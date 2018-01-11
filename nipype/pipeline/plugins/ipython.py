@@ -55,8 +55,10 @@ class IPythonPlugin(DistributedPluginBase):
         valid_args = ('url_file', 'profile', 'cluster_id', 'context', 'debug',
                       'timeout', 'config', 'username', 'sshserver', 'sshkey',
                       'password', 'paramiko')
-        self.client_args = {arg: plugin_args[arg]
-                            for arg in valid_args if arg in plugin_args}
+        self.client_args = {
+            arg: plugin_args[arg]
+            for arg in valid_args if arg in plugin_args
+        }
         self.iparallel = None
         self.taskclient = None
         self.taskmap = {}
@@ -72,22 +74,24 @@ class IPythonPlugin(DistributedPluginBase):
             __import__(name)
             self.iparallel = sys.modules[name]
         except ImportError as e:
-            raise_from(ImportError("ipyparallel not found. Parallel execution "
-                                   "will be unavailable"), e)
+            raise_from(
+                ImportError("ipyparallel not found. Parallel execution "
+                            "will be unavailable"), e)
         try:
             self.taskclient = self.iparallel.Client(**self.client_args)
         except Exception as e:
             if isinstance(e, TimeoutError):
                 raise_from(Exception("No IPython clients found."), e)
             if isinstance(e, IOError):
-                raise_from(Exception(
-                    "ipcluster/ipcontroller has not been started"), e)
+                raise_from(
+                    Exception("ipcluster/ipcontroller has not been started"),
+                    e)
             if isinstance(e, ValueError):
                 raise_from(Exception("Ipython kernel not installed"), e)
             else:
                 raise e
-        return super(IPythonPlugin, self).run(graph, config,
-                                              updatehash=updatehash)
+        return super(IPythonPlugin, self).run(
+            graph, config, updatehash=updatehash)
 
     def _get_result(self, taskid):
         if taskid not in self.taskmap:
@@ -114,8 +118,7 @@ class IPythonPlugin(DistributedPluginBase):
         if result and result['traceback']:
             node._result = result['result']
             node._traceback = result['traceback']
-            return report_crash(node,
-                                traceback=result['traceback'])
+            return report_crash(node, traceback=result['traceback'])
         else:
             return report_crash(node)
 

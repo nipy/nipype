@@ -38,8 +38,7 @@ def test_debug(tmpdir):
 
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(DebugTestInterface(), name='mod1')
-    mod2 = pe.MapNode(DebugTestInterface(), iterfield=['input1'],
-                      name='mod2')
+    mod2 = pe.MapNode(DebugTestInterface(), iterfield=['input1'], name='mod2')
 
     pipe.connect([(mod1, mod2, [('output1', 'input1')])])
     pipe.base_dir = os.getcwd()

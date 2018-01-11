@@ -65,9 +65,12 @@ def test_coherence_analysis(tmpdir):
     assert (CA._csv2ts().data == T.data).all()
 
     T.metadata['roi'] = roi_names
-    C = nta.CoherenceAnalyzer(T, method=dict(this_method='welch',
-                                             NFFT=CA.inputs.NFFT,
-                                             n_overlap=CA.inputs.n_overlap))
+    C = nta.CoherenceAnalyzer(
+        T,
+        method=dict(
+            this_method='welch',
+            NFFT=CA.inputs.NFFT,
+            n_overlap=CA.inputs.n_overlap))
 
     freq_idx = np.where((C.frequencies > CA.inputs.frequency_range[0]) *
                         (C.frequencies < CA.inputs.frequency_range[1]))[0]

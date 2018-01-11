@@ -58,8 +58,11 @@ class ANTSCommandInputSpec(CommandLineInputSpec):
     """Base Input Specification for all ANTS Commands
     """
 
-    num_threads = traits.Int(LOCAL_DEFAULT_NUMBER_OF_THREADS, usedefault=True,
-                             nohash=True, desc="Number of ITK threads to use")
+    num_threads = traits.Int(
+        LOCAL_DEFAULT_NUMBER_OF_THREADS,
+        usedefault=True,
+        nohash=True,
+        desc="Number of ITK threads to use")
 
 
 class ANTSCommand(CommandLine):
@@ -95,8 +98,10 @@ class ANTSCommand(CommandLine):
             if (PREFERED_ITKv4_THREAD_LIMIT_VARIABLE in self.inputs.environ):
                 del self.inputs.environ[PREFERED_ITKv4_THREAD_LIMIT_VARIABLE]
         else:
-            self.inputs.environ.update({PREFERED_ITKv4_THREAD_LIMIT_VARIABLE:
-                                        '%s' % self.inputs.num_threads})
+            self.inputs.environ.update({
+                PREFERED_ITKv4_THREAD_LIMIT_VARIABLE:
+                '%s' % self.inputs.num_threads
+            })
 
     @staticmethod
     def _format_xarray(val):

@@ -96,7 +96,8 @@ optional arguments:
     def test_run_4d_realign_without_arguments(self):
         with pytest.raises(SystemExit) as cm:
             with capture_sys_output() as (stdout, stderr):
-                nipype_cmd.main(['nipype_cmd', 'nipype.interfaces.nipy', 'FmriRealign4d'])
+                nipype_cmd.main(
+                    ['nipype_cmd', 'nipype.interfaces.nipy', 'FmriRealign4d'])
 
         exit_exception = cm.value
         assert exit_exception.code == 2
@@ -128,7 +129,10 @@ nipype_cmd nipype.interfaces.nipy FmriRealign4d: error: too few arguments
     def test_run_4d_realign_help(self):
         with pytest.raises(SystemExit) as cm:
             with capture_sys_output() as (stdout, stderr):
-                nipype_cmd.main(['nipype_cmd', 'nipype.interfaces.nipy', 'FmriRealign4d', '-h'])
+                nipype_cmd.main([
+                    'nipype_cmd', 'nipype.interfaces.nipy', 'FmriRealign4d',
+                    '-h'
+                ])
 
         exit_exception = cm.value
         assert exit_exception.code == 0

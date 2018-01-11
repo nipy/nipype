@@ -30,8 +30,8 @@ def add_options(parser=None, module=None, function=None):
         inputs = interface.input_spec()
         for name, spec in sorted(
                 interface.inputs.traits(transient=None).items()):
-            desc = "\n".join(interface._get_trait_desc(
-                inputs, name, spec))[len(name) + 2:]
+            desc = "\n".join(interface._get_trait_desc(inputs, name,
+                                                       spec))[len(name) + 2:]
             args = {}
 
             if spec.is_trait_type(traits.Bool):
@@ -44,8 +44,8 @@ def add_options(parser=None, module=None, function=None):
             else:
                 if spec.is_trait_type(InputMultiPath):
                     args["nargs"] = "*"
-                parser.add_argument("--%s" % name, dest=name,
-                                    help=desc, **args)
+                parser.add_argument(
+                    "--%s" % name, dest=name, help=desc, **args)
     return parser, interface
 
 
@@ -56,11 +56,10 @@ def run_instance(interface, options):
         if getattr(options, input_name) is not None:
             value = getattr(options, input_name)
             try:
-                setattr(interface.inputs, input_name,
-                        value)
+                setattr(interface.inputs, input_name, value)
             except ValueError as e:
-                print("Error when setting the value of %s: '%s'" %
-                      (input_name, str(e)))
+                print("Error when setting the value of %s: '%s'" % (input_name,
+                                                                    str(e)))
 
     print(interface.inputs)
     res = interface.run()
@@ -83,7 +82,7 @@ def main(argv):
     interface_parser = argparse.ArgumentParser(
         description="Run %s" % parsed.interface,
         prog=" ".join([prog] + argv[1:3]))
-    interface_parser, interface = add_options(
-        interface_parser, parsed.module, parsed.interface)
+    interface_parser, interface = add_options(interface_parser, parsed.module,
+                                              parsed.interface)
     args = interface_parser.parse_args(args=argv[3:])
     run_instance(interface, args)

@@ -13,10 +13,12 @@ from ..confounds import CompCor, TCompCor, ACompCor
 class TestCompCor():
     ''' Note: Tests currently do a poor job of testing functionality '''
 
-    filenames = {'functionalnii': 'compcorfunc.nii',
-                 'masknii': 'compcormask.nii',
-                 'masknii2': 'compcormask2.nii',
-                 'components_file': None}
+    filenames = {
+        'functionalnii': 'compcorfunc.nii',
+        'masknii': 'compcormask.nii',
+        'masknii2': 'compcormask2.nii',
+        'components_file': None
+    }
 
     @pytest.fixture(autouse=True)
     def setup_class(self, tmpdir):
@@ -38,32 +40,34 @@ class TestCompCor():
         self.mask_files = [mask1, mask2]
 
     def test_compcor(self):
-        expected_components = [['-0.1989607212', '-0.5753813646'],
-                               ['0.5692369697', '0.5674945949'],
-                               ['-0.6662573243', '0.4675843432'],
-                               ['0.4206466244', '-0.3361270124'],
+        expected_components = [['-0.1989607212', '-0.5753813646'], [
+            '0.5692369697', '0.5674945949'
+        ], ['-0.6662573243',
+            '0.4675843432'], ['0.4206466244', '-0.3361270124'],
                                ['-0.1246655485', '-0.1235705610']]
 
-        self.run_cc(CompCor(realigned_file=self.realigned_file,
-                            mask_files=self.mask_files,
-                            mask_index=0),
-                    expected_components)
+        self.run_cc(
+            CompCor(
+                realigned_file=self.realigned_file,
+                mask_files=self.mask_files,
+                mask_index=0), expected_components)
 
-        self.run_cc(ACompCor(realigned_file=self.realigned_file,
-                             mask_files=self.mask_files,
-                             mask_index=0,
-                             components_file='acc_components_file'),
-                    expected_components, 'aCompCor')
+        self.run_cc(
+            ACompCor(
+                realigned_file=self.realigned_file,
+                mask_files=self.mask_files,
+                mask_index=0,
+                components_file='acc_components_file'), expected_components,
+            'aCompCor')
 
     def test_tcompcor(self):
-        ccinterface = TCompCor(realigned_file=self.realigned_file,
-                               percentile_threshold=0.75)
-        self.run_cc(ccinterface, [['-0.1114536190', '-0.4632908609'],
-                                  ['0.4566907310', '0.6983205193'],
-                                  ['-0.7132557407', '0.1340170559'],
-                                  ['0.5022537643', '-0.5098322262'],
-                                  ['-0.1342351356', '0.1407855119']],
-                    'tCompCor')
+        ccinterface = TCompCor(
+            realigned_file=self.realigned_file, percentile_threshold=0.75)
+        self.run_cc(ccinterface, [['-0.1114536190', '-0.4632908609'], [
+            '0.4566907310', '0.6983205193'
+        ], ['-0.7132557407', '0.1340170559'], [
+            '0.5022537643', '-0.5098322262'
+        ], ['-0.1342351356', '0.1407855119']], 'tCompCor')
 
     def test_tcompcor_no_percentile(self):
         ccinterface = TCompCor(realigned_file=self.realigned_file)
@@ -74,20 +78,21 @@ class TestCompCor():
         assert num_nonmasked_voxels == 1
 
     def test_compcor_no_regress_poly(self):
-        self.run_cc(CompCor(realigned_file=self.realigned_file,
-                            mask_files=self.mask_files,
-                            mask_index=0,
-                            pre_filter=False),
-                    [['0.4451946442', '-0.7683311482'],
-                     ['-0.4285129505', '-0.0926034137'],
-                     ['0.5721540256', '0.5608764842'],
-                     ['-0.5367548139', '0.0059943226'],
-                     ['-0.0520809054', '0.2940637551']])
+        self.run_cc(
+            CompCor(
+                realigned_file=self.realigned_file,
+                mask_files=self.mask_files,
+                mask_index=0,
+                pre_filter=False), [['0.4451946442', '-0.7683311482'], [
+                    '-0.4285129505', '-0.0926034137'
+                ], ['0.5721540256', '0.5608764842'], [
+                    '-0.5367548139', '0.0059943226'
+                ], ['-0.0520809054', '0.2940637551']])
 
     def test_tcompcor_asymmetric_dim(self):
         asymmetric_shape = (2, 3, 4, 5)
-        asymmetric_data = utils.save_toy_nii(np.zeros(asymmetric_shape),
-                                             'asymmetric.nii')
+        asymmetric_data = utils.save_toy_nii(
+            np.zeros(asymmetric_shape), 'asymmetric.nii')
 
         TCompCor(realigned_file=asymmetric_data).run()
         assert nb.load(
@@ -101,8 +106,8 @@ class TestCompCor():
 
         for data_shape in (shape_less_than, shape_more_than):
             data_file = utils.save_toy_nii(np.zeros(data_shape), 'temp.nii')
-            interface = CompCor(realigned_file=data_file,
-                                mask_files=self.mask_files[0])
+            interface = CompCor(
+                realigned_file=data_file, mask_files=self.mask_files[0])
             with pytest.raises(ValueError, message="Dimension mismatch"):
                 interface.run()
 
@@ -115,30 +120,37 @@ class TestCompCor():
 
     def test_tcompcor_merge_intersect_masks(self):
         for method in ['union', 'intersect']:
-            TCompCor(realigned_file=self.realigned_file,
-                     mask_files=self.mask_files,
-                     merge_method=method).run()
+            TCompCor(
+                realigned_file=self.realigned_file,
+                mask_files=self.mask_files,
+                merge_method=method).run()
             if method == 'union':
-                assert np.array_equal(nb.load('mask_000.nii.gz').get_data(),
-                                      ([[[0, 0], [0, 0]], [[0, 0], [1, 0]]]))
+                assert np.array_equal(
+                    nb.load('mask_000.nii.gz').get_data(),
+                    ([[[0, 0], [0, 0]], [[0, 0], [1, 0]]]))
             if method == 'intersect':
-                assert np.array_equal(nb.load('mask_000.nii.gz').get_data(),
-                                      ([[[0, 0], [0, 0]], [[0, 1], [0, 0]]]))
+                assert np.array_equal(
+                    nb.load('mask_000.nii.gz').get_data(),
+                    ([[[0, 0], [0, 0]], [[0, 1], [0, 0]]]))
 
     def test_tcompcor_index_mask(self):
-        TCompCor(realigned_file=self.realigned_file,
-                 mask_files=self.mask_files,
-                 mask_index=1).run()
-        assert np.array_equal(nb.load('mask_000.nii.gz').get_data(),
-                              ([[[0, 0], [0, 0]], [[0, 1], [0, 0]]]))
+        TCompCor(
+            realigned_file=self.realigned_file,
+            mask_files=self.mask_files,
+            mask_index=1).run()
+        assert np.array_equal(
+            nb.load('mask_000.nii.gz').get_data(),
+            ([[[0, 0], [0, 0]], [[0, 1], [0, 0]]]))
 
     def test_tcompcor_multi_mask_no_index(self):
-        interface = TCompCor(realigned_file=self.realigned_file,
-                             mask_files=self.mask_files)
+        interface = TCompCor(
+            realigned_file=self.realigned_file, mask_files=self.mask_files)
         with pytest.raises(ValueError, message='more than one mask file'):
             interface.run()
 
-    def run_cc(self, ccinterface, expected_components,
+    def run_cc(self,
+               ccinterface,
+               expected_components,
                expected_header='CompCor'):
         # run
         ccresult = ccinterface.run()
@@ -158,31 +170,26 @@ class TestCompCor():
 
             # the first item will be '#', we can throw it out
             header = components_data.pop(0)
-            expected_header = [expected_header + '{:02d}'.format(i) for i in
-                               range(expected_n_components)]
+            expected_header = [
+                expected_header + '{:02d}'.format(i)
+                for i in range(expected_n_components)
+            ]
             for i, heading in enumerate(header):
                 assert expected_header[i] in heading
 
             num_got_timepoints = len(components_data)
             assert num_got_timepoints == self.fake_data.shape[3]
             for index, timepoint in enumerate(components_data):
-                assert (len(timepoint) == ccinterface.inputs.num_components or
-                        len(timepoint) == self.fake_data.shape[3])
+                assert (len(timepoint) == ccinterface.inputs.num_components
+                        or len(timepoint) == self.fake_data.shape[3])
                 assert timepoint[:2] == expected_components[index]
         return ccresult
 
     @staticmethod
     def fake_noise_fun(i, j, l, m):
-        return m*i + l - j
+        return m * i + l - j
 
-    fake_data = np.array([[[[8, 5, 3, 8, 0],
-                            [6, 7, 4, 7, 1]],
-
-                           [[7, 9, 1, 6, 5],
-                            [0, 7, 4, 7, 7]]],
-
-                          [[[2, 4, 5, 7, 0],
-                            [1, 7, 0, 5, 4]],
-
-                           [[7, 3, 9, 0, 4],
-                            [9, 4, 1, 5, 0]]]])
+    fake_data = np.array([[[[8, 5, 3, 8, 0], [6, 7, 4, 7, 1]],
+                           [[7, 9, 1, 6, 5], [0, 7, 4, 7, 7]]],
+                          [[[2, 4, 5, 7, 0], [1, 7, 0, 5, 4]],
+                           [[7, 3, 9, 0, 4], [9, 4, 1, 5, 0]]]])

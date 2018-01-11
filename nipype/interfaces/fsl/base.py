@@ -57,14 +57,15 @@ class Info(PackageInfo):
 
     """
 
-    ftypes = {'NIFTI': '.nii',
-              'NIFTI_PAIR': '.img',
-              'NIFTI_GZ': '.nii.gz',
-              'NIFTI_PAIR_GZ': '.img.gz'}
+    ftypes = {
+        'NIFTI': '.nii',
+        'NIFTI_PAIR': '.img',
+        'NIFTI_GZ': '.nii.gz',
+        'NIFTI_PAIR_GZ': '.img.gz'
+    }
 
     if os.getenv('FSLDIR'):
-        version_file = os.path.join(
-            os.getenv('FSLDIR'), 'etc', 'fslversion')
+        version_file = os.path.join(os.getenv('FSLDIR'), 'etc', 'fslversion')
 
     @staticmethod
     def parse_version(raw_info):
@@ -123,8 +124,10 @@ class Info(PackageInfo):
             raise Exception('FSL environment variables not set')
         stdpath = os.path.join(fsldir, 'data', 'standard')
         if img_name is None:
-            return [filename.replace(stdpath + '/', '')
-                    for filename in glob(os.path.join(stdpath, '*nii*'))]
+            return [
+                filename.replace(stdpath + '/', '')
+                for filename in glob(os.path.join(stdpath, '*nii*'))
+            ]
         return os.path.join(stdpath, img_name)
 
 
@@ -139,8 +142,8 @@ class FSLCommandInputSpec(CommandLineInputSpec):
     -------
     fsl.ExtractRoi(tmin=42, tsize=1, output_type='NIFTI')
     """
-    output_type = traits.Enum('NIFTI', list(Info.ftypes.keys()),
-                              desc='FSL output type')
+    output_type = traits.Enum(
+        'NIFTI', list(Info.ftypes.keys()), desc='FSL output type')
 
 
 class FSLCommand(CommandLine):
@@ -151,16 +154,17 @@ class FSLCommand(CommandLine):
     input_spec = FSLCommandInputSpec
     _output_type = None
 
-    references_ = [{'entry': BibTeX(
-        '@article{JenkinsonBeckmannBehrensWoolrichSmith2012,'
-        'author={M. Jenkinson, C.F. Beckmann, T.E. Behrens, '
-        'M.W. Woolrich, and S.M. Smith},'
-        'title={FSL},'
-        'journal={NeuroImage},'
-        'volume={62},'
-        'pages={782-790},'
-        'year={2012},'
-        '}'),
+    references_ = [{
+        'entry':
+        BibTeX('@article{JenkinsonBeckmannBehrensWoolrichSmith2012,'
+               'author={M. Jenkinson, C.F. Beckmann, T.E. Behrens, '
+               'M.W. Woolrich, and S.M. Smith},'
+               'title={FSL},'
+               'journal={NeuroImage},'
+               'volume={62},'
+               'pages={782-790},'
+               'year={2012},'
+               '}'),
         'tags': ['implementation'],
     }]
 
@@ -199,7 +203,11 @@ class FSLCommand(CommandLine):
     def version(self):
         return Info.version()
 
-    def _gen_fname(self, basename, cwd=None, suffix=None, change_ext=True,
+    def _gen_fname(self,
+                   basename,
+                   cwd=None,
+                   suffix=None,
+                   change_ext=True,
                    ext=None):
         """Generate a filename based on the given parameters.
 
@@ -241,8 +249,8 @@ class FSLCommand(CommandLine):
                 suffix = ext
         if suffix is None:
             suffix = ''
-        fname = fname_presuffix(basename, suffix=suffix,
-                                use_ext=False, newpath=cwd)
+        fname = fname_presuffix(
+            basename, suffix=suffix, use_ext=False, newpath=cwd)
         return fname
 
     def _overload_extension(self, value, name=None):
@@ -270,5 +278,5 @@ def no_fsl():
 
 def no_fsl_course_data():
     """check if fsl_course data is present"""
-    return not ('FSL_COURSE_DATA' in os.environ and
-                os.path.isdir(os.path.abspath(os.environ['FSL_COURSE_DATA'])))
+    return not ('FSL_COURSE_DATA' in os.environ and os.path.isdir(
+        os.path.abspath(os.environ['FSL_COURSE_DATA'])))

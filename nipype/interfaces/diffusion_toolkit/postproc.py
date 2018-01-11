@@ -14,22 +14,30 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
 import os
-from ..base import (TraitedSpec, File, traits, CommandLine,
-                    InputMultiPath, CommandLineInputSpec)
+from ..base import (TraitedSpec, File, traits, CommandLine, InputMultiPath,
+                    CommandLineInputSpec)
 
 __docformat__ = 'restructuredtext'
 
 
 class SplineFilterInputSpec(CommandLineInputSpec):
     track_file = File(
-        exists=True, desc="file containing tracks to be filtered", position=0,
-        argstr="%s", mandatory=True)
+        exists=True,
+        desc="file containing tracks to be filtered",
+        position=0,
+        argstr="%s",
+        mandatory=True)
     step_length = traits.Float(
-        desc="in the unit of minimum voxel size", position=1, argstr="%f",
+        desc="in the unit of minimum voxel size",
+        position=1,
+        argstr="%f",
         mandatory=True)
     output_file = File(
-        "spline_tracks.trk", desc="target file for smoothed tracks",
-        position=2, argstr="%s", usedefault=True)
+        "spline_tracks.trk",
+        desc="target file for smoothed tracks",
+        position=2,
+        argstr="%s",
+        usedefault=True)
 
 
 class SplineFilterOutputSpec(TraitedSpec):
@@ -68,11 +76,17 @@ class SplineFilter(CommandLine):
 
 class TrackMergeInputSpec(CommandLineInputSpec):
     track_files = InputMultiPath(
-        File(exists=True), desc="file containing tracks to be filtered",
-        position=0, argstr="%s...", mandatory=True)
+        File(exists=True),
+        desc="file containing tracks to be filtered",
+        position=0,
+        argstr="%s...",
+        mandatory=True)
     output_file = File(
-        "merged_tracks.trk", desc="target file for merged tracks", position=-1,
-        argstr="%s", usedefault=True)
+        "merged_tracks.trk",
+        desc="target file for merged tracks",
+        position=-1,
+        argstr="%s",
+        usedefault=True)
 
 
 class TrackMergeOutputSpec(TraitedSpec):

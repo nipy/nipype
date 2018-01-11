@@ -69,6 +69,7 @@ class LockException(Exception):
     # Error codes:
     LOCK_FAILED = 1
 
+
 if os.name == 'nt':
     import win32con
     import win32file
@@ -87,6 +88,7 @@ else:
     raise RuntimeError('PortaLocker only defined for nt and posix platforms')
 
 if os.name == 'nt':
+
     def lock(file, flags):
         hfile = win32file._get_osfhandle(file.fileno())
         try:
@@ -115,6 +117,7 @@ if os.name == 'nt':
                 raise
 
 elif os.name == 'posix':
+
     def lock(file, flags):
         try:
             fcntl.flock(file.fileno(), flags)

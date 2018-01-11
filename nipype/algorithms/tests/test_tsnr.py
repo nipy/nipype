@@ -39,50 +39,54 @@ class TestTSNR():
         tsnrresult = TSNR(in_file=self.in_filenames['in_file']).run()
 
         # assert
-        self.assert_expected_outputs(tsnrresult, {
-            'mean_file': (2.8, 7.4),
-            'stddev_file': (0.8, 2.9),
-            'tsnr_file': (1.3, 9.25)
-        })
+        self.assert_expected_outputs(
+            tsnrresult, {
+                'mean_file': (2.8, 7.4),
+                'stddev_file': (0.8, 2.9),
+                'tsnr_file': (1.3, 9.25)
+            })
 
     def test_tsnr_withpoly1(self):
         # run
-        tsnrresult = TSNR(in_file=self.in_filenames['in_file'],
-                          regress_poly=1).run()
+        tsnrresult = TSNR(
+            in_file=self.in_filenames['in_file'], regress_poly=1).run()
 
         # assert
-        self.assert_expected_outputs_poly(tsnrresult, {
-            'detrended_file': (-0.1, 8.7),
-            'mean_file': (2.8, 7.4),
-            'stddev_file': (0.75, 2.75),
-            'tsnr_file': (1.4, 9.9)
-        })
+        self.assert_expected_outputs_poly(
+            tsnrresult, {
+                'detrended_file': (-0.1, 8.7),
+                'mean_file': (2.8, 7.4),
+                'stddev_file': (0.75, 2.75),
+                'tsnr_file': (1.4, 9.9)
+            })
 
     def test_tsnr_withpoly2(self):
         # run
-        tsnrresult = TSNR(in_file=self.in_filenames['in_file'],
-                          regress_poly=2).run()
+        tsnrresult = TSNR(
+            in_file=self.in_filenames['in_file'], regress_poly=2).run()
 
         # assert
-        self.assert_expected_outputs_poly(tsnrresult, {
-            'detrended_file': (-0.22, 8.55),
-            'mean_file': (2.8, 7.7),
-            'stddev_file': (0.21, 2.4),
-            'tsnr_file': (1.7, 35.9)
-        })
+        self.assert_expected_outputs_poly(
+            tsnrresult, {
+                'detrended_file': (-0.22, 8.55),
+                'mean_file': (2.8, 7.7),
+                'stddev_file': (0.21, 2.4),
+                'tsnr_file': (1.7, 35.9)
+            })
 
     def test_tsnr_withpoly3(self):
         # run
-        tsnrresult = TSNR(in_file=self.in_filenames['in_file'],
-                          regress_poly=3).run()
+        tsnrresult = TSNR(
+            in_file=self.in_filenames['in_file'], regress_poly=3).run()
 
         # assert
-        self.assert_expected_outputs_poly(tsnrresult, {
-            'detrended_file': (1.8, 7.95),
-            'mean_file': (2.8, 7.7),
-            'stddev_file': (0.1, 1.7),
-            'tsnr_file': (2.6, 57.3)
-        })
+        self.assert_expected_outputs_poly(
+            tsnrresult, {
+                'detrended_file': (1.8, 7.95),
+                'mean_file': (2.8, 7.7),
+                'stddev_file': (0.1, 1.7),
+                'tsnr_file': (2.6, 57.3)
+            })
 
     @mock.patch('warnings.warn')
     def test_warning(self, mock_warn):
@@ -92,8 +96,10 @@ class TestTSNR():
         misc.TSNR(in_file=self.in_filenames['in_file'])
 
         # assert
-        assert True in [args[0].count(
-            'confounds') > 0 for _, args, _ in mock_warn.mock_calls]
+        assert True in [
+            args[0].count('confounds') > 0
+            for _, args, _ in mock_warn.mock_calls
+        ]
 
     def assert_expected_outputs_poly(self, tsnrresult, expected_ranges):
         assert os.path.basename(tsnrresult.outputs.detrended_file) == \
@@ -118,14 +124,7 @@ class TestTSNR():
             npt.assert_almost_equal(np.amin(data), min_, decimal=1)
             npt.assert_almost_equal(np.amax(data), max_, decimal=1)
 
-    fake_data = np.array([[[[2, 4, 3, 9, 1],
-                            [3, 6, 4, 7, 4]],
-
-                           [[8, 3, 4, 6, 2],
-                            [4, 0, 4, 4, 2]]],
-
-                          [[[9, 7, 5, 5, 7],
-                            [7, 8, 4, 8, 4]],
-
-                           [[0, 4, 7, 1, 7],
-                            [6, 8, 8, 8, 7]]]])
+    fake_data = np.array([[[[2, 4, 3, 9, 1], [3, 6, 4, 7, 4]],
+                           [[8, 3, 4, 6, 2], [4, 0, 4, 4, 2]]],
+                          [[[9, 7, 5, 5, 7], [7, 8, 4, 8, 4]],
+                           [[0, 4, 7, 1, 7], [6, 8, 8, 8, 7]]]])

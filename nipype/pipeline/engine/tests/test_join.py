@@ -16,8 +16,8 @@ from ....interfaces.base import traits, File
 
 
 class PickFirstSpec(nib.TraitedSpec):
-    in_files = traits.List(File(exists=True), argstr="%s", position=2,
-                           mandatory=True)
+    in_files = traits.List(
+        File(exists=True), argstr="%s", position=2, mandatory=True)
 
 
 class PickFirstOutSpec(nib.TraitedSpec):
@@ -59,6 +59,7 @@ class IncrementInterface(nib.BaseInterface):
         outputs = self._outputs().get()
         outputs['output1'] = self.inputs.input1 + self.inputs.inc
         return outputs
+
 
 _sums = []
 
@@ -164,8 +165,11 @@ def test_join_expansion(tmpdir):
     pre_join2 = pe.Node(IncrementInterface(), name='pre_join2')
     wf.connect(pre_join1, 'output1', pre_join2, 'input1')
     # the join node
-    join = pe.JoinNode(SumInterface(), joinsource='inputspec',
-                       joinfield='input1', name='join')
+    join = pe.JoinNode(
+        SumInterface(),
+        joinsource='inputspec',
+        joinfield='input1',
+        name='join')
     wf.connect(pre_join2, 'output1', join, 'input1')
     # an uniterated post-join node
     post_join1 = pe.Node(IncrementInterface(), name='post_join1')
@@ -183,10 +187,12 @@ def test_join_expansion(tmpdir):
     # the expanded graph contains 2 * 2 = 4 iteration pre-join nodes, 1 join
     # node, 1 non-iterated post-join node and 2 * 1 iteration post-join nodes.
     # Nipype factors away the IdentityInterface.
-    assert len(result.nodes()) == 8, "The number of expanded nodes is incorrect."
+    assert len(
+        result.nodes()) == 8, "The number of expanded nodes is incorrect."
     # the join Sum result is (1 + 1 + 1) + (2 + 1 + 1)
     assert len(_sums) == 1, "The number of join outputs is incorrect"
-    assert _sums[0] == 7, "The join Sum output value is incorrect: %s." % _sums[0]
+    assert _sums[
+        0] == 7, "The join Sum output value is incorrect: %s." % _sums[0]
     # the join input preserves the iterables input order
     assert _sum_operands[0] == [3, 4], \
         "The join Sum input is incorrect: %s." % _sum_operands[0]
@@ -203,8 +209,8 @@ def test_node_joinsource(tmpdir):
     inputspec = pe.Node(IdentityInterface(fields=['n']), name='inputspec')
     inputspec.iterables = [('n', [1, 2])]
     # the join node
-    join = pe.JoinNode(SetInterface(), joinsource=inputspec,
-                       joinfield='input1', name='join')
+    join = pe.JoinNode(
+        SetInterface(), joinsource=inputspec, joinfield='input1', name='join')
 
     # the joinsource is the inputspec name
     assert join.joinsource == inputspec.name, \
@@ -224,8 +230,11 @@ def test_set_join_node(tmpdir):
     pre_join1 = pe.Node(IncrementInterface(), name='pre_join1')
     wf.connect(inputspec, 'n', pre_join1, 'input1')
     # the set join node
-    join = pe.JoinNode(SetInterface(), joinsource='inputspec',
-                       joinfield='input1', name='join')
+    join = pe.JoinNode(
+        SetInterface(),
+        joinsource='inputspec',
+        joinfield='input1',
+        name='join')
     wf.connect(pre_join1, 'output1', join, 'input1')
 
     wf.run()
@@ -250,8 +259,12 @@ def test_unique_join_node(tmpdir):
     pre_join1 = pe.Node(IncrementInterface(), name='pre_join1')
     wf.connect(inputspec, 'n', pre_join1, 'input1')
     # the set join node
-    join = pe.JoinNode(SumInterface(), joinsource='inputspec',
-                       joinfield='input1', unique=True, name='join')
+    join = pe.JoinNode(
+        SumInterface(),
+        joinsource='inputspec',
+        joinfield='input1',
+        unique=True,
+        name='join')
     wf.connect(pre_join1, 'output1', join, 'input1')
 
     wf.run()
@@ -275,18 +288,22 @@ def test_multiple_join_nodes(tmpdir):
     pre_join1 = pe.Node(IncrementInterface(), name='pre_join1')
     wf.connect(inputspec, 'n', pre_join1, 'input1')
     # the first join node
-    join1 = pe.JoinNode(IdentityInterface(fields=['vector']),
-                        joinsource='inputspec', joinfield='vector',
-                        name='join1')
+    join1 = pe.JoinNode(
+        IdentityInterface(fields=['vector']),
+        joinsource='inputspec',
+        joinfield='vector',
+        name='join1')
     wf.connect(pre_join1, 'output1', join1, 'vector')
     # an uniterated post-join node
     post_join1 = pe.Node(SumInterface(), name='post_join1')
     wf.connect(join1, 'vector', post_join1, 'input1')
     # the downstream join node connected to both an upstream join
     # path output and a separate input in the iterated path
-    join2 = pe.JoinNode(IdentityInterface(fields=['vector', 'scalar']),
-                        joinsource='inputspec', joinfield='vector',
-                        name='join2')
+    join2 = pe.JoinNode(
+        IdentityInterface(fields=['vector', 'scalar']),
+        joinsource='inputspec',
+        joinfield='vector',
+        name='join2')
     wf.connect(pre_join1, 'output1', join2, 'vector')
     wf.connect(post_join1, 'output1', join2, 'scalar')
     # a second post-join node
@@ -322,16 +339,17 @@ def test_identity_join_node(tmpdir):
     # Make the workflow.
     wf = pe.Workflow(name='test')
     # the iterated input node
-    inputspec = pe.Node(IdentityInterface(fields=['n']),
-                        name='inputspec')
+    inputspec = pe.Node(IdentityInterface(fields=['n']), name='inputspec')
     inputspec.iterables = [('n', [1, 2, 3])]
     # a pre-join node in the iterated path
     pre_join1 = pe.Node(IncrementInterface(), name='pre_join1')
     wf.connect(inputspec, 'n', pre_join1, 'input1')
     # the IdentityInterface join node
-    join = pe.JoinNode(IdentityInterface(fields=['vector']),
-                       joinsource='inputspec', joinfield='vector',
-                       name='join')
+    join = pe.JoinNode(
+        IdentityInterface(fields=['vector']),
+        joinsource='inputspec',
+        joinfield='vector',
+        name='join')
     wf.connect(pre_join1, 'output1', join, 'vector')
     # an uniterated post-join node
     post_join1 = pe.Node(SumInterface(), name='post_join1')
@@ -357,8 +375,7 @@ def test_multifield_join_node(tmpdir):
     # Make the workflow.
     wf = pe.Workflow(name='test')
     # the iterated input node
-    inputspec = pe.Node(IdentityInterface(fields=['m', 'n']),
-                        name='inputspec')
+    inputspec = pe.Node(IdentityInterface(fields=['m', 'n']), name='inputspec')
     inputspec.iterables = [('m', [1, 2]), ('n', [3, 4])]
     # two pre-join nodes in a parallel iterated path
     inc1 = pe.Node(IncrementInterface(), name='inc1')
@@ -366,13 +383,15 @@ def test_multifield_join_node(tmpdir):
     inc2 = pe.Node(IncrementInterface(), name='inc2')
     wf.connect(inputspec, 'n', inc2, 'input1')
     # the join node
-    join = pe.JoinNode(IdentityInterface(fields=['vector1', 'vector2']),
-                       joinsource='inputspec', name='join')
+    join = pe.JoinNode(
+        IdentityInterface(fields=['vector1', 'vector2']),
+        joinsource='inputspec',
+        name='join')
     wf.connect(inc1, 'output1', join, 'vector1')
     wf.connect(inc2, 'output1', join, 'vector2')
     # a post-join node
-    prod = pe.MapNode(ProductInterface(), name='prod',
-                      iterfield=['input1', 'input2'])
+    prod = pe.MapNode(
+        ProductInterface(), name='prod', iterfield=['input1', 'input2'])
     wf.connect(join, 'vector1', prod, 'input1')
     wf.connect(join, 'vector2', prod, 'input2')
 
@@ -406,12 +425,15 @@ def test_synchronize_join_node(tmpdir):
     inc2 = pe.Node(IncrementInterface(), name='inc2')
     wf.connect(inputspec, 'n', inc2, 'input1')
     # the join node
-    join = pe.JoinNode(IdentityInterface(fields=['vector1', 'vector2']),
-                       joinsource='inputspec', name='join')
+    join = pe.JoinNode(
+        IdentityInterface(fields=['vector1', 'vector2']),
+        joinsource='inputspec',
+        name='join')
     wf.connect(inc1, 'output1', join, 'vector1')
     wf.connect(inc2, 'output1', join, 'vector2')
     # a post-join node
-    prod = pe.MapNode(ProductInterface(), name='prod', iterfield=['input1', 'input2'])
+    prod = pe.MapNode(
+        ProductInterface(), name='prod', iterfield=['input1', 'input2'])
     wf.connect(join, 'vector1', prod, 'input1')
     wf.connect(join, 'vector2', prod, 'input2')
 
@@ -448,8 +470,11 @@ def test_itersource_join_source_node(tmpdir):
     pre_join3 = pe.Node(IncrementInterface(), name='pre_join3')
     wf.connect(pre_join2, 'output1', pre_join3, 'input1')
     # the join node
-    join = pe.JoinNode(IdentityInterface(fields=['vector']),
-                       joinsource='pre_join2', joinfield='vector', name='join')
+    join = pe.JoinNode(
+        IdentityInterface(fields=['vector']),
+        joinsource='pre_join2',
+        joinfield='vector',
+        name='join')
     wf.connect(pre_join3, 'output1', join, 'vector')
     # a join successor node
     post_join1 = pe.Node(SumInterface(), name='post_join1')
@@ -502,15 +527,21 @@ def test_itersource_two_join_nodes(tmpdir):
     pre_join3 = pe.Node(IncrementInterface(), name='pre_join3')
     wf.connect(pre_join2, 'output1', pre_join3, 'input1')
     # the first join node
-    join1 = pe.JoinNode(IdentityInterface(fields=['vector']),
-                        joinsource='pre_join2', joinfield='vector', name='join1')
+    join1 = pe.JoinNode(
+        IdentityInterface(fields=['vector']),
+        joinsource='pre_join2',
+        joinfield='vector',
+        name='join1')
     wf.connect(pre_join3, 'output1', join1, 'vector')
     # a join successor node
     post_join1 = pe.Node(SumInterface(), name='post_join1')
     wf.connect(join1, 'vector', post_join1, 'input1')
     # a summary join node
-    join2 = pe.JoinNode(IdentityInterface(fields=['vector']),
-                        joinsource='inputspec', joinfield='vector', name='join2')
+    join2 = pe.JoinNode(
+        IdentityInterface(fields=['vector']),
+        joinsource='inputspec',
+        joinfield='vector',
+        name='join2')
     wf.connect(post_join1, 'output1', join2, 'vector')
 
     result = wf.run()
@@ -531,13 +562,16 @@ def test_set_join_node_file_input(tmpdir):
     wf = pe.Workflow(name='test')
     # the iterated input node
     inputspec = pe.Node(IdentityInterface(fields=['n']), name='inputspec')
-    inputspec.iterables = [('n', [tmpdir.join('test.nii').strpath, tmpdir.join('test2.nii').strpath])]
+    inputspec.iterables = [('n', [
+        tmpdir.join('test.nii').strpath,
+        tmpdir.join('test2.nii').strpath
+    ])]
     # a pre-join node in the iterated path
     pre_join1 = pe.Node(IdentityInterface(fields=['n']), name='pre_join1')
     wf.connect(inputspec, 'n', pre_join1, 'n')
     # the set join node
-    join = pe.JoinNode(PickFirst(), joinsource='inputspec',
-                       joinfield='in_files', name='join')
+    join = pe.JoinNode(
+        PickFirst(), joinsource='inputspec', joinfield='in_files', name='join')
     wf.connect(pre_join1, 'n', join, 'in_files')
 
     wf.run()
@@ -553,18 +587,19 @@ def test_nested_workflow_join(tmpdir):
         inputspec = pe.Node(IdentityInterface(fields=['n']), name='inputspec')
         inputspec.iterables = [('n', i)]
         # increment each iterable before joining
-        pre_join = pe.Node(IncrementInterface(),
-                           name='pre_join')
+        pre_join = pe.Node(IncrementInterface(), name='pre_join')
         # rejoin nums into list
-        join = pe.JoinNode(IdentityInterface(fields=['n']),
-                           joinsource='inputspec',
-                           joinfield='n',
-                           name='join')
+        join = pe.JoinNode(
+            IdentityInterface(fields=['n']),
+            joinsource='inputspec',
+            joinfield='n',
+            name='join')
         # define and connect nested workflow
         wf = pe.Workflow(name='wf_%d' % i[0])
         wf.connect(inputspec, 'n', pre_join, 'input1')
         wf.connect(pre_join, 'output1', join, 'n')
         return wf
+
     # master wf
     meta_wf = pe.Workflow(name='meta', base_dir='.')
     # add each mini-workflow to master

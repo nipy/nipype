@@ -26,6 +26,7 @@ from builtins import object
 class OneTimeProperty(object):
     """A descriptor to make special properties that become normal attributes.
     """
+
     def __init__(self, func):
         """Create a OneTimeProperty instance.
 
@@ -59,7 +60,6 @@ def setattr_on_read(func):
     # - sor_property (set on read property)
     # - prop2attr_on_read
     # ... ?
-
     """Decorator to create OneTimeProperty attributes.
 
     Parameters

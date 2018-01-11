@@ -17,7 +17,6 @@ import warnings
 
 from ..base import CommandLine
 
-
 warnings.filterwarnings('always', category=UserWarning)
 
 
@@ -55,9 +54,10 @@ class Info(object):
 
         """
         try:
-            clout = CommandLine(command='mincinfo',
-                                args='-version',
-                                terminal_output='allatonce').run()
+            clout = CommandLine(
+                command='mincinfo',
+                args='-version',
+                terminal_output='allatonce').run()
         except IOError:
             return None
 
@@ -83,16 +83,20 @@ class Info(object):
                 return s.split(':')[1].strip()
             return None
 
-        versions = {'minc': None,
-                    'libminc': None,
-                    'netcdf': None,
-                    'hdf5': None, }
+        versions = {
+            'minc': None,
+            'libminc': None,
+            'netcdf': None,
+            'hdf5': None,
+        }
 
         for l in out.split('\n'):
-            for (name, f) in [('minc', read_program_version),
-                              ('libminc', read_libminc_version),
-                              ('netcdf', read_netcdf_version),
-                              ('hdf5', read_hdf5_version), ]:
+            for (name, f) in [
+                ('minc', read_program_version),
+                ('libminc', read_libminc_version),
+                ('netcdf', read_netcdf_version),
+                ('hdf5', read_hdf5_version),
+            ]:
                 if f(l) is not None:
                     versions[name] = f(l)
 
@@ -126,8 +130,10 @@ def aggregate_filename(files, new_suffix):
     path = os.getcwd()
 
     if common_prefix == '':
-        return os.path.abspath(os.path.join(
-            path, os.path.splitext(files[0])[0] + '_' + new_suffix + '.mnc'))
+        return os.path.abspath(
+            os.path.join(
+                path,
+                os.path.splitext(files[0])[0] + '_' + new_suffix + '.mnc'))
     else:
-        return os.path.abspath(os.path.join(
-            path, common_prefix + '_' + new_suffix + '.mnc'))
+        return os.path.abspath(
+            os.path.join(path, common_prefix + '_' + new_suffix + '.mnc'))

@@ -44,16 +44,17 @@ class PBSPlugin(SGELikeBatchManagerBase):
             if 'max_tries' in kwargs['plugin_args']:
                 self._max_tries = kwargs['plugin_args']['max_tries']
             if 'max_jobname_len' in kwargs['plugin_args']:
-                self._max_jobname_len = kwargs[
-                    'plugin_args']['max_jobname_len']
+                self._max_jobname_len = kwargs['plugin_args'][
+                    'max_jobname_len']
         super(PBSPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
-        result = CommandLine('qstat {}'.format(taskid),
-                             environ=dict(os.environ),
-                             terminal_output='allatonce',
-                             resource_monitor=False,
-                             ignore_exception=True).run()
+        result = CommandLine(
+            'qstat {}'.format(taskid),
+            environ=dict(os.environ),
+            terminal_output='allatonce',
+            resource_monitor=False,
+            ignore_exception=True).run()
         errmsg = 'Unknown Job Id'  # %s' % taskid
         success = 'Job has finished'
         if success in e:  # Fix for my PBS
@@ -62,9 +63,11 @@ class PBSPlugin(SGELikeBatchManagerBase):
             return errmsg not in e
 
     def _submit_batchtask(self, scriptfile, node):
-        cmd = CommandLine('qsub', environ=dict(os.environ),
-                          resource_monitor=False,
-                          terminal_output='allatonce')
+        cmd = CommandLine(
+            'qsub',
+            environ=dict(os.environ),
+            resource_monitor=False,
+            terminal_output='allatonce')
         path = os.path.dirname(scriptfile)
         qsubargs = ''
         if self._qsub_args:
@@ -80,19 +83,15 @@ class PBSPlugin(SGELikeBatchManagerBase):
         if '-e' not in qsubargs:
             qsubargs = '%s -e %s' % (qsubargs, path)
         if node._hierarchy:
-            jobname = '.'.join((dict(os.environ)['LOGNAME'],
-                                node._hierarchy,
+            jobname = '.'.join((dict(os.environ)['LOGNAME'], node._hierarchy,
                                 node._id))
         else:
-            jobname = '.'.join((dict(os.environ)['LOGNAME'],
-                                node._id))
+            jobname = '.'.join((dict(os.environ)['LOGNAME'], node._id))
         jobnameitems = jobname.split('.')
         jobnameitems.reverse()
         jobname = '.'.join(jobnameitems)
         jobname = jobname[0:self._max_jobname_len]
-        cmd.inputs.args = '%s -N %s %s' % (qsubargs,
-                                           jobname,
-                                           scriptfile)
+        cmd.inputs.args = '%s -N %s %s' % (qsubargs, jobname, scriptfile)
 
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName('CRITICAL'))
@@ -116,7 +115,7 @@ class PBSPlugin(SGELikeBatchManagerBase):
         # retrieve pbs taskid
         taskid = result.runtime.stdout.split('.')[0]
         self._pending[taskid] = node.output_dir()
-        logger.debug(
-            'submitted pbs task: {} for node {}'.format(taskid, node._id))
+        logger.debug('submitted pbs task: {} for node {}'.format(
+            taskid, node._id))
 
         return taskid

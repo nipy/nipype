@@ -8,32 +8,133 @@ import os
 
 
 class ResampleDTIVolumeInputSpec(CommandLineInputSpec):
-    inputVolume = File(position=-2, desc="Input volume to be resampled", exists=True, argstr="%s")
-    outputVolume = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Resampled Volume", argstr="%s")
-    Reference = File(desc="Reference Volume (spacing,size,orientation,origin)", exists=True, argstr="--Reference %s")
+    inputVolume = File(
+        position=-2,
+        desc="Input volume to be resampled",
+        exists=True,
+        argstr="%s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        position=-1,
+        hash_files=False,
+        desc="Resampled Volume",
+        argstr="%s")
+    Reference = File(
+        desc="Reference Volume (spacing,size,orientation,origin)",
+        exists=True,
+        argstr="--Reference %s")
     transformationFile = File(exists=True, argstr="--transformationFile %s")
-    defField = File(desc="File containing the deformation field (3D vector image containing vectors with 3 components)", exists=True, argstr="--defField %s")
-    hfieldtype = traits.Enum("displacement", "h-Field", desc="Set if the deformation field is an -Field", argstr="--hfieldtype %s")
-    interpolation = traits.Enum("linear", "nn", "ws", "bs", desc="Sampling algorithm (linear , nn (nearest neighborhoor), ws (WindowedSinc), bs (BSpline) )", argstr="--interpolation %s")
-    correction = traits.Enum("zero", "none", "abs", "nearest", desc="Correct the tensors if computed tensor is not semi-definite positive", argstr="--correction %s")
-    transform_tensor_method = traits.Enum("PPD", "FS", desc="Chooses between 2 methods to transform the tensors: Finite Strain (FS), faster but less accurate, or Preservation of the Principal Direction (PPD)", argstr="--transform_tensor_method %s")
-    transform_order = traits.Enum("input-to-output", "output-to-input", desc="Select in what order the transforms are read", argstr="--transform_order %s")
-    notbulk = traits.Bool(desc="The transform following the BSpline transform is not set as a bulk transform for the BSpline transform", argstr="--notbulk ")
-    spaceChange = traits.Bool(desc="Space Orientation between transform and image is different (RAS/LPS) (warning: if the transform is a Transform Node in Slicer3, do not select)", argstr="--spaceChange ")
-    rotation_point = traits.List(desc="Center of rotation (only for rigid and affine transforms)", argstr="--rotation_point %s")
-    centered_transform = traits.Bool(desc="Set the center of the transformation to the center of the input image (only for rigid and affine transforms)", argstr="--centered_transform ")
-    image_center = traits.Enum("input", "output", desc="Image to use to center the transform (used only if \'Centered Transform\' is selected)", argstr="--image_center %s")
-    Inverse_ITK_Transformation = traits.Bool(desc="Inverse the transformation before applying it from output image to input image (only for rigid and affine transforms)", argstr="--Inverse_ITK_Transformation ")
-    spacing = InputMultiPath(traits.Float, desc="Spacing along each dimension (0 means use input spacing)", sep=",", argstr="--spacing %s")
-    size = InputMultiPath(traits.Float, desc="Size along each dimension (0 means use input size)", sep=",", argstr="--size %s")
-    origin = traits.List(desc="Origin of the output Image", argstr="--origin %s")
-    direction_matrix = InputMultiPath(traits.Float, desc="9 parameters of the direction matrix by rows (ijk to LPS if LPS transform, ijk to RAS if RAS transform)", sep=",", argstr="--direction_matrix %s")
-    number_of_thread = traits.Int(desc="Number of thread used to compute the output image", argstr="--number_of_thread %d")
-    default_pixel_value = traits.Float(desc="Default pixel value for samples falling outside of the input region", argstr="--default_pixel_value %f")
-    window_function = traits.Enum("h", "c", "w", "l", "b", desc="Window Function , h = Hamming , c = Cosine , w = Welch , l = Lanczos , b = Blackman", argstr="--window_function %s")
-    spline_order = traits.Int(desc="Spline Order (Spline order may be from 0 to 5)", argstr="--spline_order %d")
-    transform_matrix = InputMultiPath(traits.Float, desc="12 parameters of the transform matrix by rows ( --last 3 being translation-- )", sep=",", argstr="--transform_matrix %s")
-    transform = traits.Enum("rt", "a", desc="Transform algorithm, rt = Rigid Transform, a = Affine Transform", argstr="--transform %s")
+    defField = File(
+        desc=
+        "File containing the deformation field (3D vector image containing vectors with 3 components)",
+        exists=True,
+        argstr="--defField %s")
+    hfieldtype = traits.Enum(
+        "displacement",
+        "h-Field",
+        desc="Set if the deformation field is an -Field",
+        argstr="--hfieldtype %s")
+    interpolation = traits.Enum(
+        "linear",
+        "nn",
+        "ws",
+        "bs",
+        desc=
+        "Sampling algorithm (linear , nn (nearest neighborhoor), ws (WindowedSinc), bs (BSpline) )",
+        argstr="--interpolation %s")
+    correction = traits.Enum(
+        "zero",
+        "none",
+        "abs",
+        "nearest",
+        desc=
+        "Correct the tensors if computed tensor is not semi-definite positive",
+        argstr="--correction %s")
+    transform_tensor_method = traits.Enum(
+        "PPD",
+        "FS",
+        desc=
+        "Chooses between 2 methods to transform the tensors: Finite Strain (FS), faster but less accurate, or Preservation of the Principal Direction (PPD)",
+        argstr="--transform_tensor_method %s")
+    transform_order = traits.Enum(
+        "input-to-output",
+        "output-to-input",
+        desc="Select in what order the transforms are read",
+        argstr="--transform_order %s")
+    notbulk = traits.Bool(
+        desc=
+        "The transform following the BSpline transform is not set as a bulk transform for the BSpline transform",
+        argstr="--notbulk ")
+    spaceChange = traits.Bool(
+        desc=
+        "Space Orientation between transform and image is different (RAS/LPS) (warning: if the transform is a Transform Node in Slicer3, do not select)",
+        argstr="--spaceChange ")
+    rotation_point = traits.List(
+        desc="Center of rotation (only for rigid and affine transforms)",
+        argstr="--rotation_point %s")
+    centered_transform = traits.Bool(
+        desc=
+        "Set the center of the transformation to the center of the input image (only for rigid and affine transforms)",
+        argstr="--centered_transform ")
+    image_center = traits.Enum(
+        "input",
+        "output",
+        desc=
+        "Image to use to center the transform (used only if \'Centered Transform\' is selected)",
+        argstr="--image_center %s")
+    Inverse_ITK_Transformation = traits.Bool(
+        desc=
+        "Inverse the transformation before applying it from output image to input image (only for rigid and affine transforms)",
+        argstr="--Inverse_ITK_Transformation ")
+    spacing = InputMultiPath(
+        traits.Float,
+        desc="Spacing along each dimension (0 means use input spacing)",
+        sep=",",
+        argstr="--spacing %s")
+    size = InputMultiPath(
+        traits.Float,
+        desc="Size along each dimension (0 means use input size)",
+        sep=",",
+        argstr="--size %s")
+    origin = traits.List(
+        desc="Origin of the output Image", argstr="--origin %s")
+    direction_matrix = InputMultiPath(
+        traits.Float,
+        desc=
+        "9 parameters of the direction matrix by rows (ijk to LPS if LPS transform, ijk to RAS if RAS transform)",
+        sep=",",
+        argstr="--direction_matrix %s")
+    number_of_thread = traits.Int(
+        desc="Number of thread used to compute the output image",
+        argstr="--number_of_thread %d")
+    default_pixel_value = traits.Float(
+        desc=
+        "Default pixel value for samples falling outside of the input region",
+        argstr="--default_pixel_value %f")
+    window_function = traits.Enum(
+        "h",
+        "c",
+        "w",
+        "l",
+        "b",
+        desc=
+        "Window Function , h = Hamming , c = Cosine , w = Welch , l = Lanczos , b = Blackman",
+        argstr="--window_function %s")
+    spline_order = traits.Int(
+        desc="Spline Order (Spline order may be from 0 to 5)",
+        argstr="--spline_order %d")
+    transform_matrix = InputMultiPath(
+        traits.Float,
+        desc=
+        "12 parameters of the transform matrix by rows ( --last 3 being translation-- )",
+        sep=",",
+        argstr="--transform_matrix %s")
+    transform = traits.Enum(
+        "rt",
+        "a",
+        desc="Transform algorithm, rt = Rigid Transform, a = Affine Transform",
+        argstr="--transform %s")
 
 
 class ResampleDTIVolumeOutputSpec(TraitedSpec):
@@ -64,18 +165,41 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 
 class DWIRicianLMMSEFilterInputSpec(CommandLineInputSpec):
-    iter = traits.Int(desc="Number of iterations for the noise removal filter.", argstr="--iter %d")
-    re = InputMultiPath(traits.Int, desc="Estimation radius.", sep=",", argstr="--re %s")
-    rf = InputMultiPath(traits.Int, desc="Filtering radius.", sep=",", argstr="--rf %s")
-    mnvf = traits.Int(desc="Minimum number of voxels in kernel used for filtering.", argstr="--mnvf %d")
-    mnve = traits.Int(desc="Minimum number of voxels in kernel used for estimation.", argstr="--mnve %d")
-    minnstd = traits.Int(desc="Minimum allowed noise standard deviation.", argstr="--minnstd %d")
-    maxnstd = traits.Int(desc="Maximum allowed noise standard deviation.", argstr="--maxnstd %d")
-    hrf = traits.Float(desc="How many histogram bins per unit interval.", argstr="--hrf %f")
-    uav = traits.Bool(desc="Use absolute value in case of negative square.", argstr="--uav ")
-    inputVolume = File(position=-2, desc="Input DWI volume.", exists=True, argstr="%s")
-    outputVolume = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Output DWI volume.", argstr="%s")
-    compressOutput = traits.Bool(desc="Compress the data of the compressed file using gzip", argstr="--compressOutput ")
+    iter = traits.Int(
+        desc="Number of iterations for the noise removal filter.",
+        argstr="--iter %d")
+    re = InputMultiPath(
+        traits.Int, desc="Estimation radius.", sep=",", argstr="--re %s")
+    rf = InputMultiPath(
+        traits.Int, desc="Filtering radius.", sep=",", argstr="--rf %s")
+    mnvf = traits.Int(
+        desc="Minimum number of voxels in kernel used for filtering.",
+        argstr="--mnvf %d")
+    mnve = traits.Int(
+        desc="Minimum number of voxels in kernel used for estimation.",
+        argstr="--mnve %d")
+    minnstd = traits.Int(
+        desc="Minimum allowed noise standard deviation.",
+        argstr="--minnstd %d")
+    maxnstd = traits.Int(
+        desc="Maximum allowed noise standard deviation.",
+        argstr="--maxnstd %d")
+    hrf = traits.Float(
+        desc="How many histogram bins per unit interval.", argstr="--hrf %f")
+    uav = traits.Bool(
+        desc="Use absolute value in case of negative square.", argstr="--uav ")
+    inputVolume = File(
+        position=-2, desc="Input DWI volume.", exists=True, argstr="%s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        position=-1,
+        hash_files=False,
+        desc="Output DWI volume.",
+        argstr="%s")
+    compressOutput = traits.Bool(
+        desc="Compress the data of the compressed file using gzip",
+        argstr="--compressOutput ")
 
 
 class DWIRicianLMMSEFilterOutputSpec(TraitedSpec):
@@ -109,28 +233,69 @@ acknowledgements: Partially founded by grant number TEC2007-67073/TCM from the C
 
 
 class TractographyLabelMapSeedingInputSpec(CommandLineInputSpec):
-    InputVolume = File(position=-2, desc="Input DTI volume", exists=True, argstr="%s")
-    inputroi = File(desc="Label map with seeding ROIs", exists=True, argstr="--inputroi %s")
-    OutputFibers = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Tractography result", argstr="%s")
-    useindexspace = traits.Bool(desc="Seed at IJK voxel grid", argstr="--useindexspace ")
-    seedspacing = traits.Float(desc="Spacing (in mm) between seed points, only matters if use Use Index Space is off", argstr="--seedspacing %f")
-    randomgrid = traits.Bool(desc="Enable random placing of seeds", argstr="--randomgrid ")
-    clthreshold = traits.Float(desc="Minimum Linear Measure for the seeding to start.", argstr="--clthreshold %f")
-    minimumlength = traits.Float(desc="Minimum length of the fibers (in mm)", argstr="--minimumlength %f")
-    maximumlength = traits.Float(desc="Maximum length of fibers (in mm)", argstr="--maximumlength %f")
-    stoppingmode = traits.Enum("LinearMeasure", "FractionalAnisotropy", desc="Tensor measurement used to stop the tractography", argstr="--stoppingmode %s")
-    stoppingvalue = traits.Float(desc="Tractography will stop when the stopping measurement drops below this value", argstr="--stoppingvalue %f")
-    stoppingcurvature = traits.Float(desc="Tractography will stop if radius of curvature becomes smaller than this number units are degrees per mm", argstr="--stoppingcurvature %f")
-    integrationsteplength = traits.Float(desc="Distance between points on the same fiber in mm", argstr="--integrationsteplength %f")
-    label = traits.Int(desc="Label value that defines seeding region.", argstr="--label %d")
-    writetofile = traits.Bool(desc="Write fibers to disk or create in the scene?", argstr="--writetofile ")
-    outputdirectory = traits.Either(traits.Bool, Directory(), hash_files=False, desc="Directory in which to save fiber(s)", argstr="--outputdirectory %s")
+    InputVolume = File(
+        position=-2, desc="Input DTI volume", exists=True, argstr="%s")
+    inputroi = File(
+        desc="Label map with seeding ROIs",
+        exists=True,
+        argstr="--inputroi %s")
+    OutputFibers = traits.Either(
+        traits.Bool,
+        File(),
+        position=-1,
+        hash_files=False,
+        desc="Tractography result",
+        argstr="%s")
+    useindexspace = traits.Bool(
+        desc="Seed at IJK voxel grid", argstr="--useindexspace ")
+    seedspacing = traits.Float(
+        desc=
+        "Spacing (in mm) between seed points, only matters if use Use Index Space is off",
+        argstr="--seedspacing %f")
+    randomgrid = traits.Bool(
+        desc="Enable random placing of seeds", argstr="--randomgrid ")
+    clthreshold = traits.Float(
+        desc="Minimum Linear Measure for the seeding to start.",
+        argstr="--clthreshold %f")
+    minimumlength = traits.Float(
+        desc="Minimum length of the fibers (in mm)",
+        argstr="--minimumlength %f")
+    maximumlength = traits.Float(
+        desc="Maximum length of fibers (in mm)", argstr="--maximumlength %f")
+    stoppingmode = traits.Enum(
+        "LinearMeasure",
+        "FractionalAnisotropy",
+        desc="Tensor measurement used to stop the tractography",
+        argstr="--stoppingmode %s")
+    stoppingvalue = traits.Float(
+        desc=
+        "Tractography will stop when the stopping measurement drops below this value",
+        argstr="--stoppingvalue %f")
+    stoppingcurvature = traits.Float(
+        desc=
+        "Tractography will stop if radius of curvature becomes smaller than this number units are degrees per mm",
+        argstr="--stoppingcurvature %f")
+    integrationsteplength = traits.Float(
+        desc="Distance between points on the same fiber in mm",
+        argstr="--integrationsteplength %f")
+    label = traits.Int(
+        desc="Label value that defines seeding region.", argstr="--label %d")
+    writetofile = traits.Bool(
+        desc="Write fibers to disk or create in the scene?",
+        argstr="--writetofile ")
+    outputdirectory = traits.Either(
+        traits.Bool,
+        Directory(),
+        hash_files=False,
+        desc="Directory in which to save fiber(s)",
+        argstr="--outputdirectory %s")
     name = traits.Str(desc="Name to use for fiber files", argstr="--name %s")
 
 
 class TractographyLabelMapSeedingOutputSpec(TraitedSpec):
     OutputFibers = File(position=-1, desc="Tractography result", exists=True)
-    outputdirectory = Directory(desc="Directory in which to save fiber(s)", exists=True)
+    outputdirectory = Directory(
+        desc="Directory in which to save fiber(s)", exists=True)
 
 
 class TractographyLabelMapSeeding(SEMLikeCommandLine):
@@ -155,16 +320,33 @@ acknowledgements: Laboratory of Mathematics in Imaging. This work is part of the
     input_spec = TractographyLabelMapSeedingInputSpec
     output_spec = TractographyLabelMapSeedingOutputSpec
     _cmd = "TractographyLabelMapSeeding "
-    _outputs_filenames = {'OutputFibers': 'OutputFibers.vtk', 'outputdirectory': 'outputdirectory'}
+    _outputs_filenames = {
+        'OutputFibers': 'OutputFibers.vtk',
+        'outputdirectory': 'outputdirectory'
+    }
 
 
 class DWIJointRicianLMMSEFilterInputSpec(CommandLineInputSpec):
-    re = InputMultiPath(traits.Int, desc="Estimation radius.", sep=",", argstr="--re %s")
-    rf = InputMultiPath(traits.Int, desc="Filtering radius.", sep=",", argstr="--rf %s")
-    ng = traits.Int(desc="The number of the closest gradients that are used to jointly filter a given gradient direction (0 to use all).", argstr="--ng %d")
-    inputVolume = File(position=-2, desc="Input DWI volume.", exists=True, argstr="%s")
-    outputVolume = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Output DWI volume.", argstr="%s")
-    compressOutput = traits.Bool(desc="Compress the data of the compressed file using gzip", argstr="--compressOutput ")
+    re = InputMultiPath(
+        traits.Int, desc="Estimation radius.", sep=",", argstr="--re %s")
+    rf = InputMultiPath(
+        traits.Int, desc="Filtering radius.", sep=",", argstr="--rf %s")
+    ng = traits.Int(
+        desc=
+        "The number of the closest gradients that are used to jointly filter a given gradient direction (0 to use all).",
+        argstr="--ng %d")
+    inputVolume = File(
+        position=-2, desc="Input DWI volume.", exists=True, argstr="%s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        position=-1,
+        hash_files=False,
+        desc="Output DWI volume.",
+        argstr="%s")
+    compressOutput = traits.Bool(
+        desc="Compress the data of the compressed file using gzip",
+        argstr="--compressOutput ")
 
 
 class DWIJointRicianLMMSEFilterOutputSpec(TraitedSpec):
@@ -198,15 +380,33 @@ acknowledgements: Partially founded by grant number TEC2007-67073/TCM from the C
 
 
 class DiffusionWeightedVolumeMaskingInputSpec(CommandLineInputSpec):
-    inputVolume = File(position=-4, desc="Input DWI volume", exists=True, argstr="%s")
-    outputBaseline = traits.Either(traits.Bool, File(), position=-2, hash_files=False, desc="Estimated baseline volume", argstr="%s")
-    thresholdMask = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Otsu Threshold Mask", argstr="%s")
-    otsuomegathreshold = traits.Float(desc="Control the sharpness of the threshold in the Otsu computation. 0: lower threshold, 1: higher threhold", argstr="--otsuomegathreshold %f")
-    removeislands = traits.Bool(desc="Remove Islands in Threshold Mask?", argstr="--removeislands ")
+    inputVolume = File(
+        position=-4, desc="Input DWI volume", exists=True, argstr="%s")
+    outputBaseline = traits.Either(
+        traits.Bool,
+        File(),
+        position=-2,
+        hash_files=False,
+        desc="Estimated baseline volume",
+        argstr="%s")
+    thresholdMask = traits.Either(
+        traits.Bool,
+        File(),
+        position=-1,
+        hash_files=False,
+        desc="Otsu Threshold Mask",
+        argstr="%s")
+    otsuomegathreshold = traits.Float(
+        desc=
+        "Control the sharpness of the threshold in the Otsu computation. 0: lower threshold, 1: higher threhold",
+        argstr="--otsuomegathreshold %f")
+    removeislands = traits.Bool(
+        desc="Remove Islands in Threshold Mask?", argstr="--removeislands ")
 
 
 class DiffusionWeightedVolumeMaskingOutputSpec(TraitedSpec):
-    outputBaseline = File(position=-2, desc="Estimated baseline volume", exists=True)
+    outputBaseline = File(
+        position=-2, desc="Estimated baseline volume", exists=True)
     thresholdMask = File(position=-1, desc="Otsu Threshold Mask", exists=True)
 
 
@@ -230,13 +430,26 @@ contributor: Demian Wassermann (SPL, BWH)
     input_spec = DiffusionWeightedVolumeMaskingInputSpec
     output_spec = DiffusionWeightedVolumeMaskingOutputSpec
     _cmd = "DiffusionWeightedVolumeMasking "
-    _outputs_filenames = {'outputBaseline': 'outputBaseline.nii', 'thresholdMask': 'thresholdMask.nii'}
+    _outputs_filenames = {
+        'outputBaseline': 'outputBaseline.nii',
+        'thresholdMask': 'thresholdMask.nii'
+    }
 
 
 class DTIimportInputSpec(CommandLineInputSpec):
-    inputFile = File(position=-2, desc="Input DTI file", exists=True, argstr="%s")
-    outputTensor = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Output DTI volume", argstr="%s")
-    testingmode = traits.Bool(desc="Enable testing mode. Sample helix file (helix-DTI.nhdr) will be loaded into Slicer and converted in Nifti.", argstr="--testingmode ")
+    inputFile = File(
+        position=-2, desc="Input DTI file", exists=True, argstr="%s")
+    outputTensor = traits.Either(
+        traits.Bool,
+        File(),
+        position=-1,
+        hash_files=False,
+        desc="Output DTI volume",
+        argstr="%s")
+    testingmode = traits.Bool(
+        desc=
+        "Enable testing mode. Sample helix file (helix-DTI.nhdr) will be loaded into Slicer and converted in Nifti.",
+        argstr="--testingmode ")
 
 
 class DTIimportOutputSpec(TraitedSpec):
@@ -267,17 +480,41 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 
 class DWIToDTIEstimationInputSpec(CommandLineInputSpec):
-    inputVolume = File(position=-3, desc="Input DWI volume", exists=True, argstr="%s")
-    mask = File(desc="Mask where the tensors will be computed", exists=True, argstr="--mask %s")
-    outputTensor = traits.Either(traits.Bool, File(), position=-2, hash_files=False, desc="Estimated DTI volume", argstr="%s")
-    outputBaseline = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Estimated baseline volume", argstr="%s")
-    enumeration = traits.Enum("LS", "WLS", desc="LS: Least Squares, WLS: Weighted Least Squares", argstr="--enumeration %s")
-    shiftNeg = traits.Bool(desc="Shift eigenvalues so all are positive (accounts for bad tensors related to noise or acquisition error)", argstr="--shiftNeg ")
+    inputVolume = File(
+        position=-3, desc="Input DWI volume", exists=True, argstr="%s")
+    mask = File(
+        desc="Mask where the tensors will be computed",
+        exists=True,
+        argstr="--mask %s")
+    outputTensor = traits.Either(
+        traits.Bool,
+        File(),
+        position=-2,
+        hash_files=False,
+        desc="Estimated DTI volume",
+        argstr="%s")
+    outputBaseline = traits.Either(
+        traits.Bool,
+        File(),
+        position=-1,
+        hash_files=False,
+        desc="Estimated baseline volume",
+        argstr="%s")
+    enumeration = traits.Enum(
+        "LS",
+        "WLS",
+        desc="LS: Least Squares, WLS: Weighted Least Squares",
+        argstr="--enumeration %s")
+    shiftNeg = traits.Bool(
+        desc=
+        "Shift eigenvalues so all are positive (accounts for bad tensors related to noise or acquisition error)",
+        argstr="--shiftNeg ")
 
 
 class DWIToDTIEstimationOutputSpec(TraitedSpec):
     outputTensor = File(position=-2, desc="Estimated DTI volume", exists=True)
-    outputBaseline = File(position=-1, desc="Estimated baseline volume", exists=True)
+    outputBaseline = File(
+        position=-1, desc="Estimated baseline volume", exists=True)
 
 
 class DWIToDTIEstimation(SEMLikeCommandLine):
@@ -304,17 +541,55 @@ acknowledgements: This command module is based on the estimation functionality p
     input_spec = DWIToDTIEstimationInputSpec
     output_spec = DWIToDTIEstimationOutputSpec
     _cmd = "DWIToDTIEstimation "
-    _outputs_filenames = {'outputTensor': 'outputTensor.nii', 'outputBaseline': 'outputBaseline.nii'}
+    _outputs_filenames = {
+        'outputTensor': 'outputTensor.nii',
+        'outputBaseline': 'outputBaseline.nii'
+    }
 
 
 class DiffusionTensorScalarMeasurementsInputSpec(CommandLineInputSpec):
-    inputVolume = File(position=-3, desc="Input DTI volume", exists=True, argstr="%s")
-    outputScalar = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Scalar volume derived from tensor", argstr="%s")
-    enumeration = traits.Enum("Trace", "Determinant", "RelativeAnisotropy", "FractionalAnisotropy", "Mode", "LinearMeasure", "PlanarMeasure", "SphericalMeasure", "MinEigenvalue", "MidEigenvalue", "MaxEigenvalue", "MaxEigenvalueProjectionX", "MaxEigenvalueProjectionY", "MaxEigenvalueProjectionZ", "RAIMaxEigenvecX", "RAIMaxEigenvecY", "RAIMaxEigenvecZ", "MaxEigenvecX", "MaxEigenvecY", "MaxEigenvecZ", "D11", "D22", "D33", "ParallelDiffusivity", "PerpendicularDffusivity", desc="An enumeration of strings", argstr="--enumeration %s")
+    inputVolume = File(
+        position=-3, desc="Input DTI volume", exists=True, argstr="%s")
+    outputScalar = traits.Either(
+        traits.Bool,
+        File(),
+        position=-1,
+        hash_files=False,
+        desc="Scalar volume derived from tensor",
+        argstr="%s")
+    enumeration = traits.Enum(
+        "Trace",
+        "Determinant",
+        "RelativeAnisotropy",
+        "FractionalAnisotropy",
+        "Mode",
+        "LinearMeasure",
+        "PlanarMeasure",
+        "SphericalMeasure",
+        "MinEigenvalue",
+        "MidEigenvalue",
+        "MaxEigenvalue",
+        "MaxEigenvalueProjectionX",
+        "MaxEigenvalueProjectionY",
+        "MaxEigenvalueProjectionZ",
+        "RAIMaxEigenvecX",
+        "RAIMaxEigenvecY",
+        "RAIMaxEigenvecZ",
+        "MaxEigenvecX",
+        "MaxEigenvecY",
+        "MaxEigenvecZ",
+        "D11",
+        "D22",
+        "D33",
+        "ParallelDiffusivity",
+        "PerpendicularDffusivity",
+        desc="An enumeration of strings",
+        argstr="--enumeration %s")
 
 
 class DiffusionTensorScalarMeasurementsOutputSpec(TraitedSpec):
-    outputScalar = File(position=-1, desc="Scalar volume derived from tensor", exists=True)
+    outputScalar = File(
+        position=-1, desc="Scalar volume derived from tensor", exists=True)
 
 
 class DiffusionTensorScalarMeasurements(SEMLikeCommandLine):
@@ -341,8 +616,15 @@ acknowledgements: LMI
 
 
 class DTIexportInputSpec(CommandLineInputSpec):
-    inputTensor = File(position=-2, desc="Input DTI volume", exists=True, argstr="%s")
-    outputFile = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Output DTI file", argstr="%s")
+    inputTensor = File(
+        position=-2, desc="Input DTI volume", exists=True, argstr="%s")
+    outputFile = traits.Either(
+        traits.Bool,
+        File(),
+        position=-1,
+        hash_files=False,
+        desc="Output DTI file",
+        argstr="%s")
 
 
 class DTIexportOutputSpec(TraitedSpec):

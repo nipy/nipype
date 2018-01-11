@@ -9,7 +9,6 @@ def _func1(x):
 
 
 def test_func_to_str():
-
     def func1(x):
         return x**2
 

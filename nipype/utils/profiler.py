@@ -96,8 +96,9 @@ class ResourceMonitor(threading.Thread):
             except psutil.NoSuchProcess:
                 pass
 
-        print('%f,%f,%f,%f' % (time(), cpu, rss / _MB, vms / _MB),
-              file=self._logfile)
+        print(
+            '%f,%f,%f,%f' % (time(), cpu, rss / _MB, vms / _MB),
+            file=self._logfile)
         self._logfile.flush()
 
     def run(self):
@@ -143,10 +144,9 @@ def log_nodes_cb(node, status):
         'start': getattr(node.result.runtime, 'startTime'),
         'finish': getattr(node.result.runtime, 'endTime'),
         'duration': getattr(node.result.runtime, 'duration'),
-        'runtime_threads': getattr(
-            node.result.runtime, 'cpu_percent', 'N/A'),
-        'runtime_memory_gb': getattr(
-            node.result.runtime, 'mem_peak_gb', 'N/A'),
+        'runtime_threads': getattr(node.result.runtime, 'cpu_percent', 'N/A'),
+        'runtime_memory_gb': getattr(node.result.runtime, 'mem_peak_gb',
+                                     'N/A'),
         'estimated_memory_gb': node.mem_gb,
         'num_threads': node.n_procs,
     }
@@ -172,8 +172,9 @@ def get_system_total_memory_gb():
     if 'linux' in sys.platform:
         with open('/proc/meminfo', 'r') as f_in:
             meminfo_lines = f_in.readlines()
-            mem_total_line = [line for line in meminfo_lines
-                              if 'MemTotal' in line][0]
+            mem_total_line = [
+                line for line in meminfo_lines if 'MemTotal' in line
+            ][0]
             mem_total = float(mem_total_line.split()[1])
             memory_gb = mem_total / (1024.0**2)
     elif 'darwin' in sys.platform:
@@ -248,7 +249,8 @@ def _get_num_threads(pid):
             tprocs = [psutil.Process(thr.id) for thr in proc.threads()]
             alive_tprocs = [
                 tproc for tproc in tprocs
-                if tproc.status() == psutil.STATUS_RUNNING]
+                if tproc.status() == psutil.STATUS_RUNNING
+            ]
             num_threads = len(alive_tprocs)
         else:
             num_threads = 1
@@ -264,10 +266,13 @@ def _get_num_threads(pid):
                 # If its not necessarily running, but still multi-threaded
                 elif child.num_threads() > 1:
                     # Cast each thread as a process and check for only running
-                    tprocs = [psutil.Process(thr.id)
-                              for thr in child.threads()]
-                    alive_tprocs = [tproc for tproc in tprocs
-                                    if tproc.status() == psutil.STATUS_RUNNING]
+                    tprocs = [
+                        psutil.Process(thr.id) for thr in child.threads()
+                    ]
+                    alive_tprocs = [
+                        tproc for tproc in tprocs
+                        if tproc.status() == psutil.STATUS_RUNNING
+                    ]
                     child_thr = len(alive_tprocs)
                 # Otherwise, no threads are running
                 else:
@@ -368,8 +373,8 @@ def _use_resources(n_procs, mem_gb):
     _use_cpu(5)
     mem_total = p.memory_info().rss / _GB
     del big_str
-    iflogger.info('[%d] Memory offset %0.2fGB, total %0.2fGB',
-                  os.getpid(), mem_offset, mem_total)
+    iflogger.info('[%d] Memory offset %0.2fGB, total %0.2fGB', os.getpid(),
+                  mem_offset, mem_total)
 
     if n_procs > 1:
         pool = Pool(n_procs)

@@ -3,8 +3,8 @@ from __future__ import absolute_import
 from .morphology import (GrayscaleGrindPeakImageFilter,
                          GrayscaleFillHoleImageFilter)
 from .denoising import (GradientAnisotropicDiffusion,
-                        CurvatureAnisotropicDiffusion,
-                        GaussianBlurImageFilter, MedianImageFilter)
+                        CurvatureAnisotropicDiffusion, GaussianBlurImageFilter,
+                        MedianImageFilter)
 from .arithmetic import (MultiplyScalarVolumes, MaskScalarVolume,
                          SubtractScalarVolumes, AddScalarVolumes,
                          CastScalarVolume)

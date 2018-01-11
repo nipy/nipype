@@ -62,10 +62,12 @@ def pkg_commit_hash(pkg_path):
     if install_subst != '':
         return 'installation', install_subst
     # maybe we are in a repository
-    proc = subprocess.Popen('git rev-parse --short HEAD',
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                            cwd=pkg_path, shell=True)
+    proc = subprocess.Popen(
+        'git rev-parse --short HEAD',
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        cwd=pkg_path,
+        shell=True)
     repo_commit, _ = proc.communicate()
     if repo_commit:
         if PY3:

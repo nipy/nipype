@@ -25,10 +25,8 @@ def test_CreateNifti(create_analyze_pair_file_in_directory):
 
     # .inputs based parameters setting
     create_nifti.inputs.header_file = filelist[0]
-    create_nifti.inputs.data_file = fname_presuffix(filelist[0],
-                                                    '',
-                                                    '.img',
-                                                    use_ext=False)
+    create_nifti.inputs.data_file = fname_presuffix(
+        filelist[0], '', '.img', use_ext=False)
 
     result = create_nifti.run()
 

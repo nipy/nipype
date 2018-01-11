@@ -12,7 +12,6 @@ nb_runs = 0
 
 
 class SideEffectInterface(EngineTestInterface):
-
     def _run_interface(self, runtime):
         global nb_runs
         nb_runs += 1

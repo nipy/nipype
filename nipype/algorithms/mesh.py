@@ -40,15 +40,25 @@ class TVTKBaseInterface(BaseInterface):
 
 
 class WarpPointsInputSpec(BaseInterfaceInputSpec):
-    points = File(exists=True, mandatory=True,
-                  desc='file containing the point set')
-    warp = File(exists=True, mandatory=True,
-                desc='dense deformation field to be applied')
-    interp = traits.Enum('cubic', 'nearest', 'linear', usedefault=True,
-                         mandatory=True, desc='interpolation')
-    out_points = File(name_source='points', name_template='%s_warped',
-                      output_name='out_points', keep_extension=True,
-                      desc='the warped point set')
+    points = File(
+        exists=True, mandatory=True, desc='file containing the point set')
+    warp = File(
+        exists=True,
+        mandatory=True,
+        desc='dense deformation field to be applied')
+    interp = traits.Enum(
+        'cubic',
+        'nearest',
+        'linear',
+        usedefault=True,
+        mandatory=True,
+        desc='interpolation')
+    out_points = File(
+        name_source='points',
+        name_template='%s_warped',
+        output_name='out_points',
+        keep_extension=True,
+        desc='the warped point set')
 
 
 class WarpPointsOutputSpec(TraitedSpec):
@@ -111,10 +121,9 @@ class WarpPoints(TVTKBaseInterface):
             wdata = axis.get_data()
             if np.any(wdata != 0):
 
-                warp = ndimage.map_coordinates(wdata,
-                                               voxpoints.transpose())
+                warp = ndimage.map_coordinates(wdata, voxpoints.transpose())
             else:
-                warp = np.zeros((points.shape[0],))
+                warp = np.zeros((points.shape[0], ))
 
             warps.append(warp)
 
@@ -130,39 +139,52 @@ class WarpPoints(TVTKBaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_points'] = self._gen_fname(self.inputs.points,
-                                                suffix='warped',
-                                                ext='.vtk')
+        outputs['out_points'] = self._gen_fname(
+            self.inputs.points, suffix='warped', ext='.vtk')
         return outputs
 
 
 class ComputeMeshWarpInputSpec(BaseInterfaceInputSpec):
-    surface1 = File(exists=True, mandatory=True,
-                    desc=('Reference surface (vtk format) to which compute '
-                          'distance.'))
-    surface2 = File(exists=True, mandatory=True,
-
-                    desc=('Test surface (vtk format) from which compute '
-                          'distance.'))
-    metric = traits.Enum('euclidean', 'sqeuclidean', usedefault=True,
-                         desc='norm used to report distance')
+    surface1 = File(
+        exists=True,
+        mandatory=True,
+        desc=('Reference surface (vtk format) to which compute '
+              'distance.'))
+    surface2 = File(
+        exists=True,
+        mandatory=True,
+        desc=('Test surface (vtk format) from which compute '
+              'distance.'))
+    metric = traits.Enum(
+        'euclidean',
+        'sqeuclidean',
+        usedefault=True,
+        desc='norm used to report distance')
     weighting = traits.Enum(
-        'none', 'area', usedefault=True,
+        'none',
+        'area',
+        usedefault=True,
         desc=('"none": no weighting is performed, surface": edge distance is '
               'weighted by the corresponding surface area'))
-    out_warp = File('surfwarp.vtk', usedefault=True,
-                    desc='vtk file based on surface1 and warpings mapping it '
-                    'to surface2')
-    out_file = File('distance.npy', usedefault=True,
-                    desc='numpy file keeping computed distances and weights')
+    out_warp = File(
+        'surfwarp.vtk',
+        usedefault=True,
+        desc='vtk file based on surface1 and warpings mapping it '
+        'to surface2')
+    out_file = File(
+        'distance.npy',
+        usedefault=True,
+        desc='numpy file keeping computed distances and weights')
 
 
 class ComputeMeshWarpOutputSpec(TraitedSpec):
     distance = traits.Float(desc="computed distance")
-    out_warp = File(exists=True, desc=('vtk file with the vertex-wise '
-                                       'mapping of surface1 to surface2'))
-    out_file = File(exists=True,
-                    desc='numpy file keeping computed distances and weights')
+    out_warp = File(
+        exists=True,
+        desc=('vtk file with the vertex-wise '
+              'mapping of surface1 to surface2'))
+    out_file = File(
+        exists=True, desc='numpy file keeping computed distances and weights')
 
 
 class ComputeMeshWarp(TVTKBaseInterface):
@@ -206,7 +228,7 @@ class ComputeMeshWarp(TVTKBaseInterface):
         vtk2 = VTKInfo.vtk_output(r2)
         r1.update()
         r2.update()
-        assert(len(vtk1.points) == len(vtk2.points))
+        assert (len(vtk1.points) == len(vtk2.points))
 
         points1 = np.array(vtk1.points)
         points2 = np.array(vtk2.points)
@@ -262,31 +284,45 @@ class ComputeMeshWarp(TVTKBaseInterface):
 
 
 class MeshWarpMathsInputSpec(BaseInterfaceInputSpec):
-    in_surf = File(exists=True, mandatory=True,
-                   desc=('Input surface in vtk format, with associated warp '
-                         'field as point data (ie. from ComputeMeshWarp'))
-    float_trait = traits.Either(traits.Float(1.0), traits.Tuple(
-        traits.Float(1.0), traits.Float(1.0), traits.Float(1.0)))
+    in_surf = File(
+        exists=True,
+        mandatory=True,
+        desc=('Input surface in vtk format, with associated warp '
+              'field as point data (ie. from ComputeMeshWarp'))
+    float_trait = traits.Either(
+        traits.Float(1.0),
+        traits.Tuple(traits.Float(1.0), traits.Float(1.0), traits.Float(1.0)))
 
     operator = traits.Either(
-        float_trait, File(exists=True), default=1.0, mandatory=True,
+        float_trait,
+        File(exists=True),
+        default=1.0,
+        mandatory=True,
         desc='image, float or tuple of floats to act as operator')
 
-    operation = traits.Enum('sum', 'sub', 'mul', 'div', usedefault=True,
-                            desc='operation to be performed')
+    operation = traits.Enum(
+        'sum',
+        'sub',
+        'mul',
+        'div',
+        usedefault=True,
+        desc='operation to be performed')
 
-    out_warp = File('warp_maths.vtk', usedefault=True,
-                    desc='vtk file based on in_surf and warpings mapping it '
-                    'to out_file')
-    out_file = File('warped_surf.vtk', usedefault=True,
-                    desc='vtk with surface warped')
+    out_warp = File(
+        'warp_maths.vtk',
+        usedefault=True,
+        desc='vtk file based on in_surf and warpings mapping it '
+        'to out_file')
+    out_file = File(
+        'warped_surf.vtk', usedefault=True, desc='vtk with surface warped')
 
 
 class MeshWarpMathsOutputSpec(TraitedSpec):
-    out_warp = File(exists=True, desc=('vtk file with the vertex-wise '
-                                       'mapping of surface1 to surface2'))
-    out_file = File(exists=True,
-                    desc='vtk with surface warped')
+    out_warp = File(
+        exists=True,
+        desc=('vtk file with the vertex-wise '
+              'mapping of surface1 to surface2'))
+    out_file = File(exists=True, desc='vtk with surface warped')
 
 
 class MeshWarpMaths(TVTKBaseInterface):
@@ -330,7 +366,7 @@ class MeshWarpMaths(TVTKBaseInterface):
             r2 = tvtk.PolyDataReader(file_name=self.inputs.surface2)
             vtk2 = VTKInfo.vtk_output(r2)
             r2.update()
-            assert(len(points1) == len(vtk2.points))
+            assert (len(points1) == len(vtk2.points))
 
             opfield = vtk2.point_data.vectors
 
@@ -338,8 +374,7 @@ class MeshWarpMaths(TVTKBaseInterface):
                 opfield = vtk2.point_data.scalars
 
             if opfield is None:
-                raise RuntimeError(
-                    'No operator values found in operator file')
+                raise RuntimeError('No operator values found in operator file')
 
             opfield = np.array(opfield)
 

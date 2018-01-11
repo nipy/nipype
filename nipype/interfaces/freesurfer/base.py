@@ -22,10 +22,8 @@ import os
 
 from ... import LooseVersion
 from ...utils.filemanip import fname_presuffix
-from ..base import (CommandLine, Directory,
-                    CommandLineInputSpec, isdefined,
-                    traits, TraitedSpec, File,
-                    PackageInfo)
+from ..base import (CommandLine, Directory, CommandLineInputSpec, isdefined,
+                    traits, TraitedSpec, File, PackageInfo)
 
 __docformat__ = 'restructuredtext'
 
@@ -42,8 +40,8 @@ class Info(PackageInfo):
 
     """
     if os.getenv('FREESURFER_HOME'):
-        version_file = os.path.join(os.getenv('FREESURFER_HOME'),
-                                    'build-stamp.txt')
+        version_file = os.path.join(
+            os.getenv('FREESURFER_HOME'), 'build-stamp.txt')
 
     @staticmethod
     def parse_version(raw_info):
@@ -131,8 +129,9 @@ class FSCommand(CommandLine):
 
     def _subjects_dir_update(self):
         if self.inputs.subjects_dir:
-            self.inputs.environ.update({'SUBJECTS_DIR':
-                                        self.inputs.subjects_dir})
+            self.inputs.environ.update({
+                'SUBJECTS_DIR': self.inputs.subjects_dir
+            })
 
     @classmethod
     def set_default_subjects_dir(cls, subjects_dir):
@@ -144,7 +143,11 @@ class FSCommand(CommandLine):
         self._subjects_dir_update()
         return super(FSCommand, self).run(**inputs)
 
-    def _gen_fname(self, basename, fname=None, cwd=None, suffix='_fs',
+    def _gen_fname(self,
+                   basename,
+                   fname=None,
+                   cwd=None,
+                   suffix='_fs',
                    use_ext=True):
         '''Define a generic mapping for a single outfile
 
@@ -167,8 +170,8 @@ class FSCommand(CommandLine):
             raise ValueError(msg)
         if cwd is None:
             cwd = os.getcwd()
-        fname = fname_presuffix(basename, suffix=suffix,
-                                use_ext=use_ext, newpath=cwd)
+        fname = fname_presuffix(
+            basename, suffix=suffix, use_ext=use_ext, newpath=cwd)
         return fname
 
     @property
@@ -185,6 +188,7 @@ class FSSurfaceCommand(FSCommand):
     filename. Output out_file must be adjusted to accommodate this. By
     including the full path in the filename, we can also avoid this behavior.
     """
+
     def _get_filecopy_info(self):
         self._normalize_filenames()
         return super(FSSurfaceCommand, self)._get_filecopy_info()
@@ -227,8 +231,8 @@ class FSScriptCommand(FSCommand):
 
 
 class FSScriptOutputSpec(TraitedSpec):
-    log_file = File('output.nipype', usedefault=True,
-                    exists=True, desc="The output log")
+    log_file = File(
+        'output.nipype', usedefault=True, exists=True, desc="The output log")
 
 
 class FSTraitedSpecOpenMP(FSTraitedSpec):
@@ -259,8 +263,10 @@ class FSCommandOpenMP(FSCommand):
 
     def _num_threads_update(self):
         if self.inputs.num_threads:
-            self.inputs.environ.update(
-                {'OMP_NUM_THREADS': str(self.inputs.num_threads)})
+            self.inputs.environ.update({
+                'OMP_NUM_THREADS':
+                str(self.inputs.num_threads)
+            })
 
     def run(self, **inputs):
         if 'num_threads' in inputs:

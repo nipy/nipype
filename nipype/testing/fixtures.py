@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-
 """
 Pytest fixtures used in tests.
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
-
 
 import os
 import pytest
@@ -105,7 +103,7 @@ def set_output_type(fsl_output_type):
     return prev_output_type
 
 
-@pytest.fixture(params=[None]+list(Info.ftypes))
+@pytest.fixture(params=[None] + list(Info.ftypes))
 def create_files_in_directory_plus_output_type(request, tmpdir):
     func_prev_type = set_output_type(request.param)
     origdir = tmpdir.chdir()

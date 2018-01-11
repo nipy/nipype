@@ -6,7 +6,6 @@ from builtins import str, bytes
 from future import standard_library
 standard_library.install_aliases()
 
-
 import os
 
 from nipype.utils.provenance import ProvStore, safe_encode

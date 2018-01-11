@@ -192,8 +192,7 @@ def _hash_bunch_dict(adict, key):
     stuff = adict[key]
     if not is_container(stuff):
         stuff = [stuff]
-    return [(afile, hash_infile(afile))
-            for afile in stuff]
+    return [(afile, hash_infile(afile)) for afile in stuff]
 
 
 class InterfaceResult(object):
@@ -223,7 +222,11 @@ class InterfaceResult(object):
 
     """
 
-    def __init__(self, interface, runtime, inputs=None, outputs=None,
+    def __init__(self,
+                 interface,
+                 runtime,
+                 inputs=None,
+                 outputs=None,
                  provenance=None):
         self._version = 2.0
         self.interface = interface
@@ -298,6 +301,5 @@ def load_template(name):
     from ..fsl.model import load_template
     iflogger.warning(
         'Deprecated in 1.0.0, and will be removed in 1.1.0, '
-        'please use nipype.interfaces.fsl.model.load_template instead.'
-    )
+        'please use nipype.interfaces.fsl.model.load_template instead.')
     return load_template(name)

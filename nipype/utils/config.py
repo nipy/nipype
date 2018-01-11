@@ -29,7 +29,6 @@ from ..external import portalocker
 
 standard_library.install_aliases()
 
-
 CONFIG_DEPRECATIONS = {
     'profile_runtime': ('monitoring.enabled', '1.0'),
     'filemanip_level': ('logging.utils_level', '1.0'),
@@ -105,17 +104,18 @@ class NipypeConfig(object):
         self._resource_monitor = None
 
         if os.path.exists(config_dir):
-            self._config.read([os.path.join(config_dir, 'nipype.cfg'), 'nipype.cfg'])
+            self._config.read(
+                [os.path.join(config_dir, 'nipype.cfg'), 'nipype.cfg'])
 
         for option in CONFIG_DEPRECATIONS:
             for section in ['execution', 'logging', 'monitoring']:
                 if self.has_option(section, option):
-                    new_section, new_option = CONFIG_DEPRECATIONS[
-                        option][0].split('.')
+                    new_section, new_option = CONFIG_DEPRECATIONS[option][
+                        0].split('.')
                     if not self.has_option(new_section, new_option):
                         # Warn implicit in get
-                        self.set(new_section, new_option, self.get(
-                            section, option))
+                        self.set(new_section, new_option,
+                                 self.get(section, option))
 
     @property
     def cwd(self):
@@ -126,15 +126,16 @@ class NipypeConfig(object):
             try:
                 self._cwd = os.getcwd()
             except OSError:
-                warn('Trying to run Nipype from a nonexistent directory "{}".'.format(
-                     os.getenv('PWD', 'unknown')), RuntimeWarning)
+                warn('Trying to run Nipype from a nonexistent directory "{}".'.
+                     format(os.getenv('PWD', 'unknown')), RuntimeWarning)
                 raise
         return self._cwd
 
     def set_default_config(self):
         """Read default settings template and set into config object"""
         default_cfg = DEFAULT_CONFIG_TPL(
-            log_dir=os.path.expanduser('~'),  # Get $HOME in a platform-agnostic way
+            log_dir=os.path.expanduser(
+                '~'),  # Get $HOME in a platform-agnostic way
             crashdump_dir=self.cwd  # Read cached cwd
         )
 
@@ -165,8 +166,8 @@ class NipypeConfig(object):
         if option in CONFIG_DEPRECATIONS:
             msg = ('Config option "%s" has been deprecated as of nipype %s. '
                    'Please use "%s" instead.') % (
-                option, CONFIG_DEPRECATIONS[option][1],
-                CONFIG_DEPRECATIONS[option][0])
+                       option, CONFIG_DEPRECATIONS[option][1],
+                       CONFIG_DEPRECATIONS[option][0])
             warn(msg)
             section, option = CONFIG_DEPRECATIONS[option][0].split('.')
 
@@ -182,8 +183,8 @@ class NipypeConfig(object):
         if option in CONFIG_DEPRECATIONS:
             msg = ('Config option "%s" has been deprecated as of nipype %s. '
                    'Please use "%s" instead.') % (
-                option, CONFIG_DEPRECATIONS[option][1],
-                CONFIG_DEPRECATIONS[option][0])
+                       option, CONFIG_DEPRECATIONS[option][1],
+                       CONFIG_DEPRECATIONS[option][0])
             warn(msg)
             section, option = CONFIG_DEPRECATIONS[option][0].split('.')
 
@@ -253,8 +254,8 @@ class NipypeConfig(object):
             return self._resource_monitor
 
         # Cache config from nipype config
-        self.resource_monitor = str2bool(self._config.get(
-            'monitoring', 'enabled')) or False
+        self.resource_monitor = str2bool(
+            self._config.get('monitoring', 'enabled')) or False
         return self._resource_monitor
 
     @resource_monitor.setter

@@ -26,12 +26,14 @@ from .base import DistributedPluginBase
 try:
     from textwrap import indent
 except ImportError:
+
     def indent(text, prefix):
         """ A textwrap.indent replacement for Python < 3.3 """
         if not prefix:
             return text
         splittext = text.splitlines(True)
         return prefix + prefix.join(splittext)
+
 
 # Init logger
 logger = logging.getLogger('workflow')
@@ -146,8 +148,8 @@ class MultiProcPlugin(DistributedPluginBase):
 
         NipypePool = NonDaemonPool if non_daemon else Pool
         try:
-            self.pool = NipypePool(processes=self.processors,
-                                   maxtasksperchild=maxtasks)
+            self.pool = NipypePool(
+                processes=self.processors, maxtasksperchild=maxtasks)
         except TypeError:
             self.pool = NipypePool(processes=self.processors)
 
@@ -233,8 +235,10 @@ class MultiProcPlugin(DistributedPluginBase):
             tasks_list_msg = ''
 
             if logger.level <= INFO:
-                running_tasks = ['  * %s' % self.procs[jobid].fullname
-                                 for _, jobid in self.pending_tasks]
+                running_tasks = [
+                    '  * %s' % self.procs[jobid].fullname
+                    for _, jobid in self.pending_tasks
+                ]
                 if running_tasks:
                     tasks_list_msg = '\nCurrently running:\n'
                     tasks_list_msg += '\n'.join(running_tasks)
@@ -256,8 +260,8 @@ class MultiProcPlugin(DistributedPluginBase):
                          'be submitted to the queue. Potential deadlock')
             return
 
-        jobids = self._sort_jobs(jobids,
-                                 scheduler=self.plugin_args.get('scheduler'))
+        jobids = self._sort_jobs(
+            jobids, scheduler=self.plugin_args.get('scheduler'))
 
         # Run garbage collector before potentially submitting jobs
         gc.collect()
@@ -271,9 +275,12 @@ class MultiProcPlugin(DistributedPluginBase):
                 except Exception:
                     traceback = format_exception(*sys.exc_info())
                     self._clean_queue(
-                        jobid, graph,
-                        result={'result': None, 'traceback': traceback}
-                    )
+                        jobid,
+                        graph,
+                        result={
+                            'result': None,
+                            'traceback': traceback
+                        })
                     self.proc_pending[jobid] = False
                     continue
                 if num_subnodes > 1:
@@ -314,9 +321,12 @@ class MultiProcPlugin(DistributedPluginBase):
                 except Exception:
                     traceback = format_exception(*sys.exc_info())
                     self._clean_queue(
-                        jobid, graph,
-                        result={'result': None, 'traceback': traceback}
-                    )
+                        jobid,
+                        graph,
+                        result={
+                            'result': None,
+                            'traceback': traceback
+                        })
 
                 # Release resources
                 self._task_finished_cb(jobid)
@@ -334,8 +344,8 @@ class MultiProcPlugin(DistributedPluginBase):
             # Send job to task manager and add to pending tasks
             if self._status_callback:
                 self._status_callback(self.procs[jobid], 'start')
-            tid = self._submit_job(deepcopy(self.procs[jobid]),
-                                   updatehash=updatehash)
+            tid = self._submit_job(
+                deepcopy(self.procs[jobid]), updatehash=updatehash)
             if tid is None:
                 self.proc_done[jobid] = False
                 self.proc_pending[jobid] = False
@@ -346,6 +356,9 @@ class MultiProcPlugin(DistributedPluginBase):
 
     def _sort_jobs(self, jobids, scheduler='tsort'):
         if scheduler == 'mem_thread':
-            return sorted(jobids, key=lambda item: (
-                self.procs[item].mem_gb, self.procs[item].n_procs))
+            return sorted(
+                jobids,
+                key=
+                lambda item: (self.procs[item].mem_gb, self.procs[item].n_procs)
+            )
         return jobids

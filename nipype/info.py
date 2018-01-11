@@ -35,30 +35,32 @@ def get_nipype_gitversion():
         return None
     ver = None
     try:
-        o, _ = subprocess.Popen('git describe', shell=True, cwd=gitpath,
-                                stdout=subprocess.PIPE).communicate()
+        o, _ = subprocess.Popen(
+            'git describe', shell=True, cwd=gitpath,
+            stdout=subprocess.PIPE).communicate()
     except Exception:
         pass
     else:
         ver = o.decode().strip().split('-')[-1]
     return ver
 
+
 if __version__.endswith('-dev'):
     gitversion = get_nipype_gitversion()
     if gitversion:
         __version__ = '{}+{}'.format(__version__, gitversion)
 
-CLASSIFIERS = ['Development Status :: 5 - Production/Stable',
-               'Environment :: Console',
-               'Intended Audience :: Science/Research',
-               'License :: OSI Approved :: Apache Software License',
-               'Operating System :: MacOS :: MacOS X',
-               'Operating System :: POSIX :: Linux',
-               'Programming Language :: Python :: 2.7',
-               'Programming Language :: Python :: 3.4',
-               'Programming Language :: Python :: 3.5',
-               'Programming Language :: Python :: 3.6',
-               'Topic :: Scientific/Engineering']
+CLASSIFIERS = [
+    'Development Status :: 5 - Production/Stable', 'Environment :: Console',
+    'Intended Audience :: Science/Research',
+    'License :: OSI Approved :: Apache Software License',
+    'Operating System :: MacOS :: MacOS X',
+    'Operating System :: POSIX :: Linux',
+    'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3.4',
+    'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6', 'Topic :: Scientific/Engineering'
+]
 
 description = 'Neuroimaging in Python: Pipelines and Interfaces'
 
@@ -125,8 +127,8 @@ PLATFORMS = 'OS Independent'
 MAJOR = __version__.split('.')[0]
 MINOR = __version__.split('.')[1]
 MICRO = __version__.replace('-', '.').split('.')[2]
-ISRELEASE = (len(__version__.replace('-', '.').split('.')) == 3 or
-             'post' in __version__.replace('-', '.').split('.')[-1])
+ISRELEASE = (len(__version__.replace('-', '.').split('.')) == 3
+             or 'post' in __version__.replace('-', '.').split('.')[-1])
 VERSION = __version__
 PROVIDES = ['nipype']
 REQUIRES = [
@@ -151,10 +153,7 @@ REQUIRES = [
 if sys.version_info <= (3, 4):
     REQUIRES.append('configparser')
 
-TESTS_REQUIRES = [
-    'pytest-cov',
-    'codecov'
-]
+TESTS_REQUIRES = ['pytest-cov', 'codecov']
 
 EXTRA_REQUIRES = {
     'doc': ['Sphinx>=1.4', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],

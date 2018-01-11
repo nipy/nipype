@@ -56,15 +56,14 @@ class TempFATFS(object):
         mount_args = ['fusefat', '-o', 'rw+', '-f', vfatfile, self.vfatmount]
 
         try:
-            subprocess.check_call(args=mkfs_args, stdout=self.dev_null,
-                                  stderr=self.dev_null)
+            subprocess.check_call(
+                args=mkfs_args, stdout=self.dev_null, stderr=self.dev_null)
         except CalledProcessError as e:
             raise_from(IOError("mkfs.vfat failed"), e)
 
         try:
-            self.fusefat = subprocess.Popen(args=mount_args,
-                                            stdout=self.dev_null,
-                                            stderr=self.dev_null)
+            self.fusefat = subprocess.Popen(
+                args=mount_args, stdout=self.dev_null, stderr=self.dev_null)
         except OSError as e:
             raise_from(IOError("fusefat is not installed"), e)
 

@@ -52,8 +52,8 @@ class PipeFunc(object):
                 An optional callable called each time after the function
                 is called.
         """
-        if not (isinstance(interface, type) and
-                issubclass(interface, BaseInterface)):
+        if not (isinstance(interface, type)
+                and issubclass(interface, BaseInterface)):
             raise ValueError('the interface argument should be a nipype '
                              'interface class, but %s (type %s) was passed.' %
                              (interface, type(interface)))
@@ -97,6 +97,7 @@ class PipeFunc(object):
         return '{}({}.{}}, base_dir={})'.format(
             self.__class__.__name__, self.interface.__module__,
             self.interface.__name__, self.base_dir)
+
 
 ###############################################################################
 # Memory manager: provide some tracking about what is computed when, to
@@ -243,8 +244,8 @@ class Memory(object):
         except OSError:
             "Dir exists"
 
-        with open(os.path.join(
-                month_dir, '%02i.log' % t.tm_mday), 'a') as rotatefile:
+        with open(os.path.join(month_dir, '%02i.log' % t.tm_mday),
+                  'a') as rotatefile:
             rotatefile.write('%s/%s\n' % (dir_name, job_name))
 
     def clear_previous_runs(self, warn=True):
@@ -280,8 +281,7 @@ class Memory(object):
         month = month if month is not None else t.tm_mon
         year = year if year is not None else t.tm_year
         base_dir = self.base_dir
-        cut_off_file = '%s/log.%i/%02i/%02i.log' % (base_dir,
-                                                    year, month, day)
+        cut_off_file = '%s/log.%i/%02i/%02i.log' % (base_dir, year, month, day)
         logs_to_flush = list()
         recent_runs = dict()
         for log_name in glob.glob('%s/log.*/*/*.log' % base_dir):
@@ -299,8 +299,8 @@ class Memory(object):
         """
         rm_all_but(self.base_dir, set(runs.keys()), warn=warn)
         for dir_name, job_names in list(runs.items()):
-            rm_all_but(os.path.join(self.base_dir, dir_name),
-                       job_names, warn=warn)
+            rm_all_but(
+                os.path.join(self.base_dir, dir_name), job_names, warn=warn)
 
     def __repr__(self):
         return '{}(base_dir={})'.format(self.__class__.__name__, self.base_dir)

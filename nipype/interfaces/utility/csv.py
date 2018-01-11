@@ -24,10 +24,14 @@ from ..io import add_traits
 
 
 class CSVReaderInputSpec(DynamicTraitedSpec, TraitedSpec):
-    in_file = File(exists=True, mandatory=True,
-                   desc='Input comma-seperated value (CSV) file')
-    header = traits.Bool(False, usedefault=True,
-                         desc='True if the first line is a column header')
+    in_file = File(
+        exists=True,
+        mandatory=True,
+        desc='Input comma-seperated value (CSV) file')
+    header = traits.Bool(
+        False,
+        usedefault=True,
+        desc='True if the first line is a column header')
 
 
 class CSVReader(BaseInterface):
@@ -77,8 +81,8 @@ class CSVReader(BaseInterface):
             if self.inputs.header:
                 self._outfields = tuple(entry)
             else:
-                self._outfields = tuple(['column_' + str(x)
-                                         for x in range(len(entry))])
+                self._outfields = tuple(
+                    ['column_' + str(x) for x in range(len(entry))])
         return self._outfields
 
     def _run_interface(self, runtime):

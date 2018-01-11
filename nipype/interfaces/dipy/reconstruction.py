@@ -29,20 +29,20 @@ class RESTOREInputSpec(DipyBaseInterfaceInputSpec):
 
 class RESTOREOutputSpec(TraitedSpec):
     fa = File(desc='output fractional anisotropy (FA) map computed from '
-                   'the fitted DTI')
+              'the fitted DTI')
     md = File(desc='output mean diffusivity (MD) map computed from the '
-                   'fitted DTI')
+              'fitted DTI')
     rd = File(desc='output radial diffusivity (RD) map computed from '
-                   'the fitted DTI')
+              'the fitted DTI')
     mode = File(desc=('output mode (MO) map computed from the fitted DTI'))
-    trace = File(desc=('output the tensor trace map computed from the '
-                       'fitted DTI'))
+    trace = File(
+        desc=('output the tensor trace map computed from the '
+              'fitted DTI'))
     evals = File(desc=('output the eigenvalues of the fitted DTI'))
     evecs = File(desc=('output the eigenvectors of the fitted DTI'))
 
 
 class RESTORE(DipyDiffusionInterface):
-
     """
     Uses RESTORE [Chang2005]_ to perform DTI fitting with outlier detection.
     The interface uses :py:mod:`dipy`, as explained in `dipy's documentation`_.
@@ -102,8 +102,8 @@ class RESTORE(DipyDiffusionInterface):
         dsample = data.reshape(-1, data.shape[-1])
 
         if try_b0 and (nb0 > 1):
-            noise_data = dsample.take(np.where(gtab.b0s_mask),
-                                      axis=-1)[noise_msk == 0, ...]
+            noise_data = dsample.take(
+                np.where(gtab.b0s_mask), axis=-1)[noise_msk == 0, ...]
             n = nb0
         else:
             nodiff = np.where(~gtab.b0s_mask)
@@ -115,8 +115,8 @@ class RESTORE(DipyDiffusionInterface):
         # Estimate sigma required by RESTORE
         mean_std = np.median(noise_data.std(-1))
         try:
-            bias = (1. - np.sqrt(2. / (n - 1)) *
-                    (gamma(n / 2.) / gamma((n - 1) / 2.)))
+            bias = (1. - np.sqrt(2. / (n - 1)) * (gamma(n / 2.) / gamma(
+                (n - 1) / 2.)))
         except:
             bias = .0
             pass
@@ -144,8 +144,8 @@ class RESTORE(DipyDiffusionInterface):
         for k in self._outputs().get():
             scalar = getattr(fit_restore, k)
             hdr.set_data_shape(np.shape(scalar))
-            nb.Nifti1Image(scalar.astype(np.float32),
-                           affine, hdr).to_filename(self._gen_filename(k))
+            nb.Nifti1Image(scalar.astype(np.float32), affine, hdr).to_filename(
+                self._gen_filename(k))
 
         return runtime
 
@@ -161,8 +161,7 @@ class EstimateResponseSHInputSpec(DipyBaseInterfaceInputSpec):
         exists=True, mandatory=True, desc=('input eigenvalues file'))
     in_mask = File(
         exists=True, desc=('input mask in which we find single fibers'))
-    fa_thresh = traits.Float(
-        0.7, usedefault=True, desc=('FA threshold'))
+    fa_thresh = traits.Float(0.7, usedefault=True, desc=('FA threshold'))
     roi_radius = traits.Int(
         10, usedefault=True, desc=('ROI radius to be used in auto_response'))
     auto = traits.Bool(
@@ -180,7 +179,6 @@ class EstimateResponseSHOutputSpec(TraitedSpec):
 
 
 class EstimateResponseSH(DipyDiffusionInterface):
-
     """
     Uses dipy to compute the single fiber response to be used in spherical
     deconvolution methods, in a similar way to MRTrix's command
@@ -229,20 +227,28 @@ class EstimateResponseSH(DipyDiffusionInterface):
         S0 = np.mean(S0s)
 
         if self.inputs.auto:
-            response, ratio = auto_response(gtab, data,
-                                            roi_radius=self.inputs.roi_radius,
-                                            fa_thr=self.inputs.fa_thresh)
+            response, ratio = auto_response(
+                gtab,
+                data,
+                roi_radius=self.inputs.roi_radius,
+                fa_thr=self.inputs.fa_thresh)
             response = response[0].tolist() + [S0]
         elif self.inputs.recursive:
             MD = np.nan_to_num(mean_diffusivity(evals)) * msk
-            indices = np.logical_or(
-                FA >= 0.4, (np.logical_and(FA >= 0.15, MD >= 0.0011)))
+            indices = np.logical_or(FA >= 0.4,
+                                    (np.logical_and(FA >= 0.15, MD >= 0.0011)))
             data = nb.load(self.inputs.in_file).get_data()
-            response = recursive_response(gtab, data, mask=indices, sh_order=8,
-                                          peak_thr=0.01, init_fa=0.08,
-                                          init_trace=0.0021, iter=8,
-                                          convergence=0.001,
-                                          parallel=True)
+            response = recursive_response(
+                gtab,
+                data,
+                mask=indices,
+                sh_order=8,
+                peak_thr=0.01,
+                init_fa=0.08,
+                init_trace=0.0021,
+                iter=8,
+                convergence=0.001,
+                parallel=True)
             ratio = abs(response[1] / response[0])
         else:
             lambdas = evals[indices]
@@ -265,9 +271,8 @@ class EstimateResponseSH(DipyDiffusionInterface):
 
         wm_mask = np.zeros_like(FA)
         wm_mask[indices] = 1
-        nb.Nifti1Image(
-            wm_mask.astype(np.uint8), affine,
-            None).to_filename(op.abspath(self.inputs.out_mask))
+        nb.Nifti1Image(wm_mask.astype(np.uint8), affine, None).to_filename(
+            op.abspath(self.inputs.out_mask))
         return runtime
 
     def _list_outputs(self):
@@ -280,10 +285,9 @@ class EstimateResponseSH(DipyDiffusionInterface):
 class CSDInputSpec(DipyBaseInterfaceInputSpec):
     in_mask = File(exists=True, desc=('input mask in which compute tensors'))
     response = File(exists=True, desc=('single fiber estimated response'))
-    sh_order = traits.Int(8, usedefault=True,
-                          desc=('maximal shperical harmonics order'))
-    save_fods = traits.Bool(True, usedefault=True,
-                            desc=('save fODFs in file'))
+    sh_order = traits.Int(
+        8, usedefault=True, desc=('maximal shperical harmonics order'))
+    save_fods = traits.Bool(True, usedefault=True, desc=('save fODFs in file'))
     out_fods = File(desc=('fODFs output file name'))
 
 
@@ -293,7 +297,6 @@ class CSDOutputSpec(TraitedSpec):
 
 
 class CSD(DipyDiffusionInterface):
-
     """
     Uses CSD [Tournier2007]_ to generate the fODF of DWIs. The interface uses
     :py:mod:`dipy`, as explained in `dipy's CSD example

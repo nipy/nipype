@@ -7,10 +7,8 @@ from __future__ import (print_function, division, unicode_literals,
 import os
 from distutils.version import LooseVersion
 
-from .info import (LONG_DESCRIPTION as __doc__,
-                   URL as __url__,
-                   STATUS as __status__,
-                   __version__)
+from .info import (LONG_DESCRIPTION as __doc__, URL as __url__, STATUS as
+                   __status__, __version__)
 from .utils.config import NipypeConfig
 from .utils.logger import Logging
 from .refs import due
@@ -41,6 +39,7 @@ class NipypeTester(object):
             ['-x', '--ignore={}/external'.format(nipype_path), nipype_path])
         pytest.main(**params)
 
+
 test = NipypeTester()
 
 
@@ -48,6 +47,7 @@ def get_info():
     """Returns package information"""
     return _get_pkg_info(os.path.dirname(__file__))
 
+
 from .pipeline import Node, MapNode, JoinNode, Workflow
-from .interfaces import (DataGrabber, DataSink, SelectFiles,
-                         IdentityInterface, Rename, Function, Select, Merge)
+from .interfaces import (DataGrabber, DataSink, SelectFiles, IdentityInterface,
+                         Rename, Function, Select, Merge)

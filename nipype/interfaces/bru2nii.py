@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """The bru2nii module provides basic functions for dicom conversion
 
     Change directory to provide relative paths for doctests
@@ -12,13 +11,16 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
 import os
-from .base import (CommandLine, CommandLineInputSpec,
-                   traits, TraitedSpec, isdefined, File, Directory)
+from .base import (CommandLine, CommandLineInputSpec, traits, TraitedSpec,
+                   isdefined, File, Directory)
 
 
 class Bru2InputSpec(CommandLineInputSpec):
     input_dir = Directory(
-        desc="Input Directory", exists=True, mandatory=True, position=-1,
+        desc="Input Directory",
+        exists=True,
+        mandatory=True,
+        position=-1,
         argstr="%s")
     actual_size = traits.Bool(
         argstr='-a',
@@ -26,11 +28,12 @@ class Bru2InputSpec(CommandLineInputSpec):
     force_conversion = traits.Bool(
         argstr='-f',
         desc="Force conversion of localizers images (multiple slice "
-             "orientations).")
+        "orientations).")
     append_protocol_name = traits.Bool(
         argstr='-p', desc="Append protocol name to output filename.")
     output_filename = traits.Str(
-        argstr="-o %s", desc="Output filename ('.nii' will be appended)",
+        argstr="-o %s",
+        desc="Output filename ('.nii' will be appended)",
         genfile=True)
 
 
@@ -39,7 +42,6 @@ class Bru2OutputSpec(TraitedSpec):
 
 
 class Bru2(CommandLine):
-
     """Uses bru2nii's Bru2 to convert Bruker files
 
     Examples
@@ -67,6 +69,6 @@ class Bru2(CommandLine):
     def _gen_filename(self, name):
         if name == 'output_filename':
             outfile = os.path.join(
-                os.getcwd(), os.path.basename(os.path.normpath(
-                    self.inputs.input_dir)))
+                os.getcwd(),
+                os.path.basename(os.path.normpath(self.inputs.input_dir)))
             return outfile

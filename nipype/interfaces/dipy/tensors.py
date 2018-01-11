@@ -18,8 +18,7 @@ IFLOGGER = logging.getLogger('interface')
 
 
 class DTIInputSpec(DipyBaseInterfaceInputSpec):
-    mask_file = File(exists=True,
-                     desc='An optional white matter mask')
+    mask_file = File(exists=True, desc='An optional white matter mask')
 
 
 class DTIOutputSpec(TraitedSpec):
@@ -88,8 +87,7 @@ class DTI(DipyDiffusionInterface):
 
 
 class TensorModeInputSpec(DipyBaseInterfaceInputSpec):
-    mask_file = File(exists=True,
-                     desc='An optional white matter mask')
+    mask_file = File(exists=True, desc='An optional white matter mask')
 
 
 class TensorModeOutputSpec(TraitedSpec):
@@ -97,7 +95,6 @@ class TensorModeOutputSpec(TraitedSpec):
 
 
 class TensorMode(DipyDiffusionInterface):
-
     """
     Creates a map of the mode of the diffusion tensors given a set of
     diffusion-weighted images, as well as their associated b-values and

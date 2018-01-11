@@ -103,7 +103,7 @@ def main():
     deleteExtensions = True
     primaryExtensions = ['.nii.gz', '.nii', '.hdr.gz', '.hdr']
     secondaryExtensions = ['.img.gz', '.img']
-    allExtensions = primaryExtensions+secondaryExtensions
+    allExtensions = primaryExtensions + secondaryExtensions
     validExtensions = primaryExtensions
     startingArg = 1
 
@@ -125,8 +125,9 @@ def main():
         #            filelist.extend(glob.glob(sys.argv[arg]+currentExtension))
         for currentExtension in validExtensions:
             filelist.extend(
-                glob.glob(removeImageExtension(
-                    sys.argv[arg], allExtensions)+currentExtension))
+                glob.glob(
+                    removeImageExtension(sys.argv[arg], allExtensions) +
+                    currentExtension))
 
     if deleteExtensions:
         for file in range(0, len(filelist)):
@@ -140,8 +141,9 @@ def main():
 
     for file in range(0, len(filelist)):
         print(filelist[file], end=' ')
-        if file < len(filelist)-1:
+        if file < len(filelist) - 1:
             print(" ", end=' ')
+
 
 if __name__ == "__main__":
     main()

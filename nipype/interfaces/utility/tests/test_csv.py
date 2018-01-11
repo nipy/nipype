@@ -8,9 +8,7 @@ from nipype.interfaces import utility
 
 def test_csvReader(tmpdir):
     header = "files,labels,erosion\n"
-    lines = ["foo,hello,300.1\n",
-             "bar,world,5\n",
-             "baz,goodbye,0.3\n"]
+    lines = ["foo,hello,300.1\n", "bar,world,5\n", "baz,goodbye,0.3\n"]
     for x in range(2):
         name = tmpdir.join("testfile.csv").strpath
         with open(name, 'w') as fid:

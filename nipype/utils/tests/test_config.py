@@ -19,8 +19,8 @@ except ImportError:
 # Define mocks for xvfbwrapper. Do not forget the spec to ensure that
 # hasattr() checks return False with missing attributes.
 xvfbpatch = MagicMock(spec=['Xvfb'])
-xvfbpatch.Xvfb.return_value = MagicMock(spec=['new_display', 'start', 'stop'],
-                                        new_display=2010)
+xvfbpatch.Xvfb.return_value = MagicMock(
+    spec=['new_display', 'start', 'stop'], new_display=2010)
 
 # Mock the legacy xvfbwrapper.Xvfb class (changed display attribute name)
 xvfbpatch_old = MagicMock(spec=['Xvfb'])
@@ -196,6 +196,7 @@ def test_display_empty_macosx(monkeypatch):
     monkeypatch.setattr(sys, 'platform', 'darwin')
     with pytest.raises(RuntimeError):
         config.get_display()
+
 
 def test_cwd_cached(tmpdir):
     """Check that changing dirs does not change nipype's cwd"""
