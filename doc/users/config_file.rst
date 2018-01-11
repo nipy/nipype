@@ -170,7 +170,7 @@ Resource Monitor
     Indicates where the summary file collecting all profiling information from the
     resource monitor should be stored after execution of a workflow.
     The ``summary_file`` does not apply to interfaces run independently.
-    (unset by default, in which case the summary file will be written out to 
+    (unset by default, in which case the summary file will be written out to
     ``<base_dir>/resource_monitor.json`` of the top-level workflow).
 
 *summary_append*
