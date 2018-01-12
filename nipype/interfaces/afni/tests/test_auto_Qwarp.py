@@ -10,7 +10,7 @@ def test_Qwarp_inputs():
         allineate=dict(argstr='-allineate', ),
         allineate_opts=dict(
             argstr='-allineate_opts %s',
-            xand=['allineate'],
+            requires=['allineate'],
         ),
         allsave=dict(
             argstr='-allsave',

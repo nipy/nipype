@@ -2831,7 +2831,7 @@ class QwarpInputSpec(AFNICommandInputSpec):
         desc='add extra options to the 3dAllineate command to be run by '
         '3dQwarp.',
         argstr='-allineate_opts %s',
-        xand=['allineate'])
+        requires=['allineate'])
     nowarp = traits.Bool(desc='Do not save the _WARP file.', argstr='-nowarp')
     iwarp = traits.Bool(
         desc='Do compute and save the _WARPINV file.',

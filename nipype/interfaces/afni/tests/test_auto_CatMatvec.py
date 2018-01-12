@@ -12,8 +12,6 @@ def test_CatMatvec_inputs():
         ),
         fourxfour=dict(
             argstr='-4x4',
-            descr=
-            'Output matrix in augmented form (last row is 0 0 0 1)This option does not work with -MATRIX or -ONELINE',
             xor=['matrix', 'oneline'],
         ),
         ignore_exception=dict(
@@ -23,14 +21,11 @@ def test_CatMatvec_inputs():
         ),
         in_file=dict(
             argstr='%s',
-            descr='list of tuples of mfiles and associated opkeys',
             mandatory=True,
             position=-2,
         ),
         matrix=dict(
             argstr='-MATRIX',
-            descr=
-            "indicates that the resulting matrix willbe written to outfile in the 'MATRIX(...)' format (FORM 3).This feature could be used, with clever scripting, to inputa matrix directly on the command line to program 3dWarp.",
             xor=['oneline', 'fourxfour'],
         ),
         num_threads=dict(
@@ -39,13 +34,10 @@ def test_CatMatvec_inputs():
         ),
         oneline=dict(
             argstr='-ONELINE',
-            descr=
-            'indicates that the resulting matrixwill simply be written as 12 numbers on one line.',
             xor=['matrix', 'fourxfour'],
         ),
         out_file=dict(
             argstr=' > %s',
-            descr='File to write concattenated matvecs to',
             mandatory=True,
             position=-1,
         ),

@@ -18,7 +18,6 @@ def test_NwarpCat_inputs():
         ),
         in_files=dict(
             argstr='%s',
-            descr='list of tuples of 3D warps and associated functions',
             mandatory=True,
             position=-1,
         ),

@@ -564,29 +564,29 @@ class Cat(AFNICommand):
 class CatMatvecInputSpec(AFNICommandInputSpec):
     in_file = traits.List(
         traits.Tuple(traits.Str(), traits.Str()),
-        descr="list of tuples of mfiles and associated opkeys",
+        desc="list of tuples of mfiles and associated opkeys",
         mandatory=True,
         argstr="%s",
         position=-2)
     out_file = File(
-        descr="File to write concattenated matvecs to",
+        desc="File to write concattenated matvecs to",
         argstr=" > %s",
         position=-1,
         mandatory=True)
     matrix = traits.Bool(
-        descr="indicates that the resulting matrix will"
+        desc="indicates that the resulting matrix will"
         "be written to outfile in the 'MATRIX(...)' format (FORM 3)."
         "This feature could be used, with clever scripting, to input"
         "a matrix directly on the command line to program 3dWarp.",
         argstr="-MATRIX",
         xor=['oneline', 'fourxfour'])
     oneline = traits.Bool(
-        descr="indicates that the resulting matrix"
+        desc="indicates that the resulting matrix"
         "will simply be written as 12 numbers on one line.",
         argstr="-ONELINE",
         xor=['matrix', 'fourxfour'])
     fourxfour = traits.Bool(
-        descr="Output matrix in augmented form (last row is 0 0 0 1)"
+        desc="Output matrix in augmented form (last row is 0 0 0 1)"
         "This option does not work with -MATRIX or -ONELINE",
         argstr="-4x4",
         xor=['matrix', 'oneline'])
@@ -635,7 +635,7 @@ class CenterMassInputSpec(CommandLineInputSpec):
         name_template='%s_cm.out',
         hash_files=False,
         keep_extension=False,
-        descr="File to write center of mass to",
+        desc="File to write center of mass to",
         argstr="> %s",
         position=-1)
     mask_file = File(
@@ -1553,7 +1553,7 @@ class NwarpCatInputSpec(AFNICommandInputSpec):
                       traits.Tuple(
                           traits.Enum('IDENT', 'INV', 'SQRT', 'SQRTINV'),
                           traits.File())),
-        descr="list of tuples of 3D warps and associated functions",
+        desc="list of tuples of 3D warps and associated functions",
         mandatory=True,
         argstr="%s",
         position=-1)

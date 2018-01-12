@@ -331,7 +331,7 @@ class ComposeMultiTransformInputSpec(ANTSCommandInputSpec):
         position=1,
         name_source=['transforms'],
         name_template='%s_composed',
-        keep_ext=True,
+        keep_extension=True,
         desc='the name of the resulting transform.')
     reference_image = File(
         argstr='%s',

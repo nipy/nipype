@@ -26,7 +26,7 @@ def test_ComposeMultiTransform_inputs():
         ),
         output_transform=dict(
             argstr='%s',
-            keep_ext=True,
+            keep_extension=True,
             name_source=['transforms'],
             name_template='%s_composed',
             position=1,

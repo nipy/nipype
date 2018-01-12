@@ -311,8 +311,8 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     )
 
     initial_moving_transform = InputMultiPath(
+        File(exists=True),
         argstr='%s',
-        exists=True,
         desc='A transform or a list of transforms that should be applied'
         'before the registration begins. Note that, when a list is given,'
         'the transformations are applied in reverse order.',
