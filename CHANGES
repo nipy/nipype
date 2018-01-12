@@ -1,6 +1,7 @@
 Upcoming release (0.14.1)
 ================
 
+* FIX: Cluster threshold in randomise + change default prefix (https://github.com/nipy/nipype/pull/2369)
 * MAINT: Cleaning / simplify ``Node`` (https://github.com/nipy/nipype/pull/#2325)
 * STY: Cleanup of PEP8 violations (https://github.com/nipy/nipype/pull/2358)
 * STY: Cleanup of trailing spaces and adding of missing newlines at end of files (https://github.com/nipy/nipype/pull/2355)
