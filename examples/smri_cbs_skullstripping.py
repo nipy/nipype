@@ -10,7 +10,6 @@ This simple workflow uses SPECTRE2010 algorithm to skullstrip an MP2RAGE
 anatomical scan.
 """
 
-
 import nipype.pipeline.engine as pe
 from nipype.interfaces.mipav.developer import (JistIntensityMp2rageMasking,
                                                MedicAlgorithmSPECTRE2010)

@@ -19,7 +19,7 @@ from __future__ import print_function
 from builtins import str
 from builtins import range
 
-import os                                    # system functions
+import os  # system functions
 
 from nipype import config
 # config.enable_provenance()
@@ -31,13 +31,12 @@ from nipype.interfaces import spm, fsl
 #               '/Applications/MATLAB/MATLAB_Compiler_Runtime/v713/ script')
 # spm.SPMCommand.set_mlab_paths(matlab_cmd=matlab_cmd, use_mcr=True)
 
-import nipype.interfaces.io as nio           # Data i/o
-import nipype.interfaces.utility as util     # utility
-import nipype.pipeline.engine as pe          # pypeline engine
-import nipype.algorithms.rapidart as ra      # artifact detection
-import nipype.algorithms.modelgen as model   # model specification
+import nipype.interfaces.io as nio  # Data i/o
+import nipype.interfaces.utility as util  # utility
+import nipype.pipeline.engine as pe  # pypeline engine
+import nipype.algorithms.rapidart as ra  # artifact detection
+import nipype.algorithms.modelgen as model  # model specification
 import nipype.interfaces.matlab as mlab
-
 """
 
 Preliminaries
@@ -58,7 +57,6 @@ fsl.FSLCommand.set_default_output_type('NIFTI')
 
 # In case a different path is required
 # mlab.MatlabCommand.set_default_paths('/software/matlab/spm12b/spm12b_r5918')
-
 """The nipype tutorial contains data for two subjects.  Subject data
 is in two subdirectories, ``s1`` and ``s2``.  Each subject directory
 contains four functional volumes: f3.nii, f5.nii, f7.nii, f10.nii. And
@@ -81,12 +79,12 @@ data_dir = os.path.abspath('data')
 # Specify the subject directories
 subject_list = ['s1', 's3']
 # Map field names to individual subject runs.
-info = dict(func=[['subject_id', ['f3', 'f5', 'f7', 'f10']]],
-            struct=[['subject_id', 'struct']])
+info = dict(
+    func=[['subject_id', ['f3', 'f5', 'f7', 'f10']]],
+    struct=[['subject_id', 'struct']])
 
-infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
-                     name="infosource")
-
+infosource = pe.Node(
+    interface=util.IdentityInterface(fields=['subject_id']), name="infosource")
 """Here we set up iteration over all the subjects. The following line
 is a particular example of the flexibility of the system.  The
 ``datasource`` attribute ``iterables`` tells the pipeline engine that
@@ -97,7 +95,6 @@ contained in subject_list.
 """
 
 infosource.iterables = ('subject_id', subject_list)
-
 """
 Preprocessing pipeline nodes
 ----------------------------
@@ -109,21 +106,20 @@ and provides additional housekeeping and pipeline specific
 functionality.
 """
 
-datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
-                                               outfields=['func', 'struct']),
-                     name='datasource')
+datasource = pe.Node(
+    interface=nio.DataGrabber(
+        infields=['subject_id'], outfields=['func', 'struct']),
+    name='datasource')
 datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info
 datasource.inputs.sort_filelist = True
-
 """Use :class:`nipype.interfaces.spm.Realign` for motion correction
 and register all images to the mean image.
 """
 
 realign = pe.Node(interface=spm.Realign(), name="realign")
 realign.inputs.register_to_mean = True
-
 """Use :class:`nipype.algorithms.rapidart` to determine which of the
 images in the functional series are outliers based on deviations in
 intensity or movement.
@@ -136,22 +132,18 @@ art.inputs.norm_threshold = 1
 art.inputs.zintensity_threshold = 3
 art.inputs.mask_type = 'file'
 art.inputs.parameter_source = 'SPM'
-
 """Skull strip structural images using
 :class:`nipype.interfaces.fsl.BET`.
 """
 
 skullstrip = pe.Node(interface=fsl.BET(), name="skullstrip")
 skullstrip.inputs.mask = True
-
 """Use :class:`nipype.interfaces.spm.Coregister` to perform a rigid
 body registration of the functional data to the structural data.
 """
 
 coregister = pe.Node(interface=spm.Coregister(), name="coregister")
 coregister.inputs.jobtype = 'estimate'
-
-
 """Warp functional and structural data to SPM's T1 template using
 :class:`nipype.interfaces.spm.Normalize`.  The tutorial data set
 includes the template image, T1.nii.
@@ -159,8 +151,6 @@ includes the template image, T1.nii.
 
 normalize = pe.Node(interface=spm.Normalize(), name="normalize")
 normalize.inputs.template = os.path.abspath('data/T1.nii')
-
-
 """Smooth the functional data using
 :class:`nipype.interfaces.spm.Smooth`.
 """
@@ -168,7 +158,6 @@ normalize.inputs.template = os.path.abspath('data/T1.nii')
 smooth = pe.Node(interface=spm.Smooth(), name="smooth")
 fwhmlist = [4]
 smooth.iterables = ('fwhm', fwhmlist)
-
 """
 Set up analysis components
 --------------------------
@@ -190,10 +179,12 @@ def subjectinfo(subject_id):
     for r in range(4):
         onsets = [list(range(15, 240, 60)), list(range(45, 240, 60))]
         output.insert(r,
-                      Bunch(conditions=names,
-                            onsets=deepcopy(onsets),
-                            durations=[[15] for s in names]))
+                      Bunch(
+                          conditions=names,
+                          onsets=deepcopy(onsets),
+                          durations=[[15] for s in names]))
     return output
+
 
 """Setup the contrast structure that needs to be evaluated. This is a
 list of lists. The inner list specifies the contrasts and has the
@@ -205,7 +196,6 @@ in the `subjectinfo` function described above.
 cont1 = ('Task>Baseline', 'T', ['Task-Odd', 'Task-Even'], [0.5, 0.5])
 cont2 = ('Task-Odd>Task-Even', 'T', ['Task-Odd', 'Task-Even'], [1, -1])
 contrasts = [cont1, cont2]
-
 """Generate SPM-specific design information using
 :class:`nipype.interfaces.spm.SpecifyModel`.
 """
@@ -216,7 +206,6 @@ modelspec.inputs.input_units = 'secs'
 modelspec.inputs.output_units = 'secs'
 modelspec.inputs.time_repetition = 3.
 modelspec.inputs.high_pass_filter_cutoff = 120
-
 """Generate a first level SPM.mat file for analysis
 :class:`nipype.interfaces.spm.Level1Design`.
 """
@@ -225,24 +214,21 @@ level1design = pe.Node(interface=spm.Level1Design(), name="level1design")
 level1design.inputs.timing_units = modelspec.inputs.output_units
 level1design.inputs.interscan_interval = modelspec.inputs.time_repetition
 level1design.inputs.bases = {'hrf': {'derivs': [0, 0]}}
-
-
 """Use :class:`nipype.interfaces.spm.EstimateModel` to determine the
 parameters of the model.
 """
 
 level1estimate = pe.Node(interface=spm.EstimateModel(), name="level1estimate")
 level1estimate.inputs.estimation_method = {'Classical': 1}
-
 """Use :class:`nipype.interfaces.spm.EstimateContrast` to estimate the
 first level contrasts specified in a few steps above.
 """
 
-contrastestimate = pe.Node(interface=spm.EstimateContrast(), name="contrastestimate")
+contrastestimate = pe.Node(
+    interface=spm.EstimateContrast(), name="contrastestimate")
 contrastestimate.inputs.contrasts = contrasts
 contrastestimate.overwrite = True
 contrastestimate.config = {'execution': {'remove_unnecessary_outputs': False}}
-
 """
 Setup the pipeline
 ------------------
@@ -269,32 +255,31 @@ the processing nodes.
 l1pipeline = pe.Workflow(name="level1")
 l1pipeline.base_dir = os.path.abspath('spm_tutorial/workingdir')
 
-l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
-                    (datasource, realign, [('func', 'in_files')]),
-                    (realign, coregister, [('mean_image', 'source'),
-                                           ('realigned_files', 'apply_to_files')]),
-                    (datasource, coregister, [('struct', 'target')]),
-                    (datasource, normalize, [('struct', 'source')]),
-                    (coregister, normalize, [('coregistered_files', 'apply_to_files')]),
-                    (normalize, smooth, [('normalized_files', 'in_files')]),
-                    (infosource, modelspec, [(('subject_id', subjectinfo),
-                                              'subject_info')]),
-                    (realign, modelspec, [('realignment_parameters', 'realignment_parameters')]),
-                    (smooth, modelspec, [('smoothed_files', 'functional_runs')]),
-                    (normalize, skullstrip, [('normalized_source', 'in_file')]),
-                    (realign, art, [('realignment_parameters', 'realignment_parameters')]),
-                    (normalize, art, [('normalized_files', 'realigned_files')]),
-                    (skullstrip, art, [('mask_file', 'mask_file')]),
-                    (art, modelspec, [('outlier_files', 'outlier_files')]),
-                    (modelspec, level1design, [('session_info', 'session_info')]),
-                    (skullstrip, level1design, [('mask_file', 'mask_image')]),
-                    (level1design, level1estimate, [('spm_mat_file', 'spm_mat_file')]),
-                    (level1estimate, contrastestimate, [('spm_mat_file', 'spm_mat_file'),
-                                                        ('beta_images', 'beta_images'),
-                                                        ('residual_image', 'residual_image')]),
-                    ])
-
-
+l1pipeline.connect([
+    (infosource, datasource, [('subject_id', 'subject_id')]),
+    (datasource, realign, [('func', 'in_files')]),
+    (realign, coregister, [('mean_image', 'source'), ('realigned_files',
+                                                      'apply_to_files')]),
+    (datasource, coregister, [('struct', 'target')]),
+    (datasource, normalize, [('struct', 'source')]),
+    (coregister, normalize, [('coregistered_files', 'apply_to_files')]),
+    (normalize, smooth, [('normalized_files', 'in_files')]),
+    (infosource, modelspec, [(('subject_id', subjectinfo), 'subject_info')]),
+    (realign, modelspec, [('realignment_parameters',
+                           'realignment_parameters')]),
+    (smooth, modelspec, [('smoothed_files', 'functional_runs')]),
+    (normalize, skullstrip, [('normalized_source', 'in_file')]),
+    (realign, art, [('realignment_parameters', 'realignment_parameters')]),
+    (normalize, art, [('normalized_files', 'realigned_files')]),
+    (skullstrip, art, [('mask_file', 'mask_file')]),
+    (art, modelspec, [('outlier_files', 'outlier_files')]),
+    (modelspec, level1design, [('session_info', 'session_info')]),
+    (skullstrip, level1design, [('mask_file', 'mask_image')]),
+    (level1design, level1estimate, [('spm_mat_file', 'spm_mat_file')]),
+    (level1estimate, contrastestimate,
+     [('spm_mat_file', 'spm_mat_file'), ('beta_images', 'beta_images'),
+      ('residual_image', 'residual_image')]),
+])
 """
 
 Setup storage results
@@ -321,26 +306,27 @@ datasink.inputs.base_directory = os.path.abspath('spm_tutorial/l1output')
 
 def getstripdir(subject_id):
     import os
-    return os.path.join(os.path.abspath('spm_tutorial/workingdir'), '_subject_id_%s' % subject_id)
+    return os.path.join(
+        os.path.abspath('spm_tutorial/workingdir'),
+        '_subject_id_%s' % subject_id)
+
 
 # store relevant outputs from various stages of the 1st level analysis
-l1pipeline.connect([(infosource, datasink, [('subject_id', 'container'),
-                                            (('subject_id', getstripdir), 'strip_dir')]),
-                    (realign, datasink, [('mean_image', 'realign.@mean'),
-                                         ('realignment_parameters', 'realign.@param')]),
-                    (art, datasink, [('outlier_files', 'art.@outliers'),
-                                     ('statistic_files', 'art.@stats')]),
-                    (level1design, datasink, [('spm_mat_file', 'model.pre-estimate')]),
-                    (level1estimate, datasink, [('spm_mat_file', 'model.@spm'),
-                                                ('beta_images', 'model.@beta'),
-                                                ('mask_image', 'model.@mask'),
-                                                ('residual_image', 'model.@res'),
-                                                ('RPVimage', 'model.@rpv')]),
-                    (contrastestimate, datasink, [('con_images', 'contrasts.@con'),
-                                                  ('spmT_images', 'contrasts.@T')]),
-                    ])
-
-
+l1pipeline.connect([
+    (infosource, datasink, [('subject_id', 'container'),
+                            (('subject_id', getstripdir), 'strip_dir')]),
+    (realign, datasink, [('mean_image', 'realign.@mean'),
+                         ('realignment_parameters', 'realign.@param')]),
+    (art, datasink, [('outlier_files', 'art.@outliers'), ('statistic_files',
+                                                          'art.@stats')]),
+    (level1design, datasink, [('spm_mat_file', 'model.pre-estimate')]),
+    (level1estimate, datasink,
+     [('spm_mat_file', 'model.@spm'), ('beta_images', 'model.@beta'),
+      ('mask_image', 'model.@mask'), ('residual_image', 'model.@res'),
+      ('RPVimage', 'model.@rpv')]),
+    (contrastestimate, datasink, [('con_images', 'contrasts.@con'),
+                                  ('spmT_images', 'contrasts.@T')]),
+])
 """
 Setup level 2 pipeline
 ----------------------
@@ -355,41 +341,39 @@ contrasts.
 contrast_ids = list(range(1, len(contrasts) + 1))
 l2source = pe.Node(nio.DataGrabber(infields=['fwhm', 'con']), name="l2source")
 # we use .*i* to capture both .img (SPM8) and .nii (SPM12)
-l2source.inputs.template = os.path.abspath('spm_tutorial/l1output/*/con*/*/_fwhm_%d/con_%04d.*i*')
+l2source.inputs.template = os.path.abspath(
+    'spm_tutorial/l1output/*/con*/*/_fwhm_%d/con_%04d.*i*')
 # iterate over all contrast images
-l2source.iterables = [('fwhm', fwhmlist),
-                      ('con', contrast_ids)]
+l2source.iterables = [('fwhm', fwhmlist), ('con', contrast_ids)]
 l2source.inputs.sort_filelist = True
-
-
 """Use :class:`nipype.interfaces.spm.OneSampleTTestDesign` to perform a
 simple statistical analysis of the contrasts from the group of
 subjects (n=2 in this example).
 """
 
 # setup a 1-sample t-test node
-onesamplettestdes = pe.Node(interface=spm.OneSampleTTestDesign(), name="onesampttestdes")
+onesamplettestdes = pe.Node(
+    interface=spm.OneSampleTTestDesign(), name="onesampttestdes")
 l2estimate = pe.Node(interface=spm.EstimateModel(), name="level2estimate")
 l2estimate.inputs.estimation_method = {'Classical': 1}
-l2conestimate = pe.Node(interface=spm.EstimateContrast(), name="level2conestimate")
+l2conestimate = pe.Node(
+    interface=spm.EstimateContrast(), name="level2conestimate")
 cont1 = ('Group', 'T', ['mean'], [1])
 l2conestimate.inputs.contrasts = [cont1]
 l2conestimate.inputs.group_contrast = True
-
-
 """As before, we setup a pipeline to connect these two nodes (l2source
 -> onesamplettest).
 """
 
 l2pipeline = pe.Workflow(name="level2")
 l2pipeline.base_dir = os.path.abspath('spm_tutorial/l2output')
-l2pipeline.connect([(l2source, onesamplettestdes, [('outfiles', 'in_files')]),
-                    (onesamplettestdes, l2estimate, [('spm_mat_file', 'spm_mat_file')]),
-                    (l2estimate, l2conestimate, [('spm_mat_file', 'spm_mat_file'),
-                                                 ('beta_images', 'beta_images'),
-                                                 ('residual_image', 'residual_image')]),
-                    ])
-
+l2pipeline.connect([
+    (l2source, onesamplettestdes, [('outfiles', 'in_files')]),
+    (onesamplettestdes, l2estimate, [('spm_mat_file', 'spm_mat_file')]),
+    (l2estimate, l2conestimate,
+     [('spm_mat_file', 'spm_mat_file'), ('beta_images', 'beta_images'),
+      ('residual_image', 'residual_image')]),
+])
 """
 Execute the pipeline
 --------------------
