@@ -82,7 +82,7 @@ class IdentityInterface(IOBase):
                 value = getattr(self.inputs, key)
                 if not isdefined(value):
                     msg = "%s requires a value for input '%s' because it was listed in 'fields'. \
-                    You can turn off mandatory inputs checking by passing mandatory_inputs = False to the constructor."                                                                                                                        % \
+                    You can turn off mandatory inputs checking by passing mandatory_inputs = False to the constructor."                                                                                                                                                                                                                                               % \
                         (self.__class__.__name__, key)
                     raise ValueError(msg)
 

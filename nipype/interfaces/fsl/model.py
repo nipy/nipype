@@ -2111,8 +2111,11 @@ class RandomiseInputSpec(FSLCommandInputSpec):
         position=0,
         mandatory=True)
     base_name = traits.Str(
-        'randomise', desc='the rootname that all generated files will have',
-        argstr='-o "%s"', position=1, usedefault=True)
+        'randomise',
+        desc='the rootname that all generated files will have',
+        argstr='-o "%s"',
+        position=1,
+        usedefault=True)
     design_mat = File(
         exists=True, desc='design matrix file', argstr='-d %s', position=2)
     tcon = File(
