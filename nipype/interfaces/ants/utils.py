@@ -360,7 +360,7 @@ class ComposeMultiTransform(ANTSCommand):
     >>> compose_transform.inputs.dimension = 3
     >>> compose_transform.inputs.transforms = ['struct_to_template.mat', 'func_to_struct.mat']
     >>> compose_transform.cmdline
-    'ComposeMultiTransform 3 struct_to_template_composed struct_to_template.mat func_to_struct.mat'
+    'ComposeMultiTransform 3 struct_to_template_composed.mat struct_to_template.mat func_to_struct.mat'
 
     """
     _cmd = 'ComposeMultiTransform'
