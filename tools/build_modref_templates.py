@@ -19,16 +19,17 @@ if __name__ == '__main__':
     outdir = os.path.join('api', 'generated')
     docwriter = ApiDocWriter(package)
     # Packages that should not be included in generated API docs.
-    docwriter.package_skip_patterns += ['\.external$',
-                                        '\.utils$',
-                                        '\.interfaces\.',
-                                        '\.workflows$',
-                                        '\.pipeline\.plugins$',
-                                        '\.testing$',
-                                        '\.fixes$',
-                                        '\.algorithms$',
-                                        '\.scripts$',
-                                        ]
+    docwriter.package_skip_patterns += [
+        '\.external$',
+        '\.utils$',
+        '\.interfaces\.',
+        '\.workflows$',
+        '\.pipeline\.plugins$',
+        '\.testing$',
+        '\.fixes$',
+        '\.algorithms$',
+        '\.scripts$',
+    ]
     # Modules that should not be included in generated API docs.
     docwriter.module_skip_patterns += [
         '\.version$',

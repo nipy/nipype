@@ -36,12 +36,18 @@ def run_examples(example, pipelines, data_path, plugin=None, rm_base_dir=True):
         log_dir = os.path.join(os.getcwd(), 'logs', example)
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
-        wf.config = {'execution': {'hash_method': 'timestamp',
-                                   'stop_on_first_rerun': 'true',
-                                   'write_provenance': 'true',
-                                   'poll_sleep_duration': 2},
-                     'logging': {'log_directory': log_dir,
-                                 'log_to_file': True}}
+        wf.config = {
+            'execution': {
+                'hash_method': 'timestamp',
+                'stop_on_first_rerun': 'true',
+                'write_provenance': 'true',
+                'poll_sleep_duration': 2
+            },
+            'logging': {
+                'log_directory': log_dir,
+                'log_to_file': True
+            }
+        }
         try:
             wf.inputs.inputnode.in_data = os.path.abspath(data_path)
         except AttributeError:
@@ -51,14 +57,16 @@ def run_examples(example, pipelines, data_path, plugin=None, rm_base_dir=True):
         # run twice to check if nothing is rerunning
         wf.run(plugin=plugin)
 
+
 if __name__ == '__main__':
     path, file = os.path.split(__file__)
     sys.path.insert(0, os.path.realpath(os.path.join(path, '..', 'examples')))
-    examples = {'fmri_fsl_reuse': ['level1_workflow'],
-                'fmri_spm_nested': ['level1', 'l2pipeline'],
-                # 'fmri_spm_dartel':['level1','l2pipeline'],
-                # 'fmri_fsl_feeds':['l1pipeline']
-                }
+    examples = {
+        'fmri_fsl_reuse': ['level1_workflow'],
+        'fmri_spm_nested': ['level1', 'l2pipeline'],
+        # 'fmri_spm_dartel':['level1','l2pipeline'],
+        # 'fmri_fsl_feeds':['l1pipeline']
+    }
     example = sys.argv[1]
     plugin = sys.argv[2]
     data_path = sys.argv[3]

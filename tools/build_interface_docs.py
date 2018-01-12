@@ -18,14 +18,15 @@ if __name__ == '__main__':
     outdir = os.path.join('interfaces', 'generated')
     docwriter = InterfaceHelpWriter(package)
     # Packages that should not be included in generated API docs.
-    docwriter.package_skip_patterns += ['\.external$',
-                                        '\.fixes$',
-                                        '\.utils$',
-                                        '\.pipeline',
-                                        '\.testing',
-                                        '\.caching',
-                                        '\.scripts',
-                                        ]
+    docwriter.package_skip_patterns += [
+        '\.external$',
+        '\.fixes$',
+        '\.utils$',
+        '\.pipeline',
+        '\.testing',
+        '\.caching',
+        '\.scripts',
+    ]
     # Modules that should not be included in generated API docs.
     docwriter.module_skip_patterns += [
         '\.version$',
@@ -41,20 +42,21 @@ if __name__ == '__main__':
         '\.testing',
         '\.scripts',
     ]
-    docwriter.class_skip_patterns += ['AFNICommand',
-                                      'ANTS',
-                                      'FSLCommand',
-                                      'FS',
-                                      'Info',
-                                      '^SPM',
-                                      'Tester',
-                                      'Spec$',
-                                      'Numpy'
-                                      # NipypeTester raises an
-                                      # exception when instantiated in
-                                      # InterfaceHelpWriter.generate_api_doc
-                                      'NipypeTester',
-                                      ]
+    docwriter.class_skip_patterns += [
+        'AFNICommand',
+        'ANTS',
+        'FSLCommand',
+        'FS',
+        'Info',
+        '^SPM',
+        'Tester',
+        'Spec$',
+        'Numpy'
+        # NipypeTester raises an
+        # exception when instantiated in
+        # InterfaceHelpWriter.generate_api_doc
+        'NipypeTester',
+    ]
     docwriter.write_api_docs(outdir)
     docwriter.write_index(outdir, 'gen', relative_to='interfaces')
     print('%d files written' % len(docwriter.written_modules))

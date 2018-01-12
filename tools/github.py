@@ -28,8 +28,11 @@ def get_local_branch():
     """Determine current branch
     """
     if is_git_repo():
-        o, _ = Popen('git branch | grep "\* "', shell=True, stdout=PIPE,
-                     cwd=os.path.dirname(nipype.__file__)).communicate()
+        o, _ = Popen(
+            'git branch | grep "\* "',
+            shell=True,
+            stdout=PIPE,
+            cwd=os.path.dirname(nipype.__file__)).communicate()
         return o.strip()[2:]
     else:
         return None
@@ -51,8 +54,12 @@ def create_hash_map():
     import pwd
     login_name = pwd.getpwuid(os.geteuid())[0]
     conn = http.client.HTTPSConnection("api.github.com")
-    conn.request("GET", "/repos/nipy/nipype",
-                 headers={'Authorization': 'Basic %s' % base64(login_name)})
+    conn.request(
+        "GET",
+        "/repos/nipy/nipype",
+        headers={
+            'Authorization': 'Basic %s' % base64(login_name)
+        })
     try:
         conn.request("GET", "/repos/nipy/nipype/git/trees/master?recursive=1")
     except:
