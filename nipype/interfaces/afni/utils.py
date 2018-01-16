@@ -1318,11 +1318,12 @@ class FWHMx(AFNICommandBase):
 
         # handle newer versions of AFNI
         if sout.size == 8:
-            outputs['fwhm'] = tuple(sout[0,:])
+            outputs['fwhm'] = tuple(sout[0, :])
         else:
             outputs['fwhm'] = tuple(sout)
 
         if self._acf:
+            assert sout.size == 8, "Wrong number of elements in %s"%str(sout)
             outputs['acf_param'] = tuple(sout[1])
 
             outputs['out_acf'] = op.abspath('3dFWHMx.1D')
