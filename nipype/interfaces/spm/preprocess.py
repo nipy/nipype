@@ -119,11 +119,9 @@ class SliceTiming(SPMCommand):
 
 
 class RealignInputSpec(SPMCommandInputSpec):
-    in_files = InputMultiPath(traits.Either(traits.List(
-                                            ImageFileSPM(exists=True)),
-                                            ImageFileSPM(exists=True)), field='data',
-                              mandatory=True, copyfile=True,
-                              desc='list of filenames to realign')
+    in_files = InputMultiPath(ImageFileSPM(exists=True),
+                              field='data', desc='list of files to realign',
+                              mandatory=True, copyfile=True)
     jobtype = traits.Enum('estwrite', 'estimate', 'write',
                           desc='one of: estimate, write, estwrite',
                           usedefault=True)
