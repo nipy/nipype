@@ -1323,7 +1323,7 @@ class FWHMx(AFNICommandBase):
             outputs['fwhm'] = tuple(sout)
 
         if self._acf:
-            assert sout.size == 8, "Wrong number of elements in %s"%str(sout)
+            assert sout.size == 8, "Wrong number of elements in %s" % str(sout)
             outputs['acf_param'] = tuple(sout[1])
 
             outputs['out_acf'] = op.abspath('3dFWHMx.1D')
