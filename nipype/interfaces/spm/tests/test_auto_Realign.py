@@ -10,7 +10,7 @@ def test_Realign_inputs():
     nohash=True,
     usedefault=True,
     ),
-    in_files=dict(copyfile=True,
+    in_files=dict(copyfile=False,
     field='data',
     mandatory=True,
     ),
