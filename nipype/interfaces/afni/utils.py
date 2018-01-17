@@ -1268,15 +1268,21 @@ class FWHMx(AFNICommandBase):
             outputs['out_detrend'] = Undefined
 
         sout = np.loadtxt(outputs['out_file'])
+
+        # handle newer versions of AFNI
+        if sout.size == 8:
+            outputs['fwhm'] = tuple(sout[0, :])
+        else:
+            outputs['fwhm'] = tuple(sout)
+
         if self._acf:
+            assert sout.size == 8, "Wrong number of elements in %s" % str(sout)
             outputs['acf_param'] = tuple(sout[1])
-            sout = tuple(sout[0])
 
             outputs['out_acf'] = op.abspath('3dFWHMx.1D')
             if isinstance(self.inputs.acf, (str, bytes)):
                 outputs['out_acf'] = op.abspath(self.inputs.acf)
 
-        outputs['fwhm'] = tuple(sout)
         return outputs
 
 
