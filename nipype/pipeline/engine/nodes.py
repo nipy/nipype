@@ -161,12 +161,14 @@ class Node(EngineBase):
 
         super(Node, self).__init__(name, kwargs.get('base_dir'))
 
-        self.name = name
         self._interface = interface
         self._hierarchy = None
         self._got_inputs = False
         self._originputs = None
         self._output_dir = None
+        self._id = None  # for compatibility with node expansion using iterables
+
+        self.name = name
         self.iterables = iterables
         self.synchronize = synchronize
         self.itersource = itersource
@@ -228,7 +230,6 @@ class Node(EngineBase):
         if hasattr(self._interface.inputs, 'num_threads') and isdefined(
                 self._interface.inputs.num_threads):
             return self._interface.inputs.num_threads
-
         return 1
 
     @n_procs.setter
@@ -239,6 +240,13 @@ class Node(EngineBase):
         # Overwrite interface's dynamic input of num_threads
         if hasattr(self._interface.inputs, 'num_threads'):
             self._interface.inputs.num_threads = self._n_procs
+
+    @property
+    def itername(self):
+        itername = self._id
+        if self._hierarchy:
+            itername = self._hierarchy + '.' + self._id
+        return itername
 
     def output_dir(self):
         """Return the location of the output directory for the node"""
