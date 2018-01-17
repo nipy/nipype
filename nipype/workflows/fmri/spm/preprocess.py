@@ -8,7 +8,6 @@ from ....algorithms import rapidart as ra
 from ....interfaces import spm as spm
 from ....interfaces import utility as niu
 from ....pipeline import engine as pe
-from ....interfaces.matlab import no_matlab
 from ...smri.freesurfer.utils import create_getmask_flow
 
 from .... import logging
@@ -55,25 +54,21 @@ def create_spm_preproc(name='preproc'):
                                  freesurfer space
          outputspec.reg_cost : cost of registration (useful for detecting misalignment)
     """
-
     """
     Initialize the workflow
     """
 
     workflow = pe.Workflow(name=name)
-
     """
     Define the inputs to this workflow
     """
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=['functionals',
-                                                      'subject_id',
-                                                      'subjects_dir',
-                                                      'fwhm',
-                                                      'norm_threshold',
-                                                      'zintensity_threshold']),
-                        name='inputspec')
-
+    inputnode = pe.Node(
+        niu.IdentityInterface(fields=[
+            'functionals', 'subject_id', 'subjects_dir', 'fwhm',
+            'norm_threshold', 'zintensity_threshold'
+        ]),
+        name='inputspec')
     """
     Setup the processing nodes and create the mask generation and coregistration
     workflow
@@ -83,51 +78,53 @@ def create_spm_preproc(name='preproc'):
     realign = pe.Node(spm.Realign(), name='realign')
     workflow.connect(inputnode, 'functionals', realign, 'in_files')
     maskflow = create_getmask_flow()
-    workflow.connect([(inputnode, maskflow, [('subject_id', 'inputspec.subject_id'),
-                                             ('subjects_dir', 'inputspec.subjects_dir')])])
+    workflow.connect([(inputnode, maskflow,
+                       [('subject_id', 'inputspec.subject_id'),
+                        ('subjects_dir', 'inputspec.subjects_dir')])])
     maskflow.inputs.inputspec.contrast_type = 't2'
     workflow.connect(realign, 'mean_image', maskflow, 'inputspec.source_file')
     smooth = pe.Node(spm.Smooth(), name='smooth')
     workflow.connect(inputnode, 'fwhm', smooth, 'fwhm')
     workflow.connect(realign, 'realigned_files', smooth, 'in_files')
-    artdetect = pe.Node(ra.ArtifactDetect(mask_type='file',
-                                          parameter_source='SPM',
-                                          use_differences=[True, False],
-                                          use_norm=True,
-                                          save_plot=True),
-                        name='artdetect')
-    workflow.connect([(inputnode, artdetect, [('norm_threshold', 'norm_threshold'),
-                                              ('zintensity_threshold',
-                                               'zintensity_threshold')])])
-    workflow.connect([(realign, artdetect, [('realigned_files', 'realigned_files'),
+    artdetect = pe.Node(
+        ra.ArtifactDetect(
+            mask_type='file',
+            parameter_source='SPM',
+            use_differences=[True, False],
+            use_norm=True,
+            save_plot=True),
+        name='artdetect')
+    workflow.connect([(inputnode, artdetect,
+                       [('norm_threshold', 'norm_threshold'),
+                        ('zintensity_threshold', 'zintensity_threshold')])])
+    workflow.connect([(realign, artdetect, [('realigned_files',
+                                             'realigned_files'),
                                             ('realignment_parameters',
                                              'realignment_parameters')])])
-    workflow.connect(maskflow, ('outputspec.mask_file', poplist), artdetect, 'mask_file')
-
+    workflow.connect(maskflow, ('outputspec.mask_file', poplist), artdetect,
+                     'mask_file')
     """
     Define the outputs of the workflow and connect the nodes to the outputnode
     """
 
-    outputnode = pe.Node(niu.IdentityInterface(fields=["realignment_parameters",
-                                                       "smoothed_files",
-                                                       "mask_file",
-                                                       "reg_file",
-                                                       "reg_cost",
-                                                       'outlier_files',
-                                                       'outlier_stats',
-                                                       'outlier_plots'
-                                                       ]),
-                         name="outputspec")
-    workflow.connect([
-        (maskflow, outputnode, [("outputspec.reg_file", "reg_file")]),
-        (maskflow, outputnode, [("outputspec.reg_cost", "reg_cost")]),
-        (maskflow, outputnode, [(("outputspec.mask_file", poplist), "mask_file")]),
-        (realign, outputnode, [('realignment_parameters', 'realignment_parameters')]),
-        (smooth, outputnode, [('smoothed_files', 'smoothed_files')]),
-        (artdetect, outputnode, [('outlier_files', 'outlier_files'),
-                                 ('statistic_files', 'outlier_stats'),
-                                 ('plot_files', 'outlier_plots')])
-    ])
+    outputnode = pe.Node(
+        niu.IdentityInterface(fields=[
+            "realignment_parameters", "smoothed_files", "mask_file",
+            "reg_file", "reg_cost", 'outlier_files', 'outlier_stats',
+            'outlier_plots'
+        ]),
+        name="outputspec")
+    workflow.connect(
+        [(maskflow, outputnode, [("outputspec.reg_file", "reg_file")]),
+         (maskflow, outputnode,
+          [("outputspec.reg_cost", "reg_cost")]), (maskflow, outputnode, [
+              (("outputspec.mask_file", poplist), "mask_file")
+          ]), (realign, outputnode, [('realignment_parameters',
+                                      'realignment_parameters')]),
+         (smooth, outputnode, [('smoothed_files', 'smoothed_files')]),
+         (artdetect, outputnode, [('outlier_files', 'outlier_files'),
+                                  ('statistic_files', 'outlier_stats'),
+                                  ('plot_files', 'outlier_plots')])])
     return workflow
 
 
@@ -141,7 +138,8 @@ def create_vbm_preproc(name='vbmpreproc'):
 
     >>> preproc = create_vbm_preproc()
     >>> preproc.inputs.inputspec.fwhm = 8
-    >>> preproc.inputs.inputspec.structural_files = [os.path.abspath('s1.nii'), os.path.abspath('s3.nii')]
+    >>> preproc.inputs.inputspec.structural_files = [
+    ...     os.path.abspath('s1.nii'), os.path.abspath('s3.nii')]
     >>> preproc.inputs.inputspec.template_prefix = 'Template'
     >>> preproc.run() # doctest: +SKIP
 
@@ -160,24 +158,27 @@ def create_vbm_preproc(name='vbmpreproc'):
     """
 
     workflow = pe.Workflow(name=name)
-
     """
     Define the inputs to this workflow
     """
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=['structural_files',
-                                                      'fwhm',
-                                                      'template_prefix']),
-                        name='inputspec')
+    inputnode = pe.Node(
+        niu.IdentityInterface(
+            fields=['structural_files', 'fwhm', 'template_prefix']),
+        name='inputspec')
 
     dartel_template = create_DARTEL_template()
 
-    workflow.connect(inputnode, 'template_prefix', dartel_template, 'inputspec.template_prefix')
-    workflow.connect(inputnode, 'structural_files', dartel_template, 'inputspec.structural_files')
+    workflow.connect(inputnode, 'template_prefix', dartel_template,
+                     'inputspec.template_prefix')
+    workflow.connect(inputnode, 'structural_files', dartel_template,
+                     'inputspec.structural_files')
 
     norm2mni = pe.Node(spm.DARTELNorm2MNI(modulate=True), name='norm2mni')
-    workflow.connect(dartel_template, 'outputspec.template_file', norm2mni, 'template_file')
-    workflow.connect(dartel_template, 'outputspec.flow_fields', norm2mni, 'flowfield_files')
+    workflow.connect(dartel_template, 'outputspec.template_file', norm2mni,
+                     'template_file')
+    workflow.connect(dartel_template, 'outputspec.flow_fields', norm2mni,
+                     'flowfield_files')
 
     def getclass1images(class_images):
         class1images = []
@@ -185,7 +186,9 @@ def create_vbm_preproc(name='vbmpreproc'):
             class1images.extend(session[0])
         return class1images
 
-    workflow.connect(dartel_template, ('segment.native_class_images', getclass1images), norm2mni, 'apply_to_files')
+    workflow.connect(dartel_template,
+                     ('segment.native_class_images', getclass1images),
+                     norm2mni, 'apply_to_files')
     workflow.connect(inputnode, 'fwhm', norm2mni, 'fwhm')
 
     def compute_icv(class_images):
@@ -201,26 +204,29 @@ def create_vbm_preproc(name='vbmpreproc'):
             icv.append(img_icv)
         return icv
 
-    calc_icv = pe.Node(niu.Function(function=compute_icv,
-                                    input_names=['class_images'],
-                                    output_names=['icv']),
-                       name='calc_icv')
+    calc_icv = pe.Node(
+        niu.Function(
+            function=compute_icv,
+            input_names=['class_images'],
+            output_names=['icv']),
+        name='calc_icv')
 
-    workflow.connect(dartel_template, 'segment.native_class_images', calc_icv, 'class_images')
-
+    workflow.connect(dartel_template, 'segment.native_class_images', calc_icv,
+                     'class_images')
     """
     Define the outputs of the workflow and connect the nodes to the outputnode
     """
 
-    outputnode = pe.Node(niu.IdentityInterface(fields=["normalized_files",
-                                                       "template_file",
-                                                       "icv"
-                                                       ]),
-                         name="outputspec")
-    workflow.connect([(dartel_template, outputnode, [('outputspec.template_file', 'template_file')]),
-                      (norm2mni, outputnode, [("normalized_files", "normalized_files")]),
-                      (calc_icv, outputnode, [("icv", "icv")]),
-                      ])
+    outputnode = pe.Node(
+        niu.IdentityInterface(
+            fields=["normalized_files", "template_file", "icv"]),
+        name="outputspec")
+    workflow.connect([
+        (dartel_template, outputnode, [('outputspec.template_file',
+                                        'template_file')]),
+        (norm2mni, outputnode, [("normalized_files", "normalized_files")]),
+        (calc_icv, outputnode, [("icv", "icv")]),
+    ])
 
     return workflow
 
@@ -233,7 +239,8 @@ def create_DARTEL_template(name='dartel_template'):
     -------
 
     >>> preproc = create_DARTEL_template()
-    >>> preproc.inputs.inputspec.structural_files = [os.path.abspath('s1.nii'), os.path.abspath('s3.nii')]
+    >>> preproc.inputs.inputspec.structural_files = [
+    ...     os.path.abspath('s1.nii'), os.path.abspath('s3.nii')]
     >>> preproc.inputs.inputspec.template_prefix = 'Template'
     >>> preproc.run() # doctest: +SKIP
 
@@ -251,41 +258,54 @@ def create_DARTEL_template(name='dartel_template'):
 
     workflow = pe.Workflow(name=name)
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=['structural_files', 'template_prefix']),
-                        name='inputspec')
+    inputnode = pe.Node(
+        niu.IdentityInterface(fields=['structural_files', 'template_prefix']),
+        name='inputspec')
 
-    segment = pe.MapNode(spm.NewSegment(),
-                         iterfield=['channel_files'],
-                         name='segment')
+    segment = pe.MapNode(
+        spm.NewSegment(), iterfield=['channel_files'], name='segment')
     workflow.connect(inputnode, 'structural_files', segment, 'channel_files')
 
-    version = spm.Info.version()
-    if version:
-        spm_path = version['path']
-        if version['name'] == 'SPM8':
-            tissue1 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 1), 2, (True, True), (False, False))
-            tissue2 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 2), 2, (True, True), (False, False))
-            tissue3 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 3), 2, (True, False), (False, False))
-            tissue4 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 4), 3, (False, False), (False, False))
-            tissue5 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 5), 4, (False, False), (False, False))
-            tissue6 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 6), 2, (False, False), (False, False))
-        elif version['name'] == 'SPM12':
-            spm_path = version['path']
-            tissue1 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 1), 1, (True, True), (False, False))
-            tissue2 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 2), 1, (True, True), (False, False))
-            tissue3 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 3), 2, (True, False), (False, False))
-            tissue4 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 4), 3, (False, False), (False, False))
-            tissue5 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 5), 4, (False, False), (False, False))
-            tissue6 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 6), 2, (False, False), (False, False))
+    spm_info = spm.Info.getinfo()
+    if spm_info:
+        spm_path = spm_info['path']
+        if spm_info['name'] == 'SPM8':
+            tissue1 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 1), 2,
+                       (True, True), (False, False))
+            tissue2 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 2), 2,
+                       (True, True), (False, False))
+            tissue3 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 3), 2,
+                       (True, False), (False, False))
+            tissue4 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 4), 3,
+                       (False, False), (False, False))
+            tissue5 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 5), 4,
+                       (False, False), (False, False))
+            tissue6 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 6), 2,
+                       (False, False), (False, False))
+        elif spm_info['name'] == 'SPM12':
+            spm_path = spm_info['path']
+            tissue1 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 1), 1,
+                       (True, True), (False, False))
+            tissue2 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 2), 1,
+                       (True, True), (False, False))
+            tissue3 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 3), 2,
+                       (True, False), (False, False))
+            tissue4 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 4), 3,
+                       (False, False), (False, False))
+            tissue5 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 5), 4,
+                       (False, False), (False, False))
+            tissue6 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 6), 2,
+                       (False, False), (False, False))
         else:
             logger.critical('Unsupported version of SPM')
 
-        segment.inputs.tissues = [tissue1, tissue2, tissue3, tissue4, tissue5, tissue6]
+        segment.inputs.tissues = [
+            tissue1, tissue2, tissue3, tissue4, tissue5, tissue6
+        ]
     else:
         logger.critical('SPM not found')
 
     dartel = pe.Node(spm.DARTEL(), name='dartel')
-
     """Get the gray and white segmentation classes generated by NewSegment
     """
 
@@ -297,13 +317,13 @@ def create_DARTEL_template(name='dartel_template'):
             class2images.extend(session[1])
         return [class1images, class2images]
 
-    workflow.connect(segment, ('dartel_input_images', get2classes), dartel, 'image_files')
+    workflow.connect(segment, ('dartel_input_images', get2classes), dartel,
+                     'image_files')
     workflow.connect(inputnode, 'template_prefix', dartel, 'template_prefix')
 
-    outputnode = pe.Node(niu.IdentityInterface(fields=["template_file",
-                                                       "flow_fields"
-                                                       ]),
-                         name="outputspec")
+    outputnode = pe.Node(
+        niu.IdentityInterface(fields=["template_file", "flow_fields"]),
+        name="outputspec")
     workflow.connect([
         (dartel, outputnode, [('final_template_file', 'template_file'),
                               ('dartel_flow_fields', 'flow_fields')]),

@@ -32,7 +32,6 @@ def test_ident_distances(tmpdir):
 
 @pytest.mark.skipif(VTKInfo.no_tvtk(), reason="tvtk is not installed")
 def test_trans_distances(tmpdir):
-    tempdir = tmpdir.strpath
     from ...interfaces.vtkbase import tvtk
 
     in_surf = example_data('surf01.vtk')

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 from builtins import object
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
@@ -29,29 +30,31 @@ class Logging(object):
 
     def __init__(self, config):
         self._config = config
-        logging.basicConfig(format=self.fmt, datefmt=self.datefmt,
-                            stream=sys.stdout)
+        logging.basicConfig(
+            format=self.fmt, datefmt=self.datefmt, stream=sys.stdout)
         # logging.basicConfig(stream=sys.stdout)
         self._logger = logging.getLogger('workflow')
         self._utlogger = logging.getLogger('utils')
         self._fmlogger = logging.getLogger('filemanip')
         self._iflogger = logging.getLogger('interface')
 
-        self.loggers = {'workflow': self._logger,
-                        'utils': self._utlogger,
-                        'filemanip': self._fmlogger,
-                        'interface': self._iflogger}
+        self.loggers = {
+            'workflow': self._logger,
+            'utils': self._utlogger,
+            'filemanip': self._fmlogger,
+            'interface': self._iflogger
+        }
         self._hdlr = None
         self.update_logging(self._config)
 
     def enable_file_logging(self):
         config = self._config
-        LOG_FILENAME = os.path.join(config.get('logging', 'log_directory'),
-                                    'pypeline.log')
-        hdlr = RFHandler(LOG_FILENAME,
-                         maxBytes=int(config.get('logging', 'log_size')),
-                         backupCount=int(config.get('logging',
-                                                    'log_rotate')))
+        LOG_FILENAME = os.path.join(
+            config.get('logging', 'log_directory'), 'pypeline.log')
+        hdlr = RFHandler(
+            LOG_FILENAME,
+            maxBytes=int(config.get('logging', 'log_size')),
+            backupCount=int(config.get('logging', 'log_rotate')))
         formatter = logging.Formatter(fmt=self.fmt, datefmt=self.datefmt)
         hdlr.setFormatter(formatter)
         self._logger.addHandler(hdlr)
@@ -71,12 +74,12 @@ class Logging(object):
     def update_logging(self, config):
         self._config = config
         self.disable_file_logging()
-        self._logger.setLevel(logging.getLevelName(config.get('logging',
-                                                              'workflow_level')))
-        self._utlogger.setLevel(logging.getLevelName(config.get('logging',
-                                                                'utils_level')))
-        self._iflogger.setLevel(logging.getLevelName(config.get('logging',
-                                                                'interface_level')))
+        self._logger.setLevel(
+            logging.getLevelName(config.get('logging', 'workflow_level')))
+        self._utlogger.setLevel(
+            logging.getLevelName(config.get('logging', 'utils_level')))
+        self._iflogger.setLevel(
+            logging.getLevelName(config.get('logging', 'interface_level')))
         if str2bool(config.get('logging', 'log_to_file')):
             self.enable_file_logging()
 
@@ -97,42 +100,8 @@ class Logging(object):
 
         typical use -- log difference for hashed_inputs
         """
-        # First check inputs, since they usually are lists of tuples
-        # and dicts are required.
-        if isinstance(dnew, list):
-            dnew = dict(dnew)
-        if isinstance(dold, list):
-            dold = dict(dold)
-
-        # Compare against hashed_inputs
-        # Keys: should rarely differ
-        new_keys = set(dnew.keys())
-        old_keys = set(dold.keys())
-        if len(new_keys - old_keys):
-            self._logger.debug("%s not previously seen: %s"
-                               % (prefix, new_keys - old_keys))
-        if len(old_keys - new_keys):
-            self._logger.debug("%s not presently seen: %s"
-                               % (prefix, old_keys - new_keys))
-
-        # Values in common keys would differ quite often,
-        # so we need to join the messages together
-        msgs = []
-        for k in new_keys.intersection(old_keys):
-            same = False
-            try:
-                new, old = dnew[k], dold[k]
-                same = new == old
-                if not same:
-                    # Since JSON does not discriminate between lists and
-                    # tuples, we might need to cast them into the same type
-                    # as the last resort.  And lets try to be more generic
-                    same = old.__class__(new) == old
-            except Exception as e:
-                same = False
-            if not same:
-                msgs += ["%s: %r != %r"
-                         % (k, dnew[k], dold[k])]
-        if len(msgs):
-            self._logger.debug("%s values differ in fields: %s" % (prefix,
-                                                                   ", ".join(msgs)))
+        from .misc import dict_diff
+        self._logger.warning(
+            "logdebug_dict_differences has been deprecated, please use "
+            "nipype.utils.misc.dict_diff.")
+        self._logger.debug(dict_diff(dold, dnew))

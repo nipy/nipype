@@ -4,16 +4,19 @@
 """Miscellaneous file manipulation functions
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import sys
 import pickle
+import errno
 import subprocess as sp
 import gzip
 import hashlib
 import locale
 from hashlib import md5
 import os
+import os.path as op
 import re
 import shutil
 import posixpath
@@ -28,7 +31,6 @@ from future import standard_library
 standard_library.install_aliases()
 
 fmlogger = logging.getLogger('utils')
-
 
 related_filetype_sets = [
     ('.hdr', '.img', '.mat'),
@@ -75,8 +77,8 @@ def split_filename(fname):
 
     special_extensions = [".nii.gz", ".tar.gz"]
 
-    pth = os.path.dirname(fname)
-    fname = os.path.basename(fname)
+    pth = op.dirname(fname)
+    fname = op.basename(fname)
 
     ext = None
     for special_ext in special_extensions:
@@ -87,7 +89,7 @@ def split_filename(fname):
             fname = fname[:-ext_len]
             break
     if not ext:
-        fname, ext = os.path.splitext(fname)
+        fname, ext = op.splitext(fname)
 
     return pth, fname, ext
 
@@ -186,8 +188,8 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
 
     # No need for isdefined: bool(Undefined) evaluates to False
     if newpath:
-        pth = os.path.abspath(newpath)
-    return os.path.join(pth, prefix + fname + suffix + ext)
+        pth = op.abspath(newpath)
+    return op.join(pth, prefix + fname + suffix + ext)
 
 
 def fnames_presuffix(fnames, prefix='', suffix='', newpath=None, use_ext=True):
@@ -205,14 +207,14 @@ def hash_rename(filename, hashvalue):
     """
     path, name, ext = split_filename(filename)
     newfilename = ''.join((name, '_0x', hashvalue, ext))
-    return os.path.join(path, newfilename)
+    return op.join(path, newfilename)
 
 
 def check_forhash(filename):
     """checks if file has a hash in its filename"""
     if isinstance(filename, list):
         filename = filename[0]
-    path, name = os.path.split(filename)
+    path, name = op.split(filename)
     if re.search('(_0x[a-z0-9]{32})', name):
         hashvalue = re.findall('(_0x[a-z0-9]{32})', name)
         return True, hashvalue
@@ -223,7 +225,7 @@ def check_forhash(filename):
 def hash_infile(afile, chunk_len=8192, crypto=hashlib.md5):
     """ Computes hash of a file using 'crypto' module"""
     hex = None
-    if os.path.isfile(afile):
+    if op.isfile(afile):
         crypto_obj = crypto()
         with open(afile, 'rb') as fp:
             while True:
@@ -238,7 +240,7 @@ def hash_infile(afile, chunk_len=8192, crypto=hashlib.md5):
 def hash_timestamp(afile):
     """ Computes md5 hash of the timestamp of a file """
     md5hex = None
-    if os.path.isfile(afile):
+    if op.isfile(afile):
         md5obj = md5()
         stat = os.stat(afile)
         md5obj.update(str(stat.st_size).encode())
@@ -263,13 +265,16 @@ def _generate_cifs_table():
         return []
 
     # (path, fstype) tuples, sorted by path length (longest first)
-    mount_info = sorted((line.split()[2:5:2] for line in output.splitlines()),
-                        key=lambda x: len(x[0]),
-                        reverse=True)
+    mount_info = sorted(
+        (line.split()[2:5:2] for line in output.splitlines()),
+        key=lambda x: len(x[0]),
+        reverse=True)
     cifs_paths = [path for path, fstype in mount_info if fstype == 'cifs']
 
-    return [mount for mount in mount_info
-            if any(mount[0].startswith(path) for path in cifs_paths)]
+    return [
+        mount for mount in mount_info
+        if any(mount[0].startswith(path) for path in cifs_paths)
+    ]
 
 
 _cifs_table = _generate_cifs_table()
@@ -295,8 +300,12 @@ def on_cifs(fname):
     return False
 
 
-def copyfile(originalfile, newfile, copy=False, create_new=False,
-             hashmethod=None, use_hardlink=False,
+def copyfile(originalfile,
+             newfile,
+             copy=False,
+             create_new=False,
+             hashmethod=None,
+             use_hardlink=False,
              copy_related_files=True):
     """Copy or link ``originalfile`` to ``newfile``.
 
@@ -332,7 +341,7 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
     fmlogger.debug(newfile)
 
     if create_new:
-        while os.path.exists(newfile):
+        while op.exists(newfile):
             base, fname, ext = split_filename(newfile)
             s = re.search('_c[0-9]{4,4}$', fname)
             i = 0
@@ -362,9 +371,9 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
     #       copy of file (same hash)                (keep)
     #       different file (diff hash)              (unlink)
     keep = False
-    if os.path.lexists(newfile):
-        if os.path.islink(newfile):
-            if all((os.readlink(newfile) == os.path.realpath(originalfile),
+    if op.lexists(newfile):
+        if op.islink(newfile):
+            if all((os.readlink(newfile) == op.realpath(originalfile),
                     not use_hardlink, not copy)):
                 keep = True
         elif posixpath.samefile(newfile, originalfile):
@@ -394,7 +403,7 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
         try:
             fmlogger.debug('Linking File: %s->%s', newfile, originalfile)
             # Use realpath to avoid hardlinking symlinks
-            os.link(os.path.realpath(originalfile), newfile)
+            os.link(op.realpath(originalfile), newfile)
         except OSError:
             use_hardlink = False  # Disable hardlink for associated files
         else:
@@ -421,9 +430,14 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
         related_file_pairs = (get_related_files(f, include_this_file=False)
                               for f in (originalfile, newfile))
         for alt_ofile, alt_nfile in zip(*related_file_pairs):
-            if os.path.exists(alt_ofile):
-                copyfile(alt_ofile, alt_nfile, copy, hashmethod=hashmethod,
-                         use_hardlink=use_hardlink, copy_related_files=False)
+            if op.exists(alt_ofile):
+                copyfile(
+                    alt_ofile,
+                    alt_nfile,
+                    copy,
+                    hashmethod=hashmethod,
+                    use_hardlink=use_hardlink,
+                    copy_related_files=False)
 
     return newfile
 
@@ -446,7 +460,7 @@ def get_related_files(filename, include_this_file=True):
         if this_type in type_set:
             for related_type in type_set:
                 if include_this_file or related_type != this_type:
-                    related_files.append(os.path.join(path, name + related_type))
+                    related_files.append(op.join(path, name + related_type))
     if not len(related_files):
         related_files = [filename]
     return related_files
@@ -476,8 +490,9 @@ def copyfiles(filelist, dest, copy=False, create_new=False):
     newfiles = []
     for i, f in enumerate(filename_to_list(filelist)):
         if isinstance(f, list):
-            newfiles.insert(i, copyfiles(f, dest, copy=copy,
-                                         create_new=create_new))
+            newfiles.insert(i,
+                            copyfiles(
+                                f, dest, copy=copy, create_new=create_new))
         else:
             if len(outfiles) > 1:
                 destfile = outfiles[i]
@@ -518,9 +533,9 @@ def check_depends(targets, dependencies):
     """
     tgts = filename_to_list(targets)
     deps = filename_to_list(dependencies)
-    return all(map(os.path.exists, tgts)) and \
-        min(map(os.path.getmtime, tgts)) > \
-        max(list(map(os.path.getmtime, deps)) + [0])
+    return all(map(op.exists, tgts)) and \
+        min(map(op.getmtime, tgts)) > \
+        max(list(map(op.getmtime, deps)) + [0])
 
 
 def save_json(filename, data):
@@ -638,8 +653,8 @@ rst_levels = ['=', '-', '~', '+']
 
 
 def write_rst_header(header, level=0):
-    return '\n'.join((header, ''.join([rst_levels[level]
-                                       for _ in header]))) + '\n\n'
+    return '\n'.join(
+        (header, ''.join([rst_levels[level] for _ in header]))) + '\n\n'
 
 
 def write_rst_list(items, prefix=''):
@@ -667,10 +682,71 @@ def dist_is_editable(dist):
     # Borrowed from `pip`'s' API
     """
     for path_item in sys.path:
-        egg_link = os.path.join(path_item, dist + '.egg-link')
-        if os.path.isfile(egg_link):
+        egg_link = op.join(path_item, dist + '.egg-link')
+        if op.isfile(egg_link):
             return True
     return False
+
+
+def makedirs(path, exist_ok=False):
+    """
+    Create path, if it doesn't exist.
+
+    Parameters
+    ----------
+    path : output directory to create
+
+    """
+    if not exist_ok:  # The old makedirs
+        os.makedirs(path)
+        return path
+
+    # this odd approach deals with concurrent directory cureation
+    if not op.exists(op.abspath(path)):
+        fmlogger.debug("Creating directory %s", path)
+        try:
+            os.makedirs(path)
+        except OSError:
+            fmlogger.debug("Problem creating directory %s", path)
+            if not op.exists(path):
+                raise OSError('Could not create directory %s' % path)
+    return path
+
+
+def emptydirs(path, noexist_ok=False):
+    """
+    Empty an existing directory, without deleting it. Do not
+    raise error if the path does not exist and noexist_ok is True.
+
+    Parameters
+    ----------
+    path : directory that should be empty
+
+    """
+    fmlogger.debug("Removing contents of %s", path)
+
+    if noexist_ok and not op.exists(path):
+        return True
+
+    if op.isfile(path):
+        raise OSError('path "%s" should be a directory' % path)
+
+    try:
+        shutil.rmtree(path)
+    except OSError as ex:
+        elcont = os.listdir(path)
+        if ex.errno == errno.ENOTEMPTY and not elcont:
+            fmlogger.warning(
+                'An exception was raised trying to remove old %s, but the path '
+                'seems empty. Is it an NFS mount?. Passing the exception.',
+                path)
+        elif ex.errno == errno.ENOTEMPTY and elcont:
+            fmlogger.debug('Folder %s contents (%d items).', path, len(elcont))
+            raise ex
+        else:
+            raise ex
+
+    makedirs(path)
 
 
 def which(cmd, env=None, pathext=None):
@@ -701,8 +777,8 @@ def which(cmd, env=None, pathext=None):
     for ext in pathext:
         extcmd = cmd + ext
         for directory in path.split(os.pathsep):
-            filename = os.path.join(directory, extcmd)
-            if os.path.exists(filename):
+            filename = op.join(directory, extcmd)
+            if op.exists(filename):
                 return filename
     return None
 
@@ -714,17 +790,19 @@ def get_dependencies(name, environ):
 
     """
     if sys.platform == 'darwin':
-        proc = sp.Popen('otool -L `which %s`' % name,
-                        stdout=sp.PIPE,
-                        stderr=sp.PIPE,
-                        shell=True,
-                        env=environ)
+        proc = sp.Popen(
+            'otool -L `which %s`' % name,
+            stdout=sp.PIPE,
+            stderr=sp.PIPE,
+            shell=True,
+            env=environ)
     elif 'linux' in sys.platform:
-        proc = sp.Popen('ldd `which %s`' % name,
-                        stdout=sp.PIPE,
-                        stderr=sp.PIPE,
-                        shell=True,
-                        env=environ)
+        proc = sp.Popen(
+            'ldd `which %s`' % name,
+            stdout=sp.PIPE,
+            stderr=sp.PIPE,
+            shell=True,
+            env=environ)
     else:
         return 'Platform %s not supported' % sys.platform
     o, e = proc.communicate()
@@ -758,3 +836,39 @@ def canonicalize_env(env):
             val = val.encode('utf-8')
         out_env[key] = val
     return out_env
+
+
+def relpath(path, start=None):
+    """Return a relative version of a path"""
+
+    try:
+        return op.relpath(path, start)
+    except AttributeError:
+        pass
+
+    if start is None:
+        start = os.curdir
+    if not path:
+        raise ValueError("no path specified")
+    start_list = op.abspath(start).split(op.sep)
+    path_list = op.abspath(path).split(op.sep)
+    if start_list[0].lower() != path_list[0].lower():
+        unc_path, rest = op.splitunc(path)
+        unc_start, rest = op.splitunc(start)
+        if bool(unc_path) ^ bool(unc_start):
+            raise ValueError(("Cannot mix UNC and non-UNC paths "
+                              "(%s and %s)") % (path, start))
+        else:
+            raise ValueError("path is on drive %s, start on drive %s" %
+                             (path_list[0], start_list[0]))
+    # Work out how much of the filepath is shared by start and path.
+    for i in range(min(len(start_list), len(path_list))):
+        if start_list[i].lower() != path_list[i].lower():
+            break
+    else:
+        i += 1
+
+    rel_list = [op.pardir] * (len(start_list) - i) + path_list[i:]
+    if not rel_list:
+        return os.curdir
+    return op.join(*rel_list)
