@@ -1562,6 +1562,7 @@ class FSSourceInputSpec(BaseInterfaceInputSpec):
     hemi = traits.Enum('both', 'lh', 'rh', usedefault=True,
                        desc='Selects hemisphere specific outputs')
 
+
 class FSSourceOutputSpec(TraitedSpec):
     T1 = File(
         exists=True, desc='Intensity normalized whole-head volume', loc='mri')
