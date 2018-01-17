@@ -11,18 +11,32 @@ from ...base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
 
 
 class gtractTransformToDisplacementFieldInputSpec(CommandLineInputSpec):
-    inputTransform = File(desc="Input Transform File Name", exists=True, argstr="--inputTransform %s")
-    inputReferenceVolume = File(desc="Required: input image file name to exemplify the anatomical space over which to vcl_express the transform as a displacement field.", exists=True, argstr="--inputReferenceVolume %s")
-    outputDeformationFieldVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Output deformation field", argstr="--outputDeformationFieldVolume %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputTransform = File(
+        desc="Input Transform File Name",
+        exists=True,
+        argstr="--inputTransform %s")
+    inputReferenceVolume = File(
+        desc=
+        "Required: input image file name to exemplify the anatomical space over which to vcl_express the transform as a displacement field.",
+        exists=True,
+        argstr="--inputReferenceVolume %s")
+    outputDeformationFieldVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Output deformation field",
+        argstr="--outputDeformationFieldVolume %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class gtractTransformToDisplacementFieldOutputSpec(TraitedSpec):
-    outputDeformationFieldVolume = File(desc="Output deformation field", exists=True)
+    outputDeformationFieldVolume = File(
+        desc="Output deformation field", exists=True)
 
 
 class gtractTransformToDisplacementField(SEMLikeCommandLine):
-
     """title: Create Displacement Field
 
 category: Diffusion.GTRACT
@@ -44,24 +58,44 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     input_spec = gtractTransformToDisplacementFieldInputSpec
     output_spec = gtractTransformToDisplacementFieldOutputSpec
     _cmd = " gtractTransformToDisplacementField "
-    _outputs_filenames = {'outputDeformationFieldVolume': 'outputDeformationFieldVolume.nii'}
+    _outputs_filenames = {
+        'outputDeformationFieldVolume': 'outputDeformationFieldVolume.nii'
+    }
     _redirect_x = False
 
 
 class gtractInvertBSplineTransformInputSpec(CommandLineInputSpec):
-    inputReferenceVolume = File(desc="Required: input image file name to exemplify the anatomical space to interpolate over.", exists=True, argstr="--inputReferenceVolume %s")
-    inputTransform = File(desc="Required: input B-Spline transform file name", exists=True, argstr="--inputTransform %s")
-    outputTransform = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: output transform file name", argstr="--outputTransform %s")
-    landmarkDensity = InputMultiPath(traits.Int, desc="Number of landmark subdivisions in all 3 directions", sep=",", argstr="--landmarkDensity %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputReferenceVolume = File(
+        desc=
+        "Required: input image file name to exemplify the anatomical space to interpolate over.",
+        exists=True,
+        argstr="--inputReferenceVolume %s")
+    inputTransform = File(
+        desc="Required: input B-Spline transform file name",
+        exists=True,
+        argstr="--inputTransform %s")
+    outputTransform = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Required: output transform file name",
+        argstr="--outputTransform %s")
+    landmarkDensity = InputMultiPath(
+        traits.Int,
+        desc="Number of landmark subdivisions in all 3 directions",
+        sep=",",
+        argstr="--landmarkDensity %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class gtractInvertBSplineTransformOutputSpec(TraitedSpec):
-    outputTransform = File(desc="Required: output transform file name", exists=True)
+    outputTransform = File(
+        desc="Required: output transform file name", exists=True)
 
 
 class gtractInvertBSplineTransform(SEMLikeCommandLine):
-
     """title: B-Spline Transform Inversion
 
 category: Diffusion.GTRACT
@@ -88,18 +122,35 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 
 class gtractConcatDwiInputSpec(CommandLineInputSpec):
-    inputVolume = InputMultiPath(File(exists=True), desc="Required: input file containing the first diffusion weighted image", argstr="--inputVolume %s...")
-    ignoreOrigins = traits.Bool(desc="If image origins are different force all images to origin of first image", argstr="--ignoreOrigins ")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: name of output NRRD file containing the combined diffusion weighted images.", argstr="--outputVolume %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputVolume = InputMultiPath(
+        File(exists=True),
+        desc=
+        "Required: input file containing the first diffusion weighted image",
+        argstr="--inputVolume %s...")
+    ignoreOrigins = traits.Bool(
+        desc=
+        "If image origins are different force all images to origin of first image",
+        argstr="--ignoreOrigins ")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Required: name of output NRRD file containing the combined diffusion weighted images.",
+        argstr="--outputVolume %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class gtractConcatDwiOutputSpec(TraitedSpec):
-    outputVolume = File(desc="Required: name of output NRRD file containing the combined diffusion weighted images.", exists=True)
+    outputVolume = File(
+        desc=
+        "Required: name of output NRRD file containing the combined diffusion weighted images.",
+        exists=True)
 
 
 class gtractConcatDwi(SEMLikeCommandLine):
-
     """title: Concat DWI Images
 
 category: Diffusion.GTRACT
@@ -126,19 +177,38 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 
 class gtractAverageBvaluesInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Required: input image file name containing multiple baseline gradients to average", exists=True, argstr="--inputVolume %s")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: name of output NRRD file containing directly averaged baseline images", argstr="--outputVolume %s")
-    directionsTolerance = traits.Float(desc="Tolerance for matching identical gradient direction pairs", argstr="--directionsTolerance %f")
-    averageB0only = traits.Bool(desc="Average only baseline gradients. All other gradient directions are not averaged, but retained in the outputVolume", argstr="--averageB0only ")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputVolume = File(
+        desc=
+        "Required: input image file name containing multiple baseline gradients to average",
+        exists=True,
+        argstr="--inputVolume %s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Required: name of output NRRD file containing directly averaged baseline images",
+        argstr="--outputVolume %s")
+    directionsTolerance = traits.Float(
+        desc="Tolerance for matching identical gradient direction pairs",
+        argstr="--directionsTolerance %f")
+    averageB0only = traits.Bool(
+        desc=
+        "Average only baseline gradients. All other gradient directions are not averaged, but retained in the outputVolume",
+        argstr="--averageB0only ")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class gtractAverageBvaluesOutputSpec(TraitedSpec):
-    outputVolume = File(desc="Required: name of output NRRD file containing directly averaged baseline images", exists=True)
+    outputVolume = File(
+        desc=
+        "Required: name of output NRRD file containing directly averaged baseline images",
+        exists=True)
 
 
 class gtractAverageBvalues(SEMLikeCommandLine):
-
     """title: Average B-Values
 
 category: Diffusion.GTRACT
@@ -165,33 +235,88 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 
 class gtractCoregBvaluesInputSpec(CommandLineInputSpec):
-    movingVolume = File(desc="Required: input moving image file name. In order to register gradients within a scan to its first gradient, set the movingVolume and fixedVolume as the same image.", exists=True, argstr="--movingVolume %s")
-    fixedVolume = File(desc="Required: input fixed image file name. It is recommended that this image should either contain or be a b0 image.", exists=True, argstr="--fixedVolume %s")
-    fixedVolumeIndex = traits.Int(desc="Index in the fixed image for registration. It is recommended that this image should be a b0 image.", argstr="--fixedVolumeIndex %d")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: name of output NRRD file containing moving images individually resampled and fit to the specified fixed image index.", argstr="--outputVolume %s")
-    outputTransform = traits.Either(traits.Bool, File(), hash_files=False, desc="Registration 3D transforms concatenated in a single output file.  There are no tools that can use this, but can be used for debugging purposes.", argstr="--outputTransform %s")
-    eddyCurrentCorrection = traits.Bool(desc="Flag to perform eddy current corection in addition to motion correction (recommended)", argstr="--eddyCurrentCorrection ")
-    numberOfIterations = traits.Int(desc="Number of iterations in each 3D fit", argstr="--numberOfIterations %d")
+    movingVolume = File(
+        desc=
+        "Required: input moving image file name. In order to register gradients within a scan to its first gradient, set the movingVolume and fixedVolume as the same image.",
+        exists=True,
+        argstr="--movingVolume %s")
+    fixedVolume = File(
+        desc=
+        "Required: input fixed image file name. It is recommended that this image should either contain or be a b0 image.",
+        exists=True,
+        argstr="--fixedVolume %s")
+    fixedVolumeIndex = traits.Int(
+        desc=
+        "Index in the fixed image for registration. It is recommended that this image should be a b0 image.",
+        argstr="--fixedVolumeIndex %d")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Required: name of output NRRD file containing moving images individually resampled and fit to the specified fixed image index.",
+        argstr="--outputVolume %s")
+    outputTransform = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Registration 3D transforms concatenated in a single output file.  There are no tools that can use this, but can be used for debugging purposes.",
+        argstr="--outputTransform %s")
+    eddyCurrentCorrection = traits.Bool(
+        desc=
+        "Flag to perform eddy current corection in addition to motion correction (recommended)",
+        argstr="--eddyCurrentCorrection ")
+    numberOfIterations = traits.Int(
+        desc="Number of iterations in each 3D fit",
+        argstr="--numberOfIterations %d")
     numberOfSpatialSamples = traits.Int(
-        desc="The number of voxels sampled for mutual information computation.  Increase this for a slower, more careful fit. NOTE that it is suggested to use samplingPercentage instead of this option. However, if set, it overwrites the samplingPercentage option.  ", argstr="--numberOfSpatialSamples %d")
+        desc=
+        "The number of voxels sampled for mutual information computation.  Increase this for a slower, more careful fit. NOTE that it is suggested to use samplingPercentage instead of this option. However, if set, it overwrites the samplingPercentage option.  ",
+        argstr="--numberOfSpatialSamples %d")
     samplingPercentage = traits.Float(
-        desc="This is a number in (0.0,1.0] interval that shows the percentage of the input fixed image voxels that are sampled for mutual information computation.  Increase this for a slower, more careful fit. You can also limit the sampling focus with ROI masks and ROIAUTO mask generation. The default is to use approximately 5% of voxels (for backwards compatibility 5% ~= 500000/(256*256*256)). Typical values range from 1% for low detail images to 20% for high detail images.", argstr="--samplingPercentage %f")
-    relaxationFactor = traits.Float(desc="Fraction of gradient from Jacobian to attempt to move in each 3D fit step (adjust when eddyCurrentCorrection is enabled; suggested value = 0.25)", argstr="--relaxationFactor %f")
-    maximumStepSize = traits.Float(desc="Maximum permitted step size to move in each 3D fit step (adjust when eddyCurrentCorrection is enabled; suggested value = 0.1)", argstr="--maximumStepSize %f")
-    minimumStepSize = traits.Float(desc="Minimum required step size to move in each 3D fit step without converging -- decrease this to make the fit more exacting", argstr="--minimumStepSize %f")
-    spatialScale = traits.Float(desc="How much to scale up changes in position compared to unit rotational changes in radians -- decrease this to put more rotation in the fit", argstr="--spatialScale %f")
-    registerB0Only = traits.Bool(desc="Register the B0 images only", argstr="--registerB0Only ")
-    debugLevel = traits.Int(desc="Display debug messages, and produce debug intermediate results.  0=OFF, 1=Minimal, 10=Maximum debugging.", argstr="--debugLevel %d")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+        desc=
+        "This is a number in (0.0,1.0] interval that shows the percentage of the input fixed image voxels that are sampled for mutual information computation.  Increase this for a slower, more careful fit. You can also limit the sampling focus with ROI masks and ROIAUTO mask generation. The default is to use approximately 5% of voxels (for backwards compatibility 5% ~= 500000/(256*256*256)). Typical values range from 1% for low detail images to 20% for high detail images.",
+        argstr="--samplingPercentage %f")
+    relaxationFactor = traits.Float(
+        desc=
+        "Fraction of gradient from Jacobian to attempt to move in each 3D fit step (adjust when eddyCurrentCorrection is enabled; suggested value = 0.25)",
+        argstr="--relaxationFactor %f")
+    maximumStepSize = traits.Float(
+        desc=
+        "Maximum permitted step size to move in each 3D fit step (adjust when eddyCurrentCorrection is enabled; suggested value = 0.1)",
+        argstr="--maximumStepSize %f")
+    minimumStepSize = traits.Float(
+        desc=
+        "Minimum required step size to move in each 3D fit step without converging -- decrease this to make the fit more exacting",
+        argstr="--minimumStepSize %f")
+    spatialScale = traits.Float(
+        desc=
+        "How much to scale up changes in position compared to unit rotational changes in radians -- decrease this to put more rotation in the fit",
+        argstr="--spatialScale %f")
+    registerB0Only = traits.Bool(
+        desc="Register the B0 images only", argstr="--registerB0Only ")
+    debugLevel = traits.Int(
+        desc=
+        "Display debug messages, and produce debug intermediate results.  0=OFF, 1=Minimal, 10=Maximum debugging.",
+        argstr="--debugLevel %d")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class gtractCoregBvaluesOutputSpec(TraitedSpec):
-    outputVolume = File(desc="Required: name of output NRRD file containing moving images individually resampled and fit to the specified fixed image index.", exists=True)
-    outputTransform = File(desc="Registration 3D transforms concatenated in a single output file.  There are no tools that can use this, but can be used for debugging purposes.", exists=True)
+    outputVolume = File(
+        desc=
+        "Required: name of output NRRD file containing moving images individually resampled and fit to the specified fixed image index.",
+        exists=True)
+    outputTransform = File(
+        desc=
+        "Registration 3D transforms concatenated in a single output file.  There are no tools that can use this, but can be used for debugging purposes.",
+        exists=True)
 
 
 class gtractCoregBvalues(SEMLikeCommandLine):
-
     """title: Coregister B-Values
 
 category: Diffusion.GTRACT
@@ -213,25 +338,52 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     input_spec = gtractCoregBvaluesInputSpec
     output_spec = gtractCoregBvaluesOutputSpec
     _cmd = " gtractCoregBvalues "
-    _outputs_filenames = {'outputVolume': 'outputVolume.nrrd', 'outputTransform': 'outputTransform.h5'}
+    _outputs_filenames = {
+        'outputVolume': 'outputVolume.nrrd',
+        'outputTransform': 'outputTransform.h5'
+    }
     _redirect_x = False
 
 
 class gtractResampleAnisotropyInputSpec(CommandLineInputSpec):
-    inputAnisotropyVolume = File(desc="Required: input file containing the anisotropy image", exists=True, argstr="--inputAnisotropyVolume %s")
-    inputAnatomicalVolume = File(desc="Required: input file containing the anatomical image whose characteristics will be cloned.", exists=True, argstr="--inputAnatomicalVolume %s")
-    inputTransform = File(desc="Required: input Rigid OR Bspline transform file name", exists=True, argstr="--inputTransform %s")
-    transformType = traits.Enum("Rigid", "B-Spline", desc="Transform type: Rigid, B-Spline", argstr="--transformType %s")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: name of output NRRD file containing the resampled transformed anisotropy image.", argstr="--outputVolume %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputAnisotropyVolume = File(
+        desc="Required: input file containing the anisotropy image",
+        exists=True,
+        argstr="--inputAnisotropyVolume %s")
+    inputAnatomicalVolume = File(
+        desc=
+        "Required: input file containing the anatomical image whose characteristics will be cloned.",
+        exists=True,
+        argstr="--inputAnatomicalVolume %s")
+    inputTransform = File(
+        desc="Required: input Rigid OR Bspline transform file name",
+        exists=True,
+        argstr="--inputTransform %s")
+    transformType = traits.Enum(
+        "Rigid",
+        "B-Spline",
+        desc="Transform type: Rigid, B-Spline",
+        argstr="--transformType %s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Required: name of output NRRD file containing the resampled transformed anisotropy image.",
+        argstr="--outputVolume %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class gtractResampleAnisotropyOutputSpec(TraitedSpec):
-    outputVolume = File(desc="Required: name of output NRRD file containing the resampled transformed anisotropy image.", exists=True)
+    outputVolume = File(
+        desc=
+        "Required: name of output NRRD file containing the resampled transformed anisotropy image.",
+        exists=True)
 
 
 class gtractResampleAnisotropy(SEMLikeCommandLine):
-
     """title: Resample Anisotropy
 
 category: Diffusion.GTRACT
@@ -258,20 +410,47 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 
 class gtractResampleCodeImageInputSpec(CommandLineInputSpec):
-    inputCodeVolume = File(desc="Required: input file containing the code image", exists=True, argstr="--inputCodeVolume %s")
-    inputReferenceVolume = File(desc="Required: input file containing the standard image to clone the characteristics of.", exists=True, argstr="--inputReferenceVolume %s")
-    inputTransform = File(desc="Required: input Rigid or Inverse-B-Spline transform file name", exists=True, argstr="--inputTransform %s")
-    transformType = traits.Enum("Rigid", "Affine", "B-Spline", "Inverse-B-Spline", "None", desc="Transform type: Rigid or Inverse-B-Spline", argstr="--transformType %s")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: name of output NRRD file containing the resampled code image in acquisition space.", argstr="--outputVolume %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputCodeVolume = File(
+        desc="Required: input file containing the code image",
+        exists=True,
+        argstr="--inputCodeVolume %s")
+    inputReferenceVolume = File(
+        desc=
+        "Required: input file containing the standard image to clone the characteristics of.",
+        exists=True,
+        argstr="--inputReferenceVolume %s")
+    inputTransform = File(
+        desc="Required: input Rigid or Inverse-B-Spline transform file name",
+        exists=True,
+        argstr="--inputTransform %s")
+    transformType = traits.Enum(
+        "Rigid",
+        "Affine",
+        "B-Spline",
+        "Inverse-B-Spline",
+        "None",
+        desc="Transform type: Rigid or Inverse-B-Spline",
+        argstr="--transformType %s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Required: name of output NRRD file containing the resampled code image in acquisition space.",
+        argstr="--outputVolume %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class gtractResampleCodeImageOutputSpec(TraitedSpec):
-    outputVolume = File(desc="Required: name of output NRRD file containing the resampled code image in acquisition space.", exists=True)
+    outputVolume = File(
+        desc=
+        "Required: name of output NRRD file containing the resampled code image in acquisition space.",
+        exists=True)
 
 
 class gtractResampleCodeImage(SEMLikeCommandLine):
-
     """title: Resample Code Image
 
 category: Diffusion.GTRACT
@@ -298,18 +477,35 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 
 class gtractCopyImageOrientationInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Required: input file containing the signed short image to reorient without resampling.", exists=True, argstr="--inputVolume %s")
-    inputReferenceVolume = File(desc="Required: input file containing orietation that will be cloned.", exists=True, argstr="--inputReferenceVolume %s")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: name of output NRRD or Nifti file containing the reoriented image in reference image space.", argstr="--outputVolume %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputVolume = File(
+        desc=
+        "Required: input file containing the signed short image to reorient without resampling.",
+        exists=True,
+        argstr="--inputVolume %s")
+    inputReferenceVolume = File(
+        desc="Required: input file containing orietation that will be cloned.",
+        exists=True,
+        argstr="--inputReferenceVolume %s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Required: name of output NRRD or Nifti file containing the reoriented image in reference image space.",
+        argstr="--outputVolume %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class gtractCopyImageOrientationOutputSpec(TraitedSpec):
-    outputVolume = File(desc="Required: name of output NRRD or Nifti file containing the reoriented image in reference image space.", exists=True)
+    outputVolume = File(
+        desc=
+        "Required: name of output NRRD or Nifti file containing the reoriented image in reference image space.",
+        exists=True)
 
 
 class gtractCopyImageOrientation(SEMLikeCommandLine):
-
     """title: Copy Image Orientation
 
 category: Diffusion.GTRACT
@@ -336,19 +532,34 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 
 class gtractCreateGuideFiberInputSpec(CommandLineInputSpec):
-    inputFiber = File(desc="Required: input fiber tract file name", exists=True, argstr="--inputFiber %s")
-    numberOfPoints = traits.Int(desc="Number of points in output guide fiber", argstr="--numberOfPoints %d")
-    outputFiber = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: output guide fiber file name", argstr="--outputFiber %s")
-    writeXMLPolyDataFile = traits.Bool(desc="Flag to make use of XML files when reading and writing vtkPolyData.", argstr="--writeXMLPolyDataFile ")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputFiber = File(
+        desc="Required: input fiber tract file name",
+        exists=True,
+        argstr="--inputFiber %s")
+    numberOfPoints = traits.Int(
+        desc="Number of points in output guide fiber",
+        argstr="--numberOfPoints %d")
+    outputFiber = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Required: output guide fiber file name",
+        argstr="--outputFiber %s")
+    writeXMLPolyDataFile = traits.Bool(
+        desc=
+        "Flag to make use of XML files when reading and writing vtkPolyData.",
+        argstr="--writeXMLPolyDataFile ")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class gtractCreateGuideFiberOutputSpec(TraitedSpec):
-    outputFiber = File(desc="Required: output guide fiber file name", exists=True)
+    outputFiber = File(
+        desc="Required: output guide fiber file name", exists=True)
 
 
 class gtractCreateGuideFiber(SEMLikeCommandLine):
-
     """title: Create Guide Fiber
 
 category: Diffusion.GTRACT
@@ -375,18 +586,40 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 
 class gtractAnisotropyMapInputSpec(CommandLineInputSpec):
-    inputTensorVolume = File(desc="Required: input file containing the diffusion tensor image", exists=True, argstr="--inputTensorVolume %s")
-    anisotropyType = traits.Enum("ADC", "FA", "RA", "VR", "AD", "RD", "LI", desc="Anisotropy Mapping Type: ADC, FA, RA, VR, AD, RD, LI", argstr="--anisotropyType %s")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: name of output NRRD file containing the selected kind of anisotropy scalar.", argstr="--outputVolume %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputTensorVolume = File(
+        desc="Required: input file containing the diffusion tensor image",
+        exists=True,
+        argstr="--inputTensorVolume %s")
+    anisotropyType = traits.Enum(
+        "ADC",
+        "FA",
+        "RA",
+        "VR",
+        "AD",
+        "RD",
+        "LI",
+        desc="Anisotropy Mapping Type: ADC, FA, RA, VR, AD, RD, LI",
+        argstr="--anisotropyType %s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Required: name of output NRRD file containing the selected kind of anisotropy scalar.",
+        argstr="--outputVolume %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class gtractAnisotropyMapOutputSpec(TraitedSpec):
-    outputVolume = File(desc="Required: name of output NRRD file containing the selected kind of anisotropy scalar.", exists=True)
+    outputVolume = File(
+        desc=
+        "Required: name of output NRRD file containing the selected kind of anisotropy scalar.",
+        exists=True)
 
 
 class gtractAnisotropyMap(SEMLikeCommandLine):
-
     """title: Anisotropy Map
 
 category: Diffusion.GTRACT
@@ -413,19 +646,36 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 
 class gtractClipAnisotropyInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Required: input image file name", exists=True, argstr="--inputVolume %s")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: name of output NRRD file containing the clipped anisotropy image", argstr="--outputVolume %s")
-    clipFirstSlice = traits.Bool(desc="Clip the first slice of the anisotropy image", argstr="--clipFirstSlice ")
-    clipLastSlice = traits.Bool(desc="Clip the last slice of the anisotropy image", argstr="--clipLastSlice ")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputVolume = File(
+        desc="Required: input image file name",
+        exists=True,
+        argstr="--inputVolume %s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Required: name of output NRRD file containing the clipped anisotropy image",
+        argstr="--outputVolume %s")
+    clipFirstSlice = traits.Bool(
+        desc="Clip the first slice of the anisotropy image",
+        argstr="--clipFirstSlice ")
+    clipLastSlice = traits.Bool(
+        desc="Clip the last slice of the anisotropy image",
+        argstr="--clipLastSlice ")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class gtractClipAnisotropyOutputSpec(TraitedSpec):
-    outputVolume = File(desc="Required: name of output NRRD file containing the clipped anisotropy image", exists=True)
+    outputVolume = File(
+        desc=
+        "Required: name of output NRRD file containing the clipped anisotropy image",
+        exists=True)
 
 
 class gtractClipAnisotropy(SEMLikeCommandLine):
-
     """title: Clip Anisotropy
 
 category: Diffusion.GTRACT
@@ -452,21 +702,47 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 
 class gtractResampleB0InputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Required: input file containing the 4D image", exists=True, argstr="--inputVolume %s")
-    inputAnatomicalVolume = File(desc="Required: input file containing the anatomical image defining the origin, spacing and size of the resampled image (template)", exists=True, argstr="--inputAnatomicalVolume %s")
-    inputTransform = File(desc="Required: input Rigid OR Bspline transform file name", exists=True, argstr="--inputTransform %s")
-    vectorIndex = traits.Int(desc="Index in the diffusion weighted image set for the B0 image", argstr="--vectorIndex %d")
-    transformType = traits.Enum("Rigid", "B-Spline", desc="Transform type: Rigid, B-Spline", argstr="--transformType %s")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: name of output NRRD file containing the resampled input image.", argstr="--outputVolume %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputVolume = File(
+        desc="Required: input file containing the 4D image",
+        exists=True,
+        argstr="--inputVolume %s")
+    inputAnatomicalVolume = File(
+        desc=
+        "Required: input file containing the anatomical image defining the origin, spacing and size of the resampled image (template)",
+        exists=True,
+        argstr="--inputAnatomicalVolume %s")
+    inputTransform = File(
+        desc="Required: input Rigid OR Bspline transform file name",
+        exists=True,
+        argstr="--inputTransform %s")
+    vectorIndex = traits.Int(
+        desc="Index in the diffusion weighted image set for the B0 image",
+        argstr="--vectorIndex %d")
+    transformType = traits.Enum(
+        "Rigid",
+        "B-Spline",
+        desc="Transform type: Rigid, B-Spline",
+        argstr="--transformType %s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Required: name of output NRRD file containing the resampled input image.",
+        argstr="--outputVolume %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class gtractResampleB0OutputSpec(TraitedSpec):
-    outputVolume = File(desc="Required: name of output NRRD file containing the resampled input image.", exists=True)
+    outputVolume = File(
+        desc=
+        "Required: name of output NRRD file containing the resampled input image.",
+        exists=True)
 
 
 class gtractResampleB0(SEMLikeCommandLine):
-
     """title: Resample B0
 
 category: Diffusion.GTRACT
@@ -493,17 +769,27 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 
 class gtractInvertRigidTransformInputSpec(CommandLineInputSpec):
-    inputTransform = File(desc="Required: input rigid transform file name", exists=True, argstr="--inputTransform %s")
-    outputTransform = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: output transform file name", argstr="--outputTransform %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputTransform = File(
+        desc="Required: input rigid transform file name",
+        exists=True,
+        argstr="--inputTransform %s")
+    outputTransform = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Required: output transform file name",
+        argstr="--outputTransform %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class gtractInvertRigidTransformOutputSpec(TraitedSpec):
-    outputTransform = File(desc="Required: output transform file name", exists=True)
+    outputTransform = File(
+        desc="Required: output transform file name", exists=True)
 
 
 class gtractInvertRigidTransform(SEMLikeCommandLine):
-
     """title: Rigid Transform Inversion
 
 category: Diffusion.GTRACT
@@ -530,18 +816,36 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 
 class gtractImageConformityInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Required: input file containing the signed short image to reorient without resampling.", exists=True, argstr="--inputVolume %s")
-    inputReferenceVolume = File(desc="Required: input file containing the standard image to clone the characteristics of.", exists=True, argstr="--inputReferenceVolume %s")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: name of output Nrrd or Nifti file containing the reoriented image in reference image space.", argstr="--outputVolume %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputVolume = File(
+        desc=
+        "Required: input file containing the signed short image to reorient without resampling.",
+        exists=True,
+        argstr="--inputVolume %s")
+    inputReferenceVolume = File(
+        desc=
+        "Required: input file containing the standard image to clone the characteristics of.",
+        exists=True,
+        argstr="--inputReferenceVolume %s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Required: name of output Nrrd or Nifti file containing the reoriented image in reference image space.",
+        argstr="--outputVolume %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class gtractImageConformityOutputSpec(TraitedSpec):
-    outputVolume = File(desc="Required: name of output Nrrd or Nifti file containing the reoriented image in reference image space.", exists=True)
+    outputVolume = File(
+        desc=
+        "Required: name of output Nrrd or Nifti file containing the reoriented image in reference image space.",
+        exists=True)
 
 
 class gtractImageConformity(SEMLikeCommandLine):
-
     """title: Image Conformity
 
 category: Diffusion.GTRACT
@@ -568,14 +872,34 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 
 class compareTractInclusionInputSpec(CommandLineInputSpec):
-    testFiber = File(desc="Required: test fiber tract file name", exists=True, argstr="--testFiber %s")
-    standardFiber = File(desc="Required: standard fiber tract file name", exists=True, argstr="--standardFiber %s")
-    closeness = traits.Float(desc="Closeness of every test fiber to some fiber in the standard tract, computed as a sum of squares of spatial differences of standard points", argstr="--closeness %f")
-    numberOfPoints = traits.Int(desc="Number of points in comparison fiber pairs", argstr="--numberOfPoints %d")
-    testForBijection = traits.Bool(desc="Flag to apply the closeness criterion both ways", argstr="--testForBijection ")
-    testForFiberCardinality = traits.Bool(desc="Flag to require the same number of fibers in both tracts", argstr="--testForFiberCardinality ")
-    writeXMLPolyDataFile = traits.Bool(desc="Flag to make use of XML files when reading and writing vtkPolyData.", argstr="--writeXMLPolyDataFile ")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    testFiber = File(
+        desc="Required: test fiber tract file name",
+        exists=True,
+        argstr="--testFiber %s")
+    standardFiber = File(
+        desc="Required: standard fiber tract file name",
+        exists=True,
+        argstr="--standardFiber %s")
+    closeness = traits.Float(
+        desc=
+        "Closeness of every test fiber to some fiber in the standard tract, computed as a sum of squares of spatial differences of standard points",
+        argstr="--closeness %f")
+    numberOfPoints = traits.Int(
+        desc="Number of points in comparison fiber pairs",
+        argstr="--numberOfPoints %d")
+    testForBijection = traits.Bool(
+        desc="Flag to apply the closeness criterion both ways",
+        argstr="--testForBijection ")
+    testForFiberCardinality = traits.Bool(
+        desc="Flag to require the same number of fibers in both tracts",
+        argstr="--testForFiberCardinality ")
+    writeXMLPolyDataFile = traits.Bool(
+        desc=
+        "Flag to make use of XML files when reading and writing vtkPolyData.",
+        argstr="--writeXMLPolyDataFile ")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class compareTractInclusionOutputSpec(TraitedSpec):
@@ -583,7 +907,6 @@ class compareTractInclusionOutputSpec(TraitedSpec):
 
 
 class compareTractInclusion(SEMLikeCommandLine):
-
     """title: Compare Tracts
 
 category: Diffusion.GTRACT
@@ -610,28 +933,65 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 
 class gtractFastMarchingTrackingInputSpec(CommandLineInputSpec):
-    inputTensorVolume = File(desc="Required: input tensor image file name", exists=True, argstr="--inputTensorVolume %s")
-    inputAnisotropyVolume = File(desc="Required: input anisotropy image file name", exists=True, argstr="--inputAnisotropyVolume %s")
-    inputCostVolume = File(desc="Required: input vcl_cost image file name", exists=True, argstr="--inputCostVolume %s")
-    inputStartingSeedsLabelMapVolume = File(desc="Required: input starting seeds LabelMap image file name", exists=True, argstr="--inputStartingSeedsLabelMapVolume %s")
-    startingSeedsLabel = traits.Int(desc="Label value for Starting Seeds", argstr="--startingSeedsLabel %d")
-    outputTract = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: name of output vtkPolydata file containing tract lines and the point data collected along them.", argstr="--outputTract %s")
-    writeXMLPolyDataFile = traits.Bool(desc="Flag to make use of the XML format for vtkPolyData fiber tracts.", argstr="--writeXMLPolyDataFile ")
-    numberOfIterations = traits.Int(desc="Number of iterations used for the optimization", argstr="--numberOfIterations %d")
-    seedThreshold = traits.Float(desc="Anisotropy threshold used for seed selection", argstr="--seedThreshold %f")
-    trackingThreshold = traits.Float(desc="Anisotropy threshold used for fiber tracking", argstr="--trackingThreshold %f")
-    costStepSize = traits.Float(desc="Cost image sub-voxel sampling", argstr="--costStepSize %f")
-    maximumStepSize = traits.Float(desc="Maximum step size to move when tracking", argstr="--maximumStepSize %f")
-    minimumStepSize = traits.Float(desc="Minimum step size to move when tracking", argstr="--minimumStepSize %f")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputTensorVolume = File(
+        desc="Required: input tensor image file name",
+        exists=True,
+        argstr="--inputTensorVolume %s")
+    inputAnisotropyVolume = File(
+        desc="Required: input anisotropy image file name",
+        exists=True,
+        argstr="--inputAnisotropyVolume %s")
+    inputCostVolume = File(
+        desc="Required: input vcl_cost image file name",
+        exists=True,
+        argstr="--inputCostVolume %s")
+    inputStartingSeedsLabelMapVolume = File(
+        desc="Required: input starting seeds LabelMap image file name",
+        exists=True,
+        argstr="--inputStartingSeedsLabelMapVolume %s")
+    startingSeedsLabel = traits.Int(
+        desc="Label value for Starting Seeds",
+        argstr="--startingSeedsLabel %d")
+    outputTract = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Required: name of output vtkPolydata file containing tract lines and the point data collected along them.",
+        argstr="--outputTract %s")
+    writeXMLPolyDataFile = traits.Bool(
+        desc="Flag to make use of the XML format for vtkPolyData fiber tracts.",
+        argstr="--writeXMLPolyDataFile ")
+    numberOfIterations = traits.Int(
+        desc="Number of iterations used for the optimization",
+        argstr="--numberOfIterations %d")
+    seedThreshold = traits.Float(
+        desc="Anisotropy threshold used for seed selection",
+        argstr="--seedThreshold %f")
+    trackingThreshold = traits.Float(
+        desc="Anisotropy threshold used for fiber tracking",
+        argstr="--trackingThreshold %f")
+    costStepSize = traits.Float(
+        desc="Cost image sub-voxel sampling", argstr="--costStepSize %f")
+    maximumStepSize = traits.Float(
+        desc="Maximum step size to move when tracking",
+        argstr="--maximumStepSize %f")
+    minimumStepSize = traits.Float(
+        desc="Minimum step size to move when tracking",
+        argstr="--minimumStepSize %f")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class gtractFastMarchingTrackingOutputSpec(TraitedSpec):
-    outputTract = File(desc="Required: name of output vtkPolydata file containing tract lines and the point data collected along them.", exists=True)
+    outputTract = File(
+        desc=
+        "Required: name of output vtkPolydata file containing tract lines and the point data collected along them.",
+        exists=True)
 
 
 class gtractFastMarchingTracking(SEMLikeCommandLine):
-
     """title: Fast Marching Tracking
 
 category: Diffusion.GTRACT
@@ -658,11 +1018,27 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 
 class gtractInvertDisplacementFieldInputSpec(CommandLineInputSpec):
-    baseImage = File(desc="Required: base image used to define the size of the inverse field", exists=True, argstr="--baseImage %s")
-    deformationImage = File(desc="Required: Displacement field image", exists=True, argstr="--deformationImage %s")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: Output deformation field", argstr="--outputVolume %s")
-    subsamplingFactor = traits.Int(desc="Subsampling factor for the deformation field", argstr="--subsamplingFactor %d")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    baseImage = File(
+        desc=
+        "Required: base image used to define the size of the inverse field",
+        exists=True,
+        argstr="--baseImage %s")
+    deformationImage = File(
+        desc="Required: Displacement field image",
+        exists=True,
+        argstr="--deformationImage %s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Required: Output deformation field",
+        argstr="--outputVolume %s")
+    subsamplingFactor = traits.Int(
+        desc="Subsampling factor for the deformation field",
+        argstr="--subsamplingFactor %d")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class gtractInvertDisplacementFieldOutputSpec(TraitedSpec):
@@ -670,7 +1046,6 @@ class gtractInvertDisplacementFieldOutputSpec(TraitedSpec):
 
 
 class gtractInvertDisplacementField(SEMLikeCommandLine):
-
     """title: Invert Displacement Field
 
 category: Diffusion.GTRACT
@@ -697,44 +1072,105 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 
 class gtractCoRegAnatomyInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Required: input vector image file name. It is recommended that the input volume is the skull stripped baseline image of the DWI scan.", exists=True, argstr="--inputVolume %s")
-    inputAnatomicalVolume = File(desc="Required: input anatomical image file name. It is recommended that that the input anatomical image has been skull stripped and has the same orientation as the DWI scan.", exists=True, argstr="--inputAnatomicalVolume %s")
-    vectorIndex = traits.Int(desc="Vector image index in the moving image (within the DWI) to be used for registration.", argstr="--vectorIndex %d")
-    inputRigidTransform = File(desc="Required (for B-Spline type co-registration): input rigid transform file name. Used as a starting point for the anatomical B-Spline registration.", exists=True, argstr="--inputRigidTransform %s")
-    outputTransformName = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: filename for the  fit transform.", argstr="--outputTransformName %s")
-    transformType = traits.Enum("Rigid", "Bspline", desc="Transform Type: Rigid|Bspline", argstr="--transformType %s")
-    numberOfIterations = traits.Int(desc="Number of iterations in the selected 3D fit", argstr="--numberOfIterations %d")
-    gridSize = InputMultiPath(traits.Int, desc="Number of grid subdivisions in all 3 directions", sep=",", argstr="--gridSize %s")
+    inputVolume = File(
+        desc=
+        "Required: input vector image file name. It is recommended that the input volume is the skull stripped baseline image of the DWI scan.",
+        exists=True,
+        argstr="--inputVolume %s")
+    inputAnatomicalVolume = File(
+        desc=
+        "Required: input anatomical image file name. It is recommended that that the input anatomical image has been skull stripped and has the same orientation as the DWI scan.",
+        exists=True,
+        argstr="--inputAnatomicalVolume %s")
+    vectorIndex = traits.Int(
+        desc=
+        "Vector image index in the moving image (within the DWI) to be used for registration.",
+        argstr="--vectorIndex %d")
+    inputRigidTransform = File(
+        desc=
+        "Required (for B-Spline type co-registration): input rigid transform file name. Used as a starting point for the anatomical B-Spline registration.",
+        exists=True,
+        argstr="--inputRigidTransform %s")
+    outputTransformName = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Required: filename for the  fit transform.",
+        argstr="--outputTransformName %s")
+    transformType = traits.Enum(
+        "Rigid",
+        "Bspline",
+        desc="Transform Type: Rigid|Bspline",
+        argstr="--transformType %s")
+    numberOfIterations = traits.Int(
+        desc="Number of iterations in the selected 3D fit",
+        argstr="--numberOfIterations %d")
+    gridSize = InputMultiPath(
+        traits.Int,
+        desc="Number of grid subdivisions in all 3 directions",
+        sep=",",
+        argstr="--gridSize %s")
     borderSize = traits.Int(desc="Size of border", argstr="--borderSize %d")
-    numberOfHistogramBins = traits.Int(desc="Number of histogram bins", argstr="--numberOfHistogramBins %d")
-    spatialScale = traits.Int(desc="Scales the number of voxels in the image by this value to specify the number of voxels used in the registration", argstr="--spatialScale %d")
-    convergence = traits.Float(desc="Convergence Factor", argstr="--convergence %f")
-    gradientTolerance = traits.Float(desc="Gradient Tolerance", argstr="--gradientTolerance %f")
+    numberOfHistogramBins = traits.Int(
+        desc="Number of histogram bins", argstr="--numberOfHistogramBins %d")
+    spatialScale = traits.Int(
+        desc=
+        "Scales the number of voxels in the image by this value to specify the number of voxels used in the registration",
+        argstr="--spatialScale %d")
+    convergence = traits.Float(
+        desc="Convergence Factor", argstr="--convergence %f")
+    gradientTolerance = traits.Float(
+        desc="Gradient Tolerance", argstr="--gradientTolerance %f")
     maxBSplineDisplacement = traits.Float(
-        desc=" Sets the maximum allowed displacements in image physical coordinates for BSpline control grid along each axis.  A value of 0.0 indicates that the problem should be unbounded.  NOTE:  This only constrains the BSpline portion, and does not limit the displacement from the associated bulk transform.  This can lead to a substantial reduction in computation time in the BSpline optimizer.,       ", argstr="--maxBSplineDisplacement %f")
-    maximumStepSize = traits.Float(desc="Maximum permitted step size to move in the selected 3D fit", argstr="--maximumStepSize %f")
-    minimumStepSize = traits.Float(desc="Minimum required step size to move in the selected 3D fit without converging -- decrease this to make the fit more exacting", argstr="--minimumStepSize %f")
-    translationScale = traits.Float(desc="How much to scale up changes in position compared to unit rotational changes in radians -- decrease this to put more translation in the fit", argstr="--translationScale %f")
-    relaxationFactor = traits.Float(desc="Fraction of gradient from Jacobian to attempt to move in the selected 3D fit", argstr="--relaxationFactor %f")
+        desc=
+        " Sets the maximum allowed displacements in image physical coordinates for BSpline control grid along each axis.  A value of 0.0 indicates that the problem should be unbounded.  NOTE:  This only constrains the BSpline portion, and does not limit the displacement from the associated bulk transform.  This can lead to a substantial reduction in computation time in the BSpline optimizer.,       ",
+        argstr="--maxBSplineDisplacement %f")
+    maximumStepSize = traits.Float(
+        desc="Maximum permitted step size to move in the selected 3D fit",
+        argstr="--maximumStepSize %f")
+    minimumStepSize = traits.Float(
+        desc=
+        "Minimum required step size to move in the selected 3D fit without converging -- decrease this to make the fit more exacting",
+        argstr="--minimumStepSize %f")
+    translationScale = traits.Float(
+        desc=
+        "How much to scale up changes in position compared to unit rotational changes in radians -- decrease this to put more translation in the fit",
+        argstr="--translationScale %f")
+    relaxationFactor = traits.Float(
+        desc=
+        "Fraction of gradient from Jacobian to attempt to move in the selected 3D fit",
+        argstr="--relaxationFactor %f")
     numberOfSamples = traits.Int(
-        desc="The number of voxels sampled for mutual information computation.  Increase this for a slower, more careful fit. NOTE that it is suggested to use samplingPercentage instead of this option. However, if set, it overwrites the samplingPercentage option.  ", argstr="--numberOfSamples %d")
+        desc=
+        "The number of voxels sampled for mutual information computation.  Increase this for a slower, more careful fit. NOTE that it is suggested to use samplingPercentage instead of this option. However, if set, it overwrites the samplingPercentage option.  ",
+        argstr="--numberOfSamples %d")
     samplingPercentage = traits.Float(
-        desc="This is a number in (0.0,1.0] interval that shows the percentage of the input fixed image voxels that are sampled for mutual information computation.  Increase this for a slower, more careful fit. You can also limit the sampling focus with ROI masks and ROIAUTO mask generation. The default is to use approximately 5% of voxels (for backwards compatibility 5% ~= 500000/(256*256*256)). Typical values range from 1% for low detail images to 20% for high detail images.", argstr="--samplingPercentage %f")
+        desc=
+        "This is a number in (0.0,1.0] interval that shows the percentage of the input fixed image voxels that are sampled for mutual information computation.  Increase this for a slower, more careful fit. You can also limit the sampling focus with ROI masks and ROIAUTO mask generation. The default is to use approximately 5% of voxels (for backwards compatibility 5% ~= 500000/(256*256*256)). Typical values range from 1% for low detail images to 20% for high detail images.",
+        argstr="--samplingPercentage %f")
     useMomentsAlign = traits.Bool(
-        desc="MomentsAlign assumes that the center of mass of the images represent similar structures.  Perform a MomentsAlign registration as part of the sequential registration steps.   This option MUST come first, and CAN NOT be used with either CenterOfHeadLAlign, GeometryAlign, or initialTransform file.  This family of options superceeds the use of transformType if any of them are set.", argstr="--useMomentsAlign ")
+        desc=
+        "MomentsAlign assumes that the center of mass of the images represent similar structures.  Perform a MomentsAlign registration as part of the sequential registration steps.   This option MUST come first, and CAN NOT be used with either CenterOfHeadLAlign, GeometryAlign, or initialTransform file.  This family of options superceeds the use of transformType if any of them are set.",
+        argstr="--useMomentsAlign ")
     useGeometryAlign = traits.Bool(
-        desc="GeometryAlign on assumes that the center of the voxel lattice of the images represent similar structures. Perform a GeometryCenterAlign registration as part of the sequential registration steps.   This option MUST come first, and CAN NOT be used with either MomentsAlign, CenterOfHeadAlign, or initialTransform file.  This family of options superceeds the use of transformType if any of them are set.", argstr="--useGeometryAlign ")
+        desc=
+        "GeometryAlign on assumes that the center of the voxel lattice of the images represent similar structures. Perform a GeometryCenterAlign registration as part of the sequential registration steps.   This option MUST come first, and CAN NOT be used with either MomentsAlign, CenterOfHeadAlign, or initialTransform file.  This family of options superceeds the use of transformType if any of them are set.",
+        argstr="--useGeometryAlign ")
     useCenterOfHeadAlign = traits.Bool(
-        desc="CenterOfHeadAlign attempts to find a hemisphere full of foreground voxels from the superior direction as an estimate of where the center of a head shape would be to drive a center of mass estimate.  Perform a CenterOfHeadAlign registration as part of the sequential registration steps.   This option MUST come first, and CAN NOT be used with either MomentsAlign, GeometryAlign, or initialTransform file.  This family of options superceeds the use of transformType if any of them are set.", argstr="--useCenterOfHeadAlign ")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+        desc=
+        "CenterOfHeadAlign attempts to find a hemisphere full of foreground voxels from the superior direction as an estimate of where the center of a head shape would be to drive a center of mass estimate.  Perform a CenterOfHeadAlign registration as part of the sequential registration steps.   This option MUST come first, and CAN NOT be used with either MomentsAlign, GeometryAlign, or initialTransform file.  This family of options superceeds the use of transformType if any of them are set.",
+        argstr="--useCenterOfHeadAlign ")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class gtractCoRegAnatomyOutputSpec(TraitedSpec):
-    outputTransformName = File(desc="Required: filename for the  fit transform.", exists=True)
+    outputTransformName = File(
+        desc="Required: filename for the  fit transform.", exists=True)
 
 
 class gtractCoRegAnatomy(SEMLikeCommandLine):
-
     """title: Coregister B0 to Anatomy B-Spline
 
 category: Diffusion.GTRACT
@@ -761,24 +1197,65 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 
 class gtractResampleDWIInPlaceInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Required: input image is a 4D NRRD image.", exists=True, argstr="--inputVolume %s")
-    referenceVolume = File(desc="If provided, resample to the final space of the referenceVolume 3D data set.", exists=True, argstr="--referenceVolume %s")
-    outputResampledB0 = traits.Either(traits.Bool, File(), hash_files=False, desc="Convenience function for extracting the first index location (assumed to be the B0)", argstr="--outputResampledB0 %s")
-    inputTransform = File(desc="Required: transform file derived from rigid registration of b0 image to reference structural image.", exists=True, argstr="--inputTransform %s")
-    warpDWITransform = File(desc="Optional: transform file to warp gradient volumes.", exists=True, argstr="--warpDWITransform %s")
-    debugLevel = traits.Int(desc="Display debug messages, and produce debug intermediate results.  0=OFF, 1=Minimal, 10=Maximum debugging.", argstr="--debugLevel %d")
-    imageOutputSize = InputMultiPath(traits.Int, desc="The voxel lattice for the output image, padding is added if necessary. NOTE: if 0,0,0, then the inputVolume size is used.", sep=",", argstr="--imageOutputSize %s")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: output image (NRRD file) that has been rigidly transformed into the space of the structural image and padded if image padding was changed from 0,0,0 default.", argstr="--outputVolume %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputVolume = File(
+        desc="Required: input image is a 4D NRRD image.",
+        exists=True,
+        argstr="--inputVolume %s")
+    referenceVolume = File(
+        desc=
+        "If provided, resample to the final space of the referenceVolume 3D data set.",
+        exists=True,
+        argstr="--referenceVolume %s")
+    outputResampledB0 = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Convenience function for extracting the first index location (assumed to be the B0)",
+        argstr="--outputResampledB0 %s")
+    inputTransform = File(
+        desc=
+        "Required: transform file derived from rigid registration of b0 image to reference structural image.",
+        exists=True,
+        argstr="--inputTransform %s")
+    warpDWITransform = File(
+        desc="Optional: transform file to warp gradient volumes.",
+        exists=True,
+        argstr="--warpDWITransform %s")
+    debugLevel = traits.Int(
+        desc=
+        "Display debug messages, and produce debug intermediate results.  0=OFF, 1=Minimal, 10=Maximum debugging.",
+        argstr="--debugLevel %d")
+    imageOutputSize = InputMultiPath(
+        traits.Int,
+        desc=
+        "The voxel lattice for the output image, padding is added if necessary. NOTE: if 0,0,0, then the inputVolume size is used.",
+        sep=",",
+        argstr="--imageOutputSize %s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Required: output image (NRRD file) that has been rigidly transformed into the space of the structural image and padded if image padding was changed from 0,0,0 default.",
+        argstr="--outputVolume %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class gtractResampleDWIInPlaceOutputSpec(TraitedSpec):
-    outputResampledB0 = File(desc="Convenience function for extracting the first index location (assumed to be the B0)", exists=True)
-    outputVolume = File(desc="Required: output image (NRRD file) that has been rigidly transformed into the space of the structural image and padded if image padding was changed from 0,0,0 default.", exists=True)
+    outputResampledB0 = File(
+        desc=
+        "Convenience function for extracting the first index location (assumed to be the B0)",
+        exists=True)
+    outputVolume = File(
+        desc=
+        "Required: output image (NRRD file) that has been rigidly transformed into the space of the structural image and padded if image padding was changed from 0,0,0 default.",
+        exists=True)
 
 
 class gtractResampleDWIInPlace(SEMLikeCommandLine):
-
     """title: Resample DWI In Place
 
 category: Diffusion.GTRACT
@@ -800,21 +1277,53 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     input_spec = gtractResampleDWIInPlaceInputSpec
     output_spec = gtractResampleDWIInPlaceOutputSpec
     _cmd = " gtractResampleDWIInPlace "
-    _outputs_filenames = {'outputResampledB0': 'outputResampledB0.nii', 'outputVolume': 'outputVolume.nii'}
+    _outputs_filenames = {
+        'outputResampledB0': 'outputResampledB0.nii',
+        'outputVolume': 'outputVolume.nii'
+    }
     _redirect_x = False
 
 
 class gtractCostFastMarchingInputSpec(CommandLineInputSpec):
-    inputTensorVolume = File(desc="Required: input tensor image file name", exists=True, argstr="--inputTensorVolume %s")
-    inputAnisotropyVolume = File(desc="Required: input anisotropy image file name", exists=True, argstr="--inputAnisotropyVolume %s")
-    inputStartingSeedsLabelMapVolume = File(desc="Required: input starting seeds LabelMap image file name", exists=True, argstr="--inputStartingSeedsLabelMapVolume %s")
-    startingSeedsLabel = traits.Int(desc="Label value for Starting Seeds", argstr="--startingSeedsLabel %d")
-    outputCostVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Output vcl_cost image", argstr="--outputCostVolume %s")
-    outputSpeedVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Output speed image", argstr="--outputSpeedVolume %s")
-    anisotropyWeight = traits.Float(desc="Anisotropy weight used for vcl_cost function calculations", argstr="--anisotropyWeight %f")
-    stoppingValue = traits.Float(desc="Terminiating value for vcl_cost function estimation", argstr="--stoppingValue %f")
-    seedThreshold = traits.Float(desc="Anisotropy threshold used for seed selection", argstr="--seedThreshold %f")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputTensorVolume = File(
+        desc="Required: input tensor image file name",
+        exists=True,
+        argstr="--inputTensorVolume %s")
+    inputAnisotropyVolume = File(
+        desc="Required: input anisotropy image file name",
+        exists=True,
+        argstr="--inputAnisotropyVolume %s")
+    inputStartingSeedsLabelMapVolume = File(
+        desc="Required: input starting seeds LabelMap image file name",
+        exists=True,
+        argstr="--inputStartingSeedsLabelMapVolume %s")
+    startingSeedsLabel = traits.Int(
+        desc="Label value for Starting Seeds",
+        argstr="--startingSeedsLabel %d")
+    outputCostVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Output vcl_cost image",
+        argstr="--outputCostVolume %s")
+    outputSpeedVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Output speed image",
+        argstr="--outputSpeedVolume %s")
+    anisotropyWeight = traits.Float(
+        desc="Anisotropy weight used for vcl_cost function calculations",
+        argstr="--anisotropyWeight %f")
+    stoppingValue = traits.Float(
+        desc="Terminiating value for vcl_cost function estimation",
+        argstr="--stoppingValue %f")
+    seedThreshold = traits.Float(
+        desc="Anisotropy threshold used for seed selection",
+        argstr="--seedThreshold %f")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class gtractCostFastMarchingOutputSpec(TraitedSpec):
@@ -823,7 +1332,6 @@ class gtractCostFastMarchingOutputSpec(TraitedSpec):
 
 
 class gtractCostFastMarching(SEMLikeCommandLine):
-
     """title: Cost Fast Marching
 
 category: Diffusion.GTRACT
@@ -845,47 +1353,126 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
     input_spec = gtractCostFastMarchingInputSpec
     output_spec = gtractCostFastMarchingOutputSpec
     _cmd = " gtractCostFastMarching "
-    _outputs_filenames = {'outputCostVolume': 'outputCostVolume.nrrd', 'outputSpeedVolume': 'outputSpeedVolume.nrrd'}
+    _outputs_filenames = {
+        'outputCostVolume': 'outputCostVolume.nrrd',
+        'outputSpeedVolume': 'outputSpeedVolume.nrrd'
+    }
     _redirect_x = False
 
 
 class gtractFiberTrackingInputSpec(CommandLineInputSpec):
-    inputTensorVolume = File(desc="Required (for Free, Streamline, GraphSearch, and Guided fiber tracking methods): input tensor image file name", exists=True, argstr="--inputTensorVolume %s")
-    inputAnisotropyVolume = File(desc="Required (for Free, Streamline, GraphSearch, and Guided fiber tracking methods): input anisotropy image file name", exists=True, argstr="--inputAnisotropyVolume %s")
-    inputStartingSeedsLabelMapVolume = File(desc="Required (for Free, Streamline, GraphSearch, and Guided fiber tracking methods): input starting seeds LabelMap image file name", exists=True, argstr="--inputStartingSeedsLabelMapVolume %s")
-    startingSeedsLabel = traits.Int(desc="Label value for Starting Seeds (required if Label number used to create seed point in Slicer was not 1)", argstr="--startingSeedsLabel %d")
-    inputEndingSeedsLabelMapVolume = File(desc="Required (for Streamline, GraphSearch, and Guided fiber tracking methods): input ending seeds LabelMap image file name", exists=True, argstr="--inputEndingSeedsLabelMapVolume %s")
-    endingSeedsLabel = traits.Int(desc="Label value for Ending Seeds (required if Label number used to create seed point in Slicer was not 1)", argstr="--endingSeedsLabel %d")
-    inputTract = File(desc="Required (for Guided fiber tracking method): guide fiber in vtkPolydata file containing one tract line.", exists=True, argstr="--inputTract %s")
-    outputTract = traits.Either(traits.Bool, File(), hash_files=False, desc="Required (for Free, Streamline, GraphSearch, and Guided fiber tracking methods): name of output vtkPolydata file containing tract lines and the point data collected along them.", argstr="--outputTract %s")
-    writeXMLPolyDataFile = traits.Bool(desc="Flag to make use of the XML format for vtkPolyData fiber tracts.", argstr="--writeXMLPolyDataFile ")
-    trackingMethod = traits.Enum("Guided", "Free", "Streamline", "GraphSearch", desc="Fiber tracking Filter Type: Guided|Free|Streamline|GraphSearch", argstr="--trackingMethod %s")
-    guidedCurvatureThreshold = traits.Float(desc="Guided Curvature Threshold (Degrees)", argstr="--guidedCurvatureThreshold %f")
-    maximumGuideDistance = traits.Float(desc="Maximum distance for using the guide fiber direction", argstr="--maximumGuideDistance %f")
-    seedThreshold = traits.Float(desc="Anisotropy threshold for seed selection (recommended for Free fiber tracking)", argstr="--seedThreshold %f")
-    trackingThreshold = traits.Float(desc="Anisotropy threshold for fiber tracking (anisotropy values of the next point along the path)", argstr="--trackingThreshold %f")
-    curvatureThreshold = traits.Float(desc="Curvature threshold in degrees (recommended for Free  fiber tracking)", argstr="--curvatureThreshold %f")
-    branchingThreshold = traits.Float(desc="Anisotropy Branching threshold (recommended for GraphSearch fiber tracking method)", argstr="--branchingThreshold %f")
-    maximumBranchPoints = traits.Int(desc="Maximum branch points (recommended for GraphSearch fiber tracking method)", argstr="--maximumBranchPoints %d")
-    useRandomWalk = traits.Bool(desc="Flag to use random walk.", argstr="--useRandomWalk ")
-    randomSeed = traits.Int(desc="Random number generator seed", argstr="--randomSeed %d")
-    branchingAngle = traits.Float(desc="Branching angle in degrees (recommended for GraphSearch fiber tracking method)", argstr="--branchingAngle %f")
-    minimumLength = traits.Float(desc="Minimum fiber length. Helpful for filtering invalid tracts.", argstr="--minimumLength %f")
-    maximumLength = traits.Float(desc="Maximum fiber length (voxels)", argstr="--maximumLength %f")
-    stepSize = traits.Float(desc="Fiber tracking step size", argstr="--stepSize %f")
-    useLoopDetection = traits.Bool(desc="Flag to make use of loop detection.", argstr="--useLoopDetection ")
-    useTend = traits.Bool(desc="Flag to make use of Tend F and Tend G parameters.", argstr="--useTend ")
+    inputTensorVolume = File(
+        desc=
+        "Required (for Free, Streamline, GraphSearch, and Guided fiber tracking methods): input tensor image file name",
+        exists=True,
+        argstr="--inputTensorVolume %s")
+    inputAnisotropyVolume = File(
+        desc=
+        "Required (for Free, Streamline, GraphSearch, and Guided fiber tracking methods): input anisotropy image file name",
+        exists=True,
+        argstr="--inputAnisotropyVolume %s")
+    inputStartingSeedsLabelMapVolume = File(
+        desc=
+        "Required (for Free, Streamline, GraphSearch, and Guided fiber tracking methods): input starting seeds LabelMap image file name",
+        exists=True,
+        argstr="--inputStartingSeedsLabelMapVolume %s")
+    startingSeedsLabel = traits.Int(
+        desc=
+        "Label value for Starting Seeds (required if Label number used to create seed point in Slicer was not 1)",
+        argstr="--startingSeedsLabel %d")
+    inputEndingSeedsLabelMapVolume = File(
+        desc=
+        "Required (for Streamline, GraphSearch, and Guided fiber tracking methods): input ending seeds LabelMap image file name",
+        exists=True,
+        argstr="--inputEndingSeedsLabelMapVolume %s")
+    endingSeedsLabel = traits.Int(
+        desc=
+        "Label value for Ending Seeds (required if Label number used to create seed point in Slicer was not 1)",
+        argstr="--endingSeedsLabel %d")
+    inputTract = File(
+        desc=
+        "Required (for Guided fiber tracking method): guide fiber in vtkPolydata file containing one tract line.",
+        exists=True,
+        argstr="--inputTract %s")
+    outputTract = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Required (for Free, Streamline, GraphSearch, and Guided fiber tracking methods): name of output vtkPolydata file containing tract lines and the point data collected along them.",
+        argstr="--outputTract %s")
+    writeXMLPolyDataFile = traits.Bool(
+        desc="Flag to make use of the XML format for vtkPolyData fiber tracts.",
+        argstr="--writeXMLPolyDataFile ")
+    trackingMethod = traits.Enum(
+        "Guided",
+        "Free",
+        "Streamline",
+        "GraphSearch",
+        desc="Fiber tracking Filter Type: Guided|Free|Streamline|GraphSearch",
+        argstr="--trackingMethod %s")
+    guidedCurvatureThreshold = traits.Float(
+        desc="Guided Curvature Threshold (Degrees)",
+        argstr="--guidedCurvatureThreshold %f")
+    maximumGuideDistance = traits.Float(
+        desc="Maximum distance for using the guide fiber direction",
+        argstr="--maximumGuideDistance %f")
+    seedThreshold = traits.Float(
+        desc=
+        "Anisotropy threshold for seed selection (recommended for Free fiber tracking)",
+        argstr="--seedThreshold %f")
+    trackingThreshold = traits.Float(
+        desc=
+        "Anisotropy threshold for fiber tracking (anisotropy values of the next point along the path)",
+        argstr="--trackingThreshold %f")
+    curvatureThreshold = traits.Float(
+        desc=
+        "Curvature threshold in degrees (recommended for Free  fiber tracking)",
+        argstr="--curvatureThreshold %f")
+    branchingThreshold = traits.Float(
+        desc=
+        "Anisotropy Branching threshold (recommended for GraphSearch fiber tracking method)",
+        argstr="--branchingThreshold %f")
+    maximumBranchPoints = traits.Int(
+        desc=
+        "Maximum branch points (recommended for GraphSearch fiber tracking method)",
+        argstr="--maximumBranchPoints %d")
+    useRandomWalk = traits.Bool(
+        desc="Flag to use random walk.", argstr="--useRandomWalk ")
+    randomSeed = traits.Int(
+        desc="Random number generator seed", argstr="--randomSeed %d")
+    branchingAngle = traits.Float(
+        desc=
+        "Branching angle in degrees (recommended for GraphSearch fiber tracking method)",
+        argstr="--branchingAngle %f")
+    minimumLength = traits.Float(
+        desc="Minimum fiber length. Helpful for filtering invalid tracts.",
+        argstr="--minimumLength %f")
+    maximumLength = traits.Float(
+        desc="Maximum fiber length (voxels)", argstr="--maximumLength %f")
+    stepSize = traits.Float(
+        desc="Fiber tracking step size", argstr="--stepSize %f")
+    useLoopDetection = traits.Bool(
+        desc="Flag to make use of loop detection.",
+        argstr="--useLoopDetection ")
+    useTend = traits.Bool(
+        desc="Flag to make use of Tend F and Tend G parameters.",
+        argstr="--useTend ")
     tendF = traits.Float(desc="Tend F parameter", argstr="--tendF %f")
     tendG = traits.Float(desc="Tend G parameter", argstr="--tendG %f")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class gtractFiberTrackingOutputSpec(TraitedSpec):
-    outputTract = File(desc="Required (for Free, Streamline, GraphSearch, and Guided fiber tracking methods): name of output vtkPolydata file containing tract lines and the point data collected along them.", exists=True)
+    outputTract = File(
+        desc=
+        "Required (for Free, Streamline, GraphSearch, and Guided fiber tracking methods): name of output vtkPolydata file containing tract lines and the point data collected along them.",
+        exists=True)
 
 
 class gtractFiberTracking(SEMLikeCommandLine):
-
     """title: Fiber Tracking
 
 category: Diffusion.GTRACT
@@ -912,19 +1499,41 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 
 class extractNrrdVectorIndexInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Required: input file containing the vector that will be extracted", exists=True, argstr="--inputVolume %s")
-    vectorIndex = traits.Int(desc="Index in the vector image to extract", argstr="--vectorIndex %d")
-    setImageOrientation = traits.Enum("AsAcquired", "Axial", "Coronal", "Sagittal", desc="Sets the image orientation of the extracted vector (Axial, Coronal, Sagittal)", argstr="--setImageOrientation %s")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: name of output NRRD file containing the vector image at the given index", argstr="--outputVolume %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputVolume = File(
+        desc=
+        "Required: input file containing the vector that will be extracted",
+        exists=True,
+        argstr="--inputVolume %s")
+    vectorIndex = traits.Int(
+        desc="Index in the vector image to extract", argstr="--vectorIndex %d")
+    setImageOrientation = traits.Enum(
+        "AsAcquired",
+        "Axial",
+        "Coronal",
+        "Sagittal",
+        desc=
+        "Sets the image orientation of the extracted vector (Axial, Coronal, Sagittal)",
+        argstr="--setImageOrientation %s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Required: name of output NRRD file containing the vector image at the given index",
+        argstr="--outputVolume %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class extractNrrdVectorIndexOutputSpec(TraitedSpec):
-    outputVolume = File(desc="Required: name of output NRRD file containing the vector image at the given index", exists=True)
+    outputVolume = File(
+        desc=
+        "Required: name of output NRRD file containing the vector image at the given index",
+        exists=True)
 
 
 class extractNrrdVectorIndex(SEMLikeCommandLine):
-
     """title: Extract Nrrd Index
 
 category: Diffusion.GTRACT
@@ -951,20 +1560,41 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 
 class gtractResampleFibersInputSpec(CommandLineInputSpec):
-    inputForwardDeformationFieldVolume = File(desc="Required: input forward deformation field image file name", exists=True, argstr="--inputForwardDeformationFieldVolume %s")
-    inputReverseDeformationFieldVolume = File(desc="Required: input reverse deformation field image file name", exists=True, argstr="--inputReverseDeformationFieldVolume %s")
-    inputTract = File(desc="Required: name of input vtkPolydata file containing tract lines.", exists=True, argstr="--inputTract %s")
-    outputTract = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: name of output vtkPolydata file containing tract lines and the point data collected along them.", argstr="--outputTract %s")
-    writeXMLPolyDataFile = traits.Bool(desc="Flag to make use of the XML format for vtkPolyData fiber tracts.", argstr="--writeXMLPolyDataFile ")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputForwardDeformationFieldVolume = File(
+        desc="Required: input forward deformation field image file name",
+        exists=True,
+        argstr="--inputForwardDeformationFieldVolume %s")
+    inputReverseDeformationFieldVolume = File(
+        desc="Required: input reverse deformation field image file name",
+        exists=True,
+        argstr="--inputReverseDeformationFieldVolume %s")
+    inputTract = File(
+        desc="Required: name of input vtkPolydata file containing tract lines.",
+        exists=True,
+        argstr="--inputTract %s")
+    outputTract = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Required: name of output vtkPolydata file containing tract lines and the point data collected along them.",
+        argstr="--outputTract %s")
+    writeXMLPolyDataFile = traits.Bool(
+        desc="Flag to make use of the XML format for vtkPolyData fiber tracts.",
+        argstr="--writeXMLPolyDataFile ")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class gtractResampleFibersOutputSpec(TraitedSpec):
-    outputTract = File(desc="Required: name of output vtkPolydata file containing tract lines and the point data collected along them.", exists=True)
+    outputTract = File(
+        desc=
+        "Required: name of output vtkPolydata file containing tract lines and the point data collected along them.",
+        exists=True)
 
 
 class gtractResampleFibers(SEMLikeCommandLine):
-
     """title: Resample Fibers
 
 category: Diffusion.GTRACT
@@ -991,29 +1621,68 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 
 class gtractTensorInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Required: input image 4D NRRD image. Must contain data based on at least 6 distinct diffusion directions. The inputVolume is allowed to have multiple b0 and gradient direction images. Averaging of the b0 image is done internally in this step. Prior averaging of the DWIs is not required.",
-                       exists=True, argstr="--inputVolume %s")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: name of output NRRD file containing the Tensor vector image", argstr="--outputVolume %s")
-    medianFilterSize = InputMultiPath(traits.Int, desc="Median filter radius in all 3 directions", sep=",", argstr="--medianFilterSize %s")
+    inputVolume = File(
+        desc=
+        "Required: input image 4D NRRD image. Must contain data based on at least 6 distinct diffusion directions. The inputVolume is allowed to have multiple b0 and gradient direction images. Averaging of the b0 image is done internally in this step. Prior averaging of the DWIs is not required.",
+        exists=True,
+        argstr="--inputVolume %s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Required: name of output NRRD file containing the Tensor vector image",
+        argstr="--outputVolume %s")
+    medianFilterSize = InputMultiPath(
+        traits.Int,
+        desc="Median filter radius in all 3 directions",
+        sep=",",
+        argstr="--medianFilterSize %s")
     maskProcessingMode = traits.Enum(
-        "NOMASK", "ROIAUTO", "ROI", desc="ROIAUTO:  mask is implicitly defined using a otsu forground and hole filling algorithm. ROI: Uses the masks to define what parts of the image should be used for computing the transform. NOMASK: no mask used", argstr="--maskProcessingMode %s")
-    maskVolume = File(desc="Mask Image, if maskProcessingMode is ROI", exists=True, argstr="--maskVolume %s")
+        "NOMASK",
+        "ROIAUTO",
+        "ROI",
+        desc=
+        "ROIAUTO:  mask is implicitly defined using a otsu forground and hole filling algorithm. ROI: Uses the masks to define what parts of the image should be used for computing the transform. NOMASK: no mask used",
+        argstr="--maskProcessingMode %s")
+    maskVolume = File(
+        desc="Mask Image, if maskProcessingMode is ROI",
+        exists=True,
+        argstr="--maskVolume %s")
     backgroundSuppressingThreshold = traits.Int(
-        desc="Image threshold to suppress background. This sets a threshold used on the b0 image to remove background voxels from processing. Typically, values of 100 and 500 work well for Siemens and GE DTI data, respectively. Check your data particularly in the globus pallidus to make sure the brain tissue is not being eliminated with this threshold.", argstr="--backgroundSuppressingThreshold %d")
-    resampleIsotropic = traits.Bool(desc="Flag to resample to isotropic voxels. Enabling this feature is recommended if fiber tracking will be performed.", argstr="--resampleIsotropic ")
-    size = traits.Float(desc="Isotropic voxel size to resample to", argstr="--size %f")
-    b0Index = traits.Int(desc="Index in input vector index to extract", argstr="--b0Index %d")
-    applyMeasurementFrame = traits.Bool(desc="Flag to apply the measurement frame to the gradient directions", argstr="--applyMeasurementFrame ")
-    ignoreIndex = InputMultiPath(traits.Int, desc="Ignore diffusion gradient index. Used to remove specific gradient directions with artifacts.", sep=",", argstr="--ignoreIndex %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+        desc=
+        "Image threshold to suppress background. This sets a threshold used on the b0 image to remove background voxels from processing. Typically, values of 100 and 500 work well for Siemens and GE DTI data, respectively. Check your data particularly in the globus pallidus to make sure the brain tissue is not being eliminated with this threshold.",
+        argstr="--backgroundSuppressingThreshold %d")
+    resampleIsotropic = traits.Bool(
+        desc=
+        "Flag to resample to isotropic voxels. Enabling this feature is recommended if fiber tracking will be performed.",
+        argstr="--resampleIsotropic ")
+    size = traits.Float(
+        desc="Isotropic voxel size to resample to", argstr="--size %f")
+    b0Index = traits.Int(
+        desc="Index in input vector index to extract", argstr="--b0Index %d")
+    applyMeasurementFrame = traits.Bool(
+        desc="Flag to apply the measurement frame to the gradient directions",
+        argstr="--applyMeasurementFrame ")
+    ignoreIndex = InputMultiPath(
+        traits.Int,
+        desc=
+        "Ignore diffusion gradient index. Used to remove specific gradient directions with artifacts.",
+        sep=",",
+        argstr="--ignoreIndex %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class gtractTensorOutputSpec(TraitedSpec):
-    outputVolume = File(desc="Required: name of output NRRD file containing the Tensor vector image", exists=True)
+    outputVolume = File(
+        desc=
+        "Required: name of output NRRD file containing the Tensor vector image",
+        exists=True)
 
 
 class gtractTensor(SEMLikeCommandLine):
-
     """title: Tensor Estimation
 
 category: Diffusion.GTRACT

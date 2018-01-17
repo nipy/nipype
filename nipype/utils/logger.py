@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 from builtins import object
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
@@ -29,29 +30,31 @@ class Logging(object):
 
     def __init__(self, config):
         self._config = config
-        logging.basicConfig(format=self.fmt, datefmt=self.datefmt,
-                            stream=sys.stdout)
+        logging.basicConfig(
+            format=self.fmt, datefmt=self.datefmt, stream=sys.stdout)
         # logging.basicConfig(stream=sys.stdout)
         self._logger = logging.getLogger('workflow')
         self._utlogger = logging.getLogger('utils')
         self._fmlogger = logging.getLogger('filemanip')
         self._iflogger = logging.getLogger('interface')
 
-        self.loggers = {'workflow': self._logger,
-                        'utils': self._utlogger,
-                        'filemanip': self._fmlogger,
-                        'interface': self._iflogger}
+        self.loggers = {
+            'workflow': self._logger,
+            'utils': self._utlogger,
+            'filemanip': self._fmlogger,
+            'interface': self._iflogger
+        }
         self._hdlr = None
         self.update_logging(self._config)
 
     def enable_file_logging(self):
         config = self._config
-        LOG_FILENAME = os.path.join(config.get('logging', 'log_directory'),
-                                    'pypeline.log')
-        hdlr = RFHandler(LOG_FILENAME,
-                         maxBytes=int(config.get('logging', 'log_size')),
-                         backupCount=int(config.get('logging',
-                                                    'log_rotate')))
+        LOG_FILENAME = os.path.join(
+            config.get('logging', 'log_directory'), 'pypeline.log')
+        hdlr = RFHandler(
+            LOG_FILENAME,
+            maxBytes=int(config.get('logging', 'log_size')),
+            backupCount=int(config.get('logging', 'log_rotate')))
         formatter = logging.Formatter(fmt=self.fmt, datefmt=self.datefmt)
         hdlr.setFormatter(formatter)
         self._logger.addHandler(hdlr)
@@ -71,12 +74,12 @@ class Logging(object):
     def update_logging(self, config):
         self._config = config
         self.disable_file_logging()
-        self._logger.setLevel(logging.getLevelName(config.get('logging',
-                                                              'workflow_level')))
-        self._utlogger.setLevel(logging.getLevelName(config.get('logging',
-                                                                'utils_level')))
-        self._iflogger.setLevel(logging.getLevelName(config.get('logging',
-                                                                'interface_level')))
+        self._logger.setLevel(
+            logging.getLevelName(config.get('logging', 'workflow_level')))
+        self._utlogger.setLevel(
+            logging.getLevelName(config.get('logging', 'utils_level')))
+        self._iflogger.setLevel(
+            logging.getLevelName(config.get('logging', 'interface_level')))
         if str2bool(config.get('logging', 'log_to_file')):
             self.enable_file_logging()
 
@@ -98,6 +101,7 @@ class Logging(object):
         typical use -- log difference for hashed_inputs
         """
         from .misc import dict_diff
-        self._logger.warning("logdebug_dict_differences has been deprecated, please use "
-                             "nipype.utils.misc.dict_diff.")
+        self._logger.warning(
+            "logdebug_dict_differences has been deprecated, please use "
+            "nipype.utils.misc.dict_diff.")
         self._logger.debug(dict_diff(dold, dnew))

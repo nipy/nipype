@@ -2,13 +2,13 @@
 # coding: utf-8
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-
 """
 Generic interfaces to manipulate registration parameters files, including
 transform files (to configure warpings)
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import open
 
 import os.path as op
@@ -20,22 +20,38 @@ iflogger = logging.getLogger('interface')
 
 
 class EditTransformInputSpec(BaseInterfaceInputSpec):
-    transform_file = File(exists=True, mandatory=True,
-                          desc='transform-parameter file, only 1')
-    reference_image = File(exists=True,
-                           desc=('set a new reference image to change the '
-                                 'target coordinate system.'))
-    interpolation = traits.Enum('cubic', 'linear', 'nearest', usedefault=True,
-                                argstr='FinalBSplineInterpolationOrder',
-                                desc='set a new interpolator for transformation')
+    transform_file = File(
+        exists=True, mandatory=True, desc='transform-parameter file, only 1')
+    reference_image = File(
+        exists=True,
+        desc=('set a new reference image to change the '
+              'target coordinate system.'))
+    interpolation = traits.Enum(
+        'cubic',
+        'linear',
+        'nearest',
+        usedefault=True,
+        argstr='FinalBSplineInterpolationOrder',
+        desc='set a new interpolator for transformation')
 
-    output_type = traits.Enum('float', 'unsigned char', 'unsigned short', 'short',
-                              'unsigned long', 'long', 'double',
-                              argstr='ResultImagePixelType',
-                              desc='set a new output pixel type for resampled images')
-    output_format = traits.Enum('nii.gz', 'nii', 'mhd', 'hdr', 'vtk',
-                                argstr='ResultImageFormat',
-                                desc='set a new image format for resampled images')
+    output_type = traits.Enum(
+        'float',
+        'unsigned char',
+        'unsigned short',
+        'short',
+        'unsigned long',
+        'long',
+        'double',
+        argstr='ResultImagePixelType',
+        desc='set a new output pixel type for resampled images')
+    output_format = traits.Enum(
+        'nii.gz',
+        'nii',
+        'mhd',
+        'hdr',
+        'vtk',
+        argstr='ResultImageFormat',
+        desc='set a new image format for resampled images')
     output_file = File(desc='the filename for the resulting transform file')
 
 
@@ -77,17 +93,21 @@ class EditTransform(BaseInterface):
             contents = f.read()
 
         if isdefined(self.inputs.output_type):
-            p = re.compile((self._pattern % 'ResultImagePixelType').decode('string-escape'))
+            p = re.compile((self._pattern %
+                            'ResultImagePixelType').decode('string-escape'))
             rep = '(\g<entry>%s\g<3>' % self.inputs.output_type
             contents = p.sub(rep, contents)
 
         if isdefined(self.inputs.output_format):
-            p = re.compile((self._pattern % 'ResultImageFormat').decode('string-escape'))
+            p = re.compile(
+                (self._pattern % 'ResultImageFormat').decode('string-escape'))
             rep = '(\g<entry>%s\g<3>' % self.inputs.output_format
             contents = p.sub(rep, contents)
 
         if isdefined(self.inputs.interpolation):
-            p = re.compile((self._pattern % 'FinalBSplineInterpolationOrder').decode('string-escape'))
+            p = re.compile(
+                (self._pattern %
+                 'FinalBSplineInterpolationOrder').decode('string-escape'))
             rep = '(\g<entry>%s\g<3>' % self._interp[self.inputs.interpolation]
             contents = p.sub(rep, contents)
 
@@ -117,7 +137,8 @@ class EditTransform(BaseInterface):
             itkmat[1, 1] = -1
 
             affine = np.dot(itkmat, im.affine)
-            dirs = ' '.join(['%0.4f' % f for f in affine[0:3, 0:3].reshape(-1)])
+            dirs = ' '.join(
+                ['%0.4f' % f for f in affine[0:3, 0:3].reshape(-1)])
             orig = ' '.join(['%0.4f' % f for f in affine[0:3, 3].reshape(-1)])
 
             # p = re.compile((self._pattern % 'Direction').decode('string-escape'))

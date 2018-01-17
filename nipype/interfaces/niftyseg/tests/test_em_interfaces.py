@@ -9,8 +9,8 @@ from ...niftyreg.tests.test_regutils import no_nifty_tool
 from .. import EM
 
 
-@pytest.mark.skipif(no_nifty_tool(cmd='seg_EM'),
-                    reason="niftyseg is not installed")
+@pytest.mark.skipif(
+    no_nifty_tool(cmd='seg_EM'), reason="niftyseg is not installed")
 def test_seg_em():
 
     # Create a node object
@@ -31,6 +31,7 @@ def test_seg_em():
 
     cmd_tmp = '{cmd} -in {in_file} -nopriors 4 -bc_out {bc_out} -out \
 {out_file} -out_outlier {out_outlier}'
+
     expected_cmd = cmd_tmp.format(
         cmd=cmd,
         in_file=in_file,

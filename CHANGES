@@ -4,6 +4,8 @@ Upcoming release (0.14.1)
 * FIX: Robustly handled outputs of 3dFWHMx across different versions of AFNI (https://github.com/nipy/nipype/pull/2373)
 * FIX: Cluster threshold in randomise + change default prefix (https://github.com/nipy/nipype/pull/2369)
 * MAINT: Cleaning / simplify ``Node`` (https://github.com/nipy/nipype/pull/#2325)
+* STY: Cleanup of PEP8 violations (https://github.com/nipy/nipype/pull/2358)
+* STY: Cleanup of trailing spaces and adding of missing newlines at end of files (https://github.com/nipy/nipype/pull/2355)
 
 0.14.0 (November 29, 2017)
 ==========================

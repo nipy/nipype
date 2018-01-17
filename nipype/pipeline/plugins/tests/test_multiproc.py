@@ -38,9 +38,8 @@ def test_run_multiproc(tmpdir):
 
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(MultiprocTestInterface(), name='mod1')
-    mod2 = pe.MapNode(MultiprocTestInterface(),
-                      iterfield=['input1'],
-                      name='mod2')
+    mod2 = pe.MapNode(
+        MultiprocTestInterface(), iterfield=['input1'], name='mod2')
     pipe.connect([(mod1, mod2, [('output1', 'input1')])])
     pipe.base_dir = os.getcwd()
     mod1.inputs.input1 = 1
@@ -91,9 +90,12 @@ def test_no_more_memory_than_specified(tmpdir):
 
     max_memory = 0.5
     with pytest.raises(RuntimeError):
-        pipe.run(plugin='MultiProc',
-                 plugin_args={'memory_gb': max_memory,
-                              'n_procs': 2})
+        pipe.run(
+            plugin='MultiProc',
+            plugin_args={
+                'memory_gb': max_memory,
+                'n_procs': 2
+            })
 
 
 def test_no_more_threads_than_specified(tmpdir):
@@ -113,8 +115,7 @@ def test_no_more_threads_than_specified(tmpdir):
 
     max_threads = 2
     with pytest.raises(RuntimeError):
-        pipe.run(plugin='MultiProc',
-                 plugin_args={'n_procs': max_threads})
+        pipe.run(plugin='MultiProc', plugin_args={'n_procs': max_threads})
 
 
 def test_hold_job_until_procs_available(tmpdir):
@@ -133,5 +134,4 @@ def test_hold_job_until_procs_available(tmpdir):
     n1.inputs.input1 = 4
 
     max_threads = 2
-    pipe.run(plugin='MultiProc',
-             plugin_args={'n_procs': max_threads})
+    pipe.run(plugin='MultiProc', plugin_args={'n_procs': max_threads})
