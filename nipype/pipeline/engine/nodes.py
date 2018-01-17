@@ -13,7 +13,8 @@ The `Node` class provides core functionality for batch processing.
      os.chdir(datadir)
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import range, str, bytes, open
 
 from collections import OrderedDict
@@ -30,27 +31,19 @@ from future import standard_library
 
 from ... import config, logging
 from ...utils.misc import flatten, unflatten, str2bool, dict_diff
-from ...utils.filemanip import (
-    md5, FileNotFoundError, filename_to_list, list_to_filename,
-    copyfiles, fnames_presuffix, loadpkl, split_filename, load_json, makedirs,
-    emptydirs, savepkl, to_str
-)
+from ...utils.filemanip import (md5, FileNotFoundError, filename_to_list,
+                                list_to_filename, copyfiles, fnames_presuffix,
+                                loadpkl, split_filename, load_json, makedirs,
+                                emptydirs, savepkl, to_str)
 
-from ...interfaces.base import (
-    traits, InputMultiPath, CommandLine, Undefined, DynamicTraitedSpec,
-    Bunch, InterfaceResult, Interface, isdefined
-)
+from ...interfaces.base import (traits, InputMultiPath, CommandLine, Undefined,
+                                DynamicTraitedSpec, Bunch, InterfaceResult,
+                                Interface, isdefined)
 from .utils import (
-    _parameterization_dir,
-    save_hashfile as _save_hashfile,
-    load_resultfile as _load_resultfile,
-    save_resultfile as _save_resultfile,
-    nodelist_runner as _node_runner,
-    strip_temp as _strip_temp,
-    write_report,
-    clean_working_directory,
-    merge_dict, evaluate_connect_function
-)
+    _parameterization_dir, save_hashfile as _save_hashfile, load_resultfile as
+    _load_resultfile, save_resultfile as _save_resultfile, nodelist_runner as
+    _node_runner, strip_temp as _strip_temp, write_report,
+    clean_working_directory, merge_dict, evaluate_connect_function)
 from .base import EngineBase
 
 standard_library.install_aliases()
@@ -80,9 +73,17 @@ class Node(EngineBase):
 
     """
 
-    def __init__(self, interface, name, iterables=None, itersource=None,
-                 synchronize=False, overwrite=None, needed_outputs=None,
-                 run_without_submitting=False, n_procs=None, mem_gb=0.20,
+    def __init__(self,
+                 interface,
+                 name,
+                 iterables=None,
+                 itersource=None,
+                 synchronize=False,
+                 overwrite=None,
+                 needed_outputs=None,
+                 run_without_submitting=False,
+                 n_procs=None,
+                 mem_gb=0.20,
                  **kwargs):
         """
         Parameters
@@ -179,7 +180,8 @@ class Node(EngineBase):
         self._n_procs = n_procs
 
         # Downstream n_procs
-        if hasattr(self._interface.inputs, 'num_threads') and self._n_procs is not None:
+        if hasattr(self._interface.inputs,
+                   'num_threads') and self._n_procs is not None:
             self._interface.inputs.num_threads = self._n_procs
 
         # Initialize needed_outputs
@@ -212,8 +214,9 @@ class Node(EngineBase):
         """Get estimated memory (GB)"""
         if hasattr(self._interface, 'estimated_memory_gb'):
             self._mem_gb = self._interface.estimated_memory_gb
-            logger.warning('Setting "estimated_memory_gb" on Interfaces has been '
-                           'deprecated as of nipype 1.0, please use Node.mem_gb.')
+            logger.warning(
+                'Setting "estimated_memory_gb" on Interfaces has been '
+                'deprecated as of nipype 1.0, please use Node.mem_gb.')
 
         return self._mem_gb
 
@@ -222,8 +225,8 @@ class Node(EngineBase):
         """Get the estimated number of processes/threads"""
         if self._n_procs is not None:
             return self._n_procs
-        if hasattr(self._interface.inputs,
-                   'num_threads') and isdefined(self._interface.inputs.num_threads):
+        if hasattr(self._interface.inputs, 'num_threads') and isdefined(
+                self._interface.inputs.num_threads):
             return self._interface.inputs.num_threads
 
         return 1
@@ -260,8 +263,8 @@ class Node(EngineBase):
 
     def set_input(self, parameter, val):
         """Set interface input value"""
-        logger.debug('[Node] %s - setting input %s = %s',
-                     self.name, parameter, to_str(val))
+        logger.debug('[Node] %s - setting input %s = %s', self.name, parameter,
+                     to_str(val))
         setattr(self.inputs, parameter, deepcopy(val))
 
     def get_output(self, parameter):
@@ -290,7 +293,10 @@ class Node(EngineBase):
         if op.exists(outdir):
             # Find previous hashfiles
             globhashes = glob(op.join(outdir, '_0x*.json'))
-            unfinished = [path for path in globhashes if path.endswith('_unfinished.json')]
+            unfinished = [
+                path for path in globhashes
+                if path.endswith('_unfinished.json')
+            ]
             hashfiles = list(set(globhashes) - set(unfinished))
             if len(hashfiles) > 1:
                 for rmfile in hashfiles:
@@ -313,8 +319,9 @@ class Node(EngineBase):
 
             # Remove outdated hashfile
             if hashfiles and hashfiles[0] != hashfile:
-                logger.info('[Node] Outdated hashfile found for "%s", removing and forcing node '
-                            'to rerun.', self.fullname)
+                logger.info(
+                    '[Node] Outdated hashfile found for "%s", removing and forcing node '
+                    'to rerun.', self.fullname)
 
                 # If logging is more verbose than INFO (20), print diff between hashes
                 loglevel = logger.getEffectiveLevel()
@@ -322,13 +329,15 @@ class Node(EngineBase):
                     split_out = split_filename(hashfiles[0])
                     exp_hash_file_base = split_out[1]
                     exp_hash = exp_hash_file_base[len('_0x'):]
-                    logger.log(loglevel, "[Node] Old/new hashes = %s/%s", exp_hash, hashvalue)
+                    logger.log(loglevel, "[Node] Old/new hashes = %s/%s",
+                               exp_hash, hashvalue)
                     try:
                         prev_inputs = load_json(hashfiles[0])
                     except Exception:
                         pass
                     else:
-                        logger.log(loglevel, dict_diff(prev_inputs, hashed_inputs, 10))
+                        logger.log(loglevel,
+                                   dict_diff(prev_inputs, hashed_inputs, 10))
 
                 os.remove(hashfiles[0])
 
@@ -339,8 +348,9 @@ class Node(EngineBase):
 
         logger.debug(
             'updatehash=%s, overwrite=%s, always_run=%s, hash_exists=%s, '
-            'hash_method=%s', updatehash, self.overwrite, self._interface.always_run,
-            hash_exists, self.config['execution']['hash_method'].lower())
+            'hash_method=%s', updatehash, self.overwrite,
+            self._interface.always_run, hash_exists,
+            self.config['execution']['hash_method'].lower())
         return hash_exists, hashvalue, hashfile, hashed_inputs
 
     def run(self, updatehash=False):
@@ -370,7 +380,8 @@ class Node(EngineBase):
         logger.info('[Node] Setting-up "%s" in "%s".', self.fullname, outdir)
         hash_info = self.hash_exists(updatehash=updatehash)
         hash_exists, hashvalue, hashfile, hashed_inputs = hash_info
-        force_run = self.overwrite or (self.overwrite is None and self._interface.always_run)
+        force_run = self.overwrite or (self.overwrite is None
+                                       and self._interface.always_run)
 
         # If the node is cached, check on pklz files and finish
         if hash_exists and (updatehash or not force_run):
@@ -393,16 +404,18 @@ class Node(EngineBase):
         # by rerunning we mean only nodes that did finish to run previously
         if hash_exists and not isinstance(self, MapNode):
             logger.debug('[Node] Rerunning "%s"', self.fullname)
-            if not force_run and str2bool(self.config['execution']['stop_on_first_rerun']):
-                raise Exception('Cannot rerun when "stop_on_first_rerun" is set to True')
+            if not force_run and str2bool(
+                    self.config['execution']['stop_on_first_rerun']):
+                raise Exception(
+                    'Cannot rerun when "stop_on_first_rerun" is set to True')
 
         # Remove hashfile if it exists at this point (re-running)
         if op.exists(hashfile):
             os.remove(hashfile)
 
         # Hashfile while running
-        hashfile_unfinished = op.join(
-            outdir, '_0x%s_unfinished.json' % hashvalue)
+        hashfile_unfinished = op.join(outdir,
+                                      '_0x%s_unfinished.json' % hashvalue)
 
         # Delete directory contents if this is not a MapNode or can't resume
         rm_outdir = not isinstance(self, MapNode) and not (
@@ -423,11 +436,10 @@ class Node(EngineBase):
 
         # Store runtime-hashfile, pre-execution report, the node and the inputs set.
         _save_hashfile(hashfile_unfinished, hashed_inputs)
-        write_report(self, report_type='preexec',
-                     is_mapnode=isinstance(self, MapNode))
+        write_report(
+            self, report_type='preexec', is_mapnode=isinstance(self, MapNode))
         savepkl(op.join(outdir, '_node.pklz'), self)
-        savepkl(op.join(outdir, '_inputs.pklz'),
-                self.inputs.get_traitsfree())
+        savepkl(op.join(outdir, '_inputs.pklz'), self.inputs.get_traitsfree())
 
         try:
             cwd = os.getcwd()
@@ -435,8 +447,9 @@ class Node(EngineBase):
             # Changing back to cwd is probably not necessary
             # but this makes sure there's somewhere to change to.
             cwd = op.split(outdir)[0]
-            logger.warning('Current folder "%s" does not exist, changing to "%s" instead.',
-                           os.getenv('PWD', 'unknown'), cwd)
+            logger.warning(
+                'Current folder "%s" does not exist, changing to "%s" instead.',
+                os.getenv('PWD', 'unknown'), cwd)
 
         os.chdir(outdir)
         try:
@@ -451,8 +464,8 @@ class Node(EngineBase):
 
         # Tear-up after success
         shutil.move(hashfile_unfinished, hashfile)
-        write_report(self, report_type='postexec',
-                     is_mapnode=isinstance(self, MapNode))
+        write_report(
+            self, report_type='postexec', is_mapnode=isinstance(self, MapNode))
         logger.info('[Node] Finished "%s".', self.fullname)
         return result
 
@@ -503,12 +516,14 @@ class Node(EngineBase):
             try:
                 self.set_input(key, deepcopy(output_value))
             except traits.TraitError as e:
-                msg = ['Error setting node input:',
-                       'Node: %s' % self.name,
-                       'input: %s' % key,
-                       'results_file: %s' % results_file,
-                       'value: %s' % str(output_value)]
-                e.args = (e.args[0] + "\n" + '\n'.join(msg),)
+                msg = [
+                    'Error setting node input:',
+                    'Node: %s' % self.name,
+                    'input: %s' % key,
+                    'results_file: %s' % results_file,
+                    'value: %s' % str(output_value)
+                ]
+                e.args = (e.args[0] + "\n" + '\n'.join(msg), )
                 raise
 
         # Successfully set inputs
@@ -532,10 +547,11 @@ class Node(EngineBase):
                 self._copyfiles_to_wd(linksonly=True)
                 aggouts = self._interface.aggregate_outputs(
                     needed_outputs=self.needed_outputs)
-                runtime = Bunch(cwd=cwd,
-                                returncode=0,
-                                environ=dict(os.environ),
-                                hostname=socket.gethostname())
+                runtime = Bunch(
+                    cwd=cwd,
+                    returncode=0,
+                    environ=dict(os.environ),
+                    hostname=socket.gethostname())
                 result = InterfaceResult(
                     interface=self._interface.__class__,
                     runtime=runtime,
@@ -557,16 +573,16 @@ class Node(EngineBase):
                 logger.info("[Node] Some of the outputs were not found: "
                             "rerunning node.")
                 copyfiles = False  # OE: this was like this before,
-                execute = True     # I'll keep them for safety
+                execute = True  # I'll keep them for safety
             else:
-                logger.info(
-                    "[Node] Cached - collecting precomputed outputs")
+                logger.info("[Node] Cached - collecting precomputed outputs")
                 return result
 
         # Run command: either execute is true or load_results failed.
-        runtime = Bunch(returncode=1,
-                        environ=dict(os.environ),
-                        hostname=socket.gethostname())
+        runtime = Bunch(
+            returncode=1,
+            environ=dict(os.environ),
+            hostname=socket.gethostname())
         result = InterfaceResult(
             interface=self._interface.__class__,
             runtime=runtime,
@@ -605,12 +621,12 @@ class Node(EngineBase):
             dirs2keep = [op.join(outdir, 'mapflow')]
 
         result.outputs = clean_working_directory(
-            result.outputs, outdir,
+            result.outputs,
+            outdir,
             self._interface.inputs,
             self.needed_outputs,
             self.config,
-            dirs2keep=dirs2keep
-        )
+            dirs2keep=dirs2keep)
         _save_resultfile(result, outdir, self.name)
 
         return result
@@ -621,8 +637,8 @@ class Node(EngineBase):
             # Nothing to be done
             return
 
-        logger.debug('copying files to wd [execute=%s, linksonly=%s]',
-                     execute, linksonly)
+        logger.debug('copying files to wd [execute=%s, linksonly=%s]', execute,
+                     linksonly)
 
         outdir = self.output_dir()
         if execute and linksonly:
@@ -639,21 +655,18 @@ class Node(EngineBase):
             if execute:
                 if linksonly:
                     if not info['copy']:
-                        newfiles = copyfiles(infiles,
-                                             [outdir],
-                                             copy=info['copy'],
-                                             create_new=True)
+                        newfiles = copyfiles(
+                            infiles, [outdir],
+                            copy=info['copy'],
+                            create_new=True)
                     else:
-                        newfiles = fnames_presuffix(infiles,
-                                                    newpath=outdir)
-                    newfiles = _strip_temp(
-                        newfiles,
-                        op.abspath(olddir).split(op.sep)[-1])
+                        newfiles = fnames_presuffix(infiles, newpath=outdir)
+                    newfiles = _strip_temp(newfiles,
+                                           op.abspath(olddir).split(
+                                               op.sep)[-1])
                 else:
-                    newfiles = copyfiles(infiles,
-                                         [outdir],
-                                         copy=info['copy'],
-                                         create_new=True)
+                    newfiles = copyfiles(
+                        infiles, [outdir], copy=info['copy'], create_new=True)
             else:
                 newfiles = fnames_presuffix(infiles, newpath=outdir)
             if not isinstance(files, list):
@@ -696,8 +709,13 @@ class JoinNode(Node):
 
     """
 
-    def __init__(self, interface, name, joinsource, joinfield=None,
-                 unique=False, **kwargs):
+    def __init__(self,
+                 interface,
+                 name,
+                 joinsource,
+                 joinfield=None,
+                 unique=False,
+                 **kwargs):
         """
 
         Parameters
@@ -849,8 +867,10 @@ class JoinNode(Node):
                 try:
                     setattr(self._interface.inputs, field, val)
                 except Exception as e:
-                    raise ValueError(">>JN %s %s %s %s %s: %s" % (
-                        self, field, val, self.inputs.copyable_trait_names(), self.joinfield, e))
+                    raise ValueError(">>JN %s %s %s %s %s: %s" %
+                                     (self, field, val,
+                                      self.inputs.copyable_trait_names(),
+                                      self.joinfield, e))
             elif hasattr(self._interface.inputs, field):
                 # copy the non-join field
                 val = getattr(self._inputs, field)
@@ -871,8 +891,10 @@ class JoinNode(Node):
         the iterables order. If the ``unique`` flag is set, then duplicate
         values are removed but the iterables order is preserved.
         """
-        val = [self._slot_value(field, idx)
-               for idx in range(self._next_slot_index)]
+        val = [
+            self._slot_value(field, idx)
+            for idx in range(self._next_slot_index)
+        ]
         basetrait = self._interface.inputs.trait(field)
         if isinstance(basetrait.trait_type, traits.Set):
             return set(val)
@@ -887,9 +909,10 @@ class JoinNode(Node):
         try:
             return getattr(self._inputs, slot_field)
         except AttributeError as e:
-            raise AttributeError("The join node %s does not have a slot field %s"
-                                 " to hold the %s value at index %d: %s"
-                                 % (self, slot_field, field, index, e))
+            raise AttributeError(
+                "The join node %s does not have a slot field %s"
+                " to hold the %s value at index %d: %s" % (self, slot_field,
+                                                           field, index, e))
 
 
 class MapNode(Node):
@@ -908,7 +931,13 @@ class MapNode(Node):
 
     """
 
-    def __init__(self, interface, iterfield, name, serial=False, nested=False, **kwargs):
+    def __init__(self,
+                 interface,
+                 iterfield,
+                 name,
+                 serial=False,
+                 nested=False,
+                 **kwargs):
         """
 
         Parameters
@@ -938,8 +967,8 @@ class MapNode(Node):
             iterfield = [iterfield]
         self.iterfield = iterfield
         self.nested = nested
-        self._inputs = self._create_dynamic_traits(self._interface.inputs,
-                                                   fields=self.iterfield)
+        self._inputs = self._create_dynamic_traits(
+            self._interface.inputs, fields=self.iterfield)
         self._inputs.on_trait_change(self._set_mapnode_input)
         self._got_inputs = False
         self._serial = serial
@@ -971,13 +1000,13 @@ class MapNode(Node):
         Set interface input value or nodewrapper attribute
         Priority goes to interface.
         """
-        logger.debug('setting nodelevel(%s) input %s = %s',
-                     to_str(self), parameter, to_str(val))
+        logger.debug('setting nodelevel(%s) input %s = %s', to_str(self),
+                     parameter, to_str(val))
         self._set_mapnode_input(parameter, deepcopy(val))
 
     def _set_mapnode_input(self, name, newvalue):
-        logger.debug('setting mapnode(%s) input: %s -> %s',
-                     to_str(self), name, to_str(newvalue))
+        logger.debug('setting mapnode(%s) input: %s -> %s', to_str(self), name,
+                     to_str(newvalue))
         if name in self.iterfield:
             setattr(self._inputs, name, newvalue)
         else:
@@ -994,8 +1023,8 @@ class MapNode(Node):
                 name,
                 InputMultiPath(
                     self._interface.inputs.traits()[name].trait_type))
-            logger.debug('setting hashinput %s-> %s',
-                         name, getattr(self._inputs, name))
+            logger.debug('setting hashinput %s-> %s', name,
+                         getattr(self._inputs, name))
             if self.nested:
                 setattr(hashinputs, name, flatten(getattr(self._inputs, name)))
             else:
@@ -1025,26 +1054,31 @@ class MapNode(Node):
         if cwd is None:
             cwd = self.output_dir()
         if self.nested:
-            nitems = len(flatten(filename_to_list(getattr(self.inputs, self.iterfield[0]))))
+            nitems = len(
+                flatten(
+                    filename_to_list(getattr(self.inputs, self.iterfield[0]))))
         else:
-            nitems = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
+            nitems = len(
+                filename_to_list(getattr(self.inputs, self.iterfield[0])))
         for i in range(nitems):
             nodename = '_%s%d' % (self.name, i)
-            node = Node(deepcopy(self._interface),
-                        n_procs=self._n_procs,
-                        mem_gb=self._mem_gb,
-                        overwrite=self.overwrite,
-                        needed_outputs=self.needed_outputs,
-                        run_without_submitting=self.run_without_submitting,
-                        base_dir=op.join(cwd, 'mapflow'),
-                        name=nodename)
+            node = Node(
+                deepcopy(self._interface),
+                n_procs=self._n_procs,
+                mem_gb=self._mem_gb,
+                overwrite=self.overwrite,
+                needed_outputs=self.needed_outputs,
+                run_without_submitting=self.run_without_submitting,
+                base_dir=op.join(cwd, 'mapflow'),
+                name=nodename)
             node.plugin_args = self.plugin_args
             node.interface.inputs.trait_set(
                 **deepcopy(self._interface.inputs.get()))
             node.interface.resource_monitor = self._interface.resource_monitor
             for field in self.iterfield:
                 if self.nested:
-                    fieldvals = flatten(filename_to_list(getattr(self.inputs, field)))
+                    fieldvals = flatten(
+                        filename_to_list(getattr(self.inputs, field)))
                 else:
                     fieldvals = filename_to_list(getattr(self.inputs, field))
                 logger.debug('setting input %d %s %s', i, field, fieldvals[i])
@@ -1054,7 +1088,10 @@ class MapNode(Node):
 
     def _collate_results(self, nodes):
         finalresult = InterfaceResult(
-            interface=[], runtime=[], provenance=[], inputs=[],
+            interface=[],
+            runtime=[],
+            provenance=[],
+            inputs=[],
             outputs=self.outputs)
         returncode = []
         for i, nresult, err in nodes:
@@ -1071,8 +1108,8 @@ class MapNode(Node):
 
             if self.outputs:
                 for key, _ in list(self.outputs.items()):
-                    rm_extra = (self.config['execution']
-                                ['remove_unnecessary_outputs'])
+                    rm_extra = (
+                        self.config['execution']['remove_unnecessary_outputs'])
                     if str2bool(rm_extra) and self.needed_outputs:
                         if key not in self.needed_outputs:
                             continue
@@ -1091,8 +1128,10 @@ class MapNode(Node):
             for key, _ in list(self.outputs.items()):
                 values = getattr(finalresult.outputs, key)
                 if isdefined(values):
-                    values = unflatten(values, filename_to_list(
-                        getattr(self.inputs, self.iterfield[0])))
+                    values = unflatten(values,
+                                       filename_to_list(
+                                           getattr(self.inputs,
+                                                   self.iterfield[0])))
                 setattr(finalresult.outputs, key, values)
 
         if returncode and any([code is not None for code in returncode]):
@@ -1120,13 +1159,15 @@ class MapNode(Node):
         if self._serial:
             return 1
         if self.nested:
-            return len(filename_to_list(flatten(getattr(self.inputs, self.iterfield[0]))))
+            return len(
+                filename_to_list(
+                    flatten(getattr(self.inputs, self.iterfield[0]))))
         return len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
 
     def _get_inputs(self):
         old_inputs = self._inputs.get()
-        self._inputs = self._create_dynamic_traits(self._interface.inputs,
-                                                   fields=self.iterfield)
+        self._inputs = self._create_dynamic_traits(
+            self._interface.inputs, fields=self.iterfield)
         self._inputs.trait_set(**old_inputs)
         super(MapNode, self)._get_inputs()
 
@@ -1141,14 +1182,14 @@ class MapNode(Node):
                 raise ValueError(("Input %s was not set but it is listed "
                                   "in iterfields.") % iterfield)
         if len(self.iterfield) > 1:
-            first_len = len(filename_to_list(getattr(self.inputs,
-                                                     self.iterfield[0])))
+            first_len = len(
+                filename_to_list(getattr(self.inputs, self.iterfield[0])))
             for iterfield in self.iterfield[1:]:
-                if first_len != len(filename_to_list(getattr(self.inputs,
-                                                             iterfield))):
-                    raise ValueError(("All iterfields of a MapNode have to "
-                                      "have the same length. %s") %
-                                     str(self.inputs))
+                if first_len != len(
+                        filename_to_list(getattr(self.inputs, iterfield))):
+                    raise ValueError(
+                        ("All iterfields of a MapNode have to "
+                         "have the same length. %s") % str(self.inputs))
 
     def _run_interface(self, execute=True, updatehash=False):
         """Run the mapnode interface
@@ -1163,20 +1204,22 @@ class MapNode(Node):
 
         # Set up mapnode folder names
         if self.nested:
-            nitems = len(filename_to_list(flatten(getattr(self.inputs,
-                                                          self.iterfield[0]))))
+            nitems = len(
+                filename_to_list(
+                    flatten(getattr(self.inputs, self.iterfield[0]))))
         else:
-            nitems = len(filename_to_list(getattr(self.inputs,
-                                                  self.iterfield[0])))
+            nitems = len(
+                filename_to_list(getattr(self.inputs, self.iterfield[0])))
         nnametpl = '_%s{}' % self.name
         nodenames = [nnametpl.format(i) for i in range(nitems)]
 
         # Run mapnode
-        result = self._collate_results(_node_runner(
-            self._make_nodes(cwd),
-            updatehash=updatehash,
-            stop_first=str2bool(self.config['execution']['stop_on_first_crash'])
-        ))
+        result = self._collate_results(
+            _node_runner(
+                self._make_nodes(cwd),
+                updatehash=updatehash,
+                stop_first=str2bool(
+                    self.config['execution']['stop_on_first_crash'])))
         # And store results
         _save_resultfile(result, cwd, self.name)
         # remove any node directories no longer required
@@ -1186,7 +1229,7 @@ class MapNode(Node):
                 if path.split(op.sep)[-1] not in nodenames:
                     dirs2remove.append(path)
         for path in dirs2remove:
-            logger.debug('[MapNode] Removing folder "%s".' , path)
+            logger.debug('[MapNode] Removing folder "%s".', path)
             shutil.rmtree(path)
 
         return result

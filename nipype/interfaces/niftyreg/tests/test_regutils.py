@@ -6,10 +6,8 @@ import pytest
 
 from ....utils.filemanip import which
 from ....testing import example_data
-from .. import (
-    get_custom_path, RegAverage, RegResample, RegJacobian,
-    RegTools, RegMeasure, RegTransform
-)
+from .. import (get_custom_path, RegAverage, RegResample, RegJacobian,
+                RegTools, RegMeasure, RegTransform)
 
 
 def no_nifty_tool(cmd=None):
@@ -43,6 +41,7 @@ def test_reg_resample_res():
 
     cmd_tmp = '{cmd} -flo {flo} -inter 1 -omp 4 -ref {ref} -trans {trans} \
 -res {res}'
+
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('reg_resample'),
         flo=flo_file,
@@ -63,6 +62,7 @@ def test_reg_resample_res():
 
     cmd_tmp = '{cmd} -flo {flo} -inter 1 -omp 4 -ref {ref} -trans {trans} \
 -blank {blank}'
+
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('reg_resample'),
         flo=flo_file,
@@ -207,14 +207,14 @@ def test_reg_average():
 
     expected_argv = '%s %s -avg %s %s %s -omp 1' % (
         get_custom_path('reg_average'),
-        os.path.join(os.getcwd(), 'avg_out.nii.gz'),
-        one_file, two_file, three_file)
+        os.path.join(os.getcwd(), 'avg_out.nii.gz'), one_file, two_file,
+        three_file)
 
     assert argv.decode('utf-8') == expected_argv
 
     # Test command line with text file
-    expected_cmd = ('%s --cmd_file %s'
-                    % (get_custom_path('reg_average'), reg_average_cmd))
+    expected_cmd = ('%s --cmd_file %s' % (get_custom_path('reg_average'),
+                                          reg_average_cmd))
 
     assert generated_cmd == expected_cmd
 
@@ -235,8 +235,8 @@ def test_reg_average():
 
     expected_argv = '%s %s -avg %s %s %s -omp 1' % (
         get_custom_path('reg_average'),
-        os.path.join(os.getcwd(), 'avg_out.txt'),
-        one_file, two_file, three_file)
+        os.path.join(os.getcwd(), 'avg_out.txt'), one_file, two_file,
+        three_file)
 
     assert argv.decode('utf-8') == expected_argv
 
@@ -255,10 +255,10 @@ def test_reg_average():
         argv = f_obj.read()
     os.remove(reg_average_cmd)
 
-    expected_argv = ('%s %s -avg_lts %s %s %s -omp 1'
-                     % (get_custom_path('reg_average'),
-                        os.path.join(os.getcwd(), 'avg_out.txt'),
-                        one_file, two_file, three_file))
+    expected_argv = ('%s %s -avg_lts %s %s %s -omp 1' %
+                     (get_custom_path('reg_average'),
+                      os.path.join(os.getcwd(), 'avg_out.txt'), one_file,
+                      two_file, three_file))
 
     assert argv.decode('utf-8') == expected_argv
 
@@ -271,9 +271,9 @@ def test_reg_average():
     trans1_file = example_data('roi01.nii')
     trans2_file = example_data('roi02.nii')
     trans3_file = example_data('roi03.nii')
-    nr_average_4.inputs.warp_files = [trans1_file, one_file,
-                                      trans2_file, two_file,
-                                      trans3_file, three_file]
+    nr_average_4.inputs.warp_files = [
+        trans1_file, one_file, trans2_file, two_file, trans3_file, three_file
+    ]
     nr_average_4.inputs.avg_ref_file = ref_file
     nr_average_4.inputs.omp_core_val = 1
     generated_cmd = nr_average_4.cmdline
@@ -284,11 +284,11 @@ def test_reg_average():
         argv = f_obj.read()
     os.remove(reg_average_cmd)
 
-    expected_argv = ('%s %s -avg_tran %s -omp 1 %s %s %s %s %s %s'
-                     % (get_custom_path('reg_average'),
-                        os.path.join(os.getcwd(), 'avg_out.nii.gz'),
-                        ref_file, trans1_file, one_file, trans2_file, two_file,
-                        trans3_file, three_file))
+    expected_argv = ('%s %s -avg_tran %s -omp 1 %s %s %s %s %s %s' %
+                     (get_custom_path('reg_average'),
+                      os.path.join(os.getcwd(), 'avg_out.nii.gz'), ref_file,
+                      trans1_file, one_file, trans2_file, two_file,
+                      trans3_file, three_file))
 
     assert argv.decode('utf-8') == expected_argv
 
@@ -304,9 +304,10 @@ def test_reg_average():
     trans1_file = example_data('roi01.nii')
     trans2_file = example_data('roi02.nii')
     trans3_file = example_data('roi03.nii')
-    nr_average_5.inputs.warp_files = [aff1_file, trans1_file, one_file,
-                                      aff2_file, trans2_file, two_file,
-                                      aff3_file, trans3_file, three_file]
+    nr_average_5.inputs.warp_files = [
+        aff1_file, trans1_file, one_file, aff2_file, trans2_file, two_file,
+        aff3_file, trans3_file, three_file
+    ]
     nr_average_5.inputs.demean3_ref_file = ref_file
     nr_average_5.inputs.omp_core_val = 1
     generated_cmd = nr_average_5.cmdline
@@ -317,13 +318,11 @@ def test_reg_average():
         argv = f_obj.read()
     os.remove(reg_average_cmd)
 
-    expected_argv = ('%s %s -demean3 %s -omp 1 %s %s %s %s %s %s %s %s %s'
-                     % (get_custom_path('reg_average'),
-                        os.path.join(os.getcwd(), 'avg_out.nii.gz'),
-                        ref_file,
-                        aff1_file, trans1_file, one_file,
-                        aff2_file, trans2_file, two_file,
-                        aff3_file, trans3_file, three_file))
+    expected_argv = ('%s %s -demean3 %s -omp 1 %s %s %s %s %s %s %s %s %s' %
+                     (get_custom_path('reg_average'),
+                      os.path.join(os.getcwd(), 'avg_out.nii.gz'), ref_file,
+                      aff1_file, trans1_file, one_file, aff2_file, trans2_file,
+                      two_file, aff3_file, trans3_file, three_file))
 
     assert argv.decode('utf-8') == expected_argv
 

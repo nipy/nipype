@@ -1,6 +1,5 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-
 """
 Nipype interface for seg_maths.
 
@@ -30,24 +29,31 @@ from ...utils.filemanip import split_filename
 
 class MathsInput(CommandLineInputSpec):
     """Input Spec for seg_maths interfaces."""
-    in_file = File(position=2,
-                   argstr='%s',
-                   exists=True,
-                   mandatory=True,
-                   desc='image to operate on')
+    in_file = File(
+        position=2,
+        argstr='%s',
+        exists=True,
+        mandatory=True,
+        desc='image to operate on')
 
-    out_file = File(name_source=['in_file'],
-                    name_template='%s',
-                    position=-2,
-                    argstr='%s',
-                    desc='image to write')
+    out_file = File(
+        name_source=['in_file'],
+        name_template='%s',
+        position=-2,
+        argstr='%s',
+        desc='image to write')
 
     desc = 'datatype to use for output (default uses input type)'
-    output_datatype = traits.Enum('float', 'char', 'int', 'short',
-                                  'double', 'input',
-                                  position=-3,
-                                  argstr='-odt %s',
-                                  desc=desc)
+    output_datatype = traits.Enum(
+        'float',
+        'char',
+        'int',
+        'short',
+        'double',
+        'input',
+        position=-3,
+        argstr='-odt %s',
+        desc=desc)
 
 
 class MathsOutput(TraitedSpec):
@@ -90,13 +96,34 @@ class MathsCommand(NiftySegCommand):
 
 class UnaryMathsInput(MathsInput):
     """Input Spec for seg_maths Unary operations."""
-    operation = traits.Enum('sqrt', 'exp', 'log', 'recip', 'abs', 'bin',
-                            'otsu', 'lconcomp', 'concomp6', 'concomp26',
-                            'fill', 'euc', 'tpmax', 'tmean', 'tmax', 'tmin',
-                            'splitlab', 'removenan', 'isnan', 'subsamp2',
-                            'scl', '4to5', 'range',
-                            argstr='-%s', position=4, mandatory=True,
-                            desc='operation to perform')
+    operation = traits.Enum(
+        'sqrt',
+        'exp',
+        'log',
+        'recip',
+        'abs',
+        'bin',
+        'otsu',
+        'lconcomp',
+        'concomp6',
+        'concomp26',
+        'fill',
+        'euc',
+        'tpmax',
+        'tmean',
+        'tmax',
+        'tmin',
+        'splitlab',
+        'removenan',
+        'isnan',
+        'subsamp2',
+        'scl',
+        '4to5',
+        'range',
+        argstr='-%s',
+        position=4,
+        mandatory=True,
+        desc='operation to perform')
 
 
 class UnaryMaths(MathsCommand):
@@ -203,35 +230,55 @@ scaled)
 
 class BinaryMathsInput(MathsInput):
     """Input Spec for seg_maths Binary operations."""
-    operation = traits.Enum('mul', 'div', 'add', 'sub', 'pow', 'thr', 'uthr',
-                            'smo', 'edge', 'sobel3', 'sobel5', 'min', 'smol',
-                            'geo', 'llsnorm', 'masknan', 'hdr_copy',
-                            'splitinter',
-                            mandatory=True,
-                            argstr='-%s',
-                            position=4,
-                            desc='operation to perform')
+    operation = traits.Enum(
+        'mul',
+        'div',
+        'add',
+        'sub',
+        'pow',
+        'thr',
+        'uthr',
+        'smo',
+        'edge',
+        'sobel3',
+        'sobel5',
+        'min',
+        'smol',
+        'geo',
+        'llsnorm',
+        'masknan',
+        'hdr_copy',
+        'splitinter',
+        mandatory=True,
+        argstr='-%s',
+        position=4,
+        desc='operation to perform')
 
-    operand_file = File(exists=True,
-                        argstr='%s',
-                        mandatory=True,
-                        position=5,
-                        xor=['operand_value', 'operand_str'],
-                        desc='second image to perform operation with')
+    operand_file = File(
+        exists=True,
+        argstr='%s',
+        mandatory=True,
+        position=5,
+        xor=['operand_value', 'operand_str'],
+        desc='second image to perform operation with')
 
-    operand_value = traits.Float(argstr='%.8f',
-                                 mandatory=True,
-                                 position=5,
-                                 xor=['operand_file', 'operand_str'],
-                                 desc='float value to perform operation with')
+    operand_value = traits.Float(
+        argstr='%.8f',
+        mandatory=True,
+        position=5,
+        xor=['operand_file', 'operand_str'],
+        desc='float value to perform operation with')
 
     desc = 'string value to perform operation splitinter'
-    operand_str = traits.Enum('x', 'y', 'z',
-                              argstr='%s',
-                              mandatory=True,
-                              position=5,
-                              xor=['operand_value', 'operand_file'],
-                              desc=desc)
+    operand_str = traits.Enum(
+        'x',
+        'y',
+        'z',
+        argstr='%s',
+        mandatory=True,
+        position=5,
+        xor=['operand_value', 'operand_file'],
+        desc=desc)
 
 
 class BinaryMaths(MathsCommand):
@@ -335,12 +382,15 @@ separate time points
         if opt == 'operand_str' and self.inputs.operation != 'splitinter':
             err = 'operand_str set but with an operation different than \
 "splitinter"'
+
             raise NipypeInterfaceError(err)
 
         if opt == 'operation':
             # Only float
-            if val in ['pow', 'thr', 'uthr', 'smo', 'edge', 'sobel3', 'sobel5',
-                       'smol']:
+            if val in [
+                    'pow', 'thr', 'uthr', 'smo', 'edge', 'sobel3', 'sobel5',
+                    'smol'
+            ]:
                 if not isdefined(self.inputs.operand_value):
                     err = 'operand_value not set for {0}.'.format(val)
                     raise NipypeInterfaceError(err)
@@ -372,16 +422,23 @@ separate time points
 
 class BinaryMathsInputInteger(MathsInput):
     """Input Spec for seg_maths Binary operations that require integer."""
-    operation = traits.Enum('dil', 'ero', 'tp', 'equal', 'pad', 'crop',
-                            mandatory=True,
-                            argstr='-%s',
-                            position=4,
-                            desc='operation to perform')
+    operation = traits.Enum(
+        'dil',
+        'ero',
+        'tp',
+        'equal',
+        'pad',
+        'crop',
+        mandatory=True,
+        argstr='-%s',
+        position=4,
+        desc='operation to perform')
 
-    operand_value = traits.Int(argstr='%d',
-                               mandatory=True,
-                               position=5,
-                               desc='int value to perform operation with')
+    operand_value = traits.Int(
+        argstr='%d',
+        mandatory=True,
+        position=5,
+        desc='int value to perform operation with')
 
 
 class BinaryMathsInteger(MathsCommand):
@@ -443,39 +500,46 @@ class BinaryMathsInteger(MathsCommand):
 
 class TupleMathsInput(MathsInput):
     """Input Spec for seg_maths Tuple operations."""
-    operation = traits.Enum('lncc', 'lssd', 'lltsnorm',
-                            mandatory=True,
-                            argstr='-%s',
-                            position=4,
-                            desc='operation to perform')
+    operation = traits.Enum(
+        'lncc',
+        'lssd',
+        'lltsnorm',
+        mandatory=True,
+        argstr='-%s',
+        position=4,
+        desc='operation to perform')
 
-    operand_file1 = File(exists=True,
-                         argstr='%s',
-                         mandatory=True,
-                         position=5,
-                         xor=['operand_value1'],
-                         desc='image to perform operation 1 with')
+    operand_file1 = File(
+        exists=True,
+        argstr='%s',
+        mandatory=True,
+        position=5,
+        xor=['operand_value1'],
+        desc='image to perform operation 1 with')
 
     desc = 'float value to perform operation 1 with'
-    operand_value1 = traits.Float(argstr='%.8f',
-                                  mandatory=True,
-                                  position=5,
-                                  xor=['operand_file1'],
-                                  desc=desc)
+    operand_value1 = traits.Float(
+        argstr='%.8f',
+        mandatory=True,
+        position=5,
+        xor=['operand_file1'],
+        desc=desc)
 
-    operand_file2 = File(exists=True,
-                         argstr='%s',
-                         mandatory=True,
-                         position=6,
-                         xor=['operand_value2'],
-                         desc='image to perform operation 2 with')
+    operand_file2 = File(
+        exists=True,
+        argstr='%s',
+        mandatory=True,
+        position=6,
+        xor=['operand_value2'],
+        desc='image to perform operation 2 with')
 
     desc = 'float value to perform operation 2 with'
-    operand_value2 = traits.Float(argstr='%.8f',
-                                  mandatory=True,
-                                  position=6,
-                                  xor=['operand_file2'],
-                                  desc=desc)
+    operand_value2 = traits.Float(
+        argstr='%.8f',
+        mandatory=True,
+        position=6,
+        xor=['operand_file2'],
+        desc=desc)
 
 
 class TupleMaths(MathsCommand):
@@ -540,15 +604,12 @@ im1_lltsnorm.nii'
 
 class MergeInput(MathsInput):
     """Input Spec for seg_maths merge operation."""
-    dimension = traits.Int(mandatory=True,
-                           desc='Dimension to merge the images.')
+    dimension = traits.Int(
+        mandatory=True, desc='Dimension to merge the images.')
 
     desc = 'List of images to merge to the working image <input>.'
-    merge_files = traits.List(File(exists=True),
-                              argstr='%s',
-                              mandatory=True,
-                              position=4,
-                              desc=desc)
+    merge_files = traits.List(
+        File(exists=True), argstr='%s', mandatory=True, position=4, desc=desc)
 
 
 class Merge(MathsCommand):

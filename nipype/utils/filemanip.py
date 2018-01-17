@@ -4,7 +4,8 @@
 """Miscellaneous file manipulation functions
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import sys
 import pickle
@@ -30,7 +31,6 @@ from future import standard_library
 standard_library.install_aliases()
 
 fmlogger = logging.getLogger('utils')
-
 
 related_filetype_sets = [
     ('.hdr', '.img', '.mat'),
@@ -265,13 +265,16 @@ def _generate_cifs_table():
         return []
 
     # (path, fstype) tuples, sorted by path length (longest first)
-    mount_info = sorted((line.split()[2:5:2] for line in output.splitlines()),
-                        key=lambda x: len(x[0]),
-                        reverse=True)
+    mount_info = sorted(
+        (line.split()[2:5:2] for line in output.splitlines()),
+        key=lambda x: len(x[0]),
+        reverse=True)
     cifs_paths = [path for path, fstype in mount_info if fstype == 'cifs']
 
-    return [mount for mount in mount_info
-            if any(mount[0].startswith(path) for path in cifs_paths)]
+    return [
+        mount for mount in mount_info
+        if any(mount[0].startswith(path) for path in cifs_paths)
+    ]
 
 
 _cifs_table = _generate_cifs_table()
@@ -297,8 +300,12 @@ def on_cifs(fname):
     return False
 
 
-def copyfile(originalfile, newfile, copy=False, create_new=False,
-             hashmethod=None, use_hardlink=False,
+def copyfile(originalfile,
+             newfile,
+             copy=False,
+             create_new=False,
+             hashmethod=None,
+             use_hardlink=False,
              copy_related_files=True):
     """Copy or link ``originalfile`` to ``newfile``.
 
@@ -424,8 +431,13 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
                               for f in (originalfile, newfile))
         for alt_ofile, alt_nfile in zip(*related_file_pairs):
             if op.exists(alt_ofile):
-                copyfile(alt_ofile, alt_nfile, copy, hashmethod=hashmethod,
-                         use_hardlink=use_hardlink, copy_related_files=False)
+                copyfile(
+                    alt_ofile,
+                    alt_nfile,
+                    copy,
+                    hashmethod=hashmethod,
+                    use_hardlink=use_hardlink,
+                    copy_related_files=False)
 
     return newfile
 
@@ -478,8 +490,9 @@ def copyfiles(filelist, dest, copy=False, create_new=False):
     newfiles = []
     for i, f in enumerate(filename_to_list(filelist)):
         if isinstance(f, list):
-            newfiles.insert(i, copyfiles(f, dest, copy=copy,
-                                         create_new=create_new))
+            newfiles.insert(i,
+                            copyfiles(
+                                f, dest, copy=copy, create_new=create_new))
         else:
             if len(outfiles) > 1:
                 destfile = outfiles[i]
@@ -640,8 +653,8 @@ rst_levels = ['=', '-', '~', '+']
 
 
 def write_rst_header(header, level=0):
-    return '\n'.join((header, ''.join([rst_levels[level]
-                                       for _ in header]))) + '\n\n'
+    return '\n'.join(
+        (header, ''.join([rst_levels[level] for _ in header]))) + '\n\n'
 
 
 def write_rst_list(items, prefix=''):
@@ -725,7 +738,8 @@ def emptydirs(path, noexist_ok=False):
         if ex.errno == errno.ENOTEMPTY and not elcont:
             fmlogger.warning(
                 'An exception was raised trying to remove old %s, but the path '
-                'seems empty. Is it an NFS mount?. Passing the exception.', path)
+                'seems empty. Is it an NFS mount?. Passing the exception.',
+                path)
         elif ex.errno == errno.ENOTEMPTY and elcont:
             fmlogger.debug('Folder %s contents (%d items).', path, len(elcont))
             raise ex
@@ -776,17 +790,19 @@ def get_dependencies(name, environ):
 
     """
     if sys.platform == 'darwin':
-        proc = sp.Popen('otool -L `which %s`' % name,
-                        stdout=sp.PIPE,
-                        stderr=sp.PIPE,
-                        shell=True,
-                        env=environ)
+        proc = sp.Popen(
+            'otool -L `which %s`' % name,
+            stdout=sp.PIPE,
+            stderr=sp.PIPE,
+            shell=True,
+            env=environ)
     elif 'linux' in sys.platform:
-        proc = sp.Popen('ldd `which %s`' % name,
-                        stdout=sp.PIPE,
-                        stderr=sp.PIPE,
-                        shell=True,
-                        env=environ)
+        proc = sp.Popen(
+            'ldd `which %s`' % name,
+            stdout=sp.PIPE,
+            stderr=sp.PIPE,
+            shell=True,
+            env=environ)
     else:
         return 'Platform %s not supported' % sys.platform
     o, e = proc.communicate()
@@ -843,8 +859,8 @@ def relpath(path, start=None):
             raise ValueError(("Cannot mix UNC and non-UNC paths "
                               "(%s and %s)") % (path, start))
         else:
-            raise ValueError("path is on drive %s, start on drive %s"
-                             % (path_list[0], start_list[0]))
+            raise ValueError("path is on drive %s, start on drive %s" %
+                             (path_list[0], start_list[0]))
     # Work out how much of the filepath is shared by start and path.
     for i in range(min(len(start_list), len(path_list))):
         if start_list[i].lower() != path_list[i].lower():

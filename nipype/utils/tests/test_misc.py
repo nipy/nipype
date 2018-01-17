@@ -8,8 +8,8 @@ from builtins import next
 
 import pytest
 
-from nipype.utils.misc import (container_to_string, str2bool,
-                               flatten, unflatten)
+from nipype.utils.misc import (container_to_string, str2bool, flatten,
+                               unflatten)
 
 
 def test_cont_to_str():
@@ -34,10 +34,10 @@ def test_cont_to_str():
     assert (container_to_string(123) == '123')
 
 
-@pytest.mark.parametrize("string, expected", [
-        ("yes", True), ("true", True), ("t", True), ("1", True),
-        ("no", False), ("false", False), ("n", False), ("f", False), ("0", False)
-        ])
+@pytest.mark.parametrize("string, expected",
+                         [("yes", True), ("true", True), ("t", True),
+                          ("1", True), ("no", False), ("false", False),
+                          ("n", False), ("f", False), ("0", False)])
 def test_str2bool(string, expected):
     assert str2bool(string) == expected
 

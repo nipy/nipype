@@ -14,7 +14,8 @@ The `EngineBase` class implements the more general view of a task.
      os.chdir(datadir)
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import object
 
 from future import standard_library

@@ -3,7 +3,8 @@
 
 This also creates the index.rst file appropriately, makes figures, etc.
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import open
 from past.builtins import execfile
 # -----------------------------------------------------------------------------
@@ -56,8 +57,8 @@ figure_basename = None
 def show():
     allfm = Gcf.get_all_fig_managers()
     for fcount, fm in enumerate(allfm):
-        fm.canvas.figure.savefig('%s_%02i.png' %
-                                 (figure_basename, fcount + 1))
+        fm.canvas.figure.savefig('%s_%02i.png' % (figure_basename, fcount + 1))
+
 
 _mpl_show = plt.show
 plt.show = show
@@ -73,7 +74,8 @@ if not os.getcwd().endswith('users/examples'):
 
 # Run the conversion from .py to rst file
 sh('../../../tools/ex2rst --project Nipype --outdir . ../../../examples')
-sh('../../../tools/ex2rst --project Nipype --outdir . ../../../examples/frontiers_paper')
+sh('../../../tools/ex2rst --project Nipype '
+   '--outdir . ../../../examples/frontiers_paper')
 
 # Make the index.rst file
 """

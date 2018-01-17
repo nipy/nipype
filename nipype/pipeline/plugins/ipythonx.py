@@ -3,7 +3,8 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Parallel workflow execution via IPython controller
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import sys
 from future.utils import raise_from
@@ -28,8 +29,7 @@ class IPythonXPlugin(DistributedPluginBase):
         if LooseVersion(IPyversion) > LooseVersion('0.10.1'):
             raise EnvironmentError(('The IPythonX plugin can only be used with'
                                     ' older IPython versions. Please use the '
-                                    'IPython plugin instead.'
-                                    ))
+                                    'IPython plugin instead.'))
         DeprecationWarning('This plugin will be deprecated as of version 0.13')
         if IPython_not_loaded:
             raise ImportError('ipyparallel could not be imported')
@@ -47,8 +47,9 @@ class IPythonXPlugin(DistributedPluginBase):
             __import__(name)
             self.ipyclient = sys.modules[name]
         except ImportError as e:
-            raise_from(ImportError("Ipython kernel not found. Parallel execution "
-                                   "will be unavailable"), e)
+            raise_from(
+                ImportError("Ipython kernel not found. Parallel "
+                            "execution will be unavailable"), e)
         try:
             self.taskclient = self.ipyclient.TaskClient()
         except Exception as e:
@@ -56,7 +57,8 @@ class IPythonXPlugin(DistributedPluginBase):
                 raise_from(Exception("No IPython clients found."), e)
             if isinstance(e, ValueError):
                 raise_from(Exception("Ipython kernel not installed"), e)
-        return super(IPythonXPlugin, self).run(graph, config, updatehash=updatehash)
+        return super(IPythonXPlugin, self).run(
+            graph, config, updatehash=updatehash)
 
     def _get_result(self, taskid):
         return self.taskclient.get_task_result(taskid, block=False)
@@ -73,18 +75,17 @@ except:
     traceback = format_exception(etype,eval,etr)
     result = task.result
 """
-        task = self.ipyclient.StringTask(cmdstr,
-                                         push=dict(task=node,
-                                                   updatehash=updatehash),
-                                         pull=['result', 'traceback'])
+        task = self.ipyclient.StringTask(
+            cmdstr,
+            push=dict(task=node, updatehash=updatehash),
+            pull=['result', 'traceback'])
         return self.taskclient.run(task, block=False)
 
     def _report_crash(self, node, result=None):
         if result and result['traceback']:
             node._result = result['result']
             node._traceback = result['traceback']
-            return report_crash(node,
-                                traceback=result['traceback'])
+            return report_crash(node, traceback=result['traceback'])
         else:
             return report_crash(node)
 
