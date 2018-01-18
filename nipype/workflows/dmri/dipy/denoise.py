@@ -10,7 +10,10 @@ from ....interfaces import dipy
 
 
 def nlmeans_pipeline(name='Denoise',
-                     params={'patch_radius': 1, 'block_radius': 5}):
+                     params={
+                         'patch_radius': 1,
+                         'block_radius': 5
+                     }):
     """
     Workflow that performs nlmeans denoising
 
@@ -25,25 +28,25 @@ def nlmeans_pipeline(name='Denoise',
 
 
     """
-    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_mask']),
-                        name='inputnode')
-    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file']),
-                         name='outputnode')
+    inputnode = pe.Node(
+        niu.IdentityInterface(fields=['in_file', 'in_mask']), name='inputnode')
+    outputnode = pe.Node(
+        niu.IdentityInterface(fields=['out_file']), name='outputnode')
 
-    nmask = pe.Node(niu.Function(input_names=['in_file', 'in_mask'],
-                                 output_names=['out_file'], function=bg_mask),
-                    name='NoiseMsk')
+    nmask = pe.Node(
+        niu.Function(
+            input_names=['in_file', 'in_mask'],
+            output_names=['out_file'],
+            function=bg_mask),
+        name='NoiseMsk')
     nlmeans = pe.Node(dipy.Denoise(**params), name='NLMeans')
 
     wf = pe.Workflow(name=name)
-    wf.connect([
-        (inputnode, nmask, [('in_file', 'in_file'),
-                            ('in_mask', 'in_mask')]),
-        (inputnode, nlmeans, [('in_file', 'in_file'),
-                              ('in_mask', 'in_mask')]),
-        (nmask, nlmeans, [('out_file', 'noise_mask')]),
-        (nlmeans, outputnode, [('out_file', 'out_file')])
-    ])
+    wf.connect([(inputnode, nmask, [
+        ('in_file', 'in_file'), ('in_mask', 'in_mask')
+    ]), (inputnode, nlmeans, [('in_file', 'in_file'), ('in_mask', 'in_mask')]),
+                (nmask, nlmeans, [('out_file', 'noise_mask')]),
+                (nlmeans, outputnode, [('out_file', 'out_file')])])
     return wf
 
 
@@ -71,14 +74,13 @@ def csf_mask(in_file, in_mask, out_file=None):
     hdr.set_xyzt_units('mm')
     imdata = im.get_data()
     msk = nb.load(in_mask, mmap=NUMPY_MMAP).get_data()
-    msk = binary_erosion(msk,
-                         structure=np.ones((15, 15, 10))).astype(np.uint8)
+    msk = binary_erosion(msk, structure=np.ones((15, 15, 10))).astype(np.uint8)
     thres = np.percentile(imdata[msk > 0].reshape(-1), 90.0)
     imdata[imdata < thres] = 0
     imdata = imdata * msk
     imdata[imdata > 0] = 1
-    imdata = binary_opening(imdata,
-                            structure=np.ones((2, 2, 2))).astype(np.uint8)
+    imdata = binary_opening(
+        imdata, structure=np.ones((2, 2, 2))).astype(np.uint8)
 
     label_im, nb_labels = label(imdata)
     sizes = nd.sum(imdata, label_im, list(range(nb_labels + 1)))
@@ -113,7 +115,6 @@ def bg_mask(in_file, in_mask, out_file=None):
     hdr = im.header.copy()
     hdr.set_data_dtype(np.uint8)
     hdr.set_xyzt_units('mm')
-    imdata = im.get_data()
     msk = nb.load(in_mask, mmap=NUMPY_MMAP).get_data()
     msk = 1 - binary_dilation(msk, structure=np.ones((20, 20, 20)))
     nb.Nifti1Image(msk.astype(np.uint8), im.affine, hdr).to_filename(out_file)

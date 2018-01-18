@@ -17,12 +17,12 @@ except ImportError:
 
 
 # There are three reasons these tests will be skipped:
-@pytest.mark.skipif(not have_pybids,
-                    reason="Pybids is not installed")
-@pytest.mark.skipif(sys.version_info < (3, 0),
-                    reason="Pybids no longer supports Python 2")
-@pytest.mark.skipif(not dist_is_editable('pybids'),
-                    reason="Pybids is not installed in editable mode")
+@pytest.mark.skipif(not have_pybids, reason="Pybids is not installed")
+@pytest.mark.skipif(
+    sys.version_info < (3, 0), reason="Pybids no longer supports Python 2")
+@pytest.mark.skipif(
+    not dist_is_editable('pybids'),
+    reason="Pybids is not installed in editable mode")
 def test_bids_grabber(tmpdir):
     tmpdir.chdir()
     bg = BIDSDataGrabber()
@@ -31,18 +31,18 @@ def test_bids_grabber(tmpdir):
     results = bg.run()
     assert os.path.basename(results.outputs.anat[0]) == 'sub-01_T1w.nii.gz'
     assert os.path.basename(results.outputs.func[0]) == (
-           'sub-01_task-mixedgamblestask_run-01_bold.nii.gz')
+        'sub-01_task-mixedgamblestask_run-01_bold.nii.gz')
 
 
-@pytest.mark.skipif(not have_pybids,
-                    reason="Pybids is not installed")
-@pytest.mark.skipif(sys.version_info < (3, 0),
-                    reason="Pybids no longer supports Python 2")
-@pytest.mark.skipif(not dist_is_editable('pybids'),
-                    reason="Pybids is not installed in editable mode")
+@pytest.mark.skipif(not have_pybids, reason="Pybids is not installed")
+@pytest.mark.skipif(
+    sys.version_info < (3, 0), reason="Pybids no longer supports Python 2")
+@pytest.mark.skipif(
+    not dist_is_editable('pybids'),
+    reason="Pybids is not installed in editable mode")
 def test_bids_fields(tmpdir):
     tmpdir.chdir()
-    bg = BIDSDataGrabber(infields = ['subject'], outfields = ['dwi'])
+    bg = BIDSDataGrabber(infields=['subject'], outfields=['dwi'])
     bg.inputs.base_dir = os.path.join(datadir, 'ds005')
     bg.inputs.subject = '01'
     bg.inputs.output_query['dwi'] = dict(modality='dwi')

@@ -6,7 +6,8 @@ Change directory to provide relative paths for doctests
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import os.path as op
 import numpy as np
@@ -14,26 +15,35 @@ import nibabel as nb
 import nibabel.trackvis as nbt
 
 from ... import logging
-from ..base import (TraitedSpec, BaseInterfaceInputSpec,
-                    File, isdefined, traits)
+from ..base import (TraitedSpec, BaseInterfaceInputSpec, File, isdefined,
+                    traits)
 from .base import DipyBaseInterface
 IFLOGGER = logging.getLogger('interface')
 
 
 class TrackDensityMapInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True,
-                   desc='The input TrackVis track file')
-    reference = File(exists=True,
-                     desc='A reference file to define RAS coordinates space')
-    points_space = traits.Enum('rasmm', 'voxel', None, usedefault=True,
-                               desc='coordinates of trk file')
-    voxel_dims = traits.List(traits.Float, minlen=3, maxlen=3,
-                             desc='The size of each voxel in mm.')
-    data_dims = traits.List(traits.Int, minlen=3, maxlen=3,
-                            desc='The size of the image in voxels.')
-    out_filename = File('tdi.nii', usedefault=True,
-                        desc='The output filename for the tracks in TrackVis '
-                             '(.trk) format')
+    in_file = File(
+        exists=True, mandatory=True, desc='The input TrackVis track file')
+    reference = File(
+        exists=True, desc='A reference file to define RAS coordinates space')
+    points_space = traits.Enum(
+        'rasmm',
+        'voxel',
+        None,
+        usedefault=True,
+        desc='coordinates of trk file')
+    voxel_dims = traits.List(
+        traits.Float, minlen=3, maxlen=3, desc='The size of each voxel in mm.')
+    data_dims = traits.List(
+        traits.Int,
+        minlen=3,
+        maxlen=3,
+        desc='The size of the image in voxels.')
+    out_filename = File(
+        'tdi.nii',
+        usedefault=True,
+        desc='The output filename for the tracks in TrackVis '
+        '(.trk) format')
 
 
 class TrackDensityMapOutputSpec(TraitedSpec):
@@ -41,7 +51,6 @@ class TrackDensityMapOutputSpec(TraitedSpec):
 
 
 class TrackDensityMap(DipyBaseInterface):
-
     """
     Creates a tract density image from a TrackVis track file using functions
     from dipy
@@ -106,41 +115,57 @@ class TrackDensityMap(DipyBaseInterface):
 class StreamlineTractographyInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc=('input diffusion data'))
     in_model = File(exists=True, desc=('input f/d-ODF model extracted from.'))
-    tracking_mask = File(exists=True,
-                         desc=('input mask within which perform tracking'))
-    seed_mask = File(exists=True,
-                     desc=('input mask within which perform seeding'))
+    tracking_mask = File(
+        exists=True, desc=('input mask within which perform tracking'))
+    seed_mask = File(
+        exists=True, desc=('input mask within which perform seeding'))
     in_peaks = File(exists=True, desc=('peaks computed from the odf'))
-    seed_coord = File(exists=True,
-                      desc=('file containing the list of seed voxel '
-                            'coordinates (N,3)'))
-    gfa_thresh = traits.Float(0.2, mandatory=True, usedefault=True,
-                              desc=('GFA threshold to compute tracking mask'))
+    seed_coord = File(
+        exists=True,
+        desc=('file containing the list of seed voxel '
+              'coordinates (N,3)'))
+    gfa_thresh = traits.Float(
+        0.2,
+        mandatory=True,
+        usedefault=True,
+        desc=('GFA threshold to compute tracking mask'))
     peak_threshold = traits.Float(
-        0.5, mandatory=True, usedefault=True,
+        0.5,
+        mandatory=True,
+        usedefault=True,
         desc=('threshold to consider peaks from model'))
-    min_angle = traits.Float(25.0, mandatory=True, usedefault=True,
-                             desc=('minimum separation angle'))
-    multiprocess = traits.Bool(True, mandatory=True, usedefault=True,
-                               desc=('use multiprocessing'))
-    save_seeds = traits.Bool(False, mandatory=True, usedefault=True,
-                             desc=('save seeding voxels coordinates'))
-    num_seeds = traits.Int(10000, mandatory=True, usedefault=True,
-                           desc=('desired number of tracks in tractography'))
+    min_angle = traits.Float(
+        25.0,
+        mandatory=True,
+        usedefault=True,
+        desc=('minimum separation angle'))
+    multiprocess = traits.Bool(
+        True, mandatory=True, usedefault=True, desc=('use multiprocessing'))
+    save_seeds = traits.Bool(
+        False,
+        mandatory=True,
+        usedefault=True,
+        desc=('save seeding voxels coordinates'))
+    num_seeds = traits.Int(
+        10000,
+        mandatory=True,
+        usedefault=True,
+        desc=('desired number of tracks in tractography'))
     out_prefix = traits.Str(desc=('output prefix for file names'))
 
 
 class StreamlineTractographyOutputSpec(TraitedSpec):
     tracks = File(desc='TrackVis file containing extracted streamlines')
-    gfa = File(desc=('The resulting GFA (generalized FA) computed using the '
-                     'peaks of the ODF'))
+    gfa = File(
+        desc=('The resulting GFA (generalized FA) computed using the '
+              'peaks of the ODF'))
     odf_peaks = File(desc=('peaks computed from the odf'))
-    out_seeds = File(desc=('file containing the (N,3) *voxel* coordinates used'
-                           ' in seeding.'))
+    out_seeds = File(
+        desc=('file containing the (N,3) *voxel* coordinates used'
+              ' in seeding.'))
 
 
 class StreamlineTractography(DipyBaseInterface):
-
     """
     Streamline tractography using EuDX [Garyfallidis12]_.
 
@@ -168,8 +193,8 @@ class StreamlineTractography(DipyBaseInterface):
         import pickle as pickle
         import gzip
 
-        if (not (isdefined(self.inputs.in_model) or
-                 isdefined(self.inputs.in_peaks))):
+        if (not (isdefined(self.inputs.in_model)
+                 or isdefined(self.inputs.in_peaks))):
             raise RuntimeError(('At least one of in_model or in_peaks should '
                                 'be supplied'))
 
@@ -210,8 +235,8 @@ class StreamlineTractography(DipyBaseInterface):
             f.close()
 
         hdr.set_data_shape(peaks.gfa.shape)
-        nb.Nifti1Image(peaks.gfa.astype(np.float32), affine,
-                       hdr).to_filename(self._gen_filename('gfa'))
+        nb.Nifti1Image(peaks.gfa.astype(np.float32), affine, hdr).to_filename(
+            self._gen_filename('gfa'))
 
         IFLOGGER.info('Performing tractography')
 
@@ -230,23 +255,23 @@ class StreamlineTractography(DipyBaseInterface):
 
         elif isdefined(self.inputs.seed_mask):
             seedmsk = nb.load(self.inputs.seed_mask).get_data()
-            assert(seedmsk.shape == data.shape[:3])
+            assert (seedmsk.shape == data.shape[:3])
             seedmsk[seedmsk > 0] = 1
             seedmsk[seedmsk < 1] = 0
             seedps = np.array(np.where(seedmsk == 1), dtype=np.float32).T
             vseeds = seedps.shape[0]
             nsperv = (seeds // vseeds) + 1
             IFLOGGER.info('Seed mask is provided (%d voxels inside '
-                          'mask), computing seeds (%d seeds/voxel).',
-                          vseeds, nsperv)
+                          'mask), computing seeds (%d seeds/voxel).', vseeds,
+                          nsperv)
             if nsperv > 1:
                 IFLOGGER.info('Needed %d seeds per selected voxel (total %d).',
                               nsperv, vseeds)
                 seedps = np.vstack(np.array([seedps] * nsperv))
                 voxcoord = seedps + np.random.uniform(-1, 1, size=seedps.shape)
                 nseeds = voxcoord.shape[0]
-                seeds = affine.dot(np.vstack((voxcoord.T,
-                                              np.ones((1, nseeds)))))[:3, :].T
+                seeds = affine.dot(
+                    np.vstack((voxcoord.T, np.ones((1, nseeds)))))[:3, :].T
 
                 if self.inputs.save_seeds:
                     np.savetxt(self._gen_filename('seeds', ext='.txt'), seeds)
@@ -258,17 +283,20 @@ class StreamlineTractography(DipyBaseInterface):
             tmask = gfa
             a_low = self.inputs.gfa_thresh
 
-        eu = EuDX(tmask,
-                  peaks.peak_indices[..., 0],
-                  seeds=seeds,
-                  affine=affine,
-                  odf_vertices=sphere.vertices,
-                  a_low=a_low)
+        eu = EuDX(
+            tmask,
+            peaks.peak_indices[..., 0],
+            seeds=seeds,
+            affine=affine,
+            odf_vertices=sphere.vertices,
+            a_low=a_low)
 
         ss_mm = [np.array(s) for s in eu]
 
         trkfilev = nb.trackvis.TrackvisFile(
-            [(s, None, None) for s in ss_mm], points_space='rasmm', affine=np.eye(4))
+            [(s, None, None) for s in ss_mm],
+            points_space='rasmm',
+            affine=np.eye(4))
         trkfilev.to_file(self._gen_filename('tracked', ext='.trk'))
         return runtime
 
@@ -282,8 +310,7 @@ class StreamlineTractography(DipyBaseInterface):
             if isdefined(self.inputs.seed_coord):
                 outputs['out_seeds'] = self.inputs.seed_coord
             else:
-                outputs['out_seeds'] = self._gen_filename('seeds',
-                                                          ext='.txt')
+                outputs['out_seeds'] = self._gen_filename('seeds', ext='.txt')
 
         return outputs
 

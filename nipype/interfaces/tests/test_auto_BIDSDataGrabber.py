@@ -4,21 +4,17 @@ from ..bids_utils import BIDSDataGrabber
 
 
 def test_BIDSDataGrabber_inputs():
-    input_map = dict(base_dir=dict(mandatory=True,
-    ),
-    output_query=dict(),
-    raise_on_empty=dict(usedefault=True,
-    ),
-    return_type=dict(usedefault=True,
-    ),
+    input_map = dict(
+        base_dir=dict(mandatory=True, ),
+        output_query=dict(),
+        raise_on_empty=dict(usedefault=True, ),
+        return_type=dict(usedefault=True, ),
     )
     inputs = BIDSDataGrabber.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_BIDSDataGrabber_outputs():
     output_map = dict()
     outputs = BIDSDataGrabber.output_spec()

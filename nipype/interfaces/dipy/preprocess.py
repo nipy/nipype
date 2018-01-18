@@ -7,7 +7,8 @@ Change directory to provide relative paths for doctests
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import os.path as op
 import nibabel as nb
@@ -23,15 +24,22 @@ IFLOGGER = logging.getLogger('interface')
 
 
 class ResampleInputSpec(TraitedSpec):
-    in_file = File(exists=True, mandatory=True,
-                   desc='The input 4D diffusion-weighted image file')
-    vox_size = traits.Tuple(traits.Float, traits.Float, traits.Float,
-                            desc=('specify the new voxel zooms. If no vox_size'
-                                  ' is set, then isotropic regridding will '
-                                  'be performed, with spacing equal to the '
-                                  'smallest current zoom.'))
+    in_file = File(
+        exists=True,
+        mandatory=True,
+        desc='The input 4D diffusion-weighted image file')
+    vox_size = traits.Tuple(
+        traits.Float,
+        traits.Float,
+        traits.Float,
+        desc=('specify the new voxel zooms. If no vox_size'
+              ' is set, then isotropic regridding will '
+              'be performed, with spacing equal to the '
+              'smallest current zoom.'))
     interp = traits.Int(
-        1, mandatory=True, usedefault=True,
+        1,
+        mandatory=True,
+        usedefault=True,
         desc=('order of the interpolator (0 = nearest, 1 = linear, etc.'))
 
 
@@ -40,7 +48,6 @@ class ResampleOutputSpec(TraitedSpec):
 
 
 class Resample(DipyBaseInterface):
-
     """
     An interface to reslicing diffusion datasets.
     See
@@ -65,8 +72,11 @@ class Resample(DipyBaseInterface):
             vox_size = self.inputs.vox_size
 
         out_file = op.abspath(self._gen_outfilename())
-        resample_proxy(self.inputs.in_file, order=order,
-                       new_zooms=vox_size, out_file=out_file)
+        resample_proxy(
+            self.inputs.in_file,
+            order=order,
+            new_zooms=vox_size,
+            out_file=out_file)
 
         IFLOGGER.info('Resliced image saved as %s', out_file)
         return runtime
@@ -85,16 +95,25 @@ class Resample(DipyBaseInterface):
 
 
 class DenoiseInputSpec(TraitedSpec):
-    in_file = File(exists=True, mandatory=True,
-                   desc='The input 4D diffusion-weighted image file')
+    in_file = File(
+        exists=True,
+        mandatory=True,
+        desc='The input 4D diffusion-weighted image file')
     in_mask = File(exists=True, desc='brain mask')
-    noise_model = traits.Enum('rician', 'gaussian', mandatory=True,
-                              usedefault=True,
-                              desc=('noise distribution model'))
-    signal_mask = File(desc=('mask in which the mean signal '
-                             'will be computed'), exists=True)
-    noise_mask = File(desc=('mask in which the standard deviation of noise '
-                            'will be computed'), exists=True)
+    noise_model = traits.Enum(
+        'rician',
+        'gaussian',
+        mandatory=True,
+        usedefault=True,
+        desc=('noise distribution model'))
+    signal_mask = File(
+        desc=('mask in which the mean signal '
+              'will be computed'),
+        exists=True)
+    noise_mask = File(
+        desc=('mask in which the standard deviation of noise '
+              'will be computed'),
+        exists=True)
     patch_radius = traits.Int(1, desc='patch radius')
     block_radius = traits.Int(5, desc='block_radius')
     snr = traits.Float(desc='manually set an SNR')
@@ -105,7 +124,6 @@ class DenoiseOutputSpec(TraitedSpec):
 
 
 class Denoise(DipyBaseInterface):
-
     """
     An interface to denoising diffusion datasets [Coupe2008]_.
     See
@@ -131,8 +149,8 @@ class Denoise(DipyBaseInterface):
     def _run_interface(self, runtime):
         out_file = op.abspath(self._gen_outfilename())
 
-        settings = dict(mask=None,
-                        rician=(self.inputs.noise_model == 'rician'))
+        settings = dict(
+            mask=None, rician=(self.inputs.noise_model == 'rician'))
 
         if isdefined(self.inputs.in_mask):
             settings['mask'] = nb.load(self.inputs.in_mask).get_data()
@@ -154,13 +172,15 @@ class Denoise(DipyBaseInterface):
         if isdefined(self.inputs.noise_mask):
             noise_mask = nb.load(self.inputs.noise_mask).get_data()
 
-        _, s = nlmeans_proxy(self.inputs.in_file, settings,
-                             snr=snr,
-                             smask=signal_mask,
-                             nmask=noise_mask,
-                             out_file=out_file)
-        IFLOGGER.info('Denoised image saved as %s, estimated SNR=%s',
-                      out_file, str(s))
+        _, s = nlmeans_proxy(
+            self.inputs.in_file,
+            settings,
+            snr=snr,
+            smask=signal_mask,
+            nmask=noise_mask,
+            out_file=out_file)
+        IFLOGGER.info('Denoised image saved as %s, estimated SNR=%s', out_file,
+                      str(s))
         return runtime
 
     def _list_outputs(self):
@@ -197,7 +217,7 @@ def resample_proxy(in_file, order=3, new_zooms=None, out_file=None):
 
     if new_zooms is None:
         minzoom = np.array(im_zooms).min()
-        new_zooms = tuple(np.ones((3,)) * minzoom)
+        new_zooms = tuple(np.ones((3, )) * minzoom)
 
     if np.all(im_zooms == new_zooms):
         return in_file
@@ -208,12 +228,13 @@ def resample_proxy(in_file, order=3, new_zooms=None, out_file=None):
     hdr.set_zooms(tuple(tmp_zooms))
     hdr.set_data_shape(data2.shape)
     hdr.set_xyzt_units('mm')
-    nb.Nifti1Image(data2.astype(hdr.get_data_dtype()),
-                   affine2, hdr).to_filename(out_file)
+    nb.Nifti1Image(data2.astype(hdr.get_data_dtype()), affine2,
+                   hdr).to_filename(out_file)
     return out_file, new_zooms
 
 
-def nlmeans_proxy(in_file, settings,
+def nlmeans_proxy(in_file,
+                  settings,
                   snr=None,
                   smask=None,
                   nmask=None,

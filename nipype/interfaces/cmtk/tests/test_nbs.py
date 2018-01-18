@@ -11,12 +11,13 @@ try:
 except Exception as e:
     have_cv = False
 
+
 @pytest.fixture()
 def creating_graphs(tmpdir):
     graphlist = []
-    graphnames = ["name"+str(i) for i in range(6)]
+    graphnames = ["name" + str(i) for i in range(6)]
     for idx, name in enumerate(graphnames):
-        graph = np.random.rand(10,10)
+        graph = np.random.rand(10, 10)
         G = nx.from_numpy_matrix(graph)
         out_file = tmpdir.strpath + graphnames[idx] + '.pck'
         # Save as pck file
@@ -25,7 +26,8 @@ def creating_graphs(tmpdir):
     return graphlist
 
 
-@pytest.mark.skipif(have_cv, reason="tests for import error, cviewer available")
+@pytest.mark.skipif(
+    have_cv, reason="tests for import error, cviewer available")
 def test_importerror(creating_graphs, tmpdir):
     tmpdir.chdir()
     graphlist = creating_graphs
@@ -44,7 +46,7 @@ def test_importerror(creating_graphs, tmpdir):
 
 @pytest.mark.skipif(not have_cv, reason="cviewer has to be available")
 def test_keyerror(creating_graphs):
-    graphlist =creating_graphs
+    graphlist = creating_graphs
 
     group1 = graphlist[:3]
     group2 = graphlist[3:]

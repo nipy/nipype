@@ -16,7 +16,6 @@ anatfile = os.path.join(basedir, 'data', 'structural.nii')
 template = funcfile
 transfm = funcfile
 
-
 from . import decorators as dec
 from .utils import package_check, TempFATFS
 

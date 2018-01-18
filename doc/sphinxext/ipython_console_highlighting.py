@@ -59,7 +59,6 @@ class IPythonConsoleLexer(Lexer):
 
     def get_tokens_unprocessed(self, text):
         pylexer = PythonLexer(**self.options)
-        tblexer = PythonTracebackLexer(**self.options)
 
         curcode = ''
         insertions = []
@@ -72,21 +71,22 @@ class IPythonConsoleLexer(Lexer):
                 insertions.append((len(curcode),
                                    [(0, Comment, line)]))
             elif input_prompt is not None:
-                insertions.append((len(curcode),
-                                   [(0, Generic.Prompt, input_prompt.group())]))
+                insertions.append((len(
+                    curcode), [(0, Generic.Prompt, input_prompt.group())]))
                 curcode += line[input_prompt.end():]
             elif continue_prompt is not None:
-                insertions.append((len(curcode),
-                                   [(0, Generic.Prompt, continue_prompt.group())]))
+                insertions.append((len(
+                    curcode), [(0, Generic.Prompt, continue_prompt.group())]))
                 curcode += line[continue_prompt.end():]
             elif output_prompt is not None:
-                insertions.append((len(curcode),
-                                   [(0, Generic.Output, output_prompt.group())]))
+                insertions.append((len(
+                    curcode), [(0, Generic.Output, output_prompt.group())]))
                 curcode += line[output_prompt.end():]
             else:
                 if curcode:
                     for item in do_insertions(insertions,
-                                              pylexer.get_tokens_unprocessed(curcode)):
+                                              pylexer.get_tokens_unprocessed(
+                                                  curcode)):
                         yield item
                         curcode = ''
                         insertions = []

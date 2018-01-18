@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-
 """
 The niftyreg module provides classes for interfacing with `niftyreg
 <http://sourceforge.net/projects/niftyreg/>`_ command line tools.
@@ -37,9 +36,11 @@ def get_custom_path(command, env_dir='NIFTYREGDIR'):
 class NiftyRegCommandInputSpec(CommandLineInputSpec):
     """Input Spec for niftyreg interfaces."""
     # Set the number of omp thread to use
-    omp_core_val = traits.Int(int(os.environ.get('OMP_NUM_THREADS', '1')),
-                              desc='Number of openmp thread to use',
-                              argstr='-omp %i', usedefault=True)
+    omp_core_val = traits.Int(
+        int(os.environ.get('OMP_NUM_THREADS', '1')),
+        desc='Number of openmp thread to use',
+        argstr='-omp %i',
+        usedefault=True)
 
 
 class NiftyRegCommand(CommandLine):
