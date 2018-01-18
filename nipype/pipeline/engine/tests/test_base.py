@@ -32,14 +32,15 @@ class EngineTestInterface(nib.BaseInterface):
         return outputs
 
 
-@pytest.mark.parametrize('name', ['valid1', 'valid_node', 'ValidNode0'])
+@pytest.mark.parametrize(
+    'name', ['valid1', 'valid_node', 'valid-node', 'ValidNode0'])
 def test_create(name):
     base = EngineBase(name=name)
     assert base.name == name
 
 
 @pytest.mark.parametrize(
-    'name', ['invalid-1', 'invalid.1', 'invalid@', 'in/valid', None])
+    'name', ['invalid*1', 'invalid.1', 'invalid@', 'in/valid', None])
 def test_create_invalid(name):
     with pytest.raises(ValueError):
         EngineBase(name=name)

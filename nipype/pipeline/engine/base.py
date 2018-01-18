@@ -59,10 +59,9 @@ class EngineBase(object):
 
     @name.setter
     def name(self, name):
-        if name and bool(re.match(r'^[\w_]+$', name)):
-            self._name = name
-        else:
+        if not name or not re.match(r'^[\w-]+$', name):
             raise ValueError('[Workflow|Node] name "%s" is not valid.' % name)
+        self._name = name
 
     @property
     def fullname(self):
