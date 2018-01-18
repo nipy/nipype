@@ -857,6 +857,7 @@ class CommandLine(BaseInterface):
 
     """
     input_spec = CommandLineInputSpec
+    _cmd_prefix = ''
     _cmd = None
     _version = None
     _terminal_output = 'stream'
@@ -915,7 +916,7 @@ class CommandLine(BaseInterface):
         """ `command` plus any arguments (args)
         validates arguments and generates command line"""
         self._check_mandatory_inputs()
-        allargs = [self.cmd] + self._parse_inputs()
+        allargs = [self._cmd_prefix + self.cmd] + self._parse_inputs()
         return ' '.join(allargs)
 
     @property
