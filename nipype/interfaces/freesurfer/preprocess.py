@@ -655,8 +655,9 @@ class DICOMConvert(FSCommand):
         files = self._get_filelist(outdir)
         for infile, outfile in files:
             if not os.path.exists(outfile):
-                single_cmd = '%s %s %s' % (self.cmd, infile,
-                                           os.path.join(outdir, outfile))
+                single_cmd = '%s%s %s %s' % (self._cmd_prefix, self.cmd,
+                                             infile, os.path.join(outdir,
+                                                                  outfile))
                 cmd.extend([single_cmd])
         return '; '.join(cmd)
 

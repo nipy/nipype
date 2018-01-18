@@ -294,13 +294,10 @@ class AFNIPythonCommandInputSpec(CommandLineInputSpec):
 class AFNIPythonCommand(AFNICommand):
     @property
     def cmd(self):
-        if spawn.find_executable(super(AFNIPythonCommand,
-                                       self).cmd) is not None:
-            return spawn.find_executable(super(AFNIPythonCommand, self).cmd)
-        else:
-            return super(AFNIPythonCommand, self).cmd
+        orig_cmd = super(AFNIPythonCommand, self).cmd
+        found = spawn.find_executable(orig_cmd)
+        return found if found is not None else orig_cmd
 
     @property
-    def cmdline(self):
-        return "{} {}".format(self.inputs.py27_path,
-                              super(AFNIPythonCommand, self).cmdline)
+    def _cmd_prefix(self):
+        return "{} ".format(self.inputs.py27_path)
