@@ -185,10 +185,11 @@ class Node(EngineBase):
                    'num_threads') and self._n_procs is not None:
             self._interface.inputs.num_threads = self._n_procs
 
-        # Initialize needed_outputs
-        self.needed_outputs = []
-        if needed_outputs:
-            self.needed_outputs = sorted(needed_outputs)
+        # Initialize needed_outputs and hashes
+        self._hashvalue = None
+        self._hashed_inputs = None
+        self._needed_outputs = []
+        self.needed_outputs = sorted(needed_outputs)
 
     @property
     def interface(self):
@@ -209,6 +210,20 @@ class Node(EngineBase):
     def outputs(self):
         """Return the output fields of the underlying interface"""
         return self._interface._outputs()
+
+    @property
+    def needed_outputs(self):
+        return self._needed_outputs
+
+    @needed_outputs.setter
+    def needed_outputs(self, new_outputs):
+        """Needed outputs changes the hash, refresh if changed"""
+        new_outputs = sorted(new_outputs or [])
+        if new_outputs != self._needed_outputs:
+            # Reset hash
+            self._hashvalue = None
+            self._hashed_inputs = None
+            self._needed_outputs = new_outputs
 
     @property
     def mem_gb(self):
@@ -387,8 +402,8 @@ class Node(EngineBase):
         logger.info('[Node] Setting-up "%s" in "%s".', self.fullname, outdir)
         hash_info = self.hash_exists(updatehash=updatehash)
         hash_exists, hashvalue, hashfile, hashed_inputs = hash_info
-        force_run = self.overwrite or (self.overwrite is None
-                                       and self._interface.always_run)
+        force_run = self.overwrite or (self.overwrite is None and
+                                       self._interface.always_run)
 
         # If the node is cached, check on pklz files and finish
         if hash_exists and (updatehash or not force_run):
@@ -479,17 +494,17 @@ class Node(EngineBase):
     def _get_hashval(self):
         """Return a hash of the input state"""
         self._get_inputs()
-        hashed_inputs, hashvalue = self.inputs.get_hashval(
-            hash_method=self.config['execution']['hash_method'])
-        rm_extra = self.config['execution']['remove_unnecessary_outputs']
-        if str2bool(rm_extra) and self.needed_outputs:
-            hashobject = md5()
-            hashobject.update(hashvalue.encode())
-            sorted_outputs = sorted(self.needed_outputs)
-            hashobject.update(str(sorted_outputs).encode())
-            hashvalue = hashobject.hexdigest()
-            hashed_inputs.append(('needed_outputs', sorted_outputs))
-        return hashed_inputs, hashvalue
+        if self._hashvalue is None and self._hashed_inputs is None:
+            self._hashed_inputs, self._hashvalue = self.inputs.get_hashval(
+                hash_method=self.config['execution']['hash_method'])
+            rm_extra = self.config['execution']['remove_unnecessary_outputs']
+            if str2bool(rm_extra) and self.needed_outputs:
+                hashobject = md5()
+                hashobject.update(self._hashvalue.encode())
+                hashobject.update(str(self.needed_outputs).encode())
+                self._hashvalue = hashobject.hexdigest()
+                self._hashed_inputs.append(('needed_outputs', self.needed_outputs))
+        return self._hashed_inputs, self._hashvalue
 
     def _get_inputs(self):
         """Retrieve inputs from pointers to results file
