@@ -17,7 +17,8 @@ Hettinger. http://users.rcn.com/python/download/Descriptor.htm
 
 [2] Python data model, http://docs.python.org/reference/datamodel.html
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 from builtins import object
 
@@ -25,6 +26,7 @@ from builtins import object
 class OneTimeProperty(object):
     """A descriptor to make special properties that become normal attributes.
     """
+
     def __init__(self, func):
         """Create a OneTimeProperty instance.
 
@@ -42,8 +44,8 @@ class OneTimeProperty(object):
     def __get__(self, obj, type=None):
         """ Called on attribute access on the class or instance.  """
         if obj is None:
-            # Being called on the class, return the original function. This way,
-            # introspection works on the class.
+            # Being called on the class, return the original function.
+            # This way, introspection works on the class.
             return self.getter
 
         val = self.getter(obj)
@@ -58,7 +60,6 @@ def setattr_on_read(func):
     # - sor_property (set on read property)
     # - prop2attr_on_read
     # ... ?
-
     """Decorator to create OneTimeProperty attributes.
 
     Parameters

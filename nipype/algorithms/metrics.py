@@ -12,7 +12,8 @@ measures to evaluate results from other processing units.
     >>> os.chdir(datadir)
 
 '''
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import zip, range
 
 import os
@@ -28,22 +29,28 @@ from .. import config, logging
 from ..utils.misc import package_check
 
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
-                               InputMultiPath,
-                               BaseInterfaceInputSpec, isdefined)
+                               InputMultiPath, BaseInterfaceInputSpec,
+                               isdefined)
 from ..utils import NUMPY_MMAP
 
 iflogger = logging.getLogger('interface')
 
 
 class DistanceInputSpec(BaseInterfaceInputSpec):
-    volume1 = File(exists=True, mandatory=True,
-                   desc="Has to have the same dimensions as volume2.")
+    volume1 = File(
+        exists=True,
+        mandatory=True,
+        desc="Has to have the same dimensions as volume2.")
     volume2 = File(
-        exists=True, mandatory=True,
-        desc="Has to have the same dimensions as volume1."
-    )
+        exists=True,
+        mandatory=True,
+        desc="Has to have the same dimensions as volume1.")
     method = traits.Enum(
-        "eucl_min", "eucl_cog", "eucl_mean", "eucl_wmean", "eucl_max",
+        "eucl_min",
+        "eucl_cog",
+        "eucl_mean",
+        "eucl_wmean",
+        "eucl_max",
         desc='""eucl_min": Euclidean distance between two closest points\
         "eucl_cog": mean Euclidian distance between the Center of Gravity\
         of volume1 and CoGs of volume2\
@@ -53,16 +60,15 @@ class DistanceInputSpec(BaseInterfaceInputSpec):
         to volume1 weighted by their values\
         "eucl_max": maximum over minimum Euclidian distances of all volume2\
         voxels to volume1 (also known as the Hausdorff distance)',
-        usedefault=True
-    )
+        usedefault=True)
     mask_volume = File(
         exists=True, desc="calculate overlap only within this mask.")
 
 
 class DistanceOutputSpec(TraitedSpec):
     distance = traits.Float()
-    point1 = traits.Array(shape=(3,))
-    point2 = traits.Array(shape=(3,))
+    point1 = traits.Array(shape=(3, ))
+    point2 = traits.Array(shape=(3, ))
     histogram = File()
 
 
@@ -103,23 +109,24 @@ class Distance(BaseInterface):
             np.argmin(dist_matrix), dist_matrix.shape)
         return (euclidean(set1_coordinates.T[point1, :],
                           set2_coordinates.T[point2, :]),
-                set1_coordinates.T[point1, :],
-                set2_coordinates.T[point2, :])
+                set1_coordinates.T[point1, :], set2_coordinates.T[point2, :])
 
     def _eucl_cog(self, nii1, nii2):
-        origdata1 = np.logical_and(nii1.get_data() != 0, np.logical_not(np.isnan(nii1.get_data())))
+        origdata1 = np.logical_and(nii1.get_data() != 0,
+                                   np.logical_not(np.isnan(nii1.get_data())))
         cog_t = np.array(center_of_mass(origdata1.copy())).reshape(-1, 1)
         cog_t = np.vstack((cog_t, np.array([1])))
         cog_t_coor = np.dot(nii1.affine, cog_t)[:3, :]
 
-        origdata2 = np.logical_and(nii2.get_data() != 0, np.logical_not(np.isnan(nii2.get_data())))
+        origdata2 = np.logical_and(nii2.get_data() != 0,
+                                   np.logical_not(np.isnan(nii2.get_data())))
         (labeled_data, n_labels) = label(origdata2)
 
         cogs = np.ones((4, n_labels))
 
         for i in range(n_labels):
-            cogs[:3, i] = np.array(center_of_mass(origdata2,
-                                                  labeled_data, i + 1))
+            cogs[:3, i] = np.array(
+                center_of_mass(origdata2, labeled_data, i + 1))
 
         cogs_coor = np.dot(nii2.affine, cogs)[:3, :]
 
@@ -149,9 +156,7 @@ class Distance(BaseInterface):
 
         if weighted:
             return np.average(
-                min_dist_matrix,
-                weights=nii2.get_data()[origdata2].flat
-            )
+                min_dist_matrix, weights=nii2.get_data()[origdata2].flat)
         else:
             return np.mean(min_dist_matrix)
 
@@ -179,8 +184,8 @@ class Distance(BaseInterface):
         set1_coordinates = self._get_coordinates(border1, nii1.affine)
         set2_coordinates = self._get_coordinates(border2, nii2.affine)
         distances = cdist(set1_coordinates.T, set2_coordinates.T)
-        mins = np.concatenate(
-            (np.amin(distances, axis=0), np.amin(distances, axis=1)))
+        mins = np.concatenate((np.amin(distances, axis=0),
+                               np.amin(distances, axis=1)))
 
         return np.max(mins)
 
@@ -218,39 +223,52 @@ class Distance(BaseInterface):
 
 
 class OverlapInputSpec(BaseInterfaceInputSpec):
-    volume1 = File(exists=True, mandatory=True,
-                   desc='Has to have the same dimensions as volume2.')
-    volume2 = File(exists=True, mandatory=True,
-                   desc='Has to have the same dimensions as volume1.')
-    mask_volume = File(exists=True,
-                       desc='calculate overlap only within this mask.')
-    bg_overlap = traits.Bool(False, usedefault=True, mandatory=True,
-                             desc='consider zeros as a label')
+    volume1 = File(
+        exists=True,
+        mandatory=True,
+        desc='Has to have the same dimensions as volume2.')
+    volume2 = File(
+        exists=True,
+        mandatory=True,
+        desc='Has to have the same dimensions as volume1.')
+    mask_volume = File(
+        exists=True, desc='calculate overlap only within this mask.')
+    bg_overlap = traits.Bool(
+        False,
+        usedefault=True,
+        mandatory=True,
+        desc='consider zeros as a label')
     out_file = File('diff.nii', usedefault=True)
-    weighting = traits.Enum('none', 'volume', 'squared_vol', usedefault=True,
-                            desc=('\'none\': no class-overlap weighting is '
-                                  'performed. \'volume\': computed class-'
-                                  'overlaps are weighted by class volume '
-                                  '\'squared_vol\': computed class-overlaps '
-                                  'are weighted by the squared volume of '
-                                  'the class'))
-    vol_units = traits.Enum('voxel', 'mm', mandatory=True, usedefault=True,
-                            desc='units for volumes')
+    weighting = traits.Enum(
+        'none',
+        'volume',
+        'squared_vol',
+        usedefault=True,
+        desc=('\'none\': no class-overlap weighting is '
+              'performed. \'volume\': computed class-'
+              'overlaps are weighted by class volume '
+              '\'squared_vol\': computed class-overlaps '
+              'are weighted by the squared volume of '
+              'the class'))
+    vol_units = traits.Enum(
+        'voxel',
+        'mm',
+        mandatory=True,
+        usedefault=True,
+        desc='units for volumes')
 
 
 class OverlapOutputSpec(TraitedSpec):
     jaccard = traits.Float(desc='averaged jaccard index')
     dice = traits.Float(desc='averaged dice index')
-    roi_ji = traits.List(traits.Float(),
-                         desc=('the Jaccard index (JI) per ROI'))
+    roi_ji = traits.List(
+        traits.Float(), desc=('the Jaccard index (JI) per ROI'))
     roi_di = traits.List(traits.Float(), desc=('the Dice index (DI) per ROI'))
     volume_difference = traits.Float(desc=('averaged volume difference'))
-    roi_voldiff = traits.List(traits.Float(),
-                              desc=('volume differences of ROIs'))
-    labels = traits.List(traits.Int(),
-                         desc=('detected labels'))
-    diff_file = File(exists=True,
-                     desc='error map of differences')
+    roi_voldiff = traits.List(
+        traits.Float(), desc=('volume differences of ROIs'))
+    labels = traits.List(traits.Int(), desc=('detected labels'))
+    diff_file = File(exists=True, desc='error map of differences')
 
 
 class Overlap(BaseInterface):
@@ -298,8 +316,6 @@ class Overlap(BaseInterface):
         data1 = data1.astype(np.min_scalar_type(max1))
         data2 = nii2.get_data().astype(np.min_scalar_type(max1))
         data2[np.logical_or(data1 < 0, np.isnan(data1))] = 0
-        max2 = data2.max()
-        maxlabel = max(max1, max2)
 
         if isdefined(self.inputs.mask_volume):
             maskdata = nb.load(self.inputs.mask_volume).get_data()
@@ -316,8 +332,9 @@ class Overlap(BaseInterface):
             labels.insert(0, 0)
 
         for l in labels:
-            res.append(self._bool_vec_dissimilarity(data1 == l,
-                                                    data2 == l, method='jaccard'))
+            res.append(
+                self._bool_vec_dissimilarity(
+                    data1 == l, data2 == l, method='jaccard'))
             volumes1.append(scale * len(data1[data1 == l]))
             volumes2.append(scale * len(data2[data2 == l]))
 
@@ -325,7 +342,7 @@ class Overlap(BaseInterface):
         results['jaccard'] = np.array(res)
         results['dice'] = 2.0 * results['jaccard'] / (results['jaccard'] + 1.0)
 
-        weights = np.ones((len(volumes1),), dtype=np.float32)
+        weights = np.ones((len(volumes1), ), dtype=np.float32)
         if self.inputs.weighting != 'none':
             weights = weights / np.array(volumes1)
             if self.inputs.weighting == 'squared_vol':
@@ -335,13 +352,14 @@ class Overlap(BaseInterface):
         both_data = np.zeros(data1.shape)
         both_data[(data1 - data2) != 0] = 1
 
-        nb.save(nb.Nifti1Image(both_data, nii1.affine, nii1.header),
-                self.inputs.out_file)
+        nb.save(
+            nb.Nifti1Image(both_data, nii1.affine, nii1.header),
+            self.inputs.out_file)
 
         self._labels = labels
         self._ove_rois = results
-        self._vol_rois = (np.array(volumes1) -
-                          np.array(volumes2)) / np.array(volumes1)
+        self._vol_rois = (
+            np.array(volumes1) - np.array(volumes2)) / np.array(volumes1)
 
         self._dice = round(np.sum(weights * results['dice']), 5)
         self._jaccard = round(np.sum(weights * results['jaccard']), 5)
@@ -364,26 +382,44 @@ class Overlap(BaseInterface):
 
 
 class FuzzyOverlapInputSpec(BaseInterfaceInputSpec):
-    in_ref = InputMultiPath(File(exists=True), mandatory=True,
-                            desc='Reference image. Requires the same dimensions as in_tst.')
-    in_tst = InputMultiPath(File(exists=True), mandatory=True,
-                            desc='Test image. Requires the same dimensions as in_ref.')
-    weighting = traits.Enum('none', 'volume', 'squared_vol', usedefault=True,
-                            desc=('\'none\': no class-overlap weighting is '
-                                  'performed. \'volume\': computed class-'
-                                  'overlaps are weighted by class volume '
-                                  '\'squared_vol\': computed class-overlaps '
-                                  'are weighted by the squared volume of '
-                                  'the class'))
-    out_file = File('diff.nii', desc='alternative name for resulting difference-map', usedefault=True)
+    in_ref = InputMultiPath(
+        File(exists=True),
+        mandatory=True,
+        desc='Reference image. Requires the same dimensions as in_tst.')
+    in_tst = InputMultiPath(
+        File(exists=True),
+        mandatory=True,
+        desc='Test image. Requires the same dimensions as in_ref.')
+    weighting = traits.Enum(
+        'none',
+        'volume',
+        'squared_vol',
+        usedefault=True,
+        desc=('\'none\': no class-overlap weighting is '
+              'performed. \'volume\': computed class-'
+              'overlaps are weighted by class volume '
+              '\'squared_vol\': computed class-overlaps '
+              'are weighted by the squared volume of '
+              'the class'))
+    out_file = File(
+        'diff.nii',
+        desc='alternative name for resulting difference-map',
+        usedefault=True)
 
 
 class FuzzyOverlapOutputSpec(TraitedSpec):
     jaccard = traits.Float(desc='Fuzzy Jaccard Index (fJI), all the classes')
     dice = traits.Float(desc='Fuzzy Dice Index (fDI), all the classes')
-    diff_file = File(exists=True, desc='resulting difference-map of all classes, using the chosen weighting')
-    class_fji = traits.List(traits.Float(), desc='Array containing the fJIs of each computed class')
-    class_fdi = traits.List(traits.Float(), desc='Array containing the fDIs of each computed class')
+    diff_file = File(
+        exists=True,
+        desc=
+        'resulting difference-map of all classes, using the chosen weighting')
+    class_fji = traits.List(
+        traits.Float(),
+        desc='Array containing the fJIs of each computed class')
+    class_fdi = traits.List(
+        traits.Float(),
+        desc='Array containing the fDIs of each computed class')
 
 
 class FuzzyOverlap(BaseInterface):
@@ -411,11 +447,17 @@ class FuzzyOverlap(BaseInterface):
 
     def _run_interface(self, runtime):
         ncomp = len(self.inputs.in_ref)
-        assert(ncomp == len(self.inputs.in_tst))
+        assert (ncomp == len(self.inputs.in_tst))
         weights = np.ones(shape=ncomp)
 
-        img_ref = np.array([nb.load(fname, mmap=NUMPY_MMAP).get_data() for fname in self.inputs.in_ref])
-        img_tst = np.array([nb.load(fname, mmap=NUMPY_MMAP).get_data() for fname in self.inputs.in_tst])
+        img_ref = np.array([
+            nb.load(fname, mmap=NUMPY_MMAP).get_data()
+            for fname in self.inputs.in_ref
+        ])
+        img_tst = np.array([
+            nb.load(fname, mmap=NUMPY_MMAP).get_data()
+            for fname in self.inputs.in_tst
+        ])
 
         msk = np.sum(img_ref, axis=0)
         msk[msk > 0] = 1.0
@@ -444,7 +486,7 @@ class FuzzyOverlap(BaseInterface):
         if self.inputs.weighting != "none":
             weights = 1.0 / np.array(volumes)
             if self.inputs.weighting == "squared_vol":
-                weights = weights ** 2
+                weights = weights**2
 
         weights = weights / np.sum(weights)
 
@@ -457,9 +499,11 @@ class FuzzyOverlap(BaseInterface):
             ch[msk == 0] = 0
             diff += w * ch
 
-        nb.save(nb.Nifti1Image(diff, nb.load(self.inputs.in_ref[0]).affine,
-                               nb.load(self.inputs.in_ref[0]).header),
-                self.inputs.out_file)
+        nb.save(
+            nb.Nifti1Image(diff,
+                           nb.load(self.inputs.in_ref[0]).affine,
+                           nb.load(self.inputs.in_ref[0]).header),
+            self.inputs.out_file)
 
         return runtime
 
@@ -475,14 +519,21 @@ class FuzzyOverlap(BaseInterface):
 
 
 class ErrorMapInputSpec(BaseInterfaceInputSpec):
-    in_ref = File(exists=True, mandatory=True,
-                  desc="Reference image. Requires the same dimensions as in_tst.")
-    in_tst = File(exists=True, mandatory=True,
-                  desc="Test image. Requires the same dimensions as in_ref.")
+    in_ref = File(
+        exists=True,
+        mandatory=True,
+        desc="Reference image. Requires the same dimensions as in_tst.")
+    in_tst = File(
+        exists=True,
+        mandatory=True,
+        desc="Test image. Requires the same dimensions as in_ref.")
     mask = File(exists=True, desc="calculate overlap only within this mask.")
-    metric = traits.Enum("sqeuclidean", "euclidean",
-                         desc='error map metric (as implemented in scipy cdist)',
-                         usedefault=True, mandatory=True)
+    metric = traits.Enum(
+        "sqeuclidean",
+        "euclidean",
+        desc='error map metric (as implemented in scipy cdist)',
+        usedefault=True,
+        mandatory=True)
     out_map = File(desc="Name for the output file")
 
 
@@ -511,7 +562,7 @@ class ErrorMap(BaseInterface):
         nii_ref = nb.load(self.inputs.in_ref)
         ref_data = np.squeeze(nii_ref.get_data())
         tst_data = np.squeeze(nb.load(self.inputs.in_tst).get_data())
-        assert(ref_data.ndim == tst_data.ndim)
+        assert (ref_data.ndim == tst_data.ndim)
 
         # Load mask
         comps = 1
@@ -547,11 +598,13 @@ class ErrorMap(BaseInterface):
         elif self.inputs.metric == 'euclidean':
             errvector = np.linalg.norm(diffvector, axis=1)
 
-        errvectorexp = np.zeros_like(mskvector, dtype=np.float32)  # The default type is uint8
+        errvectorexp = np.zeros_like(
+            mskvector, dtype=np.float32)  # The default type is uint8
         errvectorexp[msk_idxs] = errvector
 
         # Get averaged error
-        self._distance = np.average(errvector)  # Only average the masked voxels
+        self._distance = np.average(
+            errvector)  # Only average the masked voxels
 
         errmap = errvectorexp.reshape(mapshape)
 
@@ -586,20 +639,23 @@ class SimilarityInputSpec(BaseInterfaceInputSpec):
     volume2 = File(exists=True, desc="3D/4D volume", mandatory=True)
     mask1 = File(exists=True, desc="3D volume")
     mask2 = File(exists=True, desc="3D volume")
-    metric = traits.Either(traits.Enum('cc', 'cr', 'crl1', 'mi', 'nmi', 'slr'),
-                           traits.Callable(),
-                           desc="""str or callable
+    metric = traits.Either(
+        traits.Enum('cc', 'cr', 'crl1', 'mi', 'nmi', 'slr'),
+        traits.Callable(),
+        desc="""str or callable
 Cost-function for assessing image similarity. If a string,
 one of 'cc': correlation coefficient, 'cr': correlation
 ratio, 'crl1': L1-norm based correlation ratio, 'mi': mutual
 information, 'nmi': normalized mutual information, 'slr':
 supervised log-likelihood ratio. If a callable, it should
 take a two-dimensional array representing the image joint
-histogram as an input and return a float.""", usedefault=True)
+histogram as an input and return a float.""",
+        usedefault=True)
 
 
 class SimilarityOutputSpec(TraitedSpec):
-    similarity = traits.List(traits.Float(desc="Similarity between volume 1 and 2, frame by frame"))
+    similarity = traits.List(
+        traits.Float(desc="Similarity between volume 1 and 2, frame by frame"))
 
 
 class Similarity(BaseInterface):
@@ -630,7 +686,7 @@ class Similarity(BaseInterface):
     def __init__(self, **inputs):
         try:
             package_check('nipy')
-        except Exception as e:
+        except Exception:
             self._have_nipy = False
         super(Similarity, self).__init__(**inputs)
 
@@ -654,7 +710,8 @@ class Similarity(BaseInterface):
             vols2 = nb.four_to_three(vol2_nii)
 
         if dims < 2 or dims > 4:
-            raise RuntimeError('Image dimensions not supported (detected %dD file)' % dims)
+            raise RuntimeError(
+                'Image dimensions not supported (detected %dD file)' % dims)
 
         if isdefined(self.inputs.mask1):
             mask1 = nb.load(self.inputs.mask1).get_data() == 1
@@ -669,11 +726,12 @@ class Similarity(BaseInterface):
         self._similarity = []
 
         for ts1, ts2 in zip(vols1, vols2):
-            histreg = HistogramRegistration(from_img=ts1,
-                                            to_img=ts2,
-                                            similarity=self.inputs.metric,
-                                            from_mask=mask1,
-                                            to_mask=mask2)
+            histreg = HistogramRegistration(
+                from_img=ts1,
+                to_img=ts2,
+                similarity=self.inputs.metric,
+                from_mask=mask1,
+                to_mask=mask2)
             self._similarity.append(histreg.eval(Affine()))
 
         return runtime

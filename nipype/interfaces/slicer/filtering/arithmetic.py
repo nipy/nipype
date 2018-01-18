@@ -8,10 +8,25 @@ import os
 
 
 class MultiplyScalarVolumesInputSpec(CommandLineInputSpec):
-    inputVolume1 = File(position=-3, desc="Input volume 1", exists=True, argstr="%s")
-    inputVolume2 = File(position=-2, desc="Input volume 2", exists=True, argstr="%s")
-    outputVolume = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Volume1 * Volume2", argstr="%s")
-    order = traits.Enum("0", "1", "2", "3", desc="Interpolation order if two images are in different coordinate frames or have different sampling.", argstr="--order %s")
+    inputVolume1 = File(
+        position=-3, desc="Input volume 1", exists=True, argstr="%s")
+    inputVolume2 = File(
+        position=-2, desc="Input volume 2", exists=True, argstr="%s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        position=-1,
+        hash_files=False,
+        desc="Volume1 * Volume2",
+        argstr="%s")
+    order = traits.Enum(
+        "0",
+        "1",
+        "2",
+        "3",
+        desc=
+        "Interpolation order if two images are in different coordinate frames or have different sampling.",
+        argstr="--order %s")
 
 
 class MultiplyScalarVolumesOutputSpec(TraitedSpec):
@@ -42,15 +57,38 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 
 class MaskScalarVolumeInputSpec(CommandLineInputSpec):
-    InputVolume = File(position=-3, desc="Input volume to be masked", exists=True, argstr="%s")
-    MaskVolume = File(position=-2, desc="Label volume containing the mask", exists=True, argstr="%s")
-    OutputVolume = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Output volume: Input Volume masked by label value from Mask Volume", argstr="%s")
-    label = traits.Int(desc="Label value in the Mask Volume to use as the mask", argstr="--label %d")
-    replace = traits.Int(desc="Value to use for the output volume outside of the mask", argstr="--replace %d")
+    InputVolume = File(
+        position=-3,
+        desc="Input volume to be masked",
+        exists=True,
+        argstr="%s")
+    MaskVolume = File(
+        position=-2,
+        desc="Label volume containing the mask",
+        exists=True,
+        argstr="%s")
+    OutputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        position=-1,
+        hash_files=False,
+        desc=
+        "Output volume: Input Volume masked by label value from Mask Volume",
+        argstr="%s")
+    label = traits.Int(
+        desc="Label value in the Mask Volume to use as the mask",
+        argstr="--label %d")
+    replace = traits.Int(
+        desc="Value to use for the output volume outside of the mask",
+        argstr="--replace %d")
 
 
 class MaskScalarVolumeOutputSpec(TraitedSpec):
-    OutputVolume = File(position=-1, desc="Output volume: Input Volume masked by label value from Mask Volume", exists=True)
+    OutputVolume = File(
+        position=-1,
+        desc=
+        "Output volume: Input Volume masked by label value from Mask Volume",
+        exists=True)
 
 
 class MaskScalarVolume(SEMLikeCommandLine):
@@ -77,10 +115,25 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 
 class SubtractScalarVolumesInputSpec(CommandLineInputSpec):
-    inputVolume1 = File(position=-3, desc="Input volume 1", exists=True, argstr="%s")
-    inputVolume2 = File(position=-2, desc="Input volume 2", exists=True, argstr="%s")
-    outputVolume = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Volume1 - Volume2", argstr="%s")
-    order = traits.Enum("0", "1", "2", "3", desc="Interpolation order if two images are in different coordinate frames or have different sampling.", argstr="--order %s")
+    inputVolume1 = File(
+        position=-3, desc="Input volume 1", exists=True, argstr="%s")
+    inputVolume2 = File(
+        position=-2, desc="Input volume 2", exists=True, argstr="%s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        position=-1,
+        hash_files=False,
+        desc="Volume1 - Volume2",
+        argstr="%s")
+    order = traits.Enum(
+        "0",
+        "1",
+        "2",
+        "3",
+        desc=
+        "Interpolation order if two images are in different coordinate frames or have different sampling.",
+        argstr="--order %s")
 
 
 class SubtractScalarVolumesOutputSpec(TraitedSpec):
@@ -111,10 +164,25 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 
 class AddScalarVolumesInputSpec(CommandLineInputSpec):
-    inputVolume1 = File(position=-3, desc="Input volume 1", exists=True, argstr="%s")
-    inputVolume2 = File(position=-2, desc="Input volume 2", exists=True, argstr="%s")
-    outputVolume = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Volume1 + Volume2", argstr="%s")
-    order = traits.Enum("0", "1", "2", "3", desc="Interpolation order if two images are in different coordinate frames or have different sampling.", argstr="--order %s")
+    inputVolume1 = File(
+        position=-3, desc="Input volume 1", exists=True, argstr="%s")
+    inputVolume2 = File(
+        position=-2, desc="Input volume 2", exists=True, argstr="%s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        position=-1,
+        hash_files=False,
+        desc="Volume1 + Volume2",
+        argstr="%s")
+    order = traits.Enum(
+        "0",
+        "1",
+        "2",
+        "3",
+        desc=
+        "Interpolation order if two images are in different coordinate frames or have different sampling.",
+        argstr="--order %s")
 
 
 class AddScalarVolumesOutputSpec(TraitedSpec):
@@ -145,13 +213,34 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 
 class CastScalarVolumeInputSpec(CommandLineInputSpec):
-    InputVolume = File(position=-2, desc="Input volume, the volume to cast.", exists=True, argstr="%s")
-    OutputVolume = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Output volume, cast to the new type.", argstr="%s")
-    type = traits.Enum("Char", "UnsignedChar", "Short", "UnsignedShort", "Int", "UnsignedInt", "Float", "Double", desc="Type for the new output volume.", argstr="--type %s")
+    InputVolume = File(
+        position=-2,
+        desc="Input volume, the volume to cast.",
+        exists=True,
+        argstr="%s")
+    OutputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        position=-1,
+        hash_files=False,
+        desc="Output volume, cast to the new type.",
+        argstr="%s")
+    type = traits.Enum(
+        "Char",
+        "UnsignedChar",
+        "Short",
+        "UnsignedShort",
+        "Int",
+        "UnsignedInt",
+        "Float",
+        "Double",
+        desc="Type for the new output volume.",
+        argstr="--type %s")
 
 
 class CastScalarVolumeOutputSpec(TraitedSpec):
-    OutputVolume = File(position=-1, desc="Output volume, cast to the new type.", exists=True)
+    OutputVolume = File(
+        position=-1, desc="Output volume, cast to the new type.", exists=True)
 
 
 class CastScalarVolume(SEMLikeCommandLine):

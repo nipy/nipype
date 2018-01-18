@@ -10,14 +10,10 @@ import warnings
 
 import pytest
 from ...testing import TempFATFS
-from ...utils.filemanip import (save_json, load_json,
-                                fname_presuffix, fnames_presuffix,
-                                hash_rename, check_forhash,
-                                _cifs_table, on_cifs,
-                                copyfile, copyfiles,
-                                filename_to_list, list_to_filename,
-                                check_depends,
-                                split_filename, get_related_files)
+from ...utils.filemanip import (
+    save_json, load_json, fname_presuffix, fnames_presuffix, hash_rename,
+    check_forhash, _cifs_table, on_cifs, copyfile, copyfiles, filename_to_list,
+    list_to_filename, check_depends, split_filename, get_related_files)
 
 import numpy as np
 
@@ -25,14 +21,16 @@ import numpy as np
 def _ignore_atime(stat):
     return stat[:7] + stat[8:]
 
-@pytest.mark.parametrize("filename, split",[
-        ('foo.nii',                ('', 'foo', '.nii')),
-        ('foo.nii.gz',             ('', 'foo', '.nii.gz')),
-        ('/usr/local/foo.nii.gz',  ('/usr/local', 'foo', '.nii.gz')),
-        ('../usr/local/foo.nii',   ('../usr/local', 'foo', '.nii')),
-        ('/usr/local/foo.a.b.c.d', ('/usr/local', 'foo.a.b.c', '.d')),
-        ('/usr/local/',            ('/usr/local', '', ''))
-        ])
+
+@pytest.mark.parametrize(
+    "filename, split",
+    [('foo.nii', ('', 'foo', '.nii')), ('foo.nii.gz', ('', 'foo', '.nii.gz')),
+     ('/usr/local/foo.nii.gz',
+      ('/usr/local', 'foo', '.nii.gz')), ('../usr/local/foo.nii',
+                                          ('../usr/local', 'foo', '.nii')),
+     ('/usr/local/foo.a.b.c.d',
+      ('/usr/local', 'foo.a.b.c', '.d')), ('/usr/local/',
+                                           ('/usr/local', '', ''))])
 def test_split_filename(filename, split):
     res = split_filename(filename)
     assert res == split
@@ -54,10 +52,10 @@ def test_fnames_presuffix():
     pths = fnames_presuffix(fnames, 'pre_', '_post', '/tmp')
     assert pths == ['/tmp/pre_foo_post.nii', '/tmp/pre_bar_post.nii']
 
-@pytest.mark.parametrize("filename, newname",[
-        ('foobar.nii',    'foobar_0xabc123.nii'),
-        ('foobar.nii.gz', 'foobar_0xabc123.nii.gz')
-        ])
+
+@pytest.mark.parametrize("filename, newname",
+                         [('foobar.nii', 'foobar_0xabc123.nii'),
+                          ('foobar.nii.gz', 'foobar_0xabc123.nii.gz')])
 def test_hash_rename(filename, newname):
     new_name = hash_rename(filename, 'abc123')
     assert new_name == newname
@@ -72,7 +70,8 @@ def test_check_forhash():
     assert hash == [orig_hash]
     result, hash = check_forhash('foobar.nii')
     assert not result
-    assert hash == None
+    assert hash is None
+
 
 @pytest.fixture()
 def _temp_analyze_files(tmpdir):
@@ -165,15 +164,17 @@ def test_recopy(_temp_analyze_files):
     orig_img, orig_hdr = _temp_analyze_files
     pth, fname = os.path.split(orig_img)
     img_link = os.path.join(pth, 'imglink.img')
-    hdr_link = os.path.join(pth, 'imglink.hdr')
     new_img = os.path.join(pth, 'newfile.img')
     new_hdr = os.path.join(pth, 'newfile.hdr')
     copyfile(orig_img, img_link)
     for copy in (True, False):
         for use_hardlink in (True, False):
             for hashmethod in ('timestamp', 'content'):
-                kwargs = {'copy': copy, 'use_hardlink': use_hardlink,
-                          'hashmethod': hashmethod}
+                kwargs = {
+                    'copy': copy,
+                    'use_hardlink': use_hardlink,
+                    'hashmethod': hashmethod
+                }
                 # Copying does not preserve the original file's timestamp, so
                 # we may delete and re-copy, if the test is slower than a clock
                 # tick
@@ -219,8 +220,11 @@ def test_copyfallback(_temp_analyze_files):
             tgt_hdr = os.path.join(fatdir, hdrname)
             for copy in (True, False):
                 for use_hardlink in (True, False):
-                    copyfile(orig_img, tgt_img, copy=copy,
-                             use_hardlink=use_hardlink)
+                    copyfile(
+                        orig_img,
+                        tgt_img,
+                        copy=copy,
+                        use_hardlink=use_hardlink)
                     assert os.path.exists(tgt_img)
                     assert os.path.exists(tgt_hdr)
                     assert not os.path.islink(tgt_img)
@@ -254,20 +258,19 @@ def test_get_related_files_noninclusive(_temp_analyze_files):
     assert orig_img in related_files
     assert orig_hdr not in related_files
 
-@pytest.mark.parametrize("filename, expected", [
-        ('foo.nii',      ['foo.nii']),
-        (['foo.nii'],    ['foo.nii']),
-        (('foo', 'bar'), ['foo', 'bar']),
-        (12.34,          None)
-        ])
+
+@pytest.mark.parametrize("filename, expected",
+                         [('foo.nii', ['foo.nii']), (['foo.nii'], ['foo.nii']),
+                          (('foo', 'bar'), ['foo', 'bar']), (12.34, None)])
 def test_filename_to_list(filename, expected):
     x = filename_to_list(filename)
     assert x == expected
 
+
 @pytest.mark.parametrize("list, expected", [
-        (['foo.nii'],    'foo.nii'),
-        (['foo', 'bar'], ['foo', 'bar']),
-        ])
+    (['foo.nii'], 'foo.nii'),
+    (['foo', 'bar'], ['foo', 'bar']),
+])
 def test_list_to_filename(list, expected):
     x = list_to_filename(list)
     assert x == expected
@@ -277,7 +280,6 @@ def test_check_depends(tmpdir):
     def touch(fname):
         with open(fname, 'a'):
             os.utime(fname, None)
-
 
     dependencies = [tmpdir.join(str(i)).strpath for i in range(3)]
     targets = [tmpdir.join(str(i)).strpath for i in range(3, 6)]
@@ -299,7 +301,7 @@ def test_check_depends(tmpdir):
     os.unlink(dependencies[0])
     try:
         check_depends(targets, dependencies)
-    except OSError as e:
+    except OSError:
         pass
     else:
         assert False, "Should raise OSError on missing dependency"
@@ -315,13 +317,15 @@ def test_json(tmpdir):
     assert sorted(adict.items()) == sorted(new_dict.items())
 
 
-@pytest.mark.parametrize("file, length, expected_files", [
-        ('/path/test.img',  3, ['/path/test.hdr', '/path/test.img', '/path/test.mat']),
-        ('/path/test.hdr',  3, ['/path/test.hdr', '/path/test.img', '/path/test.mat']),
-        ('/path/test.BRIK', 2, ['/path/test.BRIK', '/path/test.HEAD']),
-        ('/path/test.HEAD', 2, ['/path/test.BRIK', '/path/test.HEAD']),
-        ('/path/foo.nii',   2, ['/path/foo.nii', '/path/foo.mat'])
-        ])
+@pytest.mark.parametrize(
+    "file, length, expected_files",
+    [('/path/test.img', 3,
+      ['/path/test.hdr', '/path/test.img', '/path/test.mat']),
+     ('/path/test.hdr', 3,
+      ['/path/test.hdr', '/path/test.img', '/path/test.mat']),
+     ('/path/test.BRIK', 2, ['/path/test.BRIK', '/path/test.HEAD']),
+     ('/path/test.HEAD', 2, ['/path/test.BRIK', '/path/test.HEAD']),
+     ('/path/foo.nii', 2, ['/path/foo.nii', '/path/foo.mat'])])
 def test_related_files(file, length, expected_files):
     related_files = get_related_files(file)
 
@@ -335,13 +339,9 @@ def test_cifs_check():
     assert isinstance(_cifs_table, list)
     assert isinstance(on_cifs('/'), bool)
     fake_table = [('/scratch/tmp', 'ext4'), ('/scratch', 'cifs')]
-    cifs_targets = [('/scratch/tmp/x/y', False),
-                    ('/scratch/tmp/x', False),
-                    ('/scratch/x/y', True),
-                    ('/scratch/x', True),
-                    ('/x/y', False),
-                    ('/x', False),
-                    ('/', False)]
+    cifs_targets = [('/scratch/tmp/x/y', False), ('/scratch/tmp/x', False),
+                    ('/scratch/x/y', True), ('/scratch/x', True),
+                    ('/x/y', False), ('/x', False), ('/', False)]
 
     orig_table = _cifs_table[:]
     _cifs_table[:] = []

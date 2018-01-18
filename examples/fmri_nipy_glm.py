@@ -22,19 +22,16 @@ from builtins import range
 
 from nipype.interfaces.nipy.model import FitGLM, EstimateContrast
 from nipype.interfaces.nipy.preprocess import ComputeMask
-
-
 """Import necessary modules from nipype."""
 
-import nipype.interfaces.io as nio           # Data i/o
-import nipype.interfaces.spm as spm          # spm
-import nipype.interfaces.matlab as mlab      # how to run matlab
-import nipype.interfaces.utility as util     # utility
-import nipype.pipeline.engine as pe          # pypeline engine
-import nipype.algorithms.rapidart as ra      # artifact detection
-import nipype.algorithms.modelgen as model   # model specification
-import os                                    # system functions
-
+import nipype.interfaces.io as nio  # Data i/o
+import nipype.interfaces.spm as spm  # spm
+import nipype.interfaces.matlab as mlab  # how to run matlab
+import nipype.interfaces.utility as util  # utility
+import nipype.pipeline.engine as pe  # pypeline engine
+import nipype.algorithms.rapidart as ra  # artifact detection
+import nipype.algorithms.modelgen as model  # model specification
+import os  # system functions
 """
 
 Preliminaries
@@ -48,7 +45,6 @@ because SPM does not handle compressed NIFTI.
 
 # Set the way matlab should be called
 mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodesktop -nosplash")
-
 """The nipype tutorial contains data for two subjects.  Subject data
 is in two subdirectories, ``s1`` and ``s2``.  Each subject directory
 contains four functional volumes: f3.nii, f5.nii, f7.nii, f10.nii. And
@@ -71,12 +67,12 @@ data_dir = os.path.abspath('data')
 # Specify the subject directories
 subject_list = ['s1']
 # Map field names to individual subject runs.
-info = dict(func=[['subject_id', ['f3', 'f5', 'f7', 'f10']]],
-            struct=[['subject_id', 'struct']])
+info = dict(
+    func=[['subject_id', ['f3', 'f5', 'f7', 'f10']]],
+    struct=[['subject_id', 'struct']])
 
-infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
-                     name="infosource")
-
+infosource = pe.Node(
+    interface=util.IdentityInterface(fields=['subject_id']), name="infosource")
 """Here we set up iteration over all the subjects. The following line
 is a particular example of the flexibility of the system.  The
 ``datasource`` attribute ``iterables`` tells the pipeline engine that
@@ -87,7 +83,6 @@ contained in subject_list.
 """
 
 infosource.iterables = ('subject_id', subject_list)
-
 """
 Preprocessing pipeline nodes
 ----------------------------
@@ -99,14 +94,14 @@ and provides additional housekeeping and pipeline specific
 functionality.
 """
 
-datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
-                                               outfields=['func', 'struct']),
-                     name='datasource')
+datasource = pe.Node(
+    interface=nio.DataGrabber(
+        infields=['subject_id'], outfields=['func', 'struct']),
+    name='datasource')
 datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info
 datasource.inputs.sort_filelist = True
-
 """Use :class:`nipype.interfaces.spm.Realign` for motion correction
 and register all images to the mean image.
 """
@@ -115,7 +110,6 @@ realign = pe.Node(interface=spm.Realign(), name="realign")
 realign.inputs.register_to_mean = True
 
 compute_mask = pe.Node(interface=ComputeMask(), name="compute_mask")
-
 """Use :class:`nipype.algorithms.rapidart` to determine which of the
 images in the functional series are outliers based on deviations in
 intensity or movement.
@@ -128,23 +122,18 @@ art.inputs.norm_threshold = 1
 art.inputs.zintensity_threshold = 3
 art.inputs.mask_type = 'file'
 art.inputs.parameter_source = 'SPM'
-
-
 """Use :class:`nipype.interfaces.spm.Coregister` to perform a rigid
 body registration of the functional data to the structural data.
 """
 
 coregister = pe.Node(interface=spm.Coregister(), name="coregister")
 coregister.inputs.jobtype = 'estimate'
-
-
 """Smooth the functional data using
 :class:`nipype.interfaces.spm.Smooth`.
 """
 
 smooth = pe.Node(interface=spm.Smooth(), name="smooth")
 smooth.inputs.fwhm = 4
-
 """
 Set up analysis components
 --------------------------
@@ -166,15 +155,17 @@ def subjectinfo(subject_id):
     for r in range(4):
         onsets = [list(range(15, 240, 60)), list(range(45, 240, 60))]
         output.insert(r,
-                      Bunch(conditions=names,
-                            onsets=deepcopy(onsets),
-                            durations=[[15] for s in names],
-                            amplitudes=None,
-                            tmod=None,
-                            pmod=None,
-                            regressor_names=None,
-                            regressors=None))
+                      Bunch(
+                          conditions=names,
+                          onsets=deepcopy(onsets),
+                          durations=[[15] for s in names],
+                          amplitudes=None,
+                          tmod=None,
+                          pmod=None,
+                          regressor_names=None,
+                          regressors=None))
     return output
+
 
 """Setup the contrast structure that needs to be evaluated. This is a
 list of lists. The inner list specifies the contrasts and has the
@@ -186,7 +177,6 @@ in the `subjectinfo` function described above.
 cont1 = ('Task>Baseline', 'T', ['Task-Odd', 'Task-Even'], [0.5, 0.5])
 cont2 = ('Task-Odd>Task-Even', 'T', ['Task-Odd', 'Task-Even'], [1, -1])
 contrasts = [cont1, cont2]
-
 """Generate design information using
 :class:`nipype.interfaces.spm.SpecifyModel`. nipy accepts only design specified
 in seconds so "output_units" has always have to be set to "secs".
@@ -198,7 +188,6 @@ modelspec.inputs.input_units = 'secs'
 modelspec.inputs.output_units = 'secs'
 modelspec.inputs.time_repetition = 3.
 modelspec.inputs.high_pass_filter_cutoff = 120
-
 """Fit the GLM model using nipy and ordinary least square method
 """
 
@@ -206,16 +195,15 @@ model_estimate = pe.Node(interface=FitGLM(), name="model_estimate")
 model_estimate.inputs.TR = 3.
 model_estimate.inputs.model = "spherical"
 model_estimate.inputs.method = "ols"
-
 """Estimate the contrasts. The format of the contrasts definition is the same as
 for FSL and SPM
 """
 
-contrast_estimate = pe.Node(interface=EstimateContrast(), name="contrast_estimate")
+contrast_estimate = pe.Node(
+    interface=EstimateContrast(), name="contrast_estimate")
 cont1 = ('Task>Baseline', 'T', ['Task-Odd', 'Task-Even'], [0.5, 0.5])
 cont2 = ('Task-Odd>Task-Even', 'T', ['Task-Odd', 'Task-Even'], [1, -1])
 contrast_estimate.inputs.contrasts = [cont1, cont2]
-
 """
 Setup the pipeline
 ------------------
@@ -242,30 +230,32 @@ the processing nodes.
 l1pipeline = pe.Workflow(name="level1")
 l1pipeline.base_dir = os.path.abspath('nipy_tutorial/workingdir')
 
-l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
-                    (datasource, realign, [('func', 'in_files')]),
-                    (realign, compute_mask, [('mean_image', 'mean_volume')]),
-                    (realign, coregister, [('mean_image', 'source'),
-                                           ('realigned_files', 'apply_to_files')]),
-                    (datasource, coregister, [('struct', 'target')]),
-                    (coregister, smooth, [('coregistered_files', 'in_files')]),
-                    (realign, modelspec, [('realignment_parameters', 'realignment_parameters')]),
-                    (smooth, modelspec, [('smoothed_files', 'functional_runs')]),
-                    (realign, art, [('realignment_parameters', 'realignment_parameters')]),
-                    (coregister, art, [('coregistered_files', 'realigned_files')]),
-                    (compute_mask, art, [('brain_mask', 'mask_file')]),
-                    (art, modelspec, [('outlier_files', 'outlier_files')]),
-                    (infosource, modelspec, [(("subject_id", subjectinfo), "subject_info")]),
-                    (modelspec, model_estimate, [('session_info', 'session_info')]),
-                    (compute_mask, model_estimate, [('brain_mask', 'mask')]),
-                    (model_estimate, contrast_estimate, [("beta", "beta"),
-                                                         ("nvbeta", "nvbeta"),
-                                                         ("s2", "s2"),
-                                                         ("dof", "dof"),
-                                                         ("axis", "axis"),
-                                                         ("constants", "constants"),
-                                                         ("reg_names", "reg_names")])
-                    ])
+l1pipeline.connect(
+    [(infosource, datasource, [('subject_id', 'subject_id')]),
+     (datasource, realign, [('func', 'in_files')]), (realign, compute_mask, [
+         ('mean_image', 'mean_volume')
+     ]), (realign, coregister, [('mean_image', 'source'),
+                                ('realigned_files',
+                                 'apply_to_files')]), (datasource, coregister,
+                                                       [('struct', 'target')]),
+     (coregister, smooth,
+      [('coregistered_files', 'in_files')]), (realign, modelspec, [
+          ('realignment_parameters', 'realignment_parameters')
+      ]), (smooth, modelspec,
+           [('smoothed_files', 'functional_runs')]), (realign, art, [
+               ('realignment_parameters', 'realignment_parameters')
+           ]), (coregister, art, [('coregistered_files', 'realigned_files')]),
+     (compute_mask, art, [('brain_mask', 'mask_file')]), (art, modelspec, [
+         ('outlier_files', 'outlier_files')
+     ]), (infosource, modelspec, [
+         (("subject_id", subjectinfo), "subject_info")
+     ]), (modelspec, model_estimate,
+          [('session_info', 'session_info')]), (compute_mask, model_estimate,
+                                                [('brain_mask', 'mask')]),
+     (model_estimate, contrast_estimate,
+      [("beta", "beta"), ("nvbeta", "nvbeta"), ("s2", "s2"), ("dof", "dof"),
+       ("axis", "axis"), ("constants", "constants"), ("reg_names",
+                                                      "reg_names")])])
 
 if __name__ == '__main__':
     l1pipeline.run()
