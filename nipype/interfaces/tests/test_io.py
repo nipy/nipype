@@ -147,7 +147,8 @@ templates3 = {"model": "interfaces/{package.name}/model.py"}
         "node_output": ["model"]
     }),
 ])
-def test_selectfiles(SF_args, inputs_att, expected):
+def test_selectfiles(tmpdir, SF_args, inputs_att, expected):
+    tmpdir.chdir()
     base_dir = op.dirname(nipype.__file__)
     dg = nio.SelectFiles(base_directory=base_dir, **SF_args)
     for key, val in inputs_att.items():

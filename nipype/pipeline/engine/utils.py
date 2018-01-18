@@ -1015,10 +1015,8 @@ def generate_expanded_graph(graph_in):
 
         # collect the subnodes to expand
         subnodes = [s for s in dfs_preorder(graph_in, inode)]
-        prior_prefix = []
-        for s in subnodes:
-            prior_prefix.extend(re.findall('\.(.)I', s._id))
-        prior_prefix = sorted(prior_prefix)
+        prior_prefix = [re.findall(r'\.(.)I', s._id) for s in subnodes if s._id]
+        prior_prefix = sorted([l for item in prior_prefix for l in item])
         if not prior_prefix:
             iterable_prefix = 'a'
         else:
@@ -1029,7 +1027,7 @@ def generate_expanded_graph(graph_in):
         logger.debug(('subnodes:', subnodes))
 
         # append a suffix to the iterable node id
-        inode._id += ('.' + iterable_prefix + 'I')
+        inode._id += '.%sI' % iterable_prefix
 
         # merge the iterated subgraphs
         # dj: the behaviour of .copy changes in version 2
