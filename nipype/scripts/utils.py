@@ -2,7 +2,8 @@
 """
 Utilities for the CLI functions.
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 from builtins import bytes, str
 
@@ -13,15 +14,13 @@ import json
 from .instance import import_module
 from ..interfaces.base import InputMultiPath, traits
 
-
 # different context options
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-UNKNOWN_OPTIONS = dict(allow_extra_args=True,
-                       ignore_unknown_options=True)
+UNKNOWN_OPTIONS = dict(allow_extra_args=True, ignore_unknown_options=True)
 
 # specification of existing ParamTypes
-ExistingDirPath  = click.Path(exists=True, file_okay=False, resolve_path=True)
-ExistingFilePath = click.Path(exists=True,  dir_okay=False, resolve_path=True)
+ExistingDirPath = click.Path(exists=True, file_okay=False, resolve_path=True)
+ExistingFilePath = click.Path(exists=True, dir_okay=False, resolve_path=True)
 UnexistingFilePath = click.Path(dir_okay=False, resolve_path=True)
 
 
@@ -40,7 +39,8 @@ class RegularExpression(click.ParamType):
         try:
             rex = re.compile(value, re.IGNORECASE)
         except ValueError:
-            self.fail('%s is not a valid regular expression.' % value, param, ctx)
+            self.fail('%s is not a valid regular expression.' % value, param,
+                      ctx)
         else:
             return rex
 
@@ -61,7 +61,8 @@ def add_args_options(arg_parser, interface):
     """Add arguments to `arg_parser` to create a CLI for `interface`."""
     inputs = interface.input_spec()
     for name, spec in sorted(interface.inputs.traits(transient=None).items()):
-        desc = "\n".join(interface._get_trait_desc(inputs, name, spec))[len(name) + 2:]
+        desc = "\n".join(interface._get_trait_desc(inputs, name,
+                                                   spec))[len(name) + 2:]
         # Escape any % signs with a %
         desc = desc.replace('%', '%%')
         args = {}
@@ -119,7 +120,7 @@ def add_args_options(arg_parser, interface):
                 else:
                     args["nargs"] = "*"
             if not has_multiple_inner_traits:
-                arg_parser.add_argument("--%s" % name, dest=name,
-                                        help=desc, **args)
+                arg_parser.add_argument(
+                    "--%s" % name, dest=name, help=desc, **args)
 
     return arg_parser

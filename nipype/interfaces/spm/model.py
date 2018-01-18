@@ -11,7 +11,8 @@ and spm to access spm tools.
    >>> os.chdir(datadir)
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import str, bytes
 
 # Standard library imports
@@ -28,38 +29,46 @@ from ...utils.filemanip import (filename_to_list, list_to_filename,
                                 split_filename)
 from ..base import (Bunch, traits, TraitedSpec, File, Directory,
                     OutputMultiPath, InputMultiPath, isdefined)
-from .base import (SPMCommand, SPMCommandInputSpec,
-                   scans_for_fnames, ImageFileSPM)
+from .base import (SPMCommand, SPMCommandInputSpec, scans_for_fnames,
+                   ImageFileSPM)
 
 __docformat__ = 'restructuredtext'
 iflogger = logging.getLogger('interface')
 
 
 class Level1DesignInputSpec(SPMCommandInputSpec):
-    spm_mat_dir = Directory(exists=True, field='dir',
-                            desc='directory to store SPM.mat file (opt)')
-    timing_units = traits.Enum('secs', 'scans', field='timing.units',
-                               desc='units for specification of onsets',
-                               mandatory=True)
-    interscan_interval = traits.Float(field='timing.RT',
-                                      desc='Interscan interval in secs',
-                                      mandatory=True)
-    microtime_resolution = traits.Int(field='timing.fmri_t',
-                                      desc=('Number of time-bins per scan '
-                                            'in secs (opt)'))
-    microtime_onset = traits.Float(field='timing.fmri_t0',
-                                   desc=('The onset/time-bin in seconds for '
-                                         'alignment (opt)'))
-    session_info = traits.Any(field='sess',
-                              desc=('Session specific information generated '
-                                    'by ``modelgen.SpecifyModel``'),
-                              mandatory=True)
-    factor_info = traits.List(traits.Dict(traits.Enum('name', 'levels')),
-                              field='fact',
-                              desc=('Factor specific information '
-                                    'file (opt)'))
-    bases = traits.Dict(traits.Enum('hrf', 'fourier', 'fourier_han',
-                                    'gamma', 'fir'), field='bases', desc="""
+    spm_mat_dir = Directory(
+        exists=True, field='dir', desc='directory to store SPM.mat file (opt)')
+    timing_units = traits.Enum(
+        'secs',
+        'scans',
+        field='timing.units',
+        desc='units for specification of onsets',
+        mandatory=True)
+    interscan_interval = traits.Float(
+        field='timing.RT', desc='Interscan interval in secs', mandatory=True)
+    microtime_resolution = traits.Int(
+        field='timing.fmri_t',
+        desc=('Number of time-bins per scan '
+              'in secs (opt)'))
+    microtime_onset = traits.Float(
+        field='timing.fmri_t0',
+        desc=('The onset/time-bin in seconds for '
+              'alignment (opt)'))
+    session_info = traits.Any(
+        field='sess',
+        desc=('Session specific information generated '
+              'by ``modelgen.SpecifyModel``'),
+        mandatory=True)
+    factor_info = traits.List(
+        traits.Dict(traits.Enum('name', 'levels')),
+        field='fact',
+        desc=('Factor specific information '
+              'file (opt)'))
+    bases = traits.Dict(
+        traits.Enum('hrf', 'fourier', 'fourier_han', 'gamma', 'fir'),
+        field='bases',
+        desc="""
             dict {'name':{'basesparam1':val,...}}
             name : string
                 Name of basis function (hrf, fourier, fourier_han,
@@ -75,25 +84,36 @@ class Level1DesignInputSpec(SPMCommandInputSpec):
                         Post-stimulus window length (in seconds)
                     order : int
                         Number of basis functions
-""", mandatory=True)
-    volterra_expansion_order = traits.Enum(1, 2, field='volt',
-                                           desc=('Model interactions - '
-                                                 'yes:1, no:2'))
-    global_intensity_normalization = traits.Enum('none', 'scaling',
-                                                 field='global',
-                                                 desc=('Global intensity '
-                                                       'normalization - '
-                                                       'scaling or none'))
-    mask_image = File(exists=True, field='mask',
-                      desc='Image  for  explicitly  masking the analysis')
-    mask_threshold = traits.Either(traits.Enum('-Inf'), traits.Float(),
-                                   desc="Thresholding for the mask",
-                                   default='-Inf', usedefault=True)
-    model_serial_correlations = traits.Enum('AR(1)', 'FAST', 'none',
-                                            field='cvi',
-                                            desc=('Model serial correlations '
-                                                  'AR(1), FAST or none. FAST '
-                                                  'is available in SPM12'))
+""",
+        mandatory=True)
+    volterra_expansion_order = traits.Enum(
+        1, 2, field='volt', desc=('Model interactions - '
+                                  'yes:1, no:2'))
+    global_intensity_normalization = traits.Enum(
+        'none',
+        'scaling',
+        field='global',
+        desc=('Global intensity '
+              'normalization - '
+              'scaling or none'))
+    mask_image = File(
+        exists=True,
+        field='mask',
+        desc='Image  for  explicitly  masking the analysis')
+    mask_threshold = traits.Either(
+        traits.Enum('-Inf'),
+        traits.Float(),
+        desc="Thresholding for the mask",
+        default='-Inf',
+        usedefault=True)
+    model_serial_correlations = traits.Enum(
+        'AR(1)',
+        'FAST',
+        'none',
+        field='cvi',
+        desc=('Model serial correlations '
+              'AR(1), FAST or none. FAST '
+              'is available in SPM12'))
 
 
 class Level1DesignOutputSpec(TraitedSpec):
@@ -138,8 +158,8 @@ class Level1Design(SPMCommand):
     def _parse_inputs(self):
         """validate spm realign options if set to None ignore
         """
-        einputs = super(Level1Design, self)._parse_inputs(
-            skip=('mask_threshold'))
+        einputs = super(Level1Design,
+                        self)._parse_inputs(skip=('mask_threshold'))
         for sessinfo in einputs[0]['sess']:
             sessinfo['scans'] = scans_for_fnames(
                 filename_to_list(sessinfo['scans']), keep4d=False)
@@ -156,12 +176,12 @@ class Level1Design(SPMCommand):
             # SPM doesn't handle explicit masking properly, especially
             # when you want to use the entire mask image
             postscript = "load SPM;\n"
-            postscript += ("SPM.xM.VM = spm_vol('%s');\n"
-                           % list_to_filename(self.inputs.mask_image))
+            postscript += ("SPM.xM.VM = spm_vol('%s');\n" % list_to_filename(
+                self.inputs.mask_image))
             postscript += "SPM.xM.I = 0;\n"
             postscript += "SPM.xM.T = [];\n"
-            postscript += ("SPM.xM.TH = ones(size(SPM.xM.TH))*(%s);\n"
-                           % self.inputs.mask_threshold)
+            postscript += ("SPM.xM.TH = ones(size(SPM.xM.TH))*(%s);\n" %
+                           self.inputs.mask_threshold)
             postscript += ("SPM.xM.xs = struct('Masking', "
                            "'explicit masking only');\n")
             postscript += "save SPM SPM;\n"
@@ -178,38 +198,45 @@ class Level1Design(SPMCommand):
 
 
 class EstimateModelInputSpec(SPMCommandInputSpec):
-    spm_mat_file = File(exists=True, field='spmmat',
-        copyfile=True, mandatory=True,
+    spm_mat_file = File(
+        exists=True,
+        field='spmmat',
+        copyfile=True,
+        mandatory=True,
         desc='Absolute path to SPM.mat')
     estimation_method = traits.Dict(
         traits.Enum('Classical', 'Bayesian2', 'Bayesian'),
-        field='method', mandatory=True,
+        field='method',
+        mandatory=True,
         desc=('Dictionary of either Classical: 1, Bayesian: 1, '
               'or Bayesian2: 1 (dict)'))
-    write_residuals = traits.Bool(field='write_residuals',
-        desc="Write individual residual images")
+    write_residuals = traits.Bool(
+        field='write_residuals', desc="Write individual residual images")
     flags = traits.Dict(desc='Additional arguments')
 
 
 class EstimateModelOutputSpec(TraitedSpec):
-    mask_image = ImageFileSPM(exists=True,
-        desc='binary mask to constrain estimation')
-    beta_images = OutputMultiPath(ImageFileSPM(exists=True),
-        desc='design parameter estimates')
-    residual_image = ImageFileSPM(exists=True,
-        desc='Mean-squared image of the residuals')
-    residual_images = OutputMultiPath(ImageFileSPM(exists=True),
+    mask_image = ImageFileSPM(
+        exists=True, desc='binary mask to constrain estimation')
+    beta_images = OutputMultiPath(
+        ImageFileSPM(exists=True), desc='design parameter estimates')
+    residual_image = ImageFileSPM(
+        exists=True, desc='Mean-squared image of the residuals')
+    residual_images = OutputMultiPath(
+        ImageFileSPM(exists=True),
         desc="individual residual images (requires `write_residuals`")
     RPVimage = ImageFileSPM(exists=True, desc='Resels per voxel image')
     spm_mat_file = File(exists=True, desc='Updated SPM mat file')
     labels = ImageFileSPM(exists=True, desc="label file")
-    SDerror = OutputMultiPath(ImageFileSPM(exists=True),
+    SDerror = OutputMultiPath(
+        ImageFileSPM(exists=True),
         desc="Images of the standard deviation of the error")
-    ARcoef = OutputMultiPath(ImageFileSPM(exists=True),
-        desc="Images of the AR coefficient")
-    Cbetas = OutputMultiPath(ImageFileSPM(exists=True),
-        desc="Images of the parameter posteriors")
-    SDbetas = OutputMultiPath(ImageFileSPM(exists=True),
+    ARcoef = OutputMultiPath(
+        ImageFileSPM(exists=True), desc="Images of the AR coefficient")
+    Cbetas = OutputMultiPath(
+        ImageFileSPM(exists=True), desc="Images of the parameter posteriors")
+    SDbetas = OutputMultiPath(
+        ImageFileSPM(exists=True),
         desc="Images of the standard deviation of parameter posteriors")
 
 
@@ -247,8 +274,9 @@ class EstimateModel(SPMCommand):
         """
         einputs = super(EstimateModel, self)._parse_inputs(skip=('flags'))
         if isdefined(self.inputs.flags):
-            einputs[0].update({flag: val for (flag, val) in
-                               self.inputs.flags.items()})
+            einputs[0].update(
+                {flag: val
+                 for (flag, val) in self.inputs.flags.items()})
         return einputs
 
     def _list_outputs(self):
@@ -258,93 +286,90 @@ class EstimateModel(SPMCommand):
         spm = sio.loadmat(self.inputs.spm_mat_file, struct_as_record=False)
 
         betas = [vbeta.fname[0] for vbeta in spm['SPM'][0, 0].Vbeta[0]]
-        if ('Bayesian' in self.inputs.estimation_method.keys() or
-            'Bayesian2' in self.inputs.estimation_method.keys()):
-            outputs['labels'] = os.path.join(pth,
-                                            'labels.{}'.format(outtype))
+        if ('Bayesian' in self.inputs.estimation_method.keys()
+                or 'Bayesian2' in self.inputs.estimation_method.keys()):
+            outputs['labels'] = os.path.join(pth, 'labels.{}'.format(outtype))
             outputs['SDerror'] = glob(os.path.join(pth, 'Sess*_SDerror*'))
             outputs['ARcoef'] = glob(os.path.join(pth, 'Sess*_AR_*'))
             if betas:
-                outputs['Cbetas'] = [os.path.join(pth, 'C{}'.format(beta))
-                                            for beta in betas]
-                outputs['SDbetas'] = [os.path.join(pth, 'SD{}'.format(beta))
-                                            for beta in betas]
+                outputs['Cbetas'] = [
+                    os.path.join(pth, 'C{}'.format(beta)) for beta in betas
+                ]
+                outputs['SDbetas'] = [
+                    os.path.join(pth, 'SD{}'.format(beta)) for beta in betas
+                ]
 
         if 'Classical' in self.inputs.estimation_method.keys():
-            outputs['residual_image'] = os.path.join(pth,
-                                            'ResMS.{}'.format(outtype))
-            outputs['RPVimage'] =  os.path.join(pth,
-                                            'RPV.{}'.format(outtype))
+            outputs['residual_image'] = os.path.join(
+                pth, 'ResMS.{}'.format(outtype))
+            outputs['RPVimage'] = os.path.join(pth, 'RPV.{}'.format(outtype))
             if self.inputs.write_residuals:
                 outputs['residual_images'] = glob(os.path.join(pth, 'Res_*'))
             if betas:
-                outputs['beta_images'] = [os.path.join(pth, beta)
-                                            for beta in betas]
+                outputs['beta_images'] = [
+                    os.path.join(pth, beta) for beta in betas
+                ]
 
-        outputs['mask_image'] = os.path.join(pth,
-                                            'mask.{}'.format(outtype))
+        outputs['mask_image'] = os.path.join(pth, 'mask.{}'.format(outtype))
         outputs['spm_mat_file'] = os.path.join(pth, 'SPM.mat')
         return outputs
 
 
 class EstimateContrastInputSpec(SPMCommandInputSpec):
-    spm_mat_file = File(exists=True, field='spmmat',
-                        desc='Absolute path to SPM.mat',
-                        copyfile=True,
-                        mandatory=True)
+    spm_mat_file = File(
+        exists=True,
+        field='spmmat',
+        desc='Absolute path to SPM.mat',
+        copyfile=True,
+        mandatory=True)
     contrasts = traits.List(
-        traits.Either(traits.Tuple(traits.Str,
-                                   traits.Enum('T'),
-                                   traits.List(traits.Str),
-                                   traits.List(traits.Float)),
-                      traits.Tuple(traits.Str,
-                                   traits.Enum('T'),
-                                   traits.List(traits.Str),
-                                   traits.List(traits.Float),
-                                   traits.List(traits.Float)),
-                      traits.Tuple(traits.Str,
-                                   traits.Enum('F'),
-                                   traits.List(traits.Either(
-                                       traits.Tuple(traits.Str,
-                                                    traits.Enum('T'),
-                                                    traits.List(traits.Str),
-                                                    traits.List(traits.Float)),
-                                       traits.Tuple(traits.Str,
-                                                    traits.Enum('T'),
-                                                    traits.List(traits.Str),
-                                                    traits.List(traits.Float),
-                                                    traits.List(
-                                                        traits.Float)))))),
+        traits.Either(
+            traits.Tuple(traits.Str, traits.Enum('T'), traits.List(traits.Str),
+                         traits.List(traits.Float)),
+            traits.Tuple(traits.Str, traits.Enum('T'), traits.List(traits.Str),
+                         traits.List(traits.Float), traits.List(traits.Float)),
+            traits.Tuple(traits.Str, traits.Enum('F'),
+                         traits.List(
+                             traits.Either(
+                                 traits.Tuple(traits.Str, traits.Enum('T'),
+                                              traits.List(traits.Str),
+                                              traits.List(traits.Float)),
+                                 traits.Tuple(traits.Str, traits.Enum('T'),
+                                              traits.List(traits.Str),
+                                              traits.List(traits.Float),
+                                              traits.List(traits.Float)))))),
         desc="""List of contrasts with each contrast being a list of the form:
             [('name', 'stat', [condition list], [weight list], [session list])]
             If session list is None or not provided, all sessions are used. For
             F contrasts, the condition list should contain previously defined
             T-contrasts.""",
         mandatory=True)
-    beta_images = InputMultiPath(File(exists=True),
-                                 desc=('Parameter estimates of the '
-                                       'design matrix'),
-                                 copyfile=False,
-                                 mandatory=True)
-    residual_image = File(exists=True,
-                          desc='Mean-squared image of the residuals',
-                          copyfile=False,
-                          mandatory=True)
-    use_derivs = traits.Bool(desc='use derivatives for estimation',
-                             xor=['group_contrast'])
-    group_contrast = traits.Bool(desc='higher level contrast',
-                                 xor=['use_derivs'])
+    beta_images = InputMultiPath(
+        File(exists=True),
+        desc=('Parameter estimates of the '
+              'design matrix'),
+        copyfile=False,
+        mandatory=True)
+    residual_image = File(
+        exists=True,
+        desc='Mean-squared image of the residuals',
+        copyfile=False,
+        mandatory=True)
+    use_derivs = traits.Bool(
+        desc='use derivatives for estimation', xor=['group_contrast'])
+    group_contrast = traits.Bool(
+        desc='higher level contrast', xor=['use_derivs'])
 
 
 class EstimateContrastOutputSpec(TraitedSpec):
-    con_images = OutputMultiPath(File(exists=True),
-                                 desc='contrast images from a t-contrast')
-    spmT_images = OutputMultiPath(File(exists=True),
-                                  desc='stat images from a t-contrast')
-    ess_images = OutputMultiPath(File(exists=True),
-                                 desc='contrast images from an F-contrast')
-    spmF_images = OutputMultiPath(File(exists=True),
-                                  desc='stat images from an F-contrast')
+    con_images = OutputMultiPath(
+        File(exists=True), desc='contrast images from a t-contrast')
+    spmT_images = OutputMultiPath(
+        File(exists=True), desc='stat images from a t-contrast')
+    ess_images = OutputMultiPath(
+        File(exists=True), desc='contrast images from an F-contrast')
+    spmF_images = OutputMultiPath(
+        File(exists=True), desc='stat images from an F-contrast')
     spm_mat_file = File(exists=True, desc='Updated SPM mat file')
 
 
@@ -376,26 +401,28 @@ class EstimateContrast(SPMCommand):
         cname = []
         for i, cont in enumerate(self.inputs.contrasts):
             cname.insert(i, cont[0])
-            contrasts.insert(i, Bunch(name=cont[0],
-                                      stat=cont[1],
-                                      conditions=cont[2],
-                                      weights=None,
-                                      sessions=None))
+            contrasts.insert(i,
+                             Bunch(
+                                 name=cont[0],
+                                 stat=cont[1],
+                                 conditions=cont[2],
+                                 weights=None,
+                                 sessions=None))
             if len(cont) >= 4:
                 contrasts[i].weights = cont[3]
             if len(cont) >= 5:
                 contrasts[i].sessions = cont[4]
         script = "% generated by nipype.interfaces.spm\n"
         script += "spm_defaults;\n"
-        script += ("jobs{1}.stats{1}.con.spmmat  = {'%s'};\n"
-                   % self.inputs.spm_mat_file)
+        script += ("jobs{1}.stats{1}.con.spmmat  = {'%s'};\n" %
+                   self.inputs.spm_mat_file)
         script += "load(jobs{1}.stats{1}.con.spmmat{:});\n"
         script += "SPM.swd = '%s';\n" % os.getcwd()
         script += "save(jobs{1}.stats{1}.con.spmmat{:},'SPM');\n"
         script += "names = SPM.xX.name;\n"
         # get names for columns
-        if (isdefined(self.inputs.group_contrast) and
-                self.inputs.group_contrast):
+        if (isdefined(self.inputs.group_contrast)
+                and self.inputs.group_contrast):
             script += "condnames=names;\n"
         else:
             if self.inputs.use_derivs:
@@ -413,30 +440,31 @@ class EstimateContrast(SPMCommand):
         # BUILD CONTRAST SESSION STRUCTURE
         for i, contrast in enumerate(contrasts):
             if contrast.stat == 'T':
-                script += ("consess{%d}.tcon.name   = '%s';\n"
-                           % (i + 1, contrast.name))
-                script += ("consess{%d}.tcon.convec = zeros(1,numel(names));\n"
-                           % (i + 1))
+                script += ("consess{%d}.tcon.name   = '%s';\n" %
+                           (i + 1, contrast.name))
+                script += (
+                    "consess{%d}.tcon.convec = zeros(1,numel(names));\n" %
+                    (i + 1))
                 for c0, cond in enumerate(contrast.conditions):
-                    script += ("idx = strmatch('%s',condnames,'exact');\n"
-                               % (cond))
+                    script += ("idx = strmatch('%s',condnames,'exact');\n" %
+                               (cond))
                     script += (("if isempty(idx), throw(MException("
                                 "'CondName:Chk', sprintf('Condition %%s not "
                                 "found in design','%s'))); end;\n") % cond)
                     if contrast.sessions:
                         for sno, sw in enumerate(contrast.sessions):
-                            script += ("sidx = find(condsess(idx)==%d);\n"
-                                       % (sno + 1))
+                            script += ("sidx = find(condsess(idx)==%d);\n" %
+                                       (sno + 1))
                             script += (("consess{%d}.tcon.convec(idx(sidx)) "
-                                        "= %f;\n")
-                                       % (i + 1, sw * contrast.weights[c0]))
+                                        "= %f;\n") %
+                                       (i + 1, sw * contrast.weights[c0]))
                     else:
-                        script += ("consess{%d}.tcon.convec(idx) = %f;\n"
-                                   % (i + 1, contrast.weights[c0]))
+                        script += ("consess{%d}.tcon.convec(idx) = %f;\n" %
+                                   (i + 1, contrast.weights[c0]))
         for i, contrast in enumerate(contrasts):
             if contrast.stat == 'F':
-                script += ("consess{%d}.fcon.name   =  '%s';\n"
-                           % (i + 1, contrast.name))
+                script += ("consess{%d}.fcon.name   =  '%s';\n" %
+                           (i + 1, contrast.name))
                 for cl0, fcont in enumerate(contrast.conditions):
                     try:
                         tidx = cname.index(fcont[0])
@@ -445,8 +473,8 @@ class EstimateContrast(SPMCommand):
                                   " T contrast. probably not defined prior "
                                   "to the F contrasts")
                     script += (("consess{%d}.fcon.convec{%d} = "
-                                "consess{%d}.tcon.convec;\n")
-                               % (i + 1, cl0 + 1, tidx + 1))
+                                "consess{%d}.tcon.convec;\n") %
+                               (i + 1, cl0 + 1, tidx + 1))
         script += "jobs{1}.stats{1}.con.consess = consess;\n"
         script += ("if strcmp(spm('ver'),'SPM8'), spm_jobman('initcfg');"
                    "jobs=spm_jobman('spm5tospm8',{jobs});end\n")
@@ -483,37 +511,53 @@ class EstimateContrast(SPMCommand):
 
 
 class ThresholdInputSpec(SPMCommandInputSpec):
-    spm_mat_file = File(exists=True, desc='absolute path to SPM.mat',
-                        copyfile=True, mandatory=True)
-    stat_image = File(exists=True, desc='stat image',
-                      copyfile=False, mandatory=True)
-    contrast_index = traits.Int(mandatory=True,
-                                desc='which contrast in the SPM.mat to use')
-    use_fwe_correction = traits.Bool(True, usedefault=True,
-                                     desc=('whether to use FWE (Bonferroni) '
-                                           'correction for initial threshold '
-                                           '(height_threshold_type has to be '
-                                           'set to p-value)'))
-    use_topo_fdr = traits.Bool(True, usedefault=True,
-                               desc=('whether to use FDR over cluster extent '
-                                     'probabilities'))
-    height_threshold = traits.Float(0.05, usedefault=True,
-                                    desc=('value for initial thresholding '
-                                          '(defining clusters)'))
-    height_threshold_type = traits.Enum('p-value', 'stat', usedefault=True,
-                                        desc=('Is the cluster forming '
-                                              'threshold a stat value or '
-                                              'p-value?'))
-    extent_fdr_p_threshold = traits.Float(0.05, usedefault=True,
-                                          desc=('p threshold on FDR corrected '
-                                                'cluster size probabilities'))
-    extent_threshold = traits.Int(0, usedefault=True,
-                                  desc='Minimum cluster size in voxels')
-    force_activation = traits.Bool(False, usedefault=True,
-                                   desc=('In case no clusters survive the '
-                                         'topological inference step this '
-                                         'will pick a culster with the highes '
-                                         'sum of t-values. Use with care.'))
+    spm_mat_file = File(
+        exists=True,
+        desc='absolute path to SPM.mat',
+        copyfile=True,
+        mandatory=True)
+    stat_image = File(
+        exists=True, desc='stat image', copyfile=False, mandatory=True)
+    contrast_index = traits.Int(
+        mandatory=True, desc='which contrast in the SPM.mat to use')
+    use_fwe_correction = traits.Bool(
+        True,
+        usedefault=True,
+        desc=('whether to use FWE (Bonferroni) '
+              'correction for initial threshold '
+              '(height_threshold_type has to be '
+              'set to p-value)'))
+    use_topo_fdr = traits.Bool(
+        True,
+        usedefault=True,
+        desc=('whether to use FDR over cluster extent '
+              'probabilities'))
+    height_threshold = traits.Float(
+        0.05,
+        usedefault=True,
+        desc=('value for initial thresholding '
+              '(defining clusters)'))
+    height_threshold_type = traits.Enum(
+        'p-value',
+        'stat',
+        usedefault=True,
+        desc=('Is the cluster forming '
+              'threshold a stat value or '
+              'p-value?'))
+    extent_fdr_p_threshold = traits.Float(
+        0.05,
+        usedefault=True,
+        desc=('p threshold on FDR corrected '
+              'cluster size probabilities'))
+    extent_threshold = traits.Int(
+        0, usedefault=True, desc='Minimum cluster size in voxels')
+    force_activation = traits.Bool(
+        False,
+        usedefault=True,
+        desc=('In case no clusters survive the '
+              'topological inference step this '
+              'will pick a culster with the highes '
+              'sum of t-values. Use with care.'))
 
 
 class ThresholdOutputSpec(TraitedSpec):
@@ -568,11 +612,11 @@ class Threshold(SPMCommand):
             script += "force_activation  = 1;\n"
         else:
             script += "force_activation  = 0;\n"
-        script += ("cluster_extent_p_fdr_thr = %f;\n"
-                   % self.inputs.extent_fdr_p_threshold)
+        script += ("cluster_extent_p_fdr_thr = %f;\n" %
+                   self.inputs.extent_fdr_p_threshold)
         script += "stat_filename = '%s';\n" % self.inputs.stat_image
-        script += ("height_threshold_type = '%s';\n"
-                   % self.inputs.height_threshold_type)
+        script += ("height_threshold_type = '%s';\n" %
+                   self.inputs.height_threshold_type)
         script += "extent_threshold = %d;\n" % self.inputs.extent_threshold
 
         script += "load %s;\n" % self.inputs.spm_mat_file
@@ -606,8 +650,8 @@ Zth = Z(Z >= cluster_forming_thr);
 
 """
         script += (("spm_write_filtered(Zth,XYZth,stat_map_vol.dim',"
-                    "stat_map_vol.mat,'thresholded map', '%s');\n")
-                   % self._gen_pre_topo_map_filename())
+                    "stat_map_vol.mat,'thresholded map', '%s');\n") %
+                   self._gen_pre_topo_map_filename())
         script += """
 max_size = 0;
 max_size_index = 0;
@@ -699,17 +743,21 @@ fprintf('cluster_forming_thr = %f\\n',cluster_forming_thr);
 
 
 class ThresholdStatisticsInputSpec(SPMCommandInputSpec):
-    spm_mat_file = File(exists=True, desc='absolute path to SPM.mat',
-                        copyfile=True, mandatory=True)
-    stat_image = File(exists=True, desc='stat image',
-                      copyfile=False, mandatory=True)
-    contrast_index = traits.Int(mandatory=True,
-                                desc='which contrast in the SPM.mat to use')
-    height_threshold = traits.Float(desc=('stat value for initial '
-                                          'thresholding (defining clusters)'),
-                                    mandatory=True)
-    extent_threshold = traits.Int(0, usedefault=True,
-                                  desc="Minimum cluster size in voxels")
+    spm_mat_file = File(
+        exists=True,
+        desc='absolute path to SPM.mat',
+        copyfile=True,
+        mandatory=True)
+    stat_image = File(
+        exists=True, desc='stat image', copyfile=False, mandatory=True)
+    contrast_index = traits.Int(
+        mandatory=True, desc='which contrast in the SPM.mat to use')
+    height_threshold = traits.Float(
+        desc=('stat value for initial '
+              'thresholding (defining clusters)'),
+        mandatory=True)
+    extent_threshold = traits.Int(
+        0, usedefault=True, desc="Minimum cluster size in voxels")
 
 
 class ThresholdStatisticsOutputSpec(TraitedSpec):
@@ -800,11 +848,11 @@ clusterwise_P_FDR = spm_P_clusterFDR(extent_threshold*V2R,df,STAT,R,n,cluster_fo
                 setattr(outputs, cur_output, float(line))
                 cur_output = ""
                 continue
-            if (len(line.split()) != 0 and
-                    line.split()[0] in ["clusterwise_P_FDR",
-                                        "clusterwise_P_RF", "voxelwise_P_Bonf",
-                                        "voxelwise_P_FDR", "voxelwise_P_RF",
-                                        "voxelwise_P_uncor"]):
+            if (len(line.split()) != 0 and line.split()[0] in [
+                    "clusterwise_P_FDR", "clusterwise_P_RF",
+                    "voxelwise_P_Bonf", "voxelwise_P_FDR", "voxelwise_P_RF",
+                    "voxelwise_P_uncor"
+            ]):
                 cur_output = line.split()[0]
                 continue
 
@@ -812,52 +860,61 @@ clusterwise_P_FDR = spm_P_clusterFDR(extent_threshold*V2R,df,STAT,R,n,cluster_fo
 
 
 class FactorialDesignInputSpec(SPMCommandInputSpec):
-    spm_mat_dir = Directory(exists=True, field='dir',
-                            desc='directory to store SPM.mat file (opt)')
+    spm_mat_dir = Directory(
+        exists=True, field='dir', desc='directory to store SPM.mat file (opt)')
     # Need to make an alias of InputMultiPath; the inputs below are not Path
-    covariates = InputMultiPath(traits.Dict(
-        key_trait=traits.Enum('vector', 'name', 'interaction', 'centering')),
-                                field='cov',
-                                desc=('covariate dictionary {vector, name, '
-                                      'interaction, centering}'))
-    threshold_mask_none = traits.Bool(field='masking.tm.tm_none',
-                                      xor=['threshold_mask_absolute',
-                                           'threshold_mask_relative'],
-                                      desc='do not use threshold masking')
-    threshold_mask_absolute = traits.Float(field='masking.tm.tma.athresh',
-                                           xor=['threshold_mask_none',
-                                                'threshold_mask_relative'],
-                                           desc='use an absolute threshold')
-    threshold_mask_relative = traits.Float(field='masking.tm.tmr.rthresh',
-                                           xor=['threshold_mask_absolute',
-                                                'threshold_mask_none'],
-                                           desc=('threshold using a '
-                                                 'proportion of the global '
-                                                 'value'))
-    use_implicit_threshold = traits.Bool(field='masking.im',
-                                         desc=('use implicit mask NaNs or '
-                                               'zeros to threshold'))
-    explicit_mask_file = File(field='masking.em',  # requires cell
-                              desc='use an implicit mask file to threshold')
-    global_calc_omit = traits.Bool(field='globalc.g_omit',
-                                   xor=['global_calc_mean',
-                                        'global_calc_values'],
-                                   desc='omit global calculation')
-    global_calc_mean = traits.Bool(field='globalc.g_mean',
-                                   xor=['global_calc_omit',
-                                        'global_calc_values'],
-                                   desc='use mean for global calculation')
-    global_calc_values = traits.List(traits.Float,
-                                     field='globalc.g_user.global_uval',
-                                     xor=['global_calc_mean',
-                                          'global_calc_omit'],
-                                     desc='omit global calculation')
-    no_grand_mean_scaling = traits.Bool(field='globalm.gmsca.gmsca_no',
-                                        desc=('do not perform grand mean '
-                                              'scaling'))
-    global_normalization = traits.Enum(1, 2, 3, field='globalm.glonorm',
-                                       desc=('global normalization None-1, '
-                                             'Proportional-2, ANCOVA-3'))
+    covariates = InputMultiPath(
+        traits.Dict(
+            key_trait=traits.Enum('vector', 'name', 'interaction',
+                                  'centering')),
+        field='cov',
+        desc=('covariate dictionary {vector, name, '
+              'interaction, centering}'))
+    threshold_mask_none = traits.Bool(
+        field='masking.tm.tm_none',
+        xor=['threshold_mask_absolute', 'threshold_mask_relative'],
+        desc='do not use threshold masking')
+    threshold_mask_absolute = traits.Float(
+        field='masking.tm.tma.athresh',
+        xor=['threshold_mask_none', 'threshold_mask_relative'],
+        desc='use an absolute threshold')
+    threshold_mask_relative = traits.Float(
+        field='masking.tm.tmr.rthresh',
+        xor=['threshold_mask_absolute', 'threshold_mask_none'],
+        desc=('threshold using a '
+              'proportion of the global '
+              'value'))
+    use_implicit_threshold = traits.Bool(
+        field='masking.im',
+        desc=('use implicit mask NaNs or '
+              'zeros to threshold'))
+    explicit_mask_file = File(
+        field='masking.em',  # requires cell
+        desc='use an implicit mask file to threshold')
+    global_calc_omit = traits.Bool(
+        field='globalc.g_omit',
+        xor=['global_calc_mean', 'global_calc_values'],
+        desc='omit global calculation')
+    global_calc_mean = traits.Bool(
+        field='globalc.g_mean',
+        xor=['global_calc_omit', 'global_calc_values'],
+        desc='use mean for global calculation')
+    global_calc_values = traits.List(
+        traits.Float,
+        field='globalc.g_user.global_uval',
+        xor=['global_calc_mean', 'global_calc_omit'],
+        desc='omit global calculation')
+    no_grand_mean_scaling = traits.Bool(
+        field='globalm.gmsca.gmsca_no',
+        desc=('do not perform grand mean '
+              'scaling'))
+    global_normalization = traits.Enum(
+        1,
+        2,
+        3,
+        field='globalm.glonorm',
+        desc=('global normalization None-1, '
+              'Proportional-2, ANCOVA-3'))
 
 
 class FactorialDesignOutputSpec(TraitedSpec):
@@ -883,9 +940,12 @@ class FactorialDesign(SPMCommand):
             return np.array([str(val)], dtype=object)
         if opt in ['covariates']:
             outlist = []
-            mapping = {'name': 'cname', 'vector': 'c',
-                       'interaction': 'iCFI',
-                       'centering': 'iCC'}
+            mapping = {
+                'name': 'cname',
+                'vector': 'c',
+                'interaction': 'iCFI',
+                'centering': 'iCC'
+            }
             for dictitem in val:
                 outdict = {}
                 for key, keyval in list(dictitem.items()):
@@ -910,9 +970,12 @@ class FactorialDesign(SPMCommand):
 
 
 class OneSampleTTestDesignInputSpec(FactorialDesignInputSpec):
-    in_files = traits.List(File(exists=True), field='des.t1.scans',
-                           mandatory=True, minlen=2,
-                           desc='input files')
+    in_files = traits.List(
+        File(exists=True),
+        field='des.t1.scans',
+        mandatory=True,
+        minlen=2,
+        desc='input files')
 
 
 class OneSampleTTestDesign(FactorialDesign):
@@ -939,18 +1002,26 @@ class OneSampleTTestDesign(FactorialDesign):
 class TwoSampleTTestDesignInputSpec(FactorialDesignInputSpec):
     # very unlikely that you will have a single image in one group, so setting
     # parameters to require at least two files in each group [SG]
-    group1_files = traits.List(File(exists=True), field='des.t2.scans1',
-                               mandatory=True, minlen=2,
-                               desc='Group 1 input files')
-    group2_files = traits.List(File(exists=True), field='des.t2.scans2',
-                               mandatory=True, minlen=2,
-                               desc='Group 2 input files')
-    dependent = traits.Bool(field='des.t2.dept',
-                            desc=('Are the measurements dependent between '
-                                  'levels'))
-    unequal_variance = traits.Bool(field='des.t2.variance',
-                                   desc=('Are the variances equal or unequal '
-                                         'between groups'))
+    group1_files = traits.List(
+        File(exists=True),
+        field='des.t2.scans1',
+        mandatory=True,
+        minlen=2,
+        desc='Group 1 input files')
+    group2_files = traits.List(
+        File(exists=True),
+        field='des.t2.scans2',
+        mandatory=True,
+        minlen=2,
+        desc='Group 2 input files')
+    dependent = traits.Bool(
+        field='des.t2.dept',
+        desc=('Are the measurements dependent between '
+              'levels'))
+    unequal_variance = traits.Bool(
+        field='des.t2.variance',
+        desc=('Are the variances equal or unequal '
+              'between groups'))
 
 
 class TwoSampleTTestDesign(FactorialDesign):
@@ -976,15 +1047,16 @@ class TwoSampleTTestDesign(FactorialDesign):
 
 
 class PairedTTestDesignInputSpec(FactorialDesignInputSpec):
-    paired_files = traits.List(traits.List(File(exists=True),
-                               minlen=2, maxlen=2),
-                               field='des.pt.pair',
-                               mandatory=True, minlen=2,
-                               desc='List of paired files')
-    grand_mean_scaling = traits.Bool(field='des.pt.gmsca',
-                                     desc='Perform grand mean scaling')
-    ancova = traits.Bool(field='des.pt.ancova',
-                         desc='Specify ancova-by-factor regressors')
+    paired_files = traits.List(
+        traits.List(File(exists=True), minlen=2, maxlen=2),
+        field='des.pt.pair',
+        mandatory=True,
+        minlen=2,
+        desc='List of paired files')
+    grand_mean_scaling = traits.Bool(
+        field='des.pt.gmsca', desc='Perform grand mean scaling')
+    ancova = traits.Bool(
+        field='des.pt.ancova', desc='Specify ancova-by-factor regressors')
 
 
 class PairedTTestDesign(FactorialDesign):
@@ -1009,18 +1081,22 @@ class PairedTTestDesign(FactorialDesign):
 
 
 class MultipleRegressionDesignInputSpec(FactorialDesignInputSpec):
-    in_files = traits.List(File(exists=True),
-                           field='des.mreg.scans',
-                           mandatory=True, minlen=2,
-                           desc='List of files')
-    include_intercept = traits.Bool(True, field='des.mreg.incint',
-                                    usedefault=True,
-                                    desc='Include intercept in design')
-    user_covariates = InputMultiPath(traits.Dict(
-        key_trait=traits.Enum('vector', 'name', 'centering')),
-                                     field='des.mreg.mcov',
-                                     desc=('covariate dictionary {vector, '
-                                           'name, centering}'))
+    in_files = traits.List(
+        File(exists=True),
+        field='des.mreg.scans',
+        mandatory=True,
+        minlen=2,
+        desc='List of files')
+    include_intercept = traits.Bool(
+        True,
+        field='des.mreg.incint',
+        usedefault=True,
+        desc='Include intercept in design')
+    user_covariates = InputMultiPath(
+        traits.Dict(key_trait=traits.Enum('vector', 'name', 'centering')),
+        field='des.mreg.mcov',
+        desc=('covariate dictionary {vector, '
+              'name, centering}'))
 
 
 class MultipleRegressionDesign(FactorialDesign):
@@ -1043,13 +1119,12 @@ class MultipleRegressionDesign(FactorialDesign):
             return np.array(val, dtype=object)
         if opt in ['user_covariates']:
             outlist = []
-            mapping = {'name': 'cname', 'vector': 'c',
-                       'centering': 'iCC'}
+            mapping = {'name': 'cname', 'vector': 'c', 'centering': 'iCC'}
             for dictitem in val:
                 outdict = {}
                 for key, keyval in list(dictitem.items()):
                     outdict[mapping[key]] = keyval
                 outlist.append(outdict)
             return outlist
-        return (super(MultipleRegressionDesign, self)
-                ._format_arg(opt, spec, val))
+        return (super(MultipleRegressionDesign, self)._format_arg(
+            opt, spec, val))

@@ -16,8 +16,8 @@
 * The person who accepts/merges your PR will include an update to the CHANGES file: prefix: description (URL of pull request)
 * Run `make check-before-commit` before submitting the PR.
   This will require you to either install or be in developer mode with: `python setup.py install/develop`.
-* In general, do not catch exceptions without good reason. 
-  * catching non-fatal exceptions. 
+* In general, do not catch exceptions without good reason.
+  * catching non-fatal exceptions.
     Log the exception as a warning.
   * adding more information about what may have caused the error.
     Raise a new exception using ``raise_from(NewException("message"), oldException)`` from ``future``.

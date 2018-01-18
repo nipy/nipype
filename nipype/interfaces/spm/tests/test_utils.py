@@ -18,7 +18,7 @@ def test_coreg():
     coreg.inputs.target = target
     assert coreg.inputs.matlab_cmd == 'mymatlab'
     coreg.inputs.moving = moving
-    assert isdefined(coreg.inputs.mat) == False
+    assert not isdefined(coreg.inputs.mat)
     pth, mov, _ = split_filename(moving)
     _, tgt, _ = split_filename(target)
     mat = os.path.join(pth, '%s_to_%s.mat' % (mov, tgt))
@@ -50,8 +50,10 @@ def test_reslice():
     reslice.inputs.in_file = moving
     reslice.inputs.space_defining = space_defining
     assert reslice.inputs.interp == 0
-    with pytest.raises(TraitError): reslice.inputs.trait_set(interp='nearest')
-    with pytest.raises(TraitError): reslice.inputs.trait_set(interp=10)
+    with pytest.raises(TraitError):
+        reslice.inputs.trait_set(interp='nearest')
+    with pytest.raises(TraitError):
+        reslice.inputs.trait_set(interp=10)
     reslice.inputs.interp = 1
     script = reslice._make_matlab_command(None)
     outfile = fname_presuffix(moving, prefix='r')
@@ -70,9 +72,12 @@ def test_dicom_import():
     assert di.inputs.output_dir_struct == 'flat'
     assert di.inputs.output_dir == './converted_dicom'
     assert di.inputs.format == 'nii'
-    assert di.inputs.icedims == False
-    with pytest.raises(TraitError): di.inputs.trait_set(output_dir_struct='wrong')
-    with pytest.raises(TraitError): di.inputs.trait_set(format='FAT')
-    with pytest.raises(TraitError): di.inputs.trait_set(in_files=['does_sfd_not_32fn_exist.dcm'])
+    assert not di.inputs.icedims
+    with pytest.raises(TraitError):
+        di.inputs.trait_set(output_dir_struct='wrong')
+    with pytest.raises(TraitError):
+        di.inputs.trait_set(format='FAT')
+    with pytest.raises(TraitError):
+        di.inputs.trait_set(in_files=['does_sfd_not_32fn_exist.dcm'])
     di.inputs.in_files = [dicom]
     assert di.inputs.in_files == [dicom]

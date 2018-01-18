@@ -2,7 +2,8 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The ants module provides basic functions for interfacing with ANTS tools."""
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import str
 
 import os
@@ -46,7 +47,8 @@ class Info(PackageInfo):
         v_string = v_string.split('-')[0]
 
         # 2.2.0-equivalent version string
-        if 'post' in v_string and LooseVersion(v_string) >= LooseVersion('2.1.0.post789'):
+        if 'post' in v_string and \
+                LooseVersion(v_string) >= LooseVersion('2.1.0.post789'):
             return '2.2.0'
         else:
             return '.'.join(v_string.split('.')[:3])
@@ -56,8 +58,11 @@ class ANTSCommandInputSpec(CommandLineInputSpec):
     """Base Input Specification for all ANTS Commands
     """
 
-    num_threads = traits.Int(LOCAL_DEFAULT_NUMBER_OF_THREADS, usedefault=True,
-                             nohash=True, desc="Number of ITK threads to use")
+    num_threads = traits.Int(
+        LOCAL_DEFAULT_NUMBER_OF_THREADS,
+        usedefault=True,
+        nohash=True,
+        desc="Number of ITK threads to use")
 
 
 class ANTSCommand(CommandLine):
@@ -93,12 +98,15 @@ class ANTSCommand(CommandLine):
             if (PREFERED_ITKv4_THREAD_LIMIT_VARIABLE in self.inputs.environ):
                 del self.inputs.environ[PREFERED_ITKv4_THREAD_LIMIT_VARIABLE]
         else:
-            self.inputs.environ.update({PREFERED_ITKv4_THREAD_LIMIT_VARIABLE:
-                                        '%s' % self.inputs.num_threads})
+            self.inputs.environ.update({
+                PREFERED_ITKv4_THREAD_LIMIT_VARIABLE:
+                '%s' % self.inputs.num_threads
+            })
 
     @staticmethod
     def _format_xarray(val):
-        """ Convenience method for converting input arrays [1,2,3] to commandline format '1x2x3' """
+        """ Convenience method for converting input arrays [1,2,3] to
+        commandline format '1x2x3' """
         return 'x'.join([str(x) for x in val])
 
     @classmethod
