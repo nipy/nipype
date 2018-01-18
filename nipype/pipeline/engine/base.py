@@ -23,6 +23,7 @@ import re
 import numpy as np
 from future import standard_library
 
+from ... import config
 from ...interfaces.base import DynamicTraitedSpec
 from ...utils.filemanip import loadpkl, savepkl
 
@@ -49,7 +50,7 @@ class EngineBase(object):
         self._name = None
 
         self.base_dir = base_dir
-        self.config = None
+        self.config = deepcopy(config._sections)
         self.name = name
 
     @property

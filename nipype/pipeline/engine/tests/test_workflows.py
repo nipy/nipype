@@ -4,9 +4,81 @@
 """Tests for the engine workflows module
 """
 import pytest
+import networkx as nx
 
 from ... import engine as pe
 from ....interfaces import utility as niu
+from .test_base import EngineTestInterface
+
+
+def test_init():
+    with pytest.raises(TypeError):
+        pe.Workflow()
+    pipe = pe.Workflow(name='pipe')
+    assert type(pipe._graph) == nx.DiGraph
+
+
+def test_connect():
+    pipe = pe.Workflow(name='pipe')
+    mod2 = pe.Node(EngineTestInterface(), name='mod2')
+    mod1 = pe.Node(EngineTestInterface(), name='mod1')
+    pipe.connect([(mod1, mod2, [('output1', 'input1')])])
+
+    assert mod1 in pipe._graph.nodes()
+    assert mod2 in pipe._graph.nodes()
+    assert pipe._graph.get_edge_data(mod1, mod2) == {
+        'connect': [('output1', 'input1')]
+    }
+
+
+def test_add_nodes():
+    pipe = pe.Workflow(name='pipe')
+    mod1 = pe.Node(EngineTestInterface(), name='mod1')
+    mod2 = pe.Node(EngineTestInterface(), name='mod2')
+    pipe.add_nodes([mod1, mod2])
+
+    assert mod1 in pipe._graph.nodes()
+    assert mod2 in pipe._graph.nodes()
+
+
+def test_disconnect():
+    a = pe.Node(niu.IdentityInterface(fields=['a', 'b']), name='a')
+    b = pe.Node(niu.IdentityInterface(fields=['a', 'b']), name='b')
+    flow1 = pe.Workflow(name='test')
+    flow1.connect(a, 'a', b, 'a')
+    flow1.disconnect(a, 'a', b, 'a')
+    assert list(flow1._graph.edges()) == []
+
+
+def test_workflow_add():
+    n1 = pe.Node(niu.IdentityInterface(fields=['a', 'b']), name='n1')
+    n2 = pe.Node(niu.IdentityInterface(fields=['c', 'd']), name='n2')
+    n3 = pe.Node(niu.IdentityInterface(fields=['c', 'd']), name='n1')
+    w1 = pe.Workflow(name='test')
+    w1.connect(n1, 'a', n2, 'c')
+    for node in [n1, n2, n3]:
+        with pytest.raises(IOError):
+            w1.add_nodes([node])
+    with pytest.raises(IOError):
+        w1.connect([(w1, n2, [('n1.a', 'd')])])
+
+
+def test_doubleconnect():
+    a = pe.Node(niu.IdentityInterface(fields=['a', 'b']), name='a')
+    b = pe.Node(niu.IdentityInterface(fields=['a', 'b']), name='b')
+    flow1 = pe.Workflow(name='test')
+    flow1.connect(a, 'a', b, 'a')
+    x = lambda: flow1.connect(a, 'b', b, 'a')
+    with pytest.raises(Exception) as excinfo:
+        x()
+    assert "Trying to connect" in str(excinfo.value)
+
+    c = pe.Node(niu.IdentityInterface(fields=['a', 'b']), name='c')
+    flow1 = pe.Workflow(name='test2')
+    x = lambda: flow1.connect([(a, c, [('b', 'b')]), (b, c, [('a', 'b')])])
+    with pytest.raises(Exception) as excinfo:
+        x()
+    assert "Trying to connect" in str(excinfo.value)
 
 
 def test_duplicate_node_check():

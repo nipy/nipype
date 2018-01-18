@@ -66,7 +66,6 @@ class Workflow(EngineBase):
         """
         super(Workflow, self).__init__(name, base_dir)
         self._graph = nx.DiGraph()
-        self.config = deepcopy(config._sections)
 
     # PUBLIC API
     def clone(self, name):

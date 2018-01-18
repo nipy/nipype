@@ -166,9 +166,8 @@ class Node(EngineBase):
         self._got_inputs = False
         self._originputs = None
         self._output_dir = None
-        self._id = None  # for compatibility with node expansion using iterables
+        self._id = self.name  # for compatibility with node expansion using iterables
 
-        self.name = name
         self.iterables = iterables
         self.synchronize = synchronize
         self.itersource = itersource
