@@ -18,6 +18,7 @@ standard_library.install_aliases()
 
 def check_dict(ref_dict, tst_dict):
     """Compare dictionaries of inputs and and those loaded from json files"""
+
     def to_list(x):
         if isinstance(x, tuple):
             x = list(x)
@@ -135,8 +136,7 @@ def test_BaseInterface_load_save_inputs(tmpdir):
         def __init__(self, **inputs):
             super(DerivedInterface, self).__init__(**inputs)
 
-    inputs_dict = {'input1': 12, 'input3': True,
-                   'input4': 'some string'}
+    inputs_dict = {'input1': 12, 'input3': True, 'input4': 'some string'}
     bif = DerivedInterface(**inputs_dict)
     bif.save_inputs_to_json(tmp_json)
     bif2 = DerivedInterface()
@@ -161,7 +161,8 @@ def test_BaseInterface_load_save_inputs(tmpdir):
 
     # test get hashval in a complex interface
     from nipype.interfaces.ants import Registration
-    settings = example_data(example_data('smri_ants_registration_settings.json'))
+    settings = example_data(
+        example_data('smri_ants_registration_settings.json'))
     with open(settings) as setf:
         data_dict = json.load(setf)
 
@@ -182,6 +183,7 @@ def test_input_version():
 
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
+
     obj = DerivedInterface1()
     obj._check_version_requirements(obj.inputs)
 
@@ -198,6 +200,7 @@ def test_input_version():
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
         _version = '0.8'
+
     obj = DerivedInterface1()
     obj.inputs.foo = 1
     with pytest.raises(Exception):
@@ -209,6 +212,7 @@ def test_input_version():
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
         _version = '0.10'
+
     obj = DerivedInterface1()
     obj._check_version_requirements(obj.inputs)
 
@@ -218,6 +222,7 @@ def test_input_version():
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
         _version = '0.9'
+
     obj = DerivedInterface1()
     obj.inputs.foo = 1
     obj._check_version_requirements(obj.inputs)
@@ -228,6 +233,7 @@ def test_input_version():
     class DerivedInterface2(nib.BaseInterface):
         input_spec = InputSpec
         _version = '0.8'
+
     obj = DerivedInterface2()
     obj.inputs.foo = 1
     with pytest.raises(Exception):
@@ -239,6 +245,7 @@ def test_input_version():
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
         _version = '0.9'
+
     obj = DerivedInterface1()
     obj.inputs.foo = 1
     obj._check_version_requirements(obj.inputs)
@@ -292,6 +299,7 @@ def test_output_version():
 
         def _list_outputs(self):
             return {'foo': 1}
+
     obj = DerivedInterface1()
     with pytest.raises(KeyError):
         obj.run()
@@ -316,8 +324,8 @@ def test_Commandline():
         foo = nib.Str(argstr='%s', desc='a str')
         goo = nib.traits.Bool(argstr='-g', desc='a bool', position=0)
         hoo = nib.traits.List(argstr='-l %s', desc='a list')
-        moo = nib.traits.List(argstr='-i %d...', desc='a repeated list',
-                              position=-1)
+        moo = nib.traits.List(
+            argstr='-i %d...', desc='a repeated list', position=-1)
         noo = nib.traits.Int(argstr='-x %d', desc='an int')
         roo = nib.traits.Str(desc='not on command line')
         soo = nib.traits.Bool(argstr="-soo")
@@ -342,6 +350,7 @@ def test_Commandline():
 
     class CommandLineInputSpec2(nib.CommandLineInputSpec):
         foo = nib.File(argstr='%s', desc='a str', genfile=True)
+
     nib.CommandLine.input_spec = CommandLineInputSpec2
     ci5 = nib.CommandLine(command='cmd')
     with pytest.raises(NotImplementedError):

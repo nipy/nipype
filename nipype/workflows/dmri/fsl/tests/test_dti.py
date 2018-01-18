@@ -18,27 +18,26 @@ from nipype.utils.filemanip import list_to_filename
 def test_create_bedpostx_pipeline(tmpdir):
     fsl_course_dir = os.path.abspath(os.environ['FSL_COURSE_DATA'])
 
-    mask_file = os.path.join(fsl_course_dir, "fdt2/subj1.bedpostX/nodif_brain_mask.nii.gz")
+    mask_file = os.path.join(fsl_course_dir,
+                             "fdt2/subj1.bedpostX/nodif_brain_mask.nii.gz")
     bvecs_file = os.path.join(fsl_course_dir, "fdt2/subj1/bvecs")
     bvals_file = os.path.join(fsl_course_dir, "fdt2/subj1/bvals")
     dwi_file = os.path.join(fsl_course_dir, "fdt2/subj1/data.nii.gz")
     z_min = 62
     z_size = 2
 
-    slice_mask = pe.Node(fsl.ExtractROI(x_min=0,
-                                        x_size=-1,
-                                        y_min=0,
-                                        y_size=-1,
-                                        z_min=z_min,
-                                        z_size=z_size), name="slice_mask")
+    slice_mask = pe.Node(
+        fsl.ExtractROI(
+            x_min=0, x_size=-1, y_min=0, y_size=-1, z_min=z_min,
+            z_size=z_size),
+        name="slice_mask")
     slice_mask.inputs.in_file = mask_file
 
-    slice_dwi = pe.Node(fsl.ExtractROI(x_min=0,
-                                       x_size=-1,
-                                       y_min=0,
-                                       y_size=-1,
-                                       z_min=z_min,
-                                       z_size=z_size), name="slice_dwi")
+    slice_dwi = pe.Node(
+        fsl.ExtractROI(
+            x_min=0, x_size=-1, y_min=0, y_size=-1, z_min=z_min,
+            z_size=z_size),
+        name="slice_dwi")
     slice_dwi.inputs.in_file = dwi_file
 
     nipype_bedpostx = create_bedpostx_pipeline("nipype_bedpostx")
@@ -55,7 +54,8 @@ def test_create_bedpostx_pipeline(tmpdir):
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        original_bedpostx = pe.Node(interface=fsl.BEDPOSTX(), name="original_bedpostx")
+        original_bedpostx = pe.Node(
+            interface=fsl.BEDPOSTX(), name="original_bedpostx")
     original_bedpostx.inputs.bvecs = bvecs_file
     original_bedpostx.inputs.bvals = bvals_file
     original_bedpostx.inputs.environ['FSLPARALLEL'] = ""
@@ -72,14 +72,14 @@ def test_create_bedpostx_pipeline(tmpdir):
     pipeline = pe.Workflow(name="test_bedpostx")
     pipeline.base_dir = tmpdir.mkdir("nipype_test_bedpostx_").strpath
 
-    pipeline.connect([(slice_mask, original_bedpostx, [("roi_file", "mask")]),
-                      (slice_mask, nipype_bedpostx, [("roi_file", "inputnode.mask")]),
-
-                      (slice_dwi, original_bedpostx, [("roi_file", "dwi")]),
-                      (slice_dwi, nipype_bedpostx, [("roi_file", "inputnode.dwi")]),
-
-                      (nipype_bedpostx, test_f1, [(("outputnode.mean_fsamples", list_to_filename), "volume1")]),
-                      (original_bedpostx, test_f1, [("mean_fsamples", "volume2")]),
-                      ])
+    pipeline.connect([
+        (slice_mask, original_bedpostx, [("roi_file", "mask")]),
+        (slice_mask, nipype_bedpostx, [("roi_file", "inputnode.mask")]),
+        (slice_dwi, original_bedpostx, [("roi_file", "dwi")]),
+        (slice_dwi, nipype_bedpostx, [("roi_file", "inputnode.dwi")]),
+        (nipype_bedpostx, test_f1, [(("outputnode.mean_fsamples",
+                                      list_to_filename), "volume1")]),
+        (original_bedpostx, test_f1, [("mean_fsamples", "volume2")]),
+    ])
 
     pipeline.run(plugin='Linear')

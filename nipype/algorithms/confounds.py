@@ -11,7 +11,8 @@ Algorithms to compute confounds in :abbr:`fMRI (functional MRI)`
     >>> os.chdir(datadir)
 
 '''
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import range
 
 import os
@@ -34,36 +35,41 @@ IFLOGGER = logging.getLogger('interface')
 
 
 class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc='functional data, after HMC')
+    in_file = File(
+        exists=True, mandatory=True, desc='functional data, after HMC')
     in_mask = File(exists=True, mandatory=True, desc='a brain mask')
-    remove_zerovariance = traits.Bool(True, usedefault=True,
-                                      desc='remove voxels with zero variance')
-    save_std = traits.Bool(True, usedefault=True,
-                           desc='save standardized DVARS')
-    save_nstd = traits.Bool(False, usedefault=True,
-                            desc='save non-standardized DVARS')
-    save_vxstd = traits.Bool(False, usedefault=True,
-                             desc='save voxel-wise standardized DVARS')
+    remove_zerovariance = traits.Bool(
+        True, usedefault=True, desc='remove voxels with zero variance')
+    save_std = traits.Bool(
+        True, usedefault=True, desc='save standardized DVARS')
+    save_nstd = traits.Bool(
+        False, usedefault=True, desc='save non-standardized DVARS')
+    save_vxstd = traits.Bool(
+        False, usedefault=True, desc='save voxel-wise standardized DVARS')
     save_all = traits.Bool(False, usedefault=True, desc='output all DVARS')
 
     series_tr = traits.Float(desc='repetition time in sec.')
     save_plot = traits.Bool(False, usedefault=True, desc='write DVARS plot')
     figdpi = traits.Int(100, usedefault=True, desc='output dpi for the plot')
-    figsize = traits.Tuple(traits.Float(11.7), traits.Float(2.3), usedefault=True,
-                           desc='output figure size')
-    figformat = traits.Enum('png', 'pdf', 'svg', usedefault=True,
-                            desc='output format for figures')
-    intensity_normalization = traits.Float(1000.0, usedefault=True,
-                              desc='Divide value in each voxel at each timepoint '
-                                   'by the median calculated across all voxels'
-                                   'and timepoints within the mask (if specified)'
-                                   'and then multiply by the value specified by'
-                                   'this parameter. By using the default (1000)' \
-                                   'output DVARS will be expressed in ' \
-                                   'x10 % BOLD units compatible with Power et al.' \
-                                   '2012. Set this to 0 to disable intensity' \
-                                   'normalization altogether.')
-
+    figsize = traits.Tuple(
+        traits.Float(11.7),
+        traits.Float(2.3),
+        usedefault=True,
+        desc='output figure size')
+    figformat = traits.Enum(
+        'png', 'pdf', 'svg', usedefault=True, desc='output format for figures')
+    intensity_normalization = traits.Float(
+        1000.0,
+        usedefault=True,
+        desc='Divide value in each voxel at each timepoint '
+        'by the median calculated across all voxels'
+        'and timepoints within the mask (if specified)'
+        'and then multiply by the value specified by'
+        'this parameter. By using the default (1000)'
+        'output DVARS will be expressed in '
+        'x10 % BOLD units compatible with Power et al.'
+        '2012. Set this to 0 to disable intensity'
+        'normalization altogether.')
 
 
 class ComputeDVARSOutputSpec(TraitedSpec):
@@ -86,7 +92,8 @@ class ComputeDVARS(BaseInterface):
     input_spec = ComputeDVARSInputSpec
     output_spec = ComputeDVARSOutputSpec
     references_ = [{
-        'entry': BibTeX("""\
+        'entry':
+        BibTeX("""\
 @techreport{nichols_notes_2013,
     address = {Coventry, UK},
     title = {Notes on {Creating} a {Standardized} {Version} of {DVARS}},
@@ -99,7 +106,8 @@ research/nichols/scripts/fsl/standardizeddvars.pdf},
 }"""),
         'tags': ['method']
     }, {
-        'entry': BibTeX("""\
+        'entry':
+        BibTeX("""\
 @article{power_spurious_2012,
     title = {Spurious but systematic correlations in functional connectivity {MRI} networks \
 arise from subject motion},
@@ -122,8 +130,7 @@ Bradley L. and Petersen, Steven E.},
         super(ComputeDVARS, self).__init__(**inputs)
 
     def _gen_fname(self, suffix, ext=None):
-        fname, in_ext = op.splitext(op.basename(
-            self.inputs.in_file))
+        fname, in_ext = op.splitext(op.basename(self.inputs.in_file))
 
         if in_ext == '.gz':
             fname, in_ext2 = op.splitext(fname)
@@ -138,13 +145,15 @@ Bradley L. and Petersen, Steven E.},
         return op.abspath('{}_{}.{}'.format(fname, suffix, ext))
 
     def _run_interface(self, runtime):
-        dvars = compute_dvars(self.inputs.in_file, self.inputs.in_mask,
-                              remove_zerovariance=self.inputs.remove_zerovariance,
-                              intensity_normalization=self.inputs.intensity_normalization)
+        dvars = compute_dvars(
+            self.inputs.in_file,
+            self.inputs.in_mask,
+            remove_zerovariance=self.inputs.remove_zerovariance,
+            intensity_normalization=self.inputs.intensity_normalization)
 
-        (self._results['avg_std'],
-         self._results['avg_nstd'],
-         self._results['avg_vxstd']) = np.mean(dvars, axis=1).astype(float)
+        (self._results['avg_std'], self._results['avg_nstd'],
+         self._results['avg_vxstd']) = np.mean(
+             dvars, axis=1).astype(float)
 
         tr = None
         if isdefined(self.inputs.series_tr):
@@ -158,11 +167,16 @@ Bradley L. and Petersen, Steven E.},
             if self.inputs.save_plot:
                 self._results['fig_std'] = self._gen_fname(
                     'dvars_std', ext=self.inputs.figformat)
-                fig = plot_confound(dvars[0], self.inputs.figsize, 'Standardized DVARS',
-                                    series_tr=tr)
-                fig.savefig(self._results['fig_std'], dpi=float(self.inputs.figdpi),
-                        format=self.inputs.figformat,
-                        bbox_inches='tight')
+                fig = plot_confound(
+                    dvars[0],
+                    self.inputs.figsize,
+                    'Standardized DVARS',
+                    series_tr=tr)
+                fig.savefig(
+                    self._results['fig_std'],
+                    dpi=float(self.inputs.figdpi),
+                    format=self.inputs.figformat,
+                    bbox_inches='tight')
                 fig.clf()
 
         if self.inputs.save_nstd:
@@ -173,10 +187,13 @@ Bradley L. and Petersen, Steven E.},
             if self.inputs.save_plot:
                 self._results['fig_nstd'] = self._gen_fname(
                     'dvars_nstd', ext=self.inputs.figformat)
-                fig = plot_confound(dvars[1], self.inputs.figsize, 'DVARS', series_tr=tr)
-                fig.savefig(self._results['fig_nstd'], dpi=float(self.inputs.figdpi),
-                            format=self.inputs.figformat,
-                            bbox_inches='tight')
+                fig = plot_confound(
+                    dvars[1], self.inputs.figsize, 'DVARS', series_tr=tr)
+                fig.savefig(
+                    self._results['fig_nstd'],
+                    dpi=float(self.inputs.figdpi),
+                    format=self.inputs.figformat,
+                    bbox_inches='tight')
                 fig.clf()
 
         if self.inputs.save_vxstd:
@@ -187,17 +204,27 @@ Bradley L. and Petersen, Steven E.},
             if self.inputs.save_plot:
                 self._results['fig_vxstd'] = self._gen_fname(
                     'dvars_vxstd', ext=self.inputs.figformat)
-                fig = plot_confound(dvars[2], self.inputs.figsize, 'Voxelwise std DVARS',
-                                    series_tr=tr)
-                fig.savefig(self._results['fig_vxstd'], dpi=float(self.inputs.figdpi),
-                            format=self.inputs.figformat,
-                            bbox_inches='tight')
+                fig = plot_confound(
+                    dvars[2],
+                    self.inputs.figsize,
+                    'Voxelwise std DVARS',
+                    series_tr=tr)
+                fig.savefig(
+                    self._results['fig_vxstd'],
+                    dpi=float(self.inputs.figdpi),
+                    format=self.inputs.figformat,
+                    bbox_inches='tight')
                 fig.clf()
 
         if self.inputs.save_all:
             out_file = self._gen_fname('dvars', ext='tsv')
-            np.savetxt(out_file, np.vstack(dvars).T, fmt=b'%0.8f', delimiter=b'\t',
-                       header='std DVARS\tnon-std DVARS\tvx-wise std DVARS', comments='')
+            np.savetxt(
+                out_file,
+                np.vstack(dvars).T,
+                fmt=b'%0.8f',
+                delimiter=b'\t',
+                header='std DVARS\tnon-std DVARS\tvx-wise std DVARS',
+                comments='')
             self._results['out_all'] = out_file
 
         return runtime
@@ -208,20 +235,34 @@ Bradley L. and Petersen, Steven E.},
 
 class FramewiseDisplacementInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='motion parameters')
-    parameter_source = traits.Enum("FSL", "AFNI", "SPM", "FSFAST", "NIPY",
-                                   desc="Source of movement parameters",
-                                   mandatory=True)
-    radius = traits.Float(50, usedefault=True,
-                          desc='radius in mm to calculate angular FDs, 50mm is the '
-                               'default since it is used in Power et al. 2012')
-    out_file = File('fd_power_2012.txt', usedefault=True, desc='output file name')
-    out_figure = File('fd_power_2012.pdf', usedefault=True, desc='output figure name')
+    parameter_source = traits.Enum(
+        "FSL",
+        "AFNI",
+        "SPM",
+        "FSFAST",
+        "NIPY",
+        desc="Source of movement parameters",
+        mandatory=True)
+    radius = traits.Float(
+        50,
+        usedefault=True,
+        desc='radius in mm to calculate angular FDs, 50mm is the '
+        'default since it is used in Power et al. 2012')
+    out_file = File(
+        'fd_power_2012.txt', usedefault=True, desc='output file name')
+    out_figure = File(
+        'fd_power_2012.pdf', usedefault=True, desc='output figure name')
     series_tr = traits.Float(desc='repetition time in sec.')
     save_plot = traits.Bool(False, usedefault=True, desc='write FD plot')
-    normalize = traits.Bool(False, usedefault=True, desc='calculate FD in mm/s')
-    figdpi = traits.Int(100, usedefault=True, desc='output dpi for the FD plot')
-    figsize = traits.Tuple(traits.Float(11.7), traits.Float(2.3), usedefault=True,
-                           desc='output figure size')
+    normalize = traits.Bool(
+        False, usedefault=True, desc='calculate FD in mm/s')
+    figdpi = traits.Int(
+        100, usedefault=True, desc='output dpi for the FD plot')
+    figsize = traits.Tuple(
+        traits.Float(11.7),
+        traits.Float(2.3),
+        usedefault=True,
+        desc='output figure size')
 
 
 class FramewiseDisplacementOutputSpec(TraitedSpec):
@@ -247,7 +288,8 @@ class FramewiseDisplacement(BaseInterface):
     output_spec = FramewiseDisplacementOutputSpec
 
     references_ = [{
-        'entry': BibTeX("""\
+        'entry':
+        BibTeX("""\
 @article{power_spurious_2012,
     title = {Spurious but systematic correlations in functional connectivity {MRI} networks \
 arise from subject motion},
@@ -267,9 +309,11 @@ Bradley L. and Petersen, Steven E.},
 
     def _run_interface(self, runtime):
         mpars = np.loadtxt(self.inputs.in_file)  # mpars is N_t x 6
-        mpars = np.apply_along_axis(func1d=normalize_mc_params,
-                                    axis=1, arr=mpars,
-                                    source=self.inputs.parameter_source)
+        mpars = np.apply_along_axis(
+            func1d=normalize_mc_params,
+            axis=1,
+            arr=mpars,
+            source=self.inputs.parameter_source)
         diff = mpars[:-1, :6] - mpars[1:, :6]
         diff[:, 3:6] *= self.inputs.radius
         fd_res = np.abs(diff).sum(axis=1)
@@ -278,7 +322,11 @@ Bradley L. and Petersen, Steven E.},
             'out_file': op.abspath(self.inputs.out_file),
             'fd_average': float(fd_res.mean())
         }
-        np.savetxt(self.inputs.out_file, fd_res, header='FramewiseDisplacement', comments='')
+        np.savetxt(
+            self.inputs.out_file,
+            fd_res,
+            header='FramewiseDisplacement',
+            comments='')
 
         if self.inputs.save_plot:
             tr = None
@@ -289,11 +337,18 @@ Bradley L. and Petersen, Steven E.},
                 IFLOGGER.warn('FD plot cannot be normalized if TR is not set')
 
             self._results['out_figure'] = op.abspath(self.inputs.out_figure)
-            fig = plot_confound(fd_res, self.inputs.figsize, 'FD', units='mm',
-                                series_tr=tr, normalize=self.inputs.normalize)
-            fig.savefig(self._results['out_figure'], dpi=float(self.inputs.figdpi),
-                        format=self.inputs.out_figure[-3:],
-                        bbox_inches='tight')
+            fig = plot_confound(
+                fd_res,
+                self.inputs.figsize,
+                'FD',
+                units='mm',
+                series_tr=tr,
+                normalize=self.inputs.normalize)
+            fig.savefig(
+                self._results['out_figure'],
+                dpi=float(self.inputs.figdpi),
+                format=self.inputs.out_figure[-3:],
+                bbox_inches='tight')
             fig.clf()
 
         return runtime
@@ -303,56 +358,74 @@ Bradley L. and Petersen, Steven E.},
 
 
 class CompCorInputSpec(BaseInterfaceInputSpec):
-    realigned_file = File(exists=True, mandatory=True,
-                          desc='already realigned brain image (4D)')
-    mask_files = InputMultiPath(File(exists=True),
-                                desc=('One or more mask files that determines '
-                                      'ROI (3D). When more that one file is '
-                                      'provided `merge_method` or '
-                                      '`merge_index` must be provided'))
-    merge_method = traits.Enum('union', 'intersect', 'none', xor=['mask_index'],
-                               requires=['mask_files'],
-                               desc=('Merge method if multiple masks are '
-                                     'present - `union` uses voxels included in'
-                                     ' at least one input mask, `intersect` '
-                                     'uses only voxels present in all input '
-                                     'masks, `none` performs CompCor on '
-                                     'each mask individually'))
-    mask_index = traits.Range(low=0, xor=['merge_method'],
-                              requires=['mask_files'],
-                              desc=('Position of mask in `mask_files` to use - '
-                                    'first is the default.'))
-    components_file = traits.Str('components_file.txt', usedefault=True,
-                                 desc='Filename to store physiological components')
-    num_components = traits.Int(6, usedefault=True) # 6 for BOLD, 4 for ASL
-    pre_filter = traits.Enum('polynomial', 'cosine', False, usedefault=True,
-                             desc='Detrend time series prior to component '
-                                  'extraction')
-    use_regress_poly = traits.Bool(True,
-                                   deprecated='0.15.0', new_name='pre_filter',
-                                   desc=('use polynomial regression '
-                                         'pre-component extraction'))
-    regress_poly_degree = traits.Range(low=1, default=1, usedefault=True,
-                                       desc='the degree polynomial to use')
-    header_prefix = traits.Str(desc=('the desired header for the output tsv '
-                                     'file (one column). If undefined, will '
-                                     'default to "CompCor"'))
+    realigned_file = File(
+        exists=True, mandatory=True, desc='already realigned brain image (4D)')
+    mask_files = InputMultiPath(
+        File(exists=True),
+        desc=('One or more mask files that determines '
+              'ROI (3D). When more that one file is '
+              'provided `merge_method` or '
+              '`merge_index` must be provided'))
+    merge_method = traits.Enum(
+        'union',
+        'intersect',
+        'none',
+        xor=['mask_index'],
+        requires=['mask_files'],
+        desc=('Merge method if multiple masks are '
+              'present - `union` uses voxels included in'
+              ' at least one input mask, `intersect` '
+              'uses only voxels present in all input '
+              'masks, `none` performs CompCor on '
+              'each mask individually'))
+    mask_index = traits.Range(
+        low=0,
+        xor=['merge_method'],
+        requires=['mask_files'],
+        desc=('Position of mask in `mask_files` to use - '
+              'first is the default.'))
+    components_file = traits.Str(
+        'components_file.txt',
+        usedefault=True,
+        desc='Filename to store physiological components')
+    num_components = traits.Int(6, usedefault=True)  # 6 for BOLD, 4 for ASL
+    pre_filter = traits.Enum(
+        'polynomial',
+        'cosine',
+        False,
+        usedefault=True,
+        desc='Detrend time series prior to component '
+        'extraction')
+    use_regress_poly = traits.Bool(
+        True,
+        deprecated='0.15.0',
+        new_name='pre_filter',
+        desc=('use polynomial regression '
+              'pre-component extraction'))
+    regress_poly_degree = traits.Range(
+        low=1, default=1, usedefault=True, desc='the degree polynomial to use')
+    header_prefix = traits.Str(
+        desc=('the desired header for the output tsv '
+              'file (one column). If undefined, will '
+              'default to "CompCor"'))
     high_pass_cutoff = traits.Float(
-        128, usedefault=True,
+        128,
+        usedefault=True,
         desc='Cutoff (in seconds) for "cosine" pre-filter')
     repetition_time = traits.Float(
         desc='Repetition time (TR) of series - derived from image header if '
-             'unspecified')
+        'unspecified')
     save_pre_filter = traits.Either(
         traits.Bool, File, desc='Save pre-filter basis as text file')
     ignore_initial_volumes = traits.Range(
-        low=0, usedefault=True,
+        low=0,
+        usedefault=True,
         desc='Number of volumes at start of series to ignore')
 
 
 class CompCorOutputSpec(TraitedSpec):
-    components_file = File(exists=True,
-                           desc='text file containing the noise components')
+    components_file = File(
+        exists=True, desc='text file containing the noise components')
     pre_filter_file = File(desc='text file containing high-pass filter basis')
 
 
@@ -393,19 +466,21 @@ class CompCor(BaseInterface):
     """
     input_spec = CompCorInputSpec
     output_spec = CompCorOutputSpec
-    references_ = [{'entry': BibTeX("@article{compcor_2007,"
-                                    "title = {A component based noise correction method (CompCor) for BOLD and perfusion based},"
-                                    "volume = {37},"
-                                    "number = {1},"
-                                    "doi = {10.1016/j.neuroimage.2007.04.042},"
-                                    "urldate = {2016-08-13},"
-                                    "journal = {NeuroImage},"
-                                    "author = {Behzadi, Yashar and Restom, Khaled and Liau, Joy and Liu, Thomas T.},"
-                                    "year = {2007},"
-                                    "pages = {90-101},}"
-                                   ),
-                    'tags': ['method', 'implementation']
-                   }]
+    references_ = [{
+        'entry':
+        BibTeX(
+            "@article{compcor_2007,"
+            "title = {A component based noise correction method (CompCor) for BOLD and perfusion based},"
+            "volume = {37},"
+            "number = {1},"
+            "doi = {10.1016/j.neuroimage.2007.04.042},"
+            "urldate = {2016-08-13},"
+            "journal = {NeuroImage},"
+            "author = {Behzadi, Yashar and Restom, Khaled and Liau, Joy and Liu, Thomas T.},"
+            "year = {2007},"
+            "pages = {90-101},}"),
+        'tags': ['method', 'implementation']
+    }]
 
     def __init__(self, *args, **kwargs):
         ''' exactly the same as compcor except the header '''
@@ -423,21 +498,22 @@ class CompCor(BaseInterface):
             self.inputs.pre_filter = 'polynomial'
 
         # Degree 0 == remove mean; see compute_noise_components
-        degree = (self.inputs.regress_poly_degree if
-                  self.inputs.pre_filter == 'polynomial' else 0)
+        degree = (self.inputs.regress_poly_degree
+                  if self.inputs.pre_filter == 'polynomial' else 0)
 
         imgseries = nb.load(self.inputs.realigned_file, mmap=NUMPY_MMAP)
 
         if len(imgseries.shape) != 4:
             raise ValueError('{} expected a 4-D nifti file. Input {} has '
                              '{} dimensions (shape {})'.format(
-                                self._header, self.inputs.realigned_file,
-                                len(imgseries.shape), imgseries.shape))
+                                 self._header, self.inputs.realigned_file,
+                                 len(imgseries.shape), imgseries.shape))
 
         if len(mask_images) == 0:
-            img = nb.Nifti1Image(np.ones(imgseries.shape[:3], dtype=np.bool),
-                                 affine=imgseries.affine,
-                                 header=imgseries.header)
+            img = nb.Nifti1Image(
+                np.ones(imgseries.shape[:3], dtype=np.bool),
+                affine=imgseries.affine,
+                header=imgseries.header)
             mask_images = [img]
 
         skip_vols = self.inputs.ignore_initial_volumes
@@ -473,32 +549,47 @@ class CompCor(BaseInterface):
         if skip_vols:
             old_comp = components
             nrows = skip_vols + components.shape[0]
-            components = np.zeros((nrows, components.shape[1]),
-                                  dtype=components.dtype)
+            components = np.zeros(
+                (nrows, components.shape[1]), dtype=components.dtype)
             components[skip_vols:] = old_comp
 
-        components_file = os.path.join(os.getcwd(), self.inputs.components_file)
-        np.savetxt(components_file, components, fmt=b"%.10f", delimiter='\t',
-                   header=self._make_headers(components.shape[1]), comments='')
+        components_file = os.path.join(os.getcwd(),
+                                       self.inputs.components_file)
+        np.savetxt(
+            components_file,
+            components,
+            fmt=b"%.10f",
+            delimiter='\t',
+            header=self._make_headers(components.shape[1]),
+            comments='')
 
         if self.inputs.pre_filter and self.inputs.save_pre_filter:
             pre_filter_file = self._list_outputs()['pre_filter_file']
-            ftype = {'polynomial': 'Legendre',
-                     'cosine': 'Cosine'}[self.inputs.pre_filter]
+            ftype = {
+                'polynomial': 'Legendre',
+                'cosine': 'Cosine'
+            }[self.inputs.pre_filter]
             ncols = filter_basis.shape[1] if filter_basis.size > 0 else 0
             header = ['{}{:02d}'.format(ftype, i) for i in range(ncols)]
             if skip_vols:
                 old_basis = filter_basis
                 # nrows defined above
-                filter_basis = np.zeros((nrows, ncols + skip_vols),
-                                        dtype=filter_basis.dtype)
+                filter_basis = np.zeros(
+                    (nrows, ncols + skip_vols), dtype=filter_basis.dtype)
                 if old_basis.size > 0:
                     filter_basis[skip_vols:, :ncols] = old_basis
                 filter_basis[:skip_vols, -skip_vols:] = np.eye(skip_vols)
-                header.extend(['NonSteadyStateOutlier{:02d}'.format(i)
-                               for i in range(skip_vols)])
-            np.savetxt(pre_filter_file, filter_basis, fmt=b'%.10f',
-                       delimiter='\t', header='\t'.join(header), comments='')
+                header.extend([
+                    'NonSteadyStateOutlier{:02d}'.format(i)
+                    for i in range(skip_vols)
+                ])
+            np.savetxt(
+                pre_filter_file,
+                filter_basis,
+                fmt=b'%.10f',
+                delimiter='\t',
+                header='\t'.join(header),
+                comments='')
 
         return runtime
 
@@ -507,7 +598,8 @@ class CompCor(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['components_file'] = os.path.abspath(self.inputs.components_file)
+        outputs['components_file'] = os.path.abspath(
+            self.inputs.components_file)
 
         save_pre_filter = self.inputs.save_pre_filter
         if save_pre_filter:
@@ -539,22 +631,28 @@ class ACompCor(CompCor):
 
 class TCompCorInputSpec(CompCorInputSpec):
     # and all the fields in CompCorInputSpec
-    percentile_threshold = traits.Range(low=0., high=1., value=.02,
-                                        exclude_low=True, exclude_high=True,
-                                        usedefault=True, desc='the percentile '
-                                        'used to select highest-variance '
-                                        'voxels, represented by a number '
-                                        'between 0 and 1, exclusive. By '
-                                        'default, this value is set to .02. '
-                                        'That is, the 2% of voxels '
-                                        'with the highest variance are used.')
+    percentile_threshold = traits.Range(
+        low=0.,
+        high=1.,
+        value=.02,
+        exclude_low=True,
+        exclude_high=True,
+        usedefault=True,
+        desc='the percentile '
+        'used to select highest-variance '
+        'voxels, represented by a number '
+        'between 0 and 1, exclusive. By '
+        'default, this value is set to .02. '
+        'That is, the 2% of voxels '
+        'with the highest variance are used.')
 
 
 class TCompCorOutputSpec(CompCorOutputSpec):
     # and all the fields in CompCorOutputSpec
-    high_variance_masks = OutputMultiPath(File(exists=True),
-                                          desc=(("voxels exceeding the variance"
-                                                 " threshold")))
+    high_variance_masks = OutputMultiPath(
+        File(exists=True),
+        desc=(("voxels exceeding the variance"
+               " threshold")))
 
 
 class TCompCor(CompCor):
@@ -591,12 +689,14 @@ class TCompCor(CompCor):
             imgseries = timeseries[mask, :]
             imgseries = regress_poly(2, imgseries)[0]
             tSTD = _compute_tSTD(imgseries, 0, axis=-1)
-            threshold_std = np.percentile(tSTD, np.round(100. *
-                           (1. - self.inputs.percentile_threshold)).astype(int))
+            threshold_std = np.percentile(
+                tSTD,
+                np.round(100. *
+                         (1. - self.inputs.percentile_threshold)).astype(int))
             mask_data = np.zeros_like(mask)
             mask_data[mask != 0] = tSTD >= threshold_std
-            out_image = nb.Nifti1Image(mask_data, affine=img.affine,
-                                       header=img.header)
+            out_image = nb.Nifti1Image(
+                mask_data, affine=img.affine, header=img.header)
 
             # save mask
             mask_file = os.path.abspath('mask_{:03d}.nii.gz'.format(i))
@@ -614,17 +714,31 @@ class TCompCor(CompCor):
 
 
 class TSNRInputSpec(BaseInterfaceInputSpec):
-    in_file = InputMultiPath(File(exists=True), mandatory=True,
-                             desc='realigned 4D file or a list of 3D files')
+    in_file = InputMultiPath(
+        File(exists=True),
+        mandatory=True,
+        desc='realigned 4D file or a list of 3D files')
     regress_poly = traits.Range(low=1, desc='Remove polynomials')
-    tsnr_file = File('tsnr.nii.gz', usedefault=True, hash_files=False,
-                     desc='output tSNR file')
-    mean_file = File('mean.nii.gz', usedefault=True, hash_files=False,
-                     desc='output mean file')
-    stddev_file = File('stdev.nii.gz', usedefault=True, hash_files=False,
-                       desc='output tSNR file')
-    detrended_file = File('detrend.nii.gz', usedefault=True, hash_files=False,
-                          desc='input file after detrending')
+    tsnr_file = File(
+        'tsnr.nii.gz',
+        usedefault=True,
+        hash_files=False,
+        desc='output tSNR file')
+    mean_file = File(
+        'mean.nii.gz',
+        usedefault=True,
+        hash_files=False,
+        desc='output mean file')
+    stddev_file = File(
+        'stdev.nii.gz',
+        usedefault=True,
+        hash_files=False,
+        desc='output tSNR file')
+    detrended_file = File(
+        'detrend.nii.gz',
+        usedefault=True,
+        hash_files=False,
+        desc='input file after detrending')
 
 
 class TSNROutputSpec(TraitedSpec):
@@ -654,9 +768,16 @@ class TSNR(BaseInterface):
     def _run_interface(self, runtime):
         img = nb.load(self.inputs.in_file[0], mmap=NUMPY_MMAP)
         header = img.header.copy()
-        vollist = [nb.load(filename, mmap=NUMPY_MMAP) for filename in self.inputs.in_file]
-        data = np.concatenate([vol.get_data().reshape(
-            vol.shape[:3] + (-1,)) for vol in vollist], axis=3)
+        vollist = [
+            nb.load(filename, mmap=NUMPY_MMAP)
+            for filename in self.inputs.in_file
+        ]
+        data = np.concatenate(
+            [
+                vol.get_data().reshape(vol.shape[:3] + (-1, ))
+                for vol in vollist
+            ],
+            axis=3)
         data = np.nan_to_num(data)
 
         if data.dtype.kind == 'i':
@@ -664,14 +785,16 @@ class TSNR(BaseInterface):
             data = data.astype(np.float32)
 
         if isdefined(self.inputs.regress_poly):
-            data = regress_poly(self.inputs.regress_poly, data, remove_mean=False)[0]
+            data = regress_poly(
+                self.inputs.regress_poly, data, remove_mean=False)[0]
             img = nb.Nifti1Image(data, img.affine, header)
             nb.save(img, op.abspath(self.inputs.detrended_file))
 
         meanimg = np.mean(data, axis=3)
         stddevimg = np.std(data, axis=3)
         tsnr = np.zeros_like(meanimg)
-        tsnr[stddevimg > 1.e-3] = meanimg[stddevimg > 1.e-3] / stddevimg[stddevimg > 1.e-3]
+        tsnr[stddevimg > 1.e-3] = meanimg[stddevimg > 1.e-3] / stddevimg[
+            stddevimg > 1.e-3]
         img = nb.Nifti1Image(tsnr, img.affine, header)
         nb.save(img, op.abspath(self.inputs.tsnr_file))
         img = nb.Nifti1Image(meanimg, img.affine, header)
@@ -696,7 +819,7 @@ class NonSteadyStateDetectorInputSpec(BaseInterfaceInputSpec):
 
 class NonSteadyStateDetectorOutputSpec(TraitedSpec):
     n_volumes_to_discard = traits.Int(desc='Number of non-steady state volumes'
-                                           'detected in the beginning of the scan.')
+                                      'detected in the beginning of the scan.')
 
 
 class NonSteadyStateDetector(BaseInterface):
@@ -710,11 +833,10 @@ class NonSteadyStateDetector(BaseInterface):
 
     def _run_interface(self, runtime):
         in_nii = nb.load(self.inputs.in_file)
-        global_signal = in_nii.get_data()[:,:,:,:50].mean(axis=0).mean(axis=0).mean(axis=0)
+        global_signal = in_nii.get_data()[:, :, :, :50].mean(axis=0).mean(
+            axis=0).mean(axis=0)
 
-        self._results = {
-            'n_volumes_to_discard': is_outlier(global_signal)
-        }
+        self._results = {'n_volumes_to_discard': is_outlier(global_signal)}
 
         return runtime
 
@@ -722,7 +844,9 @@ class NonSteadyStateDetector(BaseInterface):
         return self._results
 
 
-def compute_dvars(in_file, in_mask, remove_zerovariance=False,
+def compute_dvars(in_file,
+                  in_mask,
+                  remove_zerovariance=False,
                   intensity_normalization=1000):
     """
     Compute the :abbr:`DVARS (D referring to temporal
@@ -761,8 +885,7 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     mask = nb.load(in_mask, mmap=NUMPY_MMAP).get_data().astype(np.uint8)
 
     if len(func.shape) != 4:
-        raise RuntimeError(
-            "Input fMRI dataset should be 4-dimensional")
+        raise RuntimeError("Input fMRI dataset should be 4-dimensional")
 
     idx = np.where(mask > 0)
     mfunc = func[idx[0], idx[1], idx[2], :]
@@ -780,10 +903,10 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
         func_sd = func_sd[func_sd != 0]
 
     # Compute (non-robust) estimate of lag-1 autocorrelation
-    ar1 = np.apply_along_axis(
-        AR_est_YW, 1,
-        regress_poly(0, mfunc, remove_mean=True)[0].astype(np.float32),
-        1)[:, 0]
+    ar1 = np.apply_along_axis(AR_est_YW, 1,
+                              regress_poly(0, mfunc,
+                                           remove_mean=True)[0].astype(
+                                               np.float32), 1)[:, 0]
 
     # Compute (predicted) standard deviation of temporal difference time series
     diff_sdhat = np.squeeze(np.sqrt(((1 - ar1) * 2).tolist())) * func_sd
@@ -809,8 +932,12 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     return (dvars_stdz, dvars_nstd, dvars_vx_stdz)
 
 
-def plot_confound(tseries, figsize, name, units=None,
-                  series_tr=None, normalize=False):
+def plot_confound(tseries,
+                  figsize,
+                  name,
+                  units=None,
+                  series_tr=None,
+                  normalize=False):
     """
     A helper function to plot :abbr:`fMRI (functional MRI)` confounds.
 
@@ -874,7 +1001,7 @@ def is_outlier(points, thresh=3.5):
     if len(points.shape) == 1:
         points = points[:, None]
     median = np.median(points, axis=0)
-    diff = np.sum((points - median) ** 2, axis=-1)
+    diff = np.sum((points - median)**2, axis=-1)
     diff = np.sqrt(diff)
     med_abs_deviation = np.median(diff)
 
@@ -929,7 +1056,7 @@ def regress_poly(degree, data, remove_mean=True, axis=-1):
     data = data.reshape((-1, timepoints))
 
     # Generate design matrix
-    X = np.ones((timepoints, 1)) # quick way to calc degree 0
+    X = np.ones((timepoints, 1))  # quick way to calc degree 0
     for i in range(degree):
         polynomial_func = Legendre.basis(i + 1)
         value_array = np.linspace(-1, 1, timepoints)
@@ -943,7 +1070,7 @@ def regress_poly(degree, data, remove_mean=True, axis=-1):
     # Estimation
     if remove_mean:
         datahat = X.dot(betas).T
-    else: # disregard the first layer of X, which is degree 0
+    else:  # disregard the first layer of X, which is degree 0
         datahat = X[:, 1:].dot(betas[1:, ...]).T
     regressed_data = data - datahat
 
@@ -1007,8 +1134,7 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
 
 
 def compute_noise_components(imgseries, mask_images, num_components,
-                             filter_type, degree, period_cut,
-                             repetition_time):
+                             filter_type, degree, period_cut, repetition_time):
     """Compute the noise components from the imgseries for each mask
 
     imgseries: a nibabel img
@@ -1072,8 +1198,7 @@ def compute_noise_components(imgseries, mask_images, num_components,
         if components is None:
             components = u[:, :num_components]
         else:
-            components = np.hstack((components,
-                                    u[:, :num_components]))
+            components = np.hstack((components, u[:, :num_components]))
     if components is None and num_components > 0:
         raise ValueError('No components found')
     return components, basis
@@ -1091,6 +1216,7 @@ def _compute_tSTD(M, x, axis=0):
 #
 # Nipy release: 0.4.1
 # Modified for smooth integration in CompCor classes
+
 
 def _cosine_drift(period_cut, frametimes):
     """Create a cosine drift matrix with periods greater or equals to period_cut
@@ -1117,14 +1243,15 @@ def _cosine_drift(period_cut, frametimes):
     dt = frametimes[1] - frametimes[0]
     # hfcut = 1/(2*dt) yields len_time
     # If series is too short, return constant regressor
-    order = max(int(np.floor(2*len_tim*hfcut*dt)), 1)
+    order = max(int(np.floor(2 * len_tim * hfcut * dt)), 1)
     cdrift = np.zeros((len_tim, order))
-    nfct = np.sqrt(2.0/len_tim)
+    nfct = np.sqrt(2.0 / len_tim)
 
     for k in range(1, order):
-        cdrift[:, k-1] = nfct * np.cos((np.pi / len_tim) * (n_times + .5) * k)
+        cdrift[:, k - 1] = nfct * np.cos(
+            (np.pi / len_tim) * (n_times + .5) * k)
 
-    cdrift[:, order-1] = 1.  # or 1./sqrt(len_tim) to normalize
+    cdrift[:, order - 1] = 1.  # or 1./sqrt(len_tim) to normalize
     return cdrift
 
 

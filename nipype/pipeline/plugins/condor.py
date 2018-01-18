@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Parallel workflow execution via Condor
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import os
 from time import sleep
@@ -47,9 +48,8 @@ class CondorPlugin(SGELikeBatchManagerBase):
         super(CondorPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
-        cmd = CommandLine('condor_q',
-                          resource_monitor=False,
-                          terminal_output='allatonce')
+        cmd = CommandLine(
+            'condor_q', resource_monitor=False, terminal_output='allatonce')
         cmd.inputs.args = '%d' % taskid
         # check condor cluster
         oldlevel = iflogger.level
@@ -61,9 +61,11 @@ class CondorPlugin(SGELikeBatchManagerBase):
         return False
 
     def _submit_batchtask(self, scriptfile, node):
-        cmd = CommandLine('condor_qsub', environ=dict(os.environ),
-                          resource_monitor=False,
-                          terminal_output='allatonce')
+        cmd = CommandLine(
+            'condor_qsub',
+            environ=dict(os.environ),
+            resource_monitor=False,
+            terminal_output='allatonce')
         path = os.path.dirname(scriptfile)
         qsubargs = ''
         if self._qsub_args:
@@ -81,18 +83,14 @@ class CondorPlugin(SGELikeBatchManagerBase):
         if '-e' not in qsubargs:
             qsubargs = '%s -e %s' % (qsubargs, path)
         if node._hierarchy:
-            jobname = '.'.join((dict(os.environ)['LOGNAME'],
-                                node._hierarchy,
+            jobname = '.'.join((dict(os.environ)['LOGNAME'], node._hierarchy,
                                 node._id))
         else:
-            jobname = '.'.join((dict(os.environ)['LOGNAME'],
-                                node._id))
+            jobname = '.'.join((dict(os.environ)['LOGNAME'], node._id))
         jobnameitems = jobname.split('.')
         jobnameitems.reverse()
         jobname = '.'.join(jobnameitems)
-        cmd.inputs.args = '%s -N %s %s' % (qsubargs,
-                                           jobname,
-                                           scriptfile)
+        cmd.inputs.args = '%s -N %s %s' % (qsubargs, jobname, scriptfile)
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName('CRITICAL'))
         tries = 0
@@ -102,7 +100,7 @@ class CondorPlugin(SGELikeBatchManagerBase):
             except Exception as e:
                 if tries < self._max_tries:
                     tries += 1
-                    sleep(self._retry_timeout)  # sleep 2 seconds and try again.
+                    sleep(self._retry_timeout)  # sleep 2 seconds and try again
                 else:
                     iflogger.setLevel(oldlevel)
                     raise RuntimeError('\n'.join((('Could not submit condor '

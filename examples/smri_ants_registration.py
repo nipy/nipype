@@ -25,7 +25,6 @@ import urllib.error
 import urllib.parse
 from nipype.interfaces.ants import Registration
 from nipype.testing import example_data
-
 """
 2. Download T1 volumes into home directory
 
@@ -39,8 +38,10 @@ if not os.path.exists(mydatadir):
 print(mydatadir)
 
 MyFileURLs = [
-    ('http://slicer.kitware.com/midas3/download?bitstream=13121', '01_T1_half.nii.gz'),
-    ('http://slicer.kitware.com/midas3/download?bitstream=13122', '02_T1_half.nii.gz'),
+    ('http://slicer.kitware.com/midas3/download?bitstream=13121',
+     '01_T1_half.nii.gz'),
+    ('http://slicer.kitware.com/midas3/download?bitstream=13122',
+     '02_T1_half.nii.gz'),
 ]
 for tt in MyFileURLs:
     myURL = tt[0]
@@ -59,7 +60,6 @@ input_images = [
     os.path.join(mydatadir, '01_T1_half.nii.gz'),
     os.path.join(mydatadir, '02_T1_half.nii.gz'),
 ]
-
 """
 3. Define the parameters of the registration. Settings are
 found in the file ``smri_ants_registration_settings.json``
@@ -67,10 +67,10 @@ distributed with the ``example_data`` of `nipype`.
 
 """
 
-reg = Registration(from_file=example_data('smri_ants_registration_settings.json'))
+reg = Registration(
+    from_file=example_data('smri_ants_registration_settings.json'))
 reg.inputs.fixed_image = input_images[0]
 reg.inputs.moving_image = input_images[1]
-
 """
 Alternatively to the use of the ``from_file`` feature to load ANTs settings,
 the user can manually set all those inputs instead::
@@ -102,8 +102,6 @@ the user can manually set all those inputs instead::
 """
 
 print(reg.cmdline)
-
-
 """
 3. Run the registration
 """

@@ -5,7 +5,8 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import nibabel as nb
 
@@ -17,8 +18,7 @@ IFLOGGER = logging.getLogger('interface')
 
 
 class DTIInputSpec(DipyBaseInterfaceInputSpec):
-    mask_file = File(exists=True,
-                     desc='An optional white matter mask')
+    mask_file = File(exists=True, desc='An optional white matter mask')
 
 
 class DTIOutputSpec(TraitedSpec):
@@ -67,9 +67,9 @@ class DTI(DipyDiffusionInterface):
         nb.save(img, out_file)
         IFLOGGER.info('DTI parameters image saved as %s', out_file)
 
-        #FA MD RD and AD
+        # FA MD RD and AD
         for metric in ["fa", "md", "rd", "ad"]:
-            data = getattr(ten_fit,metric).astype("float32")
+            data = getattr(ten_fit, metric).astype("float32")
             out_name = self._gen_filename(metric)
             nb.Nifti1Image(data, affine).to_filename(out_name)
             IFLOGGER.info('DTI %s image saved as %s', metric, out_name)
@@ -87,8 +87,7 @@ class DTI(DipyDiffusionInterface):
 
 
 class TensorModeInputSpec(DipyBaseInterfaceInputSpec):
-    mask_file = File(exists=True,
-                     desc='An optional white matter mask')
+    mask_file = File(exists=True, desc='An optional white matter mask')
 
 
 class TensorModeOutputSpec(TraitedSpec):
@@ -96,7 +95,6 @@ class TensorModeOutputSpec(TraitedSpec):
 
 
 class TensorMode(DipyDiffusionInterface):
-
     """
     Creates a map of the mode of the diffusion tensors given a set of
     diffusion-weighted images, as well as their associated b-values and

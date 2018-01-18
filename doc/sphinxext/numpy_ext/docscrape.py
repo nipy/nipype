@@ -295,7 +295,8 @@ class NumpyDocString(object):
 
         for (section, content) in self._read_sections():
             if not section.startswith('..'):
-                section = ' '.join([s.capitalize() for s in section.split(' ')])
+                section = ' '.join([s.capitalize()
+                                    for s in section.split(' ')])
             if section in ('Parameters', 'Returns', 'Raises', 'Warns',
                            'Other Parameters', 'Attributes', 'Methods'):
                 self[section] = self._parse_param_list(content)
@@ -443,7 +444,7 @@ class FunctionDoc(NumpyDocString):
                 argspec = inspect.formatargspec(*argspec)
                 argspec = argspec.replace('*', '\*')
                 signature = '%s%s' % (func_name, argspec)
-            except TypeError as e:
+            except TypeError:
                 signature = '%s()' % func_name
             self['Signature'] = signature
 
@@ -459,7 +460,6 @@ class FunctionDoc(NumpyDocString):
         out = ''
 
         func, func_name = self.get_func()
-        signature = self['Signature'].replace('*', '\*')
 
         roles = {'func': 'function',
                  'meth': 'method'}

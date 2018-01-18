@@ -1,6 +1,5 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-
 """
 The fusion module provides higher-level interfaces to some of the operations
 that can be performed with the seg_LabFusion command-line program.
@@ -23,51 +22,55 @@ from .base import NiftySegCommand
 from ..niftyreg.base import get_custom_path
 from ...utils.filemanip import load_json, save_json, split_filename
 
-
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
 
 class LabelFusionInput(CommandLineInputSpec):
     """Input Spec for LabelFusion."""
-    in_file = File(argstr='-in %s',
-                   exists=True,
-                   mandatory=True,
-                   position=1,
-                   desc='Filename of the 4D integer label image.')
+    in_file = File(
+        argstr='-in %s',
+        exists=True,
+        mandatory=True,
+        position=1,
+        desc='Filename of the 4D integer label image.')
 
-    template_file = File(exists=True,
-                         desc='Registered templates (4D Image)')
+    template_file = File(exists=True, desc='Registered templates (4D Image)')
 
-    file_to_seg = File(exists=True,
-                       mandatory=True,
-                       desc='Original image to segment (3D Image)')
+    file_to_seg = File(
+        exists=True,
+        mandatory=True,
+        desc='Original image to segment (3D Image)')
 
-    mask_file = File(argstr='-mask %s',
-                     exists=True,
-                     desc='Filename of the ROI for label fusion')
+    mask_file = File(
+        argstr='-mask %s',
+        exists=True,
+        desc='Filename of the ROI for label fusion')
 
-    out_file = File(argstr='-out %s',
-                    name_source=['in_file'],
-                    name_template='%s',
-                    desc='Output consensus segmentation')
+    out_file = File(
+        argstr='-out %s',
+        name_source=['in_file'],
+        name_template='%s',
+        desc='Output consensus segmentation')
 
-    prob_flag = traits.Bool(desc='Probabilistic/Fuzzy segmented image',
-                            argstr='-outProb')
+    prob_flag = traits.Bool(
+        desc='Probabilistic/Fuzzy segmented image', argstr='-outProb')
 
     desc = 'Verbose level [0 = off, 1 = on, 2 = debug] (default = 0)'
-    verbose = traits.Enum('0', '1', '2',
-                          desc=desc,
-                          argstr='-v %s')
+    verbose = traits.Enum('0', '1', '2', desc=desc, argstr='-v %s')
 
     desc = 'Only consider non-consensus voxels to calculate statistics'
     unc = traits.Bool(desc=desc, argstr='-unc')
 
-    classifier_type = traits.Enum('STEPS', 'STAPLE', 'MV', 'SBA',
-                                  argstr='-%s',
-                                  mandatory=True,
-                                  position=2,
-                                  desc='Type of Classifier Fusion.')
+    classifier_type = traits.Enum(
+        'STEPS',
+        'STAPLE',
+        'MV',
+        'SBA',
+        argstr='-%s',
+        mandatory=True,
+        position=2,
+        desc='Type of Classifier Fusion.')
 
     desc = "Gaussian kernel size in mm to compute the local similarity"
     kernel_size = traits.Float(desc=desc)
@@ -75,11 +78,15 @@ class LabelFusionInput(CommandLineInputSpec):
     template_num = traits.Int(desc='Number of labels to use')
 
     # STAPLE and MV options
-    sm_ranking = traits.Enum('ALL', 'GNCC', 'ROINCC', 'LNCC',
-                             argstr='-%s',
-                             usedefault=True,
-                             position=3,
-                             desc='Ranking for STAPLE and MV')
+    sm_ranking = traits.Enum(
+        'ALL',
+        'GNCC',
+        'ROINCC',
+        'LNCC',
+        argstr='-%s',
+        usedefault=True,
+        position=3,
+        desc='Ranking for STAPLE and MV')
 
     dilation_roi = traits.Int(desc='Dilation of the ROI ( <int> d>=1 )')
 
@@ -91,12 +98,11 @@ class LabelFusionInput(CommandLineInputSpec):
     prob_update_flag = traits.Bool(desc=desc, argstr='-prop_update')
 
     desc = 'Value of P and Q [ 0 < (P,Q) < 1 ] (default = 0.99 0.99)'
-    set_pq = traits.Tuple(traits.Float, traits.Float,
-                          argstr='-setPQ %f %f',
-                          desc=desc)
+    set_pq = traits.Tuple(
+        traits.Float, traits.Float, argstr='-setPQ %f %f', desc=desc)
 
-    mrf_value = traits.Float(argstr='-MRF_beta %f',
-                             desc='MRF prior strength (between 0 and 5)')
+    mrf_value = traits.Float(
+        argstr='-MRF_beta %f', desc='MRF prior strength (between 0 and 5)')
 
     desc = 'Maximum number of iterations (default = 15).'
     max_iter = traits.Int(argstr='-max_iter %d', desc=desc)
@@ -177,14 +183,17 @@ class LabelFusion(NiftySegCommand):
         if not isdefined(self.inputs.template_file):
             err = "LabelFusion requires a value for input 'template_file' \
 when 'classifier_type' is set to 'STEPS'."
+
             raise NipypeInterfaceError(err)
         if not isdefined(self.inputs.kernel_size):
             err = "LabelFusion requires a value for input 'kernel_size' when \
 'classifier_type' is set to 'STEPS'."
+
             raise NipypeInterfaceError(err)
         if not isdefined(self.inputs.template_num):
             err = "LabelFusion requires a value for input 'template_num' when \
 'classifier_type' is set to 'STEPS'."
+
             raise NipypeInterfaceError(err)
         return "-STEPS %f %d %s %s" % (self.inputs.kernel_size,
                                        self.inputs.template_num,
@@ -202,20 +211,22 @@ when 'classifier_type' is set to 'STEPS'."
         if not isdefined(self.inputs.template_file):
             err = "LabelFusion requires a value for input 'tramplate_file' \
 when 'classifier_type' is set to '%s' and 'sm_ranking' is set to '%s'."
+
             raise NipypeInterfaceError(err % (classtype, ranking))
         if not isdefined(self.inputs.template_num):
             err = "LabelFusion requires a value for input 'template-num' when \
 'classifier_type' is set to '%s' and 'sm_ranking' is set to '%s'."
+
             raise NipypeInterfaceError(err % (classtype, ranking))
 
         if ranking == 'GNCC':
             if not isdefined(self.inputs.template_num):
                 err = "LabelFusion requires a value for input 'template_num' \
 when 'classifier_type' is set to '%s' and 'sm_ranking' is set to '%s'."
+
                 raise NipypeInterfaceError(err % (classtype, ranking))
 
-            return "-%s %d %s %s" % (ranking,
-                                     self.inputs.template_num,
+            return "-%s %d %s %s" % (ranking, self.inputs.template_num,
                                      self.inputs.file_to_seg,
                                      self.inputs.template_file)
 
@@ -223,15 +234,16 @@ when 'classifier_type' is set to '%s' and 'sm_ranking' is set to '%s'."
             if not isdefined(self.inputs.dilation_roi):
                 err = "LabelFusion requires a value for input 'dilation_roi' \
 when 'classifier_type' is set to '%s' and 'sm_ranking' is set to '%s'."
+
                 raise NipypeInterfaceError(err % (classtype, ranking))
 
             elif self.inputs.dilation_roi < 1:
                 err = "The 'dilation_roi' trait of a LabelFusionInput \
 instance must be an integer >= 1, but a value of '%s' was specified."
+
                 raise NipypeInterfaceError(err % self.inputs.dilation_roi)
 
-            return "-%s %d %d %s %s" % (ranking,
-                                        self.inputs.dilation_roi,
+            return "-%s %d %d %s %s" % (ranking, self.inputs.dilation_roi,
                                         self.inputs.template_num,
                                         self.inputs.file_to_seg,
                                         self.inputs.template_file)
@@ -239,10 +251,10 @@ instance must be an integer >= 1, but a value of '%s' was specified."
             if not isdefined(self.inputs.kernel_size):
                 err = "LabelFusion requires a value for input 'kernel_size' \
 when 'classifier_type' is set to '%s' and 'sm_ranking' is set to '%s'."
+
                 raise NipypeInterfaceError(err % (classtype, ranking))
 
-            return "-%s %f %d %s %s" % (ranking,
-                                        self.inputs.kernel_size,
+            return "-%s %f %d %s %s" % (ranking, self.inputs.kernel_size,
                                         self.inputs.template_num,
                                         self.inputs.file_to_seg,
                                         self.inputs.template_file)
@@ -256,30 +268,32 @@ when 'classifier_type' is set to '%s' and 'sm_ranking' is set to '%s'."
 
 class CalcTopNCCInputSpec(CommandLineInputSpec):
     """Input Spec for CalcTopNCC."""
-    in_file = File(argstr='-target %s',
-                   exists=True,
-                   mandatory=True,
-                   desc='Target file',
-                   position=1)
+    in_file = File(
+        argstr='-target %s',
+        exists=True,
+        mandatory=True,
+        desc='Target file',
+        position=1)
 
-    num_templates = traits.Int(argstr='-templates %s',
-                               mandatory=True,
-                               position=2,
-                               desc='Number of Templates')
+    num_templates = traits.Int(
+        argstr='-templates %s',
+        mandatory=True,
+        position=2,
+        desc='Number of Templates')
 
-    in_templates = traits.List(File(exists=True),
-                               argstr="%s",
-                               position=3,
-                               mandatory=True)
+    in_templates = traits.List(
+        File(exists=True), argstr="%s", position=3, mandatory=True)
 
-    top_templates = traits.Int(argstr='-n %s',
-                               mandatory=True,
-                               position=4,
-                               desc='Number of Top Templates')
+    top_templates = traits.Int(
+        argstr='-n %s',
+        mandatory=True,
+        position=4,
+        desc='Number of Top Templates')
 
-    mask_file = File(argstr='-mask %s',
-                     exists=True,
-                     desc='Filename of the ROI for label fusion')
+    mask_file = File(
+        argstr='-mask %s',
+        exists=True,
+        desc='Filename of the ROI for label fusion')
 
 
 class CalcTopNCCOutputSpec(TraitedSpec):
