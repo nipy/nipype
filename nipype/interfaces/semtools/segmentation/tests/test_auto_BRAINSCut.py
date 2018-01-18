@@ -4,59 +4,46 @@ from ..specialized import BRAINSCut
 
 
 def test_BRAINSCut_inputs():
-    input_map = dict(NoTrainingVectorShuffling=dict(argstr='--NoTrainingVectorShuffling ',
-    ),
-    applyModel=dict(argstr='--applyModel ',
-    ),
-    args=dict(argstr='%s',
-    ),
-    computeSSEOn=dict(argstr='--computeSSEOn ',
-    ),
-    createVectors=dict(argstr='--createVectors ',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    generateProbability=dict(argstr='--generateProbability ',
-    ),
-    histogramEqualization=dict(argstr='--histogramEqualization ',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    method=dict(argstr='--method %s',
-    ),
-    modelConfigurationFilename=dict(argstr='--modelConfigurationFilename %s',
-    ),
-    modelFilename=dict(argstr='--modelFilename %s',
-    ),
-    multiStructureThreshold=dict(argstr='--multiStructureThreshold ',
-    ),
-    netConfiguration=dict(argstr='--netConfiguration %s',
-    ),
-    numberOfTrees=dict(argstr='--numberOfTrees %d',
-    ),
-    randomTreeDepth=dict(argstr='--randomTreeDepth %d',
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
-    trainModel=dict(argstr='--trainModel ',
-    ),
-    trainModelStartIndex=dict(argstr='--trainModelStartIndex %d',
-    ),
-    validate=dict(argstr='--validate ',
-    ),
-    verbose=dict(argstr='--verbose %d',
-    ),
+    input_map = dict(
+        NoTrainingVectorShuffling=dict(
+            argstr='--NoTrainingVectorShuffling ', ),
+        applyModel=dict(argstr='--applyModel ', ),
+        args=dict(argstr='%s', ),
+        computeSSEOn=dict(argstr='--computeSSEOn ', ),
+        createVectors=dict(argstr='--createVectors ', ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        generateProbability=dict(argstr='--generateProbability ', ),
+        histogramEqualization=dict(argstr='--histogramEqualization ', ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        method=dict(argstr='--method %s', ),
+        modelConfigurationFilename=dict(
+            argstr='--modelConfigurationFilename %s', ),
+        modelFilename=dict(argstr='--modelFilename %s', ),
+        multiStructureThreshold=dict(argstr='--multiStructureThreshold ', ),
+        netConfiguration=dict(argstr='--netConfiguration %s', ),
+        numberOfTrees=dict(argstr='--numberOfTrees %d', ),
+        randomTreeDepth=dict(argstr='--randomTreeDepth %d', ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
+        trainModel=dict(argstr='--trainModel ', ),
+        trainModelStartIndex=dict(argstr='--trainModelStartIndex %d', ),
+        validate=dict(argstr='--validate ', ),
+        verbose=dict(argstr='--verbose %d', ),
     )
     inputs = BRAINSCut.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_BRAINSCut_outputs():
     output_map = dict()
     outputs = BRAINSCut.output_spec()

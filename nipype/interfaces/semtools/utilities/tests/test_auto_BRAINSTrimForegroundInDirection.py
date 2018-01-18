@@ -4,45 +4,40 @@ from ..brains import BRAINSTrimForegroundInDirection
 
 
 def test_BRAINSTrimForegroundInDirection_inputs():
-    input_map = dict(BackgroundFillValue=dict(argstr='--BackgroundFillValue %s',
-    ),
-    args=dict(argstr='%s',
-    ),
-    closingSize=dict(argstr='--closingSize %d',
-    ),
-    directionCode=dict(argstr='--directionCode %d',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    headSizeLimit=dict(argstr='--headSizeLimit %f',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    inputVolume=dict(argstr='--inputVolume %s',
-    ),
-    numberOfThreads=dict(argstr='--numberOfThreads %d',
-    ),
-    otsuPercentileThreshold=dict(argstr='--otsuPercentileThreshold %f',
-    ),
-    outputVolume=dict(argstr='--outputVolume %s',
-    hash_files=False,
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
+    input_map = dict(
+        BackgroundFillValue=dict(argstr='--BackgroundFillValue %s', ),
+        args=dict(argstr='%s', ),
+        closingSize=dict(argstr='--closingSize %d', ),
+        directionCode=dict(argstr='--directionCode %d', ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        headSizeLimit=dict(argstr='--headSizeLimit %f', ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        inputVolume=dict(argstr='--inputVolume %s', ),
+        numberOfThreads=dict(argstr='--numberOfThreads %d', ),
+        otsuPercentileThreshold=dict(argstr='--otsuPercentileThreshold %f', ),
+        outputVolume=dict(
+            argstr='--outputVolume %s',
+            hash_files=False,
+        ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
     )
     inputs = BRAINSTrimForegroundInDirection.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_BRAINSTrimForegroundInDirection_outputs():
-    output_map = dict(outputVolume=dict(),
-    )
+    output_map = dict(outputVolume=dict(), )
     outputs = BRAINSTrimForegroundInDirection.output_spec()
 
     for key, metadata in list(output_map.items()):

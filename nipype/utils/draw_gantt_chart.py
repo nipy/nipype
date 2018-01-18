@@ -5,7 +5,8 @@
 Module to draw an html gantt chart from logfile produced by
 ``nipype.utils.profiler.log_nodes_cb()``
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 # Import packages
 import sys
@@ -22,11 +23,12 @@ from collections import OrderedDict
 try:
     import pandas as pd
 except ImportError:
-    print('Pandas not found; in order for full functionality of this module '\
+    print('Pandas not found; in order for full functionality of this module '
           'install the pandas package')
     pass
 
 PY3 = sys.version_info[0] > 2
+
 
 def create_event_dict(start_time, nodes_list):
     '''
@@ -247,9 +249,10 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes,
     result = ''
     scale = space_between_minutes / minute_scale
     space_between_minutes = space_between_minutes / scale
-    end_times = [datetime.datetime(start.year, start.month, start.day,
-                                   start.hour, start.minute, start.second) \
-                 for core in range(cores)]
+    end_times = [
+        datetime.datetime(start.year, start.month, start.day, start.hour,
+                          start.minute, start.second) for core in range(cores)
+    ]
 
     # For each node in the pipeline
     for node in nodes_list:
@@ -258,9 +261,10 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes,
         node_finish = node['finish']
         # Calculate an offset and scale duration
         offset = ((node_start - start).total_seconds() / 60) * scale * \
-                 space_between_minutes + 220
+            space_between_minutes + 220
         # Scale duration
-        scale_duration = (node['duration'] / 60) * scale * space_between_minutes
+        scale_duration = (
+            node['duration'] / 60) * scale * space_between_minutes
         if scale_duration < 5:
             scale_duration = 5
         scale_duration -= 2
@@ -269,12 +273,9 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes,
         for core in range(len(end_times)):
             if end_times[core] < node_start:
                 left += core * 30
-                end_times[core] = datetime.datetime(node_finish.year,
-                                                    node_finish.month,
-                                                    node_finish.day,
-                                                    node_finish.hour,
-                                                    node_finish.minute,
-                                                    node_finish.second)
+                end_times[core] = datetime.datetime(
+                    node_finish.year, node_finish.month, node_finish.day,
+                    node_finish.hour, node_finish.minute, node_finish.second)
                 break
 
         # Get color for node object
@@ -283,14 +284,16 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes,
             color = 'red'
 
         # Setup dictionary for node html string insertion
-        node_dict = {'left' : left,
-                     'offset' : offset,
-                     'scale_duration' : scale_duration,
-                     'color' : color,
-                     'node_name' : node['name'],
-                     'node_dur' : node['duration'] / 60.0,
-                     'node_start' : node_start.strftime("%Y-%m-%d %H:%M:%S"),
-                     'node_finish' : node_finish.strftime("%Y-%m-%d %H:%M:%S")}
+        node_dict = {
+            'left': left,
+            'offset': offset,
+            'scale_duration': scale_duration,
+            'color': color,
+            'node_name': node['name'],
+            'node_dur': node['duration'] / 60.0,
+            'node_start': node_start.strftime("%Y-%m-%d %H:%M:%S"),
+            'node_finish': node_finish.strftime("%Y-%m-%d %H:%M:%S")
+        }
         # Create new node string
         new_node = "<div class='node' style='left:%(left)spx;top:%(offset)spx;"\
                    "height:%(scale_duration)spx;background-color:%(color)s;'"\
@@ -304,8 +307,10 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes,
     # Return html string for nodes
     return result
 
-def draw_resource_bar(start_time, finish_time, time_series, space_between_minutes,
-                      minute_scale, color, left, resource):
+
+def draw_resource_bar(start_time, finish_time, time_series,
+                      space_between_minutes, minute_scale, color, left,
+                      resource):
     '''
     '''
 
@@ -324,17 +329,16 @@ def draw_resource_bar(start_time, finish_time, time_series, space_between_minute
 
     ts_len = len(time_series)
     for idx, (ts_start, amount) in enumerate(ts_items):
-        if idx < ts_len-1:
-            ts_end = time_series.index[idx+1]
+        if idx < ts_len - 1:
+            ts_end = time_series.index[idx + 1]
         else:
             ts_end = finish_time
         # Calculate offset from start at top
         offset = ((ts_start-start_time).total_seconds() / 60.0) * scale * \
-                 space_between_minutes + 220
+            space_between_minutes + 220
         # Scale duration
-        duration_mins = (ts_end-ts_start).total_seconds() / 60.0
-        height = duration_mins * scale * \
-                 space_between_minutes
+        duration_mins = (ts_end - ts_start).total_seconds() / 60.0
+        height = duration_mins * scale * space_between_minutes
         if height < 5:
             height = 5
         height -= 2
@@ -348,15 +352,17 @@ def draw_resource_bar(start_time, finish_time, time_series, space_between_minute
             label = '%d threads' % amount
 
         # Setup dictionary for bar html string insertion
-        bar_dict = {'color' : color,
-                    'height' : height,
-                    'width' : width,
-                    'offset': offset,
-                    'left' : left,
-                    'label' : label,
-                    'duration' : duration_mins,
-                    'start' : ts_start.strftime('%Y-%m-%d %H:%M:%S'),
-                    'finish' : ts_end.strftime('%Y-%m-%d %H:%M:%S')}
+        bar_dict = {
+            'color': color,
+            'height': height,
+            'width': width,
+            'offset': offset,
+            'left': left,
+            'label': label,
+            'duration': duration_mins,
+            'start': ts_start.strftime('%Y-%m-%d %H:%M:%S'),
+            'finish': ts_end.strftime('%Y-%m-%d %H:%M:%S')
+        }
 
         bar_html = "<div class='bar' style='background-color:%(color)s;"\
                    "height:%(height).3fpx;width:%(width).3fpx;"\
@@ -370,7 +376,9 @@ def draw_resource_bar(start_time, finish_time, time_series, space_between_minute
     return result
 
 
-def generate_gantt_chart(logfile, cores, minute_scale=10,
+def generate_gantt_chart(logfile,
+                         cores,
+                         minute_scale=10,
                          space_between_minutes=50,
                          colors=["#7070FF", "#4E4EB2", "#2D2D66", "#9B9BFF"]):
     '''
@@ -423,7 +431,7 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
     # generate_gantt_chart('callback.log', 8)
     '''
 
-    #add the html header
+    # add the html header
     html_string = '''<!DOCTYPE html>
     <head>
         <style>
@@ -502,47 +510,56 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
     events = create_event_dict(start_node['start'], nodes_list)
 
     # Summary strings of workflow at top
-    html_string += '<p>Start: ' + start_node['start'].strftime("%Y-%m-%d %H:%M:%S") + '</p>'
-    html_string += '<p>Finish: ' + last_node['finish'].strftime("%Y-%m-%d %H:%M:%S") + '</p>'
-    html_string += '<p>Duration: ' + "{0:.2f}".format(duration / 60) + ' minutes</p>'
-    html_string += '<p>Nodes: ' + str(len(nodes_list))+'</p>'
+    html_string += '<p>Start: ' + start_node['start'].strftime(
+        "%Y-%m-%d %H:%M:%S") + '</p>'
+    html_string += '<p>Finish: ' + last_node['finish'].strftime(
+        "%Y-%m-%d %H:%M:%S") + '</p>'
+    html_string += '<p>Duration: ' + "{0:.2f}".format(
+        duration / 60) + ' minutes</p>'
+    html_string += '<p>Nodes: ' + str(len(nodes_list)) + '</p>'
     html_string += '<p>Cores: ' + str(cores) + '</p>'
     html_string += close_header
     # Draw nipype nodes Gantt chart and runtimes
     html_string += draw_lines(start_node['start'], duration, minute_scale,
                               space_between_minutes)
-    html_string += draw_nodes(start_node['start'], nodes_list, cores, minute_scale,
-                              space_between_minutes, colors)
+    html_string += draw_nodes(start_node['start'], nodes_list, cores,
+                              minute_scale, space_between_minutes, colors)
 
     # Get memory timeseries
-    estimated_mem_ts = calculate_resource_timeseries(events, 'estimated_memory_gb')
+    estimated_mem_ts = calculate_resource_timeseries(events,
+                                                     'estimated_memory_gb')
     runtime_mem_ts = calculate_resource_timeseries(events, 'runtime_memory_gb')
     # Plot gantt chart
-    resource_offset = 120 + 30*cores
-    html_string += draw_resource_bar(
-        start_node['start'], last_node['finish'], estimated_mem_ts,
-        space_between_minutes, minute_scale, '#90BBD7', resource_offset*2+120, 'Memory')
-    html_string += draw_resource_bar(
-        start_node['start'], last_node['finish'], runtime_mem_ts,
-        space_between_minutes, minute_scale, '#03969D', resource_offset*2+120, 'Memory')
+    resource_offset = 120 + 30 * cores
+    html_string += draw_resource_bar(start_node['start'], last_node['finish'],
+                                     estimated_mem_ts, space_between_minutes,
+                                     minute_scale, '#90BBD7',
+                                     resource_offset * 2 + 120, 'Memory')
+    html_string += draw_resource_bar(start_node['start'], last_node['finish'],
+                                     runtime_mem_ts, space_between_minutes,
+                                     minute_scale, '#03969D',
+                                     resource_offset * 2 + 120, 'Memory')
 
     # Get threads timeseries
-    estimated_threads_ts = calculate_resource_timeseries(events, 'estimated_threads')
-    runtime_threads_ts = calculate_resource_timeseries(events, 'runtime_threads')
+    estimated_threads_ts = calculate_resource_timeseries(
+        events, 'estimated_threads')
+    runtime_threads_ts = calculate_resource_timeseries(events,
+                                                       'runtime_threads')
     # Plot gantt chart
-    html_string += draw_resource_bar(
-        start_node['start'], last_node['finish'], estimated_threads_ts,
-        space_between_minutes, minute_scale, '#90BBD7', resource_offset, 'Threads')
-    html_string += draw_resource_bar(
-        start_node['start'], last_node['finish'], runtime_threads_ts,
-        space_between_minutes, minute_scale, '#03969D', resource_offset, 'Threads')
+    html_string += draw_resource_bar(start_node['start'], last_node['finish'],
+                                     estimated_threads_ts,
+                                     space_between_minutes, minute_scale,
+                                     '#90BBD7', resource_offset, 'Threads')
+    html_string += draw_resource_bar(start_node['start'], last_node['finish'],
+                                     runtime_threads_ts, space_between_minutes,
+                                     minute_scale, '#03969D', resource_offset,
+                                     'Threads')
 
-    #finish html
+    # finish html
     html_string += '''
         </div>
     </body>'''
 
-    #save file
+    # save file
     with open(logfile + '.html', 'w' if PY3 else 'wb') as html_file:
         html_file.write(html_string)
-

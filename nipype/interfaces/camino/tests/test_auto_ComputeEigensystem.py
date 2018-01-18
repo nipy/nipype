@@ -4,46 +4,49 @@ from ..dti import ComputeEigensystem
 
 
 def test_ComputeEigensystem_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_file=dict(argstr='< %s',
-    mandatory=True,
-    position=1,
-    ),
-    inputdatatype=dict(argstr='-inputdatatype %s',
-    usedefault=True,
-    ),
-    inputmodel=dict(argstr='-inputmodel %s',
-    ),
-    maxcomponents=dict(argstr='-maxcomponents %d',
-    ),
-    out_file=dict(argstr='> %s',
-    genfile=True,
-    position=-1,
-    ),
-    outputdatatype=dict(argstr='-outputdatatype %s',
-    usedefault=True,
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr='< %s',
+            mandatory=True,
+            position=1,
+        ),
+        inputdatatype=dict(
+            argstr='-inputdatatype %s',
+            usedefault=True,
+        ),
+        inputmodel=dict(argstr='-inputmodel %s', ),
+        maxcomponents=dict(argstr='-maxcomponents %d', ),
+        out_file=dict(
+            argstr='> %s',
+            genfile=True,
+            position=-1,
+        ),
+        outputdatatype=dict(
+            argstr='-outputdatatype %s',
+            usedefault=True,
+        ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
     )
     inputs = ComputeEigensystem.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_ComputeEigensystem_outputs():
-    output_map = dict(eigen=dict(),
-    )
+    output_map = dict(eigen=dict(), )
     outputs = ComputeEigensystem.output_spec()
 
     for key, metadata in list(output_map.items()):

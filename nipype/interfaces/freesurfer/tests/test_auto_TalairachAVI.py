@@ -4,38 +4,42 @@ from ..utils import TalairachAVI
 
 
 def test_TalairachAVI_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    atlas=dict(argstr='--atlas %s',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_file=dict(argstr='--i %s',
-    mandatory=True,
-    ),
-    out_file=dict(argstr='--xfm %s',
-    mandatory=True,
-    ),
-    subjects_dir=dict(),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        atlas=dict(argstr='--atlas %s', ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr='--i %s',
+            mandatory=True,
+        ),
+        out_file=dict(
+            argstr='--xfm %s',
+            mandatory=True,
+        ),
+        subjects_dir=dict(),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
     )
     inputs = TalairachAVI.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_TalairachAVI_outputs():
-    output_map = dict(out_file=dict(),
-    out_log=dict(),
-    out_txt=dict(),
+    output_map = dict(
+        out_file=dict(),
+        out_log=dict(),
+        out_txt=dict(),
     )
     outputs = TalairachAVI.output_spec()
 

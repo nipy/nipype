@@ -3,15 +3,14 @@
 
 import pytest
 
-from nipype.interfaces.niftyreg import no_nifty_package, get_custom_path
-from nipype.interfaces.niftyseg import (UnaryMaths, BinaryMaths,
-                                        BinaryMathsInteger, TupleMaths,
-                                        Merge)
-from nipype.testing import example_data
+from ....testing import example_data
+from ...niftyreg import get_custom_path
+from ...niftyreg.tests.test_regutils import no_nifty_tool
+from .. import (UnaryMaths, BinaryMaths, BinaryMathsInteger, TupleMaths, Merge)
 
 
-@pytest.mark.skipif(no_nifty_package(cmd='seg_maths'),
-                    reason="niftyseg is not installed")
+@pytest.mark.skipif(
+    no_nifty_tool(cmd='seg_maths'), reason="niftyseg is not installed")
 def test_unary_maths():
 
     # Create a node object
@@ -32,15 +31,13 @@ def test_unary_maths():
     unarym.inputs.output_datatype = 'float'
 
     expected_cmd = '{cmd} {in_file} -otsu -odt float {out_file}'.format(
-        cmd=cmd,
-        in_file=in_file,
-        out_file='im1_otsu.nii')
+        cmd=cmd, in_file=in_file, out_file='im1_otsu.nii')
 
     assert unarym.cmdline == expected_cmd
 
 
-@pytest.mark.skipif(no_nifty_package(cmd='seg_maths'),
-                    reason="niftyseg is not installed")
+@pytest.mark.skipif(
+    no_nifty_tool(cmd='seg_maths'), reason="niftyseg is not installed")
 def test_binary_maths():
 
     # Create a node object
@@ -63,15 +60,13 @@ def test_binary_maths():
 
     cmd_tmp = '{cmd} {in_file} -sub 2.00000000 -odt float {out_file}'
     expected_cmd = cmd_tmp.format(
-        cmd=cmd,
-        in_file=in_file,
-        out_file='im1_sub.nii')
+        cmd=cmd, in_file=in_file, out_file='im1_sub.nii')
 
     assert binarym.cmdline == expected_cmd
 
 
-@pytest.mark.skipif(no_nifty_package(cmd='seg_maths'),
-                    reason="niftyseg is not installed")
+@pytest.mark.skipif(
+    no_nifty_tool(cmd='seg_maths'), reason="niftyseg is not installed")
 def test_int_binary_maths():
 
     # Create a node object
@@ -93,15 +88,13 @@ def test_int_binary_maths():
     ibinarym.inputs.output_datatype = 'float'
 
     expected_cmd = '{cmd} {in_file} -dil 2 -odt float {out_file}'.format(
-        cmd=cmd,
-        in_file=in_file,
-        out_file='im1_dil.nii')
+        cmd=cmd, in_file=in_file, out_file='im1_dil.nii')
 
     assert ibinarym.cmdline == expected_cmd
 
 
-@pytest.mark.skipif(no_nifty_package(cmd='seg_maths'),
-                    reason="niftyseg is not installed")
+@pytest.mark.skipif(
+    no_nifty_tool(cmd='seg_maths'), reason="niftyseg is not installed")
 def test_tuple_maths():
 
     # Create a node object
@@ -126,16 +119,13 @@ def test_tuple_maths():
 
     cmd_tmp = '{cmd} {in_file} -lncc {op} 2.00000000 -odt float {out_file}'
     expected_cmd = cmd_tmp.format(
-        cmd=cmd,
-        in_file=in_file,
-        op=op_file,
-        out_file='im1_lncc.nii')
+        cmd=cmd, in_file=in_file, op=op_file, out_file='im1_lncc.nii')
 
     assert tuplem.cmdline == expected_cmd
 
 
-@pytest.mark.skipif(no_nifty_package(cmd='seg_maths'),
-                    reason="niftyseg is not installed")
+@pytest.mark.skipif(
+    no_nifty_tool(cmd='seg_maths'), reason="niftyseg is not installed")
 def test_merge():
 
     # Create a node object

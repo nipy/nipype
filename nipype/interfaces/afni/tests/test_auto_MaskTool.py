@@ -4,61 +4,61 @@ from ..utils import MaskTool
 
 
 def test_MaskTool_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    count=dict(argstr='-count',
-    position=2,
-    ),
-    datum=dict(argstr='-datum %s',
-    ),
-    dilate_inputs=dict(argstr='-dilate_inputs %s',
-    ),
-    dilate_results=dict(argstr='-dilate_results %s',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    fill_dirs=dict(argstr='-fill_dirs %s',
-    requires=['fill_holes'],
-    ),
-    fill_holes=dict(argstr='-fill_holes',
-    ),
-    frac=dict(argstr='-frac %s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_file=dict(argstr='-input %s',
-    copyfile=False,
-    mandatory=True,
-    position=-1,
-    ),
-    inter=dict(argstr='-inter',
-    ),
-    num_threads=dict(nohash=True,
-    usedefault=True,
-    ),
-    out_file=dict(argstr='-prefix %s',
-    name_source='in_file',
-    name_template='%s_mask',
-    ),
-    outputtype=dict(),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
-    union=dict(argstr='-union',
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        count=dict(
+            argstr='-count',
+            position=2,
+        ),
+        datum=dict(argstr='-datum %s', ),
+        dilate_inputs=dict(argstr='-dilate_inputs %s', ),
+        dilate_results=dict(argstr='-dilate_results %s', ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        fill_dirs=dict(
+            argstr='-fill_dirs %s',
+            requires=['fill_holes'],
+        ),
+        fill_holes=dict(argstr='-fill_holes', ),
+        frac=dict(argstr='-frac %s', ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr='-input %s',
+            copyfile=False,
+            mandatory=True,
+            position=-1,
+        ),
+        inter=dict(argstr='-inter', ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        out_file=dict(
+            argstr='-prefix %s',
+            name_source='in_file',
+            name_template='%s_mask',
+        ),
+        outputtype=dict(),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
+        union=dict(argstr='-union', ),
+        verbose=dict(argstr='-verb %s', ),
     )
     inputs = MaskTool.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_MaskTool_outputs():
-    output_map = dict(out_file=dict(),
-    )
+    output_map = dict(out_file=dict(), )
     outputs = MaskTool.output_spec()
 
     for key, metadata in list(output_map.items()):

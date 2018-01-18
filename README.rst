@@ -2,7 +2,7 @@
 NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 ========================================================
 
-.. image:: https://travis-ci.org/nipy/nipype.png?branch=master
+.. image:: https://travis-ci.org/nipy/nipype.svg?branch=master
   :target: https://travis-ci.org/nipy/nipype
 
 .. image:: https://circleci.com/gh/nipy/nipype/tree/master.svg?style=svg
@@ -94,4 +94,3 @@ Contributing to the project
 ---------------------------
 
 If you'd like to contribute to the project please read our `guidelines <https://github.com/nipy/nipype/blob/master/CONTRIBUTING.md>`_. Please also read through our `code of conduct <https://github.com/nipy/nipype/blob/master/CODE_OF_CONDUCT.md>`_.
-

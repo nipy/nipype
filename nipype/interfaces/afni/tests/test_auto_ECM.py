@@ -4,67 +4,58 @@ from ..preprocess import ECM
 
 
 def test_ECM_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    autoclip=dict(argstr='-autoclip',
-    ),
-    automask=dict(argstr='-automask',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    eps=dict(argstr='-eps %f',
-    ),
-    fecm=dict(argstr='-fecm',
-    ),
-    full=dict(argstr='-full',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_file=dict(argstr='%s',
-    copyfile=False,
-    mandatory=True,
-    position=-1,
-    ),
-    mask=dict(argstr='-mask %s',
-    ),
-    max_iter=dict(argstr='-max_iter %d',
-    ),
-    memory=dict(argstr='-memory %f',
-    ),
-    num_threads=dict(nohash=True,
-    usedefault=True,
-    ),
-    out_file=dict(argstr='-prefix %s',
-    name_source=['in_file'],
-    name_template='%s_afni',
-    ),
-    outputtype=dict(),
-    polort=dict(argstr='-polort %d',
-    ),
-    scale=dict(argstr='-scale %f',
-    ),
-    shift=dict(argstr='-shift %f',
-    ),
-    sparsity=dict(argstr='-sparsity %f',
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
-    thresh=dict(argstr='-thresh %f',
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        autoclip=dict(argstr='-autoclip', ),
+        automask=dict(argstr='-automask', ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        eps=dict(argstr='-eps %f', ),
+        fecm=dict(argstr='-fecm', ),
+        full=dict(argstr='-full', ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr='%s',
+            copyfile=False,
+            mandatory=True,
+            position=-1,
+        ),
+        mask=dict(argstr='-mask %s', ),
+        max_iter=dict(argstr='-max_iter %d', ),
+        memory=dict(argstr='-memory %f', ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        out_file=dict(
+            argstr='-prefix %s',
+            name_source=['in_file'],
+            name_template='%s_afni',
+        ),
+        outputtype=dict(),
+        polort=dict(argstr='-polort %d', ),
+        scale=dict(argstr='-scale %f', ),
+        shift=dict(argstr='-shift %f', ),
+        sparsity=dict(argstr='-sparsity %f', ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
+        thresh=dict(argstr='-thresh %f', ),
     )
     inputs = ECM.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_ECM_outputs():
-    output_map = dict(out_file=dict(),
-    )
+    output_map = dict(out_file=dict(), )
     outputs = ECM.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -4,70 +4,73 @@ from ..odf import ODFRecon
 
 
 def test_ODFRecon_inputs():
-    input_map = dict(DWI=dict(argstr='%s',
-    mandatory=True,
-    position=1,
-    ),
-    args=dict(argstr='%s',
-    ),
-    dsi=dict(argstr='-dsi',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    filter=dict(argstr='-f',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    image_orientation_vectors=dict(argstr='-iop %f',
-    ),
-    matrix=dict(argstr='-mat %s',
-    mandatory=True,
-    ),
-    n_b0=dict(argstr='-b0 %s',
-    mandatory=True,
-    ),
-    n_directions=dict(argstr='%s',
-    mandatory=True,
-    position=2,
-    ),
-    n_output_directions=dict(argstr='%s',
-    mandatory=True,
-    position=3,
-    ),
-    oblique_correction=dict(argstr='-oc',
-    ),
-    out_prefix=dict(argstr='%s',
-    position=4,
-    usedefault=True,
-    ),
-    output_entropy=dict(argstr='-oe',
-    ),
-    output_type=dict(argstr='-ot %s',
-    usedefault=True,
-    ),
-    sharpness=dict(argstr='-s %f',
-    ),
-    subtract_background=dict(argstr='-bg',
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
+    input_map = dict(
+        DWI=dict(
+            argstr='%s',
+            mandatory=True,
+            position=1,
+        ),
+        args=dict(argstr='%s', ),
+        dsi=dict(argstr='-dsi', ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        filter=dict(argstr='-f', ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        image_orientation_vectors=dict(argstr='-iop %f', ),
+        matrix=dict(
+            argstr='-mat %s',
+            mandatory=True,
+        ),
+        n_b0=dict(
+            argstr='-b0 %s',
+            mandatory=True,
+        ),
+        n_directions=dict(
+            argstr='%s',
+            mandatory=True,
+            position=2,
+        ),
+        n_output_directions=dict(
+            argstr='%s',
+            mandatory=True,
+            position=3,
+        ),
+        oblique_correction=dict(argstr='-oc', ),
+        out_prefix=dict(
+            argstr='%s',
+            position=4,
+            usedefault=True,
+        ),
+        output_entropy=dict(argstr='-oe', ),
+        output_type=dict(
+            argstr='-ot %s',
+            usedefault=True,
+        ),
+        sharpness=dict(argstr='-s %f', ),
+        subtract_background=dict(argstr='-bg', ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
     )
     inputs = ODFRecon.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_ODFRecon_outputs():
-    output_map = dict(B0=dict(),
-    DWI=dict(),
-    ODF=dict(),
-    entropy=dict(),
-    max=dict(),
+    output_map = dict(
+        B0=dict(),
+        DWI=dict(),
+        ODF=dict(),
+        entropy=dict(),
+        max=dict(),
     )
     outputs = ODFRecon.output_spec()
 

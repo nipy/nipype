@@ -102,7 +102,6 @@ from builtins import str
 import nipype.interfaces.fsl as fsl
 result = fsl.BET(in_file='data/s1/struct.nii').run()
 print(result)
-
 """
 Running a single program is not much of a breakthrough. Lets run motion correction followed by smoothing
 (isotropic - in other words not using SUSAN). Notice that in the first line we are setting the output data type
@@ -112,7 +111,6 @@ for all FSL interfaces.
 fsl.FSLCommand.set_default_output_type('NIFTI_GZ')
 result1 = fsl.MCFLIRT(in_file='data/s1/f3.nii').run()
 result2 = fsl.Smooth(in_file='f3_mcf.nii.gz', fwhm=6).run()
-
 """
 Simple workflow
 ---------------
@@ -127,18 +125,18 @@ process data in a separate folder.
 import nipype.pipeline.engine as pe
 import os
 
-motion_correct = pe.Node(interface=fsl.MCFLIRT(in_file=os.path.abspath('data/s1/f3.nii')),
-                         name="motion_correct")
+motion_correct = pe.Node(
+    interface=fsl.MCFLIRT(in_file=os.path.abspath('data/s1/f3.nii')),
+    name="motion_correct")
 smooth = pe.Node(interface=fsl.Smooth(fwhm=6), name="smooth")
 
 motion_correct_and_smooth = pe.Workflow(name="motion_correct_and_smooth")
-motion_correct_and_smooth.base_dir = os.path.abspath('.')  # define where will be the root folder for the workflow
-motion_correct_and_smooth.connect([
-    (motion_correct, smooth, [('out_file', 'in_file')])
-])
+motion_correct_and_smooth.base_dir = os.path.abspath(
+    '.')  # define where will be the root folder for the workflow
+motion_correct_and_smooth.connect([(motion_correct, smooth, [('out_file',
+                                                              'in_file')])])
 # we are connecting 'out_file' output of motion_correct to 'in_file' input of smooth
 motion_correct_and_smooth.run()
-
 """
 Another workflow
 ----------------
@@ -154,14 +152,11 @@ subtract.inputs.op_string = "-sub"
 
 demean = pe.Workflow(name="demean")
 demean.base_dir = os.path.abspath('.')
-demean.connect([
-    (calc_mean, subtract, [('out_file', 'in_file2')])
-])
+demean.connect([(calc_mean, subtract, [('out_file', 'in_file2')])])
 
 demean.inputs.calc_mean.in_file = os.path.abspath('data/s1/f3.nii')
 demean.inputs.subtract.in_file = os.path.abspath('data/s1/f3.nii')
 demean.run()
-
 """
 Reusing workflows
 -----------------
@@ -175,16 +170,12 @@ preproc.base_dir = os.path.abspath('.')
 preproc.inputs.inputspec.func = os.path.abspath('data/s1/f3.nii')
 preproc.inputs.inputspec.struct = os.path.abspath('data/s1/struct.nii')
 preproc.run()
-
-
 """
 ... and we can run it again and it won't actually rerun anything because none of
 the parameters have changed.
 """
 
 preproc.run()
-
-
 """
 ... and we can change a parameter and run it again. Only the dependent nodes
 are rerun and that too only if the input state has changed.
@@ -192,7 +183,6 @@ are rerun and that too only if the input state has changed.
 
 preproc.inputs.meanfuncmask.frac = 0.5
 preproc.run()
-
 """
 Visualizing workflows 1
 -----------------------
@@ -201,7 +191,6 @@ So what did we run in this precanned workflow
 """
 
 preproc.write_graph()
-
 """
 Datasink
 --------
@@ -216,12 +205,9 @@ preproc.inputs.inputspec.struct = os.path.abspath('data/s1/struct.nii')
 datasink = pe.Node(interface=nio.DataSink(), name='sinker')
 preprocess = pe.Workflow(name='preprocout')
 preprocess.base_dir = os.path.abspath('.')
-preprocess.connect([
-    (preproc, datasink, [('meanfunc2.out_file', 'meanfunc'),
-                         ('maskfunc3.out_file', 'funcruns')])
-])
+preprocess.connect([(preproc, datasink, [('meanfunc2.out_file', 'meanfunc'),
+                                         ('maskfunc3.out_file', 'funcruns')])])
 preprocess.run()
-
 """
 Datagrabber
 -----------
@@ -256,7 +242,6 @@ datasource4.inputs.run = [3, 7]
 datasource4.inputs.subject_id = ['s1', 's3']
 results = datasource4.run()
 print(results.outputs)
-
 """
 Iterables
 ---------
@@ -266,14 +251,17 @@ some parameters. Here we'll use it to iterate over two subjects.
 """
 
 import nipype.interfaces.utility as util
-infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
-                     name="infosource")
+infosource = pe.Node(
+    interface=util.IdentityInterface(fields=['subject_id']), name="infosource")
 infosource.iterables = ('subject_id', ['s1', 's3'])
 
-datasource = pe.Node(nio.DataGrabber(infields=['subject_id'], outfields=['func', 'struct']), name="datasource")
+datasource = pe.Node(
+    nio.DataGrabber(infields=['subject_id'], outfields=['func', 'struct']),
+    name="datasource")
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.base_directory = os.path.abspath('data')
-datasource.inputs.template_args = dict(func=[['subject_id', 'f3']], struct=[['subject_id', 'struct']])
+datasource.inputs.template_args = dict(
+    func=[['subject_id', 'f3']], struct=[['subject_id', 'struct']])
 datasource.inputs.sort_filelist = True
 
 my_workflow = pe.Workflow(name="my_workflow")
@@ -283,18 +271,15 @@ my_workflow.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                      (datasource, preproc, [('func', 'inputspec.func'),
                                             ('struct', 'inputspec.struct')])])
 my_workflow.run()
-
-
 """
 and we can change a node attribute and run it again
 
 """
 
 smoothnode = my_workflow.get_node('preproc.smooth')
-assert(str(smoothnode) == 'preproc.smooth')
+assert (str(smoothnode) == 'preproc.smooth')
 smoothnode.iterables = ('fwhm', [5., 10.])
 my_workflow.run()
-
 """
 Visualizing workflows 2
 -----------------------

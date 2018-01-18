@@ -4,49 +4,49 @@ from ..developer import JistLaminarProfileSampling
 
 
 def test_JistLaminarProfileSampling_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    inCortex=dict(argstr='--inCortex %s',
-    ),
-    inIntensity=dict(argstr='--inIntensity %s',
-    ),
-    inProfile=dict(argstr='--inProfile %s',
-    ),
-    null=dict(argstr='--null %s',
-    ),
-    outProfile2=dict(argstr='--outProfile2 %s',
-    hash_files=False,
-    ),
-    outProfilemapped=dict(argstr='--outProfilemapped %s',
-    hash_files=False,
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
-    xDefaultMem=dict(argstr='-xDefaultMem %d',
-    ),
-    xMaxProcess=dict(argstr='-xMaxProcess %d',
-    usedefault=True,
-    ),
-    xPrefExt=dict(argstr='--xPrefExt %s',
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        inCortex=dict(argstr='--inCortex %s', ),
+        inIntensity=dict(argstr='--inIntensity %s', ),
+        inProfile=dict(argstr='--inProfile %s', ),
+        null=dict(argstr='--null %s', ),
+        outProfile2=dict(
+            argstr='--outProfile2 %s',
+            hash_files=False,
+        ),
+        outProfilemapped=dict(
+            argstr='--outProfilemapped %s',
+            hash_files=False,
+        ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
+        xDefaultMem=dict(argstr='-xDefaultMem %d', ),
+        xMaxProcess=dict(
+            argstr='-xMaxProcess %d',
+            usedefault=True,
+        ),
+        xPrefExt=dict(argstr='--xPrefExt %s', ),
     )
     inputs = JistLaminarProfileSampling.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_JistLaminarProfileSampling_outputs():
-    output_map = dict(outProfile2=dict(),
-    outProfilemapped=dict(),
+    output_map = dict(
+        outProfile2=dict(),
+        outProfilemapped=dict(),
     )
     outputs = JistLaminarProfileSampling.output_spec()
 

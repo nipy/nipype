@@ -4,46 +4,50 @@ from ..label_fusion import CalcTopNCC
 
 
 def test_CalcTopNCC_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_file=dict(argstr='-target %s',
-    mandatory=True,
-    position=1,
-    ),
-    in_templates=dict(argstr='%s',
-    mandatory=True,
-    position=3,
-    ),
-    mask_file=dict(argstr='-mask %s',
-    ),
-    num_templates=dict(argstr='-templates %s',
-    mandatory=True,
-    position=2,
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
-    top_templates=dict(argstr='-n %s',
-    mandatory=True,
-    position=4,
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr='-target %s',
+            mandatory=True,
+            position=1,
+        ),
+        in_templates=dict(
+            argstr='%s',
+            mandatory=True,
+            position=3,
+        ),
+        mask_file=dict(argstr='-mask %s', ),
+        num_templates=dict(
+            argstr='-templates %s',
+            mandatory=True,
+            position=2,
+        ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
+        top_templates=dict(
+            argstr='-n %s',
+            mandatory=True,
+            position=4,
+        ),
     )
     inputs = CalcTopNCC.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_CalcTopNCC_outputs():
-    output_map = dict(out_files=dict(),
-    )
+    output_map = dict(out_files=dict(), )
     outputs = CalcTopNCC.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -4,72 +4,74 @@ from ..brainsuite import Cerebro
 
 
 def test_Cerebro_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    costFunction=dict(argstr='-c %d',
-    usedefault=True,
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    inputAtlasLabelFile=dict(argstr='--atlaslabels %s',
-    mandatory=True,
-    ),
-    inputAtlasMRIFile=dict(argstr='--atlas %s',
-    mandatory=True,
-    ),
-    inputBrainMaskFile=dict(argstr='-m %s',
-    ),
-    inputMRIFile=dict(argstr='-i %s',
-    mandatory=True,
-    ),
-    keepTempFiles=dict(argstr='--keep',
-    ),
-    linearConvergence=dict(argstr='--linconv %f',
-    ),
-    outputAffineTransformFile=dict(argstr='--air %s',
-    genfile=True,
-    ),
-    outputCerebrumMaskFile=dict(argstr='-o %s',
-    genfile=True,
-    ),
-    outputLabelVolumeFile=dict(argstr='-l %s',
-    genfile=True,
-    ),
-    outputWarpTransformFile=dict(argstr='--warp %s',
-    genfile=True,
-    ),
-    tempDirectory=dict(argstr='--tempdir %s',
-    ),
-    tempDirectoryBase=dict(argstr='--tempdirbase %s',
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
-    useCentroids=dict(argstr='--centroids',
-    ),
-    verbosity=dict(argstr='-v %d',
-    ),
-    warpConvergence=dict(argstr='--warpconv %f',
-    ),
-    warpLabel=dict(argstr='--warplevel %d',
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        costFunction=dict(
+            argstr='-c %d',
+            usedefault=True,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        inputAtlasLabelFile=dict(
+            argstr='--atlaslabels %s',
+            mandatory=True,
+        ),
+        inputAtlasMRIFile=dict(
+            argstr='--atlas %s',
+            mandatory=True,
+        ),
+        inputBrainMaskFile=dict(argstr='-m %s', ),
+        inputMRIFile=dict(
+            argstr='-i %s',
+            mandatory=True,
+        ),
+        keepTempFiles=dict(argstr='--keep', ),
+        linearConvergence=dict(argstr='--linconv %f', ),
+        outputAffineTransformFile=dict(
+            argstr='--air %s',
+            genfile=True,
+        ),
+        outputCerebrumMaskFile=dict(
+            argstr='-o %s',
+            genfile=True,
+        ),
+        outputLabelVolumeFile=dict(
+            argstr='-l %s',
+            genfile=True,
+        ),
+        outputWarpTransformFile=dict(
+            argstr='--warp %s',
+            genfile=True,
+        ),
+        tempDirectory=dict(argstr='--tempdir %s', ),
+        tempDirectoryBase=dict(argstr='--tempdirbase %s', ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
+        useCentroids=dict(argstr='--centroids', ),
+        verbosity=dict(argstr='-v %d', ),
+        warpConvergence=dict(argstr='--warpconv %f', ),
+        warpLabel=dict(argstr='--warplevel %d', ),
     )
     inputs = Cerebro.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_Cerebro_outputs():
-    output_map = dict(outputAffineTransformFile=dict(),
-    outputCerebrumMaskFile=dict(),
-    outputLabelVolumeFile=dict(),
-    outputWarpTransformFile=dict(),
+    output_map = dict(
+        outputAffineTransformFile=dict(),
+        outputCerebrumMaskFile=dict(),
+        outputLabelVolumeFile=dict(),
+        outputWarpTransformFile=dict(),
     )
     outputs = Cerebro.output_spec()
 

@@ -4,50 +4,55 @@ from ..registration import Register
 
 
 def test_Register_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    curv=dict(argstr='-curv',
-    requires=['in_smoothwm'],
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_smoothwm=dict(copyfile=True,
-    ),
-    in_sulc=dict(copyfile=True,
-    mandatory=True,
-    ),
-    in_surf=dict(argstr='%s',
-    copyfile=True,
-    mandatory=True,
-    position=-3,
-    ),
-    out_file=dict(argstr='%s',
-    genfile=True,
-    position=-1,
-    ),
-    subjects_dir=dict(),
-    target=dict(argstr='%s',
-    mandatory=True,
-    position=-2,
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        curv=dict(
+            argstr='-curv',
+            requires=['in_smoothwm'],
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        in_smoothwm=dict(copyfile=True, ),
+        in_sulc=dict(
+            copyfile=True,
+            mandatory=True,
+        ),
+        in_surf=dict(
+            argstr='%s',
+            copyfile=True,
+            mandatory=True,
+            position=-3,
+        ),
+        out_file=dict(
+            argstr='%s',
+            genfile=True,
+            position=-1,
+        ),
+        subjects_dir=dict(),
+        target=dict(
+            argstr='%s',
+            mandatory=True,
+            position=-2,
+        ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
     )
     inputs = Register.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_Register_outputs():
-    output_map = dict(out_file=dict(),
-    )
+    output_map = dict(out_file=dict(), )
     outputs = Register.output_spec()
 
     for key, metadata in list(output_map.items()):

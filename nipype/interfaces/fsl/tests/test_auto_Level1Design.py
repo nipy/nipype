@@ -4,30 +4,28 @@ from ..model import Level1Design
 
 
 def test_Level1Design_inputs():
-    input_map = dict(bases=dict(mandatory=True,
-    ),
-    contrasts=dict(),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    interscan_interval=dict(mandatory=True,
-    ),
-    model_serial_correlations=dict(mandatory=True,
-    ),
-    orthogonalization=dict(),
-    session_info=dict(mandatory=True,
-    ),
+    input_map = dict(
+        bases=dict(mandatory=True, ),
+        contrasts=dict(),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        interscan_interval=dict(mandatory=True, ),
+        model_serial_correlations=dict(mandatory=True, ),
+        orthogonalization=dict(),
+        session_info=dict(mandatory=True, ),
     )
     inputs = Level1Design.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_Level1Design_outputs():
-    output_map = dict(ev_files=dict(),
-    fsf_files=dict(),
+    output_map = dict(
+        ev_files=dict(),
+        fsf_files=dict(),
     )
     outputs = Level1Design.output_spec()
 

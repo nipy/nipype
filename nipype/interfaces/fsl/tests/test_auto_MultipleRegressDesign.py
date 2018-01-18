@@ -4,27 +4,27 @@ from ..model import MultipleRegressDesign
 
 
 def test_MultipleRegressDesign_inputs():
-    input_map = dict(contrasts=dict(mandatory=True,
-    ),
-    groups=dict(),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    regressors=dict(mandatory=True,
-    ),
+    input_map = dict(
+        contrasts=dict(mandatory=True, ),
+        groups=dict(),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        regressors=dict(mandatory=True, ),
     )
     inputs = MultipleRegressDesign.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_MultipleRegressDesign_outputs():
-    output_map = dict(design_con=dict(),
-    design_fts=dict(),
-    design_grp=dict(),
-    design_mat=dict(),
+    output_map = dict(
+        design_con=dict(),
+        design_fts=dict(),
+        design_grp=dict(),
+        design_mat=dict(),
     )
     outputs = MultipleRegressDesign.output_spec()
 

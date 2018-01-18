@@ -4,52 +4,56 @@ from ..brainsuite import Cortex
 
 
 def test_Cortex_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    computeGCBoundary=dict(argstr='-g',
-    ),
-    computeWGBoundary=dict(argstr='-w',
-    usedefault=True,
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    includeAllSubcorticalAreas=dict(argstr='-a',
-    usedefault=True,
-    ),
-    inputHemisphereLabelFile=dict(argstr='-h %s',
-    mandatory=True,
-    ),
-    inputTissueFractionFile=dict(argstr='-f %s',
-    mandatory=True,
-    ),
-    outputCerebrumMask=dict(argstr='-o %s',
-    genfile=True,
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
-    timer=dict(argstr='--timer',
-    ),
-    tissueFractionThreshold=dict(argstr='-p %f',
-    usedefault=True,
-    ),
-    verbosity=dict(argstr='-v %d',
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        computeGCBoundary=dict(argstr='-g', ),
+        computeWGBoundary=dict(
+            argstr='-w',
+            usedefault=True,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        includeAllSubcorticalAreas=dict(
+            argstr='-a',
+            usedefault=True,
+        ),
+        inputHemisphereLabelFile=dict(
+            argstr='-h %s',
+            mandatory=True,
+        ),
+        inputTissueFractionFile=dict(
+            argstr='-f %s',
+            mandatory=True,
+        ),
+        outputCerebrumMask=dict(
+            argstr='-o %s',
+            genfile=True,
+        ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
+        timer=dict(argstr='--timer', ),
+        tissueFractionThreshold=dict(
+            argstr='-p %f',
+            usedefault=True,
+        ),
+        verbosity=dict(argstr='-v %d', ),
     )
     inputs = Cortex.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_Cortex_outputs():
-    output_map = dict(outputCerebrumMask=dict(),
-    )
+    output_map = dict(outputCerebrumMask=dict(), )
     outputs = Cortex.output_spec()
 
     for key, metadata in list(output_map.items()):

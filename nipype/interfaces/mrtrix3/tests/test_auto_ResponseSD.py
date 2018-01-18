@@ -4,70 +4,70 @@ from ..preprocess import ResponseSD
 
 
 def test_ResponseSD_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    bval_scale=dict(argstr='-bvalue_scaling %s',
-    ),
-    disp_mult=dict(argstr='-dispersion_multiplier %f',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    grad_file=dict(argstr='-grad %s',
-    ),
-    grad_fsl=dict(argstr='-fslgrad %s %s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_bval=dict(),
-    in_bvec=dict(argstr='-fslgrad %s %s',
-    ),
-    in_file=dict(argstr='%s',
-    mandatory=True,
-    position=-2,
-    ),
-    in_mask=dict(argstr='-mask %s',
-    ),
-    int_mult=dict(argstr='-integral_multiplier %f',
-    ),
-    iterations=dict(argstr='-max_iters %d',
-    ),
-    max_change=dict(argstr='-max_change %f',
-    ),
-    max_sh=dict(argstr='-lmax %d',
-    ),
-    nthreads=dict(argstr='-nthreads %d',
-    nohash=True,
-    ),
-    out_file=dict(argstr='%s',
-    mandatory=True,
-    position=-1,
-    usedefault=True,
-    ),
-    out_sf=dict(argstr='-sf %s',
-    ),
-    shell=dict(argstr='-shell %s',
-    sep=',',
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
-    test_all=dict(argstr='-test_all',
-    ),
-    vol_ratio=dict(argstr='-volume_ratio %f',
-    ),
+    input_map = dict(
+        algorithm=dict(
+            argstr='%s',
+            mandatory=True,
+            position=-6,
+        ),
+        args=dict(argstr='%s', ),
+        bval_scale=dict(argstr='-bvalue_scaling %s', ),
+        csf_file=dict(
+            argstr='%s',
+            position=-1,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        gm_file=dict(
+            argstr='%s',
+            position=-2,
+        ),
+        grad_file=dict(argstr='-grad %s', ),
+        grad_fsl=dict(argstr='-fslgrad %s %s', ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        in_bval=dict(),
+        in_bvec=dict(argstr='-fslgrad %s %s', ),
+        in_file=dict(
+            argstr='%s',
+            mandatory=True,
+            position=-5,
+        ),
+        in_mask=dict(argstr='-mask %s', ),
+        max_sh=dict(argstr='-lmax %d', ),
+        mtt_file=dict(
+            argstr='%s',
+            position=-4,
+        ),
+        nthreads=dict(
+            argstr='-nthreads %d',
+            nohash=True,
+        ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
+        wm_file=dict(
+            argstr='%s',
+            position=-3,
+            usedefault=True,
+        ),
     )
     inputs = ResponseSD.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_ResponseSD_outputs():
-    output_map = dict(out_file=dict(),
-    out_sf=dict(),
+    output_map = dict(
+        csf_file=dict(argstr='%s', ),
+        gm_file=dict(argstr='%s', ),
+        wm_file=dict(argstr='%s', ),
     )
     outputs = ResponseSD.output_spec()
 

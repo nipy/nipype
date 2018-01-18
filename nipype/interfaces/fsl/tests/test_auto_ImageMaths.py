@@ -4,48 +4,54 @@ from ..utils import ImageMaths
 
 
 def test_ImageMaths_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_file=dict(argstr='%s',
-    mandatory=True,
-    position=1,
-    ),
-    in_file2=dict(argstr='%s',
-    position=3,
-    ),
-    op_string=dict(argstr='%s',
-    position=2,
-    ),
-    out_data_type=dict(argstr='-odt %s',
-    position=5,
-    ),
-    out_file=dict(argstr='%s',
-    genfile=True,
-    hash_files=False,
-    position=4,
-    ),
-    output_type=dict(),
-    suffix=dict(),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr='%s',
+            mandatory=True,
+            position=1,
+        ),
+        in_file2=dict(
+            argstr='%s',
+            position=3,
+        ),
+        op_string=dict(
+            argstr='%s',
+            position=2,
+        ),
+        out_data_type=dict(
+            argstr='-odt %s',
+            position=5,
+        ),
+        out_file=dict(
+            argstr='%s',
+            genfile=True,
+            hash_files=False,
+            position=4,
+        ),
+        output_type=dict(),
+        suffix=dict(),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
     )
     inputs = ImageMaths.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_ImageMaths_outputs():
-    output_map = dict(out_file=dict(),
-    )
+    output_map = dict(out_file=dict(), )
     outputs = ImageMaths.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -4,46 +4,48 @@ from ..brainsuite import Scrubmask
 
 
 def test_Scrubmask_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    backgroundFillThreshold=dict(argstr='-b %d',
-    usedefault=True,
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    foregroundTrimThreshold=dict(argstr='-f %d',
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    inputMaskFile=dict(argstr='-i %s',
-    mandatory=True,
-    ),
-    numberIterations=dict(argstr='-n %d',
-    ),
-    outputMaskFile=dict(argstr='-o %s',
-    genfile=True,
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
-    timer=dict(argstr='--timer',
-    ),
-    verbosity=dict(argstr='-v %d',
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        backgroundFillThreshold=dict(
+            argstr='-b %d',
+            usedefault=True,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        foregroundTrimThreshold=dict(
+            argstr='-f %d',
+            usedefault=True,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        inputMaskFile=dict(
+            argstr='-i %s',
+            mandatory=True,
+        ),
+        numberIterations=dict(argstr='-n %d', ),
+        outputMaskFile=dict(
+            argstr='-o %s',
+            genfile=True,
+        ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
+        timer=dict(argstr='--timer', ),
+        verbosity=dict(argstr='-v %d', ),
     )
     inputs = Scrubmask.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_Scrubmask_outputs():
-    output_map = dict(outputMaskFile=dict(),
-    )
+    output_map = dict(outputMaskFile=dict(), )
     outputs = Scrubmask.output_spec()
 
     for key, metadata in list(output_map.items()):

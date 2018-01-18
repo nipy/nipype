@@ -4,47 +4,48 @@ from ..brainsuite import Pvc
 
 
 def test_Pvc_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    inputMRIFile=dict(argstr='-i %s',
-    mandatory=True,
-    ),
-    inputMaskFile=dict(argstr='-m %s',
-    ),
-    outputLabelFile=dict(argstr='-o %s',
-    genfile=True,
-    ),
-    outputTissueFractionFile=dict(argstr='-f %s',
-    genfile=True,
-    ),
-    spatialPrior=dict(argstr='-l %f',
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
-    threeClassFlag=dict(argstr='-3',
-    ),
-    timer=dict(argstr='--timer',
-    ),
-    verbosity=dict(argstr='-v %d',
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        inputMRIFile=dict(
+            argstr='-i %s',
+            mandatory=True,
+        ),
+        inputMaskFile=dict(argstr='-m %s', ),
+        outputLabelFile=dict(
+            argstr='-o %s',
+            genfile=True,
+        ),
+        outputTissueFractionFile=dict(
+            argstr='-f %s',
+            genfile=True,
+        ),
+        spatialPrior=dict(argstr='-l %f', ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
+        threeClassFlag=dict(argstr='-3', ),
+        timer=dict(argstr='--timer', ),
+        verbosity=dict(argstr='-v %d', ),
     )
     inputs = Pvc.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_Pvc_outputs():
-    output_map = dict(outputLabelFile=dict(),
-    outputTissueFractionFile=dict(),
+    output_map = dict(
+        outputLabelFile=dict(),
+        outputTissueFractionFile=dict(),
     )
     outputs = Pvc.output_spec()
 

@@ -4,51 +4,52 @@ from ..model import Label2Annot
 
 
 def test_Label2Annot_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    color_table=dict(argstr='--ctab %s',
-    ),
-    copy_inputs=dict(),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    hemisphere=dict(argstr='--hemi %s',
-    mandatory=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_labels=dict(argstr='--l %s...',
-    mandatory=True,
-    ),
-    keep_max=dict(argstr='--maxstatwinner',
-    ),
-    orig=dict(mandatory=True,
-    ),
-    out_annot=dict(argstr='--a %s',
-    mandatory=True,
-    ),
-    subject_id=dict(argstr='--s %s',
-    mandatory=True,
-    usedefault=True,
-    ),
-    subjects_dir=dict(),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
-    verbose_off=dict(argstr='--noverbose',
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        color_table=dict(argstr='--ctab %s', ),
+        copy_inputs=dict(),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        hemisphere=dict(
+            argstr='--hemi %s',
+            mandatory=True,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        in_labels=dict(
+            argstr='--l %s...',
+            mandatory=True,
+        ),
+        keep_max=dict(argstr='--maxstatwinner', ),
+        orig=dict(mandatory=True, ),
+        out_annot=dict(
+            argstr='--a %s',
+            mandatory=True,
+        ),
+        subject_id=dict(
+            argstr='--s %s',
+            mandatory=True,
+            usedefault=True,
+        ),
+        subjects_dir=dict(),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
+        verbose_off=dict(argstr='--noverbose', ),
     )
     inputs = Label2Annot.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_Label2Annot_outputs():
-    output_map = dict(out_file=dict(),
-    )
+    output_map = dict(out_file=dict(), )
     outputs = Label2Annot.output_spec()
 
     for key, metadata in list(output_map.items()):

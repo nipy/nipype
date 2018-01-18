@@ -4,38 +4,39 @@ from ..arithmetic import CastScalarVolume
 
 
 def test_CastScalarVolume_inputs():
-    input_map = dict(InputVolume=dict(argstr='%s',
-    position=-2,
-    ),
-    OutputVolume=dict(argstr='%s',
-    hash_files=False,
-    position=-1,
-    ),
-    args=dict(argstr='%s',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
-    type=dict(argstr='--type %s',
-    ),
+    input_map = dict(
+        InputVolume=dict(
+            argstr='%s',
+            position=-2,
+        ),
+        OutputVolume=dict(
+            argstr='%s',
+            hash_files=False,
+            position=-1,
+        ),
+        args=dict(argstr='%s', ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
+        type=dict(argstr='--type %s', ),
     )
     inputs = CastScalarVolume.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_CastScalarVolume_outputs():
-    output_map = dict(OutputVolume=dict(position=-1,
-    ),
-    )
+    output_map = dict(OutputVolume=dict(position=-1, ), )
     outputs = CastScalarVolume.output_spec()
 
     for key, metadata in list(output_map.items()):
