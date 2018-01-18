@@ -712,7 +712,7 @@ class CenterMass(AFNICommandBase):
         return outputs
 
 
-class ConvertDsetInputSpec(CommandLineInputSpec):
+class ConvertDsetInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc='input file to ConvertDset',
         argstr='-input %s',
