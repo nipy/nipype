@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """ Base interfaces for dipy """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import os.path as op
 import numpy as np
 from ... import logging
-from ..base import (traits, File, isdefined,
-                    BaseInterface, BaseInterfaceInputSpec)
+from ..base import (traits, File, isdefined, BaseInterface,
+                    BaseInterfaceInputSpec)
 
 IFLOGGER = logging.getLogger('interface')
 
@@ -32,10 +33,10 @@ def dipy_version():
 
 
 class DipyBaseInterface(BaseInterface):
-
     """
     A base interface for py:mod:`dipy` computations
     """
+
     def __init__(self, **inputs):
         if no_dipy():
             IFLOGGER.warn('dipy was not found')
@@ -52,7 +53,6 @@ class DipyBaseInterfaceInputSpec(BaseInterfaceInputSpec):
 
 
 class DipyDiffusionInterface(DipyBaseInterface):
-
     """
     A base interface for py:mod:`dipy` computations
     """

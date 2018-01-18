@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Parallel workflow execution via SGE
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 from builtins import object
 
@@ -30,21 +31,22 @@ def sge_debug_print(message):
 
 
 class QJobInfo(object):
-
     """Information about a single job created by OGE/SGE or similar
     Each job is responsible for knowing it's own refresh state
     :author Hans J. Johnson
     """
 
-    def __init__(self, job_num, job_queue_state, job_time, job_queue_name, job_slots, qsub_command_line):
+    def __init__(self, job_num, job_queue_state, job_time, job_queue_name,
+                 job_slots, qsub_command_line):
         # self._jobName = None           # Ascii text name of job not unique
         self._job_num = int(
-            job_num)      # The primary unique identifier for this job, must be an integer!
+            job_num
+        )  # The primary unique identifier for this job, must be an integer!
         # self._jobOwn  = None           # Who owns this job
         self._job_queue_state = str(
-            job_queue_state)     # ["running","zombie",...??]
+            job_queue_state)  # ["running","zombie",...??]
         # self._jobActionState = str(jobActionState)  # ['r','qw','S',...??]
-        self._job_time = job_time               # The job start time
+        self._job_time = job_time  # The job start time
         self._job_info_creation_time = time.time(
         )  # When this job was created (for comparing against initalization)
         self._job_queue_name = job_queue_name  # Where the job is running
@@ -75,20 +77,23 @@ class QJobInfo(object):
         time_diff = (time.time() - self._job_info_creation_time)
         if self.is_zombie():
             sge_debug_print(
-                "DONE! QJobInfo.IsPending found in 'zombie' list, returning False so claiming done!\n{0}".format(self))
+                "DONE! QJobInfo.IsPending found in 'zombie' list, returning False so claiming done!\n{0}".
+                format(self))
             is_pending_status = False  # Job explicitly found as being completed!
         elif self.is_initializing() and (time_diff > 600):
             # if initializing for more than 5 minute, failure due to
             # initialization and completion before registration
             sge_debug_print(
                 "FAILURE! QJobInfo.IsPending found long running at {1} seconds"
-                "'initializing' returning False for to break loop!\n{0}".format(self, time_diff))
+                "'initializing' returning False for to break loop!\n{0}".
+                format(self, time_diff))
             is_pending_status = True  # Job initialization took too long, so report!
         else:  # self.is_running() || self.is_pending():
             is_pending_status = True  # Job cache last listed as running
         return is_pending_status  # The job is in one of the hold states
 
-    def update_info(self, job_queue_state, job_time, job_queue_name, job_slots):
+    def update_info(self, job_queue_state, job_time, job_queue_name,
+                    job_slots):
         self._job_queue_state = job_queue_state
         self._job_time = job_time
         self._job_queue_name = job_queue_name
@@ -99,11 +104,12 @@ class QJobInfo(object):
 
 
 class QstatSubstitute(object):
-
     """A wrapper for Qstat to avoid overloading the
     SGE/OGS server with rapid continuous qstat requests"""
 
-    def __init__(self, qstat_instant_executable='qstat', qstat_cached_executable='qstat'):
+    def __init__(self,
+                 qstat_instant_executable='qstat',
+                 qstat_cached_executable='qstat'):
         """
         :param qstat_instant_executable:
         :param qstat_cached_executable:
@@ -131,8 +137,9 @@ class QstatSubstitute(object):
         :return: NONE
         """
         taskid = int(taskid)  # Ensure that it is an integer
-        self._task_dictionary[taskid] = QJobInfo(taskid, "initializing", time.time(),
-                                                 "noQueue", 1, qsub_command_line)
+        self._task_dictionary[taskid] = QJobInfo(taskid, "initializing",
+                                                 time.time(), "noQueue", 1,
+                                                 qsub_command_line)
 
     @staticmethod
     def _qacct_verified_complete(taskid):
@@ -150,7 +157,11 @@ class QstatSubstitute(object):
             qacct_retries -= 1
             try:
                 proc = subprocess.Popen(
-                    [this_command, '-o', pwd.getpwuid(os.getuid())[0], '-j', str(taskid)],
+                    [
+                        this_command, '-o',
+                        pwd.getpwuid(os.getuid())[0], '-j',
+                        str(taskid)
+                    ],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE)
                 qacct_result, _ = proc.communicate()
@@ -177,18 +188,21 @@ class QstatSubstitute(object):
             except:
                 job_queue_name = "unknown"
             try:
-                job_slots = int(current_job_element.getElementsByTagName(
-                    'slots')[0].childNodes[0].data)
+                job_slots = int(
+                    current_job_element.getElementsByTagName('slots')[0]
+                    .childNodes[0].data)
             except:
                 job_slots = -1
             job_queue_state = current_job_element.getAttribute('state')
-            job_num = int(current_job_element.getElementsByTagName(
-                'JB_job_number')[0].childNodes[0].data)
+            job_num = int(
+                current_job_element.getElementsByTagName('JB_job_number')[0]
+                .childNodes[0].data)
             try:
                 job_time_text = current_job_element.getElementsByTagName(
                     'JAT_start_time')[0].childNodes[0].data
-                job_time = float(time.mktime(time.strptime(
-                    job_time_text, "%Y-%m-%dT%H:%M:%S")))
+                job_time = float(
+                    time.mktime(
+                        time.strptime(job_time_text, "%Y-%m-%dT%H:%M:%S")))
             except:
                 job_time = float(0.0)
                 # Make job entry
@@ -219,17 +233,20 @@ class QstatSubstitute(object):
                     self._task_dictionary[dictionary_job].set_state("zombie")
                 else:
                     sge_debug_print("ERROR:  Job not in current parselist, "
-                                    "and not in done list {0}: {1}".format(dictionary_job,
-                                                                           self._task_dictionary[dictionary_job]))
+                                    "and not in done list {0}: {1}".format(
+                                        dictionary_job,
+                                        self._task_dictionary[dictionary_job]))
                     pass
             if self._task_dictionary[dictionary_job].is_initializing():
                 is_completed = self._qacct_verified_complete(dictionary_job)
                 if is_completed:
                     self._task_dictionary[dictionary_job].set_state("zombie")
                 else:
-                    sge_debug_print("ERROR:  Job not in still in intializing mode, "
-                                    "and not in done list {0}: {1}".format(dictionary_job,
-                                                                           self._task_dictionary[dictionary_job]))
+                    sge_debug_print(
+                        "ERROR:  Job not in still in intializing mode, "
+                        "and not in done list {0}: {1}".format(
+                            dictionary_job,
+                            self._task_dictionary[dictionary_job]))
                     pass
 
     def _run_qstat(self, reason_for_qstat, force_instant=True):
@@ -252,7 +269,10 @@ class QstatSubstitute(object):
             qstat_retries -= 1
             try:
                 proc = subprocess.Popen(
-                    [this_command, '-u', pwd.getpwuid(os.getuid())[0], '-xml', '-s', 'psrz'],
+                    [
+                        this_command, '-u',
+                        pwd.getpwuid(os.getuid())[0], '-xml', '-s', 'psrz'
+                    ],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE)
                 qstat_xml_result, _ = proc.communicate()
@@ -264,9 +284,8 @@ class QstatSubstitute(object):
                 break
             except Exception as inst:
                 exception_message = "QstatParsingError:\n\t{0}\n\t{1}\n".format(
-                    type(
-                        inst),     # the exception instance
-                    inst           # __str__ allows args to printed directly
+                    type(inst),  # the exception instance
+                    inst  # __str__ allows args to printed directly
                 )
                 sge_debug_print(exception_message)
                 time.sleep(5)
@@ -282,24 +301,31 @@ class QstatSubstitute(object):
         # Check if the task is in the dictionary first (before running qstat)
         if task_id in self._task_dictionary:
             # Trust the cache, only False if state='zombie'
-            job_is_pending = self._task_dictionary[task_id].is_job_state_pending()
+            job_is_pending = self._task_dictionary[
+                task_id].is_job_state_pending()
             # Double check pending jobs in case of change (since we don't check at the beginning)
             if job_is_pending:
-                self._run_qstat("checking job pending status {0}".format(task_id), False)
-                job_is_pending = self._task_dictionary[task_id].is_job_state_pending()
+                self._run_qstat(
+                    "checking job pending status {0}".format(task_id), False)
+                job_is_pending = self._task_dictionary[
+                    task_id].is_job_state_pending()
         else:
-            self._run_qstat("checking job pending status {0}".format(task_id), True)
+            self._run_qstat("checking job pending status {0}".format(task_id),
+                            True)
             if task_id in self._task_dictionary:
                 # Trust the cache, only False if state='zombie'
-                job_is_pending = self._task_dictionary[task_id].is_job_state_pending()
+                job_is_pending = self._task_dictionary[
+                    task_id].is_job_state_pending()
             else:
                 sge_debug_print("ERROR: Job {0} not in task list, "
                                 "even after forced qstat!".format(task_id))
                 job_is_pending = False
         if not job_is_pending:
-            sge_debug_print("DONE! Returning for {0} claiming done!".format(task_id))
+            sge_debug_print(
+                "DONE! Returning for {0} claiming done!".format(task_id))
             if task_id in self._task_dictionary:
-                sge_debug_print("NOTE: Adding {0} to OutOfScopeJobs list!".format(task_id))
+                sge_debug_print(
+                    "NOTE: Adding {0} to OutOfScopeJobs list!".format(task_id))
                 self._out_of_scope_jobs.append(int(task_id))
                 self._task_dictionary.pop(task_id)
             else:
@@ -325,7 +351,6 @@ def qsub_sanitize_job_name(testjobname):
 
 
 class SGEPlugin(SGELikeBatchManagerBase):
-
     """Execute using SGE (OGE not tested)
 
     The plugin_args input to run can be used to control the SGE execution.
@@ -364,9 +389,11 @@ class SGEPlugin(SGELikeBatchManagerBase):
         return self._refQstatSubstitute.is_job_pending(int(taskid))
 
     def _submit_batchtask(self, scriptfile, node):
-        cmd = CommandLine('qsub', environ=dict(os.environ),
-                          resource_monitor=False,
-                          terminal_output='allatonce')
+        cmd = CommandLine(
+            'qsub',
+            environ=dict(os.environ),
+            resource_monitor=False,
+            terminal_output='allatonce')
         path = os.path.dirname(scriptfile)
         qsubargs = ''
         if self._qsub_args:
@@ -382,19 +409,15 @@ class SGEPlugin(SGELikeBatchManagerBase):
         if '-e' not in qsubargs:
             qsubargs = '%s -e %s' % (qsubargs, path)
         if node._hierarchy:
-            jobname = '.'.join((dict(os.environ)['LOGNAME'],
-                                node._hierarchy,
+            jobname = '.'.join((dict(os.environ)['LOGNAME'], node._hierarchy,
                                 node._id))
         else:
-            jobname = '.'.join((dict(os.environ)['LOGNAME'],
-                                node._id))
+            jobname = '.'.join((dict(os.environ)['LOGNAME'], node._id))
         jobnameitems = jobname.split('.')
         jobnameitems.reverse()
         jobname = '.'.join(jobnameitems)
         jobname = qsub_sanitize_job_name(jobname)
-        cmd.inputs.args = '%s -N %s %s' % (qsubargs,
-                                           jobname,
-                                           scriptfile)
+        cmd.inputs.args = '%s -N %s %s' % (qsubargs, jobname, scriptfile)
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName('CRITICAL'))
         tries = 0
@@ -417,8 +440,9 @@ class SGEPlugin(SGELikeBatchManagerBase):
         iflogger.setLevel(oldlevel)
         # retrieve sge taskid
         lines = [line for line in result.runtime.stdout.split('\n') if line]
-        taskid = int(re.match("Your job ([0-9]*) .* has been submitted",
-                              lines[-1]).groups()[0])
+        taskid = int(
+            re.match("Your job ([0-9]*) .* has been submitted",
+                     lines[-1]).groups()[0])
         self._pending[taskid] = node.output_dir()
         self._refQstatSubstitute.add_startup_job(taskid, cmd.cmdline)
         logger.debug('submitted sge task: %d for node %s with %s' %

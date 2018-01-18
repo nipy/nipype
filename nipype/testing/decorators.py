@@ -5,7 +5,7 @@
 Extend numpy's decorators to use nipype's gui and data labels.
 """
 
-from numpy.testing.decorators import *
+from numpy.testing.decorators import knownfailureif, skipif
 
 from nibabel.data import DataError
 
@@ -17,10 +17,10 @@ def make_label_dec(label, ds=None):
     ----------
     label : str or sequence
         One or more labels that will be applied by the decorator to the
-        functions it decorates.  Labels are attributes of the decorated function
+        functions it decorates. Labels are attributes of the decorated function
         with their value set to True.
     ds : str
-        An optional docstring for the resulting decorator.  If not given, a
+        An optional docstring for the resulting decorator. If not given, a
         default docstring is auto-generated.
 
     Returns
@@ -60,11 +60,13 @@ def make_label_dec(label, ds=None):
         for label in labels:
             setattr(f, label, True)
         return f
+
     # Apply the user's docstring
     if ds is None:
         ds = "Labels a test as %r" % label
         decor.__doc__ = ds
     return decor
+
 
 # For tests that need further review
 
@@ -77,8 +79,10 @@ def needs_review(msg):
     msg : string
         msg regarding the review that needs to be done
     """
+
     def skip_func(func):
         return skipif(True, msg)(func)
+
     return skip_func
 
 

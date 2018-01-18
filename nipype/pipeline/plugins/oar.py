@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Parallel workflow execution via OAR http://oar.imag.fr
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 from builtins import str, open
 import os
@@ -14,6 +15,7 @@ from ... import logging
 from ...interfaces.base import CommandLine
 from .base import SGELikeBatchManagerBase, logger
 iflogger = logging.getLogger('interface')
+
 
 class OARPlugin(SGELikeBatchManagerBase):
     """Execute using OAR
@@ -54,67 +56,53 @@ class OARPlugin(SGELikeBatchManagerBase):
     def _is_pending(self, taskid):
         #  subprocess.Popen requires taskid to be a string
         proc = subprocess.Popen(
-            ['oarstat', '-J', '-s',
-             '-j', taskid],
+            ['oarstat', '-J', '-s', '-j', taskid],
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
+            stderr=subprocess.PIPE)
         o, e = proc.communicate()
         parsed_result = json.loads(o)[taskid].lower()
-        is_pending = (
-            ('error' not in parsed_result) and
-            ('terminated' not in parsed_result)
-        )
+        is_pending = (('error' not in parsed_result)
+                      and ('terminated' not in parsed_result))
         return is_pending
 
     def _submit_batchtask(self, scriptfile, node):
-        cmd = CommandLine('oarsub', environ=dict(os.environ),
-                          resource_monitor=False,
-                          terminal_output='allatonce')
+        cmd = CommandLine(
+            'oarsub',
+            environ=dict(os.environ),
+            resource_monitor=False,
+            terminal_output='allatonce')
         path = os.path.dirname(scriptfile)
         oarsubargs = ''
         if self._oarsub_args:
             oarsubargs = self._oarsub_args
         if 'oarsub_args' in node.plugin_args:
-            if (
-               'overwrite' in node.plugin_args and
-               node.plugin_args['overwrite']
-               ):
+            if ('overwrite' in node.plugin_args
+                    and node.plugin_args['overwrite']):
                 oarsubargs = node.plugin_args['oarsub_args']
             else:
                 oarsubargs += (" " + node.plugin_args['oarsub_args'])
 
         if node._hierarchy:
-            jobname = '.'.join((dict(os.environ)['LOGNAME'],
-                                node._hierarchy,
+            jobname = '.'.join((dict(os.environ)['LOGNAME'], node._hierarchy,
                                 node._id))
         else:
-            jobname = '.'.join((dict(os.environ)['LOGNAME'],
-                                node._id))
+            jobname = '.'.join((dict(os.environ)['LOGNAME'], node._id))
         jobnameitems = jobname.split('.')
         jobnameitems.reverse()
         jobname = '.'.join(jobnameitems)
         jobname = jobname[0:self._max_jobname_len]
 
         if '-O' not in oarsubargs:
-            oarsubargs = '%s -O %s' % (
-                oarsubargs,
-                os.path.join(path, jobname + '.stdout')
-            )
+            oarsubargs = '%s -O %s' % (oarsubargs,
+                                       os.path.join(path, jobname + '.stdout'))
         if '-E' not in oarsubargs:
-            oarsubargs = '%s -E %s' % (
-                oarsubargs,
-                os.path.join(path, jobname + '.stderr')
-            )
+            oarsubargs = '%s -E %s' % (oarsubargs,
+                                       os.path.join(path, jobname + '.stderr'))
         if '-J' not in oarsubargs:
             oarsubargs = '%s -J' % (oarsubargs)
 
         os.chmod(scriptfile, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
-        cmd.inputs.args = '%s -n %s -S %s' % (
-           oarsubargs,
-           jobname,
-           scriptfile
-        )
+        cmd.inputs.args = '%s -n %s -S %s' % (oarsubargs, jobname, scriptfile)
 
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName('CRITICAL'))

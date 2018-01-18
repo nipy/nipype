@@ -6,7 +6,8 @@
     >>> tmp = getfixture('tmpdir')
     >>> old = tmp.chdir()
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import range
 
 from future import standard_library
@@ -17,9 +18,9 @@ import re
 import numpy as np
 import nibabel as nb
 
-from ..base import (traits, TraitedSpec, DynamicTraitedSpec, File,
-                    Undefined, isdefined, OutputMultiPath, InputMultiPath,
-                    BaseInterface, BaseInterfaceInputSpec, Str)
+from ..base import (traits, TraitedSpec, DynamicTraitedSpec, File, Undefined,
+                    isdefined, OutputMultiPath, InputMultiPath, BaseInterface,
+                    BaseInterfaceInputSpec, Str)
 from ..io import IOBase, add_traits
 from ...utils.filemanip import filename_to_list, copyfile, split_filename
 
@@ -55,11 +56,14 @@ class IdentityInterface(IOBase):
     def __init__(self, fields=None, mandatory_inputs=True, **inputs):
         super(IdentityInterface, self).__init__(**inputs)
         if fields is None or not fields:
-            raise ValueError('Identity Interface fields must be a non-empty list')
+            raise ValueError(
+                'Identity Interface fields must be a non-empty list')
         # Each input must be in the fields.
         for in_field in inputs:
             if in_field not in fields:
-                raise ValueError('Identity Interface input is not in the fields: %s' % in_field)
+                raise ValueError(
+                    'Identity Interface input is not in the fields: %s' %
+                    in_field)
         self._fields = fields
         self._mandatory_inputs = mandatory_inputs
         add_traits(self.inputs, fields)
@@ -78,7 +82,7 @@ class IdentityInterface(IOBase):
                 value = getattr(self.inputs, key)
                 if not isdefined(value):
                     msg = "%s requires a value for input '%s' because it was listed in 'fields'. \
-                    You can turn off mandatory inputs checking by passing mandatory_inputs = False to the constructor." % \
+                    You can turn off mandatory inputs checking by passing mandatory_inputs = False to the constructor."                                                                                                                                                                                                                                               % \
                         (self.__class__.__name__, key)
                     raise ValueError(msg)
 
@@ -91,12 +95,19 @@ class IdentityInterface(IOBase):
 
 
 class MergeInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    axis = traits.Enum('vstack', 'hstack', usedefault=True,
-                       desc='direction in which to merge, hstack requires same number of elements in each input')
-    no_flatten = traits.Bool(False, usedefault=True,
-                             desc='append to outlist instead of extending in vstack mode')
-    ravel_inputs = traits.Bool(False, usedefault=True,
-                               desc='ravel inputs when no_flatten is False')
+    axis = traits.Enum(
+        'vstack',
+        'hstack',
+        usedefault=True,
+        desc=
+        'direction in which to merge, hstack requires same number of elements in each input'
+    )
+    no_flatten = traits.Bool(
+        False,
+        usedefault=True,
+        desc='append to outlist instead of extending in vstack mode')
+    ravel_inputs = traits.Bool(
+        False, usedefault=True, desc='ravel inputs when no_flatten is False')
 
 
 class MergeOutputSpec(TraitedSpec):
@@ -173,14 +184,16 @@ class Merge(IOBase):
             return outputs
         else:
             getval = lambda idx: getattr(self.inputs, 'in%d' % (idx + 1))
-            values = [getval(idx) for idx in range(self._numinputs)
-                      if isdefined(getval(idx))]
+            values = [
+                getval(idx) for idx in range(self._numinputs)
+                if isdefined(getval(idx))
+            ]
 
         if self.inputs.axis == 'vstack':
             for value in values:
                 if isinstance(value, list) and not self.inputs.no_flatten:
-                    out.extend(_ravel(value) if self.inputs.ravel_inputs else
-                               value)
+                    out.extend(
+                        _ravel(value) if self.inputs.ravel_inputs else value)
                 else:
                     out.append(value)
         else:
@@ -193,19 +206,21 @@ class Merge(IOBase):
 class RenameInputSpec(DynamicTraitedSpec):
 
     in_file = File(exists=True, mandatory=True, desc="file to rename")
-    keep_ext = traits.Bool(desc=("Keep in_file extension, replace "
-                                 "non-extension component of name"))
-    format_string = Str(mandatory=True,
-                        desc="Python formatting string for output template")
+    keep_ext = traits.Bool(
+        desc=("Keep in_file extension, replace "
+              "non-extension component of name"))
+    format_string = Str(
+        mandatory=True, desc="Python formatting string for output template")
     parse_string = Str(desc="Python regexp parse string to define "
-                            "replacement inputs")
-    use_fullpath = traits.Bool(False, usedefault=True,
-                               desc="Use full path as input to regex parser")
+                       "replacement inputs")
+    use_fullpath = traits.Bool(
+        False, usedefault=True, desc="Use full path as input to regex parser")
 
 
 class RenameOutputSpec(TraitedSpec):
 
-    out_file = traits.File(exists=True, desc="softlink to original file with new name")
+    out_file = traits.File(
+        exists=True, desc="softlink to original file with new name")
 
 
 class Rename(IOBase):
@@ -265,9 +280,9 @@ class Rename(IOBase):
     def _rename(self):
         fmt_dict = dict()
         if isdefined(self.inputs.parse_string):
-            if isdefined(self.inputs.use_fullpath) and self.inputs.use_fullpath:
-                m = re.search(self.inputs.parse_string,
-                              self.inputs.in_file)
+            if isdefined(
+                    self.inputs.use_fullpath) and self.inputs.use_fullpath:
+                m = re.search(self.inputs.parse_string, self.inputs.in_file)
             else:
                 m = re.search(self.inputs.parse_string,
                               os.path.split(self.inputs.in_file)[1])
@@ -278,16 +293,18 @@ class Rename(IOBase):
             if isdefined(val):
                 fmt_dict[field] = getattr(self.inputs, field)
         if self.inputs.keep_ext:
-            fmt_string = "".join([self.inputs.format_string,
-                                  split_filename(self.inputs.in_file)[2]])
+            fmt_string = "".join([
+                self.inputs.format_string,
+                split_filename(self.inputs.in_file)[2]
+            ])
         else:
             fmt_string = self.inputs.format_string
         return fmt_string % fmt_dict
 
     def _run_interface(self, runtime):
         runtime.returncode = 0
-        _ = copyfile(self.inputs.in_file, os.path.join(os.getcwd(),
-                                                       self._rename()))
+        _ = copyfile(self.inputs.in_file,
+                     os.path.join(os.getcwd(), self._rename()))
         return runtime
 
     def _list_outputs(self):
@@ -297,12 +314,17 @@ class Rename(IOBase):
 
 
 class SplitInputSpec(BaseInterfaceInputSpec):
-    inlist = traits.List(traits.Any, mandatory=True,
-                         desc='list of values to split')
-    splits = traits.List(traits.Int, mandatory=True,
-                         desc='Number of outputs in each split - should add to number of inputs')
-    squeeze = traits.Bool(False, usedefault=True,
-                          desc='unfold one-element splits removing the list')
+    inlist = traits.List(
+        traits.Any, mandatory=True, desc='list of values to split')
+    splits = traits.List(
+        traits.Int,
+        mandatory=True,
+        desc='Number of outputs in each split - should add to number of inputs'
+    )
+    squeeze = traits.Bool(
+        False,
+        usedefault=True,
+        desc='unfold one-element splits removing the list')
 
 
 class Split(IOBase):
@@ -341,7 +363,8 @@ class Split(IOBase):
             splits.extend(self.inputs.splits)
             splits = np.cumsum(splits)
             for i in range(len(splits) - 1):
-                val = np.array(self.inputs.inlist)[splits[i]:splits[i + 1]].tolist()
+                val = np.array(
+                    self.inputs.inlist)[splits[i]:splits[i + 1]].tolist()
                 if self.inputs.squeeze and len(val) == 1:
                     val = val[0]
                 outputs['out%d' % (i + 1)] = val
@@ -349,10 +372,10 @@ class Split(IOBase):
 
 
 class SelectInputSpec(BaseInterfaceInputSpec):
-    inlist = InputMultiPath(traits.Any, mandatory=True,
-                            desc='list of values to choose from')
-    index = InputMultiPath(traits.Int, mandatory=True,
-                           desc='0-based indices of values to choose')
+    inlist = InputMultiPath(
+        traits.Any, mandatory=True, desc='list of values to choose from')
+    index = InputMultiPath(
+        traits.Int, mandatory=True, desc='0-based indices of values to choose')
 
 
 class SelectOutputSpec(TraitedSpec):
@@ -384,7 +407,8 @@ class Select(IOBase):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        out = np.array(self.inputs.inlist)[np.array(self.inputs.index)].tolist()
+        out = np.array(self.inputs.inlist)[np.array(
+            self.inputs.index)].tolist()
         outputs['out'] = out
         return outputs
 

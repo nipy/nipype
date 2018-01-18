@@ -4,7 +4,6 @@
 
 from nipype.utils.docparse import reverse_opt_map, build_doc, insert_doc
 
-
 foo_opt_map = {'outline': '-o', 'fun': '-f %.2f', 'flags': '%s'}
 
 foo_doc = """Usage: foo infile outfile [opts]
@@ -41,6 +40,7 @@ def test_build_doc():
     opts = reverse_opt_map(foo_opt_map)
     doc = build_doc(foo_doc, opts)
     assert doc == fmtd_doc
+
 
 inserted_doc = """Parameters
 ----------

@@ -22,7 +22,10 @@ def test_rename(tmpdir):
     assert os.path.exists(outfile)
 
     # Now a string-formatting version
-    rn = utility.Rename(in_file="file.txt", format_string="%(field1)s_file%(field2)d", keep_ext=True)
+    rn = utility.Rename(
+        in_file="file.txt",
+        format_string="%(field1)s_file%(field2)d",
+        keep_ext=True)
     # Test .input field creation
     assert hasattr(rn.inputs, "field1")
     assert hasattr(rn.inputs, "field2")
@@ -36,33 +39,36 @@ def test_rename(tmpdir):
     assert os.path.exists(outfile)
 
 
-@pytest.mark.parametrize("args, expected", [
-        ({}                ,  ([0], [1,2,3])),
-        ({"squeeze" : True},  (0  , [1,2,3]))
-        ])
+@pytest.mark.parametrize("args, expected", [({}, ([0], [1, 2, 3])),
+                                            ({
+                                                "squeeze": True
+                                            }, (0, [1, 2, 3]))])
 def test_split(tmpdir, args, expected):
     tmpdir.chdir()
 
-    node = pe.Node(utility.Split(inlist=list(range(4)),
-                                 splits=[1, 3],
-                                 **args),
-                   name='split_squeeze')
+    node = pe.Node(
+        utility.Split(inlist=list(range(4)), splits=[1, 3], **args),
+        name='split_squeeze')
     res = node.run()
     assert res.outputs.out1 == expected[0]
     assert res.outputs.out2 == expected[1]
 
 
 @pytest.mark.parametrize("args, kwargs, in_lists, expected", [
-        ([3], {}, [0, [1, 2], [3, 4, 5]], [0, 1, 2, 3, 4, 5]),
-        ([0], {}, None, None),
-        ([], {}, [], []),
-        ([], {}, [0, [1, 2], [3, 4, 5]], [0, [1, 2], [3, 4, 5]]),
-        ([3], {'axis': 'hstack'}, [[0], [1, 2], [3, 4, 5]], [[0, 1, 3]]),
-        ([3], {'axis': 'hstack'}, [[0, 1], [2, 3], [4, 5]],
-         [[0, 2, 4], [1, 3, 5]]),
-        ([3], {'axis': 'hstack'}, [[0, 1], [2, 3], [4, 5]],
-         [[0, 2, 4], [1, 3, 5]]),
-        ])
+    ([3], {}, [0, [1, 2], [3, 4, 5]], [0, 1, 2, 3, 4, 5]),
+    ([0], {}, None, None),
+    ([], {}, [], []),
+    ([], {}, [0, [1, 2], [3, 4, 5]], [0, [1, 2], [3, 4, 5]]),
+    ([3], {
+        'axis': 'hstack'
+    }, [[0], [1, 2], [3, 4, 5]], [[0, 1, 3]]),
+    ([3], {
+        'axis': 'hstack'
+    }, [[0, 1], [2, 3], [4, 5]], [[0, 2, 4], [1, 3, 5]]),
+    ([3], {
+        'axis': 'hstack'
+    }, [[0, 1], [2, 3], [4, 5]], [[0, 2, 4], [1, 3, 5]]),
+])
 def test_merge(tmpdir, args, kwargs, in_lists, expected):
     tmpdir.chdir()
 

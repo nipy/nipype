@@ -82,9 +82,9 @@ Optional arguments::
   exceed the total amount of resources available (memory and threads), when
   ``False`` (default), only a warning will be issued.
 
-  maxtasksperchild : number of nodes to run on each process before refreshing 
+  maxtasksperchild : number of nodes to run on each process before refreshing
   the worker (default: 10).
-  
+
 
 To distribute processing on a multicore machine, simply call::
 
