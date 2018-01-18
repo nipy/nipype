@@ -13,7 +13,7 @@ def test_duplicate_node_check():
 
     wf = pe.Workflow(name="testidentity")
 
-    original_list = [0,1,2,3,4,5,6,7,8,9]
+    original_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
     selector1 = pe.Node(niu.Select(), name="selector1")
     selector1.inputs.index = original_list[:-1]
@@ -26,10 +26,10 @@ def test_duplicate_node_check():
     selector4.inputs.index = original_list[:-4]
 
     wf_connections = [
-            (selector1, selector2, [("out","inlist")]),
-            (selector2, selector3, [("out","inlist")]),
-            (selector3, selector4, [("out","inlist")]),
-            ]
+        (selector1, selector2, [("out", "inlist")]),
+        (selector2, selector3, [("out", "inlist")]),
+        (selector3, selector4, [("out", "inlist")]),
+    ]
 
     with pytest.raises(IOError) as excinfo:
         wf.connect(wf_connections)

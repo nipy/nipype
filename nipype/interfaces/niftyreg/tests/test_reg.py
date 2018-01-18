@@ -35,6 +35,7 @@ def test_reg_aladin():
 
     cmd_tmp = '{cmd} -aff {aff} -flo {flo} -omp 4 -ref {ref} -res {res} \
 -rmask {rmask}'
+
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('reg_aladin'),
         aff='im2_aff.txt',
@@ -76,6 +77,7 @@ def test_reg_f3d():
 
     cmd_tmp = '{cmd} -be 0.100000 -cpp {cpp} -flo {flo} -le 0.100000 -omp 4 \
 -ref {ref} -res {res} -rmask {rmask} -vel'
+
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('reg_f3d'),
         cpp='im2_cpp.nii.gz',

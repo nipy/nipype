@@ -3,7 +3,8 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous utility functions
 """
-from __future__ import print_function, unicode_literals, division, absolute_import
+from __future__ import (print_function, unicode_literals, division,
+                        absolute_import)
 from builtins import next, str
 
 import sys
@@ -18,6 +19,7 @@ from future import standard_library
 try:
     from textwrap import indent as textwrap_indent
 except ImportError:
+
     def textwrap_indent(text, prefix):
         """ A textwrap.indent replacement for Python < 3.3 """
         if not prefix:
@@ -25,11 +27,13 @@ except ImportError:
         splittext = text.splitlines(True)
         return prefix + prefix.join(splittext)
 
+
 standard_library.install_aliases()
 
 
 def human_order_sorted(l):
     """Sorts string in human order (i.e. 'stat10' will go after 'stat2')"""
+
     def atoi(text):
         return int(text) if text.isdigit() else text
 
@@ -131,7 +135,10 @@ def container_to_string(cont):
 
 # Dependency checks.  Copied this from Nipy, with some modificiations
 # (added app as a parameter).
-def package_check(pkg_name, version=None, app=None, checker=LooseVersion,
+def package_check(pkg_name,
+                  version=None,
+                  app=None,
+                  checker=LooseVersion,
                   exc_failed_import=ImportError,
                   exc_failed_check=RuntimeError):
     """Check that the minimal version of the required package is installed.
@@ -166,7 +173,7 @@ def package_check(pkg_name, version=None, app=None, checker=LooseVersion,
     else:
         msg = 'Nipype requires %s' % pkg_name
     if version:
-        msg += ' with version >= %s' % (version,)
+        msg += ' with version >= %s' % (version, )
     try:
         mod = __import__(pkg_name)
     except ImportError as e:
@@ -176,7 +183,8 @@ def package_check(pkg_name, version=None, app=None, checker=LooseVersion,
     try:
         have_version = mod.__version__
     except AttributeError as e:
-        raise_from(exc_failed_check('Cannot find version for %s' % pkg_name), e)
+        raise_from(
+            exc_failed_check('Cannot find version for %s' % pkg_name), e)
     if checker(have_version) < checker(version):
         raise exc_failed_check(msg)
 

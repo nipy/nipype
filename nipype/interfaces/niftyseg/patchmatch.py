@@ -1,6 +1,5 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-
 """
 The fusion module provides higher-level interfaces to some of the operations
 that can be performed with the seg_DetectLesions command-line program.
@@ -19,7 +18,6 @@ from ..base import TraitedSpec, File, traits, CommandLineInputSpec
 from .base import NiftySegCommand
 from ..niftyreg.base import get_custom_path
 
-
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
@@ -27,49 +25,51 @@ warnings.filterwarnings('always', category=UserWarning)
 class PatchMatchInputSpec(CommandLineInputSpec):
     """Input Spec for PatchMatch."""
     # Mandatory input arguments
-    in_file = File(argstr='-i %s',
-                   exists=True,
-                   mandatory=True,
-                   desc='Input image to segment',
-                   position=1)
+    in_file = File(
+        argstr='-i %s',
+        exists=True,
+        mandatory=True,
+        desc='Input image to segment',
+        position=1)
 
-    mask_file = File(argstr='-m %s',
-                     exists=True,
-                     mandatory=True,
-                     desc='Input mask for the area where applies PatchMatch',
-                     position=2)
+    mask_file = File(
+        argstr='-m %s',
+        exists=True,
+        mandatory=True,
+        desc='Input mask for the area where applies PatchMatch',
+        position=2)
 
-    database_file = File(argstr='-db %s',
-                         exists=True,
-                         mandatory=True,
-                         desc='Database with the segmentations',
-                         position=3)
+    database_file = File(
+        argstr='-db %s',
+        exists=True,
+        mandatory=True,
+        desc='Database with the segmentations',
+        position=3)
 
     # Output file name
-    out_file = File(name_source=['in_file'],
-                    name_template='%s_pm.nii.gz',
-                    desc='The output filename of the patchmatch results',
-                    argstr='-o %s',
-                    position=4)
+    out_file = File(
+        name_source=['in_file'],
+        name_template='%s_pm.nii.gz',
+        desc='The output filename of the patchmatch results',
+        argstr='-o %s',
+        position=4)
 
     # Optional arguments
-    patch_size = traits.Int(desc="Patch size, #voxels",
-                            argstr='-size %i')
+    patch_size = traits.Int(desc="Patch size, #voxels", argstr='-size %i')
 
     desc = "Constrained search area size, number of times bigger than the \
 patchsize"
-    cs_size = traits.Int(desc=desc,
-                         argstr='-cs %i')
 
-    match_num = traits.Int(desc="Number of better matching",
-                           argstr='-match %i')
+    cs_size = traits.Int(desc=desc, argstr='-cs %i')
 
-    pm_num = traits.Int(desc="Number of patchmatch executions",
-                        argstr='-pm %i')
+    match_num = traits.Int(
+        desc="Number of better matching", argstr='-match %i')
+
+    pm_num = traits.Int(
+        desc="Number of patchmatch executions", argstr='-pm %i')
 
     desc = "Number of iterations for the patchmatch algorithm"
-    it_num = traits.Int(desc=desc,
-                        argstr='-it %i')
+    it_num = traits.Int(desc=desc, argstr='-it %i')
 
 
 class PatchMatchOutputSpec(TraitedSpec):
