@@ -7,7 +7,8 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import os
 
@@ -16,12 +17,25 @@ from .base import ANTSCommand, ANTSCommandInputSpec
 
 
 class AverageAffineTransformInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='%d', usedefault=False, mandatory=True,
-                            position=0, desc='image dimension (2 or 3)')
-    output_affine_transform = File(argstr='%s', mandatory=True, position=1,
-                                   desc='Outputfname.txt: the name of the resulting transform.')
-    transforms = InputMultiPath(File(exists=True), argstr='%s', mandatory=True,
-                                position=3, desc='transforms to average')
+    dimension = traits.Enum(
+        3,
+        2,
+        argstr='%d',
+        usedefault=False,
+        mandatory=True,
+        position=0,
+        desc='image dimension (2 or 3)')
+    output_affine_transform = File(
+        argstr='%s',
+        mandatory=True,
+        position=1,
+        desc='Outputfname.txt: the name of the resulting transform.')
+    transforms = InputMultiPath(
+        File(exists=True),
+        argstr='%s',
+        mandatory=True,
+        position=3,
+        desc='transforms to average')
 
 
 class AverageAffineTransformOutputSpec(TraitedSpec):
@@ -55,18 +69,34 @@ class AverageAffineTransform(ANTSCommand):
 
 
 class AverageImagesInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='%d', mandatory=True,
-                            position=0, desc='image dimension (2 or 3)')
+    dimension = traits.Enum(
+        3,
+        2,
+        argstr='%d',
+        mandatory=True,
+        position=0,
+        desc='image dimension (2 or 3)')
     output_average_image = File(
-        "average.nii", argstr='%s', position=1, usedefault=True, hash_files=False,
+        "average.nii",
+        argstr='%s',
+        position=1,
+        usedefault=True,
+        hash_files=False,
         desc='the name of the resulting image.')
     normalize = traits.Bool(
-        argstr="%d", mandatory=True, position=2,
+        argstr="%d",
+        mandatory=True,
+        position=2,
         desc='Normalize: if true, the 2nd image is divided by its mean. '
-             'This will select the largest image to average into.')
+        'This will select the largest image to average into.')
     images = InputMultiPath(
-        File(exists=True), argstr='%s', mandatory=True, position=3,
-        desc='image to apply transformation to (generally a coregistered functional)')
+        File(exists=True),
+        argstr='%s',
+        mandatory=True,
+        position=3,
+        desc=
+        'image to apply transformation to (generally a coregistered functional)'
+    )
 
 
 class AverageImagesOutputSpec(TraitedSpec):
@@ -101,15 +131,28 @@ class AverageImages(ANTSCommand):
 
 
 class MultiplyImagesInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='%d', usedefault=False, mandatory=True, position=0,
-                            desc='image dimension (2 or 3)')
-    first_input = File(argstr='%s', exists=True,
-                       mandatory=True, position=1, desc='image 1')
+    dimension = traits.Enum(
+        3,
+        2,
+        argstr='%d',
+        usedefault=False,
+        mandatory=True,
+        position=0,
+        desc='image dimension (2 or 3)')
+    first_input = File(
+        argstr='%s', exists=True, mandatory=True, position=1, desc='image 1')
     second_input = traits.Either(
-        File(exists=True), traits.Float, argstr='%s', mandatory=True, position=2,
+        File(exists=True),
+        traits.Float,
+        argstr='%s',
+        mandatory=True,
+        position=2,
         desc='image 2 or multiplication weight')
-    output_product_image = File(argstr='%s', mandatory=True, position=3,
-                                desc='Outputfname.nii.gz: the name of the resulting image.')
+    output_product_image = File(
+        argstr='%s',
+        mandatory=True,
+        position=3,
+        desc='Outputfname.nii.gz: the name of the resulting image.')
 
 
 class MultiplyImagesOutputSpec(TraitedSpec):
@@ -144,17 +187,26 @@ class MultiplyImages(ANTSCommand):
 
 
 class CreateJacobianDeterminantImageInputSpec(ANTSCommandInputSpec):
-    imageDimension = traits.Enum(3, 2, argstr='%d', usedefault=False, mandatory=True,
-                                 position=0, desc='image dimension (2 or 3)')
-    deformationField = File(argstr='%s', exists=True, mandatory=True,
-                            position=1, desc='deformation transformation file')
-    outputImage = File(argstr='%s', mandatory=True,
-                       position=2,
-                       desc='output filename')
-    doLogJacobian = traits.Enum(0, 1, argstr='%d', position=3,
-                                desc='return the log jacobian')
-    useGeometric = traits.Enum(0, 1, argstr='%d', position=4,
-                               desc='return the geometric jacobian')
+    imageDimension = traits.Enum(
+        3,
+        2,
+        argstr='%d',
+        usedefault=False,
+        mandatory=True,
+        position=0,
+        desc='image dimension (2 or 3)')
+    deformationField = File(
+        argstr='%s',
+        exists=True,
+        mandatory=True,
+        position=1,
+        desc='deformation transformation file')
+    outputImage = File(
+        argstr='%s', mandatory=True, position=2, desc='output filename')
+    doLogJacobian = traits.Enum(
+        0, 1, argstr='%d', position=3, desc='return the log jacobian')
+    useGeometric = traits.Enum(
+        0, 1, argstr='%d', position=4, desc='return the geometric jacobian')
 
 
 class CreateJacobianDeterminantImageOutputSpec(TraitedSpec):
@@ -179,36 +231,67 @@ class CreateJacobianDeterminantImage(ANTSCommand):
     output_spec = CreateJacobianDeterminantImageOutputSpec
 
     def _format_arg(self, opt, spec, val):
-        return super(CreateJacobianDeterminantImage, self)._format_arg(opt, spec, val)
+        return super(CreateJacobianDeterminantImage, self)._format_arg(
+            opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['jacobian_image'] = os.path.abspath(
-            self.inputs.outputImage)
+        outputs['jacobian_image'] = os.path.abspath(self.inputs.outputImage)
         return outputs
 
 
 class AffineInitializerInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, usedefault=True, position=0, argstr='%s',
-                            desc='dimension')
-    fixed_image = File(exists=True, mandatory=True, position=1, argstr='%s',
-                       desc='reference image')
-    moving_image = File(exists=True, mandatory=True, position=2, argstr='%s',
-                        desc='moving image')
-    out_file = File('transform.mat', usedefault=True, position=3, argstr='%s',
-                    desc='output transform file')
+    dimension = traits.Enum(
+        3, 2, usedefault=True, position=0, argstr='%s', desc='dimension')
+    fixed_image = File(
+        exists=True,
+        mandatory=True,
+        position=1,
+        argstr='%s',
+        desc='reference image')
+    moving_image = File(
+        exists=True,
+        mandatory=True,
+        position=2,
+        argstr='%s',
+        desc='moving image')
+    out_file = File(
+        'transform.mat',
+        usedefault=True,
+        position=3,
+        argstr='%s',
+        desc='output transform file')
     # Defaults in antsBrainExtraction.sh -> 15 0.1 0 10
-    search_factor = traits.Float(15.0, usedefault=True, position=4, argstr='%f',
-                                 desc='increments (degrees) for affine search')
-    radian_fraction = traits.Range(0.0, 1.0, value=0.1, usedefault=True, position=5,
-                                   argstr='%f', desc='search this arc +/- principal axes')
+    search_factor = traits.Float(
+        15.0,
+        usedefault=True,
+        position=4,
+        argstr='%f',
+        desc='increments (degrees) for affine search')
+    radian_fraction = traits.Range(
+        0.0,
+        1.0,
+        value=0.1,
+        usedefault=True,
+        position=5,
+        argstr='%f',
+        desc='search this arc +/- principal axes')
     principal_axes = traits.Bool(
-        False, usedefault=True, position=6, argstr='%d',
-        desc='whether the rotation is searched around an initial principal axis alignment.')
+        False,
+        usedefault=True,
+        position=6,
+        argstr='%d',
+        desc=
+        'whether the rotation is searched around an initial principal axis alignment.'
+    )
     local_search = traits.Int(
-        10, usedefault=True, position=7, argstr='%d',
-        desc=' determines if a local optimization is run at each search point for the set '
-             'number of iterations')
+        10,
+        usedefault=True,
+        position=7,
+        argstr='%d',
+        desc=
+        ' determines if a local optimization is run at each search point for the set '
+        'number of iterations')
 
 
 class AffineInitializerOutputSpec(TraitedSpec):
@@ -236,15 +319,30 @@ class AffineInitializer(ANTSCommand):
 
 
 class ComposeMultiTransformInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='%d', usedefault=True, position=0,
-                            desc='image dimension (2 or 3)')
-    output_transform = File(argstr='%s', position=1, name_source=['transforms'],
-                            name_template='%s_composed', keep_ext=True,
-                            desc='the name of the resulting transform.')
-    reference_image = File(argstr='%s', position=2,
-                           desc='Reference image (only necessary when output is warpfield)')
-    transforms = InputMultiPath(File(exists=True), argstr='%s', mandatory=True,
-                                position=3, desc='transforms to average')
+    dimension = traits.Enum(
+        3,
+        2,
+        argstr='%d',
+        usedefault=True,
+        position=0,
+        desc='image dimension (2 or 3)')
+    output_transform = File(
+        argstr='%s',
+        position=1,
+        name_source=['transforms'],
+        name_template='%s_composed',
+        keep_extension=True,
+        desc='the name of the resulting transform.')
+    reference_image = File(
+        argstr='%s',
+        position=2,
+        desc='Reference image (only necessary when output is warpfield)')
+    transforms = InputMultiPath(
+        File(exists=True),
+        argstr='%s',
+        mandatory=True,
+        position=3,
+        desc='transforms to average')
 
 
 class ComposeMultiTransformOutputSpec(TraitedSpec):
@@ -262,7 +360,7 @@ class ComposeMultiTransform(ANTSCommand):
     >>> compose_transform.inputs.dimension = 3
     >>> compose_transform.inputs.transforms = ['struct_to_template.mat', 'func_to_struct.mat']
     >>> compose_transform.cmdline
-    'ComposeMultiTransform 3 struct_to_template_composed struct_to_template.mat func_to_struct.mat'
+    'ComposeMultiTransform 3 struct_to_template_composed.mat struct_to_template.mat func_to_struct.mat'
 
     """
     _cmd = 'ComposeMultiTransform'

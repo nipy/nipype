@@ -9,7 +9,8 @@ name-steps pipeline: getting back scope in command-line based programming.
    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
    >>> os.chdir(datadir)
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import object, open
 
 import os
@@ -23,7 +24,7 @@ from ..interfaces.base import BaseInterface
 from ..pipeline.engine import Node
 from ..pipeline.engine.utils import modify_paths
 
-################################################################################
+###############################################################################
 # PipeFunc object: callable interface to nipype.interface objects
 
 
@@ -51,8 +52,8 @@ class PipeFunc(object):
                 An optional callable called each time after the function
                 is called.
         """
-        if not (isinstance(interface, type) and
-                issubclass(interface, BaseInterface)):
+        if not (isinstance(interface, type)
+                and issubclass(interface, BaseInterface)):
             raise ValueError('the interface argument should be a nipype '
                              'interface class, but %s (type %s) was passed.' %
                              (interface, type(interface)))
@@ -85,8 +86,8 @@ class PipeFunc(object):
         try:
             out = node.run()
         finally:
-            # node.run() changes to the node directory - if something goes wrong
-            # before it cds back you would end up in strange places
+            # node.run() changes to the node directory - if something goes
+            # wrong before it cds back you would end up in strange places
             os.chdir(cwd)
         if self.callback is not None:
             self.callback(dir_name, job_name)
@@ -94,10 +95,11 @@ class PipeFunc(object):
 
     def __repr__(self):
         return '{}({}.{}}, base_dir={})'.format(
-            self.__class__.__name__, self.interface.__module__, self.interface.__name__,
-            self.base_dir)
+            self.__class__.__name__, self.interface.__module__,
+            self.interface.__name__, self.base_dir)
 
-################################################################################
+
+###############################################################################
 # Memory manager: provide some tracking about what is computed when, to
 # be able to flush the disk
 
@@ -242,7 +244,8 @@ class Memory(object):
         except OSError:
             "Dir exists"
 
-        with open(os.path.join(month_dir, '%02i.log' % t.tm_mday), 'a') as rotatefile:
+        with open(os.path.join(month_dir, '%02i.log' % t.tm_mday),
+                  'a') as rotatefile:
             rotatefile.write('%s/%s\n' % (dir_name, job_name))
 
     def clear_previous_runs(self, warn=True):
@@ -278,8 +281,7 @@ class Memory(object):
         month = month if month is not None else t.tm_mon
         year = year if year is not None else t.tm_year
         base_dir = self.base_dir
-        cut_off_file = '%s/log.%i/%02i/%02i.log' % (base_dir,
-                                                    year, month, day)
+        cut_off_file = '%s/log.%i/%02i/%02i.log' % (base_dir, year, month, day)
         logs_to_flush = list()
         recent_runs = dict()
         for log_name in glob.glob('%s/log.*/*/*.log' % base_dir):
@@ -297,8 +299,8 @@ class Memory(object):
         """
         rm_all_but(self.base_dir, set(runs.keys()), warn=warn)
         for dir_name, job_names in list(runs.items()):
-            rm_all_but(os.path.join(self.base_dir, dir_name),
-                       job_names, warn=warn)
+            rm_all_but(
+                os.path.join(self.base_dir, dir_name), job_names, warn=warn)
 
     def __repr__(self):
         return '{}(base_dir={})'.format(self.__class__.__name__, self.base_dir)

@@ -14,10 +14,7 @@ from ... import base as nib
 standard_library.install_aliases()
 
 
-@pytest.mark.parametrize("args", [
-    {},
-    {'a': 1, 'b': [2, 3]}
-])
+@pytest.mark.parametrize("args", [{}, {'a': 1, 'b': [2, 3]}])
 def test_bunch(args):
     b = nib.Bunch(**args)
     assert b.__dict__ == args
@@ -50,14 +47,12 @@ def test_bunch_methods():
 def test_bunch_hash():
     # NOTE: Since the path to the json file is included in the Bunch,
     # the hash will be unique to each machine.
-    json_pth = pkgrf(
-        'nipype', os.path.join('testing', 'data', 'realign_json.json'))
+    json_pth = pkgrf('nipype',
+                     os.path.join('testing', 'data', 'realign_json.json'))
 
-    b = nib.Bunch(infile=json_pth,
-                  otherthing='blue',
-                  yat=True)
+    b = nib.Bunch(infile=json_pth, otherthing='blue', yat=True)
     newbdict, bhash = b._get_bunch_hash()
-    assert bhash == 'ddcc7b4ec5675df8cf317a48bd1857fa'
+    assert bhash == 'd1f46750044c3de102efc847720fc35f'
     # Make sure the hash stored in the json file for `infile` is correct.
     jshash = md5()
     with open(json_pth, 'r') as fp:
