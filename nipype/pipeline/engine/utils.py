@@ -188,6 +188,7 @@ def write_report(node, report_type=None, is_mapnode=False):
     rst_dict = {
         'hostname': result.runtime.hostname,
         'duration': result.runtime.duration,
+        'working_dir': result.runtime.cwd,
     }
 
     if hasattr(result.runtime, 'cmdline'):
