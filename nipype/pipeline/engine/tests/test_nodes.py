@@ -4,10 +4,15 @@
 from __future__ import print_function, unicode_literals
 from builtins import str
 import os
+from copy import deepcopy
 import pytest
 
+from .... import config
+from ....interfaces import utility as niu
 from ... import engine as pe
+from ..utils import merge_dict
 from .test_base import EngineTestInterface
+from .test_utils import UtilsTestInterface
 
 '''
 Test for order of iterables
@@ -195,18 +200,13 @@ def test_node_hash(tmpdir):
         Function(input_names=['a'], output_names=['b'], function=func2),
         name='n2')
     w1 = pe.Workflow(name='test')
-    modify = lambda x: x + 1
+
+    def modify(x):
+        return x + 1
     n1.inputs.a = 1
     w1.connect(n1, ('a', modify), n2, 'a')
     w1.base_dir = os.getcwd()
-    # generate outputs
-    w1.run(plugin='Linear')
-    # ensure plugin is being called
-    w1.config['execution'] = {
-        'stop_on_first_crash': 'true',
-        'local_hash_check': 'false',
-        'crashdump_dir': os.getcwd()
-    }
+
     # create dummy distributed plugin class
     from nipype.pipeline.plugins.base import DistributedPluginBase
 
@@ -223,6 +223,15 @@ def test_node_hash(tmpdir):
         w1.run(plugin=RaiseError())
     assert 'Submit called' == str(excinfo.value)
 
+    # generate outputs
+    w1.run(plugin='Linear')
+    # ensure plugin is being called
+    w1.config['execution'] = {
+        'stop_on_first_crash': 'true',
+        'local_hash_check': 'false',
+        'crashdump_dir': os.getcwd()
+    }
+
     # rerun to ensure we have outputs
     w1.run(plugin='Linear')
     # set local check
@@ -233,3 +242,51 @@ def test_node_hash(tmpdir):
     }
 
     w1.run(plugin=RaiseError())
+
+
+def test_outputs_removal(tmpdir):
+    def test_function(arg1):
+        import os
+        file1 = os.path.join(os.getcwd(), 'file1.txt')
+        file2 = os.path.join(os.getcwd(), 'file2.txt')
+        with open(file1, 'wt') as fp:
+            fp.write('%d' % arg1)
+        with open(file2, 'wt') as fp:
+            fp.write('%d' % arg1)
+        return file1, file2
+
+    n1 = pe.Node(
+        niu.Function(
+            input_names=['arg1'],
+            output_names=['file1', 'file2'],
+            function=test_function),
+        base_dir=tmpdir.strpath,
+        name='testoutputs')
+    n1.inputs.arg1 = 1
+    n1.config = {'execution': {'remove_unnecessary_outputs': True}}
+    n1.config = merge_dict(deepcopy(config._sections), n1.config)
+    n1.run()
+    assert tmpdir.join(n1.name, 'file1.txt').check()
+    assert tmpdir.join(n1.name, 'file1.txt').check()
+    n1.needed_outputs = ['file2']
+    n1.run()
+    assert not tmpdir.join(n1.name, 'file1.txt').check()
+    assert tmpdir.join(n1.name, 'file2.txt').check()
+
+
+def test_inputs_removal(tmpdir):
+    file1 = tmpdir.join('file1.txt')
+    file1.write('dummy_file')
+    n1 = pe.Node(
+        UtilsTestInterface(), base_dir=tmpdir.strpath, name='testinputs')
+    n1.inputs.in_file = file1.strpath
+    n1.config = {'execution': {'keep_inputs': True}}
+    n1.config = merge_dict(deepcopy(config._sections), n1.config)
+    n1.run()
+    assert tmpdir.join(n1.name, 'file1.txt').check()
+    n1.inputs.in_file = file1.strpath
+    n1.config = {'execution': {'keep_inputs': False}}
+    n1.config = merge_dict(deepcopy(config._sections), n1.config)
+    n1.overwrite = True
+    n1.run()
+    assert not tmpdir.join(n1.name, 'file1.txt').check()
