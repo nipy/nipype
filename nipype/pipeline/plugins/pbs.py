@@ -51,7 +51,7 @@ class PBSPlugin(SGELikeBatchManagerBase):
     def _is_pending(self, taskid):
         result = CommandLine('qstat -f {}'.format(taskid),
                              environ=dict(os.environ),
-                             terminal_output='allatonce',
+                             terminal_output='file_split',
                              resource_monitor=False,
                              ignore_exception=True).run()
 
