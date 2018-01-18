@@ -917,7 +917,7 @@ class Label2VolInputSpec(FSTraitedSpec):
                            desc='set R=I')
     invert_mtx = traits.Bool(argstr='--invertmtx',
                              desc='Invert the registration matrix')
-    fill_thresh = traits.Range(0., 1., argstr='--fillthresh %.f',
+    fill_thresh = traits.Range(0., 1., argstr='--fillthresh %f',
                                desc='thresh : between 0 and 1')
     label_voxel_volume = traits.Float(argstr='--labvoxvol %f',
                                       desc='volume of each label point (def 1mm3)')
