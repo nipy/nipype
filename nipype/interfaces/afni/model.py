@@ -295,7 +295,11 @@ class Deconvolve(AFNICommand):
 
         outputs['reml_script'] = self._gen_fname(
             suffix='.REML_cmd', **_gen_fname_opts)
-        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        # remove out_file from outputs if x1d_stop set to True
+        if self.inputs.x1D_stop:
+            del outputs['out_file']
+        else:
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
 
         return outputs
 
