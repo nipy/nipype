@@ -10,6 +10,7 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
 # Import packages
+import os
 from multiprocessing import Process, Pool, cpu_count, pool
 from traceback import format_exception
 import sys
@@ -50,6 +51,8 @@ def run_node(node, updatehash, taskid):
         the node to run
     updatehash : boolean
         flag for updating hash
+    taskid : int
+        an identifier for this task
 
     Returns
     -------
@@ -63,7 +66,7 @@ def run_node(node, updatehash, taskid):
     # Try and execute the node via node.run()
     try:
         result['result'] = node.run(updatehash=updatehash)
-    except:
+    except:  # noqa: E722, intendedly catch all here
         result['traceback'] = format_exception(*sys.exc_info())
         result['result'] = node.result
 
@@ -131,6 +134,10 @@ class MultiProcPlugin(DistributedPluginBase):
         self._task_obj = {}
         self._taskid = 0
 
+        # Cache current working directory and make sure we
+        # change to it when workers are set up
+        self._cwd = os.getcwd()
+
         # Read in options or set defaults.
         non_daemon = self.plugin_args.get('non_daemon', True)
         maxtasks = self.plugin_args.get('maxtasksperchild', 10)
@@ -143,19 +150,28 @@ class MultiProcPlugin(DistributedPluginBase):
 
         # Instantiate different thread pools for non-daemon processes
         logger.debug('[MultiProc] Starting in "%sdaemon" mode (n_procs=%d, '
-                     'mem_gb=%0.2f)', 'non' * int(non_daemon), self.processors,
-                     self.memory_gb)
+                     'mem_gb=%0.2f, cwd=%s)', 'non' * int(non_daemon),
+                     self.processors, self.memory_gb, self._cwd)
 
         NipypePool = NonDaemonPool if non_daemon else Pool
         try:
             self.pool = NipypePool(
-                processes=self.processors, maxtasksperchild=maxtasks)
+                processes=self.processors,
+                maxtasksperchild=maxtasks,
+                initializer=os.chdir,
+                initargs=(self._cwd,)
+            )
         except TypeError:
+            # Python < 3.2 does not have maxtasksperchild
+            # When maxtasksperchild is not set, initializer is not to be
+            # called
             self.pool = NipypePool(processes=self.processors)
 
         self._stats = None
 
     def _async_callback(self, args):
+        # Make sure runtime is not left at a dubious working directory
+        os.chdir(self._cwd)
         self._taskresult[args['taskid']] = args
 
     def _get_result(self, taskid):
@@ -359,7 +375,6 @@ class MultiProcPlugin(DistributedPluginBase):
         if scheduler == 'mem_thread':
             return sorted(
                 jobids,
-                key=
-                lambda item: (self.procs[item].mem_gb, self.procs[item].n_procs)
+                key=lambda item: (self.procs[item].mem_gb, self.procs[item].n_procs)
             )
         return jobids
