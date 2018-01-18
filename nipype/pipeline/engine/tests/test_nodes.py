@@ -187,6 +187,10 @@ def test_node_hash(tmpdir):
     from nipype.interfaces.utility import Function
     tmpdir.chdir()
 
+    config.set_default_config()
+    config.set('execution', 'stop_on_first_crash', True)
+    config.set('execution', 'crashdump_dir', os.getcwd())
+
     def func1():
         return 1
 
@@ -216,31 +220,27 @@ def test_node_hash(tmpdir):
 
     class RaiseError(DistributedPluginBase):
         def _submit_job(self, node, updatehash=False):
-            raise EngineTestException('Submit called')
+            raise EngineTestException(
+                'Submit called - cached=%s, updated=%s' % node.is_cached())
 
     # check if a proper exception is raised
     with pytest.raises(EngineTestException) as excinfo:
         w1.run(plugin=RaiseError())
-    assert 'Submit called' == str(excinfo.value)
+    assert str(excinfo.value).startswith('Submit called')
 
     # generate outputs
     w1.run(plugin='Linear')
     # ensure plugin is being called
-    w1.config['execution'] = {
-        'stop_on_first_crash': 'true',
-        'local_hash_check': 'false',
-        'crashdump_dir': os.getcwd()
-    }
+    config.set('execution', 'local_hash_check', False)
 
     # rerun to ensure we have outputs
     w1.run(plugin='Linear')
-    # set local check
-    w1.config['execution'] = {
-        'stop_on_first_crash': 'true',
-        'local_hash_check': 'true',
-        'crashdump_dir': os.getcwd()
-    }
 
+    # set local check
+    config.set('execution', 'local_hash_check', True)
+    w1 = pe.Workflow(name='test')
+    w1.connect(n1, ('a', modify), n2, 'a')
+    w1.base_dir = os.getcwd()
     w1.run(plugin=RaiseError())
 
 
