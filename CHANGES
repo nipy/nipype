@@ -1,6 +1,7 @@
 Upcoming release (0.14.1)
 =========================
 
+* REF+FIX: Move BIDSDataGrabber to `interfaces.io` + fix correct default behavior (https://github.com/nipy/nipype/pull/2336)
 * ENH: Add AFNI interface for 3dConvertDset (https://github.com/nipy/nipype/pull/2337)
 * MAINT: Cleanup EngineBase (https://github.com/nipy/nipype/pull/2376)
 * FIX: Robustly handled outputs of 3dFWHMx across different versions of AFNI (https://github.com/nipy/nipype/pull/2373)
