@@ -28,6 +28,17 @@ xvfbpatch_old.Xvfb.return_value = MagicMock(
     spec=['vdisplay_num', 'start', 'stop'], vdisplay_num=2010)
 
 
+@pytest.mark.parametrize('dispvar', [':12', 'localhost:12', 'localhost:12.1'])
+def test_display_parse(monkeypatch, dispvar):
+    """Check that when $DISPLAY is defined, the display is correctly parsed"""
+    config._display = None
+    config._config.remove_option('execution', 'display_variable')
+    monkeypatch.setenv('DISPLAY', dispvar)
+    assert config.get_display() == ':12'
+    # Test that it was correctly cached
+    assert config.get_display() == ':12'
+
+
 @pytest.mark.parametrize('dispnum', range(5))
 def test_display_config(monkeypatch, dispnum):
     """Check that the display_variable option is used ($DISPLAY not set)"""
@@ -46,7 +57,7 @@ def test_display_system(monkeypatch, dispnum):
     config._display = None
     config._config.remove_option('execution', 'display_variable')
     dispstr = ':%d' % dispnum
-    monkeypatch.setitem(os.environ, 'DISPLAY', dispstr)
+    monkeypatch.setenv('DISPLAY', dispstr)
     assert config.get_display() == dispstr
     # Test that it was correctly cached
     assert config.get_display() == dispstr
@@ -58,7 +69,7 @@ def test_display_config_and_system(monkeypatch):
     config._display = None
     dispstr = ':10'
     config.set('execution', 'display_variable', dispstr)
-    monkeypatch.setitem(os.environ, 'DISPLAY', ':0')
+    monkeypatch.setenv('DISPLAY', ':0')
     assert config.get_display() == dispstr
     # Test that it was correctly cached
     assert config.get_display() == dispstr
@@ -72,9 +83,16 @@ def test_display_noconfig_nosystem_patched(monkeypatch):
         config._config.remove_option('execution', 'display_variable')
     monkeypatch.delitem(os.environ, 'DISPLAY', raising=False)
     monkeypatch.setitem(sys.modules, 'xvfbwrapper', xvfbpatch)
+    monkeypatch.setattr(sys, 'platform', value='linux')
     assert config.get_display() == ":2010"
     # Test that it was correctly cached
     assert config.get_display() == ':2010'
+
+    # Check that raises in Mac
+    config._display = None
+    monkeypatch.setattr(sys, 'platform', value='darwin')
+    with pytest.raises(RuntimeError):
+        config.get_display()
 
 
 def test_display_empty_patched(monkeypatch):
@@ -85,12 +103,18 @@ def test_display_empty_patched(monkeypatch):
     config._display = None
     if config.has_option('execution', 'display_variable'):
         config._config.remove_option('execution', 'display_variable')
-    monkeypatch.setitem(os.environ, 'DISPLAY', '')
+    monkeypatch.setenv('DISPLAY', '')
     monkeypatch.setitem(sys.modules, 'xvfbwrapper', xvfbpatch)
+    monkeypatch.setattr(sys, 'platform', value='linux')
     assert config.get_display() == ':2010'
     # Test that it was correctly cached
     assert config.get_display() == ':2010'
 
+    # Check that raises in Mac
+    config._display = None
+    monkeypatch.setattr(sys, 'platform', value='darwin')
+    with pytest.raises(RuntimeError):
+        config.get_display()
 
 def test_display_noconfig_nosystem_patched_oldxvfbwrapper(monkeypatch):
     """
@@ -102,10 +126,16 @@ def test_display_noconfig_nosystem_patched_oldxvfbwrapper(monkeypatch):
         config._config.remove_option('execution', 'display_variable')
     monkeypatch.delitem(os.environ, 'DISPLAY', raising=False)
     monkeypatch.setitem(sys.modules, 'xvfbwrapper', xvfbpatch_old)
+    monkeypatch.setattr(sys, 'platform', value='linux')
     assert config.get_display() == ":2010"
     # Test that it was correctly cached
     assert config.get_display() == ':2010'
 
+    # Check that raises in Mac
+    config._display = None
+    monkeypatch.setattr(sys, 'platform', value='darwin')
+    with pytest.raises(RuntimeError):
+        config.get_display()
 
 def test_display_empty_patched_oldxvfbwrapper(monkeypatch):
     """
@@ -115,12 +145,18 @@ def test_display_empty_patched_oldxvfbwrapper(monkeypatch):
     config._display = None
     if config.has_option('execution', 'display_variable'):
         config._config.remove_option('execution', 'display_variable')
-    monkeypatch.setitem(os.environ, 'DISPLAY', '')
+    monkeypatch.setenv('DISPLAY', '')
     monkeypatch.setitem(sys.modules, 'xvfbwrapper', xvfbpatch_old)
+    monkeypatch.setattr(sys, 'platform', value='linux')
     assert config.get_display() == ':2010'
     # Test that it was correctly cached
     assert config.get_display() == ':2010'
 
+    # Check that raises in Mac
+    config._display = None
+    monkeypatch.setattr(sys, 'platform', value='darwin')
+    with pytest.raises(RuntimeError):
+        config.get_display()
 
 def test_display_noconfig_nosystem_notinstalled(monkeypatch):
     """
@@ -130,7 +166,7 @@ def test_display_noconfig_nosystem_notinstalled(monkeypatch):
     config._display = None
     if config.has_option('execution', 'display_variable'):
         config._config.remove_option('execution', 'display_variable')
-    monkeypatch.delitem(os.environ, 'DISPLAY', raising=False)
+    monkeypatch.delenv('DISPLAY', raising=False)
     monkeypatch.setitem(sys.modules, 'xvfbwrapper', None)
     with pytest.raises(RuntimeError):
         config.get_display()
@@ -144,13 +180,14 @@ def test_display_empty_notinstalled(monkeypatch):
     config._display = None
     if config.has_option('execution', 'display_variable'):
         config._config.remove_option('execution', 'display_variable')
-    monkeypatch.setitem(os.environ, 'DISPLAY', '')
+    monkeypatch.setenv('DISPLAY', '')
     monkeypatch.setitem(sys.modules, 'xvfbwrapper', None)
     with pytest.raises(RuntimeError):
         config.get_display()
 
 
 @pytest.mark.skipif(not has_Xvfb, reason='xvfbwrapper not installed')
+@pytest.mark.skipif('darwin' in sys.platform, reason='macosx requires root for Xvfb')
 def test_display_noconfig_nosystem_installed(monkeypatch):
     """
     Check that actually uses xvfbwrapper when installed (not mocked)
@@ -159,7 +196,7 @@ def test_display_noconfig_nosystem_installed(monkeypatch):
     config._display = None
     if config.has_option('execution', 'display_variable'):
         config._config.remove_option('execution', 'display_variable')
-    monkeypatch.delitem(os.environ, 'DISPLAY', raising=False)
+    monkeypatch.delenv('DISPLAY', raising=False)
     newdisp = config.get_display()
     assert int(newdisp.split(':')[-1]) > 1000
     # Test that it was correctly cached
@@ -167,6 +204,7 @@ def test_display_noconfig_nosystem_installed(monkeypatch):
 
 
 @pytest.mark.skipif(not has_Xvfb, reason='xvfbwrapper not installed')
+@pytest.mark.skipif('darwin' in sys.platform, reason='macosx requires root for Xvfb')
 def test_display_empty_installed(monkeypatch):
     """
     Check that actually uses xvfbwrapper when installed (not mocked)
@@ -175,7 +213,7 @@ def test_display_empty_installed(monkeypatch):
     config._display = None
     if config.has_option('execution', 'display_variable'):
         config._config.remove_option('execution', 'display_variable')
-    monkeypatch.setitem(os.environ, 'DISPLAY', '')
+    monkeypatch.setenv('DISPLAY', '')
     newdisp = config.get_display()
     assert int(newdisp.split(':')[-1]) > 1000
     # Test that it was correctly cached
@@ -191,7 +229,7 @@ def test_display_empty_macosx(monkeypatch):
     config._display = None
     if config.has_option('execution', 'display_variable'):
         config._config.remove_option('execution', 'display_variable')
-    monkeypatch.delitem(os.environ, 'DISPLAY', '')
+    monkeypatch.delenv('DISPLAY', '')
 
     monkeypatch.setattr(sys, 'platform', 'darwin')
     with pytest.raises(RuntimeError):

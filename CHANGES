@@ -1,6 +1,7 @@
 Upcoming release (0.14.1)
 =========================
 
+* FIX: Errors parsing ``$DISPLAY`` (https://github.com/nipy/nipype/pull/2363)
 * FIX: MultiProc starting workers at dubious wd (https://github.com/nipy/nipype/pull/2368)
 * REF+FIX: Move BIDSDataGrabber to `interfaces.io` + fix correct default behavior (https://github.com/nipy/nipype/pull/2336)
 * ENH: Add AFNI interface for 3dConvertDset (https://github.com/nipy/nipype/pull/2337)

@@ -312,11 +312,11 @@ class NipypeConfig(object):
             def _mock():
                 pass
 
-            # Store a fake Xvfb object
-            ndisp = int(sysdisplay.split(':')[-1])
+            # Store a fake Xvfb object. Format - <host>:<display>[.<screen>]
+            ndisp = sysdisplay.split(':')[-1].split('.')[0]
             Xvfb = namedtuple('Xvfb', ['new_display', 'stop'])
-            self._display = Xvfb(ndisp, _mock)
-            return sysdisplay
+            self._display = Xvfb(int(ndisp), _mock)
+            return self.get_display()
         else:
             if 'darwin' in sys.platform:
                 raise RuntimeError(
@@ -343,8 +343,7 @@ class NipypeConfig(object):
             if not hasattr(self._display, 'new_display'):
                 setattr(self._display, 'new_display',
                         self._display.vdisplay_num)
-
-            return ':%d' % self._display.new_display
+            return self.get_display()
 
     def stop_display(self):
         """Closes the display if started"""
