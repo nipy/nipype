@@ -49,18 +49,20 @@ class PBSPlugin(SGELikeBatchManagerBase):
         super(PBSPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
-        result = CommandLine(
-            'qstat {}'.format(taskid),
-            environ=dict(os.environ),
-            terminal_output='allatonce',
-            resource_monitor=False,
-            ignore_exception=True).run()
-        errmsg = 'Unknown Job Id'  # %s' % taskid
+        result = CommandLine('qstat -f {}'.format(taskid),
+                             environ=dict(os.environ),
+                             terminal_output='file_split',
+                             resource_monitor=False,
+                             ignore_exception=True).run()
+
+        stdout = result.runtime.stdout
+        stderr = result.runtime.stderr
+        errmsg = 'Unknown Job Id' 
         success = 'Job has finished'
-        if success in e:  # Fix for my PBS
+        if (success in stderr) or ('job_state = C' in stdout):  
             return False
         else:
-            return errmsg not in e
+            return errmsg not in stderr
 
     def _submit_batchtask(self, scriptfile, node):
         cmd = CommandLine(
