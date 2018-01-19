@@ -4,6 +4,8 @@
 from future import standard_library
 standard_library.install_aliases()
 
+import os
+from shutil import rmtree
 from builtins import next
 
 import pytest
@@ -60,3 +62,30 @@ def test_flatten():
 
     back = unflatten([], [])
     assert back == []
+
+
+def test_rgetcwd(monkeypatch, tmpdir):
+    from ..misc import rgetcwd
+    oldpath = tmpdir.strpath
+    tmpdir.mkdir("sub").chdir()
+    newpath = os.getcwd()
+
+    # Path still there
+    assert rgetcwd() == newpath
+
+    # Remove path
+    rmtree(newpath, ignore_errors=True)
+    with pytest.raises(OSError):
+        os.getcwd()
+
+    monkeypatch.setenv('PWD', oldpath)
+    assert rgetcwd(error=False) == oldpath
+
+    # Test when error should be raised
+    with pytest.raises(OSError):
+        rgetcwd()
+
+    # Deleted env variable
+    monkeypatch.delenv('PWD')
+    with pytest.raises(OSError):
+        rgetcwd(error=False)
