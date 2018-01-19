@@ -344,13 +344,13 @@ class Node(EngineBase):
 
             hashfiles = [hashfile] if cached else []
 
-        # At this point only one hashfile is in the folder
-        # and we directly check whether it is updated
         if not hashfiles:
             logger.debug('[Node] No hashfiles found in "%s".', outdir)
             assert(not cached)
             return False, False
 
+        # At this point only one hashfile is in the folder
+        # and we directly check whether it is updated
         updated = hashfile == hashfiles[0]
         if not updated:  # Report differences depending on log verbosity
             cached = True
