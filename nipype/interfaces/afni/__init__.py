@@ -15,9 +15,10 @@ from .preprocess import (
     ROIStats, Retroicor, Seg, SkullStrip, TCorr1D, TCorrMap, TCorrelate, TNorm,
     TShift, Volreg, Warp, QwarpPlusMinus, Qwarp)
 from .svm import (SVMTest, SVMTrain)
-from .utils import (ABoverlap, AFNItoNIFTI, Autobox, Axialize, BrickStat,
-                    Bucket, Calc, Cat, CatMatvec, CenterMass, Copy, Dot, Edge3,
-                    Eval, FWHMx, MaskTool, Merge, Notes, NwarpApply, NwarpCat,
-                    OneDToolPy, Refit, Resample, TCat, TCatSubBrick, TStat,
-                    To3D, Unifize, Undump, ZCutUp, GCOR, Zcat, Zeropad)
+from .utils import (
+    ABoverlap, AFNItoNIFTI, Autobox, Axialize, BrickStat, Bucket, Calc, Cat,
+    CatMatvec, CenterMass, ConvertDset, Copy, Dot, Edge3, Eval, FWHMx,
+    MaskTool, Merge, Notes, NwarpApply, NwarpCat, OneDToolPy, Refit, Resample,
+    TCat, TCatSubBrick, TStat, To3D, Unifize, Undump, ZCutUp, GCOR, Zcat,
+    Zeropad)
 from .model import (Deconvolve, Remlfit, Synthesize)

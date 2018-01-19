@@ -87,7 +87,7 @@ workflow.run()
 
 
 def test_node_init():
-    with pytest.raises(Exception):
+    with pytest.raises(TypeError):
         pe.Node()
     with pytest.raises(IOError):
         pe.Node(EngineTestInterface, name='test')

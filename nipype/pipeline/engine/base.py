@@ -21,13 +21,10 @@ from builtins import object
 from copy import deepcopy
 import re
 import numpy as np
-from future import standard_library
 
 from ... import config
 from ...interfaces.base import DynamicTraitedSpec
 from ...utils.filemanip import loadpkl, savepkl
-
-standard_library.install_aliases()
 
 
 class EngineBase(object):

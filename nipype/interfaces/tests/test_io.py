@@ -9,6 +9,7 @@ import simplejson
 import glob
 import shutil
 import os.path as op
+import sys
 from subprocess import Popen
 import hashlib
 from collections import namedtuple
@@ -16,7 +17,9 @@ from collections import namedtuple
 import pytest
 import nipype
 import nipype.interfaces.io as nio
-from nipype.interfaces.base import Undefined
+from nipype.interfaces.base.traits_extension import isdefined
+from nipype.interfaces.base import Undefined, TraitError
+from nipype.utils.filemanip import dist_is_editable
 
 # Check for boto
 noboto = False
@@ -42,6 +45,16 @@ try:
     fakes3 = (ret_code == 0)
 except CalledProcessError:
     fakes3 = False
+
+# check for bids
+have_pybids = True
+try:
+    import bids
+    from bids import grabbids as gb
+    filepath = os.path.realpath(os.path.dirname(bids.__file__))
+    datadir = os.path.realpath(os.path.join(filepath, 'grabbids/tests/data/'))
+except ImportError:
+    have_pybids = False
 
 
 def test_datagrabber():
@@ -147,7 +160,8 @@ templates3 = {"model": "interfaces/{package.name}/model.py"}
         "node_output": ["model"]
     }),
 ])
-def test_selectfiles(SF_args, inputs_att, expected):
+def test_selectfiles(tmpdir, SF_args, inputs_att, expected):
+    tmpdir.chdir()
     base_dir = op.dirname(nipype.__file__)
     dg = nio.SelectFiles(base_directory=base_dir, **SF_args)
     for key, val in inputs_att.items():
@@ -498,6 +512,12 @@ def test_freesurfersource():
     assert fss.inputs.subjects_dir == Undefined
 
 
+def test_freesurfersource_incorrectdir():
+    fss = nio.FreeSurferSource()
+    with pytest.raises(TraitError) as err:
+        fss.inputs.subjects_dir = 'path/to/no/existing/directory'
+
+
 def test_jsonsink_input():
 
     ds = nio.JSONFileSink()
@@ -530,3 +550,64 @@ def test_jsonsink(tmpdir, inputs_attributes):
         data = simplejson.load(f)
 
     assert data == expected_data
+
+
+# There are three reasons these tests will be skipped:
+@pytest.mark.skipif(not have_pybids,
+                    reason="Pybids is not installed")
+@pytest.mark.skipif(sys.version_info < (3, 0),
+                    reason="Pybids no longer supports Python 2")
+@pytest.mark.skipif(not dist_is_editable('pybids'),
+                    reason="Pybids is not installed in editable mode")
+def test_bids_grabber(tmpdir):
+    tmpdir.chdir()
+    bg = nio.BIDSDataGrabber()
+    bg.inputs.base_dir = os.path.join(datadir, 'ds005')
+    bg.inputs.subject = '01'
+    results = bg.run()
+    assert os.path.basename(results.outputs.anat[0]) == 'sub-01_T1w.nii.gz'
+    assert os.path.basename(results.outputs.func[0]) == (
+        'sub-01_task-mixedgamblestask_run-01_bold.nii.gz')
+
+
+@pytest.mark.skipif(not have_pybids,
+                    reason="Pybids is not installed")
+@pytest.mark.skipif(sys.version_info < (3, 0),
+                    reason="Pybids no longer supports Python 2")
+@pytest.mark.skipif(not dist_is_editable('pybids'),
+                    reason="Pybids is not installed in editable mode")
+def test_bids_fields(tmpdir):
+    tmpdir.chdir()
+    bg = nio.BIDSDataGrabber(infields = ['subject'], outfields = ['dwi'])
+    bg.inputs.base_dir = os.path.join(datadir, 'ds005')
+    bg.inputs.subject = '01'
+    bg.inputs.output_query['dwi'] = dict(modality='dwi')
+    results = bg.run()
+    assert os.path.basename(results.outputs.dwi[0]) == 'sub-01_dwi.nii.gz'
+
+
+@pytest.mark.skipif(not have_pybids,
+                    reason="Pybids is not installed")
+@pytest.mark.skipif(sys.version_info < (3, 0),
+                    reason="Pybids no longer supports Python 2")
+@pytest.mark.skipif(not dist_is_editable('pybids'),
+                    reason="Pybids is not installed in editable mode")
+def test_bids_infields_outfields(tmpdir):
+    tmpdir.chdir()
+    infields = ['infield1', 'infield2']
+    outfields = ['outfield1', 'outfield2']
+    bg = nio.BIDSDataGrabber(infields=infields)
+    for outfield in outfields:
+        bg.inputs.output_query[outfield] = {'key': 'value'}
+
+    for infield in infields:
+        assert(infield in bg.inputs.traits())
+        assert(not(isdefined(bg.inputs.get()[infield])))
+
+    for outfield in outfields:
+        assert(outfield in bg._outputs().traits())
+
+    # now try without defining outfields, we should get anat and func for free
+    bg = nio.BIDSDataGrabber()
+    for outfield in ['anat', 'func']:
+        assert outfield in bg._outputs().traits()
