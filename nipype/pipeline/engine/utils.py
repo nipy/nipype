@@ -189,6 +189,7 @@ def write_report(node, report_type=None, is_mapnode=False):
         'hostname': result.runtime.hostname,
         'duration': result.runtime.duration,
         'working_dir': result.runtime.cwd,
+        'prev_wd': getattr(result.runtime, 'prevcwd', '<not-set>'),
     }
 
     if hasattr(result.runtime, 'cmdline'):
