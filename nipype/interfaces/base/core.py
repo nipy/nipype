@@ -988,13 +988,25 @@ class CommandLine(BaseInterface):
 
         # which $cmd
         executable_name = self.cmd.split()[0]
-        cmd_path = which(executable_name, env=runtime.environ)
+
+        prefix_parts = self._cmd_prefix.split()
+        r_pre = prefix_parts.pop() if prefix_parts else ''
+
+        cmd_path = which(r_pre + executable_name, env=runtime.environ)
 
         if cmd_path is None:
             raise IOError(
                 'No command "%s" found on host %s. Please check that the '
                 'corresponding package is installed.' % (executable_name,
                                                          runtime.hostname))
+
+        if prefix_parts:
+            helper_command = which(prefix_parts[0], env=runtime.environ)
+            if helper_command is None:
+                raise IOError(
+                    'No command "%s" found on host %s. Please check that the '
+                    'corresponding package is installed.' % (helper_command,
+                                                             runtime.hostname))
 
         runtime.command_path = cmd_path
         runtime.dependencies = (get_dependencies(executable_name,
