@@ -1,6 +1,7 @@
 Upcoming release (0.14.1)
 =========================
 
+* ENH: Add AFNI interface for 3dConvertDset (https://github.com/nipy/nipype/pull/2337)
 * MAINT: Cleanup EngineBase (https://github.com/nipy/nipype/pull/2376)
 * FIX: Robustly handled outputs of 3dFWHMx across different versions of AFNI (https://github.com/nipy/nipype/pull/2373)
 * FIX: Cluster threshold in randomise + change default prefix (https://github.com/nipy/nipype/pull/2369)
