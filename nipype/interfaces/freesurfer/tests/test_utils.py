@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import open
-import os, os.path as op
+import os
+import os.path as op
 import pytest
 from nipype.testing.fixtures import (create_files_in_directory_plus_dummy_file,
                                      create_surf_file_in_directory)
@@ -22,7 +24,8 @@ def test_sample2surf(create_files_in_directory_plus_dummy_file):
     assert s2s.cmd == 'mri_vol2surf'
 
     # Test mandatory args exception
-    with pytest.raises(ValueError): s2s.run()
+    with pytest.raises(ValueError):
+        s2s.run()
 
     # Create testing files
     files, cwd = create_files_in_directory_plus_dummy_file
@@ -37,22 +40,27 @@ def test_sample2surf(create_files_in_directory_plus_dummy_file):
     s2s.inputs.sampling_method = "point"
 
     # Test a basic command line
-    assert s2s.cmdline == ("mri_vol2surf "
-                           "--hemi lh --o %s --ref %s --reg reg.dat --projfrac 0.500 --mov %s"
-                           % (os.path.join(cwd, "lh.a.mgz"), files[1], files[0]))
+    assert s2s.cmdline == (
+        "mri_vol2surf "
+        "--hemi lh --o %s --ref %s --reg reg.dat --projfrac 0.500 --mov %s" %
+        (os.path.join(cwd, "lh.a.mgz"), files[1], files[0]))
 
     # Test identity
-    s2sish = fs.SampleToSurface(source_file=files[1], reference_file=files[0], hemi="rh")
+    s2sish = fs.SampleToSurface(
+        source_file=files[1], reference_file=files[0], hemi="rh")
     assert s2s != s2sish
 
     # Test hits file name creation
     s2s.inputs.hits_file = True
-    assert s2s._get_outfilename("hits_file") == os.path.join(cwd, "lh.a_hits.mgz")
+    assert s2s._get_outfilename("hits_file") == os.path.join(
+        cwd, "lh.a_hits.mgz")
 
     # Test that a 2-tuple range raises an error
     def set_illegal_range():
         s2s.inputs.sampling_range = (.2, .5)
-    with pytest.raises(TraitError): set_illegal_range()
+
+    with pytest.raises(TraitError):
+        set_illegal_range()
 
 
 @pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
@@ -64,7 +72,8 @@ def test_surfsmooth(create_surf_file_in_directory):
     assert smooth.cmd == "mri_surf2surf"
 
     # Test mandatory args exception
-    with pytest.raises(ValueError): smooth.run()
+    with pytest.raises(ValueError):
+        smooth.run()
 
     # Create testing files
     surf, cwd = create_surf_file_in_directory
@@ -83,7 +92,11 @@ def test_surfsmooth(create_surf_file_in_directory):
 
     # Test identity
     shmooth = fs.SurfaceSmooth(
-        subject_id="fsaverage", fwhm=6, in_file=surf, hemi="lh", out_file="lh.a_smooth.nii")
+        subject_id="fsaverage",
+        fwhm=6,
+        in_file=surf,
+        hemi="lh",
+        out_file="lh.a_smooth.nii")
     assert smooth != shmooth
 
 
@@ -96,7 +109,8 @@ def test_surfxfm(create_surf_file_in_directory):
     assert xfm.cmd == "mri_surf2surf"
 
     # Test mandatory args exception
-    with pytest.raises(ValueError): xfm.run()
+    with pytest.raises(ValueError):
+        xfm.run()
 
     # Create testing files
     surf, cwd = create_surf_file_in_directory
@@ -114,7 +128,10 @@ def test_surfxfm(create_surf_file_in_directory):
 
     # Test identity
     xfmish = fs.SurfaceTransform(
-        source_subject="fsaverage", target_subject="my_subject", source_file=surf, hemi="lh")
+        source_subject="fsaverage",
+        target_subject="my_subject",
+        source_file=surf,
+        hemi="lh")
     assert xfm != xfmish
 
 
@@ -127,7 +144,8 @@ def test_surfshots(create_files_in_directory_plus_dummy_file):
     assert fotos.cmd == "tksurfer"
 
     # Test mandatory args exception
-    with pytest.raises(ValueError): fotos.run()
+    with pytest.raises(ValueError):
+        fotos.run()
 
     # Create testing files
     files, cwd = create_files_in_directory_plus_dummy_file
@@ -141,7 +159,8 @@ def test_surfshots(create_files_in_directory_plus_dummy_file):
     assert fotos.cmdline == "tksurfer fsaverage lh pial -tcl snapshots.tcl"
 
     # Test identity
-    schmotos = fs.SurfaceSnapshots(subject_id="mysubject", hemi="rh", surface="white")
+    schmotos = fs.SurfaceSnapshots(
+        subject_id="mysubject", hemi="rh", surface="white")
     assert fotos != schmotos
 
     # Test that the tcl script gets written
@@ -157,7 +176,8 @@ def test_surfshots(create_files_in_directory_plus_dummy_file):
     try:
         hold_display = os.environ["DISPLAY"]
         del os.environ["DISPLAY"]
-        with pytest.raises(RuntimeError): fotos.run()
+        with pytest.raises(RuntimeError):
+            fotos.run()
         os.environ["DISPLAY"] = hold_display
     except KeyError:
         pass
@@ -165,26 +185,26 @@ def test_surfshots(create_files_in_directory_plus_dummy_file):
 
 @pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
 def test_mrisexpand(tmpdir):
-    fssrc = FreeSurferSource(subjects_dir=fs.Info.subjectsdir(),
-                             subject_id='fsaverage', hemi='lh')
+    fssrc = FreeSurferSource(
+        subjects_dir=fs.Info.subjectsdir(), subject_id='fsaverage', hemi='lh')
 
     fsavginfo = fssrc.run().outputs.get()
 
     # dt=60 to ensure very short runtime
-    expand_if = fs.MRIsExpand(in_file=fsavginfo['smoothwm'],
-                              out_name='expandtmp',
-                              distance=1,
-                              dt=60)
+    expand_if = fs.MRIsExpand(
+        in_file=fsavginfo['smoothwm'], out_name='expandtmp', distance=1, dt=60)
 
     expand_nd = pe.Node(
-        fs.MRIsExpand(in_file=fsavginfo['smoothwm'],
-                      out_name='expandtmp',
-                      distance=1,
-                      dt=60),
+        fs.MRIsExpand(
+            in_file=fsavginfo['smoothwm'],
+            out_name='expandtmp',
+            distance=1,
+            dt=60),
         name='expand_node')
 
     # Interfaces should have same command line at instantiation
-    orig_cmdline = 'mris_expand -T 60 {} 1 expandtmp'.format(fsavginfo['smoothwm'])
+    orig_cmdline = 'mris_expand -T 60 {} 1 expandtmp'.format(
+        fsavginfo['smoothwm'])
     assert expand_if.cmdline == orig_cmdline
     assert expand_nd.interface.cmdline == orig_cmdline
 

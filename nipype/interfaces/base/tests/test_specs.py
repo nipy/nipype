@@ -41,7 +41,8 @@ def test_TraitedSpec():
     with pytest.raises(nib.traits.TraitError):
         specfunc(1)
     infields = spec(foo=1)
-    hashval = ([('foo', 1), ('goo', '0.0000000000')], 'e89433b8c9141aa0fda2f8f4d662c047')
+    hashval = ([('foo', 1), ('goo', '0.0000000000')],
+               'e89433b8c9141aa0fda2f8f4d662c047')
     assert infields.get_hashval() == hashval
     assert infields.__repr__() == '\nfoo = 1\ngoo = 0.0\n'
 
@@ -66,13 +67,10 @@ def test_TraitedSpec_logic():
     class spec3(nib.TraitedSpec):
         _xor_inputs = ('foo', 'bar')
 
-        foo = nib.traits.Int(xor=_xor_inputs,
-                             desc='foo or bar, not both')
-        bar = nib.traits.Int(xor=_xor_inputs,
-                             desc='bar or foo, not both')
-        kung = nib.traits.Float(requires=('foo',),
-                                position=0,
-                                desc='kung foo')
+        foo = nib.traits.Int(xor=_xor_inputs, desc='foo or bar, not both')
+        bar = nib.traits.Int(xor=_xor_inputs, desc='bar or foo, not both')
+        kung = nib.traits.Float(
+            requires=('foo', ), position=0, desc='kung foo')
 
     class out3(nib.TraitedSpec):
         output = nib.traits.Int
@@ -101,6 +99,7 @@ def test_deprecation():
 
         class DeprecationSpec1(nib.TraitedSpec):
             foo = nib.traits.Int(deprecated='0.1')
+
         spec_instance = DeprecationSpec1()
         set_foo = lambda: setattr(spec_instance, 'foo', 1)
         with pytest.raises(nib.TraitError):
@@ -112,6 +111,7 @@ def test_deprecation():
 
         class DeprecationSpec2(nib.TraitedSpec):
             foo = nib.traits.Int(deprecated='100', new_name='bar')
+
         spec_instance = DeprecationSpec2()
         set_foo = lambda: setattr(spec_instance, 'foo', 1)
         with pytest.raises(nib.TraitError):
@@ -124,6 +124,7 @@ def test_deprecation():
         class DeprecationSpec3(nib.TraitedSpec):
             foo = nib.traits.Int(deprecated='1000', new_name='bar')
             bar = nib.traits.Int()
+
         spec_instance = DeprecationSpec3()
         not_raised = True
         try:
@@ -131,7 +132,8 @@ def test_deprecation():
         except nib.TraitError:
             not_raised = False
         assert not_raised
-        assert len(w) == 1, 'deprecated warning 1 %s' % [w1.message for w1 in w]
+        assert len(
+            w) == 1, 'deprecated warning 1 %s' % [w1.message for w1 in w]
 
     with warnings.catch_warnings(record=True) as w:
         warnings.filterwarnings('always', '', UserWarning)
@@ -139,6 +141,7 @@ def test_deprecation():
         class DeprecationSpec3(nib.TraitedSpec):
             foo = nib.traits.Int(deprecated='1000', new_name='bar')
             bar = nib.traits.Int()
+
         spec_instance = DeprecationSpec3()
         not_raised = True
         try:
@@ -148,7 +151,8 @@ def test_deprecation():
         assert not_raised
         assert spec_instance.foo == Undefined
         assert spec_instance.bar == 1
-        assert len(w) == 1, 'deprecated warning 2 %s' % [w1.message for w1 in w]
+        assert len(
+            w) == 1, 'deprecated warning 2 %s' % [w1.message for w1 in w]
 
 
 def test_namesource(setup_file):
@@ -156,16 +160,17 @@ def test_namesource(setup_file):
     tmpd, nme, ext = split_filename(tmp_infile)
 
     class spec2(nib.CommandLineInputSpec):
-        moo = nib.File(name_source=['doo'], hash_files=False, argstr="%s",
-                       position=2)
+        moo = nib.File(
+            name_source=['doo'], hash_files=False, argstr="%s", position=2)
         doo = nib.File(exists=True, argstr="%s", position=1)
         goo = traits.Int(argstr="%d", position=4)
-        poo = nib.File(name_source=['goo'], hash_files=False, argstr="%s",
-                       position=3)
+        poo = nib.File(
+            name_source=['goo'], hash_files=False, argstr="%s", position=3)
 
     class TestName(nib.CommandLine):
         _cmd = "mycommand"
         input_spec = spec2
+
     testobj = TestName()
     testobj.inputs.doo = tmp_infile
     testobj.inputs.goo = 99
@@ -181,10 +186,14 @@ def test_chained_namesource(setup_file):
 
     class spec2(nib.CommandLineInputSpec):
         doo = nib.File(exists=True, argstr="%s", position=1)
-        moo = nib.File(name_source=['doo'], hash_files=False, argstr="%s",
-                       position=2, name_template='%s_mootpl')
-        poo = nib.File(name_source=['moo'], hash_files=False,
-                       argstr="%s", position=3)
+        moo = nib.File(
+            name_source=['doo'],
+            hash_files=False,
+            argstr="%s",
+            position=2,
+            name_template='%s_mootpl')
+        poo = nib.File(
+            name_source=['moo'], hash_files=False, argstr="%s", position=3)
 
     class TestName(nib.CommandLine):
         _cmd = "mycommand"
@@ -203,12 +212,16 @@ def test_cycle_namesource1(setup_file):
     tmpd, nme, ext = split_filename(tmp_infile)
 
     class spec3(nib.CommandLineInputSpec):
-        moo = nib.File(name_source=['doo'], hash_files=False, argstr="%s",
-                       position=1, name_template='%s_mootpl')
-        poo = nib.File(name_source=['moo'], hash_files=False,
-                       argstr="%s", position=2)
-        doo = nib.File(name_source=['poo'], hash_files=False,
-                       argstr="%s", position=3)
+        moo = nib.File(
+            name_source=['doo'],
+            hash_files=False,
+            argstr="%s",
+            position=1,
+            name_template='%s_mootpl')
+        poo = nib.File(
+            name_source=['moo'], hash_files=False, argstr="%s", position=2)
+        doo = nib.File(
+            name_source=['poo'], hash_files=False, argstr="%s", position=3)
 
     class TestCycle(nib.CommandLine):
         _cmd = "mycommand"
@@ -229,12 +242,16 @@ def test_cycle_namesource2(setup_file):
     tmpd, nme, ext = split_filename(tmp_infile)
 
     class spec3(nib.CommandLineInputSpec):
-        moo = nib.File(name_source=['doo'], hash_files=False, argstr="%s",
-                       position=1, name_template='%s_mootpl')
-        poo = nib.File(name_source=['moo'], hash_files=False,
-                       argstr="%s", position=2)
-        doo = nib.File(name_source=['poo'], hash_files=False,
-                       argstr="%s", position=3)
+        moo = nib.File(
+            name_source=['doo'],
+            hash_files=False,
+            argstr="%s",
+            position=1,
+            name_template='%s_mootpl')
+        poo = nib.File(
+            name_source=['moo'], hash_files=False, argstr="%s", position=2)
+        doo = nib.File(
+            name_source=['poo'], hash_files=False, argstr="%s", position=3)
 
     class TestCycle(nib.CommandLine):
         _cmd = "mycommand"
@@ -265,6 +282,7 @@ def test_TraitedSpec_withFile(setup_file):
     class spec2(nib.TraitedSpec):
         moo = nib.File(exists=True)
         doo = nib.traits.List(nib.File(exists=True))
+
     infields = spec2(moo=tmp_infile, doo=[tmp_infile])
     hashval = infields.get_hashval(hash_method='content')
     assert hashval[1] == 'a00e9ee24f5bfa9545a515b7a759886b'
@@ -278,6 +296,7 @@ def test_TraitedSpec_withNoFileHashing(setup_file):
     class spec2(nib.TraitedSpec):
         moo = nib.File(exists=True, hash_files=False)
         doo = nib.traits.List(nib.File(exists=True))
+
     infields = spec2(moo=nme, doo=[tmp_infile])
     hashval = infields.get_hashval(hash_method='content')
     assert hashval[1] == '8da4669ff5d72f670a46ea3e7a203215'
@@ -285,12 +304,14 @@ def test_TraitedSpec_withNoFileHashing(setup_file):
     class spec3(nib.TraitedSpec):
         moo = nib.File(exists=True, name_source="doo")
         doo = nib.traits.List(nib.File(exists=True))
+
     infields = spec3(moo=nme, doo=[tmp_infile])
     hashval1 = infields.get_hashval(hash_method='content')
 
     class spec4(nib.TraitedSpec):
         moo = nib.File(exists=True)
         doo = nib.traits.List(nib.File(exists=True))
+
     infields = spec4(moo=nme, doo=[tmp_infile])
     hashval2 = infields.get_hashval(hash_method='content')
     assert hashval1[1] != hashval2[1]
@@ -303,8 +324,8 @@ def test_ImageFile():
     x.add_trait('nifti', nib.ImageFile(types=['nifti1', 'dicom']))
     x.add_trait('anytype', nib.ImageFile())
     x.add_trait('newtype', nib.ImageFile(types=['nifti10']))
-    x.add_trait('nocompress', nib.ImageFile(types=['mgh'],
-                                            allow_compressed=False))
+    x.add_trait('nocompress',
+                nib.ImageFile(types=['mgh'], allow_compressed=False))
 
     with pytest.raises(nib.TraitError):
         x.nifti = 'test.mgz'

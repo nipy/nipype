@@ -3,7 +3,8 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import zip, next, range, str
 
 from ....pipeline import engine as pe
@@ -17,37 +18,38 @@ def cleanup_edge_pipeline(name='Cleanup'):
     Perform some de-spiking filtering to clean up the edge of the fieldmap
     (copied from fsl_prepare_fieldmap)
     """
-    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_mask']),
-                        name='inputnode')
-    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file']),
-                         name='outputnode')
+    inputnode = pe.Node(
+        niu.IdentityInterface(fields=['in_file', 'in_mask']), name='inputnode')
+    outputnode = pe.Node(
+        niu.IdentityInterface(fields=['out_file']), name='outputnode')
 
-    fugue = pe.Node(fsl.FUGUE(save_fmap=True, despike_2dfilter=True,
-                              despike_threshold=2.1), name='Despike')
-    erode = pe.Node(fsl.maths.MathsCommand(
-        nan2zeros=True, args='-kernel 2D -ero'), name='MskErode')
-    newmsk = pe.Node(fsl.MultiImageMaths(op_string='-sub %s -thr 0.5 -bin'),
-                     name='NewMask')
+    fugue = pe.Node(
+        fsl.FUGUE(
+            save_fmap=True, despike_2dfilter=True, despike_threshold=2.1),
+        name='Despike')
+    erode = pe.Node(
+        fsl.maths.MathsCommand(nan2zeros=True, args='-kernel 2D -ero'),
+        name='MskErode')
+    newmsk = pe.Node(
+        fsl.MultiImageMaths(op_string='-sub %s -thr 0.5 -bin'), name='NewMask')
     applymsk = pe.Node(fsl.ApplyMask(nan2zeros=True), name='ApplyMask')
     join = pe.Node(niu.Merge(2), name='Merge')
-    addedge = pe.Node(fsl.MultiImageMaths(op_string='-mas %s -add %s'),
-                      name='AddEdge')
+    addedge = pe.Node(
+        fsl.MultiImageMaths(op_string='-mas %s -add %s'), name='AddEdge')
 
     wf = pe.Workflow(name=name)
-    wf.connect([
-        (inputnode, fugue, [('in_file', 'fmap_in_file'),
-                            ('in_mask', 'mask_file')]),
-        (inputnode, erode, [('in_mask', 'in_file')]),
-        (inputnode, newmsk, [('in_mask', 'in_file')]),
-        (erode, newmsk, [('out_file', 'operand_files')]),
-        (fugue, applymsk, [('fmap_out_file', 'in_file')]),
-        (newmsk, applymsk, [('out_file', 'mask_file')]),
-        (erode, join, [('out_file', 'in1')]),
-        (applymsk, join, [('out_file', 'in2')]),
-        (inputnode, addedge, [('in_file', 'in_file')]),
-        (join, addedge, [('out', 'operand_files')]),
-        (addedge, outputnode, [('out_file', 'out_file')])
-    ])
+    wf.connect([(inputnode, fugue, [
+        ('in_file', 'fmap_in_file'), ('in_mask', 'mask_file')
+    ]), (inputnode, erode, [('in_mask', 'in_file')]), (inputnode, newmsk, [
+        ('in_mask', 'in_file')
+    ]), (erode, newmsk, [('out_file', 'operand_files')]), (fugue, applymsk, [
+        ('fmap_out_file', 'in_file')
+    ]), (newmsk, applymsk,
+         [('out_file', 'mask_file')]), (erode, join, [('out_file', 'in1')]),
+                (applymsk, join, [('out_file', 'in2')]), (inputnode, addedge, [
+                    ('in_file', 'in_file')
+                ]), (join, addedge, [('out', 'operand_files')]),
+                (addedge, outputnode, [('out_file', 'out_file')])])
     return wf
 
 
@@ -55,84 +57,102 @@ def vsm2warp(name='Shiftmap2Warping'):
     """
     Converts a voxel shift map (vsm) to a displacements field (warp).
     """
-    inputnode = pe.Node(niu.IdentityInterface(
-        fields=['in_vsm', 'in_ref', 'scaling', 'enc_dir']), name='inputnode')
-    outputnode = pe.Node(niu.IdentityInterface(fields=['out_warp']),
-                         name='outputnode')
-    fixhdr = pe.Node(niu.Function(
-        input_names=['in_file', 'in_file_hdr'], output_names=['out_file'],
-        function=copy_hdr), name='Fix_hdr')
+    inputnode = pe.Node(
+        niu.IdentityInterface(
+            fields=['in_vsm', 'in_ref', 'scaling', 'enc_dir']),
+        name='inputnode')
+    outputnode = pe.Node(
+        niu.IdentityInterface(fields=['out_warp']), name='outputnode')
+    fixhdr = pe.Node(
+        niu.Function(
+            input_names=['in_file', 'in_file_hdr'],
+            output_names=['out_file'],
+            function=copy_hdr),
+        name='Fix_hdr')
     vsm = pe.Node(fsl.maths.BinaryMaths(operation='mul'), name='ScaleField')
-    vsm2dfm = pe.Node(fsl.ConvertWarp(relwarp=True, out_relwarp=True),
-                      name='vsm2dfm')
+    vsm2dfm = pe.Node(
+        fsl.ConvertWarp(relwarp=True, out_relwarp=True), name='vsm2dfm')
 
     wf = pe.Workflow(name=name)
-    wf.connect([
-        (inputnode, fixhdr, [('in_vsm', 'in_file'),
-                             ('in_ref', 'in_file_hdr')]),
-        (inputnode, vsm, [('scaling', 'operand_value')]),
-        (fixhdr, vsm, [('out_file', 'in_file')]),
-        (vsm, vsm2dfm, [('out_file', 'shift_in_file')]),
-        (inputnode, vsm2dfm, [('in_ref', 'reference'),
-                              ('enc_dir', 'shift_direction')]),
-        (vsm2dfm, outputnode, [('out_file', 'out_warp')])
-    ])
+    wf.connect([(inputnode, fixhdr, [('in_vsm', 'in_file'), ('in_ref',
+                                                             'in_file_hdr')]),
+                (inputnode, vsm,
+                 [('scaling', 'operand_value')]), (fixhdr, vsm, [('out_file',
+                                                                  'in_file')]),
+                (vsm, vsm2dfm,
+                 [('out_file', 'shift_in_file')]), (inputnode, vsm2dfm, [
+                     ('in_ref', 'reference'), ('enc_dir', 'shift_direction')
+                 ]), (vsm2dfm, outputnode, [('out_file', 'out_warp')])])
     return wf
 
 
-def dwi_flirt(name='DWICoregistration', excl_nodiff=False,
-              flirt_param={}):
+def dwi_flirt(name='DWICoregistration', excl_nodiff=False, flirt_param={}):
     """
     Generates a workflow for linear registration of dwi volumes
     """
-    inputnode = pe.Node(niu.IdentityInterface(
-        fields=['reference', 'in_file', 'ref_mask', 'in_xfms', 'in_bval']),
+    inputnode = pe.Node(
+        niu.IdentityInterface(
+            fields=['reference', 'in_file', 'ref_mask', 'in_xfms', 'in_bval']),
         name='inputnode')
 
-    initmat = pe.Node(niu.Function(
-        input_names=['in_bval', 'in_xfms', 'excl_nodiff'],
-        output_names=['init_xfms'], function=_checkinitxfm), name='InitXforms')
+    initmat = pe.Node(
+        niu.Function(
+            input_names=['in_bval', 'in_xfms', 'excl_nodiff'],
+            output_names=['init_xfms'],
+            function=_checkinitxfm),
+        name='InitXforms')
     initmat.inputs.excl_nodiff = excl_nodiff
-    dilate = pe.Node(fsl.maths.MathsCommand(
-        nan2zeros=True, args='-kernel sphere 5 -dilM'), name='MskDilate')
+    dilate = pe.Node(
+        fsl.maths.MathsCommand(nan2zeros=True, args='-kernel sphere 5 -dilM'),
+        name='MskDilate')
     split = pe.Node(fsl.Split(dimension='t'), name='SplitDWIs')
     n4 = pe.Node(ants.N4BiasFieldCorrection(dimension=3), name='Bias')
-    enhb0 = pe.Node(niu.Function(
-        input_names=['in_file', 'in_mask', 'clip_limit'],
-        output_names=['out_file'], function=enhance), name='B0Equalize')
+    enhb0 = pe.Node(
+        niu.Function(
+            input_names=['in_file', 'in_mask', 'clip_limit'],
+            output_names=['out_file'],
+            function=enhance),
+        name='B0Equalize')
     enhb0.inputs.clip_limit = 0.015
-    enhdw = pe.MapNode(niu.Function(
-        input_names=['in_file', 'in_mask'], output_names=['out_file'],
-        function=enhance), name='DWEqualize', iterfield=['in_file'])
-    flirt = pe.MapNode(fsl.FLIRT(**flirt_param), name='CoRegistration',
-                       iterfield=['in_file', 'in_matrix_file'])
-    thres = pe.MapNode(fsl.Threshold(thresh=0.0), iterfield=['in_file'],
-                       name='RemoveNegative')
+    enhdw = pe.MapNode(
+        niu.Function(
+            input_names=['in_file', 'in_mask'],
+            output_names=['out_file'],
+            function=enhance),
+        name='DWEqualize',
+        iterfield=['in_file'])
+    flirt = pe.MapNode(
+        fsl.FLIRT(**flirt_param),
+        name='CoRegistration',
+        iterfield=['in_file', 'in_matrix_file'])
+    thres = pe.MapNode(
+        fsl.Threshold(thresh=0.0),
+        iterfield=['in_file'],
+        name='RemoveNegative')
     merge = pe.Node(fsl.Merge(dimension='t'), name='MergeDWIs')
-    outputnode = pe.Node(niu.IdentityInterface(
-        fields=['out_file', 'out_xfms']), name='outputnode')
+    outputnode = pe.Node(
+        niu.IdentityInterface(fields=['out_file', 'out_xfms']),
+        name='outputnode')
     wf = pe.Workflow(name=name)
-    wf.connect([
-        (inputnode, split, [('in_file', 'in_file')]),
-        (inputnode, dilate, [('ref_mask', 'in_file')]),
-        (inputnode, enhb0, [('ref_mask', 'in_mask')]),
-        (inputnode, initmat, [('in_xfms', 'in_xfms'),
-                              ('in_bval', 'in_bval')]),
-        (inputnode, n4, [('reference', 'input_image'),
-                         ('ref_mask', 'mask_image')]),
-        (dilate, flirt, [('out_file', 'ref_weight'),
-                         ('out_file', 'in_weight')]),
-        (n4, enhb0, [('output_image', 'in_file')]),
-        (split, enhdw, [('out_files', 'in_file')]),
-        (dilate, enhdw, [('out_file', 'in_mask')]),
-        (enhb0, flirt, [('out_file', 'reference')]),
-        (enhdw, flirt, [('out_file', 'in_file')]),
-        (initmat, flirt, [('init_xfms', 'in_matrix_file')]),
-        (flirt, thres, [('out_file', 'in_file')]),
-        (thres, merge, [('out_file', 'in_files')]),
-        (merge, outputnode, [('merged_file', 'out_file')]),
-        (flirt, outputnode, [('out_matrix_file', 'out_xfms')])
-    ])
+    wf.connect(
+        [(inputnode, split, [('in_file', 'in_file')]),
+         (inputnode, dilate, [('ref_mask', 'in_file')]),
+         (inputnode, enhb0, [('ref_mask', 'in_mask')]), (inputnode, initmat, [
+             ('in_xfms', 'in_xfms'), ('in_bval', 'in_bval')
+         ]), (inputnode, n4,
+              [('reference', 'input_image'),
+               ('ref_mask', 'mask_image')]), (dilate, flirt, [
+                   ('out_file', 'ref_weight'), ('out_file', 'in_weight')
+               ]), (n4, enhb0, [('output_image', 'in_file')]), (split, enhdw, [
+                   ('out_files', 'in_file')
+               ]), (dilate, enhdw, [('out_file', 'in_mask')]), (enhb0, flirt, [
+                   ('out_file', 'reference')
+               ]), (enhdw, flirt, [('out_file', 'in_file')]),
+         (initmat, flirt, [('init_xfms', 'in_matrix_file')]), (flirt, thres, [
+             ('out_file', 'in_file')
+         ]), (thres, merge, [('out_file', 'in_files')]), (merge, outputnode, [
+             ('merged_file', 'out_file')
+         ]), (flirt, outputnode, [('out_matrix_file', 'out_xfms')])])
     return wf
 
 
@@ -144,57 +164,67 @@ def apply_all_corrections(name='UnwarpArtifacts'):
     the map of determinants of the jacobian.
     """
 
-    inputnode = pe.Node(niu.IdentityInterface(
-        fields=['in_sdc', 'in_hmc', 'in_ecc', 'in_dwi']), name='inputnode')
-    outputnode = pe.Node(niu.IdentityInterface(
-        fields=['out_file', 'out_warp', 'out_coeff', 'out_jacobian']),
+    inputnode = pe.Node(
+        niu.IdentityInterface(fields=['in_sdc', 'in_hmc', 'in_ecc', 'in_dwi']),
+        name='inputnode')
+    outputnode = pe.Node(
+        niu.IdentityInterface(
+            fields=['out_file', 'out_warp', 'out_coeff', 'out_jacobian']),
         name='outputnode')
-    warps = pe.MapNode(fsl.ConvertWarp(relwarp=True),
-                       iterfield=['premat', 'postmat'],
-                       name='ConvertWarp')
+    warps = pe.MapNode(
+        fsl.ConvertWarp(relwarp=True),
+        iterfield=['premat', 'postmat'],
+        name='ConvertWarp')
 
     selref = pe.Node(niu.Select(index=[0]), name='Reference')
 
     split = pe.Node(fsl.Split(dimension='t'), name='SplitDWIs')
-    unwarp = pe.MapNode(fsl.ApplyWarp(), iterfield=['in_file', 'field_file'],
-                        name='UnwarpDWIs')
+    unwarp = pe.MapNode(
+        fsl.ApplyWarp(),
+        iterfield=['in_file', 'field_file'],
+        name='UnwarpDWIs')
 
-    coeffs = pe.MapNode(fsl.WarpUtils(out_format='spline'),
-                        iterfield=['in_file'], name='CoeffComp')
-    jacobian = pe.MapNode(fsl.WarpUtils(write_jacobian=True),
-                          iterfield=['in_file'], name='JacobianComp')
-    jacmult = pe.MapNode(fsl.MultiImageMaths(op_string='-mul %s'),
-                         iterfield=['in_file', 'operand_files'],
-                         name='ModulateDWIs')
+    coeffs = pe.MapNode(
+        fsl.WarpUtils(out_format='spline'),
+        iterfield=['in_file'],
+        name='CoeffComp')
+    jacobian = pe.MapNode(
+        fsl.WarpUtils(write_jacobian=True),
+        iterfield=['in_file'],
+        name='JacobianComp')
+    jacmult = pe.MapNode(
+        fsl.MultiImageMaths(op_string='-mul %s'),
+        iterfield=['in_file', 'operand_files'],
+        name='ModulateDWIs')
 
-    thres = pe.MapNode(fsl.Threshold(thresh=0.0), iterfield=['in_file'],
-                       name='RemoveNegative')
+    thres = pe.MapNode(
+        fsl.Threshold(thresh=0.0),
+        iterfield=['in_file'],
+        name='RemoveNegative')
     merge = pe.Node(fsl.Merge(dimension='t'), name='MergeDWIs')
 
     wf = pe.Workflow(name=name)
-    wf.connect([
-        (inputnode, warps, [('in_sdc', 'warp1'),
-                            ('in_hmc', 'premat'),
-                            ('in_ecc', 'postmat'),
-                            ('in_dwi', 'reference')]),
-        (inputnode, split, [('in_dwi', 'in_file')]),
-        (split, selref, [('out_files', 'inlist')]),
-        (warps, unwarp, [('out_file', 'field_file')]),
-        (split, unwarp, [('out_files', 'in_file')]),
-        (selref, unwarp, [('out', 'ref_file')]),
-        (selref, coeffs, [('out', 'reference')]),
-        (warps, coeffs, [('out_file', 'in_file')]),
-        (selref, jacobian, [('out', 'reference')]),
-        (coeffs, jacobian, [('out_file', 'in_file')]),
-        (unwarp, jacmult, [('out_file', 'in_file')]),
-        (jacobian, jacmult, [('out_jacobian', 'operand_files')]),
-        (jacmult, thres, [('out_file', 'in_file')]),
-        (thres, merge, [('out_file', 'in_files')]),
-        (warps, outputnode, [('out_file', 'out_warp')]),
-        (coeffs, outputnode, [('out_file', 'out_coeff')]),
-        (jacobian, outputnode, [('out_jacobian', 'out_jacobian')]),
-        (merge, outputnode, [('merged_file', 'out_file')])
-    ])
+    wf.connect([(inputnode, warps, [
+        ('in_sdc', 'warp1'), ('in_hmc', 'premat'), ('in_ecc', 'postmat'),
+        ('in_dwi', 'reference')
+    ]), (inputnode, split, [('in_dwi', 'in_file')]), (split, selref, [
+        ('out_files', 'inlist')
+    ]), (warps, unwarp, [('out_file', 'field_file')]), (split, unwarp, [
+        ('out_files', 'in_file')
+    ]), (selref, unwarp, [('out', 'ref_file')]), (selref, coeffs, [
+        ('out', 'reference')
+    ]), (warps, coeffs, [('out_file', 'in_file')]), (selref, jacobian, [
+        ('out', 'reference')
+    ]), (coeffs, jacobian, [('out_file', 'in_file')]), (unwarp, jacmult, [
+        ('out_file', 'in_file')
+    ]), (jacobian, jacmult, [('out_jacobian', 'operand_files')]),
+                (jacmult, thres, [('out_file', 'in_file')]), (thres, merge, [
+                    ('out_file', 'in_files')
+                ]), (warps, outputnode, [('out_file', 'out_warp')]),
+                (coeffs, outputnode,
+                 [('out_file', 'out_coeff')]), (jacobian, outputnode, [
+                     ('out_jacobian', 'out_jacobian')
+                 ]), (merge, outputnode, [('merged_file', 'out_file')])])
     return wf
 
 
@@ -262,8 +292,8 @@ def hmc_split(in_file, in_bval, ref_num=0, lowbval=5.0):
         data = data[..., :-1]
         bval = bval[:-1]
     else:
-        data = np.concatenate((data[..., :volid], data[..., (volid + 1):]),
-                              axis=3)
+        data = np.concatenate(
+            (data[..., :volid], data[..., (volid + 1):]), axis=3)
         bval = np.hstack((bval[:volid], bval[(volid + 1):]))
 
     out_ref = op.abspath('hmc_ref.nii.gz')
@@ -308,8 +338,8 @@ def remove_comp(in_file, in_bval, volid=0, out_file=None):
         data = data[..., :-1]
         bval = bval[:-1]
     else:
-        data = np.concatenate((data[..., :volid], data[..., (volid + 1):]),
-                              axis=3)
+        data = np.concatenate(
+            (data[..., :volid], data[..., (volid + 1):]), axis=3)
         bval = np.hstack((bval[:volid], bval[(volid + 1):]))
     hdr.set_data_shape(data.shape)
     nb.Nifti1Image(data, im.affine, hdr).to_filename(out_file)
@@ -370,7 +400,6 @@ def recompose_xfm(in_bval, in_xfms):
     import os.path as op
 
     bvals = np.loadtxt(in_bval)
-    out_matrix = np.array([np.eye(4)] * len(bvals))
     xfms = iter([np.loadtxt(xfm) for xfm in in_xfms])
     out_files = []
 
@@ -413,8 +442,9 @@ def time_avg(in_file, index=[0], out_file=None):
     if len(index) == 1:
         data = imgs[0].get_data().astype(np.float32)
     else:
-        data = np.average(np.array([im.get_data().astype(np.float32)
-                                    for im in imgs]), axis=0)
+        data = np.average(
+            np.array([im.get_data().astype(np.float32) for im in imgs]),
+            axis=0)
 
     hdr = imgs[0].header.copy()
     hdr.set_data_shape(data.shape)
@@ -459,8 +489,7 @@ def b0_average(in_dwi, in_bval, max_b=10.0, out_file=None):
     bval = np.loadtxt(in_bval)
     index = np.argwhere(bval <= max_b).flatten().tolist()
 
-    b0s = [im.get_data().astype(np.float32)
-           for im in imgs[index]]
+    b0s = [im.get_data().astype(np.float32) for im in imgs[index]]
     b0 = np.average(np.array(b0s), axis=0)
 
     hdr = imgs[0].header.copy()
@@ -539,14 +568,12 @@ def eddy_rotate_bvecs(in_bvec, eddy_params):
             ay = row[4]
             az = row[5]
 
-            Rx = np.array([[1.0, 0.0, 0.0],
-                           [0.0, cos(ax), -sin(ax)],
+            Rx = np.array([[1.0, 0.0, 0.0], [0.0, cos(ax), -sin(ax)],
                            [0.0, sin(ax), cos(ax)]])
-            Ry = np.array([[cos(ay), 0.0, sin(ay)],
-                           [0.0, 1.0, 0.0],
+            Ry = np.array([[cos(ay), 0.0, sin(ay)], [0.0, 1.0, 0.0],
                            [-sin(ay), 0.0, cos(ay)]])
-            Rz = np.array([[cos(az), -sin(az), 0.0],
-                           [sin(az), cos(az), 0.0],
+            Rz = np.array([[cos(az), -sin(az), 0.0], [sin(az),
+                                                      cos(az), 0.0],
                            [0.0, 0.0, 1.0]])
             R = Rx.dot(Ry).dot(Rz)
 
@@ -688,8 +715,7 @@ def add_empty_vol(in_file, out_file=None):
         out_file = op.abspath('./%s_4D.nii.gz' % fname)
 
     im = nb.load(in_file, mmap=NUMPY_MMAP)
-    zim = nb.Nifti1Image(np.zeros_like(im.get_data()), im.affine,
-                         im.header)
+    zim = nb.Nifti1Image(np.zeros_like(im.get_data()), im.affine, im.header)
     nb.funcs.concat_images([im, zim]).to_filename(out_file)
     return out_file
 
@@ -773,8 +799,8 @@ def enhance(in_file, clip_limit=0.010, in_mask=None, out_file=None):
     immin = imdata.min()
     imdata = (imdata - immin).astype(np.uint16)
 
-    adapted = exposure.equalize_adapthist(imdata.reshape(imshape[0], -1),
-                                          clip_limit=clip_limit)
+    adapted = exposure.equalize_adapthist(
+        imdata.reshape(imshape[0], -1), clip_limit=clip_limit)
 
     nb.Nifti1Image(adapted.reshape(imshape), im.affine,
                    im.header).to_filename(out_file)
@@ -788,9 +814,8 @@ def _checkinitxfm(in_bval, excl_nodiff, in_xfms=None):
     import os.path as op
     bvals = np.loadtxt(in_bval)
 
-    gen_id = ((in_xfms is None) or
-              (not isdefined(in_xfms)) or
-              (len(in_xfms) != len(bvals)))
+    gen_id = ((in_xfms is None) or (not isdefined(in_xfms))
+              or (len(in_xfms) != len(bvals)))
 
     init_xfms = []
     if excl_nodiff:

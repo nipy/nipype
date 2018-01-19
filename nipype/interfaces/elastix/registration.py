@@ -2,13 +2,13 @@
 # coding: utf-8
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-
 """
 Interfaces to perform image registrations and to apply the resulting
 displacement maps to images and points.
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import open
 
 import os.path as op
@@ -22,25 +22,34 @@ iflogger = logging.getLogger('interface')
 
 
 class RegistrationInputSpec(ElastixBaseInputSpec):
-    fixed_image = File(exists=True, mandatory=True, argstr='-f %s',
-                       desc='fixed image')
-    moving_image = File(exists=True, mandatory=True, argstr='-m %s',
-                        desc='moving image')
-    parameters = InputMultiPath(File(exists=True), mandatory=True, argstr='-p %s...',
-                                desc='parameter file, elastix handles 1 or more -p')
-    fixed_mask = File(exists=True, argstr='-fMask %s', desc='mask for fixed image')
-    moving_mask = File(exists=True, argstr='-mMask %s', desc='mask for moving image')
-    initial_transform = File(exists=True, argstr='-t0 %s',
-                             desc='parameter file for initial transform')
+    fixed_image = File(
+        exists=True, mandatory=True, argstr='-f %s', desc='fixed image')
+    moving_image = File(
+        exists=True, mandatory=True, argstr='-m %s', desc='moving image')
+    parameters = InputMultiPath(
+        File(exists=True),
+        mandatory=True,
+        argstr='-p %s...',
+        desc='parameter file, elastix handles 1 or more -p')
+    fixed_mask = File(
+        exists=True, argstr='-fMask %s', desc='mask for fixed image')
+    moving_mask = File(
+        exists=True, argstr='-mMask %s', desc='mask for moving image')
+    initial_transform = File(
+        exists=True,
+        argstr='-t0 %s',
+        desc='parameter file for initial transform')
 
 
 class RegistrationOutputSpec(TraitedSpec):
     transform = InputMultiPath(File(exists=True), desc='output transform')
     warped_file = File(desc='input moving image warped to fixed image')
-    warped_files = InputMultiPath(File(exists=False),
-                                  desc=('input moving image warped to fixed image at each level'))
-    warped_files_flags = traits.List(traits.Bool(False),
-                                     desc='flag indicating if warped image was generated')
+    warped_files = InputMultiPath(
+        File(exists=False),
+        desc=('input moving image warped to fixed image at each level'))
+    warped_files_flags = traits.List(
+        traits.Bool(False),
+        desc='flag indicating if warped image was generated')
 
 
 class Registration(CommandLine):
@@ -70,7 +79,6 @@ class Registration(CommandLine):
 
         out_dir = op.abspath(self.inputs.output_path)
 
-        opts = ['WriteResultImage', 'ResultImageFormat']
         regex = re.compile(r'^\((\w+)\s(.+)\)$')
 
         outputs['transform'] = []
@@ -89,13 +97,13 @@ class Registration(CommandLine):
                             value = self._cast(m.group(2).strip())
                             config[m.group(1).strip()] = value
 
-            outputs['transform'].append(op.join(out_dir,
-                                                'TransformParameters.%01d.txt' % i))
+            outputs['transform'].append(
+                op.join(out_dir, 'TransformParameters.%01d.txt' % i))
 
             warped_file = None
             if config['WriteResultImage']:
-                warped_file = op.join(out_dir,
-                                      'result.%01d.%s' % (i, config['ResultImageFormat']))
+                warped_file = op.join(out_dir, 'result.%01d.%s' %
+                                      (i, config['ResultImageFormat']))
 
             outputs['warped_files'].append(warped_file)
             outputs['warped_files_flags'].append(config['WriteResultImage'])
@@ -124,11 +132,17 @@ class Registration(CommandLine):
 
 
 class ApplyWarpInputSpec(ElastixBaseInputSpec):
-    transform_file = File(exists=True, mandatory=True, argstr='-tp %s',
-                          desc='transform-parameter file, only 1')
+    transform_file = File(
+        exists=True,
+        mandatory=True,
+        argstr='-tp %s',
+        desc='transform-parameter file, only 1')
 
-    moving_image = File(exists=True, argstr='-in %s', mandatory=True,
-                        desc='input image to deform')
+    moving_image = File(
+        exists=True,
+        argstr='-in %s',
+        mandatory=True,
+        desc='input image to deform')
 
 
 class ApplyWarpOutputSpec(TraitedSpec):
@@ -165,8 +179,11 @@ class ApplyWarp(CommandLine):
 
 
 class AnalyzeWarpInputSpec(ElastixBaseInputSpec):
-    transform_file = File(exists=True, mandatory=True, argstr='-tp %s',
-                          desc='transform-parameter file, only 1')
+    transform_file = File(
+        exists=True,
+        mandatory=True,
+        argstr='-tp %s',
+        desc='transform-parameter file, only 1')
 
 
 class AnalyzeWarpOutputSpec(TraitedSpec):
@@ -207,10 +224,16 @@ class AnalyzeWarp(CommandLine):
 
 
 class PointsWarpInputSpec(ElastixBaseInputSpec):
-    points_file = File(exists=True, argstr='-def %s', mandatory=True,
-                       desc='input points (accepts .vtk triangular meshes).')
-    transform_file = File(exists=True, mandatory=True, argstr='-tp %s',
-                          desc='transform-parameter file, only 1')
+    points_file = File(
+        exists=True,
+        argstr='-def %s',
+        mandatory=True,
+        desc='input points (accepts .vtk triangular meshes).')
+    transform_file = File(
+        exists=True,
+        mandatory=True,
+        argstr='-tp %s',
+        desc='transform-parameter file, only 1')
 
 
 class PointsWarpOutputSpec(TraitedSpec):
