@@ -19,6 +19,7 @@
 .DS_Store
 nipype/testing/data/von-ray_errmap.nii.gz
 nipype/testing/data/von_errmap.nii.gz
+nipype/testing/data/.proc*
 crash*.pklz
 .coverage
 htmlcov/

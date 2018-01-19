@@ -161,12 +161,13 @@ class Node(EngineBase):
 
         super(Node, self).__init__(name, kwargs.get('base_dir'))
 
-        self.name = name
         self._interface = interface
         self._hierarchy = None
         self._got_inputs = False
         self._originputs = None
         self._output_dir = None
+        self._id = self.name  # for compatibility with node expansion using iterables
+
         self.iterables = iterables
         self.synchronize = synchronize
         self.itersource = itersource
@@ -228,7 +229,6 @@ class Node(EngineBase):
         if hasattr(self._interface.inputs, 'num_threads') and isdefined(
                 self._interface.inputs.num_threads):
             return self._interface.inputs.num_threads
-
         return 1
 
     @n_procs.setter
@@ -239,6 +239,13 @@ class Node(EngineBase):
         # Overwrite interface's dynamic input of num_threads
         if hasattr(self._interface.inputs, 'num_threads'):
             self._interface.inputs.num_threads = self._n_procs
+
+    @property
+    def itername(self):
+        itername = self._id
+        if self._hierarchy:
+            itername = self._hierarchy + '.' + self._id
+        return itername
 
     def output_dir(self):
         """Return the location of the output directory for the node"""
@@ -593,25 +600,26 @@ class Node(EngineBase):
             self._originputs = deepcopy(self._interface.inputs)
             self._copyfiles_to_wd(execute=execute)
 
-        message = '[Node] Running "%s" ("%s.%s")'
+        message = '[Node] Running "{}" ("{}.{}")'.format(
+            self.name, self._interface.__module__,
+            self._interface.__class__.__name__)
         if issubclass(self._interface.__class__, CommandLine):
             try:
                 cmd = self._interface.cmdline
             except Exception as msg:
-                result.runtime.stderr = '%s\n\n%s' % (
+                result.runtime.stderr = '{}\n\n{}'.format(
                     getattr(result.runtime, 'stderr', ''), msg)
                 _save_resultfile(result, outdir, self.name)
                 raise
             cmdfile = op.join(outdir, 'command.txt')
             with open(cmdfile, 'wt') as fd:
                 print(cmd + "\n", file=fd)
-            message += ', a CommandLine Interface with command:\n%s' % cmd
-        logger.info(message, self.name, self._interface.__module__,
-                    self._interface.__class__.__name__)
+            message += ', a CommandLine Interface with command:\n{}'.format(cmd)
+        logger.info(message)
         try:
             result = self._interface.run()
         except Exception as msg:
-            result.runtime.stderr = '%s\n\n%s' % (
+            result.runtime.stderr = '%s\n\n%s'.format(
                 getattr(result.runtime, 'stderr', ''), msg)
             _save_resultfile(result, outdir, self.name)
             raise

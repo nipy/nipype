@@ -284,7 +284,7 @@ class DistributedPluginBase(PluginBase):
 
             if len(jobids) > 0:
                 # send all available jobs
-                logger.info('Pending[%d] Submitting[%d] jobs Slots[%d]',
+                logger.info('Pending[%d] Submitting[%d] jobs Slots[%s]',
                             num_jobs, len(jobids[:slots]), slots or 'inf')
 
                 for jobid in jobids[:slots]:
@@ -528,15 +528,15 @@ class GraphPluginBase(PluginBase):
         pyfiles = []
         dependencies = {}
         self._config = config
-        nodes = nx.topological_sort(graph)
+        nodes = list(nx.topological_sort(graph))
         logger.debug('Creating executable python files for each node')
         for idx, node in enumerate(nodes):
             pyfiles.append(
                 create_pyscript(
                     node, updatehash=updatehash, store_exception=False))
             dependencies[idx] = [
-                nodes.index(prevnode) for prevnode in graph.predecessors(node)
-            ]
+                nodes.index(prevnode)
+                for prevnode in list(graph.predecessors(node))]
         self._submit_graph(pyfiles, dependencies, nodes)
 
     def _get_args(self, node, keywords):
