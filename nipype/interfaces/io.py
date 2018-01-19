@@ -1555,16 +1555,12 @@ class DataFinder(IOBase):
 
 
 class FSSourceInputSpec(BaseInterfaceInputSpec):
-    subjects_dir = Directory(
-        mandatory=True, desc='Freesurfer subjects directory.')
-    subject_id = Str(
-        mandatory=True, desc='Subject name for whom to retrieve data')
-    hemi = traits.Enum(
-        'both',
-        'lh',
-        'rh',
-        usedefault=True,
-        desc='Selects hemisphere specific outputs')
+    subjects_dir = Directory(exists=True, mandatory=True,
+                             desc='Freesurfer subjects directory.')
+    subject_id = Str(mandatory=True,
+                     desc='Subject name for whom to retrieve data')
+    hemi = traits.Enum('both', 'lh', 'rh', usedefault=True,
+                       desc='Selects hemisphere specific outputs')
 
 
 class FSSourceOutputSpec(TraitedSpec):
