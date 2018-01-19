@@ -10,5 +10,5 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 __docformat__ = 'restructuredtext'
 
-from .io import DataGrabber, DataSink, SelectFiles
+from .io import DataGrabber, DataSink, SelectFiles, BIDSDataGrabber
 from .utility import IdentityInterface, Rename, Function, Select, Merge
