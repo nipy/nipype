@@ -6,12 +6,7 @@ import os
 import nipype.interfaces.spm.model as spm
 import nipype.interfaces.matlab as mlab
 
-try:
-    matlab_cmd = os.environ['MATLABCMD']
-except:
-    matlab_cmd = 'matlab'
-
-mlab.MatlabCommand.set_default_matlab_cmd(matlab_cmd)
+mlab.MatlabCommand.set_default_matlab_cmd(os.getenv('MATLABCMD', 'matlab'))
 
 
 def test_level1design():

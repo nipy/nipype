@@ -8,11 +8,30 @@ import os
 
 
 class GradientAnisotropicDiffusionInputSpec(CommandLineInputSpec):
-    conductance = traits.Float(desc="Conductance controls the sensitivity of the conductance term. As a general rule, the lower the value, the more strongly the filter preserves edges. A high value will cause diffusion (smoothing) across edges. Note that the number of iterations controls how much smoothing is done within regions bounded by edges.", argstr="--conductance %f")
-    iterations = traits.Int(desc="The more iterations, the more smoothing. Each iteration takes the same amount of time. If it takes 10 seconds for one iteration, then it will take 100 seconds for 10 iterations. Note that the conductance controls how much each iteration smooths across edges.", argstr="--iterations %d")
-    timeStep = traits.Float(desc="The time step depends on the dimensionality of the image. In Slicer the images are 3D and the default (.0625) time step will provide a stable solution.", argstr="--timeStep %f")
-    inputVolume = File(position=-2, desc="Input volume to be filtered", exists=True, argstr="%s")
-    outputVolume = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Output filtered", argstr="%s")
+    conductance = traits.Float(
+        desc=
+        "Conductance controls the sensitivity of the conductance term. As a general rule, the lower the value, the more strongly the filter preserves edges. A high value will cause diffusion (smoothing) across edges. Note that the number of iterations controls how much smoothing is done within regions bounded by edges.",
+        argstr="--conductance %f")
+    iterations = traits.Int(
+        desc=
+        "The more iterations, the more smoothing. Each iteration takes the same amount of time. If it takes 10 seconds for one iteration, then it will take 100 seconds for 10 iterations. Note that the conductance controls how much each iteration smooths across edges.",
+        argstr="--iterations %d")
+    timeStep = traits.Float(
+        desc=
+        "The time step depends on the dimensionality of the image. In Slicer the images are 3D and the default (.0625) time step will provide a stable solution.",
+        argstr="--timeStep %f")
+    inputVolume = File(
+        position=-2,
+        desc="Input volume to be filtered",
+        exists=True,
+        argstr="%s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        position=-1,
+        hash_files=False,
+        desc="Output filtered",
+        argstr="%s")
 
 
 class GradientAnisotropicDiffusionOutputSpec(TraitedSpec):
@@ -45,11 +64,30 @@ acknowledgements: This command module was derived from Insight/Examples (copyrig
 
 
 class CurvatureAnisotropicDiffusionInputSpec(CommandLineInputSpec):
-    conductance = traits.Float(desc="Conductance controls the sensitivity of the conductance term. As a general rule, the lower the value, the more strongly the filter preserves edges. A high value will cause diffusion (smoothing) across edges. Note that the number of iterations controls how much smoothing is done within regions bounded by edges.", argstr="--conductance %f")
-    iterations = traits.Int(desc="The more iterations, the more smoothing. Each iteration takes the same amount of time. If it takes 10 seconds for one iteration, then it will take 100 seconds for 10 iterations. Note that the conductance controls how much each iteration smooths across edges.", argstr="--iterations %d")
-    timeStep = traits.Float(desc="The time step depends on the dimensionality of the image. In Slicer the images are 3D and the default (.0625) time step will provide a stable solution.", argstr="--timeStep %f")
-    inputVolume = File(position=-2, desc="Input volume to be filtered", exists=True, argstr="%s")
-    outputVolume = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Output filtered", argstr="%s")
+    conductance = traits.Float(
+        desc=
+        "Conductance controls the sensitivity of the conductance term. As a general rule, the lower the value, the more strongly the filter preserves edges. A high value will cause diffusion (smoothing) across edges. Note that the number of iterations controls how much smoothing is done within regions bounded by edges.",
+        argstr="--conductance %f")
+    iterations = traits.Int(
+        desc=
+        "The more iterations, the more smoothing. Each iteration takes the same amount of time. If it takes 10 seconds for one iteration, then it will take 100 seconds for 10 iterations. Note that the conductance controls how much each iteration smooths across edges.",
+        argstr="--iterations %d")
+    timeStep = traits.Float(
+        desc=
+        "The time step depends on the dimensionality of the image. In Slicer the images are 3D and the default (.0625) time step will provide a stable solution.",
+        argstr="--timeStep %f")
+    inputVolume = File(
+        position=-2,
+        desc="Input volume to be filtered",
+        exists=True,
+        argstr="%s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        position=-1,
+        hash_files=False,
+        desc="Output filtered",
+        argstr="%s")
 
 
 class CurvatureAnisotropicDiffusionOutputSpec(TraitedSpec):
@@ -84,9 +122,18 @@ acknowledgements: This command module was derived from Insight/Examples (copyrig
 
 
 class GaussianBlurImageFilterInputSpec(CommandLineInputSpec):
-    sigma = traits.Float(desc="Sigma value in physical units (e.g., mm) of the Gaussian kernel", argstr="--sigma %f")
-    inputVolume = File(position=-2, desc="Input volume", exists=True, argstr="%s")
-    outputVolume = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Blurred Volume", argstr="%s")
+    sigma = traits.Float(
+        desc="Sigma value in physical units (e.g., mm) of the Gaussian kernel",
+        argstr="--sigma %f")
+    inputVolume = File(
+        position=-2, desc="Input volume", exists=True, argstr="%s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        position=-1,
+        hash_files=False,
+        desc="Blurred Volume",
+        argstr="%s")
 
 
 class GaussianBlurImageFilterOutputSpec(TraitedSpec):
@@ -117,9 +164,23 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 
 class MedianImageFilterInputSpec(CommandLineInputSpec):
-    neighborhood = InputMultiPath(traits.Int, desc="The size of the neighborhood in each dimension", sep=",", argstr="--neighborhood %s")
-    inputVolume = File(position=-2, desc="Input volume to be filtered", exists=True, argstr="%s")
-    outputVolume = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Output filtered", argstr="%s")
+    neighborhood = InputMultiPath(
+        traits.Int,
+        desc="The size of the neighborhood in each dimension",
+        sep=",",
+        argstr="--neighborhood %s")
+    inputVolume = File(
+        position=-2,
+        desc="Input volume to be filtered",
+        exists=True,
+        argstr="%s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        position=-1,
+        hash_files=False,
+        desc="Output filtered",
+        argstr="%s")
 
 
 class MedianImageFilterOutputSpec(TraitedSpec):

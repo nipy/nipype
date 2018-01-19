@@ -39,6 +39,5 @@ def test_overlap(tmpdir):
     overlap.inputs.vol_units = 'mm'
     res = overlap.run()
     check_close(res.outputs.jaccard, 0.99705)
-    check_close(res.outputs.roi_voldiff,
-                np.array([0.0063086, -0.0025506, 0.0]))
-
+    check_close(res.outputs.roi_voldiff, np.array([0.0063086, -0.0025506,
+                                                   0.0]))

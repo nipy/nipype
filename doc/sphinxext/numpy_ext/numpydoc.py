@@ -11,7 +11,7 @@ It will:
 - Convert Parameters etc. sections to field lists.
 - Convert See Also section to a See also entry.
 - Renumber references.
-- Extract the signature from the docstring, if it can't be determined otherwise.
+- Extract signature from docstring, if it can't be determined otherwise.
 
 .. [1] https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt
 

@@ -16,13 +16,8 @@ BIDSDataGrabber: Query data from BIDS dataset using pybids grabbids.
 from os.path import join, dirname
 import json
 from .. import logging
-from .base import (traits,
-                   DynamicTraitedSpec,
-                   Directory,
-                   BaseInterface,
-                   isdefined,
-                   Str,
-                   Undefined)
+from .base import (traits, DynamicTraitedSpec, Directory, BaseInterface,
+                   isdefined, Str, Undefined)
 
 have_pybids = True
 try:
@@ -34,20 +29,21 @@ LOGGER = logging.getLogger('workflows')
 
 
 class BIDSDataGrabberInputSpec(DynamicTraitedSpec):
-    base_dir = Directory(exists=True,
-                         desc='Path to BIDS Directory.',
-                         mandatory=True)
-    output_query = traits.Dict(key_trait=Str,
-                               value_trait=traits.Dict,
-                               desc='Queries for outfield outputs')
-    raise_on_empty = traits.Bool(True, usedefault=True,
-                                 desc='Generate exception if list is empty '
-                                 'for a given field')
+    base_dir = Directory(
+        exists=True, desc='Path to BIDS Directory.', mandatory=True)
+    output_query = traits.Dict(
+        key_trait=Str,
+        value_trait=traits.Dict,
+        desc='Queries for outfield outputs')
+    raise_on_empty = traits.Bool(
+        True,
+        usedefault=True,
+        desc='Generate exception if list is empty '
+        'for a given field')
     return_type = traits.Enum('file', 'namedtuple', usedefault=True)
 
 
 class BIDSDataGrabber(BaseInterface):
-
     """ BIDS datagrabber module that wraps around pybids to allow arbitrary
     querying of BIDS datasets.
 
@@ -94,11 +90,17 @@ class BIDSDataGrabber(BaseInterface):
         super(BIDSDataGrabber, self).__init__(**kwargs)
 
         if not isdefined(self.inputs.output_query):
-            self.inputs.output_query = {"func": {"modality": "func"},
-                                        "anat": {"modality": "anat"}}
+            self.inputs.output_query = {
+                "func": {
+                    "modality": "func"
+                },
+                "anat": {
+                    "modality": "anat"
+                }
+            }
 
         # If infields is empty, use all BIDS entities
-        if not infields is None and have_pybids:
+        if infields is not None and have_pybids:
             bids_config = join(dirname(gb.__file__), 'config', 'bids.json')
             bids_config = json.load(open(bids_config, 'r'))
             infields = [i['name'] for i in bids_config['entities']]
