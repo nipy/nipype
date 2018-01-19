@@ -172,7 +172,7 @@ class Node(EngineBase):
         self.synchronize = synchronize
         self.itersource = itersource
         self.overwrite = overwrite
-        self.parameterization = None
+        self.parameterization = []
         self.input_source = {}
         self.plugin_args = {}
 
@@ -242,9 +242,10 @@ class Node(EngineBase):
 
     @property
     def itername(self):
+        """Name for expanded iterable"""
         itername = self._id
         if self._hierarchy:
-            itername = self._hierarchy + '.' + self._id
+            itername = '%s.%s' % (self._hierarchy, self._id)
         return itername
 
     def output_dir(self):
