@@ -10,7 +10,9 @@ from .autorecon3 import create_AutoRecon3
 from ....interfaces.freesurfer import AddXFormToHeader, Info
 from ....interfaces.io import DataSink
 from .utils import getdefaultconfig
-from ....pipeline.engine.base import logger
+from .... import logging
+
+logger = logging.getLogger('workflow')
 
 
 def create_skullstripped_recon_flow(name="skullstripped_recon_all"):

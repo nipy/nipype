@@ -284,7 +284,7 @@ class DistributedPluginBase(PluginBase):
 
             if len(jobids) > 0:
                 # send all available jobs
-                logger.info('Pending[%d] Submitting[%d] jobs Slots[%d]',
+                logger.info('Pending[%d] Submitting[%d] jobs Slots[%s]',
                             num_jobs, len(jobids[:slots]), slots or 'inf')
 
                 for jobid in jobids[:slots]:
