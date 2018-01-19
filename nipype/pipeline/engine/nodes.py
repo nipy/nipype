@@ -25,6 +25,7 @@ import shutil
 import socket
 from copy import deepcopy
 from glob import glob
+from logging import INFO
 
 from tempfile import mkdtemp
 from future import standard_library
@@ -356,7 +357,7 @@ class Node(EngineBase):
             logger.info('[Node] Outdated cache found for "%s".', self.fullname)
             # If logging is more verbose than INFO (20), print diff between hashes
             loglevel = logger.getEffectiveLevel()
-            if loglevel < 40:  # Lazy logging: only < INFO
+            if loglevel < INFO:  # Lazy logging: only < INFO
                 exp_hash_file_base = split_filename(hashfiles[0])[1]
                 exp_hash = exp_hash_file_base[len('_0x'):]
                 logger.log(loglevel, "[Node] Old/new hashes = %s/%s",
