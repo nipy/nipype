@@ -106,7 +106,7 @@ class SignalExtraction(BaseInterface):
                             region_signals.astype(str)))
 
         # save output
-        self._results['out_file'] = os.path.abspath(self.inputs.out_file)
+        self._results['out_file'] = os.path.join(runtime.cwd, self.inputs.out_file)
         np.savetxt(
             self._results['out_file'], output, fmt=b'%s', delimiter='\t')
         return runtime
