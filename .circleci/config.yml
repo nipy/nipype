@@ -35,7 +35,7 @@ jobs:
             - docker/Dockerfile.base-pruned
             - docker/get_base_image.sh
 
-  fetch_base:
+  build_images:
     machine:
       # Ubuntu 14.04 with Docker 17.10.0-ce
       image: circleci/classic:201710-02
@@ -73,85 +73,6 @@ jobs:
               exit 1
             fi
       - run:
-          name: Save Docker images to workspace
-          no_output_timeout: 60m
-          command: |
-              docker save nipype/nipype:base | gzip -1 > /tmp/docker/nipype-base.tar.gz \
-              && du -h /tmp/docker/nipype-base.tar.gz
-      - persist_to_workspace:
-          root: /tmp
-          paths:
-            - docker/*
-
-  build_py2:
-    machine:
-      # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: circleci/classic:201710-02
-    working_directory: /home/circleci/nipype
-    steps:
-      - checkout:
-          path: /home/circleci/nipype
-      - attach_workspace:
-          at: /tmp
-      - run:
-          name: Load saved Docker images.
-          no_output_timeout: 60m
-          command: |
-            docker load < /tmp/docker/nipype-base.tar.gz
-      - run:
-          name: Get test dependencies and generate Dockerfiles
-          command: |
-            pip install --no-cache-dir codecov
-            make gen-dockerfiles
-      - run:
-          name: Modify Nipype version if necessary
-          command: |
-            if [ "$CIRCLE_TAG" != "" ]; then
-              sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" nipype/info.py
-            fi
-      - run:
-          name: Build main image (py27)
-          no_output_timeout: 60m
-          command: |
-            e=1 && for i in {1..5}; do
-              docker build \
-                --rm=false \
-                --tag nipype/nipype:py27 \
-                --build-arg PYTHON_VERSION_MAJOR=2 \
-                --build-arg PYTHON_VERSION_MINOR=7 \
-                --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-                --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
-                --build-arg VERSION="${CIRCLE_TAG}-py27" /home/circleci/nipype \
-              && e=0 && break || sleep 15
-            done && [ "$e" -eq "0" ]
-      - run:
-          name: Save Docker images to workspace
-          no_output_timeout: 60m
-          command: |
-              docker save nipype/nipype:py27 | gzip -1 > /tmp/docker/nipype-py27.tar.gz \
-              && du -h /tmp/docker/nipype-py27.tar.gz
-      - persist_to_workspace:
-          root: /tmp
-          paths:
-            - docker/*
-
-
-  build_py3:
-    machine:
-      # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: circleci/classic:201710-02
-    working_directory: /home/circleci/nipype
-    steps:
-      - checkout:
-          path: /home/circleci/nipype
-      - attach_workspace:
-          at: /tmp
-      - run:
-          name: Load saved Docker images.
-          no_output_timeout: 60m
-          command: |
-            docker load < /tmp/docker/nipype-base.tar.gz
-      - run:
           name: Get test dependencies and generate Dockerfiles
           command: |
             pip install --no-cache-dir codecov
@@ -177,19 +98,35 @@ jobs:
               && e=0 && break || sleep 15
             done && [ "$e" -eq "0" ]
       - run:
+          name: Build main image (py27)
+          no_output_timeout: 60m
+          command: |
+            e=1 && for i in {1..5}; do
+              docker build \
+                --rm=false \
+                --tag nipype/nipype:py27 \
+                --build-arg PYTHON_VERSION_MAJOR=2 \
+                --build-arg PYTHON_VERSION_MINOR=7 \
+                --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+                --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
+                --build-arg VERSION="${CIRCLE_TAG}-py27" /home/circleci/nipype \
+              && e=0 && break || sleep 15
+            done && [ "$e" -eq "0" ]
+      - run:
           name: Save Docker images to workspace
           no_output_timeout: 60m
           command: |
-              docker save nipype/nipype:latest \
-                          nipype/nipype:py36 | gzip -1 > /tmp/docker/nipype-latest-py36.tar.gz \
-              && du -h /tmp/docker/nipype-latest-py36.tar.gz
+              docker save nipype/nipype:base \
+                          nipype/nipype:latest \
+                          nipype/nipype:py27 \
+                          nipype/nipype:py36 | gzip -1 > /tmp/docker/nipype-base-latest-py36-py27.tar.gz \
+              && du -h /tmp/docker/nipype-base-latest-py36-py27.tar.gz
       - persist_to_workspace:
           root: /tmp
           paths:
             - docker/*
 
-
-  build_and_test:
+  test:
     machine:
       # Ubuntu 14.04 with Docker 17.10.0-ce
       image: circleci/classic:201710-02
@@ -201,9 +138,7 @@ jobs:
           name: Load saved Docker images.
           no_output_timeout: 60m
           command: |
-            docker load < /tmp/docker/nipype-base.tar.gz \
-            && docker load < /tmp/docker/nipype-py27.tar.gz \
-            && docker load < /tmp/docker/nipype-latest-py36.tar.gz
+            docker load < /tmp/docker/nipype-base-latest-py36-py27.tar.gz
       - checkout:
           path: /home/circleci/nipype
       - run:
@@ -275,22 +210,15 @@ workflows:
   build_test_deploy:
     jobs:
       - compare_base_dockerfiles
-      - fetch_base:
+      - build_images:
           requires:
             - compare_base_dockerfiles
-      - build_py2:
+      - test:
           requires:
-            - fetch_base
-      - build_py3:
-          requires:
-            - fetch_base
-      - build_and_test:
-          requires:
-            - build_py2
-            - build_py3
+            - build_images
       - deploy:
           filters:
             branches:
               only: master
           requires:
-            - build_and_test
+            - test
