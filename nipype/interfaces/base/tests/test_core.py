@@ -494,7 +494,7 @@ def test_CommandLine_prefix(tmpdir):
     os.chmod(script_path, 0o755)
 
     ci = nib.CommandLine(command=script_name)
-    with pytest.raises(OSError):
+    with pytest.raises(IOError):
         ci.run()
 
     class OOPCLI(nib.CommandLine):
@@ -513,5 +513,5 @@ def test_CommandLine_prefix(tmpdir):
         _cmd_prefix = 'shell_dne {}/'.format(oop)
 
     ci = OOPBadShell(command=script_name)
-    with pytest.raises(OSError):
+    with pytest.raises(IOError):
         ci.run()
