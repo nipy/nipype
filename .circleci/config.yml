@@ -46,9 +46,8 @@ jobs:
       - attach_workspace:
           at: /tmp
       - run:
-          name: Get test dependencies and generate Dockerfiles
+          name: Generate Dockerfiles
           command: |
-            pip install --no-cache-dir codecov
             make gen-dockerfiles
       - run:
           name: Modify Nipype version if necessary
@@ -131,6 +130,10 @@ jobs:
       - checkout:
           path: /home/circleci/nipype
       - run:
+          name: Get codecov
+          command: |
+            pip install --no-cache-dir codecov
+      - run:
           name: Download test data
           no_output_timeout: 20m
           working_directory: /home/circleci/examples
@@ -172,6 +175,10 @@ jobs:
             docker load < /tmp/docker/nipype-base-latest-py36-py27.tar.gz
       - checkout:
           path: /home/circleci/nipype
+      - run:
+          name: Get codecov
+          command: |
+            pip install --no-cache-dir codecov
       - run:
           name: Download test data
           no_output_timeout: 20m
@@ -215,6 +222,10 @@ jobs:
       - checkout:
           path: /home/circleci/nipype
       - run:
+          name: Get codecov
+          command: |
+            pip install --no-cache-dir codecov
+      - run:
           name: Download test data
           no_output_timeout: 20m
           working_directory: /home/circleci/examples
@@ -256,6 +267,10 @@ jobs:
             docker load < /tmp/docker/nipype-base-latest-py36-py27.tar.gz
       - checkout:
           path: /home/circleci/nipype
+      - run:
+          name: Get codecov
+          command: |
+            pip install --no-cache-dir codecov
       - run:
           name: Download test data
           no_output_timeout: 20m
@@ -299,6 +314,10 @@ jobs:
       - checkout:
           path: /home/circleci/nipype
       - run:
+          name: Get codecov
+          command: |
+            pip install --no-cache-dir codecov
+      - run:
           name: Download test data
           no_output_timeout: 20m
           working_directory: /home/circleci/examples
@@ -340,6 +359,10 @@ jobs:
             docker load < /tmp/docker/nipype-base-latest-py36-py27.tar.gz
       - checkout:
           path: /home/circleci/nipype
+      - run:
+          name: Get codecov
+          command: |
+            pip install --no-cache-dir codecov
       - run:
           name: Download test data
           no_output_timeout: 20m
@@ -383,6 +406,10 @@ jobs:
       - checkout:
           path: /home/circleci/nipype
       - run:
+          name: Get codecov
+          command: |
+            pip install --no-cache-dir codecov
+      - run:
           name: Download test data
           no_output_timeout: 20m
           working_directory: /home/circleci/examples
@@ -425,6 +452,10 @@ jobs:
       - checkout:
           path: /home/circleci/nipype
       - run:
+          name: Get codecov
+          command: |
+            pip install --no-cache-dir codecov
+      - run:
           name: Download test data
           no_output_timeout: 20m
           working_directory: /home/circleci/examples
@@ -466,6 +497,10 @@ jobs:
             docker load < /tmp/docker/nipype-base-latest-py36-py27.tar.gz
       - checkout:
           path: /home/circleci/nipype
+      - run:
+          name: Get codecov
+          command: |
+            pip install --no-cache-dir codecov
       - run:
           name: Download test data
           no_output_timeout: 20m
