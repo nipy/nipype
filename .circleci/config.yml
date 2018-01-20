@@ -43,7 +43,6 @@ jobs:
     steps:
       - checkout:
           path: /home/circleci/nipype
-      - setup_remote_docker
       - attach_workspace:
           at: /tmp
       - run:
@@ -92,7 +91,6 @@ jobs:
     steps:
       - checkout:
           path: /home/circleci/nipype
-      - setup_remote_docker
       - attach_workspace:
           at: /tmp
       - run:
@@ -146,7 +144,6 @@ jobs:
     steps:
       - checkout:
           path: /home/circleci/nipype
-      - setup_remote_docker
       - attach_workspace:
           at: /tmp
       - run:
