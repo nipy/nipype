@@ -73,17 +73,6 @@ jobs:
               exit 1
             fi
       - run:
-          name: Get test dependencies and generate Dockerfiles
-          command: |
-            pip install --no-cache-dir codecov
-            make gen-dockerfiles
-      - run:
-          name: Modify Nipype version if necessary
-          command: |
-            if [ "$CIRCLE_TAG" != "" ]; then
-              sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" nipype/info.py
-            fi
-      - run:
           name: Build main image (py36)
           no_output_timeout: 60m
           command: |
