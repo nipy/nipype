@@ -11,9 +11,10 @@ import os
 from nipype.utils.provenance import ProvStore, safe_encode
 
 
-def test_provenance():
-    ps = ProvStore()
+def test_provenance(tmpdir):
     from nipype.interfaces.base import CommandLine
+    tmpdir.chdir()
+    ps = ProvStore()
     results = CommandLine('echo hello').run()
     ps.add_results(results)
     provn = ps.g.get_provn()

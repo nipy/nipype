@@ -450,25 +450,12 @@ class Node(EngineBase):
         savepkl(op.join(outdir, '_inputs.pklz'), self.inputs.get_traitsfree())
 
         try:
-            cwd = os.getcwd()
-        except OSError:
-            # Changing back to cwd is probably not necessary
-            # but this makes sure there's somewhere to change to.
-            cwd = op.split(outdir)[0]
-            logger.warning(
-                'Current folder "%s" does not exist, changing to "%s" instead.',
-                os.getenv('PWD', 'unknown'), cwd)
-
-        os.chdir(outdir)
-        try:
             result = self._run_interface(execute=True)
         except Exception:
             logger.warning('[Node] Error on "%s" (%s)', self.fullname, outdir)
             # Tear-up after error
             os.remove(hashfile_unfinished)
             raise
-        finally:  # Ensure we come back to the original CWD
-            os.chdir(cwd)
 
         # Tear-up after success
         shutil.move(hashfile_unfinished, hashfile)
@@ -586,17 +573,18 @@ class Node(EngineBase):
                 logger.info("[Node] Cached - collecting precomputed outputs")
                 return result
 
+        outdir = self.output_dir()
         # Run command: either execute is true or load_results failed.
-        runtime = Bunch(
-            returncode=1,
-            environ=dict(os.environ),
-            hostname=socket.gethostname())
         result = InterfaceResult(
             interface=self._interface.__class__,
-            runtime=runtime,
+            runtime=Bunch(
+                cwd=outdir,
+                returncode=1,
+                environ=dict(os.environ),
+                hostname=socket.gethostname()
+            ),
             inputs=self._interface.inputs.get_traitsfree())
 
-        outdir = self.output_dir()
         if copyfiles:
             self._originputs = deepcopy(self._interface.inputs)
             self._copyfiles_to_wd(execute=execute)
@@ -618,7 +606,7 @@ class Node(EngineBase):
             message += ', a CommandLine Interface with command:\n{}'.format(cmd)
         logger.info(message)
         try:
-            result = self._interface.run()
+            result = self._interface.run(cwd=outdir)
         except Exception as msg:
             result.runtime.stderr = '%s\n\n%s'.format(
                 getattr(result.runtime, 'stderr', ''), msg)

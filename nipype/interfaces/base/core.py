@@ -33,7 +33,7 @@ from dateutil.parser import parse as parseutc
 
 from ... import config, logging, LooseVersion
 from ...utils.provenance import write_provenance
-from ...utils.misc import trim, str2bool
+from ...utils.misc import trim, str2bool, rgetcwd
 from ...utils.filemanip import (FileNotFoundError, split_filename, read_stream,
                                 which, get_dependencies, canonicalize_env as
                                 _canonicalize_env)
@@ -438,7 +438,7 @@ class BaseInterface(Interface):
             r['path'] = self.__module__
             due.cite(**r)
 
-    def run(self, **inputs):
+    def run(self, cwd=None, **inputs):
         """Execute this interface.
 
         This interface will not raise an exception if runtime.returncode is
@@ -446,6 +446,8 @@ class BaseInterface(Interface):
 
         Parameters
         ----------
+
+        cwd : specify a folder where the interface should be run
         inputs : allows the interface settings to be updated
 
         Returns
@@ -454,6 +456,13 @@ class BaseInterface(Interface):
         that was executed, provenance information and, if successful, results
         """
         from ...utils.profiler import ResourceMonitor
+
+        # Tear-up: get current and prev directories
+        syscwd = rgetcwd(error=False)  # Recover when wd does not exist
+        if cwd is None:
+            cwd = syscwd
+
+        os.chdir(cwd)  # Change to the interface wd
 
         enable_rm = config.resource_monitor and self.resource_monitor
         force_raise = not getattr(self.inputs, 'ignore_exception', False)
@@ -471,7 +480,8 @@ class BaseInterface(Interface):
             env['DISPLAY'] = config.get_display()
 
         runtime = Bunch(
-            cwd=os.getcwd(),
+            cwd=cwd,
+            prevcwd=syscwd,
             returncode=None,
             duration=None,
             environ=env,
@@ -556,6 +566,7 @@ class BaseInterface(Interface):
                         'rss_GiB': (vals[:, 2] / 1024).tolist(),
                         'vms_GiB': (vals[:, 3] / 1024).tolist(),
                     }
+            os.chdir(syscwd)
 
         return results
 
