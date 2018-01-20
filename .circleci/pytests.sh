@@ -1,6 +1,8 @@
 #!/bin/bash
 
-. test_init.sh
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+. $DIR/test_init.sh
 
 # These tests are manually balanced based on previous build timings.
 # They may need to be rebalanced in the future.
@@ -9,4 +11,4 @@ docker run --rm=false -t -v $WORKDIR:/work -v $HOME/examples:/data/examples:ro -
 && docker run --rm=false -t -v $WORKDIR:/work -v $HOME/examples:/data/examples:ro -w /src/nipype/doc "${DOCKER_IMAGE}:py36" /usr/bin/run_builddocs.sh
 exitcode=$?
 
-. test_complete.sh
+. $DIR/test_complete.sh
