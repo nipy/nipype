@@ -126,7 +126,7 @@ jobs:
           paths:
             - docker/*
 
-  test:
+  test_pytest:
     machine:
       # Ubuntu 14.04 with Docker 17.10.0-ce
       image: circleci/classic:201710-02
@@ -167,11 +167,48 @@ jobs:
             bash /home/circleci/nipype/.circleci/pytests.sh
       - store_artifacts:
           path: /home/circleci/work/tests
-      - persist_to_workspace:
-          root: /tmp
-          paths:
-            - docker/*
 
+  test_py2_fmri_spm_nested_multiproc_l2:
+    machine:
+      # Ubuntu 14.04 with Docker 17.10.0-ce
+      image: circleci/classic:201710-02
+    working_directory: /home/circleci/nipype
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Load saved Docker images.
+          no_output_timeout: 60m
+          command: |
+            docker load < /tmp/docker/nipype-base-latest-py36-py27.tar.gz
+      - checkout:
+          path: /home/circleci/nipype
+      - run:
+          name: Download test data
+          no_output_timeout: 20m
+          working_directory: /home/circleci/examples
+          environment:
+            OSF_NIPYPE_URL: "https://files.osf.io/v1/resources/nefdp/providers/osfstorage"
+          command: |
+            export DATA_NIPYPE_TUTORIAL_URL="${OSF_NIPYPE_URL}/57f4739cb83f6901ed94bf21"
+            curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_TUTORIAL_URL" | tar xj
+
+            export DATA_NIPYPE_FSL_COURSE="${OSF_NIPYPE_URL}/57f472cf9ad5a101f977ecfe"
+            curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_COURSE" | tar xz
+
+            export DATA_NIPYPE_FSL_FEEDS="${OSF_NIPYPE_URL}/57f473066c613b01f113e7af"
+            curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_FEEDS" | tar xz
+      - run:
+          name: Run tests
+          no_output_timeout: 2h
+          environment:
+            WORKDIR: /home/circleci/work
+          command: |
+            mkdir -p "$WORKDIR"
+            chmod -R 777 "$WORKDIR"
+            bash /home/circleci/nipype/.circleci/test_py2_fmri_spm_nested_multiproc_l2.sh
+      - store_artifacts:
+          path: /home/circleci/work/tests
 
   deploy:
     docker:
@@ -213,7 +250,10 @@ workflows:
       - build_images:
           requires:
             - compare_base_dockerfiles
-      - test:
+      - test_pytest:
+          requires:
+            - build_images
+      - test_py2_fmri_spm_nested_multiproc_l2:
           requires:
             - build_images
       - deploy:
@@ -221,4 +261,5 @@ workflows:
             branches:
               only: master
           requires:
-            - test
+            - test_pytest
+            - test_py2_fmri_spm_nested_multiproc_l2
