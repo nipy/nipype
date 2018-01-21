@@ -151,29 +151,6 @@ class BaseTraitedSpec(traits.HasTraits):
                             '%s' % trait_spec.new_name: new
                         })
 
-    def _hash_infile(self, adict, key):
-        """ Inject file hashes into adict[key]"""
-        stuff = adict[key]
-        if not is_container(stuff):
-            stuff = [stuff]
-        file_list = []
-        for afile in stuff:
-            if is_container(afile):
-                hashlist = self._hash_infile({'infiles': afile}, 'infiles')
-                hash = [val[1] for val in hashlist]
-            else:
-                if config.get('execution',
-                              'hash_method').lower() == 'timestamp':
-                    hash = hash_timestamp(afile)
-                elif config.get('execution',
-                                'hash_method').lower() == 'content':
-                    hash = hash_infile(afile)
-                else:
-                    raise Exception("Unknown hash method: %s" % config.get(
-                        'execution', 'hash_method'))
-            file_list.append((afile, hash))
-        return file_list
-
     def get(self, **kwargs):
         """ Returns traited class as a dict
 
