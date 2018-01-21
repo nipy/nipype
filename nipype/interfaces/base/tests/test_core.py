@@ -237,7 +237,7 @@ def test_input_version():
     obj = DerivedInterface2()
     obj.inputs.foo = 1
     with pytest.raises(Exception):
-        obj._check_version_requirements()
+        obj._check_version_requirements(obj.inputs)
 
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', max_ver='0.9')
