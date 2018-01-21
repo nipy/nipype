@@ -411,8 +411,12 @@ class BaseInterface(Interface):
                         raise Exception(
                             'Trait %s (%s) (version %s < required %s)' %
                             (name, self.__class__.__name__, version, min_ver))
-            check = dict(max_ver=lambda t: t is not None)
-            names = trait_object.trait_names(**check)
+
+        # check maximum version
+        check = dict(max_ver=lambda t: t is not None)
+        names = trait_object.trait_names(**check)
+        if names and self.version:
+            version = LooseVersion(str(self.version))
             for name in names:
                 max_ver = LooseVersion(
                     str(trait_object.traits()[name].max_ver))
