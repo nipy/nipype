@@ -781,7 +781,7 @@ def which(cmd, env=None, pathext=None):
         extcmd = cmd + ext
         fpath, fname = os.path.split(extcmd)
         if fpath:
-            if isexec(fpath):
+            if isexec(extcmd):
                 return extcmd
         else:
             for directory in path.split(os.pathsep):
