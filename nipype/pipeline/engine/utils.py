@@ -1316,18 +1316,19 @@ def export_graph(graph_in,
 def format_dot(dotfilename, format='png'):
     """Dump a directed graph (Linux only; install via `brew` on OSX)"""
     if format != 'dot':
-        cmd = 'dot -T%s -O \'%s\'' % (format, dotfilename)
+        dot_base =  os.path.splitext(dotfilename)[0]
+        formatted_dot = '{}.{}'.format(dot_base, format)
+        cmd = 'dot -T{} -o"{}" "{}"'.format(format, formatted_dot, dotfilename)
         try:
             CommandLine(cmd, resource_monitor=False).run()
         except IOError as ioe:
             if "could not be found" in str(ioe):
-                raise IOError(
-                    "Cannot draw directed graph; executable 'dot' is unavailable"
-                )
+                raise IOError("Cannot draw directed graph; executable 'dot' is unavailable")
             else:
                 raise ioe
-        dotfilename += '.%s' % format
-    return dotfilename
+    else:
+        formatted_dot = dotfilename
+    return formatted_dot
 
 
 def get_all_files(infile):
