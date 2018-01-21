@@ -168,10 +168,8 @@ class Bunch(object):
         sorted_dict = to_str(sorted(dict_nofilename.items()))
         return dict_withhash, md5(sorted_dict.encode()).hexdigest()
 
-    def __pretty__(self, p, cycle):
-        """Support for the pretty module
-
-        pretty is included in ipython.externals for ipython > 0.10"""
+    def _repr_pretty_(self, p, cycle):
+        """Support for the pretty module from ipython.externals"""
         if cycle:
             p.text('Bunch(...)')
         else:
