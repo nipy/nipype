@@ -119,20 +119,6 @@ class BaseTraitedSpec(traits.HasTraits):
                            'which is already set') % (name, trait_name)
                     raise IOError(msg)
 
-    def _requires_warn(self, obj, name, old, new):
-        """Part of the xor behavior
-        """
-        if isdefined(new):
-            trait_spec = self.traits()[name]
-            msg = None
-            for trait_name in trait_spec.requires:
-                if not isdefined(getattr(self, trait_name)):
-                    if not msg:
-                        msg = 'Input %s requires inputs: %s' \
-                            % (name, ', '.join(trait_spec.requires))
-            if msg:  # only one requires warning at a time.
-                warn(msg)
-
     def _deprecated_warn(self, obj, name, old, new):
         """Checks if a user assigns a value to a deprecated trait
         """
