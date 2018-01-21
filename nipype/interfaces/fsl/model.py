@@ -344,7 +344,11 @@ class Level1Design(BaseInterface):
                 cwd, info, i, ev_parameters, self.inputs.orthogonalization,
                 self.inputs.contrasts, do_tempfilter, basis_key)
             nim = load(func_files[i])
-            (_, _, _, timepoints) = nim.shape
+            if hasattr(nim, 'get_arrays_from_intent'):
+                timepoints = len(
+                    nim.get_arrays_from_intent('NIFTI_INTENT_TIME_SERIES'))
+            else:
+                (_, _, _, timepoints) = nim.shape
             fsf_txt = fsf_header.substitute(
                 run_num=i,
                 interscan_interval=self.inputs.interscan_interval,
