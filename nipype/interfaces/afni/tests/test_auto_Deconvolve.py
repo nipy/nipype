@@ -18,7 +18,10 @@ def test_Deconvolve_inputs():
             nohash=True,
             usedefault=True,
         ),
-        force_TR=dict(argstr='-force_TR %d', ),
+        force_TR=dict(
+            argstr='-force_TR %f',
+            position=0,
+        ),
         fout=dict(argstr='-fout', ),
         global_times=dict(
             argstr='-global_times',
@@ -42,7 +45,7 @@ def test_Deconvolve_inputs():
         in_files=dict(
             argstr='-input %s',
             copyfile=False,
-            position=0,
+            position=1,
             sep=' ',
         ),
         input1D=dict(argstr='-input1D %s', ),
