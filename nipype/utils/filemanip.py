@@ -774,12 +774,20 @@ def which(cmd, env=None, pathext=None):
                 return filename
         return None
 
+    def isexec(path):
+        return os.path.isfile(path) and os.access(path, os.X_OK)
+
     for ext in pathext:
         extcmd = cmd + ext
-        for directory in path.split(os.pathsep):
-            filename = op.join(directory, extcmd)
-            if op.exists(filename):
-                return filename
+        fpath, fname = os.path.split(extcmd)
+        if fpath:
+            if isexec(extcmd):
+                return extcmd
+        else:
+            for directory in path.split(os.pathsep):
+                filename = op.join(directory, extcmd)
+                if isexec(filename):
+                    return filename
     return None
 
 

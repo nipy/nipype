@@ -26,6 +26,7 @@ import re
 import platform
 import select
 import subprocess as sp
+import shlex
 import sys
 from textwrap import wrap
 import simplejson as json
@@ -868,6 +869,7 @@ class CommandLine(BaseInterface):
 
     """
     input_spec = CommandLineInputSpec
+    _cmd_prefix = ''
     _cmd = None
     _version = None
     _terminal_output = 'stream'
@@ -926,7 +928,7 @@ class CommandLine(BaseInterface):
         """ `command` plus any arguments (args)
         validates arguments and generates command line"""
         self._check_mandatory_inputs()
-        allargs = [self.cmd] + self._parse_inputs()
+        allargs = [self._cmd_prefix + self.cmd] + self._parse_inputs()
         return ' '.join(allargs)
 
     @property
@@ -997,7 +999,7 @@ class CommandLine(BaseInterface):
         runtime.environ.update(out_environ)
 
         # which $cmd
-        executable_name = self.cmd.split()[0]
+        executable_name = shlex.split(self._cmd_prefix + self.cmd)[0]
         cmd_path = which(executable_name, env=runtime.environ)
 
         if cmd_path is None:
