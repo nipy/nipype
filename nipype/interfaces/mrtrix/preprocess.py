@@ -16,7 +16,7 @@ import os.path as op
 
 from ...utils.filemanip import split_filename
 from ..base import (CommandLineInputSpec, CommandLine, traits, TraitedSpec,
-                    File, InputMultiObject, isdefined)
+                    File, InputMultiPath, isdefined)
 
 
 class MRConvertInputSpec(CommandLineInputSpec):
@@ -167,7 +167,7 @@ class MRConvert(CommandLine):
 
 
 class DWI2TensorInputSpec(CommandLineInputSpec):
-    in_file = InputMultiObject(
+    in_file = InputMultiPath(
         File(exists=True),
         argstr='%s',
         mandatory=True,
@@ -439,7 +439,7 @@ class Tensor2ApparentDiffusion(CommandLine):
 
 
 class MRMultiplyInputSpec(CommandLineInputSpec):
-    in_files = InputMultiObject(
+    in_files = InputMultiPath(
         File(exists=True),
         argstr='%s',
         mandatory=True,
@@ -497,7 +497,7 @@ class MRMultiply(CommandLine):
 
 
 class MRTrixViewerInputSpec(CommandLineInputSpec):
-    in_files = InputMultiObject(
+    in_files = InputMultiPath(
         File(exists=True),
         argstr='%s',
         mandatory=True,
@@ -841,7 +841,7 @@ class MedianFilter3D(CommandLine):
 
 
 class MRTransformInputSpec(CommandLineInputSpec):
-    in_files = InputMultiObject(
+    in_files = InputMultiPath(
         File(exists=True),
         argstr='%s',
         mandatory=True,

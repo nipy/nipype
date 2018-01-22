@@ -58,13 +58,13 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
 from ..base import (TraitedSpec, CommandLineInputSpec, CommandLine,
-                    InputMultiObject, OutputMultiObject, BaseInterface,
+                    InputMultiPath, OutputMultiPath, BaseInterface,
                     BaseInterfaceInputSpec, traits, Directory, File, isdefined)
 import os
 
 
 class TrainingSetCreatorInputSpec(BaseInterfaceInputSpec):
-    mel_icas_in = InputMultiObject(
+    mel_icas_in = InputMultiPath(
         Directory(exists=True),
         copyfile=False,
         desc='Melodic output directories',
@@ -73,7 +73,7 @@ class TrainingSetCreatorInputSpec(BaseInterfaceInputSpec):
 
 
 class TrainingSetCreatorOutputSpec(TraitedSpec):
-    mel_icas_out = OutputMultiObject(
+    mel_icas_out = OutputMultiPath(
         Directory(exists=True),
         copyfile=False,
         desc='Hand labels for noise vs signal',
@@ -150,7 +150,7 @@ class FeatureExtractor(CommandLine):
 
 
 class TrainingInputSpec(CommandLineInputSpec):
-    mel_icas = InputMultiObject(
+    mel_icas = InputMultiPath(
         Directory(exists=True),
         copyfile=False,
         desc='Melodic output directories',
@@ -193,7 +193,7 @@ class Training(CommandLine):
 
 
 class AccuracyTesterInputSpec(CommandLineInputSpec):
-    mel_icas = InputMultiObject(
+    mel_icas = InputMultiPath(
         Directory(exists=True),
         copyfile=False,
         desc='Melodic output directories',

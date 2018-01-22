@@ -7,7 +7,7 @@ import os
 
 from ...base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
                      TraitedSpec, File, Directory, traits, isdefined,
-                     InputMultiObject, OutputMultiObject)
+                     InputMultiPath, OutputMultiPath)
 
 
 class gtractTransformToDisplacementFieldInputSpec(CommandLineInputSpec):
@@ -80,7 +80,7 @@ class gtractInvertBSplineTransformInputSpec(CommandLineInputSpec):
         hash_files=False,
         desc="Required: output transform file name",
         argstr="--outputTransform %s")
-    landmarkDensity = InputMultiObject(
+    landmarkDensity = InputMultiPath(
         traits.Int,
         desc="Number of landmark subdivisions in all 3 directions",
         sep=",",
@@ -122,7 +122,7 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 
 class gtractConcatDwiInputSpec(CommandLineInputSpec):
-    inputVolume = InputMultiObject(
+    inputVolume = InputMultiPath(
         File(exists=True),
         desc=
         "Required: input file containing the first diffusion weighted image",
@@ -1105,7 +1105,7 @@ class gtractCoRegAnatomyInputSpec(CommandLineInputSpec):
     numberOfIterations = traits.Int(
         desc="Number of iterations in the selected 3D fit",
         argstr="--numberOfIterations %d")
-    gridSize = InputMultiObject(
+    gridSize = InputMultiPath(
         traits.Int,
         desc="Number of grid subdivisions in all 3 directions",
         sep=",",
@@ -1226,7 +1226,7 @@ class gtractResampleDWIInPlaceInputSpec(CommandLineInputSpec):
         desc=
         "Display debug messages, and produce debug intermediate results.  0=OFF, 1=Minimal, 10=Maximum debugging.",
         argstr="--debugLevel %d")
-    imageOutputSize = InputMultiObject(
+    imageOutputSize = InputMultiPath(
         traits.Int,
         desc=
         "The voxel lattice for the output image, padding is added if necessary. NOTE: if 0,0,0, then the inputVolume size is used.",
@@ -1633,7 +1633,7 @@ class gtractTensorInputSpec(CommandLineInputSpec):
         desc=
         "Required: name of output NRRD file containing the Tensor vector image",
         argstr="--outputVolume %s")
-    medianFilterSize = InputMultiObject(
+    medianFilterSize = InputMultiPath(
         traits.Int,
         desc="Median filter radius in all 3 directions",
         sep=",",
@@ -1664,7 +1664,7 @@ class gtractTensorInputSpec(CommandLineInputSpec):
     applyMeasurementFrame = traits.Bool(
         desc="Flag to apply the measurement frame to the gradient directions",
         argstr="--applyMeasurementFrame ")
-    ignoreIndex = InputMultiObject(
+    ignoreIndex = InputMultiPath(
         traits.Int,
         desc=
         "Ignore diffusion gradient index. Used to remove specific gradient directions with artifacts.",

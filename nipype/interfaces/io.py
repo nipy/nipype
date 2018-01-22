@@ -41,8 +41,8 @@ from .. import config, logging
 from ..utils.filemanip import copyfile, list_to_filename, filename_to_list
 from ..utils.misc import human_order_sorted, str2bool
 from .base import (
-    TraitedSpec, traits, Str, File, Directory, BaseInterface, InputMultiObject,
-    isdefined, OutputMultiObject, DynamicTraitedSpec, Undefined, BaseInterfaceInputSpec)
+    TraitedSpec, traits, Str, File, Directory, BaseInterface, InputMultiPath,
+    isdefined, OutputMultiPath, DynamicTraitedSpec, Undefined, BaseInterfaceInputSpec)
 
 have_pybids = True
 try:
@@ -196,13 +196,13 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     parameterization = traits.Bool(
         True, usedefault=True, desc='store output in parametrized structure')
     strip_dir = Directory(desc='path to strip out of filename')
-    substitutions = InputMultiObject(
+    substitutions = InputMultiPath(
         traits.Tuple(Str, Str),
         desc=('List of 2-tuples reflecting string '
               'to substitute and string to replace '
               'it with'))
     regexp_substitutions = \
-        InputMultiObject(traits.Tuple(Str, Str),
+        InputMultiPath(traits.Tuple(Str, Str),
                        desc=('List of 2-tuples reflecting a pair of a '
                              'Python regexp pattern and a replacement '
                              'string. Invoked after string `substitutions`'))
@@ -893,7 +893,7 @@ class S3DataGrabber(IOBase):
         """
         S3 specific: Downloads relevant files to a local folder specified
 
-        Using traits.Any instead out OutputMultiObject till add_trait bug
+        Using traits.Any instead out OutputMultiPath till add_trait bug
         is fixed.
         """
         return add_traits(base, list(self.inputs.template_args.keys()))
@@ -1154,7 +1154,7 @@ class DataGrabber(IOBase):
     def _add_output_traits(self, base):
         """
 
-        Using traits.Any instead out OutputMultiObject till add_trait bug
+        Using traits.Any instead out OutputMultiPath till add_trait bug
         is fixed.
         """
         return add_traits(base, list(self.inputs.template_args.keys()))
@@ -1594,7 +1594,7 @@ class FSSourceOutputSpec(TraitedSpec):
         loc='mri')
     rawavg = File(
         exists=True, desc='Volume formed by averaging input images', loc='mri')
-    ribbon = OutputMultiObject(
+    ribbon = OutputMultiPath(
         File(exists=True),
         desc='Volumetric maps of cortical ribbons',
         loc='mri',
@@ -1604,103 +1604,103 @@ class FSSourceOutputSpec(TraitedSpec):
         exists=True,
         loc='mri',
         desc='Aparc parcellation projected into subcortical white matter')
-    curv = OutputMultiObject(
+    curv = OutputMultiPath(
         File(exists=True), desc='Maps of surface curvature', loc='surf')
-    avg_curv = OutputMultiObject(
+    avg_curv = OutputMultiPath(
         File(exists=True),
         desc='Average atlas curvature, sampled to subject',
         loc='surf')
-    inflated = OutputMultiObject(
+    inflated = OutputMultiPath(
         File(exists=True), desc='Inflated surface meshes', loc='surf')
-    pial = OutputMultiObject(
+    pial = OutputMultiPath(
         File(exists=True),
         desc='Gray matter/pia mater surface meshes',
         loc='surf')
-    area_pial = OutputMultiObject(
+    area_pial = OutputMultiPath(
         File(exists=True),
         desc='Mean area of triangles each vertex on the pial surface is '
         'associated with',
         loc='surf',
         altkey='area.pial')
-    curv_pial = OutputMultiObject(
+    curv_pial = OutputMultiPath(
         File(exists=True),
         desc='Curvature of pial surface',
         loc='surf',
         altkey='curv.pial')
-    smoothwm = OutputMultiObject(
+    smoothwm = OutputMultiPath(
         File(exists=True), loc='surf', desc='Smoothed original surface meshes')
-    sphere = OutputMultiObject(
+    sphere = OutputMultiPath(
         File(exists=True), desc='Spherical surface meshes', loc='surf')
-    sulc = OutputMultiObject(
+    sulc = OutputMultiPath(
         File(exists=True), desc='Surface maps of sulcal depth', loc='surf')
-    thickness = OutputMultiObject(
+    thickness = OutputMultiPath(
         File(exists=True),
         loc='surf',
         desc='Surface maps of cortical thickness')
-    volume = OutputMultiObject(
+    volume = OutputMultiPath(
         File(exists=True), desc='Surface maps of cortical volume', loc='surf')
-    white = OutputMultiObject(
+    white = OutputMultiPath(
         File(exists=True), desc='White/gray matter surface meshes', loc='surf')
-    jacobian_white = OutputMultiObject(
+    jacobian_white = OutputMultiPath(
         File(exists=True),
         desc='Distortion required to register to spherical atlas',
         loc='surf')
-    graymid = OutputMultiObject(
+    graymid = OutputMultiPath(
         File(exists=True),
         desc='Graymid/midthickness surface meshes',
         loc='surf',
         altkey=['graymid', 'midthickness'])
-    label = OutputMultiObject(
+    label = OutputMultiPath(
         File(exists=True),
         desc='Volume and surface label files',
         loc='label',
         altkey='*label')
-    annot = OutputMultiObject(
+    annot = OutputMultiPath(
         File(exists=True),
         desc='Surface annotation files',
         loc='label',
         altkey='*annot')
-    aparc_aseg = OutputMultiObject(
+    aparc_aseg = OutputMultiPath(
         File(exists=True),
         loc='mri',
         altkey='aparc*aseg',
         desc='Aparc parcellation projected into aseg volume')
-    sphere_reg = OutputMultiObject(
+    sphere_reg = OutputMultiPath(
         File(exists=True),
         loc='surf',
         altkey='sphere.reg',
         desc='Spherical registration file')
-    aseg_stats = OutputMultiObject(
+    aseg_stats = OutputMultiPath(
         File(exists=True),
         loc='stats',
         altkey='aseg',
         desc='Automated segmentation statistics file')
-    wmparc_stats = OutputMultiObject(
+    wmparc_stats = OutputMultiPath(
         File(exists=True),
         loc='stats',
         altkey='wmparc',
         desc='White matter parcellation statistics file')
-    aparc_stats = OutputMultiObject(
+    aparc_stats = OutputMultiPath(
         File(exists=True),
         loc='stats',
         altkey='aparc',
         desc='Aparc parcellation statistics files')
-    BA_stats = OutputMultiObject(
+    BA_stats = OutputMultiPath(
         File(exists=True),
         loc='stats',
         altkey='BA',
         desc='Brodmann Area statistics files')
-    aparc_a2009s_stats = OutputMultiObject(
+    aparc_a2009s_stats = OutputMultiPath(
         File(exists=True),
         loc='stats',
         altkey='aparc.a2009s',
         desc='Aparc a2009s parcellation statistics files')
-    curv_stats = OutputMultiObject(
+    curv_stats = OutputMultiPath(
         File(exists=True),
         loc='stats',
         altkey='curv',
         desc='Curvature statistics files')
-    entorhinal_exvivo_stats = OutputMultiObject(
+    entorhinal_exvivo_stats = OutputMultiPath(
         File(exists=True),
         loc='stats',
         altkey='entorhinal_exvivo',
@@ -1868,7 +1868,7 @@ class XNATSource(IOBase):
     def _add_output_traits(self, base):
         """
 
-        Using traits.Any instead out OutputMultiObject till add_trait bug
+        Using traits.Any instead out OutputMultiPath till add_trait bug
         is fixed.
         """
         return add_traits(base, list(self.inputs.query_template_args.keys()))

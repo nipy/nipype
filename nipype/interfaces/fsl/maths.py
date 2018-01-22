@@ -16,7 +16,7 @@ from __future__ import (print_function, division, unicode_literals,
 import os
 import numpy as np
 
-from ..base import (TraitedSpec, File, traits, InputMultiObject, isdefined)
+from ..base import (TraitedSpec, File, traits, InputMultiPath, isdefined)
 from .base import FSLCommand, FSLCommandInputSpec
 
 
@@ -573,7 +573,7 @@ class MultiImageMathsInput(MathsInput):
         mandatory=True,
         desc=("python formatted string of operations "
               "to perform"))
-    operand_files = InputMultiObject(
+    operand_files = InputMultiPath(
         File(exists=True),
         mandatory=True,
         desc=("list of file names to plug into op "

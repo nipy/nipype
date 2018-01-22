@@ -36,7 +36,7 @@ from ...utils.filemanip import (md5, FileNotFoundError, filename_to_list,
                                 loadpkl, split_filename, load_json, makedirs,
                                 emptydirs, savepkl, to_str)
 
-from ...interfaces.base import (traits, InputMultiObject, CommandLine, Undefined,
+from ...interfaces.base import (traits, InputMultiPath, CommandLine, Undefined,
                                 DynamicTraitedSpec, Bunch, InterfaceResult,
                                 Interface, isdefined)
 from .utils import (
@@ -980,9 +980,9 @@ class MapNode(Node):
             if name in fields and ((nitems is None) or (nitems > 1)):
                 logger.debug('adding multipath trait: %s', name)
                 if self.nested:
-                    output.add_trait(name, InputMultiObject(traits.Any()))
+                    output.add_trait(name, InputMultiPath(traits.Any()))
                 else:
-                    output.add_trait(name, InputMultiObject(spec.trait_type))
+                    output.add_trait(name, InputMultiPath(spec.trait_type))
             else:
                 output.add_trait(name, traits.Trait(spec))
             setattr(output, name, Undefined)
@@ -1018,7 +1018,7 @@ class MapNode(Node):
             hashinputs.remove_trait(name)
             hashinputs.add_trait(
                 name,
-                InputMultiObject(
+                InputMultiPath(
                     self._interface.inputs.traits()[name].trait_type))
             logger.debug('setting hashinput %s-> %s', name,
                          getattr(self._inputs, name))

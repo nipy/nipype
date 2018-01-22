@@ -7,7 +7,7 @@ import os
 
 from ....base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
                       TraitedSpec, File, Directory, traits, isdefined,
-                      InputMultiObject, OutputMultiObject)
+                      InputMultiPath, OutputMultiPath)
 
 
 class fibertrackInputSpec(CommandLineInputSpec):

@@ -7,7 +7,7 @@ import os
 
 from ...base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
                      TraitedSpec, File, Directory, traits, isdefined,
-                     InputMultiObject, OutputMultiObject)
+                     InputMultiPath, OutputMultiPath)
 
 
 class BRAINSCutInputSpec(CommandLineInputSpec):
@@ -280,7 +280,7 @@ class BRAINSConstellationDetectorInputSpec(CommandLineInputSpec):
         desc=
         ",                 Turn on clipping the rescaled image one-tailed on input.  Units of standard deviations above the mean.  Very large values are very permissive.  Non-positive value turns clipping off.  Defaults to removing 0.00001 of a normal tail above the mean.,             ",
         argstr="--trimRescaledIntensities %f")
-    rescaleIntensitiesOutputRange = InputMultiObject(
+    rescaleIntensitiesOutputRange = InputMultiPath(
         traits.Int,
         desc=
         ",                 This pair of integers gives the lower and upper bounds on the signal portion of the output image.  Out-of-field voxels are taken from BackgroundFillValue.,             ",
@@ -304,25 +304,25 @@ class BRAINSConstellationDetectorInputSpec(CommandLineInputSpec):
         desc=
         "Type of interpolation to be used when applying transform to moving volume.  Options are Linear, ResampleInPlace, NearestNeighbor, BSpline, or WindowedSinc",
         argstr="--interpolationMode %s")
-    forceACPoint = InputMultiObject(
+    forceACPoint = InputMultiPath(
         traits.Float,
         desc=
         ",                 Use this flag to manually specify the AC point from the original image on the command line.,             ",
         sep=",",
         argstr="--forceACPoint %s")
-    forcePCPoint = InputMultiObject(
+    forcePCPoint = InputMultiPath(
         traits.Float,
         desc=
         ",                 Use this flag to manually specify the PC point from the original image on the command line.,             ",
         sep=",",
         argstr="--forcePCPoint %s")
-    forceVN4Point = InputMultiObject(
+    forceVN4Point = InputMultiPath(
         traits.Float,
         desc=
         ",                 Use this flag to manually specify the VN4 point from the original image on the command line.,             ",
         sep=",",
         argstr="--forceVN4Point %s")
-    forceRPPoint = InputMultiObject(
+    forceRPPoint = InputMultiPath(
         traits.Float,
         desc=
         ",                 Use this flag to manually specify the RP point from the original image on the command line.,             ",
@@ -480,17 +480,17 @@ documentation-url: http://www.nitrc.org/projects/brainscdetector/
 
 
 class BRAINSCreateLabelMapFromProbabilityMapsInputSpec(CommandLineInputSpec):
-    inputProbabilityVolume = InputMultiObject(
+    inputProbabilityVolume = InputMultiPath(
         File(exists=True),
         desc="The list of proobabilityimages.",
         argstr="--inputProbabilityVolume %s...")
-    priorLabelCodes = InputMultiObject(
+    priorLabelCodes = InputMultiPath(
         traits.Int,
         desc=
         "A list of PriorLabelCode values used for coding the output label images",
         sep=",",
         argstr="--priorLabelCodes %s")
-    foregroundPriors = InputMultiObject(
+    foregroundPriors = InputMultiPath(
         traits.Int,
         desc="A list: For each Prior Label, 1 if foreground, 0 if background",
         sep=",",
@@ -556,25 +556,25 @@ class BinaryMaskEditorBasedOnLandmarksInputSpec(CommandLineInputSpec):
         " The filename for the  landmark definition file in the same format produced by Slicer3 (.fcsv). ",
         exists=True,
         argstr="--inputLandmarksFilename %s")
-    inputLandmarkNames = InputMultiObject(
+    inputLandmarkNames = InputMultiPath(
         traits.Str,
         desc=
         " A target input landmark name to be edited. This should be listed in the inputLandmakrFilename Given. ",
         sep=",",
         argstr="--inputLandmarkNames %s")
-    setCutDirectionForLandmark = InputMultiObject(
+    setCutDirectionForLandmark = InputMultiPath(
         traits.Str,
         desc=
         "Setting the cutting out direction of the input binary image to the one of anterior, posterior, left, right, superior or posterior. (ENUMERATION: ANTERIOR, POSTERIOR, LEFT, RIGHT, SUPERIOR, POSTERIOR) ",
         sep=",",
         argstr="--setCutDirectionForLandmark %s")
-    setCutDirectionForObliquePlane = InputMultiObject(
+    setCutDirectionForObliquePlane = InputMultiPath(
         traits.Str,
         desc=
         "If this is true, the mask will be thresholded out to the direction of inferior, posterior,  and/or left. Default behavrior is that cutting out to the direction of superior, anterior and/or right. ",
         sep=",",
         argstr="--setCutDirectionForObliquePlane %s")
-    inputLandmarkNamesForObliquePlane = InputMultiObject(
+    inputLandmarkNamesForObliquePlane = InputMultiPath(
         traits.Str,
         desc=
         " Three subset landmark names of inputLandmarksFilename for a oblique plane computation. The plane computed for binary volume editing. ",
@@ -611,11 +611,11 @@ class BRAINSMultiSTAPLEInputSpec(CommandLineInputSpec):
         "Composite T1, all label maps transofrmed into the space for this image.",
         exists=True,
         argstr="--inputCompositeT1Volume %s")
-    inputLabelVolume = InputMultiObject(
+    inputLabelVolume = InputMultiPath(
         File(exists=True),
         desc="The list of proobabilityimages.",
         argstr="--inputLabelVolume %s...")
-    inputTransform = InputMultiObject(
+    inputTransform = InputMultiPath(
         File(exists=True),
         desc="transforms to apply to label volumes",
         argstr="--inputTransform %s...")
@@ -668,7 +668,7 @@ description: given a list of label map images, create a representative/average l
 
 
 class BRAINSABCInputSpec(CommandLineInputSpec):
-    inputVolumes = InputMultiObject(
+    inputVolumes = InputMultiPath(
         File(exists=True),
         desc="The list of input image files to be segmented.",
         argstr="--inputVolumes %s...")
@@ -687,7 +687,7 @@ class BRAINSABCInputSpec(CommandLineInputSpec):
         desc=
         "(optional) Filename to which save the final state of the registration",
         argstr="--saveState %s")
-    inputVolumeTypes = InputMultiObject(
+    inputVolumeTypes = InputMultiPath(
         traits.Str,
         desc="The list of input image types corresponding to the inputVolumes.",
         sep=",",
@@ -729,7 +729,7 @@ class BRAINSABCInputSpec(CommandLineInputSpec):
         argstr="--subjectIntermodeTransformType %s")
     outputVolumes = traits.Either(
         traits.Bool,
-        InputMultiObject(File(), ),
+        InputMultiPath(File(), ),
         hash_files=False,
         desc=
         "Corrected Output Images: should specify the same number of images as inputVolume, if only one element is given, then it is used as a file pattern where %s is replaced by the imageVolumeType, and %d by the index list location.",
@@ -771,7 +771,7 @@ class BRAINSABCInputSpec(CommandLineInputSpec):
         argstr="--interpolationMode %s")
     maxIterations = traits.Int(
         desc="Filter iterations", argstr="--maxIterations %d")
-    medianFilterSize = InputMultiObject(
+    medianFilterSize = InputMultiPath(
         traits.Int,
         desc=
         "The radius for the optional MedianImageFilter preprocessing in all 3 directions.",
@@ -798,7 +798,7 @@ class BRAINSABCInputSpec(CommandLineInputSpec):
         desc=
         "If this threshold value is greater than zero, only pure samples are used to compute the distributions in EM classification, and only pure samples are used for KNN training. The default value is set to 0, that means not using pure plugs. However, a value of 0.2 is suggested if you want to activate using pure plugs option.",
         argstr="--purePlugsThreshold %f")
-    numberOfSubSamplesInEachPlugArea = InputMultiObject(
+    numberOfSubSamplesInEachPlugArea = InputMultiPath(
         traits.Int,
         desc=
         "Number of continous index samples taken at each direction of lattice space for each plug volume.",
@@ -807,7 +807,7 @@ class BRAINSABCInputSpec(CommandLineInputSpec):
     atlasWarpingOff = traits.Bool(
         desc="Deformable registration of atlas to subject",
         argstr="--atlasWarpingOff ")
-    gridSize = InputMultiObject(
+    gridSize = InputMultiPath(
         traits.Int,
         desc="Grid size for atlas warping with BSplines",
         sep=",",
@@ -815,7 +815,7 @@ class BRAINSABCInputSpec(CommandLineInputSpec):
     defaultSuffix = traits.Str(argstr="--defaultSuffix %s")
     implicitOutputs = traits.Either(
         traits.Bool,
-        InputMultiObject(File(), ),
+        InputMultiPath(File(), ),
         hash_files=False,
         desc=
         "Outputs to be made available to NiPype. Needed because not all BRAINSABC outputs have command line arguments.",
@@ -842,14 +842,14 @@ class BRAINSABCOutputSpec(TraitedSpec):
         desc="The transform from atlas to the subject", exists=True)
     atlasToSubjectInitialTransform = File(
         desc="The initial transform from atlas to the subject", exists=True)
-    outputVolumes = OutputMultiObject(
+    outputVolumes = OutputMultiPath(
         File(exists=True),
         desc=
         "Corrected Output Images: should specify the same number of images as inputVolume, if only one element is given, then it is used as a file pattern where %s is replaced by the imageVolumeType, and %d by the index list location."
     )
     outputLabels = File(desc="Output Label Image", exists=True)
     outputDirtyLabels = File(desc="Output Dirty Label Image", exists=True)
-    implicitOutputs = OutputMultiObject(
+    implicitOutputs = OutputMultiPath(
         File(exists=True),
         desc=
         "Outputs to be made available to NiPype. Needed because not all BRAINSABC outputs have command line arguments."

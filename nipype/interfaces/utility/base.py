@@ -19,7 +19,7 @@ import numpy as np
 import nibabel as nb
 
 from ..base import (traits, TraitedSpec, DynamicTraitedSpec, File, Undefined,
-                    isdefined, OutputMultiObject, InputMultiObject, BaseInterface,
+                    isdefined, OutputMultiPath, InputMultiPath, BaseInterface,
                     BaseInterfaceInputSpec, Str)
 from ..io import IOBase, add_traits
 from ...utils.filemanip import filename_to_list, copyfile, split_filename
@@ -372,14 +372,14 @@ class Split(IOBase):
 
 
 class SelectInputSpec(BaseInterfaceInputSpec):
-    inlist = InputMultiObject(
+    inlist = InputMultiPath(
         traits.Any, mandatory=True, desc='list of values to choose from')
-    index = InputMultiObject(
+    index = InputMultiPath(
         traits.Int, mandatory=True, desc='0-based indices of values to choose')
 
 
 class SelectOutputSpec(TraitedSpec):
-    out = OutputMultiObject(traits.Any, desc='list of selected values')
+    out = OutputMultiPath(traits.Any, desc='list of selected values')
 
 
 class Select(IOBase):

@@ -20,8 +20,8 @@ import os
 import warnings
 
 from ...utils.filemanip import fname_presuffix, split_filename, copyfile
-from ..base import (TraitedSpec, isdefined, File, Directory, InputMultiObject,
-                    OutputMultiObject, traits)
+from ..base import (TraitedSpec, isdefined, File, Directory, InputMultiPath,
+                    OutputMultiPath, traits)
 from .base import (FSLCommand, FSLCommandInputSpec, Info)
 
 
@@ -235,18 +235,18 @@ class FSLXCommandInputSpec(FSLCommandInputSpec):
 
 
 class FSLXCommandOutputSpec(TraitedSpec):
-    dyads = OutputMultiObject(
+    dyads = OutputMultiPath(
         File(exists=True),
         desc=('Mean of PDD distribution'
               ' in vector form.'))
-    fsamples = OutputMultiObject(
+    fsamples = OutputMultiPath(
         File(exists=True),
         desc=('Samples from the '
               'distribution on f '
               'anisotropy'))
     mean_dsamples = File(
         exists=True, desc='Mean of distribution on diffusivity d')
-    mean_fsamples = OutputMultiObject(
+    mean_fsamples = OutputMultiPath(
         File(exists=True), desc=('Mean of distribution on f '
                                  'anisotropy'))
     mean_S0samples = File(
@@ -258,9 +258,9 @@ class FSLXCommandOutputSpec(TraitedSpec):
         desc=('Mean of distribution on '
               'tau samples (only with rician '
               'noise)'))
-    phsamples = OutputMultiObject(
+    phsamples = OutputMultiPath(
         File(exists=True), desc=('phi samples, per fiber'))
-    thsamples = OutputMultiObject(
+    thsamples = OutputMultiPath(
         File(exists=True), desc=('theta samples, per fiber'))
 
 
@@ -375,30 +375,30 @@ class BEDPOSTX5InputSpec(FSLXCommandInputSpec):
 class BEDPOSTX5OutputSpec(TraitedSpec):
     mean_dsamples = File(
         exists=True, desc='Mean of distribution on diffusivity d')
-    mean_fsamples = OutputMultiObject(
+    mean_fsamples = OutputMultiPath(
         File(exists=True), desc=('Mean of distribution on f '
                                  'anisotropy'))
     mean_S0samples = File(
         exists=True,
         desc=('Mean of distribution on T2w'
               'baseline signal intensity S0'))
-    mean_phsamples = OutputMultiObject(
+    mean_phsamples = OutputMultiPath(
         File(exists=True), desc='Mean of distribution on phi')
-    mean_thsamples = OutputMultiObject(
+    mean_thsamples = OutputMultiPath(
         File(exists=True), desc='Mean of distribution on theta')
-    merged_thsamples = OutputMultiObject(
+    merged_thsamples = OutputMultiPath(
         File(exists=True), desc=('Samples from the distribution '
                                  'on theta'))
-    merged_phsamples = OutputMultiObject(
+    merged_phsamples = OutputMultiPath(
         File(exists=True), desc=('Samples from the distribution '
                                  'on phi'))
-    merged_fsamples = OutputMultiObject(
+    merged_fsamples = OutputMultiPath(
         File(exists=True),
         desc=('Samples from the distribution on '
               'anisotropic volume fraction'))
-    dyads = OutputMultiObject(
+    dyads = OutputMultiPath(
         File(exists=True), desc='Mean of PDD distribution in vector form.')
-    dyads_dispersion = OutputMultiObject(File(exists=True), desc=('Dispersion'))
+    dyads_dispersion = OutputMultiPath(File(exists=True), desc=('Dispersion'))
 
 
 class BEDPOSTX5(FSLXCommand):
@@ -525,9 +525,9 @@ BEDPOSTX = BEDPOSTX5
 
 
 class ProbTrackXBaseInputSpec(FSLCommandInputSpec):
-    thsamples = InputMultiObject(File(exists=True), mandatory=True)
-    phsamples = InputMultiObject(File(exists=True), mandatory=True)
-    fsamples = InputMultiObject(File(exists=True), mandatory=True)
+    thsamples = InputMultiPath(File(exists=True), mandatory=True)
+    phsamples = InputMultiPath(File(exists=True), mandatory=True)
+    fsamples = InputMultiPath(File(exists=True), mandatory=True)
     samples_base_name = traits.Str(
         "merged",
         desc=('the rootname/base_name for samples '
@@ -547,7 +547,7 @@ class ProbTrackXBaseInputSpec(FSLCommandInputSpec):
               'label file'),
         argstr='--seed=%s',
         mandatory=True)
-    target_masks = InputMultiObject(
+    target_masks = InputMultiPath(
         File(exits=True),
         desc=('list of target masks - required for '
               'seeds_to_targets classification'),
@@ -694,7 +694,7 @@ class ProbTrackXOutputSpec(TraitedSpec):
     log = File(
         exists=True,
         desc='path/name of a text record of the command that was run')
-    fdt_paths = OutputMultiObject(
+    fdt_paths = OutputMultiPath(
         File(exists=True),
         desc=('path/name of a 3D image file '
               'containing the output connectivity '

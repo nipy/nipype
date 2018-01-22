@@ -27,7 +27,7 @@ from .. import config, logging
 from ..external.due import BibTeX
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
                                BaseInterfaceInputSpec, File, isdefined,
-                               InputMultiObject, OutputMultiObject)
+                               InputMultiPath, OutputMultiPath)
 from ..utils import NUMPY_MMAP
 from ..utils.misc import normalize_mc_params
 
@@ -360,7 +360,7 @@ Bradley L. and Petersen, Steven E.},
 class CompCorInputSpec(BaseInterfaceInputSpec):
     realigned_file = File(
         exists=True, mandatory=True, desc='already realigned brain image (4D)')
-    mask_files = InputMultiObject(
+    mask_files = InputMultiPath(
         File(exists=True),
         desc=('One or more mask files that determines '
               'ROI (3D). When more that one file is '
@@ -649,7 +649,7 @@ class TCompCorInputSpec(CompCorInputSpec):
 
 class TCompCorOutputSpec(CompCorOutputSpec):
     # and all the fields in CompCorOutputSpec
-    high_variance_masks = OutputMultiObject(
+    high_variance_masks = OutputMultiPath(
         File(exists=True),
         desc=(("voxels exceeding the variance"
                " threshold")))
@@ -714,7 +714,7 @@ class TCompCor(CompCor):
 
 
 class TSNRInputSpec(BaseInterfaceInputSpec):
-    in_file = InputMultiObject(
+    in_file = InputMultiPath(
         File(exists=True),
         mandatory=True,
         desc='realigned 4D file or a list of 3D files')

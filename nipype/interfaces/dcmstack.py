@@ -20,7 +20,7 @@ from glob import glob
 import nibabel as nb
 import imghdr
 
-from .base import (TraitedSpec, DynamicTraitedSpec, InputMultiObject, File,
+from .base import (TraitedSpec, DynamicTraitedSpec, InputMultiPath, File,
                    Directory, traits, BaseInterface, isdefined, Undefined)
 from ..utils import NUMPY_MMAP
 
@@ -96,7 +96,7 @@ class NiftiGeneratorBase(BaseInterface):
 
 class DcmStackInputSpec(NiftiGeneratorBaseInputSpec):
     dicom_files = traits.Either(
-        InputMultiObject(File(exists=True)),
+        InputMultiPath(File(exists=True)),
         Directory(exists=True),
         traits.Str(),
         mandatory=True)

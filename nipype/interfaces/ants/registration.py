@@ -14,7 +14,7 @@ from builtins import range, str
 import os
 
 from ...utils.filemanip import filename_to_list
-from ..base import TraitedSpec, File, Str, traits, InputMultiObject, isdefined
+from ..base import TraitedSpec, File, Str, traits, InputMultiPath, isdefined
 from .base import ANTSCommand, ANTSCommandInputSpec
 
 
@@ -26,12 +26,12 @@ class ANTSInputSpec(ANTSCommandInputSpec):
         usedefault=False,
         position=1,
         desc='image dimension (2 or 3)')
-    fixed_image = InputMultiObject(
+    fixed_image = InputMultiPath(
         File(exists=True),
         mandatory=True,
         desc=('image to which the moving image is '
               'warped'))
-    moving_image = InputMultiObject(
+    moving_image = InputMultiPath(
         File(exists=True),
         argstr='%s',
         mandatory=True,
@@ -257,7 +257,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         argstr='--dimensionality %d',
         usedefault=True,
         desc='image dimension (2 or 3)')
-    fixed_image = InputMultiObject(
+    fixed_image = InputMultiPath(
         File(exists=True),
         mandatory=True,
         desc='Image to which the moving_image should be transformed'
@@ -269,14 +269,14 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         xor=['fixed_image_masks'],
         desc='Mask used to limit metric sampling region of the fixed image'
         'in all stages')
-    fixed_image_masks = InputMultiObject(
+    fixed_image_masks = InputMultiPath(
         traits.Either('NULL', File(exists=True)),
         min_ver='2.2.0',
         xor=['fixed_image_mask'],
         desc=
         'Masks used to limit metric sampling region of the fixed image, defined per registration stage'
         '(Use "NULL" to omit a mask at a given stage)')
-    moving_image = InputMultiObject(
+    moving_image = InputMultiPath(
         File(exists=True),
         mandatory=True,
         desc=
@@ -289,7 +289,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         xor=['moving_image_masks'],
         desc='mask used to limit metric sampling region of the moving image'
         'in all stages')
-    moving_image_masks = InputMultiObject(
+    moving_image_masks = InputMultiPath(
         traits.Either('NULL', File(exists=True)),
         min_ver='2.2.0',
         xor=['moving_image_mask'],
@@ -310,14 +310,14 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         'Filename for restoring the internal restorable state of the registration'
     )
 
-    initial_moving_transform = InputMultiObject(
+    initial_moving_transform = InputMultiPath(
         File(exists=True),
         argstr='%s',
         desc='A transform or a list of transforms that should be applied'
         'before the registration begins. Note that, when a list is given,'
         'the transformations are applied in reverse order.',
         xor=['initial_moving_transform_com'])
-    invert_initial_moving_transform = InputMultiObject(
+    invert_initial_moving_transform = InputMultiPath(
         traits.Bool(),
         requires=["initial_moving_transform"],
         desc='One boolean or a list of booleans that indicate'

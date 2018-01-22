@@ -14,7 +14,7 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
 import os
-from ..base import (TraitedSpec, File, traits, CommandLine, InputMultiObject,
+from ..base import (TraitedSpec, File, traits, CommandLine, InputMultiPath,
                     CommandLineInputSpec)
 
 __docformat__ = 'restructuredtext'
@@ -75,7 +75,7 @@ class SplineFilter(CommandLine):
 
 
 class TrackMergeInputSpec(CommandLineInputSpec):
-    track_files = InputMultiObject(
+    track_files = InputMultiPath(
         File(exists=True),
         desc="file containing tracks to be filtered",
         position=0,

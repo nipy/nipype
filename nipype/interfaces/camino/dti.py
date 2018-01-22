@@ -15,7 +15,7 @@ import os
 from ...utils.filemanip import split_filename
 from ..base import (CommandLineInputSpec, CommandLine, traits, TraitedSpec,
                     File, Directory, StdOutCommandLine,
-                    StdOutCommandLineInputSpec, isdefined, InputMultiObject)
+                    StdOutCommandLineInputSpec, isdefined, InputMultiPath)
 
 
 class DTIFitInputSpec(StdOutCommandLineInputSpec):
@@ -533,7 +533,7 @@ class PicoPDFsInputSpec(StdOutCommandLineInputSpec):
         desc='input model type',
         usedefault=True)
 
-    luts = InputMultiObject(
+    luts = InputMultiPath(
         File(exists=True),
         argstr='-luts %s',
         mandatory=True,

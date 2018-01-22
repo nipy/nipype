@@ -31,7 +31,7 @@ import warnings
 from .. import logging
 from . import metrics as nam
 from ..interfaces.base import (
-    BaseInterface, traits, TraitedSpec, File, InputMultiObject, OutputMultiObject,
+    BaseInterface, traits, TraitedSpec, File, InputMultiPath, OutputMultiPath,
     BaseInterfaceInputSpec, isdefined, DynamicTraitedSpec, Undefined)
 from ..utils.filemanip import fname_presuffix, split_filename, filename_to_list
 from ..utils import NUMPY_MMAP
@@ -124,7 +124,7 @@ class PickAtlas(BaseInterface):
 
 
 class SimpleThresholdInputSpec(BaseInterfaceInputSpec):
-    volumes = InputMultiObject(
+    volumes = InputMultiPath(
         File(exists=True), desc='volumes to be thresholded', mandatory=True)
     threshold = traits.Float(
         desc='volumes to be thresholdedeverything below this value will be set\
@@ -133,7 +133,7 @@ class SimpleThresholdInputSpec(BaseInterfaceInputSpec):
 
 
 class SimpleThresholdOutputSpec(TraitedSpec):
-    thresholded_volumes = OutputMultiObject(
+    thresholded_volumes = OutputMultiPath(
         File(exists=True), desc="thresholded volumes")
 
 
@@ -170,7 +170,7 @@ class SimpleThreshold(BaseInterface):
 
 
 class ModifyAffineInputSpec(BaseInterfaceInputSpec):
-    volumes = InputMultiObject(
+    volumes = InputMultiPath(
         File(exists=True),
         desc='volumes which affine matrices will be modified',
         mandatory=True)
@@ -183,7 +183,7 @@ class ModifyAffineInputSpec(BaseInterfaceInputSpec):
 
 
 class ModifyAffineOutputSpec(TraitedSpec):
-    transformed_volumes = OutputMultiObject(File(exist=True))
+    transformed_volumes = OutputMultiPath(File(exist=True))
 
 
 class ModifyAffine(BaseInterface):
@@ -328,7 +328,7 @@ class Matlab2CSVInputSpec(TraitedSpec):
 
 
 class Matlab2CSVOutputSpec(TraitedSpec):
-    csv_files = OutputMultiObject(
+    csv_files = OutputMultiPath(
         File(desc='Output CSV files for each variable saved in the input .mat\
         file'))
 
@@ -503,7 +503,7 @@ def makefmtlist(output_array, typelist, rowheadingsBool, shape,
 
 
 class MergeCSVFilesInputSpec(TraitedSpec):
-    in_files = InputMultiObject(
+    in_files = InputMultiPath(
         File(exists=True),
         mandatory=True,
         desc='Input comma-separated value (CSV) files')
@@ -1046,14 +1046,14 @@ class AddNoise(BaseInterface):
 
 
 class NormalizeProbabilityMapSetInputSpec(TraitedSpec):
-    in_files = InputMultiObject(
+    in_files = InputMultiPath(
         File(exists=True, mandatory=True, desc='The tpms to be normalized'))
     in_mask = File(
         exists=True, desc='Masked voxels must sum up 1.0, 0.0 otherwise.')
 
 
 class NormalizeProbabilityMapSetOutputSpec(TraitedSpec):
-    out_files = OutputMultiObject(File(exists=True), desc="normalized maps")
+    out_files = OutputMultiPath(File(exists=True), desc="normalized maps")
 
 
 class NormalizeProbabilityMapSet(BaseInterface):
@@ -1099,10 +1099,10 @@ class SplitROIsInputSpec(TraitedSpec):
 
 
 class SplitROIsOutputSpec(TraitedSpec):
-    out_files = OutputMultiObject(File(exists=True), desc='the resulting ROIs')
-    out_masks = OutputMultiObject(
+    out_files = OutputMultiPath(File(exists=True), desc='the resulting ROIs')
+    out_masks = OutputMultiPath(
         File(exists=True), desc='a mask indicating valid values')
-    out_index = OutputMultiObject(
+    out_index = OutputMultiPath(
         File(exists=True), desc='arrays keeping original locations')
 
 
@@ -1148,9 +1148,9 @@ class SplitROIs(BaseInterface):
 
 
 class MergeROIsInputSpec(TraitedSpec):
-    in_files = InputMultiObject(
+    in_files = InputMultiPath(
         File(exists=True, mandatory=True, desc='files to be re-merged'))
-    in_index = InputMultiObject(
+    in_index = InputMultiPath(
         File(exists=True, mandatory=True),
         desc='array keeping original locations')
     in_reference = File(exists=True, desc='reference file')
@@ -1421,7 +1421,7 @@ def merge_rois(in_files, in_idxs, in_ref, dtype=None, out_file=None):
 
 
 class CalculateMedianInputSpec(BaseInterfaceInputSpec):
-    in_files = InputMultiObject(
+    in_files = InputMultiPath(
         File(
             exists=True,
             mandatory=True,
@@ -1432,7 +1432,7 @@ class CalculateMedianInputSpec(BaseInterfaceInputSpec):
 
 
 class CalculateMedianOutputSpec(TraitedSpec):
-    median_files = OutputMultiObject(
+    median_files = OutputMultiPath(
         File(exists=True), desc="One or more median images")
 
 

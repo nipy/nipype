@@ -18,7 +18,7 @@ from __future__ import (print_function, division, unicode_literals,
 import os
 
 from ..base import (CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
-                    traits, isdefined, File, InputMultiObject, Undefined, Str)
+                    traits, isdefined, File, InputMultiPath, Undefined, Str)
 from ...external.due import BibTeX
 
 from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec,
@@ -26,7 +26,7 @@ from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec,
 
 
 class DeconvolveInputSpec(AFNICommandInputSpec):
-    in_files = InputMultiObject(
+    in_files = InputMultiPath(
         File(exists=True),
         desc='filenames of 3D+time input datasets. More than one filename can '
         'be given and the datasets will be auto-catenated in time. '
@@ -306,7 +306,7 @@ class Deconvolve(AFNICommand):
 
 class RemlfitInputSpec(AFNICommandInputSpec):
     # mandatory files
-    in_files = InputMultiObject(
+    in_files = InputMultiPath(
         File(exists=True),
         desc='Read time series dataset',
         argstr='-input "%s"',
@@ -353,7 +353,7 @@ class RemlfitInputSpec(AFNICommandInputSpec):
         '(only with \'mask\' or \'automask\' options).',
         argstr='-STATmask %s',
         exists=True)
-    addbase = InputMultiObject(
+    addbase = InputMultiPath(
         File(
             exists=True,
             desc='file containing columns to add to regression matrix'),
@@ -364,7 +364,7 @@ class RemlfitInputSpec(AFNICommandInputSpec):
         copyfile=False,
         sep=" ",
         argstr='-addbase %s')
-    slibase = InputMultiObject(
+    slibase = InputMultiPath(
         File(
             exists=True,
             desc='file containing columns to add to regression matrix'),
@@ -381,7 +381,7 @@ class RemlfitInputSpec(AFNICommandInputSpec):
         'will slow the program down, and make it use a lot more memory '
         '(to hold all the matrix stuff).',
         argstr='-slibase %s')
-    slibase_sm = InputMultiObject(
+    slibase_sm = InputMultiPath(
         File(
             exists=True,
             desc='file containing columns to add to regression matrix'),

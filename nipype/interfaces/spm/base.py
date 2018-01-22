@@ -30,7 +30,7 @@ from scipy.io import savemat
 # Local imports
 from ... import logging
 from ...utils import spm_docs as sd, NUMPY_MMAP
-from ..base import (BaseInterface, traits, isdefined, InputMultiObject,
+from ..base import (BaseInterface, traits, isdefined, InputMultiPath,
                     BaseInterfaceInputSpec, Directory, Undefined, ImageFile,
                     PackageInfo)
 from ..matlab import MatlabCommand
@@ -241,7 +241,7 @@ def no_spm():
 
 class SPMCommandInputSpec(BaseInterfaceInputSpec):
     matlab_cmd = traits.Str(desc='matlab command to use')
-    paths = InputMultiObject(Directory(), desc='Paths to add to matlabpath')
+    paths = InputMultiPath(Directory(), desc='Paths to add to matlabpath')
     mfile = traits.Bool(True, desc='Run m-code using m-file', usedefault=True)
     use_mcr = traits.Bool(desc='Run m-code using SPM MCR')
     use_v8struct = traits.Bool(

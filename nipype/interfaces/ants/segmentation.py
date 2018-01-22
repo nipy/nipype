@@ -15,7 +15,7 @@ from builtins import range, str
 import os
 from ...external.due import BibTeX
 from ...utils.filemanip import split_filename, copyfile, which
-from ..base import TraitedSpec, File, traits, InputMultiObject, OutputMultiObject, isdefined
+from ..base import TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined
 from .base import ANTSCommand, ANTSCommandInputSpec
 
 
@@ -27,7 +27,7 @@ class AtroposInputSpec(ANTSCommandInputSpec):
         argstr='--image-dimensionality %d',
         usedefault=True,
         desc='image dimension (2, 3, or 4)')
-    intensity_images = InputMultiObject(
+    intensity_images = InputMultiPath(
         File(exists=True), argstr="--intensity-image %s...", mandatory=True)
     mask_image = File(exists=True, argstr='--mask-image %s', mandatory=True)
     initialization = traits.Enum(
@@ -39,7 +39,7 @@ class AtroposInputSpec(ANTSCommandInputSpec):
         argstr="%s",
         requires=['number_of_tissue_classes'],
         mandatory=True)
-    prior_probability_images = InputMultiObject(File(exists=True))
+    prior_probability_images = InputMultiPath(File(exists=True))
     number_of_tissue_classes = traits.Int(mandatory=True)
     prior_weighting = traits.Float()
     prior_probability_threshold = traits.Float(requires=['prior_weighting'])
@@ -68,7 +68,7 @@ class AtroposInputSpec(ANTSCommandInputSpec):
 
 class AtroposOutputSpec(TraitedSpec):
     classified_image = File(exists=True)
-    posteriors = OutputMultiObject(File(exist=True))
+    posteriors = OutputMultiPath(File(exist=True))
 
 
 class Atropos(ANTSCommand):
@@ -478,7 +478,7 @@ class CorticalThicknessInputSpec(ANTSCommandInputSpec):
         desc='brain probability mask in template space',
         copyfile=False,
         mandatory=True)
-    segmentation_priors = InputMultiObject(
+    segmentation_priors = InputMultiPath(
         File(exists=True), argstr='-p %s', mandatory=True)
     out_prefix = traits.Str(
         'antsCT_',
@@ -578,7 +578,7 @@ class CorticalThicknessOutputSpec(TraitedSpec):
     BrainExtractionMask = File(exists=True, desc='brain extraction mask')
     BrainSegmentation = File(exists=True, desc='brain segmentaion image')
     BrainSegmentationN4 = File(exists=True, desc='N4 corrected image')
-    BrainSegmentationPosteriors = OutputMultiObject(
+    BrainSegmentationPosteriors = OutputMultiPath(
         File(exists=True), desc='Posterior probability images')
     CorticalThickness = File(exists=True, desc='cortical thickness file')
     TemplateToSubject1GenericAffine = File(
@@ -945,17 +945,17 @@ class JointFusionInputSpec(ANTSCommandInputSpec):
         position=1,
         mandatory=True,
         desc='Number of modalities or features')
-    warped_intensity_images = InputMultiObject(
+    warped_intensity_images = InputMultiPath(
         File(exists=True),
         argstr="-g %s...",
         mandatory=True,
         desc='Warped atlas images')
-    target_image = InputMultiObject(
+    target_image = InputMultiPath(
         File(exists=True),
         argstr='-tg %s...',
         mandatory=True,
         desc='Target image(s)')
-    warped_label_images = InputMultiObject(
+    warped_label_images = InputMultiPath(
         File(exists=True),
         argstr="-l %s...",
         mandatory=True,
@@ -1188,20 +1188,20 @@ class AntsJointFusionInputSpec(ANTSCommandInputSpec):
         'specified, the program tries to infer the '
         'dimensionality from the input image.')
     target_image = traits.List(
-        InputMultiObject(File(exists=True)),
+        InputMultiPath(File(exists=True)),
         argstr='-t %s',
         mandatory=True,
         desc='The target image (or '
         'multimodal target images) assumed to be '
         'aligned to a common image domain.')
     atlas_image = traits.List(
-        InputMultiObject(File(exists=True)),
+        InputMultiPath(File(exists=True)),
         argstr="-g %s...",
         mandatory=True,
         desc='The atlas image (or '
         'multimodal atlas images) assumed to be '
         'aligned to a common image domain.')
-    atlas_segmentation_image = InputMultiObject(
+    atlas_segmentation_image = InputMultiPath(
         File(exists=True),
         argstr="-l %s...",
         mandatory=True,

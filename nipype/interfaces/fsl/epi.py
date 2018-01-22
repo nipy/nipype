@@ -24,7 +24,7 @@ import warnings
 from ...utils.filemanip import split_filename
 from ...utils import NUMPY_MMAP
 
-from ..base import (traits, TraitedSpec, InputMultiObject, File, isdefined)
+from ..base import (traits, TraitedSpec, InputMultiPath, File, isdefined)
 from .base import FSLCommand, FSLCommandInputSpec, Info
 
 
@@ -151,7 +151,7 @@ class TOPUPInputSpec(FSLCommandInputSpec):
         argstr='--datain=%s',
         desc=('encoding direction for automatic '
               'generation of encoding_file'))
-    readout_times = InputMultiObject(
+    readout_times = InputMultiPath(
         traits.Float,
         requires=['encoding_direction'],
         xor=['encoding_file'],
@@ -417,7 +417,7 @@ class TOPUP(FSLCommand):
 
 
 class ApplyTOPUPInputSpec(FSLCommandInputSpec):
-    in_files = InputMultiObject(
+    in_files = InputMultiPath(
         File(exists=True),
         mandatory=True,
         desc='name of file with images',

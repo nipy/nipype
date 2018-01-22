@@ -13,7 +13,7 @@ from builtins import range, str
 import os
 
 from .base import ANTSCommand, ANTSCommandInputSpec
-from ..base import TraitedSpec, File, traits, isdefined, InputMultiObject
+from ..base import TraitedSpec, File, traits, isdefined, InputMultiPath
 from ...utils.filemanip import split_filename
 
 
@@ -55,7 +55,7 @@ class WarpTimeSeriesImageMultiTransformInputSpec(ANTSCommandInputSpec):
         argstr='--use-NN', desc='Use nearest neighbor interpolation')
     use_bspline = traits.Bool(
         argstr='--use-Bspline', desc='Use 3rd order B-Spline interpolation')
-    transformation_series = InputMultiObject(
+    transformation_series = InputMultiPath(
         File(exists=True),
         argstr='%s',
         desc='transformation file(s) to be applied',
@@ -197,7 +197,7 @@ class WarpImageMultiTransformInputSpec(ANTSCommandInputSpec):
         argstr='--use-NN', desc='Use nearest neighbor interpolation')
     use_bspline = traits.Bool(
         argstr='--use-BSpline', desc='Use 3rd order B-Spline interpolation')
-    transformation_series = InputMultiObject(
+    transformation_series = InputMultiPath(
         File(exists=True),
         argstr='%s',
         desc='transformation file(s) to be applied',
@@ -350,13 +350,13 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
             traits.Float(),  # Gaussian/MultiLabel (sigma, alpha)
             traits.Float()))
     transforms = traits.Either(
-        InputMultiObject(File(exists=True)),
+        InputMultiPath(File(exists=True)),
         'identity',
         argstr='%s',
         mandatory=True,
         desc='transform files: will be applied in reverse order. For '
         'example, the last specified transform will be applied first.')
-    invert_transform_flags = InputMultiObject(traits.Bool())
+    invert_transform_flags = InputMultiPath(traits.Bool())
     default_value = traits.Float(
         0.0, argstr='--default-value %g', usedefault=True)
     print_out_composite_warp_file = traits.Bool(

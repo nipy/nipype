@@ -12,7 +12,7 @@ import networkx as nx
 from ... import logging
 from ...utils.misc import package_check
 from ..base import (BaseInterface, BaseInterfaceInputSpec, traits, File,
-                    TraitedSpec, InputMultiObject, OutputMultiObject, isdefined)
+                    TraitedSpec, InputMultiPath, OutputMultiPath, isdefined)
 iflogger = logging.getLogger('interface')
 
 have_cv = True
@@ -44,11 +44,11 @@ def ntwks_to_matrices(in_files, edge_key):
 
 
 class NetworkBasedStatisticInputSpec(BaseInterfaceInputSpec):
-    in_group1 = InputMultiObject(
+    in_group1 = InputMultiPath(
         File(exists=True),
         mandatory=True,
         desc='Networks for the first group of subjects')
-    in_group2 = InputMultiObject(
+    in_group2 = InputMultiPath(
         File(exists=True),
         mandatory=True,
         desc='Networks for the second group of subjects')
@@ -87,7 +87,7 @@ class NetworkBasedStatisticOutputSpec(TraitedSpec):
         desc=
         'Output network with p-values to weight the edges identified by the NBS'
     )
-    network_files = OutputMultiObject(
+    network_files = OutputMultiPath(
         File(exists=True),
         desc='Output network with edges identified by the NBS')
 

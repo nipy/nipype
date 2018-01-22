@@ -15,12 +15,12 @@ import re
 from copy import deepcopy
 
 from ..utils.filemanip import split_filename
-from .base import (CommandLine, CommandLineInputSpec, InputMultiObject, traits,
-                   TraitedSpec, OutputMultiObject, isdefined, File, Directory)
+from .base import (CommandLine, CommandLineInputSpec, InputMultiPath, traits,
+                   TraitedSpec, OutputMultiPath, isdefined, File, Directory)
 
 
 class Dcm2niiInputSpec(CommandLineInputSpec):
-    source_names = InputMultiObject(
+    source_names = InputMultiPath(
         File(exists=True),
         argstr="%s",
         position=-1,
@@ -87,11 +87,11 @@ class Dcm2niiInputSpec(CommandLineInputSpec):
 
 
 class Dcm2niiOutputSpec(TraitedSpec):
-    converted_files = OutputMultiObject(File(exists=True))
-    reoriented_files = OutputMultiObject(File(exists=True))
-    reoriented_and_cropped_files = OutputMultiObject(File(exists=True))
-    bvecs = OutputMultiObject(File(exists=True))
-    bvals = OutputMultiObject(File(exists=True))
+    converted_files = OutputMultiPath(File(exists=True))
+    reoriented_files = OutputMultiPath(File(exists=True))
+    reoriented_and_cropped_files = OutputMultiPath(File(exists=True))
+    bvecs = OutputMultiPath(File(exists=True))
+    bvals = OutputMultiPath(File(exists=True))
 
 
 class Dcm2nii(CommandLine):
@@ -252,7 +252,7 @@ class Dcm2nii(CommandLine):
 
 
 class Dcm2niixInputSpec(CommandLineInputSpec):
-    source_names = InputMultiObject(
+    source_names = InputMultiPath(
         File(exists=True),
         argstr="%s",
         position=-1,
@@ -298,10 +298,10 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
 
 
 class Dcm2niixOutputSpec(TraitedSpec):
-    converted_files = OutputMultiObject(File(exists=True))
-    bvecs = OutputMultiObject(File(exists=True))
-    bvals = OutputMultiObject(File(exists=True))
-    bids = OutputMultiObject(File(exists=True))
+    converted_files = OutputMultiPath(File(exists=True))
+    bvecs = OutputMultiPath(File(exists=True))
+    bvals = OutputMultiPath(File(exists=True))
+    bids = OutputMultiPath(File(exists=True))
 
 
 class Dcm2niix(CommandLine):

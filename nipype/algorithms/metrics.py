@@ -29,7 +29,7 @@ from .. import config, logging
 from ..utils.misc import package_check
 
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
-                               InputMultiObject, BaseInterfaceInputSpec,
+                               InputMultiPath, BaseInterfaceInputSpec,
                                isdefined)
 from ..utils import NUMPY_MMAP
 
@@ -382,11 +382,11 @@ class Overlap(BaseInterface):
 
 
 class FuzzyOverlapInputSpec(BaseInterfaceInputSpec):
-    in_ref = InputMultiObject(
+    in_ref = InputMultiPath(
         File(exists=True),
         mandatory=True,
         desc='Reference image. Requires the same dimensions as in_tst.')
-    in_tst = InputMultiObject(
+    in_tst = InputMultiPath(
         File(exists=True),
         mandatory=True,
         desc='Test image. Requires the same dimensions as in_ref.')

@@ -7,7 +7,7 @@ import os
 
 from ...base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
                      TraitedSpec, File, Directory, traits, isdefined,
-                     InputMultiObject, OutputMultiObject)
+                     InputMultiPath, OutputMultiPath)
 
 
 class HistogramMatchingFilterInputSpec(CommandLineInputSpec):
@@ -73,7 +73,7 @@ contributor: University of Iowa Department of Psychiatry, http:://www.psychiatry
 
 
 class GenerateEdgeMapImageInputSpec(CommandLineInputSpec):
-    inputMRVolumes = InputMultiObject(
+    inputMRVolumes = InputMultiPath(
         File(exists=True),
         desc=
         "List of input structural MR volumes to create the maximum edgemap",
@@ -146,14 +146,14 @@ contributor: Ali Ghayoor
 
 
 class GeneratePurePlugMaskInputSpec(CommandLineInputSpec):
-    inputImageModalities = InputMultiObject(
+    inputImageModalities = InputMultiPath(
         File(exists=True),
         desc="List of input image file names to create pure plugs mask",
         argstr="--inputImageModalities %s...")
     threshold = traits.Float(
         desc="threshold value to define class membership",
         argstr="--threshold %f")
-    numberOfSubSamples = InputMultiObject(
+    numberOfSubSamples = InputMultiPath(
         traits.Int,
         desc=
         "Number of continous index samples taken at each direction of lattice space for each plug volume",

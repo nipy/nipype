@@ -23,7 +23,7 @@ import numpy as np
 from nibabel import load
 
 from ...utils.filemanip import split_filename
-from ..base import (TraitedSpec, File, InputMultiObject, OutputMultiObject,
+from ..base import (TraitedSpec, File, InputMultiPath, OutputMultiPath,
                     Undefined, traits, isdefined)
 from .base import FSLCommand, FSLCommandInputSpec, Info
 
@@ -198,7 +198,7 @@ class BET(FSLCommand):
 
 class FASTInputSpec(FSLCommandInputSpec):
     """ Defines inputs (trait classes) for FAST """
-    in_files = InputMultiObject(
+    in_files = InputMultiPath(
         File(exists=True),
         copyfile=False,
         desc='image, or multi-channel set of images, '
@@ -247,7 +247,7 @@ class FASTInputSpec(FSLCommandInputSpec):
         desc='<standard2input.mat> initialise'
         ' using priors',
         argstr='-a %s')
-    other_priors = InputMultiObject(
+    other_priors = InputMultiPath(
         File(exist=True),
         desc='alternative prior images',
         argstr='-A %s',
@@ -293,12 +293,12 @@ class FASTOutputSpec(TraitedSpec):
         exists=True,
         desc='path/name of binary segmented volume file'
         ' one val for each class  _seg')
-    tissue_class_files = OutputMultiObject(
+    tissue_class_files = OutputMultiPath(
         File(
             desc=(
                 'path/name of binary segmented volumes one file for each class  '
                 '_seg_x')))
-    restored_image = OutputMultiObject(
+    restored_image = OutputMultiPath(
         File(
             desc=(
                 'restored images (one for each input image) named according to '
@@ -307,13 +307,13 @@ class FASTOutputSpec(TraitedSpec):
     mixeltype = File(desc="path/name of mixeltype volume file _mixeltype")
 
     partial_volume_map = File(desc='path/name of partial volume file _pveseg')
-    partial_volume_files = OutputMultiObject(
+    partial_volume_files = OutputMultiPath(
         File(
             desc='path/name of partial volumes files one for each class, _pve_x'
         ))
 
-    bias_field = OutputMultiObject(File(desc='Estimated bias field _bias'))
-    probability_maps = OutputMultiObject(
+    bias_field = OutputMultiPath(File(desc='Estimated bias field _bias'))
+    probability_maps = OutputMultiPath(
         File(desc='filenames, one for each class, for each input, prob_x'))
 
 
@@ -788,9 +788,9 @@ class MCFLIRTOutputSpec(TraitedSpec):
     mean_img = File(
         exists=True, desc="mean timeseries image (if mean_vol=True)")
     par_file = File(exists=True, desc="text-file with motion parameters")
-    mat_file = OutputMultiObject(
+    mat_file = OutputMultiPath(
         File(exists=True), desc="transformation matrices")
-    rms_files = OutputMultiObject(
+    rms_files = OutputMultiPath(
         File(exists=True),
         desc="absolute and relative displacement parameters")
 
@@ -1970,10 +1970,10 @@ class FIRSTInputSpec(FSLCommandInputSpec):
 
 
 class FIRSTOutputSpec(TraitedSpec):
-    vtk_surfaces = OutputMultiObject(
+    vtk_surfaces = OutputMultiPath(
         File(exists=True),
         desc='VTK format meshes for each subcortical region')
-    bvars = OutputMultiObject(
+    bvars = OutputMultiPath(
         File(exists=True), desc='bvars for each subcortical region')
     original_segmentations = File(
         exists=True,

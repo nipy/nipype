@@ -7,7 +7,7 @@ import os
 
 from ...base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
                      TraitedSpec, File, Directory, traits, isdefined,
-                     InputMultiObject, OutputMultiObject)
+                     InputMultiPath, OutputMultiPath)
 
 
 class SimilarityIndexInputSpec(CommandLineInputSpec):
@@ -56,19 +56,19 @@ contributor: Eunyoung Regin Kim
 
 
 class BRAINSTalairachInputSpec(CommandLineInputSpec):
-    AC = InputMultiObject(
+    AC = InputMultiPath(
         traits.Float, desc="Location of AC Point ", sep=",", argstr="--AC %s")
     ACisIndex = traits.Bool(desc="AC Point is Index", argstr="--ACisIndex ")
-    PC = InputMultiObject(
+    PC = InputMultiPath(
         traits.Float, desc="Location of PC Point ", sep=",", argstr="--PC %s")
     PCisIndex = traits.Bool(desc="PC Point is Index", argstr="--PCisIndex ")
-    SLA = InputMultiObject(
+    SLA = InputMultiPath(
         traits.Float,
         desc="Location of SLA Point ",
         sep=",",
         argstr="--SLA %s")
     SLAisIndex = traits.Bool(desc="SLA Point is Index", argstr="--SLAisIndex ")
-    IRP = InputMultiObject(
+    IRP = InputMultiPath(
         traits.Float,
         desc="Location of IRP Point ",
         sep=",",

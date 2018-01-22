@@ -7,7 +7,7 @@ import os
 
 from ...base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
                      TraitedSpec, File, Directory, traits, isdefined,
-                     InputMultiObject, OutputMultiObject)
+                     InputMultiPath, OutputMultiPath)
 
 
 class BRAINSFitInputSpec(CommandLineInputSpec):
@@ -25,7 +25,7 @@ class BRAINSFitInputSpec(CommandLineInputSpec):
         desc=
         "Fraction of voxels of the fixed image that will be used for registration. The number has to be larger than zero and less or equal to one. Higher values increase the computation time but may give more accurate results. You can also limit the sampling focus with ROI masks and ROIAUTO mask generation. The default is 0.002 (use approximately 0.2% of voxels, resulting in 100000 samples in a 512x512x192 volume) to provide a very fast registration in most cases. Typical values range from 0.01 (1%) for low detail images to 0.2 (20%) for high detail images.",
         argstr="--samplingPercentage %f")
-    splineGridSize = InputMultiObject(
+    splineGridSize = InputMultiPath(
         traits.Int,
         desc=
         "Number of BSpline grid subdivisions along each axis of the fixed image, centered on the image space. Values must be 3 or higher for the BSpline to be correctly computed.",
@@ -133,7 +133,7 @@ class BRAINSFitInputSpec(CommandLineInputSpec):
         desc=
         "Apply histogram matching operation for the input images to make them more similar.  This is suitable for images of the same modality that may have different brightness or contrast, but the same overall intensity profile. Do NOT use if registering images from different modalities.",
         argstr="--histogramMatch ")
-    medianFilterSize = InputMultiObject(
+    medianFilterSize = InputMultiPath(
         traits.Int,
         desc=
         "Apply median filtering to reduce noise in the input volumes. The 3 values specify the radius for the optional MedianImageFilter preprocessing in all 3 directions (in voxels).",
@@ -184,7 +184,7 @@ class BRAINSFitInputSpec(CommandLineInputSpec):
         desc=
         "Type of interpolation to be used when applying transform to moving volume.  Options are Linear, NearestNeighbor, BSpline, WindowedSinc, Hamming, Cosine, Welch, Lanczos, or ResampleInPlace.  The ResampleInPlace option will create an image with the same discrete voxel values and will adjust the origin and direction of the physical space interpretation.",
         argstr="--interpolationMode %s")
-    numberOfIterations = InputMultiObject(
+    numberOfIterations = InputMultiPath(
         traits.Int,
         desc=
         "The maximum number of iterations to try before stopping the optimization. When using a lower value (500-1000) then the registration is forced to terminate earlier but there is a higher risk of stopping before an optimal solution is reached.",
@@ -194,7 +194,7 @@ class BRAINSFitInputSpec(CommandLineInputSpec):
         desc=
         "Starting step length of the optimizer. In general, higher values allow for recovering larger initial misalignments but there is an increased chance that the registration will not converge.",
         argstr="--maximumStepLength %f")
-    minimumStepLength = InputMultiObject(
+    minimumStepLength = InputMultiPath(
         traits.Float,
         desc=
         "Each step in the optimization takes steps at least this big.  When none are possible, registration is complete. Smaller values allows the optimizer to make smaller adjustments, but the registration time may increase.",
@@ -267,7 +267,7 @@ class BRAINSFitInputSpec(CommandLineInputSpec):
         desc=
         "Rigid component of the estimated affine transform. Can be used to rigidly register the moving image to the fixed image. NOTE:  This value is overridden if either bsplineTransform or linearTransform is set.",
         argstr="--strippedOutputTransform %s")
-    transformType = InputMultiObject(
+    transformType = InputMultiPath(
         traits.Str,
         desc=
         "Specifies a list of registration types to be used.  The valid types are, Rigid, ScaleVersor3D, ScaleSkewVersor3D, Affine, BSpline and SyN.  Specifying more than one in a comma separated list will initialize the next stage with the previous results. If registrationClass flag is used, it overrides this parameter setting.",

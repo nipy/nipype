@@ -16,7 +16,7 @@ from __future__ import (print_function, division, unicode_literals,
 import os
 
 from ... import logging
-from ..base import (TraitedSpec, File, traits, InputMultiObject, OutputMultiObject,
+from ..base import (TraitedSpec, File, traits, InputMultiPath, OutputMultiPath,
                     isdefined)
 from .base import (FSCommand, FSTraitedSpec, FSCommandOpenMP,
                    FSTraitedSpecOpenMP)
@@ -27,7 +27,7 @@ iflogger = logging.getLogger('interface')
 
 class RobustTemplateInputSpec(FSTraitedSpecOpenMP):
     # required
-    in_files = InputMultiObject(
+    in_files = InputMultiPath(
         File(exists=True),
         mandatory=True,
         argstr='--mov %s',
@@ -53,7 +53,7 @@ class RobustTemplateInputSpec(FSTraitedSpecOpenMP):
         'values mean less sensitivity.')
     # optional
     transform_outputs = traits.Either(
-        InputMultiObject(File(exists=False)),
+        InputMultiPath(File(exists=False)),
         traits.Bool,
         argstr='--lta %s',
         desc='output xforms to template (for each input)')
@@ -62,7 +62,7 @@ class RobustTemplateInputSpec(FSTraitedSpecOpenMP):
         argstr='--iscale',
         desc='allow also intensity scaling (default off)')
     scaled_intensity_outputs = traits.Either(
-        InputMultiObject(File(exists=False)),
+        InputMultiPath(File(exists=False)),
         traits.Bool,
         argstr='--iscaleout %s',
         desc='final intensity scales (will activate --iscale)')
@@ -85,11 +85,11 @@ class RobustTemplateInputSpec(FSTraitedSpecOpenMP):
         default_value=False,
         argstr='--noit',
         desc='do not iterate, just create first template')
-    initial_transforms = InputMultiObject(
+    initial_transforms = InputMultiPath(
         File(exists=True),
         argstr='--ixforms %s',
         desc='use initial transforms (lta) on source')
-    in_intensity_scales = InputMultiObject(
+    in_intensity_scales = InputMultiPath(
         File(exists=True),
         argstr='--iscalein %s',
         desc='use initial intensity scales')
@@ -98,9 +98,9 @@ class RobustTemplateInputSpec(FSTraitedSpecOpenMP):
 class RobustTemplateOutputSpec(TraitedSpec):
     out_file = File(
         exists=True, desc='output template volume (final mean/median image)')
-    transform_outputs = OutputMultiObject(
+    transform_outputs = OutputMultiPath(
         File(exists=True), desc="output xform files from moving to template")
-    scaled_intensity_outputs = OutputMultiObject(
+    scaled_intensity_outputs = OutputMultiPath(
         File(exists=True), desc="output final intensity scales")
 
 
@@ -184,7 +184,7 @@ class FuseSegmentationsInputSpec(FSTraitedSpec):
     # required
     subject_id = traits.String(
         argstr='%s', position=-3, desc="subject_id being processed")
-    timepoints = InputMultiObject(
+    timepoints = InputMultiPath(
         traits.String(),
         mandatory=True,
         argstr='%s',
@@ -195,19 +195,19 @@ class FuseSegmentationsInputSpec(FSTraitedSpec):
         mandatory=True,
         position=-1,
         desc="output fused segmentation file")
-    in_segmentations = InputMultiObject(
+    in_segmentations = InputMultiPath(
         File(exists=True),
         argstr="-a %s",
         mandatory=True,
         desc="name of aseg file to use (default: aseg.mgz) \
         must include the aseg files for all the given timepoints")
-    in_segmentations_noCC = InputMultiObject(
+    in_segmentations_noCC = InputMultiPath(
         File(exists=True),
         argstr="-c %s",
         mandatory=True,
         desc="name of aseg file w/o CC labels (default: aseg.auto_noCCseg.mgz) \
         must include the corresponding file for all the given timepoints")
-    in_norms = InputMultiObject(
+    in_norms = InputMultiPath(
         File(exists=True),
         argstr="-n %s",
         mandatory=True,

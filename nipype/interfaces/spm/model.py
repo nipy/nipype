@@ -28,7 +28,7 @@ from ... import logging
 from ...utils.filemanip import (filename_to_list, list_to_filename,
                                 split_filename)
 from ..base import (Bunch, traits, TraitedSpec, File, Directory,
-                    OutputMultiObject, InputMultiObject, isdefined)
+                    OutputMultiPath, InputMultiPath, isdefined)
 from .base import (SPMCommand, SPMCommandInputSpec, scans_for_fnames,
                    ImageFileSPM)
 
@@ -218,24 +218,24 @@ class EstimateModelInputSpec(SPMCommandInputSpec):
 class EstimateModelOutputSpec(TraitedSpec):
     mask_image = ImageFileSPM(
         exists=True, desc='binary mask to constrain estimation')
-    beta_images = OutputMultiObject(
+    beta_images = OutputMultiPath(
         ImageFileSPM(exists=True), desc='design parameter estimates')
     residual_image = ImageFileSPM(
         exists=True, desc='Mean-squared image of the residuals')
-    residual_images = OutputMultiObject(
+    residual_images = OutputMultiPath(
         ImageFileSPM(exists=True),
         desc="individual residual images (requires `write_residuals`")
     RPVimage = ImageFileSPM(exists=True, desc='Resels per voxel image')
     spm_mat_file = File(exists=True, desc='Updated SPM mat file')
     labels = ImageFileSPM(exists=True, desc="label file")
-    SDerror = OutputMultiObject(
+    SDerror = OutputMultiPath(
         ImageFileSPM(exists=True),
         desc="Images of the standard deviation of the error")
-    ARcoef = OutputMultiObject(
+    ARcoef = OutputMultiPath(
         ImageFileSPM(exists=True), desc="Images of the AR coefficient")
-    Cbetas = OutputMultiObject(
+    Cbetas = OutputMultiPath(
         ImageFileSPM(exists=True), desc="Images of the parameter posteriors")
-    SDbetas = OutputMultiObject(
+    SDbetas = OutputMultiPath(
         ImageFileSPM(exists=True),
         desc="Images of the standard deviation of parameter posteriors")
 
@@ -344,7 +344,7 @@ class EstimateContrastInputSpec(SPMCommandInputSpec):
             F contrasts, the condition list should contain previously defined
             T-contrasts.""",
         mandatory=True)
-    beta_images = InputMultiObject(
+    beta_images = InputMultiPath(
         File(exists=True),
         desc=('Parameter estimates of the '
               'design matrix'),
@@ -362,13 +362,13 @@ class EstimateContrastInputSpec(SPMCommandInputSpec):
 
 
 class EstimateContrastOutputSpec(TraitedSpec):
-    con_images = OutputMultiObject(
+    con_images = OutputMultiPath(
         File(exists=True), desc='contrast images from a t-contrast')
-    spmT_images = OutputMultiObject(
+    spmT_images = OutputMultiPath(
         File(exists=True), desc='stat images from a t-contrast')
-    ess_images = OutputMultiObject(
+    ess_images = OutputMultiPath(
         File(exists=True), desc='contrast images from an F-contrast')
-    spmF_images = OutputMultiObject(
+    spmF_images = OutputMultiPath(
         File(exists=True), desc='stat images from an F-contrast')
     spm_mat_file = File(exists=True, desc='Updated SPM mat file')
 
@@ -862,8 +862,8 @@ clusterwise_P_FDR = spm_P_clusterFDR(extent_threshold*V2R,df,STAT,R,n,cluster_fo
 class FactorialDesignInputSpec(SPMCommandInputSpec):
     spm_mat_dir = Directory(
         exists=True, field='dir', desc='directory to store SPM.mat file (opt)')
-    # Need to make an alias of InputMultiObject; the inputs below are not Path
-    covariates = InputMultiObject(
+    # Need to make an alias of InputMultiPath; the inputs below are not Path
+    covariates = InputMultiPath(
         traits.Dict(
             key_trait=traits.Enum('vector', 'name', 'interaction',
                                   'centering')),
@@ -1092,7 +1092,7 @@ class MultipleRegressionDesignInputSpec(FactorialDesignInputSpec):
         field='des.mreg.incint',
         usedefault=True,
         desc='Include intercept in design')
-    user_covariates = InputMultiObject(
+    user_covariates = InputMultiPath(
         traits.Dict(key_trait=traits.Enum('vector', 'name', 'centering')),
         field='des.mreg.mcov',
         desc=('covariate dictionary {vector, '

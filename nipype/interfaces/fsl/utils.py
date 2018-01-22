@@ -30,7 +30,7 @@ import numpy as np
 
 from ...utils.filemanip import (load_json, save_json, split_filename,
                                 fname_presuffix)
-from ..base import (traits, TraitedSpec, OutputMultiObject, File, CommandLine,
+from ..base import (traits, TraitedSpec, OutputMultiPath, File, CommandLine,
                     CommandLineInputSpec, isdefined)
 from .base import FSLCommand, FSLCommandInputSpec, Info
 
@@ -467,7 +467,7 @@ class SplitInputSpec(FSLCommandInputSpec):
 
 
 class SplitOutputSpec(TraitedSpec):
-    out_files = OutputMultiObject(File(exists=True))
+    out_files = OutputMultiPath(File(exists=True))
 
 
 class Split(FSLCommand):
