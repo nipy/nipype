@@ -285,7 +285,6 @@ def dict_diff(dold, dnew, indent=0):
     # Values in common keys would differ quite often,
     # so we need to join the messages together
     for k in new_keys.intersection(old_keys):
-        same = False
         try:
             new, old = dnew[k], dold[k]
             same = new == old
