@@ -148,7 +148,6 @@ REQUIRES = [
     'pydotplus',
     'pydot>=%s' % PYDOT_MIN_VERSION,
     'packaging',
-    'yapf'
 ]
 
 if sys.version_info <= (3, 4):
