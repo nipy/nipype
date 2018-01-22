@@ -24,7 +24,7 @@ from ... import logging
 from ...utils.filemanip import split_filename
 from ...utils.misc import package_check
 from ..base import (BaseInterface, BaseInterfaceInputSpec, traits, File,
-                    TraitedSpec, InputMultiPath, OutputMultiPath, isdefined)
+                    TraitedSpec, InputMultiObject, OutputMultiObject, isdefined)
 
 iflogger = logging.getLogger('interface')
 
@@ -407,9 +407,9 @@ class NetworkXMetricsInputSpec(BaseInterfaceInputSpec):
 
 
 class NetworkXMetricsOutputSpec(TraitedSpec):
-    gpickled_network_files = OutputMultiPath(
+    gpickled_network_files = OutputMultiObject(
         File(desc='Output gpickled network files'))
-    matlab_matrix_files = OutputMultiPath(
+    matlab_matrix_files = OutputMultiObject(
         File(desc='Output network metrics in MATLAB .mat format'))
     global_measures_matlab = File(
         desc='Output global metrics in MATLAB .mat format')
@@ -417,11 +417,11 @@ class NetworkXMetricsOutputSpec(TraitedSpec):
         desc='Output node metrics in MATLAB .mat format')
     edge_measures_matlab = File(
         desc='Output edge metrics in MATLAB .mat format')
-    node_measure_networks = OutputMultiPath(
+    node_measure_networks = OutputMultiObject(
         File(desc='Output gpickled network files for all node-based measures'))
-    edge_measure_networks = OutputMultiPath(
+    edge_measure_networks = OutputMultiObject(
         File(desc='Output gpickled network files for all edge-based measures'))
-    k_networks = OutputMultiPath(
+    k_networks = OutputMultiObject(
         File(
             desc=
             'Output gpickled network files for the k-core, k-shell, and k-crust networks'
@@ -435,7 +435,7 @@ class NetworkXMetricsOutputSpec(TraitedSpec):
         desc=
         'Network measures for the group that return dictionaries, stored as a Pickle.'
     )
-    matlab_dict_measures = OutputMultiPath(
+    matlab_dict_measures = OutputMultiObject(
         File(
             desc=
             'Network measures for the group that return dictionaries, stored as matlab matrices.'
@@ -594,7 +594,7 @@ class NetworkXMetrics(BaseInterface):
 
 
 class AverageNetworksInputSpec(BaseInterfaceInputSpec):
-    in_files = InputMultiPath(
+    in_files = InputMultiObject(
         File(exists=True),
         mandatory=True,
         desc='Networks for a group of subjects')
@@ -613,7 +613,7 @@ class AverageNetworksInputSpec(BaseInterfaceInputSpec):
 class AverageNetworksOutputSpec(TraitedSpec):
     gpickled_groupavg = File(desc='Average network saved as a NetworkX .pck')
     gexf_groupavg = File(desc='Average network saved as a .gexf file')
-    matlab_groupavgs = OutputMultiPath(
+    matlab_groupavgs = OutputMultiObject(
         File(desc='Average network saved as a .gexf file'))
 
 

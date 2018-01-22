@@ -7,15 +7,15 @@ import os
 
 from ...base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
                      TraitedSpec, File, Directory, traits, isdefined,
-                     InputMultiPath, OutputMultiPath)
+                     InputMultiObject, OutputMultiObject)
 
 
 class VBRAINSDemonWarpInputSpec(CommandLineInputSpec):
-    movingVolume = InputMultiPath(
+    movingVolume = InputMultiObject(
         File(exists=True),
         desc="Required: input moving image",
         argstr="--movingVolume %s...")
-    fixedVolume = InputMultiPath(
+    fixedVolume = InputMultiObject(
         File(exists=True),
         desc="Required: input fixed (target) image",
         argstr="--fixedVolume %s...")
@@ -82,19 +82,19 @@ class VBRAINSDemonWarpInputSpec(CommandLineInputSpec):
         desc=
         "Number of image pyramid levels to use in the multi-resolution registration.",
         argstr="--numberOfPyramidLevels %d")
-    minimumFixedPyramid = InputMultiPath(
+    minimumFixedPyramid = InputMultiObject(
         traits.Int,
         desc=
         "The shrink factor for the first level of the fixed image pyramid. (i.e. start at 1/16 scale, then 1/8, then 1/4, then 1/2, and finally full scale)",
         sep=",",
         argstr="--minimumFixedPyramid %s")
-    minimumMovingPyramid = InputMultiPath(
+    minimumMovingPyramid = InputMultiObject(
         traits.Int,
         desc=
         "The shrink factor for the first level of the moving image pyramid. (i.e. start at 1/16 scale, then 1/8, then 1/4, then 1/2, and finally full scale)",
         sep=",",
         argstr="--minimumMovingPyramid %s")
-    arrayOfPyramidLevelIterations = InputMultiPath(
+    arrayOfPyramidLevelIterations = InputMultiObject(
         traits.Int,
         desc="The number of iterations for each pyramid level",
         sep=",",
@@ -109,7 +109,7 @@ class VBRAINSDemonWarpInputSpec(CommandLineInputSpec):
     numberOfMatchPoints = traits.Int(
         desc="The number of match points for histrogramMatch",
         argstr="--numberOfMatchPoints %d")
-    medianFilterSize = InputMultiPath(
+    medianFilterSize = InputMultiObject(
         traits.Int,
         desc=
         "Median filter radius in all 3 directions.  When images have a lot of salt and pepper noise, this step can improve the registration.",
@@ -145,12 +145,12 @@ class VBRAINSDemonWarpInputSpec(CommandLineInputSpec):
     backgroundFillValue = traits.Int(
         desc="Replacement value to overwrite background when performing BOBF",
         argstr="--backgroundFillValue %d")
-    seedForBOBF = InputMultiPath(
+    seedForBOBF = InputMultiObject(
         traits.Int,
         desc="coordinates in all 3 directions for Seed when performing BOBF",
         sep=",",
         argstr="--seedForBOBF %s")
-    neighborhoodForBOBF = InputMultiPath(
+    neighborhoodForBOBF = InputMultiObject(
         traits.Int,
         desc=
         "neighborhood in all 3 directions to be included when performing BOBF",
@@ -167,7 +167,7 @@ class VBRAINSDemonWarpInputSpec(CommandLineInputSpec):
         desc=
         "Genete a checkerboard image volume between the fixedVolume and the deformed movingVolume.",
         argstr="--outputCheckerboardVolume %s")
-    checkerboardPatternSubdivisions = InputMultiPath(
+    checkerboardPatternSubdivisions = InputMultiObject(
         traits.Int,
         desc="Number of Checkerboard subdivisions in all 3 directions",
         sep=",",
@@ -179,7 +179,7 @@ class VBRAINSDemonWarpInputSpec(CommandLineInputSpec):
     outputDebug = traits.Bool(
         desc="Flag to write debugging images after each step.",
         argstr="--outputDebug ")
-    weightFactors = InputMultiPath(
+    weightFactors = InputMultiObject(
         traits.Float,
         desc="Weight fatctors for each input images",
         sep=",",
@@ -329,19 +329,19 @@ class BRAINSDemonWarpInputSpec(CommandLineInputSpec):
         desc=
         "Number of image pyramid levels to use in the multi-resolution registration.",
         argstr="--numberOfPyramidLevels %d")
-    minimumFixedPyramid = InputMultiPath(
+    minimumFixedPyramid = InputMultiObject(
         traits.Int,
         desc=
         "The shrink factor for the first level of the fixed image pyramid. (i.e. start at 1/16 scale, then 1/8, then 1/4, then 1/2, and finally full scale)",
         sep=",",
         argstr="--minimumFixedPyramid %s")
-    minimumMovingPyramid = InputMultiPath(
+    minimumMovingPyramid = InputMultiObject(
         traits.Int,
         desc=
         "The shrink factor for the first level of the moving image pyramid. (i.e. start at 1/16 scale, then 1/8, then 1/4, then 1/2, and finally full scale)",
         sep=",",
         argstr="--minimumMovingPyramid %s")
-    arrayOfPyramidLevelIterations = InputMultiPath(
+    arrayOfPyramidLevelIterations = InputMultiObject(
         traits.Int,
         desc="The number of iterations for each pyramid level",
         sep=",",
@@ -356,7 +356,7 @@ class BRAINSDemonWarpInputSpec(CommandLineInputSpec):
     numberOfMatchPoints = traits.Int(
         desc="The number of match points for histrogramMatch",
         argstr="--numberOfMatchPoints %d")
-    medianFilterSize = InputMultiPath(
+    medianFilterSize = InputMultiObject(
         traits.Int,
         desc=
         "Median filter radius in all 3 directions.  When images have a lot of salt and pepper noise, this step can improve the registration.",
@@ -396,12 +396,12 @@ class BRAINSDemonWarpInputSpec(CommandLineInputSpec):
     backgroundFillValue = traits.Int(
         desc="Replacement value to overwrite background when performing BOBF",
         argstr="--backgroundFillValue %d")
-    seedForBOBF = InputMultiPath(
+    seedForBOBF = InputMultiObject(
         traits.Int,
         desc="coordinates in all 3 directions for Seed when performing BOBF",
         sep=",",
         argstr="--seedForBOBF %s")
-    neighborhoodForBOBF = InputMultiPath(
+    neighborhoodForBOBF = InputMultiObject(
         traits.Int,
         desc=
         "neighborhood in all 3 directions to be included when performing BOBF",
@@ -418,7 +418,7 @@ class BRAINSDemonWarpInputSpec(CommandLineInputSpec):
         desc=
         "Genete a checkerboard image volume between the fixedVolume and the deformed movingVolume.",
         argstr="--outputCheckerboardVolume %s")
-    checkerboardPatternSubdivisions = InputMultiPath(
+    checkerboardPatternSubdivisions = InputMultiObject(
         traits.Int,
         desc="Number of Checkerboard subdivisions in all 3 directions",
         sep=",",
@@ -506,11 +506,11 @@ acknowledgements: The development of this tool was supported by funding from gra
 
 
 class BRAINSTransformFromFiducialsInputSpec(CommandLineInputSpec):
-    fixedLandmarks = InputMultiPath(
+    fixedLandmarks = InputMultiObject(
         traits.List(traits.Float(), minlen=3, maxlen=3),
         desc="Ordered list of landmarks in the fixed image",
         argstr="--fixedLandmarks %s...")
-    movingLandmarks = InputMultiPath(
+    movingLandmarks = InputMultiObject(
         traits.List(traits.Float(), minlen=3, maxlen=3),
         desc="Ordered list of landmarks in the moving image",
         argstr="--movingLandmarks %s...")

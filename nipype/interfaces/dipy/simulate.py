@@ -17,21 +17,21 @@ import nibabel as nb
 from ... import logging
 from ...utils import NUMPY_MMAP
 from ..base import (traits, TraitedSpec, BaseInterfaceInputSpec, File,
-                    InputMultiPath, isdefined)
+                    InputMultiObject, isdefined)
 from .base import DipyBaseInterface
 IFLOGGER = logging.getLogger('interface')
 
 
 class SimulateMultiTensorInputSpec(BaseInterfaceInputSpec):
-    in_dirs = InputMultiPath(
+    in_dirs = InputMultiObject(
         File(exists=True),
         mandatory=True,
         desc='list of fibers (principal directions)')
-    in_frac = InputMultiPath(
+    in_frac = InputMultiObject(
         File(exists=True),
         mandatory=True,
         desc=('volume fraction of each fiber'))
-    in_vfms = InputMultiPath(
+    in_vfms = InputMultiObject(
         File(exists=True),
         mandatory=True,
         desc=('volume fractions of isotropic '

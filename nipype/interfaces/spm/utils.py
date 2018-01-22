@@ -9,8 +9,8 @@ import numpy as np
 
 from ...utils.filemanip import (split_filename, fname_presuffix,
                                 filename_to_list, list_to_filename)
-from ..base import (TraitedSpec, isdefined, File, traits, OutputMultiPath,
-                    InputMultiPath)
+from ..base import (TraitedSpec, isdefined, File, traits, OutputMultiObject,
+                    InputMultiObject)
 from .base import (SPMCommandInputSpec, SPMCommand, scans_for_fnames,
                    scans_for_fname)
 
@@ -248,7 +248,7 @@ class Reslice(SPMCommand):
 
 
 class ApplyInverseDeformationInput(SPMCommandInputSpec):
-    in_files = InputMultiPath(
+    in_files = InputMultiObject(
         File(exists=True),
         mandatory=True,
         field='fnames',
@@ -288,7 +288,7 @@ class ApplyInverseDeformationInput(SPMCommandInputSpec):
 
 
 class ApplyInverseDeformationOutput(TraitedSpec):
-    out_files = OutputMultiPath(File(exists=True), desc='Transformed files')
+    out_files = OutputMultiObject(File(exists=True), desc='Transformed files')
 
 
 class ApplyInverseDeformation(SPMCommand):
@@ -335,7 +335,7 @@ class ApplyInverseDeformation(SPMCommand):
 
 
 class ResliceToReferenceInput(SPMCommandInputSpec):
-    in_files = InputMultiPath(
+    in_files = InputMultiObject(
         File(exists=True),
         mandatory=True,
         field='fnames',
@@ -365,7 +365,7 @@ class ResliceToReferenceInput(SPMCommandInputSpec):
 
 
 class ResliceToReferenceOutput(TraitedSpec):
-    out_files = OutputMultiPath(File(exists=True), desc='Transformed files')
+    out_files = OutputMultiObject(File(exists=True), desc='Transformed files')
 
 
 class ResliceToReference(SPMCommand):
@@ -411,7 +411,7 @@ class ResliceToReference(SPMCommand):
 
 
 class DicomImportInputSpec(SPMCommandInputSpec):
-    in_files = InputMultiPath(
+    in_files = InputMultiObject(
         File(exists=True),
         mandatory=True,
         field='data',
@@ -449,7 +449,7 @@ class DicomImportInputSpec(SPMCommandInputSpec):
 
 
 class DicomImportOutputSpec(TraitedSpec):
-    out_files = OutputMultiPath(File(exists=True), desc='converted files')
+    out_files = OutputMultiObject(File(exists=True), desc='converted files')
 
 
 class DicomImport(SPMCommand):

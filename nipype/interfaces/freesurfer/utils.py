@@ -20,7 +20,7 @@ import shutil
 
 from ... import logging
 from ...utils.filemanip import fname_presuffix, split_filename
-from ..base import (TraitedSpec, File, traits, OutputMultiPath, isdefined,
+from ..base import (TraitedSpec, File, traits, OutputMultiObject, isdefined,
                     CommandLine, CommandLineInputSpec)
 from .base import (FSCommand, FSTraitedSpec, FSSurfaceCommand, FSScriptCommand,
                    FSScriptOutputSpec, FSTraitedSpecOpenMP, FSCommandOpenMP)
@@ -865,7 +865,7 @@ class SurfaceSnapshotsInputSpec(FSTraitedSpec):
 
 class SurfaceSnapshotsOutputSpec(TraitedSpec):
 
-    snapshots = OutputMultiPath(
+    snapshots = OutputMultiObject(
         File(exists=True),
         desc="tiff images of the surface from different perspectives")
 

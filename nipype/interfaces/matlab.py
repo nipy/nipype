@@ -8,7 +8,7 @@ from builtins import open
 import os
 
 from .. import config
-from .base import (CommandLineInputSpec, InputMultiPath, isdefined,
+from .base import (CommandLineInputSpec, InputMultiObject, isdefined,
                    CommandLine, traits, File, Directory)
 
 
@@ -69,7 +69,7 @@ class MatlabInputSpec(CommandLineInputSpec):
     mfile = traits.Bool(True, desc='Run m-code using m-file', usedefault=True)
     script_file = File(
         'pyscript.m', usedefault=True, desc='Name of file to write m-code to')
-    paths = InputMultiPath(Directory(), desc='Paths to add to matlabpath')
+    paths = InputMultiObject(Directory(), desc='Paths to add to matlabpath')
     prescript = traits.List(
         ["ver,", "try,"],
         usedefault=True,

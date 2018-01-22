@@ -7,7 +7,7 @@ import os
 
 from ...base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
                      TraitedSpec, File, Directory, traits, isdefined,
-                     InputMultiPath, OutputMultiPath)
+                     InputMultiObject, OutputMultiObject)
 
 
 class UnbiasedNonLocalMeansInputSpec(CommandLineInputSpec):
@@ -15,13 +15,13 @@ class UnbiasedNonLocalMeansInputSpec(CommandLineInputSpec):
         desc=
         "The root power of noise (sigma) in the complex Gaussian process the Rician comes from. If it is underestimated, the algorithm fails to remove the noise. If it is overestimated, over-blurring is likely to occur.",
         argstr="--sigma %f")
-    rs = InputMultiPath(
+    rs = InputMultiObject(
         traits.Int,
         desc=
         "The algorithm search for similar voxels in a neighborhood of this radius (radii larger than 5,5,5 are very slow, and the results can be only marginally better. Small radii may fail to effectively remove the noise).",
         sep=",",
         argstr="--rs %s")
-    rc = InputMultiPath(
+    rc = InputMultiObject(
         traits.Int,
         desc=
         "Similarity between blocks is computed as the difference between mean values and gradients. These parameters are computed fitting a hyperplane with LS inside a neighborhood of this size",

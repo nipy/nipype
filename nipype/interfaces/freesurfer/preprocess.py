@@ -25,8 +25,8 @@ from nibabel import load
 from ... import logging, LooseVersion
 from ...utils.filemanip import fname_presuffix, check_depends
 from ..io import FreeSurferSource
-from ..base import (TraitedSpec, File, traits, Directory, InputMultiPath,
-                    OutputMultiPath, CommandLine, CommandLineInputSpec,
+from ..base import (TraitedSpec, File, traits, Directory, InputMultiObject,
+                    OutputMultiObject, CommandLine, CommandLineInputSpec,
                     isdefined)
 from .base import (FSCommand, FSTraitedSpec, FSTraitedSpecOpenMP,
                    FSCommandOpenMP, Info)
@@ -422,7 +422,7 @@ class MRIConvertInputSpec(FSTraitedSpec):
 
 
 class MRIConvertOutputSpec(TraitedSpec):
-    out_file = OutputMultiPath(File(exists=True), desc='converted output file')
+    out_file = OutputMultiObject(File(exists=True), desc='converted output file')
 
 
 class MRIConvert(FSCommand):
@@ -750,7 +750,7 @@ class ReconAllInputSpec(CommandLineInputSpec):
         position=0)
     hemi = traits.Enum(
         'lh', 'rh', desc='hemisphere to process', argstr="-hemi %s")
-    T1_files = InputMultiPath(
+    T1_files = InputMultiObject(
         File(exists=True),
         argstr='-i %s...',
         desc='name of T1 file to process')
@@ -819,7 +819,7 @@ class ReconAllInputSpec(CommandLineInputSpec):
         hash_files=False,
         desc='path to subjects directory',
         genfile=True)
-    flags = InputMultiPath(
+    flags = InputMultiObject(
         traits.Str, argstr='%s', desc='additional parameters')
 
     # Expert options
@@ -2455,7 +2455,7 @@ class CARegisterInputSpec(FSTraitedSpecOpenMP):
     A = traits.Int(
         argstr='-A %d',
         desc='undocumented flag used in longitudinal processing')
-    l_files = InputMultiPath(
+    l_files = InputMultiObject(
         File(exists=False),
         argstr='-l %s',
         desc='undocumented flag used in longitudinal processing')

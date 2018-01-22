@@ -7,11 +7,11 @@ import os
 
 from ...base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
                      TraitedSpec, File, Directory, traits, isdefined,
-                     InputMultiPath, OutputMultiPath)
+                     InputMultiObject, OutputMultiObject)
 
 
 class dtiaverageInputSpec(CommandLineInputSpec):
-    inputs = InputMultiPath(
+    inputs = InputMultiObject(
         File(exists=True),
         desc="List of all the tensor fields to be averaged",
         argstr="--inputs %s...")
@@ -135,7 +135,7 @@ class dtiestimInputSpec(CommandLineInputSpec):
         "Tensor components are saved as doubles (cannot be visualized in Slicer)",
         argstr="--DTI_double ")
     verbose = traits.Bool(desc="produce verbose output", argstr="--verbose ")
-    defaultTensor = InputMultiPath(
+    defaultTensor = InputMultiObject(
         traits.Float,
         desc=
         "Default tensor used if estimated tensor is below a given threshold",

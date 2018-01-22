@@ -7,7 +7,7 @@ import os
 
 from ...base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
                      TraitedSpec, File, Directory, traits, isdefined,
-                     InputMultiPath, OutputMultiPath)
+                     InputMultiObject, OutputMultiObject)
 
 
 class BRAINSResampleInputSpec(CommandLineInputSpec):
@@ -65,7 +65,7 @@ class BRAINSResampleInputSpec(CommandLineInputSpec):
         argstr="--inverseTransform ")
     defaultValue = traits.Float(
         desc="Default voxel value", argstr="--defaultValue %f")
-    gridSpacing = InputMultiPath(
+    gridSpacing = InputMultiObject(
         traits.Int,
         desc=
         "Add warped grid to output image to help show the deformation that occured with specified spacing.   A spacing of 0 in a dimension indicates that grid lines should be rendered to fall exactly (i.e. do not allow displacements off that plane).  This is useful for makeing a 2D image of grid lines from the 3D space",

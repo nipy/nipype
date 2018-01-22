@@ -15,7 +15,7 @@ import glob
 
 from ...utils.filemanip import split_filename
 from ..base import (CommandLineInputSpec, CommandLine, traits, TraitedSpec,
-                    File, StdOutCommandLine, OutputMultiPath,
+                    File, StdOutCommandLine, OutputMultiObject,
                     StdOutCommandLineInputSpec, isdefined)
 
 
@@ -422,7 +422,7 @@ class ProcStreamlinesInputSpec(StdOutCommandLineInputSpec):
 
 class ProcStreamlinesOutputSpec(TraitedSpec):
     proc = File(exists=True, desc='Processed Streamlines')
-    outputroot_files = OutputMultiPath(File(exists=True))
+    outputroot_files = OutputMultiObject(File(exists=True))
 
 
 class ProcStreamlines(StdOutCommandLine):

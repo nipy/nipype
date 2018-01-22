@@ -390,8 +390,8 @@ def has_metadata(trait, metadata, value=None, recursive=True):
     return count > 0
 
 
-class MultiPath(traits.List):
-    """ Abstract class - shared functionality of input and output MultiPath
+class MultiObject(traits.List):
+    """ Abstract class - shared functionality of input and output MultiObject
     """
 
     def validate(self, object, name, value):
@@ -412,12 +412,12 @@ class MultiPath(traits.List):
                 isinstance(self.inner_traits()[0].trait_type,
                            traits.List) and not
                 isinstance(self.inner_traits()[0].trait_type,
-                           InputMultiPath) and
+                           InputMultiObject) and
                 isinstance(value, list) and
                 value and not
                 isinstance(value[0], list)):
             newvalue = [value]
-        value = super(MultiPath, self).validate(object, name, newvalue)
+        value = super(MultiObject, self).validate(object, name, newvalue)
 
         if value:
             return value
@@ -425,7 +425,7 @@ class MultiPath(traits.List):
         self.error(object, name, value)
 
 
-class OutputMultiPath(MultiPath):
+class OutputMultiObject(MultiObject):
     """ Implements a user friendly traits that accepts one or more
     paths to files or directories. This is the output version which
     return a single string whenever possible (when it was set to a
@@ -437,9 +437,9 @@ class OutputMultiPath(MultiPath):
 
     XXX This needs to be vetted by somebody who understands traits
 
-    >>> from nipype.interfaces.base import OutputMultiPath, TraitedSpec
+    >>> from nipype.interfaces.base import OutputMultiObject, TraitedSpec
     >>> class A(TraitedSpec):
-    ...     foo = OutputMultiPath(File(exists=False))
+    ...     foo = OutputMultiObject(File(exists=False))
     >>> a = A()
     >>> a.foo
     <undefined>
@@ -471,7 +471,7 @@ class OutputMultiPath(MultiPath):
         self.set_value(object, name, value)
 
 
-class InputMultiPath(MultiPath):
+class InputMultiObject(MultiObject):
     """ Implements a user friendly traits that accepts one or more
     paths to files or directories. This is the input version which
     always returns a list. Default value of this trait
@@ -482,9 +482,9 @@ class InputMultiPath(MultiPath):
 
     XXX This needs to be vetted by somebody who understands traits
 
-    >>> from nipype.interfaces.base import InputMultiPath, TraitedSpec
+    >>> from nipype.interfaces.base import InputMultiObject, TraitedSpec
     >>> class A(TraitedSpec):
-    ...     foo = InputMultiPath(File(exists=False))
+    ...     foo = InputMultiObject(File(exists=False))
     >>> a = A()
     >>> a.foo
     <undefined>

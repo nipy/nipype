@@ -12,12 +12,12 @@ from __future__ import (print_function, division, unicode_literals,
 import os
 
 from ..base import (traits, TraitedSpec, File, CommandLine,
-                    CommandLineInputSpec, InputMultiPath)
+                    CommandLineInputSpec, InputMultiObject)
 from ...utils.filemanip import split_filename
 
 
 class ImageStatsInputSpec(CommandLineInputSpec):
-    in_files = InputMultiPath(
+    in_files = InputMultiObject(
         File(exists=True),
         argstr='-images %s',
         mandatory=True,

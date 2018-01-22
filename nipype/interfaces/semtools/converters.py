@@ -7,7 +7,7 @@ import os
 
 from ..base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
                     TraitedSpec, File, Directory, traits, isdefined,
-                    InputMultiPath, OutputMultiPath)
+                    InputMultiObject, OutputMultiObject)
 
 
 class DWISimpleCompareInputSpec(CommandLineInputSpec):

@@ -30,7 +30,7 @@ import numpy as np
 from scipy.special import gammaln
 
 from ..utils import NUMPY_MMAP
-from ..interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
+from ..interfaces.base import (BaseInterface, TraitedSpec, InputMultiObject,
                                traits, File, Bunch, BaseInterfaceInputSpec,
                                isdefined)
 from ..utils.filemanip import filename_to_list
@@ -182,7 +182,7 @@ def gen_info(run_event_files):
 
 
 class SpecifyModelInputSpec(BaseInterfaceInputSpec):
-    subject_info = InputMultiPath(
+    subject_info = InputMultiObject(
         Bunch,
         mandatory=True,
         xor=['subject_info', 'event_files'],
@@ -190,14 +190,14 @@ class SpecifyModelInputSpec(BaseInterfaceInputSpec):
         'condition information. see '
         ':ref:`SpecifyModel` or '
         'SpecifyModel.__doc__ for details')
-    event_files = InputMultiPath(
+    event_files = InputMultiObject(
         traits.List(File(exists=True)),
         mandatory=True,
         xor=['subject_info', 'event_files'],
         desc='List of event description files 1, 2 or 3 '
         'column format corresponding to onsets, '
         'durations and amplitudes')
-    realignment_parameters = InputMultiPath(
+    realignment_parameters = InputMultiObject(
         File(exists=True),
         desc='Realignment parameters returned '
         'by motion correction algorithm',
@@ -210,12 +210,12 @@ class SpecifyModelInputSpec(BaseInterfaceInputSpec):
         "NIPY",
         usedefault=True,
         desc="Source of motion parameters")
-    outlier_files = InputMultiPath(
+    outlier_files = InputMultiObject(
         File(exists=True),
         desc='Files containing scan outlier indices '
         'that should be tossed',
         copyfile=False)
-    functional_runs = InputMultiPath(
+    functional_runs = InputMultiObject(
         traits.Either(traits.List(File(exists=True)), File(exists=True)),
         mandatory=True,
         desc='Data files for model. List of 4D '

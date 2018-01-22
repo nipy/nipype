@@ -7,7 +7,7 @@ import argparse
 import inspect
 import sys
 
-from ..interfaces.base import Interface, InputMultiPath, traits
+from ..interfaces.base import Interface, InputMultiObject, traits
 from .misc import str2bool
 
 
@@ -38,11 +38,11 @@ def add_options(parser=None, module=None, function=None):
                 args["action"] = 'store_true'
 
             if hasattr(spec, "mandatory") and spec.mandatory:
-                if spec.is_trait_type(InputMultiPath):
+                if spec.is_trait_type(InputMultiObject):
                     args["nargs"] = "+"
                 parser.add_argument(name, help=desc, **args)
             else:
-                if spec.is_trait_type(InputMultiPath):
+                if spec.is_trait_type(InputMultiObject):
                     args["nargs"] = "*"
                 parser.add_argument(
                     "--%s" % name, dest=name, help=desc, **args)

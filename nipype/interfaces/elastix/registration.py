@@ -16,7 +16,7 @@ import re
 
 from ... import logging
 from .base import ElastixBaseInputSpec
-from ..base import CommandLine, TraitedSpec, File, traits, InputMultiPath
+from ..base import CommandLine, TraitedSpec, File, traits, InputMultiObject
 
 iflogger = logging.getLogger('interface')
 
@@ -26,7 +26,7 @@ class RegistrationInputSpec(ElastixBaseInputSpec):
         exists=True, mandatory=True, argstr='-f %s', desc='fixed image')
     moving_image = File(
         exists=True, mandatory=True, argstr='-m %s', desc='moving image')
-    parameters = InputMultiPath(
+    parameters = InputMultiObject(
         File(exists=True),
         mandatory=True,
         argstr='-p %s...',
@@ -42,9 +42,9 @@ class RegistrationInputSpec(ElastixBaseInputSpec):
 
 
 class RegistrationOutputSpec(TraitedSpec):
-    transform = InputMultiPath(File(exists=True), desc='output transform')
+    transform = InputMultiObject(File(exists=True), desc='output transform')
     warped_file = File(desc='input moving image warped to fixed image')
-    warped_files = InputMultiPath(
+    warped_files = InputMultiObject(
         File(exists=False),
         desc=('input moving image warped to fixed image at each level'))
     warped_files_flags = traits.List(

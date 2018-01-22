@@ -7,7 +7,7 @@ import os
 
 from ...base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
                      TraitedSpec, File, Directory, traits, isdefined,
-                     InputMultiPath, OutputMultiPath)
+                     InputMultiObject, OutputMultiObject)
 
 
 class BRAINSConstellationModelerInputSpec(CommandLineInputSpec):
@@ -53,7 +53,7 @@ class BRAINSConstellationModelerInputSpec(CommandLineInputSpec):
         desc=
         ",                 Turn on clipping the rescaled image one-tailed on input.  Units of standard deviations above the mean.  Very large values are very permissive.  Non-positive value turns clipping off.  Defaults to removing 0.00001 of a normal tail above the mean.,             ",
         argstr="--trimRescaledIntensities %f")
-    rescaleIntensitiesOutputRange = InputMultiPath(
+    rescaleIntensitiesOutputRange = InputMultiObject(
         traits.Int,
         desc=
         ",                 This pair of integers gives the lower and upper bounds on the signal portion of the output image.  Out-of-field voxels are taken from BackgroundFillValue.,             ",
@@ -308,7 +308,7 @@ class BRAINSMushInputSpec(CommandLineInputSpec):
         hash_files=False,
         desc="The brain volume mask generated from the MUSH image",
         argstr="--outputMask %s")
-    seed = InputMultiPath(
+    seed = InputMultiObject(
         traits.Int,
         desc="Seed Point for Brain Region Filling",
         sep=",",
@@ -332,13 +332,13 @@ class BRAINSMushInputSpec(CommandLineInputSpec):
     upperThresholdFactor = traits.Float(
         desc="Upper threshold factor for defining the brain mask",
         argstr="--upperThresholdFactor %f")
-    boundingBoxSize = InputMultiPath(
+    boundingBoxSize = InputMultiObject(
         traits.Int,
         desc=
         "Size of the cubic bounding box mask used when no brain mask is present",
         sep=",",
         argstr="--boundingBoxSize %s")
-    boundingBoxStart = InputMultiPath(
+    boundingBoxStart = InputMultiObject(
         traits.Int,
         desc=
         "XYZ point-coordinate for the start of the cubic bounding box mask used when no brain mask is present",
@@ -566,13 +566,13 @@ class BRAINSInitializedControlPointsInputSpec(CommandLineInputSpec):
         hash_files=False,
         desc="Output Volume",
         argstr="--outputVolume %s")
-    splineGridSize = InputMultiPath(
+    splineGridSize = InputMultiObject(
         traits.Int,
         desc=
         "The number of subdivisions of the BSpline Grid to be centered on the image space.  Each dimension must have at least 3 subdivisions for the BSpline to be correctly computed. ",
         sep=",",
         argstr="--splineGridSize %s")
-    permuteOrder = InputMultiPath(
+    permuteOrder = InputMultiObject(
         traits.Int,
         desc=
         "The permutation order for the images.  The default is 0,1,2 (i.e. no permutation)",
@@ -614,14 +614,14 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 
 class CleanUpOverlapLabelsInputSpec(CommandLineInputSpec):
-    inputBinaryVolumes = InputMultiPath(
+    inputBinaryVolumes = InputMultiObject(
         File(exists=True),
         desc=
         "The list of binary images to be checked and cleaned up. Order is important. Binary volume given first always wins out. ",
         argstr="--inputBinaryVolumes %s...")
     outputBinaryVolumes = traits.Either(
         traits.Bool,
-        InputMultiPath(File(), ),
+        InputMultiObject(File(), ),
         hash_files=False,
         desc=
         "The output label map images, with integer values in it. Each label value specified in the inputLabels is combined into this output label map volume",
@@ -629,7 +629,7 @@ class CleanUpOverlapLabelsInputSpec(CommandLineInputSpec):
 
 
 class CleanUpOverlapLabelsOutputSpec(TraitedSpec):
-    outputBinaryVolumes = OutputMultiPath(
+    outputBinaryVolumes = OutputMultiObject(
         File(exists=True),
         desc=
         "The output label map images, with integer values in it. Each label value specified in the inputLabels is combined into this output label map volume"
@@ -707,7 +707,7 @@ version: 1.0
 
 
 class GenerateLabelMapFromProbabilityMapInputSpec(CommandLineInputSpec):
-    inputVolumes = InputMultiPath(
+    inputVolumes = InputMultiObject(
         File(exists=True),
         desc="The Input probaiblity images to be computed for lable maps",
         argstr="--inputVolumes %s...")
@@ -782,7 +782,7 @@ class BRAINSAlignMSPInputSpec(CommandLineInputSpec):
         desc=
         ",           Turn on clipping the rescaled image one-tailed on input.  Units of standard deviations above the mean.  Very large values are very permissive.  Non-positive value turns clipping off.  Defaults to removing 0.00001 of a normal tail above the mean.,       ",
         argstr="--trimRescaledIntensities %f")
-    rescaleIntensitiesOutputRange = InputMultiPath(
+    rescaleIntensitiesOutputRange = InputMultiObject(
         traits.Int,
         desc=
         ",           This pair of integers gives the lower and upper bounds on the signal portion of the output image.  Out-of-field voxels are taken from BackgroundFillValue.,       ",
@@ -924,35 +924,35 @@ contributor: Ali Ghayoor
 
 
 class BRAINSSnapShotWriterInputSpec(CommandLineInputSpec):
-    inputVolumes = InputMultiPath(
+    inputVolumes = InputMultiObject(
         File(exists=True),
         desc=
         "Input image volume list to be extracted as 2D image. Multiple input is possible. At least one input is required.",
         argstr="--inputVolumes %s...")
-    inputBinaryVolumes = InputMultiPath(
+    inputBinaryVolumes = InputMultiObject(
         File(exists=True),
         desc=
         "Input mask (binary) volume list to be extracted as 2D image. Multiple input is possible.",
         argstr="--inputBinaryVolumes %s...")
-    inputSliceToExtractInPhysicalPoint = InputMultiPath(
+    inputSliceToExtractInPhysicalPoint = InputMultiObject(
         traits.Float,
         desc=
         "2D slice number of input images. For autoWorkUp output, which AC-PC aligned, 0,0,0 will be the center.",
         sep=",",
         argstr="--inputSliceToExtractInPhysicalPoint %s")
-    inputSliceToExtractInIndex = InputMultiPath(
+    inputSliceToExtractInIndex = InputMultiObject(
         traits.Int,
         desc=
         "2D slice number of input images. For size of 256*256*256 image, 128 is usually used.",
         sep=",",
         argstr="--inputSliceToExtractInIndex %s")
-    inputSliceToExtractInPercent = InputMultiPath(
+    inputSliceToExtractInPercent = InputMultiObject(
         traits.Int,
         desc=
         "2D slice number of input images. Percentage input from 0%-100%. (ex. --inputSliceToExtractInPercent 50,50,50",
         sep=",",
         argstr="--inputSliceToExtractInPercent %s")
-    inputPlaneDirection = InputMultiPath(
+    inputPlaneDirection = InputMultiObject(
         traits.Int,
         desc=
         "Plane to display. In general, 0=saggital, 1=coronal, and 2=axial plane.",

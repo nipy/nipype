@@ -20,13 +20,13 @@ import nibabel as nb
 
 from .. import logging
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
-                               BaseInterfaceInputSpec, File, InputMultiPath)
+                               BaseInterfaceInputSpec, File, InputMultiObject)
 IFLOGGER = logging.getLogger('interface')
 
 
 class SignalExtractionInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='4-D fMRI nii file')
-    label_files = InputMultiPath(
+    label_files = InputMultiObject(
         File(exists=True),
         mandatory=True,
         desc='a 3-D label image, with 0 denoting '

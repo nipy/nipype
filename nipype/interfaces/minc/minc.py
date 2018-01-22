@@ -28,7 +28,7 @@ import warnings
 
 from ..base import (TraitedSpec, CommandLineInputSpec, CommandLine,
                     StdOutCommandLineInputSpec, StdOutCommandLine, File,
-                    Directory, InputMultiPath, OutputMultiPath, traits,
+                    Directory, InputMultiObject, OutputMultiObject, traits,
                     isdefined)
 from .base import aggregate_filename
 
@@ -143,14 +143,14 @@ class ExtractInputSpec(StdOutCommandLineInputSpec):
               'Default value: 1.79769e+308.'),
         argstr='-image_maximum %s')
 
-    start = InputMultiPath(
+    start = InputMultiObject(
         traits.Int,
         desc='Specifies corner of hyperslab (C conventions for indices).',
         sep=',',
         argstr='-start %s',
     )
 
-    count = InputMultiPath(
+    count = InputMultiObject(
         traits.Int,
         desc='Specifies edge lengths of hyperslab to read.',
         sep=',',
@@ -620,7 +620,7 @@ class DumpInputSpec(StdOutCommandLineInputSpec):
         desc='Full annotations for C or Fortran indices in data.',
         xor=_xor_annotations)
 
-    variables = InputMultiPath(
+    variables = InputMultiObject(
         traits.Str,
         desc='Output data for specified variables only.',
         sep=',',
@@ -688,7 +688,7 @@ class Dump(StdOutCommandLine):
 class AverageInputSpec(CommandLineInputSpec):
     _xor_input_files = ('input_files', 'filelist')
 
-    input_files = InputMultiPath(
+    input_files = InputMultiObject(
         traits.File(exists=True),
         desc='input file(s)',
         mandatory=True,
@@ -854,7 +854,7 @@ class AverageInputSpec(CommandLineInputSpec):
               'binarization. Default value: -1.79769e+308'),
         argstr='-binvalue %s')
 
-    weights = InputMultiPath(
+    weights = InputMultiObject(
         traits.Str,
         desc='Specify weights for averaging ("<w1>,<w2>,...").',
         sep=',',
@@ -948,7 +948,7 @@ class Blob(CommandLine):
 class CalcInputSpec(CommandLineInputSpec):
     _xor_input_files = ('input_files', 'filelist')
 
-    input_files = InputMultiPath(
+    input_files = InputMultiObject(
         traits.File(exists=True),
         desc='input file(s) for calculation',
         mandatory=True,
@@ -1756,7 +1756,7 @@ class Blur(StdOutCommandLine):
 class MathInputSpec(CommandLineInputSpec):
     _xor_input_files = ('input_files', 'filelist')
 
-    input_files = InputMultiPath(
+    input_files = InputMultiObject(
         traits.File(exists=True),
         desc='input file(s) for calculation',
         mandatory=True,
@@ -2207,7 +2207,7 @@ class ResampleInputSpec(CommandLineInputSpec):
         name_template='%s_resample.mnc')
 
     # This is a dummy input.
-    input_grid_files = InputMultiPath(
+    input_grid_files = InputMultiObject(
         traits.File,
         desc='input grid file(s)',
     )
@@ -3002,7 +3002,7 @@ class Gennlxfm(CommandLine):
 
 
 class XfmConcatInputSpec(CommandLineInputSpec):
-    input_files = InputMultiPath(
+    input_files = InputMultiObject(
         traits.File(exists=True),
         desc='input file(s)',
         mandatory=True,
@@ -3011,7 +3011,7 @@ class XfmConcatInputSpec(CommandLineInputSpec):
         position=-2)
 
     # This is a dummy input.
-    input_grid_files = InputMultiPath(
+    input_grid_files = InputMultiObject(
         traits.File,
         desc='input grid file(s)',
     )
@@ -3036,7 +3036,7 @@ class XfmConcatInputSpec(CommandLineInputSpec):
 
 class XfmConcatOutputSpec(TraitedSpec):
     output_file = File(desc='output file', exists=True)
-    output_grids = OutputMultiPath(File(exists=True), desc='output grids')
+    output_grids = OutputMultiObject(File(exists=True), desc='output grids')
 
 
 class XfmConcat(CommandLine):
@@ -3179,7 +3179,7 @@ class NlpFitInputSpec(CommandLineInputSpec):
     )
 
     # This is a dummy input.
-    input_grid_files = InputMultiPath(
+    input_grid_files = InputMultiObject(
         traits.File,
         desc='input grid file(s)',
     )
@@ -3270,7 +3270,7 @@ class NlpFit(CommandLine):
 
 
 class XfmAvgInputSpec(CommandLineInputSpec):
-    input_files = InputMultiPath(
+    input_files = InputMultiObject(
         traits.File(exists=True),
         desc='input file(s)',
         mandatory=True,
@@ -3279,7 +3279,7 @@ class XfmAvgInputSpec(CommandLineInputSpec):
         position=-2)
 
     # This is a dummy input.
-    input_grid_files = InputMultiPath(
+    input_grid_files = InputMultiObject(
         traits.File,
         desc='input grid file(s)',
     )
@@ -3444,7 +3444,7 @@ class XfmInvert(CommandLine):
 
 
 class BigAverageInputSpec(CommandLineInputSpec):
-    input_files = InputMultiPath(
+    input_files = InputMultiObject(
         traits.File(exists=True),
         desc='input file(s)',
         mandatory=True,
@@ -3620,7 +3620,7 @@ class VolSymmInputSpec(CommandLineInputSpec):
         name_template='%s_vol_symm.mnc')
 
     # This is a dummy input.
-    input_grid_files = InputMultiPath(
+    input_grid_files = InputMultiObject(
         traits.File,
         desc='input grid file(s)',
     )

@@ -19,7 +19,7 @@ data'))
 """
 
 from ..base import (TraitedSpec, File, traits, CommandLineInputSpec,
-                    InputMultiPath)
+                    InputMultiObject)
 from .base import NiftySegCommand
 from ..niftyreg.base import get_custom_path
 
@@ -52,7 +52,7 @@ class EMInputSpec(CommandLineInputSpec):
         desc='4D file containing the priors',
         xor=['no_prior', 'priors'])
 
-    priors = InputMultiPath(
+    priors = InputMultiObject(
         argstr='%s',
         mandatory=True,
         desc='List of priors filepaths.',

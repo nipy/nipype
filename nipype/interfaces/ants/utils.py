@@ -12,7 +12,7 @@ from __future__ import (print_function, division, unicode_literals,
 
 import os
 
-from ..base import TraitedSpec, File, traits, InputMultiPath
+from ..base import TraitedSpec, File, traits, InputMultiObject
 from .base import ANTSCommand, ANTSCommandInputSpec
 
 
@@ -30,7 +30,7 @@ class AverageAffineTransformInputSpec(ANTSCommandInputSpec):
         mandatory=True,
         position=1,
         desc='Outputfname.txt: the name of the resulting transform.')
-    transforms = InputMultiPath(
+    transforms = InputMultiObject(
         File(exists=True),
         argstr='%s',
         mandatory=True,
@@ -89,7 +89,7 @@ class AverageImagesInputSpec(ANTSCommandInputSpec):
         position=2,
         desc='Normalize: if true, the 2nd image is divided by its mean. '
         'This will select the largest image to average into.')
-    images = InputMultiPath(
+    images = InputMultiObject(
         File(exists=True),
         argstr='%s',
         mandatory=True,
@@ -337,7 +337,7 @@ class ComposeMultiTransformInputSpec(ANTSCommandInputSpec):
         argstr='%s',
         position=2,
         desc='Reference image (only necessary when output is warpfield)')
-    transforms = InputMultiPath(
+    transforms = InputMultiObject(
         File(exists=True),
         argstr='%s',
         mandatory=True,

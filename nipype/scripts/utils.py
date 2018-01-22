@@ -12,7 +12,7 @@ import click
 import json
 
 from .instance import import_module
-from ..interfaces.base import InputMultiPath, traits
+from ..interfaces.base import InputMultiObject, traits
 
 # different context options
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -92,7 +92,7 @@ def add_args_options(arg_parser, interface):
                     has_multiple_inner_traits = True
 
         if getattr(spec, "mandatory", False):
-            if spec.is_trait_type(InputMultiPath):
+            if spec.is_trait_type(InputMultiObject):
                 args["nargs"] = "+"
             elif spec.is_trait_type(traits.List):
                 if (spec.trait_type.minlen == spec.trait_type.maxlen) and \
@@ -111,7 +111,7 @@ def add_args_options(arg_parser, interface):
                      ' argument: {}.'.format(name)))
             arg_parser.add_argument(name, help=desc, **args)
         else:
-            if spec.is_trait_type(InputMultiPath):
+            if spec.is_trait_type(InputMultiObject):
                 args["nargs"] = "*"
             elif spec.is_trait_type(traits.List):
                 if (spec.trait_type.minlen == spec.trait_type.maxlen) and \

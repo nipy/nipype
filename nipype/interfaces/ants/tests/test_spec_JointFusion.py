@@ -2,7 +2,7 @@
 from __future__ import division
 from builtins import range
 from nipype.testing import example_data
-from nipype.interfaces.base import InputMultiPath
+from nipype.interfaces.base import InputMultiObject
 from traits.trait_errors import TraitError
 from nipype.interfaces.ants import JointFusion
 import pytest
@@ -83,5 +83,5 @@ def test_JointFusion_cmd():
     assert at.cmdline == expected_command
     # setting intensity or labels with unequal lengths raises error
     with pytest.raises(AssertionError):
-        at._format_arg('warped_intensity_images', InputMultiPath,
+        at._format_arg('warped_intensity_images', InputMultiObject,
                        warped_intensity_images + [example_data('im3.nii')])

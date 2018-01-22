@@ -22,8 +22,8 @@ import numpy as np
 # Local imports
 from ...utils.filemanip import (fname_presuffix, filename_to_list,
                                 list_to_filename, split_filename)
-from ..base import (OutputMultiPath, TraitedSpec, isdefined, traits,
-                    InputMultiPath, File)
+from ..base import (OutputMultiObject, TraitedSpec, isdefined, traits,
+                    InputMultiObject, File)
 from .base import (SPMCommand, scans_for_fname, func_is_3d, scans_for_fnames,
                    SPMCommandInputSpec, ImageFileSPM)
 
@@ -31,7 +31,7 @@ __docformat__ = 'restructuredtext'
 
 
 class SliceTimingInputSpec(SPMCommandInputSpec):
-    in_files = InputMultiPath(
+    in_files = InputMultiObject(
         traits.Either(
             traits.List(ImageFileSPM(exists=True)), ImageFileSPM(exists=True)),
         field='scans',
@@ -67,7 +67,7 @@ class SliceTimingInputSpec(SPMCommandInputSpec):
 
 
 class SliceTimingOutputSpec(TraitedSpec):
-    timecorrected_files = OutputMultiPath(
+    timecorrected_files = OutputMultiObject(
         traits.Either(traits.List(File(exists=True)), File(exists=True)),
         desc='slice time corrected files')
 
@@ -124,7 +124,7 @@ class SliceTiming(SPMCommand):
 
 
 class RealignInputSpec(SPMCommandInputSpec):
-    in_files = InputMultiPath(
+    in_files = InputMultiObject(
         ImageFileSPM(exists=True),
         field='data',
         mandatory=True,
@@ -195,7 +195,7 @@ class RealignInputSpec(SPMCommandInputSpec):
 
 class RealignOutputSpec(TraitedSpec):
     mean_image = File(exists=True, desc='Mean image file from the realignment')
-    modified_in_files = OutputMultiPath(
+    modified_in_files = OutputMultiObject(
         traits.Either(traits.List(File(exists=True)), File(exists=True)),
         desc=('Copies of all files passed to '
               'in_files. Headers will have '
@@ -204,14 +204,14 @@ class RealignOutputSpec(TraitedSpec):
               'optionally to first do that, '
               'extract a mean image, and '
               're-align to that mean image.'))
-    realigned_files = OutputMultiPath(
+    realigned_files = OutputMultiObject(
         traits.Either(traits.List(File(exists=True)), File(exists=True)),
         desc=('If jobtype is write or estwrite, '
               'these will be the resliced files.'
               ' Otherwise, they will be copies '
               'of in_files that have had their '
               'headers rewritten.'))
-    realignment_parameters = OutputMultiPath(
+    realignment_parameters = OutputMultiObject(
         File(exists=True),
         desc=('Estimated translation and '
               'rotation parameters'))
@@ -314,7 +314,7 @@ class CoregisterInputSpec(SPMCommandInputSpec):
         field='ref',
         desc='reference file to register to',
         copyfile=False)
-    source = InputMultiPath(
+    source = InputMultiObject(
         ImageFileSPM(exists=True),
         field='source',
         desc='file to register to target',
@@ -326,7 +326,7 @@ class CoregisterInputSpec(SPMCommandInputSpec):
         'write',
         desc='one of: estimate, write, estwrite',
         usedefault=True)
-    apply_to_files = InputMultiPath(
+    apply_to_files = InputMultiObject(
         File(exists=True),
         field='other',
         desc='files to apply transformation to',
@@ -377,9 +377,9 @@ class CoregisterInputSpec(SPMCommandInputSpec):
 
 
 class CoregisterOutputSpec(TraitedSpec):
-    coregistered_source = OutputMultiPath(
+    coregistered_source = OutputMultiObject(
         File(exists=True), desc='Coregistered source files')
-    coregistered_files = OutputMultiPath(
+    coregistered_files = OutputMultiObject(
         File(exists=True), desc='Coregistered other files')
 
 
@@ -461,7 +461,7 @@ class NormalizeInputSpec(SPMCommandInputSpec):
         mandatory=True,
         xor=['parameter_file'],
         copyfile=False)
-    source = InputMultiPath(
+    source = InputMultiObject(
         ImageFileSPM(exists=True),
         field='subj.source',
         xor=['parameter_file'],
@@ -474,7 +474,7 @@ class NormalizeInputSpec(SPMCommandInputSpec):
         'write',
         usedefault=True,
         desc='Estimate, Write or do both')
-    apply_to_files = InputMultiPath(
+    apply_to_files = InputMultiObject(
         traits.Either(File(exists=True), traits.List(File(exists=True))),
         field='subj.resample',
         desc='files to apply transformation to',
@@ -549,14 +549,14 @@ class NormalizeInputSpec(SPMCommandInputSpec):
 
 
 class NormalizeOutputSpec(TraitedSpec):
-    normalization_parameters = OutputMultiPath(
+    normalization_parameters = OutputMultiObject(
         File(exists=True),
         desc=('MAT files containing '
               'the normalization '
               'parameters'))
-    normalized_source = OutputMultiPath(
+    normalized_source = OutputMultiObject(
         File(exists=True), desc='Normalized source files')
-    normalized_files = OutputMultiPath(
+    normalized_files = OutputMultiObject(
         File(exists=True), desc='Normalized other files')
 
 
@@ -665,7 +665,7 @@ class Normalize12InputSpec(SPMCommandInputSpec):
         xor=['deformation_file'],
         mandatory=True,
         copyfile=True)
-    apply_to_files = InputMultiPath(
+    apply_to_files = InputMultiObject(
         traits.Either(
             ImageFileSPM(exists=True), traits.List(ImageFileSPM(exists=True))),
         field='subj.resample',
@@ -767,17 +767,17 @@ class Normalize12InputSpec(SPMCommandInputSpec):
 
 
 class Normalize12OutputSpec(TraitedSpec):
-    deformation_field = OutputMultiPath(
+    deformation_field = OutputMultiObject(
         File(exists=True),
         desc=('NIfTI file containing 3 '
               'deformation fields for the '
               'deformation in x, y and z '
               'dimension'))
-    normalized_image = OutputMultiPath(
+    normalized_image = OutputMultiObject(
         File(exists=True),
         desc=('Normalized file that needed to '
               'be aligned'))
-    normalized_files = OutputMultiPath(
+    normalized_files = OutputMultiObject(
         File(exists=True), desc='Normalized other files')
 
 
@@ -875,7 +875,7 @@ class Normalize12(SPMCommand):
 
 
 class SegmentInputSpec(SPMCommandInputSpec):
-    data = InputMultiPath(
+    data = InputMultiObject(
         ImageFileSPM(exists=True),
         field='data',
         desc='one scan per subject',
@@ -1098,7 +1098,7 @@ class Segment(SPMCommand):
 
 
 class NewSegmentInputSpec(SPMCommandInputSpec):
-    channel_files = InputMultiPath(
+    channel_files = InputMultiObject(
         ImageFileSPM(exists=True),
         mandatory=True,
         desc="A list of files to be segmented",
@@ -1164,14 +1164,14 @@ class NewSegmentOutputSpec(TraitedSpec):
         traits.List(File(exists=True)),
         desc=('modulated+normalized class '
               'images'))
-    transformation_mat = OutputMultiPath(
+    transformation_mat = OutputMultiObject(
         File(exists=True), desc='Normalization transformation')
-    bias_corrected_images = OutputMultiPath(
+    bias_corrected_images = OutputMultiObject(
         File(exists=True), desc='bias corrected images')
-    bias_field_images = OutputMultiPath(
+    bias_field_images = OutputMultiObject(
         File(exists=True), desc='bias field images')
-    forward_deformation_field = OutputMultiPath(File(exists=True))
-    inverse_deformation_field = OutputMultiPath(File(exists=True))
+    forward_deformation_field = OutputMultiObject(File(exists=True))
+    inverse_deformation_field = OutputMultiObject(File(exists=True))
 
 
 class NewSegment(SPMCommand):
@@ -1314,7 +1314,7 @@ class NewSegment(SPMCommand):
 
 
 class SmoothInputSpec(SPMCommandInputSpec):
-    in_files = InputMultiPath(
+    in_files = InputMultiObject(
         ImageFileSPM(exists=True),
         field='data',
         desc='list of files to smooth',
@@ -1335,7 +1335,7 @@ class SmoothInputSpec(SPMCommandInputSpec):
 
 
 class SmoothOutputSpec(TraitedSpec):
-    smoothed_files = OutputMultiPath(File(exists=True), desc='smoothed files')
+    smoothed_files = OutputMultiObject(File(exists=True), desc='smoothed files')
 
 
 class Smooth(SPMCommand):
@@ -1510,12 +1510,12 @@ class DARTELNorm2MNIInputSpec(SPMCommandInputSpec):
         mandatory=True,
         desc="DARTEL template",
         field='mni_norm.template')
-    flowfield_files = InputMultiPath(
+    flowfield_files = InputMultiObject(
         ImageFileSPM(exists=True),
         mandatory=True,
         desc="DARTEL flow fields u_rc1*",
         field='mni_norm.data.subjs.flowfields')
-    apply_to_files = InputMultiPath(
+    apply_to_files = InputMultiObject(
         ImageFileSPM(exists=True),
         desc="Files to apply the transform to",
         field='mni_norm.data.subjs.images',
@@ -1548,7 +1548,7 @@ class DARTELNorm2MNIInputSpec(SPMCommandInputSpec):
 
 
 class DARTELNorm2MNIOutputSpec(TraitedSpec):
-    normalized_files = OutputMultiPath(
+    normalized_files = OutputMultiObject(
         File(exists=True), desc='Normalized files in MNI space')
     normalization_parameter_file = File(
         exists=True, desc=('Transform parameters to MNI '
@@ -1618,13 +1618,13 @@ class DARTELNorm2MNI(SPMCommand):
 
 
 class CreateWarpedInputSpec(SPMCommandInputSpec):
-    image_files = InputMultiPath(
+    image_files = InputMultiObject(
         ImageFileSPM(exists=True),
         mandatory=True,
         desc="A list of files to be warped",
         field='crt_warped.images',
         copyfile=False)
-    flowfield_files = InputMultiPath(
+    flowfield_files = InputMultiObject(
         ImageFileSPM(exists=True),
         copyfile=False,
         desc="DARTEL flow fields u_rc1*",
@@ -1695,7 +1695,7 @@ class CreateWarped(SPMCommand):
 
 
 class ApplyDeformationFieldInputSpec(SPMCommandInputSpec):
-    in_files = InputMultiPath(
+    in_files = InputMultiObject(
         ImageFileSPM(exists=True), mandatory=True, field='fnames')
     deformation_field = File(exists=True, mandatory=True, field='comp{1}.def')
     reference_volume = ImageFileSPM(
@@ -1708,7 +1708,7 @@ class ApplyDeformationFieldInputSpec(SPMCommandInputSpec):
 
 
 class ApplyDeformationFieldOutputSpec(TraitedSpec):
-    out_files = OutputMultiPath(File(exists=True))
+    out_files = OutputMultiObject(File(exists=True))
 
 
 class ApplyDeformations(SPMCommand):
@@ -1743,7 +1743,7 @@ class ApplyDeformations(SPMCommand):
 
 class VBMSegmentInputSpec(SPMCommandInputSpec):
 
-    in_files = InputMultiPath(
+    in_files = InputMultiObject(
         ImageFileSPM(exists=True),
         desc="A list of files to be segmented",
         field='estwrite.data',
@@ -1930,22 +1930,22 @@ class VBMSegmentOuputSpec(TraitedSpec):
         traits.List(File(exists=True)),
         desc=('modulated+normalized class '
               'images'))
-    transformation_mat = OutputMultiPath(
+    transformation_mat = OutputMultiObject(
         File(exists=True), desc='Normalization transformation')
 
-    bias_corrected_images = OutputMultiPath(
+    bias_corrected_images = OutputMultiObject(
         File(exists=True), desc='bias corrected images')
-    normalized_bias_corrected_images = OutputMultiPath(
+    normalized_bias_corrected_images = OutputMultiObject(
         File(exists=True), desc='bias corrected images')
 
-    pve_label_native_images = OutputMultiPath(File(exists=True))
-    pve_label_normalized_images = OutputMultiPath(File(exists=True))
-    pve_label_registered_images = OutputMultiPath(File(exists=True))
+    pve_label_native_images = OutputMultiObject(File(exists=True))
+    pve_label_normalized_images = OutputMultiObject(File(exists=True))
+    pve_label_registered_images = OutputMultiObject(File(exists=True))
 
-    forward_deformation_field = OutputMultiPath(File(exists=True))
-    inverse_deformation_field = OutputMultiPath(File(exists=True))
+    forward_deformation_field = OutputMultiObject(File(exists=True))
+    inverse_deformation_field = OutputMultiObject(File(exists=True))
 
-    jacobian_determinant_images = OutputMultiPath(File(exists=True))
+    jacobian_determinant_images = OutputMultiObject(File(exists=True))
 
 
 class VBMSegment(SPMCommand):

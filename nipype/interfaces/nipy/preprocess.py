@@ -21,7 +21,7 @@ from ...utils import NUMPY_MMAP
 
 from ...utils.filemanip import split_filename, fname_presuffix
 from ..base import (TraitedSpec, BaseInterface, traits, BaseInterfaceInputSpec,
-                    isdefined, File, InputMultiPath, OutputMultiPath)
+                    isdefined, File, InputMultiObject, OutputMultiObject)
 
 have_nipy = True
 try:
@@ -87,7 +87,7 @@ class ComputeMask(BaseInterface):
 
 class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
 
-    in_file = InputMultiPath(
+    in_file = InputMultiObject(
         File(exists=True), mandatory=True, desc="File to realign")
     tr = traits.Float(desc="TR in seconds", mandatory=True)
     slice_order = traits.List(
@@ -107,16 +107,16 @@ class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
         desc="Assume smooth changes across time e.g.,\
                      fmri series. If you don't want slice timing \
                      correction set this to undefined")
-    loops = InputMultiPath(
+    loops = InputMultiObject(
         [5], traits.Int, usedefault=True, desc="loops within each run")
-    between_loops = InputMultiPath(
+    between_loops = InputMultiObject(
         [5],
         traits.Int,
         usedefault=True,
         desc="loops used to \
                                                           realign different \
                                                           runs")
-    speedup = InputMultiPath(
+    speedup = InputMultiObject(
         [5],
         traits.Int,
         usedefault=True,
@@ -127,8 +127,8 @@ class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
 
 class FmriRealign4dOutputSpec(TraitedSpec):
 
-    out_file = OutputMultiPath(File(exists=True), desc="Realigned files")
-    par_file = OutputMultiPath(
+    out_file = OutputMultiObject(File(exists=True), desc="Realigned files")
+    par_file = OutputMultiObject(
         File(exists=True), desc="Motion parameter files")
 
 
@@ -225,7 +225,7 @@ class FmriRealign4d(BaseInterface):
 
 class SpaceTimeRealignerInputSpec(BaseInterfaceInputSpec):
 
-    in_file = InputMultiPath(
+    in_file = InputMultiObject(
         File(exists=True),
         mandatory=True,
         min_ver='0.4.0.dev',
@@ -258,8 +258,8 @@ class SpaceTimeRealignerInputSpec(BaseInterfaceInputSpec):
 
 
 class SpaceTimeRealignerOutputSpec(TraitedSpec):
-    out_file = OutputMultiPath(File(exists=True), desc="Realigned files")
-    par_file = OutputMultiPath(
+    out_file = OutputMultiObject(File(exists=True), desc="Realigned files")
+    par_file = OutputMultiObject(
         File(exists=True),
         desc=("Motion parameter files. Angles are not "
               "euler angles"))

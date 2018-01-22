@@ -17,7 +17,7 @@ from __future__ import (print_function, division, unicode_literals,
 import os
 
 from ...utils.filemanip import fname_presuffix, split_filename
-from ..base import (TraitedSpec, File, traits, InputMultiPath, OutputMultiPath,
+from ..base import (TraitedSpec, File, traits, InputMultiObject, OutputMultiObject,
                     Directory, isdefined)
 from .base import FSCommand, FSTraitedSpec
 from .utils import copy2subjdir
@@ -58,7 +58,7 @@ class MRISPreprocInputSpec(FSTraitedSpec):
         argstr='--f %s',
         xor=('subjects', 'fsgd_file', 'subject_file'),
         desc='file specifying subjects separated by white space')
-    surf_measure_file = InputMultiPath(
+    surf_measure_file = InputMultiObject(
         File(exists=True),
         argstr='--is %s...',
         xor=('surf_measure', 'surf_measure_file', 'surf_area'),
@@ -66,7 +66,7 @@ class MRISPreprocInputSpec(FSTraitedSpec):
     source_format = traits.Str(argstr='--srcfmt %s', desc='source format')
     surf_dir = traits.Str(
         argstr='--surfdir %s', desc='alternative directory (instead of surf)')
-    vol_measure_file = InputMultiPath(
+    vol_measure_file = InputMultiObject(
         traits.Tuple(File(exists=True), File(exists=True)),
         argstr='--iv %s %s...',
         desc='list of volume measure and reg file tuples')
@@ -141,7 +141,7 @@ class MRISPreprocReconAllInputSpec(MRISPreprocInputSpec):
         argstr='--meas %s',
         xor=('surf_measure', 'surf_measure_file', 'surf_area'),
         desc='file necessary for surfmeas')
-    surfreg_files = InputMultiPath(
+    surfreg_files = InputMultiObject(
         File(exists=True),
         argstr="--surfreg %s",
         requires=['lh_surfreg_target', 'rh_surfreg_target'],
@@ -241,7 +241,7 @@ class GLMFitInputSpec(FSTraitedSpec):
         argstr='--X %s',
         xor=_design_xor,
         desc='design matrix file')
-    contrast = InputMultiPath(
+    contrast = InputMultiObject(
         File(exists=True), argstr='--C %s...', desc='contrast file')
 
     one_sample = traits.Bool(
@@ -251,7 +251,7 @@ class GLMFitInputSpec(FSTraitedSpec):
     no_contrast_ok = traits.Bool(
         argstr='--no-contrasts-ok',
         desc='do not fail if no contrasts specified')
-    per_voxel_reg = InputMultiPath(
+    per_voxel_reg = InputMultiObject(
         File(exists=True), argstr='--pvr %s...', desc='per-voxel regressors')
     self_reg = traits.Tuple(
         traits.Int,
@@ -396,12 +396,12 @@ class GLMFitOutputSpec(TraitedSpec):
     fwhm_file = File(desc="text file with estimated smoothness")
     dof_file = File(
         desc="text file with effective degrees-of-freedom for the analysis")
-    gamma_file = OutputMultiPath(
+    gamma_file = OutputMultiObject(
         desc="map of contrast of regression coefficients")
-    gamma_var_file = OutputMultiPath(
+    gamma_var_file = OutputMultiObject(
         desc="map of regression contrast variance")
-    sig_file = OutputMultiPath(desc="map of F-test significance (in -log10p)")
-    ftest_file = OutputMultiPath(desc="map of test statistic values")
+    sig_file = OutputMultiObject(desc="map of F-test significance (in -log10p)")
+    ftest_file = OutputMultiObject(desc="map of test statistic values")
     spatial_eigenvectors = File(
         desc="map of spatial eigenvectors from residual PCA")
     frame_eigenvectors = File(
@@ -639,7 +639,7 @@ class Binarize(FSCommand):
 
 
 class ConcatenateInputSpec(FSTraitedSpec):
-    in_files = InputMultiPath(
+    in_files = InputMultiObject(
         File(exists=True),
         desc='Individual volumes to be concatenated',
         argstr='--i %s...',
@@ -1095,7 +1095,7 @@ class SegStatsReconAll(SegStats):
 
 
 class Label2VolInputSpec(FSTraitedSpec):
-    label_file = InputMultiPath(
+    label_file = InputMultiObject(
         File(exists=True),
         argstr='--label %s...',
         xor=('label_file', 'annot_file', 'seg_file', 'aparc_aseg'),
@@ -1250,7 +1250,7 @@ class MS_LDAInputSpec(FSTraitedSpec):
         argstr='-W',
         desc=('Use the weights from a previously '
               'generated weight file'))
-    images = InputMultiPath(
+    images = InputMultiObject(
         File(exists=True),
         argstr='%s',
         mandatory=True,

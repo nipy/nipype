@@ -42,7 +42,7 @@ If you spot a bug, please report it on the mailing list and/or change the genera
     imports = """from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 from ..base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine, TraitedSpec,
-                    File, Directory, traits, isdefined, InputMultiPath, OutputMultiPath)
+                    File, Directory, traits, isdefined, InputMultiObject, OutputMultiObject)
 import os\n\n\n"""
     f_m.write(imports)
     f_m.write("\n\n".join(class_codes))
@@ -266,7 +266,7 @@ def generate_class(module,
                     for el in param.getElementsByTagName('element')
                 ]
             elif param.nodeName.endswith('-vector'):
-                type = "InputMultiPath"
+                type = "InputMultiObject"
                 if param.nodeName in [
                         'file', 'directory', 'image', 'geometry', 'transform',
                         'table'
@@ -282,7 +282,7 @@ def generate_class(module,
                 else:
                     traitsParams["sep"] = ','
             elif param.getAttribute('multiple') == "true":
-                type = "InputMultiPath"
+                type = "InputMultiObject"
                 if param.nodeName in [
                         'file', 'directory', 'image', 'geometry', 'transform',
                         'table'
@@ -331,7 +331,7 @@ def generate_class(module,
                     if param.nodeName in [
                             'file', 'directory', 'image', 'geometry',
                             'transform', 'table'
-                    ] and type not in ["InputMultiPath", "traits.List"]:
+                    ] and type not in ["InputMultiObject", "traits.List"]:
                         traitsParams["exists"] = True
                     inputTraits.append("%s = %s(%s%s)" %
                                        (name, type, parse_values(values),

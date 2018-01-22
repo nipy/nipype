@@ -26,7 +26,7 @@ from ...utils.filemanip import split_filename
 from ...utils import NUMPY_MMAP
 
 from ..base import (BaseInterface, BaseInterfaceInputSpec, traits, File,
-                    TraitedSpec, Directory, OutputMultiPath, isdefined)
+                    TraitedSpec, Directory, OutputMultiObject, isdefined)
 iflogger = logging.getLogger('interface')
 
 
@@ -504,11 +504,11 @@ class CreateMatrixOutputSpec(TraitedSpec):
         desc='NetworkX graph describing the connectivity', exists=True)
     intersection_matrix_file = File(
         desc='NetworkX graph describing the connectivity', exists=True)
-    matrix_files = OutputMultiPath(
+    matrix_files = OutputMultiObject(
         File(
             desc='All of the gpickled network files output by this interface',
             exists=True))
-    matlab_matrix_files = OutputMultiPath(
+    matlab_matrix_files = OutputMultiObject(
         File(
             desc='All of the MATLAB .mat files output by this interface',
             exists=True))
@@ -550,7 +550,7 @@ class CreateMatrixOutputSpec(TraitedSpec):
     filtered_tractography_by_intersections = File(
         desc='TrackVis file containing all fibers which connect two regions',
         exists=True)
-    filtered_tractographies = OutputMultiPath(
+    filtered_tractographies = OutputMultiObject(
         File(
             desc=
             'TrackVis file containing only those fibers originate in one and terminate in another region',

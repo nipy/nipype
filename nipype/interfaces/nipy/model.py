@@ -11,7 +11,7 @@ import numpy as np
 from ...utils.misc import package_check
 from ...utils import NUMPY_MMAP
 
-from ..base import (BaseInterface, TraitedSpec, traits, File, OutputMultiPath,
+from ..base import (BaseInterface, TraitedSpec, traits, File, OutputMultiObject,
                     BaseInterfaceInputSpec, isdefined)
 
 have_nipy = True
@@ -278,9 +278,9 @@ class EstimateContrastInputSpec(BaseInterfaceInputSpec):
 
 
 class EstimateContrastOutputSpec(TraitedSpec):
-    stat_maps = OutputMultiPath(File(exists=True))
-    z_maps = OutputMultiPath(File(exists=True))
-    p_maps = OutputMultiPath(File(exists=True))
+    stat_maps = OutputMultiObject(File(exists=True))
+    z_maps = OutputMultiObject(File(exists=True))
+    p_maps = OutputMultiObject(File(exists=True))
 
 
 class EstimateContrast(BaseInterface):

@@ -8,7 +8,7 @@ import glob
 
 from ... import logging
 from ...utils.filemanip import list_to_filename
-from ..base import (traits, File, Directory, TraitedSpec, OutputMultiPath)
+from ..base import (traits, File, Directory, TraitedSpec, OutputMultiObject)
 from ..freesurfer.base import FSCommand, FSTraitedSpec
 
 iflogger = logging.getLogger('interface')
@@ -46,7 +46,7 @@ class WatershedBEMInputSpec(FSTraitedSpec):
 
 
 class WatershedBEMOutputSpec(TraitedSpec):
-    mesh_files = OutputMultiPath(
+    mesh_files = OutputMultiObject(
         File(exists=True),
         desc=('Paths to the output meshes (brain, inner '
               'skull, outer skull, outer skin)'))
@@ -71,7 +71,7 @@ class WatershedBEMOutputSpec(TraitedSpec):
         loc='bem',
         altkey='fif',
         desc='"fif" format file for EEG processing in MNE')
-    cor_files = OutputMultiPath(
+    cor_files = OutputMultiObject(
         File(exists=True),
         loc='bem/watershed/ws',
         altkey='COR',

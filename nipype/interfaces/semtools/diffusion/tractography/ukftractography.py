@@ -7,7 +7,7 @@ import os
 
 from ....base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
                       TraitedSpec, File, Directory, traits, isdefined,
-                      InputMultiPath, OutputMultiPath)
+                      InputMultiObject, OutputMultiObject)
 
 
 class UKFTractographyInputSpec(CommandLineInputSpec):
@@ -17,7 +17,7 @@ class UKFTractographyInputSpec(CommandLineInputSpec):
         "Seeds for diffusion. If not specified, full brain tractography will be performed, and the algorithm will start from every voxel in the brain mask where the Generalized Anisotropy is bigger than 0.18",
         exists=True,
         argstr="--seedsFile %s")
-    labels = InputMultiPath(
+    labels = InputMultiObject(
         traits.Int,
         desc="A vector of the ROI labels to be used",
         sep=",",

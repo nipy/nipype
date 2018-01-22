@@ -23,7 +23,7 @@ import numpy as np
 
 from ...utils.filemanip import (load_json, save_json, split_filename)
 from ..base import (CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
-                    traits, isdefined, File, InputMultiPath, Undefined, Str)
+                    traits, isdefined, File, InputMultiObject, Undefined, Str)
 from ...external.due import BibTeX
 from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec,
                    AFNICommandOutputSpec, AFNIPythonCommandInputSpec,
@@ -1424,7 +1424,7 @@ class MaskTool(AFNICommand):
 
 
 class MergeInputSpec(AFNICommandInputSpec):
-    in_files = InputMultiPath(
+    in_files = InputMultiObject(
         File(desc='input file to 3dmerge', exists=True),
         argstr='%s',
         position=-1,
@@ -1990,7 +1990,7 @@ class Resample(AFNICommand):
 
 
 class TCatInputSpec(AFNICommandInputSpec):
-    in_files = InputMultiPath(
+    in_files = InputMultiObject(
         File(exists=True),
         desc='input file to 3dTcat',
         argstr=' %s',
@@ -2020,7 +2020,7 @@ class TCatInputSpec(AFNICommandInputSpec):
 class TCat(AFNICommand):
     """Concatenate sub-bricks from input datasets into one big 3D+time dataset.
 
-    TODO Replace InputMultiPath in_files with Traits.List, if possible. Current
+    TODO Replace InputMultiObject in_files with Traits.List, if possible. Current
     version adds extra whitespace.
 
     For complete details, see the `3dTcat Documentation.
@@ -2628,7 +2628,7 @@ class Axialize(AFNICommand):
 
 
 class ZcatInputSpec(AFNICommandInputSpec):
-    in_files = InputMultiPath(
+    in_files = InputMultiObject(
         File(desc='input files to 3dZcat', exists=True),
         argstr='%s',
         position=-1,

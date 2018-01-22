@@ -19,7 +19,7 @@ import os.path as op
 from ...utils.filemanip import (load_json, save_json, split_filename,
                                 fname_presuffix)
 from ..base import (CommandLineInputSpec, CommandLine, TraitedSpec, traits,
-                    isdefined, File, InputMultiPath, Undefined, Str)
+                    isdefined, File, InputMultiObject, Undefined, Str)
 
 from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec,
                    AFNICommandOutputSpec, AFNIPythonCommandInputSpec,
@@ -775,7 +775,7 @@ class BandpassInputSpec(AFNICommandInputSpec):
         desc='Despike each time series before other processing. Hopefully, '
         'you don\'t actually need to do this, which is why it is '
         'optional.')
-    orthogonalize_file = InputMultiPath(
+    orthogonalize_file = InputMultiObject(
         File(exists=True),
         argstr='-ort %s',
         desc='Also orthogonalize input to columns in f.1D. Multiple \'-ort\' '

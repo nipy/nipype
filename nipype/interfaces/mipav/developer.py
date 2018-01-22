@@ -7,7 +7,7 @@ import os
 
 from ..base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
                     TraitedSpec, File, Directory, traits, isdefined,
-                    InputMultiPath, OutputMultiPath)
+                    InputMultiObject, OutputMultiObject)
 
 
 class JistLaminarVolumetricLayeringInputSpec(CommandLineInputSpec):
@@ -1047,7 +1047,7 @@ version: 3.0.RC
 
 
 class MedicAlgorithmMipavReorientInputSpec(CommandLineInputSpec):
-    inSource = InputMultiPath(
+    inSource = InputMultiObject(
         File, desc="Source", sep=";", argstr="--inSource %s")
     inTemplate = File(desc="Template", exists=True, argstr="--inTemplate %s")
     inNew = traits.Enum(
@@ -1114,7 +1114,7 @@ class MedicAlgorithmMipavReorientInputSpec(CommandLineInputSpec):
         argstr="--inResolution %s")
     xPrefExt = traits.Enum(
         "nrrd", desc="Output File Type", argstr="--xPrefExt %s")
-    outReoriented = InputMultiPath(
+    outReoriented = InputMultiObject(
         File, desc="Reoriented Volume", sep=";", argstr="--outReoriented %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(
@@ -1567,7 +1567,7 @@ version: 3.0.RC
 
 
 class MedicAlgorithmThresholdToBinaryMaskInputSpec(CommandLineInputSpec):
-    inLabel = InputMultiPath(
+    inLabel = InputMultiObject(
         File, desc="Input volumes", sep=";", argstr="--inLabel %s")
     inMinimum = traits.Float(
         desc="Minimum threshold value.", argstr="--inMinimum %f")
@@ -1580,7 +1580,7 @@ class MedicAlgorithmThresholdToBinaryMaskInputSpec(CommandLineInputSpec):
         argstr="--inUse %s")
     xPrefExt = traits.Enum(
         "nrrd", desc="Output File Type", argstr="--xPrefExt %s")
-    outBinary = InputMultiPath(
+    outBinary = InputMultiObject(
         File, desc="Binary Mask", sep=";", argstr="--outBinary %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(

@@ -31,8 +31,8 @@ from scipy import signal
 import scipy.io as sio
 
 from ..utils import NUMPY_MMAP
-from ..interfaces.base import (BaseInterface, traits, InputMultiPath,
-                               OutputMultiPath, TraitedSpec, File,
+from ..interfaces.base import (BaseInterface, traits, InputMultiObject,
+                               OutputMultiObject, TraitedSpec, File,
                                BaseInterfaceInputSpec, isdefined)
 from ..utils.filemanip import filename_to_list, save_json, split_filename
 from ..utils.misc import find_indices, normalize_mc_params
@@ -163,12 +163,12 @@ def _calc_norm_affine(affines, use_differences, brain_pts=None):
 
 
 class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
-    realigned_files = InputMultiPath(
+    realigned_files = InputMultiObject(
         File(exists=True),
         desc=("Names of realigned functional data "
               "files"),
         mandatory=True)
-    realignment_parameters = InputMultiPath(
+    realignment_parameters = InputMultiObject(
         File(exists=True),
         mandatory=True,
         desc=("Names of realignment "
@@ -267,22 +267,22 @@ class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
 
 
 class ArtifactDetectOutputSpec(TraitedSpec):
-    outlier_files = OutputMultiPath(
+    outlier_files = OutputMultiObject(
         File(exists=True),
         desc=("One file for each functional run "
               "containing a list of 0-based indices"
               " corresponding to outlier volumes"))
-    intensity_files = OutputMultiPath(
+    intensity_files = OutputMultiObject(
         File(exists=True),
         desc=("One file for each functional run "
               "containing the global intensity "
               "values determined from the "
               "brainmask"))
-    norm_files = OutputMultiPath(
+    norm_files = OutputMultiObject(
         File,
         desc=("One file for each functional run "
               "containing the composite norm"))
-    statistic_files = OutputMultiPath(
+    statistic_files = OutputMultiObject(
         File(exists=True),
         desc=("One file for each functional run "
               "containing information about the "
@@ -291,16 +291,16 @@ class ArtifactDetectOutputSpec(TraitedSpec):
               "details of stimulus correlated "
               "motion and a listing or artifacts "
               "by event type."))
-    plot_files = OutputMultiPath(
+    plot_files = OutputMultiObject(
         File,
         desc=("One image file for each functional run "
               "containing the detected outliers"))
-    mask_files = OutputMultiPath(
+    mask_files = OutputMultiObject(
         File,
         desc=("One image file for each functional run "
               "containing the mask used for global "
               "signal calculation"))
-    displacement_files = OutputMultiPath(
+    displacement_files = OutputMultiObject(
         File,
         desc=("One image file for each "
               "functional run containing the "
@@ -631,13 +631,13 @@ class ArtifactDetect(BaseInterface):
 
 
 class StimCorrInputSpec(BaseInterfaceInputSpec):
-    realignment_parameters = InputMultiPath(
+    realignment_parameters = InputMultiObject(
         File(exists=True),
         mandatory=True,
         desc=("Names of realignment "
               "parameters corresponding to "
               "the functional data files"))
-    intensity_values = InputMultiPath(
+    intensity_values = InputMultiObject(
         File(exists=True),
         mandatory=True,
         desc=("Name of file containing intensity "
@@ -653,7 +653,7 @@ class StimCorrInputSpec(BaseInterfaceInputSpec):
 
 
 class StimCorrOutputSpec(TraitedSpec):
-    stimcorr_files = OutputMultiPath(
+    stimcorr_files = OutputMultiObject(
         File(exists=True),
         desc=("List of files containing "
               "correlation values"))

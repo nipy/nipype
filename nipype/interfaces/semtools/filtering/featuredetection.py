@@ -7,7 +7,7 @@ import os
 
 from ...base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
                      TraitedSpec, File, Directory, traits, isdefined,
-                     InputMultiPath, OutputMultiPath)
+                     InputMultiObject, OutputMultiObject)
 
 
 class GenerateSummedGradientImageInputSpec(CommandLineInputSpec):
@@ -697,7 +697,7 @@ class STAPLEAnalysisInputSpec(CommandLineInputSpec):
     inputDimension = traits.Int(
         desc="Required: input image Dimension 2 or 3",
         argstr="--inputDimension %d")
-    inputLabelVolume = InputMultiPath(
+    inputLabelVolume = InputMultiObject(
         File(exists=True),
         desc="Required: input label volume",
         argstr="--inputLabelVolume %s...")

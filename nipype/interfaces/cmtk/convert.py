@@ -19,7 +19,7 @@ import networkx as nx
 from ...utils.misc import package_check
 from ...utils.filemanip import split_filename
 from ..base import (BaseInterface, BaseInterfaceInputSpec, traits, File,
-                    TraitedSpec, InputMultiPath, isdefined)
+                    TraitedSpec, InputMultiObject, isdefined)
 
 have_cfflib = True
 try:
@@ -31,25 +31,25 @@ else:
 
 
 class CFFConverterInputSpec(BaseInterfaceInputSpec):
-    graphml_networks = InputMultiPath(
+    graphml_networks = InputMultiObject(
         File(exists=True), desc='list of graphML networks')
-    gpickled_networks = InputMultiPath(
+    gpickled_networks = InputMultiObject(
         File(exists=True), desc='list of gpickled Networkx graphs')
 
-    gifti_surfaces = InputMultiPath(
+    gifti_surfaces = InputMultiObject(
         File(exists=True), desc='list of GIFTI surfaces')
-    gifti_labels = InputMultiPath(
+    gifti_labels = InputMultiObject(
         File(exists=True), desc='list of GIFTI labels')
-    nifti_volumes = InputMultiPath(
+    nifti_volumes = InputMultiObject(
         File(exists=True), desc='list of NIFTI volumes')
-    tract_files = InputMultiPath(
+    tract_files = InputMultiObject(
         File(exists=True), desc='list of Trackvis fiber files')
 
-    timeseries_files = InputMultiPath(
+    timeseries_files = InputMultiObject(
         File(exists=True), desc='list of HDF5 timeseries files')
-    script_files = InputMultiPath(
+    script_files = InputMultiObject(
         File(exists=True), desc='list of script files to include')
-    data_files = InputMultiPath(
+    data_files = InputMultiObject(
         File(exists=True),
         desc='list of external data files (i.e. Numpy, HD5, XML) ')
 
@@ -225,7 +225,7 @@ class CFFConverter(BaseInterface):
 
 
 class MergeCNetworksInputSpec(BaseInterfaceInputSpec):
-    in_files = InputMultiPath(
+    in_files = InputMultiObject(
         File(exists=True),
         mandatory=True,
         desc='List of CFF files to extract networks from')
