@@ -1158,9 +1158,6 @@ def _standardize_iterables(node):
     iterables = node.iterables
     # The candidate iterable fields
     fields = set(node.inputs.copyable_trait_names())
-    # Flag indicating whether the iterables are in the alternate
-    # synchronize form and are not converted to a standard format.
-    # synchronize = False  # OE: commented out since it is not used
     # A synchronize iterables node without an itersource can be in
     # [fields, value tuples] format rather than
     # [(field, value list), (field, value list), ...]
