@@ -128,9 +128,9 @@ You're awesome. :wave::smiley:
 
 [link_bugs]: https://github.com/nipy/nipype/labels/bug
 [link_issue_template]: https://github.com/nipy/nipype/blob/master/.github/ISSUE_TEMPLATE.md
-[link_helpwanted]: https://github.com/nipy/nipype/labels/help%20wanted
+[link_helpwanted]: https://github.com/nipy/nipype/labels/help-wanted
 [link_good_first_issue]: https://github.com/nipy/nipype/issues?q=is%3Aopen+is%3Aissue+label%3Agood-first-issue
-[link_enhancement]: https://github.com/nipy/nipype/labels/feature
+[link_enhancement]: https://github.com/nipy/nipype/labels/enhancement
 
 [link_pullrequest]: https://help.github.com/articles/creating-a-pull-request/
 [link_fork]: https://help.github.com/articles/fork-a-repo/
