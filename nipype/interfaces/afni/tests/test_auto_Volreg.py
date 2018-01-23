@@ -22,7 +22,7 @@ def test_Volreg_inputs():
     mandatory=True,
     position=-1,
     ),
-    in_weight_file=dict(argstr="-weight '%s[0]'",
+    in_weight_volume=dict(argstr="-weight '%s[%d]'",
     ),
     interp=dict(argstr='-%s',
     ),

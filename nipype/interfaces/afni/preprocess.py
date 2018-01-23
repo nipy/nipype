@@ -2547,10 +2547,12 @@ class VolregInputSpec(AFNICommandInputSpec):
         argstr='-base %s',
         position=-6,
         exists=True)
-    in_weight_file = File(
-        desc='File for input weighting volume',
-        argstr="-weight '%s[0]'",
-        exists=True)
+    in_weight_volume = traits.Either(
+        traits.Tuple(File(exists=True), traits.Int),
+        File(exists=True),
+        desc='weights for each voxel. a file with an optional volume number'
+             ' (defaults to 0)',
+        argstr="-weight '%s[%d]'")
 
     zpad = traits.Int(
         desc='Zeropad around the edges by \'n\' voxels during rotations',
@@ -2585,9 +2587,14 @@ class VolregInputSpec(AFNICommandInputSpec):
         keep_extension=True,
         name_source='in_file')
     interp = traits.Enum(
-        ('Fourier', 'cubic', 'heptic', 'quintic','linear'),
+        ('Fourier', 'cubic', 'heptic', 'quintic', 'linear'),
         desc='spatial interpolation methods [default = heptic]',
         argstr='-%s')
+
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'in_weight_volume' and not isinstance(value, traits.Tuple):
+            value = (value, 0)
+        return super(Volreg, self)._format_arg(name, trait_spec, value)
 
 
 class VolregOutputSpec(TraitedSpec):
