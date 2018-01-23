@@ -7,18 +7,18 @@ Interface Specifications
 Before you start
 ----------------
 
-Nipype is maintained by an enthusiastic group of developers, and we're excited to have you join!
+Nipype is maintained by an enthusiastic group of developers, and we're excited to have you join us!
 In case of trouble, we encourage you to post on `NeuroStars <https://neurostars.org>`_ with the `nipype` tag.
 NeuroStars.org is a platform similar to StackOverflow but dedicated to neuroinformatics.
 You can also post on the nipype developers mailing list: http://mail.python.org/mailman/listinfo/neuroimaging.
-We are sharing a mailing list with the nipy community therefore please add ``[nipype]`` to the message title.
+As we are sharing a mailing list with the nipy community, please add ``[nipype]`` to the message title.
 
 
 Overview
 --------
 
-We're using the `Traits, formerly known as Enthought Traits
-<http://docs.enthought.com/traits/traits_user_manual/intro.html>`_ package for all of our
+We're using the `Traits <http://docs.enthought.com/traits/traits_user_manual/intro.html>`_
+(formerly known as Enthought Traits) package for all of our
 inputs and outputs.  Traits allows us to validate user inputs and
 provides a mechanism to handle all the *special cases* in a simple and
 concise way though metadata.  With the metadata, each input/output can

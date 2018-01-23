@@ -48,7 +48,7 @@ This allows other members of the Nipype development team to confirm that you are
 **2. [Fork][link_fork] the [Nipype repository][link_nipype] to your profile.**
 
 This is now your own unique copy of Nipype.
-Changes here won't effect anyone else's work, so it's a safe space to explore edits to the code!
+Changes here won't affect anyone else's work, so it's a safe space to explore edits to the code!
 
 Make sure to [keep your fork up to date][link_updateupstreamwiki] with the master repository.
 
