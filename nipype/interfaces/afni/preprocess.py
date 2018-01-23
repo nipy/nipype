@@ -2483,6 +2483,12 @@ class VolregInputSpec(AFNICommandInputSpec):
         mandatory=True,
         exists=True,
         copyfile=False)
+    in_weight_volume = traits.Either(
+        traits.Tuple(File(exists=True), traits.Int),
+        File(exists=True),
+        desc='weights for each voxel specified by a file with an '
+             'optional volume number (defaults to 0)',
+        argstr="-weight '%s[%d]'")
     out_file = File(
         name_template='%s_volreg',
         desc='output image file name',
