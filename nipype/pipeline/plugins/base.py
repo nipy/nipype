@@ -337,14 +337,14 @@ class DistributedPluginBase(PluginBase):
                 self.procs[jobid].config['execution']['local_hash_check']):
             return False
 
-        logger.debug('Checking hash (%d) locally', jobid)
-
-        hash_exists, _, _, _ = self.procs[jobid].hash_exists()
+        cached, updated = self.procs[jobid].is_cached()
+        logger.debug('Checking hash "%s" locally: cached=%s, updated=%s.',
+                    self.procs[jobid].fullname, cached, updated)
         overwrite = self.procs[jobid].overwrite
         always_run = self.procs[jobid]._interface.always_run
 
-        if hash_exists and (overwrite is False
-                            or overwrite is None and not always_run):
+        if cached and updated and (overwrite is False or
+                                   overwrite is None and not always_run):
             logger.debug('Skipping cached node %s with ID %s.',
                          self.procs[jobid]._id, jobid)
             try:
