@@ -52,6 +52,9 @@ jobs:
               sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" nipype/info.py
             fi
       - run:
+          name: Install build dependencies
+          command: apk update && apk add make bash
+      - run:
           name: Generate Dockerfiles
           command: |
             make gen-dockerfiles
