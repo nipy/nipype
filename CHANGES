@@ -1,4 +1,7 @@
-Upcoming release (1.0.0)
+Upcoming release
+================
+
+1.0.0 (January 24, 2018)
 ========================
 
 * FIX: PBS plugin submissions (https://github.com/nipy/nipype/pull/2344)
@@ -22,6 +25,7 @@ Upcoming release (1.0.0)
 * STY: Cleanup of PEP8 violations (https://github.com/nipy/nipype/pull/2358)
 * STY: Cleanup of trailing spaces and adding of missing newlines at end of files (https://github.com/nipy/nipype/pull/2355)
 * STY: Apply yapf to codebase (https://github.com/nipy/nipype/pull/2371)
+* DOC: Updated guide for contributing (https://github.com/nipy/nipype/pull/2393)
 
 0.14.0 (November 29, 2017)
 ==========================

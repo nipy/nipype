@@ -57,9 +57,9 @@ class PBSPlugin(SGELikeBatchManagerBase):
 
         stdout = result.runtime.stdout
         stderr = result.runtime.stderr
-        errmsg = 'Unknown Job Id' 
+        errmsg = 'Unknown Job Id'
         success = 'Job has finished'
-        if (success in stderr) or ('job_state = C' in stdout):  
+        if (success in stderr) or ('job_state = C' in stdout):
             return False
         else:
             return errmsg not in stderr
