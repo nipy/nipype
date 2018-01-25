@@ -120,14 +120,21 @@ jobs:
             export DATA_NIPYPE_FSL_FEEDS="${OSF_NIPYPE_URL}/57f473066c613b01f113e7af"
             curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_FEEDS" | tar xz
       - run:
-          name: Run tests
-          no_output_timeout: 2h
+          name: Prepare working directory
           environment:
             WORKDIR: /home/circleci/work
           command: |
             mkdir -p "$WORKDIR"
             chmod -R 777 "$WORKDIR"
-            bash /home/circleci/nipype/.circleci/pytests.sh
+      - run:
+          name: Run pytests (py36)
+          command: bash /home/circleci/nipype/.circleci/test_py3_pytest.sh
+      - run:
+          name: Run pytests (py27)
+          command: bash /home/circleci/nipype/.circleci/test_py2_pytest.sh
+      - run:
+          name: Build docs (py36)
+          command: bash /home/circleci/nipype/.circleci/test_py3_docs.sh
       - store_artifacts:
           path: /home/circleci/work/tests
 
@@ -201,17 +208,36 @@ jobs:
             export DATA_NIPYPE_FSL_FEEDS="${OSF_NIPYPE_URL}/57f473066c613b01f113e7af"
             curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_FEEDS" | tar xz
       - run:
-          name: Run tests
-          no_output_timeout: 2h
+          name: Prepare working directory
           environment:
             WORKDIR: /home/circleci/work
           command: |
             mkdir -p "$WORKDIR"
             chmod -R 777 "$WORKDIR"
-            bash /home/circleci/nipype/.circleci/test_py3_fmri_fsl_feeds_linear_l1.sh
-            bash /home/circleci/nipype/.circleci/test_py3_fmri_fsl_reuse_linear_l1.sh
-            bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_linear_3d.sh
-            bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_linear_4d.sh
+      - run:
+          name: Run FSL FEEDS pipeline (py36)
+          no_output_timeout: 40m
+          environment:
+            WORKDIR: /home/circleci/work
+          command: bash /home/circleci/nipype/.circleci/test_py3_fmri_fsl_feeds_linear_l1.sh
+      - run:
+          name: Run FSL reuse pipeline (py36)
+          no_output_timeout: 40m
+          environment:
+            WORKDIR: /home/circleci/work
+          command: bash /home/circleci/nipype/.circleci/test_py3_fmri_fsl_reuse_linear_l1.sh
+      - run:
+          name: Run SPM test workflow - 3D inputs (py36)
+          no_output_timeout: 40m
+          environment:
+            WORKDIR: /home/circleci/work
+          command: bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_linear_3d.sh
+      - run:
+          name: Run SPM test workflow - 4D inputs (py36)
+          no_output_timeout: 40m
+          environment:
+            WORKDIR: /home/circleci/work
+          command: bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_linear_4d.sh
       - store_artifacts:
           path: /home/circleci/work/tests
 
@@ -285,15 +311,24 @@ jobs:
             export DATA_NIPYPE_FSL_FEEDS="${OSF_NIPYPE_URL}/57f473066c613b01f113e7af"
             curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_FEEDS" | tar xz
       - run:
-          name: Run tests
-          no_output_timeout: 2h
+          name: Prepare working directory
           environment:
             WORKDIR: /home/circleci/work
           command: |
             mkdir -p "$WORKDIR"
             chmod -R 777 "$WORKDIR"
-            bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_dartel_multiproc_l1.sh
-            bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_dartel_multiproc_l2.sh
+      - run:
+          name: Run SPM DARTEL Level 1 pipeline (py36)
+          no_output_timeout: 1h
+          environment:
+            WORKDIR: /home/circleci/work
+          command: bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_dartel_multiproc_l1.sh
+      - run:
+          name: Run SPM DARTEL Level 2 pipeline (py36)
+          no_output_timeout: 30m
+          environment:
+            WORKDIR: /home/circleci/work
+          command: bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_dartel_multiproc_l2.sh
       - store_artifacts:
           path: /home/circleci/work/tests
 
@@ -382,15 +417,24 @@ jobs:
             export DATA_NIPYPE_FSL_FEEDS="${OSF_NIPYPE_URL}/57f473066c613b01f113e7af"
             curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_FEEDS" | tar xz
       - run:
-          name: Run tests
-          no_output_timeout: 2h
+          name: Prepare working directory
           environment:
             WORKDIR: /home/circleci/work
           command: |
             mkdir -p "$WORKDIR"
             chmod -R 777 "$WORKDIR"
-            bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_nested_multiproc_l1.sh
-            bash /home/circleci/nipype/.circleci/test_py2_fmri_spm_nested_multiproc_l2.sh
+      - run:
+          name: Run SPM Nested Level 1 pipeline (py36)
+          no_output_timeout: 1h
+          environment:
+            WORKDIR: /home/circleci/work
+          command: bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_nested_multiproc_l1.sh
+      - run:
+          name: Run SPM Nested Level 2 pipeline (py27)
+          no_output_timeout: 30m
+          environment:
+            WORKDIR: /home/circleci/work
+          command: bash /home/circleci/nipype/.circleci/test_py2_fmri_spm_nested_multiproc_l2.sh
       - store_artifacts:
           path: /home/circleci/work/tests
       - run:
