@@ -128,12 +128,21 @@ jobs:
             chmod -R 777 "$WORKDIR"
       - run:
           name: Run pytests (py36)
+          no_output_timeout: 30m
+          environment:
+            WORKDIR: /home/circleci/work
           command: bash /home/circleci/nipype/.circleci/test_py3_pytest.sh
       - run:
           name: Run pytests (py27)
+          no_output_timeout: 30m
+          environment:
+            WORKDIR: /home/circleci/work
           command: bash /home/circleci/nipype/.circleci/test_py2_pytest.sh
       - run:
           name: Build docs (py36)
+          no_output_timeout: 30m
+          environment:
+            WORKDIR: /home/circleci/work
           command: bash /home/circleci/nipype/.circleci/test_py3_docs.sh
       - store_artifacts:
           path: /home/circleci/work/tests
