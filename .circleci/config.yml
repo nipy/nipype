@@ -36,28 +36,25 @@ jobs:
             - docker/get_base_image.sh
 
   build_images:
-    docker:
-      - image: docker:17.10.0-ce-git
+    machine:
+      # Ubuntu 14.04 with Docker 17.10.0-ce
+      image: circleci/classic:201710-02
     working_directory: /home/circleci/nipype
     steps:
-      - setup_remote_docker
       - checkout:
           path: /home/circleci/nipype
       - attach_workspace:
           at: /tmp
+      - run:
+          name: Generate Dockerfiles
+          command: |
+            make gen-dockerfiles
       - run:
           name: Modify Nipype version if necessary
           command: |
             if [ "$CIRCLE_TAG" != "" ]; then
               sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" nipype/info.py
             fi
-      - run:
-          name: Install build dependencies
-          command: apk update && apk add make bash
-      - run:
-          name: Generate Dockerfiles
-          command: |
-            make gen-dockerfiles
       - run:
           name: Get base image (pull or build)
           no_output_timeout: 60m
@@ -68,7 +65,7 @@ jobs:
               docker pull nipype/nipype:base
             elif [ "$GET_BASE" == "BUILD" ]; then
               e=1 && for i in {1..5}; do
-                docker build --cache-from=nipype/nipype -t nipype/nipype:base - < docker/Dockerfile.base  && e=0 && break || sleep 15
+                docker build -t nipype/nipype:base - < docker/Dockerfile.base  && e=0 && break || sleep 15
               done && [ "$e" -eq "0" ]
             else
               echo "Error: method to get base image not understood"
@@ -118,11 +115,11 @@ jobs:
             - docker/*
 
   test_pytest:
-    docker:
-      - image: docker:17.10.0-ce-git
+    machine:
+      # Ubuntu 14.04 with Docker 17.10.0-ce
+      image: circleci/classic:201710-02
     working_directory: /home/circleci/nipype
     steps:
-      - setup_remote_docker
       - attach_workspace:
           at: /tmp
       - run:
@@ -169,7 +166,6 @@ jobs:
       image: circleci/classic:201710-02
     working_directory: /home/circleci/nipype
     steps:
-      - setup_remote_docker
       - attach_workspace:
           at: /tmp
       - run:
@@ -214,11 +210,11 @@ jobs:
           path: /home/circleci/work/tests
 
   test_py3_fmri_spm_dartel_linear:
-    docker:
-      - image: docker:17.10.0-ce-git
+    machine:
+      # Ubuntu 14.04 with Docker 17.10.0-ce
+      image: circleci/classic:201710-02
     working_directory: /home/circleci/nipype
     steps:
-      - setup_remote_docker
       - attach_workspace:
           at: /tmp
       - run:
@@ -261,11 +257,11 @@ jobs:
           path: /home/circleci/work/tests
 
   test_fmri_spm_nested_multiproc:
-    docker:
-      - image: docker:17.10.0-ce-git
+    machine:
+      # Ubuntu 14.04 with Docker 17.10.0-ce
+      image: circleci/classic:201710-02
     working_directory: /home/circleci/nipype
     steps:
-      - setup_remote_docker
       - attach_workspace:
           at: /tmp
       - run:
