@@ -215,7 +215,7 @@ jobs:
       - store_artifacts:
           path: /home/circleci/work/tests
 
-  test_py3_fmri_spm_dartel_linear:
+  test_py3_fmri_spm_dartel_multiproc:
     machine:
       # Ubuntu 14.04 with Docker 17.10.0-ce
       image: circleci/classic:201710-02
@@ -292,8 +292,8 @@ jobs:
           command: |
             mkdir -p "$WORKDIR"
             chmod -R 777 "$WORKDIR"
-            bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_dartel_linear_l1.sh
-            bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_dartel_linear_l2.sh
+            bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_dartel_multiproc_l1.sh
+            bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_dartel_multiproc_l2.sh
       - store_artifacts:
           path: /home/circleci/work/tests
 
@@ -450,7 +450,7 @@ workflows:
       - test_py3_fmri_fsl_spm:
           requires:
             - compare_base_dockerfiles
-      - test_py3_fmri_spm_dartel_linear:
+      - test_py3_fmri_spm_dartel_multiproc:
           requires:
             - compare_base_dockerfiles
       - test_fmri_spm_nested_multiproc:
@@ -464,4 +464,4 @@ workflows:
             - test_pytest
             - test_fmri_spm_nested_multiproc
             - test_py3_fmri_fsl_spm
-            - test_py3_fmri_spm_dartel_linear
+            - test_py3_fmri_spm_dartel_multiproc
