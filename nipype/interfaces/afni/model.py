@@ -293,11 +293,14 @@ class Deconvolve(AFNICommand):
             outputs['x1D'] = self._gen_fname(
                 suffix='.xmat.1D', **_gen_fname_opts)
 
+        if isdefined(self.inputs.cbucket):
+            outputs['cbucket'] = os.path.abspath(self.inputs.cbucket)
+
         outputs['reml_script'] = self._gen_fname(
             suffix='.REML_cmd', **_gen_fname_opts)
         # remove out_file from outputs if x1d_stop set to True
         if self.inputs.x1D_stop:
-            del outputs['out_file']
+            del outputs['out_file'], outputs['cbucket']
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
 
@@ -652,3 +655,12 @@ class Synthesize(AFNICommand):
     _cmd = '3dSynthesize'
     input_spec = SynthesizeInputSpec
     output_spec = AFNICommandOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+
+        for key in outputs.keys():
+            if isdefined(self.inputs.get()[key]):
+                outputs[key] = os.path.abspath(self.inputs.get()[key])
+
+        return outputs
