@@ -2581,6 +2581,11 @@ class Volreg(AFNICommand):
     input_spec = VolregInputSpec
     output_spec = VolregOutputSpec
 
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'in_weight_volume' and not isinstance(value, Tuple):
+            value = (value, 0)
+        return super(Volreg, self)._format_arg(name, trait_spec, value)
+
 
 class WarpInputSpec(AFNICommandInputSpec):
     in_file = File(
