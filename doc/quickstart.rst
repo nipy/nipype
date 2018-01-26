@@ -47,6 +47,7 @@ Learning Resources
 ==================
 
 `Porcupine <https://timvanmourik.github.io/Porcupine/getting-started/>`_ : create Nipype pipelines using a graphical interface
+
 View the `examples gallery here <https://timvanmourik.github.io/Porcupine/examples/>`_
 
 Developer guides
