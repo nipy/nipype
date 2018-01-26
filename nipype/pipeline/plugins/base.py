@@ -7,13 +7,13 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 from builtins import range, object, open
 
+import sys
 from copy import deepcopy
 from glob import glob
 import os
 import shutil
-import sys
 from time import sleep, time
-from traceback import format_exc
+from traceback import format_exception
 
 import numpy as np
 import scipy.sparse as ssp
@@ -159,7 +159,7 @@ class DistributedPluginBase(PluginBase):
                             graph,
                             result={
                                 'result': None,
-                                'traceback': format_exc()
+                                'traceback': '\n'.join(format_exception(*sys.exc_info()))
                             }))
                 else:
                     if result:
@@ -327,7 +327,7 @@ class DistributedPluginBase(PluginBase):
                                 self.proc_pending[jobid] = False
                             else:
                                 self.pending_tasks.insert(0, (tid, jobid))
-                    logger.info('Finished submitting: %s ID: %d' %
+                    logger.info('Finished submitting: %s ID: %d',
                                 (self.procs[jobid]._id, jobid))
             else:
                 break
@@ -337,11 +337,17 @@ class DistributedPluginBase(PluginBase):
                 self.procs[jobid].config['execution']['local_hash_check']):
             return False
 
-        cached, updated = self.procs[jobid].is_cached()
+        try:
+            cached, updated = self.procs[jobid].is_cached()
+        except Exception:
+            logger.warning('Error while checking node hash, forcing re-run\n\n%s',
+                           '\n'.join(format_exception(*sys.exc_info())))
+            return False
+
         logger.debug('Checking hash "%s" locally: cached=%s, updated=%s.',
                     self.procs[jobid].fullname, cached, updated)
         overwrite = self.procs[jobid].overwrite
-        always_run = self.procs[jobid]._interface.always_run
+        always_run = self.procs[jobid].interface.always_run
 
         if cached and updated and (overwrite is False or
                                    overwrite is None and not always_run):
@@ -351,8 +357,9 @@ class DistributedPluginBase(PluginBase):
                 self._task_finished_cb(jobid, cached=True)
                 self._remove_node_dirs()
             except Exception:
-                logger.debug('Error skipping cached node %s (%s).',
-                             self.procs[jobid]._id, jobid)
+                logger.debug('Error skipping cached node %s (%s).\n\n%s',
+                             self.procs[jobid]._id, jobid,
+                             '\n'.join(format_exception(*sys.exc_info())))
                 self._clean_queue(jobid, graph)
                 self.proc_pending[jobid] = False
             return True
@@ -481,7 +488,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
                                      taskid, timeout, node_dir))
                 raise IOError(error_message)
             except IOError as e:
-                result_data['traceback'] = format_exc()
+                result_data['traceback'] = '\n'.join(format_exception(*sys.exc_info()))
         else:
             results_file = glob(os.path.join(node_dir, 'result_*.pklz'))[0]
             result_data = loadpkl(results_file)
