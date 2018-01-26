@@ -340,7 +340,11 @@ class DistributedPluginBase(PluginBase):
         try:
             cached, updated = self.procs[jobid].is_cached()
         except Exception:
-            logger.warning('Error while checking node hash, forcing re-run\n\n%s',
+            logger.warning('Error while checking node hash, forcing re-run. '
+                           'Although this error may not prevent the workflow from running, '
+                           'it could indicate a major problem. Please report a new issue'
+                           'at https://github.com/nipy/nipype/issues adding the following'
+                           'information:\n\n%s',
                            '\n'.join(format_exception(*sys.exc_info())))
             return False
 
