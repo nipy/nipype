@@ -244,7 +244,7 @@ class DistributedPluginBase(PluginBase):
         mapnodesubids = self.procs[jobid].get_subnodes()
         numnodes = len(mapnodesubids)
         logger.debug('Adding %d jobs for mapnode %s', numnodes,
-                     self.procs[jobid]._id)
+                     self.procs[jobid].fullname)
         for i in range(numnodes):
             self.mapnodesubids[self.depidx.shape[0] + i] = jobid
         self.procs.extend(mapnodesubids)
@@ -274,7 +274,7 @@ class DistributedPluginBase(PluginBase):
                 slots = None
             else:
                 slots = max(0, self.max_jobs - num_jobs)
-            logger.debug('Slots available: %s' % slots)
+            logger.debug('Slots available: %s', slots)
             if (num_jobs >= self.max_jobs) or (slots == 0):
                 break
 
@@ -303,14 +303,14 @@ class DistributedPluginBase(PluginBase):
                     self.proc_done[jobid] = True
                     self.proc_pending[jobid] = True
                     # Send job to task manager and add to pending tasks
-                    logger.info('Submitting: %s ID: %d' %
-                                (self.procs[jobid]._id, jobid))
+                    logger.info('Submitting: %s ID: %d',
+                                self.procs[jobid]._id, jobid)
                     if self._status_callback:
                         self._status_callback(self.procs[jobid], 'start')
 
                     if not self._local_hash_check(jobid, graph):
                         if self.procs[jobid].run_without_submitting:
-                            logger.debug('Running node %s on master thread' %
+                            logger.debug('Running node %s on master thread',
                                          self.procs[jobid])
                             try:
                                 self.procs[jobid].run()
@@ -328,7 +328,7 @@ class DistributedPluginBase(PluginBase):
                             else:
                                 self.pending_tasks.insert(0, (tid, jobid))
                     logger.info('Finished submitting: %s ID: %d',
-                                (self.procs[jobid]._id, jobid))
+                                self.procs[jobid]._id, jobid)
             else:
                 break
 
@@ -340,12 +340,17 @@ class DistributedPluginBase(PluginBase):
         try:
             cached, updated = self.procs[jobid].is_cached()
         except Exception:
-            logger.warning('Error while checking node hash, forcing re-run. '
-                           'Although this error may not prevent the workflow from running, '
-                           'it could indicate a major problem. Please report a new issue'
-                           'at https://github.com/nipy/nipype/issues adding the following'
-                           'information:\n\n%s',
-                           '\n'.join(format_exception(*sys.exc_info())))
+            logger.warning(
+                'Error while checking node hash, forcing re-run. '
+                'Although this error may not prevent the workflow from running, '
+                'it could indicate a major problem. Please report a new issue'
+                'at https://github.com/nipy/nipype/issues adding the following'
+                'information:\n\n\tNode: %s\n\tInterface: %s.%s\n\tTraceback:\n%s',
+                self.procs[jobid].fullname,
+                self.procs[jobid].interface.__module__,
+                self.procs[jobid].interface.__class__.__name__,
+                '\n'.join(format_exception(*sys.exc_info()))
+            )
             return False
 
         logger.debug('Checking hash "%s" locally: cached=%s, updated=%s.',
