@@ -73,7 +73,7 @@ This will create a file "outputtestsave.py" with the following content:
 	    return out
 
 	testfunc.inputs.function_str = getsource(testfunc_1)
-	testfunc.ignore_exception = False
+	testfunc.interface.ignore_exception = False
 	testfunc.inputs.in1 = '-sub'
 	testsave.connect(inode, "a", testfunc, "in1")
 	# Node: testsave.bet2
