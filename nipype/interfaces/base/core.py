@@ -170,12 +170,14 @@ class BaseInterface(Interface):
     references_ = []
     resource_monitor = True  # Enabled for this interface IFF enabled in the config
 
-    def __init__(self, from_file=None, resource_monitor=None, **inputs):
+    def __init__(self, from_file=None, resource_monitor=None,
+                 ignore_exception=False, **inputs):
         if not self.input_spec:
             raise Exception(
                 'No input_spec in class: %s' % self.__class__.__name__)
 
         self.inputs = self.input_spec(**inputs)
+        self.ignore_exception = ignore_exception
 
         if resource_monitor is not None:
             self.resource_monitor = resource_monitor
@@ -470,7 +472,6 @@ class BaseInterface(Interface):
         os.chdir(cwd)  # Change to the interface wd
 
         enable_rm = config.resource_monitor and self.resource_monitor
-        force_raise = not getattr(self.inputs, 'ignore_exception', False)
         self.inputs.trait_set(**inputs)
         self._check_mandatory_inputs()
         self._check_version_requirements(self.inputs)
@@ -530,7 +531,7 @@ class BaseInterface(Interface):
             runtime.traceback_args = ('\n'.join(
                 ['%s' % arg for arg in exc_args]), )
 
-            if force_raise:
+            if not self.ignore_exception:
                 raise
         finally:
             # This needs to be done always

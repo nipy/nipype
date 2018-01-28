@@ -66,6 +66,7 @@ This will create a file "outputtestsave.py" with the following content:
 	inode = Node(IdentityInterface(fields=['a'], mandatory_inputs=True), name="inode")
 	# Node: testsave.testfunc
 	testfunc = Node(Function(input_names=['a'], output_names=['output']), name="testfunc")
+	testfunc.interface.ignore_exception = False
 	def testfunc_1(in1):
 	    """dummy func
 	    """
@@ -73,27 +74,26 @@ This will create a file "outputtestsave.py" with the following content:
 	    return out
 
 	testfunc.inputs.function_str = getsource(testfunc_1)
-	testfunc.inputs.ignore_exception = False
 	testfunc.inputs.in1 = '-sub'
 	testsave.connect(inode, "a", testfunc, "in1")
 	# Node: testsave.bet2
 	bet2 = MapNode(BET(), iterfield=['infile'], name="bet2")
+	bet2.interface.ignore_exception = False
 	bet2.iterables = ('frac', [0.4, 0.5])
 	bet2.inputs.environ = {'FSLOUTPUTTYPE': 'NIFTI_GZ'}
-	bet2.inputs.ignore_exception = False
 	bet2.inputs.output_type = 'NIFTI_GZ'
 	bet2.terminal_output = 'stream'
 	# Node: testsave.bet
 	bet = Node(BET(), name="bet")
+	bet.interface.ignore_exception = False
 	bet.iterables = ('frac', [0.3, 0.4])
 	bet.inputs.environ = {'FSLOUTPUTTYPE': 'NIFTI_GZ'}
-	bet.inputs.ignore_exception = False
 	bet.inputs.output_type = 'NIFTI_GZ'
 	bet.terminal_output = 'stream'
 	# Node: testsave.maths
 	maths = Node(ImageMaths(), name="maths")
+	maths.interface.ignore_exception = False
 	maths.inputs.environ = {'FSLOUTPUTTYPE': 'NIFTI_GZ'}
-	maths.inputs.ignore_exception = False
 	maths.inputs.output_type = 'NIFTI_GZ'
 	maths.terminal_output = 'stream'
 	testsave.connect(bet2, ('mask_file', func), maths, "in_file2")
