@@ -244,7 +244,7 @@ class DistributedPluginBase(PluginBase):
         mapnodesubids = self.procs[jobid].get_subnodes()
         numnodes = len(mapnodesubids)
         logger.debug('Adding %d jobs for mapnode %s', numnodes,
-                     self.procs[jobid].fullname)
+                     self.procs[jobid])
         for i in range(numnodes):
             self.mapnodesubids[self.depidx.shape[0] + i] = jobid
         self.procs.extend(mapnodesubids)
@@ -343,10 +343,10 @@ class DistributedPluginBase(PluginBase):
             logger.warning(
                 'Error while checking node hash, forcing re-run. '
                 'Although this error may not prevent the workflow from running, '
-                'it could indicate a major problem. Please report a new issue'
-                'at https://github.com/nipy/nipype/issues adding the following'
+                'it could indicate a major problem. Please report a new issue '
+                'at https://github.com/nipy/nipype/issues adding the following '
                 'information:\n\n\tNode: %s\n\tInterface: %s.%s\n\tTraceback:\n%s',
-                self.procs[jobid].fullname,
+                self.procs[jobid],
                 self.procs[jobid].interface.__module__,
                 self.procs[jobid].interface.__class__.__name__,
                 '\n'.join(format_exception(*sys.exc_info()))
@@ -354,20 +354,20 @@ class DistributedPluginBase(PluginBase):
             return False
 
         logger.debug('Checking hash "%s" locally: cached=%s, updated=%s.',
-                    self.procs[jobid].fullname, cached, updated)
+                     self.procs[jobid], cached, updated)
         overwrite = self.procs[jobid].overwrite
         always_run = self.procs[jobid].interface.always_run
 
         if cached and updated and (overwrite is False or
                                    overwrite is None and not always_run):
             logger.debug('Skipping cached node %s with ID %s.',
-                         self.procs[jobid]._id, jobid)
+                         self.procs[jobid], jobid)
             try:
                 self._task_finished_cb(jobid, cached=True)
                 self._remove_node_dirs()
             except Exception:
                 logger.debug('Error skipping cached node %s (%s).\n\n%s',
-                             self.procs[jobid]._id, jobid,
+                             self.procs[jobid], jobid,
                              '\n'.join(format_exception(*sys.exc_info())))
                 self._clean_queue(jobid, graph)
                 self.proc_pending[jobid] = False
@@ -380,7 +380,7 @@ class DistributedPluginBase(PluginBase):
         This is called when a job is completed.
         """
         logger.info('[Job %d] %s (%s).', jobid, 'Cached'
-                    if cached else 'Completed', self.procs[jobid].fullname)
+                    if cached else 'Completed', self.procs[jobid])
         if self._status_callback:
             self._status_callback(self.procs[jobid], 'end')
         # Update job and worker queues
