@@ -142,7 +142,7 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
         desc='this option lets you input a rectangular array of 1 or more '
         'baseline vectors from a file. This method is a fast way to '
         'include a lot of baseline regressors in one step. ',
-        argstr='ortvec %s')
+        argstr='-ortvec %s %s')
     x1D = File(desc='specify name for saved X matrix', argstr='-x1D %s')
     x1D_stop = traits.Bool(
         desc='stop running after writing .xmat.1D file', argstr='-x1D_stop')
