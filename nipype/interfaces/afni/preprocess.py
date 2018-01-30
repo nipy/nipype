@@ -930,7 +930,7 @@ class BlurToFWHMInputSpec(AFNICommandInputSpec):
     mask = File(
         desc='Mask dataset, if desired. Voxels NOT in mask will be set to zero '
         'in output.',
-        argstr='-blurmaster %s',
+        argstr='-mask %s',
         exists=True)
 
 
