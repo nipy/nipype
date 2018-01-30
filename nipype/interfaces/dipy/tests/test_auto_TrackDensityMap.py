@@ -4,29 +4,26 @@ from ..tracks import TrackDensityMap
 
 
 def test_TrackDensityMap_inputs():
-    input_map = dict(data_dims=dict(),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_file=dict(mandatory=True,
-    ),
-    out_filename=dict(usedefault=True,
-    ),
-    points_space=dict(usedefault=True,
-    ),
-    reference=dict(),
-    voxel_dims=dict(),
+    input_map = dict(
+        data_dims=dict(),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(mandatory=True, ),
+        out_filename=dict(usedefault=True, ),
+        points_space=dict(usedefault=True, ),
+        reference=dict(),
+        voxel_dims=dict(),
     )
     inputs = TrackDensityMap.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_TrackDensityMap_outputs():
-    output_map = dict(out_file=dict(),
-    )
+    output_map = dict(out_file=dict(), )
     outputs = TrackDensityMap.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -6,7 +6,7 @@ try,
         end;
         spm_path = spm('dir');
         fprintf(1, 'NIPYPE  %s', spm_path);
-        
+
 ,catch ME,
 fprintf(2,'MATLAB code threw an exception:\n');
 fprintf(2,'%s\n',ME.message);

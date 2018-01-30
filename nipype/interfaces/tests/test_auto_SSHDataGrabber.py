@@ -4,36 +4,29 @@ from ..io import SSHDataGrabber
 
 
 def test_SSHDataGrabber_inputs():
-    input_map = dict(base_directory=dict(mandatory=True,
-    ),
-    download_files=dict(usedefault=True,
-    ),
-    hostname=dict(mandatory=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    password=dict(),
-    raise_on_empty=dict(usedefault=True,
-    ),
-    sort_filelist=dict(mandatory=True,
-    ),
-    ssh_log_to_file=dict(usedefault=True,
-    ),
-    template=dict(mandatory=True,
-    ),
-    template_args=dict(),
-    template_expression=dict(usedefault=True,
-    ),
-    username=dict(),
+    input_map = dict(
+        base_directory=dict(mandatory=True, ),
+        download_files=dict(usedefault=True, ),
+        hostname=dict(mandatory=True, ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        password=dict(),
+        raise_on_empty=dict(usedefault=True, ),
+        sort_filelist=dict(mandatory=True, ),
+        ssh_log_to_file=dict(usedefault=True, ),
+        template=dict(mandatory=True, ),
+        template_args=dict(),
+        template_expression=dict(usedefault=True, ),
+        username=dict(),
     )
     inputs = SSHDataGrabber.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_SSHDataGrabber_outputs():
     output_map = dict()
     outputs = SSHDataGrabber.output_spec()

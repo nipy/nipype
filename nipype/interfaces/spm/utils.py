@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import os
 import numpy as np
 
-from ...utils.filemanip import split_filename, fname_presuffix, filename_to_list, list_to_filename
-from ..base import TraitedSpec, isdefined, File, traits, OutputMultiPath, InputMultiPath
-from .base import SPMCommandInputSpec, SPMCommand, scans_for_fnames, scans_for_fname
+from ...utils.filemanip import (split_filename, fname_presuffix,
+                                filename_to_list, list_to_filename)
+from ..base import (TraitedSpec, isdefined, File, traits, OutputMultiPath,
+                    InputMultiPath)
+from .base import (SPMCommandInputSpec, SPMCommand, scans_for_fnames,
+                   scans_for_fname)
 
 
 class Analyze2niiInputSpec(SPMCommandInputSpec):
@@ -41,11 +45,16 @@ class Analyze2nii(SPMCommand):
 
 
 class CalcCoregAffineInputSpec(SPMCommandInputSpec):
-    target = File(exists=True, mandatory=True,
-                  desc='target for generating affine transform')
-    moving = File(exists=True, mandatory=True, copyfile=False,
-                  desc=('volume transform can be applied to register with '
-                        'target'))
+    target = File(
+        exists=True,
+        mandatory=True,
+        desc='target for generating affine transform')
+    moving = File(
+        exists=True,
+        mandatory=True,
+        copyfile=False,
+        desc=('volume transform can be applied to register with '
+              'target'))
     mat = File(desc='Filename used to store affine matrix')
     invmat = File(desc='Filename used to store inverse affine matrix')
 
@@ -109,9 +118,7 @@ class CalcCoregAffine(SPMCommand):
         save('%s' , 'M' );
         M = inv(M);
         save('%s','M')
-        """ % (self.inputs.target,
-               self.inputs.moving,
-               self.inputs.mat,
+        """ % (self.inputs.target, self.inputs.moving, self.inputs.mat,
                self.inputs.invmat)
         return script
 
@@ -123,12 +130,14 @@ class CalcCoregAffine(SPMCommand):
 
 
 class ApplyTransformInputSpec(SPMCommandInputSpec):
-    in_file = File(exists=True, mandatory=True, copyfile=True,
-                   desc='file to apply transform to, (only updates header)')
-    mat = File(exists=True, mandatory=True,
-               desc='file holding transform to apply')
-    out_file = File(desc="output file name for transformed data",
-                    genfile=True)
+    in_file = File(
+        exists=True,
+        mandatory=True,
+        copyfile=True,
+        desc='file to apply transform to, (only updates header)')
+    mat = File(
+        exists=True, mandatory=True, desc='file holding transform to apply')
+    out_file = File(desc="output file name for transformed data", genfile=True)
 
 
 class ApplyTransformOutputSpec(TraitedSpec):
@@ -167,9 +176,7 @@ class ApplyTransform(SPMCommand):
         V.fname = fullfile(outfile);
         spm_write_vol(V,X);
 
-        """ % (self.inputs.in_file,
-               self.inputs.out_file,
-               self.inputs.mat)
+        """ % (self.inputs.in_file, self.inputs.out_file, self.inputs.mat)
         # img_space = spm_get_space(infile);
         # spm_get_space(infile, transform.M * img_space);
         return script
@@ -188,14 +195,21 @@ class ApplyTransform(SPMCommand):
 
 
 class ResliceInputSpec(SPMCommandInputSpec):
-    in_file = File(exists=True, mandatory=True,
-                   desc='file to apply transform to, (only updates header)')
-    space_defining = File(exists=True, mandatory=True,
-                          desc='Volume defining space to slice in_file into')
+    in_file = File(
+        exists=True,
+        mandatory=True,
+        desc='file to apply transform to, (only updates header)')
+    space_defining = File(
+        exists=True,
+        mandatory=True,
+        desc='Volume defining space to slice in_file into')
 
-    interp = traits.Range(low=0, high=7, usedefault=True,
-                          desc='degree of b-spline used for interpolation'
-                          '0 is nearest neighbor (default)')
+    interp = traits.Range(
+        low=0,
+        high=7,
+        usedefault=True,
+        desc='degree of b-spline used for interpolation'
+        '0 is nearest neighbor (default)')
 
     out_file = File(desc='Optional file to save resliced volume')
 
@@ -213,8 +227,8 @@ class Reslice(SPMCommand):
     def _make_matlab_command(self, _):
         """ generates script"""
         if not isdefined(self.inputs.out_file):
-            self.inputs.out_file = fname_presuffix(self.inputs.in_file,
-                                                   prefix='r')
+            self.inputs.out_file = fname_presuffix(
+                self.inputs.in_file, prefix='r')
         script = """
         flags.mean = 0;
         flags.which = 1;
@@ -223,8 +237,7 @@ class Reslice(SPMCommand):
         infiles = strvcat(\'%s\', \'%s\');
         invols = spm_vol(infiles);
         spm_reslice(invols, flags);
-        """ % (self.inputs.interp,
-               self.inputs.space_defining,
+        """ % (self.inputs.interp, self.inputs.space_defining,
                self.inputs.in_file)
         return script
 
@@ -236,7 +249,9 @@ class Reslice(SPMCommand):
 
 class ApplyInverseDeformationInput(SPMCommandInputSpec):
     in_files = InputMultiPath(
-        File(exists=True), mandatory=True, field='fnames',
+        File(exists=True),
+        mandatory=True,
+        field='fnames',
         desc='Files on which deformation is applied')
     target = File(
         exists=True,
@@ -253,24 +268,27 @@ class ApplyInverseDeformationInput(SPMCommandInputSpec):
         desc='SN SPM deformation file',
         xor=['deformation'])
     interpolation = traits.Range(
-        low=0, high=7, field='interp',
+        low=0,
+        high=7,
+        field='interp',
         desc='degree of b-spline used for interpolation')
 
     bounding_box = traits.List(
         traits.Float(),
         field='comp{1}.inv.comp{1}.sn2def.bb',
-        minlen=6, maxlen=6,
+        minlen=6,
+        maxlen=6,
         desc='6-element list (opt)')
     voxel_sizes = traits.List(
         traits.Float(),
         field='comp{1}.inv.comp{1}.sn2def.vox',
-        minlen=3, maxlen=3,
+        minlen=3,
+        maxlen=3,
         desc='3-element list (opt)')
 
 
 class ApplyInverseDeformationOutput(TraitedSpec):
-    out_files = OutputMultiPath(File(exists=True),
-                                desc='Transformed files')
+    out_files = OutputMultiPath(File(exists=True), desc='Transformed files')
 
 
 class ApplyInverseDeformation(SPMCommand):
@@ -318,31 +336,36 @@ class ApplyInverseDeformation(SPMCommand):
 
 class ResliceToReferenceInput(SPMCommandInputSpec):
     in_files = InputMultiPath(
-        File(exists=True), mandatory=True, field='fnames',
+        File(exists=True),
+        mandatory=True,
+        field='fnames',
         desc='Files on which deformation is applied')
     target = File(
         exists=True,
         field='comp{1}.id.space',
         desc='File defining target space')
     interpolation = traits.Range(
-        low=0, high=7, field='interp',
+        low=0,
+        high=7,
+        field='interp',
         desc='degree of b-spline used for interpolation')
 
     bounding_box = traits.List(
         traits.Float(),
         field='comp{2}.idbbvox.bb',
-        minlen=6, maxlen=6,
+        minlen=6,
+        maxlen=6,
         desc='6-element list (opt)')
     voxel_sizes = traits.List(
         traits.Float(),
         field='comp{2}.idbbvox.vox',
-        minlen=3, maxlen=3,
+        minlen=3,
+        maxlen=3,
         desc='3-element list (opt)')
 
 
 class ResliceToReferenceOutput(TraitedSpec):
-    out_files = OutputMultiPath(File(exists=True),
-                                desc='Transformed files')
+    out_files = OutputMultiPath(File(exists=True), desc='Transformed files')
 
 
 class ResliceToReference(SPMCommand):
@@ -394,32 +417,39 @@ class DicomImportInputSpec(SPMCommandInputSpec):
         field='data',
         desc='dicom files to be converted')
     output_dir_struct = traits.Enum(
-        'flat', 'series', 'patname', 'patid_date', 'patid', 'date_time',
+        'flat',
+        'series',
+        'patname',
+        'patid_date',
+        'patid',
+        'date_time',
         field='root',
         usedefault=True,
         desc='directory structure for the output.')
-    output_dir = traits.Str('./converted_dicom',
-                            field='outdir',
-                            usedefault=True,
-                            desc='output directory.')
+    output_dir = traits.Str(
+        './converted_dicom',
+        field='outdir',
+        usedefault=True,
+        desc='output directory.')
     format = traits.Enum(
-        'nii', 'img',
+        'nii',
+        'img',
         field='convopts.format',
         usedefault=True,
         desc='output format.')
-    icedims = traits.Bool(False,
-                          field='convopts.icedims',
-                          usedefault=True,
-                          desc=('If image sorting fails, one can try using '
-                                'the additional SIEMENS ICEDims information '
-                                'to create unique filenames. Use this only if '
-                                'there would be multiple volumes with exactly '
-                                'the same file names.'))
+    icedims = traits.Bool(
+        False,
+        field='convopts.icedims',
+        usedefault=True,
+        desc=('If image sorting fails, one can try using '
+              'the additional SIEMENS ICEDims information '
+              'to create unique filenames. Use this only if '
+              'there would be multiple volumes with exactly '
+              'the same file names.'))
 
 
 class DicomImportOutputSpec(TraitedSpec):
-    out_files = OutputMultiPath(File(exists=True),
-                                desc='converted files')
+    out_files = OutputMultiPath(File(exists=True), desc='converted files')
 
 
 class DicomImport(SPMCommand):
@@ -472,8 +502,9 @@ class DicomImport(SPMCommand):
         elif self.inputs.output_dir_struct == 'series':
             outputs['out_files'] = glob(
                 os.path.join(od, os.path.join('*', '*.%s' % ext)))
-        elif (self.inputs.output_dir_struct in
-              ['patid', 'date_time', 'patname']):
+        elif (self.inputs.output_dir_struct in [
+                'patid', 'date_time', 'patname'
+        ]):
             outputs['out_files'] = glob(
                 os.path.join(od, os.path.join('*', '*', '*.%s' % ext)))
         elif self.inputs.output_dir_struct == 'patid_date':

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-
 """
 The niftyseg module provides classes for interfacing with `niftyseg
 <https://sourceforge.net/projects/niftyseg/>`_ command line tools.
@@ -16,16 +15,10 @@ Examples
 --------
 See the docstrings of the individual classes for examples.
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
-from ..niftyreg.base import no_nifty_package
 from ..niftyfit.base import NiftyFitCommand
-import subprocess
-import warnings
-
-
-warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 class NiftySegCommand(NiftyFitCommand):
@@ -39,9 +32,5 @@ class NiftySegCommand(NiftyFitCommand):
         super(NiftySegCommand, self).__init__(**inputs)
 
     def get_version(self):
-        if no_nifty_package(cmd=self.cmd):
-            return None
-        # exec_cmd = ''.join((self.cmd, ' --version'))
-        exec_cmd = 'seg_EM --version'
-        # Using seg_EM for version (E.G: seg_stats --version doesn't work)
-        return subprocess.check_output(exec_cmd, shell=True).strip('\n')
+        return super(NiftySegCommand, self).version_from_command(
+            cmd='seg_EM', flag='--version')

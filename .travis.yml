@@ -8,9 +8,10 @@ python:
 - 3.5
 - 3.6
 env:
-- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler"
-- INSTALL_DEB_DEPENDECIES=false NIPYPE_EXTRAS="doc,tests,fmri,profiler"
-- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit"
+- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler" CI_SKIP_TEST=1
+- INSTALL_DEB_DEPENDECIES=false NIPYPE_EXTRAS="doc,tests,fmri,profiler" CI_SKIP_TEST=1
+- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit" CI_SKIP_TEST=1
+- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler" PIP_FLAGS="--pre" CI_SKIP_TEST=1
 before_install:
 - function apt_inst {
   if $INSTALL_DEB_DEPENDECIES; then sudo rm -rf /dev/shm; fi &&
@@ -33,15 +34,20 @@ before_install:
   hash -r &&
   conda config --set always_yes yes --set changeps1 no &&
   conda update -q conda &&
-  conda install python=${TRAVIS_PYTHON_VERSION} &&
   conda config --add channels conda-forge &&
-  conda install -y nipype icu &&
-  rm -r ${CONDA_HOME}/lib/python${TRAVIS_PYTHON_VERSION}/site-packages/nipype*; }
+  conda install python=${TRAVIS_PYTHON_VERSION} &&
+  conda install -y icu &&
+  pip install -r requirements.txt &&
+  pushd $HOME;
+  git clone https://github.com/INCF/pybids.git;
+  cd pybids;
+  pip install -e .;
+  popd; }
 #  Add install of vtk and mayavi to test mesh (disabled): conda install -y vtk mayavi
 - travis_retry apt_inst
 - travis_retry conda_inst
 install:
-- travis_retry pip install -e .[$NIPYPE_EXTRAS]
+- travis_retry pip install $PIP_FLAGS -e .[$NIPYPE_EXTRAS]
 script:
 - py.test -v --doctest-modules nipype
 deploy:
@@ -53,4 +59,4 @@ deploy:
     tags: true
     repo: nipy/nipype
     branch: master
-  distributions: "sdist"
+  distributions: "sdist bdist_wheel"

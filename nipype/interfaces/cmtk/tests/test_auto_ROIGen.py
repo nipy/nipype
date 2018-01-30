@@ -4,32 +4,28 @@ from ..cmtk import ROIGen
 
 
 def test_ROIGen_inputs():
-    input_map = dict(LUT_file=dict(xor=['use_freesurfer_LUT'],
-    ),
-    aparc_aseg_file=dict(mandatory=True,
-    ),
-    freesurfer_dir=dict(requires=['use_freesurfer_LUT'],
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    out_dict_file=dict(genfile=True,
-    ),
-    out_roi_file=dict(genfile=True,
-    ),
-    use_freesurfer_LUT=dict(xor=['LUT_file'],
-    ),
+    input_map = dict(
+        LUT_file=dict(xor=['use_freesurfer_LUT'], ),
+        aparc_aseg_file=dict(mandatory=True, ),
+        freesurfer_dir=dict(requires=['use_freesurfer_LUT'], ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        out_dict_file=dict(genfile=True, ),
+        out_roi_file=dict(genfile=True, ),
+        use_freesurfer_LUT=dict(xor=['LUT_file'], ),
     )
     inputs = ROIGen.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_ROIGen_outputs():
-    output_map = dict(dict_file=dict(),
-    roi_file=dict(),
+    output_map = dict(
+        dict_file=dict(),
+        roi_file=dict(),
     )
     outputs = ROIGen.output_spec()
 
