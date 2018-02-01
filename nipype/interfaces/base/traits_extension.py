@@ -214,8 +214,25 @@ class ImageFile(File):
         """
         self.types = types
         self.allow_compressed = allow_compressed
+        self._exts = None
         super(ImageFile, self).__init__(value, filter, auto_set, entries,
                                         exists, **metadata)
+
+    def info(self):
+        existing='n existing' if self.exists else ''
+        comma = ',' if self.exists and not self.allow_compressed else ''
+        uncompressed=' uncompressed' if not self.allow_compressed else ''
+        with_ext = ' (valid extensions: [{}])'.format(', '.join(self.exts)) \
+            if self.types else ''
+        return 'a{existing}{comma}{uncompressed} file{with_ext}'.format(
+            existing=existing, comma=comma, uncompressed=uncompressed,
+            with_ext=with_ext)
+
+    @property
+    def exts(self):
+        if self.types and self._exts is None:
+            self._exts = self.grab_exts()
+        return self._exts
 
     def grab_exts(self):
         # TODO: file type validation
@@ -243,11 +260,10 @@ class ImageFile(File):
         """
         validated_value = super(ImageFile, self).validate(object, name, value)
         if validated_value and self.types:
-            self._exts = self.grab_exts()
-            if not any(validated_value.endswith(x) for x in self._exts):
+            if not any(validated_value.endswith(x) for x in self.exts):
                 raise TraitError(
                     args="{} is not included in allowed types: {}".format(
-                        validated_value, ', '.join(self._exts)))
+                        validated_value, ', '.join(self.exts)))
         return validated_value
 
 
