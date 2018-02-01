@@ -125,8 +125,8 @@ class SliceTiming(SPMCommand):
 
 class RealignInputSpec(SPMCommandInputSpec):
     in_files = InputMultiPath(
-        traits.Either(traits.List(ImageFileSPM(exists=True)),
-                      ImageFileSPM(exists=True)),
+        traits.Either(ImageFileSPM(exists=True),
+                      traits.List(ImageFileSPM(exists=True))),
         field='data',
         mandatory=True,
         copyfile=True,
