@@ -322,15 +322,11 @@ class MultiPath(traits.List):
 
         newvalue = value
 
+        inner_trait = self.inner_traits()[0]
         if not isinstance(value, list) \
-            or (self.inner_traits() and
-                isinstance(self.inner_traits()[0].trait_type,
-                           traits.List) and not
-                isinstance(self.inner_traits()[0].trait_type,
-                           InputMultiPath) and
-                isinstance(value, list) and
-                value and not
-                isinstance(value[0], list)):
+            or (isinstance(inner_trait.trait_type, traits.List) and
+                not isinstance(inner_trait.trait_type, InputMultiPath) and
+                not isinstance(value[0], list)):
             newvalue = [value]
         value = super(MultiPath, self).validate(object, name, newvalue)
 
