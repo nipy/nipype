@@ -36,7 +36,8 @@ def test_Zcat_inputs():
         ),
         out_file=dict(
             argstr='-prefix %s',
-            name_template='zcat',
+            name_source='in_files',
+            name_template='%s_zcat',
         ),
         outputtype=dict(),
         terminal_output=dict(
