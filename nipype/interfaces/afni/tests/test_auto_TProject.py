@@ -27,7 +27,7 @@ def test_TProject_inputs():
             usedefault=True,
         ),
         in_file=dict(
-            argstr='%s',
+            argstr='-input %s',
             copyfile=False,
             mandatory=True,
             position=1,
