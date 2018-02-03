@@ -2409,7 +2409,7 @@ class TNorm(AFNICommand):
 class TProjectInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc='input file to 3dTproject',
-        argstr='%s',
+        argstr='-input %s',
         position=1,
         mandatory=True,
         exists=True,
