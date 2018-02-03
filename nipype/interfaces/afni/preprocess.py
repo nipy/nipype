@@ -2562,7 +2562,7 @@ class TProject(AFNICommand):
     >>> tproject.inputs.automask = True
     >>> tproject.inputs.out_file = 'projected.nii.gz'
     >>> tproject.cmdline
-    '3dTproject functional.nii -automask -bandpass 0.006670 99999.000000 -polort 3 -prefix projected.nii.gz'
+    '3dTproject -input functional.nii -automask -bandpass 0.006670 99999.000000 -polort 3 -prefix projected.nii.gz'
     >>> res = tproject.run()  # doctest: +SKIP
 
     """
