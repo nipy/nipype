@@ -6,6 +6,7 @@ Upcoming release
 
 ###### [Full changelog](https://github.com/nipy/nipype/milestone/16?closed=1)
 
+* FIX: Change to interface workdir within ``Interface.run()`` instead Node (https://github.com/nipy/nipype/pull/2384)
 * FIX: PBS plugin submissions (https://github.com/nipy/nipype/pull/2344)
 * FIX: Graph plugins submissions (https://github.com/nipy/nipype/pull/2359)
 * FIX: Logging error if % in interface command (https://github.com/nipy/nipype/pull/2364)

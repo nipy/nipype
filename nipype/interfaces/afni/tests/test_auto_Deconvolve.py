@@ -73,7 +73,7 @@ def test_Deconvolve_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ortvec=dict(argstr='ortvec %s', ),
+        ortvec=dict(argstr='-ortvec %s %s', ),
         out_file=dict(argstr='-bucket %s', ),
         outputtype=dict(),
         polort=dict(argstr='-polort %d', ),
