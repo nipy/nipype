@@ -165,6 +165,10 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
     vout = traits.Bool(
         desc='output the sample variance (MSE) for each stimulus',
         argstr='-vout')
+    nofdr = traits.Bool(
+        desc="Don't compute the statistic-vs-FDR curves for the bucket "
+             "dataset.",
+        argstr='-noFDR')
     global_times = traits.Bool(
         desc='use global timing for stimulus timing files',
         argstr='-global_times',

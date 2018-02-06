@@ -59,6 +59,7 @@ def test_Deconvolve_inputs():
         noblock=dict(argstr='-noblock', ),
         nocond=dict(argstr='-nocond', ),
         nodmbase=dict(argstr='-nodmbase', ),
+        nofdr=dict(argstr='-noFDR', ),
         nolegendre=dict(argstr='-nolegendre', ),
         nosvd=dict(argstr='-nosvd', ),
         num_glt=dict(
