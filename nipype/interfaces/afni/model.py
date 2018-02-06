@@ -278,6 +278,8 @@ class Deconvolve(AFNICommand):
             self.inputs.num_glt = len(self.inputs.gltsym)
         if not isdefined(self.inputs.out_file):
             self.inputs.out_file = 'Decon.nii'
+        if isdefined(self.inputs.jobs):
+            self.inputs.num_threads = self.inputs.jobs
 
         return super(Deconvolve, self)._parse_inputs(skip)
 
