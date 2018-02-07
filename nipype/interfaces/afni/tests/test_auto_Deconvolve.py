@@ -49,7 +49,6 @@ def test_Deconvolve_inputs():
             sep=' ',
         ),
         input1D=dict(argstr='-input1D %s', ),
-        jobs=dict(argstr='-jobs %d', ),
         legendre=dict(argstr='-legendre', ),
         local_times=dict(
             argstr='-local_times',
@@ -70,10 +69,7 @@ def test_Deconvolve_inputs():
             argstr='-num_stimts %d',
             position=-6,
         ),
-        num_threads=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        num_threads=dict(argstr='-jobs %d', ),
         ortvec=dict(argstr='-ortvec %s %s', ),
         out_file=dict(argstr='-bucket %s', ),
         outputtype=dict(),

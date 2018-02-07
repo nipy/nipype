@@ -153,7 +153,7 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
         'instead of the bucket dataset, if possible.',
         argstr='-cbucket %s')
     out_file = File(desc='output statistics file', argstr='-bucket %s')
-    jobs = traits.Int(
+    num_threads = traits.Int(
         desc='run the program with provided number of sub-processes',
         argstr='-jobs %d')
     fout = traits.Bool(
@@ -278,8 +278,6 @@ class Deconvolve(AFNICommand):
             self.inputs.num_glt = len(self.inputs.gltsym)
         if not isdefined(self.inputs.out_file):
             self.inputs.out_file = 'Decon.nii'
-        if isdefined(self.inputs.jobs):
-            self.inputs.num_threads = self.inputs.jobs
 
         return super(Deconvolve, self)._parse_inputs(skip)
 
