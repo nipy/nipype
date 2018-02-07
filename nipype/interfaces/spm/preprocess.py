@@ -23,7 +23,7 @@ import numpy as np
 from ...utils.filemanip import (fname_presuffix, filename_to_list,
                                 list_to_filename, split_filename)
 from ..base import (OutputMultiPath, TraitedSpec, isdefined,
-                    traits, InputMultiPath, File)
+                    traits, InputMultiPath, File, Str)
 from .base import (SPMCommand, scans_for_fname, func_is_3d,
                    scans_for_fnames, SPMCommandInputSpec)
 
@@ -39,7 +39,7 @@ class FieldMapInputSpec(SPMCommandInputSpec):
     magnitude = File(mandatory=True, exists=True, copyfile=False,
         field='subj.data.presubphasemag.magnitude',
         desc='presubstracted magnitude file')
-    et = traits.List(traits.Float(), minlen=2, maxlen=2, mandatory=True,
+    et = traits.Tuple(traits.Float, traits.Float, mandatory=True,
         field='subj.defaults.defaultsval.et',
         desc='short and long echo times')
     maskbrain = traits.Bool(True, usedefault=True,
@@ -71,7 +71,7 @@ class FieldMapInputSpec(SPMCommandInputSpec):
         field='subj.defaults.defaultsval.uflags.ws',
         desc='weighted smoothing');
     # Brain mask defaults parameters
-    template = traits.File(copyfile=False, exists=True,
+    template = File(copyfile=False, exists=True,
         field='subj.defaults.defaultsval.mflags.template',
         desc='template image for brain masking');
     fwhm = traits.Range(low=0, value=5, usedefault=True,
@@ -90,19 +90,19 @@ class FieldMapInputSpec(SPMCommandInputSpec):
         field='subj.defaults.defaultsval.mflags.reg',
         desc='regularization value used in the segmentation');
     # EPI unwarping for quality check
-    epi = traits.File(copyfile=False, exists=True, mandatory=True,
+    epi = File(copyfile=False, exists=True, mandatory=True,
         field='subj.session.epi',
         desc='EPI to unwarp');
     matchvdm = traits.Bool(True, usedefault=True,
         field='subj.matchvdm',
         desc='match VDM to EPI');
-    sessname = traits.String('_run-', usedefault=True,
+    sessname = Str('_run-', usedefault=True,
         field='subj.sessname',
         desc='VDM filename extension');
     writeunwarped = traits.Bool(False, usedefault=True,
         field='subj.writeunwarped',
         desc='write unwarped EPI');
-    anat = traits.File(copyfile=False, exists=True,
+    anat = File(copyfile=False, exists=True,
         field='subj.anat',
         desc='anatomical image for comparison');
     matchanat = traits.Bool(True, usedefault=True,
@@ -115,9 +115,9 @@ class FieldMapOutputSpec(TraitedSpec):
 
 
 class FieldMap(SPMCommand):
-    """Use spm to calculate fieldmap vdm.
+    """Use the fieldmap toolbox from spm to calculate the voxel displacement map (VDM).
 
-    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=19
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=173
 
     To do
     -----
@@ -145,9 +145,7 @@ class FieldMap(SPMCommand):
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
         """
-        if opt == 'phase' or opt == 'magnitude' or opt == 'anat':
-            return scans_for_fname(filename_to_list(val))
-        if opt == 'epi' or opt == 'magnitude':
+        if opt in ['phase', 'magnitude', 'anat', 'epi']:
             return scans_for_fname(filename_to_list(val))
 
         return super(FieldMap, self)._format_arg(opt, spec, val)
