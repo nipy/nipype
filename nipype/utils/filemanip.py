@@ -281,7 +281,7 @@ def _generate_cifs_table():
 				# if this entry is cifs, add it to list
 				if path_and_fstype[1] == 'cifs':
 					cifs_paths.append(path_and_fstype[0])			
-	        else:
+			else:
 				fmlogger.debug('mount file system types not described by fstype')
     except:
 		fmlogger.debug('mount file system type check for CIFS error')
