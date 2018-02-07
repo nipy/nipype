@@ -69,7 +69,10 @@ def test_Deconvolve_inputs():
             argstr='-num_stimts %d',
             position=-6,
         ),
-        num_threads=dict(argstr='-jobs %d', ),
+        num_threads=dict(
+            argstr='-jobs %d',
+            nohash=True,
+        ),
         ortvec=dict(argstr='-ortvec %s %s', ),
         out_file=dict(argstr='-bucket %s', ),
         outputtype=dict(),

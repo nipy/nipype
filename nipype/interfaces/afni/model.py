@@ -155,7 +155,8 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
     out_file = File(desc='output statistics file', argstr='-bucket %s')
     num_threads = traits.Int(
         desc='run the program with provided number of sub-processes',
-        argstr='-jobs %d')
+        argstr='-jobs %d',
+        nohash=True)
     fout = traits.Bool(
         desc='output F-statistic for each stimulus', argstr='-fout')
     rout = traits.Bool(
