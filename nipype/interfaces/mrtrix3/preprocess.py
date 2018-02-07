@@ -27,7 +27,7 @@ class ResponseSDInputSpec(MRTrix3BaseInputSpec):
         'tournier',
         'tax',
         argstr='%s',
-        position=-6,
+        position=1,
         mandatory=True,
         desc='response estimation algorithm (multi-tissue)')
     in_file = File(
