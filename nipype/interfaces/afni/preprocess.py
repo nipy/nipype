@@ -2483,6 +2483,12 @@ class VolregInputSpec(AFNICommandInputSpec):
         mandatory=True,
         exists=True,
         copyfile=False)
+    in_weight_volume = traits.Either(
+        traits.Tuple(File(exists=True), traits.Int),
+        File(exists=True),
+        desc='weights for each voxel specified by a file with an '
+             'optional volume number (defaults to 0)',
+        argstr="-weight '%s[%d]'")
     out_file = File(
         name_template='%s_volreg',
         desc='output image file name',
@@ -2574,6 +2580,11 @@ class Volreg(AFNICommand):
     _cmd = '3dvolreg'
     input_spec = VolregInputSpec
     output_spec = VolregOutputSpec
+
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'in_weight_volume' and not isinstance(value, tuple):
+            value = (value, 0)
+        return super(Volreg, self)._format_arg(name, trait_spec, value)
 
 
 class WarpInputSpec(AFNICommandInputSpec):
