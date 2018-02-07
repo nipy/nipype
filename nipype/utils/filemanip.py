@@ -3,13 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous file manipulation functions
 
-  .. testsetup::
-    # Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname(os.path.realpath( __file__ ))
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
-    >>> os.chdir(datadir)
-
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
@@ -229,38 +222,19 @@ def check_forhash(filename):
         return False, None
 
 
-def hash_infile(afile, chunk_len=8192, crypto=hashlib.md5,
-                raise_notfound=False):
-    """
-    Computes hash of a file using 'crypto' module
-
-    >>> hash_infile('smri_ants_registration_settings.json')
-    '49b956387ed8d95a4eb44576fc5103b6'
-
-    >>> hash_infile('surf01.vtk')
-    'fdf1cf359b4e346034372cdeb58f9a88'
-
-    >>> hash_infile('spminfo')
-    '0dc55e3888c98a182dab179b976dfffc'
-
-    >>> hash_infile('fsl_motion_outliers_fd.txt')
-    'defd1812c22405b1ee4431aac5bbdd73'
-
-
-    """
-    if not op.isfile(afile):
-        if raise_notfound:
-            raise RuntimeError('File "%s" not found.' % afile)
-        return None
-
-    crypto_obj = crypto()
-    with open(afile, 'rb') as fp:
-        while True:
-            data = fp.read(chunk_len)
-            if not data:
-                break
-            crypto_obj.update(data)
-    return crypto_obj.hexdigest()
+def hash_infile(afile, chunk_len=8192, crypto=hashlib.md5):
+    """ Computes hash of a file using 'crypto' module"""
+    hex = None
+    if op.isfile(afile):
+        crypto_obj = crypto()
+        with open(afile, 'rb') as fp:
+            while True:
+                data = fp.read(chunk_len)
+                if not data:
+                    break
+                crypto_obj.update(data)
+        hex = crypto_obj.hexdigest()
+    return hex
 
 
 def hash_timestamp(afile):
@@ -295,8 +269,23 @@ def _generate_cifs_table():
         (line.split()[2:5:2] for line in output.splitlines()),
         key=lambda x: len(x[0]),
         reverse=True)
-    cifs_paths = [path for path, fstype in mount_info if fstype == 'cifs']
 
+    # find which mount points are CIFS
+    # init to empty list
+    cifs_paths = []
+        
+    try:    
+	    for  path_and_fstype in mount_info:
+			# need to check for tables that have only path and no fstype
+			if len(path_and_fstype) == 2:
+				# if this entry is cifs, add it to list
+				if path_and_fstype[1] == 'cifs':
+					cifs_paths.append(path_and_fstype[0])			
+	        else:
+				fmlogger.debug('mount file system types not described by fstype')
+    except:
+		fmlogger.debug('mount file system type check for CIFS error')
+		return []
     return [
         mount for mount in mount_info
         if any(mount[0].startswith(path) for path in cifs_paths)
