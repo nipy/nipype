@@ -5,14 +5,14 @@ from ..preprocess import TProject
 
 def test_TProject_inputs():
     input_map = dict(
-        TR=dict(argstr='-TR %f', ),
+        TR=dict(argstr='-TR %g', ),
         args=dict(argstr='%s', ),
         automask=dict(
             argstr='-automask',
             xor=['mask'],
         ),
-        bandpass=dict(argstr='-bandpass %f %f', ),
-        blur=dict(argstr='-blur %f', ),
+        bandpass=dict(argstr='-bandpass %g %g', ),
+        blur=dict(argstr='-blur %g', ),
         cenmode=dict(argstr='-cenmode %s', ),
         censor=dict(argstr='-censor %s', ),
         censortr=dict(argstr='-CENSORTR %s', ),
@@ -42,10 +42,7 @@ def test_TProject_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ort=dict(
-            argstr='-ort %s',
-            exist=True,
-        ),
+        ort=dict(argstr='-ort %s', ),
         out_file=dict(
             argstr='-prefix %s',
             name_source='in_file',
@@ -54,7 +51,7 @@ def test_TProject_inputs():
         ),
         outputtype=dict(),
         polort=dict(argstr='-polort %d', ),
-        stopband=dict(argstr='-stopband %f %f', ),
+        stopband=dict(argstr='-stopband %g %g', ),
         terminal_output=dict(
             deprecated='1.0.0',
             nohash=True,

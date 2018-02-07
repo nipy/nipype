@@ -2425,7 +2425,8 @@ class TProjectInputSpec(AFNICommandInputSpec):
              * This is a file of 1s and 0s, indicating which
              time points are to be included (1) and which are
              to be excluded (0).""",
-        argstr="-censor %s")
+        argstr="-censor %s",
+        exists=True)
     censortr = traits.List(
         traits.Str(),
         desc="""list of strings that specify time indexes 
@@ -2489,7 +2490,7 @@ class TProjectInputSpec(AFNICommandInputSpec):
     ort = File(
         desc="""Remove each column in file
                 ++ Each column will have its mean removed.""",
-        exist=True,
+        exists=True,
         argstr="-ort %s")
     polort = traits.Int(
         desc="""Remove polynomials up to and including degree pp.
@@ -2505,15 +2506,15 @@ class TProjectInputSpec(AFNICommandInputSpec):
     bandpass = traits.Tuple(
         traits.Float, traits.Float,
         desc="""Remove all frequencies EXCEPT those in the range""",
-        argstr='-bandpass %f %f')
+        argstr='-bandpass %g %g')
     stopband = traits.Tuple(
         traits.Float, traits.Float,
         desc="""Remove all frequencies in the range""",
-        argstr='-stopband %f %f')
+        argstr='-stopband %g %g')
     TR = traits.Float(
         desc="""Use time step dd for the frequency calculations,
                rather than the value stored in the dataset header.""",
-        argstr='-TR %f')
+        argstr='-TR %g')
     mask = File(
         exist=True,
         desc="""Only operate on voxels nonzero in the mset dataset.
@@ -2530,7 +2531,7 @@ class TProjectInputSpec(AFNICommandInputSpec):
                 width (FWHM) of fff millimeters.
                 ++ Spatial blurring (if done) is after the time
                    series filtering.""",
-        argstr='-blur %f')
+        argstr='-blur %g')
     norm = traits.Bool(
         desc="""Normalize each output time series to have sum of
                 squares = 1. This is the LAST operation.""",
@@ -2562,7 +2563,7 @@ class TProject(AFNICommand):
     >>> tproject.inputs.automask = True
     >>> tproject.inputs.out_file = 'projected.nii.gz'
     >>> tproject.cmdline
-    '3dTproject -input functional.nii -automask -bandpass 0.006670 99999.000000 -polort 3 -prefix projected.nii.gz'
+    '3dTproject -input functional.nii -automask -bandpass 0.00667 99999 -polort 3 -prefix projected.nii.gz'
     >>> res = tproject.run()  # doctest: +SKIP
 
     """
