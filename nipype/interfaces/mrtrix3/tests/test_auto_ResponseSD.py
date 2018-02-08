@@ -8,7 +8,7 @@ def test_ResponseSD_inputs():
         algorithm=dict(
             argstr='%s',
             mandatory=True,
-            position=-6,
+            position=1,
         ),
         args=dict(argstr='%s', ),
         bval_scale=dict(argstr='-bvalue_scaling %s', ),
