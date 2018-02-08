@@ -91,7 +91,7 @@ class C3dInputSpec(CommandLineInputSpec):
         traits.Int(), traits.Float(),
         argstr="-scale %s",
         desc=("Multiplies the intensity of each voxel in the last image on the"
-        " stack by the given factor.")
+        " stack by the given factor."))
     shift = traits.Either(
         traits.Int(), traits.Float(),
         argstr="-shift %s",
@@ -100,7 +100,7 @@ class C3dInputSpec(CommandLineInputSpec):
         "Linear", "NearestNeighbor", "Cubic", "Sinc", "Gaussian",
         argstr="-interpolation %s",
         desc=("Specifies the interpolation used with -resample and other"
-        " commands. Default is Linear.")
+        " commands. Default is Linear."))
     resample = traits.Str(
         argstr="-resample %s",
         desc=("Resamples the image, keeping the bounding box the same, but"
@@ -122,7 +122,7 @@ class C3dInputSpec(CommandLineInputSpec):
         False,
         usedefault=True,
         desc=("Changes command to support 4D file operations (default is"
-        " false).")
+        " false)."))
 
 
 class C3dOutputSpec(TraitedSpec):
