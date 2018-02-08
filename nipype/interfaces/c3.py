@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""The ants module provides basic functions for interfacing with ants functions.
+"""The ants module provides basic functions for interfacing with ants
+   functions.
 
    Change directory to provide relative paths for doctests
    >>> import os
@@ -7,19 +8,24 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
    >>> os.chdir(datadir)
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
-from .base import (CommandLineInputSpec, traits, TraitedSpec,
-                   File, SEMLikeCommandLine)
+from .base import (CommandLineInputSpec, traits, TraitedSpec, File,
+                   SEMLikeCommandLine)
 
 
 class C3dAffineToolInputSpec(CommandLineInputSpec):
     reference_file = File(exists=True, argstr="-ref %s", position=1)
     source_file = File(exists=True, argstr='-src %s', position=2)
     transform_file = File(exists=True, argstr='%s', position=3)
-    itk_transform = traits.Either(traits.Bool, File(), hash_files=False,
-                                  desc="Export ITK transform.",
-                                  argstr="-oitk %s", position=5)
+    itk_transform = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Export ITK transform.",
+        argstr="-oitk %s",
+        position=5)
     fsl2ras = traits.Bool(argstr='-fsl2ras', position=4)
 
 
@@ -38,7 +44,7 @@ class C3dAffineTool(SEMLikeCommandLine):
     >>> c3.inputs.source_file = 'cmatrix.mat'
     >>> c3.inputs.itk_transform = 'affine.txt'
     >>> c3.inputs.fsl2ras = True
-    >>> c3.cmdline # doctest: +ALLOW_UNICODE
+    >>> c3.cmdline
     'c3d_affine_tool -src cmatrix.mat -fsl2ras -oitk affine.txt'
     """
     input_spec = C3dAffineToolInputSpec

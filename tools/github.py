@@ -15,8 +15,8 @@ import nipype
 def is_git_repo():
     """Does the current nipype module have a git folder
     """
-    sourcepath = os.path.realpath(os.path.join(os.path.dirname(nipype.__file__),
-                                               os.path.pardir))
+    sourcepath = os.path.realpath(
+        os.path.join(os.path.dirname(nipype.__file__), os.path.pardir))
     gitpathgit = os.path.join(sourcepath, '.git')
     if os.path.exists(gitpathgit):
         return True
@@ -28,8 +28,11 @@ def get_local_branch():
     """Determine current branch
     """
     if is_git_repo():
-        o, _ = Popen('git branch | grep "\* "', shell=True, stdout=PIPE,
-                     cwd=os.path.dirname(nipype.__file__)).communicate()
+        o, _ = Popen(
+            'git branch | grep "\* "',
+            shell=True,
+            stdout=PIPE,
+            cwd=os.path.dirname(nipype.__file__)).communicate()
         return o.strip()[2:]
     else:
         return None
@@ -51,8 +54,12 @@ def create_hash_map():
     import pwd
     login_name = pwd.getpwuid(os.geteuid())[0]
     conn = http.client.HTTPSConnection("api.github.com")
-    conn.request("GET", "/repos/nipy/nipype",
-                 headers={'Authorization': 'Basic %s' % base64(login_name)})
+    conn.request(
+        "GET",
+        "/repos/nipy/nipype",
+        headers={
+            'Authorization': 'Basic %s' % base64(login_name)
+        })
     try:
         conn.request("GET", "/repos/nipy/nipype/git/trees/master?recursive=1")
     except:
@@ -76,8 +83,8 @@ def get_repo_url(force_github=False):
     URI: str
        filesystem path or github repo url
     """
-    sourcepath = os.path.realpath(os.path.join(os.path.dirname(nipype.__file__),
-                                               os.path.pardir))
+    sourcepath = os.path.realpath(
+        os.path.join(os.path.dirname(nipype.__file__), os.path.pardir))
     gitpathgit = os.path.join(sourcepath, '.git')
     if not os.path.exists(gitpathgit) and not force_github:
         uri = 'file://%s' % sourcepath

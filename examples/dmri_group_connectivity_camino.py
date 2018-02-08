@@ -54,13 +54,14 @@ First, we import the necessary modules from nipype.
 """
 
 import nipype.interfaces.fsl as fsl
-import nipype.interfaces.freesurfer as fs    # freesurfer
-import os.path as op                      # system functions
+import nipype.interfaces.freesurfer as fs  # freesurfer
+import os.path as op  # system functions
 import cmp
 from nipype.workflows.dmri.camino.group_connectivity import create_group_connectivity_pipeline
-from nipype.workflows.dmri.connectivity.group_connectivity import (create_merge_networks_by_group_workflow,
-                                                                   create_merge_group_networks_workflow, create_average_networks_by_group_workflow)
-
+from nipype.workflows.dmri.connectivity.group_connectivity import (
+    create_merge_networks_by_group_workflow,
+    create_merge_group_networks_workflow,
+    create_average_networks_by_group_workflow)
 """
 Set the proper directories
 --------------------------
@@ -72,7 +73,6 @@ subjects_dir = op.abspath('groupcondatapackage/subjects/')
 data_dir = op.abspath('groupcondatapackage/data/')
 fs.FSCommand.set_default_subjects_dir(subjects_dir)
 fsl.FSLCommand.set_default_output_type('NIFTI')
-
 """
 Define the groups
 -----------------
@@ -84,14 +84,12 @@ with group IDs ('controls', 'parkinsons') as keys, and subject/patient names as 
 group_list = {}
 group_list['controls'] = ['cont17']
 group_list['parkinsons'] = ['pat10', 'pat20']
-
 """
 The output directory must be named as well.
 """
 
 global output_dir
 output_dir = op.abspath('dmri_group_connectivity_camino')
-
 """
 Main processing loop
 ====================
@@ -122,46 +120,49 @@ using the NBS plugin in ConnectomeViewer.
 
 """
 
-
 title = ''
 for idx, group_id in enumerate(group_list.keys()):
     title += group_id
     if not idx == len(list(group_list.keys())) - 1:
         title += '-'
 
-    info = dict(dwi=[['subject_id', 'dti']],
-                bvecs=[['subject_id', 'bvecs']],
-                bvals=[['subject_id', 'bvals']])
+    info = dict(
+        dwi=[['subject_id', 'dti']],
+        bvecs=[['subject_id', 'bvecs']],
+        bvals=[['subject_id', 'bvals']])
 
-    l1pipeline = create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, info)
+    l1pipeline = create_group_connectivity_pipeline(
+        group_list, group_id, data_dir, subjects_dir, output_dir, info)
 
     # Here we define the parcellation scheme and the number of tracks to produce
     parcellation_scheme = 'NativeFreesurfer'
     cmp_config = cmp.configuration.PipelineConfiguration()
     cmp_config.parcellation_scheme = parcellation_scheme
-    l1pipeline.inputs.connectivity.inputnode.resolution_network_file = cmp_config._get_lausanne_parcellation(parcellation_scheme)['freesurferaparc']['node_information_graphml']
+    l1pipeline.inputs.connectivity.inputnode.resolution_network_file = cmp_config._get_lausanne_parcellation(
+        parcellation_scheme)['freesurferaparc']['node_information_graphml']
 
     l1pipeline.run()
     l1pipeline.write_graph(format='eps', graph2use='flat')
 
     # The second-level pipeline is created here
-    l2pipeline = create_merge_networks_by_group_workflow(group_list, group_id, data_dir, subjects_dir, output_dir)
+    l2pipeline = create_merge_networks_by_group_workflow(
+        group_list, group_id, data_dir, subjects_dir, output_dir)
     l2pipeline.run()
     l2pipeline.write_graph(format='eps', graph2use='flat')
-
 """
 Now that the for loop is complete there are two grouped CFF files each containing the appropriate subjects.
 It is also convenient to have every subject in a single CFF file, so that is what the third-level pipeline does.
 """
 
-l3pipeline = create_merge_group_networks_workflow(group_list, data_dir, subjects_dir, output_dir, title)
+l3pipeline = create_merge_group_networks_workflow(
+    group_list, data_dir, subjects_dir, output_dir, title)
 l3pipeline.run()
 l3pipeline.write_graph(format='eps', graph2use='flat')
-
 """
 The fourth and final workflow averages the networks and saves them in another CFF file
 """
 
-l4pipeline = create_average_networks_by_group_workflow(group_list, data_dir, subjects_dir, output_dir, title)
+l4pipeline = create_average_networks_by_group_workflow(
+    group_list, data_dir, subjects_dir, output_dir, title)
 l4pipeline.run()
 l4pipeline.write_graph(format='eps', graph2use='flat')

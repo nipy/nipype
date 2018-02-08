@@ -11,15 +11,12 @@
    :maxdepth: 2
 
    install
-   vagrant
 
-   interface_tutorial
    caching_tutorial
 
 .. toctree::
    :maxdepth: 1
 
-   pipeline_tutorial
    plugins
    config_file
    debug

@@ -84,7 +84,6 @@
         true,
         true
     ],
-    "terminal_output": "stream",
     "write_composite_transform": true,
     "initialize_transforms_per_stage": false,
     "num_threads": 1,

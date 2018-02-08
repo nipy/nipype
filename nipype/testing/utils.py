@@ -3,7 +3,8 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Additional handy utilities for testing
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import range, object, open
 
 import os
@@ -55,15 +56,14 @@ class TempFATFS(object):
         mount_args = ['fusefat', '-o', 'rw+', '-f', vfatfile, self.vfatmount]
 
         try:
-            subprocess.check_call(args=mkfs_args, stdout=self.dev_null,
-                                  stderr=self.dev_null)
+            subprocess.check_call(
+                args=mkfs_args, stdout=self.dev_null, stderr=self.dev_null)
         except CalledProcessError as e:
             raise_from(IOError("mkfs.vfat failed"), e)
 
         try:
-            self.fusefat = subprocess.Popen(args=mount_args,
-                                            stdout=self.dev_null,
-                                            stderr=self.dev_null)
+            self.fusefat = subprocess.Popen(
+                args=mount_args, stdout=self.dev_null, stderr=self.dev_null)
         except OSError as e:
             raise_from(IOError("fusefat is not installed"), e)
 
@@ -92,6 +92,7 @@ class TempFATFS(object):
             assert not os.path.exists(self.canary)
         self.dev_null.close()
         shutil.rmtree(self.tmpdir)
+
 
 def save_toy_nii(ndarray, filename):
     toy = nb.Nifti1Image(ndarray, np.eye(4))

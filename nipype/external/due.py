@@ -29,14 +29,17 @@ __version__ = '0.0.5'
 
 class InactiveDueCreditCollector(object):
     """Just a stub at the Collector which would not do anything"""
+
     def _donothing(self, *args, **kwargs):
         """Perform no good and no bad"""
         pass
 
     def dcite(self, *args, **kwargs):
         """If I could cite I would"""
+
         def nondecorating_decorator(func):
             return func
+
         return nondecorating_decorator
 
     cite = load = add = _donothing
@@ -49,16 +52,13 @@ def _donothing_func(*args, **kwargs):
     """Perform no good and no bad"""
     pass
 
+
 try:
     from duecredit import due, BibTeX, Doi, Url
     if 'due' in locals() and not hasattr(due, 'cite'):
         raise RuntimeError(
             "Imported due lacks .cite. DueCredit is now disabled")
-except Exception as e:
-    if type(e).__name__ != 'ImportError':
-        import logging
-        logging.getLogger("duecredit").error(
-            "Failed to import duecredit due to %s" % str(e))
+except ImportError:
     # Initiate due stub
     due = InactiveDueCreditCollector()
     BibTeX = Doi = Url = _donothing_func

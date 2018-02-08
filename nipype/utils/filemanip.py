@@ -3,31 +3,41 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous file manipulation functions
 
-"""
-from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import str, bytes, open
+  .. testsetup::
+    # Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname(os.path.realpath( __file__ ))
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
+    >>> os.chdir(datadir)
 
-from future import standard_library
-standard_library.install_aliases()
+"""
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import sys
 import pickle
+import errno
+import subprocess as sp
 import gzip
 import hashlib
+import locale
 from hashlib import md5
 import os
+import os.path as op
 import re
 import shutil
 import posixpath
 import simplejson as json
 import numpy as np
 
+from builtins import str, bytes, open
+
 from .. import logging, config
 from .misc import is_container
-from ..interfaces.traits_extension import isdefined
+from future import standard_library
+standard_library.install_aliases()
 
-fmlogger = logging.getLogger("filemanip")
-
+fmlogger = logging.getLogger('utils')
 
 related_filetype_sets = [
     ('.hdr', '.img', '.mat'),
@@ -61,21 +71,21 @@ def split_filename(fname):
     --------
     >>> from nipype.utils.filemanip import split_filename
     >>> pth, fname, ext = split_filename('/home/data/subject.nii.gz')
-    >>> pth # doctest: +ALLOW_UNICODE
+    >>> pth
     '/home/data'
 
-    >>> fname # doctest: +ALLOW_UNICODE
+    >>> fname
     'subject'
 
-    >>> ext # doctest: +ALLOW_UNICODE
+    >>> ext
     '.nii.gz'
 
     """
 
     special_extensions = [".nii.gz", ".tar.gz"]
 
-    pth = os.path.dirname(fname)
-    fname = os.path.basename(fname)
+    pth = op.dirname(fname)
+    fname = op.basename(fname)
 
     ext = None
     for special_ext in special_extensions:
@@ -86,9 +96,10 @@ def split_filename(fname):
             fname = fname[:-ext_len]
             break
     if not ext:
-        fname, ext = os.path.splitext(fname)
+        fname, ext = op.splitext(fname)
 
     return pth, fname, ext
+
 
 def to_str(value):
     """
@@ -100,6 +111,7 @@ def to_str(value):
     else:
         retval = to_str_py27(value)
     return retval
+
 
 def to_str_py27(value):
     """
@@ -118,7 +130,7 @@ def to_str_py27(value):
             venc = to_str_py27(val)
             if venc.startswith(("u'", 'u"')):
                 venc = venc[1:]
-            retval+= entry(kenc, venc)
+            retval += entry(kenc, venc)
         retval += '}'
         return retval
 
@@ -145,6 +157,7 @@ def to_str_py27(value):
         retval = retval[1:]
     return retval
 
+
 def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     """Manipulates path and name of input filename
 
@@ -168,16 +181,22 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
 
     >>> from nipype.utils.filemanip import fname_presuffix
     >>> fname = 'foo.nii.gz'
-    >>> fname_presuffix(fname,'pre','post','/tmp') # doctest: +ALLOW_UNICODE
+    >>> fname_presuffix(fname,'pre','post','/tmp')
     '/tmp/prefoopost.nii.gz'
+
+    >>> from nipype.interfaces.base import Undefined
+    >>> fname_presuffix(fname, 'pre', 'post', Undefined) == fname_presuffix(fname, 'pre', 'post')
+    True
 
     """
     pth, fname, ext = split_filename(fname)
     if not use_ext:
         ext = ''
-    if newpath and isdefined(newpath):
-        pth = os.path.abspath(newpath)
-    return os.path.join(pth, prefix + fname + suffix + ext)
+
+    # No need for isdefined: bool(Undefined) evaluates to False
+    if newpath:
+        pth = op.abspath(newpath)
+    return op.join(pth, prefix + fname + suffix + ext)
 
 
 def fnames_presuffix(fnames, prefix='', suffix='', newpath=None, use_ext=True):
@@ -195,14 +214,14 @@ def hash_rename(filename, hashvalue):
     """
     path, name, ext = split_filename(filename)
     newfilename = ''.join((name, '_0x', hashvalue, ext))
-    return os.path.join(path, newfilename)
+    return op.join(path, newfilename)
 
 
 def check_forhash(filename):
     """checks if file has a hash in its filename"""
     if isinstance(filename, list):
         filename = filename[0]
-    path, name = os.path.split(filename)
+    path, name = op.split(filename)
     if re.search('(_0x[a-z0-9]{32})', name):
         hashvalue = re.findall('(_0x[a-z0-9]{32})', name)
         return True, hashvalue
@@ -210,25 +229,44 @@ def check_forhash(filename):
         return False, None
 
 
-def hash_infile(afile, chunk_len=8192, crypto=hashlib.md5):
-    """ Computes hash of a file using 'crypto' module"""
-    hex = None
-    if os.path.isfile(afile):
-        crypto_obj = crypto()
-        with open(afile, 'rb') as fp:
-            while True:
-                data = fp.read(chunk_len)
-                if not data:
-                    break
-                crypto_obj.update(data)
-        hex = crypto_obj.hexdigest()
-    return hex
+def hash_infile(afile, chunk_len=8192, crypto=hashlib.md5,
+                raise_notfound=False):
+    """
+    Computes hash of a file using 'crypto' module
+
+    >>> hash_infile('smri_ants_registration_settings.json')
+    '49b956387ed8d95a4eb44576fc5103b6'
+
+    >>> hash_infile('surf01.vtk')
+    'fdf1cf359b4e346034372cdeb58f9a88'
+
+    >>> hash_infile('spminfo')
+    '0dc55e3888c98a182dab179b976dfffc'
+
+    >>> hash_infile('fsl_motion_outliers_fd.txt')
+    'defd1812c22405b1ee4431aac5bbdd73'
+
+
+    """
+    if not op.isfile(afile):
+        if raise_notfound:
+            raise RuntimeError('File "%s" not found.' % afile)
+        return None
+
+    crypto_obj = crypto()
+    with open(afile, 'rb') as fp:
+        while True:
+            data = fp.read(chunk_len)
+            if not data:
+                break
+            crypto_obj.update(data)
+    return crypto_obj.hexdigest()
 
 
 def hash_timestamp(afile):
     """ Computes md5 hash of the timestamp of a file """
     md5hex = None
-    if os.path.isfile(afile):
+    if op.isfile(afile):
         md5obj = md5()
         stat = os.stat(afile)
         md5obj.update(str(stat.st_size).encode())
@@ -237,8 +275,63 @@ def hash_timestamp(afile):
     return md5hex
 
 
-def copyfile(originalfile, newfile, copy=False, create_new=False,
-             hashmethod=None, use_hardlink=False,
+def _generate_cifs_table():
+    """Construct a reverse-length-ordered list of mount points that
+    fall under a CIFS mount.
+
+    This precomputation allows efficient checking for whether a given path
+    would be on a CIFS filesystem.
+
+    On systems without a ``mount`` command, or with no CIFS mounts, returns an
+    empty list.
+    """
+    exit_code, output = sp.getstatusoutput("mount")
+    # Not POSIX
+    if exit_code != 0:
+        return []
+
+    # (path, fstype) tuples, sorted by path length (longest first)
+    mount_info = sorted(
+        (line.split()[2:5:2] for line in output.splitlines()),
+        key=lambda x: len(x[0]),
+        reverse=True)
+    cifs_paths = [path for path, fstype in mount_info if fstype == 'cifs']
+
+    return [
+        mount for mount in mount_info
+        if any(mount[0].startswith(path) for path in cifs_paths)
+    ]
+
+
+_cifs_table = _generate_cifs_table()
+
+
+def on_cifs(fname):
+    """ Checks whether a file path is on a CIFS filesystem mounted in a POSIX
+    host (i.e., has the ``mount`` command).
+
+    On Windows, Docker mounts host directories into containers through CIFS
+    shares, which has support for Minshall+French symlinks, or text files that
+    the CIFS driver exposes to the OS as symlinks.
+    We have found that under concurrent access to the filesystem, this feature
+    can result in failures to create or read recently-created symlinks,
+    leading to inconsistent behavior and ``FileNotFoundError``s.
+
+    This check is written to support disabling symlinks on CIFS shares.
+    """
+    # Only the first match (most recent parent) counts
+    for fspath, fstype in _cifs_table:
+        if fname.startswith(fspath):
+            return fstype == 'cifs'
+    return False
+
+
+def copyfile(originalfile,
+             newfile,
+             copy=False,
+             create_new=False,
+             hashmethod=None,
+             use_hardlink=False,
              copy_related_files=True):
     """Copy or link ``originalfile`` to ``newfile``.
 
@@ -274,7 +367,7 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
     fmlogger.debug(newfile)
 
     if create_new:
-        while os.path.exists(newfile):
+        while op.exists(newfile):
             base, fname, ext = split_filename(newfile)
             s = re.search('_c[0-9]{4,4}$', fname)
             i = 0
@@ -288,6 +381,10 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
     if hashmethod is None:
         hashmethod = config.get('execution', 'hash_method').lower()
 
+    # Don't try creating symlinks on CIFS
+    if copy is False and on_cifs(newfile):
+        copy = True
+
     # Existing file
     # -------------
     # Options:
@@ -300,9 +397,9 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
     #       copy of file (same hash)                (keep)
     #       different file (diff hash)              (unlink)
     keep = False
-    if os.path.lexists(newfile):
-        if os.path.islink(newfile):
-            if all((os.readlink(newfile) == os.path.realpath(originalfile),
+    if op.lexists(newfile):
+        if op.islink(newfile):
+            if all((os.readlink(newfile) == op.realpath(originalfile),
                     not use_hardlink, not copy)):
                 keep = True
         elif posixpath.samefile(newfile, originalfile):
@@ -313,13 +410,13 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
             elif hashmethod == 'content':
                 hashfn = hash_infile
             newhash = hashfn(newfile)
-            fmlogger.debug("File: %s already exists,%s, copy:%d" %
-                           (newfile, newhash, copy))
+            fmlogger.debug('File: %s already exists,%s, copy:%d', newfile,
+                           newhash, copy)
             orighash = hashfn(originalfile)
             keep = newhash == orighash
         if keep:
-            fmlogger.debug("File: %s already exists, not overwriting, copy:%d"
-                           % (newfile, copy))
+            fmlogger.debug('File: %s already exists, not overwriting, copy:%d',
+                           newfile, copy)
         else:
             os.unlink(newfile)
 
@@ -330,9 +427,9 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
     # ~hardlink & ~symlink => copy
     if not keep and use_hardlink:
         try:
-            fmlogger.debug("Linking File: %s->%s" % (newfile, originalfile))
+            fmlogger.debug('Linking File: %s->%s', newfile, originalfile)
             # Use realpath to avoid hardlinking symlinks
-            os.link(os.path.realpath(originalfile), newfile)
+            os.link(op.realpath(originalfile), newfile)
         except OSError:
             use_hardlink = False  # Disable hardlink for associated files
         else:
@@ -340,7 +437,7 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
 
     if not keep and not copy and os.name == 'posix':
         try:
-            fmlogger.debug("Symlinking File: %s->%s" % (newfile, originalfile))
+            fmlogger.debug('Symlinking File: %s->%s', newfile, originalfile)
             os.symlink(originalfile, newfile)
         except OSError:
             copy = True  # Disable symlink for associated files
@@ -349,7 +446,7 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
 
     if not keep:
         try:
-            fmlogger.debug("Copying File: %s->%s" % (newfile, originalfile))
+            fmlogger.debug('Copying File: %s->%s', newfile, originalfile)
             shutil.copyfile(originalfile, newfile)
         except shutil.Error as e:
             fmlogger.warn(e.message)
@@ -359,9 +456,14 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
         related_file_pairs = (get_related_files(f, include_this_file=False)
                               for f in (originalfile, newfile))
         for alt_ofile, alt_nfile in zip(*related_file_pairs):
-            if os.path.exists(alt_ofile):
-                copyfile(alt_ofile, alt_nfile, copy, hashmethod=hashmethod,
-                         use_hardlink=use_hardlink, copy_related_files=False)
+            if op.exists(alt_ofile):
+                copyfile(
+                    alt_ofile,
+                    alt_nfile,
+                    copy,
+                    hashmethod=hashmethod,
+                    use_hardlink=use_hardlink,
+                    copy_related_files=False)
 
     return newfile
 
@@ -384,7 +486,7 @@ def get_related_files(filename, include_this_file=True):
         if this_type in type_set:
             for related_type in type_set:
                 if include_this_file or related_type != this_type:
-                    related_files.append(os.path.join(path, name + related_type))
+                    related_files.append(op.join(path, name + related_type))
     if not len(related_files):
         related_files = [filename]
     return related_files
@@ -414,8 +516,9 @@ def copyfiles(filelist, dest, copy=False, create_new=False):
     newfiles = []
     for i, f in enumerate(filename_to_list(filelist)):
         if isinstance(f, list):
-            newfiles.insert(i, copyfiles(f, dest, copy=copy,
-                                         create_new=create_new))
+            newfiles.insert(i,
+                            copyfiles(
+                                f, dest, copy=copy, create_new=create_new))
         else:
             if len(outfiles) > 1:
                 destfile = outfiles[i]
@@ -456,9 +559,9 @@ def check_depends(targets, dependencies):
     """
     tgts = filename_to_list(targets)
     deps = filename_to_list(dependencies)
-    return all(map(os.path.exists, tgts)) and \
-        min(map(os.path.getmtime, tgts)) > \
-        max(list(map(os.path.getmtime, deps)) + [0])
+    return all(map(op.exists, tgts)) and \
+        min(map(op.getmtime, tgts)) > \
+        max(list(map(op.getmtime, deps)) + [0])
 
 
 def save_json(filename, data):
@@ -543,6 +646,26 @@ def crash2txt(filename, record):
         fp.write(''.join(record['traceback']))
 
 
+def read_stream(stream, logger=None, encoding=None):
+    """
+    Robustly reads a stream, sending a warning to a logger
+    if some decoding error was raised.
+
+    >>> read_stream(bytearray([65, 0xc7, 65, 10, 66]))  # doctest: +ELLIPSIS
+    ['A...A', 'B']
+
+
+    """
+    default_encoding = encoding or locale.getdefaultlocale()[1] or 'UTF-8'
+    logger = logger or fmlogger
+    try:
+        out = stream.decode(default_encoding)
+    except UnicodeDecodeError as err:
+        out = stream.decode(default_encoding, errors='replace')
+        logger.warning('Error decoding string: %s', err)
+    return out.splitlines()
+
+
 def savepkl(filename, record):
     if filename.endswith('pklz'):
         pkl_file = gzip.open(filename, 'wb')
@@ -551,12 +674,13 @@ def savepkl(filename, record):
     pickle.dump(record, pkl_file)
     pkl_file.close()
 
+
 rst_levels = ['=', '-', '~', '+']
 
 
 def write_rst_header(header, level=0):
-    return '\n'.join((header, ''.join([rst_levels[level]
-                                       for _ in header]))) + '\n\n'
+    return '\n'.join(
+        (header, ''.join([rst_levels[level] for _ in header]))) + '\n\n'
 
 
 def write_rst_list(items, prefix=''):
@@ -571,3 +695,214 @@ def write_rst_dict(info, prefix=''):
     for key, value in sorted(info.items()):
         out.append('{}* {} : {}'.format(prefix, key, str(value)))
     return '\n'.join(out) + '\n\n'
+
+
+def dist_is_editable(dist):
+    """Is distribution an editable install?
+
+    Parameters
+    ----------
+    dist : string
+        Package name
+
+    # Borrowed from `pip`'s' API
+    """
+    for path_item in sys.path:
+        egg_link = op.join(path_item, dist + '.egg-link')
+        if op.isfile(egg_link):
+            return True
+    return False
+
+
+def makedirs(path, exist_ok=False):
+    """
+    Create path, if it doesn't exist.
+
+    Parameters
+    ----------
+    path : output directory to create
+
+    """
+    if not exist_ok:  # The old makedirs
+        os.makedirs(path)
+        return path
+
+    # this odd approach deals with concurrent directory cureation
+    if not op.exists(op.abspath(path)):
+        fmlogger.debug("Creating directory %s", path)
+        try:
+            os.makedirs(path)
+        except OSError:
+            fmlogger.debug("Problem creating directory %s", path)
+            if not op.exists(path):
+                raise OSError('Could not create directory %s' % path)
+    return path
+
+
+def emptydirs(path, noexist_ok=False):
+    """
+    Empty an existing directory, without deleting it. Do not
+    raise error if the path does not exist and noexist_ok is True.
+
+    Parameters
+    ----------
+    path : directory that should be empty
+
+    """
+    fmlogger.debug("Removing contents of %s", path)
+
+    if noexist_ok and not op.exists(path):
+        return True
+
+    if op.isfile(path):
+        raise OSError('path "%s" should be a directory' % path)
+
+    try:
+        shutil.rmtree(path)
+    except OSError as ex:
+        elcont = os.listdir(path)
+        if ex.errno == errno.ENOTEMPTY and not elcont:
+            fmlogger.warning(
+                'An exception was raised trying to remove old %s, but the path '
+                'seems empty. Is it an NFS mount?. Passing the exception.',
+                path)
+        elif ex.errno == errno.ENOTEMPTY and elcont:
+            fmlogger.debug('Folder %s contents (%d items).', path, len(elcont))
+            raise ex
+        else:
+            raise ex
+
+    makedirs(path)
+
+
+def which(cmd, env=None, pathext=None):
+    """
+    Return the path to an executable which would be run if the given
+    cmd was called. If no cmd would be called, return ``None``.
+
+    Code for Python < 3.3 is based on a code snippet from
+    http://orip.org/2009/08/python-checking-if-executable-exists-in.html
+
+    """
+
+    if pathext is None:
+        pathext = os.getenv('PATHEXT', '').split(os.pathsep)
+        pathext.insert(0, '')
+
+    path = os.getenv("PATH", os.defpath)
+    if env and 'PATH' in env:
+        path = env.get("PATH")
+
+    if sys.version_info >= (3, 3):
+        for ext in pathext:
+            filename = shutil.which(cmd + ext, path=path)
+            if filename:
+                return filename
+        return None
+
+    def isexec(path):
+        return os.path.isfile(path) and os.access(path, os.X_OK)
+
+    for ext in pathext:
+        extcmd = cmd + ext
+        fpath, fname = os.path.split(extcmd)
+        if fpath:
+            if isexec(extcmd):
+                return extcmd
+        else:
+            for directory in path.split(os.pathsep):
+                filename = op.join(directory, extcmd)
+                if isexec(filename):
+                    return filename
+    return None
+
+
+def get_dependencies(name, environ):
+    """Return library dependencies of a dynamically linked executable
+
+    Uses otool on darwin, ldd on linux. Currently doesn't support windows.
+
+    """
+    if sys.platform == 'darwin':
+        proc = sp.Popen(
+            'otool -L `which %s`' % name,
+            stdout=sp.PIPE,
+            stderr=sp.PIPE,
+            shell=True,
+            env=environ)
+    elif 'linux' in sys.platform:
+        proc = sp.Popen(
+            'ldd `which %s`' % name,
+            stdout=sp.PIPE,
+            stderr=sp.PIPE,
+            shell=True,
+            env=environ)
+    else:
+        return 'Platform %s not supported' % sys.platform
+    o, e = proc.communicate()
+    return o.rstrip()
+
+
+def canonicalize_env(env):
+    """Windows requires that environment be dicts with bytes as keys and values
+    This function converts any unicode entries for Windows only, returning the
+    dictionary untouched in other environments.
+
+    Parameters
+    ----------
+    env : dict
+        environment dictionary with unicode or bytes keys and values
+
+    Returns
+    -------
+    env : dict
+        Windows: environment dictionary with bytes keys and values
+        Other: untouched input ``env``
+    """
+    if os.name != 'nt':
+        return env
+
+    out_env = {}
+    for key, val in env.items():
+        if not isinstance(key, bytes):
+            key = key.encode('utf-8')
+        if not isinstance(val, bytes):
+            val = val.encode('utf-8')
+        out_env[key] = val
+    return out_env
+
+
+def relpath(path, start=None):
+    """Return a relative version of a path"""
+
+    try:
+        return op.relpath(path, start)
+    except AttributeError:
+        pass
+
+    if start is None:
+        start = os.curdir
+    if not path:
+        raise ValueError("no path specified")
+    start_list = op.abspath(start).split(op.sep)
+    path_list = op.abspath(path).split(op.sep)
+    if start_list[0].lower() != path_list[0].lower():
+        unc_path, rest = op.splitunc(path)
+        unc_start, rest = op.splitunc(start)
+        if bool(unc_path) ^ bool(unc_start):
+            raise ValueError(("Cannot mix UNC and non-UNC paths "
+                              "(%s and %s)") % (path, start))
+        else:
+            raise ValueError("path is on drive %s, start on drive %s" %
+                             (path_list[0], start_list[0]))
+    # Work out how much of the filepath is shared by start and path.
+    for i in range(min(len(start_list), len(path_list))):
+        if start_list[i].lower() != path_list[i].lower():
+            break
+    else:
+        i += 1
+
+    rel_list = [op.pardir] * (len(start_list) - i) + path_list[i:]
+    if not rel_list:
+        return os.curdir
+    return op.join(*rel_list)
