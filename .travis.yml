@@ -1,55 +1,64 @@
-cache:
-  apt: true
+dist: trusty
+sudo: required
 
 language: python
+# our build matrix
 python:
 - 2.7
 - 3.4
 - 3.5
 - 3.6
+
 env:
 - INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler" CI_SKIP_TEST=1
 - INSTALL_DEB_DEPENDECIES=false NIPYPE_EXTRAS="doc,tests,fmri,profiler" CI_SKIP_TEST=1
 - INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit" CI_SKIP_TEST=1
 - INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler" PIP_FLAGS="--pre" CI_SKIP_TEST=1
+
+addons:
+  apt:
+    packages:
+      - xvfb
+      - fusefat
+      - graphviz
+
+cache:
+  directories:
+    - ${HOME}/.cache
+
 before_install:
-- function apt_inst {
-  if $INSTALL_DEB_DEPENDECIES; then sudo rm -rf /dev/shm; fi &&
-  if $INSTALL_DEB_DEPENDECIES; then sudo ln -s /run/shm /dev/shm; fi &&
-  bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh) &&
-  sudo apt-get -y update &&
-  sudo apt-get -y install xvfb fusefat graphviz &&
-  if $INSTALL_DEB_DEPENDECIES; then travis_retry sudo apt-get install -y -qq
-  fsl afni elastix fsl-atlases; fi &&
-  if $INSTALL_DEB_DEPENDECIES; then
+- if $INSTALL_DEB_DEPENDECIES; then sudo rm -rf /dev/shm; sudo ln -s /run/shm /dev/shm; fi
+- travis_retry bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh);
+- if $INSTALL_DEB_DEPENDECIES; then
+    travis_retry sudo apt-get -y update &&
+    travis_retry sudo apt-get install -y -qq fsl afni elastix fsl-atlases;
+  fi;
+- if $INSTALL_DEB_DEPENDECIES; then
     source /etc/fsl/fsl.sh;
     source /etc/afni/afni.sh;
-    export FSLOUTPUTTYPE=NIFTI_GZ; fi }
-- function conda_inst {
-  export CONDA_HOME=$HOME/conda &&
-  wget https://repo.continuum.io/miniconda/Miniconda${TRAVIS_PYTHON_VERSION:0:1}-latest-Linux-x86_64.sh
-    -O /home/travis/.cache/conda.sh &&
-  bash /home/travis/.cache/conda.sh -b -p ${CONDA_HOME} &&
-  export PATH=${CONDA_HOME}/bin:$PATH &&
-  hash -r &&
-  conda config --set always_yes yes --set changeps1 no &&
-  conda update -q conda &&
-  conda config --add channels conda-forge &&
-  conda install python=${TRAVIS_PYTHON_VERSION} &&
-  conda install -y icu &&
-  pip install -r requirements.txt &&
-  pushd $HOME;
-  git clone https://github.com/INCF/pybids.git;
-  cd pybids;
-  pip install -e .;
-  popd; }
-#  Add install of vtk and mayavi to test mesh (disabled): conda install -y vtk mayavi
-- travis_retry apt_inst
-- travis_retry conda_inst
+    export FSLOUTPUTTYPE=NIFTI_GZ;
+  fi;
+
+# handle python operations separately to reduce timeouts
+- wget https://repo.continuum.io/miniconda/Miniconda${TRAVIS_PYTHON_VERSION:0:1}-latest-Linux-x86_64.sh
+    -O /home/travis/.cache/conda.sh
+- bash ${HOME}/.cache/conda.sh -b -p ${HOME}/conda
+- export PATH=${HOME}/conda/bin:$PATH
+- hash -r
+- conda config --set always_yes yes --set changeps1 no
+- travis_retry conda update -q conda
+- conda config --add channels conda-forge
+- travis_retry conda install -y python=${TRAVIS_PYTHON_VERSION} icu
+- travis_retry pip install -r requirements.txt
+- travis_retry git clone https://github.com/INCF/pybids.git ${HOME}/pybids &&
+  pip install -e ${HOME}/pybids
+
 install:
 - travis_retry pip install $PIP_FLAGS -e .[$NIPYPE_EXTRAS]
+
 script:
 - py.test -v --doctest-modules nipype
+
 deploy:
   provider: pypi
   user: satra
