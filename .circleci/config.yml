@@ -1,3 +1,101 @@
+_machine_kwds: &machine_kwds
+  image: circleci/classic:201710-02
+
+_store_artifacts_kwds: &store_artifacts_kwds
+  path: /home/circleci/work/tests
+
+_test_environment: &test_environment
+  WORKDIR: /home/circleci/work
+
+_generate_dockerfiles: &generate_dockerfiles
+  name: Generate Dockerfiles
+  command: |
+    make gen-dockerfiles
+
+_modify_nipype_version: &modify_nipype_version
+  name: Modify Nipype version if necessary
+  command: |
+    if [ "$CIRCLE_TAG" != "" ]; then
+      sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" nipype/info.py
+    fi
+
+_get_base_image: &get_base_image
+  name: Get base image (pull or build)
+  no_output_timeout: 60m
+  command: |
+    source /tmp/docker/get_base_image.sh
+    if [ "$GET_BASE" == "PULL" ]; then
+      echo "Pulling base image ..."
+      docker pull nipype/nipype:base
+    elif [ "$GET_BASE" == "BUILD" ]; then
+      e=1 && for i in {1..5}; do
+        docker build -t nipype/nipype:base - < docker/Dockerfile.base  && e=0 && break || sleep 15
+      done && [ "$e" -eq "0" ]
+    else
+      echo "Error: method to get base image not understood"
+      exit 1
+    fi
+
+_build_main_image_py36: &build_main_image_py36
+  name: Build main image (py36)
+  no_output_timeout: 60m
+  command: |
+    e=1 && for i in {1..5}; do
+      docker build \
+        --rm=false \
+        --tag nipype/nipype:latest \
+        --tag nipype/nipype:py36 \
+        --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+        --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
+        --build-arg VERSION="${CIRCLE_TAG}" /home/circleci/nipype \
+      && e=0 && break || sleep 15
+    done && [ "$e" -eq "0" ]
+
+_build_main_image_py27: &build_main_image_py27
+  name: Build main image (py27)
+  no_output_timeout: 60m
+  command: |
+    e=1 && for i in {1..5}; do
+      docker build \
+        --rm=false \
+        --tag nipype/nipype:py27 \
+        --build-arg PYTHON_VERSION_MAJOR=2 \
+        --build-arg PYTHON_VERSION_MINOR=7 \
+        --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+        --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
+        --build-arg VERSION="${CIRCLE_TAG}-py27" /home/circleci/nipype \
+      && e=0 && break || sleep 15
+    done && [ "$e" -eq "0" ]
+
+_download_test_data: &_download_test_data
+  name: Download test data
+  no_output_timeout: 20m
+  working_directory: /home/circleci/examples
+  environment:
+    OSF_NIPYPE_URL: "https://files.osf.io/v1/resources/nefdp/providers/osfstorage"
+  command: |
+    export DATA_NIPYPE_TUTORIAL_URL="${OSF_NIPYPE_URL}/57f4739cb83f6901ed94bf21"
+    curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_TUTORIAL_URL" | tar xj
+
+    export DATA_NIPYPE_FSL_COURSE="${OSF_NIPYPE_URL}/57f472cf9ad5a101f977ecfe"
+    curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_COURSE" | tar xz
+
+    export DATA_NIPYPE_FSL_FEEDS="${OSF_NIPYPE_URL}/57f473066c613b01f113e7af"
+    curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_FEEDS" | tar xz
+
+_prepare_working_directory: &prepare_working_directory
+  name: Prepare working directory
+  environment: *test_environment
+  command: |
+    mkdir -p "$WORKDIR"
+    chmod -R 777 "$WORKDIR"
+
+_get_codecov: &_get_codecov
+  name: Get codecov
+  command: |
+    pip install --no-cache-dir codecov
+
+
 version: 2
 jobs:
 
@@ -36,416 +134,129 @@ jobs:
             - docker/get_base_image.sh
 
   test_pytest:
-    machine:
-      # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: circleci/classic:201710-02
+    machine: *machine_kwds
     working_directory: /home/circleci/nipype
     steps:
       - checkout:
           path: /home/circleci/nipype
       - attach_workspace:
           at: /tmp
-      - run:
-          name: Generate Dockerfiles
-          command: |
-            make gen-dockerfiles
-      - run:
-          name: Modify Nipype version if necessary
-          command: |
-            if [ "$CIRCLE_TAG" != "" ]; then
-              sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" nipype/info.py
-            fi
-      - run:
-          name: Get base image (pull or build)
-          no_output_timeout: 60m
-          command: |
-            source /tmp/docker/get_base_image.sh
-            if [ "$GET_BASE" == "PULL" ]; then
-              echo "Pulling base image ..."
-              docker pull nipype/nipype:base
-            elif [ "$GET_BASE" == "BUILD" ]; then
-              e=1 && for i in {1..5}; do
-                docker build -t nipype/nipype:base - < docker/Dockerfile.base  && e=0 && break || sleep 15
-              done && [ "$e" -eq "0" ]
-            else
-              echo "Error: method to get base image not understood"
-              exit 1
-            fi
-      - run:
-          name: Build main image (py36)
-          no_output_timeout: 60m
-          command: |
-            e=1 && for i in {1..5}; do
-              docker build \
-                --rm=false \
-                --tag nipype/nipype:latest \
-                --tag nipype/nipype:py36 \
-                --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-                --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
-                --build-arg VERSION="${CIRCLE_TAG}" /home/circleci/nipype \
-              && e=0 && break || sleep 15
-            done && [ "$e" -eq "0" ]
-      - run:
-          name: Build main image (py27)
-          no_output_timeout: 60m
-          command: |
-            e=1 && for i in {1..5}; do
-              docker build \
-                --rm=false \
-                --tag nipype/nipype:py27 \
-                --build-arg PYTHON_VERSION_MAJOR=2 \
-                --build-arg PYTHON_VERSION_MINOR=7 \
-                --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-                --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
-                --build-arg VERSION="${CIRCLE_TAG}-py27" /home/circleci/nipype \
-              && e=0 && break || sleep 15
-            done && [ "$e" -eq "0" ]
-      - run:
-          name: Get codecov
-          command: |
-            pip install --no-cache-dir codecov
-      - run:
-          name: Download test data
-          no_output_timeout: 20m
-          working_directory: /home/circleci/examples
-          environment:
-            OSF_NIPYPE_URL: "https://files.osf.io/v1/resources/nefdp/providers/osfstorage"
-          command: |
-            export DATA_NIPYPE_TUTORIAL_URL="${OSF_NIPYPE_URL}/57f4739cb83f6901ed94bf21"
-            curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_TUTORIAL_URL" | tar xj
-
-            export DATA_NIPYPE_FSL_COURSE="${OSF_NIPYPE_URL}/57f472cf9ad5a101f977ecfe"
-            curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_COURSE" | tar xz
-
-            export DATA_NIPYPE_FSL_FEEDS="${OSF_NIPYPE_URL}/57f473066c613b01f113e7af"
-            curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_FEEDS" | tar xz
-      - run:
-          name: Prepare working directory
-          environment:
-            WORKDIR: /home/circleci/work
-          command: |
-            mkdir -p "$WORKDIR"
-            chmod -R 777 "$WORKDIR"
+      - run: *generate_dockerfiles
+      - run: *modify_nipype_version
+      - run: *get_base_image
+      - run: *build_main_image_py36
+      - run: *build_main_image_py27
+      - run: *_get_codecov
+      - run: *_download_test_data
+      - run: *prepare_working_directory
       - run:
           name: Run pytests (py36)
           no_output_timeout: 30m
-          environment:
-            WORKDIR: /home/circleci/work
+          environment: *test_environment
           command: bash /home/circleci/nipype/.circleci/test_py3_pytest.sh
       - run:
           name: Run pytests (py27)
           no_output_timeout: 30m
-          environment:
-            WORKDIR: /home/circleci/work
+          environment: *test_environment
           command: bash /home/circleci/nipype/.circleci/test_py2_pytest.sh
       - run:
           name: Build docs (py36)
           no_output_timeout: 30m
-          environment:
-            WORKDIR: /home/circleci/work
+          environment: *test_environment
           command: bash /home/circleci/nipype/.circleci/test_py3_docs.sh
-      - store_artifacts:
-          path: /home/circleci/work/tests
+      - store_artifacts: *store_artifacts_kwds
 
   test_py3_fmri_fsl_spm:
-    machine:
-      # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: circleci/classic:201710-02
+    machine: *machine_kwds
     working_directory: /home/circleci/nipype
     steps:
       - checkout:
           path: /home/circleci/nipype
       - attach_workspace:
           at: /tmp
-      - run:
-          name: Generate Dockerfiles
-          command: |
-            make gen-dockerfiles
-      - run:
-          name: Modify Nipype version if necessary
-          command: |
-            if [ "$CIRCLE_TAG" != "" ]; then
-              sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" nipype/info.py
-            fi
-      - run:
-          name: Get base image (pull or build)
-          no_output_timeout: 60m
-          command: |
-            source /tmp/docker/get_base_image.sh
-            if [ "$GET_BASE" == "PULL" ]; then
-              echo "Pulling base image ..."
-              docker pull nipype/nipype:base
-            elif [ "$GET_BASE" == "BUILD" ]; then
-              e=1 && for i in {1..5}; do
-                docker build -t nipype/nipype:base - < docker/Dockerfile.base  && e=0 && break || sleep 15
-              done && [ "$e" -eq "0" ]
-            else
-              echo "Error: method to get base image not understood"
-              exit 1
-            fi
-      - run:
-          name: Build main image (py36)
-          no_output_timeout: 60m
-          command: |
-            e=1 && for i in {1..5}; do
-              docker build \
-                --rm=false \
-                --tag nipype/nipype:latest \
-                --tag nipype/nipype:py36 \
-                --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-                --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
-                --build-arg VERSION="${CIRCLE_TAG}" /home/circleci/nipype \
-              && e=0 && break || sleep 15
-            done && [ "$e" -eq "0" ]
-      - run:
-          name: Get codecov
-          command: |
-            pip install --no-cache-dir codecov
-      - run:
-          name: Download test data
-          no_output_timeout: 20m
-          working_directory: /home/circleci/examples
-          environment:
-            OSF_NIPYPE_URL: "https://files.osf.io/v1/resources/nefdp/providers/osfstorage"
-          command: |
-            export DATA_NIPYPE_TUTORIAL_URL="${OSF_NIPYPE_URL}/57f4739cb83f6901ed94bf21"
-            curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_TUTORIAL_URL" | tar xj
-
-            export DATA_NIPYPE_FSL_COURSE="${OSF_NIPYPE_URL}/57f472cf9ad5a101f977ecfe"
-            curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_COURSE" | tar xz
-
-            export DATA_NIPYPE_FSL_FEEDS="${OSF_NIPYPE_URL}/57f473066c613b01f113e7af"
-            curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_FEEDS" | tar xz
-      - run:
-          name: Prepare working directory
-          environment:
-            WORKDIR: /home/circleci/work
-          command: |
-            mkdir -p "$WORKDIR"
-            chmod -R 777 "$WORKDIR"
+      - run: *generate_dockerfiles
+      - run: *modify_nipype_version
+      - run: *get_base_image
+      - run: *build_main_image_py36
+      - run: *_get_codecov
+      - run: *_download_test_data
+      - run: *prepare_working_directory
       - run:
           name: Run FSL FEEDS pipeline (py36)
           no_output_timeout: 40m
-          environment:
-            WORKDIR: /home/circleci/work
+          environment: *test_environment
           command: bash /home/circleci/nipype/.circleci/test_py3_fmri_fsl_feeds_linear_l1.sh
       - run:
           name: Run FSL reuse pipeline (py36)
           no_output_timeout: 40m
-          environment:
-            WORKDIR: /home/circleci/work
+          environment: *test_environment
           command: bash /home/circleci/nipype/.circleci/test_py3_fmri_fsl_reuse_linear_l1.sh
       - run:
           name: Run SPM test workflow - 3D inputs (py36)
           no_output_timeout: 40m
-          environment:
-            WORKDIR: /home/circleci/work
+          environment: *test_environment
           command: bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_linear_3d.sh
       - run:
           name: Run SPM test workflow - 4D inputs (py36)
           no_output_timeout: 40m
-          environment:
-            WORKDIR: /home/circleci/work
+          environment: *test_environment
           command: bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_linear_4d.sh
-      - store_artifacts:
-          path: /home/circleci/work/tests
+      - store_artifacts: *store_artifacts_kwds
 
   test_py3_fmri_spm_dartel_multiproc:
-    machine:
-      # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: circleci/classic:201710-02
+    machine: *machine_kwds
     working_directory: /home/circleci/nipype
     steps:
       - checkout:
           path: /home/circleci/nipype
       - attach_workspace:
           at: /tmp
-      - run:
-          name: Generate Dockerfiles
-          command: |
-            make gen-dockerfiles
-      - run:
-          name: Modify Nipype version if necessary
-          command: |
-            if [ "$CIRCLE_TAG" != "" ]; then
-              sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" nipype/info.py
-            fi
-      - run:
-          name: Get base image (pull or build)
-          no_output_timeout: 60m
-          command: |
-            source /tmp/docker/get_base_image.sh
-            if [ "$GET_BASE" == "PULL" ]; then
-              echo "Pulling base image ..."
-              docker pull nipype/nipype:base
-            elif [ "$GET_BASE" == "BUILD" ]; then
-              e=1 && for i in {1..5}; do
-                docker build -t nipype/nipype:base - < docker/Dockerfile.base  && e=0 && break || sleep 15
-              done && [ "$e" -eq "0" ]
-            else
-              echo "Error: method to get base image not understood"
-              exit 1
-            fi
-      - run:
-          name: Build main image (py36)
-          no_output_timeout: 60m
-          command: |
-            e=1 && for i in {1..5}; do
-              docker build \
-                --rm=false \
-                --tag nipype/nipype:latest \
-                --tag nipype/nipype:py36 \
-                --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-                --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
-                --build-arg VERSION="${CIRCLE_TAG}" /home/circleci/nipype \
-              && e=0 && break || sleep 15
-            done && [ "$e" -eq "0" ]
-      - run:
-          name: Get codecov
-          command: |
-            pip install --no-cache-dir codecov
-      - run:
-          name: Download test data
-          no_output_timeout: 20m
-          working_directory: /home/circleci/examples
-          environment:
-            OSF_NIPYPE_URL: "https://files.osf.io/v1/resources/nefdp/providers/osfstorage"
-          command: |
-            export DATA_NIPYPE_TUTORIAL_URL="${OSF_NIPYPE_URL}/57f4739cb83f6901ed94bf21"
-            curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_TUTORIAL_URL" | tar xj
-
-            export DATA_NIPYPE_FSL_COURSE="${OSF_NIPYPE_URL}/57f472cf9ad5a101f977ecfe"
-            curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_COURSE" | tar xz
-
-            export DATA_NIPYPE_FSL_FEEDS="${OSF_NIPYPE_URL}/57f473066c613b01f113e7af"
-            curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_FEEDS" | tar xz
-      - run:
-          name: Prepare working directory
-          environment:
-            WORKDIR: /home/circleci/work
-          command: |
-            mkdir -p "$WORKDIR"
-            chmod -R 777 "$WORKDIR"
+      - run: *generate_dockerfiles
+      - run: *modify_nipype_version
+      - run: *get_base_image
+      - run: *build_main_image_py36
+      - run: *_get_codecov
+      - run: *_download_test_data
+      - run: *prepare_working_directory
       - run:
           name: Run SPM DARTEL Level 1 pipeline (py36)
           no_output_timeout: 1h
-          environment:
-            WORKDIR: /home/circleci/work
+          environment: *test_environment
           command: bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_dartel_multiproc_l1.sh
       - run:
           name: Run SPM DARTEL Level 2 pipeline (py36)
           no_output_timeout: 30m
-          environment:
-            WORKDIR: /home/circleci/work
+          environment: *test_environment
           command: bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_dartel_multiproc_l2.sh
-      - store_artifacts:
-          path: /home/circleci/work/tests
+      - store_artifacts: *store_artifacts_kwds
 
   test_fmri_spm_nested_multiproc:
-    machine:
-      # Ubuntu 14.04 with Docker 17.10.0-ce
-      image: circleci/classic:201710-02
+    machine: *machine_kwds
     working_directory: /home/circleci/nipype
     steps:
       - checkout:
           path: /home/circleci/nipype
       - attach_workspace:
           at: /tmp
-      - run:
-          name: Generate Dockerfiles
-          command: |
-            make gen-dockerfiles
-      - run:
-          name: Modify Nipype version if necessary
-          command: |
-            if [ "$CIRCLE_TAG" != "" ]; then
-              sed -i -E "s/(__version__ = )'[A-Za-z0-9.-]+'/\1'$CIRCLE_TAG'/" nipype/info.py
-            fi
-      - run:
-          name: Get base image (pull or build)
-          no_output_timeout: 60m
-          command: |
-            source /tmp/docker/get_base_image.sh
-            if [ "$GET_BASE" == "PULL" ]; then
-              echo "Pulling base image ..."
-              docker pull nipype/nipype:base
-            elif [ "$GET_BASE" == "BUILD" ]; then
-              e=1 && for i in {1..5}; do
-                docker build -t nipype/nipype:base - < docker/Dockerfile.base  && e=0 && break || sleep 15
-              done && [ "$e" -eq "0" ]
-            else
-              echo "Error: method to get base image not understood"
-              exit 1
-            fi
-      - run:
-          name: Build main image (py36)
-          no_output_timeout: 60m
-          command: |
-            e=1 && for i in {1..5}; do
-              docker build \
-                --rm=false \
-                --tag nipype/nipype:latest \
-                --tag nipype/nipype:py36 \
-                --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-                --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
-                --build-arg VERSION="${CIRCLE_TAG}" /home/circleci/nipype \
-              && e=0 && break || sleep 15
-            done && [ "$e" -eq "0" ]
-      - run:
-          name: Build main image (py27)
-          no_output_timeout: 60m
-          command: |
-            e=1 && for i in {1..5}; do
-              docker build \
-                --rm=false \
-                --tag nipype/nipype:py27 \
-                --build-arg PYTHON_VERSION_MAJOR=2 \
-                --build-arg PYTHON_VERSION_MINOR=7 \
-                --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-                --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
-                --build-arg VERSION="${CIRCLE_TAG}-py27" /home/circleci/nipype \
-              && e=0 && break || sleep 15
-            done && [ "$e" -eq "0" ]
-      - run:
-          name: Get codecov
-          command: |
-            pip install --no-cache-dir codecov
-      - run:
-          name: Download test data
-          no_output_timeout: 20m
-          working_directory: /home/circleci/examples
-          environment:
-            OSF_NIPYPE_URL: "https://files.osf.io/v1/resources/nefdp/providers/osfstorage"
-          command: |
-            export DATA_NIPYPE_TUTORIAL_URL="${OSF_NIPYPE_URL}/57f4739cb83f6901ed94bf21"
-            curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_TUTORIAL_URL" | tar xj
-
-            export DATA_NIPYPE_FSL_COURSE="${OSF_NIPYPE_URL}/57f472cf9ad5a101f977ecfe"
-            curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_COURSE" | tar xz
-
-            export DATA_NIPYPE_FSL_FEEDS="${OSF_NIPYPE_URL}/57f473066c613b01f113e7af"
-            curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_FEEDS" | tar xz
-      - run:
-          name: Prepare working directory
-          environment:
-            WORKDIR: /home/circleci/work
-          command: |
-            mkdir -p "$WORKDIR"
-            chmod -R 777 "$WORKDIR"
+      - run: *generate_dockerfiles
+      - run: *modify_nipype_version
+      - run: *get_base_image
+      - run: *build_main_image_py36
+      - run: *build_main_image_py27
+      - run: *_get_codecov
+      - run: *_download_test_data
+      - run: *prepare_working_directory
       - run:
           name: Run SPM Nested Level 1 pipeline (py36)
           no_output_timeout: 1h
-          environment:
-            WORKDIR: /home/circleci/work
+          environment: *test_environment
           command: bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_nested_multiproc_l1.sh
       - run:
           name: Run SPM Nested Level 2 pipeline (py27)
           no_output_timeout: 30m
-          environment:
-            WORKDIR: /home/circleci/work
+          environment: *test_environment
           command: bash /home/circleci/nipype/.circleci/test_py2_fmri_spm_nested_multiproc_l2.sh
-      - store_artifacts:
-          path: /home/circleci/work/tests
+      - store_artifacts: *store_artifacts_kwds
       - run:
           name: Save Docker images to workspace
           no_output_timeout: 60m
