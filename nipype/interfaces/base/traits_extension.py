@@ -217,6 +217,16 @@ class ImageFile(File):
         super(ImageFile, self).__init__(value, filter, auto_set, entries,
                                         exists, **metadata)
 
+    def info(self):
+        existing = 'n existing' if self.exists else ''
+        comma = ',' if self.exists and not self.allow_compressed else ''
+        uncompressed = ' uncompressed' if not self.allow_compressed else ''
+        with_ext = ' (valid extensions: [{}])'.format(
+            ', '.join(self.grab_exts())) if self.types else ''
+        return 'a{existing}{comma}{uncompressed} file{with_ext}'.format(
+            existing=existing, comma=comma, uncompressed=uncompressed,
+            with_ext=with_ext)
+
     def grab_exts(self):
         # TODO: file type validation
         exts = []
@@ -243,11 +253,11 @@ class ImageFile(File):
         """
         validated_value = super(ImageFile, self).validate(object, name, value)
         if validated_value and self.types:
-            self._exts = self.grab_exts()
-            if not any(validated_value.endswith(x) for x in self._exts):
+            _exts = self.grab_exts()
+            if not any(validated_value.endswith(x) for x in _exts):
                 raise TraitError(
                     args="{} is not included in allowed types: {}".format(
-                        validated_value, ', '.join(self._exts)))
+                        validated_value, ', '.join(_exts)))
         return validated_value
 
 
@@ -322,15 +332,11 @@ class MultiPath(traits.List):
 
         newvalue = value
 
+        inner_trait = self.inner_traits()[0]
         if not isinstance(value, list) \
-            or (self.inner_traits() and
-                isinstance(self.inner_traits()[0].trait_type,
-                           traits.List) and not
-                isinstance(self.inner_traits()[0].trait_type,
-                           InputMultiPath) and
-                isinstance(value, list) and
-                value and not
-                isinstance(value[0], list)):
+            or (isinstance(inner_trait.trait_type, traits.List) and
+                not isinstance(inner_trait.trait_type, InputMultiPath) and
+                not isinstance(value[0], list)):
             newvalue = [value]
         value = super(MultiPath, self).validate(object, name, newvalue)
 
