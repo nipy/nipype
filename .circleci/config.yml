@@ -98,6 +98,7 @@ _get_codecov: &_get_codecov
 
 _run_codecov: &_run_codecov
   name: Run codecov
+  environment: *test_environment
   command: |
     codecov --file "$WORKDIR/tests/coverage*.xml" --root "$HOME/nipype" --flags unittests -e "$CIRCLE_JOB"
     codecov --file "$WORKDIR/tests/smoketest*.xml" --root "$HOME/nipype" --flags smoketests -e "$CIRCLE_JOB"
