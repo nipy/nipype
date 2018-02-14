@@ -166,11 +166,6 @@ jobs:
           no_output_timeout: 30m
           environment: *test_environment
           command: bash -ux /home/circleci/nipype/.circleci/test_py2_pytest.sh
-      - run:
-          name: Build docs (py36)
-          no_output_timeout: 30m
-          environment: *test_environment
-          command: bash -ux /home/circleci/nipype/.circleci/test_py3_docs.sh
       - run: *_run_codecov
       - store_artifacts: *store_artifacts_kwds
 
@@ -268,6 +263,13 @@ jobs:
           command: bash -ux /home/circleci/nipype/.circleci/test_py2_fmri_spm_nested_multiproc_l2.sh
       - run: *_run_codecov
       - store_artifacts: *store_artifacts_kwds
+      - run:
+          name: Build docs (py36)
+          no_output_timeout: 30m
+          environment: *test_environment
+          command: bash -ux /home/circleci/nipype/.circleci/test_py3_docs.sh
+      - store_artifacts:
+          path: /home/circleci/work/docs
       - run:
           name: Save Docker images to workspace
           no_output_timeout: 60m
