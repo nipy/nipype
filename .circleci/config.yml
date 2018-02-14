@@ -6,6 +6,7 @@ _store_artifacts_kwds: &store_artifacts_kwds
 
 _test_environment: &test_environment
   WORKDIR: /home/circleci/work
+  DOCKER_IMAGE: "nipype/nipype"
 
 _generate_dockerfiles: &generate_dockerfiles
   name: Generate Dockerfiles
@@ -159,17 +160,17 @@ jobs:
           name: Run pytests (py36)
           no_output_timeout: 30m
           environment: *test_environment
-          command: bash /home/circleci/nipype/.circleci/test_py3_pytest.sh
+          command: bash -ux /home/circleci/nipype/.circleci/test_py3_pytest.sh
       - run:
           name: Run pytests (py27)
           no_output_timeout: 30m
           environment: *test_environment
-          command: bash /home/circleci/nipype/.circleci/test_py2_pytest.sh
+          command: bash -ux /home/circleci/nipype/.circleci/test_py2_pytest.sh
       - run:
           name: Build docs (py36)
           no_output_timeout: 30m
           environment: *test_environment
-          command: bash /home/circleci/nipype/.circleci/test_py3_docs.sh
+          command: bash -ux /home/circleci/nipype/.circleci/test_py3_docs.sh
       - run: *_run_codecov
       - store_artifacts: *store_artifacts_kwds
 
@@ -192,22 +193,22 @@ jobs:
           name: Run FSL FEEDS pipeline (py36)
           no_output_timeout: 40m
           environment: *test_environment
-          command: bash /home/circleci/nipype/.circleci/test_py3_fmri_fsl_feeds_linear_l1.sh
+          command: bash -ux /home/circleci/nipype/.circleci/test_py3_fmri_fsl_feeds_linear_l1.sh
       - run:
           name: Run FSL reuse pipeline (py36)
           no_output_timeout: 40m
           environment: *test_environment
-          command: bash /home/circleci/nipype/.circleci/test_py3_fmri_fsl_reuse_linear_l1.sh
+          command: bash -ux /home/circleci/nipype/.circleci/test_py3_fmri_fsl_reuse_linear_l1.sh
       - run:
           name: Run SPM test workflow - 3D inputs (py36)
           no_output_timeout: 40m
           environment: *test_environment
-          command: bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_linear_3d.sh
+          command: bash -ux /home/circleci/nipype/.circleci/test_py3_fmri_spm_linear_3d.sh
       - run:
           name: Run SPM test workflow - 4D inputs (py36)
           no_output_timeout: 40m
           environment: *test_environment
-          command: bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_linear_4d.sh
+          command: bash -ux /home/circleci/nipype/.circleci/test_py3_fmri_spm_linear_4d.sh
       - run: *_run_codecov
       - store_artifacts: *store_artifacts_kwds
 
@@ -230,12 +231,12 @@ jobs:
           name: Run SPM DARTEL Level 1 pipeline (py36)
           no_output_timeout: 1h
           environment: *test_environment
-          command: bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_dartel_multiproc_l1.sh
+          command: bash -ux /home/circleci/nipype/.circleci/test_py3_fmri_spm_dartel_multiproc_l1.sh
       - run:
           name: Run SPM DARTEL Level 2 pipeline (py36)
           no_output_timeout: 30m
           environment: *test_environment
-          command: bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_dartel_multiproc_l2.sh
+          command: bash -ux /home/circleci/nipype/.circleci/test_py3_fmri_spm_dartel_multiproc_l2.sh
       - run: *_run_codecov
       - store_artifacts: *store_artifacts_kwds
 
@@ -259,12 +260,12 @@ jobs:
           name: Run SPM Nested Level 1 pipeline (py36)
           no_output_timeout: 1h
           environment: *test_environment
-          command: bash /home/circleci/nipype/.circleci/test_py3_fmri_spm_nested_multiproc_l1.sh
+          command: bash -ux /home/circleci/nipype/.circleci/test_py3_fmri_spm_nested_multiproc_l1.sh
       - run:
           name: Run SPM Nested Level 2 pipeline (py27)
           no_output_timeout: 30m
           environment: *test_environment
-          command: bash /home/circleci/nipype/.circleci/test_py2_fmri_spm_nested_multiproc_l2.sh
+          command: bash -ux /home/circleci/nipype/.circleci/test_py2_fmri_spm_nested_multiproc_l2.sh
       - run: *_run_codecov
       - store_artifacts: *store_artifacts_kwds
       - run:
