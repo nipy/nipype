@@ -2,7 +2,7 @@
 NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 ========================================================
 
-.. image:: https://travis-ci.org/nipy/nipype.png?branch=master
+.. image:: https://travis-ci.org/nipy/nipype.svg?branch=master
   :target: https://travis-ci.org/nipy/nipype
 
 .. image:: https://circleci.com/gh/nipy/nipype/tree/master.svg?style=svg
@@ -33,6 +33,9 @@ NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 .. image:: https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg?style=flat
     :target: http://gitter.im/nipy/nipype
     :alt: Chat
+
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.581704.svg
+   :target: https://doi.org/10.5281/zenodo.581704
 
 Current neuroimaging software offer users an incredible opportunity to
 analyze data using a variety of different algorithms. However, this has
@@ -87,33 +90,7 @@ To participate in the Nipype development related discussions please use the foll
 
 Please add *[nipype]* to the subject line when posting on the mailing list.
 
+Contributing to the project
+---------------------------
 
-Nipype structure
-----------------
-
-Currently Nipype consists of the following files and directories:
-
-  INSTALL
-    NIPYPE prerequisites, installation, development, testing, and
-    troubleshooting.
-
-  README
-    This document.
-
-  THANKS
-    NIPYPE developers and contributors. Please keep it up to date!!
-
-  LICENSE
-    NIPYPE license terms.
-
-  doc/
-    Sphinx/reST documentation
-
-  examples/
-
-  nipype/
-    Contains the source code.
-
-  setup.py
-    Script for building and installing NIPYPE.
-
+If you'd like to contribute to the project please read our `guidelines <https://github.com/nipy/nipype/blob/master/CONTRIBUTING.md>`_. Please also read through our `code of conduct <https://github.com/nipy/nipype/blob/master/CODE_OF_CONDUCT.md>`_.

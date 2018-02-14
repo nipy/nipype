@@ -8,16 +8,28 @@ import os
 
 
 class GenerateAverageLmkFileInputSpec(CommandLineInputSpec):
-    inputLandmarkFiles = InputMultiPath(traits.Str, desc="Input landmark files names (.fcsv or .wts)", sep=",", argstr="--inputLandmarkFiles %s")
-    outputLandmarkFile = traits.Either(traits.Bool, File(), hash_files=False, desc="Ouput landmark file name that includes average values for landmarks (.fcsv or .wts)", argstr="--outputLandmarkFile %s")
+    inputLandmarkFiles = InputMultiPath(
+        traits.Str,
+        desc="Input landmark files names (.fcsv or .wts)",
+        sep=",",
+        argstr="--inputLandmarkFiles %s")
+    outputLandmarkFile = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Ouput landmark file name that includes average values for landmarks (.fcsv or .wts)",
+        argstr="--outputLandmarkFile %s")
 
 
 class GenerateAverageLmkFileOutputSpec(TraitedSpec):
-    outputLandmarkFile = File(desc="Ouput landmark file name that includes average values for landmarks (.fcsv or .wts)", exists=True)
+    outputLandmarkFile = File(
+        desc=
+        "Ouput landmark file name that includes average values for landmarks (.fcsv or .wts)",
+        exists=True)
 
 
 class GenerateAverageLmkFile(SEMLikeCommandLine):
-
     """title: Average Fiducials
 
 category: Testing

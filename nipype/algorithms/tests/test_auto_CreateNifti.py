@@ -4,25 +4,23 @@ from ..misc import CreateNifti
 
 
 def test_CreateNifti_inputs():
-    input_map = dict(affine=dict(),
-    data_file=dict(mandatory=True,
-    ),
-    header_file=dict(mandatory=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
+    input_map = dict(
+        affine=dict(),
+        data_file=dict(mandatory=True, ),
+        header_file=dict(mandatory=True, ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
     )
     inputs = CreateNifti.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_CreateNifti_outputs():
-    output_map = dict(nifti_file=dict(),
-    )
+    output_map = dict(nifti_file=dict(), )
     outputs = CreateNifti.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -8,16 +8,17 @@ Top-level namespace for afni.
 """
 
 from .base import Info
-from .preprocess import (Allineate, Automask, AutoTcorrelate,
-                         Bandpass, BlurInMask, BlurToFWHM,
-                         ClipLevel, DegreeCentrality, Despike,
-                         Detrend, ECM, Fim, Fourier, Hist, LFCD,
-                         Maskave, Means, OutlierCount,
-                         QualityIndex, ROIStats, Retroicor,
-                         Seg, SkullStrip, TCorr1D, TCorrMap, TCorrelate,
-                         TShift, Volreg, Warp)
+from .preprocess import (
+    AlignEpiAnatPy, Allineate, Automask, AutoTcorrelate, AutoTLRC, Bandpass,
+    BlurInMask, BlurToFWHM, ClipLevel, DegreeCentrality, Despike, Detrend, ECM,
+    Fim, Fourier, Hist, LFCD, Maskave, Means, OutlierCount, QualityIndex,
+    ROIStats, Retroicor, Seg, SkullStrip, TCorr1D, TCorrMap, TCorrelate, TNorm,
+    TProject, TShift, Volreg, Warp, QwarpPlusMinus, Qwarp)
 from .svm import (SVMTest, SVMTrain)
-from .utils import (AFNItoNIFTI, Autobox, BrickStat, Calc, Copy,
-                    Eval, FWHMx,
-                    MaskTool, Merge, Notes, Refit, Resample, TCat, TStat, To3D,
-                    ZCutUp,)
+from .utils import (
+    ABoverlap, AFNItoNIFTI, Autobox, Axialize, BrickStat, Bucket, Calc, Cat,
+    CatMatvec, CenterMass, ConvertDset, Copy, Dot, Edge3, Eval, FWHMx,
+    MaskTool, Merge, Notes, NwarpApply, NwarpCat, OneDToolPy, Refit, Resample,
+    TCat, TCatSubBrick, TStat, To3D, Unifize, Undump, ZCutUp, GCOR, Zcat,
+    Zeropad)
+from .model import (Deconvolve, Remlfit, Synthesize)

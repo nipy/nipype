@@ -74,6 +74,18 @@ Optional arguments::
   n_procs :  Number of processes to launch in parallel, if not set number of
   processors/threads will be automatically detected
 
+  memory_gb : Total memory available to be shared by all simultaneous tasks
+  currently running, if not set it will be automatically set to 90\% of
+  system RAM.
+
+  raise_insufficient : Raise exception when the estimated resources of a node
+  exceed the total amount of resources available (memory and threads), when
+  ``False`` (default), only a warning will be issued.
+
+  maxtasksperchild : number of nodes to run on each process before refreshing
+  the worker (default: 10).
+
+
 To distribute processing on a multicore machine, simply call::
 
   workflow.run(plugin='MultiProc')

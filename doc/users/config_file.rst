@@ -14,48 +14,52 @@ Logging
 ~~~~~~~
 
 *workflow_level*
-	How detailed the logs regarding workflow should be (possible values:
-	``INFO`` and ``DEBUG``; default value: ``INFO``)
-*filemanip_level*
-	How detailed the logs regarding file operations (for example overwriting
-	warning) should be (possible values: ``INFO`` and ``DEBUG``; default value:
-	``INFO``)
+    How detailed the logs regarding workflow should be (possible values:
+    ``INFO`` and ``DEBUG``; default value: ``INFO``)
+*utils_level*
+    How detailed the logs regarding nipype utils, like file operations
+    (for example overwriting warning) or the resource profiler, should be
+    (possible values: ``INFO`` and ``DEBUG``; default value:
+    ``INFO``)
 *interface_level*
-	How detailed the logs regarding interface execution should be (possible
-	values: ``INFO`` and ``DEBUG``; default value: ``INFO``)
+    How detailed the logs regarding interface execution should be (possible
+    values: ``INFO`` and ``DEBUG``; default value: ``INFO``)
+*filemanip_level* (deprecated as of 1.0)
+    How detailed the logs regarding file operations (for example overwriting
+    warning) should be (possible values: ``INFO`` and ``DEBUG``)
 *log_to_file*
     Indicates whether logging should also send the output to a file (possible
     values: ``true`` and ``false``; default value: ``false``)
 *log_directory*
-	Where to store logs. (string, default value: home directory)
+    Where to store logs. (string, default value: home directory)
 *log_size*
-	Size of a single log file. (integer, default value: 254000)
+    Size of a single log file. (integer, default value: 254000)
 *log_rotate*
-	How many rotation should the log file make. (integer, default value: 4)
+    How many rotation should the log file make. (integer, default value: 4)
 
 Execution
 ~~~~~~~~~
 
 *plugin*
-	This defines which execution plugin to use. (possible values: ``Linear``,
-	``MultiProc``, ``SGE``, ``IPython``; default value: ``Linear``)
+    This defines which execution plugin to use. (possible values: ``Linear``,
+    ``MultiProc``, ``SGE``, ``IPython``; default value: ``Linear``)
 
 *stop_on_first_crash*
-	Should the workflow stop upon first node crashing or try to execute as many
-	nodes as possible? (possible values: ``true`` and ``false``; default value:
-	``false``)
+    Should the workflow stop upon first node crashing or try to execute as many
+    nodes as possible? (possible values: ``true`` and ``false``; default value:
+    ``false``)
 
 *stop_on_first_rerun*
-	Should the workflow stop upon first node trying to recompute (by that we
-	mean rerunning a node that has been run before - this can happen due changed
-	inputs and/or hash_method since the last run). (possible values: ``true``
-	and ``false``; default value: ``false``)
+    Should the workflow stop upon first node trying to recompute (by that we
+    mean rerunning a node that has been run before - this can happen due changed
+    inputs and/or hash_method since the last run). (possible values: ``true``
+    and ``false``; default value: ``false``)
 
 *hash_method*
-	Should the input files be checked for changes using their content (slow, but
-	100% accurate) or just their size and modification date (fast, but
-	potentially prone to errors)? (possible values: ``content`` and
-	``timestamp``; default value: ``timestamp``)
+    Should the input files be checked for changes using their content (slow, but
+    100% accurate) or just their size and modification date (fast, but
+    potentially prone to errors)? (possible values: ``content`` and
+    ``timestamp``; default value: ``timestamp``)
 
 *keep_inputs*
     Ensures that all inputs that are created in the nodes working directory are
@@ -63,44 +67,47 @@ Execution
     value: ``false``)
 
 *single_thread_matlab*
-	Should all of the Matlab interfaces (including SPM) use only one thread?
-	This is useful if you are parallelizing your workflow using MultiProc or
-	IPython on a single multicore machine. (possible values: ``true`` and
-	``false``; default value: ``true``)
+    Should all of the Matlab interfaces (including SPM) use only one thread?
+    This is useful if you are parallelizing your workflow using MultiProc or
+    IPython on a single multicore machine. (possible values: ``true`` and
+    ``false``; default value: ``true``)
 
 *display_variable*
-	What ``DISPLAY`` variable should all command line interfaces be
-	run with. This is useful if you are using `xnest
-	<http://www.x.org/archive/X11R7.5/doc/man/man1/Xnest.1.html>`_
-	or `Xvfb <http://www.x.org/archive/X11R6.8.1/doc/Xvfb.1.html>`_
-	and you would like to redirect all spawned windows to
-	it. (possible values: any X server address; default value: not
-	set)
+	Override the ``$DISPLAY`` environment variable for interfaces that require
+    an X server. This option is useful if there is a running X server, but
+    ``$DISPLAY`` was not defined in nipype's environment. For example, if an X
+    server is listening on the default port of 6000, set ``display_variable = :0``
+    to enable nipype interfaces to use it. It may also point to displays provided
+    by VNC, `xnest <http://www.x.org/archive/X11R7.5/doc/man/man1/Xnest.1.html>`_
+    or `Xvfb <http://www.x.org/archive/X11R6.8.1/doc/Xvfb.1.html>`_.
+    If neither ``display_variable`` nor the ``$DISPLAY`` environment variable are
+    set, nipype will try to configure a new virtual server using Xvfb.
+    (possible values: any X server address; default value: not set)
 
 *remove_unnecessary_outputs*
-	This will remove any interface outputs not needed by the workflow. If the
-	required outputs from a node changes, rerunning the workflow will rerun the
-	node. Outputs of leaf nodes (nodes whose outputs are not connected to any
-	other nodes) will never be deleted independent of this parameter. (possible
-	values: ``true`` and ``false``; default value: ``true``)
+    This will remove any interface outputs not needed by the workflow. If the
+    required outputs from a node changes, rerunning the workflow will rerun the
+    node. Outputs of leaf nodes (nodes whose outputs are not connected to any
+    other nodes) will never be deleted independent of this parameter. (possible
+    values: ``true`` and ``false``; default value: ``true``)
 
 *try_hard_link_datasink*
-	When the DataSink is used to produce an orginized output file outside
-	of nipypes internal cache structure, a file system hard link will be
-	attempted first. A hard link allow multiple file paths to point to the
-	same physical storage location on disk if the conditions allow. By
-	refering to the same physical file on disk (instead of copying files
-	byte-by-byte) we can avoid unnecessary data duplication.  If hard links
-	are not supported for the source or destination paths specified, then
-	a standard byte-by-byte copy is used.  (possible values: ``true`` and
-	``false``; default value: ``true``)
+    When the DataSink is used to produce an orginized output file outside
+    of nipypes internal cache structure, a file system hard link will be
+    attempted first. A hard link allow multiple file paths to point to the
+    same physical storage location on disk if the conditions allow. By
+    refering to the same physical file on disk (instead of copying files
+    byte-by-byte) we can avoid unnecessary data duplication.  If hard links
+    are not supported for the source or destination paths specified, then
+    a standard byte-by-byte copy is used.  (possible values: ``true`` and
+    ``false``; default value: ``true``)
 
 *use_relative_paths*
-	Should the paths stored in results (and used to look for inputs)
-	be relative or absolute. Relative paths allow moving the whole
-	working directory around but may cause problems with
-	symlinks. (possible values: ``true`` and ``false``; default
-	value: ``false``)
+    Should the paths stored in results (and used to look for inputs)
+    be relative or absolute. Relative paths allow moving the whole
+    working directory around but may cause problems with
+    symlinks. (possible values: ``true`` and ``false``; default
+    value: ``false``)
 
 *local_hash_check*
     Perform the hash check on the job submission machine. This option minimizes
@@ -115,10 +122,10 @@ Execution
     done after a job finish is detected. (float in seconds; default value: 5)
 
 *remove_node_directories (EXPERIMENTAL)*
-	Removes directories whose outputs have already been used
-	up. Doesn't work with IdentiInterface or any node that patches
-	data through (without copying) (possible values: ``true`` and
-	``false``; default value: ``false``)
+    Removes directories whose outputs have already been used
+    up. Doesn't work with IdentiInterface or any node that patches
+    data through (without copying) (possible values: ``true`` and
+    ``false``; default value: ``false``)
 
 *stop_on_unknown_version*
     If this is set to True, an underlying interface will raise an error, when no
@@ -145,19 +152,47 @@ Execution
     crashfiles allow interactive debugging and rerunning of nodes, while text
     crashfiles allow portability across machines and shorter load time.
     (possible values: ``pklz`` and ``txt``; default value: ``pklz``)
-    
+
+
+Resource Monitor
+~~~~~~~~~~~~~~~~
+
+*enabled*
+    Enables monitoring the resources occupation (possible values: ``true`` and
+    ``false``; default value: ``false``). All the following options will be
+    dismissed if the resource monitor is not enabled.
+
+*sample_frequency*
+    Sampling period (in seconds) between measurements of resources (memory, cpus)
+    being used by an interface (default value: ``1``)
+
+*summary_file*
+    Indicates where the summary file collecting all profiling information from the
+    resource monitor should be stored after execution of a workflow.
+    The ``summary_file`` does not apply to interfaces run independently.
+    (unset by default, in which case the summary file will be written out to
+    ``<base_dir>/resource_monitor.json`` of the top-level workflow).
+
+*summary_append*
+    Append to an existing summary file (only applies to workflows).
+    (default value: ``true``, possible values: ``true`` or ``false``).
+
 Example
 ~~~~~~~
 
 ::
 
-	[logging]
-	workflow_level = DEBUG
+    [logging]
+    workflow_level = DEBUG
 
-	[execution]
-	stop_on_first_crash = true
-	hash_method = timestamp
-	display_variable = :1
+    [execution]
+    stop_on_first_crash = true
+    hash_method = timestamp
+    display_variable = :1
+
+    [monitoring]
+    enabled = false
+
 
 Workflow.config property has a form of a nested dictionary reflecting the
 structure of the .cfg file.

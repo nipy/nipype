@@ -43,26 +43,31 @@ def test_ad_get_affine_matrix():
     # test rotation
     params = np.array([0, 0, 0, np.pi / 2, np.pi / 2, np.pi / 2])
     matrix = ra._get_affine_matrix(params, 'SPM')
-    out = np.array([0, 0, 1, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1]).reshape((4, 4))
+    out = np.array([0, 0, 1, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1]).reshape(
+        (4, 4))
     npt.assert_almost_equal(matrix, out)
     # test scaling
     params = np.array([0, 0, 0, 0, 0, 0, 1, 2, 3])
     matrix = ra._get_affine_matrix(params, 'SPM')
-    out = np.array([1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 3, 0, 0, 0, 0, 1]).reshape((4, 4))
+    out = np.array([1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 3, 0, 0, 0, 0, 1]).reshape(
+        (4, 4))
     npt.assert_equal(matrix, out)
     # test shear
     params = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 3])
     matrix = ra._get_affine_matrix(params, 'SPM')
-    out = np.array([1, 1, 2, 0, 0, 1, 3, 0, 0, 0, 1, 0, 0, 0, 0, 1]).reshape((4, 4))
+    out = np.array([1, 1, 2, 0, 0, 1, 3, 0, 0, 0, 1, 0, 0, 0, 0, 1]).reshape(
+        (4, 4))
     npt.assert_equal(matrix, out)
 
 
 def test_ad_get_norm():
-    params = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, np.pi / 4, np.pi / 4,
-                       np.pi / 4, 0, 0, 0, -np.pi / 4,
-                       -np.pi / 4, -np.pi / 4]).reshape((3, 6))
+    params = np.array([
+        0, 0, 0, 0, 0, 0, 0, 0, 0, np.pi / 4, np.pi / 4, np.pi / 4, 0, 0, 0,
+        -np.pi / 4, -np.pi / 4, -np.pi / 4
+    ]).reshape((3, 6))
     norm, _ = ra._calc_norm(params, False, 'SPM')
-    npt.assert_almost_equal(norm, np.array([18.86436316, 37.74610158, 31.29780829]))
+    npt.assert_almost_equal(norm,
+                            np.array([18.86436316, 37.74610158, 31.29780829]))
     norm, _ = ra._calc_norm(params, True, 'SPM')
     npt.assert_almost_equal(norm, np.array([0., 143.72192614, 173.92527131]))
 
@@ -74,10 +79,11 @@ def test_sc_init():
 
 def test_sc_populate_inputs():
     sc = ra.StimulusCorrelation()
-    inputs = Bunch(realignment_parameters=None,
-                   intensity_values=None,
-                   spm_mat_file=None,
-                   concatenated_design=None)
+    inputs = Bunch(
+        realignment_parameters=None,
+        intensity_values=None,
+        spm_mat_file=None,
+        concatenated_design=None)
     assert set(sc.inputs.__dict__.keys()) == set(inputs.__dict__.keys())
 
 

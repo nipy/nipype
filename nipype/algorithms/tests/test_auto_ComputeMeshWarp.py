@@ -4,33 +4,29 @@ from ..mesh import ComputeMeshWarp
 
 
 def test_ComputeMeshWarp_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    metric=dict(usedefault=True,
-    ),
-    out_file=dict(usedefault=True,
-    ),
-    out_warp=dict(usedefault=True,
-    ),
-    surface1=dict(mandatory=True,
-    ),
-    surface2=dict(mandatory=True,
-    ),
-    weighting=dict(usedefault=True,
-    ),
+    input_map = dict(
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        metric=dict(usedefault=True, ),
+        out_file=dict(usedefault=True, ),
+        out_warp=dict(usedefault=True, ),
+        surface1=dict(mandatory=True, ),
+        surface2=dict(mandatory=True, ),
+        weighting=dict(usedefault=True, ),
     )
     inputs = ComputeMeshWarp.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_ComputeMeshWarp_outputs():
-    output_map = dict(distance=dict(),
-    out_file=dict(),
-    out_warp=dict(),
+    output_map = dict(
+        distance=dict(),
+        out_file=dict(),
+        out_warp=dict(),
     )
     outputs = ComputeMeshWarp.output_spec()
 

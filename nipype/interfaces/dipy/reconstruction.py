@@ -3,7 +3,8 @@
 Interfaces to the reconstruction algorithms in dipy
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from future import standard_library
 standard_library.install_aliases()
 from builtins import str, open
@@ -28,20 +29,20 @@ class RESTOREInputSpec(DipyBaseInterfaceInputSpec):
 
 class RESTOREOutputSpec(TraitedSpec):
     fa = File(desc='output fractional anisotropy (FA) map computed from '
-                   'the fitted DTI')
+              'the fitted DTI')
     md = File(desc='output mean diffusivity (MD) map computed from the '
-                   'fitted DTI')
+              'fitted DTI')
     rd = File(desc='output radial diffusivity (RD) map computed from '
-                   'the fitted DTI')
+              'the fitted DTI')
     mode = File(desc=('output mode (MO) map computed from the fitted DTI'))
-    trace = File(desc=('output the tensor trace map computed from the '
-                       'fitted DTI'))
+    trace = File(
+        desc=('output the tensor trace map computed from the '
+              'fitted DTI'))
     evals = File(desc=('output the eigenvalues of the fitted DTI'))
     evecs = File(desc=('output the eigenvectors of the fitted DTI'))
 
 
 class RESTORE(DipyDiffusionInterface):
-
     """
     Uses RESTORE [Chang2005]_ to perform DTI fitting with outlier detection.
     The interface uses :py:mod:`dipy`, as explained in `dipy's documentation`_.
@@ -74,8 +75,8 @@ class RESTORE(DipyDiffusionInterface):
         import gc
 
         img = nb.load(self.inputs.in_file)
-        hdr = img.get_header().copy()
-        affine = img.get_affine()
+        hdr = img.header.copy()
+        affine = img.affine
         data = img.get_data()
         gtab = self._get_gradient_table()
 
@@ -101,8 +102,8 @@ class RESTORE(DipyDiffusionInterface):
         dsample = data.reshape(-1, data.shape[-1])
 
         if try_b0 and (nb0 > 1):
-            noise_data = dsample.take(np.where(gtab.b0s_mask),
-                                      axis=-1)[noise_msk == 0, ...]
+            noise_data = dsample.take(
+                np.where(gtab.b0s_mask), axis=-1)[noise_msk == 0, ...]
             n = nb0
         else:
             nodiff = np.where(~gtab.b0s_mask)
@@ -114,8 +115,8 @@ class RESTORE(DipyDiffusionInterface):
         # Estimate sigma required by RESTORE
         mean_std = np.median(noise_data.std(-1))
         try:
-            bias = (1. - np.sqrt(2. / (n - 1)) *
-                    (gamma(n / 2.) / gamma((n - 1) / 2.)))
+            bias = (1. - np.sqrt(2. / (n - 1)) * (gamma(n / 2.) / gamma(
+                (n - 1) / 2.)))
         except:
             bias = .0
             pass
@@ -123,13 +124,12 @@ class RESTORE(DipyDiffusionInterface):
         sigma = mean_std * (1 + bias)
 
         if sigma == 0:
-            IFLOGGER.warn(
-                ('Noise std is 0.0, looks like data was masked and noise'
-                 ' cannot be estimated correctly. Using default tensor '
-                 'model instead of RESTORE.'))
+            IFLOGGER.warn('Noise std is 0.0, looks like data was masked and '
+                          'noise cannot be estimated correctly. Using default '
+                          'tensor model instead of RESTORE.')
             dti = TensorModel(gtab)
         else:
-            IFLOGGER.info(('Performing RESTORE with noise std=%.4f.') % sigma)
+            IFLOGGER.info('Performing RESTORE with noise std=%.4f.', sigma)
             dti = TensorModel(gtab, fit_method='RESTORE', sigma=sigma)
 
         try:
@@ -144,8 +144,8 @@ class RESTORE(DipyDiffusionInterface):
         for k in self._outputs().get():
             scalar = getattr(fit_restore, k)
             hdr.set_data_shape(np.shape(scalar))
-            nb.Nifti1Image(scalar.astype(np.float32),
-                           affine, hdr).to_filename(self._gen_filename(k))
+            nb.Nifti1Image(scalar.astype(np.float32), affine, hdr).to_filename(
+                self._gen_filename(k))
 
         return runtime
 
@@ -161,8 +161,7 @@ class EstimateResponseSHInputSpec(DipyBaseInterfaceInputSpec):
         exists=True, mandatory=True, desc=('input eigenvalues file'))
     in_mask = File(
         exists=True, desc=('input mask in which we find single fibers'))
-    fa_thresh = traits.Float(
-        0.7, usedefault=True, desc=('FA threshold'))
+    fa_thresh = traits.Float(0.7, usedefault=True, desc=('FA threshold'))
     roi_radius = traits.Int(
         10, usedefault=True, desc=('ROI radius to be used in auto_response'))
     auto = traits.Bool(
@@ -180,7 +179,6 @@ class EstimateResponseSHOutputSpec(TraitedSpec):
 
 
 class EstimateResponseSH(DipyDiffusionInterface):
-
     """
     Uses dipy to compute the single fiber response to be used in spherical
     deconvolution methods, in a similar way to MRTrix's command
@@ -210,14 +208,14 @@ class EstimateResponseSH(DipyDiffusionInterface):
 
         img = nb.load(self.inputs.in_file)
         imref = nb.four_to_three(img)[0]
-        affine = img.get_affine()
+        affine = img.affine
 
         if isdefined(self.inputs.in_mask):
             msk = nb.load(self.inputs.in_mask).get_data()
             msk[msk > 0] = 1
             msk[msk < 0] = 0
         else:
-            msk = np.ones(imref.get_shape())
+            msk = np.ones(imref.shape)
 
         data = img.get_data().astype(np.float32)
         gtab = self._get_gradient_table()
@@ -229,20 +227,28 @@ class EstimateResponseSH(DipyDiffusionInterface):
         S0 = np.mean(S0s)
 
         if self.inputs.auto:
-            response, ratio = auto_response(gtab, data,
-                                            roi_radius=self.inputs.roi_radius,
-                                            fa_thr=self.inputs.fa_thresh)
+            response, ratio = auto_response(
+                gtab,
+                data,
+                roi_radius=self.inputs.roi_radius,
+                fa_thr=self.inputs.fa_thresh)
             response = response[0].tolist() + [S0]
         elif self.inputs.recursive:
             MD = np.nan_to_num(mean_diffusivity(evals)) * msk
-            indices = np.logical_or(
-                FA >= 0.4, (np.logical_and(FA >= 0.15, MD >= 0.0011)))
+            indices = np.logical_or(FA >= 0.4,
+                                    (np.logical_and(FA >= 0.15, MD >= 0.0011)))
             data = nb.load(self.inputs.in_file).get_data()
-            response = recursive_response(gtab, data, mask=indices, sh_order=8,
-                                          peak_thr=0.01, init_fa=0.08,
-                                          init_trace=0.0021, iter=8,
-                                          convergence=0.001,
-                                          parallel=True)
+            response = recursive_response(
+                gtab,
+                data,
+                mask=indices,
+                sh_order=8,
+                peak_thr=0.01,
+                init_fa=0.08,
+                init_trace=0.0021,
+                iter=8,
+                convergence=0.001,
+                parallel=True)
             ratio = abs(response[1] / response[0])
         else:
             lambdas = evals[indices]
@@ -252,22 +258,21 @@ class EstimateResponseSH(DipyDiffusionInterface):
             ratio = abs(response[1] / response[0])
 
         if ratio > 0.25:
-            IFLOGGER.warn(('Estimated response is not prolate enough. '
-                           'Ratio=%0.3f.') % ratio)
+            IFLOGGER.warn('Estimated response is not prolate enough. '
+                          'Ratio=%0.3f.', ratio)
         elif ratio < 1.e-5 or np.any(np.isnan(response)):
             response = np.array([1.8e-3, 3.6e-4, 3.6e-4, S0])
             IFLOGGER.warn(
-                ('Estimated response is not valid, using a default one'))
+                'Estimated response is not valid, using a default one')
         else:
-            IFLOGGER.info(('Estimated response: %s') % str(response[:3]))
+            IFLOGGER.info('Estimated response: %s', str(response[:3]))
 
         np.savetxt(op.abspath(self.inputs.response), response)
 
         wm_mask = np.zeros_like(FA)
         wm_mask[indices] = 1
-        nb.Nifti1Image(
-            wm_mask.astype(np.uint8), affine,
-            None).to_filename(op.abspath(self.inputs.out_mask))
+        nb.Nifti1Image(wm_mask.astype(np.uint8), affine, None).to_filename(
+            op.abspath(self.inputs.out_mask))
         return runtime
 
     def _list_outputs(self):
@@ -280,10 +285,9 @@ class EstimateResponseSH(DipyDiffusionInterface):
 class CSDInputSpec(DipyBaseInterfaceInputSpec):
     in_mask = File(exists=True, desc=('input mask in which compute tensors'))
     response = File(exists=True, desc=('single fiber estimated response'))
-    sh_order = traits.Int(8, usedefault=True,
-                          desc=('maximal shperical harmonics order'))
-    save_fods = traits.Bool(True, usedefault=True,
-                            desc=('save fODFs in file'))
+    sh_order = traits.Int(
+        8, usedefault=True, desc=('maximal shperical harmonics order'))
+    save_fods = traits.Bool(True, usedefault=True, desc=('save fODFs in file'))
     out_fods = File(desc=('fODFs output file name'))
 
 
@@ -293,7 +297,6 @@ class CSDOutputSpec(TraitedSpec):
 
 
 class CSD(DipyDiffusionInterface):
-
     """
     Uses CSD [Tournier2007]_ to generate the fODF of DWIs. The interface uses
     :py:mod:`dipy`, as explained in `dipy's CSD example
@@ -326,15 +329,13 @@ class CSD(DipyDiffusionInterface):
 
         img = nb.load(self.inputs.in_file)
         imref = nb.four_to_three(img)[0]
-        affine = img.get_affine()
 
         if isdefined(self.inputs.in_mask):
             msk = nb.load(self.inputs.in_mask).get_data()
         else:
-            msk = np.ones(imref.get_shape())
+            msk = np.ones(imref.shape)
 
         data = img.get_data().astype(np.float32)
-        hdr = imref.get_header().copy()
 
         gtab = self._get_gradient_table()
         resp_file = np.loadtxt(self.inputs.response)
@@ -343,8 +344,8 @@ class CSD(DipyDiffusionInterface):
         ratio = response[0][1] / response[0][0]
 
         if abs(ratio - 0.2) > 0.1:
-            IFLOGGER.warn(('Estimated response is not prolate enough. '
-                           'Ratio=%0.3f.') % ratio)
+            IFLOGGER.warn('Estimated response is not prolate enough. '
+                          'Ratio=%0.3f.', ratio)
 
         csd_model = ConstrainedSphericalDeconvModel(
             gtab, response, sh_order=self.inputs.sh_order)
@@ -359,7 +360,7 @@ class CSD(DipyDiffusionInterface):
         if self.inputs.save_fods:
             sphere = get_sphere('symmetric724')
             fods = csd_fit.odf(sphere)
-            nb.Nifti1Image(fods.astype(np.float32), img.get_affine(),
+            nb.Nifti1Image(fods.astype(np.float32), img.affine,
                            None).to_filename(self._gen_filename('fods'))
 
         return runtime

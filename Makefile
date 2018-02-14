@@ -5,7 +5,7 @@
 PYTHON ?= python
 NOSETESTS=`which nosetests`
 
-.PHONY: zipdoc sdist egg upload_to_pypi trailing-spaces clean-pyc clean-so clean-build clean-ctags clean in inplace test-code test-coverage test html specs check-before-commit check
+.PHONY: zipdoc sdist egg upload_to_pypi trailing-spaces clean-pyc clean-so clean-build clean-ctags clean in inplace test-code test-coverage test html specs check-before-commit check gen-base-dockerfile gen-main-dockerfile gen-dockerfiles
 
 zipdoc: html
 	zip documentation.zip doc/_build/html
@@ -61,7 +61,7 @@ test-code: in
 
 test-coverage: clean-tests in
 	py.test --doctest-modules --cov-config .coveragerc --cov=nipype nipype
-	
+
 test: tests # just another name
 tests: clean test-code
 
@@ -79,3 +79,13 @@ check-before-commit: specs trailing-spaces html test
 	@echo "built docs"
 	@echo "ran test"
 	@echo "generated spec tests"
+
+gen-base-dockerfile:
+	@echo "Generating base Dockerfile"
+	bash docker/generate_dockerfiles.sh -b
+
+gen-main-dockerfile:
+	@echo "Generating main Dockerfile"
+	bash docker/generate_dockerfiles.sh -m
+
+gen-dockerfiles: gen-base-dockerfile gen-main-dockerfile
