@@ -127,8 +127,8 @@ class FieldMap(SPMCommand):
     --------
     >>> from nipype.interfaces.spm import FieldMap
     >>> fm = FieldMap()
-    >>> fm.inputs.phase = 'phasediff.nii'
-    >>> fm.inputs.magnitude = 'magnitude1.nii'
+    >>> fm.inputs.phase = 'phase.nii'
+    >>> fm.inputs.magnitude = 'magnitude.nii'
     >>> fm.inputs.et = [5.19, 7.65]
     >>> fm.inputs.blipdir = 1
     >>> fm.inputs.tert = 15.6
