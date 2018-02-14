@@ -131,13 +131,20 @@ class BuildConnectome(MRTrix3Base):
         return outputs
 
 
-class LabelConfigInputSpec(CommandLineInputSpec):
+class LabelConvertInputSpec(CommandLineInputSpec):
     in_file = File(
         exists=True,
         argstr='%s',
         mandatory=True,
-        position=-3,
+        position=-4,
         desc='input anatomical image')
+    in_lut = File(
+        exists=True,
+        argstr='%s',
+        mandatory=True,
+        position=-3,
+        desc='get information from '
+        'a basic lookup table consisting of index / name pairs')
     in_config = File(
         exists=True,
         argstr='%s',
@@ -150,25 +157,6 @@ class LabelConfigInputSpec(CommandLineInputSpec):
         position=-1,
         usedefault=True,
         desc='output file after processing')
-
-    lut_basic = File(
-        argstr='-lut_basic %s',
-        desc='get information from '
-        'a basic lookup table consisting of index / name pairs')
-    lut_fs = File(
-        argstr='-lut_freesurfer %s',
-        desc='get information from '
-        'a FreeSurfer lookup table(typically "FreeSurferColorLUT'
-        '.txt")')
-    lut_aal = File(
-        argstr='-lut_aal %s',
-        desc='get information from the AAL '
-        'lookup table (typically "ROI_MNI_V4.txt")')
-    lut_itksnap = File(
-        argstr='-lut_itksnap %s',
-        desc='get information from an'
-        ' ITK - SNAP lookup table(this includes the IIT atlas '
-        'file "LUT_GM.txt")')
     spine = File(
         argstr='-spine %s',
         desc='provide a manually-defined '
@@ -182,11 +170,11 @@ class LabelConfigInputSpec(CommandLineInputSpec):
         nohash=True)
 
 
-class LabelConfigOutputSpec(TraitedSpec):
+class LabelConvertOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='the output response file')
 
 
-class LabelConfig(MRTrix3Base):
+class LabelConvert(MRTrix3Base):
     """
     Re-configure parcellation to be incrementally defined.
 
@@ -194,17 +182,17 @@ class LabelConfig(MRTrix3Base):
     -------
 
     >>> import nipype.interfaces.mrtrix3 as mrt
-    >>> labels = mrt.LabelConfig()
+    >>> labels = mrt.LabelConvert()
     >>> labels.inputs.in_file = 'aparc+aseg.nii'
     >>> labels.inputs.in_config = 'mrtrix3_labelconfig.txt'
     >>> labels.cmdline                               # doctest: +ELLIPSIS
-    'labelconfig aparc+aseg.nii mrtrix3_labelconfig.txt parcellation.mif'
+    'labelconvert aparc+aseg.nii mrtrix3_labelconfig.txt parcellation.mif'
     >>> labels.run()                                 # doctest: +SKIP
     """
 
-    _cmd = 'labelconfig'
-    input_spec = LabelConfigInputSpec
-    output_spec = LabelConfigOutputSpec
+    _cmd = 'labelconvert'
+    input_spec = LabelConvertInputSpec
+    output_spec = LabelConvertOutputSpec
 
     def _parse_inputs(self, skip=None):
         if skip is None:
@@ -222,7 +210,7 @@ class LabelConfig(MRTrix3Base):
                 path, 'src/dwi/tractography/connectomics/'
                 'example_configs/fs_default.txt')
 
-        return super(LabelConfig, self)._parse_inputs(skip=skip)
+        return super(LabelConvert, self)._parse_inputs(skip=skip)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
