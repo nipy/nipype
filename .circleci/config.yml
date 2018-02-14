@@ -7,6 +7,7 @@ _store_artifacts_kwds: &store_artifacts_kwds
 _test_environment: &test_environment
   WORKDIR: /home/circleci/work
   DOCKER_IMAGE: "nipype/nipype"
+  CIRCLE_PR_NUMBER: "${CIRCLE_PR_NUMBER:-${CIRCLE_PULL_REQUEST##*/}}"
 
 _generate_dockerfiles: &generate_dockerfiles
   name: Generate Dockerfiles
