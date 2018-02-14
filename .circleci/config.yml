@@ -7,7 +7,13 @@ _store_artifacts_kwds: &store_artifacts_kwds
 _test_environment: &test_environment
   WORKDIR: /home/circleci/work
   DOCKER_IMAGE: "nipype/nipype"
-  CIRCLE_PR_NUMBER: "${CIRCLE_PR_NUMBER:-${CIRCLE_PULL_REQUEST##*/}}"
+
+_set_pr_number: &set_pr_number
+  name: Set PR number
+  command: |
+      echo 'export CIRCLE_PR_NUMBER="${CIRCLE_PR_NUMBER:-${CIRCLE_PULL_REQUEST##*/}}"' >> $BASH_ENV
+      source $BASH_ENV
+      echo $CIRCLE_PR_NUMBER
 
 _generate_dockerfiles: &generate_dockerfiles
   name: Generate Dockerfiles
@@ -155,6 +161,7 @@ jobs:
           path: /home/circleci/nipype
       - attach_workspace:
           at: /tmp
+      - run: *set_pr_number
       - run: *generate_dockerfiles
       - run: *modify_nipype_version
       - run: *get_base_image
@@ -185,6 +192,7 @@ jobs:
           path: /home/circleci/nipype
       - attach_workspace:
           at: /tmp
+      - run: *set_pr_number
       - run: *generate_dockerfiles
       - run: *modify_nipype_version
       - run: *get_base_image
@@ -223,6 +231,7 @@ jobs:
           path: /home/circleci/nipype
       - attach_workspace:
           at: /tmp
+      - run: *set_pr_number
       - run: *generate_dockerfiles
       - run: *modify_nipype_version
       - run: *get_base_image
@@ -251,6 +260,7 @@ jobs:
           path: /home/circleci/nipype
       - attach_workspace:
           at: /tmp
+      - run: *set_pr_number
       - run: *generate_dockerfiles
       - run: *modify_nipype_version
       - run: *get_base_image
