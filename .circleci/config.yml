@@ -96,12 +96,17 @@ _get_codecov: &_get_codecov
   command: |
     pip install --no-cache-dir codecov
 
-_run_codecov: &_run_codecov
-  name: Run codecov
+_run_codecov_coverage: &_run_codecov_coverage
+  name: Run codecov (coverage)
   environment: *test_environment
   command: |
-    codecov --file "$WORKDIR/tests/coverage*.xml" --root "$HOME/nipype" --flags unittests -e "$CIRCLE_JOB"
-    codecov --file "$WORKDIR/tests/smoketest*.xml" --root "$HOME/nipype" --flags smoketests -e "$CIRCLE_JOB"
+    codecov --file $WORKDIR/tests/coverage*.xml --root "$HOME/nipype" --flags unittests -e CIRCLE_JOB
+
+_run_codecov_smoke: &_run_codecov_smoke
+  name: Run codecov (smoke tests)
+  environment: *test_environment
+  command: |
+    codecov --file $WORKDIR/tests/smoketest*.xml --root "$HOME/nipype" --flags smoketests -e CIRCLE_JOB
 
 
 version: 2
@@ -167,7 +172,7 @@ jobs:
           no_output_timeout: 30m
           environment: *test_environment
           command: bash -ux /home/circleci/nipype/.circleci/test_py2_pytest.sh
-      - run: *_run_codecov
+      - run: *_run_codecov_coverage
       - store_artifacts: *store_artifacts_kwds
 
   test_py3_fmri_fsl_spm:
@@ -205,7 +210,7 @@ jobs:
           no_output_timeout: 40m
           environment: *test_environment
           command: bash -ux /home/circleci/nipype/.circleci/test_py3_fmri_spm_linear_4d.sh
-      - run: *_run_codecov
+      - run: *_run_codecov_smoke
       - store_artifacts: *store_artifacts_kwds
 
   test_py3_fmri_spm_dartel_multiproc:
@@ -233,7 +238,7 @@ jobs:
           no_output_timeout: 30m
           environment: *test_environment
           command: bash -ux /home/circleci/nipype/.circleci/test_py3_fmri_spm_dartel_multiproc_l2.sh
-      - run: *_run_codecov
+      - run: *_run_codecov_smoke
       - store_artifacts: *store_artifacts_kwds
 
   test_fmri_spm_nested_multiproc:
@@ -262,7 +267,7 @@ jobs:
           no_output_timeout: 30m
           environment: *test_environment
           command: bash -ux /home/circleci/nipype/.circleci/test_py2_fmri_spm_nested_multiproc_l2.sh
-      - run: *_run_codecov
+      - run: *_run_codecov_smoke
       - store_artifacts: *store_artifacts_kwds
       - run:
           name: Build docs (py36)
