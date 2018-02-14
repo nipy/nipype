@@ -277,18 +277,20 @@ jobs:
       - store_artifacts:
           path: /home/circleci/work/docs
       - run:
-          name: Save Docker images to workspace
+          name: Save Docker images to workspace if on master
           no_output_timeout: 60m
           command: |
+            if [ "$CIRCLE_BRANCH" = "master" -a -z "$CIRCLE_PULL_REQUEST" ]; then
               docker save nipype/nipype:base \
                           nipype/nipype:latest \
                           nipype/nipype:py27 \
                           nipype/nipype:py36 | gzip -1 > /tmp/docker/nipype-base-latest-py36-py27.tar.gz \
               && du -h /tmp/docker/nipype-base-latest-py36-py27.tar.gz
+            fi
       - persist_to_workspace:
           root: /tmp
           paths:
-            - docker/*
+            - docker
 
   deploy:
     docker:
