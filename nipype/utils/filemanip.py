@@ -295,8 +295,23 @@ def _generate_cifs_table():
         (line.split()[2:5:2] for line in output.splitlines()),
         key=lambda x: len(x[0]),
         reverse=True)
-    cifs_paths = [path for path, fstype in mount_info if fstype == 'cifs']
 
+    # find which mount points are CIFS
+    # init to empty list
+    cifs_paths = []
+        
+    try:    
+        for  path_and_fstype in mount_info:
+            # need to check for tables that have only path and no fstype
+            if len(path_and_fstype) == 2:
+                # if this entry is cifs, add it to list
+                if path_and_fstype[1] == 'cifs':
+                    cifs_paths.append(path_and_fstype[0])           
+            else:
+                fmlogger.debug('mount file system types not described by fstype')
+    except:
+        fmlogger.debug('mount file system type check for CIFS error')
+        return []
     return [
         mount for mount in mount_info
         if any(mount[0].startswith(path) for path in cifs_paths)
