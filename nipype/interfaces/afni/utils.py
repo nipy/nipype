@@ -1815,7 +1815,8 @@ class OneDToolPy(AFNIPythonCommand):
                 os.getcwd(), self.inputs.show_cormat_warnings)
         if isdefined(self.inputs.censor_motion):
             outputs['out_file'] = os.path.join(os.getcwd(),
-                                               self.inputs.censor_motion[1])
+                                               self.inputs.censor_motion[1] +
+                                               '_censor.1D')
         return outputs
 
 

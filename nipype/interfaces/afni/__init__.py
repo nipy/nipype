@@ -13,7 +13,7 @@ from .preprocess import (
     BlurInMask, BlurToFWHM, ClipLevel, DegreeCentrality, Despike, Detrend, ECM,
     Fim, Fourier, Hist, LFCD, Maskave, Means, OutlierCount, QualityIndex,
     ROIStats, Retroicor, Seg, SkullStrip, TCorr1D, TCorrMap, TCorrelate, TNorm,
-    TShift, Volreg, Warp, QwarpPlusMinus, Qwarp)
+    TProject, TShift, Volreg, Warp, QwarpPlusMinus, Qwarp)
 from .svm import (SVMTest, SVMTrain)
 from .utils import (
     ABoverlap, AFNItoNIFTI, Autobox, Axialize, BrickStat, Bucket, Calc, Cat,
