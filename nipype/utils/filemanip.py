@@ -275,6 +275,34 @@ def hash_timestamp(afile):
     return md5hex
 
 
+def _parse_mount_table(exit_code, output):
+    """Parses the output of ``mount`` to produce (path, fs_type) pairs
+
+    Separated from _generate_cifs_table to enable testing logic with real
+    outputs
+    """
+    # Not POSIX
+    if exit_code != 0:
+        return []
+
+    # Linux mount example:  sysfs on /sys type sysfs (rw,nosuid,nodev,noexec)
+    #                          <PATH>^^^^      ^^^^^<FSTYPE>
+    # OSX mount example:    /dev/disk2 on / (hfs, local, journaled)
+    #                               <PATH>^  ^^^<FSTYPE>
+    pattern = re.compile(r'.*? on (/.*?) (?:type |\()([^\s,]+)(?:, |\)| )')
+
+    # (path, fstype) tuples, sorted by path length (longest first)
+    mount_info = sorted((pattern.match(l).groups() for l in output.splitlines()),
+                        key=lambda x: len(x[0]), reverse=True)
+    cifs_paths = [path for path, fstype in mount_info
+                  if fstype.lower() == 'cifs']
+
+    return [
+        mount for mount in mount_info
+        if any(mount[0].startswith(path) for path in cifs_paths)
+    ]
+
+
 def _generate_cifs_table():
     """Construct a reverse-length-ordered list of mount points that
     fall under a CIFS mount.
@@ -286,36 +314,7 @@ def _generate_cifs_table():
     empty list.
     """
     exit_code, output = sp.getstatusoutput("mount")
-    # Not POSIX
-    if exit_code != 0:
-        return []
-
-    # (path, fstype) tuples, sorted by path length (longest first)
-    mount_info = sorted(
-        (line.split()[2:5:2] for line in output.splitlines()),
-        key=lambda x: len(x[0]),
-        reverse=True)
-
-    # find which mount points are CIFS
-    # init to empty list
-    cifs_paths = []
-        
-    try:    
-        for  path_and_fstype in mount_info:
-            # need to check for tables that have only path and no fstype
-            if len(path_and_fstype) == 2:
-                # if this entry is cifs, add it to list
-                if path_and_fstype[1] == 'cifs':
-                    cifs_paths.append(path_and_fstype[0])           
-            else:
-                fmlogger.debug('mount file system types not described by fstype')
-    except:
-        fmlogger.debug('mount file system type check for CIFS error')
-        return []
-    return [
-        mount for mount in mount_info
-        if any(mount[0].startswith(path) for path in cifs_paths)
-    ]
+    return _parse_mount_table(exit_code, output)
 
 
 _cifs_table = _generate_cifs_table()
