@@ -292,7 +292,8 @@ def _parse_mount_table(exit_code, output):
     pattern = re.compile(r'.*? on (/.*?) (?:type |\()([^\s,]+)(?:, |\)| )')
 
     # (path, fstype) tuples, sorted by path length (longest first)
-    mount_info = sorted((pattern.match(l).groups() for l in output.splitlines()),
+    mount_info = sorted((pattern.match(l).groups()
+                         for l in output.splitlines()),
                         key=lambda x: len(x[0]), reverse=True)
     cifs_paths = [path for path, fstype in mount_info
                   if fstype.lower() == 'cifs']
@@ -777,8 +778,8 @@ def emptydirs(path, noexist_ok=False):
         elcont = os.listdir(path)
         if ex.errno == errno.ENOTEMPTY and not elcont:
             fmlogger.warning(
-                'An exception was raised trying to remove old %s, but the path '
-                'seems empty. Is it an NFS mount?. Passing the exception.',
+                'An exception was raised trying to remove old %s, but the path'
+                ' seems empty. Is it an NFS mount?. Passing the exception.',
                 path)
         elif ex.errno == errno.ENOTEMPTY and elcont:
             fmlogger.debug('Folder %s contents (%d items).', path, len(elcont))

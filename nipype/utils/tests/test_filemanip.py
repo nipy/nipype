@@ -16,8 +16,6 @@ from ...utils.filemanip import (
     copyfiles, filename_to_list, list_to_filename, check_depends,
     split_filename, get_related_files)
 
-import numpy as np
-
 
 def _ignore_atime(stat):
     return stat[:7] + stat[8:]
@@ -124,7 +122,7 @@ def test_copyfiles(_temp_analyze_files, _temp_analyze_files_prime):
     pth, fname = os.path.split(orig_img2)
     new_img2 = os.path.join(pth, 'secondfile.img')
     new_hdr2 = os.path.join(pth, 'secondfile.hdr')
-    newfiles = copyfiles([orig_img1, orig_img2], [new_img1, new_img2])
+    copyfiles([orig_img1, orig_img2], [new_img1, new_img2])
     assert os.path.exists(new_img1)
     assert os.path.exists(new_hdr1)
     assert os.path.exists(new_img2)
