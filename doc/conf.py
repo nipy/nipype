@@ -48,7 +48,7 @@ extensions = ['sphinx.ext.todo',
               'sphinx.ext.autodoc',
               'sphinx.ext.doctest',
               'sphinx.ext.autosummary',
-              'numpy_ext.numpydoc',
+              'numpydoc',
               'matplotlib.sphinxext.plot_directive',
               'matplotlib.sphinxext.only_directives',
               'nipype.sphinxext.plot_workflow',
@@ -73,7 +73,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'nipype'
-copyright = u'2009-17, Neuroimaging in Python team'
+copyright = u'2009-18, Neuroimaging in Python team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

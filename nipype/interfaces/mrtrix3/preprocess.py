@@ -27,7 +27,7 @@ class ResponseSDInputSpec(MRTrix3BaseInputSpec):
         'tournier',
         'tax',
         argstr='%s',
-        position=-6,
+        position=1,
         mandatory=True,
         desc='response estimation algorithm (multi-tissue)')
     in_file = File(
@@ -74,7 +74,7 @@ class ResponseSD(MRTrix3Base):
     >>> resp.inputs.algorithm = 'tournier'
     >>> resp.inputs.grad_fsl = ('bvecs', 'bvals')
     >>> resp.cmdline                               # doctest: +ELLIPSIS
-    'dwi2response -fslgrad bvecs bvals tournier dwi.mif wm.txt'
+    'dwi2response tournier -fslgrad bvecs bvals dwi.mif wm.txt'
     >>> resp.run()                                 # doctest: +SKIP
     """
 

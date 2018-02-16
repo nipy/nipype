@@ -156,7 +156,7 @@ if sys.version_info <= (3, 4):
 TESTS_REQUIRES = ['pytest-cov', 'codecov']
 
 EXTRA_REQUIRES = {
-    'doc': ['Sphinx>=1.4', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],
+    'doc': ['Sphinx>=1.4', 'numpydoc', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],
     'tests': TESTS_REQUIRES,
     'specs': ['yapf'],
     'nipy': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
