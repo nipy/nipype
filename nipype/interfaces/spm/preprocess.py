@@ -33,35 +33,35 @@ __docformat__ = 'restructuredtext'
 class FieldMapInputSpec(SPMCommandInputSpec):
     jobtype = traits.Enum('calculatevdm', 'applyvdm', usedefault=True,
         desc='one of: calculatevdm, applyvdm')
-    phase = File(mandatory=True, exists=True, copyfile=False,
+    phase_file = File(mandatory=True, exists=True, copyfile=False,
         field='subj.data.presubphasemag.phase',
         desc='presubstracted phase file')
-    magnitude = File(mandatory=True, exists=True, copyfile=False,
+    magnitude_file = File(mandatory=True, exists=True, copyfile=False,
         field='subj.data.presubphasemag.magnitude',
         desc='presubstracted magnitude file')
-    et = traits.Tuple(traits.Float, traits.Float, mandatory=True,
+    echo_times = traits.Tuple(traits.Float, traits.Float, mandatory=True,
         field='subj.defaults.defaultsval.et',
         desc='short and long echo times')
     maskbrain = traits.Bool(True, usedefault=True,
         field='subj.defaults.defaultsval.maskbrain',
         desc='masking or no masking of the brain')
-    blipdir = traits.Enum(1, -1, mandatory=True,
+    blip_direction = traits.Enum(1, -1, mandatory=True,
         field='subj.defaults.defaultsval.blipdir',
         desc='polarity of the phase-encode blips')
-    tert = traits.Float(mandatory=True,
+    total_readout_time = traits.Float(mandatory=True,
         field='subj.defaults.defaultsval.tert',
         desc='total EPI readout time')
     epifm = traits.Bool(False, usedefault=True,
         field='subj.defaults.defaultsval.epifm',
         desc='epi-based field map');
-    ajm = traits.Bool(False, usedefault=True,
+    jacobian_modulation = traits.Bool(False, usedefault=True,
         field='subj.defaults.defaultsval.ajm',
         desc='jacobian modulation');
     # Unwarping defaults parameters
     method = traits.Enum('Mark3D', 'Mark2D', 'Huttonish', usedefault=True,
         desc='One of: Mark3D, Mark2D, Huttonish',
         field='subj.defaults.defaultsval.uflags.method');
-    fwhm = traits.Range(low=0, value=10, usedefault=True,
+    unwarp_fwhm = traits.Range(low=0, value=10, usedefault=True,
         field='subj.defaults.defaultsval.uflags.fwhm',
         desc='gaussian smoothing kernel width');
     pad = traits.Range(low=0, value=0, usedefault=True,
@@ -74,7 +74,7 @@ class FieldMapInputSpec(SPMCommandInputSpec):
     template = File(copyfile=False, exists=True,
         field='subj.defaults.defaultsval.mflags.template',
         desc='template image for brain masking');
-    fwhm = traits.Range(low=0, value=5, usedefault=True,
+    mask_fwhm = traits.Range(low=0, value=5, usedefault=True,
         field='subj.defaults.defaultsval.mflags.fwhm',
         desc='gaussian smoothing kernel width');
     nerode = traits.Range(low=0, value=2, usedefault=True,
@@ -90,7 +90,7 @@ class FieldMapInputSpec(SPMCommandInputSpec):
         field='subj.defaults.defaultsval.mflags.reg',
         desc='regularization value used in the segmentation');
     # EPI unwarping for quality check
-    epi = File(copyfile=False, exists=True, mandatory=True,
+    epi_file = File(copyfile=False, exists=True, mandatory=True,
         field='subj.session.epi',
         desc='EPI to unwarp');
     matchvdm = traits.Bool(True, usedefault=True,
@@ -102,7 +102,7 @@ class FieldMapInputSpec(SPMCommandInputSpec):
     writeunwarped = traits.Bool(False, usedefault=True,
         field='subj.writeunwarped',
         desc='write unwarped EPI');
-    anat = File(copyfile=False, exists=True,
+    anat_file = File(copyfile=False, exists=True,
         field='subj.anat',
         desc='anatomical image for comparison');
     matchanat = traits.Bool(True, usedefault=True,
@@ -127,12 +127,12 @@ class FieldMap(SPMCommand):
     --------
     >>> from nipype.interfaces.spm import FieldMap
     >>> fm = FieldMap()
-    >>> fm.inputs.phase = 'phase.nii'
-    >>> fm.inputs.magnitude = 'magnitude.nii'
-    >>> fm.inputs.et = [5.19, 7.65]
-    >>> fm.inputs.blipdir = 1
-    >>> fm.inputs.tert = 15.6
-    >>> fm.inputs.epi = 'bold.nii'
+    >>> fm.inputs.phase_file = 'phase.nii'
+    >>> fm.inputs.magnitude_file = 'magnitude.nii'
+    >>> fm.inputs.echo_times = (5.19, 7.65)
+    >>> fm.inputs.blip_direction = 1
+    >>> fm.inputs.total_readout_time = 15.6
+    >>> fm.inputs.epi_file = 'bold.nii'
     >>> fm.run() # doctest: +SKIP
 
     """
@@ -145,7 +145,7 @@ class FieldMap(SPMCommand):
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
         """
-        if opt in ['phase', 'magnitude', 'anat', 'epi']:
+        if opt in ['phase_file', 'magnitude_file', 'anat_file', 'epi_file']:
             return scans_for_fname(filename_to_list(val))
 
         return super(FieldMap, self)._format_arg(opt, spec, val)
@@ -154,17 +154,13 @@ class FieldMap(SPMCommand):
         """validate spm fieldmap options if set to None ignore
         """
         einputs = super(FieldMap, self)._parse_inputs()
-        jobtype = self.inputs.jobtype
-        return [{'%s' % (jobtype): einputs[0]}]
+        return [{self.inputs.jobtype: einputs[0]}]
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         jobtype = self.inputs.jobtype
         if jobtype == "calculatevdm":
-            outputs['vdm'] = []
-            for phase in filename_to_list(self.inputs.phase):
-                outputs['vdm'].append(fname_presuffix(phase, prefix='vdm5_sc'))
-            outputs['vdm'] = list_to_filename(outputs['vdm'])
+            outputs['vdm'] = fname_presuffix(self.inputs.phase_file, prefix='vdm5_sc')
 
         return outputs
 
