@@ -26,3 +26,4 @@ coverage:
     - "nipype/external/*"
     - "tools/*"
     - "doc/*"
+    - "**/tests"
