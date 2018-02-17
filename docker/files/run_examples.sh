@@ -3,7 +3,7 @@ set -e
 set -x
 set -u
 
-WORKDIR=${WORK:-/work}
+WORKDIR=${WORKDIR:-/work}
 arr=$@
 tmp_var=$( IFS=$' '; echo "${arr[*]}" )
 example_id=${tmp_var//[^A-Za-z0-9_-]/_}
