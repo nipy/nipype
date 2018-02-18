@@ -1554,9 +1554,9 @@ class NwarpAdjust(AFNICommandBase):
 
     >>> from nipype.interfaces import afni
     >>> adjust = afni.NwarpAdjust()
-    >>> adjust.inputs.warps = [Fred_WARP+tlrc, Fred.Xaff12.1D, Fred.Xaff12.1D, Fred.Xaff12.1D, Fred.Xaff12.1D]
+    >>> adjust.inputs.warps = ['func2anat_InverseWarp.nii.gz', 'func2anat_InverseWarp.nii.gz', 'func2anat_InverseWarp.nii.gz', 'func2anat_InverseWarp.nii.gz', 'func2anat_InverseWarp.nii.gz']
     >>> adjust.cmdline
-    "NwarpAdjust -nwarp Fred_WARP+tlrc Fred.Xaff12.1D Fred.Xaff12.1D Fred.Xaff12.1D Fred.Xaff12.1D"
+    '3dNwarpAdjust -nwarp func2anat_InverseWarp.nii.gz func2anat_InverseWarp.nii.gz func2anat_InverseWarp.nii.gz func2anat_InverseWarp.nii.gz func2anat_InverseWarp.nii.gz'
     >>> res = adjust.run()  # doctest: +SKIP
 
     """
