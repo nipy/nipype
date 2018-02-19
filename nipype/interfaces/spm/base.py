@@ -186,7 +186,7 @@ class Info(PackageInfo):
             }
 
         use_mcr = use_mcr or 'FORCE_SPMMCR' in os.environ
-        matlab_cmd = ((use_mcr and os.getenv('SPMMCRCMD'))
+        matlab_cmd = matlab_cmd or ((use_mcr and os.getenv('SPMMCRCMD'))
                       or os.getenv('MATLABCMD', 'matlab -nodesktop -nosplash'))
 
         mlab = MatlabCommand(matlab_cmd=matlab_cmd, resource_monitor=False)
