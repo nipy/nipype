@@ -387,13 +387,13 @@ def create_tbss_all(name='tbss_all', estimate_skeleton=True):
     -------
 
     >>> from nipype.workflows.dmri.fsl import tbss
-    >>> tbss = tbss.create_tbss_all('tbss', estimate_skeleton=True)
-    >>> tbss.inputs.inputnode.skeleton_thresh = 0.2
-    >>> tbss.inputs.inputnode.fa_list = ['s1_wrapped_FA.nii', 's2_wrapped_FA.nii', 's3_wrapped_FA.nii']
+    >>> tbss_wf = tbss.create_tbss_all('tbss', estimate_skeleton=True)
+    >>> tbss_wf.inputs.inputnode.skeleton_thresh = 0.2
+    >>> tbss_wf.inputs.inputnode.fa_list = ['s1_wrapped_FA.nii', 's2_wrapped_FA.nii', 's3_wrapped_FA.nii']
 
-    >>> tbss = tbss.create_tbss_all('tbss', estimate_skeleton=False)
-    >>> tbss.inputs.inputnode.skeleton_thresh = 0.2
-    >>> tbss.inputs.inputnode.fa_list = ['s1_wrapped_FA.nii', 's2_wrapped_FA.nii', 's3_wrapped_FA.nii']
+    >>> tbss_wf = tbss.create_tbss_all('tbss', estimate_skeleton=False)
+    >>> tbss_wf.inputs.inputnode.skeleton_thresh = 0.2
+    >>> tbss_wf.inputs.inputnode.fa_list = ['s1_wrapped_FA.nii', 's2_wrapped_FA.nii', 's3_wrapped_FA.nii']
 
 
     Inputs::
