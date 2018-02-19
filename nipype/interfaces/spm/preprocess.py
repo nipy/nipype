@@ -132,7 +132,7 @@ class FieldMap(SPMCommand):
     >>> fm.inputs.echo_times = (5.19, 7.65)
     >>> fm.inputs.blip_direction = 1
     >>> fm.inputs.total_readout_time = 15.6
-    >>> fm.inputs.epi_file = 'bold.nii'
+    >>> fm.inputs.epi_file = 'epi.nii'
     >>> fm.run() # doctest: +SKIP
 
     """
