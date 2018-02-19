@@ -264,8 +264,11 @@ def create_tbss_3_postreg(name='tbss_3_postreg', estimate_skeleton=True):
         # $FSLDIR/bin/fslmaths $FSLDIR/data/standard/FMRIB58_FA_1mm -mas mean_FA_mask mean_FA
         maskstd = pe.Node(
             fsl.ImageMaths(op_string="-mas", suffix="_masked"), name="maskstd")
-        maskstd.inputs.in_file = fsl.Info.standard_image(
-            "FMRIB58_FA_1mm.nii.gz")
+        if fsl.no_fsl():
+            warn('NO FSL found')
+        else:
+            maskstd.inputs.in_file = fsl.Info.standard_image(
+                "FMRIB58_FA_1mm.nii.gz")
 
         # $FSLDIR/bin/fslmaths mean_FA -bin mean_FA_mask
         binmaskstd = pe.Node(
