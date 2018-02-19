@@ -1044,6 +1044,10 @@ class DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         True,
         usedefault=True,
         desc='Generate exception if list is empty for a given field')
+    drop_blank_outputs = traits.Bool(
+        False, usedefault=True,
+        desc="Remove ``None`` entries from output lists"
+        )
     sort_filelist = traits.Bool(
         mandatory=True, desc='Sort the filelist that matches the template')
     template = Str(
@@ -1242,8 +1246,11 @@ class DataGrabber(IOBase):
                         if self.inputs.sort_filelist:
                             outfiles = human_order_sorted(outfiles)
                         outputs[key].append(list_to_filename(outfiles))
-            if any([val is None for val in outputs[key]]):
-                outputs[key] = []
+            if self.inputs.drop_blank_outputs:
+                outputs[key] = [x for x in outputs[key] if x is not None]
+            else:
+                if any([val is None for val in outputs[key]]):
+                    outputs[key] = []
             if len(outputs[key]) == 0:
                 outputs[key] = None
             elif len(outputs[key]) == 1:
