@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from ..connectivity import LabelConvert
 
 
-def test_LabelConfig_inputs():
+def test_LabelConvert_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
         environ=dict(
@@ -22,12 +22,13 @@ def test_LabelConfig_inputs():
         in_file=dict(
             argstr='%s',
             mandatory=True,
+            position=-4,
+        ),
+        in_lut=dict(
+            argstr='%s',
+            mandatory=True,
             position=-3,
         ),
-        lut_aal=dict(argstr='-lut_aal %s', ),
-        lut_basic=dict(argstr='-lut_basic %s', ),
-        lut_fs=dict(argstr='-lut_freesurfer %s', ),
-        lut_itksnap=dict(argstr='-lut_itksnap %s', ),
         nthreads=dict(
             argstr='-nthreads %d',
             nohash=True,
@@ -49,7 +50,7 @@ def test_LabelConfig_inputs():
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-def test_LabelConfig_outputs():
+def test_LabelConvert_outputs():
     output_map = dict(out_file=dict(), )
     outputs = LabelConvert.output_spec()
 

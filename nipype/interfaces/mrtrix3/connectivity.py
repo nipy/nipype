@@ -185,8 +185,9 @@ class LabelConvert(MRTrix3Base):
     >>> labels = mrt.LabelConvert()
     >>> labels.inputs.in_file = 'aparc+aseg.nii'
     >>> labels.inputs.in_config = 'mrtrix3_labelconfig.txt'
+    >>> labels.inputs.in_lut = 'FreeSurferColorLUT.txt'
     >>> labels.cmdline                               # doctest: +ELLIPSIS
-    'labelconvert aparc+aseg.nii mrtrix3_labelconfig.txt parcellation.mif'
+    'labelconvert aparc+aseg.nii FreeSurferColorLUT.txt mrtrix3_labelconfig.txt parcellation.mif'
     >>> labels.run()                                 # doctest: +SKIP
     """
 
