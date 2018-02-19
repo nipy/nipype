@@ -284,8 +284,11 @@ def create_tbss_3_postreg(name='tbss_3_postreg', estimate_skeleton=True):
                        (maskgroup, maskgroup2, [("out_file", "in_file")]),
                        (binmaskstd, maskgroup2, [("out_file", "in_file2")])])
 
-        outputnode.inputs.skeleton_file = fsl.Info.standard_image(
-            "FMRIB58_FA-skeleton_1mm.nii.gz")
+        if fsl.no_fsl():
+            warn('NO FSL found')
+        else:
+            outputnode.inputs.skeleton_file = fsl.Info.standard_image(
+                "FMRIB58_FA-skeleton_1mm.nii.gz")
         tbss3.connect([(binmaskstd, outputnode, [('out_file', 'groupmask')]),
                        (maskstd, outputnode, [('out_file', 'meanfa_file')]),
                        (maskgroup2, outputnode, [('out_file',
