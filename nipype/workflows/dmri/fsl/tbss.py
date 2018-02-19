@@ -264,8 +264,11 @@ def create_tbss_3_postreg(name='tbss_3_postreg', estimate_skeleton=True):
         # $FSLDIR/bin/fslmaths $FSLDIR/data/standard/FMRIB58_FA_1mm -mas mean_FA_mask mean_FA
         maskstd = pe.Node(
             fsl.ImageMaths(op_string="-mas", suffix="_masked"), name="maskstd")
-        maskstd.inputs.in_file = fsl.Info.standard_image(
-            "FMRIB58_FA_1mm.nii.gz")
+        if fsl.no_fsl():
+            warn('NO FSL found')
+        else:
+            maskstd.inputs.in_file = fsl.Info.standard_image(
+                "FMRIB58_FA_1mm.nii.gz")
 
         # $FSLDIR/bin/fslmaths mean_FA -bin mean_FA_mask
         binmaskstd = pe.Node(
@@ -281,8 +284,11 @@ def create_tbss_3_postreg(name='tbss_3_postreg', estimate_skeleton=True):
                        (maskgroup, maskgroup2, [("out_file", "in_file")]),
                        (binmaskstd, maskgroup2, [("out_file", "in_file2")])])
 
-        outputnode.inputs.skeleton_file = fsl.Info.standard_image(
-            "FMRIB58_FA-skeleton_1mm.nii.gz")
+        if fsl.no_fsl():
+            warn('NO FSL found')
+        else:
+            outputnode.inputs.skeleton_file = fsl.Info.standard_image(
+                "FMRIB58_FA-skeleton_1mm.nii.gz")
         tbss3.connect([(binmaskstd, outputnode, [('out_file', 'groupmask')]),
                        (maskstd, outputnode, [('out_file', 'meanfa_file')]),
                        (maskgroup2, outputnode, [('out_file',
@@ -387,8 +393,14 @@ def create_tbss_all(name='tbss_all', estimate_skeleton=True):
     -------
 
     >>> from nipype.workflows.dmri.fsl import tbss
-    >>> tbss = tbss.create_tbss_all('tbss')
-    >>> tbss.inputs.inputnode.skeleton_thresh = 0.2
+    >>> tbss_wf = tbss.create_tbss_all('tbss', estimate_skeleton=True)
+    >>> tbss_wf.inputs.inputnode.skeleton_thresh = 0.2
+    >>> tbss_wf.inputs.inputnode.fa_list = ['s1_wrapped_FA.nii', 's2_wrapped_FA.nii', 's3_wrapped_FA.nii']
+
+    >>> tbss_wf = tbss.create_tbss_all('tbss', estimate_skeleton=False)
+    >>> tbss_wf.inputs.inputnode.skeleton_thresh = 0.2
+    >>> tbss_wf.inputs.inputnode.fa_list = ['s1_wrapped_FA.nii', 's2_wrapped_FA.nii', 's3_wrapped_FA.nii']
+
 
     Inputs::
 
