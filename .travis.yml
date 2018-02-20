@@ -48,7 +48,7 @@ before_install:
 - conda config --set always_yes yes --set changeps1 no
 - travis_retry conda update -q conda
 - conda config --add channels conda-forge
-- travis_retry conda install -y python=${TRAVIS_PYTHON_VERSION} icu
+- travis_retry conda install -y python=${TRAVIS_PYTHON_VERSION} icu asn1crypto=0.23
 - travis_retry pip install -r requirements.txt
 - travis_retry git clone https://github.com/INCF/pybids.git ${HOME}/pybids &&
   pip install -e ${HOME}/pybids
