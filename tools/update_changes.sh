@@ -26,7 +26,7 @@ echo $( printf "%${#HEADER}s" | tr " " "=" ) >> newchanges
 echo "" >> newchanges
 
 # Search for PRs since previous release
-git log --grep="Merge pull request" `git describe --tags --abbrev=0`..HEAD --pretty='format:  * %b %s' | sed  's/Merge pull request \#\([^\d]*\)\ from\ .*/(\#\1)/' >> newchanges
+git log --grep="Merge pull request" `git describe --tags --abbrev=0`..HEAD --pretty='format:  * %b %s' | sed  's+Merge pull request \#\([^\d]*\)\ from\ .*+(https://github.com/nipy/nipype/pull/\1)+' >> newchanges
 echo "" >> newchanges
 echo "" >> newchanges
 
