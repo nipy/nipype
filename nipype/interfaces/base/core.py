@@ -12,7 +12,8 @@ The I/O specifications corresponding to these base
 interfaces are found in the ``specs`` module.
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 from builtins import object, open, str, bytes
 
@@ -25,6 +26,7 @@ import re
 import platform
 import select
 import subprocess as sp
+import shlex
 import sys
 from textwrap import wrap
 import simplejson as json
@@ -32,32 +34,29 @@ from dateutil.parser import parse as parseutc
 
 from ... import config, logging, LooseVersion
 from ...utils.provenance import write_provenance
-from ...utils.misc import trim, str2bool
-from ...utils.filemanip import (
-    FileNotFoundError, split_filename, read_stream, which,
-    get_dependencies, canonicalize_env as _canonicalize_env)
+from ...utils.misc import trim, str2bool, rgetcwd
+from ...utils.filemanip import (FileNotFoundError, split_filename, read_stream,
+                                which, get_dependencies, canonicalize_env as
+                                _canonicalize_env)
 
 from ...external.due import due
 
 from .traits_extension import traits, isdefined, TraitError
-from .specs import (
-    BaseInterfaceInputSpec, CommandLineInputSpec,
-    StdOutCommandLineInputSpec, MpiCommandLineInputSpec
-)
-from .support import (
-    Bunch, Stream, InterfaceResult, NipypeInterfaceError
-)
+from .specs import (BaseInterfaceInputSpec, CommandLineInputSpec,
+                    StdOutCommandLineInputSpec, MpiCommandLineInputSpec)
+from .support import (Bunch, Stream, InterfaceResult, NipypeInterfaceError)
 
 from future import standard_library
 standard_library.install_aliases()
-
 
 iflogger = logging.getLogger('interface')
 
 PY35 = sys.version_info >= (3, 5)
 PY3 = sys.version_info[0] > 2
-VALID_TERMINAL_OUTPUT = ['stream', 'allatonce', 'file', 'file_split',
-                         'file_stdout', 'file_stderr', 'none']
+VALID_TERMINAL_OUTPUT = [
+    'stream', 'allatonce', 'file', 'file_split', 'file_stdout', 'file_stderr',
+    'none'
+]
 __docformat__ = 'restructuredtext'
 
 
@@ -171,12 +170,14 @@ class BaseInterface(Interface):
     references_ = []
     resource_monitor = True  # Enabled for this interface IFF enabled in the config
 
-    def __init__(self, from_file=None, resource_monitor=None, **inputs):
+    def __init__(self, from_file=None, resource_monitor=None,
+                 ignore_exception=False, **inputs):
         if not self.input_spec:
-            raise Exception('No input_spec in class: %s' %
-                            self.__class__.__name__)
+            raise Exception(
+                'No input_spec in class: %s' % self.__class__.__name__)
 
         self.inputs = self.input_spec(**inputs)
+        self.ignore_exception = ignore_exception
 
         if resource_monitor is not None:
             self.resource_monitor = resource_monitor
@@ -199,9 +200,8 @@ class BaseInterface(Interface):
         else:
             docstring = ['']
 
-        allhelp = '\n'.join(docstring + cls._inputs_help() + [''] +
-                            cls._outputs_help() + [''] +
-                            cls._refs_help() + [''])
+        allhelp = '\n'.join(docstring + cls._inputs_help(
+        ) + [''] + cls._outputs_help() + [''] + cls._refs_help() + [''])
         if returnhelp:
             return allhelp
         else:
@@ -234,43 +234,53 @@ class BaseInterface(Interface):
 
         default = ''
         if spec.usedefault:
-            default = ', nipype default value: %s' % str(spec.default_value()[1])
+            default = ', nipype default value: %s' % str(
+                spec.default_value()[1])
         line = "(%s%s)" % (type_info, default)
 
-        manhelpstr = wrap(line, 70,
-                          initial_indent=manhelpstr[0] + ': ',
-                          subsequent_indent='\t\t ')
+        manhelpstr = wrap(
+            line,
+            70,
+            initial_indent=manhelpstr[0] + ': ',
+            subsequent_indent='\t\t ')
 
         if desc:
             for line in desc.split('\n'):
                 line = re.sub("\s+", " ", line)
-                manhelpstr += wrap(line, 70,
-                                   initial_indent='\t\t',
-                                   subsequent_indent='\t\t')
+                manhelpstr += wrap(
+                    line, 70, initial_indent='\t\t', subsequent_indent='\t\t')
 
         if argstr:
             pos = spec.position
             if pos is not None:
-                manhelpstr += wrap('flag: %s, position: %s' % (argstr, pos), 70,
-                                   initial_indent='\t\t',
-                                   subsequent_indent='\t\t')
+                manhelpstr += wrap(
+                    'flag: %s, position: %s' % (argstr, pos),
+                    70,
+                    initial_indent='\t\t',
+                    subsequent_indent='\t\t')
             else:
-                manhelpstr += wrap('flag: %s' % argstr, 70,
-                                   initial_indent='\t\t',
-                                   subsequent_indent='\t\t')
+                manhelpstr += wrap(
+                    'flag: %s' % argstr,
+                    70,
+                    initial_indent='\t\t',
+                    subsequent_indent='\t\t')
 
         if xor:
             line = '%s' % ', '.join(xor)
-            manhelpstr += wrap(line, 70,
-                               initial_indent='\t\tmutually_exclusive: ',
-                               subsequent_indent='\t\t ')
+            manhelpstr += wrap(
+                line,
+                70,
+                initial_indent='\t\tmutually_exclusive: ',
+                subsequent_indent='\t\t ')
 
         if requires:
             others = [field for field in requires if field != name]
             line = '%s' % ', '.join(others)
-            manhelpstr += wrap(line, 70,
-                               initial_indent='\t\trequires: ',
-                               subsequent_indent='\t\t ')
+            manhelpstr += wrap(
+                line,
+                70,
+                initial_indent='\t\trequires: ',
+                subsequent_indent='\t\t ')
         return manhelpstr
 
     @classmethod
@@ -307,7 +317,7 @@ class BaseInterface(Interface):
         """
         helpstr = ['Outputs::', '']
         if cls.output_spec:
-            outputs = cls.output_spec()  # pylint: disable=E1102
+            outputs = cls.output_spec()
             for name, spec in sorted(outputs.traits(transient=None).items()):
                 helpstr += cls._get_trait_desc(outputs, name, spec)
         if len(helpstr) == 2:
@@ -319,7 +329,7 @@ class BaseInterface(Interface):
         """
         outputs = None
         if self.output_spec:
-            outputs = self.output_spec()  # pylint: disable=E1102
+            outputs = self.output_spec()
 
         return outputs
 
@@ -333,16 +343,17 @@ class BaseInterface(Interface):
             return info
         metadata = dict(copyfile=lambda t: t is not None)
         for name, spec in sorted(cls.input_spec().traits(**metadata).items()):
-            info.append(dict(key=name,
-                             copy=spec.copyfile))
+            info.append(dict(key=name, copy=spec.copyfile))
         return info
 
     def _check_requires(self, spec, name, value):
         """ check if required inputs are satisfied
         """
         if spec.requires:
-            values = [not isdefined(getattr(self.inputs, field))
-                      for field in spec.requires]
+            values = [
+                not isdefined(getattr(self.inputs, field))
+                for field in spec.requires
+            ]
             if any(values) and isdefined(value):
                 msg = ("%s requires a value for input '%s' because one of %s "
                        "is set. For a list of required inputs, see %s.help()" %
@@ -354,8 +365,9 @@ class BaseInterface(Interface):
         """ check if mutually exclusive inputs are satisfied
         """
         if spec.xor:
-            values = [isdefined(getattr(self.inputs, field))
-                      for field in spec.xor]
+            values = [
+                isdefined(getattr(self.inputs, field)) for field in spec.xor
+            ]
             if not any(values) and not isdefined(value):
                 msg = ("%s requires a value for one of the inputs '%s'. "
                        "For a list of required inputs, see %s.help()" %
@@ -372,12 +384,13 @@ class BaseInterface(Interface):
             if not isdefined(value) and spec.xor is None:
                 msg = ("%s requires a value for input '%s'. "
                        "For a list of required inputs, see %s.help()" %
-                       (self.__class__.__name__, name, self.__class__.__name__))
+                       (self.__class__.__name__, name,
+                        self.__class__.__name__))
                 raise ValueError(msg)
             if isdefined(value):
                 self._check_requires(spec, name, value)
-        for name, spec in list(self.inputs.traits(mandatory=None,
-                                                  transient=None).items()):
+        for name, spec in list(
+                self.inputs.traits(mandatory=None, transient=None).items()):
             self._check_requires(spec, name, getattr(self.inputs, name))
 
     def _check_version_requirements(self, trait_object, raise_exception=True):
@@ -391,27 +404,33 @@ class BaseInterface(Interface):
         if names and self.version:
             version = LooseVersion(str(self.version))
             for name in names:
-                min_ver = LooseVersion(str(trait_object.traits()[name].min_ver))
+                min_ver = LooseVersion(
+                    str(trait_object.traits()[name].min_ver))
                 if min_ver > version:
                     unavailable_traits.append(name)
                     if not isdefined(getattr(trait_object, name)):
                         continue
                     if raise_exception:
-                        raise Exception('Trait %s (%s) (version %s < required %s)' %
-                                        (name, self.__class__.__name__,
-                                         version, min_ver))
-            check = dict(max_ver=lambda t: t is not None)
-            names = trait_object.trait_names(**check)
+                        raise Exception(
+                            'Trait %s (%s) (version %s < required %s)' %
+                            (name, self.__class__.__name__, version, min_ver))
+
+        # check maximum version
+        check = dict(max_ver=lambda t: t is not None)
+        names = trait_object.trait_names(**check)
+        if names and self.version:
+            version = LooseVersion(str(self.version))
             for name in names:
-                max_ver = LooseVersion(str(trait_object.traits()[name].max_ver))
+                max_ver = LooseVersion(
+                    str(trait_object.traits()[name].max_ver))
                 if max_ver < version:
                     unavailable_traits.append(name)
                     if not isdefined(getattr(trait_object, name)):
                         continue
                     if raise_exception:
-                        raise Exception('Trait %s (%s) (version %s > required %s)' %
-                                        (name, self.__class__.__name__,
-                                         version, max_ver))
+                        raise Exception(
+                            'Trait %s (%s) (version %s > required %s)' %
+                            (name, self.__class__.__name__, version, max_ver))
         return unavailable_traits
 
     def _run_interface(self, runtime):
@@ -426,7 +445,7 @@ class BaseInterface(Interface):
             r['path'] = self.__module__
             due.cite(**r)
 
-    def run(self, **inputs):
+    def run(self, cwd=None, **inputs):
         """Execute this interface.
 
         This interface will not raise an exception if runtime.returncode is
@@ -434,6 +453,8 @@ class BaseInterface(Interface):
 
         Parameters
         ----------
+
+        cwd : specify a folder where the interface should be run
         inputs : allows the interface settings to be updated
 
         Returns
@@ -443,8 +464,14 @@ class BaseInterface(Interface):
         """
         from ...utils.profiler import ResourceMonitor
 
+        # Tear-up: get current and prev directories
+        syscwd = rgetcwd(error=False)  # Recover when wd does not exist
+        if cwd is None:
+            cwd = syscwd
+
+        os.chdir(cwd)  # Change to the interface wd
+
         enable_rm = config.resource_monitor and self.resource_monitor
-        force_raise = not getattr(self.inputs, 'ignore_exception', False)
         self.inputs.trait_set(**inputs)
         self._check_mandatory_inputs()
         self._check_version_requirements(self.inputs)
@@ -452,28 +479,32 @@ class BaseInterface(Interface):
         self._duecredit_cite()
 
         # initialize provenance tracking
-        store_provenance = str2bool(config.get(
-            'execution', 'write_provenance', 'false'))
+        store_provenance = str2bool(
+            config.get('execution', 'write_provenance', 'false'))
         env = deepcopy(dict(os.environ))
         if self._redirect_x:
             env['DISPLAY'] = config.get_display()
 
-        runtime = Bunch(cwd=os.getcwd(),
-                        returncode=None,
-                        duration=None,
-                        environ=env,
-                        startTime=dt.isoformat(dt.utcnow()),
-                        endTime=None,
-                        platform=platform.platform(),
-                        hostname=platform.node(),
-                        version=self.version)
+        runtime = Bunch(
+            cwd=cwd,
+            prevcwd=syscwd,
+            returncode=None,
+            duration=None,
+            environ=env,
+            startTime=dt.isoformat(dt.utcnow()),
+            endTime=None,
+            platform=platform.platform(),
+            hostname=platform.node(),
+            version=self.version)
 
         mon_sp = None
         if enable_rm:
-            mon_freq = float(config.get('execution', 'resource_monitor_frequency', 1))
+            mon_freq = float(
+                config.get('execution', 'resource_monitor_frequency', 1))
             proc_pid = os.getpid()
-            iflogger.debug('Creating a ResourceMonitor on a %s interface, PID=%d.',
-                           self.__class__.__name__, proc_pid)
+            iflogger.debug(
+                'Creating a ResourceMonitor on a %s interface, PID=%d.',
+                self.__class__.__name__, proc_pid)
             mon_sp = ResourceMonitor(proc_pid, freq=mon_freq)
             mon_sp.start()
 
@@ -490,14 +521,17 @@ class BaseInterface(Interface):
             runtime.traceback = traceback.format_exc()
             # Gather up the exception arguments and append nipype info.
             exc_args = e.args if getattr(e, 'args') else tuple()
-            exc_args += ('An exception of type %s occurred while running interface %s.' %
-                         (type(e).__name__, self.__class__.__name__), )
-            if config.get('logging', 'interface_level', 'info').lower() == 'debug':
-                exc_args += ('Inputs: %s' % str(self.inputs),)
+            exc_args += (
+                'An exception of type %s occurred while running interface %s.'
+                % (type(e).__name__, self.__class__.__name__), )
+            if config.get('logging', 'interface_level',
+                          'info').lower() == 'debug':
+                exc_args += ('Inputs: %s' % str(self.inputs), )
 
-            runtime.traceback_args = ('\n'.join(['%s' % arg for arg in exc_args]),)
+            runtime.traceback_args = ('\n'.join(
+                ['%s' % arg for arg in exc_args]), )
 
-            if force_raise:
+            if not self.ignore_exception:
                 raise
         finally:
             # This needs to be done always
@@ -505,8 +539,12 @@ class BaseInterface(Interface):
             timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
             runtime.duration = (timediff.days * 86400 + timediff.seconds +
                                 timediff.microseconds / 1e6)
-            results = InterfaceResult(interface, runtime, inputs=inputs, outputs=outputs,
-                                      provenance=None)
+            results = InterfaceResult(
+                interface,
+                runtime,
+                inputs=inputs,
+                outputs=outputs,
+                provenance=None)
 
             # Add provenance (if required)
             if store_provenance:
@@ -534,6 +572,7 @@ class BaseInterface(Interface):
                         'rss_GiB': (vals[:, 2] / 1024).tolist(),
                         'vms_GiB': (vals[:, 3] / 1024).tolist(),
                     }
+            os.chdir(syscwd)
 
         return results
 
@@ -567,7 +606,8 @@ class BaseInterface(Interface):
                 try:
                     setattr(outputs, key, val)
                 except TraitError as error:
-                    if getattr(error, 'info', 'default').startswith('an existing'):
+                    if getattr(error, 'info',
+                               'default').startswith('an existing'):
                         msg = ("File/Directory '%s' not found for %s output "
                                "'%s'." % (val, self.__class__.__name__, key))
                         raise FileNotFoundError(msg)
@@ -700,14 +740,15 @@ def run_command(runtime, output=None, timeout=0.01):
         errfile = os.path.join(runtime.cwd, 'stderr.nipype')
         stderr = open(errfile, 'wb')
 
-    proc = sp.Popen(cmdline,
-                    stdout=stdout,
-                    stderr=stderr,
-                    shell=True,
-                    cwd=runtime.cwd,
-                    env=env,
-                    close_fds=True,
-                    )
+    proc = sp.Popen(
+        cmdline,
+        stdout=stdout,
+        stderr=stderr,
+        shell=True,
+        cwd=runtime.cwd,
+        env=env,
+        close_fds=True,
+    )
 
     result = {
         'stdout': [],
@@ -716,7 +757,10 @@ def run_command(runtime, output=None, timeout=0.01):
     }
 
     if output == 'stream':
-        streams = [Stream('stdout', proc.stdout), Stream('stderr', proc.stderr)]
+        streams = [
+            Stream('stdout', proc.stdout),
+            Stream('stderr', proc.stderr)
+        ]
 
         def _process(drain=0):
             try:
@@ -830,6 +874,7 @@ class CommandLine(BaseInterface):
 
     """
     input_spec = CommandLineInputSpec
+    _cmd_prefix = ''
     _cmd = None
     _version = None
     _terminal_output = 'stream'
@@ -847,8 +892,8 @@ class CommandLine(BaseInterface):
         if output_type in VALID_TERMINAL_OUTPUT:
             cls._terminal_output = output_type
         else:
-            raise AttributeError('Invalid terminal output_type: %s' %
-                                 output_type)
+            raise AttributeError(
+                'Invalid terminal output_type: %s' % output_type)
 
     @classmethod
     def help(cls, returnhelp=False):
@@ -865,7 +910,8 @@ class CommandLine(BaseInterface):
         self._cmd = command or getattr(self, '_cmd', None)
 
         # Store dependencies in runtime object
-        self._ldd = str2bool(config.get('execution', 'get_linked_libs', 'true'))
+        self._ldd = str2bool(
+            config.get('execution', 'get_linked_libs', 'true'))
 
         if self._cmd is None:
             raise Exception("Missing command")
@@ -887,7 +933,7 @@ class CommandLine(BaseInterface):
         """ `command` plus any arguments (args)
         validates arguments and generates command line"""
         self._check_mandatory_inputs()
-        allargs = [self.cmd] + self._parse_inputs()
+        allargs = [self._cmd_prefix + self.cmd] + self._parse_inputs()
         return ' '.join(allargs)
 
     @property
@@ -899,7 +945,9 @@ class CommandLine(BaseInterface):
         if value not in VALID_TERMINAL_OUTPUT:
             raise RuntimeError(
                 'Setting invalid value "%s" for terminal_output. Valid values are '
-                '%s.' % (value, ', '.join(['"%s"' % v for v in VALID_TERMINAL_OUTPUT])))
+                '%s.' % (value,
+                         ', '.join(['"%s"' % v
+                                    for v in VALID_TERMINAL_OUTPUT])))
         self._terminal_output = value
 
     def _terminal_output_update(self):
@@ -908,8 +956,8 @@ class CommandLine(BaseInterface):
     def raise_exception(self, runtime):
         raise RuntimeError(
             ('Command:\n{cmdline}\nStandard output:\n{stdout}\n'
-             'Standard error:\n{stderr}\nReturn code: {returncode}').format(
-                 **runtime.dictcopy()))
+             'Standard error:\n{stderr}\nReturn code: {returncode}'
+             ).format(**runtime.dictcopy()))
 
     def _get_environ(self):
         return getattr(self.inputs, 'environ', {})
@@ -924,16 +972,17 @@ class CommandLine(BaseInterface):
         if which(cmd, env=env):
             out_environ = self._get_environ()
             env.update(out_environ)
-            proc = sp.Popen(' '.join((cmd, flag)),
-                            shell=True,
-                            env=env,
-                            stdout=sp.PIPE,
-                            stderr=sp.PIPE,
-                            )
+            proc = sp.Popen(
+                ' '.join((cmd, flag)),
+                shell=True,
+                env=env,
+                stdout=sp.PIPE,
+                stderr=sp.PIPE,
+            )
             o, e = proc.communicate()
             return o
 
-    def _run_interface(self, runtime, correct_return_codes=(0,)):
+    def _run_interface(self, runtime, correct_return_codes=(0, )):
         """Execute command via subprocess
 
         Parameters
@@ -955,17 +1004,18 @@ class CommandLine(BaseInterface):
         runtime.environ.update(out_environ)
 
         # which $cmd
-        executable_name = self.cmd.split()[0]
+        executable_name = shlex.split(self._cmd_prefix + self.cmd)[0]
         cmd_path = which(executable_name, env=runtime.environ)
 
         if cmd_path is None:
             raise IOError(
                 'No command "%s" found on host %s. Please check that the '
-                'corresponding package is installed.' % (
-                    executable_name, runtime.hostname))
+                'corresponding package is installed.' % (executable_name,
+                                                         runtime.hostname))
 
         runtime.command_path = cmd_path
-        runtime.dependencies = (get_dependencies(executable_name, runtime.environ)
+        runtime.dependencies = (get_dependencies(executable_name,
+                                                 runtime.environ)
                                 if self._ldd else '<skipped>')
         runtime = run_command(runtime, output=self.terminal_output)
         if runtime.returncode is None or \
@@ -1032,13 +1082,15 @@ class CommandLine(BaseInterface):
             ns = trait_spec.name_source
             while isinstance(ns, (list, tuple)):
                 if len(ns) > 1:
-                    iflogger.warning('Only one name_source per trait is allowed')
+                    iflogger.warning(
+                        'Only one name_source per trait is allowed')
                 ns = ns[0]
 
             if not isinstance(ns, (str, bytes)):
                 raise ValueError(
                     'name_source of \'{}\' trait should be an input trait '
-                    'name, but a type {} object was found'.format(name, type(ns)))
+                    'name, but a type {} object was found'.format(
+                        name, type(ns)))
 
             if isdefined(getattr(self.inputs, ns)):
                 name_source = ns
@@ -1053,7 +1105,8 @@ class CommandLine(BaseInterface):
                     base = source
             else:
                 if name in chain:
-                    raise NipypeInterfaceError('Mutually pointing name_sources')
+                    raise NipypeInterfaceError(
+                        'Mutually pointing name_sources')
 
                 chain.append(name)
                 base = self._filename_from_source(ns, chain)
@@ -1080,7 +1133,7 @@ class CommandLine(BaseInterface):
         metadata = dict(name_source=lambda t: t is not None)
         traits = self.inputs.traits(**metadata)
         if traits:
-            outputs = self.output_spec().get()  # pylint: disable=E1102
+            outputs = self.output_spec().get()
             for name, trait_spec in list(traits.items()):
                 out_name = name
                 if trait_spec.output_name is not None:
@@ -1184,21 +1237,22 @@ class SEMLikeCommandLine(CommandLine):
     """
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()  # pylint: disable=E1102
+        outputs = self.output_spec().get()
         return self._outputs_from_inputs(outputs)
 
     def _outputs_from_inputs(self, outputs):
         for name in list(outputs.keys()):
             corresponding_input = getattr(self.inputs, name)
             if isdefined(corresponding_input):
-                if (isinstance(corresponding_input, bool) and
-                        corresponding_input):
+                if (isinstance(corresponding_input, bool)
+                        and corresponding_input):
                     outputs[name] = \
                         os.path.abspath(self._outputs_filenames[name])
                 else:
                     if isinstance(corresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp)
-                                         for inp in corresponding_input]
+                        outputs[name] = [
+                            os.path.abspath(inp) for inp in corresponding_input
+                        ]
                     else:
                         outputs[name] = os.path.abspath(corresponding_input)
         return outputs
@@ -1223,9 +1277,10 @@ class PackageInfo(object):
         if klass._version is None:
             if klass.version_cmd is not None:
                 try:
-                    clout = CommandLine(command=klass.version_cmd,
-                                        resource_monitor=False,
-                                        terminal_output='allatonce').run()
+                    clout = CommandLine(
+                        command=klass.version_cmd,
+                        resource_monitor=False,
+                        terminal_output='allatonce').run()
                 except IOError:
                     return None
 

@@ -2,7 +2,8 @@
 # coding: utf-8
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 from ....interfaces.io import JSONFileGrabber
 from ....interfaces import utility as niu
@@ -11,12 +12,27 @@ from ....interfaces import fsl
 from ....pipeline import engine as pe
 from ...data import get_flirt_schedule
 
-from .utils import (b0_indices, time_avg, apply_all_corrections, b0_average,
-                    hmc_split, dwi_flirt, eddy_rotate_bvecs, rotate_bvecs,
-                    insert_mat, extract_bval, recompose_dwi, recompose_xfm,
-                    siemens2rads, rads2radsec, demean_image,
-                    cleanup_edge_pipeline, add_empty_vol, vsm2warp,
-                    compute_readout,)
+from .utils import (
+    b0_indices,
+    time_avg,
+    apply_all_corrections,
+    b0_average,
+    hmc_split,
+    dwi_flirt,
+    eddy_rotate_bvecs,
+    rotate_bvecs,
+    insert_mat,
+    extract_bval,
+    recompose_dwi,
+    recompose_xfm,
+    siemens2rads,
+    rads2radsec,
+    demean_image,
+    cleanup_edge_pipeline,
+    add_empty_vol,
+    vsm2warp,
+    compute_readout,
+)
 
 
 def all_fmb_pipeline(name='hmc_sdc_ecc', fugue_params=dict(smooth3d=2.0)):
@@ -46,28 +62,41 @@ def all_fmb_pipeline(name='hmc_sdc_ecc', fugue_params=dict(smooth3d=2.0)):
     >>> allcorr.run() # doctest: +SKIP
 
     """
-    inputnode = pe.Node(niu.IdentityInterface(
-        fields=['in_file', 'in_bvec', 'in_bval', 'bmap_pha', 'bmap_mag',
-                'epi_param']), name='inputnode')
+    inputnode = pe.Node(
+        niu.IdentityInterface(fields=[
+            'in_file', 'in_bvec', 'in_bval', 'bmap_pha', 'bmap_mag',
+            'epi_param'
+        ]),
+        name='inputnode')
 
-    outputnode = pe.Node(niu.IdentityInterface(
-        fields=['out_file', 'out_mask', 'out_bvec']), name='outputnode')
+    outputnode = pe.Node(
+        niu.IdentityInterface(fields=['out_file', 'out_mask', 'out_bvec']),
+        name='outputnode')
 
-    list_b0 = pe.Node(niu.Function(
-        input_names=['in_bval'], output_names=['out_idx'],
-        function=b0_indices), name='B0indices')
+    list_b0 = pe.Node(
+        niu.Function(
+            input_names=['in_bval'],
+            output_names=['out_idx'],
+            function=b0_indices),
+        name='B0indices')
 
-    avg_b0_0 = pe.Node(niu.Function(
-        input_names=['in_file', 'index'], output_names=['out_file'],
-        function=time_avg), name='b0_avg_pre')
-    avg_b0_1 = pe.Node(niu.Function(
-        input_names=['in_file', 'index'], output_names=['out_file'],
-        function=time_avg), name='b0_avg_post')
+    avg_b0_0 = pe.Node(
+        niu.Function(
+            input_names=['in_file', 'index'],
+            output_names=['out_file'],
+            function=time_avg),
+        name='b0_avg_pre')
+    avg_b0_1 = pe.Node(
+        niu.Function(
+            input_names=['in_file', 'index'],
+            output_names=['out_file'],
+            function=time_avg),
+        name='b0_avg_post')
 
-    bet_dwi0 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True),
-                       name='bet_dwi_pre')
-    bet_dwi1 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True),
-                       name='bet_dwi_post')
+    bet_dwi0 = pe.Node(
+        fsl.BET(frac=0.3, mask=True, robust=True), name='bet_dwi_pre')
+    bet_dwi1 = pe.Node(
+        fsl.BET(frac=0.3, mask=True, robust=True), name='bet_dwi_post')
 
     hmc = hmc_pipeline()
     sdc = sdc_fmb(fugue_params=fugue_params)
@@ -75,48 +104,58 @@ def all_fmb_pipeline(name='hmc_sdc_ecc', fugue_params=dict(smooth3d=2.0)):
     unwarp = apply_all_corrections()
 
     wf = pe.Workflow(name=name)
-    wf.connect([
-        (inputnode, hmc, [('in_file', 'inputnode.in_file'),
-                          ('in_bvec', 'inputnode.in_bvec'),
-                          ('in_bval', 'inputnode.in_bval')]),
-        (inputnode, list_b0, [('in_bval', 'in_bval')]),
-        (inputnode, avg_b0_0, [('in_file', 'in_file')]),
-        (list_b0, avg_b0_0, [('out_idx', 'index')]),
-        (avg_b0_0, bet_dwi0, [('out_file', 'in_file')]),
-        (bet_dwi0, hmc, [('mask_file', 'inputnode.in_mask')]),
-        (hmc, sdc, [('outputnode.out_file', 'inputnode.in_file')]),
-        (bet_dwi0, sdc, [('mask_file', 'inputnode.in_mask')]),
-        (inputnode, sdc, [('bmap_pha', 'inputnode.bmap_pha'),
-                          ('bmap_mag', 'inputnode.bmap_mag'),
-                          ('epi_param', 'inputnode.settings')]),
-        (list_b0, sdc, [('out_idx', 'inputnode.in_ref')]),
-        (hmc, ecc, [('outputnode.out_xfms', 'inputnode.in_xfms')]),
-        (inputnode, ecc, [('in_file', 'inputnode.in_file'),
-                          ('in_bval', 'inputnode.in_bval')]),
-        (bet_dwi0, ecc, [('mask_file', 'inputnode.in_mask')]),
-        (ecc, avg_b0_1, [('outputnode.out_file', 'in_file')]),
-        (list_b0, avg_b0_1, [('out_idx', 'index')]),
-        (avg_b0_1, bet_dwi1, [('out_file', 'in_file')]),
-        (inputnode, unwarp, [('in_file', 'inputnode.in_dwi')]),
-        (hmc, unwarp, [('outputnode.out_xfms', 'inputnode.in_hmc')]),
-        (ecc, unwarp, [('outputnode.out_xfms', 'inputnode.in_ecc')]),
-        (sdc, unwarp, [('outputnode.out_warp', 'inputnode.in_sdc')]),
-        (hmc, outputnode, [('outputnode.out_bvec', 'out_bvec')]),
-        (unwarp, outputnode, [('outputnode.out_file', 'out_file')]),
-        (bet_dwi1, outputnode, [('mask_file', 'out_mask')])
-    ])
+    wf.connect(
+        [(inputnode, hmc,
+          [('in_file', 'inputnode.in_file'), ('in_bvec', 'inputnode.in_bvec'),
+           ('in_bval', 'inputnode.in_bval')]), (inputnode, list_b0,
+                                                [('in_bval', 'in_bval')]),
+         (inputnode, avg_b0_0, [('in_file', 'in_file')]), (list_b0, avg_b0_0,
+                                                           [('out_idx',
+                                                             'index')]),
+         (avg_b0_0, bet_dwi0, [('out_file', 'in_file')]), (bet_dwi0, hmc, [
+             ('mask_file', 'inputnode.in_mask')
+         ]), (hmc, sdc, [('outputnode.out_file', 'inputnode.in_file')]),
+         (bet_dwi0, sdc,
+          [('mask_file', 'inputnode.in_mask')]), (inputnode, sdc, [
+              ('bmap_pha', 'inputnode.bmap_pha'),
+              ('bmap_mag', 'inputnode.bmap_mag'), ('epi_param',
+                                                   'inputnode.settings')
+          ]), (list_b0, sdc, [('out_idx', 'inputnode.in_ref')]), (hmc, ecc, [
+              ('outputnode.out_xfms', 'inputnode.in_xfms')
+          ]), (inputnode, ecc,
+               [('in_file', 'inputnode.in_file'),
+                ('in_bval', 'inputnode.in_bval')]), (bet_dwi0, ecc, [
+                    ('mask_file', 'inputnode.in_mask')
+                ]), (ecc, avg_b0_1, [('outputnode.out_file',
+                                      'in_file')]), (list_b0, avg_b0_1,
+                                                     [('out_idx', 'index')]),
+         (avg_b0_1, bet_dwi1, [('out_file', 'in_file')]), (inputnode, unwarp, [
+             ('in_file', 'inputnode.in_dwi')
+         ]), (hmc, unwarp,
+              [('outputnode.out_xfms', 'inputnode.in_hmc')]), (ecc, unwarp, [
+                  ('outputnode.out_xfms', 'inputnode.in_ecc')
+              ]), (sdc, unwarp, [('outputnode.out_warp',
+                                  'inputnode.in_sdc')]), (hmc, outputnode, [
+                                      ('outputnode.out_bvec', 'out_bvec')
+                                  ]), (unwarp, outputnode,
+                                       [('outputnode.out_file',
+                                         'out_file')]), (bet_dwi1, outputnode,
+                                                         [('mask_file',
+                                                           'out_mask')])])
     return wf
 
 
 def all_peb_pipeline(name='hmc_sdc_ecc',
-                     epi_params=dict(echospacing=0.77e-3,
-                                     acc_factor=3,
-                                     enc_dir='y-',
-                                     epi_factor=1),
-                     altepi_params=dict(echospacing=0.77e-3,
-                                        acc_factor=3,
-                                        enc_dir='y',
-                                        epi_factor=1)):
+                     epi_params=dict(
+                         echospacing=0.77e-3,
+                         acc_factor=3,
+                         enc_dir='y-',
+                         epi_factor=1),
+                     altepi_params=dict(
+                         echospacing=0.77e-3,
+                         acc_factor=3,
+                         enc_dir='y',
+                         epi_factor=1)):
     """
     Builds a pipeline including three artifact corrections: head-motion
     correction (HMC), susceptibility-derived distortion correction (SDC),
@@ -138,23 +177,31 @@ def all_peb_pipeline(name='hmc_sdc_ecc',
     >>> allcorr.run() # doctest: +SKIP
 
     """
-    inputnode = pe.Node(niu.IdentityInterface(
-        fields=['in_file', 'in_bvec', 'in_bval', 'alt_file']),
+    inputnode = pe.Node(
+        niu.IdentityInterface(
+            fields=['in_file', 'in_bvec', 'in_bval', 'alt_file']),
         name='inputnode')
 
-    outputnode = pe.Node(niu.IdentityInterface(
-        fields=['out_file', 'out_mask', 'out_bvec']), name='outputnode')
+    outputnode = pe.Node(
+        niu.IdentityInterface(fields=['out_file', 'out_mask', 'out_bvec']),
+        name='outputnode')
 
-    avg_b0_0 = pe.Node(niu.Function(
-        input_names=['in_dwi', 'in_bval'], output_names=['out_file'],
-        function=b0_average), name='b0_avg_pre')
-    avg_b0_1 = pe.Node(niu.Function(
-        input_names=['in_dwi', 'in_bval'], output_names=['out_file'],
-        function=b0_average), name='b0_avg_post')
-    bet_dwi0 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True),
-                       name='bet_dwi_pre')
-    bet_dwi1 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True),
-                       name='bet_dwi_post')
+    avg_b0_0 = pe.Node(
+        niu.Function(
+            input_names=['in_dwi', 'in_bval'],
+            output_names=['out_file'],
+            function=b0_average),
+        name='b0_avg_pre')
+    avg_b0_1 = pe.Node(
+        niu.Function(
+            input_names=['in_dwi', 'in_bval'],
+            output_names=['out_file'],
+            function=b0_average),
+        name='b0_avg_post')
+    bet_dwi0 = pe.Node(
+        fsl.BET(frac=0.3, mask=True, robust=True), name='bet_dwi_pre')
+    bet_dwi1 = pe.Node(
+        fsl.BET(frac=0.3, mask=True, robust=True), name='bet_dwi_post')
 
     hmc = hmc_pipeline()
     sdc = sdc_peb(epi_params=epi_params, altepi_params=altepi_params)
@@ -163,43 +210,47 @@ def all_peb_pipeline(name='hmc_sdc_ecc',
     unwarp = apply_all_corrections()
 
     wf = pe.Workflow(name=name)
-    wf.connect([
-        (inputnode, hmc, [('in_file', 'inputnode.in_file'),
-                          ('in_bvec', 'inputnode.in_bvec'),
-                          ('in_bval', 'inputnode.in_bval')]),
-        (inputnode, avg_b0_0, [('in_file', 'in_dwi'),
-                               ('in_bval', 'in_bval')]),
-        (avg_b0_0, bet_dwi0, [('out_file', 'in_file')]),
-        (bet_dwi0, hmc, [('mask_file', 'inputnode.in_mask')]),
-        (hmc, sdc, [('outputnode.out_file', 'inputnode.in_file')]),
-        (bet_dwi0, sdc, [('mask_file', 'inputnode.in_mask')]),
-        (inputnode, sdc, [('in_bval', 'inputnode.in_bval'),
-                          ('alt_file', 'inputnode.alt_file')]),
-        (inputnode, ecc, [('in_file', 'inputnode.in_file'),
-                          ('in_bval', 'inputnode.in_bval')]),
-        (bet_dwi0, ecc, [('mask_file', 'inputnode.in_mask')]),
-        (hmc, ecc, [('outputnode.out_xfms', 'inputnode.in_xfms')]),
-        (ecc, avg_b0_1, [('outputnode.out_file', 'in_dwi')]),
-        (inputnode, avg_b0_1, [('in_bval', 'in_bval')]),
-        (avg_b0_1, bet_dwi1, [('out_file', 'in_file')]),
-        (inputnode, unwarp, [('in_file', 'inputnode.in_dwi')]),
-        (hmc, unwarp, [('outputnode.out_xfms', 'inputnode.in_hmc')]),
-        (ecc, unwarp, [('outputnode.out_xfms', 'inputnode.in_ecc')]),
-        (sdc, unwarp, [('outputnode.out_warp', 'inputnode.in_sdc')]),
-        (hmc, outputnode, [('outputnode.out_bvec', 'out_bvec')]),
-        (unwarp, outputnode, [('outputnode.out_file', 'out_file')]),
-        (bet_dwi1, outputnode, [('mask_file', 'out_mask')])
-    ])
+    wf.connect(
+        [(inputnode, hmc,
+          [('in_file', 'inputnode.in_file'), ('in_bvec', 'inputnode.in_bvec'),
+           ('in_bval', 'inputnode.in_bval')]), (inputnode, avg_b0_0,
+                                                [('in_file', 'in_dwi'),
+                                                 ('in_bval', 'in_bval')]),
+         (avg_b0_0, bet_dwi0, [('out_file', 'in_file')]), (bet_dwi0, hmc, [
+             ('mask_file', 'inputnode.in_mask')
+         ]), (hmc, sdc, [('outputnode.out_file', 'inputnode.in_file')]),
+         (bet_dwi0, sdc,
+          [('mask_file', 'inputnode.in_mask')]), (inputnode, sdc, [
+              ('in_bval', 'inputnode.in_bval'), ('alt_file',
+                                                 'inputnode.alt_file')
+          ]), (inputnode, ecc, [('in_file', 'inputnode.in_file'),
+                                ('in_bval', 'inputnode.in_bval')]),
+         (bet_dwi0, ecc, [('mask_file', 'inputnode.in_mask')]), (hmc, ecc, [
+             ('outputnode.out_xfms', 'inputnode.in_xfms')
+         ]), (ecc, avg_b0_1, [('outputnode.out_file',
+                               'in_dwi')]), (inputnode, avg_b0_1,
+                                             [('in_bval', 'in_bval')]),
+         (avg_b0_1, bet_dwi1, [('out_file', 'in_file')]), (inputnode, unwarp, [
+             ('in_file', 'inputnode.in_dwi')
+         ]), (hmc, unwarp,
+              [('outputnode.out_xfms', 'inputnode.in_hmc')]), (ecc, unwarp, [
+                  ('outputnode.out_xfms', 'inputnode.in_ecc')
+              ]), (sdc, unwarp, [('outputnode.out_warp',
+                                  'inputnode.in_sdc')]), (hmc, outputnode, [
+                                      ('outputnode.out_bvec', 'out_bvec')
+                                  ]), (unwarp, outputnode,
+                                       [('outputnode.out_file',
+                                         'out_file')]), (bet_dwi1, outputnode,
+                                                         [('mask_file',
+                                                           'out_mask')])])
     return wf
 
 
 def all_fsl_pipeline(name='fsl_all_correct',
-                     epi_params=dict(echospacing=0.77e-3,
-                                     acc_factor=3,
-                                     enc_dir='y-'),
-                     altepi_params=dict(echospacing=0.77e-3,
-                                        acc_factor=3,
-                                        enc_dir='y')):
+                     epi_params=dict(
+                         echospacing=0.77e-3, acc_factor=3, enc_dir='y-'),
+                     altepi_params=dict(
+                         echospacing=0.77e-3, acc_factor=3, enc_dir='y')):
     """
     Workflow that integrates FSL ``topup`` and ``eddy``.
 
@@ -225,12 +276,14 @@ def all_fsl_pipeline(name='fsl_all_correct',
 
     """
 
-    inputnode = pe.Node(niu.IdentityInterface(
-        fields=['in_file', 'in_bvec', 'in_bval', 'alt_file']),
+    inputnode = pe.Node(
+        niu.IdentityInterface(
+            fields=['in_file', 'in_bvec', 'in_bval', 'alt_file']),
         name='inputnode')
 
-    outputnode = pe.Node(niu.IdentityInterface(
-        fields=['out_file', 'out_mask', 'out_bvec']), name='outputnode')
+    outputnode = pe.Node(
+        niu.IdentityInterface(fields=['out_file', 'out_mask', 'out_bvec']),
+        name='outputnode')
 
     def gen_index(in_file):
         import numpy as np
@@ -239,56 +292,70 @@ def all_fsl_pipeline(name='fsl_all_correct',
         from nipype.utils import NUMPY_MMAP
         out_file = os.path.abspath('index.txt')
         vols = nb.load(in_file, mmap=NUMPY_MMAP).get_data().shape[-1]
-        np.savetxt(out_file, np.ones((vols,)).T)
+        np.savetxt(out_file, np.ones((vols, )).T)
         return out_file
 
-    gen_idx = pe.Node(niu.Function(
-        input_names=['in_file'], output_names=['out_file'],
-        function=gen_index), name='gen_index')
-    avg_b0_0 = pe.Node(niu.Function(
-        input_names=['in_dwi', 'in_bval'], output_names=['out_file'],
-        function=b0_average), name='b0_avg_pre')
-    bet_dwi0 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True),
-                       name='bet_dwi_pre')
+    gen_idx = pe.Node(
+        niu.Function(
+            input_names=['in_file'],
+            output_names=['out_file'],
+            function=gen_index),
+        name='gen_index')
+    avg_b0_0 = pe.Node(
+        niu.Function(
+            input_names=['in_dwi', 'in_bval'],
+            output_names=['out_file'],
+            function=b0_average),
+        name='b0_avg_pre')
+    bet_dwi0 = pe.Node(
+        fsl.BET(frac=0.3, mask=True, robust=True), name='bet_dwi_pre')
 
     sdc = sdc_peb(epi_params=epi_params, altepi_params=altepi_params)
     ecc = pe.Node(fsl.Eddy(method='jac'), name='fsl_eddy')
-    rot_bvec = pe.Node(niu.Function(
-        input_names=['in_bvec', 'eddy_params'], output_names=['out_file'],
-        function=eddy_rotate_bvecs), name='Rotate_Bvec')
-    avg_b0_1 = pe.Node(niu.Function(
-        input_names=['in_dwi', 'in_bval'], output_names=['out_file'],
-        function=b0_average), name='b0_avg_post')
-    bet_dwi1 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True),
-                       name='bet_dwi_post')
+    rot_bvec = pe.Node(
+        niu.Function(
+            input_names=['in_bvec', 'eddy_params'],
+            output_names=['out_file'],
+            function=eddy_rotate_bvecs),
+        name='Rotate_Bvec')
+    avg_b0_1 = pe.Node(
+        niu.Function(
+            input_names=['in_dwi', 'in_bval'],
+            output_names=['out_file'],
+            function=b0_average),
+        name='b0_avg_post')
+    bet_dwi1 = pe.Node(
+        fsl.BET(frac=0.3, mask=True, robust=True), name='bet_dwi_post')
 
     wf = pe.Workflow(name=name)
-    wf.connect([
-        (inputnode, avg_b0_0, [('in_file', 'in_dwi'),
-                               ('in_bval', 'in_bval')]),
-        (avg_b0_0, bet_dwi0, [('out_file', 'in_file')]),
-        (bet_dwi0, sdc, [('mask_file', 'inputnode.in_mask')]),
-        (inputnode, sdc, [('in_file', 'inputnode.in_file'),
-                          ('alt_file', 'inputnode.alt_file'),
-                          ('in_bval', 'inputnode.in_bval')]),
-        (sdc, ecc, [('topup.out_enc_file', 'in_acqp'),
-                    ('topup.out_fieldcoef', 'in_topup_fieldcoef'),
-                    ('topup.out_movpar', 'in_topup_movpar')]),
-        (bet_dwi0, ecc, [('mask_file', 'in_mask')]),
-        (inputnode, gen_idx, [('in_file', 'in_file')]),
-        (inputnode, ecc, [('in_file', 'in_file'),
-                          ('in_bval', 'in_bval'),
-                          ('in_bvec', 'in_bvec')]),
-        (gen_idx, ecc, [('out_file', 'in_index')]),
-        (inputnode, rot_bvec, [('in_bvec', 'in_bvec')]),
-        (ecc, rot_bvec, [('out_parameter', 'eddy_params')]),
-        (ecc, avg_b0_1, [('out_corrected', 'in_dwi')]),
-        (inputnode, avg_b0_1, [('in_bval', 'in_bval')]),
-        (avg_b0_1, bet_dwi1, [('out_file', 'in_file')]),
-        (ecc, outputnode, [('out_corrected', 'out_file')]),
-        (rot_bvec, outputnode, [('out_file', 'out_bvec')]),
-        (bet_dwi1, outputnode, [('mask_file', 'out_mask')])
-    ])
+    wf.connect(
+        [(inputnode, avg_b0_0, [('in_file', 'in_dwi'), ('in_bval',
+                                                        'in_bval')]),
+         (avg_b0_0, bet_dwi0, [('out_file', 'in_file')]), (bet_dwi0, sdc, [
+             ('mask_file', 'inputnode.in_mask')
+         ]), (inputnode, sdc, [('in_file', 'inputnode.in_file'),
+                               ('alt_file', 'inputnode.alt_file'),
+                               ('in_bval', 'inputnode.in_bval')]),
+         (sdc, ecc, [('topup.out_enc_file', 'in_acqp'),
+                     ('topup.out_fieldcoef', 'in_topup_fieldcoef'),
+                     ('topup.out_movpar',
+                      'in_topup_movpar')]), (bet_dwi0, ecc, [('mask_file',
+                                                              'in_mask')]),
+         (inputnode, gen_idx, [('in_file', 'in_file')]), (inputnode, ecc, [
+             ('in_file', 'in_file'), ('in_bval', 'in_bval'), ('in_bvec',
+                                                              'in_bvec')
+         ]), (gen_idx, ecc,
+              [('out_file', 'in_index')]), (inputnode, rot_bvec, [
+                  ('in_bvec', 'in_bvec')
+              ]), (ecc, rot_bvec,
+                   [('out_parameter', 'eddy_params')]), (ecc, avg_b0_1, [
+                       ('out_corrected', 'in_dwi')
+                   ]), (inputnode, avg_b0_1, [('in_bval', 'in_bval')]),
+         (avg_b0_1, bet_dwi1, [('out_file', 'in_file')]), (ecc, outputnode, [
+             ('out_corrected', 'out_file')
+         ]), (rot_bvec, outputnode,
+              [('out_file', 'out_bvec')]), (bet_dwi1, outputnode,
+                                            [('mask_file', 'out_mask')])])
     return wf
 
 
@@ -358,44 +425,58 @@ should be taken as reference
         outputnode.out_xfms - list of transformation matrices
 
     """
-    params = dict(dof=6, bgvalue=0, save_log=True, no_search=True,
-                  # cost='mutualinfo', cost_func='mutualinfo', bins=64,
-                  schedule=get_flirt_schedule('hmc'))
+    params = dict(
+        dof=6,
+        bgvalue=0,
+        save_log=True,
+        no_search=True,
+        # cost='mutualinfo', cost_func='mutualinfo', bins=64,
+        schedule=get_flirt_schedule('hmc'))
 
-    inputnode = pe.Node(niu.IdentityInterface(
-        fields=['in_file', 'ref_num', 'in_bvec', 'in_bval', 'in_mask']),
+    inputnode = pe.Node(
+        niu.IdentityInterface(
+            fields=['in_file', 'ref_num', 'in_bvec', 'in_bval', 'in_mask']),
         name='inputnode')
-    split = pe.Node(niu.Function(
-        output_names=['out_ref', 'out_mov', 'out_bval', 'volid'],
-        input_names=['in_file', 'in_bval', 'ref_num'], function=hmc_split),
+    split = pe.Node(
+        niu.Function(
+            output_names=['out_ref', 'out_mov', 'out_bval', 'volid'],
+            input_names=['in_file', 'in_bval', 'ref_num'],
+            function=hmc_split),
         name='SplitDWI')
     flirt = dwi_flirt(flirt_param=params)
-    insmat = pe.Node(niu.Function(input_names=['inlist', 'volid'],
-                                  output_names=['out'], function=insert_mat),
-                     name='InsertRefmat')
-    rot_bvec = pe.Node(niu.Function(
-        function=rotate_bvecs, input_names=['in_bvec', 'in_matrix'],
-        output_names=['out_file']), name='Rotate_Bvec')
-    outputnode = pe.Node(niu.IdentityInterface(
-        fields=['out_file', 'out_bvec', 'out_xfms']), name='outputnode')
+    insmat = pe.Node(
+        niu.Function(
+            input_names=['inlist', 'volid'],
+            output_names=['out'],
+            function=insert_mat),
+        name='InsertRefmat')
+    rot_bvec = pe.Node(
+        niu.Function(
+            function=rotate_bvecs,
+            input_names=['in_bvec', 'in_matrix'],
+            output_names=['out_file']),
+        name='Rotate_Bvec')
+    outputnode = pe.Node(
+        niu.IdentityInterface(fields=['out_file', 'out_bvec', 'out_xfms']),
+        name='outputnode')
 
     wf = pe.Workflow(name=name)
-    wf.connect([
-        (inputnode, split, [('in_file', 'in_file'),
-                            ('in_bval', 'in_bval'),
-                            ('ref_num', 'ref_num')]),
-        (inputnode, flirt, [('in_mask', 'inputnode.ref_mask')]),
-        (split, flirt, [('out_ref', 'inputnode.reference'),
-                        ('out_mov', 'inputnode.in_file'),
-                        ('out_bval', 'inputnode.in_bval')]),
-        (flirt, insmat, [('outputnode.out_xfms', 'inlist')]),
-        (split, insmat, [('volid', 'volid')]),
-        (inputnode, rot_bvec, [('in_bvec', 'in_bvec')]),
-        (insmat, rot_bvec, [('out', 'in_matrix')]),
-        (rot_bvec, outputnode, [('out_file', 'out_bvec')]),
-        (flirt, outputnode, [('outputnode.out_file', 'out_file')]),
-        (insmat, outputnode, [('out', 'out_xfms')])
-    ])
+    wf.connect([(inputnode, split,
+                 [('in_file', 'in_file'), ('in_bval', 'in_bval'),
+                  ('ref_num', 'ref_num')]), (inputnode, flirt, [
+                      ('in_mask', 'inputnode.ref_mask')
+                  ]), (split, flirt, [('out_ref', 'inputnode.reference'),
+                                      ('out_mov', 'inputnode.in_file'),
+                                      ('out_bval', 'inputnode.in_bval')]),
+                (flirt, insmat, [('outputnode.out_xfms', 'inlist')]),
+                (split, insmat, [('volid', 'volid')]), (inputnode, rot_bvec, [
+                    ('in_bvec', 'in_bvec')
+                ]), (insmat, rot_bvec,
+                     [('out', 'in_matrix')]), (rot_bvec, outputnode,
+                                               [('out_file', 'out_bvec')]),
+                (flirt, outputnode, [('outputnode.out_file',
+                                      'out_file')]), (insmat, outputnode,
+                                                      [('out', 'out_xfms')])])
     return wf
 
 
@@ -458,66 +539,88 @@ head-motion correction)
         outputnode.out_xfms - list of transformation matrices
     """
 
-    params = dict(dof=12, no_search=True, interp='spline', bgvalue=0,
-                  schedule=get_flirt_schedule('ecc'))
+    params = dict(
+        dof=12,
+        no_search=True,
+        interp='spline',
+        bgvalue=0,
+        schedule=get_flirt_schedule('ecc'))
     # cost='normmi', cost_func='normmi', bins=64,
 
-    inputnode = pe.Node(niu.IdentityInterface(
-        fields=['in_file', 'in_bval', 'in_mask', 'in_xfms']), name='inputnode')
-    avg_b0 = pe.Node(niu.Function(
-        input_names=['in_dwi', 'in_bval'], output_names=['out_file'],
-        function=b0_average), name='b0_avg')
-    pick_dws = pe.Node(niu.Function(
-        input_names=['in_dwi', 'in_bval', 'b'], output_names=['out_file'],
-        function=extract_bval), name='ExtractDWI')
+    inputnode = pe.Node(
+        niu.IdentityInterface(
+            fields=['in_file', 'in_bval', 'in_mask', 'in_xfms']),
+        name='inputnode')
+    avg_b0 = pe.Node(
+        niu.Function(
+            input_names=['in_dwi', 'in_bval'],
+            output_names=['out_file'],
+            function=b0_average),
+        name='b0_avg')
+    pick_dws = pe.Node(
+        niu.Function(
+            input_names=['in_dwi', 'in_bval', 'b'],
+            output_names=['out_file'],
+            function=extract_bval),
+        name='ExtractDWI')
     pick_dws.inputs.b = 'diff'
 
     flirt = dwi_flirt(flirt_param=params, excl_nodiff=True)
 
-    mult = pe.MapNode(fsl.BinaryMaths(operation='mul'), name='ModulateDWIs',
-                      iterfield=['in_file', 'operand_value'])
-    thres = pe.MapNode(fsl.Threshold(thresh=0.0), iterfield=['in_file'],
-                       name='RemoveNegative')
+    mult = pe.MapNode(
+        fsl.BinaryMaths(operation='mul'),
+        name='ModulateDWIs',
+        iterfield=['in_file', 'operand_value'])
+    thres = pe.MapNode(
+        fsl.Threshold(thresh=0.0),
+        iterfield=['in_file'],
+        name='RemoveNegative')
 
     split = pe.Node(fsl.Split(dimension='t'), name='SplitDWIs')
-    get_mat = pe.Node(niu.Function(
-        input_names=['in_bval', 'in_xfms'], output_names=['out_files'],
-        function=recompose_xfm), name='GatherMatrices')
-    merge = pe.Node(niu.Function(
-        input_names=['in_dwi', 'in_bval', 'in_corrected'],
-        output_names=['out_file'], function=recompose_dwi), name='MergeDWIs')
+    get_mat = pe.Node(
+        niu.Function(
+            input_names=['in_bval', 'in_xfms'],
+            output_names=['out_files'],
+            function=recompose_xfm),
+        name='GatherMatrices')
+    merge = pe.Node(
+        niu.Function(
+            input_names=['in_dwi', 'in_bval', 'in_corrected'],
+            output_names=['out_file'],
+            function=recompose_dwi),
+        name='MergeDWIs')
 
-    outputnode = pe.Node(niu.IdentityInterface(
-        fields=['out_file', 'out_xfms']), name='outputnode')
+    outputnode = pe.Node(
+        niu.IdentityInterface(fields=['out_file', 'out_xfms']),
+        name='outputnode')
 
     wf = pe.Workflow(name=name)
     wf.connect([
-        (inputnode, avg_b0, [('in_file', 'in_dwi'),
-                             ('in_bval', 'in_bval')]),
-        (inputnode, pick_dws, [('in_file', 'in_dwi'),
-                               ('in_bval', 'in_bval')]),
-        (inputnode, merge, [('in_file', 'in_dwi'),
-                            ('in_bval', 'in_bval')]),
-        (inputnode, flirt, [('in_mask', 'inputnode.ref_mask'),
-                            ('in_xfms', 'inputnode.in_xfms'),
-                            ('in_bval', 'inputnode.in_bval')]),
-        (inputnode, get_mat, [('in_bval', 'in_bval')]),
-        (avg_b0, flirt, [('out_file', 'inputnode.reference')]),
-        (pick_dws, flirt, [('out_file', 'inputnode.in_file')]),
-        (flirt, get_mat, [('outputnode.out_xfms', 'in_xfms')]),
-        (flirt, mult, [(('outputnode.out_xfms', _xfm_jacobian),
-                        'operand_value')]),
-        (flirt, split, [('outputnode.out_file', 'in_file')]),
-        (split, mult, [('out_files', 'in_file')]),
-        (mult, thres, [('out_file', 'in_file')]),
-        (thres, merge, [('out_file', 'in_corrected')]),
-        (get_mat, outputnode, [('out_files', 'out_xfms')]),
-        (merge, outputnode, [('out_file', 'out_file')])
+        (inputnode, avg_b0, [('in_file', 'in_dwi'), ('in_bval', 'in_bval')]),
+        (inputnode, pick_dws, [('in_file', 'in_dwi'), ('in_bval', 'in_bval')]),
+        (inputnode, merge,
+         [('in_file', 'in_dwi'), ('in_bval', 'in_bval')]), (inputnode, flirt, [
+             ('in_mask', 'inputnode.ref_mask'),
+             ('in_xfms', 'inputnode.in_xfms'), ('in_bval', 'inputnode.in_bval')
+         ]), (inputnode, get_mat, [('in_bval', 'in_bval')]), (avg_b0, flirt, [
+             ('out_file', 'inputnode.reference')
+         ]), (pick_dws, flirt, [('out_file', 'inputnode.in_file')]),
+        (flirt, get_mat, [('outputnode.out_xfms', 'in_xfms')]), (flirt, mult, [
+            (('outputnode.out_xfms', _xfm_jacobian), 'operand_value')
+        ]), (flirt, split,
+             [('outputnode.out_file', 'in_file')]), (split, mult, [
+                 ('out_files', 'in_file')
+             ]), (mult, thres, [('out_file', 'in_file')]), (thres, merge, [
+                 ('out_file', 'in_corrected')
+             ]), (get_mat, outputnode,
+                  [('out_files', 'out_xfms')]), (merge, outputnode,
+                                                 [('out_file', 'out_file')])
     ])
     return wf
 
 
-def sdc_fmb(name='fmb_correction', interp='Linear',
+def sdc_fmb(name='fmb_correction',
+            interp='Linear',
             fugue_params=dict(smooth3d=2.0)):
     """
     SDC stands for susceptibility distortion correction. FMB stands for
@@ -562,43 +665,63 @@ def sdc_fmb(name='fmb_correction', interp='Linear',
 
     """
 
-    epi_defaults = {'delta_te': 2.46e-3, 'echospacing': 0.77e-3,
-                    'acc_factor': 2, 'enc_dir': u'AP'}
+    epi_defaults = {
+        'delta_te': 2.46e-3,
+        'echospacing': 0.77e-3,
+        'acc_factor': 2,
+        'enc_dir': u'AP'
+    }
 
-    inputnode = pe.Node(niu.IdentityInterface(
-        fields=['in_file', 'in_ref', 'in_mask', 'bmap_pha', 'bmap_mag',
-                'settings']), name='inputnode')
+    inputnode = pe.Node(
+        niu.IdentityInterface(fields=[
+            'in_file', 'in_ref', 'in_mask', 'bmap_pha', 'bmap_mag', 'settings'
+        ]),
+        name='inputnode')
 
-    outputnode = pe.Node(niu.IdentityInterface(
-        fields=['out_file', 'out_vsm', 'out_warp']), name='outputnode')
+    outputnode = pe.Node(
+        niu.IdentityInterface(fields=['out_file', 'out_vsm', 'out_warp']),
+        name='outputnode')
 
-    r_params = pe.Node(JSONFileGrabber(defaults=epi_defaults),
-                       name='SettingsGrabber')
-    eff_echo = pe.Node(niu.Function(function=_eff_t_echo,
-                                    input_names=['echospacing', 'acc_factor'],
-                                    output_names=['eff_echo']), name='EffEcho')
+    r_params = pe.Node(
+        JSONFileGrabber(defaults=epi_defaults), name='SettingsGrabber')
+    eff_echo = pe.Node(
+        niu.Function(
+            function=_eff_t_echo,
+            input_names=['echospacing', 'acc_factor'],
+            output_names=['eff_echo']),
+        name='EffEcho')
 
     firstmag = pe.Node(fsl.ExtractROI(t_min=0, t_size=1), name='GetFirst')
     n4 = pe.Node(ants.N4BiasFieldCorrection(dimension=3), name='Bias')
     bet = pe.Node(fsl.BET(frac=0.4, mask=True), name='BrainExtraction')
-    dilate = pe.Node(fsl.maths.MathsCommand(
-        nan2zeros=True, args='-kernel sphere 5 -dilM'), name='MskDilate')
-    pha2rads = pe.Node(niu.Function(
-        input_names=['in_file'], output_names=['out_file'],
-        function=siemens2rads), name='PreparePhase')
+    dilate = pe.Node(
+        fsl.maths.MathsCommand(nan2zeros=True, args='-kernel sphere 5 -dilM'),
+        name='MskDilate')
+    pha2rads = pe.Node(
+        niu.Function(
+            input_names=['in_file'],
+            output_names=['out_file'],
+            function=siemens2rads),
+        name='PreparePhase')
     prelude = pe.Node(fsl.PRELUDE(process3d=True), name='PhaseUnwrap')
-    rad2rsec = pe.Node(niu.Function(
-        input_names=['in_file', 'delta_te'], output_names=['out_file'],
-        function=rads2radsec), name='ToRadSec')
+    rad2rsec = pe.Node(
+        niu.Function(
+            input_names=['in_file', 'delta_te'],
+            output_names=['out_file'],
+            function=rads2radsec),
+        name='ToRadSec')
 
-    baseline = pe.Node(niu.Function(
-        input_names=['in_file', 'index'], output_names=['out_file'],
-        function=time_avg), name='Baseline')
+    baseline = pe.Node(
+        niu.Function(
+            input_names=['in_file', 'index'],
+            output_names=['out_file'],
+            function=time_avg),
+        name='Baseline')
 
-    fmm2b0 = pe.Node(ants.Registration(output_warped_image=True),
-                     name="FMm_to_B0")
+    fmm2b0 = pe.Node(
+        ants.Registration(output_warped_image=True), name="FMm_to_B0")
     fmm2b0.inputs.transforms = ['Rigid'] * 2
-    fmm2b0.inputs.transform_parameters = [(1.0,)] * 2
+    fmm2b0.inputs.transform_parameters = [(1.0, )] * 2
     fmm2b0.inputs.number_of_iterations = [[50], [20]]
     fmm2b0.inputs.dimension = 3
     fmm2b0.inputs.metric = ['Mattes', 'Mattes']
@@ -617,99 +740,110 @@ def sdc_fmb(name='fmb_correction', interp='Linear',
     fmm2b0.inputs.collapse_output_transforms = True
     fmm2b0.inputs.winsorize_upper_quantile = 0.995
 
-    applyxfm = pe.Node(ants.ApplyTransforms(
-        dimension=3, interpolation=interp), name='FMp_to_B0')
+    applyxfm = pe.Node(
+        ants.ApplyTransforms(dimension=3, interpolation=interp),
+        name='FMp_to_B0')
 
     pre_fugue = pe.Node(fsl.FUGUE(save_fmap=True), name='PreliminaryFugue')
-    demean = pe.Node(niu.Function(
-        input_names=['in_file', 'in_mask'], output_names=['out_file'],
-        function=demean_image), name='DemeanFmap')
+    demean = pe.Node(
+        niu.Function(
+            input_names=['in_file', 'in_mask'],
+            output_names=['out_file'],
+            function=demean_image),
+        name='DemeanFmap')
 
     cleanup = cleanup_edge_pipeline()
 
-    addvol = pe.Node(niu.Function(
-        input_names=['in_file'], output_names=['out_file'],
-        function=add_empty_vol), name='AddEmptyVol')
+    addvol = pe.Node(
+        niu.Function(
+            input_names=['in_file'],
+            output_names=['out_file'],
+            function=add_empty_vol),
+        name='AddEmptyVol')
 
-    vsm = pe.Node(fsl.FUGUE(save_shift=True, **fugue_params),
-                  name="ComputeVSM")
+    vsm = pe.Node(
+        fsl.FUGUE(save_shift=True, **fugue_params), name="ComputeVSM")
 
     split = pe.Node(fsl.Split(dimension='t'), name='SplitDWIs')
     merge = pe.Node(fsl.Merge(dimension='t'), name='MergeDWIs')
-    unwarp = pe.MapNode(fsl.FUGUE(icorr=True, forward_warping=False),
-                        iterfield=['in_file'], name='UnwarpDWIs')
-    thres = pe.MapNode(fsl.Threshold(thresh=0.0), iterfield=['in_file'],
-                       name='RemoveNegative')
+    unwarp = pe.MapNode(
+        fsl.FUGUE(icorr=True, forward_warping=False),
+        iterfield=['in_file'],
+        name='UnwarpDWIs')
+    thres = pe.MapNode(
+        fsl.Threshold(thresh=0.0),
+        iterfield=['in_file'],
+        name='RemoveNegative')
     vsm2dfm = vsm2warp()
     vsm2dfm.inputs.inputnode.scaling = 1.0
 
     wf = pe.Workflow(name=name)
     wf.connect([
-        (inputnode, r_params, [('settings', 'in_file')]),
-        (r_params, eff_echo, [('echospacing', 'echospacing'),
-                              ('acc_factor', 'acc_factor')]),
-        (inputnode, pha2rads, [('bmap_pha', 'in_file')]),
-        (inputnode, firstmag, [('bmap_mag', 'in_file')]),
-        (inputnode, baseline, [('in_file', 'in_file'),
-                               ('in_ref', 'index')]),
-        (firstmag, n4, [('roi_file', 'input_image')]),
-        (n4, bet, [('output_image', 'in_file')]),
-        (bet, dilate, [('mask_file', 'in_file')]),
-        (pha2rads, prelude, [('out_file', 'phase_file')]),
-        (n4, prelude, [('output_image', 'magnitude_file')]),
-        (dilate, prelude, [('out_file', 'mask_file')]),
-        (r_params, rad2rsec, [('delta_te', 'delta_te')]),
-        (prelude, rad2rsec, [('unwrapped_phase_file', 'in_file')]),
-
-        (baseline, fmm2b0, [('out_file', 'fixed_image')]),
-        (n4, fmm2b0, [('output_image', 'moving_image')]),
-        (inputnode, fmm2b0, [('in_mask', 'fixed_image_mask')]),
-        (dilate, fmm2b0, [('out_file', 'moving_image_mask')]),
-
-        (baseline, applyxfm, [('out_file', 'reference_image')]),
-        (rad2rsec, applyxfm, [('out_file', 'input_image')]),
-        (fmm2b0, applyxfm, [
-            ('forward_transforms', 'transforms'),
-            ('forward_invert_flags', 'invert_transform_flags')]),
-
-        (applyxfm, pre_fugue, [('output_image', 'fmap_in_file')]),
-        (inputnode, pre_fugue, [('in_mask', 'mask_file')]),
-        (pre_fugue, demean, [('fmap_out_file', 'in_file')]),
-        (inputnode, demean, [('in_mask', 'in_mask')]),
-        (demean, cleanup, [('out_file', 'inputnode.in_file')]),
-        (inputnode, cleanup, [('in_mask', 'inputnode.in_mask')]),
-        (cleanup, addvol, [('outputnode.out_file', 'in_file')]),
-        (inputnode, vsm, [('in_mask', 'mask_file')]),
-        (addvol, vsm, [('out_file', 'fmap_in_file')]),
-        (r_params, vsm, [('delta_te', 'asym_se_time')]),
-        (eff_echo, vsm, [('eff_echo', 'dwell_time')]),
-        (inputnode, split, [('in_file', 'in_file')]),
-        (split, unwarp, [('out_files', 'in_file')]),
-        (vsm, unwarp, [('shift_out_file', 'shift_in_file')]),
-        (r_params, unwarp, [
-            (('enc_dir', _fix_enc_dir), 'unwarp_direction')]),
-        (unwarp, thres, [('unwarped_file', 'in_file')]),
-        (thres, merge, [('out_file', 'in_files')]),
-        (r_params, vsm2dfm, [
-            (('enc_dir', _fix_enc_dir), 'inputnode.enc_dir')]),
-        (merge, vsm2dfm, [('merged_file', 'inputnode.in_ref')]),
-        (vsm, vsm2dfm, [('shift_out_file', 'inputnode.in_vsm')]),
-        (merge, outputnode, [('merged_file', 'out_file')]),
-        (vsm, outputnode, [('shift_out_file', 'out_vsm')]),
-        (vsm2dfm, outputnode, [('outputnode.out_warp', 'out_warp')])
+        (inputnode, r_params,
+         [('settings', 'in_file')]), (r_params, eff_echo, [
+             ('echospacing', 'echospacing'), ('acc_factor', 'acc_factor')
+         ]), (inputnode, pha2rads,
+              [('bmap_pha', 'in_file')]), (inputnode, firstmag,
+                                           [('bmap_mag', 'in_file')]),
+        (inputnode, baseline,
+         [('in_file', 'in_file'), ('in_ref', 'index')]), (firstmag, n4, [
+             ('roi_file', 'input_image')
+         ]), (n4, bet, [('output_image', 'in_file')]), (bet, dilate, [
+             ('mask_file', 'in_file')
+         ]), (pha2rads, prelude, [('out_file', 'phase_file')]), (n4, prelude, [
+             ('output_image', 'magnitude_file')
+         ]), (dilate, prelude, [('out_file', 'mask_file')]),
+        (r_params, rad2rsec, [('delta_te', 'delta_te')]), (prelude, rad2rsec, [
+            ('unwrapped_phase_file', 'in_file')
+        ]), (baseline, fmm2b0, [('out_file', 'fixed_image')]), (n4, fmm2b0, [
+            ('output_image', 'moving_image')
+        ]), (inputnode, fmm2b0,
+             [('in_mask', 'fixed_image_mask')]), (dilate, fmm2b0, [
+                 ('out_file', 'moving_image_mask')
+             ]), (baseline, applyxfm, [('out_file', 'reference_image')]),
+        (rad2rsec, applyxfm,
+         [('out_file', 'input_image')]), (fmm2b0, applyxfm, [
+             ('forward_transforms', 'transforms'), ('forward_invert_flags',
+                                                    'invert_transform_flags')
+         ]), (applyxfm, pre_fugue,
+              [('output_image', 'fmap_in_file')]), (inputnode, pre_fugue, [
+                  ('in_mask', 'mask_file')
+              ]), (pre_fugue, demean,
+                   [('fmap_out_file', 'in_file')]), (inputnode, demean, [
+                       ('in_mask', 'in_mask')
+                   ]), (demean, cleanup, [('out_file', 'inputnode.in_file')]),
+        (inputnode, cleanup,
+         [('in_mask', 'inputnode.in_mask')]), (cleanup, addvol, [
+             ('outputnode.out_file', 'in_file')
+         ]), (inputnode, vsm, [('in_mask', 'mask_file')]), (addvol, vsm, [
+             ('out_file', 'fmap_in_file')
+         ]), (r_params, vsm, [('delta_te', 'asym_se_time')]), (eff_echo, vsm, [
+             ('eff_echo', 'dwell_time')
+         ]), (inputnode, split, [('in_file', 'in_file')]), (split, unwarp, [
+             ('out_files', 'in_file')
+         ]), (vsm, unwarp,
+              [('shift_out_file', 'shift_in_file')]), (r_params, unwarp, [
+                  (('enc_dir', _fix_enc_dir), 'unwarp_direction')
+              ]), (unwarp, thres, [('unwarped_file', 'in_file')]),
+        (thres, merge, [('out_file', 'in_files')]), (r_params, vsm2dfm, [
+            (('enc_dir', _fix_enc_dir), 'inputnode.enc_dir')
+        ]), (merge, vsm2dfm,
+             [('merged_file', 'inputnode.in_ref')]), (vsm, vsm2dfm, [
+                 ('shift_out_file', 'inputnode.in_vsm')
+             ]), (merge, outputnode,
+                  [('merged_file', 'out_file')]), (vsm, outputnode, [
+                      ('shift_out_file', 'out_vsm')
+                  ]), (vsm2dfm, outputnode, [('outputnode.out_warp',
+                                              'out_warp')])
     ])
     return wf
 
 
 def sdc_peb(name='peb_correction',
-            epi_params=dict(echospacing=0.77e-3,
-                            acc_factor=3,
-                            enc_dir='y-',
-                            epi_factor=1),
-            altepi_params=dict(echospacing=0.77e-3,
-                               acc_factor=3,
-                               enc_dir='y',
-                               epi_factor=1)):
+            epi_params=dict(
+                echospacing=0.77e-3, acc_factor=3, enc_dir='y-', epi_factor=1),
+            altepi_params=dict(
+                echospacing=0.77e-3, acc_factor=3, enc_dir='y', epi_factor=1)):
     """
     SDC stands for susceptibility distortion correction. PEB stands for
     phase-encoding-based.
@@ -752,11 +886,13 @@ def sdc_peb(name='peb_correction',
 
     """
 
-    inputnode = pe.Node(niu.IdentityInterface(
-        fields=['in_file', 'in_bval', 'in_mask', 'alt_file', 'ref_num']),
+    inputnode = pe.Node(
+        niu.IdentityInterface(
+            fields=['in_file', 'in_bval', 'in_mask', 'alt_file', 'ref_num']),
         name='inputnode')
-    outputnode = pe.Node(niu.IdentityInterface(
-        fields=['out_file', 'out_vsm', 'out_warp']), name='outputnode')
+    outputnode = pe.Node(
+        niu.IdentityInterface(fields=['out_file', 'out_vsm', 'out_warp']),
+        name='outputnode')
 
     b0_ref = pe.Node(fsl.ExtractROI(t_size=1), name='b0_ref')
     b0_alt = pe.Node(fsl.ExtractROI(t_size=1), name='b0_alt')
@@ -764,12 +900,12 @@ def sdc_peb(name='peb_correction',
     b0_merge = pe.Node(fsl.Merge(dimension='t'), name='b0_merged')
 
     topup = pe.Node(fsl.TOPUP(), name='topup')
-    topup.inputs.encoding_direction = [epi_params['enc_dir'],
-                                       altepi_params['enc_dir']]
+    topup.inputs.encoding_direction = [
+        epi_params['enc_dir'], altepi_params['enc_dir']
+    ]
 
     readout = compute_readout(epi_params)
-    topup.inputs.readout_times = [readout,
-                                  compute_readout(altepi_params)]
+    topup.inputs.readout_times = [readout, compute_readout(altepi_params)]
 
     unwarp = pe.Node(fsl.ApplyTOPUP(in_index=[1], method='jac'), name='unwarp')
 
@@ -783,10 +919,10 @@ def sdc_peb(name='peb_correction',
 
     wf = pe.Workflow(name=name)
     wf.connect([
-        (inputnode, b0_ref, [('in_file', 'in_file'),
-                             (('ref_num', _checkrnum), 't_min')]),
-        (inputnode, b0_alt, [('alt_file', 'in_file'),
-                             (('ref_num', _checkrnum), 't_min')]),
+        (inputnode, b0_ref, [('in_file', 'in_file'), (('ref_num', _checkrnum),
+                                                      't_min')]),
+        (inputnode, b0_alt, [('alt_file', 'in_file'), (('ref_num', _checkrnum),
+                                                       't_min')]),
         (b0_ref, b0_comb, [('roi_file', 'in1')]),
         (b0_alt, b0_comb, [('roi_file', 'in2')]),
         (b0_comb, b0_merge, [('out', 'in_files')]),
@@ -830,38 +966,45 @@ def remove_bias(name='bias_correct'):
     >>> bias.run() # doctest: +SKIP
 
     """
-    inputnode = pe.Node(niu.IdentityInterface(
-        fields=['in_file', 'in_bval', 'in_mask']), name='inputnode')
+    inputnode = pe.Node(
+        niu.IdentityInterface(fields=['in_file', 'in_bval', 'in_mask']),
+        name='inputnode')
 
-    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file']),
-                         name='outputnode')
+    outputnode = pe.Node(
+        niu.IdentityInterface(fields=['out_file']), name='outputnode')
 
-    avg_b0 = pe.Node(niu.Function(
-        input_names=['in_dwi', 'in_bval'], output_names=['out_file'],
-        function=b0_average), name='b0_avg')
-    n4 = pe.Node(ants.N4BiasFieldCorrection(
-        dimension=3, save_bias=True, bspline_fitting_distance=600),
+    avg_b0 = pe.Node(
+        niu.Function(
+            input_names=['in_dwi', 'in_bval'],
+            output_names=['out_file'],
+            function=b0_average),
+        name='b0_avg')
+    n4 = pe.Node(
+        ants.N4BiasFieldCorrection(
+            dimension=3, save_bias=True, bspline_fitting_distance=600),
         name='Bias_b0')
     split = pe.Node(fsl.Split(dimension='t'), name='SplitDWIs')
-    mult = pe.MapNode(fsl.MultiImageMaths(op_string='-div %s'),
-                      iterfield=['in_file'], name='RemoveBiasOfDWIs')
-    thres = pe.MapNode(fsl.Threshold(thresh=0.0), iterfield=['in_file'],
-                       name='RemoveNegative')
+    mult = pe.MapNode(
+        fsl.MultiImageMaths(op_string='-div %s'),
+        iterfield=['in_file'],
+        name='RemoveBiasOfDWIs')
+    thres = pe.MapNode(
+        fsl.Threshold(thresh=0.0),
+        iterfield=['in_file'],
+        name='RemoveNegative')
     merge = pe.Node(fsl.utils.Merge(dimension='t'), name='MergeDWIs')
 
     wf = pe.Workflow(name=name)
-    wf.connect([
-        (inputnode, avg_b0, [('in_file', 'in_dwi'),
-                             ('in_bval', 'in_bval')]),
-        (avg_b0, n4, [('out_file', 'input_image')]),
-        (inputnode, n4, [('in_mask', 'mask_image')]),
-        (inputnode, split, [('in_file', 'in_file')]),
-        (n4, mult, [('bias_image', 'operand_files')]),
-        (split, mult, [('out_files', 'in_file')]),
-        (mult, thres, [('out_file', 'in_file')]),
-        (thres, merge, [('out_file', 'in_files')]),
-        (merge, outputnode, [('merged_file', 'out_file')])
-    ])
+    wf.connect([(inputnode, avg_b0, [
+        ('in_file', 'in_dwi'), ('in_bval', 'in_bval')
+    ]), (avg_b0, n4, [('out_file', 'input_image')]), (inputnode, n4, [
+        ('in_mask', 'mask_image')
+    ]), (inputnode, split, [('in_file', 'in_file')]), (n4, mult, [
+        ('bias_image', 'operand_files')
+    ]), (split, mult, [('out_files', 'in_file')]), (mult, thres,
+                                                    [('out_file', 'in_file')]),
+                (thres, merge, [('out_file', 'in_files')]),
+                (merge, outputnode, [('merged_file', 'out_file')])])
     return wf
 
 

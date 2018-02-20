@@ -17,7 +17,7 @@ set fmri(level) 1
 # 2 :             Stats
 # 6 :             Stats + Post-stats
 # 4 :                     Post-stats
-set fmri(analysis) $analysis_stages 
+set fmri(analysis) $analysis_stages
 
 # Use relative filenames
 set fmri(relative_yn) 0
@@ -57,7 +57,7 @@ set fmri(inputtype) 1
 # Carry out pre-stats processing?
 set fmri(filtering_yn) 0
 
-# Brain/background threshold, 
+# Brain/background threshold,
 set fmri(brain_thresh) 10
 
 # Critical z for design efficiency calculation
@@ -157,7 +157,7 @@ set fmri(evs_real) $num_evs
 set fmri(evs_vox) 0
 
 # Number of contrasts
-set fmri(ncon_orig) $num_contrasts 
+set fmri(ncon_orig) $num_contrasts
 set fmri(ncon_real) $num_contrasts
 
 # Number of F-tests
@@ -259,7 +259,7 @@ set fmri(regstandard_dof) 12
 set fmri(regstandard_nonlinear_yn) 0
 
 # Control nonlinear warp field resolution
-set fmri(regstandard_nonlinear_warpres) 10 
+set fmri(regstandard_nonlinear_warpres) 10
 
 # High pass filter cutoff
 set fmri(paradigm_hp) 100

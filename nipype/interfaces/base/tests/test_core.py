@@ -18,6 +18,7 @@ standard_library.install_aliases()
 
 def check_dict(ref_dict, tst_dict):
     """Compare dictionaries of inputs and and those loaded from json files"""
+
     def to_list(x):
         if isinstance(x, tuple):
             x = list(x)
@@ -135,8 +136,7 @@ def test_BaseInterface_load_save_inputs(tmpdir):
         def __init__(self, **inputs):
             super(DerivedInterface, self).__init__(**inputs)
 
-    inputs_dict = {'input1': 12, 'input3': True,
-                   'input4': 'some string'}
+    inputs_dict = {'input1': 12, 'input3': True, 'input4': 'some string'}
     bif = DerivedInterface(**inputs_dict)
     bif.save_inputs_to_json(tmp_json)
     bif2 = DerivedInterface()
@@ -161,7 +161,8 @@ def test_BaseInterface_load_save_inputs(tmpdir):
 
     # test get hashval in a complex interface
     from nipype.interfaces.ants import Registration
-    settings = example_data(example_data('smri_ants_registration_settings.json'))
+    settings = example_data(
+        example_data('smri_ants_registration_settings.json'))
     with open(settings) as setf:
         data_dict = json.load(setf)
 
@@ -176,69 +177,77 @@ def test_BaseInterface_load_save_inputs(tmpdir):
     assert 'ec5755e07287e04a4b409e03b77a517c' == hashvalue
 
 
-def test_input_version():
-    class InputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int', min_ver='0.9')
+class MinVerInputSpec(nib.TraitedSpec):
+    foo = nib.traits.Int(desc='a random int', min_ver='0.9')
 
+class MaxVerInputSpec(nib.TraitedSpec):
+    foo = nib.traits.Int(desc='a random int', max_ver='0.7')
+
+
+def test_input_version_1():
     class DerivedInterface1(nib.BaseInterface):
-        input_spec = InputSpec
+        input_spec = MinVerInputSpec
+
     obj = DerivedInterface1()
     obj._check_version_requirements(obj.inputs)
 
     config.set('execution', 'stop_on_unknown_version', True)
 
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError) as excinfo:
         obj._check_version_requirements(obj.inputs)
+    assert "no version information" in str(excinfo.value)
 
     config.set_default_config()
 
-    class InputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int', min_ver='0.9')
 
+def test_input_version_2():
     class DerivedInterface1(nib.BaseInterface):
-        input_spec = InputSpec
+        input_spec = MinVerInputSpec
         _version = '0.8'
+
     obj = DerivedInterface1()
     obj.inputs.foo = 1
-    with pytest.raises(Exception):
-        obj._check_version_requirements()
+    with pytest.raises(Exception) as excinfo:
+        obj._check_version_requirements(obj.inputs)
+    assert "version 0.8 < required 0.9" in str(excinfo.value)
 
-    class InputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int', min_ver='0.9')
 
+def test_input_version_3():
     class DerivedInterface1(nib.BaseInterface):
-        input_spec = InputSpec
+        input_spec = MinVerInputSpec
         _version = '0.10'
+
     obj = DerivedInterface1()
     obj._check_version_requirements(obj.inputs)
 
-    class InputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int', min_ver='0.9')
 
+def test_input_version_4():
     class DerivedInterface1(nib.BaseInterface):
-        input_spec = InputSpec
+        input_spec = MinVerInputSpec
         _version = '0.9'
+
     obj = DerivedInterface1()
     obj.inputs.foo = 1
     obj._check_version_requirements(obj.inputs)
 
-    class InputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int', max_ver='0.7')
 
+def test_input_version_5():
     class DerivedInterface2(nib.BaseInterface):
-        input_spec = InputSpec
+        input_spec = MaxVerInputSpec
         _version = '0.8'
+
     obj = DerivedInterface2()
     obj.inputs.foo = 1
-    with pytest.raises(Exception):
-        obj._check_version_requirements()
+    with pytest.raises(Exception) as excinfo:
+        obj._check_version_requirements(obj.inputs)
+    assert "version 0.8 > required 0.7" in str(excinfo.value)
 
-    class InputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int', max_ver='0.9')
 
+def test_input_version_6():
     class DerivedInterface1(nib.BaseInterface):
-        input_spec = InputSpec
-        _version = '0.9'
+        input_spec = MaxVerInputSpec
+        _version = '0.7'
+
     obj = DerivedInterface1()
     obj.inputs.foo = 1
     obj._check_version_requirements(obj.inputs)
@@ -292,6 +301,7 @@ def test_output_version():
 
         def _list_outputs(self):
             return {'foo': 1}
+
     obj = DerivedInterface1()
     with pytest.raises(KeyError):
         obj.run()
@@ -316,8 +326,8 @@ def test_Commandline():
         foo = nib.Str(argstr='%s', desc='a str')
         goo = nib.traits.Bool(argstr='-g', desc='a bool', position=0)
         hoo = nib.traits.List(argstr='-l %s', desc='a list')
-        moo = nib.traits.List(argstr='-i %d...', desc='a repeated list',
-                              position=-1)
+        moo = nib.traits.List(
+            argstr='-i %d...', desc='a repeated list', position=-1)
         noo = nib.traits.Int(argstr='-x %d', desc='an int')
         roo = nib.traits.Str(desc='not on command line')
         soo = nib.traits.Bool(argstr="-soo")
@@ -342,6 +352,7 @@ def test_Commandline():
 
     class CommandLineInputSpec2(nib.CommandLineInputSpec):
         foo = nib.File(argstr='%s', desc='a str', genfile=True)
+
     nib.CommandLine.input_spec = CommandLineInputSpec2
     ci5 = nib.CommandLine(command='cmd')
     with pytest.raises(NotImplementedError):
@@ -471,3 +482,38 @@ def test_global_CommandLine_output(tmpdir):
     # Check default affects derived interfaces
     ci = BET()
     assert ci.terminal_output == 'file'
+
+
+def test_CommandLine_prefix(tmpdir):
+    tmpdir.chdir()
+    oop = 'out/of/path'
+    os.makedirs(oop)
+
+    script_name = 'test_script.sh'
+    script_path = os.path.join(oop, script_name)
+    with open(script_path, 'w') as script_f:
+        script_f.write('#!/usr/bin/env bash\necho Success!')
+    os.chmod(script_path, 0o755)
+
+    ci = nib.CommandLine(command=script_name)
+    with pytest.raises(IOError):
+        ci.run()
+
+    class OOPCLI(nib.CommandLine):
+        _cmd_prefix = oop + '/'
+
+    ci = OOPCLI(command=script_name)
+    ci.run()
+
+    class OOPShell(nib.CommandLine):
+        _cmd_prefix = 'bash {}/'.format(oop)
+
+    ci = OOPShell(command=script_name)
+    ci.run()
+
+    class OOPBadShell(nib.CommandLine):
+        _cmd_prefix = 'shell_dne {}/'.format(oop)
+
+    ci = OOPBadShell(command=script_name)
+    with pytest.raises(IOError):
+        ci.run()

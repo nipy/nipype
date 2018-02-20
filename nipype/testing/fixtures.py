@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-
 """
 Pytest fixtures used in tests.
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
-
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import os
 import pytest
@@ -41,7 +40,7 @@ def nifti_image_files(outdir, filelist, shape):
 def create_files_in_directory(request, tmpdir):
     cwd = tmpdir.chdir()
     filelist = ['a.nii', 'b.nii']
-    nifti_image_files(tmpdir.strpath, filelist, shape=(3,3,3,4))
+    nifti_image_files(tmpdir.strpath, filelist, shape=(3, 3, 3, 4))
 
     def change_directory():
         cwd.chdir()
@@ -67,7 +66,7 @@ def create_analyze_pair_file_in_directory(request, tmpdir):
 def create_files_in_directory_plus_dummy_file(request, tmpdir):
     cwd = tmpdir.chdir()
     filelist = ['a.nii', 'b.nii']
-    nifti_image_files(tmpdir.strpath, filelist, shape=(3,3,3,4))
+    nifti_image_files(tmpdir.strpath, filelist, shape=(3, 3, 3, 4))
 
     tmpdir.join('reg.dat').write('dummy file')
     filelist.append('reg.dat')
@@ -103,12 +102,13 @@ def set_output_type(fsl_output_type):
     FSLCommand.set_default_output_type(Info.output_type())
     return prev_output_type
 
-@pytest.fixture(params=[None]+list(Info.ftypes))
+
+@pytest.fixture(params=[None] + list(Info.ftypes))
 def create_files_in_directory_plus_output_type(request, tmpdir):
     func_prev_type = set_output_type(request.param)
     origdir = tmpdir.chdir()
     filelist = ['a.nii', 'b.nii']
-    nifti_image_files(tmpdir.strpath, filelist, shape=(3,3,3,4))
+    nifti_image_files(tmpdir.strpath, filelist, shape=(3, 3, 3, 4))
 
     out_ext = Info.output_type_to_ext(Info.output_type())
 

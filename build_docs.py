@@ -8,7 +8,8 @@ To use this code, run::
 
     python setup.py build_sphinx
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import open, str
 
 # Standard library imports
@@ -28,7 +29,7 @@ exec(str(open(_info_fname, 'rt').read()), {}, INFO_VARS)
 DOC_BUILD_DIR = os.path.join('doc', '_build', 'html')
 DOC_DOCTREES_DIR = os.path.join('doc', '_build', 'doctrees')
 
-################################################################################
+###############################################################################
 # Distutils Command class for installing nipype to a temporary location.
 
 
@@ -63,7 +64,7 @@ class TempInstall(Command):
         pass
 
 
-################################################################################
+###############################################################################
 # Distutils Command class for API generation
 class APIDocs(TempInstall):
     description = \
@@ -93,7 +94,7 @@ class APIDocs(TempInstall):
             os.chdir('..')
 
 
-################################################################################
+###############################################################################
 # Code to copy the sphinx-generated html docs in the distribution.
 def relative_path(filename):
     """ Return the relative path to the file, assuming the file is
@@ -103,7 +104,7 @@ def relative_path(filename):
     return os.path.abspath(filename)[length:]
 
 
-################################################################################
+###############################################################################
 # Distutils Command class build the docs
 # Sphinx import.
 try:
@@ -165,7 +166,7 @@ else:
             self.build_dir = os.path.join(*DOC_BUILD_DIR.split(os.sep)[:-1])
             BuildDoc.finalize_options(self)
 
-################################################################################
+###############################################################################
 # Distutils Command class to clean
 
 

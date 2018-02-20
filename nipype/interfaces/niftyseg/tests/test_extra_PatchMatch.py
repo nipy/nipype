@@ -9,8 +9,8 @@ from ...niftyreg.tests.test_regutils import no_nifty_tool
 from .. import PatchMatch
 
 
-@pytest.mark.skipif(no_nifty_tool(cmd='seg_PatchMatch'),
-                    reason="niftyseg is not installed")
+@pytest.mark.skipif(
+    no_nifty_tool(cmd='seg_PatchMatch'), reason="niftyseg is not installed")
 def test_seg_patchmatch():
 
     # Create a node object

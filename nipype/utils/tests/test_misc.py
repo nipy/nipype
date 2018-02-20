@@ -4,12 +4,14 @@
 from future import standard_library
 standard_library.install_aliases()
 
+import os
+from shutil import rmtree
 from builtins import next
 
 import pytest
 
-from nipype.utils.misc import (container_to_string, str2bool,
-                               flatten, unflatten)
+from nipype.utils.misc import (container_to_string, str2bool, flatten,
+                               unflatten)
 
 
 def test_cont_to_str():
@@ -34,10 +36,10 @@ def test_cont_to_str():
     assert (container_to_string(123) == '123')
 
 
-@pytest.mark.parametrize("string, expected", [
-        ("yes", True), ("true", True), ("t", True), ("1", True),
-        ("no", False), ("false", False), ("n", False), ("f", False), ("0", False)
-        ])
+@pytest.mark.parametrize("string, expected",
+                         [("yes", True), ("true", True), ("t", True),
+                          ("1", True), ("no", False), ("false", False),
+                          ("n", False), ("f", False), ("0", False)])
 def test_str2bool(string, expected):
     assert str2bool(string) == expected
 
@@ -60,3 +62,30 @@ def test_flatten():
 
     back = unflatten([], [])
     assert back == []
+
+
+def test_rgetcwd(monkeypatch, tmpdir):
+    from ..misc import rgetcwd
+    oldpath = tmpdir.strpath
+    tmpdir.mkdir("sub").chdir()
+    newpath = os.getcwd()
+
+    # Path still there
+    assert rgetcwd() == newpath
+
+    # Remove path
+    rmtree(newpath, ignore_errors=True)
+    with pytest.raises(OSError):
+        os.getcwd()
+
+    monkeypatch.setenv('PWD', oldpath)
+    assert rgetcwd(error=False) == oldpath
+
+    # Test when error should be raised
+    with pytest.raises(OSError):
+        rgetcwd()
+
+    # Deleted env variable
+    monkeypatch.delenv('PWD')
+    with pytest.raises(OSError):
+        rgetcwd(error=False)

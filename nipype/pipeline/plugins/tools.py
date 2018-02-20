@@ -3,7 +3,8 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Common graph operations for execution
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import open
 
 import os
@@ -15,7 +16,7 @@ from time import strftime
 from traceback import format_exception
 
 from ... import logging
-from ...utils.filemanip import savepkl, crash2txt
+from ...utils.filemanip import savepkl, crash2txt, makedirs
 
 logger = logging.getLogger('workflow')
 
@@ -38,12 +39,11 @@ def report_crash(node, traceback=None, hostname=None):
         traceback = format_exception(*sys.exc_info())
     timeofcrash = strftime('%Y%m%d-%H%M%S')
     login_name = getpass.getuser()
-    crashfile = 'crash-%s-%s-%s-%s' % (
-        timeofcrash, login_name, name, str(uuid.uuid4()))
+    crashfile = 'crash-%s-%s-%s-%s' % (timeofcrash, login_name, name,
+                                       str(uuid.uuid4()))
     crashdir = node.config['execution'].get('crashdump_dir', os.getcwd())
 
-    if not os.path.exists(crashdir):
-        os.makedirs(crashdir)
+    makedirs(crashdir, exist_ok=True)
     crashfile = os.path.join(crashdir, crashfile)
 
     if node.config['execution']['crashfile_format'].lower() in ['text', 'txt']:
@@ -68,9 +68,8 @@ def report_nodes_not_run(notrun):
     if notrun:
         logger.info("***********************************")
         for info in notrun:
-            logger.error("could not run node: %s" %
-                         '.'.join((info['node']._hierarchy,
-                                   info['node']._id)))
+            logger.error("could not run node: %s" % '.'.join(
+                (info['node']._hierarchy, info['node']._id)))
             logger.info("crashfile: %s" % info['crashfile'])
             logger.debug("The following dependent nodes were not run")
             for subnode in info['dependents']:
@@ -86,8 +85,7 @@ def create_pyscript(node, updatehash=False, store_exception=True):
     if node._hierarchy:
         suffix = '%s_%s_%s' % (timestamp, node._hierarchy, node._id)
         batch_dir = os.path.join(node.base_dir,
-                                 node._hierarchy.split('.')[0],
-                                 'batch')
+                                 node._hierarchy.split('.')[0], 'batch')
     else:
         suffix = '%s_%s' % (timestamp, node._id)
         batch_dir = os.path.join(node.base_dir, 'batch')

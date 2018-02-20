@@ -9,7 +9,8 @@ Provides interfaces to various commands provided by Camino-Trackvis
     >>> os.chdir(datadir)
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import os
 
@@ -18,26 +19,54 @@ from ..base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
 
 
 class Camino2TrackvisInputSpec(CommandLineInputSpec):
-    in_file = File(exists=True, argstr='-i %s', mandatory=True, position=1,
-                   desc='The input .Bfloat (camino) file.')
+    in_file = File(
+        exists=True,
+        argstr='-i %s',
+        mandatory=True,
+        position=1,
+        desc='The input .Bfloat (camino) file.')
 
-    out_file = File(argstr='-o %s', genfile=True, position=2,
-                    desc='The filename to which to write the .trk (trackvis) file.')
+    out_file = File(
+        argstr='-o %s',
+        genfile=True,
+        position=2,
+        desc='The filename to which to write the .trk (trackvis) file.')
 
-    min_length = traits.Float(argstr='-l %d', position=3,
-                              units='mm', desc='The minimum length of tracts to output')
+    min_length = traits.Float(
+        argstr='-l %d',
+        position=3,
+        units='mm',
+        desc='The minimum length of tracts to output')
 
-    data_dims = traits.List(traits.Int, argstr='-d %s', sep=',',
-                            mandatory=True, position=4, minlen=3, maxlen=3,
-                            desc='Three comma-separated integers giving the number of voxels along each dimension of the source scans.')
+    data_dims = traits.List(
+        traits.Int,
+        argstr='-d %s',
+        sep=',',
+        mandatory=True,
+        position=4,
+        minlen=3,
+        maxlen=3,
+        desc=
+        'Three comma-separated integers giving the number of voxels along each dimension of the source scans.'
+    )
 
-    voxel_dims = traits.List(traits.Float, argstr='-x %s', sep=',',
-                             mandatory=True, position=5, minlen=3, maxlen=3,
-                             desc='Three comma-separated numbers giving the size of each voxel in mm.')
+    voxel_dims = traits.List(
+        traits.Float,
+        argstr='-x %s',
+        sep=',',
+        mandatory=True,
+        position=5,
+        minlen=3,
+        maxlen=3,
+        desc=
+        'Three comma-separated numbers giving the size of each voxel in mm.')
 
     # Change to enum with all combinations? i.e. LAS, LPI, RAS, etc..
-    voxel_order = File(argstr='--voxel-order %s', mandatory=True, position=6,
-                       desc='Set the order in which various directions were stored.\
+    voxel_order = File(
+        argstr='--voxel-order %s',
+        mandatory=True,
+        position=6,
+        desc='Set the order in which various directions were stored.\
         Specify with three letters consisting of one each  \
         from the pairs LR, AP, and SI. These stand for Left-Right, \
         Anterior-Posterior, and Superior-Inferior.  \
@@ -45,12 +74,17 @@ class Camino2TrackvisInputSpec(CommandLineInputSpec):
         be the direction of increasing order.  \
         Read coordinate system from a NIfTI file.')
 
-    nifti_file = File(argstr='--nifti %s', exists=True,
-                      position=7, desc='Read coordinate system from a NIfTI file.')
+    nifti_file = File(
+        argstr='--nifti %s',
+        exists=True,
+        position=7,
+        desc='Read coordinate system from a NIfTI file.')
 
 
 class Camino2TrackvisOutputSpec(TraitedSpec):
-    trackvis = File(exists=True, desc='The filename to which to write the .trk (trackvis) file.')
+    trackvis = File(
+        exists=True,
+        desc='The filename to which to write the .trk (trackvis) file.')
 
 
 class Camino2Trackvis(CommandLine):
@@ -107,19 +141,30 @@ class Trackvis2CaminoInputSpec(CommandLineInputSpec):
     >>> t2c.run()                  # doctest: +SKIP
     """
 
-    in_file = File(exists=True, argstr='-i %s',
-                   mandatory=True, position=1,
-                   desc='The input .trk (trackvis) file.')
+    in_file = File(
+        exists=True,
+        argstr='-i %s',
+        mandatory=True,
+        position=1,
+        desc='The input .trk (trackvis) file.')
 
-    out_file = File(argstr='-o %s', genfile=True,
-                    position=2, desc='The filename to which to write the .Bfloat (camino).')
+    out_file = File(
+        argstr='-o %s',
+        genfile=True,
+        position=2,
+        desc='The filename to which to write the .Bfloat (camino).')
 
-    append_file = File(exists=True, argstr='-a %s',
-                       position=2, desc='A file to which the append the .Bfloat data. ')
+    append_file = File(
+        exists=True,
+        argstr='-a %s',
+        position=2,
+        desc='A file to which the append the .Bfloat data. ')
 
 
 class Trackvis2CaminoOutputSpec(TraitedSpec):
-    camino = File(exists=True, desc='The filename to which to write the .Bfloat (camino).')
+    camino = File(
+        exists=True,
+        desc='The filename to which to write the .Bfloat (camino).')
 
 
 class Trackvis2Camino(CommandLine):

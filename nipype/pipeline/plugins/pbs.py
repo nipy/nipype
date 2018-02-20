@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Parallel workflow execution via PBS/Torque
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import str, open
 
 import os
@@ -43,27 +44,32 @@ class PBSPlugin(SGELikeBatchManagerBase):
             if 'max_tries' in kwargs['plugin_args']:
                 self._max_tries = kwargs['plugin_args']['max_tries']
             if 'max_jobname_len' in kwargs['plugin_args']:
-                self._max_jobname_len = kwargs['plugin_args']['max_jobname_len']
+                self._max_jobname_len = kwargs['plugin_args'][
+                    'max_jobname_len']
         super(PBSPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
-        result = CommandLine('qstat {}'.format(taskid),
+        result = CommandLine('qstat -f {}'.format(taskid),
                              environ=dict(os.environ),
-                             terminal_output='allatonce',
+                             terminal_output='file_split',
                              resource_monitor=False,
                              ignore_exception=True).run()
+
+        stdout = result.runtime.stdout
         stderr = result.runtime.stderr
-        errmsg = 'Unknown Job Id'  # %s' % taskid
+        errmsg = 'Unknown Job Id'
         success = 'Job has finished'
-        if success in e:  # Fix for my PBS
+        if (success in stderr) or ('job_state = C' in stdout):
             return False
         else:
-            return errmsg not in e
+            return errmsg not in stderr
 
     def _submit_batchtask(self, scriptfile, node):
-        cmd = CommandLine('qsub', environ=dict(os.environ),
-                          resource_monitor=False,
-                          terminal_output='allatonce')
+        cmd = CommandLine(
+            'qsub',
+            environ=dict(os.environ),
+            resource_monitor=False,
+            terminal_output='allatonce')
         path = os.path.dirname(scriptfile)
         qsubargs = ''
         if self._qsub_args:
@@ -79,19 +85,15 @@ class PBSPlugin(SGELikeBatchManagerBase):
         if '-e' not in qsubargs:
             qsubargs = '%s -e %s' % (qsubargs, path)
         if node._hierarchy:
-            jobname = '.'.join((dict(os.environ)['LOGNAME'],
-                                node._hierarchy,
+            jobname = '.'.join((dict(os.environ)['LOGNAME'], node._hierarchy,
                                 node._id))
         else:
-            jobname = '.'.join((dict(os.environ)['LOGNAME'],
-                                node._id))
+            jobname = '.'.join((dict(os.environ)['LOGNAME'], node._id))
         jobnameitems = jobname.split('.')
         jobnameitems.reverse()
         jobname = '.'.join(jobnameitems)
         jobname = jobname[0:self._max_jobname_len]
-        cmd.inputs.args = '%s -N %s %s' % (qsubargs,
-                                           jobname,
-                                           scriptfile)
+        cmd.inputs.args = '%s -N %s %s' % (qsubargs, jobname, scriptfile)
 
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName('CRITICAL'))
@@ -102,17 +104,20 @@ class PBSPlugin(SGELikeBatchManagerBase):
             except Exception as e:
                 if tries < self._max_tries:
                     tries += 1
-                    sleep(self._retry_timeout)  # sleep 2 seconds and try again.
+                    # sleep 2 seconds and try again.
+                    sleep(self._retry_timeout)
                 else:
                     iflogger.setLevel(oldlevel)
                     raise RuntimeError(
-                        'Could not submit pbs task for node {}\n{}'.format(node._id, e))
+                        'Could not submit pbs task for node {}\n{}'.format(
+                            node._id, e))
             else:
                 break
         iflogger.setLevel(oldlevel)
         # retrieve pbs taskid
         taskid = result.runtime.stdout.split('.')[0]
         self._pending[taskid] = node.output_dir()
-        logger.debug('submitted pbs task: {} for node {}'.format(taskid, node._id))
+        logger.debug('submitted pbs task: {} for node {}'.format(
+            taskid, node._id))
 
         return taskid

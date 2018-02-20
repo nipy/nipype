@@ -6,77 +6,31 @@
 
 from __future__ import print_function
 from __future__ import unicode_literals
-from builtins import str
 from builtins import open
 from copy import deepcopy
 from glob import glob
-import os, sys
+import os
 
-import networkx as nx
 
 import pytest
 from ... import engine as pe
-from ....interfaces import base as nib
+from .test_base import EngineTestInterface
 
-
-class InputSpec(nib.TraitedSpec):
-    input1 = nib.traits.Int(desc='a random int')
-    input2 = nib.traits.Int(desc='a random int')
-    input_file = nib.traits.File(desc='Random File')
-
-class OutputSpec(nib.TraitedSpec):
-    output1 = nib.traits.List(nib.traits.Int, desc='outputs')
-
-
-class EngineTestInterface(nib.BaseInterface):
-    input_spec = InputSpec
-    output_spec = OutputSpec
-
-    def _run_interface(self, runtime):
-        runtime.returncode = 0
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['output1'] = [1, self.inputs.input1]
-        return outputs
-
-
-def test_init():
-    with pytest.raises(TypeError): pe.Workflow()
-    pipe = pe.Workflow(name='pipe')
-    assert type(pipe._graph) == nx.DiGraph
-
-
-def test_connect():
-    pipe = pe.Workflow(name='pipe')
-    mod1 = pe.Node(interface=EngineTestInterface(), name='mod1')
-    mod2 = pe.Node(interface=EngineTestInterface(), name='mod2')
-    pipe.connect([(mod1, mod2, [('output1', 'input1')])])
-
-    assert mod1 in pipe._graph.nodes()
-    assert mod2 in pipe._graph.nodes()
-    assert pipe._graph.get_edge_data(mod1, mod2) == {'connect': [('output1', 'input1')]}
-
-
-def test_add_nodes():
-    pipe = pe.Workflow(name='pipe')
-    mod1 = pe.Node(interface=EngineTestInterface(), name='mod1')
-    mod2 = pe.Node(interface=EngineTestInterface(), name='mod2')
-    pipe.add_nodes([mod1, mod2])
-
-    assert mod1 in pipe._graph.nodes()
-    assert mod2 in pipe._graph.nodes()
 
 # Test graph expansion.  The following set tests the building blocks
 # of the graph expansion routine.
 # XXX - SG I'll create a graphical version of these tests and actually
 # ensure that all connections are tested later
-
-@pytest.mark.parametrize("iterables, expected", [
-        ({"1": None}, (1,0)), #test1
-        ({"1": dict(input1=lambda: [1, 2], input2=lambda: [1, 2])}, (4,0)) #test2
-        ])
+@pytest.mark.parametrize(
+    "iterables, expected",
+    [
+        ({
+            "1": None
+        }, (1, 0)),  # test1
+        ({
+            "1": dict(input1=lambda: [1, 2], input2=lambda: [1, 2])
+        }, (4, 0))  # test2
+    ])
 def test_1mod(iterables, expected):
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=EngineTestInterface(), name='mod1')
@@ -88,17 +42,28 @@ def test_1mod(iterables, expected):
     assert len(pipe._execgraph.edges()) == expected[1]
 
 
-@pytest.mark.parametrize("iterables, expected", [
-        ({"1": {}, "2": dict(input1=lambda: [1, 2])}, (3,2)), #test3
-        ({"1": dict(input1=lambda: [1, 2]), "2": {}}, (4,2)), #test4
-        ({"1": dict(input1=lambda: [1, 2]), "2": dict(input1=lambda: [1, 2])}, (6,4)) #test5
-        ])
+@pytest.mark.parametrize(
+    "iterables, expected",
+    [
+        ({
+            "1": {},
+            "2": dict(input1=lambda: [1, 2])
+        }, (3, 2)),  # test3
+        ({
+            "1": dict(input1=lambda: [1, 2]),
+            "2": {}
+        }, (4, 2)),  # test4
+        ({
+            "1": dict(input1=lambda: [1, 2]),
+            "2": dict(input1=lambda: [1, 2])
+        }, (6, 4))  # test5
+    ])
 def test_2mods(iterables, expected):
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=EngineTestInterface(), name='mod1')
     mod2 = pe.Node(interface=EngineTestInterface(), name='mod2')
     for nr in ["1", "2"]:
-        setattr(eval("mod"+nr), "iterables", iterables[nr])
+        setattr(eval("mod" + nr), "iterables", iterables[nr])
     pipe.connect([(mod1, mod2, [('output1', 'input2')])])
     pipe._flatgraph = pipe._create_flat_graph()
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
@@ -106,27 +71,41 @@ def test_2mods(iterables, expected):
     assert len(pipe._execgraph.edges()) == expected[1]
 
 
-@pytest.mark.parametrize("iterables, expected, connect", [
-        ({"1": {}, "2": dict(input1=lambda: [1, 2]), "3": {}}, (5,4), ("1-2","2-3")), #test6
-        ({"1": dict(input1=lambda: [1, 2]), "2": {}, "3": {}}, (5,4), ("1-3","2-3")), #test7
-        ({"1": dict(input1=lambda: [1, 2]), "2":  dict(input1=lambda: [1, 2]), "3": {}},
-         (8,8), ("1-3","2-3")), #test8
-        ])
+@pytest.mark.parametrize(
+    "iterables, expected, connect",
+    [
+        ({
+            "1": {},
+            "2": dict(input1=lambda: [1, 2]),
+            "3": {}
+        }, (5, 4), ("1-2", "2-3")),  # test6
+        ({
+            "1": dict(input1=lambda: [1, 2]),
+            "2": {},
+            "3": {}
+        }, (5, 4), ("1-3", "2-3")),  # test7
+        ({
+            "1": dict(input1=lambda: [1, 2]),
+            "2": dict(input1=lambda: [1, 2]),
+            "3": {}
+        }, (8, 8), ("1-3", "2-3")),  # test8
+    ])
 def test_3mods(iterables, expected, connect):
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=EngineTestInterface(), name='mod1')
     mod2 = pe.Node(interface=EngineTestInterface(), name='mod2')
     mod3 = pe.Node(interface=EngineTestInterface(), name='mod3')
     for nr in ["1", "2", "3"]:
-        setattr(eval("mod"+nr), "iterables", iterables[nr])
-    if connect == ("1-2","2-3"):
+        setattr(eval("mod" + nr), "iterables", iterables[nr])
+    if connect == ("1-2", "2-3"):
         pipe.connect([(mod1, mod2, [('output1', 'input2')]),
                       (mod2, mod3, [('output1', 'input2')])])
-    elif connect == ("1-3","2-3"):
+    elif connect == ("1-3", "2-3"):
         pipe.connect([(mod1, mod3, [('output1', 'input1')]),
                       (mod2, mod3, [('output1', 'input2')])])
     else:
-        raise Exception("connect pattern is not implemented yet within the test function")
+        raise Exception(
+            "connect pattern is not implemented yet within the test function")
     pipe._flatgraph = pipe._create_flat_graph()
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
     assert len(pipe._execgraph.nodes()) == expected[0]
@@ -155,7 +134,8 @@ def test_expansion():
     pipe5 = pe.Workflow(name="pipe5")
     pipe5.add_nodes([pipe4])
     pipe6 = pe.Workflow(name="pipe6")
-    pipe6.connect([(pipe5, pipe3, [('pipe4.mod5.output1', 'pipe2.mod3.input1')])])
+    pipe6.connect([(pipe5, pipe3, [('pipe4.mod5.output1',
+                                    'pipe2.mod3.input1')])])
 
     pipe6._flatgraph = pipe6._create_flat_graph()
 
@@ -256,8 +236,12 @@ def test_itersource_synchronize1_expansion():
     wf1.connect(node1, 'output1', node2, 'input1')
     node3 = pe.Node(EngineTestInterface(), name='node3')
     node3.itersource = ('node1', ['input1', 'input2'])
-    node3.iterables = [('input1', {(1, 3): [5, 6]}),
-                       ('input2', {(1, 3): [7, 8], (2, 4): [9]})]
+    node3.iterables = [('input1', {
+        (1, 3): [5, 6]
+    }), ('input2', {
+        (1, 3): [7, 8],
+        (2, 4): [9]
+    })]
     wf1.connect(node2, 'output1', node3, 'input1')
     node4 = pe.Node(EngineTestInterface(), name='node4')
     wf1.connect(node3, 'output1', node4, 'input1')
@@ -288,8 +272,10 @@ def test_itersource_synchronize2_expansion():
     node3 = pe.Node(EngineTestInterface(), name='node3')
     node3.itersource = ('node1', ['input1', 'input2'])
     node3.synchronize = True
-    node3.iterables = [('input1', 'input2'),
-                       {(1, 3): [(5, 7), (6, 8)], (2, 4):[(None, 9)]}]
+    node3.iterables = [('input1', 'input2'), {
+        (1, 3): [(5, 7), (6, 8)],
+        (2, 4): [(None, 9)]
+    }]
     wf1.connect(node2, 'output1', node3, 'input1')
     node4 = pe.Node(EngineTestInterface(), name='node4')
     wf1.connect(node3, 'output1', node4, 'input1')
@@ -309,276 +295,6 @@ def test_itersource_synchronize2_expansion():
     assert len(pe.generate_expanded_graph(wf3._flatgraph).nodes()) == 30
 
 
-def test_disconnect():
-    from nipype.interfaces.utility import IdentityInterface
-    a = pe.Node(IdentityInterface(fields=['a', 'b']), name='a')
-    b = pe.Node(IdentityInterface(fields=['a', 'b']), name='b')
-    flow1 = pe.Workflow(name='test')
-    flow1.connect(a, 'a', b, 'a')
-    flow1.disconnect(a, 'a', b, 'a')
-    assert list(flow1._graph.edges()) == []
-
-
-def test_doubleconnect():
-    from nipype.interfaces.utility import IdentityInterface
-    a = pe.Node(IdentityInterface(fields=['a', 'b']), name='a')
-    b = pe.Node(IdentityInterface(fields=['a', 'b']), name='b')
-    flow1 = pe.Workflow(name='test')
-    flow1.connect(a, 'a', b, 'a')
-    x = lambda: flow1.connect(a, 'b', b, 'a')
-    with pytest.raises(Exception) as excinfo:
-        x()
-    assert "Trying to connect" in str(excinfo.value)
-
-    c = pe.Node(IdentityInterface(fields=['a', 'b']), name='c')
-    flow1 = pe.Workflow(name='test2')
-    x = lambda: flow1.connect([(a, c, [('b', 'b')]), (b, c, [('a', 'b')])])
-    with pytest.raises(Exception) as excinfo:
-        x()
-    assert "Trying to connect" in str(excinfo.value)
-
-
-'''
-Test for order of iterables
-
-import nipype.pipeline.engine as pe
-import nipype.interfaces.utility as niu
-
-wf1 = pe.Workflow(name='wf1')
-node1 = pe.Node(interface=niu.IdentityInterface(fields=['a1','b1']), name='node1')
-node1.iterables = ('a1', [1,2])
-wf1.add_nodes([node1])
-
-wf2 = pe.Workflow(name='wf2')
-node2 = pe.Node(interface=niu.IdentityInterface(fields=['a2','b2']), name='node2')
-wf2.add_nodes([node2])
-wf1.connect(node1, 'a1', wf2, 'node2.a2')
-
-node4 = pe.Node(interface=niu.IdentityInterface(fields=['a4','b4']), name='node4')
-#node4.iterables = ('a4', [5,6])
-wf2.connect(node2, 'b2', node4, 'b4')
-
-wf3 = pe.Workflow(name='wf3')
-node3 = pe.Node(interface=niu.IdentityInterface(fields=['a3','b3']), name='node3')
-node3.iterables = ('b3', [3,4])
-wf3.add_nodes([node3])
-wf1.connect(wf3, 'node3.b3', wf2, 'node2.b2')
-
-wf1.base_dir = os.path.join(os.getcwd(),'testit')
-wf1.run(inseries=True, createdirsonly=True)
-
-wf1.write_graph(graph2use='exec')
-'''
-
-'''
-import nipype.pipeline.engine as pe
-import nipype.interfaces.spm as spm
-import os
-from io import StringIO
-from nipype.utils.config import config
-
-config.readfp(StringIO("""
-[execution]
-remove_unnecessary_outputs = true
-"""))
-
-
-segment = pe.Node(interface=spm.Segment(), name="segment")
-segment.inputs.data = os.path.abspath("data/T1.nii")
-segment.inputs.gm_output_type = [True, True, True]
-segment.inputs.wm_output_type = [True, True, True]
-
-
-smooth_gm = pe.Node(interface=spm.Smooth(), name="smooth_gm")
-
-workflow = pe.Workflow(name="workflow_cleanup_test")
-workflow.base_dir = os.path.abspath('./workflow_cleanup_test')
-
-workflow.connect([(segment, smooth_gm, [('native_gm_image','in_files')])])
-
-workflow.run()
-
-#adding new node that uses one of the previously deleted outputs of segment; this should force segment to rerun
-smooth_wm = pe.Node(interface=spm.Smooth(), name="smooth_wm")
-
-workflow.connect([(segment, smooth_wm, [('native_wm_image','in_files')])])
-
-workflow.run()
-
-workflow.run()
-'''
-
-# Node
-
-
-def test_node_init():
-    with pytest.raises(Exception): pe.Node()
-    try:
-        node = pe.Node(EngineTestInterface, name='test')
-    except IOError:
-        exception = True
-    else:
-        exception = False
-    assert exception
-
-
-def test_workflow_add():
-    from nipype.interfaces.utility import IdentityInterface as ii
-    n1 = pe.Node(ii(fields=['a', 'b']), name='n1')
-    n2 = pe.Node(ii(fields=['c', 'd']), name='n2')
-    n3 = pe.Node(ii(fields=['c', 'd']), name='n1')
-    w1 = pe.Workflow(name='test')
-    w1.connect(n1, 'a', n2, 'c')
-    for node in [n1, n2, n3]:
-        with pytest.raises(IOError): w1.add_nodes([node])
-    with pytest.raises(IOError): w1.connect([(w1, n2, [('n1.a', 'd')])])
-
-
-def test_node_get_output():
-    mod1 = pe.Node(interface=EngineTestInterface(), name='mod1')
-    mod1.inputs.input1 = 1
-    mod1.run()
-    assert mod1.get_output('output1') == [1, 1]
-    mod1._result = None
-    assert mod1.get_output('output1') == [1, 1]
-
-
-def test_mapnode_iterfield_check():
-    mod1 = pe.MapNode(EngineTestInterface(),
-                      iterfield=['input1'],
-                      name='mod1')
-    with pytest.raises(ValueError): mod1._check_iterfield()
-    mod1 = pe.MapNode(EngineTestInterface(),
-                      iterfield=['input1', 'input2'],
-                      name='mod1')
-    mod1.inputs.input1 = [1, 2]
-    mod1.inputs.input2 = 3
-    with pytest.raises(ValueError): mod1._check_iterfield()
-
-
-@pytest.mark.parametrize("x_inp, f_exp", [
-        (3, [6]), ([2, 3], [4, 6]), ((2, 3), [4, 6]),
-        (range(3), [0, 2, 4]),
-         ("Str", ["StrStr"]), (["Str1", "Str2"], ["Str1Str1", "Str2Str2"])
-        ])
-def test_mapnode_iterfield_type(x_inp, f_exp):
-    from nipype import MapNode, Function
-    def double_func(x):
-        return 2 * x
-    double = Function(["x"], ["f_x"], double_func)
-
-    double_node = MapNode(double, name="double", iterfield=["x"])
-    double_node.inputs.x = x_inp
-
-    res  = double_node.run()
-    assert res.outputs.f_x == f_exp
-
-
-def test_mapnode_nested(tmpdir):
-    tmpdir.chdir()
-    from nipype import MapNode, Function
-
-    def func1(in1):
-        return in1 + 1
-    n1 = MapNode(Function(input_names=['in1'],
-                          output_names=['out'],
-                          function=func1),
-                 iterfield=['in1'],
-                 nested=True,
-                 name='n1')
-    n1.inputs.in1 = [[1, [2]], 3, [4, 5]]
-    n1.run()
-    print(n1.get_output('out'))
-    assert n1.get_output('out') == [[2, [3]], 4, [5, 6]]
-
-    n2 = MapNode(Function(input_names=['in1'],
-                          output_names=['out'],
-                          function=func1),
-                 iterfield=['in1'],
-                 nested=False,
-                 name='n1')
-    n2.inputs.in1 = [[1, [2]], 3, [4, 5]]
-
-    with pytest.raises(Exception) as excinfo:
-        n2.run()
-    assert "can only concatenate list" in str(excinfo.value)
-
-
-def test_mapnode_expansion(tmpdir):
-    tmpdir.chdir()
-    from nipype import MapNode, Function
-
-    def func1(in1):
-        return in1 + 1
-
-    mapnode = MapNode(Function(function=func1),
-                      iterfield='in1',
-                      name='mapnode',
-                      n_procs=2,
-                      mem_gb=2)
-    mapnode.inputs.in1 = [1, 2]
-
-    for idx, node in mapnode._make_nodes():
-        for attr in ('overwrite', 'run_without_submitting', 'plugin_args'):
-            assert getattr(node, attr) == getattr(mapnode, attr)
-        for attr in ('_n_procs', '_mem_gb'):
-            assert (getattr(node, attr) ==
-                    getattr(mapnode, attr))
-
-
-def test_node_hash(tmpdir):
-    from nipype.interfaces.utility import Function
-    tmpdir.chdir()
-
-    def func1():
-        return 1
-
-    def func2(a):
-        return a + 1
-    n1 = pe.Node(Function(input_names=[],
-                          output_names=['a'],
-                          function=func1),
-                 name='n1')
-    n2 = pe.Node(Function(input_names=['a'],
-                          output_names=['b'],
-                          function=func2),
-                 name='n2')
-    w1 = pe.Workflow(name='test')
-    modify = lambda x: x + 1
-    n1.inputs.a = 1
-    w1.connect(n1, ('a', modify), n2, 'a')
-    w1.base_dir = os.getcwd()
-    # generate outputs
-    w1.run(plugin='Linear')
-    # ensure plugin is being called
-    w1.config['execution'] = {'stop_on_first_crash': 'true',
-                              'local_hash_check': 'false',
-                              'crashdump_dir': os.getcwd()}
-    # create dummy distributed plugin class
-    from nipype.pipeline.plugins.base import DistributedPluginBase
-
-    # create a custom exception
-    class EngineTestException(Exception):
-        pass
-
-    class RaiseError(DistributedPluginBase):
-        def _submit_job(self, node, updatehash=False):
-            raise EngineTestException('Submit called')
-
-    # check if a proper exception is raised
-    with pytest.raises(EngineTestException) as excinfo:
-        w1.run(plugin=RaiseError())
-    assert 'Submit called' == str(excinfo.value)
-
-    # rerun to ensure we have outputs
-    w1.run(plugin='Linear')
-    # set local check
-    w1.config['execution'] = {'stop_on_first_crash': 'true',
-                              'local_hash_check': 'true',
-                              'crashdump_dir': os.getcwd()}
-
-    w1.run(plugin=RaiseError())
-
 
 def test_old_config(tmpdir):
     tmpdir.chdir()
@@ -590,14 +306,13 @@ def test_old_config(tmpdir):
 
     def func2(a):
         return a + 1
-    n1 = pe.Node(Function(input_names=[],
-                          output_names=['a'],
-                          function=func1),
-                 name='n1')
-    n2 = pe.Node(Function(input_names=['a'],
-                          output_names=['b'],
-                          function=func2),
-                 name='n2')
+
+    n1 = pe.Node(
+        Function(input_names=[], output_names=['a'], function=func1),
+        name='n1')
+    n2 = pe.Node(
+        Function(input_names=['a'], output_names=['b'], function=func2),
+        name='n2')
     w1 = pe.Workflow(name='test')
     modify = lambda x: x + 1
     n1.inputs.a = 1
@@ -619,11 +334,11 @@ def test_mapnode_json(tmpdir):
 
     def func1(in1):
         return in1 + 1
-    n1 = MapNode(Function(input_names=['in1'],
-                          output_names=['out'],
-                          function=func1),
-                 iterfield=['in1'],
-                 name='n1')
+
+    n1 = MapNode(
+        Function(input_names=['in1'], output_names=['out'], function=func1),
+        iterfield=['in1'],
+        name='n1')
     n1.inputs.in1 = [1]
     w1 = Workflow(name='test')
     w1.base_dir = wd
@@ -665,7 +380,6 @@ def test_parameterize_dirs_false(tmpdir):
     wf.config['execution']['parameterize_dirs'] = False
     wf.connect([(n1, n2, [('output1', 'in1')])])
 
-
     wf.run()
 
 
@@ -676,21 +390,23 @@ def test_serial_input(tmpdir):
 
     def func1(in1):
         return in1
-    n1 = MapNode(Function(input_names=['in1'],
-                          output_names=['out'],
-                          function=func1),
-                 iterfield=['in1'],
-                 name='n1')
+
+    n1 = MapNode(
+        Function(input_names=['in1'], output_names=['out'], function=func1),
+        iterfield=['in1'],
+        name='n1')
     n1.inputs.in1 = [1, 2, 3]
 
     w1 = Workflow(name='test')
     w1.base_dir = wd
     w1.add_nodes([n1])
     # set local check
-    w1.config['execution'] = {'stop_on_first_crash': 'true',
-                              'local_hash_check': 'true',
-                              'crashdump_dir': wd,
-                              'poll_sleep_duration': 2}
+    w1.config['execution'] = {
+        'stop_on_first_crash': 'true',
+        'local_hash_check': 'true',
+        'crashdump_dir': wd,
+        'poll_sleep_duration': 2
+    }
 
     # test output of num_subnodes method when serial is default (False)
     assert n1.num_subnodes() == len(n1.inputs.in1)
@@ -716,14 +432,15 @@ def test_write_graph_runs(tmpdir):
             mod2 = pe.Node(interface=EngineTestInterface(), name='mod2')
             pipe.connect([(mod1, mod2, [('output1', 'input1')])])
             try:
-                pipe.write_graph(graph2use=graph, simple_form=simple,
-                                 format='dot')
+                pipe.write_graph(
+                    graph2use=graph, simple_form=simple, format='dot')
             except Exception:
                 assert False, \
                     'Failed to plot {} {} graph'.format(
-                    'simple' if simple else 'detailed', graph)
+                        'simple' if simple else 'detailed', graph)
 
-            assert os.path.exists('graph.dot') or os.path.exists('graph_detailed.dot')
+            assert os.path.exists('graph.dot') or os.path.exists(
+                'graph_detailed.dot')
             try:
                 os.remove('graph.dot')
             except OSError:
@@ -748,14 +465,15 @@ def test_deep_nested_write_graph_runs(tmpdir):
             mod1 = pe.Node(interface=EngineTestInterface(), name='mod1')
             parent.add_nodes([mod1])
             try:
-                pipe.write_graph(graph2use=graph, simple_form=simple,
-                                 format='dot')
+                pipe.write_graph(
+                    graph2use=graph, simple_form=simple, format='dot')
             except Exception as e:
                 assert False, \
                     'Failed to plot {} {} deep graph: {!s}'.format(
-                    'simple' if simple else 'detailed', graph, e)
+                        'simple' if simple else 'detailed', graph, e)
 
-            assert os.path.exists('graph.dot') or os.path.exists('graph_detailed.dot')
+            assert os.path.exists('graph.dot') or os.path.exists(
+                'graph_detailed.dot')
             try:
                 os.remove('graph.dot')
             except OSError:
@@ -789,7 +507,8 @@ def test_io_subclass():
     kvnode = pe.Node(TestKV(), name='testkv')
     from nipype.interfaces.utility import Function
     func = pe.Node(
-        Function(input_names=['test'], output_names=['test2'], function=testx2),
+        Function(
+            input_names=['test'], output_names=['test2'], function=testx2),
         name='func')
     exception_not_raised = True
     try:
