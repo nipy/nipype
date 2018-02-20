@@ -126,6 +126,11 @@ def scans_for_fnames(fnames, keep4d=False, separate_sessions=False):
 
 class Info(PackageInfo):
     """Handles SPM version information
+
+    If you use `SPMCommand.set_mlab_paths` to set alternate entries for
+    matlab_cmd, paths, and use_mcr, then you will need to use the same entries
+    to any call in the Info class to maintain memoization. Otherwise, it will
+    default to the parameters in the `getinfo` function below.
     """
     _path = None
     _name = None
@@ -134,22 +139,16 @@ class Info(PackageInfo):
 
     @classmethod
     def path(klass, matlab_cmd=None, paths=None, use_mcr=None):
-        if klass._path:
-            return klass._path
         klass.getinfo(matlab_cmd, paths, use_mcr)
         return klass._path
 
     @classmethod
     def version(klass, matlab_cmd=None, paths=None, use_mcr=None):
-        if klass._version:
-            return klass._version
         klass.getinfo(matlab_cmd, paths, use_mcr)
         return klass._version
 
     @classmethod
     def name(klass, matlab_cmd=None, paths=None, use_mcr=None):
-        if klass._name:
-            return klass._name
         klass.getinfo(matlab_cmd, paths, use_mcr)
         return klass._name
 
@@ -191,7 +190,6 @@ class Info(PackageInfo):
                 'path': klass._path,
                 'release': klass._version
             }
-
         mlab = MatlabCommand(matlab_cmd=matlab_cmd, resource_monitor=False)
         mlab.inputs.mfile = False
         if paths:
@@ -217,6 +215,11 @@ exit;
             # if no Matlab at all -- exception could be raised
             # No Matlab -- no spm
             logger.debug('%s', e)
+            klass._version = None
+            klass._path = None
+            klass._name = None
+            klass._command = matlab_cmd
+            klass._paths = paths
             return None
 
         out = sd._strip_header(out.runtime.stdout)
@@ -301,6 +304,10 @@ class SPMCommand(BaseInterface):
         cls._matlab_cmd = matlab_cmd
         cls._paths = paths
         cls._use_mcr = use_mcr
+        info_dict = Info.getinfo(
+            matlab_cmd=matlab_cmd,
+            paths=paths,
+            use_mcr=use_mcr)
 
     def _find_mlab_cmd_defaults(self):
         # check if the user has set environment variables to enforce
