@@ -22,12 +22,147 @@ import numpy as np
 # Local imports
 from ...utils.filemanip import (fname_presuffix, filename_to_list,
                                 list_to_filename, split_filename)
-from ..base import (OutputMultiPath, TraitedSpec, isdefined, traits,
-                    InputMultiPath, File)
-from .base import (SPMCommand, scans_for_fname, func_is_3d, scans_for_fnames,
-                   SPMCommandInputSpec, ImageFileSPM)
+from ..base import (OutputMultiPath, TraitedSpec, isdefined,
+                    traits, InputMultiPath, File, Str)
+from .base import (SPMCommand, scans_for_fname, func_is_3d,
+                   scans_for_fnames, SPMCommandInputSpec, ImageFileSPM)
 
 __docformat__ = 'restructuredtext'
+
+
+class FieldMapInputSpec(SPMCommandInputSpec):
+    jobtype = traits.Enum('calculatevdm', 'applyvdm', usedefault=True,
+        desc='one of: calculatevdm, applyvdm')
+    phase_file = File(mandatory=True, exists=True, copyfile=False,
+        field='subj.data.presubphasemag.phase',
+        desc='presubstracted phase file')
+    magnitude_file = File(mandatory=True, exists=True, copyfile=False,
+        field='subj.data.presubphasemag.magnitude',
+        desc='presubstracted magnitude file')
+    echo_times = traits.Tuple(traits.Float, traits.Float, mandatory=True,
+        field='subj.defaults.defaultsval.et',
+        desc='short and long echo times')
+    maskbrain = traits.Bool(True, usedefault=True,
+        field='subj.defaults.defaultsval.maskbrain',
+        desc='masking or no masking of the brain')
+    blip_direction = traits.Enum(1, -1, mandatory=True,
+        field='subj.defaults.defaultsval.blipdir',
+        desc='polarity of the phase-encode blips')
+    total_readout_time = traits.Float(mandatory=True,
+        field='subj.defaults.defaultsval.tert',
+        desc='total EPI readout time')
+    epifm = traits.Bool(False, usedefault=True,
+        field='subj.defaults.defaultsval.epifm',
+        desc='epi-based field map');
+    jacobian_modulation = traits.Bool(False, usedefault=True,
+        field='subj.defaults.defaultsval.ajm',
+        desc='jacobian modulation');
+    # Unwarping defaults parameters
+    method = traits.Enum('Mark3D', 'Mark2D', 'Huttonish', usedefault=True,
+        desc='One of: Mark3D, Mark2D, Huttonish',
+        field='subj.defaults.defaultsval.uflags.method');
+    unwarp_fwhm = traits.Range(low=0, value=10, usedefault=True,
+        field='subj.defaults.defaultsval.uflags.fwhm',
+        desc='gaussian smoothing kernel width');
+    pad = traits.Range(low=0, value=0, usedefault=True,
+        field='subj.defaults.defaultsval.uflags.pad',
+        desc='padding kernel width');
+    ws = traits.Bool(True, usedefault=True,
+        field='subj.defaults.defaultsval.uflags.ws',
+        desc='weighted smoothing');
+    # Brain mask defaults parameters
+    template = File(copyfile=False, exists=True,
+        field='subj.defaults.defaultsval.mflags.template',
+        desc='template image for brain masking');
+    mask_fwhm = traits.Range(low=0, value=5, usedefault=True,
+        field='subj.defaults.defaultsval.mflags.fwhm',
+        desc='gaussian smoothing kernel width');
+    nerode = traits.Range(low=0, value=2, usedefault=True,
+        field='subj.defaults.defaultsval.mflags.nerode',
+        desc='number of erosions');
+    ndilate = traits.Range(low=0, value=4, usedefault=True,
+        field='subj.defaults.defaultsval.mflags.ndilate',
+        desc='number of erosions');
+    thresh = traits.Float(0.5, usedefault=True,
+        field='subj.defaults.defaultsval.mflags.thresh',
+        desc='threshold used to create brain mask from segmented data');
+    reg = traits.Float(0.02, usedefault=True,
+        field='subj.defaults.defaultsval.mflags.reg',
+        desc='regularization value used in the segmentation');
+    # EPI unwarping for quality check
+    epi_file = File(copyfile=False, exists=True, mandatory=True,
+        field='subj.session.epi',
+        desc='EPI to unwarp');
+    matchvdm = traits.Bool(True, usedefault=True,
+        field='subj.matchvdm',
+        desc='match VDM to EPI');
+    sessname = Str('_run-', usedefault=True,
+        field='subj.sessname',
+        desc='VDM filename extension');
+    writeunwarped = traits.Bool(False, usedefault=True,
+        field='subj.writeunwarped',
+        desc='write unwarped EPI');
+    anat_file = File(copyfile=False, exists=True,
+        field='subj.anat',
+        desc='anatomical image for comparison');
+    matchanat = traits.Bool(True, usedefault=True,
+        field='subj.matchanat',
+        desc='match anatomical image to EPI');
+
+
+class FieldMapOutputSpec(TraitedSpec):
+    vdm = File(exists=True, desc='voxel difference map')
+
+
+class FieldMap(SPMCommand):
+    """Use the fieldmap toolbox from spm to calculate the voxel displacement map (VDM).
+
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=173
+
+    To do
+    -----
+    Deal with real/imag magnitude images and with the two phase files case.
+
+    Examples
+    --------
+    >>> from nipype.interfaces.spm import FieldMap
+    >>> fm = FieldMap()
+    >>> fm.inputs.phase_file = 'phase.nii'
+    >>> fm.inputs.magnitude_file = 'magnitude.nii'
+    >>> fm.inputs.echo_times = (5.19, 7.65)
+    >>> fm.inputs.blip_direction = 1
+    >>> fm.inputs.total_readout_time = 15.6
+    >>> fm.inputs.epi_file = 'epi.nii'
+    >>> fm.run() # doctest: +SKIP
+
+    """
+
+    input_spec = FieldMapInputSpec
+    output_spec = FieldMapOutputSpec
+    _jobtype = 'tools'
+    _jobname = 'fieldmap'
+
+    def _format_arg(self, opt, spec, val):
+        """Convert input to appropriate format for spm
+        """
+        if opt in ['phase_file', 'magnitude_file', 'anat_file', 'epi_file']:
+            return scans_for_fname(filename_to_list(val))
+
+        return super(FieldMap, self)._format_arg(opt, spec, val)
+
+    def _parse_inputs(self):
+        """validate spm fieldmap options if set to None ignore
+        """
+        einputs = super(FieldMap, self)._parse_inputs()
+        return [{self.inputs.jobtype: einputs[0]}]
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        jobtype = self.inputs.jobtype
+        if jobtype == "calculatevdm":
+            outputs['vdm'] = fname_presuffix(self.inputs.phase_file, prefix='vdm5_sc')
+
+        return outputs
 
 
 class SliceTimingInputSpec(SPMCommandInputSpec):
