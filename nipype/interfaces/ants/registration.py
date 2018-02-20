@@ -17,6 +17,11 @@ from ...utils.filemanip import filename_to_list
 from ..base import TraitedSpec, File, Str, traits, InputMultiPath, isdefined
 from .base import ANTSCommand, ANTSCommandInputSpec
 
+try:
+    LOCAL_DEFAULT_NUMBER_OF_THREADS = int(os.getenv("LOCAL_DEFAULT_NUMBER_OF_THREADS"))
+except TypeError:
+    LOCAL_DEFAULT_NUMBER_OF_THREADS = 1
+
 
 class ANTSInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(
@@ -1516,9 +1521,8 @@ class RegistrationSynQuickInputSpec(ANTSCommandInputSpec):
                                   desc='Moving image or target image')
     output_prefix = Str("transform", usedefault=True, argstr='-o %s',
                         desc="A prefix that is prepended to all output files")
-
-    # todo ANTSCommandInputSpec already has this, but I can't figure out how to set it without defining it again
-    num_threads = traits.Int(default_value=1, desc='Number of threads (default = 1)', argstr='-n %d')
+    num_threads = traits.Int(default_value=LOCAL_DEFAULT_NUMBER_OF_THREADS, usedefault=True,
+                             desc='Number of threads (default = 1)', argstr='-n %d')
 
     transform_type = traits.Enum('s', 't', 'r', 'a', 'sr', 'b', 'br', argstr='-t %s',
                                  desc="""
@@ -1554,11 +1558,24 @@ class RegistrationSynQuickOutputSpec(TraitedSpec):
 
 class RegistrationSynQuick(ANTSCommand):
     """
+    Reistration using a symmetric image normalization method (SyN).
+    You can read more in Avants et al.; Med Image Anal., 2008
+    (https://www.ncbi.nlm.nih.gov/pubmed/17659998).
+
     Examples
     --------
 
+    >>> import copy, pprint
+    >>> from nipype.interfaces.ants import Registration
+    >>> reg = RegistrationSynQuick()
+    >>> reg.inputs.fixed_image = 'fixed1.nii'
+    >>> reg.inputs.moving_image = 'moving1.nii'
+    >>> reg.inputs.num_threads = 2
+    >>> reg.cmdline
+    'antsRegistrationSynQuick.sh -d 3 -f fixed1.nii -m moving1.nii -n 2 -o transform -p d -t s'
+    >>> reg.run()  # doctest: +SKIP
     """
-    # todo examples
+
 
     _cmd = 'antsRegistrationSynQuick.sh'
     input_spec = RegistrationSynQuickInputSpec
