@@ -129,6 +129,8 @@ class Info(PackageInfo):
     """
     _path = None
     _name = None
+    _command = None
+    _paths = None
 
     @classmethod
     def path(klass, matlab_cmd=None, paths=None, use_mcr=None):
@@ -178,16 +180,17 @@ class Info(PackageInfo):
             returns None of path not found
         """
 
-        if klass._name and klass._path and klass._version:
+        use_mcr = use_mcr or 'FORCE_SPMMCR' in os.environ
+        matlab_cmd = matlab_cmd or ((use_mcr and os.getenv('SPMMCRCMD'))
+                      or os.getenv('MATLABCMD', 'matlab -nodesktop -nosplash'))
+
+        if klass._name and klass._path and klass._version and \
+                klass._command == matlab_cmd and klass._paths == paths:
             return {
                 'name': klass._name,
                 'path': klass._path,
                 'release': klass._version
             }
-
-        use_mcr = use_mcr or 'FORCE_SPMMCR' in os.environ
-        matlab_cmd = matlab_cmd or ((use_mcr and os.getenv('SPMMCRCMD'))
-                      or os.getenv('MATLABCMD', 'matlab -nodesktop -nosplash'))
 
         mlab = MatlabCommand(matlab_cmd=matlab_cmd, resource_monitor=False)
         mlab.inputs.mfile = False
@@ -225,6 +228,8 @@ exit;
         klass._version = out_dict['release']
         klass._path = out_dict['path']
         klass._name = out_dict['name']
+        klass._command = matlab_cmd
+        klass._paths = paths
         return out_dict
 
 
