@@ -183,6 +183,28 @@ jobs:
       - run: *_run_codecov_coverage
       - store_artifacts: *store_artifacts_kwds
       - store_test_results: *store_artifacts_kwds
+      - run:
+          name: Build docs (py36)
+          no_output_timeout: 30m
+          environment: *test_environment
+          command: bash -ux /home/circleci/nipype/.circleci/test_py3_docs.sh
+      - store_artifacts:
+          path: /home/circleci/work/docs
+      - run:
+          name: Save Docker images to workspace if on master
+          no_output_timeout: 60m
+          command: |
+            if [ "$CIRCLE_BRANCH" = "master" -a -z "$CIRCLE_PULL_REQUEST" ]; then
+              docker save nipype/nipype:base \
+                          nipype/nipype:latest \
+                          nipype/nipype:py27 \
+                          nipype/nipype:py36 | gzip -1 > /tmp/docker/nipype-base-latest-py36-py27.tar.gz \
+              && du -h /tmp/docker/nipype-base-latest-py36-py27.tar.gz
+            fi
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - docker
 
   test_py3_fmri_fsl_spm:
     machine: *machine_kwds
@@ -200,11 +222,6 @@ jobs:
       - run: *_get_codecov
       - run: *_download_test_data
       - run: *prepare_working_directory
-      - run:
-          name: Run FSL FEEDS pipeline (py36)
-          no_output_timeout: 40m
-          environment: *test_environment
-          command: bash -ux /home/circleci/nipype/.circleci/test_py3_fmri_fsl_feeds_linear_l1.sh
       - run:
           name: Run FSL reuse pipeline (py36)
           no_output_timeout: 40m
@@ -252,7 +269,7 @@ jobs:
       - run: *_run_codecov_smoke
       - store_artifacts: *store_artifacts_kwds
 
-  test_fmri_spm_nested_multiproc:
+  test_fmri_spm_nested_fsl_feeds:
     machine: *machine_kwds
     working_directory: /home/circleci/nipype
     steps:
@@ -279,30 +296,13 @@ jobs:
           no_output_timeout: 30m
           environment: *test_environment
           command: bash -ux /home/circleci/nipype/.circleci/test_py2_fmri_spm_nested_multiproc_l2.sh
+      - run:
+          name: Run FSL FEEDS pipeline (py36)
+          no_output_timeout: 40m
+          environment: *test_environment
+          command: bash -ux /home/circleci/nipype/.circleci/test_py3_fmri_fsl_feeds_linear_l1.sh
       - run: *_run_codecov_smoke
       - store_artifacts: *store_artifacts_kwds
-      - run:
-          name: Build docs (py36)
-          no_output_timeout: 30m
-          environment: *test_environment
-          command: bash -ux /home/circleci/nipype/.circleci/test_py3_docs.sh
-      - store_artifacts:
-          path: /home/circleci/work/docs
-      - run:
-          name: Save Docker images to workspace if on master
-          no_output_timeout: 60m
-          command: |
-            if [ "$CIRCLE_BRANCH" = "master" -a -z "$CIRCLE_PULL_REQUEST" ]; then
-              docker save nipype/nipype:base \
-                          nipype/nipype:latest \
-                          nipype/nipype:py27 \
-                          nipype/nipype:py36 | gzip -1 > /tmp/docker/nipype-base-latest-py36-py27.tar.gz \
-              && du -h /tmp/docker/nipype-base-latest-py36-py27.tar.gz
-            fi
-      - persist_to_workspace:
-          root: /tmp
-          paths:
-            - docker
 
   deploy:
     docker:
@@ -350,7 +350,7 @@ workflows:
       - test_py3_fmri_spm_dartel_multiproc:
           requires:
             - compare_base_dockerfiles
-      - test_fmri_spm_nested_multiproc:
+      - test_fmri_spm_nested_fsl_feeds:
           requires:
             - compare_base_dockerfiles
       - deploy:
@@ -359,6 +359,6 @@ workflows:
               only: master
           requires:
             - test_pytest
-            - test_fmri_spm_nested_multiproc
+            - test_fmri_spm_nested_fsl_feeds
             - test_py3_fmri_fsl_spm
             - test_py3_fmri_spm_dartel_multiproc
