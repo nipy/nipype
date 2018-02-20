@@ -40,7 +40,7 @@ before_install:
   fi;
 
 # handle python operations separately to reduce timeouts
-- wget https://repo.continuum.io/miniconda/Miniconda${TRAVIS_PYTHON_VERSION:0:1}-latest-Linux-x86_64.sh
+- wget https://repo.continuum.io/miniconda/Miniconda${TRAVIS_PYTHON_VERSION:0:1}-4.3.31-Linux-x86_64.sh
     -O /home/travis/.cache/conda.sh
 - bash ${HOME}/.cache/conda.sh -b -p ${HOME}/conda
 - export PATH=${HOME}/conda/bin:$PATH
@@ -48,7 +48,7 @@ before_install:
 - conda config --set always_yes yes --set changeps1 no
 - travis_retry conda update -q conda
 - conda config --add channels conda-forge
-- travis_retry conda install -y python=${TRAVIS_PYTHON_VERSION} icu asn1crypto=0.23
+- travis_retry conda install -y python=${TRAVIS_PYTHON_VERSION} icu
 - travis_retry pip install -r requirements.txt
 - travis_retry git clone https://github.com/INCF/pybids.git ${HOME}/pybids &&
   pip install -e ${HOME}/pybids
