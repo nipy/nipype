@@ -15,9 +15,6 @@ set -x         # Print command traces before executing command.
 # Check whether the Upcoming release header is present
 head -1 CHANGES | grep -q Upcoming
 UPCOMING=$?
-if [[ "$UPCOMING" == "0" ]]; then
-    head -n3  CHANGES >> newchanges
-fi
 
 # Elaborate today's release header
 HEADER="$1 ($(date '+%B %d, %Y'))"
@@ -30,8 +27,9 @@ git log --grep="Merge pull request" `git describe --tags --abbrev=0`..HEAD --pre
 echo "" >> newchanges
 echo "" >> newchanges
 
-# Add back the Upcoming header if it was present
+# Append old CHANGES
 if [[ "$UPCOMING" == "0" ]]; then
+    # Drop the Upcoming title if present
     tail -n+4 CHANGES >> newchanges
 else
     cat CHANGES >> newchanges
