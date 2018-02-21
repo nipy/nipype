@@ -1,8 +1,13 @@
+# -*- coding: utf-8 -*-
 """Parallel workflow execution via PBS/Torque
 """
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import os
 import sys
+
+from .base import (GraphPluginBase, logger)
 
 soma_not_loaded = False
 try:
@@ -11,8 +16,6 @@ try:
 except:
     soma_not_loaded = True
 
-
-from .base import (GraphPluginBase, logger)
 
 class SomaFlowPlugin(GraphPluginBase):
     """Execute using Soma workflow
@@ -28,10 +31,8 @@ class SomaFlowPlugin(GraphPluginBase):
         soma_deps = []
         for idx, fname in enumerate(pyfiles):
             name = os.path.splitext(os.path.split(fname)[1])[0]
-            jobs.append(Job(command=[sys.executable,
-                                     fname],
-                            name=name))
-        for key, values in dependencies.items():
+            jobs.append(Job(command=[sys.executable, fname], name=name))
+        for key, values in list(dependencies.items()):
             for val in values:
                 soma_deps.append((jobs[val], jobs[key]))
 

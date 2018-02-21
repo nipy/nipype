@@ -1,15 +1,17 @@
+# -*- coding: utf-8 -*-
 """Parallel workflow execution via LSF
 """
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import os
-
-from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
-
-from nipype.interfaces.base import CommandLine
-
+import re
 from time import sleep
 
-import re
+from ... import logging
+from ...interfaces.base import CommandLine
+from .base import SGELikeBatchManagerBase, logger
+iflogger = logging.getLogger('interface')
 
 
 class LSFPlugin(SGELikeBatchManagerBase):
@@ -34,19 +36,20 @@ class LSFPlugin(SGELikeBatchManagerBase):
         if 'plugin_args' in kwargs and kwargs['plugin_args']:
             if 'retry_timeout' in kwargs['plugin_args']:
                 self._retry_timeout = kwargs['plugin_args']['retry_timeout']
-            if  'max_tries' in kwargs['plugin_args']:
+            if 'max_tries' in kwargs['plugin_args']:
                 self._max_tries = kwargs['plugin_args']['max_tries']
             if 'bsub_args' in kwargs['plugin_args']:
                 self._bsub_args = kwargs['plugin_args']['bsub_args']
         super(LSFPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
-        """LSF lists a status of 'PEND' when a job has been submitted but is waiting to be picked up,
-        and 'RUN' when it is actively being processed. But _is_pending should return True until a job has
-        finished and is ready to be checked for completeness. So return True if status is either 'PEND'
-        or 'RUN'"""
-        cmd = CommandLine('bjobs',
-                          terminal_output='allatonce')
+        """LSF lists a status of 'PEND' when a job has been submitted but is
+        waiting to be picked up, and 'RUN' when it is actively being processed.
+        But _is_pending should return True until a job has finished and is
+        ready to be checked for completeness. So return True if status is
+        either 'PEND' or 'RUN'"""
+        cmd = CommandLine(
+            'bjobs', resource_monitor=False, terminal_output='allatonce')
         cmd.inputs.args = '%d' % taskid
         # check lsf task
         oldlevel = iflogger.level
@@ -60,9 +63,11 @@ class LSFPlugin(SGELikeBatchManagerBase):
             return True
 
     def _submit_batchtask(self, scriptfile, node):
-        cmd = CommandLine('bsub', environ=os.environ.data,
-                          terminal_output='allatonce')
-        path = os.path.dirname(scriptfile)
+        cmd = CommandLine(
+            'bsub',
+            environ=dict(os.environ),
+            resource_monitor=False,
+            terminal_output='allatonce')
         bsubargs = ''
         if self._bsub_args:
             bsubargs = self._bsub_args
@@ -75,19 +80,17 @@ class LSFPlugin(SGELikeBatchManagerBase):
         if '-o' not in bsubargs:  # -o outfile
             bsubargs = '%s -o %s' % (bsubargs, scriptfile + ".log")
         if '-e' not in bsubargs:
-            bsubargs = '%s -e %s' % (bsubargs, scriptfile + ".log")  # -e error file
+            # -e error file
+            bsubargs = '%s -e %s' % (bsubargs, scriptfile + ".log")
         if node._hierarchy:
-            jobname = '.'.join((os.environ.data['LOGNAME'],
-                                node._hierarchy,
+            jobname = '.'.join((dict(os.environ)['LOGNAME'], node._hierarchy,
                                 node._id))
         else:
-            jobname = '.'.join((os.environ.data['LOGNAME'],
-                                node._id))
+            jobname = '.'.join((dict(os.environ)['LOGNAME'], node._id))
         jobnameitems = jobname.split('.')
         jobnameitems.reverse()
         jobname = '.'.join(jobnameitems)
-        cmd.inputs.args = '%s -J %s sh %s' % (bsubargs,
-                                              jobname,
+        cmd.inputs.args = '%s -J %s sh %s' % (bsubargs, jobname,
                                               scriptfile)  # -J job_name_spec
         logger.debug('bsub ' + cmd.inputs.args)
         oldlevel = iflogger.level
@@ -96,7 +99,7 @@ class LSFPlugin(SGELikeBatchManagerBase):
         while True:
             try:
                 result = cmd.run()
-            except Exception, e:
+            except Exception as e:
                 if tries < self._max_tries:
                     tries += 1
                     sleep(

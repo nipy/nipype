@@ -1,9 +1,19 @@
 #!/usr/bin/env python
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
-from StringIO import StringIO
-import unittest, sys
-from nipype.utils import nipype_cmd
+from future import standard_library
+standard_library.install_aliases()
+
+import pytest
+import sys
 from contextlib import contextmanager
+
+from io import StringIO
+from ...utils import nipype_cmd
+
+PY2 = sys.version_info[0] < 3
+
 
 @contextmanager
 def capture_sys_output():
@@ -16,33 +26,39 @@ def capture_sys_output():
         sys.stdout, sys.stderr = current_out, current_err
 
 
-class TestNipypeCMD(unittest.TestCase):
+class TestNipypeCMD():
+    maxDiff = None
 
     def test_main_returns_2_on_empty(self):
-        with self.assertRaises(SystemExit) as cm:
+        with pytest.raises(SystemExit) as cm:
             with capture_sys_output() as (stdout, stderr):
                 nipype_cmd.main(['nipype_cmd'])
 
-        exit_exception = cm.exception
-        self.assertEqual(exit_exception.code, 2)
+        exit_exception = cm.value
+        assert exit_exception.code == 2
 
-        self.assertEqual(stderr.getvalue(),
-"""usage: nipype_cmd [-h] module interface
+        msg = """usage: nipype_cmd [-h] module interface
+nipype_cmd: error: the following arguments are required: module, interface
+"""
+
+        if PY2:
+            msg = """usage: nipype_cmd [-h] module interface
 nipype_cmd: error: too few arguments
-""")
-        self.assertEqual(stdout.getvalue(), '')
+"""
+        assert stderr.getvalue() == msg
+        assert stdout.getvalue() == ''
 
     def test_main_returns_0_on_help(self):
-        with self.assertRaises(SystemExit) as cm:
+        with pytest.raises(SystemExit) as cm:
             with capture_sys_output() as (stdout, stderr):
                 nipype_cmd.main(['nipype_cmd', '-h'])
 
-        exit_exception = cm.exception
-        self.assertEqual(exit_exception.code, 0)
+        exit_exception = cm.value
+        assert exit_exception.code == 0
 
-        self.assertEqual(stderr.getvalue(), '')
-        self.assertEqual(stdout.getvalue(),
-"""usage: nipype_cmd [-h] module interface
+        assert stderr.getvalue() == ''
+        assert stdout.getvalue() == \
+            """usage: nipype_cmd [-h] module interface
 
 Nipype interface runner
 
@@ -52,41 +68,41 @@ positional arguments:
 
 optional arguments:
   -h, --help  show this help message and exit
-""")
+"""
 
     def test_list_nipy_interfacesp(self):
-        with self.assertRaises(SystemExit) as cm:
+        with pytest.raises(SystemExit) as cm:
             with capture_sys_output() as (stdout, stderr):
                 nipype_cmd.main(['nipype_cmd', 'nipype.interfaces.nipy'])
 
         # repeat twice in case nipy raises warnings
-        with self.assertRaises(SystemExit) as cm:
+        with pytest.raises(SystemExit) as cm:
             with capture_sys_output() as (stdout, stderr):
                 nipype_cmd.main(['nipype_cmd', 'nipype.interfaces.nipy'])
-        exit_exception = cm.exception
-        self.assertEqual(exit_exception.code, 0)
+        exit_exception = cm.value
+        assert exit_exception.code == 0
 
-        self.assertEqual(stderr.getvalue(), '')
-        self.assertEqual(stdout.getvalue(),
-"""Available Interfaces:
-	SpaceTimeRealigner
-	Similarity
-	ComputeMask
-	FitGLM
-	EstimateContrast
-	FmriRealign4d
-""")
+        assert stderr.getvalue() == ''
+        assert stdout.getvalue() == \
+            """Available Interfaces:
+\tComputeMask
+\tEstimateContrast
+\tFitGLM
+\tFmriRealign4d
+\tSimilarity
+\tSpaceTimeRealigner
+"""
 
     def test_run_4d_realign_without_arguments(self):
-        with self.assertRaises(SystemExit) as cm:
+        with pytest.raises(SystemExit) as cm:
             with capture_sys_output() as (stdout, stderr):
-                nipype_cmd.main(['nipype_cmd', 'nipype.interfaces.nipy', 'FmriRealign4d'])
+                nipype_cmd.main(
+                    ['nipype_cmd', 'nipype.interfaces.nipy', 'FmriRealign4d'])
 
-        exit_exception = cm.exception
-        self.assertEqual(exit_exception.code, 2)
+        exit_exception = cm.value
+        assert exit_exception.code == 2
 
-        self.assertEqual(stderr.getvalue(),
-"""usage: nipype_cmd nipype.interfaces.nipy FmriRealign4d [-h]
+        error_message = """usage: nipype_cmd nipype.interfaces.nipy FmriRealign4d [-h]
                                                        [--between_loops [BETWEEN_LOOPS [BETWEEN_LOOPS ...]]]
                                                        [--ignore_exception]
                                                        [--loops [LOOPS [LOOPS ...]]]
@@ -96,21 +112,30 @@ optional arguments:
                                                        [--time_interp TIME_INTERP]
                                                        [--tr_slices TR_SLICES]
                                                        in_file [in_file ...]
-                                                       tr
+                                                       tr"""
+
+        if not PY2:
+            error_message += """
+nipype_cmd nipype.interfaces.nipy FmriRealign4d: error: the following arguments are required: in_file, tr
+"""
+        else:
+            error_message += """
 nipype_cmd nipype.interfaces.nipy FmriRealign4d: error: too few arguments
-""")
-        self.assertEqual(stdout.getvalue(), '')
+"""
+
+        assert stderr.getvalue() == error_message
+        assert stdout.getvalue() == ''
 
     def test_run_4d_realign_help(self):
-        with self.assertRaises(SystemExit) as cm:
+        with pytest.raises(SystemExit) as cm:
             with capture_sys_output() as (stdout, stderr):
-                nipype_cmd.main(['nipype_cmd', 'nipype.interfaces.nipy', 'FmriRealign4d', '-h'])
+                nipype_cmd.main([
+                    'nipype_cmd', 'nipype.interfaces.nipy', 'FmriRealign4d',
+                    '-h'
+                ])
 
-        exit_exception = cm.exception
-        self.assertEqual(exit_exception.code, 0)
+        exit_exception = cm.value
+        assert exit_exception.code == 0
 
-        self.assertEqual(stderr.getvalue(), '')
-        self.assertTrue("Run FmriRealign4d" in stdout.getvalue())
-
-if __name__ == '__main__':
-    unittest.main()
+        assert stderr.getvalue() == ''
+        assert "Run FmriRealign4d" in stdout.getvalue()

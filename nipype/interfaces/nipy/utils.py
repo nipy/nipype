@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     Change directory to provide relative paths for doctests
     >>> import os
@@ -6,23 +7,24 @@
     >>> os.chdir(datadir)
 
 """
-import warnings
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
+import warnings
 import nibabel as nb
 
 from ...utils.misc import package_check
+from ..base import (TraitedSpec, BaseInterface, traits, BaseInterfaceInputSpec,
+                    File, isdefined)
 
 have_nipy = True
 try:
     package_check('nipy')
-except Exception, e:
+except Exception as e:
     have_nipy = False
 else:
     from nipy.algorithms.registration.histogram_registration import HistogramRegistration
     from nipy.algorithms.registration.affine import Affine
-
-from ..base import (TraitedSpec, BaseInterface, traits,
-                    BaseInterfaceInputSpec, File, isdefined)
 
 
 class SimilarityInputSpec(BaseInterfaceInputSpec):
@@ -30,16 +32,18 @@ class SimilarityInputSpec(BaseInterfaceInputSpec):
     volume2 = File(exists=True, desc="3D volume", mandatory=True)
     mask1 = File(exists=True, desc="3D volume")
     mask2 = File(exists=True, desc="3D volume")
-    metric = traits.Either(traits.Enum('cc', 'cr', 'crl1', 'mi', 'nmi', 'slr'),
-                          traits.Callable(),
-                         desc="""str or callable
+    metric = traits.Either(
+        traits.Enum('cc', 'cr', 'crl1', 'mi', 'nmi', 'slr'),
+        traits.Callable(),
+        desc="""str or callable
 Cost-function for assessing image similarity. If a string,
 one of 'cc': correlation coefficient, 'cr': correlation
 ratio, 'crl1': L1-norm based correlation ratio, 'mi': mutual
 information, 'nmi': normalized mutual information, 'slr':
 supervised log-likelihood ratio. If a callable, it should
 take a two-dimensional array representing the image joint
-histogram as an input and return a float.""", usedefault=True)
+histogram as an input and return a float.""",
+        usedefault=True)
 
 
 class SimilarityOutputSpec(TraitedSpec):
@@ -71,9 +75,9 @@ class Similarity(BaseInterface):
 
     def __init__(self, **inputs):
         warnings.warn(("This interface is deprecated since 0.10.0."
-                      " Please use nipype.algorithms.metrics.Similarity"),
+                       " Please use nipype.algorithms.metrics.Similarity"),
                       DeprecationWarning)
-        super(Similarity,self).__init__(**inputs)
+        super(Similarity, self).__init__(**inputs)
 
     def _run_interface(self, runtime):
 
@@ -90,11 +94,12 @@ class Similarity(BaseInterface):
         else:
             mask2 = None
 
-        histreg = HistogramRegistration(from_img = vol1_nii,
-                                        to_img = vol2_nii,
-                                        similarity=self.inputs.metric,
-                                        from_mask = mask1,
-                                        to_mask = mask2)
+        histreg = HistogramRegistration(
+            from_img=vol1_nii,
+            to_img=vol2_nii,
+            similarity=self.inputs.metric,
+            from_mask=mask1,
+            to_mask=mask2)
         self._similarity = histreg.eval(Affine())
 
         return runtime

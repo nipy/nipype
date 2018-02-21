@@ -3,9 +3,13 @@
 
 This also creates the index.rst file appropriately, makes figures, etc.
 """
-#-----------------------------------------------------------------------------
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
+from builtins import open
+from past.builtins import execfile
+# -----------------------------------------------------------------------------
 # Library imports
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # Stdlib imports
 import os
@@ -25,9 +29,9 @@ from matplotlib._pylab_helpers import Gcf
 # Local tools
 from toollib import *
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Globals
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 examples_header = """
 
@@ -38,9 +42,9 @@ Examples
 
 .. note_about_examples
 """
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Function defintions
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # These global variables let show() be called by the scripts in the usual
 # manner, but when generating examples, we override it to write the figures to
@@ -48,18 +52,20 @@ Examples
 figure_basename = None
 
 # We must change the show command to save instead
+
+
 def show():
     allfm = Gcf.get_all_fig_managers()
     for fcount, fm in enumerate(allfm):
-        fm.canvas.figure.savefig('%s_%02i.png' %
-                                 (figure_basename, fcount+1))
+        fm.canvas.figure.savefig('%s_%02i.png' % (figure_basename, fcount + 1))
+
 
 _mpl_show = plt.show
 plt.show = show
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Main script
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # Work in examples directory
 cd('users/examples')
@@ -68,7 +74,8 @@ if not os.getcwd().endswith('users/examples'):
 
 # Run the conversion from .py to rst file
 sh('../../../tools/ex2rst --project Nipype --outdir . ../../../examples')
-sh('../../../tools/ex2rst --project Nipype --outdir . ../../../examples/frontiers_paper')
+sh('../../../tools/ex2rst --project Nipype '
+   '--outdir . ../../../examples/frontiers_paper')
 
 # Make the index.rst file
 """
@@ -93,4 +100,3 @@ else:
         figure_basename = pjoin('fig', os.path.splitext(script)[0])
         execfile(script)
         plt.close('all')
-

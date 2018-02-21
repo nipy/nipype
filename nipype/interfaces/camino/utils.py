@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     Change directory to provide relative paths for doctests
     >>> import os
@@ -6,31 +7,60 @@
     >>> os.chdir(datadir)
 
 """
-from nipype.interfaces.base import (traits, TraitedSpec, File,
-                                    CommandLine, CommandLineInputSpec, isdefined,
-                                    InputMultiPath)
-from nipype.utils.filemanip import split_filename
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 import os
 
-class ImageStatsInputSpec(CommandLineInputSpec):
-    in_files = InputMultiPath(File(exists=True), argstr='-images %s', mandatory=True,
-                              position=-1, desc=('List of images to process. They must '
-                                                 'be in the same space and have the same '
-                                                 'dimensions.'))
-    stat = traits.Enum("min", "max", "mean", "median", "sum", "std", "var",
-                       argstr='-stat %s', units='NA', mandatory=True,
-                       desc="The statistic to compute.")
+from ..base import (traits, TraitedSpec, File, CommandLine,
+                    CommandLineInputSpec, InputMultiPath)
+from ...utils.filemanip import split_filename
 
-    out_type = traits.Enum("float", "char", "short", "int", "long", "double",
-                           argstr='-outputdatatype %s', usedefault=True,
-                           desc=('A Camino data type string, default is "float". '
-                                 'Type must be signed.'))
-    output_root = File(argstr='-outputroot %s', mandatory=True,
-                       desc=('Filename root prepended onto the names of the output '
-                             ' files. The extension will be determined from the input.'))
+
+class ImageStatsInputSpec(CommandLineInputSpec):
+    in_files = InputMultiPath(
+        File(exists=True),
+        argstr='-images %s',
+        mandatory=True,
+        position=-1,
+        desc=('List of images to process. They must '
+              'be in the same space and have the same '
+              'dimensions.'))
+    stat = traits.Enum(
+        "min",
+        "max",
+        "mean",
+        "median",
+        "sum",
+        "std",
+        "var",
+        argstr='-stat %s',
+        units='NA',
+        mandatory=True,
+        desc="The statistic to compute.")
+
+    out_type = traits.Enum(
+        "float",
+        "char",
+        "short",
+        "int",
+        "long",
+        "double",
+        argstr='-outputdatatype %s',
+        usedefault=True,
+        desc=('A Camino data type string, default is "float". '
+              'Type must be signed.'))
+    output_root = File(
+        argstr='-outputroot %s',
+        mandatory=True,
+        desc=('Filename root prepended onto the names of the output '
+              ' files. The extension will be determined from the input.'))
+
 
 class ImageStatsOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='Path of the file computed with the statistic chosen')
+    out_file = File(
+        exists=True,
+        desc='Path of the file computed with the statistic chosen')
+
 
 class ImageStats(CommandLine):
     """
@@ -59,5 +89,5 @@ class ImageStats(CommandLine):
     def _gen_outfilename(self):
         output_root = self.inputs.output_root
         first_file = self.inputs.in_files[0]
-        _, _ , ext = split_filename(first_file)
+        _, _, ext = split_filename(first_file)
         return output_root + ext

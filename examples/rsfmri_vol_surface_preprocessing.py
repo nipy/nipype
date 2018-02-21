@@ -43,12 +43,13 @@ specifically the 2mm versions of:
 - `MNI template <http://mindboggle.info/data/templates/ants/OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz>`_
 """
 
+from __future__ import division, unicode_literals
+from builtins import open, range, str
 
 import os
 
 from nipype.interfaces.base import CommandLine
 CommandLine.set_default_terminal_output('allatonce')
-
 
 from dicom import read_file
 
@@ -65,7 +66,7 @@ mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodisplay")
 # mlab.MatlabCommand.set_default_paths('/software/matlab/spm12')
 
 from nipype.algorithms.rapidart import ArtifactDetect
-from nipype.algorithms.misc import TSNR
+from nipype.algorithms.misc import TSNR, CalculateMedian
 from nipype.interfaces.utility import Rename, Merge, IdentityInterface
 from nipype.utils.filemanip import filename_to_list
 from nipype.interfaces.io import DataSink, FreeSurferSource
@@ -74,13 +75,12 @@ import numpy as np
 import scipy as sp
 import nibabel as nb
 
-imports = ['import os',
-           'import nibabel as nb',
-           'import numpy as np',
-           'import scipy as sp',
-           'from nipype.utils.filemanip import filename_to_list, list_to_filename, split_filename',
-           'from scipy.special import legendre'
-           ]
+imports = [
+    'import os', 'import nibabel as nb', 'import numpy as np',
+    'import scipy as sp',
+    'from nipype.utils.filemanip import filename_to_list, list_to_filename, split_filename',
+    'from scipy.special import legendre'
+]
 
 
 def get_info(dicom_files):
@@ -93,10 +93,12 @@ def get_info(dicom_files):
     Slice Acquisition Times
     Spacing between slices
     """
-    meta = default_extractor(read_file(filename_to_list(dicom_files)[0],
-                                       stop_before_pixels=True,
-                                       force=True))
-    return (meta['RepetitionTime']/1000., meta['CsaImage.MosaicRefAcqTimes'],
+    meta = default_extractor(
+        read_file(
+            filename_to_list(dicom_files)[0],
+            stop_before_pixels=True,
+            force=True))
+    return (meta['RepetitionTime'] / 1000., meta['CsaImage.MosaicRefAcqTimes'],
             meta['SpacingBetweenSlices'])
 
 
@@ -115,16 +117,17 @@ def median(in_files):
     """
     import numpy as np
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     average = None
     for idx, filename in enumerate(filename_to_list(in_files)):
-        img = nb.load(filename)
+        img = nb.load(filename, mmap=NUMPY_MMAP)
         data = np.median(img.get_data(), axis=3)
         if average is None:
             average = data
         else:
             average = average + data
-    median_img = nb.Nifti1Image(average/float(idx + 1),
-                                img.get_affine(), img.get_header())
+    median_img = nb.Nifti1Image(average / float(idx + 1), img.affine,
+                                img.header)
     filename = os.path.join(os.getcwd(), 'median.nii.gz')
     median_img.to_filename(filename)
     return filename
@@ -143,14 +146,15 @@ def bandpass_filter(files, lowpass_freq, highpass_freq, fs):
     from nipype.utils.filemanip import split_filename, list_to_filename
     import numpy as np
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     out_files = []
     for filename in filename_to_list(files):
         path, name, ext = split_filename(filename)
         out_file = os.path.join(os.getcwd(), name + '_bp' + ext)
-        img = nb.load(filename)
+        img = nb.load(filename, mmap=NUMPY_MMAP)
         timepoints = img.shape[-1]
         F = np.zeros((timepoints))
-        lowidx = timepoints/2 + 1
+        lowidx = int(timepoints / 2) + 1
         if lowpass_freq > 0:
             lowidx = np.round(lowpass_freq / fs * timepoints)
         highidx = 0
@@ -163,8 +167,7 @@ def bandpass_filter(files, lowpass_freq, highpass_freq, fs):
             filtered_data = data
         else:
             filtered_data = np.real(np.fft.ifftn(np.fft.fftn(data) * F))
-        img_out = nb.Nifti1Image(filtered_data, img.get_affine(),
-                                 img.get_header())
+        img_out = nb.Nifti1Image(filtered_data, img.affine, img.header)
         img_out.to_filename(out_file)
         out_files.append(out_file)
     return list_to_filename(out_files)
@@ -188,7 +191,7 @@ def motion_regressors(motion_params, order=0, derivatives=1):
         for i in range(2, order + 1):
             out_params2 = np.hstack((out_params2, np.power(out_params, i)))
         filename = os.path.join(os.getcwd(), "motion_regressor%02d.txt" % idx)
-        np.savetxt(filename, out_params2, fmt="%.10f")
+        np.savetxt(filename, out_params2, fmt=b"%.10f")
         out_files.append(filename)
     return out_files
 
@@ -232,16 +235,18 @@ def build_filter1(motion_params, comp_norm, outliers, detrend_poly=None):
             timepoints = out_params.shape[0]
             X = np.empty((timepoints, 0))
             for i in range(detrend_poly):
-                X = np.hstack((X, legendre(
-                    i + 1)(np.linspace(-1, 1, timepoints))[:, None]))
+                X = np.hstack((X, legendre(i + 1)(np.linspace(
+                    -1, 1, timepoints))[:, None]))
             out_params = np.hstack((out_params, X))
         filename = os.path.join(os.getcwd(), "filter_regressor%02d.txt" % idx)
-        np.savetxt(filename, out_params, fmt="%.10f")
+        np.savetxt(filename, out_params, fmt=b"%.10f")
         out_files.append(filename)
     return out_files
 
 
-def extract_noise_components(realigned_file, mask_file, num_components=5,
+def extract_noise_components(realigned_file,
+                             mask_file,
+                             num_components=5,
                              extra_regressors=None):
     """Derive components most reflective of physiological noise
 
@@ -259,11 +264,12 @@ def extract_noise_components(realigned_file, mask_file, num_components=5,
     from scipy.linalg.decomp_svd import svd
     import numpy as np
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     import os
-    imgseries = nb.load(realigned_file)
+    imgseries = nb.load(realigned_file, mmap=NUMPY_MMAP)
     components = None
     for filename in filename_to_list(mask_file):
-        mask = nb.load(filename).get_data()
+        mask = nb.load(filename, mmap=NUMPY_MMAP).get_data()
         if len(np.nonzero(mask > 0)[0]) == 0:
             continue
         voxel_timecourses = imgseries.get_data()[mask > 0]
@@ -275,7 +281,7 @@ def extract_noise_components(realigned_file, mask_file, num_components=5,
         stdX[stdX == 0] = 1.
         stdX[np.isnan(stdX)] = 1.
         stdX[np.isinf(stdX)] = 1.
-        X = (X - np.mean(X, axis=0))/stdX
+        X = (X - np.mean(X, axis=0)) / stdX
         u, _, _ = svd(X, full_matrices=False)
         if components is None:
             components = u[:, :num_components]
@@ -285,7 +291,7 @@ def extract_noise_components(realigned_file, mask_file, num_components=5,
         regressors = np.genfromtxt(extra_regressors)
         components = np.hstack((components, regressors))
     components_file = os.path.join(os.getcwd(), 'noise_components.txt')
-    np.savetxt(components_file, components, fmt="%.10f")
+    np.savetxt(components_file, components, fmt=b"%.10f")
     return components_file
 
 
@@ -328,10 +334,11 @@ def extract_subrois(timeseries_file, label_file, indices):
     """
     from nipype.utils.filemanip import split_filename
     import nibabel as nb
+    from nipype.utils import NUMPY_MMAP
     import os
-    img = nb.load(timeseries_file)
+    img = nb.load(timeseries_file, mmap=NUMPY_MMAP)
     data = img.get_data()
-    roiimg = nb.load(label_file)
+    roiimg = nb.load(label_file, mmap=NUMPY_MMAP)
     rois = roiimg.get_data()
     prefix = split_filename(timeseries_file)[1]
     out_ts_file = os.path.join(os.getcwd(), '%s_subcortical_ts.txt' % prefix)
@@ -340,9 +347,10 @@ def extract_subrois(timeseries_file, label_file, indices):
             ijk = np.nonzero(rois == fsindex)
             ts = data[ijk]
             for i0, row in enumerate(ts):
-                fp.write('%d,%d,%d,%d,' % (fsindex, ijk[0][i0],
-                                           ijk[1][i0], ijk[2][i0]) +
-                         ','.join(['%.10f' % val for val in row]) + '\n')
+                fp.write('%d,%d,%d,%d,' % (
+                    fsindex, ijk[0][i0], ijk[1][i0],
+                    ijk[2][i0]) + ','.join(['%.10f' % val
+                                            for val in row]) + '\n')
     return out_ts_file
 
 
@@ -351,16 +359,19 @@ def combine_hemi(left, right):
     """
     import os
     import numpy as np
-    lh_data = nb.load(left).get_data()
-    rh_data = nb.load(right).get_data()
+    from nipype.utils import NUMPY_MMAP
+    lh_data = nb.load(left, mmap=NUMPY_MMAP).get_data()
+    rh_data = nb.load(right, mmap=NUMPY_MMAP).get_data()
 
     indices = np.vstack((1000000 + np.arange(0, lh_data.shape[0])[:, None],
                          2000000 + np.arange(0, rh_data.shape[0])[:, None]))
-    all_data = np.hstack((indices, np.vstack((lh_data.squeeze(),
-                                              rh_data.squeeze()))))
+    all_data = np.hstack((indices,
+                          np.vstack((lh_data.squeeze(), rh_data.squeeze()))))
     filename = left.split('.')[1] + '_combined.txt'
-    np.savetxt(filename, all_data,
-               fmt=','.join(['%d'] + ['%.10f'] * (all_data.shape[1] - 1)))
+    np.savetxt(
+        filename,
+        all_data,
+        fmt=','.join(['%d'] + ['%.10f'] * (all_data.shape[1] - 1)))
     return os.path.abspath(filename)
 
 
@@ -389,38 +400,32 @@ def create_reg_workflow(name='registration'):
 
     register = Workflow(name=name)
 
-    inputnode = Node(interface=IdentityInterface(fields=['source_files',
-                                                         'mean_image',
-                                                         'subject_id',
-                                                         'subjects_dir',
-                                                         'target_image']),
-                     name='inputspec')
+    inputnode = Node(
+        interface=IdentityInterface(fields=[
+            'source_files', 'mean_image', 'subject_id', 'subjects_dir',
+            'target_image'
+        ]),
+        name='inputspec')
 
-    outputnode = Node(interface=IdentityInterface(fields=['func2anat_transform',
-                                                          'out_reg_file',
-                                                          'anat2target_transform',
-                                                          'transforms',
-                                                          'transformed_mean',
-                                                          'segmentation_files',
-                                                          'anat2target',
-                                                          'aparc'
-                                                          ]),
-                      name='outputspec')
+    outputnode = Node(
+        interface=IdentityInterface(fields=[
+            'func2anat_transform', 'out_reg_file', 'anat2target_transform',
+            'transforms', 'transformed_mean', 'segmentation_files',
+            'anat2target', 'aparc'
+        ]),
+        name='outputspec')
 
     # Get the subject's freesurfer source directory
-    fssource = Node(FreeSurferSource(),
-                    name='fssource')
+    fssource = Node(FreeSurferSource(), name='fssource')
     fssource.run_without_submitting = True
     register.connect(inputnode, 'subject_id', fssource, 'subject_id')
     register.connect(inputnode, 'subjects_dir', fssource, 'subjects_dir')
 
-    convert = Node(freesurfer.MRIConvert(out_type='nii'),
-                   name="convert")
+    convert = Node(freesurfer.MRIConvert(out_type='nii'), name="convert")
     register.connect(fssource, 'T1', convert, 'in_file')
 
     # Coregister the median to the surface
-    bbregister = Node(freesurfer.BBRegister(),
-                    name='bbregister')
+    bbregister = Node(freesurfer.BBRegister(), name='bbregister')
     bbregister.inputs.init = 'fsl'
     bbregister.inputs.contrast_type = 't2'
     bbregister.inputs.out_fsl_file = True
@@ -428,7 +433,6 @@ def create_reg_workflow(name='registration'):
     register.connect(inputnode, 'subject_id', bbregister, 'subject_id')
     register.connect(inputnode, 'mean_image', bbregister, 'source_file')
     register.connect(inputnode, 'subjects_dir', bbregister, 'subjects_dir')
-
     """
     Estimate the tissue classes from the anatomical image. But use spm's segment
     as FSL appears to be breaking.
@@ -438,42 +442,39 @@ def create_reg_workflow(name='registration'):
     register.connect(convert, 'out_file', stripper, 'in_file')
     fast = Node(fsl.FAST(), name='fast')
     register.connect(stripper, 'out_file', fast, 'in_files')
-
     """
     Binarize the segmentation
     """
 
-    binarize = MapNode(fsl.ImageMaths(op_string='-nan -thr 0.9 -ero -bin'),
-                       iterfield=['in_file'],
-                       name='binarize')
+    binarize = MapNode(
+        fsl.ImageMaths(op_string='-nan -thr 0.9 -ero -bin'),
+        iterfield=['in_file'],
+        name='binarize')
     register.connect(fast, 'partial_volume_files', binarize, 'in_file')
-
     """
     Apply inverse transform to take segmentations to functional space
     """
 
-    applyxfm = MapNode(freesurfer.ApplyVolTransform(inverse=True,
-                                                    interp='nearest'),
-                       iterfield=['target_file'],
-                       name='inverse_transform')
+    applyxfm = MapNode(
+        freesurfer.ApplyVolTransform(inverse=True, interp='nearest'),
+        iterfield=['target_file'],
+        name='inverse_transform')
     register.connect(inputnode, 'subjects_dir', applyxfm, 'subjects_dir')
     register.connect(bbregister, 'out_reg_file', applyxfm, 'reg_file')
     register.connect(binarize, 'out_file', applyxfm, 'target_file')
     register.connect(inputnode, 'mean_image', applyxfm, 'source_file')
-
     """
     Apply inverse transform to aparc file
     """
 
-    aparcxfm = Node(freesurfer.ApplyVolTransform(inverse=True,
-                                                 interp='nearest'),
-                    name='aparc_inverse_transform')
+    aparcxfm = Node(
+        freesurfer.ApplyVolTransform(inverse=True, interp='nearest'),
+        name='aparc_inverse_transform')
     register.connect(inputnode, 'subjects_dir', aparcxfm, 'subjects_dir')
     register.connect(bbregister, 'out_reg_file', aparcxfm, 'reg_file')
-    register.connect(fssource, ('aparc_aseg', get_aparc_aseg),
-                     aparcxfm, 'target_file')
+    register.connect(fssource, ('aparc_aseg', get_aparc_aseg), aparcxfm,
+                     'target_file')
     register.connect(inputnode, 'mean_image', aparcxfm, 'source_file')
-
     """
     Convert the BBRegister transformation to ANTS ITK format
     """
@@ -482,9 +483,8 @@ def create_reg_workflow(name='registration'):
     convert2itk.inputs.fsl2ras = True
     convert2itk.inputs.itk_transform = True
     register.connect(bbregister, 'out_fsl_file', convert2itk, 'transform_file')
-    register.connect(inputnode, 'mean_image',convert2itk, 'source_file')
+    register.connect(inputnode, 'mean_image', convert2itk, 'source_file')
     register.connect(stripper, 'out_file', convert2itk, 'reference_file')
-
     """
     Compute registration between the subject's structural and MNI template
     This is currently set to perform a very quick registration. However, the
@@ -497,8 +497,10 @@ def create_reg_workflow(name='registration'):
     reg = Node(ants.Registration(), name='antsRegister')
     reg.inputs.output_transform_prefix = "output_"
     reg.inputs.transforms = ['Rigid', 'Affine', 'SyN']
-    reg.inputs.transform_parameters = [(0.1,), (0.1,), (0.2, 3.0, 0.0)]
-    reg.inputs.number_of_iterations = [[10000, 11110, 11110]] * 2 + [[100, 30, 20]]
+    reg.inputs.transform_parameters = [(0.1, ), (0.1, ), (0.2, 3.0, 0.0)]
+    reg.inputs.number_of_iterations = [[10000, 11110, 11110]] * 2 + [[
+        100, 30, 20
+    ]]
     reg.inputs.dimension = 3
     reg.inputs.write_composite_transform = True
     reg.inputs.collapse_output_transforms = True
@@ -512,7 +514,7 @@ def create_reg_workflow(name='registration'):
     reg.inputs.convergence_window_size = [20] * 2 + [5]
     reg.inputs.smoothing_sigmas = [[4, 2, 1]] * 2 + [[1, 0.5, 0]]
     reg.inputs.sigma_units = ['vox'] * 3
-    reg.inputs.shrink_factors = [[3, 2, 1]]*2 + [[4, 2, 1]]
+    reg.inputs.shrink_factors = [[3, 2, 1]] * 2 + [[4, 2, 1]]
     reg.inputs.use_estimate_learning_rate_once = [True] * 3
     reg.inputs.use_histogram_matching = [False] * 2 + [True]
     reg.inputs.winsorize_lower_quantile = 0.005
@@ -522,8 +524,7 @@ def create_reg_workflow(name='registration'):
     reg.inputs.num_threads = 4
     reg.plugin_args = {'qsub_args': '-l nodes=1:ppn=4'}
     register.connect(stripper, 'out_file', reg, 'moving_image')
-    register.connect(inputnode,'target_image', reg,'fixed_image')
-
+    register.connect(inputnode, 'target_image', reg, 'fixed_image')
     """
     Concatenate the affine and ants transforms into a list
     """
@@ -531,7 +532,6 @@ def create_reg_workflow(name='registration'):
     merge = Node(Merge(2), iterfield=['in2'], name='mergexfm')
     register.connect(convert2itk, 'itk_transform', merge, 'in2')
     register.connect(reg, 'composite_transform', merge, 'in1')
-
     """
     Transform the mean image. First to anatomical and then to target
     """
@@ -540,30 +540,27 @@ def create_reg_workflow(name='registration'):
     warpmean.inputs.input_image_type = 3
     warpmean.inputs.interpolation = 'Linear'
     warpmean.inputs.invert_transform_flags = [False, False]
-    warpmean.inputs.terminal_output = 'file'
+    warpmean.terminal_output = 'file'
     warpmean.inputs.args = '--float'
     warpmean.inputs.num_threads = 4
 
-    register.connect(inputnode,'target_image', warpmean,'reference_image')
+    register.connect(inputnode, 'target_image', warpmean, 'reference_image')
     register.connect(inputnode, 'mean_image', warpmean, 'input_image')
     register.connect(merge, 'out', warpmean, 'transforms')
-
     """
     Assign all the output files
     """
 
     register.connect(reg, 'warped_image', outputnode, 'anat2target')
     register.connect(warpmean, 'output_image', outputnode, 'transformed_mean')
-    register.connect(applyxfm, 'transformed_file',
-                     outputnode, 'segmentation_files')
-    register.connect(aparcxfm, 'transformed_file',
-                     outputnode, 'aparc')
-    register.connect(bbregister, 'out_fsl_file',
-                     outputnode, 'func2anat_transform')
-    register.connect(bbregister, 'out_reg_file',
-                     outputnode, 'out_reg_file')
-    register.connect(reg, 'composite_transform',
-                     outputnode, 'anat2target_transform')
+    register.connect(applyxfm, 'transformed_file', outputnode,
+                     'segmentation_files')
+    register.connect(aparcxfm, 'transformed_file', outputnode, 'aparc')
+    register.connect(bbregister, 'out_fsl_file', outputnode,
+                     'func2anat_transform')
+    register.connect(bbregister, 'out_reg_file', outputnode, 'out_reg_file')
+    register.connect(reg, 'composite_transform', outputnode,
+                     'anat2target_transform')
     register.connect(merge, 'out', outputnode, 'transforms')
 
     return register
@@ -593,11 +590,12 @@ def create_workflow(files,
     wf = Workflow(name=name)
 
     # Rename files in case they are named identically
-    name_unique = MapNode(Rename(format_string='rest_%(run)02d'),
-                          iterfield=['in_file', 'run'],
-                          name='rename')
+    name_unique = MapNode(
+        Rename(format_string='rest_%(run)02d'),
+        iterfield=['in_file', 'run'],
+        name='rename')
     name_unique.inputs.keep_ext = True
-    name_unique.inputs.run = range(1, len(files) + 1)
+    name_unique.inputs.run = list(range(1, len(files) + 1))
     name_unique.inputs.in_file = files
 
     realign = Node(interface=spm.Realign(), name="realign")
@@ -607,32 +605,26 @@ def create_workflow(files,
     slice_timing = Node(interface=spm.SliceTiming(), name="slice_timing")
     slice_timing.inputs.num_slices = num_slices
     slice_timing.inputs.time_repetition = TR
-    slice_timing.inputs.time_acquisition = TR - TR/float(num_slices)
+    slice_timing.inputs.time_acquisition = TR - TR / float(num_slices)
     slice_timing.inputs.slice_order = (np.argsort(slice_times) + 1).tolist()
-    slice_timing.inputs.ref_slice = int(num_slices/2)
+    slice_timing.inputs.ref_slice = int(num_slices / 2)
 
     # Comute TSNR on realigned data regressing polynomials upto order 2
     tsnr = MapNode(TSNR(regress_poly=2), iterfield=['in_file'], name='tsnr')
     wf.connect(slice_timing, 'timecorrected_files', tsnr, 'in_file')
 
     # Compute the median image across runs
-    calc_median = Node(Function(input_names=['in_files'],
-                                output_names=['median_file'],
-                                function=median,
-                                imports=imports),
-                       name='median')
+    calc_median = Node(CalculateMedian(), name='median')
     wf.connect(tsnr, 'detrended_file', calc_median, 'in_files')
-
     """Segment and Register
     """
 
     registration = create_reg_workflow(name='registration')
-    wf.connect(calc_median, 'median_file', registration, 'inputspec.mean_image')
+    wf.connect(calc_median, 'median_file', registration,
+               'inputspec.mean_image')
     registration.inputs.inputspec.subject_id = subject_id
     registration.inputs.inputspec.subjects_dir = subjects_dir
     registration.inputs.inputspec.target_image = target_file
-
-
     """Use :class:`nipype.algorithms.rapidart` to determine which of the
     images in the functional series are outliers based on deviations in
     intensity or movement.
@@ -645,27 +637,28 @@ def create_workflow(files,
     art.inputs.zintensity_threshold = 9
     art.inputs.mask_type = 'spm_global'
     art.inputs.parameter_source = 'SPM'
-
-
     """Here we are connecting all the nodes together. Notice that we add the merge node only if you choose
     to use 4D. Also `get_vox_dims` function is passed along the input volume of normalise to set the optimal
     voxel sizes.
     """
 
-    wf.connect([(name_unique, realign, [('out_file', 'in_files')]),
-                (realign, slice_timing, [('realigned_files', 'in_files')]),
-                (slice_timing, art, [('timecorrected_files', 'realigned_files')]),
-                (realign, art, [('realignment_parameters', 'realignment_parameters')]),
-                ])
+    wf.connect([
+        (name_unique, realign, [('out_file', 'in_files')]),
+        (realign, slice_timing, [('realigned_files', 'in_files')]),
+        (slice_timing, art, [('timecorrected_files', 'realigned_files')]),
+        (realign, art, [('realignment_parameters', 'realignment_parameters')]),
+    ])
 
     def selectindex(files, idx):
         import numpy as np
         from nipype.utils.filemanip import filename_to_list, list_to_filename
-        return list_to_filename(np.array(filename_to_list(files))[idx].tolist())
+        return list_to_filename(
+            np.array(filename_to_list(files))[idx].tolist())
 
     mask = Node(fsl.BET(), name='getmask')
     mask.inputs.mask = True
     wf.connect(calc_median, 'median_file', mask, 'in_file')
+
     # get segmentation in normalized functional space
 
     def merge_files(in1, in2):
@@ -676,77 +669,81 @@ def create_workflow(files,
     # filter some noise
 
     # Compute motion regressors
-    motreg = Node(Function(input_names=['motion_params', 'order',
-                                        'derivatives'],
-                           output_names=['out_files'],
-                           function=motion_regressors,
-                           imports=imports),
-                  name='getmotionregress')
+    motreg = Node(
+        Function(
+            input_names=['motion_params', 'order', 'derivatives'],
+            output_names=['out_files'],
+            function=motion_regressors,
+            imports=imports),
+        name='getmotionregress')
     wf.connect(realign, 'realignment_parameters', motreg, 'motion_params')
 
     # Create a filter to remove motion and art confounds
-    createfilter1 = Node(Function(input_names=['motion_params', 'comp_norm',
-                                               'outliers', 'detrend_poly'],
-                                  output_names=['out_files'],
-                                  function=build_filter1,
-                                  imports=imports),
-                         name='makemotionbasedfilter')
+    createfilter1 = Node(
+        Function(
+            input_names=[
+                'motion_params', 'comp_norm', 'outliers', 'detrend_poly'
+            ],
+            output_names=['out_files'],
+            function=build_filter1,
+            imports=imports),
+        name='makemotionbasedfilter')
     createfilter1.inputs.detrend_poly = 2
     wf.connect(motreg, 'out_files', createfilter1, 'motion_params')
     wf.connect(art, 'norm_files', createfilter1, 'comp_norm')
     wf.connect(art, 'outlier_files', createfilter1, 'outliers')
 
-
-    filter1 = MapNode(fsl.GLM(out_f_name='F_mcart.nii',
-                              out_pf_name='pF_mcart.nii',
-                              demean=True),
-                      iterfield=['in_file', 'design', 'out_res_name'],
-                      name='filtermotion')
+    filter1 = MapNode(
+        fsl.GLM(
+            out_f_name='F_mcart.nii', out_pf_name='pF_mcart.nii', demean=True),
+        iterfield=['in_file', 'design', 'out_res_name'],
+        name='filtermotion')
 
     wf.connect(slice_timing, 'timecorrected_files', filter1, 'in_file')
     wf.connect(slice_timing, ('timecorrected_files', rename, '_filtermotart'),
                filter1, 'out_res_name')
     wf.connect(createfilter1, 'out_files', filter1, 'design')
 
-
-    createfilter2 = MapNode(Function(input_names=['realigned_file', 'mask_file',
-                                                  'num_components',
-                                                  'extra_regressors'],
-                                     output_names=['out_files'],
-                                     function=extract_noise_components,
-                                     imports=imports),
-                            iterfield=['realigned_file', 'extra_regressors'],
-                            name='makecompcorrfilter')
+    createfilter2 = MapNode(
+        Function(
+            input_names=[
+                'realigned_file', 'mask_file', 'num_components',
+                'extra_regressors'
+            ],
+            output_names=['out_files'],
+            function=extract_noise_components,
+            imports=imports),
+        iterfield=['realigned_file', 'extra_regressors'],
+        name='makecompcorrfilter')
     createfilter2.inputs.num_components = num_components
 
     wf.connect(createfilter1, 'out_files', createfilter2, 'extra_regressors')
     wf.connect(filter1, 'out_res', createfilter2, 'realigned_file')
-    wf.connect(registration, ('outputspec.segmentation_files', selectindex, [0, 2]),
+    wf.connect(registration,
+               ('outputspec.segmentation_files', selectindex, [0, 2]),
                createfilter2, 'mask_file')
 
-
-    filter2 = MapNode(fsl.GLM(out_f_name='F.nii',
-                              out_pf_name='pF.nii',
-                              demean=True),
-                      iterfield=['in_file', 'design', 'out_res_name'],
-                      name='filter_noise_nosmooth')
+    filter2 = MapNode(
+        fsl.GLM(out_f_name='F.nii', out_pf_name='pF.nii', demean=True),
+        iterfield=['in_file', 'design', 'out_res_name'],
+        name='filter_noise_nosmooth')
     wf.connect(filter1, 'out_res', filter2, 'in_file')
-    wf.connect(filter1, ('out_res', rename, '_cleaned'),
-               filter2, 'out_res_name')
+    wf.connect(filter1, ('out_res', rename, '_cleaned'), filter2,
+               'out_res_name')
     wf.connect(createfilter2, 'out_files', filter2, 'design')
     wf.connect(mask, 'mask_file', filter2, 'mask')
 
-    bandpass = Node(Function(input_names=['files', 'lowpass_freq',
-                                           'highpass_freq', 'fs'],
-                              output_names=['out_files'],
-                              function=bandpass_filter,
-                              imports=imports),
-                     name='bandpass_unsmooth')
-    bandpass.inputs.fs = 1./TR
+    bandpass = Node(
+        Function(
+            input_names=['files', 'lowpass_freq', 'highpass_freq', 'fs'],
+            output_names=['out_files'],
+            function=bandpass_filter,
+            imports=imports),
+        name='bandpass_unsmooth')
+    bandpass.inputs.fs = 1. / TR
     bandpass.inputs.highpass_freq = highpass_freq
     bandpass.inputs.lowpass_freq = lowpass_freq
     wf.connect(filter2, 'out_res', bandpass, 'files')
-
     """Smooth the functional data using
     :class:`nipype.interfaces.spm.Smooth`.
     """
@@ -759,17 +756,16 @@ def create_workflow(files,
     collector = Node(Merge(2), name='collect_streams')
     wf.connect(smooth, 'smoothed_files', collector, 'in1')
     wf.connect(bandpass, 'out_files', collector, 'in2')
-
     """
     Transform the remaining images. First to anatomical and then to target
     """
 
-    warpall = MapNode(ants.ApplyTransforms(), iterfield=['input_image'],
-                      name='warpall')
+    warpall = MapNode(
+        ants.ApplyTransforms(), iterfield=['input_image'], name='warpall')
     warpall.inputs.input_image_type = 3
     warpall.inputs.interpolation = 'Linear'
     warpall.inputs.invert_transform_flags = [False, False]
-    warpall.inputs.terminal_output = 'file'
+    warpall.terminal_output = 'file'
     warpall.inputs.reference_image = target_file
     warpall.inputs.args = '--float'
     warpall.inputs.num_threads = 1
@@ -796,16 +792,16 @@ def create_workflow(files,
     # Convert aparc to subject functional space
 
     # Sample the average time series in aparc ROIs
-    sampleaparc = MapNode(freesurfer.SegStats(default_color_table=True),
-                          iterfield=['in_file', 'summary_file',
-                                     'avgwf_txt_file'],
-                          name='aparc_ts')
-    sampleaparc.inputs.segment_id = ([8] + range(10, 14) + [17, 18, 26, 47] +
-                                     range(49, 55) + [58] + range(1001, 1036) +
-                                     range(2001, 2036))
+    sampleaparc = MapNode(
+        freesurfer.SegStats(default_color_table=True),
+        iterfield=['in_file', 'summary_file', 'avgwf_txt_file'],
+        name='aparc_ts')
+    sampleaparc.inputs.segment_id = (
+        [8] + list(range(10, 14)) + [17, 18, 26, 47] + list(range(49, 55)) +
+        [58] + list(range(1001, 1036)) + list(range(2001, 2036)))
 
-    wf.connect(registration, 'outputspec.aparc',
-               sampleaparc, 'segmentation_file')
+    wf.connect(registration, 'outputspec.aparc', sampleaparc,
+               'segmentation_file')
     wf.connect(collector, 'out', sampleaparc, 'in_file')
 
     def get_names(files, suffix):
@@ -819,25 +815,26 @@ def create_workflow(files,
             out_names.append(name + suffix)
         return list_to_filename(out_names)
 
-    wf.connect(collector, ('out', get_names, '_avgwf.txt'),
-               sampleaparc, 'avgwf_txt_file')
-    wf.connect(collector, ('out', get_names, '_summary.stats'),
-               sampleaparc, 'summary_file')
+    wf.connect(collector, ('out', get_names, '_avgwf.txt'), sampleaparc,
+               'avgwf_txt_file')
+    wf.connect(collector, ('out', get_names, '_summary.stats'), sampleaparc,
+               'summary_file')
 
     # Sample the time series onto the surface of the target surface. Performs
     # sampling into left and right hemisphere
     target = Node(IdentityInterface(fields=['target_subject']), name='target')
     target.iterables = ('target_subject', filename_to_list(target_subject))
 
-    samplerlh = MapNode(freesurfer.SampleToSurface(),
-                        iterfield=['source_file'],
-                        name='sampler_lh')
+    samplerlh = MapNode(
+        freesurfer.SampleToSurface(),
+        iterfield=['source_file'],
+        name='sampler_lh')
     samplerlh.inputs.sampling_method = "average"
     samplerlh.inputs.sampling_range = (0.1, 0.9, 0.1)
     samplerlh.inputs.sampling_units = "frac"
     samplerlh.inputs.interp_method = "trilinear"
     samplerlh.inputs.smooth_surf = surf_fwhm
-    #samplerlh.inputs.cortex_mask = True
+    # samplerlh.inputs.cortex_mask = True
     samplerlh.inputs.out_type = 'niigz'
     samplerlh.inputs.subjects_dir = subjects_dir
 
@@ -854,25 +851,28 @@ def create_workflow(files,
     wf.connect(target, 'target_subject', samplerrh, 'target_subject')
 
     # Combine left and right hemisphere to text file
-    combiner = MapNode(Function(input_names=['left', 'right'],
-                                output_names=['out_file'],
-                                function=combine_hemi,
-                                imports=imports),
-                       iterfield=['left', 'right'],
-                       name="combiner")
+    combiner = MapNode(
+        Function(
+            input_names=['left', 'right'],
+            output_names=['out_file'],
+            function=combine_hemi,
+            imports=imports),
+        iterfield=['left', 'right'],
+        name="combiner")
     wf.connect(samplerlh, 'out_file', combiner, 'left')
     wf.connect(samplerrh, 'out_file', combiner, 'right')
 
     # Sample the time series file for each subcortical roi
-    ts2txt = MapNode(Function(input_names=['timeseries_file', 'label_file',
-                                           'indices'],
-                              output_names=['out_file'],
-                              function=extract_subrois,
-                              imports=imports),
-                     iterfield=['timeseries_file'],
-                     name='getsubcortts')
-    ts2txt.inputs.indices = [8] + range(10, 14) + [17, 18, 26, 47] +\
-                            range(49, 55) + [58]
+    ts2txt = MapNode(
+        Function(
+            input_names=['timeseries_file', 'label_file', 'indices'],
+            output_names=['out_file'],
+            function=extract_subrois,
+            imports=imports),
+        iterfield=['timeseries_file'],
+        name='getsubcortts')
+    ts2txt.inputs.indices = [8] + list(range(10, 14)) + [17, 18, 26, 47] +\
+        list(range(49, 55)) + [58]
     ts2txt.inputs.label_file = \
         os.path.abspath(('OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_'
                          '2mm_v2.nii.gz'))
@@ -880,61 +880,66 @@ def create_workflow(files,
 
     ######
 
-    substitutions = [('_target_subject_', ''),
-                     ('_filtermotart_cleaned_bp_trans_masked', ''),
-                     ('_filtermotart_cleaned_bp', '')
-                     ]
-    regex_subs = [('_ts_masker.*/sar', '/smooth/'),
-                  ('_ts_masker.*/ar', '/unsmooth/'),
-                  ('_combiner.*/sar', '/smooth/'),
-                  ('_combiner.*/ar', '/unsmooth/'),
-                  ('_aparc_ts.*/sar', '/smooth/'),
-                  ('_aparc_ts.*/ar', '/unsmooth/'),
-                  ('_getsubcortts.*/sar', '/smooth/'),
-                  ('_getsubcortts.*/ar', '/unsmooth/'),
-                  ('series/sar', 'series/smooth/'),
-                  ('series/ar', 'series/unsmooth/'),
-                  ('_inverse_transform./', ''),
-                  ]
+    substitutions = [('_target_subject_',
+                      ''), ('_filtermotart_cleaned_bp_trans_masked', ''),
+                     ('_filtermotart_cleaned_bp', '')]
+    regex_subs = [
+        ('_ts_masker.*/sar', '/smooth/'),
+        ('_ts_masker.*/ar', '/unsmooth/'),
+        ('_combiner.*/sar', '/smooth/'),
+        ('_combiner.*/ar', '/unsmooth/'),
+        ('_aparc_ts.*/sar', '/smooth/'),
+        ('_aparc_ts.*/ar', '/unsmooth/'),
+        ('_getsubcortts.*/sar', '/smooth/'),
+        ('_getsubcortts.*/ar', '/unsmooth/'),
+        ('series/sar', 'series/smooth/'),
+        ('series/ar', 'series/unsmooth/'),
+        ('_inverse_transform./', ''),
+    ]
     # Save the relevant data into an output directory
     datasink = Node(interface=DataSink(), name="datasink")
     datasink.inputs.base_directory = sink_directory
     datasink.inputs.container = subject_id
     datasink.inputs.substitutions = substitutions
-    datasink.inputs.regexp_substitutions = regex_subs #(r'(/_.*(\d+/))', r'/run\2')
-    wf.connect(realign, 'realignment_parameters', datasink, 'resting.qa.motion')
+    datasink.inputs.regexp_substitutions = regex_subs  # (r'(/_.*(\d+/))', r'/run\2')
+    wf.connect(realign, 'realignment_parameters', datasink,
+               'resting.qa.motion')
     wf.connect(art, 'norm_files', datasink, 'resting.qa.art.@norm')
     wf.connect(art, 'intensity_files', datasink, 'resting.qa.art.@intensity')
     wf.connect(art, 'outlier_files', datasink, 'resting.qa.art.@outlier_files')
-    wf.connect(registration, 'outputspec.segmentation_files', datasink, 'resting.mask_files')
-    wf.connect(registration, 'outputspec.anat2target', datasink, 'resting.qa.ants')
+    wf.connect(registration, 'outputspec.segmentation_files', datasink,
+               'resting.mask_files')
+    wf.connect(registration, 'outputspec.anat2target', datasink,
+               'resting.qa.ants')
     wf.connect(mask, 'mask_file', datasink, 'resting.mask_files.@brainmask')
     wf.connect(mask_target, 'out_file', datasink, 'resting.mask_files.target')
     wf.connect(filter1, 'out_f', datasink, 'resting.qa.compmaps.@mc_F')
     wf.connect(filter1, 'out_pf', datasink, 'resting.qa.compmaps.@mc_pF')
     wf.connect(filter2, 'out_f', datasink, 'resting.qa.compmaps')
     wf.connect(filter2, 'out_pf', datasink, 'resting.qa.compmaps.@p')
-    wf.connect(bandpass, 'out_files', datasink, 'resting.timeseries.@bandpassed')
-    wf.connect(smooth, 'smoothed_files', datasink, 'resting.timeseries.@smoothed')
-    wf.connect(createfilter1, 'out_files',
-               datasink, 'resting.regress.@regressors')
-    wf.connect(createfilter2, 'out_files',
-               datasink, 'resting.regress.@compcorr')
+    wf.connect(bandpass, 'out_files', datasink,
+               'resting.timeseries.@bandpassed')
+    wf.connect(smooth, 'smoothed_files', datasink,
+               'resting.timeseries.@smoothed')
+    wf.connect(createfilter1, 'out_files', datasink,
+               'resting.regress.@regressors')
+    wf.connect(createfilter2, 'out_files', datasink,
+               'resting.regress.@compcorr')
     wf.connect(maskts, 'out_file', datasink, 'resting.timeseries.target')
-    wf.connect(sampleaparc, 'summary_file',
-               datasink, 'resting.parcellations.aparc')
-    wf.connect(sampleaparc, 'avgwf_txt_file',
-               datasink, 'resting.parcellations.aparc.@avgwf')
-    wf.connect(ts2txt, 'out_file',
-               datasink, 'resting.parcellations.grayo.@subcortical')
+    wf.connect(sampleaparc, 'summary_file', datasink,
+               'resting.parcellations.aparc')
+    wf.connect(sampleaparc, 'avgwf_txt_file', datasink,
+               'resting.parcellations.aparc.@avgwf')
+    wf.connect(ts2txt, 'out_file', datasink,
+               'resting.parcellations.grayo.@subcortical')
 
     datasink2 = Node(interface=DataSink(), name="datasink2")
     datasink2.inputs.base_directory = sink_directory
     datasink2.inputs.container = subject_id
     datasink2.inputs.substitutions = substitutions
-    datasink2.inputs.regexp_substitutions = regex_subs #(r'(/_.*(\d+/))', r'/run\2')
-    wf.connect(combiner, 'out_file',
-               datasink2, 'resting.parcellations.grayo.@surface')
+    datasink2.inputs.regexp_substitutions = regex_subs  # (r'(/_.*(\d+/))', r'/run\2')
+    wf.connect(combiner, 'out_file', datasink2,
+               'resting.parcellations.grayo.@surface')
     return wf
 
 
@@ -948,71 +953,124 @@ def create_resting_workflow(args, name=None):
     slice_times = args.slice_times
     if args.dicom_file:
         TR, slice_times, slice_thickness = get_info(args.dicom_file)
-        slice_times = (np.array(slice_times)/1000.).tolist()
+        slice_times = (np.array(slice_times) / 1000.).tolist()
     if name is None:
         name = 'resting_' + args.subject_id
-    kwargs = dict(files=[os.path.abspath(filename) for filename in args.files],
-                  target_file=os.path.abspath(args.target_file),
-                  subject_id=args.subject_id,
-                  TR=TR,
-                  slice_times=slice_times,
-                  vol_fwhm=args.vol_fwhm,
-                  surf_fwhm=args.surf_fwhm,
-                  norm_threshold=2.,
-                  subjects_dir=os.path.abspath(args.fsdir),
-                  target_subject=args.target_surfs,
-                  lowpass_freq=args.lowpass_freq,
-                  highpass_freq=args.highpass_freq,
-                  sink_directory=os.path.abspath(args.sink),
-                  name=name)
+    kwargs = dict(
+        files=[os.path.abspath(filename) for filename in args.files],
+        target_file=os.path.abspath(args.target_file),
+        subject_id=args.subject_id,
+        TR=TR,
+        slice_times=slice_times,
+        vol_fwhm=args.vol_fwhm,
+        surf_fwhm=args.surf_fwhm,
+        norm_threshold=2.,
+        subjects_dir=os.path.abspath(args.fsdir),
+        target_subject=args.target_surfs,
+        lowpass_freq=args.lowpass_freq,
+        highpass_freq=args.highpass_freq,
+        sink_directory=os.path.abspath(args.sink),
+        name=name)
     wf = create_workflow(**kwargs)
     return wf
+
 
 if __name__ == "__main__":
     from argparse import ArgumentParser, RawTextHelpFormatter
     defstr = ' (default %(default)s)'
-    parser = ArgumentParser(description=__doc__,
-                            formatter_class=RawTextHelpFormatter)
-    parser.add_argument("-d", "--dicom_file", dest="dicom_file",
-                        help="an example dicom file from the resting series")
-    parser.add_argument("-f", "--files", dest="files", nargs="+",
-                        help="4d nifti files for resting state",
-                        required=True)
-    parser.add_argument("-t", "--target", dest="target_file",
-                        help=("Target in MNI space. Best to use the MindBoggle "
-                              "template - "
-                              "OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz"),
-                        required=True)
-    parser.add_argument("-s", "--subject_id", dest="subject_id",
-                        help="FreeSurfer subject id", required=True)
-    parser.add_argument("--subjects_dir", dest="fsdir",
-                        help="FreeSurfer subject directory", required=True)
-    parser.add_argument("--target_surfaces", dest="target_surfs", nargs="+",
-                        default=['fsaverage5'],
-                        help="FreeSurfer target surfaces" + defstr)
-    parser.add_argument("--TR", dest="TR", default=None, type=float,
-                        help="TR if dicom not provided in seconds")
-    parser.add_argument("--slice_times", dest="slice_times", nargs="+",
-                        type=float, help="Slice onset times in seconds")
-    parser.add_argument('--vol_fwhm', default=6., dest='vol_fwhm',
-                        type=float, help="Spatial FWHM" + defstr)
-    parser.add_argument('--surf_fwhm', default=15., dest='surf_fwhm',
-                        type=float, help="Spatial FWHM" + defstr)
-    parser.add_argument("-l", "--lowpass_freq", dest="lowpass_freq",
-                        default=0.1, type=float,
-                        help="Low pass frequency (Hz)" + defstr)
-    parser.add_argument("-u", "--highpass_freq", dest="highpass_freq",
-                        default=0.01, type=float,
-                        help="High pass frequency (Hz)" + defstr)
-    parser.add_argument("-o", "--output_dir", dest="sink",
-                        help="Output directory base", required=True)
-    parser.add_argument("-w", "--work_dir", dest="work_dir",
-                        help="Output directory base")
-    parser.add_argument("-p", "--plugin", dest="plugin",
-                        default='Linear',
-                        help="Plugin to use")
-    parser.add_argument("--plugin_args", dest="plugin_args",
-                        help="Plugin arguments")
+    parser = ArgumentParser(
+        description=__doc__, formatter_class=RawTextHelpFormatter)
+    parser.add_argument(
+        "-d",
+        "--dicom_file",
+        dest="dicom_file",
+        help="an example dicom file from the resting series")
+    parser.add_argument(
+        "-f",
+        "--files",
+        dest="files",
+        nargs="+",
+        help="4d nifti files for resting state",
+        required=True)
+    parser.add_argument(
+        "-t",
+        "--target",
+        dest="target_file",
+        help=("Target in MNI space. Best to use the MindBoggle "
+              "template - "
+              "OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz"),
+        required=True)
+    parser.add_argument(
+        "-s",
+        "--subject_id",
+        dest="subject_id",
+        help="FreeSurfer subject id",
+        required=True)
+    parser.add_argument(
+        "--subjects_dir",
+        dest="fsdir",
+        help="FreeSurfer subject directory",
+        required=True)
+    parser.add_argument(
+        "--target_surfaces",
+        dest="target_surfs",
+        nargs="+",
+        default=['fsaverage5'],
+        help="FreeSurfer target surfaces" + defstr)
+    parser.add_argument(
+        "--TR",
+        dest="TR",
+        default=None,
+        type=float,
+        help="TR if dicom not provided in seconds")
+    parser.add_argument(
+        "--slice_times",
+        dest="slice_times",
+        nargs="+",
+        type=float,
+        help="Slice onset times in seconds")
+    parser.add_argument(
+        '--vol_fwhm',
+        default=6.,
+        dest='vol_fwhm',
+        type=float,
+        help="Spatial FWHM" + defstr)
+    parser.add_argument(
+        '--surf_fwhm',
+        default=15.,
+        dest='surf_fwhm',
+        type=float,
+        help="Spatial FWHM" + defstr)
+    parser.add_argument(
+        "-l",
+        "--lowpass_freq",
+        dest="lowpass_freq",
+        default=0.1,
+        type=float,
+        help="Low pass frequency (Hz)" + defstr)
+    parser.add_argument(
+        "-u",
+        "--highpass_freq",
+        dest="highpass_freq",
+        default=0.01,
+        type=float,
+        help="High pass frequency (Hz)" + defstr)
+    parser.add_argument(
+        "-o",
+        "--output_dir",
+        dest="sink",
+        help="Output directory base",
+        required=True)
+    parser.add_argument(
+        "-w", "--work_dir", dest="work_dir", help="Output directory base")
+    parser.add_argument(
+        "-p",
+        "--plugin",
+        dest="plugin",
+        default='Linear',
+        help="Plugin to use")
+    parser.add_argument(
+        "--plugin_args", dest="plugin_args", help="Plugin arguments")
     args = parser.parse_args()
 
     wf = create_resting_workflow(args)

@@ -1,6 +1,11 @@
-import httplib
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import open
+import http.client
 import inspect
-import json
+import simplejson
 import os
 from subprocess import Popen, PIPE
 
@@ -10,8 +15,8 @@ import nipype
 def is_git_repo():
     """Does the current nipype module have a git folder
     """
-    sourcepath = os.path.realpath(os.path.join(os.path.dirname(nipype.__file__),
-                                               os.path.pardir))
+    sourcepath = os.path.realpath(
+        os.path.join(os.path.dirname(nipype.__file__), os.path.pardir))
     gitpathgit = os.path.join(sourcepath, '.git')
     if os.path.exists(gitpathgit):
         return True
@@ -23,8 +28,11 @@ def get_local_branch():
     """Determine current branch
     """
     if is_git_repo():
-        o, _ = Popen('git branch | grep "\* "', shell=True, stdout=PIPE,
-                     cwd=os.path.dirname(nipype.__file__)).communicate()
+        o, _ = Popen(
+            'git branch | grep "\* "',
+            shell=True,
+            stdout=PIPE,
+            cwd=os.path.dirname(nipype.__file__)).communicate()
         return o.strip()[2:]
     else:
         return None
@@ -45,9 +53,13 @@ def create_hash_map():
     from base64 import encodestring as base64
     import pwd
     login_name = pwd.getpwuid(os.geteuid())[0]
-    conn = httplib.HTTPSConnection("api.github.com")
-    conn.request("GET", "/repos/nipy/nipype",
-                 headers={'Authorization': 'Basic %s' % base64(login_name)})
+    conn = http.client.HTTPSConnection("api.github.com")
+    conn.request(
+        "GET",
+        "/repos/nipy/nipype",
+        headers={
+            'Authorization': 'Basic %s' % base64(login_name)
+        })
     try:
         conn.request("GET", "/repos/nipy/nipype/git/trees/master?recursive=1")
     except:
@@ -56,7 +68,7 @@ def create_hash_map():
         r1 = conn.getresponse()
         if r1.reason != 'OK':
             raise Exception('HTTP Response  %s:%s' % (r1.status, r1.reason))
-        payload = json.loads(r1.read())
+        payload = simplejson.loads(r1.read())
         for infodict in payload['tree']:
             if infodict['type'] == "blob":
                 hashmap[infodict['sha']] = infodict['path']
@@ -71,8 +83,8 @@ def get_repo_url(force_github=False):
     URI: str
        filesystem path or github repo url
     """
-    sourcepath = os.path.realpath(os.path.join(os.path.dirname(nipype.__file__),
-                                               os.path.pardir))
+    sourcepath = os.path.realpath(
+        os.path.join(os.path.dirname(nipype.__file__), os.path.pardir))
     gitpathgit = os.path.join(sourcepath, '.git')
     if not os.path.exists(gitpathgit) and not force_github:
         uri = 'file://%s' % sourcepath
@@ -91,6 +103,6 @@ def get_file_url(object):
         info = nipype.get_info()
         shortfile = os.path.join('nipype', filename.split('nipype/')[-1])
         uri = 'http://github.com/nipy/nipype/tree/%s/%s#L%d' % \
-                                                           (info['commit_hash'],
-                                                            shortfile, lines[1])
+            (info['commit_hash'],
+             shortfile, lines[1])
     return uri

@@ -71,7 +71,8 @@ realigner to the smoother in step 5.
 **3. Creating and configuring a workflow**
 
 Here we create an instance of a workflow and indicate that it should operate in
-the current directory.
+the current directory. The workflow's output will be placed in the ``preproc``
+directory.
 
 .. literalinclude:: tutorial_101.py
    :lines: 25-26
@@ -93,13 +94,8 @@ This results in a workflow containing two isolated nodes:
 
 **5. Connecting nodes to each other**
 
-<<<<<<< HEAD
 We want to connect the output produced by the node realignment to the input of
 the node smoothing. This is done as follows:
-=======
-We want to connect the output produced by realignment to the input of
-smoothing. This is done as follows:
->>>>>>> cb80e24fc2a68758defcb16c7ab70092aa35b693
 
 .. literalinclude:: tutorial_101.py
    :lines: 31
@@ -126,11 +122,13 @@ above were generated using this):
 
    workflow.write_graph()
 
-This creates two files graph.dot and graph_detailed.dot and if
+This creates two files ``graph.dot`` and ``graph_detailed.dot`` inside
+``./preproc`` and if
 graphviz_ is installed on your system it automatically converts it
 to png files. If graphviz is not installed you can take the dot files
 and load them in a graphviz visualizer elsewhere. You can specify how detailed
-the graph is going to be, by using "graph2use" argument which takes the following
+the graph is going to be, by using the ``graph2use`` argument which takes
+the following
 options:
 
 * hierarchical - creates a graph showing all embedded workflows (default)

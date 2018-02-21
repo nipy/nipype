@@ -1,2 +1,2 @@
-from nipype.caching.memory import Memory
-
+# -*- coding: utf-8 -*-
+from .memory import Memory

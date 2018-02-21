@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -8,20 +9,34 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
-from nipype.utils.filemanip import split_filename
-import os, os.path as op
-from nipype.interfaces.traits_extension import isdefined
+from ..base import CommandLineInputSpec, CommandLine, TraitedSpec, File
+
 
 class Vnifti2ImageInputSpec(CommandLineInputSpec):
-    in_file = File(exists=True, argstr='-in %s', mandatory=True, position=1, desc='in file')
-    attributes = File(exists=True, argstr='-attr %s', position=2, desc='attribute file')
-    out_file = File(name_template="%s.v", keep_extension=False, argstr='-out %s', hash_files=False,
-                    position= -1, desc='output data file', name_source=["in_file"])
+    in_file = File(
+        exists=True,
+        argstr='-in %s',
+        mandatory=True,
+        position=1,
+        desc='in file')
+    attributes = File(
+        exists=True, argstr='-attr %s', position=2, desc='attribute file')
+    out_file = File(
+        name_template="%s.v",
+        keep_extension=False,
+        argstr='-out %s',
+        hash_files=False,
+        position=-1,
+        desc='output data file',
+        name_source=["in_file"])
+
 
 class Vnifti2ImageOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='Output vista file')
+
 
 class Vnifti2Image(CommandLine):
     """
@@ -38,17 +53,30 @@ class Vnifti2Image(CommandLine):
     """
 
     _cmd = 'vnifti2image'
-    input_spec=Vnifti2ImageInputSpec
-    output_spec=Vnifti2ImageOutputSpec
+    input_spec = Vnifti2ImageInputSpec
+    output_spec = Vnifti2ImageOutputSpec
 
 
 class VtoMatInputSpec(CommandLineInputSpec):
-    in_file = File(exists=True, argstr='-in %s', mandatory=True, position=1, desc='in file')
-    out_file = File(name_template="%s.mat", keep_extension=False, argstr='-out %s', hash_files=False,
-                    position= -1, desc='output mat file', name_source=["in_file"])
+    in_file = File(
+        exists=True,
+        argstr='-in %s',
+        mandatory=True,
+        position=1,
+        desc='in file')
+    out_file = File(
+        name_template="%s.mat",
+        keep_extension=False,
+        argstr='-out %s',
+        hash_files=False,
+        position=-1,
+        desc='output mat file',
+        name_source=["in_file"])
+
 
 class VtoMatOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='Output mat file')
+
 
 class VtoMat(CommandLine):
     """
@@ -65,6 +93,5 @@ class VtoMat(CommandLine):
     """
 
     _cmd = 'vtomat'
-    input_spec=VtoMatInputSpec
-    output_spec=VtoMatOutputSpec
-
+    input_spec = VtoMatInputSpec
+    output_spec = VtoMatOutputSpec

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Attempt to generate templates for module reference with Sphinx
@@ -19,6 +20,9 @@ NOTE: this is a modified version of a script originally shipped with the
 PyMVPA project, which we've adapted for NIPY use.  PyMVPA is an MIT-licensed
 project."""
 
+from __future__ import print_function, unicode_literals
+from builtins import object, open
+
 # Stdlib imports
 import inspect
 import os
@@ -34,6 +38,8 @@ from nipype.utils.misc import trim
 from github import get_file_url
 
 # Functions and classes
+
+
 class InterfaceHelpWriter(object):
     ''' Class for automatic detection and parsing of API docs
     to Sphinx-parsable reST format'''
@@ -46,8 +52,7 @@ class InterfaceHelpWriter(object):
                  rst_extension='.rst',
                  package_skip_patterns=None,
                  module_skip_patterns=None,
-                 class_skip_patterns=None
-                 ):
+                 class_skip_patterns=None):
         ''' Initialize package for parsing
 
         Parameters
@@ -119,7 +124,7 @@ class InterfaceHelpWriter(object):
         ''' Get second token in line
         >>> docwriter = ApiDocWriter('sphinx')
         >>> docwriter._get_object_name("  def func():  ")
-        'func'
+        u'func'
         >>> docwriter._get_object_name("  class Klass(object):  ")
         'Klass'
         >>> docwriter._get_object_name("  class Klass:  ")
@@ -164,7 +169,7 @@ class InterfaceHelpWriter(object):
         path = path.replace(self.package_name + os.path.sep, '')
         path = os.path.join(self.root_path, path)
         # XXX maybe check for extensions as well?
-        if os.path.exists(path + '.py'): # file
+        if os.path.exists(path + '.py'):  # file
             path += '.py'
         elif os.path.exists(os.path.join(path, '__init__.py')):
             path = os.path.join(path, '__init__.py')
@@ -184,7 +189,7 @@ class InterfaceHelpWriter(object):
         filename = self._uri2path(uri)
         if filename is None:
             # nothing that we could handle here.
-            return ([],[])
+            return ([], [])
         f = open(filename, 'rt')
         functions, classes = self._parse_lines(f, uri)
         f.close()
@@ -213,7 +218,6 @@ class InterfaceHelpWriter(object):
         classes.sort()
         return functions, classes
 
-
     def _write_graph_section(self, fname, title):
         ad = '\n%s\n%s\n\n' % (title, self.rst_section_levels[3] * len(title))
         ad += '.. graphviz::\n\n'
@@ -223,7 +227,8 @@ class InterfaceHelpWriter(object):
 
         fhandle.close()
         os.remove(fname)
-        os.remove(fname + ".png")
+        bitmap_fname = '{}.png'.format(os.path.splitext(fname)[0])
+        os.remove(bitmap_fname)
         return ad
 
     def generate_api_doc(self, uri):
@@ -257,42 +262,42 @@ class InterfaceHelpWriter(object):
                 continue
 
             if isinstance(workflow, Workflow):
-                workflows.append((workflow,function, finst))
+                workflows.append((workflow, function, finst))
 
         if not classes and not workflows and not helper_functions:
-            print 'WARNING: Empty -',uri  # dbg
+            print('WARNING: Empty -', uri)  # dbg
             return ''
 
         # Make a shorter version of the uri that omits the package name for
         # titles
         uri_short = re.sub(r'^%s\.' % self.package_name, '', uri)
-        #uri_short = uri
+        # uri_short = uri
 
         ad = '.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n'
 
         chap_title = uri_short
-        ad += (chap_title+'\n'+ self.rst_section_levels[1] * len(chap_title)
-               + '\n\n')
+        ad += (chap_title + '\n' +
+               self.rst_section_levels[1] * len(chap_title) + '\n\n')
 
         # Set the chapter title to read 'module' for all modules except for the
         # main packages
-        #if '.' in uri:
+        # if '.' in uri:
         #    title = 'Module: :mod:`' + uri_short + '`'
-        #else:
+        # else:
         #    title = ':mod:`' + uri_short + '`'
-        #ad += title + '\n' + self.rst_section_levels[2] * len(title)
+        # ad += title + '\n' + self.rst_section_levels[2] * len(title)
 
-        #ad += '\n' + 'Classes' + '\n' + \
+        # ad += '\n' + 'Classes' + '\n' + \
         #    self.rst_section_levels[2] * 7 + '\n'
         for c in classes:
             __import__(uri)
-            print c
+            print(c)
             try:
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
                     classinst = sys.modules[uri].__dict__[c]
             except Exception as inst:
-                print inst
+                print(inst)
                 continue
 
             if not issubclass(classinst, BaseInterface):
@@ -303,8 +308,9 @@ class InterfaceHelpWriter(object):
             ad += '\n.. index:: %s\n\n' % c
             ad += c + '\n' + self.rst_section_levels[2] * len(c) + '\n\n'
             ad += "`Link to code <%s>`__\n\n" % get_file_url(classinst)
-            ad += trim(classinst.help(returnhelp=True),
-                       self.rst_section_levels[3]) + '\n'
+            ad += trim(
+                classinst.help(returnhelp=True),
+                self.rst_section_levels[3]) + '\n'
 
         if workflows or helper_functions:
             ad += '\n.. module:: %s\n\n' % uri
@@ -316,14 +322,13 @@ class InterfaceHelpWriter(object):
             ad += "\n\n`Link to code <%s>`__\n\n" % get_file_url(finst)
             helpstr = trim(finst.__doc__, self.rst_section_levels[3])
             ad += '\n\n' + helpstr + '\n\n'
-
             """
             # use sphinx autodoc for function signature
             ad += '\n.. _%s:\n\n' % (uri + '.' + name)
             ad += '.. autofunction:: %s\n\n' % name
             """
 
-            (_,fname) =  tempfile.mkstemp(suffix=".dot")
+            (_, fname) = tempfile.mkstemp(suffix=".dot")
             workflow.write_graph(dotfilename=fname, graph2use='hierarchical')
 
             ad += self._write_graph_section(fname, 'Graph') + '\n'
@@ -366,8 +371,7 @@ class InterfaceHelpWriter(object):
         elif match_type == 'class':
             patterns = self.class_skip_patterns
         else:
-            raise ValueError('Cannot interpret match type "%s"'
-                             % match_type)
+            raise ValueError('Cannot interpret match type "%s"' % match_type)
         # Match to URI without package name
         L = len(self.package_name)
         if matchstr[:L] == self.package_name:
@@ -409,12 +413,11 @@ class InterfaceHelpWriter(object):
         # raw directory parsing
         for dirpath, dirnames, filenames in os.walk(self.root_path):
             # Check directory names for packages
-            root_uri = self._path2uri(os.path.join(self.root_path,
-                                                   dirpath))
-            for dirname in dirnames[:]: # copy list - we modify inplace
+            root_uri = self._path2uri(os.path.join(self.root_path, dirpath))
+            for dirname in dirnames[:]:  # copy list - we modify inplace
                 package_uri = '.'.join((root_uri, dirname))
-                if (self._uri2path(package_uri) and
-                    self._survives_exclude(package_uri, 'package')):
+                if (self._uri2path(package_uri)
+                        and self._survives_exclude(package_uri, 'package')):
                     modules.append(package_uri)
                 else:
                     dirnames.remove(dirname)
@@ -422,12 +425,12 @@ class InterfaceHelpWriter(object):
             for filename in filenames:
                 module_name = filename[:-3]
                 module_uri = '.'.join((root_uri, module_name))
-                if (self._uri2path(module_uri) and
-                    self._survives_exclude(module_uri, 'module')):
+                if (self._uri2path(module_uri)
+                        and self._survives_exclude(module_uri, 'module')):
                     modules.append(module_uri)
         return sorted(modules)
 
-    def write_modules_api(self, modules,outdir):
+    def write_modules_api(self, modules, outdir):
         # write the list
         written_modules = []
         for m in modules:
@@ -435,8 +438,29 @@ class InterfaceHelpWriter(object):
             if not api_str:
                 continue
             # write out to file
-            outfile = os.path.join(outdir,
-                                   m + self.rst_extension)
+            mvalues = m.split('.')
+            if len(mvalues) > 3:
+                index_prefix = '.'.join(mvalues[1:3])
+                index_dir = os.path.join(outdir, index_prefix)
+                index_file = index_dir + self.rst_extension
+                if not os.path.exists(index_dir):
+                    os.makedirs(index_dir)
+                    header = """.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+{name}
+{underline}
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   {name}/*
+                    """.format(
+                        name=index_prefix, underline='=' * len(index_prefix))
+                    with open(index_file, 'wt') as fp:
+                        fp.write(header)
+                m = os.path.join(index_prefix, '.'.join(mvalues[3:]))
+            outfile = os.path.join(outdir, m + self.rst_extension)
             fileobj = open(outfile, 'wt')
             fileobj.write(api_str)
             fileobj.close()
@@ -464,7 +488,7 @@ class InterfaceHelpWriter(object):
             os.mkdir(outdir)
         # compose list of modules
         modules = self.discover_modules()
-        self.write_modules_api(modules,outdir)
+        self.write_modules_api(modules, outdir)
 
     def write_index(self, outdir, froot='gen', relative_to=None):
         """Make a reST API index file from written files
@@ -487,17 +511,17 @@ class InterfaceHelpWriter(object):
         if self.written_modules is None:
             raise ValueError('No modules written')
         # Get full filename path
-        path = os.path.join(outdir, froot+self.rst_extension)
+        path = os.path.join(outdir, froot + self.rst_extension)
         # Path written into index is relative to rootpath
         if relative_to is not None:
             relpath = outdir.replace(relative_to + os.path.sep, '')
         else:
             relpath = outdir
-        idx = open(path,'wt')
+        idx = open(path, 'wt')
         w = idx.write
         w('.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n')
         w('.. toctree::\n')
         w('   :maxdepth: 2\n\n')
         for f in self.written_modules:
-            w('   %s\n' % os.path.join(relpath,f))
+            w('   %s\n' % os.path.join(relpath, f))
         idx.close()

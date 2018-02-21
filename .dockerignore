@@ -1,0 +1,37 @@
+# python cache
+__pycache__
+**/__pycache__
+**/*.pyc
+*.pyc
+
+# python distribution
+build/**/*
+build
+dist/**/*
+dist
+nipype.egg-info/**/*
+nipype.egg-info
+.eggs/**/*
+.eggs
+src/**/*
+src/
+
+# git
+.gitignore
+.git/**/*
+.git
+
+# other
+docs/**/*
+docs/
+.cache/
+.circle/**/*
+.circle/
+circle.yml
+rtd_requirements.txt
+Vagrantfile
+.travis.yml
+.mailmap
+
+# Previous coverage results
+.coverage

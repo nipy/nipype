@@ -3,7 +3,7 @@ setscale 4
 setoption smoothing 6
 setoption paramsubset 1  0 0 0 0 0 0 1 1 1 1 1 1
 clear U
-clear UA 
+clear UA
 clear UB
 clear US
 clear UP
@@ -53,7 +53,7 @@ clear U
 setrow UG  1 0 0 0  0 1 0 0  0 0 1 0  0 0 0 1
 optimise 7 UG  0.0   0.0   0.0   0.0   0.0   0.0   0.0  abs 2
 sort U
-copy U UG 
+copy U UG
 # 1mm scale
 setscale 1
 setoption smoothing 2
