@@ -136,6 +136,7 @@ class Info(PackageInfo):
     _name = None
     _command = None
     _paths = None
+    _version = None
 
     @classmethod
     def path(klass, matlab_cmd=None, paths=None, use_mcr=None):
@@ -185,6 +186,7 @@ class Info(PackageInfo):
 
         if klass._name and klass._path and klass._version and \
                 klass._command == matlab_cmd and klass._paths == paths:
+
             return {
                 'name': klass._name,
                 'path': klass._path,
