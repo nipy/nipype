@@ -88,6 +88,7 @@ function generate_main_dockerfile() {
   --user neuro \
   --miniconda env_name=neuro \
               activate=true \
+              miniconda_version=4.3.31 \
   --copy docker/files/run_builddocs.sh docker/files/run_examples.sh \
          docker/files/run_pytests.sh nipype/external/fsl_imglob.py /usr/bin/ \
   --copy . /src/nipype \

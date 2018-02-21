@@ -387,6 +387,8 @@ class SPMCommand(BaseInterface):
         """Convert input to appropriate format for SPM."""
         if spec.is_trait_type(traits.Bool):
             return int(val)
+        elif spec.is_trait_type(traits.Tuple):
+            return list(val)
         else:
             return val
 
