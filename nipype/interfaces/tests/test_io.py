@@ -38,9 +38,26 @@ try:
 except ImportError:
     noboto3 = True
 
+# Check for paramiko
 try:
     import paramiko
     no_paramiko = False
+
+    # Check for localhost SSH Server
+    # FIXME: Tests requiring this are never run on CI
+    try:
+        proxy = None
+        client = paramiko.SSHClient()
+        client.load_system_host_keys()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        client.connect('localhost', username=os.getenv('USER'), sock=proxy)
+
+        no_local_ssh = False
+
+    except (paramiko.SSHException,
+            paramiko.ssh_exception.NoValidConnectionsError):
+        no_local_ssh = True
+
 except ImportError:
     no_paramiko = True
 
@@ -621,6 +638,7 @@ def test_bids_infields_outfields(tmpdir):
 
 
 @pytest.mark.skipif(no_paramiko, reason="paramiko library is not available")
+@pytest.mark.skipif(no_local_ssh, reason="SSH Server is not running")
 def test_SSHDataGrabber(tmpdir):
     """Test SSHDataGrabber by connecting to localhost and collecting some data.
     """
