@@ -20,5 +20,6 @@ from .sgegraph import SGEGraphPlugin
 from .lsf import LSFPlugin
 from .slurm import SLURMPlugin
 from .slurmgraph import SLURMGraphPlugin
+from .dask import DaskPlugin
 
 from . import semaphore_singleton
