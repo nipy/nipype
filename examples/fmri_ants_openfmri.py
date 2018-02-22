@@ -161,10 +161,10 @@ def create_reg_workflow(name='registration'):
     """
     Compute registration between the subject's structural and MNI template
 
-        * All parameters are set using the example from: \
-          `newAntsExample.sh <https://github.com/stnava/ANTs/blob/master/Scripts/newAntsExample.sh>`_
-        * This is currently set to perform a very quick registration. However,\
-          the registration can be made significantly more accurate for cortical\
+        * All parameters are set using the example from:
+          #https://github.com/stnava/ANTs/blob/master/Scripts/newAntsExample.sh
+        * This is currently set to perform a very quick registration. However,
+          the registration can be made significantly more accurate for cortical
           structures by increasing the number of iterations.
     """
 
@@ -257,9 +257,7 @@ def create_reg_workflow(name='registration'):
 
 
 def get_aparc_aseg(files):
-    """
-    Return the aparc+aseg.mgz file
-    """
+    """Return the aparc+aseg.mgz file"""
 
     for name in files:
         if 'aparc+aseg.mgz' in name:
@@ -371,10 +369,10 @@ def create_fs_reg_workflow(name='registration'):
     """
     Compute registration between the subject's structural and MNI template
 
-        * All parameters are set using the example from: \
-          `newAntsExample.sh <https://github.com/stnava/ANTs/blob/master/Scripts/newAntsExample.sh>`_
-        * This is currently set to perform a very quick registration. However,\
-          the registration can be made significantly more accurate for cortical\
+        * All parameters are set using the example from:
+          #https://github.com/stnava/ANTs/blob/master/Scripts/newAntsExample.sh
+        * This is currently set to perform a very quick registration. However,
+          the registration can be made significantly more accurate for cortical
           structures by increasing the number of iterations.
     """
 

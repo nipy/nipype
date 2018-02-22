@@ -18,7 +18,7 @@
         packages (e.g., ANTS_, SPM_, FSL_, FreeSurfer_, Camino_, MRtrix_, MNE_, AFNI_, 
         Slicer_), eases the design of workflows within and between packages, and
         reduces the learning curve necessary to use different packages. Nipype is
-        creating a collaborative platform for neuroimaging software development 
+        creating a collaborative platform for neuroimaging software development
         in a high-level language and addressing limitations of existing pipeline
         systems.
 
