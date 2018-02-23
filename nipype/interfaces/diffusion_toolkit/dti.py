@@ -103,15 +103,15 @@ class DTIRecon(CommandLine):
         with open(bvals_file) as fbvals:
             bvals = [val for val in re.split('\s+', fbvals.readline().strip())]
         with open(bvecs_file) as fbvecs:
+            bvecs_x = [
+                val for val in re.split('\s+',
+                                        fbvecs.readline().strip())
+            ]
             bvecs_y = [
                 val for val in re.split('\s+',
                                         fbvecs.readline().strip())
             ]
             bvecs_z = [
-                val for val in re.split('\s+',
-                                        fbvecs.readline().strip())
-            ]
-            bvecs_x = [
                 val for val in re.split('\s+',
                                         fbvecs.readline().strip())
             ]
