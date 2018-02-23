@@ -1170,6 +1170,7 @@ class Label2VolInputSpec(FSTraitedSpec):
         argstr='--native-vox2ras',
         desc='use native vox2ras xform instead of  tkregister-style')
 
+
 class Label2VolOutputSpec(TraitedSpec):
     vol_label_file = File(exists=True, desc='output volume')
 
