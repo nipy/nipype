@@ -15,12 +15,7 @@ import os
 
 from ...utils.filemanip import filename_to_list
 from ..base import TraitedSpec, File, Str, traits, InputMultiPath, isdefined
-from .base import ANTSCommand, ANTSCommandInputSpec
-
-try:
-    LOCAL_DEFAULT_NUMBER_OF_THREADS = int(os.getenv("LOCAL_DEFAULT_NUMBER_OF_THREADS"))
-except TypeError:
-    LOCAL_DEFAULT_NUMBER_OF_THREADS = 1
+from .base import ANTSCommand, ANTSCommandInputSpec, LOCAL_DEFAULT_NUMBER_OF_THREADS
 
 
 class ANTSInputSpec(ANTSCommandInputSpec):
@@ -1565,14 +1560,24 @@ class RegistrationSynQuick(ANTSCommand):
     Examples
     --------
 
-    >>> import copy, pprint
-    >>> from nipype.interfaces.ants import Registration
+    >>> from nipype.interfaces.ants import RegistrationSynQuick
     >>> reg = RegistrationSynQuick()
     >>> reg.inputs.fixed_image = 'fixed1.nii'
     >>> reg.inputs.moving_image = 'moving1.nii'
     >>> reg.inputs.num_threads = 2
     >>> reg.cmdline
     'antsRegistrationSynQuick.sh -d 3 -f fixed1.nii -m moving1.nii -n 2 -o transform -p d -t s'
+    >>> reg.run()  # doctest: +SKIP
+
+    example for multiple images
+
+    >>> from nipype.interfaces.ants import RegistrationSynQuick
+    >>> reg = RegistrationSynQuick()
+    >>> reg.inputs.fixed_image = ['fixed1.nii', 'fixed2.nii']
+    >>> reg.inputs.moving_image = ['moving1.nii', 'moving2.nii']
+    >>> reg.inputs.num_threads = 2
+    >>> reg.cmdline
+    'antsRegistrationSynQuick.sh -d 3 -f fixed1.nii fixed2.nii -m moving1.nii moving2.nii -n 2 -o transform -p d -t s'
     >>> reg.run()  # doctest: +SKIP
     """
 
@@ -1581,6 +1586,13 @@ class RegistrationSynQuick(ANTSCommand):
     input_spec = RegistrationSynQuickInputSpec
     output_spec = RegistrationSynQuickOutputSpec
 
+    def _num_threads_update(self):
+        """
+        antsRegistrationSynQuick.sh ignores environment variables,
+        so override environment update frm ANTSCommand class
+        """
+        pass
+
     def _format_arg(self, name, spec, value):
         if name == 'precision_type':
             return spec.argstr % value[0]
@@ -1588,15 +1600,12 @@ class RegistrationSynQuick(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['warped_image'] = os.path.abspath(self.inputs.output_prefix + 'Warped.nii.gz')
-        outputs['inverse_warped_image'] = os.path.abspath(
-            self.inputs.output_prefix + 'InverseWarped.nii.gz')
-        outputs['out_matrix'] = os.path.abspath(self.inputs.output_prefix + '0GenericAffine.mat')
+        out_base = os.path.abspath(self.inputs.output_prefix)
+        outputs['warped_image'] = out_base + 'Warped.nii.gz'
+        outputs['inverse_warped_image'] = out_base + 'InverseWarped.nii.gz'
+        outputs['out_matrix'] = out_base + '0GenericAffine.mat'
 
-        # todo in the case of linear transformation-only there won't be fields. is there a more elegant way to specify that?
         if self.inputs.transform_type not in ('t', 'r', 'a'):
-            outputs['forward_warp_field'] = os.path.abspath(
-                self.inputs.output_prefix + '1Warp.nii.gz')
-            outputs['inverse_warp_field'] = os.path.abspath(
-                self.inputs.output_prefix + '1InverseWarp.nii.gz')
+            outputs['forward_warp_field'] = out_base + '1Warp.nii.gz'
+            outputs['inverse_warp_field'] = out_base + '1InverseWarp.nii.gz'
         return outputs
