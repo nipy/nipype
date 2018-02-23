@@ -171,7 +171,10 @@ class Info(PackageInfo):
             If none of the above was successful, the fallback value of
             'matlab -nodesktop -nosplash' will be used.
         paths : str
+            Add paths to matlab session
         use_mcr : bool
+            Whether to use the MATLAB Common Runtime. In this case, the
+            matlab_cmd is expected to be a valid MCR call.
 
         Returns
         -------
@@ -192,6 +195,7 @@ class Info(PackageInfo):
                 'path': klass._path,
                 'release': klass._version
             }
+        logger.debug('matlab command or path has changed. recomputing version.')
         mlab = MatlabCommand(matlab_cmd=matlab_cmd, resource_monitor=False)
         mlab.inputs.mfile = False
         if paths:
