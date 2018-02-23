@@ -14,7 +14,7 @@ You can follow the `Nipype tutorial <https://miykael.github.io/nipype_tutorial/>
 or use this docker container: `docker pull nipype/nipype`
 
 or if you want to build custom docker containers with specific versions of
-software see Neurodocker_. Read the `brief tutorial <neurodocker.html>`_.
+software see Neurodocker_. Read the brief :doc:`neurodocker`.
 
 Using conda
 ~~~~~~~~~~~
@@ -108,7 +108,9 @@ Interface Dependencies
 Nipype provides wrappers around many neuroimaging tools and contains some
 algorithms. These tools will need to be installed for Nipype to run. You can
 create containers with different versions of these tools installed using
-Neurodocker_. Read the `brief tutorial <neurodocker.html>`_.
+Neurodocker_. Read the brief :doc:`neurodocker`.
+
+
 
 Installation for developers
 ---------------------------
