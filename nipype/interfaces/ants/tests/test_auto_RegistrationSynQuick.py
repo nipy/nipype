@@ -15,7 +15,7 @@ def test_RegistrationSynQuick_inputs():
             usedefault=True,
         ),
         fixed_image=dict(
-            argstr='-f %s',
+            argstr='-f %s...',
             mandatory=True,
         ),
         histogram_bins=dict(argstr='-r %d', ),
@@ -25,10 +25,13 @@ def test_RegistrationSynQuick_inputs():
             usedefault=True,
         ),
         moving_image=dict(
-            argstr='-m %s',
+            argstr='-m %s...',
             mandatory=True,
         ),
-        num_threads=dict(argstr='-n %d', ),
+        num_threads=dict(
+            argstr='-n %d',
+            usedefault=True,
+        ),
         output_prefix=dict(
             argstr='-o %s',
             usedefault=True,
