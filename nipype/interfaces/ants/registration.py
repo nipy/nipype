@@ -1510,9 +1510,9 @@ class MeasureImageSimilarity(ANTSCommand):
 class RegistrationSynQuickInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='-d %d',
                             usedefault=True, desc='image dimension (2 or 3)')
-    fixed_image = InputMultiPath(File(exists=True), mandatory=True, argstr='-f %s',
+    fixed_image = InputMultiPath(File(exists=True), mandatory=True, argstr='-f %s...',
                                  desc='Fixed image or source image or reference image')
-    moving_image = InputMultiPath(File(exists=True), mandatory=True, argstr='-m %s',
+    moving_image = InputMultiPath(File(exists=True), mandatory=True, argstr='-m %s...',
                                   desc='Moving image or target image')
     output_prefix = Str("transform", usedefault=True, argstr='-o %s',
                         desc="A prefix that is prepended to all output files")
@@ -1577,7 +1577,7 @@ class RegistrationSynQuick(ANTSCommand):
     >>> reg.inputs.moving_image = ['moving1.nii', 'moving2.nii']
     >>> reg.inputs.num_threads = 2
     >>> reg.cmdline
-    'antsRegistrationSynQuick.sh -d 3 -f fixed1.nii fixed2.nii -m moving1.nii moving2.nii -n 2 -o transform -p d -t s'
+    'antsRegistrationSynQuick.sh -d 3 -f fixed1.nii -f fixed2.nii -m moving1.nii -m moving2.nii -n 2 -o transform -p d -t s'
     >>> reg.run()  # doctest: +SKIP
     """
 
