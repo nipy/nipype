@@ -1558,7 +1558,7 @@ class RegistrationSynQuickOutputSpec(TraitedSpec):
 
 class RegistrationSynQuick(ANTSCommand):
     """
-    Reistration using a symmetric image normalization method (SyN).
+    Registration using a symmetric image normalization method (SyN).
     You can read more in Avants et al.; Med Image Anal., 2008
     (https://www.ncbi.nlm.nih.gov/pubmed/17659998).
 
