@@ -32,7 +32,7 @@ To view the Neurodocker help message
    image. The package manager is ``apt`` or ``yum``, depending on the base
    image.
 2. Next, users should configure the container to fit their needs. This includes
-   installing neuroimaing software, installing packages from the chosen package
+   installing neuroimaging software, installing packages from the chosen package
    manager, installing Python and Python packages, copying files from the local
    machine into the container, and other operations. The list of supported
    neuroimaging software packages is available in the ``neurodocker`` help
@@ -74,22 +74,24 @@ The Dockerfile can be saved and used to build the Docker image
 Use NeuroDebian
 ---------------
 
-This example install AFNI and ANTs from the NeuoDebian repositories. It also
+This example installs AFNI and ANTs from the NeuroDebian repositories. It also
 installs ``git`` and ``vim``.
 ::
-  $ docker run --rm kaczmarj/neurodocker:v0.3.2 generate --base neurodebian:stretch --pkg-manager apt --install afni ants git vim
+  $ docker run --rm kaczmarj/neurodocker:v0.3.2 generate \
+    --base neurodebian:stretch --pkg-manager apt \
+    --install afni ants git vim
 
 Note: the ``--install`` option will install software using the package manager.
 Because the NeuroDebian repositories are enabled in the chosen base image, AFNI
-and ANTs may be installed using the package manager. git and vim are available
-in the default repositories.
+and ANTs may be installed using the package manager. ``git`` and ``vim`` are
+available in the default repositories.
 
 
 Other examples
 --------------
 
 Create a container with ``dcm2niix``, Nipype, and jupyter notebook. Install
-Miniconda as a non-root user, and activate the miniconda environment upon
+Miniconda as a non-root user, and activate the Miniconda environment upon
 running the container.
 ::
   $ docker run --rm kaczmarj/neurodocker:v0.3.2 generate \
