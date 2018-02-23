@@ -7,19 +7,18 @@ Interface Specifications
 Before you start
 ----------------
 
-Nipype is a young project maintained by an enthusiastic group of developers.
-Even though the documentation might be sparse or cryptic at times we strongly
-encourage you to contact us on the official nipype developers mailing list in
-case of any troubles: nipy-devel@neuroimaging.scipy.org (we are sharing a
-mailing list with the nipy community therefore please add ``[nipype]`` to the
-messsage title).
+Nipype is maintained by an enthusiastic group of developers, and we're excited to have you join us!
+In case of trouble, we encourage you to post on `NeuroStars <https://neurostars.org>`_ with the `nipype` tag.
+NeuroStars.org is a platform similar to StackOverflow but dedicated to neuroinformatics.
+You can also post on the nipype developers mailing list: http://mail.python.org/mailman/listinfo/neuroimaging.
+As we are sharing a mailing list with the nipy community, please add ``[nipype]`` to the message title.
 
 
 Overview
 --------
 
-We're using the `Enthought Traits
-<http://code.enthought.com/projects/traits/>`_ package for all of our
+We're using the `Traits <http://docs.enthought.com/traits/traits_user_manual/intro.html>`_
+(formerly known as Enthought Traits) package for all of our
 inputs and outputs.  Traits allows us to validate user inputs and
 provides a mechanism to handle all the *special cases* in a simple and
 concise way though metadata.  With the metadata, each input/output can
@@ -37,17 +36,17 @@ Specification, you only need to learn a few of the basics of Traits.
 Here are a few starting points in the documentation:
 
 * What are Traits?  The `Introduction in the User Manual
-  <http://code.enthought.com/projects/traits/docs/html/traits_user_manual/intro.html>`_
+  <http://docs.enthought.com/traits/traits_user_manual/intro.html>`_
   gives a brief description of the functionality traits provides.
 
 * Traits and metadata.  The `second section of the User Manual
-  <http://code.enthought.com/projects/traits/docs/html/traits_user_manual/defining.html>`_
+  <http://docs.enthought.com/traits/traits_user_manual/defining.html>`_
   gives more details on traits and how to use them.  Plus there a
   section describing metadata, including the metadata all traits have.
 
 * If your interested in more of a *big picture* overview, `Gael wrote
   a good tutorial
-  <http://code.enthought.com/projects/traits/docs/html/tutorials/traits_ui_scientific_app.html>`_
+  <http://docs.enthought.com/traitsui/tutorials/traits_ui_scientific_app.html>`_
   that shows how to write a scientific application using traits for
   the benefit of the generated UI components.  (For now, Nipype is not
   taking advantage of the generated UI feature of traits.)
@@ -55,18 +54,15 @@ Here are a few starting points in the documentation:
 Traits version
 ^^^^^^^^^^^^^^
 
-We're using Traits version 3.x which can be install as part of `EPD
-<http://enthought.com/products/epd.php>`_ or from `pypi
-<http://pypi.python.org/pypi/Traits/3.3.0>`_
+We're using Traits version 4.x which can be installed from `pypi
+<https://pypi.python.org/pypi/traits>`_
 
 More documentation
 ^^^^^^^^^^^^^^^^^^
 
 Not everything is documented in the User Manual, in those cases the
-`enthought-dev mailing list
-<https://mail.enthought.com/mailman/listinfo/enthought-dev>`_ or the
-`API docs
-<http://code.enthought.com/projects/files/ETS32_API/enthought.traits.html>`_
+the `API docs
+<http://docs.enthought.com/traits/traits_api_reference/index.html>`_
 is your next place to look.
 
 Nipype Interface Specifications
@@ -80,13 +76,12 @@ the interfaces.  For example, Bet has these specs:
   - BETOutputSpec
 
 Each of these Specs are classes, derived from a base TraitedSpec class
-(more on these below).  The InputSpec consists of attributes which
+(more on these below). The InputSpec consists of attributes which
 correspond to different parameters for the tool they wrap/interface.
 In the case of a command-line tool like Bet, the InputSpec attributes
 correspond to the different command-line parameters that can be passed
-to Bet.  If you are familiar with the Nipype 0.2 code-base, these
-attributes are the same as the keys in the opt_map dictionaries.  When
-an interfaces class is instantiated, the InputSpec is bound to the
+to Bet.
+When an interfaces class is instantiated, the InputSpec is bound to the
 ``inputs`` attribute of that object.  Below is an example of how the
 ``inputs`` appear to a user for Bet::
 

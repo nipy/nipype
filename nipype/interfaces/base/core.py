@@ -26,6 +26,7 @@ import re
 import platform
 import select
 import subprocess as sp
+import shlex
 import sys
 from textwrap import wrap
 import simplejson as json
@@ -33,7 +34,7 @@ from dateutil.parser import parse as parseutc
 
 from ... import config, logging, LooseVersion
 from ...utils.provenance import write_provenance
-from ...utils.misc import trim, str2bool
+from ...utils.misc import trim, str2bool, rgetcwd
 from ...utils.filemanip import (FileNotFoundError, split_filename, read_stream,
                                 which, get_dependencies, canonicalize_env as
                                 _canonicalize_env)
@@ -169,12 +170,14 @@ class BaseInterface(Interface):
     references_ = []
     resource_monitor = True  # Enabled for this interface IFF enabled in the config
 
-    def __init__(self, from_file=None, resource_monitor=None, **inputs):
+    def __init__(self, from_file=None, resource_monitor=None,
+                 ignore_exception=False, **inputs):
         if not self.input_spec:
             raise Exception(
                 'No input_spec in class: %s' % self.__class__.__name__)
 
         self.inputs = self.input_spec(**inputs)
+        self.ignore_exception = ignore_exception
 
         if resource_monitor is not None:
             self.resource_monitor = resource_monitor
@@ -411,8 +414,12 @@ class BaseInterface(Interface):
                         raise Exception(
                             'Trait %s (%s) (version %s < required %s)' %
                             (name, self.__class__.__name__, version, min_ver))
-            check = dict(max_ver=lambda t: t is not None)
-            names = trait_object.trait_names(**check)
+
+        # check maximum version
+        check = dict(max_ver=lambda t: t is not None)
+        names = trait_object.trait_names(**check)
+        if names and self.version:
+            version = LooseVersion(str(self.version))
             for name in names:
                 max_ver = LooseVersion(
                     str(trait_object.traits()[name].max_ver))
@@ -438,7 +445,7 @@ class BaseInterface(Interface):
             r['path'] = self.__module__
             due.cite(**r)
 
-    def run(self, **inputs):
+    def run(self, cwd=None, **inputs):
         """Execute this interface.
 
         This interface will not raise an exception if runtime.returncode is
@@ -446,6 +453,8 @@ class BaseInterface(Interface):
 
         Parameters
         ----------
+
+        cwd : specify a folder where the interface should be run
         inputs : allows the interface settings to be updated
 
         Returns
@@ -455,8 +464,14 @@ class BaseInterface(Interface):
         """
         from ...utils.profiler import ResourceMonitor
 
+        # Tear-up: get current and prev directories
+        syscwd = rgetcwd(error=False)  # Recover when wd does not exist
+        if cwd is None:
+            cwd = syscwd
+
+        os.chdir(cwd)  # Change to the interface wd
+
         enable_rm = config.resource_monitor and self.resource_monitor
-        force_raise = not getattr(self.inputs, 'ignore_exception', False)
         self.inputs.trait_set(**inputs)
         self._check_mandatory_inputs()
         self._check_version_requirements(self.inputs)
@@ -471,7 +486,8 @@ class BaseInterface(Interface):
             env['DISPLAY'] = config.get_display()
 
         runtime = Bunch(
-            cwd=os.getcwd(),
+            cwd=cwd,
+            prevcwd=syscwd,
             returncode=None,
             duration=None,
             environ=env,
@@ -515,7 +531,7 @@ class BaseInterface(Interface):
             runtime.traceback_args = ('\n'.join(
                 ['%s' % arg for arg in exc_args]), )
 
-            if force_raise:
+            if not self.ignore_exception:
                 raise
         finally:
             # This needs to be done always
@@ -556,6 +572,7 @@ class BaseInterface(Interface):
                         'rss_GiB': (vals[:, 2] / 1024).tolist(),
                         'vms_GiB': (vals[:, 3] / 1024).tolist(),
                     }
+            os.chdir(syscwd)
 
         return results
 
@@ -857,6 +874,7 @@ class CommandLine(BaseInterface):
 
     """
     input_spec = CommandLineInputSpec
+    _cmd_prefix = ''
     _cmd = None
     _version = None
     _terminal_output = 'stream'
@@ -915,7 +933,7 @@ class CommandLine(BaseInterface):
         """ `command` plus any arguments (args)
         validates arguments and generates command line"""
         self._check_mandatory_inputs()
-        allargs = [self.cmd] + self._parse_inputs()
+        allargs = [self._cmd_prefix + self.cmd] + self._parse_inputs()
         return ' '.join(allargs)
 
     @property
@@ -986,7 +1004,7 @@ class CommandLine(BaseInterface):
         runtime.environ.update(out_environ)
 
         # which $cmd
-        executable_name = self.cmd.split()[0]
+        executable_name = shlex.split(self._cmd_prefix + self.cmd)[0]
         cmd_path = which(executable_name, env=runtime.environ)
 
         if cmd_path is None:

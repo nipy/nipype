@@ -23,7 +23,7 @@ def test_BlurToFWHM_inputs():
             argstr='-input %s',
             mandatory=True,
         ),
-        mask=dict(argstr='-blurmaster %s', ),
+        mask=dict(argstr='-mask %s', ),
         num_threads=dict(
             nohash=True,
             usedefault=True,

@@ -119,20 +119,6 @@ class BaseTraitedSpec(traits.HasTraits):
                            'which is already set') % (name, trait_name)
                     raise IOError(msg)
 
-    def _requires_warn(self, obj, name, old, new):
-        """Part of the xor behavior
-        """
-        if isdefined(new):
-            trait_spec = self.traits()[name]
-            msg = None
-            for trait_name in trait_spec.requires:
-                if not isdefined(getattr(self, trait_name)):
-                    if not msg:
-                        msg = 'Input %s requires inputs: %s' \
-                            % (name, ', '.join(trait_spec.requires))
-            if msg:  # only one requires warning at a time.
-                warn(msg)
-
     def _deprecated_warn(self, obj, name, old, new):
         """Checks if a user assigns a value to a deprecated trait
         """
@@ -164,29 +150,6 @@ class BaseTraitedSpec(traits.HasTraits):
                             '%s' % name: Undefined,
                             '%s' % trait_spec.new_name: new
                         })
-
-    def _hash_infile(self, adict, key):
-        """ Inject file hashes into adict[key]"""
-        stuff = adict[key]
-        if not is_container(stuff):
-            stuff = [stuff]
-        file_list = []
-        for afile in stuff:
-            if is_container(afile):
-                hashlist = self._hash_infile({'infiles': afile}, 'infiles')
-                hash = [val[1] for val in hashlist]
-            else:
-                if config.get('execution',
-                              'hash_method').lower() == 'timestamp':
-                    hash = hash_timestamp(afile)
-                elif config.get('execution',
-                                'hash_method').lower() == 'content':
-                    hash = hash_infile(afile)
-                else:
-                    raise Exception("Unknown hash method: %s" % config.get(
-                        'execution', 'hash_method'))
-            file_list.append((afile, hash))
-        return file_list
 
     def get(self, **kwargs):
         """ Returns traited class as a dict

@@ -1742,15 +1742,15 @@ class Blur(StdOutCommandLine):
     @property
     def cmdline(self):
         output_file_base = self.inputs.output_file_base
+        orig_cmdline = super(Blur, self).cmdline
 
         if isdefined(output_file_base):
-            return super(Blur, self).cmdline
+            return orig_cmdline
         else:
             # FIXME this seems like a bit of a hack. Can we force output_file
             # to show up in cmdline by default, even if it isn't specified in
             # the instantiation of Pik?
-            return '%s %s' % (super(Blur, self).cmdline,
-                              self._gen_output_base())
+            return '%s %s' % (orig_cmdline, self._gen_output_base())
 
 
 class MathInputSpec(CommandLineInputSpec):

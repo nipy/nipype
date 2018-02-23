@@ -26,6 +26,7 @@ def test_Volreg_inputs():
             mandatory=True,
             position=-1,
         ),
+        in_weight_volume=dict(argstr="-weight '%s[%d]'", ),
         interp=dict(argstr='-%s', ),
         md1d_file=dict(
             argstr='-maxdisp1D %s',

@@ -80,7 +80,6 @@ class ICC(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['icc_map'] = os.path.abspath('icc_map.nii')
-        outputs['sessions_F_map'] = os.path.abspath('sessions_F_map.nii')
         outputs['session_var_map'] = os.path.abspath('session_var_map.nii')
         outputs['subject_var_map'] = os.path.abspath('subject_var_map.nii')
         return outputs

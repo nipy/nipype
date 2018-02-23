@@ -188,6 +188,8 @@ def write_report(node, report_type=None, is_mapnode=False):
     rst_dict = {
         'hostname': result.runtime.hostname,
         'duration': result.runtime.duration,
+        'working_dir': result.runtime.cwd,
+        'prev_wd': getattr(result.runtime, 'prevcwd', '<not-set>'),
     }
 
     if hasattr(result.runtime, 'cmdline'):
@@ -1156,9 +1158,6 @@ def _standardize_iterables(node):
     iterables = node.iterables
     # The candidate iterable fields
     fields = set(node.inputs.copyable_trait_names())
-    # Flag indicating whether the iterables are in the alternate
-    # synchronize form and are not converted to a standard format.
-    # synchronize = False  # OE: commented out since it is not used
     # A synchronize iterables node without an itersource can be in
     # [fields, value tuples] format rather than
     # [(field, value list), (field, value list), ...]
@@ -1280,52 +1279,56 @@ def export_graph(graph_in,
         base_dir = os.getcwd()
 
     makedirs(base_dir, exist_ok=True)
-    outfname = fname_presuffix(
+    out_dot = fname_presuffix(
         dotfilename, suffix='_detailed.dot', use_ext=False, newpath=base_dir)
-    _write_detailed_dot(graph, outfname)
-    if format != 'dot':
-        cmd = 'dot -T%s -O %s' % (format, outfname)
-        res = CommandLine(
-            cmd, terminal_output='allatonce', resource_monitor=False).run()
-        if res.runtime.returncode:
-            logger.warning('dot2png: %s', res.runtime.stderr)
+    _write_detailed_dot(graph, out_dot)
+
+    # Convert .dot if format != 'dot'
+    outfname, res = _run_dot(out_dot, format_ext=format)
+    if res is not None and res.runtime.returncode:
+        logger.warning('dot2png: %s', res.runtime.stderr)
+
     pklgraph = _create_dot_graph(graph, show_connectinfo, simple_form)
-    simplefname = fname_presuffix(
+    simple_dot = fname_presuffix(
         dotfilename, suffix='.dot', use_ext=False, newpath=base_dir)
-    nx.drawing.nx_pydot.write_dot(pklgraph, simplefname)
-    if format != 'dot':
-        cmd = 'dot -T%s -O %s' % (format, simplefname)
-        res = CommandLine(
-            cmd, terminal_output='allatonce', resource_monitor=False).run()
-        if res.runtime.returncode:
-            logger.warning('dot2png: %s', res.runtime.stderr)
+    nx.drawing.nx_pydot.write_dot(pklgraph, simple_dot)
+
+    # Convert .dot if format != 'dot'
+    simplefname, res = _run_dot(simple_dot, format_ext=format)
+    if res is not None and res.runtime.returncode:
+        logger.warning('dot2png: %s', res.runtime.stderr)
+
     if show:
         pos = nx.graphviz_layout(pklgraph, prog='dot')
         nx.draw(pklgraph, pos)
         if show_connectinfo:
             nx.draw_networkx_edge_labels(pklgraph, pos)
 
-    if format != 'dot':
-        outfname += '.%s' % format
-        simplefname += '.%s' % format
     return simplefname if simple_form else outfname
 
 
 def format_dot(dotfilename, format='png'):
     """Dump a directed graph (Linux only; install via `brew` on OSX)"""
-    if format != 'dot':
-        cmd = 'dot -T%s -O \'%s\'' % (format, dotfilename)
-        try:
-            CommandLine(cmd, resource_monitor=False).run()
-        except IOError as ioe:
-            if "could not be found" in str(ioe):
-                raise IOError(
-                    "Cannot draw directed graph; executable 'dot' is unavailable"
-                )
-            else:
-                raise ioe
-        dotfilename += '.%s' % format
-    return dotfilename
+    try:
+        formatted_dot, _ = _run_dot(dotfilename, format_ext=format)
+    except IOError as ioe:
+        if "could not be found" in str(ioe):
+            raise IOError("Cannot draw directed graph; executable 'dot' is unavailable")
+        else:
+            raise ioe
+    return formatted_dot
+
+
+def _run_dot(dotfilename, format_ext):
+    if format_ext == 'dot':
+        return dotfilename, None
+
+    dot_base =  os.path.splitext(dotfilename)[0]
+    formatted_dot = '{}.{}'.format(dot_base, format_ext)
+    cmd = 'dot -T{} -o"{}" "{}"'.format(format_ext, formatted_dot, dotfilename)
+    res = CommandLine(cmd, terminal_output='allatonce',
+                      resource_monitor=False).run()
+    return formatted_dot, res
 
 
 def get_all_files(infile):

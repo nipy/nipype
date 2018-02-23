@@ -54,7 +54,7 @@ DictStrStr = traits.Dict((bytes, str), (bytes, str))
 traits.DictStrStr = DictStrStr
 
 
-class BaseFile(BaseUnicode):
+class File(BaseUnicode):
     """ Defines a trait whose value must be the name of a file.
     """
 
@@ -96,14 +96,11 @@ class BaseFile(BaseUnicode):
         if exists:
             self.info_text = 'an existing file name'
 
-        super(BaseFile, self).__init__(value, **metadata)
+        super(File, self).__init__(value, **metadata)
 
     def validate(self, object, name, value):
-        """ Validates that a specified value is valid for this trait.
-
-            Note: The 'fast validator' version performs this check in C.
-        """
-        validated_value = super(BaseFile, self).validate(object, name, value)
+        """ Validates that a specified value is valid for this trait."""
+        validated_value = super(File, self).validate(object, name, value)
         if not self.exists:
             return validated_value
         elif os.path.isfile(value):
@@ -117,116 +114,18 @@ class BaseFile(BaseUnicode):
         self.error(object, name, value)
 
 
-class File(BaseFile):
-    """
-    Defines a trait whose value must be the name of a file.
-    Disables the default C-level fast validator.
-    """
-
-    def __init__(self,
-                 value='',
-                 filter=None,
-                 auto_set=False,
-                 entries=0,
-                 exists=False,
-                 **metadata):
-        """ Creates a File trait.
-
-        Parameters
-        ----------
-        value : string
-            The default value for the trait
-        filter : string
-            A wildcard string to filter filenames in the file dialog box used by
-            the attribute trait editor.
-        auto_set : boolean
-            Indicates whether the file editor updates the trait value after
-            every key stroke.
-        exists : boolean
-            Indicates whether the trait value must be an existing file or
-            not.
-
-        Default Value
-        -------------
-        *value* or ''
-        """
-        # if not exists:
-        #     # Define the C-level fast validator to use:
-        #     fast_validate = (11, str)
-
-        super(File, self).__init__(value, filter, auto_set, entries, exists,
-                                   **metadata)
-
-
 # -------------------------------------------------------------------------------
-#  'BaseDirectory' and 'Directory' traits:
+#  'Directory' trait
 # -------------------------------------------------------------------------------
 
 
-class BaseDirectory(BaseUnicode):
+class Directory(BaseUnicode):
     """
     Defines a trait whose value must be the name of a directory.
     """
 
     # A description of the type of value this trait accepts:
     info_text = 'a directory name'
-
-    def __init__(self,
-                 value='',
-                 auto_set=False,
-                 entries=0,
-                 exists=False,
-                 **metadata):
-        """ Creates a BaseDirectory trait.
-
-        Parameters
-        ----------
-        value : string
-            The default value for the trait
-        auto_set : boolean
-            Indicates whether the directory editor updates the trait value
-            after every key stroke.
-        exists : boolean
-            Indicates whether the trait value must be an existing directory or
-            not.
-
-        Default Value
-        -------------
-        *value* or ''
-        """
-        self.entries = entries
-        self.auto_set = auto_set
-        self.exists = exists
-
-        if exists:
-            self.info_text = 'an existing directory name'
-
-        super(BaseDirectory, self).__init__(value, **metadata)
-
-    def validate(self, object, name, value):
-        """ Validates that a specified value is valid for this trait.
-
-            Note: The 'fast validator' version performs this check in C.
-        """
-        if isinstance(value, (str, bytes)):
-            if not self.exists:
-                return value
-            if os.path.isdir(value):
-                return value
-            else:
-                raise TraitError(
-                    args='The trait \'{}\' of {} instance is {}, but the path '
-                    ' \'{}\' does not exist.'.format(name, class_of(object),
-                                                     self.info_text, value))
-
-        self.error(object, name, value)
-
-
-class Directory(BaseDirectory):
-    """
-    Defines a trait whose value must be the name of a directory.
-    Disables the default C-level fast validator.
-    """
 
     def __init__(self,
                  value='',
@@ -251,13 +150,29 @@ class Directory(BaseDirectory):
         -------------
         *value* or ''
         """
-        # Define the C-level fast validator to use if the directory existence
-        # test is not required:
-        # if not exists:
-        #     self.fast_validate = (11, str)
+        self.entries = entries
+        self.auto_set = auto_set
+        self.exists = exists
 
-        super(Directory, self).__init__(value, auto_set, entries, exists,
-                                        **metadata)
+        if exists:
+            self.info_text = 'an existing directory name'
+
+        super(Directory, self).__init__(value, **metadata)
+
+    def validate(self, object, name, value):
+        """ Validates that a specified value is valid for this trait."""
+        if isinstance(value, (str, bytes)):
+            if not self.exists:
+                return value
+            if os.path.isdir(value):
+                return value
+            else:
+                raise TraitError(
+                    args='The trait \'{}\' of {} instance is {}, but the path '
+                    ' \'{}\' does not exist.'.format(name, class_of(object),
+                                                     self.info_text, value))
+
+        self.error(object, name, value)
 
 
 # lists of tuples
@@ -302,6 +217,16 @@ class ImageFile(File):
         super(ImageFile, self).__init__(value, filter, auto_set, entries,
                                         exists, **metadata)
 
+    def info(self):
+        existing = 'n existing' if self.exists else ''
+        comma = ',' if self.exists and not self.allow_compressed else ''
+        uncompressed = ' uncompressed' if not self.allow_compressed else ''
+        with_ext = ' (valid extensions: [{}])'.format(
+            ', '.join(self.grab_exts())) if self.types else ''
+        return 'a{existing}{comma}{uncompressed} file{with_ext}'.format(
+            existing=existing, comma=comma, uncompressed=uncompressed,
+            with_ext=with_ext)
+
     def grab_exts(self):
         # TODO: file type validation
         exts = []
@@ -328,11 +253,11 @@ class ImageFile(File):
         """
         validated_value = super(ImageFile, self).validate(object, name, value)
         if validated_value and self.types:
-            self._exts = self.grab_exts()
-            if not any(validated_value.endswith(x) for x in self._exts):
+            _exts = self.grab_exts()
+            if not any(validated_value.endswith(x) for x in _exts):
                 raise TraitError(
                     args="{} is not included in allowed types: {}".format(
-                        validated_value, ', '.join(self._exts)))
+                        validated_value, ', '.join(_exts)))
         return validated_value
 
 
@@ -407,15 +332,11 @@ class MultiPath(traits.List):
 
         newvalue = value
 
+        inner_trait = self.inner_traits()[0]
         if not isinstance(value, list) \
-            or (self.inner_traits() and
-                isinstance(self.inner_traits()[0].trait_type,
-                           traits.List) and not
-                isinstance(self.inner_traits()[0].trait_type,
-                           InputMultiPath) and
-                isinstance(value, list) and
-                value and not
-                isinstance(value[0], list)):
+            or (isinstance(inner_trait.trait_type, traits.List) and
+                not isinstance(inner_trait.trait_type, InputMultiPath) and
+                not isinstance(value[0], list)):
             newvalue = [value]
         value = super(MultiPath, self).validate(object, name, newvalue)
 

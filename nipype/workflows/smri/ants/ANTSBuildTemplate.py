@@ -183,7 +183,7 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
             output_names=['out']),
         run_without_submitting=True,
         name='MakeTransformsLists')
-    MakeTransformsLists.inputs.ignore_exception = True
+    MakeTransformsLists.interface.ignore_exception = True
     TemplateBuildSingleIterationWF.connect(
         BeginANTS, 'warp_transform', MakeTransformsLists, 'warpTransformList')
     TemplateBuildSingleIterationWF.connect(BeginANTS, 'affine_transform',
@@ -263,7 +263,7 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
             output_names=['TransformListWithGradientWarps']),
         run_without_submitting=True,
         name='MakeTransformListWithGradientWarps')
-    ApplyInvAverageAndFourTimesGradientStepWarpImage.inputs.ignore_exception = True
+    ApplyInvAverageAndFourTimesGradientStepWarpImage.interface.ignore_exception = True
 
     TemplateBuildSingleIterationWF.connect(
         AvgAffineTransform, 'affine_transform',

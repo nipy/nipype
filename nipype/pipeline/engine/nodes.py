@@ -25,6 +25,7 @@ import shutil
 import socket
 from copy import deepcopy
 from glob import glob
+from logging import INFO
 
 from tempfile import mkdtemp
 from future import standard_library
@@ -172,7 +173,7 @@ class Node(EngineBase):
         self.synchronize = synchronize
         self.itersource = itersource
         self.overwrite = overwrite
-        self.parameterization = None
+        self.parameterization = []
         self.input_source = {}
         self.plugin_args = {}
 
@@ -185,10 +186,11 @@ class Node(EngineBase):
                    'num_threads') and self._n_procs is not None:
             self._interface.inputs.num_threads = self._n_procs
 
-        # Initialize needed_outputs
-        self.needed_outputs = []
-        if needed_outputs:
-            self.needed_outputs = sorted(needed_outputs)
+        # Initialize needed_outputs and hashes
+        self._hashvalue = None
+        self._hashed_inputs = None
+        self._needed_outputs = []
+        self.needed_outputs = needed_outputs
 
     @property
     def interface(self):
@@ -209,6 +211,20 @@ class Node(EngineBase):
     def outputs(self):
         """Return the output fields of the underlying interface"""
         return self._interface._outputs()
+
+    @property
+    def needed_outputs(self):
+        return self._needed_outputs
+
+    @needed_outputs.setter
+    def needed_outputs(self, new_outputs):
+        """Needed outputs changes the hash, refresh if changed"""
+        new_outputs = sorted(list(set(new_outputs or [])))
+        if new_outputs != self._needed_outputs:
+            # Reset hash
+            self._hashvalue = None
+            self._hashed_inputs = None
+            self._needed_outputs = new_outputs
 
     @property
     def mem_gb(self):
@@ -242,9 +258,10 @@ class Node(EngineBase):
 
     @property
     def itername(self):
+        """Name for expanded iterable"""
         itername = self._id
         if self._hierarchy:
-            itername = self._hierarchy + '.' + self._id
+            itername = '%s.%s' % (self._hierarchy, self._id)
         return itername
 
     def output_dir(self):
@@ -282,83 +299,105 @@ class Node(EngineBase):
         """Print interface help"""
         self._interface.help()
 
-    def hash_exists(self, updatehash=False):
+    def is_cached(self, rm_outdated=False):
         """
         Check if the interface has been run previously, and whether
-        cached results are viable for reuse
+        cached results are up-to-date.
+        """
+        outdir = self.output_dir()
+
+        # Update hash
+        hashed_inputs, hashvalue = self._get_hashval()
+
+        # The output folder does not exist: not cached
+        if not op.exists(outdir):
+            logger.debug('[Node] Directory not found "%s".', outdir)
+            return False, False
+
+        hashfile = op.join(outdir, '_0x%s.json' % hashvalue)
+        cached = op.exists(hashfile)
+
+        # Check if updated
+        globhashes = glob(op.join(outdir, '_0x*.json'))
+        unfinished = [
+            path for path in globhashes
+            if path.endswith('_unfinished.json')
+        ]
+        hashfiles = list(set(globhashes) - set(unfinished))
+        logger.debug('[Node] Hashes: %s, %s, %s, %s',
+                     hashed_inputs, hashvalue, hashfile, hashfiles)
+
+        # No previous hashfiles found, we're all set.
+        if cached and len(hashfiles) == 1:
+            assert(hashfile == hashfiles[0])
+            logger.debug('[Node] Up-to-date cache found for "%s".', self.fullname)
+            return True, True  # Cached and updated
+
+        if len(hashfiles) > 1:
+            if cached:
+                hashfiles.remove(hashfile)  # Do not clean up the node, if cached
+            logger.warning('[Node] Found %d previous hashfiles indicating that the working '
+                           'directory of node "%s" is stale, deleting old hashfiles.',
+                           len(hashfiles), self.fullname)
+            for rmfile in hashfiles:
+                os.remove(rmfile)
+
+            hashfiles = [hashfile] if cached else []
+
+        if not hashfiles:
+            logger.debug('[Node] No hashfiles found in "%s".', outdir)
+            assert(not cached)
+            return False, False
+
+        # At this point only one hashfile is in the folder
+        # and we directly check whether it is updated
+        updated = hashfile == hashfiles[0]
+        if not updated:  # Report differences depending on log verbosity
+            cached = True
+            logger.info('[Node] Outdated cache found for "%s".', self.fullname)
+            # If logging is more verbose than INFO (20), print diff between hashes
+            loglevel = logger.getEffectiveLevel()
+            if loglevel < INFO:  # Lazy logging: only < INFO
+                exp_hash_file_base = split_filename(hashfiles[0])[1]
+                exp_hash = exp_hash_file_base[len('_0x'):]
+                logger.log(loglevel, "[Node] Old/new hashes = %s/%s",
+                           exp_hash, hashvalue)
+                try:
+                    prev_inputs = load_json(hashfiles[0])
+                except Exception:
+                    pass
+                else:
+                    logger.log(loglevel,
+                               dict_diff(prev_inputs, hashed_inputs, 10))
+
+            if rm_outdated:
+                os.remove(hashfiles[0])
+
+        assert(cached)  # At this point, node is cached (may not be up-to-date)
+        return cached, updated
+
+    def hash_exists(self, updatehash=False):
+        """
+        Decorate the new `is_cached` method with hash updating
+        to maintain backwards compatibility.
         """
 
         # Get a dictionary with hashed filenames and a hashvalue
         # of the dictionary itself.
-        hashed_inputs, hashvalue = self._get_hashval()
+        cached, updated = self.is_cached(rm_outdated=True)
+
         outdir = self.output_dir()
-        hashfile = op.join(outdir, '_0x%s.json' % hashvalue)
-        hash_exists = op.exists(hashfile)
+        hashfile = op.join(outdir, '_0x%s.json' % self._hashvalue)
 
-        logger.debug('[Node] hash value=%s, exists=%s', hashvalue, hash_exists)
-
-        if op.exists(outdir):
-            # Find previous hashfiles
-            globhashes = glob(op.join(outdir, '_0x*.json'))
-            unfinished = [
-                path for path in globhashes
-                if path.endswith('_unfinished.json')
-            ]
-            hashfiles = list(set(globhashes) - set(unfinished))
-            if len(hashfiles) > 1:
-                for rmfile in hashfiles:
-                    os.remove(rmfile)
-
-                raise RuntimeError(
-                    '[Node] Cache ERROR - Found %d previous hashfiles indicating '
-                    'that the ``base_dir`` for this node went stale. Please re-run the '
-                    'workflow.' % len(hashfiles))
-
-            # This should not happen, but clean up and break if so.
-            if unfinished and updatehash:
-                for rmfile in unfinished:
-                    os.remove(rmfile)
-
-                raise RuntimeError(
-                    '[Node] Cache ERROR - Found unfinished hashfiles (%d) indicating '
-                    'that the ``base_dir`` for this node went stale. Please re-run the '
-                    'workflow.' % len(unfinished))
-
-            # Remove outdated hashfile
-            if hashfiles and hashfiles[0] != hashfile:
-                logger.info(
-                    '[Node] Outdated hashfile found for "%s", removing and forcing node '
-                    'to rerun.', self.fullname)
-
-                # If logging is more verbose than INFO (20), print diff between hashes
-                loglevel = logger.getEffectiveLevel()
-                if loglevel < 20:  # Lazy logging: only < INFO
-                    split_out = split_filename(hashfiles[0])
-                    exp_hash_file_base = split_out[1]
-                    exp_hash = exp_hash_file_base[len('_0x'):]
-                    logger.log(loglevel, "[Node] Old/new hashes = %s/%s",
-                               exp_hash, hashvalue)
-                    try:
-                        prev_inputs = load_json(hashfiles[0])
-                    except Exception:
-                        pass
-                    else:
-                        logger.log(loglevel,
-                                   dict_diff(prev_inputs, hashed_inputs, 10))
-
-                os.remove(hashfiles[0])
+        if updated:
+            return True, self._hashvalue, hashfile, self._hashed_inputs
 
         # Update only possible if it exists
-        if hash_exists and updatehash:
-            logger.debug("[Node] Updating hash: %s", hashvalue)
-            _save_hashfile(hashfile, hashed_inputs)
+        if cached and updatehash:
+            logger.debug("[Node] Updating hash: %s", self._hashvalue)
+            _save_hashfile(hashfile, self._hashed_inputs)
 
-        logger.debug(
-            'updatehash=%s, overwrite=%s, always_run=%s, hash_exists=%s, '
-            'hash_method=%s', updatehash, self.overwrite,
-            self._interface.always_run, hash_exists,
-            self.config['execution']['hash_method'].lower())
-        return hash_exists, hashvalue, hashfile, hashed_inputs
+        return cached, self._hashvalue, hashfile, self._hashed_inputs
 
     def run(self, updatehash=False):
         """Execute the node in its directory.
@@ -375,23 +414,17 @@ class Node(EngineBase):
         if self.config is None:
             self.config = {}
         self.config = merge_dict(deepcopy(config._sections), self.config)
-        self._get_inputs()
 
-        # Check if output directory exists
         outdir = self.output_dir()
-        if op.exists(outdir):
-            logger.debug('Output directory (%s) exists and is %sempty,',
-                         outdir, 'not ' * bool(os.listdir(outdir)))
+        force_run = self.overwrite or (self.overwrite is None and
+                                       self._interface.always_run)
 
         # Check hash, check whether run should be enforced
         logger.info('[Node] Setting-up "%s" in "%s".', self.fullname, outdir)
-        hash_info = self.hash_exists(updatehash=updatehash)
-        hash_exists, hashvalue, hashfile, hashed_inputs = hash_info
-        force_run = self.overwrite or (self.overwrite is None
-                                       and self._interface.always_run)
+        cached, updated = self.is_cached()
 
         # If the node is cached, check on pklz files and finish
-        if hash_exists and (updatehash or not force_run):
+        if not force_run and (updated or (not updated and updatehash)):
             logger.debug("Only updating node hashes or skipping execution")
             inputs_file = op.join(outdir, '_inputs.pklz')
             if not op.exists(inputs_file):
@@ -403,62 +436,53 @@ class Node(EngineBase):
                 logger.debug('Creating node file %s', node_file)
                 savepkl(node_file, self)
 
-            result = self._run_interface(execute=False, updatehash=updatehash)
+            result = self._run_interface(execute=False,
+                                         updatehash=updatehash and not updated)
             logger.info('[Node] "%s" found cached%s.', self.fullname,
-                        ' (and hash updated)' * updatehash)
+                        ' (and hash updated)' * (updatehash and not updated))
             return result
 
-        # by rerunning we mean only nodes that did finish to run previously
-        if hash_exists and not isinstance(self, MapNode):
-            logger.debug('[Node] Rerunning "%s"', self.fullname)
+        if cached and updated and not isinstance(self, MapNode):
+            logger.debug('[Node] Rerunning cached, up-to-date node "%s"', self.fullname)
             if not force_run and str2bool(
                     self.config['execution']['stop_on_first_rerun']):
                 raise Exception(
                     'Cannot rerun when "stop_on_first_rerun" is set to True')
 
-        # Remove hashfile if it exists at this point (re-running)
-        if op.exists(hashfile):
-            os.remove(hashfile)
+        # Remove any hashfile that exists at this point (re)running.
+        if cached:
+            for outdatedhash in glob(op.join(self.output_dir(), '_0x*.json')):
+                os.remove(outdatedhash)
+
 
         # Hashfile while running
-        hashfile_unfinished = op.join(outdir,
-                                      '_0x%s_unfinished.json' % hashvalue)
+        hashfile_unfinished = op.join(
+            outdir, '_0x%s_unfinished.json' % self._hashvalue)
 
         # Delete directory contents if this is not a MapNode or can't resume
-        rm_outdir = not isinstance(self, MapNode) and not (
-            self._interface.can_resume and op.isfile(hashfile_unfinished))
-        if rm_outdir:
+        can_resume = not (self._interface.can_resume and op.isfile(hashfile_unfinished))
+        if can_resume and not isinstance(self, MapNode):
             emptydirs(outdir, noexist_ok=True)
         else:
             logger.debug('[%sNode] Resume - hashfile=%s',
                          'Map' * int(isinstance(self, MapNode)),
                          hashfile_unfinished)
-            if isinstance(self, MapNode):
-                # remove old json files
-                for filename in glob(op.join(outdir, '_0x*.json')):
-                    os.remove(filename)
+
+        if isinstance(self, MapNode):
+            # remove old json files
+            for filename in glob(op.join(outdir, '_0x*.json')):
+                os.remove(filename)
 
         # Make sure outdir is created
         makedirs(outdir, exist_ok=True)
 
         # Store runtime-hashfile, pre-execution report, the node and the inputs set.
-        _save_hashfile(hashfile_unfinished, hashed_inputs)
+        _save_hashfile(hashfile_unfinished, self._hashed_inputs)
         write_report(
             self, report_type='preexec', is_mapnode=isinstance(self, MapNode))
         savepkl(op.join(outdir, '_node.pklz'), self)
         savepkl(op.join(outdir, '_inputs.pklz'), self.inputs.get_traitsfree())
 
-        try:
-            cwd = os.getcwd()
-        except OSError:
-            # Changing back to cwd is probably not necessary
-            # but this makes sure there's somewhere to change to.
-            cwd = op.split(outdir)[0]
-            logger.warning(
-                'Current folder "%s" does not exist, changing to "%s" instead.',
-                os.getenv('PWD', 'unknown'), cwd)
-
-        os.chdir(outdir)
         try:
             result = self._run_interface(execute=True)
         except Exception:
@@ -466,11 +490,10 @@ class Node(EngineBase):
             # Tear-up after error
             os.remove(hashfile_unfinished)
             raise
-        finally:  # Ensure we come back to the original CWD
-            os.chdir(cwd)
 
         # Tear-up after success
-        shutil.move(hashfile_unfinished, hashfile)
+        shutil.move(hashfile_unfinished,
+                    hashfile_unfinished.replace('_unfinished', ''))
         write_report(
             self, report_type='postexec', is_mapnode=isinstance(self, MapNode))
         logger.info('[Node] Finished "%s".', self.fullname)
@@ -479,17 +502,17 @@ class Node(EngineBase):
     def _get_hashval(self):
         """Return a hash of the input state"""
         self._get_inputs()
-        hashed_inputs, hashvalue = self.inputs.get_hashval(
-            hash_method=self.config['execution']['hash_method'])
-        rm_extra = self.config['execution']['remove_unnecessary_outputs']
-        if str2bool(rm_extra) and self.needed_outputs:
-            hashobject = md5()
-            hashobject.update(hashvalue.encode())
-            sorted_outputs = sorted(self.needed_outputs)
-            hashobject.update(str(sorted_outputs).encode())
-            hashvalue = hashobject.hexdigest()
-            hashed_inputs.append(('needed_outputs', sorted_outputs))
-        return hashed_inputs, hashvalue
+        if self._hashvalue is None and self._hashed_inputs is None:
+            self._hashed_inputs, self._hashvalue = self.inputs.get_hashval(
+                hash_method=self.config['execution']['hash_method'])
+            rm_extra = self.config['execution']['remove_unnecessary_outputs']
+            if str2bool(rm_extra) and self.needed_outputs:
+                hashobject = md5()
+                hashobject.update(self._hashvalue.encode())
+                hashobject.update(str(self.needed_outputs).encode())
+                self._hashvalue = hashobject.hexdigest()
+                self._hashed_inputs.append(('needed_outputs', self.needed_outputs))
+        return self._hashed_inputs, self._hashvalue
 
     def _get_inputs(self):
         """Retrieve inputs from pointers to results file
@@ -536,8 +559,14 @@ class Node(EngineBase):
         # Successfully set inputs
         self._got_inputs = True
 
+    def _update_hash(self):
+        for outdatedhash in glob(op.join(self.output_dir(), '_0x*.json')):
+            os.remove(outdatedhash)
+        _save_hashfile(self._hashvalue, self._hashed_inputs)
+
     def _run_interface(self, execute=True, updatehash=False):
         if updatehash:
+            self._update_hash()
             return self._load_results()
         return self._run_command(execute)
 
@@ -571,7 +600,6 @@ class Node(EngineBase):
         return result
 
     def _run_command(self, execute, copyfiles=True):
-
         if not execute:
             try:
                 result = self._load_results()
@@ -582,43 +610,46 @@ class Node(EngineBase):
                 copyfiles = False  # OE: this was like this before,
                 execute = True  # I'll keep them for safety
             else:
-                logger.info("[Node] Cached - collecting precomputed outputs")
+                logger.info('[Node] Cached "%s" - collecting precomputed outputs',
+                            self.fullname)
                 return result
 
+        outdir = self.output_dir()
         # Run command: either execute is true or load_results failed.
-        runtime = Bunch(
-            returncode=1,
-            environ=dict(os.environ),
-            hostname=socket.gethostname())
         result = InterfaceResult(
             interface=self._interface.__class__,
-            runtime=runtime,
+            runtime=Bunch(
+                cwd=outdir,
+                returncode=1,
+                environ=dict(os.environ),
+                hostname=socket.gethostname()
+            ),
             inputs=self._interface.inputs.get_traitsfree())
 
-        outdir = self.output_dir()
         if copyfiles:
             self._originputs = deepcopy(self._interface.inputs)
             self._copyfiles_to_wd(execute=execute)
 
-        message = '[Node] Running "%s" ("%s.%s")'
+        message = '[Node] Running "{}" ("{}.{}")'.format(
+            self.name, self._interface.__module__,
+            self._interface.__class__.__name__)
         if issubclass(self._interface.__class__, CommandLine):
             try:
                 cmd = self._interface.cmdline
             except Exception as msg:
-                result.runtime.stderr = '%s\n\n%s' % (
+                result.runtime.stderr = '{}\n\n{}'.format(
                     getattr(result.runtime, 'stderr', ''), msg)
                 _save_resultfile(result, outdir, self.name)
                 raise
             cmdfile = op.join(outdir, 'command.txt')
             with open(cmdfile, 'wt') as fd:
                 print(cmd + "\n", file=fd)
-            message += ', a CommandLine Interface with command:\n%s' % cmd
-        logger.info(message, self.name, self._interface.__module__,
-                    self._interface.__class__.__name__)
+            message += ', a CommandLine Interface with command:\n{}'.format(cmd)
+        logger.info(message)
         try:
-            result = self._interface.run()
+            result = self._interface.run(cwd=outdir)
         except Exception as msg:
-            result.runtime.stderr = '%s\n\n%s' % (
+            result.runtime.stderr = '%s\n\n%s'.format(
                 getattr(result.runtime, 'stderr', ''), msg)
             _save_resultfile(result, outdir, self.name)
             raise
@@ -1022,6 +1053,10 @@ class MapNode(Node):
     def _get_hashval(self):
         """Compute hash including iterfield lists."""
         self._get_inputs()
+
+        if self._hashvalue is not None and self._hashed_inputs is not None:
+            return self._hashed_inputs, self._hashvalue
+
         self._check_iterfield()
         hashinputs = deepcopy(self._interface.inputs)
         for name in self.iterfield:
@@ -1046,7 +1081,8 @@ class MapNode(Node):
             hashobject.update(str(sorted_outputs).encode())
             hashvalue = hashobject.hexdigest()
             hashed_inputs.append(('needed_outputs', sorted_outputs))
-        return hashed_inputs, hashvalue
+        self._hashed_inputs, self._hashvalue = hashed_inputs, hashvalue
+        return self._hashed_inputs, self._hashvalue
 
     @property
     def inputs(self):

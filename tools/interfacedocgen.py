@@ -227,7 +227,8 @@ class InterfaceHelpWriter(object):
 
         fhandle.close()
         os.remove(fname)
-        os.remove(fname + ".png")
+        bitmap_fname = '{}.png'.format(os.path.splitext(fname)[0])
+        os.remove(bitmap_fname)
         return ad
 
     def generate_api_doc(self, uri):

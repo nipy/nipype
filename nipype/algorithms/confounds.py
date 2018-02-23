@@ -532,7 +532,7 @@ class CompCor(BaseInterface):
                 # Derive TR from NIfTI header, if possible
                 try:
                     TR = imgseries.header.get_zooms()[3]
-                    if imgseries.get_xyzt_units()[1] == 'msec':
+                    if imgseries.header.get_xyzt_units()[1] == 'msec':
                         TR /= 1000
                 except (AttributeError, IndexError):
                     TR = 0

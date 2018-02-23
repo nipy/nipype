@@ -3,6 +3,13 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous file manipulation functions
 
+  .. testsetup::
+    # Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname(os.path.realpath( __file__ ))
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
+    >>> os.chdir(datadir)
+
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
@@ -222,19 +229,38 @@ def check_forhash(filename):
         return False, None
 
 
-def hash_infile(afile, chunk_len=8192, crypto=hashlib.md5):
-    """ Computes hash of a file using 'crypto' module"""
-    hex = None
-    if op.isfile(afile):
-        crypto_obj = crypto()
-        with open(afile, 'rb') as fp:
-            while True:
-                data = fp.read(chunk_len)
-                if not data:
-                    break
-                crypto_obj.update(data)
-        hex = crypto_obj.hexdigest()
-    return hex
+def hash_infile(afile, chunk_len=8192, crypto=hashlib.md5,
+                raise_notfound=False):
+    """
+    Computes hash of a file using 'crypto' module
+
+    >>> hash_infile('smri_ants_registration_settings.json')
+    '49b956387ed8d95a4eb44576fc5103b6'
+
+    >>> hash_infile('surf01.vtk')
+    'fdf1cf359b4e346034372cdeb58f9a88'
+
+    >>> hash_infile('spminfo')
+    '0dc55e3888c98a182dab179b976dfffc'
+
+    >>> hash_infile('fsl_motion_outliers_fd.txt')
+    'defd1812c22405b1ee4431aac5bbdd73'
+
+
+    """
+    if not op.isfile(afile):
+        if raise_notfound:
+            raise RuntimeError('File "%s" not found.' % afile)
+        return None
+
+    crypto_obj = crypto()
+    with open(afile, 'rb') as fp:
+        while True:
+            data = fp.read(chunk_len)
+            if not data:
+                break
+            crypto_obj.update(data)
+    return crypto_obj.hexdigest()
 
 
 def hash_timestamp(afile):
@@ -249,6 +275,35 @@ def hash_timestamp(afile):
     return md5hex
 
 
+def _parse_mount_table(exit_code, output):
+    """Parses the output of ``mount`` to produce (path, fs_type) pairs
+
+    Separated from _generate_cifs_table to enable testing logic with real
+    outputs
+    """
+    # Not POSIX
+    if exit_code != 0:
+        return []
+
+    # Linux mount example:  sysfs on /sys type sysfs (rw,nosuid,nodev,noexec)
+    #                          <PATH>^^^^      ^^^^^<FSTYPE>
+    # OSX mount example:    /dev/disk2 on / (hfs, local, journaled)
+    #                               <PATH>^  ^^^<FSTYPE>
+    pattern = re.compile(r'.*? on (/.*?) (?:type |\()([^\s,]+)(?:, |\)| )')
+
+    # (path, fstype) tuples, sorted by path length (longest first)
+    mount_info = sorted((pattern.match(l).groups()
+                         for l in output.splitlines()),
+                        key=lambda x: len(x[0]), reverse=True)
+    cifs_paths = [path for path, fstype in mount_info
+                  if fstype.lower() == 'cifs']
+
+    return [
+        mount for mount in mount_info
+        if any(mount[0].startswith(path) for path in cifs_paths)
+    ]
+
+
 def _generate_cifs_table():
     """Construct a reverse-length-ordered list of mount points that
     fall under a CIFS mount.
@@ -260,21 +315,7 @@ def _generate_cifs_table():
     empty list.
     """
     exit_code, output = sp.getstatusoutput("mount")
-    # Not POSIX
-    if exit_code != 0:
-        return []
-
-    # (path, fstype) tuples, sorted by path length (longest first)
-    mount_info = sorted(
-        (line.split()[2:5:2] for line in output.splitlines()),
-        key=lambda x: len(x[0]),
-        reverse=True)
-    cifs_paths = [path for path, fstype in mount_info if fstype == 'cifs']
-
-    return [
-        mount for mount in mount_info
-        if any(mount[0].startswith(path) for path in cifs_paths)
-    ]
+    return _parse_mount_table(exit_code, output)
 
 
 _cifs_table = _generate_cifs_table()
@@ -737,8 +778,8 @@ def emptydirs(path, noexist_ok=False):
         elcont = os.listdir(path)
         if ex.errno == errno.ENOTEMPTY and not elcont:
             fmlogger.warning(
-                'An exception was raised trying to remove old %s, but the path '
-                'seems empty. Is it an NFS mount?. Passing the exception.',
+                'An exception was raised trying to remove old %s, but the path'
+                ' seems empty. Is it an NFS mount?. Passing the exception.',
                 path)
         elif ex.errno == errno.ENOTEMPTY and elcont:
             fmlogger.debug('Folder %s contents (%d items).', path, len(elcont))
@@ -774,12 +815,20 @@ def which(cmd, env=None, pathext=None):
                 return filename
         return None
 
+    def isexec(path):
+        return os.path.isfile(path) and os.access(path, os.X_OK)
+
     for ext in pathext:
         extcmd = cmd + ext
-        for directory in path.split(os.pathsep):
-            filename = op.join(directory, extcmd)
-            if op.exists(filename):
-                return filename
+        fpath, fname = os.path.split(extcmd)
+        if fpath:
+            if isexec(extcmd):
+                return extcmd
+        else:
+            for directory in path.split(os.pathsep):
+                filename = op.join(directory, extcmd)
+                if isexec(filename):
+                    return filename
     return None
 
 

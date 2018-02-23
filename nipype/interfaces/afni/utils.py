@@ -712,6 +712,59 @@ class CenterMass(AFNICommandBase):
         return outputs
 
 
+class ConvertDsetInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to ConvertDset',
+        argstr='-input %s',
+        position=-2,
+        mandatory=True,
+        exists=True)
+
+    out_file = File(
+        desc='output file for ConvertDset',
+        argstr='-prefix %s',
+        position=-1,
+        mandatory=True)
+
+    out_type = traits.Enum(
+        ('niml', 'niml_asc', 'niml_bi',
+         '1D', '1Dp', '1Dpt',
+         'gii', 'gii_asc', 'gii_b64', 'gii_b64gz'),
+        desc='output type',
+        argstr='-o_%s',
+        mandatory=True,
+        position=0)
+
+
+class ConvertDset(AFNICommandBase):
+    """Converts a surface dataset from one format to another.
+
+    For complete details, see the `ConvertDset Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/ConvertDset.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> convertdset = afni.ConvertDset()
+    >>> convertdset.inputs.in_file = 'lh.pial_converted.gii'
+    >>> convertdset.inputs.out_type = 'niml_asc'
+    >>> convertdset.inputs.out_file = 'lh.pial_converted.niml.dset'
+    >>> convertdset.cmdline
+    'ConvertDset -o_niml_asc -input lh.pial_converted.gii -prefix lh.pial_converted.niml.dset'
+    >>> res = convertdset.run()  # doctest: +SKIP
+    """
+
+    _cmd = 'ConvertDset'
+    input_spec = ConvertDsetInputSpec
+    output_spec = AFNICommandOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        return outputs
+
+
 class CopyInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc='input file to 3dcopy',
@@ -1381,7 +1434,7 @@ class MergeInputSpec(AFNICommandInputSpec):
         name_template='%s_merge',
         desc='output image file name',
         argstr='-prefix %s',
-        name_source='in_file')
+        name_source='in_files')
     doall = traits.Bool(
         desc='apply options to all sub-bricks in dataset', argstr='-doall')
     blurfwhm = traits.Int(
@@ -1762,7 +1815,8 @@ class OneDToolPy(AFNIPythonCommand):
                 os.getcwd(), self.inputs.show_cormat_warnings)
         if isdefined(self.inputs.censor_motion):
             outputs['out_file'] = os.path.join(os.getcwd(),
-                                               self.inputs.censor_motion[1])
+                                               self.inputs.censor_motion[1] +
+                                               '_censor.1D')
         return outputs
 
 
@@ -2582,9 +2636,10 @@ class ZcatInputSpec(AFNICommandInputSpec):
         mandatory=True,
         copyfile=False)
     out_file = File(
-        name_template='zcat',
+        name_template='%s_zcat',
         desc='output dataset prefix name (default \'zcat\')',
-        argstr='-prefix %s')
+        argstr='-prefix %s',
+        name_source='in_files')
     datum = traits.Enum(
         'byte',
         'short',

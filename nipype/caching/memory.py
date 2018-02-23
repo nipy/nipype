@@ -94,7 +94,7 @@ class PipeFunc(object):
         return out
 
     def __repr__(self):
-        return '{}({}.{}}, base_dir={})'.format(
+        return '{}({}.{}), base_dir={})'.format(
             self.__class__.__name__, self.interface.__module__,
             self.interface.__name__, self.base_dir)
 

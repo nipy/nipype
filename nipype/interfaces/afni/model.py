@@ -36,7 +36,7 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
         argstr='-input %s',
         copyfile=False,
         sep=" ",
-        position=0)
+        position=1)
     sat = traits.Bool(
         desc='check the dataset time series for initial saturation transients,'
         ' which should normally have been excised before data analysis.',
@@ -57,10 +57,11 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
         '* If the auto-catenation feature isn\'t used, then this option '
         'has no effect, no how, no way.',
         argstr='-noblock')
-    force_TR = traits.Int(
+    force_TR = traits.Float(
         desc='use this value instead of the TR in the \'input\' '
-        'dataset. (It\'s better to fix the input using Refit.)',
-        argstr='-force_TR %d')
+             'dataset. (It\'s better to fix the input using Refit.)',
+        argstr='-force_TR %f',
+        position=0)
     input1D = File(
         desc='filename of single (fMRI) .1D time series where time runs down '
         'the column.',
@@ -141,7 +142,7 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
         desc='this option lets you input a rectangular array of 1 or more '
         'baseline vectors from a file. This method is a fast way to '
         'include a lot of baseline regressors in one step. ',
-        argstr='ortvec %s')
+        argstr='-ortvec %s %s')
     x1D = File(desc='specify name for saved X matrix', argstr='-x1D %s')
     x1D_stop = traits.Bool(
         desc='stop running after writing .xmat.1D file', argstr='-x1D_stop')
@@ -152,9 +153,10 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
         'instead of the bucket dataset, if possible.',
         argstr='-cbucket %s')
     out_file = File(desc='output statistics file', argstr='-bucket %s')
-    jobs = traits.Int(
+    num_threads = traits.Int(
         desc='run the program with provided number of sub-processes',
-        argstr='-jobs %d')
+        argstr='-jobs %d',
+        nohash=True)
     fout = traits.Bool(
         desc='output F-statistic for each stimulus', argstr='-fout')
     rout = traits.Bool(
@@ -164,6 +166,10 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
     vout = traits.Bool(
         desc='output the sample variance (MSE) for each stimulus',
         argstr='-vout')
+    nofdr = traits.Bool(
+        desc="Don't compute the statistic-vs-FDR curves for the bucket "
+             "dataset.",
+        argstr='-noFDR')
     global_times = traits.Bool(
         desc='use global timing for stimulus timing files',
         argstr='-global_times',
@@ -292,9 +298,16 @@ class Deconvolve(AFNICommand):
             outputs['x1D'] = self._gen_fname(
                 suffix='.xmat.1D', **_gen_fname_opts)
 
+        if isdefined(self.inputs.cbucket):
+            outputs['cbucket'] = os.path.abspath(self.inputs.cbucket)
+
         outputs['reml_script'] = self._gen_fname(
             suffix='.REML_cmd', **_gen_fname_opts)
-        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        # remove out_file from outputs if x1d_stop set to True
+        if self.inputs.x1D_stop:
+            del outputs['out_file'], outputs['cbucket']
+        else:
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
 
         return outputs
 
@@ -647,3 +660,12 @@ class Synthesize(AFNICommand):
     _cmd = '3dSynthesize'
     input_spec = SynthesizeInputSpec
     output_spec = AFNICommandOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+
+        for key in outputs.keys():
+            if isdefined(self.inputs.get()[key]):
+                outputs[key] = os.path.abspath(self.inputs.get()[key])
+
+        return outputs

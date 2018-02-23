@@ -18,7 +18,10 @@ def test_Deconvolve_inputs():
             nohash=True,
             usedefault=True,
         ),
-        force_TR=dict(argstr='-force_TR %d', ),
+        force_TR=dict(
+            argstr='-force_TR %f',
+            position=0,
+        ),
         fout=dict(argstr='-fout', ),
         global_times=dict(
             argstr='-global_times',
@@ -42,11 +45,10 @@ def test_Deconvolve_inputs():
         in_files=dict(
             argstr='-input %s',
             copyfile=False,
-            position=0,
+            position=1,
             sep=' ',
         ),
         input1D=dict(argstr='-input1D %s', ),
-        jobs=dict(argstr='-jobs %d', ),
         legendre=dict(argstr='-legendre', ),
         local_times=dict(
             argstr='-local_times',
@@ -56,6 +58,7 @@ def test_Deconvolve_inputs():
         noblock=dict(argstr='-noblock', ),
         nocond=dict(argstr='-nocond', ),
         nodmbase=dict(argstr='-nodmbase', ),
+        nofdr=dict(argstr='-noFDR', ),
         nolegendre=dict(argstr='-nolegendre', ),
         nosvd=dict(argstr='-nosvd', ),
         num_glt=dict(
@@ -67,10 +70,10 @@ def test_Deconvolve_inputs():
             position=-6,
         ),
         num_threads=dict(
+            argstr='-jobs %d',
             nohash=True,
-            usedefault=True,
         ),
-        ortvec=dict(argstr='ortvec %s', ),
+        ortvec=dict(argstr='-ortvec %s %s', ),
         out_file=dict(argstr='-bucket %s', ),
         outputtype=dict(),
         polort=dict(argstr='-polort %d', ),
