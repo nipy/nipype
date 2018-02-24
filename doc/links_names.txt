@@ -75,6 +75,7 @@
 .. _EPD: http://www.enthought.com/products/epd.php
 .. _Traits: http://code.enthought.com/projects/traits/
 .. _Miniconda: https://conda.io/miniconda.html
+.. _neurodocker: https://github.com/kaczmarj/neurodocker
 
 .. Python imaging projects
 .. _PyMVPA: http://www.pymvpa.org
@@ -105,6 +106,7 @@
 .. _macports: http://www.macports.org/
 .. _Vagrant: http://www.vagrantup.com/
 .. _Docker: http://www.docker.io/
+.. _Singularity: http://singularity.lbl.gov/
 .. _Virtualbox: https://www.virtualbox.org/
 
 .. Functional imaging labs
