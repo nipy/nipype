@@ -1144,7 +1144,7 @@ class Label2VolInputSpec(FSTraitedSpec):
     invert_mtx = traits.Bool(
         argstr='--invertmtx', desc='Invert the registration matrix')
     fill_thresh = traits.Range(
-        0., 1., argstr='--fillthresh %.f', desc='thresh : between 0 and 1')
+        0., 1., argstr='--fillthresh %g', desc='thresh : between 0 and 1')
     label_voxel_volume = traits.Float(
         argstr='--labvoxvol %f', desc='volume of each label point (def 1mm3)')
     proj = traits.Tuple(
@@ -1183,7 +1183,7 @@ class Label2Vol(FSCommand):
 
     >>> binvol = Label2Vol(label_file='cortex.label', template_file='structural.nii', reg_file='register.dat', fill_thresh=0.5, vol_label_file='foo_out.nii')
     >>> binvol.cmdline
-    'mri_label2vol --fillthresh 0 --label cortex.label --reg register.dat --temp structural.nii --o foo_out.nii'
+    'mri_label2vol --fillthresh 0.5 --label cortex.label --reg register.dat --temp structural.nii --o foo_out.nii'
 
    """
 
