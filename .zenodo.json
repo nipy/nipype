@@ -602,11 +602,6 @@
       "name": "Davison, Andrew"
     },
     {
-      "affiliation": "MIT, HMS",
-      "name": "Ghosh, Satrajit",
-      "orcid": "0000-0002-5312-6729"
-    },
-    {
       "affiliation": "Vrije Universiteit Amsterdam",
       "name": "Ort, Eduard"
     },
@@ -614,6 +609,11 @@
       "affiliation": "Technical University Munich",
       "name": "Molina-Romero, Miguel",
       "orcid": "0000-0001-8054-0426"
+    },
+    {
+      "affiliation": "MIT, HMS",
+      "name": "Ghosh, Satrajit",
+      "orcid": "0000-0002-5312-6729"
     }
   ],
   "keywords": [
