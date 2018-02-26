@@ -1196,6 +1196,111 @@ class StdOutCommandLine(CommandLine):
         raise NotImplementedError
 
 
+class StdInCommandLine(CommandLine):
+    """Implements functionality to interact with command line programs
+    that take input on stdin.
+    """
+    stdin_join_char = r'\\n' # join multiple stdin args on this
+
+    @property
+    def cmdline(self):
+        """ `command` plus any arguments (args)
+        validates arguments and generates command line"""
+        self._check_mandatory_inputs()
+        args, stdin = self._parse_inputs()
+        allargs = [self._cmd_prefix + self.cmd] + args
+        stdin_pipe = self.stdin_join_char.join(stdin)
+        result = ['echo', '-n', stdin_pipe, '|', self.cmd] + args
+        return ' '.join(result)
+
+    def _parse_inputs(self, skip=None):
+        """Parse all inputs using the ``argstr`` format string in the
+        Trait.
+
+        Allows both normal inputs (arguments) and stdin inputs, which
+        will be piped to the command.
+
+        Returns
+        -------
+        arg_inputs: list
+            A list of all inputs formatted for command args.
+        stdin_inputs : list
+            A list of inputs formatted for piping to the command.
+        """
+        # compile a skip list for stdin arguments and command line arguments
+        # separately
+        arg_skip = []
+        stdin_skip = []
+        metadata = dict(argstr=lambda t: t is not None)
+        for name, spec in sorted(self.inputs.traits(**metadata).items()):
+            if skip and name in skip:
+                arg_skip.append(name)
+                stdin_skip.append(name)
+            else:
+                if spec.stdin:
+                    arg_skip.append(name)
+                else:
+                    stdin_skip.append(name)
+
+        arg_inputs = super(StdInCommandLine, self)._parse_inputs(arg_skip)
+        stdin_inputs = super(StdInCommandLine, self)._parse_inputs(stdin_skip)
+        return arg_inputs, stdin_inputs
+
+
+class EnvironmentInputCommandLine(CommandLine):
+    """Command line where runtime inputs may be passed as environment
+    variables.
+
+    Environment field of inputspec should have environ=True or
+    environ='env_var_name' defined.
+    """
+    def _parse_inputs(self, skip=[]):
+        """Run CommandLine's _parse_inputs, but first append all
+        environment inputs to the skip argument.
+        """
+        is_env = dict(environ=lambda t: t is not None)
+        environment_args = self.inputs.traits(**is_env)
+        skip += environment_args
+        iflogger.debug('Environment inputs: %s', environment_args)
+        iflogger.debug('Cmdline skip inputs: %s', skip)
+        return super(EnvironmentInputCommandLine, self)._parse_inputs(skip)
+
+    def _run_interface(self, runtime, correct_return_codes=(0, )):
+        """Execute command via subprocess, passing stdin inputs as stdin
+
+        Parameters
+        ----------
+        runtime : passed by the run function
+
+        Returns
+        -------
+        runtime : updated runtime information
+            adds stdout, stderr, merged, cmdline, dependencies, command_path
+        """
+        # Get environment inputs
+        env_inputs = {}
+        is_env = dict(environ=lambda t: t is not None)
+        for name, spec in sorted(self.inputs.traits(**is_env).items()):
+            value = getattr(self.inputs, name)
+            if isdefined(value):
+                env_var = (spec.environ
+                           if isinstance(spec.environ, str)
+                           else name)
+                env_inputs[env_var] = shlex.quote(str(
+                    value
+                    if spec.argstr is None
+                    else self._format_arg(
+                            name, spec, getattr(self.inputs, name))))
+
+        # Add to existing environment input mechanism
+        runtime.environ.update(env_inputs)
+        iflogger.info('Additional environment for command: %s',
+                      ' '.join('{}={}'.format(k, v)
+                               for k, v in env_inputs.items()))
+        return super(EnvironmentInputCommandLine, self)._run_interface(
+            runtime, correct_return_codes)
+
+
 class MpiCommandLine(CommandLine):
     """Implements functionality to interact with command line programs
     that can be run with MPI (i.e. using 'mpiexec').

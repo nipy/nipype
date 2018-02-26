@@ -517,3 +517,43 @@ def test_CommandLine_prefix(tmpdir):
     ci = OOPBadShell(command=script_name)
     with pytest.raises(IOError):
         ci.run()
+
+
+def test_StdInCommandLine():
+    class SedInputSpec(nib.StdOutCommandLineInputSpec):
+        string1 = nib.traits.String(stdin=True, position=1, argstr='%s')
+        string2 = nib.traits.String(stdin=True, position=2, argstr='%s')
+        script = nib.traits.String(position=1, argstr='-e %s')
+
+    class Sed(nib.StdInCommandLine, nib.StdOutCommandLine):
+        _cmd = 'sed'
+        input_spec = SedInputSpec
+
+        def _gen_outfilename(self):
+            return 'stdout.txt'
+
+    c = Sed(string1='hello', string2='world', script='s/hello/hi/g')
+    runtime = c.run()
+
+    with open('stdout.txt') as fp:
+        assert fp.read() == 'hi\nworld'
+
+
+def test_EnvironmentInputCommandLine():
+    class SedInputSpec(nib.StdOutCommandLineInputSpec):
+        string1 = nib.traits.String(environ='STRING1', position=1, argstr='%s')
+        string2 = nib.traits.String(environ=True, position=2, argstr='%s')
+        script = nib.traits.String(position=1, argstr='-e %s')
+
+    class Sed(nib.EnvironmentInputCommandLine, nib.StdOutCommandLine):
+        _cmd = r'echo -n $STRING1\\n$string2 | sed'
+        input_spec = SedInputSpec
+
+        def _gen_outfilename(self):
+            return 'stdout.txt'
+
+    c = Sed(string1='hello', string2='world', script='s/hello/hi/g')
+    runtime = c.run()
+
+    with open('stdout.txt') as fp:
+        assert fp.read() == 'hi\nworld'
