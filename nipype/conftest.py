@@ -11,3 +11,13 @@ def add_np(doctest_namespace):
     filepath = os.path.dirname(os.path.realpath(__file__))
     datadir = os.path.realpath(os.path.join(filepath, 'testing/data'))
     doctest_namespace["datadir"] = datadir
+
+
+@pytest.fixture(scope='session', autouse=True)
+def in_testing():
+    datadir = os.path.realpath(
+        os.path.join(os.path.dirname(__file__), 'testing/data'))
+    origdir = os.getcwd()
+    os.chdir(datadir)
+    yield
+    os.chdir(origdir)
