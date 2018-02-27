@@ -4,36 +4,34 @@ from ..reconstruction import RESTORE
 
 
 def test_RESTORE_inputs():
-    input_map = dict(b0_thres=dict(usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_bval=dict(mandatory=True,
-    ),
-    in_bvec=dict(mandatory=True,
-    ),
-    in_file=dict(mandatory=True,
-    ),
-    in_mask=dict(),
-    noise_mask=dict(),
-    out_prefix=dict(),
+    input_map = dict(
+        b0_thres=dict(usedefault=True, ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        in_bval=dict(mandatory=True, ),
+        in_bvec=dict(mandatory=True, ),
+        in_file=dict(mandatory=True, ),
+        in_mask=dict(),
+        noise_mask=dict(),
+        out_prefix=dict(),
     )
     inputs = RESTORE.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_RESTORE_outputs():
-    output_map = dict(evals=dict(),
-    evecs=dict(),
-    fa=dict(),
-    md=dict(),
-    mode=dict(),
-    rd=dict(),
-    trace=dict(),
+    output_map = dict(
+        evals=dict(),
+        evecs=dict(),
+        fa=dict(),
+        md=dict(),
+        mode=dict(),
+        rd=dict(),
+        trace=dict(),
     )
     outputs = RESTORE.output_spec()
 

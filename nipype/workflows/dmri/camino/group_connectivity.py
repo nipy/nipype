@@ -1,13 +1,18 @@
 # -*- coding: utf-8 -*-
-import os.path as op                      # system functions
+import os.path as op  # system functions
 
 from .connectivity_mapping import create_connectivity_pipeline
-from ....interfaces import io as nio           # Data i/o
-from ....interfaces import utility as util     # utility
-from ....pipeline import engine as pe          # pypeline engine
+from ....interfaces import io as nio  # Data i/o
+from ....interfaces import utility as util  # utility
+from ....pipeline import engine as pe  # pypeline engine
 
 
-def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, template_args_dict=0):
+def create_group_connectivity_pipeline(group_list,
+                                       group_id,
+                                       data_dir,
+                                       subjects_dir,
+                                       output_dir,
+                                       template_args_dict=0):
     """Creates a pipeline that performs basic Camino structural connectivity processing
     on groups of subjects. Given a diffusion-weighted image, and text files containing
     the associated b-values and b-vectors, the workflow will return each subjects' connectomes
@@ -42,29 +47,34 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
                                                 bvecs=[['subject_id','bvecs']],
                                                 bvals=[['subject_id','bvals']])
     """
-    group_infosource = pe.Node(interface=util.IdentityInterface(fields=['group_id']), name="group_infosource")
+    group_infosource = pe.Node(
+        interface=util.IdentityInterface(fields=['group_id']),
+        name="group_infosource")
     group_infosource.inputs.group_id = group_id
     subject_list = group_list[group_id]
-    subj_infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']), name="subj_infosource")
+    subj_infosource = pe.Node(
+        interface=util.IdentityInterface(fields=['subject_id']),
+        name="subj_infosource")
     subj_infosource.iterables = ('subject_id', subject_list)
 
     if template_args_dict == 0:
-        info = dict(dwi=[['subject_id', 'dwi']],
-                    bvecs=[['subject_id', 'bvecs']],
-                    bvals=[['subject_id', 'bvals']])
+        info = dict(
+            dwi=[['subject_id', 'dwi']],
+            bvecs=[['subject_id', 'bvecs']],
+            bvals=[['subject_id', 'bvals']])
     else:
         info = template_args_dict
 
-    datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
-                                                   outfields=list(info.keys())),
-                         name='datasource')
+    datasource = pe.Node(
+        interface=nio.DataGrabber(
+            infields=['subject_id'], outfields=list(info.keys())),
+        name='datasource')
 
     datasource.inputs.template = "%s/%s"
     datasource.inputs.base_directory = data_dir
     datasource.inputs.field_template = dict(dwi='%s/%s.nii')
     datasource.inputs.template_args = info
     datasource.inputs.sort_filelist = True
-
     """
     Create a connectivity mapping workflow
     """
@@ -79,22 +89,27 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
     l1pipeline = pe.Workflow(name="l1pipeline_" + group_id)
     l1pipeline.base_dir = output_dir
     l1pipeline.base_output_dir = group_id
-    l1pipeline.connect([(subj_infosource, datasource, [('subject_id', 'subject_id')])])
-    l1pipeline.connect([(subj_infosource, conmapper, [('subject_id', 'inputnode.subject_id')])])
-    l1pipeline.connect([(datasource, conmapper, [("dwi", "inputnode.dwi"),
-                                                 ("bvals", "inputnode.bvals"),
-                                                 ("bvecs", "inputnode.bvecs"),
-                                                 ])])
-    l1pipeline.connect([(conmapper, datasink, [("outputnode.connectome", "@l1output.cff"),
-                                               ("outputnode.fa", "@l1output.fa"),
-                                               ("outputnode.tracts", "@l1output.tracts"),
-                                               ("outputnode.trace", "@l1output.trace"),
-                                               ("outputnode.cmatrix", "@l1output.cmatrix"),
-                                               ("outputnode.rois", "@l1output.rois"),
-                                               ("outputnode.struct", "@l1output.struct"),
-                                               ("outputnode.networks", "@l1output.networks"),
-                                               ("outputnode.mean_fiber_length", "@l1output.mean_fiber_length"),
-                                               ("outputnode.fiber_length_std", "@l1output.fiber_length_std"),
-                                               ])])
-    l1pipeline.connect([(group_infosource, datasink, [('group_id', '@group_id')])])
+    l1pipeline.connect([(subj_infosource, datasource, [('subject_id',
+                                                        'subject_id')])])
+    l1pipeline.connect([(subj_infosource, conmapper,
+                         [('subject_id', 'inputnode.subject_id')])])
+    l1pipeline.connect([(datasource, conmapper, [
+        ("dwi", "inputnode.dwi"),
+        ("bvals", "inputnode.bvals"),
+        ("bvecs", "inputnode.bvecs"),
+    ])])
+    l1pipeline.connect([(conmapper, datasink, [
+        ("outputnode.connectome", "@l1output.cff"),
+        ("outputnode.fa", "@l1output.fa"),
+        ("outputnode.tracts", "@l1output.tracts"),
+        ("outputnode.trace", "@l1output.trace"),
+        ("outputnode.cmatrix", "@l1output.cmatrix"),
+        ("outputnode.rois", "@l1output.rois"),
+        ("outputnode.struct", "@l1output.struct"),
+        ("outputnode.networks", "@l1output.networks"),
+        ("outputnode.mean_fiber_length", "@l1output.mean_fiber_length"),
+        ("outputnode.fiber_length_std", "@l1output.fiber_length_std"),
+    ])])
+    l1pipeline.connect([(group_infosource, datasink, [('group_id',
+                                                       '@group_id')])])
     return l1pipeline

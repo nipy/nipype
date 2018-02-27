@@ -7,11 +7,30 @@ import os
 
 
 class OtsuThresholdImageFilterInputSpec(CommandLineInputSpec):
-    insideValue = traits.Int(desc="The value assigned to pixels that are inside the computed threshold", argstr="--insideValue %d")
-    outsideValue = traits.Int(desc="The value assigned to pixels that are outside the computed threshold", argstr="--outsideValue %d")
-    numberOfBins = traits.Int(desc="This is an advanced parameter. The number of bins in the histogram used to model the probability mass function of the two intensity distributions. Small numbers of bins may result in a more conservative threshold. The default should suffice for most applications. Experimentation is the only way to see the effect of varying this parameter.", argstr="--numberOfBins %d")
-    inputVolume = File(position=-2, desc="Input volume to be filtered", exists=True, argstr="%s")
-    outputVolume = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Output filtered", argstr="%s")
+    insideValue = traits.Int(
+        desc=
+        "The value assigned to pixels that are inside the computed threshold",
+        argstr="--insideValue %d")
+    outsideValue = traits.Int(
+        desc=
+        "The value assigned to pixels that are outside the computed threshold",
+        argstr="--outsideValue %d")
+    numberOfBins = traits.Int(
+        desc=
+        "This is an advanced parameter. The number of bins in the histogram used to model the probability mass function of the two intensity distributions. Small numbers of bins may result in a more conservative threshold. The default should suffice for most applications. Experimentation is the only way to see the effect of varying this parameter.",
+        argstr="--numberOfBins %d")
+    inputVolume = File(
+        position=-2,
+        desc="Input volume to be filtered",
+        exists=True,
+        argstr="%s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        position=-1,
+        hash_files=False,
+        desc="Output filtered",
+        argstr="%s")
 
 
 class OtsuThresholdImageFilterOutputSpec(TraitedSpec):
@@ -46,10 +65,35 @@ acknowledgements: This command module was derived from Insight/Examples (copyrig
 
 
 class ResampleScalarVolumeInputSpec(CommandLineInputSpec):
-    spacing = InputMultiPath(traits.Float, desc="Spacing along each dimension (0 means use input spacing)", sep=",", argstr="--spacing %s")
-    interpolation = traits.Enum("linear", "nearestNeighbor", "bspline", "hamming", "cosine", "welch", "lanczos", "blackman", desc="Sampling algorithm (linear, nearest neighbor, bspline(cubic)  or windowed sinc). There are several sinc algorithms available as described in the following publication: Erik H. W. Meijering, Wiro J. Niessen, Josien P. W. Pluim, Max A. Viergever: Quantitative Comparison of Sinc-Approximating Kernels for Medical Image Interpolation. MICCAI 1999, pp. 210-217. Each window has a radius of 3;", argstr="--interpolation %s")
-    InputVolume = File(position=-2, desc="Input volume to be resampled", exists=True, argstr="%s")
-    OutputVolume = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Resampled Volume", argstr="%s")
+    spacing = InputMultiPath(
+        traits.Float,
+        desc="Spacing along each dimension (0 means use input spacing)",
+        sep=",",
+        argstr="--spacing %s")
+    interpolation = traits.Enum(
+        "linear",
+        "nearestNeighbor",
+        "bspline",
+        "hamming",
+        "cosine",
+        "welch",
+        "lanczos",
+        "blackman",
+        desc=
+        "Sampling algorithm (linear, nearest neighbor, bspline(cubic)  or windowed sinc). There are several sinc algorithms available as described in the following publication: Erik H. W. Meijering, Wiro J. Niessen, Josien P. W. Pluim, Max A. Viergever: Quantitative Comparison of Sinc-Approximating Kernels for Medical Image Interpolation. MICCAI 1999, pp. 210-217. Each window has a radius of 3;",
+        argstr="--interpolation %s")
+    InputVolume = File(
+        position=-2,
+        desc="Input volume to be resampled",
+        exists=True,
+        argstr="%s")
+    OutputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        position=-1,
+        hash_files=False,
+        desc="Resampled Volume",
+        argstr="%s")
 
 
 class ResampleScalarVolumeOutputSpec(TraitedSpec):

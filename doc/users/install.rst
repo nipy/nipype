@@ -9,12 +9,14 @@ This page covers the necessary steps to install Nipype.
 Using docker
 ~~~~~~~~~~~~
 
-You can follow the `Nipype tutorial <https://miykael.github.io/nipype_tutorial/>`_
+To get started using Docker, you can follow the `Nipype tutorial
+<https://miykael.github.io/nipype_tutorial/>`_, or pull the `nipype/nipype`
+image from Docker hub::
 
-or use this docker container: `docker pull nipype/nipype`
+    docker pull nipype/nipype
 
-or if you want to build custom docker containers with specific versions of
-software see `Neurodocker <https://github.com/kaczmarj/neurodocker>`_
+You may also build custom docker containers with specific versions of software
+using Neurodocker_ (see the :doc:`neurodocker`).
 
 Using conda
 ~~~~~~~~~~~
@@ -47,7 +49,7 @@ use the following command::
 While `all` installs everything, one can also install select components as
 listed below::
 
-    'doc': ['Sphinx>=1.4', 'matplotlib', 'pydotplus'],
+    'doc': ['Sphinx>=1.4', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],
     'tests': ['pytest-cov', 'codecov'],
     'nipy': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
     'profiler': ['psutil'],
@@ -108,7 +110,7 @@ Interface Dependencies
 Nipype provides wrappers around many neuroimaging tools and contains some
 algorithms. These tools will need to be installed for Nipype to run. You can
 create containers with different versions of these tools installed using
-`Neurodocker <https://github.com/kaczmarj/neurodocker>`_
+Neurodocker_ (see the :doc:`neurodocker`).
 
 Installation for developers
 ---------------------------

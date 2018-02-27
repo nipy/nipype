@@ -3,13 +3,14 @@
 
 import pytest
 
-from nipype.interfaces.niftyreg import no_nifty_package, get_custom_path
-from nipype.interfaces.niftyseg import LabelFusion, CalcTopNCC
-from nipype.testing import example_data
+from ....testing import example_data
+from ...niftyreg import get_custom_path
+from ...niftyreg.tests.test_regutils import no_nifty_tool
+from .. import LabelFusion, CalcTopNCC
 
 
-@pytest.mark.skipif(no_nifty_package(cmd='seg_LabFusion'),
-                    reason="niftyseg is not installed")
+@pytest.mark.skipif(
+    no_nifty_tool(cmd='seg_LabFusion'), reason="niftyseg is not installed")
 def test_seg_lab_fusion():
     """ Test interfaces for seg_labfusion"""
     # Create a node object
@@ -36,6 +37,7 @@ def test_seg_lab_fusion():
 
     cmd_tmp = '{cmd} -in {in_file} -STEPS 2.000000 2 {file_to_seg} \
 {template_file} -out {out_file}'
+
     expected_cmd = cmd_tmp.format(
         cmd=cmd,
         in_file=in_file,
@@ -47,8 +49,8 @@ def test_seg_lab_fusion():
     assert steps.cmdline == expected_cmd
 
     # Staple
-    staple = LabelFusion(kernel_size=2.0, template_num=2,
-                         classifier_type='STAPLE')
+    staple = LabelFusion(
+        kernel_size=2.0, template_num=2, classifier_type='STAPLE')
     in_file = example_data('im1.nii')
     file_to_seg = example_data('im2.nii')
     template_file = example_data('im3.nii')
@@ -68,8 +70,11 @@ def test_seg_lab_fusion():
     assert staple.cmdline == expected_cmd
 
     # Assign some input data
-    mv_node = LabelFusion(template_num=2, classifier_type='MV',
-                          sm_ranking='ROINCC', dilation_roi=2)
+    mv_node = LabelFusion(
+        template_num=2,
+        classifier_type='MV',
+        sm_ranking='ROINCC',
+        dilation_roi=2)
     in_file = example_data('im1.nii')
     file_to_seg = example_data('im2.nii')
     template_file = example_data('im3.nii')
@@ -79,6 +84,7 @@ def test_seg_lab_fusion():
 
     cmd_tmp = '{cmd} -in {in_file} -MV -ROINCC 2 2 {file_to_seg} \
 {template_file} -out {out_file}'
+
     expected_cmd = cmd_tmp.format(
         cmd=cmd,
         in_file=in_file,
@@ -90,8 +96,8 @@ def test_seg_lab_fusion():
     assert mv_node.cmdline == expected_cmd
 
 
-@pytest.mark.skipif(no_nifty_package(cmd='seg_CalcTopNCC'),
-                    reason="niftyseg is not installed")
+@pytest.mark.skipif(
+    no_nifty_tool(cmd='seg_CalcTopNCC'), reason="niftyseg is not installed")
 def test_seg_calctopncc():
     """ Test interfaces for seg_CalctoNCC"""
     # Create a node object

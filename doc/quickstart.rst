@@ -43,6 +43,13 @@ __ http://nipy.org/workshops/2017-03-boston/index.html
 
 `All notebooks visualized <http://nbviewer.jupyter.org/github/nipy/workshops/tree/master/170327-nipype/notebooks/>`_
 
+Learning Resources
+==================
+
+`Porcupine <https://timvanmourik.github.io/Porcupine/getting-started/>`_ : create Nipype pipelines using a graphical interface
+
+View the `examples gallery here <https://timvanmourik.github.io/Porcupine/examples/>`_
+
 Developer guides
 ================
 
@@ -52,4 +59,3 @@ Developer guides
    devel/writing_custom_interfaces
 
 .. include:: links_names.txt
-

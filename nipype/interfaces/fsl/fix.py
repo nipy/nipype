@@ -12,7 +12,7 @@ output directories). If no hand_labels_noise.txt exists already, this
 will fail and comment on that.
 
 EXAMPLE:
-subject_list = ['1','2','3']
+subject_list = ['1', '2', '3']
 
 fix_pipeline = pe.Workflow(name='fix_pipeline')
 fix_pipeline.base_dir = os.path.abspath('./')
@@ -54,31 +54,31 @@ fix_pipeline.write_graph()
 outgraph = fix_pipeline.run()
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
-from ..base import (
-    TraitedSpec,
-    CommandLineInputSpec,
-    CommandLine,
-    InputMultiPath,
-    OutputMultiPath,
-    BaseInterface,
-    BaseInterfaceInputSpec,
-    traits
-)
-from ..traits_extension import Directory, File, isdefined
+from ..base import (TraitedSpec, CommandLineInputSpec, CommandLine,
+                    InputMultiPath, OutputMultiPath, BaseInterface,
+                    BaseInterfaceInputSpec, traits, Directory, File, isdefined)
 import os
 
 
 class TrainingSetCreatorInputSpec(BaseInterfaceInputSpec):
-    mel_icas_in = InputMultiPath(Directory(exists=True), copyfile=False,
-                              desc='Melodic output directories',
-                              argstr='%s', position=-1)
+    mel_icas_in = InputMultiPath(
+        Directory(exists=True),
+        copyfile=False,
+        desc='Melodic output directories',
+        argstr='%s',
+        position=-1)
+
 
 class TrainingSetCreatorOutputSpec(TraitedSpec):
-    mel_icas_out = OutputMultiPath(Directory(exists=True), copyfile=False,
-                              desc='Hand labels for noise vs signal',
-                              argstr='%s', position=-1)
+    mel_icas_out = OutputMultiPath(
+        Directory(exists=True),
+        copyfile=False,
+        desc='Hand labels for noise vs signal',
+        argstr='%s',
+        position=-1)
 
 
 class TrainingSetCreator(BaseInterface):
@@ -97,34 +97,42 @@ class TrainingSetCreator(BaseInterface):
     def _run_interface(self, runtime):
         mel_icas = []
         for item in self.inputs.mel_icas_in:
-            if os.path.exists(os.path.join(item,'hand_labels_noise.txt')):
+            if os.path.exists(os.path.join(item, 'hand_labels_noise.txt')):
                 mel_icas.append(item)
 
         if len(mel_icas) == 0:
-            raise Exception('%s did not find any hand_labels_noise.txt files in the following directories: %s' % (self.__class__.__name__, mel_icas))
+            raise Exception(
+                '%s did not find any hand_labels_noise.txt files in the following directories: %s'
+                % (self.__class__.__name__, mel_icas))
 
         return runtime
 
     def _list_outputs(self):
         mel_icas = []
         for item in self.inputs.mel_icas_in:
-            if os.path.exists(os.path.join(item,'hand_labels_noise.txt')):
+            if os.path.exists(os.path.join(item, 'hand_labels_noise.txt')):
                 mel_icas.append(item)
         outputs = self._outputs().get()
         outputs['mel_icas_out'] = mel_icas
         return outputs
 
 
-
-
 class FeatureExtractorInputSpec(CommandLineInputSpec):
-    mel_ica = Directory(exists=True, copyfile=False, desc='Melodic output directory or directories',
-                        argstr='%s', position=-1)
+    mel_ica = Directory(
+        exists=True,
+        copyfile=False,
+        desc='Melodic output directory or directories',
+        argstr='%s',
+        position=-1)
 
 
 class FeatureExtractorOutputSpec(TraitedSpec):
-    mel_ica = Directory(exists=True, copyfile=False, desc='Melodic output directory or directories',
-                        argstr='%s', position=-1)
+    mel_ica = Directory(
+        exists=True,
+        copyfile=False,
+        desc='Melodic output directory or directories',
+        argstr='%s',
+        position=-1)
 
 
 class FeatureExtractor(CommandLine):
@@ -142,13 +150,23 @@ class FeatureExtractor(CommandLine):
 
 
 class TrainingInputSpec(CommandLineInputSpec):
-    mel_icas = InputMultiPath(Directory(exists=True), copyfile=False,
-                              desc='Melodic output directories',
-                              argstr='%s', position=-1)
+    mel_icas = InputMultiPath(
+        Directory(exists=True),
+        copyfile=False,
+        desc='Melodic output directories',
+        argstr='%s',
+        position=-1)
 
-    trained_wts_filestem = traits.Str(desc='trained-weights filestem, used for trained_wts_file and output directories', argstr='%s', position=1)
+    trained_wts_filestem = traits.Str(
+        desc=
+        'trained-weights filestem, used for trained_wts_file and output directories',
+        argstr='%s',
+        position=1)
 
-    loo = traits.Bool(argstr='-l', desc='full leave-one-out test with classifier training', position=2)
+    loo = traits.Bool(
+        argstr='-l',
+        desc='full leave-one-out test with classifier training',
+        position=2)
 
 
 class TrainingOutputSpec(TraitedSpec):
@@ -166,26 +184,40 @@ class Training(CommandLine):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if isdefined(self.inputs.trained_wts_filestem):
-            outputs['trained_wts_file'] = os.path.abspath(self.inputs.trained_wts_filestem + '.RData')
+            outputs['trained_wts_file'] = os.path.abspath(
+                self.inputs.trained_wts_filestem + '.RData')
         else:
-            outputs['trained_wts_file'] = os.path.abspath('trained_wts_file.RData')
+            outputs['trained_wts_file'] = os.path.abspath(
+                'trained_wts_file.RData')
         return outputs
 
 
-
-
 class AccuracyTesterInputSpec(CommandLineInputSpec):
-    mel_icas = InputMultiPath(Directory(exists=True), copyfile=False,
-                              desc='Melodic output directories',
-                              argstr='%s', position=3, mandatory=True)
+    mel_icas = InputMultiPath(
+        Directory(exists=True),
+        copyfile=False,
+        desc='Melodic output directories',
+        argstr='%s',
+        position=3,
+        mandatory=True)
 
-    trained_wts_file = File(desc='trained-weights file', argstr='%s', position=1, mandatory=True)
+    trained_wts_file = File(
+        desc='trained-weights file', argstr='%s', position=1, mandatory=True)
 
-    output_directory = Directory(desc='Path to folder in which to store the results of the accuracy test.', argstr='%s', position=2, mandatory=True)
+    output_directory = Directory(
+        desc=
+        'Path to folder in which to store the results of the accuracy test.',
+        argstr='%s',
+        position=2,
+        mandatory=True)
 
 
 class AccuracyTesterOutputSpec(TraitedSpec):
-    output_directory = Directory(desc='Path to folder in which to store the results of the accuracy test.', argstr='%s', position=1)
+    output_directory = Directory(
+        desc=
+        'Path to folder in which to store the results of the accuracy test.',
+        argstr='%s',
+        position=1)
 
 
 class AccuracyTester(CommandLine):
@@ -200,25 +232,47 @@ class AccuracyTester(CommandLine):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if isdefined(self.inputs.output_directory):
-            outputs['output_directory'] = Directory(exists=False, value=self.inputs.output_directory)
+            outputs['output_directory'] = Directory(
+                exists=False, value=self.inputs.output_directory)
         else:
-            outputs['output_directory'] = Directory(exists=False, value='accuracy_test')
+            outputs['output_directory'] = Directory(
+                exists=False, value='accuracy_test')
         return outputs
 
 
-
 class ClassifierInputSpec(CommandLineInputSpec):
-    mel_ica = Directory(exists=True, copyfile=False, desc='Melodic output directory or directories',
-                        argstr='%s', position=1)
+    mel_ica = Directory(
+        exists=True,
+        copyfile=False,
+        desc='Melodic output directory or directories',
+        argstr='%s',
+        position=1)
 
-    trained_wts_file = File(exists=True, desc='trained-weights file', argstr='%s', position=2, mandatory=True, copyfile=False)
+    trained_wts_file = File(
+        exists=True,
+        desc='trained-weights file',
+        argstr='%s',
+        position=2,
+        mandatory=True,
+        copyfile=False)
 
-    thresh = traits.Int(argstr='%d', desc='Threshold for cleanup.', position=-1, mandatory=True)
+    thresh = traits.Int(
+        argstr='%d',
+        desc='Threshold for cleanup.',
+        position=-1,
+        mandatory=True)
 
-    artifacts_list_file = File(desc='Text file listing which ICs are artifacts; can be the output from classification or can be created manually')
+    artifacts_list_file = File(
+        desc=
+        'Text file listing which ICs are artifacts; can be the output from classification or can be created manually'
+    )
+
 
 class ClassifierOutputSpec(TraitedSpec):
-    artifacts_list_file = File(desc='Text file listing which ICs are artifacts; can be the output from classification or can be created manually')
+    artifacts_list_file = File(
+        desc=
+        'Text file listing which ICs are artifacts; can be the output from classification or can be created manually'
+    )
 
 
 class Classifier(CommandLine):
@@ -240,34 +294,49 @@ class Classifier(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['artifacts_list_file'] = self._gen_artifacts_list_file(self.inputs.mel_ica, self.inputs.thresh)
+        outputs['artifacts_list_file'] = self._gen_artifacts_list_file(
+            self.inputs.mel_ica, self.inputs.thresh)
 
         return outputs
 
 
-
-
 class CleanerInputSpec(CommandLineInputSpec):
-    artifacts_list_file = File(exists=True, argstr='%s', position=1, mandatory=True, desc='Text file listing which ICs are artifacts; can be the output from classification or can be created manually')
+    artifacts_list_file = File(
+        exists=True,
+        argstr='%s',
+        position=1,
+        mandatory=True,
+        desc=
+        'Text file listing which ICs are artifacts; can be the output from classification or can be created manually'
+    )
 
-    cleanup_motion = traits.Bool(argstr='-m',
-                                 desc='cleanup motion confounds, looks for design.fsf for highpass filter cut-off',
-                                 position=2)
+    cleanup_motion = traits.Bool(
+        argstr='-m',
+        desc=
+        'cleanup motion confounds, looks for design.fsf for highpass filter cut-off',
+        position=2)
 
-    highpass = traits.Float(100, argstr='-m -h %f', usedefault=True,
-                            desc='cleanup motion confounds', position=2)
+    highpass = traits.Float(
+        100,
+        argstr='-m -h %f',
+        usedefault=True,
+        desc='cleanup motion confounds',
+        position=2)
 
-    aggressive = traits.Bool(argstr='-A',
-                             desc='Apply aggressive (full variance) cleanup, instead of the default less-aggressive (unique variance) cleanup.', position=3)
+    aggressive = traits.Bool(
+        argstr='-A',
+        desc=
+        'Apply aggressive (full variance) cleanup, instead of the default less-aggressive (unique variance) cleanup.',
+        position=3)
 
-    confound_file = traits.File(argstr='-x %s',
-                                desc='Include additional confound file.', position=4)
+    confound_file = traits.File(
+        argstr='-x %s', desc='Include additional confound file.', position=4)
 
-    confound_file_1 = traits.File(argstr='-x %s',
-                                  desc='Include additional confound file.', position=5)
+    confound_file_1 = traits.File(
+        argstr='-x %s', desc='Include additional confound file.', position=5)
 
-    confound_file_2 = traits.File(argstr='-x %s',
-                                  desc='Include additional confound file.', position=6)
+    confound_file_2 = traits.File(
+        argstr='-x %s', desc='Include additional confound file.', position=6)
 
 
 class CleanerOutputSpec(TraitedSpec):
@@ -285,13 +354,17 @@ class Cleaner(CommandLine):
     def _get_cleaned_functional_filename(self, artifacts_list_filename):
         ''' extract the proper filename from the first line of the artifacts file '''
         artifacts_list_file = open(artifacts_list_filename, 'r')
-        functional_filename, extension = artifacts_list_file.readline().split('.')
-        artifacts_list_file_path, artifacts_list_filename = os.path.split(artifacts_list_filename)
+        functional_filename, extension = artifacts_list_file.readline().split(
+            '.')
+        artifacts_list_file_path, artifacts_list_filename = os.path.split(
+            artifacts_list_filename)
 
-        return(os.path.join(artifacts_list_file_path, functional_filename + '_clean.nii.gz'))
+        return (os.path.join(artifacts_list_file_path,
+                             functional_filename + '_clean.nii.gz'))
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['cleaned_functional_file'] = self._get_cleaned_functional_filename(self.inputs.artifacts_list_file)
+        outputs[
+            'cleaned_functional_file'] = self._get_cleaned_functional_filename(
+                self.inputs.artifacts_list_file)
         return outputs
-

@@ -4,45 +4,44 @@ from ..utils import ApplyInverseDeformation
 
 
 def test_ApplyInverseDeformation_inputs():
-    input_map = dict(bounding_box=dict(field='comp{1}.inv.comp{1}.sn2def.bb',
-    ),
-    deformation=dict(field='comp{1}.inv.comp{1}.sn2def.matname',
-    xor=['deformation_field'],
-    ),
-    deformation_field=dict(field='comp{1}.inv.comp{1}.def',
-    xor=['deformation'],
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_files=dict(field='fnames',
-    mandatory=True,
-    ),
-    interpolation=dict(field='interp',
-    ),
-    matlab_cmd=dict(),
-    mfile=dict(usedefault=True,
-    ),
-    paths=dict(),
-    target=dict(field='comp{1}.inv.space',
-    ),
-    use_mcr=dict(),
-    use_v8struct=dict(min_ver='8',
-    usedefault=True,
-    ),
-    voxel_sizes=dict(field='comp{1}.inv.comp{1}.sn2def.vox',
-    ),
+    input_map = dict(
+        bounding_box=dict(field='comp{1}.inv.comp{1}.sn2def.bb', ),
+        deformation=dict(
+            field='comp{1}.inv.comp{1}.sn2def.matname',
+            xor=['deformation_field'],
+        ),
+        deformation_field=dict(
+            field='comp{1}.inv.comp{1}.def',
+            xor=['deformation'],
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        in_files=dict(
+            field='fnames',
+            mandatory=True,
+        ),
+        interpolation=dict(field='interp', ),
+        matlab_cmd=dict(),
+        mfile=dict(usedefault=True, ),
+        paths=dict(),
+        target=dict(field='comp{1}.inv.space', ),
+        use_mcr=dict(),
+        use_v8struct=dict(
+            min_ver='8',
+            usedefault=True,
+        ),
+        voxel_sizes=dict(field='comp{1}.inv.comp{1}.sn2def.vox', ),
     )
     inputs = ApplyInverseDeformation.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_ApplyInverseDeformation_outputs():
-    output_map = dict(out_files=dict(),
-    )
+    output_map = dict(out_files=dict(), )
     outputs = ApplyInverseDeformation.output_spec()
 
     for key, metadata in list(output_map.items()):

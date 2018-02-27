@@ -1,17 +1,21 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-
-from nipype.interfaces.niftyreg import (no_nifty_package, get_custom_path,
-                                        RegAverage, RegResample, RegJacobian,
-                                        RegTools, RegMeasure, RegTransform)
-from nipype.testing import example_data
 import os
 import pytest
 
+from ....utils.filemanip import which
+from ....testing import example_data
+from .. import (get_custom_path, RegAverage, RegResample, RegJacobian,
+                RegTools, RegMeasure, RegTransform)
+
+
+def no_nifty_tool(cmd=None):
+    return which(cmd) is None
+
 
 @pytest.mark.skipif(
-    no_nifty_package(cmd='reg_resample'),
+    no_nifty_tool(cmd='reg_resample'),
     reason="niftyreg is not installed. reg_resample not found.")
 def test_reg_resample_res():
     """ tests for reg_resample interface """
@@ -37,6 +41,7 @@ def test_reg_resample_res():
 
     cmd_tmp = '{cmd} -flo {flo} -inter 1 -omp 4 -ref {ref} -trans {trans} \
 -res {res}'
+
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('reg_resample'),
         flo=flo_file,
@@ -57,6 +62,7 @@ def test_reg_resample_res():
 
     cmd_tmp = '{cmd} -flo {flo} -inter 1 -omp 4 -ref {ref} -trans {trans} \
 -blank {blank}'
+
     expected_cmd = cmd_tmp.format(
         cmd=get_custom_path('reg_resample'),
         flo=flo_file,
@@ -68,7 +74,7 @@ def test_reg_resample_res():
 
 
 @pytest.mark.skipif(
-    no_nifty_package(cmd='reg_jacobian'),
+    no_nifty_tool(cmd='reg_jacobian'),
     reason="niftyreg is not installed. reg_jacobian not found.")
 def test_reg_jacobian_jac():
     """ Test interface for RegJacobian """
@@ -132,7 +138,7 @@ def test_reg_jacobian_jac():
 
 
 @pytest.mark.skipif(
-    no_nifty_package(cmd='reg_tools'),
+    no_nifty_tool(cmd='reg_tools'),
     reason="niftyreg is not installed. reg_tools not found.")
 def test_reg_tools_mul():
     """ tests for reg_tools interface """
@@ -175,7 +181,7 @@ def test_reg_tools_mul():
 
 
 @pytest.mark.skipif(
-    no_nifty_package(cmd='reg_average'),
+    no_nifty_tool(cmd='reg_average'),
     reason="niftyreg is not installed. reg_average not found.")
 def test_reg_average():
     """ tests for reg_average interface """
@@ -201,14 +207,14 @@ def test_reg_average():
 
     expected_argv = '%s %s -avg %s %s %s -omp 1' % (
         get_custom_path('reg_average'),
-        os.path.join(os.getcwd(), 'avg_out.nii.gz'),
-        one_file, two_file, three_file)
+        os.path.join(os.getcwd(), 'avg_out.nii.gz'), one_file, two_file,
+        three_file)
 
     assert argv.decode('utf-8') == expected_argv
 
     # Test command line with text file
-    expected_cmd = ('%s --cmd_file %s'
-                    % (get_custom_path('reg_average'), reg_average_cmd))
+    expected_cmd = ('%s --cmd_file %s' % (get_custom_path('reg_average'),
+                                          reg_average_cmd))
 
     assert generated_cmd == expected_cmd
 
@@ -229,8 +235,8 @@ def test_reg_average():
 
     expected_argv = '%s %s -avg %s %s %s -omp 1' % (
         get_custom_path('reg_average'),
-        os.path.join(os.getcwd(), 'avg_out.txt'),
-        one_file, two_file, three_file)
+        os.path.join(os.getcwd(), 'avg_out.txt'), one_file, two_file,
+        three_file)
 
     assert argv.decode('utf-8') == expected_argv
 
@@ -249,10 +255,10 @@ def test_reg_average():
         argv = f_obj.read()
     os.remove(reg_average_cmd)
 
-    expected_argv = ('%s %s -avg_lts %s %s %s -omp 1'
-                     % (get_custom_path('reg_average'),
-                        os.path.join(os.getcwd(), 'avg_out.txt'),
-                        one_file, two_file, three_file))
+    expected_argv = ('%s %s -avg_lts %s %s %s -omp 1' %
+                     (get_custom_path('reg_average'),
+                      os.path.join(os.getcwd(), 'avg_out.txt'), one_file,
+                      two_file, three_file))
 
     assert argv.decode('utf-8') == expected_argv
 
@@ -265,9 +271,9 @@ def test_reg_average():
     trans1_file = example_data('roi01.nii')
     trans2_file = example_data('roi02.nii')
     trans3_file = example_data('roi03.nii')
-    nr_average_4.inputs.warp_files = [trans1_file, one_file,
-                                      trans2_file, two_file,
-                                      trans3_file, three_file]
+    nr_average_4.inputs.warp_files = [
+        trans1_file, one_file, trans2_file, two_file, trans3_file, three_file
+    ]
     nr_average_4.inputs.avg_ref_file = ref_file
     nr_average_4.inputs.omp_core_val = 1
     generated_cmd = nr_average_4.cmdline
@@ -278,11 +284,11 @@ def test_reg_average():
         argv = f_obj.read()
     os.remove(reg_average_cmd)
 
-    expected_argv = ('%s %s -avg_tran %s -omp 1 %s %s %s %s %s %s'
-                     % (get_custom_path('reg_average'),
-                        os.path.join(os.getcwd(), 'avg_out.nii.gz'),
-                        ref_file, trans1_file, one_file, trans2_file, two_file,
-                        trans3_file, three_file))
+    expected_argv = ('%s %s -avg_tran %s -omp 1 %s %s %s %s %s %s' %
+                     (get_custom_path('reg_average'),
+                      os.path.join(os.getcwd(), 'avg_out.nii.gz'), ref_file,
+                      trans1_file, one_file, trans2_file, two_file,
+                      trans3_file, three_file))
 
     assert argv.decode('utf-8') == expected_argv
 
@@ -298,9 +304,10 @@ def test_reg_average():
     trans1_file = example_data('roi01.nii')
     trans2_file = example_data('roi02.nii')
     trans3_file = example_data('roi03.nii')
-    nr_average_5.inputs.warp_files = [aff1_file, trans1_file, one_file,
-                                      aff2_file, trans2_file, two_file,
-                                      aff3_file, trans3_file, three_file]
+    nr_average_5.inputs.warp_files = [
+        aff1_file, trans1_file, one_file, aff2_file, trans2_file, two_file,
+        aff3_file, trans3_file, three_file
+    ]
     nr_average_5.inputs.demean3_ref_file = ref_file
     nr_average_5.inputs.omp_core_val = 1
     generated_cmd = nr_average_5.cmdline
@@ -311,19 +318,17 @@ def test_reg_average():
         argv = f_obj.read()
     os.remove(reg_average_cmd)
 
-    expected_argv = ('%s %s -demean3 %s -omp 1 %s %s %s %s %s %s %s %s %s'
-                     % (get_custom_path('reg_average'),
-                        os.path.join(os.getcwd(), 'avg_out.nii.gz'),
-                        ref_file,
-                        aff1_file, trans1_file, one_file,
-                        aff2_file, trans2_file, two_file,
-                        aff3_file, trans3_file, three_file))
+    expected_argv = ('%s %s -demean3 %s -omp 1 %s %s %s %s %s %s %s %s %s' %
+                     (get_custom_path('reg_average'),
+                      os.path.join(os.getcwd(), 'avg_out.nii.gz'), ref_file,
+                      aff1_file, trans1_file, one_file, aff2_file, trans2_file,
+                      two_file, aff3_file, trans3_file, three_file))
 
     assert argv.decode('utf-8') == expected_argv
 
 
 @pytest.mark.skipif(
-    no_nifty_package(cmd='reg_transform'),
+    no_nifty_tool(cmd='reg_transform'),
     reason="niftyreg is not installed. reg_transform not found.")
 def test_reg_transform_def():
     """ tests for reg_transform interface """
@@ -432,7 +437,7 @@ def test_reg_transform_def():
 
 
 @pytest.mark.skipif(
-    no_nifty_package(cmd='reg_measure'),
+    no_nifty_tool(cmd='reg_measure'),
     reason="niftyreg is not installed. reg_measure not found.")
 def test_reg_measure():
     """ tests for reg_measure interface """
