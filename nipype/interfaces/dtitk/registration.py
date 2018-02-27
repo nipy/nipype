@@ -23,22 +23,23 @@ class RigidInputSpec(CommandLineInputSpec):
     moving_file = File(desc="diffusion tensor image path", exists=True,
                        mandatory=True, position=1, argstr="%s", copyfile=False)
     similarity_metric = traits.Enum('EDS', 'GDS', 'DDS', 'NMI',
-                                    mandatory=False, position=2, argstr="%s",
+                                    mandatory=True, position=2, argstr="%s",
                                     desc="similarity metric", usedefault=True)
-    samplingX = traits.Float(mandatory=False, position=3, argstr="%s",
+    samplingX = traits.Float(mandatory=True, position=3, argstr="%s",
                              desc="dist between samp points (mm)",
                              default_value=4, usedefault=True)
-    samplingY = traits.Float(mandatory=False, position=4, argstr="%s",
+    samplingY = traits.Float(mandatory=True, position=4, argstr="%s",
                              desc="dist between samp points (mm)",
                              default_value=4, usedefault=True)
-    samplingZ = traits.Float(mandatory=False, position=5, argstrr="%s",
+    samplingZ = traits.Float(mandatory=True, position=5, argstr="%s",
                              desc="dist between samp points (mm)",
                              default_value=4, usedefault=True)
-    ftol = traits.Float(mandatory=False, position=6, argstr="%s",
-                        desc="cost function tolerance", default_value=0.01, usedefault=True)
-    useInTrans = traits.Int(mandatory=False, position=7, argstr="%s",
-                              desc="to initialize with existing xfm set as 1",
-                              default_value=1)
+    ftol = traits.Float(mandatory=True, position=6, argstr="%s",
+                        desc="cost function tolerance", default_value=0.01,
+                        usedefault=True)
+    useInTrans = traits.Int(position=7, argstr="%s",
+                            desc="to initialize with existing xfm set as 1",
+                            default_value=1)
 
 
 class RigidOutputSpec(TraitedSpec):
@@ -85,21 +86,22 @@ class AffineInputSpec(CommandLineInputSpec):
                        mandatory=True, position=1, argstr="%s", copyfile=False)
     similarity_metric = traits.Enum('EDS', 'GDS', 'DDS', 'NMI',
                                     mandatory=True, position=2, argstr="%s",
-                                    desc="similarity metric")
+                                    desc="similarity metric", usedefault=True)
     samplingX = traits.Float(mandatory=True, position=3, argstr="%s",
                              desc="dist between samp points (mm)",
-                             default_value=4)
+                             default_value=4, usedefault=True)
     samplingY = traits.Float(mandatory=True, position=4, argstr="%s",
                              desc="dist between samp points (mm)",
-                             default_value=4)
+                             default_value=4, usedefault=True)
     samplingZ = traits.Float(mandatory=True, position=5, argstr="%s",
                              desc="dist between samp points (mm)",
-                             default_value=4)
+                             default_value=4, usedefault=True)
     ftol = traits.Float(mandatory=True, position=6, argstr="%s",
-                        desc="cost function tolerance", default_value=0.01)
-    useInTrans = traits.Float(position=7, argstr="%s",
-                              desc="to initialize with existing xfm set as 1",
-                              default_value=1)
+                        desc="cost function tolerance", default_value=0.01,
+                        usedefault=True)
+    useInTrans = traits.Int(position=7, argstr="%s",
+                            desc="to initialize with existing xfm set as 1",
+                            default_value=1)
 
 
 class AffineOutputSpec(TraitedSpec):
