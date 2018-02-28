@@ -122,7 +122,7 @@ warpfield.nii -res im2_res.nii.gz'
     # Need this overload to properly constraint the interpolation type input
     def _format_arg(self, name, spec, value):
         if name == 'inter_val':
-            inter_val = {'NN': 0, 'LIN': 1, 'CUB': 3, 'SINC': 5}
+            inter_val = {'NN': 0, 'LIN': 1, 'CUB': 3, 'SINC': 4}
             return spec.argstr % inter_val[value]
         else:
             return super(RegResample, self)._format_arg(name, spec, value)
@@ -338,7 +338,7 @@ class RegTools(NiftyRegCommand):
     # Need this overload to properly constraint the interpolation type input
     def _format_arg(self, name, spec, value):
         if name == 'inter_val':
-            inter_val = {'NN': 0, 'LIN': 1, 'CUB': 3, 'SINC': 5}
+            inter_val = {'NN': 0, 'LIN': 1, 'CUB': 3, 'SINC': 4}
             return spec.argstr % inter_val[value]
         else:
             return super(RegTools, self)._format_arg(name, spec, value)
