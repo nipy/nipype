@@ -335,6 +335,14 @@ class RegTools(NiftyRegCommand):
     output_spec = RegToolsOutputSpec
     _suffix = '_tools'
 
+    # Need this overload to properly constraint the interpolation type input
+    def _format_arg(self, name, spec, value):
+        if name == 'inter_val':
+            inter_val = {'NN': 0, 'LIN': 1, 'CUB': 3, 'SINC': 5}
+            return spec.argstr % inter_val[value]
+        else:
+            return super(RegTools, self)._format_arg(name, spec, value)
+
 
 class RegAverageInputSpec(NiftyRegCommandInputSpec):
     """ Input Spec for RegAverage. """
