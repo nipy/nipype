@@ -295,6 +295,15 @@ class RegToolsInputSpec(NiftyRegCommandInputSpec):
         desc=desc,
         argstr='-smoG %f %f %f')
 
+    # Interpolation type
+    inter_val = traits.Enum(
+        'NN',
+        'LIN',
+        'CUB',
+        'SINC',
+        desc='Interpolation order to use to warp the floating image',
+        argstr='-interp %d')
+
 
 class RegToolsOutputSpec(TraitedSpec):
     """ Output Spec for RegTools. """
