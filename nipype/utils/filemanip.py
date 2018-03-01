@@ -289,14 +289,24 @@ def _parse_mount_table(exit_code, output):
     #                          <PATH>^^^^      ^^^^^<FSTYPE>
     # OSX mount example:    /dev/disk2 on / (hfs, local, journaled)
     #                               <PATH>^  ^^^<FSTYPE>
-    pattern = re.compile(r'.*? on (/.*?) (?:type |\()([^\s,]+)(?:, |\)| )')
+    pattern = re.compile(r'.*? on (/.*?) (?:type |\()([^\s,\)]+)')
+
+    # Keep line and match for error reporting (match == None on failure)
+    # Ignore empty lines
+    matches = [(l, pattern.match(l))
+               for l in output.strip().splitlines() if l]
 
     # (path, fstype) tuples, sorted by path length (longest first)
-    mount_info = sorted((pattern.match(l).groups()
-                         for l in output.splitlines()),
+    mount_info = sorted((match.groups() for _, match in matches
+                         if match is not None),
                         key=lambda x: len(x[0]), reverse=True)
     cifs_paths = [path for path, fstype in mount_info
                   if fstype.lower() == 'cifs']
+
+    # Report failures as warnings
+    for line, match in matches:
+        if match is None:
+            fmlogger.debug("Cannot parse mount line: '%s'", line)
 
     return [
         mount for mount in mount_info
