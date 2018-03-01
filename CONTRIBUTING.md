@@ -57,8 +57,9 @@ Make sure to [keep your fork up to date][link_updateupstreamwiki] with the maste
 If you're adding a new tool from an existing neuroimaging toolkit (e.g., 3dDeconvolve from AFNI), check out the [guide for adding new interfaces to Nipype][link_new_interfaces].
 
 To confirm that your changes worked as intended, [clone your fork][link_cloning] to create a local directory.
-In this local directory, run `python setup.py develop`.
-This will add your version of nipype to your local python environment.
+In this local directory, run `pip install -e .[dev]`.
+This will add your version of nipype to your local python environment and
+install dependencies needed for development.
 
 Then, in this local nipype directory, run `make check-before-commit`. If you get no errors, you're ready to submit your changes!
 
