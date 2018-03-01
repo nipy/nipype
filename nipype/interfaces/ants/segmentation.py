@@ -150,7 +150,7 @@ class Atropos(ANTSCommand):
             if isdefined(self.inputs.save_posteriors):
                 retval += ",%s" % self.inputs.output_posteriors_name_template
             return retval + "]"
-        return super(ANTSCommand, self)._format_arg(opt, spec, val)
+        return super(Atropos, self)._format_arg(opt, spec, val)
 
     def _run_interface(self, runtime, correct_return_codes=[0]):
         if self.inputs.initialization == "PriorProbabilityImages":
@@ -640,7 +640,7 @@ class CorticalThickness(ANTSCommand):
             _, _, ext = split_filename(self.inputs.segmentation_priors[0])
             retval = "-p nipype_priors/BrainSegmentationPrior%02d" + ext
             return retval
-        return super(ANTSCommand, self)._format_arg(opt, spec, val)
+        return super(CorticalThickness, self)._format_arg(opt, spec, val)
 
     def _run_interface(self, runtime, correct_return_codes=[0]):
         priors_directory = os.path.join(os.getcwd(), "nipype_priors")
@@ -1066,7 +1066,7 @@ class JointFusion(ANTSCommand):
                 assert len(val) == self.inputs.modalities * len(self.inputs.warped_label_images), \
                     "Number of intensity images and label maps must be the same {0}!={1}".format(
                     len(val), len(self.inputs.warped_label_images))
-            return super(ANTSCommand, self)._format_arg(opt, spec, val)
+            return super(JointFusion, self)._format_arg(opt, spec, val)
         return retval
 
     def _list_outputs(self):
