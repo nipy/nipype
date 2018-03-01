@@ -1050,7 +1050,7 @@ def generate_expanded_graph(graph_in):
             expansions = defaultdict(list)
             for node in graph_in.nodes():
                 for src_id in list(old_edge_dict.keys()):
-                    if node.itername.startswith(src_id):
+                    if node.itername.startswith(src_id + '.'):
                         expansions[src_id].append(node)
             for in_id, in_nodes in list(expansions.items()):
                 logger.debug("The join node %s input %s was expanded"
