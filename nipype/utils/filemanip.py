@@ -185,7 +185,8 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     '/tmp/prefoopost.nii.gz'
 
     >>> from nipype.interfaces.base import Undefined
-    >>> fname_presuffix(fname, 'pre', 'post', Undefined) == fname_presuffix(fname, 'pre', 'post')
+    >>> fname_presuffix(fname, 'pre', 'post', Undefined) == \
+            fname_presuffix(fname, 'pre', 'post')
     True
 
     """
