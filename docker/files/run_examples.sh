@@ -3,7 +3,7 @@ set -e
 set -x
 set -u
 
-WORKDIR=${WORK:-/work}
+WORKDIR=${WORKDIR:-/work}
 arr=$@
 tmp_var=$( IFS=$' '; echo "${arr[*]}" )
 example_id=${tmp_var//[^A-Za-z0-9_-]/_}
@@ -20,8 +20,9 @@ echo '[execution]' >> ${HOME}/.nipype/nipype.cfg
 echo 'crashfile_format = txt' >> ${HOME}/.nipype/nipype.cfg
 
 if [[ "${NIPYPE_RESOURCE_MONITOR:-0}" == "1" ]]; then
-    echo 'resource_monitor = true' >> ${HOME}/.nipype/nipype.cfg
-    echo 'resource_monitor_frequency = 3' >> ${HOME}/.nipype/nipype.cfg
+    echo '[monitoring]' >> ${HOME}/.nipype/nipype.cfg
+    echo 'enabled = true' >> ${HOME}/.nipype/nipype.cfg
+    echo 'sample_frequency = 3' >> ${HOME}/.nipype/nipype.cfg
 fi
 
 # Set up coverage

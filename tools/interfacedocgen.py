@@ -52,8 +52,7 @@ class InterfaceHelpWriter(object):
                  rst_extension='.rst',
                  package_skip_patterns=None,
                  module_skip_patterns=None,
-                 class_skip_patterns=None
-                 ):
+                 class_skip_patterns=None):
         ''' Initialize package for parsing
 
         Parameters
@@ -228,7 +227,8 @@ class InterfaceHelpWriter(object):
 
         fhandle.close()
         os.remove(fname)
-        os.remove(fname + ".png")
+        bitmap_fname = '{}.png'.format(os.path.splitext(fname)[0])
+        os.remove(bitmap_fname)
         return ad
 
     def generate_api_doc(self, uri):
@@ -308,8 +308,9 @@ class InterfaceHelpWriter(object):
             ad += '\n.. index:: %s\n\n' % c
             ad += c + '\n' + self.rst_section_levels[2] * len(c) + '\n\n'
             ad += "`Link to code <%s>`__\n\n" % get_file_url(classinst)
-            ad += trim(classinst.help(returnhelp=True),
-                       self.rst_section_levels[3]) + '\n'
+            ad += trim(
+                classinst.help(returnhelp=True),
+                self.rst_section_levels[3]) + '\n'
 
         if workflows or helper_functions:
             ad += '\n.. module:: %s\n\n' % uri
@@ -321,7 +322,6 @@ class InterfaceHelpWriter(object):
             ad += "\n\n`Link to code <%s>`__\n\n" % get_file_url(finst)
             helpstr = trim(finst.__doc__, self.rst_section_levels[3])
             ad += '\n\n' + helpstr + '\n\n'
-
             """
             # use sphinx autodoc for function signature
             ad += '\n.. _%s:\n\n' % (uri + '.' + name)
@@ -371,8 +371,7 @@ class InterfaceHelpWriter(object):
         elif match_type == 'class':
             patterns = self.class_skip_patterns
         else:
-            raise ValueError('Cannot interpret match type "%s"'
-                             % match_type)
+            raise ValueError('Cannot interpret match type "%s"' % match_type)
         # Match to URI without package name
         L = len(self.package_name)
         if matchstr[:L] == self.package_name:
@@ -414,12 +413,11 @@ class InterfaceHelpWriter(object):
         # raw directory parsing
         for dirpath, dirnames, filenames in os.walk(self.root_path):
             # Check directory names for packages
-            root_uri = self._path2uri(os.path.join(self.root_path,
-                                                   dirpath))
+            root_uri = self._path2uri(os.path.join(self.root_path, dirpath))
             for dirname in dirnames[:]:  # copy list - we modify inplace
                 package_uri = '.'.join((root_uri, dirname))
-                if (self._uri2path(package_uri) and
-                        self._survives_exclude(package_uri, 'package')):
+                if (self._uri2path(package_uri)
+                        and self._survives_exclude(package_uri, 'package')):
                     modules.append(package_uri)
                 else:
                     dirnames.remove(dirname)
@@ -427,8 +425,8 @@ class InterfaceHelpWriter(object):
             for filename in filenames:
                 module_name = filename[:-3]
                 module_uri = '.'.join((root_uri, module_name))
-                if (self._uri2path(module_uri) and
-                        self._survives_exclude(module_uri, 'module')):
+                if (self._uri2path(module_uri)
+                        and self._survives_exclude(module_uri, 'module')):
                     modules.append(module_uri)
         return sorted(modules)
 
@@ -443,8 +441,7 @@ class InterfaceHelpWriter(object):
             mvalues = m.split('.')
             if len(mvalues) > 3:
                 index_prefix = '.'.join(mvalues[1:3])
-                index_dir = os.path.join(outdir,
-                                         index_prefix)
+                index_dir = os.path.join(outdir, index_prefix)
                 index_file = index_dir + self.rst_extension
                 if not os.path.exists(index_dir):
                     os.makedirs(index_dir)
@@ -458,14 +455,12 @@ class InterfaceHelpWriter(object):
    :glob:
 
    {name}/*
-                    """.format(name=index_prefix,
-                               underline='='*len(index_prefix))
+                    """.format(
+                        name=index_prefix, underline='=' * len(index_prefix))
                     with open(index_file, 'wt') as fp:
                         fp.write(header)
-                m = os.path.join(index_prefix,
-                                 '.'.join(mvalues[3:]))
-            outfile = os.path.join(outdir,
-                                   m + self.rst_extension)
+                m = os.path.join(index_prefix, '.'.join(mvalues[3:]))
+            outfile = os.path.join(outdir, m + self.rst_extension)
             fileobj = open(outfile, 'wt')
             fileobj.write(api_str)
             fileobj.close()

@@ -1,7 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 # -*- coding: utf-8 -*-
-
 """
     Change directory to provide relative paths for doctests
     >>> import os
@@ -11,28 +10,38 @@
     >>> os.chdir(datadir)
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import os
 import os.path as op
 
-from ..traits_extension import isdefined
-from ..base import (CommandLineInputSpec, traits, TraitedSpec, File)
+from ..base import (CommandLineInputSpec, traits, TraitedSpec, File, isdefined)
 from .base import MRTrix3Base
 
 
 class BuildConnectomeInputSpec(CommandLineInputSpec):
-    in_file = File(exists=True, argstr='%s', mandatory=True, position=-3,
-                   desc='input tractography')
-    in_parc = File(exists=True, argstr='%s', position=-2,
-                   desc='parcellation file')
+    in_file = File(
+        exists=True,
+        argstr='%s',
+        mandatory=True,
+        position=-3,
+        desc='input tractography')
+    in_parc = File(
+        exists=True, argstr='%s', position=-2, desc='parcellation file')
     out_file = File(
-        'connectome.csv', argstr='%s', mandatory=True, position=-1,
-        usedefault=True, desc='output file after processing')
+        'connectome.csv',
+        argstr='%s',
+        mandatory=True,
+        position=-1,
+        usedefault=True,
+        desc='output file after processing')
 
     nthreads = traits.Int(
-        argstr='-nthreads %d', desc='number of threads. if zero, the number'
-        ' of available cpus will be used', nohash=True)
+        argstr='-nthreads %d',
+        desc='number of threads. if zero, the number'
+        ' of available cpus will be used',
+        nohash=True)
 
     vox_lookup = traits.Bool(
         argstr='-assignment_voxel_lookup',
@@ -56,25 +65,37 @@ class BuildConnectomeInputSpec(CommandLineInputSpec):
         'mm.')
 
     metric = traits.Enum(
-        'count', 'meanlength', 'invlength', 'invnodevolume', 'mean_scalar',
-        'invlength_invnodevolume', argstr='-metric %s', desc='specify the edge'
+        'count',
+        'meanlength',
+        'invlength',
+        'invnodevolume',
+        'mean_scalar',
+        'invlength_invnodevolume',
+        argstr='-metric %s',
+        desc='specify the edge'
         ' weight metric')
 
     in_scalar = File(
-        exists=True, argstr='-image %s', desc='provide the associated image '
+        exists=True,
+        argstr='-image %s',
+        desc='provide the associated image '
         'for the mean_scalar metric')
 
     in_weights = File(
-        exists=True, argstr='-tck_weights_in %s', desc='specify a text scalar '
+        exists=True,
+        argstr='-tck_weights_in %s',
+        desc='specify a text scalar '
         'file containing the streamline weights')
 
     keep_unassigned = traits.Bool(
-        argstr='-keep_unassigned', desc='By default, the program discards the'
+        argstr='-keep_unassigned',
+        desc='By default, the program discards the'
         ' information regarding those streamlines that are not successfully '
         'assigned to a node pair. Set this option to keep these values (will '
         'be the first row/column in the output matrix)')
     zero_diagonal = traits.Bool(
-        argstr='-zero_diagonal', desc='set all diagonal entries in the matrix '
+        argstr='-zero_diagonal',
+        desc='set all diagonal entries in the matrix '
         'to zero (these represent streamlines that connect to the same node at'
         ' both ends)')
 
@@ -84,7 +105,6 @@ class BuildConnectomeOutputSpec(TraitedSpec):
 
 
 class BuildConnectome(MRTrix3Base):
-
     """
     Generate a connectome matrix from a streamlines file and a node
     parcellation image
@@ -112,31 +132,54 @@ class BuildConnectome(MRTrix3Base):
 
 
 class LabelConfigInputSpec(CommandLineInputSpec):
-    in_file = File(exists=True, argstr='%s', mandatory=True, position=-3,
-                   desc='input anatomical image')
-    in_config = File(exists=True, argstr='%s', position=-2,
-                     desc='connectome configuration file')
+    in_file = File(
+        exists=True,
+        argstr='%s',
+        mandatory=True,
+        position=-3,
+        desc='input anatomical image')
+    in_config = File(
+        exists=True,
+        argstr='%s',
+        position=-2,
+        desc='connectome configuration file')
     out_file = File(
-        'parcellation.mif', argstr='%s', mandatory=True, position=-1,
-        usedefault=True, desc='output file after processing')
+        'parcellation.mif',
+        argstr='%s',
+        mandatory=True,
+        position=-1,
+        usedefault=True,
+        desc='output file after processing')
 
-    lut_basic = File(argstr='-lut_basic %s', desc='get information from '
-                     'a basic lookup table consisting of index / name pairs')
-    lut_fs = File(argstr='-lut_freesurfer %s', desc='get information from '
-                  'a FreeSurfer lookup table(typically "FreeSurferColorLUT'
-                  '.txt")')
-    lut_aal = File(argstr='-lut_aal %s', desc='get information from the AAL '
-                   'lookup table (typically "ROI_MNI_V4.txt")')
-    lut_itksnap = File(argstr='-lut_itksnap %s', desc='get information from an'
-                       ' ITK - SNAP lookup table(this includes the IIT atlas '
-                       'file "LUT_GM.txt")')
-    spine = File(argstr='-spine %s', desc='provide a manually-defined '
-                 'segmentation of the base of the spine where the streamlines'
-                 ' terminate, so that this can become a node in the connection'
-                 ' matrix.')
+    lut_basic = File(
+        argstr='-lut_basic %s',
+        desc='get information from '
+        'a basic lookup table consisting of index / name pairs')
+    lut_fs = File(
+        argstr='-lut_freesurfer %s',
+        desc='get information from '
+        'a FreeSurfer lookup table(typically "FreeSurferColorLUT'
+        '.txt")')
+    lut_aal = File(
+        argstr='-lut_aal %s',
+        desc='get information from the AAL '
+        'lookup table (typically "ROI_MNI_V4.txt")')
+    lut_itksnap = File(
+        argstr='-lut_itksnap %s',
+        desc='get information from an'
+        ' ITK - SNAP lookup table(this includes the IIT atlas '
+        'file "LUT_GM.txt")')
+    spine = File(
+        argstr='-spine %s',
+        desc='provide a manually-defined '
+        'segmentation of the base of the spine where the streamlines'
+        ' terminate, so that this can become a node in the connection'
+        ' matrix.')
     nthreads = traits.Int(
-        argstr='-nthreads %d', desc='number of threads. if zero, the number'
-        ' of available cpus will be used', nohash=True)
+        argstr='-nthreads %d',
+        desc='number of threads. if zero, the number'
+        ' of available cpus will be used',
+        nohash=True)
 
 
 class LabelConfigOutputSpec(TraitedSpec):
@@ -144,7 +187,6 @@ class LabelConfigOutputSpec(TraitedSpec):
 
 
 class LabelConfig(MRTrix3Base):
-
     """
     Re-configure parcellation to be incrementally defined.
 
@@ -178,7 +220,7 @@ class LabelConfig(MRTrix3Base):
 
             self.inputs.in_config = op.join(
                 path, 'src/dwi/tractography/connectomics/'
-                      'example_configs/fs_default.txt')
+                'example_configs/fs_default.txt')
 
         return super(LabelConfig, self)._parse_inputs(skip=skip)
 

@@ -4,45 +4,45 @@ from ..histogrammatching import HistogramMatching
 
 
 def test_HistogramMatching_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    inputVolume=dict(argstr='%s',
-    position=-3,
-    ),
-    numberOfHistogramLevels=dict(argstr='--numberOfHistogramLevels %d',
-    ),
-    numberOfMatchPoints=dict(argstr='--numberOfMatchPoints %d',
-    ),
-    outputVolume=dict(argstr='%s',
-    hash_files=False,
-    position=-1,
-    ),
-    referenceVolume=dict(argstr='%s',
-    position=-2,
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
-    threshold=dict(argstr='--threshold ',
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        inputVolume=dict(
+            argstr='%s',
+            position=-3,
+        ),
+        numberOfHistogramLevels=dict(argstr='--numberOfHistogramLevels %d', ),
+        numberOfMatchPoints=dict(argstr='--numberOfMatchPoints %d', ),
+        outputVolume=dict(
+            argstr='%s',
+            hash_files=False,
+            position=-1,
+        ),
+        referenceVolume=dict(
+            argstr='%s',
+            position=-2,
+        ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
+        threshold=dict(argstr='--threshold ', ),
     )
     inputs = HistogramMatching.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_HistogramMatching_outputs():
-    output_map = dict(outputVolume=dict(position=-1,
-    ),
-    )
+    output_map = dict(outputVolume=dict(position=-1, ), )
     outputs = HistogramMatching.output_spec()
 
     for key, metadata in list(output_map.items()):

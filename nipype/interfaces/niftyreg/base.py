@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-
 """
 The niftyreg module provides classes for interfacing with `niftyreg
 <http://sourceforge.net/projects/niftyreg/>`_ command line tools.
@@ -22,34 +21,26 @@ from __future__ import (print_function, division, unicode_literals,
 from builtins import property, super
 from distutils.version import StrictVersion
 import os
-import shutil
-import subprocess
-from warnings import warn
 
+from ... import logging
 from ..base import CommandLine, CommandLineInputSpec, traits, Undefined
 from ...utils.filemanip import split_filename
+
+iflogger = logging.getLogger('interface')
 
 
 def get_custom_path(command, env_dir='NIFTYREGDIR'):
     return os.path.join(os.getenv(env_dir, ''), command)
 
 
-def no_nifty_package(cmd='reg_f3d'):
-    try:
-        return shutil.which(cmd) is None
-    except AttributeError:  # Python < 3.3
-        return not any(
-            [os.path.isfile(os.path.join(path, cmd)) and
-             os.access(os.path.join(path, cmd), os.X_OK)
-             for path in os.environ["PATH"].split(os.pathsep)])
-
-
 class NiftyRegCommandInputSpec(CommandLineInputSpec):
     """Input Spec for niftyreg interfaces."""
     # Set the number of omp thread to use
-    omp_core_val = traits.Int(int(os.environ.get('OMP_NUM_THREADS', '1')),
-                              desc='Number of openmp thread to use',
-                              argstr='-omp %i', usedefault=True)
+    omp_core_val = traits.Int(
+        int(os.environ.get('OMP_NUM_THREADS', '1')),
+        desc='Number of openmp thread to use',
+        argstr='-omp %i',
+        usedefault=True)
 
 
 class NiftyRegCommand(CommandLine):
@@ -65,18 +56,18 @@ class NiftyRegCommand(CommandLine):
         self.num_threads = 1
         super(NiftyRegCommand, self).__init__(**inputs)
         self.required_version = required_version
-        _version = self.get_version()
+        _version = self.version_from_command()
         if _version:
             _version = _version.decode("utf-8")
             if self._min_version is not None and \
                StrictVersion(_version) < StrictVersion(self._min_version):
                 msg = 'A later version of Niftyreg is required (%s < %s)'
-                warn(msg % (_version, self._min_version))
+                iflogger.warning(msg, _version, self._min_version)
             if required_version is not None:
                 if StrictVersion(_version) != StrictVersion(required_version):
                     msg = 'The version of NiftyReg differs from the required'
                     msg += '(%s != %s)'
-                    warn(msg % (_version, self.required_version))
+                    iflogger.warning(msg, _version, self.required_version)
         self.inputs.on_trait_change(self._omp_update, 'omp_core_val')
         self.inputs.on_trait_change(self._environ_update, 'environ')
         self._omp_update()
@@ -102,7 +93,7 @@ class NiftyRegCommand(CommandLine):
             self.inputs.omp_core_val = Undefined
 
     def check_version(self):
-        _version = self.get_version()
+        _version = self.version_from_command()
         if not _version:
             raise Exception('Niftyreg not found')
         # Decoding to string:
@@ -116,18 +107,12 @@ class NiftyRegCommand(CommandLine):
                 err += '(%s != %s)'
                 raise ValueError(err % (_version, self.required_version))
 
-    def get_version(self):
-        if no_nifty_package(cmd=self.cmd):
-            return None
-        exec_cmd = ''.join((self.cmd, ' -v'))
-        return subprocess.check_output(exec_cmd, shell=True).strip()
-
     @property
     def version(self):
-        return self.get_version()
+        return self.version_from_command()
 
     def exists(self):
-        return self.get_version() is not None
+        return self.version_from_command() is not None
 
     def _format_arg(self, name, spec, value):
         if name == 'omp_core_val':

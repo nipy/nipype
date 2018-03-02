@@ -4,80 +4,95 @@ from ..brainsuite import Bse
 
 
 def test_Bse_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    diffusionConstant=dict(argstr='-d %f',
-    usedefault=True,
-    ),
-    diffusionIterations=dict(argstr='-n %d',
-    usedefault=True,
-    ),
-    dilateFinalMask=dict(argstr='-p',
-    usedefault=True,
-    ),
-    edgeDetectionConstant=dict(argstr='-s %f',
-    usedefault=True,
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    inputMRIFile=dict(argstr='-i %s',
-    mandatory=True,
-    ),
-    noRotate=dict(argstr='--norotate',
-    ),
-    outputCortexFile=dict(argstr='--cortex %s',
-    hash_files=False,
-    ),
-    outputDetailedBrainMask=dict(argstr='--hires %s',
-    hash_files=False,
-    ),
-    outputDiffusionFilter=dict(argstr='--adf %s',
-    hash_files=False,
-    ),
-    outputEdgeMap=dict(argstr='--edge %s',
-    hash_files=False,
-    ),
-    outputMRIVolume=dict(argstr='-o %s',
-    genfile=True,
-    hash_files=False,
-    ),
-    outputMaskFile=dict(argstr='--mask %s',
-    genfile=True,
-    hash_files=False,
-    ),
-    radius=dict(argstr='-r %f',
-    usedefault=True,
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
-    timer=dict(argstr='--timer',
-    ),
-    trim=dict(argstr='--trim',
-    usedefault=True,
-    ),
-    verbosityLevel=dict(argstr='-v %f',
-    usedefault=True,
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        diffusionConstant=dict(
+            argstr='-d %f',
+            usedefault=True,
+        ),
+        diffusionIterations=dict(
+            argstr='-n %d',
+            usedefault=True,
+        ),
+        dilateFinalMask=dict(
+            argstr='-p',
+            usedefault=True,
+        ),
+        edgeDetectionConstant=dict(
+            argstr='-s %f',
+            usedefault=True,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        inputMRIFile=dict(
+            argstr='-i %s',
+            mandatory=True,
+        ),
+        noRotate=dict(argstr='--norotate', ),
+        outputCortexFile=dict(
+            argstr='--cortex %s',
+            hash_files=False,
+        ),
+        outputDetailedBrainMask=dict(
+            argstr='--hires %s',
+            hash_files=False,
+        ),
+        outputDiffusionFilter=dict(
+            argstr='--adf %s',
+            hash_files=False,
+        ),
+        outputEdgeMap=dict(
+            argstr='--edge %s',
+            hash_files=False,
+        ),
+        outputMRIVolume=dict(
+            argstr='-o %s',
+            genfile=True,
+            hash_files=False,
+        ),
+        outputMaskFile=dict(
+            argstr='--mask %s',
+            genfile=True,
+            hash_files=False,
+        ),
+        radius=dict(
+            argstr='-r %f',
+            usedefault=True,
+        ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
+        timer=dict(argstr='--timer', ),
+        trim=dict(
+            argstr='--trim',
+            usedefault=True,
+        ),
+        verbosityLevel=dict(
+            argstr='-v %f',
+            usedefault=True,
+        ),
     )
     inputs = Bse.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_Bse_outputs():
-    output_map = dict(outputCortexFile=dict(),
-    outputDetailedBrainMask=dict(),
-    outputDiffusionFilter=dict(),
-    outputEdgeMap=dict(),
-    outputMRIVolume=dict(),
-    outputMaskFile=dict(),
+    output_map = dict(
+        outputCortexFile=dict(),
+        outputDetailedBrainMask=dict(),
+        outputDiffusionFilter=dict(),
+        outputEdgeMap=dict(),
+        outputMRIVolume=dict(),
+        outputMaskFile=dict(),
     )
     outputs = Bse.output_spec()
 

@@ -4,53 +4,55 @@ from ..utils import WarpUtils
 
 
 def test_WarpUtils_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_file=dict(argstr='--in=%s',
-    mandatory=True,
-    ),
-    knot_space=dict(argstr='--knotspace=%d,%d,%d',
-    ),
-    out_file=dict(argstr='--out=%s',
-    name_source=['in_file'],
-    output_name='out_file',
-    position=-1,
-    ),
-    out_format=dict(argstr='--outformat=%s',
-    ),
-    out_jacobian=dict(argstr='--jac=%s',
-    ),
-    output_type=dict(),
-    reference=dict(argstr='--ref=%s',
-    mandatory=True,
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
-    warp_resolution=dict(argstr='--warpres=%0.4f,%0.4f,%0.4f',
-    ),
-    with_affine=dict(argstr='--withaff',
-    ),
-    write_jacobian=dict(mandatory=True,
-    usedefault=True,
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr='--in=%s',
+            mandatory=True,
+        ),
+        knot_space=dict(argstr='--knotspace=%d,%d,%d', ),
+        out_file=dict(
+            argstr='--out=%s',
+            name_source=['in_file'],
+            output_name='out_file',
+            position=-1,
+        ),
+        out_format=dict(argstr='--outformat=%s', ),
+        out_jacobian=dict(argstr='--jac=%s', ),
+        output_type=dict(),
+        reference=dict(
+            argstr='--ref=%s',
+            mandatory=True,
+        ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
+        warp_resolution=dict(argstr='--warpres=%0.4f,%0.4f,%0.4f', ),
+        with_affine=dict(argstr='--withaff', ),
+        write_jacobian=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
     )
     inputs = WarpUtils.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_WarpUtils_outputs():
-    output_map = dict(out_file=dict(),
-    out_jacobian=dict(),
+    output_map = dict(
+        out_file=dict(),
+        out_jacobian=dict(),
     )
     outputs = WarpUtils.output_spec()
 

@@ -4,63 +4,73 @@ from ..aroma import ICA_AROMA
 
 
 def test_ICA_AROMA_inputs():
-    input_map = dict(TR=dict(argstr='-tr %.3f',
-    ),
-    args=dict(argstr='%s',
-    ),
-    denoise_type=dict(argstr='-den %s',
-    mandatory=True,
-    usedefault=True,
-    ),
-    dim=dict(argstr='-dim %d',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    feat_dir=dict(argstr='-feat %s',
-    mandatory=True,
-    xor=['in_file', 'mat_file', 'fnirt_warp_file', 'motion_parameters'],
-    ),
-    fnirt_warp_file=dict(argstr='-warp %s',
-    xor=['feat_dir'],
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_file=dict(argstr='-i %s',
-    mandatory=True,
-    xor=['feat_dir'],
-    ),
-    mask=dict(argstr='-m %s',
-    xor=['feat_dir'],
-    ),
-    mat_file=dict(argstr='-affmat %s',
-    xor=['feat_dir'],
-    ),
-    melodic_dir=dict(argstr='-meldir %s',
-    ),
-    motion_parameters=dict(argstr='-mc %s',
-    mandatory=True,
-    xor=['feat_dir'],
-    ),
-    out_dir=dict(argstr='-o %s',
-    genfile=True,
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
+    input_map = dict(
+        TR=dict(argstr='-tr %.3f', ),
+        args=dict(argstr='%s', ),
+        denoise_type=dict(
+            argstr='-den %s',
+            mandatory=True,
+            usedefault=True,
+        ),
+        dim=dict(argstr='-dim %d', ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        feat_dir=dict(
+            argstr='-feat %s',
+            mandatory=True,
+            xor=[
+                'in_file', 'mat_file', 'fnirt_warp_file', 'motion_parameters'
+            ],
+        ),
+        fnirt_warp_file=dict(
+            argstr='-warp %s',
+            xor=['feat_dir'],
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr='-i %s',
+            mandatory=True,
+            xor=['feat_dir'],
+        ),
+        mask=dict(
+            argstr='-m %s',
+            xor=['feat_dir'],
+        ),
+        mat_file=dict(
+            argstr='-affmat %s',
+            xor=['feat_dir'],
+        ),
+        melodic_dir=dict(argstr='-meldir %s', ),
+        motion_parameters=dict(
+            argstr='-mc %s',
+            mandatory=True,
+            xor=['feat_dir'],
+        ),
+        out_dir=dict(
+            argstr='-o %s',
+            genfile=True,
+        ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
     )
     inputs = ICA_AROMA.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_ICA_AROMA_outputs():
-    output_map = dict(aggr_denoised_file=dict(),
-    nonaggr_denoised_file=dict(),
-    out_dir=dict(),
+    output_map = dict(
+        aggr_denoised_file=dict(),
+        nonaggr_denoised_file=dict(),
+        out_dir=dict(),
     )
     outputs = ICA_AROMA.output_spec()
 

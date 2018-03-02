@@ -11,7 +11,8 @@
    :maxdepth: 2
 
    install
-
+   neurodocker
+   
    caching_tutorial
 
 .. toctree::

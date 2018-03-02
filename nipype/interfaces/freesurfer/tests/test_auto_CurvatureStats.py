@@ -4,60 +4,62 @@ from ..utils import CurvatureStats
 
 
 def test_CurvatureStats_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    copy_inputs=dict(),
-    curvfile1=dict(argstr='%s',
-    mandatory=True,
-    position=-2,
-    ),
-    curvfile2=dict(argstr='%s',
-    mandatory=True,
-    position=-1,
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    hemisphere=dict(argstr='%s',
-    mandatory=True,
-    position=-3,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    min_max=dict(argstr='-m',
-    ),
-    out_file=dict(argstr='-o %s',
-    hash_files=False,
-    name_source=['hemisphere'],
-    name_template='%s.curv.stats',
-    ),
-    subject_id=dict(argstr='%s',
-    mandatory=True,
-    position=-4,
-    usedefault=True,
-    ),
-    subjects_dir=dict(),
-    surface=dict(argstr='-F %s',
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
-    values=dict(argstr='-G',
-    ),
-    write=dict(argstr='--writeCurvatureFiles',
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        copy_inputs=dict(),
+        curvfile1=dict(
+            argstr='%s',
+            mandatory=True,
+            position=-2,
+        ),
+        curvfile2=dict(
+            argstr='%s',
+            mandatory=True,
+            position=-1,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        hemisphere=dict(
+            argstr='%s',
+            mandatory=True,
+            position=-3,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        min_max=dict(argstr='-m', ),
+        out_file=dict(
+            argstr='-o %s',
+            hash_files=False,
+            name_source=['hemisphere'],
+            name_template='%s.curv.stats',
+        ),
+        subject_id=dict(
+            argstr='%s',
+            mandatory=True,
+            position=-4,
+            usedefault=True,
+        ),
+        subjects_dir=dict(),
+        surface=dict(argstr='-F %s', ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
+        values=dict(argstr='-G', ),
+        write=dict(argstr='--writeCurvatureFiles', ),
     )
     inputs = CurvatureStats.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_CurvatureStats_outputs():
-    output_map = dict(out_file=dict(),
-    )
+    output_map = dict(out_file=dict(), )
     outputs = CurvatureStats.output_spec()
 
     for key, metadata in list(output_map.items()):

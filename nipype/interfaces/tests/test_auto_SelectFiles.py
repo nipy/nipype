@@ -4,24 +4,22 @@ from ..io import SelectFiles
 
 
 def test_SelectFiles_inputs():
-    input_map = dict(base_directory=dict(),
-    force_lists=dict(usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    raise_on_empty=dict(usedefault=True,
-    ),
-    sort_filelist=dict(usedefault=True,
-    ),
+    input_map = dict(
+        base_directory=dict(),
+        force_lists=dict(usedefault=True, ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        raise_on_empty=dict(usedefault=True, ),
+        sort_filelist=dict(usedefault=True, ),
     )
     inputs = SelectFiles.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_SelectFiles_outputs():
     output_map = dict()
     outputs = SelectFiles.output_spec()

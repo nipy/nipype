@@ -23,6 +23,8 @@ coverage:
         flags:
           - "smoketests"
   ignore:          # files and folders that will be removed during processing
-    - "nipype/external/*"
-    - "tools/*"
-    - "doc/*"
+    - "nipype/external"
+    - "tools"
+    - "doc"
+    - "**/tests"
+    - "examples"

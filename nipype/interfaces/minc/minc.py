@@ -16,7 +16,8 @@ Author: Carlo Hamalainen <carlo@carlo-hamalainen.net>
     >>> os.chdir(datadir)
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import open
 
 import glob
@@ -40,7 +41,8 @@ class ExtractInputSpec(StdOutCommandLineInputSpec):
         exists=True,
         mandatory=True,
         argstr='%s',
-        position=-2,)
+        position=-2,
+    )
 
     output_file = File(
         desc='output file',
@@ -50,10 +52,18 @@ class ExtractInputSpec(StdOutCommandLineInputSpec):
         name_template='%s.raw',
         keep_extension=False)
 
-    _xor_write = ('write_ascii', 'write_ascii', 'write_byte',
-                  'write_short', 'write_int', 'write_long',
-                  'write_float', 'write_double', 'write_signed',
-                  'write_unsigned',)
+    _xor_write = (
+        'write_ascii',
+        'write_ascii',
+        'write_byte',
+        'write_short',
+        'write_int',
+        'write_long',
+        'write_float',
+        'write_double',
+        'write_signed',
+        'write_unsigned',
+    )
 
     write_ascii = traits.Bool(
         desc='Write out data as ascii strings (default).',
@@ -61,9 +71,7 @@ class ExtractInputSpec(StdOutCommandLineInputSpec):
         xor=_xor_write)
 
     write_byte = traits.Bool(
-        desc='Write out data as bytes.',
-        argstr='-byte',
-        xor=_xor_write)
+        desc='Write out data as bytes.', argstr='-byte', xor=_xor_write)
 
     write_short = traits.Bool(
         desc='Write out data as short integers.',
@@ -76,9 +84,7 @@ class ExtractInputSpec(StdOutCommandLineInputSpec):
         xor=_xor_write)
 
     write_long = traits.Bool(
-        desc='Superseded by write_int.',
-        argstr='-long',
-        xor=_xor_write)
+        desc='Superseded by write_int.', argstr='-long', xor=_xor_write)
 
     write_float = traits.Bool(
         desc='Write out data as single precision floating-point values.',
@@ -93,20 +99,23 @@ class ExtractInputSpec(StdOutCommandLineInputSpec):
     _xor_signed = ('write_signed', 'write_unsigned')
 
     write_signed = traits.Bool(
-        desc='Write out signed data.',
-        argstr='-signed',
-        xor=_xor_signed)
+        desc='Write out signed data.', argstr='-signed', xor=_xor_signed)
 
     write_unsigned = traits.Bool(
-        desc='Write out unsigned data.',
-        argstr='-unsigned',
-        xor=_xor_signed)
+        desc='Write out unsigned data.', argstr='-unsigned', xor=_xor_signed)
 
     write_range = traits.Tuple(
-        traits.Float, traits.Float, argstr='-range %s %s',
-        desc='Specify the range of output values\nDefault value: 1.79769e+308 1.79769e+308.',)
+        traits.Float,
+        traits.Float,
+        argstr='-range %s %s',
+        desc=
+        'Specify the range of output values\nDefault value: 1.79769e+308 1.79769e+308.',
+    )
 
-    _xor_normalize = ('normalize', 'nonormalize',)
+    _xor_normalize = (
+        'normalize',
+        'nonormalize',
+    )
 
     normalize = traits.Bool(
         desc='Normalize integer pixel values to file max and min.',
@@ -119,7 +128,8 @@ class ExtractInputSpec(StdOutCommandLineInputSpec):
         xor=_xor_normalize)
 
     image_range = traits.Tuple(
-        traits.Float, traits.Float,
+        traits.Float,
+        traits.Float,
         desc='Specify the range of real image values for normalization.',
         argstr='-image_range %s %s')
 
@@ -137,20 +147,20 @@ class ExtractInputSpec(StdOutCommandLineInputSpec):
         traits.Int,
         desc='Specifies corner of hyperslab (C conventions for indices).',
         sep=',',
-        argstr='-start %s',)
+        argstr='-start %s',
+    )
 
     count = InputMultiPath(
         traits.Int,
         desc='Specifies edge lengths of hyperslab to read.',
         sep=',',
-        argstr='-count %s',)
+        argstr='-count %s',
+    )
 
     # FIXME Can we make sure that len(start) == len(count)?
 
-    _xor_flip = (
-        'flip_positive_direction',
-        'flip_negative_direction',
-        'flip_any_direction')
+    _xor_flip = ('flip_positive_direction', 'flip_negative_direction',
+                 'flip_any_direction')
 
     flip_positive_direction = traits.Bool(
         desc='Flip images to always have positive direction.',
@@ -242,7 +252,8 @@ class ToRawInputSpec(StdOutCommandLineInputSpec):
         exists=True,
         mandatory=True,
         argstr='%s',
-        position=-2,)
+        position=-2,
+    )
 
     output_file = File(
         desc='output file',
@@ -252,13 +263,11 @@ class ToRawInputSpec(StdOutCommandLineInputSpec):
         name_template='%s.raw',
         keep_extension=False)
 
-    _xor_write = ('write_byte', 'write_short', 'write_int',
-                  'write_long', 'write_float', 'write_double')
+    _xor_write = ('write_byte', 'write_short', 'write_int', 'write_long',
+                  'write_float', 'write_double')
 
     write_byte = traits.Bool(
-        desc='Write out data as bytes.',
-        argstr='-byte',
-        xor=_xor_write)
+        desc='Write out data as bytes.', argstr='-byte', xor=_xor_write)
 
     write_short = traits.Bool(
         desc='Write out data as short integers.',
@@ -271,9 +280,7 @@ class ToRawInputSpec(StdOutCommandLineInputSpec):
         xor=_xor_write)
 
     write_long = traits.Bool(
-        desc='Superseded by write_int.',
-        argstr='-long',
-        xor=_xor_write)
+        desc='Superseded by write_int.', argstr='-long', xor=_xor_write)
 
     write_float = traits.Bool(
         desc='Write out data as single precision floating-point values.',
@@ -288,21 +295,23 @@ class ToRawInputSpec(StdOutCommandLineInputSpec):
     _xor_signed = ('write_signed', 'write_unsigned')
 
     write_signed = traits.Bool(
-        desc='Write out signed data.',
-        argstr='-signed',
-        xor=_xor_signed)
+        desc='Write out signed data.', argstr='-signed', xor=_xor_signed)
 
     write_unsigned = traits.Bool(
-        desc='Write out unsigned data.',
-        argstr='-unsigned',
-        xor=_xor_signed)
+        desc='Write out unsigned data.', argstr='-unsigned', xor=_xor_signed)
 
     write_range = traits.Tuple(
-        traits.Float, traits.Float, argstr='-range %s %s',
+        traits.Float,
+        traits.Float,
+        argstr='-range %s %s',
         desc=('Specify the range of output values.'
-              'Default value: 1.79769e+308 1.79769e+308.'),)
+              'Default value: 1.79769e+308 1.79769e+308.'),
+    )
 
-    _xor_normalize = ('normalize', 'nonormalize',)
+    _xor_normalize = (
+        'normalize',
+        'nonormalize',
+    )
 
     normalize = traits.Bool(
         desc='Normalize integer pixel values to file max and min.',
@@ -347,7 +356,8 @@ class ConvertInputSpec(CommandLineInputSpec):
         exists=True,
         mandatory=True,
         argstr='%s',
-        position=-2,)
+        position=-2,
+    )
 
     output_file = File(
         desc='output file',
@@ -366,8 +376,10 @@ class ConvertInputSpec(CommandLineInputSpec):
     two = traits.Bool(desc='Create a MINC 2 output file.', argstr='-2')
 
     template = traits.Bool(
-        desc=('Create a template file. The dimensions, variables, and'
-              'attributes of the input file are preserved but all data it set to zero.'),
+        desc=
+        ('Create a template file. The dimensions, variables, and'
+         'attributes of the input file are preserved but all data it set to zero.'
+         ),
         argstr='-template',
     )
 
@@ -388,7 +400,8 @@ class ConvertInputSpec(CommandLineInputSpec):
 
     chunk = traits.Range(
         low=0,
-        desc='Set the target block size for chunking (0 default, >1 block size).',
+        desc=
+        'Set the target block size for chunking (0 default, >1 block size).',
         value=0,
         usedefault=False,
         argstr='-chunk %d',
@@ -422,7 +435,8 @@ class CopyInputSpec(CommandLineInputSpec):
         exists=True,
         mandatory=True,
         argstr='%s',
-        position=-2,)
+        position=-2,
+    )
 
     output_file = File(
         desc='output file',
@@ -473,7 +487,8 @@ class ToEcatInputSpec(CommandLineInputSpec):
         exists=True,
         mandatory=True,
         argstr='%s',
-        position=-2,)
+        position=-2,
+    )
 
     output_file = File(
         desc='output file',
@@ -487,36 +502,44 @@ class ToEcatInputSpec(CommandLineInputSpec):
 
     ignore_patient_variable = traits.Bool(
         desc='Ignore informations from the minc patient variable.',
-        argstr='-ignore_patient_variable',)
+        argstr='-ignore_patient_variable',
+    )
 
     ignore_study_variable = traits.Bool(
         desc='Ignore informations from the minc study variable.',
-        argstr='-ignore_study_variable',)
+        argstr='-ignore_study_variable',
+    )
 
     ignore_acquisition_variable = traits.Bool(
         desc='Ignore informations from the minc acquisition variable.',
-        argstr='-ignore_acquisition_variable',)
+        argstr='-ignore_acquisition_variable',
+    )
 
     ignore_ecat_acquisition_variable = traits.Bool(
         desc='Ignore informations from the minc ecat_acquisition variable.',
-        argstr='-ignore_ecat_acquisition_variable',)
+        argstr='-ignore_ecat_acquisition_variable',
+    )
 
     ignore_ecat_main = traits.Bool(
         desc='Ignore informations from the minc ecat-main variable.',
-        argstr='-ignore_ecat_main',)
+        argstr='-ignore_ecat_main',
+    )
 
     ignore_ecat_subheader_variable = traits.Bool(
         desc='Ignore informations from the minc ecat-subhdr variable.',
-        argstr='-ignore_ecat_subheader_variable',)
+        argstr='-ignore_ecat_subheader_variable',
+    )
 
     no_decay_corr_fctr = traits.Bool(
         desc='Do not compute the decay correction factors',
-        argstr='-no_decay_corr_fctr',)
+        argstr='-no_decay_corr_fctr',
+    )
 
     voxels_as_integers = traits.Bool(
         desc=('Voxel values are treated as integers, scale and'
               'calibration factors are set to unity'),
-        argstr='-label',)
+        argstr='-label',
+    )
 
 
 class ToEcatOutputSpec(TraitedSpec):
@@ -552,7 +575,8 @@ class DumpInputSpec(StdOutCommandLineInputSpec):
         exists=True,
         mandatory=True,
         argstr='%s',
-        position=-2,)
+        position=-2,
+    )
 
     output_file = File(
         desc='output file',
@@ -562,7 +586,10 @@ class DumpInputSpec(StdOutCommandLineInputSpec):
         name_template='%s_dump.txt',
         keep_extension=False)
 
-    _xor_coords_or_header = ('coordinate_data', 'header_data',)
+    _xor_coords_or_header = (
+        'coordinate_data',
+        'header_data',
+    )
 
     coordinate_data = traits.Bool(
         desc='Coordinate variable data and header information.',
@@ -574,7 +601,10 @@ class DumpInputSpec(StdOutCommandLineInputSpec):
         argstr='-h',
         xor=_xor_coords_or_header)
 
-    _xor_annotations = ('annotations_brief', 'annotations_full',)
+    _xor_annotations = (
+        'annotations_brief',
+        'annotations_full',
+    )
 
     annotations_brief = traits.Enum(
         'c',
@@ -611,7 +641,8 @@ class DumpInputSpec(StdOutCommandLineInputSpec):
         traits.Int(),
         traits.Tuple(traits.Int, traits.Int),
         desc='Display floating-point values with less precision',
-        argstr='%s',)  # See _format_arg in Dump for actual formatting.
+        argstr='%s',
+    )  # See _format_arg in Dump for actual formatting.
 
 
 class DumpOutputSpec(TraitedSpec):
@@ -643,8 +674,12 @@ class Dump(StdOutCommandLine):
         if name == 'precision':
             if isinstance(value, int):
                 return '-p %d' % value
-            elif isinstance(value, tuple) and isinstance(value[0], int) and isinstance(value[1], int):
-                return '-p %d,%d' % (value[0], value[1],)
+            elif isinstance(value, tuple) and isinstance(
+                    value[0], int) and isinstance(value[1], int):
+                return '-p %d,%d' % (
+                    value[0],
+                    value[1],
+                )
             else:
                 raise ValueError('Invalid precision argument: ' + str(value))
         return super(Dump, self)._format_arg(name, spec, value)
@@ -686,7 +721,10 @@ class AverageInputSpec(CommandLineInputSpec):
         usedefault=True,
         default_value=True)
 
-    _xor_verbose = ('verbose', 'quiet',)
+    _xor_verbose = (
+        'verbose',
+        'quiet',
+    )
 
     verbose = traits.Bool(
         desc='Print out log messages (default).',
@@ -699,7 +737,10 @@ class AverageInputSpec(CommandLineInputSpec):
 
     debug = traits.Bool(desc='Print out debugging messages.', argstr='-debug')
 
-    _xor_check_dimensions = ('check_dimensions', 'no_check_dimensions',)
+    _xor_check_dimensions = (
+        'check_dimensions',
+        'no_check_dimensions',
+    )
 
     check_dimensions = traits.Bool(
         desc='Check that dimension info matches across files (default).',
@@ -727,21 +768,13 @@ class AverageInputSpec(CommandLineInputSpec):
         argstr='-filetype',
         xor=_xor_format)
     format_byte = traits.Bool(
-        desc='Write out byte data.',
-        argstr='-byte',
-        xor=_xor_format)
+        desc='Write out byte data.', argstr='-byte', xor=_xor_format)
     format_short = traits.Bool(
-        desc='Write out short integer data.',
-        argstr='-short',
-        xor=_xor_format)
+        desc='Write out short integer data.', argstr='-short', xor=_xor_format)
     format_int = traits.Bool(
-        desc='Write out 32-bit integer data.',
-        argstr='-int',
-        xor=_xor_format)
+        desc='Write out 32-bit integer data.', argstr='-int', xor=_xor_format)
     format_long = traits.Bool(
-        desc='Superseded by -int.',
-        argstr='-long',
-        xor=_xor_format)
+        desc='Superseded by -int.', argstr='-long', xor=_xor_format)
     format_float = traits.Bool(
         desc='Write out single-precision floating-point data.',
         argstr='-float',
@@ -751,9 +784,7 @@ class AverageInputSpec(CommandLineInputSpec):
         argstr='-double',
         xor=_xor_format)
     format_signed = traits.Bool(
-        desc='Write signed integer data.',
-        argstr='-signed',
-        xor=_xor_format)
+        desc='Write signed integer data.', argstr='-signed', xor=_xor_format)
     format_unsigned = traits.Bool(
         desc='Write unsigned integer data (default).',
         argstr='-unsigned',
@@ -763,9 +794,13 @@ class AverageInputSpec(CommandLineInputSpec):
         low=0,
         desc='Specify the maximum size of the internal buffers (in kbytes).',
         value=4096,
-        argstr='-max_buffer_size_in_kb %d',)
+        argstr='-max_buffer_size_in_kb %d',
+    )
 
-    _xor_normalize = ('normalize', 'nonormalize',)
+    _xor_normalize = (
+        'normalize',
+        'nonormalize',
+    )
 
     normalize = traits.Bool(
         desc='Normalize data sets for mean intensity.',
@@ -777,21 +812,24 @@ class AverageInputSpec(CommandLineInputSpec):
         xor=_xor_normalize)
 
     voxel_range = traits.Tuple(
-        traits.Int, traits.Int, argstr='-range %d %d',
+        traits.Int,
+        traits.Int,
+        argstr='-range %d %d',
         desc='Valid range for output data.')
 
     sdfile = traits.File(
-        desc='Specify an output sd file (default=none).',
-        argstr='-sdfile %s')
+        desc='Specify an output sd file (default=none).', argstr='-sdfile %s')
 
     _xor_copy_header = ('copy_header', 'no_copy_header')
 
     copy_header = traits.Bool(
-        desc='Copy all of the header from the first file (default for one file).',
+        desc=
+        'Copy all of the header from the first file (default for one file).',
         argstr='-copy_header',
         xor=_xor_copy_header)
     no_copy_header = traits.Bool(
-        desc='Do not copy all of the header from the first file (default for many files)).',
+        desc=
+        'Do not copy all of the header from the first file (default for many files)).',
         argstr='-nocopy_header',
         xor=_xor_copy_header)
 
@@ -804,8 +842,12 @@ class AverageInputSpec(CommandLineInputSpec):
         argstr='-binarize')
 
     binrange = traits.Tuple(
-        traits.Float, traits.Float, argstr='-binrange %s %s',
-        desc='Specify a range for binarization. Default value: 1.79769e+308 -1.79769e+308.')
+        traits.Float,
+        traits.Float,
+        argstr='-binrange %s %s',
+        desc=
+        'Specify a range for binarization. Default value: 1.79769e+308 -1.79769e+308.'
+    )
 
     binvalue = traits.Float(
         desc=('Specify a target value (+/- 0.5) for'
@@ -816,14 +858,13 @@ class AverageInputSpec(CommandLineInputSpec):
         traits.Str,
         desc='Specify weights for averaging ("<w1>,<w2>,...").',
         sep=',',
-        argstr='-weights %s',)
+        argstr='-weights %s',
+    )
 
     width_weighted = traits.Bool(
         desc='Weight by dimension widths when -avgdim is used.',
         argstr='-width_weighted',
-        requires=(
-            'avgdim',
-        ))
+        requires=('avgdim', ))
 
 
 class AverageOutputSpec(TraitedSpec):
@@ -856,7 +897,8 @@ class BlobInputSpec(CommandLineInputSpec):
         exists=True,
         mandatory=True,
         argstr='%s',
-        position=-2,)
+        position=-2,
+    )
 
     output_file = File(
         desc='output file',
@@ -912,7 +954,8 @@ class CalcInputSpec(CommandLineInputSpec):
         mandatory=True,
         sep=' ',
         argstr='%s',
-        position=-2,)
+        position=-2,
+    )
 
     output_file = File(
         desc='output file',
@@ -931,7 +974,10 @@ class CalcInputSpec(CommandLineInputSpec):
         usedefault=True,
         default_value=True)
 
-    _xor_verbose = ('verbose', 'quiet',)
+    _xor_verbose = (
+        'verbose',
+        'quiet',
+    )
 
     verbose = traits.Bool(
         desc='Print out log messages (default).',
@@ -978,21 +1024,13 @@ class CalcInputSpec(CommandLineInputSpec):
         argstr='-filetype',
         xor=_xor_format)
     format_byte = traits.Bool(
-        desc='Write out byte data.',
-        argstr='-byte',
-        xor=_xor_format)
+        desc='Write out byte data.', argstr='-byte', xor=_xor_format)
     format_short = traits.Bool(
-        desc='Write out short integer data.',
-        argstr='-short',
-        xor=_xor_format)
+        desc='Write out short integer data.', argstr='-short', xor=_xor_format)
     format_int = traits.Bool(
-        desc='Write out 32-bit integer data.',
-        argstr='-int',
-        xor=_xor_format)
+        desc='Write out 32-bit integer data.', argstr='-int', xor=_xor_format)
     format_long = traits.Bool(
-        desc='Superseded by -int.',
-        argstr='-long',
-        xor=_xor_format)
+        desc='Superseded by -int.', argstr='-long', xor=_xor_format)
     format_float = traits.Bool(
         desc='Write out single-precision floating-point data.',
         argstr='-float',
@@ -1002,17 +1040,18 @@ class CalcInputSpec(CommandLineInputSpec):
         argstr='-double',
         xor=_xor_format)
     format_signed = traits.Bool(
-        desc='Write signed integer data.',
-        argstr='-signed',
-        xor=_xor_format)
+        desc='Write signed integer data.', argstr='-signed', xor=_xor_format)
     format_unsigned = traits.Bool(
         desc='Write unsigned integer data (default).',
         argstr='-unsigned',
         xor=_xor_format)
 
     voxel_range = traits.Tuple(
-        traits.Int, traits.Int, argstr='-range %d %d',
-        desc='Valid range for output data.',)
+        traits.Int,
+        traits.Int,
+        argstr='-range %d %d',
+        desc='Valid range for output data.',
+    )
 
     max_buffer_size_in_kb = traits.Range(
         low=0,
@@ -1021,7 +1060,10 @@ class CalcInputSpec(CommandLineInputSpec):
         usedefault=False,
         argstr='-max_buffer_size_in_kb %d')
 
-    _xor_check_dimensions = ('check_dimensions', 'no_check_dimensions',)
+    _xor_check_dimensions = (
+        'check_dimensions',
+        'no_check_dimensions',
+    )
 
     check_dimensions = traits.Bool(
         desc='Check that files have matching dimensions (default).',
@@ -1042,10 +1084,8 @@ class CalcInputSpec(CommandLineInputSpec):
         argstr='-propagate_nan')
 
     # FIXME Double-check that these are mutually exclusive?
-    _xor_nan_zero_illegal = (
-        'output_nan',
-        'output_zero',
-        'output_illegal_value')
+    _xor_nan_zero_illegal = ('output_nan', 'output_zero',
+                             'output_illegal_value')
 
     output_nan = traits.Bool(
         desc='Output NaN when an illegal operation is done (default).',
@@ -1056,7 +1096,8 @@ class CalcInputSpec(CommandLineInputSpec):
         argstr='-zero',
         xor=_xor_nan_zero_illegal)
     output_illegal = traits.Bool(
-        desc='Value to write out when an illegal operation is done. Default value: 1.79769e+308',
+        desc=
+        'Value to write out when an illegal operation is done. Default value: 1.79769e+308',
         argstr='-illegal_value',
         xor=_xor_nan_zero_illegal)
 
@@ -1080,11 +1121,13 @@ class CalcInputSpec(CommandLineInputSpec):
             traits.Str,
             traits.File,
             argstr='-outfile %s %s',
-            desc=('List of (symbol, file) tuples indicating that output should be written'
-                  'to the specified file, taking values from the symbol which should be'
-                  'created in the expression (see the EXAMPLES section). If this option'
-                  'is given, then all non-option arguments are taken as input files.'
-                  'This option can be used multiple times for multiple output files.')))
+            desc=
+            ('List of (symbol, file) tuples indicating that output should be written'
+             'to the specified file, taking values from the symbol which should be'
+             'created in the expression (see the EXAMPLES section). If this option'
+             'is given, then all non-option arguments are taken as input files.'
+             'This option can be used multiple times for multiple output files.'
+             )))
 
     eval_width = traits.Int(
         200,
@@ -1131,7 +1174,8 @@ class BBoxInputSpec(StdOutCommandLineInputSpec):
         exists=True,
         mandatory=True,
         argstr='%s',
-        position=-2,)
+        position=-2,
+    )
 
     output_file = File(
         desc='output file containing bounding box corners',
@@ -1158,7 +1202,8 @@ class BBoxInputSpec(StdOutCommandLineInputSpec):
         xor=_xor_one_two)
 
     format_mincresample = traits.Bool(
-        desc='Output format for mincresample: (-step x y z -start x y z -nelements x y z',
+        desc=
+        'Output format for mincresample: (-step x y z -start x y z -nelements x y z',
         argstr='-mincresample')
     format_mincreshape = traits.Bool(
         desc='Output format for mincreshape: (-start x,y,z -count dx,dy,dz',
@@ -1177,8 +1222,7 @@ class BBoxInputSpec(StdOutCommandLineInputSpec):
 
 class BBoxOutputSpec(TraitedSpec):
     output_file = File(
-        desc='output file containing bounding box corners',
-        exists=True)
+        desc='output file containing bounding box corners', exists=True)
 
 
 class BBox(StdOutCommandLine):
@@ -1250,18 +1294,17 @@ class BeastInputSpec(CommandLineInputSpec):
         desc='Output the probability map instead of crisp mask.',
         argstr='-probability')
     flip_images = traits.Bool(
-        desc='Flip images around the mid-sagittal plane to increase patch count.',
+        desc=
+        'Flip images around the mid-sagittal plane to increase patch count.',
         argstr='-flip')
     load_moments = traits.Bool(
         desc=('Do not calculate moments instead use precalculated'
               'library moments. (for optimization purposes)'),
         argstr='-load_moments')
     fill_holes = traits.Bool(
-        desc='Fill holes in the binary output.',
-        argstr='-fill')
+        desc='Fill holes in the binary output.', argstr='-fill')
     median_filter = traits.Bool(
-        desc='Apply a median filter on the probability map.',
-        argstr='-median')
+        desc='Apply a median filter on the probability map.', argstr='-median')
     nlm_filter = traits.Bool(
         desc='Apply an NLM filter on the probability map (experimental).',
         argstr='-nlm_filter')
@@ -1273,8 +1316,7 @@ class BeastInputSpec(CommandLineInputSpec):
         default_value=True)
 
     configuration_file = traits.File(
-        desc='Specify configuration file.',
-        argstr='-configuration %s')
+        desc='Specify configuration file.', argstr='-configuration %s')
 
     voxel_size = traits.Int(
         4,
@@ -1284,7 +1326,8 @@ class BeastInputSpec(CommandLineInputSpec):
         argstr='-voxel_size %s')
 
     abspath = traits.Bool(
-        desc='File paths in the library are absolute (default is relative to library root).',
+        desc=
+        'File paths in the library are absolute (default is relative to library root).',
         argstr='-abspath',
         usedefault=True,
         default_value=True)
@@ -1296,7 +1339,8 @@ class BeastInputSpec(CommandLineInputSpec):
 
     search_area = traits.Int(
         2,
-        desc='Specify size of search area for single scale approach. Default value: 2.',
+        desc=
+        'Specify size of search area for single scale approach. Default value: 2.',
         argstr='-search_area %s')
 
     confidence_level_alpha = traits.Float(
@@ -1321,15 +1365,9 @@ class BeastInputSpec(CommandLineInputSpec):
         argstr='-same_resolution')
 
     library_dir = traits.Directory(
-        desc='library directory',
-        position=-3,
-        argstr='%s',
-        mandatory=True)
+        desc='library directory', position=-3, argstr='%s', mandatory=True)
     input_file = traits.File(
-        desc='input file',
-        position=-2,
-        argstr='%s',
-        mandatory=True)
+        desc='input file', position=-2, argstr='%s', mandatory=True)
     output_file = traits.File(
         desc='output file',
         position=-1,
@@ -1369,7 +1407,8 @@ class PikInputSpec(CommandLineInputSpec):
         exists=True,
         mandatory=True,
         argstr='%s',
-        position=-2,)
+        position=-2,
+    )
 
     _xor_image_type = ('jpg', 'png')
 
@@ -1403,7 +1442,8 @@ class PikInputSpec(CommandLineInputSpec):
         argstr='--scale %s')
 
     width = traits.Int(
-        desc='Autoscale the resulting image to have a fixed image width (in pixels).',
+        desc=
+        'Autoscale the resulting image to have a fixed image width (in pixels).',
         argstr='--width %s')
 
     depth = traits.Enum(
@@ -1425,25 +1465,29 @@ class PikInputSpec(CommandLineInputSpec):
         requires=['title'])
 
     annotated_bar = traits.Bool(
-        desc='create an annotated bar to match the image (use height of the output image)',
+        desc=
+        'create an annotated bar to match the image (use height of the output image)',
         argstr='--anot_bar')
 
     # FIXME tuple of floats? Not voxel values? Man page doesn't specify.
     minc_range = traits.Tuple(
-        traits.Float, traits.Float,
+        traits.Float,
+        traits.Float,
         desc='Valid range of values for MINC file.',
         argstr='--range %s %s')
 
     _xor_image_range = ('image_range', 'auto_range')
 
     image_range = traits.Tuple(
-        traits.Float, traits.Float,
+        traits.Float,
+        traits.Float,
         desc='Range of image values to use for pixel intensity.',
         argstr='--image_range %s %s',
         xor=_xor_image_range)
 
     auto_range = traits.Bool(
-        desc='Automatically determine image range using a 5 and 95% PcT. (histogram)',
+        desc=
+        'Automatically determine image range using a 5 and 95% PcT. (histogram)',
         argstr='--auto_range',
         xor=_xor_image_range)
 
@@ -1454,16 +1498,11 @@ class PikInputSpec(CommandLineInputSpec):
     _xor_slice = ('slice_z', 'slice_y', 'slice_x')
 
     slice_z = traits.Bool(
-        desc='Get an axial/transverse (z) slice.',
-        argstr='-z',
-        xor=_xor_slice)
+        desc='Get an axial/transverse (z) slice.', argstr='-z', xor=_xor_slice)
     slice_y = traits.Bool(
-        desc='Get a coronal (y) slice.',
-        argstr='-y',
-        xor=_xor_slice)
+        desc='Get a coronal (y) slice.', argstr='-y', xor=_xor_slice)
     slice_x = traits.Bool(
-        desc='Get a sagittal (x) slice.',
-        argstr='-x',
+        desc='Get a sagittal (x) slice.', argstr='-x',
         xor=_xor_slice)  # FIXME typo in man page? sagital?
 
     triplanar = traits.Bool(
@@ -1485,9 +1524,8 @@ class PikInputSpec(CommandLineInputSpec):
         argstr='--sagittal_offset_perc %d',
     )
 
-    _xor_vertical_horizontal = (
-        'vertical_triplanar_view',
-        'horizontal_triplanar_view')
+    _xor_vertical_horizontal = ('vertical_triplanar_view',
+                                'horizontal_triplanar_view')
 
     vertical_triplanar_view = traits.Bool(
         desc='Create a vertical triplanar view (Default).',
@@ -1499,8 +1537,7 @@ class PikInputSpec(CommandLineInputSpec):
         xor=_xor_vertical_horizontal)
 
     lookup = traits.Str(
-        desc='Arguments to pass to minclookup',
-        argstr='--lookup %s')
+        desc='Arguments to pass to minclookup', argstr='--lookup %s')
 
 
 class PikOutputSpec(TraitedSpec):
@@ -1534,7 +1571,7 @@ class Pik(CommandLine):
             if isinstance(value, bool) and value:
                 return '--title'
             elif isinstance(value, str):
-                return '--title --title_text %s' % (value,)
+                return '--title --title_text %s' % (value, )
             else:
                 raise ValueError(
                     'Unknown value for "title" argument: ' + str(value))
@@ -1547,12 +1584,10 @@ class BlurInputSpec(CommandLineInputSpec):
         exists=True,
         mandatory=True,
         argstr='%s',
-        position=-2,)
+        position=-2,
+    )
 
-    output_file_base = File(
-        desc='output file base',
-        argstr='%s',
-        position=-1)
+    output_file_base = File(desc='output file base', argstr='%s', position=-1)
 
     clobber = traits.Bool(
         desc='Overwrite existing file.',
@@ -1575,12 +1610,12 @@ class BlurInputSpec(CommandLineInputSpec):
         desc='Create the gradient magnitude volume as well.',
         argstr='-gradient')
     partial = traits.Bool(
-        desc='Create the partial derivative and gradient magnitude volumes as well.',
+        desc=
+        'Create the partial derivative and gradient magnitude volumes as well.',
         argstr='-partial')
 
     no_apodize = traits.Bool(
-        desc='Do not apodize the data before blurring.',
-        argstr='-no_apodize')
+        desc='Do not apodize the data before blurring.', argstr='-no_apodize')
 
     _xor_main_options = ('fwhm', 'fwhm3d', 'standard_dev')
 
@@ -1612,7 +1647,8 @@ class BlurInputSpec(CommandLineInputSpec):
         1,
         2,
         3,
-        desc='Number of dimensions to blur (either 1,2 or 3). Default value: 3.',
+        desc=
+        'Number of dimensions to blur (either 1,2 or 3). Default value: 3.',
         argstr='-dimensions %s',
         default=3)
 
@@ -1674,13 +1710,12 @@ class Blur(StdOutCommandLine):
         if isdefined(output_file_base):
             return output_file_base
         else:
-            base_file_name = os.path.split(self.inputs.input_file)[
-                1]                          # e.g. 'foo.mnc'
-            base_file_name_no_ext = os.path.splitext(
-                base_file_name)[0]                               # e.g. 'foo'
+            base_file_name = os.path.split(
+                self.inputs.input_file)[1]  # e.g. 'foo.mnc'
+            base_file_name_no_ext = os.path.splitext(base_file_name)[
+                0]  # e.g. 'foo'
             output_base = os.path.join(
-                os.getcwd(),
-                base_file_name_no_ext +
+                os.getcwd(), base_file_name_no_ext +
                 '_bluroutput')  # e.g. '/tmp/blah/foo_bluroutput'
             # return os.path.splitext(self.inputs.input_file)[0] +
             # '_bluroutput'
@@ -1707,15 +1742,15 @@ class Blur(StdOutCommandLine):
     @property
     def cmdline(self):
         output_file_base = self.inputs.output_file_base
+        orig_cmdline = super(Blur, self).cmdline
 
         if isdefined(output_file_base):
-            return super(Blur, self).cmdline
+            return orig_cmdline
         else:
             # FIXME this seems like a bit of a hack. Can we force output_file
             # to show up in cmdline by default, even if it isn't specified in
             # the instantiation of Pik?
-            return '%s %s' % (super(Blur, self).cmdline,
-                              self._gen_output_base())
+            return '%s %s' % (orig_cmdline, self._gen_output_base())
 
 
 class MathInputSpec(CommandLineInputSpec):
@@ -1757,11 +1792,13 @@ class MathInputSpec(CommandLineInputSpec):
     _xor_copy_header = ('copy_header', 'no_copy_header')
 
     copy_header = traits.Bool(
-        desc='Copy all of the header from the first file (default for one file).',
+        desc=
+        'Copy all of the header from the first file (default for one file).',
         argstr='-copy_header',
         xor=_xor_copy_header)
     no_copy_header = traits.Bool(
-        desc='Do not copy all of the header from the first file (default for many files)).',
+        desc=
+        'Do not copy all of the header from the first file (default for many files)).',
         argstr='-nocopy_header',
         xor=_xor_copy_header)
 
@@ -1782,21 +1819,13 @@ class MathInputSpec(CommandLineInputSpec):
         argstr='-filetype',
         xor=_xor_format)
     format_byte = traits.Bool(
-        desc='Write out byte data.',
-        argstr='-byte',
-        xor=_xor_format)
+        desc='Write out byte data.', argstr='-byte', xor=_xor_format)
     format_short = traits.Bool(
-        desc='Write out short integer data.',
-        argstr='-short',
-        xor=_xor_format)
+        desc='Write out short integer data.', argstr='-short', xor=_xor_format)
     format_int = traits.Bool(
-        desc='Write out 32-bit integer data.',
-        argstr='-int',
-        xor=_xor_format)
+        desc='Write out 32-bit integer data.', argstr='-int', xor=_xor_format)
     format_long = traits.Bool(
-        desc='Superseded by -int.',
-        argstr='-long',
-        xor=_xor_format)
+        desc='Superseded by -int.', argstr='-long', xor=_xor_format)
     format_float = traits.Bool(
         desc='Write out single-precision floating-point data.',
         argstr='-float',
@@ -1806,25 +1835,29 @@ class MathInputSpec(CommandLineInputSpec):
         argstr='-double',
         xor=_xor_format)
     format_signed = traits.Bool(
-        desc='Write signed integer data.',
-        argstr='-signed',
-        xor=_xor_format)
+        desc='Write signed integer data.', argstr='-signed', xor=_xor_format)
     format_unsigned = traits.Bool(
         desc='Write unsigned integer data (default).',
         argstr='-unsigned',
         xor=_xor_format)
 
     voxel_range = traits.Tuple(
-        traits.Int, traits.Int, argstr='-range %d %d',
+        traits.Int,
+        traits.Int,
+        argstr='-range %d %d',
         desc='Valid range for output data.')
 
     max_buffer_size_in_kb = traits.Range(
         low=0,
         desc='Specify the maximum size of the internal buffers (in kbytes).',
         value=4096,
-        argstr='-max_buffer_size_in_kb %d',)
+        argstr='-max_buffer_size_in_kb %d',
+    )
 
-    _xor_check_dimensions = ('check_dimensions', 'no_check_dimensions',)
+    _xor_check_dimensions = (
+        'check_dimensions',
+        'no_check_dimensions',
+    )
 
     check_dimensions = traits.Bool(
         desc='Check that dimension info matches across files (default).',
@@ -1836,7 +1869,8 @@ class MathInputSpec(CommandLineInputSpec):
         xor=_xor_check_dimensions)
 
     dimension = traits.Str(
-        desc='Specify a dimension along which we wish to perform a calculation.',
+        desc=
+        'Specify a dimension along which we wish to perform a calculation.',
         argstr='-dimension %s')
 
     # FIXME Is it sensible to use ignore_nan and propagate_nan at the same
@@ -1849,10 +1883,8 @@ class MathInputSpec(CommandLineInputSpec):
         argstr='-propagate_nan')
 
     # FIXME Double-check that these are mutually exclusive?
-    _xor_nan_zero_illegal = (
-        'output_nan',
-        'output_zero',
-        'output_illegal_value')
+    _xor_nan_zero_illegal = ('output_nan', 'output_zero',
+                             'output_illegal_value')
 
     output_nan = traits.Bool(
         desc='Output NaN when an illegal operation is done (default).',
@@ -1876,16 +1908,9 @@ class MathInputSpec(CommandLineInputSpec):
     ##########################################################################
 
     bool_or_const_traits = [
-        'test_gt',
-        'test_lt',
-        'test_eq',
-        'test_ne',
-        'test_ge',
-        'test_le',
-        'calc_add',
-        'calc_sub',
-        'calc_mul',
-        'calc_div']
+        'test_gt', 'test_lt', 'test_eq', 'test_ne', 'test_ge', 'test_le',
+        'calc_add', 'calc_sub', 'calc_mul', 'calc_div'
+    ]
 
     test_gt = traits.Either(
         traits.Bool(),
@@ -1944,24 +1969,12 @@ class MathInputSpec(CommandLineInputSpec):
     ######################################
 
     single_volume_traits = [
-        'invert',
-        'calc_not',
-        'sqrt',
-        'square',
-        'abs',
-        'exp',
-        'log',
-        'scale',
-        'clamp',
-        'segment',
-        'nsegment',
-        'isnan',
-        'isnan']  # FIXME enforce this in _parse_inputs and check for other members
+        'invert', 'calc_not', 'sqrt', 'square', 'abs', 'exp', 'log', 'scale',
+        'clamp', 'segment', 'nsegment', 'isnan', 'isnan'
+    ]  # FIXME enforce this in _parse_inputs and check for other members
 
     invert = traits.Either(
-        traits.Float(),
-        desc='Calculate 1/c.',
-        argstr='-invert -const %s')
+        traits.Float(), desc='Calculate 1/c.', argstr='-invert -const %s')
 
     calc_not = traits.Bool(desc='Calculate !vol1.', argstr='-not')
 
@@ -1970,27 +1983,41 @@ class MathInputSpec(CommandLineInputSpec):
     abs = traits.Bool(desc='Take absolute value of a volume.', argstr='-abs')
 
     exp = traits.Tuple(
-        traits.Float, traits.Float, argstr='-exp -const2 %s %s',
+        traits.Float,
+        traits.Float,
+        argstr='-exp -const2 %s %s',
         desc='Calculate c2*exp(c1*x). Both constants must be specified.')
 
     log = traits.Tuple(
-        traits.Float, traits.Float, argstr='-log -const2 %s %s',
+        traits.Float,
+        traits.Float,
+        argstr='-log -const2 %s %s',
         desc='Calculate log(x/c2)/c1. The constants c1 and c2 default to 1.')
 
     scale = traits.Tuple(
-        traits.Float, traits.Float, argstr='-scale -const2 %s %s',
+        traits.Float,
+        traits.Float,
+        argstr='-scale -const2 %s %s',
         desc='Scale a volume: volume * c1 + c2.')
 
     clamp = traits.Tuple(
-        traits.Float, traits.Float, argstr='-clamp -const2 %s %s',
+        traits.Float,
+        traits.Float,
+        argstr='-clamp -const2 %s %s',
         desc='Clamp a volume to lie between two values.')
 
     segment = traits.Tuple(
-        traits.Float, traits.Float, argstr='-segment -const2 %s %s',
-        desc='Segment a volume using range of -const2: within range = 1, outside range = 0.')
+        traits.Float,
+        traits.Float,
+        argstr='-segment -const2 %s %s',
+        desc=
+        'Segment a volume using range of -const2: within range = 1, outside range = 0.'
+    )
 
     nsegment = traits.Tuple(
-        traits.Float, traits.Float, argstr='-nsegment -const2 %s %s',
+        traits.Float,
+        traits.Float,
+        argstr='-nsegment -const2 %s %s',
         desc='Opposite of -segment: within range = 0, outside range = 1.')
 
     isnan = traits.Bool(desc='Test for NaN values in vol1.', argstr='-isnan')
@@ -2004,7 +2031,8 @@ class MathInputSpec(CommandLineInputSpec):
     two_volume_traits = ['percentdiff']
 
     percentdiff = traits.Float(
-        desc='Percent difference between 2 volumes, thresholded (const def=0.0).',
+        desc=
+        'Percent difference between 2 volumes, thresholded (const def=0.0).',
         argstr='-percentdiff')
 
     #####################################
@@ -2012,11 +2040,8 @@ class MathInputSpec(CommandLineInputSpec):
     #####################################
 
     n_volume_traits = [
-        'count_valid',
-        'maximum',
-        'minimum',
-        'calc_add',
-        'calc_or']
+        'count_valid', 'maximum', 'minimum', 'calc_add', 'calc_or'
+    ]
 
     count_valid = traits.Bool(
         desc='Count the number of valid values in N volumes.',
@@ -2026,11 +2051,9 @@ class MathInputSpec(CommandLineInputSpec):
     minimum = traits.Bool(desc='Find minimum of N volumes.', argstr='-minimum')
 
     calc_and = traits.Bool(
-        desc='Calculate vol1 && vol2 (&& ...).',
-        argstr='-and')
+        desc='Calculate vol1 && vol2 (&& ...).', argstr='-and')
     calc_or = traits.Bool(
-        desc='Calculate vol1 || vol2 (|| ...).',
-        argstr='-or')
+        desc='Calculate vol1 || vol2 (|| ...).', argstr='-or')
 
 
 class MathOutputSpec(TraitedSpec):
@@ -2072,13 +2095,18 @@ class Math(StdOutCommandLine):
             if isinstance(value, bool) and value:
                 return spec.argstr
             elif isinstance(value, bool) and not value:
-                raise ValueError(
-                    'Does not make sense to specify %s=False' %
-                    (name,))
+                raise ValueError('Does not make sense to specify %s=False' %
+                                 (name, ))
             elif isinstance(value, float):
-                return '%s -const %s' % (spec.argstr, value,)
+                return '%s -const %s' % (
+                    spec.argstr,
+                    value,
+                )
             else:
-                raise ValueError('Invalid %s argument: %s' % (name, value,))
+                raise ValueError('Invalid %s argument: %s' % (
+                    name,
+                    value,
+                ))
 
         return super(Math, self)._format_arg(name, spec, value)
 
@@ -2095,17 +2123,22 @@ class Math(StdOutCommandLine):
                 if isinstance(t, bool):
                     if nr_input_files != 2:
                         raise ValueError(
-                            'Due to the %s option we expected 2 files but input_files is of length %d' %
-                            (n, nr_input_files,))
+                            'Due to the %s option we expected 2 files but input_files is of length %d'
+                            % (
+                                n,
+                                nr_input_files,
+                            ))
                 elif isinstance(t, float):
                     if nr_input_files != 1:
                         raise ValueError(
-                            'Due to the %s option we expected 1 file but input_files is of length %d' %
-                            (n, nr_input_files,))
+                            'Due to the %s option we expected 1 file but input_files is of length %d'
+                            % (
+                                n,
+                                nr_input_files,
+                            ))
                 else:
                     raise ValueError(
-                        'Argument should be a bool or const, but got: %s' %
-                        t)
+                        'Argument should be a bool or const, but got: %s' % t)
 
         for n in self.input_spec.single_volume_traits:
             t = self.inputs.__getattribute__(n)
@@ -2113,8 +2146,11 @@ class Math(StdOutCommandLine):
             if isdefined(t):
                 if nr_input_files != 1:
                     raise ValueError(
-                        'Due to the %s option we expected 1 file but input_files is of length %d' %
-                        (n, nr_input_files,))
+                        'Due to the %s option we expected 1 file but input_files is of length %d'
+                        % (
+                            n,
+                            nr_input_files,
+                        ))
 
         for n in self.input_spec.two_volume_traits:
             t = self.inputs.__getattribute__(n)
@@ -2122,8 +2158,11 @@ class Math(StdOutCommandLine):
             if isdefined(t):
                 if nr_input_files != 2:
                     raise ValueError(
-                        'Due to the %s option we expected 2 files but input_files is of length %d' %
-                        (n, nr_input_files,))
+                        'Due to the %s option we expected 2 files but input_files is of length %d'
+                        % (
+                            n,
+                            nr_input_files,
+                        ))
 
         for n in self.input_spec.n_volume_traits:
             t = self.inputs.__getattribute__(n)
@@ -2131,8 +2170,11 @@ class Math(StdOutCommandLine):
             if isdefined(t):
                 if not nr_input_files >= 1:
                     raise ValueError(
-                        'Due to the %s option we expected at least one file but input_files is of length %d' %
-                        (n, nr_input_files,))
+                        'Due to the %s option we expected at least one file but input_files is of length %d'
+                        % (
+                            n,
+                            nr_input_files,
+                        ))
 
         return super(Math, self)._parse_inputs()
 
@@ -2152,7 +2194,8 @@ class ResampleInputSpec(CommandLineInputSpec):
         exists=True,
         mandatory=True,
         argstr='%s',
-        position=-2,)
+        position=-2,
+    )
 
     output_file = File(
         desc='output file',
@@ -2166,7 +2209,8 @@ class ResampleInputSpec(CommandLineInputSpec):
     # This is a dummy input.
     input_grid_files = InputMultiPath(
         traits.File,
-        desc='input grid file(s)',)
+        desc='input grid file(s)',
+    )
 
     two = traits.Bool(desc='Create a MINC 2 output file.', argstr='-2')
 
@@ -2176,11 +2220,9 @@ class ResampleInputSpec(CommandLineInputSpec):
         usedefault=True,
         default_value=True)
 
-    _xor_interpolation = (
-        'trilinear_interpolation',
-        'tricubic_interpolation',
-        'nearest_neighbour_interpolation',
-        'sinc_interpolation')
+    _xor_interpolation = ('trilinear_interpolation', 'tricubic_interpolation',
+                          'nearest_neighbour_interpolation',
+                          'sinc_interpolation')
 
     trilinear_interpolation = traits.Bool(
         desc='Do trilinear interpolation.',
@@ -2268,21 +2310,13 @@ class ResampleInputSpec(CommandLineInputSpec):
     )
 
     format_byte = traits.Bool(
-        desc='Write out byte data.',
-        argstr='-byte',
-        xor=_xor_format)
+        desc='Write out byte data.', argstr='-byte', xor=_xor_format)
     format_short = traits.Bool(
-        desc='Write out short integer data.',
-        argstr='-short',
-        xor=_xor_format)
+        desc='Write out short integer data.', argstr='-short', xor=_xor_format)
     format_int = traits.Bool(
-        desc='Write out 32-bit integer data.',
-        argstr='-int',
-        xor=_xor_format)
+        desc='Write out 32-bit integer data.', argstr='-int', xor=_xor_format)
     format_long = traits.Bool(
-        desc='Superseded by -int.',
-        argstr='-long',
-        xor=_xor_format)
+        desc='Superseded by -int.', argstr='-long', xor=_xor_format)
     format_float = traits.Bool(
         desc='Write out single-precision floating-point data.',
         argstr='-float',
@@ -2292,17 +2326,19 @@ class ResampleInputSpec(CommandLineInputSpec):
         argstr='-double',
         xor=_xor_format)
     format_signed = traits.Bool(
-        desc='Write signed integer data.',
-        argstr='-signed',
-        xor=_xor_format)
+        desc='Write signed integer data.', argstr='-signed', xor=_xor_format)
     format_unsigned = traits.Bool(
         desc='Write unsigned integer data (default).',
         argstr='-unsigned',
         xor=_xor_format)
 
     output_range = traits.Tuple(
-        traits.Float, traits.Float, argstr='-range %s %s',
-        desc='Valid range for output data. Default value: -1.79769e+308 -1.79769e+308.')
+        traits.Float,
+        traits.Float,
+        argstr='-range %s %s',
+        desc=
+        'Valid range for output data. Default value: -1.79769e+308 -1.79769e+308.'
+    )
 
     _xor_slices = ('transverse', 'sagittal', 'coronal')
 
@@ -2312,14 +2348,10 @@ class ResampleInputSpec(CommandLineInputSpec):
         xor=_xor_slices)
 
     sagittal_slices = traits.Bool(
-        desc='Write out sagittal slices',
-        argstr='-sagittal',
-        xor=_xor_slices)
+        desc='Write out sagittal slices', argstr='-sagittal', xor=_xor_slices)
 
     coronal_slices = traits.Bool(
-        desc='Write out coronal slices',
-        argstr='-coronal',
-        xor=_xor_slices)
+        desc='Write out coronal slices', argstr='-coronal', xor=_xor_slices)
 
     _xor_fill = ('nofill', 'fill')
 
@@ -2356,11 +2388,12 @@ class ResampleInputSpec(CommandLineInputSpec):
         desc='Set the spacetype attribute to a specified string.',
         argstr='-spacetype %s')
     talairach = traits.Bool(
-        desc='Output is in Talairach space.',
-        argstr='-talairach')
+        desc='Output is in Talairach space.', argstr='-talairach')
 
     origin = traits.Tuple(
-        traits.Float, traits.Float, traits.Float,
+        traits.Float,
+        traits.Float,
+        traits.Float,
         desc=('Origin of first pixel in 3D space.'
               'Default value: 1.79769e+308 1.79769e+308 1.79769e+308.'),
         argstr='-origin %s %s %s')
@@ -2394,15 +2427,17 @@ class ResampleInputSpec(CommandLineInputSpec):
         requires=('ynelements', 'znelements'),
         xor=_xor_nelements)
 
-    ynelements = traits.Int(desc='Number of elements along the Y dimension.',
-                            argstr='-ynelements %s',
-                            requires=('xnelements', 'znelements'),
-                            xor=_xor_nelements)
+    ynelements = traits.Int(
+        desc='Number of elements along the Y dimension.',
+        argstr='-ynelements %s',
+        requires=('xnelements', 'znelements'),
+        xor=_xor_nelements)
 
-    znelements = traits.Int(desc='Number of elements along the Z dimension.',
-                            argstr='-znelements %s',
-                            requires=('xnelements', 'ynelements'),
-                            xor=_xor_nelements)
+    znelements = traits.Int(
+        desc='Number of elements along the Z dimension.',
+        argstr='-znelements %s',
+        requires=('xnelements', 'ynelements'),
+        xor=_xor_nelements)
 
     # step size along each dimension
     _xor_step = ('step', 'step_x_y_or_z')
@@ -2411,7 +2446,8 @@ class ResampleInputSpec(CommandLineInputSpec):
         traits.Int,
         traits.Int,
         traits.Int,
-        desc='Step size along each dimension (X, Y, Z). Default value: (0, 0, 0).',
+        desc=
+        'Step size along each dimension (X, Y, Z). Default value: (0, 0, 0).',
         argstr='-step %s %s %s',
         xor=_xor_nelements)
 
@@ -2425,17 +2461,13 @@ class ResampleInputSpec(CommandLineInputSpec):
     ystep = traits.Int(
         desc='Step size along the Y dimension. Default value: 0.',
         argstr='-ystep %s',
-        requires=(
-            'xstep',
-            'zstep'),
+        requires=('xstep', 'zstep'),
         xor=_xor_step)
 
     zstep = traits.Int(
         desc='Step size along the Z dimension. Default value: 0.',
         argstr='-zstep %s',
-        requires=(
-            'xstep',
-            'ystep'),
+        requires=('xstep', 'ystep'),
         xor=_xor_step)
 
     # start point along each dimension
@@ -2460,17 +2492,13 @@ class ResampleInputSpec(CommandLineInputSpec):
     ystart = traits.Float(
         desc='Start point along the Y dimension. Default value: 1.79769e+308.',
         argstr='-ystart %s',
-        requires=(
-            'xstart',
-            'zstart'),
+        requires=('xstart', 'zstart'),
         xor=_xor_start)
 
     zstart = traits.Float(
         desc='Start point along the Z dimension. Default value: 1.79769e+308.',
         argstr='-zstart %s',
-        requires=(
-            'xstart',
-            'ystart'),
+        requires=('xstart', 'ystart'),
         xor=_xor_start)
 
     # dircos along each dimension
@@ -2480,9 +2508,11 @@ class ResampleInputSpec(CommandLineInputSpec):
         traits.Float,
         traits.Float,
         traits.Float,
-        desc=('Direction cosines along each dimension (X, Y, Z). Default value:'
-              '1.79769e+308 1.79769e+308 1.79769e+308 1.79769e+308 ...'
-              '  1.79769e+308 1.79769e+308 1.79769e+308 1.79769e+308 1.79769e+308.'),
+        desc=(
+            'Direction cosines along each dimension (X, Y, Z). Default value:'
+            '1.79769e+308 1.79769e+308 1.79769e+308 1.79769e+308 ...'
+            '  1.79769e+308 1.79769e+308 1.79769e+308 1.79769e+308 1.79769e+308.'
+        ),
         argstr='-dircos %s %s %s',
         xor=_xor_nelements)
 
@@ -2491,27 +2521,21 @@ class ResampleInputSpec(CommandLineInputSpec):
         desc=('Direction cosines along the X dimension.'
               'Default value: 1.79769e+308 1.79769e+308 1.79769e+308.'),
         argstr='-xdircos %s',
-        requires=(
-            'ydircos',
-            'zdircos'),
+        requires=('ydircos', 'zdircos'),
         xor=_xor_dircos)
 
     ydircos = traits.Float(
         desc=('Direction cosines along the Y dimension.'
               'Default value: 1.79769e+308 1.79769e+308 1.79769e+308.'),
         argstr='-ydircos %s',
-        requires=(
-            'xdircos',
-            'zdircos'),
+        requires=('xdircos', 'zdircos'),
         xor=_xor_dircos)
 
     zdircos = traits.Float(
         desc=('Direction cosines along the Z dimension.'
               'Default value: 1.79769e+308 1.79769e+308 1.79769e+308.'),
         argstr='-zdircos %s',
-        requires=(
-            'xdircos',
-            'ydircos'),
+        requires=('xdircos', 'ydircos'),
         xor=_xor_dircos)
 
 
@@ -2557,7 +2581,8 @@ class NormInputSpec(CommandLineInputSpec):
         exists=True,
         mandatory=True,
         argstr='%s',
-        position=-2,)
+        position=-2,
+    )
 
     output_file = File(
         desc='output file',
@@ -2595,7 +2620,8 @@ class NormInputSpec(CommandLineInputSpec):
     cutoff = traits.Range(
         low=0.0,
         high=100.0,
-        desc='Cutoff value to use to calculate thresholds by a histogram PcT in %. [default: 0.01]',
+        desc=
+        'Cutoff value to use to calculate thresholds by a histogram PcT in %. [default: 0.01]',
         argstr='-cutoff %s',
     )
 
@@ -2611,13 +2637,15 @@ class NormInputSpec(CommandLineInputSpec):
 
     # Threshold Options
     threshold = traits.Bool(
-        desc='Threshold the image (set values below threshold_perc to -out_floor).',
+        desc=
+        'Threshold the image (set values below threshold_perc to -out_floor).',
         argstr='-threshold')
 
     threshold_perc = traits.Range(
         low=0.0,
         high=100.0,
-        desc='Threshold percentage (0.1 == lower 10% of intensity range) [default: 0.1].',
+        desc=
+        'Threshold percentage (0.1 == lower 10% of intensity range) [default: 0.1].',
         argstr='-threshold_perc %s')
 
     threshold_bmt = traits.Bool(
@@ -2694,7 +2722,8 @@ class VolcentreInputSpec(CommandLineInputSpec):
         exists=True,
         mandatory=True,
         argstr='%s',
-        position=-2,)
+        position=-2,
+    )
 
     output_file = File(
         desc='output file',
@@ -2706,8 +2735,7 @@ class VolcentreInputSpec(CommandLineInputSpec):
         name_template='%s_volcentre.mnc')
 
     verbose = traits.Bool(
-        desc='Print out log messages. Default: False.',
-        argstr='-verbose')
+        desc='Print out log messages. Default: False.', argstr='-verbose')
     clobber = traits.Bool(
         desc='Overwrite existing file.',
         argstr='-clobber',
@@ -2715,13 +2743,17 @@ class VolcentreInputSpec(CommandLineInputSpec):
         default_value=True)
 
     com = traits.Bool(
-        desc='Use the CoM of the volume for the new centre (via mincstats). Default: False',
+        desc=
+        'Use the CoM of the volume for the new centre (via mincstats). Default: False',
         argstr='-com')
 
     centre = traits.Tuple(
-        traits.Float, traits.Float, traits.Float,
+        traits.Float,
+        traits.Float,
+        traits.Float,
         argstr='-centre %s %s %s',
-        desc='Centre to use (x,y,z) [default: 0 0 0].',)
+        desc='Centre to use (x,y,z) [default: 0 0 0].',
+    )
 
     zero_dircos = traits.Bool(
         desc='Set the direction cosines to identity [default].',
@@ -2778,7 +2810,8 @@ class VolpadInputSpec(CommandLineInputSpec):
         exists=True,
         mandatory=True,
         argstr='%s',
-        position=-2,)
+        position=-2,
+    )
 
     output_file = File(
         desc='output file',
@@ -2790,8 +2823,7 @@ class VolpadInputSpec(CommandLineInputSpec):
         name_template='%s_volpad.mnc')
 
     verbose = traits.Bool(
-        desc='Print out log messages. Default: False.',
-        argstr='-verbose')
+        desc='Print out log messages. Default: False.', argstr='-verbose')
     clobber = traits.Bool(
         desc='Overwrite existing file.',
         argstr='-clobber',
@@ -2799,11 +2831,13 @@ class VolpadInputSpec(CommandLineInputSpec):
         default_value=True)
 
     auto = traits.Bool(
-        desc='Automatically determine padding distances (uses -distance as max). Default: False.',
+        desc=
+        'Automatically determine padding distances (uses -distance as max). Default: False.',
         argstr='-auto')
 
     auto_freq = traits.Float(
-        desc='Frequency of voxels over bimodalt threshold to stop at [default: 500].',
+        desc=
+        'Frequency of voxels over bimodalt threshold to stop at [default: 500].',
         argstr='-auto_freq %s')
 
     distance = traits.Int(
@@ -2847,7 +2881,8 @@ class VolisoInputSpec(CommandLineInputSpec):
         exists=True,
         mandatory=True,
         argstr='%s',
-        position=-2,)
+        position=-2,
+    )
 
     output_file = File(
         desc='output file',
@@ -2859,8 +2894,7 @@ class VolisoInputSpec(CommandLineInputSpec):
         name_template='%s_voliso.mnc')
 
     verbose = traits.Bool(
-        desc='Print out log messages. Default: False.',
-        argstr='--verbose')
+        desc='Print out log messages. Default: False.', argstr='--verbose')
     clobber = traits.Bool(
         desc='Overwrite existing file.',
         argstr='--clobber',
@@ -2876,7 +2910,8 @@ class VolisoInputSpec(CommandLineInputSpec):
         argstr='--minstep %s')
 
     avgstep = traits.Bool(
-        desc='Calculate the maximum step from the average steps of the input volume.',
+        desc=
+        'Calculate the maximum step from the average steps of the input volume.',
         argstr='--avgstep')
 
 
@@ -2913,8 +2948,7 @@ class GennlxfmInputSpec(CommandLineInputSpec):
         name_template='%s_gennlxfm.xfm')
 
     verbose = traits.Bool(
-        desc='Print out log messages. Default: False.',
-        argstr='-verbose')
+        desc='Print out log messages. Default: False.', argstr='-verbose')
     clobber = traits.Bool(
         desc='Overwrite existing file.',
         argstr='-clobber',
@@ -2922,15 +2956,15 @@ class GennlxfmInputSpec(CommandLineInputSpec):
         default_value=True)
 
     ident = traits.Bool(
-        desc='Generate an identity xfm. Default: False.',
-        argstr='-ident')
+        desc='Generate an identity xfm. Default: False.', argstr='-ident')
     step = traits.Int(
-        desc='Output ident xfm step [default: 1].',
-        argstr='-step %s')
+        desc='Output ident xfm step [default: 1].', argstr='-step %s')
 
-    like = File(desc='Generate a nlxfm like this file.',
-                exists=True,
-                argstr='-like %s',)
+    like = File(
+        desc='Generate a nlxfm like this file.',
+        exists=True,
+        argstr='-like %s',
+    )
 
 
 class GennlxfmOutputSpec(TraitedSpec):
@@ -2962,8 +2996,8 @@ class Gennlxfm(CommandLine):
 
     def _list_outputs(self):
         outputs = super(Gennlxfm, self)._list_outputs()
-        outputs['output_grid'] = re.sub(
-            '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['output_file'])
+        outputs['output_grid'] = re.sub('.(nlxfm|xfm)$', '_grid_0.mnc',
+                                        outputs['output_file'])
         return outputs
 
 
@@ -2979,7 +3013,8 @@ class XfmConcatInputSpec(CommandLineInputSpec):
     # This is a dummy input.
     input_grid_files = InputMultiPath(
         traits.File,
-        desc='input grid file(s)',)
+        desc='input grid file(s)',
+    )
 
     output_file = File(
         desc='output file',
@@ -2991,8 +3026,7 @@ class XfmConcatInputSpec(CommandLineInputSpec):
         name_template='%s_xfmconcat.xfm')
 
     verbose = traits.Bool(
-        desc='Print out log messages. Default: False.',
-        argstr='-verbose')
+        desc='Print out log messages. Default: False.', argstr='-verbose')
     clobber = traits.Bool(
         desc='Overwrite existing file.',
         argstr='-clobber',
@@ -3029,10 +3063,8 @@ class XfmConcat(CommandLine):
         if os.path.exists(outputs['output_file']):
             if 'grid' in open(outputs['output_file'], 'r').read():
                 outputs['output_grids'] = glob.glob(
-                    re.sub(
-                        '.(nlxfm|xfm)$',
-                        '_grid_*.mnc',
-                        outputs['output_file']))
+                    re.sub('.(nlxfm|xfm)$', '_grid_*.mnc',
+                           outputs['output_file']))
 
         return outputs
 
@@ -3043,14 +3075,16 @@ class BestLinRegInputSpec(CommandLineInputSpec):
         exists=True,
         mandatory=True,
         argstr='%s',
-        position=-4,)
+        position=-4,
+    )
 
     target = File(
         desc='target Minc file',
         exists=True,
         mandatory=True,
         argstr='%s',
-        position=-3,)
+        position=-3,
+    )
 
     output_xfm = File(
         desc='output xfm file',
@@ -3073,8 +3107,7 @@ class BestLinRegInputSpec(CommandLineInputSpec):
         keep_extension=False)
 
     verbose = traits.Bool(
-        desc='Print out log messages. Default: False.',
-        argstr='-verbose')
+        desc='Print out log messages. Default: False.', argstr='-verbose')
     clobber = traits.Bool(
         desc='Overwrite existing file.',
         argstr='-clobber',
@@ -3127,25 +3160,29 @@ class NlpFitInputSpec(CommandLineInputSpec):
         exists=True,
         mandatory=True,
         argstr='%s',
-        position=-3,)
+        position=-3,
+    )
 
     target = File(
         desc='target Minc file',
         exists=True,
         mandatory=True,
         argstr='%s',
-        position=-2,)
+        position=-2,
+    )
 
     output_xfm = File(
         desc='output xfm file',
         genfile=True,
         argstr='%s',
-        position=-1,)
+        position=-1,
+    )
 
     # This is a dummy input.
     input_grid_files = InputMultiPath(
         traits.File,
-        desc='input grid file(s)',)
+        desc='input grid file(s)',
+    )
 
     config_file = File(
         desc='File containing the fitting configuration use.',
@@ -3166,8 +3203,7 @@ class NlpFitInputSpec(CommandLineInputSpec):
         exists=True)
 
     verbose = traits.Bool(
-        desc='Print out log messages. Default: False.',
-        argstr='-verbose')
+        desc='Print out log messages. Default: False.', argstr='-verbose')
     clobber = traits.Bool(
         desc='Overwrite existing file.',
         argstr='-clobber',
@@ -3215,7 +3251,8 @@ class NlpFit(CommandLine):
                 return os.path.abspath(output_xfm)
             else:
                 return aggregate_filename(
-                    [self.inputs.source, self.inputs.target], 'nlpfit_xfm_output') + '.xfm'
+                    [self.inputs.source, self.inputs.target],
+                    'nlpfit_xfm_output') + '.xfm'
         else:
             raise NotImplemented
 
@@ -3226,8 +3263,8 @@ class NlpFit(CommandLine):
 
         assert os.path.exists(outputs['output_xfm'])
         if 'grid' in open(outputs['output_xfm'], 'r').read():
-            outputs['output_grid'] = re.sub(
-                '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['output_xfm'])
+            outputs['output_grid'] = re.sub('.(nlxfm|xfm)$', '_grid_0.mnc',
+                                            outputs['output_xfm'])
 
         return outputs
 
@@ -3244,17 +3281,18 @@ class XfmAvgInputSpec(CommandLineInputSpec):
     # This is a dummy input.
     input_grid_files = InputMultiPath(
         traits.File,
-        desc='input grid file(s)',)
+        desc='input grid file(s)',
+    )
 
     output_file = File(
         desc='output file',
         genfile=True,
         argstr='%s',
-        position=-1,)
+        position=-1,
+    )
 
     verbose = traits.Bool(
-        desc='Print out log messages. Default: False.',
-        argstr='-verbose')
+        desc='Print out log messages. Default: False.', argstr='-verbose')
     clobber = traits.Bool(
         desc='Overwrite existing file.',
         argstr='-clobber',
@@ -3264,18 +3302,14 @@ class XfmAvgInputSpec(CommandLineInputSpec):
     # FIXME xor these:
 
     avg_linear = traits.Bool(
-        desc='average the linear part [default].',
-        argstr='-avg_linear')
+        desc='average the linear part [default].', argstr='-avg_linear')
     avg_nonlinear = traits.Bool(
-        desc='average the non-linear part [default].',
-        argstr='-avg_nonlinear')
+        desc='average the non-linear part [default].', argstr='-avg_nonlinear')
 
     ignore_linear = traits.Bool(
-        desc='opposite of -avg_linear.',
-        argstr='-ignore_linear')
+        desc='opposite of -avg_linear.', argstr='-ignore_linear')
     ignore_nonlinear = traits.Bool(
-        desc='opposite of -avg_nonlinear.',
-        argstr='-ignore_nonline')
+        desc='opposite of -avg_nonlinear.', argstr='-ignore_nonline')
 
 
 class XfmAvgOutputSpec(TraitedSpec):
@@ -3315,8 +3349,8 @@ class XfmAvg(CommandLine):
             if isdefined(output_file):
                 return os.path.abspath(output_file)
             else:
-                return aggregate_filename(
-                    self.inputs.input_files, 'xfmavg_output') + '.xfm'
+                return aggregate_filename(self.inputs.input_files,
+                                          'xfmavg_output') + '.xfm'
         else:
             raise NotImplemented
 
@@ -3329,8 +3363,8 @@ class XfmAvg(CommandLine):
 
         assert os.path.exists(outputs['output_file'])
         if 'grid' in open(outputs['output_file'], 'r').read():
-            outputs['output_grid'] = re.sub(
-                '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['output_file'])
+            outputs['output_grid'] = re.sub('.(nlxfm|xfm)$', '_grid_0.mnc',
+                                            outputs['output_file'])
 
         return outputs
 
@@ -3347,11 +3381,11 @@ class XfmInvertInputSpec(CommandLineInputSpec):
         desc='output file',
         genfile=True,
         argstr='%s',
-        position=-1,)
+        position=-1,
+    )
 
     verbose = traits.Bool(
-        desc='Print out log messages. Default: False.',
-        argstr='-verbose')
+        desc='Print out log messages. Default: False.', argstr='-verbose')
     clobber = traits.Bool(
         desc='Overwrite existing file.',
         argstr='-clobber',
@@ -3389,8 +3423,8 @@ class XfmInvert(CommandLine):
             if isdefined(output_file):
                 return os.path.abspath(output_file)
             else:
-                return aggregate_filename(
-                    [self.inputs.input_file], 'xfminvert_output') + '.xfm'
+                return aggregate_filename([self.inputs.input_file],
+                                          'xfminvert_output') + '.xfm'
         else:
             raise NotImplemented
 
@@ -3403,8 +3437,8 @@ class XfmInvert(CommandLine):
 
         assert os.path.exists(outputs['output_file'])
         if 'grid' in open(outputs['output_file'], 'r').read():
-            outputs['output_grid'] = re.sub(
-                '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['output_file'])
+            outputs['output_grid'] = re.sub('.(nlxfm|xfm)$', '_grid_0.mnc',
+                                            outputs['output_file'])
 
         return outputs
 
@@ -3428,8 +3462,7 @@ class BigAverageInputSpec(CommandLineInputSpec):
         name_template='%s_bigaverage.mnc')
 
     verbose = traits.Bool(
-        desc='Print out log messages. Default: False.',
-        argstr='--verbose')
+        desc='Print out log messages. Default: False.', argstr='--verbose')
     clobber = traits.Bool(
         desc='Overwrite existing file.',
         argstr='--clobber',
@@ -3439,8 +3472,7 @@ class BigAverageInputSpec(CommandLineInputSpec):
     # FIXME Redumentary implementation, various parameters not implemented.
     # TODO!
     output_float = traits.Bool(
-        desc='Output files with float precision.',
-        argstr='--float')
+        desc='Output files with float precision.', argstr='--float')
 
     robust = traits.Bool(
         desc=('Perform robust averaging, features that are outside 1 standard'
@@ -3520,8 +3552,7 @@ class ReshapeInputSpec(CommandLineInputSpec):
         name_template='%s_reshape.mnc')
 
     verbose = traits.Bool(
-        desc='Print out log messages. Default: False.',
-        argstr='-verbose')
+        desc='Print out log messages. Default: False.', argstr='-verbose')
     clobber = traits.Bool(
         desc='Overwrite existing file.',
         argstr='-clobber',
@@ -3531,8 +3562,7 @@ class ReshapeInputSpec(CommandLineInputSpec):
     # FIXME MANY options not implemented!
 
     write_short = traits.Bool(
-        desc='Convert to short integer data.',
-        argstr='-short')
+        desc='Convert to short integer data.', argstr='-short')
 
 
 class ReshapeOutputSpec(TraitedSpec):
@@ -3592,11 +3622,11 @@ class VolSymmInputSpec(CommandLineInputSpec):
     # This is a dummy input.
     input_grid_files = InputMultiPath(
         traits.File,
-        desc='input grid file(s)',)
+        desc='input grid file(s)',
+    )
 
     verbose = traits.Bool(
-        desc='Print out log messages. Default: False.',
-        argstr='-verbose')
+        desc='Print out log messages. Default: False.', argstr='-verbose')
     clobber = traits.Bool(
         desc='Overwrite existing file.',
         argstr='-clobber',
@@ -3607,8 +3637,7 @@ class VolSymmInputSpec(CommandLineInputSpec):
 
     fit_linear = traits.Bool(desc='Fit using a linear xfm.', argstr='-linear')
     fit_nonlinear = traits.Bool(
-        desc='Fit using a non-linear xfm.',
-        argstr='-nonlinear')
+        desc='Fit using a non-linear xfm.', argstr='-nonlinear')
 
     # FIXME This changes the input/output behaviour of trans_file! Split into
     # two separate interfaces?
@@ -3617,7 +3646,8 @@ class VolSymmInputSpec(CommandLineInputSpec):
         argstr='-nofit')
 
     config_file = File(
-        desc='File containing the fitting configuration (nlpfit -help for info).',
+        desc=
+        'File containing the fitting configuration (nlpfit -help for info).',
         argstr='-config_file %s',
         exists=True)
 
@@ -3629,8 +3659,8 @@ class VolSymmInputSpec(CommandLineInputSpec):
 class VolSymmOutputSpec(TraitedSpec):
     output_file = File(desc='output file', exists=True)
     trans_file = File(desc='xfm trans file', exists=True)
-    output_grid = File(desc='output grid file',
-                       exists=True)  # FIXME Is exists=True correct?
+    output_grid = File(
+        desc='output grid file', exists=True)  # FIXME Is exists=True correct?
 
 
 class VolSymm(CommandLine):
@@ -3664,7 +3694,7 @@ class VolSymm(CommandLine):
         # Have to manually check for the grid files.
         if os.path.exists(outputs['trans_file']):
             if 'grid' in open(outputs['trans_file'], 'r').read():
-                outputs['output_grid'] = re.sub(
-                    '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['trans_file'])
+                outputs['output_grid'] = re.sub('.(nlxfm|xfm)$', '_grid_0.mnc',
+                                                outputs['trans_file'])
 
         return outputs

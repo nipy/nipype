@@ -2,7 +2,8 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provide interface to AFNI commands."""
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import object, str
 from future.utils import raise_from
 
@@ -13,9 +14,8 @@ from distutils import spawn
 from ... import logging, LooseVersion
 from ...utils.filemanip import split_filename, fname_presuffix
 
-from ..base import (
-    CommandLine, traits, CommandLineInputSpec, isdefined, File, TraitedSpec,
-    PackageInfo)
+from ..base import (CommandLine, traits, CommandLineInputSpec, isdefined, File,
+                    TraitedSpec, PackageInfo)
 from ...external.due import BibTeX
 
 # Use nipype's logging system
@@ -26,9 +26,7 @@ class Info(PackageInfo):
     """Handle afni output type and version information.
     """
     __outputtype = 'AFNI'
-    ftypes = {'NIFTI': '.nii',
-              'AFNI': '',
-              'NIFTI_GZ': '.nii.gz'}
+    ftypes = {'NIFTI': '.nii', 'AFNI': '', 'NIFTI_GZ': '.nii.gz'}
     version_cmd = 'afni --version'
 
     @staticmethod
@@ -87,10 +85,11 @@ class Info(PackageInfo):
         '''Grab an image from the standard location.
 
         Could be made more fancy to allow for more relocatability'''
-        clout = CommandLine('which afni',
-                            ignore_exception=True,
-                            resource_monitor=False,
-                            terminal_output='allatonce').run()
+        clout = CommandLine(
+            'which afni',
+            ignore_exception=True,
+            resource_monitor=False,
+            terminal_output='allatonce').run()
         if clout.runtime.returncode is not 0:
             return None
 
@@ -104,6 +103,7 @@ class AFNICommandBase(CommandLine):
     A base class to fix a linking problem in OSX and afni.
     See http://afni.nimh.nih.gov/afni/community/board/read.php?1,145346,145347#msg-145347
     """
+
     def _run_interface(self, runtime):
         if platform == 'darwin':
             runtime.environ['DYLD_FALLBACK_LIBRARY_PATH'] = '/usr/local/afni/'
@@ -111,18 +111,19 @@ class AFNICommandBase(CommandLine):
 
 
 class AFNICommandInputSpec(CommandLineInputSpec):
-    num_threads = traits.Int(1, usedefault=True, nohash=True,
-                             desc='set number of threads')
-    outputtype = traits.Enum('AFNI', list(Info.ftypes.keys()),
-                             desc='AFNI output filetype')
-    out_file = File(name_template="%s_afni", desc='output image file name',
-                    argstr='-prefix %s',
-                    name_source=["in_file"])
+    num_threads = traits.Int(
+        1, usedefault=True, nohash=True, desc='set number of threads')
+    outputtype = traits.Enum(
+        'AFNI', list(Info.ftypes.keys()), desc='AFNI output filetype')
+    out_file = File(
+        name_template="%s_afni",
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source=["in_file"])
 
 
 class AFNICommandOutputSpec(TraitedSpec):
-    out_file = File(desc='output file',
-                    exists=True)
+    out_file = File(desc='output file', exists=True)
 
 
 class AFNICommand(AFNICommandBase):
@@ -130,31 +131,34 @@ class AFNICommand(AFNICommandBase):
     input_spec = AFNICommandInputSpec
     _outputtype = None
 
-    references_ = [{'entry': BibTeX('@article{Cox1996,'
-                                    'author={R.W. Cox},'
-                                    'title={AFNI: software for analysis and '
-                                    'visualization of functional magnetic '
-                                    'resonance neuroimages},'
-                                    'journal={Computers and Biomedical research},'
-                                    'volume={29},'
-                                    'number={3},'
-                                    'pages={162-173},'
-                                    'year={1996},'
-                                    '}'),
-                    'tags': ['implementation'],
-                    },
-                   {'entry': BibTeX('@article{CoxHyde1997,'
-                                    'author={R.W. Cox and J.S. Hyde},'
-                                    'title={Software tools for analysis and '
-                                    'visualization of fMRI data},'
-                                    'journal={NMR in Biomedicine},'
-                                    'volume={10},'
-                                    'number={45},'
-                                    'pages={171-178},'
-                                    'year={1997},'
-                                    '}'),
-                    'tags': ['implementation'],
-                    }]
+    references_ = [{
+        'entry':
+        BibTeX('@article{Cox1996,'
+               'author={R.W. Cox},'
+               'title={AFNI: software for analysis and '
+               'visualization of functional magnetic '
+               'resonance neuroimages},'
+               'journal={Computers and Biomedical research},'
+               'volume={29},'
+               'number={3},'
+               'pages={162-173},'
+               'year={1996},'
+               '}'),
+        'tags': ['implementation'],
+    }, {
+        'entry':
+        BibTeX('@article{CoxHyde1997,'
+               'author={R.W. Cox and J.S. Hyde},'
+               'title={Software tools for analysis and '
+               'visualization of fMRI data},'
+               'journal={NMR in Biomedicine},'
+               'volume={10},'
+               'number={45},'
+               'pages={171-178},'
+               'year={1997},'
+               '}'),
+        'tags': ['implementation'],
+    }]
 
     @property
     def num_threads(self):
@@ -207,7 +211,8 @@ class AFNICommand(AFNICommandBase):
 
     def _overload_extension(self, value, name=None):
         path, base, _ = split_filename(value)
-        return os.path.join(path, base + Info.output_type_to_ext(self.inputs.outputtype))
+        return os.path.join(
+            path, base + Info.output_type_to_ext(self.inputs.outputtype))
 
     def _list_outputs(self):
         outputs = super(AFNICommand, self)._list_outputs()
@@ -221,7 +226,11 @@ class AFNICommand(AFNICommandBase):
                         outputs[name] = outputs[name] + "+orig.BRIK"
         return outputs
 
-    def _gen_fname(self, basename, cwd=None, suffix=None, change_ext=True,
+    def _gen_fname(self,
+                   basename,
+                   cwd=None,
+                   suffix=None,
+                   change_ext=True,
                    ext=None):
         """Generate a filename based on the given parameters.
 
@@ -263,8 +272,8 @@ class AFNICommand(AFNICommandBase):
                 suffix = ext
         if suffix is None:
             suffix = ''
-        fname = fname_presuffix(basename, suffix=suffix,
-                                use_ext=False, newpath=cwd)
+        fname = fname_presuffix(
+            basename, suffix=suffix, use_ext=False, newpath=cwd)
         return fname
 
 
@@ -276,21 +285,19 @@ def no_afni():
 
 
 class AFNIPythonCommandInputSpec(CommandLineInputSpec):
-    outputtype = traits.Enum('AFNI', list(Info.ftypes.keys()),
-                             desc='AFNI output filetype')
-    py27_path = traits.Either('python2', File(exists=True),
-                              usedefault=True,
-                              default='python2')
+    outputtype = traits.Enum(
+        'AFNI', list(Info.ftypes.keys()), desc='AFNI output filetype')
+    py27_path = traits.Either(
+        'python2', File(exists=True), usedefault=True, default='python2')
 
 
 class AFNIPythonCommand(AFNICommand):
     @property
     def cmd(self):
-        if spawn.find_executable(super(AFNIPythonCommand, self).cmd) is not None:
-            return spawn.find_executable(super(AFNIPythonCommand, self).cmd)
-        else:
-            return super(AFNIPythonCommand, self).cmd
+        orig_cmd = super(AFNIPythonCommand, self).cmd
+        found = spawn.find_executable(orig_cmd)
+        return found if found is not None else orig_cmd
 
     @property
-    def cmdline(self):
-        return "{} {}".format(self.inputs.py27_path, super(AFNIPythonCommand, self).cmdline)
+    def _cmd_prefix(self):
+        return "{} ".format(self.inputs.py27_path)

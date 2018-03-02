@@ -4,58 +4,59 @@ from ..preprocess import BlurInMask
 
 
 def test_BlurInMask_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    automask=dict(argstr='-automask',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    float_out=dict(argstr='-float',
-    ),
-    fwhm=dict(argstr='-FWHM %f',
-    mandatory=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_file=dict(argstr='-input %s',
-    copyfile=False,
-    mandatory=True,
-    position=1,
-    ),
-    mask=dict(argstr='-mask %s',
-    ),
-    multimask=dict(argstr='-Mmask %s',
-    ),
-    num_threads=dict(nohash=True,
-    usedefault=True,
-    ),
-    options=dict(argstr='%s',
-    position=2,
-    ),
-    out_file=dict(argstr='-prefix %s',
-    name_source='in_file',
-    name_template='%s_blur',
-    position=-1,
-    ),
-    outputtype=dict(),
-    preserve=dict(argstr='-preserve',
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        automask=dict(argstr='-automask', ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        float_out=dict(argstr='-float', ),
+        fwhm=dict(
+            argstr='-FWHM %f',
+            mandatory=True,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr='-input %s',
+            copyfile=False,
+            mandatory=True,
+            position=1,
+        ),
+        mask=dict(argstr='-mask %s', ),
+        multimask=dict(argstr='-Mmask %s', ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        options=dict(
+            argstr='%s',
+            position=2,
+        ),
+        out_file=dict(
+            argstr='-prefix %s',
+            name_source='in_file',
+            name_template='%s_blur',
+            position=-1,
+        ),
+        outputtype=dict(),
+        preserve=dict(argstr='-preserve', ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
     )
     inputs = BlurInMask.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_BlurInMask_outputs():
-    output_map = dict(out_file=dict(),
-    )
+    output_map = dict(out_file=dict(), )
     outputs = BlurInMask.output_spec()
 
     for key, metadata in list(output_map.items()):

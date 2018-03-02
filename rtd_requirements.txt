@@ -16,3 +16,4 @@ pydot>=1.2.3
 psutil
 matplotlib
 packaging
+numpydoc

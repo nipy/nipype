@@ -4,47 +4,41 @@ from ..specialized import ESLR
 
 
 def test_ESLR_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    closingSize=dict(argstr='--closingSize %d',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    high=dict(argstr='--high %d',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    inputVolume=dict(argstr='--inputVolume %s',
-    ),
-    low=dict(argstr='--low %d',
-    ),
-    numberOfThreads=dict(argstr='--numberOfThreads %d',
-    ),
-    openingSize=dict(argstr='--openingSize %d',
-    ),
-    outputVolume=dict(argstr='--outputVolume %s',
-    hash_files=False,
-    ),
-    preserveOutside=dict(argstr='--preserveOutside ',
-    ),
-    safetySize=dict(argstr='--safetySize %d',
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        closingSize=dict(argstr='--closingSize %d', ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        high=dict(argstr='--high %d', ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        inputVolume=dict(argstr='--inputVolume %s', ),
+        low=dict(argstr='--low %d', ),
+        numberOfThreads=dict(argstr='--numberOfThreads %d', ),
+        openingSize=dict(argstr='--openingSize %d', ),
+        outputVolume=dict(
+            argstr='--outputVolume %s',
+            hash_files=False,
+        ),
+        preserveOutside=dict(argstr='--preserveOutside ', ),
+        safetySize=dict(argstr='--safetySize %d', ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
     )
     inputs = ESLR.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_ESLR_outputs():
-    output_map = dict(outputVolume=dict(),
-    )
+    output_map = dict(outputVolume=dict(), )
     outputs = ESLR.output_spec()
 
     for key, metadata in list(output_map.items()):

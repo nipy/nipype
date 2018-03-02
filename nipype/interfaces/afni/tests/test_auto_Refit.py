@@ -4,65 +4,51 @@ from ..utils import Refit
 
 
 def test_Refit_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    atrcopy=dict(argstr='-atrcopy %s %s',
-    ),
-    atrfloat=dict(argstr='-atrfloat %s %s',
-    ),
-    atrint=dict(argstr='-atrint %s %s',
-    ),
-    atrstring=dict(argstr='-atrstring %s %s',
-    ),
-    deoblique=dict(argstr='-deoblique',
-    ),
-    duporigin_file=dict(argstr='-duporigin %s',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_file=dict(argstr='%s',
-    copyfile=True,
-    mandatory=True,
-    position=-1,
-    ),
-    nosaveatr=dict(argstr='-nosaveatr',
-    ),
-    saveatr=dict(argstr='-saveatr',
-    ),
-    space=dict(argstr='-space %s',
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
-    xdel=dict(argstr='-xdel %f',
-    ),
-    xorigin=dict(argstr='-xorigin %s',
-    ),
-    xyzscale=dict(argstr='-xyzscale %f',
-    ),
-    ydel=dict(argstr='-ydel %f',
-    ),
-    yorigin=dict(argstr='-yorigin %s',
-    ),
-    zdel=dict(argstr='-zdel %f',
-    ),
-    zorigin=dict(argstr='-zorigin %s',
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        atrcopy=dict(argstr='-atrcopy %s %s', ),
+        atrfloat=dict(argstr='-atrfloat %s %s', ),
+        atrint=dict(argstr='-atrint %s %s', ),
+        atrstring=dict(argstr='-atrstring %s %s', ),
+        deoblique=dict(argstr='-deoblique', ),
+        duporigin_file=dict(argstr='-duporigin %s', ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr='%s',
+            copyfile=True,
+            mandatory=True,
+            position=-1,
+        ),
+        nosaveatr=dict(argstr='-nosaveatr', ),
+        saveatr=dict(argstr='-saveatr', ),
+        space=dict(argstr='-space %s', ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
+        xdel=dict(argstr='-xdel %f', ),
+        xorigin=dict(argstr='-xorigin %s', ),
+        xyzscale=dict(argstr='-xyzscale %f', ),
+        ydel=dict(argstr='-ydel %f', ),
+        yorigin=dict(argstr='-yorigin %s', ),
+        zdel=dict(argstr='-zdel %f', ),
+        zorigin=dict(argstr='-zorigin %s', ),
     )
     inputs = Refit.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_Refit_outputs():
-    output_map = dict(out_file=dict(),
-    )
+    output_map = dict(out_file=dict(), )
     outputs = Refit.output_spec()
 
     for key, metadata in list(output_map.items()):

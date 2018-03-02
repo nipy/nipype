@@ -11,12 +11,14 @@ was written to work with FSL version 4.1.4.
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import range, open
 
 import os
 from glob import glob
 from shutil import rmtree
+from string import Template
 
 import numpy as np
 from nibabel import load
@@ -25,32 +27,38 @@ from ... import LooseVersion
 from ...utils.filemanip import list_to_filename, filename_to_list
 from ...utils.misc import human_order_sorted
 from ...external.due import BibTeX
-from ..base import (load_template, File, traits, isdefined,
-                    TraitedSpec, BaseInterface, Directory,
-                    InputMultiPath, OutputMultiPath,
+from ..base import (File, traits, isdefined, TraitedSpec, BaseInterface,
+                    Directory, InputMultiPath, OutputMultiPath,
                     BaseInterfaceInputSpec)
 from .base import FSLCommand, FSLCommandInputSpec, Info
 
+
 class Level1DesignInputSpec(BaseInterfaceInputSpec):
-    interscan_interval = traits.Float(mandatory=True,
-                                      desc='Interscan  interval (in secs)')
-    session_info = traits.Any(mandatory=True,
-                              desc=('Session specific information generated '
-                                    'by ``modelgen.SpecifyModel``'))
+    interscan_interval = traits.Float(
+        mandatory=True, desc='Interscan  interval (in secs)')
+    session_info = traits.Any(
+        mandatory=True,
+        desc=('Session specific information generated '
+              'by ``modelgen.SpecifyModel``'))
     bases = traits.Either(
-        traits.Dict(traits.Enum('dgamma'), traits.Dict(
-            traits.Enum('derivs'), traits.Bool)),
-        traits.Dict(traits.Enum('gamma'), traits.Dict(
-            traits.Enum('derivs', 'gammasigma', 'gammadelay'))),
-        traits.Dict(traits.Enum('custom'), traits.Dict(
-            traits.Enum('bfcustompath'), traits.Str)),
+        traits.Dict(
+            traits.Enum('dgamma'),
+            traits.Dict(traits.Enum('derivs'), traits.Bool)),
+        traits.Dict(
+            traits.Enum('gamma'),
+            traits.Dict(traits.Enum('derivs', 'gammasigma', 'gammadelay'))),
+        traits.Dict(
+            traits.Enum('custom'),
+            traits.Dict(traits.Enum('bfcustompath'), traits.Str)),
         traits.Dict(traits.Enum('none'), traits.Dict()),
         traits.Dict(traits.Enum('none'), traits.Enum(None)),
         mandatory=True,
         desc=("name of basis function and options e.g., "
-              "{'dgamma': {'derivs': True}}"),)
-    orthogonalization = traits.Dict(traits.Int, traits.Dict(traits.Int,
-        traits.Either(traits.Bool,traits.Int)),
+              "{'dgamma': {'derivs': True}}"),
+    )
+    orthogonalization = traits.Dict(
+        traits.Int,
+        traits.Dict(traits.Int, traits.Either(traits.Bool, traits.Int)),
         desc=("which regressors to make orthogonal e.g., "
               "{1: {0:0,1:0,2:0}, 2: {0:1,1:1,2:0}} to make the second "
               "regressor in a 2-regressor model orthogonal to the first."),
@@ -62,34 +70,21 @@ useful in the context of the fsf file. If you set this to False, you need to \
 repeat this option for FILMGLS by setting autocorr_noestimate to True",
         mandatory=True)
     contrasts = traits.List(
-        traits.Either(traits.Tuple(traits.Str,
-                                   traits.Enum('T'),
-                                   traits.List(traits.Str),
-                                   traits.List(traits.Float)),
-                      traits.Tuple(traits.Str,
-                                   traits.Enum('T'),
-                                   traits.List(traits.Str),
-                                   traits.List(traits.Float),
-                                   traits.List(traits.Float)),
-                      traits.Tuple(traits.Str,
-                                   traits.Enum('F'),
-                                   traits.List(
-                                       traits.Either(
-                                           traits.Tuple(traits.Str,
-                                                        traits.Enum('T'),
-                                                        traits.List(
-                                                            traits.Str),
-                                                        traits.List(
-                                                            traits.Float)),
-                                           traits.Tuple(
-                                               traits.Str,
-                                               traits.Enum('T'),
-                                               traits.List(
-                                                   traits.Str),
-                                               traits.List(
-                                                   traits.Float),
-                                               traits.List(
-                                                   traits.Float)))))),
+        traits.Either(
+            traits.Tuple(traits.Str, traits.Enum('T'), traits.List(traits.Str),
+                         traits.List(traits.Float)),
+            traits.Tuple(traits.Str, traits.Enum('T'), traits.List(traits.Str),
+                         traits.List(traits.Float), traits.List(traits.Float)),
+            traits.Tuple(traits.Str, traits.Enum('F'),
+                         traits.List(
+                             traits.Either(
+                                 traits.Tuple(traits.Str, traits.Enum('T'),
+                                              traits.List(traits.Str),
+                                              traits.List(traits.Float)),
+                                 traits.Tuple(traits.Str, traits.Enum('T'),
+                                              traits.List(traits.Str),
+                                              traits.List(traits.Float),
+                                              traits.List(traits.Float)))))),
         desc="List of contrasts with each contrast being a list of the form - \
 [('name', 'stat', [condition list], [weight list], [session list])]. if \
 session list is None or not provided, all sessions are used. For F \
@@ -98,10 +93,10 @@ T-contrasts.")
 
 
 class Level1DesignOutputSpec(TraitedSpec):
-    fsf_files = OutputMultiPath(File(exists=True),
-                                desc='FSL feat specification files')
-    ev_files = OutputMultiPath(traits.List(File(exists=True)),
-                               desc='condition information files')
+    fsf_files = OutputMultiPath(
+        File(exists=True), desc='FSL feat specification files')
+    ev_files = OutputMultiPath(
+        traits.List(File(exists=True)), desc='condition information files')
 
 
 class Level1Design(BaseInterface):
@@ -130,9 +125,9 @@ class Level1Design(BaseInterface):
                 f.write('%f\n' % i[0])
         f.close()
 
-    def _create_ev_files(
-        self, cwd, runinfo, runidx, ev_parameters, orthogonalization,
-            contrasts, do_tempfilter, basis_key):
+    def _create_ev_files(self, cwd, runinfo, runidx, ev_parameters,
+                         orthogonalization, contrasts, do_tempfilter,
+                         basis_key):
         """Creates EV files from condition and regressor information.
 
            Parameters:
@@ -157,14 +152,14 @@ class Level1Design(BaseInterface):
             basis_key = "hrf"
         elif basis_key == "gamma":
             try:
-                 _ = ev_parameters['gammasigma']
+                _ = ev_parameters['gammasigma']
             except KeyError:
-                 ev_parameters['gammasigma'] = 3
+                ev_parameters['gammasigma'] = 3
             try:
-                 _ = ev_parameters['gammadelay']
+                _ = ev_parameters['gammadelay']
             except KeyError:
-                 ev_parameters['gammadelay'] = 6
-        ev_template = load_template('feat_ev_'+basis_key+'.tcl')
+                ev_parameters['gammadelay'] = 6
+        ev_template = load_template('feat_ev_' + basis_key + '.tcl')
         ev_none = load_template('feat_ev_none.tcl')
         ev_ortho = load_template('feat_ev_ortho.tcl')
         ev_txt = ''
@@ -198,28 +193,31 @@ class Level1Design(BaseInterface):
                     ev_parameters['ev_num'] = num_evs[0]
                     ev_parameters['ev_name'] = name
                     ev_parameters['tempfilt_yn'] = do_tempfilter
-                    if not 'basisorth' in ev_parameters:
+                    if 'basisorth' not in ev_parameters:
                         ev_parameters['basisorth'] = 1
-                    if not 'basisfnum' in ev_parameters:
+                    if 'basisfnum' not in ev_parameters:
                         ev_parameters['basisfnum'] = 1
                     try:
                         ev_parameters['fsldir'] = os.environ['FSLDIR']
                     except KeyError:
                         if basis_key == 'flobs':
-                            raise Exception('FSL environment variables not set')
+                            raise Exception(
+                                'FSL environment variables not set')
                         else:
                             ev_parameters['fsldir'] = '/usr/share/fsl'
-                    ev_parameters['temporalderiv'] = int(bool(ev_parameters.get('derivs', False)))
+                    ev_parameters['temporalderiv'] = int(
+                        bool(ev_parameters.get('derivs', False)))
                     if ev_parameters['temporalderiv']:
                         evname.append(name + 'TD')
                         num_evs[1] += 1
                     ev_txt += ev_template.substitute(ev_parameters)
                 elif field == 'regress':
                     evinfo = [[j] for j in cond['val']]
-                    ev_txt += ev_none.substitute(ev_num=num_evs[0],
-                                                 ev_name=name,
-                                                 tempfilt_yn=do_tempfilter,
-                                                 cond_file=evfname)
+                    ev_txt += ev_none.substitute(
+                        ev_num=num_evs[0],
+                        ev_name=name,
+                        tempfilt_yn=do_tempfilter,
+                        cond_file=evfname)
                 ev_txt += "\n"
                 conds[name] = evfname
                 self._create_ev_file(evfname, evinfo)
@@ -230,7 +228,8 @@ class Level1Design(BaseInterface):
                     orthogonal = int(orthogonalization[i][j])
                 except (KeyError, TypeError, ValueError, IndexError):
                     orthogonal = 0
-                ev_txt += ev_ortho.substitute(c0=i, c1=j, orthogonal=orthogonal)
+                ev_txt += ev_ortho.substitute(
+                    c0=i, c1=j, orthogonal=orthogonal)
                 ev_txt += "\n"
         # add contrast info to fsf file
         if isdefined(contrasts):
@@ -266,9 +265,8 @@ class Level1Design(BaseInterface):
                     if con[1] == 'F':
                         continue
                     tidx = ttest_idx.index(j) + 1
-                    ev_txt += contrast_prolog.substitute(cnum=tidx,
-                                                         ctype=ctype,
-                                                         cname=con[0])
+                    ev_txt += contrast_prolog.substitute(
+                        cnum=tidx, ctype=ctype, cname=con[0])
                     count = 0
                     for c in range(1, len(evname) + 1):
                         if evname[c - 1].endswith('TD') and ctype == 'orig':
@@ -284,8 +282,8 @@ class Level1Design(BaseInterface):
 
                     for fconidx in ftest_idx:
                         fval = 0
-                        if (con[0] in con_map.keys() and
-                                fconidx in con_map[con[0]]):
+                        if (con[0] in con_map.keys()
+                                and fconidx in con_map[con[0]]):
                             fval = 1
                         ev_txt += contrast_ftest_element.substitute(
                             cnum=ftest_idx.index(fconidx) + 1,
@@ -299,8 +297,8 @@ class Level1Design(BaseInterface):
             for j, _ in enumerate(contrasts):
                 for k, _ in enumerate(contrasts):
                     if j != k:
-                        ev_txt += contrastmask_element.substitute(c1=j + 1,
-                                                                  c2=k + 1)
+                        ev_txt += contrastmask_element.substitute(
+                            c1=j + 1, c2=k + 1)
             ev_txt += contrastmask_footer.substitute()
         return num_evs, ev_txt
 
@@ -342,10 +340,9 @@ class Level1Design(BaseInterface):
             do_tempfilter = 1
             if info['hpf'] == np.inf:
                 do_tempfilter = 0
-            num_evs, cond_txt = self._create_ev_files(cwd, info, i, ev_parameters,
-                                                      self.inputs.orthogonalization,
-                                                      self.inputs.contrasts,
-                                                      do_tempfilter, basis_key)
+            num_evs, cond_txt = self._create_ev_files(
+                cwd, info, i, ev_parameters, self.inputs.orthogonalization,
+                self.inputs.contrasts, do_tempfilter, basis_key)
             nim = load(func_files[i])
             (_, _, _, timepoints) = nim.shape
             fsf_txt = fsf_header.substitute(
@@ -357,8 +354,7 @@ class Level1Design(BaseInterface):
                 num_evs_real=num_evs[1],
                 num_tcon=n_tcon,
                 num_fcon=n_fcon,
-                high_pass_filter_cutoff=info[
-                    'hpf'],
+                high_pass_filter_cutoff=info['hpf'],
                 temphp_yn=do_tempfilter,
                 func_file=func_files[i])
             fsf_txt += cond_txt
@@ -386,11 +382,12 @@ class Level1Design(BaseInterface):
                 for i, cond in enumerate(runinfo[field]):
                     name = cond['name']
                     evname.append(name)
-                    evfname = os.path.join(
-                        cwd, 'ev_%s_%d_%d.txt' % (name, runno,
-                                                  len(evname)))
+                    evfname = os.path.join(cwd,
+                                           'ev_%s_%d_%d.txt' % (name, runno,
+                                                                len(evname)))
                     if field == 'cond':
-                        ev_parameters['temporalderiv'] = int(bool(ev_parameters.get('derivs', False)))
+                        ev_parameters['temporalderiv'] = int(
+                            bool(ev_parameters.get('derivs', False)))
                         if ev_parameters['temporalderiv']:
                             evname.append(name + 'TD')
                     outputs['ev_files'][runno].append(
@@ -399,8 +396,12 @@ class Level1Design(BaseInterface):
 
 
 class FEATInputSpec(FSLCommandInputSpec):
-    fsf_file = File(exists=True, mandatory=True, argstr="%s", position=0,
-                    desc="File specifying the feat design spec file")
+    fsf_file = File(
+        exists=True,
+        mandatory=True,
+        argstr="%s",
+        position=0,
+        desc="File specifying the feat design spec file")
 
 
 class FEATOutputSpec(TraitedSpec):
@@ -434,22 +435,29 @@ class FEAT(FSLCommand):
         if not outputs['feat_dir']:
             if is_ica:
                 outputs['feat_dir'] = glob(os.path.join(os.getcwd(),
-                                           '*ica'))[0]
+                                                        '*ica'))[0]
             else:
                 outputs['feat_dir'] = glob(os.path.join(os.getcwd(),
-                                           '*feat'))[0]
+                                                        '*feat'))[0]
         print('Outputs from FEATmodel:', outputs)
         return outputs
 
 
 class FEATModelInputSpec(FSLCommandInputSpec):
-    fsf_file = File(exists=True, mandatory=True, argstr="%s", position=0,
-                    desc="File specifying the feat design spec file",
-                    copyfile=False)
-    ev_files = traits.List(File(exists=True),
-                           mandatory=True, argstr="%s",
-                           desc="Event spec files generated by level1design",
-                           position=1, copyfile=False)
+    fsf_file = File(
+        exists=True,
+        mandatory=True,
+        argstr="%s",
+        position=0,
+        desc="File specifying the feat design spec file",
+        copyfile=False)
+    ev_files = traits.List(
+        File(exists=True),
+        mandatory=True,
+        argstr="%s",
+        desc="Event spec files generated by level1design",
+        position=1,
+        copyfile=False)
 
 
 class FEATModelOutpuSpec(TraitedSpec):
@@ -473,8 +481,9 @@ class FEATModel(FSLCommand):
 
     def _format_arg(self, name, trait_spec, value):
         if name == 'fsf_file':
-            return super(FEATModel, self)._format_arg(
-                name, trait_spec, self._get_design_root(value))
+            return super(FEATModel,
+                         self)._format_arg(name, trait_spec,
+                                           self._get_design_root(value))
         elif name == 'ev_files':
             return ''
         else:
@@ -510,152 +519,210 @@ class FEATModel(FSLCommand):
 
 
 class FILMGLSInputSpec(FSLCommandInputSpec):
-    in_file = File(exists=True, mandatory=True, position=-3,
-                   argstr='%s',
-                   desc='input data file')
-    design_file = File(exists=True, position=-2,
-                       argstr='%s',
-                       desc='design matrix file')
-    threshold = traits.Range(default=1000., low=0.0, argstr='%f',
-                             position=-1, usedefault=True,
-                             desc='threshold')
-    smooth_autocorr = traits.Bool(argstr='-sa',
-                                  desc='Smooth auto corr estimates')
-    mask_size = traits.Int(argstr='-ms %d',
-                           desc="susan mask size")
-    brightness_threshold = traits.Range(low=0, argstr='-epith %d',
-                                        desc=('susan brightness threshold, '
-                                              'otherwise it is estimated'))
+    in_file = File(
+        exists=True,
+        mandatory=True,
+        position=-3,
+        argstr='%s',
+        desc='input data file')
+    design_file = File(
+        exists=True, position=-2, argstr='%s', desc='design matrix file')
+    threshold = traits.Range(
+        default=1000.,
+        low=0.0,
+        argstr='%f',
+        position=-1,
+        usedefault=True,
+        desc='threshold')
+    smooth_autocorr = traits.Bool(
+        argstr='-sa', desc='Smooth auto corr estimates')
+    mask_size = traits.Int(argstr='-ms %d', desc="susan mask size")
+    brightness_threshold = traits.Range(
+        low=0,
+        argstr='-epith %d',
+        desc=('susan brightness threshold, '
+              'otherwise it is estimated'))
     full_data = traits.Bool(argstr='-v', desc='output full data')
-    _estimate_xor = ['autocorr_estimate_only', 'fit_armodel', 'tukey_window',
-                     'multitaper_product', 'use_pava', 'autocorr_noestimate']
-    autocorr_estimate_only = traits.Bool(argstr='-ac',
-                                         xor=_estimate_xor,
-                                         desc=('perform autocorrelation '
-                                               'estimatation only'))
-    fit_armodel = traits.Bool(argstr='-ar', xor=_estimate_xor,
-                              desc=('fits autoregressive model - default is '
-                                    'to use tukey with M=sqrt(numvols)'))
-    tukey_window = traits.Int(argstr='-tukey %d', xor=_estimate_xor,
-                              desc='tukey window size to estimate autocorr')
-    multitaper_product = traits.Int(argstr='-mt %d', xor=_estimate_xor,
-                                    desc=('multitapering with slepian tapers '
-                                          'and num is the time-bandwidth '
-                                          'product'))
+    _estimate_xor = [
+        'autocorr_estimate_only', 'fit_armodel', 'tukey_window',
+        'multitaper_product', 'use_pava', 'autocorr_noestimate'
+    ]
+    autocorr_estimate_only = traits.Bool(
+        argstr='-ac',
+        xor=_estimate_xor,
+        desc=('perform autocorrelation '
+              'estimatation only'))
+    fit_armodel = traits.Bool(
+        argstr='-ar',
+        xor=_estimate_xor,
+        desc=('fits autoregressive model - default is '
+              'to use tukey with M=sqrt(numvols)'))
+    tukey_window = traits.Int(
+        argstr='-tukey %d',
+        xor=_estimate_xor,
+        desc='tukey window size to estimate autocorr')
+    multitaper_product = traits.Int(
+        argstr='-mt %d',
+        xor=_estimate_xor,
+        desc=('multitapering with slepian tapers '
+              'and num is the time-bandwidth '
+              'product'))
     use_pava = traits.Bool(
         argstr='-pava', desc='estimates autocorr using PAVA')
-    autocorr_noestimate = traits.Bool(argstr='-noest', xor=_estimate_xor,
-                                      desc='do not estimate autocorrs')
-    output_pwdata = traits.Bool(argstr='-output_pwdata',
-                                desc=('output prewhitened data and average '
-                                      'design matrix'))
-    results_dir = Directory('results', argstr='-rn %s', usedefault=True,
-                            desc='directory to store results in')
+    autocorr_noestimate = traits.Bool(
+        argstr='-noest', xor=_estimate_xor, desc='do not estimate autocorrs')
+    output_pwdata = traits.Bool(
+        argstr='-output_pwdata',
+        desc=('output prewhitened data and average '
+              'design matrix'))
+    results_dir = Directory(
+        'results',
+        argstr='-rn %s',
+        usedefault=True,
+        desc='directory to store results in')
 
 
 class FILMGLSInputSpec505(FSLCommandInputSpec):
-    in_file = File(exists=True, mandatory=True, position=-3,
-                   argstr='--in=%s', desc='input data file')
-    design_file = File(exists=True, position=-2,
-                       argstr='--pd=%s', desc='design matrix file')
-    threshold = traits.Range(default=1000., low=0.0, argstr='--thr=%f',
-                             position=-1, usedefault=True, desc='threshold')
-    smooth_autocorr = traits.Bool(argstr='--sa',
-                                  desc='Smooth auto corr estimates')
+    in_file = File(
+        exists=True,
+        mandatory=True,
+        position=-3,
+        argstr='--in=%s',
+        desc='input data file')
+    design_file = File(
+        exists=True, position=-2, argstr='--pd=%s', desc='design matrix file')
+    threshold = traits.Range(
+        default=1000.,
+        low=0.0,
+        argstr='--thr=%f',
+        position=-1,
+        usedefault=True,
+        desc='threshold')
+    smooth_autocorr = traits.Bool(
+        argstr='--sa', desc='Smooth auto corr estimates')
     mask_size = traits.Int(argstr='--ms=%d', desc="susan mask size")
-    brightness_threshold = traits.Range(low=0, argstr='--epith=%d',
-                                        desc=('susan brightness threshold, '
-                                              'otherwise it is estimated'))
+    brightness_threshold = traits.Range(
+        low=0,
+        argstr='--epith=%d',
+        desc=('susan brightness threshold, '
+              'otherwise it is estimated'))
     full_data = traits.Bool(argstr='-v', desc='output full data')
-    _estimate_xor = ['autocorr_estimate_only', 'fit_armodel', 'tukey_window',
-                     'multitaper_product', 'use_pava', 'autocorr_noestimate']
-    autocorr_estimate_only = traits.Bool(argstr='--ac', xor=_estimate_xor,
-                                         desc=('perform autocorrelation '
-                                               'estimation only'))
-    fit_armodel = traits.Bool(argstr='--ar', xor=_estimate_xor,
-                              desc=('fits autoregressive model - default is '
-                                    'to use tukey with M=sqrt(numvols)'))
-    tukey_window = traits.Int(argstr='--tukey=%d', xor=_estimate_xor,
-                              desc='tukey window size to estimate autocorr')
-    multitaper_product = traits.Int(argstr='--mt=%d', xor=_estimate_xor,
-                                    desc=('multitapering with slepian tapers '
-                                          'and num is the time-bandwidth '
-                                          'product'))
-    use_pava = traits.Bool(argstr='--pava',
-                           desc='estimates autocorr using PAVA')
-    autocorr_noestimate = traits.Bool(argstr='--noest', xor=_estimate_xor,
-                                      desc='do not estimate autocorrs')
-    output_pwdata = traits.Bool(argstr='--outputPWdata',
-                                desc=('output prewhitened data and average '
-                                      'design matrix'))
-    results_dir = Directory('results', argstr='--rn=%s', usedefault=True,
-                            desc='directory to store results in')
+    _estimate_xor = [
+        'autocorr_estimate_only', 'fit_armodel', 'tukey_window',
+        'multitaper_product', 'use_pava', 'autocorr_noestimate'
+    ]
+    autocorr_estimate_only = traits.Bool(
+        argstr='--ac',
+        xor=_estimate_xor,
+        desc=('perform autocorrelation '
+              'estimation only'))
+    fit_armodel = traits.Bool(
+        argstr='--ar',
+        xor=_estimate_xor,
+        desc=('fits autoregressive model - default is '
+              'to use tukey with M=sqrt(numvols)'))
+    tukey_window = traits.Int(
+        argstr='--tukey=%d',
+        xor=_estimate_xor,
+        desc='tukey window size to estimate autocorr')
+    multitaper_product = traits.Int(
+        argstr='--mt=%d',
+        xor=_estimate_xor,
+        desc=('multitapering with slepian tapers '
+              'and num is the time-bandwidth '
+              'product'))
+    use_pava = traits.Bool(
+        argstr='--pava', desc='estimates autocorr using PAVA')
+    autocorr_noestimate = traits.Bool(
+        argstr='--noest', xor=_estimate_xor, desc='do not estimate autocorrs')
+    output_pwdata = traits.Bool(
+        argstr='--outputPWdata',
+        desc=('output prewhitened data and average '
+              'design matrix'))
+    results_dir = Directory(
+        'results',
+        argstr='--rn=%s',
+        usedefault=True,
+        desc='directory to store results in')
 
 
 class FILMGLSInputSpec507(FILMGLSInputSpec505):
-    threshold = traits.Float(default=-1000., argstr='--thr=%f',
-                             position=-1, usedefault=True,
-                             desc='threshold')
-    tcon_file = File(exists=True, argstr='--con=%s',
-                     desc='contrast file containing T-contrasts')
-    fcon_file = File(exists=True, argstr='--fcon=%s',
-                     desc='contrast file containing F-contrasts')
-    mode = traits.Enum('volumetric', 'surface', argstr="--mode=%s",
-                       desc="Type of analysis to be done")
-    surface = File(exists=True, argstr="--in2=%s",
-                   desc=("input surface for autocorr smoothing in "
-                         "surface-based analyses"))
+    threshold = traits.Float(
+        default=-1000.,
+        argstr='--thr=%f',
+        position=-1,
+        usedefault=True,
+        desc='threshold')
+    tcon_file = File(
+        exists=True,
+        argstr='--con=%s',
+        desc='contrast file containing T-contrasts')
+    fcon_file = File(
+        exists=True,
+        argstr='--fcon=%s',
+        desc='contrast file containing F-contrasts')
+    mode = traits.Enum(
+        'volumetric',
+        'surface',
+        argstr="--mode=%s",
+        desc="Type of analysis to be done")
+    surface = File(
+        exists=True,
+        argstr="--in2=%s",
+        desc=("input surface for autocorr smoothing in "
+              "surface-based analyses"))
 
 
 class FILMGLSOutputSpec(TraitedSpec):
-    param_estimates = OutputMultiPath(File(exists=True),
-                                      desc=('Parameter estimates for each '
-                                            'column of the design matrix'))
-    residual4d = File(exists=True,
-                      desc=('Model fit residual mean-squared error for each '
-                            'time point'))
+    param_estimates = OutputMultiPath(
+        File(exists=True),
+        desc=('Parameter estimates for each '
+              'column of the design matrix'))
+    residual4d = File(
+        exists=True,
+        desc=('Model fit residual mean-squared error for each '
+              'time point'))
     dof_file = File(exists=True, desc='degrees of freedom')
     sigmasquareds = File(
         exists=True, desc='summary of residuals, See Woolrich, et. al., 2001')
-    results_dir = Directory(exists=True,
-                            desc='directory storing model estimation output')
-    corrections = File(exists=True,
-                       desc=('statistical corrections used within FILM '
-                             'modeling'))
-    thresholdac = File(exists=True,
-                       desc='The FILM autocorrelation parameters')
-    logfile = File(exists=True,
-                   desc='FILM run logfile')
+    results_dir = Directory(
+        exists=True, desc='directory storing model estimation output')
+    corrections = File(
+        exists=True,
+        desc=('statistical corrections used within FILM '
+              'modeling'))
+    thresholdac = File(exists=True, desc='The FILM autocorrelation parameters')
+    logfile = File(exists=True, desc='FILM run logfile')
 
 
 class FILMGLSOutputSpec507(TraitedSpec):
-    param_estimates = OutputMultiPath(File(exists=True),
-                                      desc=('Parameter estimates for each '
-                                            'column of the design matrix'))
-    residual4d = File(exists=True,
-                      desc=('Model fit residual mean-squared error for each '
-                            'time point'))
+    param_estimates = OutputMultiPath(
+        File(exists=True),
+        desc=('Parameter estimates for each '
+              'column of the design matrix'))
+    residual4d = File(
+        exists=True,
+        desc=('Model fit residual mean-squared error for each '
+              'time point'))
     dof_file = File(exists=True, desc='degrees of freedom')
     sigmasquareds = File(
         exists=True, desc='summary of residuals, See Woolrich, et. al., 2001')
-    results_dir = Directory(exists=True,
-                            desc='directory storing model estimation output')
-    thresholdac = File(exists=True,
-                       desc='The FILM autocorrelation parameters')
-    logfile = File(exists=True,
-                   desc='FILM run logfile')
-    copes = OutputMultiPath(File(exists=True),
-                            desc='Contrast estimates for each contrast')
-    varcopes = OutputMultiPath(File(exists=True),
-                               desc='Variance estimates for each contrast')
-    zstats = OutputMultiPath(File(exists=True),
-                             desc='z-stat file for each contrast')
-    tstats = OutputMultiPath(File(exists=True),
-                             desc='t-stat file for each contrast')
-    fstats = OutputMultiPath(File(exists=True),
-                             desc='f-stat file for each contrast')
-    zfstats = OutputMultiPath(File(exists=True),
-                              desc='z-stat file for each F contrast')
+    results_dir = Directory(
+        exists=True, desc='directory storing model estimation output')
+    thresholdac = File(exists=True, desc='The FILM autocorrelation parameters')
+    logfile = File(exists=True, desc='FILM run logfile')
+    copes = OutputMultiPath(
+        File(exists=True), desc='Contrast estimates for each contrast')
+    varcopes = OutputMultiPath(
+        File(exists=True), desc='Variance estimates for each contrast')
+    zstats = OutputMultiPath(
+        File(exists=True), desc='z-stat file for each contrast')
+    tstats = OutputMultiPath(
+        File(exists=True), desc='t-stat file for each contrast')
+    fstats = OutputMultiPath(
+        File(exists=True), desc='f-stat file for each contrast')
+    zfstats = OutputMultiPath(
+        File(exists=True), desc='z-stat file for each F contrast')
 
 
 class FILMGLS(FSLCommand):
@@ -694,10 +761,9 @@ threshold=10, results_dir='stats')
     if Info.version() and LooseVersion(Info.version()) > LooseVersion('5.0.6'):
         input_spec = FILMGLSInputSpec507
         output_spec = FILMGLSOutputSpec507
-    elif (Info.version() and
-            LooseVersion(Info.version()) > LooseVersion('5.0.4')):
+    elif (Info.version()
+          and LooseVersion(Info.version()) > LooseVersion('5.0.4')):
         input_spec = FILMGLSInputSpec505
-
 
     def _get_pe_files(self, cwd):
         files = None
@@ -708,8 +774,8 @@ threshold=10, results_dir='stats')
                     numpes = int(line.split()[-1])
                     files = []
                     for i in range(numpes):
-                        files.append(self._gen_fname('pe%d.nii' % (i + 1),
-                                                     cwd=cwd))
+                        files.append(
+                            self._gen_fname('pe%d.nii' % (i + 1), cwd=cwd))
                     break
             fp.close()
         return files
@@ -743,20 +809,19 @@ threshold=10, results_dir='stats')
             outputs['param_estimates'] = pe_files
         outputs['residual4d'] = self._gen_fname('res4d.nii', cwd=results_dir)
         outputs['dof_file'] = os.path.join(results_dir, 'dof')
-        outputs['sigmasquareds'] = self._gen_fname('sigmasquareds.nii',
-                                                   cwd=results_dir)
-        outputs['thresholdac'] = self._gen_fname('threshac1.nii',
-                                                 cwd=results_dir)
-        if (Info.version() and
-                LooseVersion(Info.version()) < LooseVersion('5.0.7')):
-            outputs['corrections'] = self._gen_fname('corrections.nii',
-                                                     cwd=results_dir)
-        outputs['logfile'] = self._gen_fname('logfile',
-                                             change_ext=False,
-                                             cwd=results_dir)
+        outputs['sigmasquareds'] = self._gen_fname(
+            'sigmasquareds.nii', cwd=results_dir)
+        outputs['thresholdac'] = self._gen_fname(
+            'threshac1.nii', cwd=results_dir)
+        if (Info.version()
+                and LooseVersion(Info.version()) < LooseVersion('5.0.7')):
+            outputs['corrections'] = self._gen_fname(
+                'corrections.nii', cwd=results_dir)
+        outputs['logfile'] = self._gen_fname(
+            'logfile', change_ext=False, cwd=results_dir)
 
-        if (Info.version() and
-                LooseVersion(Info.version()) > LooseVersion('5.0.6')):
+        if (Info.version()
+                and LooseVersion(Info.version()) > LooseVersion('5.0.6')):
             pth = results_dir
             numtcons, numfcons = self._get_numcons()
             base_contrast = 1
@@ -764,17 +829,19 @@ threshold=10, results_dir='stats')
             varcopes = []
             zstats = []
             tstats = []
-            neffs = []
             for i in range(numtcons):
-                copes.append(self._gen_fname(
-                    'cope%d.nii' % (base_contrast + i), cwd=pth))
+                copes.append(
+                    self._gen_fname(
+                        'cope%d.nii' % (base_contrast + i), cwd=pth))
                 varcopes.append(
-                    self._gen_fname('varcope%d.nii' % (base_contrast + i),
-                                    cwd=pth))
-                zstats.append(self._gen_fname(
-                    'zstat%d.nii' % (base_contrast + i), cwd=pth))
-                tstats.append(self._gen_fname(
-                    'tstat%d.nii' % (base_contrast + i), cwd=pth))
+                    self._gen_fname(
+                        'varcope%d.nii' % (base_contrast + i), cwd=pth))
+                zstats.append(
+                    self._gen_fname(
+                        'zstat%d.nii' % (base_contrast + i), cwd=pth))
+                tstats.append(
+                    self._gen_fname(
+                        'tstat%d.nii' % (base_contrast + i), cwd=pth))
             if copes:
                 outputs['copes'] = copes
                 outputs['varcopes'] = varcopes
@@ -783,8 +850,9 @@ threshold=10, results_dir='stats')
             fstats = []
             zfstats = []
             for i in range(numfcons):
-                fstats.append(self._gen_fname(
-                    'fstat%d.nii' % (base_contrast + i), cwd=pth))
+                fstats.append(
+                    self._gen_fname(
+                        'fstat%d.nii' % (base_contrast + i), cwd=pth))
                 zfstats.append(
                     self._gen_fname(
                         'zfstat%d.nii' % (base_contrast + i), cwd=pth))
@@ -796,18 +864,17 @@ threshold=10, results_dir='stats')
 
 class FEATRegisterInputSpec(BaseInterfaceInputSpec):
     feat_dirs = InputMultiPath(
-        Directory(exists=True), desc="Lower level feat dirs",
-        mandatory=True)
+        Directory(exists=True), desc="Lower level feat dirs", mandatory=True)
     reg_image = File(
-        exists=True, desc="image to register to (will be treated as standard)",
+        exists=True,
+        desc="image to register to (will be treated as standard)",
         mandatory=True)
     reg_dof = traits.Int(
         12, desc="registration degrees of freedom", usedefault=True)
 
 
 class FEATRegisterOutputSpec(TraitedSpec):
-    fsf_file = File(exists=True,
-                    desc="FSL feat specification file")
+    fsf_file = File(exists=True, desc="FSL feat specification file")
 
 
 class FEATRegister(BaseInterface):
@@ -822,12 +889,13 @@ class FEATRegister(BaseInterface):
         fsf_dirs = load_template('feat_fe_featdirs.tcl')
 
         num_runs = len(self.inputs.feat_dirs)
-        fsf_txt = fsf_header.substitute(num_runs=num_runs,
-                                        regimage=self.inputs.reg_image,
-                                        regdof=self.inputs.reg_dof)
+        fsf_txt = fsf_header.substitute(
+            num_runs=num_runs,
+            regimage=self.inputs.reg_image,
+            regdof=self.inputs.reg_dof)
         for i, rundir in enumerate(filename_to_list(self.inputs.feat_dirs)):
-            fsf_txt += fsf_dirs.substitute(runno=i + 1,
-                                           rundir=os.path.abspath(rundir))
+            fsf_txt += fsf_dirs.substitute(
+                runno=i + 1, rundir=os.path.abspath(rundir))
         fsf_txt += fsf_footer.substitute()
         f = open(os.path.join(os.getcwd(), 'register.fsf'), 'wt')
         f.write(fsf_txt)
@@ -843,78 +911,105 @@ class FEATRegister(BaseInterface):
 
 
 class FLAMEOInputSpec(FSLCommandInputSpec):
-    cope_file = File(exists=True, argstr='--copefile=%s', mandatory=True,
-                     desc='cope regressor data file')
-    var_cope_file = File(exists=True, argstr='--varcopefile=%s',
-                         desc='varcope weightings data file')
-    dof_var_cope_file = File(exists=True, argstr='--dofvarcopefile=%s',
-                             desc='dof data file for varcope data')
-    mask_file = File(exists=True, argstr='--maskfile=%s', mandatory=True,
-                     desc='mask file')
-    design_file = File(exists=True, argstr='--designfile=%s', mandatory=True,
-                       desc='design matrix file')
+    cope_file = File(
+        exists=True,
+        argstr='--copefile=%s',
+        mandatory=True,
+        desc='cope regressor data file')
+    var_cope_file = File(
+        exists=True,
+        argstr='--varcopefile=%s',
+        desc='varcope weightings data file')
+    dof_var_cope_file = File(
+        exists=True,
+        argstr='--dofvarcopefile=%s',
+        desc='dof data file for varcope data')
+    mask_file = File(
+        exists=True, argstr='--maskfile=%s', mandatory=True, desc='mask file')
+    design_file = File(
+        exists=True,
+        argstr='--designfile=%s',
+        mandatory=True,
+        desc='design matrix file')
     t_con_file = File(
-        exists=True, argstr='--tcontrastsfile=%s', mandatory=True,
+        exists=True,
+        argstr='--tcontrastsfile=%s',
+        mandatory=True,
         desc='ascii matrix specifying t-contrasts')
-    f_con_file = File(exists=True, argstr='--fcontrastsfile=%s',
-                      desc='ascii matrix specifying f-contrasts')
+    f_con_file = File(
+        exists=True,
+        argstr='--fcontrastsfile=%s',
+        desc='ascii matrix specifying f-contrasts')
     cov_split_file = File(
-        exists=True, argstr='--covsplitfile=%s', mandatory=True,
+        exists=True,
+        argstr='--covsplitfile=%s',
+        mandatory=True,
         desc='ascii matrix specifying the groups the covariance is split into')
     run_mode = traits.Enum(
-        'fe', 'ols', 'flame1', 'flame12', argstr='--runmode=%s',
-        mandatory=True, desc='inference to perform')
+        'fe',
+        'ols',
+        'flame1',
+        'flame12',
+        argstr='--runmode=%s',
+        mandatory=True,
+        desc='inference to perform')
     n_jumps = traits.Int(
         argstr='--njumps=%d', desc='number of jumps made by mcmc')
-    burnin = traits.Int(argstr='--burnin=%d',
-                        desc=('number of jumps at start of mcmc to be '
-                              'discarded'))
-    sample_every = traits.Int(argstr='--sampleevery=%d',
-                              desc='number of jumps for each sample')
+    burnin = traits.Int(
+        argstr='--burnin=%d',
+        desc=('number of jumps at start of mcmc to be '
+              'discarded'))
+    sample_every = traits.Int(
+        argstr='--sampleevery=%d', desc='number of jumps for each sample')
     fix_mean = traits.Bool(argstr='--fixmean', desc='fix mean for tfit')
-    infer_outliers = traits.Bool(argstr='--inferoutliers',
-                                 desc='infer outliers - not for fe')
-    no_pe_outputs = traits.Bool(argstr='--nopeoutput',
-                                desc='do not output pe files')
-    sigma_dofs = traits.Int(argstr='--sigma_dofs=%d',
-                            desc=('sigma (in mm) to use for Gaussian '
-                                  'smoothing the DOFs in FLAME 2. Default is '
-                                  '1mm, -1 indicates no smoothing'))
-    outlier_iter = traits.Int(argstr='--ioni=%d',
-                              desc=('Number of max iterations to use when '
-                                    'inferring outliers. Default is 12.'))
+    infer_outliers = traits.Bool(
+        argstr='--inferoutliers', desc='infer outliers - not for fe')
+    no_pe_outputs = traits.Bool(
+        argstr='--nopeoutput', desc='do not output pe files')
+    sigma_dofs = traits.Int(
+        argstr='--sigma_dofs=%d',
+        desc=('sigma (in mm) to use for Gaussian '
+              'smoothing the DOFs in FLAME 2. Default is '
+              '1mm, -1 indicates no smoothing'))
+    outlier_iter = traits.Int(
+        argstr='--ioni=%d',
+        desc=('Number of max iterations to use when '
+              'inferring outliers. Default is 12.'))
     log_dir = Directory("stats", argstr='--ld=%s', usedefault=True)  # ohinds
     # no support for ven, vef
 
 
 class FLAMEOOutputSpec(TraitedSpec):
-    pes = OutputMultiPath(File(exists=True),
-                          desc=("Parameter estimates for each column of the "
-                                "design matrix for each voxel"))
-    res4d = OutputMultiPath(File(exists=True),
-                            desc=("Model fit residual mean-squared error for "
-                                  "each time point"))
-    copes = OutputMultiPath(File(exists=True),
-                            desc="Contrast estimates for each contrast")
-    var_copes = OutputMultiPath(File(exists=True),
-                                desc="Variance estimates for each contrast")
-    zstats = OutputMultiPath(File(exists=True),
-                             desc="z-stat file for each contrast")
-    tstats = OutputMultiPath(File(exists=True),
-                             desc="t-stat file for each contrast")
-    zfstats = OutputMultiPath(File(exists=True),
-                              desc="z stat file for each f contrast")
-    fstats = OutputMultiPath(File(exists=True),
-                             desc="f-stat file for each contrast")
-    mrefvars = OutputMultiPath(File(exists=True),
-                               desc=("mean random effect variances for each "
-                                     "contrast"))
-    tdof = OutputMultiPath(File(exists=True),
-                           desc="temporal dof file for each contrast")
-    weights = OutputMultiPath(File(exists=True),
-                              desc="weights file for each contrast")
-    stats_dir = Directory(File(exists=True),
-                          desc="directory storing model estimation output")
+    pes = OutputMultiPath(
+        File(exists=True),
+        desc=("Parameter estimates for each column of the "
+              "design matrix for each voxel"))
+    res4d = OutputMultiPath(
+        File(exists=True),
+        desc=("Model fit residual mean-squared error for "
+              "each time point"))
+    copes = OutputMultiPath(
+        File(exists=True), desc="Contrast estimates for each contrast")
+    var_copes = OutputMultiPath(
+        File(exists=True), desc="Variance estimates for each contrast")
+    zstats = OutputMultiPath(
+        File(exists=True), desc="z-stat file for each contrast")
+    tstats = OutputMultiPath(
+        File(exists=True), desc="t-stat file for each contrast")
+    zfstats = OutputMultiPath(
+        File(exists=True), desc="z stat file for each f contrast")
+    fstats = OutputMultiPath(
+        File(exists=True), desc="f-stat file for each contrast")
+    mrefvars = OutputMultiPath(
+        File(exists=True),
+        desc=("mean random effect variances for each "
+              "contrast"))
+    tdof = OutputMultiPath(
+        File(exists=True), desc="temporal dof file for each contrast")
+    weights = OutputMultiPath(
+        File(exists=True), desc="weights file for each contrast")
+    stats_dir = Directory(
+        File(exists=True), desc="directory storing model estimation output")
 
 
 class FLAMEO(FSLCommand):
@@ -943,27 +1038,32 @@ class FLAMEO(FSLCommand):
     input_spec = FLAMEOInputSpec
     output_spec = FLAMEOOutputSpec
 
-    references_ = [{'entry': BibTeX('@article{BeckmannJenkinsonSmith2003,'
-                                    'author={C.F. Beckmann, M. Jenkinson, and S.M. Smith},'
-                                    'title={General multilevel linear modeling for group analysis in FMRI.},'
-                                    'journal={NeuroImage},'
-                                    'volume={20},'
-                                    'pages={1052-1063},'
-                                    'year={2003},'
-                                    '}'),
-                    'tags': ['method'],
-                    },
-                   {'entry': BibTeX('@article{WoolrichBehrensBeckmannJenkinsonSmith2004,'
-                                    'author={M.W. Woolrich, T.E. Behrens, '
-                                    'C.F. Beckmann, M. Jenkinson, and S.M. Smith},'
-                                    'title={Multilevel linear modelling for FMRI group analysis using Bayesian inference.},'
-                                    'journal={NeuroImage},'
-                                    'volume={21},'
-                                    'pages={1732-1747},'
-                                    'year={2004},'
-                                    '}'),
-                    'tags': ['method'],
-                    }]
+    references_ = [{
+        'entry':
+        BibTeX(
+            '@article{BeckmannJenkinsonSmith2003,'
+            'author={C.F. Beckmann, M. Jenkinson, and S.M. Smith},'
+            'title={General multilevel linear modeling for group analysis in FMRI.},'
+            'journal={NeuroImage},'
+            'volume={20},'
+            'pages={1052-1063},'
+            'year={2003},'
+            '}'),
+        'tags': ['method'],
+    }, {
+        'entry':
+        BibTeX(
+            '@article{WoolrichBehrensBeckmannJenkinsonSmith2004,'
+            'author={M.W. Woolrich, T.E. Behrens, '
+            'C.F. Beckmann, M. Jenkinson, and S.M. Smith},'
+            'title={Multilevel linear modelling for FMRI group analysis using Bayesian inference.},'
+            'journal={NeuroImage},'
+            'volume={21},'
+            'pages={1732-1747},'
+            'year={2004},'
+            '}'),
+        'tags': ['method'],
+    }]
 
     # ohinds: 2010-04-06
     def _run_interface(self, runtime):
@@ -1040,49 +1140,69 @@ class FLAMEO(FSLCommand):
 
 
 class ContrastMgrInputSpec(FSLCommandInputSpec):
-    tcon_file = File(exists=True, mandatory=True,
-                     argstr='%s', position=-1,
-                     desc='contrast file containing T-contrasts')
-    fcon_file = File(exists=True, argstr='-f %s',
-                     desc='contrast file containing F-contrasts')
-    param_estimates = InputMultiPath(File(exists=True),
-                                     argstr='', copyfile=False,
-                                     mandatory=True,
-                                     desc=('Parameter estimates for each '
-                                           'column of the design matrix'))
+    tcon_file = File(
+        exists=True,
+        mandatory=True,
+        argstr='%s',
+        position=-1,
+        desc='contrast file containing T-contrasts')
+    fcon_file = File(
+        exists=True,
+        argstr='-f %s',
+        desc='contrast file containing F-contrasts')
+    param_estimates = InputMultiPath(
+        File(exists=True),
+        argstr='',
+        copyfile=False,
+        mandatory=True,
+        desc=('Parameter estimates for each '
+              'column of the design matrix'))
     corrections = File(
-        exists=True, copyfile=False, mandatory=True,
+        exists=True,
+        copyfile=False,
+        mandatory=True,
         desc='statistical corrections used within FILM modelling')
-    dof_file = File(exists=True, argstr='', copyfile=False, mandatory=True,
-                    desc='degrees of freedom')
-    sigmasquareds = File(exists=True, argstr='', position=-2,
-                         copyfile=False, mandatory=True,
-                         desc=('summary of residuals, See Woolrich, et. al., '
-                               '2001'))
-    contrast_num = traits.Range(low=1, argstr='-cope',
-                                desc=('contrast number to start labeling '
-                                      'copes from'))
-    suffix = traits.Str(argstr='-suffix %s',
-                        desc=('suffix to put on the end of the cope filename '
-                              'before the contrast number, default is '
-                              'nothing'))
+    dof_file = File(
+        exists=True,
+        argstr='',
+        copyfile=False,
+        mandatory=True,
+        desc='degrees of freedom')
+    sigmasquareds = File(
+        exists=True,
+        argstr='',
+        position=-2,
+        copyfile=False,
+        mandatory=True,
+        desc=('summary of residuals, See Woolrich, et. al., '
+              '2001'))
+    contrast_num = traits.Range(
+        low=1,
+        argstr='-cope',
+        desc=('contrast number to start labeling '
+              'copes from'))
+    suffix = traits.Str(
+        argstr='-suffix %s',
+        desc=('suffix to put on the end of the cope filename '
+              'before the contrast number, default is '
+              'nothing'))
 
 
 class ContrastMgrOutputSpec(TraitedSpec):
-    copes = OutputMultiPath(File(exists=True),
-                            desc='Contrast estimates for each contrast')
-    varcopes = OutputMultiPath(File(exists=True),
-                               desc='Variance estimates for each contrast')
-    zstats = OutputMultiPath(File(exists=True),
-                             desc='z-stat file for each contrast')
-    tstats = OutputMultiPath(File(exists=True),
-                             desc='t-stat file for each contrast')
-    fstats = OutputMultiPath(File(exists=True),
-                             desc='f-stat file for each contrast')
-    zfstats = OutputMultiPath(File(exists=True),
-                              desc='z-stat file for each F contrast')
-    neffs = OutputMultiPath(File(exists=True),
-                            desc='neff file ?? for each contrast')
+    copes = OutputMultiPath(
+        File(exists=True), desc='Contrast estimates for each contrast')
+    varcopes = OutputMultiPath(
+        File(exists=True), desc='Variance estimates for each contrast')
+    zstats = OutputMultiPath(
+        File(exists=True), desc='z-stat file for each contrast')
+    tstats = OutputMultiPath(
+        File(exists=True), desc='t-stat file for each contrast')
+    fstats = OutputMultiPath(
+        File(exists=True), desc='f-stat file for each contrast')
+    zfstats = OutputMultiPath(
+        File(exists=True), desc='z-stat file for each F contrast')
+    neffs = OutputMultiPath(
+        File(exists=True), desc='neff file ?? for each contrast')
 
 
 class ContrastMgr(FSLCommand):
@@ -1092,12 +1212,12 @@ class ContrastMgr(FSLCommand):
     same location. This has deprecated for FSL versions 5.0.7+ as the necessary
     corrections file is no longer generated by FILMGLS.
     """
-    if Info.version() and LooseVersion(Info.version()) >= LooseVersion("5.0.7"):
+    if Info.version() and LooseVersion(
+            Info.version()) >= LooseVersion("5.0.7"):
         DeprecationWarning("ContrastMgr is deprecated in FSL 5.0.7+")
     _cmd = 'contrast_mgr'
     input_spec = ContrastMgrInputSpec
     output_spec = ContrastMgrOutputSpec
-
 
     def _run_interface(self, runtime):
         # The returncode is meaningless in ContrastMgr.  So check the output
@@ -1154,17 +1274,17 @@ class ContrastMgr(FSLCommand):
         tstats = []
         neffs = []
         for i in range(numtcons):
-            copes.append(self._gen_fname('cope%d.nii' % (base_contrast + i),
-                                         cwd=pth))
+            copes.append(
+                self._gen_fname('cope%d.nii' % (base_contrast + i), cwd=pth))
             varcopes.append(
-                self._gen_fname('varcope%d.nii' % (base_contrast + i),
-                                cwd=pth))
-            zstats.append(self._gen_fname('zstat%d.nii' % (base_contrast + i),
-                                          cwd=pth))
-            tstats.append(self._gen_fname('tstat%d.nii' % (base_contrast + i),
-                                          cwd=pth))
-            neffs.append(self._gen_fname('neff%d.nii' % (base_contrast + i),
-                                         cwd=pth))
+                self._gen_fname(
+                    'varcope%d.nii' % (base_contrast + i), cwd=pth))
+            zstats.append(
+                self._gen_fname('zstat%d.nii' % (base_contrast + i), cwd=pth))
+            tstats.append(
+                self._gen_fname('tstat%d.nii' % (base_contrast + i), cwd=pth))
+            neffs.append(
+                self._gen_fname('neff%d.nii' % (base_contrast + i), cwd=pth))
         if copes:
             outputs['copes'] = copes
             outputs['varcopes'] = varcopes
@@ -1174,11 +1294,10 @@ class ContrastMgr(FSLCommand):
         fstats = []
         zfstats = []
         for i in range(numfcons):
-            fstats.append(self._gen_fname('fstat%d.nii' % (base_contrast + i),
-                                          cwd=pth))
+            fstats.append(
+                self._gen_fname('fstat%d.nii' % (base_contrast + i), cwd=pth))
             zfstats.append(
-                self._gen_fname('zfstat%d.nii' % (base_contrast + i),
-                                cwd=pth))
+                self._gen_fname('zfstat%d.nii' % (base_contrast + i), cwd=pth))
         if fstats:
             outputs['fstats'] = fstats
             outputs['zfstats'] = zfstats
@@ -1186,8 +1305,8 @@ class ContrastMgr(FSLCommand):
 
 
 class L2ModelInputSpec(BaseInterfaceInputSpec):
-    num_copes = traits.Range(low=1, mandatory=True,
-                             desc='number of copes to be combined')
+    num_copes = traits.Range(
+        low=1, mandatory=True, desc='number of copes to be combined')
 
 
 class L2ModelOutputSpec(TraitedSpec):
@@ -1212,37 +1331,40 @@ class L2Model(BaseInterface):
 
     def _run_interface(self, runtime):
         cwd = os.getcwd()
-        mat_txt = ['/NumWaves   1',
-                   '/NumPoints  {:d}'.format(self.inputs.num_copes),
-                   '/PPheights  1',
-                   '',
-                   '/Matrix']
+        mat_txt = [
+            '/NumWaves   1', '/NumPoints  {:d}'.format(self.inputs.num_copes),
+            '/PPheights  1', '', '/Matrix'
+        ]
         for i in range(self.inputs.num_copes):
             mat_txt += ['1']
         mat_txt = '\n'.join(mat_txt)
 
-        con_txt = ['/ContrastName1  group mean',
-                   '/NumWaves   1',
-                   '/NumContrasts   1',
-                   '/PPheights  1',
-                   '/RequiredEffect     100',  # XX where does this
-                   # number come from
-                   '',
-                   '/Matrix',
-                   '1']
+        con_txt = [
+            '/ContrastName1  group mean',
+            '/NumWaves   1',
+            '/NumContrasts   1',
+            '/PPheights  1',
+            '/RequiredEffect     100',  # XX where does this
+            # number come from
+            '',
+            '/Matrix',
+            '1'
+        ]
         con_txt = '\n'.join(con_txt)
 
-        grp_txt = ['/NumWaves   1',
-                   '/NumPoints  {:d}'.format(self.inputs.num_copes),
-                   '',
-                   '/Matrix']
+        grp_txt = [
+            '/NumWaves   1', '/NumPoints  {:d}'.format(self.inputs.num_copes),
+            '', '/Matrix'
+        ]
         for i in range(self.inputs.num_copes):
             grp_txt += ['1']
         grp_txt = '\n'.join(grp_txt)
 
-        txt = {'design.mat': mat_txt,
-               'design.con': con_txt,
-               'design.grp': grp_txt}
+        txt = {
+            'design.mat': mat_txt,
+            'design.con': con_txt,
+            'design.grp': grp_txt
+        }
 
         # write design files
         for i, name in enumerate(['design.mat', 'design.con', 'design.grp']):
@@ -1255,39 +1377,36 @@ class L2Model(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         for field in list(outputs.keys()):
-            outputs[field] = os.path.join(os.getcwd(),
-                                          field.replace('_', '.'))
+            outputs[field] = os.path.join(os.getcwd(), field.replace('_', '.'))
         return outputs
 
 
 class MultipleRegressDesignInputSpec(BaseInterfaceInputSpec):
     contrasts = traits.List(
-        traits.Either(traits.Tuple(traits.Str,
-                                   traits.Enum('T'),
-                                   traits.List(traits.Str),
-                                   traits.List(traits.Float)),
-                      traits.Tuple(traits.Str,
-                                   traits.Enum('F'),
-                                   traits.List(traits.Tuple(traits.Str,
-                                                            traits.Enum('T'),
-                                                            traits.List(
-                                                                traits.Str),
-                                                            traits.List(
-                                                                traits.Float)),
-                                               ))),
+        traits.Either(
+            traits.Tuple(traits.Str, traits.Enum('T'), traits.List(traits.Str),
+                         traits.List(traits.Float)),
+            traits.Tuple(traits.Str, traits.Enum('F'),
+                         traits.List(
+                             traits.Tuple(traits.Str, traits.Enum('T'),
+                                          traits.List(traits.Str),
+                                          traits.List(traits.Float)), ))),
         mandatory=True,
         desc="List of contrasts with each contrast being a list of the form - \
 [('name', 'stat', [condition list], [weight list])]. if \
 session list is None or not provided, all sessions are used. For F \
 contrasts, the condition list should contain previously defined \
 T-contrasts without any weight list.")
-    regressors = traits.Dict(traits.Str, traits.List(traits.Float),
-                             mandatory=True,
-                             desc=('dictionary containing named lists of '
-                                   'regressors'))
-    groups = traits.List(traits.Int,
-                         desc=('list of group identifiers (defaults to single '
-                               'group)'))
+    regressors = traits.Dict(
+        traits.Str,
+        traits.List(traits.Float),
+        mandatory=True,
+        desc=('dictionary containing named lists of '
+              'regressors'))
+    groups = traits.List(
+        traits.Int,
+        desc=('list of group identifiers (defaults to single '
+              'group)'))
 
 
 class MultipleRegressDesignOutputSpec(TraitedSpec):
@@ -1329,8 +1448,10 @@ class MultipleRegressDesign(BaseInterface):
         ntcons = sum([1 for con in self.inputs.contrasts if con[1] == 'T'])
         nfcons = sum([1 for con in self.inputs.contrasts if con[1] == 'F'])
         # write mat file
-        mat_txt = ['/NumWaves       %d' % nwaves,
-                   '/NumPoints      %d' % npoints]
+        mat_txt = [
+            '/NumWaves       %d' % nwaves,
+            '/NumPoints      %d' % npoints
+        ]
         ppheights = []
         for reg in regs:
             maxreg = np.max(self.inputs.regressors[reg])
@@ -1341,8 +1462,7 @@ class MultipleRegressDesign(BaseInterface):
                 regheight = abs(maxreg - minreg)
             ppheights.append('%e' % regheight)
         mat_txt += ['/PPheights      ' + ' '.join(ppheights)]
-        mat_txt += ['',
-                    '/Matrix']
+        mat_txt += ['', '/Matrix']
         for cidx in range(npoints):
             mat_txt.append(' '.join(
                 ['%e' % self.inputs.regressors[key][cidx] for key in regs]))
@@ -1356,28 +1476,28 @@ class MultipleRegressDesign(BaseInterface):
                 tconmap[conidx] = counter
                 counter += 1
                 con_txt += ['/ContrastName%d   %s' % (counter, con[0])]
-        con_txt += ['/NumWaves       %d' % nwaves,
-                    '/NumContrasts   %d' % ntcons,
-                    '/PPheights          %s' % ' '.join(
-                        ['%e' % 1 for i in range(counter)]),
-                    '/RequiredEffect     %s' % ' '.join(
-                        ['%.3f' % 100 for i in range(counter)]),
-                    '',
-                    '/Matrix']
+        con_txt += [
+            '/NumWaves       %d' % nwaves,
+            '/NumContrasts   %d' % ntcons,
+            '/PPheights          %s' % ' '.join(
+                ['%e' % 1 for i in range(counter)]),
+            '/RequiredEffect     %s' % ' '.join(
+                ['%.3f' % 100 for i in range(counter)]), '', '/Matrix'
+        ]
         for idx in sorted(tconmap.keys()):
             convals = np.zeros((nwaves, 1))
             for regidx, reg in enumerate(self.inputs.contrasts[idx][2]):
-                convals[regs.index(reg)
-                        ] = self.inputs.contrasts[idx][3][regidx]
+                convals[regs.index(reg)] = self.inputs.contrasts[idx][3][
+                    regidx]
             con_txt.append(' '.join(['%e' % val for val in convals]))
         con_txt = '\n'.join(con_txt) + '\n'
         # write f-con file
         fcon_txt = ''
         if nfcons:
-            fcon_txt = ['/NumWaves       %d' % ntcons,
-                        '/NumContrasts   %d' % nfcons,
-                        '',
-                        '/Matrix']
+            fcon_txt = [
+                '/NumWaves       %d' % ntcons,
+                '/NumContrasts   %d' % nfcons, '', '/Matrix'
+            ]
             for conidx, con in enumerate(self.inputs.contrasts):
                 if con[1] == 'F':
                     convals = np.zeros((ntcons, 1))
@@ -1387,10 +1507,10 @@ class MultipleRegressDesign(BaseInterface):
                     fcon_txt = '\n'.join(fcon_txt)
             fcon_txt += '\n'
         # write group file
-        grp_txt = ['/NumWaves       1',
-                   '/NumPoints      %d' % npoints,
-                   '',
-                   '/Matrix']
+        grp_txt = [
+            '/NumWaves       1',
+            '/NumPoints      %d' % npoints, '', '/Matrix'
+        ]
         for i in range(npoints):
             if isdefined(self.inputs.groups):
                 grp_txt += ['%d' % self.inputs.groups[i]]
@@ -1398,10 +1518,12 @@ class MultipleRegressDesign(BaseInterface):
                 grp_txt += ['1']
         grp_txt = '\n'.join(grp_txt) + '\n'
 
-        txt = {'design.mat': mat_txt,
-               'design.con': con_txt,
-               'design.fts': fcon_txt,
-               'design.grp': grp_txt}
+        txt = {
+            'design.mat': mat_txt,
+            'design.con': con_txt,
+            'design.fts': fcon_txt,
+            'design.grp': grp_txt
+        }
 
         # write design files
         for key, val in list(txt.items()):
@@ -1420,19 +1542,29 @@ class MultipleRegressDesign(BaseInterface):
         for field in list(outputs.keys()):
             if ('fts' in field) and (nfcons == 0):
                 continue
-            outputs[field] = os.path.join(os.getcwd(),
-                                          field.replace('_', '.'))
+            outputs[field] = os.path.join(os.getcwd(), field.replace('_', '.'))
         return outputs
 
 
 class SMMInputSpec(FSLCommandInputSpec):
     spatial_data_file = File(
-        exists=True, position=0, argstr='--sdf="%s"', mandatory=True,
-        desc="statistics spatial map", copyfile=False)
-    mask = File(exists=True, position=1, argstr='--mask="%s"', mandatory=True,
-                desc="mask file", copyfile=False)
-    no_deactivation_class = traits.Bool(position=2, argstr="--zfstatmode",
-                                        desc="enforces no deactivation class")
+        exists=True,
+        position=0,
+        argstr='--sdf="%s"',
+        mandatory=True,
+        desc="statistics spatial map",
+        copyfile=False)
+    mask = File(
+        exists=True,
+        position=1,
+        argstr='--mask="%s"',
+        mandatory=True,
+        desc="mask file",
+        copyfile=False)
+    no_deactivation_class = traits.Bool(
+        position=2,
+        argstr="--zfstatmode",
+        desc="enforces no deactivation class")
 
 
 class SMMOutputSpec(TraitedSpec):
@@ -1455,12 +1587,12 @@ class SMM(FSLCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         # TODO get the true logdir from the stdout
-        outputs['null_p_map'] = self._gen_fname(basename="w1_mean",
-                                                cwd="logdir")
+        outputs['null_p_map'] = self._gen_fname(
+            basename="w1_mean", cwd="logdir")
         outputs['activation_p_map'] = self._gen_fname(
             basename="w2_mean", cwd="logdir")
-        if (not isdefined(self.inputs.no_deactivation_class) or not
-                self.inputs.no_deactivation_class):
+        if (not isdefined(self.inputs.no_deactivation_class)
+                or not self.inputs.no_deactivation_class):
             outputs['deactivation_p_map'] = self._gen_fname(
                 basename="w3_mean", cwd="logdir")
         return outputs
@@ -1468,13 +1600,16 @@ class SMM(FSLCommand):
 
 class MELODICInputSpec(FSLCommandInputSpec):
     in_files = InputMultiPath(
-        File(exists=True), argstr="-i %s", mandatory=True, position=0,
+        File(exists=True),
+        argstr="-i %s",
+        mandatory=True,
+        position=0,
         desc="input file names (either single file name or a list)",
         sep=",")
     out_dir = Directory(
         argstr="-o %s", desc="output directory name", genfile=True)
-    mask = File(exists=True, argstr="-m %s",
-                desc="file name of mask for thresholding")
+    mask = File(
+        exists=True, argstr="-m %s", desc="file name of mask for thresholding")
     no_mask = traits.Bool(argstr="--nomask", desc="switch off masking")
     update_mask = traits.Bool(
         argstr="--update_mask", desc="switch off mask updating")
@@ -1487,30 +1622,32 @@ class MELODICInputSpec(FSLCommandInputSpec):
         argstr="-d %d",
         desc=("dimensionality reduction into #num dimensions (default: "
               "automatic estimation)"))
-    dim_est = traits.Str(argstr="--dimest=%s",
-                         desc=("use specific dim. estimation technique: lap, "
-                               "bic, mdl, aic, mean (default: lap)"))
+    dim_est = traits.Str(
+        argstr="--dimest=%s",
+        desc=("use specific dim. estimation technique: lap, "
+              "bic, mdl, aic, mean (default: lap)"))
     sep_whiten = traits.Bool(
         argstr="--sep_whiten", desc="switch on separate whitening")
     sep_vn = traits.Bool(
         argstr="--sep_vn", desc="switch off joined variance normalization")
-    migp = traits.Bool(
-        argstr="--migp", desc="switch on MIGP data reduction")
+    migp = traits.Bool(argstr="--migp", desc="switch on MIGP data reduction")
     migpN = traits.Int(
-        argstr="--migpN %d",
-        desc="number of internal Eigenmaps")
+        argstr="--migpN %d", desc="number of internal Eigenmaps")
     migp_shuffle = traits.Bool(
-        argstr="--migp_shuffle", desc="randomise MIGP file order (default: TRUE)")
+        argstr="--migp_shuffle",
+        desc="randomise MIGP file order (default: TRUE)")
     migp_factor = traits.Int(
         argstr="--migp_factor %d",
-        desc="Internal Factor of mem-threshold relative to number of Eigenmaps (default: 2)")
+        desc=
+        "Internal Factor of mem-threshold relative to number of Eigenmaps (default: 2)"
+    )
     num_ICs = traits.Int(
         argstr="-n %d",
         desc="number of IC's to extract (for deflation approach)")
     approach = traits.Str(
         argstr="-a %s",
         desc="approach for decomposition, 2D: defl, symm (default), 3D: tica "
-             "(default), concat")
+        "(default), concat")
     non_linearity = traits.Str(
         argstr="--nl=%s", desc="nonlinearity: gauss, tanh, pow3, pow4")
     var_norm = traits.Bool(
@@ -1526,8 +1663,9 @@ class MELODICInputSpec(FSLCommandInputSpec):
     epsilonS = traits.Float(
         argstr="--epsS=%f",
         desc="minimum error change for rank-1 approximation in TICA")
-    maxit = traits.Int(argstr="--maxit=%d",
-                       desc="maximum number of iterations before restart")
+    maxit = traits.Int(
+        argstr="--maxit=%d",
+        desc="maximum number of iterations before restart")
     max_restart = traits.Int(
         argstr="--maxrestart=%d", desc="maximum number of restarts")
     mm_thresh = traits.Float(
@@ -1535,30 +1673,45 @@ class MELODICInputSpec(FSLCommandInputSpec):
         desc="threshold for Mixture Model based inference")
     no_mm = traits.Bool(
         argstr="--no_mm", desc="switch off mixture modelling on IC maps")
-    ICs = File(exists=True, argstr="--ICs=%s",
-               desc="filename of the IC components file for mixture modelling")
-    mix = File(exists=True, argstr="--mix=%s",
-               desc="mixing matrix for mixture modelling / filtering")
-    smode = File(exists=True, argstr="--smode=%s",
-                 desc="matrix of session modes for report generation")
+    ICs = File(
+        exists=True,
+        argstr="--ICs=%s",
+        desc="filename of the IC components file for mixture modelling")
+    mix = File(
+        exists=True,
+        argstr="--mix=%s",
+        desc="mixing matrix for mixture modelling / filtering")
+    smode = File(
+        exists=True,
+        argstr="--smode=%s",
+        desc="matrix of session modes for report generation")
     rem_cmp = traits.List(
         traits.Int, argstr="-f %d", desc="component numbers to remove")
     report = traits.Bool(argstr="--report", desc="generate Melodic web report")
     bg_image = File(
-        exists=True, argstr="--bgimage=%s",
+        exists=True,
+        argstr="--bgimage=%s",
         desc="specify background image for report (default: mean image)")
     tr_sec = traits.Float(argstr="--tr=%f", desc="TR in seconds")
     log_power = traits.Bool(
         argstr="--logPower",
         desc="calculate log of power for frequency spectrum")
-    t_des = File(exists=True, argstr="--Tdes=%s",
-                 desc="design matrix across time-domain")
-    t_con = File(exists=True, argstr="--Tcon=%s",
-                 desc="t-contrast matrix across time-domain")
-    s_des = File(exists=True, argstr="--Sdes=%s",
-                 desc="design matrix across subject-domain")
-    s_con = File(exists=True, argstr="--Scon=%s",
-                 desc="t-contrast matrix across subject-domain")
+    t_des = File(
+        exists=True,
+        argstr="--Tdes=%s",
+        desc="design matrix across time-domain")
+    t_con = File(
+        exists=True,
+        argstr="--Tcon=%s",
+        desc="t-contrast matrix across time-domain")
+    s_des = File(
+        exists=True,
+        argstr="--Sdes=%s",
+        desc="design matrix across subject-domain")
+    s_con = File(
+        exists=True,
+        argstr="--Scon=%s",
+        desc="t-contrast matrix across subject-domain")
     out_all = traits.Bool(argstr="--Oall", desc="output everything")
     out_unmix = traits.Bool(argstr="--Ounmix", desc="output unmixing matrix")
     out_stats = traits.Bool(
@@ -1618,8 +1771,7 @@ class MELODIC(FSLCommand):
         else:
             outputs['out_dir'] = self._gen_filename("out_dir")
         if isdefined(self.inputs.report) and self.inputs.report:
-            outputs['report_dir'] = os.path.join(
-                outputs['out_dir'], "report")
+            outputs['report_dir'] = os.path.join(outputs['out_dir'], "report")
         return outputs
 
     def _gen_filename(self, name):
@@ -1628,18 +1780,23 @@ class MELODIC(FSLCommand):
 
 
 class SmoothEstimateInputSpec(FSLCommandInputSpec):
-    dof = traits.Int(argstr='--dof=%d', mandatory=True,
-                     xor=['zstat_file'],
-                     desc='number of degrees of freedom')
-    mask_file = File(argstr='--mask=%s',
-                     exists=True, mandatory=True,
-                     desc='brain mask volume')
-    residual_fit_file = File(argstr='--res=%s',
-                             exists=True, requires=['dof'],
-                             desc='residual-fit image file')
-    zstat_file = File(argstr='--zstat=%s',
-                      exists=True, xor=['dof'],
-                      desc='zstat image file')
+    dof = traits.Int(
+        argstr='--dof=%d',
+        mandatory=True,
+        xor=['zstat_file'],
+        desc='number of degrees of freedom')
+    mask_file = File(
+        argstr='--mask=%s',
+        exists=True,
+        mandatory=True,
+        desc='brain mask volume')
+    residual_fit_file = File(
+        argstr='--res=%s',
+        exists=True,
+        requires=['dof'],
+        desc='residual-fit image file')
+    zstat_file = File(
+        argstr='--zstat=%s', exists=True, xor=['dof'], desc='zstat image file')
 
 
 class SmoothEstimateOutputSpec(TraitedSpec):
@@ -1676,79 +1833,110 @@ class SmoothEstimate(FSLCommand):
 
 
 class ClusterInputSpec(FSLCommandInputSpec):
-    in_file = File(argstr='--in=%s', mandatory=True,
-                   exists=True, desc='input volume')
-    threshold = traits.Float(argstr='--thresh=%.10f',
-                             mandatory=True,
-                             desc='threshold for input volume')
+    in_file = File(
+        argstr='--in=%s', mandatory=True, exists=True, desc='input volume')
+    threshold = traits.Float(
+        argstr='--thresh=%.10f',
+        mandatory=True,
+        desc='threshold for input volume')
     out_index_file = traits.Either(
-        traits.Bool, File,
+        traits.Bool,
+        File,
         argstr='--oindex=%s',
-        desc='output of cluster index (in size order)', hash_files=False)
-    out_threshold_file = traits.Either(traits.Bool, File,
-                                       argstr='--othresh=%s',
-                                       desc='thresholded image',
-                                       hash_files=False)
-    out_localmax_txt_file = traits.Either(traits.Bool, File,
-                                          argstr='--olmax=%s',
-                                          desc='local maxima text file',
-                                          hash_files=False)
-    out_localmax_vol_file = traits.Either(traits.Bool, File,
-                                          argstr='--olmaxim=%s',
-                                          desc='output of local maxima volume',
-                                          hash_files=False)
-    out_size_file = traits.Either(traits.Bool, File,
-                                  argstr='--osize=%s',
-                                  desc='filename for output of size image',
-                                  hash_files=False)
-    out_max_file = traits.Either(traits.Bool, File,
-                                 argstr='--omax=%s',
-                                 desc='filename for output of max image',
-                                 hash_files=False)
-    out_mean_file = traits.Either(traits.Bool, File,
-                                  argstr='--omean=%s',
-                                  desc='filename for output of mean image',
-                                  hash_files=False)
+        desc='output of cluster index (in size order)',
+        hash_files=False)
+    out_threshold_file = traits.Either(
+        traits.Bool,
+        File,
+        argstr='--othresh=%s',
+        desc='thresholded image',
+        hash_files=False)
+    out_localmax_txt_file = traits.Either(
+        traits.Bool,
+        File,
+        argstr='--olmax=%s',
+        desc='local maxima text file',
+        hash_files=False)
+    out_localmax_vol_file = traits.Either(
+        traits.Bool,
+        File,
+        argstr='--olmaxim=%s',
+        desc='output of local maxima volume',
+        hash_files=False)
+    out_size_file = traits.Either(
+        traits.Bool,
+        File,
+        argstr='--osize=%s',
+        desc='filename for output of size image',
+        hash_files=False)
+    out_max_file = traits.Either(
+        traits.Bool,
+        File,
+        argstr='--omax=%s',
+        desc='filename for output of max image',
+        hash_files=False)
+    out_mean_file = traits.Either(
+        traits.Bool,
+        File,
+        argstr='--omean=%s',
+        desc='filename for output of mean image',
+        hash_files=False)
     out_pval_file = traits.Either(
-        traits.Bool, File,
+        traits.Bool,
+        File,
         argstr='--opvals=%s',
         desc='filename for image output of log pvals',
         hash_files=False)
-    pthreshold = traits.Float(argstr='--pthresh=%.10f',
-                              requires=['dlh', 'volume'],
-                              desc='p-threshold for clusters')
+    pthreshold = traits.Float(
+        argstr='--pthresh=%.10f',
+        requires=['dlh', 'volume'],
+        desc='p-threshold for clusters')
     peak_distance = traits.Float(
         argstr='--peakdist=%.10f',
         desc='minimum distance between local maxima/minima, in mm (default 0)')
-    cope_file = traits.File(argstr='--cope=%s',
-                            desc='cope volume')
-    volume = traits.Int(argstr='--volume=%d',
-                        desc='number of voxels in the mask')
-    dlh = traits.Float(argstr='--dlh=%.10f',
-                       desc='smoothness estimate = sqrt(det(Lambda))')
+    cope_file = traits.File(argstr='--cope=%s', desc='cope volume')
+    volume = traits.Int(
+        argstr='--volume=%d', desc='number of voxels in the mask')
+    dlh = traits.Float(
+        argstr='--dlh=%.10f', desc='smoothness estimate = sqrt(det(Lambda))')
     fractional = traits.Bool(
-        False, usedefault=True, argstr='--fractional',
+        False,
+        usedefault=True,
+        argstr='--fractional',
         desc='interprets the threshold as a fraction of the robust range')
-    connectivity = traits.Int(argstr='--connectivity=%d',
-                              desc='the connectivity of voxels (default 26)')
-    use_mm = traits.Bool(False, usedefault=True, argstr='--mm',
-                         desc='use mm, not voxel, coordinates')
-    find_min = traits.Bool(False, usedefault=True, argstr='--min',
-                           desc='find minima instead of maxima')
-    no_table = traits.Bool(False, usedefault=True, argstr='--no_table',
-                           desc='suppresses printing of the table info')
+    connectivity = traits.Int(
+        argstr='--connectivity=%d',
+        desc='the connectivity of voxels (default 26)')
+    use_mm = traits.Bool(
+        False,
+        usedefault=True,
+        argstr='--mm',
+        desc='use mm, not voxel, coordinates')
+    find_min = traits.Bool(
+        False,
+        usedefault=True,
+        argstr='--min',
+        desc='find minima instead of maxima')
+    no_table = traits.Bool(
+        False,
+        usedefault=True,
+        argstr='--no_table',
+        desc='suppresses printing of the table info')
     minclustersize = traits.Bool(
-        False, usedefault=True, argstr='--minclustersize',
+        False,
+        usedefault=True,
+        argstr='--minclustersize',
         desc='prints out minimum significant cluster size')
-    xfm_file = File(argstr='--xfm=%s',
-                    desc=('filename for Linear: input->standard-space '
-                          'transform. Non-linear: input->highres transform'))
-    std_space_file = File(argstr='--stdvol=%s',
-                          desc='filename for standard-space volume')
-    num_maxima = traits.Int(argstr='--num=%d',
-                            desc='no of local maxima to report')
-    warpfield_file = File(argstr='--warpvol=%s',
-                          desc='file contining warpfield')
+    xfm_file = File(
+        argstr='--xfm=%s',
+        desc=('filename for Linear: input->standard-space '
+              'transform. Non-linear: input->highres transform'))
+    std_space_file = File(
+        argstr='--stdvol=%s', desc='filename for standard-space volume')
+    num_maxima = traits.Int(
+        argstr='--num=%d', desc='no of local maxima to report')
+    warpfield_file = File(
+        argstr='--warpvol=%s', desc='file contining warpfield')
 
 
 class ClusterOutputSpec(TraitedSpec):
@@ -1781,11 +1969,16 @@ class Cluster(FSLCommand):
     output_spec = ClusterOutputSpec
     _cmd = 'cluster'
 
-    filemap = {'out_index_file': 'index', 'out_threshold_file': 'threshold',
-               'out_localmax_txt_file': 'localmax.txt',
-               'out_localmax_vol_file': 'localmax',
-               'out_size_file': 'size', 'out_max_file': 'max',
-               'out_mean_file': 'mean', 'out_pval_file': 'pval'}
+    filemap = {
+        'out_index_file': 'index',
+        'out_threshold_file': 'threshold',
+        'out_localmax_txt_file': 'localmax.txt',
+        'out_localmax_vol_file': 'localmax',
+        'out_size_file': 'size',
+        'out_max_file': 'max',
+        'out_mean_file': 'mean',
+        'out_pval_file': 'pval'
+    }
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -1799,7 +1992,8 @@ class Cluster(FSLCommand):
                         if suffix.endswith('.txt'):
                             change_ext = False
                         outputs[outkey] = self._gen_fname(
-                            self.inputs.in_file, suffix='_' + suffix,
+                            self.inputs.in_file,
+                            suffix='_' + suffix,
                             change_ext=change_ext)
                 else:
                     outputs[outkey] = os.path.abspath(inval)
@@ -1816,28 +2010,56 @@ class Cluster(FSLCommand):
 
 
 class DualRegressionInputSpec(FSLCommandInputSpec):
-    in_files = InputMultiPath(File(exists=True), argstr="%s", mandatory=True,
-        position=-1, sep=" ",
-        desc="List all subjects' preprocessed, standard-space 4D datasets",)
-    group_IC_maps_4D = File(exists=True, argstr="%s", mandatory=True, position=1,
+    in_files = InputMultiPath(
+        File(exists=True),
+        argstr="%s",
+        mandatory=True,
+        position=-1,
+        sep=" ",
+        desc="List all subjects' preprocessed, standard-space 4D datasets",
+    )
+    group_IC_maps_4D = File(
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=1,
         desc="4D image containing spatial IC maps (melodic_IC) from the "
         "whole-group ICA analysis")
-    des_norm = traits.Bool(True, argstr="%i",  position=2, usedefault=True,
+    des_norm = traits.Bool(
+        True,
+        argstr="%i",
+        position=2,
+        usedefault=True,
         desc="Whether to variance-normalise the timecourses used as the "
         "stage-2 regressors; True is default and recommended")
-    one_sample_group_mean = traits.Bool(argstr="-1", position=3,
+    one_sample_group_mean = traits.Bool(
+        argstr="-1",
+        position=3,
         desc="perform 1-sample group-mean test instead of generic "
         "permutation test")
-    design_file = File(exists=True, argstr="%s", position=3,
+    design_file = File(
+        exists=True,
+        argstr="%s",
+        position=3,
         desc="Design matrix for final cross-subject modelling with "
         "randomise")
-    con_file = File(exists=True, argstr="%s", position=4,
+    con_file = File(
+        exists=True,
+        argstr="%s",
+        position=4,
         desc="Design contrasts for final cross-subject modelling with "
         "randomise")
-    n_perm = traits.Int(argstr="%i", mandatory=True, position=5,
+    n_perm = traits.Int(
+        argstr="%i",
+        mandatory=True,
+        position=5,
         desc="Number of permutations for randomise; set to 1 for just raw "
         "tstat output, set to 0 to not run randomise at all.")
-    out_dir = Directory("output", argstr="%s", usedefault=True, position=6,
+    out_dir = Directory(
+        "output",
+        argstr="%s",
+        usedefault=True,
+        position=6,
         desc="This directory will be created to hold all output and logfiles",
         genfile=True)
 
@@ -1860,7 +2082,7 @@ class DualRegression(FSLCommand):
     >>> dual_regression.inputs.n_perm = 10
     >>> dual_regression.inputs.out_dir = "my_output_directory"
     >>> dual_regression.cmdline
-    u'dual_regression allFA.nii 0 -1 10 my_output_directory functional.nii functional2.nii functional3.nii'
+    'dual_regression allFA.nii 0 -1 10 my_output_directory functional.nii functional2.nii functional3.nii'
     >>> dual_regression.run() # doctest: +SKIP
 
     """
@@ -1882,11 +2104,18 @@ class DualRegression(FSLCommand):
 
 
 class RandomiseInputSpec(FSLCommandInputSpec):
-    in_file = File(exists=True, desc='4D input file', argstr='-i %s',
-                   position=0, mandatory=True)
+    in_file = File(
+        exists=True,
+        desc='4D input file',
+        argstr='-i %s',
+        position=0,
+        mandatory=True)
     base_name = traits.Str(
-        'tbss_', desc='the rootname that all generated files will have',
-        argstr='-o "%s"', position=1, usedefault=True)
+        'randomise',
+        desc='the rootname that all generated files will have',
+        argstr='-o "%s"',
+        position=1,
+        usedefault=True)
     design_mat = File(
         exists=True, desc='design matrix file', argstr='-d %s', position=2)
     tcon = File(
@@ -1932,9 +2161,9 @@ class RandomiseInputSpec(FSLCommandInputSpec):
     var_smooth = traits.Int(
         argstr='-v %d', desc='use variance smoothing (std is in mm)')
     c_thresh = traits.Float(
-        argstr='-c %.2f', desc='carry out cluster-based thresholding')
+        argstr='-c %.1f', desc='carry out cluster-based thresholding')
     cm_thresh = traits.Float(
-        argstr='-C %.2f', desc='carry out cluster-mass-based thresholding')
+        argstr='-C %.1f', desc='carry out cluster-mass-based thresholding')
     f_c_thresh = traits.Float(
         argstr='-F %.2f', desc='carry out f cluster thresholding')
     f_cm_thresh = traits.Float(
@@ -1949,17 +2178,13 @@ class RandomiseInputSpec(FSLCommandInputSpec):
 
 class RandomiseOutputSpec(TraitedSpec):
     tstat_files = traits.List(
-        File(exists=True),
-        desc='t contrast raw statistic')
+        File(exists=True), desc='t contrast raw statistic')
     fstat_files = traits.List(
-        File(exists=True),
-        desc='f contrast raw statistic')
+        File(exists=True), desc='f contrast raw statistic')
     t_p_files = traits.List(
-        File(exists=True),
-        desc='f contrast uncorrected p values files')
+        File(exists=True), desc='f contrast uncorrected p values files')
     f_p_files = traits.List(
-        File(exists=True),
-        desc='f contrast uncorrected p values files')
+        File(exists=True), desc='f contrast uncorrected p values files')
     t_corrected_p_files = traits.List(
         File(exists=True),
         desc='t contrast FWE (Family-wise error) corrected p values files')
@@ -1978,7 +2203,7 @@ class Randomise(FSLCommand):
     >>> import nipype.interfaces.fsl as fsl
     >>> rand = fsl.Randomise(in_file='allFA.nii', mask = 'mask.nii', tcon='design.con', design_mat='design.mat')
     >>> rand.cmdline
-    'randomise -i allFA.nii -o "tbss_" -d design.mat -t design.con -m mask.nii'
+    'randomise -i allFA.nii -o "randomise" -d design.mat -t design.con -m mask.nii'
 
     """
 
@@ -1988,10 +2213,10 @@ class Randomise(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['tstat_files'] = glob(self._gen_fname(
-            '%s_tstat*.nii' % self.inputs.base_name))
-        outputs['fstat_files'] = glob(self._gen_fname(
-            '%s_fstat*.nii' % self.inputs.base_name))
+        outputs['tstat_files'] = glob(
+            self._gen_fname('%s_tstat*.nii' % self.inputs.base_name))
+        outputs['fstat_files'] = glob(
+            self._gen_fname('%s_fstat*.nii' % self.inputs.base_name))
         prefix = False
         if self.inputs.tfce or self.inputs.tfce2D:
             prefix = 'tfce'
@@ -2003,50 +2228,66 @@ class Randomise(FSLCommand):
             prefix = 'clusterm'
         if prefix:
             outputs['t_p_files'] = glob(
-                self._gen_fname('%s_%s_p_tstat*' % (
-                    self.inputs.base_name, prefix)))
-            outputs['t_corrected_p_files'] = glob(self._gen_fname(
-                '%s_%s_corrp_tstat*.nii' % (self.inputs.base_name, prefix)))
+                self._gen_fname('%s_%s_p_tstat*' % (self.inputs.base_name,
+                                                    prefix)))
+            outputs['t_corrected_p_files'] = glob(
+                self._gen_fname('%s_%s_corrp_tstat*.nii' %
+                                (self.inputs.base_name, prefix)))
 
-            outputs['f_p_files'] = glob(self._gen_fname(
-                '%s_%s_p_fstat*.nii' % (self.inputs.base_name, prefix)))
-            outputs['f_corrected_p_files'] = glob(self._gen_fname(
-                '%s_%s_corrp_fstat*.nii' % (self.inputs.base_name, prefix)))
+            outputs['f_p_files'] = glob(
+                self._gen_fname('%s_%s_p_fstat*.nii' % (self.inputs.base_name,
+                                                        prefix)))
+            outputs['f_corrected_p_files'] = glob(
+                self._gen_fname('%s_%s_corrp_fstat*.nii' %
+                                (self.inputs.base_name, prefix)))
         return outputs
 
 
 class GLMInputSpec(FSLCommandInputSpec):
-    in_file = File(exists=True, argstr='-i %s', mandatory=True, position=1,
-                   desc='input file name (text matrix or 3D/4D image file)')
-    out_file = File(name_template="%s_glm", argstr='-o %s', position=3,
-                    desc=('filename for GLM parameter estimates' +
-                          ' (GLM betas)'),
-                    name_source="in_file", keep_extension=True)
-    design = File(exists=True, argstr='-d %s', mandatory=True, position=2,
-                  desc=('file name of the GLM design matrix (text time' +
-                        ' courses for temporal regression or an image' +
-                        ' file for spatial regression)'))
-    contrasts = File(exists=True, argstr='-c %s',
-                     desc=('matrix of t-statics contrasts'))
-    mask = File(exists=True, argstr='-m %s',
-                desc=('mask image file name if input is image'))
-    dof = traits.Int(argstr='--dof=%d', desc=('set degrees of freedom' +
-                                              ' explicitly'))
-    des_norm = traits.Bool(argstr='--des_norm',
-                           desc=('switch on normalization of the design' +
-                                 ' matrix columns to unit std deviation'))
+    in_file = File(
+        exists=True,
+        argstr='-i %s',
+        mandatory=True,
+        position=1,
+        desc='input file name (text matrix or 3D/4D image file)')
+    out_file = File(
+        name_template="%s_glm",
+        argstr='-o %s',
+        position=3,
+        desc=('filename for GLM parameter estimates' + ' (GLM betas)'),
+        name_source="in_file",
+        keep_extension=True)
+    design = File(
+        exists=True,
+        argstr='-d %s',
+        mandatory=True,
+        position=2,
+        desc=('file name of the GLM design matrix (text time' +
+              ' courses for temporal regression or an image' +
+              ' file for spatial regression)'))
+    contrasts = File(
+        exists=True, argstr='-c %s', desc=('matrix of t-statics contrasts'))
+    mask = File(
+        exists=True,
+        argstr='-m %s',
+        desc=('mask image file name if input is image'))
+    dof = traits.Int(
+        argstr='--dof=%d', desc=('set degrees of freedom' + ' explicitly'))
+    des_norm = traits.Bool(
+        argstr='--des_norm',
+        desc=('switch on normalization of the design' +
+              ' matrix columns to unit std deviation'))
     dat_norm = traits.Bool(
         argstr='--dat_norm',
         desc=('switch on normalization of the data time series to unit std '
               'deviation'))
     var_norm = traits.Bool(
-        argstr='--vn',
-        desc=('perform MELODIC variance-normalisation on data'))
+        argstr='--vn', desc=('perform MELODIC variance-normalisation on data'))
     demean = traits.Bool(
-        argstr='--demean',
-        desc=('switch on demeaining of design and data'))
-    out_cope = File(argstr='--out_cope=%s',
-                    desc='output file name for COPE (either as txt or image')
+        argstr='--demean', desc=('switch on demeaining of design and data'))
+    out_cope = File(
+        argstr='--out_cope=%s',
+        desc='output file name for COPE (either as txt or image')
     out_z_name = File(
         argstr='--out_z=%s',
         desc='output file name for Z-stats (either as txt or image')
@@ -2057,19 +2298,21 @@ class GLMInputSpec(FSLCommandInputSpec):
         argstr='--out_p=%s',
         desc=('output file name for p-values of Z-stats (either as text file '
               'or image)'))
-    out_f_name = File(argstr='--out_f=%s',
-                      desc='output file name for F-value of full model fit')
-    out_pf_name = File(argstr='--out_pf=%s',
-                       desc='output file name for p-value for full model fit')
-    out_res_name = File(argstr='--out_res=%s',
-                        desc='output file name for residuals')
-    out_varcb_name = File(argstr='--out_varcb=%s',
-                          desc='output file name for variance of COPEs')
+    out_f_name = File(
+        argstr='--out_f=%s',
+        desc='output file name for F-value of full model fit')
+    out_pf_name = File(
+        argstr='--out_pf=%s',
+        desc='output file name for p-value for full model fit')
+    out_res_name = File(
+        argstr='--out_res=%s', desc='output file name for residuals')
+    out_varcb_name = File(
+        argstr='--out_varcb=%s', desc='output file name for variance of COPEs')
     out_sigsq_name = File(
         argstr='--out_sigsq=%s',
         desc=('output file name for residual noise variance sigma-square'))
-    out_data_name = File(argstr='--out_data=%s',
-                         desc='output file name for pre-processed data')
+    out_data_name = File(
+        argstr='--out_data=%s', desc='output file name for pre-processed data')
     out_vnscales_name = File(
         argstr='--out_vnscales=%s',
         desc=('output file name for scaling factors for variance '
@@ -2078,8 +2321,7 @@ class GLMInputSpec(FSLCommandInputSpec):
 
 class GLMOutputSpec(TraitedSpec):
     out_file = File(
-        exists=True,
-        desc=('file name of GLM parameters (if generated)'))
+        exists=True, desc=('file name of GLM parameters (if generated)'))
     out_cope = OutputMultiPath(
         File(exists=True),
         desc=('output file name for COPEs (either as text file or image)'))
@@ -2101,13 +2343,13 @@ class GLMOutputSpec(TraitedSpec):
         desc=('output file name for p-value for full model fit'))
     out_res = OutputMultiPath(
         File(exists=True), desc='output file name for residuals')
-    out_varcb = OutputMultiPath(File(exists=True),
-                                desc='output file name for variance of COPEs')
+    out_varcb = OutputMultiPath(
+        File(exists=True), desc='output file name for variance of COPEs')
     out_sigsq = OutputMultiPath(
         File(exists=True),
         desc=('output file name for residual noise variance sigma-square'))
-    out_data = OutputMultiPath(File(exists=True),
-                               desc='output file for preprocessed data')
+    out_data = OutputMultiPath(
+        File(exists=True), desc='output file for preprocessed data')
     out_vnscales = OutputMultiPath(
         File(exists=True),
         desc=('output file name for scaling factors for variance '
@@ -2168,3 +2410,26 @@ class GLM(FSLCommand):
                 self.inputs.out_vnscales_name)
 
         return outputs
+
+
+def load_template(name):
+    """Load a template from the model_templates directory
+
+    Parameters
+    ----------
+    name : str
+        The name of the file to load
+
+    Returns
+    -------
+    template : string.Template
+
+    """
+    from pkg_resources import resource_filename as pkgrf
+    full_fname = pkgrf('nipype',
+                       os.path.join('interfaces', 'fsl', 'model_templates',
+                                    name))
+    with open(full_fname) as template_file:
+        template = Template(template_file.read())
+
+    return template

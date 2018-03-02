@@ -4,35 +4,35 @@ from ..brains import ShuffleVectorsModule
 
 
 def test_ShuffleVectorsModule_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    inputVectorFileBaseName=dict(argstr='--inputVectorFileBaseName %s',
-    ),
-    outputVectorFileBaseName=dict(argstr='--outputVectorFileBaseName %s',
-    hash_files=False,
-    ),
-    resampleProportion=dict(argstr='--resampleProportion %f',
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        inputVectorFileBaseName=dict(argstr='--inputVectorFileBaseName %s', ),
+        outputVectorFileBaseName=dict(
+            argstr='--outputVectorFileBaseName %s',
+            hash_files=False,
+        ),
+        resampleProportion=dict(argstr='--resampleProportion %f', ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
     )
     inputs = ShuffleVectorsModule.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_ShuffleVectorsModule_outputs():
-    output_map = dict(outputVectorFileBaseName=dict(),
-    )
+    output_map = dict(outputVectorFileBaseName=dict(), )
     outputs = ShuffleVectorsModule.output_spec()
 
     for key, metadata in list(output_map.items()):

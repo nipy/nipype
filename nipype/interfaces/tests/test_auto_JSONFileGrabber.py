@@ -4,19 +4,20 @@ from ..io import JSONFileGrabber
 
 
 def test_JSONFileGrabber_inputs():
-    input_map = dict(defaults=dict(),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_file=dict(),
+    input_map = dict(
+        defaults=dict(),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(),
     )
     inputs = JSONFileGrabber.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_JSONFileGrabber_outputs():
     output_map = dict()
     outputs = JSONFileGrabber.output_spec()

@@ -4,42 +4,46 @@ from ..fix import Classifier
 
 
 def test_Classifier_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    artifacts_list_file=dict(),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    mel_ica=dict(argstr='%s',
-    copyfile=False,
-    position=1,
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
-    thresh=dict(argstr='%d',
-    mandatory=True,
-    position=-1,
-    ),
-    trained_wts_file=dict(argstr='%s',
-    copyfile=False,
-    mandatory=True,
-    position=2,
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        artifacts_list_file=dict(),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        mel_ica=dict(
+            argstr='%s',
+            copyfile=False,
+            position=1,
+        ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
+        thresh=dict(
+            argstr='%d',
+            mandatory=True,
+            position=-1,
+        ),
+        trained_wts_file=dict(
+            argstr='%s',
+            copyfile=False,
+            mandatory=True,
+            position=2,
+        ),
     )
     inputs = Classifier.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_Classifier_outputs():
-    output_map = dict(artifacts_list_file=dict(),
-    )
+    output_map = dict(artifacts_list_file=dict(), )
     outputs = Classifier.output_spec()
 
     for key, metadata in list(output_map.items()):

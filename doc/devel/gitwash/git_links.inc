@@ -2,7 +2,7 @@
    and name substitutions.  It may be included in many files,
    therefore it should only contain link targets and name
    substitutions.  Try grepping for "^\.\. _" to find plausible
-   candidates for this list.  
+   candidates for this list.
 
 .. NOTE: reST targets are
    __not_case_sensitive__, so only one target definition is needed for
@@ -42,7 +42,7 @@
 .. _git config: http://www.kernel.org/pub/software/scm/git/docs/git-config.html
 .. _why the -a flag?: http://www.gitready.com/beginner/2009/01/18/the-staging-area.html
 .. _git staging area: http://www.gitready.com/beginner/2009/01/18/the-staging-area.html
-.. _tangled working copy problem: http://tomayko.com/writings/the-thing-about-git 
+.. _tangled working copy problem: http://tomayko.com/writings/the-thing-about-git
 .. _git management: http://kerneltrap.org/Linux/Git_Management
 .. _linux git workflow: http://www.mail-archive.com/dri-devel@lists.sourceforge.net/msg39091.html
 .. _git parable: http://tom.preston-werner.com/2009/05/19/the-git-parable.html

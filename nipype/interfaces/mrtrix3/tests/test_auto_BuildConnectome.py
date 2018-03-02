@@ -4,61 +4,57 @@ from ..connectivity import BuildConnectome
 
 
 def test_BuildConnectome_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_file=dict(argstr='%s',
-    mandatory=True,
-    position=-3,
-    ),
-    in_parc=dict(argstr='%s',
-    position=-2,
-    ),
-    in_scalar=dict(argstr='-image %s',
-    ),
-    in_weights=dict(argstr='-tck_weights_in %s',
-    ),
-    keep_unassigned=dict(argstr='-keep_unassigned',
-    ),
-    metric=dict(argstr='-metric %s',
-    ),
-    nthreads=dict(argstr='-nthreads %d',
-    nohash=True,
-    ),
-    out_file=dict(argstr='%s',
-    mandatory=True,
-    position=-1,
-    usedefault=True,
-    ),
-    search_forward=dict(argstr='-assignment_forward_search %f',
-    ),
-    search_radius=dict(argstr='-assignment_radial_search %f',
-    ),
-    search_reverse=dict(argstr='-assignment_reverse_search %f',
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
-    vox_lookup=dict(argstr='-assignment_voxel_lookup',
-    ),
-    zero_diagonal=dict(argstr='-zero_diagonal',
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr='%s',
+            mandatory=True,
+            position=-3,
+        ),
+        in_parc=dict(
+            argstr='%s',
+            position=-2,
+        ),
+        in_scalar=dict(argstr='-image %s', ),
+        in_weights=dict(argstr='-tck_weights_in %s', ),
+        keep_unassigned=dict(argstr='-keep_unassigned', ),
+        metric=dict(argstr='-metric %s', ),
+        nthreads=dict(
+            argstr='-nthreads %d',
+            nohash=True,
+        ),
+        out_file=dict(
+            argstr='%s',
+            mandatory=True,
+            position=-1,
+            usedefault=True,
+        ),
+        search_forward=dict(argstr='-assignment_forward_search %f', ),
+        search_radius=dict(argstr='-assignment_radial_search %f', ),
+        search_reverse=dict(argstr='-assignment_reverse_search %f', ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
+        vox_lookup=dict(argstr='-assignment_voxel_lookup', ),
+        zero_diagonal=dict(argstr='-zero_diagonal', ),
     )
     inputs = BuildConnectome.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_BuildConnectome_outputs():
-    output_map = dict(out_file=dict(),
-    )
+    output_map = dict(out_file=dict(), )
     outputs = BuildConnectome.output_spec()
 
     for key, metadata in list(output_map.items()):

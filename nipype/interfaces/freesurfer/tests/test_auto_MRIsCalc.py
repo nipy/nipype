@@ -4,52 +4,59 @@ from ..utils import MRIsCalc
 
 
 def test_MRIsCalc_inputs():
-    input_map = dict(action=dict(argstr='%s',
-    mandatory=True,
-    position=-2,
-    ),
-    args=dict(argstr='%s',
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_file1=dict(argstr='%s',
-    mandatory=True,
-    position=-3,
-    ),
-    in_file2=dict(argstr='%s',
-    position=-1,
-    xor=['in_float', 'in_int'],
-    ),
-    in_float=dict(argstr='%f',
-    position=-1,
-    xor=['in_file2', 'in_int'],
-    ),
-    in_int=dict(argstr='%d',
-    position=-1,
-    xor=['in_file2', 'in_float'],
-    ),
-    out_file=dict(argstr='-o %s',
-    mandatory=True,
-    ),
-    subjects_dir=dict(),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
+    input_map = dict(
+        action=dict(
+            argstr='%s',
+            mandatory=True,
+            position=-2,
+        ),
+        args=dict(argstr='%s', ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file1=dict(
+            argstr='%s',
+            mandatory=True,
+            position=-3,
+        ),
+        in_file2=dict(
+            argstr='%s',
+            position=-1,
+            xor=['in_float', 'in_int'],
+        ),
+        in_float=dict(
+            argstr='%f',
+            position=-1,
+            xor=['in_file2', 'in_int'],
+        ),
+        in_int=dict(
+            argstr='%d',
+            position=-1,
+            xor=['in_file2', 'in_float'],
+        ),
+        out_file=dict(
+            argstr='-o %s',
+            mandatory=True,
+        ),
+        subjects_dir=dict(),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
     )
     inputs = MRIsCalc.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_MRIsCalc_outputs():
-    output_map = dict(out_file=dict(),
-    )
+    output_map = dict(out_file=dict(), )
     outputs = MRIsCalc.output_spec()
 
     for key, metadata in list(output_map.items()):

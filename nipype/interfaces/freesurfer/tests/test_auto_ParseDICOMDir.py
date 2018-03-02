@@ -4,39 +4,40 @@ from ..preprocess import ParseDICOMDir
 
 
 def test_ParseDICOMDir_inputs():
-    input_map = dict(args=dict(argstr='%s',
-    ),
-    dicom_dir=dict(argstr='--d %s',
-    mandatory=True,
-    ),
-    dicom_info_file=dict(argstr='--o %s',
-    usedefault=True,
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    sortbyrun=dict(argstr='--sortbyrun',
-    ),
-    subjects_dir=dict(),
-    summarize=dict(argstr='--summarize',
-    ),
-    terminal_output=dict(deprecated='1.0.0',
-    nohash=True,
-    ),
+    input_map = dict(
+        args=dict(argstr='%s', ),
+        dicom_dir=dict(
+            argstr='--d %s',
+            mandatory=True,
+        ),
+        dicom_info_file=dict(
+            argstr='--o %s',
+            usedefault=True,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        ignore_exception=dict(
+            deprecated='1.0.0',
+            nohash=True,
+            usedefault=True,
+        ),
+        sortbyrun=dict(argstr='--sortbyrun', ),
+        subjects_dir=dict(),
+        summarize=dict(argstr='--summarize', ),
+        terminal_output=dict(
+            deprecated='1.0.0',
+            nohash=True,
+        ),
     )
     inputs = ParseDICOMDir.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_ParseDICOMDir_outputs():
-    output_map = dict(dicom_info_file=dict(),
-    )
+    output_map = dict(dicom_info_file=dict(), )
     outputs = ParseDICOMDir.output_spec()
 
     for key, metadata in list(output_map.items()):
