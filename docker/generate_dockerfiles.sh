@@ -103,7 +103,7 @@ function generate_main_dockerfile() {
   --arg PYTHON_VERSION_MAJOR=3 PYTHON_VERSION_MINOR=6 BUILD_DATE VCS_REF VERSION \
   --miniconda env_name=neuro \
               conda_install='python=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
-                             icu=58.1 libxml2 libxslt matplotlib mkl numpy
+                             icu=58.1 libxml2 libxslt matplotlib mkl numpy paramiko
                              pandas psutil scikit-learn scipy traits=4.6.0' \
               pip_opts="-e" \
               pip_install="/src/nipype[all]" \
