@@ -50,7 +50,7 @@ try:
         client = paramiko.SSHClient()
         client.load_system_host_keys()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect('localhost', username=os.getenv('USER'), sock=proxy)
+        client.connect('127.0.0.1', username=os.getenv('USER'), sock=proxy)
 
         no_local_ssh = False
 
@@ -342,7 +342,7 @@ def test_datasink_to_s3(dummy_input, tmpdir):
         aws_access_key_id='mykey',
         aws_secret_access_key='mysecret',
         service_name='s3',
-        endpoint_url='http://localhost:4567',
+        endpoint_url='http://127.0.0.1:4567',
         use_ssl=False)
     resource.meta.client.meta.events.unregister('before-sign.s3', fix_s3_host)
 
@@ -659,7 +659,7 @@ def test_SSHDataGrabber(tmpdir):
         client = paramiko.SSHClient()
         client.load_system_host_keys()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect('localhost', username=os.getenv('USER'), sock=proxy)
+        client.connect('127.0.0.1', username=os.getenv('USER'), sock=proxy)
         return client
     MockSSHDataGrabber = copy.copy(nio.SSHDataGrabber)
     MockSSHDataGrabber._get_ssh_client = _mock_get_ssh_client
@@ -668,7 +668,7 @@ def test_SSHDataGrabber(tmpdir):
     ssh_grabber = MockSSHDataGrabber(infields=['test'],
                                      outfields=['test_file'])
     ssh_grabber.inputs.base_directory = str(source_dir)
-    ssh_grabber.inputs.hostname = 'localhost'
+    ssh_grabber.inputs.hostname = '127.0.0.1'
     ssh_grabber.inputs.field_template = dict(test_file='%s.hdr')
     ssh_grabber.inputs.template = ''
     ssh_grabber.inputs.template_args = dict(test_file=[['test']])
