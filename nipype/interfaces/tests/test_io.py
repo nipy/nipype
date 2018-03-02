@@ -50,7 +50,8 @@ try:
         client = paramiko.SSHClient()
         client.load_system_host_keys()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect('127.0.0.1', username=os.getenv('USER'), sock=proxy)
+        client.connect('127.0.0.1', username=os.getenv('USER'), sock=proxy,
+                       timeout=10)
 
         no_local_ssh = False
 
@@ -659,7 +660,8 @@ def test_SSHDataGrabber(tmpdir):
         client = paramiko.SSHClient()
         client.load_system_host_keys()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect('127.0.0.1', username=os.getenv('USER'), sock=proxy)
+        client.connect('127.0.0.1', username=os.getenv('USER'), sock=proxy,
+                       timeout=10)
         return client
     MockSSHDataGrabber = copy.copy(nio.SSHDataGrabber)
     MockSSHDataGrabber._get_ssh_client = _mock_get_ssh_client
