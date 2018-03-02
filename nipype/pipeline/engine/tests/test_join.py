@@ -623,7 +623,7 @@ def test_name_prefix_join(tmpdir):
     square.iterables = [('x', [1, 2])]
     square_join = pe.JoinNode(Merge(1, ravel_inputs=True),
                               name='square_join',
-                              joinsource=square,
+                              joinsource='square',
                               joinfield=['in1'])
     wf.connect(square, 'out', square_join, "in1")
     wf.run()
