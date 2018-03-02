@@ -55,11 +55,13 @@ try:
         no_local_ssh = False
 
     except (paramiko.SSHException,
-            paramiko.ssh_exception.NoValidConnectionsError):
+            paramiko.ssh_exception.NoValidConnectionsError,
+            OSError):
         no_local_ssh = True
 
 except ImportError:
     no_paramiko = True
+    no_local_ssh = True
 
 # Check for fakes3
 standard_library.install_aliases()
