@@ -35,6 +35,14 @@ The current list of issue labels are [here][link_labels] and include:
     Please try to make sure that your requested enhancement is distinct from any others that have already been requested or implemented.
     If you find one that's similar but there are subtle differences, please reference the other request in your issue.
 
+* [![Orphaned](https://img.shields.io/badge/-orphaned-9baddd.svg)][link_orphaned] *These pull requests have been closed for inactivity.*
+
+    Before proposing a new pull request, browse through the "orphaned" pull requests.
+    You may find that someone has already made significant progress toward your goal, and you can re-use their
+    unfinished work.
+    An adopted PR should be updated to merge or rebase the current master, and a new PR should be created (see
+    below) that references the original PR.
+
 ## Making a change
 
 We appreciate all contributions to Nipype, but those accepted fastest will follow a workflow similar to the following:
@@ -131,6 +139,7 @@ You're awesome. :wave::smiley:
 [link_helpwanted]: https://github.com/nipy/nipype/labels/help-wanted
 [link_good_first_issue]: https://github.com/nipy/nipype/issues?q=is%3Aopen+is%3Aissue+label%3Agood-first-issue
 [link_enhancement]: https://github.com/nipy/nipype/labels/enhancement
+[link_orphaned]: https://github.com/nipy/nipype/pulls?q=is%3Apr+label%3Aorphaned+is%3Aclosed
 
 [link_pullrequest]: https://help.github.com/articles/creating-a-pull-request/
 [link_fork]: https://help.github.com/articles/fork-a-repo/
