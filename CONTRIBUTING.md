@@ -67,15 +67,17 @@ check out the [guide for adding new interfaces to Nipype][link_new_interfaces].
 When you are working on your changes, you should test frequently if you are not breaking the existing code,
 more on testing you will find [the testing section of Nipype documentation](http://nipype.readthedocs.io/en/latest/devel/testing_nipype.html). 
 
-It's a good practice to create a new branch of your Nipype repository for a new set of changes.
-
 Before pushing your changes to GitHub run `make check-before-commit`, this will remove trailing spaces, create new auto tests,
 test entire package and build the documentation.
 If you get no errors, you're ready to submit your changes!
 
+It's a good practice to create [a new branch](https://help.github.com/articles/about-branches/) 
+of the repository for a new set of changes.
+
+
 **4. Submit a [pull request][link_pullrequest].**
 
-A new pull request for your changes should be created from your GitHub account.
+A new pull request for your changes should be [created from your GitHub account](https://help.github.com/articles/creating-a-pull-request-from-a-fork/).
 
 When opening a pull request, please use one of the following prefixes:  
 
