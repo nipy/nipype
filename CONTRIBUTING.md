@@ -77,7 +77,7 @@ of the repository for a new set of changes.
 
 **4. Submit a [pull request][link_pullrequest].**
 
-A new pull request for your changes should be [created from your GitHub account](https://help.github.com/articles/creating-a-pull-request-from-a-fork/).
+A new pull request for your changes should be created from your fork of the repository.
 
 When opening a pull request, please use one of the following prefixes:  
 
@@ -145,7 +145,7 @@ You're awesome. :wave::smiley:
 [link_good_first_issue]: https://github.com/nipy/nipype/issues?q=is%3Aopen+is%3Aissue+label%3Agood-first-issue
 [link_enhancement]: https://github.com/nipy/nipype/labels/enhancement
 
-[link_pullrequest]: https://help.github.com/articles/creating-a-pull-request/
+[link_pullrequest]: https://help.github.com/articles/creating-a-pull-request-from-a-fork/
 [link_fork]: https://help.github.com/articles/fork-a-repo/
 [link_pushpullblog]: https://www.igvita.com/2011/12/19/dont-push-your-pull-requests/
 [link_updateupstreamwiki]: https://help.github.com/articles/syncing-a-fork/
