@@ -4,7 +4,9 @@ Welcome to the Nipype repository! We're excited you're here and want to contribu
 
 These guidelines are designed to make it as easy as possible to get involved. If you have any questions that aren't discussed below, please let us know by opening an [issue][link_issues]!
 
-Before you start you'll need to set up a free [GitHub][link_github] account and sign in. Here are some [instructions][link_signupinstructions].
+Before you start you'll need to set up a free [GitHub][link_github] account and sign in, here are some [instructions][link_signupinstructions].
+If you are not familiar with version control system and Git, 
+you will find introduction and links to tutorials [here](http://www.reproducibleimaging.org/module-reproducible-basics/02-vcs/).
 
 Already know what you're looking for in this guide? Jump to the following sections:
 * [Understanding issue labels](#issue-labels)
@@ -47,30 +49,35 @@ This allows other members of the Nipype development team to confirm that you are
 
 **2. [Fork][link_fork] the [Nipype repository][link_nipype] to your profile.**
 
-This is now your own unique copy of Nipype.
+This is now your own unique copy of Nipype repository.
 Changes here won't affect anyone else's work, so it's a safe space to explore edits to the code!
 
-Make sure to [keep your fork up to date][link_updateupstreamwiki] with the master repository.
+You can clone your Nipype repository in order to create a local copy of the code on your machine.
+In your local Nipype directory, run `pip install -e .[dev]`.
+This will add your version of nipype to your local python environment and
+install dependencies needed for development.
+
+Make sure to [keep your fork up to date][link_updateupstreamwiki] with the original Nipype repository.
 
 **3. Make the changes you've discussed.**
 
-If you're adding a new tool from an existing neuroimaging toolkit (e.g., 3dDeconvolve from AFNI), check out the [guide for adding new interfaces to Nipype][link_new_interfaces].
+If you're adding a new tool from an existing neuroimaging toolkit (e.g., 3dDeconvolve from AFNI), 
+check out the [guide for adding new interfaces to Nipype][link_new_interfaces].
 
-To confirm that your changes worked as intended, [clone your fork][link_cloning] to create a local directory.
-In this local directory, run `python setup.py develop`.
-This will add your version of nipype to your local python environment.
+When you are working on your changes, you should test frequently if you are not breaking the existing code,
+more on testing you will find [the testing section of Nipype documentation](http://nipype.readthedocs.io/en/latest/devel/testing_nipype.html). 
 
-Then, in this local nipype directory, run `make check-before-commit`. If you get no errors, you're ready to submit your changes!
+It's a good practice to create a new branch of your Nipype repository for a new set of changes.
+
+Before pushing your changes to GitHub run `make check-before-commit`, this will remove trailing spaces, create new auto tests,
+test entire package and build the documentation.
+If you get no errors, you're ready to submit your changes!
 
 **4. Submit a [pull request][link_pullrequest].**
 
-Submit a new pull request for your changes, using the tags outlined in the [tagging pull requests section](#tagging-pull-requests).
+A new pull request for your changes should be created from your GitHub account.
 
-A member of the development team will review your changes to confirm that they can be merged into the main codebase.
-
-## Tagging Pull Requests
-
-Pull requests should be submitted early and often! When opening a pull request, please use one of the following prefixes:  
+When opening a pull request, please use one of the following prefixes:  
 
 
 * **[ENH]** for enhancements  
@@ -81,11 +88,14 @@ Pull requests should be submitted early and often! When opening a pull request, 
 * **[REF]** for refactoring existing code    
 
 <br>
-
-If, when you submit, your pull request is not yet ready to be merged, please also include the **[WIP]** prefix. This tells the development team that your pull request is a "work-in-progress", and that you plan to continue working on it.
+Pull requests should be submitted early and often (please don't mix too many unrelated changes within one PR)!
+If your pull request is not yet ready to be merged, please also include the **[WIP]** prefix (you can remove it once your PR is ready to be merged). 
+This tells the development team that your pull request is a "work-in-progress", and that you plan to continue working on it.
 
 Review and discussion on new code can begin well before the work is complete, and the more discussion the better!
-In the worst case scenario, if the development team decides to pursue a different path than you've outlined, they'll close the pull request. That's really not so bad! :smile:
+This provides the opportunity to check with the development team the path you've outlined.
+
+One your PR is ready a member of the development team will review your changes to confirm that they can be merged into the main codebase.
 
 ## Notes for New Code
 
@@ -98,8 +108,9 @@ Do not log this, as it creates redundant/confusing logs.
 
 #### Testing
 New code should be tested, whenever feasible.
-Bug fixes should include regression tests, and any new behavior should at least get minimal exercise.
-If you're not sure what this means for your code, ask!
+Bug fixes should include an example that exposes the issue.
+Any new features should have tests that show at least a minimal example.
+If you're not sure what this means for your code, please ask in your pull request.
 
 ## Recognizing contributions
 
