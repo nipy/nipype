@@ -64,7 +64,7 @@ where ``$pathtomatlabdir`` is the path to your matlab installation and
 (typically ``glnxa64`` on 64-bit installations).
 
 Skipped tests
-~~~~~~~~~~
+~~~~~~~~~~~~~
 
 Nipype will skip some tests depending on the currently available software and data
 dependencies. Installing software dependencies and downloading the necessary data
@@ -79,7 +79,7 @@ Note, that the test execution time can increase significantly with these additio
 
 
 Xfailed tests
-~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 Some tests are expect to fail until the code will be changed or for other reasons.
 
@@ -106,7 +106,7 @@ Additional comments
 -------------------
 
 If the project is tested both on your local OS and within a Docker container you might have to remove all 
-``__pycache__`` directory before changing between system.
+``__pycache__`` directories before switching between your OS and a container.
 
 
   
