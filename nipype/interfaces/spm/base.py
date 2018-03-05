@@ -126,28 +126,30 @@ def scans_for_fnames(fnames, keep4d=False, separate_sessions=False):
 
 class Info(PackageInfo):
     """Handles SPM version information
+
+    If you use `SPMCommand.set_mlab_paths` to set alternate entries for
+    matlab_cmd, paths, and use_mcr, then you will need to use the same entries
+    to any call in the Info class to maintain memoization. Otherwise, it will
+    default to the parameters in the `getinfo` function below.
     """
     _path = None
     _name = None
+    _command = None
+    _paths = None
+    _version = None
 
     @classmethod
     def path(klass, matlab_cmd=None, paths=None, use_mcr=None):
-        if klass._path:
-            return klass._path
         klass.getinfo(matlab_cmd, paths, use_mcr)
         return klass._path
 
     @classmethod
     def version(klass, matlab_cmd=None, paths=None, use_mcr=None):
-        if klass._version:
-            return klass._version
         klass.getinfo(matlab_cmd, paths, use_mcr)
         return klass._version
 
     @classmethod
     def name(klass, matlab_cmd=None, paths=None, use_mcr=None):
-        if klass._name:
-            return klass._name
         klass.getinfo(matlab_cmd, paths, use_mcr)
         return klass._name
 
@@ -169,7 +171,10 @@ class Info(PackageInfo):
             If none of the above was successful, the fallback value of
             'matlab -nodesktop -nosplash' will be used.
         paths : str
+            Add paths to matlab session
         use_mcr : bool
+            Whether to use the MATLAB Common Runtime. In this case, the
+            matlab_cmd is expected to be a valid MCR call.
 
         Returns
         -------
@@ -178,17 +183,19 @@ class Info(PackageInfo):
             returns None of path not found
         """
 
-        if klass._name and klass._path and klass._version:
+        use_mcr = use_mcr or 'FORCE_SPMMCR' in os.environ
+        matlab_cmd = matlab_cmd or ((use_mcr and os.getenv('SPMMCRCMD'))
+                      or os.getenv('MATLABCMD', 'matlab -nodesktop -nosplash'))
+
+        if klass._name and klass._path and klass._version and \
+                klass._command == matlab_cmd and klass._paths == paths:
+
             return {
                 'name': klass._name,
                 'path': klass._path,
                 'release': klass._version
             }
-
-        use_mcr = use_mcr or 'FORCE_SPMMCR' in os.environ
-        matlab_cmd = ((use_mcr and os.getenv('SPMMCRCMD'))
-                      or os.getenv('MATLABCMD', 'matlab -nodesktop -nosplash'))
-
+        logger.debug('matlab command or path has changed. recomputing version.')
         mlab = MatlabCommand(matlab_cmd=matlab_cmd, resource_monitor=False)
         mlab.inputs.mfile = False
         if paths:
@@ -214,6 +221,11 @@ exit;
             # if no Matlab at all -- exception could be raised
             # No Matlab -- no spm
             logger.debug('%s', e)
+            klass._version = None
+            klass._path = None
+            klass._name = None
+            klass._command = matlab_cmd
+            klass._paths = paths
             return None
 
         out = sd._strip_header(out.runtime.stdout)
@@ -225,6 +237,8 @@ exit;
         klass._version = out_dict['release']
         klass._path = out_dict['path']
         klass._name = out_dict['name']
+        klass._command = matlab_cmd
+        klass._paths = paths
         return out_dict
 
 
@@ -296,6 +310,10 @@ class SPMCommand(BaseInterface):
         cls._matlab_cmd = matlab_cmd
         cls._paths = paths
         cls._use_mcr = use_mcr
+        info_dict = Info.getinfo(
+            matlab_cmd=matlab_cmd,
+            paths=paths,
+            use_mcr=use_mcr)
 
     def _find_mlab_cmd_defaults(self):
         # check if the user has set environment variables to enforce
@@ -375,6 +393,8 @@ class SPMCommand(BaseInterface):
         """Convert input to appropriate format for SPM."""
         if spec.is_trait_type(traits.Bool):
             return int(val)
+        elif spec.is_trait_type(traits.Tuple):
+            return list(val)
         else:
             return val
 

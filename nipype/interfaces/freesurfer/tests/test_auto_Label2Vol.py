@@ -22,7 +22,7 @@ def test_Label2Vol_inputs():
             nohash=True,
             usedefault=True,
         ),
-        fill_thresh=dict(argstr='--fillthresh %.f', ),
+        fill_thresh=dict(argstr='--fillthresh %g', ),
         hemi=dict(argstr='--hemi %s', ),
         identity=dict(
             argstr='--identity',

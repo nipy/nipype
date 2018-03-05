@@ -24,6 +24,7 @@ def test_RegTools_inputs():
             argstr='-in %s',
             mandatory=True,
         ),
+        inter_val=dict(argstr='-interp %d', ),
         iso_flag=dict(argstr='-iso', ),
         mask_file=dict(argstr='-nan %s', ),
         mul_val=dict(argstr='-mul %s', ),
