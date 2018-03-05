@@ -131,6 +131,105 @@ class BuildConnectome(MRTrix3Base):
         return outputs
 
 
+class LabelConfigInputSpec(CommandLineInputSpec):
+    in_file = File(
+        exists=True,
+        argstr='%s',
+        mandatory=True,
+        position=-3,
+        desc='input anatomical image')
+    in_config = File(
+        exists=True,
+        argstr='%s',
+        position=-2,
+        desc='connectome configuration file')
+    out_file = File(
+        'parcellation.mif',
+        argstr='%s',
+        mandatory=True,
+        position=-1,
+        usedefault=True,
+        desc='output file after processing')
+
+    lut_basic = File(
+        argstr='-lut_basic %s',
+        desc='get information from '
+        'a basic lookup table consisting of index / name pairs')
+    lut_fs = File(
+        argstr='-lut_freesurfer %s',
+        desc='get information from '
+        'a FreeSurfer lookup table(typically "FreeSurferColorLUT'
+        '.txt")')
+    lut_aal = File(
+        argstr='-lut_aal %s',
+        desc='get information from the AAL '
+        'lookup table (typically "ROI_MNI_V4.txt")')
+    lut_itksnap = File(
+        argstr='-lut_itksnap %s',
+        desc='get information from an'
+        ' ITK - SNAP lookup table(this includes the IIT atlas '
+        'file "LUT_GM.txt")')
+    spine = File(
+        argstr='-spine %s',
+        desc='provide a manually-defined '
+        'segmentation of the base of the spine where the streamlines'
+        ' terminate, so that this can become a node in the connection'
+        ' matrix.')
+    nthreads = traits.Int(
+        argstr='-nthreads %d',
+        desc='number of threads. if zero, the number'
+        ' of available cpus will be used',
+        nohash=True)
+
+
+class LabelConfigOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='the output response file')
+
+
+class LabelConfig(MRTrix3Base):
+    """
+    Re-configure parcellation to be incrementally defined.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> labels = mrt.LabelConfig()
+    >>> labels.inputs.in_file = 'aparc+aseg.nii'
+    >>> labels.inputs.in_config = 'mrtrix3_labelconfig.txt'
+    >>> labels.cmdline                               # doctest: +ELLIPSIS
+    'labelconfig aparc+aseg.nii mrtrix3_labelconfig.txt parcellation.mif'
+    >>> labels.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = 'labelconfig'
+    input_spec = LabelConfigInputSpec
+    output_spec = LabelConfigOutputSpec
+
+    def _parse_inputs(self, skip=None):
+        if skip is None:
+            skip = []
+
+        if not isdefined(self.inputs.in_config):
+            from distutils.spawn import find_executable
+            path = find_executable(self._cmd)
+            if path is None:
+                path = os.getenv(MRTRIX3_HOME, '/opt/mrtrix3')
+            else:
+                path = op.dirname(op.dirname(path))
+
+            self.inputs.in_config = op.join(
+                path, 'src/dwi/tractography/connectomics/'
+                'example_configs/fs_default.txt')
+
+        return super(LabelConfig, self)._parse_inputs(skip=skip)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        return outputs
+
+
 class LabelConvertInputSpec(CommandLineInputSpec):
     in_file = File(
         exists=True,
