@@ -10,13 +10,6 @@
 
     To come :
     XNATSink
-
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
-    >>> os.chdir(datadir)
-
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
@@ -31,6 +24,7 @@ import os.path as op
 import shutil
 import subprocess
 import re
+import copy
 import tempfile
 from os.path import join, dirname
 from warnings import warn
@@ -38,7 +32,9 @@ from warnings import warn
 import sqlite3
 
 from .. import config, logging
-from ..utils.filemanip import copyfile, list_to_filename, filename_to_list
+from ..utils.filemanip import (
+    copyfile, list_to_filename, filename_to_list,
+    get_related_files, related_filetype_sets)
 from ..utils.misc import human_order_sorted, str2bool
 from .base import (
     TraitedSpec, traits, Str, File, Directory, BaseInterface, InputMultiPath,
@@ -2412,6 +2408,65 @@ class SSHDataGrabber(DataGrabber):
                 and self.inputs.template[-1] != '$'):
             self.inputs.template += '$'
 
+    def _get_files_over_ssh(self, template):
+        """Get the files matching template over an SSH connection."""
+        # Connect over SSH
+        client = self._get_ssh_client()
+        sftp = client.open_sftp()
+        sftp.chdir(self.inputs.base_directory)
+
+        # Get all files in the dir, and filter for desired files
+        template_dir = os.path.dirname(template)
+        template_base = os.path.basename(template)
+        every_file_in_dir = sftp.listdir(template_dir)
+        if self.inputs.template_expression == 'fnmatch':
+            outfiles = fnmatch.filter(every_file_in_dir, template_base)
+        elif self.inputs.template_expression == 'regexp':
+            regexp = re.compile(template_base)
+            outfiles = list(filter(regexp.match, every_file_in_dir))
+        else:
+            raise ValueError('template_expression value invalid')
+
+        if len(outfiles) == 0:
+            # no files
+            msg = 'Output template: %s returned no files' % template
+            if self.inputs.raise_on_empty:
+                raise IOError(msg)
+            else:
+                warn(msg)
+
+            # return value
+            outfiles = None
+
+        else:
+            # found files, sort and save to outputs
+            if self.inputs.sort_filelist:
+                outfiles = human_order_sorted(outfiles)
+
+            # actually download the files, if desired
+            if self.inputs.download_files:
+                files_to_download = copy.copy(outfiles) # make sure new list!
+
+                # check to see if there are any related files to download
+                for file_to_download in files_to_download:
+                    related_to_current = get_related_files(
+                        file_to_download, include_this_file=False)
+                    existing_related_not_downloading = [
+                        f for f in related_to_current
+                        if f in every_file_in_dir and f not in files_to_download]
+                    files_to_download.extend(existing_related_not_downloading)
+
+                for f in files_to_download:
+                    try:
+                        sftp.get(os.path.join(template_dir, f), f)
+                    except IOError:
+                        iflogger.info('remote file %s not found' % f)
+
+            # return value
+            outfiles = list_to_filename(outfiles)
+
+        return outfiles
+
     def _list_outputs(self):
         try:
             paramiko
@@ -2439,32 +2494,10 @@ class SSHDataGrabber(DataGrabber):
                     isdefined(self.inputs.field_template) and \
                     key in self.inputs.field_template:
                 template = self.inputs.field_template[key]
+
             if not args:
-                client = self._get_ssh_client()
-                sftp = client.open_sftp()
-                sftp.chdir(self.inputs.base_directory)
-                filelist = sftp.listdir()
-                if self.inputs.template_expression == 'fnmatch':
-                    filelist = fnmatch.filter(filelist, template)
-                elif self.inputs.template_expression == 'regexp':
-                    regexp = re.compile(template)
-                    filelist = list(filter(regexp.match, filelist))
-                else:
-                    raise ValueError('template_expression value invalid')
-                if len(filelist) == 0:
-                    msg = 'Output key: %s Template: %s returned no files' % (
-                        key, template)
-                    if self.inputs.raise_on_empty:
-                        raise IOError(msg)
-                    else:
-                        warn(msg)
-                else:
-                    if self.inputs.sort_filelist:
-                        filelist = human_order_sorted(filelist)
-                    outputs[key] = list_to_filename(filelist)
-                if self.inputs.download_files:
-                    for f in filelist:
-                        sftp.get(f, f)
+                outputs[key] = self._get_files_over_ssh(template)
+
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
@@ -2498,44 +2531,18 @@ class SSHDataGrabber(DataGrabber):
                                 e.message +
                                 ": Template %s failed to convert with args %s"
                                 % (template, str(tuple(argtuple))))
-                    client = self._get_ssh_client()
-                    sftp = client.open_sftp()
-                    sftp.chdir(self.inputs.base_directory)
-                    filledtemplate_dir = os.path.dirname(filledtemplate)
-                    filledtemplate_base = os.path.basename(filledtemplate)
-                    filelist = sftp.listdir(filledtemplate_dir)
-                    if self.inputs.template_expression == 'fnmatch':
-                        outfiles = fnmatch.filter(filelist,
-                                                  filledtemplate_base)
-                    elif self.inputs.template_expression == 'regexp':
-                        regexp = re.compile(filledtemplate_base)
-                        outfiles = list(filter(regexp.match, filelist))
-                    else:
-                        raise ValueError('template_expression value invalid')
-                    if len(outfiles) == 0:
-                        msg = 'Output key: %s Template: %s returned no files' % (
-                            key, filledtemplate)
-                        if self.inputs.raise_on_empty:
-                            raise IOError(msg)
-                        else:
-                            warn(msg)
-                        outputs[key].append(None)
-                    else:
-                        if self.inputs.sort_filelist:
-                            outfiles = human_order_sorted(outfiles)
-                        outputs[key].append(list_to_filename(outfiles))
-                        if self.inputs.download_files:
-                            for f in outfiles:
-                                try:
-                                    sftp.get(
-                                        os.path.join(filledtemplate_dir, f), f)
-                                except IOError:
-                                    iflogger.info('remote file %s not found',
-                                                  f)
+
+                    outputs[key].append(self._get_files_over_ssh(filledtemplate))
+
+            # disclude where there was any invalid matches
             if any([val is None for val in outputs[key]]):
                 outputs[key] = []
+
+            # no outputs is None, not empty list
             if len(outputs[key]) == 0:
                 outputs[key] = None
+
+            # one output is the item, not a list
             elif len(outputs[key]) == 1:
                 outputs[key] = outputs[key][0]
 
