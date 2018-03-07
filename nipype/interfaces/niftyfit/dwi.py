@@ -2,13 +2,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 The dwi module of niftyfit, which wraps the fitting methods in NiftyFit.
-
-Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/\
-data'))
-    >>> os.chdir(datadir)
 """
 
 from ..base import TraitedSpec, traits, isdefined, CommandLineInputSpec

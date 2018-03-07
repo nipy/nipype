@@ -7,14 +7,6 @@ module was written to work with MINC version 2.2.00.
 
 Author: Carlo Hamalainen <carlo@carlo-hamalainen.net>
         http://carlo-hamalainen.net
-
-
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-    >>> os.chdir(datadir)
-
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)

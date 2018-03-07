@@ -3,13 +3,6 @@
 """
 The fusion module provides higher-level interfaces to some of the operations
 that can be performed with the seg_DetectLesions command-line program.
-
-Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/\
-data'))
-    >>> os.chdir(datadir)
 """
 
 import warnings
