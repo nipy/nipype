@@ -44,6 +44,8 @@ def generate_boutiques_descriptor(
         import_module(module)
         module_name = str(module)
         module = sys.modules[module]
+    else:
+        module_name = str(module.__name__)
 
     interface = getattr(module, interface_name)()
     inputs = interface.input_spec()
@@ -249,7 +251,7 @@ def create_tempfile():
     Creates a temp file and returns its name.
     '''
     fileTemp = tempfile.NamedTemporaryFile(delete=False)
-    fileTemp.write("hello")
+    fileTemp.write(b"hello")
     fileTemp.close()
     return fileTemp.name
 
@@ -282,6 +284,8 @@ def must_generate_value(name, type, ignored_template_inputs, spec_info, spec,
         return False
     # Best guess to detect string restrictions...
     if "' or '" in spec_info:
+        return False
+    if spec.default or spec.default_value():
         return False
     if not ignored_template_inputs:
         return True
