@@ -168,7 +168,15 @@ EXTRA_REQUIRES = {
     # 'mesh': ['mayavi']  # Enable when it works
 }
 
+
+def _list_union(iterable):
+    return list(set(sum(iterable, [])))
+
+
 # Enable a handle to install all extra dependencies at once
-EXTRA_REQUIRES['all'] = [val for _, val in list(EXTRA_REQUIRES.items())]
+EXTRA_REQUIRES['all'] = _list_union(EXTRA_REQUIRES.values())
+# dev = doc + tests + specs
+EXTRA_REQUIRES['dev'] = _list_union(val for key, val in EXTRA_REQUIRES.items()
+                                    if key in ('doc', 'tests', 'specs'))
 
 STATUS = 'stable'
