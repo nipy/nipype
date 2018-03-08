@@ -2,7 +2,7 @@
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
-from builtins import str, open
+from builtins import str, open, bytes
 # This tool exports a Nipype interface in the Boutiques (https://github.com/boutiques) JSON format.
 # Boutiques tools can be imported in CBRAIN (https://github.com/aces/cbrain) among other platforms.
 #
@@ -40,7 +40,7 @@ def generate_boutiques_descriptor(
         raise Exception("Undefined module.")
 
     # Retrieves Nipype interface
-    if isinstance(module, str):
+    if isinstance(module, (str, bytes)):
         import_module(module)
         module_name = str(module)
         module = sys.modules[module]
