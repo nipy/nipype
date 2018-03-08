@@ -496,6 +496,7 @@ connected.
         flatgraph = self._create_flat_graph()
         nodes = nx.topological_sort(flatgraph)
 
+        all_lines = None
         lines = ['# Workflow']
         importlines = [
             'from nipype.pipeline.engine import Workflow, '

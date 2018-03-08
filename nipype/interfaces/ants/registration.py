@@ -1118,8 +1118,6 @@ class Registration(ANTSCommand):
                 output_filename = self.inputs.output_warped_image
                 if isinstance(output_filename, bool):
                     output_filename = '%s_Warped.nii.gz' % self.inputs.output_transform_prefix
-                else:
-                    output_filename = output_filename
             return output_filename
         inv_output_filename = None
         if isdefined(self.inputs.output_inverse_warped_image) and \
@@ -1127,8 +1125,6 @@ class Registration(ANTSCommand):
             inv_output_filename = self.inputs.output_inverse_warped_image
             if isinstance(inv_output_filename, bool):
                 inv_output_filename = '%s_InverseWarped.nii.gz' % self.inputs.output_transform_prefix
-            else:
-                inv_output_filename = inv_output_filename
         return inv_output_filename
 
     def _format_convergence(self, ii):

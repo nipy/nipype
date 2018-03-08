@@ -1202,7 +1202,7 @@ def normalize_tpms(in_files, in_mask=None, out_files=None):
 
     in_files = np.atleast_1d(in_files).tolist()
 
-    if not out_files:
+    if out_files is None:
         out_files = []
 
     if len(out_files) != len(in_files):

@@ -109,8 +109,4 @@ class EngineBase(object):
         savepkl(filename, self)
 
     def load(self, filename):
-        if '.npz' in filename:
-            DeprecationWarning(('npz files will be deprecated in the next '
-                                'release. you can use numpy to open them.'))
-            return np.load(filename)
         return loadpkl(filename)

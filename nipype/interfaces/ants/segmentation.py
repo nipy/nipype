@@ -700,12 +700,6 @@ class CorticalThickness(ANTSCommand):
         return outputs
 
 
-class antsCorticalThickness(CorticalThickness):
-    DeprecationWarning(
-        'This class has been replaced by CorticalThickness and will be removed in version 0.13'
-    )
-
-
 class BrainExtractionInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(
         3, 2, argstr='-d %d', usedefault=True, desc='image dimension (2 or 3)')
@@ -922,12 +916,6 @@ class BrainExtraction(ANTSCommand):
                 self.inputs.image_suffix)
 
         return outputs
-
-
-class antsBrainExtraction(BrainExtraction):
-    DeprecationWarning(
-        'This class has been replaced by BrainExtraction and will be removed in version 0.13'
-    )
 
 
 class JointFusionInputSpec(ANTSCommandInputSpec):
