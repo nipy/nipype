@@ -10,7 +10,7 @@ This is especially useful when running Interfaces wrapping code that does not ha
 command line equivalents (nipy or SPM). Being able to run Nipype interfaces opens new
 possibilities such as inclusion of SPM processing steps in bash scripts.
 
-To run Nipype Interafces you need to use the nipype_cmd tool that should already be installed.
+To run Nipype Interfaces you need to use the nipype_cmd tool that should already be installed.
 The tool allows you to list Interfaces available in a certain package:
 
 .. testcode::
@@ -24,7 +24,6 @@ The tool allows you to list Interfaces available in a certain package:
 	    ComputeMask
 	    FitGLM
 	    EstimateContrast
-	    FmriRealign4d
 
 After selecting a particular Interface you can learn what inputs it requires:
 
