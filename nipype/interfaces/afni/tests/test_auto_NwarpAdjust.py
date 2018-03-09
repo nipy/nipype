@@ -16,6 +16,10 @@ def test_NwarpAdjust_inputs():
             usedefault=True,
         ),
         in_files=dict(argstr='-source %s', ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         out_file=dict(
             argstr='-prefix %s',
             keep_extension=True,
@@ -23,6 +27,7 @@ def test_NwarpAdjust_inputs():
             name_template='%s_NwarpAdjust',
             requires=['in_files'],
         ),
+        outputtype=dict(),
         terminal_output=dict(
             deprecated='1.0.0',
             nohash=True,

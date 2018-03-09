@@ -1511,7 +1511,7 @@ class Notes(CommandLine):
         return outputs
 
 
-class NwarpAdjustInputSpec(CommandLineInputSpec):
+class NwarpAdjustInputSpec(AFNICommandInputSpec):
     warps = InputMultiPath(
         File(exists=True),
         minlen=5,
@@ -1569,16 +1569,8 @@ class NwarpAdjust(AFNICommandBase):
             skip += ['out_file']
         return super(NwarpAdjust, self)._parse_inputs(skip=skip)
 
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()[name]
-        return None
-
     def _list_outputs(self):
         outputs = self.output_spec().get()
-
-        if self.inputs.out_file:
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
 
         if self.inputs.in_files:
             if self.inputs.out_file:
@@ -1591,7 +1583,6 @@ class NwarpAdjust(AFNICommandBase):
                     ext = ext2 + ext
                 outputs['out_file'] = os.path.abspath(
                     basename_noext + '_NwarpAdjust' + ext)
-
         return outputs
 
 
