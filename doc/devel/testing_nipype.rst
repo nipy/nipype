@@ -54,8 +54,8 @@ environment variable is not set, some FreeSurfer related tests will fail.
 If any of the tests failed, please report them on our `bug tracker
 <http://github.com/nipy/nipype/issues>`_.
 
-On Debian systems, set the following environment variable before running
-tests::
+On Debian systems with a local copy of MATLAB installed, set the following 
+environment variable before running tests::
 
        export MATLABCMD=$pathtomatlabdir/bin/$platform/MATLAB
 
