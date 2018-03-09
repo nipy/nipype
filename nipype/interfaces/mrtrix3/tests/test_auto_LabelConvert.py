@@ -29,7 +29,7 @@ def test_LabelConvert_inputs():
             mandatory=True,
             position=-3,
         ),
-        nthreads=dict(
+        num_threads=dict(
             argstr='-nthreads %d',
             nohash=True,
         ),

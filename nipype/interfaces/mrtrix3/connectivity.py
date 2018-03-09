@@ -253,7 +253,7 @@ class LabelConvertInputSpec(CommandLineInputSpec):
         'segmentation of the base of the spine where the streamlines'
         ' terminate, so that this can become a node in the connection'
         ' matrix.')
-    nthreads = traits.Int(
+    num_threads = traits.Int(
         argstr='-nthreads %d',
         desc='number of threads. if zero, the number'
         ' of available cpus will be used',
@@ -276,7 +276,7 @@ class LabelConvert(MRTrix3Base):
     >>> labels.inputs.in_file = 'aparc+aseg.nii'
     >>> labels.inputs.in_config = 'mrtrix3_labelconfig.txt'
     >>> labels.inputs.in_lut = 'FreeSurferColorLUT.txt'
-    >>> labels.cmdline                               # doctest: +ELLIPSIS
+    >>> labels.cmdline
     'labelconvert aparc+aseg.nii FreeSurferColorLUT.txt mrtrix3_labelconfig.txt parcellation.mif'
     >>> labels.run()                                 # doctest: +SKIP
     """
@@ -290,8 +290,8 @@ class LabelConvert(MRTrix3Base):
             skip = []
 
         if not isdefined(self.inputs.in_config):
-            from distutils.spawn import find_executable
-            path = find_executable(self._cmd)
+            from nipype.utils.filemanip import which
+            path = which(self._cmd)
             if path is None:
                 path = os.getenv(MRTRIX3_HOME, '/opt/mrtrix3')
             else:
