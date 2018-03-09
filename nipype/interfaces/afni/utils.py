@@ -1533,7 +1533,7 @@ class NwarpAdjustInputSpec(CommandLineInputSpec):
         name_source='in_files',
         name_template='%s_NwarpAdjust',
         keep_extension=True,
-        xand=['requires'])
+        requires=['in_files'])
 
 
 class NwarpAdjust(AFNICommandBase):

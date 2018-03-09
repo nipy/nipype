@@ -21,7 +21,7 @@ def test_NwarpAdjust_inputs():
             keep_extension=True,
             name_source='in_files',
             name_template='%s_NwarpAdjust',
-            xand=['requires'],
+            requires=['in_files'],
         ),
         terminal_output=dict(
             deprecated='1.0.0',
