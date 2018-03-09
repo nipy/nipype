@@ -2,7 +2,7 @@
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
-from builtins import str, open
+from builtins import str, open, bytes
 # This tool exports a Nipype interface in the Boutiques (https://github.com/boutiques) JSON format.
 # Boutiques tools can be imported in CBRAIN (https://github.com/aces/cbrain) among other platforms.
 #
@@ -40,10 +40,12 @@ def generate_boutiques_descriptor(
         raise Exception("Undefined module.")
 
     # Retrieves Nipype interface
-    if isinstance(module, str):
+    if isinstance(module, (str, bytes)):
         import_module(module)
         module_name = str(module)
         module = sys.modules[module]
+    else:
+        module_name = str(module.__name__)
 
     interface = getattr(module, interface_name)()
     inputs = interface.input_spec()
@@ -249,7 +251,7 @@ def create_tempfile():
     Creates a temp file and returns its name.
     '''
     fileTemp = tempfile.NamedTemporaryFile(delete=False)
-    fileTemp.write("hello")
+    fileTemp.write(b"hello")
     fileTemp.close()
     return fileTemp.name
 
@@ -282,6 +284,8 @@ def must_generate_value(name, type, ignored_template_inputs, spec_info, spec,
         return False
     # Best guess to detect string restrictions...
     if "' or '" in spec_info:
+        return False
+    if spec.default or spec.default_value():
         return False
     if not ignored_template_inputs:
         return True
