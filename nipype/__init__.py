@@ -25,19 +25,19 @@ logging = Logging(config)
 
 
 class NipypeTester(object):
-    def __call__(self, doctests=True):
+    def __call__(self, doctests=True, parallel=True):
         try:
             import pytest
         except:
             raise RuntimeError(
                 'py.test not installed, run: pip install pytest')
-        params = {'args': []}
-        if doctests:
-            params['args'].append('--doctest-modules')
-        nipype_path = os.path.dirname(__file__)
-        params['args'].extend(
-            ['-x', '--ignore={}/external'.format(nipype_path), nipype_path])
-        pytest.main(**params)
+        args = []
+        if not doctests:
+            args.extend(['-p', 'no:doctest'])
+        if not parallel:
+            args.append('-n0')
+        args.append(os.path.dirname(__file__))
+        pytest.main(args=args)
 
 
 test = NipypeTester()

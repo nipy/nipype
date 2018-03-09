@@ -9,13 +9,6 @@ that can be performed with the seg_em command-line program.
 Examples
 --------
 See the docstrings of the individual classes for examples.
-
-Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/\
-data'))
-    >>> os.chdir(datadir)
 """
 
 from ..base import (TraitedSpec, File, traits, CommandLineInputSpec,

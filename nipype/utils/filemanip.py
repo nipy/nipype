@@ -2,14 +2,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous file manipulation functions
-
-  .. testsetup::
-    # Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname(os.path.realpath( __file__ ))
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
-    >>> os.chdir(datadir)
-
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
@@ -185,7 +177,8 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     '/tmp/prefoopost.nii.gz'
 
     >>> from nipype.interfaces.base import Undefined
-    >>> fname_presuffix(fname, 'pre', 'post', Undefined) == fname_presuffix(fname, 'pre', 'post')
+    >>> fname_presuffix(fname, 'pre', 'post', Undefined) == \
+            fname_presuffix(fname, 'pre', 'post')
     True
 
     """
@@ -289,14 +282,24 @@ def _parse_mount_table(exit_code, output):
     #                          <PATH>^^^^      ^^^^^<FSTYPE>
     # OSX mount example:    /dev/disk2 on / (hfs, local, journaled)
     #                               <PATH>^  ^^^<FSTYPE>
-    pattern = re.compile(r'.*? on (/.*?) (?:type |\()([^\s,]+)(?:, |\)| )')
+    pattern = re.compile(r'.*? on (/.*?) (?:type |\()([^\s,\)]+)')
+
+    # Keep line and match for error reporting (match == None on failure)
+    # Ignore empty lines
+    matches = [(l, pattern.match(l))
+               for l in output.strip().splitlines() if l]
 
     # (path, fstype) tuples, sorted by path length (longest first)
-    mount_info = sorted((pattern.match(l).groups()
-                         for l in output.splitlines()),
+    mount_info = sorted((match.groups() for _, match in matches
+                         if match is not None),
                         key=lambda x: len(x[0]), reverse=True)
     cifs_paths = [path for path, fstype in mount_info
                   if fstype.lower() == 'cifs']
+
+    # Report failures as warnings
+    for line, match in matches:
+        if match is None:
+            fmlogger.debug("Cannot parse mount line: '%s'", line)
 
     return [
         mount for mount in mount_info

@@ -8,14 +8,6 @@ The possum module provides classes for interfacing with `POSSUM
 Please, check out the link for pertinent citations using POSSUM.
 
   .. Note:: This was written to work with FSL version 5.0.6.
-
-  .. testsetup::
-    # Change directory to provide relative paths for doctests
-    import os
-    filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-    os.chdir(datadir)
-
 """
 
 from .base import FSLCommand, FSLCommandInputSpec
