@@ -1521,7 +1521,6 @@ class NwarpAdjustInputSpec(CommandLineInputSpec):
     in_files = InputMultiPath(
         File(exists=True),
         minlen=5,
-        mandatory=False,
         argstr='-source %s',
         desc='List of input 3D datasets to be warped by the adjusted warp '
              'datasets.  There must be exactly as many of these datasets as '
@@ -1531,11 +1530,10 @@ class NwarpAdjustInputSpec(CommandLineInputSpec):
              'The output dataset will be on the common grid shared by the '
              'source datasets.',
         argstr='-prefix %s',
-        mandatory=False,
         name_source='in_files',
         name_template='%s_NwarpAdjust',
         keep_extension=True,
-        xand=['in_files'])
+        xand=['requires'])
 
 
 class NwarpAdjust(AFNICommandBase):

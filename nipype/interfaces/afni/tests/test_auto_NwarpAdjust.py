@@ -15,17 +15,13 @@ def test_NwarpAdjust_inputs():
             nohash=True,
             usedefault=True,
         ),
-        in_files=dict(
-            argstr='-source %s',
-            mandatory=False,
-        ),
+        in_files=dict(argstr='-source %s', ),
         out_file=dict(
             argstr='-prefix %s',
             keep_extension=True,
-            mandatory=False,
             name_source='in_files',
             name_template='%s_NwarpAdjust',
-            xand=['in_files'],
+            xand=['requires'],
         ),
         terminal_output=dict(
             deprecated='1.0.0',
