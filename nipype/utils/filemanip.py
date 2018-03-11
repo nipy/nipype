@@ -74,7 +74,7 @@ def split_filename(fname):
 
     """
 
-    special_extensions = [".nii.gz", ".tar.gz"]
+    special_extensions = [".nii.gz", ".tar.gz", ".niml.dset"]
 
     pth = op.dirname(fname)
     fname = op.basename(fname)
