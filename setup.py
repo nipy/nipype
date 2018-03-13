@@ -125,9 +125,8 @@ def main():
     with open(ver_file) as infofile:
         exec(infofile.read(), globals(), ldict)
 
-    SETUP_REQUIRES = ['future']
     if sys.version_info <= (3, 4):
-        SETUP_REQUIRES.append('configparser')
+        ldict['SETUP_REQUIRES'].append('configparser')
     setup(
         name=ldict['NAME'],
         maintainer=ldict['MAINTAINER'],
@@ -143,7 +142,7 @@ def main():
         platforms=ldict['PLATFORMS'],
         version=ldict['VERSION'],
         install_requires=ldict['REQUIRES'],
-        setup_requires=SETUP_REQUIRES,
+        setup_requires=ldict['SETUP_REQUIRES'],
         provides=ldict['PROVIDES'],
         packages=find_packages(),
         package_data={'nipype': testdatafiles},

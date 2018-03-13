@@ -143,11 +143,14 @@ REQUIRES = [
     'prov==%s' % PROV_VERSION,
     'click>=%s' % CLICK_MIN_VERSION,
     'funcsigs',
-    'pytest>=%s' % PYTEST_MIN_VERSION,
-    'mock',
     'pydotplus',
     'pydot>=%s' % PYDOT_MIN_VERSION,
     'packaging',
+]
+SETUP_REQUIRES = [
+    'future',
+    'mock',
+    'pytest>=%s' % PYTEST_MIN_VERSION,
 ]
 
 if sys.version_info <= (3, 4):
