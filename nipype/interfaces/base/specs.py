@@ -197,6 +197,7 @@ class BaseTraitedSpec(traits.HasTraits):
             if isinstance(objekt, tuple):
                 out = tuple(out)
         else:
+            out = None
             if isdefined(objekt):
                 out = objekt
             else:
@@ -283,6 +284,7 @@ class BaseTraitedSpec(traits.HasTraits):
             if isinstance(objekt, tuple):
                 out = tuple(out)
         else:
+            out = None
             if isdefined(objekt):
                 if (hash_files and isinstance(objekt, (str, bytes))
                         and os.path.isfile(objekt)):

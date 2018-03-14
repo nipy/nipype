@@ -120,7 +120,6 @@ LONG_DESCRIPTION = long_description
 URL = 'http://nipy.org/nipype'
 DOWNLOAD_URL = 'http://github.com/nipy/nipype/archives/master'
 LICENSE = 'Apache License, 2.0'
-CLASSIFIERS = CLASSIFIERS
 AUTHOR = 'nipype developers'
 AUTHOR_EMAIL = 'neuroimaging@python.org'
 PLATFORMS = 'OS Independent'

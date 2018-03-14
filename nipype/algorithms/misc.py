@@ -1184,7 +1184,7 @@ class MergeROIs(BaseInterface):
         return outputs
 
 
-def normalize_tpms(in_files, in_mask=None, out_files=[]):
+def normalize_tpms(in_files, in_mask=None, out_files=None):
     """
     Returns the input tissue probability maps (tpms, aka volume fractions)
     normalized to sum up 1.0 at each voxel within the mask.
@@ -1194,6 +1194,9 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
     import os.path as op
 
     in_files = np.atleast_1d(in_files).tolist()
+
+    if out_files is None:
+        out_files = []
 
     if len(out_files) != len(in_files):
         for i, finname in enumerate(in_files):

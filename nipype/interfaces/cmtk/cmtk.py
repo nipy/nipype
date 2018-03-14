@@ -214,7 +214,8 @@ def cmat(track_file,
         gp = nx.read_gpickle(resolution_network_file)
     elif ext == '.graphml':
         gp = nx.read_graphml(resolution_network_file)
-
+    else:
+        raise TypeError("Unable to read file:", resolution_network_file)
     nROIs = len(gp.nodes())
 
     # add node information from parcellation

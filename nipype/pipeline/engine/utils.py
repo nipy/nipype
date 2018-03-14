@@ -280,7 +280,7 @@ def load_resultfile(path, name):
         except UnicodeDecodeError:
             # Was this pickle created with Python 2.x?
             pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
-            logger.warning('Successfully loaded pickle in compatibility mode')
+            logger.warning('Successfully loaded pkl in compatibility mode')
         except (traits.TraitError, AttributeError, ImportError,
                 EOFError) as err:
             if isinstance(err, (AttributeError, ImportError)):
@@ -439,6 +439,8 @@ def modify_paths(object, relative=True, basedir=None):
                     raise IOError('File %s not found' % out)
             else:
                 out = object
+        else:
+            raise TypeError("Object {} is undefined".format(object))
     return out
 
 
