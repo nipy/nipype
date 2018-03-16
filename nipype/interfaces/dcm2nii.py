@@ -343,15 +343,15 @@ class Dcm2niix(CommandLine):
 
     >>> from nipype.interfaces.dcm2nii import Dcm2niix
     >>> converter = Dcm2niix()
-    >>> converter.inputs.source_dir = '.'
-    >>> converter.inputs.compress = 'i'
-    >>> converter.inputs.single_file = True
-    >>> converter.cmdline # doctest: +SKIP
-    'dcm2niix -b y -z y -x n -t n -m n -s y -v n .'
+    >>> converter.inputs.source_dir = 'dicomdir'
+    >>> converter.inputs.compression = 5
+    >>> converter.inputs.output_dir = 'ds005'
+    >>> converter.cmdline
+    'dcm2niix -b y -z y -5 -x n -t n -m n -o ds005 -s n -v n dicomdir'
 
     >>> flags = '-'.join([val.strip() + ' ' for val in sorted(' '.join(converter.cmdline.split()[1:-1]).split('-'))])
     >>> flags
-    ' -b y -m n -s y -t n -v n -x n -z y '
+    ' -5 -b y -m n -o ds005 -s n -t n -v n -x n -z y '
     """
 
     input_spec = Dcm2niixInputSpec
