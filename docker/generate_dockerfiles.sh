@@ -69,10 +69,10 @@ function generate_base_dockerfile() {
   --label maintainer="The nipype developers https://github.com/nipy/nipype" \
   --spm version=12 matlab_version=R2017a \
   --afni version=latest install_python2=true \
-  --freesurfer version=6.0.0 min=true --dcm2niix version=v1.0.20171215 \
+  --freesurfer version=6.0.0 min=true \
   --run 'echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW12RVYzelRmZ1xuRlM1Si8yYzFhZ2c0RVxuIiA+IC9vcHQvZnJlZXN1cmZlci9saWNlbnNlLnR4dAo=" | base64 -d | sh' \
   --install ants apt-utils bzip2 convert3d file fsl-core fsl-mni152-templates \
-            fusefat g++ git graphviz make ruby unzip xvfb git-annex-standalone \
+            fusefat g++ git graphviz make ruby unzip xvfb \
   --add-to-entrypoint "source /etc/fsl/fsl.sh" \
   --env ANTSPATH='/usr/lib/ants' PATH='/usr/lib/ants:$PATH' \
   --run "gem install fakes3" \

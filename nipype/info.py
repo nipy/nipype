@@ -165,7 +165,6 @@ EXTRA_REQUIRES = {
     'xvfbwrapper': ['xvfbwrapper'],
     'pybids': ['pybids'],
     'ssh': ['paramiko'],
-    'data': ['datalad']
     # 'mesh': ['mayavi']  # Enable when it works
 }
 
