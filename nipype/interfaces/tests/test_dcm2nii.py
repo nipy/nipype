@@ -1,7 +1,9 @@
 import os
 import pytest
+import shutil
 
 from nipype.interfaces.dcm2nii import Dcm2niix
+no_dcm2niix = not shutil.which(Dcm2niix()._cmd)
 no_datalad = False
 try:
     from datalad import api # to pull and grab data
@@ -21,6 +23,7 @@ def fetch_data(tmpdir, dicoms):
     return data
 
 @pytest.mark.skipif(no_datalad, reason="Datalad required")
+@pytest.mark.skipif(no_dcm2niix, reason="Dcm2niix required")
 def test_dcm2niix_dwi(tmpdir):
     tmpdir.chdir()
     try:
