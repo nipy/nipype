@@ -51,4 +51,4 @@ def test_dcm2niix_dwi(tmpdir):
     dcm.inputs.output_dir = outdir
     dcm.inputs.bids_format = False
     eg2 = dcm.run()
-    assert_dwi(eg1, False)
+    assert_dwi(eg2, False)
