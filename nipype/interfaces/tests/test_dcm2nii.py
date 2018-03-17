@@ -3,7 +3,7 @@ import pytest
 import shutil
 
 from nipype.interfaces.dcm2nii import Dcm2niix
-no_dcm2niix = not shutil.which(Dcm2niix()._cmd)
+no_dcm2niix = not bool(Dcm2niix().version)
 no_datalad = False
 try:
     from datalad import api # to pull and grab data

@@ -10,7 +10,19 @@ from copy import deepcopy
 
 from ..utils.filemanip import split_filename
 from .base import (CommandLine, CommandLineInputSpec, InputMultiPath, traits,
-                   TraitedSpec, OutputMultiPath, isdefined, File, Directory)
+                   TraitedSpec, OutputMultiPath, isdefined, File, Directory,
+                   PackageInfo)
+
+
+class Info(PackageInfo):
+    """Handle dcm2niix version information"""
+
+    version_cmd = 'dcm2niix'
+
+    @staticmethod
+    def parse_version(raw_info):
+        m = re.search(r'version (\S+)', raw_info)
+        return m[1] if m else None
 
 
 class Dcm2niiInputSpec(CommandLineInputSpec):
@@ -357,6 +369,10 @@ class Dcm2niix(CommandLine):
     input_spec = Dcm2niixInputSpec
     output_spec = Dcm2niixOutputSpec
     _cmd = 'dcm2niix'
+
+    @property
+    def version(self):
+        return Info.version()
 
     def _format_arg(self, opt, spec, val):
         bools = ['bids_format', 'merge_imgs', 'single_file', 'verbose', 'crop',
