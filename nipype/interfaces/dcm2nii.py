@@ -22,7 +22,7 @@ class Info(PackageInfo):
     @staticmethod
     def parse_version(raw_info):
         m = re.search(r'version (\S+)', raw_info)
-        return m[1] if m else None
+        return m.groups()[0] if m else None
 
 
 class Dcm2niiInputSpec(CommandLineInputSpec):
