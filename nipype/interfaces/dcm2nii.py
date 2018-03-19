@@ -364,6 +364,7 @@ class Dcm2niix(CommandLine):
     >>> flags = '-'.join([val.strip() + ' ' for val in sorted(' '.join(converter.cmdline.split()[1:-1]).split('-'))])
     >>> flags
     ' -5 -b y -m n -o ds005 -s n -t n -v n -x n -z y '
+    >>> converter.run() # doctest: +SKIP
     """
 
     input_spec = Dcm2niixInputSpec
