@@ -74,7 +74,7 @@ def split_filename(fname):
 
     """
 
-    special_extensions = [".nii.gz", ".tar.gz"]
+    special_extensions = [".nii.gz", ".tar.gz", ".niml.dset"]
 
     pth = op.dirname(fname)
     fname = op.basename(fname)
@@ -427,6 +427,8 @@ def copyfile(originalfile,
                 hashfn = hash_timestamp
             elif hashmethod == 'content':
                 hashfn = hash_infile
+            else:
+                raise AttributeError("Unknown hash method found:", hashmethod)
             newhash = hashfn(newfile)
             fmlogger.debug('File: %s already exists,%s, copy:%d', newfile,
                            newhash, copy)
@@ -622,16 +624,6 @@ def load_json(filename):
 def loadcrash(infile, *args):
     if '.pkl' in infile:
         return loadpkl(infile)
-    elif '.npz' in infile:
-        DeprecationWarning(('npz files will be deprecated in the next '
-                            'release. you can use numpy to open them.'))
-        data = np.load(infile)
-        out = {}
-        for k in data.files:
-            out[k] = [f for f in data[k].flat]
-            if len(out[k]) == 1:
-                out[k] = out[k].pop()
-        return out
     else:
         raise ValueError('Only pickled crashfiles are supported')
 

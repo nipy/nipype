@@ -2019,7 +2019,7 @@ class FIRST(FSLCommand):
         outputs['bvars'] = self._gen_mesh_names('bvars', structures)
         return outputs
 
-    def _gen_fname(self, name):
+    def _gen_fname(self, basename):
         path, outname, ext = split_filename(self.inputs.out_file)
 
         method = 'none'
@@ -2033,9 +2033,9 @@ class FIRST(FSLCommand):
             thres = '%.4f' % self.inputs.method_as_numerical_threshold
             method = thres.replace('.', '')
 
-        if name == 'original_segmentations':
+        if basename == 'original_segmentations':
             return op.abspath('%s_all_%s_origsegs.nii.gz' % (outname, method))
-        if name == 'segmentation_file':
+        if basename == 'segmentation_file':
             return op.abspath('%s_all_%s_firstseg.nii.gz' % (outname, method))
 
         return None

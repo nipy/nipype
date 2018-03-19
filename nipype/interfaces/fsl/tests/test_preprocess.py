@@ -615,15 +615,15 @@ def test_first_genfname():
     first.inputs.out_file = 'segment.nii'
     first.inputs.output_type = "NIFTI_GZ"
 
-    value = first._gen_fname(name='original_segmentations')
+    value = first._gen_fname(basename='original_segmentations')
     expected_value = os.path.abspath('segment_all_fast_origsegs.nii.gz')
     assert value == expected_value
     first.inputs.method = 'none'
-    value = first._gen_fname(name='original_segmentations')
+    value = first._gen_fname(basename='original_segmentations')
     expected_value = os.path.abspath('segment_all_none_origsegs.nii.gz')
     assert value == expected_value
     first.inputs.method = 'auto'
     first.inputs.list_of_specific_structures = ['L_Hipp', 'R_Hipp']
-    value = first._gen_fname(name='original_segmentations')
+    value = first._gen_fname(basename='original_segmentations')
     expected_value = os.path.abspath('segment_all_none_origsegs.nii.gz')
     assert value == expected_value

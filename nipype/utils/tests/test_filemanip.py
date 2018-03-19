@@ -24,6 +24,7 @@ def _ignore_atime(stat):
 @pytest.mark.parametrize(
     "filename, split",
     [('foo.nii', ('', 'foo', '.nii')), ('foo.nii.gz', ('', 'foo', '.nii.gz')),
+     ('foo.niml.dset', ('', 'foo', '.niml.dset')),
      ('/usr/local/foo.nii.gz',
       ('/usr/local', 'foo', '.nii.gz')), ('../usr/local/foo.nii',
                                           ('../usr/local', 'foo', '.nii')),

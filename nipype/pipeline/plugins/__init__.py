@@ -6,7 +6,6 @@ from __future__ import (print_function, division, unicode_literals,
 
 from .debug import DebugPlugin
 from .linear import LinearPlugin
-from .ipythonx import IPythonXPlugin
 from .pbs import PBSPlugin
 from .oar import OARPlugin
 from .sge import SGEPlugin
