@@ -219,6 +219,7 @@ class AllineateInputSpec(AFNICommandInputSpec):
         desc='output file from 3dAllineate',
         argstr='-prefix %s',
         genfile=True,
+        hash_files=False,
         xor=['allcostx'])
     out_param_file = File(
         argstr='-1Dparam_save %s',
@@ -485,17 +486,22 @@ class Allineate(AFNICommand):
             return arg
         return super(Allineate, self)._format_arg(name, trait_spec, value)
 
+    def _gen_outfilename(self):
+        out_file = self.inputs.out_file
+        if not isdefined(out_file) and isdefined(self.inputs.in_file) and not isdefined(self.inputs.allcostx):
+            out_file = op.abspath(self._gen_fname(self.inputs.in_file,op.dirname(self.inputs.in_file),suffix='_allineate'))
+        return out_file
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
 
-        if self.inputs.out_file:
-            outputs['out_file'] = op.abspath(self.inputs.out_file)
+        outputs['out_file'] = self._gen_outfilename()
 
-        if self.inputs.out_weight_file:
+        if isdefined(self.inputs.out_weight_file):
             outputs['out_weight_file'] = op.abspath(
                 self.inputs.out_weight_file)
 
-        if self.inputs.out_matrix:
+        if isdefined(self.inputs.out_matrix):
             path, base, ext = split_filename(self.inputs.out_matrix)
             if ext.lower() not in ['.1d', '.1D']:
                 outputs['out_matrix'] = self._gen_fname(
@@ -503,7 +509,7 @@ class Allineate(AFNICommand):
             else:
                 outputs['out_matrix'] = op.abspath(self.inputs.out_matrix)
 
-        if self.inputs.out_param_file:
+        if isdefined(self.inputs.out_param_file):
             path, base, ext = split_filename(self.inputs.out_param_file)
             if ext.lower() not in ['.1d', '.1D']:
                 outputs['out_param_file'] = self._gen_fname(
@@ -519,7 +525,7 @@ class Allineate(AFNICommand):
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._list_outputs()[name]
+            return self._gen_outfilename()
         return None
 
 
