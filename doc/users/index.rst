@@ -12,8 +12,11 @@
 
    install
    neurodocker
-   
    caching_tutorial
+
+- `Nipype tutorials <https://miykael.github.io/nipype_tutorial/>`_
+- `Porcupine graphical interface
+  <https://timvanmourik.github.io/Porcupine/getting-started/>`_
 
 .. toctree::
    :maxdepth: 1
