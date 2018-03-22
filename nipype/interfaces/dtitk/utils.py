@@ -23,13 +23,13 @@ class TVAdjustVoxSpInputSpec(CommandLineInputSpec):
     out_file = traits.Str(genfile=True, desc='output path', position=1,
                           argstr="-out %s", name_source='in_file',
                           name_template='%s_avs', keep_extension=True)
-    target = traits.File(desc='target volume',
-                         position=2, argstr="-target %s")
+    target_file = traits.File(desc='target volume to match',
+                              position=2, argstr="-target %s")
     vsize = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
-                         desc='resampled voxel size',
+                         desc='xyz voxel size (superseded by target)',
                          position=3, argstr="-vsize %f %f %f")
     origin = traits.Tuple((0, 0, 0),
-                          desc='xyz voxel size', position=4,
+                          desc='xyz origin (superseded by target)', position=4,
                           argstr='-origin %f %f %f', usedefault=True)
 
 
@@ -53,6 +53,46 @@ class TVAdjustVoxSpTask(CommandLineDtitk):
     output_spec = TVAdjustVoxSpOutputSpec
     _cmd = 'TVAdjustVoxelspace'
 
+
+class TVResampleInputSpec(CommandLineInputSpec):
+    in_file = File(desc="image to resample", exists=True,
+                   mandatory=True, position=0, argstr="-in %s")
+    out_file = traits.Str(desc='output path', position=1,
+                          name_source="in_file", name_template="%s_resampled",
+                          keep_extension=True, argstr="-out %s")
+    target_file = File(desc='specs read from the target volume', position=2,
+                       argstr="-target %s")
+    align = traits.Str('center', position=3, argstr="-align %s")
+    interp = traits.Enum('LEI', 'EI', position=4)
+    arraysz = traits.Tuple((128, 128, 64), desc='resampled array size',
+                           position=5, argstr="-size %s")
+    voxsz = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
+                         desc='resampled voxel size (superseded by target)',
+                         exists=True, position=6, argstr="-vsize %f %f %f")
+    origin = traits.Tuple((0, 0, 0),
+                          desc='xyz origin (superseded by target)', position=4,
+                          argstr='-origin %f %f %f')
+
+
+class TVResampleOutputSpec(TraitedSpec):
+    out_file = File(exists=True)
+
+
+class TVResampleTask(CommandLineDtitk):
+    """
+    Resamples a tensor volume
+
+        Example
+        -------
+
+        >>> import nipype.interfaces.dtitk as dtitk
+        >>> node = dtitk.TVResampleTask()
+        >>> node.inputs.in_file = 'diffusion.nii.gz'
+        >>> node.run() # doctest: +SKIP
+        """
+    input_spec = TVResampleInputSpec
+    output_spec = TVResampleOutputSpec
+    _cmd = 'TVResample'
 
 # TODO not using these yet... need to be tested
 
@@ -90,38 +130,6 @@ class SVAdjustVoxSpTask(CommandLineDtitk):
     output_spec = SVAdjustVoxSpOutputSpec
     _cmd = 'SVAdjustVoxelspace'
 
-
-class TVResampleInputSpec(CommandLineInputSpec):
-    in_file = File(desc="image to resample", exists=True,
-                   mandatory=True, position=0, argstr="-in %s")
-    in_arraysz = traits.Str(desc='resampled array size', exists=True,
-                            position=1, argstr="-size %s")
-    in_voxsz = traits.Str(desc='resampled voxel size', exists=True,
-                          position=2, argstr="-vsize %s")
-    out_file = traits.Str(desc='output path', position=3, argstr="-out %s",
-                          name_source="in_file", name_template="%s_resampled",
-                          keep_extension=True)
-
-
-class TVResampleOutputSpec(TraitedSpec):
-    out_file = File(exists=True)
-
-
-class TVResampleTask(CommandLineDtitk):
-    """
-    Resamples a tensor volume
-
-        Example
-        -------
-
-        >>> import nipype.interfaces.dtitk as dtitk
-        >>> node = dtitk.TVResampleTask()
-        >>> node.inputs.in_file = 'diffusion.nii.gz'
-        >>> node.run() # doctest: +SKIP
-        """
-    input_spec = TVResampleInputSpec
-    output_spec = TVResampleOutputSpec
-    _cmd = 'TVResample'
 
 
 class SVResampleInputSpec(TVResampleInputSpec):
