@@ -145,16 +145,19 @@ class DiffeoInputSpec(CommandLineInputSpec):
                       exists=True,  position=0, argstr="%s")
     moving_file = File(desc="moving diffusion tensor image",
                        exists=True, position=1, argstr="%s", copyfile=False)
-    mask = File(desc="mask", exists=True,  position=2, argstr="%s")
-    legacy = traits.Float(desc="legacy parameter; always set to 1",
-                          exists=True, mandatory=True,
-                          position=3, default_value=1, argstr="%s")
-    n_iters = traits.Float(desc="number of iterations",
-                           exists=True, mandatory=True,
-                           position=4, default_value=6, argstr="%s")
+    mask_file = File(desc="mask", exists=True,  position=2, argstr="%s")
+    legacy = traits.Int(desc="legacy parameter; always set to 1",
+                        exists=True, mandatory=True,
+                        position=3, default_value=1, argstr="%s",
+                        usedefault=True)
+    n_iters = traits.Int(desc="number of iterations",
+                         exists=True, mandatory=True,
+                         position=4, default_value=6, argstr="%s",
+                         usedefault=True)
     ftol = traits.Float(desc="iteration for the optimization to stop",
                         exists=True, mandatory=True,
-                        position=5, default_value=0.002, argstr="%s")
+                        position=5, default_value=0.002, argstr="%s",
+                        usedefault=True)
 
 
 class DiffeoOutputSpec(TraitedSpec):
@@ -193,16 +196,16 @@ class DiffeoTask(CommandLineDtitk):
 
 class ComposeXfmInputSpec(CommandLineInputSpec):
     in_df = File(desc='diffeomorphic file.df.nii.gz', exists=True,
-                        position=1, argstr="-df %s", copyfile=False)
+                 position=1, argstr="-df %s", copyfile=False)
     in_aff = File(desc='affine file.aff', exists=True,
-                        position=0, argstr="-aff %s")
+                  position=0, argstr="-aff %s")
     out_file = traits.Str(desc='output_path', exists=True,
                           position=2, argstr="-out %s",  name_source="in_df",
                           name_template="%s_comboaff.nii.gz")
 
 
 class ComposeXfmOutputSpec(TraitedSpec):
-    out_file = File(desc='cheese', exists=True)
+    out_file = File(exists=True)
 
 
 class ComposeXfmTask(CommandLineDtitk):
@@ -231,11 +234,11 @@ class ComposeXfmTask(CommandLineDtitk):
 
 class diffeoSymTensor3DVolInputSpec(CommandLineInputSpec):
     in_tensor = File(desc='moving tensor', exists=True,
-                           position=0, argstr="-in %s")
+                     position=0, argstr="-in %s")
     in_xfm = File(desc='transform to apply', exists=True,
                   position=1, argstr="-trans %s")
     in_target = File(desc='', exists=True,  position=2,
-                           argstr="-target %s")
+                     argstr="-target %s")
     out_file = traits.Str(desc='', exists=True,  position=3,
                           argstr="-out %s", name_source="in_tensor",
                           name_template="%s_diffeoxfmd.nii.gz")
@@ -266,18 +269,18 @@ class diffeoSymTensor3DVolTask(CommandLineDtitk):
 
 class affSymTensor3DVolInputSpec(CommandLineInputSpec):
     in_tensor = File(desc='moving tensor', exists=True,
-                           position=0, argstr="-in %s")
+                     position=0, argstr="-in %s")
     in_xfm = File(desc='transform to apply', exists=True,
-                         position=1, argstr="-trans %s")
+                  position=1, argstr="-trans %s")
     in_target = File(desc='', exists=True,  position=2,
-                           argstr="-target %s")
+                     argstr="-target %s")
     out_file = traits.Str(desc='', exists=True,  position=3,
                           argstr="-out %s", name_source="in_tensor",
                           name_template="%s_affxfmd.nii.gz")
 
 
 class affSymTensor3DVolOutputSpec(TraitedSpec):
-    out_file = File(desc='cheese', exists=True)
+    out_file = File(exists=True)
 
 
 class affSymTensor3DVolTask(CommandLineDtitk):
@@ -300,9 +303,9 @@ class affSymTensor3DVolTask(CommandLineDtitk):
 
 class affScalarVolInputSpec(CommandLineInputSpec):
     in_volume = File(desc='moving volume', exists=True,
-                           position=0, argstr="-in %s")
+                     position=0, argstr="-in %s")
     in_xfm = File(desc='transform to apply', exists=True,
-                        position=1, argstr="-trans %s")
+                  position=1, argstr="-trans %s")
     in_target = File(desc='', position=2, argstr="-target %s")
     out_file = traits.Str(desc='',  position=3,
                           argstr="-out %s", name_source="in_volume",
@@ -344,11 +347,11 @@ class diffeoScalarVolInputSpec(CommandLineInputSpec):
     in_vsize = File(desc='', exists=True,  position=4,
                           argstr="-vsize %s")
     in_flip = File(desc='', exists=True,  position=5,
-                         argstr="-flip %s")
+                   argstr="-flip %s")
     in_type = File(desc='', exists=True,  position=6,
-                         argstr="-type %s")
+                   argstr="-type %s")
     in_interp = File(desc='0 trilin, 1 NN', exists=True,
-                           position=7, argstr="-interp %s")
+                     position=7, argstr="-interp %s")
 
 
 class diffeoScalarVolOutputSpec(TraitedSpec):

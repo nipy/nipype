@@ -21,7 +21,8 @@ class TVAdjustOriginInputSpec(CommandLineInputSpec):
     in_file = File(desc="image to resample", exists=True, mandatory=True,
                    position=0, argstr="-in %s")
     out_file = traits.Str(desc='output path', position=1, argstr="-out %s",
-                          namesource=['in_file'], name_template='%s_originzero')
+                          namesource=['in_file'],
+                          name_template='%s_originzero')
     origin = traits.Str(desc='xyz voxel size',
                         position=4, argstr='-origin %s')
 
@@ -59,7 +60,7 @@ class TVAdjustVoxSpInputSpec(CommandLineInputSpec):
     target = traits.Str(desc='target volume', mandaotry=True,
                         position=2, argstr="-target %s")
     vsize = traits.Str(desc='resampled voxel size', mandatory=True,
-                        position=3, argstr="-vsize %s")
+                       position=3, argstr="-vsize %s")
 
 
 class TVAdjustVoxSpOutputSpec(TraitedSpec):
@@ -87,11 +88,11 @@ class TVAdjustVoxSpTask(CommandLineDtitk):
 
 class SVAdjustVoxSpInputSpec(CommandLineInputSpec):
     in_file = File(desc="image to resample", exists=True,
-                         mandatory=True, position=0, argstr="-in %s")
+                   mandatory=True, position=0, argstr="-in %s")
     in_target = File(desc='target volume', mandatory=True,
-                           position=2, argstr="-target %s")
+                     position=2, argstr="-target %s")
     in_voxsz = traits.Str(desc='resampled voxel size', mandatory=True,
-                           position=3, argstr="-vsize %s")
+                          position=3, argstr="-vsize %s")
     out_file = traits.Str(desc='output path', position=1, argstr="-out %s",
                           name_source="in_file", name_template='%s_reslice',
                           keep_extension=True)
@@ -122,11 +123,11 @@ class SVAdjustVoxSpTask(CommandLineDtitk):
 
 class TVResampleInputSpec(CommandLineInputSpec):
     in_file = File(desc="image to resample", exists=True,
-                         mandatory=True, position=0, argstr="-in %s")
+                   mandatory=True, position=0, argstr="-in %s")
     in_arraysz = traits.Str(desc='resampled array size', exists=True,
-                             position=1, argstr="-size %s")
+                            position=1, argstr="-size %s")
     in_voxsz = traits.Str(desc='resampled voxel size', exists=True,
-                           position=2, argstr="-vsize %s")
+                          position=2, argstr="-vsize %s")
     out_file = traits.Str(desc='output path', position=3, argstr="-out %s",
                           name_source="in_file", name_template="%s_resampled",
                           keep_extesnion=True)
@@ -181,9 +182,9 @@ class SVResampleTask(CommandLineDtitk):
 
 class TVtoolInputSpec(CommandLineInputSpec):
     in_file = File(desc="image to resample", exists=True,
-                          position=0, argstr="-in %s")
+                   position=0, argstr="-in %s")
     in_flag = traits.Enum('fa', 'tr', 'ad', 'rd', 'pd', 'rgb', exists=True,
-                           position=1, argstr="-%s", desc='')
+                          position=1, argstr="-%s", desc='')
 
 
 class TVtoolOutputSpec(TraitedSpec):
@@ -228,7 +229,7 @@ class TVtoolTask(CommandLineDtitk):
 
 class BinThreshInputSpec(CommandLineInputSpec):
     in_file = File(desc='', exists=True,  position=0,
-                         argstr="%s")
+                   argstr="%s")
     out_file = traits.Str(desc='',  position=1, argstr="%s",
                           keep_extension=True, name_source='in_file',
                           name_template='%s_bin')
