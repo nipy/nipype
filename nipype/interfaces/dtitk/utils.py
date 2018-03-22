@@ -17,50 +17,20 @@ import os
 from .base import CommandLineDtitk
 
 
-class TVAdjustOriginInputSpec(CommandLineInputSpec):
-    in_file = File(desc="image to resample", exists=True, mandatory=True,
-                   position=0, argstr="-in %s")
-    out_file = traits.Str(desc='output path', position=1, argstr="-out %s",
-                          namesource=['in_file'],
-                          name_template='%s_originzero')
-    origin = traits.Str(desc='xyz voxel size',
-                        position=4, argstr='-origin %s')
-
-
-class TVAdjustOriginOutputSpec(TraitedSpec):
-    out_file = File(exists=True)
-
-
-class TVAdjustOriginTask(CommandLineDtitk):
-    """
-    Moves the origin of a tensor volume to zero
-
-    Example
-    -------
-
-    >>> import nipype.interfaces.dtitk as dtitk
-    >>> node = dtitk.TVAdjustOriginTask()
-    >>> node.inputs.in_file = 'diffusion.nii'
-    >>> node.run() # doctest: +SKIP
-    """
-
-    input_spec = TVAdjustOriginInputSpec
-    output_spec = TVAdjustOriginOutputSpec
-    _cmd = 'TVAdjustVoxelspace'
-
-
 class TVAdjustVoxSpInputSpec(CommandLineInputSpec):
-    in_file = File(desc="image to resample", exists=True, mandatory=True,
+    in_file = File(desc="tensor to resample", exists=True, mandatory=True,
                    position=0, argstr="-in %s")
     out_file = traits.Str(genfile=True, desc='output path', position=1,
                           argstr="-out %s", name_source='in_file',
-                          name_template='%s_reslice', keep_extension=True)
-    origin = traits.Str(desc='xyz voxel size', mandatory=True,
-                        position=4, argstr='-origin %s')
-    target = traits.Str(desc='target volume', mandaotry=True,
-                        position=2, argstr="-target %s")
-    vsize = traits.Str(desc='resampled voxel size', mandatory=True,
-                       position=3, argstr="-vsize %s")
+                          name_template='%s_avs', keep_extension=True)
+    target = traits.File(desc='target volume',
+                         position=2, argstr="-target %s")
+    vsize = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
+                         desc='resampled voxel size',
+                         position=3, argstr="-vsize %f %f %f")
+    origin = traits.Tuple((0, 0, 0),
+                          desc='xyz voxel size', position=4,
+                          argstr='-origin %f %f %f', usedefault=True)
 
 
 class TVAdjustVoxSpOutputSpec(TraitedSpec):
@@ -130,7 +100,7 @@ class TVResampleInputSpec(CommandLineInputSpec):
                           position=2, argstr="-vsize %s")
     out_file = traits.Str(desc='output path', position=3, argstr="-out %s",
                           name_source="in_file", name_template="%s_resampled",
-                          keep_extesnion=True)
+                          keep_extension=True)
 
 
 class TVResampleOutputSpec(TraitedSpec):

@@ -10,6 +10,6 @@ from .registration import (RigidTask, AffineTask, DiffeoTask,
                            ComposeXfmTask, diffeoSymTensor3DVolTask,
                            affSymTensor3DVolTask, affScalarVolTask,
                            diffeoScalarVolTask)
-from .utils import (TVAdjustOriginTask, TVAdjustVoxSpTask,
+from .utils import (TVAdjustVoxSpTask,
                     SVAdjustVoxSpTask, TVResampleTask, SVResampleTask,
                     TVtoolTask, BinThreshTask)
