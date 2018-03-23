@@ -245,7 +245,7 @@ class diffeoSymTensor3DVolInputSpec(CommandLineInputSpec):
 
 
 class diffeoSymTensor3DVolOutputSpec(TraitedSpec):
-    out_file = File(desc='cheese', exists=True)
+    out_file = File(exists=True)
 
 
 class diffeoSymTensor3DVolTask(CommandLineDtitk):

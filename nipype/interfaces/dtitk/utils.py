@@ -64,8 +64,9 @@ class TVResampleInputSpec(CommandLineInputSpec):
                        argstr="-target %s")
     align = traits.Str('center', position=3, argstr="-align %s")
     interp = traits.Enum('LEI', 'EI', position=4)
-    arraysz = traits.Tuple((128, 128, 64), desc='resampled array size',
-                           position=5, argstr="-size %s")
+    arraysz = traits.Tuple((128, 128, 64),
+                           desc='resampled array size', position=5,
+                           argstr="-size %f %f %f")
     voxsz = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
                          desc='resampled voxel size (superseded by target)',
                          exists=True, position=6, argstr="-vsize %f %f %f")
@@ -161,8 +162,14 @@ class SVResampleTask(CommandLineDtitk):
 class TVtoolInputSpec(CommandLineInputSpec):
     in_file = File(desc="image to resample", exists=True,
                    position=0, argstr="-in %s")
+
+    '''Note: there are a lot more options here; not putting all of them in'''
     in_flag = traits.Enum('fa', 'tr', 'ad', 'rd', 'pd', 'rgb', exists=True,
-                          position=1, argstr="-%s", desc='')
+                          position=2, argstr="-%s", desc='')
+    out_file = traits.Str(exists=True,  position=1,
+                          argstr="-out %s", name_source=["in_file", "in_flag"],
+                          name_template="%s_tvt_%s.nii.gz")
+
 
 
 class TVtoolOutputSpec(TraitedSpec):
@@ -185,24 +192,6 @@ class TVtoolTask(CommandLineDtitk):
     input_spec = TVtoolInputSpec
     output_spec = TVtoolOutputSpec
     _cmd = 'TVtool'
-
-    def _list_outputs(self):
-        _suffix = self.inputs.in_flag
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(self.inputs.out_file):
-            outputs["out_file"] = self._gen_fname(self.inputs.in_file,
-                                                  suffix=_suffix,
-                                                  ext='.' + '.'.join(
-                                                      self.inputs.in_file.
-                                                      split(".")[1:]))
-        outputs["out_file"] = os.path.abspath(outputs["out_file"])
-        return outputs
-
-    def _gen_filename(self, name):
-        if name == "out_file":
-            return self._list_outputs()["out_file"]
-        return None
 
 
 class BinThreshInputSpec(CommandLineInputSpec):
