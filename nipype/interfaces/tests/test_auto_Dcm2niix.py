@@ -5,15 +5,21 @@ from ..dcm2nii import Dcm2niix
 
 def test_Dcm2niix_inputs():
     input_map = dict(
+        anon_bids=dict(
+            argstr='-ba',
+            requires=['bids_format'],
+        ),
         args=dict(argstr='%s', ),
         bids_format=dict(
             argstr='-b',
             usedefault=True,
         ),
+        comment=dict(argstr='-c %s', ),
         compress=dict(
             argstr='-z %s',
             usedefault=True,
         ),
+        compression=dict(argstr='-%d', ),
         crop=dict(
             argstr='-x',
             usedefault=True,
@@ -26,6 +32,7 @@ def test_Dcm2niix_inputs():
             argstr='-t',
             usedefault=True,
         ),
+        ignore_deriv=dict(argstr='-i', ),
         ignore_exception=dict(
             deprecated='1.0.0',
             nohash=True,
@@ -35,14 +42,13 @@ def test_Dcm2niix_inputs():
             argstr='-m',
             usedefault=True,
         ),
-        out_filename=dict(
-            argstr='-f %s',
-            usedefault=True,
-        ),
+        out_filename=dict(argstr='-f %s', ),
         output_dir=dict(
             argstr='-o %s',
-            genfile=True,
+            usedefault=True,
         ),
+        philips_float=dict(argstr='-p', ),
+        series_numbers=dict(argstr='-n %s...', ),
         single_file=dict(
             argstr='-s',
             usedefault=True,
@@ -56,7 +62,9 @@ def test_Dcm2niix_inputs():
         source_names=dict(
             argstr='%s',
             copyfile=False,
+            deprecated='1.0.2',
             mandatory=True,
+            new_name='source_dir',
             position=-1,
             xor=['source_dir'],
         ),
