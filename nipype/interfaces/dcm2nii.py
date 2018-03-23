@@ -277,7 +277,7 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
         argstr="-f %s",
         desc="Output filename")
     output_dir = Directory(
-        os.getcwd(),
+        ".",
         usedefault=True,
         exists=True,
         argstr='-o %s',
@@ -323,7 +323,7 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
         desc="Flag if text notes includes private patient details")
     compression = traits.Enum(
         1, 2, 3, 4, 5, 6, 7, 8, 9,
-        argstr='-%s',
+        argstr='-%d',
         desc="Gz compression level (1=fastest, 9=smallest)")
     comment = traits.Str(
         argstr='-c %s',
@@ -360,11 +360,6 @@ class Dcm2niix(CommandLine):
     >>> converter.inputs.output_dir = 'ds005'
     >>> converter.cmdline
     'dcm2niix -b y -z y -5 -x n -t n -m n -o ds005 -s n -v n dicomdir'
-
-    >>> flags = '-'.join([val.strip() + ' ' for val in sorted(' '.join(converter.cmdline.split()[1:-1]).split('-'))])
-    >>> flags
-    ' -5 -b y -m n -o ds005 -s n -t n -v n -x n -z y '
-    >>> converter.run() # doctest: +SKIP
     """
 
     input_spec = Dcm2niixInputSpec
@@ -387,6 +382,8 @@ class Dcm2niix(CommandLine):
                 val = True
         if opt == 'source_names':
             return spec.argstr % val[0]
+        if opt == 'series_numbers':
+            return ' '.join([spec.argstr % v for v in val])
         return super(Dcm2niix, self)._format_arg(opt, spec, val)
 
     def _run_interface(self, runtime):
