@@ -333,7 +333,7 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
         desc="Ignore derived, localizer and 2D images")
     series_numbers = InputMultiPath(
         traits.Str(),
-        argstr='-n %s',
+        argstr='-n %s...',
         desc="Selectively convert by series number - can be used up to 16 times")
     philips_float = traits.Bool(
         argstr='-p',
@@ -360,6 +360,7 @@ class Dcm2niix(CommandLine):
     >>> converter.inputs.output_dir = 'ds005'
     >>> converter.cmdline
     'dcm2niix -b y -z y -5 -x n -t n -m n -o ds005 -s n -v n dicomdir'
+    >>> converter.run() # doctest: +SKIP
     """
 
     input_spec = Dcm2niixInputSpec
@@ -382,8 +383,6 @@ class Dcm2niix(CommandLine):
                 val = True
         if opt == 'source_names':
             return spec.argstr % val[0]
-        if opt == 'series_numbers':
-            return ' '.join([spec.argstr % v for v in val])
         return super(Dcm2niix, self)._format_arg(opt, spec, val)
 
     def _run_interface(self, runtime):

@@ -19,7 +19,7 @@ def test_Dcm2niix_inputs():
             argstr='-z %s',
             usedefault=True,
         ),
-        compression=dict(argstr='-%s', ),
+        compression=dict(argstr='-%d', ),
         crop=dict(
             argstr='-x',
             usedefault=True,
@@ -48,7 +48,7 @@ def test_Dcm2niix_inputs():
             usedefault=True,
         ),
         philips_float=dict(argstr='-p', ),
-        series_numbers=dict(argstr='-n %s', ),
+        series_numbers=dict(argstr='-n %s...', ),
         single_file=dict(
             argstr='-s',
             usedefault=True,
