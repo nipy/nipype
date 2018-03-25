@@ -25,12 +25,12 @@ class TVAdjustVoxSpInputSpec(CommandLineInputSpec):
                           name_template='%s_avs', keep_extension=True)
     target_file = traits.File(desc='target volume to match',
                               position=2, argstr="-target %s")
-    vsize = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
-                         desc='xyz voxel size (superseded by target)',
-                         position=3, argstr="-vsize %f %f %f")
+    voxel_size = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
+                              desc='xyz voxel size (superseded by target)',
+                              position=3, argstr="-vsize %g %g %g")
     origin = traits.Tuple((0, 0, 0),
                           desc='xyz origin (superseded by target)', position=4,
-                          argstr='-origin %f %f %f', usedefault=True)
+                          argstr='-origin %g %g %g', usedefault=True)
 
 
 class TVAdjustVoxSpOutputSpec(TraitedSpec):
@@ -56,23 +56,26 @@ class TVAdjustVoxSpTask(CommandLineDtitk):
 
 class TVResampleInputSpec(CommandLineInputSpec):
     in_file = File(desc="image to resample", exists=True,
-                   mandatory=True, position=0, argstr="-in %s")
-    out_file = traits.Str(desc='output path', position=1,
+                   mandatory=True, argstr="-in %s")
+    out_file = traits.Str(desc='output path',
                           name_source="in_file", name_template="%s_resampled",
                           keep_extension=True, argstr="-out %s")
-    target_file = File(desc='specs read from the target volume', position=2,
-                       argstr="-target %s")
-    align = traits.Str('center', position=3, argstr="-align %s")
-    interp = traits.Enum('LEI', 'EI', position=4)
-    arraysz = traits.Tuple((128, 128, 64),
-                           desc='resampled array size', position=5,
-                           argstr="-size %f %f %f")
-    voxsz = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
-                         desc='resampled voxel size (superseded by target)',
-                         exists=True, position=6, argstr="-vsize %f %f %f")
-    origin = traits.Tuple((0, 0, 0),
-                          desc='xyz origin (superseded by target)', position=4,
-                          argstr='-origin %f %f %f')
+    target_file = File(desc='specs read from the target volume',
+                       argstr="-target %s",
+                       xor=['array_size', 'voxel_size', 'origin'])
+    align = traits.Enum('center', 'origin', argstr="-align %s",
+                        desc='how to align output volume to input volume')
+    interpolation = traits.Enum('LEI', 'EI', argstr="-interp %s",
+                                desc='Log Euclidean Euclidean Interpolation')
+    array_size = traits.Tuple((traits.Int(), traits.Int(), traits.Int()),
+                              desc='resampled array size', xor=['target_file'],
+                              argstr="-size %d %d %d")
+    voxel_size = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
+                              desc='resampled voxel size', xor=['target_file'],
+                              argstr="-vsize %g %g %g")
+    origin = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
+                          desc='xyz origin', xor=['target_file'],
+                          argstr='-origin %g %g %g')
 
 
 class TVResampleOutputSpec(TraitedSpec):
@@ -99,9 +102,6 @@ class TVResampleTask(CommandLineDtitk):
 class TVtoolInputSpec(CommandLineInputSpec):
     in_file = File(desc="image to resample", exists=True,
                    position=0, argstr="-in %s", mandatory=True)
-    # out_file = traits.Str(exists=True,  position=1,
-    #                      argstr="-out %s", name_source="in_file",
-    #                      name_template="%s_tvt.nii.gz"
     '''NOTE: there are a lot more options here; not putting all of them in'''
     in_flag = traits.Enum('fa', 'tr', 'ad', 'rd', 'pd', 'rgb', exists=True,
                           position=2, argstr="-%s", desc='')
@@ -135,7 +135,7 @@ class TVtoolTask(CommandLineDtitk):
         if not isdefined(self.inputs.out_file):
             outputs['out_file'] = self._gen_filename('out_file')
         else:
-            outputs['out_file'] = self.inputs.out_file + self.inputs.in_flag+'.nii.gz'
+            outputs['out_file'] = self.inputs.out_file
         return outputs
 
     def _gen_filename(self, name):
@@ -143,6 +143,7 @@ class TVtoolTask(CommandLineDtitk):
         return basename + '_'+self.inputs.in_flag+'.nii.gz'
 
 # TODO not using these yet... need to be tested
+
 
 class SVAdjustVoxSpInputSpec(CommandLineInputSpec):
     in_file = File(desc="image to resample", exists=True,
