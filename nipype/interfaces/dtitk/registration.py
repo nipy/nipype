@@ -15,8 +15,6 @@ from ...utils.filemanip import fname_presuffix
 import os
 from .base import CommandLineDtitk
 
-# TODO: add cmdline expectation to all tests
-
 
 class RigidInputSpec(CommandLineInputSpec):
     fixed_file = File(desc="fixed diffusion tensor image",
@@ -27,21 +25,14 @@ class RigidInputSpec(CommandLineInputSpec):
     similarity_metric = traits.Enum('EDS', 'GDS', 'DDS', 'NMI',
                                     mandatory=True, position=2, argstr="%s",
                                     desc="similarity metric", usedefault=True)
-    samplingX = traits.Float(mandatory=True, position=3, argstr="%s",
-                             desc="dist between samp points (mm)",
-                             default_value=4, usedefault=True)
-    samplingY = traits.Float(mandatory=True, position=4, argstr="%s",
-                             desc="dist between samp points (mm)",
-                             default_value=4, usedefault=True)
-    samplingZ = traits.Float(mandatory=True, position=5, argstr="%s",
-                             desc="dist between samp points (mm)",
-                             default_value=4, usedefault=True)
-    ftol = traits.Float(mandatory=True, position=6, argstr="%s",
+    samplingXYZ = traits.Tuple((4, 4, 4), mandatory=True, position=3,
+                               argstr="%g %g %g", usedefault=True,
+                               desc="dist between samp points (mm) (x,y,z)")
+    ftol = traits.Float(mandatory=True, position=4, argstr="%g",
                         desc="cost function tolerance", default_value=0.01,
                         usedefault=True)
-    useInTrans = traits.Int(position=7, argstr="%s",
-                            desc="to initialize with existing xfm set as 1",
-                            default_value=1)
+    useInTrans = traits.Bool(position=5, argstr="1",
+                             desc="to initialize with existing xfm set as 1")
 
 
 class RigidOutputSpec(TraitedSpec):
@@ -61,11 +52,9 @@ class RigidTask(CommandLineDtitk):
     >>> node.inputs.fixed_file = 'diffusion.nii.gz'
     >>> node.inputs.moving_file = 'diffusion2.nii.gz'
     >>> node.inputs.similarity_metric = 'EDS'
-    >>> node.inputs.samplingX = 4
-    >>> node.inputs.samplingY = 4
-    >>> node.inputs.samplingZ = 4
+    >>> node.inputs.samplingXYZ = (4,4,4)
     >>> node.inputs.ftol = 0.01
-    >>> node.inputs.useInTrans = 1
+    >>> node.inputs.useInTrans = True
     >>> node.cmdline # doctest: +ELLIPSIS
     'dti_rigid_reg diffusion.nii.gz diffusion2.nii.gz EDS 4 4 4 0.01 1'
     >>> node.run() # doctest: +SKIP
@@ -92,21 +81,15 @@ class AffineInputSpec(CommandLineInputSpec):
     similarity_metric = traits.Enum('EDS', 'GDS', 'DDS', 'NMI',
                                     mandatory=True, position=2, argstr="%s",
                                     desc="similarity metric", usedefault=True)
-    samplingX = traits.Float(mandatory=True, position=3, argstr="%s",
-                             desc="dist between samp points (mm)",
-                             default_value=4, usedefault=True)
-    samplingY = traits.Float(mandatory=True, position=4, argstr="%s",
-                             desc="dist between samp points (mm)",
-                             default_value=4, usedefault=True)
-    samplingZ = traits.Float(mandatory=True, position=5, argstr="%s",
-                             desc="dist between samp points (mm)",
-                             default_value=4, usedefault=True)
-    ftol = traits.Float(mandatory=True, position=6, argstr="%s",
+    samplingXYZ = traits.Tuple((4, 4, 4), mandatory=True, position=3,
+                               argstr="%g %g %g", usedefault=True,
+                               desc="dist between samp points (mm) (x,y,z)")
+    ftol = traits.Float(mandatory=True, position=4, argstr="%s",
                         desc="cost function tolerance", default_value=0.01,
                         usedefault=True)
-    useInTrans = traits.Int(position=7, argstr="%s",
-                            desc="to initialize with existing xfm set as 1",
-                            default_value=1)
+    useInTrans = traits.Bool(position=5, argstr="1",
+                             desc="to initialize with existing xfm set as 1",
+                             default_value=True, usedefault=True)
 
 
 class AffineOutputSpec(TraitedSpec):
@@ -125,11 +108,9 @@ class AffineTask(CommandLineDtitk):
     >>> node.inputs.fixed_file = 'diffusion.nii.gz'
     >>> node.inputs.moving_file = 'diffusion2.nii.gz'
     >>> node.inputs.similarity_metric = 'EDS'
-    >>> node.inputs.samplingX = 4
-    >>> node.inputs.samplingY = 4
-    >>> node.inputs.samplingZ = 4
+    >>> node.inputs.samplingXYZ = (4,4,4)
     >>> node.inputs.ftol = 0.01
-    >>> node.inputs.useInTrans = 1
+    >>> node.inputs.useInTrans = True
     >>> node.cmdline # doctest: +ELLIPSIS
     'dti_affine_reg diffusion.nii.gz diffusion2.nii.gz EDS 4 4 4 0.01 1'
     >>> node.run() # doctest: +SKIP

@@ -155,14 +155,16 @@ class TVtoolTask(CommandLineDtitk):
 
 class BinThreshInputSpec(CommandLineInputSpec):
     in_file = File(desc='Image to threshold/binarize', exists=True,
-                   position=0, argstr="%s")
+                   position=0, argstr="%s", mandatory=True)
     out_file = traits.Str(desc='',  position=1, argstr="%s",
                           keep_extension=True, name_source='in_file',
                           name_template='%s_thrbin')
-    lower_bound = traits.Float(0.01, position=2, argstr="%g")
-    upper_bound = traits.Float(100, position=3, argstr="%g")
-    inside_value = traits.Float(1, position=4, argstr="%g", usedefault=True)
-    outside_value = traits.Float(0, position=5, argstr="%g", usedefault=True)
+    lower_bound = traits.Float(0.01, position=2, argstr="%g", mandatory=True)
+    upper_bound = traits.Float(100, position=3, argstr="%g", mandatory=True)
+    inside_value = traits.Float(1, position=4, argstr="%g", usedefault=True,
+                                mandatory=True)
+    outside_value = traits.Float(0, position=5, argstr="%g", usedefault=True,
+                                 mandatory=True)
 
 
 class BinThreshOutputSpec(TraitedSpec):
@@ -199,9 +201,9 @@ class SVAdjustVoxSpInputSpec(CommandLineInputSpec):
     in_file = File(desc="image to resample", exists=True,
                    mandatory=True, position=0, argstr="-in %s")
     target_file = File(desc='target volume', mandatory=True,
-                     position=2, argstr="-target %s")
+                       position=2, argstr="-target %s")
     voxel_size = traits.Str(desc='resampled voxel size', mandatory=True,
-                          position=3, argstr="-vsize %s")
+                            position=3, argstr="-vsize %s")
     out_file = traits.Str(desc='output path', position=1, argstr="-out %s",
                           name_source="in_file", name_template='%s_reslice',
                           keep_extension=True)
