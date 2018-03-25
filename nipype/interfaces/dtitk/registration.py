@@ -15,7 +15,8 @@ from ...utils.filemanip import fname_presuffix
 import os
 from .base import CommandLineDtitk
 
-#TODO: add cmdline expectation to all tests
+# TODO: add cmdline expectation to all tests
+
 
 class RigidInputSpec(CommandLineInputSpec):
     fixed_file = File(desc="fixed diffusion tensor image",

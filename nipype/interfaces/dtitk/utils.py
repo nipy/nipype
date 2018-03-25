@@ -19,18 +19,20 @@ from .base import CommandLineDtitk
 
 class TVAdjustVoxSpInputSpec(CommandLineInputSpec):
     in_file = File(desc="tensor to resample", exists=True, mandatory=True,
-                   position=0, argstr="-in %s")
-    out_file = traits.Str(genfile=True, desc='output path', position=1,
+                   argstr="-in %s")
+    out_file = traits.Str(genfile=True, desc='output path',
                           argstr="-out %s", name_source='in_file',
                           name_template='%s_avs', keep_extension=True)
     target_file = traits.File(desc='target volume to match',
-                              position=2, argstr="-target %s")
+                              argstr="-target %s",
+                              xor=['voxel_size', 'origin'])
     voxel_size = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
                               desc='xyz voxel size (superseded by target)',
-                              position=3, argstr="-vsize %g %g %g")
+                              argstr="-vsize %g %g %g", xor=['target_file'])
     origin = traits.Tuple((0, 0, 0),
-                          desc='xyz origin (superseded by target)', position=4,
-                          argstr='-origin %g %g %g', usedefault=True)
+                          desc='xyz origin (superseded by target)',
+                          argstr='-origin %g %g %g', usedefault=True,
+                          xor=['target_file'])
 
 
 class TVAdjustVoxSpOutputSpec(TraitedSpec):
@@ -47,6 +49,9 @@ class TVAdjustVoxSpTask(CommandLineDtitk):
     >>> import nipype.interfaces.dtitk as dtitk
     >>> node = dtitk.TVAdjustVoxSpTask()
     >>> node.inputs.in_file = 'diffusion.nii'
+    >>> node.inputs.target_file = 'diffusion2.nii'
+    >>> node.cmdline # doctest: +ELLIPSIS
+    'TVAdjustVoxelspace -in diffusion.nii -out diffusion_avs.nii -target 'diffusion2.nii''
     >>> node.run() # doctest: +SKIP
     """
     input_spec = TVAdjustVoxSpInputSpec
@@ -92,6 +97,9 @@ class TVResampleTask(CommandLineDtitk):
         >>> import nipype.interfaces.dtitk as dtitk
         >>> node = dtitk.TVResampleTask()
         >>> node.inputs.in_file = 'diffusion.nii.gz'
+        >>> node.inputs.target_file = 'diffusion.nii.gz'
+        >>> node.cmdline # doctest: +ELLIPSIS
+        'TVResample -in diffusion.nii -out diffusion_resampled.nii -target 'diffusion2.nii''
         >>> node.run() # doctest: +SKIP
         """
     input_spec = TVResampleInputSpec
@@ -100,12 +108,12 @@ class TVResampleTask(CommandLineDtitk):
 
 
 class TVtoolInputSpec(CommandLineInputSpec):
-    in_file = File(desc="image to resample", exists=True,
-                   position=0, argstr="-in %s", mandatory=True)
+    in_file = File(desc="image to resample", exists=True, argstr="-in %s",
+                   mandatory=True)
     '''NOTE: there are a lot more options here; not putting all of them in'''
     in_flag = traits.Enum('fa', 'tr', 'ad', 'rd', 'pd', 'rgb', exists=True,
-                          position=2, argstr="-%s", desc='')
-    out_file = traits.Str(exists=True,  position=1,
+                          argstr="-%s", desc='')
+    out_file = traits.Str(exists=True,
                           argstr="-out %s", genfile=True)
 
 
@@ -124,6 +132,8 @@ class TVtoolTask(CommandLineDtitk):
         >>> node = dtitk.TVtoolTask()
         >>> node.inputs.in_file = 'diffusion.nii'
         >>> node.inputs.in_flag = 'fa'
+        >>> node.cmdline # doctest: +ELLIPSIS
+        'TVtool -in diffusion.nii -fa -out diffusion_fa.nii.gz'
         >>> node.run() # doctest: +SKIP
         """
     input_spec = TVtoolInputSpec
@@ -142,15 +152,55 @@ class TVtoolTask(CommandLineDtitk):
         basename = os.path.basename(self.inputs.in_file).split('.')[0]
         return basename + '_'+self.inputs.in_flag+'.nii.gz'
 
+
+class BinThreshInputSpec(CommandLineInputSpec):
+    in_file = File(desc='Image to threshold/binarize', exists=True,
+                   position=0, argstr="%s")
+    out_file = traits.Str(desc='',  position=1, argstr="%s",
+                          keep_extension=True, name_source='in_file',
+                          name_template='%s_thrbin')
+    lower_bound = traits.Float(0.01, position=2, argstr="%g")
+    upper_bound = traits.Float(100, position=3, argstr="%g")
+    inside_value = traits.Float(1, position=4, argstr="%g", usedefault=True)
+    outside_value = traits.Float(0, position=5, argstr="%g", usedefault=True)
+
+
+class BinThreshOutputSpec(TraitedSpec):
+    out_file = File(exists=True)
+
+
+class BinThreshTask(CommandLineDtitk):
+    """
+    Binarizes an image based on parameters
+
+        Example
+        -------
+
+        >>> import nipype.interfaces.dtitk as dtitk
+        >>> node = dtitk.BinThreshTask()
+        >>> node.inputs.in_file = 'diffusion.nii'
+        >>> node.inputs.lower_bound = 0
+        >>> node.inputs.upper_bound = 100
+        >>> node.inputs.inside_value = 1
+        >>> node.inputs.outside_value = 0
+        >>> node.cmdline
+        'BinaryThresholdImageFilter diffusion.nii diffusion_bin.nii 0.0 100.0 1.0 0.0'
+        >>> node.run() # doctest: +SKIP
+        """
+
+    input_spec = BinThreshInputSpec
+    output_spec = BinThreshOutputSpec
+    _cmd = 'BinaryThresholdImageFilter'
+
 # TODO not using these yet... need to be tested
 
 
 class SVAdjustVoxSpInputSpec(CommandLineInputSpec):
     in_file = File(desc="image to resample", exists=True,
                    mandatory=True, position=0, argstr="-in %s")
-    in_target = File(desc='target volume', mandatory=True,
+    target_file = File(desc='target volume', mandatory=True,
                      position=2, argstr="-target %s")
-    in_voxsz = traits.Str(desc='resampled voxel size', mandatory=True,
+    voxel_size = traits.Str(desc='resampled voxel size', mandatory=True,
                           position=3, argstr="-vsize %s")
     out_file = traits.Str(desc='output path', position=1, argstr="-out %s",
                           name_source="in_file", name_template='%s_reslice',
@@ -205,39 +255,3 @@ class SVResampleTask(CommandLineDtitk):
     input_spec = SVResampleInputSpec
     output_spec = SVResampleOutputSpec
     _cmd = 'SVResample'
-
-
-class BinThreshInputSpec(CommandLineInputSpec):
-    in_file = File(desc='', exists=True,  position=0,
-                   argstr="%s")
-    out_file = traits.Str(desc='',  position=1, argstr="%s",
-                          keep_extension=True, name_source='in_file',
-                          name_template='%s_bin')
-    in_numbers = traits.List(traits.Float, minlen=4, maxlen=4,
-                             desc='LB UB inside_value outside_value',
-                             position=2, argstr="%s")
-
-
-class BinThreshOutputSpec(TraitedSpec):
-    out_file = File(exists=True)
-
-
-class BinThreshTask(CommandLineDtitk):
-    """
-    Binarizes an image based on parameters
-
-        Example
-        -------
-
-        >>> import nipype.interfaces.dtitk as dtitk
-        >>> node = dtitk.BinThreshTask()
-        >>> node.inputs.in_file = 'diffusion.nii'
-        >>> node.inputs.in_numbers = [0, 100, 1, 0]
-        >>> node.cmdline
-        'BinaryThresholdImageFilter diffusion.nii diffusion_bin.nii 0.0 100.0 1.0 0.0'
-        >>> node.run() # doctest: +SKIP
-        """
-
-    input_spec = BinThreshInputSpec
-    output_spec = BinThreshOutputSpec
-    _cmd = 'BinaryThresholdImageFilter'
