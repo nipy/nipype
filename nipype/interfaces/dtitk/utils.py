@@ -95,6 +95,53 @@ class TVResampleTask(CommandLineDtitk):
     output_spec = TVResampleOutputSpec
     _cmd = 'TVResample'
 
+
+class TVtoolInputSpec(CommandLineInputSpec):
+    in_file = File(desc="image to resample", exists=True,
+                   position=0, argstr="-in %s", mandatory=True)
+    # out_file = traits.Str(exists=True,  position=1,
+    #                      argstr="-out %s", name_source="in_file",
+    #                      name_template="%s_tvt.nii.gz"
+    '''NOTE: there are a lot more options here; not putting all of them in'''
+    in_flag = traits.Enum('fa', 'tr', 'ad', 'rd', 'pd', 'rgb', exists=True,
+                          position=2, argstr="-%s", desc='')
+    out_file = traits.Str(exists=True,  position=1,
+                          argstr="-out %s", genfile=True)
+
+
+class TVtoolOutputSpec(TraitedSpec):
+    out_file = File()
+
+
+class TVtoolTask(CommandLineDtitk):
+    """
+    Calculates a tensor metric volume from a tensor volume
+
+        Example
+        -------
+
+        >>> import nipype.interfaces.dtitk as dtitk
+        >>> node = dtitk.TVtoolTask()
+        >>> node.inputs.in_file = 'diffusion.nii'
+        >>> node.inputs.in_flag = 'fa'
+        >>> node.run() # doctest: +SKIP
+        """
+    input_spec = TVtoolInputSpec
+    output_spec = TVtoolOutputSpec
+    _cmd = 'TVtool'
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        if not isdefined(self.inputs.out_file):
+            outputs['out_file'] = self._gen_filename('out_file')
+        else:
+            outputs['out_file'] = self.inputs.out_file + self.inputs.in_flag+'.nii.gz'
+        return outputs
+
+    def _gen_filename(self, name):
+        basename = os.path.basename(self.inputs.in_file).split('.')[0]
+        return basename + '_'+self.inputs.in_flag+'.nii.gz'
+
 # TODO not using these yet... need to be tested
 
 class SVAdjustVoxSpInputSpec(CommandLineInputSpec):
@@ -157,41 +204,6 @@ class SVResampleTask(CommandLineDtitk):
     input_spec = SVResampleInputSpec
     output_spec = SVResampleOutputSpec
     _cmd = 'SVResample'
-
-
-class TVtoolInputSpec(CommandLineInputSpec):
-    in_file = File(desc="image to resample", exists=True,
-                   position=0, argstr="-in %s")
-
-    '''Note: there are a lot more options here; not putting all of them in'''
-    in_flag = traits.Enum('fa', 'tr', 'ad', 'rd', 'pd', 'rgb', exists=True,
-                          position=2, argstr="-%s", desc='')
-    out_file = traits.Str(exists=True,  position=1,
-                          argstr="-out %s", name_source=["in_file", "in_flag"],
-                          name_template="%s_tvt_%s.nii.gz")
-
-
-
-class TVtoolOutputSpec(TraitedSpec):
-    out_file = File(exists=True)
-
-
-class TVtoolTask(CommandLineDtitk):
-    """
-    Calculates a tensor metric volume from a tensor volume
-
-        Example
-        -------
-
-        >>> import nipype.interfaces.dtitk as dtitk
-        >>> node = dtitk.TVtoolTask()
-        >>> node.inputs.in_file = 'diffusion.nii'
-        >>> node.inputs.in_flag = 'fa'
-        >>> node.run() # doctest: +SKIP
-        """
-    input_spec = TVtoolInputSpec
-    output_spec = TVtoolOutputSpec
-    _cmd = 'TVtool'
 
 
 class BinThreshInputSpec(CommandLineInputSpec):

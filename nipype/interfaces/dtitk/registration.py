@@ -236,7 +236,7 @@ class ComposeXfmTask(CommandLineDtitk):
     _cmd = 'dfRightComposeAffine'
 
 
-# TODO: these haven't been used yet; need to be tested
+# TODO: these haven't been used yet; need to be tested (ALL BELOW)
 
 class diffeoSymTensor3DVolInputSpec(CommandLineInputSpec):
     in_tensor = File(desc='moving tensor', exists=True,
