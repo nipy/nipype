@@ -15,6 +15,7 @@ from ...utils.filemanip import fname_presuffix
 import os
 from .base import CommandLineDtitk
 
+#TODO: add cmdline expectation to all tests
 
 class RigidInputSpec(CommandLineInputSpec):
     fixed_file = File(desc="fixed diffusion tensor image",
@@ -46,6 +47,7 @@ class RigidOutputSpec(TraitedSpec):
     out_file = File(exists=True)
     out_file_xfm = File(exists=True)
 
+# TODO: try true/false so we can make useInTrans = False for rigid
 
 class RigidTask(CommandLineDtitk):
     """Performs rigid registration between two tensor volumes
@@ -63,6 +65,8 @@ class RigidTask(CommandLineDtitk):
     >>> node.inputs.samplingZ = 4
     >>> node.inputs.ftol = 0.01
     >>> node.inputs.useInTrans = 1
+    >>> node.cmdline # doctest: +ELLIPSIS
+    'dti_rigid_reg diffusion.nii.gz diffusion2.nii.gz EDS 4 4 4 0.01 1'
     >>> node.run() # doctest: +SKIP
     """
     input_spec = RigidInputSpec
@@ -125,6 +129,8 @@ class AffineTask(CommandLineDtitk):
     >>> node.inputs.samplingZ = 4
     >>> node.inputs.ftol = 0.01
     >>> node.inputs.useInTrans = 1
+    >>> node.cmdline # doctest: +ELLIPSIS
+    'dti_affine_reg diffusion.nii.gz diffusion2.nii.gz EDS 4 4 4 0.01 1'
     >>> node.run() # doctest: +SKIP
     """
     input_spec = AffineInputSpec
@@ -179,6 +185,8 @@ class DiffeoTask(CommandLineDtitk):
     >>> node.inputs.legacy = 1
     >>> node.inputs.n_iters = 6
     >>> node.inputs.ftol = 0.002
+    >>> node.cmdline # doctest: +ELLIPSIS
+    dti_diffeomorphic_reg diffusion.nii.gz diffusion2.nii.gz mask.nii.gz 1 6 0.002
     >>> node.run() # doctest: +SKIP
     """
     input_spec = DiffeoInputSpec
@@ -195,13 +203,13 @@ class DiffeoTask(CommandLineDtitk):
 
 
 class ComposeXfmInputSpec(CommandLineInputSpec):
-    in_df = File(desc='diffeomorphic file.df.nii.gz', exists=True,
-                 position=1, argstr="-df %s", copyfile=False)
-    in_aff = File(desc='affine file.aff', exists=True,
-                  position=0, argstr="-aff %s")
+    in_df = File(desc='diffeomorphic warp diffeo_xfm.df.nii.gz', exists=True,
+                 position=0, argstr="-df %s", copyfile=False, mandatory=True)
+    in_aff = File(desc='affine_xfm.aff', exists=True,
+                  position=1, argstr="-aff %s", mandatory=True)
     out_file = traits.Str(desc='output_path', exists=True,
                           position=2, argstr="-out %s",  name_source="in_df",
-                          name_template="%s_comboaff.nii.gz")
+                          name_template="%s_aff.df.nii.gz")
 
 
 class ComposeXfmOutputSpec(TraitedSpec):
@@ -217,20 +225,18 @@ class ComposeXfmTask(CommandLineDtitk):
 
     >>> import nipype.interfaces.dtitk as dtitk
     >>> node = dtitk.ComposeXfmTask()
-    >>> node.inputs.in_df = 'ants_Warp.nii.gz'
-    >>> node.inputs.in_aff= 'ants_Affine.txt'
+    >>> node.inputs.in_df = 'myxfm.df.nii.gz'
+    >>> node.inputs.in_aff= 'myxfm.aff'
+    >>> node.cmdline # doctest: +ELLIPSIS
+    'dfRightComposeAffine -df myxfm.df.nii.gz -aff myxfm.aff -out myxfm.df_aff.df.nii.gz'
     >>> node.run() # doctest: +SKIP
     """
     input_spec = ComposeXfmInputSpec
     output_spec = ComposeXfmOutputSpec
     _cmd = 'dfRightComposeAffine'
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.in_df.replace('.df.nii.gz',
-                                                        '_combo.df.nii.gz')
-        return outputs
 
+# TODO: these haven't been used yet; need to be tested
 
 class diffeoSymTensor3DVolInputSpec(CommandLineInputSpec):
     in_tensor = File(desc='moving tensor', exists=True,
