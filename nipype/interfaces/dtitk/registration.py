@@ -218,18 +218,18 @@ class ComposeXfmTask(CommandLineDtitk):
 
 
 class affSymTensor3DVolInputSpec(CommandLineInputSpec):
-    in_file = File(desc='moving tensor', exists=True,
+    in_file = File(desc='moving tensor volume', exists=True,
                    argstr="-in %s", mandatory=True)
-    out_file = traits.Str(desc='', exists=True,
+    out_file = traits.Str(desc='output filename', exists=True,
                           argstr="-out %s", name_source="in_file",
                           name_template="%s_affxfmd", keep_extension=True)
     transform = File(exists=True, argstr="-trans %s",
                      xor=['target', 'translation', 'euler', 'deformation'], desc='transform to apply: specify an input transformation  file; parameters input will be ignored',)
-    target = File(exists=True, argstr="-target %s", xor=['transform'],
-                  desc='output volume specification read from the target volume if specified')
     interpolation = traits.Enum('LEI', 'EI', usedefault=True,
                                 argstr="-interp %s",
                                 desc='Log Euclidean Euclidean Interpolation')
+    target = File(exists=True, argstr="-target %s", xor=['transform'],
+                  desc='output volume specification read from the target volume if specified')
     reorient = traits.Enum('PPD', 'NO', 'FS', argstr='-reorient %s',
                            usedefault=True)
     translation = traits.Tuple((0, 0, 0), desc='translation (x,y,z) in mm',
@@ -264,6 +264,55 @@ class affSymTensor3DVolTask(CommandLineDtitk):
     input_spec = affSymTensor3DVolInputSpec
     output_spec = affSymTensor3DVolOutputSpec
     _cmd = 'affineSymTensor3DVolume'
+
+
+class affScalarVolInputSpec(CommandLineInputSpec):
+    in_file = File(desc='moving scalar volume', exists=True,
+                   argstr="-in %s", mandatory=True)
+    out_file = traits.Str(desc='output filename', exists=True,
+                          argstr="-out %s", name_source="in_file",
+                          name_template="%s_affxfmd", keep_extension=True)
+    transform = File(exists=True, argstr="-trans %s",
+                     xor=['target', 'translation', 'euler', 'deformation'], desc='transform to apply: specify an input transformation  file; parameters input will be ignored',)
+    interpolation = traits.Enum(0, 1, usedefault=True,
+                                argstr="-interp %s",
+                                desc='0=trilinear (def); 1=nearest neighbor')
+    target = File(exists=True, argstr="-target %s", xor=['transform'],
+                  desc='output volume specification read from the target volume if specified')
+    translation = traits.Tuple((0, 0, 0), desc='translation (x,y,z) in mm',
+                               argstr='-translation %g %g %g',
+                               xor=['transform'])
+    euler = traits.Tuple((0, 0, 0), desc='(theta, phi, psi) in degrees',
+                         xor=['transform'], argstr='-euler %g %g %g')
+    deformation = traits.Tuple((1, 1, 1, 0, 0, 0), desc='(xx,yy,zz,xy,yz,xz)',
+                               xor=['transform'],
+                               argstr='-deformation %g %g %g %g %g %g')
+
+
+
+class affScalarVolOutputSpec(TraitedSpec):
+    out_file = File(desc='moved volume', exists=True)
+
+
+class affScalarVolTask(CommandLineDtitk):
+    """
+    Applies affine transform to a scalar volume
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.dtitk as dtitk
+    >>> node = dtitk.affScalarVolTask()
+    >>> node.inputs.in_volume = 'myvol.nii'
+    >>> node.inputs.in_xfm = 'myxfm.aff'
+    >>> node.cmdline # doctest: +ELLIPSIS
+    affineScalarVolume -in myvol.nii -interp 0 -out myvol_affxfmd.nii -trans myxfm.aff
+    >>> node.run() # doctest: +SKIP
+    """
+    input_spec = affScalarVolInputSpec
+    output_spec = affScalarVolOutputSpec
+    _cmd = 'affineScalarVolume'
+
 
 # TODO: these haven't been used yet; need to be tested (ALL BELOW)
 
@@ -303,40 +352,6 @@ class diffeoSymTensor3DVolTask(CommandLineDtitk):
     input_spec = diffeoSymTensor3DVolInputSpec
     output_spec = diffeoSymTensor3DVolOutputSpec
     _cmd = 'deformationSymTensor3DVolume'
-
-
-class affScalarVolInputSpec(CommandLineInputSpec):
-    in_volume = File(desc='moving volume', exists=True,
-                     position=0, argstr="-in %s", mandatory=True)
-    in_xfm = File(desc='transform to apply', exists=True,
-                  position=1, argstr="-trans %s")
-    in_target = File(desc='', argstr="-target %s")
-    out_file = traits.Str(desc='', argstr="-out %s", name_source="in_volume",
-                          name_template="%s_affxfmd", keep_extension=True)
-
-
-class affScalarVolOutputSpec(TraitedSpec):
-    out_file = File(desc='moved volume', exists=True)
-
-
-class affScalarVolTask(CommandLineDtitk):
-    """
-    Applies affine transform to a scalar volume
-
-    Example
-    -------
-
-    >>> import nipype.interfaces.dtitk as dtitk
-    >>> node = dtitk.affScalarVolTask()
-    >>> node.inputs.in_volume = 'fa.nii.gz'
-    >>> node.inputs.in_xfm = 'ants_Affine.txt'
-    >>> node.cmdline # doctest: +ELLIPSIS
-
-    >>> node.run() # doctest: +SKIP
-    """
-    input_spec = affScalarVolInputSpec
-    output_spec = affScalarVolOutputSpec
-    _cmd = 'affineScalarVolume'
 
 
 class diffeoScalarVolInputSpec(CommandLineInputSpec):
