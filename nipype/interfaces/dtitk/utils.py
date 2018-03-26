@@ -280,32 +280,3 @@ class BinThreshTask(CommandLineDtitk):
     input_spec = BinThreshInputSpec
     output_spec = BinThreshOutputSpec
     _cmd = 'BinaryThresholdImageFilter'
-
-# TODO not using these yet... need to be tested
-
-
-
-class SVResampleInputSpec(TVResampleInputSpec):
-    pass
-
-
-class SVResampleOutputSpec(TVResampleOutputSpec):
-    pass
-
-
-class SVResampleTask(CommandLineDtitk):
-    """
-    Resamples a scalar volume
-
-        Example
-        -------
-
-        >>> import nipype.interfaces.dtitk as dtitk
-        >>> node = dtitk.SVResampleTask()
-        >>> node.inputs.in_file = 'diffusion.nii'
-        >>> node.inputs.in_file = 'diffusion.nii'
-        >>> node.run() # doctest: +SKIP
-        """
-    input_spec = SVResampleInputSpec
-    output_spec = SVResampleOutputSpec
-    _cmd = 'SVResample'
