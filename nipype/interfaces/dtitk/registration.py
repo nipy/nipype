@@ -88,7 +88,7 @@ class AffineInputSpec(CommandLineInputSpec):
                         usedefault=True)
     useInTrans = traits.Bool(position=5, argstr="1",
                              desc="to initialize with existing xfm set as 1",
-                             default_value=True, usedefault=True)
+                             default_value=True)
 
 
 class AffineOutputSpec(TraitedSpec):
@@ -266,6 +266,7 @@ class affSymTensor3DVolTask(CommandLineDtitk):
     _cmd = 'affineSymTensor3DVolume'
 
 # TODO: these haven't been used yet; need to be tested (ALL BELOW)
+
 
 class diffeoSymTensor3DVolInputSpec(CommandLineInputSpec):
     in_tensor = File(desc='moving tensor', exists=True,
