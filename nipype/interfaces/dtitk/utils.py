@@ -101,7 +101,7 @@ class SVAdjustVoxSpTask(CommandLineDtitk):
 
 
 class TVResampleInputSpec(CommandLineInputSpec):
-    in_file = File(desc="image to resample", exists=True,
+    in_file = File(desc="tensor to resample", exists=True,
                    mandatory=True, argstr="-in %s")
     out_file = traits.Str(desc='output path',
                           name_source="in_file", name_template="%s_resampled",
@@ -137,15 +137,61 @@ class TVResampleTask(CommandLineDtitk):
 
         >>> import nipype.interfaces.dtitk as dtitk
         >>> node = dtitk.TVResampleTask()
-        >>> node.inputs.in_file = 'diffusion.nii.gz'
-        >>> node.inputs.target_file = 'diffusion.nii.gz'
+        >>> node.inputs.in_file = 'ten1.nii.gz'
+        >>> node.inputs.target_file = 'ten2.nii.gz'
         >>> node.cmdline # doctest: +ELLIPSIS
-        'TVResample -in diffusion.nii -out diffusion_resampled.nii -target 'diffusion2.nii''
+        'TVResample -in ten1.nii -out ten1_resampled.nii -target 'ten2.nii''
         >>> node.run() # doctest: +SKIP
         """
     input_spec = TVResampleInputSpec
     output_spec = TVResampleOutputSpec
     _cmd = 'TVResample'
+
+
+class SVResampleInputSpec(CommandLineInputSpec):
+    in_file = File(desc="image to resample", exists=True,
+                   mandatory=True, argstr="-in %s")
+    out_file = traits.Str(desc='output path',
+                          name_source="in_file", name_template="%s_resampled",
+                          keep_extension=True, argstr="-out %s")
+    target_file = File(desc='specs read from the target volume',
+                       argstr="-target %s",
+                       xor=['array_size', 'voxel_size', 'origin'])
+    align = traits.Enum('center', 'origin', argstr="-align %s",
+                        desc='how to align output volume to input volume')
+    array_size = traits.Tuple((traits.Int(), traits.Int(), traits.Int()),
+                              desc='resampled array size', xor=['target_file'],
+                              argstr="-size %d %d %d")
+    voxel_size = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
+                              desc='resampled voxel size', xor=['target_file'],
+                              argstr="-vsize %g %g %g")
+    origin = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
+                          desc='xyz origin', xor=['target_file'],
+                          argstr='-origin %g %g %g')
+
+
+class SVResampleOutputSpec(TraitedSpec):
+    out_file = File(exists=True)
+
+
+class SVResampleTask(CommandLineDtitk):
+    """
+    Resamples a non-tensor volume
+
+        Example
+        -------
+
+        >>> import nipype.interfaces.dtitk as dtitk
+        >>> node = dtitk.TVResampleTask()
+        >>> node.inputs.in_file = 'vol1.nii.gz'
+        >>> node.inputs.target_file = 'vol2.nii.gz'
+        >>> node.cmdline # doctest: +ELLIPSIS
+        'SVResample -in vol1.nii -out vol1_resampled.nii -target 'vol2.nii''
+        >>> node.run() # doctest: +SKIP
+        """
+    input_spec = SVResampleInputSpec
+    output_spec = SVResampleOutputSpec
+    _cmd = 'SVResample'
 
 
 class TVtoolInputSpec(CommandLineInputSpec):
