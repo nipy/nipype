@@ -167,7 +167,7 @@ class DiffeoTask(CommandLineDtitk):
     >>> node.inputs.n_iters = 6
     >>> node.inputs.ftol = 0.002
     >>> node.cmdline # doctest: +ELLIPSIS
-    dti_diffeomorphic_reg ten1.nii.gz ten2.nii.gz mask.nii.gz 1 6 0.002
+    'dti_diffeomorphic_reg ten1.nii.gz ten2.nii.gz mask.nii.gz 1 6 0.002'
     >>> node.run() # doctest: +SKIP
     """
     input_spec = DiffeoInputSpec
@@ -227,11 +227,11 @@ class affSymTensor3DVolInputSpec(CommandLineInputSpec):
                      xor=['target', 'translation', 'euler', 'deformation'], desc='transform to apply: specify an input transformation  file; parameters input will be ignored',)
     interpolation = traits.Enum('LEI', 'EI', usedefault=True,
                                 argstr="-interp %s",
-                                desc='Log Euclidean Euclidean Interpolation')
-    target = File(exists=True, argstr="-target %s", xor=['transform'],
-                  desc='output volume specification read from the target volume if specified')
+                                desc='Log Euclidean/Euclidean Interpolation')
     reorient = traits.Enum('PPD', 'NO', 'FS', argstr='-reorient %s',
                            usedefault=True)
+    target = File(exists=True, argstr="-target %s", xor=['transform'],
+                  desc='output volume specification read from the target volume if specified')
     translation = traits.Tuple((0, 0, 0), desc='translation (x,y,z) in mm',
                                argstr='-translation %g %g %g',
                                xor=['transform'])
@@ -306,7 +306,7 @@ class affScalarVolTask(CommandLineDtitk):
     >>> node.inputs.in_volume = 'myvol.nii'
     >>> node.inputs.in_xfm = 'myxfm.aff'
     >>> node.cmdline # doctest: +ELLIPSIS
-    affineScalarVolume -in myvol.nii -interp 0 -out myvol_affxfmd.nii -trans myxfm.aff
+    'affineScalarVolume -in myvol.nii -interp 0 -out myvol_affxfmd.nii -trans myxfm.aff'
     >>> node.run() # doctest: +SKIP
     """
     input_spec = affScalarVolInputSpec
@@ -314,19 +314,29 @@ class affScalarVolTask(CommandLineDtitk):
     _cmd = 'affineScalarVolume'
 
 
-# TODO: these haven't been used yet; need to be tested (ALL BELOW)
-
-
 class diffeoSymTensor3DVolInputSpec(CommandLineInputSpec):
-    in_tensor = File(desc='moving tensor', exists=True,
-                     argstr="-in %s")
-    in_xfm = File(desc='transform to apply', exists=True,
-                  argstr="-trans %s")
-    in_target = File(desc='', exists=True,
-                     argstr="-target %s")
-    out_file = traits.Str(desc='', exists=True,
-                          argstr="-out %s", name_source="in_tensor",
-                          name_template="%s_diffeoxfmd.nii.gz")
+    in_file = File(desc='moving tensor volume', exists=True,
+                   argstr="-in %s", mandatory=True)
+    out_file = traits.Str(desc='output filename', exists=True,
+                          argstr="-out %s", name_source="in_file",
+                          name_template="%s_diffeoxfmd", keep_extension=True)
+    transform = File(exists=True, argstr="-trans %s",
+                     xor=['target', 'voxel_size'], desc='transform to apply: specify an input transformation  file; parameters input will be ignored',)
+    df = traits.Str('FD', argstr="-df %s", usedefault=True)
+    interpolation = traits.Enum('LEI', 'EI', usedefault=True,
+                                argstr="-interp %s",
+                                desc='Log Euclidean/Euclidean Interpolation')
+    reorient = traits.Enum('PPD','FS', argstr='-reorient %s',
+                           usedefault=True)
+    target = File(exists=True, argstr="-target %s", xor=['transform'],
+                  desc='output volume specification read from the target volume if specified')
+    voxel_size = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
+                              desc='xyz voxel size (superseded by target)',
+                              argstr="-vsize %g %g %g", xor=['target_file'])
+    flip = traits.Tuple((0, 0, 0), exists=True,  argstr="-flip %s")
+    resampling_type = traits.Enum(1, 0, desc='1=backward(def), 0=forward',
+                                  exists=True,  argstr="-type %s")
+
 
 
 class diffeoSymTensor3DVolOutputSpec(TraitedSpec):
@@ -343,9 +353,9 @@ class diffeoSymTensor3DVolTask(CommandLineDtitk):
     >>> import nipype.interfaces.dtitk as dtitk
     >>> node = dtitk.diffeoSymTensor3DVolTask()
     >>> node.inputs.in_tensor = 'ten.nii'
-    >>> node.inputs.in_xfm = 'myxfm.df.nii.gz'
+    >>> node.inputs.in_xfm = 'myxfm.df.nii'
     >>> node.cmdline # doctest: +ELLIPSIS
-
+    'deformationSymTensor3DVolume -df FD -in ten.nii.gz -interp LEI -out ten_diffeoxfmd.nii.gz -reorient PPD -trans myxfm.df.nii'
     >>> node.run() # doctest: +SKIP
     """
 
@@ -354,15 +364,20 @@ class diffeoSymTensor3DVolTask(CommandLineDtitk):
     _cmd = 'deformationSymTensor3DVolume'
 
 
+# TODO: these haven't been used yet; need to be tested (ALL BELOW)
+
+
 class diffeoScalarVolInputSpec(CommandLineInputSpec):
-    in_volume = File(desc='moving volume', exists=True, argstr="-in %s",
+    in_file = File(desc='moving volume', exists=True, argstr="-in %s",
                      mandatory=True)
     in_xfm = File(desc='transform to apply', exists=True, argstr="-trans %s",
                   mandatory=True)
-    in_target = File(desc='', exists=True, argstr="-target %s", mandatory=True)
-    out_file = traits.Str(desc='', argstr="-out %s", name_source="in_volume",
+    target_file = File(desc='', exists=True, argstr="-target %s", mandatory=True)
+    out_file = traits.Str(desc='', argstr="-out %s", name_source="in_file",
                           name_template="%s_diffeoxfmd", keep_extension=True)
-    voxel_size = File(desc='', exists=True, argstr="-vsize %g")
+    voxel_size = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
+                              desc='xyz voxel size (superseded by target)',
+                              argstr="-vsize %g %g %g", xor=['target_file'])
     flip = File(desc='', exists=True,  argstr="-flip %s")
     resampling_type = traits.Enum(1, 0, desc='1=backward(def), 0=forward',
                                   exists=True,  argstr="-type %s")
