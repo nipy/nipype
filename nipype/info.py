@@ -120,7 +120,6 @@ LONG_DESCRIPTION = long_description
 URL = 'http://nipy.org/nipype'
 DOWNLOAD_URL = 'http://github.com/nipy/nipype/archives/master'
 LICENSE = 'Apache License, 2.0'
-CLASSIFIERS = CLASSIFIERS
 AUTHOR = 'nipype developers'
 AUTHOR_EMAIL = 'neuroimaging@python.org'
 PLATFORMS = 'OS Independent'
@@ -153,7 +152,7 @@ REQUIRES = [
 if sys.version_info <= (3, 4):
     REQUIRES.append('configparser')
 
-TESTS_REQUIRES = ['pytest-cov', 'codecov']
+TESTS_REQUIRES = ['pytest-cov', 'codecov', 'pytest-xdist', 'pytest-env']
 
 EXTRA_REQUIRES = {
     'doc': ['Sphinx>=1.4', 'numpydoc', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],
@@ -163,11 +162,20 @@ EXTRA_REQUIRES = {
     'profiler': ['psutil>=5.0'],
     'duecredit': ['duecredit'],
     'xvfbwrapper': ['xvfbwrapper'],
-    'pybids': ['pybids']
+    'pybids': ['pybids'],
+    'ssh': ['paramiko'],
     # 'mesh': ['mayavi']  # Enable when it works
 }
 
+
+def _list_union(iterable):
+    return list(set(sum(iterable, [])))
+
+
 # Enable a handle to install all extra dependencies at once
-EXTRA_REQUIRES['all'] = [val for _, val in list(EXTRA_REQUIRES.items())]
+EXTRA_REQUIRES['all'] = _list_union(EXTRA_REQUIRES.values())
+# dev = doc + tests + specs
+EXTRA_REQUIRES['dev'] = _list_union(val for key, val in EXTRA_REQUIRES.items()
+                                    if key in ('doc', 'tests', 'specs'))
 
 STATUS = 'stable'

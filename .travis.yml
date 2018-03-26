@@ -12,7 +12,7 @@ python:
 env:
 - INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler" CI_SKIP_TEST=1
 - INSTALL_DEB_DEPENDECIES=false NIPYPE_EXTRAS="doc,tests,fmri,profiler" CI_SKIP_TEST=1
-- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit" CI_SKIP_TEST=1
+- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit,ssh" CI_SKIP_TEST=1
 - INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler" PIP_FLAGS="--pre" CI_SKIP_TEST=1
 
 addons:
@@ -40,7 +40,7 @@ before_install:
   fi;
 
 # handle python operations separately to reduce timeouts
-- wget https://repo.continuum.io/miniconda/Miniconda${TRAVIS_PYTHON_VERSION:0:1}-4.3.31-Linux-x86_64.sh
+- wget https://repo.continuum.io/miniconda/Miniconda${TRAVIS_PYTHON_VERSION:0:1}-latest-Linux-x86_64.sh
     -O /home/travis/.cache/conda.sh
 - bash ${HOME}/.cache/conda.sh -b -p ${HOME}/conda
 - export PATH=${HOME}/conda/bin:$PATH

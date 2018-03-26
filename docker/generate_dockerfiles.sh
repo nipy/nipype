@@ -54,7 +54,7 @@ done
 
 
 # neurodocker version 0.3.1-22-gb0ee069
-NEURODOCKER_IMAGE="kaczmarj/neurodocker@sha256:c670ec2e0666a63d4e017a73780f66554283e294f3b12250928ee74b8a48bc59"
+NEURODOCKER_IMAGE="kaczmarj/neurodocker@sha256:f15ca90803f4b89acfca55cd1c7269bf2ec2dfd95b3de1118b08afa34b87d9d1"
 
 # neurodebian:stretch-non-free pulled on November 3, 2017
 BASE_IMAGE="neurodebian@sha256:7590552afd0e7a481a33314724ae27f76ccedd05ffd7ac06ec38638872427b9b"
@@ -88,7 +88,6 @@ function generate_main_dockerfile() {
   --user neuro \
   --miniconda env_name=neuro \
               activate=true \
-              miniconda_version=4.3.31 \
   --copy docker/files/run_builddocs.sh docker/files/run_examples.sh \
          docker/files/run_pytests.sh nipype/external/fsl_imglob.py /usr/bin/ \
   --copy . /src/nipype \
@@ -103,7 +102,7 @@ function generate_main_dockerfile() {
   --arg PYTHON_VERSION_MAJOR=3 PYTHON_VERSION_MINOR=6 BUILD_DATE VCS_REF VERSION \
   --miniconda env_name=neuro \
               conda_install='python=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
-                             icu=58.1 libxml2 libxslt matplotlib mkl numpy
+                             icu=58.1 libxml2 libxslt matplotlib mkl numpy paramiko
                              pandas psutil scikit-learn scipy traits=4.6.0' \
               pip_opts="-e" \
               pip_install="/src/nipype[all]" \

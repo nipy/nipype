@@ -8,4 +8,4 @@ from .utils import (Mesh2PVE, Generate5tt, BrainMask, TensorMetrics,
 from .preprocess import ResponseSD, ACTPrepareFSL, ReplaceFSwithFIRST
 from .tracking import Tractography
 from .reconst import FitTensor, EstimateFOD
-from .connectivity import LabelConfig, BuildConnectome
+from .connectivity import LabelConfig, LabelConvert, BuildConnectome

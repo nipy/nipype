@@ -3,13 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 '''
 Miscellaneous algorithms
-
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname(os.path.realpath(__file__))
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
-    >>> os.chdir(datadir)
-
 '''
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
@@ -1191,7 +1184,7 @@ class MergeROIs(BaseInterface):
         return outputs
 
 
-def normalize_tpms(in_files, in_mask=None, out_files=[]):
+def normalize_tpms(in_files, in_mask=None, out_files=None):
     """
     Returns the input tissue probability maps (tpms, aka volume fractions)
     normalized to sum up 1.0 at each voxel within the mask.
@@ -1201,6 +1194,9 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
     import os.path as op
 
     in_files = np.atleast_1d(in_files).tolist()
+
+    if out_files is None:
+        out_files = []
 
     if len(out_files) != len(in_files):
         for i, finname in enumerate(in_files):

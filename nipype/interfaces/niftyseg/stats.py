@@ -3,13 +3,6 @@
 """
 The stats module provides higher-level interfaces to some of the operations
 that can be performed with the niftyseg stats (seg_stats) command-line program.
-
-Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/\
-data'))
-    >>> os.chdir(datadir)
 """
 from __future__ import print_function
 import numpy as np

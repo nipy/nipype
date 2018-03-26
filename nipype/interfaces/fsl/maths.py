@@ -2,14 +2,8 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-    The maths module provides higher-level interfaces to some of the operations
-    that can be performed with the fslmaths command-line program.
-
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-    >>> os.chdir(datadir)
+The maths module provides higher-level interfaces to some of the operations
+that can be performed with the fslmaths command-line program.
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)

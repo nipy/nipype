@@ -24,6 +24,7 @@ def _ignore_atime(stat):
 @pytest.mark.parametrize(
     "filename, split",
     [('foo.nii', ('', 'foo', '.nii')), ('foo.nii.gz', ('', 'foo', '.nii.gz')),
+     ('foo.niml.dset', ('', 'foo', '.niml.dset')),
      ('/usr/local/foo.nii.gz',
       ('/usr/local', 'foo', '.nii.gz')), ('../usr/local/foo.nii',
                                           ('../usr/local', 'foo', '.nii')),
@@ -451,7 +452,16 @@ tmpfs on /proc/timer_list type tmpfs (rw,nosuid,size=65536k,mode=755)
 tmpfs on /proc/sched_debug type tmpfs (rw,nosuid,size=65536k,mode=755)
 tmpfs on /proc/scsi type tmpfs (ro,relatime)
 tmpfs on /sys/firmware type tmpfs (ro,relatime)
-''', 0, [('/data', 'cifs')])
+''', 0, [('/data', 'cifs')]),
+# From @yarikoptic - added blank lines to test for resilience
+(r'''/proc on /proc type proc (rw,relatime)
+sysfs on /sys type sysfs (rw,nosuid,nodev,noexec,relatime)
+tmpfs on /dev/shm type tmpfs (rw,relatime)
+devpts on /dev/pts type devpts (rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666)
+
+devpts on /dev/ptmx type devpts (rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666)
+
+''', 0, []),
 )
 
 

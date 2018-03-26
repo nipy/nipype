@@ -88,54 +88,6 @@ optional arguments:
 \tComputeMask
 \tEstimateContrast
 \tFitGLM
-\tFmriRealign4d
 \tSimilarity
 \tSpaceTimeRealigner
 """
-
-    def test_run_4d_realign_without_arguments(self):
-        with pytest.raises(SystemExit) as cm:
-            with capture_sys_output() as (stdout, stderr):
-                nipype_cmd.main(
-                    ['nipype_cmd', 'nipype.interfaces.nipy', 'FmriRealign4d'])
-
-        exit_exception = cm.value
-        assert exit_exception.code == 2
-
-        error_message = """usage: nipype_cmd nipype.interfaces.nipy FmriRealign4d [-h]
-                                                       [--between_loops [BETWEEN_LOOPS [BETWEEN_LOOPS ...]]]
-                                                       [--ignore_exception]
-                                                       [--loops [LOOPS [LOOPS ...]]]
-                                                       [--slice_order SLICE_ORDER]
-                                                       [--speedup [SPEEDUP [SPEEDUP ...]]]
-                                                       [--start START]
-                                                       [--time_interp TIME_INTERP]
-                                                       [--tr_slices TR_SLICES]
-                                                       in_file [in_file ...]
-                                                       tr"""
-
-        if not PY2:
-            error_message += """
-nipype_cmd nipype.interfaces.nipy FmriRealign4d: error: the following arguments are required: in_file, tr
-"""
-        else:
-            error_message += """
-nipype_cmd nipype.interfaces.nipy FmriRealign4d: error: too few arguments
-"""
-
-        assert stderr.getvalue() == error_message
-        assert stdout.getvalue() == ''
-
-    def test_run_4d_realign_help(self):
-        with pytest.raises(SystemExit) as cm:
-            with capture_sys_output() as (stdout, stderr):
-                nipype_cmd.main([
-                    'nipype_cmd', 'nipype.interfaces.nipy', 'FmriRealign4d',
-                    '-h'
-                ])
-
-        exit_exception = cm.value
-        assert exit_exception.code == 0
-
-        assert stderr.getvalue() == ''
-        assert "Run FmriRealign4d" in stdout.getvalue()
