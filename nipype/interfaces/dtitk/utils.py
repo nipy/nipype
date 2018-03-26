@@ -18,8 +18,8 @@ from .base import CommandLineDtitk
 
 
 class TVAdjustVoxSpInputSpec(CommandLineInputSpec):
-    in_file = File(desc="tensor to resample", exists=True, mandatory=True,
-                   argstr="-in %s")
+    in_file = File(desc="tensor volume to modify", exists=True,
+                   mandatory=True, argstr="-in %s")
     out_file = traits.Str(genfile=True, desc='output path',
                           argstr="-out %s", name_source='in_file',
                           name_template='%s_avs', keep_extension=True)
@@ -60,7 +60,7 @@ class TVAdjustVoxSpTask(CommandLineDtitk):
 
 
 class SVAdjustVoxSpInputSpec(CommandLineInputSpec):
-    in_file = File(desc="image to resample", exists=True,
+    in_file = File(desc="scalar volume to modify", exists=True,
                    mandatory=True, argstr="-in %s")
     out_file = traits.Str(desc='output path', argstr="-out %s",
                           name_source="in_file", name_template='%s_avs',
@@ -101,7 +101,7 @@ class SVAdjustVoxSpTask(CommandLineDtitk):
 
 
 class TVResampleInputSpec(CommandLineInputSpec):
-    in_file = File(desc="tensor to resample", exists=True,
+    in_file = File(desc="tensor volume to resample", exists=True,
                    mandatory=True, argstr="-in %s")
     out_file = traits.Str(desc='output path',
                           name_source="in_file", name_template="%s_resampled",
@@ -176,7 +176,7 @@ class SVResampleOutputSpec(TraitedSpec):
 
 class SVResampleTask(CommandLineDtitk):
     """
-    Resamples a non-tensor volume
+    Resamples a scalar volume
 
         Example
         -------
@@ -195,8 +195,8 @@ class SVResampleTask(CommandLineDtitk):
 
 
 class TVtoolInputSpec(CommandLineInputSpec):
-    in_file = File(desc="image to resample", exists=True, argstr="-in %s",
-                   mandatory=True)
+    in_file = File(desc="scalar volume to resample", exists=True,
+                   argstr="-in %s", mandatory=True)
     '''NOTE: there are a lot more options here; not putting all of them in'''
     in_flag = traits.Enum('fa', 'tr', 'ad', 'rd', 'pd', 'rgb', exists=True,
                           argstr="-%s", desc='')
@@ -240,6 +240,9 @@ class TVtoolTask(CommandLineDtitk):
         return basename + '_'+self.inputs.in_flag+'.nii.gz'
 
 
+'''Note: SVTool not implemented at this time'''
+
+
 class BinThreshInputSpec(CommandLineInputSpec):
     in_file = File(desc='Image to threshold/binarize', exists=True,
                    position=0, argstr="%s", mandatory=True)
@@ -260,7 +263,7 @@ class BinThreshOutputSpec(TraitedSpec):
 
 class BinThreshTask(CommandLineDtitk):
     """
-    Binarizes an image based on parameters
+    Binarizes an image
 
         Example
         -------
