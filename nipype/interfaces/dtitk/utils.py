@@ -31,7 +31,7 @@ class TVAdjustVoxSpInputSpec(CommandLineInputSpec):
                               argstr="-vsize %g %g %g", xor=['target_file'])
     origin = traits.Tuple((0, 0, 0),
                           desc='xyz origin (superseded by target)',
-                          argstr='-origin %g %g %g', usedefault=True,
+                          argstr='-origin %g %g %g',
                           xor=['target_file'])
 
 
@@ -48,15 +48,56 @@ class TVAdjustVoxSpTask(CommandLineDtitk):
 
     >>> import nipype.interfaces.dtitk as dtitk
     >>> node = dtitk.TVAdjustVoxSpTask()
-    >>> node.inputs.in_file = 'diffusion.nii'
-    >>> node.inputs.target_file = 'diffusion2.nii'
+    >>> node.inputs.in_file = 'diff1.nii'
+    >>> node.inputs.target_file = 'diff2.nii'
     >>> node.cmdline # doctest: +ELLIPSIS
-    'TVAdjustVoxelspace -in diffusion.nii -out diffusion_avs.nii -target 'diffusion2.nii''
+    'TVAdjustVoxelspace -in diff1.nii -out diff1_avs.nii -target 'diff2.nii''
     >>> node.run() # doctest: +SKIP
     """
     input_spec = TVAdjustVoxSpInputSpec
     output_spec = TVAdjustVoxSpOutputSpec
     _cmd = 'TVAdjustVoxelspace'
+
+
+class SVAdjustVoxSpInputSpec(CommandLineInputSpec):
+    in_file = File(desc="image to resample", exists=True,
+                   mandatory=True, argstr="-in %s")
+    out_file = traits.Str(desc='output path', argstr="-out %s",
+                          name_source="in_file", name_template='%s_avs',
+                          keep_extension=True)
+    target_file = File(desc='target volume to match',
+                       argstr="-target %s", xor=['voxel_size', 'origin'])
+    voxel_size = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
+                              desc='xyz voxel size (superseded by target)',
+                              argstr="-vsize %g %g %g", xor=['target_file'])
+    origin = traits.Tuple((0, 0, 0),
+                          desc='xyz origin (superseded by target)',
+                          argstr='-origin %g %g %g',
+                          xor=['target_file'])
+
+
+class SVAdjustVoxSpOutputSpec(TraitedSpec):
+    out_file = File(exists=True)
+
+
+class SVAdjustVoxSpTask(CommandLineDtitk):
+    """
+     Adjusts the voxel space of a scalar volume
+
+        Example
+        -------
+
+        >>> import nipype.interfaces.dtitk as dtitk
+        >>> node = dtitk.SVAdjustVoxSpTask()
+        >>> node.inputs.in_file = 'vol1.nii'
+        >>> node.inputs.target_file = 'vol2.nii'
+        >>> node.cmdline # doctest: +ELLIPSIS
+        'TVAdjustVoxelspace -in vol1.nii -out vol1_avs.nii -target 'vol2.nii''
+        >>> node.run() # doctest: +SKIP
+        """
+    input_spec = SVAdjustVoxSpInputSpec
+    output_spec = SVAdjustVoxSpOutputSpec
+    _cmd = 'SVAdjustVoxelspace'
 
 
 class TVResampleInputSpec(CommandLineInputSpec):
@@ -195,41 +236,6 @@ class BinThreshTask(CommandLineDtitk):
     _cmd = 'BinaryThresholdImageFilter'
 
 # TODO not using these yet... need to be tested
-
-
-class SVAdjustVoxSpInputSpec(CommandLineInputSpec):
-    in_file = File(desc="image to resample", exists=True,
-                   mandatory=True, position=0, argstr="-in %s")
-    target_file = File(desc='target volume', mandatory=True,
-                       position=2, argstr="-target %s")
-    voxel_size = traits.Str(desc='resampled voxel size', mandatory=True,
-                            position=3, argstr="-vsize %s")
-    out_file = traits.Str(desc='output path', position=1, argstr="-out %s",
-                          name_source="in_file", name_template='%s_reslice',
-                          keep_extension=True)
-    origin = traits.Str(desc='xyz voxel size', mandatory=True,
-                        position=4, argstr='-origin %s')
-
-
-class SVAdjustVoxSpOutputSpec(TraitedSpec):
-    out_file = File(exists=True)
-
-
-class SVAdjustVoxSpTask(CommandLineDtitk):
-    """
-     Adjusts the voxel space of a scalar volume
-
-        Example
-        -------
-
-        >>> import nipype.interfaces.dtitk as dtitk
-        >>> node = dtitk.SVAdjustVoxSpTask()
-        >>> node.inputs.in_file = 'diffusion.nii.gz'
-        >>> node.run() # doctest: +SKIP
-        """
-    input_spec = SVAdjustVoxSpInputSpec
-    output_spec = SVAdjustVoxSpOutputSpec
-    _cmd = 'SVAdjustVoxelspace'
 
 
 
