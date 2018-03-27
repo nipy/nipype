@@ -17,23 +17,19 @@ def test_ComposeXfmTask_inputs():
         ),
         in_aff=dict(
             argstr='-aff %s',
-            exists=True,
-            mandatory=False,
-            position=0,
+            mandatory=True,
         ),
         in_df=dict(
             argstr='-df %s',
-            exists=True,
-            mandatory=False,
-            position=1,
+            copyfile=False,
+            mandatory=True,
         ),
         out_file=dict(
             argstr='-out %s',
             exists=True,
-            mandatory=False,
+            keep_extension=True,
             name_source='in_df',
-            name_template='%s_comboaff.nii.gz',
-            position=2,
+            name_template='%s_aff.df',
         ),
         terminal_output=dict(
             deprecated='1.0.0',

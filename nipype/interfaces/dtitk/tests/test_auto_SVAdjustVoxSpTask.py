@@ -17,39 +17,29 @@ def test_SVAdjustVoxSpTask_inputs():
         ),
         in_file=dict(
             argstr='-in %s',
-            exists=True,
             mandatory=True,
-            position=0,
-        ),
-        in_target=dict(
-            argstr='-target %s',
-            exists=True,
-            mandatory=False,
-            position=2,
-        ),
-        in_voxsz=dict(
-            argstr='-vsize %s',
-            exists=True,
-            mandatory=False,
-            position=3,
         ),
         origin=dict(
-            argstr='-origin %s',
-            exists=True,
-            mandatory=False,
-            position=4,
+            argstr='-origin %g %g %g',
+            xor=['target_file'],
         ),
         out_file=dict(
             argstr='-out %s',
-            exists=True,
-            mandatory=False,
+            keep_extension=True,
             name_source='in_file',
-            name_template='%s_origmvd.nii.gz',
-            position=1,
+            name_template='%s_avs',
+        ),
+        target_file=dict(
+            argstr='-target %s',
+            xor=['voxel_size', 'origin'],
         ),
         terminal_output=dict(
             deprecated='1.0.0',
             nohash=True,
+        ),
+        voxel_size=dict(
+            argstr='-vsize %g %g %g',
+            xor=['target_file'],
         ),
     )
     inputs = SVAdjustVoxSpTask.input_spec()

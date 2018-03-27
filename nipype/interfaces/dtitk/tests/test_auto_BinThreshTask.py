@@ -17,25 +17,41 @@ def test_BinThreshTask_inputs():
         ),
         in_file=dict(
             argstr='%s',
-            exists=True,
-            mandatory=False,
+            mandatory=True,
             position=0,
         ),
-        in_numbers=dict(
-            argstr='%s',
-            exists=True,
-            mandatory=False,
+        inside_value=dict(
+            argstr='%g',
+            mandatory=True,
+            position=4,
+            usedefault=True,
+        ),
+        lower_bound=dict(
+            argstr='%g',
+            mandatory=True,
             position=2,
         ),
         out_file=dict(
             argstr='%s',
-            exists=True,
-            mandatory=False,
+            keep_extension=True,
+            name_source='in_file',
+            name_template='%s_thrbin',
             position=1,
+        ),
+        outside_value=dict(
+            argstr='%g',
+            mandatory=True,
+            position=5,
+            usedefault=True,
         ),
         terminal_output=dict(
             deprecated='1.0.0',
             nohash=True,
+        ),
+        upper_bound=dict(
+            argstr='%g',
+            mandatory=True,
+            position=3,
         ),
     )
     inputs = BinThreshTask.input_spec()

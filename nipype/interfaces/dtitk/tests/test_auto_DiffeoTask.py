@@ -12,8 +12,6 @@ def test_DiffeoTask_inputs():
         ),
         fixed_file=dict(
             argstr='%s',
-            exists=True,
-            mandatory=False,
             position=0,
         ),
         ftol=dict(
@@ -21,6 +19,7 @@ def test_DiffeoTask_inputs():
             exists=True,
             mandatory=True,
             position=5,
+            usedefault=True,
         ),
         ignore_exception=dict(
             deprecated='1.0.0',
@@ -32,17 +31,15 @@ def test_DiffeoTask_inputs():
             exists=True,
             mandatory=True,
             position=3,
+            usedefault=True,
         ),
-        mask=dict(
+        mask_file=dict(
             argstr='%s',
-            exists=True,
-            mandatory=False,
             position=2,
         ),
         moving_file=dict(
             argstr='%s',
-            exists=True,
-            mandatory=False,
+            copyfile=False,
             position=1,
         ),
         n_iters=dict(
@@ -50,6 +47,7 @@ def test_DiffeoTask_inputs():
             exists=True,
             mandatory=True,
             position=4,
+            usedefault=True,
         ),
         terminal_output=dict(
             deprecated='1.0.0',

@@ -17,15 +17,16 @@ def test_TVtoolTask_inputs():
         ),
         in_file=dict(
             argstr='-in %s',
-            exists=True,
-            mandatory=False,
-            position=0,
+            mandatory=True,
         ),
         in_flag=dict(
             argstr='-%s',
             exists=True,
-            mandatory=False,
-            position=1,
+        ),
+        out_file=dict(
+            argstr='-out %s',
+            exists=True,
+            genfile=True,
         ),
         terminal_output=dict(
             deprecated='1.0.0',
