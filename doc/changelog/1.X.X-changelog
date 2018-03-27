@@ -11,6 +11,7 @@
   * DOC: Add tutorials, porcupine to users TOC (https://github.com/nipy/nipype/pull/2503
   * DOC: Contributing and testing (https://github.com/nipy/nipype/pull/2482)
   * DOC: Describe 'orphaned' tag in CONTRIBUTING (https://github.com/nipy/nipype/pull/2481)
+  * DOC: Add details for dcm2niix output filename pattern (https://github.com/nipy/nipype/pull/2512)
   * ENH: Add interface for AFNI 3dNwarpAdjust (https://github.com/nipy/nipype/pull/2450)
   * ENH: Update SSHDataGrabber to fetch related files (https://github.com/nipy/nipype/pull/2104)
   * ENH: Add interpolation order parameter to NiftyReg's RegTools (https://github.com/nipy/nipype/pull/2471)
