@@ -32,10 +32,7 @@ def test_TProject_inputs():
             mandatory=True,
             position=1,
         ),
-        mask=dict(
-            argstr='-mask %s',
-            exist=True,
-        ),
+        mask=dict(argstr='-mask %s', ),
         noblock=dict(argstr='-noblock', ),
         norm=dict(argstr='-norm', ),
         num_threads=dict(
