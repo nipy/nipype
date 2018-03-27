@@ -3,6 +3,17 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """DTITK utility interfaces
 
+DTI-TK developed by Gary Hui Zhang, gary.zhang@ucl.ac.uk
+For additional help, visit http://dti-tk.sf.net
+
+The high-dimensional tensor-based DTI registration algorithm
+
+Zhang, H., Avants, B.B, Yushkevich, P.A., Woo, J.H., Wang, S., McCluskey, L.H., Elman, L.B., Melhem, E.R., Gee, J.C., High-dimensional spatial normalization of diffusion tensor images improves the detection of white matter differences in amyotrophic lateral sclerosis, IEEE Transactions on Medical Imaging, 26(11):1585-1597, November 2007. PMID: 18041273.
+
+The original piecewise-affine tensor-based DTI registration algorithm at the core of DTI-TK
+
+Zhang, H., Yushkevich, P.A., Alexander, D.C., Gee, J.C., Deformable registration of diffusion tensor MR images with explicit orientation optimization, Medical Image Analysis, 10(5):764-785, October 2006. PMID: 16899392.
+
 """
 __author__ = 'kjordan'
 
@@ -11,6 +22,7 @@ from ..base import TraitedSpec, CommandLineInputSpec, File, \
 import os
 from .base import CommandLineDtitk
 
+__docformat__ = 'restructuredtext'
 
 class TVAdjustVoxSpInputSpec(CommandLineInputSpec):
     in_file = File(desc="tensor volume to modify", exists=True,
@@ -43,10 +55,10 @@ class TVAdjustVoxSpTask(CommandLineDtitk):
 
     >>> import nipype.interfaces.dtitk as dtitk
     >>> node = dtitk.TVAdjustVoxSpTask()
-    >>> node.inputs.in_file = 'diff1.nii'
-    >>> node.inputs.target_file = 'diff2.nii'
-    >>> node.cmdline # doctest: +ELLIPSIS
-    'TVAdjustVoxelspace -in diff1.nii -out diff1_avs.nii -target 'diff2.nii''
+    >>> node.inputs.in_file = 'im1.nii'
+    >>> node.inputs.target_file = 'im2.nii'
+    >>> node.cmdline
+    'TVAdjustVoxelspace -in im1.nii -out im1_avs.nii -target im2.nii'
     >>> node.run() # doctest: +SKIP
     """
     input_spec = TVAdjustVoxSpInputSpec
@@ -84,10 +96,10 @@ class SVAdjustVoxSpTask(CommandLineDtitk):
 
         >>> import nipype.interfaces.dtitk as dtitk
         >>> node = dtitk.SVAdjustVoxSpTask()
-        >>> node.inputs.in_file = 'vol1.nii'
-        >>> node.inputs.target_file = 'vol2.nii'
-        >>> node.cmdline # doctest: +ELLIPSIS
-        'TVAdjustVoxelspace -in vol1.nii -out vol1_avs.nii -target 'vol2.nii''
+        >>> node.inputs.in_file = 'im1.nii'
+        >>> node.inputs.target_file = 'im2.nii'
+        >>> node.cmdline
+        'SVAdjustVoxelspace -in im1.nii -out im1_avs.nii -target im2.nii'
         >>> node.run() # doctest: +SKIP
         """
     input_spec = SVAdjustVoxSpInputSpec
@@ -132,10 +144,10 @@ class TVResampleTask(CommandLineDtitk):
 
         >>> import nipype.interfaces.dtitk as dtitk
         >>> node = dtitk.TVResampleTask()
-        >>> node.inputs.in_file = 'ten1.nii.gz'
-        >>> node.inputs.target_file = 'ten2.nii.gz'
-        >>> node.cmdline # doctest: +ELLIPSIS
-        'TVResample -in ten1.nii -out ten1_resampled.nii -target 'ten2.nii''
+        >>> node.inputs.in_file = 'im1.nii'
+        >>> node.inputs.target_file = 'im2.nii'
+        >>> node.cmdline
+        'TVResample -in im1.nii -out im1_resampled.nii -target im2.nii'
         >>> node.run() # doctest: +SKIP
         """
     input_spec = TVResampleInputSpec
@@ -169,6 +181,7 @@ class SVResampleOutputSpec(TraitedSpec):
     out_file = File(exists=True)
 
 
+
 class SVResampleTask(CommandLineDtitk):
     """
     Resamples a scalar volume
@@ -177,11 +190,11 @@ class SVResampleTask(CommandLineDtitk):
         -------
 
         >>> import nipype.interfaces.dtitk as dtitk
-        >>> node = dtitk.TVResampleTask()
-        >>> node.inputs.in_file = 'vol1.nii.gz'
-        >>> node.inputs.target_file = 'vol2.nii.gz'
-        >>> node.cmdline # doctest: +ELLIPSIS
-        'SVResample -in vol1.nii -out vol1_resampled.nii -target 'vol2.nii''
+        >>> node = dtitk.SVResampleTask()
+        >>> node.inputs.in_file = 'im1.nii'
+        >>> node.inputs.target_file = 'im2.nii'
+        >>> node.cmdline
+        'SVResample -in im1.nii -out im1_resampled.nii -target im2.nii'
         >>> node.run() # doctest: +SKIP
         """
     input_spec = SVResampleInputSpec
@@ -212,10 +225,10 @@ class TVtoolTask(CommandLineDtitk):
 
         >>> import nipype.interfaces.dtitk as dtitk
         >>> node = dtitk.TVtoolTask()
-        >>> node.inputs.in_file = 'diffusion.nii'
+        >>> node.inputs.in_file = 'im1.nii'
         >>> node.inputs.in_flag = 'fa'
-        >>> node.cmdline # doctest: +ELLIPSIS
-        'TVtool -in diffusion.nii -fa -out diffusion_fa.nii.gz'
+        >>> node.cmdline
+        'TVtool -in im1.nii -fa -out im1_fa.nii'
         >>> node.run() # doctest: +SKIP
         """
     input_spec = TVtoolInputSpec
@@ -231,8 +244,10 @@ class TVtoolTask(CommandLineDtitk):
         return outputs
 
     def _gen_filename(self, name):
-        basename = os.path.basename(self.inputs.in_file).split('.')[0]
-        return basename + '_'+self.inputs.in_flag+'.nii.gz'
+        splitlist = os.path.basename(self.inputs.in_file).split('.')
+        basename = splitlist[0]
+        termination = '.' + '.'.join(splitlist[1:])
+        return basename + '_'+self.inputs.in_flag + termination
 
 
 '''Note: SVTool not implemented at this time'''
@@ -265,13 +280,13 @@ class BinThreshTask(CommandLineDtitk):
 
         >>> import nipype.interfaces.dtitk as dtitk
         >>> node = dtitk.BinThreshTask()
-        >>> node.inputs.in_file = 'diffusion.nii'
+        >>> node.inputs.in_file = 'im1.nii'
         >>> node.inputs.lower_bound = 0
         >>> node.inputs.upper_bound = 100
         >>> node.inputs.inside_value = 1
         >>> node.inputs.outside_value = 0
         >>> node.cmdline
-        'BinaryThresholdImageFilter diffusion.nii diffusion_bin.nii 0.0 100.0 1.0 0.0'
+        'BinaryThresholdImageFilter im1.nii im1_thrbin.nii 0 100 1 0'
         >>> node.run() # doctest: +SKIP
         """
 

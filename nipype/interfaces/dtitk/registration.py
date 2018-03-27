@@ -3,6 +3,17 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """DTITK registration interfaces
 
+DTI-TK developed by Gary Hui Zhang, gary.zhang@ucl.ac.uk
+For additional help, visit http://dti-tk.sf.net
+
+The high-dimensional tensor-based DTI registration algorithm
+
+Zhang, H., Avants, B.B, Yushkevich, P.A., Woo, J.H., Wang, S., McCluskey, L.H., Elman, L.B., Melhem, E.R., Gee, J.C., High-dimensional spatial normalization of diffusion tensor images improves the detection of white matter differences in amyotrophic lateral sclerosis, IEEE Transactions on Medical Imaging, 26(11):1585-1597, November 2007. PMID: 18041273.
+
+The original piecewise-affine tensor-based DTI registration algorithm at the core of DTI-TK
+
+Zhang, H., Yushkevich, P.A., Alexander, D.C., Gee, J.C., Deformable registration of diffusion tensor MR images with explicit orientation optimization, Medical Image Analysis, 10(5):764-785, October 2006. PMID: 16899392.
+
 """
 
 from ..base import TraitedSpec, CommandLineInputSpec, traits, isdefined, File
@@ -10,6 +21,7 @@ from ...utils.filemanip import fname_presuffix
 import os
 from .base import CommandLineDtitk
 
+__docformat__ = 'restructuredtext'
 
 class RigidInputSpec(CommandLineInputSpec):
     fixed_file = File(desc="fixed diffusion tensor image",
@@ -43,14 +55,14 @@ class RigidTask(CommandLineDtitk):
 
     >>> import nipype.interfaces.dtitk as dtitk
     >>> node = dtitk.RigidTask()
-    >>> node.inputs.fixed_file = 'ten1.nii.gz'
-    >>> node.inputs.moving_file = 'ten2.nii.gz'
+    >>> node.inputs.fixed_file = 'im1.nii'
+    >>> node.inputs.moving_file = 'im2.nii'
     >>> node.inputs.similarity_metric = 'EDS'
     >>> node.inputs.samplingXYZ = (4,4,4)
     >>> node.inputs.ftol = 0.01
     >>> node.inputs.useInTrans = True
-    >>> node.cmdline # doctest: +ELLIPSIS
-    'dti_rigid_reg ten1.nii.gz ten2.nii.gz EDS 4 4 4 0.01 1'
+    >>> node.cmdline
+    'dti_rigid_reg im1.nii im2.nii EDS 4 4 4 0.01 1'
     >>> node.run() # doctest: +SKIP
     """
     input_spec = RigidInputSpec
@@ -59,10 +71,11 @@ class RigidTask(CommandLineDtitk):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file_xfm'] = self.inputs.moving_file.replace('.nii.gz',
-                                                                  '.aff')
-        outputs['out_file'] = self.inputs.moving_file.replace('.nii.gz',
-                                                              '_aff.nii.gz')
+        splitlist = os.path.basename(self.inputs.moving_file).split('.')
+        basename = splitlist[0]
+        termination = '.'+'.'.join(splitlist[1:])
+        outputs['out_file_xfm'] = basename+'.aff'
+        outputs['out_file'] = basename+'_aff'+termination
         return outputs
 
 
@@ -99,14 +112,14 @@ class AffineTask(CommandLineDtitk):
 
     >>> import nipype.interfaces.dtitk as dtitk
     >>> node = dtitk.AffineTask()
-    >>> node.inputs.fixed_file = 'ten1.nii.gz'
-    >>> node.inputs.moving_file = 'ten2.nii.gz'
+    >>> node.inputs.fixed_file = 'im1.nii'
+    >>> node.inputs.moving_file = 'im2.nii'
     >>> node.inputs.similarity_metric = 'EDS'
     >>> node.inputs.samplingXYZ = (4,4,4)
     >>> node.inputs.ftol = 0.01
     >>> node.inputs.useInTrans = True
-    >>> node.cmdline # doctest: +ELLIPSIS
-    'dti_affine_reg ten1.nii.gz ten2.nii.gz EDS 4 4 4 0.01 1'
+    >>> node.cmdline
+    'dti_affine_reg im1.nii im2.nii EDS 4 4 4 0.01 1'
     >>> node.run() # doctest: +SKIP
     """
     input_spec = AffineInputSpec
@@ -115,10 +128,11 @@ class AffineTask(CommandLineDtitk):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file_xfm'] = self.inputs.moving_file.replace('.nii.gz',
-                                                                  '.aff')
-        outputs['out_file'] = self.inputs.moving_file.replace('.nii.gz',
-                                                              '_aff.nii.gz')
+        splitlist = os.path.basename(self.inputs.moving_file).split('.')
+        basename = splitlist[0]
+        termination = '.'+'.'.join(splitlist[1:])
+        outputs['out_file_xfm'] = basename+'.aff'
+        outputs['out_file'] = basename+'_aff'+termination
         return outputs
 
 
@@ -155,14 +169,14 @@ class DiffeoTask(CommandLineDtitk):
 
     >>> import nipype.interfaces.dtitk as dtitk
     >>> node = dtitk.DiffeoTask()
-    >>> node.inputs.fixed_file = 'ten1.nii.gz'
-    >>> node.inputs.moving_file = 'ten2.nii.gz'
-    >>> node.inputs.mask = 'mask.nii.gz'
+    >>> node.inputs.fixed_file = 'im1.nii'
+    >>> node.inputs.moving_file = 'im2.nii'
+    >>> node.inputs.mask_file = 'mask.nii'
     >>> node.inputs.legacy = 1
     >>> node.inputs.n_iters = 6
     >>> node.inputs.ftol = 0.002
-    >>> node.cmdline # doctest: +ELLIPSIS
-    'dti_diffeomorphic_reg ten1.nii.gz ten2.nii.gz mask.nii.gz 1 6 0.002'
+    >>> node.cmdline
+    'dti_diffeomorphic_reg im1.nii im2.nii mask.nii 1 6 0.002'
     >>> node.run() # doctest: +SKIP
     """
     input_spec = DiffeoInputSpec
@@ -171,21 +185,22 @@ class DiffeoTask(CommandLineDtitk):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file_xfm'] = self.inputs.moving_file.replace(
-            '.nii.gz', '_diffeo.df.nii.gz')
-        outputs['out_file'] = self.inputs.moving_file.replace(
-            '.nii.gz', '_diffeo.nii.gz')
+        splitlist = os.path.basename(self.inputs.moving_file).split('.')
+        basename = splitlist[0]
+        termination = '.'+'.'.join(splitlist[1:])
+        outputs['out_file_xfm'] = basename+'_diffeo.df'+termination
+        outputs['out_file'] = basename+'_diffeo'+termination
         return outputs
 
 
 class ComposeXfmInputSpec(CommandLineInputSpec):
-    in_df = File(desc='diffeomorphic warp diffeo_xfm.df.nii.gz', exists=True,
+    in_df = File(desc='diffeomorphic warp file', exists=True,
                  argstr="-df %s", copyfile=False, mandatory=True)
     in_aff = File(desc='affine_xfm.aff', exists=True,
                   argstr="-aff %s", mandatory=True)
     out_file = traits.Str(desc='output_path', exists=True,
                           argstr="-out %s",  name_source="in_df",
-                          name_template="%s_aff.df.nii.gz")
+                          name_template="%s_aff.df", keep_extension=True)
 
 
 class ComposeXfmOutputSpec(TraitedSpec):
@@ -201,10 +216,10 @@ class ComposeXfmTask(CommandLineDtitk):
 
     >>> import nipype.interfaces.dtitk as dtitk
     >>> node = dtitk.ComposeXfmTask()
-    >>> node.inputs.in_df = 'myxfm.df.nii.gz'
-    >>> node.inputs.in_aff= 'myxfm.aff'
-    >>> node.cmdline # doctest: +ELLIPSIS
-    'dfRightComposeAffine -df myxfm.df.nii.gz -aff myxfm.aff -out myxfm.df_aff.df.nii.gz'
+    >>> node.inputs.in_df = 'im1.nii'
+    >>> node.inputs.in_aff= 'im2.nii'
+    >>> node.cmdline
+    'dfRightComposeAffine -aff im2.nii -df im1.nii -out im1_aff.df'
     >>> node.run() # doctest: +SKIP
     """
     input_spec = ComposeXfmInputSpec
@@ -250,10 +265,10 @@ class affSymTensor3DVolTask(CommandLineDtitk):
 
     >>> import nipype.interfaces.dtitk as dtitk
     >>> node = dtitk.affSymTensor3DVolTask()
-    >>> node.inputs.in_file = 'ten.nii'
-    >>> node.inputs.transform = 'aff.txt'
-    >>> node.cmdline # doctest: +ELLIPSIS
-    'affineSymTensor3DVolume -in ten.nii -interp LEI -out Ptensor_affxfmd.nii.gz -reorient PPD -trans aff.aff'
+    >>> node.inputs.in_file = 'im1.nii'
+    >>> node.inputs.transform = 'im2.nii'
+    >>> node.cmdline
+    'affineSymTensor3DVolume -in im1.nii -interp LEI -out im1_affxfmd.nii -reorient PPD -trans im2.nii'
     >>> node.run() # doctest: +SKIP
     """
     input_spec = affSymTensor3DVolInputSpec
@@ -298,10 +313,10 @@ class affScalarVolTask(CommandLineDtitk):
 
     >>> import nipype.interfaces.dtitk as dtitk
     >>> node = dtitk.affScalarVolTask()
-    >>> node.inputs.in_volume = 'myvol.nii'
-    >>> node.inputs.in_xfm = 'myxfm.aff'
-    >>> node.cmdline # doctest: +ELLIPSIS
-    'affineScalarVolume -in myvol.nii -interp 0 -out myvol_affxfmd.nii -trans myxfm.aff'
+    >>> node.inputs.in_file = 'im1.nii'
+    >>> node.inputs.transform = 'im2.nii'
+    >>> node.cmdline
+    'affineScalarVolume -in im1.nii -interp 0 -out im1_affxfmd.nii -trans im2.nii'
     >>> node.run() # doctest: +SKIP
     """
     input_spec = affScalarVolInputSpec
@@ -347,10 +362,10 @@ class diffeoSymTensor3DVolTask(CommandLineDtitk):
 
     >>> import nipype.interfaces.dtitk as dtitk
     >>> node = dtitk.diffeoSymTensor3DVolTask()
-    >>> node.inputs.in_tensor = 'ten.nii'
-    >>> node.inputs.in_xfm = 'myxfm.df.nii'
-    >>> node.cmdline # doctest: +ELLIPSIS
-    'deformationSymTensor3DVolume -df FD -in ten.nii.gz -interp LEI -out ten_diffeoxfmd.nii.gz -reorient PPD -trans myxfm.df.nii'
+    >>> node.inputs.in_file = 'im1.nii'
+    >>> node.inputs.transform = 'im2.nii'
+    >>> node.cmdline
+    'deformationSymTensor3DVolume -df FD -in im1.nii -interp LEI -out im1_diffeoxfmd.nii -reorient PPD -trans im2.nii'
     >>> node.run() # doctest: +SKIP
     """
 
@@ -392,10 +407,10 @@ class diffeoScalarVolTask(CommandLineDtitk):
 
     >>> import nipype.interfaces.dtitk as dtitk
     >>> node = dtitk.diffeoScalarVolTask()
-    >>> node.inputs.in_volume = 'sv.nii'
-    >>> node.inputs.in_xfm = 'myxfm.df.nii'
-    >>> node.cmdline # doctest: +ELLIPSIS
-    'deformationScalarVolume -in sv.nii -interp 0 -out sv_diffeoxfmd.nii -trans myxfm.df.nii.gz'
+    >>> node.inputs.in_file = 'im1.nii'
+    >>> node.inputs.transform = 'im2.nii'
+    >>> node.cmdline
+    'deformationScalarVolume -in im1.nii -interp 0 -out im1_diffeoxfmd.nii -trans im2.nii'
     >>> node.run() # doctest: +SKIP
     """
 
