@@ -275,7 +275,24 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
         xor=['source_names'])
     out_filename = traits.Str(
         argstr="-f %s",
-        desc="Output filename")
+        desc="Output filename template ("
+             "%a=antenna (coil) number, "
+             "%c=comments, "
+             "%d=description, "
+             "%e=echo number, "
+             "%f=folder name, "
+             "%i=ID of patient, "
+             "%j=seriesInstanceUID, "
+             "%k=studyInstanceUID, "
+             "%m=manufacturer, "
+             "%n=name of patient, "
+             "%p=protocol, "
+             "%s=series number, "
+             "%t=time, "
+             "%u=acquisition number, "
+             "%v=vendor, "
+             "%x=study ID; "
+             "%z=sequence name)")
     output_dir = Directory(
         ".",
         usedefault=True,
@@ -320,7 +337,7 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
         False,
         argstr='-t',
         usedefault=True,
-        desc="Flag if text notes includes private patient details")
+        desc="Flag if text notes include private patient details")
     compression = traits.Enum(
         1, 2, 3, 4, 5, 6, 7, 8, 9,
         argstr='-%d',
