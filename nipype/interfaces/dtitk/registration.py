@@ -163,9 +163,9 @@ class ComposeXfmInputSpec(CommandLineInputSpec):
                  argstr="-df %s", copyfile=False, mandatory=True)
     in_aff = File(desc='affine transform file', exists=True,
                   argstr="-aff %s", mandatory=True)
-    out_file = traits.File(desc='output path',
-                           argstr="-out %s",  name_source="in_df",
-                           name_template="%s_aff.df", keep_extension=True)
+    out_file = File(desc='output path',
+                    argstr="-out %s",  name_source="in_df",
+                    name_template="%s_aff.df", keep_extension=True)
 
 
 class ComposeXfmOutputSpec(TraitedSpec):
@@ -196,9 +196,9 @@ class ComposeXfm(CommandLineDtitk):
 class affSymTensor3DVolInputSpec(CommandLineInputSpec):
     in_file = File(desc='moving tensor volume', exists=True,
                    argstr="-in %s", mandatory=True)
-    out_file = traits.File(desc='output filename',
-                           argstr="-out %s", name_source="in_file",
-                           name_template="%s_affxfmd", keep_extension=True)
+    out_file = File(desc='output filename',
+                    argstr="-out %s", name_source="in_file",
+                    name_template="%s_affxfmd", keep_extension=True)
     transform = File(exists=True, argstr="-trans %s",
                      xor=['target', 'translation', 'euler', 'deformation'],
                      desc='transform to apply: specify an input transformation\
@@ -254,16 +254,17 @@ class affSymTensor3DVol(CommandLineDtitk):
 class affScalarVolInputSpec(CommandLineInputSpec):
     in_file = File(desc='moving scalar volume', exists=True,
                    argstr="-in %s", mandatory=True)
-    out_file = traits.File(desc='output filename',
-                           argstr="-out %s", name_source="in_file",
-                           name_template="%s_affxfmd", keep_extension=True)
+    out_file = File(desc='output filename',
+                    argstr="-out %s", name_source="in_file",
+                    name_template="%s_affxfmd", keep_extension=True)
     transform = File(exists=True, argstr="-trans %s",
                      xor=['target', 'translation', 'euler', 'deformation'],
                      desc='transform to apply: specify an input transformation\
                       file; parameters input will be ignored',)
-    interpolation = traits.Enum(0, 1, usedefault=True,
-                                argstr="-interp %s",
-                                desc='0=trilinear (def); 1=nearest neighbor')
+    interpolation = traits.Enum('trilinear', 'NN',
+                                usedefault=True, argstr="-interp %s",
+                                desc='trilinear or nearest neighbor\
+                                 interpolation')
     target = File(exists=True, argstr="-target %s", xor=['transform'],
                   desc='output volume specification read from the target volume\
                    if specified')
@@ -301,13 +302,18 @@ class affScalarVol(CommandLineDtitk):
     output_spec = affScalarVolOutputSpec
     _cmd = 'affineScalarVolume'
 
+    def _format_arg(self, name, spec, value):
+        if name == 'interpolation':
+            value = {'trilinear': 0, 'NN': 1}[value]
+        super(affScalarVol, self)._format_arg(name, spec, value)
+
 
 class diffeoSymTensor3DVolInputSpec(CommandLineInputSpec):
     in_file = File(desc='moving tensor volume', exists=True,
                    argstr="-in %s", mandatory=True)
-    out_file = traits.File(desc='output filename',
-                           argstr="-out %s", name_source="in_file",
-                           name_template="%s_diffeoxfmd", keep_extension=True)
+    out_file = File(desc='output filename',
+                    argstr="-out %s", name_source="in_file",
+                    name_template="%s_diffeoxfmd", keep_extension=True)
     transform = File(exists=True, argstr="-trans %s",
                      mandatory=True, desc='transform to apply')
     df = traits.Str('FD', argstr="-df %s", usedefault=True)
@@ -326,7 +332,8 @@ class diffeoSymTensor3DVolInputSpec(CommandLineInputSpec):
                               argstr="-vsize %g %g %g", xor=['target'])
     flip = traits.Tuple((traits.Int(), traits.Int(), traits.Int()),
                         exists=True, argstr="-flip %d %d %d")
-    resampling_type = traits.Enum(1, 0, desc='1=backward(def), 0=forward',
+    resampling_type = traits.Enum('backward', 'forward',
+                                  desc='use backward or forward resampling',
                                   exists=True,  argstr="-type %d")
 
 
@@ -355,13 +362,18 @@ class diffeoSymTensor3DVol(CommandLineDtitk):
     output_spec = diffeoSymTensor3DVolOutputSpec
     _cmd = 'deformationSymTensor3DVolume'
 
+    def _format_arg(self, name, spec, value):
+        if name == 'resampling_type':
+            value = {'forward': 0, 'backward': 1}[value]
+        super(diffeoSymTensor3DVol, self)._format_arg(name, spec, value)
+
 
 class diffeoScalarVolInputSpec(CommandLineInputSpec):
     in_file = File(desc='moving scalar volume', exists=True,
                    argstr="-in %s", mandatory=True)
-    out_file = traits.File(desc='output filename',
-                           argstr="-out %s", name_source="in_file",
-                           name_template="%s_diffeoxfmd", keep_extension=True)
+    out_file = File(desc='output filename',
+                    argstr="-out %s", name_source="in_file",
+                    name_template="%s_diffeoxfmd", keep_extension=True)
     transform = transform = File(exists=True, argstr="-trans %s",
                                  mandatory=True, desc='transform to apply')
     target = File(exists=True, argstr="-target %s", xor=['voxel_size'],
@@ -372,10 +384,13 @@ class diffeoScalarVolInputSpec(CommandLineInputSpec):
                               argstr="-vsize %g %g %g", xor=['target'])
     flip = traits.Tuple((traits.Int(), traits.Int(), traits.Int()),
                         exists=True, argstr="-flip %d %d %d")
-    resampling_type = traits.Enum(1, 0, desc='1=backward(def), 0=forward',
+    resampling_type = traits.Enum('backward', 'forward',
+                                  desc='use backward or forward resampling',
                                   exists=True,  argstr="-type %d")
-    interp = traits.Enum(0, 1, desc='0=trilinear(def), 1=nearest neighbor',
-                         exists=True, argstr="-interp %d", usedefault=True)
+    interpolation = traits.Enum('trilinear', 'NN',
+                                desc='trilinear, or nearest neighbor',
+                                exists=True, argstr="-interp %d",
+                                usedefault=True)
 
 
 class diffeoScalarVolOutputSpec(TraitedSpec):
@@ -402,3 +417,11 @@ class diffeoScalarVol(CommandLineDtitk):
     input_spec = diffeoScalarVolInputSpec
     output_spec = diffeoScalarVolOutputSpec
     _cmd = 'deformationScalarVolume'
+
+    def _format_arg(self, name, spec, value):
+        if name == 'resampling_type':
+            value = {'forward': 0, 'backward': 1}[value]
+        super(diffeoScalarVol, self)._format_arg(name, spec, value)
+        if name == 'interpolation':
+            value = {'trilinear': 0, 'NN': 1}[value]
+        super(diffeoScalarVol, self)._format_arg(name, spec, value)
