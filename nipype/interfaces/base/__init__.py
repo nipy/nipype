@@ -18,7 +18,8 @@ from .specs import (BaseTraitedSpec, TraitedSpec, DynamicTraitedSpec,
 
 from .traits_extension import (
     traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined,
-    File, Directory, Str, DictStrStr, has_metadata, ImageFile, MultiPath,
+    File, Directory, Str, DictStrStr, has_metadata, ImageFile,
+    OutputMultiObject, InputMultiObject,
     OutputMultiPath, InputMultiPath)
 
 from .support import (Bunch, InterfaceResult, load_template,
