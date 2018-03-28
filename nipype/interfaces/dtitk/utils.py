@@ -8,35 +8,43 @@ For additional help, visit http://dti-tk.sf.net
 
 The high-dimensional tensor-based DTI registration algorithm
 
-Zhang, H., Avants, B.B, Yushkevich, P.A., Woo, J.H., Wang, S., McCluskey, L.H., Elman, L.B., Melhem, E.R., Gee, J.C., High-dimensional spatial normalization of diffusion tensor images improves the detection of white matter differences in amyotrophic lateral sclerosis, IEEE Transactions on Medical Imaging, 26(11):1585-1597, November 2007. PMID: 18041273.
+Zhang, H., Avants, B.B, Yushkevich, P.A., Woo, J.H., Wang, S., McCluskey, L.H.,
+Elman, L.B., Melhem, E.R., Gee, J.C., High-dimensional spatial normalization of
+diffusion tensor images improves the detection of white matter differences in
+amyotrophic lateral sclerosis, IEEE Transactions on Medical Imaging,
+26(11):1585-1597, November 2007. PMID: 18041273.
 
-The original piecewise-affine tensor-based DTI registration algorithm at the core of DTI-TK
+The original piecewise-affine tensor-based DTI registration algorithm at the
+core of DTI-TK
 
-Zhang, H., Yushkevich, P.A., Alexander, D.C., Gee, J.C., Deformable registration of diffusion tensor MR images with explicit orientation optimization, Medical Image Analysis, 10(5):764-785, October 2006. PMID: 16899392.
+Zhang, H., Yushkevich, P.A., Alexander, D.C., Gee, J.C., Deformable
+registration of diffusion tensor MR images with explicit orientation
+optimization, Medical Image Analysis, 10(5):764-785, October 2006. PMID:
+16899392.
 
 """
 __author__ = 'kjordan'
 
-from ..base import TraitedSpec, CommandLineInputSpec, File, \
-    traits, isdefined
-import os
+from ..base import TraitedSpec, CommandLineInputSpec, File, traits, isdefined
+from ...utils.filemanip import fname_presuffix
 from .base import CommandLineDtitk
 
 __docformat__ = 'restructuredtext'
 
+
 class TVAdjustVoxSpInputSpec(CommandLineInputSpec):
     in_file = File(desc="tensor volume to modify", exists=True,
                    mandatory=True, argstr="-in %s")
-    out_file = traits.Str(genfile=True, desc='output path',
-                          argstr="-out %s", name_source='in_file',
-                          name_template='%s_avs', keep_extension=True)
+    out_file = traits.File(genfile=True, desc='output path',
+                           argstr="-out %s", name_source='in_file',
+                           name_template='%s_avs', keep_extension=True)
     target_file = traits.File(desc='target volume to match',
                               argstr="-target %s",
                               xor=['voxel_size', 'origin'])
     voxel_size = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
                               desc='xyz voxel size (superseded by target)',
                               argstr="-vsize %g %g %g", xor=['target_file'])
-    origin = traits.Tuple((0, 0, 0),
+    origin = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
                           desc='xyz origin (superseded by target)',
                           argstr='-origin %g %g %g',
                           xor=['target_file'])
@@ -46,15 +54,15 @@ class TVAdjustVoxSpOutputSpec(TraitedSpec):
     out_file = File(exists=True)
 
 
-class TVAdjustVoxSpTask(CommandLineDtitk):
+class TVAdjustVoxSp(CommandLineDtitk):
     """
      Adjusts the voxel space of a tensor volume
 
     Example
     -------
 
-    >>> import nipype.interfaces.dtitk as dtitk
-    >>> node = dtitk.TVAdjustVoxSpTask()
+    >>> from nipype.interfaces import dtitk
+    >>> node = dtitk.TVAdjustVoxSp()
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.target_file = 'im2.nii'
     >>> node.cmdline
@@ -69,15 +77,15 @@ class TVAdjustVoxSpTask(CommandLineDtitk):
 class SVAdjustVoxSpInputSpec(CommandLineInputSpec):
     in_file = File(desc="scalar volume to modify", exists=True,
                    mandatory=True, argstr="-in %s")
-    out_file = traits.Str(desc='output path', argstr="-out %s",
-                          name_source="in_file", name_template='%s_avs',
-                          keep_extension=True)
+    out_file = traits.File(desc='output path', argstr="-out %s",
+                           name_source="in_file", name_template='%s_avs',
+                           keep_extension=True)
     target_file = File(desc='target volume to match',
                        argstr="-target %s", xor=['voxel_size', 'origin'])
     voxel_size = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
                               desc='xyz voxel size (superseded by target)',
                               argstr="-vsize %g %g %g", xor=['target_file'])
-    origin = traits.Tuple((0, 0, 0),
+    origin = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
                           desc='xyz origin (superseded by target)',
                           argstr='-origin %g %g %g',
                           xor=['target_file'])
@@ -87,15 +95,15 @@ class SVAdjustVoxSpOutputSpec(TraitedSpec):
     out_file = File(exists=True)
 
 
-class SVAdjustVoxSpTask(CommandLineDtitk):
+class SVAdjustVoxSp(CommandLineDtitk):
     """
      Adjusts the voxel space of a scalar volume
 
         Example
         -------
 
-        >>> import nipype.interfaces.dtitk as dtitk
-        >>> node = dtitk.SVAdjustVoxSpTask()
+        >>> from nipype.interfaces import dtitk
+        >>> node = dtitk.SVAdjustVoxSp()
         >>> node.inputs.in_file = 'im1.nii'
         >>> node.inputs.target_file = 'im2.nii'
         >>> node.cmdline
@@ -110,9 +118,9 @@ class SVAdjustVoxSpTask(CommandLineDtitk):
 class TVResampleInputSpec(CommandLineInputSpec):
     in_file = File(desc="tensor volume to resample", exists=True,
                    mandatory=True, argstr="-in %s")
-    out_file = traits.Str(desc='output path',
-                          name_source="in_file", name_template="%s_resampled",
-                          keep_extension=True, argstr="-out %s")
+    out_file = traits.File(desc='output path',
+                           name_source="in_file", name_template="%s_resampled",
+                           keep_extension=True, argstr="-out %s")
     target_file = File(desc='specs read from the target volume',
                        argstr="-target %s",
                        xor=['array_size', 'voxel_size', 'origin'])
@@ -135,15 +143,15 @@ class TVResampleOutputSpec(TraitedSpec):
     out_file = File(exists=True)
 
 
-class TVResampleTask(CommandLineDtitk):
+class TVResample(CommandLineDtitk):
     """
     Resamples a tensor volume
 
         Example
         -------
 
-        >>> import nipype.interfaces.dtitk as dtitk
-        >>> node = dtitk.TVResampleTask()
+        >>> from nipype.interfaces import dtitk
+        >>> node = dtitk.TVResample()
         >>> node.inputs.in_file = 'im1.nii'
         >>> node.inputs.target_file = 'im2.nii'
         >>> node.cmdline
@@ -158,9 +166,9 @@ class TVResampleTask(CommandLineDtitk):
 class SVResampleInputSpec(CommandLineInputSpec):
     in_file = File(desc="image to resample", exists=True,
                    mandatory=True, argstr="-in %s")
-    out_file = traits.Str(desc='output path',
-                          name_source="in_file", name_template="%s_resampled",
-                          keep_extension=True, argstr="-out %s")
+    out_file = traits.File(desc='output path',
+                           name_source="in_file", name_template="%s_resampled",
+                           keep_extension=True, argstr="-out %s")
     target_file = File(desc='specs read from the target volume',
                        argstr="-target %s",
                        xor=['array_size', 'voxel_size', 'origin'])
@@ -181,16 +189,15 @@ class SVResampleOutputSpec(TraitedSpec):
     out_file = File(exists=True)
 
 
-
-class SVResampleTask(CommandLineDtitk):
+class SVResample(CommandLineDtitk):
     """
     Resamples a scalar volume
 
         Example
         -------
 
-        >>> import nipype.interfaces.dtitk as dtitk
-        >>> node = dtitk.SVResampleTask()
+        >>> from nipype.interfaces import dtitk
+        >>> node = dtitk.SVResample()
         >>> node.inputs.in_file = 'im1.nii'
         >>> node.inputs.target_file = 'im2.nii'
         >>> node.cmdline
@@ -205,26 +212,26 @@ class SVResampleTask(CommandLineDtitk):
 class TVtoolInputSpec(CommandLineInputSpec):
     in_file = File(desc="scalar volume to resample", exists=True,
                    argstr="-in %s", mandatory=True)
-    '''NOTE: there are a lot more options here; not putting all of them in'''
+    '''NOTE: there are a lot more options here; not implementing all of them'''
     in_flag = traits.Enum('fa', 'tr', 'ad', 'rd', 'pd', 'rgb', exists=True,
                           argstr="-%s", desc='')
-    out_file = traits.Str(exists=True,
-                          argstr="-out %s", genfile=True)
+    out_file = traits.File(exists=True,
+                           argstr="-out %s", genfile=True)
 
 
 class TVtoolOutputSpec(TraitedSpec):
     out_file = File()
 
 
-class TVtoolTask(CommandLineDtitk):
+class TVtool(CommandLineDtitk):
     """
     Calculates a tensor metric volume from a tensor volume
 
         Example
         -------
 
-        >>> import nipype.interfaces.dtitk as dtitk
-        >>> node = dtitk.TVtoolTask()
+        >>> from nipype.interfaces import dtitk
+        >>> node = dtitk.TVtool()
         >>> node.inputs.in_file = 'im1.nii'
         >>> node.inputs.in_flag = 'fa'
         >>> node.cmdline
@@ -244,10 +251,10 @@ class TVtoolTask(CommandLineDtitk):
         return outputs
 
     def _gen_filename(self, name):
-        splitlist = os.path.basename(self.inputs.in_file).split('.')
-        basename = splitlist[0]
-        termination = '.' + '.'.join(splitlist[1:])
-        return basename + '_'+self.inputs.in_flag + termination
+        tensor_volume = self.inputs.in_file
+        output_name = fname_presuffix(tensor_volume,
+                                      suffix='_'+self.inputs.in_flag)
+        return output_name
 
 
 '''Note: SVTool not implemented at this time'''
@@ -256,9 +263,9 @@ class TVtoolTask(CommandLineDtitk):
 class BinThreshInputSpec(CommandLineInputSpec):
     in_file = File(desc='Image to threshold/binarize', exists=True,
                    position=0, argstr="%s", mandatory=True)
-    out_file = traits.Str(desc='',  position=1, argstr="%s",
-                          keep_extension=True, name_source='in_file',
-                          name_template='%s_thrbin')
+    out_file = traits.File(desc='',  position=1, argstr="%s",
+                           keep_extension=True, name_source='in_file',
+                           name_template='%s_thrbin')
     lower_bound = traits.Float(0.01, position=2, argstr="%g", mandatory=True)
     upper_bound = traits.Float(100, position=3, argstr="%g", mandatory=True)
     inside_value = traits.Float(1, position=4, argstr="%g", usedefault=True,
@@ -271,15 +278,15 @@ class BinThreshOutputSpec(TraitedSpec):
     out_file = File(exists=True)
 
 
-class BinThreshTask(CommandLineDtitk):
+class BinThresh(CommandLineDtitk):
     """
     Binarizes an image
 
         Example
         -------
 
-        >>> import nipype.interfaces.dtitk as dtitk
-        >>> node = dtitk.BinThreshTask()
+        >>> from nipype.interfaces import dtitk
+        >>> node = dtitk.BinThresh()
         >>> node.inputs.in_file = 'im1.nii'
         >>> node.inputs.lower_bound = 0
         >>> node.inputs.upper_bound = 100
