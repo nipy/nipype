@@ -19,9 +19,15 @@ while true; do
     esac
 done
 
+# Normalize whitespace in command, preserving quotes
+CMD=""
+for ARG; do
+    CMD="$CMD \"$ARG\"";
+done
+
 RET=0
 for i in `seq $NLOOPS`; do
-    sh -c "$@"
+    sh -c "$CMD"
     RET="$?"
     if [ "$RET" -eq 0 ]; then break; fi
     if [ "$i" -ne "$NLOOPS" ]; then sleep $TOSLEEP; fi
