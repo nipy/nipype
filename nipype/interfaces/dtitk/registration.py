@@ -334,7 +334,7 @@ class diffeoSymTensor3DVolInputSpec(CommandLineInputSpec):
                         exists=True, argstr="-flip %d %d %d")
     resampling_type = traits.Enum('backward', 'forward',
                                   desc='use backward or forward resampling',
-                                  exists=True,  argstr="-type %d")
+                                  exists=True,  argstr="-type %s")
 
 
 class diffeoSymTensor3DVolOutputSpec(TraitedSpec):
@@ -386,10 +386,10 @@ class diffeoScalarVolInputSpec(CommandLineInputSpec):
                         exists=True, argstr="-flip %d %d %d")
     resampling_type = traits.Enum('backward', 'forward',
                                   desc='use backward or forward resampling',
-                                  exists=True,  argstr="-type %d")
+                                  exists=True,  argstr="-type %s")
     interpolation = traits.Enum('trilinear', 'NN',
                                 desc='trilinear, or nearest neighbor',
-                                exists=True, argstr="-interp %d",
+                                exists=True, argstr="-interp %s",
                                 usedefault=True)
 
 
