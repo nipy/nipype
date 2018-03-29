@@ -184,8 +184,7 @@ class ComposeXfm(CommandLineDtitk):
     >>> node.inputs.in_df = 'im_warp.df.nii'
     >>> node.inputs.in_aff= 'im_affine.aff'
     >>> node.cmdline
-    'dfRightComposeAffine -aff im_affine.aff -df im_warp.df.nii -out\
-    im_warp.df_aff.df'
+    'dfRightComposeAffine -aff im_affine.aff -df im_warp.df.nii -out im_warp.df_aff.df'
     >>> node.run() # doctest: +SKIP
     """
     input_spec = ComposeXfmInputSpec
@@ -242,8 +241,7 @@ class affSymTensor3DVol(CommandLineDtitk):
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.transform = 'im_affine.aff'
     >>> node.cmdline
-    'affineSymTensor3DVolume -in im1.nii -interp LEI -out im1_affxfmd.nii\
-     -reorient PPD -trans im_affine.aff'
+    'affineSymTensor3DVolume -in im1.nii -interp LEI -out im1_affxfmd.nii -reorient PPD -trans im_affine.aff'
     >>> node.run() # doctest: +SKIP
     """
     input_spec = affSymTensor3DVolInputSpec
@@ -261,17 +259,24 @@ class affScalarVolInputSpec(CommandLineInputSpec):
                      xor=['target', 'translation', 'euler', 'deformation'],
                      desc='transform to apply: specify an input transformation\
                       file; parameters input will be ignored',)
-    interpolation = traits.Enum('trilinear', 'NN',
+    '''interpolation = traits.Enum('trilinear', 'NN',
+                                usedefault=True, argstr="-interp %s",
+                                desc='trilinear or nearest neighbor\
+                                 interpolation')'''
+    interpolation = traits.Enum(0, 1,
                                 usedefault=True, argstr="-interp %s",
                                 desc='trilinear or nearest neighbor\
                                  interpolation')
     target = File(exists=True, argstr="-target %s", xor=['transform'],
                   desc='output volume specification read from the target volume\
                    if specified')
-    translation = traits.Tuple((0, 0, 0), desc='translation (x,y,z) in mm',
+    translation = traits.Tuple((traits.Float(), traits.Float(),
+                               traits.Float()),
+                               desc='translation (x,y,z) in mm',
                                argstr='-translation %g %g %g',
                                xor=['transform'])
-    euler = traits.Tuple((0, 0, 0), desc='(theta, phi, psi) in degrees',
+    euler = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
+                         desc='(theta, phi, psi) in degrees',
                          xor=['transform'], argstr='-euler %g %g %g')
     deformation = traits.Tuple(traits.Tuple((traits.Float(),) * 6, ...),
                                desc='(xx,yy,zz,xy,yz,xz)', xor=['transform'],
@@ -294,18 +299,17 @@ class affScalarVol(CommandLineDtitk):
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.transform = 'im_affine.aff'
     >>> node.cmdline
-    'affineScalarVolume -in im1.nii -interp 0 -out im1_affxfmd.nii -trans\
-     im_affine.aff'
+    'affineScalarVolume -in im1.nii -interp 0 -out im1_affxfmd.nii -trans im_affine.aff'
     >>> node.run() # doctest: +SKIP
     """
     input_spec = affScalarVolInputSpec
     output_spec = affScalarVolOutputSpec
     _cmd = 'affineScalarVolume'
 
-    def _format_arg(self, name, spec, value):
+    '''def _format_arg(self, name, spec, value):
         if name == 'interpolation':
             value = {'trilinear': 0, 'NN': 1}[value]
-        super(affScalarVol, self)._format_arg(name, spec, value)
+        super(affScalarVol, self)._format_arg(name, spec, value)'''
 
 
 class diffeoSymTensor3DVolInputSpec(CommandLineInputSpec):
@@ -332,9 +336,12 @@ class diffeoSymTensor3DVolInputSpec(CommandLineInputSpec):
                               argstr="-vsize %g %g %g", xor=['target'])
     flip = traits.Tuple((traits.Int(), traits.Int(), traits.Int()),
                         exists=True, argstr="-flip %d %d %d")
-    resampling_type = traits.Enum('backward', 'forward',
+    resampling_type = traits.Enum(1, 0,
                                   desc='use backward or forward resampling',
                                   exists=True,  argstr="-type %s")
+    '''resampling_type = traits.Enum('backward', 'forward',
+                                  desc='use backward or forward resampling',
+                                  exists=True,  argstr="-type %s")'''
 
 
 class diffeoSymTensor3DVolOutputSpec(TraitedSpec):
@@ -353,8 +360,7 @@ class diffeoSymTensor3DVol(CommandLineDtitk):
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.transform = 'im_warp.df.nii'
     >>> node.cmdline
-    'deformationSymTensor3DVolume -df FD -in im1.nii -interp LEI -out\
-     im1_diffeoxfmd.nii -reorient PPD -trans im_warp.df.nii'
+    'deformationSymTensor3DVolume -df FD -in im1.nii -interp LEI -out im1_diffeoxfmd.nii -reorient PPD -trans im_warp.df.nii'
     >>> node.run() # doctest: +SKIP
     """
 
@@ -362,10 +368,10 @@ class diffeoSymTensor3DVol(CommandLineDtitk):
     output_spec = diffeoSymTensor3DVolOutputSpec
     _cmd = 'deformationSymTensor3DVolume'
 
-    def _format_arg(self, name, spec, value):
+    '''def _format_arg(self, name, spec, value):
         if name == 'resampling_type':
             value = {'forward': 0, 'backward': 1}[value]
-        super(diffeoSymTensor3DVol, self)._format_arg(name, spec, value)
+        super(diffeoSymTensor3DVol, self)._format_arg(name, spec, value)'''
 
 
 class diffeoScalarVolInputSpec(CommandLineInputSpec):
@@ -384,10 +390,17 @@ class diffeoScalarVolInputSpec(CommandLineInputSpec):
                               argstr="-vsize %g %g %g", xor=['target'])
     flip = traits.Tuple((traits.Int(), traits.Int(), traits.Int()),
                         exists=True, argstr="-flip %d %d %d")
-    resampling_type = traits.Enum('backward', 'forward',
+    '''resampling_type = traits.Enum('backward', 'forward',
                                   desc='use backward or forward resampling',
                                   exists=True,  argstr="-type %s")
     interpolation = traits.Enum('trilinear', 'NN',
+                                desc='trilinear, or nearest neighbor',
+                                exists=True, argstr="-interp %s",
+                                usedefault=True)'''
+    resampling_type = traits.Enum(1, 0,
+                                  desc='use backward or forward resampling',
+                                  exists=True,  argstr="-type %s")
+    interpolation = traits.Enum(0, 1,
                                 desc='trilinear, or nearest neighbor',
                                 exists=True, argstr="-interp %s",
                                 usedefault=True)
@@ -409,8 +422,7 @@ class diffeoScalarVol(CommandLineDtitk):
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.transform = 'im_warp.df.nii'
     >>> node.cmdline
-    'deformationScalarVolume -in im1.nii -interp 0 -out im1_diffeoxfmd.nii\
-     -trans im_warp.df.nii'
+    'deformationScalarVolume -in im1.nii -interp 0 -out im1_diffeoxfmd.nii -trans im_warp.df.nii'
     >>> node.run() # doctest: +SKIP
     """
 
@@ -418,10 +430,10 @@ class diffeoScalarVol(CommandLineDtitk):
     output_spec = diffeoScalarVolOutputSpec
     _cmd = 'deformationScalarVolume'
 
-    def _format_arg(self, name, spec, value):
+    '''def _format_arg(self, name, spec, value):
         if name == 'resampling_type':
             value = {'forward': 0, 'backward': 1}[value]
         super(diffeoScalarVol, self)._format_arg(name, spec, value)
         if name == 'interpolation':
             value = {'trilinear': 0, 'NN': 1}[value]
-        super(diffeoScalarVol, self)._format_arg(name, spec, value)
+        super(diffeoScalarVol, self)._format_arg(name, spec, value)'''

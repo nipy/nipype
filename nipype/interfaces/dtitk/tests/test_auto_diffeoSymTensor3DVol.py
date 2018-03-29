@@ -42,7 +42,7 @@ def test_diffeoSymTensor3DVol_inputs():
             usedefault=True,
         ),
         resampling_type=dict(
-            argstr='-type %d',
+            argstr='-type %s',
             exists=True,
         ),
         target=dict(

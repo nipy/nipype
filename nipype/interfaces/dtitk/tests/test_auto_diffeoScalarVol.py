@@ -23,8 +23,8 @@ def test_diffeoScalarVol_inputs():
             argstr='-in %s',
             mandatory=True,
         ),
-        interp=dict(
-            argstr='-interp %d',
+        interpolation=dict(
+            argstr='-interp %s',
             exists=True,
             usedefault=True,
         ),
@@ -35,7 +35,7 @@ def test_diffeoScalarVol_inputs():
             name_template='%s_diffeoxfmd',
         ),
         resampling_type=dict(
-            argstr='-type %d',
+            argstr='-type %s',
             exists=True,
         ),
         target=dict(
