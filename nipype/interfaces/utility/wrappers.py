@@ -25,6 +25,40 @@ from ...utils.functions import getsource, create_function_from_source
 iflogger = logging.getLogger('interface')
 
 
+def _get_varnames(func):
+    """Return list of names of arguments to a function
+
+    Parameters
+    ----------
+    func: callable, string or Undefined
+        Function or source code of function to query
+
+    Returns
+    -------
+    varnames: list of str
+        Names of arguments to passed function (empty if undefined)
+    """
+    if not isdefined(func):
+        return []
+    if isinstance(func, (str, bytes)):
+        func = create_function_from_source(func)
+    fninfo = func.__code__
+    return fninfo.co_varnames[:fninfo.co_argcount]
+
+
+class CheckHidden(traits.TraitType):
+    """Trait that allows a class to decide whether it may be set"""
+    def __init__(self, interface):
+        super(CheckHidden, self).__init__()
+        self._interface = interface
+
+    def validate(self, obj, name, value):
+        msg = self._interface.check_hidden(name)
+        if msg is not None:
+            raise traits.TraitError(msg)
+        return value
+
+
 class FunctionInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     function_str = traits.Str(mandatory=True, desc='code for function')
 
@@ -82,19 +116,14 @@ class Function(IOBase):
                     raise Exception('Interface Function does not accept '
                                     'function objects defined interactively '
                                     'in a python session')
-                else:
-                    if input_names is None:
-                        fninfo = function.__code__
             elif isinstance(function, (str, bytes)):
                 self.inputs.function_str = function
-                if input_names is None:
-                    fninfo = create_function_from_source(function,
-                                                         imports).__code__
             else:
                 raise Exception('Unknown type of function')
-            if input_names is None:
-                input_names = fninfo.co_varnames[:fninfo.co_argcount]
         self.inputs.on_trait_change(self._set_function_string, 'function_str')
+
+        if input_names is None:
+            input_names = _get_varnames(self.inputs.function_str)
         self._input_names = ensure_list(input_names)
         self._output_names = ensure_list(output_names)
         add_traits(self.inputs, [name for name in self._input_names])
@@ -103,21 +132,37 @@ class Function(IOBase):
         for name in self._output_names:
             self._out[name] = None
 
+        # If parameters with default values are not listed in input_names,
+        # they are not passed to the function.
+        # This preempts their setting, inserting a trait just in time that
+        # will warn users that it cannot be set.
+        # A dynamically-validating trait is used to ensure that changes to
+        # the function string can re-enable fields
+        self.inputs.on_trait_change(self._disallow_hidden, 'trait_added')
+
+    def _disallow_hidden(self, obj, name, new):
+        obj.add_trait(new, CheckHidden(self))
+
+    def check_hidden(self, name):
+        all_vars = _get_varnames(self.inputs.function_str)
+        hidden = set(all_vars) - set(self._input_names)
+        if name in hidden:
+            return ("The '{name}' trait cannot be set on this {cls} because "
+                    "the '{name}' argument was not included in 'input_names'."
+                    "".format(name=name, cls=self.inputs.__class__.__name__))
+
     def _set_function_string(self, obj, name, old, new):
         if name == 'function_str':
             if hasattr(new, '__call__'):
                 function_source = getsource(new)
-                fninfo = new.__code__
             elif isinstance(new, (str, bytes)):
                 function_source = new
-                fninfo = create_function_from_source(new,
-                                                     self.imports).__code__
             self.inputs.trait_set(
                 trait_change_notify=False, **{
                     '%s' % name: function_source
                 })
             # Update input traits
-            input_names = fninfo.co_varnames[:fninfo.co_argcount]
+            input_names = _get_varnames(new)
             new_names = set(input_names) - set(self._input_names)
             add_traits(self.inputs, list(new_names))
             self._input_names.extend(new_names)
