@@ -259,11 +259,7 @@ class affScalarVolInputSpec(CommandLineInputSpec):
                      xor=['target', 'translation', 'euler', 'deformation'],
                      desc='transform to apply: specify an input transformation\
                       file; parameters input will be ignored',)
-    '''interpolation = traits.Enum('trilinear', 'NN',
-                                usedefault=True, argstr="-interp %s",
-                                desc='trilinear or nearest neighbor\
-                                 interpolation')'''
-    interpolation = traits.Enum(0, 1,
+    interpolation = traits.Enum('trilinear', 'NN',
                                 usedefault=True, argstr="-interp %s",
                                 desc='trilinear or nearest neighbor\
                                  interpolation')
@@ -306,10 +302,10 @@ class affScalarVol(CommandLineDtitk):
     output_spec = affScalarVolOutputSpec
     _cmd = 'affineScalarVolume'
 
-    '''def _format_arg(self, name, spec, value):
+    def _format_arg(self, name, spec, value):
         if name == 'interpolation':
             value = {'trilinear': 0, 'NN': 1}[value]
-        super(affScalarVol, self)._format_arg(name, spec, value)'''
+        return super(affScalarVol, self)._format_arg(name, spec, value)
 
 
 class diffeoSymTensor3DVolInputSpec(CommandLineInputSpec):
@@ -336,12 +332,9 @@ class diffeoSymTensor3DVolInputSpec(CommandLineInputSpec):
                               argstr="-vsize %g %g %g", xor=['target'])
     flip = traits.Tuple((traits.Int(), traits.Int(), traits.Int()),
                         exists=True, argstr="-flip %d %d %d")
-    resampling_type = traits.Enum(1, 0,
+    resampling_type = traits.Enum('backward', 'forward',
                                   desc='use backward or forward resampling',
                                   exists=True,  argstr="-type %s")
-    '''resampling_type = traits.Enum('backward', 'forward',
-                                  desc='use backward or forward resampling',
-                                  exists=True,  argstr="-type %s")'''
 
 
 class diffeoSymTensor3DVolOutputSpec(TraitedSpec):
@@ -368,10 +361,10 @@ class diffeoSymTensor3DVol(CommandLineDtitk):
     output_spec = diffeoSymTensor3DVolOutputSpec
     _cmd = 'deformationSymTensor3DVolume'
 
-    '''def _format_arg(self, name, spec, value):
+    def _format_arg(self, name, spec, value):
         if name == 'resampling_type':
             value = {'forward': 0, 'backward': 1}[value]
-        super(diffeoSymTensor3DVol, self)._format_arg(name, spec, value)'''
+        return super(diffeoSymTensor3DVol, self)._format_arg(name, spec, value)
 
 
 class diffeoScalarVolInputSpec(CommandLineInputSpec):
@@ -390,17 +383,10 @@ class diffeoScalarVolInputSpec(CommandLineInputSpec):
                               argstr="-vsize %g %g %g", xor=['target'])
     flip = traits.Tuple((traits.Int(), traits.Int(), traits.Int()),
                         exists=True, argstr="-flip %d %d %d")
-    '''resampling_type = traits.Enum('backward', 'forward',
+    resampling_type = traits.Enum('backward', 'forward',
                                   desc='use backward or forward resampling',
                                   exists=True,  argstr="-type %s")
     interpolation = traits.Enum('trilinear', 'NN',
-                                desc='trilinear, or nearest neighbor',
-                                exists=True, argstr="-interp %s",
-                                usedefault=True)'''
-    resampling_type = traits.Enum(1, 0,
-                                  desc='use backward or forward resampling',
-                                  exists=True,  argstr="-type %s")
-    interpolation = traits.Enum(0, 1,
                                 desc='trilinear, or nearest neighbor',
                                 exists=True, argstr="-interp %s",
                                 usedefault=True)
@@ -430,10 +416,10 @@ class diffeoScalarVol(CommandLineDtitk):
     output_spec = diffeoScalarVolOutputSpec
     _cmd = 'deformationScalarVolume'
 
-    '''def _format_arg(self, name, spec, value):
+    def _format_arg(self, name, spec, value):
         if name == 'resampling_type':
             value = {'forward': 0, 'backward': 1}[value]
         super(diffeoScalarVol, self)._format_arg(name, spec, value)
         if name == 'interpolation':
             value = {'trilinear': 0, 'NN': 1}[value]
-        super(diffeoScalarVol, self)._format_arg(name, spec, value)'''
+        return super(diffeoScalarVol, self)._format_arg(name, spec, value)
