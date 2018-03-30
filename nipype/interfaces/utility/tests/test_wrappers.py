@@ -94,6 +94,36 @@ def test_function_inputs():
     assert fun3.run().outputs.out == 2
 
 
+def test_function_string_reset():
+    fstr = "def f(a, b):\n\treturn a + b"
+    gstr = "def g(a, b, c):\n\treturn a + b - c"
+    hstr = "def h(b, c):\n\treturn b - c"
+
+    fun = utility.Function(function=fstr)
+    assert fun._input_names == ['a', 'b']
+    fun.inputs.a = 5
+    fun.inputs.b = 3
+    fun.inputs.c = 2  # Unused trait
+    assert fun.run().outputs.out == 8
+
+    fun.inputs.function_str = gstr
+    # _set_function_str updates _input_names
+    assert fun._input_names == ['a', 'b', 'c']
+    # inputs.c should be required but Undefined
+    with pytest.raises(TypeError):
+        fun.run()
+    fun.inputs.c = 2  # Now used trait
+    assert fun.run().outputs.out == 6
+
+    fun.inputs.function_str = hstr
+    assert fun._input_names == ['b', 'c']
+    assert fun.run().outputs.out == 1
+
+    fun.inputs.on_trait_change(fun._set_function_string, 'd')
+
+    with pytest.raises(ValueError):
+        fun.inputs.d = "Handler should fail except for function_str"
+
 def make_random_array(size):
     return np.random.randn(size, size)
 
