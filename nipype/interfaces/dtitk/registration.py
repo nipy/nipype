@@ -184,9 +184,9 @@ class ComposeXfm(CommandLineDtitk):
     >>> node = dtitk.ComposeXfm()
     >>> node.inputs.in_df = 'im_warp.df.nii'
     >>> node.inputs.in_aff= 'im_affine.aff'
-    >>> node.cmdline
-    'dfRightComposeAffine -aff im_affine.aff -df im_warp.df.nii -out'
-    ' im_warp.df_affdf.nii'
+    >>> node.cmdline #doctest:
+    'dfRightComposeAffine -aff im_affine.aff -df im_warp.df.nii -out\
+     im_warp.df_affdf.nii'
     >>> node.run() # doctest: +SKIP
     """
     input_spec = ComposeXfmInputSpec
@@ -242,8 +242,8 @@ class affSymTensor3DVol(CommandLineDtitk):
     >>> node = dtitk.affSymTensor3DVol()
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.transform = 'im_affine.aff'
-    >>> node.cmdline
-    'affineSymTensor3DVolume -in im1.nii -interp LEI -out im1_affxfmd.nii'
+    >>> node.cmdline #doctest:
+    'affineSymTensor3DVolume -in im1.nii -interp LEI -out im1_affxfmd.nii\
      -reorient PPD -trans im_affine.aff'
     >>> node.run() # doctest: +SKIP
     """
@@ -297,9 +297,9 @@ class affScalarVol(CommandLineDtitk):
     >>> node = dtitk.affScalarVol()
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.transform = 'im_affine.aff'
-    >>> node.cmdline
-    'affineScalarVolume -in im1.nii -interp 0 -out im1_affxfmd.nii -trans'
-    ' im_affine.aff'
+    >>> node.cmdline #doctest:
+    'affineScalarVolume -in im1.nii -interp 0 -out im1_affxfmd.nii -trans\
+     im_affine.aff'
     >>> node.run() # doctest: +SKIP
     """
     input_spec = affScalarVolInputSpec
@@ -356,9 +356,9 @@ class diffeoSymTensor3DVol(CommandLineDtitk):
     >>> node = dtitk.diffeoSymTensor3DVol()
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.transform = 'im_warp.df.nii'
-    >>> node.cmdline
-    'deformationSymTensor3DVolume -df FD -in im1.nii -interp LEI -out'
-    ' im1_diffeoxfmd.nii -reorient PPD -trans im_warp.df.nii'
+    >>> node.cmdline #doctest:
+    'deformationSymTensor3DVolume -df FD -in im1.nii -interp LEI -out\
+     im1_diffeoxfmd.nii -reorient PPD -trans im_warp.df.nii'
     >>> node.run() # doctest: +SKIP
     """
 
@@ -413,8 +413,8 @@ class diffeoScalarVol(CommandLineDtitk):
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.transform = 'im_warp.df.nii'
     >>> node.cmdline
-    'deformationScalarVolume -in im1.nii -interp 0 -out im1_diffeoxfmd.nii'
-    ' -trans im_warp.df.nii'
+    'deformationScalarVolume -in im1.nii -interp 0 -out im1_diffeoxfmd.nii\
+     -trans im_warp.df.nii'
     >>> node.run() # doctest: +SKIP
     """
 
