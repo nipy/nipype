@@ -54,7 +54,7 @@ environment variable is not set, some FreeSurfer related tests will fail.
 If any of the tests failed, please report them on our `bug tracker
 <http://github.com/nipy/nipype/issues>`_.
 
-On Debian systems with a local copy of MATLAB installed, set the following 
+On Debian systems with a local copy of MATLAB installed, set the following
 environment variable before running tests::
 
        export MATLABCMD=$pathtomatlabdir/bin/$platform/MATLAB
@@ -74,8 +74,8 @@ A few tests in Nipype make use of some images distributed within the `FSL course
 <http://fsl.fmrib.ox.ac.uk/fslcourse/>`_. This reduced version of the package can be downloaded `here
 <https://files.osf.io/v1/resources/nefdp/providers/osfstorage/57f472cf9ad5a101f977ecfe>`_.
 To enable the tests depending on these data, just unpack the targz file and set the :code:`FSL_COURSE_DATA` environment
-variable to point to that folder. 
-Note, that the test execution time can increase significantly with these additional tests.  
+variable to point to that folder.
+Note, that the test execution time can increase significantly with these additional tests.
 
 
 Xfailed tests
@@ -87,14 +87,14 @@ Some tests are expect to fail until the code will be changed or for other reason
 Testing Nipype using Docker
 ---------------------------
 
-Nipype is tested inside Docker containers and users can use nipype images to test local versions. 
+Nipype is tested inside Docker containers and users can use nipype images to test local versions.
 First, install the `Docker Engine <https://docs.docker.com/engine/installation/>`_.
 Nipype has one base docker image called nipype/nipype:base, that contains several useful tools
  (FreeSurfer, AFNI, FSL, ANTs, etc.), and additional test images
 for specific Python versions: py27 for Python 2.7 and py36 for Python 3.6.
 
 Users can pull the nipype image for Python 3.6 as follows::
-  
+
   docker pull nipype/nipype:py36
 
 In order to test a local version of nipype you can run test within container as follows::
@@ -105,5 +105,5 @@ In order to test a local version of nipype you can run test within container as 
 Additional comments
 -------------------
 
-If the project is tested both on your local OS and within a Docker container, you might have to remove all 
+If the project is tested both on your local OS and within a Docker container, you might have to remove all
 ``__pycache__`` directories before switching between your OS and a container.
