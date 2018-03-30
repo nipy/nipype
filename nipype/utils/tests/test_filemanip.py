@@ -515,3 +515,9 @@ def test_indirectory(tmpdir):
             assert os.getcwd() == sd2
         assert os.getcwd() == sd1
     assert os.getcwd() == tmpdir.strpath
+    try:
+        with indirectory('subdir1'):
+            raise ValueError("Erroring out of context")
+    except ValueError:
+        pass
+    assert os.getcwd() == tmpdir.strpath
