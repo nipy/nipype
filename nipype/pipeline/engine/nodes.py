@@ -27,7 +27,7 @@ from ...utils.misc import flatten, unflatten, str2bool, dict_diff
 from ...utils.filemanip import (md5, FileNotFoundError, filename_to_list,
                                 list_to_filename, copyfiles, fnames_presuffix,
                                 loadpkl, split_filename, load_json, makedirs,
-                                emptydirs, savepkl, to_str)
+                                emptydirs, savepkl, to_str, indirectory)
 
 from ...interfaces.base import (traits, InputMultiPath, CommandLine, Undefined,
                                 DynamicTraitedSpec, Bunch, InterfaceResult,
@@ -627,7 +627,8 @@ class Node(EngineBase):
             self._interface.__class__.__name__)
         if issubclass(self._interface.__class__, CommandLine):
             try:
-                cmd = self._interface.cmdline
+                with indirectory(outdir):
+                    cmd = self._interface.cmdline
             except Exception as msg:
                 result.runtime.stderr = '{}\n\n{}'.format(
                     getattr(result.runtime, 'stderr', ''), msg)
