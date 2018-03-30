@@ -155,9 +155,8 @@ class Function(IOBase):
         if name != 'function_str':
             raise ValueError("_set_function_string should only be called when"
                              " function_str is set")
-        self.inputs.trait_set(trait_change_notify=False, function_str=new)
 
-        # Update input traits
+        # Update input traits to match new function signature
         input_names = _get_varnames(new)
         new_names = set(input_names) - set(self._input_names)
         add_traits(self.inputs, list(new_names))
