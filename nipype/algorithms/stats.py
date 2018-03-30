@@ -33,6 +33,9 @@ class ACMOutputSpec(TraitedSpec):
 class ACM(SimpleInterface):
     """
     Calculate a simple Activation Count Maps
+
+    Adapted from: https://github.com/poldracklab/CNP_task_analysis/\
+    blob/61c27f5992db9d8800884f8ffceb73e6957db8af/CNP_2nd_level_ACM.py
     """
     input_spec = ACMInputSpec
     output_spec = ACMOutputSpec
