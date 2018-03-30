@@ -152,20 +152,15 @@ class Function(IOBase):
                     "".format(name=name, cls=self.inputs.__class__.__name__))
 
     def _set_function_string(self, obj, name, old, new):
-        if name == 'function_str':
-            if hasattr(new, '__call__'):
-                function_source = getsource(new)
-            elif isinstance(new, (str, bytes)):
-                function_source = new
-            self.inputs.trait_set(
-                trait_change_notify=False, **{
-                    '%s' % name: function_source
-                })
-            # Update input traits
-            input_names = _get_varnames(new)
-            new_names = set(input_names) - set(self._input_names)
-            add_traits(self.inputs, list(new_names))
-            self._input_names.extend(new_names)
+        if name != 'function_str':
+            raise ValueError("_set_function_string should only be called when"
+                             " function_str is set")
+        self.inputs.trait_set(trait_change_notify=False, function_str=new)
+
+        # Update input traits
+        new_names = set(_get_varnames(new)) - set(self._input_names)
+        add_traits(self.inputs, list(new_names))
+        self._input_names.extend(new_names)
 
     def _add_output_traits(self, base):
         undefined_traits = {}
