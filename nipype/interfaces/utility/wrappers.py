@@ -158,9 +158,10 @@ class Function(IOBase):
         self.inputs.trait_set(trait_change_notify=False, function_str=new)
 
         # Update input traits
-        new_names = set(_get_varnames(new)) - set(self._input_names)
+        input_names = _get_varnames(new)
+        new_names = set(input_names) - set(self._input_names)
         add_traits(self.inputs, list(new_names))
-        self._input_names.extend(new_names)
+        self._input_names = list(input_names)
 
     def _add_output_traits(self, base):
         undefined_traits = {}
