@@ -6,7 +6,9 @@ import os
 import pytest
 
 from nipype.interfaces import utility
+from nipype.interfaces.base import traits
 import nipype.pipeline.engine as pe
+from nipype.utils.functions import getsource
 
 concat_sort = """\
 def concat_sort(in_arrays):
@@ -48,6 +50,48 @@ def test_function(tmpdir):
 
     wf.connect(f2, 'out', f3, 'in_arrays')
     wf.run()
+
+
+def test_function_inputs():
+    def f(a, b=2):
+        return a + b
+
+    def g(a, b=3):
+        return a + b
+
+    fun1 = utility.Function(function=f)
+    fun2 = utility.Function(function=f, input_names=['a', 'b'])
+    fun3 = utility.Function(function=f, input_names=['a'])
+
+    fun1.inputs.a = 1
+    fun2.inputs.a = 1
+    fun3.inputs.a = 1
+
+    assert fun1.run().outputs.out == 3
+    assert fun2.run().outputs.out == 3
+    assert fun3.run().outputs.out == 3
+
+    fun1.inputs.b = 1
+    fun2.inputs.b = 1
+
+    assert fun1.run().outputs.out == 2
+    assert fun2.run().outputs.out == 2
+
+    with pytest.raises(traits.TraitError):
+        fun3.inputs.b = 1
+
+    # Non-hidden parameters are unaffected
+    fun1.inputs.c = 1
+    fun2.inputs.c = 1
+    fun3.inputs.c = 1
+
+    # Updating the function string adds all parameters
+    fun3.inputs.function_str = getsource(g)
+    # Check we're using the new function with default b=3
+    assert fun3.run().outputs.out == 4
+    # Verify we can now set this parameter
+    fun3.inputs.b = 1
+    assert fun3.run().outputs.out == 2
 
 
 def make_random_array(size):
