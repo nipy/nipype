@@ -41,8 +41,7 @@ class ACM(SimpleInterface):
     output_spec = ACMOutputSpec
 
     def _run_interface(self, runtime):
-        allmaps = nb.concat_images(
-            [nb.load(f) for f in self.inputs.in_files]).get_data()
+        allmaps = nb.concat_images(self.inputs.in_files).get_data()
         acm_pos = np.mean(allmaps > self.inputs.threshold,
                           axis=3, dtype=np.float32)
         acm_neg = np.mean(allmaps < -1.0 * self.inputs.threshold,
