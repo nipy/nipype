@@ -43,11 +43,10 @@ class ACM(SimpleInterface):
     def _run_interface(self, runtime):
         allmaps = nb.concat_images(
             [nb.load(f) for f in self.inputs.in_files]).get_data()
-        acm_pos = (allmaps > self.inputs.threshold).astype(
-            float).mean(3)
-        acm_neg = (allmaps < -1.0 * self.inputs.threshold).astype(
-            float).mean(3)
-
+        acm_pos = np.mean(allmaps > self.inputs.threshold,
+                          axis=3, dtype=np.float32)
+        acm_neg = np.mean(allmaps < -1.0 * self.inputs.threshold,
+                          axis=3, dtype=np.float32)
         acm_diff = acm_pos - acm_neg
 
         nii = nb.load(self.inputs.in_files[0])
