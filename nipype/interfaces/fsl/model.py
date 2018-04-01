@@ -217,16 +217,16 @@ class Level1Design(BaseInterface):
                 self._create_ev_file(evfname, evinfo)
         # add ev orthogonalization
         for i in range(1, num_evs[0] + 1):
+            initial = ev_ortho.substitute(c0=i, c1=0, orthogonal=1)
             for j in range(0, num_evs[0] + 1):
                 try:
                     orthogonal = int(orthogonalization[i][j])
                 except (KeyError, TypeError, ValueError, IndexError):
                     orthogonal = 0
-                if orthogonal = 1 and not ev_ortho.substitute(c0=i,c1=0,orthogonal=1) in ev_txt:
-                    ev_txt += ev_ortho.substitute(c0=i,c1=0,orthogonal=1)
-                    ev_txt += "\n"
-                ev_txt += ev_ortho.substitute(
-                    c0=i, c1=j, orthogonal=orthogonal)
+                if orthogonal == 1 and initial not in ev_txt:
+                    ev_txt += initial + "\n"
+                ev_txt += ev_ortho.substitute(c0=i, c1=j,
+                                              orthogonal=orthogonal)
                 ev_txt += "\n"
         # add contrast info to fsf file
         if isdefined(contrasts):
