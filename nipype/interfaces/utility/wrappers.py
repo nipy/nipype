@@ -134,6 +134,10 @@ class Function(IOBase):
 
     def _cannot_modify(self, obj, name, old, new):
         if name in self._banned_names:
+            self.inputs.trait_set(
+                trait_change_notify=False, **{
+                    '%s' % name: old
+                })
             raise traits.TraitError('The function does not allow modifying ' 
                                     'input: {}'.format(name))
 
