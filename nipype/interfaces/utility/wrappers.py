@@ -25,8 +25,41 @@ from ...utils.functions import getsource, create_function_from_source
 iflogger = logging.getLogger('interface')
 
 
-class FunctionInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class FunctionInputSpec2(DynamicTraitedSpec, BaseInterfaceInputSpec):
     function_str = traits.Str(mandatory=True, desc='code for function')
+
+class FunctionInputSpec(BaseInterfaceInputSpec):
+    function_str = traits.Str(mandatory=True, desc='code for function')
+
+from inspect import getfullargspec, getsource
+
+def parse_function(function, input_names=None, imports=None):
+    if hasattr(function, '__call__'):
+        function_str = getsource(function)
+        argspec = getfullargspec(function)
+    elif isinstance(function, (str, bytes)):
+        fninfo = create_function_from_source(function,
+                                             imports)
+        function_str = function
+        argspec = getfullargspec(fninfo)
+    else:
+        raise TypeError('Unknown type of function')
+    all_args = argspec.args + argspec.kwonlyargs
+    required_args = set(all_args) - set(argspec.kwonlydefaults.keys())
+    if input_names is None:
+        input_names = all_args
+    else:
+        missed_args = required_args - set(input_names)
+        if missed_args:
+            raise ValueError('These positional args must be in '
+                             'input_names: {}'.format(missed_args))
+        unknown = set(input_names) - set(all_args)
+        if unknown:
+            raise ValueError('Unknown arguments: {} '
+                             'for function'.format(unknown))
+    banned_names = list(set(argspec.kwonlydefaults.keys()) - set(input_names))
+    return function_str, filename_to_list(input_names), \
+           banned_names, argspec.varkw is not None
 
 
 class Function(IOBase):
@@ -48,9 +81,9 @@ class Function(IOBase):
     output_spec = DynamicTraitedSpec
 
     def __init__(self,
+                 function=None,
                  input_names=None,
                  output_names='out',
-                 function=None,
                  imports=None,
                  **inputs):
         """
@@ -74,53 +107,56 @@ class Function(IOBase):
         """
 
         super(Function, self).__init__(**inputs)
-        if function:
-            if hasattr(function, '__call__'):
-                try:
-                    self.inputs.function_str = getsource(function)
-                except IOError:
-                    raise Exception('Interface Function does not accept '
-                                    'function objects defined interactively '
-                                    'in a python session')
-                else:
-                    if input_names is None:
-                        fninfo = function.__code__
-            elif isinstance(function, (str, bytes)):
-                self.inputs.function_str = function
-                if input_names is None:
-                    fninfo = create_function_from_source(function,
-                                                         imports).__code__
-            else:
-                raise Exception('Unknown type of function')
-            if input_names is None:
-                input_names = fninfo.co_varnames[:fninfo.co_argcount]
+        self._input_names = None
+        self._kwargs_allowed = None
+        if function is not None:
+            function_str,\
+            self._input_names,\
+            self._banned_names,\
+            self._kwargs_allowed = parse_function(function, input_names, imports)
+        if self._kwargs_allowed:
+            self.inputs = FunctionInputSpec2()
         self.inputs.on_trait_change(self._set_function_string, 'function_str')
-        self._input_names = filename_to_list(input_names)
         self._output_names = filename_to_list(output_names)
         add_traits(self.inputs, [name for name in self._input_names])
+        for name in self._banned_names:
+            self.inputs.add_trait(name, traits.Any)
+            self.inputs.on_trait_change(self._cannot_modify, name)
         self.imports = imports
         self._out = {}
         for name in self._output_names:
             self._out[name] = None
 
+    def _cannot_modify(self, obj, name, old, new):
+        if name in self._banned_names:
+            raise traits.TraitError('The function does not allow modifying ' 
+                                    'input: {}'.format(name))
+
     def _set_function_string(self, obj, name, old, new):
         if name == 'function_str':
-            if hasattr(new, '__call__'):
-                function_source = getsource(new)
-                fninfo = new.__code__
-            elif isinstance(new, (str, bytes)):
-                function_source = new
-                fninfo = create_function_from_source(new,
-                                                     self.imports).__code__
+            function_str,\
+            input_names,\
+            self._banned_names,\
+            self._kwargs_allowed = parse_function(new, None, self.imports)
             self.inputs.trait_set(
                 trait_change_notify=False, **{
-                    '%s' % name: function_source
+                    '%s' % name: function_str
                 })
-            # Update input traits
-            input_names = fninfo.co_varnames[:fninfo.co_argcount]
-            new_names = set(input_names) - set(self._input_names)
-            add_traits(self.inputs, list(new_names))
-            self._input_names.extend(new_names)
+            for name in self._input_names:
+                self.inputs.remove_trait(name)
+            self._input_names = input_names
+            add_traits(self.inputs, input_names)
+        else:
+            print(2, name, self._banned_names, obj, old)
+            if name not in self._banned_names and (self._kwargs_allowed or
+                                                   (self._input_names and
+                                                    name in self._input_names)):
+                self.inputs.trait_set(
+                    trait_change_notify=False, **{
+                        '%s' % name: new
+                    })
+            else:
+                raise ValueError('{} not an allowed argument'.format(name))
 
     def _add_output_traits(self, base):
         undefined_traits = {}
