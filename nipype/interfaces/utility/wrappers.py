@@ -58,6 +58,7 @@ def parse_function(function, input_names=None, imports=None):
             raise ValueError('Unknown arguments: {} '
                              'for function'.format(unknown))
     banned_names = list(set(argspec.kwonlydefaults.keys()) - set(input_names))
+    banned_names = {k: argspec.kwonlydefaults[k] for k in banned_names}
     return function_str, filename_to_list(input_names), \
            banned_names, argspec.varkw is not None
 
@@ -119,8 +120,12 @@ class Function(IOBase):
         self.inputs.on_trait_change(self._set_function_string, 'function_str')
         self._output_names = filename_to_list(output_names)
         add_traits(self.inputs, [name for name in self._input_names])
-        for name in self._banned_names:
+        for name, value in self._banned_names.items():
             self.inputs.add_trait(name, traits.Any)
+            self.inputs.trait_set(
+                trait_change_notify=False, **{
+                    '%s' % name: value
+                })
             self.inputs.on_trait_change(self._cannot_modify, name)
         self.imports = imports
         self._out = {}
