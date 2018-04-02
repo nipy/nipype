@@ -146,17 +146,6 @@ class Function(IOBase):
                 self.inputs.remove_trait(name)
             self._input_names = input_names
             add_traits(self.inputs, input_names)
-        else:
-            print(2, name, self._banned_names, obj, old)
-            if name not in self._banned_names and (self._kwargs_allowed or
-                                                   (self._input_names and
-                                                    name in self._input_names)):
-                self.inputs.trait_set(
-                    trait_change_notify=False, **{
-                        '%s' % name: new
-                    })
-            else:
-                raise ValueError('{} not an allowed argument'.format(name))
 
     def _add_output_traits(self, base):
         undefined_traits = {}
