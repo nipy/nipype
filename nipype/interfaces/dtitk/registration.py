@@ -39,14 +39,14 @@ class RigidInputSpec(CommandLineInputSpec):
     similarity_metric = traits.Enum('EDS', 'GDS', 'DDS', 'NMI',
                                     mandatory=True, position=2, argstr="%s",
                                     desc="similarity metric", usedefault=True)
-    samplingXYZ = traits.Tuple((4, 4, 4), mandatory=True, position=3,
-                               argstr="%g %g %g", usedefault=True,
-                               desc="dist between samp points (mm) (x,y,z)")
+    sampling_xyz = traits.Tuple((4, 4, 4), mandatory=True, position=3,
+                                argstr="%g %g %g", usedefault=True,
+                                desc="dist between samp points (mm) (x,y,z)")
     ftol = traits.Float(mandatory=True, position=4, argstr="%g",
                         desc="cost function tolerance", default_value=0.01,
                         usedefault=True)
-    useInTrans = traits.Bool(position=5, argstr="1",
-                             desc="to initialize with existing xfm set as 1")
+    use_in_trans = traits.Bool(position=5, argstr="1",
+                               desc="initialize with existing transform")
 
 
 class RigidOutputSpec(TraitedSpec):
@@ -65,9 +65,9 @@ class Rigid(CommandLineDtitk):
     >>> node.inputs.fixed_file = 'im1.nii'
     >>> node.inputs.moving_file = 'im2.nii'
     >>> node.inputs.similarity_metric = 'EDS'
-    >>> node.inputs.samplingXYZ = (4,4,4)
+    >>> node.inputs.sampling_xyz = (4,4,4)
     >>> node.inputs.ftol = 0.01
-    >>> node.inputs.useInTrans = True
+    >>> node.inputs.use_in_trans = True
     >>> node.cmdline
     'dti_rigid_reg im1.nii im2.nii EDS 4 4 4 0.01 1'
     >>> node.run() # doctest: +SKIP
@@ -96,9 +96,9 @@ class Affine(Rigid):
     >>> node.inputs.fixed_file = 'im1.nii'
     >>> node.inputs.moving_file = 'im2.nii'
     >>> node.inputs.similarity_metric = 'EDS'
-    >>> node.inputs.samplingXYZ = (4,4,4)
+    >>> node.inputs.sampling_xyz = (4,4,4)
     >>> node.inputs.ftol = 0.01
-    >>> node.inputs.useInTrans = True
+    >>> node.inputs.use_in_trans = True
     >>> node.cmdline
     'dti_affine_reg im1.nii im2.nii EDS 4 4 4 0.01 1'
     >>> node.run() # doctest: +SKIP
@@ -116,10 +116,10 @@ class DiffeoInputSpec(CommandLineInputSpec):
                          usedefault=True, mandatory=True,
                          position=3, argstr="%d")
     n_iters = traits.Int(6, desc="number of iterations",
-                         exists=True, mandatory=True,
+                         mandatory=True,
                          position=4, argstr="%d", usedefault=True)
     ftol = traits.Float(0.002, desc="iteration for the optimization to stop",
-                        exists=True, mandatory=True, position=5, argstr="%g",
+                        mandatory=True, position=5, argstr="%g",
                         usedefault=True)
 
 
@@ -152,7 +152,7 @@ class Diffeo(CommandLineDtitk):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        moving = self.inputs.moving_file()
+        moving = self.inputs.moving_file
         outputs['out_file_xfm'] = fname_presuffix(moving, suffix='_diffeo.df')
         outputs['out_file'] = fname_presuffix(moving, suffix='_diffeo')
         return outputs
@@ -184,8 +184,8 @@ class ComposeXfm(CommandLineDtitk):
     >>> node = dtitk.ComposeXfm()
     >>> node.inputs.in_df = 'im_warp.df.nii'
     >>> node.inputs.in_aff= 'im_affine.aff'
-    >>> node.cmdline #doctest:
-    'dfRightComposeAffine -aff im_affine.aff -df im_warp.df.nii -out\
+    >>> node.cmdline
+    'dfRightComposeAffine -aff im_affine.aff -df im_warp.df.nii -out
      im_warp.df_affdf.nii'
     >>> node.run() # doctest: +SKIP
     """
@@ -194,7 +194,7 @@ class ComposeXfm(CommandLineDtitk):
     _cmd = 'dfRightComposeAffine'
 
 
-class affSymTensor3DVolInputSpec(CommandLineInputSpec):
+class AffSymTensor3DVolInputSpec(CommandLineInputSpec):
     in_file = File(desc='moving tensor volume', exists=True,
                    argstr="-in %s", mandatory=True)
     out_file = File(desc='output filename',
@@ -215,7 +215,7 @@ class affSymTensor3DVolInputSpec(CommandLineInputSpec):
                   desc='output volume specification read from the target '
                   'volume if specified')
     translation = traits.Tuple((traits.Float(), traits.Float(),
-                               traits.Float()),
+                                traits.Float()),
                                desc='translation (x,y,z) in mm',
                                argstr='-translation %g %g %g',
                                xor=['transform'])
@@ -227,11 +227,11 @@ class affSymTensor3DVolInputSpec(CommandLineInputSpec):
                                argstr='-deformation %g %g %g %g %g %g')
 
 
-class affSymTensor3DVolOutputSpec(TraitedSpec):
+class AffSymTensor3DVolOutputSpec(TraitedSpec):
     out_file = File(exists=True)
 
 
-class affSymTensor3DVol(CommandLineDtitk):
+class AffSymTensor3DVol(CommandLineDtitk):
     """
     Applies affine transform to a tensor volume
 
@@ -239,20 +239,20 @@ class affSymTensor3DVol(CommandLineDtitk):
     -------
 
     >>> from nipype.interfaces import dtitk
-    >>> node = dtitk.affSymTensor3DVol()
+    >>> node = dtitk.AffSymTensor3DVol()
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.transform = 'im_affine.aff'
-    >>> node.cmdline #doctest:
-    'affineSymTensor3DVolume -in im1.nii -interp LEI -out im1_affxfmd.nii\
+    >>> node.cmdline
+    'affineSymTensor3DVolume -in im1.nii -interp LEI -out im1_affxfmd.nii
      -reorient PPD -trans im_affine.aff'
     >>> node.run() # doctest: +SKIP
     """
-    input_spec = affSymTensor3DVolInputSpec
-    output_spec = affSymTensor3DVolOutputSpec
+    input_spec = AffSymTensor3DVolInputSpec
+    output_spec = AffSymTensor3DVolOutputSpec
     _cmd = 'affineSymTensor3DVolume'
 
 
-class affScalarVolInputSpec(CommandLineInputSpec):
+class AffScalarVolInputSpec(CommandLineInputSpec):
     in_file = File(desc='moving scalar volume', exists=True,
                    argstr="-in %s", mandatory=True)
     out_file = File(desc='output filename',
@@ -270,7 +270,7 @@ class affScalarVolInputSpec(CommandLineInputSpec):
                   desc='output volume specification read from the target '
                   'volume if specified')
     translation = traits.Tuple((traits.Float(), traits.Float(),
-                               traits.Float()),
+                                traits.Float()),
                                desc='translation (x,y,z) in mm',
                                argstr='-translation %g %g %g',
                                xor=['transform'])
@@ -282,11 +282,11 @@ class affScalarVolInputSpec(CommandLineInputSpec):
                                argstr='-deformation %g %g %g %g %g %g')
 
 
-class affScalarVolOutputSpec(TraitedSpec):
+class AffScalarVolOutputSpec(TraitedSpec):
     out_file = File(desc='moved volume', exists=True)
 
 
-class affScalarVol(CommandLineDtitk):
+class AffScalarVol(CommandLineDtitk):
     """
     Applies affine transform to a scalar volume
 
@@ -294,25 +294,25 @@ class affScalarVol(CommandLineDtitk):
     -------
 
     >>> from nipype.interfaces import dtitk
-    >>> node = dtitk.affScalarVol()
+    >>> node = dtitk.AffScalarVol()
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.transform = 'im_affine.aff'
-    >>> node.cmdline #doctest:
-    'affineScalarVolume -in im1.nii -interp 0 -out im1_affxfmd.nii -trans\
+    >>> node.cmdline
+    'affineScalarVolume -in im1.nii -interp 0 -out im1_affxfmd.nii -trans
      im_affine.aff'
     >>> node.run() # doctest: +SKIP
     """
-    input_spec = affScalarVolInputSpec
-    output_spec = affScalarVolOutputSpec
+    input_spec = AffScalarVolInputSpec
+    output_spec = AffScalarVolOutputSpec
     _cmd = 'affineScalarVolume'
 
     def _format_arg(self, name, spec, value):
         if name == 'interpolation':
             value = {'trilinear': 0, 'NN': 1}[value]
-        return super(affScalarVol, self)._format_arg(name, spec, value)
+        return super(AffScalarVol, self)._format_arg(name, spec, value)
 
 
-class diffeoSymTensor3DVolInputSpec(CommandLineInputSpec):
+class DiffeoSymTensor3DVolInputSpec(CommandLineInputSpec):
     in_file = File(desc='moving tensor volume', exists=True,
                    argstr="-in %s", mandatory=True)
     out_file = File(desc='output filename',
@@ -335,17 +335,17 @@ class diffeoSymTensor3DVolInputSpec(CommandLineInputSpec):
                               desc='xyz voxel size (superseded by target)',
                               argstr="-vsize %g %g %g", xor=['target'])
     flip = traits.Tuple((traits.Int(), traits.Int(), traits.Int()),
-                        exists=True, argstr="-flip %d %d %d")
+                        argstr="-flip %d %d %d")
     resampling_type = traits.Enum('backward', 'forward',
                                   desc='use backward or forward resampling',
-                                  exists=True,  argstr="-type %s")
+                                  argstr="-type %s")
 
 
-class diffeoSymTensor3DVolOutputSpec(TraitedSpec):
+class DiffeoSymTensor3DVolOutputSpec(TraitedSpec):
     out_file = File(exists=True)
 
 
-class diffeoSymTensor3DVol(CommandLineDtitk):
+class DiffeoSymTensor3DVol(CommandLineDtitk):
     """
     Applies diffeomorphic transform to a tensor volume
 
@@ -353,26 +353,26 @@ class diffeoSymTensor3DVol(CommandLineDtitk):
     -------
 
     >>> from nipype.interfaces import dtitk
-    >>> node = dtitk.diffeoSymTensor3DVol()
+    >>> node = dtitk.DiffeoSymTensor3DVol()
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.transform = 'im_warp.df.nii'
-    >>> node.cmdline #doctest:
-    'deformationSymTensor3DVolume -df FD -in im1.nii -interp LEI -out\
+    >>> node.cmdline
+    'deformationSymTensor3DVolume -df FD -in im1.nii -interp LEI -out
      im1_diffeoxfmd.nii -reorient PPD -trans im_warp.df.nii'
     >>> node.run() # doctest: +SKIP
     """
 
-    input_spec = diffeoSymTensor3DVolInputSpec
-    output_spec = diffeoSymTensor3DVolOutputSpec
+    input_spec = DiffeoSymTensor3DVolInputSpec
+    output_spec = DiffeoSymTensor3DVolOutputSpec
     _cmd = 'deformationSymTensor3DVolume'
 
     def _format_arg(self, name, spec, value):
         if name == 'resampling_type':
             value = {'forward': 0, 'backward': 1}[value]
-        return super(diffeoSymTensor3DVol, self)._format_arg(name, spec, value)
+        return super(DiffeoSymTensor3DVol, self)._format_arg(name, spec, value)
 
 
-class diffeoScalarVolInputSpec(CommandLineInputSpec):
+class DiffeoScalarVolInputSpec(CommandLineInputSpec):
     in_file = File(desc='moving scalar volume', exists=True,
                    argstr="-in %s", mandatory=True)
     out_file = File(desc='output filename',
@@ -387,21 +387,21 @@ class diffeoScalarVolInputSpec(CommandLineInputSpec):
                               desc='xyz voxel size (superseded by target)',
                               argstr="-vsize %g %g %g", xor=['target'])
     flip = traits.Tuple((traits.Int(), traits.Int(), traits.Int()),
-                        exists=True, argstr="-flip %d %d %d")
+                        argstr="-flip %d %d %d")
     resampling_type = traits.Enum('backward', 'forward',
                                   desc='use backward or forward resampling',
-                                  exists=True,  argstr="-type %s")
+                                  argstr="-type %s")
     interpolation = traits.Enum('trilinear', 'NN',
                                 desc='trilinear, or nearest neighbor',
-                                exists=True, argstr="-interp %s",
+                                argstr="-interp %s",
                                 usedefault=True)
 
 
-class diffeoScalarVolOutputSpec(TraitedSpec):
+class DiffeoScalarVolOutputSpec(TraitedSpec):
     out_file = File(desc='moved volume', exists=True)
 
 
-class diffeoScalarVol(CommandLineDtitk):
+class DiffeoScalarVol(CommandLineDtitk):
     """
     Applies diffeomorphic transform to a scalar volume
 
@@ -409,23 +409,22 @@ class diffeoScalarVol(CommandLineDtitk):
     -------
 
     >>> from nipype.interfaces import dtitk
-    >>> node = dtitk.diffeoScalarVol()
+    >>> node = dtitk.DiffeoScalarVol()
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.transform = 'im_warp.df.nii'
     >>> node.cmdline
-    'deformationScalarVolume -in im1.nii -interp 0 -out im1_diffeoxfmd.nii\
+    'deformationScalarVolume -in im1.nii -interp 0 -out im1_diffeoxfmd.nii
      -trans im_warp.df.nii'
     >>> node.run() # doctest: +SKIP
     """
 
-    input_spec = diffeoScalarVolInputSpec
-    output_spec = diffeoScalarVolOutputSpec
+    input_spec = DiffeoScalarVolInputSpec
+    output_spec = DiffeoScalarVolOutputSpec
     _cmd = 'deformationScalarVolume'
 
     def _format_arg(self, name, spec, value):
         if name == 'resampling_type':
             value = {'forward': 0, 'backward': 1}[value]
-        super(diffeoScalarVol, self)._format_arg(name, spec, value)
-        if name == 'interpolation':
+        elif name == 'interpolation':
             value = {'trilinear': 0, 'NN': 1}[value]
-        return super(diffeoScalarVol, self)._format_arg(name, spec, value)
+        return super(DiffeoScalarVol, self)._format_arg(name, spec, value)

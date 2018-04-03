@@ -32,7 +32,7 @@ def test_Affine_inputs():
             mandatory=True,
             position=1,
         ),
-        samplingXYZ=dict(
+        sampling_xyz=dict(
             argstr='%g %g %g',
             mandatory=True,
             position=3,
@@ -48,7 +48,7 @@ def test_Affine_inputs():
             deprecated='1.0.0',
             nohash=True,
         ),
-        useInTrans=dict(
+        use_in_trans=dict(
             argstr='1',
             position=5,
         ),

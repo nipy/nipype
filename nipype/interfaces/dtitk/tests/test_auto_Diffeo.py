@@ -16,7 +16,6 @@ def test_Diffeo_inputs():
         ),
         ftol=dict(
             argstr='%g',
-            exists=True,
             mandatory=True,
             position=5,
             usedefault=True,
@@ -43,7 +42,6 @@ def test_Diffeo_inputs():
         ),
         n_iters=dict(
             argstr='%d',
-            exists=True,
             mandatory=True,
             position=4,
             usedefault=True,

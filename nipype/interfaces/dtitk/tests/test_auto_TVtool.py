@@ -19,10 +19,7 @@ def test_TVtool_inputs():
             argstr='-in %s',
             mandatory=True,
         ),
-        in_flag=dict(
-            argstr='-%s',
-            exists=True,
-        ),
+        in_flag=dict(argstr='-%s', ),
         out_file=dict(
             argstr='-out %s',
             genfile=True,

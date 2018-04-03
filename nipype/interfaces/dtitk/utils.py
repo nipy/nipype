@@ -28,6 +28,7 @@ __author__ = 'kjordan'
 from ..base import TraitedSpec, CommandLineInputSpec, File, traits, isdefined
 from ...utils.filemanip import fname_presuffix
 from .base import CommandLineDtitk
+import os
 
 __docformat__ = 'restructuredtext'
 
@@ -213,9 +214,9 @@ class TVtoolInputSpec(CommandLineInputSpec):
     in_file = File(desc="scalar volume to resample", exists=True,
                    argstr="-in %s", mandatory=True)
     '''NOTE: there are a lot more options here; not implementing all of them'''
-    in_flag = traits.Enum('fa', 'tr', 'ad', 'rd', 'pd', 'rgb', exists=True,
+    in_flag = traits.Enum('fa', 'tr', 'ad', 'rd', 'pd', 'rgb',
                           argstr="-%s", desc='')
-    out_file = File(exists=True, argstr="-out %s", genfile=True)
+    out_file = File(argstr="-out %s", genfile=True)
 
 
 class TVtoolOutputSpec(TraitedSpec):
@@ -243,17 +244,17 @@ class TVtool(CommandLineDtitk):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_filename('out_file')
-        else:
-            outputs['out_file'] = self.inputs.out_file
+        out_file = self.inputs.out_file
+        if not isdefined(out_file):
+            out_file = self._gen_filename('out_file')
+        outputs['out_file'] = os.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
-        tensor_volume = self.inputs.in_file
-        output_name = fname_presuffix(tensor_volume,
-                                      suffix='_'+self.inputs.in_flag)
-        return output_name
+        if name != 'out_file':
+            return
+        return fname_presuffix(os.path.basename(self.inputs.in_file),
+                               suffix='_' + self.inputs.in_flag)
 
 
 '''Note: SVTool not implemented at this time'''
