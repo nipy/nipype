@@ -21,14 +21,14 @@
       "orcid": "0000-0002-3718-6836"
     },
     {
-      "affiliation": "The Laboratory for Investigative Neurophysiology (The LINE), Department of Radiology and Department of Clinical Neurosciences, Lausanne, Switzerland; Center for Biomedical Imaging (CIBM), Lausanne, Switzerland",
-      "name": "Notter, Michael Philipp",
-      "orcid": "0000-0002-5866-047X"
-    },
-    {
       "affiliation": "Stanford University",
       "name": "Markiewicz, Christopher J.",
       "orcid": "0000-0002-6533-164X"
+    },
+    {
+      "affiliation": "The Laboratory for Investigative Neurophysiology (The LINE), Department of Radiology and Department of Clinical Neurosciences, Lausanne, Switzerland; Center for Biomedical Imaging (CIBM), Lausanne, Switzerland",
+      "name": "Notter, Michael Philipp",
+      "orcid": "0000-0002-5866-047X"
     },
     {
       "affiliation": "University of Iowa",
@@ -106,11 +106,6 @@
       "orcid": "0000-0002-2666-0969"
     },
     {
-      "affiliation": "UC Berkeley - UCSF Graduate Program in Bioengineering",
-      "name": "Keshavan, Anisha",
-      "orcid": "0000-0003-3554-043X"
-    },
-    {
       "affiliation": "UC Berkeley",
       "name": "Clark, Dav",
       "orcid": "0000-0002-3982-4416"
@@ -119,6 +114,11 @@
       "affiliation": "Dartmouth College",
       "name": "Visconti di Oleggio Castello, Matteo",
       "orcid": "0000-0001-7931-5272"
+    },
+    {
+      "affiliation": "UC Berkeley - UCSF Graduate Program in Bioengineering",
+      "name": "Keshavan, Anisha",
+      "orcid": "0000-0003-3554-043X"
     },
     {
       "affiliation": "CNRS LTCI, Telecom ParisTech, Universit\u00e9 Paris-Saclay",
@@ -157,12 +157,16 @@
       "orcid": "0000-0003-0679-1985"
     },
     {
+      "name": "Moloney, Brendan"
+    },
+    {
+      "affiliation": "Molecular Imaging Research Center, CEA, France",
+      "name": "Bougacha, Salma"
+    },
+    {
       "affiliation": "Athena EPI, Inria Sophia-Antipolis",
       "name": "Wassermann , Demian",
       "orcid": "0000-0001-5194-6056"
-    },
-    {
-      "name": "Moloney, Brendan"
     },
     {
       "affiliation": "Dartmouth College: Hanover, NH, United States",
@@ -180,10 +184,6 @@
       "orcid": "0000-0001-7037-2449"
     },
     {
-      "affiliation": "Molecular Imaging Research Center, CEA, France",
-      "name": "Bougacha, Salma"
-    },
-    {
       "affiliation": "MIT",
       "name": "Kaczmarzyk, Jakub",
       "orcid": "0000-0002-5544-7577"
@@ -192,6 +192,16 @@
       "affiliation": "Vrije Universiteit, Amsterdam",
       "name": "Gilles de Hollander",
       "orcid": "0000-0003-1988-5091"
+    },
+    {
+      "affiliation": "Montreal Neurological Institute and Hospital",
+      "name": "DuPre, Elizabeth",
+      "orcid": "0000-0003-1358-196X"
+    },
+    {
+      "affiliation": "Australian eHealth Research Centre, Commonwealth Scientific and Industrial Research Organisation; University of Queensland",
+      "name": "Gillman, Ashley",
+      "orcid": "0000-0001-9130-1092"
     },
     {
       "name": "Mordom, David"
@@ -230,11 +240,6 @@
       "orcid": "0000-0001-7512-7856"
     },
     {
-      "affiliation": "Montreal Neurological Institute and Hospital",
-      "name": "DuPre, Elizabeth",
-      "orcid": "0000-0003-1358-196X"
-    },
-    {
       "name": "Dubois, Mathieu"
     },
     {
@@ -260,11 +265,6 @@
       "orcid": "0000-0003-0579-9811"
     },
     {
-      "affiliation": "University College London",
-      "name": "Eshaghi, Arman",
-      "orcid": "0000-0002-6652-3512"
-    },
-    {
       "affiliation": "Harvard University - Psychology",
       "name": "Kastman, Erik",
       "orcid": "0000-0001-7221-9042"
@@ -273,6 +273,11 @@
       "affiliation": "SRI International",
       "name": "Nichols, B. Nolan",
       "orcid": "0000-0003-1099-3328"
+    },
+    {
+      "affiliation": "University College London",
+      "name": "Eshaghi, Arman",
+      "orcid": "0000-0002-6652-3512"
     },
     {
       "name": "Ginsburg, Daniel"
@@ -289,11 +294,6 @@
     },
     {
       "name": "Kent, James"
-    },
-    {
-      "affiliation": "Australian eHealth Research Centre, Commonwealth Scientific and Industrial Research Organisation; University of Queensland",
-      "name": "Gillman, Ashley",
-      "orcid": "0000-0001-9130-1092"
     },
     {
       "affiliation": "Child Mind Institute",
@@ -357,6 +357,11 @@
       "orcid": "0000-0002-2127-0507"
     },
     {
+      "affiliation": "University College London",
+      "name": "P\u00e9rez-Garc\u00eda, Fernando",
+      "orcid": "0000-0001-9090-3024"
+    },
+    {
       "affiliation": "Department of Psychology, Stanford University",
       "name": "Triplett, William",
       "orcid": "0000-0002-9546-1306"
@@ -385,9 +390,6 @@
       "name": "Salvatore, John"
     },
     {
-      "name": "Mertz, Fred"
-    },
-    {
       "name": "Park, Anne"
     },
     {
@@ -408,11 +410,6 @@
     },
     {
       "name": "Hinds, Oliver"
-    },
-    {
-      "affiliation": "Technical University Munich",
-      "name": "Molina-Romero, Miguel",
-      "orcid": "0000-0001-8054-0426"
     },
     {
       "affiliation": "University of Newcastle, Australia",
@@ -468,6 +465,9 @@
       "orcid": "0000-0001-9030-2202"
     },
     {
+      "name": "Mertz, Fred"
+    },
+    {
       "affiliation": "Technische Universit\u00e4t Dresden, Faculty of Medicine, Department of Child and Adolescent Psychiatry",
       "name": "Geisler, Daniel",
       "orcid": "0000-0003-2076-5329"
@@ -476,14 +476,15 @@
       "affiliation": "The University of Texas at Austin",
       "name": "Floren, Andrew",
       "orcid": "0000-0003-3618-2056"
-    },
+      },
     {
       "affiliation": "University of illinois urbana champaign",
       "name": "Sharp, Paul"
     },
     {
-      "affiliation": "Vrije Universiteit Amsterdam",
-      "name": "Ort, Eduard"
+      "affiliation": "Technical University Munich",
+      "name": "Molina-Romero, Miguel",
+      "orcid": "0000-0001-8054-0426"
     },
     {
       "name": "Weinstein, Alejandro"
@@ -558,9 +559,8 @@
       "name": "Flandin, Guillaume"
     },
     {
-      "affiliation": "University College London",
-      "name": "P\u00e9rez-Garc\u00eda, Fernando",
-      "orcid": "0000-0001-9090-3024"
+      "affiliation": "Vrije Universiteit Amsterdam",
+      "name": "Ort, Eduard"
     },
     {
       "name": "Shachnev, Dmitry"

@@ -36,9 +36,8 @@ _get_base_image: &get_base_image
       echo "Pulling base image ..."
       docker pull nipype/nipype:base
     elif [ "$GET_BASE" == "BUILD" ]; then
-      e=1 && for i in {1..5}; do
-        docker build -t nipype/nipype:base - < docker/Dockerfile.base  && e=0 && break || sleep 15
-      done && [ "$e" -eq "0" ]
+      tools/retry_cmd.sh -n 5 -s 15 \
+        docker build -t nipype/nipype:base - < docker/Dockerfile.base
     else
       echo "Error: method to get base image not understood"
       exit 1
@@ -48,7 +47,7 @@ _build_main_image_py36: &build_main_image_py36
   name: Build main image (py36)
   no_output_timeout: 60m
   command: |
-    e=1 && for i in {1..5}; do
+    tools/retry_cmd.sh -n 5 -s 15 \
       docker build \
         --rm=false \
         --tag nipype/nipype:latest \
@@ -56,14 +55,12 @@ _build_main_image_py36: &build_main_image_py36
         --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
         --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
         --build-arg VERSION="${CIRCLE_TAG}" /home/circleci/nipype \
-      && e=0 && break || sleep 15
-    done && [ "$e" -eq "0" ]
 
 _build_main_image_py27: &build_main_image_py27
   name: Build main image (py27)
   no_output_timeout: 60m
   command: |
-    e=1 && for i in {1..5}; do
+    tools/retry_cmd.sh -n 5 -s 15 \
       docker build \
         --rm=false \
         --tag nipype/nipype:py27 \
@@ -72,8 +69,6 @@ _build_main_image_py27: &build_main_image_py27
         --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
         --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
         --build-arg VERSION="${CIRCLE_TAG}-py27" /home/circleci/nipype \
-      && e=0 && break || sleep 15
-    done && [ "$e" -eq "0" ]
 
 _download_test_data: &_download_test_data
   name: Download test data

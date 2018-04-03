@@ -1,3 +1,26 @@
+1.0.2 (March 27, 2018)
+======================
+
+###### [Full changelog](https://github.com/nipy/nipype/milestone/16?closed=1)
+
+  * FIX: dcm2niix interface (https://github.com/nipy/nipype/pull/2498)
+  * FIX: mark .niml.dset as special extension in utils.filemanip (https://github.com/nipy/nipype/pull/2495)
+  * FIX: handle automatic module creation, name extraction, default value (https://github.com/nipy/nipype/pull/2490)
+  * FIX: Check and report mount table parsing failures (https://github.com/nipy/nipype/pull/2476)
+  * FIX: Check against full node name when reconnecting JoinNodes (https://github.com/nipy/nipype/pull/2479)
+  * DOC: Add tutorials, porcupine to users TOC (https://github.com/nipy/nipype/pull/2503
+  * DOC: Contributing and testing (https://github.com/nipy/nipype/pull/2482)
+  * DOC: Describe 'orphaned' tag in CONTRIBUTING (https://github.com/nipy/nipype/pull/2481)
+  * DOC: Add details for dcm2niix output filename pattern (https://github.com/nipy/nipype/pull/2512)
+  * ENH: Add interface for AFNI 3dNwarpAdjust (https://github.com/nipy/nipype/pull/2450)
+  * ENH: Update SSHDataGrabber to fetch related files (https://github.com/nipy/nipype/pull/2104)
+  * ENH: Add interpolation order parameter to NiftyReg's RegTools (https://github.com/nipy/nipype/pull/2471)
+  * MAINT: Stray warnings and exceptions (https://github.com/nipy/nipype/pull/2478)
+  * MAINT: Add dev install option, update CONTRIBUTING (https://github.com/nipy/nipype/pull/2477)
+  * MAINT: Sync requirements with info.py (https://github.com/nipy/nipype/pull/2472)
+  * CI: Update Travis builds, Docker to use latest miniconda (https://github.com/nipy/nipype/pull/2455)
+  * TEST: Parallelize pytest (https://github.com/nipy/nipype/pull/2469)
+
 1.0.1 (February 27, 2018)
 =========================
 
