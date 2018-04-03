@@ -619,6 +619,7 @@ class CatMatvec(AFNICommand):
                                             for i in value]))
         return super(CatMatvec, self)._format_arg(name, spec, value)
 
+
 class CenterMassInputSpec(CommandLineInputSpec):
     in_file = File(
         desc='input file to 3dCM',
