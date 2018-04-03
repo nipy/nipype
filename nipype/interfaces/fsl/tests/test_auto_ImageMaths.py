@@ -24,19 +24,20 @@ def test_ImageMaths_inputs():
             argstr='%s',
             position=3,
         ),
+        mask_file=dict(argstr='-mas %s', ),
         op_string=dict(
             argstr='%s',
             position=2,
         ),
         out_data_type=dict(
             argstr='-odt %s',
-            position=5,
+            position=-1,
         ),
         out_file=dict(
             argstr='%s',
             genfile=True,
             hash_files=False,
-            position=4,
+            position=-2,
         ),
         output_type=dict(),
         suffix=dict(),

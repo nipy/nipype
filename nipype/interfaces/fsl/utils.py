@@ -500,7 +500,9 @@ class Split(FSLCommand):
 class ImageMathsInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr="%s", mandatory=True, position=1)
     in_file2 = File(exists=True, argstr="%s", position=3)
-    out_file = File(argstr="%s", position=4, genfile=True, hash_files=False)
+    mask_file = File(exists=True, argstr='-mas %s',
+                     desc='use (following image>0) to mask current image')
+    out_file = File(argstr="%s", position=-2, genfile=True, hash_files=False)
     op_string = traits.Str(
         argstr="%s",
         position=2,
@@ -514,7 +516,7 @@ class ImageMathsInputSpec(FSLCommandInputSpec):
         'double',
         'input',
         argstr="-odt %s",
-        position=5,
+        position=-1,
         desc=("output datatype, one of (char, short, "
               "int, float, double, input)"))
 
