@@ -564,8 +564,11 @@ class CatMatvecInputSpec(AFNICommandInputSpec):
         argstr="%s",
         position=-2)
     out_file = File(
-        desc="File to write concattenated matvecs to",
         argstr=" > %s",
+        name_template='%s_cat.aff12.1D',
+        name_source='in_file',
+        keep_extension=False,
+        desc="File to write concattenated matvecs to",
         position=-1,
         mandatory=True)
     matrix = traits.Bool(
