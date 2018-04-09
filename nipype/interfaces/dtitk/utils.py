@@ -23,7 +23,6 @@ optimization, Medical Image Analysis, 10(5):764-785, October 2006. PMID:
 16899392.
 
 """
-__author__ = 'kjordan'
 
 from ..base import TraitedSpec, CommandLineInputSpec, File, traits, isdefined
 from ...utils.filemanip import fname_presuffix
