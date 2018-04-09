@@ -378,8 +378,8 @@ class DiffeoScalarVolInputSpec(CommandLineInputSpec):
     out_file = File(desc='output filename',
                     argstr="-out %s", name_source="in_file",
                     name_template="%s_diffeoxfmd", keep_extension=True)
-    transform = transform = File(exists=True, argstr="-trans %s",
-                                 mandatory=True, desc='transform to apply')
+    transform = File(exists=True, argstr="-trans %s",
+                     mandatory=True, desc='transform to apply')
     target = File(exists=True, argstr="-target %s", xor=['voxel_size'],
                   desc='output volume specification read from the target '
                   'volume if specified')

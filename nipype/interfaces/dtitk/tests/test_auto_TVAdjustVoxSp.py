@@ -25,7 +25,6 @@ def test_TVAdjustVoxSp_inputs():
         ),
         out_file=dict(
             argstr='-out %s',
-            genfile=True,
             keep_extension=True,
             name_source='in_file',
             name_template='%s_avs',

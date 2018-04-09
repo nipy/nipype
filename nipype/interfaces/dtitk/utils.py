@@ -36,7 +36,7 @@ __docformat__ = 'restructuredtext'
 class TVAdjustVoxSpInputSpec(CommandLineInputSpec):
     in_file = File(desc="tensor volume to modify", exists=True,
                    mandatory=True, argstr="-in %s")
-    out_file = File(genfile=True, desc='output path',
+    out_file = File(desc='output path',
                     argstr="-out %s", name_source='in_file',
                     name_template='%s_avs', keep_extension=True)
     target_file = File(desc='target volume to match',
@@ -263,15 +263,19 @@ class TVtool(CommandLineDtitk):
 class BinThreshInputSpec(CommandLineInputSpec):
     in_file = File(desc='Image to threshold/binarize', exists=True,
                    position=0, argstr="%s", mandatory=True)
-    out_file = File(desc='',  position=1, argstr="%s",
+    out_file = File(desc='output path',  position=1, argstr="%s",
                     keep_extension=True, name_source='in_file',
                     name_template='%s_thrbin')
-    lower_bound = traits.Float(0.01, position=2, argstr="%g", mandatory=True)
-    upper_bound = traits.Float(100, position=3, argstr="%g", mandatory=True)
+    lower_bound = traits.Float(0.01, position=2, argstr="%g", mandatory=True,
+                               desc='lower bound of binarization range')
+    upper_bound = traits.Float(100, position=3, argstr="%g", mandatory=True,
+                               desc='upper bound of binarization range')
     inside_value = traits.Float(1, position=4, argstr="%g", usedefault=True,
-                                mandatory=True)
+                                mandatory=True, desc='value for voxels in '
+                                'binarization range')
     outside_value = traits.Float(0, position=5, argstr="%g", usedefault=True,
-                                 mandatory=True)
+                                 mandatory=True, desc='value for voxels'
+                                 'outside of binarization range')
 
 
 class BinThreshOutputSpec(TraitedSpec):
@@ -282,20 +286,20 @@ class BinThresh(CommandLineDtitk):
     """
     Binarizes an image
 
-        Example
-        -------
+    Example
+    -------
 
-        >>> from nipype.interfaces import dtitk
-        >>> node = dtitk.BinThresh()
-        >>> node.inputs.in_file = 'im1.nii'
-        >>> node.inputs.lower_bound = 0
-        >>> node.inputs.upper_bound = 100
-        >>> node.inputs.inside_value = 1
-        >>> node.inputs.outside_value = 0
-        >>> node.cmdline
-        'BinaryThresholdImageFilter im1.nii im1_thrbin.nii 0 100 1 0'
-        >>> node.run() # doctest: +SKIP
-        """
+    >>> from nipype.interfaces import dtitk
+    >>> node = dtitk.BinThresh()
+    >>> node.inputs.in_file = 'im1.nii'
+    >>> node.inputs.lower_bound = 0
+    >>> node.inputs.upper_bound = 100
+    >>> node.inputs.inside_value = 1
+    >>> node.inputs.outside_value = 0
+    >>> node.cmdline
+    'BinaryThresholdImageFilter im1.nii im1_thrbin.nii 0 100 1 0'
+    >>> node.run() # doctest: +SKIP
+    """
 
     input_spec = BinThreshInputSpec
     output_spec = BinThreshOutputSpec
