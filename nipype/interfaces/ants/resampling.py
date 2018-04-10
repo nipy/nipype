@@ -359,7 +359,8 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
         desc='output a composite warp file instead of a transformed image')
     float = traits.Bool(
         argstr='--float %d',
-        default=False,
+        default_value=False,
+        usedefault=True,
         desc='Use float instead of double for computations.')
 
 

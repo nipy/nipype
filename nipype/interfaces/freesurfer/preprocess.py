@@ -1785,7 +1785,6 @@ class RobustRegisterInputSpec(FSTraitedSpec):
     out_reg_file = traits.Either(
         True,
         File,
-        default=True,
         usedefault=True,
         argstr='--lta %s',
         desc='registration file; either True or filename')

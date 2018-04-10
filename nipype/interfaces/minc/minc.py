@@ -1636,13 +1636,12 @@ class BlurInputSpec(CommandLineInputSpec):
         mandatory=True)
 
     dimensions = traits.Enum(
-        1,
-        2,
         3,
+        1,
+        2
         desc=
         'Number of dimensions to blur (either 1,2 or 3). Default value: 3.',
-        argstr='-dimensions %s',
-        default=3)
+        argstr='-dimensions %s')
 
 
 class BlurOutputSpec(TraitedSpec):

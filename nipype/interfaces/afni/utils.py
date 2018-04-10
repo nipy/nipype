@@ -479,7 +479,8 @@ class CatInputSpec(AFNICommandInputSpec):
         File(exists=True), argstr="%s", mandatory=True, position=-2)
     out_file = File(
         argstr='> %s',
-        default='catout.1d',
+        value='catout.1d',
+        usedefault=True,
         desc='output (concatenated) file name',
         position=-1,
         mandatory=True)
@@ -1610,6 +1611,7 @@ class NwarpApplyInputSpec(CommandLineInputSpec):
         desc='the name of the master dataset, which defines the output grid',
         argstr='-master %s')
     interp = traits.Enum(
+        'wsinc5'
         'NN',
         'nearestneighbour',
         'nearestneighbor',
@@ -1619,11 +1621,11 @@ class NwarpApplyInputSpec(CommandLineInputSpec):
         'tricubic',
         'quintic',
         'triquintic',
-        'wsinc5',
         desc='defines interpolation method to use during warp',
         argstr='-interp %s',
-        default='wsinc5')
+        usedefault=True)
     ainterp = traits.Enum(
+        'wsinc5'
         'NN',
         'nearestneighbour',
         'nearestneighbor',
@@ -1633,11 +1635,10 @@ class NwarpApplyInputSpec(CommandLineInputSpec):
         'tricubic',
         'quintic',
         'triquintic',
-        'wsinc5',
         desc='specify a different interpolation method than might '
         'be used for the warp',
         argstr='-ainterp %s',
-        default='wsinc5')
+        usedefault=True)
     out_file = File(
         name_template='%s_Nwarp',
         desc='output image file name',
@@ -1696,13 +1697,14 @@ class NwarpCatInputSpec(AFNICommandInputSpec):
     inv_warp = traits.Bool(
         desc='invert the final warp before output', argstr='-iwarp')
     interp = traits.Enum(
+        'wsinc5'
         'linear',
         'quintic',
         'wsinc5',
         desc='specify a different interpolation method than might '
         'be used for the warp',
         argstr='-interp %s',
-        default='wsinc5')
+        usedefault=True)
     expad = traits.Int(
         desc='Pad the nonlinear warps by the given number of voxels voxels in '
         'all directions. The warp displacements are extended by linear '
@@ -1841,7 +1843,6 @@ class OneDToolPyInputSpec(AFNIPythonCommandInputSpec):
     show_cormat_warnings = traits.File(
         desc='Write cormat warnings to a file',
         argstr="-show_cormat_warnings |& tee %s",
-        default="out.cormat_warn.txt",
         usedefault=False,
         position=-1,
         xor=['out_file'])

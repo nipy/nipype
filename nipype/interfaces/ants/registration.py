@@ -98,7 +98,7 @@ class ANTSInputSpec(ANTSCommandInputSpec):
     symmetry_type = traits.Float(requires=['delta_time'], desc='')
 
     use_histogram_matching = traits.Bool(
-        argstr='%s', default=True, usedefault=True)
+        argstr='%s', default_value=True, usedefault=True)
     number_of_iterations = traits.List(
         traits.Int(), argstr='--number-of-iterations %s', sep='x')
     smoothing_sigmas = traits.List(
@@ -324,7 +324,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         1,
         2,
         argstr='%s',
-        default=0,
+        usedefault=True,
         xor=['initial_moving_transform'],
         desc="Align the moving_image nad fixed_image befor registration using"
         "the geometric center of the images (=0), the image intensities (=1),"
@@ -405,12 +405,12 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
 
     write_composite_transform = traits.Bool(
         argstr='--write-composite-transform %d',
-        default=False,
+        default_value=False,
         usedefault=True,
         desc='')
     collapse_output_transforms = traits.Bool(
         argstr='--collapse-output-transforms %d',
-        default=True,
+        default_value=True,
         usedefault=True,  # This should be true for explicit completeness
         desc=('Collapse output transforms. Specifically, enabling this option '
               'combines all adjacent linear transforms and composes all '
@@ -418,7 +418,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
               'results to disk.'))
     initialize_transforms_per_stage = traits.Bool(
         argstr='--initialize-transforms-per-stage %d',
-        default=False,
+        default_value=False,
         usedefault=True,  # This should be true for explicit completeness
         desc=
         ('Initialize linear transforms from the previous stage. By enabling this option, '
@@ -430,7 +430,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     # values instead of booleans
     float = traits.Bool(
         argstr='--float %d',
-        default=False,
+        default_value=False,
         desc='Use float instead of double for computations.')
 
     transforms = traits.List(
@@ -532,7 +532,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         usedefault=True,
         desc="The Lower quantile to clip image ranges")
 
-    verbose = traits.Bool(argstr='-v', default=False)
+    verbose = traits.Bool(argstr='-v', default_value=False, usedefault=True)
 
 
 class RegistrationOutputSpec(TraitedSpec):
@@ -1386,7 +1386,7 @@ class MeasureImageSimilarityInputSpec(ANTSCommandInputSpec):
     )
     metric_weight = traits.Float(
         requires=['metric'],
-        default=1.0,
+        default_value=1.0,
         usedefault=True,
         desc='The "metricWeight" variable is not used.',
     )
@@ -1401,7 +1401,6 @@ class MeasureImageSimilarityInputSpec(ANTSCommandInputSpec):
         "Regular",
         "Random",
         requires=['metric'],
-        default="None",
         usedefault=True,
         desc='Manner of choosing point set over which to optimize the metric. '
         'Defaults to "None" (i.e. a dense sampling of one sample per voxel).')

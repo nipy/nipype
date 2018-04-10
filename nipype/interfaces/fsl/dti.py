@@ -144,7 +144,7 @@ class FSLXCommandInputSpec(FSLCommandInputSpec):
     n_fibres = traits.Range(
         usedefault=True,
         low=1,
-        default=2,
+        value=2,
         argstr='--nfibres=%d',
         desc=('Maximum number of fibres to fit in each voxel'),
         mandatory=True)
@@ -161,24 +161,28 @@ class FSLXCommandInputSpec(FSLCommandInputSpec):
         5000, argstr='--njumps=%d', desc='Num of jumps to be made by MCMC')
     burn_in = traits.Range(
         low=0,
-        default=0,
+        value=0,
+        usedefault=True,
         argstr='--burnin=%d',
         desc=('Total num of jumps at start of MCMC to be '
               'discarded'))
     burn_in_no_ard = traits.Range(
         low=0,
-        default=0,
+        value=0,
+        usedefault=True,
         argstr='--burninnoard=%d',
         desc=('num of burnin jumps before the ard is'
               ' imposed'))
     sample_every = traits.Range(
         low=0,
-        default=1,
+        value=1,
+        usedefault=True,
         argstr='--sampleevery=%d',
         desc='Num of jumps for each sample (MCMC)')
     update_proposal_every = traits.Range(
         low=1,
-        default=40,
+        value=40,
+        usedefault=True,
         argstr='--updateproposalevery=%d',
         desc=('Num of jumps for each update '
               'to the proposal density std '
@@ -322,7 +326,7 @@ class BEDPOSTX5InputSpec(FSLXCommandInputSpec):
     n_fibres = traits.Range(
         usedefault=True,
         low=1,
-        default=2,
+        value=2,
         argstr='-n %d',
         desc=('Maximum number of fibres to fit in each voxel'),
         mandatory=True)
@@ -339,13 +343,15 @@ class BEDPOSTX5InputSpec(FSLXCommandInputSpec):
         5000, argstr='-j %d', desc='Num of jumps to be made by MCMC')
     burn_in = traits.Range(
         low=0,
-        default=0,
+        value=0,
+        usedefault=True,
         argstr='-b %d',
         desc=('Total num of jumps at start of MCMC to be '
               'discarded'))
     sample_every = traits.Range(
         low=0,
-        default=1,
+        value=1,
+        usedefault=True,
         argstr='-s %d',
         desc='Num of jumps for each sample (MCMC)')
     out_dir = Directory(

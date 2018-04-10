@@ -1383,7 +1383,6 @@ class MRIPretessInputSpec(FSTraitedSpec):
         traits.Str('wm'),
         traits.Int(1),
         argstr='%s',
-        default='wm',
         mandatory=True,
         usedefault=True,
         position=-3,
@@ -1946,7 +1945,8 @@ class CheckTalairachAlignmentInputSpec(FSTraitedSpec):
         desc="specify subject's name")
     # optional
     threshold = traits.Float(
-        default=0.010,
+        default_value=0.010,
+        usedefault=True,
         argstr='-T %.3f',
         desc="Talairach transforms for subjects with p-values <= T " +
         "are considered as very unlikely default=0.010")

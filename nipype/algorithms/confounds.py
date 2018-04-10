@@ -396,7 +396,7 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         desc=('use polynomial regression '
               'pre-component extraction'))
     regress_poly_degree = traits.Range(
-        low=1, default=1, usedefault=True, desc='the degree polynomial to use')
+        low=1, value=1, usedefault=True, desc='the degree polynomial to use')
     header_prefix = traits.Str(
         desc=('the desired header for the output tsv '
               'file (one column). If undefined, will '
