@@ -4,17 +4,17 @@
 
 import numpy as np
 import nibabel as nb
-from nipype.algorithms.stats import ACM
+from nipype.algorithms.stats import ActivationCount
 
 
-def test_ACM(tmpdir):
+def test_ActivationCount(tmpdir):
     tmpdir.chdir()
     in_files = ['{:d}.nii'.format(i) for i in range(3)]
     for fname in in_files:
         nb.Nifti1Image(np.random.normal(size=(5, 5, 5)),
                        np.eye(4)).to_filename(fname)
 
-    acm = ACM(in_files=in_files)
+    acm = ActivationCount(in_files=in_files)
     res = acm.run()
     diff = nb.load(res.outputs.out_file)
     pos = nb.load(res.outputs.acm_pos)

@@ -14,7 +14,7 @@ from ..interfaces.base import (
     BaseInterfaceInputSpec, TraitedSpec, SimpleInterface,
     traits, InputMultiPath, File
 )
-from ...utils.filemanip import split_filename
+from ..utils.filemanip import split_filename
 
 
 class ActivationCountInputSpec(BaseInterfaceInputSpec):
