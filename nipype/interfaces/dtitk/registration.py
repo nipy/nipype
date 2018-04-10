@@ -25,7 +25,7 @@ Zhang, H., Yushkevich, P.A., Alexander, D.C., Gee, J.C., Deformable
 """
 
 from ..base import TraitedSpec, CommandLineInputSpec, traits, File, isdefined
-from ...utils.filemanip import fname_presuffix
+from ...utils.filemanip import fname_presuffix, split_filename
 from .base import CommandLineDtitk, DTITKRenameMixin
 import os
 
@@ -166,8 +166,6 @@ class ComposeXfmInputSpec(CommandLineInputSpec):
                   argstr="-aff %s", mandatory=True)
     out_file = File(desc='output path',
                     argstr="-out %s",  genfile=True)
-    # keep_extension is keeping the .df but not .nii
-    # need to fix when PR 2506 is done
 
 
 class ComposeXfmOutputSpec(TraitedSpec):
@@ -205,9 +203,12 @@ class ComposeXfm(CommandLineDtitk):
     def _gen_filename(self, name):
         if name != 'out_file':
             return
-        return fname_presuffix(os.path.basename(
-                               self.inputs.in_df).split('.')[0],
-                               suffix='_affdf.df.nii')
+        path, base, ext = split_filename(self.inputs.in_df)
+        suffix = '_affdf'
+        if base.endswith('.df'):
+            suffix += '.df'
+            base = base[:-3]
+        return fname_presuffix(base, suffix=suffix + ext, use_ext=False)
 
 
 class AffSymTensor3DVolInputSpec(CommandLineInputSpec):
