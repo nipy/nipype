@@ -305,7 +305,7 @@ class BinThresh(CommandLineDtitk):
     _cmd = 'BinaryThresholdImageFilter'
 
 
-class BinThreshTASK(DTITKRenameMixin, BinThresh):
+class BinThreshTask(DTITKRenameMixin, BinThresh):
     pass
 
 

@@ -13,6 +13,12 @@ Currently these tools are supported:
 * Rigid Tensor Registration
 * Affine Tensor Registration
 * Diffeomorphic Tensor Registration
+* Combine affiine and diffeomorphic transforms
+* Application of transform to tensor and scalar volumes
+* Threshold and Binarize
+* Adjusting the voxel space of tensor and scalar volumes
+* Resampling tensor and scalar volumes
+* Calculation of tensor metrics from tensor volume
 
 Examples
 --------
