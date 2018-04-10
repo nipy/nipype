@@ -18,7 +18,6 @@ from warnings import warn
 from builtins import str, bytes
 from packaging.version import Version
 
-from ...utils.misc import is_container
 from ...utils.filemanip import md5, hash_infile, hash_timestamp, to_str
 from .traits_extension import (
     traits,
@@ -157,7 +156,10 @@ class BaseTraitedSpec(traits.HasTraits):
         Augments the trait get function to return a dictionary without
         notification handles
         """
-        out = super(BaseTraitedSpec, self).get(**kwargs)
+        try:
+            out = super(BaseTraitedSpec, self).trait_get(**kwargs)
+        except AttributeError:  # deprecated old get
+            out = super(BaseTraitedSpec, self).get(**kwargs)
         out = self._clean_container(out, Undefined)
         return out
 
@@ -183,8 +185,8 @@ class BaseTraitedSpec(traits.HasTraits):
                 else:
                     if not skipundefined:
                         out[key] = undefinedval
-        elif (isinstance(objekt, TraitListObject) or isinstance(objekt, list)
-              or isinstance(objekt, tuple)):
+        elif (isinstance(objekt, TraitListObject) or isinstance(objekt, list) or
+              isinstance(objekt, tuple)):
             out = []
             for val in objekt:
                 if isdefined(val):
@@ -241,8 +243,8 @@ class BaseTraitedSpec(traits.HasTraits):
                 # skip undefined traits and traits with nohash=True
                 continue
 
-            hash_files = (not self.has_metadata(name, "hash_files", False)
-                          and not self.has_metadata(name, "name_source"))
+            hash_files = (not self.has_metadata(name, "hash_files", False) and
+                          not self.has_metadata(name, "name_source"))
             list_nofilename.append((name,
                                     self._get_sorteddict(
                                         val,
@@ -286,8 +288,8 @@ class BaseTraitedSpec(traits.HasTraits):
         else:
             out = None
             if isdefined(objekt):
-                if (hash_files and isinstance(objekt, (str, bytes))
-                        and os.path.isfile(objekt)):
+                if (hash_files and isinstance(objekt, (str, bytes)) and
+                        os.path.isfile(objekt)):
                     if hash_method is None:
                         hash_method = config.get('execution', 'hash_method')
 
