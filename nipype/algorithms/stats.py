@@ -14,9 +14,10 @@ from ..interfaces.base import (
     BaseInterfaceInputSpec, TraitedSpec, SimpleInterface,
     traits, InputMultiPath, File
 )
+from ...utils.filemanip import split_filename
 
 
-class ACMInputSpec(BaseInterfaceInputSpec):
+class ActivationCountInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True,
                               desc='input file, generally a list of z-stat maps')
     threshold = traits.Float(1.65, usedefault=True,
@@ -24,21 +25,21 @@ class ACMInputSpec(BaseInterfaceInputSpec):
                                   'corresponds to a two-sided test of p<.10')
 
 
-class ACMOutputSpec(TraitedSpec):
+class ActivationCountOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='output activation count map')
     acm_pos = File(exists=True, desc='positive activation count map')
     acm_neg = File(exists=True, desc='negative activation count map')
 
 
-class ACM(SimpleInterface):
+class ActivationCount(SimpleInterface):
     """
     Calculate a simple Activation Count Maps
 
     Adapted from: https://github.com/poldracklab/CNP_task_analysis/\
     blob/61c27f5992db9d8800884f8ffceb73e6957db8af/CNP_2nd_level_ACM.py
     """
-    input_spec = ACMInputSpec
-    output_spec = ACMOutputSpec
+    input_spec = ActivationCountInputSpec
+    output_spec = ActivationCountOutputSpec
 
     def _run_interface(self, runtime):
         allmaps = nb.concat_images(self.inputs.in_files).get_data()
@@ -48,19 +49,20 @@ class ACM(SimpleInterface):
                           axis=3, dtype=np.float32)
         acm_diff = acm_pos - acm_neg
 
-        nii = nb.load(self.inputs.in_files[0])
-        self._results['out_file'] = os.path.join(
-            runtime.cwd, 'acm_diff.nii.gz')
-        self._results['acm_pos'] = os.path.join(
-            runtime.cwd, 'acm_pos.nii.gz')
-        self._results['acm_neg'] = os.path.join(
-            runtime.cwd, 'acm_neg.nii.gz')
+        template_fname = self.inputs.in_files[0]
+        ext = split_filename(template_fname)[2]
+        fname_fmt = os.path.join(runtime.cwd, 'acm_{}' + ext).format
 
-        nb.Nifti1Image(
-            acm_diff, nii.affine, nii.header).to_filename(self._results['out_file'])
-        nb.Nifti1Image(
-            acm_pos, nii.affine, nii.header).to_filename(self._results['acm_pos'])
-        nb.Nifti1Image(
-            acm_neg, nii.affine, nii.header).to_filename(self._results['acm_neg'])
+        self._results['out_file'] = fname_fmt('diff')
+        self._results['acm_pos'] = fname_fmt('pos')
+        self._results['acm_neg'] = fname_fmt('neg')
+
+        img = nb.load(template_fname)
+        img.__class__(acm_diff, img.affine, img.header).to_filename(
+            self._results['out_file'])
+        img.__class__(acm_pos, img.affine, img.header).to_filename(
+            self._results['acm_pos'])
+        img.__class__(acm_neg, img.affine, img.header).to_filename(
+            self._results['acm_neg'])
 
         return runtime
