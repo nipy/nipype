@@ -5,14 +5,6 @@
 """Defines functionality for pipelined execution of interfaces
 
 The `EngineBase` class implements the more general view of a task.
-
-  .. testsetup::
-     # Change directory to provide relative paths for doctests
-     import os
-     filepath = os.path.dirname(os.path.realpath( __file__ ))
-     datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-     os.chdir(datadir)
-
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
@@ -109,8 +101,4 @@ class EngineBase(object):
         savepkl(filename, self)
 
     def load(self, filename):
-        if '.npz' in filename:
-            DeprecationWarning(('npz files will be deprecated in the next '
-                                'release. you can use numpy to open them.'))
-            return np.load(filename)
         return loadpkl(filename)

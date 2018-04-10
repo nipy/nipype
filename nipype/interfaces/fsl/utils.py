@@ -8,13 +8,6 @@ was written to work with FSL version 4.1.4.
 Examples
 --------
 See the docstrings of the individual classes for examples.
-
-  .. testsetup::
-    # Change directory to provide relative paths for doctests
-    import os
-    filepath = os.path.dirname(os.path.realpath( __file__ ))
-    datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
-    os.chdir(datadir)
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
@@ -507,7 +500,9 @@ class Split(FSLCommand):
 class ImageMathsInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr="%s", mandatory=True, position=1)
     in_file2 = File(exists=True, argstr="%s", position=3)
-    out_file = File(argstr="%s", position=4, genfile=True, hash_files=False)
+    mask_file = File(exists=True, argstr='-mas %s',
+                     desc='use (following image>0) to mask current image')
+    out_file = File(argstr="%s", position=-2, genfile=True, hash_files=False)
     op_string = traits.Str(
         argstr="%s",
         position=2,
@@ -521,7 +516,7 @@ class ImageMathsInputSpec(FSLCommandInputSpec):
         'double',
         'input',
         argstr="-odt %s",
-        position=5,
+        position=-1,
         desc=("output datatype, one of (char, short, "
               "int, float, double, input)"))
 

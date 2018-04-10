@@ -12,8 +12,10 @@
 set -u         # Treat unset variables as an error when substituting.
 set -x         # Print command traces before executing command.
 
+CHANGES=../doc/changelog/1.X.X-changelog
+
 # Check whether the Upcoming release header is present
-head -1 CHANGES | grep -q Upcoming
+head -1 $CHANGES | grep -q Upcoming
 UPCOMING=$?
 
 # Elaborate today's release header
@@ -30,11 +32,11 @@ echo "" >> newchanges
 # Append old CHANGES
 if [[ "$UPCOMING" == "0" ]]; then
     # Drop the Upcoming title if present
-    tail -n+4 CHANGES >> newchanges
+    tail -n+4 $CHANGES >> newchanges
 else
-    cat CHANGES >> newchanges
+    cat $CHANGES >> newchanges
 fi
 
 # Replace old CHANGES with new file
-mv newchanges CHANGES
+mv newchanges $CHANGES
 

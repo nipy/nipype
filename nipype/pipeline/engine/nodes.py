@@ -4,14 +4,6 @@
 """Defines functionality for pipelined execution of interfaces
 
 The `Node` class provides core functionality for batch processing.
-
-  .. testsetup::
-     # Change directory to provide relative paths for doctests
-     import os
-     filepath = os.path.dirname(os.path.realpath( __file__ ))
-     datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-     os.chdir(datadir)
-
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
@@ -35,7 +27,7 @@ from ...utils.misc import flatten, unflatten, str2bool, dict_diff
 from ...utils.filemanip import (md5, FileNotFoundError, filename_to_list,
                                 list_to_filename, copyfiles, fnames_presuffix,
                                 loadpkl, split_filename, load_json, makedirs,
-                                emptydirs, savepkl, to_str)
+                                emptydirs, savepkl, to_str, indirectory)
 
 from ...interfaces.base import (traits, InputMultiPath, CommandLine, Undefined,
                                 DynamicTraitedSpec, Bunch, InterfaceResult,
@@ -635,7 +627,8 @@ class Node(EngineBase):
             self._interface.__class__.__name__)
         if issubclass(self._interface.__class__, CommandLine):
             try:
-                cmd = self._interface.cmdline
+                with indirectory(outdir):
+                    cmd = self._interface.cmdline
             except Exception as msg:
                 result.runtime.stderr = '{}\n\n{}'.format(
                     getattr(result.runtime, 'stderr', ''), msg)

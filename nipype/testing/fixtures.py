@@ -103,7 +103,7 @@ def set_output_type(fsl_output_type):
     return prev_output_type
 
 
-@pytest.fixture(params=[None] + list(Info.ftypes))
+@pytest.fixture(params=[None] + sorted(Info.ftypes))
 def create_files_in_directory_plus_output_type(request, tmpdir):
     func_prev_type = set_output_type(request.param)
     origdir = tmpdir.chdir()

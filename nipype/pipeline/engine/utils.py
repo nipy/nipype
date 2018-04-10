@@ -280,7 +280,7 @@ def load_resultfile(path, name):
         except UnicodeDecodeError:
             # Was this pickle created with Python 2.x?
             pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
-            logger.warning('Successfully loaded pickle in compatibility mode')
+            logger.warning('Successfully loaded pkl in compatibility mode')
         except (traits.TraitError, AttributeError, ImportError,
                 EOFError) as err:
             if isinstance(err, (AttributeError, ImportError)):
@@ -439,6 +439,8 @@ def modify_paths(object, relative=True, basedir=None):
                     raise IOError('File %s not found' % out)
             else:
                 out = object
+        else:
+            raise TypeError("Object {} is undefined".format(object))
     return out
 
 
@@ -1050,7 +1052,17 @@ def generate_expanded_graph(graph_in):
             expansions = defaultdict(list)
             for node in graph_in.nodes():
                 for src_id in list(old_edge_dict.keys()):
-                    if node.itername.startswith(src_id):
+                    # Drop the original JoinNodes; only concerned with
+                    # generated Nodes
+                    if hasattr(node, 'joinfield'):
+                        continue
+                    # Patterns:
+                    #   - src_id : Non-iterable node
+                    #   - src_id.[a-z]\d+ : IdentityInterface w/ iterables
+                    #   - src_id.[a-z]I.[a-z]\d+ : Non-IdentityInterface w/ iterables
+                    #   - src_idJ\d+ : JoinNode(IdentityInterface)
+                    if re.match(src_id + r'((\.[a-z](I\.[a-z])?|J)\d+)?$',
+                                node.itername):
                         expansions[src_id].append(node)
             for in_id, in_nodes in list(expansions.items()):
                 logger.debug("The join node %s input %s was expanded"

@@ -4,12 +4,6 @@
 """The fsl module provides classes for interfacing with the `FSL
 <http://www.fmrib.ox.ac.uk/fsl/index.html>`_ command line tools.  This
 was written to work with FSL version 4.1.4.
-
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-    >>> os.chdir(datadir)
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
@@ -223,13 +217,16 @@ class Level1Design(BaseInterface):
                 self._create_ev_file(evfname, evinfo)
         # add ev orthogonalization
         for i in range(1, num_evs[0] + 1):
+            initial = ev_ortho.substitute(c0=i, c1=0, orthogonal=1)
             for j in range(0, num_evs[0] + 1):
                 try:
                     orthogonal = int(orthogonalization[i][j])
                 except (KeyError, TypeError, ValueError, IndexError):
                     orthogonal = 0
-                ev_txt += ev_ortho.substitute(
-                    c0=i, c1=j, orthogonal=orthogonal)
+                if orthogonal == 1 and initial not in ev_txt:
+                    ev_txt += initial + "\n"
+                ev_txt += ev_ortho.substitute(c0=i, c1=j,
+                                              orthogonal=orthogonal)
                 ev_txt += "\n"
         # add contrast info to fsf file
         if isdefined(contrasts):

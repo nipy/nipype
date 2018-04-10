@@ -2,12 +2,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """AFNI preprocessing interfaces
-
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-    >>> os.chdir(datadir)
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
@@ -2429,19 +2423,19 @@ class TProjectInputSpec(AFNICommandInputSpec):
         exists=True)
     censortr = traits.List(
         traits.Str(),
-        desc="""list of strings that specify time indexes 
+        desc="""list of strings that specify time indexes
                 to be removed from the analysis.  Each string is
-                of one of the following forms:                  
-                       37 => remove global time index #37          
-                     2:37 => remove time index #37 in run #2       
-                   37..47 => remove global time indexes #37-47     
-                   37-47  => same as above                         
-                 2:37..47 => remove time indexes #37-47 in run #2  
-                 *:0-2    => remove time indexes #0-2 in all runs  
-                +Time indexes within each run start at 0.        
-                +Run indexes start at 1 (just be to confusing).  
-                +N.B.: 2:37,47 means index #37 in run #2 and     
-                global time index 47; it does NOT mean         
+                of one of the following forms:
+                       37 => remove global time index #37
+                     2:37 => remove time index #37 in run #2
+                   37..47 => remove global time indexes #37-47
+                   37-47  => same as above
+                 2:37..47 => remove time indexes #37-47 in run #2
+                 *:0-2    => remove time indexes #0-2 in all runs
+                +Time indexes within each run start at 0.
+                +Run indexes start at 1 (just be to confusing).
+                +N.B.: 2:37,47 means index #37 in run #2 and
+                global time index 47; it does NOT mean
                 index #37 in run #2 AND index #47 in run #2.""",
         argstr="-CENSORTR %s")
     cenmode = traits.Enum(

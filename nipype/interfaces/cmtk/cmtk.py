@@ -1,14 +1,6 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-    >>> os.chdir(datadir)
-
-"""
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 from builtins import range, open
@@ -222,7 +214,8 @@ def cmat(track_file,
         gp = nx.read_gpickle(resolution_network_file)
     elif ext == '.graphml':
         gp = nx.read_graphml(resolution_network_file)
-
+    else:
+        raise TypeError("Unable to read file:", resolution_network_file)
     nROIs = len(gp.nodes())
 
     # add node information from parcellation

@@ -4,12 +4,6 @@
 """The fsl module provides classes for interfacing with the `FSL
 <http://www.fmrib.ox.ac.uk/fsl/index.html>`_ command line tools.  This
 was written to work with FSL version 4.1.4.
-
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-    >>> os.chdir(datadir)
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
@@ -2025,7 +2019,7 @@ class FIRST(FSLCommand):
         outputs['bvars'] = self._gen_mesh_names('bvars', structures)
         return outputs
 
-    def _gen_fname(self, name):
+    def _gen_fname(self, basename):
         path, outname, ext = split_filename(self.inputs.out_file)
 
         method = 'none'
@@ -2039,9 +2033,9 @@ class FIRST(FSLCommand):
             thres = '%.4f' % self.inputs.method_as_numerical_threshold
             method = thres.replace('.', '')
 
-        if name == 'original_segmentations':
+        if basename == 'original_segmentations':
             return op.abspath('%s_all_%s_origsegs.nii.gz' % (outname, method))
-        if name == 'segmentation_file':
+        if basename == 'segmentation_file':
             return op.abspath('%s_all_%s_firstseg.nii.gz' % (outname, method))
 
         return None

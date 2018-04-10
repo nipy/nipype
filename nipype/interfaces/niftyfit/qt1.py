@@ -3,13 +3,6 @@
 """
 The QT1 module of niftyfit, which wraps the Multi-Echo T1 fitting methods
 in NiftyFit.
-
-Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/\
-data'))
-    >>> os.chdir(datadir)
 """
 
 from ..base import TraitedSpec, File, traits, CommandLineInputSpec
