@@ -26,8 +26,7 @@ def test_ComposeXfm_inputs():
         ),
         out_file=dict(
             argstr='-out %s',
-            name_source='in_df',
-            name_template='%s_affdf.nii',
+            genfile=True,
         ),
         terminal_output=dict(
             deprecated='1.0.0',

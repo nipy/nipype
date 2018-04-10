@@ -24,9 +24,10 @@ Zhang, H., Yushkevich, P.A., Alexander, D.C., Gee, J.C., Deformable
 
 """
 
-from ..base import TraitedSpec, CommandLineInputSpec, traits, File
+from ..base import TraitedSpec, CommandLineInputSpec, traits, File, isdefined
 from ...utils.filemanip import fname_presuffix
 from .base import CommandLineDtitk
+import os
 
 __docformat__ = 'restructuredtext'
 
@@ -164,9 +165,9 @@ class ComposeXfmInputSpec(CommandLineInputSpec):
     in_aff = File(desc='affine transform file', exists=True,
                   argstr="-aff %s", mandatory=True)
     out_file = File(desc='output path',
-                    argstr="-out %s",  name_source="in_df",
-                    name_template="%s_affdf.nii")
-    # keep_extension is keeping the .df but not .nii; need to figure out
+                    argstr="-out %s",  genfile=True)
+    # keep_extension is keeping the .df but not .nii
+    # need to fix when PR 2506 is done
 
 
 class ComposeXfmOutputSpec(TraitedSpec):
@@ -186,12 +187,27 @@ class ComposeXfm(CommandLineDtitk):
     >>> node.inputs.in_aff= 'im_affine.aff'
     >>> node.cmdline
     'dfRightComposeAffine -aff im_affine.aff -df im_warp.df.nii -out
-     im_warp.df_affdf.nii'
+     im_warp_affdf.df.nii'
     >>> node.run() # doctest: +SKIP
     """
     input_spec = ComposeXfmInputSpec
     output_spec = ComposeXfmOutputSpec
     _cmd = 'dfRightComposeAffine'
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        out_file = self.inputs.out_file
+        if not isdefined(out_file):
+            out_file = self._gen_filename('out_file')
+        outputs['out_file'] = os.path.abspath(out_file)
+        return outputs
+
+    def _gen_filename(self, name):
+        if name != 'out_file':
+            return
+        return fname_presuffix(os.path.basename(
+                               self.inputs.in_df).split('.')[0],
+                               suffix='_affdf.df.nii')
 
 
 class AffSymTensor3DVolInputSpec(CommandLineInputSpec):

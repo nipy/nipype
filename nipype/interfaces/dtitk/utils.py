@@ -246,7 +246,7 @@ class TVtool(CommandLineDtitk):
         out_file = self.inputs.out_file
         if not isdefined(out_file):
             out_file = self._gen_filename('out_file')
-        outputs['out_file'] = os.abspath(out_file)
+        outputs['out_file'] = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
