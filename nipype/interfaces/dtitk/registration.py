@@ -26,7 +26,7 @@ Zhang, H., Yushkevich, P.A., Alexander, D.C., Gee, J.C., Deformable
 
 from ..base import TraitedSpec, CommandLineInputSpec, traits, File, isdefined
 from ...utils.filemanip import fname_presuffix
-from .base import CommandLineDtitk
+from .base import CommandLineDtitk, DTITKRenameMixin
 import os
 
 __docformat__ = 'restructuredtext'
@@ -444,3 +444,35 @@ class DiffeoScalarVol(CommandLineDtitk):
         elif name == 'interpolation':
             value = {'trilinear': 0, 'NN': 1}[value]
         return super(DiffeoScalarVol, self)._format_arg(name, spec, value)
+
+
+class RigidTask(DTITKRenameMixin, Rigid):
+    pass
+
+
+class AffineTask(DTITKRenameMixin, Affine):
+    pass
+
+
+class DiffeoTask(DTITKRenameMixin, Diffeo):
+    pass
+
+
+class ComposeXfmTask(DTITKRenameMixin, ComposeXfm):
+    pass
+
+
+class affScalarVolTask(DTITKRenameMixin, AffScalarVol):
+    pass
+
+
+class affSymTensor3DVolTask(DTITKRenameMixin, AffSymTensor3DVol):
+    pass
+
+
+class diffeoScalarVolTask(DTITKRenameMixin, DiffeoScalarVol):
+    pass
+
+
+class diffeoSymTensor3DVolTask(DTITKRenameMixin, DiffeoSymTensor3DVol):
+    pass

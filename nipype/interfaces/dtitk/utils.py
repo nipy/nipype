@@ -26,7 +26,7 @@ optimization, Medical Image Analysis, 10(5):764-785, October 2006. PMID:
 
 from ..base import TraitedSpec, CommandLineInputSpec, File, traits, isdefined
 from ...utils.filemanip import fname_presuffix
-from .base import CommandLineDtitk
+from .base import CommandLineDtitk, DTITKRenameMixin
 import os
 
 __docformat__ = 'restructuredtext'
@@ -303,3 +303,31 @@ class BinThresh(CommandLineDtitk):
     input_spec = BinThreshInputSpec
     output_spec = BinThreshOutputSpec
     _cmd = 'BinaryThresholdImageFilter'
+
+
+class BinThreshTASK(DTITKRenameMixin, BinThresh):
+    pass
+
+
+class SVAdjustVoxSpTask(DTITKRenameMixin, SVAdjustVoxSp):
+    pass
+
+
+class SVResampleTask(DTITKRenameMixin, SVResample):
+    pass
+
+
+class TVAdjustOriginTask(DTITKRenameMixin, TVAdjustVoxSp):
+    pass
+
+
+class TVAdjustVoxSpTask(DTITKRenameMixin, TVAdjustVoxSp):
+    pass
+
+
+class TVResampleTask(DTITKRenameMixin, TVResample):
+    pass
+
+
+class TVtoolTask(DTITKRenameMixin, TVtool):
+    pass
