@@ -22,7 +22,7 @@ from ..base import (traits, TraitedSpec, DynamicTraitedSpec, File, Undefined,
                     isdefined, OutputMultiPath, InputMultiPath, BaseInterface,
                     BaseInterfaceInputSpec, Str)
 from ..io import IOBase, add_traits
-from ...utils.filemanip import filename_to_list, copyfile, split_filename
+from ...utils.filemanip import ensure_list, copyfile, split_filename
 
 
 class IdentityInterface(IOBase):
@@ -197,7 +197,7 @@ class Merge(IOBase):
                 else:
                     out.append(value)
         else:
-            lists = [filename_to_list(val) for val in values]
+            lists = [ensure_list(val) for val in values]
             out = [[val[i] for val in lists] for i in range(len(lists[0]))]
         outputs['out'] = out
         return outputs

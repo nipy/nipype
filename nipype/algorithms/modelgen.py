@@ -26,7 +26,7 @@ from ..utils import NUMPY_MMAP
 from ..interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
                                traits, File, Bunch, BaseInterfaceInputSpec,
                                isdefined)
-from ..utils.filemanip import filename_to_list
+from ..utils.filemanip import ensure_list
 from ..utils.misc import normalize_mc_params
 from .. import config, logging
 iflogger = logging.getLogger('interface')
@@ -383,7 +383,7 @@ None])
         if outliers is not None:
             for i, out in enumerate(outliers):
                 numscans = 0
-                for f in filename_to_list(sessinfo[i]['scans']):
+                for f in ensure_list(sessinfo[i]['scans']):
                     shape = load(f, mmap=NUMPY_MMAP).shape
                     if len(shape) == 3 or shape[3] == 1:
                         iflogger.warning('You are using 3D instead of 4D '
@@ -580,7 +580,7 @@ class SpecifySPMModel(SpecifyModel):
         else:
             infolist = gen_info(self.inputs.event_files)
         concatlist, nscans = self._concatenate_info(infolist)
-        functional_runs = [filename_to_list(self.inputs.functional_runs)]
+        functional_runs = [ensure_list(self.inputs.functional_runs)]
         realignment_parameters = []
         if isdefined(self.inputs.realignment_parameters):
             realignment_parameters = []
