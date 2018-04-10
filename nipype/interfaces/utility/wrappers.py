@@ -25,6 +25,72 @@ from ...utils.functions import getsource, create_function_from_source
 iflogger = logging.getLogger('interface')
 
 
+try:
+    from inspect import import getfullargspec
+except ImportError:
+    def getfullargspec(func):
+        from collections import import namedtuple
+        from inspect import import getargspec
+        args, varargs, keywords, defaults = getargspec(func)
+        ret_t = namedtuple('FullArgSpec',
+                           ('args', 'varargs', 'varkw', 'defaults',
+                            'kwonlyargs', 'kwonlydefaults', 'annotations'))
+        return ret_t(args, varargs, keywords, defaults, [], None, {})
+
+
+def parse_function(func, input_names=None, imports=None):
+    """Collect Function-relevant information from a Python function
+
+    Parameters
+    ----------
+    func : callable, source code of a function, or Undefined
+
+    Returns
+    -------
+    arg_names : list of str
+        Names of all named arguments
+    default_args : dict of (str, object) pairs
+        Names and default values of arguments with default values
+    kwargs : {True, False}
+        Name of keyword argument dictionary, if given
+    """
+    if not isdefined(func):
+        return [], {}, None
+    if isinstance(func, (str, bytes)):
+        function_str = func
+        func = create_function_from_source(func)
+    elif hasattr(func, '__call__'):
+        function_str = getsource(func)
+    else:
+        raise TypeError('Unknown type of function')
+
+    argspec = getfullargspec(func)
+    all_args = argspec.args + argspec.kwonlyargs
+    # Arguments with defaults must occur at the end of the protocol
+    all_defaults = ({} if argspec.defaults is None else
+                    dict(zip(argspec.args[-len(argspec.defaults):],
+                             argspec.defaults)))
+    all_defaults.update(argspec.kwonlydefaults)
+
+    required_args = set(all_args) - set(all_defaults.keys())
+    if input_names is None:
+        input_names = all_args
+    else:
+        missed_args = required_args - set(input_names)
+        if missed_args:
+            raise ValueError('These positional arguments must be in '
+                             'input names: {}'.format(', '.join(missed_args)))
+
+        unknown = set(input_names) - set(all_args)
+        if unknown:
+            raise ValueError('Input names do not match function arguments: '
+                             '{}'.format(', '.join(unknown)))
+
+    banned_names = list(set(all_defaults.keys()) - set(input_names))
+
+    return all_args, all_defaults, argspec.varkw is not None
+
+
 def _get_varnames(func):
     """Return list of names of arguments to a function
 
