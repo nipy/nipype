@@ -490,7 +490,7 @@ class FuzzyOverlap(SimpleInterface):
         weights = np.ones_like(jaccards, dtype=float)
         if self.inputs.weighting != "none":
             volumes = np.sum((refdata + tstdata) > 0, axis=1).reshape((-1, ncomp))
-            weights = 1.0 / np.array(volumes)
+            weights = 1.0 / volumes
             if self.inputs.weighting == "squared_vol":
                 weights = weights**2
 
@@ -498,13 +498,10 @@ class FuzzyOverlap(SimpleInterface):
         dices = 2.0 * jaccards / (jaccards + 1.0)
 
         # Fill-in the results object
-        self._results['jaccard'] = float(np.sum(weights * jaccards))
-        self._results['dice'] = float(np.sum(weights * dices))
-        self._results['class_fji'] = [
-            float(v) for v in jaccards.astype(float).tolist()]
-        self._results['class_fdi'] = [
-            float(v) for v in dices.astype(float).tolist()]
-
+        self._results['jaccard'] = float(weights.dot(jaccards))
+        self._results['dice'] = float(weights.dot(dices))
+        self._results['class_fji'] = [float(v) for v in jaccards]
+        self._results['class_fdi'] = [float(v) for v in dices]
         return runtime
 
 
