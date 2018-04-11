@@ -126,7 +126,10 @@ def test_Registration_inputs():
         ),
         use_estimate_learning_rate_once=dict(),
         use_histogram_matching=dict(usedefault=True, ),
-        verbose=dict(argstr='-v', ),
+        verbose=dict(
+            argstr='-v',
+            usedefault=True,
+        ),
         winsorize_lower_quantile=dict(
             argstr='%s',
             usedefault=True,

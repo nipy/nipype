@@ -5,7 +5,10 @@ from ..utils import NwarpApply
 
 def test_NwarpApply_inputs():
     input_map = dict(
-        ainterp=dict(argstr='-ainterp %s', ),
+        ainterp=dict(
+            argstr='-ainterp %s',
+            usedefault=True,
+        ),
         args=dict(argstr='%s', ),
         environ=dict(
             nohash=True,
@@ -20,7 +23,10 @@ def test_NwarpApply_inputs():
             argstr='-source %s',
             mandatory=True,
         ),
-        interp=dict(argstr='-interp %s', ),
+        interp=dict(
+            argstr='-interp %s',
+            usedefault=True,
+        ),
         inv_warp=dict(argstr='-iwarp', ),
         master=dict(argstr='-master %s', ),
         out_file=dict(
