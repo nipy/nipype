@@ -1700,7 +1700,6 @@ class NwarpCatInputSpec(AFNICommandInputSpec):
         'wsinc5',
         'linear',
         'quintic',
-        'wsinc5',
         desc='specify a different interpolation method than might '
         'be used for the warp',
         argstr='-interp %s',
