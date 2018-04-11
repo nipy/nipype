@@ -1611,7 +1611,7 @@ class NwarpApplyInputSpec(CommandLineInputSpec):
         desc='the name of the master dataset, which defines the output grid',
         argstr='-master %s')
     interp = traits.Enum(
-        'wsinc5'
+        'wsinc5',
         'NN',
         'nearestneighbour',
         'nearestneighbor',
@@ -1625,7 +1625,7 @@ class NwarpApplyInputSpec(CommandLineInputSpec):
         argstr='-interp %s',
         usedefault=True)
     ainterp = traits.Enum(
-        'wsinc5'
+        'wsinc5',
         'NN',
         'nearestneighbour',
         'nearestneighbor',
@@ -1697,7 +1697,7 @@ class NwarpCatInputSpec(AFNICommandInputSpec):
     inv_warp = traits.Bool(
         desc='invert the final warp before output', argstr='-iwarp')
     interp = traits.Enum(
-        'wsinc5'
+        'wsinc5',
         'linear',
         'quintic',
         'wsinc5',
