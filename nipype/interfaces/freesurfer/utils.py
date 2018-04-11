@@ -1383,6 +1383,7 @@ class MRIPretessInputSpec(FSTraitedSpec):
         traits.Str('wm'),
         traits.Int(1),
         argstr='%s',
+        default='wm',
         mandatory=True,
         usedefault=True,
         position=-3,

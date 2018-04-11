@@ -422,6 +422,7 @@ class MRICoregInputSpec(FSTraitedSpec):
         True,
         File,
         argstr='--lta %s',
+        default=True,
         usedefault=True,
         desc='output registration file (LTA format)')
     out_reg_file = traits.Either(
