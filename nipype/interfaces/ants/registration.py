@@ -324,7 +324,6 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         1,
         2,
         argstr='%s',
-        usedefault=True,
         xor=['initial_moving_transform'],
         desc="Align the moving_image nad fixed_image befor registration using"
         "the geometric center of the images (=0), the image intensities (=1),"
