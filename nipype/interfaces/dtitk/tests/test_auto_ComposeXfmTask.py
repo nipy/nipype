@@ -21,7 +21,6 @@ def test_ComposeXfmTask_inputs():
         ),
         in_df=dict(
             argstr='-df %s',
-            copyfile=False,
             mandatory=True,
         ),
         out_file=dict(
