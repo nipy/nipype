@@ -381,7 +381,7 @@ class ApplyTransforms(ANTSCommand):
     >>> at.inputs.reference_image = 'fixed1.nii'
     >>> at.inputs.transforms = 'identity'
     >>> at.cmdline
-    'antsApplyTransforms --default-value 0 --input moving1.nii \
+    'antsApplyTransforms --default-value 0 --float 0 --input moving1.nii \
 --interpolation Linear --output moving1_trans.nii \
 --reference-image fixed1.nii -t identity'
 
@@ -395,9 +395,9 @@ class ApplyTransforms(ANTSCommand):
     >>> at.inputs.transforms = ['ants_Warp.nii.gz', 'trans.mat']
     >>> at.inputs.invert_transform_flags = [False, False]
     >>> at.cmdline
-    'antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii --interpolation Linear \
---output deformed_moving1.nii --reference-image fixed1.nii --transform [ ants_Warp.nii.gz, 0 ] \
---transform [ trans.mat, 0 ]'
+    'antsApplyTransforms --default-value 0 --dimensionality 3 --float 0 --input moving1.nii \
+--interpolation Linear --output deformed_moving1.nii --reference-image fixed1.nii \
+--transform [ ants_Warp.nii.gz, 0 ] --transform [ trans.mat, 0 ]'
 
     >>> at1 = ApplyTransforms()
     >>> at1.inputs.dimension = 3
@@ -410,9 +410,9 @@ class ApplyTransforms(ANTSCommand):
     >>> at1.inputs.transforms = ['ants_Warp.nii.gz', 'trans.mat']
     >>> at1.inputs.invert_transform_flags = [False, False]
     >>> at1.cmdline
-    'antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii --interpolation BSpline[ 5 ] \
---output deformed_moving1.nii --reference-image fixed1.nii --transform [ ants_Warp.nii.gz, 0 ] \
---transform [ trans.mat, 0 ]'
+    'antsApplyTransforms --default-value 0 --dimensionality 3 --float 0 --input moving1.nii \
+--interpolation BSpline[ 5 ] --output deformed_moving1.nii --reference-image fixed1.nii \
+--transform [ ants_Warp.nii.gz, 0 ] --transform [ trans.mat, 0 ]'
     """
     _cmd = 'antsApplyTransforms'
     input_spec = ApplyTransformsInputSpec
