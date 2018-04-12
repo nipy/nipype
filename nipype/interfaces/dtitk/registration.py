@@ -34,7 +34,7 @@ __docformat__ = 'restructuredtext'
 
 class RigidInputSpec(CommandLineInputSpec):
     fixed_file = File(desc="fixed tensor volume", exists=True,
-                      mandatory=True, position=0, argstr="%s")
+                      mandatory=True, position=0, argstr="%s", copyfile=False)
     moving_file = File(desc="moving tensor volume", exists=True,
                        mandatory=True, position=1, argstr="%s", copyfile=False)
     similarity_metric = traits.Enum('EDS', 'GDS', 'DDS', 'NMI',
@@ -46,8 +46,13 @@ class RigidInputSpec(CommandLineInputSpec):
     ftol = traits.Float(mandatory=True, position=4, argstr="%g",
                         desc="cost function tolerance", default_value=0.01,
                         usedefault=True)
-    use_in_trans = traits.Bool(position=5, argstr="1",
-                               desc="initialize with existing transform")
+    # use_in_trans = traits.Bool(position=5, argstr="1",
+    #                            desc="initialize with existing transform")
+    initialize_xfm = File(desc="DTITK-FORMAT transform ",
+                          copyfile=False, position=5, argstr="%s")
+    # need to enforce DTITK format or it's a silent failure
+    # (can we search the stderr for keywords to error if not found?)
+    # stderr: filename.aff doesn't exist or can't be opened
 
 
 class RigidOutputSpec(TraitedSpec):
@@ -68,14 +73,18 @@ class Rigid(CommandLineDtitk):
     >>> node.inputs.similarity_metric = 'EDS'
     >>> node.inputs.sampling_xyz = (4,4,4)
     >>> node.inputs.ftol = 0.01
-    >>> node.inputs.use_in_trans = True
     >>> node.cmdline
-    'dti_rigid_reg im1.nii im2.nii EDS 4 4 4 0.01 1'
+    'dti_rigid_reg im1.nii im2.nii EDS 4 4 4 0.01'
     >>> node.run() # doctest: +SKIP
     """
     input_spec = RigidInputSpec
     output_spec = RigidOutputSpec
     _cmd = 'dti_rigid_reg'
+
+    '''def _format_arg(self, name, spec, value):
+        if name == 'initialize_xfm':
+            value = 1
+        return super(Rigid, self)._format_arg(name, spec, value)'''
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -99,9 +108,9 @@ class Affine(Rigid):
     >>> node.inputs.similarity_metric = 'EDS'
     >>> node.inputs.sampling_xyz = (4,4,4)
     >>> node.inputs.ftol = 0.01
-    >>> node.inputs.use_in_trans = True
+    >>> node.inputs.initialize_xfm = 'im_affine.aff'
     >>> node.cmdline
-    'dti_affine_reg im1.nii im2.nii EDS 4 4 4 0.01 1'
+    'dti_affine_reg im1.nii im2.nii EDS 4 4 4 0.01 im_affine.aff'
     >>> node.run() # doctest: +SKIP
     """
     _cmd = 'dti_affine_reg'

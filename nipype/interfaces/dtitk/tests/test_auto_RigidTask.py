@@ -12,6 +12,7 @@ def test_RigidTask_inputs():
         ),
         fixed_file=dict(
             argstr='%s',
+            copyfile=False,
             mandatory=True,
             position=0,
         ),
@@ -25,6 +26,11 @@ def test_RigidTask_inputs():
             deprecated='1.0.0',
             nohash=True,
             usedefault=True,
+        ),
+        initialize_xfm=dict(
+            argstr='%s',
+            copyfile=False,
+            position=5,
         ),
         moving_file=dict(
             argstr='%s',
@@ -47,10 +53,6 @@ def test_RigidTask_inputs():
         terminal_output=dict(
             deprecated='1.0.0',
             nohash=True,
-        ),
-        use_in_trans=dict(
-            argstr='1',
-            position=5,
         ),
     )
     inputs = RigidTask.input_spec()
