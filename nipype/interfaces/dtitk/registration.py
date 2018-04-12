@@ -46,8 +46,9 @@ class RigidInputSpec(CommandLineInputSpec):
     ftol = traits.Float(mandatory=True, position=4, argstr="%g",
                         desc="cost function tolerance", default_value=0.01,
                         usedefault=True)
-    initialize_xfm = File(desc="DTITK-FORMAT transform ",
-                          copyfile=False, position=5, argstr="%s")
+    initialize_xfm = File(copyfile=True, desc="Initialize w/DTITK-FORMAT"
+                          "transform ('1' initializes w/existing transform"
+                          "in working directory)", position=5, argstr="%s")
 
 
 class RigidOutputSpec(TraitedSpec):
