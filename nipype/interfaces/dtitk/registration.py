@@ -46,13 +46,8 @@ class RigidInputSpec(CommandLineInputSpec):
     ftol = traits.Float(mandatory=True, position=4, argstr="%g",
                         desc="cost function tolerance", default_value=0.01,
                         usedefault=True)
-    # use_in_trans = traits.Bool(position=5, argstr="1",
-    #                            desc="initialize with existing transform")
     initialize_xfm = File(desc="DTITK-FORMAT transform ",
                           copyfile=False, position=5, argstr="%s")
-    # need to enforce DTITK format or it's a silent failure
-    # (can we search the stderr for keywords to error if not found?)
-    # stderr: filename.aff doesn't exist or can't be opened
 
 
 class RigidOutputSpec(TraitedSpec):
@@ -85,6 +80,12 @@ class Rigid(CommandLineDtitk):
         if name == 'initialize_xfm':
             value = 1
         return super(Rigid, self)._format_arg(name, spec, value)'''
+
+    def _run_interface(self, runtime):
+        runtime = super(Rigid, self)._run_interface(runtime)
+        if '''.aff doesn't exist or can't be opened''' in runtime.stderr:
+            self.raise_exception(runtime)
+        return runtime
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
