@@ -4,6 +4,7 @@ from ....utils.misc import package_check
 import numpy as np
 import networkx as nx
 import pytest
+from nibabel.testing import clear_and_catch_warnings
 
 have_cv = True
 try:
@@ -41,7 +42,7 @@ def test_importerror(creating_graphs, tmpdir):
 
     with pytest.raises(ImportError) as e:
         nbs.run()
-    assert "cviewer library is not available" == str(e.value)
+    assert "No module named 'cviewer'" == str(e.value)
 
 
 @pytest.mark.skipif(not have_cv, reason="cviewer has to be available")
