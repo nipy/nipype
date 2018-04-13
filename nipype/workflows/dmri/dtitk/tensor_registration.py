@@ -17,8 +17,7 @@ def affine_tensor_pipeline(name='AffTen'):
     Example
     -------
 
-    >>> from nipype.workflows.dmri.dtitk.tensor_registration import
-     affine_tensor_pipeline
+    >>> from nipype.workflows.dmri.dtitk.tensor_registration import affine_tensor_pipeline
     >>> affine = affine_tensor_pipeline()
     >>> affine.inputs.inputnode.fixed_file = 'im1.nii'
     >>> affine.inputs.inputnode.moving_file = 'im2.nii'
@@ -61,8 +60,7 @@ def diffeomorphic_tensor_pipeline(name='DiffeoTen',
     Example
     -------
 
-    >>> from nipype.workflows.dmri.dtitk.tensor_registration import
-     diffeomorphic_tensor_pipeline
+    >>> from nipype.workflows.dmri.dtitk.tensor_registration import diffeomorphic_tensor_pipeline
     >>> diffeo = diffeomorphic_tensor_pipeline()
     >>> diffeo.inputs.inputnode.fixed_file = 'im1.nii'
     >>> diffeo.inputs.inputnode.moving_file = 'im2.nii'
@@ -74,7 +72,8 @@ def diffeomorphic_tensor_pipeline(name='DiffeoTen',
                         fields=['fixed_file', 'moving_file']),
                         name='inputnode')
     outputnode = pe.Node(niu.IdentityInterface(
-                         fields=['out_file', 'out_file_xfm']),
+                         fields=['out_file', 'out_file_xfm',
+                                 'fixed_resliced', 'moving_resliced']),
                          name='outputnode')
 
     reslice_node_pow2 = pe.Node(dtitk.TVResample(
@@ -122,5 +121,7 @@ def diffeomorphic_tensor_pipeline(name='DiffeoTen',
     # Send to output
     wf.connect(apply_xfm_node, 'out_file', outputnode, 'out_file')
     wf.connect(compose_xfm_node, 'out_file', outputnode, 'out_file_xfm')
+    wf.connect(reslice_node_pow2, 'out_file', outputnode, 'fixed_resliced')
+    wf.connect(reslice_node_moving, 'out_file', outputnode, 'moving_resliced')
 
     return wf

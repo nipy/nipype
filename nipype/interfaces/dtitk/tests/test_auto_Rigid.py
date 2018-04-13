@@ -29,7 +29,7 @@ def test_Rigid_inputs():
         ),
         initialize_xfm=dict(
             argstr='%s',
-            copyfile=False,
+            copyfile=True,
             position=5,
         ),
         moving_file=dict(

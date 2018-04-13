@@ -47,8 +47,7 @@ class RigidInputSpec(CommandLineInputSpec):
                         desc="cost function tolerance", default_value=0.01,
                         usedefault=True)
     initialize_xfm = File(copyfile=True, desc="Initialize w/DTITK-FORMAT"
-                          "transform ('1' initializes w/existing transform"
-                          "in working directory)", position=5, argstr="%s")
+                          "affine", position=5, argstr="%s", exists=True)
 
 
 class RigidOutputSpec(TraitedSpec):
