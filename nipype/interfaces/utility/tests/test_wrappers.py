@@ -56,8 +56,9 @@ def test_function_inputs():
     def f(a, b=2):
         return a + b
 
-    def g(a, b=3):
-        return a + b
+    def g(a, b=3, **kwargs):
+        c = kwargs.pop('c', 0)
+        return a + b + c
 
     fun1 = utility.Function(function=f)
     fun2 = utility.Function(function=f, input_names=['a', 'b'])
@@ -80,49 +81,44 @@ def test_function_inputs():
     with pytest.raises(traits.TraitError):
         fun3.inputs.b = 1
 
-    # Non-hidden parameters are unaffected
-    fun1.inputs.c = 1
-    fun2.inputs.c = 1
-    fun3.inputs.c = 1
+    # Non-arguments always rejected
+    with pytest.raises(traits.TraitError):
+        fun1.inputs.c = 1
+    with pytest.raises(traits.TraitError):
+        fun2.inputs.c = 1
+    with pytest.raises(traits.TraitError):
+        fun3.inputs.c = 1
 
-    # Updating the function string adds all parameters
-    fun3.inputs.function_str = getsource(g)
-    # Check we're using the new function with default b=3
-    assert fun3.run().outputs.out == 4
-    # Verify we can now set this parameter
-    fun3.inputs.b = 1
-    assert fun3.run().outputs.out == 2
+    fun_g = utility.Function(function=g, input_names=['a'])
+
+    fun_g.inputs.a = 1
+    assert fun_g.run().outputs.out == 4
+    with pytest.raises(traits.TraitError):
+        fun_g.inputs.b = 1
+    fun_g.inputs.d = 3
+    assert fun_g.run().outputs.out == 4
+    fun_g.inputs.c = 3
+    assert fun_g.run().outputs.out == 7
 
 
 def test_function_string_reset():
     fstr = "def f(a, b):\n\treturn a + b"
     gstr = "def g(a, b, c):\n\treturn a + b - c"
-    hstr = "def h(b, c):\n\treturn b - c"
 
-    fun = utility.Function(function=fstr)
-    assert fun._input_names == ['a', 'b']
-    fun.inputs.a = 5
-    fun.inputs.b = 3
-    fun.inputs.c = 2  # Unused trait
-    assert fun.run().outputs.out == 8
+    fun1 = utility.Function(function=fstr)
 
-    fun.inputs.function_str = gstr
-    # _set_function_str updates _input_names
-    assert fun._input_names == ['a', 'b', 'c']
-    # inputs.c should be required but Undefined
-    with pytest.raises(TypeError):
-        fun.run()
-    fun.inputs.c = 2  # Now used trait
-    assert fun.run().outputs.out == 6
+    fun2 = utility.Function()
+    fun2.inputs.function_str = fstr
 
-    fun.inputs.function_str = hstr
-    assert fun._input_names == ['b', 'c']
-    assert fun.run().outputs.out == 1
+    for fun in (fun1, fun2):
+        assert fun._input_names == ['a', 'b']
+        fun.inputs.a = 5
+        fun.inputs.b = 3
+        assert fun.run().outputs.out == 8
 
-    fun.inputs.on_trait_change(fun._set_function_string, 'd')
+        fun.inputs.function_str = gstr
+        assert fun.inputs.function_str == fstr
 
-    with pytest.raises(ValueError):
-        fun.inputs.d = "Handler should fail except for function_str"
 
 def make_random_array(size):
     return np.random.randn(size, size)
