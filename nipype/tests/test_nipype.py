@@ -12,5 +12,6 @@ def test_nipype_info():
 
 
 def test_git_hash():
-    #removing the first "g" from gitversion
-    get_nipype_gitversion()[1:] == get_info()['commit_hash']
+    if get_nipype_gitversion():
+        # removing the first "g" from gitversion
+        get_nipype_gitversion()[1:] == get_info()['commit_hash']
