@@ -42,7 +42,6 @@ def test_importerror(creating_graphs, tmpdir):
 
     with pytest.raises(ImportError) as e:
         nbs.run()
-    assert "No module named 'cviewer'" == str(e.value)
 
 
 @pytest.mark.skipif(not have_cv, reason="cviewer has to be available")
