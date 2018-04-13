@@ -4,7 +4,6 @@ from ....utils.misc import package_check
 import numpy as np
 import networkx as nx
 import pytest
-from nibabel.testing import clear_and_catch_warnings
 
 have_cv = True
 try:
