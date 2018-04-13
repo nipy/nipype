@@ -16,7 +16,7 @@ standard_library.install_aliases()
 from builtins import str, bytes
 
 from ... import logging
-from ..base import (traits, DynamicTraitedSpec, Undefined, isdefined,
+from ..base import (traits, DynamicTraitedSpec, Undefined,
                     BaseInterfaceInputSpec)
 from ..io import IOBase, add_traits
 from ...utils.filemanip import ensure_list
@@ -26,11 +26,11 @@ iflogger = logging.getLogger('interface')
 
 
 try:
-    from inspect import import getfullargspec
+    from inspect import getfullargspec
 except ImportError:
     def getfullargspec(func):
-        from collections import import namedtuple
-        from inspect import import getargspec
+        from collections import namedtuple
+        from inspect import getargspec
         args, varargs, keywords, defaults = getargspec(func)
         ret_t = namedtuple('FullArgSpec',
                            ('args', 'varargs', 'varkw', 'defaults',
@@ -38,7 +38,7 @@ except ImportError:
         return ret_t(args, varargs, keywords, defaults, [], None, {})
 
 
-def parse_function(func, input_names=None, imports=None):
+def parse_function(func, input_names=None):
     """Collect Function-relevant information from a Python function
 
     Parameters
@@ -54,8 +54,6 @@ def parse_function(func, input_names=None, imports=None):
     kwargs : {True, False}
         Name of keyword argument dictionary, if given
     """
-    if not isdefined(func):
-        return [], {}, None
     if isinstance(func, (str, bytes)):
         function_str = func
         func = create_function_from_source(func)
@@ -70,7 +68,8 @@ def parse_function(func, input_names=None, imports=None):
     all_defaults = ({} if argspec.defaults is None else
                     dict(zip(argspec.args[-len(argspec.defaults):],
                              argspec.defaults)))
-    all_defaults.update(argspec.kwonlydefaults)
+    if argspec.kwonlydefaults is not None:
+        all_defaults.update(argspec.kwonlydefaults)
 
     required_args = set(all_args) - set(all_defaults.keys())
     if input_names is None:
@@ -88,45 +87,28 @@ def parse_function(func, input_names=None, imports=None):
 
     banned_names = list(set(all_defaults.keys()) - set(input_names))
 
-    return all_args, all_defaults, argspec.varkw is not None
+    return (function_str, all_args, all_defaults, banned_names,
+            argspec.varkw is not None)
 
 
-def _get_varnames(func):
-    """Return list of names of arguments to a function
-
-    Parameters
-    ----------
-    func: callable, string or Undefined
-        Function or source code of function to query
-
-    Returns
-    -------
-    varnames: list of str
-        Names of arguments to passed function (empty if undefined)
-    """
-    if not isdefined(func):
-        return []
-    if isinstance(func, (str, bytes)):
-        func = create_function_from_source(func)
-    fninfo = func.__code__
-    return fninfo.co_varnames[:fninfo.co_argcount]
-
-
-class CheckHidden(traits.TraitType):
-    """Trait that allows a class to decide whether it may be set"""
-    def __init__(self, interface):
-        super(CheckHidden, self).__init__()
-        self._interface = interface
-
-    def validate(self, obj, name, value):
-        msg = self._interface.check_hidden(name)
-        if msg is not None:
-            raise traits.TraitError(msg)
-        return value
-
-
-class FunctionInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class FunctionInputSpec(BaseInterfaceInputSpec):
     function_str = traits.Str(mandatory=True, desc='code for function')
+
+    def __deepcopy__(self, memo):
+        from copy import deepcopy
+        values = deepcopy(self.trait_get(), memo)
+        dup = self.clone_traits(memo=memo)
+        orig_traits = self.traits()
+        dup_traits = dup.traits()
+        for name, value in values.items():
+            if name not in dup_traits:
+                dup.add_trait(name, deepcopy(orig_traits[name], memo))
+        dup.trait_set(**values)
+        return dup
+
+
+class DynamicFunctionInputSpec(FunctionInputSpec):
+    _ = traits.Any()
 
 
 class Function(IOBase):
@@ -173,60 +155,73 @@ class Function(IOBase):
             in an otherwise empty namespace
         """
 
-        super(Function, self).__init__(**inputs)
-        if function:
-            if hasattr(function, '__call__'):
-                try:
-                    self.inputs.function_str = getsource(function)
-                except IOError:
-                    raise Exception('Interface Function does not accept '
-                                    'function objects defined interactively '
-                                    'in a python session')
-            elif isinstance(function, (str, bytes)):
-                self.inputs.function_str = function
-            else:
-                raise Exception('Unknown type of function')
-        self.inputs.on_trait_change(self._set_function_string, 'function_str')
+        kwargs = {k: inputs.pop(k) for k in list(inputs.keys())
+                  if k in ('from_file', 'resource_monitor',
+                           'ignore_exception')}
+        super(Function, self).__init__(**kwargs)
 
-        if input_names is None:
-            input_names = _get_varnames(self.inputs.function_str)
-        self._input_names = ensure_list(input_names)
-        self._output_names = ensure_list(output_names)
-        add_traits(self.inputs, [name for name in self._input_names])
+        if function:
+            # Use callback for consistent behavior
+            self._input_names = []
+            self._set_function(function, input_names)
+        else:
+            # Set input_names and wait to have function defined
+            # Input names will be overridden
+            if input_names is None:
+                input_names = []
+            self._input_names = ensure_list(input_names)
+            add_traits(self.inputs, [name for name in self._input_names])
+            self._allow_kwargs = True
+            self.inputs.on_trait_change(self._set_function_str, 'function_str')
+
+        self._output_names = filename_to_list(output_names)
         self.imports = imports
         self._out = {}
         for name in self._output_names:
             self._out[name] = None
 
-        # If parameters with default values are not listed in input_names,
-        # they are not passed to the function.
-        # This preempts their setting, inserting a trait just in time that
-        # will warn users that it cannot be set.
-        # A dynamically-validating trait is used to ensure that changes to
-        # the function string can re-enable fields
-        self.inputs.on_trait_change(self._disallow_hidden, 'trait_added')
+        # With constraints in place, set inputs
+        self.inputs.trait_set(True, **inputs)
 
-    def _disallow_hidden(self, obj, name, new):
-        obj.add_trait(new, CheckHidden(self))
+    def _set_function_str(self, obj, name, old, new):
+        obj.on_trait_change(self._set_function_str, 'function_str',
+                            remove=True)
+        self._set_function(new)
 
-    def check_hidden(self, name):
-        all_vars = _get_varnames(self.inputs.function_str)
-        hidden = set(all_vars) - set(self._input_names)
-        if name in hidden:
-            return ("The '{name}' trait cannot be set on this {cls} because "
-                    "the '{name}' argument was not included in 'input_names'."
-                    "".format(name=name, cls=self.inputs.__class__.__name__))
+    def _set_function(self, function, input_names=None):
+        fstr, in_names, defaults, ban, allow_kw = parse_function(function,
+                                                                 input_names)
 
-    def _set_function_string(self, obj, name, old, new):
-        if name != 'function_str':
-            raise ValueError("_set_function_string should only be called when"
-                             " function_str is set")
+        # If `**kwargs` appears in the function signature, permit arbitrary
+        # keywords
+        if allow_kw:
+            # Preserve trait values
+            self.inputs = DynamicFunctionInputSpec(
+                **self.inputs.get_traitsfree())
 
-        # Update input traits to match new function signature
-        input_names = _get_varnames(new)
-        new_names = set(input_names) - set(self._input_names)
-        add_traits(self.inputs, list(new_names))
-        self._input_names = list(input_names)
+        self.inputs.trait_set(False, function_str=fstr)
+
+        # "Banned" names are names with default values missing from the
+        # input_names list. Setting as `Enum(x)` will throw an error if
+        # a change is attempted.
+        for banned_name in ban:
+            self.inputs.add_trait(banned_name,
+                             traits.Enum(defaults[banned_name],
+                                         usedefault=True))
+
+        to_add = set(in_names) - set(self._input_names) - set(ban)
+        add_traits(self.inputs, to_add)
+        self.inputs.trait_set(**defaults)
+        self._input_names = in_names
+
+        # Disable reseting inputs.function_str
+        self.inputs.on_trait_change(self._disable_reset, 'function_str')
+
+    @staticmethod
+    def _disable_reset(obj, name, old, new):
+        iflogger.warn("Attempted to modify '%s' trait of %s; modification "
+                      "disabled", name, obj.__class__.__name__)
+        obj.trait_set(False, **{name: old})
 
     def _add_output_traits(self, base):
         undefined_traits = {}
@@ -241,28 +236,24 @@ class Function(IOBase):
         function_handle = create_function_from_source(self.inputs.function_str,
                                                       self.imports)
         # Get function args
-        args = {}
-        for name in self._input_names:
-            value = getattr(self.inputs, name)
-            if isdefined(value):
-                args[name] = value
+        args = self.inputs.get_traitsfree()
+        # Drop non-argument traits
+        args.pop('function_str')
+        args.pop('ignore_exception')
 
         out = function_handle(**args)
         if len(self._output_names) == 1:
             self._out[self._output_names[0]] = out
+        elif (isinstance(out, tuple) and
+              len(out) == len(self._output_names)):
+            for idx, name in enumerate(self._output_names):
+                self._out[name] = out[idx]
         else:
-            if isinstance(out, tuple) and \
-                    (len(out) != len(self._output_names)):
-                raise RuntimeError('Mismatch in number of expected outputs')
-
-            else:
-                for idx, name in enumerate(self._output_names):
-                    self._out[name] = out[idx]
+            raise RuntimeError('Mismatch in number of expected outputs')
 
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        for key in self._output_names:
-            outputs[key] = self._out[key]
+        outputs.update({key: self._out[key] for key in self._output_names})
         return outputs
