@@ -20,7 +20,7 @@ from .traits_extension import (
     traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined,
     File, Directory, Str, DictStrStr, has_metadata, ImageFile,
     OutputMultiObject, InputMultiObject,
-    OutputMultiPath, InputMultiPath)
+    OutputMultiPath, InputMultiPath, SetOnce)
 
 from .support import (Bunch, InterfaceResult, load_template,
                       NipypeInterfaceError)

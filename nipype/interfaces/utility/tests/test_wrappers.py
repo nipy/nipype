@@ -78,6 +78,8 @@ def test_function_inputs():
     assert fun1.run().outputs.out == 2
     assert fun2.run().outputs.out == 2
 
+    # Can assign if value doesn't change
+    fun3.inputs.b = 2
     with pytest.raises(traits.TraitError):
         fun3.inputs.b = 1
 
@@ -116,7 +118,8 @@ def test_function_string_reset():
         fun.inputs.b = 3
         assert fun.run().outputs.out == 8
 
-        fun.inputs.function_str = gstr
+        with pytest.raises(traits.TraitError):
+            fun.inputs.function_str = gstr
         assert fun.inputs.function_str == fstr
 
 

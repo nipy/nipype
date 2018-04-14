@@ -26,11 +26,13 @@ from __future__ import (print_function, division, unicode_literals,
 from builtins import str, bytes
 import os
 import collections
+import weakref
 
 # perform all external trait imports here
 from traits import __version__ as traits_version
 import traits.api as traits
-from traits.trait_handlers import TraitDictObject, TraitListObject
+from traits.trait_handlers import (TraitDictObject, TraitListObject,
+                                   NoDefaultSpecified, trait_from)
 from traits.trait_errors import TraitError
 from traits.trait_base import _Undefined, class_of
 
@@ -425,5 +427,22 @@ class InputMultiObject(MultiObject):
     """
     pass
 
+
 InputMultiPath = InputMultiObject
 OutputMultiPath = OutputMultiObject
+
+
+class SetOnce(traits.TraitType):
+    def __init__(self, trait=None, value=NoDefaultSpecified, **metadata):
+        metadata.setdefault('copy', 'deep')
+        self.item_trait = trait_from(trait)
+        self._val_cache = weakref.WeakKeyDictionary()
+        super(SetOnce, self).__init__(value, **metadata)
+
+    def validate(self, obj, name, value):
+        val = self.item_trait.validate(obj, name, value)
+        if self._val_cache.setdefault(obj, val) != val:
+            raise TraitError("Cannot change the '{}' attribute of a '{}' "
+                             "object once set.".format(name,
+                                                       obj.__class__.__name__))
+        return val

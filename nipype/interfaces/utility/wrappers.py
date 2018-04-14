@@ -16,7 +16,7 @@ standard_library.install_aliases()
 from builtins import str, bytes
 
 from ... import logging
-from ..base import (traits, DynamicTraitedSpec, Undefined,
+from ..base import (traits, DynamicTraitedSpec, Undefined, SetOnce,
                     BaseInterfaceInputSpec)
 from ..io import IOBase, add_traits
 from ...utils.filemanip import ensure_list
@@ -92,7 +92,8 @@ def parse_function(func, input_names=None):
 
 
 class FunctionInputSpec(BaseInterfaceInputSpec):
-    function_str = traits.Str(mandatory=True, desc='code for function')
+    function_str = SetOnce(traits.Str, mandatory=True,
+                           desc='code for function')
 
     def __deepcopy__(self, memo):
         from copy import deepcopy
@@ -174,7 +175,7 @@ class Function(IOBase):
             self._allow_kwargs = True
             self.inputs.on_trait_change(self._set_function_str, 'function_str')
 
-        self._output_names = filename_to_list(output_names)
+        self._output_names = ensure_list(output_names)
         self.imports = imports
         self._out = {}
         for name in self._output_names:
@@ -205,23 +206,12 @@ class Function(IOBase):
         # input_names list. Setting as `Enum(x)` will throw an error if
         # a change is attempted.
         for banned_name in ban:
-            self.inputs.add_trait(banned_name,
-                             traits.Enum(defaults[banned_name],
-                                         usedefault=True))
+            self.inputs.add_trait(banned_name, SetOnce)
 
         to_add = set(in_names) - set(self._input_names) - set(ban)
         add_traits(self.inputs, to_add)
         self.inputs.trait_set(**defaults)
         self._input_names = in_names
-
-        # Disable reseting inputs.function_str
-        self.inputs.on_trait_change(self._disable_reset, 'function_str')
-
-    @staticmethod
-    def _disable_reset(obj, name, old, new):
-        iflogger.warn("Attempted to modify '%s' trait of %s; modification "
-                      "disabled", name, obj.__class__.__name__)
-        obj.trait_set(False, **{name: old})
 
     def _add_output_traits(self, base):
         undefined_traits = {}
