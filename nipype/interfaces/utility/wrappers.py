@@ -236,16 +236,19 @@ class Function(IOBase):
         out = function_handle(**args)
         if len(self._output_names) == 1:
             self._out[self._output_names[0]] = out
-        elif (isinstance(out, tuple) and
-              len(out) == len(self._output_names)):
-            for idx, name in enumerate(self._output_names):
-                self._out[name] = out[idx]
         else:
-            raise RuntimeError('Mismatch in number of expected outputs')
+            if isinstance(out, tuple) and \
+                    (len(out) != len(self._output_names)):
+                raise RuntimeError('Mismatch in number of expected outputs')
+
+            else:
+                for idx, name in enumerate(self._output_names):
+                    self._out[name] = out[idx]
 
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs.update({key: self._out[key] for key in self._output_names})
+        for key in self._output_names:
+            outputs[key] = self._out[key]
         return outputs
