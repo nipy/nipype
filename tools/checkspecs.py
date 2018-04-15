@@ -276,8 +276,13 @@ class InterfaceChecker(object):
                 # also have `usedefault` specified;
                 # excluding Enum: always has default value (the first value)
                 # excluding Tuple: takes tuple of inner traits default values as default, but doesn't use it
+                # for Range assuming that if default == low, it's likely that usedefault should be False
+                # (for Range traits takes low as a default default        
                 if trait.trait_type.__class__.__name__ not in ["Tuple", "Enum"]\
                         and trait.default and "usedefault" not in trait.__dict__:
+                    if trait.trait_type.__class__.__name__ is "Range"\
+                            and trait.default == trait.trait_type._low: 
+                        continue
                     bad_specs.append(
                         [uri, c, 'Inputs', traitname, 'default value is set, no value for usedefault'])
 
