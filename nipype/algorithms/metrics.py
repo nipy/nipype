@@ -19,11 +19,11 @@ from scipy.spatial.distance import cdist, euclidean, dice, jaccard
 from scipy.ndimage.measurements import center_of_mass, label
 
 from .. import config, logging
-from ..utils.misc import package_check
 
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                InputMultiPath, BaseInterfaceInputSpec,
                                isdefined)
+from ..interfaces.nipy.base import NipyBaseInterface
 from ..utils import NUMPY_MMAP
 
 iflogger = logging.getLogger('interface')
@@ -651,7 +651,7 @@ class SimilarityOutputSpec(TraitedSpec):
         traits.Float(desc="Similarity between volume 1 and 2, frame by frame"))
 
 
-class Similarity(BaseInterface):
+class Similarity(NipyBaseInterface):
     """Calculates similarity between two 3D or 4D volumes. Both volumes have to be in
     the same coordinate system, same space within that coordinate system and
     with the same voxel dimensions.
@@ -674,19 +674,8 @@ class Similarity(BaseInterface):
 
     input_spec = SimilarityInputSpec
     output_spec = SimilarityOutputSpec
-    _have_nipy = True
-
-    def __init__(self, **inputs):
-        try:
-            package_check('nipy')
-        except Exception:
-            self._have_nipy = False
-        super(Similarity, self).__init__(**inputs)
 
     def _run_interface(self, runtime):
-        if not self._have_nipy:
-            raise RuntimeError('nipy is not installed')
-
         from nipy.algorithms.registration.histogram_registration import HistogramRegistration
         from nipy.algorithms.registration.affine import Affine
 
