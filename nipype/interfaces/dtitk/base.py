@@ -13,6 +13,12 @@ Currently these tools are supported:
 * Rigid Tensor Registration
 * Affine Tensor Registration
 * Diffeomorphic Tensor Registration
+* Combine affiine and diffeomorphic transforms
+* Application of transform to tensor and scalar volumes
+* Threshold and Binarize
+* Adjusting the voxel space of tensor and scalar volumes
+* Resampling tensor and scalar volumes
+* Calculation of tensor metrics from tensor volume
 
 Examples
 --------
@@ -28,8 +34,24 @@ from ... import logging
 from ...utils.filemanip import fname_presuffix
 from ..base import CommandLine
 from nipype.interfaces.fsl.base import Info
+import warnings
 
 LOGGER = logging.getLogger('interface')
+
+
+class DTITKRenameMixin(object):
+    def __init__(self, *args, **kwargs):
+        classes = [cls.__name__ for cls in self.__class__.mro()]
+        dep_name = classes[0]
+        rename_idx = classes.index('DTITKRenameMixin')
+        new_name = classes[rename_idx + 1]
+        warnings.warn('The {} interface has been renamed to {}\n'
+                      'Please see the documentation for DTI-TK '
+                      'interfaces, as some inputs have been '
+                      'added or renamed for clarity.'
+                      ''.format(dep_name, new_name),
+                      DeprecationWarning)
+        super(DTITKRenameMixin, self).__init__(*args, **kwargs)
 
 
 class CommandLineDtitk(CommandLine):

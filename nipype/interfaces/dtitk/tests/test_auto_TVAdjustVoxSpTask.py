@@ -18,34 +18,28 @@ def test_TVAdjustVoxSpTask_inputs():
         in_file=dict(
             argstr='-in %s',
             mandatory=True,
-            position=0,
         ),
         origin=dict(
-            argstr='-origin %s',
-            exists=True,
-            mandatory=False,
-            position=4,
+            argstr='-origin %g %g %g',
+            xor=['target_file'],
         ),
         out_file=dict(
             argstr='-out %s',
-            genfile=True,
-            position=1,
+            keep_extension=True,
+            name_source='in_file',
+            name_template='%s_avs',
         ),
-        target=dict(
+        target_file=dict(
             argstr='-target %s',
-            exists=True,
-            mandatory=False,
-            position=2,
+            xor=['voxel_size', 'origin'],
         ),
         terminal_output=dict(
             deprecated='1.0.0',
             nohash=True,
         ),
-        vsize=dict(
-            argstr='-vsize %s',
-            exists=True,
-            mandatory=False,
-            position=3,
+        voxel_size=dict(
+            argstr='-vsize %g %g %g',
+            xor=['target_file'],
         ),
     )
     inputs = TVAdjustVoxSpTask.input_spec()
@@ -54,7 +48,7 @@ def test_TVAdjustVoxSpTask_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TVAdjustVoxSpTask_outputs():
-    output_map = dict(out_file=dict(exists=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = TVAdjustVoxSpTask.output_spec()
 
     for key, metadata in list(output_map.items()):
