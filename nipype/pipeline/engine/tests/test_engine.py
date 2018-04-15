@@ -315,7 +315,6 @@ def test_old_config(tmpdir):
         name='n2')
     w1 = pe.Workflow(name='test')
     modify = lambda x: x + 1
-    n1.inputs.a = 1
     w1.connect(n1, ('a', modify), n2, 'a')
     w1.base_dir = wd
 

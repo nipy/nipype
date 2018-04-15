@@ -207,7 +207,6 @@ def test_node_hash(tmpdir):
 
     def modify(x):
         return x + 1
-    n1.inputs.a = 1
     w1.connect(n1, ('a', modify), n2, 'a')
     w1.base_dir = os.getcwd()
 
