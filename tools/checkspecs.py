@@ -273,8 +273,10 @@ class InterfaceChecker(object):
                         bad_specs.append(
                             [uri, c, 'Inputs', traitname, 'mandatory=False'])
                 # checking if traits that have default_value different that the trits default one
-                # also have `usedefault` specified; excluding Enum, since it always has default value
-                if trait.trait_type.__class__.__name__ != "Enum"\
+                # also have `usedefault` specified;
+                # excluding Enum: always has default value (the first value)
+                # excluding Tuple: takes tuple of inner traits default values as default, but doesn't use it
+                if trait.trait_type.__class__.__name__ not in ["Tuple", "Enum"]\
                         and trait.default and "usedefault" not in trait.__dict__:
                     bad_specs.append(
                         [uri, c, 'Inputs', traitname, 'default value is set, no value for usedefault'])
