@@ -161,6 +161,8 @@ class Function(IOBase):
                            'ignore_exception')}
         super(Function, self).__init__(**kwargs)
 
+        if input_names is not None:
+            input_names = ensure_list(input_names)
         if function:
             # Use callback for consistent behavior
             self._input_names = []
@@ -170,7 +172,7 @@ class Function(IOBase):
             # Input names will be overridden
             if input_names is None:
                 input_names = []
-            self._input_names = ensure_list(input_names)
+            self._input_names = input_names
             add_traits(self.inputs, [name for name in self._input_names])
             self._allow_kwargs = True
             self.inputs.on_trait_change(self._set_function_str, 'function_str')
