@@ -174,7 +174,7 @@ def test_BaseInterface_load_save_inputs(tmpdir):
     assert {} == check_dict(data_dict, tsthash2.inputs.get_traitsfree())
 
     _, hashvalue = tsthash.inputs.get_hashval(hash_method='timestamp')
-    assert '269f084898fab793e270f9d6de7ef0c2' == hashvalue
+    assert '8562a5623562a871115eb14822ee8d02' == hashvalue
 
 
 class MinVerInputSpec(nib.TraitedSpec):
