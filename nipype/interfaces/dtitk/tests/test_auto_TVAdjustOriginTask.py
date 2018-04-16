@@ -18,22 +18,28 @@ def test_TVAdjustOriginTask_inputs():
         in_file=dict(
             argstr='-in %s',
             mandatory=True,
-            position=0,
         ),
         origin=dict(
-            argstr='-origin %s',
-            exists=True,
-            mandatory=False,
-            position=4,
+            argstr='-origin %g %g %g',
+            xor=['target_file'],
         ),
         out_file=dict(
             argstr='-out %s',
-            genfile=True,
-            position=1,
+            keep_extension=True,
+            name_source='in_file',
+            name_template='%s_avs',
+        ),
+        target_file=dict(
+            argstr='-target %s',
+            xor=['voxel_size', 'origin'],
         ),
         terminal_output=dict(
             deprecated='1.0.0',
             nohash=True,
+        ),
+        voxel_size=dict(
+            argstr='-vsize %g %g %g',
+            xor=['target_file'],
         ),
     )
     inputs = TVAdjustOriginTask.input_spec()
@@ -42,7 +48,7 @@ def test_TVAdjustOriginTask_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TVAdjustOriginTask_outputs():
-    output_map = dict(out_file=dict(exists=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = TVAdjustOriginTask.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -11,10 +11,13 @@ import os
 import numpy as np
 import nibabel as nb
 
-from .. import logging
-from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
-                               BaseInterfaceInputSpec, File, InputMultiPath)
-IFLOGGER = logging.getLogger('interface')
+from ..interfaces.base import (traits, TraitedSpec, LibraryBaseInterface,
+                               SimpleInterface, BaseInterfaceInputSpec, File,
+                               InputMultiPath)
+
+
+class NilearnBaseInterface(LibraryBaseInterface):
+    _pkg = 'nilearn'
 
 
 class SignalExtractionInputSpec(BaseInterfaceInputSpec):
@@ -70,7 +73,7 @@ class SignalExtractionOutputSpec(TraitedSpec):
         'header row with values from class_labels')
 
 
-class SignalExtraction(BaseInterface):
+class SignalExtraction(NilearnBaseInterface, SimpleInterface):
     '''
     Extracts signals over tissue classes or brain regions
 
@@ -85,7 +88,6 @@ class SignalExtraction(BaseInterface):
     '''
     input_spec = SignalExtractionInputSpec
     output_spec = SignalExtractionOutputSpec
-    _results = {}
 
     def _run_interface(self, runtime):
         maskers = self._process_inputs()
@@ -99,14 +101,16 @@ class SignalExtraction(BaseInterface):
                             region_signals.astype(str)))
 
         # save output
-        self._results['out_file'] = os.path.join(runtime.cwd, self.inputs.out_file)
+        self._results['out_file'] = os.path.join(runtime.cwd,
+                                                 self.inputs.out_file)
         np.savetxt(
             self._results['out_file'], output, fmt=b'%s', delimiter='\t')
         return runtime
 
     def _process_inputs(self):
         ''' validate and  process inputs into useful form.
-        Returns a list of nilearn maskers and the list of corresponding label names.'''
+        Returns a list of nilearn maskers and the list of corresponding label
+        names.'''
         import nilearn.input_data as nl
         import nilearn.image as nli
 
@@ -119,12 +123,12 @@ class SignalExtraction(BaseInterface):
             maskers.append(nl.NiftiLabelsMasker(label_data))
         else:  # 4d labels
             n_labels = label_data.get_data().shape[3]
-            if self.inputs.incl_shared_variance:  # 4d labels, independent computation
+            if self.inputs.incl_shared_variance:  # independent computation
                 for img in nli.iter_img(label_data):
                     maskers.append(
                         nl.NiftiMapsMasker(
                             self._4d(img.get_data(), img.affine)))
-            else:  # 4d labels, one computation fitting all
+            else:  # one computation fitting all
                 maskers.append(nl.NiftiMapsMasker(label_data))
 
         # check label list size
@@ -160,6 +164,3 @@ class SignalExtraction(BaseInterface):
         ''' takes a 3-dimensional numpy array and an affine,
         returns the equivalent 4th dimensional nifti file '''
         return nb.Nifti1Image(array[:, :, :, np.newaxis], affine)
-
-    def _list_outputs(self):
-        return self._results
