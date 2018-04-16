@@ -10,62 +10,42 @@ def test_diffeoScalarVolTask_inputs():
             nohash=True,
             usedefault=True,
         ),
+        flip=dict(argstr='-flip %d %d %d', ),
         ignore_exception=dict(
             deprecated='1.0.0',
             nohash=True,
             usedefault=True,
         ),
-        in_flip=dict(
-            argstr='-flip %s',
-            exists=True,
-            mandatory=False,
-            position=5,
-        ),
-        in_interp=dict(
-            argstr='-interp %s',
-            exists=True,
-            mandatory=False,
-            position=7,
-        ),
-        in_target=dict(
-            argstr='-target %s',
-            exists=True,
-            mandatory=False,
-            position=3,
-        ),
-        in_type=dict(
-            argstr='-type %s',
-            exists=True,
-            mandatory=False,
-            position=6,
-        ),
-        in_volume=dict(
+        in_file=dict(
             argstr='-in %s',
-            exists=True,
-            mandatory=False,
-            position=0,
+            mandatory=True,
         ),
-        in_vsize=dict(
-            argstr='-vsize %s',
-            exists=True,
-            mandatory=False,
-            position=4,
-        ),
-        in_xfm=dict(
-            argstr='-trans %s',
-            exists=True,
-            mandatory=False,
-            position=2,
+        interpolation=dict(
+            argstr='-interp %s',
+            usedefault=True,
         ),
         out_file=dict(
             argstr='-out %s',
-            name_source='in_volume',
-            name_template='%s_diffeoxfmd.nii.gz',
-            position=1,
+            keep_extension=True,
+            name_source='in_file',
+            name_template='%s_diffeoxfmd',
+        ),
+        resampling_type=dict(argstr='-type %s', ),
+        target=dict(
+            argstr='-target %s',
+            xor=['voxel_size'],
         ),
         terminal_output=dict(
             deprecated='1.0.0',
             nohash=True,
+        ),
+        transform=dict(
+            argstr='-trans %s',
+            mandatory=True,
+        ),
+        voxel_size=dict(
+            argstr='-vsize %g %g %g',
+            xor=['target'],
         ),
     )
     inputs = diffeoScalarVolTask.input_spec()

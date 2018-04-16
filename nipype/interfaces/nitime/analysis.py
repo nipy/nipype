@@ -19,18 +19,15 @@ import tempfile
 
 from ...utils.misc import package_check
 from ...utils.filemanip import fname_presuffix
-from ..base import (TraitedSpec, File, Undefined, traits, BaseInterface,
+from .base import NitimeBaseInterface
+from ..base import (TraitedSpec, File, Undefined, traits,
                     isdefined, BaseInterfaceInputSpec)
 
 have_nitime = True
 try:
     package_check('nitime')
-except Exception as e:
+except ImportError:
     have_nitime = False
-else:
-    import nitime.analysis as nta
-    from nitime.timeseries import TimeSeries
-    import nitime.viz as viz
 
 
 class CoherenceAnalyzerInputSpec(BaseInterfaceInputSpec):
@@ -116,7 +113,7 @@ class CoherenceAnalyzerOutputSpec(TraitedSpec):
     timedelay_fig = File(desc=('Figure representing coherence values'))
 
 
-class CoherenceAnalyzer(BaseInterface):
+class CoherenceAnalyzer(NitimeBaseInterface):
 
     input_spec = CoherenceAnalyzerInputSpec
     output_spec = CoherenceAnalyzerOutputSpec
@@ -148,6 +145,7 @@ class CoherenceAnalyzer(BaseInterface):
 
     def _csv2ts(self):
         """ Read data from the in_file and generate a nitime TimeSeries object"""
+        from nitime.timeseries import TimeSeries
         data, roi_names = self._read_csv()
 
         TS = TimeSeries(
@@ -159,6 +157,7 @@ class CoherenceAnalyzer(BaseInterface):
 
     # Rewrite _run_interface, but not run
     def _run_interface(self, runtime):
+        import nitime.analysis as nta
         lb, ub = self.inputs.frequency_range
 
         if self.inputs.in_TS is Undefined:
@@ -253,6 +252,7 @@ class CoherenceAnalyzer(BaseInterface):
         self.inputs.output_figure_file
 
         """
+        import nitime.viz as viz
         if self.inputs.figure_type == 'matrix':
             fig_coh = viz.drawmatrix_channels(
                 self.coherence, channel_names=self.ROIs, color_anchor=0)
@@ -281,16 +281,3 @@ class CoherenceAnalyzer(BaseInterface):
             fig_dt.savefig(
                 fname_presuffix(
                     self.inputs.output_figure_file, suffix='_delay'))
-
-
-class GetTimeSeriesInputSpec(object):
-    pass
-
-
-class GetTimeSeriesOutputSpec(object):
-    pass
-
-
-class GetTimeSeries(object):
-    # getting time series data from nifti files and ROIs
-    pass

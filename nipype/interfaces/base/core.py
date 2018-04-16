@@ -1267,6 +1267,35 @@ class SEMLikeCommandLine(CommandLine):
         return super(SEMLikeCommandLine, self)._format_arg(name, spec, value)
 
 
+class LibraryBaseInterface(BaseInterface):
+    _pkg = None
+    imports = ()
+
+    def __init__(self, check_import=True, *args, **kwargs):
+        super(LibraryBaseInterface, self).__init__(*args, **kwargs)
+        if check_import:
+            import importlib
+            failed_imports = []
+            for pkg in (self._pkg,) + tuple(self.imports):
+                try:
+                    importlib.import_module(pkg)
+                except ImportError:
+                    failed_imports.append(pkg)
+            if failed_imports:
+                iflogger.warn('Unable to import %s; %s interface may fail to '
+                              'run', failed_imports, self.__class__.__name__)
+
+    @property
+    def version(self):
+        if self._version is None:
+            import importlib
+            try:
+                self._version = importlib.import_module(self._pkg).__version__
+            except (ImportError, AttributeError):
+                pass
+        return super(LibraryBaseInterface, self).version
+
+
 class PackageInfo(object):
     _version = None
     version_cmd = None

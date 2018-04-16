@@ -5,18 +5,9 @@ from __future__ import (print_function, division, unicode_literals,
 import warnings
 import nibabel as nb
 
-from ...utils.misc import package_check
-from ..base import (TraitedSpec, BaseInterface, traits, BaseInterfaceInputSpec,
+from .base import NipyBaseInterface, have_nipy
+from ..base import (TraitedSpec, traits, BaseInterfaceInputSpec,
                     File, isdefined)
-
-have_nipy = True
-try:
-    package_check('nipy')
-except Exception as e:
-    have_nipy = False
-else:
-    from nipy.algorithms.registration.histogram_registration import HistogramRegistration
-    from nipy.algorithms.registration.affine import Affine
 
 
 class SimilarityInputSpec(BaseInterfaceInputSpec):
@@ -42,7 +33,7 @@ class SimilarityOutputSpec(TraitedSpec):
     similarity = traits.Float(desc="Similarity between volume 1 and 2")
 
 
-class Similarity(BaseInterface):
+class Similarity(NipyBaseInterface):
     """Calculates similarity between two 3D volumes. Both volumes have to be in
     the same coordinate system, same space within that coordinate system and
     with the same voxel dimensions.
@@ -72,6 +63,8 @@ class Similarity(BaseInterface):
         super(Similarity, self).__init__(**inputs)
 
     def _run_interface(self, runtime):
+        from nipy.algorithms.registration.histogram_registration import HistogramRegistration
+        from nipy.algorithms.registration.affine import Affine
 
         vol1_nii = nb.load(self.inputs.volume1)
         vol2_nii = nb.load(self.inputs.volume2)

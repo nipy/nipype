@@ -2510,7 +2510,7 @@ class TProjectInputSpec(AFNICommandInputSpec):
                rather than the value stored in the dataset header.""",
         argstr='-TR %g')
     mask = File(
-        exist=True,
+        exists=True,
         desc="""Only operate on voxels nonzero in the mset dataset.
                 ++ Voxels outside the mask will be filled with zeros.
                 ++ If no masking option is given, then all voxels

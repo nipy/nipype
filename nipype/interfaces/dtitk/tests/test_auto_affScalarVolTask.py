@@ -6,41 +6,52 @@ from ..registration import affScalarVolTask
 def test_affScalarVolTask_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
+        deformation=dict(
+            argstr='-deformation %g %g %g %g %g %g',
+            xor=['transform'],
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
+        ),
+        euler=dict(
+            argstr='-euler %g %g %g',
+            xor=['transform'],
         ),
         ignore_exception=dict(
             deprecated='1.0.0',
             nohash=True,
             usedefault=True,
         ),
-        in_target=dict(
-            argstr='-target %s',
-            position=2,
-        ),
-        in_volume=dict(
+        in_file=dict(
             argstr='-in %s',
-            exists=True,
-            mandatory=False,
-            position=0,
+            mandatory=True,
         ),
-        in_xfm=dict(
-            argstr='-trans %s',
-            exists=True,
-            mandatory=False,
-            position=1,
+        interpolation=dict(
+            argstr='-interp %s',
+            usedefault=True,
         ),
         out_file=dict(
             argstr='-out %s',
-            mandatory=False,
-            name_source='in_volume',
-            name_template='%s_affxfmd.nii.gz',
-            position=3,
+            keep_extension=True,
+            name_source='in_file',
+            name_template='%s_affxfmd',
+        ),
+        target=dict(
+            argstr='-target %s',
+            xor=['transform'],
         ),
         terminal_output=dict(
             deprecated='1.0.0',
             nohash=True,
+        ),
+        transform=dict(
+            argstr='-trans %s',
+            xor=['target', 'translation', 'euler', 'deformation'],
+        ),
+        translation=dict(
+            argstr='-translation %g %g %g',
+            xor=['transform'],
         ),
     )
     inputs = affScalarVolTask.input_spec()
