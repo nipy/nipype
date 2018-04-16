@@ -18,7 +18,10 @@ def test_RegistrationSynQuick_inputs():
             argstr='-f %s...',
             mandatory=True,
         ),
-        histogram_bins=dict(argstr='-r %d', ),
+        histogram_bins=dict(
+            argstr='-r %d',
+            usedefault=True,
+        ),
         ignore_exception=dict(
             deprecated='1.0.0',
             nohash=True,
@@ -40,7 +43,10 @@ def test_RegistrationSynQuick_inputs():
             argstr='-p %s',
             usedefault=True,
         ),
-        spline_distance=dict(argstr='-s %d', ),
+        spline_distance=dict(
+            argstr='-s %d',
+            usedefault=True,
+        ),
         terminal_output=dict(
             deprecated='1.0.0',
             nohash=True,

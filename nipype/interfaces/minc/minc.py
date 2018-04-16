@@ -786,6 +786,7 @@ class AverageInputSpec(CommandLineInputSpec):
         low=0,
         desc='Specify the maximum size of the internal buffers (in kbytes).',
         value=4096,
+        usedefault=True,
         argstr='-max_buffer_size_in_kb %d',
     )
 
@@ -1311,7 +1312,7 @@ class BeastInputSpec(CommandLineInputSpec):
         desc='Specify configuration file.', argstr='-configuration %s')
 
     voxel_size = traits.Int(
-        4,
+        4, usedefault=True,
         desc=('Specify voxel size for calculations (4, 2, or 1).'
               'Default value: 4. Assumes no multiscale. Use configuration'
               'file for multiscale.'),
@@ -1325,30 +1326,30 @@ class BeastInputSpec(CommandLineInputSpec):
         default_value=True)
 
     patch_size = traits.Int(
-        1,
+        1, usedefault=True,
         desc='Specify patch size for single scale approach. Default value: 1.',
         argstr='-patch_size %s')
 
     search_area = traits.Int(
-        2,
+        2, usedefault=True,
         desc=
         'Specify size of search area for single scale approach. Default value: 2.',
         argstr='-search_area %s')
 
     confidence_level_alpha = traits.Float(
-        0.5,
+        0.5, usedefault=True,
         desc='Specify confidence level Alpha. Default value: 0.5',
         argstr='-alpha %s')
     smoothness_factor_beta = traits.Float(
-        0.5,
+        0.5, usedefault=True,
         desc='Specify smoothness factor Beta. Default value: 0.25',
         argstr='-beta %s')
     threshold_patch_selection = traits.Float(
-        0.95,
+        0.95, usedefault=True,
         desc='Specify threshold for patch selection. Default value: 0.95',
         argstr='-threshold %s')
     number_selected_images = traits.Int(
-        20,
+        20, usedefault=True,
         desc='Specify number of selected images. Default value: 20',
         argstr='-selection_num %s')
 
@@ -1428,7 +1429,7 @@ class PikInputSpec(CommandLineInputSpec):
     #                        --lookup    ==> arguments to pass to minclookup
 
     scale = traits.Int(
-        2,
+        2, usedefault=True,
         desc=('Scaling factor for resulting image. By default images are'
               'output at twice their original resolution.'),
         argstr='--scale %s')
@@ -1842,6 +1843,7 @@ class MathInputSpec(CommandLineInputSpec):
         low=0,
         desc='Specify the maximum size of the internal buffers (in kbytes).',
         value=4096,
+        usedefault=True,
         argstr='-max_buffer_size_in_kb %d',
     )
 

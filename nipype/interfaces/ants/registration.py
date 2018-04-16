@@ -338,7 +338,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         desc='the metric(s) to use for each stage. '
         'Note that multiple metrics per stage are not supported '
         'in ANTS 1.9.1 and earlier.')
-    metric_weight_item_trait = traits.Float(1.0)
+    metric_weight_item_trait = traits.Float(1.0, usedefault=True)
     metric_weight_stage_trait = traits.Either(
         metric_weight_item_trait, traits.List(metric_weight_item_trait))
     metric_weight = traits.List(
@@ -349,7 +349,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         mandatory=True,
         desc='the metric weight(s) for each stage. '
         'The weights must sum to 1 per stage.')
-    radius_bins_item_trait = traits.Int(5)
+    radius_bins_item_trait = traits.Int(5, usedefault=True)
     radius_bins_stage_trait = traits.Either(
         radius_bins_item_trait, traits.List(radius_bins_item_trait))
     radius_or_number_of_bins = traits.List(
@@ -1521,10 +1521,10 @@ class RegistrationSynQuickInputSpec(ANTSCommandInputSpec):
 
     use_histogram_matching = traits.Bool(False, argstr='-j %d',
                                          desc='use histogram matching')
-    histogram_bins = traits.Int(default_value=32, argstr='-r %d',
+    histogram_bins = traits.Int(default_value=32, usedefault=True, argstr='-r %d',
                                 desc='histogram bins for mutual information in SyN stage \
                                  (default = 32)')
-    spline_distance = traits.Int(default_value=26, argstr='-s %d',
+    spline_distance = traits.Int(default_value=26, usedefault=True, argstr='-s %d',
                                  desc='spline distance for deformable B-spline SyN transform \
                                  (default = 26)')
     precision_type = traits.Enum('double', 'float', argstr='-p %s',
@@ -1554,7 +1554,7 @@ class RegistrationSynQuick(ANTSCommand):
     >>> reg.inputs.moving_image = 'moving1.nii'
     >>> reg.inputs.num_threads = 2
     >>> reg.cmdline
-    'antsRegistrationSynQuick.sh -d 3 -f fixed1.nii -m moving1.nii -n 2 -o transform -p d -t s'
+    'antsRegistrationSynQuick.sh -d 3 -f fixed1.nii -r 32 -m moving1.nii -n 2 -o transform -p d -s 26 -t s'
     >>> reg.run()  # doctest: +SKIP
 
     example for multiple images
@@ -1565,7 +1565,7 @@ class RegistrationSynQuick(ANTSCommand):
     >>> reg.inputs.moving_image = ['moving1.nii', 'moving2.nii']
     >>> reg.inputs.num_threads = 2
     >>> reg.cmdline
-    'antsRegistrationSynQuick.sh -d 3 -f fixed1.nii -f fixed2.nii -m moving1.nii -m moving2.nii -n 2 -o transform -p d -t s'
+    'antsRegistrationSynQuick.sh -d 3 -f fixed1.nii -f fixed2.nii -r 32 -m moving1.nii -m moving2.nii -n 2 -o transform -p d -s 26 -t s'
     >>> reg.run()  # doctest: +SKIP
     """
 

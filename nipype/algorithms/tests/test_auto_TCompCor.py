@@ -33,6 +33,7 @@ def test_TCompCor_inputs():
         use_regress_poly=dict(
             deprecated='0.15.0',
             new_name='pre_filter',
+            usedefault=True,
         ),
     )
     inputs = TCompCor.input_spec()

@@ -55,6 +55,7 @@ def test_ICA_AROMA_inputs():
         out_dir=dict(
             argstr='-o %s',
             genfile=True,
+            usedefault=True,
         ),
         terminal_output=dict(
             deprecated='1.0.0',

@@ -28,7 +28,8 @@ class ICA_AROMAInputSpec(CommandLineInputSpec):
         xor=['feat_dir'],
         desc='volume to be denoised')
     out_dir = Directory(
-        'out', genfile=True, argstr='-o %s', desc='output directory')
+        'out', usedefault=True, genfile=True,
+        argstr='-o %s', desc='output directory')
     mask = File(
         exists=True,
         argstr='-m %s',

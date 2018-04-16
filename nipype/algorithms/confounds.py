@@ -391,6 +391,7 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         'extraction')
     use_regress_poly = traits.Bool(
         True,
+        usedefault=True,
         deprecated='0.15.0',
         new_name='pre_filter',
         desc=('use polynomial regression '

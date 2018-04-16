@@ -158,7 +158,8 @@ class FSLXCommandInputSpec(FSLCommandInputSpec):
               'shell) model'))
     fudge = traits.Int(argstr='--fudge=%d', desc='ARD fudge factor')
     n_jumps = traits.Int(
-        5000, argstr='--njumps=%d', desc='Num of jumps to be made by MCMC')
+        5000, usedefault=True,
+        argstr='--njumps=%d', desc='Num of jumps to be made by MCMC')
     burn_in = traits.Range(
         low=0,
         value=0,
@@ -340,7 +341,8 @@ class BEDPOSTX5InputSpec(FSLXCommandInputSpec):
               'shell) model'))
     fudge = traits.Int(argstr='-w %d', desc='ARD fudge factor')
     n_jumps = traits.Int(
-        5000, argstr='-j %d', desc='Num of jumps to be made by MCMC')
+        5000, usedefault=True,
+        argstr='-j %d', desc='Num of jumps to be made by MCMC')
     burn_in = traits.Range(
         low=0,
         value=0,
@@ -422,7 +424,8 @@ class BEDPOSTX5(FSLXCommand):
     >>> bedp = fsl.BEDPOSTX5(bvecs='bvecs', bvals='bvals', dwi='diffusion.nii',
     ...                     mask='mask.nii', n_fibres=1)
     >>> bedp.cmdline
-    'bedpostx bedpostx -b 0 --burninnoard=0 --forcedir -n 1 -s 1 --updateproposalevery=40'
+    'bedpostx bedpostx -b 0 --burninnoard=0 --forcedir -n 1 -j 5000 \
+-s 1 --updateproposalevery=40'
 
     """
 

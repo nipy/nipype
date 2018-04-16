@@ -8,7 +8,10 @@ def test_ComputeTDI_inputs():
         args=dict(argstr='%s', ),
         contrast=dict(argstr='-constrast %s', ),
         data_type=dict(argstr='-datatype %s', ),
-        dixel=dict(argstr='-dixel %s', ),
+        dixel=dict(
+            argstr='-dixel %s',
+            usedefault=True,
+        ),
         ends_only=dict(argstr='-ends_only', ),
         environ=dict(
             nohash=True,

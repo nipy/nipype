@@ -1612,6 +1612,7 @@ class OutlierCountInputSpec(CommandLineInputSpec):
         value=1e-3,
         low=0.0,
         high=1.0,
+        usedefault=True,
         argstr='-qthr %.5f',
         desc='indicate a value for q to compute alpha')
     autoclip = traits.Bool(
@@ -1681,7 +1682,7 @@ class OutlierCount(CommandLine):
     >>> toutcount = afni.OutlierCount()
     >>> toutcount.inputs.in_file = 'functional.nii'
     >>> toutcount.cmdline  # doctest: +ELLIPSIS
-    '3dToutcount functional.nii'
+    '3dToutcount -qthr 0.00100 functional.nii'
     >>> res = toutcount.run()  # doctest: +SKIP
 
     """

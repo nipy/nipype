@@ -39,20 +39,29 @@ def test_KellyKapowski_inputs():
         ),
         max_invert_displacement_field_iters=dict(
             argstr=
-            '--maximum-number-of-invert-displacement-field-iterations %d', ),
+            '--maximum-number-of-invert-displacement-field-iterations %d',
+            usedefault=True,
+        ),
         num_threads=dict(
             nohash=True,
             usedefault=True,
         ),
         number_integration_points=dict(
-            argstr='--number-of-integration-points %d', ),
+            argstr='--number-of-integration-points %d',
+            usedefault=True,
+        ),
         segmentation_image=dict(
             argstr='--segmentation-image "%s"',
             mandatory=True,
         ),
-        smoothing_variance=dict(argstr='--smoothing-variance %f', ),
+        smoothing_variance=dict(
+            argstr='--smoothing-variance %f',
+            usedefault=True,
+        ),
         smoothing_velocity_field=dict(
-            argstr='--smoothing-velocity-field-parameter %f', ),
+            argstr='--smoothing-velocity-field-parameter %f',
+            usedefault=True,
+        ),
         terminal_output=dict(
             deprecated='1.0.0',
             nohash=True,

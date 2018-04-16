@@ -71,7 +71,10 @@ def test_XFibres5_inputs():
             mandatory=True,
             usedefault=True,
         ),
-        n_jumps=dict(argstr='--njumps=%d', ),
+        n_jumps=dict(
+            argstr='--njumps=%d',
+            usedefault=True,
+        ),
         no_ard=dict(
             argstr='--noard',
             xor=('no_ard', 'all_ard'),

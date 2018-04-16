@@ -106,8 +106,8 @@ class DenoiseInputSpec(TraitedSpec):
         desc=('mask in which the standard deviation of noise '
               'will be computed'),
         exists=True)
-    patch_radius = traits.Int(1, desc='patch radius')
-    block_radius = traits.Int(5, desc='block_radius')
+    patch_radius = traits.Int(1, usedefault=True, desc='patch radius')
+    block_radius = traits.Int(5, usedefault=True, desc='block_radius')
     snr = traits.Float(desc='manually set an SNR')
 
 

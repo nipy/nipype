@@ -37,7 +37,10 @@ def test_FitTensor_inputs():
             position=-1,
             usedefault=True,
         ),
-        reg_term=dict(argstr='-regularisation %f', ),
+        reg_term=dict(
+            argstr='-regularisation %f',
+            usedefault=True,
+        ),
         terminal_output=dict(
             deprecated='1.0.0',
             nohash=True,
