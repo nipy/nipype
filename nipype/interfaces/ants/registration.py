@@ -1556,7 +1556,7 @@ class RegistrationSynQuick(ANTSCommand):
     >>> reg.inputs.moving_image = 'moving1.nii'
     >>> reg.inputs.num_threads = 2
     >>> reg.cmdline
-    'antsRegistrationSynQuick.sh -d 3 -f fixed1.nii -m moving1.nii -n 2 -o transform -p d -t s'
+    'antsRegistrationSyNQuick.sh -d 3 -f fixed1.nii -m moving1.nii -n 2 -o transform -p d -t s'
     >>> reg.run()  # doctest: +SKIP
 
     example for multiple images
@@ -1567,18 +1567,18 @@ class RegistrationSynQuick(ANTSCommand):
     >>> reg.inputs.moving_image = ['moving1.nii', 'moving2.nii']
     >>> reg.inputs.num_threads = 2
     >>> reg.cmdline
-    'antsRegistrationSynQuick.sh -d 3 -f fixed1.nii -f fixed2.nii -m moving1.nii -m moving2.nii -n 2 -o transform -p d -t s'
+    'antsRegistrationSyNQuick.sh -d 3 -f fixed1.nii -f fixed2.nii -m moving1.nii -m moving2.nii -n 2 -o transform -p d -t s'
     >>> reg.run()  # doctest: +SKIP
     """
 
 
-    _cmd = 'antsRegistrationSynQuick.sh'
+    _cmd = 'antsRegistrationSyNQuick.sh'
     input_spec = RegistrationSynQuickInputSpec
     output_spec = RegistrationSynQuickOutputSpec
 
     def _num_threads_update(self):
         """
-        antsRegistrationSynQuick.sh ignores environment variables,
+        antsRegistrationSyNQuick.sh ignores environment variables,
         so override environment update frm ANTSCommand class
         """
         pass
