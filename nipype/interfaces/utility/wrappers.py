@@ -95,18 +95,6 @@ class FunctionInputSpec(BaseInterfaceInputSpec):
     function_str = SetOnce(traits.Str, mandatory=True,
                            desc='code for function')
 
-    def __deepcopy__(self, memo):
-        from copy import deepcopy
-        values = deepcopy(self.trait_get(), memo)
-        dup = self.clone_traits(memo=memo)
-        orig_traits = self.traits()
-        dup_traits = dup.traits()
-        for name, value in values.items():
-            if name not in dup_traits:
-                dup.add_trait(name, deepcopy(orig_traits[name], memo))
-        dup.trait_set(**values)
-        return dup
-
 
 class DynamicFunctionInputSpec(FunctionInputSpec):
     _ = traits.Any()
@@ -185,6 +173,17 @@ class Function(IOBase):
 
         # With constraints in place, set inputs
         self.inputs.trait_set(True, **inputs)
+
+    def __deepcopy__(self, memo):
+        from copy import deepcopy
+        dup = self.__class__(input_names=deepcopy(self._input_names, memo),
+                             output_names=deepcopy(self._output_names, memo),
+                             function=deepcopy(self.inputs.function_str, memo),
+                             imports=deepcopy(self.imports, memo),
+                             resource_monitor=self.resource_monitor,
+                             ignore_exception=self.ignore_exception)
+        dup.inputs.trait_set(**self.inputs.trait_get())
+        return dup
 
     def _set_function_str(self, obj, name, old, new):
         obj.on_trait_change(self._set_function_str, 'function_str',
