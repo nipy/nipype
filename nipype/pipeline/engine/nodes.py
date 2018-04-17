@@ -157,7 +157,6 @@ class Node(EngineBase):
         self._interface = interface
         self._hierarchy = None
         self._got_inputs = False
-        self._originputs = None
         self._output_dir = None
         self._id = self.name  # for compatibility with node expansion using iterables
 
@@ -620,7 +619,6 @@ class Node(EngineBase):
             inputs=self._interface.inputs.get_traitsfree())
 
         if copyfiles:
-            self._originputs = deepcopy(self._interface.inputs)
             self._copyfiles_to_wd(execute=execute)
 
         message = '[Node] Running "{}" ("{}.{}")'.format(
