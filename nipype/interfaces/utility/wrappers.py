@@ -16,7 +16,7 @@ standard_library.install_aliases()
 from builtins import str, bytes
 
 from ... import logging
-from ..base import (traits, DynamicTraitedSpec, Undefined,
+from ..base import (traits, DynamicTraitedSpec, Undefined, SetOnce,
                     BaseInterfaceInputSpec)
 from ..io import IOBase, add_traits
 from ...utils.filemanip import ensure_list
@@ -92,8 +92,8 @@ def parse_function(func, input_names=None):
 
 
 class FunctionInputSpec(BaseInterfaceInputSpec):
-    function_str = traits.Str(mandatory=True,
-                              desc='code for function')
+    function_str = SetOnce(traits.Str, mandatory=True,
+                           desc='code for function')
 
     def __deepcopy__(self, memo):
         from copy import deepcopy
@@ -208,7 +208,7 @@ class Function(IOBase):
         # input_names list. Setting as `Enum(x)` will throw an error if
         # a change is attempted.
         for banned_name in ban:
-            self.inputs.add_trait(banned_name, traits.Any)
+            self.inputs.add_trait(banned_name, SetOnce)
 
         to_add = set(in_names) - set(self._input_names) - set(ban)
         add_traits(self.inputs, to_add)
