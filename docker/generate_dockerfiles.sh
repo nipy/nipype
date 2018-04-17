@@ -108,7 +108,7 @@ function generate_main_dockerfile() {
          && curl -sSL --retry 5 https://github.com/nipy/nipype/tarball/master
          | tar -xz -C /src/nipype --strip-components 1
          && source activate neuro
-         && pip install --no-cache-dir -e /src/nipype" \
+         && pip install --no-cache-dir -e /src/nipype[all]" \
   --run-bash "mkdir -p /src/pybids
          && curl -sSL --retry 5 https://github.com/INCF/pybids/tarball/master
          | tar -xz -C /src/pybids --strip-components 1
