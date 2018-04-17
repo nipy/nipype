@@ -1571,7 +1571,6 @@ class RegistrationSynQuick(ANTSCommand):
     >>> reg.run()  # doctest: +SKIP
     """
 
-
     _cmd = 'antsRegistrationSyNQuick.sh'
     input_spec = RegistrationSynQuickInputSpec
     output_spec = RegistrationSynQuickOutputSpec
@@ -1579,7 +1578,7 @@ class RegistrationSynQuick(ANTSCommand):
     def _num_threads_update(self):
         """
         antsRegistrationSyNQuick.sh ignores environment variables,
-        so override environment update frm ANTSCommand class
+        so override environment update from ANTSCommand class
         """
         pass
 
