@@ -150,18 +150,17 @@ class BaseTraitedSpec(traits.HasTraits):
                             '%s' % trait_spec.new_name: new
                         })
 
-    def get(self, **kwargs):
+    def trait_get(self, **kwargs):
         """ Returns traited class as a dict
 
         Augments the trait get function to return a dictionary without
         notification handles
         """
-        try:
-            out = super(BaseTraitedSpec, self).trait_get(**kwargs)
-        except AttributeError:  # deprecated old get
-            out = super(BaseTraitedSpec, self).get(**kwargs)
+        out = super(BaseTraitedSpec, self).trait_get(**kwargs)
         out = self._clean_container(out, Undefined)
         return out
+
+    get = trait_get
 
     def get_traitsfree(self, **kwargs):
         """ Returns traited class as a dict
@@ -170,7 +169,7 @@ class BaseTraitedSpec(traits.HasTraits):
         any traits. The dictionary does not contain any attributes that
         were Undefined
         """
-        out = super(BaseTraitedSpec, self).get(**kwargs)
+        out = super(BaseTraitedSpec, self).trait_get(**kwargs)
         out = self._clean_container(out, skipundefined=True)
         return out
 
@@ -238,7 +237,7 @@ class BaseTraitedSpec(traits.HasTraits):
 
         list_withhash = []
         list_nofilename = []
-        for name, val in sorted(self.get().items()):
+        for name, val in sorted(self.trait_get().items()):
             if not isdefined(val) or self.has_metadata(name, "nohash", True):
                 # skip undefined traits and traits with nohash=True
                 continue
@@ -343,7 +342,7 @@ class DynamicTraitedSpec(BaseTraitedSpec):
         id_self = id(self)
         if id_self in memo:
             return memo[id_self]
-        dup_dict = deepcopy(self.get(), memo)
+        dup_dict = deepcopy(self.trait_get(), memo)
         # access all keys
         for key in self.copyable_trait_names():
             if key in self.__dict__.keys():
