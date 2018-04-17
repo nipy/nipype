@@ -90,7 +90,6 @@ function generate_main_dockerfile() {
               activate=true \
   --copy docker/files/run_builddocs.sh docker/files/run_examples.sh \
          docker/files/run_pytests.sh nipype/external/fsl_imglob.py /usr/bin/ \
-  --copy . /src/nipype \
   --user root \
   --run 'chown -R neuro /src
 && chmod +x /usr/bin/fsl_imglob.py /usr/bin/run_*.sh
@@ -104,8 +103,11 @@ function generate_main_dockerfile() {
               conda_install='python=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
                              icu=58.1 libxml2 libxslt matplotlib mkl numpy paramiko
                              pandas psutil scikit-learn scipy traits=4.6.0' \
-              pip_opts="-e" \
-              pip_install="/src/nipype[all]" \
+  --run-bash "mkdir -p /src/nipype
+         && curl -sSL --retry 5 https://github.com/nipy/nipype/tarball/master
+         | tar -xz -C /src/nipype --strip-components 1
+         && source activate neuro
+         && pip install --no-cache-dir -e /src/nipype" \
   --run-bash "mkdir -p /src/pybids
          && curl -sSL --retry 5 https://github.com/INCF/pybids/tarball/master
          | tar -xz -C /src/pybids --strip-components 1
