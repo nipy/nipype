@@ -531,7 +531,7 @@ class Node(EngineBase):
             else:
                 output_name = info[1]
                 try:
-                    output_value = results.outputs.get()[output_name]
+                    output_value = results.outputs.trait_get()[output_name]
                 except TypeError:
                     output_value = results.outputs.dictcopy()[output_name]
             logger.debug('output: %s', output_name)
@@ -678,7 +678,7 @@ class Node(EngineBase):
             makedirs(outdir, exist_ok=True)
 
         for info in self._interface._get_filecopy_info():
-            files = self.inputs.get().get(info['key'])
+            files = self.inputs.trait_get().get(info['key'])
             if not isdefined(files) or not files:
                 continue
 
@@ -1084,7 +1084,7 @@ class MapNode(Node):
     @property
     def outputs(self):
         if self._interface._outputs():
-            return Bunch(self._interface._outputs().get())
+            return Bunch(self._interface._outputs().trait_get())
 
     def _make_nodes(self, cwd=None):
         if cwd is None:
@@ -1109,7 +1109,7 @@ class MapNode(Node):
                 name=nodename)
             node.plugin_args = self.plugin_args
             node.interface.inputs.trait_set(
-                **deepcopy(self._interface.inputs.get()))
+                **deepcopy(self._interface.inputs.trait_get()))
             node.interface.resource_monitor = self._interface.resource_monitor
             for field in self.iterfield:
                 if self.nested:
@@ -1153,7 +1153,7 @@ class MapNode(Node):
                     if not isdefined(values):
                         values = []
                     if nresult and nresult.outputs:
-                        values.insert(i, nresult.outputs.get()[key])
+                        values.insert(i, nresult.outputs.trait_get()[key])
                     else:
                         values.insert(i, None)
                     defined_vals = [isdefined(val) for val in values]
@@ -1201,7 +1201,7 @@ class MapNode(Node):
         return len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
 
     def _get_inputs(self):
-        old_inputs = self._inputs.get()
+        old_inputs = self._inputs.trait_get()
         self._inputs = self._create_dynamic_traits(
             self._interface.inputs, fields=self.iterfield)
         self._inputs.trait_set(**old_inputs)
