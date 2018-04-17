@@ -239,7 +239,7 @@ def save_resultfile(result, cwd, name):
     if result.outputs:
         try:
             outputs = result.outputs.trait_get()
-        except TypeError:
+        except AttributeError:
             outputs = result.outputs.dictcopy()  # outputs was a bunch
         result.outputs.set(**modify_paths(outputs, relative=True, basedir=cwd))
 
@@ -294,7 +294,7 @@ def load_resultfile(path, name):
             if result.outputs:
                 try:
                     outputs = result.outputs.trait_get()
-                except TypeError:
+                except AttributeError:
                     outputs = result.outputs.dictcopy()  # outputs == Bunch
                 try:
                     result.outputs.set(

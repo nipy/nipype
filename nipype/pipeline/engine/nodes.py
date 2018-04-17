@@ -532,7 +532,7 @@ class Node(EngineBase):
                 output_name = info[1]
                 try:
                     output_value = results.outputs.trait_get()[output_name]
-                except TypeError:
+                except AttributeError:
                     output_value = results.outputs.dictcopy()[output_name]
             logger.debug('output: %s', output_name)
             try:
