@@ -91,6 +91,7 @@ function generate_main_dockerfile() {
   --copy docker/files/run_builddocs.sh docker/files/run_examples.sh \
          docker/files/run_pytests.sh nipype/external/fsl_imglob.py /usr/bin/ \
   --user root \
+  --run-bash "mkdir -p /src" \
   --run 'chown -R neuro /src
 && chmod +x /usr/bin/fsl_imglob.py /usr/bin/run_*.sh
 && . /etc/fsl/fsl.sh
