@@ -32,12 +32,12 @@ def test_ActivationCount_normaldistr(tmpdir, threshold, above_thresh):
     tmpdir.chdir()
     in_files = ['{:d}.nii'.format(i) for i in range(3)]
     for fname in in_files:
-        nb.Nifti1Image(np.random.normal(size=(50, 50, 50)),
+        nb.Nifti1Image(np.random.normal(size=(100, 100, 100)),
                        np.eye(4)).to_filename(fname)
 
     acm = ActivationCount(in_files=in_files, threshold=threshold)
     res = acm.run()
     pos = nb.load(res.outputs.acm_pos)
     neg = nb.load(res.outputs.acm_neg)
-    assert np.isclose(pos.get_data().mean(), above_thresh*1.e-2, rtol=0.1, atol=1.e-6)
-    assert np.isclose(neg.get_data().mean(), above_thresh*1.e-2, rtol=0.1, atol=1.e-6)
+    assert np.isclose(pos.get_data().mean(), above_thresh*1.e-2, rtol=0.1, atol=1.e-4)
+    assert np.isclose(neg.get_data().mean(), above_thresh*1.e-2, rtol=0.1, atol=1.e-4)
