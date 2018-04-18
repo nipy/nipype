@@ -142,7 +142,7 @@ def write_report(node, report_type=None, is_mapnode=False):
                 ['Hierarchy : %s' % node.fullname,
                  'Exec ID : %s' % node._id]),
             write_rst_header('Original Inputs', level=1),
-            write_rst_dict(node.inputs.get()),
+            write_rst_dict(node.inputs.trait_get()),
         ]
         with open(report_file, 'wt') as fp:
             fp.write('\n'.join(lines))
@@ -150,7 +150,7 @@ def write_report(node, report_type=None, is_mapnode=False):
 
     lines = [
         write_rst_header('Execution Inputs', level=1),
-        write_rst_dict(node.inputs.get()),
+        write_rst_dict(node.inputs.trait_get()),
     ]
 
     result = node.result  # Locally cache result
@@ -166,7 +166,7 @@ def write_report(node, report_type=None, is_mapnode=False):
     if isinstance(outputs, Bunch):
         lines.append(write_rst_dict(outputs.dictcopy()))
     elif outputs:
-        lines.append(write_rst_dict(outputs.get()))
+        lines.append(write_rst_dict(outputs.trait_get()))
 
     if is_mapnode:
         lines.append(write_rst_header('Subnode reports', level=1))
@@ -238,8 +238,8 @@ def save_resultfile(result, cwd, name):
     resultsfile = os.path.join(cwd, 'result_%s.pklz' % name)
     if result.outputs:
         try:
-            outputs = result.outputs.get()
-        except TypeError:
+            outputs = result.outputs.trait_get()
+        except AttributeError:
             outputs = result.outputs.dictcopy()  # outputs was a bunch
         result.outputs.set(**modify_paths(outputs, relative=True, basedir=cwd))
 
@@ -293,8 +293,8 @@ def load_resultfile(path, name):
         else:
             if result.outputs:
                 try:
-                    outputs = result.outputs.get()
-                except TypeError:
+                    outputs = result.outputs.trait_get()
+                except AttributeError:
                     outputs = result.outputs.dictcopy()  # outputs == Bunch
                 try:
                     result.outputs.set(
@@ -1391,19 +1391,19 @@ def clean_working_directory(outputs,
     """
     if not outputs:
         return
-    outputs_to_keep = list(outputs.get().keys())
+    outputs_to_keep = list(outputs.trait_get().keys())
     if needed_outputs and \
        str2bool(config['execution']['remove_unnecessary_outputs']):
         outputs_to_keep = needed_outputs
     # build a list of needed files
     output_files = []
-    outputdict = outputs.get()
+    outputdict = outputs.trait_get()
     for output in outputs_to_keep:
         output_files.extend(walk_outputs(outputdict[output]))
     needed_files = [path for path, type in output_files if type == 'f']
     if str2bool(config['execution']['keep_inputs']):
         input_files = []
-        inputdict = inputs.get()
+        inputdict = inputs.trait_get()
         input_files.extend(walk_outputs(inputdict))
         needed_files += [path for path, type in input_files if type == 'f']
     for extra in [
@@ -1435,7 +1435,7 @@ def clean_working_directory(outputs,
     else:
         if not str2bool(config['execution']['keep_inputs']):
             input_files = []
-            inputdict = inputs.get()
+            inputdict = inputs.trait_get()
             input_files.extend(walk_outputs(inputdict))
             input_files = [path for path, type in input_files if type == 'f']
             for f in walk_files(cwd):
