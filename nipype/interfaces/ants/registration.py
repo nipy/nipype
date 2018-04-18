@@ -17,7 +17,6 @@ class ANTSInputSpec(ANTSCommandInputSpec):
         3,
         2,
         argstr='%d',
-        usedefault=False,
         position=1,
         desc='image dimension (2 or 3)')
     fixed_image = InputMultiPath(

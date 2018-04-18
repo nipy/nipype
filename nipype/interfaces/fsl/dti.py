@@ -851,7 +851,6 @@ class ProbTrackX2InputSpec(ProbTrackXBaseInputSpec):
     simple = traits.Bool(
         desc=('rack from a list of voxels (seed must be a '
               'ASCII list of coordinates)'),
-        usedefault=False,
         argstr='--simple')
     fopd = File(
         exists=True,

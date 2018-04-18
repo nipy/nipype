@@ -394,8 +394,6 @@ class ConvertInputSpec(CommandLineInputSpec):
         low=0,
         desc=
         'Set the target block size for chunking (0 default, >1 block size).',
-        value=0,
-        usedefault=False,
         argstr='-chunk %d',
     )
 
@@ -621,8 +619,6 @@ class DumpInputSpec(StdOutCommandLineInputSpec):
     line_length = traits.Range(
         low=0,
         desc='Line length maximum in data section (default 80).',
-        value=80,
-        usedefault=False,
         argstr='-l %d')
 
     netcdf_name = traits.Str(
@@ -1049,8 +1045,6 @@ class CalcInputSpec(CommandLineInputSpec):
     max_buffer_size_in_kb = traits.Range(
         low=0,
         desc='Specify the maximum size of the internal buffers (in kbytes).',
-        value=0,
-        usedefault=False,
         argstr='-max_buffer_size_in_kb %d')
 
     _xor_check_dimensions = (
@@ -1123,10 +1117,8 @@ class CalcInputSpec(CommandLineInputSpec):
              )))
 
     eval_width = traits.Int(
-        200,
         desc='Number of voxels to evaluate simultaneously.',
-        argstr='-eval_width %s',
-        usedefault=False)
+        argstr='-eval_width %s')
 
 
 class CalcOutputSpec(TraitedSpec):

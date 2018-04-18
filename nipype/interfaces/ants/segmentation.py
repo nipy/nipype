@@ -1063,7 +1063,6 @@ class DenoiseImageInputSpec(ANTSCommandInputSpec):
         3,
         4,
         argstr='-d %d',
-        usedefault=False,
         desc='This option forces the image to be treated '
         'as a specified-dimensional image. If not '
         'specified, the program tries to infer the '
@@ -1163,7 +1162,6 @@ class AntsJointFusionInputSpec(ANTSCommandInputSpec):
         2,
         4,
         argstr='-d %d',
-        usedefault=False,
         desc='This option forces the image to be treated '
         'as a specified-dimensional image. If not '
         'specified, the program tries to infer the '
@@ -1231,7 +1229,6 @@ class AntsJointFusionInputSpec(ANTSCommandInputSpec):
         'PC',
         'MSQ',
         argstr='-m %s',
-        usedefault=False,
         desc=('Metric to be used in determining the most similar '
               'neighborhood patch. Options include Pearson\'s '
               'correlation (PC) and mean squares (MSQ). Default = '

@@ -2292,9 +2292,7 @@ class NormalizeInputSpec(FSTraitedSpec):
         desc="The output file for Normalize")
     # optional
     gradient = traits.Int(
-        1,
         argstr="-g %d",
-        usedefault=False,
         desc="use max intensity/mm gradient g (default=1)")
     mask = File(
         argstr="-mask %s",

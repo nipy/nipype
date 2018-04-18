@@ -6,10 +6,7 @@ from ..segmentation import DenoiseImage
 def test_DenoiseImage_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        dimension=dict(
-            argstr='-d %d',
-            usedefault=False,
-        ),
+        dimension=dict(argstr='-d %d', ),
         environ=dict(
             nohash=True,
             usedefault=True,
