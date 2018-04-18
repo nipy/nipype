@@ -272,6 +272,9 @@ class InterfaceChecker(object):
                     if key == 'mandatory' and trait.mandatory is not None and not trait.mandatory:
                         bad_specs.append(
                             [uri, c, 'Inputs', traitname, 'mandatory=False'])
+                    if key == "usedefault" and trait.__dict__[key] == False:
+                        bad_specs.append(
+                            [uri, c, 'Inputs', traitname, 'usedefault=False'])
                 # checking if traits that have default_value different that the trits default one
                 # also have `usedefault` specified;
                 # excluding TraitCompound
