@@ -56,7 +56,7 @@ class Level1DesignInputSpec(BaseInterfaceInputSpec):
         desc=("which regressors to make orthogonal e.g., "
               "{1: {0:0,1:0,2:0}, 2: {0:1,1:1,2:0}} to make the second "
               "regressor in a 2-regressor model orthogonal to the first."),
-        value={}, usedefault=True)
+        usedefault=True)
     model_serial_correlations = traits.Bool(
         desc="Option to model serial correlations using an \
 autoregressive estimator (order 1). Setting this option is only \

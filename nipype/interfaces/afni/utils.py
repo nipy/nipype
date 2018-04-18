@@ -1625,7 +1625,6 @@ class NwarpApplyInputSpec(CommandLineInputSpec):
         argstr='-interp %s',
         usedefault=True)
     ainterp = traits.Enum(
-        'wsinc5',
         'NN',
         'nearestneighbour',
         'nearestneighbor',
@@ -1635,10 +1634,10 @@ class NwarpApplyInputSpec(CommandLineInputSpec):
         'tricubic',
         'quintic',
         'triquintic',
+        'wsinc5',
         desc='specify a different interpolation method than might '
         'be used for the warp',
-        argstr='-ainterp %s',
-        usedefault=True)
+        argstr='-ainterp %s')
     out_file = File(
         name_template='%s_Nwarp',
         desc='output image file name',
@@ -1671,7 +1670,7 @@ class NwarpApply(AFNICommandBase):
     >>> nwarp.inputs.master = 'NWARP'
     >>> nwarp.inputs.warp = "'Fred_WARP+tlrc Fred.Xaff12.1D'"
     >>> nwarp.cmdline
-    "3dNwarpApply -ainterp wsinc5 -source Fred+orig -interp wsinc5 -master NWARP -prefix Fred+orig_Nwarp -nwarp \'Fred_WARP+tlrc Fred.Xaff12.1D\'"
+    "3dNwarpApply -source Fred+orig -interp wsinc5 -master NWARP -prefix Fred+orig_Nwarp -nwarp \'Fred_WARP+tlrc Fred.Xaff12.1D\'"
     >>> res = nwarp.run()  # doctest: +SKIP
 
     """
@@ -1842,7 +1841,6 @@ class OneDToolPyInputSpec(AFNIPythonCommandInputSpec):
     show_cormat_warnings = traits.File(
         desc='Write cormat warnings to a file',
         argstr="-show_cormat_warnings |& tee %s",
-        usedefault=False,
         position=-1,
         xor=['out_file'])
     show_indices_interest = traits.Bool(

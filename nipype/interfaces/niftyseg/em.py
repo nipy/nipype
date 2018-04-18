@@ -62,7 +62,7 @@ class EMInputSpec(CommandLineInputSpec):
         argstr='-min_iter %s',
         default_value=0,
         usedefault=True,
-        desc='Minimun number of iterations')
+        desc='Minimum number of iterations')
 
     # other options
     bc_order_val = traits.Int(
