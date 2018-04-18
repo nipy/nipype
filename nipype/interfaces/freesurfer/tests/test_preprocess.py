@@ -132,7 +132,7 @@ def test_mandatory_outvol(create_files_in_directory):
         base, ext2 = os.path.splitext(base)
         ext = ext2 + ext
 
-    assert mni.cmdline == ('mri_nu_correct.mni --n 4 --i %s --o %s_output%s' %
+    assert mni.cmdline == ('mri_nu_correct.mni --i %s --n 4 --o %s_output%s' %
                            (filelist[0], base, ext))
 
     # test with custom outfile
