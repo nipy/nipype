@@ -426,11 +426,11 @@ class AllineateInputSpec(AFNICommandInputSpec):
     _dirs = ['X', 'Y', 'Z', 'I', 'J', 'K']
     nwarp_fixmot = traits.List(
         traits.Enum(*_dirs),
-        argstr='-nwarp_fixmot%s',
+        argstr='-nwarp_fixmot%s...',
         desc='To fix motion along directions.')
     nwarp_fixdep = traits.List(
         traits.Enum(*_dirs),
-        argstr='-nwarp_fixdep%s',
+        argstr='-nwarp_fixdep%s...',
         desc='To fix non-linear warp dependency along directions.')
     verbose = traits.Bool(
         argstr='-verb', desc='Print out verbose progress reports.')
@@ -467,7 +467,6 @@ class Allineate(AFNICommand):
     '3dAllineate -source functional.nii -prefix functional_allineate.nii -1Dmatrix_apply cmatrix.mat'
     >>> res = allineate.run()  # doctest: +SKIP
 
-    >>> from nipype.interfaces import afni
     >>> allineate = afni.Allineate()
     >>> allineate.inputs.in_file = 'functional.nii'
     >>> allineate.inputs.reference = 'structural.nii'
@@ -475,17 +474,19 @@ class Allineate(AFNICommand):
     >>> allineate.cmdline
     '3dAllineate -source functional.nii -base structural.nii -allcostx |& tee out.allcostX.txt'
     >>> res = allineate.run()  # doctest: +SKIP
+
+    >>> allineate = afni.Allineate()
+    >>> allineate.inputs.in_file = 'functional.nii'
+    >>> allineate.inputs.reference = 'structural.nii'
+    >>> allineate.inputs.nwarp_fixmot = ['X', 'Y']
+    >>> allineate.cmdline
+    '3dAllineate -source functional.nii -nwarp_fixmotX -nwarp_fixmotY -prefix functional_allineate -base structural.nii'
+    >>> res = allineate.run()  # doctest: +SKIP
     """
 
     _cmd = '3dAllineate'
     input_spec = AllineateInputSpec
     output_spec = AllineateOutputSpec
-
-    def _format_arg(self, name, trait_spec, value):
-        if name == 'nwarp_fixmot' or name == 'nwarp_fixdep':
-            arg = ' '.join([trait_spec.argstr % v for v in value])
-            return arg
-        return super(Allineate, self)._format_arg(name, trait_spec, value)
 
     def _list_outputs(self):
         outputs = super(Allineate, self)._list_outputs()
