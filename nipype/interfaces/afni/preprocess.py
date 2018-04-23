@@ -490,11 +490,11 @@ class Allineate(AFNICommand):
     def _list_outputs(self):
         outputs = super(Allineate, self)._list_outputs()
 
-        if isdefined(self.inputs.out_weight_file):
+        if self.inputs.out_weight_file:
             outputs['out_weight_file'] = op.abspath(
                 self.inputs.out_weight_file)
 
-        if isdefined(self.inputs.out_matrix):
+        if self.inputs.out_matrix:
             path, base, ext = split_filename(self.inputs.out_matrix)
             if ext.lower() not in ['.1d', '.1D']:
                 outputs['out_matrix'] = self._gen_fname(
@@ -502,7 +502,7 @@ class Allineate(AFNICommand):
             else:
                 outputs['out_matrix'] = op.abspath(self.inputs.out_matrix)
 
-        if isdefined(self.inputs.out_param_file):
+        if self.inputs.out_param_file:
             path, base, ext = split_filename(self.inputs.out_param_file)
             if ext.lower() not in ['.1d', '.1D']:
                 outputs['out_param_file'] = self._gen_fname(
@@ -511,9 +511,8 @@ class Allineate(AFNICommand):
                 outputs['out_param_file'] = op.abspath(
                     self.inputs.out_param_file)
 
-        if isdefined(self.inputs.allcostx):
-            outputs['allcostX'] = os.path.abspath(
-                os.path.join(os.getcwd(), self.inputs.allcostx))
+        if self.inputs.allcostx:
+            outputs['allcostX'] = os.path.abspath(self.inputs.allcostx)
         return outputs
 
 
