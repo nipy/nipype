@@ -1072,6 +1072,12 @@ class CommandLine(BaseInterface):
         if not isdefined(retval) or "%s" in retval:
             if not trait_spec.name_source:
                 return retval
+
+            # Do not generate filename when excluded by other inputs
+            if trait_spec.xor and any(isdefined(getattr(self.inputs, field))
+                                      for field in trait_spec.xor):
+                return retval
+
             if isdefined(retval) and "%s" in retval:
                 name_template = retval
             else:
