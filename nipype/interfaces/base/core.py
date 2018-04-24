@@ -1074,8 +1074,13 @@ class CommandLine(BaseInterface):
                 return retval
 
             # Do not generate filename when excluded by other inputs
-            if trait_spec.xor and any(isdefined(getattr(self.inputs, field))
-                                      for field in trait_spec.xor):
+            if any(isdefined(getattr(self.inputs, field))
+                   for field in trait_spec.xor or ()):
+                return retval
+
+            # Do not generate filename when required fields are missing
+            if not all(isdefined(getattr(self.inputs, field))
+                       for field in trait_spec.requires or ()):
                 return retval
 
             if isdefined(retval) and "%s" in retval:
