@@ -30,7 +30,7 @@ from ...utils.filemanip import (
     makedirs,
     fname_presuffix,
     to_str,
-    filename_to_list,
+    ensure_list,
     get_related_files,
     FileNotFoundError,
     save_json,
@@ -170,7 +170,7 @@ def write_report(node, report_type=None, is_mapnode=False):
 
     if is_mapnode:
         lines.append(write_rst_header('Subnode reports', level=1))
-        nitems = len(filename_to_list(getattr(node.inputs, node.iterfield[0])))
+        nitems = len(ensure_list(getattr(node.inputs, node.iterfield[0])))
         subnode_report_files = []
         for i in range(nitems):
             nodecwd = os.path.join(cwd, 'mapflow', '_%s%d' % (node.name, i),
@@ -1412,10 +1412,10 @@ def clean_working_directory(outputs,
     ]:
         needed_files.extend(glob(os.path.join(cwd, extra)))
     if files2keep:
-        needed_files.extend(filename_to_list(files2keep))
+        needed_files.extend(ensure_list(files2keep))
     needed_dirs = [path for path, type in output_files if type == 'd']
     if dirs2keep:
-        needed_dirs.extend(filename_to_list(dirs2keep))
+        needed_dirs.extend(ensure_list(dirs2keep))
     for extra in ['_nipype', '_report']:
         needed_dirs.extend(glob(os.path.join(cwd, extra)))
     temp = []

@@ -7,7 +7,7 @@ from __future__ import (print_function, division, unicode_literals,
 from builtins import range, str
 import os
 
-from ...utils.filemanip import filename_to_list
+from ...utils.filemanip import ensure_list
 from ..base import TraitedSpec, File, Str, traits, InputMultiPath, isdefined
 from .base import ANTSCommand, ANTSCommandInputSpec, LOCAL_DEFAULT_NUMBER_OF_THREADS
 
@@ -1088,14 +1088,14 @@ class Registration(ANTSCommand):
             if any((isdefined(self.inputs.fixed_image_masks),
                     isdefined(self.inputs.moving_image_masks))):
                 if isdefined(self.inputs.fixed_image_masks):
-                    fixed_masks = filename_to_list(
+                    fixed_masks = ensure_list(
                         self.inputs.fixed_image_masks)
                     fixed_mask = fixed_masks[ii if len(fixed_masks) > 1 else 0]
                 else:
                     fixed_mask = 'NULL'
 
                 if isdefined(self.inputs.moving_image_masks):
-                    moving_masks = filename_to_list(
+                    moving_masks = ensure_list(
                         self.inputs.moving_image_masks)
                     moving_mask = moving_masks[ii
                                                if len(moving_masks) > 1 else 0]
