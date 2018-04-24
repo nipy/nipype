@@ -24,8 +24,8 @@ from future import standard_library
 
 from ... import config, logging
 from ...utils.misc import flatten, unflatten, str2bool, dict_diff
-from ...utils.filemanip import (md5, FileNotFoundError, filename_to_list,
-                                list_to_filename, copyfiles, fnames_presuffix,
+from ...utils.filemanip import (md5, FileNotFoundError, ensure_list,
+                                simplify_list, copyfiles, fnames_presuffix,
                                 loadpkl, split_filename, load_json, makedirs,
                                 emptydirs, savepkl, to_str, indirectory)
 
@@ -531,8 +531,8 @@ class Node(EngineBase):
             else:
                 output_name = info[1]
                 try:
-                    output_value = results.outputs.get()[output_name]
-                except TypeError:
+                    output_value = results.outputs.trait_get()[output_name]
+                except AttributeError:
                     output_value = results.outputs.dictcopy()[output_name]
             logger.debug('output: %s', output_name)
             try:
@@ -678,11 +678,11 @@ class Node(EngineBase):
             makedirs(outdir, exist_ok=True)
 
         for info in self._interface._get_filecopy_info():
-            files = self.inputs.get().get(info['key'])
+            files = self.inputs.trait_get().get(info['key'])
             if not isdefined(files) or not files:
                 continue
 
-            infiles = filename_to_list(files)
+            infiles = ensure_list(files)
             if execute:
                 if linksonly:
                     if not info['copy']:
@@ -701,7 +701,7 @@ class Node(EngineBase):
             else:
                 newfiles = fnames_presuffix(infiles, newpath=outdir)
             if not isinstance(files, list):
-                newfiles = list_to_filename(newfiles)
+                newfiles = simplify_list(newfiles)
             setattr(self.inputs, info['key'], newfiles)
         if execute and linksonly:
             emptydirs(outdir, noexist_ok=True)
@@ -1084,7 +1084,7 @@ class MapNode(Node):
     @property
     def outputs(self):
         if self._interface._outputs():
-            return Bunch(self._interface._outputs().get())
+            return Bunch(self._interface._outputs().trait_get())
 
     def _make_nodes(self, cwd=None):
         if cwd is None:
@@ -1092,10 +1092,10 @@ class MapNode(Node):
         if self.nested:
             nitems = len(
                 flatten(
-                    filename_to_list(getattr(self.inputs, self.iterfield[0]))))
+                    ensure_list(getattr(self.inputs, self.iterfield[0]))))
         else:
             nitems = len(
-                filename_to_list(getattr(self.inputs, self.iterfield[0])))
+                ensure_list(getattr(self.inputs, self.iterfield[0])))
         for i in range(nitems):
             nodename = '_%s%d' % (self.name, i)
             node = Node(
@@ -1109,14 +1109,14 @@ class MapNode(Node):
                 name=nodename)
             node.plugin_args = self.plugin_args
             node.interface.inputs.trait_set(
-                **deepcopy(self._interface.inputs.get()))
+                **deepcopy(self._interface.inputs.trait_get()))
             node.interface.resource_monitor = self._interface.resource_monitor
             for field in self.iterfield:
                 if self.nested:
                     fieldvals = flatten(
-                        filename_to_list(getattr(self.inputs, field)))
+                        ensure_list(getattr(self.inputs, field)))
                 else:
-                    fieldvals = filename_to_list(getattr(self.inputs, field))
+                    fieldvals = ensure_list(getattr(self.inputs, field))
                 logger.debug('setting input %d %s %s', i, field, fieldvals[i])
                 setattr(node.inputs, field, fieldvals[i])
             node.config = self.config
@@ -1153,7 +1153,7 @@ class MapNode(Node):
                     if not isdefined(values):
                         values = []
                     if nresult and nresult.outputs:
-                        values.insert(i, nresult.outputs.get()[key])
+                        values.insert(i, nresult.outputs.trait_get()[key])
                     else:
                         values.insert(i, None)
                     defined_vals = [isdefined(val) for val in values]
@@ -1165,7 +1165,7 @@ class MapNode(Node):
                 values = getattr(finalresult.outputs, key)
                 if isdefined(values):
                     values = unflatten(values,
-                                       filename_to_list(
+                                       ensure_list(
                                            getattr(self.inputs,
                                                    self.iterfield[0])))
                 setattr(finalresult.outputs, key, values)
@@ -1196,12 +1196,12 @@ class MapNode(Node):
             return 1
         if self.nested:
             return len(
-                filename_to_list(
+                ensure_list(
                     flatten(getattr(self.inputs, self.iterfield[0]))))
-        return len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
+        return len(ensure_list(getattr(self.inputs, self.iterfield[0])))
 
     def _get_inputs(self):
-        old_inputs = self._inputs.get()
+        old_inputs = self._inputs.trait_get()
         self._inputs = self._create_dynamic_traits(
             self._interface.inputs, fields=self.iterfield)
         self._inputs.trait_set(**old_inputs)
@@ -1219,10 +1219,10 @@ class MapNode(Node):
                                   "in iterfields.") % iterfield)
         if len(self.iterfield) > 1:
             first_len = len(
-                filename_to_list(getattr(self.inputs, self.iterfield[0])))
+                ensure_list(getattr(self.inputs, self.iterfield[0])))
             for iterfield in self.iterfield[1:]:
                 if first_len != len(
-                        filename_to_list(getattr(self.inputs, iterfield))):
+                        ensure_list(getattr(self.inputs, iterfield))):
                     raise ValueError(
                         ("All iterfields of a MapNode have to "
                          "have the same length. %s") % str(self.inputs))
@@ -1241,11 +1241,11 @@ class MapNode(Node):
         # Set up mapnode folder names
         if self.nested:
             nitems = len(
-                filename_to_list(
+                ensure_list(
                     flatten(getattr(self.inputs, self.iterfield[0]))))
         else:
             nitems = len(
-                filename_to_list(getattr(self.inputs, self.iterfield[0])))
+                ensure_list(getattr(self.inputs, self.iterfield[0])))
         nnametpl = '_%s{}' % self.name
         nodenames = [nnametpl.format(i) for i in range(nitems)]
 

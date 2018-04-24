@@ -15,13 +15,13 @@ import nibabel as nb
 from io import open
 from builtins import str
 
-from nipype.utils.filemanip import filename_to_list
+from nipype.utils.filemanip import ensure_list
 from nipype.interfaces.fsl import Info
 from nipype.interfaces.fsl.base import FSLCommand
 
 
 def analyze_pair_image_files(outdir, filelist, shape):
-    for f in filename_to_list(filelist):
+    for f in ensure_list(filelist):
         hdr = nb.Nifti1Header()
         hdr.set_data_shape(shape)
         img = np.random.random(shape)
@@ -30,7 +30,7 @@ def analyze_pair_image_files(outdir, filelist, shape):
 
 
 def nifti_image_files(outdir, filelist, shape):
-    for f in filename_to_list(filelist):
+    for f in ensure_list(filelist):
         img = np.random.random(shape)
         nb.Nifti1Image(img, np.eye(4), None).to_filename(
             os.path.join(outdir, f))

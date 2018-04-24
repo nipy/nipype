@@ -10,18 +10,10 @@ import numpy as np
 import networkx as nx
 
 from ... import logging
-from ...utils.misc import package_check
-from ..base import (BaseInterface, BaseInterfaceInputSpec, traits, File,
+from ..base import (LibraryBaseInterface, BaseInterfaceInputSpec, traits, File,
                     TraitedSpec, InputMultiPath, OutputMultiPath, isdefined)
+from .base import have_cv
 iflogger = logging.getLogger('interface')
-
-have_cv = True
-try:
-    package_check('cviewer')
-except Exception as e:
-    have_cv = False
-else:
-    import cviewer.libs.pyconto.groupstatistics.nbs as nbs
 
 
 def ntwks_to_matrices(in_files, edge_key):
@@ -92,7 +84,7 @@ class NetworkBasedStatisticOutputSpec(TraitedSpec):
         desc='Output network with edges identified by the NBS')
 
 
-class NetworkBasedStatistic(BaseInterface):
+class NetworkBasedStatistic(LibraryBaseInterface):
     """
     Calculates and outputs the average network given a set of input NetworkX gpickle files
 
@@ -111,11 +103,10 @@ class NetworkBasedStatistic(BaseInterface):
     """
     input_spec = NetworkBasedStatisticInputSpec
     output_spec = NetworkBasedStatisticOutputSpec
+    _pkg = 'cviewer'
 
     def _run_interface(self, runtime):
-
-        if not have_cv:
-            raise ImportError("cviewer library is not available")
+        from cviewer.libs.pyconto.groupstatistics import nbs
 
         THRESH = self.inputs.threshold
         K = self.inputs.number_of_permutations

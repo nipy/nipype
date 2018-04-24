@@ -776,9 +776,9 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
 
     # replaces the functionality of a "for loop"
     def cartesian_product(fwhms, in_files, usans, btthresh):
-        from nipype.utils.filemanip import filename_to_list
+        from nipype.utils.filemanip import ensure_list
         # ensure all inputs are lists
-        in_files = filename_to_list(in_files)
+        in_files = ensure_list(in_files)
         fwhms = [fwhms] if isinstance(fwhms, (int, float)) else fwhms
         # create cartesian product lists (s_<name> = single element of list)
         cart_in_file = [

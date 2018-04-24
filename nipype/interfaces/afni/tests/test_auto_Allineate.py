@@ -61,12 +61,14 @@ def test_Allineate_inputs():
             usedefault=True,
         ),
         nwarp=dict(argstr='-nwarp %s', ),
-        nwarp_fixdep=dict(argstr='-nwarp_fixdep%s', ),
-        nwarp_fixmot=dict(argstr='-nwarp_fixmot%s', ),
+        nwarp_fixdep=dict(argstr='-nwarp_fixdep%s...', ),
+        nwarp_fixmot=dict(argstr='-nwarp_fixmot%s...', ),
         one_pass=dict(argstr='-onepass', ),
         out_file=dict(
             argstr='-prefix %s',
-            genfile=True,
+            hash_files=False,
+            name_source='in_file',
+            name_template='%s_allineate',
             xor=['allcostx'],
         ),
         out_matrix=dict(

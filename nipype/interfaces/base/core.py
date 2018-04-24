@@ -1072,6 +1072,12 @@ class CommandLine(BaseInterface):
         if not isdefined(retval) or "%s" in retval:
             if not trait_spec.name_source:
                 return retval
+
+            # Do not generate filename when excluded by other inputs
+            if trait_spec.xor and any(isdefined(getattr(self.inputs, field))
+                                      for field in trait_spec.xor):
+                return retval
+
             if isdefined(retval) and "%s" in retval:
                 name_template = retval
             else:
@@ -1133,7 +1139,7 @@ class CommandLine(BaseInterface):
         metadata = dict(name_source=lambda t: t is not None)
         traits = self.inputs.traits(**metadata)
         if traits:
-            outputs = self.output_spec().get()
+            outputs = self.output_spec().trait_get()
             for name, trait_spec in list(traits.items()):
                 out_name = name
                 if trait_spec.output_name is not None:
@@ -1237,7 +1243,7 @@ class SEMLikeCommandLine(CommandLine):
     """
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        outputs = self.output_spec().trait_get()
         return self._outputs_from_inputs(outputs)
 
     def _outputs_from_inputs(self, outputs):
@@ -1265,6 +1271,35 @@ class SEMLikeCommandLine(CommandLine):
                 else:
                     return ""
         return super(SEMLikeCommandLine, self)._format_arg(name, spec, value)
+
+
+class LibraryBaseInterface(BaseInterface):
+    _pkg = None
+    imports = ()
+
+    def __init__(self, check_import=True, *args, **kwargs):
+        super(LibraryBaseInterface, self).__init__(*args, **kwargs)
+        if check_import:
+            import importlib
+            failed_imports = []
+            for pkg in (self._pkg,) + tuple(self.imports):
+                try:
+                    importlib.import_module(pkg)
+                except ImportError:
+                    failed_imports.append(pkg)
+            if failed_imports:
+                iflogger.warn('Unable to import %s; %s interface may fail to '
+                              'run', failed_imports, self.__class__.__name__)
+
+    @property
+    def version(self):
+        if self._version is None:
+            import importlib
+            try:
+                self._version = importlib.import_module(self._pkg).__version__
+            except (ImportError, AttributeError):
+                pass
+        return super(LibraryBaseInterface, self).version
 
 
 class PackageInfo(object):

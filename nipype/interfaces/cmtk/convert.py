@@ -8,18 +8,10 @@ import datetime
 import string
 import networkx as nx
 
-from ...utils.misc import package_check
 from ...utils.filemanip import split_filename
-from ..base import (BaseInterface, BaseInterfaceInputSpec, traits, File,
+from ..base import (BaseInterfaceInputSpec, traits, File,
                     TraitedSpec, InputMultiPath, isdefined)
-
-have_cfflib = True
-try:
-    package_check('cfflib')
-except Exception as e:
-    have_cfflib = False
-else:
-    import cfflib as cf
+from .base import CFFBaseInterface, have_cfflib
 
 
 class CFFConverterInputSpec(BaseInterfaceInputSpec):
@@ -67,7 +59,7 @@ class CFFConverterOutputSpec(TraitedSpec):
     connectome_file = File(exists=True, desc='Output connectome file')
 
 
-class CFFConverter(BaseInterface):
+class CFFConverter(CFFBaseInterface):
     """
     Creates a Connectome File Format (CFF) file from input networks, surfaces, volumes, tracts, etcetera....
 
@@ -87,6 +79,7 @@ class CFFConverter(BaseInterface):
     output_spec = CFFConverterOutputSpec
 
     def _run_interface(self, runtime):
+        import cfflib as cf
         a = cf.connectome()
 
         if isdefined(self.inputs.title):
@@ -232,7 +225,7 @@ class MergeCNetworksOutputSpec(TraitedSpec):
         exists=True, desc='Output CFF file with all the networks added')
 
 
-class MergeCNetworks(BaseInterface):
+class MergeCNetworks(CFFBaseInterface):
     """ Merges networks from multiple CFF files into one new CFF file.
 
     Example
@@ -248,6 +241,7 @@ class MergeCNetworks(BaseInterface):
     output_spec = MergeCNetworksOutputSpec
 
     def _run_interface(self, runtime):
+        import cfflib as cf
         extracted_networks = []
 
         for i, con in enumerate(self.inputs.in_files):

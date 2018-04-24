@@ -14,8 +14,8 @@ from copy import deepcopy
 import numpy as np
 
 # Local imports
-from ...utils.filemanip import (fname_presuffix, filename_to_list,
-                                list_to_filename, split_filename)
+from ...utils.filemanip import (fname_presuffix, ensure_list,
+                                simplify_list, split_filename)
 from ..base import (OutputMultiPath, TraitedSpec, isdefined,
                     traits, InputMultiPath, File, Str)
 from .base import (SPMCommand, scans_for_fname, func_is_3d,
@@ -140,7 +140,7 @@ class FieldMap(SPMCommand):
         """Convert input to appropriate format for spm
         """
         if opt in ['phase_file', 'magnitude_file', 'anat_file', 'epi_file']:
-            return scans_for_fname(filename_to_list(val))
+            return scans_for_fname(ensure_list(val))
 
         return super(FieldMap, self)._format_arg(opt, spec, val)
 
@@ -232,14 +232,14 @@ class SliceTiming(SPMCommand):
         """
         if opt == 'in_files':
             return scans_for_fnames(
-                filename_to_list(val), keep4d=False, separate_sessions=True)
+                ensure_list(val), keep4d=False, separate_sessions=True)
         return super(SliceTiming, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['timecorrected_files'] = []
 
-        filelist = filename_to_list(self.inputs.in_files)
+        filelist = ensure_list(self.inputs.in_files)
         for f in filelist:
             if isinstance(f, list):
                 run = [
@@ -423,10 +423,10 @@ class Realign(SPMCommand):
             if resliced_all:
                 outputs['realigned_files'] = []
                 for idx, imgf in enumerate(
-                        filename_to_list(self.inputs.in_files)):
+                        ensure_list(self.inputs.in_files)):
                     realigned_run = []
                     if isinstance(imgf, list):
-                        for i, inner_imgf in enumerate(filename_to_list(imgf)):
+                        for i, inner_imgf in enumerate(ensure_list(imgf)):
                             newfile = fname_presuffix(
                                 inner_imgf, prefix=self.inputs.out_prefix)
                             realigned_run.append(newfile)
@@ -539,9 +539,9 @@ class Coregister(SPMCommand):
         """
         if (opt == 'target'
                 or (opt == 'source' and self.inputs.jobtype != "write")):
-            return scans_for_fnames(filename_to_list(val), keep4d=True)
+            return scans_for_fnames(ensure_list(val), keep4d=True)
         if opt == 'apply_to_files':
-            return np.array(filename_to_list(val), dtype=object)
+            return np.array(ensure_list(val), dtype=object)
         if opt == 'source' and self.inputs.jobtype == "write":
             if isdefined(self.inputs.apply_to_files):
                 return scans_for_fnames(val + self.inputs.apply_to_files)
@@ -571,12 +571,12 @@ class Coregister(SPMCommand):
               or self.inputs.jobtype == "estwrite"):
             if isdefined(self.inputs.apply_to_files):
                 outputs['coregistered_files'] = []
-                for imgf in filename_to_list(self.inputs.apply_to_files):
+                for imgf in ensure_list(self.inputs.apply_to_files):
                     (outputs['coregistered_files'].append(
                         fname_presuffix(imgf, prefix=self.inputs.out_prefix)))
 
             outputs['coregistered_source'] = []
-            for imgf in filename_to_list(self.inputs.source):
+            for imgf in ensure_list(self.inputs.source):
                 (outputs['coregistered_source'].append(
                     fname_presuffix(imgf, prefix=self.inputs.out_prefix)))
 
@@ -713,13 +713,13 @@ class Normalize(SPMCommand):
         """Convert input to appropriate format for spm
         """
         if opt == 'template':
-            return scans_for_fname(filename_to_list(val))
+            return scans_for_fname(ensure_list(val))
         if opt == 'source':
-            return scans_for_fname(filename_to_list(val))
+            return scans_for_fname(ensure_list(val))
         if opt == 'apply_to_files':
-            return scans_for_fnames(filename_to_list(val))
+            return scans_for_fnames(ensure_list(val))
         if opt == 'parameter_file':
-            return np.array([list_to_filename(val)], dtype=object)
+            return np.array([simplify_list(val)], dtype=object)
         if opt in ['write_wrap']:
             if len(val) != 3:
                 raise ValueError('%s must have 3 elements' % opt)
@@ -749,10 +749,10 @@ class Normalize(SPMCommand):
         jobtype = self.inputs.jobtype
         if jobtype.startswith('est'):
             outputs['normalization_parameters'] = []
-            for imgf in filename_to_list(self.inputs.source):
+            for imgf in ensure_list(self.inputs.source):
                 outputs['normalization_parameters'].append(
                     fname_presuffix(imgf, suffix='_sn.mat', use_ext=False))
-            outputs['normalization_parameters'] = list_to_filename(
+            outputs['normalization_parameters'] = simplify_list(
                 outputs['normalization_parameters'])
 
         if self.inputs.jobtype == "estimate":
@@ -767,7 +767,7 @@ class Normalize(SPMCommand):
                 prefixNorm = self.inputs.out_prefix
             outputs['normalized_files'] = []
             if isdefined(self.inputs.apply_to_files):
-                filelist = filename_to_list(self.inputs.apply_to_files)
+                filelist = ensure_list(self.inputs.apply_to_files)
                 for f in filelist:
                     if isinstance(f, list):
                         run = [
@@ -779,7 +779,7 @@ class Normalize(SPMCommand):
                     outputs['normalized_files'].extend(run)
             if isdefined(self.inputs.source):
                 outputs['normalized_source'] = []
-                for imgf in filename_to_list(self.inputs.source):
+                for imgf in ensure_list(self.inputs.source):
                     outputs['normalized_source'].append(
                         fname_presuffix(imgf, prefix=prefixNorm))
 
@@ -939,13 +939,13 @@ class Normalize12(SPMCommand):
         """Convert input to appropriate format for spm
         """
         if opt == 'tpm':
-            return scans_for_fname(filename_to_list(val))
+            return scans_for_fname(ensure_list(val))
         if opt == 'image_to_align':
-            return scans_for_fname(filename_to_list(val))
+            return scans_for_fname(ensure_list(val))
         if opt == 'apply_to_files':
-            return scans_for_fnames(filename_to_list(val))
+            return scans_for_fnames(ensure_list(val))
         if opt == 'deformation_file':
-            return np.array([list_to_filename(val)], dtype=object)
+            return np.array([simplify_list(val)], dtype=object)
         if opt in ['nonlinear_regularization']:
             if len(val) != 5:
                 raise ValueError('%s must have 5 elements' % opt)
@@ -976,10 +976,10 @@ class Normalize12(SPMCommand):
         jobtype = self.inputs.jobtype
         if jobtype.startswith('est'):
             outputs['deformation_field'] = []
-            for imgf in filename_to_list(self.inputs.image_to_align):
+            for imgf in ensure_list(self.inputs.image_to_align):
                 outputs['deformation_field'].append(
                     fname_presuffix(imgf, prefix='y_'))
-            outputs['deformation_field'] = list_to_filename(
+            outputs['deformation_field'] = simplify_list(
                 outputs['deformation_field'])
 
         if self.inputs.jobtype == "estimate":
@@ -990,7 +990,7 @@ class Normalize12(SPMCommand):
         elif 'write' in self.inputs.jobtype:
             outputs['normalized_files'] = []
             if isdefined(self.inputs.apply_to_files):
-                filelist = filename_to_list(self.inputs.apply_to_files)
+                filelist = ensure_list(self.inputs.apply_to_files)
                 for f in filelist:
                     if isinstance(f, list):
                         run = [fname_presuffix(in_f, prefix='w') for in_f in f]
@@ -1489,7 +1489,7 @@ class Smooth(SPMCommand):
 
     def _format_arg(self, opt, spec, val):
         if opt in ['in_files']:
-            return scans_for_fnames(filename_to_list(val))
+            return scans_for_fnames(ensure_list(val))
         if opt == 'fwhm':
             if not isinstance(val, list):
                 return [val, val, val]
@@ -1505,7 +1505,7 @@ class Smooth(SPMCommand):
         outputs = self._outputs().get()
         outputs['smoothed_files'] = []
 
-        for imgf in filename_to_list(self.inputs.in_files):
+        for imgf in ensure_list(self.inputs.in_files):
             outputs['smoothed_files'].append(
                 fname_presuffix(imgf, prefix=self.inputs.out_prefix))
         return outputs
