@@ -446,18 +446,19 @@ class FuzzyOverlap(SimpleInterface):
                 'Size of "in_tst" %s must match that of "in_ref" %s.' %
                 (tstdata.shape, refdata.shape))
 
+        ncomp = refdata.shape[-1]
+
         # Load mask
-        mask = np.ones_like(refdata[..., 0], dtype=bool)
+        mask = np.ones_like(refdata, dtype=bool)
         if isdefined(self.inputs.in_mask):
             mask = nb.load(self.inputs.in_mask).get_data()
             mask = mask > 0
-            assert mask.shape == refdata.shape[:-1]
-
-        ncomp = refdata.shape[-1]
+            mask = np.repeat(mask[..., np.newaxis], ncomp, -1)
+            assert mask.shape == refdata.shape
 
         # Drop data outside mask
-        refdata = refdata[mask[..., np.newaxis]]
-        tstdata = tstdata[mask[..., np.newaxis]]
+        refdata = refdata[mask]
+        tstdata = tstdata[mask]
 
         if np.any(refdata < 0.0):
             iflogger.warning('Negative values encountered in "in_ref" input, '
