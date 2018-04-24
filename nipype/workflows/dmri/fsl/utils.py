@@ -133,6 +133,10 @@ def dwi_flirt(name='DWICoregistration', excl_nodiff=False, flirt_param={}):
         name='ApplyXFMs',
         iterfield=['in_file', 'in_matrix_file']
     )
+    thres = pe.MapNode(
+        fsl.Threshold(thresh=0.0),
+        iterfield=['in_file'],
+        name='RemoveNegative')
     merge = pe.Node(fsl.Merge(dimension='t'), name='MergeDWIs')
     outputnode = pe.Node(
         niu.IdentityInterface(fields=['out_file', 'out_xfms']),
@@ -157,7 +161,8 @@ def dwi_flirt(name='DWICoregistration', excl_nodiff=False, flirt_param={}):
         (enhdw, flirt, [('out_file', 'in_file')]),
         (initmat, flirt, [('init_xfms', 'in_matrix_file')]),
         (flirt, apply_xfms, [('out_matrix_file', 'in_matrix_file')]),
-        (apply_xfms, merge, [('out_file', 'in_files')]),
+        (apply_xfms, thres, [('out_file', 'in_file')]),
+        (thres, merge, [('out_file', 'in_files')]),
         (merge, outputnode, [('merged_file', 'out_file')]),
         (flirt, outputnode, [('out_matrix_file', 'out_xfms')])
     ])
