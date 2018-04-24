@@ -66,13 +66,11 @@ class FitDwiInputSpec(CommandLineInputSpec):
         argstr='-nodiff %s')
 
     # Output options, with templated output names based on the source image
-    desc = 'Filename of multi-compartment model parameter map \
-(-ivim,-ball,-nod)'
-
     mcmap_file = traits.File(
         name_source=['source_file'],
         name_template='%s_mcmap.nii.gz',
-        desc=desc,
+        desc='Filename of multi-compartment model parameter map '
+             '(-ivim,-ball,-nod)',
         argstr='-mcmap %s',
         requires=['nodv_flag'])
 
@@ -239,10 +237,7 @@ identity covariance...).'
 
 class FitDwiOutputSpec(TraitedSpec):
     """ Output Spec for FitDwi. """
-    desc = 'Filename of multi-compartment model parameter map \
-(-ivim,-ball,-nod)'
 
-    mcmap_file = traits.File(desc=desc)
     error_file = traits.File(desc='Filename of parameter error maps')
     res_file = traits.File(desc='Filename of model residual map')
     syn_file = traits.File(desc='Filename of synthetic image')
@@ -253,10 +248,9 @@ class FitDwiOutputSpec(TraitedSpec):
     rgbmap_file = traits.File(desc='Filename of colour FA map')
     tenmap_file = traits.File(desc='Filename of tensor map')
     tenmap2_file = traits.File(desc='Filename of tensor map [lower tri]')
-    desc = 'Filename of multi-compartment model parameter map \
-(-ivim,-ball,-nod).'
 
-    mcmap_file = traits.File(desc=desc)
+    mcmap_file = traits.File(desc='Filename of multi-compartment model '
+                                  'parameter map (-ivim,-ball,-nod).')
     mcout = traits.File(desc='Filename of mc samples (ascii text file)')
 
 
@@ -281,10 +275,10 @@ class FitDwi(NiftyFitCommand):
     >>> fit_dwi.inputs.rgbmap_file = 'rgb.nii.gz'
     >>> fit_dwi.cmdline
     'fit_dwi -source dwi.nii.gz -bval bvals -bvec bvecs -dti \
--error dwi_error.nii.gz -famap dwi_famap.nii.gz -mcmap dwi_mcmap.nii.gz \
--mcout dwi_mcout.txt -mdmap dwi_mdmap.nii.gz -nodiff dwi_no_diff.nii.gz \
--res dwi_resmap.nii.gz -rgbmap rgb.nii.gz -syn dwi_syn.nii.gz \
--tenmap2 dwi_tenmap2.nii.gz  -v1map dwi_v1map.nii.gz'
+-error dwi_error.nii.gz -famap dwi_famap.nii.gz -mcout dwi_mcout.txt \
+-mdmap dwi_mdmap.nii.gz -nodiff dwi_no_diff.nii.gz -res dwi_resmap.nii.gz \
+-rgbmap rgb.nii.gz -syn dwi_syn.nii.gz -tenmap2 dwi_tenmap2.nii.gz \
+-v1map dwi_v1map.nii.gz'
 
     """
     _cmd = get_custom_path('fit_dwi', env_dir='NIFTYFITDIR')
