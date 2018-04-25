@@ -22,7 +22,7 @@ class ActivationCountInputSpec(BaseInterfaceInputSpec):
                               desc='input file, generally a list of z-stat maps')
     threshold = traits.Float(
         mandatory=True, desc='binarization threshold. E.g. a threshold of 1.65 '
-                             'corresponds to a two-sided test of p<.10')
+                             'corresponds to a two-sided Z-test of p<.10')
 
 
 class ActivationCountOutputSpec(TraitedSpec):
