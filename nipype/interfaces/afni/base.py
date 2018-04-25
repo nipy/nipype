@@ -87,8 +87,7 @@ class Info(PackageInfo):
         Could be made more fancy to allow for more relocatability'''
         clout = CommandLine(
             'which afni',
-            resource_monitor=False,
-            terminal_output='allatonce').run()
+            resource_monitor=False).run()
         if clout.runtime.returncode is not 0:
             return None
 

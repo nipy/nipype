@@ -66,8 +66,7 @@ class SLURMPlugin(SGELikeBatchManagerBase):
         res = CommandLine(
             'squeue',
             args=' '.join(['-j', '%s' % taskid]),
-            resource_monitor=False,
-            terminal_output='allatonce').run()
+            resource_monitor=False).run()
         return res.runtime.stdout.find(str(taskid)) > -1
 
     def _submit_batchtask(self, scriptfile, node):
@@ -79,8 +78,7 @@ class SLURMPlugin(SGELikeBatchManagerBase):
         cmd = CommandLine(
             'sbatch',
             environ=dict(os.environ),
-            resource_monitor=False,
-            terminal_output='allatonce')
+            resource_monitor=False)
         path = os.path.dirname(scriptfile)
 
         sbatch_args = ''

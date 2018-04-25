@@ -392,8 +392,7 @@ class SGEPlugin(SGELikeBatchManagerBase):
         cmd = CommandLine(
             'qsub',
             environ=dict(os.environ),
-            resource_monitor=False,
-            terminal_output='allatonce')
+            resource_monitor=False)
         path = os.path.dirname(scriptfile)
         qsubargs = ''
         if self._qsub_args:

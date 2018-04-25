@@ -49,7 +49,7 @@ class CondorPlugin(SGELikeBatchManagerBase):
 
     def _is_pending(self, taskid):
         cmd = CommandLine(
-            'condor_q', resource_monitor=False, terminal_output='allatonce')
+            'condor_q', resource_monitor=False)
         cmd.inputs.args = '%d' % taskid
         # check condor cluster
         oldlevel = iflogger.level
@@ -64,8 +64,7 @@ class CondorPlugin(SGELikeBatchManagerBase):
         cmd = CommandLine(
             'condor_qsub',
             environ=dict(os.environ),
-            resource_monitor=False,
-            terminal_output='allatonce')
+            resource_monitor=False)
         path = os.path.dirname(scriptfile)
         qsubargs = ''
         if self._qsub_args:

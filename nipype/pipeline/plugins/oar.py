@@ -69,8 +69,7 @@ class OARPlugin(SGELikeBatchManagerBase):
         cmd = CommandLine(
             'oarsub',
             environ=dict(os.environ),
-            resource_monitor=False,
-            terminal_output='allatonce')
+            resource_monitor=False)
         path = os.path.dirname(scriptfile)
         oarsubargs = ''
         if self._oarsub_args:
