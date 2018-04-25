@@ -54,7 +54,7 @@ class CondorPlugin(SGELikeBatchManagerBase):
         # check condor cluster
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName('CRITICAL'))
-        result = cmd.run(ignore_exception=True)
+        result = cmd.run()
         iflogger.setLevel(oldlevel)
         if result.runtime.stdout.count('\n%d' % taskid):
             return True
