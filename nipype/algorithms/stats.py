@@ -20,9 +20,9 @@ from ..utils.filemanip import split_filename
 class ActivationCountInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True,
                               desc='input file, generally a list of z-stat maps')
-    threshold = traits.Float(1.65, usedefault=True,
-                             desc='binarization threshold. A z-value of 1.65 '
-                                  'corresponds to a two-sided test of p<.10')
+    threshold = traits.Float(
+        mandatory=True, desc='binarization threshold. E.g. a threshold of 1.65 '
+                             'corresponds to a two-sided test of p<.10')
 
 
 class ActivationCountOutputSpec(TraitedSpec):
