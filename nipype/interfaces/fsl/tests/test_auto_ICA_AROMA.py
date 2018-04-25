@@ -54,7 +54,7 @@ def test_ICA_AROMA_inputs():
         ),
         out_dir=dict(
             argstr='-o %s',
-            genfile=True,
+            mandatory=True,
             usedefault=True,
         ),
         terminal_output=dict(
