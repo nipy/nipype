@@ -1123,6 +1123,9 @@ class CommandLine(BaseInterface):
                 base = self._filename_from_source(ns, chain)
                 if isdefined(base):
                     _, _, source_ext = split_filename(base)
+                else:
+                    # Do not generate filename when required fields are missing
+                    return retval
 
             chain = None
             retval = name_template % base
