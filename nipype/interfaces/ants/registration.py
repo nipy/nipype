@@ -7,7 +7,7 @@ from __future__ import (print_function, division, unicode_literals,
 from builtins import range, str
 import os
 
-from ...utils.filemanip import filename_to_list
+from ...utils.filemanip import ensure_list
 from ..base import TraitedSpec, File, Str, traits, InputMultiPath, isdefined
 from .base import ANTSCommand, ANTSCommandInputSpec, LOCAL_DEFAULT_NUMBER_OF_THREADS
 
@@ -1088,14 +1088,14 @@ class Registration(ANTSCommand):
             if any((isdefined(self.inputs.fixed_image_masks),
                     isdefined(self.inputs.moving_image_masks))):
                 if isdefined(self.inputs.fixed_image_masks):
-                    fixed_masks = filename_to_list(
+                    fixed_masks = ensure_list(
                         self.inputs.fixed_image_masks)
                     fixed_mask = fixed_masks[ii if len(fixed_masks) > 1 else 0]
                 else:
                     fixed_mask = 'NULL'
 
                 if isdefined(self.inputs.moving_image_masks):
-                    moving_masks = filename_to_list(
+                    moving_masks = ensure_list(
                         self.inputs.moving_image_masks)
                     moving_mask = moving_masks[ii
                                                if len(moving_masks) > 1 else 0]
@@ -1556,7 +1556,7 @@ class RegistrationSynQuick(ANTSCommand):
     >>> reg.inputs.moving_image = 'moving1.nii'
     >>> reg.inputs.num_threads = 2
     >>> reg.cmdline
-    'antsRegistrationSynQuick.sh -d 3 -f fixed1.nii -m moving1.nii -n 2 -o transform -p d -t s'
+    'antsRegistrationSyNQuick.sh -d 3 -f fixed1.nii -m moving1.nii -n 2 -o transform -p d -t s'
     >>> reg.run()  # doctest: +SKIP
 
     example for multiple images
@@ -1567,19 +1567,18 @@ class RegistrationSynQuick(ANTSCommand):
     >>> reg.inputs.moving_image = ['moving1.nii', 'moving2.nii']
     >>> reg.inputs.num_threads = 2
     >>> reg.cmdline
-    'antsRegistrationSynQuick.sh -d 3 -f fixed1.nii -f fixed2.nii -m moving1.nii -m moving2.nii -n 2 -o transform -p d -t s'
+    'antsRegistrationSyNQuick.sh -d 3 -f fixed1.nii -f fixed2.nii -m moving1.nii -m moving2.nii -n 2 -o transform -p d -t s'
     >>> reg.run()  # doctest: +SKIP
     """
 
-
-    _cmd = 'antsRegistrationSynQuick.sh'
+    _cmd = 'antsRegistrationSyNQuick.sh'
     input_spec = RegistrationSynQuickInputSpec
     output_spec = RegistrationSynQuickOutputSpec
 
     def _num_threads_update(self):
         """
-        antsRegistrationSynQuick.sh ignores environment variables,
-        so override environment update frm ANTSCommand class
+        antsRegistrationSyNQuick.sh ignores environment variables,
+        so override environment update from ANTSCommand class
         """
         pass
 

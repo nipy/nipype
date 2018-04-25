@@ -10,6 +10,7 @@ def test_FuzzyOverlap_inputs():
             nohash=True,
             usedefault=True,
         ),
+        in_mask=dict(),
         in_ref=dict(mandatory=True, ),
         in_tst=dict(mandatory=True, ),
         out_file=dict(usedefault=True, ),
@@ -25,7 +26,6 @@ def test_FuzzyOverlap_outputs():
         class_fdi=dict(),
         class_fji=dict(),
         dice=dict(),
-        diff_file=dict(),
         jaccard=dict(),
     )
     outputs = FuzzyOverlap.output_spec()

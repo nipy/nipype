@@ -5,7 +5,12 @@ from ..utils import TVResampleTask
 
 def test_TVResampleTask_inputs():
     input_map = dict(
+        align=dict(argstr='-align %s', ),
         args=dict(argstr='%s', ),
+        array_size=dict(
+            argstr='-size %d %d %d',
+            xor=['target_file'],
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -15,35 +20,32 @@ def test_TVResampleTask_inputs():
             nohash=True,
             usedefault=True,
         ),
-        in_arraysz=dict(
-            argstr='-size %s',
-            exists=True,
-            mandatory=False,
-            position=1,
-        ),
         in_file=dict(
             argstr='-in %s',
-            exists=True,
             mandatory=True,
-            position=0,
         ),
-        in_voxsz=dict(
-            argstr='-vsize %s',
-            exists=True,
-            mandatory=False,
-            position=2,
+        interpolation=dict(argstr='-interp %s', ),
+        origin=dict(
+            argstr='-origin %g %g %g',
+            xor=['target_file'],
         ),
         out_file=dict(
             argstr='-out %s',
-            exists=True,
-            mandatory=False,
+            keep_extension=True,
             name_source='in_file',
-            name_template='%s_resampled.nii.gz',
-            position=3,
+            name_template='%s_resampled',
+        ),
+        target_file=dict(
+            argstr='-target %s',
+            xor=['array_size', 'voxel_size', 'origin'],
         ),
         terminal_output=dict(
             deprecated='1.0.0',
             nohash=True,
+        ),
+        voxel_size=dict(
+            argstr='-vsize %g %g %g',
+            xor=['target_file'],
         ),
     )
     inputs = TVResampleTask.input_spec()

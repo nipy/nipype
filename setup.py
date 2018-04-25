@@ -76,10 +76,7 @@ class BuildWithCommitInfoCommand(build_py):
             repo_commit = repo_commit.decode()
 
         # We write the installation commit even if it's empty
-        if PY3:
-            cfg_parser = configparser.RawConfigParser()
-        else:
-            cfg_parser = configparser.ConfigParser()
+        cfg_parser = configparser.RawConfigParser()
         cfg_parser.read(pjoin('nipype', 'COMMIT_INFO.txt'))
         cfg_parser.set('commit hash', 'install_hash', repo_commit.strip())
         out_pth = pjoin(self.build_lib, 'nipype', 'COMMIT_INFO.txt')

@@ -18,6 +18,7 @@ import os
 import os.path as op
 import re
 import shutil
+import contextlib
 import posixpath
 import simplejson as json
 import numpy as np
@@ -532,9 +533,9 @@ def copyfiles(filelist, dest, copy=False, create_new=False):
     None
 
     """
-    outfiles = filename_to_list(dest)
+    outfiles = ensure_list(dest)
     newfiles = []
-    for i, f in enumerate(filename_to_list(filelist)):
+    for i, f in enumerate(ensure_list(filelist)):
         if isinstance(f, list):
             newfiles.insert(i,
                             copyfiles(
@@ -549,7 +550,7 @@ def copyfiles(filelist, dest, copy=False, create_new=False):
     return newfiles
 
 
-def filename_to_list(filename):
+def ensure_list(filename):
     """Returns a list given either a string or a list
     """
     if isinstance(filename, (str, bytes)):
@@ -562,7 +563,7 @@ def filename_to_list(filename):
         return None
 
 
-def list_to_filename(filelist):
+def simplify_list(filelist):
     """Returns a list if filelist is a list of length greater than 1,
        otherwise returns the first element
     """
@@ -572,13 +573,17 @@ def list_to_filename(filelist):
         return filelist[0]
 
 
+filename_to_list = ensure_list
+list_to_filename = simplify_list
+
+
 def check_depends(targets, dependencies):
     """Return true if all targets exist and are newer than all dependencies.
 
     An OSError will be raised if there are missing dependencies.
     """
-    tgts = filename_to_list(targets)
-    deps = filename_to_list(dependencies)
+    tgts = ensure_list(targets)
+    deps = ensure_list(dependencies)
     return all(map(op.exists, tgts)) and \
         min(map(op.getmtime, tgts)) > \
         max(list(map(op.getmtime, deps)) + [0])
@@ -916,3 +921,13 @@ def relpath(path, start=None):
     if not rel_list:
         return os.curdir
     return op.join(*rel_list)
+
+
+@contextlib.contextmanager
+def indirectory(path):
+    cwd = os.getcwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(cwd)

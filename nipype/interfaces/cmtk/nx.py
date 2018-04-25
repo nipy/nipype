@@ -14,19 +14,11 @@ import scipy.io as sio
 
 from ... import logging
 from ...utils.filemanip import split_filename
-from ...utils.misc import package_check
 from ..base import (BaseInterface, BaseInterfaceInputSpec, traits, File,
                     TraitedSpec, InputMultiPath, OutputMultiPath, isdefined)
+from .base import have_cmp
 
 iflogger = logging.getLogger('interface')
-
-have_cmp = True
-try:
-    package_check('cmp')
-except Exception as e:
-    have_cmp = False
-else:
-    import cmp
 
 
 def read_unknown_ntwk(ntwk):

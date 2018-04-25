@@ -8,7 +8,7 @@ import os
 import numpy as np
 
 from ...utils.filemanip import (split_filename, fname_presuffix,
-                                filename_to_list, list_to_filename)
+                                ensure_list, simplify_list)
 from ..base import (TraitedSpec, isdefined, File, traits, OutputMultiPath,
                     InputMultiPath)
 from .base import (SPMCommandInputSpec, SPMCommand, scans_for_fnames,
@@ -316,13 +316,13 @@ class ApplyInverseDeformation(SPMCommand):
         """Convert input to appropriate format for spm
         """
         if opt == 'in_files':
-            return scans_for_fnames(filename_to_list(val))
+            return scans_for_fnames(ensure_list(val))
         if opt == 'target':
-            return scans_for_fname(filename_to_list(val))
+            return scans_for_fname(ensure_list(val))
         if opt == 'deformation':
-            return np.array([list_to_filename(val)], dtype=object)
+            return np.array([simplify_list(val)], dtype=object)
         if opt == 'deformation_field':
-            return np.array([list_to_filename(val)], dtype=object)
+            return np.array([simplify_list(val)], dtype=object)
         return val
 
     def _list_outputs(self):
@@ -392,13 +392,13 @@ class ResliceToReference(SPMCommand):
         """Convert input to appropriate format for spm
         """
         if opt == 'in_files':
-            return scans_for_fnames(filename_to_list(val))
+            return scans_for_fnames(ensure_list(val))
         if opt == 'target':
-            return scans_for_fname(filename_to_list(val))
+            return scans_for_fname(ensure_list(val))
         if opt == 'deformation':
-            return np.array([list_to_filename(val)], dtype=object)
+            return np.array([simplify_list(val)], dtype=object)
         if opt == 'deformation_field':
-            return np.array([list_to_filename(val)], dtype=object)
+            return np.array([simplify_list(val)], dtype=object)
         return val
 
     def _list_outputs(self):
