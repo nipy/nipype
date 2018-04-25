@@ -1258,10 +1258,10 @@ class AntsJointFusionInputSpec(ANTSCommandInputSpec):
     out_label_fusion = File(
         argstr="%s", hash_files=False, desc='The output label fusion image.')
     out_intensity_fusion_name_format = traits.Str(
-        'antsJointFusionIntensity_%d.nii.gz',
         argstr="",
         desc='Optional intensity fusion '
-        'image file name format.')
+        'image file name format. '
+        '(e.g. "antsJointFusionIntensity_%d.nii.gz")')
     out_label_post_prob_name_format = traits.Str(
         'antsJointFusionPosterior_%d.nii.gz',
         requires=['out_label_fusion', 'out_intensity_fusion_name_format'],
