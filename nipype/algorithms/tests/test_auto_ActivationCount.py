@@ -11,7 +11,7 @@ def test_ActivationCount_inputs():
             usedefault=True,
         ),
         in_files=dict(mandatory=True, ),
-        threshold=dict(usedefault=True, ),
+        threshold=dict(mandatory=True, ),
     )
     inputs = ActivationCount.input_spec()
 
