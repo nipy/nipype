@@ -38,7 +38,10 @@ def test_CatMatvec_inputs():
         ),
         out_file=dict(
             argstr=' > %s',
+            keep_extension=False,
             mandatory=True,
+            name_source='in_file',
+            name_template='%s_cat.aff12.1D',
             position=-1,
         ),
         outputtype=dict(),

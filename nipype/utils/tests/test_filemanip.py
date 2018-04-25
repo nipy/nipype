@@ -14,7 +14,7 @@ from ...utils.filemanip import (
     save_json, load_json, fname_presuffix, fnames_presuffix, hash_rename,
     check_forhash, _parse_mount_table, _cifs_table, on_cifs, copyfile,
     copyfiles, filename_to_list, list_to_filename, check_depends,
-    split_filename, get_related_files)
+    split_filename, get_related_files, indirectory)
 
 
 def _ignore_atime(stat):
@@ -490,3 +490,34 @@ def test_cifs_check():
 
     _cifs_table[:] = []
     _cifs_table.extend(orig_table)
+
+
+def test_indirectory(tmpdir):
+    tmpdir.chdir()
+
+    os.makedirs('subdir1/subdir2')
+    sd1 = os.path.abspath('subdir1')
+    sd2 = os.path.abspath('subdir1/subdir2')
+
+    assert os.getcwd() == tmpdir.strpath
+    with indirectory('/'):
+        assert os.getcwd() == '/'
+    assert os.getcwd() == tmpdir.strpath
+    with indirectory('subdir1'):
+        assert os.getcwd() == sd1
+        with indirectory('subdir2'):
+            assert os.getcwd() == sd2
+            with indirectory('..'):
+                assert os.getcwd() == sd1
+                with indirectory('/'):
+                    assert os.getcwd() == '/'
+                assert os.getcwd() == sd1
+            assert os.getcwd() == sd2
+        assert os.getcwd() == sd1
+    assert os.getcwd() == tmpdir.strpath
+    try:
+        with indirectory('subdir1'):
+            raise ValueError("Erroring out of context")
+    except ValueError:
+        pass
+    assert os.getcwd() == tmpdir.strpath

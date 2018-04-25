@@ -18,6 +18,7 @@ import os
 import os.path as op
 import re
 import shutil
+import contextlib
 import posixpath
 import simplejson as json
 import numpy as np
@@ -916,3 +917,13 @@ def relpath(path, start=None):
     if not rel_list:
         return os.curdir
     return op.join(*rel_list)
+
+
+@contextlib.contextmanager
+def indirectory(path):
+    cwd = os.getcwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(cwd)
