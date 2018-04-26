@@ -1074,8 +1074,13 @@ class CommandLine(BaseInterface):
                 return retval
 
             # Do not generate filename when excluded by other inputs
-            if trait_spec.xor and any(isdefined(getattr(self.inputs, field))
-                                      for field in trait_spec.xor):
+            if any(isdefined(getattr(self.inputs, field))
+                   for field in trait_spec.xor or ()):
+                return retval
+
+            # Do not generate filename when required fields are missing
+            if not all(isdefined(getattr(self.inputs, field))
+                       for field in trait_spec.requires or ()):
                 return retval
 
             if isdefined(retval) and "%s" in retval:
@@ -1118,6 +1123,9 @@ class CommandLine(BaseInterface):
                 base = self._filename_from_source(ns, chain)
                 if isdefined(base):
                     _, _, source_ext = split_filename(base)
+                else:
+                    # Do not generate filename when required fields are missing
+                    return retval
 
             chain = None
             retval = name_template % base
@@ -1144,8 +1152,9 @@ class CommandLine(BaseInterface):
                 out_name = name
                 if trait_spec.output_name is not None:
                     out_name = trait_spec.output_name
-                outputs[out_name] = \
-                    os.path.abspath(self._filename_from_source(name))
+                fname = self._filename_from_source(name)
+                if isdefined(fname):
+                    outputs[out_name] = os.path.abspath(fname)
             return outputs
 
     def _parse_inputs(self, skip=None):
