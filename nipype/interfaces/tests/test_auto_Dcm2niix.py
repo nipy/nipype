@@ -62,9 +62,7 @@ def test_Dcm2niix_inputs():
         source_names=dict(
             argstr='%s',
             copyfile=False,
-            deprecated='1.0.2',
             mandatory=True,
-            new_name='source_dir',
             position=-1,
             xor=['source_dir'],
         ),
