@@ -15,7 +15,10 @@ def test_ApplyTransforms_inputs():
             nohash=True,
             usedefault=True,
         ),
-        float=dict(argstr='--float %d', ),
+        float=dict(
+            argstr='--float %d',
+            usedefault=True,
+        ),
         ignore_exception=dict(
             deprecated='1.0.0',
             nohash=True,

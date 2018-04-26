@@ -29,6 +29,7 @@ def test_Registration_inputs():
         num_threads=dict(
             argstr='-threads %01d',
             nohash=True,
+            usedefault=True,
         ),
         output_path=dict(
             argstr='-out %s',

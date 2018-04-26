@@ -56,7 +56,7 @@ class Level1DesignInputSpec(BaseInterfaceInputSpec):
         desc=("which regressors to make orthogonal e.g., "
               "{1: {0:0,1:0,2:0}, 2: {0:1,1:1,2:0}} to make the second "
               "regressor in a 2-regressor model orthogonal to the first."),
-        default={})
+        usedefault=True)
     model_serial_correlations = traits.Bool(
         desc="Option to model serial correlations using an \
 autoregressive estimator (order 1). Setting this option is only \
@@ -525,7 +525,7 @@ class FILMGLSInputSpec(FSLCommandInputSpec):
     design_file = File(
         exists=True, position=-2, argstr='%s', desc='design matrix file')
     threshold = traits.Range(
-        default=1000.,
+        value=1000.,
         low=0.0,
         argstr='%f',
         position=-1,
@@ -589,7 +589,7 @@ class FILMGLSInputSpec505(FSLCommandInputSpec):
     design_file = File(
         exists=True, position=-2, argstr='--pd=%s', desc='design matrix file')
     threshold = traits.Range(
-        default=1000.,
+        value=1000.,
         low=0.0,
         argstr='--thr=%f',
         position=-1,
@@ -645,7 +645,7 @@ class FILMGLSInputSpec505(FSLCommandInputSpec):
 
 class FILMGLSInputSpec507(FILMGLSInputSpec505):
     threshold = traits.Float(
-        default=-1000.,
+        default_value=-1000.,
         argstr='--thr=%f',
         position=-1,
         usedefault=True,

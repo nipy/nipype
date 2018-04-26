@@ -28,7 +28,8 @@ class ICA_AROMAInputSpec(CommandLineInputSpec):
         xor=['feat_dir'],
         desc='volume to be denoised')
     out_dir = Directory(
-        'out', genfile=True, argstr='-o %s', desc='output directory')
+        'out', usedefault=True, mandatory=True,
+        argstr='-o %s', desc='output directory')
     mask = File(
         exists=True,
         argstr='-m %s',
@@ -128,10 +129,7 @@ class ICA_AROMA(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        if isdefined(self.inputs.out_dir):
-            outputs['out_dir'] = os.path.abspath(self.inputs.out_dir)
-        else:
-            outputs['out_dir'] = self._gen_filename('out_dir')
+        outputs['out_dir'] = os.path.abspath(self.inputs.out_dir)
         out_dir = outputs['out_dir']
 
         if self.inputs.denoise_type in ('aggr', 'both'):
@@ -141,7 +139,3 @@ class ICA_AROMA(CommandLine):
             outputs['nonaggr_denoised_file'] = os.path.join(
                 out_dir, 'denoised_func_data_nonaggr.nii.gz')
         return outputs
-
-    def _gen_filename(self, name):
-        if name == 'out_dir':
-            return os.getcwd()

@@ -358,7 +358,7 @@ class GLMFitInputSpec(FSTraitedSpec):
     force_perm = traits.Bool(
         argstr='--perm-force',
         desc='force perumtation test, even when design matrix is not orthog')
-    diag = traits.Int('--diag %d', desc='Gdiag_no : set diagnositc level')
+    diag = traits.Int(argstr='--diag %d', desc='Gdiag_no : set diagnositc level')
     diag_cluster = traits.Bool(
         argstr='--diag-cluster',
         desc='save sig volume and exit from first sim loop')

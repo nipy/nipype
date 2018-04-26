@@ -65,7 +65,7 @@ class Registration(CommandLine):
     >>> reg.inputs.moving_image = 'moving1.nii'
     >>> reg.inputs.parameters = ['elastix.txt']
     >>> reg.cmdline
-    'elastix -f fixed1.nii -m moving1.nii -out ./ -p elastix.txt'
+    'elastix -f fixed1.nii -m moving1.nii -threads 1 -out ./ -p elastix.txt'
 
 
     """
@@ -162,7 +162,7 @@ class ApplyWarp(CommandLine):
     >>> reg.inputs.moving_image = 'moving1.nii'
     >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
     >>> reg.cmdline
-    'transformix -in moving1.nii -out ./ -tp TransformParameters.0.txt'
+    'transformix -in moving1.nii -threads 1 -out ./ -tp TransformParameters.0.txt'
 
 
     """
@@ -205,7 +205,7 @@ class AnalyzeWarp(CommandLine):
     >>> reg = AnalyzeWarp()
     >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
     >>> reg.cmdline
-    'transformix -def all -jac all -jacmat all -out ./ -tp TransformParameters.0.txt'
+    'transformix -def all -jac all -jacmat all -threads 1 -out ./ -tp TransformParameters.0.txt'
 
 
     """
@@ -252,7 +252,7 @@ class PointsWarp(CommandLine):
     >>> reg.inputs.points_file = 'surf1.vtk'
     >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
     >>> reg.cmdline
-    'transformix -out ./ -def surf1.vtk -tp TransformParameters.0.txt'
+    'transformix -threads 1 -out ./ -def surf1.vtk -tp TransformParameters.0.txt'
 
 
     """

@@ -313,6 +313,7 @@ def test_flirt(setup_flirt):
         os.path.join(os.getcwd(), flirter.inputs.out_file)
     assert outs['out_matrix_file'] == \
         os.path.join(os.getcwd(), flirter.inputs.out_matrix_file)
+    assert not isdefined(flirter.inputs.out_log)
 
 
 # Mcflirt

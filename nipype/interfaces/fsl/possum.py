@@ -30,30 +30,30 @@ class B0CalcInputSpec(FSLCommandInputSpec):
         desc='filename of B0 output volume')
 
     x_grad = traits.Float(
-        0.0,
+        0.0, usedefault=True,
         argstr='--gx=%0.4f',
         desc='Value for zeroth-order x-gradient field (per mm)')
     y_grad = traits.Float(
-        0.0,
+        0.0, usedefault=True,
         argstr='--gy=%0.4f',
         desc='Value for zeroth-order y-gradient field (per mm)')
     z_grad = traits.Float(
-        0.0,
+        0.0, usedefault=True,
         argstr='--gz=%0.4f',
         desc='Value for zeroth-order z-gradient field (per mm)')
 
     x_b0 = traits.Float(
-        0.0,
+        0.0, usedefault=True,
         argstr='--b0x=%0.2f',
         xor=['xyz_b0'],
         desc='Value for zeroth-order b0 field (x-component), in Tesla')
     y_b0 = traits.Float(
-        0.0,
+        0.0, usedefault=True,
         argstr='--b0y=%0.2f',
         xor=['xyz_b0'],
         desc='Value for zeroth-order b0 field (y-component), in Tesla')
     z_b0 = traits.Float(
-        1.0,
+        1.0, usedefault=True,
         argstr='--b0=%0.2f',
         xor=['xyz_b0'],
         desc='Value for zeroth-order b0 field (z-component), in Tesla')
@@ -67,19 +67,21 @@ class B0CalcInputSpec(FSLCommandInputSpec):
         desc='Zeroth-order B0 field in Tesla')
 
     delta = traits.Float(
-        -9.45e-6, argstr='-d %e', desc='Delta value (chi_tissue - chi_air)')
+        -9.45e-6, usedefault=True,
+         argstr='-d %e', desc='Delta value (chi_tissue - chi_air)')
     chi_air = traits.Float(
-        4.0e-7, argstr='--chi0=%e', desc='susceptibility of air')
+        4.0e-7, usedefault=True,
+        argstr='--chi0=%e', desc='susceptibility of air')
     compute_xyz = traits.Bool(
-        False,
+        False, usedefault=True,
         argstr='--xyz',
         desc='calculate and save all 3 field components (i.e. x,y,z)')
     extendboundary = traits.Float(
-        1.0,
+        1.0, usedefault=True,
         argstr='--extendboundary=%0.2f',
         desc='Relative proportion to extend voxels at boundary')
     directconv = traits.Bool(
-        False,
+        False, usedefault=True,
         argstr='--directconv',
         desc='use direct (image space) convolution, not FFT')
 
@@ -104,7 +106,9 @@ class B0Calc(FSLCommand):
     >>> b0calc.inputs.z_b0 = 3.0
     >>> b0calc.inputs.output_type = "NIFTI_GZ"
     >>> b0calc.cmdline
-    'b0calc -i tissue+air_map.nii -o tissue+air_map_b0field.nii.gz --b0=3.00'
+    'b0calc -i tissue+air_map.nii -o tissue+air_map_b0field.nii.gz --chi0=4.000000e-07 \
+-d -9.450000e-06 --extendboundary=1.00 --b0x=0.00 --gx=0.0000 --b0y=0.00 --gy=0.0000 \
+--b0=3.00 --gz=0.0000'
 
     """
 

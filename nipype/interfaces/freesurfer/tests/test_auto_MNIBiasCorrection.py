@@ -20,7 +20,10 @@ def test_MNIBiasCorrection_inputs():
             argstr='--i %s',
             mandatory=True,
         ),
-        iterations=dict(argstr='--n %d', ),
+        iterations=dict(
+            argstr='--n %d',
+            usedefault=True,
+        ),
         mask=dict(argstr='--mask %s', ),
         no_rescale=dict(argstr='--no-rescale', ),
         out_file=dict(

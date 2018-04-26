@@ -26,10 +26,7 @@ def test_AntsJointFusion_inputs():
             argstr='-c',
             usedefault=True,
         ),
-        dimension=dict(
-            argstr='-d %d',
-            usedefault=False,
-        ),
+        dimension=dict(argstr='-d %d', ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -62,10 +59,7 @@ def test_AntsJointFusion_inputs():
         out_label_post_prob_name_format=dict(
             requires=['out_label_fusion', 'out_intensity_fusion_name_format'],
         ),
-        patch_metric=dict(
-            argstr='-m %s',
-            usedefault=False,
-        ),
+        patch_metric=dict(argstr='-m %s', ),
         patch_radius=dict(
             argstr='-p %s',
             maxlen=3,

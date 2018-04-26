@@ -390,13 +390,12 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         desc='Detrend time series prior to component '
         'extraction')
     use_regress_poly = traits.Bool(
-        True,
         deprecated='0.15.0',
         new_name='pre_filter',
         desc=('use polynomial regression '
               'pre-component extraction'))
     regress_poly_degree = traits.Range(
-        low=1, default=1, usedefault=True, desc='the degree polynomial to use')
+        low=1, value=1, usedefault=True, desc='the degree polynomial to use')
     header_prefix = traits.Str(
         desc=('the desired header for the output tsv '
               'file (one column). If undefined, will '
