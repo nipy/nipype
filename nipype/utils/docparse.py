@@ -254,7 +254,8 @@ def get_doc(cmd, opt_map, help_flag=None, trap_error=True):
     """
     res = CommandLine(
         'which %s' % cmd.split(' ')[0],
-        resource_monitor=False).run()
+        resource_monitor=False,
+        terminal_output='allatonce').run()
     cmd_path = res.runtime.stdout.strip()
     if cmd_path == '':
         raise Exception('Command %s not found' % cmd.split(' ')[0])
@@ -333,7 +334,8 @@ def get_params_from_doc(cmd, style='--', help_flag=None, trap_error=True):
     """
     res = CommandLine(
         'which %s' % cmd.split(' ')[0],
-        resource_monitor=False).run()
+        resource_monitor=False,
+        terminal_output='allatonce').run()
     cmd_path = res.runtime.stdout.strip()
     if cmd_path == '':
         raise Exception('Command %s not found' % cmd.split(' ')[0])

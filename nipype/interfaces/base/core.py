@@ -1314,7 +1314,8 @@ class PackageInfo(object):
                 try:
                     clout = CommandLine(
                         command=klass.version_cmd,
-                        resource_monitor=False).run()
+                        resource_monitor=False,
+                        terminal_output='allatonce').run()
                 except IOError:
                     return None
 

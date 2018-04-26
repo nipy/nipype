@@ -1338,7 +1338,8 @@ def _run_dot(dotfilename, format_ext):
     dot_base =  os.path.splitext(dotfilename)[0]
     formatted_dot = '{}.{}'.format(dot_base, format_ext)
     cmd = 'dot -T{} -o"{}" "{}"'.format(format_ext, formatted_dot, dotfilename)
-    res = CommandLine(cmd, resource_monitor=False).run()
+    res = CommandLine(cmd, terminal_output='allatonce',
+                      resource_monitor=False).run()
     return formatted_dot, res
 
 

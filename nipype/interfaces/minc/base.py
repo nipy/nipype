@@ -56,7 +56,8 @@ class Info(object):
         try:
             clout = CommandLine(
                 command='mincinfo',
-                args='-version').run()
+                args='-version',
+                terminal_output='allatonce').run()
         except IOError:
             return None
 

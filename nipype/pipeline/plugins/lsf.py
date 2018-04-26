@@ -48,7 +48,8 @@ class LSFPlugin(SGELikeBatchManagerBase):
         But _is_pending should return True until a job has finished and is
         ready to be checked for completeness. So return True if status is
         either 'PEND' or 'RUN'"""
-        cmd = CommandLine('bjobs', resource_monitor=False)
+        cmd = CommandLine(
+            'bjobs', resource_monitor=False, terminal_output='allatonce')
         cmd.inputs.args = '%d' % taskid
         # check lsf task
         oldlevel = iflogger.level
@@ -65,7 +66,8 @@ class LSFPlugin(SGELikeBatchManagerBase):
         cmd = CommandLine(
             'bsub',
             environ=dict(os.environ),
-            resource_monitor=False)
+            resource_monitor=False,
+            terminal_output='allatonce')
         bsubargs = ''
         if self._bsub_args:
             bsubargs = self._bsub_args

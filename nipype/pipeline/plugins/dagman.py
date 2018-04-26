@@ -158,7 +158,8 @@ getenv = True
         cmd = CommandLine(
             'condor_submit_dag',
             environ=dict(os.environ),
-            resource_monitor=False)
+            resource_monitor=False,
+            terminal_output='allatonce')
         # needs -update_submit or re-running a workflow will fail
         cmd.inputs.args = '%s -update_submit %s' % (self._dagman_args,
                                                     dagfilename)
