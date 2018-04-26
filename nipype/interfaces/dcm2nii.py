@@ -265,9 +265,9 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
         copyfile=False,
         mandatory=True,
         desc=('A set of filenames to be converted. Note that the current ' 
-              'version of dcm2niix converts any files in the directory. To '
-              'only convert specific files they should be in an isolated '
-              'directory'),
+              'version (1.0.20180328) of dcm2niix converts any files in the '
+              'directory. To only convert specific files they should be in an '
+              'isolated directory'),
         xor=['source_dir'])
     source_dir = Directory(
         exists=True,
