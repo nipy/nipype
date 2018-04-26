@@ -445,7 +445,7 @@ class BaseInterface(Interface):
             r['path'] = self.__module__
             due.cite(**r)
 
-    def run(self, cwd=None, **inputs):
+    def run(self, cwd=None, ignore_exception=None, **inputs):
         """Execute this interface.
 
         This interface will not raise an exception if runtime.returncode is
@@ -463,6 +463,10 @@ class BaseInterface(Interface):
         that was executed, provenance information and, if successful, results
         """
         from ...utils.profiler import ResourceMonitor
+
+        # if ignore_exception is not provided, taking self.ignore_exception
+        if ignore_exception is None:
+            ignore_exception = self.ignore_exception
 
         # Tear-up: get current and prev directories
         syscwd = rgetcwd(error=False)  # Recover when wd does not exist
@@ -531,7 +535,7 @@ class BaseInterface(Interface):
             runtime.traceback_args = ('\n'.join(
                 ['%s' % arg for arg in exc_args]), )
 
-            if not self.ignore_exception:
+            if not ignore_exception:
                 raise
         finally:
             # This needs to be done always
@@ -919,10 +923,6 @@ class CommandLine(BaseInterface):
         if terminal_output is not None:
             self.terminal_output = terminal_output
 
-        # Attach terminal_output callback for backwards compatibility
-        self.inputs.on_trait_change(self._terminal_output_update,
-                                    'terminal_output')
-
     @property
     def cmd(self):
         """sets base command, immutable"""
@@ -949,9 +949,6 @@ class CommandLine(BaseInterface):
                          ', '.join(['"%s"' % v
                                     for v in VALID_TERMINAL_OUTPUT])))
         self._terminal_output = value
-
-    def _terminal_output_update(self):
-        self.terminal_output = self.terminal_output
 
     def raise_exception(self, runtime):
         raise RuntimeError(
