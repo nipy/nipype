@@ -52,7 +52,8 @@ class PBSPlugin(SGELikeBatchManagerBase):
         result = CommandLine('qstat -f {}'.format(taskid),
                              environ=dict(os.environ),
                              terminal_output='file_split',
-                             resource_monitor=False).run()
+                             resource_monitor=False,
+                             ignore_exception=True).run()
 
         stdout = result.runtime.stdout
         stderr = result.runtime.stderr

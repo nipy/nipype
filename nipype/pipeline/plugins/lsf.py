@@ -54,7 +54,7 @@ class LSFPlugin(SGELikeBatchManagerBase):
         # check lsf task
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName('CRITICAL'))
-        result = cmd.run()
+        result = cmd.run(ignore_exception=True)
         iflogger.setLevel(oldlevel)
         # logger.debug(result.runtime.stdout)
         if 'DONE' in result.runtime.stdout or 'EXIT' in result.runtime.stdout:
