@@ -6,10 +6,7 @@ from ..minc import Convert
 def test_Convert_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        chunk=dict(
-            argstr='-chunk %d',
-            usedefault=False,
-        ),
+        chunk=dict(argstr='-chunk %d', ),
         clobber=dict(
             argstr='-clobber',
             usedefault=True,

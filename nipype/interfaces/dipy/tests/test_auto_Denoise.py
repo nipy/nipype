@@ -5,7 +5,7 @@ from ..preprocess import Denoise
 
 def test_Denoise_inputs():
     input_map = dict(
-        block_radius=dict(),
+        block_radius=dict(usedefault=True, ),
         in_file=dict(mandatory=True, ),
         in_mask=dict(),
         noise_mask=dict(),
@@ -13,7 +13,7 @@ def test_Denoise_inputs():
             mandatory=True,
             usedefault=True,
         ),
-        patch_radius=dict(),
+        patch_radius=dict(usedefault=True, ),
         signal_mask=dict(),
         snr=dict(),
     )

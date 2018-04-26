@@ -1458,7 +1458,6 @@ class SUSANInputSpec(FSLCommandInputSpec):
         maxlen=2,
         argstr='',
         position=6,
-        default=[],
         usedefault=True,
         desc='determines whether the smoothing area (USAN) is to be '
         'found from secondary images (0, 1 or 2). A negative '

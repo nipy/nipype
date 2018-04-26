@@ -234,8 +234,9 @@ class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
         desc=("Mask threshold to be used if mask_type"
               " is 'thresh'."))
     intersect_mask = traits.Bool(
-        True, desc=("Intersect the masks when computed from "
-                    "spm_global."))
+        True, usedefault=True,
+        desc=("Intersect the masks when computed from "
+              "spm_global."))
     save_plot = traits.Bool(
         True, desc="save plots containing outliers", usedefault=True)
     plot_type = traits.Enum(

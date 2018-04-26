@@ -6,15 +6,30 @@ from ..possum import B0Calc
 def test_B0Calc_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        chi_air=dict(argstr='--chi0=%e', ),
-        compute_xyz=dict(argstr='--xyz', ),
-        delta=dict(argstr='-d %e', ),
-        directconv=dict(argstr='--directconv', ),
+        chi_air=dict(
+            argstr='--chi0=%e',
+            usedefault=True,
+        ),
+        compute_xyz=dict(
+            argstr='--xyz',
+            usedefault=True,
+        ),
+        delta=dict(
+            argstr='-d %e',
+            usedefault=True,
+        ),
+        directconv=dict(
+            argstr='--directconv',
+            usedefault=True,
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
         ),
-        extendboundary=dict(argstr='--extendboundary=%0.2f', ),
+        extendboundary=dict(
+            argstr='--extendboundary=%0.2f',
+            usedefault=True,
+        ),
         ignore_exception=dict(
             deprecated='1.0.0',
             nohash=True,
@@ -39,23 +54,35 @@ def test_B0Calc_inputs():
         ),
         x_b0=dict(
             argstr='--b0x=%0.2f',
+            usedefault=True,
             xor=['xyz_b0'],
         ),
-        x_grad=dict(argstr='--gx=%0.4f', ),
+        x_grad=dict(
+            argstr='--gx=%0.4f',
+            usedefault=True,
+        ),
         xyz_b0=dict(
             argstr='--b0x=%0.2f --b0y=%0.2f --b0=%0.2f',
             xor=['x_b0', 'y_b0', 'z_b0'],
         ),
         y_b0=dict(
             argstr='--b0y=%0.2f',
+            usedefault=True,
             xor=['xyz_b0'],
         ),
-        y_grad=dict(argstr='--gy=%0.4f', ),
+        y_grad=dict(
+            argstr='--gy=%0.4f',
+            usedefault=True,
+        ),
         z_b0=dict(
             argstr='--b0=%0.2f',
+            usedefault=True,
             xor=['xyz_b0'],
         ),
-        z_grad=dict(argstr='--gz=%0.4f', ),
+        z_grad=dict(
+            argstr='--gz=%0.4f',
+            usedefault=True,
+        ),
     )
     inputs = B0Calc.input_spec()
 

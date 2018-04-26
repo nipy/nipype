@@ -272,6 +272,25 @@ class InterfaceChecker(object):
                     if key == 'mandatory' and trait.mandatory is not None and not trait.mandatory:
                         bad_specs.append(
                             [uri, c, 'Inputs', traitname, 'mandatory=False'])
+                    if key == "usedefault" and trait.__dict__[key] == False:
+                        bad_specs.append(
+                            [uri, c, 'Inputs', traitname, 'usedefault=False'])
+                # checking if traits that have default_value different that the trits default one
+                # also have `usedefault` specified;
+                # excluding TraitCompound
+                # excluding Enum: always has default value (the first value)
+                # excluding Tuple: takes tuple of inner traits default values as default, but doesn't use it
+                # for Range assuming that if default == low, it's likely that usedefault should be False
+                # (for Range traits takes low as a default default
+                if trait.trait_type.__class__.__name__ not in ['TraitCompound', "Tuple", "Enum"]\
+                        and trait.default and "usedefault" not in trait.__dict__\
+                        and "requires" not in trait.__dict__\
+                        and "xor" not in trait.__dict__:
+                    if trait.trait_type.__class__.__name__ is "Range"\
+                            and trait.default == trait.trait_type._low: 
+                        continue
+                    bad_specs.append(
+                        [uri, c, 'Inputs', traitname, 'default value is set, no value for usedefault'])
 
             if not classinst.output_spec:
                 continue

@@ -221,7 +221,6 @@ class PercentileImageInput(MathsInput):
     perc = traits.Range(
         low=0,
         high=100,
-        usedefault=False,
         argstr="%f",
         position=5,
         desc=("nth percentile (0-100) of FULL RANGE "

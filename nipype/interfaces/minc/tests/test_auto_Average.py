@@ -98,7 +98,10 @@ def test_Average_inputs():
             sep=' ',
             xor=('input_files', 'filelist'),
         ),
-        max_buffer_size_in_kb=dict(argstr='-max_buffer_size_in_kb %d', ),
+        max_buffer_size_in_kb=dict(
+            argstr='-max_buffer_size_in_kb %d',
+            usedefault=True,
+        ),
         no_check_dimensions=dict(
             argstr='-nocheck_dimensions',
             xor=('check_dimensions', 'no_check_dimensions'),

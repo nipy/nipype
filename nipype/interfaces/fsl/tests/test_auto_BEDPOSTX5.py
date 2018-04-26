@@ -10,8 +10,14 @@ def test_BEDPOSTX5_inputs():
             xor=('no_ard', 'all_ard'),
         ),
         args=dict(argstr='%s', ),
-        burn_in=dict(argstr='-b %d', ),
-        burn_in_no_ard=dict(argstr='--burninnoard=%d', ),
+        burn_in=dict(
+            argstr='-b %d',
+            usedefault=True,
+        ),
+        burn_in_no_ard=dict(
+            argstr='--burninnoard=%d',
+            usedefault=True,
+        ),
         bvals=dict(mandatory=True, ),
         bvecs=dict(mandatory=True, ),
         cnlinear=dict(
@@ -51,7 +57,10 @@ def test_BEDPOSTX5_inputs():
             mandatory=True,
             usedefault=True,
         ),
-        n_jumps=dict(argstr='-j %d', ),
+        n_jumps=dict(
+            argstr='-j %d',
+            usedefault=True,
+        ),
         no_ard=dict(
             argstr='--noard',
             xor=('no_ard', 'all_ard'),
@@ -72,13 +81,19 @@ def test_BEDPOSTX5_inputs():
         ),
         output_type=dict(),
         rician=dict(argstr='--rician', ),
-        sample_every=dict(argstr='-s %d', ),
+        sample_every=dict(
+            argstr='-s %d',
+            usedefault=True,
+        ),
         seed=dict(argstr='--seed=%d', ),
         terminal_output=dict(
             deprecated='1.0.0',
             nohash=True,
         ),
-        update_proposal_every=dict(argstr='--updateproposalevery=%d', ),
+        update_proposal_every=dict(
+            argstr='--updateproposalevery=%d',
+            usedefault=True,
+        ),
         use_gpu=dict(),
     )
     inputs = BEDPOSTX5.input_spec()

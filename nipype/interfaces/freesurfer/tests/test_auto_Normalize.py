@@ -10,10 +10,7 @@ def test_Normalize_inputs():
             nohash=True,
             usedefault=True,
         ),
-        gradient=dict(
-            argstr='-g %d',
-            usedefault=False,
-        ),
+        gradient=dict(argstr='-g %d', ),
         ignore_exception=dict(
             deprecated='1.0.0',
             nohash=True,

@@ -16,7 +16,10 @@ def test_Eddy_inputs():
         field=dict(argstr='--field=%s', ),
         field_mat=dict(argstr='--field_mat=%s', ),
         flm=dict(argstr='--flm=%s', ),
-        fudge_factor=dict(argstr='--ff=%s', ),
+        fudge_factor=dict(
+            argstr='--ff=%s',
+            usedefault=True,
+        ),
         fwhm=dict(argstr='--fwhm=%s', ),
         ignore_exception=dict(
             deprecated='1.0.0',
@@ -55,12 +58,18 @@ def test_Eddy_inputs():
         interp=dict(argstr='--interp=%s', ),
         is_shelled=dict(argstr='--data_is_shelled', ),
         method=dict(argstr='--resamp=%s', ),
-        niter=dict(argstr='--niter=%s', ),
+        niter=dict(
+            argstr='--niter=%s',
+            usedefault=True,
+        ),
         num_threads=dict(
             nohash=True,
             usedefault=True,
         ),
-        nvoxhp=dict(argstr='--nvoxhp=%s', ),
+        nvoxhp=dict(
+            argstr='--nvoxhp=%s',
+            usedefault=True,
+        ),
         out_base=dict(
             argstr='--out=%s',
             usedefault=True,

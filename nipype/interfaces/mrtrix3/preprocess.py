@@ -41,7 +41,7 @@ class ResponseSDInputSpec(MRTrix3BaseInputSpec):
     in_mask = File(
         exists=True, argstr='-mask %s', desc='provide initial mask image')
     max_sh = traits.Int(
-        8,
+        8, usedefault=True,
         argstr='-lmax %d',
         desc='maximum harmonic degree of response function')
 
@@ -65,7 +65,7 @@ class ResponseSD(MRTrix3Base):
     >>> resp.inputs.algorithm = 'tournier'
     >>> resp.inputs.grad_fsl = ('bvecs', 'bvals')
     >>> resp.cmdline                               # doctest: +ELLIPSIS
-    'dwi2response tournier -fslgrad bvecs bvals dwi.mif wm.txt'
+    'dwi2response tournier -fslgrad bvecs bvals -lmax 8 dwi.mif wm.txt'
     >>> resp.run()                                 # doctest: +SKIP
     """
 

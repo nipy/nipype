@@ -30,6 +30,7 @@ def test_BinThresh_inputs():
             argstr='%g',
             mandatory=True,
             position=2,
+            usedefault=True,
         ),
         out_file=dict(
             argstr='%s',
@@ -52,6 +53,7 @@ def test_BinThresh_inputs():
             argstr='%g',
             mandatory=True,
             position=3,
+            usedefault=True,
         ),
     )
     inputs = BinThresh.input_spec()

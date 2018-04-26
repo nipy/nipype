@@ -10,8 +10,14 @@ def test_XFibres5_inputs():
             xor=('no_ard', 'all_ard'),
         ),
         args=dict(argstr='%s', ),
-        burn_in=dict(argstr='--burnin=%d', ),
-        burn_in_no_ard=dict(argstr='--burninnoard=%d', ),
+        burn_in=dict(
+            argstr='--burnin=%d',
+            usedefault=True,
+        ),
+        burn_in_no_ard=dict(
+            argstr='--burninnoard=%d',
+            usedefault=True,
+        ),
         bvals=dict(
             argstr='--bvals=%s',
             mandatory=True,
@@ -65,7 +71,10 @@ def test_XFibres5_inputs():
             mandatory=True,
             usedefault=True,
         ),
-        n_jumps=dict(argstr='--njumps=%d', ),
+        n_jumps=dict(
+            argstr='--njumps=%d',
+            usedefault=True,
+        ),
         no_ard=dict(
             argstr='--noard',
             xor=('no_ard', 'all_ard'),
@@ -80,13 +89,19 @@ def test_XFibres5_inputs():
         ),
         output_type=dict(),
         rician=dict(argstr='--rician', ),
-        sample_every=dict(argstr='--sampleevery=%d', ),
+        sample_every=dict(
+            argstr='--sampleevery=%d',
+            usedefault=True,
+        ),
         seed=dict(argstr='--seed=%d', ),
         terminal_output=dict(
             deprecated='1.0.0',
             nohash=True,
         ),
-        update_proposal_every=dict(argstr='--updateproposalevery=%d', ),
+        update_proposal_every=dict(
+            argstr='--updateproposalevery=%d',
+            usedefault=True,
+        ),
     )
     inputs = XFibres5.input_spec()
 
