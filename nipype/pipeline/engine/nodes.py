@@ -405,7 +405,6 @@ class Node(EngineBase):
 
         if self.config is None:
             self.config = {}
-        self.config = merge_dict(deepcopy(config._sections), self.config)
 
         outdir = self.output_dir()
         force_run = self.overwrite or (self.overwrite is None and
