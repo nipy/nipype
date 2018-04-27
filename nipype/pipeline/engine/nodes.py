@@ -183,6 +183,7 @@ class Node(EngineBase):
         self._hashed_inputs = None
         self._needed_outputs = []
         self.needed_outputs = needed_outputs
+        self.config = None
 
     @property
     def interface(self):
