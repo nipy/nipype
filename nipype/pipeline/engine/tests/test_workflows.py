@@ -3,6 +3,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Tests for the engine workflows module
 """
+from glob import glob
 import os
 from shutil import rmtree
 from itertools import product
@@ -229,3 +230,46 @@ def test_outputs_removal_wf(tmpdir, plugin, remove_unnecessary_outputs,
     assert os.path.exists(
         os.path.join(wf.base_dir, wf.name, n4.name,
                      'file1.txt')) is keep_inputs
+
+
+def _test_function4():
+    raise FileNotFoundError('Generic error')
+
+
+def test_config_setting(tmpdir):
+    tmpdir.chdir()
+    wf = pe.Workflow('config')
+    wf.base_dir = os.getcwd()
+
+    crashdir = os.path.join(os.getcwd(), 'crashdir')
+    os.mkdir(crashdir)
+    wf.config = {"execution": {"crashdump_dir": crashdir}}
+
+    n1 = pe.Node(niu.Function(function=_test_function4),
+                 name='errorfunc')
+    wf.add_nodes([n1])
+    try:
+        wf.run()
+    except RuntimeError:
+        pass
+
+    fl = glob(os.path.join(crashdir, 'crash*'))
+    assert len(fl) == 1
+
+    # Now test node overwrite
+    crashdir2 = os.path.join(os.getcwd(), 'crashdir2')
+    os.mkdir(crashdir2)
+    crashdir3 = os.path.join(os.getcwd(), 'crashdir3')
+    os.mkdir(crashdir3)
+    wf.config = {"execution": {"crashdump_dir": crashdir3}}
+    n1.config = {"execution": {"crashdump_dir": crashdir2}}
+
+    try:
+        wf.run()
+    except RuntimeError:
+        pass
+
+    fl = glob(os.path.join(crashdir2, 'crash*'))
+    assert len(fl) == 1
+    fl = glob(os.path.join(crashdir3, 'crash*'))
+    assert len(fl) == 0
