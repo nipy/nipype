@@ -75,7 +75,9 @@ def diffeomorphic_tensor_pipeline(name='DiffeoTen',
                          fields=['out_file', 'out_file_xfm',
                                  'fixed_resliced', 'moving_resliced']),
                          name='outputnode')
-
+    origin_node_fixed = pe.Node(dtitk.TVAdjustVoxSp(origin=(0, 0, 0)),
+                                name='origin_node_fixed')
+    origin_node_moving = origin_node_fixed.clone(name='origin_node_moving')
     reslice_node_pow2 = pe.Node(dtitk.TVResample(
                                 origin=(0, 0, 0),
                                 array_size=params['array_size']),
@@ -96,10 +98,12 @@ def diffeomorphic_tensor_pipeline(name='DiffeoTen',
     wf = pe.Workflow(name=name)
 
     # Reslice input images
-    wf.connect(inputnode, 'fixed_file', reslice_node_pow2, 'in_file')
+    wf.connect(inputnode, 'fixed_file', origin_node_fixed, 'in_file')
+    wf.connect(origin_node_fixed, 'out_file', reslice_node_pow2, 'in_file')
     wf.connect(reslice_node_pow2, 'out_file',
                reslice_node_moving, 'target_file')
-    wf.connect(inputnode, 'moving_file', reslice_node_moving, 'in_file')
+    wf.connect(inputnode, 'moving_file', origin_node_moving, 'in_file')
+    wf.connect(origin_node_moving, 'out_file', reslice_node_moving, 'in_file')
     # Rigid registration
     wf.connect(reslice_node_pow2, 'out_file', rigid_node, 'fixed_file')
     wf.connect(reslice_node_moving, 'out_file', rigid_node, 'moving_file')
