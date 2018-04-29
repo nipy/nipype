@@ -9,6 +9,7 @@ def test_TensorMetrics_inputs():
         component=dict(
             argstr='-num %s',
             sep=',',
+            usedefault=True,
         ),
         environ=dict(
             nohash=True,

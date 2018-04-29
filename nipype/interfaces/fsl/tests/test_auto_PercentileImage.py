@@ -47,7 +47,6 @@ def test_PercentileImage_inputs():
         perc=dict(
             argstr='%f',
             position=5,
-            usedefault=False,
         ),
         terminal_output=dict(
             deprecated='1.0.0',

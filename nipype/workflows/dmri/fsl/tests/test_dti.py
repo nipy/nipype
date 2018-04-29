@@ -10,7 +10,7 @@ from nipype.interfaces.fsl import no_fsl, no_fsl_course_data
 import nipype.pipeline.engine as pe
 import warnings
 from nipype.workflows.dmri.fsl.dti import create_bedpostx_pipeline
-from nipype.utils.filemanip import list_to_filename
+from nipype.utils.filemanip import simplify_list
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
@@ -78,7 +78,7 @@ def test_create_bedpostx_pipeline(tmpdir):
         (slice_dwi, original_bedpostx, [("roi_file", "dwi")]),
         (slice_dwi, nipype_bedpostx, [("roi_file", "inputnode.dwi")]),
         (nipype_bedpostx, test_f1, [(("outputnode.mean_fsamples",
-                                      list_to_filename), "volume1")]),
+                                      simplify_list), "volume1")]),
         (original_bedpostx, test_f1, [("mean_fsamples", "volume2")]),
     ])
 

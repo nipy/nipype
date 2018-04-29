@@ -265,9 +265,11 @@ class BinThreshInputSpec(CommandLineInputSpec):
     out_file = File(desc='output path',  position=1, argstr="%s",
                     keep_extension=True, name_source='in_file',
                     name_template='%s_thrbin')
-    lower_bound = traits.Float(0.01, position=2, argstr="%g", mandatory=True,
+    lower_bound = traits.Float(0.01, usedefault=True,
+                               position=2, argstr="%g", mandatory=True,
                                desc='lower bound of binarization range')
-    upper_bound = traits.Float(100, position=3, argstr="%g", mandatory=True,
+    upper_bound = traits.Float(100, usedefault=True,
+                               position=3, argstr="%g", mandatory=True,
                                desc='upper bound of binarization range')
     inside_value = traits.Float(1, position=4, argstr="%g", usedefault=True,
                                 mandatory=True, desc='value for voxels in '

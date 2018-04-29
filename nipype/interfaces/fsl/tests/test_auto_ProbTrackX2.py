@@ -79,10 +79,7 @@ def test_ProbTrackX2_inputs():
             mandatory=True,
         ),
         seed_ref=dict(argstr='--seedref=%s', ),
-        simple=dict(
-            argstr='--simple',
-            usedefault=False,
-        ),
+        simple=dict(argstr='--simple', ),
         step_length=dict(argstr='--steplength=%.3f', ),
         stop_mask=dict(argstr='--stop=%s', ),
         target2=dict(argstr='--target2=%s', ),

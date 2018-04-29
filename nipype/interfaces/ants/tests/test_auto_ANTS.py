@@ -11,7 +11,6 @@ def test_ANTS_inputs():
         dimension=dict(
             argstr='%d',
             position=1,
-            usedefault=False,
         ),
         environ=dict(
             nohash=True,

@@ -23,10 +23,7 @@ def test_Calc_inputs():
             nohash=True,
             usedefault=True,
         ),
-        eval_width=dict(
-            argstr='-eval_width %s',
-            usedefault=False,
-        ),
+        eval_width=dict(argstr='-eval_width %s', ),
         expfile=dict(
             argstr='-expfile %s',
             mandatory=True,
@@ -108,10 +105,7 @@ def test_Calc_inputs():
             position=-2,
             sep=' ',
         ),
-        max_buffer_size_in_kb=dict(
-            argstr='-max_buffer_size_in_kb %d',
-            usedefault=False,
-        ),
+        max_buffer_size_in_kb=dict(argstr='-max_buffer_size_in_kb %d', ),
         no_check_dimensions=dict(
             argstr='-nocheck_dimensions',
             xor=('check_dimensions', 'no_check_dimensions'),

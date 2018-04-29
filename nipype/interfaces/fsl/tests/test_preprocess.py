@@ -10,7 +10,7 @@ from copy import deepcopy
 
 import pytest
 import pdb
-from nipype.utils.filemanip import split_filename, filename_to_list
+from nipype.utils.filemanip import split_filename, ensure_list
 from .. import preprocess as fsl
 from nipype.interfaces.fsl import Info
 from nipype.interfaces.base import File, TraitError, Undefined, isdefined
@@ -164,7 +164,7 @@ def test_fast_list_outputs(setup_infile, tmpdir):
         outputs = fsl.FAST(**opts)._list_outputs()
         for output in outputs.values():
             if output:
-                for filename in filename_to_list(output):
+                for filename in ensure_list(output):
                     assert os.path.realpath(filename).startswith(
                         os.path.realpath(output_base))
 
@@ -313,6 +313,7 @@ def test_flirt(setup_flirt):
         os.path.join(os.getcwd(), flirter.inputs.out_file)
     assert outs['out_matrix_file'] == \
         os.path.join(os.getcwd(), flirter.inputs.out_matrix_file)
+    assert not isdefined(flirter.inputs.out_log)
 
 
 # Mcflirt

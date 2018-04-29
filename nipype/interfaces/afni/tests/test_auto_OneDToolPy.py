@@ -34,7 +34,6 @@ def test_OneDToolPy_inputs():
         show_cormat_warnings=dict(
             argstr='-show_cormat_warnings |& tee %s',
             position=-1,
-            usedefault=False,
             xor=['out_file'],
         ),
         show_indices_interest=dict(argstr='-show_indices_interest', ),

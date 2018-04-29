@@ -124,7 +124,7 @@ class TractographyInputSpec(MRTrix3BaseInputSpec):
         argstr='-power %d',
         desc=('raise the FOD to the power specified (default is 1/nsamples)'))
     n_samples = traits.Int(
-        4,
+        4, usedefault=True,
         argstr='-samples %d',
         desc=('set the number of FOD samples to take per step for the 2nd '
               'order (iFOD2) method'))
@@ -208,7 +208,7 @@ class TractographyInputSpec(MRTrix3BaseInputSpec):
               'algorithm should attempt to find an appropriate tracking'
               ' direction from a given seed point'))
     out_seeds = File(
-        'out_seeds.nii.gz',
+        'out_seeds.nii.gz', usedefault=True,
         argstr='-output_seeds %s',
         desc=('output the seed location of all successful streamlines to'
               ' a file'))
@@ -262,7 +262,8 @@ class Tractography(MRTrix3Base):
     >>> tk.inputs.roi_mask = 'mask.nii.gz'
     >>> tk.inputs.seed_sphere = (80, 100, 70, 10)
     >>> tk.cmdline                               # doctest: +ELLIPSIS
-    'tckgen -algorithm iFOD2 -mask mask.nii.gz -seed_sphere \
+    'tckgen -algorithm iFOD2 -samples 4 -output_seeds out_seeds.nii.gz \
+-mask mask.nii.gz -seed_sphere \
 80.000000,100.000000,70.000000,10.000000 fods.mif tracked.tck'
     >>> tk.run()                                 # doctest: +SKIP
     """

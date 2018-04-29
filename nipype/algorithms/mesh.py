@@ -289,6 +289,7 @@ class MeshWarpMathsInputSpec(BaseInterfaceInputSpec):
         float_trait,
         File(exists=True),
         default=1.0,
+        usedefault=True,
         mandatory=True,
         desc='image, float or tuple of floats to act as operator')
 

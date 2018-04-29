@@ -38,6 +38,7 @@ def test_Cat_inputs():
             argstr='> %s',
             mandatory=True,
             position=-1,
+            usedefault=True,
         ),
         out_fint=dict(
             argstr='-f',
