@@ -1,3 +1,30 @@
+1.0.3 (April 30, 2018)
+======================
+
+###### [Full changelog](https://github.com/nipy/nipype/milestone/19?closed=1)
+
+  * FIX: Propagate explicit Workflow config to Nodes (https://github.com/nipy/nipype/pull/2559)
+  * FIX: Return non-enhanced volumes from dwi_flirt (https://github.com/nipy/nipype/pull/2547)
+  * FIX: Skip filename generation when required fields are missing (https://github.com/nipy/nipype/pull/2549)
+  * FIX: Fix Afni's Allineate hashing and out_file (https://github.com/nipy/nipype/pull/2502)
+  * FIX: Replace deprecated ``HasTraits.get`` with ``trait_get`` (https://github.com/nipy/nipype/pull/2534)
+  * FIX: Typo in "antsRegistrationSyNQuick.sh" (https://github.com/nipy/nipype/pull/2544)
+  * FIX: DTITK Interface (https://github.com/nipy/nipype/pull/2514)
+  * FIX: Add ``-mas`` argument to fsl.utils.ImageMaths (https://github.com/nipy/nipype/pull/2529)
+  * FIX: Build cmdline from working directory (https://github.com/nipy/nipype/pull/2521)
+  * FIX: FSL orthogonalization bug (https://github.com/nipy/nipype/pull/2523)
+  * FIX: Re-enable dcm2niix source_names (https://github.com/nipy/nipype/pull/2550)
+  * ENH: Add an activation count map interface (https://github.com/nipy/nipype/pull/2522)
+  * ENH: Revise the implementation of FuzzyOverlap (https://github.com/nipy/nipype/pull/2530)
+  * ENH: Add MultiObject, ensure/simplify_list; alias old names for 1.x compatibility (https://github.com/nipy/nipype/pull/2517)
+  * ENH: Add LibraryBaseInterface (https://github.com/nipy/nipype/pull/2538)
+  * ENH: Define default output file template for afni.CatMatvec (https://github.com/nipy/nipype/pull/2527)
+  * MAINT: Deprecate terminal_output and ignore_exception from CommandLine (https://github.com/nipy/nipype/pull/2552)
+  * MAINT: Set traits default values properly (https://github.com/nipy/nipype/pull/2533)
+  * MAINT: use RawConfigParser (https://github.com/nipy/nipype/pull/2542)
+  * MAINT: Minor autotest cleanups (https://github.com/nipy/nipype/pull/2519)
+  * CI: Add retry script for Docker commands (https://github.com/nipy/nipype/pull/2516)
+
 1.0.2 (March 27, 2018)
 ======================
 
