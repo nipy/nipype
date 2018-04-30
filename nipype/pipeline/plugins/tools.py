@@ -38,7 +38,10 @@ def report_crash(node, traceback=None, hostname=None):
     if not traceback:
         traceback = format_exception(*sys.exc_info())
     timeofcrash = strftime('%Y%m%d-%H%M%S')
-    login_name = getpass.getuser()
+    try:
+        login_name = getpass.getuser()
+    except KeyError:
+        login_name = 'UID{:d}'.format(os.getuid())
     crashfile = 'crash-%s-%s-%s-%s' % (timeofcrash, login_name, name,
                                        str(uuid.uuid4()))
     crashdir = node.config['execution'].get('crashdump_dir', os.getcwd())
