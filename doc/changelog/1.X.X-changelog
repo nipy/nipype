@@ -3,6 +3,7 @@
 
 ###### [Full changelog](https://github.com/nipy/nipype/milestone/19?closed=1)
 
+  * FIX: Propagate explicit Workflow config to Nodes (https://github.com/nipy/nipype/pull/2559)
   * FIX: Return non-enhanced volumes from dwi_flirt (https://github.com/nipy/nipype/pull/2547)
   * FIX: Skip filename generation when required fields are missing (https://github.com/nipy/nipype/pull/2549)
   * FIX: Fix Afni's Allineate hashing and out_file (https://github.com/nipy/nipype/pull/2502)
