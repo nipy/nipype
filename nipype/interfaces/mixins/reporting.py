@@ -10,7 +10,7 @@ from abc import abstractmethod
 
 from ... import logging
 from ..base import (
-    File, traits, BaseInterface, BaseInterfaceInputSpec, TraitedSpec)
+    File, BaseInterface, BaseInterfaceInputSpec, TraitedSpec)
 
 iflogger = logging.getLogger('interface')
 
@@ -39,7 +39,11 @@ class ReportCapableInterface(BaseInterface):
         if not self.generate_report:
             return runtime
 
-        self._out_report = os.path.abspath(self.inputs.out_report)
+        self._out_report = self.inputs.out_report
+        if not os.path.isabs(self._out_report):
+            self._out_report = os.path.abspath(os.path.join(runtime.cwd,
+                                                            self._out_report))
+
         self._generate_report()
 
         return runtime
