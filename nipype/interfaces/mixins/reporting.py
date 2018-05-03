@@ -16,8 +16,6 @@ iflogger = logging.getLogger('interface')
 
 
 class ReportCapableInputSpec(BaseInterfaceInputSpec):
-    generate_report = traits.Bool(False, usedefault=True,
-                                  desc="Enable report generation")
     out_report = File('report', usedefault=True, hash_files=False,
                       desc='filename for the visual report')
 
@@ -30,11 +28,15 @@ class ReportCapableInterface(BaseInterface):
     """Mixin to enable reporting for Nipype interfaces"""
     _out_report = None
 
+    def __init__(self, generate_report=False, **kwargs):
+        super(ReportCapableInterface, self).__init__(self, **kwargs)
+        self.generate_report = generate_report
+
     def _post_run_hook(self, runtime):
         runtime = super(ReportCapableInterface, self)._post_run_hook(runtime)
 
         # leave early if there's nothing to do
-        if not self.inputs.generate_report:
+        if not self.generate_report:
             return runtime
 
         self._out_report = os.path.abspath(self.inputs.out_report)
