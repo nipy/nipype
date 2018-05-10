@@ -120,12 +120,17 @@ class ICA_AROMA(CommandLine):
     >>> AROMA_obj.inputs.mask = 'mask.nii.gz'
     >>> AROMA_obj.inputs.denoise_type = 'both'
     >>> AROMA_obj.inputs.out_dir = 'ICA_testout'
-    >>> AROMA_obj.cmdline
-    'ICA_AROMA.py -den both -warp warpfield.nii -i functional.nii -m mask.nii.gz -affmat func_to_struct.mat -mc fsl_mcflirt_movpar.txt -o ICA_testout'
+    >>> AROMA_obj.cmdline  # doctest: +ELLIPSIS
+    'ICA_AROMA.py -den both -warp warpfield.nii -i functional.nii -m mask.nii.gz -affmat func_to_struct.mat -mc fsl_mcflirt_movpar.txt -o .../ICA_testout'
     """
     _cmd = 'ICA_AROMA.py'
     input_spec = ICA_AROMAInputSpec
     output_spec = ICA_AROMAOutputSpec
+
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'out_dir':
+            return trait_spec.argstr % os.path.abspath(value)
+        return super(ICA_AROMA, self)._format_arg(name, trait_spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
