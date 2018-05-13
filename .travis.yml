@@ -52,12 +52,13 @@ before_install:
 - travis_retry pip install -r requirements.txt
 - travis_retry git clone https://github.com/INCF/pybids.git ${HOME}/pybids &&
   pip install -e ${HOME}/pybids
+- travis_retry pip install codecov
 
 install:
 - travis_retry pip install $PIP_FLAGS -e .[$NIPYPE_EXTRAS]
 
 script:
-- py.test -v --doctest-modules nipype
+- py.test -v --cov nipype --cov-config .coveragerc --cov-report xml:cov.xml -c nipype/pytest.ini --doctest-modules nipype
 
 deploy:
   provider: pypi
@@ -69,3 +70,6 @@ deploy:
     repo: nipy/nipype
     branch: master
   distributions: "sdist bdist_wheel"
+
+after_script:
+- codecov --file cov.xml --root nipype --flags unittests -e TRAVIS_JOB_NUMBER
