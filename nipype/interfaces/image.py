@@ -57,7 +57,8 @@ class Reorient(SimpleInterface):
 
         # Image may be reoriented
         if reoriented is not orig_img:
-            out_name = fname_presuffix(fname, suffix='_ras',
+            suffix = '_' + self.inputs.orientation.lower()
+            out_name = fname_presuffix(fname, suffix=suffix,
                                        newpath=runtime.cwd)
             reoriented.to_filename(out_name)
         else:
