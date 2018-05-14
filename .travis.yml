@@ -72,4 +72,4 @@ deploy:
   distributions: "sdist bdist_wheel"
 
 after_script:
-- codecov --file cov.xml --root nipype --flags unittests -e TRAVIS_JOB_NUMBER
+- codecov --file cov.xml --flags unittests -e TRAVIS_JOB_NUMBER
