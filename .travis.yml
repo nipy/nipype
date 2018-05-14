@@ -52,11 +52,6 @@ before_install:
 - travis_retry conda install -y python=${TRAVIS_PYTHON_VERSION} icu
 - if [ "$MIN_DEP" = "1" ]; then
     sed -e 's/>=/==/' < requirements.txt > requirements_min.txt;
-    if [ "$TRAVIS_PYTHON_VERSION" = "3.5" ]; then
-        sed -i -e "s/scipy==.*/scipy==0.16.0/" requirements_min.txt;
-    elif [ "$TRAVIS_PYTHON_VERSION" = "3.6" ]; then
-        sed -i -e "s/scipy==.*/scipy==0.18.1/" requirements_min.txt;
-    fi;
     travis_retry pip install -r requirements_min.txt;
   else
     travis_retry pip install -r requirements.txt;
