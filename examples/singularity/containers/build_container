@@ -1,0 +1,4 @@
+#!/bin/bash
+singularity create --size 50 demo_container.img
+singularity bootstrap demo_container.img singularity.def
+
