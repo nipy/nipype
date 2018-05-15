@@ -1066,6 +1066,9 @@ def generate_expanded_graph(graph_in):
                     if re.match(src_id + r'((\.[a-z](I\.[a-z])?|J)\d+)?$',
                                 node.itername):
                         expansions[src_id].append(node)
+                    else:
+                        logger.debug("Unmatched pattern: %s; src_id: %s",
+                                     node.itername, src_id)
             for in_id, in_nodes in list(expansions.items()):
                 logger.debug("The join node %s input %s was expanded"
                              " to %d nodes.", jnode, in_id, len(in_nodes))
