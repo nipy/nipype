@@ -10,10 +10,11 @@ python:
 - 3.6
 
 env:
-- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler" CI_SKIP_TEST=1
-- INSTALL_DEB_DEPENDECIES=false NIPYPE_EXTRAS="doc,tests,fmri,profiler" CI_SKIP_TEST=1
-- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit,ssh" CI_SKIP_TEST=1
-- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler" PIP_FLAGS="--pre" CI_SKIP_TEST=1
+- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,profiler" CI_SKIP_TEST=1
+- INSTALL_DEB_DEPENDECIES=false NIPYPE_EXTRAS="doc,tests,profiler" CI_SKIP_TEST=1
+- INSTALL_DEB_DEPENDECIES=false NIPYPE_EXTRAS="doc,tests,profiler" MIN_DEP=1 CI_SKIP_TEST=1
+- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,profiler,duecredit,ssh" CI_SKIP_TEST=1
+- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,profiler" PIP_FLAGS="--pre" CI_SKIP_TEST=1
 
 addons:
   apt:
@@ -49,7 +50,12 @@ before_install:
 - travis_retry conda update -q conda
 - conda config --add channels conda-forge
 - travis_retry conda install -y python=${TRAVIS_PYTHON_VERSION} icu
-- travis_retry pip install -r requirements.txt
+- if [ "$MIN_DEP" = "1" ]; then
+    sed -e 's/>=/==/' < requirements.txt > requirements_min.txt;
+    travis_retry pip install -r requirements_min.txt;
+  else
+    travis_retry pip install -r requirements.txt;
+  fi;
 - travis_retry git clone https://github.com/INCF/pybids.git ${HOME}/pybids &&
   pip install -e ${HOME}/pybids
 - travis_retry pip install codecov
