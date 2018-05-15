@@ -1055,6 +1055,8 @@ def generate_expanded_graph(graph_in):
                     # Drop the original JoinNodes; only concerned with
                     # generated Nodes
                     if hasattr(node, 'joinfield'):
+                        logger.warning("Dropping JoinNode: %s; src_id: %s",
+                                       node.itername, src_id)
                         continue
                     # Patterns:
                     #   - src_id : Non-iterable node
