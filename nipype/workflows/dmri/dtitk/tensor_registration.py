@@ -55,7 +55,8 @@ def diffeomorphic_tensor_pipeline(name='DiffeoTen',
     (Rigid and Affine follwed by Diffeomorphic)
     Note: the requirements for a diffeomorphic registration specify that
     the dimension 0 is a power of 2 so images are resliced prior to
-    registration
+    registration. Remember to move origin and reslice prior to applying xfm to
+    another file
 
     Example
     -------
@@ -94,6 +95,8 @@ def diffeomorphic_tensor_pipeline(name='DiffeoTen',
     compose_xfm_node = pe.Node(dtitk.ComposeXfm(), name='compose_xfm_node')
     apply_xfm_node = pe.Node(dtitk.DiffeoSymTensor3DVol(),
                              name='apply_xfm_node')
+    reslice_node_to_input = pe.Node(dtitk.TVResample(),
+                                    name='reslice_node_to_input')
 
     wf = pe.Workflow(name=name)
 
@@ -122,8 +125,11 @@ def diffeomorphic_tensor_pipeline(name='DiffeoTen',
     # Apply transform
     wf.connect(reslice_node_moving, 'out_file', apply_xfm_node, 'in_file')
     wf.connect(compose_xfm_node, 'out_file', apply_xfm_node, 'transform')
+    # Reslice to match original fixed input image
+    wf.connect(apply_xfm_node, 'out_file', reslice_node_to_input, 'in_file')
+    wf.connect(inputnode, 'fixed_file', reslice_node_to_input, 'target_file')
     # Send to output
-    wf.connect(apply_xfm_node, 'out_file', outputnode, 'out_file')
+    wf.connect(reslice_node_to_input, 'out_file', outputnode, 'out_file')
     wf.connect(compose_xfm_node, 'out_file', outputnode, 'out_file_xfm')
     wf.connect(reslice_node_pow2, 'out_file', outputnode, 'fixed_resliced')
     wf.connect(reslice_node_moving, 'out_file', outputnode, 'moving_resliced')
