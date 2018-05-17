@@ -266,21 +266,32 @@ class GunzipOutputSpec(TraitedSpec):
 
 class Gunzip(BaseInterface):
     """Gunzip wrapper
+
+    >>> from nipype.algorithms.misc import Gunzip
+    >>> gunzip = Gunzip(in_file='tpms_msk.nii.gz')
+    >>> res = gunzip.run()
+    >>> res.outputs.out_file  # doctest: +ELLIPSIS
+    '.../tpms_msk.nii'
+
+    .. testcleanup::
+
+    >>> os.unlink('tpms_msk.nii')
     """
     input_spec = GunzipInputSpec
     output_spec = GunzipOutputSpec
 
     def _gen_output_file_name(self):
         _, base, ext = split_filename(self.inputs.in_file)
-        if ext[-2:].lower() == ".gz":
+        if ext[-3:].lower() == ".gz":
             ext = ext[:-3]
-        return os.path.abspath(base + ext[:-3])
+        return os.path.abspath(base + ext)
 
     def _run_interface(self, runtime):
         import gzip
+        import shutil
         with gzip.open(self.inputs.in_file, 'rb') as in_file:
             with open(self._gen_output_file_name(), 'wb') as out_file:
-                out_file.write(in_file.read())
+                shutil.copyfileobj(in_file, out_file)
         return runtime
 
     def _list_outputs(self):
