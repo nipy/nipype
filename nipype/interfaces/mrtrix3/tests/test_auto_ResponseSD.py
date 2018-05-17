@@ -40,7 +40,8 @@ def test_ResponseSD_inputs():
         ),
         in_mask=dict(argstr='-mask %s', ),
         max_sh=dict(
-            argstr='-lmax %d',
+            argstr='-lmax %s',
+            sep=',',
             usedefault=True,
         ),
         mtt_file=dict(
