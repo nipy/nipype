@@ -40,10 +40,13 @@ class ResponseSDInputSpec(MRTrix3BaseInputSpec):
         argstr='%s', position=-1, desc='output CSF response text file')
     in_mask = File(
         exists=True, argstr='-mask %s', desc='provide initial mask image')
-    max_sh = traits.Int(
-        8, usedefault=True,
-        argstr='-lmax %d',
-        desc='maximum harmonic degree of response function')
+    max_sh = traits.Either(
+        traits.Int(8), traits.List(traits.Int()),
+        default=8,
+        usedefault=True,
+        argstr='-lmax %s',
+        desc=('maximum harmonic degree of response function - single value for '
+              'single-shell response, list for multi-shell response'))
 
 
 class ResponseSDOutputSpec(TraitedSpec):
@@ -67,11 +70,23 @@ class ResponseSD(MRTrix3Base):
     >>> resp.cmdline                               # doctest: +ELLIPSIS
     'dwi2response tournier -fslgrad bvecs bvals -lmax 8 dwi.mif wm.txt'
     >>> resp.run()                                 # doctest: +SKIP
+
+    # We can also pass in multiple harmonic degrees in the case of multi-shell
+    >>> resp.inputs.max_sh = [6,8,10]
+    >>> resp.cmdline
+    'dwi2response tournier -fslgrad bvecs bvals -lmax 6,8,10 dwi.mif wm.txt'
     """
 
     _cmd = 'dwi2response'
     input_spec = ResponseSDInputSpec
     output_spec = ResponseSDOutputSpec
+
+    def _format_arg(self, opt, spec, val):
+        if opt == "max_sh":
+            if isinstance(val, (list, tuple)):
+                return spec.argstr % ','.join(map(str, val))
+        return super(ResponseSD, self)._format_arg(opt, spec, val)
+
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
