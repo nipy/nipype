@@ -29,7 +29,7 @@ class ReportCapableInterface(BaseInterface):
     _out_report = None
 
     def __init__(self, generate_report=False, **kwargs):
-        super(ReportCapableInterface, self).__init__(self, **kwargs)
+        super(ReportCapableInterface, self).__init__(**kwargs)
         self.generate_report = generate_report
 
     def _post_run_hook(self, runtime):
