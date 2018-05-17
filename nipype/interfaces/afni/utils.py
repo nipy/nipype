@@ -1338,6 +1338,124 @@ class FWHMx(AFNICommandBase):
         return outputs
 
 
+class LocalBistatInputSpec(AFNICommandInputSpec):
+    in_files = InputMultiPath(
+        File(exists=True),
+        minlen=2,
+        maxlen=2,
+        mandatory=True,
+        argstr='%s',
+        position=-1,
+        desc='Filenames of the 2 images to compute statistics between')
+    neighborhood = traits.Either(
+        traits.Tuple(traits.Enum('SPHERE', 'RHDD', 'TOHD'), traits.Float()),
+        traits.Tuple(traits.Enum('RECT'), traits.Tuple(traits.Float(),
+                                                       traits.Float(),
+                                                       traits.Float())),
+        mandatory=True,
+        desc='The region around each voxel that will be extracted for '
+             'the statistics calculation. Possible regions are: '
+             '\'SPHERE\', \'RHDD\' (rhombic dodecahedron), \'TOHD\' '
+             '(truncated octahedron) with a given radius in mm or '
+             '\'RECT\' (rectangular block) with dimensions to specify in mm.',
+        argstr='-nbhd %s')
+    _stat_names = ['pearson', 'spearman', 'quadrant', 'mutinfo', 'normuti',
+                   'jointent', 'hellinger', 'crU', 'crM', 'crA', 'L2slope',
+                   'L1slope', 'num', 'ALL']
+    stat = traits.Either(
+        traits.Enum(*_stat_names), traits.List(traits.Enum(_stat_names)),
+        mandatory=True,
+        desc='statistics to compute. Possible names are :'
+             '  * pearson  = Pearson correlation coefficient'
+             '  * spearman = Spearman correlation coefficient'
+             '  * quadrant = Quadrant correlation coefficient'
+             '  * mutinfo  = Mutual Information'
+             '  * normuti  = Normalized Mutual Information'
+             '  * jointent = Joint entropy'
+             '  * hellinger= Hellinger metric'
+             '  * crU      = Correlation ratio (Unsymmetric)'
+             '  * crM      = Correlation ratio (symmetrized by Multiplication)'
+             '  * crA      = Correlation ratio (symmetrized by Addition)'
+             '  * L2slope  = slope of least-squares (L2) linear regression of '
+             '               the data from dataset1 vs. the dataset2 '
+             '               (i.e., d2 = a + b*d1 ==> this is \'b\')'
+             '  * L1slope  = slope of least-absolute-sum (L1) linear '
+             '               regression of the data from dataset1 vs. '
+             '               the dataset2'
+             '  * num      = number of the values in the region: '
+             '               with the use of -mask or -automask, '
+             '               the size of the region around any given '
+             '               voxel will vary; this option lets you '
+             '               map that size.'
+             '  * ALL      = all of the above, in that order'
+             'More than one option can be used.',
+        argstr='-stat %s')
+    mask_file = traits.File(
+        exists=True,
+        desc='mask image file name. Voxels NOT in the mask will not be used '
+             'in the neighborhood of any voxel. Also, a voxel NOT in the mask '
+             'will have its statistic(s) computed as zero (0).',
+        argstr='-mask %s')
+    automask = traits.Bool(
+        desc='Compute the mask as in program 3dAutomask.')
+    mask_file = traits.File(
+        exists=True,
+        desc='File name of an image to use as a weight.  Only applies to '
+             '\'pearson\' statistics.',
+        argstr='-weight %s',
+        xor=['automask'])
+    out_file = traits.File(
+        desc='Output dataset.',
+        argstr='-prefix %s',
+        name_source='in_files',
+        name_template='%s_bistat',
+        keep_extension=True,
+        position=0)
+
+
+class LocalBistat(AFNICommand):
+    """3dLocalBistat - computes statistics between 2 datasets, at each voxel,
+    based on a local neighborhood of that voxel.
+
+    For complete details, see the `3dLocalBistat Documentation.
+    <https://afni.nimh.nih.gov/pub../pub/dist/doc/program_help/3dLocalBistat.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> bistat = afni.LocalBistat()
+    >>> bistat.inputs.in_files = ['functional.nii', 'structural.nii']
+    >>> bistat.inputs.neighborhood = ('SPHERE', 1.2)
+    >>> bistat.inputs.stat = 'pearson'
+    >>> bistat.inputs.outputtype = 'NIFTI'
+    >>> bistat.cmdline
+    "3dLocalBistat -prefix functional_bistat.nii -nbhd 'SPHERE(1.2)' -stat pearson functional.nii structural.nii"
+    >>> res = automask.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dLocalBistat'
+    input_spec = LocalBistatInputSpec
+    output_spec = AFNICommandOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'neighborhood':
+            region_name, region_size = value
+            if region_name == 'RECT':
+                return spec.argstr % (
+                    "'{0}({1})'".format(region_name, ','.join(region_size)))
+            else:
+                return spec.argstr % (
+                    "'{0}({1})'".format(region_name, region_size))
+        if name == 'stat':
+            if isinstance(value, (str, bytes)):
+                return spec.argstr % value
+            else:
+                return ' '.join([spec.argstr % v for v in value])
+        return super(LocalBistat, self)._format_arg(name, spec, value)
+
+
 class MaskToolInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc='input file or files to 3dmask_tool',
