@@ -517,7 +517,9 @@ class BaseInterface(Interface):
         outputs = None
 
         try:
+            runtime = self._pre_run_hook(runtime)
             runtime = self._run_interface(runtime)
+            runtime = self._post_run_hook(runtime)
             outputs = self.aggregate_outputs(runtime)
         except Exception as e:
             import traceback
@@ -652,6 +654,28 @@ class BaseInterface(Interface):
         iflogger.debug('saving inputs {}', inputs)
         with open(json_file, 'w' if PY3 else 'wb') as fhandle:
             json.dump(inputs, fhandle, indent=4, ensure_ascii=False)
+
+    def _pre_run_hook(self, runtime):
+        """
+        Perform any pre-_run_interface() processing
+
+        Subclasses may override this function to modify ``runtime`` object or
+        interface state
+
+        MUST return runtime object
+        """
+        return runtime
+
+    def _post_run_hook(self, runtime):
+        """
+        Perform any post-_run_interface() processing
+
+        Subclasses may override this function to modify ``runtime`` object or
+        interface state
+
+        MUST return runtime object
+        """
+        return runtime
 
 
 class SimpleInterface(BaseInterface):
