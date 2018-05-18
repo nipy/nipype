@@ -7,7 +7,7 @@ from __future__ import (print_function, division, unicode_literals,
 import os.path as op
 
 from ..base import (CommandLineInputSpec, CommandLine, traits, TraitedSpec,
-                    File, isdefined, Undefined)
+                    File, isdefined, Undefined, InputMultiObject)
 from .base import MRTrix3BaseInputSpec, MRTrix3Base
 
 
@@ -40,10 +40,14 @@ class ResponseSDInputSpec(MRTrix3BaseInputSpec):
         argstr='%s', position=-1, desc='output CSF response text file')
     in_mask = File(
         exists=True, argstr='-mask %s', desc='provide initial mask image')
-    max_sh = traits.Int(
-        8, usedefault=True,
-        argstr='-lmax %d',
-        desc='maximum harmonic degree of response function')
+    max_sh = InputMultiObject(
+        traits.Int,
+        value=[8],
+        usedefault=True,
+        argstr='-lmax %s',
+        sep=',',
+        desc=('maximum harmonic degree of response function - single value for '
+              'single-shell response, list for multi-shell response'))
 
 
 class ResponseSDOutputSpec(TraitedSpec):
@@ -67,6 +71,11 @@ class ResponseSD(MRTrix3Base):
     >>> resp.cmdline                               # doctest: +ELLIPSIS
     'dwi2response tournier -fslgrad bvecs bvals -lmax 8 dwi.mif wm.txt'
     >>> resp.run()                                 # doctest: +SKIP
+
+    # We can also pass in multiple harmonic degrees in the case of multi-shell
+    >>> resp.inputs.max_sh = [6,8,10]
+    >>> resp.cmdline
+    'dwi2response tournier -fslgrad bvecs bvals -lmax 6,8,10 dwi.mif wm.txt'
     """
 
     _cmd = 'dwi2response'
