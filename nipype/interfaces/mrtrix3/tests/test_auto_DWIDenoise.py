@@ -11,10 +11,7 @@ def test_DWIDenoise_inputs():
             nohash=True,
             usedefault=True,
         ),
-        extent=dict(
-            argstr='-extent %d,%d,%d',
-            mandatory=False,
-        ),
+        extent=dict(argstr='-extent %d,%d,%d', ),
         grad_file=dict(argstr='-grad %s', ),
         grad_fsl=dict(argstr='-fslgrad %s %s', ),
         ignore_exception=dict(
@@ -26,26 +23,23 @@ def test_DWIDenoise_inputs():
         in_bvec=dict(argstr='-fslgrad %s %s', ),
         in_file=dict(
             argstr='%s',
-            mandatory=True,
             position=-2,
         ),
         mask=dict(
             argstr='-mask %s',
-            mandatory=False,
             position=1,
         ),
-        noise=dict(
-            argstr='-noise %s',
-            mandatory=False,
-        ),
+        noise=dict(argstr='-noise %s', ),
         nthreads=dict(
             argstr='-nthreads %d',
             nohash=True,
         ),
         out_file=dict(
             argstr='%s',
+            keep_extension=True,
+            name_source='in_file',
+            name_template='%s_denoised',
             position=-1,
-            usedefault=True,
         ),
         terminal_output=dict(
             deprecated='1.0.0',

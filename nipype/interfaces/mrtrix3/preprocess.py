@@ -16,25 +16,21 @@ class DWIDenoiseInputSpec(MRTrix3BaseInputSpec):
         exists=True,
         argstr='%s',
         position=-2,
-        mandatory=True,
         desc='input DWI image')
     mask = File(
         exists=True,
         argstr='-mask %s',
         position=1,
-        mandatory=False,
         desc='mask image')
     extent = traits.Tuple((traits.Int, traits.Int, traits.Int),
         argstr='-extent %d,%d,%d',
-        mandatory=False,
         desc='set the window size of the denoising filter. (default = 5,5,5)')
     noise = File(
         argstr='-noise %s',
-        mandatory=False,
         desc='noise map')
-    out_file = File('dwi_denoised.mif',
-        exists=False,
-        usedefault=True,
+    out_file = File(name_template='%s_denoised',
+        name_source='in_file',
+        keep_extension=True,
         argstr="%s",
         position=-1,
         desc="the output denoised DWI image")
@@ -76,11 +72,6 @@ class DWIDenoise(MRTrix3Base):
     _cmd = 'dwidenoise'
     input_spec = DWIDenoiseInputSpec
     output_spec = DWIDenoiseOutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        return outputs
 
 
 class ResponseSDInputSpec(MRTrix3BaseInputSpec):
