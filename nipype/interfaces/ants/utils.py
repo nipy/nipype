@@ -406,9 +406,9 @@ class LabelGeometry(ANTSCommand):
     >>> label_extract.cmdline
     'LabelGeometryMeasures 3 atlas.nii.gz [] atlas.csv'
 
-    >>> label_extract.inputs.intensity_image = 'ants_warp.nii.gz'
+    >>> label_extract.inputs.intensity_image = 'ants_Warp.nii.gz'
     >>> label_extract.cmdline
-    'LabelGeometryMeasures 3 atlas.nii.gz ants_warp.nii.gz atlas.csv'
+    'LabelGeometryMeasures 3 atlas.nii.gz ants_Warp.nii.gz atlas.csv'
 
     """
     _cmd = 'LabelGeometryMeasures'
