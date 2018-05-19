@@ -16,6 +16,7 @@ class DWIDenoiseInputSpec(MRTrix3BaseInputSpec):
         exists=True,
         argstr='%s',
         position=-2,
+        mandatory=True,
         desc='input DWI image')
     mask = File(
         exists=True,
