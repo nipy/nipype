@@ -23,6 +23,7 @@ def test_DWIDenoise_inputs():
         in_bvec=dict(argstr='-fslgrad %s %s', ),
         in_file=dict(
             argstr='%s',
+            mandatory=True,
             position=-2,
         ),
         mask=dict(
