@@ -54,7 +54,7 @@ _build_main_image_py36: &build_main_image_py36
         --tag nipype/nipype:py36 \
         --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
         --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
-        --build-arg VERSION="${CIRCLE_TAG}" /home/circleci/nipype \
+        --build-arg VERSION="${CIRCLE_TAG}" /home/circleci/nipype
 
 _build_main_image_py27: &build_main_image_py27
   name: Build main image (py27)
@@ -68,7 +68,7 @@ _build_main_image_py27: &build_main_image_py27
         --build-arg PYTHON_VERSION_MINOR=7 \
         --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
         --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
-        --build-arg VERSION="${CIRCLE_TAG}-py27" /home/circleci/nipype \
+        --build-arg VERSION="${CIRCLE_TAG}-py27" /home/circleci/nipype
 
 _download_test_data: &_download_test_data
   name: Download test data
