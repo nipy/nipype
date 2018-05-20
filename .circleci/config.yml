@@ -339,7 +339,7 @@ jobs:
       - run:
           name: Deploy to PyPI
           command: |
-            pip install twine future
+            pip install twine future wheel
             python setup.py sdist bdist_wheel
             # twine upload dist/*
 
