@@ -334,6 +334,8 @@ jobs:
     machine: *machine_kwds
     working_directory: /home/circleci/nipype
     steps:
+      - checkout:
+          path: /home/circleci/nipype
       - run:
           name: Deploy to PyPI
           command: |
