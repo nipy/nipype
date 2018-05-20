@@ -264,7 +264,7 @@ class Smooth(FSLCommand):
 
 class SliceInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr="%s", position=0, mandatory=True,
-                   desc="input filename")
+                   desc="input filename", copyfile=False)
     out_base_name = traits.Str(argstr="%s", position=1, desc="outputs prefix")
 
 
@@ -311,18 +311,16 @@ class Slice(FSLCommand):
         """
         outputs = self._outputs().get()
         ext = Info.output_type_to_ext(self.inputs.output_type)
+        suffix = '_slice_*' + ext
         if isdefined(self.inputs.out_base_name):
-            outbase = self.inputs.out_base_name + '_slice_*'
-            out_dir = os.getcwd()
+            fname_template = os.path.abspath(
+                self.inputs.out_base_name + suffix)
         else:
-            out_dir = os.path.dirname(self.inputs.in_file)
-            in_base, _ = os.path.splitext(self.inputs.in_file)
-            if '.gz' in self.inputs.in_file:
-                in_base, _ = os.path.splitext(in_base)
+            fname_template = fname_presuffix(self.inputs.in_file,
+                                             suffix=suffix, use_ext=False)
 
-            outbase = in_base + '_slice*'
-        outputs['out_files'] = sorted(glob(os.path.join(out_dir,
-                                                        outbase + ext)))
+        outputs['out_files'] = sorted(glob(fname_template))
+
         return outputs
 
 
