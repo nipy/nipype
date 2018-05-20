@@ -299,7 +299,7 @@ jobs:
       - run: *_run_codecov_smoke
       - store_artifacts: *store_artifacts_kwds
 
-  deploy:
+  deploy_dockerhub:
     docker:
       - image: docker:17.10.0-ce-git
     steps:
@@ -330,6 +330,16 @@ jobs:
             - /tmp/docker/cache/Dockerfile.base-pruned
           key: dockerfile-cache-v1-{{ .Branch }}-{{ checksum "/tmp/docker/cache/Dockerfile.base-pruned" }}
 
+  deploy_pypi:
+    machine: *machine_kwds
+    working_directory: /home/circleci/nipype
+    steps:
+      - run:
+          name: Deploy to PyPI
+          command: |
+            pip install twine future
+            python setup.py sdist bdist_wheel
+            twine upload dist/*
 
 workflows:
   version: 2
@@ -348,10 +358,21 @@ workflows:
       - test_fmri_spm_nested_fsl_feeds:
           requires:
             - compare_base_dockerfiles
-      - deploy:
+      - deploy_dockerhub:
           filters:
             branches:
               only: master
+          requires:
+            - test_pytest
+            - test_fmri_spm_nested_fsl_feeds
+            - test_py3_fmri_fsl_spm
+            - test_py3_fmri_spm_dartel_multiproc
+      - deploy_pypi:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
           requires:
             - test_pytest
             - test_fmri_spm_nested_fsl_feeds
