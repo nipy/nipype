@@ -339,7 +339,7 @@ jobs:
           command: |
             pip install twine future
             python setup.py sdist bdist_wheel
-            twine upload dist/*
+            # twine upload dist/*
 
 workflows:
   version: 2
@@ -368,11 +368,11 @@ workflows:
             - test_py3_fmri_fsl_spm
             - test_py3_fmri_spm_dartel_multiproc
       - deploy_pypi:
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /.*/
+          # filters:
+          #   branches:
+          #     ignore: /.*/
+          #   tags:
+          #     only: /.*/
           requires:
             - test_pytest
             - test_fmri_spm_nested_fsl_feeds
