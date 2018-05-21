@@ -17,6 +17,7 @@ def test_Slice_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            copyfile=False,
             mandatory=True,
             position=0,
         ),
