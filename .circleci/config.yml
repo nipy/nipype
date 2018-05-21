@@ -330,6 +330,22 @@ jobs:
             - /tmp/docker/cache/Dockerfile.base-pruned
           key: dockerfile-cache-v1-{{ .Branch }}-{{ checksum "/tmp/docker/cache/Dockerfile.base-pruned" }}
 
+  update_feedstock:
+    machine: *machine_kwds
+    working_directory: /home/circleci/nipype
+    steps:
+      - checkout:
+          path: /home/circleci/nipype
+      - run:
+          name: Install hub
+          command: |
+            curl -sSL https://github.com/github/hub/releases/download/v2.2.9/hub-linux-amd64-2.2.9.tgz | \
+            tar zxv -C /tmp
+            sudo /tmp/hub-linux-amd64-2.2.9/install
+      - run:
+          name: Update feedstock
+          command: /home/circleci/nipype/tools/feedstock.sh
+
 
 workflows:
   version: 2
@@ -357,3 +373,9 @@ workflows:
             - test_fmri_spm_nested_fsl_feeds
             - test_py3_fmri_fsl_spm
             - test_py3_fmri_spm_dartel_multiproc
+      - update_feedstock:
+          filters:
+            branches:
+              only: /rel\/.*/
+            tags:
+              only: /.*/
