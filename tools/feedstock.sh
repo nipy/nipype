@@ -66,13 +66,21 @@ else
 fi
 
 # Calculate hash
-SHA256=`curl -sSL https://github.com/$SRCREPO/archive/$BRANCH.tar.gz | sha256sum | cut -d\  -f 1`
+SHA256=`curl -sSL https://github.com/$SRCREPO/archive/$REF.tar.gz | sha256sum | cut -d\  -f 1`
+
+URL_BASE="https://github.com/$CIRCLE_PROJECT_USERNAME/{{ name }}/archive"
+if $RELEASE; then
+    URL_FMT="$URL_BASE/{{ version }}.tar.gz"
+else
+    URL_FMT="$URL_BASE/rel/{{ version }}.tar.gz"
+fi
 
 # Set version, hash, and reset build number
-# Use ~ for separator, as it's an invalid character in a git-ref
+# Use ~ for separator in URL, to avoid slash issues
 sed -i '' \
-    -e 's~^\({% set version = "\).*\(" %}\)$~'"\1$REF\2~" \
+    -e 's/^\({% set version = "\).*\(" %}\)$/'"\1$VERSION\2/" \
     -e 's/^\({% set sha256 = "\).*\(" %}\)$/'"\1$SHA256\2/" \
+    -e 's~^\( *url:\) .*$~\1 '"$URL_FMT~" \
     -e 's/^\( *number:\) .*$/\1 0/' \
     recipe/meta.yaml
 
@@ -89,17 +97,17 @@ Updating feedstock to release branch
 
 #### Environment
 
-| Variable | Value |
-|----------|-------|
-| `CIRCLE_PROJECT_USERNAME` | $CIRCLE_PROJECT_USERNAME |
-| `CIRCLE_PROJECT_REPONAME` | $CIRCLE_PROJECT_REPONAME |
-| `CIRCLE_BRANCH` | $CIRCLE_BRANCH |
-| `CIRCLE_TAG` | $CIRCLE_TAG |
+| Variable                    | Value                    |
+|-----------------------------|--------------------------|
+| \`CIRCLE_PROJECT_USERNAME\` | $CIRCLE_PROJECT_USERNAME |
+| \`CIRCLE_PROJECT_REPONAME\` | $CIRCLE_PROJECT_REPONAME |
+| \`CIRCLE_BRANCH\`           | $CIRCLE_BRANCH           |
+| \`CIRCLE_TAG\`              | $CIRCLE_TAG              |
 
 #### Calculated values
 
-| URL | https://github.com/$SRCREPO/archive/$BRANCH.tar.gz |
-| SHA256 | $SHA256 |
+* URL = https://github.com/$SRCREPO/archive/$REF.tar.gz
+* SHA256 = \`$SHA256\`
 END
 fi
 
