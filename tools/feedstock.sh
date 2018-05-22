@@ -82,7 +82,7 @@ git commit -m "$COMMIT_MSG"
 git push -u $GITHUB_USER $BRANCH
 
 if $NEW_PR; then
-    hub pull-request -b conda-forge:master -F - <<END;
+    hub pull-request -b conda-forge:master -F - <<END
 $PR_TITLE
 
 Updating feedstock to release branch
@@ -100,7 +100,7 @@ Updating feedstock to release branch
 
 | URL | https://github.com/$SRCREPO/archive/$BRANCH.tar.gz |
 | SHA256 | $SHA256 |
-END;
+END
 fi
 
 # Remove working copy
