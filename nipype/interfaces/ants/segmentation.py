@@ -266,10 +266,15 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
     input_image = File(
         argstr='--input-image %s',
         mandatory=True,
-        desc=('image to apply transformation to (generally a '
-              'coregistered functional)'))
-    mask_image = File(argstr='--mask-image %s')
-    weight_image = File(argstr='--weight-image %s')
+        desc=('input for bias correction. Negative values or values close to '
+            'zero should be processed prior to correction'))
+    mask_image = File(
+        argstr='--mask-image %s',
+        desc=('image to specify region to perform final bias correction in'))
+    weight_image = File(
+        argstr='--weight-image %s',
+        desc=('image for relative weighting (e.g. probability map of the white '
+            'matter) of voxels during the B-spline fitting. '))
     output_image = traits.Str(
         argstr='--output %s',
         desc='output file name',
@@ -284,8 +289,7 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
         False,
         mandatory=True,
         usedefault=True,
-        desc=('True if the estimated bias should be saved'
-              ' to file.'),
+        desc=('True if the estimated bias should be saved to file.'),
         xor=['bias_image'])
     bias_image = File(
         desc='Filename for the estimated bias.', hash_files=False)
