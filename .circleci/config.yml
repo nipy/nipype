@@ -343,8 +343,19 @@ jobs:
             tar zxv -C /tmp
             sudo /tmp/hub-linux-amd64-2.2.9/install
       - run:
+          name: Expand SSH Key
+          command: |
+            (echo "-----BEGIN OPENSSH PRIVATE KEY-----";
+             echo $GITHUB_ED25519 | fold -w 71;
+             echo "-----END OPENSSH PRIVATE KEY-----") > ~/.ssh/id_ed25519
+            chmod go-rwx ~/.ssh/id_ed25519
+            ssh-keygen -y -f ~/.ssh/id_ed25519 > ~/.ssh/id_ed25519.pub
+      - run:
           name: Update feedstock
-          command: /home/circleci/nipype/tools/feedstock.sh
+          command: |
+              ssh-add -D
+              ssh-add ~/.ssh/id_ed25519
+              /home/circleci/nipype/tools/feedstock.sh
 
 
 workflows:
