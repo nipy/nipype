@@ -374,6 +374,7 @@ workflows:
             - test_py3_fmri_fsl_spm
             - test_py3_fmri_spm_dartel_multiproc
       - update_feedstock:
+          context: nipybot
           filters:
             branches:
               only: /rel\/.*/
