@@ -113,7 +113,7 @@ class BETOutputSpec(TraitedSpec):
 
 
 class BET(FSLCommand):
-    """Use FSL BET command for skull stripping.
+    """FSL BET command for skull stripping
 
     For complete details, see the `BET Documentation.
     <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/BET/UserGuide>`_
@@ -312,7 +312,7 @@ class FASTOutputSpec(TraitedSpec):
 
 
 class FAST(FSLCommand):
-    """ Use FSL FAST for segmenting and bias correction.
+    """FSL FAST command for segmentation and bias correction
 
     For complete details, see the `FAST Documentation.
     <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FAST>`_
@@ -635,7 +635,7 @@ class FLIRTOutputSpec(TraitedSpec):
 
 
 class FLIRT(FSLCommand):
-    """Use FSL FLIRT for coregistration.
+    """FSL FLIRT command for coregistration
 
     For complete details, see the `FLIRT Documentation.
     <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FLIRT>`_
@@ -790,7 +790,7 @@ class MCFLIRTOutputSpec(TraitedSpec):
 
 
 class MCFLIRT(FSLCommand):
-    """Use FSL MCFLIRT to do within-modality motion correction.
+    """FSL MCFLIRT command for within-modality motion correction
 
     For complete details, see the `MCFLIRT Documentation.
     <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/MCFLIRT>`_
@@ -1106,7 +1106,7 @@ class FNIRTOutputSpec(TraitedSpec):
 
 
 class FNIRT(FSLCommand):
-    """Use FSL FNIRT for non-linear registration.
+    """FSL FNIRT command for non-linear registration
 
     For complete details, see the `FNIRT Documentation.
     <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FNIRT>`_
@@ -1305,7 +1305,7 @@ class ApplyWarpOutputSpec(TraitedSpec):
 
 
 class ApplyWarp(FSLCommand):
-    """Use FSL's applywarp to apply the results of a FNIRT registration
+    """FSL's applywarp command to apply the results of a FNIRT registration
 
     Examples
     --------
@@ -1389,7 +1389,7 @@ class SliceTimerOutputSpec(TraitedSpec):
 
 
 class SliceTimer(FSLCommand):
-    """ use FSL slicetimer to perform slice timing correction.
+    """FSL slicetimer command to perform slice timing correction
 
     Examples
     --------
@@ -1476,7 +1476,7 @@ class SUSANOutputSpec(TraitedSpec):
 
 
 class SUSAN(FSLCommand):
-    """ use FSL SUSAN to perform smoothing
+    """FSL SUSAN command to perform smoothing
 
     For complete details, see the `SUSAN Documentation.
     <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/SUSAN>`_
@@ -1646,7 +1646,8 @@ class FUGUEOutputSpec(TraitedSpec):
 
 
 class FUGUE(FSLCommand):
-    """
+    """FSL FUGUE set of tools for EPI distortion correction
+
     `FUGUE <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FUGUE>`_ is, most generally,
     a set of tools for EPI distortion correction.
 
@@ -1869,7 +1870,7 @@ class PRELUDEOutputSpec(TraitedSpec):
 
 
 class PRELUDE(FSLCommand):
-    """Use FSL prelude to do phase unwrapping
+    """FSL prelude command for phase unwrapping
 
     Examples
     --------
@@ -1979,8 +1980,7 @@ class FIRSTOutputSpec(TraitedSpec):
 
 
 class FIRST(FSLCommand):
-    """
-    Use FSL's run_first_all command to segment subcortical volumes
+    """FSL run_first_all command for segmentation of subcortical volumes
 
     http://www.fmrib.ox.ac.uk/fsl/first/index.html
 
