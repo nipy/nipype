@@ -1358,12 +1358,12 @@ class LocalBistatInputSpec(AFNICommandInputSpec):
              '\'SPHERE\', \'RHDD\' (rhombic dodecahedron), \'TOHD\' '
              '(truncated octahedron) with a given radius in mm or '
              '\'RECT\' (rectangular block) with dimensions to specify in mm.',
-        argstr='-nbhd %s')
+        argstr="-nbhd '%s(%s)'")
     _stat_names = ['pearson', 'spearman', 'quadrant', 'mutinfo', 'normuti',
                    'jointent', 'hellinger', 'crU', 'crM', 'crA', 'L2slope',
                    'L1slope', 'num', 'ALL']
-    stat = traits.Either(
-        traits.Enum(*_stat_names), traits.List(traits.Enum(_stat_names)),
+    stat = InputMultiPath(
+        traits.Enum(_stat_names),
         mandatory=True,
         desc='statistics to compute. Possible names are :'
              '  * pearson  = Pearson correlation coefficient'
@@ -1389,7 +1389,7 @@ class LocalBistatInputSpec(AFNICommandInputSpec):
              '               map that size.'
              '  * ALL      = all of the above, in that order'
              'More than one option can be used.',
-        argstr='-stat %s')
+        argstr='-stat %s...')
     mask_file = traits.File(
         exists=True,
         desc='mask image file name. Voxels NOT in the mask will not be used '
@@ -1397,8 +1397,10 @@ class LocalBistatInputSpec(AFNICommandInputSpec):
              'will have its statistic(s) computed as zero (0).',
         argstr='-mask %s')
     automask = traits.Bool(
-        desc='Compute the mask as in program 3dAutomask.')
-    mask_file = traits.File(
+        desc='Compute the mask as in program 3dAutomask.',
+        argstr='-automask',
+        xor=['weight_file'])
+    weight_file = traits.File(
         exists=True,
         desc='File name of an image to use as a weight.  Only applies to '
              '\'pearson\' statistics.',
@@ -1440,19 +1442,9 @@ class LocalBistat(AFNICommand):
     output_spec = AFNICommandOutputSpec
 
     def _format_arg(self, name, spec, value):
-        if name == 'neighborhood':
-            region_name, region_size = value
-            if region_name == 'RECT':
-                return spec.argstr % (
-                    "'{0}({1})'".format(region_name, ','.join(region_size)))
-            else:
-                return spec.argstr % (
-                    "'{0}({1})'".format(region_name, region_size))
-        if name == 'stat':
-            if isinstance(value, (str, bytes)):
-                return spec.argstr % value
-            else:
-                return ' '.join([spec.argstr % v for v in value])
+        if name == 'neighborhood' and value[0] == 'RECT':
+            value = ('RECT', '%s,%s,%s' % value[1])
+
         return super(LocalBistat, self)._format_arg(name, spec, value)
 
 

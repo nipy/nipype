@@ -6,7 +6,10 @@ from ..utils import LocalBistat
 def test_LocalBistat_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        automask=dict(),
+        automask=dict(
+            argstr='-automask',
+            xor=['weight_file'],
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -21,12 +24,9 @@ def test_LocalBistat_inputs():
             mandatory=True,
             position=-1,
         ),
-        mask_file=dict(
-            argstr='-weight %s',
-            xor=['automask'],
-        ),
+        mask_file=dict(argstr='-mask %s', ),
         neighborhood=dict(
-            argstr='-nbhd %s',
+            argstr="-nbhd '%s(%s)'",
             mandatory=True,
         ),
         num_threads=dict(
@@ -42,12 +42,16 @@ def test_LocalBistat_inputs():
         ),
         outputtype=dict(),
         stat=dict(
-            argstr='-stat %s',
+            argstr='-stat %s...',
             mandatory=True,
         ),
         terminal_output=dict(
             deprecated='1.0.0',
             nohash=True,
+        ),
+        weight_file=dict(
+            argstr='-weight %s',
+            xor=['automask'],
         ),
     )
     inputs = LocalBistat.input_spec()
