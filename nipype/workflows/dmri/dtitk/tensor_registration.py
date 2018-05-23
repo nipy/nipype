@@ -95,11 +95,16 @@ def diffeomorphic_tensor_pipeline(name='DiffeoTen',
     compose_xfm_node = pe.Node(dtitk.ComposeXfm(), name='compose_xfm_node')
     apply_xfm_node = pe.Node(dtitk.DiffeoSymTensor3DVol(),
                              name='apply_xfm_node')
+    adjust_vs_node_to_input = pe.Node(dtitk.TVAdjustVoxSp(),
+                                      name='adjust_vs_node_to_input')
     reslice_node_to_input = pe.Node(dtitk.TVResample(),
                                     name='reslice_node_to_input')
+    input_fa = pe.Node(dtitk.TVtool(in_flag='fa'), name='input_fa')
 
     wf = pe.Workflow(name=name)
 
+    # calculate input FA image for origin reference
+    wf.connect(inputnode, 'fixed_file', input_fa, 'in_file')
     # Reslice input images
     wf.connect(inputnode, 'fixed_file', origin_node_fixed, 'in_file')
     wf.connect(origin_node_fixed, 'out_file', reslice_node_pow2, 'in_file')
@@ -125,9 +130,11 @@ def diffeomorphic_tensor_pipeline(name='DiffeoTen',
     # Apply transform
     wf.connect(reslice_node_moving, 'out_file', apply_xfm_node, 'in_file')
     wf.connect(compose_xfm_node, 'out_file', apply_xfm_node, 'transform')
-    # Reslice to match original fixed input image
-    wf.connect(apply_xfm_node, 'out_file', reslice_node_to_input, 'in_file')
-    wf.connect(inputnode, 'fixed_file', reslice_node_to_input, 'target_file')
+    # Move origin and reslice to match original fixed input image
+    wf.connect(apply_xfm_node, 'out_file', adjust_vs_node_to_input, 'in_file')
+    wf.connect(input_fa, 'out_file', adjust_vs_node_to_input, 'target_file')
+    wf.connect(adjust_vs_node_to_input, 'out_file', reslice_node_to_input, 'in_file')
+    wf.connect(input_fa, 'out_file', reslice_node_to_input, 'target_file')
     # Send to output
     wf.connect(reslice_node_to_input, 'out_file', outputnode, 'out_file')
     wf.connect(compose_xfm_node, 'out_file', outputnode, 'out_file_xfm')
