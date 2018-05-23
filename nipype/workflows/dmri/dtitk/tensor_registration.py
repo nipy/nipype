@@ -56,7 +56,7 @@ def diffeomorphic_tensor_pipeline(name='DiffeoTen',
     Note: the requirements for a diffeomorphic registration specify that
     the dimension 0 is a power of 2 so images are resliced prior to
     registration. Remember to move origin and reslice prior to applying xfm to
-    another file
+    another file!
 
     Example
     -------
@@ -133,5 +133,47 @@ def diffeomorphic_tensor_pipeline(name='DiffeoTen',
     wf.connect(compose_xfm_node, 'out_file', outputnode, 'out_file_xfm')
     wf.connect(reslice_node_pow2, 'out_file', outputnode, 'fixed_resliced')
     wf.connect(reslice_node_moving, 'out_file', outputnode, 'moving_resliced')
+
+    return wf
+
+
+def apply_diffeo(name='ApplyDiffeo', params={'array_size': (128, 128, 64)}):
+
+    """
+    Workflow that applies a dtitk diffeomorphic registration to a scalar volume
+    by moving the origin and reslicing, then applying the transform.
+
+    Example
+    -------
+
+    >>> from nipype.workflows.dmri.dtitk.tensor_registration import apply_diffeo
+    >>> app_diffeo = diffeomorphic_tensor_pipeline()
+    >>> app_diffeo.inputs.inputnode.moving_file = 'im1.nii'
+    >>> app_diffeo.inputs.inputnode.xfm_file = 'im_warp.df.nii'
+    >>> app_diffeo.run() # doctest: +SKIP
+
+
+    """
+    inputnode = pe.Node(niu.IdentityInterface(
+                        fields=['moving_file', 'xfm_file']),
+                        name='inputnode')
+    outputnode = pe.Node(niu.IdentityInterface(
+                         fields=['out_file']),
+                         name='outputnode')
+    origin_node = pe.Node(dtitk.TVAdjustVoxSp(origin=(0, 0, 0)),
+                          name='origin_node')
+    reslice_node_pow2 = pe.Node(dtitk.TVResample(
+                                origin=(0, 0, 0),
+                                array_size=params['array_size']),
+                                name='reslice_node_pow2')
+    apply_xfm_node = pe.Node(dtitk.DiffeoScalarVol(), name='apply_xfm_node')
+
+    wf = pe.Workflow(name=name)
+
+    wf.connect(inputnode, 'moving_file', origin_node, 'in_file')
+    wf.connect(origin_node, 'out_file', reslice_node_pow2, 'in_file')
+    wf.connect(reslice_node_pow2, 'out_file', apply_xfm_node, 'in_file')
+    wf.connect(inputnode, 'xfm_file', apply_xfm_node, 'transform')
+    wf.connect(apply_xfm_node, 'out_file', outputnode, 'out_file')
 
     return wf
