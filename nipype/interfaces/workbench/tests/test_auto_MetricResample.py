@@ -45,6 +45,7 @@ def test_MetricResample_inputs():
         ),
         method=dict(
             argstr='%s',
+            mandatory=True,
             position=3,
         ),
         metric_out=dict(
