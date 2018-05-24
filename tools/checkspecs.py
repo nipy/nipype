@@ -287,7 +287,7 @@ class InterfaceChecker(object):
                         and "requires" not in trait.__dict__\
                         and "xor" not in trait.__dict__:
                     if trait.trait_type.__class__.__name__ is "Range"\
-                            and trait.default == trait.trait_type._low: 
+                            and trait.default == trait.trait_type._low:
                         continue
                     bad_specs.append(
                         [uri, c, 'Inputs', traitname, 'default value is set, no value for usedefault'])

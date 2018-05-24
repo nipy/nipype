@@ -52,7 +52,7 @@ def diffeomorphic_tensor_pipeline(name='DiffeoTen',
                                   params={'array_size': (128, 128, 64)}):
     """
     Workflow that performs a diffeomorphic registration
-    (Rigid and Affine follwed by Diffeomorphic)
+    (Rigid and Affine followed by Diffeomorphic)
     Note: the requirements for a diffeomorphic registration specify that
     the dimension 0 is a power of 2 so images are resliced prior to
     registration. Remember to move origin and reslice prior to applying xfm to
@@ -143,7 +143,7 @@ def diffeomorphic_tensor_pipeline(name='DiffeoTen',
 
     return wf
 
-
+'''
 def apply_diffeo(name='ApplyDiffeo', params={'array_size': (128, 128, 64)}):
 
     """
@@ -167,10 +167,9 @@ def apply_diffeo(name='ApplyDiffeo', params={'array_size': (128, 128, 64)}):
     outputnode = pe.Node(niu.IdentityInterface(
                          fields=['out_file']),
                          name='outputnode')
-    origin_node = pe.Node(dtitk.TVAdjustVoxSp(origin=(0, 0, 0)),
+    origin_node = pe.Node(dtitk.SVAdjustVoxSp(origin=(0, 0, 0)),
                           name='origin_node')
-    reslice_node_pow2 = pe.Node(dtitk.TVResample(
-                                origin=(0, 0, 0),
+    reslice_node_pow2 = pe.Node(dtitk.SVResample(
                                 array_size=params['array_size']),
                                 name='reslice_node_pow2')
     apply_xfm_node = pe.Node(dtitk.DiffeoScalarVol(), name='apply_xfm_node')
@@ -183,4 +182,4 @@ def apply_diffeo(name='ApplyDiffeo', params={'array_size': (128, 128, 64)}):
     wf.connect(inputnode, 'xfm_file', apply_xfm_node, 'transform')
     wf.connect(apply_xfm_node, 'out_file', outputnode, 'out_file')
 
-    return wf
+    return wf'''
