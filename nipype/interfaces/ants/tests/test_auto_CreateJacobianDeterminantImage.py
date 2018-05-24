@@ -28,7 +28,6 @@ def test_CreateJacobianDeterminantImage_inputs():
             argstr='%d',
             mandatory=True,
             position=0,
-            usedefault=False,
         ),
         num_threads=dict(
             nohash=True,

@@ -10,7 +10,6 @@ def test_AverageAffineTransform_inputs():
             argstr='%d',
             mandatory=True,
             position=0,
-            usedefault=False,
         ),
         environ=dict(
             nohash=True,

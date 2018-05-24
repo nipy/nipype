@@ -6,10 +6,8 @@ from __future__ import (print_function, division, unicode_literals,
 import os.path as op
 import numpy as np
 from ... import logging
-from ..base import (traits, File, isdefined, BaseInterface,
+from ..base import (traits, File, isdefined, LibraryBaseInterface,
                     BaseInterfaceInputSpec)
-
-IFLOGGER = logging.getLogger('interface')
 
 HAVE_DIPY = True
 try:
@@ -32,16 +30,11 @@ def dipy_version():
     return dipy.__version__
 
 
-class DipyBaseInterface(BaseInterface):
+class DipyBaseInterface(LibraryBaseInterface):
     """
     A base interface for py:mod:`dipy` computations
     """
-
-    def __init__(self, **inputs):
-        if no_dipy():
-            IFLOGGER.warn('dipy was not found')
-            # raise ImportError('dipy was not found')
-        super(DipyBaseInterface, self).__init__(**inputs)
+    _pkg = 'dipy'
 
 
 class DipyBaseInterfaceInputSpec(BaseInterfaceInputSpec):

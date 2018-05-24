@@ -12,7 +12,7 @@ def test_ArtifactDetect_inputs():
             nohash=True,
             usedefault=True,
         ),
-        intersect_mask=dict(),
+        intersect_mask=dict(usedefault=True, ),
         mask_file=dict(),
         mask_threshold=dict(),
         mask_type=dict(mandatory=True, ),

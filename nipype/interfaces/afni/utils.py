@@ -479,7 +479,8 @@ class CatInputSpec(AFNICommandInputSpec):
         File(exists=True), argstr="%s", mandatory=True, position=-2)
     out_file = File(
         argstr='> %s',
-        default='catout.1d',
+        value='catout.1d',
+        usedefault=True,
         desc='output (concatenated) file name',
         position=-1,
         mandatory=True)
@@ -564,8 +565,11 @@ class CatMatvecInputSpec(AFNICommandInputSpec):
         argstr="%s",
         position=-2)
     out_file = File(
-        desc="File to write concattenated matvecs to",
         argstr=" > %s",
+        name_template='%s_cat.aff12.1D',
+        name_source='in_file',
+        keep_extension=False,
+        desc="File to write concattenated matvecs to",
         position=-1,
         mandatory=True)
     matrix = traits.Bool(
@@ -1607,6 +1611,7 @@ class NwarpApplyInputSpec(CommandLineInputSpec):
         desc='the name of the master dataset, which defines the output grid',
         argstr='-master %s')
     interp = traits.Enum(
+        'wsinc5',
         'NN',
         'nearestneighbour',
         'nearestneighbor',
@@ -1616,10 +1621,9 @@ class NwarpApplyInputSpec(CommandLineInputSpec):
         'tricubic',
         'quintic',
         'triquintic',
-        'wsinc5',
         desc='defines interpolation method to use during warp',
         argstr='-interp %s',
-        default='wsinc5')
+        usedefault=True)
     ainterp = traits.Enum(
         'NN',
         'nearestneighbour',
@@ -1633,8 +1637,7 @@ class NwarpApplyInputSpec(CommandLineInputSpec):
         'wsinc5',
         desc='specify a different interpolation method than might '
         'be used for the warp',
-        argstr='-ainterp %s',
-        default='wsinc5')
+        argstr='-ainterp %s')
     out_file = File(
         name_template='%s_Nwarp',
         desc='output image file name',
@@ -1667,7 +1670,7 @@ class NwarpApply(AFNICommandBase):
     >>> nwarp.inputs.master = 'NWARP'
     >>> nwarp.inputs.warp = "'Fred_WARP+tlrc Fred.Xaff12.1D'"
     >>> nwarp.cmdline
-    "3dNwarpApply -source Fred+orig -master NWARP -prefix Fred+orig_Nwarp -nwarp \'Fred_WARP+tlrc Fred.Xaff12.1D\'"
+    "3dNwarpApply -source Fred+orig -interp wsinc5 -master NWARP -prefix Fred+orig_Nwarp -nwarp \'Fred_WARP+tlrc Fred.Xaff12.1D\'"
     >>> res = nwarp.run()  # doctest: +SKIP
 
     """
@@ -1693,13 +1696,13 @@ class NwarpCatInputSpec(AFNICommandInputSpec):
     inv_warp = traits.Bool(
         desc='invert the final warp before output', argstr='-iwarp')
     interp = traits.Enum(
+        'wsinc5',
         'linear',
         'quintic',
-        'wsinc5',
         desc='specify a different interpolation method than might '
         'be used for the warp',
         argstr='-interp %s',
-        default='wsinc5')
+        usedefault=True)
     expad = traits.Int(
         desc='Pad the nonlinear warps by the given number of voxels voxels in '
         'all directions. The warp displacements are extended by linear '
@@ -1761,7 +1764,7 @@ class NwarpCat(AFNICommand):
     >>> nwarpcat.inputs.in_files = ['Q25_warp+tlrc.HEAD', ('IDENT', 'structural.nii')]
     >>> nwarpcat.inputs.out_file = 'Fred_total_WARP'
     >>> nwarpcat.cmdline
-    "3dNwarpCat -prefix Fred_total_WARP Q25_warp+tlrc.HEAD 'IDENT(structural.nii)'"
+    "3dNwarpCat -interp wsinc5 -prefix Fred_total_WARP Q25_warp+tlrc.HEAD 'IDENT(structural.nii)'"
     >>> res = nwarpcat.run()  # doctest: +SKIP
 
     """
@@ -1838,8 +1841,6 @@ class OneDToolPyInputSpec(AFNIPythonCommandInputSpec):
     show_cormat_warnings = traits.File(
         desc='Write cormat warnings to a file',
         argstr="-show_cormat_warnings |& tee %s",
-        default="out.cormat_warn.txt",
-        usedefault=False,
         position=-1,
         xor=['out_file'])
     show_indices_interest = traits.Bool(

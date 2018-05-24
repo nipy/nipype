@@ -263,15 +263,18 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
         argstr="%s",
         position=-1,
         copyfile=False,
-        deprecated='1.0.2',
-        new_name='source_dir',
         mandatory=True,
+        desc=('A set of filenames to be converted. Note that the current ' 
+              'version (1.0.20180328) of dcm2niix converts any files in the '
+              'directory. To only convert specific files they should be in an '
+              'isolated directory'),
         xor=['source_dir'])
     source_dir = Directory(
         exists=True,
         argstr="%s",
         position=-1,
         mandatory=True,
+        desc='A directory containing dicom files to be converted',
         xor=['source_names'])
     out_filename = traits.Str(
         argstr="-f %s",
@@ -378,6 +381,18 @@ class Dcm2niix(CommandLine):
     >>> converter.cmdline
     'dcm2niix -b y -z y -5 -x n -t n -m n -o ds005 -s n -v n dicomdir'
     >>> converter.run() # doctest: +SKIP
+
+    # In the example below, we note that the current version of dcm2niix
+    # converts any files in the directory containing the files in the list. We
+    # also do not support nested filenames with this option. Thus all files
+    # should have a common root directory.
+    >>> converter = Dcm2niix()
+    >>> converter.inputs.source_names = ['functional_1.dcm', 'functional_2.dcm']
+    >>> converter.inputs.compression = 5
+    >>> converter.inputs.output_dir = 'ds005'
+    >>> converter.cmdline
+    'dcm2niix -b y -z y -5 -x n -t n -m n -o ds005 -s n -v n .'
+    >>> converter.run() # doctest: +SKIP
     """
 
     input_spec = Dcm2niixInputSpec
@@ -399,7 +414,7 @@ class Dcm2niix(CommandLine):
                 spec.argstr += ' n'
                 val = True
         if opt == 'source_names':
-            return spec.argstr % val[0]
+            return spec.argstr % (os.path.dirname(val[0]) or '.')
         return super(Dcm2niix, self)._format_arg(opt, spec, val)
 
     def _run_interface(self, runtime):

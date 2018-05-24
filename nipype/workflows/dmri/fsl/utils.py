@@ -125,6 +125,14 @@ def dwi_flirt(name='DWICoregistration', excl_nodiff=False, flirt_param={}):
         fsl.FLIRT(**flirt_param),
         name='CoRegistration',
         iterfield=['in_file', 'in_matrix_file'])
+    apply_xfms = pe.MapNode(
+        fsl.ApplyXFM(
+            apply_xfm=True,
+            interp='spline',
+            bgvalue=0),
+        name='ApplyXFMs',
+        iterfield=['in_file', 'in_matrix_file']
+    )
     thres = pe.MapNode(
         fsl.Threshold(thresh=0.0),
         iterfield=['in_file'],
@@ -134,25 +142,30 @@ def dwi_flirt(name='DWICoregistration', excl_nodiff=False, flirt_param={}):
         niu.IdentityInterface(fields=['out_file', 'out_xfms']),
         name='outputnode')
     wf = pe.Workflow(name=name)
-    wf.connect(
-        [(inputnode, split, [('in_file', 'in_file')]),
-         (inputnode, dilate, [('ref_mask', 'in_file')]),
-         (inputnode, enhb0, [('ref_mask', 'in_mask')]), (inputnode, initmat, [
-             ('in_xfms', 'in_xfms'), ('in_bval', 'in_bval')
-         ]), (inputnode, n4,
-              [('reference', 'input_image'),
-               ('ref_mask', 'mask_image')]), (dilate, flirt, [
-                   ('out_file', 'ref_weight'), ('out_file', 'in_weight')
-               ]), (n4, enhb0, [('output_image', 'in_file')]), (split, enhdw, [
-                   ('out_files', 'in_file')
-               ]), (dilate, enhdw, [('out_file', 'in_mask')]), (enhb0, flirt, [
-                   ('out_file', 'reference')
-               ]), (enhdw, flirt, [('out_file', 'in_file')]),
-         (initmat, flirt, [('init_xfms', 'in_matrix_file')]), (flirt, thres, [
-             ('out_file', 'in_file')
-         ]), (thres, merge, [('out_file', 'in_files')]), (merge, outputnode, [
-             ('merged_file', 'out_file')
-         ]), (flirt, outputnode, [('out_matrix_file', 'out_xfms')])])
+    wf.connect([
+        (inputnode, split, [('in_file', 'in_file')]),
+        (inputnode, dilate, [('ref_mask', 'in_file')]),
+        (inputnode, enhb0, [('ref_mask', 'in_mask')]),
+        (inputnode, initmat, [('in_xfms', 'in_xfms'),
+                              ('in_bval', 'in_bval')]),
+        (inputnode, n4, [('reference', 'input_image'),
+                         ('ref_mask', 'mask_image')]),
+        (dilate, flirt, [('out_file', 'ref_weight'),
+                         ('out_file', 'in_weight')]),
+        (n4, enhb0, [('output_image', 'in_file')]),
+        (split, enhdw, [('out_files', 'in_file')]),
+        (split, apply_xfms, [('out_files', 'in_file')]),
+        (dilate, enhdw, [('out_file', 'in_mask')]),
+        (enhb0, flirt, [('out_file', 'reference')]),
+        (enhb0, apply_xfms, [('out_file', 'reference')]),
+        (enhdw, flirt, [('out_file', 'in_file')]),
+        (initmat, flirt, [('init_xfms', 'in_matrix_file')]),
+        (flirt, apply_xfms, [('out_matrix_file', 'in_matrix_file')]),
+        (apply_xfms, thres, [('out_file', 'in_file')]),
+        (thres, merge, [('out_file', 'in_files')]),
+        (merge, outputnode, [('merged_file', 'out_file')]),
+        (flirt, outputnode, [('out_matrix_file', 'out_xfms')])
+    ])
     return wf
 
 

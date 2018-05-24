@@ -8,22 +8,12 @@ import os
 import nibabel as nb
 import numpy as np
 
-from ...utils.misc import package_check
 from ...utils import NUMPY_MMAP
-
 from ...utils.filemanip import split_filename, fname_presuffix
-from ..base import (TraitedSpec, BaseInterface, traits, BaseInterfaceInputSpec,
-                    isdefined, File, InputMultiPath, OutputMultiPath)
 
-have_nipy = True
-try:
-    package_check('nipy')
-except Exception as e:
-    have_nipy = False
-else:
-    import nipy
-    from nipy import save_image, load_image
-    nipy_version = nipy.__version__
+from .base import NipyBaseInterface, have_nipy
+from ..base import (TraitedSpec, traits, BaseInterfaceInputSpec,
+                    isdefined, File, InputMultiPath, OutputMultiPath)
 
 
 class ComputeMaskInputSpec(BaseInterfaceInputSpec):
@@ -44,7 +34,7 @@ class ComputeMaskOutputSpec(TraitedSpec):
     brain_mask = File(exists=True)
 
 
-class ComputeMask(BaseInterface):
+class ComputeMask(NipyBaseInterface):
     input_spec = ComputeMaskInputSpec
     output_spec = ComputeMaskOutputSpec
 
@@ -118,7 +108,7 @@ class SpaceTimeRealignerOutputSpec(TraitedSpec):
               "euler angles"))
 
 
-class SpaceTimeRealigner(BaseInterface):
+class SpaceTimeRealigner(NipyBaseInterface):
     """Simultaneous motion and slice timing correction algorithm
 
     If slice_times is not specified, this algorithm performs spatial motion
@@ -157,11 +147,8 @@ class SpaceTimeRealigner(BaseInterface):
     output_spec = SpaceTimeRealignerOutputSpec
     keywords = ['slice timing', 'motion correction']
 
-    @property
-    def version(self):
-        return nipy_version
-
     def _run_interface(self, runtime):
+        from nipy import save_image, load_image
         all_ims = [load_image(fname) for fname in self.inputs.in_file]
 
         if not isdefined(self.inputs.slice_times):
@@ -233,7 +220,7 @@ class TrimOutputSpec(TraitedSpec):
     out_file = File(exists=True)
 
 
-class Trim(BaseInterface):
+class Trim(NipyBaseInterface):
     """ Simple interface to trim a few volumes from a 4d fmri nifti file
 
     Examples

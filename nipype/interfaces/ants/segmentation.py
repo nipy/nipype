@@ -1063,7 +1063,6 @@ class DenoiseImageInputSpec(ANTSCommandInputSpec):
         3,
         4,
         argstr='-d %d',
-        usedefault=False,
         desc='This option forces the image to be treated '
         'as a specified-dimensional image. If not '
         'specified, the program tries to infer the '
@@ -1163,7 +1162,6 @@ class AntsJointFusionInputSpec(ANTSCommandInputSpec):
         2,
         4,
         argstr='-d %d',
-        usedefault=False,
         desc='This option forces the image to be treated '
         'as a specified-dimensional image. If not '
         'specified, the program tries to infer the '
@@ -1231,7 +1229,6 @@ class AntsJointFusionInputSpec(ANTSCommandInputSpec):
         'PC',
         'MSQ',
         argstr='-m %s',
-        usedefault=False,
         desc=('Metric to be used in determining the most similar '
               'neighborhood patch. Options include Pearson\'s '
               'correlation (PC) and mean squares (MSQ). Default = '
@@ -1261,10 +1258,10 @@ class AntsJointFusionInputSpec(ANTSCommandInputSpec):
     out_label_fusion = File(
         argstr="%s", hash_files=False, desc='The output label fusion image.')
     out_intensity_fusion_name_format = traits.Str(
-        'antsJointFusionIntensity_%d.nii.gz',
         argstr="",
         desc='Optional intensity fusion '
-        'image file name format.')
+        'image file name format. '
+        '(e.g. "antsJointFusionIntensity_%d.nii.gz")')
     out_label_post_prob_name_format = traits.Str(
         'antsJointFusionPosterior_%d.nii.gz',
         requires=['out_label_fusion', 'out_intensity_fusion_name_format'],
@@ -1511,12 +1508,12 @@ class KellyKapowskiInputSpec(ANTSCommandInputSpec):
         desc="Gradient step size for the optimization.")
 
     smoothing_variance = traits.Float(
-        1.0,
+        1.0, usedefault=True,
         argstr="--smoothing-variance %f",
         desc="Defines the Gaussian smoothing of the hit and total images.")
 
     smoothing_velocity_field = traits.Float(
-        1.5,
+        1.5, usedefault=True,
         argstr="--smoothing-velocity-field-parameter %f",
         desc=
         "Defines the Gaussian smoothing of the velocity field (default = 1.5).\n"
@@ -1528,12 +1525,12 @@ class KellyKapowskiInputSpec(ANTSCommandInputSpec):
         desc="Sets the option for B-spline smoothing of the velocity field.")
 
     number_integration_points = traits.Int(
-        10,
+        10, usedefault=True,
         argstr="--number-of-integration-points %d",
         desc="Number of compositions of the diffeomorphism per iteration.")
 
     max_invert_displacement_field_iters = traits.Int(
-        20,
+        20, usedefault=True,
         argstr="--maximum-number-of-invert-displacement-field-iterations %d",
         desc="Maximum number of iterations for estimating the invert \n"
         "displacement field.")
@@ -1574,16 +1571,12 @@ class KellyKapowski(ANTSCommand):
     >>> kk.inputs.dimension = 3
     >>> kk.inputs.segmentation_image = "segmentation0.nii.gz"
     >>> kk.inputs.convergence = "[45,0.0,10]"
-    >>> kk.inputs.gradient_step = 0.025
-    >>> kk.inputs.smoothing_variance = 1.0
-    >>> kk.inputs.smoothing_velocity_field = 1.5
-    >>> #kk.inputs.use_bspline_smoothing = False
-    >>> kk.inputs.number_integration_points = 10
     >>> kk.inputs.thickness_prior_estimate = 10
     >>> kk.cmdline
     'KellyKapowski --convergence "[45,0.0,10]" \
 --output "[segmentation0_cortical_thickness.nii.gz,segmentation0_warped_white_matter.nii.gz]" \
---image-dimensionality 3 --gradient-step 0.025000 --number-of-integration-points 10 \
+--image-dimensionality 3 --gradient-step 0.025000 \
+--maximum-number-of-invert-displacement-field-iterations 20 --number-of-integration-points 10 \
 --segmentation-image "[segmentation0.nii.gz,2,3]" --smoothing-variance 1.000000 \
 --smoothing-velocity-field-parameter 1.500000 --thickness-prior-estimate 10.000000'
 

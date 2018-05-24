@@ -15,7 +15,6 @@ class AverageAffineTransformInputSpec(ANTSCommandInputSpec):
         3,
         2,
         argstr='%d',
-        usedefault=False,
         mandatory=True,
         position=0,
         desc='image dimension (2 or 3)')
@@ -129,7 +128,6 @@ class MultiplyImagesInputSpec(ANTSCommandInputSpec):
         3,
         2,
         argstr='%d',
-        usedefault=False,
         mandatory=True,
         position=0,
         desc='image dimension (2 or 3)')
@@ -185,7 +183,6 @@ class CreateJacobianDeterminantImageInputSpec(ANTSCommandInputSpec):
         3,
         2,
         argstr='%d',
-        usedefault=False,
         mandatory=True,
         position=0,
         desc='image dimension (2 or 3)')

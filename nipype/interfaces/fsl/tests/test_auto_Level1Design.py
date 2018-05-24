@@ -14,7 +14,7 @@ def test_Level1Design_inputs():
         ),
         interscan_interval=dict(mandatory=True, ),
         model_serial_correlations=dict(mandatory=True, ),
-        orthogonalization=dict(),
+        orthogonalization=dict(usedefault=True, ),
         session_info=dict(mandatory=True, ),
     )
     inputs = Level1Design.input_spec()

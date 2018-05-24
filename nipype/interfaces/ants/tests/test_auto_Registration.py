@@ -71,7 +71,7 @@ def test_Registration_inputs():
             requires=['metric'],
             usedefault=True,
         ),
-        metric_weight_item_trait=dict(),
+        metric_weight_item_trait=dict(usedefault=True, ),
         metric_weight_stage_trait=dict(),
         moving_image=dict(mandatory=True, ),
         moving_image_mask=dict(
@@ -97,7 +97,7 @@ def test_Registration_inputs():
             usedefault=True,
         ),
         output_warped_image=dict(hash_files=False, ),
-        radius_bins_item_trait=dict(),
+        radius_bins_item_trait=dict(usedefault=True, ),
         radius_bins_stage_trait=dict(),
         radius_or_number_of_bins=dict(
             requires=['metric_weight'],
@@ -126,7 +126,10 @@ def test_Registration_inputs():
         ),
         use_estimate_learning_rate_once=dict(),
         use_histogram_matching=dict(usedefault=True, ),
-        verbose=dict(argstr='-v', ),
+        verbose=dict(
+            argstr='-v',
+            usedefault=True,
+        ),
         winsorize_lower_quantile=dict(
             argstr='%s',
             usedefault=True,

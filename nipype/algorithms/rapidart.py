@@ -28,7 +28,7 @@ from ..utils import NUMPY_MMAP
 from ..interfaces.base import (BaseInterface, traits, InputMultiPath,
                                OutputMultiPath, TraitedSpec, File,
                                BaseInterfaceInputSpec, isdefined)
-from ..utils.filemanip import filename_to_list, save_json, split_filename
+from ..utils.filemanip import ensure_list, save_json, split_filename
 from ..utils.misc import find_indices, normalize_mc_params
 from .. import logging, config
 iflogger = logging.getLogger('interface')
@@ -234,8 +234,9 @@ class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
         desc=("Mask threshold to be used if mask_type"
               " is 'thresh'."))
     intersect_mask = traits.Bool(
-        True, desc=("Intersect the masks when computed from "
-                    "spm_global."))
+        True, usedefault=True,
+        desc=("Intersect the masks when computed from "
+              "spm_global."))
     save_plot = traits.Bool(
         True, desc="save plots containing outliers", usedefault=True)
     plot_type = traits.Enum(
@@ -376,7 +377,7 @@ class ArtifactDetect(BaseInterface):
                 outputs['displacement_files'] = []
         if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
             outputs['plot_files'] = []
-        for i, f in enumerate(filename_to_list(self.inputs.realigned_files)):
+        for i, f in enumerate(ensure_list(self.inputs.realigned_files)):
             (outlierfile, intensityfile, statsfile, normfile, plotfile,
              displacementfile, maskfile) = \
                 self._get_output_filenames(f, os.getcwd())
@@ -616,8 +617,8 @@ class ArtifactDetect(BaseInterface):
     def _run_interface(self, runtime):
         """Execute this module.
         """
-        funcfilelist = filename_to_list(self.inputs.realigned_files)
-        motparamlist = filename_to_list(self.inputs.realignment_parameters)
+        funcfilelist = ensure_list(self.inputs.realigned_files)
+        motparamlist = ensure_list(self.inputs.realignment_parameters)
         for i, imgf in enumerate(funcfilelist):
             self._detect_outliers_core(
                 imgf, motparamlist[i], i, cwd=os.getcwd())

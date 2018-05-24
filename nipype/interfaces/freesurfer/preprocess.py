@@ -408,7 +408,7 @@ class MRIConvertInputSpec(FSTraitedSpec):
         argstr='--sdcmlist %s',
         desc='list of DICOM files for conversion')
     template_info = traits.Bool(
-        '--template_info', desc='dump info about template')
+        argstr='--template_info', desc='dump info about template')
     crop_gdf = traits.Bool(argstr='--crop_gdf', desc='apply GDF cropping')
     zero_ge_z_offset = traits.Bool(
         argstr='--zero_ge_z_offset', desc='zero ge z offset ???')
@@ -2133,7 +2133,7 @@ class MNIBiasCorrectionInputSpec(FSTraitedSpec):
         desc="output volume. Output can be any format accepted by mri_convert. "
         + "If the output format is COR, then the directory must exist.")
     iterations = traits.Int(
-        4,
+        4, usedefault=True,
         argstr="--n %d",
         desc=
         "Number of iterations to run nu_correct. Default is 4. This is the number of times "
@@ -2292,9 +2292,7 @@ class NormalizeInputSpec(FSTraitedSpec):
         desc="The output file for Normalize")
     # optional
     gradient = traits.Int(
-        1,
         argstr="-g %d",
-        usedefault=False,
         desc="use max intensity/mm gradient g (default=1)")
     mask = File(
         argstr="-mask %s",

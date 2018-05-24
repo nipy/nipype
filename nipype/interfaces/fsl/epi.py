@@ -199,14 +199,16 @@ class TOPUPInputSpec(FSLCommandInputSpec):
     # TODO: the following traits admit values separated by commas, one value
     # per registration level inside topup.
     warp_res = traits.Float(
-        10.0,
+        10.0, usedefault=True,
         argstr='--warpres=%f',
         desc=('(approximate) resolution (in mm) of warp '
               'basis for the different sub-sampling levels'
               '.'))
-    subsamp = traits.Int(1, argstr='--subsamp=%d', desc='sub-sampling scheme')
+    subsamp = traits.Int(1, usedefault=True,
+                         argstr='--subsamp=%d', desc='sub-sampling scheme')
     fwhm = traits.Float(
         8.0,
+        usedefault=True,
         argstr='--fwhm=%f',
         desc='FWHM (in mm) of gaussian smoothing kernel')
     config = traits.String(
@@ -216,9 +218,10 @@ class TOPUPInputSpec(FSLCommandInputSpec):
         desc=('Name of config file specifying command line '
               'arguments'))
     max_iter = traits.Int(
-        5, argstr='--miter=%d', desc='max # of non-linear iterations')
+        5, usedefault=True,
+        argstr='--miter=%d', desc='max # of non-linear iterations')
     reg_lambda = traits.Float(
-        1.0,
+        1.0, usedefault=True,
         argstr='--miter=%0.f',
         desc=('lambda weighting value of the '
               'regularisation term'))
@@ -256,7 +259,7 @@ class TOPUPInputSpec(FSLCommandInputSpec):
         desc=('Minimisation method 0=Levenberg-Marquardt, '
               '1=Scaled Conjugate Gradient'))
     splineorder = traits.Int(
-        3,
+        3, usedefault=True,
         argstr='--splineorder=%d',
         desc=('order of spline, 2->Qadratic spline, '
               '3->Cubic spline'))
@@ -318,9 +321,11 @@ class TOPUP(FSLCommand):
     >>> topup.inputs.output_type = "NIFTI_GZ"
     >>> topup.cmdline # doctest: +ELLIPSIS
     'topup --config=b02b0.cnf --datain=topup_encoding.txt \
---imain=b0_b0rev.nii --out=b0_b0rev_base --iout=b0_b0rev_corrected.nii.gz \
+--fwhm=8.000000 --imain=b0_b0rev.nii --miter=5 \
+--out=b0_b0rev_base --iout=b0_b0rev_corrected.nii.gz \
 --fout=b0_b0rev_field.nii.gz --jacout=jac --logout=b0_b0rev_topup.log \
---rbmout=xfm --dfout=warpfield'
+--rbmout=xfm --dfout=warpfield --miter=1 --splineorder=3 --subsamp=1 \
+--warpres=10.000000'
     >>> res = topup.run() # doctest: +SKIP
 
     """
@@ -599,13 +604,13 @@ class EddyInputSpec(FSLCommandInputSpec):
         desc='Interpolation model for estimation step')
 
     nvoxhp = traits.Int(
-        1000,
+        1000, usedefault=True,
         argstr='--nvoxhp=%s',
         desc=('# of voxels used to estimate the '
               'hyperparameters'))
 
     fudge_factor = traits.Float(
-        10.0,
+        10.0, usedefault=True,
         argstr='--ff=%s',
         desc=('Fudge factor for hyperparameter '
               'error variance'))
@@ -628,7 +633,8 @@ class EddyInputSpec(FSLCommandInputSpec):
               'the parameters'),
         argstr='--fwhm=%s')
 
-    niter = traits.Int(5, argstr='--niter=%s', desc='Number of iterations')
+    niter = traits.Int(5, usedefault=True,
+                       argstr='--niter=%s', desc='Number of iterations')
 
     method = traits.Enum(
         'jac',
@@ -710,14 +716,14 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.in_bval  = 'bvals.scheme'
     >>> eddy.inputs.use_cuda = True
     >>> eddy.cmdline # doctest: +ELLIPSIS
-    'eddy_cuda --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
---imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
---out=.../eddy_corrected'
+    'eddy_cuda --ff=10.0 --acqp=epi_acqp.txt --bvals=bvals.scheme \
+--bvecs=bvecs.scheme --imain=epi.nii --index=epi_index.txt \
+--mask=epi_mask.nii --niter=5 --nvoxhp=1000 --out=.../eddy_corrected'
     >>> eddy.inputs.use_cuda = False
     >>> eddy.cmdline # doctest: +ELLIPSIS
-    'eddy_openmp --acqp=epi_acqp.txt --bvals=bvals.scheme \
+    'eddy_openmp --ff=10.0 --acqp=epi_acqp.txt --bvals=bvals.scheme \
 --bvecs=bvecs.scheme --imain=epi.nii --index=epi_index.txt \
---mask=epi_mask.nii --out=.../eddy_corrected'
+--mask=epi_mask.nii --niter=5 --nvoxhp=1000 --out=.../eddy_corrected'
     >>> res = eddy.run() # doctest: +SKIP
 
     """

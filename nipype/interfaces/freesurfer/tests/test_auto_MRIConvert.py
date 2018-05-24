@@ -99,7 +99,7 @@ def test_MRIConvert_inputs():
         subject_name=dict(argstr='--subject_name %s', ),
         subjects_dir=dict(),
         te=dict(argstr='-te %d', ),
-        template_info=dict(),
+        template_info=dict(argstr='--template_info', ),
         template_type=dict(argstr='--template_type %s', ),
         terminal_output=dict(
             deprecated='1.0.0',

@@ -26,7 +26,7 @@ from . import metrics as nam
 from ..interfaces.base import (
     BaseInterface, traits, TraitedSpec, File, InputMultiPath, OutputMultiPath,
     BaseInterfaceInputSpec, isdefined, DynamicTraitedSpec, Undefined)
-from ..utils.filemanip import fname_presuffix, split_filename, filename_to_list
+from ..utils.filemanip import fname_presuffix, split_filename, ensure_list
 from ..utils import NUMPY_MMAP
 
 from . import confounds
@@ -1479,7 +1479,7 @@ class CalculateMedian(BaseInterface):
     def _run_interface(self, runtime):
         total = None
         self._median_files = []
-        for idx, fname in enumerate(filename_to_list(self.inputs.in_files)):
+        for idx, fname in enumerate(ensure_list(self.inputs.in_files)):
             img = nb.load(fname, mmap=NUMPY_MMAP)
             data = np.median(img.get_data(), axis=3)
             if self.inputs.median_per_file:

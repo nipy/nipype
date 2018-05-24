@@ -8,29 +8,22 @@ from builtins import range
 import os
 import os.path as op
 import shutil
-import warnings
 
 import numpy as np
 import nibabel as nb
 import networkx as nx
 
 from ... import logging
-from ...utils.misc import package_check
-from ..base import (BaseInterface, BaseInterfaceInputSpec, traits, File,
+from ..base import (BaseInterface, LibraryBaseInterface,
+                    BaseInterfaceInputSpec, traits, File,
                     TraitedSpec, Directory, isdefined)
+from .base import have_cmp
 iflogger = logging.getLogger('interface')
-
-have_cmp = True
-try:
-    package_check('cmp')
-except Exception as e:
-    have_cmp = False
-else:
-    import cmp
-    from cmp.util import runCmd
 
 
 def create_annot_label(subject_id, subjects_dir, fs_dir, parcellation_name):
+    import cmp
+    from cmp.util import runCmd
     iflogger.info("Create the cortical labels necessary for our ROIs")
     iflogger.info("=================================================")
     fs_label_dir = op.join(op.join(subjects_dir, subject_id), 'label')
@@ -174,6 +167,8 @@ def create_annot_label(subject_id, subjects_dir, fs_dir, parcellation_name):
 def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name, dilation):
     """ Creates the ROI_%s.nii.gz files using the given parcellation information
     from networks. Iteratively create volume. """
+    import cmp
+    from cmp.util import runCmd
     iflogger.info("Create the ROIs:")
     output_dir = op.abspath(op.curdir)
     fs_dir = op.join(subjects_dir, subject_id)
@@ -306,6 +301,8 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name, dilation):
 
 
 def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
+    import cmp
+    import scipy.ndimage.morphology as nd
     iflogger.info("Create white matter mask")
     fs_dir = op.join(subjects_dir, subject_id)
     cmp_config = cmp.configuration.PipelineConfiguration()
@@ -327,11 +324,6 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
     # remove subcortical nuclei from white matter mask
     aseg = nb.load(op.join(fs_dir, 'mri', 'aseg.nii.gz'))
     asegd = aseg.get_data()
-
-    try:
-        import scipy.ndimage.morphology as nd
-    except ImportError:
-        raise Exception('Need scipy for binary erosion of white matter mask')
 
     # need binary erosion function
     imerode = nd.binary_erosion
@@ -438,6 +430,7 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
 
 def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name,
                            out_roi_file, dilation):
+    from cmp.util import runCmd
     fs_dir = op.join(subjects_dir, subject_id)
     cmp_config = cmp.configuration.PipelineConfiguration()
     cmp_config.parcellation_scheme = "Lausanne2008"
@@ -549,7 +542,7 @@ class ParcellateOutputSpec(TraitedSpec):
     )
 
 
-class Parcellate(BaseInterface):
+class Parcellate(LibraryBaseInterface):
     """Subdivides segmented ROI file into smaller subregions
 
     This interface implements the same procedure as in the ConnectomeMapper's
@@ -571,6 +564,8 @@ class Parcellate(BaseInterface):
 
     input_spec = ParcellateInputSpec
     output_spec = ParcellateOutputSpec
+    _pkg = 'cmp'
+    imports = ('scipy', )
 
     def _run_interface(self, runtime):
         if self.inputs.subjects_dir:

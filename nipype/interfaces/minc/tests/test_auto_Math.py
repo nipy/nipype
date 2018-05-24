@@ -109,7 +109,10 @@ def test_Math_inputs():
         invert=dict(argstr='-invert -const %s', ),
         isnan=dict(argstr='-isnan', ),
         log=dict(argstr='-log -const2 %s %s', ),
-        max_buffer_size_in_kb=dict(argstr='-max_buffer_size_in_kb %d', ),
+        max_buffer_size_in_kb=dict(
+            argstr='-max_buffer_size_in_kb %d',
+            usedefault=True,
+        ),
         maximum=dict(argstr='-maximum', ),
         minimum=dict(argstr='-minimum', ),
         nisnan=dict(argstr='-nisnan', ),

@@ -54,16 +54,21 @@ class EMInputSpec(CommandLineInputSpec):
     # iterations
     max_iter = traits.Int(
         argstr='-max_iter %s',
-        default=100,
+        default_value=100,
+        usedefault=True,
         desc='Maximum number of iterations')
 
     min_iter = traits.Int(
-        argstr='-min_iter %s', default=0, desc='Minimun number of iterations')
+        argstr='-min_iter %s',
+        default_value=0,
+        usedefault=True,
+        desc='Minimum number of iterations')
 
     # other options
     bc_order_val = traits.Int(
         argstr='-bc_order %s',
-        default=3,
+        default_value=3,
+        usedefault=True,
         desc='Polynomial order for the bias field')
 
     mrf_beta_val = traits.Float(
@@ -72,7 +77,11 @@ class EMInputSpec(CommandLineInputSpec):
     desc = 'Bias field correction will run only if the ratio of improvement \
 is below bc_thresh. (default=0 [OFF])'
 
-    bc_thresh_val = traits.Float(argstr='-bc_thresh %s', default=0, desc=desc)
+    bc_thresh_val = traits.Float(
+        argstr='-bc_thresh %s',
+        default_value=0,
+        usedefault=True,
+        desc=desc)
 
     desc = 'Amount of regularization over the diagonal of the covariance \
 matrix [above 1]'
@@ -134,7 +143,8 @@ class EM(NiftySegCommand):
     >>> node.inputs.in_file = 'im1.nii'
     >>> node.inputs.no_prior = 4
     >>> node.cmdline
-    'seg_EM -in im1.nii -nopriors 4 -bc_out im1_bc_em.nii.gz -out im1_em.nii.gz -out_outlier im1_outlier_em.nii.gz'
+    'seg_EM -in im1.nii -bc_order 3 -bc_thresh 0 -max_iter 100 -min_iter 0 -nopriors 4 \
+-bc_out im1_bc_em.nii.gz -out im1_em.nii.gz -out_outlier im1_outlier_em.nii.gz'
 
     """
     _cmd = get_custom_path('seg_EM', env_dir='NIFTYSEGDIR')

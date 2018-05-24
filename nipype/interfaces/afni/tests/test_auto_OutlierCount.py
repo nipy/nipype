@@ -59,7 +59,10 @@ def test_OutlierCount_inputs():
             output_name='out_outliers',
         ),
         polort=dict(argstr='-polort %d', ),
-        qthr=dict(argstr='-qthr %.5f', ),
+        qthr=dict(
+            argstr='-qthr %.5f',
+            usedefault=True,
+        ),
         save_outliers=dict(usedefault=True, ),
         terminal_output=dict(
             deprecated='1.0.0',

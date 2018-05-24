@@ -32,7 +32,10 @@ def test_CheckTalairachAlignment_inputs():
             deprecated='1.0.0',
             nohash=True,
         ),
-        threshold=dict(argstr='-T %.3f', ),
+        threshold=dict(
+            argstr='-T %.3f',
+            usedefault=True,
+        ),
     )
     inputs = CheckTalairachAlignment.input_spec()
 

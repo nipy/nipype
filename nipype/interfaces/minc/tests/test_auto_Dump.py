@@ -36,10 +36,7 @@ def test_Dump_inputs():
             mandatory=True,
             position=-2,
         ),
-        line_length=dict(
-            argstr='-l %d',
-            usedefault=False,
-        ),
+        line_length=dict(argstr='-l %d', ),
         netcdf_name=dict(argstr='-n %s', ),
         out_file=dict(
             argstr='> %s',

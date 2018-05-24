@@ -445,7 +445,7 @@ class BaseInterface(Interface):
             r['path'] = self.__module__
             due.cite(**r)
 
-    def run(self, cwd=None, **inputs):
+    def run(self, cwd=None, ignore_exception=None, **inputs):
         """Execute this interface.
 
         This interface will not raise an exception if runtime.returncode is
@@ -463,6 +463,10 @@ class BaseInterface(Interface):
         that was executed, provenance information and, if successful, results
         """
         from ...utils.profiler import ResourceMonitor
+
+        # if ignore_exception is not provided, taking self.ignore_exception
+        if ignore_exception is None:
+            ignore_exception = self.ignore_exception
 
         # Tear-up: get current and prev directories
         syscwd = rgetcwd(error=False)  # Recover when wd does not exist
@@ -531,7 +535,7 @@ class BaseInterface(Interface):
             runtime.traceback_args = ('\n'.join(
                 ['%s' % arg for arg in exc_args]), )
 
-            if not self.ignore_exception:
+            if not ignore_exception:
                 raise
         finally:
             # This needs to be done always
@@ -919,10 +923,6 @@ class CommandLine(BaseInterface):
         if terminal_output is not None:
             self.terminal_output = terminal_output
 
-        # Attach terminal_output callback for backwards compatibility
-        self.inputs.on_trait_change(self._terminal_output_update,
-                                    'terminal_output')
-
     @property
     def cmd(self):
         """sets base command, immutable"""
@@ -949,9 +949,6 @@ class CommandLine(BaseInterface):
                          ', '.join(['"%s"' % v
                                     for v in VALID_TERMINAL_OUTPUT])))
         self._terminal_output = value
-
-    def _terminal_output_update(self):
-        self.terminal_output = self.terminal_output
 
     def raise_exception(self, runtime):
         raise RuntimeError(
@@ -1072,6 +1069,17 @@ class CommandLine(BaseInterface):
         if not isdefined(retval) or "%s" in retval:
             if not trait_spec.name_source:
                 return retval
+
+            # Do not generate filename when excluded by other inputs
+            if any(isdefined(getattr(self.inputs, field))
+                   for field in trait_spec.xor or ()):
+                return retval
+
+            # Do not generate filename when required fields are missing
+            if not all(isdefined(getattr(self.inputs, field))
+                       for field in trait_spec.requires or ()):
+                return retval
+
             if isdefined(retval) and "%s" in retval:
                 name_template = retval
             else:
@@ -1112,6 +1120,9 @@ class CommandLine(BaseInterface):
                 base = self._filename_from_source(ns, chain)
                 if isdefined(base):
                     _, _, source_ext = split_filename(base)
+                else:
+                    # Do not generate filename when required fields are missing
+                    return retval
 
             chain = None
             retval = name_template % base
@@ -1133,13 +1144,14 @@ class CommandLine(BaseInterface):
         metadata = dict(name_source=lambda t: t is not None)
         traits = self.inputs.traits(**metadata)
         if traits:
-            outputs = self.output_spec().get()
+            outputs = self.output_spec().trait_get()
             for name, trait_spec in list(traits.items()):
                 out_name = name
                 if trait_spec.output_name is not None:
                     out_name = trait_spec.output_name
-                outputs[out_name] = \
-                    os.path.abspath(self._filename_from_source(name))
+                fname = self._filename_from_source(name)
+                if isdefined(fname):
+                    outputs[out_name] = os.path.abspath(fname)
             return outputs
 
     def _parse_inputs(self, skip=None):
@@ -1237,7 +1249,7 @@ class SEMLikeCommandLine(CommandLine):
     """
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        outputs = self.output_spec().trait_get()
         return self._outputs_from_inputs(outputs)
 
     def _outputs_from_inputs(self, outputs):
@@ -1265,6 +1277,35 @@ class SEMLikeCommandLine(CommandLine):
                 else:
                     return ""
         return super(SEMLikeCommandLine, self)._format_arg(name, spec, value)
+
+
+class LibraryBaseInterface(BaseInterface):
+    _pkg = None
+    imports = ()
+
+    def __init__(self, check_import=True, *args, **kwargs):
+        super(LibraryBaseInterface, self).__init__(*args, **kwargs)
+        if check_import:
+            import importlib
+            failed_imports = []
+            for pkg in (self._pkg,) + tuple(self.imports):
+                try:
+                    importlib.import_module(pkg)
+                except ImportError:
+                    failed_imports.append(pkg)
+            if failed_imports:
+                iflogger.warn('Unable to import %s; %s interface may fail to '
+                              'run', failed_imports, self.__class__.__name__)
+
+    @property
+    def version(self):
+        if self._version is None:
+            import importlib
+            try:
+                self._version = importlib.import_module(self._pkg).__version__
+            except (ImportError, AttributeError):
+                pass
+        return super(LibraryBaseInterface, self).version
 
 
 class PackageInfo(object):

@@ -14,7 +14,10 @@ def test_Beast_inputs():
             argstr='-clobber',
             usedefault=True,
         ),
-        confidence_level_alpha=dict(argstr='-alpha %s', ),
+        confidence_level_alpha=dict(
+            argstr='-alpha %s',
+            usedefault=True,
+        ),
         configuration_file=dict(argstr='-configuration %s', ),
         environ=dict(
             nohash=True,
@@ -40,7 +43,10 @@ def test_Beast_inputs():
         load_moments=dict(argstr='-load_moments', ),
         median_filter=dict(argstr='-median', ),
         nlm_filter=dict(argstr='-nlm_filter', ),
-        number_selected_images=dict(argstr='-selection_num %s', ),
+        number_selected_images=dict(
+            argstr='-selection_num %s',
+            usedefault=True,
+        ),
         output_file=dict(
             argstr='%s',
             hash_files=False,
@@ -48,17 +54,32 @@ def test_Beast_inputs():
             name_template='%s_beast_mask.mnc',
             position=-1,
         ),
-        patch_size=dict(argstr='-patch_size %s', ),
+        patch_size=dict(
+            argstr='-patch_size %s',
+            usedefault=True,
+        ),
         probability_map=dict(argstr='-probability', ),
         same_resolution=dict(argstr='-same_resolution', ),
-        search_area=dict(argstr='-search_area %s', ),
-        smoothness_factor_beta=dict(argstr='-beta %s', ),
+        search_area=dict(
+            argstr='-search_area %s',
+            usedefault=True,
+        ),
+        smoothness_factor_beta=dict(
+            argstr='-beta %s',
+            usedefault=True,
+        ),
         terminal_output=dict(
             deprecated='1.0.0',
             nohash=True,
         ),
-        threshold_patch_selection=dict(argstr='-threshold %s', ),
-        voxel_size=dict(argstr='-voxel_size %s', ),
+        threshold_patch_selection=dict(
+            argstr='-threshold %s',
+            usedefault=True,
+        ),
+        voxel_size=dict(
+            argstr='-voxel_size %s',
+            usedefault=True,
+        ),
     )
     inputs = Beast.input_spec()
 
