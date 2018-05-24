@@ -264,7 +264,7 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
         position=-1,
         copyfile=False,
         mandatory=True,
-        desc=('A set of filenames to be converted. Note that the current ' 
+        desc=('A set of filenames to be converted. Note that the current '
               'version (1.0.20180328) of dcm2niix converts any files in the '
               'directory. To only convert specific files they should be in an '
               'isolated directory'),
