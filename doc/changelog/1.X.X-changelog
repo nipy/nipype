@@ -1,3 +1,17 @@
+1.0.4 (May 29, 2018)
+====================
+
+  * FIX: ResponseSD support for multiple b-vals (https://github.com/nipy/nipype/pull/2582)
+  * FIX: Workaround to ICA-AROMA change of directory (https://github.com/nipy/nipype/pull/2566)
+  * FIX/TEST: Gunzip cleanup and test (https://github.com/nipy/nipype/pull/2564)
+  * FIX: Print UID in crashfile if login name is unavailable (https://github.com/nipy/nipype/pull/2563)
+  * ENH: Reorient interface (https://github.com/nipy/nipype/pull/2572)
+  * ENH: FSL slice interface (https://github.com/nipy/nipype/pull/2585)
+  * ENH: LabelGeometryMeasures interface (https://github.com/nipy/nipype/pull/2586)
+  * ENH: MRTrix3 dwidenoise interface (https://github.com/nipy/nipype/pull/2568)
+  * ENH: ReportCapableInterface mix-in/base interface (https://github.com/nipy/nipype/pull/2560)
+  * CI: Submit Travis results to codecov (https://github.com/nipy/nipype/pull/2574)
+
 1.0.3 (April 30, 2018)
 ======================
 
