@@ -19,7 +19,12 @@ def test_LocalBistat_inputs():
             nohash=True,
             usedefault=True,
         ),
-        in_files=dict(
+        in_file1=dict(
+            argstr='%s',
+            mandatory=True,
+            position=-2,
+        ),
+        in_file2=dict(
             argstr='%s',
             mandatory=True,
             position=-1,
@@ -36,7 +41,7 @@ def test_LocalBistat_inputs():
         out_file=dict(
             argstr='-prefix %s',
             keep_extension=True,
-            name_source='in_files',
+            name_source='in_file1',
             name_template='%s_bistat',
             position=0,
         ),

@@ -1339,14 +1339,18 @@ class FWHMx(AFNICommandBase):
 
 
 class LocalBistatInputSpec(AFNICommandInputSpec):
-    in_files = InputMultiPath(
-        File(exists=True),
-        minlen=2,
-        maxlen=2,
+    in_file1 = File(
+        exists=True,
+        mandatory=True,
+        argstr='%s',
+        position=-2,
+        desc='Filename of the first image')
+    in_file2 = File(
+        exists=True,
         mandatory=True,
         argstr='%s',
         position=-1,
-        desc='Filenames of the 2 images to compute statistics between')
+        desc='Filename of the second image')
     neighborhood = traits.Either(
         traits.Tuple(traits.Enum('SPHERE', 'RHDD', 'TOHD'), traits.Float()),
         traits.Tuple(traits.Enum('RECT'), traits.Tuple(traits.Float(),
@@ -1409,7 +1413,7 @@ class LocalBistatInputSpec(AFNICommandInputSpec):
     out_file = traits.File(
         desc='Output dataset.',
         argstr='-prefix %s',
-        name_source='in_files',
+        name_source='in_file1',
         name_template='%s_bistat',
         keep_extension=True,
         position=0)
@@ -1427,7 +1431,8 @@ class LocalBistat(AFNICommand):
 
     >>> from nipype.interfaces import afni
     >>> bistat = afni.LocalBistat()
-    >>> bistat.inputs.in_files = ['functional.nii', 'structural.nii']
+    >>> bistat.inputs.in_file1 = 'functional.nii'
+    >>> bistat.inputs.in_file2 = 'structural.nii'
     >>> bistat.inputs.neighborhood = ('SPHERE', 1.2)
     >>> bistat.inputs.stat = 'pearson'
     >>> bistat.inputs.outputtype = 'NIFTI'
