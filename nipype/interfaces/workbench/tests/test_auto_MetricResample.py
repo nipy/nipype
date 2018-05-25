@@ -48,13 +48,6 @@ def test_MetricResample_inputs():
             mandatory=True,
             position=3,
         ),
-        metric_out=dict(
-            argstr='%s',
-            keep_extension=True,
-            name_source=['new_sphere'],
-            name_template='%s.out',
-            position=4,
-        ),
         new_area=dict(
             argstr='%s',
             position=7,
@@ -63,6 +56,13 @@ def test_MetricResample_inputs():
             argstr='%s',
             mandatory=True,
             position=2,
+        ),
+        out_file=dict(
+            argstr='%s',
+            keep_extension=True,
+            name_source=['new_sphere'],
+            name_template='%s.out',
+            position=4,
         ),
         roi_metric=dict(
             argstr='-current-roi %s',

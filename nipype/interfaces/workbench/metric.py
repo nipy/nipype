@@ -31,19 +31,19 @@ class MetricResampleInputSpec(CommandLineInputSpec):
         mandatory=True,
         argstr="%s",
         position=2,
-        desc=("A sphere surface that is in register with <current-sphere> and"
-              " has the desired output mesh"))
+        desc="A sphere surface that is in register with <current-sphere> and"
+             " has the desired output mesh")
     method = traits.Enum(
         "ADAP_BARY_AREA",
         "BARYCENTRIC",
         argstr="%s",
         mandatory=True,
         position=3,
-        desc=("The method name - ADAP_BARY_AREA method is recommended for"
-              " ordinary metric data, because it should use all data while"
-              " downsampling, unlike BARYCENTRIC. If ADAP_BARY_AREA is used,"
-              " exactly one of area_surfs or area_metrics must be specified"))
-    metric_out = File(
+        desc="The method name - ADAP_BARY_AREA method is recommended for"
+             " ordinary metric data, because it should use all data while"
+             " downsampling, unlike BARYCENTRIC. If ADAP_BARY_AREA is used,"
+             " exactly one of area_surfs or area_metrics must be specified")
+    out_file = File(
         name_source=["new_sphere"],
         name_template="%s.out",
         keep_extension=True,
@@ -64,14 +64,14 @@ class MetricResampleInputSpec(CommandLineInputSpec):
         exists=True,
         position=6,
         argstr="%s",
-        desc=("A relevant anatomical surface with <current-sphere> mesh OR"
-              " a metric file with vertex areas for <current-sphere> mesh"))
+        desc="A relevant anatomical surface with <current-sphere> mesh OR"
+             " a metric file with vertex areas for <current-sphere> mesh")
     new_area = File(
         exists=True,
         position=7,
         argstr="%s",
-        desc=("A relevant anatomical surface with <current-sphere> mesh OR"
-              " a metric file with vertex areas for <current-sphere> mesh"))
+        desc="A relevant anatomical surface with <current-sphere> mesh OR"
+             " a metric file with vertex areas for <current-sphere> mesh")
     roi_metric = File(
         exists=True,
         position=8,
@@ -118,9 +118,9 @@ class MetricResample(WBCommand):
     _cmd = 'wb_command -metric-resample'
 
     def _format_arg(self, opt, spec, val):
-        if opt == "metric_out":
+        if opt == "out_file":
             # ensure generated filename is assigned to trait
-            self.inputs.trait_set(metric_out=val)
+            self.inputs.trait_set(out_file=val)
         if opt in ['current_area', 'new_area']:
             if not self.inputs.area_surfs and not self.inputs.area_metrics:
                 raise ValueError("{} was set but neither area_surfs or"
@@ -140,7 +140,7 @@ class MetricResample(WBCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = os.path.abspath(self.inputs.metric_out)
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         if self.inputs.valid_roi_out:
             roi_file = self._gen_filename(self.inputs.in_file, suffix='_roi')
             outputs['roi_file'] = os.path.abspath(roi)
