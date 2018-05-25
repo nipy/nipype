@@ -1054,21 +1054,18 @@ def generate_expanded_graph(graph_in):
                 for src_id in list(old_edge_dict.keys()):
                     # Drop the original JoinNodes; only concerned with
                     # generated Nodes
-                    if hasattr(node, 'joinfield'):
-                        logger.warning("Dropping JoinNode: %s; src_id: %s",
-                                       node.itername, src_id)
+                    if hasattr(node, 'joinfield') and node.itername == src_id:
                         continue
                     # Patterns:
                     #   - src_id : Non-iterable node
-                    #   - src_id.[a-z]\d+ : IdentityInterface w/ iterables
-                    #   - src_id.[a-z]I.[a-z]\d+ : Non-IdentityInterface w/ iterables
+                    #   - src_id.[a-z]\d+ :
+                    #       IdentityInterface w/ iterables or nested JoinNode
+                    #   - src_id.[a-z]I.[a-z]\d+ :
+                    #       Non-IdentityInterface w/ iterables
                     #   - src_idJ\d+ : JoinNode(IdentityInterface)
                     if re.match(src_id + r'((\.[a-z](I\.[a-z])?|J)\d+)?$',
                                 node.itername):
                         expansions[src_id].append(node)
-                    else:
-                        logger.debug("Unmatched pattern: %s; src_id: %s",
-                                     node.itername, src_id)
             for in_id, in_nodes in list(expansions.items()):
                 logger.debug("The join node %s input %s was expanded"
                              " to %d nodes.", jnode, in_id, len(in_nodes))
