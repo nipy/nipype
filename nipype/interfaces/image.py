@@ -77,6 +77,12 @@ class Reorient(SimpleInterface):
      [ 0.  0.  1.  0.]
      [ 0.  0.  0.  1.]]
 
+    .. testcleanup::
+
+        >>> import os
+        >>> os.unlink(res.outputs.out_file)
+        >>> os.unlink(res.outputs.transform)
+
     """
     input_spec = ReorientInputSpec
     output_spec = ReorientOutputSpec
