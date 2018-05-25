@@ -118,9 +118,6 @@ class MetricResample(WBCommand):
     _cmd = 'wb_command -metric-resample'
 
     def _format_arg(self, opt, spec, val):
-        if opt == "out_file":
-            # ensure generated filename is assigned to trait
-            self.inputs.trait_set(out_file=val)
         if opt in ['current_area', 'new_area']:
             if not self.inputs.area_surfs and not self.inputs.area_metrics:
                 raise ValueError("{} was set but neither area_surfs or"
@@ -139,8 +136,7 @@ class MetricResample(WBCommand):
         return super(MetricResample, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        outputs = super(MetricResample, self)._list_outputs()
         if self.inputs.valid_roi_out:
             roi_file = self._gen_filename(self.inputs.in_file, suffix='_roi')
             outputs['roi_file'] = os.path.abspath(roi)
