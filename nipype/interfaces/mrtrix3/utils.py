@@ -1,15 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 # -*- coding: utf-8 -*-
-"""
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname(os.path.realpath(__file__ ))
-    >>> datadir = os.path.realpath(os.path.join(filepath,
-    ...                            '../../testing/data'))
-    >>> os.chdir(datadir)
-
-"""
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
@@ -191,7 +182,8 @@ class TensorMetricsInputSpec(CommandLineInputSpec):
     out_eval = File(
         argstr='-value %s', desc='output selected eigenvalue(s) file')
     component = traits.List(
-        [1, 2, 3],
+        [1],
+        usedefault=True,
         argstr='-num %s',
         sep=',',
         desc=('specify the desired eigenvalue/eigenvector(s). Note that '
@@ -230,7 +222,7 @@ class TensorMetrics(CommandLine):
     >>> comp.inputs.in_file = 'dti.mif'
     >>> comp.inputs.out_fa = 'fa.mif'
     >>> comp.cmdline                               # doctest: +ELLIPSIS
-    'tensor2metric -fa fa.mif dti.mif'
+    'tensor2metric -num 1 -fa fa.mif dti.mif'
     >>> comp.run()                                 # doctest: +SKIP
     """
 
@@ -275,7 +267,6 @@ class ComputeTDIInputSpec(CommandLineInputSpec):
         desc='specify output image data type')
     use_dec = traits.Bool(argstr='-dec', desc='perform mapping in DEC space')
     dixel = File(
-        'dixels.txt',
         argstr='-dixel %s',
         desc='map streamlines to'
         'dixels within each voxel. Directions are stored as'

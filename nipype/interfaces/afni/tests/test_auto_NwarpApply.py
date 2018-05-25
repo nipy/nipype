@@ -20,7 +20,10 @@ def test_NwarpApply_inputs():
             argstr='-source %s',
             mandatory=True,
         ),
-        interp=dict(argstr='-interp %s', ),
+        interp=dict(
+            argstr='-interp %s',
+            usedefault=True,
+        ),
         inv_warp=dict(argstr='-iwarp', ),
         master=dict(argstr='-master %s', ),
         out_file=dict(

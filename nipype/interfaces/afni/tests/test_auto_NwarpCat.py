@@ -21,7 +21,10 @@ def test_NwarpCat_inputs():
             mandatory=True,
             position=-1,
         ),
-        interp=dict(argstr='-interp %s', ),
+        interp=dict(
+            argstr='-interp %s',
+            usedefault=True,
+        ),
         inv_warp=dict(argstr='-iwarp', ),
         num_threads=dict(
             nohash=True,

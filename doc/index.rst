@@ -2,6 +2,7 @@
 
  * -  .. image:: images/nipype_architecture_overview2.png
          :width: 100 %
+
    -  .. container::
 
         Current neuroimaging software offer users an incredible opportunity to

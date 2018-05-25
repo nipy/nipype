@@ -3,12 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """This commandline module provides classes for interfacing with the
 `ICA-AROMA.py<https://github.com/rhr-pruim/ICA-AROMA>`_ command line tool.
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname(os.path.realpath(__file__))
-    >>> datadir = os.path.realpath(os.path.join(filepath,
-    ...                            '../../testing/data'))
-    >>> os.chdir(datadir)
 """
 
 from __future__ import (print_function, division, unicode_literals,
@@ -34,7 +28,8 @@ class ICA_AROMAInputSpec(CommandLineInputSpec):
         xor=['feat_dir'],
         desc='volume to be denoised')
     out_dir = Directory(
-        'out', genfile=True, argstr='-o %s', desc='output directory')
+        'out', usedefault=True, mandatory=True,
+        argstr='-o %s', desc='output directory')
     mask = File(
         exists=True,
         argstr='-m %s',
@@ -125,19 +120,21 @@ class ICA_AROMA(CommandLine):
     >>> AROMA_obj.inputs.mask = 'mask.nii.gz'
     >>> AROMA_obj.inputs.denoise_type = 'both'
     >>> AROMA_obj.inputs.out_dir = 'ICA_testout'
-    >>> AROMA_obj.cmdline
-    'ICA_AROMA.py -den both -warp warpfield.nii -i functional.nii -m mask.nii.gz -affmat func_to_struct.mat -mc fsl_mcflirt_movpar.txt -o ICA_testout'
+    >>> AROMA_obj.cmdline  # doctest: +ELLIPSIS
+    'ICA_AROMA.py -den both -warp warpfield.nii -i functional.nii -m mask.nii.gz -affmat func_to_struct.mat -mc fsl_mcflirt_movpar.txt -o .../ICA_testout'
     """
     _cmd = 'ICA_AROMA.py'
     input_spec = ICA_AROMAInputSpec
     output_spec = ICA_AROMAOutputSpec
 
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'out_dir':
+            return trait_spec.argstr % os.path.abspath(value)
+        return super(ICA_AROMA, self)._format_arg(name, trait_spec, value)
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        if isdefined(self.inputs.out_dir):
-            outputs['out_dir'] = os.path.abspath(self.inputs.out_dir)
-        else:
-            outputs['out_dir'] = self._gen_filename('out_dir')
+        outputs['out_dir'] = os.path.abspath(self.inputs.out_dir)
         out_dir = outputs['out_dir']
 
         if self.inputs.denoise_type in ('aggr', 'both'):
@@ -147,7 +144,3 @@ class ICA_AROMA(CommandLine):
             outputs['nonaggr_denoised_file'] = os.path.join(
                 out_dir, 'denoised_func_data_nonaggr.nii.gz')
         return outputs
-
-    def _gen_filename(self, name):
-        if name == 'out_dir':
-            return os.getcwd()

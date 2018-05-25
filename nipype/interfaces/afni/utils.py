@@ -6,11 +6,6 @@
 Examples
 --------
 See the docstrings of the individual classes for examples.
-  .. testsetup::
-    # Change directory to provide relative paths for doctests
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-    >>> os.chdir(datadir)
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
@@ -484,7 +479,8 @@ class CatInputSpec(AFNICommandInputSpec):
         File(exists=True), argstr="%s", mandatory=True, position=-2)
     out_file = File(
         argstr='> %s',
-        default='catout.1d',
+        value='catout.1d',
+        usedefault=True,
         desc='output (concatenated) file name',
         position=-1,
         mandatory=True)
@@ -569,8 +565,11 @@ class CatMatvecInputSpec(AFNICommandInputSpec):
         argstr="%s",
         position=-2)
     out_file = File(
-        desc="File to write concattenated matvecs to",
         argstr=" > %s",
+        name_template='%s_cat.aff12.1D',
+        name_source='in_file',
+        keep_extension=False,
+        desc="File to write concattenated matvecs to",
         position=-1,
         mandatory=True)
     matrix = traits.Bool(
@@ -1339,6 +1338,121 @@ class FWHMx(AFNICommandBase):
         return outputs
 
 
+class LocalBistatInputSpec(AFNICommandInputSpec):
+    in_file1 = File(
+        exists=True,
+        mandatory=True,
+        argstr='%s',
+        position=-2,
+        desc='Filename of the first image')
+    in_file2 = File(
+        exists=True,
+        mandatory=True,
+        argstr='%s',
+        position=-1,
+        desc='Filename of the second image')
+    neighborhood = traits.Either(
+        traits.Tuple(traits.Enum('SPHERE', 'RHDD', 'TOHD'), traits.Float()),
+        traits.Tuple(traits.Enum('RECT'), traits.Tuple(traits.Float(),
+                                                       traits.Float(),
+                                                       traits.Float())),
+        mandatory=True,
+        desc='The region around each voxel that will be extracted for '
+             'the statistics calculation. Possible regions are: '
+             '\'SPHERE\', \'RHDD\' (rhombic dodecahedron), \'TOHD\' '
+             '(truncated octahedron) with a given radius in mm or '
+             '\'RECT\' (rectangular block) with dimensions to specify in mm.',
+        argstr="-nbhd '%s(%s)'")
+    _stat_names = ['pearson', 'spearman', 'quadrant', 'mutinfo', 'normuti',
+                   'jointent', 'hellinger', 'crU', 'crM', 'crA', 'L2slope',
+                   'L1slope', 'num', 'ALL']
+    stat = InputMultiPath(
+        traits.Enum(_stat_names),
+        mandatory=True,
+        desc='statistics to compute. Possible names are :'
+             '  * pearson  = Pearson correlation coefficient'
+             '  * spearman = Spearman correlation coefficient'
+             '  * quadrant = Quadrant correlation coefficient'
+             '  * mutinfo  = Mutual Information'
+             '  * normuti  = Normalized Mutual Information'
+             '  * jointent = Joint entropy'
+             '  * hellinger= Hellinger metric'
+             '  * crU      = Correlation ratio (Unsymmetric)'
+             '  * crM      = Correlation ratio (symmetrized by Multiplication)'
+             '  * crA      = Correlation ratio (symmetrized by Addition)'
+             '  * L2slope  = slope of least-squares (L2) linear regression of '
+             '               the data from dataset1 vs. the dataset2 '
+             '               (i.e., d2 = a + b*d1 ==> this is \'b\')'
+             '  * L1slope  = slope of least-absolute-sum (L1) linear '
+             '               regression of the data from dataset1 vs. '
+             '               the dataset2'
+             '  * num      = number of the values in the region: '
+             '               with the use of -mask or -automask, '
+             '               the size of the region around any given '
+             '               voxel will vary; this option lets you '
+             '               map that size.'
+             '  * ALL      = all of the above, in that order'
+             'More than one option can be used.',
+        argstr='-stat %s...')
+    mask_file = traits.File(
+        exists=True,
+        desc='mask image file name. Voxels NOT in the mask will not be used '
+             'in the neighborhood of any voxel. Also, a voxel NOT in the mask '
+             'will have its statistic(s) computed as zero (0).',
+        argstr='-mask %s')
+    automask = traits.Bool(
+        desc='Compute the mask as in program 3dAutomask.',
+        argstr='-automask',
+        xor=['weight_file'])
+    weight_file = traits.File(
+        exists=True,
+        desc='File name of an image to use as a weight.  Only applies to '
+             '\'pearson\' statistics.',
+        argstr='-weight %s',
+        xor=['automask'])
+    out_file = traits.File(
+        desc='Output dataset.',
+        argstr='-prefix %s',
+        name_source='in_file1',
+        name_template='%s_bistat',
+        keep_extension=True,
+        position=0)
+
+
+class LocalBistat(AFNICommand):
+    """3dLocalBistat - computes statistics between 2 datasets, at each voxel,
+    based on a local neighborhood of that voxel.
+
+    For complete details, see the `3dLocalBistat Documentation.
+    <https://afni.nimh.nih.gov/pub../pub/dist/doc/program_help/3dLocalBistat.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> bistat = afni.LocalBistat()
+    >>> bistat.inputs.in_file1 = 'functional.nii'
+    >>> bistat.inputs.in_file2 = 'structural.nii'
+    >>> bistat.inputs.neighborhood = ('SPHERE', 1.2)
+    >>> bistat.inputs.stat = 'pearson'
+    >>> bistat.inputs.outputtype = 'NIFTI'
+    >>> bistat.cmdline
+    "3dLocalBistat -prefix functional_bistat.nii -nbhd 'SPHERE(1.2)' -stat pearson functional.nii structural.nii"
+    >>> res = automask.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dLocalBistat'
+    input_spec = LocalBistatInputSpec
+    output_spec = AFNICommandOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'neighborhood' and value[0] == 'RECT':
+            value = ('RECT', '%s,%s,%s' % value[1])
+
+        return super(LocalBistat, self)._format_arg(name, spec, value)
+
+
 class MaskToolInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc='input file or files to 3dmask_tool',
@@ -1516,6 +1630,81 @@ class Notes(CommandLine):
         return outputs
 
 
+class NwarpAdjustInputSpec(AFNICommandInputSpec):
+    warps = InputMultiPath(
+        File(exists=True),
+        minlen=5,
+        mandatory=True,
+        argstr='-nwarp %s',
+        desc='List of input 3D warp datasets')
+    in_files = InputMultiPath(
+        File(exists=True),
+        minlen=5,
+        argstr='-source %s',
+        desc='List of input 3D datasets to be warped by the adjusted warp '
+             'datasets.  There must be exactly as many of these datasets as '
+             'there are input warps.')
+    out_file = File(
+        desc='Output mean dataset, only needed if in_files are also given. '
+             'The output dataset will be on the common grid shared by the '
+             'source datasets.',
+        argstr='-prefix %s',
+        name_source='in_files',
+        name_template='%s_NwarpAdjust',
+        keep_extension=True,
+        requires=['in_files'])
+
+
+class NwarpAdjust(AFNICommandBase):
+    """This program takes as input a bunch of 3D warps, averages them,
+    and computes the inverse of this average warp.  It then composes
+    each input warp with this inverse average to 'adjust' the set of
+    warps.  Optionally, it can also read in a set of 1-brick datasets
+    corresponding to the input warps, and warp each of them, and average
+    those.
+
+    For complete details, see the `3dNwarpAdjust Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dNwarpAdjust.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> adjust = afni.NwarpAdjust()
+    >>> adjust.inputs.warps = ['func2anat_InverseWarp.nii.gz', 'func2anat_InverseWarp.nii.gz', 'func2anat_InverseWarp.nii.gz', 'func2anat_InverseWarp.nii.gz', 'func2anat_InverseWarp.nii.gz']
+    >>> adjust.cmdline
+    '3dNwarpAdjust -nwarp func2anat_InverseWarp.nii.gz func2anat_InverseWarp.nii.gz func2anat_InverseWarp.nii.gz func2anat_InverseWarp.nii.gz func2anat_InverseWarp.nii.gz'
+    >>> res = adjust.run()  # doctest: +SKIP
+
+    """
+    _cmd = '3dNwarpAdjust'
+    input_spec = NwarpAdjustInputSpec
+    output_spec = AFNICommandOutputSpec
+
+    def _parse_inputs(self, skip=None):
+        if not self.inputs.in_files:
+            if skip is None:
+                skip = []
+            skip += ['out_file']
+        return super(NwarpAdjust, self)._parse_inputs(skip=skip)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+
+        if self.inputs.in_files:
+            if self.inputs.out_file:
+                outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+            else:
+                basename = os.path.basename(self.inputs.in_files[0])
+                basename_noext, ext = op.splitext(basename)
+                if '.gz' in ext:
+                    basename_noext, ext2 = op.splitext(basename_noext)
+                    ext = ext2 + ext
+                outputs['out_file'] = os.path.abspath(
+                    basename_noext + '_NwarpAdjust' + ext)
+        return outputs
+
+
 class NwarpApplyInputSpec(CommandLineInputSpec):
     in_file = traits.Either(
         File(exists=True),
@@ -1537,6 +1726,7 @@ class NwarpApplyInputSpec(CommandLineInputSpec):
         desc='the name of the master dataset, which defines the output grid',
         argstr='-master %s')
     interp = traits.Enum(
+        'wsinc5',
         'NN',
         'nearestneighbour',
         'nearestneighbor',
@@ -1546,10 +1736,9 @@ class NwarpApplyInputSpec(CommandLineInputSpec):
         'tricubic',
         'quintic',
         'triquintic',
-        'wsinc5',
         desc='defines interpolation method to use during warp',
         argstr='-interp %s',
-        default='wsinc5')
+        usedefault=True)
     ainterp = traits.Enum(
         'NN',
         'nearestneighbour',
@@ -1563,8 +1752,7 @@ class NwarpApplyInputSpec(CommandLineInputSpec):
         'wsinc5',
         desc='specify a different interpolation method than might '
         'be used for the warp',
-        argstr='-ainterp %s',
-        default='wsinc5')
+        argstr='-ainterp %s')
     out_file = File(
         name_template='%s_Nwarp',
         desc='output image file name',
@@ -1597,7 +1785,7 @@ class NwarpApply(AFNICommandBase):
     >>> nwarp.inputs.master = 'NWARP'
     >>> nwarp.inputs.warp = "'Fred_WARP+tlrc Fred.Xaff12.1D'"
     >>> nwarp.cmdline
-    "3dNwarpApply -source Fred+orig -master NWARP -prefix Fred+orig_Nwarp -nwarp \'Fred_WARP+tlrc Fred.Xaff12.1D\'"
+    "3dNwarpApply -source Fred+orig -interp wsinc5 -master NWARP -prefix Fred+orig_Nwarp -nwarp \'Fred_WARP+tlrc Fred.Xaff12.1D\'"
     >>> res = nwarp.run()  # doctest: +SKIP
 
     """
@@ -1623,13 +1811,13 @@ class NwarpCatInputSpec(AFNICommandInputSpec):
     inv_warp = traits.Bool(
         desc='invert the final warp before output', argstr='-iwarp')
     interp = traits.Enum(
+        'wsinc5',
         'linear',
         'quintic',
-        'wsinc5',
         desc='specify a different interpolation method than might '
         'be used for the warp',
         argstr='-interp %s',
-        default='wsinc5')
+        usedefault=True)
     expad = traits.Int(
         desc='Pad the nonlinear warps by the given number of voxels voxels in '
         'all directions. The warp displacements are extended by linear '
@@ -1691,7 +1879,7 @@ class NwarpCat(AFNICommand):
     >>> nwarpcat.inputs.in_files = ['Q25_warp+tlrc.HEAD', ('IDENT', 'structural.nii')]
     >>> nwarpcat.inputs.out_file = 'Fred_total_WARP'
     >>> nwarpcat.cmdline
-    "3dNwarpCat -prefix Fred_total_WARP Q25_warp+tlrc.HEAD 'IDENT(structural.nii)'"
+    "3dNwarpCat -interp wsinc5 -prefix Fred_total_WARP Q25_warp+tlrc.HEAD 'IDENT(structural.nii)'"
     >>> res = nwarpcat.run()  # doctest: +SKIP
 
     """
@@ -1768,8 +1956,6 @@ class OneDToolPyInputSpec(AFNIPythonCommandInputSpec):
     show_cormat_warnings = traits.File(
         desc='Write cormat warnings to a file',
         argstr="-show_cormat_warnings |& tee %s",
-        default="out.cormat_warn.txt",
-        usedefault=False,
         position=-1,
         xor=['out_file'])
     show_indices_interest = traits.Bool(

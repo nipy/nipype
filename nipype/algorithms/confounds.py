@@ -3,13 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 '''
 Algorithms to compute confounds in :abbr:`fMRI (functional MRI)`
-
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname(os.path.realpath(__file__))
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
-    >>> os.chdir(datadir)
-
 '''
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
@@ -397,13 +390,12 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         desc='Detrend time series prior to component '
         'extraction')
     use_regress_poly = traits.Bool(
-        True,
         deprecated='0.15.0',
         new_name='pre_filter',
         desc=('use polynomial regression '
               'pre-component extraction'))
     regress_poly_degree = traits.Range(
-        low=1, default=1, usedefault=True, desc='the degree polynomial to use')
+        low=1, value=1, usedefault=True, desc='the degree polynomial to use')
     header_prefix = traits.Str(
         desc=('the desired header for the output tsv '
               'file (one column). If undefined, will '
@@ -532,7 +524,7 @@ class CompCor(BaseInterface):
                 # Derive TR from NIfTI header, if possible
                 try:
                     TR = imgseries.header.get_zooms()[3]
-                    if imgseries.get_xyzt_units()[1] == 'msec':
+                    if imgseries.header.get_xyzt_units()[1] == 'msec':
                         TR /= 1000
                 except (AttributeError, IndexError):
                     TR = 0

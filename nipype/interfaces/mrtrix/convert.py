@@ -1,13 +1,6 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-    >>> os.chdir(datadir)
-"""
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 from io import open
@@ -22,23 +15,15 @@ from nibabel.orientations import aff2axcodes
 
 from ... import logging
 from ...utils.filemanip import split_filename
-from ...utils.misc import package_check
 from ...workflows.misc.utils import get_data_dims, get_vox_dims
-from ..base import TraitedSpec, BaseInterface, File, isdefined
-
-import warnings
-have_dipy = True
-try:
-    package_check('dipy')
-except Exception as e:
-    have_dipy = False
-else:
-    from dipy.tracking.utils import move_streamlines, affine_from_fsl_mat_file
+from ..base import TraitedSpec, File, isdefined
+from ..dipy.base import DipyBaseInterface, HAVE_DIPY as have_dipy
 
 iflogger = logging.getLogger('interface')
 
 
 def transform_to_affine(streams, header, affine):
+    from dipy.tracking.utils import move_streamlines
     rotation, scale = np.linalg.qr(affine)
     streams = move_streamlines(streams, rotation)
     scale[0:3, 0:3] = np.dot(scale[0:3, 0:3],
@@ -175,7 +160,7 @@ class MRTrix2TrackVisOutputSpec(TraitedSpec):
     out_file = File(exists=True)
 
 
-class MRTrix2TrackVis(BaseInterface):
+class MRTrix2TrackVis(DipyBaseInterface):
     """
     Converts MRtrix (.tck) tract files into TrackVis (.trk) format
     using functions from dipy
@@ -191,6 +176,8 @@ class MRTrix2TrackVis(BaseInterface):
     output_spec = MRTrix2TrackVisOutputSpec
 
     def _run_interface(self, runtime):
+        from dipy.tracking.utils import move_streamlines, \
+            affine_from_fsl_mat_file
         dx, dy, dz = get_data_dims(self.inputs.image_file)
         vx, vy, vz = get_vox_dims(self.inputs.image_file)
         image_file = nb.load(self.inputs.image_file)

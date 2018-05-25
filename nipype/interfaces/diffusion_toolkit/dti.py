@@ -2,13 +2,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provides interfaces to various commands provided by diffusion toolkit
-
-   Change directory to provide relative paths for doctests
-   >>> import os
-   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-   >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-   >>> os.chdir(datadir)
-
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
@@ -103,18 +96,9 @@ class DTIRecon(CommandLine):
         with open(bvals_file) as fbvals:
             bvals = [val for val in re.split('\s+', fbvals.readline().strip())]
         with open(bvecs_file) as fbvecs:
-            bvecs_y = [
-                val for val in re.split('\s+',
-                                        fbvecs.readline().strip())
-            ]
-            bvecs_z = [
-                val for val in re.split('\s+',
-                                        fbvecs.readline().strip())
-            ]
-            bvecs_x = [
-                val for val in re.split('\s+',
-                                        fbvecs.readline().strip())
-            ]
+          bvecs_x = fbvecs.readline().split()
+          bvecs_y = fbvecs.readline().split()
+          bvecs_z = fbvecs.readline().split()
 
         with open(_gradient_matrix_file, 'w') as gradient_matrix_f:
             for i in range(len(bvals)):

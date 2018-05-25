@@ -8,26 +8,11 @@ import os
 import nibabel as nb
 import numpy as np
 
-from ...utils.misc import package_check
 from ...utils import NUMPY_MMAP
 
-from ..base import (BaseInterface, TraitedSpec, traits, File, OutputMultiPath,
+from .base import NipyBaseInterface, have_nipy
+from ..base import (TraitedSpec, traits, File, OutputMultiPath,
                     BaseInterfaceInputSpec, isdefined)
-
-have_nipy = True
-try:
-    package_check('nipy')
-except Exception as e:
-    have_nipy = False
-else:
-    import nipy.modalities.fmri.design_matrix as dm
-    import nipy.modalities.fmri.glm as GLM
-
-if have_nipy:
-    try:
-        BlockParadigm = dm.BlockParadigm
-    except AttributeError:
-        from nipy.modalities.fmri.experimental_paradigm import BlockParadigm
 
 
 class FitGLMInputSpec(BaseInterfaceInputSpec):
@@ -94,7 +79,7 @@ class FitGLMOutputSpec(TraitedSpec):
     a = File(exists=True)
 
 
-class FitGLM(BaseInterface):
+class FitGLM(NipyBaseInterface):
     '''
     Fit GLM model based on the specified design. Supports only single or concatenated runs.
     '''
@@ -102,6 +87,12 @@ class FitGLM(BaseInterface):
     output_spec = FitGLMOutputSpec
 
     def _run_interface(self, runtime):
+        import nipy.modalities.fmri.glm as GLM
+        import nipy.modalities.fmri.design_matrix as dm
+        try:
+            BlockParadigm = dm.BlockParadigm
+        except AttributeError:
+            from nipy.modalities.fmri.experimental_paradigm import BlockParadigm
 
         session_info = self.inputs.session_info
 
@@ -283,7 +274,7 @@ class EstimateContrastOutputSpec(TraitedSpec):
     p_maps = OutputMultiPath(File(exists=True))
 
 
-class EstimateContrast(BaseInterface):
+class EstimateContrast(NipyBaseInterface):
     '''
     Estimate contrast of a fitted model.
     '''
@@ -291,6 +282,7 @@ class EstimateContrast(BaseInterface):
     output_spec = EstimateContrastOutputSpec
 
     def _run_interface(self, runtime):
+        import nipy.modalities.fmri.glm as GLM
 
         beta_nii = nb.load(self.inputs.beta)
         if isdefined(self.inputs.mask):

@@ -13,7 +13,10 @@ def test_MeshWarpMaths_inputs():
         ),
         in_surf=dict(mandatory=True, ),
         operation=dict(usedefault=True, ),
-        operator=dict(mandatory=True, ),
+        operator=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
         out_file=dict(usedefault=True, ),
         out_warp=dict(usedefault=True, ),
     )

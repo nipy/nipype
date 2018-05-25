@@ -11,6 +11,11 @@ This script demonstrates how to use nipype to analyze a data set::
 
     python fmri_ants_openfmri.py --datasetdir ds107
 
+This workflow also requires 2mm subcortical templates that are available from
+`MindBoggle <http://mindboggle.info/data.html>`_.
+Specifically the 2mm version of the `MNI template <http://mindboggle.info/data/templates/atropos/OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz>`_.
+
+Import necessary modules from nipype.
 """
 
 from __future__ import division, unicode_literals
@@ -46,12 +51,13 @@ if (fsl.Info.version()
 
 fsl.FSLCommand.set_default_output_type('NIFTI_GZ')
 
-imports = [
-    'import os', 'import nibabel as nb', 'import numpy as np',
-    'import scipy as sp',
-    'from nipype.utils.filemanip import filename_to_list, list_to_filename, split_filename',
-    'from scipy.special import legendre'
-]
+imports = ['import os',
+           'import nibabel as nb',
+           'import numpy as np',
+           'import scipy as sp',
+           'from nipype.utils.filemanip import filename_to_list, list_to_filename, split_filename',
+           'from scipy.special import legendre'
+           ]
 
 
 def create_reg_workflow(name='registration'):
@@ -74,6 +80,10 @@ def create_reg_workflow(name='registration'):
         outputspec.anat2target_transform : FLIRT+FNIRT transform
         outputspec.transformed_files : transformed files in target space
         outputspec.transformed_mean : mean image in target space
+
+    Example
+    -------
+        See code below
     """
 
     register = pe.Workflow(name=name)
@@ -150,11 +160,12 @@ def create_reg_workflow(name='registration'):
     register.connect(stripper, 'out_file', convert2itk, 'reference_file')
     """
     Compute registration between the subject's structural and MNI template
-    This is currently set to perform a very quick registration. However, the
-    registration can be made significantly more accurate for cortical
-    structures by increasing the number of iterations
-    All parameters are set using the example from:
-    #https://github.com/stnava/ANTs/blob/master/Scripts/newAntsExample.sh
+
+        * All parameters are set using the example from:
+          #https://github.com/stnava/ANTs/blob/master/Scripts/newAntsExample.sh
+        * This is currently set to perform a very quick registration. However,
+          the registration can be made significantly more accurate for cortical
+          structures by increasing the number of iterations.
     """
 
     reg = pe.Node(ants.Registration(), name='antsRegister')
@@ -191,6 +202,7 @@ def create_reg_workflow(name='registration'):
     }
     register.connect(stripper, 'out_file', reg, 'moving_image')
     register.connect(inputnode, 'target_image_brain', reg, 'fixed_image')
+
     """
     Concatenate the affine and ants transforms into a list
     """
@@ -198,6 +210,7 @@ def create_reg_workflow(name='registration'):
     merge = pe.Node(niu.Merge(2), iterfield=['in2'], name='mergexfm')
     register.connect(convert2itk, 'itk_transform', merge, 'in2')
     register.connect(reg, 'composite_transform', merge, 'in1')
+
     """
     Transform the mean image. First to anatomical and then to target
     """
@@ -245,6 +258,7 @@ def create_reg_workflow(name='registration'):
 
 def get_aparc_aseg(files):
     """Return the aparc+aseg.mgz file"""
+
     for name in files:
         if 'aparc+aseg.mgz' in name:
             return name
@@ -259,18 +273,22 @@ def create_fs_reg_workflow(name='registration'):
 
         name : name of workflow (default: 'registration')
 
-    Inputs::
+    Inputs:
 
         inputspec.source_files : files (filename or list of filenames to register)
         inputspec.mean_image : reference image to use
         inputspec.target_image : registration target
 
-    Outputs::
+    Outputs:
 
         outputspec.func2anat_transform : FLIRT transform
         outputspec.anat2target_transform : FLIRT+FNIRT transform
         outputspec.transformed_files : transformed files in target space
         outputspec.transformed_mean : mean image in target space
+
+    Example
+    -------
+        See code below
     """
 
     register = Workflow(name=name)
@@ -350,11 +368,12 @@ def create_fs_reg_workflow(name='registration'):
     register.connect(stripper, 'out_file', convert2itk, 'reference_file')
     """
     Compute registration between the subject's structural and MNI template
-    This is currently set to perform a very quick registration. However, the
-    registration can be made significantly more accurate for cortical
-    structures by increasing the number of iterations
-    All parameters are set using the example from:
-    #https://github.com/stnava/ANTs/blob/master/Scripts/newAntsExample.sh
+
+        * All parameters are set using the example from:
+          #https://github.com/stnava/ANTs/blob/master/Scripts/newAntsExample.sh
+        * This is currently set to perform a very quick registration. However,
+          the registration can be made significantly more accurate for cortical
+          structures by increasing the number of iterations.
     """
 
     reg = Node(ants.Registration(), name='antsRegister')
@@ -391,6 +410,7 @@ def create_fs_reg_workflow(name='registration'):
     }
     register.connect(stripper, 'out_file', reg, 'moving_image')
     register.connect(inputnode, 'target_image', reg, 'fixed_image')
+
     """
     Concatenate the affine and ants transforms into a list
     """
@@ -398,6 +418,7 @@ def create_fs_reg_workflow(name='registration'):
     merge = Node(Merge(2), iterfield=['in2'], name='mergexfm')
     register.connect(convert2itk, 'itk_transform', merge, 'in2')
     register.connect(reg, 'composite_transform', merge, 'in1')
+
     """
     Transform the mean image. First to anatomical and then to target
     """
@@ -410,6 +431,7 @@ def create_fs_reg_workflow(name='registration'):
     warpmean.inputs.args = '--float'
     # warpmean.inputs.num_threads = 4
     # warpmean.plugin_args = {'sbatch_args': '--mem=4G -c 4'}
+
     """
     Transform the remaining images. First to anatomical and then to target
     """
@@ -482,6 +504,7 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
     TR : float
         Repetition time
     """
+
     from glob import glob
     import os
     import numpy as np

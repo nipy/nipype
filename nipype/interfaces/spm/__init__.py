@@ -5,7 +5,7 @@
 
 from .base import (Info, SPMCommand, logger, no_spm, scans_for_fname,
                    scans_for_fnames)
-from .preprocess import (SliceTiming, Realign, Coregister, Normalize,
+from .preprocess import (FieldMap, SliceTiming, Realign, Coregister, Normalize,
                          Normalize12, Segment, Smooth, NewSegment, DARTEL,
                          DARTELNorm2MNI, CreateWarped, VBMSegment)
 from .model import (Level1Design, EstimateModel, EstimateContrast, Threshold,

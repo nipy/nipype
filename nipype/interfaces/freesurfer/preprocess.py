@@ -2,13 +2,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provides interfaces to various commands provided by FreeSurfer
-
-   Change directory to provide relative paths for doctests
-   >>> import os
-   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-   >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-   >>> os.chdir(datadir)
-
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
@@ -415,7 +408,7 @@ class MRIConvertInputSpec(FSTraitedSpec):
         argstr='--sdcmlist %s',
         desc='list of DICOM files for conversion')
     template_info = traits.Bool(
-        '--template_info', desc='dump info about template')
+        argstr='--template_info', desc='dump info about template')
     crop_gdf = traits.Bool(argstr='--crop_gdf', desc='apply GDF cropping')
     zero_ge_z_offset = traits.Bool(
         argstr='--zero_ge_z_offset', desc='zero ge z offset ???')
@@ -2140,7 +2133,7 @@ class MNIBiasCorrectionInputSpec(FSTraitedSpec):
         desc="output volume. Output can be any format accepted by mri_convert. "
         + "If the output format is COR, then the directory must exist.")
     iterations = traits.Int(
-        4,
+        4, usedefault=True,
         argstr="--n %d",
         desc=
         "Number of iterations to run nu_correct. Default is 4. This is the number of times "
@@ -2299,9 +2292,7 @@ class NormalizeInputSpec(FSTraitedSpec):
         desc="The output file for Normalize")
     # optional
     gradient = traits.Int(
-        1,
         argstr="-g %d",
-        usedefault=False,
         desc="use max intensity/mm gradient g (default=1)")
     mask = File(
         argstr="-mask %s",

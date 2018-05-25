@@ -6,44 +6,54 @@ from ..registration import diffeoSymTensor3DVolTask
 def test_diffeoSymTensor3DVolTask_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
+        df=dict(
+            argstr='-df %s',
+            usedefault=True,
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
         ),
+        flip=dict(argstr='-flip %d %d %d', ),
         ignore_exception=dict(
             deprecated='1.0.0',
             nohash=True,
             usedefault=True,
         ),
-        in_target=dict(
-            argstr='-target %s',
-            exists=True,
-            mandatory=False,
-            position=2,
-        ),
-        in_tensor=dict(
+        in_file=dict(
             argstr='-in %s',
-            exists=True,
-            mandatory=False,
-            position=0,
+            mandatory=True,
         ),
-        in_xfm=dict(
-            argstr='-trans %s',
-            exists=True,
-            mandatory=False,
-            position=1,
+        interpolation=dict(
+            argstr='-interp %s',
+            usedefault=True,
         ),
         out_file=dict(
             argstr='-out %s',
-            exists=True,
-            mandatory=False,
-            name_source='in_tensor',
-            name_template='%s_diffeoxfmd.nii.gz',
-            position=3,
+            keep_extension=True,
+            name_source='in_file',
+            name_template='%s_diffeoxfmd',
+        ),
+        reorient=dict(
+            argstr='-reorient %s',
+            usedefault=True,
+        ),
+        resampling_type=dict(argstr='-type %s', ),
+        target=dict(
+            argstr='-target %s',
+            xor=['voxel_size'],
         ),
         terminal_output=dict(
             deprecated='1.0.0',
             nohash=True,
+        ),
+        transform=dict(
+            argstr='-trans %s',
+            mandatory=True,
+        ),
+        voxel_size=dict(
+            argstr='-vsize %g %g %g',
+            xor=['target'],
         ),
     )
     inputs = diffeoSymTensor3DVolTask.input_spec()

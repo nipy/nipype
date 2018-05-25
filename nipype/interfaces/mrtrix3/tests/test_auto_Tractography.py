@@ -41,7 +41,10 @@ def test_Tractography_inputs():
         max_seed_attempts=dict(argstr='-max_seed_attempts %d', ),
         max_tracks=dict(argstr='-maxnum %d', ),
         min_length=dict(argstr='-minlength %f', ),
-        n_samples=dict(argstr='-samples %d', ),
+        n_samples=dict(
+            argstr='-samples %d',
+            usedefault=True,
+        ),
         n_tracks=dict(argstr='-number %d', ),
         n_trials=dict(argstr='-trials %d', ),
         noprecompt=dict(argstr='-noprecomputed', ),
@@ -55,7 +58,10 @@ def test_Tractography_inputs():
             position=-1,
             usedefault=True,
         ),
-        out_seeds=dict(argstr='-output_seeds %s', ),
+        out_seeds=dict(
+            argstr='-output_seeds %s',
+            usedefault=True,
+        ),
         power=dict(argstr='-power %d', ),
         roi_excl=dict(argstr='-exclude %s', ),
         roi_incl=dict(argstr='-include %s', ),

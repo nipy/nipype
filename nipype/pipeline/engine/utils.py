@@ -30,7 +30,7 @@ from ...utils.filemanip import (
     makedirs,
     fname_presuffix,
     to_str,
-    filename_to_list,
+    ensure_list,
     get_related_files,
     FileNotFoundError,
     save_json,
@@ -142,7 +142,7 @@ def write_report(node, report_type=None, is_mapnode=False):
                 ['Hierarchy : %s' % node.fullname,
                  'Exec ID : %s' % node._id]),
             write_rst_header('Original Inputs', level=1),
-            write_rst_dict(node.inputs.get()),
+            write_rst_dict(node.inputs.trait_get()),
         ]
         with open(report_file, 'wt') as fp:
             fp.write('\n'.join(lines))
@@ -150,7 +150,7 @@ def write_report(node, report_type=None, is_mapnode=False):
 
     lines = [
         write_rst_header('Execution Inputs', level=1),
-        write_rst_dict(node.inputs.get()),
+        write_rst_dict(node.inputs.trait_get()),
     ]
 
     result = node.result  # Locally cache result
@@ -166,11 +166,11 @@ def write_report(node, report_type=None, is_mapnode=False):
     if isinstance(outputs, Bunch):
         lines.append(write_rst_dict(outputs.dictcopy()))
     elif outputs:
-        lines.append(write_rst_dict(outputs.get()))
+        lines.append(write_rst_dict(outputs.trait_get()))
 
     if is_mapnode:
         lines.append(write_rst_header('Subnode reports', level=1))
-        nitems = len(filename_to_list(getattr(node.inputs, node.iterfield[0])))
+        nitems = len(ensure_list(getattr(node.inputs, node.iterfield[0])))
         subnode_report_files = []
         for i in range(nitems):
             nodecwd = os.path.join(cwd, 'mapflow', '_%s%d' % (node.name, i),
@@ -238,8 +238,8 @@ def save_resultfile(result, cwd, name):
     resultsfile = os.path.join(cwd, 'result_%s.pklz' % name)
     if result.outputs:
         try:
-            outputs = result.outputs.get()
-        except TypeError:
+            outputs = result.outputs.trait_get()
+        except AttributeError:
             outputs = result.outputs.dictcopy()  # outputs was a bunch
         result.outputs.set(**modify_paths(outputs, relative=True, basedir=cwd))
 
@@ -280,7 +280,7 @@ def load_resultfile(path, name):
         except UnicodeDecodeError:
             # Was this pickle created with Python 2.x?
             pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
-            logger.warning('Successfully loaded pickle in compatibility mode')
+            logger.warning('Successfully loaded pkl in compatibility mode')
         except (traits.TraitError, AttributeError, ImportError,
                 EOFError) as err:
             if isinstance(err, (AttributeError, ImportError)):
@@ -293,8 +293,8 @@ def load_resultfile(path, name):
         else:
             if result.outputs:
                 try:
-                    outputs = result.outputs.get()
-                except TypeError:
+                    outputs = result.outputs.trait_get()
+                except AttributeError:
                     outputs = result.outputs.dictcopy()  # outputs == Bunch
                 try:
                     result.outputs.set(
@@ -439,6 +439,8 @@ def modify_paths(object, relative=True, basedir=None):
                     raise IOError('File %s not found' % out)
             else:
                 out = object
+        else:
+            raise TypeError("Object {} is undefined".format(object))
     return out
 
 
@@ -1050,7 +1052,17 @@ def generate_expanded_graph(graph_in):
             expansions = defaultdict(list)
             for node in graph_in.nodes():
                 for src_id in list(old_edge_dict.keys()):
-                    if node.itername.startswith(src_id):
+                    # Drop the original JoinNodes; only concerned with
+                    # generated Nodes
+                    if hasattr(node, 'joinfield'):
+                        continue
+                    # Patterns:
+                    #   - src_id : Non-iterable node
+                    #   - src_id.[a-z]\d+ : IdentityInterface w/ iterables
+                    #   - src_id.[a-z]I.[a-z]\d+ : Non-IdentityInterface w/ iterables
+                    #   - src_idJ\d+ : JoinNode(IdentityInterface)
+                    if re.match(src_id + r'((\.[a-z](I\.[a-z])?|J)\d+)?$',
+                                node.itername):
                         expansions[src_id].append(node)
             for in_id, in_nodes in list(expansions.items()):
                 logger.debug("The join node %s input %s was expanded"
@@ -1379,19 +1391,19 @@ def clean_working_directory(outputs,
     """
     if not outputs:
         return
-    outputs_to_keep = list(outputs.get().keys())
+    outputs_to_keep = list(outputs.trait_get().keys())
     if needed_outputs and \
        str2bool(config['execution']['remove_unnecessary_outputs']):
         outputs_to_keep = needed_outputs
     # build a list of needed files
     output_files = []
-    outputdict = outputs.get()
+    outputdict = outputs.trait_get()
     for output in outputs_to_keep:
         output_files.extend(walk_outputs(outputdict[output]))
     needed_files = [path for path, type in output_files if type == 'f']
     if str2bool(config['execution']['keep_inputs']):
         input_files = []
-        inputdict = inputs.get()
+        inputdict = inputs.trait_get()
         input_files.extend(walk_outputs(inputdict))
         needed_files += [path for path, type in input_files if type == 'f']
     for extra in [
@@ -1400,10 +1412,10 @@ def clean_working_directory(outputs,
     ]:
         needed_files.extend(glob(os.path.join(cwd, extra)))
     if files2keep:
-        needed_files.extend(filename_to_list(files2keep))
+        needed_files.extend(ensure_list(files2keep))
     needed_dirs = [path for path, type in output_files if type == 'd']
     if dirs2keep:
-        needed_dirs.extend(filename_to_list(dirs2keep))
+        needed_dirs.extend(ensure_list(dirs2keep))
     for extra in ['_nipype', '_report']:
         needed_dirs.extend(glob(os.path.join(cwd, extra)))
     temp = []
@@ -1423,7 +1435,7 @@ def clean_working_directory(outputs,
     else:
         if not str2bool(config['execution']['keep_inputs']):
             input_files = []
-            inputdict = inputs.get()
+            inputdict = inputs.trait_get()
             input_files.extend(walk_outputs(inputdict))
             input_files = [path for path, type in input_files if type == 'f']
             for f in walk_files(cwd):

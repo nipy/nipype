@@ -7,7 +7,7 @@ import os.path as op
 import glob
 
 from ... import logging
-from ...utils.filemanip import list_to_filename
+from ...utils.filemanip import simplify_list
 from ..base import (traits, File, Directory, TraitedSpec, OutputMultiPath)
 from ..freesurfer.base import FSCommand, FSTraitedSpec
 
@@ -120,7 +120,7 @@ class WatershedBEM(FSCommand):
                                       output_traits.traits()[k].loc,
                                       output_traits.traits()[k].altkey)
                 if val:
-                    value_list = list_to_filename(val)
+                    value_list = simplify_list(val)
                     if isinstance(value_list, list):
                         out_files = []
                         for value in value_list:

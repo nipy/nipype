@@ -53,7 +53,10 @@ def test_Pik_inputs():
         png=dict(xor=('jpg', 'png'), ),
         sagittal_offset=dict(argstr='--sagittal_offset %s', ),
         sagittal_offset_perc=dict(argstr='--sagittal_offset_perc %d', ),
-        scale=dict(argstr='--scale %s', ),
+        scale=dict(
+            argstr='--scale %s',
+            usedefault=True,
+        ),
         slice_x=dict(
             argstr='-x',
             xor=('slice_z', 'slice_y', 'slice_x'),

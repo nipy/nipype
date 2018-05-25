@@ -3,13 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The freesurfer module provides basic functions for interfacing with
    freesurfer tools.
-
-   Change directory to provide relative paths for doctests
-   >>> import os
-   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-   >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-   >>> os.chdir(datadir)
-
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
@@ -365,7 +358,7 @@ class GLMFitInputSpec(FSTraitedSpec):
     force_perm = traits.Bool(
         argstr='--perm-force',
         desc='force perumtation test, even when design matrix is not orthog')
-    diag = traits.Int('--diag %d', desc='Gdiag_no : set diagnositc level')
+    diag = traits.Int(argstr='--diag %d', desc='Gdiag_no : set diagnositc level')
     diag_cluster = traits.Bool(
         argstr='--diag-cluster',
         desc='save sig volume and exit from first sim loop')
@@ -1144,7 +1137,7 @@ class Label2VolInputSpec(FSTraitedSpec):
     invert_mtx = traits.Bool(
         argstr='--invertmtx', desc='Invert the registration matrix')
     fill_thresh = traits.Range(
-        0., 1., argstr='--fillthresh %.f', desc='thresh : between 0 and 1')
+        0., 1., argstr='--fillthresh %g', desc='thresh : between 0 and 1')
     label_voxel_volume = traits.Float(
         argstr='--labvoxvol %f', desc='volume of each label point (def 1mm3)')
     proj = traits.Tuple(
@@ -1183,7 +1176,7 @@ class Label2Vol(FSCommand):
 
     >>> binvol = Label2Vol(label_file='cortex.label', template_file='structural.nii', reg_file='register.dat', fill_thresh=0.5, vol_label_file='foo_out.nii')
     >>> binvol.cmdline
-    'mri_label2vol --fillthresh 0 --label cortex.label --reg register.dat --temp structural.nii --o foo_out.nii'
+    'mri_label2vol --fillthresh 0.5 --label cortex.label --reg register.dat --temp structural.nii --o foo_out.nii'
 
    """
 

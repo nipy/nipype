@@ -21,7 +21,7 @@ def test_OneSampleTTest_inputs():
             argstr='--X %s',
             xor=('fsgd', 'design', 'one_sample'),
         ),
-        diag=dict(),
+        diag=dict(argstr='--diag %d', ),
         diag_cluster=dict(argstr='--diag-cluster', ),
         environ=dict(
             nohash=True,

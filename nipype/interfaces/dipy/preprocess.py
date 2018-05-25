@@ -1,12 +1,4 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-Change directory to provide relative paths for doctests
-   >>> import os
-   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-   >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-   >>> os.chdir(datadir)
-"""
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
@@ -114,8 +106,8 @@ class DenoiseInputSpec(TraitedSpec):
         desc=('mask in which the standard deviation of noise '
               'will be computed'),
         exists=True)
-    patch_radius = traits.Int(1, desc='patch radius')
-    block_radius = traits.Int(5, desc='block_radius')
+    patch_radius = traits.Int(1, usedefault=True, desc='patch radius')
+    block_radius = traits.Int(5, usedefault=True, desc='block_radius')
     snr = traits.Float(desc='manually set an SNR')
 
 

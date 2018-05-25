@@ -1,13 +1,6 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-   Change directory to provide relative paths for doctests
-   >>> import os
-   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-   >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
-   >>> os.chdir(datadir)
-"""
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
@@ -51,15 +44,19 @@ class PETPVCInputSpec(CommandLineInputSpec):
         default_value=False,
         argstr="-d")
     n_iter = traits.Int(
-        desc="Number of iterations", default_value=10, argstr="-n %d")
+        desc="Number of iterations", default_value=10, usedefault=True,
+        argstr="-n %d")
     n_deconv = traits.Int(
         desc="Number of deconvolution iterations",
         default_value=10,
+        usedefault=True,
         argstr="-k %d")
     alpha = traits.Float(
-        desc="Alpha value", default_value=1.5, argstr="-a %.4f")
+        desc="Alpha value", default_value=1.5, usedefault=True,
+        argstr="-a %.4f")
     stop_crit = traits.Float(
-        desc="Stopping criterion", default_value=0.01, argstr="-a %.4f")
+        desc="Stopping criterion", default_value=0.01, usedefault=True,
+        argstr="-a %.4f")
 
 
 class PETPVCOutputSpec(TraitedSpec):

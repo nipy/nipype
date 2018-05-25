@@ -132,19 +132,19 @@ def test_mandatory_outvol(create_files_in_directory):
         base, ext2 = os.path.splitext(base)
         ext = ext2 + ext
 
-    assert mni.cmdline == ('mri_nu_correct.mni --i %s --o %s_output%s' %
+    assert mni.cmdline == ('mri_nu_correct.mni --i %s --n 4 --o %s_output%s' %
                            (filelist[0], base, ext))
 
     # test with custom outfile
     mni.inputs.out_file = 'new_corrected_file.mgz'
     assert mni.cmdline == (
-        'mri_nu_correct.mni --i %s --o new_corrected_file.mgz' % (filelist[0]))
+        'mri_nu_correct.mni --i %s --n 4 --o new_corrected_file.mgz' % (filelist[0]))
 
     # constructor based tests
     mni2 = freesurfer.MNIBiasCorrection(
-        in_file=filelist[0], out_file='bias_corrected_output', iterations=4)
+        in_file=filelist[0], out_file='bias_corrected_output', iterations=2)
     assert mni2.cmdline == (
-        'mri_nu_correct.mni --i %s --n 4 --o bias_corrected_output' %
+        'mri_nu_correct.mni --i %s --n 2 --o bias_corrected_output' %
         filelist[0])
 
 

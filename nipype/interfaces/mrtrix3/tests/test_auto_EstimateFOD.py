@@ -15,6 +15,7 @@ def test_EstimateFOD_inputs():
         csf_odf=dict(
             argstr='%s',
             position=-1,
+            usedefault=True,
         ),
         csf_txt=dict(
             argstr='%s',
@@ -27,6 +28,7 @@ def test_EstimateFOD_inputs():
         gm_odf=dict(
             argstr='%s',
             position=-3,
+            usedefault=True,
         ),
         gm_txt=dict(
             argstr='%s',
@@ -48,7 +50,10 @@ def test_EstimateFOD_inputs():
             position=-7,
         ),
         mask_file=dict(argstr='-mask %s', ),
-        max_sh=dict(argstr='-lmax %d', ),
+        max_sh=dict(
+            argstr='-lmax %d',
+            usedefault=True,
+        ),
         nthreads=dict(
             argstr='-nthreads %d',
             nohash=True,

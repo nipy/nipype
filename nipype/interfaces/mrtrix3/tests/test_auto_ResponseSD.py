@@ -39,7 +39,11 @@ def test_ResponseSD_inputs():
             position=-5,
         ),
         in_mask=dict(argstr='-mask %s', ),
-        max_sh=dict(argstr='-lmax %d', ),
+        max_sh=dict(
+            argstr='-lmax %s',
+            sep=',',
+            usedefault=True,
+        ),
         mtt_file=dict(
             argstr='%s',
             position=-4,

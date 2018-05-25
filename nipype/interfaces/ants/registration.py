@@ -1,21 +1,15 @@
 # -*- coding: utf-8 -*-
 """The ants module provides basic functions for interfacing with ants
    functions.
-
-   Change directory to provide relative paths for doctests
-   >>> import os
-   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-   >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-   >>> os.chdir(datadir)
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 from builtins import range, str
 import os
 
-from ...utils.filemanip import filename_to_list
+from ...utils.filemanip import ensure_list
 from ..base import TraitedSpec, File, Str, traits, InputMultiPath, isdefined
-from .base import ANTSCommand, ANTSCommandInputSpec
+from .base import ANTSCommand, ANTSCommandInputSpec, LOCAL_DEFAULT_NUMBER_OF_THREADS
 
 
 class ANTSInputSpec(ANTSCommandInputSpec):
@@ -23,7 +17,6 @@ class ANTSInputSpec(ANTSCommandInputSpec):
         3,
         2,
         argstr='%d',
-        usedefault=False,
         position=1,
         desc='image dimension (2 or 3)')
     fixed_image = InputMultiPath(
@@ -104,7 +97,7 @@ class ANTSInputSpec(ANTSCommandInputSpec):
     symmetry_type = traits.Float(requires=['delta_time'], desc='')
 
     use_histogram_matching = traits.Bool(
-        argstr='%s', default=True, usedefault=True)
+        argstr='%s', default_value=True, usedefault=True)
     number_of_iterations = traits.List(
         traits.Int(), argstr='--number-of-iterations %s', sep='x')
     smoothing_sigmas = traits.List(
@@ -330,7 +323,6 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         1,
         2,
         argstr='%s',
-        default=0,
         xor=['initial_moving_transform'],
         desc="Align the moving_image nad fixed_image befor registration using"
         "the geometric center of the images (=0), the image intensities (=1),"
@@ -345,7 +337,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         desc='the metric(s) to use for each stage. '
         'Note that multiple metrics per stage are not supported '
         'in ANTS 1.9.1 and earlier.')
-    metric_weight_item_trait = traits.Float(1.0)
+    metric_weight_item_trait = traits.Float(1.0, usedefault=True)
     metric_weight_stage_trait = traits.Either(
         metric_weight_item_trait, traits.List(metric_weight_item_trait))
     metric_weight = traits.List(
@@ -356,7 +348,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         mandatory=True,
         desc='the metric weight(s) for each stage. '
         'The weights must sum to 1 per stage.')
-    radius_bins_item_trait = traits.Int(5)
+    radius_bins_item_trait = traits.Int(5, usedefault=True)
     radius_bins_stage_trait = traits.Either(
         radius_bins_item_trait, traits.List(radius_bins_item_trait))
     radius_or_number_of_bins = traits.List(
@@ -411,12 +403,12 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
 
     write_composite_transform = traits.Bool(
         argstr='--write-composite-transform %d',
-        default=False,
+        default_value=False,
         usedefault=True,
         desc='')
     collapse_output_transforms = traits.Bool(
         argstr='--collapse-output-transforms %d',
-        default=True,
+        default_value=True,
         usedefault=True,  # This should be true for explicit completeness
         desc=('Collapse output transforms. Specifically, enabling this option '
               'combines all adjacent linear transforms and composes all '
@@ -424,7 +416,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
               'results to disk.'))
     initialize_transforms_per_stage = traits.Bool(
         argstr='--initialize-transforms-per-stage %d',
-        default=False,
+        default_value=False,
         usedefault=True,  # This should be true for explicit completeness
         desc=
         ('Initialize linear transforms from the previous stage. By enabling this option, '
@@ -436,7 +428,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     # values instead of booleans
     float = traits.Bool(
         argstr='--float %d',
-        default=False,
+        default_value=False,
         desc='Use float instead of double for computations.')
 
     transforms = traits.List(
@@ -538,7 +530,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         usedefault=True,
         desc="The Lower quantile to clip image ranges")
 
-    verbose = traits.Bool(argstr='-v', default=False)
+    verbose = traits.Bool(argstr='-v', default_value=False, usedefault=True)
 
 
 class RegistrationOutputSpec(TraitedSpec):
@@ -1094,14 +1086,14 @@ class Registration(ANTSCommand):
             if any((isdefined(self.inputs.fixed_image_masks),
                     isdefined(self.inputs.moving_image_masks))):
                 if isdefined(self.inputs.fixed_image_masks):
-                    fixed_masks = filename_to_list(
+                    fixed_masks = ensure_list(
                         self.inputs.fixed_image_masks)
                     fixed_mask = fixed_masks[ii if len(fixed_masks) > 1 else 0]
                 else:
                     fixed_mask = 'NULL'
 
                 if isdefined(self.inputs.moving_image_masks):
-                    moving_masks = filename_to_list(
+                    moving_masks = ensure_list(
                         self.inputs.moving_image_masks)
                     moving_mask = moving_masks[ii
                                                if len(moving_masks) > 1 else 0]
@@ -1118,8 +1110,6 @@ class Registration(ANTSCommand):
                 output_filename = self.inputs.output_warped_image
                 if isinstance(output_filename, bool):
                     output_filename = '%s_Warped.nii.gz' % self.inputs.output_transform_prefix
-                else:
-                    output_filename = output_filename
             return output_filename
         inv_output_filename = None
         if isdefined(self.inputs.output_inverse_warped_image) and \
@@ -1127,8 +1117,6 @@ class Registration(ANTSCommand):
             inv_output_filename = self.inputs.output_inverse_warped_image
             if isinstance(inv_output_filename, bool):
                 inv_output_filename = '%s_InverseWarped.nii.gz' % self.inputs.output_transform_prefix
-            else:
-                inv_output_filename = inv_output_filename
         return inv_output_filename
 
     def _format_convergence(self, ii):
@@ -1396,7 +1384,7 @@ class MeasureImageSimilarityInputSpec(ANTSCommandInputSpec):
     )
     metric_weight = traits.Float(
         requires=['metric'],
-        default=1.0,
+        default_value=1.0,
         usedefault=True,
         desc='The "metricWeight" variable is not used.',
     )
@@ -1411,7 +1399,6 @@ class MeasureImageSimilarityInputSpec(ANTSCommandInputSpec):
         "Regular",
         "Random",
         requires=['metric'],
-        default="None",
         usedefault=True,
         desc='Manner of choosing point set over which to optimize the metric. '
         'Defaults to "None" (i.e. a dense sampling of one sample per voxel).')
@@ -1504,4 +1491,108 @@ class MeasureImageSimilarity(ANTSCommand):
         outputs = self._outputs()
         stdout = runtime.stdout.split('\n')
         outputs.similarity = float(stdout[0])
+        return outputs
+
+
+class RegistrationSynQuickInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Enum(3, 2, argstr='-d %d',
+                            usedefault=True, desc='image dimension (2 or 3)')
+    fixed_image = InputMultiPath(File(exists=True), mandatory=True, argstr='-f %s...',
+                                 desc='Fixed image or source image or reference image')
+    moving_image = InputMultiPath(File(exists=True), mandatory=True, argstr='-m %s...',
+                                  desc='Moving image or target image')
+    output_prefix = Str("transform", usedefault=True, argstr='-o %s',
+                        desc="A prefix that is prepended to all output files")
+    num_threads = traits.Int(default_value=LOCAL_DEFAULT_NUMBER_OF_THREADS, usedefault=True,
+                             desc='Number of threads (default = 1)', argstr='-n %d')
+
+    transform_type = traits.Enum('s', 't', 'r', 'a', 'sr', 'b', 'br', argstr='-t %s',
+                                 desc="""
+                                 transform type
+                                 t:  translation
+                                 r:  rigid
+                                 a:  rigid + affine
+                                 s:  rigid + affine + deformable syn (default)
+                                 sr: rigid + deformable syn
+                                 b:  rigid + affine + deformable b-spline syn
+                                 br: rigid + deformable b-spline syn""",
+                                 usedefault=True)
+
+    use_histogram_matching = traits.Bool(False, argstr='-j %d',
+                                         desc='use histogram matching')
+    histogram_bins = traits.Int(default_value=32, usedefault=True, argstr='-r %d',
+                                desc='histogram bins for mutual information in SyN stage \
+                                 (default = 32)')
+    spline_distance = traits.Int(default_value=26, usedefault=True, argstr='-s %d',
+                                 desc='spline distance for deformable B-spline SyN transform \
+                                 (default = 26)')
+    precision_type = traits.Enum('double', 'float', argstr='-p %s',
+                                 desc='precision type (default = double)', usedefault=True)
+
+
+class RegistrationSynQuickOutputSpec(TraitedSpec):
+    warped_image = File(exists=True, desc="Warped image")
+    inverse_warped_image = File(exists=True, desc="Inverse warped image")
+    out_matrix = File(exists=True, desc='Affine matrix')
+    forward_warp_field = File(exists=True, desc='Forward warp field')
+    inverse_warp_field = File(exists=True, desc='Inverse warp field')
+
+
+class RegistrationSynQuick(ANTSCommand):
+    """
+    Registration using a symmetric image normalization method (SyN).
+    You can read more in Avants et al.; Med Image Anal., 2008
+    (https://www.ncbi.nlm.nih.gov/pubmed/17659998).
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.ants import RegistrationSynQuick
+    >>> reg = RegistrationSynQuick()
+    >>> reg.inputs.fixed_image = 'fixed1.nii'
+    >>> reg.inputs.moving_image = 'moving1.nii'
+    >>> reg.inputs.num_threads = 2
+    >>> reg.cmdline
+    'antsRegistrationSyNQuick.sh -d 3 -f fixed1.nii -r 32 -m moving1.nii -n 2 -o transform -p d -s 26 -t s'
+    >>> reg.run()  # doctest: +SKIP
+
+    example for multiple images
+
+    >>> from nipype.interfaces.ants import RegistrationSynQuick
+    >>> reg = RegistrationSynQuick()
+    >>> reg.inputs.fixed_image = ['fixed1.nii', 'fixed2.nii']
+    >>> reg.inputs.moving_image = ['moving1.nii', 'moving2.nii']
+    >>> reg.inputs.num_threads = 2
+    >>> reg.cmdline
+    'antsRegistrationSyNQuick.sh -d 3 -f fixed1.nii -f fixed2.nii -r 32 -m moving1.nii -m moving2.nii \
+-n 2 -o transform -p d -s 26 -t s'
+    >>> reg.run()  # doctest: +SKIP
+    """
+
+    _cmd = 'antsRegistrationSyNQuick.sh'
+    input_spec = RegistrationSynQuickInputSpec
+    output_spec = RegistrationSynQuickOutputSpec
+
+    def _num_threads_update(self):
+        """
+        antsRegistrationSyNQuick.sh ignores environment variables,
+        so override environment update from ANTSCommand class
+        """
+        pass
+
+    def _format_arg(self, name, spec, value):
+        if name == 'precision_type':
+            return spec.argstr % value[0]
+        return super(RegistrationSynQuick, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        out_base = os.path.abspath(self.inputs.output_prefix)
+        outputs['warped_image'] = out_base + 'Warped.nii.gz'
+        outputs['inverse_warped_image'] = out_base + 'InverseWarped.nii.gz'
+        outputs['out_matrix'] = out_base + '0GenericAffine.mat'
+
+        if self.inputs.transform_type not in ('t', 'r', 'a'):
+            outputs['forward_warp_field'] = out_base + '1Warp.nii.gz'
+            outputs['inverse_warp_field'] = out_base + '1InverseWarp.nii.gz'
         return outputs

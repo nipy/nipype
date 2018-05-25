@@ -12,7 +12,7 @@ python:
 env:
 - INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler" CI_SKIP_TEST=1
 - INSTALL_DEB_DEPENDECIES=false NIPYPE_EXTRAS="doc,tests,fmri,profiler" CI_SKIP_TEST=1
-- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit" CI_SKIP_TEST=1
+- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit,ssh" CI_SKIP_TEST=1
 - INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler" PIP_FLAGS="--pre" CI_SKIP_TEST=1
 
 addons:
@@ -52,20 +52,13 @@ before_install:
 - travis_retry pip install -r requirements.txt
 - travis_retry git clone https://github.com/INCF/pybids.git ${HOME}/pybids &&
   pip install -e ${HOME}/pybids
+- travis_retry pip install codecov
 
 install:
 - travis_retry pip install $PIP_FLAGS -e .[$NIPYPE_EXTRAS]
 
 script:
-- py.test -v --doctest-modules nipype
+- py.test -v --cov nipype --cov-config .coveragerc --cov-report xml:cov.xml -c nipype/pytest.ini --doctest-modules nipype
 
-deploy:
-  provider: pypi
-  user: satra
-  password:
-    secure: OCO0FXb4f+pH4Uw7zWCIRp3qOJ1t7rhky4K8MjNU8tyVCJgd6O/Bv8GJgceS0LktPodlAAjB8SxAhTORPAQZ1D/44PJYy3NQIisvej1zjLpaA9TEGfl6W7MqhDpRyMHW+cnSi/n84SAmdr+Z4vOxScDHdwr13EPmGyOIlHMAGnE=
-  on:
-    tags: true
-    repo: nipy/nipype
-    branch: master
-  distributions: "sdist bdist_wheel"
+after_script:
+- codecov --file cov.xml --flags unittests -e TRAVIS_JOB_NUMBER

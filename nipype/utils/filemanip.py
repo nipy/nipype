@@ -2,14 +2,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous file manipulation functions
-
-  .. testsetup::
-    # Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname(os.path.realpath( __file__ ))
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
-    >>> os.chdir(datadir)
-
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
@@ -26,6 +18,7 @@ import os
 import os.path as op
 import re
 import shutil
+import contextlib
 import posixpath
 import simplejson as json
 import numpy as np
@@ -82,7 +75,7 @@ def split_filename(fname):
 
     """
 
-    special_extensions = [".nii.gz", ".tar.gz"]
+    special_extensions = [".nii.gz", ".tar.gz", ".niml.dset"]
 
     pth = op.dirname(fname)
     fname = op.basename(fname)
@@ -185,7 +178,8 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     '/tmp/prefoopost.nii.gz'
 
     >>> from nipype.interfaces.base import Undefined
-    >>> fname_presuffix(fname, 'pre', 'post', Undefined) == fname_presuffix(fname, 'pre', 'post')
+    >>> fname_presuffix(fname, 'pre', 'post', Undefined) == \
+            fname_presuffix(fname, 'pre', 'post')
     True
 
     """
@@ -289,14 +283,24 @@ def _parse_mount_table(exit_code, output):
     #                          <PATH>^^^^      ^^^^^<FSTYPE>
     # OSX mount example:    /dev/disk2 on / (hfs, local, journaled)
     #                               <PATH>^  ^^^<FSTYPE>
-    pattern = re.compile(r'.*? on (/.*?) (?:type |\()([^\s,]+)(?:, |\)| )')
+    pattern = re.compile(r'.*? on (/.*?) (?:type |\()([^\s,\)]+)')
+
+    # Keep line and match for error reporting (match == None on failure)
+    # Ignore empty lines
+    matches = [(l, pattern.match(l))
+               for l in output.strip().splitlines() if l]
 
     # (path, fstype) tuples, sorted by path length (longest first)
-    mount_info = sorted((pattern.match(l).groups()
-                         for l in output.splitlines()),
+    mount_info = sorted((match.groups() for _, match in matches
+                         if match is not None),
                         key=lambda x: len(x[0]), reverse=True)
     cifs_paths = [path for path, fstype in mount_info
                   if fstype.lower() == 'cifs']
+
+    # Report failures as warnings
+    for line, match in matches:
+        if match is None:
+            fmlogger.debug("Cannot parse mount line: '%s'", line)
 
     return [
         mount for mount in mount_info
@@ -424,6 +428,8 @@ def copyfile(originalfile,
                 hashfn = hash_timestamp
             elif hashmethod == 'content':
                 hashfn = hash_infile
+            else:
+                raise AttributeError("Unknown hash method found:", hashmethod)
             newhash = hashfn(newfile)
             fmlogger.debug('File: %s already exists,%s, copy:%d', newfile,
                            newhash, copy)
@@ -527,9 +533,9 @@ def copyfiles(filelist, dest, copy=False, create_new=False):
     None
 
     """
-    outfiles = filename_to_list(dest)
+    outfiles = ensure_list(dest)
     newfiles = []
-    for i, f in enumerate(filename_to_list(filelist)):
+    for i, f in enumerate(ensure_list(filelist)):
         if isinstance(f, list):
             newfiles.insert(i,
                             copyfiles(
@@ -544,7 +550,7 @@ def copyfiles(filelist, dest, copy=False, create_new=False):
     return newfiles
 
 
-def filename_to_list(filename):
+def ensure_list(filename):
     """Returns a list given either a string or a list
     """
     if isinstance(filename, (str, bytes)):
@@ -557,7 +563,7 @@ def filename_to_list(filename):
         return None
 
 
-def list_to_filename(filelist):
+def simplify_list(filelist):
     """Returns a list if filelist is a list of length greater than 1,
        otherwise returns the first element
     """
@@ -567,13 +573,17 @@ def list_to_filename(filelist):
         return filelist[0]
 
 
+filename_to_list = ensure_list
+list_to_filename = simplify_list
+
+
 def check_depends(targets, dependencies):
     """Return true if all targets exist and are newer than all dependencies.
 
     An OSError will be raised if there are missing dependencies.
     """
-    tgts = filename_to_list(targets)
-    deps = filename_to_list(dependencies)
+    tgts = ensure_list(targets)
+    deps = ensure_list(dependencies)
     return all(map(op.exists, tgts)) and \
         min(map(op.getmtime, tgts)) > \
         max(list(map(op.getmtime, deps)) + [0])
@@ -619,16 +629,6 @@ def load_json(filename):
 def loadcrash(infile, *args):
     if '.pkl' in infile:
         return loadpkl(infile)
-    elif '.npz' in infile:
-        DeprecationWarning(('npz files will be deprecated in the next '
-                            'release. you can use numpy to open them.'))
-        data = np.load(infile)
-        out = {}
-        for k in data.files:
-            out[k] = [f for f in data[k].flat]
-            if len(out[k]) == 1:
-                out[k] = out[k].pop()
-        return out
     else:
         raise ValueError('Only pickled crashfiles are supported')
 
@@ -921,3 +921,13 @@ def relpath(path, start=None):
     if not rel_list:
         return os.curdir
     return op.join(*rel_list)
+
+
+@contextlib.contextmanager
+def indirectory(path):
+    cwd = os.getcwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(cwd)

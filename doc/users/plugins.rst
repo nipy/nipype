@@ -103,10 +103,6 @@ machinery.
 
 .. note::
 
-  We provide backward compatibility with IPython_ versions earlier than
-  0.10.1 using the IPythonX plugin. This plugin will be deprecated as of
-  version 0.13 of Nipype.
-
   Please read the IPython_ documentation to determine how to setup your cluster
   for distributed processing. This typically involves calling ipcluster.
 

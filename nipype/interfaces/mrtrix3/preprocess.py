@@ -1,23 +1,78 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 # -*- coding: utf-8 -*-
-"""
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname(os.path.realpath(__file__ ))
-    >>> datadir = os.path.realpath(os.path.join(filepath,
-    ...                            '../../testing/data'))
-    >>> os.chdir(datadir)
-
-"""
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
 import os.path as op
 
 from ..base import (CommandLineInputSpec, CommandLine, traits, TraitedSpec,
-                    File, isdefined, Undefined)
+                    File, isdefined, Undefined, InputMultiObject)
 from .base import MRTrix3BaseInputSpec, MRTrix3Base
+
+
+class DWIDenoiseInputSpec(MRTrix3BaseInputSpec):
+    in_file = File(
+        exists=True,
+        argstr='%s',
+        position=-2,
+        mandatory=True,
+        desc='input DWI image')
+    mask = File(
+        exists=True,
+        argstr='-mask %s',
+        position=1,
+        desc='mask image')
+    extent = traits.Tuple((traits.Int, traits.Int, traits.Int),
+        argstr='-extent %d,%d,%d',
+        desc='set the window size of the denoising filter. (default = 5,5,5)')
+    noise = File(
+        argstr='-noise %s',
+        desc='noise map')
+    out_file = File(name_template='%s_denoised',
+        name_source='in_file',
+        keep_extension=True,
+        argstr="%s",
+        position=-1,
+        desc="the output denoised DWI image")
+
+class DWIDenoiseOutputSpec(TraitedSpec):
+    out_file = File(desc="the output denoised DWI image", exists=True)
+
+class DWIDenoise(MRTrix3Base):
+    """
+    Denoise DWI data and estimate the noise level based on the optimal
+    threshold for PCA.
+
+    DWI data denoising and noise map estimation by exploiting data redundancy
+    in the PCA domain using the prior knowledge that the eigenspectrum of
+    random covariance matrices is described by the universal Marchenko Pastur
+    distribution.
+
+    Important note: image denoising must be performed as the first step of the
+    image processing pipeline. The routine will fail if interpolation or
+    smoothing has been applied to the data prior to denoising.
+
+    Note that this function does not correct for non-Gaussian noise biases.
+
+    For more information, see
+    <https://mrtrix.readthedocs.io/en/latest/reference/commands/dwidenoise.html>
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> denoise = mrt.DWIDenoise()
+    >>> denoise.inputs.in_file = 'dwi.mif'
+    >>> denoise.inputs.mask = 'mask.mif'
+    >>> denoise.cmdline                               # doctest: +ELLIPSIS
+    'dwidenoise -mask mask.mif dwi.mif dwi_denoised.mif'
+    >>> denoise.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = 'dwidenoise'
+    input_spec = DWIDenoiseInputSpec
+    output_spec = DWIDenoiseOutputSpec
 
 
 class ResponseSDInputSpec(MRTrix3BaseInputSpec):
@@ -49,10 +104,14 @@ class ResponseSDInputSpec(MRTrix3BaseInputSpec):
         argstr='%s', position=-1, desc='output CSF response text file')
     in_mask = File(
         exists=True, argstr='-mask %s', desc='provide initial mask image')
-    max_sh = traits.Int(
-        8,
-        argstr='-lmax %d',
-        desc='maximum harmonic degree of response function')
+    max_sh = InputMultiObject(
+        traits.Int,
+        value=[8],
+        usedefault=True,
+        argstr='-lmax %s',
+        sep=',',
+        desc=('maximum harmonic degree of response function - single value for '
+              'single-shell response, list for multi-shell response'))
 
 
 class ResponseSDOutputSpec(TraitedSpec):
@@ -74,8 +133,13 @@ class ResponseSD(MRTrix3Base):
     >>> resp.inputs.algorithm = 'tournier'
     >>> resp.inputs.grad_fsl = ('bvecs', 'bvals')
     >>> resp.cmdline                               # doctest: +ELLIPSIS
-    'dwi2response tournier -fslgrad bvecs bvals dwi.mif wm.txt'
+    'dwi2response tournier -fslgrad bvecs bvals -lmax 8 dwi.mif wm.txt'
     >>> resp.run()                                 # doctest: +SKIP
+
+    # We can also pass in multiple harmonic degrees in the case of multi-shell
+    >>> resp.inputs.max_sh = [6,8,10]
+    >>> resp.cmdline
+    'dwi2response tournier -fslgrad bvecs bvals -lmax 6,8,10 dwi.mif wm.txt'
     """
 
     _cmd = 'dwi2response'

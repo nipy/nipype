@@ -4,7 +4,8 @@
 """Top-level namespace for ants."""
 
 # Registraiton programs
-from .registration import ANTS, Registration, MeasureImageSimilarity
+from .registration import (ANTS, Registration, RegistrationSynQuick,
+                           MeasureImageSimilarity)
 
 # Resampling Programs
 from .resampling import (ApplyTransforms, ApplyTransformsToPoints,
@@ -22,4 +23,4 @@ from .visualization import ConvertScalarImageToRGB, CreateTiledMosaic
 # Utility Programs
 from .utils import (AverageAffineTransform, AverageImages, MultiplyImages,
                     CreateJacobianDeterminantImage, AffineInitializer,
-                    ComposeMultiTransform)
+                    ComposeMultiTransform, LabelGeometry)

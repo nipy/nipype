@@ -5,14 +5,6 @@
 """Defines functionality for pipelined execution of interfaces
 
 The `Workflow` class provides core functionality for batch processing.
-
-  .. testsetup::
-     # Change directory to provide relative paths for doctests
-     import os
-     filepath = os.path.dirname(os.path.realpath( __file__ ))
-     datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-     os.chdir(datadir)
-
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
@@ -496,6 +488,7 @@ connected.
         flatgraph = self._create_flat_graph()
         nodes = nx.topological_sort(flatgraph)
 
+        all_lines = None
         lines = ['# Workflow']
         importlines = [
             'from nipype.pipeline.engine import Workflow, '

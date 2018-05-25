@@ -146,6 +146,6 @@ the string would be
 Unlike when using a function object, this input can be set like any other,
 meaning that you could write a function that outputs different function
 strings depending on some run-time contingencies, and connect that output
-the the ``function_str`` input of a downstream Function interface.
+the ``function_str`` input of a downstream Function interface.
 
 .. include:: ../links_names.txt

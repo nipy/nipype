@@ -12,9 +12,9 @@ def checkT1s(T1_files, cw256=False):
     """Verifying size of inputs and setting workflow parameters"""
     import sys
     import nibabel as nb
-    from nipype.utils.filemanip import filename_to_list
+    from nipype.utils.filemanip import ensure_list
 
-    T1_files = filename_to_list(T1_files)
+    T1_files = ensure_list(T1_files)
     if len(T1_files) == 0:
         print("ERROR: No T1's Given")
         sys.exit(-1)

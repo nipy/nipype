@@ -41,7 +41,6 @@ def test_importerror(creating_graphs, tmpdir):
 
     with pytest.raises(ImportError) as e:
         nbs.run()
-    assert "cviewer library is not available" == str(e.value)
 
 
 @pytest.mark.skipif(not have_cv, reason="cviewer has to be available")

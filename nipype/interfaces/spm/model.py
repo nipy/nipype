@@ -3,13 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The spm module provides basic functions for interfacing with matlab
 and spm to access spm tools.
-
-   Change directory to provide relative paths for doctests
-   >>> import os
-   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-   >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-   >>> os.chdir(datadir)
-
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
@@ -25,7 +18,7 @@ import scipy.io as sio
 
 # Local imports
 from ... import logging
-from ...utils.filemanip import (filename_to_list, list_to_filename,
+from ...utils.filemanip import (ensure_list, simplify_list,
                                 split_filename)
 from ..base import (Bunch, traits, TraitedSpec, File, Directory,
                     OutputMultiPath, InputMultiPath, isdefined)
@@ -162,7 +155,7 @@ class Level1Design(SPMCommand):
                         self)._parse_inputs(skip=('mask_threshold'))
         for sessinfo in einputs[0]['sess']:
             sessinfo['scans'] = scans_for_fnames(
-                filename_to_list(sessinfo['scans']), keep4d=False)
+                ensure_list(sessinfo['scans']), keep4d=False)
         if not isdefined(self.inputs.spm_mat_dir):
             einputs[0]['dir'] = np.array([str(os.getcwd())], dtype=object)
         return einputs
@@ -176,7 +169,7 @@ class Level1Design(SPMCommand):
             # SPM doesn't handle explicit masking properly, especially
             # when you want to use the entire mask image
             postscript = "load SPM;\n"
-            postscript += ("SPM.xM.VM = spm_vol('%s');\n" % list_to_filename(
+            postscript += ("SPM.xM.VM = spm_vol('%s');\n" % simplify_list(
                 self.inputs.mask_image))
             postscript += "SPM.xM.I = 0;\n"
             postscript += "SPM.xM.T = [];\n"

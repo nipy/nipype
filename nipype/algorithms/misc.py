@@ -3,13 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 '''
 Miscellaneous algorithms
-
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname(os.path.realpath(__file__))
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
-    >>> os.chdir(datadir)
-
 '''
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
@@ -33,7 +26,7 @@ from . import metrics as nam
 from ..interfaces.base import (
     BaseInterface, traits, TraitedSpec, File, InputMultiPath, OutputMultiPath,
     BaseInterfaceInputSpec, isdefined, DynamicTraitedSpec, Undefined)
-from ..utils.filemanip import fname_presuffix, split_filename, filename_to_list
+from ..utils.filemanip import fname_presuffix, split_filename, ensure_list
 from ..utils import NUMPY_MMAP
 
 from . import confounds
@@ -273,21 +266,32 @@ class GunzipOutputSpec(TraitedSpec):
 
 class Gunzip(BaseInterface):
     """Gunzip wrapper
+
+    >>> from nipype.algorithms.misc import Gunzip
+    >>> gunzip = Gunzip(in_file='tpms_msk.nii.gz')
+    >>> res = gunzip.run()
+    >>> res.outputs.out_file  # doctest: +ELLIPSIS
+    '.../tpms_msk.nii'
+
+    .. testcleanup::
+
+    >>> os.unlink('tpms_msk.nii')
     """
     input_spec = GunzipInputSpec
     output_spec = GunzipOutputSpec
 
     def _gen_output_file_name(self):
         _, base, ext = split_filename(self.inputs.in_file)
-        if ext[-2:].lower() == ".gz":
+        if ext[-3:].lower() == ".gz":
             ext = ext[:-3]
-        return os.path.abspath(base + ext[:-3])
+        return os.path.abspath(base + ext)
 
     def _run_interface(self, runtime):
         import gzip
+        import shutil
         with gzip.open(self.inputs.in_file, 'rb') as in_file:
             with open(self._gen_output_file_name(), 'wb') as out_file:
-                out_file.write(in_file.read())
+                shutil.copyfileobj(in_file, out_file)
         return runtime
 
     def _list_outputs(self):
@@ -1191,7 +1195,7 @@ class MergeROIs(BaseInterface):
         return outputs
 
 
-def normalize_tpms(in_files, in_mask=None, out_files=[]):
+def normalize_tpms(in_files, in_mask=None, out_files=None):
     """
     Returns the input tissue probability maps (tpms, aka volume fractions)
     normalized to sum up 1.0 at each voxel within the mask.
@@ -1201,6 +1205,9 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
     import os.path as op
 
     in_files = np.atleast_1d(in_files).tolist()
+
+    if out_files is None:
+        out_files = []
 
     if len(out_files) != len(in_files):
         for i, finname in enumerate(in_files):
@@ -1483,7 +1490,7 @@ class CalculateMedian(BaseInterface):
     def _run_interface(self, runtime):
         total = None
         self._median_files = []
-        for idx, fname in enumerate(filename_to_list(self.inputs.in_files)):
+        for idx, fname in enumerate(ensure_list(self.inputs.in_files)):
             img = nb.load(fname, mmap=NUMPY_MMAP)
             data = np.median(img.get_data(), axis=3)
             if self.inputs.median_per_file:

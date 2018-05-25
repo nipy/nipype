@@ -1,15 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 # -*- coding: utf-8 -*-
-"""
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname(os.path.realpath(__file__ ))
-    >>> datadir = os.path.realpath(os.path.join(filepath,
-    ...                            '../../testing/data'))
-    >>> os.chdir(datadir)
-
-"""
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
@@ -48,7 +39,7 @@ class FitTensorInputSpec(MRTrix3BaseInputSpec):
         argstr='-method %s',
         desc=('select method used to perform the fitting'))
     reg_term = traits.Float(
-        5.e3,
+        5.e3, usedefault=True,
         argstr='-regularisation %f',
         desc=('specify the strength of the regularisation term on the '
               'magnitude of the tensor elements (default = 5000). This '
@@ -73,7 +64,8 @@ class FitTensor(MRTrix3Base):
     >>> tsr.inputs.in_mask = 'mask.nii.gz'
     >>> tsr.inputs.grad_fsl = ('bvecs', 'bvals')
     >>> tsr.cmdline                               # doctest: +ELLIPSIS
-    'dwi2tensor -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif dti.mif'
+    'dwi2tensor -fslgrad bvecs bvals -mask mask.nii.gz \
+-regularisation 5000.000000 dwi.mif dti.mif'
     >>> tsr.run()                                 # doctest: +SKIP
     """
 
@@ -111,9 +103,11 @@ class EstimateFODInputSpec(MRTrix3BaseInputSpec):
         mandatory=True,
         desc='output WM ODF')
     gm_txt = File(argstr='%s', position=-4, desc='GM response text file')
-    gm_odf = File('gm.mif', argstr='%s', position=-3, desc='output GM ODF')
+    gm_odf = File('gm.mif', usedefault=True, argstr='%s',
+                  position=-3, desc='output GM ODF')
     csf_txt = File(argstr='%s', position=-2, desc='CSF response text file')
-    csf_odf = File('csf.mif', argstr='%s', position=-1, desc='output CSF ODF')
+    csf_odf = File('csf.mif', usedefault=True, argstr='%s',
+                   position=-1, desc='output CSF ODF')
     mask_file = File(exists=True, argstr='-mask %s', desc='mask image')
 
     # DW Shell selection options
@@ -123,7 +117,7 @@ class EstimateFODInputSpec(MRTrix3BaseInputSpec):
         argstr='-shell %s',
         desc='specify one or more dw gradient shells')
     max_sh = traits.Int(
-        8,
+        8, usedefault=True,
         argstr='-lmax %d',
         desc='maximum harmonic degree of response function')
     in_dirs = File(
@@ -155,7 +149,7 @@ class EstimateFOD(MRTrix3Base):
     >>> fod.inputs.wm_txt = 'wm.txt'
     >>> fod.inputs.grad_fsl = ('bvecs', 'bvals')
     >>> fod.cmdline                               # doctest: +ELLIPSIS
-    'dwi2fod -fslgrad bvecs bvals csd dwi.mif wm.txt wm.mif'
+    'dwi2fod -fslgrad bvecs bvals -lmax 8 csd dwi.mif wm.txt wm.mif gm.mif csf.mif'
     >>> fod.run()                                 # doctest: +SKIP
     """
 

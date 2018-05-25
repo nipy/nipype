@@ -2,12 +2,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """AFNI preprocessing interfaces
-
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-    >>> os.chdir(datadir)
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
@@ -224,7 +218,9 @@ class AllineateInputSpec(AFNICommandInputSpec):
     out_file = File(
         desc='output file from 3dAllineate',
         argstr='-prefix %s',
-        genfile=True,
+        name_template='%s_allineate',
+        name_source='in_file',
+        hash_files=False,
         xor=['allcostx'])
     out_param_file = File(
         argstr='-1Dparam_save %s',
@@ -430,11 +426,11 @@ class AllineateInputSpec(AFNICommandInputSpec):
     _dirs = ['X', 'Y', 'Z', 'I', 'J', 'K']
     nwarp_fixmot = traits.List(
         traits.Enum(*_dirs),
-        argstr='-nwarp_fixmot%s',
+        argstr='-nwarp_fixmot%s...',
         desc='To fix motion along directions.')
     nwarp_fixdep = traits.List(
         traits.Enum(*_dirs),
-        argstr='-nwarp_fixdep%s',
+        argstr='-nwarp_fixdep%s...',
         desc='To fix non-linear warp dependency along directions.')
     verbose = traits.Bool(
         argstr='-verb', desc='Print out verbose progress reports.')
@@ -471,7 +467,6 @@ class Allineate(AFNICommand):
     '3dAllineate -source functional.nii -prefix functional_allineate.nii -1Dmatrix_apply cmatrix.mat'
     >>> res = allineate.run()  # doctest: +SKIP
 
-    >>> from nipype.interfaces import afni
     >>> allineate = afni.Allineate()
     >>> allineate.inputs.in_file = 'functional.nii'
     >>> allineate.inputs.reference = 'structural.nii'
@@ -479,23 +474,22 @@ class Allineate(AFNICommand):
     >>> allineate.cmdline
     '3dAllineate -source functional.nii -base structural.nii -allcostx |& tee out.allcostX.txt'
     >>> res = allineate.run()  # doctest: +SKIP
+
+    >>> allineate = afni.Allineate()
+    >>> allineate.inputs.in_file = 'functional.nii'
+    >>> allineate.inputs.reference = 'structural.nii'
+    >>> allineate.inputs.nwarp_fixmot = ['X', 'Y']
+    >>> allineate.cmdline
+    '3dAllineate -source functional.nii -nwarp_fixmotX -nwarp_fixmotY -prefix functional_allineate -base structural.nii'
+    >>> res = allineate.run()  # doctest: +SKIP
     """
 
     _cmd = '3dAllineate'
     input_spec = AllineateInputSpec
     output_spec = AllineateOutputSpec
 
-    def _format_arg(self, name, trait_spec, value):
-        if name == 'nwarp_fixmot' or name == 'nwarp_fixdep':
-            arg = ' '.join([trait_spec.argstr % v for v in value])
-            return arg
-        return super(Allineate, self)._format_arg(name, trait_spec, value)
-
     def _list_outputs(self):
-        outputs = self.output_spec().get()
-
-        if self.inputs.out_file:
-            outputs['out_file'] = op.abspath(self.inputs.out_file)
+        outputs = super(Allineate, self)._list_outputs()
 
         if self.inputs.out_weight_file:
             outputs['out_weight_file'] = op.abspath(
@@ -518,15 +512,9 @@ class Allineate(AFNICommand):
                 outputs['out_param_file'] = op.abspath(
                     self.inputs.out_param_file)
 
-        if isdefined(self.inputs.allcostx):
-            outputs['allcostX'] = os.path.abspath(
-                os.path.join(os.getcwd(), self.inputs.allcostx))
+        if self.inputs.allcostx:
+            outputs['allcostX'] = os.path.abspath(self.inputs.allcostx)
         return outputs
-
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()[name]
-        return None
 
 
 class AutoTcorrelateInputSpec(AFNICommandInputSpec):
@@ -1618,6 +1606,7 @@ class OutlierCountInputSpec(CommandLineInputSpec):
         value=1e-3,
         low=0.0,
         high=1.0,
+        usedefault=True,
         argstr='-qthr %.5f',
         desc='indicate a value for q to compute alpha')
     autoclip = traits.Bool(
@@ -1687,7 +1676,7 @@ class OutlierCount(CommandLine):
     >>> toutcount = afni.OutlierCount()
     >>> toutcount.inputs.in_file = 'functional.nii'
     >>> toutcount.cmdline  # doctest: +ELLIPSIS
-    '3dToutcount functional.nii'
+    '3dToutcount -qthr 0.00100 functional.nii'
     >>> res = toutcount.run()  # doctest: +SKIP
 
     """
@@ -2429,19 +2418,19 @@ class TProjectInputSpec(AFNICommandInputSpec):
         exists=True)
     censortr = traits.List(
         traits.Str(),
-        desc="""list of strings that specify time indexes 
+        desc="""list of strings that specify time indexes
                 to be removed from the analysis.  Each string is
-                of one of the following forms:                  
-                       37 => remove global time index #37          
-                     2:37 => remove time index #37 in run #2       
-                   37..47 => remove global time indexes #37-47     
-                   37-47  => same as above                         
-                 2:37..47 => remove time indexes #37-47 in run #2  
-                 *:0-2    => remove time indexes #0-2 in all runs  
-                +Time indexes within each run start at 0.        
-                +Run indexes start at 1 (just be to confusing).  
-                +N.B.: 2:37,47 means index #37 in run #2 and     
-                global time index 47; it does NOT mean         
+                of one of the following forms:
+                       37 => remove global time index #37
+                     2:37 => remove time index #37 in run #2
+                   37..47 => remove global time indexes #37-47
+                   37-47  => same as above
+                 2:37..47 => remove time indexes #37-47 in run #2
+                 *:0-2    => remove time indexes #0-2 in all runs
+                +Time indexes within each run start at 0.
+                +Run indexes start at 1 (just be to confusing).
+                +N.B.: 2:37,47 means index #37 in run #2 and
+                global time index 47; it does NOT mean
                 index #37 in run #2 AND index #47 in run #2.""",
         argstr="-CENSORTR %s")
     cenmode = traits.Enum(
@@ -2516,7 +2505,7 @@ class TProjectInputSpec(AFNICommandInputSpec):
                rather than the value stored in the dataset header.""",
         argstr='-TR %g')
     mask = File(
-        exist=True,
+        exists=True,
         desc="""Only operate on voxels nonzero in the mset dataset.
                 ++ Voxels outside the mask will be filled with zeros.
                 ++ If no masking option is given, then all voxels

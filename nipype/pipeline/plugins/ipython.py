@@ -39,6 +39,8 @@ def execute_task(pckld_task, node_config, updatehash):
         result = task.run(updatehash=updatehash)
     except:
         traceback = format_exc()
+        from pickle import loads
+        task = loads(pckld_task)
         result = task.result
     os.chdir(cwd)
     return result, traceback, gethostname()
