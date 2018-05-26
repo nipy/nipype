@@ -3,11 +3,14 @@
 
 ###### [Full changelog](https://github.com/nipy/nipype/milestone/20?closed=1)
 
+  * FIX: Set default result in DistributedPluginBase._clean_queue (https://github.com/nipy/nipype/pull/2596)
+  * FIX: Correctly connect JoinNodes in nested iterables (https://github.com/nipy/nipype/pull/2597)
   * FIX: DTITK nonlinear workflow origin reslicing (https://github.com/nipy/nipype/pull/2561)
   * FIX: ResponseSD support for multiple b-vals (https://github.com/nipy/nipype/pull/2582)
   * FIX: Workaround to ICA-AROMA change of directory (https://github.com/nipy/nipype/pull/2566)
   * FIX/TEST: Gunzip cleanup and test (https://github.com/nipy/nipype/pull/2564)
   * FIX: Print UID in crashfile if login name is unavailable (https://github.com/nipy/nipype/pull/2563)
+  * ENH: initial connectome workbench support (https://github.com/nipy/nipype/pull/2594)
   * ENH: AFNI (3d)LocalBistat interface (https://github.com/nipy/nipype/pull/2590)
   * ENH: Reorient interface (https://github.com/nipy/nipype/pull/2572)
   * ENH: FSL slice interface (https://github.com/nipy/nipype/pull/2585)
