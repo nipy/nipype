@@ -15,11 +15,6 @@ def test_Gennlxfm_inputs():
             usedefault=True,
         ),
         ident=dict(argstr='-ident', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         like=dict(argstr='-like %s', ),
         output_file=dict(
             argstr='%s',
@@ -30,10 +25,6 @@ def test_Gennlxfm_inputs():
             position=-1,
         ),
         step=dict(argstr='-step %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         verbose=dict(argstr='-verbose', ),
     )
     inputs = Gennlxfm.input_spec()

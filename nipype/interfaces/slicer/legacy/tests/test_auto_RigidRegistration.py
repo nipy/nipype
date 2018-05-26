@@ -20,11 +20,6 @@ def test_RigidRegistration_inputs():
         ),
         fixedsmoothingfactor=dict(argstr='--fixedsmoothingfactor %d', ),
         histogrambins=dict(argstr='--histogrambins %d', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         initialtransform=dict(argstr='--initialtransform %s', ),
         iterations=dict(
             argstr='--iterations %s',
@@ -44,10 +39,6 @@ def test_RigidRegistration_inputs():
             hash_files=False,
         ),
         spatialsamples=dict(argstr='--spatialsamples %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         testingmode=dict(argstr='--testingmode ', ),
         translationscale=dict(argstr='--translationscale %f', ),
     )

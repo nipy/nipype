@@ -10,21 +10,12 @@ def test_gtractTransformToDisplacementField_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputReferenceVolume=dict(argstr='--inputReferenceVolume %s', ),
         inputTransform=dict(argstr='--inputTransform %s', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         outputDeformationFieldVolume=dict(
             argstr='--outputDeformationFieldVolume %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = gtractTransformToDisplacementField.input_spec()

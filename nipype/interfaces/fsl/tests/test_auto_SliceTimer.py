@@ -13,11 +13,6 @@ def test_SliceTimer_inputs():
             usedefault=True,
         ),
         global_shift=dict(argstr='--tglobal', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='--in=%s',
             mandatory=True,
@@ -32,10 +27,6 @@ def test_SliceTimer_inputs():
         ),
         output_type=dict(),
         slice_direction=dict(argstr='--direction=%d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         time_repetition=dict(argstr='--repeat=%f', ),
     )
     inputs = SliceTimer.input_spec()

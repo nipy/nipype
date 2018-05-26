@@ -21,11 +21,6 @@ def test_ContrastMgr_inputs():
             usedefault=True,
         ),
         fcon_file=dict(argstr='-f %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         output_type=dict(),
         param_estimates=dict(
             argstr='',
@@ -43,10 +38,6 @@ def test_ContrastMgr_inputs():
             argstr='%s',
             mandatory=True,
             position=-1,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = ContrastMgr.input_spec()

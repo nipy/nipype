@@ -20,18 +20,9 @@ def test_PETStandardUptakeValueComputation_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         labelMap=dict(argstr='--labelMap %s', ),
         petDICOMPath=dict(argstr='--petDICOMPath %s', ),
         petVolume=dict(argstr='--petVolume %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = PETStandardUptakeValueComputation.input_spec()
 

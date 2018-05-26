@@ -7,11 +7,6 @@ def test_SignalExtraction_inputs():
     input_map = dict(
         class_labels=dict(mandatory=True, ),
         detrend=dict(usedefault=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(mandatory=True, ),
         incl_shared_variance=dict(usedefault=True, ),
         include_global=dict(usedefault=True, ),

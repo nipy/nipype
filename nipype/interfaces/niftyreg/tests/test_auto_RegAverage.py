@@ -64,11 +64,6 @@ def test_RegAverage_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         omp_core_val=dict(
             argstr='-omp %i',
             usedefault=True,
@@ -77,10 +72,6 @@ def test_RegAverage_inputs():
             argstr='%s',
             genfile=True,
             position=0,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         warp_files=dict(
             argstr='%s',

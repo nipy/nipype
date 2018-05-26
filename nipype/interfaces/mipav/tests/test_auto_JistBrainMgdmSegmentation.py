@@ -10,11 +10,6 @@ def test_JistBrainMgdmSegmentation_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inAdjust=dict(argstr='--inAdjust %s', ),
         inAtlas=dict(argstr='--inAtlas %s', ),
         inCompute=dict(argstr='--inCompute %s', ),
@@ -47,10 +42,6 @@ def test_JistBrainMgdmSegmentation_inputs():
         outSegmented=dict(
             argstr='--outSegmented %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         xDefaultMem=dict(argstr='-xDefaultMem %d', ),
         xMaxProcess=dict(

@@ -13,11 +13,6 @@ def test_Curvature_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             copyfile=True,
@@ -27,10 +22,6 @@ def test_Curvature_inputs():
         n=dict(argstr='-n', ),
         save=dict(argstr='-w', ),
         subjects_dir=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         threshold=dict(argstr='-thresh %.3f', ),
     )
     inputs = Curvature.input_spec()

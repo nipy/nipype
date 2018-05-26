@@ -21,11 +21,6 @@ def test_TProject_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-input %s',
             copyfile=False,
@@ -49,10 +44,6 @@ def test_TProject_inputs():
         outputtype=dict(),
         polort=dict(argstr='-polort %d', ),
         stopband=dict(argstr='-stopband %g %g', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = TProject.input_spec()
 

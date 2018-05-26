@@ -15,11 +15,6 @@ def test_SFLUTGen_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-inputfile %s',
             mandatory=True,
@@ -48,10 +43,6 @@ def test_SFLUTGen_inputs():
         pdf=dict(
             argstr='-pdf %s',
             usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = SFLUTGen.input_spec()

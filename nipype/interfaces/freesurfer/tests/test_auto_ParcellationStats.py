@@ -19,11 +19,6 @@ def test_ParcellationStats_inputs():
             mandatory=True,
             position=-2,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_annotation=dict(
             argstr='-a %s',
             xor=['in_label'],
@@ -61,10 +56,6 @@ def test_ParcellationStats_inputs():
             position=-1,
         ),
         tabular_output=dict(argstr='-b', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         th3=dict(
             argstr='-th3',
             requires=['cortex_label'],

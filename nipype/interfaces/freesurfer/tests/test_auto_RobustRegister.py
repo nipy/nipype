@@ -24,11 +24,6 @@ def test_RobustRegister_inputs():
         half_targ_xfm=dict(argstr='--halfdstlta %s', ),
         half_weights=dict(argstr='--halfweights %s', ),
         high_iterations=dict(argstr='--highit %d', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_xfm_file=dict(argstr='--transform', ),
         init_orient=dict(argstr='--initorient', ),
         iteration_thresh=dict(argstr='--epsit %.3f', ),
@@ -58,10 +53,6 @@ def test_RobustRegister_inputs():
         target_file=dict(
             argstr='--dst %s',
             mandatory=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         trans_only=dict(argstr='--transonly', ),
         weights_file=dict(argstr='--weights %s', ),

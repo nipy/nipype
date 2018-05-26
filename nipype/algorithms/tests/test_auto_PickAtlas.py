@@ -8,11 +8,6 @@ def test_PickAtlas_inputs():
         atlas=dict(mandatory=True, ),
         dilation_size=dict(usedefault=True, ),
         hemi=dict(usedefault=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         labels=dict(mandatory=True, ),
         output_file=dict(),
     )

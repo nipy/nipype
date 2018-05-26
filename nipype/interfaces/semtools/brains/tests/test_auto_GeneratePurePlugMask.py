@@ -10,11 +10,6 @@ def test_GeneratePurePlugMask_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputImageModalities=dict(argstr='--inputImageModalities %s...', ),
         numberOfSubSamples=dict(
             argstr='--numberOfSubSamples %s',
@@ -23,10 +18,6 @@ def test_GeneratePurePlugMask_inputs():
         outputMaskFile=dict(
             argstr='--outputMaskFile %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         threshold=dict(argstr='--threshold %f', ),
     )

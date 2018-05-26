@@ -27,11 +27,6 @@ def test_ProbabilisticSphericallyDeconvolutedStreamlineTrack_inputs():
             units='mm',
             xor=['exclude_file', 'exclude_spec'],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -110,10 +105,6 @@ def test_ProbabilisticSphericallyDeconvolutedStreamlineTrack_inputs():
             units='mm',
         ),
         stop=dict(argstr='-stop', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         unidirectional=dict(argstr='-unidirectional', ),
     )
     inputs = ProbabilisticSphericallyDeconvolutedStreamlineTrack.input_spec()

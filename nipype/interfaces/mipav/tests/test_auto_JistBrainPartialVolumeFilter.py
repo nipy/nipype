@@ -10,11 +10,6 @@ def test_JistBrainPartialVolumeFilter_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inInput=dict(argstr='--inInput %s', ),
         inPV=dict(argstr='--inPV %s', ),
         inoutput=dict(argstr='--inoutput %s', ),
@@ -22,10 +17,6 @@ def test_JistBrainPartialVolumeFilter_inputs():
         outPartial=dict(
             argstr='--outPartial %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         xDefaultMem=dict(argstr='-xDefaultMem %d', ),
         xMaxProcess=dict(

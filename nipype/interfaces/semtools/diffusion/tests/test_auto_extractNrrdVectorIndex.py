@@ -10,11 +10,6 @@ def test_extractNrrdVectorIndex_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(argstr='--inputVolume %s', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         outputVolume=dict(
@@ -22,10 +17,6 @@ def test_extractNrrdVectorIndex_inputs():
             hash_files=False,
         ),
         setImageOrientation=dict(argstr='--setImageOrientation %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         vectorIndex=dict(argstr='--vectorIndex %d', ),
     )
     inputs = extractNrrdVectorIndex.input_spec()

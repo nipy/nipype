@@ -22,11 +22,6 @@ def test_ApplyVolTransform_inputs():
             xor=('reg_file', 'lta_file', 'lta_inv_file', 'fsl_reg_file',
                  'xfm_reg_file', 'reg_header', 'mni_152_reg', 'subject'),
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         interp=dict(argstr='--interp %s', ),
         inverse=dict(argstr='--inv', ),
         invert_morph=dict(
@@ -91,10 +86,6 @@ def test_ApplyVolTransform_inputs():
             argstr='--targ %s',
             mandatory=True,
             xor=('target_file', 'tal', 'fs_target'),
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         transformed_file=dict(
             argstr='--o %s',

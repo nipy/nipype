@@ -21,11 +21,6 @@ def test_Cluster_inputs():
             argstr='--fractional',
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='--in=%s',
             mandatory=True,
@@ -78,10 +73,6 @@ def test_Cluster_inputs():
             requires=['dlh', 'volume'],
         ),
         std_space_file=dict(argstr='--stdvol=%s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         threshold=dict(
             argstr='--thresh=%.10f',
             mandatory=True,

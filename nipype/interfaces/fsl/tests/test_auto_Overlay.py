@@ -33,11 +33,6 @@ def test_Overlay_inputs():
             position=5,
             xor=('auto_thresh_bg', 'full_bg_range', 'bg_thresh'),
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         out_file=dict(
             argstr='%s',
             genfile=True,
@@ -73,10 +68,6 @@ def test_Overlay_inputs():
         stat_thresh2=dict(
             argstr='%.2f %.2f',
             position=10,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         transparency=dict(
             argstr='%s',

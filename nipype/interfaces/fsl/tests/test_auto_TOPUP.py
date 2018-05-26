@@ -30,11 +30,6 @@ def test_TOPUP_inputs():
             argstr='--fwhm=%f',
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='--imain=%s',
             mandatory=True,
@@ -107,10 +102,6 @@ def test_TOPUP_inputs():
         subsamp=dict(
             argstr='--subsamp=%d',
             usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         warp_res=dict(
             argstr='--warpres=%f',

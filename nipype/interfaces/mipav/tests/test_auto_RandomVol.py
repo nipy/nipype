@@ -10,11 +10,6 @@ def test_RandomVol_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inField=dict(argstr='--inField %s', ),
         inLambda=dict(argstr='--inLambda %f', ),
         inMaximum=dict(argstr='--inMaximum %d', ),
@@ -28,10 +23,6 @@ def test_RandomVol_inputs():
         outRand1=dict(
             argstr='--outRand1 %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         xDefaultMem=dict(argstr='-xDefaultMem %d', ),
         xMaxProcess=dict(

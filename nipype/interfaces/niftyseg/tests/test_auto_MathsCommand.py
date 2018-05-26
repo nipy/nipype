@@ -10,11 +10,6 @@ def test_MathsCommand_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -29,10 +24,6 @@ def test_MathsCommand_inputs():
         output_datatype=dict(
             argstr='-odt %s',
             position=-3,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = MathsCommand.input_spec()

@@ -16,11 +16,6 @@ def test_DARTELNorm2MNI_inputs():
             mandatory=True,
         ),
         fwhm=dict(field='mni_norm.fwhm', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         matlab_cmd=dict(),
         mfile=dict(usedefault=True, ),
         modulate=dict(field='mni_norm.preserve', ),

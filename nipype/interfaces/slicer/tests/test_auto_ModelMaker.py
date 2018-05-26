@@ -20,11 +20,6 @@ def test_ModelMaker_inputs():
         ),
         filtertype=dict(argstr='--filtertype %s', ),
         generateAll=dict(argstr='--generateAll ', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         jointsmooth=dict(argstr='--jointsmooth ', ),
         labels=dict(
             argstr='--labels %s',
@@ -42,10 +37,6 @@ def test_ModelMaker_inputs():
         smooth=dict(argstr='--smooth %d', ),
         splitnormals=dict(argstr='--splitnormals ', ),
         start=dict(argstr='--start %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = ModelMaker.input_spec()
 

@@ -17,11 +17,6 @@ def test_gtractCoRegAnatomy_inputs():
             argstr='--gridSize %s',
             sep=',',
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputAnatomicalVolume=dict(argstr='--inputAnatomicalVolume %s', ),
         inputRigidTransform=dict(argstr='--inputRigidTransform %s', ),
         inputVolume=dict(argstr='--inputVolume %s', ),
@@ -39,10 +34,6 @@ def test_gtractCoRegAnatomy_inputs():
         relaxationFactor=dict(argstr='--relaxationFactor %f', ),
         samplingPercentage=dict(argstr='--samplingPercentage %f', ),
         spatialScale=dict(argstr='--spatialScale %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         transformType=dict(argstr='--transformType %s', ),
         translationScale=dict(argstr='--translationScale %f', ),
         useCenterOfHeadAlign=dict(argstr='--useCenterOfHeadAlign ', ),

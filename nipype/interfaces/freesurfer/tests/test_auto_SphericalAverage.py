@@ -21,11 +21,6 @@ def test_SphericalAverage_inputs():
             mandatory=True,
             position=-4,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_average=dict(
             argstr='%s',
             genfile=True,
@@ -47,10 +42,6 @@ def test_SphericalAverage_inputs():
             mandatory=True,
         ),
         subjects_dir=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         threshold=dict(argstr='-t %.1f', ),
         which=dict(
             argstr='%s',

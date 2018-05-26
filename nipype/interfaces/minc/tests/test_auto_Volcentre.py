@@ -16,11 +16,6 @@ def test_Volcentre_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         input_file=dict(
             argstr='%s',
             mandatory=True,
@@ -33,10 +28,6 @@ def test_Volcentre_inputs():
             name_source=['input_file'],
             name_template='%s_volcentre.mnc',
             position=-1,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         verbose=dict(argstr='-verbose', ),
         zero_dircos=dict(argstr='-zero_dircos', ),

@@ -36,11 +36,6 @@ def test_AntsJointFusion_inputs():
             argstr='-e %s',
             requires=['exclusion_image'],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         mask_image=dict(argstr='-x %s', ),
         num_threads=dict(
             nohash=True,
@@ -81,10 +76,6 @@ def test_AntsJointFusion_inputs():
         target_image=dict(
             argstr='-t %s',
             mandatory=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         verbose=dict(argstr='-v', ),
     )

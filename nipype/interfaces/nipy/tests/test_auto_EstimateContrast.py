@@ -10,11 +10,6 @@ def test_EstimateContrast_inputs():
         constants=dict(mandatory=True, ),
         contrasts=dict(mandatory=True, ),
         dof=dict(mandatory=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         mask=dict(),
         nvbeta=dict(mandatory=True, ),
         reg_names=dict(mandatory=True, ),

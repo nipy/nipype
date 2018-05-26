@@ -11,11 +11,6 @@ def test_UnbiasedNonLocalMeans_inputs():
             usedefault=True,
         ),
         hp=dict(argstr='--hp %f', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(
             argstr='%s',
             position=-2,
@@ -35,10 +30,6 @@ def test_UnbiasedNonLocalMeans_inputs():
             sep=',',
         ),
         sigma=dict(argstr='--sigma %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = UnbiasedNonLocalMeans.input_spec()
 

@@ -30,11 +30,6 @@ def test_B0Calc_inputs():
             argstr='--extendboundary=%0.2f',
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-i %s',
             mandatory=True,
@@ -48,10 +43,6 @@ def test_B0Calc_inputs():
             position=1,
         ),
         output_type=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         x_b0=dict(
             argstr='--b0x=%0.2f',
             usedefault=True,

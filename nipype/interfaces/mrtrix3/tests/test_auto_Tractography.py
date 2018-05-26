@@ -24,11 +24,6 @@ def test_Tractography_inputs():
         ),
         grad_file=dict(argstr='-grad %s', ),
         grad_fsl=dict(argstr='-fslgrad %s %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_bval=dict(),
         in_bvec=dict(argstr='-fslgrad %s %s', ),
         in_file=dict(
@@ -85,10 +80,6 @@ def test_Tractography_inputs():
         sph_trait=dict(argstr='%f,%f,%f,%f', ),
         step_size=dict(argstr='-step %f', ),
         stop=dict(argstr='-stop', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         unidirectional=dict(argstr='-unidirectional', ),
         use_rk4=dict(argstr='-rk4', ),
     )

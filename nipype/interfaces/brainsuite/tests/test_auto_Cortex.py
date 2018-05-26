@@ -15,11 +15,6 @@ def test_Cortex_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         includeAllSubcorticalAreas=dict(
             argstr='-a',
             usedefault=True,
@@ -35,10 +30,6 @@ def test_Cortex_inputs():
         outputCerebrumMask=dict(
             argstr='-o %s',
             genfile=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         timer=dict(argstr='--timer', ),
         tissueFractionThreshold=dict(

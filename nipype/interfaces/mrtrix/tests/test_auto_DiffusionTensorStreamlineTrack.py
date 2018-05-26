@@ -32,11 +32,6 @@ def test_DiffusionTensorStreamlineTrack_inputs():
             mandatory=True,
             position=-2,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -114,10 +109,6 @@ def test_DiffusionTensorStreamlineTrack_inputs():
             units='mm',
         ),
         stop=dict(argstr='-stop', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         unidirectional=dict(argstr='-unidirectional', ),
     )
     inputs = DiffusionTensorStreamlineTrack.input_spec()

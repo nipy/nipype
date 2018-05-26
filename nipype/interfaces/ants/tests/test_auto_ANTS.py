@@ -18,11 +18,6 @@ def test_ANTS_inputs():
         ),
         fixed_image=dict(mandatory=True, ),
         gradient_step_length=dict(requires=['transformation_model'], ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         metric=dict(mandatory=True, ),
         metric_weight=dict(
             mandatory=True,
@@ -73,10 +68,6 @@ def test_ANTS_inputs():
             sep='x',
         ),
         symmetry_type=dict(requires=['delta_time'], ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         transformation_model=dict(
             argstr='%s',
             mandatory=True,

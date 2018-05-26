@@ -12,21 +12,12 @@ def test_gtractInvertDisplacementField_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         outputVolume=dict(
             argstr='--outputVolume %s',
             hash_files=False,
         ),
         subsamplingFactor=dict(argstr='--subsamplingFactor %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = gtractInvertDisplacementField.input_spec()
 

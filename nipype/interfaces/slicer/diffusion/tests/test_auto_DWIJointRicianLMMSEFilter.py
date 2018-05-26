@@ -11,11 +11,6 @@ def test_DWIJointRicianLMMSEFilter_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(
             argstr='%s',
             position=-2,
@@ -33,10 +28,6 @@ def test_DWIJointRicianLMMSEFilter_inputs():
         rf=dict(
             argstr='--rf %s',
             sep=',',
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = DWIJointRicianLMMSEFilter.input_spec()

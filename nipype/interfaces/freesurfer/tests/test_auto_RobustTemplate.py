@@ -17,11 +17,6 @@ def test_RobustTemplate_inputs():
             usedefault=True,
         ),
         fixed_timepoint=dict(argstr='--fixtp', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(
             argstr='--mov %s',
             mandatory=True,
@@ -45,10 +40,6 @@ def test_RobustTemplate_inputs():
         scaled_intensity_outputs=dict(argstr='--iscaleout %s', ),
         subjects_dir=dict(),
         subsample_threshold=dict(argstr='--subsample %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         transform_outputs=dict(argstr='--lta %s', ),
     )
     inputs = RobustTemplate.input_spec()

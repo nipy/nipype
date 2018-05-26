@@ -7,11 +7,6 @@ def test_Level1Design_inputs():
     input_map = dict(
         bases=dict(mandatory=True, ),
         contrasts=dict(),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         interscan_interval=dict(mandatory=True, ),
         model_serial_correlations=dict(mandatory=True, ),
         orthogonalization=dict(usedefault=True, ),

@@ -23,11 +23,6 @@ def test_MRConvert_inputs():
             position=2,
             sep=',',
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -63,10 +58,6 @@ def test_MRConvert_inputs():
             argstr='-scale %d',
             position=3,
             units='mm',
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         voxel_dims=dict(
             argstr='-vox %s',

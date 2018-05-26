@@ -10,11 +10,6 @@ def test_JistBrainMp2rageSkullStripping_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inFilter=dict(argstr='--inFilter %s', ),
         inSecond=dict(argstr='--inSecond %s', ),
         inSkip=dict(argstr='--inSkip %s', ),
@@ -36,10 +31,6 @@ def test_JistBrainMp2rageSkullStripping_inputs():
         outMasked3=dict(
             argstr='--outMasked3 %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         xDefaultMem=dict(argstr='-xDefaultMem %d', ),
         xMaxProcess=dict(

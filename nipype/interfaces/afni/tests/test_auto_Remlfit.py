@@ -33,11 +33,6 @@ def test_Remlfit_inputs():
         fout=dict(argstr='-fout', ),
         glt_file=dict(argstr='-Rglt %s', ),
         gltsym=dict(argstr='-gltsym "%s" %s...', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(
             argstr='-input "%s"',
             copyfile=False,
@@ -80,10 +75,6 @@ def test_Remlfit_inputs():
         rout=dict(argstr='-rout', ),
         slibase=dict(argstr='-slibase %s', ),
         slibase_sm=dict(argstr='-slibase_sm %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         tout=dict(argstr='-tout', ),
         usetemp=dict(argstr='-usetemp', ),
         var_file=dict(argstr='-Rvar %s', ),

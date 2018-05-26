@@ -10,21 +10,12 @@ def test_ShuffleVectorsModule_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVectorFileBaseName=dict(argstr='--inputVectorFileBaseName %s', ),
         outputVectorFileBaseName=dict(
             argstr='--outputVectorFileBaseName %s',
             hash_files=False,
         ),
         resampleProportion=dict(argstr='--resampleProportion %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = ShuffleVectorsModule.input_spec()
 

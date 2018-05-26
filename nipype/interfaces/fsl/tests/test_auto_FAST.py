@@ -16,11 +16,6 @@ def test_FAST_inputs():
             usedefault=True,
         ),
         hyper=dict(argstr='-H %.2f', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         img_type=dict(argstr='-t %d', ),
         in_files=dict(
             argstr='%s',
@@ -44,10 +39,6 @@ def test_FAST_inputs():
         probability_maps=dict(argstr='-p', ),
         segment_iters=dict(argstr='-W %d', ),
         segments=dict(argstr='-g', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         use_priors=dict(argstr='-P', ),
         verbose=dict(argstr='-v', ),
     )

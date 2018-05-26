@@ -14,11 +14,6 @@ def test_Surface2VolTransform_inputs():
             argstr='--hemi %s',
             mandatory=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         mkmask=dict(
             argstr='--mkmask',
             xor=['source_file'],
@@ -42,10 +37,6 @@ def test_Surface2VolTransform_inputs():
         subjects_dir=dict(argstr='--sd %s', ),
         surf_name=dict(argstr='--surf %s', ),
         template_file=dict(argstr='--template %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         transformed_file=dict(
             argstr='--outvol %s',
             hash_files=False,

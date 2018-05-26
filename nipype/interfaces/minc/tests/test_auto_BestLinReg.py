@@ -14,11 +14,6 @@ def test_BestLinReg_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         output_mnc=dict(
             argstr='%s',
             genfile=True,
@@ -46,10 +41,6 @@ def test_BestLinReg_inputs():
             argstr='%s',
             mandatory=True,
             position=-3,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         verbose=dict(argstr='-verbose', ),
     )

@@ -13,11 +13,6 @@ def test_BBox_inputs():
         format_minccrop=dict(argstr='-minccrop', ),
         format_mincresample=dict(argstr='-mincresample', ),
         format_mincreshape=dict(argstr='-mincreshape', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         input_file=dict(
             argstr='%s',
             mandatory=True,
@@ -38,10 +33,6 @@ def test_BBox_inputs():
             name_source=['input_file'],
             name_template='%s_bbox.txt',
             position=-1,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         threshold=dict(argstr='-threshold', ),
         two_lines=dict(

@@ -10,11 +10,6 @@ def test_gtractResampleAnisotropy_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputAnatomicalVolume=dict(argstr='--inputAnatomicalVolume %s', ),
         inputAnisotropyVolume=dict(argstr='--inputAnisotropyVolume %s', ),
         inputTransform=dict(argstr='--inputTransform %s', ),
@@ -22,10 +17,6 @@ def test_gtractResampleAnisotropy_inputs():
         outputVolume=dict(
             argstr='--outputVolume %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         transformType=dict(argstr='--transformType %s', ),
     )

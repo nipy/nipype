@@ -47,11 +47,6 @@ def test_TCorrMap_inputs():
             suffix='_hist',
         ),
         histogram_bin_numbers=dict(),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-input %s',
             copyfile=False,
@@ -98,10 +93,6 @@ def test_TCorrMap_inputs():
             name_source='in_file',
             suffix='_sexpr',
             xor=('average_expr', 'average_expr_nonzero', 'sum_expr'),
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         thresholds=dict(),
         var_absolute_threshold=dict(

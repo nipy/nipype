@@ -29,11 +29,6 @@ def test_SampleToSurface_inputs():
             argstr='--icoorder %d',
             requires=['target_subject'],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         interp_method=dict(argstr='--interp %s', ),
         mask_label=dict(
             argstr='--mask %s',
@@ -101,10 +96,6 @@ def test_SampleToSurface_inputs():
         ),
         surface=dict(argstr='--surf %s', ),
         target_subject=dict(argstr='--trgsubject %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         vox_file=dict(argstr='--nvox %s', ),
     )
     inputs = SampleToSurface.input_spec()

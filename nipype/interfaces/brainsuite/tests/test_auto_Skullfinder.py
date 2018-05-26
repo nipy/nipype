@@ -12,11 +12,6 @@ def test_Skullfinder_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputMRIFile=dict(
             argstr='-i %s',
             mandatory=True,
@@ -35,10 +30,6 @@ def test_Skullfinder_inputs():
         skullLabelValue=dict(argstr='--skulllabel %d', ),
         spaceLabelValue=dict(argstr='--spacelabel %d', ),
         surfaceFilePrefix=dict(argstr='-s %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         upperThreshold=dict(argstr='-u %d', ),
         verbosity=dict(argstr='-v %d', ),
     )

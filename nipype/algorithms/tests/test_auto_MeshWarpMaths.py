@@ -6,11 +6,6 @@ from ..mesh import MeshWarpMaths
 def test_MeshWarpMaths_inputs():
     input_map = dict(
         float_trait=dict(),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_surf=dict(mandatory=True, ),
         operation=dict(usedefault=True, ),
         operator=dict(

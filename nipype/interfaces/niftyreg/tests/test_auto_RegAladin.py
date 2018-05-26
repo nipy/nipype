@@ -26,11 +26,6 @@ def test_RegAladin_inputs():
         fmask_file=dict(argstr='-fmask %s', ),
         gpuid_val=dict(argstr='-gpuid %i', ),
         i_val=dict(argstr='-pi %d', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_aff_file=dict(argstr='-inaff %s', ),
         ln_val=dict(argstr='-ln %d', ),
         lp_val=dict(argstr='-lp %d', ),
@@ -57,10 +52,6 @@ def test_RegAladin_inputs():
         rmask_file=dict(argstr='-rmask %s', ),
         smoo_f_val=dict(argstr='-smooF %f', ),
         smoo_r_val=dict(argstr='-smooR %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         v_val=dict(argstr='-pv %d', ),
         verbosity_off_flag=dict(argstr='-voff', ),
     )

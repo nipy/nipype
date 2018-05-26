@@ -20,19 +20,10 @@ def test_GrayscaleModelMaker_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         name=dict(argstr='--name %s', ),
         pointnormals=dict(argstr='--pointnormals ', ),
         smooth=dict(argstr='--smooth %d', ),
         splitnormals=dict(argstr='--splitnormals ', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         threshold=dict(argstr='--threshold %f', ),
     )
     inputs = GrayscaleModelMaker.input_spec()

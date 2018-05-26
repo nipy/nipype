@@ -9,11 +9,6 @@ def test_StreamlineTractography_inputs():
             mandatory=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(mandatory=True, ),
         in_model=dict(),
         in_peaks=dict(),

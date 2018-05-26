@@ -11,11 +11,6 @@ def test_NwarpCat_inputs():
             usedefault=True,
         ),
         expad=dict(argstr='-expad %d', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(
             argstr='%s',
             mandatory=True,
@@ -37,10 +32,6 @@ def test_NwarpCat_inputs():
         ),
         outputtype=dict(),
         space=dict(argstr='-space %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         verb=dict(argstr='-verb', ),
     )
     inputs = NwarpCat.input_spec()

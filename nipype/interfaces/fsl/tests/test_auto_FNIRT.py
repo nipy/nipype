@@ -36,11 +36,6 @@ def test_FNIRT_inputs():
         ),
         fieldcoeff_file=dict(argstr='--cout=%s', ),
         hessian_precision=dict(argstr='--numprec=%s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='--in=%s',
             mandatory=True,
@@ -115,10 +110,6 @@ def test_FNIRT_inputs():
         subsampling_scheme=dict(
             argstr='--subsamp=%s',
             sep=',',
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         warp_resolution=dict(argstr='--warpres=%d,%d,%d', ),
         warped_file=dict(
