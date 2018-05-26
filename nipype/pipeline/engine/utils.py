@@ -1054,12 +1054,14 @@ def generate_expanded_graph(graph_in):
                 for src_id in list(old_edge_dict.keys()):
                     # Drop the original JoinNodes; only concerned with
                     # generated Nodes
-                    if hasattr(node, 'joinfield'):
+                    if hasattr(node, 'joinfield') and node.itername == src_id:
                         continue
                     # Patterns:
                     #   - src_id : Non-iterable node
-                    #   - src_id.[a-z]\d+ : IdentityInterface w/ iterables
-                    #   - src_id.[a-z]I.[a-z]\d+ : Non-IdentityInterface w/ iterables
+                    #   - src_id.[a-z]\d+ :
+                    #       IdentityInterface w/ iterables or nested JoinNode
+                    #   - src_id.[a-z]I.[a-z]\d+ :
+                    #       Non-IdentityInterface w/ iterables
                     #   - src_idJ\d+ : JoinNode(IdentityInterface)
                     if re.match(src_id + r'((\.[a-z](I\.[a-z])?|J)\d+)?$',
                                 node.itername):
