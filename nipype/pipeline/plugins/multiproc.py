@@ -258,15 +258,16 @@ class MultiProcPlugin(DistributedPluginBase):
                         self.gpu_q[dk][sdk]='free'
         return devno
 
-    
+ 
     #override, to set gpu slot free, if the job was a gpu job
-    def _task_finished_cb(self, jobid):
+    def _task_finished_cb(self, jobid, cached=False):
         """ Extract outputs and assign to inputs of dependent tasks
 
         This is called when a job is completed.
         """
-        logger.info('[Job finished] Jobname: %s JobID: %d' %
-                    (self.procs[jobid]._id, jobid))
+        logger.info('[Job %d] %s (%s).', jobid, 'Cached'
+                    if cached else 'Completed', self.procs[jobid])
+
         if self._status_callback:
             self._status_callback(self.procs[jobid], 'end')
         # Update job and worker queues
