@@ -3,6 +3,7 @@
 
 ###### [Full changelog](https://github.com/nipy/nipype/milestone/20?closed=1)
 
+  * FIX: Update logging levels in enable_debug_mode (https://github.com/nipy/nipype/pull/2595)
   * FIX: Set default result in DistributedPluginBase._clean_queue (https://github.com/nipy/nipype/pull/2596)
   * FIX: Correctly connect JoinNodes in nested iterables (https://github.com/nipy/nipype/pull/2597)
   * FIX: DTITK nonlinear workflow origin reslicing (https://github.com/nipy/nipype/pull/2561)
@@ -17,7 +18,7 @@
   * ENH: LabelGeometryMeasures interface (https://github.com/nipy/nipype/pull/2586)
   * ENH: MRTrix3 dwidenoise interface (https://github.com/nipy/nipype/pull/2568)
   * ENH: ReportCapableInterface mix-in/base interface (https://github.com/nipy/nipype/pull/2560)
-  * CI: Move PyPI deployment to Circle  (https://github.com/nipy/nipype/pull/2587)
+  * CI: Move PyPI deployment to Circle (https://github.com/nipy/nipype/pull/2587)
   * CI: Submit Travis results to codecov (https://github.com/nipy/nipype/pull/2574)
 
 1.0.3 (April 30, 2018)
