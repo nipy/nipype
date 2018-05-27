@@ -20,15 +20,17 @@ performance issues.
       from nipype import config
       config.enable_debug_mode()
 
-   as the first import of your nipype script. To enable debug logging use::
-
-       from nipype import logging
-       logging.update_logging(config)
+   as the first import of your nipype script.
 
    .. note::
 
-     Turning on debug will rerun your workflows and will rerun them after debugging
-     is turned off.
+     Turning on debug will rerun your workflows and will rerun them after
+     debugging is turned off.
+
+     Turning on debug mode will also override log levels specified elsewhere,
+     such as in the nipype configuration.
+     ``workflow``, ``interface`` and ``utils`` loggers will all be set to
+     level ```DEBUG``.
 
 #. There are several configuration options that can help with debugging. See
    :ref:`config_file` for more details::
