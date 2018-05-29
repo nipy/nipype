@@ -330,6 +330,19 @@ jobs:
             - /tmp/docker/cache/Dockerfile.base-pruned
           key: dockerfile-cache-v1-{{ .Branch }}-{{ checksum "/tmp/docker/cache/Dockerfile.base-pruned" }}
 
+  pypi_precheck:
+    machine: *machine_kwds
+    working_directory: /home/circleci/nipype
+    steps:
+      - checkout:
+          path: /home/circleci/nipype
+      - run:
+          name: Check pypi preconditions
+          command: |
+            pip install twine future wheel readme_renderer
+            python setup.py check -r -s
+            python setup.py sdist bdist_wheel
+
   deploy_pypi:
     machine: *machine_kwds
     working_directory: /home/circleci/nipype
@@ -339,7 +352,8 @@ jobs:
       - run:
           name: Deploy to PyPI
           command: |
-            pip install twine future wheel
+            pip install twine future wheel readme_renderer
+            python setup.py check -r -s
             python setup.py sdist bdist_wheel
             twine upload dist/*
 
@@ -422,3 +436,7 @@ workflows:
               only: /rel\/.*/
             tags:
               only: /.*/
+      - pypi_precheck:
+          filters:
+            branches:
+              only: /rel\/.*/
