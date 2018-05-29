@@ -32,7 +32,7 @@ class RescaleOutputSpec(TraitedSpec):
 class Rescale(SimpleInterface):
     """Rescale an image
 
-    Rescales the non-zero portion of ``in_file`` to match the bounds of the '
+    Rescales the non-zero portion of ``in_file`` to match the bounds of the
     non-zero portion of ``ref_file``.
     Reference values in the input and reference images are defined by the
     ``percentile`` parameter, and the reference values in each image are
