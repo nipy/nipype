@@ -381,6 +381,9 @@ workflows:
     jobs:
       - compare_base_dockerfiles
       - test_pytest:
+          filters:
+            tags:
+              only: /.*/
           requires:
             - compare_base_dockerfiles
       - test_py3_fmri_fsl_spm:
@@ -409,9 +412,6 @@ workflows:
               only: /.*/
           requires:
             - test_pytest
-            - test_fmri_spm_nested_fsl_feeds
-            - test_py3_fmri_fsl_spm
-            - test_py3_fmri_spm_dartel_multiproc
       - update_feedstock:
           context: nipybot
           filters:
