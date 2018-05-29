@@ -61,10 +61,10 @@ class Reorient(SimpleInterface):
     'segmentation0.nii.gz'
 
     >>> print(np.loadtxt(res.outputs.transform))
-    [[1. 0. 0. 0.]
-     [0. 1. 0. 0.]
-     [0. 0. 1. 0.]
-     [0. 0. 0. 1.]]
+    [[ 1.  0.  0.  0.]
+     [ 0.  1.  0.  0.]
+     [ 0.  0.  1.  0.]
+     [ 0.  0.  0.  1.]]
 
     >>> reorient.inputs.orientation = 'RAS'
     >>> res = reorient.run()
@@ -72,10 +72,10 @@ class Reorient(SimpleInterface):
     '.../segmentation0_ras.nii.gz'
 
     >>> print(np.loadtxt(res.outputs.transform))
-    [[-1.  0.  0. 60.]
-     [ 0. -1.  0. 72.]
-     [ 0.  0.  1.  0.]
-     [ 0.  0.  0.  1.]]
+    [[ -1.   0.   0.  60.]
+     [  0.  -1.   0.  72.]
+     [  0.   0.   1.   0.]
+     [  0.   0.   0.   1.]]
 
     .. testcleanup::
 
