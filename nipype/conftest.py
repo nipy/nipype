@@ -1,7 +1,6 @@
 import pytest
 import numpy
 import os
-from distutils.version import LooseVersion
 
 DATADIR = os.path.realpath(
     os.path.join(os.path.dirname(__file__), 'testing/data'))
@@ -20,5 +19,3 @@ def in_testing(request):
     # This seems to be a reliable way to distinguish tests from doctests
     if request.function is None:
         os.chdir(DATADIR)
-        if LooseVersion(numpy.__version__) >= LooseVersion('1.14'):
-            numpy.set_printoptions(legacy="1.13")

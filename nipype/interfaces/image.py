@@ -50,6 +50,13 @@ class Reorient(SimpleInterface):
     Examples
     --------
 
+    .. testsetup::
+
+    >>> def print_affine(matrix):
+    ...     print(str(matrix).translate(dict(zip(b'[]', '  '))))
+
+    .. doctest::
+
     If an image is not reoriented, the original file is not modified
 
     >>> import numpy as np
@@ -60,22 +67,22 @@ class Reorient(SimpleInterface):
     >>> res.outputs.out_file
     'segmentation0.nii.gz'
 
-    >>> print(np.loadtxt(res.outputs.transform))
-    [[ 1.  0.  0.  0.]
-     [ 0.  1.  0.  0.]
-     [ 0.  0.  1.  0.]
-     [ 0.  0.  0.  1.]]
+    >>> print_affine(np.loadtxt(res.outputs.transform))
+    1.  0.  0.  0.
+    0.  1.  0.  0.
+    0.  0.  1.  0.
+    0.  0.  0.  1.
 
     >>> reorient.inputs.orientation = 'RAS'
     >>> res = reorient.run()
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
     '.../segmentation0_ras.nii.gz'
 
-    >>> print(np.loadtxt(res.outputs.transform))
-    [[ -1.   0.   0.  60.]
-     [  0.  -1.   0.  72.]
-     [  0.   0.   1.   0.]
-     [  0.   0.   0.   1.]]
+    >>> print_affine(np.loadtxt(res.outputs.transform))
+    -1.   0.   0.  60.
+     0.  -1.   0.  72.
+     0.   0.   1.   0.
+     0.   0.   0.   1.
 
     .. testcleanup::
 
