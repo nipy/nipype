@@ -53,7 +53,7 @@ class Reorient(SimpleInterface):
     .. testsetup::
 
     >>> def print_affine(matrix):
-    ...     print(str(matrix).translate(dict(zip(b'[]', '  '))))
+    ...     print(str(matrix).replace(']', ' ').replace('[', ' '))
 
     .. doctest::
 
