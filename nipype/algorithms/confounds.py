@@ -13,6 +13,9 @@ import os.path as op
 
 import nibabel as nb
 import numpy as np
+
+from geomstats.invariant_metric import InvariantMetric
+from geomstats.special_euclidean_group import SpecialEuclideanGroup
 from numpy.polynomial import Legendre
 from scipy import linalg
 
@@ -25,6 +28,10 @@ from ..utils import NUMPY_MMAP
 from ..utils.misc import normalize_mc_params
 
 IFLOGGER = logging.getLogger('nipype.interface')
+
+SE3_GROUP = SpecialEuclideanGroup(n=3)
+DIM_TRANSLATIONS = SE3_GROUP.translations.dimension
+DIM_ROTATIONS = SE3_GROUP.rotations.dimension
 
 
 class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
@@ -307,9 +314,20 @@ Bradley L. and Petersen, Steven E.},
             axis=1,
             arr=mpars,
             source=self.inputs.parameter_source)
-        diff = mpars[:-1, :6] - mpars[1:, :6]
-        diff[:, 3:6] *= self.inputs.radius
-        fd_res = np.abs(diff).sum(axis=1)
+
+        # TODO(nina): convert to geomstats parameterization:
+        se3pars = np.hstack(
+            [mpars[:, DIM_TRANSLATIONS:], mpars[:, :DIM_TRANSLATIONS]])
+
+        diag_rotations = self.inputs.radius * np.ones(DIM_ROTATIONS)
+        diag_translations = np.ones(DIM_TRANSLATIONS)
+        diag = np.concatenate([diag_rotations, diag_translations])
+        inner_product = np.diag(diag)
+        metric = InvariantMetric(
+                   group=SE3_GROUP,
+                   inner_product_mat_at_identity=inner_product,
+                   left_or_right='left')
+        fd_res = metric.dist(se3pars[:-1], se3pars[1:])
 
         self._results = {
             'out_file': op.abspath(self.inputs.out_file),
