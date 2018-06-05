@@ -2601,13 +2601,13 @@ class TShiftInputSpec(AFNICommandInputSpec):
         desc='different interpolation methods (see 3dTshift for details) '
         'default = Fourier',
         argstr='-%s')
-    tpattern = traits.Enum(
-        'alt+z', 'altplus',   # Synonyms
-        'alt+z2',
-        'alt-z', 'altminus',  # Synonyms
-        'alt-z2',
-        'seq+z', 'seqplus',   # Synonyms
-        'seq-z', 'seqminus',  # Synonyms
+    tpattern = traits.Either(
+        traits.Enum('alt+z', 'altplus',    # Synonyms
+                    'alt+z2',
+                    'alt-z', 'altminus',   # Synonyms
+                    'alt-z2',
+                    'seq+z', 'seqplus',    # Synonyms
+                    'seq-z', 'seqminus'),  # Synonyms
         Str,  # For backwards compatibility
         desc='use specified slice time pattern rather than one in header',
         argstr='-tpattern %s',
