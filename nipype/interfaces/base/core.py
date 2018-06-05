@@ -692,6 +692,9 @@ class SimpleInterface(BaseInterface):
     Examples
     --------
 
+    >>> from nipype.interfaces.base import (
+    ...     SimpleInterface, BaseInterfaceInputSpec, TraitedSpec)
+
     >>> def double(x):
     ...    return 2 * x
     ...
