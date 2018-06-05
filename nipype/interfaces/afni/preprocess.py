@@ -20,6 +20,9 @@ from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec,
                    AFNICommandOutputSpec, AFNIPythonCommandInputSpec,
                    AFNIPythonCommand, Info, no_afni)
 
+from ...import logging
+iflogger = logging.getLogger('interface')
+
 
 class CentralityInputSpec(AFNICommandInputSpec):
     """Common input spec class for all centrality-related commands
@@ -2565,9 +2568,10 @@ class TProject(AFNICommand):
     output_spec = AFNICommandOutputSpec
     
 
+
 class TShiftInputSpec(AFNICommandInputSpec):
     in_file = File(
-        desc='input file to 3dTShift',
+        desc='input file to 3dTshift',
         argstr='%s',
         position=-1,
         mandatory=True,
@@ -2594,12 +2598,26 @@ class TShiftInputSpec(AFNICommandInputSpec):
         desc='ignore the first set of points specified', argstr='-ignore %s')
     interp = traits.Enum(
         ('Fourier', 'linear', 'cubic', 'quintic', 'heptic'),
-        desc='different interpolation methods (see 3dTShift for details) '
+        desc='different interpolation methods (see 3dTshift for details) '
         'default = Fourier',
         argstr='-%s')
-    tpattern = Str(
+    tpattern = traits.Enum(
+        'alt+z', 'altplus',   # Synonyms
+        'alt+z2',
+        'alt-z', 'altminus',  # Synonyms
+        'alt-z2',
+        'seq+z', 'seqplus',   # Synonyms
+        'seq-z', 'seqminus',  # Synonyms
+        Str,  # For backwards compatibility
         desc='use specified slice time pattern rather than one in header',
-        argstr='-tpattern %s')
+        argstr='-tpattern %s',
+        xor=['slice_timing'])
+    slice_timing = traits.Either(
+        File(exists=True),
+        traits.List(traits.Float),
+        desc='time offsets from the volume acquisition onset for each slice',
+        argstr='-tpattern @%s',
+        xor=['tpattern'])
     rlt = traits.Bool(
         desc='Before shifting, remove the mean and linear trend',
         argstr='-rlt')
@@ -2628,10 +2646,40 @@ class TShift(AFNICommand):
     '3dTshift -prefix functional_tshift -tpattern alt+z -tzero 0.0 functional.nii'
     >>> res = tshift.run()  # doctest: +SKIP
 
+    Slice timings may be explicitly specified:
+
+    >>> TR = 2.5
+    >>> tshift = afni.TShift()
+    >>> tshift.inputs.in_file = 'functional.nii'
+    >>> tshift.inputs.tzero = 0.0
+    >>> tshift.inputs.tr = '%.1fs' % TR
+    >>> tshift.inputs.slice_timing = list(np.arange(40) / TR)
+    >>> tshift.cmdline
+    '3dTshift -prefix functional_tshift -tpattern @slice_timing.1D -TR 2.5s -tzero 0.0 functional.nii'
+
+    This will create the ``slice_timing.1D`` file in the working directory.
+    You may wish to remove this after running:
+
+    >>> os.unlink('slice_timing.1D')
+
     """
     _cmd = '3dTshift'
     input_spec = TShiftInputSpec
     output_spec = AFNICommandOutputSpec
+
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'tpattern' and value.startswith('@'):
+            iflogger.warning('Passing a file prefixed by "@" will be deprecated'
+                             '; please use the `slice_timing` input')
+        elif name == 'slice_timing' and isinstance(value, list):
+            value = self._write_slice_timing()
+        return super(TShift, self)._format_arg(name, trait_spec, value)
+
+    def _write_slice_timing(self):
+        fname = 'slice_timing.1D'
+        with open(fname, 'w') as fobj:
+            fobj.write('\t'.join(map(str, self.inputs.slice_timing)))
+        return fname
 
 
 class VolregInputSpec(AFNICommandInputSpec):
