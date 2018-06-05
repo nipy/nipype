@@ -30,7 +30,14 @@ def test_TShift_inputs():
         outputtype=dict(),
         rlt=dict(argstr='-rlt', ),
         rltplus=dict(argstr='-rlt+', ),
-        tpattern=dict(argstr='-tpattern %s', ),
+        slice_timing=dict(
+            argstr='-tpattern @%s',
+            xor=['tpattern'],
+        ),
+        tpattern=dict(
+            argstr='-tpattern %s',
+            xor=['slice_timing'],
+        ),
         tr=dict(argstr='-TR %s', ),
         tslice=dict(
             argstr='-slice %s',
