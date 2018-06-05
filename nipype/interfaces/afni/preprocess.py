@@ -2637,17 +2637,10 @@ class TShift(AFNICommand):
     Examples
     ========
 
+    Slice timing details may be specified explicitly via the ``slice_timing``
+    input:
+
     >>> from nipype.interfaces import afni
-    >>> tshift = afni.TShift()
-    >>> tshift.inputs.in_file = 'functional.nii'
-    >>> tshift.inputs.tpattern = 'alt+z'
-    >>> tshift.inputs.tzero = 0.0
-    >>> tshift.cmdline
-    '3dTshift -prefix functional_tshift -tpattern alt+z -tzero 0.0 functional.nii'
-    >>> res = tshift.run()  # doctest: +SKIP
-
-    Slice timings may be explicitly specified:
-
     >>> TR = 2.5
     >>> tshift = afni.TShift()
     >>> tshift.inputs.in_file = 'functional.nii'
@@ -2657,11 +2650,45 @@ class TShift(AFNICommand):
     >>> tshift.cmdline
     '3dTshift -prefix functional_tshift -tpattern @slice_timing.1D -TR 2.5s -tzero 0.0 functional.nii'
 
-    This will create the ``slice_timing.1D`` file in the working directory.
-    You may wish to remove this after running:
+    This method creates a ``slice_timing.1D`` file to be passed to ``3dTshift``.
+    A pre-existing slice-timing file may be used in the same way:
 
-    >>> os.unlink('slice_timing.1D')
+    >>> tshift = afni.TShift()
+    >>> tshift.inputs.in_file = 'functional.nii'
+    >>> tshift.inputs.tzero = 0.0
+    >>> tshift.inputs.tr = '%.1fs' % TR
+    >>> tshift.inputs.slice_timing = 'slice_timing.1D'
+    >>> tshift.cmdline
+    '3dTshift -prefix functional_tshift -tpattern @slice_timing.1D -TR 2.5s -tzero 0.0 functional.nii'
 
+    Alternatively, pre-specified slice timing patterns may be specified with the
+    ``tpattern`` input.
+    For example, to specify an alternating, ascending slice timing pattern:
+
+    >>> tshift = afni.TShift()
+    >>> tshift.inputs.in_file = 'functional.nii'
+    >>> tshift.inputs.tzero = 0.0
+    >>> tshift.inputs.tr = '%.1fs' % TR
+    >>> tshift.inputs.tpattern = 'alt+z'
+    >>> tshift.cmdline
+    '3dTshift -prefix functional_tshift -tpattern alt+z -TR 2.5s -tzero 0.0 functional.nii'
+
+    For backwards compatibility, ``tpattern`` may also take filenames prefixed
+    with ``@``.
+    However, in this case, filenames are not validated, so this usage will be
+    deprecated in future versions of Nipype.
+
+    >>> tshift = afni.TShift()
+    >>> tshift.inputs.in_file = 'functional.nii'
+    >>> tshift.inputs.tzero = 0.0
+    >>> tshift.inputs.tr = '%.1fs' % TR
+    >>> tshift.inputs.tpattern = '@slice_timing.1D'
+    >>> tshift.cmdline
+    '3dTshift -prefix functional_tshift -tpattern @slice_timing.1D -TR 2.5s -tzero 0.0 functional.nii'
+
+    In any configuration, the interface may be run as usual:
+
+    >>> res = tshift.run()  # doctest: +SKIP
     """
     _cmd = '3dTshift'
     input_spec = TShiftInputSpec
