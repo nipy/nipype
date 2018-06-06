@@ -12,7 +12,7 @@ from ....interfaces.io import DataSink
 from .utils import getdefaultconfig
 from .... import logging
 
-logger = logging.getLogger('workflow')
+logger = logging.getLogger('nipype.workflow')
 
 
 def create_skullstripped_recon_flow(name="skullstripped_recon_all"):

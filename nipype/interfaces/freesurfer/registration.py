@@ -17,7 +17,7 @@ from .base import (FSCommand, FSTraitedSpec, FSScriptCommand,
 from ..base import (isdefined, TraitedSpec, File, traits, Directory)
 
 __docformat__ = 'restructuredtext'
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 class MPRtoMNI305InputSpec(FSTraitedSpec):

@@ -39,16 +39,16 @@ class Logging(object):
         if not len(_nipype_logger.handlers):
             _nipype_logger.addHandler(_nipype_hdlr)
 
-        self._logger = logging.getLogger('workflow')
-        self._utlogger = logging.getLogger('utils')
-        self._fmlogger = logging.getLogger('filemanip')
-        self._iflogger = logging.getLogger('interface')
+        self._logger = logging.getLogger('nipype.workflow')
+        self._utlogger = logging.getLogger('nipype.utils')
+        self._fmlogger = logging.getLogger('nipype.filemanip')
+        self._iflogger = logging.getLogger('nipype.interface')
 
         self.loggers = {
-            'workflow': self._logger,
-            'utils': self._utlogger,
-            'filemanip': self._fmlogger,
-            'interface': self._iflogger
+            'nipype.workflow': self._logger,
+            'nipype.utils': self._utlogger,
+            'nipype.filemanip': self._fmlogger,
+            'nipype.interface': self._iflogger
         }
         self._hdlr = None
         self.update_logging(self._config)

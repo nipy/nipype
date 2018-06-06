@@ -52,7 +52,7 @@ except ImportError:
     from funcsigs import signature
 
 standard_library.install_aliases()
-logger = logging.getLogger('workflow')
+logger = logging.getLogger('nipype.workflow')
 PY3 = sys.version_info[0] > 2
 
 try:

@@ -13,7 +13,7 @@ from ... import logging
 from ..base import (LibraryBaseInterface, BaseInterfaceInputSpec, traits, File,
                     TraitedSpec, InputMultiPath, OutputMultiPath, isdefined)
 from .base import have_cv
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 def ntwks_to_matrices(in_files, edge_key):

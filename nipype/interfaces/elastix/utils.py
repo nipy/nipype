@@ -16,7 +16,7 @@ import os.path as op
 from ... import logging
 from ..base import (BaseInterface, BaseInterfaceInputSpec, isdefined,
                     TraitedSpec, File, traits)
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 class EditTransformInputSpec(BaseInterfaceInputSpec):

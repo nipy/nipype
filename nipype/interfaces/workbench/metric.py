@@ -10,7 +10,7 @@ from ..base import (TraitedSpec, File, traits, CommandLineInputSpec)
 from .base import WBCommand
 from ... import logging
 
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 class MetricResampleInputSpec(CommandLineInputSpec):

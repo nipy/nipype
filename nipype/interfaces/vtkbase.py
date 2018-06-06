@@ -12,7 +12,7 @@ from __future__ import (print_function, division, unicode_literals,
 import os
 from .. import logging
 
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 # Check that VTK can be imported and get version
 _vtk_version = None

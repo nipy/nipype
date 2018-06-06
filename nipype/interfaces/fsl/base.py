@@ -37,7 +37,7 @@ from ..base import (traits, isdefined, CommandLine, CommandLineInputSpec,
                     PackageInfo)
 from ...external.due import BibTeX
 
-IFLOGGER = logging.getLogger('interface')
+IFLOGGER = logging.getLogger('nipype.interface')
 
 
 class Info(PackageInfo):

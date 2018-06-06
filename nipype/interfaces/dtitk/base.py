@@ -36,7 +36,7 @@ from ..base import CommandLine
 from nipype.interfaces.fsl.base import Info
 import warnings
 
-LOGGER = logging.getLogger('interface')
+LOGGER = logging.getLogger('nipype.interface')
 
 
 class DTITKRenameMixin(object):

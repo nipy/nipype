@@ -49,7 +49,7 @@ from .support import (Bunch, Stream, InterfaceResult, NipypeInterfaceError)
 from future import standard_library
 standard_library.install_aliases()
 
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 PY35 = sys.version_info >= (3, 5)
 PY3 = sys.version_info[0] > 2

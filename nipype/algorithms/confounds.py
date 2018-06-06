@@ -24,7 +24,7 @@ from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
 from ..utils import NUMPY_MMAP
 from ..utils.misc import normalize_mc_params
 
-IFLOGGER = logging.getLogger('interface')
+IFLOGGER = logging.getLogger('nipype.interface')
 
 
 class ComputeDVARSInputSpec(BaseInterfaceInputSpec):

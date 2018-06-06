@@ -37,7 +37,7 @@ except ImportError:
 
 
 # Init logger
-logger = logging.getLogger('workflow')
+logger = logging.getLogger('nipype.workflow')
 
 
 # Run node

@@ -353,7 +353,7 @@ class NipypeConfig(object):
         if self._display is not None:
             from .. import logging
             self._display.stop()
-            logging.getLogger('interface').debug(
+            logging.getLogger('nipype.interface').debug(
                 'Closing display (if virtual)')
 
 
