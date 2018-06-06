@@ -311,7 +311,7 @@ Bradley L. and Petersen, Steven E.},
         'tags': ['method']
     }]
 
-    def _run_interface(self, runtime):
+    def _run_interface(self, runtime, metric='L1'):
         mpars = np.loadtxt(self.inputs.in_file)  # mpars is N_t x 6
         mpars = np.apply_along_axis(
             func1d=normalize_mc_params,
@@ -319,19 +319,29 @@ Bradley L. and Petersen, Steven E.},
             arr=mpars,
             source=self.inputs.parameter_source)
 
-        # TODO(nina): convert to geomstats parameterization:
-        se3pars = np.hstack(
-            [mpars[:, DIM_TRANSLATIONS:], mpars[:, :DIM_TRANSLATIONS]])
+        if metric == 'L1':
+            diff = mpars[:-1, :6] - mpars[1:, :6]
+            diff[:, 3:6] *= self.inputs.radius
+            fd_res = np.abs(diff).sum(axis=1)
 
-        diag_rotations = self.inputs.radius * np.ones(DIM_ROTATIONS)
-        diag_translations = np.ones(DIM_TRANSLATIONS)
-        diag = np.concatenate([diag_rotations, diag_translations])
-        inner_product = np.diag(diag)
-        metric = InvariantMetric(
-                   group=SE3_GROUP,
-                   inner_product_mat_at_identity=inner_product,
-                   left_or_right='left')
-        fd_res = metric.dist(se3pars[:-1], se3pars[1:])
+        elif metric == 'riemannian':
+            # TODO(nina): convert to geomstats parameterization:
+            se3pars = np.hstack(
+                [mpars[:, DIM_TRANSLATIONS:], mpars[:, :DIM_TRANSLATIONS]])
+
+            diag_rotations = self.inputs.radius * np.ones(DIM_ROTATIONS)
+            diag_translations = np.ones(DIM_TRANSLATIONS)
+            diag = np.concatenate([diag_rotations, diag_translations])
+            inner_product = np.diag(diag)
+            metric = InvariantMetric(
+                       group=SE3_GROUP,
+                       inner_product_mat_at_identity=inner_product,
+                       left_or_right='left')
+            fd_res = metric.dist(se3pars[:-1], se3pars[1:])
+
+        else:
+            raise ValueError(
+                'The parameter \'metric\' should be \'L1\' or \'riemannian\'.')
 
         self._results = {
             'out_file': op.abspath(self.inputs.out_file),
