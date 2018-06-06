@@ -30,9 +30,15 @@ class Logging(object):
 
     def __init__(self, config):
         self._config = config
-        logging.basicConfig(
-            format=self.fmt, datefmt=self.datefmt, stream=sys.stdout)
-        # logging.basicConfig(stream=sys.stdout)
+        # scope our logger to not interfere with user
+        _nipype_logger = logging.getLogger('nipype')
+        _nipype_hdlr = logging.StreamHandler(stream=sys.stdout)
+        _nipype_hdlr.setFormatter(logging.Formatter(fmt=self.fmt,
+                                                    datefmt=self.datefmt))
+        # if StreamHandler was added, do not stack
+        if not len(_nipype_logger.handlers):
+            _nipype_logger.addHandler(_nipype_hdlr)
+
         self._logger = logging.getLogger('workflow')
         self._utlogger = logging.getLogger('utils')
         self._fmlogger = logging.getLogger('filemanip')
