@@ -775,7 +775,7 @@ def run_command(runtime, output=None, timeout=0.01):
         shell=True,
         cwd=runtime.cwd,
         env=env,
-        close_fds=True,
+        close_fds=(not sys.platform.startswith('win')),
     )
 
     result = {
