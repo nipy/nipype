@@ -15,7 +15,7 @@ import numpy as np
 
 # Local imports
 from ...utils.filemanip import (fname_presuffix, ensure_list,
-                                simplify_list, split_filename, filename_to_list)
+                                simplify_list, split_filename)
 from ..base import (OutputMultiPath, TraitedSpec, isdefined,
                     traits, InputMultiPath, File, Str)
 from .base import (SPMCommand, scans_for_fname, func_is_3d,
@@ -406,8 +406,8 @@ class Realign(SPMCommand):
                 if not isinstance(imgf, list) and func_is_3d(imgf):
                     break
         if self.inputs.jobtype == "estimate":
-            outputs['realigned_files'] = self.inputs.in_files
-        if (self.inputs.jobtype == "estimate"
+            outputs['realigned_files'] = self.inputs.in_file
+s        if (self.inputs.jobtype == "estimate"
                 or self.inputs.jobtype == "estwrite"):
             outputs['modified_in_files'] = self.inputs.in_files
         if self.inputs.jobtype == "write" or self.inputs.jobtype == "estwrite":
@@ -612,7 +612,7 @@ class RealignUnwarp(SPMCommand):
         """Convert input to appropriate format for spm
         """
         if opt == 'in_files':
-            return scans_for_fnames(filename_to_list(val),
+            return scans_for_fnames(ensure_list(val),
                                     keep4d=False,
                                     separate_sessions=True)
         return super(RealignUnwarp, self)._format_arg(opt, spec, val)
@@ -668,10 +668,10 @@ class RealignUnwarp(SPMCommand):
 
         if resliced_all:
             outputs['realigned_unwarped_files'] = []
-            for idx, imgf in enumerate(filename_to_list(self.inputs.in_files)):
+            for idx, imgf in enumerate(ensure_list(self.inputs.in_files)):
                 realigned_run = []
                 if isinstance(imgf, list):
-                    for i, inner_imgf in enumerate(filename_to_list(imgf)):
+                    for i, inner_imgf in enumerate(ensure_list(imgf)):
                         newfile = fname_presuffix(inner_imgf,
                                                   prefix=self.inputs.out_prefix)
                         realigned_run.append(newfile)
