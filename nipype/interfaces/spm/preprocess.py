@@ -406,8 +406,8 @@ class Realign(SPMCommand):
                 if not isinstance(imgf, list) and func_is_3d(imgf):
                     break
         if self.inputs.jobtype == "estimate":
-            outputs['realigned_files'] = self.inputs.in_file
-s        if (self.inputs.jobtype == "estimate"
+            outputs['realigned_files'] = self.inputs.in_files
+        if (self.inputs.jobtype == "estimate"
                 or self.inputs.jobtype == "estwrite"):
             outputs['modified_in_files'] = self.inputs.in_files
         if self.inputs.jobtype == "write" or self.inputs.jobtype == "estwrite":
