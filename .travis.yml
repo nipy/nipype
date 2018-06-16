@@ -50,6 +50,7 @@ before_install:
 - conda config --add channels conda-forge
 - travis_retry conda install -y python=${TRAVIS_PYTHON_VERSION} icu
 - travis_retry pip install -r requirements.txt
+- travis_retry pip install grabbit==0.1.2
 - travis_retry git clone https://github.com/INCF/pybids.git ${HOME}/pybids &&
   pip install -e ${HOME}/pybids
 - travis_retry pip install codecov
