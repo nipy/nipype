@@ -230,7 +230,7 @@ def hash_infile(afile, chunk_len=8192, crypto=hashlib.md5,
     Computes hash of a file using 'crypto' module
 
     >>> hash_infile('smri_ants_registration_settings.json')
-    '49b956387ed8d95a4eb44576fc5103b6'
+    'f225785dfb0db9032aa5a0e4f2c730ad'
 
     >>> hash_infile('surf01.vtk')
     'fdf1cf359b4e346034372cdeb58f9a88'
