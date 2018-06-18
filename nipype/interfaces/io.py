@@ -2585,13 +2585,6 @@ class JSONFileGrabber(IOBase):
     Example
     -------
 
-    .. testsetup::
-
-    >>> tmp = getfixture('tmpdir')
-    >>> old = tmp.chdir() # changing to a temporary directory
-
-    .. doctest::
-
     >>> import pprint
     >>> from nipype.interfaces.io import JSONFileGrabber
     >>> jsonSource = JSONFileGrabber()
@@ -2603,11 +2596,6 @@ class JSONFileGrabber(IOBase):
     >>> res = jsonSource.run()
     >>> pprint.pprint(res.outputs.get())  # doctest:, +ELLIPSIS
     {'param1': 'exampleStr', 'param2': 4, 'param3': 1.0}
-
-    .. testsetup::
-
-    >>> os.chdir(old.strpath)
-
     """
     input_spec = JSONFileGrabberInputSpec
     output_spec = DynamicTraitedSpec
