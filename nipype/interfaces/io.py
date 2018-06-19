@@ -592,10 +592,8 @@ class DataSink(IOBase):
         s3_prefix = s3_str + bucket.name
 
         # Explicitly lower-case the "s3"
-        if dst.lower().startswith(s3_str):
-            dst_sp = dst.split('/')
-            dst_sp[0] = dst_sp[0].lower()
-            dst = '/'.join(dst_sp)
+        if dst[:len(s3_str)].lower().startswith(s3_str):
+            dst = s3_str + dst[len(s3_str):]
 
         # If src is a directory, collect files (this assumes dst is a dir too)
         if os.path.isdir(src):
