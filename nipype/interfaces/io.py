@@ -543,7 +543,7 @@ class DataSink(IOBase):
 
             # Lean on AWS environment / IAM role authentication and authorization
             session = boto3.session.Session()
-            
+
         s3_resource = session.resource('s3', use_ssl=True)
 
         # And try fetch the bucket with the name argument
@@ -566,6 +566,8 @@ class DataSink(IOBase):
 
 
     def _get_head_bucket(self, s3_resource, bucket_name):
+        
+        import botocore
         
         # And try fetch the bucket with the name argument
         try:
