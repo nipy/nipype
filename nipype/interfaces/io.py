@@ -536,19 +536,37 @@ class DataSink(IOBase):
             session = boto3.session.Session(
                 aws_access_key_id=aws_access_key_id,
                 aws_secret_access_key=aws_secret_access_key)
-            s3_resource = session.resource('s3', use_ssl=True)
 
-        # Otherwise, connect anonymously
         else:
-            iflogger.info('Connecting to AWS: %s anonymously...', bucket_name)
+            iflogger.info('Connecting to S3 bucket: %s with IAM role...',
+                          bucket_name)
+
+            # Lean on AWS environment / IAM role authentication and authorization
             session = boto3.session.Session()
-            s3_resource = session.resource('s3', use_ssl=True)
+            
+        s3_resource = session.resource('s3', use_ssl=True)
+
+        # And try fetch the bucket with the name argument
+        try:
+            self._get_head_bucket(s3_resource, bucket_name)
+        except Exception as exc:
+
+            # Try to connect anonymously
             s3_resource.meta.client.meta.events.register(
                 'choose-signer.s3.*', botocore.handlers.disable_signing)
+
+            iflogger.info('Connecting to AWS: %s anonymously...', bucket_name)
+            self._get_head_bucket(s3_resource, bucket_name)
 
         # Explicitly declare a secure SSL connection for bucket object
         bucket = s3_resource.Bucket(bucket_name)
 
+        # Return the bucket
+        return bucket
+
+
+    def _get_head_bucket(self, s3_resource, bucket_name):
+        
         # And try fetch the bucket with the name argument
         try:
             s3_resource.meta.client.head_bucket(Bucket=bucket_name)
@@ -570,8 +588,6 @@ class DataSink(IOBase):
                       % (bucket_name, exc)
             raise Exception(err_msg)
 
-        # Return the bucket
-        return bucket
 
     # Send up to S3 method
     def _upload_to_s3(self, bucket, src, dst):
