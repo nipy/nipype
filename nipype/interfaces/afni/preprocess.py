@@ -2492,6 +2492,14 @@ class TProjectInputSpec(AFNICommandInputSpec):
                    even if -ort contains constant terms, as all means are
                    removed.""",
         argstr="-polort %d")
+    dsort = File(
+        desc="""Remove the 3D+time time series in dataset fset.
+                ++ That is, 'fset' contains a different nuisance time
+                series for each voxel (e.g., from AnatICOR).
+                ++ Multiple -dsort options are allowed.""",
+        argstr='-dsort %s',
+        exists=True,
+        copyfile=False)
     bandpass = traits.Tuple(
         traits.Float, traits.Float,
         desc="""Remove all frequencies EXCEPT those in the range""",
