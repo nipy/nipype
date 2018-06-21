@@ -17,6 +17,7 @@ def test_TProject_inputs():
         censor=dict(argstr='-censor %s', ),
         censortr=dict(argstr='-CENSORTR %s', ),
         concat=dict(argstr='-concat %s', ),
+        dsort=dict(argstr='%s', ),
         environ=dict(
             nohash=True,
             usedefault=True,
