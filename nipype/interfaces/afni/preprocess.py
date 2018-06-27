@@ -2497,7 +2497,7 @@ class TProjectInputSpec(AFNICommandInputSpec):
         File(
             exists=True,
             copyfile=False),
-        argstr="%s",
+        argstr="-dsort %s...",
         desc="""Remove the 3D+time time series in dataset fset.
                 ++ That is, 'fset' contains a different nuisance time
                    series for each voxel (e.g., from AnatICOR).
@@ -2570,10 +2570,6 @@ class TProject(AFNICommand):
     input_spec = TProjectInputSpec
     output_spec = AFNICommandOutputSpec
     
-    def _format_arg(self, name, spec, value):
-        if name == 'dsort':
-            return ' '.join(["-dsort %s" % dsort_file for dsort_file in value])
-        return super(TProject, self)._format_arg(name, spec, value)    
 
 class TShiftInputSpec(AFNICommandInputSpec):
     in_file = File(
