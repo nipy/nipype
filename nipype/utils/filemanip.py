@@ -665,7 +665,7 @@ def loadpkl(infile, versioning=False):
     # Unpickling problems    
     except Exception as e:
         if not versioning:
-            return None
+            raise e
 
         from nipype import __version__ as version
 
