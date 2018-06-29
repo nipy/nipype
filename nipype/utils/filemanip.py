@@ -723,12 +723,10 @@ def savepkl(filename, record, versioning=False):
 
     if versioning:
         from nipype import __version__ as version
-        metadata = json.dumps({'version': version},
-                              ensure_ascii=True,
-                              encoding='ascii')
+        metadata = json.dumps({'version': version})
 
-        pkl_file.write(metadata.encode('ascii'))
-        pkl_file.write('\n'.encode('ascii'))
+        pkl_file.write(metadata.encode('utf-8'))
+        pkl_file.write('\n'.encode('utf-8'))
 
     pickle.dump(record, pkl_file)
     pkl_file.close()
