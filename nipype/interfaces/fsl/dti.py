@@ -171,7 +171,7 @@ class FSLXCommandInputSpec(FSLCommandInputSpec):
         low=0,
         value=0,
         usedefault=True,
-        argstr='--burninnoard=%d',
+        argstr='--burnin_noard=%d',
         desc=('num of burnin jumps before the ard is'
               ' imposed'))
     sample_every = traits.Range(
