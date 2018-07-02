@@ -58,7 +58,8 @@ def report_crash(node, traceback=None, hostname=None):
     if crashfile.endswith('.txt'):
         crash2txt(crashfile, dict(node=node, traceback=traceback))
     else:
-        savepkl(crashfile, dict(node=node, traceback=traceback))
+        savepkl(crashfile, dict(node=node, traceback=traceback),
+                versioning=True)
     return crashfile
 
 
