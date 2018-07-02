@@ -13,7 +13,8 @@ import os.path as op
 from ...utils.filemanip import (load_json, save_json, split_filename,
                                 fname_presuffix)
 from ..base import (CommandLineInputSpec, CommandLine, TraitedSpec, traits,
-                    isdefined, File, InputMultiPath, Undefined, Str)
+                    isdefined, File, InputMultiPath, Undefined, Str, 
+                    InputMultiObject)
 
 from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec,
                    AFNICommandOutputSpec, AFNIPythonCommandInputSpec,
@@ -2492,6 +2493,15 @@ class TProjectInputSpec(AFNICommandInputSpec):
                    even if -ort contains constant terms, as all means are
                    removed.""",
         argstr="-polort %d")
+    dsort = InputMultiObject(
+        File(
+            exists=True,
+            copyfile=False),
+        argstr="-dsort %s...",
+        desc="""Remove the 3D+time time series in dataset fset.
+                ++ That is, 'fset' contains a different nuisance time
+                   series for each voxel (e.g., from AnatICOR).
+                ++ Multiple -dsort options are allowed.""")
     bandpass = traits.Tuple(
         traits.Float, traits.Float,
         desc="""Remove all frequencies EXCEPT those in the range""",
@@ -2559,6 +2569,7 @@ class TProject(AFNICommand):
     _cmd = '3dTproject'
     input_spec = TProjectInputSpec
     output_spec = AFNICommandOutputSpec
+    
 
 class TShiftInputSpec(AFNICommandInputSpec):
     in_file = File(
