@@ -20,11 +20,6 @@ def test_CenterMass_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             copyfile=True,
@@ -35,10 +30,6 @@ def test_CenterMass_inputs():
         mask_file=dict(argstr='-mask %s', ),
         roi_vals=dict(argstr='-roi_vals %s', ),
         set_cm=dict(argstr='-set %f %f %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = CenterMass.input_spec()
 

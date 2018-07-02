@@ -10,11 +10,6 @@ def test_CreateWarped_inputs():
             field='crt_warped.flowfields',
             mandatory=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         image_files=dict(
             copyfile=False,
             field='crt_warped.images',

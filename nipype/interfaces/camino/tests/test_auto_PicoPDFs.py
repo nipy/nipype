@@ -11,11 +11,6 @@ def test_PicoPDFs_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='< %s',
             mandatory=True,
@@ -47,10 +42,6 @@ def test_PicoPDFs_inputs():
             argstr='-pdf %s',
             position=4,
             usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = PicoPDFs.input_spec()

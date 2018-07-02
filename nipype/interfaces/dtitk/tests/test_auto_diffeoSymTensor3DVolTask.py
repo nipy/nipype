@@ -15,11 +15,6 @@ def test_diffeoSymTensor3DVolTask_inputs():
             usedefault=True,
         ),
         flip=dict(argstr='-flip %d %d %d', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-in %s',
             mandatory=True,
@@ -42,10 +37,6 @@ def test_diffeoSymTensor3DVolTask_inputs():
         target=dict(
             argstr='-target %s',
             xor=['voxel_size'],
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         transform=dict(
             argstr='-trans %s',

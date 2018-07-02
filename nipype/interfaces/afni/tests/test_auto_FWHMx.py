@@ -37,11 +37,6 @@ def test_FWHMx_inputs():
             argstr='-geom',
             xor=['arith'],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-input %s',
             mandatory=True,
@@ -65,10 +60,6 @@ def test_FWHMx_inputs():
             keep_extension=False,
             name_source='in_file',
             name_template='%s_subbricks.out',
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         unif=dict(argstr='-unif', ),
     )

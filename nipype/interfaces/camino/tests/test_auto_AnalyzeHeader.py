@@ -27,11 +27,6 @@ def test_AnalyzeHeader_inputs():
             argstr='-gl %s',
             units='NA',
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='< %s',
             mandatory=True,
@@ -91,10 +86,6 @@ def test_AnalyzeHeader_inputs():
         scheme_file=dict(
             argstr='%s',
             position=2,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         voxel_dims=dict(
             argstr='-voxeldims %s',

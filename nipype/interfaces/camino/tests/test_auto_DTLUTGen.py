@@ -17,11 +17,6 @@ def test_DTLUTGen_inputs():
             position=1,
             units='NA',
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inversion=dict(
             argstr='-inversion %d',
             units='NA',
@@ -52,10 +47,6 @@ def test_DTLUTGen_inputs():
         step=dict(
             argstr='-step %f',
             units='NA',
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         trace=dict(
             argstr='-trace %G',

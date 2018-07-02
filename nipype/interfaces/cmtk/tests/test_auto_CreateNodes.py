@@ -5,11 +5,6 @@ from ..cmtk import CreateNodes
 
 def test_CreateNodes_inputs():
     input_map = dict(
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         out_filename=dict(usedefault=True, ),
         resolution_network_file=dict(mandatory=True, ),
         roi_file=dict(mandatory=True, ),

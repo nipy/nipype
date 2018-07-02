@@ -16,11 +16,6 @@ def test_Atropos_inputs():
             usedefault=True,
         ),
         icm_use_synchronous_update=dict(argstr='%s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         initialization=dict(
             argstr='%s',
             mandatory=True,
@@ -56,10 +51,6 @@ def test_Atropos_inputs():
         prior_probability_threshold=dict(requires=['prior_weighting'], ),
         prior_weighting=dict(),
         save_posteriors=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         use_mixture_model_proportions=dict(
             requires=['posterior_formulation'], ),
         use_random_seed=dict(

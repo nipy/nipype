@@ -14,11 +14,6 @@ def test_ApplyInverseDeformation_inputs():
             field='comp{1}.inv.comp{1}.def',
             xor=['deformation'],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(
             field='fnames',
             mandatory=True,

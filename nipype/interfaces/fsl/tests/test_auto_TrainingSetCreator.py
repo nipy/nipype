@@ -5,17 +5,11 @@ from ..fix import TrainingSetCreator
 
 def test_TrainingSetCreator_inputs():
     input_map = dict(
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         mel_icas_in=dict(
             argstr='%s',
             copyfile=False,
             position=-1,
-        ),
-    )
+        ), )
     inputs = TrainingSetCreator.input_spec()
 
     for key, metadata in list(input_map.items()):

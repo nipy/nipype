@@ -10,11 +10,6 @@ def test_HistogramMatching_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(
             argstr='%s',
             position=-3,
@@ -29,10 +24,6 @@ def test_HistogramMatching_inputs():
         referenceVolume=dict(
             argstr='%s',
             position=-2,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         threshold=dict(argstr='--threshold ', ),
     )

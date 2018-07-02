@@ -15,11 +15,6 @@ def test_Label2Label_inputs():
             argstr='--hemi %s',
             mandatory=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         out_file=dict(
             argstr='--trglabel %s',
             hash_files=False,
@@ -48,10 +43,6 @@ def test_Label2Label_inputs():
             usedefault=True,
         ),
         subjects_dir=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         white=dict(mandatory=True, ),
     )
     inputs = Label2Label.input_spec()

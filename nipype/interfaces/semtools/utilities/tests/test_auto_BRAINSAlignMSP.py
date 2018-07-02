@@ -15,11 +15,6 @@ def test_BRAINSAlignMSP_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(argstr='--inputVolume %s', ),
         interpolationMode=dict(argstr='--interpolationMode %s', ),
         mspQualityLevel=dict(argstr='--mspQualityLevel %d', ),
@@ -32,10 +27,6 @@ def test_BRAINSAlignMSP_inputs():
         resultsDir=dict(
             argstr='--resultsDir %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         trimRescaledIntensities=dict(argstr='--trimRescaledIntensities %f', ),
         verbose=dict(argstr='--verbose ', ),

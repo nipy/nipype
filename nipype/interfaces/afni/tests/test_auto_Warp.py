@@ -12,11 +12,6 @@ def test_Warp_inputs():
             usedefault=True,
         ),
         gridset=dict(argstr='-gridset %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             copyfile=False,
@@ -38,10 +33,6 @@ def test_Warp_inputs():
             name_template='%s_warp',
         ),
         outputtype=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         tta2mni=dict(argstr='-tta2mni', ),
         verbose=dict(argstr='-verb', ),
         zpad=dict(argstr='-zpad %d', ),

@@ -17,11 +17,6 @@ def test_Concatenate_inputs():
             usedefault=True,
         ),
         gmean=dict(argstr='--gmean %d', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(
             argstr='--i %s...',
             mandatory=True,
@@ -38,10 +33,6 @@ def test_Concatenate_inputs():
         sort=dict(argstr='--sort', ),
         stats=dict(argstr='--%s', ),
         subjects_dir=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         vote=dict(argstr='--vote', ),
     )
     inputs = Concatenate.input_spec()

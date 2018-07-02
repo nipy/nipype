@@ -10,11 +10,6 @@ def test_AccuracyTester_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         mel_icas=dict(
             argstr='%s',
             copyfile=False,
@@ -25,10 +20,6 @@ def test_AccuracyTester_inputs():
             argstr='%s',
             mandatory=True,
             position=2,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         trained_wts_file=dict(
             argstr='%s',

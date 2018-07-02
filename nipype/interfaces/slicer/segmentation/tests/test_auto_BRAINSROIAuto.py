@@ -12,11 +12,6 @@ def test_BRAINSROIAuto_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(argstr='--inputVolume %s', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         otsuPercentileThreshold=dict(argstr='--otsuPercentileThreshold %f', ),
@@ -29,10 +24,6 @@ def test_BRAINSROIAuto_inputs():
             hash_files=False,
         ),
         outputVolumePixelType=dict(argstr='--outputVolumePixelType %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         thresholdCorrectionFactor=dict(
             argstr='--thresholdCorrectionFactor %f', ),
     )

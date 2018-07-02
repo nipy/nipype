@@ -16,11 +16,6 @@ def test_Convert_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         input_file=dict(
             argstr='%s',
             mandatory=True,
@@ -35,10 +30,6 @@ def test_Convert_inputs():
             position=-1,
         ),
         template=dict(argstr='-template', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         two=dict(argstr='-2', ),
     )
     inputs = Convert.input_spec()

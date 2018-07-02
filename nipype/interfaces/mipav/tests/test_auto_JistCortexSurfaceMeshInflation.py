@@ -10,11 +10,6 @@ def test_JistCortexSurfaceMeshInflation_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inLevelset=dict(argstr='--inLevelset %s', ),
         inLorentzian=dict(argstr='--inLorentzian %s', ),
         inMax=dict(argstr='--inMax %d', ),
@@ -30,10 +25,6 @@ def test_JistCortexSurfaceMeshInflation_inputs():
         outOriginal=dict(
             argstr='--outOriginal %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         xDefaultMem=dict(argstr='-xDefaultMem %d', ),
         xMaxProcess=dict(

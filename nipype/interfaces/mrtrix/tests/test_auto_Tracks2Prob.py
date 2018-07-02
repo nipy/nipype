@@ -18,11 +18,6 @@ def test_Tracks2Prob_inputs():
             argstr='-fraction',
             position=3,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -45,10 +40,6 @@ def test_Tracks2Prob_inputs():
         template_file=dict(
             argstr='-template %s',
             position=1,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         voxel_dims=dict(
             argstr='-vox %s',

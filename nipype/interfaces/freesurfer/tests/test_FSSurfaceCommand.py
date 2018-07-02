@@ -11,9 +11,7 @@ def test_FSSurfaceCommand_inputs():
     input_map = dict(
         args=dict(argstr='%s'),
         environ=dict(nohash=True, usedefault=True),
-        ignore_exception=dict(nohash=True, usedefault=True),
         subjects_dir=dict(),
-        terminal_output=dict(nohash=True),
     )
     inputs = FSSurfaceCommand.input_spec()
 

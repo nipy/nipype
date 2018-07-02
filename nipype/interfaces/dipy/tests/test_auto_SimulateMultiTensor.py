@@ -10,11 +10,6 @@ def test_SimulateMultiTensor_inputs():
         diff_iso=dict(usedefault=True, ),
         diff_sf=dict(usedefault=True, ),
         gradients=dict(),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_bval=dict(),
         in_bvec=dict(),
         in_dirs=dict(mandatory=True, ),

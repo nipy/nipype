@@ -11,11 +11,6 @@ def test_LabelMapSmoothing_inputs():
             usedefault=True,
         ),
         gaussianSigma=dict(argstr='--gaussianSigma %f', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(
             argstr='%s',
             position=-2,
@@ -27,10 +22,6 @@ def test_LabelMapSmoothing_inputs():
             argstr='%s',
             hash_files=False,
             position=-1,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = LabelMapSmoothing.input_spec()

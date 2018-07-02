@@ -10,18 +10,9 @@ def test_ThicknessPVC_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         subjectFilePrefix=dict(
             argstr='%s',
             mandatory=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = ThicknessPVC.input_spec()

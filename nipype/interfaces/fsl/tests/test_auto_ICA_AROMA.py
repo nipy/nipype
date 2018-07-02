@@ -28,11 +28,6 @@ def test_ICA_AROMA_inputs():
             argstr='-warp %s',
             xor=['feat_dir'],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-i %s',
             mandatory=True,
@@ -56,10 +51,6 @@ def test_ICA_AROMA_inputs():
             argstr='-o %s',
             mandatory=True,
             usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = ICA_AROMA.input_spec()

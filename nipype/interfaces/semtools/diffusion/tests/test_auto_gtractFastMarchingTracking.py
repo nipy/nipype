@@ -11,11 +11,6 @@ def test_gtractFastMarchingTracking_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputAnisotropyVolume=dict(argstr='--inputAnisotropyVolume %s', ),
         inputCostVolume=dict(argstr='--inputCostVolume %s', ),
         inputStartingSeedsLabelMapVolume=dict(
@@ -31,10 +26,6 @@ def test_gtractFastMarchingTracking_inputs():
         ),
         seedThreshold=dict(argstr='--seedThreshold %f', ),
         startingSeedsLabel=dict(argstr='--startingSeedsLabel %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         trackingThreshold=dict(argstr='--trackingThreshold %f', ),
         writeXMLPolyDataFile=dict(argstr='--writeXMLPolyDataFile ', ),
     )

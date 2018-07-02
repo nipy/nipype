@@ -27,11 +27,6 @@ def test_MRISPreprocReconAll_inputs():
             argstr='--hemi %s',
             mandatory=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         lh_surfreg_target=dict(requires=['surfreg_files'], ),
         num_iters=dict(
             argstr='--niters %d',
@@ -83,10 +78,6 @@ def test_MRISPreprocReconAll_inputs():
         target=dict(
             argstr='--target %s',
             mandatory=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         vol_measure_file=dict(argstr='--iv %s %s...', ),
     )

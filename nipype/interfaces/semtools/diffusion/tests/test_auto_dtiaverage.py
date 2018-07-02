@@ -11,19 +11,10 @@ def test_dtiaverage_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputs=dict(argstr='--inputs %s...', ),
         tensor_output=dict(
             argstr='--tensor_output %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         verbose=dict(argstr='--verbose ', ),
     )

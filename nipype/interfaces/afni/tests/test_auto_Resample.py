@@ -10,11 +10,6 @@ def test_Resample_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-inset %s',
             copyfile=False,
@@ -34,10 +29,6 @@ def test_Resample_inputs():
         ),
         outputtype=dict(),
         resample_mode=dict(argstr='-rmode %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         voxel_size=dict(argstr='-dxyz %f %f %f', ),
     )
     inputs = Resample.input_spec()

@@ -15,11 +15,6 @@ def test_TVResample_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-in %s',
             mandatory=True,
@@ -38,10 +33,6 @@ def test_TVResample_inputs():
         target_file=dict(
             argstr='-target %s',
             xor=['array_size', 'voxel_size', 'origin'],
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         voxel_size=dict(
             argstr='-vsize %g %g %g',

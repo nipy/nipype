@@ -11,11 +11,6 @@ def test_Pialmesh_inputs():
             usedefault=True,
         ),
         exportPrefix=dict(argstr='--prefix %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputMaskFile=dict(
             argstr='-m %s',
             mandatory=True,
@@ -62,10 +57,6 @@ def test_Pialmesh_inputs():
             usedefault=True,
         ),
         tangentSmoother=dict(argstr='--tc %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         timer=dict(argstr='--timer', ),
         tissueThreshold=dict(
             argstr='-t %f',

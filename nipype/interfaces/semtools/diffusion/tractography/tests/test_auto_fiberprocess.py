@@ -18,20 +18,11 @@ def test_fiberprocess_inputs():
         ),
         fiber_radius=dict(argstr='--fiber_radius %f', ),
         h_field=dict(argstr='--h_field %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         index_space=dict(argstr='--index_space ', ),
         noDataChange=dict(argstr='--noDataChange ', ),
         no_warp=dict(argstr='--no_warp ', ),
         saveProperties=dict(argstr='--saveProperties ', ),
         tensor_volume=dict(argstr='--tensor_volume %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         verbose=dict(argstr='--verbose ', ),
         voxel_label=dict(argstr='--voxel_label %d', ),
         voxelize=dict(

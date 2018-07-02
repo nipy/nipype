@@ -7,11 +7,6 @@ def test_FramewiseDisplacement_inputs():
     input_map = dict(
         figdpi=dict(usedefault=True, ),
         figsize=dict(usedefault=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(mandatory=True, ),
         normalize=dict(usedefault=True, ),
         out_figure=dict(usedefault=True, ),

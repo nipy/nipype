@@ -10,11 +10,6 @@ def test_JistLaminarProfileSampling_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inCortex=dict(argstr='--inCortex %s', ),
         inIntensity=dict(argstr='--inIntensity %s', ),
         inProfile=dict(argstr='--inProfile %s', ),
@@ -26,10 +21,6 @@ def test_JistLaminarProfileSampling_inputs():
         outProfilemapped=dict(
             argstr='--outProfilemapped %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         xDefaultMem=dict(argstr='-xDefaultMem %d', ),
         xMaxProcess=dict(

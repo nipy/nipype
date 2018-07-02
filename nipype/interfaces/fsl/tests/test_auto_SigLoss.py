@@ -11,11 +11,6 @@ def test_SigLoss_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-i %s',
             mandatory=True,
@@ -27,10 +22,6 @@ def test_SigLoss_inputs():
         ),
         output_type=dict(),
         slice_direction=dict(argstr='-d %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = SigLoss.input_spec()
 

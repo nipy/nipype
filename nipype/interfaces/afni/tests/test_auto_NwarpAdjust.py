@@ -10,11 +10,6 @@ def test_NwarpAdjust_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(argstr='-source %s', ),
         num_threads=dict(
             nohash=True,
@@ -28,10 +23,6 @@ def test_NwarpAdjust_inputs():
             requires=['in_files'],
         ),
         outputtype=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         warps=dict(
             argstr='-nwarp %s',
             mandatory=True,

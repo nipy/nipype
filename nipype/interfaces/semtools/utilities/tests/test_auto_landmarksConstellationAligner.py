@@ -10,19 +10,10 @@ def test_landmarksConstellationAligner_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputLandmarksPaired=dict(argstr='--inputLandmarksPaired %s', ),
         outputLandmarksPaired=dict(
             argstr='--outputLandmarksPaired %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = landmarksConstellationAligner.input_spec()

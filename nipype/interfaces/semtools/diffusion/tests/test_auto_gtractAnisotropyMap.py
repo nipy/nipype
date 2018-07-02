@@ -11,20 +11,11 @@ def test_gtractAnisotropyMap_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputTensorVolume=dict(argstr='--inputTensorVolume %s', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         outputVolume=dict(
             argstr='--outputVolume %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = gtractAnisotropyMap.input_spec()

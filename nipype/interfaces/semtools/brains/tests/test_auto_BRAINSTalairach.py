@@ -30,11 +30,6 @@ def test_BRAINSTalairach_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(argstr='--inputVolume %s', ),
         outputBox=dict(
             argstr='--outputBox %s',
@@ -43,10 +38,6 @@ def test_BRAINSTalairach_inputs():
         outputGrid=dict(
             argstr='--outputGrid %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = BRAINSTalairach.input_spec()

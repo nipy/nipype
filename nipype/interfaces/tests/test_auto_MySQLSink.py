@@ -16,11 +16,6 @@ def test_MySQLSink_inputs():
             usedefault=True,
             xor=['config'],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         password=dict(),
         table_name=dict(mandatory=True, ),
         username=dict(),

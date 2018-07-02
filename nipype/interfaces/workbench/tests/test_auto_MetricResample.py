@@ -29,11 +29,6 @@ def test_MetricResample_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -67,10 +62,6 @@ def test_MetricResample_inputs():
         roi_metric=dict(
             argstr='-current-roi %s',
             position=8,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         valid_roi_out=dict(
             argstr='-valid-roi-out',

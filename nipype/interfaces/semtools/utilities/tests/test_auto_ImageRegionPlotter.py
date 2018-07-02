@@ -10,11 +10,6 @@ def test_ImageRegionPlotter_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputBinaryROIVolume=dict(argstr='--inputBinaryROIVolume %s', ),
         inputLabelVolume=dict(argstr='--inputLabelVolume %s', ),
         inputVolume1=dict(argstr='--inputVolume1 %s', ),
@@ -22,10 +17,6 @@ def test_ImageRegionPlotter_inputs():
         numberOfHistogramBins=dict(argstr='--numberOfHistogramBins %d', ),
         outputJointHistogramData=dict(
             argstr='--outputJointHistogramData %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         useIntensityForHistogram=dict(argstr='--useIntensityForHistogram ', ),
         useROIAUTO=dict(argstr='--useROIAUTO ', ),
         verbose=dict(argstr='--verbose ', ),

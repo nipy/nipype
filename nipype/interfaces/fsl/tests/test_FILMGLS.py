@@ -30,7 +30,6 @@ def test_filmgls():
             argstr='-ar',
         ),
         full_data=dict(argstr='-v', ),
-        ignore_exception=dict(usedefault=True, ),
         in_file=dict(
             mandatory=True,
             argstr='%s',
@@ -87,7 +86,6 @@ def test_filmgls():
             argstr='--ar',
         ),
         full_data=dict(argstr='-v', ),
-        ignore_exception=dict(usedefault=True, ),
         in_file=dict(
             mandatory=True,
             argstr='--in=%s',
@@ -107,7 +105,6 @@ def test_filmgls():
             usedefault=True,
         ),
         smooth_autocorr=dict(argstr='--sa', ),
-        terminal_output=dict(),
         threshold=dict(
             usedefault=True,
             argstr='--thr=%f',

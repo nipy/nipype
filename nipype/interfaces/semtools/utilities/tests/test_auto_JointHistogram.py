@@ -10,21 +10,12 @@ def test_JointHistogram_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputMaskVolumeInXAxis=dict(argstr='--inputMaskVolumeInXAxis %s', ),
         inputMaskVolumeInYAxis=dict(argstr='--inputMaskVolumeInYAxis %s', ),
         inputVolumeInXAxis=dict(argstr='--inputVolumeInXAxis %s', ),
         inputVolumeInYAxis=dict(argstr='--inputVolumeInYAxis %s', ),
         outputJointHistogramImage=dict(
             argstr='--outputJointHistogramImage %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         verbose=dict(argstr='--verbose ', ),
     )
     inputs = JointHistogram.input_spec()

@@ -11,11 +11,6 @@ def test_TalairachAVI_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='--i %s',
             mandatory=True,
@@ -25,10 +20,6 @@ def test_TalairachAVI_inputs():
             mandatory=True,
         ),
         subjects_dir=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = TalairachAVI.input_spec()
 

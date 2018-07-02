@@ -8,11 +8,6 @@ def test_CreateNifti_inputs():
         affine=dict(),
         data_file=dict(mandatory=True, ),
         header_file=dict(mandatory=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
     )
     inputs = CreateNifti.input_spec()
 

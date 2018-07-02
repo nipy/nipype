@@ -16,11 +16,6 @@ def test_MRIsExpand_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             copyfile=False,
@@ -44,10 +39,6 @@ def test_MRIsExpand_inputs():
         ),
         spring=dict(argstr='-S %g', ),
         subjects_dir=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         thickness=dict(argstr='-thickness', ),
         thickness_name=dict(
             argstr='-thickness_name %s',

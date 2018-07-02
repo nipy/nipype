@@ -7,11 +7,6 @@ def test_Parcellate_inputs():
     input_map = dict(
         dilation=dict(usedefault=True, ),
         freesurfer_dir=dict(),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         out_roi_file=dict(genfile=True, ),
         parcellation_name=dict(usedefault=True, ),
         subject_id=dict(mandatory=True, ),

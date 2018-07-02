@@ -18,11 +18,6 @@ def test_Axialize_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             copyfile=False,
@@ -43,10 +38,6 @@ def test_Axialize_inputs():
         sagittal=dict(
             argstr='-sagittal',
             xor=['coronal', 'axial'],
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         verb=dict(argstr='-verb', ),
     )

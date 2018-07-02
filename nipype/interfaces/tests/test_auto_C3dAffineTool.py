@@ -14,11 +14,6 @@ def test_C3dAffineTool_inputs():
             argstr='-fsl2ras',
             position=4,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         itk_transform=dict(
             argstr='-oitk %s',
             hash_files=False,
@@ -31,10 +26,6 @@ def test_C3dAffineTool_inputs():
         source_file=dict(
             argstr='-src %s',
             position=2,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         transform_file=dict(
             argstr='%s',

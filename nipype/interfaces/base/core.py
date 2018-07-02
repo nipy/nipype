@@ -882,8 +882,7 @@ class CommandLine(BaseInterface):
     # Use get_traitsfree() to check all inputs set
     >>> pprint.pprint(cli.inputs.get_traitsfree())  # doctest:
     {'args': '-al',
-     'environ': {'DISPLAY': ':1'},
-     'ignore_exception': False}
+     'environ': {'DISPLAY': ':1'}}
 
     >>> cli.inputs.get_hashval()[0][0]
     ('args', '-al')

@@ -10,11 +10,6 @@ def test_XNATSource_inputs():
             mandatory=True,
             xor=['server'],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         pwd=dict(),
         query_template=dict(mandatory=True, ),
         query_template_args=dict(usedefault=True, ),

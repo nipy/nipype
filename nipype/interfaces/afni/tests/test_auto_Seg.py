@@ -15,11 +15,6 @@ def test_Seg_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-anat %s',
             copyfile=True,
@@ -35,10 +30,6 @@ def test_Seg_inputs():
         mixfloor=dict(argstr='-mixfloor %f', ),
         mixfrac=dict(argstr='-mixfrac %s', ),
         prefix=dict(argstr='-prefix %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = Seg.input_spec()
 

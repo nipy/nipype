@@ -8,11 +8,6 @@ def test_S3DataGrabber_inputs():
         anon=dict(usedefault=True, ),
         bucket=dict(mandatory=True, ),
         bucket_path=dict(usedefault=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         local_directory=dict(),
         raise_on_empty=dict(usedefault=True, ),
         region=dict(usedefault=True, ),
