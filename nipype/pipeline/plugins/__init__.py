@@ -12,6 +12,7 @@ from .sge import SGEPlugin
 from .condor import CondorPlugin
 from .dagman import CondorDAGManPlugin
 from .multiproc import MultiProcPlugin
+from .legacymultiproc import LegacyMultiProcPlugin
 from .ipython import IPythonPlugin
 from .somaflow import SomaFlowPlugin
 from .pbsgraph import PBSGraphPlugin

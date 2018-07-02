@@ -93,7 +93,7 @@ class NonDaemonPool(pool.Pool):
     Process = NonDaemonProcess
 
 
-class MultiProcPlugin(DistributedPluginBase):
+class LegacyMultiProcPlugin(DistributedPluginBase):
     """
     Execute workflow with multiprocessing, not sending more jobs at once
     than the system can support.
@@ -129,7 +129,7 @@ class MultiProcPlugin(DistributedPluginBase):
 
     def __init__(self, plugin_args=None):
         # Init variables and instance attributes
-        super(MultiProcPlugin, self).__init__(plugin_args=plugin_args)
+        super(LegacyMultiProcPlugin, self).__init__(plugin_args=plugin_args)
         self._taskresult = {}
         self._task_obj = {}
         self._taskid = 0
@@ -149,7 +149,7 @@ class MultiProcPlugin(DistributedPluginBase):
                                                        True)
 
         # Instantiate different thread pools for non-daemon processes
-        logger.debug('[MultiProc] Starting in "%sdaemon" mode (n_procs=%d, '
+        logger.debug('[LegacyMultiProc] Starting in "%sdaemon" mode (n_procs=%d, '
                      'mem_gb=%0.2f, cwd=%s)', 'non' * int(non_daemon),
                      self.processors, self.memory_gb, self._cwd)
 
@@ -191,7 +191,7 @@ class MultiProcPlugin(DistributedPluginBase):
             run_node, (node, updatehash, self._taskid),
             callback=self._async_callback)
 
-        logger.debug('[MultiProc] Submitted task %s (taskid=%d).',
+        logger.debug('[LegacyMultiProc] Submitted task %s (taskid=%d).',
                      node.fullname, self._taskid)
         return self._taskid
 
@@ -262,7 +262,7 @@ class MultiProcPlugin(DistributedPluginBase):
                     tasks_list_msg += '\n'.join(running_tasks)
                     tasks_list_msg = indent(tasks_list_msg, ' ' * 21)
             logger.info(
-                '[MultiProc] Running %d tasks, and %d jobs ready. Free '
+                '[LegacyMultiProc] Running %d tasks, and %d jobs ready. Free '
                 'memory (GB): %0.2f/%0.2f, Free processors: %d/%d.%s',
                 len(self.pending_tasks), len(jobids), free_memory_gb,
                 self.memory_gb, free_processors, self.processors,
