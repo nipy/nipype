@@ -13,7 +13,7 @@ from ...utils import NUMPY_MMAP
 from ..base import (traits, TraitedSpec, BaseInterfaceInputSpec, File,
                     InputMultiPath, isdefined)
 from .base import DipyBaseInterface
-IFLOGGER = logging.getLogger('interface')
+IFLOGGER = logging.getLogger('nipype.interface')
 
 
 class SimulateMultiTensorInputSpec(BaseInterfaceInputSpec):

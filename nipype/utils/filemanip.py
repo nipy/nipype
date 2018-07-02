@@ -30,7 +30,7 @@ from .misc import is_container
 from future import standard_library
 standard_library.install_aliases()
 
-fmlogger = logging.getLogger('utils')
+fmlogger = logging.getLogger('nipype.utils')
 
 related_filetype_sets = [
     ('.hdr', '.img', '.mat'),
