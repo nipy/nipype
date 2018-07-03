@@ -10,11 +10,6 @@ def test_DiffusionWeightedVolumeMasking_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(
             argstr='%s',
             position=-4,
@@ -26,10 +21,6 @@ def test_DiffusionWeightedVolumeMasking_inputs():
             position=-2,
         ),
         removeislands=dict(argstr='--removeislands ', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         thresholdMask=dict(
             argstr='%s',
             hash_files=False,

@@ -6,11 +6,6 @@ from ..model import FEATRegister
 def test_FEATRegister_inputs():
     input_map = dict(
         feat_dirs=dict(mandatory=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         reg_dof=dict(usedefault=True, ),
         reg_image=dict(mandatory=True, ),
     )

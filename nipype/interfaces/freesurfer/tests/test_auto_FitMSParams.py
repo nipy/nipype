@@ -11,11 +11,6 @@ def test_FitMSParams_inputs():
             usedefault=True,
         ),
         flip_list=dict(),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(
             argstr='%s',
             mandatory=True,
@@ -28,10 +23,6 @@ def test_FitMSParams_inputs():
         ),
         subjects_dir=dict(),
         te_list=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         tr_list=dict(),
         xfm_list=dict(),
     )

@@ -12,11 +12,6 @@ def test_BRAINSTalairachMask_inputs():
         ),
         expand=dict(argstr='--expand ', ),
         hemisphereMode=dict(argstr='--hemisphereMode %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(argstr='--inputVolume %s', ),
         outputVolume=dict(
             argstr='--outputVolume %s',
@@ -24,10 +19,6 @@ def test_BRAINSTalairachMask_inputs():
         ),
         talairachBox=dict(argstr='--talairachBox %s', ),
         talairachParameters=dict(argstr='--talairachParameters %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = BRAINSTalairachMask.input_spec()
 

@@ -21,11 +21,6 @@ def test_Bfc_inputs():
         ),
         histogramRadius=dict(argstr='-r %d', ),
         histogramType=dict(argstr='%s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputMRIFile=dict(
             argstr='-i %s',
             mandatory=True,
@@ -58,10 +53,6 @@ def test_Bfc_inputs():
             hash_files=False,
         ),
         splineLambda=dict(argstr='-w %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         timer=dict(argstr='--timer', ),
         verbosityLevel=dict(argstr='-v %d', ),
     )

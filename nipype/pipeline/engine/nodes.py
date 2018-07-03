@@ -41,7 +41,7 @@ from .base import EngineBase
 
 standard_library.install_aliases()
 
-logger = logging.getLogger('workflow')
+logger = logging.getLogger('nipype.workflow')
 
 
 class Node(EngineBase):

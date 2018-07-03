@@ -6,7 +6,7 @@ from __future__ import (print_function, division, unicode_literals,
 
 from ... import logging
 from ..base import (CommandLineInputSpec, CommandLine, traits, File, isdefined)
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 class MRTrix3BaseInputSpec(CommandLineInputSpec):

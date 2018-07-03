@@ -10,11 +10,6 @@ def test_DicomToNrrdConverter_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputDicomDirectory=dict(argstr='--inputDicomDirectory %s', ),
         outputDirectory=dict(
             argstr='--outputDirectory %s',
@@ -22,10 +17,6 @@ def test_DicomToNrrdConverter_inputs():
         ),
         outputVolume=dict(argstr='--outputVolume %s', ),
         smallGradientThreshold=dict(argstr='--smallGradientThreshold %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         useBMatrixGradientDirections=dict(
             argstr='--useBMatrixGradientDirections ', ),
         useIdentityMeaseurementFrame=dict(

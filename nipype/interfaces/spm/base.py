@@ -37,7 +37,7 @@ from ..matlab import MatlabCommand
 from ...external.due import due, Doi, BibTeX
 
 __docformat__ = 'restructuredtext'
-logger = logging.getLogger('interface')
+logger = logging.getLogger('nipype.interface')
 
 
 def func_is_3d(in_file):

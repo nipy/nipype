@@ -10,11 +10,6 @@ def test_ABoverlap_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file_a=dict(
             argstr='%s',
             copyfile=False,
@@ -38,10 +33,6 @@ def test_ABoverlap_inputs():
         ),
         outputtype=dict(),
         quiet=dict(argstr='-quiet', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         verb=dict(argstr='-verb', ),
     )
     inputs = ABoverlap.input_spec()

@@ -17,11 +17,6 @@ def test_Contrast_inputs():
             argstr='--%s-only',
             mandatory=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         orig=dict(mandatory=True, ),
         rawavg=dict(mandatory=True, ),
         subject_id=dict(
@@ -30,10 +25,6 @@ def test_Contrast_inputs():
             usedefault=True,
         ),
         subjects_dir=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         thickness=dict(mandatory=True, ),
         white=dict(mandatory=True, ),
     )

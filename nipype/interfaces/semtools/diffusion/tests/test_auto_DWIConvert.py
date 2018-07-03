@@ -18,11 +18,6 @@ def test_DWIConvert_inputs():
             argstr='--gradientVectorFile %s',
             hash_files=False,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputBValues=dict(argstr='--inputBValues %s', ),
         inputBVectors=dict(argstr='--inputBVectors %s', ),
         inputDicomDirectory=dict(argstr='--inputDicomDirectory %s', ),
@@ -44,10 +39,6 @@ def test_DWIConvert_inputs():
             hash_files=False,
         ),
         smallGradientThreshold=dict(argstr='--smallGradientThreshold %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         transposeInputBVectors=dict(argstr='--transposeInputBVectors ', ),
         useBMatrixGradientDirections=dict(
             argstr='--useBMatrixGradientDirections ', ),

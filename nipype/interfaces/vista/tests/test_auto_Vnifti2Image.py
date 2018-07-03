@@ -14,11 +14,6 @@ def test_Vnifti2Image_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-in %s',
             mandatory=True,
@@ -31,10 +26,6 @@ def test_Vnifti2Image_inputs():
             name_source=['in_file'],
             name_template='%s.v',
             position=-1,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = Vnifti2Image.input_spec()

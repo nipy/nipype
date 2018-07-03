@@ -17,11 +17,6 @@ def test_buildtemplateparallel_inputs():
             usedefault=True,
         ),
         gradient_step_size=dict(argstr='-g %f', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(
             argstr='%s',
             mandatory=True,
@@ -53,10 +48,6 @@ def test_buildtemplateparallel_inputs():
         ),
         rigid_body_registration=dict(argstr='-r 1', ),
         similarity_metric=dict(argstr='-s %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         transformation_model=dict(
             argstr='-t %s',
             usedefault=True,

@@ -5,11 +5,6 @@ from ..misc import CalculateMedian
 
 def test_CalculateMedian_inputs():
     input_map = dict(
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(),
         median_file=dict(),
         median_per_file=dict(usedefault=True, ),

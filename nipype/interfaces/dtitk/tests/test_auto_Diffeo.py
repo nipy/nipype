@@ -20,11 +20,6 @@ def test_Diffeo_inputs():
             position=5,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         legacy=dict(
             argstr='%d',
             mandatory=True,
@@ -45,10 +40,6 @@ def test_Diffeo_inputs():
             mandatory=True,
             position=4,
             usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = Diffeo.input_spec()

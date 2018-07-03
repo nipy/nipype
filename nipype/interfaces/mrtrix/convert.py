@@ -19,7 +19,7 @@ from ...workflows.misc.utils import get_data_dims, get_vox_dims
 from ..base import TraitedSpec, File, isdefined
 from ..dipy.base import DipyBaseInterface, HAVE_DIPY as have_dipy
 
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 def transform_to_affine(streams, header, affine):

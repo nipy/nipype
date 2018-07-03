@@ -15,11 +15,6 @@ def test_DT2NIfTI_inputs():
             mandatory=True,
             position=3,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-inputfile %s',
             mandatory=True,
@@ -29,10 +24,6 @@ def test_DT2NIfTI_inputs():
             argstr='-outputroot %s',
             genfile=True,
             position=2,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = DT2NIfTI.input_spec()

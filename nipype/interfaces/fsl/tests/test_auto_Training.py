@@ -10,11 +10,6 @@ def test_Training_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         loo=dict(
             argstr='-l',
             position=2,
@@ -23,10 +18,6 @@ def test_Training_inputs():
             argstr='%s',
             copyfile=False,
             position=-1,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         trained_wts_filestem=dict(
             argstr='%s',

@@ -18,7 +18,7 @@ from ..base import (BaseInterface, BaseInterfaceInputSpec, traits, File,
                     TraitedSpec, InputMultiPath, OutputMultiPath, isdefined)
 from .base import have_cmp
 
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 def read_unknown_ntwk(ntwk):

@@ -319,13 +319,7 @@ class TraitedSpec(BaseTraitedSpec):
 
 
 class BaseInterfaceInputSpec(TraitedSpec):
-    ignore_exception = traits.Bool(
-        False,
-        usedefault=True,
-        nohash=True,
-        deprecated='1.0.0',
-        desc='Print an error message instead of throwing an exception '
-        'in case the interface fails to run')
+    pass
 
 
 class DynamicTraitedSpec(BaseTraitedSpec):
@@ -364,21 +358,6 @@ class CommandLineInputSpec(BaseInterfaceInputSpec):
     args = traits.Str(argstr='%s', desc='Additional parameters to the command')
     environ = traits.DictStrStr(
         desc='Environment variables', usedefault=True, nohash=True)
-    # This input does not have a "usedefault=True" so the set_default_terminal_output()
-    # method would work
-    terminal_output = traits.Enum(
-        'stream',
-        'allatonce',
-        'file',
-        'none',
-        deprecated='1.0.0',
-        desc=('Control terminal output: `stream` - '
-              'displays to terminal immediately (default), '
-              '`allatonce` - waits till command is '
-              'finished to display output, `file` - '
-              'writes output to file, `none` - output'
-              ' is ignored'),
-        nohash=True)
 
 
 class StdOutCommandLineInputSpec(CommandLineInputSpec):

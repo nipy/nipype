@@ -18,11 +18,6 @@ def test_SVReg_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         iterations=dict(argstr="'-H %d'", ),
         keepIntermediates=dict(argstr="'-k'", ),
         pialSurfaceMaskDilation=dict(argstr="'-D %d'", ),
@@ -35,10 +30,6 @@ def test_SVReg_inputs():
             argstr="'%s'",
             mandatory=True,
             position=0,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         useCerebrumMask=dict(argstr="'-C'", ),
         useManualMaskFile=dict(argstr="'-cbm'", ),

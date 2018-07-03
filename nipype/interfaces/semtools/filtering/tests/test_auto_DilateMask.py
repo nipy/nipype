@@ -10,11 +10,6 @@ def test_DilateMask_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputBinaryVolume=dict(argstr='--inputBinaryVolume %s', ),
         inputVolume=dict(argstr='--inputVolume %s', ),
         lowerThreshold=dict(argstr='--lowerThreshold %f', ),
@@ -23,10 +18,6 @@ def test_DilateMask_inputs():
             hash_files=False,
         ),
         sizeStructuralElement=dict(argstr='--sizeStructuralElement %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = DilateMask.input_spec()
 

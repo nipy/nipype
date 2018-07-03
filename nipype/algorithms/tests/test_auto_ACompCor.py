@@ -8,11 +8,6 @@ def test_ACompCor_inputs():
         components_file=dict(usedefault=True, ),
         header_prefix=dict(),
         high_pass_cutoff=dict(usedefault=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         ignore_initial_volumes=dict(usedefault=True, ),
         mask_files=dict(),
         mask_index=dict(

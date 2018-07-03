@@ -10,21 +10,12 @@ def test_DistanceMaps_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputLabelVolume=dict(argstr='--inputLabelVolume %s', ),
         inputMaskVolume=dict(argstr='--inputMaskVolume %s', ),
         inputTissueLabel=dict(argstr='--inputTissueLabel %d', ),
         outputVolume=dict(
             argstr='--outputVolume %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = DistanceMaps.input_spec()

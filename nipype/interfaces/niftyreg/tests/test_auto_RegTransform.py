@@ -78,11 +78,6 @@ def test_RegTransform_inputs():
                 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'
             ],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inv_aff_input=dict(
             argstr='-invAff %s',
             position=-2,
@@ -127,10 +122,6 @@ def test_RegTransform_inputs():
             argstr='-ref2 %s',
             position=1,
             requires=['ref1_file'],
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         upd_s_form_input=dict(
             argstr='-updSform %s',

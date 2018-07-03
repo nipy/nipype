@@ -15,11 +15,6 @@ def test_Undump_inputs():
         ),
         fill_value=dict(argstr='-fval %f', ),
         head_only=dict(argstr='-head_only', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-master %s',
             copyfile=False,
@@ -38,10 +33,6 @@ def test_Undump_inputs():
         ),
         outputtype=dict(),
         srad=dict(argstr='-srad %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = Undump.input_spec()
 

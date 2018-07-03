@@ -10,11 +10,6 @@ def test_TCK2VTK_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -30,10 +25,6 @@ def test_TCK2VTK_inputs():
             usedefault=True,
         ),
         reference=dict(argstr='-image %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         voxel=dict(argstr='-image %s', ),
     )
     inputs = TCK2VTK.input_spec()

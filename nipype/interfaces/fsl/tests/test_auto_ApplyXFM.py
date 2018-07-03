@@ -55,11 +55,6 @@ def test_ApplyXFM_inputs():
             units='degrees',
         ),
         force_scaling=dict(argstr='-forcescaling', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-in %s',
             mandatory=True,
@@ -132,10 +127,6 @@ def test_ApplyXFM_inputs():
             units='voxels',
         ),
         sinc_window=dict(argstr='-sincwindow %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         uses_qform=dict(argstr='-usesqform', ),
         verbose=dict(argstr='-verbose %d', ),
         wm_seg=dict(

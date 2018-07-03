@@ -16,11 +16,6 @@ def test_BlurInMask_inputs():
             argstr='-FWHM %f',
             mandatory=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-input %s',
             copyfile=False,
@@ -45,10 +40,6 @@ def test_BlurInMask_inputs():
         ),
         outputtype=dict(),
         preserve=dict(argstr='-preserve', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = BlurInMask.input_spec()
 

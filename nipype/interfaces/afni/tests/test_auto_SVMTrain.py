@@ -17,11 +17,6 @@ def test_SVMTrain_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-trainvol %s',
             copyfile=False,
@@ -53,10 +48,6 @@ def test_SVMTrain_inputs():
             suffix='_bucket',
         ),
         outputtype=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         trainlabels=dict(argstr='-trainlabels %s', ),
         ttype=dict(
             argstr='-type %s',

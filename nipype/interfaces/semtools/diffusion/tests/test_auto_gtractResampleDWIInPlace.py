@@ -11,11 +11,6 @@ def test_gtractResampleDWIInPlace_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         imageOutputSize=dict(
             argstr='--imageOutputSize %s',
             sep=',',
@@ -32,10 +27,6 @@ def test_gtractResampleDWIInPlace_inputs():
             hash_files=False,
         ),
         referenceVolume=dict(argstr='--referenceVolume %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         warpDWITransform=dict(argstr='--warpDWITransform %s', ),
     )
     inputs = gtractResampleDWIInPlace.input_spec()

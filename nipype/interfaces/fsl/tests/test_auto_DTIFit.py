@@ -32,11 +32,6 @@ def test_DTIFit_inputs():
             usedefault=True,
         ),
         gradnonlin=dict(argstr='--gradnonlin=%s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         little_bit=dict(argstr='--littlebit', ),
         mask=dict(
             argstr='-m %s',
@@ -52,10 +47,6 @@ def test_DTIFit_inputs():
         output_type=dict(),
         save_tensor=dict(argstr='--save_tensor', ),
         sse=dict(argstr='--sse', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = DTIFit.input_spec()
 

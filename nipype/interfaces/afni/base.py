@@ -19,7 +19,7 @@ from ..base import (CommandLine, traits, CommandLineInputSpec, isdefined, File,
 from ...external.due import BibTeX
 
 # Use nipype's logging system
-IFLOGGER = logging.getLogger('interface')
+IFLOGGER = logging.getLogger('nipype.interface')
 
 
 class Info(PackageInfo):

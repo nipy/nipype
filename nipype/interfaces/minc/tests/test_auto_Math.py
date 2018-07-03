@@ -93,11 +93,6 @@ def test_Math_inputs():
                  'format_int', 'format_long', 'format_float', 'format_double',
                  'format_signed', 'format_unsigned'),
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         ignore_nan=dict(argstr='-ignore_nan', ),
         input_files=dict(
             argstr='%s',
@@ -151,10 +146,6 @@ def test_Math_inputs():
         segment=dict(argstr='-segment -const2 %s %s', ),
         sqrt=dict(argstr='-sqrt', ),
         square=dict(argstr='-square', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         test_eq=dict(argstr='-eq', ),
         test_ge=dict(argstr='-ge', ),
         test_gt=dict(argstr='-gt', ),

@@ -12,11 +12,6 @@ def test_VotingBinaryHoleFillingImageFilter_inputs():
             usedefault=True,
         ),
         foreground=dict(argstr='--foreground %d', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(
             argstr='%s',
             position=-2,
@@ -30,10 +25,6 @@ def test_VotingBinaryHoleFillingImageFilter_inputs():
         radius=dict(
             argstr='--radius %s',
             sep=',',
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = VotingBinaryHoleFillingImageFilter.input_spec()

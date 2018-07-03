@@ -19,17 +19,8 @@ def test_ThresholdScalarVolume_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         lower=dict(argstr='--lower %d', ),
         outsidevalue=dict(argstr='--outsidevalue %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         threshold=dict(argstr='--threshold %d', ),
         thresholdtype=dict(argstr='--thresholdtype %s', ),
         upper=dict(argstr='--upper %d', ),

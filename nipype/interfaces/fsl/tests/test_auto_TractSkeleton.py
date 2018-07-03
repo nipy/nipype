@@ -14,11 +14,6 @@ def test_TractSkeleton_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-i %s',
             mandatory=True,
@@ -31,10 +26,6 @@ def test_TractSkeleton_inputs():
         projected_data=dict(),
         search_mask_file=dict(xor=['use_cingulum_mask'], ),
         skeleton_file=dict(argstr='-o %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         threshold=dict(),
         use_cingulum_mask=dict(
             usedefault=True,

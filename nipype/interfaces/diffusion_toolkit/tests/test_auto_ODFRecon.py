@@ -17,11 +17,6 @@ def test_ODFRecon_inputs():
             usedefault=True,
         ),
         filter=dict(argstr='-f', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         image_orientation_vectors=dict(argstr='-iop %f', ),
         matrix=dict(
             argstr='-mat %s',
@@ -54,10 +49,6 @@ def test_ODFRecon_inputs():
         ),
         sharpness=dict(argstr='-s %f', ),
         subtract_background=dict(argstr='-bg', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = ODFRecon.input_spec()
 

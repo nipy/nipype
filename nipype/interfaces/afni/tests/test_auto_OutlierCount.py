@@ -24,11 +24,6 @@ def test_OutlierCount_inputs():
             argstr='-fraction',
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -64,10 +59,6 @@ def test_OutlierCount_inputs():
             usedefault=True,
         ),
         save_outliers=dict(usedefault=True, ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = OutlierCount.input_spec()
 

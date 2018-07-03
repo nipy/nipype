@@ -26,11 +26,6 @@ def test_FitAsl_inputs():
         gm_plasma=dict(argstr='-gmL %f', ),
         gm_t1=dict(argstr='-gmT1 %f', ),
         gm_ttt=dict(argstr='-gmTTT %f', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         ir_output=dict(argstr='-IRoutput %s', ),
         ir_volume=dict(argstr='-IRvolume %s', ),
         ldd=dict(argstr='-LDD %f', ),
@@ -68,10 +63,6 @@ def test_FitAsl_inputs():
         t1map=dict(argstr='-t1map %s', ),
         t_inv1=dict(argstr='-Tinv1 %f', ),
         t_inv2=dict(argstr='-Tinv2 %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         wm_plasma=dict(argstr='-wmL %f', ),
         wm_t1=dict(argstr='-wmT1 %f', ),
         wm_ttt=dict(argstr='-wmTTT %f', ),

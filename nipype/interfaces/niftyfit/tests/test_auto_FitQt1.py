@@ -31,11 +31,6 @@ def test_FitQt1_inputs():
             argstr='-gn',
             position=8,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         ir_flag=dict(
             argstr='-IR',
             position=13,
@@ -108,10 +103,6 @@ def test_FitQt1_inputs():
         te_value=dict(
             argstr='-TE %f',
             position=4,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         tis=dict(
             argstr='-TIs %s',

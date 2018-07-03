@@ -15,11 +15,6 @@ def test_ComputeTDI_inputs():
             usedefault=True,
         ),
         fwhm_tck=dict(argstr='-fwhm_tck %f', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -42,10 +37,6 @@ def test_ComputeTDI_inputs():
         stat_tck=dict(argstr='-stat_tck %s', ),
         stat_vox=dict(argstr='-stat_vox %s', ),
         tck_weights=dict(argstr='-tck_weights_in %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         upsample=dict(argstr='-upsample %d', ),
         use_dec=dict(argstr='-dec', ),
         vox_size=dict(

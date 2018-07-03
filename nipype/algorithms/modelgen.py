@@ -29,7 +29,7 @@ from ..interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
 from ..utils.filemanip import ensure_list
 from ..utils.misc import normalize_mc_params
 from .. import config, logging
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 def gcd(a, b):

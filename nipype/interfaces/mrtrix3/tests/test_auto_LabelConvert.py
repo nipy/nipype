@@ -10,11 +10,6 @@ def test_LabelConvert_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_config=dict(
             argstr='%s',
             position=-2,
@@ -40,10 +35,6 @@ def test_LabelConvert_inputs():
             usedefault=True,
         ),
         spine=dict(argstr='-spine %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = LabelConvert.input_spec()
 

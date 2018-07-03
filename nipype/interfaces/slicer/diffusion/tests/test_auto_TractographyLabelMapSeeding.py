@@ -20,11 +20,6 @@ def test_TractographyLabelMapSeeding_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputroi=dict(argstr='--inputroi %s', ),
         integrationsteplength=dict(argstr='--integrationsteplength %f', ),
         label=dict(argstr='--label %d', ),
@@ -40,10 +35,6 @@ def test_TractographyLabelMapSeeding_inputs():
         stoppingcurvature=dict(argstr='--stoppingcurvature %f', ),
         stoppingmode=dict(argstr='--stoppingmode %s', ),
         stoppingvalue=dict(argstr='--stoppingvalue %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         useindexspace=dict(argstr='--useindexspace ', ),
         writetofile=dict(argstr='--writetofile ', ),
     )

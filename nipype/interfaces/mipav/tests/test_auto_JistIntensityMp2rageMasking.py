@@ -10,11 +10,6 @@ def test_JistIntensityMp2rageMasking_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inBackground=dict(argstr='--inBackground %s', ),
         inMasking=dict(argstr='--inMasking %s', ),
         inQuantitative=dict(argstr='--inQuantitative %s', ),
@@ -37,10 +32,6 @@ def test_JistIntensityMp2rageMasking_inputs():
         outSignal2=dict(
             argstr='--outSignal_Mask %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         xDefaultMem=dict(argstr='-xDefaultMem %d', ),
         xMaxProcess=dict(

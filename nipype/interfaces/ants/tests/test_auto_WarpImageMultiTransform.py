@@ -15,11 +15,6 @@ def test_WarpImageMultiTransform_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         input_image=dict(
             argstr='%s',
             mandatory=True,
@@ -47,10 +42,6 @@ def test_WarpImageMultiTransform_inputs():
             xor=['tightest_box'],
         ),
         reslice_by_header=dict(argstr='--reslice-by-header', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         tightest_box=dict(
             argstr='--tightest-bounding-box',
             xor=['reference_image'],

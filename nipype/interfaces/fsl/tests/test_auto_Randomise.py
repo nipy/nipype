@@ -26,11 +26,6 @@ def test_Randomise_inputs():
         f_cm_thresh=dict(argstr='-S %.2f', ),
         f_only=dict(argstr='--f_only', ),
         fcon=dict(argstr='-f %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-i %s',
             mandatory=True,
@@ -48,10 +43,6 @@ def test_Randomise_inputs():
         tcon=dict(
             argstr='-t %s',
             position=3,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         tfce=dict(argstr='-T', ),
         tfce2D=dict(argstr='--T2', ),

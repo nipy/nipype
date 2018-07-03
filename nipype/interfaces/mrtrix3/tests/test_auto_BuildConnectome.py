@@ -10,11 +10,6 @@ def test_BuildConnectome_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -41,10 +36,6 @@ def test_BuildConnectome_inputs():
         search_forward=dict(argstr='-assignment_forward_search %f', ),
         search_radius=dict(argstr='-assignment_radial_search %f', ),
         search_reverse=dict(argstr='-assignment_reverse_search %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         vox_lookup=dict(argstr='-assignment_voxel_lookup', ),
         zero_diagonal=dict(argstr='-zero_diagonal', ),
     )

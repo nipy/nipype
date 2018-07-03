@@ -14,11 +14,6 @@ def test_OneDToolPy_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-infile %s',
             mandatory=True,
@@ -39,10 +34,6 @@ def test_OneDToolPy_inputs():
         show_indices_interest=dict(argstr='-show_indices_interest', ),
         show_trs_run=dict(argstr='-show_trs_run %d', ),
         show_trs_uncensored=dict(argstr='-show_trs_uncensored %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = OneDToolPy.input_spec()
 

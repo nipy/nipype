@@ -10,11 +10,6 @@ def test_gtractInvertBSplineTransform_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputReferenceVolume=dict(argstr='--inputReferenceVolume %s', ),
         inputTransform=dict(argstr='--inputTransform %s', ),
         landmarkDensity=dict(
@@ -25,10 +20,6 @@ def test_gtractInvertBSplineTransform_inputs():
         outputTransform=dict(
             argstr='--outputTransform %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = gtractInvertBSplineTransform.input_spec()

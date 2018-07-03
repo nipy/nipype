@@ -10,11 +10,6 @@ def test_ApplyMask_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -37,10 +32,6 @@ def test_ApplyMask_inputs():
             position=-1,
         ),
         subjects_dir=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         transfer=dict(argstr='-transfer %d', ),
         use_abs=dict(argstr='-abs', ),
         xfm_file=dict(argstr='-xform %s', ),

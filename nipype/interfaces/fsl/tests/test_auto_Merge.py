@@ -15,11 +15,6 @@ def test_Merge_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(
             argstr='%s',
             mandatory=True,
@@ -33,10 +28,6 @@ def test_Merge_inputs():
             position=1,
         ),
         output_type=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         tr=dict(
             argstr='%.2f',
             position=-1,

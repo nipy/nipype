@@ -62,7 +62,7 @@ try:
 except:
     pass
 
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 def copytree(src, dst, use_hardlink=False):
@@ -513,7 +513,6 @@ class DataSink(IOBase):
 
         # Init variables
         creds_path = self.inputs.creds_path
-        iflogger = logging.getLogger('interface')
 
         # Get AWS credentials
         try:
@@ -587,7 +586,6 @@ class DataSink(IOBase):
         from botocore.exceptions import ClientError
 
         # Init variables
-        iflogger = logging.getLogger('interface')
         s3_str = 's3://'
         s3_prefix = s3_str + bucket.name
 
@@ -655,7 +653,6 @@ class DataSink(IOBase):
         """
 
         # Init variables
-        iflogger = logging.getLogger('interface')
         outputs = self.output_spec().get()
         out_files = []
         # Use hardlink
@@ -2585,13 +2582,6 @@ class JSONFileGrabber(IOBase):
     Example
     -------
 
-    .. testsetup::
-
-    >>> tmp = getfixture('tmpdir')
-    >>> old = tmp.chdir() # changing to a temporary directory
-
-    .. doctest::
-
     >>> import pprint
     >>> from nipype.interfaces.io import JSONFileGrabber
     >>> jsonSource = JSONFileGrabber()
@@ -2603,11 +2593,6 @@ class JSONFileGrabber(IOBase):
     >>> res = jsonSource.run()
     >>> pprint.pprint(res.outputs.get())  # doctest:, +ELLIPSIS
     {'param1': 'exampleStr', 'param2': 4, 'param3': 1.0}
-
-    .. testsetup::
-
-    >>> os.chdir(old.strpath)
-
     """
     input_spec = JSONFileGrabberInputSpec
     output_spec = DynamicTraitedSpec

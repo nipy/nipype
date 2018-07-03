@@ -28,11 +28,6 @@ def test_DualRegression_inputs():
             mandatory=True,
             position=1,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(
             argstr='%s',
             mandatory=True,
@@ -55,10 +50,6 @@ def test_DualRegression_inputs():
             usedefault=True,
         ),
         output_type=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = DualRegression.input_spec()
 

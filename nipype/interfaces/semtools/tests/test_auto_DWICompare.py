@@ -10,17 +10,8 @@ def test_DWICompare_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume1=dict(argstr='--inputVolume1 %s', ),
         inputVolume2=dict(argstr='--inputVolume2 %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = DWICompare.input_spec()
 

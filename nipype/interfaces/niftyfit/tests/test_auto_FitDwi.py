@@ -63,11 +63,6 @@ def test_FitDwi_inputs():
             argstr='-gn',
             xor=['wls_flag'],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         ivim_flag=dict(
             argstr='-ivim',
             position=4,
@@ -178,10 +173,6 @@ def test_FitDwi_inputs():
             name_source=['source_file'],
             name_template='%s_tenmap.nii.gz',
             requires=['dti_flag'],
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         v1map_file=dict(
             argstr='-v1map %s',

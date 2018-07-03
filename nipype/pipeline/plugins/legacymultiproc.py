@@ -11,8 +11,7 @@ from __future__ import (print_function, division, unicode_literals,
 
 # Import packages
 import os
-from multiprocessing import cpu_count
-from concurrent.futures import ProcessPoolExecutor
+from multiprocessing import Process, Pool, cpu_count, pool
 from traceback import format_exception
 import sys
 from logging import INFO
@@ -75,7 +74,26 @@ def run_node(node, updatehash, taskid):
     return result
 
 
-class MultiProcPlugin(DistributedPluginBase):
+class NonDaemonProcess(Process):
+    """A non-daemon process to support internal multiprocessing.
+    """
+
+    def _get_daemon(self):
+        return False
+
+    def _set_daemon(self, value):
+        pass
+
+    daemon = property(_get_daemon, _set_daemon)
+
+
+class NonDaemonPool(pool.Pool):
+    """A process pool with non-daemon processes.
+    """
+    Process = NonDaemonProcess
+
+
+class LegacyMultiProcPlugin(DistributedPluginBase):
     """
     Execute workflow with multiprocessing, not sending more jobs at once
     than the system can support.
@@ -111,7 +129,7 @@ class MultiProcPlugin(DistributedPluginBase):
 
     def __init__(self, plugin_args=None):
         # Init variables and instance attributes
-        super(MultiProcPlugin, self).__init__(plugin_args=plugin_args)
+        super(LegacyMultiProcPlugin, self).__init__(plugin_args=plugin_args)
         self._taskresult = {}
         self._task_obj = {}
         self._taskid = 0
@@ -121,6 +139,8 @@ class MultiProcPlugin(DistributedPluginBase):
         self._cwd = os.getcwd()
 
         # Read in options or set defaults.
+        non_daemon = self.plugin_args.get('non_daemon', True)
+        maxtasks = self.plugin_args.get('maxtasksperchild', 10)
         self.processors = self.plugin_args.get('n_procs', cpu_count())
         self.memory_gb = self.plugin_args.get(
             'memory_gb',  # Allocate 90% of system memory
@@ -129,19 +149,30 @@ class MultiProcPlugin(DistributedPluginBase):
                                                        True)
 
         # Instantiate different thread pools for non-daemon processes
-        logger.debug('[MultiProc] Starting (n_procs=%d, '
-                     'mem_gb=%0.2f, cwd=%s)',
+        logger.debug('[LegacyMultiProc] Starting in "%sdaemon" mode (n_procs=%d, '
+                     'mem_gb=%0.2f, cwd=%s)', 'non' * int(non_daemon),
                      self.processors, self.memory_gb, self._cwd)
 
-        self.pool = ProcessPoolExecutor(max_workers=self.processors)
+        NipypePool = NonDaemonPool if non_daemon else Pool
+        try:
+            self.pool = NipypePool(
+                processes=self.processors,
+                maxtasksperchild=maxtasks,
+                initializer=os.chdir,
+                initargs=(self._cwd,)
+            )
+        except TypeError:
+            # Python < 3.2 does not have maxtasksperchild
+            # When maxtasksperchild is not set, initializer is not to be
+            # called
+            self.pool = NipypePool(processes=self.processors)
 
         self._stats = None
 
     def _async_callback(self, args):
         # Make sure runtime is not left at a dubious working directory
         os.chdir(self._cwd)
-        result = args.result()
-        self._taskresult[result['taskid']] = result
+        self._taskresult[args['taskid']] = args
 
     def _get_result(self, taskid):
         return self._taskresult.get(taskid)
@@ -156,11 +187,11 @@ class MultiProcPlugin(DistributedPluginBase):
         if getattr(node.interface, 'terminal_output', '') == 'stream':
             node.interface.terminal_output = 'allatonce'
 
-        result_future = self.pool.submit(run_node, node, updatehash, self._taskid)
-        result_future.add_done_callback(self._async_callback)
-        self._task_obj[self._taskid] = result_future
+        self._task_obj[self._taskid] = self.pool.apply_async(
+            run_node, (node, updatehash, self._taskid),
+            callback=self._async_callback)
 
-        logger.debug('[MultiProc] Submitted task %s (taskid=%d).',
+        logger.debug('[LegacyMultiProc] Submitted task %s (taskid=%d).',
                      node.fullname, self._taskid)
         return self._taskid
 
@@ -187,7 +218,7 @@ class MultiProcPlugin(DistributedPluginBase):
                 raise RuntimeError('Insufficient resources available for job')
 
     def _postrun_check(self):
-        self.pool.shutdown()
+        self.pool.close()
 
     def _check_resources(self, running_tasks):
         """
@@ -231,7 +262,7 @@ class MultiProcPlugin(DistributedPluginBase):
                     tasks_list_msg += '\n'.join(running_tasks)
                     tasks_list_msg = indent(tasks_list_msg, ' ' * 21)
             logger.info(
-                '[MultiProc] Running %d tasks, and %d jobs ready. Free '
+                '[LegacyMultiProc] Running %d tasks, and %d jobs ready. Free '
                 'memory (GB): %0.2f/%0.2f, Free processors: %d/%d.%s',
                 len(self.pending_tasks), len(jobids), free_memory_gb,
                 self.memory_gb, free_processors, self.processors,

@@ -29,11 +29,6 @@ def test_BrainExtraction_inputs():
             usedefault=True,
         ),
         extraction_registration_mask=dict(argstr='-f %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         image_suffix=dict(
             argstr='-s %s',
             usedefault=True,
@@ -46,10 +41,6 @@ def test_BrainExtraction_inputs():
         out_prefix=dict(
             argstr='-o %s',
             usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         use_floatingpoint_precision=dict(argstr='-q %d', ),
         use_random_seeding=dict(argstr='-u %d', ),

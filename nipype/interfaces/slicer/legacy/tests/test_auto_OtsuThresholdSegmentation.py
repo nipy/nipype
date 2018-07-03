@@ -12,11 +12,6 @@ def test_OtsuThresholdSegmentation_inputs():
             usedefault=True,
         ),
         faceConnected=dict(argstr='--faceConnected ', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(
             argstr='%s',
             position=-2,
@@ -27,10 +22,6 @@ def test_OtsuThresholdSegmentation_inputs():
             argstr='%s',
             hash_files=False,
             position=-1,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = OtsuThresholdSegmentation.input_spec()

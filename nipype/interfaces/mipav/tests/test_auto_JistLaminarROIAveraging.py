@@ -10,11 +10,6 @@ def test_JistLaminarROIAveraging_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inIntensity=dict(argstr='--inIntensity %s', ),
         inMask=dict(argstr='--inMask %s', ),
         inROI=dict(argstr='--inROI %s', ),
@@ -23,10 +18,6 @@ def test_JistLaminarROIAveraging_inputs():
         outROI3=dict(
             argstr='--outROI3 %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         xDefaultMem=dict(argstr='-xDefaultMem %d', ),
         xMaxProcess=dict(
