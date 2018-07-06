@@ -21,7 +21,7 @@ from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec,
                    AFNIPythonCommand, Info, no_afni)
 
 from ...import logging
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 class CentralityInputSpec(AFNICommandInputSpec):
