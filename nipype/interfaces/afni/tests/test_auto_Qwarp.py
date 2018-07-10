@@ -59,11 +59,6 @@ def test_Qwarp_inputs():
             argstr='-hel',
             xor=['nmi', 'mi', 'lpc', 'lpa', 'pear'],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-source %s',
             copyfile=False,
@@ -141,10 +136,6 @@ def test_Qwarp_inputs():
             xor=['verb'],
         ),
         resample=dict(argstr='-resample', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         verb=dict(
             argstr='-verb',
             xor=['quiet'],

@@ -14,21 +14,12 @@ def test_BRAINSTrimForegroundInDirection_inputs():
             usedefault=True,
         ),
         headSizeLimit=dict(argstr='--headSizeLimit %f', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(argstr='--inputVolume %s', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         otsuPercentileThreshold=dict(argstr='--otsuPercentileThreshold %f', ),
         outputVolume=dict(
             argstr='--outputVolume %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = BRAINSTrimForegroundInDirection.input_spec()

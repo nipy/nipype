@@ -10,11 +10,6 @@ def test_BRAINSInitializedControlPoints_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(argstr='--inputVolume %s', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         outputLandmarksFile=dict(argstr='--outputLandmarksFile %s', ),
@@ -29,10 +24,6 @@ def test_BRAINSInitializedControlPoints_inputs():
         splineGridSize=dict(
             argstr='--splineGridSize %s',
             sep=',',
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = BRAINSInitializedControlPoints.input_spec()

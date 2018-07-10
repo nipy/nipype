@@ -34,11 +34,6 @@ def test_BRAINSFit_inputs():
         forceMINumberOfThreads=dict(argstr='--forceMINumberOfThreads %d', ),
         gui=dict(argstr='--gui ', ),
         histogramMatch=dict(argstr='--histogramMatch ', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         initialTransform=dict(argstr='--initialTransform %s', ),
         initializeTransformMode=dict(argstr='--initializeTransformMode %s', ),
         interpolationMode=dict(argstr='--interpolationMode %s', ),
@@ -106,10 +101,6 @@ def test_BRAINSFit_inputs():
         strippedOutputTransform=dict(
             argstr='--strippedOutputTransform %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         transformType=dict(
             argstr='--transformType %s',

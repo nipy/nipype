@@ -11,11 +11,6 @@ def test_Level1Design_inputs():
         ),
         factor_info=dict(field='fact', ),
         global_intensity_normalization=dict(field='global', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         interscan_interval=dict(
             field='timing.RT',
             mandatory=True,

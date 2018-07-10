@@ -46,11 +46,6 @@ def test_Zeropad_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(
             argstr='%s',
             copyfile=False,
@@ -74,10 +69,6 @@ def test_Zeropad_inputs():
             name_template='zeropad',
         ),
         outputtype=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         z=dict(
             argstr='-z %i',
             xor=['master'],

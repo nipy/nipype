@@ -17,11 +17,6 @@ def test_VolSymm_inputs():
         ),
         fit_linear=dict(argstr='-linear', ),
         fit_nonlinear=dict(argstr='-nonlinear', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         input_file=dict(
             argstr='%s',
             mandatory=True,
@@ -36,10 +31,6 @@ def test_VolSymm_inputs():
             name_source=['input_file'],
             name_template='%s_vol_symm.mnc',
             position=-1,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         trans_file=dict(
             argstr='%s',

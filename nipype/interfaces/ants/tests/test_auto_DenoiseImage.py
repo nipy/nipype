@@ -11,11 +11,6 @@ def test_DenoiseImage_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         input_image=dict(
             argstr='-i %s',
             mandatory=True,
@@ -49,10 +44,6 @@ def test_DenoiseImage_inputs():
         shrink_factor=dict(
             argstr='-s %s',
             usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         verbose=dict(argstr='-v', ),
     )

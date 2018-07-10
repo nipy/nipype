@@ -26,11 +26,6 @@ def test_FLAMEO_inputs():
         ),
         f_con_file=dict(argstr='--fcontrastsfile=%s', ),
         fix_mean=dict(argstr='--fixmean', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         infer_outliers=dict(argstr='--inferoutliers', ),
         log_dir=dict(
             argstr='--ld=%s',
@@ -53,10 +48,6 @@ def test_FLAMEO_inputs():
         t_con_file=dict(
             argstr='--tcontrastsfile=%s',
             mandatory=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         var_cope_file=dict(argstr='--varcopefile=%s', ),
     )

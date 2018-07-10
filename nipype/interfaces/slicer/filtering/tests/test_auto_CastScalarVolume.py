@@ -19,15 +19,6 @@ def test_CastScalarVolume_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         type=dict(argstr='--type %s', ),
     )
     inputs = CastScalarVolume.input_spec()

@@ -11,11 +11,6 @@ def test_Threshold_inputs():
         force_activation=dict(usedefault=True, ),
         height_threshold=dict(usedefault=True, ),
         height_threshold_type=dict(usedefault=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         matlab_cmd=dict(),
         mfile=dict(usedefault=True, ),
         paths=dict(),

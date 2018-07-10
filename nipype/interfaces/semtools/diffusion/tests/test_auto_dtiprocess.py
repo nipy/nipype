@@ -45,11 +45,6 @@ def test_dtiprocess_inputs():
             hash_files=False,
         ),
         hField=dict(argstr='--hField ', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         interpolation=dict(argstr='--interpolation %s', ),
         lambda1_output=dict(
             argstr='--lambda1_output %s',
@@ -88,10 +83,6 @@ def test_dtiprocess_inputs():
         ),
         scalar_float=dict(argstr='--scalar_float ', ),
         sigma=dict(argstr='--sigma %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         verbose=dict(argstr='--verbose ', ),
     )
     inputs = dtiprocess.input_spec()

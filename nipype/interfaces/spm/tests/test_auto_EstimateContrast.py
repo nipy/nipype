@@ -11,11 +11,6 @@ def test_EstimateContrast_inputs():
         ),
         contrasts=dict(mandatory=True, ),
         group_contrast=dict(xor=['use_derivs'], ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         matlab_cmd=dict(),
         mfile=dict(usedefault=True, ),
         paths=dict(),

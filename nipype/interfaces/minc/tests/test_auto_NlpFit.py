@@ -18,11 +18,6 @@ def test_NlpFit_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         init_xfm=dict(
             argstr='-init_xfm %s',
             mandatory=True,
@@ -46,10 +41,6 @@ def test_NlpFit_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         verbose=dict(argstr='-verbose', ),
     )

@@ -25,11 +25,6 @@ def test_Beast_inputs():
         ),
         fill_holes=dict(argstr='-fill', ),
         flip_images=dict(argstr='-flip', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         input_file=dict(
             argstr='%s',
             mandatory=True,
@@ -67,10 +62,6 @@ def test_Beast_inputs():
         smoothness_factor_beta=dict(
             argstr='-beta %s',
             usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         threshold_patch_selection=dict(
             argstr='-threshold %s',

@@ -24,11 +24,6 @@ def test_Pik_inputs():
             argstr='--horizontal',
             xor=('vertical_triplanar_view', 'horizontal_triplanar_view'),
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         image_range=dict(
             argstr='--image_range %s %s',
             xor=('image_range', 'auto_range'),
@@ -70,10 +65,6 @@ def test_Pik_inputs():
             xor=('slice_z', 'slice_y', 'slice_x'),
         ),
         start=dict(argstr='--slice %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         tile_size=dict(argstr='--tilesize %s', ),
         title=dict(argstr='%s', ),
         title_size=dict(

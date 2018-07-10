@@ -1,3 +1,20 @@
+1.1.0 (July 04, 2018)
+=====================
+
+###### [Full changelog](https://github.com/nipy/nipype/milestone/21?closed=1)
+
+  * RF: Futures-based MultiProc (https://github.com/nipy/nipype/pull/2598)
+  * FIX: Avoid closing file descriptors on Windows (https://github.com/nipy/nipype/pull/2617)
+  * MAINT: Play nice with external logging (https://github.com/nipy/nipype/pull/2611)
+  * MAINT: Remove ignore_exception and terminal_output traits from input specs (https://github.com/nipy/nipype/pull/2618)
+  * MAINT: Converge autotest names (https://github.com/nipy/nipype/pull/2610)
+  * ENH: Add versioning metadata to crash files (https://github.com/nipy/nipype/pull/2626)
+  * ENH add -dsort option to TProject (https://github.com/nipy/nipype/pull/2623)
+  * ENH: Add Rescale interface (https://github.com/nipy/nipype/pull/2599)
+  * DOC: Improve documentation for ANTs/FSL interfaces (https://github.com/nipy/nipype/pull/2593)
+  * CI: Stop using Miniconda on Travis (https://github.com/nipy/nipype/pull/2600)
+  * CI: Add PyPI validation on rel/* branches (https://github.com/nipy/nipype/pull/2603)
+
 1.0.4 (May 29, 2018)
 ====================
 

@@ -10,11 +10,6 @@ def test_MatlabCommand_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         logfile=dict(argstr='-logfile %s', ),
         mfile=dict(usedefault=True, ),
         nodesktop=dict(
@@ -38,10 +33,6 @@ def test_MatlabCommand_inputs():
         script_file=dict(usedefault=True, ),
         single_comp_thread=dict(
             argstr='-singleCompThread',
-            nohash=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
             nohash=True,
         ),
         uses_mcr=dict(

@@ -16,11 +16,6 @@ def test_PatchMatch_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-i %s',
             mandatory=True,
@@ -41,10 +36,6 @@ def test_PatchMatch_inputs():
         ),
         patch_size=dict(argstr='-size %i', ),
         pm_num=dict(argstr='-pm %i', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = PatchMatch.input_spec()
 

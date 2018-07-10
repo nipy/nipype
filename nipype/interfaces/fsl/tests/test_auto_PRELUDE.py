@@ -16,11 +16,6 @@ def test_PRELUDE_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         label_file=dict(
             argstr='--labels=%s',
             hash_files=False,
@@ -57,10 +52,6 @@ def test_PRELUDE_inputs():
             hash_files=False,
         ),
         start=dict(argstr='--start=%d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         threshold=dict(argstr='--thresh=%.10f', ),
         unwrapped_phase_file=dict(
             argstr='--unwrap=%s',

@@ -65,11 +65,6 @@ def test_Extract_inputs():
             argstr='+zdirection',
             xor=('flip_z_positive', 'flip_z_negative', 'flip_z_any'),
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         image_maximum=dict(argstr='-image_maximum %s', ),
         image_minimum=dict(argstr='-image_minimum %s', ),
         image_range=dict(argstr='-image_range %s %s', ),
@@ -101,10 +96,6 @@ def test_Extract_inputs():
         start=dict(
             argstr='-start %s',
             sep=',',
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         write_ascii=dict(
             argstr='-ascii',

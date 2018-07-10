@@ -17,11 +17,6 @@ def test_GenWarpFields_inputs():
             usedefault=True,
         ),
         force_proceed=dict(argstr='-f 1', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         input_image=dict(
             argstr='-i %s',
             copyfile=False,
@@ -47,10 +42,6 @@ def test_GenWarpFields_inputs():
             mandatory=True,
         ),
         similarity_metric=dict(argstr='-s %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         transformation_model=dict(
             argstr='-t %s',
             usedefault=True,

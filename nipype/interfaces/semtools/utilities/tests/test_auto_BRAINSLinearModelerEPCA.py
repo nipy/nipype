@@ -10,17 +10,8 @@ def test_BRAINSLinearModelerEPCA_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputTrainingList=dict(argstr='--inputTrainingList %s', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = BRAINSLinearModelerEPCA.input_spec()
 

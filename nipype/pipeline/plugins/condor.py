@@ -10,7 +10,7 @@ from time import sleep
 from ...interfaces.base import CommandLine
 from ... import logging
 from .base import SGELikeBatchManagerBase, logger
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 class CondorPlugin(SGELikeBatchManagerBase):

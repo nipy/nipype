@@ -15,11 +15,6 @@ def test_ModelFit_inputs():
         ),
         fixedbvalue=dict(argstr='-fixedbvalue %s', ),
         fixedmodq=dict(argstr='-fixedmod %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-inputfile %s',
             mandatory=True,
@@ -44,10 +39,6 @@ def test_ModelFit_inputs():
         ),
         sigma=dict(argstr='-sigma %G', ),
         tau=dict(argstr='-tau %G', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = ModelFit.input_spec()
 

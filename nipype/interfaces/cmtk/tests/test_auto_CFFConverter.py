@@ -13,11 +13,6 @@ def test_CFFConverter_inputs():
         gifti_surfaces=dict(),
         gpickled_networks=dict(),
         graphml_networks=dict(),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         license=dict(),
         nifti_volumes=dict(),
         out_file=dict(usedefault=True, ),

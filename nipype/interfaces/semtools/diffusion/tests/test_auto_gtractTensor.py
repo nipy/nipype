@@ -18,11 +18,6 @@ def test_gtractTensor_inputs():
             argstr='--ignoreIndex %s',
             sep=',',
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(argstr='--inputVolume %s', ),
         maskProcessingMode=dict(argstr='--maskProcessingMode %s', ),
         maskVolume=dict(argstr='--maskVolume %s', ),
@@ -37,10 +32,6 @@ def test_gtractTensor_inputs():
         ),
         resampleIsotropic=dict(argstr='--resampleIsotropic ', ),
         size=dict(argstr='--size %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = gtractTensor.input_spec()
 

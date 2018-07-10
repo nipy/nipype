@@ -17,7 +17,7 @@ except ImportError as exc:
 from builtins import open, range
 from .. import config, logging
 
-proflogger = logging.getLogger('utils')
+proflogger = logging.getLogger('nipype.utils')
 resource_monitor = config.resource_monitor
 
 # Init variables
@@ -351,7 +351,7 @@ def _use_resources(n_procs, mem_gb):
     from nipype import logging
     from nipype.utils.profiler import _use_cpu
 
-    iflogger = logging.getLogger('interface')
+    iflogger = logging.getLogger('nipype.interface')
 
     # Getsize of one character string
     BSIZE = sys.getsizeof('  ') - sys.getsizeof(' ')

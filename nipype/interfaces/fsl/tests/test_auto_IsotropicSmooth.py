@@ -16,11 +16,6 @@ def test_IsotropicSmooth_inputs():
             position=4,
             xor=['sigma'],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -50,10 +45,6 @@ def test_IsotropicSmooth_inputs():
             mandatory=True,
             position=4,
             xor=['fwhm'],
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = IsotropicSmooth.input_spec()

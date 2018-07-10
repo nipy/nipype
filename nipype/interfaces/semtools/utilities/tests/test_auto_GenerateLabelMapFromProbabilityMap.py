@@ -10,20 +10,11 @@ def test_GenerateLabelMapFromProbabilityMap_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolumes=dict(argstr='--inputVolumes %s...', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         outputLabelVolume=dict(
             argstr='--outputLabelVolume %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = GenerateLabelMapFromProbabilityMap.input_spec()

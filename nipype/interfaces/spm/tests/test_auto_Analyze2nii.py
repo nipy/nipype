@@ -6,11 +6,6 @@ from ..utils import Analyze2nii
 def test_Analyze2nii_inputs():
     input_map = dict(
         analyze_file=dict(mandatory=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         matlab_cmd=dict(),
         mfile=dict(usedefault=True, ),
         paths=dict(),
@@ -27,11 +22,6 @@ def test_Analyze2nii_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Analyze2nii_outputs():
     output_map = dict(
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         matlab_cmd=dict(),
         mfile=dict(usedefault=True, ),
         nifti_file=dict(),

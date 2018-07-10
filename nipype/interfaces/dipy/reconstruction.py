@@ -18,7 +18,7 @@ from ... import logging
 from ..base import TraitedSpec, File, traits, isdefined
 from .base import DipyDiffusionInterface, DipyBaseInterfaceInputSpec
 
-IFLOGGER = logging.getLogger('interface')
+IFLOGGER = logging.getLogger('nipype.interface')
 
 
 class RESTOREInputSpec(DipyBaseInterfaceInputSpec):

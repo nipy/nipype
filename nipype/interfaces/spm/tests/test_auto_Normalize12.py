@@ -18,11 +18,6 @@ def test_Normalize12_inputs():
             mandatory=True,
             xor=['image_to_align', 'tpm'],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         image_to_align=dict(
             copyfile=True,
             field='subj.vol',

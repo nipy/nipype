@@ -8,11 +8,6 @@ def test_EstimateResponseSH_inputs():
         auto=dict(xor=['recursive'], ),
         b0_thres=dict(usedefault=True, ),
         fa_thresh=dict(usedefault=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_bval=dict(mandatory=True, ),
         in_bvec=dict(mandatory=True, ),
         in_evals=dict(mandatory=True, ),

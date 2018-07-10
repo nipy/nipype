@@ -10,11 +10,6 @@ def test_MPRtoMNI305_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             usedefault=True,
@@ -27,10 +22,6 @@ def test_MPRtoMNI305_inputs():
         target=dict(
             mandatory=True,
             usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = MPRtoMNI305.input_spec()

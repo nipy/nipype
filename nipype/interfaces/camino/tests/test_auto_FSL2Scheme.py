@@ -31,11 +31,6 @@ def test_FSL2Scheme_inputs():
         flipx=dict(argstr='-flipx', ),
         flipy=dict(argstr='-flipy', ),
         flipz=dict(argstr='-flipz', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         interleave=dict(argstr='-interleave', ),
         numscans=dict(
             argstr='-numscans %d',
@@ -45,10 +40,6 @@ def test_FSL2Scheme_inputs():
             argstr='> %s',
             genfile=True,
             position=-1,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         usegradmod=dict(argstr='-usegradmod', ),
     )

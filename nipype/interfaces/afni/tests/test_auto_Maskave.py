@@ -10,11 +10,6 @@ def test_Maskave_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             copyfile=False,
@@ -40,10 +35,6 @@ def test_Maskave_inputs():
         quiet=dict(
             argstr='-quiet',
             position=2,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = Maskave.input_spec()

@@ -10,11 +10,6 @@ def test_SkullStrip_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-input %s',
             copyfile=False,
@@ -31,10 +26,6 @@ def test_SkullStrip_inputs():
             name_template='%s_skullstrip',
         ),
         outputtype=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = SkullStrip.input_spec()
 

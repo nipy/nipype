@@ -93,11 +93,6 @@ def test_Calc_inputs():
                  'format_int', 'format_long', 'format_float', 'format_double',
                  'format_signed', 'format_unsigned'),
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         ignore_nan=dict(argstr='-ignore_nan', ),
         input_files=dict(
             argstr='%s',
@@ -139,10 +134,6 @@ def test_Calc_inputs():
         quiet=dict(
             argstr='-quiet',
             xor=('verbose', 'quiet'),
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         two=dict(argstr='-2', ),
         verbose=dict(

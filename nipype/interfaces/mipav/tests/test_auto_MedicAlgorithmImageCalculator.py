@@ -10,11 +10,6 @@ def test_MedicAlgorithmImageCalculator_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inOperation=dict(argstr='--inOperation %s', ),
         inVolume=dict(argstr='--inVolume %s', ),
         inVolume2=dict(argstr='--inVolume2 %s', ),
@@ -22,10 +17,6 @@ def test_MedicAlgorithmImageCalculator_inputs():
         outResult=dict(
             argstr='--outResult %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         xDefaultMem=dict(argstr='-xDefaultMem %d', ),
         xMaxProcess=dict(

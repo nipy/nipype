@@ -16,11 +16,6 @@ def test_BRAINSResample_inputs():
             argstr='--gridSpacing %s',
             sep=',',
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(argstr='--inputVolume %s', ),
         interpolationMode=dict(argstr='--interpolationMode %s', ),
         inverseTransform=dict(argstr='--inverseTransform ', ),
@@ -31,10 +26,6 @@ def test_BRAINSResample_inputs():
         ),
         pixelType=dict(argstr='--pixelType %s', ),
         referenceVolume=dict(argstr='--referenceVolume %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         warpTransform=dict(argstr='--warpTransform %s', ),
     )
     inputs = BRAINSResample.input_spec()

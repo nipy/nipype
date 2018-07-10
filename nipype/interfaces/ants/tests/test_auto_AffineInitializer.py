@@ -20,11 +20,6 @@ def test_AffineInitializer_inputs():
             mandatory=True,
             position=1,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         local_search=dict(
             argstr='%d',
             position=7,
@@ -58,10 +53,6 @@ def test_AffineInitializer_inputs():
             argstr='%f',
             position=4,
             usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = AffineInitializer.input_spec()

@@ -15,11 +15,6 @@ def test_LabelGeometry_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         intensity_image=dict(
             argstr='%s',
             mandatory=True,
@@ -40,10 +35,6 @@ def test_LabelGeometry_inputs():
             name_source=['label_image'],
             name_template='%s.csv',
             position=3,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = LabelGeometry.input_spec()

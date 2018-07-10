@@ -13,11 +13,6 @@ def test_DicomImport_inputs():
             field='convopts.icedims',
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(
             field='data',
             mandatory=True,

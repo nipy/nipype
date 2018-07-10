@@ -10,11 +10,6 @@ def test_ConvertDset_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-input %s',
             mandatory=True,
@@ -35,10 +30,6 @@ def test_ConvertDset_inputs():
             position=0,
         ),
         outputtype=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = ConvertDset.input_spec()
 

@@ -29,11 +29,6 @@ def test_EPIDeWarp_inputs():
             argstr='--exfdw %s',
             genfile=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         mag_file=dict(
             argstr='--mag %s',
             mandatory=True,
@@ -51,10 +46,6 @@ def test_EPIDeWarp_inputs():
         tediff=dict(
             argstr='--tediff %s',
             usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         tmpdir=dict(
             argstr='--tmpdir %s',

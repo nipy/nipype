@@ -26,11 +26,6 @@ def test_CurvatureStats_inputs():
             mandatory=True,
             position=-3,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         min_max=dict(argstr='-m', ),
         out_file=dict(
             argstr='-o %s',
@@ -46,10 +41,6 @@ def test_CurvatureStats_inputs():
         ),
         subjects_dir=dict(),
         surface=dict(argstr='-F %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         values=dict(argstr='-G', ),
         write=dict(argstr='--writeCurvatureFiles', ),
     )

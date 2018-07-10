@@ -10,11 +10,6 @@ def test_fcsv_to_hdf5_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         landmarkGlobPattern=dict(argstr='--landmarkGlobPattern %s', ),
         landmarkTypesList=dict(argstr='--landmarkTypesList %s', ),
         landmarksInformationFile=dict(
@@ -26,10 +21,6 @@ def test_fcsv_to_hdf5_inputs():
             hash_files=False,
         ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         versionID=dict(argstr='--versionID %s', ),
     )
     inputs = fcsv_to_hdf5.input_spec()

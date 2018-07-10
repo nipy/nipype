@@ -11,19 +11,10 @@ def test_Classifier_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         mel_ica=dict(
             argstr='%s',
             copyfile=False,
             position=1,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         thresh=dict(
             argstr='%d',

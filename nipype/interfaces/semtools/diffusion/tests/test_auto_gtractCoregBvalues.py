@@ -14,11 +14,6 @@ def test_gtractCoregBvalues_inputs():
         ),
         fixedVolume=dict(argstr='--fixedVolume %s', ),
         fixedVolumeIndex=dict(argstr='--fixedVolumeIndex %d', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         maximumStepSize=dict(argstr='--maximumStepSize %f', ),
         minimumStepSize=dict(argstr='--minimumStepSize %f', ),
         movingVolume=dict(argstr='--movingVolume %s', ),
@@ -37,10 +32,6 @@ def test_gtractCoregBvalues_inputs():
         relaxationFactor=dict(argstr='--relaxationFactor %f', ),
         samplingPercentage=dict(argstr='--samplingPercentage %f', ),
         spatialScale=dict(argstr='--spatialScale %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = gtractCoregBvalues.input_spec()
 

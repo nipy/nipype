@@ -11,21 +11,12 @@ def test_GenerateSummedGradientImage_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume1=dict(argstr='--inputVolume1 %s', ),
         inputVolume2=dict(argstr='--inputVolume2 %s', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         outputFileName=dict(
             argstr='--outputFileName %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = GenerateSummedGradientImage.input_spec()

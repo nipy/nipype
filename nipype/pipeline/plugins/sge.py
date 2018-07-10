@@ -19,7 +19,7 @@ import random
 from ... import logging
 from ...interfaces.base import CommandLine
 from .base import SGELikeBatchManagerBase, logger
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 DEBUGGING_PREFIX = str(int(random.uniform(100, 999)))
 
 
