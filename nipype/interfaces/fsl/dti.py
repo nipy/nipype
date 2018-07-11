@@ -424,7 +424,7 @@ class BEDPOSTX5(FSLXCommand):
     >>> bedp = fsl.BEDPOSTX5(bvecs='bvecs', bvals='bvals', dwi='diffusion.nii',
     ...                     mask='mask.nii', n_fibres=1)
     >>> bedp.cmdline
-    'bedpostx bedpostx -b 0 --burninnoard=0 --forcedir -n 1 -j 5000 \
+    'bedpostx bedpostx -b 0 --burnin_noard=0 --forcedir -n 1 -j 5000 \
 -s 1 --updateproposalevery=40'
 
     """
