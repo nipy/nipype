@@ -221,10 +221,9 @@ class TOPUPInputSpec(FSLCommandInputSpec):
         5, usedefault=True,
         argstr='--miter=%d', desc='max # of non-linear iterations')
     reg_lambda = traits.Float(
-        1.0, usedefault=True,
-        argstr='--miter=%0.f',
-        desc=('lambda weighting value of the '
-              'regularisation term'))
+        argstr='--lambda=%0.f',
+        desc=('Weight of regularisation, default '
+              'depending on --ssqlambda and --regmod switches.'))
     ssqlambda = traits.Enum(
         1,
         0,
@@ -324,8 +323,7 @@ class TOPUP(FSLCommand):
 --fwhm=8.000000 --imain=b0_b0rev.nii --miter=5 \
 --out=b0_b0rev_base --iout=b0_b0rev_corrected.nii.gz \
 --fout=b0_b0rev_field.nii.gz --jacout=jac --logout=b0_b0rev_topup.log \
---rbmout=xfm --dfout=warpfield --miter=1 --splineorder=3 --subsamp=1 \
---warpres=10.000000'
+--rbmout=xfm --dfout=warpfield --splineorder=3 --subsamp=1 --warpres=10.000000'
     >>> res = topup.run() # doctest: +SKIP
 
     """

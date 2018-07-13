@@ -87,10 +87,7 @@ def test_TOPUP_inputs():
             requires=['encoding_direction'],
             xor=['encoding_file'],
         ),
-        reg_lambda=dict(
-            argstr='--miter=%0.f',
-            usedefault=True,
-        ),
+        reg_lambda=dict(argstr='--lambda=%0.f', ),
         regmod=dict(argstr='--regmod=%s', ),
         regrid=dict(argstr='--regrid=%d', ),
         scale=dict(argstr='--scale=%d', ),
