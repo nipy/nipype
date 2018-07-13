@@ -2,6 +2,10 @@ class NipypeError(Exception):
     pass
 
 
+class EngineError(Exception):
+    pass
+
+
 class PipelineError(NipypeError):
     pass
 

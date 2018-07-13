@@ -1,7 +1,7 @@
 import pdb
 import inspect
-from .. import config, logging
-logger = logging.getLogger('workflow')
+from ... import config, logging
+logger = logging.getLogger('nipype.workflow')
 
 
 # Function to change user provided mapper to "reverse polish notation" used in State
