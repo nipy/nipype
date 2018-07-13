@@ -35,6 +35,10 @@ from .utils import (generate_expanded_graph, export_graph, write_workflow_prov,
 
 from .base import EngineBase
 from .nodes import MapNode, Node
+from . import state
+from . import auxiliary as aux
+
+
 
 # Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
 from future import standard_library
@@ -1066,16 +1070,70 @@ class MapState(object):
     pass
 
 class NewNode(EngineBase):
-    def __init__(self, inputs={}, map_on=None, join_by=None,
+    def __init__(self, name, interface, inputs=None, mapper=None, join_by=None,
                  *args, **kwargs):
-        self._mappers = {}
+        self.name = name
+        # dj: do I need a state_input and state_mapper??
+        # dj: reading the input from files should be added
+        if inputs:
+            # adding name of the node to the input name
+            self._inputs = dict(("{}-{}".format(self.name, key), value) for (key, value) in inputs.items())
+            self._inputs = dict((key, np.array(val)) if type(val) is list else (key, val)
+                                for (key, val) in self._inputs.items())
+        else:
+            self._inputs = {}
+        if mapper:
+            # adding name of the node to the input name within the mapper
+            mapper = aux.change_mapper(mapper, self.name)
+        self._mapper = mapper
+        # create state (takes care of mapper, connects inputs with axes, so we can ask for specifc element)
+        self.state = state.State(state_inputs=self._inputs, mapper=self._mapper, node_name=self.name)
+
+        # adding interface: i'm using Function Interface from aux that has input_map that can change the name of arguments
+        self._interface = interface
+        self._interface.input_map = dict((key, "{}-{}".format(self.name, value))
+                                         for (key, value) in self._interface.input_map.items())
+
         self._joiners = {}
 
-    def map(self, field, values=None):
+
+    @property
+    def mapper(self):
+        return self._mapper
+
+
+    @property
+    def inputs(self):
+        return self._inputs
+
+    #@inputs.setter
+    #def inputs(self, inputs):
+    #    self._inputs = dict(("{}-{}".format(self.name, key), value) for (key, value) in inputs.items())
+    #    self.state_inputs = self._inputs.copy()
+
+
+    def map(self, mapper, inputs=None):
+        if self._mapper:
+            raise Exception("mapper is already set")
+        else:
+            self._mapper = aux.change_mapper(mapper, self.name)
+
+        if inputs:
+            inputs = dict(("{}-{}".format(self.name, key), value) for (key, value) in inputs.items())
+            inputs = dict((key, np.array(val)) if type(val) is list else (key, val)
+                          for (key, val) in inputs.items())
+            self._inputs.update(inputs)
+
+        self.state = state.State(state_inputs=self._inputs, mapper=self._mapper, node_name=self.name)
+
+
+
+    def map_orig(self, field, values=None):
         if isinstance(field, list):
-            for field_
+            #for field_ #dj
             if values is not None:
                 if len(values != len(field)):
+                    pass #dj
         elif isinstance(field, tuple):
             pass
         if values is None:

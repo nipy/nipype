@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import pdb
 
 from . import auxiliary as aux
 
@@ -73,9 +74,8 @@ class State(object):
             # checking which axes are important for the input
             sl_ax = slice(ax[0], ax[-1]+1)
             # taking the indexes for the axes
-            ind_inp = ind[sl_ax]
+            ind_inp = tuple(ind[sl_ax]) #used to be list
             state_dict[input] = self.state_inputs[input][ind_inp]
-
         # adding values from input that are not used in the mapper
         for input in set(self._input_names) - set(self._input_names_mapper):
             state_dict[input] = self.state_inputs[input]
