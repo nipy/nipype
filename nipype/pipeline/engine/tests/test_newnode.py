@@ -58,4 +58,17 @@ def test_node_5():
     assert nn.state._mapper == "N_A-a"
     assert nn.state.state_values([0]) == {"N_A-a": 3}
     assert nn.state.state_values([1]) == {"N_A-a": 5}
-    pdb.set_trace()
+
+
+def test_node_6():
+    """Node with interface and inputs, running interface"""
+    nn = NewNode(name="N_A", interface=interf_addtwo, base_dir="test6")
+    nn.map(mapper="a", inputs={"a": [3, 5]})
+    assert nn.mapper == "N_A-a"
+    assert (nn.inputs["N_A-a"] == np.array([3, 5])).all()
+
+    assert nn.state._mapper == "N_A-a"
+
+    nn.run_interface_el(0, (0,))
+
+

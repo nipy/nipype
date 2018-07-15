@@ -1071,8 +1071,10 @@ class MapState(object):
 
 class NewNode(EngineBase):
     def __init__(self, name, interface, inputs=None, mapper=None, join_by=None,
-                 *args, **kwargs):
-        self.name = name
+                 base_dir=None, *args, **kwargs):
+        super(NewNode, self).__init__(name=name, base_dir=base_dir)
+        # dj: should be changed for wf
+        self.nodedir = self.base_dir
         # dj: do I need a state_input and state_mapper??
         # dj: reading the input from files should be added
         if inputs:
@@ -1094,6 +1096,7 @@ class NewNode(EngineBase):
         self._interface.input_map = dict((key, "{}-{}".format(self.name, value))
                                          for (key, value) in self._interface.input_map.items())
 
+        self.needed_outputs = []
         self._joiners = {}
 
 
@@ -1128,22 +1131,64 @@ class NewNode(EngineBase):
 
 
 
-    def map_orig(self, field, values=None):
-        if isinstance(field, list):
-            #for field_ #dj
-            if values is not None:
-                if len(values != len(field)):
-                    pass #dj
-        elif isinstance(field, tuple):
-            pass
-        if values is None:
-            values = getattr(self._inputs, field)
-            if values is None:
-                raise MappingError('Cannot map unassigned input field')
-        self._mappers[field] = values
+#    def map_orig(self, field, values=None):
+#        if isinstance(field, list):
+#            for field_
+#            if values is not None:
+#                if len(values != len(field)):
+#        elif isinstance(field, tuple):
+#            pass
+#        if values is None:
+#            values = getattr(self._inputs, field)
+#            if values is None:
+#                raise MappingError('Cannot map unassigned input field')
+#        self._mappers[field] = values
 
+    # TBD
     def join(self, field):
         pass
+
+
+    def run_interface_el(self, i, ind, single_node=False):
+        """ running interface one element generated from node_state."""
+        logger.debug("Run interface el, name={}, i={}, ind={}".format(self.name, i, ind))
+        if not single_node: # if we run a single node, we don't have to collect output
+            state_dict, inputs_dict = self._collecting_input_el(ind)
+        logger.debug("Run interface el, name={}, inputs_dict={}, state_dict={}".format(
+                                                            self.name, inputs_dict, state_dict))
+        res = self._interface.run(inputs_dict)
+        #pdb.set_trace()
+        output = self._interface.output
+        logger.debug("Run interface el, output={}".format(output))
+        dir_nm_el = "_".join(["{}.{}".format(i, j) for i, j in list(state_dict.items())])
+        # TODO when join
+        #if self._joinByKey:
+        #    dir_join = "join_" + "_".join(["{}.{}".format(i, j) for i, j in list(state_dict.items()) if i not in self._joinByKey])
+        #elif self._join:
+        #    dir_join = "join_"
+        #if self._joinByKey or self._join:
+        #    os.makedirs(os.path.join(self.nodedir, dir_join), exist_ok=True)
+        #    dir_nm_el = os.path.join(dir_join, dir_nm_el)
+        os.makedirs(os.path.join(self.nodedir, dir_nm_el), exist_ok=True)
+        for key_out in list(output.keys()):
+            with open(os.path.join(self.nodedir, dir_nm_el, key_out+".txt"), "w") as fout:
+                fout.write(str(output[key_out]))
+        return res
+
+    # dj: this is not used for a single node
+    def _collecting_input_el(self, ind):
+        state_dict = self.state.state_values(ind)
+        inputs_dict = {k: state_dict[k] for k in self._inputs.keys()}
+        # reading extra inputs that come from previous nodes
+        for (from_node, from_socket, to_socket) in self.needed_outputs:
+            dir_nm_el_from = "_".join(["{}.{}".format(i, j) for i, j in list(state_dict.items())
+                                       if i in list(from_node.state_inputs.keys())])
+            file_from = os.path.join(from_node.nodedir, dir_nm_el_from, from_socket+".txt")
+            with open(file_from) as f:
+                inputs_dict["{}-{}".format(self.name, to_socket)] = eval(f.readline())
+        return state_dict, inputs_dict
+
+
 
 
 class NewWorkflow(NewNode):
