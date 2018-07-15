@@ -37,7 +37,7 @@ from .base import EngineBase
 from .nodes import MapNode, Node
 from . import state
 from . import auxiliary as aux
-
+from . import submitter as sub
 
 
 # Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
@@ -1147,6 +1147,13 @@ class NewNode(EngineBase):
     # TBD
     def join(self, field):
         pass
+
+
+    def run(self, plugin="serial"):
+        self.sub = sub.SubmitterNode(plugin, node=self) #dj: ?
+        self.sub.run_node()
+        self.sub.close()
+
 
 
     def run_interface_el(self, i, ind, single_node=False):

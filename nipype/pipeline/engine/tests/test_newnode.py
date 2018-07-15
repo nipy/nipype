@@ -69,6 +69,5 @@ def test_node_6():
 
     assert nn.state._mapper == "N_A-a"
 
-    nn.run_interface_el(0, (0,))
-
-
+    # testing if the run method works
+    nn.run()
