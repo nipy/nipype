@@ -17,3 +17,4 @@ psutil
 matplotlib
 packaging
 numpydoc
+dask

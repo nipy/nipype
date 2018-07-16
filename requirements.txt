@@ -17,3 +17,4 @@ mock
 pydotplus
 pydot>=1.2.3
 packaging
+dask

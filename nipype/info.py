@@ -148,6 +148,7 @@ REQUIRES = [
     'pydot>=%s' % PYDOT_MIN_VERSION,
     'packaging',
     'futures; python_version == "2.7"',
+    'dask',
 ]
 
 if sys.version_info <= (3, 4):
