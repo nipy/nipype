@@ -20,6 +20,7 @@ import shutil
 
 import numpy as np
 import networkx as nx
+import itertools
 
 from ... import config, logging
 from ...exceptions import NodeError, WorkflowError, MappingError, JoinError
@@ -39,6 +40,7 @@ from . import state
 from . import auxiliary as aux
 from . import submitter as sub
 
+import pdb
 
 # Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
 from future import standard_library
@@ -1069,10 +1071,10 @@ class Join(Node):
 class MapState(object):
     pass
 
-class NewNode(EngineBase):
+class NewNodeBase(EngineBase):
     def __init__(self, name, interface, inputs=None, mapper=None, join_by=None,
                  base_dir=None, *args, **kwargs):
-        super(NewNode, self).__init__(name=name, base_dir=base_dir)
+        super(NewNodeBase, self).__init__(name=name, base_dir=base_dir)
         # dj: should be changed for wf
         self.nodedir = self.base_dir
         # dj: do I need a state_input and state_mapper??
@@ -1097,6 +1099,9 @@ class NewNode(EngineBase):
                                          for (key, value) in self._interface.input_map.items())
 
         self.needed_outputs = []
+        self._out_nm = self._interface._output_nm
+        self._global_done = False
+
         self._joiners = {}
 
 
@@ -1108,11 +1113,6 @@ class NewNode(EngineBase):
     @property
     def inputs(self):
         return self._inputs
-
-    #@inputs.setter
-    #def inputs(self, inputs):
-    #    self._inputs = dict(("{}-{}".format(self.name, key), value) for (key, value) in inputs.items())
-    #    self.state_inputs = self._inputs.copy()
 
 
     def map(self, mapper, inputs=None):
@@ -1126,7 +1126,6 @@ class NewNode(EngineBase):
             inputs = dict((key, np.array(val)) if type(val) is list else (key, val)
                           for (key, val) in inputs.items())
             self._inputs.update(inputs)
-
         self.state = state.State(state_inputs=self._inputs, mapper=self._mapper, node_name=self.name)
 
 
@@ -1147,13 +1146,6 @@ class NewNode(EngineBase):
     # TBD
     def join(self, field):
         pass
-
-
-    def run(self, plugin="serial"):
-        self.sub = sub.SubmitterNode(plugin, node=self) #dj: ?
-        self.sub.run_node()
-        self.sub.close()
-
 
 
     def run_interface_el(self, i, ind, single_node=False):
@@ -1194,6 +1186,76 @@ class NewNode(EngineBase):
             with open(file_from) as f:
                 inputs_dict["{}-{}".format(self.name, to_socket)] = eval(f.readline())
         return state_dict, inputs_dict
+
+
+
+    # checking if all outputs are saved
+    @property
+    def global_done(self):
+        # once _global_done os True, this should not change
+        logger.debug('global_done {}'.format(self._global_done))
+        if self._global_done:
+            return self._global_done
+        else:
+            return self._check_all_results()
+
+    # dj: version without join
+    def _check_all_results(self):
+        # checking if all files that should be created are present
+        for ind in itertools.product(*self.state._all_elements):
+            state_dict = self.state.state_values(ind)
+            dir_nm_el = "_".join(["{}.{}".format(i, j) for i, j in list(state_dict.items())])
+            for key_out in self._out_nm:
+                if not os.path.isfile(os.path.join(self.nodedir, dir_nm_el, key_out+".txt")):
+                    return False
+        self._global_done = True
+        return True
+
+
+
+
+class NewNode(object):
+    """wrapper around NewNodeBase, mostly have run method """
+    def __init__(self, name, interface, inputs=None, mapper=None, join_by=None,
+                 base_dir=None, *args, **kwargs):
+        self.node = NewNodeBase(name, interface, inputs, mapper, join_by,
+                                base_dir, *args, **kwargs)
+        # dj: might want to use a one element graph
+        #self.graph = nx.DiGraph()
+        #self.graph.add_nodes_from([self.node])
+
+
+    def map(self, mapper, inputs=None):
+         self.node.map(mapper, inputs)
+
+    @property
+    def state(self):
+        return self.node.state
+
+
+    @property
+    def mapper(self):
+        return self.node.mapper
+
+
+    @property
+    def inputs(self):
+        return self.node._inputs
+
+    @property
+    def global_done(self):
+        return self.node._global_done
+
+
+    @property
+    def outputs(self):
+        return self.node.outputs
+
+
+    def run(self, plugin="serial"):
+        self.sub = sub.SubmitterNode(plugin, node=self.node)
+        self.sub.run_node()
+        self.sub.close()
 
 
 
