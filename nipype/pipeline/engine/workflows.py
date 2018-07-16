@@ -10,7 +10,7 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 from builtins import str, bytes, open
 
-import os
+import os, glob
 import os.path as op
 import sys
 from datetime import datetime
@@ -20,7 +20,7 @@ import shutil
 
 import numpy as np
 import networkx as nx
-import itertools
+import itertools, collections
 
 from ... import config, logging
 from ...exceptions import NodeError, WorkflowError, MappingError, JoinError
@@ -1101,6 +1101,7 @@ class NewNodeBase(EngineBase):
         self.needed_outputs = []
         self._out_nm = self._interface._output_nm
         self._global_done = False
+        self._result = {}
 
         self._joiners = {}
 
@@ -1212,6 +1213,36 @@ class NewNodeBase(EngineBase):
         return True
 
 
+    # reading results (without join for now)
+    @property
+    def result(self):
+        if not self._result:
+            self._reading_results()
+        return self._result
+
+
+    def _reading_results(self):
+        """
+        reading results from file,
+        doesn't check if everything is ready, i.e. if self.global_done"""
+        for key_out in self._out_nm:
+            self._result[key_out] = []
+            if self.inputs: #self.state_inputs:
+                files = [name for name in glob.glob("{}/*/{}.txt".format(self.nodedir, key_out))]
+                for file in files:
+                    st_el = file.split(os.sep)[-2].split("_")
+                    st_dict = collections.OrderedDict([(el.split(".")[0], eval(el.split(".")[1]))
+                                                            for el in st_el])
+                    with open(file) as fout:
+                        logger.debug('Reading Results: file={}, st_dict={}'.format(file, st_dict))
+                        self._result[key_out].append((st_dict, eval(fout.readline())))
+            # for nodes without input
+            else:
+                files = [name for name in glob.glob("{}/{}.txt".format(self.nodedir, key_out))]
+                with open(files[0]) as fout:
+                    self._result[key_out].append(({}, eval(fout.readline())))
+
+
 
 
 class NewNode(object):
@@ -1250,6 +1281,11 @@ class NewNode(object):
     @property
     def outputs(self):
         return self.node.outputs
+
+
+    @property
+    def result(self):
+        return self.node.result
 
 
     def run(self, plugin="serial"):
