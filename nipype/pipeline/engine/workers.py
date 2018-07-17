@@ -81,7 +81,7 @@ class DaskWorker(Worker):
         logger.debug("Initialize Dask Worker")
         #self.cluster = LocalCluster()
         self.client = Client()#self.cluster)
-        print("BOKEH", self.client.scheduler_info()["address"] + ":" + str(self.client.scheduler_info()["services"]["bokeh"]))
+        #print("BOKEH", self.client.scheduler_info()["address"] + ":" + str(self.client.scheduler_info()["services"]["bokeh"]))
 
 
     def run_el(self, interface, inp):
