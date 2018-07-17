@@ -13,6 +13,11 @@ def fun_addtwo(a):
     return a + 2
 
 
+def fun_addvar(a, b):
+    return a + b
+
+
+
 def test_node_1():
     """Node with only mandatory arguments"""
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
@@ -87,6 +92,59 @@ def test_node_6(plugin):
 
     # checking teh results
     expected = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    # to be sure that there is the same order (not sure if node itself should keep the order)
+    key_sort = list(expected[0][0].keys())
+    expected.sort(key=lambda t: [t[0][key] for key in key_sort])
+    nn.result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
+    for i, res in enumerate(expected):
+        assert nn.result["out"][i][0] == res[0]
+        assert nn.result["out"][i][1] == res[1]
+
+
+@pytest.mark.parametrize("plugin", Plugins)
+@python3_only
+def test_node_7(plugin):
+    """Node with interface and inputs, running interface"""
+    interf_addvar = Function_Interface(fun_addvar, ["out"])
+    nn = NewNode(name="NA", interface=interf_addvar, base_dir="test7_{}".format(plugin))
+    nn.map(mapper=("a", "b"), inputs={"a": [3, 5], "b": [2, 1]})
+
+    assert nn.mapper == ("NA-a", "NA-b")
+    assert (nn.inputs["NA-a"] == np.array([3, 5])).all()
+    assert (nn.inputs["NA-b"] == np.array([2, 1])).all()
+
+    # testing if the node runs properly
+    nn.run(plugin=plugin)
+
+    # checking teh results
+    expected = [({"NA-a": 3, "NA-b": 2}, 5), ({"NA-a": 5, "NA-b": 1}, 6)]
+    # to be sure that there is the same order (not sure if node itself should keep the order)
+    key_sort = list(expected[0][0].keys())
+    expected.sort(key=lambda t: [t[0][key] for key in key_sort])
+    nn.result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
+    for i, res in enumerate(expected):
+        assert nn.result["out"][i][0] == res[0]
+        assert nn.result["out"][i][1] == res[1]
+
+
+@pytest.mark.parametrize("plugin", Plugins)
+@python3_only
+def test_node_8(plugin):
+    """Node with interface and inputs, running interface"""
+    interf_addvar = Function_Interface(fun_addvar, ["out"])
+    nn = NewNode(name="NA", interface=interf_addvar, base_dir="test8_{}".format(plugin))
+    nn.map(mapper=["a", "b"], inputs={"a": [3, 5], "b": [2, 1]})
+
+    assert nn.mapper == ["NA-a", "NA-b"]
+    assert (nn.inputs["NA-a"] == np.array([3, 5])).all()
+    assert (nn.inputs["NA-b"] == np.array([2, 1])).all()
+
+    # testing if the node runs properly
+    nn.run(plugin=plugin)
+
+    # checking teh results
+    expected = [({"NA-a": 3, "NA-b": 1}, 4), ({"NA-a": 3, "NA-b": 2}, 5),
+                ({"NA-a": 5, "NA-b": 1}, 6), ({"NA-a": 5, "NA-b": 2}, 7)]
     # to be sure that there is the same order (not sure if node itself should keep the order)
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
