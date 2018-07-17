@@ -5,8 +5,8 @@ import sys
 import numpy as np
 import pytest, pdb
 
-python3_only = pytest.mark.skipif(sys.version_info < (3, 0),
-                                  reason="requires Python3")
+python35_only = pytest.mark.skipif(sys.version_info < (3, 5),
+                                   reason="requires Python>3.4")
 
 
 def fun_addtwo(a):
@@ -77,7 +77,7 @@ def test_node_5():
 Plugins = ["mp", "serial", "cf", "dask"] 
 
 @pytest.mark.parametrize("plugin", Plugins)
-@python3_only
+@python35_only
 def test_node_6(plugin):
     """Node with interface and inputs, running interface"""
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
@@ -102,7 +102,7 @@ def test_node_6(plugin):
 
 
 @pytest.mark.parametrize("plugin", Plugins)
-@python3_only
+@python35_only
 def test_node_7(plugin):
     """Node with interface and inputs, running interface"""
     interf_addvar = Function_Interface(fun_addvar, ["out"])
@@ -128,7 +128,7 @@ def test_node_7(plugin):
 
 
 @pytest.mark.parametrize("plugin", Plugins)
-@python3_only
+@python35_only
 def test_node_8(plugin):
     """Node with interface and inputs, running interface"""
     interf_addvar = Function_Interface(fun_addvar, ["out"])
