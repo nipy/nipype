@@ -383,7 +383,7 @@ class ApplyTransforms(ANTSCommand):
     >>> at.cmdline
     'antsApplyTransforms --default-value 0 --float 0 --input moving1.nii \
 --interpolation Linear --output moving1_trans.nii \
---reference-image fixed1.nii -t identity'
+--reference-image fixed1.nii --transform identity'
 
     >>> at = ApplyTransforms()
     >>> at.inputs.dimension = 3
@@ -457,8 +457,6 @@ class ApplyTransforms(ANTSCommand):
         if opt == "output_image":
             return self._get_output_warped_filename()
         elif opt == "transforms":
-            if val == 'identity':
-                return '-t identity'
             return self._get_transform_filenames()
         elif opt == 'interpolation':
             if self.inputs.interpolation in ['BSpline', 'MultiLabel', 'Gaussian'] and \
