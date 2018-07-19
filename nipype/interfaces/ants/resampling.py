@@ -343,9 +343,9 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
         traits.Tuple(
             traits.Float(),  # Gaussian/MultiLabel (sigma, alpha)
             traits.Float()))
-    transforms = traits.Either(
-        InputMultiPath(File(exists=True)),
-        'identity',
+    transforms = InputMultiPath(traits.Either(
+        File(exists=True),
+        'identity'),
         argstr='%s',
         mandatory=True,
         desc='transform files: will be applied in reverse order. For '
