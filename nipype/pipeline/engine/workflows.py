@@ -10,7 +10,7 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 from builtins import str, bytes, open
 
-import os
+import os, glob
 import os.path as op
 import sys
 from datetime import datetime
@@ -20,8 +20,10 @@ import shutil
 
 import numpy as np
 import networkx as nx
+import itertools, collections
 
 from ... import config, logging
+from ...exceptions import NodeError, WorkflowError, MappingError, JoinError
 from ...utils.misc import str2bool
 from ...utils.functions import (getsource, create_function_from_source)
 
@@ -33,7 +35,12 @@ from .utils import (generate_expanded_graph, export_graph, write_workflow_prov,
                     get_print_name, merge_dict, format_node)
 
 from .base import EngineBase
-from .nodes import MapNode
+from .nodes import MapNode, Node
+from . import state
+from . import auxiliary as aux
+from . import submitter as sub
+
+import pdb
 
 # Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
 from future import standard_library
@@ -1043,3 +1050,311 @@ connected.
                                                   vname1.replace('.', '_')))
                     logger.debug('cross connection: %s', dotlist[-1])
         return ('\n' + prefix).join(dotlist)
+
+    def add(self, name, node_like):
+        if is_interface(node_like):
+            node = Node(node_like, name=name)
+        elif is_node(node_like):
+            node = node_like
+
+        self.add_nodes([node])
+
+
+class Map(Node):
+    pass
+
+
+class Join(Node):
+    pass
+
+
+class MapState(object):
+    pass
+
+class NewNodeBase(EngineBase):
+    def __init__(self, name, interface, inputs=None, mapper=None, join_by=None,
+                 base_dir=None, *args, **kwargs):
+        super(NewNodeBase, self).__init__(name=name, base_dir=base_dir)
+        # dj: should be changed for wf
+        self.nodedir = self.base_dir
+        # dj: do I need a state_input and state_mapper??
+        # dj: reading the input from files should be added
+        if inputs:
+            # adding name of the node to the input name
+            self._inputs = dict(("{}-{}".format(self.name, key), value) for (key, value) in inputs.items())
+            self._inputs = dict((key, np.array(val)) if type(val) is list else (key, val)
+                                for (key, val) in self._inputs.items())
+        else:
+            self._inputs = {}
+        if mapper:
+            # adding name of the node to the input name within the mapper
+            mapper = aux.change_mapper(mapper, self.name)
+        self._mapper = mapper
+        # create state (takes care of mapper, connects inputs with axes, so we can ask for specifc element)
+        self.state = state.State(state_inputs=self._inputs, mapper=self._mapper, node_name=self.name)
+
+        # adding interface: i'm using Function Interface from aux that has input_map that can change the name of arguments
+        self._interface = interface
+        self._interface.input_map = dict((key, "{}-{}".format(self.name, value))
+                                         for (key, value) in self._interface.input_map.items())
+
+        self.needed_outputs = []
+        self._out_nm = self._interface._output_nm
+        self._global_done = False
+        self._result = {}
+
+        self._joiners = {}
+
+
+    @property
+    def mapper(self):
+        return self._mapper
+
+
+    @property
+    def inputs(self):
+        return self._inputs
+
+
+    def map(self, mapper, inputs=None):
+        if self._mapper:
+            raise Exception("mapper is already set")
+        else:
+            self._mapper = aux.change_mapper(mapper, self.name)
+
+        if inputs:
+            inputs = dict(("{}-{}".format(self.name, key), value) for (key, value) in inputs.items())
+            inputs = dict((key, np.array(val)) if type(val) is list else (key, val)
+                          for (key, val) in inputs.items())
+            self._inputs.update(inputs)
+        self.state = state.State(state_inputs=self._inputs, mapper=self._mapper, node_name=self.name)
+
+
+
+#    def map_orig(self, field, values=None):
+#        if isinstance(field, list):
+#            for field_
+#            if values is not None:
+#                if len(values != len(field)):
+#        elif isinstance(field, tuple):
+#            pass
+#        if values is None:
+#            values = getattr(self._inputs, field)
+#            if values is None:
+#                raise MappingError('Cannot map unassigned input field')
+#        self._mappers[field] = values
+
+    # TBD
+    def join(self, field):
+        pass
+
+
+    def run_interface_el(self, i, ind, single_node=False):
+        """ running interface one element generated from node_state."""
+        logger.debug("Run interface el, name={}, i={}, ind={}".format(self.name, i, ind))
+        if not single_node: # if we run a single node, we don't have to collect output
+            state_dict, inputs_dict = self._collecting_input_el(ind)
+        logger.debug("Run interface el, name={}, inputs_dict={}, state_dict={}".format(
+                                                            self.name, inputs_dict, state_dict))
+        res = self._interface.run(inputs_dict)
+        #pdb.set_trace()
+        output = self._interface.output
+        logger.debug("Run interface el, output={}".format(output))
+        dir_nm_el = "_".join(["{}.{}".format(i, j) for i, j in list(state_dict.items())])
+        # TODO when join
+        #if self._joinByKey:
+        #    dir_join = "join_" + "_".join(["{}.{}".format(i, j) for i, j in list(state_dict.items()) if i not in self._joinByKey])
+        #elif self._join:
+        #    dir_join = "join_"
+        #if self._joinByKey or self._join:
+        #    os.makedirs(os.path.join(self.nodedir, dir_join), exist_ok=True)
+        #    dir_nm_el = os.path.join(dir_join, dir_nm_el)
+        os.makedirs(os.path.join(self.nodedir, dir_nm_el), exist_ok=True)
+        for key_out in list(output.keys()):
+            with open(os.path.join(self.nodedir, dir_nm_el, key_out+".txt"), "w") as fout:
+                fout.write(str(output[key_out]))
+        return res
+
+    # dj: this is not used for a single node
+    def _collecting_input_el(self, ind):
+        state_dict = self.state.state_values(ind)
+        inputs_dict = {k: state_dict[k] for k in self._inputs.keys()}
+        # reading extra inputs that come from previous nodes
+        for (from_node, from_socket, to_socket) in self.needed_outputs:
+            dir_nm_el_from = "_".join(["{}.{}".format(i, j) for i, j in list(state_dict.items())
+                                       if i in list(from_node.state_inputs.keys())])
+            file_from = os.path.join(from_node.nodedir, dir_nm_el_from, from_socket+".txt")
+            with open(file_from) as f:
+                inputs_dict["{}-{}".format(self.name, to_socket)] = eval(f.readline())
+        return state_dict, inputs_dict
+
+
+
+    # checking if all outputs are saved
+    @property
+    def global_done(self):
+        # once _global_done os True, this should not change
+        logger.debug('global_done {}'.format(self._global_done))
+        if self._global_done:
+            return self._global_done
+        else:
+            return self._check_all_results()
+
+    # dj: version without join
+    def _check_all_results(self):
+        # checking if all files that should be created are present
+        for ind in itertools.product(*self.state._all_elements):
+            state_dict = self.state.state_values(ind)
+            dir_nm_el = "_".join(["{}.{}".format(i, j) for i, j in list(state_dict.items())])
+            for key_out in self._out_nm:
+                if not os.path.isfile(os.path.join(self.nodedir, dir_nm_el, key_out+".txt")):
+                    return False
+        self._global_done = True
+        return True
+
+
+    # reading results (without join for now)
+    @property
+    def result(self):
+        if not self._result:
+            self._reading_results()
+        return self._result
+
+
+    def _reading_results(self):
+        """
+        reading results from file,
+        doesn't check if everything is ready, i.e. if self.global_done"""
+        for key_out in self._out_nm:
+            self._result[key_out] = []
+            if self.inputs: #self.state_inputs:
+                files = [name for name in glob.glob("{}/*/{}.txt".format(self.nodedir, key_out))]
+                for file in files:
+                    st_el = file.split(os.sep)[-2].split("_")
+                    st_dict = collections.OrderedDict([(el.split(".")[0], eval(el.split(".")[1]))
+                                                            for el in st_el])
+                    with open(file) as fout:
+                        logger.debug('Reading Results: file={}, st_dict={}'.format(file, st_dict))
+                        self._result[key_out].append((st_dict, eval(fout.readline())))
+            # for nodes without input
+            else:
+                files = [name for name in glob.glob("{}/{}.txt".format(self.nodedir, key_out))]
+                with open(files[0]) as fout:
+                    self._result[key_out].append(({}, eval(fout.readline())))
+
+
+
+
+class NewNode(object):
+    """wrapper around NewNodeBase, mostly have run method """
+    def __init__(self, name, interface, inputs=None, mapper=None, join_by=None,
+                 base_dir=None, *args, **kwargs):
+        self.node = NewNodeBase(name, interface, inputs, mapper, join_by,
+                                base_dir, *args, **kwargs)
+        # dj: might want to use a one element graph
+        #self.graph = nx.DiGraph()
+        #self.graph.add_nodes_from([self.node])
+
+
+    def map(self, mapper, inputs=None):
+         self.node.map(mapper, inputs)
+
+    @property
+    def state(self):
+        return self.node.state
+
+
+    @property
+    def mapper(self):
+        return self.node.mapper
+
+
+    @property
+    def inputs(self):
+        return self.node._inputs
+
+    @property
+    def global_done(self):
+        return self.node._global_done
+
+
+    @property
+    def outputs(self):
+        return self.node.outputs
+
+
+    @property
+    def result(self):
+        return self.node.result
+
+
+    def run(self, plugin="serial"):
+        self.sub = sub.SubmitterNode(plugin, node=self.node)
+        self.sub.run_node()
+        self.sub.close()
+
+
+
+
+class NewWorkflow(NewNode):
+    def __init__(self, inputs={}, *args, **kwargs):
+        super(NewWorkflow, self).__init__(*args, **kwargs)
+
+        self._nodes = {}
+
+        mro = self.__class__.mro()
+        wf_klasses = mro[:mro.index(NewWorkflow)][::-1]
+        items = {}
+        for klass in wf_klasses:
+            items.update(klass.__dict__)
+        for name, runnable in items.items():
+            if name in ('__module__', '__doc__'):
+                continue
+
+            self.add(name, value)
+
+    def add(self, name, runnable):
+        if is_function(runnable):
+            node = Node(Function(function=runnable), name=name)
+        elif is_interface(runnable):
+            node = Node(runnable, name=name)
+        elif is_node(runnable):
+            node = runnable if runnable.name == name else runnable.clone(name=name)
+        else:
+            raise ValueError("Unknown workflow element: {!r}".format(runnable))
+        setattr(self, name, node)
+        self._nodes[name] = node
+        self._last_added = name
+
+    def map(self, field, node=None, values=None):
+        if node is None:
+            if '.' in field:
+                node, field = field.rsplit('.', 1)
+            else:
+                node = self._last_added
+
+        if '.' in node:
+            subwf, node = node.split('.', 1)
+            self._nodes[subwf].map(field, node, values)
+            return
+
+        if node in self._mappers:
+            raise WorkflowError("Cannot assign two mappings to the same input")
+
+        self._mappers[node] = (field, values)
+
+    def join(self, field, node=None):
+        pass
+
+
+def is_function(obj):
+    return hasattr(obj, '__call__')
+
+
+def is_interface(obj):
+    return all(hasattr(obj, protocol)
+               for protocol in ('input_spec', 'output_spec', 'run'))
+
+
+def is_node(obj):
+    return hasattr(obj, itername)
