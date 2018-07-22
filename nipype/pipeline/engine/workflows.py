@@ -1071,29 +1071,14 @@ class Join(Node):
 class MapState(object):
     pass
 
-class NewNodeBase(EngineBase):
-    def __init__(self, name, interface, inputs=None, mapper=None, join_by=None,
-                 base_dir=None, *args, **kwargs):
-        super(NewNodeBase, self).__init__(name=name, base_dir=base_dir)
-        # dj: should be changed for wf
-        self.nodedir = self.base_dir
-        # dj: do I need a state_input and state_mapper??
-        # dj: reading the input from files should be added
-        if inputs:
-            # adding name of the node to the input name
-            self._inputs = dict(("{}-{}".format(self.name, key), value) for (key, value) in inputs.items())
-            self._inputs = dict((key, np.array(val)) if type(val) is list else (key, val)
-                                for (key, val) in self._inputs.items())
-        else:
-            self._inputs = {}
-        if mapper:
-            # adding name of the node to the input name within the mapper
-            mapper = aux.change_mapper(mapper, self.name)
-        self._mapper = mapper
-        # create state (takes care of mapper, connects inputs with axes, so we can ask for specifc element)
-        self.state = state.State(state_inputs=self._inputs, mapper=self._mapper, node_name=self.name)
-
+# dj ??: should I use EngineBase?
+class NewNodeCore(object):
+    def __init__(self, name, interface, state, inputs=None, base_dir=None, *args, **kwargs):
         # adding interface: i'm using Function Interface from aux that has input_map that can change the name of arguments
+        self.nodedir = base_dir
+        self.name = name
+        self.state = state
+        self._inputs = inputs
         self._interface = interface
         self._interface.input_map = dict((key, "{}-{}".format(self.name, value))
                                          for (key, value) in self._interface.input_map.items())
@@ -1103,50 +1088,15 @@ class NewNodeBase(EngineBase):
         self._global_done = False
         self._result = {}
 
-        self._joiners = {}
-
 
     @property
-    def mapper(self):
-        return self._mapper
+    def interface(self):
+        return self._interface
 
 
     @property
     def inputs(self):
         return self._inputs
-
-
-    def map(self, mapper, inputs=None):
-        if self._mapper:
-            raise Exception("mapper is already set")
-        else:
-            self._mapper = aux.change_mapper(mapper, self.name)
-
-        if inputs:
-            inputs = dict(("{}-{}".format(self.name, key), value) for (key, value) in inputs.items())
-            inputs = dict((key, np.array(val)) if type(val) is list else (key, val)
-                          for (key, val) in inputs.items())
-            self._inputs.update(inputs)
-        self.state = state.State(state_inputs=self._inputs, mapper=self._mapper, node_name=self.name)
-
-
-
-#    def map_orig(self, field, values=None):
-#        if isinstance(field, list):
-#            for field_
-#            if values is not None:
-#                if len(values != len(field)):
-#        elif isinstance(field, tuple):
-#            pass
-#        if values is None:
-#            values = getattr(self._inputs, field)
-#            if values is None:
-#                raise MappingError('Cannot map unassigned input field')
-#        self._mappers[field] = values
-
-    # TBD
-    def join(self, field):
-        pass
 
 
     def run_interface_el(self, i, ind, single_node=False):
@@ -1246,50 +1196,89 @@ class NewNodeBase(EngineBase):
 
 
 class NewNode(object):
-    """wrapper around NewNodeBase, mostly have run method """
     def __init__(self, name, interface, inputs=None, mapper=None, join_by=None,
                  base_dir=None, *args, **kwargs):
-        self.node = NewNodeBase(name, interface, inputs, mapper, join_by,
-                                base_dir, *args, **kwargs)
-        # dj: might want to use a one element graph
-        #self.graph = nx.DiGraph()
-        #self.graph.add_nodes_from([self.node])
+        # dj: should be changed for wf
+        self.name = name
+        self.nodedir = base_dir
+        self._interface = interface
+        # dj: do I need a state_input and state_mapper??
+        # dj: reading the input from files should be added
+        if inputs:
+            # adding name of the node to the input name
+            self._inputs = dict(("{}-{}".format(self.name, key), value) for (key, value) in inputs.items())
+            self._inputs = dict((key, np.array(val)) if type(val) is list else (key, val)
+                                for (key, val) in self._inputs.items())
+        else:
+            self._inputs = {}
+        if mapper:
+            # adding name of the node to the input name within the mapper
+            mapper = aux.change_mapper(mapper, self.name)
+        self._mapper = mapper
+        # create state (takes care of mapper, connects inputs with axes, so we can ask for specifc element)
+        self._state = state.State(mapper=self._mapper, node_name=self.name)
 
 
     def map(self, mapper, inputs=None):
-         self.node.map(mapper, inputs)
+        if self._mapper:
+            raise Exception("mapper is already set")
+        else:
+            self._mapper = aux.change_mapper(mapper, self.name)
+
+        if inputs:
+            inputs = dict(("{}-{}".format(self.name, key), value) for (key, value) in inputs.items())
+            inputs = dict((key, np.array(val)) if type(val) is list else (key, val)
+                          for (key, val) in inputs.items())
+            self._inputs.update(inputs)
+        if mapper:
+            # updating state if we have a new mapper
+            self._state = state.State(mapper=self._mapper, node_name=self.name)
+
+#    def map_orig(self, field, values=None):
+#        if isinstance(field, list):
+#            for field_
+#            if values is not None:
+#                if len(values != len(field)):
+#        elif isinstance(field, tuple):
+#            pass
+#        if values is None:
+#            values = getattr(self._inputs, field)
+#            if values is None:
+#                raise MappingError('Cannot map unassigned input field')
+#        self._mappers[field] = values
+
+    # TBD
+    def join(self, field):
+        pass
 
     @property
     def state(self):
-        return self.node.state
+        return self._state
 
 
     @property
     def mapper(self):
-        return self.node.mapper
+        return self._mapper
 
 
     @property
     def inputs(self):
-        return self.node._inputs
-
-    @property
-    def global_done(self):
-        return self.node._global_done
-
-
-    @property
-    def outputs(self):
-        return self.node.outputs
+        return self._inputs
 
 
     @property
     def result(self):
-        return self.node.result
+        return self.nodecore.result
 
+
+    def prepare_state_input(self):
+        self._state.prepare_state_input(state_inputs=self._inputs)
 
     def run(self, plugin="serial"):
-        self.sub = sub.SubmitterNode(plugin, node=self.node)
+        self.prepare_state_input()
+        self.nodecore = NewNodeCore(name=self.name, base_dir=self.nodedir, interface=self._interface,
+                                    inputs=self._inputs, state=self._state)
+        self.sub = sub.SubmitterNode(plugin, node=self.nodecore)
         self.sub.run_node()
         self.sub.close()
 

@@ -44,6 +44,8 @@ def test_node_3():
     assert (nn.inputs["NA-a"] == np.array([3, 5])).all()
     
     assert nn.state._mapper == "NA-a"
+
+    nn.prepare_state_input()
     assert nn.state.state_values([0]) == {"NA-a": 3}
     assert nn.state.state_values([1]) == {"NA-a": 5}
 
@@ -56,6 +58,7 @@ def test_node_4():
     assert nn.mapper == "NA-a"
     assert (nn.inputs["NA-a"] == np.array([3, 5])).all()
 
+    nn.prepare_state_input()
     assert nn.state._mapper == "NA-a"
     assert nn.state.state_values([0]) == {"NA-a": 3}
     assert nn.state.state_values([1]) == {"NA-a": 5}
@@ -70,6 +73,7 @@ def test_node_5():
     assert (nn.inputs["NA-a"] == np.array([3, 5])).all()
 
     assert nn.state._mapper == "NA-a"
+    nn.prepare_state_input()
     assert nn.state.state_values([0]) == {"NA-a": 3}
     assert nn.state.state_values([1]) == {"NA-a": 5}
 

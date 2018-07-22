@@ -51,7 +51,6 @@ class SubmitterNode(Submitter):
 
     def run_node(self):
         self.submit_work(self.node)
-
         while not self.node.global_done:
             logger.debug("Submitter, in while, to_finish: {}".format(self.node))
             time.sleep(3)

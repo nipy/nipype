@@ -4,9 +4,7 @@ import pdb
 from . import auxiliary as aux
 
 class State(object):
-    def __init__(self, state_inputs, node_name, mapper=None):
-        self.state_inputs = state_inputs
-
+    def __init__(self, node_name, mapper=None):
         self._mapper = mapper
         self.node_name = node_name
         if self._mapper:
@@ -17,6 +15,15 @@ class State(object):
         else:
             self._mapper_rpn = []
             self._input_names_mapper = []
+
+
+    def prepare_state_input(self, state_inputs):
+        """prepare all inputs, should be called once all input is available"""
+
+        # dj TOTHINK: I actually stopped using state_inputs for now, since people wanted to have mapper not only
+        # for state inputs. Might have to come back....
+        self.state_inputs = state_inputs
+
         # not all input field have to be use in the mapper, can be an extra scalar
         self._input_names = list(self.state_inputs.keys())
 
