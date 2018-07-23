@@ -123,7 +123,7 @@ def add_traits(base, names, trait_type=None):
     return base
 
 
-def get_head_bucket(s3_resource, bucket_name):
+def _get_head_bucket(s3_resource, bucket_name):
     """ Try to get the header info of a bucket, in order to 
     check if it exists and its permissions
     """
@@ -577,7 +577,7 @@ class DataSink(IOBase):
 
         # And try fetch the bucket with the name argument
         try:
-            get_head_bucket(s3_resource, bucket_name)
+            _get_head_bucket(s3_resource, bucket_name)
         except Exception as exc:
 
             # Try to connect anonymously
@@ -585,7 +585,7 @@ class DataSink(IOBase):
                 'choose-signer.s3.*', botocore.handlers.disable_signing)
 
             iflogger.info('Connecting to AWS: %s anonymously...', bucket_name)
-            get_head_bucket(s3_resource, bucket_name)
+            _get_head_bucket(s3_resource, bucket_name)
 
         # Explicitly declare a secure SSL connection for bucket object
         bucket = s3_resource.Bucket(bucket_name)
