@@ -2627,6 +2627,10 @@ class TShiftInputSpec(AFNICommandInputSpec):
         argstr='-rlt+')
 
 
+class TShiftOutputSpec(AFNICommandOutputSpec):
+    timing_file = File(desc="AFNI formatted timing file, if ``slice_timing`` is a list")
+
+
 class TShift(AFNICommand):
     """Shifts voxel time series from input so that seperate slices are aligned
     to the same temporal origin.
@@ -2650,6 +2654,12 @@ class TShift(AFNICommand):
     >>> tshift.cmdline
     '3dTshift -prefix functional_tshift -tpattern @slice_timing.1D -TR 2.5s -tzero 0.0 functional.nii'
 
+    When the ``slice_timing`` input is used, the ``timing_file`` output is populated,
+    in this case with the generated file.
+
+    >>> tshift._list_outputs()['timing_file']  # doctest: +ELLIPSIS
+    '.../slice_timing.1D'
+
     This method creates a ``slice_timing.1D`` file to be passed to ``3dTshift``.
     A pre-existing slice-timing file may be used in the same way:
 
@@ -2660,6 +2670,11 @@ class TShift(AFNICommand):
     >>> tshift.inputs.slice_timing = 'slice_timing.1D'
     >>> tshift.cmdline
     '3dTshift -prefix functional_tshift -tpattern @slice_timing.1D -TR 2.5s -tzero 0.0 functional.nii'
+
+    When a pre-existing file is provided, ``timing_file`` is simply passed through.
+
+    >>> tshift._list_outputs()['timing_file']  # doctest: +ELLIPSIS
+    '.../slice_timing.1D'
 
     Alternatively, pre-specified slice timing patterns may be specified with the
     ``tpattern`` input.
@@ -2686,13 +2701,18 @@ class TShift(AFNICommand):
     >>> tshift.cmdline
     '3dTshift -prefix functional_tshift -tpattern @slice_timing.1D -TR 2.5s -tzero 0.0 functional.nii'
 
+    In these cases, ``timing_file`` is undefined.
+
+    >>> tshift._list_outputs()['timing_file']  # doctest: +ELLIPSIS
+    <undefined>
+
     In any configuration, the interface may be run as usual:
 
     >>> res = tshift.run()  # doctest: +SKIP
     """
     _cmd = '3dTshift'
     input_spec = TShiftInputSpec
-    output_spec = AFNICommandOutputSpec
+    output_spec = TShiftOutputSpec
 
     def _format_arg(self, name, trait_spec, value):
         if name == 'tpattern' and value.startswith('@'):
@@ -2707,6 +2727,15 @@ class TShift(AFNICommand):
         with open(fname, 'w') as fobj:
             fobj.write('\t'.join(map(str, self.inputs.slice_timing)))
         return fname
+
+    def _list_outputs(self):
+        outputs = super(TShift, self)._list_outputs()
+        if isdefined(self.inputs.slice_timing):
+            if isinstance(self.inputs.slice_timing, list):
+                outputs['timing_file'] = os.path.abspath('slice_timing.1D')
+            else:
+                outputs['timing_file'] = os.path.abspath(self.inputs.slice_timing)
+        return outputs
 
 
 class VolregInputSpec(AFNICommandInputSpec):

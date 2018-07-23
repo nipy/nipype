@@ -54,7 +54,10 @@ def test_TShift_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TShift_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(
+        out_file=dict(),
+        timing_file=dict(),
+    )
     outputs = TShift.output_spec()
 
     for key, metadata in list(output_map.items()):
