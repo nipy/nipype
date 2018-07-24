@@ -4,12 +4,7 @@ from ..base import NipyBaseInterface
 
 
 def test_NipyBaseInterface_inputs():
-    input_map = dict(
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ), )
+    input_map = dict()
     inputs = NipyBaseInterface.input_spec()
 
     for key, metadata in list(input_map.items()):

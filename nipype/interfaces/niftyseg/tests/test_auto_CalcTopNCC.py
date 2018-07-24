@@ -10,11 +10,6 @@ def test_CalcTopNCC_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-target %s',
             mandatory=True,
@@ -30,10 +25,6 @@ def test_CalcTopNCC_inputs():
             argstr='-templates %s',
             mandatory=True,
             position=2,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         top_templates=dict(
             argstr='-n %s',

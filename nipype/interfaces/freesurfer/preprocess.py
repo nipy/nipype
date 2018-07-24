@@ -26,7 +26,7 @@ from .base import (FSCommand, FSTraitedSpec, FSTraitedSpecOpenMP,
 from .utils import copy2subjdir
 
 __docformat__ = 'restructuredtext'
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 # Keeping this to avoid breaking external programs that depend on it, but
 # this should not be used internally

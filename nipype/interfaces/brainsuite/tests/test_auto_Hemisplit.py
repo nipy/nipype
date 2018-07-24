@@ -10,11 +10,6 @@ def test_Hemisplit_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputHemisphereLabelFile=dict(
             argstr='-l %s',
             mandatory=True,
@@ -40,10 +35,6 @@ def test_Hemisplit_inputs():
             genfile=True,
         ),
         pialSurfaceFile=dict(argstr='-p %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         timer=dict(argstr='--timer', ),
         verbosity=dict(argstr='-v %d', ),
     )

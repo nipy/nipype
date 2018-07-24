@@ -5,11 +5,6 @@ from ..utils import ApplyTransform
 
 def test_ApplyTransform_inputs():
     input_map = dict(
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             copyfile=True,
             mandatory=True,

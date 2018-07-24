@@ -18,11 +18,6 @@ def test_affScalarVolTask_inputs():
             argstr='-euler %g %g %g',
             xor=['transform'],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-in %s',
             mandatory=True,
@@ -40,10 +35,6 @@ def test_affScalarVolTask_inputs():
         target=dict(
             argstr='-target %s',
             xor=['transform'],
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         transform=dict(
             argstr='-trans %s',

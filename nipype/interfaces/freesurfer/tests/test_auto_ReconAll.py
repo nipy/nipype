@@ -41,11 +41,6 @@ def test_ReconAll_inputs():
             argstr='-hires',
             min_ver='6.0.0',
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         mprage=dict(argstr='-mprage', ),
         mri_aparc2aseg=dict(xor=['expert'], ),
         mri_ca_label=dict(xor=['expert'], ),
@@ -84,10 +79,6 @@ def test_ReconAll_inputs():
             hash_files=False,
         ),
         talairach=dict(xor=['expert'], ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         use_FLAIR=dict(
             argstr='-FLAIRpial',
             min_ver='5.3.0',

@@ -17,11 +17,6 @@ def test_Volpad_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         input_file=dict(
             argstr='%s',
             mandatory=True,
@@ -37,10 +32,6 @@ def test_Volpad_inputs():
         ),
         smooth=dict(argstr='-smooth', ),
         smooth_distance=dict(argstr='-smooth_distance %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         verbose=dict(argstr='-verbose', ),
     )
     inputs = Volpad.input_spec()

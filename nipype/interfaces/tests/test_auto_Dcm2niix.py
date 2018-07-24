@@ -33,11 +33,6 @@ def test_Dcm2niix_inputs():
             usedefault=True,
         ),
         ignore_deriv=dict(argstr='-i', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         merge_imgs=dict(
             argstr='-m',
             usedefault=True,
@@ -65,10 +60,6 @@ def test_Dcm2niix_inputs():
             mandatory=True,
             position=-1,
             xor=['source_dir'],
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         verbose=dict(
             argstr='-v',

@@ -10,21 +10,12 @@ def test_gtractCreateGuideFiber_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputFiber=dict(argstr='--inputFiber %s', ),
         numberOfPoints=dict(argstr='--numberOfPoints %d', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         outputFiber=dict(
             argstr='--outputFiber %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         writeXMLPolyDataFile=dict(argstr='--writeXMLPolyDataFile ', ),
     )

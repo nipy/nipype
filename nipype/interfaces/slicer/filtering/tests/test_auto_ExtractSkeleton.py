@@ -20,17 +20,8 @@ def test_ExtractSkeleton_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         numPoints=dict(argstr='--numPoints %d', ),
         pointsFile=dict(argstr='--pointsFile %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         type=dict(argstr='--type %s', ),
     )
     inputs = ExtractSkeleton.input_spec()

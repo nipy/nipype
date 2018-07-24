@@ -10,11 +10,6 @@ def test_Mesh2PVE_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -31,10 +26,6 @@ def test_Mesh2PVE_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = Mesh2PVE.input_spec()

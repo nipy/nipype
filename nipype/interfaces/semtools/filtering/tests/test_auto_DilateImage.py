@@ -10,21 +10,12 @@ def test_DilateImage_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputMaskVolume=dict(argstr='--inputMaskVolume %s', ),
         inputRadius=dict(argstr='--inputRadius %d', ),
         inputVolume=dict(argstr='--inputVolume %s', ),
         outputVolume=dict(
             argstr='--outputVolume %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = DilateImage.input_spec()

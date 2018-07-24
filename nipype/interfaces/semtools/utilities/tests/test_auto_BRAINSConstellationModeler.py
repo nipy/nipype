@@ -11,11 +11,6 @@ def test_BRAINSConstellationModeler_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputTrainingList=dict(argstr='--inputTrainingList %s', ),
         mspQualityLevel=dict(argstr='--mspQualityLevel %d', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
@@ -35,10 +30,6 @@ def test_BRAINSConstellationModeler_inputs():
             hash_files=False,
         ),
         saveOptimizedLandmarks=dict(argstr='--saveOptimizedLandmarks ', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         trimRescaledIntensities=dict(argstr='--trimRescaledIntensities %f', ),
         verbose=dict(argstr='--verbose ', ),
         writedebuggingImagesLevel=dict(

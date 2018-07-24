@@ -18,11 +18,6 @@ def test_DWI2Tensor_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         ignore_slice_by_volume=dict(
             argstr='-ignoreslices %s',
             position=2,
@@ -48,10 +43,6 @@ def test_DWI2Tensor_inputs():
         quiet=dict(
             argstr='-quiet',
             position=1,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = DWI2Tensor.input_spec()

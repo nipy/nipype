@@ -42,11 +42,6 @@ def test_Dcm2nii_inputs():
             argstr='-i',
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         nii_output=dict(
             argstr='-n',
             usedefault=True,
@@ -84,10 +79,6 @@ def test_Dcm2nii_inputs():
         spm_analyze=dict(
             argstr='-s',
             xor=['nii_output'],
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = Dcm2nii.input_spec()

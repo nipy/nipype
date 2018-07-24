@@ -8,11 +8,6 @@ def test_FitGLM_inputs():
         TR=dict(mandatory=True, ),
         drift_model=dict(usedefault=True, ),
         hrf_model=dict(usedefault=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         mask=dict(),
         method=dict(usedefault=True, ),
         model=dict(usedefault=True, ),

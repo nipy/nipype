@@ -10,11 +10,6 @@ def test_BinaryMaskEditorBasedOnLandmarks_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputBinaryVolume=dict(argstr='--inputBinaryVolume %s', ),
         inputLandmarkNames=dict(
             argstr='--inputLandmarkNames %s',
@@ -36,10 +31,6 @@ def test_BinaryMaskEditorBasedOnLandmarks_inputs():
         setCutDirectionForObliquePlane=dict(
             argstr='--setCutDirectionForObliquePlane %s',
             sep=',',
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = BinaryMaskEditorBasedOnLandmarks.input_spec()

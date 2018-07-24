@@ -10,11 +10,6 @@ def test_ComposeXfm_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_aff=dict(
             argstr='-aff %s',
             mandatory=True,
@@ -26,10 +21,6 @@ def test_ComposeXfm_inputs():
         out_file=dict(
             argstr='-out %s',
             genfile=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = ComposeXfm.input_spec()

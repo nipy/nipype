@@ -21,11 +21,6 @@ def test_Eddy_inputs():
             usedefault=True,
         ),
         fwhm=dict(argstr='--fwhm=%s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_acqp=dict(
             argstr='--acqp=%s',
             mandatory=True,
@@ -78,10 +73,6 @@ def test_Eddy_inputs():
         repol=dict(argstr='--repol', ),
         session=dict(argstr='--session=%s', ),
         slm=dict(argstr='--slm=%s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         use_cuda=dict(),
     )
     inputs = Eddy.input_spec()

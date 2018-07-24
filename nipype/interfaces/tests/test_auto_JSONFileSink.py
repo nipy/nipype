@@ -6,11 +6,6 @@ from ..io import JSONFileSink
 def test_JSONFileSink_inputs():
     input_map = dict(
         _outputs=dict(usedefault=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_dict=dict(usedefault=True, ),
         out_file=dict(),
     )

@@ -5,11 +5,6 @@ from ..misc import Distance
 
 def test_Distance_inputs():
     input_map = dict(
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         mask_volume=dict(),
         method=dict(usedefault=True, ),
         volume1=dict(mandatory=True, ),

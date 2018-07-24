@@ -16,11 +16,6 @@ def test_QwarpPlusMinus_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         minpatch=dict(argstr='-minpatch %d', ),
         nopadWARP=dict(argstr='-nopadWARP', ),
         noweight=dict(argstr='-noweight', ),
@@ -29,10 +24,6 @@ def test_QwarpPlusMinus_inputs():
             argstr='-source %s',
             copyfile=False,
             mandatory=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = QwarpPlusMinus.input_spec()

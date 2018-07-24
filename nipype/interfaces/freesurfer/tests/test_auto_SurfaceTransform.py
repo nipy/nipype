@@ -14,11 +14,6 @@ def test_SurfaceTransform_inputs():
             argstr='--hemi %s',
             mandatory=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         out_file=dict(
             argstr='--tval %s',
             genfile=True,
@@ -50,10 +45,6 @@ def test_SurfaceTransform_inputs():
             mandatory=True,
         ),
         target_type=dict(argstr='--tfmt %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = SurfaceTransform.input_spec()
 

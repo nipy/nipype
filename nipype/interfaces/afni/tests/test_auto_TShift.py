@@ -11,11 +11,6 @@ def test_TShift_inputs():
             usedefault=True,
         ),
         ignore=dict(argstr='-ignore %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             copyfile=False,
@@ -35,11 +30,14 @@ def test_TShift_inputs():
         outputtype=dict(),
         rlt=dict(argstr='-rlt', ),
         rltplus=dict(argstr='-rlt+', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
+        slice_timing=dict(
+            argstr='-tpattern @%s',
+            xor=['tpattern'],
         ),
-        tpattern=dict(argstr='-tpattern %s', ),
+        tpattern=dict(
+            argstr='-tpattern %s',
+            xor=['slice_timing'],
+        ),
         tr=dict(argstr='-TR %s', ),
         tslice=dict(
             argstr='-slice %s',
@@ -56,7 +54,10 @@ def test_TShift_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TShift_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(
+        out_file=dict(),
+        timing_file=dict(),
+    )
     outputs = TShift.output_spec()
 
     for key, metadata in list(output_map.items()):

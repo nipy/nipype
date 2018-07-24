@@ -19,11 +19,6 @@ def test_MELODIC_inputs():
         ),
         epsilon=dict(argstr='--eps=%f', ),
         epsilonS=dict(argstr='--epsS=%f', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(
             argstr='-i %s',
             mandatory=True,
@@ -69,10 +64,6 @@ def test_MELODIC_inputs():
         smode=dict(argstr='--smode=%s', ),
         t_con=dict(argstr='--Tcon=%s', ),
         t_des=dict(argstr='--Tdes=%s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         tr_sec=dict(argstr='--tr=%f', ),
         update_mask=dict(argstr='--update_mask', ),
         var_norm=dict(argstr='--vn', ),

@@ -8,11 +8,6 @@ def test_ROIGen_inputs():
         LUT_file=dict(xor=['use_freesurfer_LUT'], ),
         aparc_aseg_file=dict(mandatory=True, ),
         freesurfer_dir=dict(requires=['use_freesurfer_LUT'], ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         out_dict_file=dict(genfile=True, ),
         out_roi_file=dict(genfile=True, ),
         use_freesurfer_LUT=dict(xor=['LUT_file'], ),

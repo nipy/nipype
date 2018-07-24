@@ -10,11 +10,6 @@ def test_SFPICOCalibData_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         info_file=dict(
             argstr='-infooutputfile %s',
             genfile=True,
@@ -45,10 +40,6 @@ def test_SFPICOCalibData_inputs():
         snr=dict(
             argstr='-snr %f',
             units='NA',
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         trace=dict(
             argstr='-trace %f',

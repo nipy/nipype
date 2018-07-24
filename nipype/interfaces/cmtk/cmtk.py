@@ -19,7 +19,7 @@ from ...utils import NUMPY_MMAP
 
 from ..base import (BaseInterface, BaseInterfaceInputSpec, traits, File,
                     TraitedSpec, Directory, OutputMultiPath, isdefined)
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 def length(xyz, along=False):

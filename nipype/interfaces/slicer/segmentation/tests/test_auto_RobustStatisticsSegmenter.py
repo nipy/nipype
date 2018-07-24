@@ -12,11 +12,6 @@ def test_RobustStatisticsSegmenter_inputs():
             usedefault=True,
         ),
         expectedVolume=dict(argstr='--expectedVolume %f', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         intensityHomogeneity=dict(argstr='--intensityHomogeneity %f', ),
         labelImageFileName=dict(
             argstr='%s',
@@ -32,10 +27,6 @@ def test_RobustStatisticsSegmenter_inputs():
             argstr='%s',
             hash_files=False,
             position=-1,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = RobustStatisticsSegmenter.input_spec()

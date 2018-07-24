@@ -14,11 +14,6 @@ def test_BRAINSTransformConvert_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputTransform=dict(argstr='--inputTransform %s', ),
         outputPrecisionType=dict(argstr='--outputPrecisionType %s', ),
         outputTransform=dict(
@@ -27,10 +22,6 @@ def test_BRAINSTransformConvert_inputs():
         ),
         outputTransformType=dict(argstr='--outputTransformType %s', ),
         referenceVolume=dict(argstr='--referenceVolume %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = BRAINSTransformConvert.input_spec()
 

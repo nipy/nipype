@@ -15,11 +15,6 @@ def test_ConvertWarp_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         jacobian_max=dict(argstr='--jmax=%f', ),
         jacobian_min=dict(argstr='--jmin=%f', ),
         midmat=dict(argstr='--midmat=%s', ),
@@ -55,10 +50,6 @@ def test_ConvertWarp_inputs():
             requires=['shift_in_file'],
         ),
         shift_in_file=dict(argstr='--shiftmap=%s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         warp1=dict(argstr='--warp1=%s', ),
         warp2=dict(argstr='--warp2=%s', ),
     )

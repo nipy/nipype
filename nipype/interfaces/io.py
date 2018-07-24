@@ -62,7 +62,7 @@ try:
 except:
     pass
 
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 def copytree(src, dst, use_hardlink=False):
@@ -121,6 +121,35 @@ def add_traits(base, names, trait_type=None):
     for key in names:
         _ = getattr(base, key)
     return base
+
+
+def _get_head_bucket(s3_resource, bucket_name):
+    """ Try to get the header info of a bucket, in order to 
+    check if it exists and its permissions
+    """
+
+    import botocore
+
+    # Try fetch the bucket with the name argument
+    try:
+        s3_resource.meta.client.head_bucket(Bucket=bucket_name)
+    except botocore.exceptions.ClientError as exc:
+        error_code = int(exc.response['Error']['Code'])
+        if error_code == 403:
+            err_msg = 'Access to bucket: %s is denied; check credentials'\
+                        % bucket_name
+            raise Exception(err_msg)
+        elif error_code == 404:
+            err_msg = 'Bucket: %s does not exist; check spelling and try '\
+                        'again' % bucket_name
+            raise Exception(err_msg)
+        else:
+            err_msg = 'Unable to connect to bucket: %s. Error message:\n%s'\
+                        % (bucket_name, exc)
+    except Exception as exc:
+        err_msg = 'Unable to connect to bucket: %s. Error message:\n%s'\
+                    % (bucket_name, exc)
+        raise Exception(err_msg)
 
 
 class IOBase(BaseInterface):
@@ -513,7 +542,6 @@ class DataSink(IOBase):
 
         # Init variables
         creds_path = self.inputs.creds_path
-        iflogger = logging.getLogger('interface')
 
         # Get AWS credentials
         try:
@@ -536,42 +564,34 @@ class DataSink(IOBase):
             session = boto3.session.Session(
                 aws_access_key_id=aws_access_key_id,
                 aws_secret_access_key=aws_secret_access_key)
-            s3_resource = session.resource('s3', use_ssl=True)
 
-        # Otherwise, connect anonymously
         else:
-            iflogger.info('Connecting to AWS: %s anonymously...', bucket_name)
+            iflogger.info('Connecting to S3 bucket: %s with IAM role...',
+                          bucket_name)
+
+            # Lean on AWS environment / IAM role authentication and authorization
             session = boto3.session.Session()
-            s3_resource = session.resource('s3', use_ssl=True)
+
+        s3_resource = session.resource('s3', use_ssl=True)
+
+        # And try fetch the bucket with the name argument
+        try:
+            _get_head_bucket(s3_resource, bucket_name)
+        except Exception as exc:
+
+            # Try to connect anonymously
             s3_resource.meta.client.meta.events.register(
                 'choose-signer.s3.*', botocore.handlers.disable_signing)
+
+            iflogger.info('Connecting to AWS: %s anonymously...', bucket_name)
+            _get_head_bucket(s3_resource, bucket_name)
 
         # Explicitly declare a secure SSL connection for bucket object
         bucket = s3_resource.Bucket(bucket_name)
 
-        # And try fetch the bucket with the name argument
-        try:
-            s3_resource.meta.client.head_bucket(Bucket=bucket_name)
-        except botocore.exceptions.ClientError as exc:
-            error_code = int(exc.response['Error']['Code'])
-            if error_code == 403:
-                err_msg = 'Access to bucket: %s is denied; check credentials'\
-                          % bucket_name
-                raise Exception(err_msg)
-            elif error_code == 404:
-                err_msg = 'Bucket: %s does not exist; check spelling and try '\
-                          'again' % bucket_name
-                raise Exception(err_msg)
-            else:
-                err_msg = 'Unable to connect to bucket: %s. Error message:\n%s'\
-                          % (bucket_name, exc)
-        except Exception as exc:
-            err_msg = 'Unable to connect to bucket: %s. Error message:\n%s'\
-                      % (bucket_name, exc)
-            raise Exception(err_msg)
-
         # Return the bucket
         return bucket
+
 
     # Send up to S3 method
     def _upload_to_s3(self, bucket, src, dst):
@@ -587,15 +607,12 @@ class DataSink(IOBase):
         from botocore.exceptions import ClientError
 
         # Init variables
-        iflogger = logging.getLogger('interface')
         s3_str = 's3://'
         s3_prefix = s3_str + bucket.name
 
         # Explicitly lower-case the "s3"
-        if dst.lower().startswith(s3_str):
-            dst_sp = dst.split('/')
-            dst_sp[0] = dst_sp[0].lower()
-            dst = '/'.join(dst_sp)
+        if dst[:len(s3_str)].lower() == s3_str:
+            dst = s3_str + dst[len(s3_str):]
 
         # If src is a directory, collect files (this assumes dst is a dir too)
         if os.path.isdir(src):
@@ -655,7 +672,6 @@ class DataSink(IOBase):
         """
 
         # Init variables
-        iflogger = logging.getLogger('interface')
         outputs = self.output_spec().get()
         out_files = []
         # Use hardlink

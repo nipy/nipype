@@ -22,11 +22,6 @@ def test_BSplineDeformableRegistration_inputs():
         ),
         gridSize=dict(argstr='--gridSize %d', ),
         histogrambins=dict(argstr='--histogrambins %d', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         initialtransform=dict(argstr='--initialtransform %s', ),
         iterations=dict(argstr='--iterations %d', ),
         maximumDeformation=dict(argstr='--maximumDeformation %f', ),
@@ -43,10 +38,6 @@ def test_BSplineDeformableRegistration_inputs():
             hash_files=False,
         ),
         spatialsamples=dict(argstr='--spatialsamples %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = BSplineDeformableRegistration.input_spec()
 

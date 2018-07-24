@@ -10,16 +10,7 @@ def test_MpiCommandLine_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         n_procs=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         use_mpi=dict(usedefault=True, ),
     )
     inputs = MpiCommandLine.input_spec()

@@ -17,7 +17,7 @@ from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                BaseInterfaceInputSpec)
 from ..interfaces.vtkbase import tvtk
 from ..interfaces import vtkbase as VTKInfo
-IFLOGGER = logging.getLogger('interface')
+IFLOGGER = logging.getLogger('nipype.interface')
 
 
 class TVTKBaseInterface(BaseInterface):

@@ -14,11 +14,6 @@ def test_Cerebro_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputAtlasLabelFile=dict(
             argstr='--atlaslabels %s',
             mandatory=True,
@@ -52,10 +47,6 @@ def test_Cerebro_inputs():
         ),
         tempDirectory=dict(argstr='--tempdir %s', ),
         tempDirectoryBase=dict(argstr='--tempdirbase %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         useCentroids=dict(argstr='--centroids', ),
         verbosity=dict(argstr='-v %d', ),
         warpConvergence=dict(argstr='--warpconv %f', ),

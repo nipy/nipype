@@ -25,11 +25,6 @@ def test_ExpertAutomatedRegistration_inputs():
         ),
         fixedImageMask=dict(argstr='--fixedImageMask %s', ),
         fixedLandmarks=dict(argstr='--fixedLandmarks %s...', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         initialization=dict(argstr='--initialization %s', ),
         interpolation=dict(argstr='--interpolation %s', ),
         loadTransform=dict(argstr='--loadTransform %s', ),
@@ -53,10 +48,6 @@ def test_ExpertAutomatedRegistration_inputs():
         saveTransform=dict(
             argstr='--saveTransform %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         verbosityLevel=dict(argstr='--verbosityLevel %s', ),
     )

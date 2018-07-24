@@ -11,11 +11,6 @@ def test_VtkStreamlines_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr=' < %s',
             mandatory=True,
@@ -43,10 +38,6 @@ def test_VtkStreamlines_inputs():
         target_file=dict(
             argstr='-targetfile %s',
             position=2,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         voxeldims=dict(
             argstr='-voxeldims %s',

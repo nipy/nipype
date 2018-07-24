@@ -31,7 +31,7 @@ from ..utils import NUMPY_MMAP
 
 from . import confounds
 
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 class PickAtlasInputSpec(BaseInterfaceInputSpec):

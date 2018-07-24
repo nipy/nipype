@@ -55,11 +55,6 @@ def test_BDP_inputs():
         generateStats=dict(argstr='--generate-stats', ),
         ignoreFieldmapFOV=dict(argstr='--ignore-fieldmap-fov', ),
         ignoreMemory=dict(argstr='--ignore-memory', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputDiffusionData=dict(
             argstr='--nii %s',
             mandatory=True,
@@ -87,10 +82,6 @@ def test_BDP_inputs():
         ),
         skipNonuniformityCorr=dict(argstr='--no-nonuniformity-correction', ),
         t1Mask=dict(argstr='--t1-mask %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         threads=dict(argstr='--threads=%d', ),
         transformDataOnly=dict(argstr='--transform-data-only', ),
         transformDiffusionSurface=dict(

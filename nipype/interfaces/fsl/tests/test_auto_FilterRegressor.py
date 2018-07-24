@@ -27,11 +27,6 @@ def test_FilterRegressor_inputs():
             position=4,
             xor=['filter_all'],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-i %s',
             mandatory=True,
@@ -46,10 +41,6 @@ def test_FilterRegressor_inputs():
         ),
         out_vnscales=dict(argstr='--out_vnscales', ),
         output_type=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         var_norm=dict(argstr='--vn', ),
     )
     inputs = FilterRegressor.input_spec()

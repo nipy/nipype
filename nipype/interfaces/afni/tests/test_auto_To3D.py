@@ -14,11 +14,6 @@ def test_To3D_inputs():
         ),
         filetype=dict(argstr='-%s', ),
         funcparams=dict(argstr='-time:zt %s alt+z2', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_folder=dict(
             argstr='%s/*.dcm',
             mandatory=True,
@@ -35,10 +30,6 @@ def test_To3D_inputs():
         ),
         outputtype=dict(),
         skipoutliers=dict(argstr='-skip_outliers', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = To3D.input_spec()
 

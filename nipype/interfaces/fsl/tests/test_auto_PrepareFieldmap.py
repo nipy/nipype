@@ -16,11 +16,6 @@ def test_PrepareFieldmap_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_magnitude=dict(
             argstr='%s',
             mandatory=True,
@@ -45,10 +40,6 @@ def test_PrepareFieldmap_inputs():
             argstr='%s',
             position=1,
             usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = PrepareFieldmap.input_spec()

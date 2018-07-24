@@ -31,11 +31,6 @@ def test_BRAINSABC_inputs():
             argstr='--gridSize %s',
             sep=',',
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         implicitOutputs=dict(
             argstr='--implicitOutputs %s...',
             hash_files=False,
@@ -83,10 +78,6 @@ def test_BRAINSABC_inputs():
         ),
         subjectIntermodeTransformType=dict(
             argstr='--subjectIntermodeTransformType %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         useKNN=dict(argstr='--useKNN ', ),
         writeLess=dict(argstr='--writeLess ', ),
     )

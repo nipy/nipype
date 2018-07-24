@@ -49,7 +49,7 @@ from .support import (Bunch, Stream, InterfaceResult, NipypeInterfaceError)
 from future import standard_library
 standard_library.install_aliases()
 
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 PY35 = sys.version_info >= (3, 5)
 PY3 = sys.version_info[0] > 2
@@ -882,8 +882,7 @@ class CommandLine(BaseInterface):
     # Use get_traitsfree() to check all inputs set
     >>> pprint.pprint(cli.inputs.get_traitsfree())  # doctest:
     {'args': '-al',
-     'environ': {'DISPLAY': ':1'},
-     'ignore_exception': False}
+     'environ': {'DISPLAY': ':1'}}
 
     >>> cli.inputs.get_hashval()[0][0]
     ('args', '-al')

@@ -30,11 +30,6 @@ def test_RegF3D_inputs():
         fmask_file=dict(argstr='-fmask %s', ),
         fupth2_thr_val=dict(argstr='-fUpTh %d %f', ),
         fupth_thr_val=dict(argstr='--fUpTh %f', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         incpp_file=dict(argstr='-incpp %s', ),
         jl_val=dict(argstr='-jl %f', ),
         kld2_flag=dict(argstr='-kld %d', ),
@@ -81,10 +76,6 @@ def test_RegF3D_inputs():
         sx_val=dict(argstr='-sx %f', ),
         sy_val=dict(argstr='-sy %f', ),
         sz_val=dict(argstr='-sz %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         vel_flag=dict(argstr='-vel', ),
         verbosity_off_flag=dict(argstr='-voff', ),
     )

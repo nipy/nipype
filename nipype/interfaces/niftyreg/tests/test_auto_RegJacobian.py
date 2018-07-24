@@ -10,11 +10,6 @@ def test_RegJacobian_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         omp_core_val=dict(
             argstr='-omp %i',
             usedefault=True,
@@ -26,10 +21,6 @@ def test_RegJacobian_inputs():
             position=-1,
         ),
         ref_file=dict(argstr='-ref %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         trans_file=dict(
             argstr='-trans %s',
             mandatory=True,

@@ -25,7 +25,7 @@ from ..engine.utils import (nx, dfs_preorder, topological_sort)
 from ..engine import MapNode
 from .tools import report_crash, report_nodes_not_run, create_pyscript
 
-logger = logging.getLogger('workflow')
+logger = logging.getLogger('nipype.workflow')
 
 
 class PluginBase(object):

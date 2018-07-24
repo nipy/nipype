@@ -54,6 +54,7 @@ before_install:
   fi;
 
 - travis_retry pip install -r requirements.txt
+- travis_retry pip install grabbit==0.1.2
 - travis_retry git clone https://github.com/INCF/pybids.git ${HOME}/pybids &&
   pip install -e ${HOME}/pybids
 

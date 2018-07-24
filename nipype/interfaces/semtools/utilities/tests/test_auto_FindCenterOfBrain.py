@@ -40,19 +40,10 @@ def test_FindCenterOfBrain_inputs():
         generateDebugImages=dict(argstr='--generateDebugImages ', ),
         headSizeEstimate=dict(argstr='--headSizeEstimate %f', ),
         headSizeLimit=dict(argstr='--headSizeLimit %f', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         imageMask=dict(argstr='--imageMask %s', ),
         inputVolume=dict(argstr='--inputVolume %s', ),
         maximize=dict(argstr='--maximize ', ),
         otsuPercentileThreshold=dict(argstr='--otsuPercentileThreshold %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = FindCenterOfBrain.input_spec()
 

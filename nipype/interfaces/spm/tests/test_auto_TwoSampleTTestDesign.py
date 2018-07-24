@@ -29,11 +29,6 @@ def test_TwoSampleTTestDesign_inputs():
             field='des.t2.scans2',
             mandatory=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         matlab_cmd=dict(),
         mfile=dict(usedefault=True, ),
         no_grand_mean_scaling=dict(field='globalm.gmsca.gmsca_no', ),

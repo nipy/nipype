@@ -41,7 +41,7 @@ from .base import EngineBase
 
 standard_library.install_aliases()
 
-logger = logging.getLogger('workflow')
+logger = logging.getLogger('nipype.workflow')
 
 
 class Node(EngineBase):
@@ -275,7 +275,7 @@ class Node(EngineBase):
                 params_str = [_parameterization_dir(p) for p in params_str]
             outputdir = op.join(outputdir, *params_str)
 
-        self._output_dir = op.abspath(op.join(outputdir, self.name))
+        self._output_dir = op.realpath(op.join(outputdir, self.name))
         return self._output_dir
 
     def set_input(self, parameter, val):

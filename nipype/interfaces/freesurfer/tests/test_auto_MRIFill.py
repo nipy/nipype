@@ -10,11 +10,6 @@ def test_MRIFill_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -28,10 +23,6 @@ def test_MRIFill_inputs():
         ),
         segmentation=dict(argstr='-segmentation %s', ),
         subjects_dir=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         transform=dict(argstr='-xform %s', ),
     )
     inputs = MRIFill.input_spec()

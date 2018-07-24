@@ -19,11 +19,6 @@ def test_Edge3_inputs():
             argstr='-gscale',
             xor=['fscale', 'nscale', 'scale_floats'],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-input %s',
             copyfile=False,
@@ -46,10 +41,6 @@ def test_Edge3_inputs():
         scale_floats=dict(
             argstr='-scale_floats %f',
             xor=['fscale', 'gscale', 'nscale'],
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         verbose=dict(argstr='-verbose', ),
     )

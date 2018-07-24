@@ -19,11 +19,6 @@ def test_SynthesizeFLASH_inputs():
             mandatory=True,
             position=3,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         out_file=dict(
             argstr='%s',
             genfile=True,
@@ -43,10 +38,6 @@ def test_SynthesizeFLASH_inputs():
             argstr='%.3f',
             mandatory=True,
             position=4,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         tr=dict(
             argstr='%.2f',

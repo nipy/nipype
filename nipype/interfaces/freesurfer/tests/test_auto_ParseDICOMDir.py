@@ -18,18 +18,9 @@ def test_ParseDICOMDir_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         sortbyrun=dict(argstr='--sortbyrun', ),
         subjects_dir=dict(),
         summarize=dict(argstr='--summarize', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = ParseDICOMDir.input_spec()
 

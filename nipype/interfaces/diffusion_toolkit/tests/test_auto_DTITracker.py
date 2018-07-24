@@ -12,11 +12,6 @@ def test_DTITracker_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         input_data_prefix=dict(
             argstr='%s',
             position=0,
@@ -50,10 +45,6 @@ def test_DTITracker_inputs():
         swap_yz=dict(argstr='-syz', ),
         swap_zx=dict(argstr='-szx', ),
         tensor_file=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         tracking_method=dict(argstr='-%s', ),
     )
     inputs = DTITracker.input_spec()

@@ -19,7 +19,7 @@ from ... import logging
 from ...utils.filemanip import split_filename
 from ..base import CommandLine, PackageInfo
 
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 class Info(PackageInfo):

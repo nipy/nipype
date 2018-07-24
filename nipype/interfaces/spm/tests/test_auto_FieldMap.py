@@ -26,11 +26,6 @@ def test_FieldMap_inputs():
             field='subj.defaults.defaultsval.epifm',
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         jacobian_modulation=dict(
             field='subj.defaults.defaultsval.ajm',
             usedefault=True,

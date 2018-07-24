@@ -10,11 +10,6 @@ def test_OrientScalarVolume_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume1=dict(
             argstr='%s',
             position=-2,
@@ -24,10 +19,6 @@ def test_OrientScalarVolume_inputs():
             argstr='%s',
             hash_files=False,
             position=-1,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = OrientScalarVolume.input_spec()

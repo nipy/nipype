@@ -40,7 +40,7 @@ from .nodes import MapNode, Node
 from future import standard_library
 standard_library.install_aliases()
 
-logger = logging.getLogger('workflow')
+logger = logging.getLogger('nipype.workflow')
 
 
 class Workflow(EngineBase):

@@ -37,11 +37,6 @@ def test_BRAINSConstellationDetector_inputs():
             sep=',',
         ),
         houghEyeDetectorMode=dict(argstr='--houghEyeDetectorMode %d', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputLandmarksEMSP=dict(argstr='--inputLandmarksEMSP %s', ),
         inputTemplateModel=dict(argstr='--inputTemplateModel %s', ),
         inputVolume=dict(argstr='--inputVolume %s', ),
@@ -94,10 +89,6 @@ def test_BRAINSConstellationDetector_inputs():
         ),
         rmpj=dict(argstr='--rmpj %f', ),
         rpc=dict(argstr='--rpc %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         trimRescaledIntensities=dict(argstr='--trimRescaledIntensities %f', ),
         verbose=dict(argstr='--verbose ', ),
         writeBranded2DImage=dict(

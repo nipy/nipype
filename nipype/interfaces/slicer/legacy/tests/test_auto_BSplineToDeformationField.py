@@ -14,16 +14,7 @@ def test_BSplineToDeformationField_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         refImage=dict(argstr='--refImage %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         tfm=dict(argstr='--tfm %s', ),
     )
     inputs = BSplineToDeformationField.input_spec()

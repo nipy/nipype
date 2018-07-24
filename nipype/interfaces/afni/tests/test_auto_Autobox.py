@@ -10,11 +10,6 @@ def test_Autobox_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-input %s',
             copyfile=False,
@@ -32,10 +27,6 @@ def test_Autobox_inputs():
         ),
         outputtype=dict(),
         padding=dict(argstr='-npad %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = Autobox.input_spec()
 

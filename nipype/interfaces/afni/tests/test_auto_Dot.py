@@ -18,11 +18,6 @@ def test_Dot_inputs():
             usedefault=True,
         ),
         full=dict(argstr='-full', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(
             argstr='%s ...',
             position=-2,
@@ -39,10 +34,6 @@ def test_Dot_inputs():
         ),
         outputtype=dict(),
         show_labels=dict(argstr='-show_labels', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         upper=dict(argstr='-upper', ),
     )
     inputs = Dot.input_spec()

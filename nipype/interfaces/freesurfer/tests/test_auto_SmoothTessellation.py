@@ -14,11 +14,6 @@ def test_SmoothTessellation_inputs():
         ),
         gaussian_curvature_norm_steps=dict(argstr='%d ', ),
         gaussian_curvature_smoothing_steps=dict(argstr='%d', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             copyfile=True,
@@ -37,10 +32,6 @@ def test_SmoothTessellation_inputs():
         smoothing_iterations=dict(argstr='-n %d', ),
         snapshot_writing_iterations=dict(argstr='-w %d', ),
         subjects_dir=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         use_gaussian_curvature_smoothing=dict(argstr='-g', ),
         use_momentum=dict(argstr='-m', ),
     )

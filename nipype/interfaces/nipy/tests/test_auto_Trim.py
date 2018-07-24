@@ -7,11 +7,6 @@ def test_Trim_inputs():
     input_map = dict(
         begin_index=dict(usedefault=True, ),
         end_index=dict(usedefault=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(mandatory=True, ),
         out_file=dict(),
         suffix=dict(usedefault=True, ),

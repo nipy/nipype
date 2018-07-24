@@ -23,11 +23,6 @@ def test_ProcStreamlines_inputs():
         ),
         exclusionfile=dict(argstr='-exclusionfile %s', ),
         gzip=dict(argstr='-gzip', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-inputfile %s',
             mandatory=True,
@@ -99,10 +94,6 @@ def test_ProcStreamlines_inputs():
             units='voxels',
         ),
         targetfile=dict(argstr='-targetfile %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         truncateinexclusion=dict(argstr='-truncateinexclusion', ),
         truncateloops=dict(argstr='-truncateloops', ),
         voxeldims=dict(

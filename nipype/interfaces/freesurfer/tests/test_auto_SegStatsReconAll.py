@@ -43,11 +43,6 @@ def test_SegStatsReconAll_inputs():
             argstr='--ctab-gca %s',
             xor=('color_table_file', 'default_color_table', 'gca_color_table'),
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(argstr='--i %s', ),
         in_intensity=dict(argstr='--in %s --in-intensity-name %s', ),
         intensity_units=dict(
@@ -95,10 +90,6 @@ def test_SegStatsReconAll_inputs():
             argstr='--slabel %s %s %s',
             mandatory=True,
             xor=('segmentation_file', 'annot', 'surf_label'),
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         total_gray=dict(argstr='--totalgray', ),
         transform=dict(mandatory=True, ),

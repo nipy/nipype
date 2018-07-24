@@ -22,11 +22,6 @@ def test_RegistrationSynQuick_inputs():
             argstr='-r %d',
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         moving_image=dict(
             argstr='-m %s...',
             mandatory=True,
@@ -46,10 +41,6 @@ def test_RegistrationSynQuick_inputs():
         spline_distance=dict(
             argstr='-s %d',
             usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         transform_type=dict(
             argstr='-t %s',

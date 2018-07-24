@@ -11,11 +11,6 @@ def test_HistogramMatchingFilter_inputs():
             usedefault=True,
         ),
         histogramAlgorithm=dict(argstr='--histogramAlgorithm %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputBinaryVolume=dict(argstr='--inputBinaryVolume %s', ),
         inputVolume=dict(argstr='--inputVolume %s', ),
         numberOfHistogramBins=dict(argstr='--numberOfHistogramBins %d', ),
@@ -26,10 +21,6 @@ def test_HistogramMatchingFilter_inputs():
         ),
         referenceBinaryVolume=dict(argstr='--referenceBinaryVolume %s', ),
         referenceVolume=dict(argstr='--referenceVolume %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         verbose=dict(argstr='--verbose ', ),
         writeHistogram=dict(argstr='--writeHistogram %s', ),
     )

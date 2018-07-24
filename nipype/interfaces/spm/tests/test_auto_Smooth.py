@@ -7,11 +7,6 @@ def test_Smooth_inputs():
     input_map = dict(
         data_type=dict(field='dtype', ),
         fwhm=dict(field='fwhm', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         implicit_masking=dict(field='im', ),
         in_files=dict(
             copyfile=False,

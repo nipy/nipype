@@ -11,7 +11,7 @@ from ...utils.filemanip import simplify_list
 from ..base import (traits, File, Directory, TraitedSpec, OutputMultiPath)
 from ..freesurfer.base import FSCommand, FSTraitedSpec
 
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 class WatershedBEMInputSpec(FSTraitedSpec):

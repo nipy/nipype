@@ -10,11 +10,6 @@ def test_ComputeMeanDiffusivity_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='< %s',
             mandatory=True,
@@ -31,10 +26,6 @@ def test_ComputeMeanDiffusivity_inputs():
         scheme_file=dict(
             argstr='%s',
             position=2,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = ComputeMeanDiffusivity.input_spec()

@@ -16,11 +16,6 @@ def test_MultiResolutionAffineRegistration_inputs():
         ),
         fixedImageMask=dict(argstr='--fixedImageMask %s', ),
         fixedImageROI=dict(argstr='--fixedImageROI %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         metricTolerance=dict(argstr='--metricTolerance %f', ),
         movingImage=dict(
             argstr='%s',
@@ -38,10 +33,6 @@ def test_MultiResolutionAffineRegistration_inputs():
         ),
         stepSize=dict(argstr='--stepSize %f', ),
         stepTolerance=dict(argstr='--stepTolerance %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = MultiResolutionAffineRegistration.input_spec()
 

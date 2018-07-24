@@ -11,21 +11,12 @@ def test_TextureMeasureFilter_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputMaskVolume=dict(argstr='--inputMaskVolume %s', ),
         inputVolume=dict(argstr='--inputVolume %s', ),
         insideROIValue=dict(argstr='--insideROIValue %f', ),
         outputFilename=dict(
             argstr='--outputFilename %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = TextureMeasureFilter.input_spec()

@@ -11,11 +11,6 @@ def test_AutoTcorrelate_inputs():
             usedefault=True,
         ),
         eta2=dict(argstr='-eta2', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             copyfile=False,
@@ -42,10 +37,6 @@ def test_AutoTcorrelate_inputs():
         ),
         outputtype=dict(),
         polort=dict(argstr='-polort %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = AutoTcorrelate.input_spec()
 

@@ -23,17 +23,8 @@ def test_MaskScalarVolume_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         label=dict(argstr='--label %d', ),
         replace=dict(argstr='--replace %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = MaskScalarVolume.input_spec()
 

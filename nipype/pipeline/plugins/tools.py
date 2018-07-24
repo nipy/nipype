@@ -18,7 +18,7 @@ from traceback import format_exception
 from ... import logging
 from ...utils.filemanip import savepkl, crash2txt, makedirs
 
-logger = logging.getLogger('workflow')
+logger = logging.getLogger('nipype.workflow')
 
 
 def report_crash(node, traceback=None, hostname=None):
@@ -58,7 +58,8 @@ def report_crash(node, traceback=None, hostname=None):
     if crashfile.endswith('.txt'):
         crash2txt(crashfile, dict(node=node, traceback=traceback))
     else:
-        savepkl(crashfile, dict(node=node, traceback=traceback))
+        savepkl(crashfile, dict(node=node, traceback=traceback),
+                versioning=True)
     return crashfile
 
 

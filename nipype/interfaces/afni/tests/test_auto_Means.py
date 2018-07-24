@@ -12,11 +12,6 @@ def test_Means_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file_a=dict(
             argstr='%s',
             mandatory=True,
@@ -43,10 +38,6 @@ def test_Means_inputs():
         sqr=dict(argstr='-sqr', ),
         std_dev=dict(argstr='-stdev', ),
         summ=dict(argstr='-sum', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = Means.input_spec()
 

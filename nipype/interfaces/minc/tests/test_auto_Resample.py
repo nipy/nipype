@@ -82,11 +82,6 @@ def test_Resample_inputs():
             argstr='-width %s',
             requires=['sinc_interpolation'],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         input_file=dict(
             argstr='%s',
             mandatory=True,
@@ -160,10 +155,6 @@ def test_Resample_inputs():
             xor=('nelements', 'nelements_x_y_or_z'),
         ),
         talairach=dict(argstr='-talairach', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         transformation=dict(argstr='-transformation %s', ),
         transverse_slices=dict(
             argstr='-transverse',

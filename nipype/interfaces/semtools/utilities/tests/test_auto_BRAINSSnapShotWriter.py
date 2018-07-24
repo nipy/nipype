@@ -10,11 +10,6 @@ def test_BRAINSSnapShotWriter_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputBinaryVolumes=dict(argstr='--inputBinaryVolumes %s...', ),
         inputPlaneDirection=dict(
             argstr='--inputPlaneDirection %s',
@@ -36,10 +31,6 @@ def test_BRAINSSnapShotWriter_inputs():
         outputFilename=dict(
             argstr='--outputFilename %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = BRAINSSnapShotWriter.input_spec()

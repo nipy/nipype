@@ -16,10 +16,6 @@ def test_BBRegister_inputs():
         ),
         epi_mask=dict(argstr='--epi-mask', ),
         fsldof=dict(argstr='--fsl-dof %d', ),
-        ignore_exception=dict(
-            nohash=True,
-            usedefault=True,
-        ),
         init=dict(
             argstr='--init-%s',
             mandatory=True,
@@ -61,7 +57,6 @@ def test_BBRegister_inputs():
             mandatory=True,
         ),
         subjects_dir=dict(),
-        terminal_output=dict(nohash=True, ),
     )
     input_map_6_0 = dict(
         args=dict(argstr='%s', ),
@@ -76,10 +71,6 @@ def test_BBRegister_inputs():
         ),
         epi_mask=dict(argstr='--epi-mask', ),
         fsldof=dict(argstr='--fsl-dof %d', ),
-        ignore_exception=dict(
-            nohash=True,
-            usedefault=True,
-        ),
         init=dict(
             argstr='--init-%s',
             xor=['init_reg_file'],
@@ -119,7 +110,6 @@ def test_BBRegister_inputs():
             mandatory=True,
         ),
         subjects_dir=dict(),
-        terminal_output=dict(nohash=True, ),
     )
 
     instance = BBRegister()

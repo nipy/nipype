@@ -10,11 +10,6 @@ def test_BRAINSLandmarkInitializer_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputFixedLandmarkFilename=dict(
             argstr='--inputFixedLandmarkFilename %s', ),
         inputMovingLandmarkFilename=dict(
@@ -23,10 +18,6 @@ def test_BRAINSLandmarkInitializer_inputs():
         outputTransformFilename=dict(
             argstr='--outputTransformFilename %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = BRAINSLandmarkInitializer.input_spec()
