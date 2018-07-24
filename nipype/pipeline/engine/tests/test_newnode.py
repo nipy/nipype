@@ -21,7 +21,7 @@ def fun_addvar(a, b):
 
 
 def test_node_1():
-    """Node with only mandatory arguments"""
+    """Node with mandatory arguments only"""
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     nn = NewNode(name="NA", interface=interf_addtwo)
     assert nn.mapper is None
@@ -39,7 +39,7 @@ def test_node_2():
 
 
 def test_node_3():
-    """Node with interface and inputs"""
+    """Node with interface, inputs and mapper"""
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     nn = NewNode(name="NA", interface=interf_addtwo, inputs={"a": [3, 5]}, mapper="a")
     assert nn.mapper == "NA-a"
@@ -53,7 +53,7 @@ def test_node_3():
 
 
 def test_node_4():
-    """Node with interface and inputs"""
+    """Node with interface and inputs. mapper set using map method"""
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     nn = NewNode(name="NA", interface=interf_addtwo, inputs={"a": [3, 5]})
     nn.map(mapper="a")
@@ -67,7 +67,7 @@ def test_node_4():
 
 
 def test_node_5():
-    """Node with interface and inputs"""
+    """Node with interface, mapper and inputs set with the map method"""
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     nn = NewNode(name="NA", interface=interf_addtwo)
     nn.map(mapper="a", inputs={"a": [3, 5]})
@@ -83,7 +83,7 @@ def test_node_5():
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_node_6(plugin):
-    """Node with interface and inputs, running interface"""
+    """Node with interface, inputs and the simplest mapper, running interface"""
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     nn = NewNode(name="NA", interface=interf_addtwo, base_dir="test6_{}".format(plugin))
     nn.map(mapper="a", inputs={"a": [3, 5]})
@@ -108,7 +108,7 @@ def test_node_6(plugin):
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_node_7(plugin):
-    """Node with interface and inputs, running interface"""
+    """Node with interface, inputs and scalar mapper, running interface"""
     interf_addvar = Function_Interface(fun_addvar, ["out"])
     nn = NewNode(name="NA", interface=interf_addvar, base_dir="test7_{}".format(plugin))
     nn.map(mapper=("a", "b"), inputs={"a": [3, 5], "b": [2, 1]})
@@ -134,7 +134,7 @@ def test_node_7(plugin):
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_node_8(plugin):
-    """Node with interface and inputs, running interface"""
+    """Node with interface, inputs and vector mapper, running interface"""
     interf_addvar = Function_Interface(fun_addvar, ["out"])
     nn = NewNode(name="NA", interface=interf_addvar, base_dir="test8_{}".format(plugin))
     nn.map(mapper=["a", "b"], inputs={"a": [3, 5], "b": [2, 1]})
@@ -163,7 +163,7 @@ def test_node_8(plugin):
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_1(plugin):
-    """one node with a mapper"""
+    """workflow with one node with a mapper"""
     wf = NewWorkflow(name="wf1", workingdir="test_wf1_{}".format(plugin))
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
@@ -184,7 +184,7 @@ def test_workflow_1(plugin):
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_2(plugin):
-    """workflow with 2 nodes, second node without mapper"""
+    """workflow with two nodes, second node without mapper"""
     wf = NewWorkflow(name="wf2", workingdir="test_wf2_{}".format(plugin))
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
@@ -220,7 +220,7 @@ def test_workflow_2(plugin):
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_2a(plugin):
-    """workflow with 2 nodes, second node with a scalar mapper"""
+    """workflow with two nodes, second node with a scalar mapper"""
     wf = NewWorkflow(name="wf2", workingdir="test_wf2a_{}".format(plugin))
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
@@ -257,7 +257,7 @@ def test_workflow_2a(plugin):
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_2b(plugin):
-    """workflow with 2 nodes, second node with a vector mapper"""
+    """workflow with two nodes, second node with a vector mapper"""
     wf = NewWorkflow(name="wf2", workingdir="test_wf2b_{}".format(plugin))
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")

@@ -1443,7 +1443,6 @@ class NewWorkflow(NewNode):
         self.sub.run_workflow()
         self.sub.close()
 
-#zamienic na node a pozniej add_node
     def add(self, runnable, name=None, base_dir=None, inputs=None, output_nm=None, mapper=None):
         # dj TODO: should I move this if checks to NewNode __init__?
         if is_function(runnable):
