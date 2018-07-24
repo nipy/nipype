@@ -20,7 +20,9 @@ Usage
 
 To view the Neurodocker help message
 ::
-    docker run --rm kaczmarj/neurodocker:0.4.0 generate --help
+    docker run --rm kaczmarj/neurodocker:0.4.0 generate [docker|singularity] --help
+
+Note: choose between ``docker`` and ``singularity`` in ``[docker|singularity]``.
 
 1. Users must specify a base Docker image and the package manager. Any Docker
    image on DockerHub can be used as your base image. Common base images
@@ -44,20 +46,11 @@ To view the Neurodocker help message
 Create a Dockerfile or Singularity recipe with FSL, Python 3.6, and Nipype
 --------------------------------------------------------------------------
 
-This command prints a Dockerfile (the specification for a Docker image) to the
+This command prints a Dockerfile (the specification for a Docker image) or a
+Singularity recipe (the specification for a Singularity container) to the
 terminal.
 ::
-  $ docker run --rm kaczmarj/neurodocker:0.4.0 generate docker \
-    --base debian:stretch --pkg-manager apt \
-    --fsl version=5.0.10 \
-    --miniconda create_env=neuro \
-                conda_install="python=3.6 traits" \
-                pip_install="nipype"
-
-This command prints a Singularity recipe (the specification for a Singularity
-container) to the terminal.
-::
-  $ docker run --rm kaczmarj/neurodocker:0.4.0 generate singularity \
+  $ docker run --rm kaczmarj/neurodocker:0.4.0 generate [docker|singularity] \
     --base debian:stretch --pkg-manager apt \
     --fsl version=5.0.10 \
     --miniconda create_env=neuro \
@@ -92,7 +85,7 @@ The Singularity recipe can be saved and used to build the Singularity container
     --miniconda create_env=neuro \
                 conda_install="python=3.6 traits" \
                 pip_install="nipype" > Singularity
-  $ singularity build Singularity my_nipype.sqsh
+  $ singularity build my_nipype.simg Singularity
 
 
 Use NeuroDebian
@@ -120,7 +113,7 @@ running the container.
 ::
   $ docker run --rm kaczmarj/neurodocker:0.4.0 generate docker \
     --base centos:7 --pkg-manager yum \
-    --dcm2niix version=master \
+    --dcm2niix version=master method=source \
     --user neuro \
     --miniconda create_env=neuro conda_install="jupyter traits nipype" \
     > Dockerfile
@@ -129,8 +122,10 @@ running the container.
 
 Copy local files into a container.
 ::
-  $ docker run --rm kaczmarj/neurodocker:v0.3.2 generate [docker|singularity] \
+  $ docker run --rm kaczmarj/neurodocker:0.4.0 generate [docker|singularity] \
     --base ubuntu:16.04 --pkg-manager apt \
     --copy relative/path/to/source.txt /absolute/path/to/destination.txt
+
+See the `Neurodocker examples page <https://github.com/kaczmarj/neurodocker/tree/master/examples/>`_ for more.
 
 .. include:: ../links_names.txt
