@@ -13,7 +13,7 @@ import os.path as op
 from ...utils.filemanip import (load_json, save_json, split_filename,
                                 fname_presuffix)
 from ..base import (CommandLineInputSpec, CommandLine, TraitedSpec, traits,
-                    isdefined, File, InputMultiPath, Undefined, Str, 
+                    isdefined, File, InputMultiPath, Undefined, Str,
                     InputMultiObject)
 
 from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec,
@@ -2563,7 +2563,7 @@ class TProject(AFNICommand):
     _cmd = '3dTproject'
     input_spec = TProjectInputSpec
     output_spec = AFNICommandOutputSpec
-    
+
 
 class TShiftInputSpec(AFNICommandInputSpec):
     in_file = File(
@@ -2791,12 +2791,12 @@ class WarpInputSpec(AFNICommandInputSpec):
     verbose = traits.Bool(
         desc='Print out some information along the way.', argstr='-verb')
     save_warp = traits.Bool(
-        False, usedefault=True, desc='save warp as .mat file')
+        desc='save warp as .mat file', requires=['verbose'])
 
 
 class WarpOutputSpec(TraitedSpec):
     out_file = File(desc='Warped file.', exists=True)
-    warp_file = File(desc='warp transfrom .mat file')
+    warp_file = File(desc='warp transform .mat file')
 
 
 class Warp(AFNICommand):
@@ -2835,39 +2835,16 @@ class Warp(AFNICommand):
 
         if self.inputs.save_warp:
             import numpy as np
-            if not self.inputs.out_file:
-                warp_file = fname_presuffix(self.inputs.in_file,
-                                            suffix='_warp_transform.mat',
-                                            use_ext=False)                        
-            else:
-                warp_file = fname_presuffix(self.inputs.out_file,
-                                            suffix='_transform.mat',
-                                            use_ext=False)
+            warp_file = self._list_outputs()['warp_file']
             np.savetxt(warp_file, [runtime.stdout], fmt=str('%s'))
         return runtime
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
-        if not self.inputs.out_file:
-            fname, ext = os.path.splitext(self.inputs.in_file)
-            if '.gz' in ext:
-                _, ext2 = os.path.splitext(fname)
-                ext = ext2 + ext
-            out_file = self._gen_fname(self.inputs.in_file, suffix='_warp',
-                                       ext=ext)
-            outputs['out_file'] = os.path.abspath(out_file)
-            if self.inputs.save_warp:
-                warp_file = fname_presuffix(self.inputs.in_file,
-                                            suffix='_warp_transform.mat',
-                                            use_ext=False)
-                outputs['warp_file'] = os.path.abspath(warp_file)
-        else:
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
-            if self.inputs.save_warp:
-                warp_file = fname_presuffix(self.inputs.out_file,
-                                            suffix='_transform.mat',
-                                            use_ext=False)
-                outputs['warp_file'] = os.path.abspath(warp_file)
+        outputs = super(Warp, self)._list_outputs()
+        if self.inputs.save_warp:
+            outputs['warp_file'] = fname_presuffix(outputs['out_file'],
+                                                   suffix='_transform.mat',
+                                                   use_ext=False)
 
         return outputs
 

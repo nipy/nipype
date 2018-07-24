@@ -34,7 +34,7 @@ def test_Warp_inputs():
             name_template='%s_warp',
         ),
         outputtype=dict(),
-        save_warp=dict(usedefault=True, ),
+        save_warp=dict(requires=['verbose'], ),
         tta2mni=dict(argstr='-tta2mni', ),
         verbose=dict(argstr='-verb', ),
         zpad=dict(argstr='-zpad %d', ),
