@@ -1073,12 +1073,14 @@ class MapState(object):
 
 # dj ??: should I use EngineBase?
 class NewNodeCore(object):
-    def __init__(self, name, interface, state, inputs=None, base_dir=None, *args, **kwargs):
+    def __init__(self, name, interface, state, inputs=None, state_inputs=None, base_dir=None, *args, **kwargs):
         # adding interface: i'm using Function Interface from aux that has input_map that can change the name of arguments
         self.nodedir = base_dir
         self.name = name
+        #dj TODO: I should think what is needed in the __init__ (I redefine some of rhe attributes anyway)
         self.state = state
         self._inputs = inputs
+        self._state_inputs = state_inputs
         self._interface = interface
         self._interface.input_map = dict((key, "{}-{}".format(self.name, value))
                                          for (key, value) in self._interface.input_map.items())
@@ -1099,11 +1101,10 @@ class NewNodeCore(object):
         return self._inputs
 
 
-    def run_interface_el(self, i, ind, single_node=False):
+    def run_interface_el(self, i, ind):
         """ running interface one element generated from node_state."""
         logger.debug("Run interface el, name={}, i={}, ind={}".format(self.name, i, ind))
-        if not single_node: # if we run a single node, we don't have to collect output
-            state_dict, inputs_dict = self._collecting_input_el(ind)
+        state_dict, inputs_dict = self._collecting_input_el(ind)
         logger.debug("Run interface el, name={}, inputs_dict={}, state_dict={}".format(
                                                             self.name, inputs_dict, state_dict))
         res = self._interface.run(inputs_dict)
@@ -1132,12 +1133,19 @@ class NewNodeCore(object):
         # reading extra inputs that come from previous nodes
         for (from_node, from_socket, to_socket) in self.needed_outputs:
             dir_nm_el_from = "_".join(["{}.{}".format(i, j) for i, j in list(state_dict.items())
-                                       if i in list(from_node.state_inputs.keys())])
+                                       if i in list(from_node._state_inputs.keys())])
             file_from = os.path.join(from_node.nodedir, dir_nm_el_from, from_socket+".txt")
             with open(file_from) as f:
                 inputs_dict["{}-{}".format(self.name, to_socket)] = eval(f.readline())
         return state_dict, inputs_dict
 
+
+    def checking_input_el(self, ind):
+        try:
+            self._collecting_input_el(ind)
+            return True
+        except: #TODO specify
+            return False
 
 
     # checking if all outputs are saved
@@ -1177,7 +1185,7 @@ class NewNodeCore(object):
         doesn't check if everything is ready, i.e. if self.global_done"""
         for key_out in self._out_nm:
             self._result[key_out] = []
-            if self.inputs: #self.state_inputs:
+            if self._state_inputs:
                 files = [name for name in glob.glob("{}/*/{}.txt".format(self.nodedir, key_out))]
                 for file in files:
                     st_el = file.split(os.sep)[-2].split("_")
@@ -1197,10 +1205,10 @@ class NewNodeCore(object):
 
 class NewNode(object):
     def __init__(self, name, interface, inputs=None, mapper=None, join_by=None,
-                 base_dir=None, *args, **kwargs):
+                 base_dir=None, singlenode=True, *args, **kwargs):
         # dj: should be changed for wf
         self.name = name
-        self.nodedir = base_dir
+        self._nodedir = base_dir
         self._interface = interface
         # dj: do I need a state_input and state_mapper??
         # dj: reading the input from files should be added
@@ -1209,15 +1217,20 @@ class NewNode(object):
             self._inputs = dict(("{}-{}".format(self.name, key), value) for (key, value) in inputs.items())
             self._inputs = dict((key, np.array(val)) if type(val) is list else (key, val)
                                 for (key, val) in self._inputs.items())
+            self._state_inputs = self._inputs.copy()
         else:
             self._inputs = {}
+            self._state_inputs = {}
         if mapper:
             # adding name of the node to the input name within the mapper
             mapper = aux.change_mapper(mapper, self.name)
         self._mapper = mapper
         # create state (takes care of mapper, connects inputs with axes, so we can ask for specifc element)
         self._state = state.State(mapper=self._mapper, node_name=self.name)
-
+        if singlenode:
+            self.nodecore = NewNodeCore(name=self.name, base_dir=self.nodedir, interface=self._interface,
+            inputs=self._inputs, state_inputs=self._state_inputs, state=self._state)
+        self.sufficient = True
 
     def map(self, mapper, inputs=None):
         if self._mapper:
@@ -1230,6 +1243,7 @@ class NewNode(object):
             inputs = dict((key, np.array(val)) if type(val) is list else (key, val)
                           for (key, val) in inputs.items())
             self._inputs.update(inputs)
+            self._state_inputs.update(inputs)
         if mapper:
             # updating state if we have a new mapper
             self._state = state.State(mapper=self._mapper, node_name=self.name)
@@ -1255,16 +1269,42 @@ class NewNode(object):
     def state(self):
         return self._state
 
+    @property
+    def nodedir(self):
+        return self._nodedir
+
+    @nodedir.setter
+    def nodedir(self, nodedir):
+        self._nodedir = nodedir
+        self.nodecore.nodedir = nodedir
+
 
     @property
     def mapper(self):
         return self._mapper
 
+    @mapper.setter
+    def mapper(self, mapper):
+        self._mapper = mapper
+        #updating state
+        self._state = state.State(mapper=self._mapper, node_name=self.name)
 
     @property
     def inputs(self):
         return self._inputs
 
+    @property
+    def state_inputs(self):
+        return self.nodecore._state_inputs
+
+    @property
+    def global_done(self):
+        return self.nodecore.global_done
+
+
+    @property
+    def needed_outputs(self):
+        return self.nodecore.needed_outputs
 
     @property
     def result(self):
@@ -1272,37 +1312,125 @@ class NewNode(object):
 
 
     def prepare_state_input(self):
-        self._state.prepare_state_input(state_inputs=self._inputs)
+        self._state.prepare_state_input(state_inputs=self.state_inputs)
+        # updating node
+        self.nodecore.state = self._state
+        self.nodecore._inputs = self._inputs
+        self.nodecore._state_inputs = self._state_inputs
 
     def run(self, plugin="serial"):
         self.prepare_state_input()
-        self.nodecore = NewNodeCore(name=self.name, base_dir=self.nodedir, interface=self._interface,
-                                    inputs=self._inputs, state=self._state)
         self.sub = sub.SubmitterNode(plugin, node=self.nodecore)
         self.sub.run_node()
         self.sub.close()
 
 
-
-
 class NewWorkflow(NewNode):
-    def __init__(self, inputs={}, *args, **kwargs):
-        super(NewWorkflow, self).__init__(*args, **kwargs)
+    def __init__(self, inputs=None, mapper=None, #join_by=None,
+                 base_dir=None, nodes=None, workingdir=None, *args, **kwargs):
+        # dj: workflow can't have interface...
+        super(NewWorkflow, self).__init__(inputs=inputs, mapper=mapper, interface=None,
+                 base_dir=base_dir, singlenode=False, *args, **kwargs)
 
-        self._nodes = {}
+        self.graph = nx.DiGraph()
+        self._nodes = []
+        self.connected_var = {}
+        if nodes:
+            self.add_nodes(nodes)
+        for nn in self._nodes:
+            self.connected_var[nn] = {}
 
-        mro = self.__class__.mro()
-        wf_klasses = mro[:mro.index(NewWorkflow)][::-1]
-        items = {}
-        for klass in wf_klasses:
-            items.update(klass.__dict__)
-        for name, runnable in items.items():
-            if name in ('__module__', '__doc__'):
-                continue
+        # dj: I have nodedir and workingdir...
+        self.workingdir = os.path.join(os.getcwd(), workingdir)
 
-            self.add(name, value)
+        # dj not sure what was the motivation, wf_klasses gives an empty list
+        #mro = self.__class__.mro()
+        #wf_klasses = mro[:mro.index(NewWorkflow)][::-1]
+        #items = {}
+        #for klass in wf_klasses:
+        #    items.update(klass.__dict__)
+        #for name, runnable in items.items():
+        #    if name in ('__module__', '__doc__'):
+        #        continue
 
-    def add(self, name, runnable):
+        #    self.add(name, value)
+
+
+
+    @property
+    def nodes(self):
+        return self._nodes
+
+    def add_nodes(self, nodes):
+        """adding nodes without defining connections"""
+        self._nodes = nodes
+        self.graph.add_nodes_from(nodes)
+        for nn in nodes:
+            #self._inputs.update(nn.inputs)
+            self.connected_var[nn] = {}
+            nn.nodedir = os.path.join(self.workingdir, nn.nodedir)
+
+
+    def connect(self, from_node, from_socket, to_node, to_socket):
+        self.graph.add_edges_from([(from_node, to_node)])
+        if not to_node in self.nodes:
+            self.add_nodes(to_node)
+        self.connected_var[to_node][to_socket] = (from_node, from_socket)
+        # from_node.sending_output.append((from_socket, to_node, to_socket))
+
+        logger.debug('connecting {} and {}'.format(from_node, to_node))
+
+
+    def _preparing(self):
+        """preparing nodes which are connected: setting the final mapper and state_inputs"""
+        self.graph_sorted = list(nx.topological_sort(self.graph))
+        logger.debug('the sorted graph is: {}'.format(self.graph_sorted))
+        for nn in self.graph_sorted:
+            nn.wfdir = self.workingdir
+            try:
+                for inp, (out_node, out_var) in self.connected_var[nn].items():
+                    nn.sufficient = False #it has some history (doesnt have to be in the loop)
+                    nn.state_inputs.update(out_node.state_inputs)
+                    nn.needed_outputs.append((out_node, out_var, inp))
+                    #if there is no mapper provided, i'm assuming that mapper is taken from the previous node
+                    if (not nn.mapper or nn.mapper == out_node.mapper) and out_node.mapper:
+                        nn.mapper = out_node.mapper
+                        #nn._mapper = inp #not used
+                    elif not out_node.mapper: # we shouldn't change anything
+                        pass
+                    # when the mapper from previous node is used in the current node (it has to be the same syntax)
+                    elif nn.mapper and out_node.mapper in nn.mapper:  # state_mapper or _mapper?? TODO
+                        #dj: if I use the syntax with state_inp name than I don't have to change the mapper...
+                        #if type(nn._mapper) is tuple:
+                        #    nn._mapper = tuple([inp if x == out_node.state_mapper else x for x in list(nn._mapper)])
+                        # TODO: not sure if I'll have to implement more
+                        pass
+
+                    #TODO: implement inner mapper
+                    # TODO: if nn.mapper is a string and inp can be a letter that exists in nn.mapper
+                    #elif nn.mapper and inp in nn.mapper:
+                    #    raise Exception("{} can be in the mapper only together with {}, i.e. {})".format(inp, out[1],
+                    #                                                                                    [out[1], inp]))
+                    else:
+                        raise Exception("worflow._preparing: should I implement something more?")
+                pass
+            except(KeyError):
+                # tmp: we don't care about nn that are not in self.connected_var
+                pass
+
+            #nn.preparing_node() #dj: only one this needed?:
+            # do i need it at all?
+            nn.prepare_state_input()
+
+
+    def run(self, plugin="serial"):
+        self._preparing()
+        self.sub = sub.SubmitterWorkflow(plugin=plugin, graph=self.graph)
+        self.sub.run_workflow()
+        self.sub.close()
+
+
+    def add_orig(self, name, runnable):
         if is_function(runnable):
             node = Node(Function(function=runnable), name=name)
         elif is_interface(runnable):
@@ -1315,7 +1443,7 @@ class NewWorkflow(NewNode):
         self._nodes[name] = node
         self._last_added = name
 
-    def map(self, field, node=None, values=None):
+    def map_orig(self, field, node=None, values=None):
         if node is None:
             if '.' in field:
                 node, field = field.rsplit('.', 1)
