@@ -1363,9 +1363,9 @@ class NewWorkflow(NewNode):
 
     def add_nodes(self, nodes):
         """adding nodes without defining connections"""
-        self._nodes = nodes
         self.graph.add_nodes_from(nodes)
         for nn in nodes:
+            self._nodes.append(nn)
             #self._inputs.update(nn.inputs)
             self.connected_var[nn] = {}
             nn.nodedir = os.path.join(self.workingdir, nn.nodedir)
@@ -1429,36 +1429,58 @@ class NewWorkflow(NewNode):
         self.sub.run_workflow()
         self.sub.close()
 
-
-    def add_orig(self, name, runnable):
+#zamienic na node a pozniej add_node
+    def add(self, runnable, name=None, base_dir=None, inputs=None, output_nm=None, mapper=None):
+        # dj TODO: should I move this if checks to NewNode __init__?
         if is_function(runnable):
-            node = Node(Function(function=runnable), name=name)
+            if not output_nm:
+                output_nm = ["out"]
+            interface = aux.Function_Interface(function=runnable, output_nm=output_nm)
+            if not name:
+                raise Exception("you have to specify name for the node")
+            if not base_dir:
+                base_dir = name
+            node = NewNode(interface=interface, base_dir=base_dir, name=name, inputs=inputs, mapper=mapper)
         elif is_interface(runnable):
-            node = Node(runnable, name=name)
+            if not name:
+                raise Exception("you have to specify name for the node")
+            if not base_dir:
+                base_dir = name
+            node = NewNode(interface=runnable, base_dir=base_dir, name=name, inputs=inputs, mapper=mapper)
         elif is_node(runnable):
-            node = runnable if runnable.name == name else runnable.clone(name=name)
+            node = runnable
+            #dj: dont have clonning right now
+            #node = runnable if runnable.name == name else runnable.clone(name=name)
         else:
             raise ValueError("Unknown workflow element: {!r}".format(runnable))
-        setattr(self, name, node)
-        self._nodes[name] = node
-        self._last_added = name
+        self.add_nodes([node])
+        # dj: i'm using name as a name of a workflow
+        #setattr(self, name, node)
+        #self._nodes[name] = node
+        self._last_added = node #name
+        #dj: so I can call map right away
+        return self
 
-    def map_orig(self, field, node=None, values=None):
-        if node is None:
-            if '.' in field:
-                node, field = field.rsplit('.', 1)
-            else:
-                node = self._last_added
 
-        if '.' in node:
-            subwf, node = node.split('.', 1)
-            self._nodes[subwf].map(field, node, values)
-            return
+    def map(self, mapper, node=None, inputs=None):
+        # if node is None:
+        #     if '.' in field:
+        #         node, field = field.rsplit('.', 1)
+        #     else:
+        #         node = self._last_added
+        #
+        # if '.' in node:
+        #     subwf, node = node.split('.', 1)
+        #     self._nodes[subwf].map(field, node, values)
+        #     return
 
-        if node in self._mappers:
+        if not node:
+            node = self._last_added
+
+        if node.mapper:
             raise WorkflowError("Cannot assign two mappings to the same input")
+        node.map(mapper=mapper, inputs=inputs)
 
-        self._mappers[node] = (field, values)
 
     def join(self, field, node=None):
         pass
@@ -1469,9 +1491,8 @@ def is_function(obj):
 
 
 def is_interface(obj):
-    return all(hasattr(obj, protocol)
-               for protocol in ('input_spec', 'output_spec', 'run'))
+    return type(obj) is aux.Function_Interface
 
 
 def is_node(obj):
-    return hasattr(obj, itername)
+    return type(obj) is NewNode
