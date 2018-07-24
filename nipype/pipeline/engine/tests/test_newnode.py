@@ -8,6 +8,7 @@ import pytest, pdb
 python35_only = pytest.mark.skipif(sys.version_info < (3, 5),
                                    reason="requires Python>3.4")
 
+Plugins = ["mp", "serial", "cf", "dask"]
 
 def fun_addtwo(a):
     time.sleep(3)
@@ -79,11 +80,9 @@ def test_node_5():
     assert nn.state.state_values([1]) == {"NA-a": 5}
 
 
-Plugins = ["mp", "serial", "cf", "dask"] 
-
-#@pytest.mark.parametrize("plugin", Plugins)
-#@python35_only
-def test_node_6(plugin="serial"):
+@pytest.mark.parametrize("plugin", Plugins)
+@python35_only
+def test_node_6(plugin):
     """Node with interface and inputs, running interface"""
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     nn = NewNode(name="NA", interface=interf_addtwo, base_dir="test6_{}".format(plugin))
