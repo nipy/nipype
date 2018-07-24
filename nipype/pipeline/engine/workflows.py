@@ -1343,6 +1343,10 @@ class NewWorkflow(NewNode):
         # dj: I have nodedir and workingdir...
         self.workingdir = os.path.join(os.getcwd(), workingdir)
 
+        if self.mapper:
+            #dj: TODO have to implement mapper for workflow. should I create as many workflows??
+            pass
+
         # dj not sure what was the motivation, wf_klasses gives an empty list
         #mro = self.__class__.mro()
         #wf_klasses = mro[:mro.index(NewWorkflow)][::-1]
@@ -1372,13 +1376,23 @@ class NewWorkflow(NewNode):
 
 
     def connect(self, from_node, from_socket, to_node, to_socket):
-        self.graph.add_edges_from([(from_node, to_node)])
-        if not to_node in self.nodes:
-            self.add_nodes(to_node)
-        self.connected_var[to_node][to_socket] = (from_node, from_socket)
-        # from_node.sending_output.append((from_socket, to_node, to_socket))
+        if from_node:
+            self.graph.add_edges_from([(from_node, to_node)])
+            if not to_node in self.nodes:
+                self.add_nodes(to_node)
+            self.connected_var[to_node][to_socket] = (from_node, from_socket)
+            # from_node.sending_output.append((from_socket, to_node, to_socket))
+            logger.debug('connecting {} and {}'.format(from_node, to_node))
+        else:
+            self.connect_workflow(to_node, from_socket, to_socket)
 
-        logger.debug('connecting {} and {}'.format(from_node, to_node))
+
+    def connect_workflow(self, node, inp_wf, inp_nd):
+        if "{}-{}".format(self.name, inp_wf) in self.inputs:
+            node.state_inputs.update({"{}-{}".format(node.name, inp_nd): self.inputs["{}-{}".format(self.name, inp_wf)]})
+            node.inputs.update({"{}-{}".format(node.name, inp_nd): self.inputs["{}-{}".format(self.name, inp_wf)]})
+        else:
+            raise Exception("{} not in the workflow inputs".format(inp_wf))
 
 
     def _preparing(self):
