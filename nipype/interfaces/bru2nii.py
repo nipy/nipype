@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """The bru2nii module provides basic functions for dicom conversion
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 
 import os
 from .base import (CommandLine, CommandLineInputSpec, traits, TraitedSpec,

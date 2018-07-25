@@ -5,8 +5,6 @@
 The maths module provides higher-level interfaces to some of the operations
 that can be performed with the fslmaths command-line program.
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 import os
 import numpy as np
 

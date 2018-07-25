@@ -3,8 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Debug plugin
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 
 import networkx as nx
 from .base import PluginBase, logger

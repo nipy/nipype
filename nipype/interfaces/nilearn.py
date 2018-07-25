@@ -4,8 +4,6 @@
 '''
 Algorithms to compute statistics on :abbr:`fMRI (functional MRI)`
 '''
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 import os
 
 import numpy as np

@@ -49,8 +49,6 @@ Author: Jonathan Feinberg <jdf@pobox.com>,
 Version: $Id: portalocker.py 5474 2008-05-16 20:53:50Z lowell $
 
 '''
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 from builtins import open
 
 __all__ = [

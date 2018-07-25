@@ -6,8 +6,6 @@
 Module to unit test the resource_monitor in nipype
 """
 
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 import os
 import pytest
 

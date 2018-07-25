@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """The ants visualisation module provides basic functions based on ITK.
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 
 import os
 

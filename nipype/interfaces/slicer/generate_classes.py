@@ -37,7 +37,6 @@ def add_class_to_package(class_codes, class_names, module_name, package_dir):
 If you spot a bug, please report it on the mailing list and/or change the generator.\"\"\"\n\n"""
               )
     imports = """from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 from ..base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine, TraitedSpec,
                     File, Directory, traits, isdefined, InputMultiPath, OutputMultiPath)
 import os\n\n\n"""
