@@ -5,10 +5,6 @@
 
 The `Node` class provides core functionality for batch processing.
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import range, str, bytes, open
-
 from collections import OrderedDict
 
 import os
@@ -20,7 +16,6 @@ from glob import glob
 from logging import INFO
 
 from tempfile import mkdtemp
-from future import standard_library
 
 from ... import config, logging
 from ...utils.misc import flatten, unflatten, str2bool, dict_diff
@@ -38,8 +33,6 @@ from .utils import (
     _node_runner, strip_temp as _strip_temp, write_report,
     clean_working_directory, merge_dict, evaluate_connect_function)
 from .base import EngineBase
-
-standard_library.install_aliases()
 
 logger = logging.getLogger('nipype.workflow')
 

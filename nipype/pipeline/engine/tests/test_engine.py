@@ -3,14 +3,9 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Tests for the engine module
 """
-
-from __future__ import print_function
-from __future__ import unicode_literals
-from builtins import open
 from copy import deepcopy
 from glob import glob
 import os
-
 
 import pytest
 from ... import engine as pe

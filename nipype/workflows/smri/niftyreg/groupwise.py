@@ -6,9 +6,6 @@ Example of registration workflows using niftyreg, useful for a variety of
 pipelines. Including linear and non-linear image co-registration
 """
 
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import str, range
 from ....interfaces import utility as niu
 from ....interfaces import niftyreg as niftyreg
 from ....pipeline import engine as pe

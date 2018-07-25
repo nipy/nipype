@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
-from future import standard_library
-standard_library.install_aliases()
-from builtins import open
 import configparser
 
 import os

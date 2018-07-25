@@ -5,10 +5,6 @@ Created on Aug 2, 2013
 
 Parallel workflow execution with SLURM
 '''
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import open
-
 import os
 import re
 from time import sleep

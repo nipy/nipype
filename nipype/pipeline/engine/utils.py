@@ -2,10 +2,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Utility routines for workflow graphs"""
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import str, open, next, zip, range
-
 import os
 import sys
 import pickle
@@ -22,7 +18,6 @@ from functools import reduce
 
 import numpy as np
 import networkx as nx
-from future import standard_library
 
 from ... import logging, config, LooseVersion
 from ...utils.filemanip import (
@@ -51,7 +46,6 @@ try:
 except ImportError:
     from funcsigs import signature
 
-standard_library.install_aliases()
 logger = logging.getLogger('nipype.workflow')
 PY3 = sys.version_info[0] > 2
 
@@ -383,8 +377,7 @@ def format_node(node, format='python', include_config=False):
 
         if include_config:
             lines = [
-                importline, "from future import standard_library",
-                "standard_library.install_aliases()",
+                importline,
                 "from collections import OrderedDict", comment, nodedef
             ]
             lines.append('%s.config = %s' % (name, node.config))

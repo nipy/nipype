@@ -106,8 +106,6 @@ The workflow directive has the following configuration options:
         Provide a customized template for preparing restructured text.
 
 """
-from __future__ import print_function, division, absolute_import, unicode_literals
-
 import sys
 import os
 import shutil
@@ -144,7 +142,7 @@ except ImportError as e:
     except ImportError as e:
         missing_imports.append(str(e))
 
-from builtins import str, bytes
+
 
 PY2 = sys.version_info[0] == 2
 PY3 = sys.version_info[0] == 3

@@ -3,9 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Tests for workflow callbacks
 """
-
-from builtins import object
-
 import pytest
 import sys
 import nipype.interfaces.utility as niu

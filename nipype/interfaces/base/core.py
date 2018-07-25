@@ -12,11 +12,6 @@ The I/O specifications corresponding to these base
 interfaces are found in the ``specs`` module.
 
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
-from builtins import object, open, str, bytes
-
 import gc
 from copy import deepcopy
 from datetime import datetime as dt
@@ -45,9 +40,6 @@ from .traits_extension import traits, isdefined, TraitError
 from .specs import (BaseInterfaceInputSpec, CommandLineInputSpec,
                     StdOutCommandLineInputSpec, MpiCommandLineInputSpec)
 from .support import (Bunch, Stream, InterfaceResult, NipypeInterfaceError)
-
-from future import standard_library
-standard_library.install_aliases()
 
 iflogger = logging.getLogger('nipype.interface')
 

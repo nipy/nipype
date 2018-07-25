@@ -3,9 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous file manipulation functions
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
 import sys
 import pickle
 import errno
@@ -21,14 +18,9 @@ import shutil
 import contextlib
 import posixpath
 import simplejson as json
-import numpy as np
-
-from builtins import str, bytes, open
 
 from .. import logging, config
 from .misc import is_container
-from future import standard_library
-standard_library.install_aliases()
 
 fmlogger = logging.getLogger('nipype.utils')
 
@@ -38,7 +30,6 @@ related_filetype_sets = [
     ('.BRIK', '.HEAD'),
 ]
 
-PY3 = sys.version_info[0] >= 3
 
 class FileNotFoundError(Exception):
     pass
@@ -662,7 +653,7 @@ def loadpkl(infile, versioning=False):
 
         return unpkl
 
-    # Unpickling problems    
+    # Unpickling problems
     except Exception as e:
         if not versioning:
             raise e
@@ -919,18 +910,12 @@ def canonicalize_env(env):
     if os.name != 'nt':
         return env
 
-    # convert unicode to string for python 2
-    if not PY3:
-        from future.utils import bytes_to_native_str
     out_env = {}
     for key, val in env.items():
         if not isinstance(key, bytes):
             key = key.encode('utf-8')
         if not isinstance(val, bytes):
             val = val.encode('utf-8')
-        if not PY3:
-            key = bytes_to_native_str(key)
-            val = bytes_to_native_str(val)
         out_env[key] = val
     return out_env
 

@@ -1,11 +1,6 @@
 # -*- coding: utf-8 -*-
 """Parallel workflow execution via SGE
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
-from builtins import object
-
 import os
 import pwd
 import re

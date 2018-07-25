@@ -4,16 +4,10 @@
 """
 Pytest fixtures used in tests.
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
 import os
 import pytest
 import numpy as np
 import nibabel as nb
-
-from io import open
-from builtins import str
 
 from nipype.utils.filemanip import ensure_list
 from nipype.interfaces.fsl import Info

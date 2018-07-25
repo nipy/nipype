@@ -3,10 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """SPM wrappers for preprocessing data
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import range
-
 import os
 from copy import deepcopy
 

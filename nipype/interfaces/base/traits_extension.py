@@ -20,10 +20,6 @@ all of these bugs and they've been fixed in enthought svn repository
 (usually by Robert Kern).
 
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
-from builtins import str, bytes
 import os
 import collections
 
@@ -36,12 +32,9 @@ from traits.trait_base import _Undefined, class_of
 
 from traits.api import BaseUnicode
 from traits.api import Unicode
-from future import standard_library
 
 if traits_version < '3.7.0':
     raise ImportError('Traits version 3.7.0 or higher must be installed')
-
-standard_library.install_aliases()
 
 
 class Str(Unicode):

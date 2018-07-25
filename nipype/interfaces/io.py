@@ -11,10 +11,6 @@
     To come :
     XNATSink
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import object, zip, filter, range, open, str
-
 import glob
 import fnmatch
 import string

@@ -3,10 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Additional handy utilities for testing
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import range, object, open
-
 import os
 import time
 import shutil
@@ -14,7 +10,6 @@ import signal
 import subprocess
 from subprocess import CalledProcessError
 from tempfile import mkdtemp
-from future.utils import raise_from
 from ..utils.misc import package_check
 
 __docformat__ = 'restructuredtext'
@@ -59,13 +54,13 @@ class TempFATFS(object):
             subprocess.check_call(
                 args=mkfs_args, stdout=self.dev_null, stderr=self.dev_null)
         except CalledProcessError as e:
-            raise_from(IOError("mkfs.vfat failed"), e)
+            raise IOError("mkfs.vfat failed") from e
 
         try:
             self.fusefat = subprocess.Popen(
                 args=mount_args, stdout=self.dev_null, stderr=self.dev_null)
         except OSError as e:
-            raise_from(IOError("fusefat is not installed"), e)
+            raise IOError("fusefat is not installed") from e
 
         time.sleep(self.delay)
 

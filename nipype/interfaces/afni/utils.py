@@ -7,10 +7,6 @@ Examples
 --------
 See the docstrings of the individual classes for examples.
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import str, bytes
-
 import os
 import os.path as op
 import re

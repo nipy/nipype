@@ -6,10 +6,6 @@
 
 The `Workflow` class provides core functionality for batch processing.
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import str, bytes, open
-
 import os
 import os.path as op
 import sys
@@ -34,10 +30,6 @@ from .utils import (generate_expanded_graph, export_graph, write_workflow_prov,
 
 from .base import EngineBase
 from .nodes import MapNode
-
-# Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
-from future import standard_library
-standard_library.install_aliases()
 
 logger = logging.getLogger('nipype.workflow')
 

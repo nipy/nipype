@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 """ANTS Apply Transforms interface
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import range, str
 import os
 
 from .base import ANTSCommand, ANTSCommandInputSpec

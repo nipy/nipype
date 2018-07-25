@@ -6,10 +6,6 @@
 
 The `EngineBase` class implements the more general view of a task.
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import object
-
 from copy import deepcopy
 import re
 import numpy as np

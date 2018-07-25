@@ -8,10 +8,6 @@ module was written to work with MINC version 2.2.00.
 Author: Carlo Hamalainen <carlo@carlo-hamalainen.net>
         http://carlo-hamalainen.net
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import open
-
 import glob
 import os
 import os.path

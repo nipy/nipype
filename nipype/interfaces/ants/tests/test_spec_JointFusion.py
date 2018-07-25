@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import division
-from builtins import range
 from nipype.testing import example_data
 from nipype.interfaces.base import InputMultiPath
 from traits.trait_errors import TraitError

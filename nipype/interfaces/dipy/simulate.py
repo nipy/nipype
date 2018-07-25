@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 from multiprocessing import (Pool, cpu_count)
 import os.path as op
-from builtins import range
 
 import numpy as np
 import nibabel as nb

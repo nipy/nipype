@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import division
 import numpy as np
 from nipype.algorithms.icc import ICC_rep_anova
 

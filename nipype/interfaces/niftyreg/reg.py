@@ -7,10 +7,6 @@ The reg module provides classes for interfacing with the `niftyreg
 
 The interfaces were written to work with niftyreg version 1.5.10
 """
-
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import staticmethod
 import os
 
 from ..base import TraitedSpec, File, traits, isdefined

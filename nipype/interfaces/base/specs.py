@@ -9,13 +9,9 @@ Base I/O specifications for Nipype interfaces
 Define the API for the I/O of interfaces
 
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
 import os
 from copy import deepcopy
 from warnings import warn
-from builtins import str, bytes
 from packaging.version import Version
 
 from ...utils.filemanip import md5, hash_infile, hash_timestamp, to_str

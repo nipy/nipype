@@ -2,9 +2,6 @@
 settings in setup.py, the nipy top-level docstring, and for building the
 docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
 import sys
 
 # nipype version information.  An empty version_extra corresponds to a

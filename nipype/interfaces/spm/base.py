@@ -14,10 +14,6 @@ you can test by calling::
 
    spm.SPMCommand().version
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import range, object, str, bytes
-
 # Standard library imports
 import os
 from copy import deepcopy

@@ -3,7 +3,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-from builtins import range
 from ....pipeline import engine as pe
 from ....interfaces import utility as niu
 from ....interfaces import dipy

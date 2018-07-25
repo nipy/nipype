@@ -5,10 +5,6 @@
 <http://www.fmrib.ox.ac.uk/fsl/index.html>`_ command line tools.  This
 was written to work with FSL version 5.0.4.
 """
-from __future__ import print_function, division, unicode_literals, \
-    absolute_import
-from builtins import str
-
 import os
 import numpy as np
 import nibabel as nb

@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import open
-
-from future.utils import raise_from
-
 import os.path as op
 
 from ....interfaces import io as nio  # Data i/o
@@ -535,10 +529,9 @@ def create_average_networks_by_group_workflow(group_list,
         l4infosource.inputs.group_id1 = list(group_list.keys())[0]
         l4infosource.inputs.group_id2 = list(group_list.keys())[1]
     except IndexError as e:
-        raise_from(
-            Exception(
-                'The create_average_networks_by_group_workflow requires 2 groups'
-            ), e)
+        raise Exception(
+            'The create_average_networks_by_group_workflow requires 2 groups'
+            ) from e
 
     l4info = dict(
         networks=[['group_id', '']],

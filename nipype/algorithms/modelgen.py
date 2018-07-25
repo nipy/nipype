@@ -11,10 +11,6 @@ These functions include:
 
   * SpecifyModel: allows specification of sparse and non-sparse models
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import range, str, bytes, int
-
 from copy import deepcopy
 import os
 

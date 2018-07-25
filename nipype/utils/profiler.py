@@ -4,9 +4,6 @@
 """
 Utilities to keep track of performance
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
 import threading
 from time import time
 try:
@@ -14,7 +11,7 @@ try:
 except ImportError as exc:
     psutil = None
 
-from builtins import open, range
+
 from .. import config, logging
 
 proflogger = logging.getLogger('nipype.utils')

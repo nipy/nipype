@@ -3,12 +3,6 @@
 Interfaces to the reconstruction algorithms in dipy
 
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str, open
-
 import os.path as op
 
 import numpy as np

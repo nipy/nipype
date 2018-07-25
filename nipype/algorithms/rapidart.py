@@ -12,10 +12,6 @@ These functions include:
   * StimulusCorrelation: determines correlation between stimuli
     schedule and movement/intensity parameters
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import open, range, str, bytes
-
 import os
 from copy import deepcopy
 

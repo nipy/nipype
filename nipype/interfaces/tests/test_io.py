@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from __future__ import print_function, unicode_literals
-from builtins import str, zip, range, open
-from future import standard_library
 import os
 import copy
 import simplejson
@@ -65,7 +62,6 @@ except ImportError:
     no_local_ssh = True
 
 # Check for fakes3
-standard_library.install_aliases()
 from subprocess import check_call, CalledProcessError
 try:
     ret_code = check_call(['which', 'fakes3'], stdout=open(os.devnull, 'wb'))

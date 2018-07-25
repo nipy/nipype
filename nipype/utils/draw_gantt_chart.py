@@ -5,18 +5,12 @@
 Module to draw an html gantt chart from logfile produced by
 ``nipype.utils.profiler.log_nodes_cb()``
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
 # Import packages
 import sys
 import random
 import datetime
 import simplejson as json
-from builtins import str, range, open
-# Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
-from future import standard_library
-standard_library.install_aliases()
+
 from collections import OrderedDict
 
 # Pandas

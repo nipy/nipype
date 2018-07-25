@@ -4,10 +4,6 @@
 """The spm module provides basic functions for interfacing with matlab
 and spm to access spm tools.
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import str, bytes
-
 # Standard library imports
 import os
 from glob import glob

@@ -3,10 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Tests for the engine utils module
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import range, open
-
 import os
 import sys
 from copy import deepcopy
