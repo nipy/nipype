@@ -2755,6 +2755,8 @@ class BIDSDataGrabberInputSpec(DynamicTraitedSpec):
                                  desc='Generate exception if list is empty '
                                  'for a given field')
     return_type = traits.Enum('file', 'namedtuple', usedefault=True)
+    strict = traits.Bool(desc='Return only BIDS "proper" files (e.g., '
+                              'ignore derivatives/, sourcedata/, etc.)')
 
 
 class BIDSDataGrabber(IOBase):
@@ -2801,8 +2803,10 @@ class BIDSDataGrabber(IOBase):
         super(BIDSDataGrabber, self).__init__(**kwargs)
 
         if not isdefined(self.inputs.output_query):
-            self.inputs.output_query = {"func": {"modality": "func"},
-                                        "anat": {"modality": "anat"}}
+            self.inputs.output_query = {
+                "func": {"modality": "func", 'extensions': ['nii', '.nii.gz']},
+                "anat": {"modality": "anat", 'extensions': ['nii', '.nii.gz']},
+                }
 
         # If infields is empty, use all BIDS entities
         if infields is None and have_pybids:
@@ -2828,7 +2832,10 @@ class BIDSDataGrabber(IOBase):
         return runtime
 
     def _list_outputs(self):
-        layout = gb.BIDSLayout(self.inputs.base_dir)
+        exclude = None
+        if self.inputs.strict:
+            exclude = ['derivatives/', 'code/', 'sourcedata/']
+        layout = gb.BIDSLayout(self.inputs.base_dir, exclude=exclude)
 
         # If infield is not given nm input value, silently ignore
         filters = {}
