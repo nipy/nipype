@@ -8,7 +8,7 @@ import sys
 # full release.  '.dev' as a version_extra string means this is a development
 # version
 # Remove -dev for release
-__version__ = '1.1.1-dev'
+__version__ = '2.0.0-dev'
 
 
 def get_nipype_gitversion():
@@ -53,7 +53,6 @@ CLASSIFIERS = [
     'License :: OSI Approved :: Apache Software License',
     'Operating System :: MacOS :: MacOS X',
     'Operating System :: POSIX :: Linux',
-    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6', 'Topic :: Scientific/Engineering'
