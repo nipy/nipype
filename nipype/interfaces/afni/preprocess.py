@@ -13,7 +13,7 @@ import os.path as op
 from ...utils.filemanip import (load_json, save_json, split_filename,
                                 fname_presuffix)
 from ..base import (CommandLineInputSpec, CommandLine, TraitedSpec, traits,
-                    isdefined, File, InputMultiPath, Undefined, Str, 
+                    isdefined, File, InputMultiPath, Undefined, Str,
                     InputMultiObject)
 
 from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec,
@@ -2566,7 +2566,7 @@ class TProject(AFNICommand):
     _cmd = '3dTproject'
     input_spec = TProjectInputSpec
     output_spec = AFNICommandOutputSpec
-    
+
 
 
 class TShiftInputSpec(AFNICommandInputSpec):
@@ -2862,7 +2862,8 @@ class WarpInputSpec(AFNICommandInputSpec):
         name_template='%s_warp',
         desc='output image file name',
         argstr='-prefix %s',
-        name_source='in_file')
+        name_source='in_file',
+        keep_extension=True)
     tta2mni = traits.Bool(
         desc='transform dataset from Talairach to MNI152', argstr='-tta2mni')
     mni2tta = traits.Bool(
@@ -2893,6 +2894,13 @@ class WarpInputSpec(AFNICommandInputSpec):
         argstr='-zpad %d')
     verbose = traits.Bool(
         desc='Print out some information along the way.', argstr='-verb')
+    save_warp = traits.Bool(
+        desc='save warp as .mat file', requires=['verbose'])
+
+
+class WarpOutputSpec(TraitedSpec):
+    out_file = File(desc='Warped file.', exists=True)
+    warp_file = File(desc='warp transform .mat file')
 
 
 class Warp(AFNICommand):
@@ -2924,7 +2932,25 @@ class Warp(AFNICommand):
     """
     _cmd = '3dWarp'
     input_spec = WarpInputSpec
-    output_spec = AFNICommandOutputSpec
+    output_spec = WarpOutputSpec
+
+    def _run_interface(self, runtime):
+        runtime = super(Warp, self)._run_interface(runtime)
+
+        if self.inputs.save_warp:
+            import numpy as np
+            warp_file = self._list_outputs()['warp_file']
+            np.savetxt(warp_file, [runtime.stdout], fmt=str('%s'))
+        return runtime
+
+    def _list_outputs(self):
+        outputs = super(Warp, self)._list_outputs()
+        if self.inputs.save_warp:
+            outputs['warp_file'] = fname_presuffix(outputs['out_file'],
+                                                   suffix='_transform.mat',
+                                                   use_ext=False)
+
+        return outputs
 
 
 class QwarpPlusMinusInputSpec(CommandLineInputSpec):
