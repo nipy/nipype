@@ -10,7 +10,7 @@ class PipelineError(NipypeError):
     pass
 
 
-class NodeError(EngineError):
+class NodeError(PipelineError):
     pass
 
 

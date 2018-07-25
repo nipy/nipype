@@ -15,7 +15,7 @@ def test_FSLXCommand_inputs():
             usedefault=True,
         ),
         burn_in_no_ard=dict(
-            argstr='--burninnoard=%d',
+            argstr='--burnin_noard=%d',
             usedefault=True,
         ),
         bvals=dict(
