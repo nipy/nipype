@@ -2803,8 +2803,10 @@ class BIDSDataGrabber(IOBase):
         super(BIDSDataGrabber, self).__init__(**kwargs)
 
         if not isdefined(self.inputs.output_query):
-            self.inputs.output_query = {"func": {"modality": "func"},
-                                        "anat": {"modality": "anat"}}
+            self.inputs.output_query = {
+                "func": {"modality": "func", extensions=['nii', '.nii.gz']},
+                "anat": {"modality": "anat", extensions=['nii', '.nii.gz']},
+                }
 
         # If infields is empty, use all BIDS entities
         if infields is None and have_pybids:
