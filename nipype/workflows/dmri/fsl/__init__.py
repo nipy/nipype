@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
 from .dti import create_bedpostx_pipeline, bedpostx_parallel
 
 from .artifacts import (all_fmb_pipeline, all_peb_pipeline, all_fsl_pipeline,

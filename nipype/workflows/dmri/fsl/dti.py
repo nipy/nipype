@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # coding: utf-8
 
-from __future__ import absolute_import
 
 from ....pipeline import engine as pe
 from ....interfaces import utility as niu

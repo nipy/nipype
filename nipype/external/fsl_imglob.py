@@ -63,7 +63,6 @@
 #   Innovation Limited ("Isis"), the technology transfer company of the
 #   University, to negotiate a licence. Contact details are:
 #   innovation@isis.ox.ac.uk quoting reference DE/9564.
-from __future__ import print_function
 import sys
 import glob
 from builtins import range

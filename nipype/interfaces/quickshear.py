@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """ Quickshear is a simple geometric defacing algorithm
 """
-from __future__ import unicode_literals
 
 from .base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
 from ..external.due import BibTeX

@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 from ..nbs import NetworkBasedStatistic
 from ....utils.misc import package_check
 import numpy as np
