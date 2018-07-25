@@ -6,8 +6,6 @@ from contextlib import contextmanager
 from io import StringIO
 from ...utils import nipype_cmd
 
-PY2 = sys.version_info[0] < 3
-
 
 @contextmanager
 def capture_sys_output():
@@ -35,10 +33,6 @@ class TestNipypeCMD():
 nipype_cmd: error: the following arguments are required: module, interface
 """
 
-        if PY2:
-            msg = """usage: nipype_cmd [-h] module interface
-nipype_cmd: error: too few arguments
-"""
         assert stderr.getvalue() == msg
         assert stdout.getvalue() == ''
 

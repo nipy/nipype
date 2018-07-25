@@ -6,7 +6,6 @@ import sys
 import subprocess
 
 COMMIT_INFO_FNAME = 'COMMIT_INFO.txt'
-PY3 = sys.version_info[0] >= 3
 
 
 def pkg_commit_hash(pkg_path):
@@ -61,9 +60,7 @@ def pkg_commit_hash(pkg_path):
         shell=True)
     repo_commit, _ = proc.communicate()
     if repo_commit:
-        if PY3:
-            repo_commit = repo_commit.decode()
-        return 'repository', repo_commit.strip()
+        return 'repository', repo_commit.decode().strip()
     return '(none found)', '<not found>'
 
 
@@ -82,8 +79,6 @@ def get_pkg_info(pkg_path):
     '''
     src, hsh = pkg_commit_hash(pkg_path)
     from .info import VERSION
-    if not PY3:
-        src, hsh, VERSION = src.encode(), hsh.encode(), VERSION.encode()
     import networkx
     import nibabel
     import numpy

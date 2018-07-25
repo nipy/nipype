@@ -144,10 +144,6 @@ except ImportError as e:
 
 
 
-PY2 = sys.version_info[0] == 2
-PY3 = sys.version_info[0] == 3
-
-
 def _mkdirp(folder):
     """
     Equivalent to bash's mkdir -p
@@ -274,8 +270,7 @@ def setup(app):
     app.add_config_value('wf_working_directory', None, True)
     app.add_config_value('wf_template', None, True)
 
-    app.connect('doctree-read'.encode()
-                if PY2 else 'doctree-read', mark_wf_labels)
+    app.connect('doctree-read', mark_wf_labels)
 
     metadata = {'parallel_read_safe': True, 'parallel_write_safe': True}
     return metadata
@@ -456,11 +451,7 @@ def run_code(code, code_path, ns=None, function_name=None):
 
     # Redirect stdout
     stdout = sys.stdout
-    if PY3:
-        sys.stdout = io.StringIO()
-    else:
-        from cStringIO import StringIO
-        sys.stdout = StringIO()
+    sys.stdout = io.StringIO()
 
     # Assign a do-nothing print function to the namespace.  There
     # doesn't seem to be any other way to provide a way to (not) print

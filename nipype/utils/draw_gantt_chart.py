@@ -21,8 +21,6 @@ except ImportError:
           'install the pandas package')
     pass
 
-PY3 = sys.version_info[0] > 2
-
 
 def create_event_dict(start_time, nodes_list):
     '''
@@ -316,10 +314,7 @@ def draw_resource_bar(start_time, finish_time, time_series,
     space_between_minutes = space_between_minutes / scale
 
     # Iterate through time series
-    if PY3:
-        ts_items = time_series.items()
-    else:
-        ts_items = time_series.iteritems()
+    ts_items = time_series.items()
 
     ts_len = len(time_series)
     for idx, (ts_start, amount) in enumerate(ts_items):
@@ -555,5 +550,5 @@ def generate_gantt_chart(logfile,
     </body>'''
 
     # save file
-    with open(logfile + '.html', 'w' if PY3 else 'wb') as html_file:
+    with open(logfile + '.html', 'w') as html_file:
         html_file.write(html_string)

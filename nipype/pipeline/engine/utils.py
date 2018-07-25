@@ -47,7 +47,6 @@ except ImportError:
     from funcsigs import signature
 
 logger = logging.getLogger('nipype.workflow')
-PY3 = sys.version_info[0] > 2
 
 try:
     dfs_preorder = nx.dfs_preorder
@@ -1595,7 +1594,7 @@ def write_workflow_resources(graph, filename=None, append=None):
     # If we append different runs, then we will see different
     # "bursts" of timestamps corresponding to those executions.
     if append and os.path.isfile(filename):
-        with open(filename, 'r' if PY3 else 'rb') as rsf:
+        with open(filename, 'r') as rsf:
             big_dict = json.load(rsf)
 
     for _, node in enumerate(graph.nodes()):
@@ -1633,7 +1632,7 @@ def write_workflow_resources(graph, filename=None, append=None):
             big_dict['mapnode'] += [subidx] * nsamples
             big_dict['params'] += [params] * nsamples
 
-    with open(filename, 'w' if PY3 else 'wb') as rsf:
+    with open(filename, 'w') as rsf:
         json.dump(big_dict, rsf, ensure_ascii=False)
 
     return filename
