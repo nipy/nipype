@@ -2828,7 +2828,8 @@ class BIDSDataGrabber(IOBase):
         return runtime
 
     def _list_outputs(self):
-        layout = gb.BIDSLayout(self.inputs.base_dir)
+        layout = gb.BIDSLayout(self.inputs.base_dir,
+                               exclude=['derivatives/', 'code/', 'sourcedata/'])
 
         # If infield is not given nm input value, silently ignore
         filters = {}
