@@ -249,12 +249,12 @@ class ReplaceFSwithFIRST(CommandLine):
     >>> prep.inputs.in_t1w = 'T1.nii.gz'
     >>> prep.inputs.in_config = 'mrtrix3_labelconfig.txt'
     >>> prep.cmdline                               # doctest: +ELLIPSIS
-    'fs_parc_replace_sgm_first aparc+aseg.nii T1.nii.gz \
+    'labelsgmfix aparc+aseg.nii T1.nii.gz \
 mrtrix3_labelconfig.txt aparc+first.mif'
     >>> prep.run()                                 # doctest: +SKIP
     """
 
-    _cmd = 'fs_parc_replace_sgm_first'
+    _cmd = 'labelsgmfix'
     input_spec = ReplaceFSwithFIRSTInputSpec
     output_spec = ReplaceFSwithFIRSTOutputSpec
 
