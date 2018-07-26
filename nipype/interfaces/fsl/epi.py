@@ -955,8 +955,6 @@ class EpiRegOutputSpec(TraitedSpec):
                     structural space')
     wmseg = File(
         exists=True, desc='white matter segmentation used in flirt bbr')
-    seg = File(
-        exists=True, desc='wm/gm/csf segmentation used in flirt bbr')
     wmedge = File(exists=True, desc='white matter edges for visualization')
 
 
