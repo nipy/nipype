@@ -1,0 +1,15 @@
+==============
+ Nipype Tools
+==============
+
+This directory contains various tools used by the nipype developers.
+Only install tools here that are unique to the nipype project.  Any
+tools shared with our parent project, nipy, should go in the
+nipy/tools directory.
+
+Exceptions
+----------
+
+* apigen.py: This is not importable from nipy, so I copied it.
+* build_modref_templates.py: This was copied and modified to work with nipype.
+

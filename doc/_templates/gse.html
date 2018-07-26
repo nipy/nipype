@@ -1,0 +1,40 @@
+{% block gse %}
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <script>
+      (function() {
+        var cx = '010960497803984932957:u8pmqf7fdoq';
+        var gcse = document.createElement('script');
+        gcse.type = 'text/javascript';
+        gcse.async = true;
+        gcse.src = 'https://cse.google.com/cse.js?cx=' + cx;
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(gcse, s);
+      })();
+    </script>
+    <gcse:search></gcse:search>
+</div>
+{% endblock %}

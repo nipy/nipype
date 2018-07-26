@@ -1,0 +1,68 @@
+dist: trusty
+sudo: required
+
+language: python
+# our build matrix
+python:
+- 2.7
+- 3.4
+- 3.5
+- 3.6
+
+env:
+  global:
+    - EXTRA_WHEELS="https://5cf40426d9f06eb7461d-6fe47d9331aba7cd62fc36c7196769e4.ssl.cf2.rackcdn.com"
+    - PRE_WHEELS="https://7933911d6844c6c53a7d-47bd50c35cd79bd838daf386af554a83.ssl.cf2.rackcdn.com"
+    - EXTRA_PIP_FLAGS="--find-links=$EXTRA_WHEELS"
+  matrix:
+    - INSTALL_DEB_DEPENDECIES=true
+      NIPYPE_EXTRAS="doc,tests,fmri,profiler"
+      CI_SKIP_TEST=1
+    - INSTALL_DEB_DEPENDECIES=false
+      NIPYPE_EXTRAS="doc,tests,fmri,profiler"
+      CI_SKIP_TEST=1
+    - INSTALL_DEB_DEPENDECIES=true
+      NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit,ssh"
+      CI_SKIP_TEST=1
+    - INSTALL_DEB_DEPENDECIES=true
+      NIPYPE_EXTRAS="doc,tests,fmri,profiler"
+      EXTRA_PIP_FLAGS="--pre $EXTRA_PIP_FLAGS --find-links $PRE_WHEELS"
+      CI_SKIP_TEST=1
+
+addons:
+  apt:
+    packages:
+      - xvfb
+      - fusefat
+      - graphviz
+
+cache:
+  directories:
+    - ${HOME}/.cache
+
+before_install:
+- if $INSTALL_DEB_DEPENDECIES; then sudo rm -rf /dev/shm; sudo ln -s /run/shm /dev/shm; fi
+- travis_retry bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh);
+- if $INSTALL_DEB_DEPENDECIES; then
+    travis_retry sudo apt-get -y update &&
+    travis_retry sudo apt-get install -y -qq fsl afni elastix fsl-atlases;
+  fi;
+- if $INSTALL_DEB_DEPENDECIES; then
+    source /etc/fsl/fsl.sh;
+    source /etc/afni/afni.sh;
+    export FSLOUTPUTTYPE=NIFTI_GZ;
+  fi;
+
+- travis_retry pip install -r requirements.txt
+- travis_retry pip install grabbit==0.1.2
+- travis_retry git clone https://github.com/INCF/pybids.git ${HOME}/pybids &&
+  pip install -e ${HOME}/pybids
+
+install:
+- travis_retry pip install $EXTRA_PIP_FLAGS -e .[$NIPYPE_EXTRAS]
+
+script:
+- py.test -v --cov nipype --cov-config .coveragerc --cov-report xml:cov.xml -c nipype/pytest.ini --doctest-modules nipype
+
+after_script:
+- codecov --file cov.xml --flags unittests -e TRAVIS_JOB_NUMBER

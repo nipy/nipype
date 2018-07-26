@@ -1,0 +1,54 @@
+{% extends "!layout.html" %}
+{% set title = 'Neuroimaging in Python - Pipelines and Interfaces' %}
+{% set short_title = 'Nipype' %}
+
+{% block extrahead %}
+{{ super() }}
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+<script>
+  ((window.gitter = {}).chat = {}).options = {
+    room: 'nipy/nipype'
+  };
+</script>
+<script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>
+{% endblock %}
+
+{% block header %}
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+        {%- block headertitle %}
+            <a href="{{pathto('index') }}">
+            <img src="{{ pathto("_static/nipype-banner-bg.png", 1) }}" alt="NIPY logo"  border="0" />
+        {%- endblock %}
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            {% include 'navbar.html' %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block relbar1 %}{% endblock %}
+{% block relbar2 %}{% endblock %}
+{% block sidebar1 %}{{ sidebar() }}{% endblock %}
+{% block sidebar2 %}{% endblock %}
+
+{% block footer %}
+{{ super() }}
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% block versions %}
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>{{ _('Versions') }}</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">{{ release }}</td><td align="right">{{ version }}</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="{{pathto('users/install')}}">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+{% endblock %}
