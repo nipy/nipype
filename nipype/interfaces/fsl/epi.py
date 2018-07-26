@@ -1021,6 +1021,8 @@ class EpiReg(FSLCommand):
             os.getcwd(), self.inputs.out_base + '_fast_wmedge.nii.gz')
         outputs['wmseg'] = os.path.join(
             os.getcwd(), self.inputs.out_base + '_fast_wmseg.nii.gz')
+        outputs['seg'] = os.path.join(
+            os.getcwd(), self.inputs.out_base + '_fast_seg.nii.gz')
 
         return outputs
 
