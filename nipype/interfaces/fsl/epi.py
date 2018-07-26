@@ -199,16 +199,16 @@ class TOPUPInputSpec(FSLCommandInputSpec):
     # TODO: the following traits admit values separated by commas, one value
     # per registration level inside topup.
     warp_res = traits.Float(
-        10.0, usedefault=True,
+        10.0, usedefault=False,
         argstr='--warpres=%f',
         desc=('(approximate) resolution (in mm) of warp '
               'basis for the different sub-sampling levels'
               '.'))
-    subsamp = traits.Int(1, usedefault=True,
+    subsamp = traits.Int(1, usedefault=False,
                          argstr='--subsamp=%d', desc='sub-sampling scheme')
     fwhm = traits.Float(
         8.0,
-        usedefault=True,
+        usedefault=False,
         argstr='--fwhm=%f',
         desc='FWHM (in mm) of gaussian smoothing kernel')
     config = traits.String(
@@ -218,10 +218,10 @@ class TOPUPInputSpec(FSLCommandInputSpec):
         desc=('Name of config file specifying command line '
               'arguments'))
     max_iter = traits.Int(
-        5, usedefault=True,
+        5, usedefault=False,
         argstr='--miter=%d', desc='max # of non-linear iterations')
     reg_lambda = traits.Float(
-        1.0, usedefault=True,
+        1.0, usedefault=False,
         argstr='--miter=%0.f',
         desc=('lambda weighting value of the '
               'regularisation term'))
@@ -259,7 +259,7 @@ class TOPUPInputSpec(FSLCommandInputSpec):
         desc=('Minimisation method 0=Levenberg-Marquardt, '
               '1=Scaled Conjugate Gradient'))
     splineorder = traits.Int(
-        3, usedefault=True,
+        3, usedefault=False,
         argstr='--splineorder=%d',
         desc=('order of spline, 2->Qadratic spline, '
               '3->Cubic spline'))
@@ -1025,7 +1025,11 @@ class EpiReg(FSLCommand):
             os.getcwd(), self.inputs.out_base + '_fast_wmseg.nii.gz')
         outputs['seg'] = os.path.join(
             os.getcwd(), self.inputs.out_base + '_fast_seg.nii.gz')
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> 7b0b2dc9b6c61eb646f807c65103cc8fc9c8f625
         return outputs
 
 
