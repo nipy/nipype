@@ -21,7 +21,7 @@ def test_DWIExtract_inputs():
             mandatory=True,
             position=-2,
         ),
-        nobzero=dict(argstr='-nobzero', ),
+        nobzero=dict(argstr='-no_bzero', ),
         nthreads=dict(
             argstr='-nthreads %d',
             nohash=True,

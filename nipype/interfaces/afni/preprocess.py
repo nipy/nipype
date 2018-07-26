@@ -13,12 +13,15 @@ import os.path as op
 from ...utils.filemanip import (load_json, save_json, split_filename,
                                 fname_presuffix)
 from ..base import (CommandLineInputSpec, CommandLine, TraitedSpec, traits,
-                    isdefined, File, InputMultiPath, Undefined, Str, 
+                    isdefined, File, InputMultiPath, Undefined, Str,
                     InputMultiObject)
 
 from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec,
                    AFNICommandOutputSpec, AFNIPythonCommandInputSpec,
                    AFNIPythonCommand, Info, no_afni)
+
+from ...import logging
+iflogger = logging.getLogger('nipype.interface')
 
 
 class CentralityInputSpec(AFNICommandInputSpec):
@@ -2563,11 +2566,12 @@ class TProject(AFNICommand):
     _cmd = '3dTproject'
     input_spec = TProjectInputSpec
     output_spec = AFNICommandOutputSpec
-    
+
+
 
 class TShiftInputSpec(AFNICommandInputSpec):
     in_file = File(
-        desc='input file to 3dTShift',
+        desc='input file to 3dTshift',
         argstr='%s',
         position=-1,
         mandatory=True,
@@ -2594,12 +2598,26 @@ class TShiftInputSpec(AFNICommandInputSpec):
         desc='ignore the first set of points specified', argstr='-ignore %s')
     interp = traits.Enum(
         ('Fourier', 'linear', 'cubic', 'quintic', 'heptic'),
-        desc='different interpolation methods (see 3dTShift for details) '
+        desc='different interpolation methods (see 3dTshift for details) '
         'default = Fourier',
         argstr='-%s')
-    tpattern = Str(
+    tpattern = traits.Either(
+        traits.Enum('alt+z', 'altplus',    # Synonyms
+                    'alt+z2',
+                    'alt-z', 'altminus',   # Synonyms
+                    'alt-z2',
+                    'seq+z', 'seqplus',    # Synonyms
+                    'seq-z', 'seqminus'),  # Synonyms
+        Str,  # For backwards compatibility
         desc='use specified slice time pattern rather than one in header',
-        argstr='-tpattern %s')
+        argstr='-tpattern %s',
+        xor=['slice_timing'])
+    slice_timing = traits.Either(
+        File(exists=True),
+        traits.List(traits.Float),
+        desc='time offsets from the volume acquisition onset for each slice',
+        argstr='-tpattern @%s',
+        xor=['tpattern'])
     rlt = traits.Bool(
         desc='Before shifting, remove the mean and linear trend',
         argstr='-rlt')
@@ -2607,6 +2625,10 @@ class TShiftInputSpec(AFNICommandInputSpec):
         desc='Before shifting, remove the mean and linear trend and later put '
         'back the mean',
         argstr='-rlt+')
+
+
+class TShiftOutputSpec(AFNICommandOutputSpec):
+    timing_file = File(desc="AFNI formatted timing file, if ``slice_timing`` is a list")
 
 
 class TShift(AFNICommand):
@@ -2619,19 +2641,101 @@ class TShift(AFNICommand):
     Examples
     ========
 
+    Slice timing details may be specified explicitly via the ``slice_timing``
+    input:
+
     >>> from nipype.interfaces import afni
+    >>> TR = 2.5
     >>> tshift = afni.TShift()
     >>> tshift.inputs.in_file = 'functional.nii'
-    >>> tshift.inputs.tpattern = 'alt+z'
     >>> tshift.inputs.tzero = 0.0
+    >>> tshift.inputs.tr = '%.1fs' % TR
+    >>> tshift.inputs.slice_timing = list(np.arange(40) / TR)
     >>> tshift.cmdline
-    '3dTshift -prefix functional_tshift -tpattern alt+z -tzero 0.0 functional.nii'
-    >>> res = tshift.run()  # doctest: +SKIP
+    '3dTshift -prefix functional_tshift -tpattern @slice_timing.1D -TR 2.5s -tzero 0.0 functional.nii'
 
+    When the ``slice_timing`` input is used, the ``timing_file`` output is populated,
+    in this case with the generated file.
+
+    >>> tshift._list_outputs()['timing_file']  # doctest: +ELLIPSIS
+    '.../slice_timing.1D'
+
+    This method creates a ``slice_timing.1D`` file to be passed to ``3dTshift``.
+    A pre-existing slice-timing file may be used in the same way:
+
+    >>> tshift = afni.TShift()
+    >>> tshift.inputs.in_file = 'functional.nii'
+    >>> tshift.inputs.tzero = 0.0
+    >>> tshift.inputs.tr = '%.1fs' % TR
+    >>> tshift.inputs.slice_timing = 'slice_timing.1D'
+    >>> tshift.cmdline
+    '3dTshift -prefix functional_tshift -tpattern @slice_timing.1D -TR 2.5s -tzero 0.0 functional.nii'
+
+    When a pre-existing file is provided, ``timing_file`` is simply passed through.
+
+    >>> tshift._list_outputs()['timing_file']  # doctest: +ELLIPSIS
+    '.../slice_timing.1D'
+
+    Alternatively, pre-specified slice timing patterns may be specified with the
+    ``tpattern`` input.
+    For example, to specify an alternating, ascending slice timing pattern:
+
+    >>> tshift = afni.TShift()
+    >>> tshift.inputs.in_file = 'functional.nii'
+    >>> tshift.inputs.tzero = 0.0
+    >>> tshift.inputs.tr = '%.1fs' % TR
+    >>> tshift.inputs.tpattern = 'alt+z'
+    >>> tshift.cmdline
+    '3dTshift -prefix functional_tshift -tpattern alt+z -TR 2.5s -tzero 0.0 functional.nii'
+
+    For backwards compatibility, ``tpattern`` may also take filenames prefixed
+    with ``@``.
+    However, in this case, filenames are not validated, so this usage will be
+    deprecated in future versions of Nipype.
+
+    >>> tshift = afni.TShift()
+    >>> tshift.inputs.in_file = 'functional.nii'
+    >>> tshift.inputs.tzero = 0.0
+    >>> tshift.inputs.tr = '%.1fs' % TR
+    >>> tshift.inputs.tpattern = '@slice_timing.1D'
+    >>> tshift.cmdline
+    '3dTshift -prefix functional_tshift -tpattern @slice_timing.1D -TR 2.5s -tzero 0.0 functional.nii'
+
+    In these cases, ``timing_file`` is undefined.
+
+    >>> tshift._list_outputs()['timing_file']  # doctest: +ELLIPSIS
+    <undefined>
+
+    In any configuration, the interface may be run as usual:
+
+    >>> res = tshift.run()  # doctest: +SKIP
     """
     _cmd = '3dTshift'
     input_spec = TShiftInputSpec
-    output_spec = AFNICommandOutputSpec
+    output_spec = TShiftOutputSpec
+
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'tpattern' and value.startswith('@'):
+            iflogger.warning('Passing a file prefixed by "@" will be deprecated'
+                             '; please use the `slice_timing` input')
+        elif name == 'slice_timing' and isinstance(value, list):
+            value = self._write_slice_timing()
+        return super(TShift, self)._format_arg(name, trait_spec, value)
+
+    def _write_slice_timing(self):
+        fname = 'slice_timing.1D'
+        with open(fname, 'w') as fobj:
+            fobj.write('\t'.join(map(str, self.inputs.slice_timing)))
+        return fname
+
+    def _list_outputs(self):
+        outputs = super(TShift, self)._list_outputs()
+        if isdefined(self.inputs.slice_timing):
+            if isinstance(self.inputs.slice_timing, list):
+                outputs['timing_file'] = os.path.abspath('slice_timing.1D')
+            else:
+                outputs['timing_file'] = os.path.abspath(self.inputs.slice_timing)
+        return outputs
 
 
 class VolregInputSpec(AFNICommandInputSpec):
@@ -2758,7 +2862,8 @@ class WarpInputSpec(AFNICommandInputSpec):
         name_template='%s_warp',
         desc='output image file name',
         argstr='-prefix %s',
-        name_source='in_file')
+        name_source='in_file',
+        keep_extension=True)
     tta2mni = traits.Bool(
         desc='transform dataset from Talairach to MNI152', argstr='-tta2mni')
     mni2tta = traits.Bool(
@@ -2789,6 +2894,13 @@ class WarpInputSpec(AFNICommandInputSpec):
         argstr='-zpad %d')
     verbose = traits.Bool(
         desc='Print out some information along the way.', argstr='-verb')
+    save_warp = traits.Bool(
+        desc='save warp as .mat file', requires=['verbose'])
+
+
+class WarpOutputSpec(TraitedSpec):
+    out_file = File(desc='Warped file.', exists=True)
+    warp_file = File(desc='warp transform .mat file')
 
 
 class Warp(AFNICommand):
@@ -2820,7 +2932,25 @@ class Warp(AFNICommand):
     """
     _cmd = '3dWarp'
     input_spec = WarpInputSpec
-    output_spec = AFNICommandOutputSpec
+    output_spec = WarpOutputSpec
+
+    def _run_interface(self, runtime):
+        runtime = super(Warp, self)._run_interface(runtime)
+
+        if self.inputs.save_warp:
+            import numpy as np
+            warp_file = self._list_outputs()['warp_file']
+            np.savetxt(warp_file, [runtime.stdout], fmt=str('%s'))
+        return runtime
+
+    def _list_outputs(self):
+        outputs = super(Warp, self)._list_outputs()
+        if self.inputs.save_warp:
+            outputs['warp_file'] = fname_presuffix(outputs['out_file'],
+                                                   suffix='_transform.mat',
+                                                   use_ext=False)
+
+        return outputs
 
 
 class QwarpPlusMinusInputSpec(CommandLineInputSpec):

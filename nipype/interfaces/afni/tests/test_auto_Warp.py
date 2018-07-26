@@ -29,10 +29,12 @@ def test_Warp_inputs():
         oblique_parent=dict(argstr='-oblique_parent %s', ),
         out_file=dict(
             argstr='-prefix %s',
+            keep_extension=True,
             name_source='in_file',
             name_template='%s_warp',
         ),
         outputtype=dict(),
+        save_warp=dict(requires=['verbose'], ),
         tta2mni=dict(argstr='-tta2mni', ),
         verbose=dict(argstr='-verb', ),
         zpad=dict(argstr='-zpad %d', ),
@@ -43,7 +45,10 @@ def test_Warp_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Warp_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(
+        out_file=dict(),
+        warp_file=dict(),
+    )
     outputs = Warp.output_spec()
 
     for key, metadata in list(output_map.items()):

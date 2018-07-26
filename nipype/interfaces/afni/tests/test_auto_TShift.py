@@ -30,7 +30,14 @@ def test_TShift_inputs():
         outputtype=dict(),
         rlt=dict(argstr='-rlt', ),
         rltplus=dict(argstr='-rlt+', ),
-        tpattern=dict(argstr='-tpattern %s', ),
+        slice_timing=dict(
+            argstr='-tpattern @%s',
+            xor=['tpattern'],
+        ),
+        tpattern=dict(
+            argstr='-tpattern %s',
+            xor=['slice_timing'],
+        ),
         tr=dict(argstr='-TR %s', ),
         tslice=dict(
             argstr='-slice %s',
@@ -47,7 +54,10 @@ def test_TShift_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TShift_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(
+        out_file=dict(),
+        timing_file=dict(),
+    )
     outputs = TShift.output_spec()
 
     for key, metadata in list(output_map.items()):
