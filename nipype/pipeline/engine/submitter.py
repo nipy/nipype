@@ -68,7 +68,7 @@ class SubmitterWorkflow(Submitter):
         for (i_n, node) in enumerate(self.graph):
             # submitting all the nodes who are self sufficient (self.graph is already sorted)
             if node.sufficient:
-                self.submit_work(node.nodecore)
+                self.submit_work(node)
             # if its not, its been added to a line
             else:
                 break
@@ -103,8 +103,8 @@ class SubmitterWorkflow(Submitter):
         _to_remove = []
         for (to_node, i, ind) in self.node_line:
             print("NODE LINE", self.node_line)
-            if to_node.nodecore.checking_input_el(ind):
-                self._submit_work_el(to_node.nodecore, i, ind)
+            if to_node.checking_input_el(ind):
+                self._submit_work_el(to_node, i, ind)
                 _to_remove.append((to_node, i, ind))
             else:
                 pass
