@@ -1,0 +1,1 @@
+reg_average /filesrv/weninger/code/nipype/nipype/testing/data/avg_out.nii.gz -avg im1.nii im2.nii im3.nii -omp 1

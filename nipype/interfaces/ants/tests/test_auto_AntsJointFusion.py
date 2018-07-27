@@ -52,8 +52,8 @@ def test_AntsJointFusion_inputs():
             hash_files=False,
         ),
         out_label_post_prob_name_format=dict(
-            requires=['out_label_fusion', 'out_intensity_fusion_name_format'],
-        ),
+            requires=['out_label_fusion',
+                      'out_intensity_fusion_name_format'], ),
         patch_metric=dict(argstr='-m %s', ),
         patch_radius=dict(
             argstr='-p %s',
