@@ -1072,111 +1072,33 @@ class MapState(object):
     pass
 
 # dj ??: should I use EngineBase?
-class NewBase(object):
-    def __init__(self, name, inputs=None, mapper=None, base_dir=None, *args, **kwargs):
+class NewNodeCore(object):
+    def __init__(self, name, interface, state, inputs=None, state_inputs=None, base_dir=None, *args, **kwargs):
         # adding interface: i'm using Function Interface from aux that has input_map that can change the name of arguments
-        self._nodedir = base_dir
+        self.nodedir = base_dir
         self.name = name
-
-        if inputs:
-            # adding name of the node to the input name
-            self._inputs = dict(("{}-{}".format(self.name, key), value) for (key, value) in inputs.items())
-            self._inputs = dict((key, np.array(val)) if type(val) is list else (key, val)
-                                for (key, val) in self._inputs.items())
-            self._state_inputs = self._inputs.copy()
-        else:
-            self._inputs = {}
-            self._state_inputs = {}
-        if mapper:
-            # adding name of the node to the input name within the mapper
-            mapper = aux.change_mapper(mapper, self.name)
-        self._mapper = mapper
-        # create state (takes care of mapper, connects inputs with axes, so we can ask for specifc element)
-        self._state = state.State(mapper=self._mapper, node_name=self.name)
-
-
-    @property
-    def state(self):
-        return self._state
-
-    @property
-    def nodedir(self):
-        return self._nodedir
-
-
-    @property
-    def mapper(self):
-        return self._mapper
-
-    # @mapper.setter
-    # def mapper(self, mapper):
-    #     self._mapper = mapper
-    #     #updating state
-    #     self._state = state.State(mapper=self._mapper, node_name=self.name)
-    #
-    @property
-    def inputs(self):
-        return self._inputs
-
-    @property
-    def state_inputs(self):
-        return self._state_inputs
-
-
-
-
-
-class NewNode(NewBase):
-    def __init__(self, name, interface, inputs=None, mapper=None, join_by=None,
-                 base_dir=None, *args, **kwargs):
-        # dj: should be changed for wf
-        super(NewNode, self).__init__(name=name, inputs=inputs, mapper=mapper,
-                                      base_dir=base_dir, *args, **kwargs)
+        #dj TODO: I should think what is needed in the __init__ (I redefine some of rhe attributes anyway)
+        self.state = state
+        self._inputs = inputs
+        self._state_inputs = state_inputs
         self._interface = interface
         self._interface.input_map = dict((key, "{}-{}".format(self.name, value))
                                          for (key, value) in self._interface.input_map.items())
 
         self.needed_outputs = []
         self._out_nm = self._interface._output_nm
-
-        self.sufficient = True
-        # dj TODO: have to decide where to put this
-        # self._global_done = False
-        # self._result = {}
+        self._global_done = False
+        self._result = {}
 
 
-    def map(self, mapper, inputs=None):
-        if self._mapper:
-            raise Exception("mapper is already set")
-        else:
-            self._mapper = aux.change_mapper(mapper, self.name)
+    @property
+    def interface(self):
+        return self._interface
 
-        if inputs:
-            inputs = dict(("{}-{}".format(self.name, key), value) for (key, value) in inputs.items())
-            inputs = dict((key, np.array(val)) if type(val) is list else (key, val)
-                          for (key, val) in inputs.items())
-            self._inputs.update(inputs)
-            self._state_inputs.update(inputs)
-        if mapper:
-            # updating state if we have a new mapper
-            self._state = state.State(mapper=self._mapper, node_name=self.name)
 
-#    def map_orig(self, field, values=None):
-#        if isinstance(field, list):
-#            for field_
-#            if values is not None:
-#                if len(values != len(field)):
-#        elif isinstance(field, tuple):
-#            pass
-#        if values is None:
-#            values = getattr(self._inputs, field)
-#            if values is None:
-#                raise MappingError('Cannot map unassigned input field')
-#        self._mappers[field] = values
-
-    # TBD
-    def join(self, field):
-        pass
+    @property
+    def inputs(self):
+        return self._inputs
 
 
     def run_interface_el(self, i, ind):
@@ -1280,31 +1202,125 @@ class NewNode(NewBase):
 
 
 
-     #
-    # @property
-    # def global_done(self):
-    #     return self.nodecore.global_done
-    #
-    #
-    # @property
-    # def needed_outputs(self):
-    #     return self.nodecore.needed_outputs
-    #
-    # @property
-    # def result(self):
-    #     return self.nodecore.result
-    #
-    #
+
+class NewNode(object):
+    def __init__(self, name, interface, inputs=None, mapper=None, join_by=None,
+                 base_dir=None, singlenode=True, *args, **kwargs):
+        # dj: should be changed for wf
+        self.name = name
+        self._nodedir = base_dir
+        self._interface = interface
+        # dj: do I need a state_input and state_mapper??
+        # dj: reading the input from files should be added
+        if inputs:
+            # adding name of the node to the input name
+            self._inputs = dict(("{}-{}".format(self.name, key), value) for (key, value) in inputs.items())
+            self._inputs = dict((key, np.array(val)) if type(val) is list else (key, val)
+                                for (key, val) in self._inputs.items())
+            self._state_inputs = self._inputs.copy()
+        else:
+            self._inputs = {}
+            self._state_inputs = {}
+        if mapper:
+            # adding name of the node to the input name within the mapper
+            mapper = aux.change_mapper(mapper, self.name)
+        self._mapper = mapper
+        # create state (takes care of mapper, connects inputs with axes, so we can ask for specifc element)
+        self._state = state.State(mapper=self._mapper, node_name=self.name)
+        if singlenode:
+            self.nodecore = NewNodeCore(name=self.name, base_dir=self.nodedir, interface=self._interface,
+            inputs=self._inputs, state_inputs=self._state_inputs, state=self._state)
+        self.sufficient = True
+
+    def map(self, mapper, inputs=None):
+        if self._mapper:
+            raise Exception("mapper is already set")
+        else:
+            self._mapper = aux.change_mapper(mapper, self.name)
+
+        if inputs:
+            inputs = dict(("{}-{}".format(self.name, key), value) for (key, value) in inputs.items())
+            inputs = dict((key, np.array(val)) if type(val) is list else (key, val)
+                          for (key, val) in inputs.items())
+            self._inputs.update(inputs)
+            self._state_inputs.update(inputs)
+        if mapper:
+            # updating state if we have a new mapper
+            self._state = state.State(mapper=self._mapper, node_name=self.name)
+
+#    def map_orig(self, field, values=None):
+#        if isinstance(field, list):
+#            for field_
+#            if values is not None:
+#                if len(values != len(field)):
+#        elif isinstance(field, tuple):
+#            pass
+#        if values is None:
+#            values = getattr(self._inputs, field)
+#            if values is None:
+#                raise MappingError('Cannot map unassigned input field')
+#        self._mappers[field] = values
+
+    # TBD
+    def join(self, field):
+        pass
+
+    @property
+    def state(self):
+        return self._state
+
+    @property
+    def nodedir(self):
+        return self._nodedir
+
+    @nodedir.setter
+    def nodedir(self, nodedir):
+        self._nodedir = nodedir
+        self.nodecore.nodedir = nodedir
+
+
+    @property
+    def mapper(self):
+        return self._mapper
+
+    @mapper.setter
+    def mapper(self, mapper):
+        self._mapper = mapper
+        #updating state
+        self._state = state.State(mapper=self._mapper, node_name=self.name)
+
+    @property
+    def inputs(self):
+        return self._inputs
+
+    @property
+    def state_inputs(self):
+        return self.nodecore._state_inputs
+
+    @property
+    def global_done(self):
+        return self.nodecore.global_done
+
+
+    @property
+    def needed_outputs(self):
+        return self.nodecore.needed_outputs
+
+    @property
+    def result(self):
+        return self.nodecore.result
+
+
     def prepare_state_input(self):
         self._state.prepare_state_input(state_inputs=self.state_inputs)
-    #     # updating node
-    #     self.nodecore.state = self._state
-    #     self.nodecore._inputs = self._inputs
-    #     self.nodecore._state_inputs = self._state_inputs
-    #
+        # updating node
+        self.nodecore.state = self._state
+        self.nodecore._inputs = self._inputs
+        self.nodecore._state_inputs = self._state_inputs
+
     def run(self, plugin="serial"):
         self.prepare_state_input()
-        self.sub = sub.SubmitterNode(plugin, node=self)
+        self.sub = sub.SubmitterNode(plugin, node=self.nodecore)
         self.sub.run_node()
         self.sub.close()
 
@@ -1316,172 +1332,172 @@ class NewWorkflow(NewNode):
         super(NewWorkflow, self).__init__(inputs=inputs, mapper=mapper, interface=None,
                  base_dir=base_dir, singlenode=False, *args, **kwargs)
 
-#         self.graph = nx.DiGraph()
-#         self._nodes = []
-#         self.connected_var = {}
-#         if nodes:
-#             self.add_nodes(nodes)
-#         for nn in self._nodes:
-#             self.connected_var[nn] = {}
-#
-#         # dj: I have nodedir and workingdir...
-#         self.workingdir = os.path.join(os.getcwd(), workingdir)
-#
-#         if self.mapper:
-#             #dj: TODO have to implement mapper for workflow. should I create as many workflows??
-#             pass
-#
-#         # dj not sure what was the motivation, wf_klasses gives an empty list
-#         #mro = self.__class__.mro()
-#         #wf_klasses = mro[:mro.index(NewWorkflow)][::-1]
-#         #items = {}
-#         #for klass in wf_klasses:
-#         #    items.update(klass.__dict__)
-#         #for name, runnable in items.items():
-#         #    if name in ('__module__', '__doc__'):
-#         #        continue
-#
-#         #    self.add(name, value)
-#
-#
-#
-#     @property
-#     def nodes(self):
-#         return self._nodes
-#
-#     def add_nodes(self, nodes):
-#         """adding nodes without defining connections"""
-#         self.graph.add_nodes_from(nodes)
-#         for nn in nodes:
-#             self._nodes.append(nn)
-#             #self._inputs.update(nn.inputs)
-#             self.connected_var[nn] = {}
-#             nn.nodedir = os.path.join(self.workingdir, nn.nodedir)
-#
-#
-#     def connect(self, from_node, from_socket, to_node, to_socket):
-#         if from_node:
-#             self.graph.add_edges_from([(from_node, to_node)])
-#             if not to_node in self.nodes:
-#                 self.add_nodes(to_node)
-#             self.connected_var[to_node][to_socket] = (from_node, from_socket)
-#             # from_node.sending_output.append((from_socket, to_node, to_socket))
-#             logger.debug('connecting {} and {}'.format(from_node, to_node))
-#         else:
-#             self.connect_workflow(to_node, from_socket, to_socket)
-#
-#
-#     def connect_workflow(self, node, inp_wf, inp_nd):
-#         if "{}-{}".format(self.name, inp_wf) in self.inputs:
-#             node.state_inputs.update({"{}-{}".format(node.name, inp_nd): self.inputs["{}-{}".format(self.name, inp_wf)]})
-#             node.inputs.update({"{}-{}".format(node.name, inp_nd): self.inputs["{}-{}".format(self.name, inp_wf)]})
-#         else:
-#             raise Exception("{} not in the workflow inputs".format(inp_wf))
-#
-#
-#     def _preparing(self):
-#         """preparing nodes which are connected: setting the final mapper and state_inputs"""
-#         self.graph_sorted = list(nx.topological_sort(self.graph))
-#         logger.debug('the sorted graph is: {}'.format(self.graph_sorted))
-#         for nn in self.graph_sorted:
-#             nn.wfdir = self.workingdir
-#             try:
-#                 for inp, (out_node, out_var) in self.connected_var[nn].items():
-#                     nn.sufficient = False #it has some history (doesnt have to be in the loop)
-#                     nn.state_inputs.update(out_node.state_inputs)
-#                     nn.needed_outputs.append((out_node, out_var, inp))
-#                     #if there is no mapper provided, i'm assuming that mapper is taken from the previous node
-#                     if (not nn.mapper or nn.mapper == out_node.mapper) and out_node.mapper:
-#                         nn.mapper = out_node.mapper
-#                         #nn._mapper = inp #not used
-#                     elif not out_node.mapper: # we shouldn't change anything
-#                         pass
-#                     # when the mapper from previous node is used in the current node (it has to be the same syntax)
-#                     elif nn.mapper and out_node.mapper in nn.mapper:  # state_mapper or _mapper?? TODO
-#                         #dj: if I use the syntax with state_inp name than I don't have to change the mapper...
-#                         #if type(nn._mapper) is tuple:
-#                         #    nn._mapper = tuple([inp if x == out_node.state_mapper else x for x in list(nn._mapper)])
-#                         # TODO: not sure if I'll have to implement more
-#                         pass
-#
-#                     #TODO: implement inner mapper
-#                     # TODO: if nn.mapper is a string and inp can be a letter that exists in nn.mapper
-#                     #elif nn.mapper and inp in nn.mapper:
-#                     #    raise Exception("{} can be in the mapper only together with {}, i.e. {})".format(inp, out[1],
-#                     #                                                                                    [out[1], inp]))
-#                     else:
-#                         raise Exception("worflow._preparing: should I implement something more?")
-#                 pass
-#             except(KeyError):
-#                 # tmp: we don't care about nn that are not in self.connected_var
-#                 pass
-#
-#             #nn.preparing_node() #dj: only one this needed?:
-#             # do i need it at all?
-#             nn.prepare_state_input()
-#
-#
-#     def run(self, plugin="serial"):
-#         self._preparing()
-#         self.sub = sub.SubmitterWorkflow(plugin=plugin, graph=self.graph)
-#         self.sub.run_workflow()
-#         self.sub.close()
-#
-#     def add(self, runnable, name=None, base_dir=None, inputs=None, output_nm=None, mapper=None):
-#         # dj TODO: should I move this if checks to NewNode __init__?
-#         if is_function(runnable):
-#             if not output_nm:
-#                 output_nm = ["out"]
-#             interface = aux.Function_Interface(function=runnable, output_nm=output_nm)
-#             if not name:
-#                 raise Exception("you have to specify name for the node")
-#             if not base_dir:
-#                 base_dir = name
-#             node = NewNode(interface=interface, base_dir=base_dir, name=name, inputs=inputs, mapper=mapper)
-#         elif is_interface(runnable):
-#             if not name:
-#                 raise Exception("you have to specify name for the node")
-#             if not base_dir:
-#                 base_dir = name
-#             node = NewNode(interface=runnable, base_dir=base_dir, name=name, inputs=inputs, mapper=mapper)
-#         elif is_node(runnable):
-#             node = runnable
-#             #dj: dont have clonning right now
-#             #node = runnable if runnable.name == name else runnable.clone(name=name)
-#         else:
-#             raise ValueError("Unknown workflow element: {!r}".format(runnable))
-#         self.add_nodes([node])
-#         # dj: i'm using name as a name of a workflow
-#         #setattr(self, name, node)
-#         #self._nodes[name] = node
-#         self._last_added = node #name
-#         #dj: so I can call map right away
-#         return self
-#
-#
-#     def map(self, mapper, node=None, inputs=None):
-#         # if node is None:
-#         #     if '.' in field:
-#         #         node, field = field.rsplit('.', 1)
-#         #     else:
-#         #         node = self._last_added
-#         #
-#         # if '.' in node:
-#         #     subwf, node = node.split('.', 1)
-#         #     self._nodes[subwf].map(field, node, values)
-#         #     return
-#
-#         if not node:
-#             node = self._last_added
-#
-#         if node.mapper:
-#             raise WorkflowError("Cannot assign two mappings to the same input")
-#         node.map(mapper=mapper, inputs=inputs)
-#
-#
-#     def join(self, field, node=None):
-#         pass
-#
+        self.graph = nx.DiGraph()
+        self._nodes = []
+        self.connected_var = {}
+        if nodes:
+            self.add_nodes(nodes)
+        for nn in self._nodes:
+            self.connected_var[nn] = {}
+
+        # dj: I have nodedir and workingdir...
+        self.workingdir = os.path.join(os.getcwd(), workingdir)
+
+        if self.mapper:
+            #dj: TODO have to implement mapper for workflow. should I create as many workflows??
+            pass
+
+        # dj not sure what was the motivation, wf_klasses gives an empty list
+        #mro = self.__class__.mro()
+        #wf_klasses = mro[:mro.index(NewWorkflow)][::-1]
+        #items = {}
+        #for klass in wf_klasses:
+        #    items.update(klass.__dict__)
+        #for name, runnable in items.items():
+        #    if name in ('__module__', '__doc__'):
+        #        continue
+
+        #    self.add(name, value)
+
+
+
+    @property
+    def nodes(self):
+        return self._nodes
+
+    def add_nodes(self, nodes):
+        """adding nodes without defining connections"""
+        self.graph.add_nodes_from(nodes)
+        for nn in nodes:
+            self._nodes.append(nn)
+            #self._inputs.update(nn.inputs)
+            self.connected_var[nn] = {}
+            nn.nodedir = os.path.join(self.workingdir, nn.nodedir)
+
+
+    def connect(self, from_node, from_socket, to_node, to_socket):
+        if from_node:
+            self.graph.add_edges_from([(from_node, to_node)])
+            if not to_node in self.nodes:
+                self.add_nodes(to_node)
+            self.connected_var[to_node][to_socket] = (from_node, from_socket)
+            # from_node.sending_output.append((from_socket, to_node, to_socket))
+            logger.debug('connecting {} and {}'.format(from_node, to_node))
+        else:
+            self.connect_workflow(to_node, from_socket, to_socket)
+
+
+    def connect_workflow(self, node, inp_wf, inp_nd):
+        if "{}-{}".format(self.name, inp_wf) in self.inputs:
+            node.state_inputs.update({"{}-{}".format(node.name, inp_nd): self.inputs["{}-{}".format(self.name, inp_wf)]})
+            node.inputs.update({"{}-{}".format(node.name, inp_nd): self.inputs["{}-{}".format(self.name, inp_wf)]})
+        else:
+            raise Exception("{} not in the workflow inputs".format(inp_wf))
+
+
+    def _preparing(self):
+        """preparing nodes which are connected: setting the final mapper and state_inputs"""
+        self.graph_sorted = list(nx.topological_sort(self.graph))
+        logger.debug('the sorted graph is: {}'.format(self.graph_sorted))
+        for nn in self.graph_sorted:
+            nn.wfdir = self.workingdir
+            try:
+                for inp, (out_node, out_var) in self.connected_var[nn].items():
+                    nn.sufficient = False #it has some history (doesnt have to be in the loop)
+                    nn.state_inputs.update(out_node.state_inputs)
+                    nn.needed_outputs.append((out_node, out_var, inp))
+                    #if there is no mapper provided, i'm assuming that mapper is taken from the previous node
+                    if (not nn.mapper or nn.mapper == out_node.mapper) and out_node.mapper:
+                        nn.mapper = out_node.mapper
+                        #nn._mapper = inp #not used
+                    elif not out_node.mapper: # we shouldn't change anything
+                        pass
+                    # when the mapper from previous node is used in the current node (it has to be the same syntax)
+                    elif nn.mapper and out_node.mapper in nn.mapper:  # state_mapper or _mapper?? TODO
+                        #dj: if I use the syntax with state_inp name than I don't have to change the mapper...
+                        #if type(nn._mapper) is tuple:
+                        #    nn._mapper = tuple([inp if x == out_node.state_mapper else x for x in list(nn._mapper)])
+                        # TODO: not sure if I'll have to implement more
+                        pass
+
+                    #TODO: implement inner mapper
+                    # TODO: if nn.mapper is a string and inp can be a letter that exists in nn.mapper
+                    #elif nn.mapper and inp in nn.mapper:
+                    #    raise Exception("{} can be in the mapper only together with {}, i.e. {})".format(inp, out[1],
+                    #                                                                                    [out[1], inp]))
+                    else:
+                        raise Exception("worflow._preparing: should I implement something more?")
+                pass
+            except(KeyError):
+                # tmp: we don't care about nn that are not in self.connected_var
+                pass
+
+            #nn.preparing_node() #dj: only one this needed?:
+            # do i need it at all?
+            nn.prepare_state_input()
+
+
+    def run(self, plugin="serial"):
+        self._preparing()
+        self.sub = sub.SubmitterWorkflow(plugin=plugin, graph=self.graph)
+        self.sub.run_workflow()
+        self.sub.close()
+
+    def add(self, runnable, name=None, base_dir=None, inputs=None, output_nm=None, mapper=None):
+        # dj TODO: should I move this if checks to NewNode __init__?
+        if is_function(runnable):
+            if not output_nm:
+                output_nm = ["out"]
+            interface = aux.Function_Interface(function=runnable, output_nm=output_nm)
+            if not name:
+                raise Exception("you have to specify name for the node")
+            if not base_dir:
+                base_dir = name
+            node = NewNode(interface=interface, base_dir=base_dir, name=name, inputs=inputs, mapper=mapper)
+        elif is_interface(runnable):
+            if not name:
+                raise Exception("you have to specify name for the node")
+            if not base_dir:
+                base_dir = name
+            node = NewNode(interface=runnable, base_dir=base_dir, name=name, inputs=inputs, mapper=mapper)
+        elif is_node(runnable):
+            node = runnable
+            #dj: dont have clonning right now
+            #node = runnable if runnable.name == name else runnable.clone(name=name)
+        else:
+            raise ValueError("Unknown workflow element: {!r}".format(runnable))
+        self.add_nodes([node])
+        # dj: i'm using name as a name of a workflow
+        #setattr(self, name, node)
+        #self._nodes[name] = node
+        self._last_added = node #name
+        #dj: so I can call map right away
+        return self
+
+
+    def map(self, mapper, node=None, inputs=None):
+        # if node is None:
+        #     if '.' in field:
+        #         node, field = field.rsplit('.', 1)
+        #     else:
+        #         node = self._last_added
+        #
+        # if '.' in node:
+        #     subwf, node = node.split('.', 1)
+        #     self._nodes[subwf].map(field, node, values)
+        #     return
+
+        if not node:
+            node = self._last_added
+
+        if node.mapper:
+            raise WorkflowError("Cannot assign two mappings to the same input")
+        node.map(mapper=mapper, inputs=inputs)
+
+
+    def join(self, field, node=None):
+        pass
+
 
 def is_function(obj):
     return hasattr(obj, '__call__')
