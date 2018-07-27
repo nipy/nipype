@@ -201,13 +201,12 @@ class TOPUPInputSpec(FSLCommandInputSpec):
     warp_res = traits.Float(
         argstr='--warpres=%f',
         desc=('(approximate) resolution (in mm) of warp '
-              'basis for the different sub-sampling levels'
-              '(default in FSL 10).'))
+              'basis for the different sub-sampling levels'))
     subsamp = traits.Int(argstr='--subsamp=%d',
-                         desc='sub-sampling scheme (default in FSL 1)')
+                         desc='sub-sampling scheme')
     fwhm = traits.Float(
         argstr='--fwhm=%f',
-        desc='FWHM (in mm) of gaussian smoothing kernel (default in FSL 8)')
+        desc='FWHM (in mm) of gaussian smoothing kernel')
     config = traits.String(
         'b02b0.cnf',
         argstr='--config=%s',
@@ -216,7 +215,7 @@ class TOPUPInputSpec(FSLCommandInputSpec):
               'arguments'))
     max_iter = traits.Int(
         argstr='--miter=%d',
-        desc='max # of non-linear iterations (default in FSL 5)')
+        desc='max # of non-linear iterations')
     reg_lambda = traits.Float(
         argstr='--lambda=%0.f',
         desc=('Weight of regularisation, default '
@@ -257,7 +256,7 @@ class TOPUPInputSpec(FSLCommandInputSpec):
     splineorder = traits.Int(
         argstr='--splineorder=%d',
         desc=('order of spline, 2->Qadratic spline, '
-              '3->Cubic spline (default in FSL 3)'))
+              '3->Cubic spline'))
     numprec = traits.Enum(
         'double',
         'float',
