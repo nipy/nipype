@@ -10,7 +10,7 @@ prov==1.5.0
 click>=6.6.0
 funcsigs
 configparser
-pytest>=3.0
+pytest>=3.4
 pytest-xdist
 pytest-env
 mock
