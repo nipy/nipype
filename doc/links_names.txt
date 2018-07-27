@@ -56,7 +56,6 @@
 .. _doctest-mode: http://www.cis.upenn.edu/~edloper/projects/doctestmode/
 .. _bazaar: http://bazaar-vcs.org/
 .. _subversion: http://subversion.tigris.org/
-.. _nose: http://nose.readthedocs.io/en/latest/
 .. _`python coverage tester`: http://nedbatchelder.com/code/modules/coverage.html
 
 .. Other python projects
