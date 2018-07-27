@@ -3,6 +3,7 @@
 
 ##### [Full changelog](https://github.com/nipy/nipype/milestone/22?closed=1)
 
+  * FIX: Un-set incorrect default options in TOPUP (https://github.com/nipy/nipype/pull/2637)
   * FIX: Copy FSCommand.version to ReconAll.version (https://github.com/nipy/nipype/pull/2656)
   * FIX: Various BIDSDataGrabber fixes (https://github.com/nipy/nipype/pull/2651)
   * FIX: changing Node._output_dir to realpath (https://github.com/nipy/nipype/pull/2639)
@@ -14,7 +15,9 @@
   * ENH Minor improvements to PR template (https://github.com/nipy/nipype/pull/2636)
   * TEST: make specs (https://github.com/nipy/nipype/pull/2653)
   * DOC: update neurodocker tutorial for neurodocker version 0.4.0 (https://github.com/nipy/nipype/pull/2647)
+  * MAINT: Remove vestiges of nose testing library (https://github.com/nipy/nipype/pull/2662)
   * MAINT: Make pytest-xdist a dependency (https://github.com/nipy/nipype/pull/2649)
+  * CI: Install pytest>=3.4 in Travis (https://github.com/nipy/nipype/pull/2659)
 
 
 1.1.0 (July 04, 2018)
