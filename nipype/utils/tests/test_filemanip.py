@@ -547,7 +547,7 @@ class PickledBreaker:
     def __setstate__(self, d):
         raise Exception()
 
-        
+
 def test_versioned_pklization(tmpdir):
     tmpdir.chdir()
 
@@ -560,7 +560,7 @@ def test_versioned_pklization(tmpdir):
 
             loadpkl('./pickled.pkz', versioning=True)
 
-        
+
 def test_unversioned_pklization(tmpdir):
     tmpdir.chdir()
 

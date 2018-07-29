@@ -61,6 +61,7 @@ def test_EpiReg_outputs():
         fullwarp=dict(),
         out_1vol=dict(),
         out_file=dict(),
+        seg=dict(),
         shiftmap=dict(),
         wmedge=dict(),
         wmseg=dict(),
