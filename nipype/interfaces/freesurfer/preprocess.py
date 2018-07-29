@@ -1326,6 +1326,12 @@ class ReconAll(CommandLine):
         with open(xopts_file, 'r') as fobj:
             return fobj.read()
 
+    @property
+    def version(self):
+        ver = Info.looseversion()
+        if ver > LooseVersion("0.0.0"):
+            return ver.vstring
+
 
 class BBRegisterInputSpec(FSTraitedSpec):
     subject_id = traits.Str(

@@ -3,7 +3,6 @@
 # rsync -e ssh nipype-0.1-py2.5.egg cburns,nipy@frs.sourceforge.net:/home/frs/project/n/ni/nipy/nipype/nipype-0.1/
 
 PYTHON ?= python
-NOSETESTS=`which nosetests`
 
 .PHONY: zipdoc sdist egg upload_to_pypi trailing-spaces clean-pyc clean-so clean-build clean-ctags clean in inplace test-code test-coverage test html specs check-before-commit check gen-base-dockerfile gen-main-dockerfile gen-dockerfiles
 

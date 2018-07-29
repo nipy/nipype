@@ -27,7 +27,7 @@ echo "export PATH=$HOME/miniconda3/bin:\\$PATH" >> .bashrc
 
 # install nipype dependencies
 $HOME/miniconda3/bin/conda update --yes conda
-$HOME/miniconda3/bin/conda install --yes pip scipy nose networkx lxml future simplejson
+$HOME/miniconda3/bin/conda install --yes pip scipy networkx lxml future simplejson
 $HOME/miniconda3/bin/conda install --yes python-dateutil jupyter matplotlib
 $HOME/miniconda3/bin/pip install nibabel
 $HOME/miniconda3/bin/pip install prov

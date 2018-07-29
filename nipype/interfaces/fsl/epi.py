@@ -199,16 +199,12 @@ class TOPUPInputSpec(FSLCommandInputSpec):
     # TODO: the following traits admit values separated by commas, one value
     # per registration level inside topup.
     warp_res = traits.Float(
-        10.0, usedefault=True,
         argstr='--warpres=%f',
         desc=('(approximate) resolution (in mm) of warp '
-              'basis for the different sub-sampling levels'
-              '.'))
-    subsamp = traits.Int(1, usedefault=True,
-                         argstr='--subsamp=%d', desc='sub-sampling scheme')
+              'basis for the different sub-sampling levels'))
+    subsamp = traits.Int(argstr='--subsamp=%d',
+                         desc='sub-sampling scheme')
     fwhm = traits.Float(
-        8.0,
-        usedefault=True,
         argstr='--fwhm=%f',
         desc='FWHM (in mm) of gaussian smoothing kernel')
     config = traits.String(
@@ -218,13 +214,12 @@ class TOPUPInputSpec(FSLCommandInputSpec):
         desc=('Name of config file specifying command line '
               'arguments'))
     max_iter = traits.Int(
-        5, usedefault=True,
-        argstr='--miter=%d', desc='max # of non-linear iterations')
+        argstr='--miter=%d',
+        desc='max # of non-linear iterations')
     reg_lambda = traits.Float(
-        1.0, usedefault=True,
-        argstr='--miter=%0.f',
-        desc=('lambda weighting value of the '
-              'regularisation term'))
+        argstr='--lambda=%0.f',
+        desc=('Weight of regularisation, default '
+              'depending on --ssqlambda and --regmod switches.'))
     ssqlambda = traits.Enum(
         1,
         0,
@@ -259,7 +254,6 @@ class TOPUPInputSpec(FSLCommandInputSpec):
         desc=('Minimisation method 0=Levenberg-Marquardt, '
               '1=Scaled Conjugate Gradient'))
     splineorder = traits.Int(
-        3, usedefault=True,
         argstr='--splineorder=%d',
         desc=('order of spline, 2->Qadratic spline, '
               '3->Cubic spline'))
@@ -321,11 +315,9 @@ class TOPUP(FSLCommand):
     >>> topup.inputs.output_type = "NIFTI_GZ"
     >>> topup.cmdline # doctest: +ELLIPSIS
     'topup --config=b02b0.cnf --datain=topup_encoding.txt \
---fwhm=8.000000 --imain=b0_b0rev.nii --miter=5 \
---out=b0_b0rev_base --iout=b0_b0rev_corrected.nii.gz \
+--imain=b0_b0rev.nii --out=b0_b0rev_base --iout=b0_b0rev_corrected.nii.gz \
 --fout=b0_b0rev_field.nii.gz --jacout=jac --logout=b0_b0rev_topup.log \
---rbmout=xfm --dfout=warpfield --miter=1 --splineorder=3 --subsamp=1 \
---warpres=10.000000'
+--rbmout=xfm --dfout=warpfield'
     >>> res = topup.run() # doctest: +SKIP
 
     """
