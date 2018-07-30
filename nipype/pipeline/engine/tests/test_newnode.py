@@ -1,7 +1,7 @@
 from .. import NewNode, NewWorkflow
 from ..auxiliary import Function_Interface
 
-import sys, time
+import sys, time, os
 import numpy as np
 import pytest, pdb
 
@@ -160,6 +160,18 @@ def test_node_8(plugin):
 
 # tests for workflows that set mapper to node that are later added to a workflow
 
+@python35_only
+def test_workflow_0(plugin="serial"):
+    """workflow with one node with a mapper"""
+    wf = NewWorkflow(name="wf0", workingdir="test_wf0_{}".format(plugin))
+    interf_addtwo = Function_Interface(fun_addtwo, ["out"])
+    na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
+    na.map(mapper="a", inputs={"a": [3, 5]})
+    wf.add_nodes([na])
+    assert wf.nodes[0].mapper == "NA-a"
+    assert (wf.nodes[0].inputs['NA-a'] == np.array([3, 5])).all()
+    assert len(wf.graph.nodes) == 1
+
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_1(plugin):
@@ -169,7 +181,7 @@ def test_workflow_1(plugin):
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
     na.map(mapper="a", inputs={"a": [3, 5]})
     wf.add_nodes([na])
-    assert wf.nodes[0].mapper == "NA-a"
+
     wf.run(plugin=plugin)
 
     expected = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
