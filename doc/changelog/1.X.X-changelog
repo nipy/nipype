@@ -1,3 +1,25 @@
+1.1.1 (July 30, 2018)
+=====================
+
+##### [Full changelog](https://github.com/nipy/nipype/milestone/22?closed=1)
+
+  * FIX: Un-set incorrect default options in TOPUP (https://github.com/nipy/nipype/pull/2637)
+  * FIX: Copy FSCommand.version to ReconAll.version (https://github.com/nipy/nipype/pull/2656)
+  * FIX: Various BIDSDataGrabber fixes (https://github.com/nipy/nipype/pull/2651)
+  * FIX: changing Node._output_dir to realpath (https://github.com/nipy/nipype/pull/2639)
+  * FIX: Typo in DWIExtract of Mrtrix3interface (https://github.com/nipy/nipype/pull/2634)
+  * FIX: Typo in FSLXCommandInputSpec (https://github.com/nipy/nipype/pull/2628)
+  * ENH: Allow transform to be saved from AFNI 3dWarp (https://github.com/nipy/nipype/pull/2642)
+  * ENH: Allow BIDS-style slice timings to be passed directly to TShift  (https://github.com/nipy/nipype/pull/2608)
+  * ENH: S3 access using instance role (https://github.com/nipy/nipype/pull/2621)
+  * ENH Minor improvements to PR template (https://github.com/nipy/nipype/pull/2636)
+  * TEST: make specs (https://github.com/nipy/nipype/pull/2653)
+  * DOC: update neurodocker tutorial for neurodocker version 0.4.0 (https://github.com/nipy/nipype/pull/2647)
+  * MAINT: Remove vestiges of nose testing library (https://github.com/nipy/nipype/pull/2662)
+  * MAINT: Make pytest-xdist a dependency (https://github.com/nipy/nipype/pull/2649)
+  * CI: Install pytest>=3.4 in Travis (https://github.com/nipy/nipype/pull/2659)
+
+
 1.1.0 (July 04, 2018)
 =====================
 

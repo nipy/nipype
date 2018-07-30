@@ -125,7 +125,7 @@ class ANTSOutputSpec(TraitedSpec):
 
 
 class ANTS(ANTSCommand):
-    """ANTS wrapper for registration of images 
+    """ANTS wrapper for registration of images
     (old, use Registration instead)
 
     Examples
