@@ -947,6 +947,8 @@ class EpiRegOutputSpec(TraitedSpec):
                     structural space')
     wmseg = File(
         exists=True, desc='white matter segmentation used in flirt bbr')
+    seg = File(
+        exists=True, desc='white matter, gray matter, csf segmentation')
     wmedge = File(exists=True, desc='white matter edges for visualization')
 
 
@@ -1013,6 +1015,8 @@ class EpiReg(FSLCommand):
             os.getcwd(), self.inputs.out_base + '_fast_wmedge.nii.gz')
         outputs['wmseg'] = os.path.join(
             os.getcwd(), self.inputs.out_base + '_fast_wmseg.nii.gz')
+        outputs['seg'] = os.path.join(
+            os.getcwd(), self.inputs.out_base + '_fast_seg.nii.gz')
 
         return outputs
 
