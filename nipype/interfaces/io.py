@@ -120,7 +120,7 @@ def add_traits(base, names, trait_type=None):
 
 
 def _get_head_bucket(s3_resource, bucket_name):
-    """ Try to get the header info of a bucket, in order to 
+    """ Try to get the header info of a bucket, in order to
     check if it exists and its permissions
     """
 
