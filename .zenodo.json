@@ -31,14 +31,14 @@
       "orcid": "0000-0002-5866-047X"
     },
     {
-      "affiliation": "MIT",
-      "name": "Jarecka, Dorota",
-      "orcid": "0000-0003-1857-8129"
-    },
-    {
       "affiliation": "University of Iowa",
       "name": "Johnson, Hans",
       "orcid": "0000-0001-9513-2660"
+    },
+    {
+      "affiliation": "MIT",
+      "name": "Jarecka, Dorota",
+      "orcid": "0000-0003-1857-8129"
     },
     {
       "name": "Burns, Christopher"
@@ -61,14 +61,14 @@
       "orcid": "0000-0001-9813-3167"
     },
     {
-      "affiliation": "University of California, San Francisco",
-      "name": "Jordan, Kesshi",
-      "orcid": "0000-0001-6313-0580"
-    },
-    {
       "affiliation": "MIT",
       "name": "Goncalves, Mathias",
       "orcid": "0000-0002-7252-7771"
+    },
+    {
+      "affiliation": "University of California, San Francisco",
+      "name": "Jordan, Kesshi",
+      "orcid": "0000-0001-6313-0580"
     },
     {
       "affiliation": "Department of Psychology, Stanford University",
@@ -152,6 +152,11 @@
       "orcid": "0000-0002-7782-0790"
     },
     {
+      "affiliation": "Dartmouth College: Hanover, NH, United States",
+      "name": "Halchenko, Yaroslav O.",
+      "orcid": "0000-0003-3456-2493"
+    },
+    {
       "affiliation": "Montreal Neurological Institute and Hospital",
       "name": "Markello, Ross",
       "orcid": "0000-0003-1057-1336"
@@ -163,11 +168,6 @@
     },
     {
       "name": "Moloney, Brendan"
-    },
-    {
-      "affiliation": "Dartmouth College: Hanover, NH, United States",
-      "name": "Halchenko, Yaroslav O.",
-      "orcid": "0000-0003-3456-2493"
     },
     {
       "affiliation": "Athena EPI, Inria Sophia-Antipolis",
@@ -326,9 +326,6 @@
       "name": "Millman, Jarrod"
     },
     {
-      "name": "Haehn, Daniel"
-    },
-    {
       "name": "Lai, Jeff"
     },
     {
@@ -448,6 +445,9 @@
     },
     {
       "name": "Mertz, Fred"
+    },
+    {
+      "name": "Haehn, Daniel"
     },
     {
       "affiliation": "Technische Universit\u00e4t Dresden, Faculty of Medicine, Department of Child and Adolescent Psychiatry",
