@@ -53,7 +53,6 @@ before_install:
     export FSLOUTPUTTYPE=NIFTI_GZ;
   fi;
 
-- travis_retry pip install --upgrade pytest>=3.4  # Work around pip failure
 - travis_retry pip install -r requirements.txt
 - travis_retry pip install grabbit==0.1.2
 - travis_retry git clone https://github.com/INCF/pybids.git ${HOME}/pybids &&
