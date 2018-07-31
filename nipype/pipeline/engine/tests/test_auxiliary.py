@@ -16,6 +16,17 @@ def test_mapper2rpn(mapper, rpn):
     assert aux.mapper2rpn(mapper) == rpn
 
 
+@pytest.mark.parametrize("mapper, wf_mappers, rpn",
+                         [
+                            (["a", "_NA"],        {"NA": ("b", "c")}, ["a", "NA-b", "NA-c", ".", "*"]),
+                            (["_NA", "c"],        {"NA": ("a", "b")}, ["NA-a", "NA-b", ".", "c", "*"]),
+                            (["a", ("b", "_NA")], {"NA": ["c", "d"]}, ["a", "b", "NA-c", "NA-d", "*", ".", "*"])
+                        ])
+
+def test_mapper2rpn_wf_mapper(mapper, wf_mappers, rpn):
+    assert aux.mapper2rpn(mapper, wf_mappers=wf_mappers) == rpn
+
+
 @pytest.mark.parametrize("mapper, mapper_changed",
                         [
                             ("a",               "Node-a"),

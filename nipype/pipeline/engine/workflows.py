@@ -1073,7 +1073,7 @@ class MapState(object):
 
 # dj ??: should I use EngineBase?
 class NewBase(object):
-    def __init__(self, name, mapper=None, inputs=None, *args, **kwargs):
+    def __init__(self, name, mapper=None, inputs=None, wf_mappers=None, *args, **kwargs):
         self.name = name
         #dj TODO: I should think what is needed in the __init__ (I redefine some of rhe attributes anyway)
         if inputs:
@@ -1089,8 +1089,9 @@ class NewBase(object):
             # adding name of the node to the input name within the mapper
             mapper = aux.change_mapper(mapper, self.name)
         self._mapper = mapper
+        self._wf_mappers = wf_mappers
         # create state (takes care of mapper, connects inputs with axes, so we can ask for specifc element)
-        self._state = state.State(mapper=self._mapper, node_name=self.name)
+        self._state = state.State(mapper=self._mapper, node_name=self.name, wf_mappers=self._wf_mappers)
 
         self._result = {}
 
@@ -1111,7 +1112,7 @@ class NewBase(object):
     def mapper(self, mapper):
         self._mapper = mapper
         # updating state
-        self._state = state.State(mapper=self._mapper, node_name=self.name)
+        self._state = state.State(mapper=self._mapper, node_name=self.name, wf_mappers=self._wf_mappers)
 
     @property
     def inputs(self):
@@ -1126,9 +1127,9 @@ class NewBase(object):
 
 class NewNode(NewBase):
     def __init__(self, name, interface, inputs=None, mapper=None, join_by=None,
-                 base_dir=None, *args, **kwargs):
+                 base_dir=None, wf_mappers=None, *args, **kwargs):
         super(NewNode, self).__init__(name=name, mapper=mapper, inputs=inputs,
-                                      *args, **kwargs)
+                                      wf_mappers=wf_mappers, *args, **kwargs)
 
         self._nodedir = base_dir
         self._interface = interface
@@ -1172,7 +1173,7 @@ class NewNode(NewBase):
             self._state_inputs.update(inputs)
         if mapper:
             # updating state if we have a new mapper
-            self._state = state.State(mapper=self._mapper, node_name=self.name)
+            self._state = state.State(mapper=self._mapper, node_name=self.name, wf_mappers=self._wf_mappers)
 
 #    def map_orig(self, field, values=None):
 #        if isinstance(field, list):
@@ -1209,7 +1210,6 @@ class NewNode(NewBase):
         logger.debug("Run interface el, name={}, inputs_dict={}, state_dict={}".format(
                                                             self.name, inputs_dict, state_dict))
         res = self._interface.run(inputs_dict)
-        #pdb.set_trace()
         output = self._interface.output
         logger.debug("Run interface el, output={}".format(output))
         dir_nm_el = "_".join(["{}.{}".format(i, j) for i, j in list(state_dict.items())])
@@ -1327,6 +1327,7 @@ class NewWorkflow(NewBase):
         for nn in self._nodes:
             self.connected_var[nn] = {}
         self._node_names = {}
+        self._node_mappers = {}
 
         # dj: not sure if this should be different than base_dir
         self.workingdir = os.path.join(os.getcwd(), workingdir)
@@ -1362,6 +1363,7 @@ class NewWorkflow(NewBase):
             self.connected_var[nn] = {}
             nn.nodedir = os.path.join(self.workingdir, nn.nodedir)
             self._node_names[nn.name] = nn
+            self._node_mappers[nn.name] = nn.mapper
 
 
     def connect(self, from_node, from_socket, to_node, to_socket):
@@ -1399,24 +1401,9 @@ class NewWorkflow(NewBase):
                     if (not nn.mapper or nn.mapper == out_node.mapper) and out_node.mapper:
                         nn.mapper = out_node.mapper
                         #nn._mapper = inp #not used
-                    elif not out_node.mapper: # we shouldn't change anything
-                        pass
-                    # when the mapper from previous node is used in the current node (it has to be the same syntax)
-                    elif nn.mapper and out_node.mapper in nn.mapper:  # state_mapper or _mapper?? TODO
-                        #dj: if I use the syntax with state_inp name than I don't have to change the mapper...
-                        #if type(nn._mapper) is tuple:
-                        #    nn._mapper = tuple([inp if x == out_node.state_mapper else x for x in list(nn._mapper)])
-                        # TODO: not sure if I'll have to implement more
-                        pass
-
-                    #TODO: implement inner mapper
-                    # TODO: if nn.mapper is a string and inp can be a letter that exists in nn.mapper
-                    #elif nn.mapper and inp in nn.mapper:
-                    #    raise Exception("{} can be in the mapper only together with {}, i.e. {})".format(inp, out[1],
-                    #                                                                                    [out[1], inp]))
                     else:
-                        raise Exception("worflow._preparing: should I implement something more?")
-                pass
+                        pass
+                    #TODO: implement inner mapper
             except(KeyError):
                 # tmp: we don't care about nn that are not in self.connected_var
                 pass
@@ -1442,13 +1429,15 @@ class NewWorkflow(NewBase):
                 raise Exception("you have to specify name for the node")
             if not base_dir:
                 base_dir = name
-            node = NewNode(interface=interface, base_dir=base_dir, name=name, inputs=inputs, mapper=mapper)
+            node = NewNode(interface=interface, base_dir=base_dir, name=name, inputs=inputs, mapper=mapper,
+                           wf_mappers=self._node_mappers)
         elif is_interface(runnable):
             if not name:
                 raise Exception("you have to specify name for the node")
             if not base_dir:
                 base_dir = name
-            node = NewNode(interface=runnable, base_dir=base_dir, name=name, inputs=inputs, mapper=mapper)
+            node = NewNode(interface=runnable, base_dir=base_dir, name=name, inputs=inputs, mapper=mapper,
+                           wf_mappers=self._node_mappers)
         elif is_node(runnable):
             node = runnable
             #dj: dont have clonning right now
@@ -1490,6 +1479,7 @@ class NewWorkflow(NewBase):
         if node.mapper:
             raise WorkflowError("Cannot assign two mappings to the same input")
         node.map(mapper=mapper, inputs=inputs)
+        self._node_mappers[node.name] = node.mapper
 
 
     def join(self, field, node=None):

@@ -4,13 +4,13 @@ import pdb
 from . import auxiliary as aux
 
 class State(object):
-    def __init__(self, node_name, mapper=None):
+    def __init__(self, node_name, mapper=None, wf_mappers=None):
         self._mapper = mapper
         self.node_name = node_name
         if self._mapper:
             # changing mapper (as in rpn), so I can read from left to right
             # e.g. if mapper=('d', ['e', 'r']), _mapper_rpn=['d', 'e', 'r', '*', '.']
-            self._mapper_rpn = aux.mapper2rpn(self._mapper)
+            self._mapper_rpn = aux.mapper2rpn(self._mapper, wf_mappers=wf_mappers)
             self._input_names_mapper = [i for i in self._mapper_rpn if i not in ["*", "."]]
         else:
             self._mapper_rpn = []
