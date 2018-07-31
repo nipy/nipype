@@ -1326,6 +1326,7 @@ class NewWorkflow(NewBase):
             self.add_nodes(nodes)
         for nn in self._nodes:
             self.connected_var[nn] = {}
+        self._node_names = {}
 
         # dj: not sure if this should be different than base_dir
         self.workingdir = os.path.join(os.getcwd(), workingdir)
@@ -1360,6 +1361,7 @@ class NewWorkflow(NewBase):
             #self._inputs.update(nn.inputs)
             self.connected_var[nn] = {}
             nn.nodedir = os.path.join(self.workingdir, nn.nodedir)
+            self._node_names[nn.name] = nn
 
 
     def connect(self, from_node, from_socket, to_node, to_socket):
@@ -1430,7 +1432,7 @@ class NewWorkflow(NewBase):
         submitter.run_workflow()
         submitter.close()
 
-    def add(self, runnable, name=None, base_dir=None, inputs=None, output_nm=None, mapper=None):
+    def add(self, runnable, name=None, base_dir=None, inputs=None, output_nm=None, mapper=None, **kwargs):
         # dj TODO: should I move this if checks to NewNode __init__?
         if is_function(runnable):
             if not output_nm:
@@ -1458,7 +1460,15 @@ class NewWorkflow(NewBase):
         #setattr(self, name, node)
         #self._nodes[name] = node
         self._last_added = node #name
-        #dj: so I can call map right away
+
+        # connecting inputs to other nodes outputs
+        for (inp, source) in kwargs.items():
+            try:
+                from_node, from_socket = source.split("-")
+                self.connect(self._node_names[from_node], from_socket, node, inp)
+            except(ValueError):
+                self.connect(None, source, node, inp)
+
         return self
 
 

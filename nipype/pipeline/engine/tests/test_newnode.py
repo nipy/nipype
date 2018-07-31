@@ -409,6 +409,41 @@ def test_workflow_4(plugin):
         assert wf.nodes[1].result["out"][i][1] == res[1]
 
 
+@pytest.mark.parametrize("plugin", Plugins)
+@python35_only
+def test_workflow_4a(plugin):
+    """using add(node) method with kwarg arg instead of connect """
+    wf = NewWorkflow(name="wf4a", workingdir="test_wf4a_{}".format(plugin))
+    interf_addtwo = Function_Interface(fun_addtwo, ["out"])
+    na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
+    na.map(mapper="a", inputs={"a": [3, 5]})
+    wf.add(na)
+
+    interf_addvar = Function_Interface(fun_addvar, ["out"])
+    nb = NewNode(name="NB", interface=interf_addvar, base_dir="nb")
+    nb.map(mapper=("NA-a", "b"), inputs={"b": [2, 1]})
+    wf.add(nb, a="NA-out")
+
+    wf.run(plugin=plugin)
+
+    expected = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    key_sort = list(expected[0][0].keys())
+    expected.sort(key=lambda t: [t[0][key] for key in key_sort])
+    wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
+    for i, res in enumerate(expected):
+        assert wf.nodes[0].result["out"][i][0] == res[0]
+        assert wf.nodes[0].result["out"][i][1] == res[1]
+
+    expected_B = [({"NA-a": 3, "NB-b": 2}, 7), ({"NA-a": 5, "NB-b": 1}, 8)]
+    key_sort = list(expected_B[0][0].keys())
+    expected_B.sort(key=lambda t: [t[0][key] for key in key_sort])
+    wf.nodes[1].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
+    for i, res in enumerate(expected_B):
+        assert wf.nodes[1].result["out"][i][0] == res[0]
+        assert wf.nodes[1].result["out"][i][1] == res[1]
+
+
+
 # using map after add method
 
 @pytest.mark.parametrize("plugin", Plugins)
@@ -522,6 +557,40 @@ def test_workflow_6a(plugin):
         assert wf.nodes[1].result["out"][i][1] == res[1]
 
 
+@pytest.mark.parametrize("plugin", Plugins)
+@python35_only
+def test_workflow_6b(plugin):
+    """using a map method for two nodes (specifying the node), usng kwarg arg instead of connect"""
+    wf = NewWorkflow(name="wf6b", workingdir="test_wf6b_{}".format(plugin))
+    interf_addtwo = Function_Interface(fun_addtwo, ["out"])
+    na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
+
+    interf_addvar = Function_Interface(fun_addvar, ["out"])
+    nb = NewNode(name="NB", interface=interf_addvar, base_dir="nb")
+
+    wf.add(na)
+    wf.add(nb, a="NA-out")
+    wf.map(mapper="a", inputs={"a": [3, 5]}, node=na)
+    wf.map(mapper=("NA-a", "b"), inputs={"b": [2, 1]}, node=nb)
+    wf.run(plugin=plugin)
+
+    expected = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    key_sort = list(expected[0][0].keys())
+    expected.sort(key=lambda t: [t[0][key] for key in key_sort])
+    wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
+    for i, res in enumerate(expected):
+        assert wf.nodes[0].result["out"][i][0] == res[0]
+        assert wf.nodes[0].result["out"][i][1] == res[1]
+
+    expected_B = [({"NA-a": 3, "NB-b": 2}, 7), ({"NA-a": 5, "NB-b": 1}, 8)]
+    key_sort = list(expected_B[0][0].keys())
+    expected_B.sort(key=lambda t: [t[0][key] for key in key_sort])
+    wf.nodes[1].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
+    for i, res in enumerate(expected_B):
+        assert wf.nodes[1].result["out"][i][0] == res[0]
+        assert wf.nodes[1].result["out"][i][1] == res[1]
+
+
 # tests for a workflow that have its own input
 
 @pytest.mark.parametrize("plugin", Plugins)
@@ -556,6 +625,27 @@ def test_workflow_7a(plugin):
 
     wf.add(na)
     wf.connect(None, "wf_a", na, "a")
+    wf.map(mapper="a")
+    wf.run(plugin=plugin)
+
+    expected = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    key_sort = list(expected[0][0].keys())
+    expected.sort(key=lambda t: [t[0][key] for key in key_sort])
+    wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
+    for i, res in enumerate(expected):
+        assert wf.nodes[0].result["out"][i][0] == res[0]
+        assert wf.nodes[0].result["out"][i][1] == res[1]
+
+
+@pytest.mark.parametrize("plugin", Plugins)
+@python35_only
+def test_workflow_7b(plugin):
+    """using inputs for workflow and kwarg arg in add (instead of connect)"""
+    wf = NewWorkflow(name="wf7b", inputs={"wf_a": [3, 5]}, workingdir="test_wf7b_{}".format(plugin))
+    interf_addtwo = Function_Interface(fun_addtwo, ["out"])
+    na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
+
+    wf.add(na, a="wf_a")
     wf.map(mapper="a")
     wf.run(plugin=plugin)
 
