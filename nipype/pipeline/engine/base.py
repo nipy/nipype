@@ -36,12 +36,11 @@ class EngineBase(object):
 
         """
         self._hierarchy = None
-        self._name = None
+        self._name = name
+        self._id = self.name # for compatibility with node expansion using iterables
 
         self.base_dir = base_dir
         self.config = deepcopy(config._sections)
-        self.name = name
-        self._id = self.name # for compatibility with node expansion using iterables
 
     @property
     def name(self):
