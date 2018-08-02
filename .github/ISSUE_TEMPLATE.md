@@ -12,7 +12,13 @@ Please put URL to code or code here (if not too long).
 
 ### Platform details:
 
-Please paste the output of: `python -c "import nipype; print(nipype.get_info()); print(nipype.__version__)"`
+<!-- Please run the following code from your shell and place the output between the triple ticks, below.
+python -c "import nipype; from pprint import pprint; pprint(nipype.get_info())"
+-->
+
+```
+
+```
 
 ### Execution environment
 
