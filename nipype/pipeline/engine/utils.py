@@ -233,12 +233,25 @@ def write_report(node, report_type=None, is_mapnode=False):
     return
 
 
+def _protect_collapses(hastraits):
+    raw = hastraits.trait_get()
+    cloned = hastraits.clone_traits().trait_get()
+
+    for key in raw:
+        val = raw[key]
+        c = cloned[key]
+        if c != val and hasattr(val, '__getitem__') and c == val[0]:
+            raw[key] = [val]
+
+    return raw
+
+
 def save_resultfile(result, cwd, name):
     """Save a result pklz file to ``cwd``"""
     resultsfile = os.path.join(cwd, 'result_%s.pklz' % name)
     if result.outputs:
         try:
-            outputs = result.outputs.trait_get()
+            outputs = _protect_collapses(result.outputs)
         except AttributeError:
             outputs = result.outputs.dictcopy()  # outputs was a bunch
         result.outputs.set(**modify_paths(outputs, relative=True, basedir=cwd))
