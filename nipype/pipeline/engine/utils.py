@@ -237,7 +237,7 @@ def _protect_collapses(hastraits):
     raw = hastraits.trait_get()
     cloned = hastraits.clone_traits().trait_get()
 
-    for key in raw:
+    for key in cloned:
         val = raw[key]
         c = cloned[key]
         if c != val and hasattr(val, '__getitem__') and c == val[0]:
