@@ -41,6 +41,7 @@ class EngineBase(object):
         self.base_dir = base_dir
         self.config = deepcopy(config._sections)
         self.name = name
+        self._id = self.name # for compatibility with node expansion using iterables
 
     @property
     def name(self):
@@ -65,6 +66,14 @@ class EngineBase(object):
     @property
     def outputs(self):
         raise NotImplementedError
+
+    @property
+    def itername(self):
+        """Name for expanded iterable"""
+        itername = self._id
+        if self._hierarchy:
+            itername = '%s.%s' % (self._hierarchy, self._id)
+        return itername
 
     def clone(self, name):
         """Clone an EngineBase object
