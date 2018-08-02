@@ -486,18 +486,18 @@ def test_deep_nested_write_graph_runs(tmpdir):
 
 
 # examples of dot files used in the following test
-dotfile_orig = ('strict digraph  {\n'
-                '"mod1 (engine)";\n'
-                '"mod2 (engine)";\n'
-                '"mod1 (engine)" -> "mod2 (engine)";\n'
-                '}\n')
+dotfile_orig = ['strict digraph  {\n',
+                '"mod1 (engine)";\n',
+                '"mod2 (engine)";\n',
+                '"mod1 (engine)" -> "mod2 (engine)";\n',
+                '}\n']
 
-dotfile_detailed_orig = ('digraph structs {\n'
-                         'node [shape=record];\n'
-                         'pipemod1 [label="{IN}|{ mod1 | engine |  }|{OUT|<outoutput1> output1}"];\n'
-                         'pipemod2 [label="{IN|<ininput1> input1}|{ mod2 | engine |  }|{OUT}"];\n'
-                         'pipemod1:outoutput1:e -> pipemod2:ininput1:w;\n'
-                         '}')
+dotfile_detailed_orig = ['digraph structs {\n',
+                         'node [shape=record];\n',
+                         'pipemod1 [label="{IN}|{ mod1 | engine |  }|{OUT|<outoutput1> output1}"];\n',
+                         'pipemod2 [label="{IN|<ininput1> input1}|{ mod2 | engine |  }|{OUT}"];\n',
+                         'pipemod1:outoutput1:e -> pipemod2:ininput1:w;\n',
+                         '}']
 
 dotfile_flat = dotfile_orig
 dotfile_detailed_flat = dotfile_detailed_orig
@@ -506,19 +506,19 @@ dotfile_exec = dotfile_orig
 dotfile_detailed_exec = dotfile_detailed_orig
 
 
-dotfile_hierarchical = ('digraph pipe{\n'
-                        '  label="pipe";\n'
-                        '  pipe_mod1[label="mod1 (engine)"];\n'
-                        '  pipe_mod2[label="mod2 (engine)"];\n'
-                        '  pipe_mod1 -> pipe_mod2;\n'
-                        '}')
+dotfile_hierarchical = ['digraph pipe{\n',
+                        '  label="pipe";\n',
+                        '  pipe_mod1[label="mod1 (engine)"];\n',
+                        '  pipe_mod2[label="mod2 (engine)"];\n',
+                        '  pipe_mod1 -> pipe_mod2;\n',
+                        '}']
 
-dotfile_colored = ('digraph pipe{\n'
-                        '  label="pipe";\n'
-                        '  pipe_mod1[label="mod1 (engine)", style=filled, fillcolor="#FFFFC8"];\n'
-                        '  pipe_mod2[label="mod2 (engine)", style=filled, fillcolor="#FFFFC8"];\n'
-                        '  pipe_mod1 -> pipe_mod2;\n'
-                        '}')
+dotfile_colored = ['digraph pipe{\n',
+                   '  label="pipe";\n',
+                   '  pipe_mod1[label="mod1 (engine)", style=filled, fillcolor="#FFFFC8"];\n',
+                   '  pipe_mod2[label="mod2 (engine)", style=filled, fillcolor="#FFFFC8"];\n',
+                   '  pipe_mod1 -> pipe_mod2;\n',
+                   '}']
 
 @pytest.mark.parametrize("simple", [True, False])
 @pytest.mark.parametrize("graph_type", ['orig', 'flat', 'exec', 'hierarchical', 'colored'])
@@ -535,24 +535,27 @@ def test_write_graph_dotfile(tmpdir, graph_type, simple):
 
     with open("graph.dot") as f:
         graph_str = f.read()
+
     if simple:
-        assert graph_str == eval("dotfile_{}".format(graph_type))
+        for str in eval("dotfile_{}".format(graph_type)):
+            assert str in graph_str
     else:
         # if simple=False graph.dot uses longer names
-        if graph_type in ["hierarchical", "colored"]:
-            assert graph_str == eval("dotfile_{}".format(graph_type)).replace(
-                "mod1 (engine)", "mod1.EngineTestInterface.engine").replace(
-                "mod2 (engine)", "mod2.EngineTestInterface.engine")
-        else:
-            assert graph_str == eval("dotfile_{}".format(graph_type)).replace(
-                "mod1 (engine)", "pipe.mod1.EngineTestInterface.engine").replace(
-                "mod2 (engine)", "pipe.mod2.EngineTestInterface.engine")
+        for str in eval("dotfile_{}".format(graph_type)):
+            if graph_type in ["hierarchical", "colored"]:
+                assert str.replace("mod1 (engine)", "mod1.EngineTestInterface.engine").replace(
+                    "mod2 (engine)", "mod2.EngineTestInterface.engine") in graph_str
+            else:
+                assert str.replace(
+                    "mod1 (engine)", "pipe.mod1.EngineTestInterface.engine").replace(
+                    "mod2 (engine)", "pipe.mod2.EngineTestInterface.engine") in graph_str
 
     # graph_detailed is not created for hierachical or colored
     if graph_type not in ["hierarchical", "colored"]:
         with open("graph_detailed.dot") as f:
-            graph_str =f.read()
-        assert graph_str == eval("dotfile_detailed_{}".format(graph_type))
+            graph_str = f.read()
+        for str in eval("dotfile_detailed_{}".format(graph_type)):
+            assert str in graph_str
 
 
 # examples of dot files used in the following test
@@ -563,32 +566,32 @@ dotfile_iter_flat = dotfile_orig
 dotfile_detailed_iter_flat = dotfile_detailed_orig
 
 dotfile_iter_exec = dotfile_orig
-dotfile_detailed_iter_exec = (
-    'digraph structs {\n'
-    'node [shape=record];\n'
-    'pipemod1aIa1 [label="{IN}|{ a1 | engine | mod1.aI }|{OUT|<outoutput1> output1}"];\n'
-    'pipemod2a1 [label="{IN|<ininput1> input1}|{ a1 | engine | mod2 }|{OUT}"];\n'
-    'pipemod1aIa0 [label="{IN}|{ a0 | engine | mod1.aI }|{OUT|<outoutput1> output1}"];\n'
-    'pipemod2a0 [label="{IN|<ininput1> input1}|{ a0 | engine | mod2 }|{OUT}"];\n'
-    'pipemod1aIa0:outoutput1:e -> pipemod2a0:ininput1:w;\n'
-    'pipemod1aIa1:outoutput1:e -> pipemod2a1:ininput1:w;\n'
-    '}')
+dotfile_detailed_iter_exec = [
+    'digraph structs {\n',
+    'node [shape=record];\n',
+    'pipemod1aIa1 [label="{IN}|{ a1 | engine | mod1.aI }|{OUT|<outoutput1> output1}"];\n',
+    'pipemod2a1 [label="{IN|<ininput1> input1}|{ a1 | engine | mod2 }|{OUT}"];\n',
+    'pipemod1aIa0 [label="{IN}|{ a0 | engine | mod1.aI }|{OUT|<outoutput1> output1}"];\n',
+    'pipemod2a0 [label="{IN|<ininput1> input1}|{ a0 | engine | mod2 }|{OUT}"];\n',
+    'pipemod1aIa0:outoutput1:e -> pipemod2a0:ininput1:w;\n',
+    'pipemod1aIa1:outoutput1:e -> pipemod2a1:ininput1:w;\n',
+    '}']
 
-dotfile_iter_hierarchical = (
-    'digraph pipe{\n'
-    '  label="pipe";\n'
-    '  pipe_mod1[label="mod1 (engine)", shape=box3d,style=filled, color=black, colorscheme=greys7 fillcolor=2];\n'
-    '  pipe_mod2[label="mod2 (engine)"];\n'
-    '  pipe_mod1 -> pipe_mod2;\n'
-    '}')
+dotfile_iter_hierarchical = [
+    'digraph pipe{\n',
+    '  label="pipe";\n',
+    '  pipe_mod1[label="mod1 (engine)", shape=box3d,style=filled, color=black, colorscheme=greys7 fillcolor=2];\n',
+    '  pipe_mod2[label="mod2 (engine)"];\n',
+    '  pipe_mod1 -> pipe_mod2;\n',
+    '}']
 
-dotfile_iter_colored = (
-    'digraph pipe{\n'
-    '  label="pipe";\n'
-    '  pipe_mod1[label="mod1 (engine)", shape=box3d,style=filled, color=black, colorscheme=greys7 fillcolor=2];\n'
-    '  pipe_mod2[label="mod2 (engine)", style=filled, fillcolor="#FFFFC8"];\n'
-    '  pipe_mod1 -> pipe_mod2;\n'
-    '}')
+dotfile_iter_colored = [
+    'digraph pipe{\n',
+    '  label="pipe";\n',
+    '  pipe_mod1[label="mod1 (engine)", shape=box3d,style=filled, color=black, colorscheme=greys7 fillcolor=2];\n',
+    '  pipe_mod2[label="mod2 (engine)", style=filled, fillcolor="#FFFFC8"];\n',
+    '  pipe_mod1 -> pipe_mod2;\n',
+    '}']
 
 @pytest.mark.parametrize("simple", [True, False])
 @pytest.mark.parametrize("graph_type", ['orig', 'flat', 'exec', 'hierarchical', 'colored'])
@@ -606,24 +609,28 @@ def test_write_graph_dotfile_iterables(tmpdir, graph_type, simple):
 
     with open("graph.dot") as f:
         graph_str = f.read()
+
     if simple:
-        assert graph_str == eval("dotfile_iter_{}".format(graph_type))
+        for str in eval("dotfile_iter_{}".format(graph_type)):
+            assert str in graph_str
     else:
         # if simple=False graph.dot uses longer names
-        if graph_type in ["hierarchical", "colored"]:
-            assert graph_str == eval("dotfile_iter_{}".format(graph_type)).replace(
-                "mod1 (engine)", "mod1.EngineTestInterface.engine").replace(
-                "mod2 (engine)", "mod2.EngineTestInterface.engine")
-        else:
-            assert graph_str == eval("dotfile_iter_{}".format(graph_type)).replace(
-                "mod1 (engine)", "pipe.mod1.EngineTestInterface.engine").replace(
-                "mod2 (engine)", "pipe.mod2.EngineTestInterface.engine")
+        for str in eval("dotfile_iter_{}".format(graph_type)):
+            if graph_type in ["hierarchical", "colored"]:
+                assert str.replace("mod1 (engine)", "mod1.EngineTestInterface.engine").replace(
+                    "mod2 (engine)", "mod2.EngineTestInterface.engine") in graph_str
+            else:
+                assert str.replace(
+                    "mod1 (engine)", "pipe.mod1.EngineTestInterface.engine").replace(
+                    "mod2 (engine)", "pipe.mod2.EngineTestInterface.engine") in graph_str
 
     # graph_detailed is not created for hierachical or colored
     if graph_type not in ["hierarchical", "colored"]:
         with open("graph_detailed.dot") as f:
-            graph_str =f.read()
-        assert graph_str == eval("dotfile_detailed_iter_{}".format(graph_type))
+            graph_str = f.read()
+        for str in eval("dotfile_detailed_iter_{}".format(graph_type)):
+            assert str in graph_str
+
 
 
 def test_io_subclass():
