@@ -234,6 +234,18 @@ def write_report(node, report_type=None, is_mapnode=False):
 
 
 def _identify_collapses(hastraits):
+    """ Identify traits that will collapse when being set to themselves.
+
+    ``OutputMultiObject``s automatically unwrap a list of length 1 to directly
+    reference the element of that list.
+    If that element is itself a list of length 1, then the following will
+    result in modified values.
+
+        hastraits.trait_set(**hastraits.trait_get())
+
+    Cloning performs this operation on a copy of the original traited object,
+    allowing us to identify traits that will be affected.
+    """
     raw = hastraits.trait_get()
     cloned = hastraits.clone_traits().trait_get()
 
@@ -241,6 +253,8 @@ def _identify_collapses(hastraits):
     for key in cloned:
         orig = raw[key]
         new = cloned[key]
+        # Allow numpy to handle the equality checks, as mixed lists and arrays
+        # can be problematic.
         if isinstance(orig, list) and len(orig) == 1 and (
                 not np.array_equal(orig, new) and np.array_equal(orig[0], new)):
             collapsed.add(key)
@@ -249,6 +263,17 @@ def _identify_collapses(hastraits):
 
 
 def _uncollapse(indexable, collapsed):
+    """ Wrap collapsible values in a list to prevent double-collapsing.
+
+    Should be used with _identify_collapses to provide the following
+    idempotent operation:
+
+        collapsed = _identify_collapses(hastraits)
+        hastraits.trait_set(**_uncollapse(hastraits.trait_get(), collapsed))
+
+    NOTE: Modifies object in-place, in addition to returning it.
+    """
+
     for key in indexable:
         if key in collapsed:
             indexable[key] = [indexable[key]]
@@ -256,6 +281,12 @@ def _uncollapse(indexable, collapsed):
 
 
 def _protect_collapses(hastraits):
+    """ A collapse-protected replacement for hastraits.trait_get()
+
+    May be used as follows to provide an idempotent trait_set:
+
+        hastraits.trait_set(**_protect_collapses(hastraits))
+    """
     collapsed = _identify_collapses(hastraits)
     return _uncollapse(hastraits.trait_get(), collapsed)
 
@@ -264,14 +295,16 @@ def save_resultfile(result, cwd, name):
     """Save a result pklz file to ``cwd``"""
     resultsfile = os.path.join(cwd, 'result_%s.pklz' % name)
     if result.outputs:
-        collapsed = set()
         try:
             collapsed = _identify_collapses(result.outputs)
             outputs = _uncollapse(result.outputs.trait_get(), collapsed)
+            # Double-protect tosave so that the original, uncollapsed trait
+            # is saved in the pickle file. Thus, when the loading process
+            # collapses, the original correct value is loaded.
+            tosave = _uncollapse(outputs.copy(), collapsed)
         except AttributeError:
-            outputs = result.outputs.dictcopy()  # outputs was a bunch
-        outputs = modify_paths(outputs, relative=True, basedir=cwd)
-        result.outputs.set(**_uncollapse(outputs, collapsed))
+            tosave = outputs = result.outputs.dictcopy()  # outputs was a bunch
+        result.outputs.set(**modify_paths(tosave, relative=True, basedir=cwd))
 
     savepkl(resultsfile, result)
     logger.debug('saved results in %s', resultsfile)
