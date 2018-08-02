@@ -233,28 +233,45 @@ def write_report(node, report_type=None, is_mapnode=False):
     return
 
 
-def _protect_collapses(hastraits):
+def _identify_collapses(hastraits):
     raw = hastraits.trait_get()
     cloned = hastraits.clone_traits().trait_get()
 
+    collapsed = set()
     for key in cloned:
-        val = raw[key]
-        c = cloned[key]
-        if c != val and hasattr(val, '__getitem__') and c == val[0]:
-            raw[key] = [val]
+        orig = raw[key]
+        new = cloned[key]
+        if isinstance(orig, list) and len(orig) == 1 and (
+                not np.array_equal(orig, new) and np.array_equal(orig[0], new)):
+            collapsed.add(key)
 
-    return raw
+    return collapsed
+
+
+def _uncollapse(indexable, collapsed):
+    for key in indexable:
+        if key in collapsed:
+            indexable[key] = [indexable[key]]
+    return indexable
+
+
+def _protect_collapses(hastraits):
+    collapsed = _identify_collapses(hastraits)
+    return _uncollapse(hastraits.trait_get(), collapsed)
 
 
 def save_resultfile(result, cwd, name):
     """Save a result pklz file to ``cwd``"""
     resultsfile = os.path.join(cwd, 'result_%s.pklz' % name)
     if result.outputs:
+        collapsed = set()
         try:
-            outputs = _protect_collapses(result.outputs)
+            collapsed = _identify_collapses(result.outputs)
+            outputs = _uncollapse(result.outputs.trait_get(), collapsed)
         except AttributeError:
             outputs = result.outputs.dictcopy()  # outputs was a bunch
-        result.outputs.set(**modify_paths(outputs, relative=True, basedir=cwd))
+        outputs = modify_paths(outputs, relative=True, basedir=cwd)
+        result.outputs.set(**_uncollapse(outputs, collapsed))
 
     savepkl(resultsfile, result)
     logger.debug('saved results in %s', resultsfile)
@@ -306,7 +323,7 @@ def load_resultfile(path, name):
         else:
             if result.outputs:
                 try:
-                    outputs = result.outputs.trait_get()
+                    outputs = _protect_collapses(result.outputs)
                 except AttributeError:
                     outputs = result.outputs.dictcopy()  # outputs == Bunch
                 try:
