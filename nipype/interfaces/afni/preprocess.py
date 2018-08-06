@@ -3624,12 +3624,6 @@ class Qwarp(AFNICommand):
 
 
 class QwarpPlusMinusInputSpec(QwarpInputSpec):
-    in_file = File(
-        desc='Source image (opposite phase encoding direction than base image)',
-        argstr='-source %s',
-        mandatory=True,
-        exists=True,
-        copyfile=False)
     source_file = File(
         desc='Source image (opposite phase encoding direction than base image)',
         argstr='-source %s',
