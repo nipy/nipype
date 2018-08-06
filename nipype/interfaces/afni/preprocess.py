@@ -3667,11 +3667,12 @@ class QwarpPlusMinus(Qwarp):
 
     >>> from nipype.interfaces import afni
     >>> qwarp = afni.QwarpPlusMinus()
-    >>> qwarp.inputs.source_file = 'sub-01_dir-LR_epi.nii.gz'
+    >>> qwarp.inputs.in_file = 'sub-01_dir-LR_epi.nii.gz'
     >>> qwarp.inputs.nopadWARP = True
     >>> qwarp.inputs.base_file = 'sub-01_dir-RL_epi.nii.gz'
     >>> qwarp.cmdline
-    '3dQwarp -prefix Qwarp.nii.gz -plusminus -base sub-01_dir-RL_epi.nii.gz -nopadWARP -source sub-01_dir-LR_epi.nii.gz'
+    '3dQwarp -prefix Qwarp.nii.gz -plusminus -base sub-01_dir-RL_epi.nii.gz \
+    -source sub-01_dir-LR_epi.nii.gz -nopadWARP'
     >>> res = warp.run()  # doctest: +SKIP
 
     """
