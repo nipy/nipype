@@ -3655,17 +3655,6 @@ class QwarpPlusMinusInputSpec(QwarpInputSpec):
         xor=['duplo', 'allsave', 'iwarp'])
 
 
-class QwarpPlusMinusOutputSpec(QwarpOutputSpec):
-    warped_source = File(desc='Undistorted source file.', exists=True)
-    warped_base = File(desc='Undistorted base file.', exists=True)
-    source_warp = File(
-        desc="Field suceptibility correction warp (in 'mm') for source image.",
-        exists=True)
-    base_warp = File(
-        desc="Field suceptibility correction warp (in 'mm') for base image.",
-        exists=True)
-
-
 class QwarpPlusMinus(Qwarp):
     """A version of 3dQwarp for performing field susceptibility correction
     using two images with opposing phase encoding directions.
@@ -3688,13 +3677,3 @@ class QwarpPlusMinus(Qwarp):
     """
 
     input_spec = QwarpPlusMinusInputSpec
-    output_spec = QwarpPlusMinusOutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['warped_source'] = os.path.abspath("Qwarp_PLUS.nii.gz")
-        outputs['warped_base'] = os.path.abspath("Qwarp_MINUS.nii.gz")
-        outputs['source_warp'] = os.path.abspath("Qwarp_PLUS_WARP.nii.gz")
-        outputs['base_warp'] = os.path.abspath("Qwarp_MINUS_WARP.nii.gz")
-
-        return outputs
