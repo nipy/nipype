@@ -507,7 +507,7 @@ def _write_detailed_dot(graph, dotfilename):
     # write nodes
     edges = []
     for n in nx.topological_sort(graph):
-        nodename = str(n.itername)
+        nodename = n.itername
         inports = []
         for u, v, d in graph.in_edges(nbunch=n, data=True):
             for cd in d['connect']:
