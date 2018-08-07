@@ -570,7 +570,7 @@ def _write_detailed_dot(graph, dotfilename):
     # write nodes
     edges = []
     for n in nx.topological_sort(graph):
-        nodename = str(n)
+        nodename = n.itername
         inports = []
         for u, v, d in graph.in_edges(nbunch=n, data=True):
             for cd in d['connect']:
@@ -582,8 +582,8 @@ def _write_detailed_dot(graph, dotfilename):
                 ipstrip = 'in%s' % _replacefunk(inport)
                 opstrip = 'out%s' % _replacefunk(outport)
                 edges.append(
-                    '%s:%s:e -> %s:%s:w;' % (str(u).replace('.', ''), opstrip,
-                                             str(v).replace('.', ''), ipstrip))
+                    '%s:%s:e -> %s:%s:w;' % (u.itername.replace('.', ''), opstrip,
+                                             v.itername.replace('.', ''), ipstrip))
                 if inport not in inports:
                     inports.append(inport)
         inputstr = ['{IN'] + [

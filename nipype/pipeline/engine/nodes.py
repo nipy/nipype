@@ -159,7 +159,6 @@ class Node(EngineBase):
         self._got_inputs = False
         self._originputs = None
         self._output_dir = None
-        self._id = self.name  # for compatibility with node expansion using iterables
 
         self.iterables = iterables
         self.synchronize = synchronize
@@ -248,14 +247,6 @@ class Node(EngineBase):
         # Overwrite interface's dynamic input of num_threads
         if hasattr(self._interface.inputs, 'num_threads'):
             self._interface.inputs.num_threads = self._n_procs
-
-    @property
-    def itername(self):
-        """Name for expanded iterable"""
-        itername = self._id
-        if self._hierarchy:
-            itername = '%s.%s' % (self._hierarchy, self._id)
-        return itername
 
     def output_dir(self):
         """Return the location of the output directory for the node"""
