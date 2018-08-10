@@ -596,7 +596,7 @@ class RealignUnwarp(SPMCommand):
 
     >>> import nipype.interfaces.spm as spm
     >>> realignUnwarp = spm.RealignUnwarp()
-    >>> realignUnwarp.inputs.in_files = ['functional.nii', 'functional1.nii']
+    >>> realignUnwarp.inputs.in_files = ['functional.nii', 'functional2.nii']
     >>> realignUnwarp.inputs.phase_map = 'voxeldisplacemap.vdm'
     >>> realignUnwarp.inputs.register_to_mean = True
     >>> realignUnwarp.run() # doctest: +SKIP
