@@ -17,7 +17,7 @@ import numpy as np
 from ...utils.filemanip import (fname_presuffix, ensure_list,
                                 simplify_list, split_filename)
 from ..base import (OutputMultiPath, TraitedSpec, isdefined,
-                    traits, InputMultiPath, File, Str)
+                    traits, InputMultiPath, InputMultiObject, File, Str)
 from .base import (SPMCommand, scans_for_fname, func_is_3d,
                    scans_for_fnames, SPMCommandInputSpec, ImageFileSPM)
 
@@ -434,6 +434,252 @@ class Realign(SPMCommand):
                         realigned_run = fname_presuffix(
                             imgf, prefix=self.inputs.out_prefix)
                     outputs['realigned_files'].append(realigned_run)
+        return outputs
+
+
+class RealignUnwarpInputSpec(SPMCommandInputSpec):
+
+    in_files = InputMultiObject(
+        traits.Either(ImageFileSPM(exists=True),
+                      traits.List(ImageFileSPM(exists=True))),
+        field='data.scans',
+        mandatory=True, 
+        copyfile=True,
+        desc='list of filenames to realign and unwarp')
+    phase_map = File(
+        field='data.pmscan',
+        desc='Voxel displacement map to use in unwarping. Unlike SPM standard '
+             'behaviour, the same map will be used for all sessions',
+        copyfile=False)
+    quality = traits.Range(
+        low=0.0, 
+        high=1.0, 
+        field='eoptions.quality',
+        desc='0.1 = fast, 1.0 = precise')
+    fwhm = traits.Range(
+        low=0.0, 
+        field='eoptions.fwhm',
+        desc='gaussian smoothing kernel width')
+    separation = traits.Range(
+        low=0.0, 
+        field='eoptions.sep',
+        desc='sampling separation in mm')
+    register_to_mean = traits.Bool(
+        field='eoptions.rtm',
+        desc='Indicate whether realignment is done to the mean image')
+    weight_img = File(
+        exists=True, 
+        field='eoptions.weight',
+        desc='filename of weighting image')
+    interp = traits.Range(
+        low=0, 
+        high=7, 
+        field='eoptions.einterp',
+        desc='degree of b-spline used for interpolation')
+    wrap = traits.List(
+        traits.Int(), 
+        minlen=3, 
+        maxlen=3,
+        field='eoptions.ewrap',
+        desc='Check if interpolation should wrap in [x,y,z]')
+    est_basis_func = traits.List(
+        traits.Int(), 
+        minlen=2, 
+        maxlen=2,
+        field='uweoptions.basfcn',
+        desc='Number of basis functions to use for each dimension')
+    est_reg_order = traits.Range(
+        low=0, 
+        high=3, 
+        field='uweoptions.regorder',
+        desc=('This parameter determines how to balance the compromise between likelihood '
+              'maximization and smoothness maximization of the estimated field.'))
+    est_reg_factor = traits.ListInt(
+        [100000], 
+        field='uweoptions.lambda',
+        minlen=1, 
+        maxlen=1,
+        usedefault=True,
+        desc='Regularisation factor. Default: 100000 (medium).')
+    est_jacobian_deformations = traits.Bool(
+        field='uweoptions.jm',
+        desc=('Jacobian deformations. In theory a good idea to include them, '
+             ' in practice a bad idea. Default: No.'))
+    est_first_order_effects = traits.List(
+        traits.Int(), 
+        minlen=1, 
+        maxlen=6,
+        field='uweoptions.fot',
+        desc='First order effects should only depend on pitch and roll, i.e. [4 5]')
+    est_second_order_effects = traits.List(
+        traits.Int(), 
+        minlen=1, 
+        maxlen=6,
+        field='uweoptions.sot',
+        desc='List of second order terms to model second derivatives of.')
+    est_unwarp_fwhm = traits.Range(
+        low=0.0, 
+        field='uweoptions.uwfwhm',
+        desc='gaussian smoothing kernel width for unwarp')
+    est_re_est_mov_par = traits.Bool(
+        field='uweoptions.rem',
+        desc='Re-estimate movement parameters at each unwarping iteration.')
+    est_num_of_interations = traits.ListInt(
+        [5], 
+        field='uweoptions.noi',
+        minlen=1, 
+        maxlen=1, 
+        usedfault=True,
+        desc='Number of iterations.')
+    est_taylor_expansion_point = traits.String(
+        'Average', 
+        field='uweoptions.expround',
+        usedefault=True,
+        desc='Point in position space to perform Taylor-expansion around.')
+    reslice_which = traits.ListInt(
+        [2, 1], 
+        field='uwroptions.uwwhich',
+        minlen=2, 
+        maxlen=2, 
+        usedefault=True,
+        desc='determines which images to reslice')
+    reslice_interp = traits.Range(
+        low=0, 
+        high=7, 
+        field='uwroptions.rinterp',
+        desc='degree of b-spline used for interpolation')
+    reslice_wrap = traits.List(
+        traits.Int(), 
+        minlen=3, 
+        maxlen=3,
+        field='uwroptions.wrap',
+        desc='Check if interpolation should wrap in [x,y,z]')
+    reslice_mask = traits.Bool(
+        field='uwroptions.mask',
+        desc='True/False mask output image')
+    out_prefix = traits.String(
+        'u', 
+        field='uwroptions.prefix', 
+        usedefault=True,
+        desc='realigned and unwarped output prefix')
+
+
+class RealignUnwarpOutputSpec(TraitedSpec):
+    mean_image = File(exists=True, desc='Mean image file from the realignment & unwarping')
+    modified_in_files = OutputMultiPath(
+        traits.Either(traits.List(File(exists=True)), File(exists=True)),
+        desc=('Copies of all files passed to '
+              'in_files. Headers will have '
+              'been modified to align all '
+              'images with the first, or '
+              'optionally to first do that, '
+              'extract a mean image, and '
+              're-align to that mean image.'))
+    realigned_unwarped_files = OutputMultiPath(
+        traits.Either(traits.List(File(exists=True)), File(exists=True)),
+        desc='Realigned and unwarped files written to disc.')
+    realignment_parameters = OutputMultiPath(
+        File(exists=True),
+        desc='Estimated translation and rotation parameters')
+
+
+class RealignUnwarp(SPMCommand):
+    """Use spm_uw_estimate for estimating within subject registration and unwarping
+    of time series. Function accepts only one single field map. If in_files is a 
+    list of files they will be treated as separate sessions but associated to the
+    same fieldmap.
+
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=31
+
+    Examples
+    --------
+
+    >>> import nipype.interfaces.spm as spm
+    >>> realignUnwarp = spm.RealignUnwarp()
+    >>> realignUnwarp.inputs.in_files = ['functional.nii', 'functional2.nii']
+    >>> realignUnwarp.inputs.phase_map = 'voxeldisplacemap.vdm'
+    >>> realignUnwarp.inputs.register_to_mean = True
+    >>> realignUnwarp.run() # doctest: +SKIP
+
+    """
+
+    input_spec = RealignUnwarpInputSpec
+    output_spec = RealignUnwarpOutputSpec
+
+    _jobtype = 'spatial'
+    _jobname = 'realignunwarp'
+
+    def _format_arg(self, opt, spec, val):
+        """Convert input to appropriate format for spm
+        """
+        if opt == 'in_files':
+            return scans_for_fnames(ensure_list(val),
+                                    keep4d=False,
+                                    separate_sessions=True)
+        return super(RealignUnwarp, self)._format_arg(opt, spec, val)
+   
+
+    def _parse_inputs(self, skip=()):
+
+        spmdict = super(RealignUnwarp, self)._parse_inputs(skip=())[0]
+
+        if isdefined(self.inputs.phase_map):
+            pmscan = spmdict['data']['pmscan']
+        else:
+            pmscan = ''
+
+        if isdefined(self.inputs.in_files):
+            if isinstance(self.inputs.in_files, list):
+                data = [dict(scans = sess, pmscan = pmscan) 
+                                          for sess in spmdict['data']['scans']]
+            else:
+                data = [dict(scans = spmdict['data']['scans'], pmscan = pmscan)]
+
+        spmdict['data'] = data
+
+        return [spmdict]
+
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        resliced_all = self.inputs.reslice_which[0] > 0
+        resliced_mean = self.inputs.reslice_which[1] > 0
+
+        if isdefined(self.inputs.in_files):
+            outputs['realignment_parameters'] = []
+        for imgf in self.inputs.in_files:
+            if isinstance(imgf, list):
+                tmp_imgf = imgf[0]
+            else:
+                tmp_imgf = imgf
+            outputs['realignment_parameters'].append(fname_presuffix(tmp_imgf,
+                                                                     prefix='rp_',
+                                                                     suffix='.txt',
+                                                                     use_ext=False))
+            if not isinstance(imgf, list) and func_is_3d(imgf):
+                break
+
+        if isinstance(self.inputs.in_files[0], list):
+            first_image = self.inputs.in_files[0][0]
+        else:
+            first_image = self.inputs.in_files[0]
+
+        if resliced_mean:
+            outputs['mean_image'] = fname_presuffix(first_image, prefix='meanu')
+
+        if resliced_all:
+            outputs['realigned_unwarped_files'] = []
+            for idx, imgf in enumerate(ensure_list(self.inputs.in_files)):
+                realigned_run = []
+                if isinstance(imgf, list):
+                    for i, inner_imgf in enumerate(ensure_list(imgf)):
+                        newfile = fname_presuffix(inner_imgf,
+                                                  prefix=self.inputs.out_prefix)
+                        realigned_run.append(newfile)
+                else:
+                    realigned_run = fname_presuffix(imgf,
+                                                    prefix=self.inputs.out_prefix)
+                outputs['realigned_unwarped_files'].append(realigned_run)
         return outputs
 
 
