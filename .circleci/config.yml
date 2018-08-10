@@ -436,7 +436,4 @@ workflows:
               only: /rel\/.*/
             tags:
               only: /.*/
-      - pypi_precheck:
-          filters:
-            branches:
-              only: /rel\/.*/
+      - pypi_precheck
