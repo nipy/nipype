@@ -339,9 +339,25 @@ jobs:
       - run:
           name: Check pypi preconditions
           command: |
-            pip install twine future wheel readme_renderer
+            pip install --upgrade twine future wheel readme_renderer setuptools
             python setup.py check -r -s
             python setup.py sdist bdist_wheel
+      - run:
+          name: Validate Python 2 installation
+          command: |
+            pyenv local 2.7.12
+            pip install dist/nipype-*-py2.py3-none-any.whl
+            # Futures should install in Python 2
+            pip show futures 2>/dev/null | grep "Name: futures"
+      - run:
+          name: Validate Python 3 installation
+          command: |
+            pyenv local 3.5.2
+            pip install dist/nipype-*-py2.py3-none-any.whl
+            # Futures should not install in Python 3
+            test $(pip show futures 2>/dev/null | wc -l) = "0"
+      - store_artifacts:
+          path: /home/circleci/nipype/dist
 
   deploy_pypi:
     machine: *machine_kwds
@@ -352,7 +368,7 @@ jobs:
       - run:
           name: Deploy to PyPI
           command: |
-            pip install twine future wheel readme_renderer
+            pip install --upgrade twine future wheel readme_renderer setuptools
             python setup.py check -r -s
             python setup.py sdist bdist_wheel
             twine upload dist/*
@@ -393,6 +409,7 @@ workflows:
   version: 2
   build_test_deploy:
     jobs:
+      - pypi_precheck
       - compare_base_dockerfiles:
           filters:
             tags:
@@ -428,6 +445,7 @@ workflows:
             tags:
               only: /.*/
           requires:
+            - pypi_precheck
             - test_pytest
       - update_feedstock:
           context: nipybot
@@ -436,7 +454,3 @@ workflows:
               only: /rel\/.*/
             tags:
               only: /.*/
-      - pypi_precheck:
-          filters:
-            branches:
-              only: /rel\/.*/
