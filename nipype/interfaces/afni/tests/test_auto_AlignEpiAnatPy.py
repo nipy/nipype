@@ -22,11 +22,6 @@ def test_AlignEpiAnatPy_inputs():
             mandatory=True,
         ),
         epi_strip=dict(argstr='-epi_strip %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-epi %s',
             copyfile=False,
@@ -38,10 +33,6 @@ def test_AlignEpiAnatPy_inputs():
         suffix=dict(
             argstr='-suffix %s',
             usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         tshift=dict(
             argstr='-tshift %s',

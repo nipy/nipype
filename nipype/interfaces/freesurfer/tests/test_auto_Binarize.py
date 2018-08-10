@@ -23,11 +23,6 @@ def test_Binarize_inputs():
         erode=dict(argstr='--erode  %d', ),
         erode2d=dict(argstr='--erode2d %d', ),
         frame_no=dict(argstr='--frame %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='--i %s',
             copyfile=False,
@@ -50,10 +45,6 @@ def test_Binarize_inputs():
         rmax=dict(argstr='--rmax %f', ),
         rmin=dict(argstr='--rmin %f', ),
         subjects_dir=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         ventricles=dict(argstr='--ventricles', ),
         wm=dict(argstr='--wm', ),
         wm_ven_csf=dict(

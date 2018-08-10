@@ -28,11 +28,6 @@ def test_Label2Vol_inputs():
             argstr='--identity',
             xor=('reg_file', 'reg_header', 'identity'),
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         invert_mtx=dict(argstr='--invertmtx', ),
         label_file=dict(
             argstr='--label %s...',
@@ -68,10 +63,6 @@ def test_Label2Vol_inputs():
         template_file=dict(
             argstr='--temp %s',
             mandatory=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         vol_label_file=dict(
             argstr='--o %s',

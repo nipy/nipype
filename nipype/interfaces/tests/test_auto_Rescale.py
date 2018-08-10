@@ -5,11 +5,6 @@ from ..image import Rescale
 
 def test_Rescale_inputs():
     input_map = dict(
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(mandatory=True, ),
         invert=dict(),
         percentile=dict(usedefault=True, ),

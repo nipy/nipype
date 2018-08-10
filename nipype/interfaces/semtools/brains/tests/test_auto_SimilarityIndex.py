@@ -11,17 +11,8 @@ def test_SimilarityIndex_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputManualVolume=dict(argstr='--inputManualVolume %s', ),
         outputCSVFilename=dict(argstr='--outputCSVFilename %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         thresholdInterval=dict(argstr='--thresholdInterval %f', ),
     )
     inputs = SimilarityIndex.input_spec()

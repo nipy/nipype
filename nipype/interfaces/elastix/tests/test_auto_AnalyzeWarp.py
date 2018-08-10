@@ -10,11 +10,15 @@ def test_AnalyzeWarp_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
+        jac=dict(
+            argstr='-jac %s',
             usedefault=True,
         ),
+        jacmat=dict(
+            argstr='-jacmat %s',
+            usedefault=True,
+        ),
+        moving_image=dict(argstr='-in %s', ),
         num_threads=dict(
             argstr='-threads %01d',
             nohash=True,
@@ -25,9 +29,10 @@ def test_AnalyzeWarp_inputs():
             mandatory=True,
             usedefault=True,
         ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
+        points=dict(
+            argstr='-def %s',
+            position=0,
+            usedefault=True,
         ),
         transform_file=dict(
             argstr='-tp %s',

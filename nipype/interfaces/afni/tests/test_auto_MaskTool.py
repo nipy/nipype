@@ -23,11 +23,6 @@ def test_MaskTool_inputs():
         ),
         fill_holes=dict(argstr='-fill_holes', ),
         frac=dict(argstr='-frac %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-input %s',
             copyfile=False,
@@ -45,10 +40,6 @@ def test_MaskTool_inputs():
             name_template='%s_mask',
         ),
         outputtype=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         union=dict(argstr='-union', ),
         verbose=dict(argstr='-verb %s', ),
     )

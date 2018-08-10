@@ -22,11 +22,6 @@ def test_ConvertXFM_inputs():
             requires=['in_file2'],
             xor=['invert_xfm', 'concat_xfm', 'fix_scale_skew'],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -48,10 +43,6 @@ def test_ConvertXFM_inputs():
             position=1,
         ),
         output_type=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = ConvertXFM.input_spec()
 

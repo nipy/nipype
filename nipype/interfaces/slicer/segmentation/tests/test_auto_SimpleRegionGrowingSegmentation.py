@@ -10,11 +10,6 @@ def test_SimpleRegionGrowingSegmentation_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(
             argstr='%s',
             position=-2,
@@ -30,10 +25,6 @@ def test_SimpleRegionGrowingSegmentation_inputs():
         ),
         seed=dict(argstr='--seed %s...', ),
         smoothingIterations=dict(argstr='--smoothingIterations %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         timestep=dict(argstr='--timestep %f', ),
     )
     inputs = SimpleRegionGrowingSegmentation.input_spec()

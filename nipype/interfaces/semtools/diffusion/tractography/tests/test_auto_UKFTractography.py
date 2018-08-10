@@ -17,11 +17,6 @@ def test_UKFTractography_inputs():
         ),
         freeWater=dict(argstr='--freeWater ', ),
         fullTensorModel=dict(argstr='--fullTensorModel ', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         labels=dict(
             argstr='--labels %s',
             sep=',',
@@ -47,10 +42,6 @@ def test_UKFTractography_inputs():
         seedsPerVoxel=dict(argstr='--seedsPerVoxel %d', ),
         stepLength=dict(argstr='--stepLength %f', ),
         storeGlyphs=dict(argstr='--storeGlyphs ', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         tracts=dict(
             argstr='--tracts %s',
             hash_files=False,

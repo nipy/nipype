@@ -8,11 +8,6 @@ def test_ComputeDVARS_inputs():
         figdpi=dict(usedefault=True, ),
         figformat=dict(usedefault=True, ),
         figsize=dict(usedefault=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(mandatory=True, ),
         in_mask=dict(mandatory=True, ),
         intensity_normalization=dict(usedefault=True, ),

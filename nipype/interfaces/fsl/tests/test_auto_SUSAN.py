@@ -25,11 +25,6 @@ def test_SUSAN_inputs():
             mandatory=True,
             position=3,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -42,10 +37,6 @@ def test_SUSAN_inputs():
             position=-1,
         ),
         output_type=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         usans=dict(
             argstr='',
             position=6,

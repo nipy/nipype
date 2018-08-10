@@ -10,11 +10,6 @@ def test_Image2Voxel_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-4dimage %s',
             mandatory=True,
@@ -29,10 +24,6 @@ def test_Image2Voxel_inputs():
             argstr='-outputdatatype %s',
             position=2,
             usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = Image2Voxel.input_spec()

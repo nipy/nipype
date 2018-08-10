@@ -26,11 +26,6 @@ def test_MRISPreproc_inputs():
             argstr='--hemi %s',
             mandatory=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         num_iters=dict(
             argstr='--niters %d',
             xor=['fwhm'],
@@ -71,10 +66,6 @@ def test_MRISPreproc_inputs():
         target=dict(
             argstr='--target %s',
             mandatory=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         vol_measure_file=dict(argstr='--iv %s %s...', ),
     )

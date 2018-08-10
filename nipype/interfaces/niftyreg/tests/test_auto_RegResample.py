@@ -14,11 +14,6 @@ def test_RegResample_inputs():
             argstr='-flo %s',
             mandatory=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inter_val=dict(argstr='-inter %d', ),
         omp_core_val=dict(
             argstr='-omp %i',
@@ -38,10 +33,6 @@ def test_RegResample_inputs():
             mandatory=True,
         ),
         tensor_flag=dict(argstr='-tensor ', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         trans_file=dict(argstr='-trans %s', ),
         type=dict(
             argstr='-%s',

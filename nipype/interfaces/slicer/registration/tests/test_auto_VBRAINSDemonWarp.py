@@ -24,11 +24,6 @@ def test_VBRAINSDemonWarp_inputs():
         gradient_type=dict(argstr='--gradient_type %s', ),
         gui=dict(argstr='--gui ', ),
         histogramMatch=dict(argstr='--histogramMatch ', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         initializeWithDisplacementField=dict(
             argstr='--initializeWithDisplacementField %s', ),
         initializeWithTransform=dict(argstr='--initializeWithTransform %s', ),
@@ -86,10 +81,6 @@ def test_VBRAINSDemonWarp_inputs():
         ),
         smoothDisplacementFieldSigma=dict(
             argstr='--smoothDisplacementFieldSigma %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         upFieldSmoothing=dict(argstr='--upFieldSmoothing %f', ),
         upperThresholdForBOBF=dict(argstr='--upperThresholdForBOBF %d', ),
         use_vanilla_dem=dict(argstr='--use_vanilla_dem ', ),

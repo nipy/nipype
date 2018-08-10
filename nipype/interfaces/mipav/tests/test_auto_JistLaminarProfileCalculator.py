@@ -10,11 +10,6 @@ def test_JistLaminarProfileCalculator_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inIntensity=dict(argstr='--inIntensity %s', ),
         inMask=dict(argstr='--inMask %s', ),
         incomputed=dict(argstr='--incomputed %s', ),
@@ -22,10 +17,6 @@ def test_JistLaminarProfileCalculator_inputs():
         outResult=dict(
             argstr='--outResult %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         xDefaultMem=dict(argstr='-xDefaultMem %d', ),
         xMaxProcess=dict(

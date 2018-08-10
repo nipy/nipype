@@ -32,11 +32,6 @@ def test_KellyKapowski_inputs():
         gray_matter_label=dict(usedefault=True, ),
         gray_matter_prob_image=dict(
             argstr='--gray-matter-probability-image "%s"', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         max_invert_displacement_field_iters=dict(
             argstr=
             '--maximum-number-of-invert-displacement-field-iterations %d',
@@ -61,10 +56,6 @@ def test_KellyKapowski_inputs():
         smoothing_velocity_field=dict(
             argstr='--smoothing-velocity-field-parameter %f',
             usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         thickness_prior_estimate=dict(
             argstr='--thickness-prior-estimate %f',

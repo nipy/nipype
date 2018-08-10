@@ -27,11 +27,6 @@ def test_JointFusion_inputs():
             usedefault=True,
         ),
         exclusion_region=dict(argstr='-x %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         method=dict(
             argstr='-m %s',
             usedefault=True,
@@ -65,10 +60,6 @@ def test_JointFusion_inputs():
         target_image=dict(
             argstr='-tg %s...',
             mandatory=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         warped_intensity_images=dict(
             argstr='-g %s...',

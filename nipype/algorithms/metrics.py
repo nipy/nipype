@@ -26,7 +26,7 @@ from ..interfaces.base import (
     isdefined)
 from ..interfaces.nipy.base import NipyBaseInterface
 
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 class DistanceInputSpec(BaseInterfaceInputSpec):

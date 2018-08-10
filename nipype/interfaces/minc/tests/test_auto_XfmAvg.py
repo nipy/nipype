@@ -16,11 +16,6 @@ def test_XfmAvg_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         ignore_linear=dict(argstr='-ignore_linear', ),
         ignore_nonlinear=dict(argstr='-ignore_nonline', ),
         input_files=dict(
@@ -34,10 +29,6 @@ def test_XfmAvg_inputs():
             argstr='%s',
             genfile=True,
             position=-1,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         verbose=dict(argstr='-verbose', ),
     )

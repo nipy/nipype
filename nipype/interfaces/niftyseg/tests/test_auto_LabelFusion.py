@@ -18,11 +18,6 @@ def test_LabelFusion_inputs():
             usedefault=True,
         ),
         file_to_seg=dict(mandatory=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-in %s',
             mandatory=True,
@@ -48,10 +43,6 @@ def test_LabelFusion_inputs():
         ),
         template_file=dict(),
         template_num=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         unc=dict(argstr='-unc', ),
         unc_thresh=dict(argstr='-uncthres %f', ),
         verbose=dict(argstr='-v %s', ),

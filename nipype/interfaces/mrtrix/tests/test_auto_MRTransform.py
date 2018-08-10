@@ -18,11 +18,6 @@ def test_MRTransform_inputs():
             argstr='-flipx',
             position=1,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(
             argstr='%s',
             mandatory=True,
@@ -52,10 +47,6 @@ def test_MRTransform_inputs():
         template_image=dict(
             argstr='-template %s',
             position=1,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         transformation_file=dict(
             argstr='-transform %s',

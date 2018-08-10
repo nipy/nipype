@@ -20,11 +20,6 @@ def test_BRAINSMush_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputFirstVolume=dict(argstr='--inputFirstVolume %s', ),
         inputMaskVolume=dict(argstr='--inputMaskVolume %s', ),
         inputSecondVolume=dict(argstr='--inputSecondVolume %s', ),
@@ -46,10 +41,6 @@ def test_BRAINSMush_inputs():
         seed=dict(
             argstr='--seed %s',
             sep=',',
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         upperThresholdFactor=dict(argstr='--upperThresholdFactor %f', ),
         upperThresholdFactorPre=dict(argstr='--upperThresholdFactorPre %f', ),

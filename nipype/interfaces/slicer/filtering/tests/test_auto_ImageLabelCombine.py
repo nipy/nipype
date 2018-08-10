@@ -24,15 +24,6 @@ def test_ImageLabelCombine_inputs():
             usedefault=True,
         ),
         first_overwrites=dict(argstr='--first_overwrites ', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = ImageLabelCombine.input_spec()
 

@@ -10,20 +10,11 @@ def test_TextureFromNoiseImageFilter_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputRadius=dict(argstr='--inputRadius %d', ),
         inputVolume=dict(argstr='--inputVolume %s', ),
         outputVolume=dict(
             argstr='--outputVolume %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = TextureFromNoiseImageFilter.input_spec()

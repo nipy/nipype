@@ -5,11 +5,6 @@ from ..mesh import P2PDistance
 
 def test_P2PDistance_inputs():
     input_map = dict(
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         metric=dict(usedefault=True, ),
         out_file=dict(usedefault=True, ),
         out_warp=dict(usedefault=True, ),

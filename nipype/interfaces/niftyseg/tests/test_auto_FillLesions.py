@@ -13,11 +13,6 @@ def test_FillLesions_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_dilation=dict(argstr='-dil %d', ),
         in_file=dict(
             argstr='-i %s',
@@ -41,10 +36,6 @@ def test_FillLesions_inputs():
         search=dict(argstr='-search %f', ),
         size=dict(argstr='-size %d', ),
         smooth=dict(argstr='-smo %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         use_2d=dict(argstr='-2D', ),
         verbose=dict(argstr='-v', ),
     )

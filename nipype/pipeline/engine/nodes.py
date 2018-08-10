@@ -41,7 +41,7 @@ from .base import EngineBase
 
 standard_library.install_aliases()
 
-logger = logging.getLogger('workflow')
+logger = logging.getLogger('nipype.workflow')
 
 
 class Node(EngineBase):
@@ -159,7 +159,6 @@ class Node(EngineBase):
         self._got_inputs = False
         self._originputs = None
         self._output_dir = None
-        self._id = self.name  # for compatibility with node expansion using iterables
 
         self.iterables = iterables
         self.synchronize = synchronize
@@ -249,14 +248,6 @@ class Node(EngineBase):
         if hasattr(self._interface.inputs, 'num_threads'):
             self._interface.inputs.num_threads = self._n_procs
 
-    @property
-    def itername(self):
-        """Name for expanded iterable"""
-        itername = self._id
-        if self._hierarchy:
-            itername = '%s.%s' % (self._hierarchy, self._id)
-        return itername
-
     def output_dir(self):
         """Return the location of the output directory for the node"""
         # Output dir is cached
@@ -275,7 +266,7 @@ class Node(EngineBase):
                 params_str = [_parameterization_dir(p) for p in params_str]
             outputdir = op.join(outputdir, *params_str)
 
-        self._output_dir = op.abspath(op.join(outputdir, self.name))
+        self._output_dir = op.realpath(op.join(outputdir, self.name))
         return self._output_dir
 
     def set_input(self, parameter, val):

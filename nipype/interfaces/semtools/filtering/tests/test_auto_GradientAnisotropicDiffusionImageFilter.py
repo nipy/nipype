@@ -11,20 +11,11 @@ def test_GradientAnisotropicDiffusionImageFilter_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(argstr='--inputVolume %s', ),
         numberOfIterations=dict(argstr='--numberOfIterations %d', ),
         outputVolume=dict(
             argstr='--outputVolume %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         timeStep=dict(argstr='--timeStep %f', ),
     )

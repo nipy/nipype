@@ -5,11 +5,6 @@ from ..icc import ICC
 
 def test_ICC_inputs():
     input_map = dict(
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         mask=dict(mandatory=True, ),
         subjects_sessions=dict(mandatory=True, ),
     )

@@ -10,11 +10,6 @@ def test_JistLaminarVolumetricLayering_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inInner=dict(argstr='--inInner %s', ),
         inLayering=dict(argstr='--inLayering %s', ),
         inLayering2=dict(argstr='--inLayering2 %s', ),
@@ -38,10 +33,6 @@ def test_JistLaminarVolumetricLayering_inputs():
         outLayer=dict(
             argstr='--outLayer %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         xDefaultMem=dict(argstr='-xDefaultMem %d', ),
         xMaxProcess=dict(

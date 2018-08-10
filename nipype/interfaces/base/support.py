@@ -20,7 +20,7 @@ import locale
 from ... import logging
 from ...utils.misc import is_container
 from ...utils.filemanip import md5, to_str, hash_infile
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 class NipypeInterfaceError(Exception):

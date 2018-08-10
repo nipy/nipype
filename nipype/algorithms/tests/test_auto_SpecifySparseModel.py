@@ -14,11 +14,6 @@ def test_SpecifySparseModel_inputs():
             mandatory=True,
         ),
         high_pass_filter_cutoff=dict(mandatory=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         input_units=dict(mandatory=True, ),
         model_hrf=dict(),
         outlier_files=dict(copyfile=False, ),

@@ -10,11 +10,6 @@ def test_MedicAlgorithmThresholdToBinaryMask_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inLabel=dict(
             argstr='--inLabel %s',
             sep=';',
@@ -26,10 +21,6 @@ def test_MedicAlgorithmThresholdToBinaryMask_inputs():
         outBinary=dict(
             argstr='--outBinary %s',
             sep=';',
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         xDefaultMem=dict(argstr='-xDefaultMem %d', ),
         xMaxProcess=dict(

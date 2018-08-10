@@ -13,11 +13,15 @@ import os.path as op
 from ...utils.filemanip import (load_json, save_json, split_filename,
                                 fname_presuffix)
 from ..base import (CommandLineInputSpec, CommandLine, TraitedSpec, traits,
-                    isdefined, File, InputMultiPath, Undefined, Str)
+                    isdefined, File, InputMultiPath, Undefined, Str,
+                    InputMultiObject)
 
 from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec,
                    AFNICommandOutputSpec, AFNIPythonCommandInputSpec,
                    AFNIPythonCommand, Info, no_afni)
+
+from ...import logging
+iflogger = logging.getLogger('nipype.interface')
 
 
 class CentralityInputSpec(AFNICommandInputSpec):
@@ -1810,12 +1814,6 @@ class ROIStatsInputSpec(CommandLineInputSpec):
         argstr='-mask_f2short',
         position=2)
     quiet = traits.Bool(desc='execute quietly', argstr='-quiet', position=1)
-    terminal_output = traits.Enum(
-        'allatonce',
-        deprecated='1.0.0',
-        desc='Control terminal output:`allatonce` - waits till command is '
-        'finished to display output',
-        nohash=True)
 
 
 class ROIStatsOutputSpec(TraitedSpec):
@@ -2492,6 +2490,15 @@ class TProjectInputSpec(AFNICommandInputSpec):
                    even if -ort contains constant terms, as all means are
                    removed.""",
         argstr="-polort %d")
+    dsort = InputMultiObject(
+        File(
+            exists=True,
+            copyfile=False),
+        argstr="-dsort %s...",
+        desc="""Remove the 3D+time time series in dataset fset.
+                ++ That is, 'fset' contains a different nuisance time
+                   series for each voxel (e.g., from AnatICOR).
+                ++ Multiple -dsort options are allowed.""")
     bandpass = traits.Tuple(
         traits.Float, traits.Float,
         desc="""Remove all frequencies EXCEPT those in the range""",
@@ -2560,9 +2567,11 @@ class TProject(AFNICommand):
     input_spec = TProjectInputSpec
     output_spec = AFNICommandOutputSpec
 
+
+
 class TShiftInputSpec(AFNICommandInputSpec):
     in_file = File(
-        desc='input file to 3dTShift',
+        desc='input file to 3dTshift',
         argstr='%s',
         position=-1,
         mandatory=True,
@@ -2589,12 +2598,26 @@ class TShiftInputSpec(AFNICommandInputSpec):
         desc='ignore the first set of points specified', argstr='-ignore %s')
     interp = traits.Enum(
         ('Fourier', 'linear', 'cubic', 'quintic', 'heptic'),
-        desc='different interpolation methods (see 3dTShift for details) '
+        desc='different interpolation methods (see 3dTshift for details) '
         'default = Fourier',
         argstr='-%s')
-    tpattern = Str(
+    tpattern = traits.Either(
+        traits.Enum('alt+z', 'altplus',    # Synonyms
+                    'alt+z2',
+                    'alt-z', 'altminus',   # Synonyms
+                    'alt-z2',
+                    'seq+z', 'seqplus',    # Synonyms
+                    'seq-z', 'seqminus'),  # Synonyms
+        Str,  # For backwards compatibility
         desc='use specified slice time pattern rather than one in header',
-        argstr='-tpattern %s')
+        argstr='-tpattern %s',
+        xor=['slice_timing'])
+    slice_timing = traits.Either(
+        File(exists=True),
+        traits.List(traits.Float),
+        desc='time offsets from the volume acquisition onset for each slice',
+        argstr='-tpattern @%s',
+        xor=['tpattern'])
     rlt = traits.Bool(
         desc='Before shifting, remove the mean and linear trend',
         argstr='-rlt')
@@ -2602,6 +2625,10 @@ class TShiftInputSpec(AFNICommandInputSpec):
         desc='Before shifting, remove the mean and linear trend and later put '
         'back the mean',
         argstr='-rlt+')
+
+
+class TShiftOutputSpec(AFNICommandOutputSpec):
+    timing_file = File(desc="AFNI formatted timing file, if ``slice_timing`` is a list")
 
 
 class TShift(AFNICommand):
@@ -2614,19 +2641,101 @@ class TShift(AFNICommand):
     Examples
     ========
 
+    Slice timing details may be specified explicitly via the ``slice_timing``
+    input:
+
     >>> from nipype.interfaces import afni
+    >>> TR = 2.5
     >>> tshift = afni.TShift()
     >>> tshift.inputs.in_file = 'functional.nii'
-    >>> tshift.inputs.tpattern = 'alt+z'
     >>> tshift.inputs.tzero = 0.0
+    >>> tshift.inputs.tr = '%.1fs' % TR
+    >>> tshift.inputs.slice_timing = list(np.arange(40) / TR)
     >>> tshift.cmdline
-    '3dTshift -prefix functional_tshift -tpattern alt+z -tzero 0.0 functional.nii'
-    >>> res = tshift.run()  # doctest: +SKIP
+    '3dTshift -prefix functional_tshift -tpattern @slice_timing.1D -TR 2.5s -tzero 0.0 functional.nii'
 
+    When the ``slice_timing`` input is used, the ``timing_file`` output is populated,
+    in this case with the generated file.
+
+    >>> tshift._list_outputs()['timing_file']  # doctest: +ELLIPSIS
+    '.../slice_timing.1D'
+
+    This method creates a ``slice_timing.1D`` file to be passed to ``3dTshift``.
+    A pre-existing slice-timing file may be used in the same way:
+
+    >>> tshift = afni.TShift()
+    >>> tshift.inputs.in_file = 'functional.nii'
+    >>> tshift.inputs.tzero = 0.0
+    >>> tshift.inputs.tr = '%.1fs' % TR
+    >>> tshift.inputs.slice_timing = 'slice_timing.1D'
+    >>> tshift.cmdline
+    '3dTshift -prefix functional_tshift -tpattern @slice_timing.1D -TR 2.5s -tzero 0.0 functional.nii'
+
+    When a pre-existing file is provided, ``timing_file`` is simply passed through.
+
+    >>> tshift._list_outputs()['timing_file']  # doctest: +ELLIPSIS
+    '.../slice_timing.1D'
+
+    Alternatively, pre-specified slice timing patterns may be specified with the
+    ``tpattern`` input.
+    For example, to specify an alternating, ascending slice timing pattern:
+
+    >>> tshift = afni.TShift()
+    >>> tshift.inputs.in_file = 'functional.nii'
+    >>> tshift.inputs.tzero = 0.0
+    >>> tshift.inputs.tr = '%.1fs' % TR
+    >>> tshift.inputs.tpattern = 'alt+z'
+    >>> tshift.cmdline
+    '3dTshift -prefix functional_tshift -tpattern alt+z -TR 2.5s -tzero 0.0 functional.nii'
+
+    For backwards compatibility, ``tpattern`` may also take filenames prefixed
+    with ``@``.
+    However, in this case, filenames are not validated, so this usage will be
+    deprecated in future versions of Nipype.
+
+    >>> tshift = afni.TShift()
+    >>> tshift.inputs.in_file = 'functional.nii'
+    >>> tshift.inputs.tzero = 0.0
+    >>> tshift.inputs.tr = '%.1fs' % TR
+    >>> tshift.inputs.tpattern = '@slice_timing.1D'
+    >>> tshift.cmdline
+    '3dTshift -prefix functional_tshift -tpattern @slice_timing.1D -TR 2.5s -tzero 0.0 functional.nii'
+
+    In these cases, ``timing_file`` is undefined.
+
+    >>> tshift._list_outputs()['timing_file']  # doctest: +ELLIPSIS
+    <undefined>
+
+    In any configuration, the interface may be run as usual:
+
+    >>> res = tshift.run()  # doctest: +SKIP
     """
     _cmd = '3dTshift'
     input_spec = TShiftInputSpec
-    output_spec = AFNICommandOutputSpec
+    output_spec = TShiftOutputSpec
+
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'tpattern' and value.startswith('@'):
+            iflogger.warning('Passing a file prefixed by "@" will be deprecated'
+                             '; please use the `slice_timing` input')
+        elif name == 'slice_timing' and isinstance(value, list):
+            value = self._write_slice_timing()
+        return super(TShift, self)._format_arg(name, trait_spec, value)
+
+    def _write_slice_timing(self):
+        fname = 'slice_timing.1D'
+        with open(fname, 'w') as fobj:
+            fobj.write('\t'.join(map(str, self.inputs.slice_timing)))
+        return fname
+
+    def _list_outputs(self):
+        outputs = super(TShift, self)._list_outputs()
+        if isdefined(self.inputs.slice_timing):
+            if isinstance(self.inputs.slice_timing, list):
+                outputs['timing_file'] = os.path.abspath('slice_timing.1D')
+            else:
+                outputs['timing_file'] = os.path.abspath(self.inputs.slice_timing)
+        return outputs
 
 
 class VolregInputSpec(AFNICommandInputSpec):
@@ -2753,7 +2862,8 @@ class WarpInputSpec(AFNICommandInputSpec):
         name_template='%s_warp',
         desc='output image file name',
         argstr='-prefix %s',
-        name_source='in_file')
+        name_source='in_file',
+        keep_extension=True)
     tta2mni = traits.Bool(
         desc='transform dataset from Talairach to MNI152', argstr='-tta2mni')
     mni2tta = traits.Bool(
@@ -2784,6 +2894,13 @@ class WarpInputSpec(AFNICommandInputSpec):
         argstr='-zpad %d')
     verbose = traits.Bool(
         desc='Print out some information along the way.', argstr='-verb')
+    save_warp = traits.Bool(
+        desc='save warp as .mat file', requires=['verbose'])
+
+
+class WarpOutputSpec(TraitedSpec):
+    out_file = File(desc='Warped file.', exists=True)
+    warp_file = File(desc='warp transform .mat file')
 
 
 class Warp(AFNICommand):
@@ -2815,106 +2932,23 @@ class Warp(AFNICommand):
     """
     _cmd = '3dWarp'
     input_spec = WarpInputSpec
-    output_spec = AFNICommandOutputSpec
+    output_spec = WarpOutputSpec
 
+    def _run_interface(self, runtime):
+        runtime = super(Warp, self)._run_interface(runtime)
 
-class QwarpPlusMinusInputSpec(CommandLineInputSpec):
-    source_file = File(
-        desc=
-        'Source image (opposite phase encoding direction than base image).',
-        argstr='-source %s',
-        mandatory=True,
-        exists=True,
-        copyfile=False)
-    base_file = File(
-        desc=
-        'Base image (opposite phase encoding direction than source image).',
-        argstr='-base %s',
-        mandatory=True,
-        exists=True,
-        copyfile=False)
-    pblur = traits.List(
-        traits.Float(),
-        desc='The fraction of the patch size that'
-        'is used for the progressive blur by providing a '
-        'value between 0 and 0.25.  If you provide TWO '
-        'values, the first fraction is used for '
-        'progressively blurring the base image and the '
-        'second for the source image.',
-        argstr='-pblur %s',
-        minlen=1,
-        maxlen=2)
-    blur = traits.List(
-        traits.Float(),
-        desc="Gaussian blur the input images by (FWHM) voxels "
-        "before doing the alignment (the output dataset "
-        "will not be blurred). The default is 2.345 (for "
-        "no good reason). Optionally, you can provide 2 "
-        "values, and then the first one is applied to the "
-        "base volume, the second to the source volume. A "
-        "negative blur radius means to use 3D median "
-        "filtering, rather than Gaussian blurring.  This "
-        "type of filtering will better preserve edges, "
-        "which can be important in alignment.",
-        argstr='-blur %s',
-        minlen=1,
-        maxlen=2)
-    noweight = traits.Bool(
-        desc='If you want a binary weight (the old default), use this option.'
-        'That is, each voxel in the base volume automask will be'
-        'weighted the same in the computation of the cost functional.',
-        argstr='-noweight')
-    minpatch = traits.Int(
-        desc="Set the minimum patch size for warp searching to 'mm' voxels.",
-        argstr='-minpatch %d')
-    nopadWARP = traits.Bool(
-        desc='If for some reason you require the warp volume to'
-        'match the base volume, then use this option to have the output'
-        'WARP dataset(s) truncated.',
-        argstr='-nopadWARP')
-
-
-class QwarpPlusMinusOutputSpec(TraitedSpec):
-    warped_source = File(desc='Undistorted source file.', exists=True)
-    warped_base = File(desc='Undistorted base file.', exists=True)
-    source_warp = File(
-        desc="Field suceptibility correction warp (in 'mm') for source image.",
-        exists=True)
-    base_warp = File(
-        desc="Field suceptibility correction warp (in 'mm') for base image.",
-        exists=True)
-
-
-class QwarpPlusMinus(CommandLine):
-    """A version of 3dQwarp for performing field susceptibility correction
-    using two images with opposing phase encoding directions.
-
-    For complete details, see the `3dQwarp Documentation.
-    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dQwarp.html>`_
-
-    Examples
-    ========
-
-    >>> from nipype.interfaces import afni
-    >>> qwarp = afni.QwarpPlusMinus()
-    >>> qwarp.inputs.source_file = 'sub-01_dir-LR_epi.nii.gz'
-    >>> qwarp.inputs.nopadWARP = True
-    >>> qwarp.inputs.base_file = 'sub-01_dir-RL_epi.nii.gz'
-    >>> qwarp.cmdline
-    '3dQwarp -prefix Qwarp.nii.gz -plusminus -base sub-01_dir-RL_epi.nii.gz -nopadWARP -source sub-01_dir-LR_epi.nii.gz'
-    >>> res = warp.run()  # doctest: +SKIP
-
-    """
-    _cmd = '3dQwarp -prefix Qwarp.nii.gz -plusminus'
-    input_spec = QwarpPlusMinusInputSpec
-    output_spec = QwarpPlusMinusOutputSpec
+        if self.inputs.save_warp:
+            import numpy as np
+            warp_file = self._list_outputs()['warp_file']
+            np.savetxt(warp_file, [runtime.stdout], fmt=str('%s'))
+        return runtime
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['warped_source'] = os.path.abspath("Qwarp_PLUS.nii.gz")
-        outputs['warped_base'] = os.path.abspath("Qwarp_MINUS.nii.gz")
-        outputs['source_warp'] = os.path.abspath("Qwarp_PLUS_WARP.nii.gz")
-        outputs['base_warp'] = os.path.abspath("Qwarp_MINUS_WARP.nii.gz")
+        outputs = super(Warp, self)._list_outputs()
+        if self.inputs.save_warp:
+            outputs['warp_file'] = fname_presuffix(outputs['out_file'],
+                                                   suffix='_transform.mat',
+                                                   use_ext=False)
 
         return outputs
 
@@ -3587,3 +3621,54 @@ class Qwarp(AFNICommand):
     def _gen_filename(self, name):
         if name == 'out_file':
             return self._gen_fname(self.inputs.source_file, suffix='_QW')
+
+
+class QwarpPlusMinusInputSpec(QwarpInputSpec):
+    source_file = File(
+        desc='Source image (opposite phase encoding direction than base image)',
+        argstr='-source %s',
+        exists=True,
+        deprecated='1.1.2',
+        new_name='in_file',
+        copyfile=False)
+    out_file = File(
+        argstr='-prefix %s',
+        value='Qwarp.nii.gz',
+        position=0,
+        usedefault=True,
+        desc="Output file")
+    plusminus = traits.Bool(
+        True,
+        usedefault=True,
+        position=1,
+        desc='Normally, the warp displacements dis(x) are defined to match'
+        'base(x) to source(x+dis(x)).  With this option, the match'
+        'is between base(x-dis(x)) and source(x+dis(x)) -- the two'
+        'images \'meet in the middle\'. For more info, view Qwarp` interface',
+        argstr='-plusminus',
+        xor=['duplo', 'allsave', 'iwarp'])
+
+
+class QwarpPlusMinus(Qwarp):
+    """A version of 3dQwarp for performing field susceptibility correction
+    using two images with opposing phase encoding directions.
+
+    For complete details, see the `3dQwarp Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dQwarp.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> qwarp = afni.QwarpPlusMinus()
+    >>> qwarp.inputs.in_file = 'sub-01_dir-LR_epi.nii.gz'
+    >>> qwarp.inputs.nopadWARP = True
+    >>> qwarp.inputs.base_file = 'sub-01_dir-RL_epi.nii.gz'
+    >>> qwarp.cmdline
+    '3dQwarp -prefix Qwarp.nii.gz -plusminus -base sub-01_dir-RL_epi.nii.gz \
+    -source sub-01_dir-LR_epi.nii.gz -nopadWARP'
+    >>> res = warp.run()  # doctest: +SKIP
+
+    """
+
+    input_spec = QwarpPlusMinusInputSpec

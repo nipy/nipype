@@ -5,11 +5,6 @@ from ..utils import Reslice
 
 def test_Reslice_inputs():
     input_map = dict(
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(mandatory=True, ),
         interp=dict(usedefault=True, ),
         matlab_cmd=dict(),

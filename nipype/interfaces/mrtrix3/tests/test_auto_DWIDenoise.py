@@ -14,11 +14,6 @@ def test_DWIDenoise_inputs():
         extent=dict(argstr='-extent %d,%d,%d', ),
         grad_file=dict(argstr='-grad %s', ),
         grad_fsl=dict(argstr='-fslgrad %s %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_bval=dict(),
         in_bvec=dict(argstr='-fslgrad %s %s', ),
         in_file=dict(
@@ -41,10 +36,6 @@ def test_DWIDenoise_inputs():
             name_source='in_file',
             name_template='%s_denoised',
             position=-1,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = DWIDenoise.input_spec()

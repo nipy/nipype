@@ -15,11 +15,6 @@ def test_AverageImages_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         images=dict(
             argstr='%s',
             mandatory=True,
@@ -39,10 +34,6 @@ def test_AverageImages_inputs():
             hash_files=False,
             position=1,
             usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = AverageImages.input_spec()

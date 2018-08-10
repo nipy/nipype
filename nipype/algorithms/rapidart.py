@@ -31,7 +31,7 @@ from ..interfaces.base import (BaseInterface, traits, InputMultiPath,
 from ..utils.filemanip import ensure_list, save_json, split_filename
 from ..utils.misc import find_indices, normalize_mc_params
 from .. import logging, config
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 def _get_affine_matrix(params, source):

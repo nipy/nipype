@@ -23,11 +23,6 @@ def test_IntensityDifferenceMetric_inputs():
             argstr='%s',
             position=-2,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         outputVolume=dict(
             argstr='%s',
             hash_files=False,
@@ -38,10 +33,6 @@ def test_IntensityDifferenceMetric_inputs():
             hash_files=False,
         ),
         sensitivityThreshold=dict(argstr='--sensitivityThreshold %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = IntensityDifferenceMetric.input_spec()
 

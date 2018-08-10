@@ -56,7 +56,6 @@
 .. _doctest-mode: http://www.cis.upenn.edu/~edloper/projects/doctestmode/
 .. _bazaar: http://bazaar-vcs.org/
 .. _subversion: http://subversion.tigris.org/
-.. _nose: http://nose.readthedocs.io/en/latest/
 .. _`python coverage tester`: http://nedbatchelder.com/code/modules/coverage.html
 
 .. Other python projects
@@ -105,8 +104,8 @@
 .. _mingw: http://www.mingw.org
 .. _macports: http://www.macports.org/
 .. _Vagrant: http://www.vagrantup.com/
-.. _Docker: http://www.docker.io/
-.. _Singularity: http://singularity.lbl.gov/
+.. _Docker: http://www.docker.com/
+.. _Singularity: https://www.sylabs.io/singularity/
 .. _Virtualbox: https://www.virtualbox.org/
 
 .. Functional imaging labs

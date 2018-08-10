@@ -5,11 +5,6 @@ from ..image import Reorient
 
 def test_Reorient_inputs():
     input_map = dict(
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(mandatory=True, ),
         orientation=dict(usedefault=True, ),
     )

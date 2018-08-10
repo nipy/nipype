@@ -15,7 +15,7 @@ def test_BEDPOSTX5_inputs():
             usedefault=True,
         ),
         burn_in_no_ard=dict(
-            argstr='--burninnoard=%d',
+            argstr='--burnin_noard=%d',
             usedefault=True,
         ),
         bvals=dict(mandatory=True, ),
@@ -44,11 +44,6 @@ def test_BEDPOSTX5_inputs():
         fudge=dict(argstr='-w %d', ),
         grad_dev=dict(),
         gradnonlin=dict(argstr='-g', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         logdir=dict(argstr='--logdir=%s', ),
         mask=dict(mandatory=True, ),
         model=dict(argstr='-model %d', ),
@@ -86,10 +81,6 @@ def test_BEDPOSTX5_inputs():
             usedefault=True,
         ),
         seed=dict(argstr='--seed=%d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         update_proposal_every=dict(
             argstr='--updateproposalevery=%d',
             usedefault=True,

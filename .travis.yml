@@ -10,10 +10,24 @@ python:
 - 3.6
 
 env:
-- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler" CI_SKIP_TEST=1
-- INSTALL_DEB_DEPENDECIES=false NIPYPE_EXTRAS="doc,tests,fmri,profiler" CI_SKIP_TEST=1
-- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit,ssh" CI_SKIP_TEST=1
-- INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,fmri,profiler" PIP_FLAGS="--pre" CI_SKIP_TEST=1
+  global:
+    - EXTRA_WHEELS="https://5cf40426d9f06eb7461d-6fe47d9331aba7cd62fc36c7196769e4.ssl.cf2.rackcdn.com"
+    - PRE_WHEELS="https://7933911d6844c6c53a7d-47bd50c35cd79bd838daf386af554a83.ssl.cf2.rackcdn.com"
+    - EXTRA_PIP_FLAGS="--find-links=$EXTRA_WHEELS"
+  matrix:
+    - INSTALL_DEB_DEPENDECIES=true
+      NIPYPE_EXTRAS="doc,tests,fmri,profiler"
+      CI_SKIP_TEST=1
+    - INSTALL_DEB_DEPENDECIES=false
+      NIPYPE_EXTRAS="doc,tests,fmri,profiler"
+      CI_SKIP_TEST=1
+    - INSTALL_DEB_DEPENDECIES=true
+      NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit,ssh"
+      CI_SKIP_TEST=1
+    - INSTALL_DEB_DEPENDECIES=true
+      NIPYPE_EXTRAS="doc,tests,fmri,profiler"
+      EXTRA_PIP_FLAGS="--pre $EXTRA_PIP_FLAGS --find-links $PRE_WHEELS"
+      CI_SKIP_TEST=1
 
 addons:
   apt:
@@ -39,23 +53,13 @@ before_install:
     export FSLOUTPUTTYPE=NIFTI_GZ;
   fi;
 
-# handle python operations separately to reduce timeouts
-- wget https://repo.continuum.io/miniconda/Miniconda${TRAVIS_PYTHON_VERSION:0:1}-latest-Linux-x86_64.sh
-    -O /home/travis/.cache/conda.sh
-- bash ${HOME}/.cache/conda.sh -b -p ${HOME}/conda
-- export PATH=${HOME}/conda/bin:$PATH
-- hash -r
-- conda config --set always_yes yes --set changeps1 no
-- travis_retry conda update -q conda
-- conda config --add channels conda-forge
-- travis_retry conda install -y python=${TRAVIS_PYTHON_VERSION} icu
 - travis_retry pip install -r requirements.txt
+- travis_retry pip install grabbit==0.1.2
 - travis_retry git clone https://github.com/INCF/pybids.git ${HOME}/pybids &&
   pip install -e ${HOME}/pybids
-- travis_retry pip install codecov
 
 install:
-- travis_retry pip install $PIP_FLAGS -e .[$NIPYPE_EXTRAS]
+- travis_retry pip install $EXTRA_PIP_FLAGS -e .[$NIPYPE_EXTRAS]
 
 script:
 - py.test -v --cov nipype --cov-config .coveragerc --cov-report xml:cov.xml -c nipype/pytest.ini --doctest-modules nipype

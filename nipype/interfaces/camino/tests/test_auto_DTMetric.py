@@ -15,11 +15,6 @@ def test_DTMetric_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputdatatype=dict(
             argstr='-inputdatatype %s',
             usedefault=True,
@@ -35,10 +30,6 @@ def test_DTMetric_inputs():
         outputfile=dict(
             argstr='-outputfile %s',
             genfile=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = DTMetric.input_spec()

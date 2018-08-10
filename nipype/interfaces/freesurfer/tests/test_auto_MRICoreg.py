@@ -21,11 +21,6 @@ def test_MRICoreg_inputs():
             usedefault=True,
         ),
         ftol=dict(argstr='--ftol %e', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         initial_rotation=dict(argstr='--rot %g %g %g', ),
         initial_scale=dict(argstr='--scale %g %g %g', ),
         initial_shear=dict(argstr='--shear %g %g %g', ),
@@ -72,10 +67,6 @@ def test_MRICoreg_inputs():
             xor=['reference_file'],
         ),
         subjects_dir=dict(argstr='--sd %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = MRICoreg.input_spec()
 

@@ -37,11 +37,6 @@ def test_Registration_inputs():
             xor=['fixed_image_mask'],
         ),
         float=dict(argstr='--float %d', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         initial_moving_transform=dict(
             argstr='%s',
             xor=['initial_moving_transform_com'],
@@ -115,10 +110,6 @@ def test_Registration_inputs():
         shrink_factors=dict(mandatory=True, ),
         sigma_units=dict(requires=['smoothing_sigmas'], ),
         smoothing_sigmas=dict(mandatory=True, ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         transform_parameters=dict(),
         transforms=dict(
             argstr='%s',

@@ -10,11 +10,6 @@ def test_MRIPretess_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_filled=dict(
             argstr='%s',
             mandatory=True,
@@ -41,10 +36,6 @@ def test_MRIPretess_inputs():
             position=-1,
         ),
         subjects_dir=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         test=dict(argstr='-test', ),
     )
     inputs = MRIPretess.input_spec()

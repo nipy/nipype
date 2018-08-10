@@ -20,11 +20,6 @@ def test_BET_inputs():
             xor=('functional', 'reduce_bias', 'robust', 'padding',
                  'remove_eyes', 'surfaces', 't2_guided'),
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -75,10 +70,6 @@ def test_BET_inputs():
             argstr='-A2 %s',
             xor=('functional', 'reduce_bias', 'robust', 'padding',
                  'remove_eyes', 'surfaces', 't2_guided'),
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         threshold=dict(argstr='-t', ),
         vertical_gradient=dict(argstr='-g %.2f', ),

@@ -7,11 +7,6 @@ def test_SelectFiles_inputs():
     input_map = dict(
         base_directory=dict(),
         force_lists=dict(usedefault=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         raise_on_empty=dict(usedefault=True, ),
         sort_filelist=dict(usedefault=True, ),
     )

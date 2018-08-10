@@ -16,11 +16,6 @@ def test_N4ITKBiasFieldCorrection_inputs():
             argstr='--histogramsharpening %s',
             sep=',',
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputimage=dict(argstr='--inputimage %s', ),
         iterations=dict(
             argstr='--iterations %s',
@@ -41,10 +36,6 @@ def test_N4ITKBiasFieldCorrection_inputs():
         ),
         shrinkfactor=dict(argstr='--shrinkfactor %d', ),
         splinedistance=dict(argstr='--splinedistance %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         weightimage=dict(argstr='--weightimage %s', ),
     )
     inputs = N4ITKBiasFieldCorrection.input_spec()

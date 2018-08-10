@@ -20,18 +20,9 @@ def test_ModelToLabelMap_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         surface=dict(
             argstr='%s',
             position=-2,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = ModelToLabelMap.input_spec()

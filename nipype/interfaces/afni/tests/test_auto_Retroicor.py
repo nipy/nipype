@@ -19,11 +19,6 @@ def test_Retroicor_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             copyfile=False,
@@ -53,10 +48,6 @@ def test_Retroicor_inputs():
             argstr='-respphase %s',
             hash_files=False,
             position=-7,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         threshold=dict(
             argstr='-threshold %d',

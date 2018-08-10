@@ -11,11 +11,6 @@ def test_DWIToDTIEstimation_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(
             argstr='%s',
             position=-3,
@@ -32,10 +27,6 @@ def test_DWIToDTIEstimation_inputs():
             position=-2,
         ),
         shiftNeg=dict(argstr='--shiftNeg ', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = DWIToDTIEstimation.input_spec()
 

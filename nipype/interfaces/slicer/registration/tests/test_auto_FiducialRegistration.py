@@ -11,21 +11,12 @@ def test_FiducialRegistration_inputs():
             usedefault=True,
         ),
         fixedLandmarks=dict(argstr='--fixedLandmarks %s...', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         movingLandmarks=dict(argstr='--movingLandmarks %s...', ),
         outputMessage=dict(argstr='--outputMessage %s', ),
         rms=dict(argstr='--rms %f', ),
         saveTransform=dict(
             argstr='--saveTransform %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         transformType=dict(argstr='--transformType %s', ),
     )

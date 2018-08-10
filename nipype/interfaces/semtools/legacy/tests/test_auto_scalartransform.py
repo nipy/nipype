@@ -12,21 +12,12 @@ def test_scalartransform_inputs():
             usedefault=True,
         ),
         h_field=dict(argstr='--h_field ', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         input_image=dict(argstr='--input_image %s', ),
         interpolation=dict(argstr='--interpolation %s', ),
         invert=dict(argstr='--invert ', ),
         output_image=dict(
             argstr='--output_image %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         transformation=dict(
             argstr='--transformation %s',

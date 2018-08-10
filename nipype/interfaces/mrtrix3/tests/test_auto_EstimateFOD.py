@@ -36,11 +36,6 @@ def test_EstimateFOD_inputs():
         ),
         grad_file=dict(argstr='-grad %s', ),
         grad_fsl=dict(argstr='-fslgrad %s %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_bval=dict(),
         in_bvec=dict(argstr='-fslgrad %s %s', ),
         in_dirs=dict(argstr='-directions %s', ),
@@ -61,10 +56,6 @@ def test_EstimateFOD_inputs():
         shell=dict(
             argstr='-shell %s',
             sep=',',
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         wm_odf=dict(
             argstr='%s',

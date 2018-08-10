@@ -10,11 +10,6 @@ def test_ZCutUp_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             copyfile=False,
@@ -32,10 +27,6 @@ def test_ZCutUp_inputs():
             name_template='%s_zcutup',
         ),
         outputtype=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = ZCutUp.input_spec()
 

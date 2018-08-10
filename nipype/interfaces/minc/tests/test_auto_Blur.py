@@ -30,11 +30,6 @@ def test_Blur_inputs():
             xor=('gaussian', 'rect'),
         ),
         gradient=dict(argstr='-gradient', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         input_file=dict(
             argstr='%s',
             mandatory=True,
@@ -54,10 +49,6 @@ def test_Blur_inputs():
             argstr='-standarddev %s',
             mandatory=True,
             xor=('fwhm', 'fwhm3d', 'standard_dev'),
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = Blur.input_spec()

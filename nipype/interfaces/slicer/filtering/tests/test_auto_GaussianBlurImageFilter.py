@@ -10,11 +10,6 @@ def test_GaussianBlurImageFilter_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(
             argstr='%s',
             position=-2,
@@ -25,10 +20,6 @@ def test_GaussianBlurImageFilter_inputs():
             position=-1,
         ),
         sigma=dict(argstr='--sigma %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = GaussianBlurImageFilter.input_spec()
 

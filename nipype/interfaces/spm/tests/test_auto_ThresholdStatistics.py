@@ -8,11 +8,6 @@ def test_ThresholdStatistics_inputs():
         contrast_index=dict(mandatory=True, ),
         extent_threshold=dict(usedefault=True, ),
         height_threshold=dict(mandatory=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         matlab_cmd=dict(),
         mfile=dict(usedefault=True, ),
         paths=dict(),

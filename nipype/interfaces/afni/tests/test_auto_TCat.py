@@ -10,11 +10,6 @@ def test_TCat_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(
             argstr=' %s',
             copyfile=False,
@@ -34,10 +29,6 @@ def test_TCat_inputs():
         rlt=dict(
             argstr='-rlt%s',
             position=1,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         verbose=dict(argstr='-verb', ),
     )

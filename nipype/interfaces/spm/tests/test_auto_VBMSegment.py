@@ -72,11 +72,6 @@ def test_VBMSegment_inputs():
             field='estwrite.output.GM.warped',
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(
             copyfile=False,
             field='estwrite.data',

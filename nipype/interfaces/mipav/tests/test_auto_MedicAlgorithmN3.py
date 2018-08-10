@@ -10,11 +10,6 @@ def test_MedicAlgorithmN3_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inAutomatic=dict(argstr='--inAutomatic %s', ),
         inEnd=dict(argstr='--inEnd %f', ),
         inField=dict(argstr='--inField %f', ),
@@ -32,10 +27,6 @@ def test_MedicAlgorithmN3_inputs():
         outInhomogeneity2=dict(
             argstr='--outInhomogeneity2 %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         xDefaultMem=dict(argstr='-xDefaultMem %d', ),
         xMaxProcess=dict(

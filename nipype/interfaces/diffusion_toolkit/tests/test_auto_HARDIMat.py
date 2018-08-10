@@ -16,11 +16,6 @@ def test_HARDIMat_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         image_info=dict(argstr='-info %s', ),
         image_orientation_vectors=dict(argstr='-iop %f', ),
         oblique_correction=dict(argstr='-oc', ),
@@ -32,10 +27,6 @@ def test_HARDIMat_inputs():
             usedefault=True,
         ),
         reference_file=dict(argstr='-ref %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = HARDIMat.input_spec()
 

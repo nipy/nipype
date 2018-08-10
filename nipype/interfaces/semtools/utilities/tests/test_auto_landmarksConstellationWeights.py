@@ -11,20 +11,11 @@ def test_landmarksConstellationWeights_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputTemplateModel=dict(argstr='--inputTemplateModel %s', ),
         inputTrainingList=dict(argstr='--inputTrainingList %s', ),
         outputWeightsList=dict(
             argstr='--outputWeightsList %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = landmarksConstellationWeights.input_spec()

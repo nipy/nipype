@@ -22,7 +22,7 @@ from ..io import IOBase, add_traits
 from ...utils.filemanip import ensure_list
 from ...utils.functions import getsource, create_function_from_source
 
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 class FunctionInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):

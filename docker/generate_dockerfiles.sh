@@ -106,8 +106,10 @@ function generate_main_dockerfile() {
                              pandas psutil scikit-learn scipy traits=4.6.0' \
               pip_opts="-e" \
               pip_install="/src/nipype[all]" \
+  --miniconda env_name=neuro \
+              pip_install="grabbit==0.1.2" \
   --run-bash "mkdir -p /src/pybids
-         && curl -sSL --retry 5 https://github.com/INCF/pybids/tarball/master
+         && curl -sSL --retry 5 https://github.com/INCF/pybids/tarball/0.5.1
          | tar -xz -C /src/pybids --strip-components 1
          && source activate neuro
          && pip install --no-cache-dir -e /src/pybids" \

@@ -17,11 +17,6 @@ def test_MakeSurfaces_inputs():
             mandatory=True,
             position=-1,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_T1=dict(argstr='-T1 %s', ),
         in_aseg=dict(argstr='-aseg %s', ),
         in_filled=dict(mandatory=True, ),
@@ -52,10 +47,6 @@ def test_MakeSurfaces_inputs():
             usedefault=True,
         ),
         subjects_dir=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         white=dict(argstr='-white %s', ),
         white_only=dict(argstr='-whiteonly', ),
     )

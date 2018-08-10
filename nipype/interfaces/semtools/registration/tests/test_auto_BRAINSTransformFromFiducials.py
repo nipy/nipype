@@ -12,21 +12,12 @@ def test_BRAINSTransformFromFiducials_inputs():
         ),
         fixedLandmarks=dict(argstr='--fixedLandmarks %s...', ),
         fixedLandmarksFile=dict(argstr='--fixedLandmarksFile %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         movingLandmarks=dict(argstr='--movingLandmarks %s...', ),
         movingLandmarksFile=dict(argstr='--movingLandmarksFile %s', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         saveTransform=dict(
             argstr='--saveTransform %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         transformType=dict(argstr='--transformType %s', ),
     )

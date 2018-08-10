@@ -10,11 +10,6 @@ def test_MedicAlgorithmSPECTRE2010_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inApply=dict(argstr='--inApply %s', ),
         inAtlas=dict(argstr='--inAtlas %s', ),
         inBackground=dict(argstr='--inBackground %f', ),
@@ -85,10 +80,6 @@ def test_MedicAlgorithmSPECTRE2010_inputs():
         outd0=dict(
             argstr='--outd0 %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         xDefaultMem=dict(argstr='-xDefaultMem %d', ),
         xMaxProcess=dict(

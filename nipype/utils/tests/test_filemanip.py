@@ -8,13 +8,15 @@ import os
 import time
 import warnings
 
+import mock
 import pytest
 from ...testing import TempFATFS
 from ...utils.filemanip import (
     save_json, load_json, fname_presuffix, fnames_presuffix, hash_rename,
     check_forhash, _parse_mount_table, _cifs_table, on_cifs, copyfile,
     copyfiles, ensure_list, simplify_list, check_depends,
-    split_filename, get_related_files, indirectory)
+    split_filename, get_related_files, indirectory,
+    loadpkl, loadcrash, savepkl)
 
 
 def _ignore_atime(stat):
@@ -521,3 +523,50 @@ def test_indirectory(tmpdir):
     except ValueError:
         pass
     assert os.getcwd() == tmpdir.strpath
+
+
+def test_pklization(tmpdir):
+    tmpdir.chdir()
+
+    exc = Exception("There is something wrong here")
+    savepkl('./except.pkz', exc)
+    newexc = loadpkl('./except.pkz')
+
+    assert exc.args == newexc.args
+    assert os.getcwd() == tmpdir.strpath
+
+
+class Pickled:
+
+    def __getstate__(self):
+        return self.__dict__
+
+
+class PickledBreaker:
+
+    def __setstate__(self, d):
+        raise Exception()
+
+
+def test_versioned_pklization(tmpdir):
+    tmpdir.chdir()
+
+    obj = Pickled()
+    savepkl('./pickled.pkz', obj, versioning=True)
+
+    with pytest.raises(Exception):
+        with mock.patch('nipype.utils.tests.test_filemanip.Pickled', PickledBreaker), \
+             mock.patch('nipype.__version__', '0.0.0'):
+
+            loadpkl('./pickled.pkz', versioning=True)
+
+
+def test_unversioned_pklization(tmpdir):
+    tmpdir.chdir()
+
+    obj = Pickled()
+    savepkl('./pickled.pkz', obj)
+
+    with pytest.raises(Exception):
+        with mock.patch('nipype.utils.tests.test_filemanip.Pickled', PickledBreaker):
+            loadpkl('./pickled.pkz', versioning=True)

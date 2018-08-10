@@ -11,11 +11,6 @@ def test_DataSink_inputs():
         container=dict(),
         creds_path=dict(),
         encrypt_bucket_keys=dict(),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         local_copy=dict(),
         parameterization=dict(usedefault=True, ),
         regexp_substitutions=dict(),

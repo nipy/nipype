@@ -14,11 +14,6 @@ def test_LocalBistat_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file1=dict(
             argstr='%s',
             mandatory=True,
@@ -49,10 +44,6 @@ def test_LocalBistat_inputs():
         stat=dict(
             argstr='-stat %s...',
             mandatory=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         weight_file=dict(
             argstr='-weight %s',

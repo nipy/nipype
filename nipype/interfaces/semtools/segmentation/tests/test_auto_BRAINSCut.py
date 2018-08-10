@@ -17,11 +17,6 @@ def test_BRAINSCut_inputs():
         ),
         generateProbability=dict(argstr='--generateProbability ', ),
         histogramEqualization=dict(argstr='--histogramEqualization ', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         method=dict(argstr='--method %s', ),
         modelConfigurationFilename=dict(
             argstr='--modelConfigurationFilename %s', ),
@@ -30,10 +25,6 @@ def test_BRAINSCut_inputs():
         netConfiguration=dict(argstr='--netConfiguration %s', ),
         numberOfTrees=dict(argstr='--numberOfTrees %d', ),
         randomTreeDepth=dict(argstr='--randomTreeDepth %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         trainModel=dict(argstr='--trainModel ', ),
         trainModelStartIndex=dict(argstr='--trainModelStartIndex %d', ),
         validate=dict(argstr='--validate ', ),

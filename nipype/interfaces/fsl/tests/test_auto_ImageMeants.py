@@ -11,11 +11,6 @@ def test_ImageMeants_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-i %s',
             mandatory=True,
@@ -35,10 +30,6 @@ def test_ImageMeants_inputs():
         output_type=dict(),
         show_all=dict(argstr='--showall', ),
         spatial_coord=dict(argstr='-c %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         transpose=dict(argstr='--transpose', ),
         use_mm=dict(argstr='--usemm', ),
     )

@@ -20,11 +20,6 @@ def test_FactorialDesign_inputs():
             xor=['global_calc_mean', 'global_calc_omit'],
         ),
         global_normalization=dict(field='globalm.glonorm', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         matlab_cmd=dict(),
         mfile=dict(usedefault=True, ),
         no_grand_mean_scaling=dict(field='globalm.gmsca.gmsca_no', ),

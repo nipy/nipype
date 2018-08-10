@@ -10,11 +10,6 @@ def test_AFNIPythonCommand_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         num_threads=dict(
             nohash=True,
             usedefault=True,
@@ -25,10 +20,6 @@ def test_AFNIPythonCommand_inputs():
             name_template='%s_afni',
         ),
         outputtype=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = AFNIPythonCommand.input_spec()
 

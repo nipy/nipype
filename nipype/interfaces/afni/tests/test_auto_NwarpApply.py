@@ -11,11 +11,6 @@ def test_NwarpApply_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-source %s',
             mandatory=True,
@@ -36,10 +31,6 @@ def test_NwarpApply_inputs():
             xor=['verb'],
         ),
         short=dict(argstr='-short', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         verb=dict(
             argstr='-verb',
             xor=['quiet'],

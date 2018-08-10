@@ -22,11 +22,6 @@ def test_Rigid_inputs():
             position=4,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         initialize_xfm=dict(
             argstr='%s',
             copyfile=True,
@@ -49,10 +44,6 @@ def test_Rigid_inputs():
             mandatory=True,
             position=2,
             usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = Rigid.input_spec()

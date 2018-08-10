@@ -6,11 +6,6 @@ from ..io import FreeSurferSource
 def test_FreeSurferSource_inputs():
     input_map = dict(
         hemi=dict(usedefault=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         subject_id=dict(mandatory=True, ),
         subjects_dir=dict(mandatory=True, ),
     )

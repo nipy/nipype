@@ -11,11 +11,6 @@ def test_VecReg_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-i %s',
             mandatory=True,
@@ -35,10 +30,6 @@ def test_VecReg_inputs():
         ),
         rotation_mat=dict(argstr='--rotmat=%s', ),
         rotation_warp=dict(argstr='--rotwarp=%s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         warp_field=dict(argstr='-w %s', ),
     )
     inputs = VecReg.input_spec()

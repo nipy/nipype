@@ -26,24 +26,13 @@ def test_TOPUP_inputs():
             usedefault=True,
         ),
         estmov=dict(argstr='--estmov=%d', ),
-        fwhm=dict(
-            argstr='--fwhm=%f',
-            usedefault=True,
-        ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
+        fwhm=dict(argstr='--fwhm=%f', ),
         in_file=dict(
             argstr='--imain=%s',
             mandatory=True,
         ),
         interp=dict(argstr='--interp=%s', ),
-        max_iter=dict(
-            argstr='--miter=%d',
-            usedefault=True,
-        ),
+        max_iter=dict(argstr='--miter=%d', ),
         minmet=dict(argstr='--minmet=%d', ),
         numprec=dict(argstr='--numprec=%s', ),
         out_base=dict(
@@ -92,30 +81,14 @@ def test_TOPUP_inputs():
             requires=['encoding_direction'],
             xor=['encoding_file'],
         ),
-        reg_lambda=dict(
-            argstr='--miter=%0.f',
-            usedefault=True,
-        ),
+        reg_lambda=dict(argstr='--lambda=%0.f', ),
         regmod=dict(argstr='--regmod=%s', ),
         regrid=dict(argstr='--regrid=%d', ),
         scale=dict(argstr='--scale=%d', ),
-        splineorder=dict(
-            argstr='--splineorder=%d',
-            usedefault=True,
-        ),
+        splineorder=dict(argstr='--splineorder=%d', ),
         ssqlambda=dict(argstr='--ssqlambda=%d', ),
-        subsamp=dict(
-            argstr='--subsamp=%d',
-            usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
-        warp_res=dict(
-            argstr='--warpres=%f',
-            usedefault=True,
-        ),
+        subsamp=dict(argstr='--subsamp=%d', ),
+        warp_res=dict(argstr='--warpres=%f', ),
     )
     inputs = TOPUP.input_spec()
 

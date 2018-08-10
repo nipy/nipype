@@ -62,11 +62,6 @@ def test_DwiTool_inputs():
             name_source=['source_file'],
             name_template='%s_famap.nii.gz',
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         ivim_flag=dict(
             argstr='-ivim',
             position=6,
@@ -133,10 +128,6 @@ def test_DwiTool_inputs():
             name_source=['source_file'],
             name_template='%s_syn.nii.gz',
             requires=['bvec_file', 'b0_file'],
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         v1map_file=dict(
             argstr='-v1map %s',

@@ -10,11 +10,6 @@ def test_PlotTimeSeries_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -42,10 +37,6 @@ def test_PlotTimeSeries_inputs():
             xor=('plot_range', ),
         ),
         sci_notation=dict(argstr='--sci', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         title=dict(argstr='%s', ),
         x_precision=dict(argstr='--precision=%d', ),
         x_units=dict(

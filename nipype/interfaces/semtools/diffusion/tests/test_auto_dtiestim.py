@@ -31,11 +31,6 @@ def test_dtiestim_inputs():
             argstr='--idwi %s',
             hash_files=False,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         method=dict(argstr='--method %s', ),
         shiftNeg=dict(argstr='--shiftNeg ', ),
         shiftNegCoeff=dict(argstr='--shiftNegCoeff %f', ),
@@ -44,10 +39,6 @@ def test_dtiestim_inputs():
         tensor_output=dict(
             argstr='--tensor_output %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         threshold=dict(argstr='--threshold %d', ),
         verbose=dict(argstr='--verbose ', ),

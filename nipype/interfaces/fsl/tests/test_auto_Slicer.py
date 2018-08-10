@@ -24,11 +24,6 @@ def test_Slicer_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         image_edges=dict(
             argstr='%s',
             position=2,
@@ -91,10 +86,6 @@ def test_Slicer_inputs():
         slice_number=dict(
             argstr='-%d',
             position=11,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         threshold_edges=dict(
             argstr='-e %.3f',

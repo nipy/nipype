@@ -10,11 +10,6 @@ def test_MedicAlgorithmMipavReorient_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inInterpolation=dict(argstr='--inInterpolation %s', ),
         inNew=dict(argstr='--inNew %s', ),
         inResolution=dict(argstr='--inResolution %s', ),
@@ -31,10 +26,6 @@ def test_MedicAlgorithmMipavReorient_inputs():
         outReoriented=dict(
             argstr='--outReoriented %s',
             sep=';',
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         xDefaultMem=dict(argstr='-xDefaultMem %d', ),
         xMaxProcess=dict(

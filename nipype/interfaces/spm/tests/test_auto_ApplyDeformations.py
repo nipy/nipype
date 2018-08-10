@@ -9,11 +9,6 @@ def test_ApplyDeformations_inputs():
             field='comp{1}.def',
             mandatory=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(
             field='fnames',
             mandatory=True,

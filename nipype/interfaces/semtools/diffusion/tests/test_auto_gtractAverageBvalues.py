@@ -12,20 +12,11 @@ def test_gtractAverageBvalues_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(argstr='--inputVolume %s', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         outputVolume=dict(
             argstr='--outputVolume %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = gtractAverageBvalues.input_spec()

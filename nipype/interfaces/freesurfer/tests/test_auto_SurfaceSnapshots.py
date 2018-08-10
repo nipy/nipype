@@ -29,11 +29,6 @@ def test_SurfaceSnapshots_inputs():
             argstr='-overlay-reg-identity',
             xor=['overlay_reg', 'identity_reg', 'mni152_reg'],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         invert_overlay=dict(argstr='-invphaseflag 1', ),
         label_file=dict(
             argstr='-label %s',
@@ -90,10 +85,6 @@ def test_SurfaceSnapshots_inputs():
         tcl_script=dict(
             argstr='%s',
             genfile=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         truncate_overlay=dict(argstr='-truncphaseflag 1', ),
     )

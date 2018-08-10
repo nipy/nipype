@@ -18,11 +18,6 @@ def test_Synthesize_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         matrix=dict(
             argstr='-matrix %s',
             copyfile=False,
@@ -40,10 +35,6 @@ def test_Synthesize_inputs():
         select=dict(
             argstr='-select %s',
             mandatory=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = Synthesize.input_spec()

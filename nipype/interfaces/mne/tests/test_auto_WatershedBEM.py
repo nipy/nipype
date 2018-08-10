@@ -11,11 +11,6 @@ def test_WatershedBEM_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         overwrite=dict(
             argstr='--overwrite',
             usedefault=True,
@@ -27,10 +22,6 @@ def test_WatershedBEM_inputs():
         subjects_dir=dict(
             mandatory=True,
             usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         volume=dict(
             argstr='--volume %s',
