@@ -42,9 +42,15 @@ from .base import (
 
 have_pybids = True
 try:
-    from bids import grabbids as gb
+    import bids
 except ImportError:
     have_pybids = False
+
+if have_pybids:
+    try:
+        from bids import layout as bidslayout
+    except ImportError:
+        from bids import grabbids as bidslayout
 
 try:
     import pyxnat
@@ -2810,7 +2816,7 @@ class BIDSDataGrabber(IOBase):
 
         # If infields is empty, use all BIDS entities
         if infields is None and have_pybids:
-            bids_config = join(dirname(gb.__file__), 'config', 'bids.json')
+            bids_config = join(dirname(bidslayout.__file__), 'config', 'bids.json')
             bids_config = json.load(open(bids_config, 'r'))
             infields = [i['name'] for i in bids_config['entities']]
 
@@ -2835,7 +2841,7 @@ class BIDSDataGrabber(IOBase):
         exclude = None
         if self.inputs.strict:
             exclude = ['derivatives/', 'code/', 'sourcedata/']
-        layout = gb.BIDSLayout(self.inputs.base_dir, exclude=exclude)
+        layout = bidslayout.BIDSLayout(self.inputs.base_dir, exclude=exclude)
 
         # If infield is not given nm input value, silently ignore
         filters = {}
