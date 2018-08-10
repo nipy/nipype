@@ -406,8 +406,8 @@ class Realign(SPMCommand):
                 if not isinstance(imgf, list) and func_is_3d(imgf):
                     break
         if self.inputs.jobtype == "estimate":
-            outputs['realigned_files'] = self.inputs.in_file
-s        if (self.inputs.jobtype == "estimate"
+            outputs['realigned_files'] = self.inputs.in_files
+        if (self.inputs.jobtype == "estimate"
                 or self.inputs.jobtype == "estwrite"):
             outputs['modified_in_files'] = self.inputs.in_files
         if self.inputs.jobtype == "write" or self.inputs.jobtype == "estwrite":
@@ -438,9 +438,10 @@ s        if (self.inputs.jobtype == "estimate"
 
 
 class RealignUnwarpInputSpec(SPMCommandInputSpec):
-    in_files = InputMultiPath(
-        traits.Either(traits.List(File(exists=True)),
-                      File(exists=True)), 
+
+    in_files = InputMultiObject(
+        traits.Either(ImageFileSPM(exists=True),
+                      traits.List(ImageFileSPM(exists=True))),
         field='data.scans',
         mandatory=True, 
         copyfile=True,
@@ -595,8 +596,8 @@ class RealignUnwarp(SPMCommand):
 
     >>> import nipype.interfaces.spm as spm
     >>> realignUnwarp = spm.RealignUnwarp()
-    >>> realignUnwarp.inputs.in_files = ['func-run01.nii', func-run02.nii']
-    >>> realignUnwarp.inputs.phase_map = 'phasemap.vdm'
+    >>> realignUnwarp.inputs.in_files = ['functional.nii', 'functional1.nii']
+    >>> realignUnwarp.inputs.phase_map = 'voxeldisplacemap.vdm'
     >>> realignUnwarp.inputs.register_to_mean = True
     >>> realignUnwarp.run() # doctest: +SKIP
 
