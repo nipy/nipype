@@ -339,7 +339,7 @@ jobs:
       - run:
           name: Check pypi preconditions
           command: |
-            pip install twine future wheel readme_renderer
+            pip install --upgrade twine future wheel readme_renderer setuptools
             python setup.py check -r -s
             python setup.py sdist bdist_wheel
       - store_artifacts:
