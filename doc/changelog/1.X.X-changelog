@@ -1,3 +1,20 @@
+1.1.2 (August 11, 2018)
+=======================
+
+Hot-fix release, resolving incorrect dependencies in 1.1.1 wheel.
+
+##### [Full changelog](https://github.com/nipy/nipype/milestone/23?closed=1)
+
+  * FIX: Read BIDS config.json under grabbids or layout (https://github.com/nipy/nipype/pull/2679)
+  * FIX: Node __repr__ and detailed graph expansion (https://github.com/nipy/nipype/pull/2669)
+  * FIX: Prevent double-collapsing of nested lists by OutputMultiObject (https://github.com/nipy/nipype/pull/2673)
+  * ENH: Add interface to SPM realign_unwarp  (https://github.com/nipy/nipype/pull/2635)
+  * MAINT: Fix wheel build to ensure futures is only required in Python 2 (https://github.com/nipy/nipype/pull/2678)
+  * MAINT: ensure interface _cmd only includes executable (https://github.com/nipy/nipype/pull/2674)
+  * MAINT: Issue template: Pretty print platform details (https://github.com/nipy/nipype/pull/2671)
+  * CI: removing travis_retry for pip install pytest xdist 1.22.5 (https://github.com/nipy/nipype/pull/2664)
+
+
 1.1.1 (July 30, 2018)
 =====================
 
