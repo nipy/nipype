@@ -342,8 +342,6 @@ jobs:
             pip install twine future wheel readme_renderer
             python setup.py check -r -s
             python setup.py sdist bdist_wheel
-      - store_artifacts: *store_artifacts_kwds
-          path: /home/circleci/nipype/dist
 
   deploy_pypi:
     machine: *machine_kwds
@@ -438,4 +436,7 @@ workflows:
               only: /rel\/.*/
             tags:
               only: /.*/
-      - pypi_precheck
+      - pypi_precheck:
+          filters:
+            branches:
+              only: /rel\/.*/
