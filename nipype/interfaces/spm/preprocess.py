@@ -17,7 +17,7 @@ import numpy as np
 from ...utils.filemanip import (fname_presuffix, ensure_list,
                                 simplify_list, split_filename)
 from ..base import (OutputMultiPath, TraitedSpec, isdefined,
-                    traits, InputMultiPath, File, Str)
+                    traits, InputMultiPath, InputMultiObject, File, Str)
 from .base import (SPMCommand, scans_for_fname, func_is_3d,
                    scans_for_fnames, SPMCommandInputSpec, ImageFileSPM)
 
