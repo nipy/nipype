@@ -77,7 +77,6 @@ except CalledProcessError:
 have_pybids = True
 try:
     import bids
-    from bids import grabbids as gb
     filepath = os.path.realpath(os.path.dirname(bids.__file__))
     datadir = os.path.realpath(os.path.join(filepath, 'tests/data/'))
 except ImportError:
