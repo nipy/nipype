@@ -8,6 +8,7 @@ python:
 - 3.4
 - 3.5
 - 3.6
+- 3.7-dev
 
 env:
   global:
@@ -16,16 +17,16 @@ env:
     - EXTRA_PIP_FLAGS="--find-links=$EXTRA_WHEELS"
   matrix:
     - INSTALL_DEB_DEPENDECIES=true
-      NIPYPE_EXTRAS="doc,tests,fmri,profiler"
+      NIPYPE_EXTRAS="doc,tests,profiler"
       CI_SKIP_TEST=1
     - INSTALL_DEB_DEPENDECIES=false
-      NIPYPE_EXTRAS="doc,tests,fmri,profiler"
+      NIPYPE_EXTRAS="doc,tests,profiler"
       CI_SKIP_TEST=1
     - INSTALL_DEB_DEPENDECIES=true
-      NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit,ssh"
+      NIPYPE_EXTRAS="doc,tests,profiler,duecredit,ssh"
       CI_SKIP_TEST=1
     - INSTALL_DEB_DEPENDECIES=true
-      NIPYPE_EXTRAS="doc,tests,fmri,profiler"
+      NIPYPE_EXTRAS="doc,tests,profiler"
       EXTRA_PIP_FLAGS="--pre $EXTRA_PIP_FLAGS --find-links $PRE_WHEELS"
       CI_SKIP_TEST=1
 
