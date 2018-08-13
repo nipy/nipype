@@ -67,7 +67,7 @@ class BuildWithCommitInfoCommand(build_py):
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
                                 shell=True)
-        repo_commit, _ = proc.communicate().decode()
+        repo_commit = proc.communicate()[0].decode()
 
         # We write the installation commit even if it's empty
         cfg_parser = configparser.RawConfigParser()
