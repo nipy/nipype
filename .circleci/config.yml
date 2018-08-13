@@ -316,6 +316,7 @@ jobs:
       - run:
           name: Check pypi preconditions
           command: |
+            pyenv local 3.5.2
             pip install --upgrade twine future wheel readme_renderer setuptools
             python setup.py check -r -s
             python setup.py sdist bdist_wheel
@@ -323,7 +324,7 @@ jobs:
           name: Validate Python 3 installation
           command: |
             pyenv local 3.5.2
-            pip install dist/nipype-*-py2.py3-none-any.whl
+            pip install dist/nipype-*-py3-none-any.whl
             # Futures should not install in Python 3
             test $(pip show futures 2>/dev/null | wc -l) = "0"
       - store_artifacts:
@@ -338,6 +339,7 @@ jobs:
       - run:
           name: Deploy to PyPI
           command: |
+            pyenv local 3.5.2
             pip install --upgrade twine future wheel readme_renderer setuptools
             python setup.py check -r -s
             python setup.py sdist bdist_wheel
@@ -382,7 +384,7 @@ workflows:
       - pypi_precheck:
           filters:
             branches:
-              only: /rel\/.*/
+              only: /(rel|dev)\/.*/
             tags:
               only: /.*/
       - compare_base_dockerfiles:
