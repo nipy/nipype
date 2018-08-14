@@ -37,6 +37,10 @@ SE3_GROUP = SpecialEuclideanGroup(n=3)
 DIM_TRANSLATIONS = SE3_GROUP.translations.dimension
 DIM_ROTATIONS = SE3_GROUP.rotations.dimension
 
+SE3_GROUP = SpecialEuclideanGroup(n=3)
+DIM_TRANSLATIONS = SE3_GROUP.translations.dimension
+DIM_ROTATIONS = SE3_GROUP.rotations.dimension
+
 
 class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
     in_file = File(
