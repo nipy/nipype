@@ -247,6 +247,15 @@ class FramewiseDisplacementInputSpec(BaseInterfaceInputSpec):
         "NIPY",
         desc="Source of movement parameters",
         mandatory=True)
+    metric = traits.Enum(
+        'L1',
+        'riemannian',
+        usedefault=True,
+        mandatory=True,
+        desc='Distance metric to apply: '
+        'L1 = Manhattan distance (original definition),'
+        'riemannian = Canonical Riemannian distance on the'
+        'Special Euclidean group in 3D (geodesic)')
     radius = traits.Float(
         50,
         usedefault=True,
@@ -319,12 +328,12 @@ Bradley L. and Petersen, Steven E.},
             arr=mpars,
             source=self.inputs.parameter_source)
 
-        if metric == 'L1':
+        if self.inputs.metric == 'L1':
             diff = mpars[:-1, :6] - mpars[1:, :6]
             diff[:, 3:6] *= self.inputs.radius
             fd_res = np.abs(diff).sum(axis=1)
 
-        elif metric == 'riemannian':
+        elif self.inputs.metric == 'riemannian':
             # TODO(nina): convert to geomstats parameterization:
             se3pars = np.hstack(
                 [mpars[:, DIM_TRANSLATIONS:], mpars[:, :DIM_TRANSLATIONS]])
