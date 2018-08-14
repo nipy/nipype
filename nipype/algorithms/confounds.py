@@ -256,7 +256,6 @@ class FramewiseDisplacementInputSpec(BaseInterfaceInputSpec):
         'L1',
         'riemannian',
         usedefault=True,
-        mandatory=True,
         desc='Distance metric to apply: '
         'L1 = Manhattan distance (original definition),'
         'riemannian = Riemannian distance on the'

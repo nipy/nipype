@@ -12,6 +12,7 @@ def test_FramewiseDisplacement_inputs():
         out_figure=dict(usedefault=True, ),
         out_file=dict(usedefault=True, ),
         parameter_source=dict(mandatory=True, ),
+        metric=dict(usedefault=True, ),
         radius=dict(usedefault=True, ),
         save_plot=dict(usedefault=True, ),
         series_tr=dict(),
@@ -21,6 +22,8 @@ def test_FramewiseDisplacement_inputs():
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
+
+
 def test_FramewiseDisplacement_outputs():
     output_map = dict(
         fd_average=dict(),
