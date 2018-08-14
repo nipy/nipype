@@ -30,6 +30,7 @@ from ..utils.misc import normalize_mc_params
 IFLOGGER = logging.getLogger('nipype.interface')
 
 SE3_GROUP = SpecialEuclideanGroup(n=3)
+SO3_GROUP = SE3_GROUP.rotations
 DIM_TRANSLATIONS = SE3_GROUP.translations.dimension
 DIM_ROTATIONS = SE3_GROUP.rotations.dimension
 
@@ -258,7 +259,7 @@ class FramewiseDisplacementInputSpec(BaseInterfaceInputSpec):
         mandatory=True,
         desc='Distance metric to apply: '
         'L1 = Manhattan distance (original definition),'
-        'riemannian = Canonical Riemannian distance on the'
+        'riemannian = Riemannian distance on the'
         'Special Euclidean group in 3D (geodesic)')
     radius = traits.Float(
         50,
@@ -338,9 +339,16 @@ Bradley L. and Petersen, Steven E.},
             fd_res = np.abs(diff).sum(axis=1)
 
         elif self.inputs.metric == 'riemannian':
-            # TODO(nina): convert to geomstats parameterization:
+            # TODO(nina): Check SPM convention for Euler angles
+            # (Tait-Bryan angles)
+            so3pars = mpars[:, DIM_TRANSLATIONS:]
+            so3pars = SO3_GROUP.rotation_vector_from_tait_bryan_angles(
+                so3pars,
+                extrinsic_or_intrinsic='intrinsic',
+                order='xyz')
+
             se3pars = np.hstack(
-                [mpars[:, DIM_TRANSLATIONS:], mpars[:, :DIM_TRANSLATIONS]])
+                [so3pars, mpars[:, :DIM_TRANSLATIONS]])
 
             diag_rotations = self.inputs.radius * np.ones(DIM_ROTATIONS)
             diag_translations = np.ones(DIM_TRANSLATIONS)
