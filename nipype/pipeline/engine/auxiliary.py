@@ -9,15 +9,13 @@ logger = logging.getLogger('nipype.workflow')
 # Function to change user provided mapper to "reverse polish notation" used in State
 def mapper2rpn(mapper, wf_mappers=None):
     """ Functions that translate mapper to "reverse polish notation."""
-    global output_mapper
     output_mapper = []
-    _ordering(mapper, i=0, wf_mappers=wf_mappers)
+    _ordering(mapper, i=0, output_mapper=output_mapper, wf_mappers=wf_mappers)
     return output_mapper
 
 
-def _ordering(el, i, current_sign=None, wf_mappers=None):
+def _ordering(el, i, output_mapper, current_sign=None, wf_mappers=None):
     """ Used in the mapper2rpn to get a proper order of fields and signs. """
-    global output_mapper
     if type(el) is tuple:
         # checking if the mapper dont contain mapper from previous nodes, i.e. has str "_NA", etc.
         if type(el[0]) is str and el[0].startswith("_"):
@@ -32,7 +30,7 @@ def _ordering(el, i, current_sign=None, wf_mappers=None):
                 raise Exception("can't ask for mapper from {}".format(node_nm))
             mapper_mod = change_mapper(mapper=wf_mappers[node_nm], name=node_nm)
             el = (el[0], mapper_mod)
-        _iterate_list(el, ".", wf_mappers)
+        _iterate_list(el, ".", wf_mappers, output_mapper=output_mapper)
     elif type(el) is list:
         if type(el[0]) is str and el[0].startswith("_"):
             node_nm = el[0][1:]
@@ -46,7 +44,7 @@ def _ordering(el, i, current_sign=None, wf_mappers=None):
                 raise Exception("can't ask for mapper from {}".format(node_nm))
             mapper_mod = change_mapper(mapper=wf_mappers[node_nm], name=node_nm)
             el[1] = mapper_mod
-        _iterate_list(el, "*", wf_mappers)
+        _iterate_list(el, "*", wf_mappers, output_mapper=output_mapper)
     elif type(el) is str:
         output_mapper.append(el)
     else:
@@ -56,10 +54,10 @@ def _ordering(el, i, current_sign=None, wf_mappers=None):
         output_mapper.append(current_sign)
 
 
-def _iterate_list(element, sign, wf_mappers):
+def _iterate_list(element, sign, wf_mappers, output_mapper):
     """ Used in the mapper2rpn to get recursion. """
     for i, el in enumerate(element):
-        _ordering(el, i, current_sign=sign, wf_mappers=wf_mappers)
+        _ordering(el, i, current_sign=sign, wf_mappers=wf_mappers, output_mapper=output_mapper)
 
 
 # functions used in State to know which element should be used for a specific axis
