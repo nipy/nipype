@@ -417,34 +417,21 @@ workflows:
               only: /.*/
       - compare_base_dockerfiles:
           filters:
-            branches:
-              ignore: /^(ci\/)?travis.*/
             tags:
               only: /.*/
       - test_pytest:
           filters:
-            branches:
-              ignore: /^(ci\/)?travis.*/
             tags:
               only: /.*/
           requires:
             - compare_base_dockerfiles
       - test_py3_fmri_fsl_spm:
-          filters:
-            branches:
-              ignore: /^(ci\/)?travis.*/
           requires:
             - compare_base_dockerfiles
       - test_py3_fmri_spm_dartel_multiproc:
-          filters:
-            branches:
-              ignore: /^(ci\/)?travis.*/
           requires:
             - compare_base_dockerfiles
       - test_fmri_spm_nested_fsl_feeds:
-          filters:
-            branches:
-              ignore: /^(ci\/)?travis.*/
           requires:
             - compare_base_dockerfiles
       - deploy_dockerhub:
