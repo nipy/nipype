@@ -1,5 +1,5 @@
-dist: trusty
-sudo: required
+dist: xenial
+sudo: true
 
 language: python
 # our build matrix
@@ -8,12 +8,7 @@ python:
 - 3.4
 - 3.5
 - 3.6
-
-matrix:
-  include:
-    - python: 3.7
-      dist: xenial
-      sudo: true
+- 3.7
 
 env:
   global:
