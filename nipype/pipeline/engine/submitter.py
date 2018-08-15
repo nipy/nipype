@@ -6,8 +6,6 @@ from future import standard_library
 standard_library.install_aliases()
 
 import os, pdb, time, glob
-import itertools, collections
-import queue
 
 from .workers import MpWorker, SerialWorker, DaskWorker, ConcurrentFuturesWorker
 
@@ -31,7 +29,7 @@ class Submitter(object):
 
 
     def submit_work(self, node):
-        for (i, ind) in enumerate(itertools.product(*node.state.all_elements)):
+        for (i, ind) in enumerate(node.state.index_generator):
             self._submit_work_el(node, i, ind)
 
     def _submit_work_el(self, node, i, ind):
@@ -82,7 +80,7 @@ class SubmitterWorkflow(Submitter):
         # iterating over all elements
         # (i think ordered list work well here, since it's more efficient to check within a specific order)
         for nn in list(self.graph)[i_n:]:
-            for (i, ind) in enumerate(itertools.product(*nn.state.all_elements)):
+            for (i, ind) in enumerate(nn.state.index_generator):
                 self.node_line.append((nn, i, ind))
 
         # this parts submits nodes that are waiting to be run

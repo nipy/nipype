@@ -20,7 +20,7 @@ import shutil
 
 import numpy as np
 import networkx as nx
-import itertools, collections
+import collections
 
 from ... import config, logging
 from ...exceptions import NodeError, WorkflowError, MappingError, JoinError
@@ -1262,7 +1262,7 @@ class NewNode(NewBase):
     # dj: version without join
     def _check_all_results(self):
         # checking if all files that should be created are present
-        for ind in itertools.product(*self.state._all_elements):
+        for ind in self.state.index_generator:
             state_dict = self.state.state_values(ind)
             dir_nm_el = "_".join(["{}.{}".format(i, j) for i, j in list(state_dict.items())])
             for key_out in self._out_nm:

@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import itertools
 import pdb
 
 from . import auxiliary as aux
@@ -40,17 +41,14 @@ class State(object):
 
         # list of all possible indexes in each dim, will be use to iterate
         # e.g. [[0, 1], [0, 1, 2]]
-        self._all_elements = [range(i) for i in self._shape]
+        self.all_elements = [range(i) for i in self._shape]
+        self.index_generator = itertools.product(*self.all_elements)
 
 
     def __getitem__(self, key):
         if type(key) is int:
             key = (key,)
         return self.state_values(key)
-
-    @property
-    def all_elements(self):
-        return self._all_elements
 
     # not used?
     #@property
