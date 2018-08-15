@@ -417,8 +417,10 @@ workflows:
               only: /.*/
       - compare_base_dockerfiles:
           filters:
-            tags:
+            branches:
               ignore: /^(ci\/)?travis.*/
+            tags:
+              only: /.*/
       - test_pytest:
           filters:
             tags:
