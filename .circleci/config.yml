@@ -418,7 +418,7 @@ workflows:
       - compare_base_dockerfiles:
           filters:
             tags:
-              only: /.*/
+              ignore: /^(ci\/)?travis.*/
       - test_pytest:
           filters:
             tags:
