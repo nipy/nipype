@@ -14,8 +14,6 @@ import os.path as op
 import nibabel as nb
 import numpy as np
 
-from geomstats.invariant_metric import InvariantMetric
-from geomstats.special_euclidean_group import SpecialEuclideanGroup
 from numpy.polynomial import Legendre
 from scipy import linalg
 
@@ -28,19 +26,6 @@ from ..utils import NUMPY_MMAP
 from ..utils.misc import normalize_mc_params
 
 IFLOGGER = logging.getLogger('nipype.interface')
-
-SE3_GROUP = SpecialEuclideanGroup(n=3)
-SO3_GROUP = SE3_GROUP.rotations
-DIM_TRANSLATIONS = SE3_GROUP.translations.dimension
-DIM_ROTATIONS = SE3_GROUP.rotations.dimension
-
-SE3_GROUP = SpecialEuclideanGroup(n=3)
-DIM_TRANSLATIONS = SE3_GROUP.translations.dimension
-DIM_ROTATIONS = SE3_GROUP.rotations.dimension
-
-SE3_GROUP = SpecialEuclideanGroup(n=3)
-DIM_TRANSLATIONS = SE3_GROUP.translations.dimension
-DIM_ROTATIONS = SE3_GROUP.rotations.dimension
 
 
 class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
@@ -256,9 +241,10 @@ class FramewiseDisplacementInputSpec(BaseInterfaceInputSpec):
         'L1',
         'riemannian',
         usedefault=True,
+        mandatory=True,
         desc='Distance metric to apply: '
-        'L1 = Manhattan distance (original definition),'
-        'riemannian = Riemannian distance on the'
+        'L1 = Manhattan distance (original definition); '
+        'riemannian = Riemannian distance on the '
         'Special Euclidean group in 3D (geodesic)')
     radius = traits.Float(
         50,
@@ -324,7 +310,7 @@ Bradley L. and Petersen, Steven E.},
         'tags': ['method']
     }]
 
-    def _run_interface(self, runtime, metric='L1'):
+    def _run_interface(self, runtime):
         mpars = np.loadtxt(self.inputs.in_file)  # mpars is N_t x 6
         mpars = np.apply_along_axis(
             func1d=normalize_mc_params,
@@ -338,6 +324,14 @@ Bradley L. and Petersen, Steven E.},
             fd_res = np.abs(diff).sum(axis=1)
 
         elif self.inputs.metric == 'riemannian':
+            from geomstats.invariant_metric import InvariantMetric
+            from geomstats.special_euclidean_group import SpecialEuclideanGroup
+
+            SE3_GROUP = SpecialEuclideanGroup(n=3)
+            SO3_GROUP = SE3_GROUP.rotations
+            DIM_TRANSLATIONS = SE3_GROUP.translations.dimension
+            DIM_ROTATIONS = SE3_GROUP.rotations.dimension
+
             # TODO(nina): Check SPM convention for Euler angles
             # (Tait-Bryan angles)
             so3pars = mpars[:, DIM_TRANSLATIONS:]
@@ -358,10 +352,6 @@ Bradley L. and Petersen, Steven E.},
                        inner_product_mat_at_identity=inner_product,
                        left_or_right='left')
             fd_res = metric.dist(se3pars[:-1], se3pars[1:])
-
-        else:
-            raise ValueError(
-                'The parameter \'metric\' should be \'L1\' or \'riemannian\'.')
 
         self._results = {
             'out_file': op.abspath(self.inputs.out_file),

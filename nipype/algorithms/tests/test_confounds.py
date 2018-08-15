@@ -17,6 +17,13 @@ try:
 except ImportError:
     pass
 
+nogeomstats = True
+try:
+    import geomstats
+    nogeomstats = False
+except ImportError:
+    pass
+
 
 def test_fd(tmpdir):
     tempdir = tmpdir.strpath
@@ -37,6 +44,13 @@ def test_fd(tmpdir):
         ground_truth, np.loadtxt(res.outputs.out_file, skiprows=1), atol=.16)
     assert np.abs(ground_truth.mean() - res.outputs.fd_average) < 1e-2
 
+
+@pytest.mark.skipif(nonitime, reason="nitime is not installed")
+def test_fd_riemannian(tmpdir):
+    tempdir = tmpdir.strpath
+    # TODO(nina): Adapt ground_truth w. SPM Euler angles convention
+    ground_truth = np.loadtxt(example_data('fsl_motion_outliers_fd.txt'))
+
     fdisplacement = FramewiseDisplacement(
         in_file=example_data('fsl_mcflirt_movpar.txt'),
         out_file=tempdir + '/fd.txt',
@@ -52,6 +66,7 @@ def test_fd(tmpdir):
     assert np.allclose(
         ground_truth, np.loadtxt(res.outputs.out_file, skiprows=1), atol=.16)
     assert np.abs(ground_truth.mean() - res.outputs.fd_average) < 1e-2
+
 
 @pytest.mark.skipif(nonitime, reason="nitime is not installed")
 def test_dvars(tmpdir):

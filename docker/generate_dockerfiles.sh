@@ -107,7 +107,7 @@ function generate_main_dockerfile() {
               pip_opts="-e" \
               pip_install="/src/nipype[all]" \
   --miniconda env_name=neuro \
-              pip_install="geomstats grabbit==0.1.2" \
+              pip_install="grabbit==0.1.2" \
   --run-bash "mkdir -p /src/pybids
          && curl -sSL --retry 5 https://github.com/INCF/pybids/tarball/0.5.1
          | tar -xz -C /src/pybids --strip-components 1
