@@ -1,14 +1,16 @@
-dist: trusty
-sudo: required
+dist: xenial
+sudo: true
 
 language: python
 # our build matrix
 python:
 - 2.7
-- 3.4
 - 3.5
 - 3.6
+- 3.7
 
+# NOTE: Any changes to the matrix section should be duplicated below for
+#       Python 3.4
 env:
   global:
     - EXTRA_WHEELS="https://5cf40426d9f06eb7461d-6fe47d9331aba7cd62fc36c7196769e4.ssl.cf2.rackcdn.com"
@@ -16,18 +18,48 @@ env:
     - EXTRA_PIP_FLAGS="--find-links=$EXTRA_WHEELS"
   matrix:
     - INSTALL_DEB_DEPENDECIES=true
-      NIPYPE_EXTRAS="doc,tests,fmri,profiler"
+      NIPYPE_EXTRAS="doc,tests,nipy,profiler"
       CI_SKIP_TEST=1
     - INSTALL_DEB_DEPENDECIES=false
-      NIPYPE_EXTRAS="doc,tests,fmri,profiler"
+      NIPYPE_EXTRAS="doc,tests,profiler"
       CI_SKIP_TEST=1
     - INSTALL_DEB_DEPENDECIES=true
-      NIPYPE_EXTRAS="doc,tests,fmri,profiler,duecredit,ssh"
+      NIPYPE_EXTRAS="doc,tests,nipy,profiler,duecredit,ssh"
       CI_SKIP_TEST=1
     - INSTALL_DEB_DEPENDECIES=true
-      NIPYPE_EXTRAS="doc,tests,fmri,profiler"
+      NIPYPE_EXTRAS="doc,tests,nipy,profiler"
       EXTRA_PIP_FLAGS="--pre $EXTRA_PIP_FLAGS --find-links $PRE_WHEELS"
       CI_SKIP_TEST=1
+
+# Python 3.4 is only available on Trusty, so we need to duplicate the
+# env matrix specifically for it.
+matrix:
+  include:
+    - python: 3.4
+      dist: trusty
+      env:
+        - INSTALL_DEB_DEPENDECIES=true
+          NIPYPE_EXTRAS="doc,tests,nipy,profiler"
+          CI_SKIP_TEST=1
+    - python: 3.4
+      dist: trusty
+      env:
+        - INSTALL_DEB_DEPENDECIES=false
+          NIPYPE_EXTRAS="doc,tests,profiler"
+          CI_SKIP_TEST=1
+    - python: 3.4
+      dist: trusty
+      env:
+        - INSTALL_DEB_DEPENDECIES=true
+          NIPYPE_EXTRAS="doc,tests,nipy,profiler,duecredit,ssh"
+          CI_SKIP_TEST=1
+    - python: 3.4
+      dist: trusty
+      env:
+        - INSTALL_DEB_DEPENDECIES=true
+          NIPYPE_EXTRAS="doc,tests,nipy,profiler"
+          EXTRA_PIP_FLAGS="--pre $EXTRA_PIP_FLAGS --find-links $PRE_WHEELS"
+          CI_SKIP_TEST=1
 
 addons:
   apt:
