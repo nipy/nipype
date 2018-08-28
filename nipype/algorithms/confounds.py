@@ -332,13 +332,11 @@ Bradley L. and Petersen, Steven E.},
             DIM_TRANSLATIONS = SE3_GROUP.translations.dimension
             DIM_ROTATIONS = SE3_GROUP.rotations.dimension
 
-            # TODO(nina): Check SPM convention for Euler angles
-            # (Tait-Bryan angles)
             so3pars = mpars[:, DIM_TRANSLATIONS:]
             so3pars = SO3_GROUP.rotation_vector_from_tait_bryan_angles(
                 so3pars,
-                extrinsic_or_intrinsic='intrinsic',
-                order='xyz')
+                extrinsic_or_intrinsic='extrinsic',
+                order='zyx')
 
             se3pars = np.hstack(
                 [so3pars, mpars[:, :DIM_TRANSLATIONS]])
