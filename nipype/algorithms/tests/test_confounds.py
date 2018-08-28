@@ -45,7 +45,7 @@ def test_fd(tmpdir):
     assert np.abs(ground_truth.mean() - res.outputs.fd_average) < 1e-2
 
 
-@pytest.mark.skipif(nonitime, reason="nitime is not installed")
+@pytest.mark.skipif(nogeomstats, reason="geomstats is not installed")
 def test_fd_riemannian(tmpdir):
     tempdir = tmpdir.strpath
     # TODO(nina): Adapt ground_truth w. SPM Euler angles convention
