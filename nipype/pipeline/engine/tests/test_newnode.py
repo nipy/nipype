@@ -162,7 +162,7 @@ def test_node_8(plugin):
 
 @python35_only
 def test_workflow_0(plugin="serial"):
-    """workflow with one node with a mapper"""
+    """workflow (without run) with one node with a mapper"""
     wf = NewWorkflow(name="wf0", workingdir="test_wf0_{}".format(plugin))
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
@@ -279,7 +279,6 @@ def test_workflow_2b(plugin):
     nb = NewNode(name="NB", interface=interf_addvar, base_dir="nb")
     nb.map(mapper=["NA.a", "b"], inputs={"b": [2, 1]})
 
-
     wf.add_nodes([na, nb])
     wf.connect(na, "out", nb, "a")
 
@@ -355,7 +354,7 @@ def test_workflow_3a(plugin):
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_3b(plugin):
-    """using add(interface) method"""
+    """using add (function) method"""
     wf = NewWorkflow(name="wf3b", workingdir="test_wf3b_{}".format(plugin))
 
     wf.add(fun_addtwo, base_dir="na", mapper="a", inputs={"a": [3, 5]}, name="NA")
@@ -376,7 +375,9 @@ def test_workflow_3b(plugin):
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_4(plugin):
-    """using add(node) method"""
+    """ using add(node) method
+        using wf.connect to connect two nodes
+    """
     wf = NewWorkflow(name="wf4", workingdir="test_wf4_{}".format(plugin))
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
@@ -412,7 +413,7 @@ def test_workflow_4(plugin):
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_4a(plugin):
-    """using add(node) method with kwarg arg instead of connect """
+    """ using add(node) method with kwarg arg to connect nodes (instead of wf.connect) """
     wf = NewWorkflow(name="wf4a", workingdir="test_wf4a_{}".format(plugin))
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
@@ -560,7 +561,7 @@ def test_workflow_6a(plugin):
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_6b(plugin):
-    """using a map method for two nodes (specifying the node), usng kwarg arg instead of connect"""
+    """using a map method for two nodes (specifying the node), using kwarg arg instead of connect"""
     wf = NewWorkflow(name="wf6b", workingdir="test_wf6b_{}".format(plugin))
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
