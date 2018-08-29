@@ -18,9 +18,9 @@ def test_mapper2rpn(mapper, rpn):
 
 @pytest.mark.parametrize("mapper, wf_mappers, rpn",
                          [
-                            (["a", "_NA"],        {"NA": ("b", "c")}, ["a", "NA-b", "NA-c", ".", "*"]),
-                            (["_NA", "c"],        {"NA": ("a", "b")}, ["NA-a", "NA-b", ".", "c", "*"]),
-                            (["a", ("b", "_NA")], {"NA": ["c", "d"]}, ["a", "b", "NA-c", "NA-d", "*", ".", "*"])
+                            (["a", "_NA"],        {"NA": ("b", "c")}, ["a", "NA.b", "NA.c", ".", "*"]),
+                            (["_NA", "c"],        {"NA": ("a", "b")}, ["NA.a", "NA.b", ".", "c", "*"]),
+                            (["a", ("b", "_NA")], {"NA": ["c", "d"]}, ["a", "b", "NA.c", "NA.d", "*", ".", "*"])
                         ])
 
 def test_mapper2rpn_wf_mapper(mapper, wf_mappers, rpn):
@@ -29,9 +29,9 @@ def test_mapper2rpn_wf_mapper(mapper, wf_mappers, rpn):
 
 @pytest.mark.parametrize("mapper, mapper_changed",
                         [
-                            ("a",               "Node-a"),
-                            (["a", ("b", "c")], ["Node-a", ("Node-b", "Node-c")]),
-                            (("a", ["b", "c"]), ("Node-a", ["Node-b", "Node-c"]))
+                            ("a",               "Node.a"),
+                            (["a", ("b", "c")], ["Node.a", ("Node.b", "Node.c")]),
+                            (("a", ["b", "c"]), ("Node.a", ["Node.b", "Node.c"]))
                         ])
 def test_change_mapper(mapper, mapper_changed):
     assert aux.change_mapper(mapper, "Node") == mapper_changed

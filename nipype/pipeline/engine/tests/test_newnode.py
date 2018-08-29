@@ -34,7 +34,7 @@ def test_node_2():
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     nn = NewNode(name="NA", interface=interf_addtwo, inputs={"a": 3})
     assert nn.mapper is None
-    assert nn.inputs == {"NA-a": 3}
+    assert nn.inputs == {"NA.a": 3}
     assert nn.state._mapper is None
 
 
@@ -42,14 +42,14 @@ def test_node_3():
     """Node with interface, inputs and mapper"""
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     nn = NewNode(name="NA", interface=interf_addtwo, inputs={"a": [3, 5]}, mapper="a")
-    assert nn.mapper == "NA-a"
-    assert (nn.inputs["NA-a"] == np.array([3, 5])).all()
+    assert nn.mapper == "NA.a"
+    assert (nn.inputs["NA.a"] == np.array([3, 5])).all()
     
-    assert nn.state._mapper == "NA-a"
+    assert nn.state._mapper == "NA.a"
 
     nn.prepare_state_input()
-    assert nn.state.state_values([0]) == {"NA-a": 3}
-    assert nn.state.state_values([1]) == {"NA-a": 5}
+    assert nn.state.state_values([0]) == {"NA.a": 3}
+    assert nn.state.state_values([1]) == {"NA.a": 5}
 
 
 def test_node_4():
@@ -57,13 +57,13 @@ def test_node_4():
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     nn = NewNode(name="NA", interface=interf_addtwo, inputs={"a": [3, 5]})
     nn.map(mapper="a")
-    assert nn.mapper == "NA-a"
-    assert (nn.inputs["NA-a"] == np.array([3, 5])).all()
+    assert nn.mapper == "NA.a"
+    assert (nn.inputs["NA.a"] == np.array([3, 5])).all()
 
     nn.prepare_state_input()
-    assert nn.state._mapper == "NA-a"
-    assert nn.state.state_values([0]) == {"NA-a": 3}
-    assert nn.state.state_values([1]) == {"NA-a": 5}
+    assert nn.state._mapper == "NA.a"
+    assert nn.state.state_values([0]) == {"NA.a": 3}
+    assert nn.state.state_values([1]) == {"NA.a": 5}
 
 
 def test_node_5():
@@ -71,13 +71,13 @@ def test_node_5():
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     nn = NewNode(name="NA", interface=interf_addtwo)
     nn.map(mapper="a", inputs={"a": [3, 5]})
-    assert nn.mapper == "NA-a"
-    assert (nn.inputs["NA-a"] == np.array([3, 5])).all()
+    assert nn.mapper == "NA.a"
+    assert (nn.inputs["NA.a"] == np.array([3, 5])).all()
 
-    assert nn.state._mapper == "NA-a"
+    assert nn.state._mapper == "NA.a"
     nn.prepare_state_input()
-    assert nn.state.state_values([0]) == {"NA-a": 3}
-    assert nn.state.state_values([1]) == {"NA-a": 5}
+    assert nn.state.state_values([0]) == {"NA.a": 3}
+    assert nn.state.state_values([1]) == {"NA.a": 5}
 
 
 @pytest.mark.parametrize("plugin", Plugins)
@@ -85,17 +85,17 @@ def test_node_5():
 def test_node_6(plugin):
     """Node with interface, inputs and the simplest mapper, running interface"""
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
-    nn = NewNode(name="NA", interface=interf_addtwo, base_dir="test6_{}".format(plugin))
+    nn = NewNode(name="NA", interface=interf_addtwo, base_dir="test_nd6_{}".format(plugin))
     nn.map(mapper="a", inputs={"a": [3, 5]})
 
-    assert nn.mapper == "NA-a"
-    assert (nn.inputs["NA-a"] == np.array([3, 5])).all()
+    assert nn.mapper == "NA.a"
+    assert (nn.inputs["NA.a"] == np.array([3, 5])).all()
 
     # testing if the node runs properly
     nn.run(plugin=plugin)
 
     # checking teh results
-    expected = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     # to be sure that there is the same order (not sure if node itself should keep the order)
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -110,18 +110,18 @@ def test_node_6(plugin):
 def test_node_7(plugin):
     """Node with interface, inputs and scalar mapper, running interface"""
     interf_addvar = Function_Interface(fun_addvar, ["out"])
-    nn = NewNode(name="NA", interface=interf_addvar, base_dir="test7_{}".format(plugin))
+    nn = NewNode(name="NA", interface=interf_addvar, base_dir="test_nd7_{}".format(plugin))
     nn.map(mapper=("a", "b"), inputs={"a": [3, 5], "b": [2, 1]})
 
-    assert nn.mapper == ("NA-a", "NA-b")
-    assert (nn.inputs["NA-a"] == np.array([3, 5])).all()
-    assert (nn.inputs["NA-b"] == np.array([2, 1])).all()
+    assert nn.mapper == ("NA.a", "NA.b")
+    assert (nn.inputs["NA.a"] == np.array([3, 5])).all()
+    assert (nn.inputs["NA.b"] == np.array([2, 1])).all()
 
     # testing if the node runs properly
     nn.run(plugin=plugin)
 
     # checking teh results
-    expected = [({"NA-a": 3, "NA-b": 2}, 5), ({"NA-a": 5, "NA-b": 1}, 6)]
+    expected = [({"NA.a": 3, "NA.b": 2}, 5), ({"NA.a": 5, "NA.b": 1}, 6)]
     # to be sure that there is the same order (not sure if node itself should keep the order)
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -136,19 +136,19 @@ def test_node_7(plugin):
 def test_node_8(plugin):
     """Node with interface, inputs and vector mapper, running interface"""
     interf_addvar = Function_Interface(fun_addvar, ["out"])
-    nn = NewNode(name="NA", interface=interf_addvar, base_dir="test8_{}".format(plugin))
+    nn = NewNode(name="NA", interface=interf_addvar, base_dir="test_nd8_{}".format(plugin))
     nn.map(mapper=["a", "b"], inputs={"a": [3, 5], "b": [2, 1]})
 
-    assert nn.mapper == ["NA-a", "NA-b"]
-    assert (nn.inputs["NA-a"] == np.array([3, 5])).all()
-    assert (nn.inputs["NA-b"] == np.array([2, 1])).all()
+    assert nn.mapper == ["NA.a", "NA.b"]
+    assert (nn.inputs["NA.a"] == np.array([3, 5])).all()
+    assert (nn.inputs["NA.b"] == np.array([2, 1])).all()
 
     # testing if the node runs properly
     nn.run(plugin=plugin)
 
     # checking teh results
-    expected = [({"NA-a": 3, "NA-b": 1}, 4), ({"NA-a": 3, "NA-b": 2}, 5),
-                ({"NA-a": 5, "NA-b": 1}, 6), ({"NA-a": 5, "NA-b": 2}, 7)]
+    expected = [({"NA.a": 3, "NA.b": 1}, 4), ({"NA.a": 3, "NA.b": 2}, 5),
+                ({"NA.a": 5, "NA.b": 1}, 6), ({"NA.a": 5, "NA.b": 2}, 7)]
     # to be sure that there is the same order (not sure if node itself should keep the order)
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -168,8 +168,8 @@ def test_workflow_0(plugin="serial"):
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
     na.map(mapper="a", inputs={"a": [3, 5]})
     wf.add_nodes([na])
-    assert wf.nodes[0].mapper == "NA-a"
-    assert (wf.nodes[0].inputs['NA-a'] == np.array([3, 5])).all()
+    assert wf.nodes[0].mapper == "NA.a"
+    assert (wf.nodes[0].inputs['NA.a'] == np.array([3, 5])).all()
     assert len(wf.graph.nodes) == 1
 
 @pytest.mark.parametrize("plugin", Plugins)
@@ -184,7 +184,7 @@ def test_workflow_1(plugin):
 
     wf.run(plugin=plugin)
 
-    expected = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -208,10 +208,10 @@ def test_workflow_2(plugin):
     wf.add_nodes([na, nb])
     wf.connect(na, "out", nb, "a")
 
-    assert wf.nodes[0].mapper == "NA-a"
+    assert wf.nodes[0].mapper == "NA.a"
     wf.run(plugin=plugin)
 
-    expected_A = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    expected_A = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected_A[0][0].keys())
     expected_A.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -220,7 +220,7 @@ def test_workflow_2(plugin):
         assert wf.nodes[0].result["out"][i][1] == res[1]
 
 
-    expected_B = [({"NA-a": 3, "NB-b": 10}, 15), ({"NA-a": 5, "NB-b": 10}, 17)]
+    expected_B = [({"NA.a": 3, "NB.b": 10}, 15), ({"NA.a": 5, "NB.b": 10}, 17)]
     key_sort = list(expected_B[0][0].keys())
     expected_B.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[1].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -240,16 +240,16 @@ def test_workflow_2a(plugin):
 
     interf_addvar = Function_Interface(fun_addvar, ["out"])
     nb = NewNode(name="NB", interface=interf_addvar, base_dir="nb")
-    nb.map(mapper=("NA-a", "b"), inputs={"b": [2, 1]})
+    nb.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]})
 
     wf.add_nodes([na, nb])
     wf.connect(na, "out", nb, "a")
 
-    assert wf.nodes[0].mapper == "NA-a"
-    assert wf.nodes[1].mapper == ("NA-a", "NB-b")
+    assert wf.nodes[0].mapper == "NA.a"
+    assert wf.nodes[1].mapper == ("NA.a", "NB.b")
     wf.run(plugin=plugin)
 
-    expected_A = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    expected_A = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected_A[0][0].keys())
     expected_A.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -257,7 +257,7 @@ def test_workflow_2a(plugin):
         assert wf.nodes[0].result["out"][i][0] == res[0]
         assert wf.nodes[0].result["out"][i][1] == res[1]
 
-    expected_B = [({"NA-a": 3, "NB-b": 2}, 7), ({"NA-a": 5, "NB-b": 1}, 8)]
+    expected_B = [({"NA.a": 3, "NB.b": 2}, 7), ({"NA.a": 5, "NB.b": 1}, 8)]
     key_sort = list(expected_B[0][0].keys())
     expected_B.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[1].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -277,17 +277,17 @@ def test_workflow_2b(plugin):
 
     interf_addvar = Function_Interface(fun_addvar, ["out"])
     nb = NewNode(name="NB", interface=interf_addvar, base_dir="nb")
-    nb.map(mapper=["NA-a", "b"], inputs={"b": [2, 1]})
+    nb.map(mapper=["NA.a", "b"], inputs={"b": [2, 1]})
 
 
     wf.add_nodes([na, nb])
     wf.connect(na, "out", nb, "a")
 
-    assert wf.nodes[0].mapper == "NA-a"
-    assert wf.nodes[1].mapper == ["NA-a", "NB-b"]
+    assert wf.nodes[0].mapper == "NA.a"
+    assert wf.nodes[1].mapper == ["NA.a", "NB.b"]
     wf.run(plugin=plugin)
 
-    expected_A = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    expected_A = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected_A[0][0].keys())
     expected_A.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -296,8 +296,8 @@ def test_workflow_2b(plugin):
         assert wf.nodes[0].result["out"][i][1] == res[1]
 
 
-    expected_B = [({"NA-a": 3, "NB-b": 1}, 6), ({"NA-a": 3, "NB-b": 2}, 7),
-                  ({"NA-a": 5, "NB-b": 1}, 8), ({"NA-a": 5, "NB-b": 2}, 9)]
+    expected_B = [({"NA.a": 3, "NB.b": 1}, 6), ({"NA.a": 3, "NB.b": 2}, 7),
+                  ({"NA.a": 5, "NB.b": 1}, 8), ({"NA.a": 5, "NB.b": 2}, 9)]
     key_sort = list(expected_B[0][0].keys())
     expected_B.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[1].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -319,10 +319,10 @@ def test_workflow_3(plugin):
 
     wf.add(na)
 
-    assert wf.nodes[0].mapper == "NA-a"
+    assert wf.nodes[0].mapper == "NA.a"
     wf.run(plugin=plugin)
 
-    expected = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -340,10 +340,10 @@ def test_workflow_3a(plugin):
 
     wf.add(interf_addtwo, base_dir="na", mapper="a", inputs={"a": [3, 5]}, name="NA")
 
-    assert wf.nodes[0].mapper == "NA-a"
+    assert wf.nodes[0].mapper == "NA.a"
     wf.run(plugin=plugin)
 
-    expected = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -360,10 +360,10 @@ def test_workflow_3b(plugin):
 
     wf.add(fun_addtwo, base_dir="na", mapper="a", inputs={"a": [3, 5]}, name="NA")
 
-    assert wf.nodes[0].mapper == "NA-a"
+    assert wf.nodes[0].mapper == "NA.a"
     wf.run(plugin=plugin)
 
-    expected = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -385,14 +385,14 @@ def test_workflow_4(plugin):
 
     interf_addvar = Function_Interface(fun_addvar, ["out"])
     nb = NewNode(name="NB", interface=interf_addvar, base_dir="nb")
-    nb.map(mapper=("NA-a", "b"), inputs={"b": [2, 1]})
+    nb.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]})
     wf.add(nb)
 
     wf.connect(na, "out", nb, "a")
 
     wf.run(plugin=plugin)
 
-    expected = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -400,7 +400,7 @@ def test_workflow_4(plugin):
         assert wf.nodes[0].result["out"][i][0] == res[0]
         assert wf.nodes[0].result["out"][i][1] == res[1]
 
-    expected_B = [({"NA-a": 3, "NB-b": 2}, 7), ({"NA-a": 5, "NB-b": 1}, 8)]
+    expected_B = [({"NA.a": 3, "NB.b": 2}, 7), ({"NA.a": 5, "NB.b": 1}, 8)]
     key_sort = list(expected_B[0][0].keys())
     expected_B.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[1].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -421,12 +421,12 @@ def test_workflow_4a(plugin):
 
     interf_addvar = Function_Interface(fun_addvar, ["out"])
     nb = NewNode(name="NB", interface=interf_addvar, base_dir="nb")
-    nb.map(mapper=("NA-a", "b"), inputs={"b": [2, 1]})
-    wf.add(nb, a="NA-out")
+    nb.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]})
+    wf.add(nb, a="NA.out")
 
     wf.run(plugin=plugin)
 
-    expected = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -434,7 +434,7 @@ def test_workflow_4a(plugin):
         assert wf.nodes[0].result["out"][i][0] == res[0]
         assert wf.nodes[0].result["out"][i][1] == res[1]
 
-    expected_B = [({"NA-a": 3, "NB-b": 2}, 7), ({"NA-a": 5, "NB-b": 1}, 8)]
+    expected_B = [({"NA.a": 3, "NB.b": 2}, 7), ({"NA.a": 5, "NB.b": 1}, 8)]
     key_sort = list(expected_B[0][0].keys())
     expected_B.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[1].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -458,7 +458,7 @@ def test_workflow_5(plugin):
     wf.map(mapper="a", inputs={"a": [3, 5]})
     wf.run(plugin=plugin)
 
-    expected = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -478,7 +478,7 @@ def test_workflow_5a(plugin):
     wf.add(na).map(mapper="a", inputs={"a": [3, 5]})
     wf.run(plugin=plugin)
 
-    expected = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -501,11 +501,11 @@ def test_workflow_6(plugin):
     wf.add(na)
     wf.map(mapper="a", inputs={"a": [3, 5]})
     wf.add(nb)
-    wf.map(mapper=("NA-a", "b"), inputs={"b": [2, 1]})
+    wf.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]})
     wf.connect(na, "out", nb, "a")
     wf.run(plugin=plugin)
 
-    expected = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -513,7 +513,7 @@ def test_workflow_6(plugin):
         assert wf.nodes[0].result["out"][i][0] == res[0]
         assert wf.nodes[0].result["out"][i][1] == res[1]
 
-    expected_B = [({"NA-a": 3, "NB-b": 2}, 7), ({"NA-a": 5, "NB-b": 1}, 8)]
+    expected_B = [({"NA.a": 3, "NB.b": 2}, 7), ({"NA.a": 5, "NB.b": 1}, 8)]
     key_sort = list(expected_B[0][0].keys())
     expected_B.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[1].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -536,11 +536,11 @@ def test_workflow_6a(plugin):
     wf.add(na)
     wf.add(nb)
     wf.map(mapper="a", inputs={"a": [3, 5]}, node=na)
-    wf.map(mapper=("NA-a", "b"), inputs={"b": [2, 1]}, node=nb)
+    wf.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]}, node=nb)
     wf.connect(na, "out", nb, "a")
     wf.run(plugin=plugin)
 
-    expected = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -548,7 +548,7 @@ def test_workflow_6a(plugin):
         assert wf.nodes[0].result["out"][i][0] == res[0]
         assert wf.nodes[0].result["out"][i][1] == res[1]
 
-    expected_B = [({"NA-a": 3, "NB-b": 2}, 7), ({"NA-a": 5, "NB-b": 1}, 8)]
+    expected_B = [({"NA.a": 3, "NB.b": 2}, 7), ({"NA.a": 5, "NB.b": 1}, 8)]
     key_sort = list(expected_B[0][0].keys())
     expected_B.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[1].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -569,12 +569,12 @@ def test_workflow_6b(plugin):
     nb = NewNode(name="NB", interface=interf_addvar, base_dir="nb")
 
     wf.add(na)
-    wf.add(nb, a="NA-out")
+    wf.add(nb, a="NA.out")
     wf.map(mapper="a", inputs={"a": [3, 5]}, node=na)
-    wf.map(mapper=("NA-a", "b"), inputs={"b": [2, 1]}, node=nb)
+    wf.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]}, node=nb)
     wf.run(plugin=plugin)
 
-    expected = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -582,7 +582,7 @@ def test_workflow_6b(plugin):
         assert wf.nodes[0].result["out"][i][0] == res[0]
         assert wf.nodes[0].result["out"][i][1] == res[1]
 
-    expected_B = [({"NA-a": 3, "NB-b": 2}, 7), ({"NA-a": 5, "NB-b": 1}, 8)]
+    expected_B = [({"NA.a": 3, "NB.b": 2}, 7), ({"NA.a": 5, "NB.b": 1}, 8)]
     key_sort = list(expected_B[0][0].keys())
     expected_B.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[1].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -606,7 +606,7 @@ def test_workflow_7(plugin):
     wf.map(mapper="a")
     wf.run(plugin=plugin)
 
-    expected = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -628,7 +628,7 @@ def test_workflow_7a(plugin):
     wf.map(mapper="a")
     wf.run(plugin=plugin)
 
-    expected = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -649,7 +649,7 @@ def test_workflow_7b(plugin):
     wf.map(mapper="a")
     wf.run(plugin=plugin)
 
-    expected = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -673,10 +673,10 @@ def test_workflow_8(plugin):
     wf.add_nodes([na, nb])
     wf.connect(na, "out", nb, "a")
     wf.connect_workflow(nb, "b", "b")
-    assert wf.nodes[0].mapper == "NA-a"
+    assert wf.nodes[0].mapper == "NA.a"
     wf.run(plugin=plugin)
 
-    expected_A = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    expected_A = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected_A[0][0].keys())
     expected_A.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -685,7 +685,7 @@ def test_workflow_8(plugin):
         assert wf.nodes[0].result["out"][i][1] == res[1]
 
 
-    expected_B = [({"NA-a": 3, "NB-b": 10}, 15), ({"NA-a": 5, "NB-b": 10}, 17)]
+    expected_B = [({"NA.a": 3, "NB.b": 10}, 15), ({"NA.a": 5, "NB.b": 10}, 17)]
     key_sort = list(expected_B[0][0].keys())
     expected_B.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[1].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -704,11 +704,10 @@ def test_workflow_9(plugin):
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     wf.add(name="NA", runnable=interf_addtwo, base_dir="na").map(mapper="a", inputs={"a": [3, 5]})
     interf_addvar = Function_Interface(fun_addvar, ["out"])
-    wf.add(name="NB", runnable=interf_addvar, base_dir="nb", a="NA-out").map(mapper=("_NA", "b"), inputs={"b": [2, 1]})
-
+    wf.add(name="NB", runnable=interf_addvar, base_dir="nb", a="NA.out").map(mapper=("_NA", "b"), inputs={"b": [2, 1]})
     wf.run(plugin=plugin)
 
-    expected = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -716,7 +715,7 @@ def test_workflow_9(plugin):
         assert wf.nodes[0].result["out"][i][0] == res[0]
         assert wf.nodes[0].result["out"][i][1] == res[1]
 
-    expected_B = [({"NA-a": 3, "NB-b": 2}, 7), ({"NA-a": 5, "NB-b": 1}, 8)]
+    expected_B = [({"NA.a": 3, "NB.b": 2}, 7), ({"NA.a": 5, "NB.b": 1}, 8)]
     key_sort = list(expected_B[0][0].keys())
     expected_B.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[1].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -733,10 +732,10 @@ def test_workflow_10(plugin):
     interf_addvar1 = Function_Interface(fun_addvar, ["out"])
     wf.add(name="NA", runnable=interf_addvar1, base_dir="na").map(mapper=("a", "b"), inputs={"a": [3, 5], "b": [0, 10]})
     interf_addvar2 = Function_Interface(fun_addvar, ["out"])
-    wf.add(name="NB", runnable=interf_addvar2, base_dir="nb", a="NA-out").map(mapper=("_NA", "b"), inputs={"b": [2, 1]})
+    wf.add(name="NB", runnable=interf_addvar2, base_dir="nb", a="NA.out").map(mapper=("_NA", "b"), inputs={"b": [2, 1]})
     wf.run(plugin=plugin)
 
-    expected = [({"NA-a": 3, "NA-b": 0}, 3), ({"NA-a": 5, "NA-b": 10}, 15)]
+    expected = [({"NA.a": 3, "NA.b": 0}, 3), ({"NA.a": 5, "NA.b": 10}, 15)]
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -744,7 +743,7 @@ def test_workflow_10(plugin):
         assert wf.nodes[0].result["out"][i][0] == res[0]
         assert wf.nodes[0].result["out"][i][1] == res[1]
 
-    expected_B = [({"NA-a": 3, "NA-b": 0, "NB-b": 2}, 5), ({"NA-a": 5, "NA-b": 10, "NB-b": 1}, 16)]
+    expected_B = [({"NA.a": 3, "NA.b": 0, "NB.b": 2}, 5), ({"NA.a": 5, "NA.b": 10, "NB.b": 1}, 16)]
     key_sort = list(expected_B[0][0].keys())
     expected_B.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[1].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -761,11 +760,11 @@ def test_workflow_10a(plugin):
     interf_addvar1 = Function_Interface(fun_addvar, ["out"])
     wf.add(name="NA", runnable=interf_addvar1, base_dir="na").map(mapper=["a", "b"], inputs={"a": [3, 5], "b": [0, 10]})
     interf_addvar2 = Function_Interface(fun_addvar, ["out"])
-    wf.add(name="NB", runnable=interf_addvar2, base_dir="nb", a="NA-out").map(mapper=("_NA", "b"), inputs={"b": [[2, 1], [0, 0]]})
+    wf.add(name="NB", runnable=interf_addvar2, base_dir="nb", a="NA.out").map(mapper=("_NA", "b"), inputs={"b": [[2, 1], [0, 0]]})
     wf.run(plugin=plugin)
 
-    expected = [({"NA-a": 3, "NA-b": 0}, 3), ({"NA-a": 3, "NA-b": 10}, 13),
-                ({"NA-a": 5, "NA-b": 0}, 5), ({"NA-a": 5, "NA-b": 10}, 15)]
+    expected = [({"NA.a": 3, "NA.b": 0}, 3), ({"NA.a": 3, "NA.b": 10}, 13),
+                ({"NA.a": 5, "NA.b": 0}, 5), ({"NA.a": 5, "NA.b": 10}, 15)]
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -773,8 +772,8 @@ def test_workflow_10a(plugin):
         assert wf.nodes[0].result["out"][i][0] == res[0]
         assert wf.nodes[0].result["out"][i][1] == res[1]
 
-    expected_B = [({"NA-a": 3, "NA-b": 0, "NB-b": 2}, 5), ({"NA-a": 3, "NA-b": 10, "NB-b": 1}, 14),
-                  ({"NA-a":5, "NA-b": 0, "NB-b": 0}, 5), ({"NA-a": 5, "NA-b": 10, "NB-b": 0}, 15)]
+    expected_B = [({"NA.a": 3, "NA.b": 0, "NB.b": 2}, 5), ({"NA.a": 3, "NA.b": 10, "NB.b": 1}, 14),
+                  ({"NA.a": 5, "NA.b": 0, "NB.b": 0}, 5), ({"NA.a": 5, "NA.b": 10, "NB.b": 0}, 15)]
     key_sort = list(expected_B[0][0].keys())
     expected_B.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[1].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -793,10 +792,10 @@ def test_workflow_11(plugin):
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     wf.add(name="NB", runnable=interf_addtwo, base_dir="nb").map(mapper="a", inputs={"a": [2, 1]})
     interf_addvar2 = Function_Interface(fun_addvar, ["out"])
-    wf.add(name="NC", runnable=interf_addvar2, base_dir="nc", a="NA-out", b="NB-out").map(mapper=["_NA", "_NB"])
+    wf.add(name="NC", runnable=interf_addvar2, base_dir="nc", a="NA.out", b="NB.out").map(mapper=["_NA", "_NB"])
     wf.run(plugin=plugin)
 
-    expected = [({"NA-a": 3, "NA-b": 0}, 3), ({"NA-a": 5, "NA-b": 10}, 15)]
+    expected = [({"NA.a": 3, "NA.b": 0}, 3), ({"NA.a": 5, "NA.b": 10}, 15)]
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -805,8 +804,8 @@ def test_workflow_11(plugin):
         assert wf.nodes[0].result["out"][i][1] == res[1]
 
 
-    expected_C = [({"NA-a": 3, "NA-b": 0, "NB-a": 1}, 6), ({"NA-a": 3, "NA-b": 0, "NB-a": 2}, 7),
-                  ({"NA-a": 5, "NA-b": 10, "NB-a": 1}, 18), ({"NA-a": 5, "NA-b": 10, "NB-a": 2}, 19)]
+    expected_C = [({"NA.a": 3, "NA.b": 0, "NB.a": 1}, 6),   ({"NA.a": 3, "NA.b": 0, "NB.a": 2}, 7),
+                  ({"NA.a": 5, "NA.b": 10, "NB.a": 1}, 18), ({"NA.a": 5, "NA.b": 10, "NB.a": 2}, 19)]
     key_sort = list(expected_C[0][0].keys())
     expected_C.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[2].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -822,7 +821,7 @@ def test_workflow_11(plugin):
 @pytest.mark.xfail(reason="mapper in workflow still not impplemented")
 def test_workflow_12(plugin="serial"):
     """using inputs for workflow and connect_workflow"""
-    wf = NewWorkflow(name="wf9", inputs={"a": [3, 5]}, mapper="a", workingdir="test_wf9_{}".format(plugin))
+    wf = NewWorkflow(name="wf9", inputs={"a": [3, 5]}, mapper="a", workingdir="test_wf12_{}".format(plugin))
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
 
@@ -830,7 +829,7 @@ def test_workflow_12(plugin="serial"):
     wf.connect_workflow(na, "wf_a","a")
     wf.run(plugin=plugin)
 
-    expected = [({"NA-a": 3}, 5), ({"NA-a": 5}, 7)]
+    expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])

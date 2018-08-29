@@ -1078,7 +1078,7 @@ class NewBase(object):
         #dj TODO: I should think what is needed in the __init__ (I redefine some of rhe attributes anyway)
         if inputs:
             # adding name of the node to the input name
-            self._inputs = dict(("{}-{}".format(self.name, key), value) for (key, value) in inputs.items())
+            self._inputs = dict(("{}.{}".format(self.name, key), value) for (key, value) in inputs.items())
             self._inputs = dict((key, np.array(val)) if type(val) is list else (key, val)
                                 for (key, val) in self._inputs.items())
             self._state_inputs = self._inputs.copy()
@@ -1133,7 +1133,7 @@ class NewNode(NewBase):
 
         self._nodedir = base_dir
         self._interface = interface
-        self._interface.input_map = dict((key, "{}-{}".format(self.name, value))
+        self._interface.input_map = dict((key, "{}.{}".format(self.name, value))
                                          for (key, value) in self._interface.input_map.items())
 
         self._needed_outputs = []
@@ -1166,7 +1166,7 @@ class NewNode(NewBase):
             self._mapper = aux.change_mapper(mapper, self.name)
 
         if inputs:
-            inputs = dict(("{}-{}".format(self.name, key), value) for (key, value) in inputs.items())
+            inputs = dict(("{}.{}".format(self.name, key), value) for (key, value) in inputs.items())
             inputs = dict((key, np.array(val)) if type(val) is list else (key, val)
                           for (key, val) in inputs.items())
             self._inputs.update(inputs)
@@ -1212,7 +1212,7 @@ class NewNode(NewBase):
         res = self._interface.run(inputs_dict)
         output = self._interface.output
         logger.debug("Run interface el, output={}".format(output))
-        dir_nm_el = "_".join(["{}.{}".format(i, j) for i, j in list(state_dict.items())])
+        dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(state_dict.items())])
         # TODO when join
         #if self._joinByKey:
         #    dir_join = "join_" + "_".join(["{}.{}".format(i, j) for i, j in list(state_dict.items()) if i not in self._joinByKey])
@@ -1233,11 +1233,11 @@ class NewNode(NewBase):
         inputs_dict = {k: state_dict[k] for k in self._inputs.keys()}
         # reading extra inputs that come from previous nodes
         for (from_node, from_socket, to_socket) in self.needed_outputs:
-            dir_nm_el_from = "_".join(["{}.{}".format(i, j) for i, j in list(state_dict.items())
+            dir_nm_el_from = "_".join(["{}:{}".format(i, j) for i, j in list(state_dict.items())
                                        if i in list(from_node._state_inputs.keys())])
             file_from = os.path.join(from_node.nodedir, dir_nm_el_from, from_socket+".txt")
             with open(file_from) as f:
-                inputs_dict["{}-{}".format(self.name, to_socket)] = eval(f.readline())
+                inputs_dict["{}.{}".format(self.name, to_socket)] = eval(f.readline())
         return state_dict, inputs_dict
 
 
@@ -1290,7 +1290,7 @@ class NewNode(NewBase):
                 files = [name for name in glob.glob("{}/*/{}.txt".format(self.nodedir, key_out))]
                 for file in files:
                     st_el = file.split(os.sep)[-2].split("_")
-                    st_dict = collections.OrderedDict([(el.split(".")[0], eval(el.split(".")[1]))
+                    st_dict = collections.OrderedDict([(el.split(":")[0], eval(el.split(":")[1]))
                                                             for el in st_el])
                     with open(file) as fout:
                         logger.debug('Reading Results: file={}, st_dict={}'.format(file, st_dict))
@@ -1379,9 +1379,9 @@ class NewWorkflow(NewBase):
 
 
     def connect_workflow(self, node, inp_wf, inp_nd):
-        if "{}-{}".format(self.name, inp_wf) in self.inputs:
-            node.state_inputs.update({"{}-{}".format(node.name, inp_nd): self.inputs["{}-{}".format(self.name, inp_wf)]})
-            node.inputs.update({"{}-{}".format(node.name, inp_nd): self.inputs["{}-{}".format(self.name, inp_wf)]})
+        if "{}.{}".format(self.name, inp_wf) in self.inputs:
+            node.state_inputs.update({"{}.{}".format(node.name, inp_nd): self.inputs["{}.{}".format(self.name, inp_wf)]})
+            node.inputs.update({"{}.{}".format(node.name, inp_nd): self.inputs["{}.{}".format(self.name, inp_wf)]})
         else:
             raise Exception("{} not in the workflow inputs".format(inp_wf))
 
@@ -1453,7 +1453,7 @@ class NewWorkflow(NewBase):
         # connecting inputs to other nodes outputs
         for (inp, source) in kwargs.items():
             try:
-                from_node, from_socket = source.split("-")
+                from_node, from_socket = source.split(".")
                 self.connect(self._node_names[from_node], from_socket, node, inp)
             except(ValueError):
                 self.connect(None, source, node, inp)

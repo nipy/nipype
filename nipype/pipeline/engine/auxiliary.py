@@ -162,10 +162,10 @@ def converting_axis2input(state_inputs, axis_for_input, ndim):
 def change_mapper(mapper, name):
     """changing names of mapper: adding names of the node"""
     if isinstance(mapper, str):
-        if "-" in mapper or mapper.startswith("_"):
+        if "." in mapper or mapper.startswith("_"):
             return mapper
         else:
-            return "{}-{}".format(name, mapper)
+            return "{}.{}".format(name, mapper)
     elif isinstance(mapper, list):
         return _add_name(mapper, name)
     elif isinstance(mapper, tuple):
@@ -176,10 +176,10 @@ def change_mapper(mapper, name):
 def _add_name(mlist, name):
     for i, elem in enumerate(mlist):
         if isinstance(elem, str):
-            if "-" in elem or elem.startswith("_"):
+            if "." in elem or elem.startswith("_"):
                 pass
             else:
-                mlist[i] = "{}-{}".format(name, mlist[i])
+                mlist[i] = "{}.{}".format(name, mlist[i])
         elif isinstance(elem, list):
             mlist[i] = _add_name(elem, name)
         elif isinstance(elem, tuple):

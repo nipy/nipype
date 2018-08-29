@@ -5,7 +5,7 @@ from collections import defaultdict
 from future import standard_library
 standard_library.install_aliases()
 
-import os, pdb, time, glob
+import os, pdb, time
 
 from .workers import MpWorker, SerialWorker, DaskWorker, ConcurrentFuturesWorker
 
@@ -96,7 +96,7 @@ class SubmitterWorkflow(Submitter):
             time.sleep(3)
 
 
-    # for now without callback, so checking all nodes(with ind) in some order
+    # for now without callback, so checking all nodes (with ind) in some order
     def _nodes_check(self):
         _to_remove = []
         for (to_node, i, ind) in self.node_line:
