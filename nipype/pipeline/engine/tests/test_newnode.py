@@ -828,13 +828,20 @@ def test_workflow_12(plugin="serial"):
 
     wf.add(na)
     wf.connect_workflow(na, "wf_a", "a")
-    #pdb.set_trace()
+
+    assert len(wf.inner_workflows) == 2
+    assert wf.inner_workflows[0].mapper is None
+    assert wf.inner_workflows[0].inputs == {'wf9(0,).wf_a': 3}
+    assert wf.inner_workflows[1].inputs == {'wf9(1,).wf_a': 5}
     wf.run(plugin=plugin)
-    # TODO: doesn't work properly (writes everything in one dir
-    # expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
-    # key_sort = list(expected[0][0].keys())
-    # expected.sort(key=lambda t: [t[0][key] for key in key_sort])
-    # wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
+    expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
+    key_sort = list(expected[0][0].keys())
+    expected.sort(key=lambda t: [t[0][key] for key in key_sort])
+    wf.inner_workflows[0].nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
+    # TODO: doesn't work properly (writes everything in one dir and overwrites results
+    # so checking only for wf.inner_workflows[1]
+    wf.inner_workflows[1].nodes[0].result["out"][0][0] == expected[1][0]
+    wf.inner_workflows[1].nodes[0].result["out"][0][1] == expected[1][1]
     # for i, res in enumerate(expected):
     #     assert wf.nodes[0].result["out"][i][0] == res[0]
     #     assert wf.nodes[0].result["out"][i][1] == res[1]
