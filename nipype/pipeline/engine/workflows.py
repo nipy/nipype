@@ -1122,6 +1122,8 @@ class NewBase(object):
     def state_inputs(self):
         return self._state_inputs
 
+    def prepare_state_input(self):
+        self._state.prepare_state_input(state_inputs=self.state_inputs)
 
 
 
@@ -1302,10 +1304,6 @@ class NewNode(NewBase):
                     self._result[key_out].append(({}, eval(fout.readline())))
 
 
-    def prepare_state_input(self):
-        self._state.prepare_state_input(state_inputs=self.state_inputs)
-
-
     def run(self, plugin="serial"):
         self.prepare_state_input()
         submitter = sub.SubmitterNode(plugin, node=self)
@@ -1332,9 +1330,16 @@ class NewWorkflow(NewBase):
         # dj: not sure if this should be different than base_dir
         self.workingdir = os.path.join(os.getcwd(), workingdir)
 
-        #if self.mapper:
-        #    #dj: TODO have to implement mapper for workflow. should I create as many workflows??
-        #    pass
+        if self.mapper:
+            self.prepare_state_input()
+            self.inner_workflows = []
+            for ind in self.state.index_generator:
+                _input = {key.split(".")[1]: val for (key, val) in self.state.state_values(ind).items()}
+                inner_wf = NewWorkflow(name=self.name+str(ind), inputs=_input,
+                                       workingdir=os.path.join(self.workingdir, str(ind)))
+                self.inner_workflows.append(inner_wf)
+        else:
+            self.inner_workflows = None
 
         # dj not sure what was the motivation, wf_klasses gives an empty list
         #mro = self.__class__.mro()
@@ -1352,9 +1357,19 @@ class NewWorkflow(NewBase):
 
     @property
     def nodes(self):
+        if self.inner_workflows:
+            raise Exception("this workflow has inner workflows")
         return self._nodes
 
+    # TODO: use a decorator
     def add_nodes(self, nodes):
+        if self.inner_workflows:
+            for inner_wf in self.inner_workflows:
+                inner_wf._add_nodes(nodes)
+        else:
+            self._add_nodes(nodes)
+
+    def _add_nodes(self, nodes):
         """adding nodes without defining connections"""
         self.graph.add_nodes_from(nodes)
         for nn in nodes:
@@ -1367,6 +1382,14 @@ class NewWorkflow(NewBase):
 
 
     def connect(self, from_node, from_socket, to_node, to_socket):
+        if self.inner_workflows:
+            for inner_wf in self.inner_workflows:
+                inner_wf._connect(from_node, from_socket, to_node, to_socket)
+        else:
+            self._connect(from_node, from_socket, to_node, to_socket)
+
+
+    def _connect(self, from_node, from_socket, to_node, to_socket):
         if from_node:
             self.graph.add_edges_from([(from_node, to_node)])
             if not to_node in self.nodes:
@@ -1379,6 +1402,14 @@ class NewWorkflow(NewBase):
 
 
     def connect_workflow(self, node, inp_wf, inp_nd):
+        if self.inner_workflows:
+            for inner_wf in self.inner_workflows:
+                inner_wf._connect_workflow(node, inp_wf, inp_nd)
+        else:
+            self._connect_workflow(node, inp_wf, inp_nd)
+
+
+    def _connect_workflow(self, node, inp_wf, inp_nd):
         if "{}.{}".format(self.name, inp_wf) in self.inputs:
             node.state_inputs.update({"{}.{}".format(node.name, inp_nd): self.inputs["{}.{}".format(self.name, inp_wf)]})
             node.inputs.update({"{}.{}".format(node.name, inp_nd): self.inputs["{}.{}".format(self.name, inp_wf)]})
@@ -1414,12 +1445,28 @@ class NewWorkflow(NewBase):
 
 
     def run(self, plugin="serial"):
+        if self.inner_workflows:
+            for inner_wf in self.inner_workflows:
+                inner_wf._run(plugin)
+        else:
+            self._run(plugin)
+
+    def _run(self, plugin="serial"):
         self._preparing()
         submitter = sub.SubmitterWorkflow(plugin=plugin, graph=self.graph)
         submitter.run_workflow()
         submitter.close()
 
+
     def add(self, runnable, name=None, base_dir=None, inputs=None, output_nm=None, mapper=None, **kwargs):
+        if self.inner_workflows:
+            for (ii, inner_wf) in enumerate(self.inner_workflows):
+                self.inner_workflows[ii] = inner_wf._add(runnable, name, base_dir, inputs, output_nm, mapper, **kwargs)
+        else:
+            return self._add(runnable, name, base_dir, inputs, output_nm, mapper, **kwargs)
+
+
+    def _add(self, runnable, name=None, base_dir=None, inputs=None, output_nm=None, mapper=None, **kwargs):
         # dj TODO: should I move this if checks to NewNode __init__?
         if is_function(runnable):
             if not output_nm:
@@ -1462,6 +1509,14 @@ class NewWorkflow(NewBase):
 
 
     def map(self, mapper, node=None, inputs=None):
+        if self.inner_workflows:
+            for inner_wf in self.inner_workflows:
+                inner_wf._map(mapper, node, inputs)
+        else:
+            self._map(mapper, node, inputs)
+
+
+    def _map(self, mapper, node=None, inputs=None):
         # if node is None:
         #     if '.' in field:
         #         node, field = field.rsplit('.', 1)

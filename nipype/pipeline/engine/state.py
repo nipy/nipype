@@ -45,10 +45,10 @@ class State(object):
         self.index_generator = itertools.product(*self.all_elements)
 
 
-    def __getitem__(self, key):
-        if type(key) is int:
-            key = (key,)
-        return self.state_values(key)
+    def __getitem__(self, ind):
+        if type(ind) is int:
+            ind = (ind,)
+        return self.state_values(ind)
 
     # not used?
     #@property
