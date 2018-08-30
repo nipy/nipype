@@ -9,8 +9,9 @@ This module defines the API of all nipype interfaces.
 
 """
 from .core import (Interface, BaseInterface, SimpleInterface, CommandLine,
-                   StdOutCommandLine, MpiCommandLine, SEMLikeCommandLine,
-                   LibraryBaseInterface, PackageInfo)
+                   StdOutCommandLine, StdInCommandLine,
+                   EnvironmentInputCommandLine, MpiCommandLine,
+                   SEMLikeCommandLine, LibraryBaseInterface, PackageInfo)
 
 from .specs import (BaseTraitedSpec, TraitedSpec, DynamicTraitedSpec,
                     BaseInterfaceInputSpec, CommandLineInputSpec,
