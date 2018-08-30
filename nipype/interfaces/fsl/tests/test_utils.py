@@ -35,12 +35,17 @@ def test_fslroi(create_files_in_directory_plus_output_type):
     assert roi.cmdline == 'fslroi %s foo_roi.nii 10 20' % filelist[0]
 
     # .run based parameter setting
-    roi2 = fsl.ExtractROI(in_file=filelist[0],
-                          roi_file='foo2_roi.nii',
-                          t_min=20, t_size=40,
-                          x_min=3, x_size=30,
-                          y_min=40, y_size=10,
-                          z_min=5, z_size=20)
+    roi2 = fsl.ExtractROI(
+        in_file=filelist[0],
+        roi_file='foo2_roi.nii',
+        t_min=20,
+        t_size=40,
+        x_min=3,
+        x_size=30,
+        y_min=40,
+        y_size=10,
+        z_min=5,
+        z_size=20)
     assert roi2.cmdline == \
         'fslroi %s foo2_roi.nii 3 30 40 10 5 20 20 40' % filelist[0]
 
@@ -66,24 +71,28 @@ def test_fslmerge(create_files_in_directory_plus_output_type):
     merger.inputs.merged_file = 'foo_merged.nii'
     merger.inputs.dimension = 't'
     merger.inputs.output_type = 'NIFTI'
-    assert merger.cmdline == 'fslmerge -t foo_merged.nii %s' % ' '.join(filelist)
+    assert merger.cmdline == 'fslmerge -t foo_merged.nii %s' % ' '.join(
+        filelist)
 
     # verify that providing a tr value updates the dimension to tr
     merger.inputs.tr = 2.25
-    assert merger.cmdline == 'fslmerge -tr foo_merged.nii %s %.2f' % (' '.join(filelist), 2.25)
+    assert merger.cmdline == 'fslmerge -tr foo_merged.nii %s %.2f' % (
+        ' '.join(filelist), 2.25)
 
     # .run based parameter setting
-    merger2 = fsl.Merge(in_files=filelist,
-                        merged_file='foo_merged.nii',
-                        dimension='t',
-                        output_type='NIFTI',
-                        tr=2.25)
+    merger2 = fsl.Merge(
+        in_files=filelist,
+        merged_file='foo_merged.nii',
+        dimension='t',
+        output_type='NIFTI',
+        tr=2.25)
 
     assert merger2.cmdline == \
         'fslmerge -tr foo_merged.nii %s %.2f' % (' '.join(filelist), 2.25)
 
     # test arguments for opt_map
     # Fslmerge class doesn't have a filled opt_map{}
+
 
 # test fslmath
 
@@ -108,12 +117,13 @@ def test_fslmaths(create_files_in_directory_plus_output_type):
         'fslmaths %s -add 2.5 -mul input_volume2 foo_math.nii' % filelist[0]
 
     # .run based parameter setting
-    math2 = fsl.ImageMaths(in_file=filelist[0], op_string='-add 2.5',
-                           out_file='foo2_math.nii')
+    math2 = fsl.ImageMaths(
+        in_file=filelist[0], op_string='-add 2.5', out_file='foo2_math.nii')
     assert math2.cmdline == 'fslmaths %s -add 2.5 foo2_math.nii' % filelist[0]
 
     # test arguments for opt_map
     # Fslmath class doesn't have opt_map{}
+
 
 # test overlay
 
@@ -142,9 +152,12 @@ def test_overlay(create_files_in_directory_plus_output_type):
             filelist[1], filelist[0], filelist[0])
 
     # .run based parameter setting
-    overlay2 = fsl.Overlay(stat_image=filelist[0], stat_thresh=(2.5, 10),
-                           background_image=filelist[1], auto_thresh_bg=True,
-                           out_file='foo2_overlay.nii')
+    overlay2 = fsl.Overlay(
+        stat_image=filelist[0],
+        stat_thresh=(2.5, 10),
+        background_image=filelist[1],
+        auto_thresh_bg=True,
+        out_file='foo2_overlay.nii')
     assert overlay2.cmdline == 'overlay 1 0 %s -a %s 2.50 10.00 foo2_overlay.nii' % (
         filelist[1], filelist[0])
 
@@ -177,7 +190,9 @@ def test_slicer(create_files_in_directory_plus_output_type):
 
     # .run based parameter setting
     slicer2 = fsl.Slicer(
-        in_file=filelist[0], middle_slices=True, label_slices=False,
+        in_file=filelist[0],
+        middle_slices=True,
+        label_slices=False,
         out_file='foo_bar2.png')
     assert slicer2.cmdline == 'slicer %s   -a foo_bar2.png' % (filelist[0])
 
@@ -186,6 +201,7 @@ def create_parfiles():
     np.savetxt('a.par', np.random.rand(6, 3))
     np.savetxt('b.par', np.random.rand(6, 3))
     return ['a.par', 'b.par']
+
 
 # test fsl_tsplot
 
@@ -215,7 +231,9 @@ def test_plottimeseries(create_files_in_directory_plus_output_type):
 
     # .run based parameter setting
     plotter2 = fsl.PlotTimeSeries(
-        in_file=parfiles, title='test2 plot', plot_range=(2, 5),
+        in_file=parfiles,
+        title='test2 plot',
+        plot_range=(2, 5),
         out_file='bar.png')
     assert plotter2.cmdline == \
         'fsl_tsplot -i %s,%s -o bar.png --start=2 --finish=5 -t \'test2 plot\' -u 1' % tuple(
@@ -246,7 +264,9 @@ def test_plotmotionparams(create_files_in_directory_plus_output_type):
 
     # .run based parameter setting
     plotter2 = fsl.PlotMotionParams(
-        in_file=parfiles[1], in_source='spm', plot_type='translations',
+        in_file=parfiles[1],
+        in_source='spm',
+        plot_type='translations',
         out_file='bar.png')
     assert plotter2.cmdline == \
         ('fsl_tsplot -i %s -o bar.png -t \'Realign estimated translations (mm)\' '
@@ -273,7 +293,9 @@ def test_convertxfm(create_files_in_directory_plus_output_type):
 
     # constructor based parameter setting
     cvt2 = fsl.ConvertXFM(
-        in_file=filelist[0], in_file2=filelist[1], concat_xfm=True,
+        in_file=filelist[0],
+        in_file2=filelist[1],
+        concat_xfm=True,
         out_file="bar.mat")
     assert cvt2.cmdline == \
         "convert_xfm -omat bar.mat -concat %s %s" % (filelist[1], filelist[0])
@@ -297,9 +319,9 @@ def test_swapdims(create_files_in_directory_plus_output_type):
     # Now test a basic command line
     swap.inputs.in_file = files[0]
     swap.inputs.new_dims = ("x", "y", "z")
-    assert swap.cmdline == "fslswapdim a.nii x y z %s" % os.path.realpath(os.path.join(testdir, "a_newdims%s" % out_ext))
+    assert swap.cmdline == "fslswapdim a.nii x y z %s" % os.path.realpath(
+        os.path.join(testdir, "a_newdims%s" % out_ext))
 
     # Test that we can set an output name
     swap.inputs.out_file = "b.nii"
     assert swap.cmdline == "fslswapdim a.nii x y z b.nii"
-

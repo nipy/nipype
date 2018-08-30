@@ -11,7 +11,8 @@ from ....base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
 
 
 class fiberstatsInputSpec(CommandLineInputSpec):
-    fiber_file = File(desc="DTI Fiber File", exists=True, argstr="--fiber_file %s")
+    fiber_file = File(
+        desc="DTI Fiber File", exists=True, argstr="--fiber_file %s")
     verbose = traits.Bool(desc="produce verbose output", argstr="--verbose ")
 
 
@@ -20,7 +21,6 @@ class fiberstatsOutputSpec(TraitedSpec):
 
 
 class fiberstats(SEMLikeCommandLine):
-
     """title: FiberStats (DTIProcess)
 
 category: Diffusion.Tractography.CommandLineOnly

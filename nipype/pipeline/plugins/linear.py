@@ -3,7 +3,8 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Local serial workflow execution
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import os
 
@@ -52,9 +53,8 @@ class LinearPlugin(PluginBase):
                 crashfile = report_crash(node)
                 # remove dependencies from queue
                 subnodes = [s for s in dfs_preorder(graph, node)]
-                notrun.append(dict(node=node,
-                                   dependents=subnodes,
-                                   crashfile=crashfile))
+                notrun.append(
+                    dict(node=node, dependents=subnodes, crashfile=crashfile))
                 donotrun.extend(subnodes)
                 if self._status_callback:
                     self._status_callback(node, 'exception')

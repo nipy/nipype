@@ -1,16 +1,8 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-
 """
 The stats module provides higher-level interfaces to some of the operations
 that can be performed with the niftyseg stats (seg_stats) command-line program.
-
-Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/\
-data'))
-    >>> os.chdir(datadir)
 """
 from __future__ import print_function
 import numpy as np
@@ -22,22 +14,22 @@ from ..niftyreg.base import get_custom_path
 
 class StatsInput(CommandLineInputSpec):
     """Input Spec for seg_stats interfaces."""
-    in_file = File(position=2,
-                   argstr='%s',
-                   exists=True,
-                   mandatory=True,
-                   desc='image to operate on')
+    in_file = File(
+        position=2,
+        argstr='%s',
+        exists=True,
+        mandatory=True,
+        desc='image to operate on')
 
     # Constrains
-    mask_file = File(exists=True,
-                     position=-2,
-                     argstr='-m %s',
-                     desc='statistics within the masked area')
+    mask_file = File(
+        exists=True,
+        position=-2,
+        argstr='-m %s',
+        desc='statistics within the masked area')
 
     desc = 'Only estimate statistics if voxel is larger than <float>'
-    larger_voxel = traits.Float(argstr='-t %f',
-                                position=-3,
-                                desc=desc)
+    larger_voxel = traits.Float(argstr='-t %f', position=-3, desc=desc)
 
 
 class StatsOutput(TraitedSpec):
@@ -87,12 +79,28 @@ class StatsCommand(NiftySegCommand):
 
 class UnaryStatsInput(StatsInput):
     """Input Spec for seg_stats unary operations."""
-    operation = traits.Enum('r', 'R', 'a', 's', 'v', 'vl', 'vp', 'n', 'np',
-                            'e', 'ne', 'x', 'X', 'c', 'B', 'xvox', 'xdim',
-                            argstr='-%s',
-                            position=4,
-                            mandatory=True,
-                            desc='operation to perform')
+    operation = traits.Enum(
+        'r',
+        'R',
+        'a',
+        's',
+        'v',
+        'vl',
+        'vp',
+        'n',
+        'np',
+        'e',
+        'ne',
+        'x',
+        'X',
+        'c',
+        'B',
+        'xvox',
+        'xdim',
+        argstr='-%s',
+        position=4,
+        mandatory=True,
+        desc='operation to perform')
 
 
 class UnaryStats(StatsCommand):
@@ -176,25 +184,36 @@ y/z for other directions.
 
 class BinaryStatsInput(StatsInput):
     """Input Spec for seg_stats Binary operations."""
-    operation = traits.Enum('p', 'sa', 'ss', 'svp', 'al', 'd', 'ncc', 'nmi',
-                            'Vl', 'Nl',
-                            mandatory=True,
-                            argstr='-%s',
-                            position=4,
-                            desc='operation to perform')
+    operation = traits.Enum(
+        'p',
+        'sa',
+        'ss',
+        'svp',
+        'al',
+        'd',
+        'ncc',
+        'nmi',
+        'Vl',
+        'Nl',
+        mandatory=True,
+        argstr='-%s',
+        position=4,
+        desc='operation to perform')
 
-    operand_file = File(exists=True,
-                        argstr="%s",
-                        mandatory=True,
-                        position=5,
-                        xor=["operand_value"],
-                        desc="second image to perform operation with")
+    operand_file = File(
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=5,
+        xor=["operand_value"],
+        desc="second image to perform operation with")
 
-    operand_value = traits.Float(argstr='%.8f',
-                                 mandatory=True,
-                                 position=5,
-                                 xor=["operand_file"],
-                                 desc='value to perform operation with')
+    operand_value = traits.Float(
+        argstr='%.8f',
+        mandatory=True,
+        position=5,
+        xor=["operand_file"],
+        desc='value to perform operation with')
 
 
 class BinaryStats(StatsCommand):

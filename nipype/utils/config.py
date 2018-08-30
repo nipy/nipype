@@ -9,13 +9,13 @@ hash_method : content, timestamp
 
 @author: Chris Filo Gorgolewski
 '''
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 import os
 import sys
 import errno
 import atexit
 from warnings import warn
-from io import StringIO
 from distutils.version import LooseVersion
 import configparser
 import numpy as np
@@ -29,29 +29,26 @@ from ..external import portalocker
 
 standard_library.install_aliases()
 
-
 CONFIG_DEPRECATIONS = {
-    'profile_runtime': ('resource_monitor', '1.0'),
-    'filemanip_level': ('utils_level', '1.0'),
+    'profile_runtime': ('monitoring.enabled', '1.0'),
+    'filemanip_level': ('logging.utils_level', '1.0'),
 }
 
 NUMPY_MMAP = LooseVersion(np.__version__) >= LooseVersion('1.12.0')
 
-# Get home directory in platform-agnostic way
-homedir = os.path.expanduser('~')
-default_cfg = """
+DEFAULT_CONFIG_TPL = """\
 [logging]
 workflow_level = INFO
 utils_level = INFO
 interface_level = INFO
 log_to_file = false
-log_directory = %s
+log_directory = {log_dir}
 log_size = 16384000
 log_rotate = 4
 
 [execution]
 create_report = true
-crashdump_dir = %s
+crashdump_dir = {crashdump_dir}
 hash_method = timestamp
 job_finished_timeout = 5
 keep_inputs = false
@@ -71,12 +68,15 @@ write_provenance = false
 parameterize_dirs = true
 poll_sleep_duration = 2
 xvfb_max_wait = 10
-resource_monitor = false
-resource_monitor_frequency = 1
+
+[monitoring]
+enabled = false
+sample_frequency = 1
+summary_append = true
 
 [check]
 interval = 1209600
-""" % (homedir, os.getcwd())
+""".format
 
 
 def mkdir_p(path):
@@ -94,34 +94,67 @@ class NipypeConfig(object):
 
     def __init__(self, *args, **kwargs):
         self._config = configparser.ConfigParser()
+        self._cwd = None
+
         config_dir = os.path.expanduser('~/.nipype')
-        config_file = os.path.join(config_dir, 'nipype.cfg')
         self.data_file = os.path.join(config_dir, 'nipype.json')
-        self._config.readfp(StringIO(default_cfg))
+
+        self.set_default_config()
         self._display = None
         self._resource_monitor = None
 
         if os.path.exists(config_dir):
-            self._config.read([config_file, 'nipype.cfg'])
+            self._config.read(
+                [os.path.join(config_dir, 'nipype.cfg'), 'nipype.cfg'])
 
         for option in CONFIG_DEPRECATIONS:
-            for section in ['execution', 'logging']:
+            for section in ['execution', 'logging', 'monitoring']:
                 if self.has_option(section, option):
-                    new_option = CONFIG_DEPRECATIONS[option][0]
-                    if not self.has_option(section, new_option):
+                    new_section, new_option = CONFIG_DEPRECATIONS[option][
+                        0].split('.')
+                    if not self.has_option(new_section, new_option):
                         # Warn implicit in get
-                        self.set(section, new_option, self.get(section, option))
+                        self.set(new_section, new_option,
+                                 self.get(section, option))
+
+    @property
+    def cwd(self):
+        """Cache current working directory ASAP"""
+        # Run getcwd only once, preventing multiproc to finish
+        # with error having changed to the wrong path
+        if self._cwd is None:
+            try:
+                self._cwd = os.getcwd()
+            except OSError:
+                warn('Trying to run Nipype from a nonexistent directory "{}".'.
+                     format(os.getenv('PWD', 'unknown')), RuntimeWarning)
+                raise
+        return self._cwd
 
     def set_default_config(self):
-        self._config.readfp(StringIO(default_cfg))
+        """Read default settings template and set into config object"""
+        default_cfg = DEFAULT_CONFIG_TPL(
+            log_dir=os.path.expanduser(
+                '~'),  # Get $HOME in a platform-agnostic way
+            crashdump_dir=self.cwd  # Read cached cwd
+        )
+
+        try:
+            self._config.read_string(default_cfg)  # Python >= 3.2
+        except AttributeError:
+            from io import StringIO
+            self._config.readfp(StringIO(default_cfg))
 
     def enable_debug_mode(self):
         """Enables debug configuration"""
+        from .. import logging
         self._config.set('execution', 'stop_on_first_crash', 'true')
         self._config.set('execution', 'remove_unnecessary_outputs', 'false')
         self._config.set('execution', 'keep_inputs', 'true')
         self._config.set('logging', 'workflow_level', 'DEBUG')
         self._config.set('logging', 'interface_level', 'DEBUG')
+        self._config.set('logging', 'utils_level', 'DEBUG')
+        logging.update_logging(self._config)
 
     def set_log_dir(self, log_dir):
         """Sets logging directory
@@ -134,11 +167,12 @@ class NipypeConfig(object):
     def get(self, section, option, default=None):
         """Get an option"""
         if option in CONFIG_DEPRECATIONS:
-            msg = ('Config option "%s" has been deprecated as of nipype %s. Please use '
-                   '"%s" instead.') % (option, CONFIG_DEPRECATIONS[option][1],
-                                       CONFIG_DEPRECATIONS[option][0])
+            msg = ('Config option "%s" has been deprecated as of nipype %s. '
+                   'Please use "%s" instead.') % (
+                       option, CONFIG_DEPRECATIONS[option][1],
+                       CONFIG_DEPRECATIONS[option][0])
             warn(msg)
-            option = CONFIG_DEPRECATIONS[option][0]
+            section, option = CONFIG_DEPRECATIONS[option][0].split('.')
 
         if self._config.has_option(section, option):
             return self._config.get(section, option)
@@ -150,11 +184,12 @@ class NipypeConfig(object):
             value = str(value)
 
         if option in CONFIG_DEPRECATIONS:
-            msg = ('Config option "%s" has been deprecated as of nipype %s. Please use '
-                   '"%s" instead.') % (option, CONFIG_DEPRECATIONS[option][1],
-                                       CONFIG_DEPRECATIONS[option][0])
+            msg = ('Config option "%s" has been deprecated as of nipype %s. '
+                   'Please use "%s" instead.') % (
+                       option, CONFIG_DEPRECATIONS[option][1],
+                       CONFIG_DEPRECATIONS[option][0])
             warn(msg)
-            option = CONFIG_DEPRECATIONS[option][0]
+            section, option = CONFIG_DEPRECATIONS[option][0].split('.')
 
         return self._config.set(section, option, value)
 
@@ -222,8 +257,8 @@ class NipypeConfig(object):
             return self._resource_monitor
 
         # Cache config from nipype config
-        self.resource_monitor = self._config.get(
-            'execution', 'resource_monitor') or False
+        self.resource_monitor = str2bool(
+            self._config.get('monitoring', 'enabled')) or False
         return self._resource_monitor
 
     @resource_monitor.setter
@@ -236,7 +271,8 @@ class NipypeConfig(object):
             self._resource_monitor = False
         elif value is True:
             if not self._resource_monitor:
-                # Before setting self._resource_monitor check psutil availability
+                # Before setting self._resource_monitor check psutil
+                # availability
                 self._resource_monitor = False
                 try:
                     import psutil
@@ -246,9 +282,9 @@ class NipypeConfig(object):
                     pass
                 finally:
                     if not self._resource_monitor:
-                        warn('Could not enable the resource monitor: psutil>=5.0'
-                             ' could not be imported.')
-                    self._config.set('execution', 'resource_monitor',
+                        warn('Could not enable the resource monitor: '
+                             'psutil>=5.0 could not be imported.')
+                    self._config.set('monitoring', 'enabled',
                                      ('%s' % self._resource_monitor).lower())
 
     def enable_resource_monitor(self):
@@ -279,11 +315,11 @@ class NipypeConfig(object):
             def _mock():
                 pass
 
-            # Store a fake Xvfb object
-            ndisp = int(sysdisplay.split(':')[-1])
+            # Store a fake Xvfb object. Format - <host>:<display>[.<screen>]
+            ndisp = sysdisplay.split(':')[-1].split('.')[0]
             Xvfb = namedtuple('Xvfb', ['new_display', 'stop'])
-            self._display = Xvfb(ndisp, _mock)
-            return sysdisplay
+            self._display = Xvfb(int(ndisp), _mock)
+            return self.get_display()
         else:
             if 'darwin' in sys.platform:
                 raise RuntimeError(
@@ -300,8 +336,8 @@ class NipypeConfig(object):
                 from xvfbwrapper import Xvfb
             except ImportError:
                 raise RuntimeError(
-                    'A display server was required, but $DISPLAY is not defined '
-                    'and Xvfb could not be imported.')
+                    'A display server was required, but $DISPLAY is not '
+                    'defined and Xvfb could not be imported.')
 
             self._display = Xvfb(nolisten='tcp')
             self._display.start()
@@ -310,15 +346,15 @@ class NipypeConfig(object):
             if not hasattr(self._display, 'new_display'):
                 setattr(self._display, 'new_display',
                         self._display.vdisplay_num)
-
-            return ':%d' % self._display.new_display
+            return self.get_display()
 
     def stop_display(self):
         """Closes the display if started"""
         if self._display is not None:
             from .. import logging
             self._display.stop()
-            logging.getLogger('interface').debug('Closing display (if virtual)')
+            logging.getLogger('nipype.interface').debug(
+                'Closing display (if virtual)')
 
 
 @atexit.register

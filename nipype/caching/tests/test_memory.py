@@ -12,7 +12,6 @@ nb_runs = 0
 
 
 class SideEffectInterface(EngineTestInterface):
-
     def _run_interface(self, runtime):
         global nb_runs
         nb_runs += 1
@@ -40,4 +39,3 @@ def test_caching(tmpdir):
         assert results.outputs.output1 == [1, 1]
     finally:
         config.set('execution', 'stop_on_first_rerun', old_rerun)
-

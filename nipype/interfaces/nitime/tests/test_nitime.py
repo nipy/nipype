@@ -21,7 +21,8 @@ def test_read_csv():
     CA = nitime.CoherenceAnalyzer()
     CA.inputs.TR = 1.89  # bogus value just to pass traits test
     CA.inputs.in_file = example_data('fmri_timeseries_nolabels.csv')
-    with pytest.raises(ValueError): CA._read_csv()
+    with pytest.raises(ValueError):
+        CA._read_csv()
 
     CA.inputs.in_file = example_data('fmri_timeseries.csv')
     data, roi_names = CA._read_csv()
@@ -64,14 +65,18 @@ def test_coherence_analysis(tmpdir):
     assert (CA._csv2ts().data == T.data).all()
 
     T.metadata['roi'] = roi_names
-    C = nta.CoherenceAnalyzer(T, method=dict(this_method='welch',
-                                             NFFT=CA.inputs.NFFT,
-                                             n_overlap=CA.inputs.n_overlap))
+    C = nta.CoherenceAnalyzer(
+        T,
+        method=dict(
+            this_method='welch',
+            NFFT=CA.inputs.NFFT,
+            n_overlap=CA.inputs.n_overlap))
 
     freq_idx = np.where((C.frequencies > CA.inputs.frequency_range[0]) *
                         (C.frequencies < CA.inputs.frequency_range[1]))[0]
 
     # Extract the coherence and average across these frequency bands:
-    coh = np.mean(C.coherence[:, :, freq_idx], -1)  # Averaging on the last dimension
+    # Averaging is done on the last dimension
+    coh = np.mean(C.coherence[:, :, freq_idx], -1)
 
     assert (o.outputs.coherence_array == coh).all()

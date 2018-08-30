@@ -23,7 +23,6 @@ import nipype.interfaces.io as nio
 from nipype.workflows.smri.freesurfer import create_reconall_workflow
 from nipype.interfaces.freesurfer.utils import MakeAverageSubject
 from nipype.interfaces.utility import IdentityInterface
-
 """
 Assign the tutorial directory
 """
@@ -31,7 +30,6 @@ Assign the tutorial directory
 tutorial_dir = os.path.abspath('smri_fsreconall_tutorial')
 if not os.path.isdir(tutorial_dir):
     os.mkdir(tutorial_dir)
-
 """
 Define the workflow directories
 """
@@ -44,22 +42,20 @@ if not os.path.exists(subjects_dir):
 
 wf = pe.Workflow(name="l1workflow")
 wf.base_dir = os.path.join(tutorial_dir, 'workdir')
-
 """
 Create inputspec
 """
 
-inputspec = pe.Node(interface=IdentityInterface(['subject_id']),
-                    name="inputspec")
+inputspec = pe.Node(
+    interface=IdentityInterface(['subject_id']), name="inputspec")
 inputspec.iterables = ("subject_id", subject_list)
-
 """
 Grab data
 """
 
-datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
-                                               outfields=['struct']),
-                        name='datasource')
+datasource = pe.Node(
+    interface=nio.DataGrabber(infields=['subject_id'], outfields=['struct']),
+    name='datasource')
 datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = dict(struct=[['subject_id', 'struct']])
@@ -67,7 +63,6 @@ datasource.inputs.subject_id = subject_list
 datasource.inputs.sort_filelist = True
 
 wf.connect(inputspec, 'subject_id', datasource, 'subject_id')
-
 """
 Run recon-all
 """
@@ -77,17 +72,18 @@ recon_all.inputs.inputspec.subjects_dir = subjects_dir
 
 wf.connect(datasource, 'struct', recon_all, 'inputspec.T1_files')
 wf.connect(inputspec, 'subject_id', recon_all, 'inputspec.subject_id')
-
 """
 Make average subject
 """
 
-average = pe.JoinNode(interface=MakeAverageSubject(),
-                      joinsource="inputspec",
-                      joinfield="subjects_ids",
-                      name="average")
+average = pe.JoinNode(
+    interface=MakeAverageSubject(),
+    joinsource="inputspec",
+    joinfield="subjects_ids",
+    name="average")
 average.inputs.subjects_dir = subjects_dir
 
-wf.connect(recon_all, 'postdatasink_outputspec.subject_id', average, 'subjects_ids')
+wf.connect(recon_all, 'postdatasink_outputspec.subject_id', average,
+           'subjects_ids')
 
 wf.run("MultiProc", plugin_args={'n_procs': 4})

@@ -8,25 +8,80 @@ import os
 
 
 class BSplineDeformableRegistrationInputSpec(CommandLineInputSpec):
-    iterations = traits.Int(desc="Number of iterations", argstr="--iterations %d")
-    gridSize = traits.Int(desc="Number of grid points on interior of the fixed image. Larger grid sizes allow for finer registrations.", argstr="--gridSize %d")
-    histogrambins = traits.Int(desc="Number of histogram bins to use for Mattes Mutual Information. Reduce the number of bins if a deformable registration fails. If the number of bins is too large, the estimated PDFs will be a field of impulses and will inhibit reliable registration estimation.", argstr="--histogrambins %d")
-    spatialsamples = traits.Int(desc="Number of spatial samples to use in estimating Mattes Mutual Information. Larger values yield more accurate PDFs and improved registration quality.", argstr="--spatialsamples %d")
-    constrain = traits.Bool(desc="Constrain the deformation to the amount specified in Maximum Deformation", argstr="--constrain ")
-    maximumDeformation = traits.Float(desc="If Constrain Deformation is checked, limit the deformation to this amount.", argstr="--maximumDeformation %f")
-    default = traits.Int(desc="Default pixel value used if resampling a pixel outside of the volume.", argstr="--default %d")
-    initialtransform = File(desc="Initial transform for aligning the fixed and moving image. Maps positions in the fixed coordinate frame to positions in the moving coordinate frame. This transform should be an affine or rigid transform.  It is used an a bulk transform for the BSpline. Optional.", exists=True, argstr="--initialtransform %s")
-    FixedImageFileName = File(position=-2, desc="Fixed image to which to register", exists=True, argstr="%s")
-    MovingImageFileName = File(position=-1, desc="Moving image", exists=True, argstr="%s")
-    outputtransform = traits.Either(traits.Bool, File(), hash_files=False, desc="Transform calculated that aligns the fixed and moving image. Maps positions from the fixed coordinate frame to the moving coordinate frame. Optional (specify an output transform or an output volume or both).", argstr="--outputtransform %s")
-    outputwarp = traits.Either(traits.Bool, File(), hash_files=False, desc="Vector field that applies an equivalent warp as the BSpline. Maps positions from the fixed coordinate frame to the moving coordinate frame. Optional.", argstr="--outputwarp %s")
-    resampledmovingfilename = traits.Either(traits.Bool, File(), hash_files=False, desc="Resampled moving image to fixed image coordinate frame. Optional (specify an output transform or an output volume or both).", argstr="--resampledmovingfilename %s")
+    iterations = traits.Int(
+        desc="Number of iterations", argstr="--iterations %d")
+    gridSize = traits.Int(
+        desc=
+        "Number of grid points on interior of the fixed image. Larger grid sizes allow for finer registrations.",
+        argstr="--gridSize %d")
+    histogrambins = traits.Int(
+        desc=
+        "Number of histogram bins to use for Mattes Mutual Information. Reduce the number of bins if a deformable registration fails. If the number of bins is too large, the estimated PDFs will be a field of impulses and will inhibit reliable registration estimation.",
+        argstr="--histogrambins %d")
+    spatialsamples = traits.Int(
+        desc=
+        "Number of spatial samples to use in estimating Mattes Mutual Information. Larger values yield more accurate PDFs and improved registration quality.",
+        argstr="--spatialsamples %d")
+    constrain = traits.Bool(
+        desc=
+        "Constrain the deformation to the amount specified in Maximum Deformation",
+        argstr="--constrain ")
+    maximumDeformation = traits.Float(
+        desc=
+        "If Constrain Deformation is checked, limit the deformation to this amount.",
+        argstr="--maximumDeformation %f")
+    default = traits.Int(
+        desc=
+        "Default pixel value used if resampling a pixel outside of the volume.",
+        argstr="--default %d")
+    initialtransform = File(
+        desc=
+        "Initial transform for aligning the fixed and moving image. Maps positions in the fixed coordinate frame to positions in the moving coordinate frame. This transform should be an affine or rigid transform.  It is used an a bulk transform for the BSpline. Optional.",
+        exists=True,
+        argstr="--initialtransform %s")
+    FixedImageFileName = File(
+        position=-2,
+        desc="Fixed image to which to register",
+        exists=True,
+        argstr="%s")
+    MovingImageFileName = File(
+        position=-1, desc="Moving image", exists=True, argstr="%s")
+    outputtransform = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Transform calculated that aligns the fixed and moving image. Maps positions from the fixed coordinate frame to the moving coordinate frame. Optional (specify an output transform or an output volume or both).",
+        argstr="--outputtransform %s")
+    outputwarp = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Vector field that applies an equivalent warp as the BSpline. Maps positions from the fixed coordinate frame to the moving coordinate frame. Optional.",
+        argstr="--outputwarp %s")
+    resampledmovingfilename = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Resampled moving image to fixed image coordinate frame. Optional (specify an output transform or an output volume or both).",
+        argstr="--resampledmovingfilename %s")
 
 
 class BSplineDeformableRegistrationOutputSpec(TraitedSpec):
-    outputtransform = File(desc="Transform calculated that aligns the fixed and moving image. Maps positions from the fixed coordinate frame to the moving coordinate frame. Optional (specify an output transform or an output volume or both).", exists=True)
-    outputwarp = File(desc="Vector field that applies an equivalent warp as the BSpline. Maps positions from the fixed coordinate frame to the moving coordinate frame. Optional.", exists=True)
-    resampledmovingfilename = File(desc="Resampled moving image to fixed image coordinate frame. Optional (specify an output transform or an output volume or both).", exists=True)
+    outputtransform = File(
+        desc=
+        "Transform calculated that aligns the fixed and moving image. Maps positions from the fixed coordinate frame to the moving coordinate frame. Optional (specify an output transform or an output volume or both).",
+        exists=True)
+    outputwarp = File(
+        desc=
+        "Vector field that applies an equivalent warp as the BSpline. Maps positions from the fixed coordinate frame to the moving coordinate frame. Optional.",
+        exists=True)
+    resampledmovingfilename = File(
+        desc=
+        "Resampled moving image to fixed image coordinate frame. Optional (specify an output transform or an output volume or both).",
+        exists=True)
 
 
 class BSplineDeformableRegistration(SEMLikeCommandLine):
@@ -49,26 +104,73 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = BSplineDeformableRegistrationInputSpec
     output_spec = BSplineDeformableRegistrationOutputSpec
     _cmd = "BSplineDeformableRegistration "
-    _outputs_filenames = {'resampledmovingfilename': 'resampledmovingfilename.nii', 'outputtransform': 'outputtransform.txt', 'outputwarp': 'outputwarp.nrrd'}
+    _outputs_filenames = {
+        'resampledmovingfilename': 'resampledmovingfilename.nii',
+        'outputtransform': 'outputtransform.txt',
+        'outputwarp': 'outputwarp.nrrd'
+    }
 
 
 class AffineRegistrationInputSpec(CommandLineInputSpec):
-    fixedsmoothingfactor = traits.Int(desc="Amount of smoothing applied to fixed image prior to registration. Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the input data if there is considerable amounts of noise or the noise pattern in the fixed and moving images is very different.", argstr="--fixedsmoothingfactor %d")
-    movingsmoothingfactor = traits.Int(desc="Amount of smoothing applied to moving image prior to registration. Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the input data if there is considerable amounts of noise or the noise pattern in the fixed and moving images is very different.", argstr="--movingsmoothingfactor %d")
-    histogrambins = traits.Int(desc="Number of histogram bins to use for Mattes Mutual Information. Reduce the number of bins if a registration fails. If the number of bins is too large, the estimated PDFs will be a field of impulses and will inhibit reliable registration estimation.", argstr="--histogrambins %d")
-    spatialsamples = traits.Int(desc="Number of spatial samples to use in estimating Mattes Mutual Information. Larger values yield more accurate PDFs and improved registration quality.", argstr="--spatialsamples %d")
-    iterations = traits.Int(desc="Number of iterations", argstr="--iterations %d")
-    translationscale = traits.Float(desc="Relative scale of translations to rotations, i.e. a value of 100 means 10mm = 1 degree. (Actual scale used is 1/(TranslationScale^2)). This parameter is used to \'weight\' or \'standardized\' the transform parameters and their effect on the registration objective function.", argstr="--translationscale %f")
-    initialtransform = File(desc="Initial transform for aligning the fixed and moving image.  Maps positions in the fixed coordinate frame to positions in the moving coordinate frame. Optional.", exists=True, argstr="--initialtransform %s")
-    FixedImageFileName = File(position=-2, desc="Fixed image to which to register", exists=True, argstr="%s")
-    MovingImageFileName = File(position=-1, desc="Moving image", exists=True, argstr="%s")
-    outputtransform = traits.Either(traits.Bool, File(), hash_files=False, desc="Transform calculated that aligns the fixed and moving image. Maps positions in the fixed coordinate frame to the moving coordinate frame. Optional (specify an output transform or an output volume or both).", argstr="--outputtransform %s")
-    resampledmovingfilename = traits.Either(traits.Bool, File(), hash_files=False, desc="Resampled moving image to the fixed image coordinate frame. Optional (specify an output transform or an output volume or both).", argstr="--resampledmovingfilename %s")
+    fixedsmoothingfactor = traits.Int(
+        desc=
+        "Amount of smoothing applied to fixed image prior to registration. Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the input data if there is considerable amounts of noise or the noise pattern in the fixed and moving images is very different.",
+        argstr="--fixedsmoothingfactor %d")
+    movingsmoothingfactor = traits.Int(
+        desc=
+        "Amount of smoothing applied to moving image prior to registration. Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the input data if there is considerable amounts of noise or the noise pattern in the fixed and moving images is very different.",
+        argstr="--movingsmoothingfactor %d")
+    histogrambins = traits.Int(
+        desc=
+        "Number of histogram bins to use for Mattes Mutual Information. Reduce the number of bins if a registration fails. If the number of bins is too large, the estimated PDFs will be a field of impulses and will inhibit reliable registration estimation.",
+        argstr="--histogrambins %d")
+    spatialsamples = traits.Int(
+        desc=
+        "Number of spatial samples to use in estimating Mattes Mutual Information. Larger values yield more accurate PDFs and improved registration quality.",
+        argstr="--spatialsamples %d")
+    iterations = traits.Int(
+        desc="Number of iterations", argstr="--iterations %d")
+    translationscale = traits.Float(
+        desc=
+        "Relative scale of translations to rotations, i.e. a value of 100 means 10mm = 1 degree. (Actual scale used is 1/(TranslationScale^2)). This parameter is used to \'weight\' or \'standardized\' the transform parameters and their effect on the registration objective function.",
+        argstr="--translationscale %f")
+    initialtransform = File(
+        desc=
+        "Initial transform for aligning the fixed and moving image.  Maps positions in the fixed coordinate frame to positions in the moving coordinate frame. Optional.",
+        exists=True,
+        argstr="--initialtransform %s")
+    FixedImageFileName = File(
+        position=-2,
+        desc="Fixed image to which to register",
+        exists=True,
+        argstr="%s")
+    MovingImageFileName = File(
+        position=-1, desc="Moving image", exists=True, argstr="%s")
+    outputtransform = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Transform calculated that aligns the fixed and moving image. Maps positions in the fixed coordinate frame to the moving coordinate frame. Optional (specify an output transform or an output volume or both).",
+        argstr="--outputtransform %s")
+    resampledmovingfilename = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Resampled moving image to the fixed image coordinate frame. Optional (specify an output transform or an output volume or both).",
+        argstr="--resampledmovingfilename %s")
 
 
 class AffineRegistrationOutputSpec(TraitedSpec):
-    outputtransform = File(desc="Transform calculated that aligns the fixed and moving image. Maps positions in the fixed coordinate frame to the moving coordinate frame. Optional (specify an output transform or an output volume or both).", exists=True)
-    resampledmovingfilename = File(desc="Resampled moving image to the fixed image coordinate frame. Optional (specify an output transform or an output volume or both).", exists=True)
+    outputtransform = File(
+        desc=
+        "Transform calculated that aligns the fixed and moving image. Maps positions in the fixed coordinate frame to the moving coordinate frame. Optional (specify an output transform or an output volume or both).",
+        exists=True)
+    resampledmovingfilename = File(
+        desc=
+        "Resampled moving image to the fixed image coordinate frame. Optional (specify an output transform or an output volume or both).",
+        exists=True)
 
 
 class AffineRegistration(SEMLikeCommandLine):
@@ -97,26 +199,63 @@ This work is part of the National Alliance for Medical Image Computing (NAMIC), 
     input_spec = AffineRegistrationInputSpec
     output_spec = AffineRegistrationOutputSpec
     _cmd = "AffineRegistration "
-    _outputs_filenames = {'resampledmovingfilename': 'resampledmovingfilename.nii', 'outputtransform': 'outputtransform.txt'}
+    _outputs_filenames = {
+        'resampledmovingfilename': 'resampledmovingfilename.nii',
+        'outputtransform': 'outputtransform.txt'
+    }
 
 
 class MultiResolutionAffineRegistrationInputSpec(CommandLineInputSpec):
-    fixedImage = File(position=-2, desc="Image which defines the space into which the moving image is registered", exists=True, argstr="%s")
-    movingImage = File(position=-1, desc="The transform goes from the fixed image's space into the moving image's space", exists=True, argstr="%s")
-    resampledImage = traits.Either(traits.Bool, File(), hash_files=False, desc="Registration results", argstr="--resampledImage %s")
-    saveTransform = traits.Either(traits.Bool, File(), hash_files=False, desc="Save the output transform from the registration", argstr="--saveTransform %s")
-    fixedImageMask = File(desc="Label image which defines a mask of interest for the fixed image", exists=True, argstr="--fixedImageMask %s")
-    fixedImageROI = traits.List(desc="Label image which defines a ROI of interest for the fixed image", argstr="--fixedImageROI %s")
-    numIterations = traits.Int(desc="Number of iterations to run at each resolution level.", argstr="--numIterations %d")
-    numLineIterations = traits.Int(desc="Number of iterations to run at each resolution level.", argstr="--numLineIterations %d")
-    stepSize = traits.Float(desc="The maximum step size of the optimizer in voxels", argstr="--stepSize %f")
-    stepTolerance = traits.Float(desc="The maximum step size of the optimizer in voxels", argstr="--stepTolerance %f")
+    fixedImage = File(
+        position=-2,
+        desc=
+        "Image which defines the space into which the moving image is registered",
+        exists=True,
+        argstr="%s")
+    movingImage = File(
+        position=-1,
+        desc=
+        "The transform goes from the fixed image's space into the moving image's space",
+        exists=True,
+        argstr="%s")
+    resampledImage = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Registration results",
+        argstr="--resampledImage %s")
+    saveTransform = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Save the output transform from the registration",
+        argstr="--saveTransform %s")
+    fixedImageMask = File(
+        desc="Label image which defines a mask of interest for the fixed image",
+        exists=True,
+        argstr="--fixedImageMask %s")
+    fixedImageROI = traits.List(
+        desc="Label image which defines a ROI of interest for the fixed image",
+        argstr="--fixedImageROI %s")
+    numIterations = traits.Int(
+        desc="Number of iterations to run at each resolution level.",
+        argstr="--numIterations %d")
+    numLineIterations = traits.Int(
+        desc="Number of iterations to run at each resolution level.",
+        argstr="--numLineIterations %d")
+    stepSize = traits.Float(
+        desc="The maximum step size of the optimizer in voxels",
+        argstr="--stepSize %f")
+    stepTolerance = traits.Float(
+        desc="The maximum step size of the optimizer in voxels",
+        argstr="--stepTolerance %f")
     metricTolerance = traits.Float(argstr="--metricTolerance %f")
 
 
 class MultiResolutionAffineRegistrationOutputSpec(TraitedSpec):
     resampledImage = File(desc="Registration results", exists=True)
-    saveTransform = File(desc="Save the output transform from the registration", exists=True)
+    saveTransform = File(
+        desc="Save the output transform from the registration", exists=True)
 
 
 class MultiResolutionAffineRegistration(SEMLikeCommandLine):
@@ -139,28 +278,86 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = MultiResolutionAffineRegistrationInputSpec
     output_spec = MultiResolutionAffineRegistrationOutputSpec
     _cmd = "MultiResolutionAffineRegistration "
-    _outputs_filenames = {'resampledImage': 'resampledImage.nii', 'saveTransform': 'saveTransform.txt'}
+    _outputs_filenames = {
+        'resampledImage': 'resampledImage.nii',
+        'saveTransform': 'saveTransform.txt'
+    }
 
 
 class RigidRegistrationInputSpec(CommandLineInputSpec):
-    fixedsmoothingfactor = traits.Int(desc="Amount of smoothing applied to fixed image prior to registration. Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the input data if there is considerable amounts of noise or the noise pattern in the fixed and moving images is very different.", argstr="--fixedsmoothingfactor %d")
-    movingsmoothingfactor = traits.Int(desc="Amount of smoothing applied to moving image prior to registration. Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the input data if there is considerable amounts of noise or the noise pattern in the fixed and moving images is very different.", argstr="--movingsmoothingfactor %d")
-    testingmode = traits.Bool(desc="Enable testing mode. Input transform will be used to construct floating image. The floating image will be ignored if passed.", argstr="--testingmode ")
-    histogrambins = traits.Int(desc="Number of histogram bins to use for Mattes Mutual Information. Reduce the number of bins if a registration fails. If the number of bins is too large, the estimated PDFs will be a field of impulses and will inhibit reliable registration estimation.", argstr="--histogrambins %d")
-    spatialsamples = traits.Int(desc="Number of spatial samples to use in estimating Mattes Mutual Information. Larger values yield more accurate PDFs and improved registration quality.", argstr="--spatialsamples %d")
-    iterations = InputMultiPath(traits.Int, desc="Comma separated list of iterations. Must have the same number of elements as the learning rate.", sep=",", argstr="--iterations %s")
-    learningrate = InputMultiPath(traits.Float, desc="Comma separated list of learning rates. Learning rate is a scale factor on the gradient of the registration objective function (gradient with respect to the parameters of the transformation) used to update the parameters of the transformation during optimization. Smaller values cause the optimizer to take smaller steps through the parameter space. Larger values are typically used early in the registration process to take large jumps in parameter space followed by smaller values to home in on the optimum value of the registration objective function. Default is: 0.01, 0.005, 0.0005, 0.0002. Must have the same number of elements as iterations.", sep=",", argstr="--learningrate %s")
-    translationscale = traits.Float(desc="Relative scale of translations to rotations, i.e. a value of 100 means 10mm = 1 degree. (Actual scale used 1/(TranslationScale^2)). This parameter is used to \'weight\' or \'standardized\' the transform parameters and their effect on the registration objective function.", argstr="--translationscale %f")
-    initialtransform = File(desc="Initial transform for aligning the fixed and moving image. Maps positions in the fixed coordinate frame to positions in the moving coordinate frame. Optional.", exists=True, argstr="--initialtransform %s")
-    FixedImageFileName = File(position=-2, desc="Fixed image to which to register", exists=True, argstr="%s")
-    MovingImageFileName = File(position=-1, desc="Moving image", exists=True, argstr="%s")
-    outputtransform = traits.Either(traits.Bool, File(), hash_files=False, desc="Transform calculated that aligns the fixed and moving image. Maps positions in the fixed coordinate frame to the moving coordinate frame. Optional (specify an output transform or an output volume or both).", argstr="--outputtransform %s")
-    resampledmovingfilename = traits.Either(traits.Bool, File(), hash_files=False, desc="Resampled moving image to the fixed image coordinate frame. Optional (specify an output transform or an output volume or both).", argstr="--resampledmovingfilename %s")
+    fixedsmoothingfactor = traits.Int(
+        desc=
+        "Amount of smoothing applied to fixed image prior to registration. Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the input data if there is considerable amounts of noise or the noise pattern in the fixed and moving images is very different.",
+        argstr="--fixedsmoothingfactor %d")
+    movingsmoothingfactor = traits.Int(
+        desc=
+        "Amount of smoothing applied to moving image prior to registration. Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the input data if there is considerable amounts of noise or the noise pattern in the fixed and moving images is very different.",
+        argstr="--movingsmoothingfactor %d")
+    testingmode = traits.Bool(
+        desc=
+        "Enable testing mode. Input transform will be used to construct floating image. The floating image will be ignored if passed.",
+        argstr="--testingmode ")
+    histogrambins = traits.Int(
+        desc=
+        "Number of histogram bins to use for Mattes Mutual Information. Reduce the number of bins if a registration fails. If the number of bins is too large, the estimated PDFs will be a field of impulses and will inhibit reliable registration estimation.",
+        argstr="--histogrambins %d")
+    spatialsamples = traits.Int(
+        desc=
+        "Number of spatial samples to use in estimating Mattes Mutual Information. Larger values yield more accurate PDFs and improved registration quality.",
+        argstr="--spatialsamples %d")
+    iterations = InputMultiPath(
+        traits.Int,
+        desc=
+        "Comma separated list of iterations. Must have the same number of elements as the learning rate.",
+        sep=",",
+        argstr="--iterations %s")
+    learningrate = InputMultiPath(
+        traits.Float,
+        desc=
+        "Comma separated list of learning rates. Learning rate is a scale factor on the gradient of the registration objective function (gradient with respect to the parameters of the transformation) used to update the parameters of the transformation during optimization. Smaller values cause the optimizer to take smaller steps through the parameter space. Larger values are typically used early in the registration process to take large jumps in parameter space followed by smaller values to home in on the optimum value of the registration objective function. Default is: 0.01, 0.005, 0.0005, 0.0002. Must have the same number of elements as iterations.",
+        sep=",",
+        argstr="--learningrate %s")
+    translationscale = traits.Float(
+        desc=
+        "Relative scale of translations to rotations, i.e. a value of 100 means 10mm = 1 degree. (Actual scale used 1/(TranslationScale^2)). This parameter is used to \'weight\' or \'standardized\' the transform parameters and their effect on the registration objective function.",
+        argstr="--translationscale %f")
+    initialtransform = File(
+        desc=
+        "Initial transform for aligning the fixed and moving image. Maps positions in the fixed coordinate frame to positions in the moving coordinate frame. Optional.",
+        exists=True,
+        argstr="--initialtransform %s")
+    FixedImageFileName = File(
+        position=-2,
+        desc="Fixed image to which to register",
+        exists=True,
+        argstr="%s")
+    MovingImageFileName = File(
+        position=-1, desc="Moving image", exists=True, argstr="%s")
+    outputtransform = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Transform calculated that aligns the fixed and moving image. Maps positions in the fixed coordinate frame to the moving coordinate frame. Optional (specify an output transform or an output volume or both).",
+        argstr="--outputtransform %s")
+    resampledmovingfilename = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Resampled moving image to the fixed image coordinate frame. Optional (specify an output transform or an output volume or both).",
+        argstr="--resampledmovingfilename %s")
 
 
 class RigidRegistrationOutputSpec(TraitedSpec):
-    outputtransform = File(desc="Transform calculated that aligns the fixed and moving image. Maps positions in the fixed coordinate frame to the moving coordinate frame. Optional (specify an output transform or an output volume or both).", exists=True)
-    resampledmovingfilename = File(desc="Resampled moving image to the fixed image coordinate frame. Optional (specify an output transform or an output volume or both).", exists=True)
+    outputtransform = File(
+        desc=
+        "Transform calculated that aligns the fixed and moving image. Maps positions in the fixed coordinate frame to the moving coordinate frame. Optional (specify an output transform or an output volume or both).",
+        exists=True)
+    resampledmovingfilename = File(
+        desc=
+        "Resampled moving image to the fixed image coordinate frame. Optional (specify an output transform or an output volume or both).",
+        exists=True)
 
 
 class RigidRegistration(SEMLikeCommandLine):
@@ -193,27 +390,82 @@ This work is part of the National Alliance for Medical Image Computing (NAMIC), 
     input_spec = RigidRegistrationInputSpec
     output_spec = RigidRegistrationOutputSpec
     _cmd = "RigidRegistration "
-    _outputs_filenames = {'resampledmovingfilename': 'resampledmovingfilename.nii', 'outputtransform': 'outputtransform.txt'}
+    _outputs_filenames = {
+        'resampledmovingfilename': 'resampledmovingfilename.nii',
+        'outputtransform': 'outputtransform.txt'
+    }
 
 
 class LinearRegistrationInputSpec(CommandLineInputSpec):
-    fixedsmoothingfactor = traits.Int(desc="Amount of smoothing applied to fixed image prior to registration. Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the input data if there is considerable amounts of noise or the noise pattern in the fixed and moving images is very different.", argstr="--fixedsmoothingfactor %d")
-    movingsmoothingfactor = traits.Int(desc="Amount of smoothing applied to moving image prior to registration. Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the input data if there is considerable amounts of noise or the noise pattern in the fixed and moving images is very different.", argstr="--movingsmoothingfactor %d")
-    histogrambins = traits.Int(desc="Number of histogram bins to use for Mattes Mutual Information. Reduce the number of bins if a registration fails. If the number of bins is too large, the estimated PDFs will be a field of impulses and will inhibit reliable registration estimation.", argstr="--histogrambins %d")
-    spatialsamples = traits.Int(desc="Number of spatial samples to use in estimating Mattes Mutual Information. Larger values yield more accurate PDFs and improved registration quality.", argstr="--spatialsamples %d")
-    iterations = InputMultiPath(traits.Int, desc="Comma separated list of iterations. Must have the same number of elements as the learning rate.", sep=",", argstr="--iterations %s")
-    learningrate = InputMultiPath(traits.Float, desc="Comma separated list of learning rates. Learning rate is a scale factor on the gradient of the registration objective function (gradient with respect to the parameters of the transformation) used to update the parameters of the transformation during optimization. Smaller values cause the optimizer to take smaller steps through the parameter space. Larger values are typically used early in the registration process to take large jumps in parameter space followed by smaller values to home in on the optimum value of the registration objective function. Default is: 0.01, 0.005, 0.0005, 0.0002. Must have the same number of elements as iterations.", sep=",", argstr="--learningrate %s")
-    translationscale = traits.Float(desc="Relative scale of translations to rotations, i.e. a value of 100 means 10mm = 1 degree. (Actual scale used 1/(TranslationScale^2)). This parameter is used to \'weight\' or \'standardized\' the transform parameters and their effect on the registration objective function.", argstr="--translationscale %f")
-    initialtransform = File(desc="Initial transform for aligning the fixed and moving image. Maps positions in the fixed coordinate frame to positions in the moving coordinate frame. Optional.", exists=True, argstr="--initialtransform %s")
-    FixedImageFileName = File(position=-2, desc="Fixed image to which to register", exists=True, argstr="%s")
-    MovingImageFileName = File(position=-1, desc="Moving image", exists=True, argstr="%s")
-    outputtransform = traits.Either(traits.Bool, File(), hash_files=False, desc="Transform calculated that aligns the fixed and moving image. Maps positions in the fixed coordinate frame to the moving coordinate frame. Optional (specify an output transform or an output volume or both).", argstr="--outputtransform %s")
-    resampledmovingfilename = traits.Either(traits.Bool, File(), hash_files=False, desc="Resampled moving image to the fixed image coordinate frame. Optional (specify an output transform or an output volume or both).", argstr="--resampledmovingfilename %s")
+    fixedsmoothingfactor = traits.Int(
+        desc=
+        "Amount of smoothing applied to fixed image prior to registration. Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the input data if there is considerable amounts of noise or the noise pattern in the fixed and moving images is very different.",
+        argstr="--fixedsmoothingfactor %d")
+    movingsmoothingfactor = traits.Int(
+        desc=
+        "Amount of smoothing applied to moving image prior to registration. Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the input data if there is considerable amounts of noise or the noise pattern in the fixed and moving images is very different.",
+        argstr="--movingsmoothingfactor %d")
+    histogrambins = traits.Int(
+        desc=
+        "Number of histogram bins to use for Mattes Mutual Information. Reduce the number of bins if a registration fails. If the number of bins is too large, the estimated PDFs will be a field of impulses and will inhibit reliable registration estimation.",
+        argstr="--histogrambins %d")
+    spatialsamples = traits.Int(
+        desc=
+        "Number of spatial samples to use in estimating Mattes Mutual Information. Larger values yield more accurate PDFs and improved registration quality.",
+        argstr="--spatialsamples %d")
+    iterations = InputMultiPath(
+        traits.Int,
+        desc=
+        "Comma separated list of iterations. Must have the same number of elements as the learning rate.",
+        sep=",",
+        argstr="--iterations %s")
+    learningrate = InputMultiPath(
+        traits.Float,
+        desc=
+        "Comma separated list of learning rates. Learning rate is a scale factor on the gradient of the registration objective function (gradient with respect to the parameters of the transformation) used to update the parameters of the transformation during optimization. Smaller values cause the optimizer to take smaller steps through the parameter space. Larger values are typically used early in the registration process to take large jumps in parameter space followed by smaller values to home in on the optimum value of the registration objective function. Default is: 0.01, 0.005, 0.0005, 0.0002. Must have the same number of elements as iterations.",
+        sep=",",
+        argstr="--learningrate %s")
+    translationscale = traits.Float(
+        desc=
+        "Relative scale of translations to rotations, i.e. a value of 100 means 10mm = 1 degree. (Actual scale used 1/(TranslationScale^2)). This parameter is used to \'weight\' or \'standardized\' the transform parameters and their effect on the registration objective function.",
+        argstr="--translationscale %f")
+    initialtransform = File(
+        desc=
+        "Initial transform for aligning the fixed and moving image. Maps positions in the fixed coordinate frame to positions in the moving coordinate frame. Optional.",
+        exists=True,
+        argstr="--initialtransform %s")
+    FixedImageFileName = File(
+        position=-2,
+        desc="Fixed image to which to register",
+        exists=True,
+        argstr="%s")
+    MovingImageFileName = File(
+        position=-1, desc="Moving image", exists=True, argstr="%s")
+    outputtransform = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Transform calculated that aligns the fixed and moving image. Maps positions in the fixed coordinate frame to the moving coordinate frame. Optional (specify an output transform or an output volume or both).",
+        argstr="--outputtransform %s")
+    resampledmovingfilename = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Resampled moving image to the fixed image coordinate frame. Optional (specify an output transform or an output volume or both).",
+        argstr="--resampledmovingfilename %s")
 
 
 class LinearRegistrationOutputSpec(TraitedSpec):
-    outputtransform = File(desc="Transform calculated that aligns the fixed and moving image. Maps positions in the fixed coordinate frame to the moving coordinate frame. Optional (specify an output transform or an output volume or both).", exists=True)
-    resampledmovingfilename = File(desc="Resampled moving image to the fixed image coordinate frame. Optional (specify an output transform or an output volume or both).", exists=True)
+    outputtransform = File(
+        desc=
+        "Transform calculated that aligns the fixed and moving image. Maps positions in the fixed coordinate frame to the moving coordinate frame. Optional (specify an output transform or an output volume or both).",
+        exists=True)
+    resampledmovingfilename = File(
+        desc=
+        "Resampled moving image to the fixed image coordinate frame. Optional (specify an output transform or an output volume or both).",
+        exists=True)
 
 
 class LinearRegistration(SEMLikeCommandLine):
@@ -236,43 +488,145 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = LinearRegistrationInputSpec
     output_spec = LinearRegistrationOutputSpec
     _cmd = "LinearRegistration "
-    _outputs_filenames = {'resampledmovingfilename': 'resampledmovingfilename.nii', 'outputtransform': 'outputtransform.txt'}
+    _outputs_filenames = {
+        'resampledmovingfilename': 'resampledmovingfilename.nii',
+        'outputtransform': 'outputtransform.txt'
+    }
 
 
 class ExpertAutomatedRegistrationInputSpec(CommandLineInputSpec):
-    fixedImage = File(position=-2, desc="Image which defines the space into which the moving image is registered", exists=True, argstr="%s")
-    movingImage = File(position=-1, desc="The transform goes from the fixed image's space into the moving image's space", exists=True, argstr="%s")
-    resampledImage = traits.Either(traits.Bool, File(), hash_files=False, desc="Registration results", argstr="--resampledImage %s")
-    loadTransform = File(desc="Load a transform that is immediately applied to the moving image", exists=True, argstr="--loadTransform %s")
-    saveTransform = traits.Either(traits.Bool, File(), hash_files=False, desc="Save the transform that results from registration", argstr="--saveTransform %s")
-    initialization = traits.Enum("None", "Landmarks", "ImageCenters", "CentersOfMass", "SecondMoments", desc="Method to prime the registration process", argstr="--initialization %s")
-    registration = traits.Enum("None", "Initial", "Rigid", "Affine", "BSpline", "PipelineRigid", "PipelineAffine", "PipelineBSpline", desc="Method for the registration process", argstr="--registration %s")
-    metric = traits.Enum("MattesMI", "NormCorr", "MeanSqrd", desc="Method to quantify image match", argstr="--metric %s")
-    expectedOffset = traits.Float(desc="Expected misalignment after initialization", argstr="--expectedOffset %f")
-    expectedRotation = traits.Float(desc="Expected misalignment after initialization", argstr="--expectedRotation %f")
-    expectedScale = traits.Float(desc="Expected misalignment after initialization", argstr="--expectedScale %f")
-    expectedSkew = traits.Float(desc="Expected misalignment after initialization", argstr="--expectedSkew %f")
-    verbosityLevel = traits.Enum("Silent", "Standard", "Verbose", desc="Level of detail of reporting progress", argstr="--verbosityLevel %s")
-    sampleFromOverlap = traits.Bool(desc="Limit metric evaluation to the fixed image region overlapped by the moving image", argstr="--sampleFromOverlap ")
-    fixedImageMask = File(desc="Image which defines a mask for the fixed image", exists=True, argstr="--fixedImageMask %s")
-    randomNumberSeed = traits.Int(desc="Seed to generate a consistent random number sequence", argstr="--randomNumberSeed %d")
-    numberOfThreads = traits.Int(desc="Number of CPU threads to use", argstr="--numberOfThreads %d")
-    minimizeMemory = traits.Bool(desc="Reduce the amount of memory required at the cost of increased computation time", argstr="--minimizeMemory ")
-    interpolation = traits.Enum("NearestNeighbor", "Linear", "BSpline", desc="Method for interpolation within the optimization process", argstr="--interpolation %s")
-    fixedLandmarks = InputMultiPath(traits.List(traits.Float(), minlen=3, maxlen=3), desc="Ordered list of landmarks in the fixed image", argstr="--fixedLandmarks %s...")
-    movingLandmarks = InputMultiPath(traits.List(traits.Float(), minlen=3, maxlen=3), desc="Ordered list of landmarks in the moving image", argstr="--movingLandmarks %s...")
-    rigidMaxIterations = traits.Int(desc="Maximum number of rigid optimization iterations", argstr="--rigidMaxIterations %d")
-    rigidSamplingRatio = traits.Float(desc="Portion of the image to use in computing the metric during rigid registration", argstr="--rigidSamplingRatio %f")
-    affineMaxIterations = traits.Int(desc="Maximum number of affine optimization iterations", argstr="--affineMaxIterations %d")
-    affineSamplingRatio = traits.Float(desc="Portion of the image to use in computing the metric during affine registration", argstr="--affineSamplingRatio %f")
-    bsplineMaxIterations = traits.Int(desc="Maximum number of bspline optimization iterations", argstr="--bsplineMaxIterations %d")
-    bsplineSamplingRatio = traits.Float(desc="Portion of the image to use in computing the metric during BSpline registration", argstr="--bsplineSamplingRatio %f")
-    controlPointSpacing = traits.Int(desc="Number of pixels between control points", argstr="--controlPointSpacing %d")
+    fixedImage = File(
+        position=-2,
+        desc=
+        "Image which defines the space into which the moving image is registered",
+        exists=True,
+        argstr="%s")
+    movingImage = File(
+        position=-1,
+        desc=
+        "The transform goes from the fixed image's space into the moving image's space",
+        exists=True,
+        argstr="%s")
+    resampledImage = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Registration results",
+        argstr="--resampledImage %s")
+    loadTransform = File(
+        desc="Load a transform that is immediately applied to the moving image",
+        exists=True,
+        argstr="--loadTransform %s")
+    saveTransform = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Save the transform that results from registration",
+        argstr="--saveTransform %s")
+    initialization = traits.Enum(
+        "None",
+        "Landmarks",
+        "ImageCenters",
+        "CentersOfMass",
+        "SecondMoments",
+        desc="Method to prime the registration process",
+        argstr="--initialization %s")
+    registration = traits.Enum(
+        "None",
+        "Initial",
+        "Rigid",
+        "Affine",
+        "BSpline",
+        "PipelineRigid",
+        "PipelineAffine",
+        "PipelineBSpline",
+        desc="Method for the registration process",
+        argstr="--registration %s")
+    metric = traits.Enum(
+        "MattesMI",
+        "NormCorr",
+        "MeanSqrd",
+        desc="Method to quantify image match",
+        argstr="--metric %s")
+    expectedOffset = traits.Float(
+        desc="Expected misalignment after initialization",
+        argstr="--expectedOffset %f")
+    expectedRotation = traits.Float(
+        desc="Expected misalignment after initialization",
+        argstr="--expectedRotation %f")
+    expectedScale = traits.Float(
+        desc="Expected misalignment after initialization",
+        argstr="--expectedScale %f")
+    expectedSkew = traits.Float(
+        desc="Expected misalignment after initialization",
+        argstr="--expectedSkew %f")
+    verbosityLevel = traits.Enum(
+        "Silent",
+        "Standard",
+        "Verbose",
+        desc="Level of detail of reporting progress",
+        argstr="--verbosityLevel %s")
+    sampleFromOverlap = traits.Bool(
+        desc=
+        "Limit metric evaluation to the fixed image region overlapped by the moving image",
+        argstr="--sampleFromOverlap ")
+    fixedImageMask = File(
+        desc="Image which defines a mask for the fixed image",
+        exists=True,
+        argstr="--fixedImageMask %s")
+    randomNumberSeed = traits.Int(
+        desc="Seed to generate a consistent random number sequence",
+        argstr="--randomNumberSeed %d")
+    numberOfThreads = traits.Int(
+        desc="Number of CPU threads to use", argstr="--numberOfThreads %d")
+    minimizeMemory = traits.Bool(
+        desc=
+        "Reduce the amount of memory required at the cost of increased computation time",
+        argstr="--minimizeMemory ")
+    interpolation = traits.Enum(
+        "NearestNeighbor",
+        "Linear",
+        "BSpline",
+        desc="Method for interpolation within the optimization process",
+        argstr="--interpolation %s")
+    fixedLandmarks = InputMultiPath(
+        traits.List(traits.Float(), minlen=3, maxlen=3),
+        desc="Ordered list of landmarks in the fixed image",
+        argstr="--fixedLandmarks %s...")
+    movingLandmarks = InputMultiPath(
+        traits.List(traits.Float(), minlen=3, maxlen=3),
+        desc="Ordered list of landmarks in the moving image",
+        argstr="--movingLandmarks %s...")
+    rigidMaxIterations = traits.Int(
+        desc="Maximum number of rigid optimization iterations",
+        argstr="--rigidMaxIterations %d")
+    rigidSamplingRatio = traits.Float(
+        desc=
+        "Portion of the image to use in computing the metric during rigid registration",
+        argstr="--rigidSamplingRatio %f")
+    affineMaxIterations = traits.Int(
+        desc="Maximum number of affine optimization iterations",
+        argstr="--affineMaxIterations %d")
+    affineSamplingRatio = traits.Float(
+        desc=
+        "Portion of the image to use in computing the metric during affine registration",
+        argstr="--affineSamplingRatio %f")
+    bsplineMaxIterations = traits.Int(
+        desc="Maximum number of bspline optimization iterations",
+        argstr="--bsplineMaxIterations %d")
+    bsplineSamplingRatio = traits.Float(
+        desc=
+        "Portion of the image to use in computing the metric during BSpline registration",
+        argstr="--bsplineSamplingRatio %f")
+    controlPointSpacing = traits.Int(
+        desc="Number of pixels between control points",
+        argstr="--controlPointSpacing %d")
 
 
 class ExpertAutomatedRegistrationOutputSpec(TraitedSpec):
     resampledImage = File(desc="Registration results", exists=True)
-    saveTransform = File(desc="Save the transform that results from registration", exists=True)
+    saveTransform = File(
+        desc="Save the transform that results from registration", exists=True)
 
 
 class ExpertAutomatedRegistration(SEMLikeCommandLine):
@@ -295,4 +649,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = ExpertAutomatedRegistrationInputSpec
     output_spec = ExpertAutomatedRegistrationOutputSpec
     _cmd = "ExpertAutomatedRegistration "
-    _outputs_filenames = {'resampledImage': 'resampledImage.nii', 'saveTransform': 'saveTransform.txt'}
+    _outputs_filenames = {
+        'resampledImage': 'resampledImage.nii',
+        'saveTransform': 'saveTransform.txt'
+    }

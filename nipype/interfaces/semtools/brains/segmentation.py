@@ -11,10 +11,22 @@ from ...base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
 
 
 class SimilarityIndexInputSpec(CommandLineInputSpec):
-    outputCSVFilename = File(desc="output CSV Filename", exists=True, argstr="--outputCSVFilename %s")
-    ANNContinuousVolume = File(desc="ANN Continuous volume to be compared to the manual volume", exists=True, argstr="--ANNContinuousVolume %s")
-    inputManualVolume = File(desc="input manual(reference) volume", exists=True, argstr="--inputManualVolume %s")
-    thresholdInterval = traits.Float(desc="Threshold interval to compute similarity index between zero and one", argstr="--thresholdInterval %f")
+    outputCSVFilename = File(
+        desc="output CSV Filename",
+        exists=True,
+        argstr="--outputCSVFilename %s")
+    ANNContinuousVolume = File(
+        desc="ANN Continuous volume to be compared to the manual volume",
+        exists=True,
+        argstr="--ANNContinuousVolume %s")
+    inputManualVolume = File(
+        desc="input manual(reference) volume",
+        exists=True,
+        argstr="--inputManualVolume %s")
+    thresholdInterval = traits.Float(
+        desc=
+        "Threshold interval to compute similarity index between zero and one",
+        argstr="--thresholdInterval %f")
 
 
 class SimilarityIndexOutputSpec(TraitedSpec):
@@ -22,7 +34,6 @@ class SimilarityIndexOutputSpec(TraitedSpec):
 
 
 class SimilarityIndex(SEMLikeCommandLine):
-
     """title: BRAINSCut:SimilarityIndexComputation
 
 category: BRAINS.Segmentation
@@ -45,26 +56,50 @@ contributor: Eunyoung Regin Kim
 
 
 class BRAINSTalairachInputSpec(CommandLineInputSpec):
-    AC = InputMultiPath(traits.Float, desc="Location of AC Point ", sep=",", argstr="--AC %s")
+    AC = InputMultiPath(
+        traits.Float, desc="Location of AC Point ", sep=",", argstr="--AC %s")
     ACisIndex = traits.Bool(desc="AC Point is Index", argstr="--ACisIndex ")
-    PC = InputMultiPath(traits.Float, desc="Location of PC Point ", sep=",", argstr="--PC %s")
+    PC = InputMultiPath(
+        traits.Float, desc="Location of PC Point ", sep=",", argstr="--PC %s")
     PCisIndex = traits.Bool(desc="PC Point is Index", argstr="--PCisIndex ")
-    SLA = InputMultiPath(traits.Float, desc="Location of SLA Point ", sep=",", argstr="--SLA %s")
+    SLA = InputMultiPath(
+        traits.Float,
+        desc="Location of SLA Point ",
+        sep=",",
+        argstr="--SLA %s")
     SLAisIndex = traits.Bool(desc="SLA Point is Index", argstr="--SLAisIndex ")
-    IRP = InputMultiPath(traits.Float, desc="Location of IRP Point ", sep=",", argstr="--IRP %s")
+    IRP = InputMultiPath(
+        traits.Float,
+        desc="Location of IRP Point ",
+        sep=",",
+        argstr="--IRP %s")
     IRPisIndex = traits.Bool(desc="IRP Point is Index", argstr="--IRPisIndex ")
-    inputVolume = File(desc="Input image used to define physical space of images", exists=True, argstr="--inputVolume %s")
-    outputBox = traits.Either(traits.Bool, File(), hash_files=False, desc="Name of the resulting Talairach Bounding Box file", argstr="--outputBox %s")
-    outputGrid = traits.Either(traits.Bool, File(), hash_files=False, desc="Name of the resulting Talairach Grid file", argstr="--outputGrid %s")
+    inputVolume = File(
+        desc="Input image used to define physical space of images",
+        exists=True,
+        argstr="--inputVolume %s")
+    outputBox = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Name of the resulting Talairach Bounding Box file",
+        argstr="--outputBox %s")
+    outputGrid = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Name of the resulting Talairach Grid file",
+        argstr="--outputGrid %s")
 
 
 class BRAINSTalairachOutputSpec(TraitedSpec):
-    outputBox = File(desc="Name of the resulting Talairach Bounding Box file", exists=True)
-    outputGrid = File(desc="Name of the resulting Talairach Grid file", exists=True)
+    outputBox = File(
+        desc="Name of the resulting Talairach Bounding Box file", exists=True)
+    outputGrid = File(
+        desc="Name of the resulting Talairach Grid file", exists=True)
 
 
 class BRAINSTalairach(SEMLikeCommandLine):
-
     """title: BRAINS Talairach
 
 category: BRAINS.Segmentation
@@ -91,20 +126,40 @@ acknowledgements: Funding for this work was provided by NIH/NINDS award NS050568
 
 
 class BRAINSTalairachMaskInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Input image used to define physical space of resulting mask", exists=True, argstr="--inputVolume %s")
-    talairachParameters = File(desc="Name of the Talairach parameter file.", exists=True, argstr="--talairachParameters %s")
-    talairachBox = File(desc="Name of the Talairach box file.", exists=True, argstr="--talairachBox %s")
-    hemisphereMode = traits.Enum("left", "right", "both", desc="Mode for box creation: left, right, both", argstr="--hemisphereMode %s")
-    expand = traits.Bool(desc="Expand exterior box to include surface CSF", argstr="--expand ")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Output filename for the resulting binary image", argstr="--outputVolume %s")
+    inputVolume = File(
+        desc="Input image used to define physical space of resulting mask",
+        exists=True,
+        argstr="--inputVolume %s")
+    talairachParameters = File(
+        desc="Name of the Talairach parameter file.",
+        exists=True,
+        argstr="--talairachParameters %s")
+    talairachBox = File(
+        desc="Name of the Talairach box file.",
+        exists=True,
+        argstr="--talairachBox %s")
+    hemisphereMode = traits.Enum(
+        "left",
+        "right",
+        "both",
+        desc="Mode for box creation: left, right, both",
+        argstr="--hemisphereMode %s")
+    expand = traits.Bool(
+        desc="Expand exterior box to include surface CSF", argstr="--expand ")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Output filename for the resulting binary image",
+        argstr="--outputVolume %s")
 
 
 class BRAINSTalairachMaskOutputSpec(TraitedSpec):
-    outputVolume = File(desc="Output filename for the resulting binary image", exists=True)
+    outputVolume = File(
+        desc="Output filename for the resulting binary image", exists=True)
 
 
 class BRAINSTalairachMask(SEMLikeCommandLine):
-
     """title: Talairach Mask
 
 category: BRAINS.Segmentation

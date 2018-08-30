@@ -5,29 +5,18 @@
 """Defines functionality for pipelined execution of interfaces
 
 The `EngineBase` class implements the more general view of a task.
-
-  .. testsetup::
-     # Change directory to provide relative paths for doctests
-     import os
-     filepath = os.path.dirname(os.path.realpath( __file__ ))
-     datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-     os.chdir(datadir)
-
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import object
-
-from future import standard_library
-standard_library.install_aliases()
 
 from copy import deepcopy
 import re
 import numpy as np
-from ... import logging
+
+from ... import config
 from ...interfaces.base import DynamicTraitedSpec
 from ...utils.filemanip import loadpkl, savepkl
-
-logger = logging.getLogger('workflow')
 
 
 class EngineBase(object):
@@ -46,13 +35,28 @@ class EngineBase(object):
             default=None, which results in the use of mkdtemp
 
         """
-        self.base_dir = base_dir
-        self.config = None
-        self._verify_name(name)
-        self.name = name
-        # for compatibility with node expansion using iterables
-        self._id = self.name
         self._hierarchy = None
+        self.name = name
+        self._id = self.name # for compatibility with node expansion using iterables
+
+        self.base_dir = base_dir
+        self.config = deepcopy(config._sections)
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, name):
+        if not name or not re.match(r'^[\w-]+$', name):
+            raise ValueError('[Workflow|Node] name "%s" is not valid.' % name)
+        self._name = name
+
+    @property
+    def fullname(self):
+        if self._hierarchy:
+            return '%s.%s' % (self._hierarchy, self.name)
+        return self.name
 
     @property
     def inputs(self):
@@ -63,17 +67,11 @@ class EngineBase(object):
         raise NotImplementedError
 
     @property
-    def fullname(self):
-        fullname = self.name
-        if self._hierarchy:
-            fullname = self._hierarchy + '.' + self.name
-        return fullname
-
-    @property
     def itername(self):
+        """Name for expanded iterable"""
         itername = self._id
         if self._hierarchy:
-            itername = self._hierarchy + '.' + self._id
+            itername = '%s.%s' % (self._hierarchy, self._id)
         return itername
 
     def clone(self, name):
@@ -85,13 +83,13 @@ class EngineBase(object):
         name : string (mandatory)
             A clone of node or workflow must have a new name
         """
-        if (name is None) or (name == self.name):
-            raise Exception('Cloning requires a new name')
-        self._verify_name(name)
+        if name == self.name:
+            raise ValueError('Cloning requires a new name, "%s" is '
+                             'in use.' % name)
         clone = deepcopy(self)
         clone.name = name
-        clone._id = name
-        clone._hierarchy = None
+        if hasattr(clone, '_id'):
+            clone._id = name
         return clone
 
     def _check_outputs(self, parameter):
@@ -102,17 +100,11 @@ class EngineBase(object):
             return True
         return hasattr(self.inputs, parameter)
 
-    def _verify_name(self, name):
-        valid_name = bool(re.match('^[\w-]+$', name))
-        if not valid_name:
-            raise ValueError('[Workflow|Node] name \'%s\' contains'
-                             ' special characters' % name)
+    def __str__(self):
+        return self.fullname
 
     def __repr__(self):
-        if self._hierarchy:
-            return '.'.join((self._hierarchy, self._id))
-        else:
-            return '{}'.format(self._id)
+        return self.itername
 
     def save(self, filename=None):
         if filename is None:
@@ -120,8 +112,4 @@ class EngineBase(object):
         savepkl(filename, self)
 
     def load(self, filename):
-        if '.npz' in filename:
-            DeprecationWarning(('npz files will be deprecated in the next '
-                                'release. you can use numpy to open them.'))
-            return np.load(filename)
         return loadpkl(filename)

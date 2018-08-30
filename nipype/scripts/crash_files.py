@@ -68,7 +68,7 @@ def display_crash_file(crashfile, rerun, debug, directory):
         print("\n")
     print("Traceback: ")
     print(''.join(tb))
-    print ("\n")
+    print("\n")
 
     if rerun:
         if node is None:

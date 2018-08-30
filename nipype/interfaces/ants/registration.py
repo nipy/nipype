@@ -1,62 +1,93 @@
 # -*- coding: utf-8 -*-
-"""The ants module provides basic functions for interfacing with ants functions.
-
-   Change directory to provide relative paths for doctests
-   >>> import os
-   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-   >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-   >>> os.chdir(datadir)
+"""The ants module provides basic functions for interfacing with ants
+   functions.
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import range, str
 import os
 
-from ...utils.filemanip import filename_to_list
+from ...utils.filemanip import ensure_list
 from ..base import TraitedSpec, File, Str, traits, InputMultiPath, isdefined
-from .base import ANTSCommand, ANTSCommandInputSpec
+from .base import ANTSCommand, ANTSCommandInputSpec, LOCAL_DEFAULT_NUMBER_OF_THREADS
 
 
 class ANTSInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='%d', usedefault=False,
-                            position=1, desc='image dimension (2 or 3)')
-    fixed_image = InputMultiPath(File(exists=True), mandatory=True,
-                                 desc=('image to which the moving image is warped'))
-    moving_image = InputMultiPath(File(exists=True), argstr='%s',
-                                  mandatory=True,
-                                  desc=('image to apply transformation to (generally a coregistered '
-                                        'functional)'))
+    dimension = traits.Enum(
+        3,
+        2,
+        argstr='%d',
+        position=1,
+        desc='image dimension (2 or 3)')
+    fixed_image = InputMultiPath(
+        File(exists=True),
+        mandatory=True,
+        desc=('image to which the moving image is '
+              'warped'))
+    moving_image = InputMultiPath(
+        File(exists=True),
+        argstr='%s',
+        mandatory=True,
+        desc=('image to apply transformation to '
+              '(generally a coregistered'
+              'functional)'))
 
-#    Not all metrics are appropriate for all modalities. Also, not all metrics
-#    are efficeint or appropriate at all resolution levels, Some metrics perform
-#    well for gross global registraiton, but do poorly for small changes (i.e.
-#    Mattes), and some metrics do well for small changes but don't work well for
-#    gross level changes (i.e. 'CC').
-#
-#    This is a two stage registration. in the first stage
-#      [ 'Mattes', .................]
-#         ^^^^^^ <- First stage
-#    Do a unimodal registration of the first elements of the fixed/moving input
-#    list use the"CC" as the metric.
-#
-#    In the second stage
-#      [ ....., ['Mattes','CC'] ]
-#               ^^^^^^^^^^^^^^^ <- Second stage
-#    Do a multi-modal registration where the first elements of fixed/moving
-#    input list use 'CC' metric and that is added to 'Mattes' metric result of
-#    the second elements of the fixed/moving input.
-#
-#    Cost = Sum_i ( metricweight[i] Metric_i ( fixedimage[i], movingimage[i]) )
-    metric = traits.List(traits.Enum('CC', 'MI', 'SMI', 'PR', 'SSD',
-                                     'MSQ', 'PSE'), mandatory=True, desc='')
+    #    Not all metrics are appropriate for all modalities. Also, not all metrics
+    #    are efficeint or appropriate at all resolution levels, Some metrics
+    #    perform well for gross global registraiton, but do poorly for small
+    #    changes (i.e. Mattes), and some metrics do well for small changes but
+    #    don't work well for gross level changes (i.e. 'CC').
+    #
+    #    This is a two stage registration. in the first stage
+    #      [ 'Mattes', .................]
+    #         ^^^^^^ <- First stage
+    #    Do a unimodal registration of the first elements of the fixed/moving input
+    #    list use the"CC" as the metric.
+    #
+    #    In the second stage
+    #      [ ....., ['Mattes','CC'] ]
+    #               ^^^^^^^^^^^^^^^ <- Second stage
+    #    Do a multi-modal registration where the first elements of fixed/moving
+    #    input list use 'CC' metric and that is added to 'Mattes' metric result of
+    #    the second elements of the fixed/moving input.
+    #
+    #    Cost = Sum_i ( metricweight[i] Metric_i ( fixedimage[i], movingimage[i]) )
+    metric = traits.List(
+        traits.Enum('CC', 'MI', 'SMI', 'PR', 'SSD', 'MSQ', 'PSE'),
+        mandatory=True,
+        desc='')
 
-    metric_weight = traits.List(traits.Float(), requires=['metric'], desc='')
-    radius = traits.List(traits.Int(), requires=['metric'], desc='')
+    metric_weight = traits.List(
+        traits.Float(),
+        value=[1.0],
+        usedefault=True,
+        requires=['metric'],
+        mandatory=True,
+        desc='the metric weight(s) for each stage. '
+        'The weights must sum to 1 per stage.')
 
-    output_transform_prefix = Str('out', usedefault=True, argstr='--output-naming %s',
-                                  mandatory=True, desc='')
-    transformation_model = traits.Enum('Diff', 'Elast', 'Exp', 'Greedy Exp',
-                                       'SyN', argstr='%s', mandatory=True,
-                                       desc='')
+    radius = traits.List(
+        traits.Int(),
+        requires=['metric'],
+        mandatory=True,
+        desc='radius of the region (i.e. number of layers around a voxel/pixel)'
+        ' that is used for computing cross correlation')
+
+    output_transform_prefix = Str(
+        'out',
+        usedefault=True,
+        argstr='--output-naming %s',
+        mandatory=True,
+        desc='')
+    transformation_model = traits.Enum(
+        'Diff',
+        'Elast',
+        'Exp',
+        'Greedy Exp',
+        'SyN',
+        argstr='%s',
+        mandatory=True,
+        desc='')
     gradient_step_length = traits.Float(
         requires=['transformation_model'], desc='')
     number_of_time_steps = traits.Float(
@@ -65,7 +96,7 @@ class ANTSInputSpec(ANTSCommandInputSpec):
     symmetry_type = traits.Float(requires=['delta_time'], desc='')
 
     use_histogram_matching = traits.Bool(
-        argstr='%s', default=True, usedefault=True)
+        argstr='%s', default_value=True, usedefault=True)
     number_of_iterations = traits.List(
         traits.Int(), argstr='--number-of-iterations %s', sep='x')
     smoothing_sigmas = traits.List(
@@ -94,9 +125,8 @@ class ANTSOutputSpec(TraitedSpec):
 
 
 class ANTS(ANTSCommand):
-
-    """
-
+    """ANTS wrapper for registration of images
+    (old, use Registration instead)
 
     Examples
     --------
@@ -135,14 +165,10 @@ class ANTS(ANTSCommand):
         for ii in range(len(self.inputs.moving_image)):
             if self.inputs.metric[ii] in intensity_based:
                 retval.append(
-                    '--image-metric %s[ %s, %s, %g, %d ]' % (self.inputs.metric[ii],
-                                                             self.inputs.fixed_image[
-                                                                 ii],
-                                                             self.inputs.moving_image[
-                                                                 ii],
-                                                             self.inputs.metric_weight[
-                                                                 ii],
-                                                             self.inputs.radius[ii]))
+                    '--image-metric %s[ %s, %s, %g, %d ]' %
+                    (self.inputs.metric[ii], self.inputs.fixed_image[ii],
+                     self.inputs.moving_image[ii],
+                     self.inputs.metric_weight[ii], self.inputs.radius[ii]))
             elif self.inputs.metric[ii] == point_set_based:
                 pass
                 # retval.append('--image-metric %s[%s, %s, ...'.format(self.inputs.metric[ii],
@@ -169,9 +195,10 @@ class ANTS(ANTSCommand):
         return ''.join(retval)
 
     def _regularization_constructor(self):
-        return '--regularization {0}[{1},{2}]'.format(self.inputs.regularization,
-                                                      self.inputs.regularization_gradient_field_sigma,
-                                                      self.inputs.regularization_deformation_field_sigma)
+        return '--regularization {0}[{1},{2}]'.format(
+            self.inputs.regularization,
+            self.inputs.regularization_gradient_field_sigma,
+            self.inputs.regularization_deformation_field_sigma)
 
     def _affine_gradient_descent_option_constructor(self):
         values = self.inputs.affine_gradient_descent_option
@@ -216,171 +243,236 @@ class ANTS(ANTSCommand):
 
 
 class RegistrationInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='--dimensionality %d',
-                            usedefault=True, desc='image dimension (2 or 3)')
-    fixed_image = InputMultiPath(File(exists=True), mandatory=True,
-                                 desc='Image to which the moving_image should be transformed'
-                                      '(usually a structural image)')
+    dimension = traits.Enum(
+        3,
+        2,
+        argstr='--dimensionality %d',
+        usedefault=True,
+        desc='image dimension (2 or 3)')
+    fixed_image = InputMultiPath(
+        File(exists=True),
+        mandatory=True,
+        desc='Image to which the moving_image should be transformed'
+        '(usually a structural image)')
     fixed_image_mask = File(
-        exists=True, argstr='%s', max_ver='2.1.0', xor=['fixed_image_masks'],
+        exists=True,
+        argstr='%s',
+        max_ver='2.1.0',
+        xor=['fixed_image_masks'],
         desc='Mask used to limit metric sampling region of the fixed image'
         'in all stages')
     fixed_image_masks = InputMultiPath(
-        traits.Either('NULL', File(exists=True)), min_ver='2.2.0', xor=['fixed_image_mask'],
-        desc='Masks used to limit metric sampling region of the fixed image, defined per registration stage'
+        traits.Either('NULL', File(exists=True)),
+        min_ver='2.2.0',
+        xor=['fixed_image_mask'],
+        desc=
+        'Masks used to limit metric sampling region of the fixed image, defined per registration stage'
         '(Use "NULL" to omit a mask at a given stage)')
-    moving_image = InputMultiPath(File(exists=True), mandatory=True,
-                                  desc='Image that will be registered to the space of fixed_image. This is the'
-                                  'image on which the transformations will be applied to')
+    moving_image = InputMultiPath(
+        File(exists=True),
+        mandatory=True,
+        desc=
+        'Image that will be registered to the space of fixed_image. This is the'
+        'image on which the transformations will be applied to')
     moving_image_mask = File(
-        exists=True, requires=['fixed_image_mask'], max_ver='2.1.0', xor=['moving_image_masks'],
+        exists=True,
+        requires=['fixed_image_mask'],
+        max_ver='2.1.0',
+        xor=['moving_image_masks'],
         desc='mask used to limit metric sampling region of the moving image'
         'in all stages')
     moving_image_masks = InputMultiPath(
-        traits.Either('NULL', File(exists=True)), min_ver='2.2.0', xor=['moving_image_mask'],
-        desc='Masks used to limit metric sampling region of the moving image, defined per registration stage'
+        traits.Either('NULL', File(exists=True)),
+        min_ver='2.2.0',
+        xor=['moving_image_mask'],
+        desc=
+        'Masks used to limit metric sampling region of the moving image, defined per registration stage'
         '(Use "NULL" to omit a mask at a given stage)')
 
-    save_state = File(argstr='--save-state %s', exists=False,
-                      desc='Filename for saving the internal restorable state of the registration')
-    restore_state = File(argstr='--restore-state %s', exists=True,
-                         desc='Filename for restoring the internal restorable state of the registration')
+    save_state = File(
+        argstr='--save-state %s',
+        exists=False,
+        desc=
+        'Filename for saving the internal restorable state of the registration'
+    )
+    restore_state = File(
+        argstr='--restore-state %s',
+        exists=True,
+        desc=
+        'Filename for restoring the internal restorable state of the registration'
+    )
 
-    initial_moving_transform = InputMultiPath(argstr='%s',
-                                              exists=True,
-                                              desc='A transform or a list of transforms that should be applied'
-                                                   'before the registration begins. Note that, when a list is given,'
-                                                   'the transformations are applied in reverse order.',
-                                              xor=['initial_moving_transform_com'])
-    invert_initial_moving_transform = InputMultiPath(traits.Bool(),
-                                                     requires=[
-        "initial_moving_transform"],
+    initial_moving_transform = InputMultiPath(
+        File(exists=True),
+        argstr='%s',
+        desc='A transform or a list of transforms that should be applied'
+        'before the registration begins. Note that, when a list is given,'
+        'the transformations are applied in reverse order.',
+        xor=['initial_moving_transform_com'])
+    invert_initial_moving_transform = InputMultiPath(
+        traits.Bool(),
+        requires=["initial_moving_transform"],
         desc='One boolean or a list of booleans that indicate'
         'whether the inverse(s) of the transform(s) defined'
         'in initial_moving_transform should be used.',
         xor=['initial_moving_transform_com'])
 
-    initial_moving_transform_com = traits.Enum(0, 1, 2, argstr='%s',
-                                               default=0, xor=['initial_moving_transform'],
-                                               desc="Align the moving_image nad fixed_image befor registration using"
-                                               "the geometric center of the images (=0), the image intensities (=1),"
-                                               "or the origin of the images (=2)")
+    initial_moving_transform_com = traits.Enum(
+        0,
+        1,
+        2,
+        argstr='%s',
+        xor=['initial_moving_transform'],
+        desc="Align the moving_image nad fixed_image befor registration using"
+        "the geometric center of the images (=0), the image intensities (=1),"
+        "or the origin of the images (=2)")
     metric_item_trait = traits.Enum("CC", "MeanSquares", "Demons", "GC", "MI",
                                     "Mattes")
-    metric_stage_trait = traits.Either(
-        metric_item_trait, traits.List(metric_item_trait))
-    metric = traits.List(metric_stage_trait, mandatory=True,
-                         desc='the metric(s) to use for each stage. '
-                         'Note that multiple metrics per stage are not supported '
-                         'in ANTS 1.9.1 and earlier.')
-    metric_weight_item_trait = traits.Float(1.0)
+    metric_stage_trait = traits.Either(metric_item_trait,
+                                       traits.List(metric_item_trait))
+    metric = traits.List(
+        metric_stage_trait,
+        mandatory=True,
+        desc='the metric(s) to use for each stage. '
+        'Note that multiple metrics per stage are not supported '
+        'in ANTS 1.9.1 and earlier.')
+    metric_weight_item_trait = traits.Float(1.0, usedefault=True)
     metric_weight_stage_trait = traits.Either(
         metric_weight_item_trait, traits.List(metric_weight_item_trait))
     metric_weight = traits.List(
-        metric_weight_stage_trait, value=[1.0], usedefault=True,
-        requires=['metric'], mandatory=True,
+        metric_weight_stage_trait,
+        value=[1.0],
+        usedefault=True,
+        requires=['metric'],
+        mandatory=True,
         desc='the metric weight(s) for each stage. '
         'The weights must sum to 1 per stage.')
-    radius_bins_item_trait = traits.Int(5)
+    radius_bins_item_trait = traits.Int(5, usedefault=True)
     radius_bins_stage_trait = traits.Either(
         radius_bins_item_trait, traits.List(radius_bins_item_trait))
     radius_or_number_of_bins = traits.List(
-        radius_bins_stage_trait, value=[5], usedefault=True,
+        radius_bins_stage_trait,
+        value=[5],
+        usedefault=True,
         requires=['metric_weight'],
         desc='the number of bins in each stage for the MI and Mattes metric, '
         'the radius for other metrics')
-    sampling_strategy_item_trait = traits.Enum(
-        "None", "Regular", "Random", None)
+    sampling_strategy_item_trait = traits.Enum("None", "Regular", "Random",
+                                               None)
     sampling_strategy_stage_trait = traits.Either(
-        sampling_strategy_item_trait, traits.List(sampling_strategy_item_trait))
+        sampling_strategy_item_trait,
+        traits.List(sampling_strategy_item_trait))
     sampling_strategy = traits.List(
-        trait=sampling_strategy_stage_trait, requires=['metric_weight'],
+        trait=sampling_strategy_stage_trait,
+        requires=['metric_weight'],
         desc='the metric sampling strategy (strategies) for each stage')
     sampling_percentage_item_trait = traits.Either(
         traits.Range(low=0.0, high=1.0), None)
     sampling_percentage_stage_trait = traits.Either(
-        sampling_percentage_item_trait, traits.List(sampling_percentage_item_trait))
+        sampling_percentage_item_trait,
+        traits.List(sampling_percentage_item_trait))
     sampling_percentage = traits.List(
-        trait=sampling_percentage_stage_trait, requires=['sampling_strategy'],
+        trait=sampling_percentage_stage_trait,
+        requires=['sampling_strategy'],
         desc="the metric sampling percentage(s) to use for each stage")
     use_estimate_learning_rate_once = traits.List(traits.Bool(), desc='')
     use_histogram_matching = traits.Either(
-        traits.Bool, traits.List(traits.Bool(argstr='%s')),
-        default=True, usedefault=True,
+        traits.Bool,
+        traits.List(traits.Bool(argstr='%s')),
+        default=True,
+        usedefault=True,
         desc='Histogram match the images before registration.')
     interpolation = traits.Enum(
-        'Linear', 'NearestNeighbor', 'CosineWindowedSinc', 'WelchWindowedSinc',
-        'HammingWindowedSinc', 'LanczosWindowedSinc', 'BSpline', 'MultiLabel', 'Gaussian',
-        argstr='%s', usedefault=True)
-    interpolation_parameters = traits.Either(traits.Tuple(traits.Int()),  # BSpline (order)
-                                             traits.Tuple(traits.Float(),  # Gaussian/MultiLabel (sigma, alpha)
-                                                          traits.Float())
-                                             )
+        'Linear',
+        'NearestNeighbor',
+        'CosineWindowedSinc',
+        'WelchWindowedSinc',
+        'HammingWindowedSinc',
+        'LanczosWindowedSinc',
+        'BSpline',
+        'MultiLabel',
+        'Gaussian',
+        argstr='%s',
+        usedefault=True)
+    interpolation_parameters = traits.Either(
+        traits.Tuple(traits.Int()),  # BSpline (order)
+        traits.Tuple(
+            traits.Float(),  # Gaussian/MultiLabel (sigma, alpha)
+            traits.Float()))
 
     write_composite_transform = traits.Bool(
         argstr='--write-composite-transform %d',
-        default=False, usedefault=True, desc='')
+        default_value=False,
+        usedefault=True,
+        desc='')
     collapse_output_transforms = traits.Bool(
-        argstr='--collapse-output-transforms %d', default=True,
+        argstr='--collapse-output-transforms %d',
+        default_value=True,
         usedefault=True,  # This should be true for explicit completeness
         desc=('Collapse output transforms. Specifically, enabling this option '
               'combines all adjacent linear transforms and composes all '
               'adjacent displacement field transforms before writing the '
               'results to disk.'))
     initialize_transforms_per_stage = traits.Bool(
-        argstr='--initialize-transforms-per-stage %d', default=False,
+        argstr='--initialize-transforms-per-stage %d',
+        default_value=False,
         usedefault=True,  # This should be true for explicit completeness
-        desc=('Initialize linear transforms from the previous stage. By enabling this option, '
-              'the current linear stage transform is directly intialized from the previous '
-              'stages linear transform; this allows multiple linear stages to be run where '
-              'each stage directly updates the estimated linear transform from the previous '
-              'stage. (e.g. Translation -> Rigid -> Affine). '
-              ))
+        desc=
+        ('Initialize linear transforms from the previous stage. By enabling this option, '
+         'the current linear stage transform is directly intialized from the previous '
+         'stages linear transform; this allows multiple linear stages to be run where '
+         'each stage directly updates the estimated linear transform from the previous '
+         'stage. (e.g. Translation -> Rigid -> Affine). '))
     # NOTE: Even though only 0=False and 1=True are allowed, ants uses integer
     # values instead of booleans
     float = traits.Bool(
-        argstr='--float %d', default=False,
+        argstr='--float %d',
+        default_value=False,
         desc='Use float instead of double for computations.')
 
-    transforms = traits.List(traits.Enum('Rigid', 'Affine', 'CompositeAffine',
-                                         'Similarity', 'Translation', 'BSpline',
-                                         'GaussianDisplacementField', 'TimeVaryingVelocityField',
-                                         'TimeVaryingBSplineVelocityField', 'SyN', 'BSplineSyN',
-                                         'Exponential', 'BSplineExponential'), argstr='%s', mandatory=True)
+    transforms = traits.List(
+        traits.Enum('Rigid', 'Affine', 'CompositeAffine', 'Similarity',
+                    'Translation', 'BSpline', 'GaussianDisplacementField',
+                    'TimeVaryingVelocityField',
+                    'TimeVaryingBSplineVelocityField', 'SyN', 'BSplineSyN',
+                    'Exponential', 'BSplineExponential'),
+        argstr='%s',
+        mandatory=True)
     # TODO: input checking and allow defaults
     # All parameters must be specified for BSplineDisplacementField, TimeVaryingBSplineVelocityField, BSplineSyN,
     # Exponential, and BSplineExponential. EVEN DEFAULTS!
-    transform_parameters = traits.List(traits.Either(traits.Tuple(traits.Float()),  # Translation, Rigid, Affine,
-                                                                                    # CompositeAffine, Similarity
-                                                     traits.Tuple(traits.Float(),  # GaussianDisplacementField, SyN
-                                                                  traits.Float(),
-                                                                  traits.Float()
-                                                                  ),
-                                                     traits.Tuple(traits.Float(),  # BSplineSyn,
-                                                                  traits.Int(),    # BSplineDisplacementField,
-                                                                  traits.Int(),    # TimeVaryingBSplineVelocityField
-                                                                  traits.Int()
-                                                                  ),
-                                                     traits.Tuple(traits.Float(),  # TimeVaryingVelocityField
-                                                                  traits.Int(),
-                                                                  traits.Float(),
-                                                                  traits.Float(),
-                                                                  traits.Float(),
-                                                                  traits.Float()
-                                                                  ),
-                                                     traits.Tuple(traits.Float(),  # Exponential
-                                                                  traits.Float(),
-                                                                  traits.Float(),
-                                                                  traits.Int()
-                                                                  ),
-                                                     traits.Tuple(traits.Float(),  # BSplineExponential
-                                                                  traits.Int(),
-                                                                  traits.Int(),
-                                                                  traits.Int(),
-                                                                  traits.Int()
-                                                                  ),
-                                                     )
-                                       )
+    transform_parameters = traits.List(
+        traits.Either(
+            traits.Tuple(traits.Float()),  # Translation, Rigid, Affine,
+            # CompositeAffine, Similarity
+            traits.Tuple(
+                traits.Float(),  # GaussianDisplacementField, SyN
+                traits.Float(),
+                traits.Float()),
+            traits.Tuple(
+                traits.Float(),  # BSplineSyn,
+                traits.Int(),  # BSplineDisplacementField,
+                traits.Int(),  # TimeVaryingBSplineVelocityField
+                traits.Int()),
+            traits.Tuple(
+                traits.Float(),  # TimeVaryingVelocityField
+                traits.Int(),
+                traits.Float(),
+                traits.Float(),
+                traits.Float(),
+                traits.Float()),
+            traits.Tuple(
+                traits.Float(),  # Exponential
+                traits.Float(),
+                traits.Float(),
+                traits.Int()),
+            traits.Tuple(
+                traits.Float(),  # BSplineExponential
+                traits.Int(),
+                traits.Int(),
+                traits.Int(),
+                traits.Int()),
+        ))
     restrict_deformation = traits.List(
         traits.List(traits.Enum(0, 1)),
         desc=("This option allows the user to restrict the optimization of "
@@ -394,51 +486,78 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     # Convergence flags
     number_of_iterations = traits.List(traits.List(traits.Int()))
     smoothing_sigmas = traits.List(traits.List(traits.Float()), mandatory=True)
-    sigma_units = traits.List(traits.Enum('mm', 'vox'),
-                              requires=['smoothing_sigmas'],
-                              desc="units for smoothing sigmas")
+    sigma_units = traits.List(
+        traits.Enum('mm', 'vox'),
+        requires=['smoothing_sigmas'],
+        desc="units for smoothing sigmas")
     shrink_factors = traits.List(traits.List(traits.Int()), mandatory=True)
-    convergence_threshold = traits.List(trait=traits.Float(), value=[
-                                        1e-6], minlen=1, requires=['number_of_iterations'], usedefault=True)
-    convergence_window_size = traits.List(trait=traits.Int(), value=[
-                                          10], minlen=1, requires=['convergence_threshold'], usedefault=True)
+    convergence_threshold = traits.List(
+        trait=traits.Float(),
+        value=[1e-6],
+        minlen=1,
+        requires=['number_of_iterations'],
+        usedefault=True)
+    convergence_window_size = traits.List(
+        trait=traits.Int(),
+        value=[10],
+        minlen=1,
+        requires=['convergence_threshold'],
+        usedefault=True)
     # Output flags
     output_transform_prefix = Str(
         "transform", usedefault=True, argstr="%s", desc="")
     output_warped_image = traits.Either(
         traits.Bool, File(), hash_files=False, desc="")
-    output_inverse_warped_image = traits.Either(traits.Bool, File(),
-                                                hash_files=False,
-                                                requires=['output_warped_image'], desc="")
+    output_inverse_warped_image = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        requires=['output_warped_image'],
+        desc="")
     winsorize_upper_quantile = traits.Range(
-        low=0.0, high=1.0, value=1.0, argstr='%s', usedefault=True, desc="The Upper quantile to clip image ranges")
+        low=0.0,
+        high=1.0,
+        value=1.0,
+        argstr='%s',
+        usedefault=True,
+        desc="The Upper quantile to clip image ranges")
     winsorize_lower_quantile = traits.Range(
-        low=0.0, high=1.0, value=0.0, argstr='%s', usedefault=True, desc="The Lower quantile to clip image ranges")
+        low=0.0,
+        high=1.0,
+        value=0.0,
+        argstr='%s',
+        usedefault=True,
+        desc="The Lower quantile to clip image ranges")
 
-    verbose = traits.Bool(argstr='-v', default=False)
+    verbose = traits.Bool(argstr='-v', default_value=False, usedefault=True)
 
 
 class RegistrationOutputSpec(TraitedSpec):
     forward_transforms = traits.List(
-        File(exists=True), desc='List of output transforms for forward registration')
+        File(exists=True),
+        desc='List of output transforms for forward registration')
     reverse_transforms = traits.List(
-        File(exists=True), desc='List of output transforms for reverse registration')
-    forward_invert_flags = traits.List(traits.Bool(
-    ), desc='List of flags corresponding to the forward transforms')
-    reverse_invert_flags = traits.List(traits.Bool(
-    ), desc='List of flags corresponding to the reverse transforms')
+        File(exists=True),
+        desc='List of output transforms for reverse registration')
+    forward_invert_flags = traits.List(
+        traits.Bool(),
+        desc='List of flags corresponding to the forward transforms')
+    reverse_invert_flags = traits.List(
+        traits.Bool(),
+        desc='List of flags corresponding to the reverse transforms')
     composite_transform = File(exists=True, desc='Composite transform file')
     inverse_composite_transform = File(desc='Inverse composite transform file')
     warped_image = File(desc="Outputs warped image")
     inverse_warped_image = File(desc="Outputs the inverse of the warped image")
     save_state = File(desc="The saved registration state to be restored")
     metric_value = traits.Float(desc='the final value of metric')
-    elapsed_time = traits.Float(desc='the total elapsed time as reported by ANTs')
+    elapsed_time = traits.Float(
+        desc='the total elapsed time as reported by ANTs')
 
 
 class Registration(ANTSCommand):
+    """ANTs Registration command for registration of images
 
-    """
     `antsRegistration <http://stnava.github.io/ANTs/>`_ registers a ``moving_image`` to a ``fixed_image``,
     using a predefined (sequence of) cost function(s) and transformation operations.
     The cost function is defined using one or more 'metrics', specifically
@@ -482,12 +601,12 @@ class Registration(ANTSCommand):
     Examples
     --------
 
-    Set up a Registation node with some default settings. This Node registers
+    Set up a Registration node with some default settings. This Node registers
     'fixed1.nii' to 'moving1.nii' by first fitting a linear 'Affine' transformation, and
     then a non-linear 'SyN' transformation, both using the Mutual Information-cost
     metric.
 
-    The registration is initailized by first applying the (linear) transform
+    The registration is initialized by first applying the (linear) transform
     trans.mat.
 
     >>> import copy, pprint
@@ -808,15 +927,16 @@ class Registration(ANTSCommand):
     input_spec = RegistrationInputSpec
     output_spec = RegistrationOutputSpec
     _quantilesDone = False
-    _linear_transform_names = ['Rigid', 'Affine',
-                               'Translation', 'CompositeAffine', 'Similarity']
+    _linear_transform_names = [
+        'Rigid', 'Affine', 'Translation', 'CompositeAffine', 'Similarity'
+    ]
 
     def __init__(self, **inputs):
         super(Registration, self).__init__(**inputs)
         self._elapsed_time = None
         self._metric_value = None
 
-    def _run_interface(self, runtime, correct_return_codes=(0,)):
+    def _run_interface(self, runtime, correct_return_codes=(0, )):
         runtime = super(Registration, self)._run_interface(runtime)
 
         # Parse some profiling info
@@ -851,14 +971,15 @@ class Registration(ANTSCommand):
             metric=name_input,
             weight=self.inputs.metric_weight[index],
             radius_or_bins=self.inputs.radius_or_number_of_bins[index],
-            optional=self.inputs.radius_or_number_of_bins[index]
-        )
+            optional=self.inputs.radius_or_number_of_bins[index])
         # The optional sampling strategy and percentage.
-        if isdefined(self.inputs.sampling_strategy) and self.inputs.sampling_strategy:
+        if isdefined(self.inputs.sampling_strategy
+                     ) and self.inputs.sampling_strategy:
             sampling_strategy = self.inputs.sampling_strategy[index]
             if sampling_strategy:
                 stage_inputs['sampling_strategy'] = sampling_strategy
-        if isdefined(self.inputs.sampling_percentage) and self.inputs.sampling_percentage:
+        if isdefined(self.inputs.sampling_percentage
+                     ) and self.inputs.sampling_percentage:
             sampling_percentage = self.inputs.sampling_percentage[index]
             if sampling_percentage:
                 stage_inputs['sampling_percentage'] = sampling_percentage
@@ -923,8 +1044,9 @@ class Registration(ANTSCommand):
     def _format_transform(self, index):
         retval = []
         retval.append('%s[ ' % self.inputs.transforms[index])
-        parameters = ', '.join([str(
-            element) for element in self.inputs.transform_parameters[index]])
+        parameters = ', '.join([
+            str(element) for element in self.inputs.transform_parameters[index]
+        ])
         retval.append('%s' % parameters)
         retval.append(' ]')
         return "".join(retval)
@@ -937,14 +1059,15 @@ class Registration(ANTSCommand):
                 retval.append('--metric %s' % metric)
             retval.append('--convergence %s' % self._format_convergence(ii))
             if isdefined(self.inputs.sigma_units):
-                retval.append('--smoothing-sigmas %s%s' %
-                              (self._format_xarray(self.inputs.smoothing_sigmas[ii]),
-                               self.inputs.sigma_units[ii]))
+                retval.append(
+                    '--smoothing-sigmas %s%s' %
+                    (self._format_xarray(self.inputs.smoothing_sigmas[ii]),
+                     self.inputs.sigma_units[ii]))
             else:
-                retval.append('--smoothing-sigmas %s' %
-                              self._format_xarray(self.inputs.smoothing_sigmas[ii]))
-            retval.append('--shrink-factors %s' %
-                          self._format_xarray(self.inputs.shrink_factors[ii]))
+                retval.append('--smoothing-sigmas %s' % self._format_xarray(
+                    self.inputs.smoothing_sigmas[ii]))
+            retval.append('--shrink-factors %s' % self._format_xarray(
+                self.inputs.shrink_factors[ii]))
             if isdefined(self.inputs.use_estimate_learning_rate_once):
                 retval.append('--use-estimate-learning-rate-once %d' %
                               self.inputs.use_estimate_learning_rate_once[ii])
@@ -957,22 +1080,23 @@ class Registration(ANTSCommand):
                     histval = self.inputs.use_histogram_matching[ii]
                 retval.append('--use-histogram-matching %d' % histval)
             if isdefined(self.inputs.restrict_deformation):
-                retval.append('--restrict-deformation %s' %
-                              self._format_xarray(self.inputs.restrict_deformation[ii]))
+                retval.append(
+                    '--restrict-deformation %s' % self._format_xarray(
+                        self.inputs.restrict_deformation[ii]))
             if any((isdefined(self.inputs.fixed_image_masks),
                     isdefined(self.inputs.moving_image_masks))):
                 if isdefined(self.inputs.fixed_image_masks):
-                    fixed_masks = filename_to_list(
+                    fixed_masks = ensure_list(
                         self.inputs.fixed_image_masks)
                     fixed_mask = fixed_masks[ii if len(fixed_masks) > 1 else 0]
                 else:
                     fixed_mask = 'NULL'
 
                 if isdefined(self.inputs.moving_image_masks):
-                    moving_masks = filename_to_list(
+                    moving_masks = ensure_list(
                         self.inputs.moving_image_masks)
-                    moving_mask = moving_masks[ii if len(
-                        moving_masks) > 1 else 0]
+                    moving_mask = moving_masks[ii
+                                               if len(moving_masks) > 1 else 0]
                 else:
                     moving_mask = 'NULL'
                 retval.append('--masks [ %s, %s ]' % (fixed_mask, moving_mask))
@@ -986,8 +1110,6 @@ class Registration(ANTSCommand):
                 output_filename = self.inputs.output_warped_image
                 if isinstance(output_filename, bool):
                     output_filename = '%s_Warped.nii.gz' % self.inputs.output_transform_prefix
-                else:
-                    output_filename = output_filename
             return output_filename
         inv_output_filename = None
         if isdefined(self.inputs.output_inverse_warped_image) and \
@@ -995,8 +1117,6 @@ class Registration(ANTSCommand):
             inv_output_filename = self.inputs.output_inverse_warped_image
             if isinstance(inv_output_filename, bool):
                 inv_output_filename = '%s_InverseWarped.nii.gz' % self.inputs.output_transform_prefix
-            else:
-                inv_output_filename = inv_output_filename
         return inv_output_filename
 
     def _format_convergence(self, ii):
@@ -1010,15 +1130,20 @@ class Registration(ANTSCommand):
             convergence_ws = self.inputs.convergence_window_size[ii]
         else:
             convergence_ws = self.inputs.convergence_window_size[0]
-        return '[ %s, %g, %d ]' % (convergence_iter, convergence_value, convergence_ws)
+        return '[ %s, %g, %d ]' % (convergence_iter, convergence_value,
+                                   convergence_ws)
 
     def _format_winsorize_image_intensities(self):
         if not self.inputs.winsorize_upper_quantile > self.inputs.winsorize_lower_quantile:
-            raise RuntimeError("Upper bound MUST be more than lower bound: %g > %g"
-                               % (self.inputs.winsorize_upper_quantile, self.inputs.winsorize_lower_quantile))
+            raise RuntimeError(
+                "Upper bound MUST be more than lower bound: %g > %g" %
+                (self.inputs.winsorize_upper_quantile,
+                 self.inputs.winsorize_lower_quantile))
         self._quantilesDone = True
-        return '--winsorize-image-intensities [ %s, %s ]' % (self.inputs.winsorize_lower_quantile,
-                                                             self.inputs.winsorize_upper_quantile)
+        return '--winsorize-image-intensities [ %s, %s ]' % (
+            self.inputs.winsorize_lower_quantile,
+            self.inputs.winsorize_upper_quantile)
+
     def _get_initial_transform_filenames(self):
         n_transforms = len(self.inputs.initial_moving_transform)
 
@@ -1031,8 +1156,10 @@ class Registration(ANTSCommand):
                     'should have the same length.')
             invert_flags = self.inputs.invert_initial_moving_transform
 
-        retval = ["[ %s, %d ]" % (xfm, int(flag)) for xfm, flag in zip(
-            self.inputs.initial_moving_transform, invert_flags)]
+        retval = [
+            "[ %s, %d ]" % (xfm, int(flag)) for xfm, flag in zip(
+                self.inputs.initial_moving_transform, invert_flags)
+        ]
         return " ".join(['--initial-moving-transform'] + retval)
 
     def _format_arg(self, opt, spec, val):
@@ -1049,27 +1176,29 @@ class Registration(ANTSCommand):
         elif opt == 'initial_moving_transform_com':
             do_center_of_mass_init = self.inputs.initial_moving_transform_com \
                 if isdefined(self.inputs.initial_moving_transform_com) else 0  # Just do the default behavior
-            return '--initial-moving-transform [ %s, %s, %d ]' % (self.inputs.fixed_image[0],
-                                                                  self.inputs.moving_image[0],
-                                                                  do_center_of_mass_init)
+            return '--initial-moving-transform [ %s, %s, %d ]' % (
+                self.inputs.fixed_image[0], self.inputs.moving_image[0],
+                do_center_of_mass_init)
         elif opt == 'interpolation':
             if self.inputs.interpolation in ['BSpline', 'MultiLabel', 'Gaussian'] and \
                     isdefined(self.inputs.interpolation_parameters):
-                return '--interpolation %s[ %s ]' % (self.inputs.interpolation,
-                                                     ', '.join([str(param)
-                                                                for param in self.inputs.interpolation_parameters]))
+                return '--interpolation %s[ %s ]' % (
+                    self.inputs.interpolation, ', '.join([
+                        str(param)
+                        for param in self.inputs.interpolation_parameters
+                    ]))
             else:
                 return '--interpolation %s' % self.inputs.interpolation
         elif opt == 'output_transform_prefix':
             out_filename = self._get_outputfilenames(inverse=False)
             inv_out_filename = self._get_outputfilenames(inverse=True)
             if out_filename and inv_out_filename:
-                return '--output [ %s, %s, %s ]' % (self.inputs.output_transform_prefix,
-                                                    out_filename,
-                                                    inv_out_filename)
+                return '--output [ %s, %s, %s ]' % (
+                    self.inputs.output_transform_prefix, out_filename,
+                    inv_out_filename)
             elif out_filename:
-                return '--output [ %s, %s ]' % (self.inputs.output_transform_prefix,
-                                                out_filename)
+                return '--output [ %s, %s ]' % (
+                    self.inputs.output_transform_prefix, out_filename)
             else:
                 return '--output %s' % self.inputs.output_transform_prefix
         elif opt == 'winsorize_upper_quantile' or opt == 'winsorize_lower_quantile':
@@ -1084,14 +1213,16 @@ class Registration(ANTSCommand):
         return super(Registration, self)._format_arg(opt, spec, val)
 
     def _output_filenames(self, prefix, count, transform, inverse=False):
-        self.low_dimensional_transform_map = {'Rigid': 'Rigid.mat',
-                                              'Affine': 'Affine.mat',
-                                              'GenericAffine': 'GenericAffine.mat',
-                                              'CompositeAffine': 'Affine.mat',
-                                              'Similarity': 'Similarity.mat',
-                                              'Translation': 'Translation.mat',
-                                              'BSpline': 'BSpline.txt',
-                                              'Initial': 'DerivedInitialMovingTranslation.mat'}
+        self.low_dimensional_transform_map = {
+            'Rigid': 'Rigid.mat',
+            'Affine': 'Affine.mat',
+            'GenericAffine': 'GenericAffine.mat',
+            'CompositeAffine': 'Affine.mat',
+            'Similarity': 'Similarity.mat',
+            'Translation': 'Translation.mat',
+            'BSpline': 'BSpline.txt',
+            'Initial': 'DerivedInitialMovingTranslation.mat'
+        }
         if transform in list(self.low_dimensional_transform_map.keys()):
             suffix = self.low_dimensional_transform_map[transform]
             inverse_mode = inverse
@@ -1112,8 +1243,8 @@ class Registration(ANTSCommand):
 
         # invert_initial_moving_transform should be always defined, even if
         # there's no initial transform
-        invert_initial_moving_transform = [
-            False] * len(self.inputs.initial_moving_transform)
+        invert_initial_moving_transform = [False] * len(
+            self.inputs.initial_moving_transform)
         if isdefined(self.inputs.invert_initial_moving_transform):
             invert_initial_moving_transform = self.inputs.invert_initial_moving_transform
 
@@ -1128,28 +1259,29 @@ class Registration(ANTSCommand):
             if not self.inputs.collapse_output_transforms:
                 transform_count = 0
                 if isdefined(self.inputs.initial_moving_transform):
-                    outputs['forward_transforms'] += self.inputs.initial_moving_transform
-                    outputs['forward_invert_flags'] += invert_initial_moving_transform
+                    outputs[
+                        'forward_transforms'] += self.inputs.initial_moving_transform
+                    outputs[
+                        'forward_invert_flags'] += invert_initial_moving_transform
                     outputs['reverse_transforms'] = self.inputs.initial_moving_transform + \
                         outputs['reverse_transforms']
                     outputs['reverse_invert_flags'] = [
-                        not e for e in invert_initial_moving_transform] + outputs['reverse_invert_flags']  # Prepend
-                    transform_count += len(self.inputs.initial_moving_transform)
+                        not e for e in invert_initial_moving_transform
+                    ] + outputs['reverse_invert_flags']  # Prepend
+                    transform_count += len(
+                        self.inputs.initial_moving_transform)
                 elif isdefined(self.inputs.initial_moving_transform_com):
                     forward_filename, forward_inversemode = self._output_filenames(
-                        self.inputs.output_transform_prefix,
-                        transform_count,
+                        self.inputs.output_transform_prefix, transform_count,
                         'Initial')
                     reverse_filename, reverse_inversemode = self._output_filenames(
-                        self.inputs.output_transform_prefix,
-                        transform_count,
-                        'Initial',
-                        True)
+                        self.inputs.output_transform_prefix, transform_count,
+                        'Initial', True)
                     outputs['forward_transforms'].append(
                         os.path.abspath(forward_filename))
                     outputs['forward_invert_flags'].append(False)
-                    outputs['reverse_transforms'].insert(0,
-                                                         os.path.abspath(reverse_filename))
+                    outputs['reverse_transforms'].insert(
+                        0, os.path.abspath(reverse_filename))
                     outputs['reverse_invert_flags'].insert(0, True)
                     transform_count += 1
 
@@ -1171,7 +1303,9 @@ class Registration(ANTSCommand):
             else:
                 transform_count = 0
                 is_linear = [
-                    t in self._linear_transform_names for t in self.inputs.transforms]
+                    t in self._linear_transform_names
+                    for t in self.inputs.transforms
+                ]
                 collapse_list = []
 
                 if isdefined(self.inputs.initial_moving_transform) or \
@@ -1220,49 +1354,69 @@ class Registration(ANTSCommand):
 
 class MeasureImageSimilarityInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(
-        2, 3, 4,
-        argstr='--dimensionality %d', position=1,
+        2,
+        3,
+        4,
+        argstr='--dimensionality %d',
+        position=1,
         desc='Dimensionality of the fixed/moving image pair',
     )
     fixed_image = File(
-        exists=True, mandatory=True,
+        exists=True,
+        mandatory=True,
         desc='Image to which the moving image is warped',
     )
     moving_image = File(
-        exists=True, mandatory=True,
-        desc='Image to apply transformation to (generally a coregistered functional)',
+        exists=True,
+        mandatory=True,
+        desc=
+        'Image to apply transformation to (generally a coregistered functional)',
     )
     metric = traits.Enum(
-        "CC", "MI", "Mattes", "MeanSquares", "Demons", "GC",
-        argstr="%s", mandatory=True,
+        "CC",
+        "MI",
+        "Mattes",
+        "MeanSquares",
+        "Demons",
+        "GC",
+        argstr="%s",
+        mandatory=True,
     )
     metric_weight = traits.Float(
-        requires=['metric'], default=1.0, usedefault=True,
+        requires=['metric'],
+        default_value=1.0,
+        usedefault=True,
         desc='The "metricWeight" variable is not used.',
     )
     radius_or_number_of_bins = traits.Int(
-        requires=['metric'], mandatory=True,
+        requires=['metric'],
+        mandatory=True,
         desc='The number of bins in each stage for the MI and Mattes metric, '
         'or the radius for other metrics',
     )
     sampling_strategy = traits.Enum(
-        "None", "Regular", "Random",
-        requires=['metric'], default="None", usedefault=True,
+        "None",
+        "Regular",
+        "Random",
+        requires=['metric'],
+        usedefault=True,
         desc='Manner of choosing point set over which to optimize the metric. '
-        'Defaults to "None" (i.e. a dense sampling of one sample per voxel).'
-    )
+        'Defaults to "None" (i.e. a dense sampling of one sample per voxel).')
     sampling_percentage = traits.Either(
         traits.Range(low=0.0, high=1.0),
-        requires=['metric'], mandatory=True,
-        desc='Percentage of points accessible to the sampling strategy over which '
-        'to optimize the metric.'
-    )
+        requires=['metric'],
+        mandatory=True,
+        desc=
+        'Percentage of points accessible to the sampling strategy over which '
+        'to optimize the metric.')
     fixed_image_mask = File(
-        exists=True, argstr='%s',
+        exists=True,
+        argstr='%s',
         desc='mask used to limit metric sampling region of the fixed image',
     )
     moving_image_mask = File(
-        exists=True, requires=['fixed_image_mask'],
+        exists=True,
+        requires=['fixed_image_mask'],
         desc='mask used to limit metric sampling region of the moving image',
     )
 
@@ -1291,7 +1445,7 @@ class MeasureImageSimilarity(ANTSCommand):
     >>> sim.inputs.fixed_image_mask = 'mask.nii'
     >>> sim.inputs.moving_image_mask = 'mask.nii.gz'
     >>> sim.cmdline
-    u'MeasureImageSimilarity --dimensionality 3 --masks ["mask.nii","mask.nii.gz"] \
+    'MeasureImageSimilarity --dimensionality 3 --masks ["mask.nii","mask.nii.gz"] \
 --metric MI["T1.nii","resting.nii",1.0,5,Regular,1.0]'
     """
     _cmd = 'MeasureImageSimilarity'
@@ -1337,4 +1491,108 @@ class MeasureImageSimilarity(ANTSCommand):
         outputs = self._outputs()
         stdout = runtime.stdout.split('\n')
         outputs.similarity = float(stdout[0])
+        return outputs
+
+
+class RegistrationSynQuickInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Enum(3, 2, argstr='-d %d',
+                            usedefault=True, desc='image dimension (2 or 3)')
+    fixed_image = InputMultiPath(File(exists=True), mandatory=True, argstr='-f %s...',
+                                 desc='Fixed image or source image or reference image')
+    moving_image = InputMultiPath(File(exists=True), mandatory=True, argstr='-m %s...',
+                                  desc='Moving image or target image')
+    output_prefix = Str("transform", usedefault=True, argstr='-o %s',
+                        desc="A prefix that is prepended to all output files")
+    num_threads = traits.Int(default_value=LOCAL_DEFAULT_NUMBER_OF_THREADS, usedefault=True,
+                             desc='Number of threads (default = 1)', argstr='-n %d')
+
+    transform_type = traits.Enum('s', 't', 'r', 'a', 'sr', 'b', 'br', argstr='-t %s',
+                                 desc="""
+                                 transform type
+                                 t:  translation
+                                 r:  rigid
+                                 a:  rigid + affine
+                                 s:  rigid + affine + deformable syn (default)
+                                 sr: rigid + deformable syn
+                                 b:  rigid + affine + deformable b-spline syn
+                                 br: rigid + deformable b-spline syn""",
+                                 usedefault=True)
+
+    use_histogram_matching = traits.Bool(False, argstr='-j %d',
+                                         desc='use histogram matching')
+    histogram_bins = traits.Int(default_value=32, usedefault=True, argstr='-r %d',
+                                desc='histogram bins for mutual information in SyN stage \
+                                 (default = 32)')
+    spline_distance = traits.Int(default_value=26, usedefault=True, argstr='-s %d',
+                                 desc='spline distance for deformable B-spline SyN transform \
+                                 (default = 26)')
+    precision_type = traits.Enum('double', 'float', argstr='-p %s',
+                                 desc='precision type (default = double)', usedefault=True)
+
+
+class RegistrationSynQuickOutputSpec(TraitedSpec):
+    warped_image = File(exists=True, desc="Warped image")
+    inverse_warped_image = File(exists=True, desc="Inverse warped image")
+    out_matrix = File(exists=True, desc='Affine matrix')
+    forward_warp_field = File(exists=True, desc='Forward warp field')
+    inverse_warp_field = File(exists=True, desc='Inverse warp field')
+
+
+class RegistrationSynQuick(ANTSCommand):
+    """
+    Registration using a symmetric image normalization method (SyN).
+    You can read more in Avants et al.; Med Image Anal., 2008
+    (https://www.ncbi.nlm.nih.gov/pubmed/17659998).
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.ants import RegistrationSynQuick
+    >>> reg = RegistrationSynQuick()
+    >>> reg.inputs.fixed_image = 'fixed1.nii'
+    >>> reg.inputs.moving_image = 'moving1.nii'
+    >>> reg.inputs.num_threads = 2
+    >>> reg.cmdline
+    'antsRegistrationSyNQuick.sh -d 3 -f fixed1.nii -r 32 -m moving1.nii -n 2 -o transform -p d -s 26 -t s'
+    >>> reg.run()  # doctest: +SKIP
+
+    example for multiple images
+
+    >>> from nipype.interfaces.ants import RegistrationSynQuick
+    >>> reg = RegistrationSynQuick()
+    >>> reg.inputs.fixed_image = ['fixed1.nii', 'fixed2.nii']
+    >>> reg.inputs.moving_image = ['moving1.nii', 'moving2.nii']
+    >>> reg.inputs.num_threads = 2
+    >>> reg.cmdline
+    'antsRegistrationSyNQuick.sh -d 3 -f fixed1.nii -f fixed2.nii -r 32 -m moving1.nii -m moving2.nii \
+-n 2 -o transform -p d -s 26 -t s'
+    >>> reg.run()  # doctest: +SKIP
+    """
+
+    _cmd = 'antsRegistrationSyNQuick.sh'
+    input_spec = RegistrationSynQuickInputSpec
+    output_spec = RegistrationSynQuickOutputSpec
+
+    def _num_threads_update(self):
+        """
+        antsRegistrationSyNQuick.sh ignores environment variables,
+        so override environment update from ANTSCommand class
+        """
+        pass
+
+    def _format_arg(self, name, spec, value):
+        if name == 'precision_type':
+            return spec.argstr % value[0]
+        return super(RegistrationSynQuick, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        out_base = os.path.abspath(self.inputs.output_prefix)
+        outputs['warped_image'] = out_base + 'Warped.nii.gz'
+        outputs['inverse_warped_image'] = out_base + 'InverseWarped.nii.gz'
+        outputs['out_matrix'] = out_base + '0GenericAffine.mat'
+
+        if self.inputs.transform_type not in ('t', 'r', 'a'):
+            outputs['forward_warp_field'] = out_base + '1Warp.nii.gz'
+            outputs['inverse_warp_field'] = out_base + '1InverseWarp.nii.gz'
         return outputs

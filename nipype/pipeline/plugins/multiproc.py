@@ -6,23 +6,39 @@
 Support for child processes running as non-daemons based on
 http://stackoverflow.com/a/8963618/1183453
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 # Import packages
-from multiprocessing import Process, Pool, cpu_count, pool
+import os
+from multiprocessing import cpu_count
+from concurrent.futures import ProcessPoolExecutor
 from traceback import format_exception
 import sys
+from logging import INFO
+import gc
 
 from copy import deepcopy
 import numpy as np
-
 from ... import logging
 from ...utils.profiler import get_system_total_memory_gb
 from ..engine import MapNode
 from .base import DistributedPluginBase
 
+try:
+    from textwrap import indent
+except ImportError:
+
+    def indent(text, prefix):
+        """ A textwrap.indent replacement for Python < 3.3 """
+        if not prefix:
+            return text
+        splittext = text.splitlines(True)
+        return prefix + prefix.join(splittext)
+
+
 # Init logger
-logger = logging.getLogger('workflow')
+logger = logging.getLogger('nipype.workflow')
 
 
 # Run node
@@ -36,6 +52,8 @@ def run_node(node, updatehash, taskid):
         the node to run
     updatehash : boolean
         flag for updating hash
+    taskid : int
+        an identifier for this task
 
     Returns
     -------
@@ -49,31 +67,12 @@ def run_node(node, updatehash, taskid):
     # Try and execute the node via node.run()
     try:
         result['result'] = node.run(updatehash=updatehash)
-    except:
+    except:  # noqa: E722, intendedly catch all here
         result['traceback'] = format_exception(*sys.exc_info())
         result['result'] = node.result
 
     # Return the result dictionary
     return result
-
-
-class NonDaemonProcess(Process):
-    """A non-daemon process to support internal multiprocessing.
-    """
-
-    def _get_daemon(self):
-        return False
-
-    def _set_daemon(self, value):
-        pass
-
-    daemon = property(_get_daemon, _set_daemon)
-
-
-class NonDaemonPool(pool.Pool):
-    """A process pool with non-daemon processes.
-    """
-    Process = NonDaemonProcess
 
 
 class MultiProcPlugin(DistributedPluginBase):
@@ -117,29 +116,32 @@ class MultiProcPlugin(DistributedPluginBase):
         self._task_obj = {}
         self._taskid = 0
 
+        # Cache current working directory and make sure we
+        # change to it when workers are set up
+        self._cwd = os.getcwd()
+
         # Read in options or set defaults.
-        non_daemon = self.plugin_args.get('non_daemon', True)
-        maxtasks = self.plugin_args.get('maxtasksperchild', 10)
         self.processors = self.plugin_args.get('n_procs', cpu_count())
-        self.memory_gb = self.plugin_args.get('memory_gb',  # Allocate 90% of system memory
-                                              get_system_total_memory_gb() * 0.9)
-        self.raise_insufficient = self.plugin_args.get('raise_insufficient', True)
+        self.memory_gb = self.plugin_args.get(
+            'memory_gb',  # Allocate 90% of system memory
+            get_system_total_memory_gb() * 0.9)
+        self.raise_insufficient = self.plugin_args.get('raise_insufficient',
+                                                       True)
 
         # Instantiate different thread pools for non-daemon processes
-        logger.debug('MultiProcPlugin starting in "%sdaemon" mode (n_procs=%d, mem_gb=%0.2f)',
-                     'non' if non_daemon else '', self.processors, self.memory_gb)
+        logger.debug('[MultiProc] Starting (n_procs=%d, '
+                     'mem_gb=%0.2f, cwd=%s)',
+                     self.processors, self.memory_gb, self._cwd)
 
-        NipypePool = NonDaemonPool if non_daemon else Pool
-        try:
-            self.pool = NipypePool(processes=self.processors,
-                                   maxtasksperchild=maxtasks)
-        except TypeError:
-            self.pool = NipypePool(processes=self.processors)
+        self.pool = ProcessPoolExecutor(max_workers=self.processors)
 
         self._stats = None
 
     def _async_callback(self, args):
-        self._taskresult[args['taskid']] = args
+        # Make sure runtime is not left at a dubious working directory
+        os.chdir(self._cwd)
+        result = args.result()
+        self._taskresult[result['taskid']] = result
 
     def _get_result(self, taskid):
         return self._taskresult.get(taskid)
@@ -154,11 +156,11 @@ class MultiProcPlugin(DistributedPluginBase):
         if getattr(node.interface, 'terminal_output', '') == 'stream':
             node.interface.terminal_output = 'allatonce'
 
-        self._task_obj[self._taskid] = self.pool.apply_async(
-            run_node, (node, updatehash, self._taskid),
-            callback=self._async_callback)
+        result_future = self.pool.submit(run_node, node, updatehash, self._taskid)
+        result_future.add_done_callback(self._async_callback)
+        self._task_obj[self._taskid] = result_future
 
-        logger.debug('MultiProc submitted task %s (taskid=%d).',
+        logger.debug('[MultiProc] Submitted task %s (taskid=%d).',
                      node.fullname, self._taskid)
         return self._taskid
 
@@ -185,7 +187,7 @@ class MultiProcPlugin(DistributedPluginBase):
                 raise RuntimeError('Insufficient resources available for job')
 
     def _postrun_check(self):
-        self.pool.close()
+        self.pool.shutdown()
 
     def _check_resources(self, running_tasks):
         """
@@ -204,19 +206,36 @@ class MultiProcPlugin(DistributedPluginBase):
         Sends jobs to workers when system resources are available.
         """
 
-        # Check to see if a job is available (jobs without dependencies not run)
+        # Check to see if a job is available (jobs with all dependencies run)
         # See https://github.com/nipy/nipype/pull/2200#discussion_r141605722
-        jobids = np.nonzero(~self.proc_done & (self.depidx.sum(0) == 0))[1]
+        # See also https://github.com/nipy/nipype/issues/2372
+        jobids = np.flatnonzero(~self.proc_done &
+                                (self.depidx.sum(axis=0) == 0).__array__())
 
-        # Check available system resources by summing all threads and memory used
-        free_memory_gb, free_processors = self._check_resources(self.pending_tasks)
+        # Check available resources by summing all threads and memory used
+        free_memory_gb, free_processors = self._check_resources(
+            self.pending_tasks)
 
         stats = (len(self.pending_tasks), len(jobids), free_memory_gb,
                  self.memory_gb, free_processors, self.processors)
         if self._stats != stats:
-            logger.info('Currently running %d tasks, and %d jobs ready. Free '
-                        'memory (GB): %0.2f/%0.2f, Free processors: %d/%d',
-                        *stats)
+            tasks_list_msg = ''
+
+            if logger.level <= INFO:
+                running_tasks = [
+                    '  * %s' % self.procs[jobid].fullname
+                    for _, jobid in self.pending_tasks
+                ]
+                if running_tasks:
+                    tasks_list_msg = '\nCurrently running:\n'
+                    tasks_list_msg += '\n'.join(running_tasks)
+                    tasks_list_msg = indent(tasks_list_msg, ' ' * 21)
+            logger.info(
+                '[MultiProc] Running %d tasks, and %d jobs ready. Free '
+                'memory (GB): %0.2f/%0.2f, Free processors: %d/%d.%s',
+                len(self.pending_tasks), len(jobids), free_memory_gb,
+                self.memory_gb, free_processors, self.processors,
+                tasks_list_msg)
             self._stats = stats
 
         if free_memory_gb < 0.01 or free_processors == 0:
@@ -228,7 +247,11 @@ class MultiProcPlugin(DistributedPluginBase):
                          'be submitted to the queue. Potential deadlock')
             return
 
-        jobids = self._sort_jobs(jobids, scheduler=self.plugin_args.get('scheduler'))
+        jobids = self._sort_jobs(
+            jobids, scheduler=self.plugin_args.get('scheduler'))
+
+        # Run garbage collector before potentially submitting jobs
+        gc.collect()
 
         # Submit jobs
         for jobid in jobids:
@@ -238,8 +261,13 @@ class MultiProcPlugin(DistributedPluginBase):
                     num_subnodes = self.procs[jobid].num_subnodes()
                 except Exception:
                     traceback = format_exception(*sys.exc_info())
-                    self._report_crash(self.procs[jobid], traceback=traceback)
-                    self._clean_queue(jobid, graph)
+                    self._clean_queue(
+                        jobid,
+                        graph,
+                        result={
+                            'result': None,
+                            'traceback': traceback
+                        })
                     self.proc_pending[jobid] = False
                     continue
                 if num_subnodes > 1:
@@ -259,26 +287,34 @@ class MultiProcPlugin(DistributedPluginBase):
 
             free_memory_gb -= next_job_gb
             free_processors -= next_job_th
-            logger.debug('Allocating %s ID=%d (%0.2fGB, %d threads). Free: %0.2fGB, %d threads.',
-                         self.procs[jobid].fullname, jobid, next_job_gb, next_job_th,
-                         free_memory_gb, free_processors)
+            logger.debug('Allocating %s ID=%d (%0.2fGB, %d threads). Free: '
+                         '%0.2fGB, %d threads.', self.procs[jobid].fullname,
+                         jobid, next_job_gb, next_job_th, free_memory_gb,
+                         free_processors)
 
             # change job status in appropriate queues
             self.proc_done[jobid] = True
             self.proc_pending[jobid] = True
 
-            # If cached just retrieve it, don't run
+            # If cached and up-to-date just retrieve it, don't run
             if self._local_hash_check(jobid, graph):
                 continue
 
-            if self.procs[jobid].run_without_submitting:
+            # updatehash and run_without_submitting are also run locally
+            if updatehash or self.procs[jobid].run_without_submitting:
                 logger.debug('Running node %s on master thread',
                              self.procs[jobid])
                 try:
-                    self.procs[jobid].run()
+                    self.procs[jobid].run(updatehash=updatehash)
                 except Exception:
                     traceback = format_exception(*sys.exc_info())
-                    self._report_crash(self.procs[jobid], traceback=traceback)
+                    self._clean_queue(
+                        jobid,
+                        graph,
+                        result={
+                            'result': None,
+                            'traceback': traceback
+                        })
 
                 # Release resources
                 self._task_finished_cb(jobid)
@@ -287,14 +323,17 @@ class MultiProcPlugin(DistributedPluginBase):
                 free_processors += next_job_th
                 # Display stats next loop
                 self._stats = None
+
+                # Clean up any debris from running node in main process
+                gc.collect()
                 continue
 
             # Task should be submitted to workers
             # Send job to task manager and add to pending tasks
             if self._status_callback:
                 self._status_callback(self.procs[jobid], 'start')
-            tid = self._submit_job(deepcopy(self.procs[jobid]),
-                                   updatehash=updatehash)
+            tid = self._submit_job(
+                deepcopy(self.procs[jobid]), updatehash=updatehash)
             if tid is None:
                 self.proc_done[jobid] = False
                 self.proc_pending[jobid] = False
@@ -305,6 +344,8 @@ class MultiProcPlugin(DistributedPluginBase):
 
     def _sort_jobs(self, jobids, scheduler='tsort'):
         if scheduler == 'mem_thread':
-            return sorted(jobids, key=lambda item: (
-                self.procs[item].mem_gb, self.procs[item].n_procs))
+            return sorted(
+                jobids,
+                key=lambda item: (self.procs[item].mem_gb, self.procs[item].n_procs)
+            )
         return jobids

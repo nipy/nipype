@@ -29,14 +29,17 @@ __version__ = '0.0.5'
 
 class InactiveDueCreditCollector(object):
     """Just a stub at the Collector which would not do anything"""
+
     def _donothing(self, *args, **kwargs):
         """Perform no good and no bad"""
         pass
 
     def dcite(self, *args, **kwargs):
         """If I could cite I would"""
+
         def nondecorating_decorator(func):
             return func
+
         return nondecorating_decorator
 
     cite = load = add = _donothing
@@ -48,6 +51,7 @@ class InactiveDueCreditCollector(object):
 def _donothing_func(*args, **kwargs):
     """Perform no good and no bad"""
     pass
+
 
 try:
     from duecredit import due, BibTeX, Doi, Url

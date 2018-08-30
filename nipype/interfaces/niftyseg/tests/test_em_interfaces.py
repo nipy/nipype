@@ -3,13 +3,14 @@
 
 import pytest
 
-from nipype.interfaces.niftyreg import no_nifty_package, get_custom_path
-from nipype.interfaces.niftyseg import EM
-from nipype.testing import example_data
+from ....testing import example_data
+from ...niftyreg import get_custom_path
+from ...niftyreg.tests.test_regutils import no_nifty_tool
+from .. import EM
 
 
-@pytest.mark.skipif(no_nifty_package(cmd='seg_EM'),
-                    reason="niftyseg is not installed")
+@pytest.mark.skipif(
+    no_nifty_tool(cmd='seg_EM'), reason="niftyseg is not installed")
 def test_seg_em():
 
     # Create a node object
@@ -30,6 +31,7 @@ def test_seg_em():
 
     cmd_tmp = '{cmd} -in {in_file} -nopriors 4 -bc_out {bc_out} -out \
 {out_file} -out_outlier {out_outlier}'
+
     expected_cmd = cmd_tmp.format(
         cmd=cmd,
         in_file=in_file,

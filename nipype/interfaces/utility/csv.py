@@ -2,28 +2,28 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """CSV Handling utilities
-
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname(os.path.realpath(__file__))
-    >>> datadir = os.path.realpath(os.path.join(filepath,
-    ...                            '../../testing/data'))
-    >>> os.chdir(datadir)
-
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import zip, range, str, open
 
 from future import standard_library
 standard_library.install_aliases()
 
-from ..base import traits, TraitedSpec, DynamicTraitedSpec, File, BaseInterface
+from ..base import (traits, TraitedSpec, DynamicTraitedSpec, File,
+                    BaseInterface)
 from ..io import add_traits
 
 
 class CSVReaderInputSpec(DynamicTraitedSpec, TraitedSpec):
-    in_file = File(exists=True, mandatory=True, desc='Input comma-seperated value (CSV) file')
-    header = traits.Bool(False, usedefault=True, desc='True if the first line is a column header')
+    in_file = File(
+        exists=True,
+        mandatory=True,
+        desc='Input comma-seperated value (CSV) file')
+    header = traits.Bool(
+        False,
+        usedefault=True,
+        desc='True if the first line is a column header')
 
 
 class CSVReader(BaseInterface):
@@ -73,7 +73,8 @@ class CSVReader(BaseInterface):
             if self.inputs.header:
                 self._outfields = tuple(entry)
             else:
-                self._outfields = tuple(['column_' + str(x) for x in range(len(entry))])
+                self._outfields = tuple(
+                    ['column_' + str(x) for x in range(len(entry))])
         return self._outfields
 
     def _run_interface(self, runtime):

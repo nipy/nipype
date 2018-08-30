@@ -14,8 +14,8 @@ def import_module(module_path):
        absolute or relative terms (e.g. either pkg.mod or ..mod).
        If the name is specified in relative terms, then the package argument
        must be set to the name of the package which is to act as the anchor
-       for resolving the package name (e.g. import_module('..mod', 'pkg.subpkg')
-       will import pkg.mod).
+       for resolving the package name (e.g. import_module('..mod',
+       'pkg.subpkg') will import pkg.mod).
 
     Parameters
     ----------
@@ -29,7 +29,8 @@ def import_module(module_path):
     try:
         mod = importlib.import_module(module_path)
     except:
-        raise ImportError('Error when importing object {}.'.format(module_path))
+        raise ImportError(
+            'Error when importing object {}.'.format(module_path))
     else:
         return mod
 

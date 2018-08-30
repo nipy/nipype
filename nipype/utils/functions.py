@@ -8,6 +8,7 @@ from future.utils import raise_from
 import inspect
 from textwrap import dedent
 
+
 def getsource(function):
     """Returns the source code of a function"""
     return dedent(inspect.getsource(function))

@@ -10,9 +10,9 @@
 #   copyright and license terms.
 #
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ##
-
 """Helper to automagically generate ReST versions of examples"""
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import open, str
 
 import os
@@ -37,17 +37,19 @@ def auto_image(line):
 
     # Match means it's an image spec, we rewrite it with extra tags
     ini_space = m.group(1)
-    lines = [line,
-             ini_space + '   :width: 500\n',
-             #ini_space + '   :height: 350\n'
-             ]
+    lines = [
+        line,
+        ini_space + '   :width: 500\n',
+        #ini_space + '   :height: 350\n'
+    ]
     fspec = m.group(2)
     if fspec.endswith('.*'):
         fspec = fspec.replace('.*', '.png')
     fspec = fspec.replace('fig/', '../_images/')
-    lines.append(ini_space + ('   :target: %s\n' % fspec) )
+    lines.append(ini_space + ('   :target: %s\n' % fspec))
     lines.append('\n')
     return ''.join(lines)
+
 
 def exfile2rst(filename):
     """Open a Python script and convert it into an ReST string.
@@ -113,7 +115,7 @@ def exfile2rst(filename):
                     indocs = True
                     code2doc = True
                     # rescue what is left on the line
-                    proc_line = cleanline[3:] # strip """
+                    proc_line = cleanline[3:]  # strip """
             else:
                 # we are already in the docs
                 # handle doc end
@@ -190,12 +192,11 @@ def exfile2rstfile(filename, opts):
    This same script is also included in the %s source distribution under the
    :file:`examples` directory.
 
-"""    % (filename, opts.project)
+""" % (filename, opts.project)
 
         dfile.write(msg)
 
     dfile.close()
-
 
 
 def main():
@@ -223,30 +224,53 @@ first (module-level) docstring instead.
 """ ) #'
 
     # define options
-    parser.add_option('--verbose', action='store_true', dest='verbose',
-                      default=False, help='print status messages')
-    parser.add_option('-x', '--exclude', action='append', dest='excluded',
-                      help="""\
+    parser.add_option(
+        '--verbose',
+        action='store_true',
+        dest='verbose',
+        default=False,
+        help='print status messages')
+    parser.add_option(
+        '-x',
+        '--exclude',
+        action='append',
+        dest='excluded',
+        help="""\
 Use this option to exclude single files from the to be parsed files. This is
 especially useful to exclude files when parsing complete directories. This
 option can be specified multiple times.
 """)
-    parser.add_option('-o', '--outdir', action='store', dest='outdir',
-                      type='string', default=None, help="""\
+    parser.add_option(
+        '-o',
+        '--outdir',
+        action='store',
+        dest='outdir',
+        type='string',
+        default=None,
+        help="""\
 Target directory to write the ReST output to. This is a required option.
 """)
-    parser.add_option('--no-sourceref', action='store_false', default=True,
-                      dest='sourceref', help="""\
+    parser.add_option(
+        '--no-sourceref',
+        action='store_false',
+        default=True,
+        dest='sourceref',
+        help="""\
 If specified, the source reference section will be suppressed.
 """)
-    parser.add_option('--project', type='string', action='store', default='',
-                      dest='project', help="""\
+    parser.add_option(
+        '--project',
+        type='string',
+        action='store',
+        default='',
+        dest='project',
+        help="""\
 Name of the project that contains the examples. This name is used in the
 'seealso' source references. Default: ''
 """)
 
     # parse options
-    (opts, args) = parser.parse_args() # read sys.argv[1:] by default
+    (opts, args) = parser.parse_args()  # read sys.argv[1:] by default
 
     # check for required options
     if opts.outdir is None:

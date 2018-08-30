@@ -2,7 +2,8 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """ General matlab interface code """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import open
 import os
 
@@ -21,13 +22,16 @@ def get_matlab_command():
         matlab_cmd = 'matlab'
 
     try:
-        res = CommandLine(command='which', args=matlab_cmd,
-                          resource_monitor=False,
-                          terminal_output='allatonce').run()
+        res = CommandLine(
+            command='which',
+            args=matlab_cmd,
+            resource_monitor=False,
+            terminal_output='allatonce').run()
         matlab_path = res.runtime.stdout.strip()
-    except Exception as e:
+    except Exception:
         return None
     return matlab_cmd
+
 
 no_matlab = get_matlab_command() is None
 
@@ -35,37 +39,50 @@ no_matlab = get_matlab_command() is None
 class MatlabInputSpec(CommandLineInputSpec):
     """ Basic expected inputs to Matlab interface """
 
-    script = traits.Str(argstr='-r \"%s;exit\"', desc='m-code to run',
-                        mandatory=True, position=-1)
-    uses_mcr = traits.Bool(desc='use MCR interface',
-                           xor=['nodesktop', 'nosplash',
-                                'single_comp_thread'],
-                           nohash=True)
-    nodesktop = traits.Bool(True, argstr='-nodesktop',
-                            usedefault=True,
-                            desc='Switch off desktop mode on unix platforms',
-                            nohash=True)
-    nosplash = traits.Bool(True, argstr='-nosplash', usedefault=True,
-                           desc='Switch of splash screen',
-                           nohash=True)
-    logfile = File(argstr='-logfile %s',
-                          desc='Save matlab output to log')
-    single_comp_thread = traits.Bool(argstr="-singleCompThread",
-                                     desc="force single threaded operation",
-                                     nohash=True)
+    script = traits.Str(
+        argstr='-r \"%s;exit\"',
+        desc='m-code to run',
+        mandatory=True,
+        position=-1)
+    uses_mcr = traits.Bool(
+        desc='use MCR interface',
+        xor=['nodesktop', 'nosplash', 'single_comp_thread'],
+        nohash=True)
+    nodesktop = traits.Bool(
+        True,
+        argstr='-nodesktop',
+        usedefault=True,
+        desc='Switch off desktop mode on unix platforms',
+        nohash=True)
+    nosplash = traits.Bool(
+        True,
+        argstr='-nosplash',
+        usedefault=True,
+        desc='Switch of splash screen',
+        nohash=True)
+    logfile = File(argstr='-logfile %s', desc='Save matlab output to log')
+    single_comp_thread = traits.Bool(
+        argstr="-singleCompThread",
+        desc="force single threaded operation",
+        nohash=True)
     # non-commandline options
-    mfile = traits.Bool(True, desc='Run m-code using m-file',
-                        usedefault=True)
-    script_file = File('pyscript.m', usedefault=True,
-                       desc='Name of file to write m-code to')
+    mfile = traits.Bool(True, desc='Run m-code using m-file', usedefault=True)
+    script_file = File(
+        'pyscript.m', usedefault=True, desc='Name of file to write m-code to')
     paths = InputMultiPath(Directory(), desc='Paths to add to matlabpath')
-    prescript = traits.List(["ver,", "try,"], usedefault=True,
-                            desc='prescript to be added before code')
-    postscript = traits.List(["\n,catch ME,",
-                              "fprintf(2,'MATLAB code threw an exception:\\n');",
-                              "fprintf(2,'%s\\n',ME.message);",
-                              "if length(ME.stack) ~= 0, fprintf(2,'File:%s\\nName:%s\\nLine:%d\\n',ME.stack.file,ME.stack.name,ME.stack.line);, end;",
-                              "end;"], desc='script added after code', usedefault=True)
+    prescript = traits.List(
+        ["ver,", "try,"],
+        usedefault=True,
+        desc='prescript to be added before code')
+    postscript = traits.List(
+        [
+            "\n,catch ME,", "fprintf(2,'MATLAB code threw an exception:\\n');",
+            "fprintf(2,'%s\\n',ME.message);",
+            "if length(ME.stack) ~= 0, fprintf(2,'File:%s\\nName:%s\\nLine:%d\\n',ME.stack.file,ME.stack.name,ME.stack.line);, end;",
+            "end;"
+        ],
+        desc='script added after code',
+        usedefault=True)
 
 
 class MatlabCommand(CommandLine):
@@ -174,24 +191,34 @@ class MatlabCommand(CommandLine):
 
         # prescript takes different default value depending on the mfile argument
         if mfile:
-            prescript.insert(0, "fprintf(1,'Executing %s at %s:\\n',mfilename(),datestr(now));")
+            prescript.insert(
+                0,
+                "fprintf(1,'Executing %s at %s:\\n',mfilename(),datestr(now));"
+            )
         else:
-            prescript.insert(0, "fprintf(1,'Executing code at %s:\\n',datestr(now));")
+            prescript.insert(
+                0, "fprintf(1,'Executing code at %s:\\n',datestr(now));")
         for path in paths:
             prescript.append("addpath('%s');\n" % path)
 
         if not mfile:
             # clean up the code of comments and replace newlines with commas
-            script_lines = ','.join([line for line in script_lines.split("\n") if not line.strip().startswith("%")])
+            script_lines = ','.join([
+                line for line in script_lines.split("\n")
+                if not line.strip().startswith("%")
+            ])
 
-        script_lines = '\n'.join(prescript) + script_lines + '\n'.join(postscript)
+        script_lines = '\n'.join(prescript) + script_lines + '\n'.join(
+            postscript)
         if mfile:
-            with open(os.path.join(cwd, self.inputs.script_file), 'wt') as mfile:
+            with open(os.path.join(cwd, self.inputs.script_file),
+                      'wt') as mfile:
                 mfile.write(script_lines)
             if self.inputs.uses_mcr:
                 script = '%s' % (os.path.join(cwd, self.inputs.script_file))
             else:
-                script = "addpath('%s');%s" % (cwd, self.inputs.script_file.split('.')[0])
+                script = "addpath('%s');%s" % (
+                    cwd, self.inputs.script_file.split('.')[0])
         else:
             script = ''.join(script_lines.split('\n'))
         return argstr % script

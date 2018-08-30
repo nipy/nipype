@@ -4,21 +4,17 @@ from ..misc import Matlab2CSV
 
 
 def test_Matlab2CSV_inputs():
-    input_map = dict(in_file=dict(mandatory=True,
-    ),
-    reshape_matrix=dict(usedefault=True,
-    ),
+    input_map = dict(
+        in_file=dict(mandatory=True, ),
+        reshape_matrix=dict(usedefault=True, ),
     )
     inputs = Matlab2CSV.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_Matlab2CSV_outputs():
-    output_map = dict(csv_files=dict(),
-    )
+    output_map = dict(csv_files=dict(), )
     outputs = Matlab2CSV.output_spec()
 
     for key, metadata in list(output_map.items()):

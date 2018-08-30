@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #   imglob - expand list of image filenames
-#   Stephen Smith, Mark Jenkinson and Matthew Webster FMRIB Image Analysis Group
+#   Stephen Smith, Mark Jenkinson & Matthew Webster FMRIB Image Analysis Group
 #   Copyright (C) 2009 University of Oxford
 #   Part of FSL - FMRIB's Software Library
 #   http://www.fmrib.ox.ac.uk/fsl
@@ -68,6 +68,7 @@ import sys
 import glob
 from builtins import range
 
+
 def usage():
     print("Usage: $0 [-extension/extensions] <list of names>")
     print("       -extension for one image with full extension")
@@ -102,7 +103,7 @@ def main():
     deleteExtensions = True
     primaryExtensions = ['.nii.gz', '.nii', '.hdr.gz', '.hdr']
     secondaryExtensions = ['.img.gz', '.img']
-    allExtensions = primaryExtensions+secondaryExtensions
+    allExtensions = primaryExtensions + secondaryExtensions
     validExtensions = primaryExtensions
     startingArg = 1
 
@@ -116,18 +117,22 @@ def main():
 
     filelist = []
     for arg in range(startingArg, len(sys.argv)):
-        #      if isImage(sys.argv[arg],allExtensions)[0]:          #These enable a "pedantic" style mode currently not used
+        #      #These if enables a "pedantic" style mode currently not used
+        #      if isImage(sys.argv[arg],allExtensions)[0]:
         #         filelist.extend(glob.glob(sys.argv[arg]))
         #      else:
         #         for currentExtension in validExtensions:
         #            filelist.extend(glob.glob(sys.argv[arg]+currentExtension))
         for currentExtension in validExtensions:
             filelist.extend(
-                glob.glob(removeImageExtension(sys.argv[arg], allExtensions)+currentExtension))
+                glob.glob(
+                    removeImageExtension(sys.argv[arg], allExtensions) +
+                    currentExtension))
 
     if deleteExtensions:
         for file in range(0, len(filelist)):
-            filelist[file] = removeImageExtension(filelist[file], allExtensions)
+            filelist[file] = removeImageExtension(filelist[file],
+                                                  allExtensions)
     if setAvailable:
         filelist = list(set(filelist))
     else:
@@ -136,8 +141,9 @@ def main():
 
     for file in range(0, len(filelist)):
         print(filelist[file], end=' ')
-        if file < len(filelist)-1:
+        if file < len(filelist) - 1:
             print(" ", end=' ')
+
 
 if __name__ == "__main__":
     main()

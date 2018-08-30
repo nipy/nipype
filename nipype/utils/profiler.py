@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-# @Author: oesteban
-# @Date:   2017-09-21 15:50:37
-# @Last Modified by:   oesteban
-# @Last Modified time: 2017-10-20 09:12:36
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 Utilities to keep track of performance
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import threading
 from time import time
@@ -18,7 +17,7 @@ except ImportError as exc:
 from builtins import open, range
 from .. import config, logging
 
-proflogger = logging.getLogger('utils')
+proflogger = logging.getLogger('nipype.utils')
 resource_monitor = config.resource_monitor
 
 # Init variables
@@ -36,7 +35,8 @@ class ResourceMonitor(threading.Thread):
         import psutil
 
         if freq < 0.2:
-            raise RuntimeError('Frequency (%0.2fs) cannot be lower than 0.2s' % freq)
+            raise RuntimeError(
+                'Frequency (%0.2fs) cannot be lower than 0.2s' % freq)
 
         if fname is None:
             fname = '.proc-%d_time-%s_freq-%0.2f' % (pid, time(), freq)
@@ -69,11 +69,14 @@ class ResourceMonitor(threading.Thread):
 
     def _sample(self, cpu_interval=None):
         cpu = 0.0
-        mem = 0.0
+        rss = 0.0
+        vms = 0.0
         try:
             with self._process.oneshot():
                 cpu += self._process.cpu_percent(interval=cpu_interval)
-                mem += self._process.memory_info().rss
+                mem_info = self._process.memory_info()
+                rss += mem_info.rss
+                vms += mem_info.vms
         except psutil.NoSuchProcess:
             pass
 
@@ -87,19 +90,25 @@ class ResourceMonitor(threading.Thread):
             try:
                 with child.oneshot():
                     cpu += child.cpu_percent()
-                    mem += child.memory_info().rss
+                    mem_info = child.memory_info()
+                    rss += mem_info.rss
+                    vms += mem_info.vms
             except psutil.NoSuchProcess:
                 pass
 
-        print('%f,%f,%f' % (time(), (mem / _MB), cpu),
-              file=self._logfile)
+        print(
+            '%f,%f,%f,%f' % (time(), cpu, rss / _MB, vms / _MB),
+            file=self._logfile)
         self._logfile.flush()
 
     def run(self):
         """Core monitoring function, called by start()"""
+        start_time = time()
+        wait_til = start_time
         while not self._event.is_set():
             self._sample()
-            self._event.wait(self._freq)
+            wait_til += self._freq
+            self._event.wait(max(0, wait_til - time()))
 
 
 # Log node stats function
@@ -135,10 +144,9 @@ def log_nodes_cb(node, status):
         'start': getattr(node.result.runtime, 'startTime'),
         'finish': getattr(node.result.runtime, 'endTime'),
         'duration': getattr(node.result.runtime, 'duration'),
-        'runtime_threads': getattr(
-            node.result.runtime, 'cpu_percent', 'N/A'),
-        'runtime_memory_gb': getattr(
-            node.result.runtime, 'mem_peak_gb', 'N/A'),
+        'runtime_threads': getattr(node.result.runtime, 'cpu_percent', 'N/A'),
+        'runtime_memory_gb': getattr(node.result.runtime, 'mem_peak_gb',
+                                     'N/A'),
         'estimated_memory_gb': node.mem_gb,
         'num_threads': node.n_procs,
     }
@@ -164,8 +172,9 @@ def get_system_total_memory_gb():
     if 'linux' in sys.platform:
         with open('/proc/meminfo', 'r') as f_in:
             meminfo_lines = f_in.readlines()
-            mem_total_line = [line for line in meminfo_lines
-                              if 'MemTotal' in line][0]
+            mem_total_line = [
+                line for line in meminfo_lines if 'MemTotal' in line
+            ][0]
             mem_total = float(mem_total_line.split()[1])
             memory_gb = mem_total / (1024.0**2)
     elif 'darwin' in sys.platform:
@@ -202,8 +211,8 @@ def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False):
     """
 
     if not resource_monitor:
-        raise RuntimeError('Attempted to measure resources with '
-                           '"resource_monitor" set off.')
+        raise RuntimeError('Attempted to measure resources with option '
+                           '"monitoring.enabled" set off.')
 
     try:
         mem_mb = max(mem_mb, _get_ram_mb(pid, pyfunc=pyfunc))
@@ -238,7 +247,10 @@ def _get_num_threads(pid):
             num_threads = proc.num_threads()
         elif proc.num_threads() > 1:
             tprocs = [psutil.Process(thr.id) for thr in proc.threads()]
-            alive_tprocs = [tproc for tproc in tprocs if tproc.status() == psutil.STATUS_RUNNING]
+            alive_tprocs = [
+                tproc for tproc in tprocs
+                if tproc.status() == psutil.STATUS_RUNNING
+            ]
             num_threads = len(alive_tprocs)
         else:
             num_threads = 1
@@ -254,9 +266,13 @@ def _get_num_threads(pid):
                 # If its not necessarily running, but still multi-threaded
                 elif child.num_threads() > 1:
                     # Cast each thread as a process and check for only running
-                    tprocs = [psutil.Process(thr.id) for thr in child.threads()]
-                    alive_tprocs = [tproc for tproc in tprocs
-                                    if tproc.status() == psutil.STATUS_RUNNING]
+                    tprocs = [
+                        psutil.Process(thr.id) for thr in child.threads()
+                    ]
+                    alive_tprocs = [
+                        tproc for tproc in tprocs
+                        if tproc.status() == psutil.STATUS_RUNNING
+                    ]
                     child_thr = len(alive_tprocs)
                 # Otherwise, no threads are running
                 else:
@@ -320,7 +336,8 @@ def _use_cpu(x):
     ctr = 0
     while ctr < 1e7:
         ctr += 1
-        x*x
+        x * x
+
 
 # Spin multiple threads
 def _use_resources(n_procs, mem_gb):
@@ -334,7 +351,7 @@ def _use_resources(n_procs, mem_gb):
     from nipype import logging
     from nipype.utils.profiler import _use_cpu
 
-    iflogger = logging.getLogger('interface')
+    iflogger = logging.getLogger('nipype.interface')
 
     # Getsize of one character string
     BSIZE = sys.getsizeof('  ') - sys.getsizeof(' ')
@@ -356,8 +373,8 @@ def _use_resources(n_procs, mem_gb):
     _use_cpu(5)
     mem_total = p.memory_info().rss / _GB
     del big_str
-    iflogger.info('[%d] Memory offset %0.2fGB, total %0.2fGB',
-                  os.getpid(), mem_offset, mem_total)
+    iflogger.info('[%d] Memory offset %0.2fGB, total %0.2fGB', os.getpid(),
+                  mem_offset, mem_total)
 
     if n_procs > 1:
         pool = Pool(n_procs)

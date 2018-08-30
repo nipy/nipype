@@ -51,4 +51,3 @@ def test_normalize_tpms(tmpdir):
         assert np.allclose(normdata, mapdata[i])
 
     assert np.allclose(sumdata[sumdata > 0.0], 1.0)
-

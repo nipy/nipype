@@ -1,6 +1,5 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-
 """
 The niftyfit module provide an interface with the niftyfit software
 developed in TIG, UCL.
@@ -19,14 +18,9 @@ See the docstrings of the individual classes for examples.
 """
 
 import os
-import warnings
 
 from ..base import CommandLine
 from ...utils.filemanip import split_filename
-
-
-warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 class NiftyFitCommand(CommandLine):

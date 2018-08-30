@@ -46,13 +46,11 @@ See the README file for an example usage of this module.
 
 from builtins import range
 
-
 __version__ = "$Id: cloghandler.py 6175 2009-11-02 18:40:35Z lowell $"
 __author__ = "Lowell Alleman"
 __all__ = [
     "ConcurrentRotatingFileHandler",
 ]
-
 
 import os
 import sys
@@ -65,7 +63,6 @@ try:
 except ImportError:
     codecs = None
 
-
 # Question/TODO: Should we have a fallback mode if we can't load portalocker /
 # we should still be better off than with the standard RotattingFileHandler
 # class, right? We do some rename checking... that should prevent some file
@@ -73,7 +70,6 @@ except ImportError:
 
 # sibling  module than handles all the ugly platform-specific details of file locking
 from .portalocker import lock, unlock, LOCK_EX, LOCK_NB, LockException
-
 
 # A client can set this to true to automatically convert relative paths to
 # absolute paths (which will also hide the absolute path warnings)
@@ -87,8 +83,15 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
     write to the log file concurrently, but this may mean that the file will
     exceed the given size.
     """
-    def __init__(self, filename, mode='a', maxBytes=0, backupCount=0,
-                 encoding=None, debug=True, supress_abs_warn=False):
+
+    def __init__(self,
+                 filename,
+                 mode='a',
+                 maxBytes=0,
+                 backupCount=0,
+                 encoding=None,
+                 debug=True,
+                 supress_abs_warn=False):
         """
         Open the specified file and use it as the stream for logging.
 
@@ -151,9 +154,10 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
                 filename = os.path.abspath(filename)
             elif not supress_abs_warn:
                 from warnings import warn
-                warn("The given 'filename' should be an absolute path.  If your "
-                     "application calls os.chdir(), your logs may get messed up. "
-                     "Use 'supress_abs_warn=True' to hide this message.")
+                warn(
+                    "The given 'filename' should be an absolute path.  If your "
+                    "application calls os.chdir(), your logs may get messed up. "
+                    "Use 'supress_abs_warn=True' to hide this message.")
         try:
             BaseRotatingHandler.__init__(self, filename, mode, encoding)
         except TypeError:  # Due to a different logging release without encoding support  (Python 2.4.1 and earlier?)
@@ -232,7 +236,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
     def _degrade(self, degrade, msg, *args):
         """ Set degrade mode or not.  Ignore msg. """
         self._rotateFailed = degrade
-        del msg, args   # avoid pychecker warnings
+        del msg, args  # avoid pychecker warnings
 
     def _degrade_debug(self, degrade, msg, *args):
         """ A more colorful version of _degade(). (This is enabled by passing
@@ -264,7 +268,8 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
             # Attempt to rename logfile to tempname:  There is a slight race-condition here, but it seems unavoidable
             tmpname = None
             while not tmpname or os.path.exists(tmpname):
-                tmpname = "%s.rotate.%08d" % (self.baseFilename, randint(0, 99999999))
+                tmpname = "%s.rotate.%08d" % (self.baseFilename,
+                                              randint(0, 99999999))
             try:
                 # Do a rename test to determine if we can successfully rename the log file
                 os.rename(self.baseFilename, tmpname)
@@ -317,15 +322,17 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         return False
 
     def _shouldRollover(self):
-        if self.maxBytes > 0:                   # are we rolling over?
+        if self.maxBytes > 0:  # are we rolling over?
             try:
-                self.stream.seek(0, 2)  # due to non-posix-compliant Windows feature
+                self.stream.seek(
+                    0, 2)  # due to non-posix-compliant Windows feature
             except IOError:
                 return True
             if self.stream.tell() >= self.maxBytes:
                 return True
             else:
-                self._degrade(False, "Rotation done or not needed at this time")
+                self._degrade(False,
+                              "Rotation done or not needed at this time")
         return False
 
 

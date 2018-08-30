@@ -31,7 +31,8 @@ def test_concatenate(tmpdir):
 
     # Test default behavior
     res = model.Concatenate(in_files=[in1, in2]).run()
-    assert res.outputs.concatenated_file == tmpdir.join('concat_output.nii.gz').strpath
+    assert res.outputs.concatenated_file == tmpdir.join(
+        'concat_output.nii.gz').strpath
     assert np.allclose(nb.load('concat_output.nii.gz').get_data(), out_data)
 
     # Test specified concatenated_file
@@ -41,17 +42,16 @@ def test_concatenate(tmpdir):
 
     # Test in workflow
     wf = pe.Workflow('test_concatenate', base_dir=tmpdir.strpath)
-    concat = pe.Node(model.Concatenate(in_files=[in1, in2],
-                                       concatenated_file=out),
-                     name='concat')
+    concat = pe.Node(
+        model.Concatenate(in_files=[in1, in2], concatenated_file=out),
+        name='concat')
     wf.add_nodes([concat])
     wf.run()
-    assert np.allclose(nb.load(tmpdir.join(
-                                           'test_concatenate',
-                                            'concat', out).strpath).get_data(),
-                       out_data)
+    assert np.allclose(
+        nb.load(tmpdir.join('test_concatenate', 'concat',
+                            out).strpath).get_data(), out_data)
 
     # Test a simple statistic
-    res = model.Concatenate(in_files=[in1, in2], concatenated_file=out,
-                            stats='mean').run()
+    res = model.Concatenate(
+        in_files=[in1, in2], concatenated_file=out, stats='mean').run()
     assert np.allclose(nb.load(out, mmap=NUMPY_MMAP).get_data(), mean_data)

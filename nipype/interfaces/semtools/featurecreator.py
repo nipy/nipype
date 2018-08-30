@@ -11,8 +11,16 @@ from ..base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
 
 
 class GenerateCsfClippedFromClassifiedImageInputSpec(CommandLineInputSpec):
-    inputCassifiedVolume = File(desc="Required: input tissue label image", exists=True, argstr="--inputCassifiedVolume %s")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: output image", argstr="--outputVolume %s")
+    inputCassifiedVolume = File(
+        desc="Required: input tissue label image",
+        exists=True,
+        argstr="--inputCassifiedVolume %s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Required: output image",
+        argstr="--outputVolume %s")
 
 
 class GenerateCsfClippedFromClassifiedImageOutputSpec(TraitedSpec):
@@ -20,7 +28,6 @@ class GenerateCsfClippedFromClassifiedImageOutputSpec(TraitedSpec):
 
 
 class GenerateCsfClippedFromClassifiedImage(SEMLikeCommandLine):
-
     """title: GenerateCsfClippedFromClassifiedImage
 
 category: FeatureCreator

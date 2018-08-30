@@ -1,12 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Change directory to provide relative paths for doctests
-   >>> import os
-   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-   >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-   >>> os.chdir(datadir)
-"""
-
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import nibabel as nb
 
@@ -14,12 +8,11 @@ from ... import logging
 from ..base import TraitedSpec, File, isdefined
 from .base import DipyDiffusionInterface, DipyBaseInterfaceInputSpec
 
-IFLOGGER = logging.getLogger('interface')
+IFLOGGER = logging.getLogger('nipype.interface')
 
 
 class APMQballInputSpec(DipyBaseInterfaceInputSpec):
-    mask_file = File(exists=True,
-                     desc='An optional brain mask')
+    mask_file = File(exists=True, desc='An optional brain mask')
 
 
 class APMQballOutputSpec(TraitedSpec):
@@ -58,12 +51,15 @@ class APMQball(DipyDiffusionInterface):
             mask = nb.load(self.inputs.mask_file).get_data()
 
         # Fit it
-        model = shm.QballModel(gtab,8)
+        model = shm.QballModel(gtab, 8)
         sphere = get_sphere('symmetric724')
-        peaks = peaks_from_model(model=model, data=data,
-                                 relative_peak_threshold=.5,
-                                 min_separation_angle=25,
-                                 sphere=sphere, mask=mask)
+        peaks = peaks_from_model(
+            model=model,
+            data=data,
+            relative_peak_threshold=.5,
+            min_separation_angle=25,
+            sphere=sphere,
+            mask=mask)
         apm = shm.anisotropic_power(peaks.shm_coeff)
         out_file = self._gen_filename('apm')
         nb.Nifti1Image(apm.astype("float32"), affine).to_filename(out_file)

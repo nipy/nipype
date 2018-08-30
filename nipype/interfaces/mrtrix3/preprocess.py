@@ -1,92 +1,128 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 # -*- coding: utf-8 -*-
-
-"""
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname(os.path.realpath(__file__ ))
-    >>> datadir = os.path.realpath(os.path.join(filepath,
-    ...                            '../../testing/data'))
-    >>> os.chdir(datadir)
-
-"""
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import os.path as op
 
-from ..traits_extension import isdefined
 from ..base import (CommandLineInputSpec, CommandLine, traits, TraitedSpec,
-                    File)
+                    File, isdefined, Undefined, InputMultiObject)
 from .base import MRTrix3BaseInputSpec, MRTrix3Base
 
 
+class DWIDenoiseInputSpec(MRTrix3BaseInputSpec):
+    in_file = File(
+        exists=True,
+        argstr='%s',
+        position=-2,
+        mandatory=True,
+        desc='input DWI image')
+    mask = File(
+        exists=True,
+        argstr='-mask %s',
+        position=1,
+        desc='mask image')
+    extent = traits.Tuple((traits.Int, traits.Int, traits.Int),
+        argstr='-extent %d,%d,%d',
+        desc='set the window size of the denoising filter. (default = 5,5,5)')
+    noise = File(
+        argstr='-noise %s',
+        desc='noise map')
+    out_file = File(name_template='%s_denoised',
+        name_source='in_file',
+        keep_extension=True,
+        argstr="%s",
+        position=-1,
+        desc="the output denoised DWI image")
+
+class DWIDenoiseOutputSpec(TraitedSpec):
+    out_file = File(desc="the output denoised DWI image", exists=True)
+
+class DWIDenoise(MRTrix3Base):
+    """
+    Denoise DWI data and estimate the noise level based on the optimal
+    threshold for PCA.
+
+    DWI data denoising and noise map estimation by exploiting data redundancy
+    in the PCA domain using the prior knowledge that the eigenspectrum of
+    random covariance matrices is described by the universal Marchenko Pastur
+    distribution.
+
+    Important note: image denoising must be performed as the first step of the
+    image processing pipeline. The routine will fail if interpolation or
+    smoothing has been applied to the data prior to denoising.
+
+    Note that this function does not correct for non-Gaussian noise biases.
+
+    For more information, see
+    <https://mrtrix.readthedocs.io/en/latest/reference/commands/dwidenoise.html>
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> denoise = mrt.DWIDenoise()
+    >>> denoise.inputs.in_file = 'dwi.mif'
+    >>> denoise.inputs.mask = 'mask.mif'
+    >>> denoise.cmdline                               # doctest: +ELLIPSIS
+    'dwidenoise -mask mask.mif dwi.mif dwi_denoised.mif'
+    >>> denoise.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = 'dwidenoise'
+    input_spec = DWIDenoiseInputSpec
+    output_spec = DWIDenoiseOutputSpec
+
+
 class ResponseSDInputSpec(MRTrix3BaseInputSpec):
-    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
-                   desc='input diffusion weighted images')
-
-    out_file = File(
-        'response.txt', argstr='%s', mandatory=True, position=-1,
-        usedefault=True, desc='output file containing SH coefficients')
-
-    # DW Shell selection options
-    shell = traits.List(traits.Float, sep=',', argstr='-shell %s',
-                        desc='specify one or more dw gradient shells')
-    in_mask = File(exists=True, argstr='-mask %s',
-                   desc='provide initial mask image')
-    max_sh = traits.Int(8, argstr='-lmax %d',
-                        desc='maximum harmonic degree of response function')
-    out_sf = File('sf_mask.nii.gz', argstr='-sf %s',
-                  desc='write a mask containing single-fibre voxels')
-    test_all = traits.Bool(False, argstr='-test_all',
-                           desc='re-test all voxels at every iteration')
-
-    # Optimization
-    iterations = traits.Int(0, argstr='-max_iters %d',
-                            desc='maximum number of iterations per pass')
-    max_change = traits.Float(
-        argstr='-max_change %f',
-        desc=('maximum percentile change in any response function coefficient;'
-              ' if no individual coefficient changes by more than this '
-              'fraction, the algorithm is terminated.'))
-
-    # Thresholds
-    vol_ratio = traits.Float(
-        .15, argstr='-volume_ratio %f',
-        desc=('maximal volume ratio between the sum of all other positive'
-              ' lobes in the voxel and the largest FOD lobe'))
-    disp_mult = traits.Float(
-        1., argstr='-dispersion_multiplier %f',
-        desc=('dispersion of FOD lobe must not exceed some threshold as '
-              'determined by this multiplier and the FOD dispersion in other '
-              'single-fibre voxels. The threshold is: (mean + (multiplier * '
-              '(mean - min))); default = 1.0. Criterion is only applied in '
-              'second pass of RF estimation.'))
-    int_mult = traits.Float(
-        2., argstr='-integral_multiplier %f',
-        desc=('integral of FOD lobe must not be outside some range as '
-              'determined by this multiplier and FOD lobe integral in other'
-              ' single-fibre voxels. The range is: (mean +- (multiplier * '
-              'stdev)); default = 2.0. Criterion is only applied in second '
-              'pass of RF estimation.'))
+    algorithm = traits.Enum(
+        'msmt_5tt',
+        'dhollander',
+        'tournier',
+        'tax',
+        argstr='%s',
+        position=1,
+        mandatory=True,
+        desc='response estimation algorithm (multi-tissue)')
+    in_file = File(
+        exists=True,
+        argstr='%s',
+        position=-5,
+        mandatory=True,
+        desc='input DWI image')
+    mtt_file = File(argstr='%s', position=-4, desc='input 5tt image')
+    wm_file = File(
+        'wm.txt',
+        argstr='%s',
+        position=-3,
+        usedefault=True,
+        desc='output WM response text file')
+    gm_file = File(
+        argstr='%s', position=-2, desc='output GM response text file')
+    csf_file = File(
+        argstr='%s', position=-1, desc='output CSF response text file')
+    in_mask = File(
+        exists=True, argstr='-mask %s', desc='provide initial mask image')
+    max_sh = InputMultiObject(
+        traits.Int,
+        value=[8],
+        usedefault=True,
+        argstr='-lmax %s',
+        sep=',',
+        desc=('maximum harmonic degree of response function - single value for '
+              'single-shell response, list for multi-shell response'))
 
 
 class ResponseSDOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='the output response file')
-    out_sf = File(desc=('mask containing single-fibre voxels'))
+    wm_file = File(argstr='%s', desc='output WM response text file')
+    gm_file = File(argstr='%s', desc='output GM response text file')
+    csf_file = File(argstr='%s', desc='output CSF response text file')
 
 
 class ResponseSD(MRTrix3Base):
-
     """
-    Generate an appropriate response function from the image data for
-    spherical deconvolution.
-
-    .. [1] Tax, C. M.; Jeurissen, B.; Vos, S. B.; Viergever, M. A. and
-      Leemans, A., Recursive calibration of the fiber response function
-      for spherical deconvolution of diffusion MRI data. NeuroImage,
-      2014, 86, 67-80
-
+    Estimate response function(s) for spherical deconvolution using the specified algorithm.
 
     Example
     -------
@@ -94,11 +130,16 @@ class ResponseSD(MRTrix3Base):
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> resp = mrt.ResponseSD()
     >>> resp.inputs.in_file = 'dwi.mif'
-    >>> resp.inputs.in_mask = 'mask.nii.gz'
+    >>> resp.inputs.algorithm = 'tournier'
     >>> resp.inputs.grad_fsl = ('bvecs', 'bvals')
     >>> resp.cmdline                               # doctest: +ELLIPSIS
-    'dwi2response -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif response.txt'
+    'dwi2response tournier -fslgrad bvecs bvals -lmax 8 dwi.mif wm.txt'
     >>> resp.run()                                 # doctest: +SKIP
+
+    # We can also pass in multiple harmonic degrees in the case of multi-shell
+    >>> resp.inputs.max_sh = [6,8,10]
+    >>> resp.cmdline
+    'dwi2response tournier -fslgrad bvecs bvals -lmax 6,8,10 dwi.mif wm.txt'
     """
 
     _cmd = 'dwi2response'
@@ -107,20 +148,29 @@ class ResponseSD(MRTrix3Base):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-
-        if isdefined(self.inputs.out_sf):
-            outputs['out_sf'] = op.abspath(self.inputs.out_sf)
+        outputs['wm_file'] = op.abspath(self.inputs.wm_file)
+        if self.inputs.gm_file != Undefined:
+            outputs['gm_file'] = op.abspath(self.inputs.gm_file)
+        if self.inputs.csf_file != Undefined:
+            outputs['csf_file'] = op.abspath(self.inputs.csf_file)
         return outputs
 
 
 class ACTPrepareFSLInputSpec(CommandLineInputSpec):
-    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
-                   desc='input anatomical image')
+    in_file = File(
+        exists=True,
+        argstr='%s',
+        mandatory=True,
+        position=-2,
+        desc='input anatomical image')
 
     out_file = File(
-        'act_5tt.mif', argstr='%s', mandatory=True, position=-1,
-        usedefault=True, desc='output file after processing')
+        'act_5tt.mif',
+        argstr='%s',
+        mandatory=True,
+        position=-1,
+        usedefault=True,
+        desc='output file after processing')
 
 
 class ACTPrepareFSLOutputSpec(TraitedSpec):
@@ -128,7 +178,6 @@ class ACTPrepareFSLOutputSpec(TraitedSpec):
 
 
 class ACTPrepareFSL(CommandLine):
-
     """
     Generate anatomical information necessary for Anatomically
     Constrained Tractography (ACT).
@@ -155,16 +204,31 @@ class ACTPrepareFSL(CommandLine):
 
 
 class ReplaceFSwithFIRSTInputSpec(CommandLineInputSpec):
-    in_file = File(exists=True, argstr='%s', mandatory=True, position=-4,
-                   desc='input anatomical image')
-    in_t1w = File(exists=True, argstr='%s', mandatory=True, position=-3,
-                  desc='input T1 image')
-    in_config = File(exists=True, argstr='%s', position=-2,
-                     desc='connectome configuration file')
+    in_file = File(
+        exists=True,
+        argstr='%s',
+        mandatory=True,
+        position=-4,
+        desc='input anatomical image')
+    in_t1w = File(
+        exists=True,
+        argstr='%s',
+        mandatory=True,
+        position=-3,
+        desc='input T1 image')
+    in_config = File(
+        exists=True,
+        argstr='%s',
+        position=-2,
+        desc='connectome configuration file')
 
     out_file = File(
-        'aparc+first.mif', argstr='%s', mandatory=True, position=-1,
-        usedefault=True, desc='output file after processing')
+        'aparc+first.mif',
+        argstr='%s',
+        mandatory=True,
+        position=-1,
+        usedefault=True,
+        desc='output file after processing')
 
 
 class ReplaceFSwithFIRSTOutputSpec(TraitedSpec):
@@ -172,7 +236,6 @@ class ReplaceFSwithFIRSTOutputSpec(TraitedSpec):
 
 
 class ReplaceFSwithFIRST(CommandLine):
-
     """
     Replace deep gray matter structures segmented with FSL FIRST in a
     FreeSurfer parcellation.

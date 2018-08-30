@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Parallel workflow execution via SGE
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import open
 
 import os
@@ -18,10 +19,9 @@ def node_completed_status(checknode):
     :return: boolean value True indicates that the node does not need to be run.
     """
     """ TODO: place this in the base.py file and refactor """
-    node_state_does_not_require_overwrite = (checknode.overwrite is False or
-                                             (checknode.overwrite is None and not
-                                              checknode._interface.always_run)
-                                             )
+    node_state_does_not_require_overwrite = (
+        checknode.overwrite is False or
+        (checknode.overwrite is None and not checknode._interface.always_run))
     hash_exists = False
     try:
         hash_exists, _, _, _ = checknode.hash_exists()
@@ -59,7 +59,8 @@ class SGEGraphPlugin(GraphPluginBase):
             if 'qsub_args' in plugin_args:
                 self._qsub_args = plugin_args['qsub_args']
             if 'dont_resubmit_completed_jobs' in plugin_args:
-                self._dont_resubmit_completed_jobs = plugin_args['dont_resubmit_completed_jobs']
+                self._dont_resubmit_completed_jobs = plugin_args[
+                    'dont_resubmit_completed_jobs']
         super(SGEGraphPlugin, self).__init__(**kwargs)
 
     def _submit_graph(self, pyfiles, dependencies, nodes):
@@ -71,8 +72,10 @@ class SGEGraphPlugin(GraphPluginBase):
             """
             job_name = 'j{0}_{1}'.format(jobnumber, nodeslist[jobnumber]._id)
             # Condition job_name to be a valid bash identifier (i.e. - is invalid)
-            job_name = job_name.replace('-', '_').replace('.', '_').replace(':', '_')
+            job_name = job_name.replace('-', '_').replace('.', '_').replace(
+                ':', '_')
             return job_name
+
         batch_dir, _ = os.path.split(pyfiles[0])
         submitjobsfile = os.path.join(batch_dir, 'submit_jobs.sh')
 
@@ -87,9 +90,11 @@ class SGEGraphPlugin(GraphPluginBase):
                 if node_status_done and idx in dependencies:
                     for child_idx in dependencies[idx]:
                         if child_idx in cache_doneness_per_node:
-                            child_status_done = cache_doneness_per_node[child_idx]
+                            child_status_done = cache_doneness_per_node[
+                                child_idx]
                         else:
-                            child_status_done = node_completed_status(nodes[child_idx])
+                            child_status_done = node_completed_status(
+                                nodes[child_idx])
                         node_status_done = node_status_done and child_status_done
 
                 cache_doneness_per_node[idx] = node_status_done
@@ -107,8 +112,8 @@ class SGEGraphPlugin(GraphPluginBase):
 
                     batch_dir, name = os.path.split(pyscript)
                     name = '.'.join(name.split('.')[:-1])
-                    batchscript = '\n'.join((template,
-                                             '%s %s' % (sys.executable, pyscript)))
+                    batchscript = '\n'.join(
+                        (template, '%s %s' % (sys.executable, pyscript)))
                     batchscriptfile = os.path.join(batch_dir,
                                                    'batchscript_%s.sh' % name)
 
@@ -123,8 +128,9 @@ class SGEGraphPlugin(GraphPluginBase):
                         values = ' '
                         for jobid in dependencies[idx]:
                             # Avoid dependancies of done jobs
-                            if not self._dont_resubmit_completed_jobs or cache_doneness_per_node[jobid] == False:
-                                values += "${{{0}}},".format(make_job_name(jobid, nodes))
+                            if not self._dont_resubmit_completed_jobs or not cache_doneness_per_node[jobid]:
+                                values += "${{{0}}},".format(
+                                    make_job_name(jobid, nodes))
                         if values != ' ':  # i.e. if some jobs were added to dependency list
                             values = values.rstrip(',')
                             deps = '-hold_jid%s' % values
@@ -146,9 +152,11 @@ class SGEGraphPlugin(GraphPluginBase):
                         dependantIndex=deps,
                         batchscript=batchscriptfile)
                     fp.writelines(full_line)
-        cmd = CommandLine('bash', environ=dict(os.environ),
-                          resource_monitor=False,
-                          terminal_output='allatonce')
+        cmd = CommandLine(
+            'bash',
+            environ=dict(os.environ),
+            resource_monitor=False,
+            terminal_output='allatonce')
         cmd.inputs.args = '%s' % submitjobsfile
         cmd.run()
         logger.info('submitted all jobs to queue')

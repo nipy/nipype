@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Parallel workflow execution via Condor DAGMan
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import open
 
 import os
@@ -81,21 +82,25 @@ getenv = True
             if 'plugin_args' in kwargs \
                     and not kwargs['plugin_args'] is None \
                     and id_ in kwargs['plugin_args']:
-                    if id_ == 'wrapper_cmd':
-                        val = os.path.abspath(kwargs['plugin_args'][id_])
-                    elif id_ == 'block':
-                        val = kwargs['plugin_args'][id_]
-                    else:
-                        val = self._get_str_or_file(kwargs['plugin_args'][id_])
+                if id_ == 'wrapper_cmd':
+                    val = os.path.abspath(kwargs['plugin_args'][id_])
+                elif id_ == 'block':
+                    val = kwargs['plugin_args'][id_]
+                else:
+                    val = self._get_str_or_file(kwargs['plugin_args'][id_])
             setattr(self, var, val)
         # TODO remove after some time
         if 'plugin_args' in kwargs \
                 and not kwargs['plugin_args'] is None:
             plugin_args = kwargs['plugin_args']
             if 'template' in plugin_args:
-                warn("the 'template' argument is deprecated, use 'initial_specs' instead")
+                warn(
+                    "the 'template' argument is deprecated, use 'initial_specs' instead"
+                )
             if 'submit_specs' in plugin_args:
-                warn("the 'submit_specs' argument is deprecated, use 'override_specs' instead")
+                warn(
+                    "the 'submit_specs' argument is deprecated, use 'override_specs' instead"
+                )
         super(CondorDAGManPlugin, self).__init__(**kwargs)
 
     def _submit_graph(self, pyfiles, dependencies, nodes):
@@ -116,10 +121,9 @@ getenv = True
                                     "override_specs", "wrapper_cmd",
                                     "wrapper_args"])
                 # add required slots to the template
-                template = '%s\n%s\n%s\nqueue\n' % (
-                    '%(initial_specs)s',
-                    template,
-                    '%(override_specs)s')
+                template = '%s\n%s\n%s\nqueue\n' % ('%(initial_specs)s',
+                                                    template,
+                                                    '%(override_specs)s')
                 batch_dir, name = os.path.split(pyscript)
                 name = '.'.join(name.split('.')[:-1])
                 specs = dict(
@@ -128,8 +132,7 @@ getenv = True
                     executable=sys.executable,
                     nodescript=pyscript,
                     basename=os.path.join(batch_dir, name),
-                    override_specs=override_specs
-                )
+                    override_specs=override_specs)
                 if wrapper_cmd is not None:
                     specs['executable'] = wrapper_cmd
                     specs['nodescript'] = \
@@ -138,8 +141,7 @@ getenv = True
                                       pyscript)
                 submitspec = template % specs
                 # write submit spec for this job
-                submitfile = os.path.join(batch_dir,
-                                          '%s.submit' % name)
+                submitfile = os.path.join(batch_dir, '%s.submit' % name)
                 with open(submitfile, 'wt') as submitfileprt:
                     submitfileprt.writelines(submitspec)
                     submitfileprt.close()
@@ -149,13 +151,15 @@ getenv = True
             for child in dependencies:
                 parents = dependencies[child]
                 if len(parents):
-                    dagfileptr.write('PARENT %s CHILD %i\n'
-                                     % (' '.join([str(i) for i in parents]),
-                                        child))
+                    dagfileptr.write('PARENT %s CHILD %i\n' %
+                                     (' '.join([str(i) for i in parents]),
+                                      child))
         # hand over DAG to condor_dagman
-        cmd = CommandLine('condor_submit_dag', environ=dict(os.environ),
-                          resource_monitor=False,
-                          terminal_output='allatonce')
+        cmd = CommandLine(
+            'condor_submit_dag',
+            environ=dict(os.environ),
+            resource_monitor=False,
+            terminal_output='allatonce')
         # needs -update_submit or re-running a workflow will fail
         cmd.inputs.args = '%s -update_submit %s' % (self._dagman_args,
                                                     dagfilename)
@@ -165,7 +169,9 @@ getenv = True
             # wait for DAGMan to settle down, no time wasted it is already running
             time.sleep(10)
             if not os.path.exists('%s.condor.sub' % dagfilename):
-                raise EnvironmentError("DAGMan did not create its submit file, please check the logs")
+                raise EnvironmentError(
+                    "DAGMan did not create its submit file, please check the logs"
+                )
             # wait for completion
             logger.info('waiting for DAGMan to finish')
             lockfilename = '%s.lock' % dagfilename

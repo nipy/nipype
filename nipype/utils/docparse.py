@@ -13,7 +13,8 @@ better = fsl.Bet()
 docstring = docparse.get_doc(better.cmd, better.opt_map)
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import str, open, bytes
 
 import subprocess
@@ -37,10 +38,8 @@ def grab_doc(cmd, trap_error=True):
         The command line documentation
     """
 
-    proc = subprocess.Popen(cmd,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                            shell=True)
+    proc = subprocess.Popen(
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     stdout, stderr = proc.communicate()
 
     if trap_error and proc.returncode:
@@ -253,9 +252,10 @@ def get_doc(cmd, opt_map, help_flag=None, trap_error=True):
         The formated docstring
 
     """
-    res = CommandLine('which %s' % cmd.split(' ')[0],
-                      resource_monitor=False,
-                      terminal_output='allatonce').run()
+    res = CommandLine(
+        'which %s' % cmd.split(' ')[0],
+        resource_monitor=False,
+        terminal_output='allatonce').run()
     cmd_path = res.runtime.stdout.strip()
     if cmd_path == '':
         raise Exception('Command %s not found' % cmd.split(' ')[0])
@@ -289,9 +289,11 @@ def _parse_doc(doc, style=['--']):
         style = [style]
     for line in doclist:
         linelist = line.split()
-        flag = [item for i, item in enumerate(linelist) if i < 2 and
-                any([item.startswith(s) for s in style]) and
-                len(item) > 1]
+        flag = [
+            item for i, item in enumerate(linelist)
+            if i < 2 and any([item.startswith(s)
+                              for s in style]) and len(item) > 1
+        ]
         if flag:
             if len(flag) == 1:
                 style_idx = [flag[0].startswith(s) for s in style].index(True)
@@ -330,9 +332,10 @@ def get_params_from_doc(cmd, style='--', help_flag=None, trap_error=True):
         Contains a mapping from input to command line variables
 
     """
-    res = CommandLine('which %s' % cmd.split(' ')[0],
-                      resource_monitor=False,
-                      terminal_output='allatonce').run()
+    res = CommandLine(
+        'which %s' % cmd.split(' ')[0],
+        resource_monitor=False,
+        terminal_output='allatonce').run()
     cmd_path = res.runtime.stdout.strip()
     if cmd_path == '':
         raise Exception('Command %s not found' % cmd.split(' ')[0])

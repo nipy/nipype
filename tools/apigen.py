@@ -20,7 +20,8 @@ NOTE: this is a modified version of a script originally shipped with the
 PyMVPA project, which we've adapted for NIPY use.  PyMVPA is an MIT-licensed
 project.
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import object, open
 
 import os
@@ -35,12 +36,13 @@ class ApiDocWriter(object):
     # only separating first two levels
     rst_section_levels = ['*', '=', '-', '~', '^']
 
-    def __init__(self,
-                 package_name,
-                 rst_extension='.rst',
-                 package_skip_patterns=None,
-                 module_skip_patterns=None,
-                 ):
+    def __init__(
+            self,
+            package_name,
+            rst_extension='.rst',
+            package_skip_patterns=None,
+            module_skip_patterns=None,
+    ):
         ''' Initialize package for parsing
 
         Parameters
@@ -297,8 +299,7 @@ class ApiDocWriter(object):
         elif match_type == 'package':
             patterns = self.package_skip_patterns
         else:
-            raise ValueError('Cannot interpret match type "%s"'
-                             % match_type)
+            raise ValueError('Cannot interpret match type "%s"' % match_type)
         # Match to URI without package name
         L = len(self.package_name)
         if matchstr[:L] == self.package_name:
@@ -342,12 +343,11 @@ class ApiDocWriter(object):
         # raw directory parsing
         for dirpath, dirnames, filenames in os.walk(self.root_path):
             # Check directory names for packages
-            root_uri = self._path2uri(os.path.join(self.root_path,
-                                                   dirpath))
+            root_uri = self._path2uri(os.path.join(self.root_path, dirpath))
             for dirname in dirnames[:]:  # copy list - we modify inplace
                 package_uri = '.'.join((root_uri, dirname))
-                if (self._uri2path(package_uri) and
-                        self._survives_exclude(package_uri, 'package')):
+                if (self._uri2path(package_uri)
+                        and self._survives_exclude(package_uri, 'package')):
                     modules.append(package_uri)
                 else:
                     dirnames.remove(dirname)
@@ -355,8 +355,8 @@ class ApiDocWriter(object):
             for filename in filenames:
                 module_name = filename[:-3]
                 module_uri = '.'.join((root_uri, module_name))
-                if (self._uri2path(module_uri) and
-                        self._survives_exclude(module_uri, 'module')):
+                if (self._uri2path(module_uri)
+                        and self._survives_exclude(module_uri, 'module')):
                     modules.append(module_uri)
         # print sorted(modules)  #dbg
         return sorted(modules)
@@ -369,8 +369,7 @@ class ApiDocWriter(object):
             if not api_str:
                 continue
             # write out to file
-            outfile = os.path.join(outdir,
-                                   m + self.rst_extension)
+            outfile = os.path.join(outdir, m + self.rst_extension)
             fileobj = open(outfile, 'wt')
             fileobj.write(api_str)
             fileobj.close()

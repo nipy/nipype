@@ -5,10 +5,12 @@ from __future__ import print_function, unicode_literals
 from builtins import str, zip, range, open
 from future import standard_library
 import os
+import copy
 import simplejson
 import glob
 import shutil
 import os.path as op
+import sys
 from subprocess import Popen
 import hashlib
 from collections import namedtuple
@@ -16,7 +18,9 @@ from collections import namedtuple
 import pytest
 import nipype
 import nipype.interfaces.io as nio
-from nipype.interfaces.base import Undefined
+from nipype.interfaces.base.traits_extension import isdefined
+from nipype.interfaces.base import Undefined, TraitError
+from nipype.utils.filemanip import dist_is_editable
 
 # Check for boto
 noboto = False
@@ -34,6 +38,32 @@ try:
 except ImportError:
     noboto3 = True
 
+# Check for paramiko
+try:
+    import paramiko
+    no_paramiko = False
+
+    # Check for localhost SSH Server
+    # FIXME: Tests requiring this are never run on CI
+    try:
+        proxy = None
+        client = paramiko.SSHClient()
+        client.load_system_host_keys()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        client.connect('127.0.0.1', username=os.getenv('USER'), sock=proxy,
+                       timeout=10)
+
+        no_local_ssh = False
+
+    except (paramiko.SSHException,
+            paramiko.ssh_exception.NoValidConnectionsError,
+            OSError):
+        no_local_ssh = True
+
+except ImportError:
+    no_paramiko = True
+    no_local_ssh = True
+
 # Check for fakes3
 standard_library.install_aliases()
 from subprocess import check_call, CalledProcessError
@@ -42,6 +72,15 @@ try:
     fakes3 = (ret_code == 0)
 except CalledProcessError:
     fakes3 = False
+
+# check for bids
+have_pybids = True
+try:
+    import bids
+    filepath = os.path.realpath(os.path.dirname(bids.__file__))
+    datadir = os.path.realpath(os.path.join(filepath, 'tests/data/'))
+except ImportError:
+    have_pybids = False
 
 
 def test_datagrabber():
@@ -59,30 +98,96 @@ def test_s3datagrabber():
     assert dg.inputs.template_args == {'outfiles': []}
 
 
-templates1 = {"model": "interfaces/{package}/model.py",
-             "preprocess": "interfaces/{package}/pre*.py"}
+templates1 = {
+    "model": "interfaces/{package}/model.py",
+    "preprocess": "interfaces/{package}/pre*.py"
+}
 templates2 = {"converter": "interfaces/dcm{to!s}nii.py"}
 templates3 = {"model": "interfaces/{package.name}/model.py"}
 
+
 @pytest.mark.parametrize("SF_args, inputs_att, expected", [
-        ({"templates":templates1}, {"package":"fsl"},
-         {"infields":["package"], "outfields":["model", "preprocess"], "run_output":{"model":op.join(op.dirname(nipype.__file__),"interfaces/fsl/model.py"), "preprocess":op.join(op.dirname(nipype.__file__),"interfaces/fsl/preprocess.py")}, "node_output":["model", "preprocess"]}),
-
-        ({"templates":templates1, "force_lists":True}, {"package":"spm"},
-         {"infields":["package"], "outfields":["model", "preprocess"], "run_output":{"model":[op.join(op.dirname(nipype.__file__),"interfaces/spm/model.py")], "preprocess":[op.join(op.dirname(nipype.__file__),"interfaces/spm/preprocess.py")]}, "node_output":["model", "preprocess"]}),
-
-        ({"templates":templates1}, {"package":"fsl", "force_lists":["model"]},
-         {"infields":["package"], "outfields":["model", "preprocess"], "run_output":{"model":[op.join(op.dirname(nipype.__file__),"interfaces/fsl/model.py")], "preprocess":op.join(op.dirname(nipype.__file__),"interfaces/fsl/preprocess.py")}, "node_output":["model", "preprocess"]}),
-
-        ({"templates":templates2}, {"to":2},
-         {"infields":["to"], "outfields":["converter"], "run_output":{"converter":op.join(op.dirname(nipype.__file__), "interfaces/dcm2nii.py")}, "node_output":["converter"]}),
-
-        ({"templates": templates3}, {"package": namedtuple("package", ["name"])("fsl")},
-        {"infields": ["package"], "outfields": ["model"],
-         "run_output": {"model": op.join(op.dirname(nipype.__file__), "interfaces/fsl/model.py")},
-         "node_output": ["model"]}),
-        ])
-def test_selectfiles(SF_args, inputs_att, expected):
+    ({
+        "templates": templates1
+    }, {
+        "package": "fsl"
+    }, {
+        "infields": ["package"],
+        "outfields": ["model", "preprocess"],
+        "run_output": {
+            "model":
+            op.join(op.dirname(nipype.__file__), "interfaces/fsl/model.py"),
+            "preprocess":
+            op.join(
+                op.dirname(nipype.__file__), "interfaces/fsl/preprocess.py")
+        },
+        "node_output": ["model", "preprocess"]
+    }),
+    ({
+        "templates": templates1,
+        "force_lists": True
+    }, {
+        "package": "spm"
+    }, {
+        "infields": ["package"],
+        "outfields": ["model", "preprocess"],
+        "run_output": {
+            "model":
+            [op.join(op.dirname(nipype.__file__), "interfaces/spm/model.py")],
+            "preprocess": [
+                op.join(
+                    op.dirname(nipype.__file__),
+                    "interfaces/spm/preprocess.py")
+            ]
+        },
+        "node_output": ["model", "preprocess"]
+    }),
+    ({
+        "templates": templates1
+    }, {
+        "package": "fsl",
+        "force_lists": ["model"]
+    }, {
+        "infields": ["package"],
+        "outfields": ["model", "preprocess"],
+        "run_output": {
+            "model":
+            [op.join(op.dirname(nipype.__file__), "interfaces/fsl/model.py")],
+            "preprocess":
+            op.join(
+                op.dirname(nipype.__file__), "interfaces/fsl/preprocess.py")
+        },
+        "node_output": ["model", "preprocess"]
+    }),
+    ({
+        "templates": templates2
+    }, {
+        "to": 2
+    }, {
+        "infields": ["to"],
+        "outfields": ["converter"],
+        "run_output": {
+            "converter":
+            op.join(op.dirname(nipype.__file__), "interfaces/dcm2nii.py")
+        },
+        "node_output": ["converter"]
+    }),
+    ({
+        "templates": templates3
+    }, {
+        "package": namedtuple("package", ["name"])("fsl")
+    }, {
+        "infields": ["package"],
+        "outfields": ["model"],
+        "run_output": {
+            "model":
+            op.join(op.dirname(nipype.__file__), "interfaces/fsl/model.py")
+        },
+        "node_output": ["model"]
+    }),
+])
+def test_selectfiles(tmpdir, SF_args, inputs_att, expected):
+    tmpdir.chdir()
     base_dir = op.dirname(nipype.__file__)
     dg = nio.SelectFiles(base_directory=base_dir, **SF_args)
     for key, val in inputs_att.items():
@@ -100,11 +205,13 @@ def test_selectfiles(SF_args, inputs_att, expected):
 def test_selectfiles_valueerror():
     """Test ValueError when force_lists has field that isn't in template."""
     base_dir = op.dirname(nipype.__file__)
-    templates = {"model": "interfaces/{package}/model.py",
-                 "preprocess": "interfaces/{package}/pre*.py"}
+    templates = {
+        "model": "interfaces/{package}/model.py",
+        "preprocess": "interfaces/{package}/pre*.py"
+    }
     force_lists = ["model", "preprocess", "registration"]
-    sf = nio.SelectFiles(templates, base_directory=base_dir,
-                         force_lists=force_lists)
+    sf = nio.SelectFiles(
+        templates, base_directory=base_dir, force_lists=force_lists)
     with pytest.raises(ValueError):
         sf.run()
 
@@ -119,8 +226,9 @@ def test_s3datagrabber_communication(tmpdir):
     dg.inputs.local_directory = tmpdir.strpath
     dg.inputs.sort_filelist = True
     dg.inputs.template = '*'
-    dg.inputs.field_template = dict(func='%s/BOLD/task001_%s/bold.nii.gz',
-                                    struct='%s/anatomy/highres001_brain.nii.gz')
+    dg.inputs.field_template = dict(
+        func='%s/BOLD/task001_%s/bold.nii.gz',
+        struct='%s/anatomy/highres001_brain.nii.gz')
     dg.inputs.subj_id = ['sub001', 'sub002']
     dg.inputs.run_num = ['run001', 'run003']
     dg.inputs.template_args = dict(
@@ -130,36 +238,47 @@ def test_s3datagrabber_communication(tmpdir):
     struct_outfiles = res.outputs.struct
 
     # check for all files
-    assert os.path.join(dg.inputs.local_directory, '/sub001/BOLD/task001_run001/bold.nii.gz') in func_outfiles[0]
+    assert os.path.join(
+        dg.inputs.local_directory,
+        '/sub001/BOLD/task001_run001/bold.nii.gz') in func_outfiles[0]
     assert os.path.exists(func_outfiles[0])
-    assert os.path.join(dg.inputs.local_directory, '/sub001/anatomy/highres001_brain.nii.gz') in struct_outfiles[0]
+    assert os.path.join(
+        dg.inputs.local_directory,
+        '/sub001/anatomy/highres001_brain.nii.gz') in struct_outfiles[0]
     assert os.path.exists(struct_outfiles[0])
-    assert os.path.join(dg.inputs.local_directory, '/sub002/BOLD/task001_run003/bold.nii.gz') in func_outfiles[1]
+    assert os.path.join(
+        dg.inputs.local_directory,
+        '/sub002/BOLD/task001_run003/bold.nii.gz') in func_outfiles[1]
     assert os.path.exists(func_outfiles[1])
-    assert os.path.join(dg.inputs.local_directory, '/sub002/anatomy/highres001_brain.nii.gz') in struct_outfiles[1]
+    assert os.path.join(
+        dg.inputs.local_directory,
+        '/sub002/anatomy/highres001_brain.nii.gz') in struct_outfiles[1]
     assert os.path.exists(struct_outfiles[1])
 
 
 def test_datagrabber_order(tmpdir):
-    for file_name in ['sub002_L1_R1.q', 'sub002_L1_R2.q', 'sub002_L2_R1.q',
-                      'sub002_L2_R2.qd', 'sub002_L3_R10.q', 'sub002_L3_R2.q']:
+    for file_name in [
+            'sub002_L1_R1.q', 'sub002_L1_R2.q', 'sub002_L2_R1.q',
+            'sub002_L2_R2.qd', 'sub002_L3_R10.q', 'sub002_L3_R2.q'
+    ]:
         tmpdir.join(file_name).open('a').close()
 
     dg = nio.DataGrabber(infields=['sid'])
     dg.inputs.base_directory = tmpdir.strpath
     dg.inputs.template = '%s_L%d_R*.q*'
-    dg.inputs.template_args = {'outfiles': [['sid', 1], ['sid', 2],
-                                            ['sid', 3]]}
+    dg.inputs.template_args = {
+        'outfiles': [['sid', 1], ['sid', 2], ['sid', 3]]
+    }
     dg.inputs.sid = 'sub002'
     dg.inputs.sort_filelist = True
     res = dg.run()
     outfiles = res.outputs.outfiles
 
-    assert 'sub002_L1_R1'  in outfiles[0][0]
-    assert 'sub002_L1_R2'  in outfiles[0][1]
-    assert 'sub002_L2_R1'  in outfiles[1][0]
-    assert 'sub002_L2_R2'  in outfiles[1][1]
-    assert 'sub002_L3_R2'  in outfiles[2][0]
+    assert 'sub002_L1_R1' in outfiles[0][0]
+    assert 'sub002_L1_R2' in outfiles[0][1]
+    assert 'sub002_L2_R1' in outfiles[1][0]
+    assert 'sub002_L2_R2' in outfiles[1][1]
+    assert 'sub002_L3_R2' in outfiles[2][0]
     assert 'sub002_L3_R10' in outfiles[2][1]
 
 
@@ -185,7 +304,8 @@ def dummy_input(request, tmpdir_factory):
     '''
     # Init variables
 
-    input_path = tmpdir_factory.mktemp('input_data').join('datasink_test_s3.txt')
+    input_path = tmpdir_factory.mktemp('input_data').join(
+        'datasink_test_s3.txt')
 
     # Create input file
     input_path.write_binary(b'ABCD1234')
@@ -195,7 +315,8 @@ def dummy_input(request, tmpdir_factory):
 
 
 # Test datasink writes to s3 properly
-@pytest.mark.skipif(noboto3 or not fakes3, reason="boto3 or fakes3 library is not available")
+@pytest.mark.skipif(
+    noboto3 or not fakes3, reason="boto3 or fakes3 library is not available")
 def test_datasink_to_s3(dummy_input, tmpdir):
     '''
     This function tests to see if the S3 functionality of a DataSink
@@ -212,14 +333,17 @@ def test_datasink_to_s3(dummy_input, tmpdir):
     input_path = dummy_input
 
     # Start up fake-S3 server
-    proc = Popen(['fakes3', '-r', fakes3_dir, '-p', '4567'], stdout=open(os.devnull, 'wb'))
+    proc = Popen(
+        ['fakes3', '-r', fakes3_dir, '-p', '4567'],
+        stdout=open(os.devnull, 'wb'))
 
     # Init boto3 s3 resource to talk with fakes3
-    resource = boto3.resource(aws_access_key_id='mykey',
-                              aws_secret_access_key='mysecret',
-                              service_name='s3',
-                              endpoint_url='http://localhost:4567',
-                              use_ssl=False)
+    resource = boto3.resource(
+        aws_access_key_id='mykey',
+        aws_secret_access_key='mysecret',
+        service_name='s3',
+        endpoint_url='http://127.0.0.1:4567',
+        use_ssl=False)
     resource.meta.client.meta.events.unregister('before-sign.s3', fix_s3_host)
 
     # Create bucket
@@ -248,7 +372,8 @@ def test_datasink_to_s3(dummy_input, tmpdir):
 
 
 # Test AWS creds read from env vars
-@pytest.mark.skipif(noboto3 or not fakes3, reason="boto3 or fakes3 library is not available")
+@pytest.mark.skipif(
+    noboto3 or not fakes3, reason="boto3 or fakes3 library is not available")
 def test_aws_keys_from_env():
     '''
     Function to ensure the DataSink can successfully read in AWS
@@ -327,13 +452,14 @@ def test_datasink_substitutions(tmpdir):
         # Patterns should be more comprehendable in the real-world usage
         # cases since paths would be quite more sensible
         regexp_substitutions=[(r'xABABAB(\w*)\.n$', r'a-\1-b.n'),
-                              ('(.*%s)[-a]([^%s]*)$' % ((os.path.sep,) * 2),
+                              ('(.*%s)[-a]([^%s]*)$' % ((os.path.sep, ) * 2),
                                r'\1!\2')])
     setattr(ds.inputs, '@outdir', files)
     ds.run()
     assert sorted([os.path.basename(x) for
-              x in glob.glob(os.path.join(str(outdir), '*'))]) \
-              == ['!-yz-b.n', 'ABABAB.n']  # so we got re used 2nd and both patterns
+                   x in glob.glob(os.path.join(str(outdir), '*'))]) \
+        == ['!-yz-b.n', 'ABABAB.n']  # so we got re used 2nd and both patterns
+
 
 @pytest.fixture()
 def _temp_analyze_files(tmpdir):
@@ -350,16 +476,19 @@ def test_datasink_copydir_1(_temp_analyze_files, tmpdir):
     orig_img, orig_hdr = _temp_analyze_files
     outdir = tmpdir
     pth, fname = os.path.split(orig_img)
-    ds = nio.DataSink(base_directory=outdir.mkdir("basedir").strpath, parameterization=False)
+    ds = nio.DataSink(
+        base_directory=outdir.mkdir("basedir").strpath, parameterization=False)
     setattr(ds.inputs, '@outdir', pth)
     ds.run()
     sep = os.path.sep
     assert tmpdir.join('basedir', pth.split(sep)[-1], fname).check()
 
+
 def test_datasink_copydir_2(_temp_analyze_files, tmpdir):
     orig_img, orig_hdr = _temp_analyze_files
     pth, fname = os.path.split(orig_img)
-    ds = nio.DataSink(base_directory=tmpdir.mkdir("basedir").strpath, parameterization=False)
+    ds = nio.DataSink(
+        base_directory=tmpdir.mkdir("basedir").strpath, parameterization=False)
     ds.inputs.remove_dest_dir = True
     setattr(ds.inputs, 'outdir', pth)
     ds.run()
@@ -379,7 +508,9 @@ def test_datafinder_depth(tmpdir):
             df.inputs.min_depth = min_depth
             df.inputs.max_depth = max_depth
             result = df.run()
-            expected = ['{}'.format(x) for x in range(min_depth, max_depth + 1)]
+            expected = [
+                '{}'.format(x) for x in range(min_depth, max_depth + 1)
+            ]
             for path, exp_fname in zip(result.outputs.out_paths, expected):
                 _, fname = os.path.split(path)
                 assert fname == exp_fname
@@ -407,6 +538,12 @@ def test_freesurfersource():
     assert fss.inputs.subjects_dir == Undefined
 
 
+def test_freesurfersource_incorrectdir():
+    fss = nio.FreeSurferSource()
+    with pytest.raises(TraitError) as err:
+        fss.inputs.subjects_dir = 'path/to/no/existing/directory'
+
+
 def test_jsonsink_input():
 
     ds = nio.JSONFileSink()
@@ -419,10 +556,12 @@ def test_jsonsink_input():
     assert 'test' in ds.inputs.copyable_trait_names()
 
 
-@pytest.mark.parametrize("inputs_attributes", [
-        {'new_entry' : 'someValue'},
-        {'new_entry' : 'someValue', 'test' : 'testInfields'}
-])
+@pytest.mark.parametrize("inputs_attributes", [{
+    'new_entry': 'someValue'
+}, {
+    'new_entry': 'someValue',
+    'test': 'testInfields'
+}])
 def test_jsonsink(tmpdir, inputs_attributes):
     tmpdir.chdir()
     js = nio.JSONFileSink(infields=['test'], in_dict={'foo': 'var'})
@@ -439,4 +578,111 @@ def test_jsonsink(tmpdir, inputs_attributes):
     assert data == expected_data
 
 
+# There are three reasons these tests will be skipped:
+@pytest.mark.skipif(not have_pybids,
+                    reason="Pybids is not installed")
+@pytest.mark.skipif(sys.version_info < (3, 0),
+                    reason="Pybids no longer supports Python 2")
+@pytest.mark.skipif(not dist_is_editable('pybids'),
+                    reason="Pybids is not installed in editable mode")
+def test_bids_grabber(tmpdir):
+    tmpdir.chdir()
+    bg = nio.BIDSDataGrabber()
+    bg.inputs.base_dir = os.path.join(datadir, 'ds005')
+    bg.inputs.subject = '01'
+    results = bg.run()
+    assert 'sub-01_T1w.nii.gz' in map(os.path.basename, results.outputs.anat)
+    assert 'sub-01_task-mixedgamblestask_run-01_bold.nii.gz' in \
+        map(os.path.basename, results.outputs.func)
 
+
+@pytest.mark.skipif(not have_pybids,
+                    reason="Pybids is not installed")
+@pytest.mark.skipif(sys.version_info < (3, 0),
+                    reason="Pybids no longer supports Python 2")
+@pytest.mark.skipif(not dist_is_editable('pybids'),
+                    reason="Pybids is not installed in editable mode")
+def test_bids_fields(tmpdir):
+    tmpdir.chdir()
+    bg = nio.BIDSDataGrabber(infields = ['subject'], outfields = ['dwi'])
+    bg.inputs.base_dir = os.path.join(datadir, 'ds005')
+    bg.inputs.subject = '01'
+    bg.inputs.output_query['dwi'] = dict(modality='dwi')
+    results = bg.run()
+    assert 'sub-01_dwi.nii.gz' in map(os.path.basename, results.outputs.dwi)
+
+
+@pytest.mark.skipif(not have_pybids,
+                    reason="Pybids is not installed")
+@pytest.mark.skipif(sys.version_info < (3, 0),
+                    reason="Pybids no longer supports Python 2")
+@pytest.mark.skipif(not dist_is_editable('pybids'),
+                    reason="Pybids is not installed in editable mode")
+def test_bids_infields_outfields(tmpdir):
+    tmpdir.chdir()
+    infields = ['infield1', 'infield2']
+    outfields = ['outfield1', 'outfield2']
+    bg = nio.BIDSDataGrabber(infields=infields)
+    for outfield in outfields:
+        bg.inputs.output_query[outfield] = {'key': 'value'}
+
+    for infield in infields:
+        assert(infield in bg.inputs.traits())
+        assert(not(isdefined(bg.inputs.get()[infield])))
+
+    for outfield in outfields:
+        assert(outfield in bg._outputs().traits())
+
+    # now try without defining outfields, we should get anat and func for free
+    bg = nio.BIDSDataGrabber()
+    for outfield in ['anat', 'func']:
+        assert outfield in bg._outputs().traits()
+
+
+@pytest.mark.skipif(no_paramiko, reason="paramiko library is not available")
+@pytest.mark.skipif(no_local_ssh, reason="SSH Server is not running")
+def test_SSHDataGrabber(tmpdir):
+    """Test SSHDataGrabber by connecting to localhost and collecting some data.
+    """
+    old_cwd = tmpdir.chdir()
+
+    source_dir = tmpdir.mkdir('source')
+    source_hdr = source_dir.join('somedata.hdr')
+    source_dat = source_dir.join('somedata.img')
+    source_hdr.ensure() # create
+    source_dat.ensure() # create
+
+    # ssh client that connects to localhost, current user, regardless of
+    # ~/.ssh/config
+    def _mock_get_ssh_client(self):
+        proxy = None
+        client = paramiko.SSHClient()
+        client.load_system_host_keys()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        client.connect('127.0.0.1', username=os.getenv('USER'), sock=proxy,
+                       timeout=10)
+        return client
+    MockSSHDataGrabber = copy.copy(nio.SSHDataGrabber)
+    MockSSHDataGrabber._get_ssh_client = _mock_get_ssh_client
+
+    # grabber to get files from source_dir matching test.hdr
+    ssh_grabber = MockSSHDataGrabber(infields=['test'],
+                                     outfields=['test_file'])
+    ssh_grabber.inputs.base_directory = str(source_dir)
+    ssh_grabber.inputs.hostname = '127.0.0.1'
+    ssh_grabber.inputs.field_template = dict(test_file='%s.hdr')
+    ssh_grabber.inputs.template = ''
+    ssh_grabber.inputs.template_args = dict(test_file=[['test']])
+    ssh_grabber.inputs.test = 'somedata'
+    ssh_grabber.inputs.sort_filelist = True
+
+    runtime = ssh_grabber.run()
+
+    # did we successfully get the header?
+    assert runtime.outputs.test_file == str(tmpdir.join(source_hdr.basename))
+    # did we successfully get the data?
+    assert (tmpdir.join(source_hdr.basename) # header file
+            .new(ext='.img') # data file
+            .check(file=True, exists=True)) # exists?
+
+    old_cwd.chdir()

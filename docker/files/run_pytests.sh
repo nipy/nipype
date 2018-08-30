@@ -26,7 +26,10 @@ fi
 
 # Run tests using pytest
 export COVERAGE_FILE=${WORKDIR}/tests/.coverage.py${PYTHON_VERSION}
-py.test -v --junitxml=${WORKDIR}/tests/pytests_py${PYTHON_VERSION}.xml --cov nipype --cov-config /src/nipype/.coveragerc --cov-report xml:${WORKDIR}/tests/coverage_py${PYTHON_VERSION}.xml ${TESTPATH}
+py.test -v --junitxml=${WORKDIR}/tests/pytests_py${PYTHON_VERSION}.xml \
+    --cov nipype --cov-config /src/nipype/.coveragerc \
+    --cov-report xml:${WORKDIR}/tests/coverage_py${PYTHON_VERSION}.xml \
+    -c ${TESTPATH}/pytest.ini ${TESTPATH}
 exit_code=$?
 
 # Collect crashfiles

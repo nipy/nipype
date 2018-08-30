@@ -90,6 +90,10 @@ To participate in the Nipype development related discussions please use the foll
 
 Please add *[nipype]* to the subject line when posting on the mailing list.
 
+You can even hangout with the Nipype developers in their 
+`Gitter <https://gitter.im/nipy/nipype>`_ channel or in the BrainHack `Slack <https://brainhack.slack.com/messages/C1FR76RAL>`_ channel. (Click `here <https://brainhack-slack-invite.herokuapp.com>`_ to join the Slack workspace.)
+
+
 Contributing to the project
 ---------------------------
 

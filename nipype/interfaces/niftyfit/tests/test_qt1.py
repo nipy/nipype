@@ -4,13 +4,14 @@
 
 import pytest
 
-from nipype.interfaces.niftyfit import FitQt1
-from nipype.interfaces.niftyreg import no_nifty_package, get_custom_path
-from nipype.testing import example_data
+from ....testing import example_data
+from ...niftyreg import get_custom_path
+from ...niftyreg.tests.test_regutils import no_nifty_tool
+from ..qt1 import FitQt1
 
 
-@pytest.mark.skipif(no_nifty_package(cmd='fit_qt1'),
-                    reason="niftyfit is not installed")
+@pytest.mark.skipif(
+    no_nifty_tool(cmd='fit_qt1'), reason="niftyfit is not installed")
 def test_fit_qt1():
     """ Testing FitQt1 interface."""
     # Create a node object
@@ -30,6 +31,7 @@ def test_fit_qt1():
 
     cmd_tmp = '{cmd} -source {in_file} -comp {comp} -error {error} -m0map \
 {map0} -mcmap {cmap} -res {res} -syn {syn} -t1map {t1map}'
+
     expected_cmd = cmd_tmp.format(
         cmd=cmd,
         in_file=in_file,
@@ -52,6 +54,7 @@ def test_fit_qt1():
     cmd_tmp = '{cmd} -source {in_file} -IR -TIs 1.0 2.0 5.0 \
 -comp {comp} -error {error} -m0map {map0} -mcmap {cmap} -res {res} \
 -syn {syn} -t1map {t1map}'
+
     expected_cmd = cmd_tmp.format(
         cmd=cmd,
         in_file=in_file,
@@ -74,6 +77,7 @@ def test_fit_qt1():
     cmd_tmp = '{cmd} -source {in_file} -comp {comp} -error {error} \
 -flips 2.0 4.0 8.0 -m0map {map0} -mcmap {cmap} -res {res} -SPGR -syn {syn} \
 -t1map {t1map}'
+
     expected_cmd = cmd_tmp.format(
         cmd=cmd,
         in_file=in_file,

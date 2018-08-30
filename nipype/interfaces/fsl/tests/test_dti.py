@@ -41,7 +41,8 @@ def test_dtifit2(create_files_in_directory):
                                                                        filelist[1])
 
 
-@pytest.mark.xfail(reason="These tests are skipped until we clean up some of this code")
+@pytest.mark.xfail(
+    reason="These tests are skipped until we clean up some of this code")
 def test_randomise2():
 
     rand = fsl.Randomise()
@@ -65,11 +66,12 @@ def test_randomise2():
     assert actualCmdline == desiredCmdline
 
     # .run based parameter setting
-    rand2 = fsl.Randomise(input_4D='infile2',
-                          output_rootname='outfile2',
-                          f_contrast='infile.f',
-                          one_sample_gmean=True,
-                          int_seed=4)
+    rand2 = fsl.Randomise(
+        input_4D='infile2',
+        output_rootname='outfile2',
+        f_contrast='infile.f',
+        one_sample_gmean=True,
+        int_seed=4)
 
     actualCmdline = sorted(rand2.cmdline.split())
     cmd = 'randomise -i infile2 -o outfile2 -1 -f infile.f --seed=4'
@@ -77,48 +79,52 @@ def test_randomise2():
     assert actualCmdline == desiredCmdline
 
     rand3 = fsl.Randomise()
-    results = rand3.run(input_4D='infile3',
-                        output_rootname='outfile3')
+    results = rand3.run(input_4D='infile3', output_rootname='outfile3')
     assert results.runtime.cmdline == \
         'randomise -i infile3 -o outfile3'
 
     # test arguments for opt_map
-    opt_map = {'demean_data': ('-D', True),
-               'one_sample_gmean': ('-1', True),
-               'mask_image': ('-m inp_mask', 'inp_mask'),
-               'design_matrix': ('-d design.mat', 'design.mat'),
-               't_contrast': ('-t input.con', 'input.con'),
-               'f_contrast': ('-f input.fts', 'input.fts'),
-               'xchange_block_labels': ('-e design.grp', 'design.grp'),
-               'print_unique_perm': ('-q', True),
-               'print_info_parallelMode': ('-Q', True),
-               'num_permutations': ('-n 10', 10),
-               'vox_pvalus': ('-x', True),
-               'fstats_only': ('--fonly', True),
-               'thresh_free_cluster': ('-T', True),
-               'thresh_free_cluster_2Dopt': ('--T2', True),
-               'cluster_thresholding': ('-c 0.20', 0.20),
-               'cluster_mass_thresholding': ('-C 0.40', 0.40),
-               'fcluster_thresholding': ('-F 0.10', 0.10),
-               'fcluster_mass_thresholding': ('-S 0.30', 0.30),
-               'variance_smoothing': ('-v 0.20', 0.20),
-               'diagnostics_off': ('--quiet', True),
-               'output_raw': ('-R', True),
-               'output_perm_vect': ('-P', True),
-               'int_seed': ('--seed=20', 20),
-               'TFCE_height_param': ('--tfce_H=0.11', 0.11),
-               'TFCE_extent_param': ('--tfce_E=0.50', 0.50),
-               'TFCE_connectivity': ('--tfce_C=0.30', 0.30),
-               'list_num_voxel_EVs_pos': ('--vxl=1,2,3,4', '1,2,3,4'),
-               'list_img_voxel_EVs': ('--vxf=6,7,8,9,3', '6,7,8,9,3')}
+    opt_map = {
+        'demean_data': ('-D', True),
+        'one_sample_gmean': ('-1', True),
+        'mask_image': ('-m inp_mask', 'inp_mask'),
+        'design_matrix': ('-d design.mat', 'design.mat'),
+        't_contrast': ('-t input.con', 'input.con'),
+        'f_contrast': ('-f input.fts', 'input.fts'),
+        'xchange_block_labels': ('-e design.grp', 'design.grp'),
+        'print_unique_perm': ('-q', True),
+        'print_info_parallelMode': ('-Q', True),
+        'num_permutations': ('-n 10', 10),
+        'vox_pvalus': ('-x', True),
+        'fstats_only': ('--fonly', True),
+        'thresh_free_cluster': ('-T', True),
+        'thresh_free_cluster_2Dopt': ('--T2', True),
+        'cluster_thresholding': ('-c 0.20', 0.20),
+        'cluster_mass_thresholding': ('-C 0.40', 0.40),
+        'fcluster_thresholding': ('-F 0.10', 0.10),
+        'fcluster_mass_thresholding': ('-S 0.30', 0.30),
+        'variance_smoothing': ('-v 0.20', 0.20),
+        'diagnostics_off': ('--quiet', True),
+        'output_raw': ('-R', True),
+        'output_perm_vect': ('-P', True),
+        'int_seed': ('--seed=20', 20),
+        'TFCE_height_param': ('--tfce_H=0.11', 0.11),
+        'TFCE_extent_param': ('--tfce_E=0.50', 0.50),
+        'TFCE_connectivity': ('--tfce_C=0.30', 0.30),
+        'list_num_voxel_EVs_pos': ('--vxl=1,2,3,4', '1,2,3,4'),
+        'list_img_voxel_EVs': ('--vxf=6,7,8,9,3', '6,7,8,9,3')
+    }
 
     for name, settings in list(opt_map.items()):
-        rand4 = fsl.Randomise(input_4D='infile', output_rootname='root',
-                              **{name: settings[1]})
+        rand4 = fsl.Randomise(
+            input_4D='infile', output_rootname='root', **{
+                name: settings[1]
+            })
         assert rand4.cmdline == rand4.cmd + ' -i infile -o root ' + settings[0]
 
 
-@pytest.mark.xfail(reason="These tests are skipped until we clean up some of this code")
+@pytest.mark.xfail(
+    reason="These tests are skipped until we clean up some of this code")
 def test_Randomise_parallel():
     rand = fsl.Randomise_parallel()
 
@@ -142,11 +148,12 @@ def test_Randomise_parallel():
     assert actualCmdline == desiredCmdline
 
     # .run based parameter setting
-    rand2 = fsl.Randomise_parallel(input_4D='infile2',
-                                   output_rootname='outfile2',
-                                   f_contrast='infile.f',
-                                   one_sample_gmean=True,
-                                   int_seed=4)
+    rand2 = fsl.Randomise_parallel(
+        input_4D='infile2',
+        output_rootname='outfile2',
+        f_contrast='infile.f',
+        one_sample_gmean=True,
+        int_seed=4)
 
     actualCmdline = sorted(rand2.cmdline.split())
     cmd = 'randomise_parallel -i infile2 -o outfile2 -1 -f infile.f --seed=4'
@@ -154,52 +161,55 @@ def test_Randomise_parallel():
     assert actualCmdline == desiredCmdline
 
     rand3 = fsl.Randomise_parallel()
-    results = rand3.run(input_4D='infile3',
-                        output_rootname='outfile3')
+    results = rand3.run(input_4D='infile3', output_rootname='outfile3')
     assert results.runtime.cmdline == \
         'randomise_parallel -i infile3 -o outfile3'
 
     # test arguments for opt_map
-    opt_map = {'demean_data': ('-D', True),
-               'one_sample_gmean': ('-1', True),
-               'mask_image': ('-m inp_mask', 'inp_mask'),
-               'design_matrix': ('-d design.mat', 'design.mat'),
-               't_contrast': ('-t input.con', 'input.con'),
-               'f_contrast': ('-f input.fts', 'input.fts'),
-               'xchange_block_labels': ('-e design.grp', 'design.grp'),
-               'print_unique_perm': ('-q', True),
-               'print_info_parallelMode': ('-Q', True),
-               'num_permutations': ('-n 10', 10),
-               'vox_pvalus': ('-x', True),
-               'fstats_only': ('--fonly', True),
-               'thresh_free_cluster': ('-T', True),
-               'thresh_free_cluster_2Dopt': ('--T2', True),
-               'cluster_thresholding': ('-c 0.20', 0.20),
-               'cluster_mass_thresholding': ('-C 0.40', 0.40),
-               'fcluster_thresholding': ('-F 0.10', 0.10),
-               'fcluster_mass_thresholding': ('-S 0.30', 0.30),
-               'variance_smoothing': ('-v 0.20', 0.20),
-               'diagnostics_off': ('--quiet', True),
-               'output_raw': ('-R', True),
-               'output_perm_vect': ('-P', True),
-               'int_seed': ('--seed=20', 20),
-               'TFCE_height_param': ('--tfce_H=0.11', 0.11),
-               'TFCE_extent_param': ('--tfce_E=0.50', 0.50),
-               'TFCE_connectivity': ('--tfce_C=0.30', 0.30),
-               'list_num_voxel_EVs_pos': ('--vxl=' + repr([1, 2, 3, 4]),
-                                          repr([1, 2, 3, 4])),
-               'list_img_voxel_EVs': ('--vxf=' + repr([6, 7, 8, 9, 3]),
-                                      repr([6, 7, 8, 9, 3]))}
+    opt_map = {
+        'demean_data': ('-D', True),
+        'one_sample_gmean': ('-1', True),
+        'mask_image': ('-m inp_mask', 'inp_mask'),
+        'design_matrix': ('-d design.mat', 'design.mat'),
+        't_contrast': ('-t input.con', 'input.con'),
+        'f_contrast': ('-f input.fts', 'input.fts'),
+        'xchange_block_labels': ('-e design.grp', 'design.grp'),
+        'print_unique_perm': ('-q', True),
+        'print_info_parallelMode': ('-Q', True),
+        'num_permutations': ('-n 10', 10),
+        'vox_pvalus': ('-x', True),
+        'fstats_only': ('--fonly', True),
+        'thresh_free_cluster': ('-T', True),
+        'thresh_free_cluster_2Dopt': ('--T2', True),
+        'cluster_thresholding': ('-c 0.20', 0.20),
+        'cluster_mass_thresholding': ('-C 0.40', 0.40),
+        'fcluster_thresholding': ('-F 0.10', 0.10),
+        'fcluster_mass_thresholding': ('-S 0.30', 0.30),
+        'variance_smoothing': ('-v 0.20', 0.20),
+        'diagnostics_off': ('--quiet', True),
+        'output_raw': ('-R', True),
+        'output_perm_vect': ('-P', True),
+        'int_seed': ('--seed=20', 20),
+        'TFCE_height_param': ('--tfce_H=0.11', 0.11),
+        'TFCE_extent_param': ('--tfce_E=0.50', 0.50),
+        'TFCE_connectivity': ('--tfce_C=0.30', 0.30),
+        'list_num_voxel_EVs_pos': ('--vxl=' + repr([1, 2, 3, 4]),
+                                   repr([1, 2, 3, 4])),
+        'list_img_voxel_EVs': ('--vxf=' + repr([6, 7, 8, 9, 3]),
+                               repr([6, 7, 8, 9, 3]))
+    }
 
     for name, settings in list(opt_map.items()):
-        rand4 = fsl.Randomise_parallel(input_4D='infile',
-                                       output_rootname='root',
-                                       **{name: settings[1]})
+        rand4 = fsl.Randomise_parallel(
+            input_4D='infile', output_rootname='root', **{
+                name: settings[1]
+            })
         assert rand4.cmdline == rand4.cmd + ' -i infile -o root ' + settings[0]
 
 
 # test proj_thresh
-@pytest.mark.xfail(reason="These tests are skipped until we clean up some of this code")
+@pytest.mark.xfail(
+    reason="These tests are skipped until we clean up some of this code")
 def test_Proj_thresh():
     proj = fsl.ProjThresh()
 
@@ -223,7 +233,7 @@ def test_Proj_thresh():
     results = proj3.run(volumes=['inp1', 'inp3', 'inp2'], threshold=2)
     assert results.runtime.cmdline == 'proj_thresh inp1 inp3 inp2 2'
     assert results.runtime.returncode != 0
-    assert isinstance(results.interface.inputs.volumes, list) == True
+    assert isinstance(results.interface.inputs.volumes, list)
     assert results.interface.inputs.threshold == 2
 
     # test arguments for opt_map
@@ -231,7 +241,8 @@ def test_Proj_thresh():
 
 
 # test vec_reg
-@pytest.mark.xfail(reason="These tests are skipped until we clean up some of this code")
+@pytest.mark.xfail(
+    reason="These tests are skipped until we clean up some of this code")
 def test_Vec_reg():
 
     vrg = fsl.VecReg()
@@ -251,11 +262,12 @@ def test_Vec_reg():
     assert vrg.cmdline == 'vecreg -i infile -o outfile -r MNI152 -t tmat.mat'
 
     # .run based parameter setting
-    vrg2 = fsl.VecReg(infile='infile2',
-                      outfile='outfile2',
-                      refVolName='MNI152',
-                      affineTmat='tmat2.mat',
-                      brainMask='nodif_brain_mask')
+    vrg2 = fsl.VecReg(
+        infile='infile2',
+        outfile='outfile2',
+        refVolName='MNI152',
+        affineTmat='tmat2.mat',
+        brainMask='nodif_brain_mask')
 
     actualCmdline = sorted(vrg2.cmdline.split())
     cmd = 'vecreg -i infile2 -o outfile2 -r MNI152 -t tmat2.mat -m nodif_brain_mask'
@@ -263,10 +275,12 @@ def test_Vec_reg():
     assert actualCmdline == desiredCmdline
 
     vrg3 = fsl.VecReg()
-    results = vrg3.run(infile='infile3',
-                       outfile='outfile3',
-                       refVolName='MNI152',
-                       affineTmat='tmat3.mat',)
+    results = vrg3.run(
+        infile='infile3',
+        outfile='outfile3',
+        refVolName='MNI152',
+        affineTmat='tmat3.mat',
+    )
 
     assert results.runtime.cmdline == \
         'vecreg -i infile3 -o outfile3 -r MNI152 -t tmat3.mat'
@@ -277,23 +291,31 @@ def test_Vec_reg():
     assert results.interface.inputs.affineTmat == 'tmat3.mat'
 
     # test arguments for opt_map
-    opt_map = {'verbose': ('-v', True),
-               'helpDoc': ('-h', True),
-               'tensor': ('--tensor', True),
-               'affineTmat': ('-t Tmat', 'Tmat'),
-               'warpFile': ('-w wrpFile', 'wrpFile'),
-               'interpolation': ('--interp=sinc', 'sinc'),
-               'brainMask': ('-m mask', 'mask')}
+    opt_map = {
+        'verbose': ('-v', True),
+        'helpDoc': ('-h', True),
+        'tensor': ('--tensor', True),
+        'affineTmat': ('-t Tmat', 'Tmat'),
+        'warpFile': ('-w wrpFile', 'wrpFile'),
+        'interpolation': ('--interp=sinc', 'sinc'),
+        'brainMask': ('-m mask', 'mask')
+    }
 
     for name, settings in list(opt_map.items()):
-        vrg4 = fsl.VecReg(infile='infile', outfile='outfile',
-                          refVolName='MNI152', **{name: settings[1]})
+        vrg4 = fsl.VecReg(
+            infile='infile',
+            outfile='outfile',
+            refVolName='MNI152',
+            **{
+                name: settings[1]
+            })
         assert vrg4.cmdline == vrg4.cmd + \
             ' -i infile -o outfile -r MNI152 ' + settings[0]
 
 
 # test find_the_biggest
-@pytest.mark.xfail(reason="These tests are skipped until we clean up some of this code")
+@pytest.mark.xfail(
+    reason="These tests are skipped until we clean up some of this code")
 def test_Find_the_biggest():
     fbg = fsl.FindTheBiggest()
 
@@ -387,7 +409,8 @@ def test_distancemap(create_files_in_directory):
     mapper.inputs.in_file = "a.nii"
 
     # It should
-    assert mapper.cmdline == "distancemap --out=%s --in=a.nii" % os.path.join(newdir, "a_dstmap.nii")
+    assert mapper.cmdline == "distancemap --out=%s --in=a.nii" % os.path.join(
+        newdir, "a_dstmap.nii")
 
     # And we should be able to write out a maxima map
     mapper.inputs.local_max_file = True
@@ -399,4 +422,3 @@ def test_distancemap(create_files_in_directory):
     mapper.inputs.local_max_file = "max.nii"
     assert mapper.cmdline == \
         "distancemap --out=%s --in=a.nii --localmax=max.nii" % os.path.join(newdir, "a_dstmap.nii")
-

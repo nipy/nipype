@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-
 """
 Pytest fixtures used in tests.
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
-
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import os
 import pytest
@@ -16,13 +15,13 @@ import nibabel as nb
 from io import open
 from builtins import str
 
-from nipype.utils.filemanip import filename_to_list
+from nipype.utils.filemanip import ensure_list
 from nipype.interfaces.fsl import Info
 from nipype.interfaces.fsl.base import FSLCommand
 
 
 def analyze_pair_image_files(outdir, filelist, shape):
-    for f in filename_to_list(filelist):
+    for f in ensure_list(filelist):
         hdr = nb.Nifti1Header()
         hdr.set_data_shape(shape)
         img = np.random.random(shape)
@@ -31,7 +30,7 @@ def analyze_pair_image_files(outdir, filelist, shape):
 
 
 def nifti_image_files(outdir, filelist, shape):
-    for f in filename_to_list(filelist):
+    for f in ensure_list(filelist):
         img = np.random.random(shape)
         nb.Nifti1Image(img, np.eye(4), None).to_filename(
             os.path.join(outdir, f))
@@ -41,7 +40,7 @@ def nifti_image_files(outdir, filelist, shape):
 def create_files_in_directory(request, tmpdir):
     cwd = tmpdir.chdir()
     filelist = ['a.nii', 'b.nii']
-    nifti_image_files(tmpdir.strpath, filelist, shape=(3,3,3,4))
+    nifti_image_files(tmpdir.strpath, filelist, shape=(3, 3, 3, 4))
 
     def change_directory():
         cwd.chdir()
@@ -67,7 +66,7 @@ def create_analyze_pair_file_in_directory(request, tmpdir):
 def create_files_in_directory_plus_dummy_file(request, tmpdir):
     cwd = tmpdir.chdir()
     filelist = ['a.nii', 'b.nii']
-    nifti_image_files(tmpdir.strpath, filelist, shape=(3,3,3,4))
+    nifti_image_files(tmpdir.strpath, filelist, shape=(3, 3, 3, 4))
 
     tmpdir.join('reg.dat').write('dummy file')
     filelist.append('reg.dat')
@@ -103,12 +102,13 @@ def set_output_type(fsl_output_type):
     FSLCommand.set_default_output_type(Info.output_type())
     return prev_output_type
 
-@pytest.fixture(params=[None]+list(Info.ftypes))
+
+@pytest.fixture(params=[None] + sorted(Info.ftypes))
 def create_files_in_directory_plus_output_type(request, tmpdir):
     func_prev_type = set_output_type(request.param)
     origdir = tmpdir.chdir()
     filelist = ['a.nii', 'b.nii']
-    nifti_image_files(tmpdir.strpath, filelist, shape=(3,3,3,4))
+    nifti_image_files(tmpdir.strpath, filelist, shape=(3, 3, 3, 4))
 
     out_ext = Info.output_type_to_ext(Info.output_type())
 
