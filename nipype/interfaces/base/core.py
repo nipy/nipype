@@ -540,6 +540,9 @@ class BaseInterface(Interface):
             if not ignore_exception:
                 raise
         finally:
+            if runtime is None:
+                raise RuntimeError("{} interface failed to return runtime "
+                                   "object".format(interface.__class__.__name__))
             # This needs to be done always
             runtime.endTime = dt.isoformat(dt.utcnow())
             timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
