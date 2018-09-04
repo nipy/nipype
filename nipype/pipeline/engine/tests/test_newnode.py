@@ -8,7 +8,7 @@ import pytest, pdb
 python35_only = pytest.mark.skipif(sys.version_info < (3, 5),
                                    reason="requires Python>3.4")
 
-Plugins = ["serial"]#, "mp", ""cf", "dask"]
+Plugins = ["serial", "mp", "cf", "dask"]
 
 def fun_addtwo(a):
     time.sleep(3)
