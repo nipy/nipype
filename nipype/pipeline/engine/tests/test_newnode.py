@@ -215,7 +215,7 @@ def test_workflow_2(plugin):
 
     # adding 2 nodes and create a connection (as it is now)
     wf.add_nodes([na, nb])
-    wf.connect(na, "out", nb, "a")
+    wf.connect("NA", "out", "NB", "a")
 
     assert wf.nodes[0].mapper == "NA.a"
     wf.run(plugin=plugin)
@@ -254,7 +254,7 @@ def test_workflow_2a(plugin):
     nb.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]})
 
     wf.add_nodes([na, nb])
-    wf.connect(na, "out", nb, "a")
+    wf.connect("NA", "out", "NB", "a")
 
     assert wf.nodes[0].mapper == "NA.a"
     assert wf.nodes[1].mapper == ("NA.a", "NB.b")
@@ -293,7 +293,7 @@ def test_workflow_2b(plugin):
     nb.map(mapper=["NA.a", "b"], inputs={"b": [2, 1]})
 
     wf.add_nodes([na, nb])
-    wf.connect(na, "out", nb, "a")
+    wf.connect("NA", "out", "NB", "a")
 
     assert wf.nodes[0].mapper == "NA.a"
     assert wf.nodes[1].mapper == ["NA.a", "NB.b"]
@@ -405,7 +405,7 @@ def test_workflow_4(plugin):
     nb.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]})
     wf.add(nb)
     # connect method as it is in the current version
-    wf.connect(na, "out", nb, "a")
+    wf.connect("NA", "out", "NB", "a")
 
     wf.run(plugin=plugin)
 
@@ -522,7 +522,7 @@ def test_workflow_6(plugin):
     wf.map(mapper="a", inputs={"a": [3, 5]})
     wf.add(nb)
     wf.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]})
-    wf.connect(na, "out", nb, "a")
+    wf.connect("NA", "out", "NB", "a")
     wf.run(plugin=plugin)
 
     expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
@@ -557,7 +557,7 @@ def test_workflow_6a(plugin):
     wf.add(nb)
     wf.map(mapper="a", inputs={"a": [3, 5]}, node=na)
     wf.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]}, node=nb)
-    wf.connect(na, "out", nb, "a")
+    wf.connect("NA", "out", "NB", "a")
     wf.run(plugin=plugin)
 
     expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
@@ -624,7 +624,7 @@ def test_workflow_7(plugin):
 
     wf.add(na)
     # connecting the node with inputs from the workflow
-    wf.connect_workflow(na, "wf_a","a")
+    wf.connect_workflow("NA", "wf_a","a")
     wf.map(mapper="a")
     wf.run(plugin=plugin)
 
@@ -648,7 +648,7 @@ def test_workflow_7a(plugin):
 
     wf.add(na)
     # if connect has None as the first arg, it is the same as connect_workflow
-    wf.connect(None, "wf_a", na, "a")
+    wf.connect(None, "wf_a", "NA", "a")
     wf.map(mapper="a")
     wf.run(plugin=plugin)
 
@@ -695,8 +695,8 @@ def test_workflow_8(plugin):
     nb = NewNode(name="NB", interface=interf_addvar, base_dir="nb")
 
     wf.add_nodes([na, nb])
-    wf.connect(na, "out", nb, "a")
-    wf.connect_workflow(nb, "b", "b")
+    wf.connect("NA", "out", "NB", "a")
+    wf.connect_workflow("NB", "b", "b")
     assert wf.nodes[0].mapper == "NA.a"
     wf.run(plugin=plugin)
 
@@ -853,9 +853,8 @@ def test_workflow_12(plugin="serial"):
     wf = NewWorkflow(name="wf9", inputs={"wf_a": [3, 5]}, mapper="wf_a", workingdir="test_wf12_{}".format(plugin))
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
-
     wf.add(na)
-    wf.connect_workflow(na, "wf_a", "a")
+    wf.connect_workflow("NA", "wf_a", "a")
 
     assert len(wf.inner_workflows) == 2
     assert wf.inner_workflows[0].mapper is None
@@ -866,10 +865,6 @@ def test_workflow_12(plugin="serial"):
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.inner_workflows[0].nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
-    # TODO: doesn't work properly (writes everything in one dir and overwrites results
-    # so checking only for wf.inner_workflows[1]
-    wf.inner_workflows[1].nodes[0].result["out"][0][0] == expected[1][0]
-    wf.inner_workflows[1].nodes[0].result["out"][0][1] == expected[1][1]
-    # for i, res in enumerate(expected):
-    #     assert wf.nodes[0].result["out"][i][0] == res[0]
-    #     assert wf.nodes[0].result["out"][i][1] == res[1]
+    for i, res in enumerate(expected):
+        assert wf.inner_workflows[i].nodes[0].result["out"][0][0] == res[0]
+        assert wf.inner_workflows[i].nodes[0].result["out"][0][1] == res[1]

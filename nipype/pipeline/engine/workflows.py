@@ -14,7 +14,7 @@ import os, glob
 import os.path as op
 import sys
 from datetime import datetime
-from copy import deepcopy
+from copy import copy, deepcopy
 import pickle
 import shutil
 
@@ -1160,6 +1160,24 @@ class NewNode(NewBase):
         return self._interface
 
 
+    def __deepcopy__(self, memo): # memo is a dict of id's to copies
+        id_self = id(self)        # memoization avoids unnecesary recursion
+        _copy = memo.get(id_self)
+        if _copy is None:
+            # changing names of inputs and input_map, so it doesnt contain node.name
+            inputs_copy = dict((key[len(self.name)+1:], deepcopy(value))
+                               for (key, value) in self.inputs.items())
+            interface_copy = deepcopy(self.interface)
+            interface_copy.input_map = dict((key, val[len(self.name)+1:])
+                                            for (key, val) in interface_copy.input_map.items())
+            _copy = type(self)(
+                name=deepcopy(self.name), interface=interface_copy,
+                inputs=inputs_copy, mapper=deepcopy(self.mapper),
+                base_dir=deepcopy(self._nodedir), wf_mappers=deepcopy(self._wf_mappers))
+            memo[id_self] = _copy
+        return _copy
+
+
 
     def map(self, mapper, inputs=None):
         if self._mapper:
@@ -1389,16 +1407,18 @@ class NewWorkflow(NewBase):
             self._connect(from_node, from_socket, to_node, to_socket)
 
 
-    def _connect(self, from_node, from_socket, to_node, to_socket):
-        if from_node:
+    def _connect(self, from_node_nm, from_socket, to_node_nm, to_socket):
+        if from_node_nm:
+            from_node = self._node_names[from_node_nm]
+            to_node = self._node_names[to_node_nm]
             self.graph.add_edges_from([(from_node, to_node)])
             if not to_node in self.nodes:
-                self.add_nodes(to_node)
+                self._add_nodes(to_node)
             self.connected_var[to_node][to_socket] = (from_node, from_socket)
             # from_node.sending_output.append((from_socket, to_node, to_socket))
             logger.debug('connecting {} and {}'.format(from_node, to_node))
         else:
-            self.connect_workflow(to_node, from_socket, to_socket)
+            self.connect_workflow(to_node_nm, from_socket, to_socket)
 
 
     def connect_workflow(self, node, inp_wf, inp_nd):
@@ -1409,10 +1429,11 @@ class NewWorkflow(NewBase):
             self._connect_workflow(node, inp_wf, inp_nd)
 
 
-    def _connect_workflow(self, node, inp_wf, inp_nd):
+    def _connect_workflow(self, node_nm, inp_wf, inp_nd):
+        node = self._node_names[node_nm]
         if "{}.{}".format(self.name, inp_wf) in self.inputs:
-            node.state_inputs.update({"{}.{}".format(node.name, inp_nd): self.inputs["{}.{}".format(self.name, inp_wf)]})
-            node.inputs.update({"{}.{}".format(node.name, inp_nd): self.inputs["{}.{}".format(self.name, inp_wf)]})
+            node.state_inputs.update({"{}.{}".format(node_nm, inp_nd): self.inputs["{}.{}".format(self.name, inp_wf)]})
+            node.inputs.update({"{}.{}".format(node_nm, inp_nd): self.inputs["{}.{}".format(self.name, inp_wf)]})
         else:
             raise Exception("{} not in the workflow inputs".format(inp_wf))
 
@@ -1461,7 +1482,9 @@ class NewWorkflow(NewBase):
     def add(self, runnable, name=None, base_dir=None, inputs=None, output_nm=None, mapper=None, **kwargs):
         if self.inner_workflows:
             for (ii, inner_wf) in enumerate(self.inner_workflows):
-                self.inner_workflows[ii] = inner_wf._add(runnable, name, base_dir, inputs, output_nm, mapper, **kwargs)
+                self.inner_workflows[ii] = inner_wf._add(deepcopy(runnable), deepcopy(name), deepcopy(base_dir),
+                                                         deepcopy(inputs), deepcopy(output_nm), deepcopy(mapper),
+                                                         **deepcopy(kwargs))
         else:
             return self._add(runnable, name, base_dir, inputs, output_nm, mapper, **kwargs)
 
@@ -1500,10 +1523,11 @@ class NewWorkflow(NewBase):
         # connecting inputs to other nodes outputs
         for (inp, source) in kwargs.items():
             try:
-                from_node, from_socket = source.split(".")
-                self.connect(self._node_names[from_node], from_socket, node, inp)
+                from_node_nm, from_socket = source.split(".")
+                self.connect(from_node_nm, from_socket, node.name, inp)
+            # TODO not sure if i need it, just check if from_node_nm is not None??
             except(ValueError):
-                self.connect(None, source, node, inp)
+                self.connect(None, source, node.name, inp)
 
         return self
 
