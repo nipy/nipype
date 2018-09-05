@@ -1073,7 +1073,7 @@ class MapState(object):
 
 # dj ??: should I use EngineBase?
 class NewBase(object):
-    def __init__(self, name, mapper=None, inputs=None, wf_mappers=None, *args, **kwargs):
+    def __init__(self, name, mapper=None, inputs=None, wf_mappers=None, mem_gb_node=None, *args, **kwargs):
         self.name = name
         #dj TODO: I should think what is needed in the __init__ (I redefine some of rhe attributes anyway)
         if inputs:
@@ -1129,9 +1129,10 @@ class NewBase(object):
 
 class NewNode(NewBase):
     def __init__(self, name, interface, inputs=None, mapper=None, join_by=None,
-                 base_dir=None, wf_mappers=None, *args, **kwargs):
+                 base_dir=None, wf_mappers=None, mem_gb_node=None, *args, **kwargs):
         super(NewNode, self).__init__(name=name, mapper=mapper, inputs=inputs,
-                                      wf_mappers=wf_mappers, *args, **kwargs)
+                                      wf_mappers=wf_mappers, mem_gb_node=mem_gb_node,
+                                      *args, **kwargs)
 
         self._nodedir = base_dir
         self._interface = interface
@@ -1331,9 +1332,9 @@ class NewNode(NewBase):
 
 class NewWorkflow(NewBase):
     def __init__(self, name, inputs=None, mapper=None, #join_by=None,
-                 nodes=None, workingdir=None, *args, **kwargs):
+                 nodes=None, workingdir=None, mem_gb_node=None, *args, **kwargs):
         super(NewWorkflow, self).__init__(name=name, mapper=mapper, inputs=inputs,
-                                          *args, **kwargs)
+                                          mem_gb_node=mem_gb_node, *args, **kwargs)
 
         self.graph = nx.DiGraph()
         self._nodes = []
@@ -1479,17 +1480,19 @@ class NewWorkflow(NewBase):
         submitter.close()
 
 
-    def add(self, runnable, name=None, base_dir=None, inputs=None, output_nm=None, mapper=None, **kwargs):
+    def add(self, runnable, name=None, base_dir=None, inputs=None, output_nm=None, mapper=None,
+            mem_gb=None, **kwargs):
         if self.inner_workflows:
             for (ii, inner_wf) in enumerate(self.inner_workflows):
-                self.inner_workflows[ii] = inner_wf._add(deepcopy(runnable), deepcopy(name), deepcopy(base_dir),
-                                                         deepcopy(inputs), deepcopy(output_nm), deepcopy(mapper),
-                                                         **deepcopy(kwargs))
+                self.inner_workflows[ii] = inner_wf._add(deepcopy(runnable), name, base_dir,
+                                                         deepcopy(inputs), output_nm, mapper,
+                                                         mem_gb, **deepcopy(kwargs))
         else:
             return self._add(runnable, name, base_dir, inputs, output_nm, mapper, **kwargs)
 
 
-    def _add(self, runnable, name=None, base_dir=None, inputs=None, output_nm=None, mapper=None, **kwargs):
+    def _add(self, runnable, name=None, base_dir=None, inputs=None, output_nm=None, mapper=None,
+             mem_gb=None, **kwargs):
         # dj TODO: should I move this if checks to NewNode __init__?
         if is_function(runnable):
             if not output_nm:
@@ -1500,14 +1503,14 @@ class NewWorkflow(NewBase):
             if not base_dir:
                 base_dir = name
             node = NewNode(interface=interface, base_dir=base_dir, name=name, inputs=inputs, mapper=mapper,
-                           wf_mappers=self._node_mappers)
+                           wf_mappers=self._node_mappers, mem_gb_node=mem_gb)
         elif is_interface(runnable):
             if not name:
                 raise Exception("you have to specify name for the node")
             if not base_dir:
                 base_dir = name
             node = NewNode(interface=runnable, base_dir=base_dir, name=name, inputs=inputs, mapper=mapper,
-                           wf_mappers=self._node_mappers)
+                           wf_mappers=self._node_mappers, mem_gb_node=mem_gb)
         elif is_node(runnable):
             node = runnable
             #dj: dont have clonning right now
