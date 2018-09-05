@@ -559,28 +559,29 @@ class Node(EngineBase):
         result, aggregate, attribute_error = _load_resultfile(cwd, self.name)
         # try aggregating first
         if aggregate:
-            logger.debug('aggregating results')
-            if attribute_error:
-                old_inputs = loadpkl(op.join(cwd, '_inputs.pklz'))
-                self.inputs.trait_set(**old_inputs)
-            if not isinstance(self, MapNode):
-                self._copyfiles_to_wd(linksonly=True)
-                aggouts = self._interface.aggregate_outputs(
-                    needed_outputs=self.needed_outputs)
-                runtime = Bunch(
-                    cwd=cwd,
-                    returncode=0,
-                    environ=dict(os.environ),
-                    hostname=socket.gethostname())
-                result = InterfaceResult(
-                    interface=self._interface.__class__,
-                    runtime=runtime,
-                    inputs=self._interface.inputs.get_traitsfree(),
-                    outputs=aggouts)
-                _save_resultfile(result, cwd, self.name)
-            else:
-                logger.debug('aggregating mapnode results')
-                result = self._run_interface()
+            with indirectory(cwd):
+                logger.debug('aggregating results')
+                if attribute_error:
+                    old_inputs = loadpkl(op.join(cwd, '_inputs.pklz'))
+                    self.inputs.trait_set(**old_inputs)
+                if not isinstance(self, MapNode):
+                    self._copyfiles_to_wd(linksonly=True)
+                    aggouts = self._interface.aggregate_outputs(
+                        needed_outputs=self.needed_outputs)
+                    runtime = Bunch(
+                        cwd=cwd,
+                        returncode=0,
+                        environ=dict(os.environ),
+                        hostname=socket.gethostname())
+                    result = InterfaceResult(
+                        interface=self._interface.__class__,
+                        runtime=runtime,
+                        inputs=self._interface.inputs.get_traitsfree(),
+                        outputs=aggouts)
+                    _save_resultfile(result, cwd, self.name)
+                else:
+                    logger.debug('aggregating mapnode results')
+                    result = self._run_interface()
         return result
 
     def _run_command(self, execute, copyfiles=True):
