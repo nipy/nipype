@@ -21,6 +21,7 @@ class DTIOutputSpec(TraitedSpec):
     md_file = File(exists=True)
     rd_file = File(exists=True)
     ad_file = File(exists=True)
+    color_fa_file = File(exists=True)
 
 
 class DTI(DipyDiffusionInterface):
@@ -62,7 +63,7 @@ class DTI(DipyDiffusionInterface):
         IFLOGGER.info('DTI parameters image saved as %s', out_file)
 
         # FA MD RD and AD
-        for metric in ["fa", "md", "rd", "ad"]:
+        for metric in ["fa", "md", "rd", "ad", "color_fa"]:
             data = getattr(ten_fit, metric).astype("float32")
             out_name = self._gen_filename(metric)
             nb.Nifti1Image(data, affine).to_filename(out_name)
@@ -74,7 +75,7 @@ class DTI(DipyDiffusionInterface):
         outputs = self._outputs().get()
         outputs['out_file'] = self._gen_filename('dti')
 
-        for metric in ["fa", "md", "rd", "ad"]:
+        for metric in ["fa", "md", "rd", "ad", "color_fa"]:
             outputs["{}_file".format(metric)] = self._gen_filename(metric)
 
         return outputs
