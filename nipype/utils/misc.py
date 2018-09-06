@@ -233,8 +233,8 @@ def normalize_mc_params(params, source):
         y   Anterior-Posterior  (mm)
         z   Superior-Inferior   (mm)
         rx  Pitch               (rad)
-        ry  Yaw                 (rad)
-        rz  Roll                (rad)
+        ry  Roll                (rad)
+        rz  Yaw                 (rad)
     """
     if source.upper() == 'FSL':
         params = params[[3, 4, 5, 0, 1, 2]]
