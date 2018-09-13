@@ -14,11 +14,6 @@ def test_DWIExtract_inputs():
         ),
         grad_file=dict(argstr='-grad %s', ),
         grad_fsl=dict(argstr='-fslgrad %s %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_bval=dict(),
         in_bvec=dict(argstr='-fslgrad %s %s', ),
         in_file=dict(
@@ -26,7 +21,7 @@ def test_DWIExtract_inputs():
             mandatory=True,
             position=-2,
         ),
-        nobzero=dict(argstr='-nobzero', ),
+        nobzero=dict(argstr='-no_bzero', ),
         nthreads=dict(
             argstr='-nthreads %d',
             nohash=True,
@@ -41,10 +36,6 @@ def test_DWIExtract_inputs():
             sep=',',
         ),
         singleshell=dict(argstr='-singleshell', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = DWIExtract.input_spec()
 

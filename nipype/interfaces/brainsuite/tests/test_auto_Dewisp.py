@@ -10,11 +10,6 @@ def test_Dewisp_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputMaskFile=dict(
             argstr='-i %s',
             mandatory=True,
@@ -25,10 +20,6 @@ def test_Dewisp_inputs():
             genfile=True,
         ),
         sizeThreshold=dict(argstr='-t %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         timer=dict(argstr='--timer', ),
         verbosity=dict(argstr='-v %d', ),
     )

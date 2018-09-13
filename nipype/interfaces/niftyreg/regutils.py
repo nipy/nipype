@@ -450,13 +450,6 @@ class RegAverage(NiftyRegCommand):
     Examples
     --------
 
-    .. testsetup::
-
-    >>> tmp = getfixture('tmpdir')
-    >>> old = tmp.chdir() # changing to temporary file
-
-    .. doctest::
-
     >>> from nipype.interfaces import niftyreg
     >>> node = niftyreg.RegAverage()
     >>> one_file = 'im1.nii'
@@ -465,11 +458,6 @@ class RegAverage(NiftyRegCommand):
     >>> node.inputs.avg_files = [one_file, two_file, three_file]
     >>> node.cmdline  # doctest: +ELLIPSIS
     'reg_average --cmd_file .../reg_average_cmd'
-
-    .. testsetup::
-
-    >>> os.chdir(old.strpath)
-
     """
     _cmd = get_custom_path('reg_average')
     input_spec = RegAverageInputSpec

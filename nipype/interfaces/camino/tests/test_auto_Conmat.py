@@ -10,11 +10,6 @@ def test_Conmat_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-inputfile %s',
             mandatory=True,
@@ -32,10 +27,6 @@ def test_Conmat_inputs():
             mandatory=True,
         ),
         targetname_file=dict(argstr='-targetnamefile %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         tract_prop=dict(
             argstr='-tractstat %s',
             units='NA',

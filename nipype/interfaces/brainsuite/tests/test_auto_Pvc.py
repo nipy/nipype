@@ -10,11 +10,6 @@ def test_Pvc_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputMRIFile=dict(
             argstr='-i %s',
             mandatory=True,
@@ -29,10 +24,6 @@ def test_Pvc_inputs():
             genfile=True,
         ),
         spatialPrior=dict(argstr='-l %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         threeClassFlag=dict(argstr='-3', ),
         timer=dict(argstr='--timer', ),
         verbosity=dict(argstr='-v %d', ),

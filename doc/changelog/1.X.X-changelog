@@ -1,3 +1,82 @@
+1.1.2 (August 11, 2018)
+=======================
+
+Hot-fix release, resolving incorrect dependencies in 1.1.1 wheel.
+
+##### [Full changelog](https://github.com/nipy/nipype/milestone/23?closed=1)
+
+  * FIX: Read BIDS config.json under grabbids or layout (https://github.com/nipy/nipype/pull/2679)
+  * FIX: Node __repr__ and detailed graph expansion (https://github.com/nipy/nipype/pull/2669)
+  * FIX: Prevent double-collapsing of nested lists by OutputMultiObject (https://github.com/nipy/nipype/pull/2673)
+  * ENH: Add interface to SPM realign_unwarp  (https://github.com/nipy/nipype/pull/2635)
+  * MAINT: Fix wheel build to ensure futures is only required in Python 2 (https://github.com/nipy/nipype/pull/2678)
+  * MAINT: ensure interface _cmd only includes executable (https://github.com/nipy/nipype/pull/2674)
+  * MAINT: Issue template: Pretty print platform details (https://github.com/nipy/nipype/pull/2671)
+  * CI: removing travis_retry for pip install pytest xdist 1.22.5 (https://github.com/nipy/nipype/pull/2664)
+
+
+1.1.1 (July 30, 2018)
+=====================
+
+##### [Full changelog](https://github.com/nipy/nipype/milestone/22?closed=1)
+
+  * FIX: Un-set incorrect default options in TOPUP (https://github.com/nipy/nipype/pull/2637)
+  * FIX: Copy FSCommand.version to ReconAll.version (https://github.com/nipy/nipype/pull/2656)
+  * FIX: Various BIDSDataGrabber fixes (https://github.com/nipy/nipype/pull/2651)
+  * FIX: changing Node._output_dir to realpath (https://github.com/nipy/nipype/pull/2639)
+  * FIX: Typo in DWIExtract of Mrtrix3interface (https://github.com/nipy/nipype/pull/2634)
+  * FIX: Typo in FSLXCommandInputSpec (https://github.com/nipy/nipype/pull/2628)
+  * ENH: Allow transform to be saved from AFNI 3dWarp (https://github.com/nipy/nipype/pull/2642)
+  * ENH: Allow BIDS-style slice timings to be passed directly to TShift  (https://github.com/nipy/nipype/pull/2608)
+  * ENH: S3 access using instance role (https://github.com/nipy/nipype/pull/2621)
+  * ENH Minor improvements to PR template (https://github.com/nipy/nipype/pull/2636)
+  * TEST: make specs (https://github.com/nipy/nipype/pull/2653)
+  * DOC: update neurodocker tutorial for neurodocker version 0.4.0 (https://github.com/nipy/nipype/pull/2647)
+  * MAINT: Remove vestiges of nose testing library (https://github.com/nipy/nipype/pull/2662)
+  * MAINT: Make pytest-xdist a dependency (https://github.com/nipy/nipype/pull/2649)
+  * CI: Install pytest>=3.4 in Travis (https://github.com/nipy/nipype/pull/2659)
+
+
+1.1.0 (July 04, 2018)
+=====================
+
+###### [Full changelog](https://github.com/nipy/nipype/milestone/21?closed=1)
+
+  * RF: Futures-based MultiProc (https://github.com/nipy/nipype/pull/2598)
+  * FIX: Avoid closing file descriptors on Windows (https://github.com/nipy/nipype/pull/2617)
+  * MAINT: Play nice with external logging (https://github.com/nipy/nipype/pull/2611)
+  * MAINT: Remove ignore_exception and terminal_output traits from input specs (https://github.com/nipy/nipype/pull/2618)
+  * MAINT: Converge autotest names (https://github.com/nipy/nipype/pull/2610)
+  * ENH: Add versioning metadata to crash files (https://github.com/nipy/nipype/pull/2626)
+  * ENH add -dsort option to TProject (https://github.com/nipy/nipype/pull/2623)
+  * ENH: Add Rescale interface (https://github.com/nipy/nipype/pull/2599)
+  * DOC: Improve documentation for ANTs/FSL interfaces (https://github.com/nipy/nipype/pull/2593)
+  * CI: Stop using Miniconda on Travis (https://github.com/nipy/nipype/pull/2600)
+  * CI: Add PyPI validation on rel/* branches (https://github.com/nipy/nipype/pull/2603)
+
+1.0.4 (May 29, 2018)
+====================
+
+###### [Full changelog](https://github.com/nipy/nipype/milestone/20?closed=1)
+
+  * FIX: Update logging levels in enable_debug_mode (https://github.com/nipy/nipype/pull/2595)
+  * FIX: Set default result in DistributedPluginBase._clean_queue (https://github.com/nipy/nipype/pull/2596)
+  * FIX: Correctly connect JoinNodes in nested iterables (https://github.com/nipy/nipype/pull/2597)
+  * FIX: DTITK nonlinear workflow origin reslicing (https://github.com/nipy/nipype/pull/2561)
+  * FIX: ResponseSD support for multiple b-vals (https://github.com/nipy/nipype/pull/2582)
+  * FIX: Workaround to ICA-AROMA change of directory (https://github.com/nipy/nipype/pull/2566)
+  * FIX/TEST: Gunzip cleanup and test (https://github.com/nipy/nipype/pull/2564)
+  * FIX: Print UID in crashfile if login name is unavailable (https://github.com/nipy/nipype/pull/2563)
+  * ENH: initial connectome workbench support (https://github.com/nipy/nipype/pull/2594)
+  * ENH: AFNI (3d)LocalBistat interface (https://github.com/nipy/nipype/pull/2590)
+  * ENH: Reorient interface (https://github.com/nipy/nipype/pull/2572)
+  * ENH: FSL slice interface (https://github.com/nipy/nipype/pull/2585)
+  * ENH: LabelGeometryMeasures interface (https://github.com/nipy/nipype/pull/2586)
+  * ENH: MRTrix3 dwidenoise interface (https://github.com/nipy/nipype/pull/2568)
+  * ENH: ReportCapableInterface mix-in/base interface (https://github.com/nipy/nipype/pull/2560)
+  * CI: Move PyPI deployment to Circle (https://github.com/nipy/nipype/pull/2587)
+  * CI: Submit Travis results to codecov (https://github.com/nipy/nipype/pull/2574)
+
 1.0.3 (April 30, 2018)
 ======================
 

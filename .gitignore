@@ -28,3 +28,4 @@ __pycache__/
 .*.swp
 .ipynb_checkpoints/
 .ruby-version
+.pytest_cache

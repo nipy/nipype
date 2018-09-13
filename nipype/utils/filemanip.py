@@ -30,7 +30,7 @@ from .misc import is_container
 from future import standard_library
 standard_library.install_aliases()
 
-fmlogger = logging.getLogger('utils')
+fmlogger = logging.getLogger('nipype.utils')
 
 related_filetype_sets = [
     ('.hdr', '.img', '.mat'),
@@ -38,6 +38,7 @@ related_filetype_sets = [
     ('.BRIK', '.HEAD'),
 ]
 
+PY3 = sys.version_info[0] >= 3
 
 class FileNotFoundError(Exception):
     pass
@@ -229,7 +230,7 @@ def hash_infile(afile, chunk_len=8192, crypto=hashlib.md5,
     Computes hash of a file using 'crypto' module
 
     >>> hash_infile('smri_ants_registration_settings.json')
-    '49b956387ed8d95a4eb44576fc5103b6'
+    'f225785dfb0db9032aa5a0e4f2c730ad'
 
     >>> hash_infile('surf01.vtk')
     'fdf1cf359b4e346034372cdeb58f9a88'
@@ -627,13 +628,13 @@ def load_json(filename):
 
 
 def loadcrash(infile, *args):
-    if '.pkl' in infile:
-        return loadpkl(infile)
+    if infile.endswith('pkl') or infile.endswith('pklz'):
+        return loadpkl(infile, versioning=True)
     else:
         raise ValueError('Only pickled crashfiles are supported')
 
 
-def loadpkl(infile):
+def loadpkl(infile, versioning=False):
     """Load a zipped or plain cPickled file
     """
     fmlogger.debug('Loading pkl: %s', infile)
@@ -642,11 +643,44 @@ def loadpkl(infile):
     else:
         pkl_file = open(infile, 'rb')
 
+    if versioning:
+        pkl_metadata = {}
+
+        # Look if pkl file contains version file
+        try:
+            pkl_metadata_line = pkl_file.readline()
+            pkl_metadata = json.loads(pkl_metadata_line)
+        except:
+            # Could not get version info
+            pkl_file.seek(0)
+
     try:
-        unpkl = pickle.load(pkl_file)
-    except UnicodeDecodeError:
-        unpkl = pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
-    return unpkl
+        try:
+            unpkl = pickle.load(pkl_file)
+        except UnicodeDecodeError:
+            unpkl = pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
+
+        return unpkl
+
+    # Unpickling problems
+    except Exception as e:
+        if not versioning:
+            raise e
+
+        from nipype import __version__ as version
+
+        if 'version' in pkl_metadata:
+            if pkl_metadata['version'] != version:
+                fmlogger.error('Your Nipype version is: %s',
+                               version)
+                fmlogger.error('Nipype version of the pkl is: %s',
+                               pkl_metadata['version'])
+        else:
+            fmlogger.error('No metadata was found in the pkl file.')
+            fmlogger.error('Make sure that you are using the same Nipype'
+                           'version from the generated pkl.')
+
+        raise e
 
 
 def crash2txt(filename, record):
@@ -681,11 +715,19 @@ def read_stream(stream, logger=None, encoding=None):
     return out.splitlines()
 
 
-def savepkl(filename, record):
+def savepkl(filename, record, versioning=False):
     if filename.endswith('pklz'):
         pkl_file = gzip.open(filename, 'wb')
     else:
         pkl_file = open(filename, 'wb')
+
+    if versioning:
+        from nipype import __version__ as version
+        metadata = json.dumps({'version': version})
+
+        pkl_file.write(metadata.encode('utf-8'))
+        pkl_file.write('\n'.encode('utf-8'))
+
     pickle.dump(record, pkl_file)
     pkl_file.close()
 
@@ -877,12 +919,18 @@ def canonicalize_env(env):
     if os.name != 'nt':
         return env
 
+    # convert unicode to string for python 2
+    if not PY3:
+        from future.utils import bytes_to_native_str
     out_env = {}
     for key, val in env.items():
         if not isinstance(key, bytes):
             key = key.encode('utf-8')
         if not isinstance(val, bytes):
             val = val.encode('utf-8')
+        if not PY3:
+            key = bytes_to_native_str(key)
+            val = bytes_to_native_str(val)
         out_env[key] = val
     return out_env
 

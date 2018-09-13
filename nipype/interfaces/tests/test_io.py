@@ -77,7 +77,6 @@ except CalledProcessError:
 have_pybids = True
 try:
     import bids
-    from bids import grabbids as gb
     filepath = os.path.realpath(os.path.dirname(bids.__file__))
     datadir = os.path.realpath(os.path.join(filepath, 'tests/data/'))
 except ImportError:
@@ -592,9 +591,9 @@ def test_bids_grabber(tmpdir):
     bg.inputs.base_dir = os.path.join(datadir, 'ds005')
     bg.inputs.subject = '01'
     results = bg.run()
-    assert os.path.basename(results.outputs.anat[0]) == 'sub-01_T1w.nii.gz'
-    assert os.path.basename(results.outputs.func[0]) == (
-        'sub-01_task-mixedgamblestask_run-01_bold.nii.gz')
+    assert 'sub-01_T1w.nii.gz' in map(os.path.basename, results.outputs.anat)
+    assert 'sub-01_task-mixedgamblestask_run-01_bold.nii.gz' in \
+        map(os.path.basename, results.outputs.func)
 
 
 @pytest.mark.skipif(not have_pybids,
@@ -610,7 +609,7 @@ def test_bids_fields(tmpdir):
     bg.inputs.subject = '01'
     bg.inputs.output_query['dwi'] = dict(modality='dwi')
     results = bg.run()
-    assert os.path.basename(results.outputs.dwi[0]) == 'sub-01_dwi.nii.gz'
+    assert 'sub-01_dwi.nii.gz' in map(os.path.basename, results.outputs.dwi)
 
 
 @pytest.mark.skipif(not have_pybids,

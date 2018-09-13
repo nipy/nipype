@@ -4,12 +4,7 @@ from ..mesh import TVTKBaseInterface
 
 
 def test_TVTKBaseInterface_inputs():
-    input_map = dict(
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ), )
+    input_map = dict()
     inputs = TVTKBaseInterface.input_spec()
 
     for key, metadata in list(input_map.items()):

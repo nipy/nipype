@@ -10,11 +10,6 @@ def test_TCorrelate_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         num_threads=dict(
             nohash=True,
             usedefault=True,
@@ -27,10 +22,6 @@ def test_TCorrelate_inputs():
         outputtype=dict(),
         pearson=dict(argstr='-pearson', ),
         polort=dict(argstr='-polort %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         xset=dict(
             argstr='%s',
             copyfile=False,

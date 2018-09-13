@@ -11,11 +11,6 @@ def test_SegmentCC_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-aseg %s',
             mandatory=True,
@@ -39,10 +34,6 @@ def test_SegmentCC_inputs():
             usedefault=True,
         ),
         subjects_dir=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = SegmentCC.input_spec()
 

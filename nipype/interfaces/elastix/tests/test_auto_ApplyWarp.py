@@ -10,11 +10,6 @@ def test_ApplyWarp_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         moving_image=dict(
             argstr='-in %s',
             mandatory=True,
@@ -28,10 +23,6 @@ def test_ApplyWarp_inputs():
             argstr='-out %s',
             mandatory=True,
             usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         transform_file=dict(
             argstr='-tp %s',

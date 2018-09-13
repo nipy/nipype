@@ -15,11 +15,6 @@ def test_ECM_inputs():
         eps=dict(argstr='-eps %f', ),
         fecm=dict(argstr='-fecm', ),
         full=dict(argstr='-full', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             copyfile=False,
@@ -43,10 +38,6 @@ def test_ECM_inputs():
         scale=dict(argstr='-scale %f', ),
         shift=dict(argstr='-shift %f', ),
         sparsity=dict(argstr='-sparsity %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         thresh=dict(argstr='-thresh %f', ),
     )
     inputs = ECM.input_spec()

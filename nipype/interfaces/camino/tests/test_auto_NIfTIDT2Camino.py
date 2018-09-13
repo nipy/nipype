@@ -11,11 +11,6 @@ def test_NIfTIDT2Camino_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-inputfile %s',
             mandatory=True,
@@ -30,10 +25,6 @@ def test_NIfTIDT2Camino_inputs():
         s0_file=dict(argstr='-s0 %s', ),
         scaleinter=dict(argstr='-scaleinter %s', ),
         scaleslope=dict(argstr='-scaleslope %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         uppertriangular=dict(argstr='-uppertriangular %s', ),
     )
     inputs = NIfTIDT2Camino.input_spec()

@@ -26,11 +26,6 @@ def test_TrackBedpostxDeter_inputs():
             usedefault=True,
         ),
         gzip=dict(argstr='-gzip', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-inputfile %s',
             position=1,
@@ -71,10 +66,6 @@ def test_TrackBedpostxDeter_inputs():
         stepsize=dict(
             argstr='-stepsize %f',
             requires=['tracker'],
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         tracker=dict(
             argstr='-tracker %s',

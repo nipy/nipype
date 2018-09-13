@@ -10,11 +10,6 @@ def test_C3d_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -42,10 +37,6 @@ def test_C3d_inputs():
         scale=dict(argstr='-scale %s', ),
         shift=dict(argstr='-shift %s', ),
         smooth=dict(argstr='-smooth %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = C3d.input_spec()
 

@@ -20,11 +20,6 @@ def test_OneSampleTTestDesign_inputs():
             xor=['global_calc_mean', 'global_calc_omit'],
         ),
         global_normalization=dict(field='globalm.glonorm', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(
             field='des.t1.scans',
             mandatory=True,

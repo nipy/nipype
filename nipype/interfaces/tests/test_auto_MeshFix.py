@@ -35,11 +35,6 @@ def test_MeshFix_inputs():
             argstr='%d',
             requires=['finetuning_distance'],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file1=dict(
             argstr='%s',
             mandatory=True,
@@ -79,10 +74,6 @@ def test_MeshFix_inputs():
             xor=['save_as_stl', 'save_as_freesurfer_mesh'],
         ),
         set_intersections_to_one=dict(argstr='--intersect', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         uniform_remeshing_steps=dict(
             argstr='-u %d',
             requires=['uniform_remeshing_vertices'],

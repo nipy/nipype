@@ -15,7 +15,7 @@ from .base import (FSCommand, FSTraitedSpec, FSCommandOpenMP,
                    FSTraitedSpecOpenMP)
 
 __docformat__ = 'restructuredtext'
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 class RobustTemplateInputSpec(FSTraitedSpecOpenMP):

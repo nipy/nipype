@@ -11,11 +11,6 @@ def test_MS_LDA_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         images=dict(
             argstr='%s',
             copyfile=False,
@@ -31,10 +26,6 @@ def test_MS_LDA_inputs():
         mask_file=dict(argstr='-mask %s', ),
         shift=dict(argstr='-shift %d', ),
         subjects_dir=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         use_weights=dict(argstr='-W', ),
         vol_synth_file=dict(
             argstr='-synth %s',

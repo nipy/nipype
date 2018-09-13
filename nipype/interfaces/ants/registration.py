@@ -70,8 +70,7 @@ class ANTSInputSpec(ANTSCommandInputSpec):
         traits.Int(),
         requires=['metric'],
         mandatory=True,
-        desc='radius of the region (i.e. number of layers'
-        ' around a voxel point)'
+        desc='radius of the region (i.e. number of layers around a voxel/pixel)'
         ' that is used for computing cross correlation')
 
     output_transform_prefix = Str(
@@ -126,8 +125,8 @@ class ANTSOutputSpec(TraitedSpec):
 
 
 class ANTS(ANTSCommand):
-    """
-
+    """ANTS wrapper for registration of images
+    (old, use Registration instead)
 
     Examples
     --------
@@ -557,7 +556,8 @@ class RegistrationOutputSpec(TraitedSpec):
 
 
 class Registration(ANTSCommand):
-    """
+    """ANTs Registration command for registration of images
+
     `antsRegistration <http://stnava.github.io/ANTs/>`_ registers a ``moving_image`` to a ``fixed_image``,
     using a predefined (sequence of) cost function(s) and transformation operations.
     The cost function is defined using one or more 'metrics', specifically
@@ -601,12 +601,12 @@ class Registration(ANTSCommand):
     Examples
     --------
 
-    Set up a Registation node with some default settings. This Node registers
+    Set up a Registration node with some default settings. This Node registers
     'fixed1.nii' to 'moving1.nii' by first fitting a linear 'Affine' transformation, and
     then a non-linear 'SyN' transformation, both using the Mutual Information-cost
     metric.
 
-    The registration is initailized by first applying the (linear) transform
+    The registration is initialized by first applying the (linear) transform
     trans.mat.
 
     >>> import copy, pprint

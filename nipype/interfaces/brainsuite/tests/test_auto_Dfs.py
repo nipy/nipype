@@ -14,11 +14,6 @@ def test_Dfs_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputShadingVolume=dict(argstr='-c %s', ),
         inputVolumeFile=dict(
             argstr='-i %s',
@@ -48,10 +43,6 @@ def test_Dfs_inputs():
             position=-1,
             requires=['tessellationThreshold'],
             xor=('nonZeroTessellation', 'specialTessellation'),
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         tessellationThreshold=dict(argstr='%f', ),
         timer=dict(argstr='--timer', ),

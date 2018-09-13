@@ -237,16 +237,23 @@ Debug configuration
 
 To enable debug mode, one can insert the following lines::
 
-  from nipype import config, logging
+  from nipype import config
   config.enable_debug_mode()
-  logging.update_logging(config)
 
 In this mode the following variables are set::
 
   config.set('execution', 'stop_on_first_crash', 'true')
   config.set('execution', 'remove_unnecessary_outputs', 'false')
+  config.set('execution', 'keep_inputs', 'true')
   config.set('logging', 'workflow_level', 'DEBUG')
   config.set('logging', 'interface_level', 'DEBUG')
+  config.set('logging', 'utils_level', 'DEBUG')
 
+The primary loggers (``workflow``, ``interface`` and ``utils``) are also reset
+to level ``DEBUG``.
+You may wish to adjust these manually using::
+
+  from nipype import logging
+  logging.getLogger(<logger>).setLevel(<level>)
 
 .. include:: ../links_names.txt

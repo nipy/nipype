@@ -17,11 +17,6 @@ def test_Unifize_inputs():
             xor=['gm'],
         ),
         gm=dict(argstr='-GM', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-input %s',
             copyfile=False,
@@ -44,10 +39,6 @@ def test_Unifize_inputs():
         scale_file=dict(argstr='-ssave %s', ),
         t2=dict(argstr='-T2', ),
         t2_up=dict(argstr='-T2up %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         urad=dict(argstr='-Urad %s', ),
     )
     inputs = Unifize.input_spec()

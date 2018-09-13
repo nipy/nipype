@@ -11,7 +11,7 @@ from ... import logging
 from ...utils.filemanip import split_filename
 from ..base import (CommandLineInputSpec, CommandLine, BaseInterface, traits,
                     File, TraitedSpec, isdefined)
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 class DWI2SphericalHarmonicsImageInputSpec(CommandLineInputSpec):

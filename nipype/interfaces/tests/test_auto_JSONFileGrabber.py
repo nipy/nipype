@@ -6,11 +6,6 @@ from ..io import JSONFileGrabber
 def test_JSONFileGrabber_inputs():
     input_map = dict(
         defaults=dict(),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(),
     )
     inputs = JSONFileGrabber.input_spec()

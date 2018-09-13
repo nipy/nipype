@@ -10,11 +10,6 @@ def test_GenerateEdgeMapImage_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputMRVolumes=dict(argstr='--inputMRVolumes %s...', ),
         inputMask=dict(argstr='--inputMask %s', ),
         lowerPercentileMatching=dict(argstr='--lowerPercentileMatching %f', ),
@@ -28,10 +23,6 @@ def test_GenerateEdgeMapImage_inputs():
         outputMaximumGradientImage=dict(
             argstr='--outputMaximumGradientImage %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         upperPercentileMatching=dict(argstr='--upperPercentileMatching %f', ),
     )

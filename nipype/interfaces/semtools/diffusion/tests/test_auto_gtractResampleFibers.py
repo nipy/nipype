@@ -10,11 +10,6 @@ def test_gtractResampleFibers_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputForwardDeformationFieldVolume=dict(
             argstr='--inputForwardDeformationFieldVolume %s', ),
         inputReverseDeformationFieldVolume=dict(
@@ -24,10 +19,6 @@ def test_gtractResampleFibers_inputs():
         outputTract=dict(
             argstr='--outputTract %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         writeXMLPolyDataFile=dict(argstr='--writeXMLPolyDataFile ', ),
     )

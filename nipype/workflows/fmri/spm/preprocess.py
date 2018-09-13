@@ -11,7 +11,7 @@ from ....pipeline import engine as pe
 from ...smri.freesurfer.utils import create_getmask_flow
 
 from .... import logging
-logger = logging.getLogger('workflow')
+logger = logging.getLogger('nipype.workflow')
 
 
 def create_spm_preproc(name='preproc'):

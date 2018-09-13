@@ -52,7 +52,7 @@ except ImportError:
     from funcsigs import signature
 
 standard_library.install_aliases()
-logger = logging.getLogger('workflow')
+logger = logging.getLogger('nipype.workflow')
 PY3 = sys.version_info[0] > 2
 
 try:
@@ -233,15 +233,78 @@ def write_report(node, report_type=None, is_mapnode=False):
     return
 
 
+def _identify_collapses(hastraits):
+    """ Identify traits that will collapse when being set to themselves.
+
+    ``OutputMultiObject``s automatically unwrap a list of length 1 to directly
+    reference the element of that list.
+    If that element is itself a list of length 1, then the following will
+    result in modified values.
+
+        hastraits.trait_set(**hastraits.trait_get())
+
+    Cloning performs this operation on a copy of the original traited object,
+    allowing us to identify traits that will be affected.
+    """
+    raw = hastraits.trait_get()
+    cloned = hastraits.clone_traits().trait_get()
+
+    collapsed = set()
+    for key in cloned:
+        orig = raw[key]
+        new = cloned[key]
+        # Allow numpy to handle the equality checks, as mixed lists and arrays
+        # can be problematic.
+        if isinstance(orig, list) and len(orig) == 1 and (
+                not np.array_equal(orig, new) and np.array_equal(orig[0], new)):
+            collapsed.add(key)
+
+    return collapsed
+
+
+def _uncollapse(indexable, collapsed):
+    """ Wrap collapsible values in a list to prevent double-collapsing.
+
+    Should be used with _identify_collapses to provide the following
+    idempotent operation:
+
+        collapsed = _identify_collapses(hastraits)
+        hastraits.trait_set(**_uncollapse(hastraits.trait_get(), collapsed))
+
+    NOTE: Modifies object in-place, in addition to returning it.
+    """
+
+    for key in indexable:
+        if key in collapsed:
+            indexable[key] = [indexable[key]]
+    return indexable
+
+
+def _protect_collapses(hastraits):
+    """ A collapse-protected replacement for hastraits.trait_get()
+
+    May be used as follows to provide an idempotent trait_set:
+
+        hastraits.trait_set(**_protect_collapses(hastraits))
+    """
+    collapsed = _identify_collapses(hastraits)
+    return _uncollapse(hastraits.trait_get(), collapsed)
+
+
 def save_resultfile(result, cwd, name):
     """Save a result pklz file to ``cwd``"""
     resultsfile = os.path.join(cwd, 'result_%s.pklz' % name)
     if result.outputs:
         try:
-            outputs = result.outputs.trait_get()
+            collapsed = _identify_collapses(result.outputs)
+            outputs = _uncollapse(result.outputs.trait_get(), collapsed)
+            # Double-protect tosave so that the original, uncollapsed trait
+            # is saved in the pickle file. Thus, when the loading process
+            # collapses, the original correct value is loaded.
+            tosave = _uncollapse(outputs.copy(), collapsed)
         except AttributeError:
-            outputs = result.outputs.dictcopy()  # outputs was a bunch
-        result.outputs.set(**modify_paths(outputs, relative=True, basedir=cwd))
+            tosave = outputs = result.outputs.dictcopy()  # outputs was a bunch
+        result.outputs.set(**modify_paths(tosave, relative=True, basedir=cwd))
 
     savepkl(resultsfile, result)
     logger.debug('saved results in %s', resultsfile)
@@ -293,7 +356,7 @@ def load_resultfile(path, name):
         else:
             if result.outputs:
                 try:
-                    outputs = result.outputs.trait_get()
+                    outputs = _protect_collapses(result.outputs)
                 except AttributeError:
                     outputs = result.outputs.dictcopy()  # outputs == Bunch
                 try:
@@ -507,7 +570,7 @@ def _write_detailed_dot(graph, dotfilename):
     # write nodes
     edges = []
     for n in nx.topological_sort(graph):
-        nodename = str(n)
+        nodename = n.itername
         inports = []
         for u, v, d in graph.in_edges(nbunch=n, data=True):
             for cd in d['connect']:
@@ -519,8 +582,8 @@ def _write_detailed_dot(graph, dotfilename):
                 ipstrip = 'in%s' % _replacefunk(inport)
                 opstrip = 'out%s' % _replacefunk(outport)
                 edges.append(
-                    '%s:%s:e -> %s:%s:w;' % (str(u).replace('.', ''), opstrip,
-                                             str(v).replace('.', ''), ipstrip))
+                    '%s:%s:e -> %s:%s:w;' % (u.itername.replace('.', ''), opstrip,
+                                             v.itername.replace('.', ''), ipstrip))
                 if inport not in inports:
                     inports.append(inport)
         inputstr = ['{IN'] + [
@@ -1054,12 +1117,14 @@ def generate_expanded_graph(graph_in):
                 for src_id in list(old_edge_dict.keys()):
                     # Drop the original JoinNodes; only concerned with
                     # generated Nodes
-                    if hasattr(node, 'joinfield'):
+                    if hasattr(node, 'joinfield') and node.itername == src_id:
                         continue
                     # Patterns:
                     #   - src_id : Non-iterable node
-                    #   - src_id.[a-z]\d+ : IdentityInterface w/ iterables
-                    #   - src_id.[a-z]I.[a-z]\d+ : Non-IdentityInterface w/ iterables
+                    #   - src_id.[a-z]\d+ :
+                    #       IdentityInterface w/ iterables or nested JoinNode
+                    #   - src_id.[a-z]I.[a-z]\d+ :
+                    #       Non-IdentityInterface w/ iterables
                     #   - src_idJ\d+ : JoinNode(IdentityInterface)
                     if re.match(src_id + r'((\.[a-z](I\.[a-z])?|J)\d+)?$',
                                 node.itername):

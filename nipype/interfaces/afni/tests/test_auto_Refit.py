@@ -16,11 +16,6 @@ def test_Refit_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             copyfile=True,
@@ -30,10 +25,6 @@ def test_Refit_inputs():
         nosaveatr=dict(argstr='-nosaveatr', ),
         saveatr=dict(argstr='-saveatr', ),
         space=dict(argstr='-space %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         xdel=dict(argstr='-xdel %f', ),
         xorigin=dict(argstr='-xorigin %s', ),
         xyzscale=dict(argstr='-xyzscale %f', ),

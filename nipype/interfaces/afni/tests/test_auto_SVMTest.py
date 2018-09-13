@@ -11,11 +11,6 @@ def test_SVMTest_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-testvol %s',
             mandatory=True,
@@ -37,10 +32,6 @@ def test_SVMTest_inputs():
             name_template='%s_predictions',
         ),
         outputtype=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         testlabels=dict(argstr='-testlabels %s', ),
     )
     inputs = SVMTest.input_spec()

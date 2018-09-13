@@ -14,11 +14,6 @@ def test_InvWarp_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inverse_warp=dict(
             argstr='--out=%s',
             hash_files=False,
@@ -38,10 +33,6 @@ def test_InvWarp_inputs():
         relative=dict(
             argstr='--rel',
             xor=['absolute'],
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         warp=dict(
             argstr='--warp=%s',

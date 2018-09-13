@@ -5,11 +5,6 @@ from ..convert import MergeCNetworks
 
 def test_MergeCNetworks_inputs():
     input_map = dict(
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(mandatory=True, ),
         out_file=dict(usedefault=True, ),
     )

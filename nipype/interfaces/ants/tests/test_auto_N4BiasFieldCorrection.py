@@ -22,11 +22,6 @@ def test_N4BiasFieldCorrection_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         input_image=dict(
             argstr='--input-image %s',
             mandatory=True,
@@ -48,10 +43,6 @@ def test_N4BiasFieldCorrection_inputs():
             xor=['bias_image'],
         ),
         shrink_factor=dict(argstr='--shrink-factor %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         weight_image=dict(argstr='--weight-image %s', ),
     )
     inputs = N4BiasFieldCorrection.input_spec()

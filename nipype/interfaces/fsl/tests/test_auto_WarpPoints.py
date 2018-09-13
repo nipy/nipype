@@ -22,11 +22,6 @@ def test_WarpPoints_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_coords=dict(
             argstr='%s',
             mandatory=True,
@@ -40,10 +35,6 @@ def test_WarpPoints_inputs():
         src_file=dict(
             argstr='-src %s',
             mandatory=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         warp_file=dict(
             argstr='-warp %s',

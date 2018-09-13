@@ -20,11 +20,6 @@ def test_Tkregister2_inputs():
             argstr='--fstarg',
             xor=['target_image'],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         invert_lta_in=dict(requires=['lta_in'], ),
         invert_lta_out=dict(
             argstr='--ltaout-inv',
@@ -52,10 +47,6 @@ def test_Tkregister2_inputs():
         target_image=dict(
             argstr='--targ %s',
             xor=['fstarg'],
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         xfm=dict(argstr='--xfm %s', ),
     )

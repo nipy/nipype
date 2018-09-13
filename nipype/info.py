@@ -11,7 +11,7 @@ import sys
 # full release.  '.dev' as a version_extra string means this is a development
 # version
 # Remove -dev for release
-__version__ = '1.0.4-dev'
+__version__ = '1.1.3-dev'
 
 
 def get_nipype_gitversion():
@@ -71,18 +71,18 @@ long_description = """========================================================
 NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 ========================================================
 
-Current neuroimaging software offer users an incredible opportunity to \
-analyze data using a variety of different algorithms. However, this has \
-resulted in a heterogeneous collection of specialized applications \
+Current neuroimaging software offer users an incredible opportunity to
+analyze data using a variety of different algorithms. However, this has
+resulted in a heterogeneous collection of specialized applications
 without transparent interoperability or a uniform operating interface.
 
-*Nipype*, an open-source, community-developed initiative under the \
-umbrella of NiPy_, is a Python project that provides a uniform interface \
-to existing neuroimaging software and facilitates interaction between \
-these packages within a single workflow. Nipype provides an environment \
-that encourages interactive exploration of algorithms from different \
-packages (e.g., AFNI, ANTS, BRAINS, BrainSuite, Camino, FreeSurfer, FSL, MNE, \
-MRtrix, MNE, Nipy, Slicer, SPM), eases the design of workflows within and \
+*Nipype*, an open-source, community-developed initiative under the
+umbrella of `NiPy <http://nipy.org>`_, is a Python project that provides a
+uniform interface to existing neuroimaging software and facilitates interaction
+between these packages within a single workflow. Nipype provides an environment
+that encourages interactive exploration of algorithms from different
+packages (e.g., AFNI, ANTS, BRAINS, BrainSuite, Camino, FreeSurfer, FSL, MNE,
+MRtrix, MNE, Nipy, Slicer, SPM), eases the design of workflows within and
 between packages, and reduces the learning curve necessary to use different \
 packages. Nipype is creating a collaborative platform for neuroimaging \
 software development in a high-level language and addressing limitations of \
@@ -143,16 +143,18 @@ REQUIRES = [
     'click>=%s' % CLICK_MIN_VERSION,
     'funcsigs',
     'pytest>=%s' % PYTEST_MIN_VERSION,
+    'pytest-xdist',
     'mock',
     'pydotplus',
     'pydot>=%s' % PYDOT_MIN_VERSION,
     'packaging',
+    'futures; python_version == "2.7"',
 ]
 
 if sys.version_info <= (3, 4):
     REQUIRES.append('configparser')
 
-TESTS_REQUIRES = ['pytest-cov', 'codecov', 'pytest-xdist', 'pytest-env']
+TESTS_REQUIRES = ['pytest-cov', 'codecov', 'pytest-env']
 
 EXTRA_REQUIRES = {
     'doc': ['Sphinx>=1.4', 'numpydoc', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],

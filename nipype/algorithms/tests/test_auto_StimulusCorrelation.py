@@ -6,11 +6,6 @@ from ..rapidart import StimulusCorrelation
 def test_StimulusCorrelation_inputs():
     input_map = dict(
         concatenated_design=dict(mandatory=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         intensity_values=dict(mandatory=True, ),
         realignment_parameters=dict(mandatory=True, ),
         spm_mat_file=dict(mandatory=True, ),

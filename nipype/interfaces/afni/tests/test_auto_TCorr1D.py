@@ -10,11 +10,6 @@ def test_TCorr1D_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         ktaub=dict(
             argstr=' -ktaub',
             position=1,
@@ -45,10 +40,6 @@ def test_TCorr1D_inputs():
             argstr=' -spearman',
             position=1,
             xor=['pearson', 'quadrant', 'ktaub'],
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         xset=dict(
             argstr=' %s',

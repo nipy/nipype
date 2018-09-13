@@ -5,11 +5,6 @@ from ..io import DataFinder
 
 def test_DataFinder_inputs():
     input_map = dict(
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         ignore_regexes=dict(),
         match_regex=dict(usedefault=True, ),
         max_depth=dict(),

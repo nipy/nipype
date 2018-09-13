@@ -23,11 +23,6 @@ def test_ConstrainedSphericalDeconvolution_inputs():
             argstr='-filter %s',
             position=-2,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -53,10 +48,6 @@ def test_ConstrainedSphericalDeconvolution_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         threshold_value=dict(argstr='-threshold %s', ),
     )

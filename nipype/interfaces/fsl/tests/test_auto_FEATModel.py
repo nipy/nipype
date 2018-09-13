@@ -22,16 +22,7 @@ def test_FEATModel_inputs():
             mandatory=True,
             position=0,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         output_type=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = FEATModel.input_spec()
 

@@ -10,11 +10,6 @@ def test_MRIsInflate_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             copyfile=True,
@@ -35,10 +30,6 @@ def test_MRIsInflate_inputs():
         ),
         out_sulc=dict(xor=['no_save_sulc'], ),
         subjects_dir=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = MRIsInflate.input_spec()
 

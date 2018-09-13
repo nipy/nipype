@@ -18,11 +18,6 @@ def test_ExtractROI_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -42,10 +37,6 @@ def test_ExtractROI_inputs():
         t_size=dict(
             argstr='%d',
             position=9,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         x_min=dict(
             argstr='%d',

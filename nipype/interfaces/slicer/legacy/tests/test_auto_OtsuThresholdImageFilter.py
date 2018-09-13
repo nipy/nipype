@@ -10,11 +10,6 @@ def test_OtsuThresholdImageFilter_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(
             argstr='%s',
             position=-2,
@@ -27,10 +22,6 @@ def test_OtsuThresholdImageFilter_inputs():
             position=-1,
         ),
         outsideValue=dict(argstr='--outsideValue %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = OtsuThresholdImageFilter.input_spec()
 

@@ -10,11 +10,6 @@ def test_MedicAlgorithmLesionToads_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inAtlas=dict(argstr='--inAtlas %s', ),
         inAtlas2=dict(argstr='--inAtlas2 %s', ),
         inAtlas3=dict(argstr='--inAtlas3 %s', ),
@@ -72,10 +67,6 @@ def test_MedicAlgorithmLesionToads_inputs():
         outWM=dict(
             argstr='--outWM %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         xDefaultMem=dict(argstr='-xDefaultMem %d', ),
         xMaxProcess=dict(

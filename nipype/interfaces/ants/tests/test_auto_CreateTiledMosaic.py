@@ -13,11 +13,6 @@ def test_CreateTiledMosaic_inputs():
             usedefault=True,
         ),
         flip_slice=dict(argstr='-f %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         input_image=dict(
             argstr='-i %s',
             mandatory=True,
@@ -38,10 +33,6 @@ def test_CreateTiledMosaic_inputs():
             mandatory=True,
         ),
         slices=dict(argstr='-s %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         tile_geometry=dict(argstr='-t %s', ),
     )
     inputs = CreateTiledMosaic.input_spec()

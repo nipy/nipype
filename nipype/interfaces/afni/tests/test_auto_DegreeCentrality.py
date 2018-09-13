@@ -12,11 +12,6 @@ def test_DegreeCentrality_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             copyfile=False,
@@ -37,10 +32,6 @@ def test_DegreeCentrality_inputs():
         outputtype=dict(),
         polort=dict(argstr='-polort %d', ),
         sparsity=dict(argstr='-sparsity %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         thresh=dict(argstr='-thresh %f', ),
     )
     inputs = DegreeCentrality.input_spec()

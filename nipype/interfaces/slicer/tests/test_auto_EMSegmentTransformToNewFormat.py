@@ -10,21 +10,12 @@ def test_EMSegmentTransformToNewFormat_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputMRMLFileName=dict(argstr='--inputMRMLFileName %s', ),
         outputMRMLFileName=dict(
             argstr='--outputMRMLFileName %s',
             hash_files=False,
         ),
         templateFlag=dict(argstr='--templateFlag ', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = EMSegmentTransformToNewFormat.input_spec()
 

@@ -14,11 +14,6 @@ def test_Trackvis2Camino_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-i %s',
             mandatory=True,
@@ -28,10 +23,6 @@ def test_Trackvis2Camino_inputs():
             argstr='-o %s',
             genfile=True,
             position=2,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = Trackvis2Camino.input_spec()

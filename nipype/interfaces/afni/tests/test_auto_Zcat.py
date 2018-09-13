@@ -15,11 +15,6 @@ def test_Zcat_inputs():
             argstr='-fscale',
             xor=['nscale'],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(
             argstr='%s',
             copyfile=False,
@@ -40,10 +35,6 @@ def test_Zcat_inputs():
             name_template='%s_zcat',
         ),
         outputtype=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         verb=dict(argstr='-verb', ),
     )
     inputs = Zcat.input_spec()

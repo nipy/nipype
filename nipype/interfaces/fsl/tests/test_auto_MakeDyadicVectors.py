@@ -10,11 +10,6 @@ def test_MakeDyadicVectors_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         mask=dict(
             argstr='%s',
             position=2,
@@ -34,10 +29,6 @@ def test_MakeDyadicVectors_inputs():
             argstr='%s',
             mandatory=True,
             position=1,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         theta_vol=dict(
             argstr='%s',

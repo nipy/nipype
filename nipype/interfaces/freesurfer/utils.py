@@ -43,7 +43,7 @@ filetypes = [
 ]
 implicit_filetypes = ['gii']
 
-logger = logging.getLogger('interface')
+logger = logging.getLogger('nipype.interface')
 
 
 def copy2subjdir(cls, in_file, folder=None, basename=None, subject_id=None):

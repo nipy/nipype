@@ -65,11 +65,6 @@ def test_Complex_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         imaginary_in_file=dict(
             argstr='%s',
             position=3,
@@ -146,10 +141,6 @@ def test_Complex_inputs():
         start_vol=dict(
             argstr='%d',
             position=-2,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = Complex.input_spec()

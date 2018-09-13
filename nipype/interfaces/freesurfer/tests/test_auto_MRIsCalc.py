@@ -15,11 +15,6 @@ def test_MRIsCalc_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file1=dict(
             argstr='%s',
             mandatory=True,
@@ -45,10 +40,6 @@ def test_MRIsCalc_inputs():
             mandatory=True,
         ),
         subjects_dir=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = MRIsCalc.input_spec()
 

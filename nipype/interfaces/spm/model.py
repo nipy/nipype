@@ -26,7 +26,7 @@ from .base import (SPMCommand, SPMCommandInputSpec, scans_for_fnames,
                    ImageFileSPM)
 
 __docformat__ = 'restructuredtext'
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 class Level1DesignInputSpec(SPMCommandInputSpec):

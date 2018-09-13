@@ -18,7 +18,7 @@ from ..base import (BaseInterface, LibraryBaseInterface,
                     BaseInterfaceInputSpec, traits, File,
                     TraitedSpec, Directory, isdefined)
 from .base import have_cmp
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 def create_annot_label(subject_id, subjects_dir, fs_dir, parcellation_name):

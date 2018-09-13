@@ -11,15 +11,6 @@ def test_fiberstats_inputs():
             usedefault=True,
         ),
         fiber_file=dict(argstr='--fiber_file %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         verbose=dict(argstr='--verbose ', ),
     )
     inputs = fiberstats.input_spec()

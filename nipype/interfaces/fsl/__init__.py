@@ -14,7 +14,7 @@ from .model import (Level1Design, FEAT, FEATModel, FILMGLS, FEATRegister,
                     FLAMEO, ContrastMgr, MultipleRegressDesign, L2Model, SMM,
                     MELODIC, SmoothEstimate, Cluster, Randomise, GLM)
 from .utils import (
-    AvScale, Smooth, Merge, ExtractROI, Split, ImageMaths, ImageMeants,
+    AvScale, Smooth, Slice, Merge, ExtractROI, Split, ImageMaths, ImageMeants,
     ImageStats, FilterRegressor, Overlay, Slicer, PlotTimeSeries,
     PlotMotionParams, ConvertXFM, SwapDimensions, PowerSpectrum, Reorient2Std,
     Complex, InvWarp, WarpUtils, ConvertWarp, WarpPoints, WarpPointsToStd,

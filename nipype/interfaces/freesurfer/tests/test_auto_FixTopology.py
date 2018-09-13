@@ -17,11 +17,6 @@ def test_FixTopology_inputs():
             mandatory=True,
             position=-1,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_brain=dict(mandatory=True, ),
         in_inflated=dict(mandatory=True, ),
         in_orig=dict(mandatory=True, ),
@@ -36,10 +31,6 @@ def test_FixTopology_inputs():
             usedefault=True,
         ),
         subjects_dir=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = FixTopology.input_spec()
 

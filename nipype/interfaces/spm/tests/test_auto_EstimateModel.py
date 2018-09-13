@@ -10,11 +10,6 @@ def test_EstimateModel_inputs():
             mandatory=True,
         ),
         flags=dict(),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         matlab_cmd=dict(),
         mfile=dict(usedefault=True, ),
         paths=dict(),

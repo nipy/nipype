@@ -16,11 +16,6 @@ def test_Label2Annot_inputs():
             argstr='--hemi %s',
             mandatory=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_labels=dict(
             argstr='--l %s...',
             mandatory=True,
@@ -37,10 +32,6 @@ def test_Label2Annot_inputs():
             usedefault=True,
         ),
         subjects_dir=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         verbose_off=dict(argstr='--noverbose', ),
     )
     inputs = Label2Annot.input_spec()

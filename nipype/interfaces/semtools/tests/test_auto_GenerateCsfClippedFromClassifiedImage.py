@@ -10,19 +10,10 @@ def test_GenerateCsfClippedFromClassifiedImage_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputCassifiedVolume=dict(argstr='--inputCassifiedVolume %s', ),
         outputVolume=dict(
             argstr='--outputVolume %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = GenerateCsfClippedFromClassifiedImage.input_spec()

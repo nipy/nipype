@@ -12,11 +12,6 @@ def test_fibertrack_inputs():
         ),
         forbidden_label=dict(argstr='--forbidden_label %d', ),
         force=dict(argstr='--force ', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         input_roi_file=dict(argstr='--input_roi_file %s', ),
         input_tensor_file=dict(argstr='--input_tensor_file %s', ),
         max_angle=dict(argstr='--max_angle %f', ),
@@ -29,10 +24,6 @@ def test_fibertrack_inputs():
         source_label=dict(argstr='--source_label %d', ),
         step_size=dict(argstr='--step_size %f', ),
         target_label=dict(argstr='--target_label %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         verbose=dict(argstr='--verbose ', ),
         whole_brain=dict(argstr='--whole_brain ', ),
     )

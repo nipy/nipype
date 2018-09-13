@@ -12,7 +12,7 @@ from ... import logging
 from ..base import (
     File, BaseInterface, BaseInterfaceInputSpec, TraitedSpec)
 
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 class ReportCapableInputSpec(BaseInterfaceInputSpec):

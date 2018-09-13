@@ -18,11 +18,6 @@ def test_Automask_inputs():
             usedefault=True,
         ),
         erode=dict(argstr='-erode %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             copyfile=False,
@@ -39,10 +34,6 @@ def test_Automask_inputs():
             name_template='%s_mask',
         ),
         outputtype=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = Automask.input_spec()
 

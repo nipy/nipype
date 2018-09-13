@@ -13,11 +13,6 @@ def test_MCFLIRT_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-in %s',
             mandatory=True,
@@ -42,10 +37,6 @@ def test_MCFLIRT_inputs():
         smooth=dict(argstr='-smooth %.2f', ),
         stages=dict(argstr='-stages %d', ),
         stats_imgs=dict(argstr='-stats', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         use_contour=dict(argstr='-edge', ),
         use_gradient=dict(argstr='-gdt', ),
     )

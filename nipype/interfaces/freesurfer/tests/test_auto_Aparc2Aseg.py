@@ -16,11 +16,6 @@ def test_Aparc2Aseg_inputs():
         ),
         filled=dict(),
         hypo_wm=dict(argstr='--hypo-as-wm', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         label_wm=dict(argstr='--labelwm', ),
         lh_annotation=dict(mandatory=True, ),
         lh_pial=dict(mandatory=True, ),
@@ -42,10 +37,6 @@ def test_Aparc2Aseg_inputs():
             usedefault=True,
         ),
         subjects_dir=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         volmask=dict(argstr='--volmask', ),
     )
     inputs = Aparc2Aseg.input_spec()

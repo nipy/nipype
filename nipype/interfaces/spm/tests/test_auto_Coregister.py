@@ -11,11 +11,6 @@ def test_Coregister_inputs():
         ),
         cost_function=dict(field='eoptions.cost_fun', ),
         fwhm=dict(field='eoptions.fwhm', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         jobtype=dict(usedefault=True, ),
         matlab_cmd=dict(),
         mfile=dict(usedefault=True, ),

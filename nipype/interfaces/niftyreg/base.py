@@ -26,7 +26,7 @@ from ... import logging
 from ..base import CommandLine, CommandLineInputSpec, traits, Undefined
 from ...utils.filemanip import split_filename
 
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 def get_custom_path(command, env_dir='NIFTYREGDIR'):

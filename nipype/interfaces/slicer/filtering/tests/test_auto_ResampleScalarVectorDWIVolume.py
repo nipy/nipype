@@ -21,11 +21,6 @@ def test_ResampleScalarVectorDWIVolume_inputs():
             usedefault=True,
         ),
         hfieldtype=dict(argstr='--hfieldtype %s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         image_center=dict(argstr='--image_center %s', ),
         inputVolume=dict(
             argstr='%s',
@@ -51,10 +46,6 @@ def test_ResampleScalarVectorDWIVolume_inputs():
             sep=',',
         ),
         spline_order=dict(argstr='--spline_order %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         transform=dict(argstr='--transform %s', ),
         transform_matrix=dict(
             argstr='--transform_matrix %s',

@@ -14,11 +14,6 @@ def test_Fourier_inputs():
             argstr='-highpass %f',
             mandatory=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             copyfile=False,
@@ -40,10 +35,6 @@ def test_Fourier_inputs():
         ),
         outputtype=dict(),
         retrend=dict(argstr='-retrend', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = Fourier.input_spec()
 

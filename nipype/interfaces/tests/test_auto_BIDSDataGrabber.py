@@ -9,6 +9,7 @@ def test_BIDSDataGrabber_inputs():
         output_query=dict(),
         raise_on_empty=dict(usedefault=True, ),
         return_type=dict(usedefault=True, ),
+        strict=dict(),
     )
     inputs = BIDSDataGrabber.input_spec()
 

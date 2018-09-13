@@ -17,11 +17,6 @@ def test_Segment_inputs():
         ),
         gaussians_per_class=dict(field='opts.ngaus', ),
         gm_output_type=dict(field='output.GM', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         mask_image=dict(field='opts.msk', ),
         matlab_cmd=dict(),
         mfile=dict(usedefault=True, ),

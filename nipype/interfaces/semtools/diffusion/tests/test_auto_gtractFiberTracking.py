@@ -16,11 +16,6 @@ def test_gtractFiberTracking_inputs():
         ),
         guidedCurvatureThreshold=dict(
             argstr='--guidedCurvatureThreshold %f', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputAnisotropyVolume=dict(argstr='--inputAnisotropyVolume %s', ),
         inputEndingSeedsLabelMapVolume=dict(
             argstr='--inputEndingSeedsLabelMapVolume %s', ),
@@ -43,10 +38,6 @@ def test_gtractFiberTracking_inputs():
         stepSize=dict(argstr='--stepSize %f', ),
         tendF=dict(argstr='--tendF %f', ),
         tendG=dict(argstr='--tendG %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         trackingMethod=dict(argstr='--trackingMethod %s', ),
         trackingThreshold=dict(argstr='--trackingThreshold %f', ),
         useLoopDetection=dict(argstr='--useLoopDetection ', ),

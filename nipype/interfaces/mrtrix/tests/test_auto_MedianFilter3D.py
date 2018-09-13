@@ -14,11 +14,6 @@ def test_MedianFilter3D_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -32,10 +27,6 @@ def test_MedianFilter3D_inputs():
         quiet=dict(
             argstr='-quiet',
             position=1,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = MedianFilter3D.input_spec()

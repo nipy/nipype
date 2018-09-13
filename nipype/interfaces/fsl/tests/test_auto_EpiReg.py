@@ -19,11 +19,6 @@ def test_EpiReg_inputs():
         fmap=dict(argstr='--fmap=%s', ),
         fmapmag=dict(argstr='--fmapmag=%s', ),
         fmapmagbrain=dict(argstr='--fmapmagbrain=%s', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         no_clean=dict(
             argstr='--noclean',
             usedefault=True,
@@ -46,10 +41,6 @@ def test_EpiReg_inputs():
             mandatory=True,
             position=-3,
         ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         weight_image=dict(argstr='--weight=%s', ),
         wmseg=dict(argstr='--wmseg=%s', ),
     )
@@ -70,6 +61,7 @@ def test_EpiReg_outputs():
         fullwarp=dict(),
         out_1vol=dict(),
         out_file=dict(),
+        seg=dict(),
         shiftmap=dict(),
         wmedge=dict(),
         wmseg=dict(),

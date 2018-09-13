@@ -15,7 +15,7 @@ def test_FSLXCommand_inputs():
             usedefault=True,
         ),
         burn_in_no_ard=dict(
-            argstr='--burninnoard=%d',
+            argstr='--burnin_noard=%d',
             usedefault=True,
         ),
         bvals=dict(
@@ -51,11 +51,6 @@ def test_FSLXCommand_inputs():
             usedefault=True,
         ),
         fudge=dict(argstr='--fudge=%d', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         logdir=dict(
             argstr='--logdir=%s',
             usedefault=True,
@@ -93,10 +88,6 @@ def test_FSLXCommand_inputs():
             usedefault=True,
         ),
         seed=dict(argstr='--seed=%d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         update_proposal_every=dict(
             argstr='--updateproposalevery=%d',
             usedefault=True,

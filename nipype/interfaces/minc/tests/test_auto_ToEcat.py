@@ -17,11 +17,6 @@ def test_ToEcat_inputs():
         ignore_ecat_main=dict(argstr='-ignore_ecat_main', ),
         ignore_ecat_subheader_variable=dict(
             argstr='-ignore_ecat_subheader_variable', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         ignore_patient_variable=dict(argstr='-ignore_patient_variable', ),
         ignore_study_variable=dict(argstr='-ignore_study_variable', ),
         input_file=dict(
@@ -38,10 +33,6 @@ def test_ToEcat_inputs():
             name_source=['input_file'],
             name_template='%s_to_ecat.v',
             position=-1,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         voxels_as_integers=dict(argstr='-label', ),
     )

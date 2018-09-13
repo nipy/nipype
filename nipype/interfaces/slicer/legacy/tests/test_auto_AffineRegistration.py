@@ -20,11 +20,6 @@ def test_AffineRegistration_inputs():
         ),
         fixedsmoothingfactor=dict(argstr='--fixedsmoothingfactor %d', ),
         histogrambins=dict(argstr='--histogrambins %d', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         initialtransform=dict(argstr='--initialtransform %s', ),
         iterations=dict(argstr='--iterations %d', ),
         movingsmoothingfactor=dict(argstr='--movingsmoothingfactor %d', ),
@@ -37,10 +32,6 @@ def test_AffineRegistration_inputs():
             hash_files=False,
         ),
         spatialsamples=dict(argstr='--spatialsamples %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         translationscale=dict(argstr='--translationscale %f', ),
     )
     inputs = AffineRegistration.input_spec()

@@ -20,11 +20,6 @@ def test_EMSegmentCommandLine_inputs():
             argstr='--generateEmptyMRMLSceneAndQuit %s',
             hash_files=False,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         intermediateResultsDirectory=dict(
             argstr='--intermediateResultsDirectory %s', ),
         keepTempFiles=dict(argstr='--keepTempFiles ', ),
@@ -49,10 +44,6 @@ def test_EMSegmentCommandLine_inputs():
         targetVolumeFileNames=dict(argstr='--targetVolumeFileNames %s...', ),
         taskPreProcessingSetting=dict(
             argstr='--taskPreProcessingSetting %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         verbose=dict(argstr='--verbose ', ),
     )
     inputs = EMSegmentCommandLine.input_spec()

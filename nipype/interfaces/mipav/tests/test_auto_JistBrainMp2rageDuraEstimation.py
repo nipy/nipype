@@ -10,11 +10,6 @@ def test_JistBrainMp2rageDuraEstimation_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inDistance=dict(argstr='--inDistance %f', ),
         inSecond=dict(argstr='--inSecond %s', ),
         inSkull=dict(argstr='--inSkull %s', ),
@@ -23,10 +18,6 @@ def test_JistBrainMp2rageDuraEstimation_inputs():
         outDura=dict(
             argstr='--outDura %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         xDefaultMem=dict(argstr='-xDefaultMem %d', ),
         xMaxProcess=dict(

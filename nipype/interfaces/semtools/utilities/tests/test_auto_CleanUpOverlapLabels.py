@@ -10,19 +10,10 @@ def test_CleanUpOverlapLabels_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputBinaryVolumes=dict(argstr='--inputBinaryVolumes %s...', ),
         outputBinaryVolumes=dict(
             argstr='--outputBinaryVolumes %s...',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = CleanUpOverlapLabels.input_spec()

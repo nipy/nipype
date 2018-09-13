@@ -106,26 +106,14 @@ class Dcm2nii(CommandLine):
     Examples
     ========
 
-    .. testsetup::
-
-    >>> tmp = getfixture('tmpdir')
-    >>> old = tmp.chdir() # changing to a temporary directory
-
-    .. doctest::
-
     >>> from nipype.interfaces.dcm2nii import Dcm2nii
     >>> converter = Dcm2nii()
-    >>> converter.inputs.source_names = [os.path.join(datadir, 'functional_1.dcm'), os.path.join(datadir, 'functional_2.dcm')]
+    >>> converter.inputs.source_names = ['functional_1.dcm', 'functional_2.dcm']
     >>> converter.inputs.gzip_output = True
     >>> converter.inputs.output_dir = '.'
-    >>> converter.cmdline #doctest: +ELLIPSIS
-    'dcm2nii -a y -c y -b config.ini -v y -d y -e y -g y -i n -n y -o . -p y -x n -f n ...functional_1.dcm'
-
-    .. testsetup::
-
-    >>> os.chdir(old.strpath)
-
-    """
+    >>> converter.cmdline  # doctest: +ELLIPSIS
+    'dcm2nii -a y -c y -b config.ini -v y -d y -e y -g y -i n -n y -o . -p y -x n -f n functional_1.dcm'
+"""
 
     input_spec = Dcm2niiInputSpec
     output_spec = Dcm2niiOutputSpec
@@ -264,7 +252,7 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
         position=-1,
         copyfile=False,
         mandatory=True,
-        desc=('A set of filenames to be converted. Note that the current ' 
+        desc=('A set of filenames to be converted. Note that the current '
               'version (1.0.20180328) of dcm2niix converts any files in the '
               'directory. To only convert specific files they should be in an '
               'isolated directory'),

@@ -18,11 +18,6 @@ def test_WarpPointsFromStd_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         img_file=dict(
             argstr='-img %s',
             mandatory=True,
@@ -35,10 +30,6 @@ def test_WarpPointsFromStd_inputs():
         std_file=dict(
             argstr='-std %s',
             mandatory=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         warp_file=dict(
             argstr='-warp %s',

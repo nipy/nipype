@@ -10,11 +10,6 @@ def test_BRAINSResize_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(argstr='--inputVolume %s', ),
         outputVolume=dict(
             argstr='--outputVolume %s',
@@ -22,10 +17,6 @@ def test_BRAINSResize_inputs():
         ),
         pixelType=dict(argstr='--pixelType %s', ),
         scaleFactor=dict(argstr='--scaleFactor %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = BRAINSResize.input_spec()
 

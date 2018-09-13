@@ -10,11 +10,6 @@ def test_Smooth_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='--i %s',
             mandatory=True,
@@ -46,10 +41,6 @@ def test_Smooth_inputs():
             mandatory=True,
             requires=['reg_file'],
             xor=['num_iters'],
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         vol_fwhm=dict(argstr='--vol-fwhm %f', ),
     )

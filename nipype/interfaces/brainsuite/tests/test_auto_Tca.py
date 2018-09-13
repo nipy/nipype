@@ -14,11 +14,6 @@ def test_Tca_inputs():
             argstr='--delta %d',
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputMaskFile=dict(
             argstr='-i %s',
             mandatory=True,
@@ -31,10 +26,6 @@ def test_Tca_inputs():
         outputMaskFile=dict(
             argstr='-o %s',
             genfile=True,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         timer=dict(argstr='--timer', ),
         verbosity=dict(argstr='-v %d', ),

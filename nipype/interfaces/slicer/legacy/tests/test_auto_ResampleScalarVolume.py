@@ -19,19 +19,10 @@ def test_ResampleScalarVolume_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         interpolation=dict(argstr='--interpolation %s', ),
         spacing=dict(
             argstr='--spacing %s',
             sep=',',
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = ResampleScalarVolume.input_spec()

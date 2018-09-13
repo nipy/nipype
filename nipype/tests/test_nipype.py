@@ -12,7 +12,7 @@ def test_nipype_info():
     assert exception_not_raised
 
 
-@pytest.mark.skipif(not get_nipype_gitversion(), 
+@pytest.mark.skipif(not get_nipype_gitversion(),
                     reason="not able to get version from get_nipype_gitversion")
 def test_git_hash():
     # removing the first "g" from gitversion

@@ -15,11 +15,6 @@ def test_Shredder_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='< %s',
             mandatory=True,
@@ -39,10 +34,6 @@ def test_Shredder_inputs():
             argstr='%d',
             position=3,
             units='NA',
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = Shredder.input_spec()

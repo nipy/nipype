@@ -27,11 +27,6 @@ def test_FUGUE_inputs():
             argstr='--icorronly',
             requires=['unwarped_file'],
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(argstr='--in=%s', ),
         mask_file=dict(argstr='--mask=%s', ),
         median_2dfilter=dict(argstr='--median', ),
@@ -57,10 +52,6 @@ def test_FUGUE_inputs():
         shift_out_file=dict(argstr='--saveshift=%s', ),
         smooth2d=dict(argstr='--smooth2=%.2f', ),
         smooth3d=dict(argstr='--smooth3=%.2f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         unwarp_direction=dict(argstr='--unwarpdir=%s', ),
         unwarped_file=dict(
             argstr='--unwarp=%s',

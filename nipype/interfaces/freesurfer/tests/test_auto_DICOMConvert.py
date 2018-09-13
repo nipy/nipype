@@ -14,21 +14,12 @@ def test_DICOMConvert_inputs():
             usedefault=True,
         ),
         file_mapping=dict(),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         ignore_single_slice=dict(requires=['dicom_info'], ),
         out_type=dict(usedefault=True, ),
         seq_list=dict(requires=['dicom_info'], ),
         subject_dir_template=dict(usedefault=True, ),
         subject_id=dict(),
         subjects_dir=dict(),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = DICOMConvert.input_spec()
 

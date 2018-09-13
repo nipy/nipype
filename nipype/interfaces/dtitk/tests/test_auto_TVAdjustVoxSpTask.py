@@ -10,11 +10,6 @@ def test_TVAdjustVoxSpTask_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='-in %s',
             mandatory=True,
@@ -32,10 +27,6 @@ def test_TVAdjustVoxSpTask_inputs():
         target_file=dict(
             argstr='-target %s',
             xor=['voxel_size', 'origin'],
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         voxel_size=dict(
             argstr='-vsize %g %g %g',

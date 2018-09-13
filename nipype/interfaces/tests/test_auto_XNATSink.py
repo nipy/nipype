@@ -13,11 +13,6 @@ def test_XNATSink_inputs():
             xor=['server'],
         ),
         experiment_id=dict(mandatory=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         project_id=dict(mandatory=True, ),
         pwd=dict(),
         reconstruction_id=dict(xor=['assessor_id'], ),

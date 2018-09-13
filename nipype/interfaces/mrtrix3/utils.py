@@ -503,7 +503,7 @@ class DWIExtractInputSpec(MRTrix3BaseInputSpec):
     out_file = File(
         argstr='%s', mandatory=True, position=-1, desc='output image')
     bzero = traits.Bool(argstr='-bzero', desc='extract b=0 volumes')
-    nobzero = traits.Bool(argstr='-nobzero', desc='extract non b=0 volumes')
+    nobzero = traits.Bool(argstr='-no_bzero', desc='extract non b=0 volumes')
     singleshell = traits.Bool(
         argstr='-singleshell', desc='extract volumes with a specific shell')
     shell = traits.List(

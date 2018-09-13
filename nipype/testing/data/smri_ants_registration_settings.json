@@ -77,7 +77,6 @@
         ]
     ],
     "interpolation": "Linear",
-    "ignore_exception": false,
     "use_estimate_learning_rate_once": [
         true,
         true,

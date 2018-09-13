@@ -10,11 +10,6 @@ def test_JistLaminarProfileGeometry_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inProfile=dict(argstr='--inProfile %s', ),
         incomputed=dict(argstr='--incomputed %s', ),
         inoutside=dict(argstr='--inoutside %f', ),
@@ -24,10 +19,6 @@ def test_JistLaminarProfileGeometry_inputs():
         outResult=dict(
             argstr='--outResult %s',
             hash_files=False,
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
         xDefaultMem=dict(argstr='-xDefaultMem %d', ),
         xMaxProcess=dict(

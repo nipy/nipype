@@ -10,11 +10,6 @@ def test_GenerateTestImage_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(argstr='--inputVolume %s', ),
         lowerBoundOfOutputVolume=dict(
             argstr='--lowerBoundOfOutputVolume %f', ),
@@ -23,10 +18,6 @@ def test_GenerateTestImage_inputs():
             hash_files=False,
         ),
         outputVolumeSize=dict(argstr='--outputVolumeSize %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         upperBoundOfOutputVolume=dict(
             argstr='--upperBoundOfOutputVolume %f', ),
     )

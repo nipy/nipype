@@ -37,11 +37,6 @@ def test_Deconvolve_inputs():
             position=-2,
         ),
         goforit=dict(argstr='-GOFORIT %i', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_files=dict(
             argstr='-input %s',
             copyfile=False,
@@ -95,10 +90,6 @@ def test_Deconvolve_inputs():
         ),
         stim_times_subtract=dict(argstr='-stim_times_subtract %f', ),
         svd=dict(argstr='-svd', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         tout=dict(argstr='-tout', ),
         trans=dict(
             argstr='-trans',

@@ -11,11 +11,6 @@ def test_gtractCostFastMarching_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputAnisotropyVolume=dict(argstr='--inputAnisotropyVolume %s', ),
         inputStartingSeedsLabelMapVolume=dict(
             argstr='--inputStartingSeedsLabelMapVolume %s', ),
@@ -32,10 +27,6 @@ def test_gtractCostFastMarching_inputs():
         seedThreshold=dict(argstr='--seedThreshold %f', ),
         startingSeedsLabel=dict(argstr='--startingSeedsLabel %d', ),
         stoppingValue=dict(argstr='--stoppingValue %f', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = gtractCostFastMarching.input_spec()
 

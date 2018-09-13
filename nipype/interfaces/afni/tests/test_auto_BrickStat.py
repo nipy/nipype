@@ -10,11 +10,6 @@ def test_BrickStat_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
@@ -33,10 +28,6 @@ def test_BrickStat_inputs():
         percentile=dict(argstr='-percentile %.3f %.3f %.3f', ),
         slow=dict(argstr='-slow', ),
         sum=dict(argstr='-sum', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         var=dict(argstr='-var', ),
     )
     inputs = BrickStat.input_spec()

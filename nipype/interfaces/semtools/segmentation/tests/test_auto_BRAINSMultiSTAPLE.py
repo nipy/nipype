@@ -10,11 +10,6 @@ def test_BRAINSMultiSTAPLE_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputCompositeT1Volume=dict(argstr='--inputCompositeT1Volume %s', ),
         inputLabelVolume=dict(argstr='--inputLabelVolume %s...', ),
         inputTransform=dict(argstr='--inputTransform %s...', ),
@@ -29,10 +24,6 @@ def test_BRAINSMultiSTAPLE_inputs():
         ),
         resampledVolumePrefix=dict(argstr='--resampledVolumePrefix %s', ),
         skipResampling=dict(argstr='--skipResampling ', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = BRAINSMultiSTAPLE.input_spec()
 

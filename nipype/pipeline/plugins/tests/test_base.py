@@ -16,7 +16,7 @@ def test_scipy_sparse():
 
 '''
 Can use the following code to test that a mapnode crash continues successfully
-Need to put this into a nose-test with a timeout
+Need to put this into a unit-test with a timeout
 
 import nipype.interfaces.utility as niu
 import nipype.pipeline.engine as pe

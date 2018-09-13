@@ -25,7 +25,7 @@ from ..engine.utils import (nx, dfs_preorder, topological_sort)
 from ..engine import MapNode
 from .tools import report_crash, report_nodes_not_run, create_pyscript
 
-logger = logging.getLogger('workflow')
+logger = logging.getLogger('nipype.workflow')
 
 
 class PluginBase(object):
@@ -154,13 +154,7 @@ class DistributedPluginBase(PluginBase):
                     result = self._get_result(taskid)
                 except Exception:
                     notrun.append(
-                        self._clean_queue(
-                            jobid,
-                            graph,
-                            result={
-                                'result': None,
-                                'traceback': '\n'.join(format_exception(*sys.exc_info()))
-                            }))
+                        self._clean_queue(jobid, graph))
                 else:
                     if result:
                         if result['traceback']:
@@ -222,6 +216,9 @@ class DistributedPluginBase(PluginBase):
 
         if self._status_callback:
             self._status_callback(self.procs[jobid], 'exception')
+        if result is None:
+            result = {'result': None,
+                      'traceback': '\n'.join(format_exception(*sys.exc_info()))}
 
         if str2bool(self._config['execution']['stop_on_first_crash']):
             raise RuntimeError("".join(result['traceback']))

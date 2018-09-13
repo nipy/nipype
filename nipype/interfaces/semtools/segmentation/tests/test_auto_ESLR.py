@@ -12,11 +12,6 @@ def test_ESLR_inputs():
             usedefault=True,
         ),
         high=dict(argstr='--high %d', ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inputVolume=dict(argstr='--inputVolume %s', ),
         low=dict(argstr='--low %d', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
@@ -27,10 +22,6 @@ def test_ESLR_inputs():
         ),
         preserveOutside=dict(argstr='--preserveOutside ', ),
         safetySize=dict(argstr='--safetySize %d', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = ESLR.input_spec()
 

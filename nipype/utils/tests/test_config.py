@@ -241,3 +241,52 @@ def test_cwd_cached(tmpdir):
     oldcwd = config.cwd
     tmpdir.chdir()
     assert config.cwd == oldcwd
+
+
+def test_debug_mode():
+    from ... import logging
+
+    sofc_config = config.get('execution', 'stop_on_first_crash')
+    ruo_config = config.get('execution', 'remove_unnecessary_outputs')
+    ki_config = config.get('execution', 'keep_inputs')
+    wf_config = config.get('logging', 'workflow_level')
+    if_config = config.get('logging', 'interface_level')
+    ut_config = config.get('logging', 'utils_level')
+
+    wf_level = logging.getLogger('nipype.workflow').level
+    if_level = logging.getLogger('nipype.interface').level
+    ut_level = logging.getLogger('nipype.utils').level
+
+    config.enable_debug_mode()
+
+    # Check config is updated and logging levels, too
+    assert config.get('execution', 'stop_on_first_crash') == 'true'
+    assert config.get('execution', 'remove_unnecessary_outputs') == 'false'
+    assert config.get('execution', 'keep_inputs') == 'true'
+    assert config.get('logging', 'workflow_level') == 'DEBUG'
+    assert config.get('logging', 'interface_level') == 'DEBUG'
+    assert config.get('logging', 'utils_level') == 'DEBUG'
+
+    assert logging.getLogger('nipype.workflow').level == 10
+    assert logging.getLogger('nipype.interface').level == 10
+    assert logging.getLogger('nipype.utils').level == 10
+
+    # Restore config and levels
+    config.set('execution', 'stop_on_first_crash', sofc_config)
+    config.set('execution', 'remove_unnecessary_outputs', ruo_config)
+    config.set('execution', 'keep_inputs', ki_config)
+    config.set('logging', 'workflow_level', wf_config)
+    config.set('logging', 'interface_level', if_config)
+    config.set('logging', 'utils_level', ut_config)
+    logging.update_logging(config)
+
+    assert config.get('execution', 'stop_on_first_crash') == sofc_config
+    assert config.get('execution', 'remove_unnecessary_outputs') == ruo_config
+    assert config.get('execution', 'keep_inputs') == ki_config
+    assert config.get('logging', 'workflow_level') == wf_config
+    assert config.get('logging', 'interface_level') == if_config
+    assert config.get('logging', 'utils_level') == ut_config
+
+    assert logging.getLogger('nipype.workflow').level == wf_level
+    assert logging.getLogger('nipype.interface').level == if_level
+    assert logging.getLogger('nipype.utils').level == ut_level

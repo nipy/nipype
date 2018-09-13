@@ -5,11 +5,6 @@ from ..utils import EditTransform
 
 def test_EditTransform_inputs():
     input_map = dict(
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         interpolation=dict(
             argstr='FinalBSplineInterpolationOrder',
             usedefault=True,

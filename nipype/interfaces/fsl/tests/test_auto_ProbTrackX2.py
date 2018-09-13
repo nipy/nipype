@@ -24,11 +24,6 @@ def test_ProbTrackX2_inputs():
             usedefault=True,
         ),
         fsamples=dict(mandatory=True, ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         inv_xfm=dict(argstr='--invxfm=%s', ),
         loop_check=dict(argstr='--loopcheck', ),
         lrtarget3=dict(argstr='--lrtarget3=%s', ),
@@ -86,10 +81,6 @@ def test_ProbTrackX2_inputs():
         target3=dict(argstr='--target3=%s', ),
         target4=dict(argstr='--target4=%s', ),
         target_masks=dict(argstr='--targetmasks=%s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         thsamples=dict(mandatory=True, ),
         use_anisotropy=dict(argstr='--usef', ),
         verbose=dict(argstr='--verbose=%d', ),

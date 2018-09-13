@@ -10,11 +10,6 @@ def test_MakeAverageSubject_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         out_name=dict(
             argstr='--out %s',
             usedefault=True,
@@ -24,10 +19,6 @@ def test_MakeAverageSubject_inputs():
             argstr='--subjects %s',
             mandatory=True,
             sep=' ',
-        ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
         ),
     )
     inputs = MakeAverageSubject.input_spec()

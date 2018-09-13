@@ -5,11 +5,6 @@ from ..misc import SimpleThreshold
 
 def test_SimpleThreshold_inputs():
     input_map = dict(
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         threshold=dict(mandatory=True, ),
         volumes=dict(mandatory=True, ),
     )

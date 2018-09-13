@@ -12,7 +12,7 @@ from ... import logging
 from ..base import (traits, TraitedSpec, File, isdefined)
 from .base import DipyBaseInterface
 
-IFLOGGER = logging.getLogger('interface')
+IFLOGGER = logging.getLogger('nipype.interface')
 
 
 class ResampleInputSpec(TraitedSpec):

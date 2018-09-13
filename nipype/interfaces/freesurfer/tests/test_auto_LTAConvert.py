@@ -10,11 +10,6 @@ def test_LTAConvert_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         in_fsl=dict(
             argstr='--infsl %s',
             mandatory=True,
@@ -64,10 +59,6 @@ def test_LTAConvert_inputs():
         source_file=dict(argstr='--src %s', ),
         target_conform=dict(argstr='--trgconform', ),
         target_file=dict(argstr='--trg %s', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
     )
     inputs = LTAConvert.input_spec()
 

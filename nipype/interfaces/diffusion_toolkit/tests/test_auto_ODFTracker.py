@@ -14,11 +14,6 @@ def test_ODFTracker_inputs():
             nohash=True,
             usedefault=True,
         ),
-        ignore_exception=dict(
-            deprecated='1.0.0',
-            nohash=True,
-            usedefault=True,
-        ),
         image_orientation_vectors=dict(argstr='-iop %f', ),
         input_data_prefix=dict(
             argstr='%s',
@@ -57,10 +52,6 @@ def test_ODFTracker_inputs():
         swap_xy=dict(argstr='-sxy', ),
         swap_yz=dict(argstr='-syz', ),
         swap_zx=dict(argstr='-szx', ),
-        terminal_output=dict(
-            deprecated='1.0.0',
-            nohash=True,
-        ),
         voxel_order=dict(argstr='-vorder %s', ),
     )
     inputs = ODFTracker.input_spec()
