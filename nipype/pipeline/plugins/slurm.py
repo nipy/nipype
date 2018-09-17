@@ -62,13 +62,17 @@ class SLURMPlugin(SGELikeBatchManagerBase):
         super(SLURMPlugin, self).__init__(self._template, **kwargs)
 
     def _is_pending(self, taskid):
-        #  subprocess.Popen requires taskid to be a string
-        res = CommandLine(
-            'squeue',
-            args=' '.join(['-j', '%s' % taskid]),
-            resource_monitor=False,
-            terminal_output='allatonce').run()
-        return res.runtime.stdout.find(str(taskid)) > -1
+        try:
+            res = CommandLine(
+                'squeue',
+                args=' '.join(['-j', '%s' % taskid]),
+                resource_monitor=False,
+                terminal_output='allatonce').run()
+            return res.runtime.stdout.find(str(taskid)) > -1
+        except RuntimeError as e:
+            if 'Invalid job id' not in str(e):
+                raise(e)
+            return False
 
     def _submit_batchtask(self, scriptfile, node):
         """
