@@ -68,9 +68,6 @@ class Bunch(object):
         Note: update is very much like HasTraits.set"""
         self.__dict__.update(*args, **kwargs)
 
-    def keys(self):
-        return list(self.__dict__.keys())
-
     def items(self):
         """iterates over bunch attributes as key, value pairs"""
         return list(self.__dict__.items())

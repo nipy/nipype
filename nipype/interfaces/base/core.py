@@ -500,7 +500,7 @@ class BaseInterface(Interface):
             platform=platform.platform(),
             hostname=platform.node(),
             version=self.version)
-        runtime_attrs = set(runtime.keys())
+        runtime_attrs = set(runtime.dictcopy())
 
         mon_sp = None
         if enable_rm:
@@ -541,7 +541,7 @@ class BaseInterface(Interface):
             if not ignore_exception:
                 raise
         finally:
-            if runtime is None or runtime_attrs - set(runtime.keys()):
+            if runtime is None or runtime_attrs - set(runtime.dictcopy()):
                 raise RuntimeError("{} interface failed to return valid "
                                    "runtime object".format(
                                        interface.__class__.__name__))
