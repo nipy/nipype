@@ -517,3 +517,29 @@ def test_CommandLine_prefix(tmpdir):
     ci = OOPBadShell(command=script_name)
     with pytest.raises(IOError):
         ci.run()
+
+
+def test_runtime_checks():
+    class TestInterface(nib.BaseInterface):
+        class input_spec(nib.TraitedSpec):
+            a = nib.traits.Any()
+        class output_spec(nib.TraitedSpec):
+            b = nib.traits.Any()
+
+        def _run_interface(self, runtime):
+            return runtime
+
+    class NoRuntime(TestInterface):
+        def _run_interface(self, runtime):
+            return None
+
+    class BrokenRuntime(TestInterface):
+        def _run_interface(self, runtime):
+            del runtime.__dict__['cwd']
+            return runtime
+
+    with pytest.raises(RuntimeError):
+        NoRuntime().run()
+
+    with pytest.raises(RuntimeError):
+        BrokenRuntime().run()
