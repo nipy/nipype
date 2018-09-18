@@ -820,16 +820,16 @@ class MCFLIRT(FSLCommand):
         return super(MCFLIRT, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
-        cwd = os.getcwd()
         outputs = self._outputs().get()
 
         outputs['out_file'] = self._gen_outfilename()
+        output_dir = os.path.dirname(outputs['out_file'])
 
         if isdefined(self.inputs.stats_imgs) and self.inputs.stats_imgs:
             outputs['variance_img'] = self._gen_fname(
-                outputs['out_file'] + '_variance.ext', cwd=cwd)
+                outputs['out_file'] + '_variance.ext', cwd=output_dir)
             outputs['std_img'] = self._gen_fname(
-                outputs['out_file'] + '_sigma.ext', cwd=cwd)
+                outputs['out_file'] + '_sigma.ext', cwd=output_dir)
 
         # The mean image created if -stats option is specified ('meanvol')
         # is missing the top and bottom slices. Therefore we only expose the
@@ -839,11 +839,11 @@ class MCFLIRT(FSLCommand):
 
         if isdefined(self.inputs.mean_vol) and self.inputs.mean_vol:
             outputs['mean_img'] = self._gen_fname(
-                outputs['out_file'] + '_mean_reg.ext', cwd=cwd)
+                outputs['out_file'] + '_mean_reg.ext', cwd=output_dir)
 
         if isdefined(self.inputs.save_mats) and self.inputs.save_mats:
             _, filename = os.path.split(outputs['out_file'])
-            matpathname = os.path.join(cwd, filename + '.mat')
+            matpathname = os.path.join(output_dir, filename + '.mat')
             _, _, _, timepoints = load(self.inputs.in_file).shape
             outputs['mat_file'] = []
             for t in range(timepoints):
