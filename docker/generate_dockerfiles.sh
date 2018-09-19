@@ -66,7 +66,7 @@ function generate_base_dockerfile() {
     --label maintainer="The nipype developers https://github.com/nipy/nipype" \
     --spm12 version=r7219 \
     --freesurfer version=6.0.0-min \
-    --run 'echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW12RVYzelRmZ1xuRlM1Si8yYzFhZ2c0RVxuIiA+IC9vcHQvZnJlZXN1cmZlci9saWNlbnNlLnR4dAo=" | base64 -d | sh' \
+    --run 'echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tCjUxNzIKICpDdnVtdkVWM3pUZmcKRlM1Si8yYzFhZ2c0RQoiID4gL29wdC9mcmVlc3VyZmVyLTYuMC4wLW1pbi9saWNlbnNlLnR4dA==" | base64 -d | sh' \
     --install afni ants apt-utils bzip2 convert3d file fsl-core \
               fsl-mni152-templates fusefat g++ git graphviz make python ruby \
               unzip xvfb \
