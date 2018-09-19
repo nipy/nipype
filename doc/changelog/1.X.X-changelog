@@ -3,6 +3,7 @@
 
 ##### [Full changelog](https://github.com/nipy/nipype/milestone/24?closed=1)
 
+  * FIX: Return afni.Qwarp outputs as absolute paths (https://github.com/nipy/nipype/pull/2705)
   * FIX: Add informative error for interfaces that fail to return valid runtime object (https://github.com/nipy/nipype/pull/2692)
   * FIX: Construct MCFLIRT output paths relative to out_file (https://github.com/nipy/nipype/pull/2703)
   * FIX: SLURM plugin polling (https://github.com/nipy/nipype/pull/2693)
