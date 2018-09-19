@@ -845,12 +845,10 @@ def test_workflow_11(plugin):
 
 
 # tests for a workflow that have its own input and mapper
-#WIP
 
-#@pytest.mark.parametrize("plugin", Plugins)
+@pytest.mark.parametrize("plugin", Plugins)
 @python35_only
-#@pytest.mark.xfail(reason="mapper in workflow still not implemented")
-def test_workflow_12(plugin="serial"):
+def test_workflow_12(plugin):
     """using inputs for workflow and connect_workflow"""
     wf = NewWorkflow(name="wf9", inputs={"wf_a": [3, 5]}, mapper="wf_a", workingdir="test_wf12_{}".format(plugin))
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
@@ -863,6 +861,7 @@ def test_workflow_12(plugin="serial"):
     assert wf.inner_workflows[0].inputs == {'wf9(0,).wf_a': 3}
     assert wf.inner_workflows[1].inputs == {'wf9(1,).wf_a': 5}
     wf.run(plugin=plugin)
+
     expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
@@ -870,3 +869,31 @@ def test_workflow_12(plugin="serial"):
     for i, res in enumerate(expected):
         assert wf.inner_workflows[i].nodes[0].result["out"][0][0] == res[0]
         assert wf.inner_workflows[i].nodes[0].result["out"][0][1] == res[1]
+
+
+@pytest.mark.parametrize("plugin", Plugins)
+@python35_only
+def test_workflow_12a(plugin):
+    """using inputs for workflow and connect_workflow"""
+    wf = NewWorkflow(name="wf9", inputs={"wf_a": [3, 5]}, mapper="wf_a", workingdir="test_wf12a_{}".format(plugin))
+    interf_addvar = Function_Interface(fun_addvar, ["out"])
+    na = NewNode(name="NA", interface=interf_addvar, base_dir="na", mapper="b", inputs={"b": [10, 20]})
+    wf.add(na)
+    wf.connect_workflow("NA", "wf_a", "a")
+
+    assert len(wf.inner_workflows) == 2
+    assert wf.inner_workflows[0].mapper is None
+    assert wf.inner_workflows[0].inputs == {'wf9(0,).wf_a': 3}
+    assert wf.inner_workflows[1].inputs == {'wf9(1,).wf_a': 5}
+    wf.run(plugin=plugin)
+
+    expected = [[({"NA.a": 3, "NA.b": 10}, 13), ({"NA.a": 3, "NA.b": 20}, 23)],
+                [({"NA.a": 5, "NA.b": 10}, 15), ({"NA.a": 5, "NA.b": 20}, 25)]]
+    key_sort = list(expected[0][0][0].keys())
+    for exp in expected:
+        exp.sort(key=lambda t: [t[0][key] for key in key_sort])
+    wf.inner_workflows[0].nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
+    for i, res_l in enumerate(expected):
+        for j, res in enumerate(res_l):
+            assert wf.inner_workflows[i].nodes[0].result["out"][j][0] == res[0]
+            assert wf.inner_workflows[i].nodes[0].result["out"][j][1] == res[1]
