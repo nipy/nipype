@@ -105,7 +105,7 @@ function generate_main_dockerfile() {
                              icu=58.1 libxml2 libxslt matplotlib mkl numpy paramiko
                              pandas psutil scikit-learn scipy traits=4.6.0' \
               pip_opts="-e" \
-              pip_install="/src/nipype[all]" \
+              pip_install="/src/nipype[all] -f https://github.com/tgbugs/rdflib/releases/download/v5.0.0-dev-tgbugs-b6/rdflib-5.0.0.dev0-py2.py3-none-any.whl" \
   --miniconda env_name=neuro \
               pip_install="grabbit==0.1.2" \
   --run-bash "mkdir -p /src/pybids

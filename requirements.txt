@@ -7,7 +7,7 @@ nibabel>=2.1.0
 future>=0.16.0
 simplejson>=3.8.0
 https://github.com/tgbugs/rdflib/releases/download/v5.0.0-dev-tgbugs-b6/rdflib-5.0.0.dev0-py2.py3-none-any.whl
-prov
+prov>=1.5.2
 click>=6.6.0
 funcsigs
 configparser
