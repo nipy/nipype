@@ -52,7 +52,7 @@ do
   esac
 done
 
-NEURODOCKER_IMAGE="kaczmarj/neurodocker:0.4.1"
+NEURODOCKER_IMAGE="kaczmarj/neurodocker:master@sha256:dd868878266e615335a911f4682e7a3e1b7c72fc3684c5b57f1da5122a40ee96"
 # neurodebian:stretch-non-free pulled on September 19, 2018
 BASE_IMAGE="neurodebian@sha256:7cd978427d7ad215834fee221d0536ed7825b3cddebc481eba2d792dfc2f7332"
 
@@ -91,6 +91,7 @@ function generate_main_dockerfile() {
                                icu=58.1 libxml2 libxslt matplotlib mkl numpy paramiko
                                pandas psutil scikit-learn scipy traits=4.6.0' \
                 pip_install="grabbit==0.1.2 https://github.com/INCF/pybids/tarball/0.5.1" \
+                activate=true \
     --copy docker/files/run_builddocs.sh docker/files/run_examples.sh \
            docker/files/run_pytests.sh nipype/external/fsl_imglob.py /usr/bin/ \
     --copy . /src/nipype \
