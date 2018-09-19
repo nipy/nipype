@@ -26,6 +26,11 @@
       "orcid": "0000-0002-3718-6836"
     },
     {
+      "affiliation": "MIT",
+      "name": "Jarecka, Dorota",
+      "orcid": "0000-0003-1857-8129"
+    },
+    {
       "affiliation": "The Laboratory for Investigative Neurophysiology (The LINE), Department of Radiology and Department of Clinical Neurosciences, Lausanne, Switzerland; Center for Biomedical Imaging (CIBM), Lausanne, Switzerland",
       "name": "Notter, Michael Philipp",
       "orcid": "0000-0002-5866-047X"
@@ -34,11 +39,6 @@
       "affiliation": "University of Iowa",
       "name": "Johnson, Hans",
       "orcid": "0000-0001-9513-2660"
-    },
-    {
-      "affiliation": "MIT",
-      "name": "Jarecka, Dorota",
-      "orcid": "0000-0003-1857-8129"
     },
     {
       "name": "Burns, Christopher"
@@ -95,7 +95,16 @@
       "orcid": "0000-0003-4554-5058"
     },
     {
+      "affiliation": "National Institute of Mental Health",
+      "name": "Nielson, Dylan M.",
+      "orcid": "0000-0003-4613-6643"
+    },
+    {
       "name": "Madison, Cindee"
+    },
+    {
+      "affiliation": "Molecular Imaging Research Center, CEA, France",
+      "name": "Bougacha, Salma"
     },
     {
       "affiliation": "Dartmouth College",
@@ -133,13 +142,9 @@
       "name": "Berleant, Shoshana"
     },
     {
-      "affiliation": "National Institute of Mental Health",
-      "name": "Nielson, Dylan M.",
-      "orcid": "0000-0003-4613-6643"
-    },
-    {
-      "affiliation": "Molecular Imaging Research Center, CEA, France",
-      "name": "Bougacha, Salma"
+      "affiliation": "MIT",
+      "name": "Kaczmarzyk, Jakub",
+      "orcid": "0000-0002-5544-7577"
     },
     {
       "affiliation": "INRIA",
@@ -167,6 +172,11 @@
       "orcid": "0000-0003-0679-1985"
     },
     {
+      "affiliation": "Montreal Neurological Institute and Hospital",
+      "name": "DuPre, Elizabeth",
+      "orcid": "0000-0003-1358-196X"
+    },
+    {
       "name": "Moloney, Brendan"
     },
     {
@@ -185,19 +195,9 @@
       "orcid": "0000-0001-7037-2449"
     },
     {
-      "affiliation": "MIT",
-      "name": "Kaczmarzyk, Jakub",
-      "orcid": "0000-0002-5544-7577"
-    },
-    {
       "affiliation": "Vrije Universiteit, Amsterdam",
       "name": "Gilles de Hollander",
       "orcid": "0000-0003-1988-5091"
-    },
-    {
-      "affiliation": "Montreal Neurological Institute and Hospital",
-      "name": "DuPre, Elizabeth",
-      "orcid": "0000-0003-1358-196X"
     },
     {
       "affiliation": "Australian eHealth Research Centre, Commonwealth Scientific and Industrial Research Organisation; University of Queensland",
@@ -233,6 +233,9 @@
       "orcid": "0000-0001-7194-4568"
     },
     {
+      "name": "Forbes, Jessica"
+    },
+    {
       "name": "Schwartz, Yannick"
     },
     {
@@ -252,21 +255,18 @@
       "name": "Welch, David"
     },
     {
-      "name": "Forbes, Jessica"
-    },
-    {
       "name": "Kent, James"
     },
     {
       "name": "Watanabe, Aimi"
     },
     {
-      "name": "Cumba, Chad"
-    },
-    {
       "affiliation": "Research Group Neuroanatomy and Connectivity, Max Planck Institute for Human Cognitive and Brain Sciences, Leipzig, Germany",
       "name": "Huntenburg, Julia M.",
       "orcid": "0000-0003-0579-9811"
+    },
+    {
+      "name": "Cumba, Chad"
     },
     {
       "affiliation": "Harvard University - Psychology",
@@ -384,6 +384,10 @@
       "orcid": "0000-0003-2767-6310"
     },
     {
+      "affiliation": "Institute of Imaging & Computer Vision, RWTH Aachen University, Germany",
+      "name": "Weninger, Leon"
+    },
+    {
       "name": "Salvatore, John"
     },
     {
@@ -413,24 +417,29 @@
       "name": "Perkins, L. Nathan"
     },
     {
+      "affiliation": "University of Amsterdam",
+      "name": "Lukas Snoek",
+      "orcid": "0000-0001-8972-204X"
+    },
+    {
       "name": "Marina, Ana"
     },
     {
       "name": "Mattfeld, Aaron"
     },
     {
-      "name": "Noel, Maxime"
-    },
-    {
-      "affiliation": "University of Amsterdam",
-      "name": "Lukas Snoek",
-      "orcid": "0000-0001-8972-204X"
-    },
-    {
       "name": "Matsubara, K"
     },
     {
+      "name": "Noel, Maxime"
+    },
+    {
       "name": "Cheung, Brian"
+    },
+    {
+      "affiliation": "The University of Texas at Austin",
+      "name": "Floren, Andrew",
+      "orcid": "0000-0003-3618-2056"
     },
     {
       "name": "Rothmei, Simon"
@@ -455,18 +464,13 @@
       "orcid": "0000-0003-2076-5329"
     },
     {
-      "affiliation": "The University of Texas at Austin",
-      "name": "Floren, Andrew",
-      "orcid": "0000-0003-3618-2056"
+      "affiliation": "University of illinois urbana champaign",
+      "name": "Sharp, Paul"
     },
     {
       "affiliation": "Institute of Neuroinformatics, ETH/University of Zurich",
       "name": "Gerhard, Stephan",
       "orcid": "0000-0003-4454-6171"
-    },
-    {
-      "affiliation": "University of illinois urbana champaign",
-      "name": "Sharp, Paul"
     },
     {
       "affiliation": "Technical University Munich",
@@ -475,6 +479,9 @@
     },
     {
       "name": "Weinstein, Alejandro"
+    },
+    {
+      "name": "Tambini, Arielle"
     },
     {
       "affiliation": "Duke University",
@@ -493,6 +500,9 @@
       "name": "Harms, Robbert"
     },
     {
+      "name": "Khanuja, Ranjeet"
+    },
+    {
       "name": "Schlamp, Kai"
     },
     {
@@ -507,12 +517,13 @@
       "name": "Tarbert, Claire"
     },
     {
-      "name": "Tambini, Arielle"
-    },
-    {
       "affiliation": "University of Texas at Austin",
       "name": "De La Vega, Alejandro",
       "orcid": "0000-0001-9062-3778"
+    },
+    {
+      "affiliation": "Vrije Universiteit Amsterdam",
+      "name": "Ort, Eduard"
     },
     {
       "name": "Nickson, Thomas"
@@ -533,10 +544,6 @@
     },
     {
       "name": "Flandin, Guillaume"
-    },
-    {
-      "affiliation": "Vrije Universiteit Amsterdam",
-      "name": "Ort, Eduard"
     },
     {
       "name": "Shachnev, Dmitry"
@@ -573,10 +580,6 @@
     },
     {
       "name": "McDermottroe, Conor"
-    },
-    {
-      "affiliation": "Institute of Imaging & Computer Vision, RWTH Aachen University, Germany",
-      "name": "Weninger, Leon"
     },
     {
       "affiliation": "MIT, HMS",
