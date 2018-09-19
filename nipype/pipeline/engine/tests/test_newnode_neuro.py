@@ -9,6 +9,7 @@ from ...interfaces.freesurfer import PatchedConcatenateLTA as ConcatenateLTA
 
 Name = "example"
 DEFAULT_MEMORY_MIN_GB = None
+# TODO, adding fields to Inputs (subject_id)
 Inputs = {}
 
 # wf = Workflow(name, mem_gb_node=DEFAULT_MEMORY_MIN_GB,
@@ -50,10 +51,9 @@ wf.add(runnable=select_target, name="targets", subject_id="subject_id")\
 #   .map('subject')
 
 
-# dj TODO: how do we get subject? how do we use it in the Rename?
 wf.add(name='rename_src',
        runnable=Rename(format_string='%(subject)s', keep_ext=True),
-                            in_file="source_file")\
+                            in_file="source_file", subject="subject_id")\
     .map('subject')
 
 

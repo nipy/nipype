@@ -229,3 +229,21 @@ class Function_Interface(object):
             raise Exception("output_nm doesnt match length of the function output")
 
         return fun_output
+
+
+# want to use to access input as dot,
+# but it doesnt work since im using "." within names (using my old syntax with - also cant work)
+# https://stackoverflow.com/questions/2352181/how-to-use-a-dot-to-access-members-of-dictionary
+class DotDict(dict):
+    """dot.notation access to dictionary attributes"""
+    def __getattr__(self, attr):
+        return self.get(attr)
+    __setattr__= dict.__setitem__
+    __delattr__= dict.__delitem__
+
+    def __getstate__(self):
+        return self
+
+    def __setstate__(self, state):
+        self.update(state)
+        self.__dict__ = self

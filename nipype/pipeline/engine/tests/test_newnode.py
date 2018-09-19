@@ -11,7 +11,9 @@ python35_only = pytest.mark.skipif(sys.version_info < (3, 5),
 Plugins = ["serial", "mp", "cf", "dask"]
 
 def fun_addtwo(a):
-    time.sleep(3)
+    time.sleep(1)
+    if a == 3:
+        time.sleep(2)
     return a + 2
 
 
