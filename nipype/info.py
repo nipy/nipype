@@ -140,7 +140,7 @@ REQUIRES = [
     'future>=%s' % FUTURE_MIN_VERSION,
     'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
     'prov>=%s' % PROV_VERSION,
-    'rdflib>=5.0.0.dev',
+    'neurdflib',
     'click>=%s' % CLICK_MIN_VERSION,
     'funcsigs',
     'pytest>=%s' % PYTEST_MIN_VERSION,
