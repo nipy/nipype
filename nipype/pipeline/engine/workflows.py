@@ -1211,11 +1211,6 @@ class NewNode(NewBase):
 
 
     @property
-    def global_done(self):
-        return self._global_done
-
-
-    @property
     def needed_outputs(self):
         return self._needed_outputs
 

@@ -558,6 +558,7 @@ def test_workflow_6a(plugin):
     wf.add(na)
     wf.add(nb)
     wf.map(mapper="a", inputs={"a": [3, 5]}, node=na)
+    # TODO: should we se ("a", "c") instead?? shold I forget "NA.a" value?
     wf.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]}, node=nb)
     wf.connect("NA", "out", "NB", "a")
     wf.run(plugin=plugin)
@@ -620,13 +621,13 @@ def test_workflow_6b(plugin):
 def test_workflow_7(plugin):
     """using inputs for workflow and connect_workflow"""
     # adding inputs to the workflow directly
-    wf = NewWorkflow(name="wf7", inputs={"wf_a": [3, 5]}, workingdir="test_wf7_{}".format(plugin))
+    wf = NewWorkflow(name="wf7", workingdir="test_wf7_{}".format(plugin))
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
 
     wf.add(na)
     # connecting the node with inputs from the workflow
-    wf.connect_workflow("NA", "wf_a","a")
+    wf.connect_workflow("NA", "wf_a", "a")
     wf.map(mapper="a")
     wf.run(plugin=plugin)
 
@@ -822,7 +823,7 @@ def test_workflow_11(plugin):
     wf.add(name="NB", runnable=interf_addtwo, base_dir="nb").map(mapper="a", inputs={"a": [2, 1]})
     interf_addvar2 = Function_Interface(fun_addvar, ["out"])
     # _NA, _NB means that I'm using mappers from the NA/NB nodes, it's the same as [("NA.a", NA.b), "NB.a"]
-    wf.add(name="NC", runnable=interf_addvar2, base_dir="nc", a="NA.out", b="NB.out").map(mapper=["_NA", "_NB"])
+    wf.add(name="NC", runnable=interf_addvar2, base_dir="nc", a="NA.out", b="NB.out").map(mapper=["_NA", "_NB"]) # TODO: this should eb default?
     wf.run(plugin=plugin)
 
     expected = [({"NA.a": 3, "NA.b": 0}, 3), ({"NA.a": 5, "NA.b": 10}, 15)]

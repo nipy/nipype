@@ -10,7 +10,13 @@ from ...interfaces.freesurfer import PatchedConcatenateLTA as ConcatenateLTA
 Name = "example"
 DEFAULT_MEMORY_MIN_GB = None
 # TODO, adding fields to Inputs (subject_id)
-Inputs = {}
+Inputs = {"subject_id": [],
+          "output_spaces": [],
+          "source_file": [],
+          "t1_preproc": [],
+          "t1_2_fsnative_forward_transform": [],
+          "subjects_dir": []
+}
 
 # wf = Workflow(name, mem_gb_node=DEFAULT_MEMORY_MIN_GB,
 #               inputs=['source_file', 't1_preproc', 'subject_id',
@@ -27,6 +33,7 @@ wf = NewWorkflow(name=Name, mem_gb_node=DEFAULT_MEMORY_MIN_GB, inputs=Inputs)
 #     """ Given a source subject ID and a target space, get the target subject ID """
 #     return subject_id if space == 'fsnative' else space
 
+# TODO: shouldn't map with subject?
 def select_target(subject_id, space):
     """ Given a source subject ID and a target space, get the target subject ID """
     return subject_id if space == 'fsnative' else space
