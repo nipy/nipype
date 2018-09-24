@@ -845,12 +845,79 @@ def test_workflow_11(plugin):
         assert wf.nodes[2].result["out"][i][1] == res[1]
 
 
+# checking workflow.result
+
+@pytest.mark.parametrize("plugin", Plugins)
+@python35_only
+def test_workflow_12(plugin):
+    """testing if wf.result works (the same workflow as in test_workflow_6)"""
+    wf = NewWorkflow(name="wf12", workingdir="test_wf12_{}".format(plugin),
+                     outputs_nm=[("NA", "out", "NA_out"), ("NB", "out")])
+    interf_addtwo = Function_Interface(fun_addtwo, ["out"])
+    na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
+
+    interf_addvar = Function_Interface(fun_addvar, ["out"])
+    nb = NewNode(name="NB", interface=interf_addvar, base_dir="nb")
+    # using the map methods after add (using mapper for the last added nodes as default)
+    wf.add(na)
+    wf.map(mapper="a", inputs={"a": [3, 5]})
+    wf.add(nb)
+    wf.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]})
+    wf.connect("NA", "out", "NB", "a")
+    wf.run(plugin=plugin)
+
+    # checking if workflow.results is the same as results of nodes
+    assert wf.result["NA_out"] == wf.nodes[0].result["out"]
+    assert wf.result["out"] == wf.nodes[1].result["out"]
+
+    # checking values of workflow.result
+    expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
+    key_sort = list(expected[0][0].keys())
+    expected.sort(key=lambda t: [t[0][key] for key in key_sort])
+    wf.result["NA_out"].sort(key=lambda t: [t[0][key] for key in key_sort])
+    for i, res in enumerate(expected):
+        assert wf.result["NA_out"][i][0] == res[0]
+        assert wf.result["NA_out"][i][1] == res[1]
+
+    expected_B = [({"NA.a": 3, "NB.b": 2}, 7), ({"NA.a": 5, "NB.b": 1}, 8)]
+    key_sort = list(expected_B[0][0].keys())
+    expected_B.sort(key=lambda t: [t[0][key] for key in key_sort])
+    wf.result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
+    for i, res in enumerate(expected_B):
+        assert wf.result["out"][i][0] == res[0]
+        assert wf.result["out"][i][1] == res[1]
+
+
+@pytest.mark.parametrize("plugin", Plugins)
+@python35_only
+def test_workflow_12a(plugin):
+    """testing if wf.result raises exceptione (the same workflow as in test_workflow_6)"""
+    wf = NewWorkflow(name="wf12a", workingdir="test_wf12a_{}".format(plugin),
+                     outputs_nm=[("NA", "out", "wf_out"), ("NB", "out", "wf_out")])
+    interf_addtwo = Function_Interface(fun_addtwo, ["out"])
+    na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
+
+    interf_addvar = Function_Interface(fun_addvar, ["out"])
+    nb = NewNode(name="NB", interface=interf_addvar, base_dir="nb")
+    # using the map methods after add (using mapper for the last added nodes as default)
+    wf.add(na)
+    wf.map(mapper="a", inputs={"a": [3, 5]})
+    wf.add(nb)
+    wf.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]})
+    wf.connect("NA", "out", "NB", "a")
+    wf.run(plugin=plugin)
+
+    # wf_out can't be used twice in wf.result
+    with pytest.raises(Exception) as exinfo:
+        wf.result
+    assert str(exinfo.value) == "the key wf_out is already used in workflow.result"
+
 # tests for a workflow that have its own input and mapper
 # WIP
 @pytest.mark.xfail(reason="WIP")
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
-def test_workflow_12(plugin):
+def test_workflow_13(plugin):
     """using inputs for workflow and connect_workflow"""
     wf = NewWorkflow(name="wf9", inputs={"wf_a": [3, 5]}, mapper="wf_a", workingdir="test_wf12_{}".format(plugin))
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
@@ -876,7 +943,7 @@ def test_workflow_12(plugin):
 @pytest.mark.xfail(reason="WIP")
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
-def test_workflow_12a(plugin):
+def test_workflow_13a(plugin):
     """using inputs for workflow and connect_workflow"""
     wf = NewWorkflow(name="wf9", inputs={"wf_a": [3, 5]}, mapper="wf_a", workingdir="test_wf12a_{}".format(plugin))
     interf_addvar = Function_Interface(fun_addvar, ["out"])

@@ -1122,6 +1122,13 @@ class NewBase(object):
     def state_inputs(self):
         return self._state_inputs
 
+    @property
+    def result(self):
+        if not self._result:
+            self._reading_results()
+        return self._result
+
+
     def prepare_state_input(self):
         self._state.prepare_state_input(state_inputs=self.state_inputs)
 
@@ -1214,10 +1221,6 @@ class NewNode(NewBase):
     def needed_outputs(self):
         return self._needed_outputs
 
-    @property
-    def result(self):
-        return self.result
-
 
     def run_interface_el(self, i, ind):
         """ running interface one element generated from node_state."""
@@ -1288,14 +1291,6 @@ class NewNode(NewBase):
         return True
 
 
-    # reading results (without join for now)
-    @property
-    def result(self):
-        if not self._result:
-            self._reading_results()
-        return self._result
-
-
     def _reading_results(self):
         """
         reading results from file,
@@ -1326,7 +1321,7 @@ class NewNode(NewBase):
 
 
 class NewWorkflow(NewBase):
-    def __init__(self, name, inputs=None, mapper=None, #join_by=None,
+    def __init__(self, name, inputs=None, outputs_nm=None, mapper=None, #join_by=None,
                  nodes=None, workingdir=None, mem_gb_node=None, *args, **kwargs):
         super(NewWorkflow, self).__init__(name=name, mapper=mapper, inputs=inputs,
                                           mem_gb_node=mem_gb_node, *args, **kwargs)
@@ -1346,6 +1341,9 @@ class NewWorkflow(NewBase):
 
         if self.mapper:
             pass #TODO
+
+        # list of (nodename, output name in the name, output name in wf) or (nodename, output name in the name)
+        self.outputs_nm = outputs_nm
 
         # dj not sure what was the motivation, wf_klasses gives an empty list
         #mro = self.__class__.mro()
@@ -1501,6 +1499,20 @@ class NewWorkflow(NewBase):
 
     def join(self, field, node=None):
         pass
+
+
+    def _reading_results(self):
+        for out in self.outputs_nm:
+            if len(out) == 2:
+                node_nm, out_nd_nm, out_wf_nm = out[0], out[1], out[1]
+            elif len(out) == 3:
+                node_nm, out_nd_nm, out_wf_nm = out
+            else:
+                raise Exception("outputs_nm should have 2 or 3 elements")
+            if out_wf_nm not in self._result.keys():
+                self._result[out_wf_nm] = self._node_names[node_nm].result[out_nd_nm]
+            else:
+                raise Exception("the key {} is already used in workflow.result".format(out_wf_nm))
 
 
 def is_function(obj):
