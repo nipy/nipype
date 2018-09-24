@@ -621,7 +621,7 @@ def test_workflow_6b(plugin):
 def test_workflow_7(plugin):
     """using inputs for workflow and connect_workflow"""
     # adding inputs to the workflow directly
-    wf = NewWorkflow(name="wf7", workingdir="test_wf7_{}".format(plugin))
+    wf = NewWorkflow(name="wf7", inputs={"wf_a": [3, 5]}, workingdir="test_wf7_{}".format(plugin))
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
 
@@ -846,7 +846,8 @@ def test_workflow_11(plugin):
 
 
 # tests for a workflow that have its own input and mapper
-
+# WIP
+@pytest.mark.xfail(reason="WIP")
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_12(plugin):
@@ -872,6 +873,7 @@ def test_workflow_12(plugin):
         assert wf.inner_workflows[i].nodes[0].result["out"][0][1] == res[1]
 
 
+@pytest.mark.xfail(reason="WIP")
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_12a(plugin):

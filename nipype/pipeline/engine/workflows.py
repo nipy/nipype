@@ -1160,23 +1160,23 @@ class NewNode(NewBase):
     def interface(self):
         return self._interface
 
-
-    def __deepcopy__(self, memo): # memo is a dict of id's to copies
-        id_self = id(self)        # memoization avoids unnecesary recursion
-        _copy = memo.get(id_self)
-        if _copy is None:
-            # changing names of inputs and input_map, so it doesnt contain node.name
-            inputs_copy = dict((key[len(self.name)+1:], deepcopy(value))
-                               for (key, value) in self.inputs.items())
-            interface_copy = deepcopy(self.interface)
-            interface_copy.input_map = dict((key, val[len(self.name)+1:])
-                                            for (key, val) in interface_copy.input_map.items())
-            _copy = type(self)(
-                name=deepcopy(self.name), interface=interface_copy,
-                inputs=inputs_copy, mapper=deepcopy(self.mapper),
-                base_dir=deepcopy(self._nodedir), wf_mappers=deepcopy(self._wf_mappers))
-            memo[id_self] = _copy
-        return _copy
+    # dj: not sure if I need it
+    # def __deepcopy__(self, memo): # memo is a dict of id's to copies
+    #     id_self = id(self)        # memoization avoids unnecesary recursion
+    #     _copy = memo.get(id_self)
+    #     if _copy is None:
+    #         # changing names of inputs and input_map, so it doesnt contain node.name
+    #         inputs_copy = dict((key[len(self.name)+1:], deepcopy(value))
+    #                            for (key, value) in self.inputs.items())
+    #         interface_copy = deepcopy(self.interface)
+    #         interface_copy.input_map = dict((key, val[len(self.name)+1:])
+    #                                         for (key, val) in interface_copy.input_map.items())
+    #         _copy = type(self)(
+    #             name=deepcopy(self.name), interface=interface_copy,
+    #             inputs=inputs_copy, mapper=deepcopy(self.mapper),
+    #             base_dir=deepcopy(self._nodedir), wf_mappers=deepcopy(self._wf_mappers))
+    #         memo[id_self] = _copy
+    #     return _copy
 
 
 
@@ -1345,15 +1345,7 @@ class NewWorkflow(NewBase):
         self.workingdir = os.path.join(os.getcwd(), workingdir)
 
         if self.mapper:
-            self.prepare_state_input()
-            self.inner_workflows = []
-            for ind in self.state.index_generator:
-                _input = {key.split(".")[1]: val for (key, val) in self.state.state_values(ind).items()}
-                inner_wf = NewWorkflow(name=self.name+str(ind), inputs=_input,
-                                       workingdir=os.path.join(self.workingdir, str(ind)))
-                self.inner_workflows.append(inner_wf)
-        else:
-            self.inner_workflows = None
+            pass #TODO
 
         # dj not sure what was the motivation, wf_klasses gives an empty list
         #mro = self.__class__.mro()
@@ -1368,22 +1360,12 @@ class NewWorkflow(NewBase):
         #    self.add(name, value)
 
 
-
     @property
     def nodes(self):
-        if self.inner_workflows:
-            raise Exception("this workflow has inner workflows")
         return self._nodes
 
-    # TODO: use a decorator
-    def add_nodes(self, nodes):
-        if self.inner_workflows:
-            for inner_wf in self.inner_workflows:
-                inner_wf._add_nodes(nodes)
-        else:
-            self._add_nodes(nodes)
 
-    def _add_nodes(self, nodes):
+    def add_nodes(self, nodes):
         """adding nodes without defining connections"""
         self.graph.add_nodes_from(nodes)
         for nn in nodes:
@@ -1395,15 +1377,7 @@ class NewWorkflow(NewBase):
             self._node_mappers[nn.name] = nn.mapper
 
 
-    def connect(self, from_node, from_socket, to_node, to_socket):
-        if self.inner_workflows:
-            for inner_wf in self.inner_workflows:
-                inner_wf._connect(from_node, from_socket, to_node, to_socket)
-        else:
-            self._connect(from_node, from_socket, to_node, to_socket)
-
-
-    def _connect(self, from_node_nm, from_socket, to_node_nm, to_socket):
+    def connect(self, from_node_nm, from_socket, to_node_nm, to_socket):
         if from_node_nm:
             from_node = self._node_names[from_node_nm]
             to_node = self._node_names[to_node_nm]
@@ -1417,15 +1391,7 @@ class NewWorkflow(NewBase):
             self.connect_workflow(to_node_nm, from_socket, to_socket)
 
 
-    def connect_workflow(self, node, inp_wf, inp_nd):
-        if self.inner_workflows:
-            for inner_wf in self.inner_workflows:
-                inner_wf._connect_workflow(node, inp_wf, inp_nd)
-        else:
-            self._connect_workflow(node, inp_wf, inp_nd)
-
-
-    def _connect_workflow(self, node_nm, inp_wf, inp_nd):
+    def connect_workflow(self, node_nm, inp_wf, inp_nd):
         node = self._node_names[node_nm]
         if "{}.{}".format(self.name, inp_wf) in self.inputs:
             node.state_inputs.update({"{}.{}".format(node_nm, inp_nd): self.inputs["{}.{}".format(self.name, inp_wf)]})
@@ -1462,13 +1428,6 @@ class NewWorkflow(NewBase):
 
 
     def run(self, plugin="serial"):
-        if self.inner_workflows:
-            for inner_wf in self.inner_workflows:
-                inner_wf._run(plugin)
-        else:
-            self._run(plugin)
-
-    def _run(self, plugin="serial"):
         self._preparing()
         submitter = sub.SubmitterWorkflow(plugin=plugin, graph=self.graph)
         submitter.run_workflow()
@@ -1477,17 +1436,6 @@ class NewWorkflow(NewBase):
 
     def add(self, runnable, name=None, base_dir=None, inputs=None, output_nm=None, mapper=None,
             mem_gb=None, **kwargs):
-        if self.inner_workflows:
-            for (ii, inner_wf) in enumerate(self.inner_workflows):
-                self.inner_workflows[ii] = inner_wf._add(deepcopy(runnable), name, base_dir,
-                                                         deepcopy(inputs), output_nm, mapper,
-                                                         mem_gb, **deepcopy(kwargs))
-        else:
-            return self._add(runnable, name, base_dir, inputs, output_nm, mapper, **kwargs)
-
-
-    def _add(self, runnable, name=None, base_dir=None, inputs=None, output_nm=None, mapper=None,
-             mem_gb=None, **kwargs):
         # dj TODO: should I move this if checks to NewNode __init__?
         if is_function(runnable):
             if not output_nm:
@@ -1531,14 +1479,6 @@ class NewWorkflow(NewBase):
 
 
     def map(self, mapper, node=None, inputs=None):
-        if self.inner_workflows:
-            for inner_wf in self.inner_workflows:
-                inner_wf._map(mapper, node, inputs)
-        else:
-            self._map(mapper, node, inputs)
-
-
-    def _map(self, mapper, node=None, inputs=None):
         # if node is None:
         #     if '.' in field:
         #         node, field = field.rsplit('.', 1)
