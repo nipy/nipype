@@ -511,3 +511,44 @@ class DicomImport(SPMCommand):
             outputs['out_files'] = glob(
                 os.path.join(od, os.path.join('*', '*', '*', '*.%s' % ext)))
         return outputs
+
+class DefaceInputSpec(SPMCommandInputSpec):
+    in_file = File(exists=True, mandatory=True,
+                   desc='filename of image to deface')
+    out_file = File(desc="output file name for defaced image",
+                    genfile=True)
+
+class DefaceOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='defaced image')
+
+class Deface(SPMCommand):
+    """ Uses  spm_deface to face strip images
+
+    Examples
+    --------
+    >>> import nipype.interfaces.spm.utils as spmu
+    >>> deface = spmu.Deface()
+    >>> deface.inputs.in_file = 'structural.nii'
+    >>> deface.run()
+
+    """
+
+    input_spec = DefaceInputSpec
+    output_spec = DefaceOutputSpec
+
+    def _make_matlab_command(self, _):
+        """ generates script"""
+
+        outputs = self._list_outputs()
+        self.inputs.out_file = outputs['out_file']
+
+        script = """
+        infiles = strvcat(\'%s\');
+        spm_deface(infiles);
+        """ % (self.inputs.in_file)
+        return script
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_file'] = os.path.abspath(fname_presuffix(self.inputs.in_file,prefix='anon_'))
+        return outputs
