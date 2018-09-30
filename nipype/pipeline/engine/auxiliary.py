@@ -7,44 +7,44 @@ logger = logging.getLogger('nipype.workflow')
 # dj: might create a new class or move to State
 
 # Function to change user provided mapper to "reverse polish notation" used in State
-def mapper2rpn(mapper, wf_mappers=None):
+def mapper2rpn(mapper, other_mappers=None):
     """ Functions that translate mapper to "reverse polish notation."""
     output_mapper = []
-    _ordering(mapper, i=0, output_mapper=output_mapper, wf_mappers=wf_mappers)
+    _ordering(mapper, i=0, output_mapper=output_mapper, other_mappers=other_mappers)
     return output_mapper
 
 
-def _ordering(el, i, output_mapper, current_sign=None, wf_mappers=None):
+def _ordering(el, i, output_mapper, current_sign=None, other_mappers=None):
     """ Used in the mapper2rpn to get a proper order of fields and signs. """
     if type(el) is tuple:
         # checking if the mapper dont contain mapper from previous nodes, i.e. has str "_NA", etc.
         if type(el[0]) is str and el[0].startswith("_"):
             node_nm = el[0][1:]
-            if node_nm not in wf_mappers:
+            if node_nm not in other_mappers:
                 raise Exception("can't ask for mapper from {}".format(node_nm))
-            mapper_mod = change_mapper(mapper=wf_mappers[node_nm], name=node_nm)
+            mapper_mod = change_mapper(mapper=other_mappers[node_nm], name=node_nm)
             el = (mapper_mod, el[1])
         if type(el[1]) is str and el[1].startswith("_"):
             node_nm = el[1][1:]
-            if node_nm not in wf_mappers:
+            if node_nm not in other_mappers:
                 raise Exception("can't ask for mapper from {}".format(node_nm))
-            mapper_mod = change_mapper(mapper=wf_mappers[node_nm], name=node_nm)
+            mapper_mod = change_mapper(mapper=other_mappers[node_nm], name=node_nm)
             el = (el[0], mapper_mod)
-        _iterate_list(el, ".", wf_mappers, output_mapper=output_mapper)
+        _iterate_list(el, ".", other_mappers, output_mapper=output_mapper)
     elif type(el) is list:
         if type(el[0]) is str and el[0].startswith("_"):
             node_nm = el[0][1:]
-            if node_nm not in wf_mappers:
+            if node_nm not in other_mappers:
                 raise Exception("can't ask for mapper from {}".format(node_nm))
-            mapper_mod = change_mapper(mapper=wf_mappers[node_nm], name=node_nm)
+            mapper_mod = change_mapper(mapper=other_mappers[node_nm], name=node_nm)
             el[0] = mapper_mod
         if type(el[1]) is str and el[1].startswith("_"):
             node_nm = el[1][1:]
-            if node_nm not in wf_mappers:
+            if node_nm not in other_mappers:
                 raise Exception("can't ask for mapper from {}".format(node_nm))
-            mapper_mod = change_mapper(mapper=wf_mappers[node_nm], name=node_nm)
+            mapper_mod = change_mapper(mapper=other_mappers[node_nm], name=node_nm)
             el[1] = mapper_mod
-        _iterate_list(el, "*", wf_mappers, output_mapper=output_mapper)
+        _iterate_list(el, "*", other_mappers, output_mapper=output_mapper)
     elif type(el) is str:
         output_mapper.append(el)
     else:
@@ -54,10 +54,10 @@ def _ordering(el, i, output_mapper, current_sign=None, wf_mappers=None):
         output_mapper.append(current_sign)
 
 
-def _iterate_list(element, sign, wf_mappers, output_mapper):
+def _iterate_list(element, sign, other_mappers, output_mapper):
     """ Used in the mapper2rpn to get recursion. """
     for i, el in enumerate(element):
-        _ordering(el, i, current_sign=sign, wf_mappers=wf_mappers, output_mapper=output_mapper)
+        _ordering(el, i, current_sign=sign, other_mappers=other_mappers, output_mapper=output_mapper)
 
 
 # functions used in State to know which element should be used for a specific axis
@@ -68,7 +68,7 @@ def mapping_axis(state_inputs, mapper_rpn):
     stack = []
     current_axis = None
     current_shape = None
-
+    #pdb.set_trace()
     for el in mapper_rpn:
         if el == ".":
             right = stack.pop()

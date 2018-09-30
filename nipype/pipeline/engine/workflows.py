@@ -1071,9 +1071,10 @@ class Join(Node):
 class MapState(object):
     pass
 
+
 # dj ??: should I use EngineBase?
 class NewBase(object):
-    def __init__(self, name, mapper=None, inputs=None, wf_mappers=None, mem_gb_node=None, *args, **kwargs):
+    def __init__(self, name, mapper=None, inputs=None, other_mappers=None, mem_gb_node=None, *args, **kwargs):
         self.name = name
         #dj TODO: I should think what is needed in the __init__ (I redefine some of rhe attributes anyway)
         if inputs:
@@ -1089,10 +1090,11 @@ class NewBase(object):
             # adding name of the node to the input name within the mapper
             mapper = aux.change_mapper(mapper, self.name)
         self._mapper = mapper
-        self._wf_mappers = wf_mappers
+        # information about other nodes' mappers from workflow (in case the mapper from previous node is used)
+        self._other_mappers = other_mappers
         # create state (takes care of mapper, connects inputs with axes, so we can ask for specifc element)
-        self._state = state.State(mapper=self._mapper, node_name=self.name, wf_mappers=self._wf_mappers)
-
+        self._state = state.State(mapper=self._mapper, node_name=self.name, other_mappers=self._other_mappers)
+        self._output = {}
         self._result = {}
 
 
@@ -1112,15 +1114,20 @@ class NewBase(object):
     def mapper(self, mapper):
         self._mapper = mapper
         # updating state
-        self._state = state.State(mapper=self._mapper, node_name=self.name, wf_mappers=self._wf_mappers)
-
-    @property
-    def inputs(self):
-        return self._inputs
+        self._state = state.State(mapper=self._mapper, node_name=self.name, other_mappers=self._other_mappers)
 
     @property
     def state_inputs(self):
         return self._state_inputs
+
+    @state_inputs.setter
+    def state_inputs(self, state_inputs):
+        self._state_inputs.update(state_inputs)
+
+
+    @property
+    def output(self):
+        return self._output
 
     @property
     def result(self):
@@ -1136,55 +1143,53 @@ class NewBase(object):
 
 class NewNode(NewBase):
     def __init__(self, name, interface, inputs=None, mapper=None, join_by=None,
-                 base_dir=None, wf_mappers=None, mem_gb_node=None, *args, **kwargs):
+                 base_dir=None, other_mappers=None, mem_gb_node=None, *args, **kwargs):
         super(NewNode, self).__init__(name=name, mapper=mapper, inputs=inputs,
-                                      wf_mappers=wf_mappers, mem_gb_node=mem_gb_node,
+                                      other_mappers=other_mappers, mem_gb_node=mem_gb_node,
                                       *args, **kwargs)
 
-        self._nodedir = base_dir
-        self._interface = interface
-        self._interface.input_map = dict((key, "{}.{}".format(self.name, value))
-                                         for (key, value) in self._interface.input_map.items())
+        # working directory for node, will be change if node is a part of a wf
+        self.nodedir = base_dir
+        self.interface = interface
+        # adding node name to the interface's name mapping
+        self.interface.input_map = dict((key, "{}.{}".format(self.name, value))
+                                         for (key, value) in self.interface.input_map.items())
+        # needed outputs from other nodes if the node part of a wf
+        self.needed_outputs = []
+        # output names taken from interface output name
+        self.output_names = self.interface._output_nm
+        # flag that says if node finished all jobs
+        self._finished_all = False
+        # flag that says if the node is ready to run (has all input)
+        self.ready2run = True
 
-        self._needed_outputs = []
-        self._out_nm = self._interface._output_nm
-        self._global_done = False
-
-        self.sufficient = True
-
-
-    @property
-    def nodedir(self):
-        return self._nodedir
-
-
-    @nodedir.setter
-    def nodedir(self, nodedir):
-        self._nodedir = nodedir
-
-
-    @property
-    def interface(self):
-        return self._interface
 
     # dj: not sure if I need it
-    # def __deepcopy__(self, memo): # memo is a dict of id's to copies
-    #     id_self = id(self)        # memoization avoids unnecesary recursion
-    #     _copy = memo.get(id_self)
-    #     if _copy is None:
-    #         # changing names of inputs and input_map, so it doesnt contain node.name
-    #         inputs_copy = dict((key[len(self.name)+1:], deepcopy(value))
-    #                            for (key, value) in self.inputs.items())
-    #         interface_copy = deepcopy(self.interface)
-    #         interface_copy.input_map = dict((key, val[len(self.name)+1:])
-    #                                         for (key, val) in interface_copy.input_map.items())
-    #         _copy = type(self)(
-    #             name=deepcopy(self.name), interface=interface_copy,
-    #             inputs=inputs_copy, mapper=deepcopy(self.mapper),
-    #             base_dir=deepcopy(self._nodedir), wf_mappers=deepcopy(self._wf_mappers))
-    #         memo[id_self] = _copy
-    #     return _copy
+    def __deepcopy__(self, memo): # memo is a dict of id's to copies
+        id_self = id(self)        # memoization avoids unnecesary recursion
+        _copy = memo.get(id_self)
+        if _copy is None:
+            # changing names of inputs and input_map, so it doesnt contain node.name
+            inputs_copy = dict((key[len(self.name)+1:], deepcopy(value))
+                               for (key, value) in self.inputs.items())
+            interface_copy = deepcopy(self.interface)
+            interface_copy.input_map = dict((key, val[len(self.name)+1:])
+                                            for (key, val) in interface_copy.input_map.items())
+            _copy = type(self)(
+                name=deepcopy(self.name), interface=interface_copy,
+                inputs=inputs_copy, mapper=deepcopy(self.mapper),
+                base_dir=deepcopy(self.nodedir), other_mappers=deepcopy(self._other_mappers))
+            memo[id_self] = _copy
+        return _copy
 
+
+    @property
+    def inputs(self):
+        return self._inputs
+
+    @inputs.setter
+    def inputs(self, inputs):
+        self._inputs.update(inputs)
 
 
     def map(self, mapper, inputs=None):
@@ -1201,7 +1206,7 @@ class NewNode(NewBase):
             self._state_inputs.update(inputs)
         if mapper:
             # updating state if we have a new mapper
-            self._state = state.State(mapper=self._mapper, node_name=self.name, wf_mappers=self._wf_mappers)
+            self._state = state.State(mapper=self._mapper, node_name=self.name, other_mappers=self._other_mappers)
 
 #    def map_orig(self, field, values=None):
 #        if isinstance(field, list):
@@ -1217,21 +1222,18 @@ class NewNode(NewBase):
 #        self._mappers[field] = values
 
 
-    @property
-    def needed_outputs(self):
-        return self._needed_outputs
-
-
-    def run_interface_el(self, i, ind):
+    def run_interface_el(self, i, ind, test=None):
         """ running interface one element generated from node_state."""
         logger.debug("Run interface el, name={}, i={}, ind={}".format(self.name, i, ind))
         state_dict, inputs_dict = self._collecting_input_el(ind)
+        dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(state_dict.items())])
+        print("Run interface el, dict={}".format(state_dict))
         logger.debug("Run interface el, name={}, inputs_dict={}, state_dict={}".format(
                                                             self.name, inputs_dict, state_dict))
-        res = self._interface.run(inputs_dict)
-        output = self._interface.output
+        res = self.interface.run(inputs_dict)
+        output = self.interface.output
+        print("Run interface el, output={}".format(output))
         logger.debug("Run interface el, output={}".format(output))
-        dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(state_dict.items())])
         # TODO when join
         #if self._joinByKey:
         #    dir_join = "join_" + "_".join(["{}.{}".format(i, j) for i, j in list(state_dict.items()) if i not in self._joinByKey])
@@ -1240,14 +1242,33 @@ class NewNode(NewBase):
         #if self._joinByKey or self._join:
         #    os.makedirs(os.path.join(self.nodedir, dir_join), exist_ok=True)
         #    dir_nm_el = os.path.join(dir_join, dir_nm_el)
-        os.makedirs(os.path.join(self.nodedir, dir_nm_el), exist_ok=True)
-        for key_out in list(output.keys()):
-            with open(os.path.join(self.nodedir, dir_nm_el, key_out+".txt"), "w") as fout:
-                fout.write(str(output[key_out]))
+        self._writting_results_tmp(state_dict, dir_nm_el, output)
         return res
+
+
+    def _writting_results_tmp(self, state_dict, dir_nm_el, output):
+        """temporary method to write the results in the files (this is usually part of a interface)"""
+        os.makedirs(os.path.join(self.nodedir, dir_nm_el), exist_ok=True)
+        for key_out, val_out in output.items():
+            with open(os.path.join(self.nodedir, dir_nm_el, key_out+".txt"), "w") as fout:
+                fout.write(str(val_out))
+
+
+    def _collecting_output(self):
+        for key_out in self.output_names:
+            self._output[key_out] = {}
+            #pdb.set_trace()
+            for (i, ind) in enumerate(itertools.product(*self.state.all_elements)):
+                state_dict, inputs_dict = self._collecting_input_el(ind)
+                dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(state_dict.items())])
+                #pdb.set_trace()
+                self._output[key_out][dir_nm_el] = (state_dict, os.path.join(self.nodedir, dir_nm_el, key_out + ".txt"))
+        return self._output
+
 
     # dj: this is not used for a single node
     def _collecting_input_el(self, ind):
+        """collecting all inputs required to run the node (for specific state element)"""
         state_dict = self.state.state_values(ind)
         inputs_dict = {k: state_dict[k] for k in self._inputs.keys()}
         # reading extra inputs that come from previous nodes
@@ -1261,6 +1282,7 @@ class NewNode(NewBase):
 
 
     def checking_input_el(self, ind):
+        """checking if all inputs are available (for specific state element)"""
         try:
             self._collecting_input_el(ind)
             return True
@@ -1270,54 +1292,53 @@ class NewNode(NewBase):
 
     # checking if all outputs are saved
     @property
-    def global_done(self):
-        # once _global_done os True, this should not change
-        logger.debug('global_done {}'.format(self._global_done))
-        if self._global_done:
-            return self._global_done
+    def finished_all(self):
+        # once _finished_all os True, this should not change
+        print("in finished all", self.inputs, self.nodedir)
+        logger.debug('finished_all {}'.format(self._finished_all))
+        if self._finished_all:
+            return self._finished_all
         else:
             return self._check_all_results()
 
+
     # dj: version without join
     def _check_all_results(self):
-        # checking if all files that should be created are present
+        """checking if all files that should be created are present"""
         for ind in itertools.product(*self.state.all_elements):
             state_dict = self.state.state_values(ind)
             dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(state_dict.items())])
-            for key_out in self._out_nm:
+            for key_out in self.output_names:
                 if not os.path.isfile(os.path.join(self.nodedir, dir_nm_el, key_out+".txt")):
                     return False
-        self._global_done = True
+        self._finished_all = True
         return True
 
 
     def _reading_results(self):
+        """temporary: reading results from output files
+            should be probably just reading output for self.output_names
         """
-        reading results from file,
-        doesn't check if everything is ready, i.e. if self.global_done"""
-        for key_out in self._out_nm:
+        for key_out in self.output_names:
             self._result[key_out] = []
             if self._state_inputs:
-                files = [name for name in glob.glob("{}/*/{}.txt".format(self.nodedir, key_out))]
-                for file in files:
-                    st_el = file.split(os.sep)[-2].split("_")
-                    st_dict = collections.OrderedDict([(el.split(":")[0], eval(el.split(":")[1]))
-                                                            for el in st_el])
-                    with open(file) as fout:
-                        logger.debug('Reading Results: file={}, st_dict={}'.format(file, st_dict))
+                for _, (st_dict, filename) in self._output[key_out].items():
+                    with open(filename) as fout:
                         self._result[key_out].append((st_dict, eval(fout.readline())))
-            # for nodes without input
             else:
-                files = [name for name in glob.glob("{}/{}.txt".format(self.nodedir, key_out))]
-                with open(files[0]) as fout:
+                # st_dict should be {}
+                (st_dict, filename) = self._output[key_out][None]
+                with open(filename) as fout:
                     self._result[key_out].append(({}, eval(fout.readline())))
 
 
     def run(self, plugin="serial"):
+        """preparing the node to run and run the interface"""
         self.prepare_state_input()
         submitter = sub.SubmitterNode(plugin, node=self)
         submitter.run_node()
         submitter.close()
+        self._collecting_output()
 
 
 class NewWorkflow(NewBase):
@@ -1329,6 +1350,7 @@ class NewWorkflow(NewBase):
         self.graph = nx.DiGraph()
         self._nodes = []
         self.connected_var = {}
+        self.needed_inp_wf = []
         if nodes:
             self.add_nodes(nodes)
         for nn in self._nodes:
@@ -1338,9 +1360,6 @@ class NewWorkflow(NewBase):
 
         # dj: not sure if this should be different than base_dir
         self.workingdir = os.path.join(os.getcwd(), workingdir)
-
-        if self.mapper:
-            pass #TODO
 
         # list of (nodename, output name in the name, output name in wf) or (nodename, output name in the name)
         self.outputs_nm = outputs_nm
@@ -1357,6 +1376,14 @@ class NewWorkflow(NewBase):
 
         #    self.add(name, value)
 
+    @property
+    def inputs(self):
+        return self._inputs
+
+    @inputs.setter
+    def inputs(self, inputs):
+        self._inputs.update(dict(("{}.{}".format(self.name, key), value) for (key, value) in inputs.items()))
+
 
     @property
     def nodes(self):
@@ -1370,7 +1397,6 @@ class NewWorkflow(NewBase):
             self._nodes.append(nn)
             #self._inputs.update(nn.inputs)
             self.connected_var[nn] = {}
-            nn.nodedir = os.path.join(self.workingdir, nn.nodedir)
             self._node_names[nn.name] = nn
             self._node_mappers[nn.name] = nn.mapper
 
@@ -1381,15 +1407,18 @@ class NewWorkflow(NewBase):
             to_node = self._node_names[to_node_nm]
             self.graph.add_edges_from([(from_node, to_node)])
             if not to_node in self.nodes:
-                self._add_nodes(to_node)
+                self.add_nodes(to_node)
             self.connected_var[to_node][to_socket] = (from_node, from_socket)
             # from_node.sending_output.append((from_socket, to_node, to_socket))
             logger.debug('connecting {} and {}'.format(from_node, to_node))
         else:
             self.connect_workflow(to_node_nm, from_socket, to_socket)
 
-
+    # TODO: change (at least the name)
     def connect_workflow(self, node_nm, inp_wf, inp_nd):
+        self.needed_inp_wf.append((node_nm, inp_wf, inp_nd))
+
+    def _connect_workflow(self, node_nm, inp_wf, inp_nd):
         node = self._node_names[node_nm]
         if "{}.{}".format(self.name, inp_wf) in self.inputs:
             node.state_inputs.update({"{}.{}".format(node_nm, inp_nd): self.inputs["{}.{}".format(self.name, inp_wf)]})
@@ -1398,21 +1427,31 @@ class NewWorkflow(NewBase):
             raise Exception("{} not in the workflow inputs".format(inp_wf))
 
 
-    def _preparing(self):
+    def preparing(self, wf_inputs=None):
         """preparing nodes which are connected: setting the final mapper and state_inputs"""
-        self.graph_sorted = list(nx.topological_sort(self.graph))
-        logger.debug('the sorted graph is: {}'.format(self.graph_sorted))
+        #pdb.set_trace()
+        for node_nm, inp_wf, inp_nd in self.needed_inp_wf:
+            node = self._node_names[node_nm]
+            if "{}.{}".format(self.name, inp_wf) in wf_inputs:
+                node.state_inputs.update({"{}.{}".format(node_nm, inp_nd): wf_inputs["{}.{}".format(self.name, inp_wf)]})
+                node.inputs.update({"{}.{}".format(node_nm, inp_nd): wf_inputs["{}.{}".format(self.name, inp_wf)]})
+            else:
+                raise Exception("{}.{} not in the workflow inputs".format(self.name, inp_wf))
         for nn in self.graph_sorted:
-            nn.wfdir = self.workingdir
+            if self.mapper:
+                dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(wf_inputs.items())])
+                nn.nodedir = os.path.join(self.workingdir, dir_nm_el, nn.nodedir)
+                nn._finished_all = False # helps when mp is used
+            else:
+                nn.nodedir = os.path.join(self.workingdir, nn.nodedir)
             try:
                 for inp, (out_node, out_var) in self.connected_var[nn].items():
-                    nn.sufficient = False #it has some history (doesnt have to be in the loop)
+                    nn.ready2run = False #it has some history (doesnt have to be in the loop)
                     nn.state_inputs.update(out_node.state_inputs)
                     nn.needed_outputs.append((out_node, out_var, inp))
                     #if there is no mapper provided, i'm assuming that mapper is taken from the previous node
                     if (not nn.mapper or nn.mapper == out_node.mapper) and out_node.mapper:
                         nn.mapper = out_node.mapper
-                        #nn._mapper = inp #not used
                     else:
                         pass
                     #TODO: implement inner mapper
@@ -1420,21 +1459,51 @@ class NewWorkflow(NewBase):
                 # tmp: we don't care about nn that are not in self.connected_var
                 pass
 
-            #nn.preparing_node() #dj: only one this needed?:
-            # do i need it at all?
             nn.prepare_state_input()
 
 
     def run(self, plugin="serial"):
-        self._preparing()
-        submitter = sub.SubmitterWorkflow(plugin=plugin, graph=self.graph)
+        self.graph_sorted = list(nx.topological_sort(self.graph))
+        #self.preparing(wf_inputs=self.inputs) # moved to submitter
+        self.prepare_state_input()
+        logger.debug('the sorted graph is: {}'.format(self.graph_sorted))
+        submitter = sub.SubmitterWorkflow(workflow=self, plugin=plugin)
         submitter.run_workflow()
         submitter.close()
+        self._collecting_outpt()
+
+
+    def _collecting_outpt(self):
+        # not sure, if I should collecto output of all nodes or only the ones that are used in wf.output
+        self.node_outputs = {}
+        for nn in self.graph:
+            if self.mapper:
+                self.node_outputs[nn.name] = [ni._collecting_output() for ni in self.inner_nodes[nn.name]]
+            else:
+                self.node_outputs[nn.name] = nn._collecting_output()
+        if self.outputs_nm:
+            for out in self.outputs_nm:
+                if len(out) == 2:
+                    node_nm, out_nd_nm, out_wf_nm = out[0], out[1], out[1]
+                elif len(out) == 3:
+                    node_nm, out_nd_nm, out_wf_nm = out
+                else:
+                    raise Exception("outputs_nm should have 2 or 3 elements")
+                if out_wf_nm not in self._output.keys():
+                    if self.mapper:
+                        self._output[out_wf_nm] = {}
+                        for (i, ind) in enumerate(itertools.product(*self.state.all_elements)):
+                            wf_inputs_dict = self.state.state_values(ind)
+                            dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(wf_inputs_dict.items())])
+                            self._output[out_wf_nm][dir_nm_el] = self.node_outputs[node_nm][i][out_nd_nm]
+                    else:
+                        self._output[out_wf_nm] = self.node_outputs[node_nm][out_nd_nm]
+                else:
+                    raise Exception("the key {} is already used in workflow.result".format(out_wf_nm))
 
 
     def add(self, runnable, name=None, base_dir=None, inputs=None, output_nm=None, mapper=None,
             mem_gb=None, **kwargs):
-        # dj TODO: should I move this if checks to NewNode __init__?
         if is_function(runnable):
             if not output_nm:
                 output_nm = ["out"]
@@ -1444,25 +1513,20 @@ class NewWorkflow(NewBase):
             if not base_dir:
                 base_dir = name
             node = NewNode(interface=interface, base_dir=base_dir, name=name, inputs=inputs, mapper=mapper,
-                           wf_mappers=self._node_mappers, mem_gb_node=mem_gb)
+                           other_mappers=self._node_mappers, mem_gb_node=mem_gb)
         elif is_interface(runnable):
             if not name:
                 raise Exception("you have to specify name for the node")
             if not base_dir:
                 base_dir = name
             node = NewNode(interface=runnable, base_dir=base_dir, name=name, inputs=inputs, mapper=mapper,
-                           wf_mappers=self._node_mappers, mem_gb_node=mem_gb)
+                           other_mappers=self._node_mappers, mem_gb_node=mem_gb)
         elif is_node(runnable):
             node = runnable
-            #dj: dont have clonning right now
-            #node = runnable if runnable.name == name else runnable.clone(name=name)
         else:
             raise ValueError("Unknown workflow element: {!r}".format(runnable))
         self.add_nodes([node])
-        # dj: i'm using name as a name of a workflow
-        #setattr(self, name, node)
-        #self._nodes[name] = node
-        self._last_added = node #name
+        self._last_added = node
 
         # connecting inputs to other nodes outputs
         for (inp, source) in kwargs.items():
@@ -1477,17 +1541,6 @@ class NewWorkflow(NewBase):
 
 
     def map(self, mapper, node=None, inputs=None):
-        # if node is None:
-        #     if '.' in field:
-        #         node, field = field.rsplit('.', 1)
-        #     else:
-        #         node = self._last_added
-        #
-        # if '.' in node:
-        #     subwf, node = node.split('.', 1)
-        #     self._nodes[subwf].map(field, node, values)
-        #     return
-
         if not node:
             node = self._last_added
 
@@ -1502,17 +1555,26 @@ class NewWorkflow(NewBase):
 
 
     def _reading_results(self):
-        for out in self.outputs_nm:
-            if len(out) == 2:
-                node_nm, out_nd_nm, out_wf_nm = out[0], out[1], out[1]
-            elif len(out) == 3:
-                node_nm, out_nd_nm, out_wf_nm = out
-            else:
-                raise Exception("outputs_nm should have 2 or 3 elements")
-            if out_wf_nm not in self._result.keys():
-                self._result[out_wf_nm] = self._node_names[node_nm].result[out_nd_nm]
-            else:
-                raise Exception("the key {} is already used in workflow.result".format(out_wf_nm))
+        if self.outputs_nm:
+            for out in self.outputs_nm:
+                key_out = out[2] if len(out)==3 else out[1]
+                self._result[key_out] = []
+                if self.mapper:
+                    for (i, ind) in enumerate(itertools.product(*self.state.all_elements)):
+                        wf_inputs_dict = self.state.state_values(ind)
+                        dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(wf_inputs_dict.items())])
+                        res_l= []
+                        for key, val in self.output[key_out][dir_nm_el].items():
+                            with open(val[1]) as fout:
+                                logger.debug('Reading Results: file={}, st_dict={}'.format(val[1], val[0]))
+                                res_l.append((val[0], eval(fout.readline())))
+                        self._result[key_out].append((wf_inputs_dict, res_l))
+                else:
+                    for key, val in self.output[key_out].items():
+                        with open(val[1]) as fout:
+                            logger.debug('Reading Results: file={}, st_dict={}'.format(val[1], val[0]))
+                            self._result[key_out].append((val[0], eval(fout.readline())))
+
 
 
 def is_function(obj):

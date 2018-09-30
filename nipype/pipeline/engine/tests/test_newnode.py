@@ -8,6 +8,7 @@ import pytest, pdb
 python35_only = pytest.mark.skipif(sys.version_info < (3, 5),
                                    reason="requires Python>3.4")
 
+Plugins = ["serial"]
 Plugins = ["serial", "mp", "cf", "dask"]
 
 def fun_addtwo(a):
@@ -16,10 +17,8 @@ def fun_addtwo(a):
         time.sleep(2)
     return a + 2
 
-
 def fun_addvar(a, b):
     return a + b
-
 
 
 def test_node_1():
@@ -190,7 +189,6 @@ def test_workflow_1(plugin):
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
     na.map(mapper="a", inputs={"a": [3, 5]})
     wf.add_nodes([na])
-
     wf.run(plugin=plugin)
 
     expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
@@ -621,13 +619,13 @@ def test_workflow_6b(plugin):
 def test_workflow_7(plugin):
     """using inputs for workflow and connect_workflow"""
     # adding inputs to the workflow directly
-    wf = NewWorkflow(name="wf7", inputs={"wf_a": [3, 5]}, workingdir="test_wf7_{}".format(plugin))
+    wf = NewWorkflow(name="wf7", inputs={"wfa": [3, 5]}, workingdir="test_wf7_{}".format(plugin))
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
 
     wf.add(na)
     # connecting the node with inputs from the workflow
-    wf.connect_workflow("NA", "wf_a", "a")
+    wf.connect_workflow("NA", "wfa", "a")
     wf.map(mapper="a")
     wf.run(plugin=plugin)
 
@@ -645,13 +643,13 @@ def test_workflow_7(plugin):
 def test_workflow_7a(plugin):
     """using inputs for workflow and connect(None...)"""
     # adding inputs to the workflow directly
-    wf = NewWorkflow(name="wf7a", inputs={"wf_a": [3, 5]}, workingdir="test_wf7a_{}".format(plugin))
+    wf = NewWorkflow(name="wf7a", inputs={"wfa": [3, 5]}, workingdir="test_wf7a_{}".format(plugin))
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
 
     wf.add(na)
     # if connect has None as the first arg, it is the same as connect_workflow
-    wf.connect(None, "wf_a", "NA", "a")
+    wf.connect(None, "wfa", "NA", "a")
     wf.map(mapper="a")
     wf.run(plugin=plugin)
 
@@ -668,11 +666,11 @@ def test_workflow_7a(plugin):
 @python35_only
 def test_workflow_7b(plugin):
     """using inputs for workflow and kwarg arg in add (instead of connect)"""
-    wf = NewWorkflow(name="wf7b", inputs={"wf_a": [3, 5]}, workingdir="test_wf7b_{}".format(plugin))
+    wf = NewWorkflow(name="wf7b", inputs={"wfa": [3, 5]}, workingdir="test_wf7b_{}".format(plugin))
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
     # using kwrg argument in the add method (instead of connect or connect_workflow
-    wf.add(na, a="wf_a")
+    wf.add(na, a="wfa")
     wf.map(mapper="a")
     wf.run(plugin=plugin)
 
@@ -875,6 +873,7 @@ def test_workflow_12(plugin):
     key_sort = list(expected[0][0].keys())
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.result["NA_out"].sort(key=lambda t: [t[0][key] for key in key_sort])
+    #pdb.set_trace()
     for i, res in enumerate(expected):
         assert wf.result["NA_out"][i][0] == res[0]
         assert wf.result["NA_out"][i][1] == res[1]
@@ -905,65 +904,51 @@ def test_workflow_12a(plugin):
     wf.add(nb)
     wf.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]})
     wf.connect("NA", "out", "NB", "a")
-    wf.run(plugin=plugin)
 
     # wf_out can't be used twice in wf.result
     with pytest.raises(Exception) as exinfo:
-        wf.result
+        wf.run(plugin=plugin)
     assert str(exinfo.value) == "the key wf_out is already used in workflow.result"
 
 # tests for a workflow that have its own input and mapper
-# WIP
-@pytest.mark.xfail(reason="WIP")
+
+
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_13(plugin):
     """using inputs for workflow and connect_workflow"""
-    wf = NewWorkflow(name="wf9", inputs={"wf_a": [3, 5]}, mapper="wf_a", workingdir="test_wf12_{}".format(plugin))
+    wf = NewWorkflow(name="wf13", inputs={"wfa": [3, 5]}, mapper="wfa", workingdir="test_wf13_{}".format(plugin),
+                     outputs_nm=[("NA", "out", "NA_out")])
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
     wf.add(na)
-    wf.connect_workflow("NA", "wf_a", "a")
-
-    assert len(wf.inner_workflows) == 2
-    assert wf.inner_workflows[0].mapper is None
-    assert wf.inner_workflows[0].inputs == {'wf9(0,).wf_a': 3}
-    assert wf.inner_workflows[1].inputs == {'wf9(1,).wf_a': 5}
+    wf.connect_workflow("NA", "wfa", "a")
     wf.run(plugin=plugin)
 
-    expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
-    key_sort = list(expected[0][0].keys())
-    expected.sort(key=lambda t: [t[0][key] for key in key_sort])
-    wf.inner_workflows[0].nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
+    expected = [({"wf13.wfa": 3}, [({"NA.a": 3}, 5)]),
+                ({'wf13.wfa': 5}, [({"NA.a": 5}, 7)])]
     for i, res in enumerate(expected):
-        assert wf.inner_workflows[i].nodes[0].result["out"][0][0] == res[0]
-        assert wf.inner_workflows[i].nodes[0].result["out"][0][1] == res[1]
+        assert wf.result["NA_out"][i][0] == res[0]
+        assert wf.result["NA_out"][i][1][0][0] == res[1][0][0]
+        assert wf.result["NA_out"][i][1][0][1] == res[1][0][1]
 
 
-@pytest.mark.xfail(reason="WIP")
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_13a(plugin):
     """using inputs for workflow and connect_workflow"""
-    wf = NewWorkflow(name="wf9", inputs={"wf_a": [3, 5]}, mapper="wf_a", workingdir="test_wf12a_{}".format(plugin))
+    wf = NewWorkflow(name="wf13a", inputs={"wfa": [3, 5]}, mapper="wfa", workingdir="test_wf13a_{}".format(plugin),
+                     outputs_nm=[("NA", "out", "NA_out")])
     interf_addvar = Function_Interface(fun_addvar, ["out"])
     na = NewNode(name="NA", interface=interf_addvar, base_dir="na", mapper="b", inputs={"b": [10, 20]})
     wf.add(na)
-    wf.connect_workflow("NA", "wf_a", "a")
-
-    assert len(wf.inner_workflows) == 2
-    assert wf.inner_workflows[0].mapper is None
-    assert wf.inner_workflows[0].inputs == {'wf9(0,).wf_a': 3}
-    assert wf.inner_workflows[1].inputs == {'wf9(1,).wf_a': 5}
+    wf.connect_workflow("NA", "wfa", "a")
     wf.run(plugin=plugin)
 
-    expected = [[({"NA.a": 3, "NA.b": 10}, 13), ({"NA.a": 3, "NA.b": 20}, 23)],
-                [({"NA.a": 5, "NA.b": 10}, 15), ({"NA.a": 5, "NA.b": 20}, 25)]]
-    key_sort = list(expected[0][0][0].keys())
-    for exp in expected:
-        exp.sort(key=lambda t: [t[0][key] for key in key_sort])
-    wf.inner_workflows[0].nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
-    for i, res_l in enumerate(expected):
-        for j, res in enumerate(res_l):
-            assert wf.inner_workflows[i].nodes[0].result["out"][j][0] == res[0]
-            assert wf.inner_workflows[i].nodes[0].result["out"][j][1] == res[1]
+    expected = [({"wf13a.wfa": 3}, [({"NA.a": 3, "NA.b": 10}, 13), ({"NA.a": 3, "NA.b": 20}, 23)]),
+                ({'wf13a.wfa': 5}, [({"NA.a": 5, "NA.b": 10}, 15), ({"NA.a": 5, "NA.b": 20}, 25)])]
+    for i, res in enumerate(expected):
+        assert wf.result["NA_out"][i][0] == res[0]
+        for j in range(len(res[1])):
+            assert wf.result["NA_out"][i][1][j][0] == res[1][j][0]
+            assert wf.result["NA_out"][i][1][j][1] == res[1][j][1]

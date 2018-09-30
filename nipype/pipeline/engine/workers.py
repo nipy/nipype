@@ -85,12 +85,13 @@ class DaskWorker(Worker):
 
 
     def run_el(self, interface, inp):
-        print("DASK, run_el: ", interface, inp)
-        x = self.client.submit(interface, inp[0], inp[1])
+        print("DASK, run_el: ", interface, inp, time.time())
+        # dask  doesn't copy the node second time, so it doesn't see that I change input in the meantime (??)
+        x = self.client.submit(interface, inp[0], inp[1], time.time())
         print("DASK, status: ", x.status)
         # this important, otherwise dask will not finish the job
         x.add_done_callback(lambda x: print("DONE ", interface, inp))
-        #print("res", x.result())
+        print("res", x.result())
 
 
     def close(self):
