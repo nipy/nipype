@@ -874,6 +874,7 @@ def test_workflow_12(plugin):
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.result["NA_out"].sort(key=lambda t: [t[0][key] for key in key_sort])
     #pdb.set_trace()
+    wf.finished_all
     for i, res in enumerate(expected):
         assert wf.result["NA_out"][i][0] == res[0]
         assert wf.result["NA_out"][i][1] == res[1]
@@ -925,6 +926,7 @@ def test_workflow_13(plugin):
     wf.connect_workflow("NA", "wfa", "a")
     wf.run(plugin=plugin)
 
+    assert wf.finished_all
     expected = [({"wf13.wfa": 3}, [({"NA.a": 3}, 5)]),
                 ({'wf13.wfa': 5}, [({"NA.a": 5}, 7)])]
     for i, res in enumerate(expected):
@@ -945,6 +947,7 @@ def test_workflow_13a(plugin):
     wf.connect_workflow("NA", "wfa", "a")
     wf.run(plugin=plugin)
 
+    assert wf.finished_all
     expected = [({"wf13a.wfa": 3}, [({"NA.a": 3, "NA.b": 10}, 13), ({"NA.a": 3, "NA.b": 20}, 23)]),
                 ({'wf13a.wfa': 5}, [({"NA.a": 5, "NA.b": 10}, 15), ({"NA.a": 5, "NA.b": 20}, 25)])]
     for i, res in enumerate(expected):
@@ -952,3 +955,177 @@ def test_workflow_13a(plugin):
         for j in range(len(res[1])):
             assert wf.result["NA_out"][i][1][j][0] == res[1][j][0]
             assert wf.result["NA_out"][i][1][j][1] == res[1][j][1]
+
+
+# workflow as a node
+
+@pytest.mark.parametrize("plugin", Plugins)
+@python35_only
+def test_workflow_14(plugin):
+    """workflow with a workflow as a node"""
+    interf_addtwo = Function_Interface(fun_addtwo, ["out"])
+    na = NewNode(name="NA", interface=interf_addtwo, base_dir="na", inputs={"a": 3})
+    wfa = NewWorkflow(name="wfa", workingdir="test_wfa",
+                      outputs_nm=[("NA", "out", "NA_out")])
+    wfa.add(na)
+
+    wf = NewWorkflow(name="wf14", workingdir="test_wf14_{}".format(plugin),
+                     outputs_nm=[("wfa", "NA_out", "wfa_out")])
+    wf.add(wfa)
+    wf.run(plugin=plugin)
+
+    assert wf.finished_all
+    expected = [({"NA.a": 3}, 5)]
+    for i, res in enumerate(expected):
+        assert wf.result["wfa_out"][i][0] == res[0]
+        assert wf.result["wfa_out"][i][1] == res[1]
+
+
+@pytest.mark.parametrize("plugin", Plugins)
+@python35_only
+def test_workflow_14a(plugin):
+    """workflow with a workflow as a node (using connect_workflow in wfa)"""
+    interf_addtwo = Function_Interface(fun_addtwo, ["out"])
+    na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
+    wfa = NewWorkflow(name="wfa", workingdir="test_wfa", inputs={"a": 3},
+                      outputs_nm=[("NA", "out", "NA_out")])
+    wfa.add(na)
+    wfa.connect_workflow("NA", "a", "a")
+
+    wf = NewWorkflow(name="wf14a", workingdir="test_wf14a_{}".format(plugin),
+                     outputs_nm=[("wfa", "NA_out", "wfa_out")])
+    wf.add(wfa)
+    wf.run(plugin=plugin)
+
+    assert wf.finished_all
+    expected = [({"NA.a": 3}, 5)]
+    for i, res in enumerate(expected):
+        assert wf.result["wfa_out"][i][0] == res[0]
+        assert wf.result["wfa_out"][i][1] == res[1]
+
+
+@pytest.mark.parametrize("plugin", Plugins)
+@python35_only
+def test_workflow_14b(plugin):
+    """workflow with a workflow as a node (using connect_workflow in wfa and wf)"""
+    interf_addtwo = Function_Interface(fun_addtwo, ["out"])
+    na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
+    wfa = NewWorkflow(name="wfa", workingdir="test_wfa",
+                      outputs_nm=[("NA", "out", "NA_out")])
+    wfa.add(na)
+    wfa.connect_workflow("NA", "a", "a")
+
+    wf = NewWorkflow(name="wf14b", workingdir="test_wf14b_{}".format(plugin),
+                     outputs_nm=[("wfa", "NA_out", "wfa_out")], inputs={"a": 3})
+    wf.add(wfa)
+    wf.connect_workflow("wfa", "a", "a")
+    wf.run(plugin=plugin)
+
+    assert wf.finished_all
+    expected = [({"NA.a": 3}, 5)]
+    for i, res in enumerate(expected):
+        assert wf.result["wfa_out"][i][0] == res[0]
+        assert wf.result["wfa_out"][i][1] == res[1]
+
+
+@pytest.mark.parametrize("plugin", Plugins)
+@python35_only
+def test_workflow_15(plugin):
+    """workflow with a workflow as a node with mapper (like 14 but with mapper)"""
+    interf_addtwo = Function_Interface(fun_addtwo, ["out"])
+    na = NewNode(name="NA", interface=interf_addtwo, base_dir="na",
+                 inputs={"a": [3, 5]}, mapper="a")
+    wfa = NewWorkflow(name="wfa", workingdir="test_wfa",
+                      outputs_nm=[("NA", "out", "NA_out")])
+    wfa.add(na)
+
+    wf = NewWorkflow(name="wf15", workingdir="test_wf15_{}".format(plugin),
+                     outputs_nm=[("wfa", "NA_out", "wfa_out")])
+    wf.add(wfa)
+    wf.run(plugin=plugin)
+    assert wf.finished_all
+    expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
+    for i, res in enumerate(expected):
+        assert wf.result["wfa_out"][i][0] == res[0]
+        assert wf.result["wfa_out"][i][1] == res[1]
+
+
+@pytest.mark.parametrize("plugin", Plugins)
+@python35_only
+def test_workflow_16(plugin):
+    """workflow with two nodes, second node without mapper"""
+    wf = NewWorkflow(name="wf16", workingdir="test_wf16_{}".format(plugin),
+                     outputs_nm=[("wfb", "NB_out"), ("NA", "out", "NA_out")])
+    interf_addtwo = Function_Interface(fun_addtwo, ["out"])
+    na = NewNode(name="NA", interface=interf_addtwo, base_dir="na", inputs={"a": 3})
+    wf.add(na)
+
+    # the second node does not have explicit mapper (but keeps the mapper from the NA node)
+    interf_addvar = Function_Interface(fun_addvar, ["out"])
+    nb = NewNode(name="NB", interface=interf_addvar, base_dir="nb")
+    wfb = NewWorkflow(name="wfb", workingdir="test_wfb", inputs={"b": 10},
+                      outputs_nm=[("NB", "out", "NB_out")])
+    wfb.add(nb)
+    wfb.connect_workflow("NB", "b", "b")
+    wfb.connect_workflow("NB", "a", "a")
+
+    wf.add(wfb)
+    wf.connect("NA", "out", "wfb", "a")
+    wf.run(plugin=plugin)
+
+    assert wf.finished_all
+    expected_A = [({"NA.a": 3}, 5)]
+    for i, res in enumerate(expected_A):
+        assert wf.result["NA_out"][i][0] == res[0]
+        assert wf.result["NA_out"][i][1] == res[1]
+
+    # TODO: the naming rememebrs only the node, doesnt remember that a came from NA...
+    # the naming should have names with workflows??
+    expected_B = [({"NB.a": 5, "NB.b": 10}, 15)]
+    for i, res in enumerate(expected_B):
+        assert wf.result["NB_out"][i][0] == res[0]
+        assert wf.result["NB_out"][i][1] == res[1]
+
+
+@pytest.mark.parametrize("plugin", Plugins)
+@python35_only
+def test_workflow_16a(plugin):
+    """workflow with two nodes, second node without mapper"""
+    wf = NewWorkflow(name="wf16a", workingdir="test_wf16a_{}".format(plugin),
+                     outputs_nm=[("wfb", "NB_out"), ("NA", "out", "NA_out")])
+    interf_addtwo = Function_Interface(fun_addtwo, ["out"])
+    na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
+    na.map(mapper="a", inputs={"a": [3, 5]})
+    wf.add(na)
+
+    # the second node does not have explicit mapper (but keeps the mapper from the NA node)
+    interf_addvar = Function_Interface(fun_addvar, ["out"])
+    nb = NewNode(name="NB", interface=interf_addvar, base_dir="nb")
+    wfb = NewWorkflow(name="wfb", workingdir="test_wfb", inputs={"b": 10},
+                      outputs_nm=[("NB", "out", "NB_out")])
+    wfb.add(nb)
+    wfb.connect_workflow("NB", "b", "b")
+    wfb.connect_workflow("NB", "a", "a")
+
+    # adding 2 nodes and create a connection (as it is now)
+    wf.add(wfb)
+    wf.connect("NA", "out", "wfb", "a")
+    assert wf.nodes[0].mapper == "NA.a"
+    wf.run(plugin=plugin)
+
+    assert wf.finished_all
+
+    expected_A = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
+    for i, res in enumerate(expected_A):
+        assert wf.result["NA_out"][i][0] == res[0]
+        assert wf.result["NA_out"][i][1] == res[1]
+
+    # TODO: the naming rememebrs only the node, doesnt remember that a came from NA...
+    # the naming should have names with workflows??
+    expected_B = [({"NB.a": 5, "NB.b": 10}, 15), ({"NB.a": 7, "NB.b": 10}, 17)]
+    key_sort = list(expected_B[0][0].keys())
+    expected_B.sort(key=lambda t: [t[0][key] for key in key_sort])
+    wf.result["NB_out"].sort(key=lambda t: [t[0][key] for key in key_sort])
+    for i, res in enumerate(expected_B):
+        assert wf.result["NB_out"][i][0] == res[0]
+        assert wf.result["NB_out"][i][1] == res[1]

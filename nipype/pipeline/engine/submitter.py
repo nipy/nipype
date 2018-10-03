@@ -29,11 +29,11 @@ class Submitter(object):
             raise Exception("plugin {} not available".format(self.plugin))
 
 
-    def submit_work(self, node):
+    def submit_node(self, node):
         for (i, ind) in enumerate(node.state.index_generator):
-            self._submit_work_el(node, i, ind)
+            self._submit_node_el(node, i, ind)
 
-    def _submit_work_el(self, node, i, ind):
+    def _submit_node_el(self, node, i, ind):
         logger.debug("SUBMIT WORKER, node: {}, ind: {}".format(node, ind))
         print("SUBMIT WORK", node.inputs)
         self.worker.run_el(node.run_interface_el, (i, ind))
@@ -50,7 +50,7 @@ class SubmitterNode(Submitter):
         self.node = node
 
     def run_node(self):
-        self.submit_work(self.node)
+        self.submit_node(self.node)
         while not self.node.finished_all:
             logger.debug("Submitter, in while, to_finish: {}".format(self.node))
             time.sleep(3)
@@ -65,23 +65,27 @@ class SubmitterWorkflow(Submitter):
         self._to_finish = []
 
 
-    def run_workflow(self):
-        if self.workflow.mapper:
-            self.workflow.inner_nodes = {}
-            for key in self.workflow._node_names.keys():
-                self.workflow.inner_nodes[key] = []
-            for (i, ind) in enumerate(self.workflow.state.index_generator):
-                print("LOOP", i, self._to_finish, self.node_line)
-                wf_inputs = self.workflow.state.state_values(ind)
-                new_workflow = deepcopy(self.workflow)
-                #pdb.set_trace()
-                new_workflow.preparing(wf_inputs=wf_inputs)
-                #pdb.set_trace()
-                self.run_workflow_el(workflow=new_workflow)
-                print("LOOP END", i, self._to_finish, self.node_line)
+    def run_workflow(self, workflow=None, ready=True):
+        if not workflow:
+            workflow = self.workflow
+
+        # TODO: should I havve inner_nodes for all workflow (to avoid if wf.mapper)??
+        if workflow.mapper:
+            for key in workflow._node_names.keys():
+                workflow.inner_nodes[key] = []
+            for (i, ind) in enumerate(workflow.state.index_generator):
+                new_workflow = deepcopy(workflow)
+                new_workflow.parent_wf = workflow
+                if ready:
+                    self.run_workflow_el(new_workflow, i, ind)
+                else:
+                    self.node_line.append((new_workflow, i, ind))
         else:
-            self.workflow.preparing(wf_inputs=self.workflow.inputs)
-            self.run_workflow_el(workflow=self.workflow)
+            if ready:
+                workflow.preparing(wf_inputs=workflow.inputs)
+                self.run_workflow_nd(workflow=workflow)
+            else:
+                self.node_line.append((workflow, 0, ()))
 
         # this parts submits nodes that are waiting to be run
         # it should stop when nothing is waiting
@@ -94,21 +98,33 @@ class SubmitterWorkflow(Submitter):
             logger.debug("Submitter, in while, to_finish: {}".format(self._to_finish))
             time.sleep(3)
 
+    def run_workflow_el(self, workflow, i, ind, collect_inp=False):
+        print("LOOP", i, self._to_finish, self.node_line)
+        # TODO: can I simplify and remove collect inp? where should it be?
+        if collect_inp:
+            st_inputs, wf_inputs = workflow._collecting_input_el(ind)
+        else:
+            wf_inputs = workflow.state.state_values(ind)
+        workflow.preparing(wf_inputs=wf_inputs)
+        self.run_workflow_nd(workflow=workflow)
+        print("LOOP END", i, self._to_finish, self.node_line)
 
-    def run_workflow_el(self, workflow):
-        #pdb.set_trace()
+    def run_workflow_nd(self, workflow):
         for (i_n, node) in enumerate(workflow.graph_sorted):
-            if self.workflow.mapper:
-                self.workflow.inner_nodes[node.name].append(node)
-            node.prepare_state_input()
+            if workflow.parent_wf and workflow.parent_wf.mapper: # for now if parent_wf, parent_wf has to have mapper
+                workflow.parent_wf.inner_nodes[node.name].append(node)
 
+            node.prepare_state_input()
 
             print("RUN WF", node.name, node.inputs)
             self._to_finish.append(node)
             # submitting all the nodes who are self sufficient (self.workflow.graph is already sorted)
             if node.ready2run:
+                if hasattr(node, 'nodedir'):
+                    self.submit_node(node)
+                else:  # it's workflow
+                    self.run_workflow(workflow=node)
 
-                self.submit_work(node)
             # if its not, its been added to a line
             else:
                 break
@@ -117,12 +133,16 @@ class SubmitterWorkflow(Submitter):
             if i_n == len(workflow.graph_sorted) - 1:
                 i_n += 1
 
+
         # all nodes that are not self sufficient (not ready to run) will go to the line
         # iterating over all elements
         for nn in list(workflow.graph_sorted)[i_n:]:
-            for (i, ind) in enumerate(nn.state.index_generator):
-                self._to_finish.append(nn)
-                self.node_line.append((nn, i, ind))
+            if hasattr(nn, 'nodedir'):
+                for (i, ind) in enumerate(nn.state.index_generator):
+                    self._to_finish.append(nn)
+                    self.node_line.append((nn, i, ind))
+            else: #wf
+                self.run_workflow(workflow=nn, ready=False)
 
 
     # for now without callback, so checking all nodes (with ind) in some order
@@ -130,11 +150,19 @@ class SubmitterWorkflow(Submitter):
         print("NODES CHECK BEG", self.node_line)
         _to_remove = []
         for (to_node, i, ind) in self.node_line:
-            if to_node.checking_input_el(ind):
-                self._submit_work_el(to_node, i, ind)
-                _to_remove.append((to_node, i, ind))
-            else:
-                pass
+            if hasattr(to_node, 'nodedir'):
+                if to_node.checking_input_el(ind):
+                    self._submit_node_el(to_node, i, ind)
+                    _to_remove.append((to_node, i, ind))
+                else:
+                    pass
+            else: #wf
+                if to_node.checking_input_el(ind):
+                    self.run_workflow_el(workflow=to_node, i=i, ind=ind, collect_inp=True)
+                    _to_remove.append((to_node, i, ind))
+                else:
+                    pass
+
         # can't remove during iterating
         for rn in _to_remove:
             self.node_line.remove(rn)

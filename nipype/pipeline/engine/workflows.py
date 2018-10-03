@@ -1096,6 +1096,12 @@ class NewBase(object):
         self._state = state.State(mapper=self._mapper, node_name=self.name, other_mappers=self._other_mappers)
         self._output = {}
         self._result = {}
+        # flag that says if the node/wf is ready to run (has all input)
+        self.ready2run = True
+        # needed outputs from other nodes if the node part of a wf
+        self.needed_outputs = []
+        # flag that says if node finished all jobs
+        self._finished_all = False
 
 
     # TBD
@@ -1140,6 +1146,40 @@ class NewBase(object):
         self._state.prepare_state_input(state_inputs=self.state_inputs)
 
 
+    # dj: this is not used for a single node
+    def _collecting_input_el(self, ind):
+        """collecting all inputs required to run the node (for specific state element)"""
+        state_dict = self.state.state_values(ind)
+        inputs_dict = {k: state_dict[k] for k in self._inputs.keys()}
+        # reading extra inputs that come from previous nodes
+        for (from_node, from_socket, to_socket) in self.needed_outputs:
+            dir_nm_el_from = "_".join(["{}:{}".format(i, j) for i, j in list(state_dict.items())
+                                       if i in list(from_node._state_inputs.keys())])
+            file_from = os.path.join(from_node.nodedir, dir_nm_el_from, from_socket+".txt")
+            with open(file_from) as f:
+                inputs_dict["{}.{}".format(self.name, to_socket)] = eval(f.readline())
+        return state_dict, inputs_dict
+
+
+    def checking_input_el(self, ind):
+        """checking if all inputs are available (for specific state element)"""
+        try:
+            self._collecting_input_el(ind)
+            return True
+        except: #TODO specify
+            return False
+
+   # checking if all outputs are saved
+    @property
+    def finished_all(self):
+        # once _finished_all os True, this should not change
+        logger.debug('finished_all {}'.format(self._finished_all))
+        if self._finished_all:
+            return self._finished_all
+        else:
+            return self._check_all_results()
+
+
 
 class NewNode(NewBase):
     def __init__(self, name, interface, inputs=None, mapper=None, join_by=None,
@@ -1154,14 +1194,8 @@ class NewNode(NewBase):
         # adding node name to the interface's name mapping
         self.interface.input_map = dict((key, "{}.{}".format(self.name, value))
                                          for (key, value) in self.interface.input_map.items())
-        # needed outputs from other nodes if the node part of a wf
-        self.needed_outputs = []
         # output names taken from interface output name
         self.output_names = self.interface._output_nm
-        # flag that says if node finished all jobs
-        self._finished_all = False
-        # flag that says if the node is ready to run (has all input)
-        self.ready2run = True
 
 
     # dj: not sure if I need it
@@ -1257,49 +1291,12 @@ class NewNode(NewBase):
     def _collecting_output(self):
         for key_out in self.output_names:
             self._output[key_out] = {}
-            #pdb.set_trace()
             for (i, ind) in enumerate(itertools.product(*self.state.all_elements)):
                 state_dict, inputs_dict = self._collecting_input_el(ind)
                 dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(state_dict.items())])
                 #pdb.set_trace()
                 self._output[key_out][dir_nm_el] = (state_dict, os.path.join(self.nodedir, dir_nm_el, key_out + ".txt"))
         return self._output
-
-
-    # dj: this is not used for a single node
-    def _collecting_input_el(self, ind):
-        """collecting all inputs required to run the node (for specific state element)"""
-        state_dict = self.state.state_values(ind)
-        inputs_dict = {k: state_dict[k] for k in self._inputs.keys()}
-        # reading extra inputs that come from previous nodes
-        for (from_node, from_socket, to_socket) in self.needed_outputs:
-            dir_nm_el_from = "_".join(["{}:{}".format(i, j) for i, j in list(state_dict.items())
-                                       if i in list(from_node._state_inputs.keys())])
-            file_from = os.path.join(from_node.nodedir, dir_nm_el_from, from_socket+".txt")
-            with open(file_from) as f:
-                inputs_dict["{}.{}".format(self.name, to_socket)] = eval(f.readline())
-        return state_dict, inputs_dict
-
-
-    def checking_input_el(self, ind):
-        """checking if all inputs are available (for specific state element)"""
-        try:
-            self._collecting_input_el(ind)
-            return True
-        except: #TODO specify
-            return False
-
-
-    # checking if all outputs are saved
-    @property
-    def finished_all(self):
-        # once _finished_all os True, this should not change
-        print("in finished all", self.inputs, self.nodedir)
-        logger.debug('finished_all {}'.format(self._finished_all))
-        if self._finished_all:
-            return self._finished_all
-        else:
-            return self._check_all_results()
 
 
     # dj: version without join
@@ -1364,6 +1361,10 @@ class NewWorkflow(NewBase):
         # list of (nodename, output name in the name, output name in wf) or (nodename, output name in the name)
         self.outputs_nm = outputs_nm
 
+        # nodes that are created when the workflow has mapper (key: node name, value: list of nodes)
+        self.inner_nodes = {}
+        # in case of inner workflow this points to the main/parent workflow
+        self.parent_wf = None
         # dj not sure what was the motivation, wf_klasses gives an empty list
         #mro = self.__class__.mro()
         #wf_klasses = mro[:mro.index(NewWorkflow)][::-1]
@@ -1389,6 +1390,10 @@ class NewWorkflow(NewBase):
     def nodes(self):
         return self._nodes
 
+    @property
+    def graph_sorted(self):
+        # TODO: should I always update the graph?
+        return list(nx.topological_sort(self.graph))
 
     def add_nodes(self, nodes):
         """adding nodes without defining connections"""
@@ -1437,13 +1442,22 @@ class NewWorkflow(NewBase):
                 node.inputs.update({"{}.{}".format(node_nm, inp_nd): wf_inputs["{}.{}".format(self.name, inp_wf)]})
             else:
                 raise Exception("{}.{} not in the workflow inputs".format(self.name, inp_wf))
+        # TODO if should be later, should unify more workingdir and nodedir
         for nn in self.graph_sorted:
             if self.mapper:
                 dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(wf_inputs.items())])
-                nn.nodedir = os.path.join(self.workingdir, dir_nm_el, nn.nodedir)
+                if is_node(nn):
+                    # TODO: should be just nn.name?
+                    nn.nodedir = os.path.join(self.workingdir, dir_nm_el, nn.nodedir)
+                elif is_workflow(nn):
+                    nn.nodedir = os.path.join(self.workingdir, dir_nm_el, nn.name)
                 nn._finished_all = False # helps when mp is used
             else:
-                nn.nodedir = os.path.join(self.workingdir, nn.nodedir)
+                if is_node(nn):
+                    #TODO: should be just nn.name?
+                    nn.nodedir = os.path.join(self.workingdir, nn.nodedir)
+                elif is_workflow(nn):
+                    nn.workingdir = os.path.join(self.workingdir, nn.name)
             try:
                 for inp, (out_node, out_var) in self.connected_var[nn].items():
                     nn.ready2run = False #it has some history (doesnt have to be in the loop)
@@ -1463,17 +1477,16 @@ class NewWorkflow(NewBase):
 
 
     def run(self, plugin="serial"):
-        self.graph_sorted = list(nx.topological_sort(self.graph))
         #self.preparing(wf_inputs=self.inputs) # moved to submitter
         self.prepare_state_input()
         logger.debug('the sorted graph is: {}'.format(self.graph_sorted))
         submitter = sub.SubmitterWorkflow(workflow=self, plugin=plugin)
         submitter.run_workflow()
         submitter.close()
-        self._collecting_outpt()
+        self._collecting_output()
 
 
-    def _collecting_outpt(self):
+    def _collecting_output(self):
         # not sure, if I should collecto output of all nodes or only the ones that are used in wf.output
         self.node_outputs = {}
         for nn in self.graph:
@@ -1500,6 +1513,7 @@ class NewWorkflow(NewBase):
                         self._output[out_wf_nm] = self.node_outputs[node_nm][out_nd_nm]
                 else:
                     raise Exception("the key {} is already used in workflow.result".format(out_wf_nm))
+        return self._output
 
 
     def add(self, runnable, name=None, base_dir=None, inputs=None, output_nm=None, mapper=None,
@@ -1522,6 +1536,8 @@ class NewWorkflow(NewBase):
             node = NewNode(interface=runnable, base_dir=base_dir, name=name, inputs=inputs, mapper=mapper,
                            other_mappers=self._node_mappers, mem_gb_node=mem_gb)
         elif is_node(runnable):
+            node = runnable
+        elif is_workflow(runnable):
             node = runnable
         else:
             raise ValueError("Unknown workflow element: {!r}".format(runnable))
@@ -1554,6 +1570,7 @@ class NewWorkflow(NewBase):
         pass
 
 
+    # TODO: should try to merge with the function from Node
     def _reading_results(self):
         if self.outputs_nm:
             for out in self.outputs_nm:
@@ -1571,15 +1588,32 @@ class NewWorkflow(NewBase):
                         self._result[key_out].append((wf_inputs_dict, res_l))
                 else:
                     for key, val in self.output[key_out].items():
+                        #TODO: I think that val shouldn't be dict here...
+                        # TMP solution
+                        if type(val) is dict:
+                            val = [v for k,v in val.items()][0]
                         with open(val[1]) as fout:
                             logger.debug('Reading Results: file={}, st_dict={}'.format(val[1], val[0]))
                             self._result[key_out].append((val[0], eval(fout.readline())))
 
 
+    # dj: version without join
+    # TODO: might merge with the function from Node
+    def _check_all_results(self):
+        """checking if all files that should be created are present"""
+        for nn in self.graph_sorted:
+            if nn.name in self.inner_nodes.keys():
+                if not all([ni.finished_all for ni in self.inner_nodes[nn.name]]):
+                    return False
+            else:
+                if not nn.finished_all:
+                    return False
+        self._finished_all = True
+        return True
+
 
 def is_function(obj):
     return hasattr(obj, '__call__')
-
 
 def is_interface(obj):
     return type(obj) is aux.Function_Interface
@@ -1587,3 +1621,6 @@ def is_interface(obj):
 
 def is_node(obj):
     return type(obj) is NewNode
+
+def is_workflow(obj):
+    return type(obj) is NewWorkflow
