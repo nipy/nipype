@@ -529,7 +529,7 @@ def test_workflow_5(plugin):
 
     wf.add(na)
     # using the map method after add (using mapper for the last added node as default)
-    wf.map(mapper="a", inputs={"a": [3, 5]})
+    wf.map_node(mapper="a", inputs={"a": [3, 5]})
 
     sub = Submitter(runnable=wf, plugin=plugin)
     sub.run()
@@ -552,7 +552,7 @@ def test_workflow_5a(plugin):
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
 
-    wf.add(na).map(mapper="a", inputs={"a": [3, 5]})
+    wf.add(na).map_node(mapper="a", inputs={"a": [3, 5]})
 
     sub = Submitter(runnable=wf, plugin=plugin)
     sub.run()
@@ -579,9 +579,9 @@ def test_workflow_6(plugin):
     nb = NewNode(name="NB", interface=interf_addvar, base_dir="nb")
     # using the map methods after add (using mapper for the last added nodes as default)
     wf.add(na)
-    wf.map(mapper="a", inputs={"a": [3, 5]})
+    wf.map_node(mapper="a", inputs={"a": [3, 5]})
     wf.add(nb)
-    wf.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]})
+    wf.map_node(mapper=("NA.a", "b"), inputs={"b": [2, 1]})
     wf.connect("NA", "out", "NB", "a")
 
     sub = Submitter(runnable=wf, plugin=plugin)
@@ -618,9 +618,9 @@ def test_workflow_6a(plugin):
     # using the map method after add (specifying the node)
     wf.add(na)
     wf.add(nb)
-    wf.map(mapper="a", inputs={"a": [3, 5]}, node=na)
+    wf.map_node(mapper="a", inputs={"a": [3, 5]}, node=na)
     # TODO: should we se ("a", "c") instead?? shold I forget "NA.a" value?
-    wf.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]}, node=nb)
+    wf.map_node(mapper=("NA.a", "b"), inputs={"b": [2, 1]}, node=nb)
     wf.connect("NA", "out", "NB", "a")
 
     sub = Submitter(runnable=wf, plugin=plugin)
@@ -657,8 +657,8 @@ def test_workflow_6b(plugin):
 
     wf.add(na)
     wf.add(nb, a="NA.out")
-    wf.map(mapper="a", inputs={"a": [3, 5]}, node=na)
-    wf.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]}, node=nb)
+    wf.map_node(mapper="a", inputs={"a": [3, 5]}, node=na)
+    wf.map_node(mapper=("NA.a", "b"), inputs={"b": [2, 1]}, node=nb)
 
     sub = Submitter(runnable=wf, plugin=plugin)
     sub.run()
@@ -695,7 +695,7 @@ def test_workflow_7(plugin):
     wf.add(na)
     # connecting the node with inputs from the workflow
     wf.connect_wf_input("wfa", "NA", "a")
-    wf.map(mapper="a")
+    wf.map_node(mapper="a")
 
     sub = Submitter(runnable=wf, plugin=plugin)
     sub.run()
@@ -719,7 +719,7 @@ def test_workflow_7a(plugin):
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
     # using kwrg argument in the add method (instead of connect or connect_wf_input
     wf.add(na, a="wfa")
-    wf.map(mapper="a")
+    wf.map_node(mapper="a")
 
     sub = Submitter(runnable=wf, plugin=plugin)
     sub.run()
@@ -781,10 +781,10 @@ def test_workflow_9(plugin):
     """using add(interface) method and mapper from previous nodes"""
     wf = NewWorkflow(name="wf9", workingdir="test_wf9_{}".format(plugin))
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
-    wf.add(name="NA", runnable=interf_addtwo, base_dir="na").map(mapper="a", inputs={"a": [3, 5]})
+    wf.add(name="NA", runnable=interf_addtwo, base_dir="na").map_node(mapper="a", inputs={"a": [3, 5]})
     interf_addvar = Function_Interface(fun_addvar, ["out"])
     # _NA means that I'm using mapper from the NA node, it's the same as ("NA.a", "b")
-    wf.add(name="NB", runnable=interf_addvar, base_dir="nb", a="NA.out").map(mapper=("_NA", "b"), inputs={"b": [2, 1]})
+    wf.add(name="NB", runnable=interf_addvar, base_dir="nb", a="NA.out").map_node(mapper=("_NA", "b"), inputs={"b": [2, 1]})
 
     sub = Submitter(runnable=wf, plugin=plugin)
     sub.run()
@@ -813,10 +813,10 @@ def test_workflow_10(plugin):
     """using add(interface) method and scalar mapper from previous nodes"""
     wf = NewWorkflow(name="wf10", workingdir="test_wf10_{}".format(plugin))
     interf_addvar1 = Function_Interface(fun_addvar, ["out"])
-    wf.add(name="NA", runnable=interf_addvar1, base_dir="na").map(mapper=("a", "b"), inputs={"a": [3, 5], "b": [0, 10]})
+    wf.add(name="NA", runnable=interf_addvar1, base_dir="na").map_node(mapper=("a", "b"), inputs={"a": [3, 5], "b": [0, 10]})
     interf_addvar2 = Function_Interface(fun_addvar, ["out"])
     # _NA means that I'm using mapper from the NA node, it's the same as (("NA.a", NA.b), "b")
-    wf.add(name="NB", runnable=interf_addvar2, base_dir="nb", a="NA.out").map(mapper=("_NA", "b"), inputs={"b": [2, 1]})
+    wf.add(name="NB", runnable=interf_addvar2, base_dir="nb", a="NA.out").map_node(mapper=("_NA", "b"), inputs={"b": [2, 1]})
 
     sub = Submitter(runnable=wf, plugin=plugin)
     sub.run()
@@ -845,10 +845,10 @@ def test_workflow_10a(plugin):
     """using add(interface) method and vector mapper from previous nodes"""
     wf = NewWorkflow(name="wf10a", workingdir="test_wf10a_{}".format(plugin))
     interf_addvar1 = Function_Interface(fun_addvar, ["out"])
-    wf.add(name="NA", runnable=interf_addvar1, base_dir="na").map(mapper=["a", "b"], inputs={"a": [3, 5], "b": [0, 10]})
+    wf.add(name="NA", runnable=interf_addvar1, base_dir="na").map_node(mapper=["a", "b"], inputs={"a": [3, 5], "b": [0, 10]})
     interf_addvar2 = Function_Interface(fun_addvar, ["out"])
     # _NA means that I'm using mapper from the NA node, it's the same as (["NA.a", NA.b], "b")
-    wf.add(name="NB", runnable=interf_addvar2, base_dir="nb", a="NA.out").map(mapper=("_NA", "b"), inputs={"b": [[2, 1], [0, 0]]})
+    wf.add(name="NB", runnable=interf_addvar2, base_dir="nb", a="NA.out").map_node(mapper=("_NA", "b"), inputs={"b": [[2, 1], [0, 0]]})
 
     sub = Submitter(runnable=wf, plugin=plugin)
     sub.run()
@@ -879,12 +879,12 @@ def test_workflow_11(plugin):
     """using add(interface) method and vector mapper from previous two nodes"""
     wf = NewWorkflow(name="wf11", workingdir="test_wf11_{}".format(plugin))
     interf_addvar1 = Function_Interface(fun_addvar, ["out"])
-    wf.add(name="NA", runnable=interf_addvar1, base_dir="na").map(mapper=("a", "b"), inputs={"a": [3, 5], "b": [0, 10]})
+    wf.add(name="NA", runnable=interf_addvar1, base_dir="na").map_node(mapper=("a", "b"), inputs={"a": [3, 5], "b": [0, 10]})
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
-    wf.add(name="NB", runnable=interf_addtwo, base_dir="nb").map(mapper="a", inputs={"a": [2, 1]})
+    wf.add(name="NB", runnable=interf_addtwo, base_dir="nb").map_node(mapper="a", inputs={"a": [2, 1]})
     interf_addvar2 = Function_Interface(fun_addvar, ["out"])
     # _NA, _NB means that I'm using mappers from the NA/NB nodes, it's the same as [("NA.a", NA.b), "NB.a"]
-    wf.add(name="NC", runnable=interf_addvar2, base_dir="nc", a="NA.out", b="NB.out").map(mapper=["_NA", "_NB"]) # TODO: this should eb default?
+    wf.add(name="NC", runnable=interf_addvar2, base_dir="nc", a="NA.out", b="NB.out").map_node(mapper=["_NA", "_NB"]) # TODO: this should eb default?
 
     sub = Submitter(runnable=wf, plugin=plugin)
     sub.run()
@@ -916,7 +916,7 @@ def test_workflow_11(plugin):
 def test_workflow_12(plugin):
     """testing if wf.result works (the same workflow as in test_workflow_6)"""
     wf = NewWorkflow(name="wf12", workingdir="test_wf12_{}".format(plugin),
-                     outputs_nm=[("NA", "out", "NA_out"), ("NB", "out")])
+                     wf_output_names=[("NA", "out", "NA_out"), ("NB", "out")])
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
 
@@ -924,9 +924,9 @@ def test_workflow_12(plugin):
     nb = NewNode(name="NB", interface=interf_addvar, base_dir="nb")
     # using the map methods after add (using mapper for the last added nodes as default)
     wf.add(na)
-    wf.map(mapper="a", inputs={"a": [3, 5]})
+    wf.map_node(mapper="a", inputs={"a": [3, 5]})
     wf.add(nb)
-    wf.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]})
+    wf.map_node(mapper=("NA.a", "b"), inputs={"b": [2, 1]})
     wf.connect("NA", "out", "NB", "a")
 
     sub = Submitter(runnable=wf, plugin=plugin)
@@ -943,7 +943,7 @@ def test_workflow_12(plugin):
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.result["NA_out"].sort(key=lambda t: [t[0][key] for key in key_sort])
     #pdb.set_trace()
-    assert wf.finished_all
+    assert wf.is_complete
     for i, res in enumerate(expected):
         assert wf.result["NA_out"][i][0] == res[0]
         assert wf.result["NA_out"][i][1] == res[1]
@@ -962,7 +962,7 @@ def test_workflow_12(plugin):
 def test_workflow_12a(plugin):
     """testing if wf.result raises exceptione (the same workflow as in test_workflow_6)"""
     wf = NewWorkflow(name="wf12a", workingdir="test_wf12a_{}".format(plugin),
-                     outputs_nm=[("NA", "out", "wf_out"), ("NB", "out", "wf_out")])
+                     wf_output_names=[("NA", "out", "wf_out"), ("NB", "out", "wf_out")])
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
 
@@ -970,9 +970,9 @@ def test_workflow_12a(plugin):
     nb = NewNode(name="NB", interface=interf_addvar, base_dir="nb")
     # using the map methods after add (using mapper for the last added nodes as default)
     wf.add(na)
-    wf.map(mapper="a", inputs={"a": [3, 5]})
+    wf.map_node(mapper="a", inputs={"a": [3, 5]})
     wf.add(nb)
-    wf.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]})
+    wf.map_node(mapper=("NA.a", "b"), inputs={"b": [2, 1]})
     wf.connect("NA", "out", "NB", "a")
 
     sub = Submitter(runnable=wf, plugin=plugin)
@@ -989,7 +989,7 @@ def test_workflow_12a(plugin):
 def test_workflow_13(plugin):
     """using inputs for workflow and connect_wf_input"""
     wf = NewWorkflow(name="wf13", inputs={"wfa": [3, 5]}, mapper="wfa", workingdir="test_wf13_{}".format(plugin),
-                     outputs_nm=[("NA", "out", "NA_out")])
+                     wf_output_names=[("NA", "out", "NA_out")])
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
     wf.add(na)
@@ -999,7 +999,7 @@ def test_workflow_13(plugin):
     sub.run()
     sub.close()
 
-    assert wf.finished_all
+    assert wf.is_complete
     expected = [({"wf13.wfa": 3}, [({"NA.a": 3}, 5)]),
                 ({'wf13.wfa': 5}, [({"NA.a": 5}, 7)])]
     for i, res in enumerate(expected):
@@ -1011,9 +1011,9 @@ def test_workflow_13(plugin):
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_13a(plugin):
-    """using inputs for workflow and connect_wf_input"""
+    """using inputs for workflow and connect_wf_input (the node has 2 inputs)"""
     wf = NewWorkflow(name="wf13a", inputs={"wfa": [3, 5]}, mapper="wfa", workingdir="test_wf13a_{}".format(plugin),
-                     outputs_nm=[("NA", "out", "NA_out")])
+                     wf_output_names=[("NA", "out", "NA_out")])
     interf_addvar = Function_Interface(fun_addvar, ["out"])
     na = NewNode(name="NA", interface=interf_addvar, base_dir="na", mapper="b", inputs={"b": [10, 20]})
     wf.add(na)
@@ -1023,7 +1023,7 @@ def test_workflow_13a(plugin):
     sub.run()
     sub.close()
 
-    assert wf.finished_all
+    assert wf.is_complete
     expected = [({"wf13a.wfa": 3}, [({"NA.a": 3, "NA.b": 10}, 13), ({"NA.a": 3, "NA.b": 20}, 23)]),
                 ({'wf13a.wfa': 5}, [({"NA.a": 5, "NA.b": 10}, 15), ({"NA.a": 5, "NA.b": 20}, 25)])]
     for i, res in enumerate(expected):
@@ -1031,6 +1031,54 @@ def test_workflow_13a(plugin):
         for j in range(len(res[1])):
             assert wf.result["NA_out"][i][1][j][0] == res[1][j][0]
             assert wf.result["NA_out"][i][1][j][1] == res[1][j][1]
+
+
+@pytest.mark.parametrize("plugin", Plugins)
+@python35_only
+def test_workflow_13c(plugin):
+    """using inputs for workflow and connect_wf_input, using wf.map(mapper, inputs)"""
+    wf = NewWorkflow(name="wf13c", workingdir="test_wf13c_{}".format(plugin),
+                     wf_output_names=[("NA", "out", "NA_out")])
+    interf_addtwo = Function_Interface(fun_addtwo, ["out"])
+    na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
+    wf.add(na).map(mapper="wfa", inputs={"wfa": [3, 5]})
+    wf.connect_wf_input("wfa", "NA", "a")
+
+    sub = Submitter(runnable=wf, plugin=plugin)
+    sub.run()
+    sub.close()
+
+    assert wf.is_complete
+    expected = [({"wf13c.wfa": 3}, [({"NA.a": 3}, 5)]),
+                ({'wf13c.wfa': 5}, [({"NA.a": 5}, 7)])]
+    for i, res in enumerate(expected):
+        assert wf.result["NA_out"][i][0] == res[0]
+        assert wf.result["NA_out"][i][1][0][0] == res[1][0][0]
+        assert wf.result["NA_out"][i][1][0][1] == res[1][0][1]
+
+    @pytest.mark.parametrize("plugin", Plugins)
+    @python35_only
+    def test_workflow_13b(plugin):
+        """using inputs for workflow and connect_wf_input, using wf.map(mapper)"""
+        wf = NewWorkflow(name="wf13b", inputs={"wfa": [3, 5]},
+                         workingdir="test_wf13b_{}".format(plugin),
+                         wf_output_names=[("NA", "out", "NA_out")])
+        interf_addtwo = Function_Interface(fun_addtwo, ["out"])
+        na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
+        wf.add(na).map(mapper="wfa")
+        wf.connect_wf_input("wfa", "NA", "a")
+
+        sub = Submitter(runnable=wf, plugin=plugin)
+        sub.run()
+        sub.close()
+
+        assert wf.is_complete
+        expected = [({"wf13b.wfa": 3}, [({"NA.a": 3}, 5)]),
+                    ({'wf13b.wfa': 5}, [({"NA.a": 5}, 7)])]
+        for i, res in enumerate(expected):
+            assert wf.result["NA_out"][i][0] == res[0]
+            assert wf.result["NA_out"][i][1][0][0] == res[1][0][0]
+            assert wf.result["NA_out"][i][1][0][1] == res[1][0][1]
 
 
 # workflow as a node
@@ -1042,18 +1090,18 @@ def test_workflow_14(plugin):
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na", inputs={"a": 3})
     wfa = NewWorkflow(name="wfa", workingdir="test_wfa",
-                      outputs_nm=[("NA", "out", "NA_out")])
+                      wf_output_names=[("NA", "out", "NA_out")])
     wfa.add(na)
 
     wf = NewWorkflow(name="wf14", workingdir="test_wf14_{}".format(plugin),
-                     outputs_nm=[("wfa", "NA_out", "wfa_out")])
+                     wf_output_names=[("wfa", "NA_out", "wfa_out")])
     wf.add(wfa)
 
     sub = Submitter(runnable=wf, plugin=plugin)
     sub.run()
     sub.close()
 
-    assert wf.finished_all
+    assert wf.is_complete
     expected = [({"NA.a": 3}, 5)]
     for i, res in enumerate(expected):
         assert wf.result["wfa_out"][i][0] == res[0]
@@ -1067,19 +1115,19 @@ def test_workflow_14a(plugin):
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
     wfa = NewWorkflow(name="wfa", workingdir="test_wfa", inputs={"a": 3},
-                      outputs_nm=[("NA", "out", "NA_out")])
+                      wf_output_names=[("NA", "out", "NA_out")])
     wfa.add(na)
     wfa.connect_wf_input("a", "NA", "a")
 
     wf = NewWorkflow(name="wf14a", workingdir="test_wf14a_{}".format(plugin),
-                     outputs_nm=[("wfa", "NA_out", "wfa_out")])
+                     wf_output_names=[("wfa", "NA_out", "wfa_out")])
     wf.add(wfa)
 
     sub = Submitter(runnable=wf, plugin=plugin)
     sub.run()
     sub.close()
 
-    assert wf.finished_all
+    assert wf.is_complete
     expected = [({"NA.a": 3}, 5)]
     for i, res in enumerate(expected):
         assert wf.result["wfa_out"][i][0] == res[0]
@@ -1093,12 +1141,12 @@ def test_workflow_14b(plugin):
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
     wfa = NewWorkflow(name="wfa", workingdir="test_wfa",
-                      outputs_nm=[("NA", "out", "NA_out")])
+                      wf_output_names=[("NA", "out", "NA_out")])
     wfa.add(na)
     wfa.connect_wf_input("a", "NA", "a")
 
     wf = NewWorkflow(name="wf14b", workingdir="test_wf14b_{}".format(plugin),
-                     outputs_nm=[("wfa", "NA_out", "wfa_out")], inputs={"a": 3})
+                     wf_output_names=[("wfa", "NA_out", "wfa_out")], inputs={"a": 3})
     wf.add(wfa)
     wf.connect_wf_input("a", "wfa", "a")
 
@@ -1106,7 +1154,7 @@ def test_workflow_14b(plugin):
     sub.run()
     sub.close()
 
-    assert wf.finished_all
+    assert wf.is_complete
     expected = [({"NA.a": 3}, 5)]
     for i, res in enumerate(expected):
         assert wf.result["wfa_out"][i][0] == res[0]
@@ -1121,18 +1169,18 @@ def test_workflow_15(plugin):
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na",
                  inputs={"a": [3, 5]}, mapper="a")
     wfa = NewWorkflow(name="wfa", workingdir="test_wfa",
-                      outputs_nm=[("NA", "out", "NA_out")])
+                      wf_output_names=[("NA", "out", "NA_out")])
     wfa.add(na)
 
     wf = NewWorkflow(name="wf15", workingdir="test_wf15_{}".format(plugin),
-                     outputs_nm=[("wfa", "NA_out", "wfa_out")])
+                     wf_output_names=[("wfa", "NA_out", "wfa_out")])
     wf.add(wfa)
 
     sub = Submitter(runnable=wf, plugin=plugin)
     sub.run()
     sub.close()
 
-    assert wf.finished_all
+    assert wf.is_complete
     expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     for i, res in enumerate(expected):
         assert wf.result["wfa_out"][i][0] == res[0]
@@ -1144,7 +1192,7 @@ def test_workflow_15(plugin):
 def test_workflow_16(plugin):
     """workflow with two nodes, and one is a workflow (no mapper)"""
     wf = NewWorkflow(name="wf16", workingdir="test_wf16_{}".format(plugin),
-                     outputs_nm=[("wfb", "NB_out"), ("NA", "out", "NA_out")])
+                     wf_output_names=[("wfb", "NB_out"), ("NA", "out", "NA_out")])
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na", inputs={"a": 3})
     wf.add(na)
@@ -1153,7 +1201,7 @@ def test_workflow_16(plugin):
     interf_addvar = Function_Interface(fun_addvar, ["out"])
     nb = NewNode(name="NB", interface=interf_addvar, base_dir="nb")
     wfb = NewWorkflow(name="wfb", workingdir="test_wfb", inputs={"b": 10},
-                      outputs_nm=[("NB", "out", "NB_out")])
+                      wf_output_names=[("NB", "out", "NB_out")])
     wfb.add(nb)
     wfb.connect_wf_input("b", "NB", "b")
     wfb.connect_wf_input("a", "NB", "a")
@@ -1165,7 +1213,7 @@ def test_workflow_16(plugin):
     sub.run()
     sub.close()
 
-    assert wf.finished_all
+    assert wf.is_complete
     expected_A = [({"NA.a": 3}, 5)]
     for i, res in enumerate(expected_A):
         assert wf.result["NA_out"][i][0] == res[0]
@@ -1184,7 +1232,7 @@ def test_workflow_16(plugin):
 def test_workflow_16a(plugin):
     """workflow with two nodes, and one is a workflow (with mapper)"""
     wf = NewWorkflow(name="wf16a", workingdir="test_wf16a_{}".format(plugin),
-                     outputs_nm=[("wfb", "NB_out"), ("NA", "out", "NA_out")])
+                     wf_output_names=[("wfb", "NB_out"), ("NA", "out", "NA_out")])
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
     na.map(mapper="a", inputs={"a": [3, 5]})
@@ -1194,7 +1242,7 @@ def test_workflow_16a(plugin):
     interf_addvar = Function_Interface(fun_addvar, ["out"])
     nb = NewNode(name="NB", interface=interf_addvar, base_dir="nb")
     wfb = NewWorkflow(name="wfb", workingdir="test_wfb", inputs={"b": 10},
-                      outputs_nm=[("NB", "out", "NB_out")])
+                      wf_output_names=[("NB", "out", "NB_out")])
     wfb.add(nb)
     wfb.connect_wf_input("b", "NB", "b")
     wfb.connect_wf_input("a", "NB", "a")
@@ -1208,7 +1256,7 @@ def test_workflow_16a(plugin):
     sub.run()
     sub.close()
 
-    assert wf.finished_all
+    assert wf.is_complete
 
     expected_A = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     for i, res in enumerate(expected_A):

@@ -55,7 +55,7 @@ def test_neuro():
     #dj: don't have option in map to connect with wf input
 
     wf.add(runnable=select_target, name="targets", subject_id="subject_id")\
-        .map(mapper="space", inputs={"space": [space for space in Inputs["output_spaces"]
+        .map_node(mapper="space", inputs={"space": [space for space in Inputs["output_spaces"]
                                                if space.startswith("fs")]})
 
 
@@ -68,7 +68,7 @@ def test_neuro():
     wf.add(name='rename_src',
            runnable=Rename(format_string='%(subject)s', keep_ext=True),
                                 in_file="source_file", subject="subject_id")\
-        .map('subject')
+        .map_node('subject')
     pdb.set_trace()
 
     # wf.add('resampling_xfm',
@@ -109,7 +109,7 @@ def test_neuro():
                                   out_type='gii'),
            subjects_dir="subjects_dir", subject_id="subject_id", reg_file="set_xfm_source.out_file",
            target_subject="targets.out", source_file="rename_src.out_file")\
-        .map(mapper=[('source_file', 'target_subject'), 'hemi'], inputs={"hemi": ['lh', 'rh']})
+        .map_node(mapper=[('source_file', 'target_subject'), 'hemi'], inputs={"hemi": ['lh', 'rh']})
 
 
     # dj: no conditions
