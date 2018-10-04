@@ -53,7 +53,7 @@ class Submitter(object):
         while not self.node.finished_all:
             logger.debug("Submitter, in while, to_finish: {}".format(self.node))
             time.sleep(3)
-        self.node._collecting_output()
+        self.node.collecting_output()
 
 
     def _submit_node(self, node):
@@ -105,7 +105,7 @@ class Submitter(object):
 
         # calling only for the main wf (other wf will be called inside the function)
         if workflow is self.workflow:
-            workflow._collecting_output()
+            workflow.collecting_output()
 
 
     def _run_workflow_el(self, workflow, i, ind, collect_inp=False):
