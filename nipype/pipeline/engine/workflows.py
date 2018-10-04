@@ -1074,7 +1074,8 @@ class MapState(object):
 
 # dj ??: should I use EngineBase?
 class NewBase(object):
-    def __init__(self, name, mapper=None, inputs=None, other_mappers=None, mem_gb_node=None, *args, **kwargs):
+    def __init__(self, name, mapper=None, inputs=None, other_mappers=None, mem_gb=None,
+                 cache_location=None, *args, **kwargs):
         self.name = name
         #dj TODO: I should think what is needed in the __init__ (I redefine some of rhe attributes anyway)
         if inputs:
@@ -1102,6 +1103,10 @@ class NewBase(object):
         self.needed_outputs = []
         # flag that says if node finished all jobs
         self._is_complete = False
+
+        # TODO: don't use it yet
+        self.mem_gb = mem_gb
+        self.cache_location = cache_location
 
 
     # TBD
@@ -1188,7 +1193,7 @@ class NewBase(object):
                                        if i in list(from_node._state_inputs.keys())])
             if not from_node.mapper:
                 dir_nm_el_from = ""
-            file_from = os.path.join(from_node.nodedir, dir_nm_el_from, from_socket+".txt")
+            file_from = os.path.join(from_node.workingdir, dir_nm_el_from, from_socket+".txt")
             with open(file_from) as f:
                 inputs_dict["{}.{}".format(self.name, to_socket)] = eval(f.readline())
         return state_dict, inputs_dict
@@ -1227,13 +1232,14 @@ class NewBase(object):
 
 class NewNode(NewBase):
     def __init__(self, name, interface, inputs=None, mapper=None, join_by=None,
-                 base_dir=None, other_mappers=None, mem_gb_node=None, *args, **kwargs):
+                 workingdir=None, other_mappers=None, mem_gb=None, cache_location=None,
+                 *args, **kwargs):
         super(NewNode, self).__init__(name=name, mapper=mapper, inputs=inputs,
-                                      other_mappers=other_mappers, mem_gb_node=mem_gb_node,
-                                      *args, **kwargs)
+                                      other_mappers=other_mappers, mem_gb=mem_gb,
+                                      cache_location=cache_location, *args, **kwargs)
 
         # working directory for node, will be change if node is a part of a wf
-        self.nodedir = base_dir
+        self.workingdir = workingdir
         self.interface = interface
         # adding node name to the interface's name mapping
         self.interface.input_map = dict((key, "{}.{}".format(self.name, value))
@@ -1298,9 +1304,9 @@ class NewNode(NewBase):
         """temporary method to write the results in the files (this is usually part of a interface)"""
         if not self.mapper:
             dir_nm_el = ''
-        os.makedirs(os.path.join(self.nodedir, dir_nm_el), exist_ok=True)
+        os.makedirs(os.path.join(self.workingdir, dir_nm_el), exist_ok=True)
         for key_out, val_out in output.items():
-            with open(os.path.join(self.nodedir, dir_nm_el, key_out+".txt"), "w") as fout:
+            with open(os.path.join(self.workingdir, dir_nm_el, key_out+".txt"), "w") as fout:
                 fout.write(str(val_out))
 
 
@@ -1311,9 +1317,9 @@ class NewNode(NewBase):
                 state_dict = self.state.state_values(ind)
                 dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(state_dict.items())])
                 if self.mapper:
-                    self._output[key_out][dir_nm_el] = (state_dict, os.path.join(self.nodedir, dir_nm_el, key_out + ".txt"))
+                    self._output[key_out][dir_nm_el] = (state_dict, os.path.join(self.workingdir, dir_nm_el, key_out + ".txt"))
                 else:
-                    self._output[key_out] = (state_dict, os.path.join(self.nodedir, key_out + ".txt"))
+                    self._output[key_out] = (state_dict, os.path.join(self.workingdir, key_out + ".txt"))
         return self._output
 
 
@@ -1326,7 +1332,7 @@ class NewNode(NewBase):
             if not self.mapper:
                 dir_nm_el = ""
             for key_out in self.output_names:
-                if not os.path.isfile(os.path.join(self.nodedir, dir_nm_el, key_out+".txt")):
+                if not os.path.isfile(os.path.join(self.workingdir, dir_nm_el, key_out+".txt")):
                     return False
         self._is_complete = True
         return True
@@ -1363,9 +1369,9 @@ class NewNode(NewBase):
 
 class NewWorkflow(NewBase):
     def __init__(self, name, inputs=None, wf_output_names=None, mapper=None, #join_by=None,
-                 nodes=None, workingdir=None, mem_gb_node=None, *args, **kwargs):
-        super(NewWorkflow, self).__init__(name=name, mapper=mapper, inputs=inputs,
-                                          mem_gb_node=mem_gb_node, *args, **kwargs)
+                 nodes=None, workingdir=None, mem_gb=None, cache_location=None, *args, **kwargs):
+        super(NewWorkflow, self).__init__(name=name, mapper=mapper, inputs=inputs, mem_gb=mem_gb,
+                                          cache_location=cache_location, *args, **kwargs)
 
         self.graph = nx.DiGraph()
         # all nodes in the workflow (probably will be removed)
@@ -1521,7 +1527,7 @@ class NewWorkflow(NewBase):
             self._node_mappers[nn.name] = nn.mapper
 
 
-    def add(self, runnable, name=None, base_dir=None, inputs=None, output_nm=None, mapper=None,
+    def add(self, runnable, name=None, workingdir=None, inputs=None, output_nm=None, mapper=None,
             mem_gb=None, **kwargs):
         if is_function(runnable):
             if not output_nm:
@@ -1529,16 +1535,16 @@ class NewWorkflow(NewBase):
             interface = aux.Function_Interface(function=runnable, output_nm=output_nm)
             if not name:
                 raise Exception("you have to specify name for the node")
-            if not base_dir:
-                base_dir = name
-            node = NewNode(interface=interface, base_dir=base_dir, name=name, inputs=inputs, mapper=mapper,
-                           other_mappers=self._node_mappers, mem_gb_node=mem_gb)
+            if not workingdir:
+                workingdir = name
+            node = NewNode(interface=interface, workingdir=workingdir, name=name, inputs=inputs, mapper=mapper,
+                           other_mappers=self._node_mappers, mem_gb=mem_gb)
         elif is_interface(runnable):
             if not name:
                 raise Exception("you have to specify name for the node")
-            if not base_dir:
-                base_dir = name
-            node = NewNode(interface=runnable, base_dir=base_dir, name=name, inputs=inputs, mapper=mapper,
+            if not workingdir:
+                workingdir = name
+            node = NewNode(interface=runnable, workingdir=workingdir, name=name, inputs=inputs, mapper=mapper,
                            other_mappers=self._node_mappers, mem_gb_node=mem_gb)
         elif is_node(runnable):
             node = runnable
@@ -1585,22 +1591,12 @@ class NewWorkflow(NewBase):
                 node.inputs.update({"{}.{}".format(node_nm, inp_nd): wf_inputs["{}.{}".format(self.name, inp_wf)]})
             else:
                 raise Exception("{}.{} not in the workflow inputs".format(self.name, inp_wf))
-        # TODO if should be later, should unify more workingdir and nodedir
         for nn in self.graph_sorted:
-            if self.mapper:
-                dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(wf_inputs.items())])
-                if is_node(nn):
-                    # TODO: should be just nn.name?
-                    nn.nodedir = os.path.join(self.workingdir, dir_nm_el, nn.nodedir)
-                elif is_workflow(nn):
-                    nn.nodedir = os.path.join(self.workingdir, dir_nm_el, nn.name)
-                nn._is_complete = False # helps when mp is used
-            else:
-                if is_node(nn):
-                    #TODO: should be just nn.name?
-                    nn.nodedir = os.path.join(self.workingdir, nn.nodedir)
-                elif is_workflow(nn):
-                    nn.workingdir = os.path.join(self.workingdir, nn.name)
+            dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(wf_inputs.items())])
+            if not self.mapper:
+                dir_nm_el = ""
+            nn.workingdir = os.path.join(self.workingdir, dir_nm_el, nn.name)
+            nn._is_complete = False # helps when mp is used
             try:
                 for inp, (out_node, out_var) in self.connected_var[nn].items():
                     nn.ready2run = False #it has some history (doesnt have to be in the loop)
