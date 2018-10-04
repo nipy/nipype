@@ -50,10 +50,12 @@ class SubmitterNode(Submitter):
         self.node = node
 
     def run_node(self):
+        self.node.prepare_state_input()
         self.submit_node(self.node)
         while not self.node.finished_all:
             logger.debug("Submitter, in while, to_finish: {}".format(self.node))
             time.sleep(3)
+        self.node._collecting_output()
 
 
 class SubmitterWorkflow(Submitter):
@@ -68,6 +70,7 @@ class SubmitterWorkflow(Submitter):
     def run_workflow(self, workflow=None, ready=True):
         if not workflow:
             workflow = self.workflow
+        workflow.prepare_state_input()
 
         # TODO: should I havve inner_nodes for all workflow (to avoid if wf.mapper)??
         if workflow.mapper:
@@ -97,6 +100,11 @@ class SubmitterWorkflow(Submitter):
         while self._output_check():
             logger.debug("Submitter, in while, to_finish: {}".format(self._to_finish))
             time.sleep(3)
+
+        # calling only for the main wf (other wf will be called inside the function)
+        if workflow is self.workflow:
+            workflow._collecting_output()
+
 
     def run_workflow_el(self, workflow, i, ind, collect_inp=False):
         print("LOOP", i, self._to_finish, self.node_line)

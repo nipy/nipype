@@ -1,5 +1,6 @@
 from .. import NewNode, NewWorkflow
 from ..auxiliary import Function_Interface
+from ..submitter import SubmitterNode, SubmitterWorkflow
 
 import sys, time, os
 import numpy as np
@@ -93,8 +94,9 @@ def test_node_6(plugin):
     assert nn.mapper == "NA.a"
     assert (nn.inputs["NA.a"] == np.array([3, 5])).all()
 
-    # testing if the node runs properly
-    nn.run(plugin=plugin)
+    sub = SubmitterNode(plugin=plugin, node=nn)
+    sub.run_node()
+    sub.close()
 
     # checking the results
     expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
@@ -121,8 +123,9 @@ def test_node_7(plugin):
     assert (nn.inputs["NA.a"] == np.array([3, 5])).all()
     assert (nn.inputs["NA.b"] == np.array([2, 1])).all()
 
-    # testing if the node runs properly
-    nn.run(plugin=plugin)
+    sub = SubmitterNode(plugin=plugin, node=nn)
+    sub.run_node()
+    sub.close()
 
     # checking the results
     expected = [({"NA.a": 3, "NA.b": 2}, 5), ({"NA.a": 5, "NA.b": 1}, 6)]
@@ -149,8 +152,9 @@ def test_node_8(plugin):
     assert (nn.inputs["NA.a"] == np.array([3, 5])).all()
     assert (nn.inputs["NA.b"] == np.array([2, 1])).all()
 
-    # testing if the node runs properly
-    nn.run(plugin=plugin)
+    sub = SubmitterNode(plugin=plugin, node=nn)
+    sub.run_node()
+    sub.close()
 
     # checking teh results
     expected = [({"NA.a": 3, "NA.b": 1}, 4), ({"NA.a": 3, "NA.b": 2}, 5),
@@ -189,7 +193,10 @@ def test_workflow_1(plugin):
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
     na.map(mapper="a", inputs={"a": [3, 5]})
     wf.add_nodes([na])
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
@@ -216,9 +223,11 @@ def test_workflow_2(plugin):
     # adding 2 nodes and create a connection (as it is now)
     wf.add_nodes([na, nb])
     wf.connect("NA", "out", "NB", "a")
-
     assert wf.nodes[0].mapper == "NA.a"
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     expected_A = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected_A[0][0].keys())
@@ -258,7 +267,10 @@ def test_workflow_2a(plugin):
 
     assert wf.nodes[0].mapper == "NA.a"
     assert wf.nodes[1].mapper == ("NA.a", "NB.b")
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     expected_A = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected_A[0][0].keys())
@@ -297,7 +309,10 @@ def test_workflow_2b(plugin):
 
     assert wf.nodes[0].mapper == "NA.a"
     assert wf.nodes[1].mapper == ["NA.a", "NB.b"]
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     expected_A = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected_A[0][0].keys())
@@ -332,7 +347,10 @@ def test_workflow_3(plugin):
     wf.add(na)
 
     assert wf.nodes[0].mapper == "NA.a"
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
@@ -354,7 +372,10 @@ def test_workflow_3a(plugin):
     wf.add(interf_addtwo, base_dir="na", mapper="a", inputs={"a": [3, 5]}, name="NA")
 
     assert wf.nodes[0].mapper == "NA.a"
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
@@ -374,7 +395,10 @@ def test_workflow_3b(plugin):
     wf.add(fun_addtwo, base_dir="na", mapper="a", inputs={"a": [3, 5]}, name="NA")
 
     assert wf.nodes[0].mapper == "NA.a"
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
@@ -407,7 +431,9 @@ def test_workflow_4(plugin):
     # connect method as it is in the current version
     wf.connect("NA", "out", "NB", "a")
 
-    wf.run(plugin=plugin)
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
@@ -443,7 +469,9 @@ def test_workflow_4a(plugin):
     # instead of "connect", using kwrg argument in the add method as in the example
     wf.add(nb, a="NA.out")
 
-    wf.run(plugin=plugin)
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
@@ -476,7 +504,10 @@ def test_workflow_5(plugin):
     wf.add(na)
     # using the map method after add (using mapper for the last added node as default)
     wf.map(mapper="a", inputs={"a": [3, 5]})
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
@@ -496,7 +527,10 @@ def test_workflow_5a(plugin):
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
 
     wf.add(na).map(mapper="a", inputs={"a": [3, 5]})
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
@@ -523,7 +557,10 @@ def test_workflow_6(plugin):
     wf.add(nb)
     wf.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]})
     wf.connect("NA", "out", "NB", "a")
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
@@ -559,7 +596,10 @@ def test_workflow_6a(plugin):
     # TODO: should we se ("a", "c") instead?? shold I forget "NA.a" value?
     wf.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]}, node=nb)
     wf.connect("NA", "out", "NB", "a")
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
@@ -593,7 +633,10 @@ def test_workflow_6b(plugin):
     wf.add(nb, a="NA.out")
     wf.map(mapper="a", inputs={"a": [3, 5]}, node=na)
     wf.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]}, node=nb)
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
@@ -627,7 +670,10 @@ def test_workflow_7(plugin):
     # connecting the node with inputs from the workflow
     wf.connect_workflow("NA", "wfa", "a")
     wf.map(mapper="a")
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
@@ -651,7 +697,10 @@ def test_workflow_7a(plugin):
     # if connect has None as the first arg, it is the same as connect_workflow
     wf.connect(None, "wfa", "NA", "a")
     wf.map(mapper="a")
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
@@ -672,7 +721,10 @@ def test_workflow_7b(plugin):
     # using kwrg argument in the add method (instead of connect or connect_workflow
     wf.add(na, a="wfa")
     wf.map(mapper="a")
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
@@ -699,7 +751,10 @@ def test_workflow_8(plugin):
     wf.connect("NA", "out", "NB", "a")
     wf.connect_workflow("NB", "b", "b")
     assert wf.nodes[0].mapper == "NA.a"
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     expected_A = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected_A[0][0].keys())
@@ -731,7 +786,10 @@ def test_workflow_9(plugin):
     interf_addvar = Function_Interface(fun_addvar, ["out"])
     # _NA means that I'm using mapper from the NA node, it's the same as ("NA.a", "b")
     wf.add(name="NB", runnable=interf_addvar, base_dir="nb", a="NA.out").map(mapper=("_NA", "b"), inputs={"b": [2, 1]})
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     key_sort = list(expected[0][0].keys())
@@ -760,7 +818,10 @@ def test_workflow_10(plugin):
     interf_addvar2 = Function_Interface(fun_addvar, ["out"])
     # _NA means that I'm using mapper from the NA node, it's the same as (("NA.a", NA.b), "b")
     wf.add(name="NB", runnable=interf_addvar2, base_dir="nb", a="NA.out").map(mapper=("_NA", "b"), inputs={"b": [2, 1]})
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     expected = [({"NA.a": 3, "NA.b": 0}, 3), ({"NA.a": 5, "NA.b": 10}, 15)]
     key_sort = list(expected[0][0].keys())
@@ -789,7 +850,10 @@ def test_workflow_10a(plugin):
     interf_addvar2 = Function_Interface(fun_addvar, ["out"])
     # _NA means that I'm using mapper from the NA node, it's the same as (["NA.a", NA.b], "b")
     wf.add(name="NB", runnable=interf_addvar2, base_dir="nb", a="NA.out").map(mapper=("_NA", "b"), inputs={"b": [[2, 1], [0, 0]]})
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     expected = [({"NA.a": 3, "NA.b": 0}, 3), ({"NA.a": 3, "NA.b": 10}, 13),
                 ({"NA.a": 5, "NA.b": 0}, 5), ({"NA.a": 5, "NA.b": 10}, 15)]
@@ -822,7 +886,10 @@ def test_workflow_11(plugin):
     interf_addvar2 = Function_Interface(fun_addvar, ["out"])
     # _NA, _NB means that I'm using mappers from the NA/NB nodes, it's the same as [("NA.a", NA.b), "NB.a"]
     wf.add(name="NC", runnable=interf_addvar2, base_dir="nc", a="NA.out", b="NB.out").map(mapper=["_NA", "_NB"]) # TODO: this should eb default?
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     expected = [({"NA.a": 3, "NA.b": 0}, 3), ({"NA.a": 5, "NA.b": 10}, 15)]
     key_sort = list(expected[0][0].keys())
@@ -862,7 +929,10 @@ def test_workflow_12(plugin):
     wf.add(nb)
     wf.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]})
     wf.connect("NA", "out", "NB", "a")
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     # checking if workflow.results is the same as results of nodes
     assert wf.result["NA_out"] == wf.nodes[0].result["out"]
@@ -874,7 +944,7 @@ def test_workflow_12(plugin):
     expected.sort(key=lambda t: [t[0][key] for key in key_sort])
     wf.result["NA_out"].sort(key=lambda t: [t[0][key] for key in key_sort])
     #pdb.set_trace()
-    wf.finished_all
+    assert wf.finished_all
     for i, res in enumerate(expected):
         assert wf.result["NA_out"][i][0] == res[0]
         assert wf.result["NA_out"][i][1] == res[1]
@@ -906,9 +976,10 @@ def test_workflow_12a(plugin):
     wf.map(mapper=("NA.a", "b"), inputs={"b": [2, 1]})
     wf.connect("NA", "out", "NB", "a")
 
-    # wf_out can't be used twice in wf.result
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    # wf_out can't be used twice
     with pytest.raises(Exception) as exinfo:
-        wf.run(plugin=plugin)
+        sub.run_workflow()
     assert str(exinfo.value) == "the key wf_out is already used in workflow.result"
 
 # tests for a workflow that have its own input and mapper
@@ -924,7 +995,10 @@ def test_workflow_13(plugin):
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
     wf.add(na)
     wf.connect_workflow("NA", "wfa", "a")
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     assert wf.finished_all
     expected = [({"wf13.wfa": 3}, [({"NA.a": 3}, 5)]),
@@ -945,7 +1019,10 @@ def test_workflow_13a(plugin):
     na = NewNode(name="NA", interface=interf_addvar, base_dir="na", mapper="b", inputs={"b": [10, 20]})
     wf.add(na)
     wf.connect_workflow("NA", "wfa", "a")
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     assert wf.finished_all
     expected = [({"wf13a.wfa": 3}, [({"NA.a": 3, "NA.b": 10}, 13), ({"NA.a": 3, "NA.b": 20}, 23)]),
@@ -972,7 +1049,10 @@ def test_workflow_14(plugin):
     wf = NewWorkflow(name="wf14", workingdir="test_wf14_{}".format(plugin),
                      outputs_nm=[("wfa", "NA_out", "wfa_out")])
     wf.add(wfa)
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     assert wf.finished_all
     expected = [({"NA.a": 3}, 5)]
@@ -995,7 +1075,10 @@ def test_workflow_14a(plugin):
     wf = NewWorkflow(name="wf14a", workingdir="test_wf14a_{}".format(plugin),
                      outputs_nm=[("wfa", "NA_out", "wfa_out")])
     wf.add(wfa)
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     assert wf.finished_all
     expected = [({"NA.a": 3}, 5)]
@@ -1019,7 +1102,10 @@ def test_workflow_14b(plugin):
                      outputs_nm=[("wfa", "NA_out", "wfa_out")], inputs={"a": 3})
     wf.add(wfa)
     wf.connect_workflow("wfa", "a", "a")
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     assert wf.finished_all
     expected = [({"NA.a": 3}, 5)]
@@ -1042,7 +1128,11 @@ def test_workflow_15(plugin):
     wf = NewWorkflow(name="wf15", workingdir="test_wf15_{}".format(plugin),
                      outputs_nm=[("wfa", "NA_out", "wfa_out")])
     wf.add(wfa)
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
+
     assert wf.finished_all
     expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
     for i, res in enumerate(expected):
@@ -1071,7 +1161,10 @@ def test_workflow_16(plugin):
 
     wf.add(wfb)
     wf.connect("NA", "out", "wfb", "a")
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     assert wf.finished_all
     expected_A = [({"NA.a": 3}, 5)]
@@ -1111,7 +1204,10 @@ def test_workflow_16a(plugin):
     wf.add(wfb)
     wf.connect("NA", "out", "wfb", "a")
     assert wf.nodes[0].mapper == "NA.a"
-    wf.run(plugin=plugin)
+
+    sub = SubmitterWorkflow(workflow=wf, plugin=plugin)
+    sub.run_workflow()
+    sub.close()
 
     assert wf.finished_all
 

@@ -1328,14 +1328,14 @@ class NewNode(NewBase):
                 with open(filename) as fout:
                     self._result[key_out].append(({}, eval(fout.readline())))
 
-
-    def run(self, plugin="serial"):
-        """preparing the node to run and run the interface"""
-        self.prepare_state_input()
-        submitter = sub.SubmitterNode(plugin, node=self)
-        submitter.run_node()
-        submitter.close()
-        self._collecting_output()
+    # dj: removing temp. from NewNode class
+    # def run(self, plugin="serial"):
+    #     """preparing the node to run and run the interface"""
+    #     self.prepare_state_input()
+    #     submitter = sub.SubmitterNode(plugin, node=self)
+    #     submitter.run_node()
+    #     submitter.close()
+    #     self._collecting_output()
 
 
 class NewWorkflow(NewBase):
@@ -1475,15 +1475,15 @@ class NewWorkflow(NewBase):
 
             nn.prepare_state_input()
 
-
-    def run(self, plugin="serial"):
-        #self.preparing(wf_inputs=self.inputs) # moved to submitter
-        self.prepare_state_input()
-        logger.debug('the sorted graph is: {}'.format(self.graph_sorted))
-        submitter = sub.SubmitterWorkflow(workflow=self, plugin=plugin)
-        submitter.run_workflow()
-        submitter.close()
-        self._collecting_output()
+    # removing temp. from NewWorkflow
+    # def run(self, plugin="serial"):
+    #     #self.preparing(wf_inputs=self.inputs) # moved to submitter
+    #     self.prepare_state_input()
+    #     logger.debug('the sorted graph is: {}'.format(self.graph_sorted))
+    #     submitter = sub.SubmitterWorkflow(workflow=self, plugin=plugin)
+    #     submitter.run_workflow()
+    #     submitter.close()
+    #     self._collecting_output()
 
 
     def _collecting_output(self):
