@@ -668,7 +668,7 @@ def test_workflow_7(plugin):
 
     wf.add(na)
     # connecting the node with inputs from the workflow
-    wf.connect_workflow("NA", "wfa", "a")
+    wf.connect_wf_input("wfa", "NA", "a")
     wf.map(mapper="a")
 
     sub = Submitter(runnable=wf, plugin=plugin)
@@ -687,38 +687,11 @@ def test_workflow_7(plugin):
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_7a(plugin):
-    """using inputs for workflow and connect(None...)"""
-    # adding inputs to the workflow directly
+    """using inputs for workflow and kwarg arg in add (instead of connect)"""
     wf = NewWorkflow(name="wf7a", inputs={"wfa": [3, 5]}, workingdir="test_wf7a_{}".format(plugin))
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
-
-    wf.add(na)
-    # if connect has None as the first arg, it is the same as connect_workflow
-    wf.connect(None, "wfa", "NA", "a")
-    wf.map(mapper="a")
-
-    sub = Submitter(runnable=wf, plugin=plugin)
-    sub.run()
-    sub.close()
-
-    expected = [({"NA.a": 3}, 5), ({"NA.a": 5}, 7)]
-    key_sort = list(expected[0][0].keys())
-    expected.sort(key=lambda t: [t[0][key] for key in key_sort])
-    wf.nodes[0].result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
-    for i, res in enumerate(expected):
-        assert wf.nodes[0].result["out"][i][0] == res[0]
-        assert wf.nodes[0].result["out"][i][1] == res[1]
-
-
-@pytest.mark.parametrize("plugin", Plugins)
-@python35_only
-def test_workflow_7b(plugin):
-    """using inputs for workflow and kwarg arg in add (instead of connect)"""
-    wf = NewWorkflow(name="wf7b", inputs={"wfa": [3, 5]}, workingdir="test_wf7b_{}".format(plugin))
-    interf_addtwo = Function_Interface(fun_addtwo, ["out"])
-    na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
-    # using kwrg argument in the add method (instead of connect or connect_workflow
+    # using kwrg argument in the add method (instead of connect or connect_wf_input
     wf.add(na, a="wfa")
     wf.map(mapper="a")
 
@@ -738,7 +711,7 @@ def test_workflow_7b(plugin):
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_8(plugin):
-    """using inputs for workflow and connect_workflow for the second node"""
+    """using inputs for workflow and connect_wf_input for the second node"""
     wf = NewWorkflow(name="wf8", workingdir="test_wf8_{}".format(plugin), inputs={"b": 10})
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
@@ -749,7 +722,7 @@ def test_workflow_8(plugin):
 
     wf.add_nodes([na, nb])
     wf.connect("NA", "out", "NB", "a")
-    wf.connect_workflow("NB", "b", "b")
+    wf.connect_wf_input("b", "NB", "b")
     assert wf.nodes[0].mapper == "NA.a"
 
     sub = Submitter(runnable=wf, plugin=plugin)
@@ -988,13 +961,13 @@ def test_workflow_12a(plugin):
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_13(plugin):
-    """using inputs for workflow and connect_workflow"""
+    """using inputs for workflow and connect_wf_input"""
     wf = NewWorkflow(name="wf13", inputs={"wfa": [3, 5]}, mapper="wfa", workingdir="test_wf13_{}".format(plugin),
                      outputs_nm=[("NA", "out", "NA_out")])
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
     wf.add(na)
-    wf.connect_workflow("NA", "wfa", "a")
+    wf.connect_wf_input("wfa", "NA", "a")
 
     sub = Submitter(runnable=wf, plugin=plugin)
     sub.run()
@@ -1012,13 +985,13 @@ def test_workflow_13(plugin):
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_13a(plugin):
-    """using inputs for workflow and connect_workflow"""
+    """using inputs for workflow and connect_wf_input"""
     wf = NewWorkflow(name="wf13a", inputs={"wfa": [3, 5]}, mapper="wfa", workingdir="test_wf13a_{}".format(plugin),
                      outputs_nm=[("NA", "out", "NA_out")])
     interf_addvar = Function_Interface(fun_addvar, ["out"])
     na = NewNode(name="NA", interface=interf_addvar, base_dir="na", mapper="b", inputs={"b": [10, 20]})
     wf.add(na)
-    wf.connect_workflow("NA", "wfa", "a")
+    wf.connect_wf_input("wfa", "NA", "a")
 
     sub = Submitter(runnable=wf, plugin=plugin)
     sub.run()
@@ -1039,7 +1012,7 @@ def test_workflow_13a(plugin):
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_14(plugin):
-    """workflow with a workflow as a node"""
+    """workflow with a workflow as a node (no mapper)"""
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na", inputs={"a": 3})
     wfa = NewWorkflow(name="wfa", workingdir="test_wfa",
@@ -1064,13 +1037,13 @@ def test_workflow_14(plugin):
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_14a(plugin):
-    """workflow with a workflow as a node (using connect_workflow in wfa)"""
+    """workflow with a workflow as a node (no mapper, using connect_wf_input in wfa)"""
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
     wfa = NewWorkflow(name="wfa", workingdir="test_wfa", inputs={"a": 3},
                       outputs_nm=[("NA", "out", "NA_out")])
     wfa.add(na)
-    wfa.connect_workflow("NA", "a", "a")
+    wfa.connect_wf_input("a", "NA", "a")
 
     wf = NewWorkflow(name="wf14a", workingdir="test_wf14a_{}".format(plugin),
                      outputs_nm=[("wfa", "NA_out", "wfa_out")])
@@ -1090,18 +1063,18 @@ def test_workflow_14a(plugin):
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_14b(plugin):
-    """workflow with a workflow as a node (using connect_workflow in wfa and wf)"""
+    """workflow with a workflow as a node (no mapper, using connect_wf_input in wfa and wf)"""
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na")
     wfa = NewWorkflow(name="wfa", workingdir="test_wfa",
                       outputs_nm=[("NA", "out", "NA_out")])
     wfa.add(na)
-    wfa.connect_workflow("NA", "a", "a")
+    wfa.connect_wf_input("a", "NA", "a")
 
     wf = NewWorkflow(name="wf14b", workingdir="test_wf14b_{}".format(plugin),
                      outputs_nm=[("wfa", "NA_out", "wfa_out")], inputs={"a": 3})
     wf.add(wfa)
-    wf.connect_workflow("wfa", "a", "a")
+    wf.connect_wf_input("a", "wfa", "a")
 
     sub = Submitter(runnable=wf, plugin=plugin)
     sub.run()
@@ -1117,7 +1090,7 @@ def test_workflow_14b(plugin):
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_15(plugin):
-    """workflow with a workflow as a node with mapper (like 14 but with mapper)"""
+    """workflow with a workflow as a node with mapper (like 14 but with a mapper)"""
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     na = NewNode(name="NA", interface=interf_addtwo, base_dir="na",
                  inputs={"a": [3, 5]}, mapper="a")
@@ -1143,7 +1116,7 @@ def test_workflow_15(plugin):
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_16(plugin):
-    """workflow with two nodes, second node without mapper"""
+    """workflow with two nodes, and one is a workflow (no mapper)"""
     wf = NewWorkflow(name="wf16", workingdir="test_wf16_{}".format(plugin),
                      outputs_nm=[("wfb", "NB_out"), ("NA", "out", "NA_out")])
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
@@ -1156,8 +1129,8 @@ def test_workflow_16(plugin):
     wfb = NewWorkflow(name="wfb", workingdir="test_wfb", inputs={"b": 10},
                       outputs_nm=[("NB", "out", "NB_out")])
     wfb.add(nb)
-    wfb.connect_workflow("NB", "b", "b")
-    wfb.connect_workflow("NB", "a", "a")
+    wfb.connect_wf_input("b", "NB", "b")
+    wfb.connect_wf_input("a", "NB", "a")
 
     wf.add(wfb)
     wf.connect("NA", "out", "wfb", "a")
@@ -1183,7 +1156,7 @@ def test_workflow_16(plugin):
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
 def test_workflow_16a(plugin):
-    """workflow with two nodes, second node without mapper"""
+    """workflow with two nodes, and one is a workflow (with mapper)"""
     wf = NewWorkflow(name="wf16a", workingdir="test_wf16a_{}".format(plugin),
                      outputs_nm=[("wfb", "NB_out"), ("NA", "out", "NA_out")])
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
@@ -1197,8 +1170,8 @@ def test_workflow_16a(plugin):
     wfb = NewWorkflow(name="wfb", workingdir="test_wfb", inputs={"b": 10},
                       outputs_nm=[("NB", "out", "NB_out")])
     wfb.add(nb)
-    wfb.connect_workflow("NB", "b", "b")
-    wfb.connect_workflow("NB", "a", "a")
+    wfb.connect_wf_input("b", "NB", "b")
+    wfb.connect_wf_input("a", "NB", "a")
 
     # adding 2 nodes and create a connection (as it is now)
     wf.add(wfb)

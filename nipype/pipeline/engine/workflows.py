@@ -1345,19 +1345,22 @@ class NewWorkflow(NewBase):
                                           mem_gb_node=mem_gb_node, *args, **kwargs)
 
         self.graph = nx.DiGraph()
+        # all nodes in the workflow (probably will be removed)
         self._nodes = []
+        # saving all connection between nodes
         self.connected_var = {}
+        # input that are expected by nodes to get from wf.inputs
         self.needed_inp_wf = []
         if nodes:
             self.add_nodes(nodes)
         for nn in self._nodes:
             self.connected_var[nn] = {}
+        # key: name of a node, value: the node
         self._node_names = {}
+        # key: name of a node, value: mapper of the node
         self._node_mappers = {}
-
         # dj: not sure if this should be different than base_dir
         self.workingdir = os.path.join(os.getcwd(), workingdir)
-
         # list of (nodename, output name in the name, output name in wf) or (nodename, output name in the name)
         self.outputs_nm = outputs_nm
 
@@ -1407,29 +1410,19 @@ class NewWorkflow(NewBase):
 
 
     def connect(self, from_node_nm, from_socket, to_node_nm, to_socket):
-        if from_node_nm:
-            from_node = self._node_names[from_node_nm]
-            to_node = self._node_names[to_node_nm]
-            self.graph.add_edges_from([(from_node, to_node)])
-            if not to_node in self.nodes:
-                self.add_nodes(to_node)
-            self.connected_var[to_node][to_socket] = (from_node, from_socket)
-            # from_node.sending_output.append((from_socket, to_node, to_socket))
-            logger.debug('connecting {} and {}'.format(from_node, to_node))
-        else:
-            self.connect_workflow(to_node_nm, from_socket, to_socket)
+        from_node = self._node_names[from_node_nm]
+        to_node = self._node_names[to_node_nm]
+        self.graph.add_edges_from([(from_node, to_node)])
+        if not to_node in self.nodes:
+            self.add_nodes(to_node)
+        self.connected_var[to_node][to_socket] = (from_node, from_socket)
+        # from_node.sending_output.append((from_socket, to_node, to_socket))
+        logger.debug('connecting {} and {}'.format(from_node, to_node))
+
 
     # TODO: change (at least the name)
-    def connect_workflow(self, node_nm, inp_wf, inp_nd):
+    def connect_wf_input(self, inp_wf, node_nm, inp_nd):
         self.needed_inp_wf.append((node_nm, inp_wf, inp_nd))
-
-    def _connect_workflow(self, node_nm, inp_wf, inp_nd):
-        node = self._node_names[node_nm]
-        if "{}.{}".format(self.name, inp_wf) in self.inputs:
-            node.state_inputs.update({"{}.{}".format(node_nm, inp_nd): self.inputs["{}.{}".format(self.name, inp_wf)]})
-            node.inputs.update({"{}.{}".format(node_nm, inp_nd): self.inputs["{}.{}".format(self.name, inp_wf)]})
-        else:
-            raise Exception("{} not in the workflow inputs".format(inp_wf))
 
 
     def preparing(self, wf_inputs=None):
@@ -1551,7 +1544,7 @@ class NewWorkflow(NewBase):
                 self.connect(from_node_nm, from_socket, node.name, inp)
             # TODO not sure if i need it, just check if from_node_nm is not None??
             except(ValueError):
-                self.connect(None, source, node.name, inp)
+                self.connect_wf_input(source, node.name, inp)
 
         return self
 
