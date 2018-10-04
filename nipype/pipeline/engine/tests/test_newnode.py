@@ -69,7 +69,7 @@ def test_node_4():
     assert nn.state.state_values([1]) == {"NA.a": 5}
 
 
-def test_node_5():
+def test_node_4a():
     """Node with interface, mapper and inputs set with the map method"""
     interf_addtwo = Function_Interface(fun_addtwo, ["out"])
     nn = NewNode(name="NA", interface=interf_addtwo)
@@ -81,6 +81,32 @@ def test_node_5():
     nn.prepare_state_input()
     assert nn.state.state_values([0]) == {"NA.a": 3}
     assert nn.state.state_values([1]) == {"NA.a": 5}
+
+
+@pytest.mark.parametrize("plugin", Plugins)
+@python35_only
+def test_node_5(plugin):
+    """Node with interface and inputs, no mapper, running interface"""
+    interf_addtwo = Function_Interface(fun_addtwo, ["out"])
+    nn = NewNode(name="NA", inputs={"a": 3}, interface=interf_addtwo,
+                 base_dir="test_nd5_{}".format(plugin))
+
+    assert (nn.inputs["NA.a"] == np.array([3])).all()
+
+    sub = Submitter(plugin=plugin, runnable=nn)
+    sub.run()
+    sub.close()
+
+    # checking the results
+    expected = [({"NA.a": 3}, 5)]
+    # to be sure that there is the same order (not sure if node itself should keep the order)
+    key_sort = list(expected[0][0].keys())
+    expected.sort(key=lambda t: [t[0][key] for key in key_sort])
+    nn.result["out"].sort(key=lambda t: [t[0][key] for key in key_sort])
+
+    for i, res in enumerate(expected):
+        assert nn.result["out"][i][0] == res[0]
+        assert nn.result["out"][i][1] == res[1]
 
 
 @pytest.mark.parametrize("plugin", Plugins)

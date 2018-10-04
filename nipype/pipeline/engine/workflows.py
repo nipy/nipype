@@ -1164,6 +1164,8 @@ class NewBase(object):
         for (from_node, from_socket, to_socket) in self.needed_outputs:
             dir_nm_el_from = "_".join(["{}:{}".format(i, j) for i, j in list(state_dict.items())
                                        if i in list(from_node._state_inputs.keys())])
+            if not from_node.mapper:
+                dir_nm_el_from = ""
             file_from = os.path.join(from_node.nodedir, dir_nm_el_from, from_socket+".txt")
             with open(file_from) as f:
                 inputs_dict["{}.{}".format(self.name, to_socket)] = eval(f.readline())
@@ -1261,7 +1263,7 @@ class NewNode(NewBase):
         pass
 
 
-    def run_interface_el(self, i, ind, test=None):
+    def run_interface_el(self, i, ind):
         """ running interface one element generated from node_state."""
         logger.debug("Run interface el, name={}, i={}, ind={}".format(self.name, i, ind))
         state_dict, inputs_dict = self._collecting_input_el(ind)
@@ -1287,19 +1289,22 @@ class NewNode(NewBase):
 
     def _writting_results_tmp(self, state_dict, dir_nm_el, output):
         """temporary method to write the results in the files (this is usually part of a interface)"""
+        if not self.mapper:
+            dir_nm_el = ''
         os.makedirs(os.path.join(self.nodedir, dir_nm_el), exist_ok=True)
         for key_out, val_out in output.items():
             with open(os.path.join(self.nodedir, dir_nm_el, key_out+".txt"), "w") as fout:
                 fout.write(str(val_out))
 
 
-    def collecting_output(self):
+    def get_output(self):
         for key_out in self.output_names:
             self._output[key_out] = {}
             for (i, ind) in enumerate(itertools.product(*self.state.all_elements)):
-                state_dict, inputs_dict = self._collecting_input_el(ind)
+                state_dict = self.state.state_values(ind)
                 dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(state_dict.items())])
-                #pdb.set_trace()
+                if not self.mapper:
+                    dir_nm_el = ""
                 self._output[key_out][dir_nm_el] = (state_dict, os.path.join(self.nodedir, dir_nm_el, key_out + ".txt"))
         return self._output
 
@@ -1310,6 +1315,8 @@ class NewNode(NewBase):
         for ind in itertools.product(*self.state.all_elements):
             state_dict = self.state.state_values(ind)
             dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(state_dict.items())])
+            if not self.mapper:
+                dir_nm_el = ""
             for key_out in self.output_names:
                 if not os.path.isfile(os.path.join(self.nodedir, dir_nm_el, key_out+".txt")):
                     return False
@@ -1425,14 +1432,14 @@ class NewWorkflow(NewBase):
         pass
 
 
-    def collecting_output(self):
+    def get_output(self):
         # not sure, if I should collecto output of all nodes or only the ones that are used in wf.output
         self.node_outputs = {}
         for nn in self.graph:
             if self.mapper:
-                self.node_outputs[nn.name] = [ni.collecting_output() for ni in self.inner_nodes[nn.name]]
+                self.node_outputs[nn.name] = [ni.get_output() for ni in self.inner_nodes[nn.name]]
             else:
-                self.node_outputs[nn.name] = nn.collecting_output()
+                self.node_outputs[nn.name] = nn.get_output()
         if self.outputs_nm:
             for out in self.outputs_nm:
                 if len(out) == 2:
