@@ -1,7 +1,8 @@
 import pdb
-import inspect
+import inspect, os
 from ... import config, logging
 logger = logging.getLogger('nipype.workflow')
+from .nodes import Node
 
 
 # dj: might create a new class or move to State
@@ -247,3 +248,22 @@ class DotDict(dict):
     def __setstate__(self, state):
         self.update(state)
         self.__dict__ = self
+
+
+class CurrentInterface(object):
+    def __init__(self, interface, name):
+        self.nn = Node(interface=interface, name=name)
+        self.output = {}
+
+    def run(self, inputs, base_dir, set_out_nm, dir_nm_el):
+        self.nn.base_dir = os.path.join(base_dir, dir_nm_el)
+        for key, val in inputs.items():
+            key = key.split(".")[-1]
+            setattr(self.nn.inputs, key, val)
+        for key, val in set_out_nm.items():
+            key = key.split(".")[-1]
+            setattr(self.nn.inputs, key, os.path.join(self.nn.base_dir, self.nn.name, val))
+            #have to set again self._output_dir
+            self.nn._output_dir = os.path.join(self.nn.base_dir, self.nn.name)
+        res = self.nn.run()
+        return res

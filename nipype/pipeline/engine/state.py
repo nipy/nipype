@@ -67,6 +67,7 @@ class State(object):
 
 
     def state_values(self, ind):
+        """returns state input as a dictionary (input name, value)"""
         if len(ind) > self._ndim:
             raise IndexError("too many indices")
 
@@ -84,6 +85,32 @@ class State(object):
         # adding values from input that are not used in the mapper
         for input in set(self._input_names) - set(self._input_names_mapper):
             state_dict[input] = self.state_inputs[input]
+
+        # in py3.7 we can skip OrderedDict
+        # returning a named tuple?
+        return OrderedDict(sorted(state_dict.items(), key=lambda t: t[0]))
+
+
+    def state_ind(self, ind):
+        """similar to state value but returns indices (not values)"""
+        if len(ind) > self._ndim:
+            raise IndexError("too many indices")
+
+        for ii, index in enumerate(ind):
+            if index > self._shape[ii] - 1:
+                raise IndexError("index {} is out of bounds for axis {} with size {}".format(index, ii, self._shape[ii]))
+
+        state_dict = {}
+        for input, ax in self._axis_for_input.items():
+            # checking which axes are important for the input
+            sl_ax = slice(ax[0], ax[-1]+1)
+            # taking the indexes for the axes
+            ind_inp = tuple(ind[sl_ax]) #used to be list
+            ind_inp_str = "x".join([str(el) for el in ind_inp])
+            state_dict[input] = ind_inp_str
+        # adding inputs that are not used in the mapper
+        for input in set(self._input_names) - set(self._input_names_mapper):
+            state_dict[input] = None
 
         # in py3.7 we can skip OrderedDict
         # returning a named tuple?

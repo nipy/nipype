@@ -64,7 +64,6 @@ class Submitter(object):
     def _submit_node_el(self, node, i, ind):
         """submitting node's interface for one element of states"""
         logger.debug("SUBMIT WORKER, node: {}, ind: {}".format(node, ind))
-        print("SUBMIT WORK", node.inputs)
         self.worker.run_el(node.run_interface_el, (i, ind))
 
 
@@ -74,7 +73,7 @@ class Submitter(object):
             workflow = self.workflow
         workflow.prepare_state_input()
 
-        # TODO: should I havve inner_nodes for all workflow (to avoid if wf.mapper)??
+        # TODO: should I have inner_nodes for all workflow (to avoid if wf.mapper)??
         if workflow.mapper:
             for key in workflow._node_names.keys():
                 workflow.inner_nodes[key] = []
@@ -87,7 +86,11 @@ class Submitter(object):
                     self.node_line.append((new_workflow, i, ind))
         else:
             if ready:
-                workflow.preparing(wf_inputs=workflow.inputs)
+                if workflow.print_val:
+                        workflow.preparing(wf_inputs=workflow.inputs)
+                else:
+                    inputs_ind = dict((key, None) for (key, _) in workflow.inputs)
+                    workflow.preparing(wf_inputs=workflow.inputs, wf_inputs_ind=inputs_ind)
                 self._run_workflow_nd(workflow=workflow)
             else:
                 self.node_line.append((workflow, 0, ()))
@@ -115,7 +118,11 @@ class Submitter(object):
             st_inputs, wf_inputs = workflow._collecting_input_el(ind)
         else:
             wf_inputs = workflow.state.state_values(ind)
-        workflow.preparing(wf_inputs=wf_inputs)
+        if workflow.print_val:
+            workflow.preparing(wf_inputs=wf_inputs)
+        else:
+            wf_inputs_ind = workflow.state.state_ind(ind)
+            workflow.preparing(wf_inputs=wf_inputs, wf_inputs_ind=wf_inputs_ind)
         self._run_workflow_nd(workflow=workflow)
 
 

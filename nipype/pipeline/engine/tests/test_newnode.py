@@ -1,7 +1,8 @@
 from ....utils.filemanip import save_json, makedirs, to_str
+from ....interfaces import fsl
 
 from .. import NewNode, NewWorkflow
-from ..auxiliary import Function_Interface
+from ..auxiliary import Function_Interface, CurrentInterface
 from ..submitter import Submitter
 
 import sys, time, os
@@ -1287,3 +1288,91 @@ def test_workflow_16a(plugin, change_dir):
     for i, res in enumerate(expected_B):
         assert wf.result["NB_out"][i][0] == res[0]
         assert wf.result["NB_out"][i][1] == res[1]
+
+
+# testing CurrentInterface that is a temporary wrapper for current interfaces
+
+@pytest.mark.skipif(not os.path.exists("/Users/dorota/nipype_workshop/data/ds000114"), reason="adding data")
+@pytest.mark.parametrize("plugin", Plugins)
+@python35_only
+def test_current_node_1(change_dir, plugin):
+    """Node with a current interface and inputs, no mapper, running interface"""
+    interf_bet = CurrentInterface(interface=fsl.BET(), name="fsl")
+
+    nn = NewNode(name="NA", inputs={"in_file": "/Users/dorota/nipype_workshop/data/ds000114/sub-01/ses-test/anat/sub-01_ses-test_T1w.nii.gz"}, interface=interf_bet,
+                 workingdir="test_cnd1_{}".format(plugin), output_names=[("brain.nii.gz", "out_file", "fsl_out")])
+
+    sub = Submitter(plugin=plugin, runnable=nn)
+    sub.run()
+    sub.close()
+
+    assert "fsl_out" in nn.output.keys()
+
+
+@pytest.mark.skipif(not os.path.exists("/Users/dorota/nipype_workshop/data/ds000114"), reason="adding data")
+@pytest.mark.parametrize("plugin", Plugins)
+@python35_only
+def test_current_node_2(change_dir, plugin):
+    """Node with a current interface and mapper"""
+    interf_bet = CurrentInterface(interface=fsl.BET(), name="fsl")
+
+    in_file_l = ["/Users/dorota/nipype_workshop/data/ds000114/sub-01/ses-test/anat/sub-01_ses-test_T1w.nii.gz",
+                 "/Users/dorota/nipype_workshop/data/ds000114/sub-02/ses-test/anat/sub-02_ses-test_T1w.nii.gz"]
+    nn = NewNode(name="NA", inputs={"in_file": in_file_l}, mapper="in_file", interface=interf_bet, print_val=False,
+                 workingdir="test_cnd2_{}".format(plugin), output_names=[("brain.nii.gz", "out_file", "fsl_out")])
+
+    sub = Submitter(plugin=plugin, runnable=nn)
+    sub.run()
+    sub.close()
+
+    assert "fsl_out" in nn.output.keys()
+    assert "NA.in_file:0" in nn.output["fsl_out"].keys()
+    assert "NA.in_file:1" in nn.output["fsl_out"].keys()
+
+
+@pytest.mark.skipif(not os.path.exists("/Users/dorota/nipype_workshop/data/ds000114"), reason="adding data")
+@pytest.mark.parametrize("plugin", Plugins)
+@python35_only
+def test_current_wf_1(change_dir, plugin):
+    """Wf with a current interface, no mapper"""
+    interf_bet = CurrentInterface(interface=fsl.BET(), name="fsl")
+
+    nn = NewNode(name="fsl", inputs={"in_file": "/Users/dorota/nipype_workshop/data/ds000114/sub-01/ses-test/anat/sub-01_ses-test_T1w.nii.gz"}, interface=interf_bet,
+                 workingdir="nn", output_names=[("brain.nii.gz", "out_file", "fsl_out")], print_val=False)
+
+    wf = NewWorkflow( workingdir="test_cwf_1_{}".format(plugin), name="cw1", wf_output_names=[("fsl", "fsl_out")], print_val=False)
+    wf.add_nodes([nn])
+
+    sub = Submitter(plugin=plugin, runnable=wf)
+    sub.run()
+    sub.close()
+
+    assert "fsl_out" in wf.output.keys()
+
+
+@pytest.mark.skipif(not os.path.exists("/Users/dorota/nipype_workshop/data/ds000114"), reason="adding data")
+@pytest.mark.parametrize("plugin", Plugins)
+@python35_only
+def test_current_wf_2(change_dir, plugin):
+    """Wf with a current interface and mapper"""
+    interf_bet = CurrentInterface(interface=fsl.BET(), name="fsl")
+
+    in_file_l = ["/Users/dorota/nipype_workshop/data/ds000114/sub-01/ses-test/anat/sub-01_ses-test_T1w.nii.gz",
+                 "/Users/dorota/nipype_workshop/data/ds000114/sub-02/ses-test/anat/sub-02_ses-test_T1w.nii.gz"]
+
+    nn = NewNode(name="fsl", interface=interf_bet, print_val=False,
+                 workingdir="nn", output_names=[("brain.nii.gz", "out_file", "fsl_out")])
+
+    wf = NewWorkflow( workingdir="test_cwf_2_{}".format(plugin), name="cw2", wf_output_names=[("fsl", "fsl_out")],
+                      inputs={"in_file": in_file_l}, mapper="in_file", print_val=False)
+    wf.add_nodes([nn])
+    wf.connect_wf_input("in_file", "fsl", "in_file")
+
+    sub = Submitter(plugin=plugin, runnable=wf)
+    sub.run()
+    sub.close()
+
+    assert "fsl_out" in wf.output.keys()
+    assert 'cw2.in_file:0' in wf.output["fsl_out"].keys()
+    assert 'cw2.in_file:1' in wf.output["fsl_out"].keys()
+

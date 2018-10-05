@@ -1052,7 +1052,7 @@ connected.
         return ('\n' + prefix).join(dotlist)
 
     def add(self, name, node_like):
-        if is_interface(node_like):
+        if is_function_interface(node_like):
             node = Node(node_like, name=name)
         elif is_node(node_like):
             node = node_like
@@ -1075,7 +1075,7 @@ class MapState(object):
 # dj ??: should I use EngineBase?
 class NewBase(object):
     def __init__(self, name, mapper=None, inputs=None, other_mappers=None, mem_gb=None,
-                 cache_location=None, *args, **kwargs):
+                 cache_location=None, print_val=True, *args, **kwargs):
         self.name = name
         #dj TODO: I should think what is needed in the __init__ (I redefine some of rhe attributes anyway)
         if inputs:
@@ -1103,6 +1103,8 @@ class NewBase(object):
         self.needed_outputs = []
         # flag that says if node finished all jobs
         self._is_complete = False
+        # flag that says if value of state input should be printed in output and directories (otherwise indices)
+        self.print_val = print_val
 
         # TODO: don't use it yet
         self.mem_gb = mem_gb
@@ -1233,19 +1235,31 @@ class NewBase(object):
 class NewNode(NewBase):
     def __init__(self, name, interface, inputs=None, mapper=None, join_by=None,
                  workingdir=None, other_mappers=None, mem_gb=None, cache_location=None,
-                 *args, **kwargs):
+                 output_names=None, print_val=True, *args, **kwargs):
         super(NewNode, self).__init__(name=name, mapper=mapper, inputs=inputs,
                                       other_mappers=other_mappers, mem_gb=mem_gb,
-                                      cache_location=cache_location, *args, **kwargs)
+                                      cache_location=cache_location, print_val=print_val,
+                                      *args, **kwargs)
 
         # working directory for node, will be change if node is a part of a wf
         self.workingdir = workingdir
         self.interface = interface
-        # adding node name to the interface's name mapping
-        self.interface.input_map = dict((key, "{}.{}".format(self.name, value))
-                                         for (key, value) in self.interface.input_map.items())
-        # output names taken from interface output name
-        self.output_names = self.interface._output_nm
+
+        # TODO: fixing mess with outputs_names etc.
+        if is_function_interface(self.interface):
+            # adding node name to the interface's name mapping
+            self.interface.input_map = dict((key, "{}.{}".format(self.name, value))
+                                             for (key, value) in self.interface.input_map.items())
+            # output names taken from interface output name
+            self.output_names = self.interface._output_nm
+        elif is_current_interface(self.interface):
+            # TODO: assuming file_name, inter_key_out, node_key_out
+            # used to define name of the output file of current interface
+            self.output_names = output_names
+
+        self.print_val = print_val
+
+
 
 
     # dj: not sure if I need it
@@ -1280,14 +1294,31 @@ class NewNode(NewBase):
         """ running interface one element generated from node_state."""
         logger.debug("Run interface el, name={}, i={}, ind={}".format(self.name, i, ind))
         state_dict, inputs_dict = self._collecting_input_el(ind)
+        if not self.print_val:
+            state_dict = self.state.state_ind(ind)
         dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(state_dict.items())])
         print("Run interface el, dict={}".format(state_dict))
         logger.debug("Run interface el, name={}, inputs_dict={}, state_dict={}".format(
                                                             self.name, inputs_dict, state_dict))
-        res = self.interface.run(inputs_dict)
-        output = self.interface.output
-        print("Run interface el, output={}".format(output))
-        logger.debug("Run interface el, output={}".format(output))
+        if is_function_interface(self.interface):
+            res = self.interface.run(inputs_dict)
+            output = self.interface.output
+            print("Run fun interface el, output={}".format(output))
+            logger.debug("Run fun interface el, output={}".format(output))
+            self._writting_results_tmp(state_dict, dir_nm_el, output)
+        elif is_current_interface(self.interface):
+            set_nm = {}
+            for out_nm in self.output_names:
+                if len(out_nm) == 2:
+                    out_nm = (out_nm[0], out_nm[1], out_nm[1])
+                if out_nm[2] not in self._output.keys():
+                    self._output[out_nm[2]] = {}
+                set_nm[out_nm[1]] = out_nm[0]
+            if not self.mapper:
+                dir_nm_el = ""
+            res = self.interface.run(inputs=inputs_dict, base_dir=os.path.join(os.getcwd(), self.workingdir),
+                                     set_out_nm=set_nm, dir_nm_el=dir_nm_el)
+
         # TODO when join
         #if self._joinByKey:
         #    dir_join = "join_" + "_".join(["{}.{}".format(i, j) for i, j in list(state_dict.items()) if i not in self._joinByKey])
@@ -1296,7 +1327,6 @@ class NewNode(NewBase):
         #if self._joinByKey or self._join:
         #    os.makedirs(os.path.join(self.nodedir, dir_join), exist_ok=True)
         #    dir_nm_el = os.path.join(dir_join, dir_nm_el)
-        self._writting_results_tmp(state_dict, dir_nm_el, output)
         return res
 
 
@@ -1312,14 +1342,22 @@ class NewNode(NewBase):
 
     def get_output(self):
         for key_out in self.output_names:
+            if is_current_interface(self.interface):
+                key_out, filename = key_out[-1], key_out[0]
             self._output[key_out] = {}
             for (i, ind) in enumerate(itertools.product(*self.state.all_elements)):
-                state_dict = self.state.state_values(ind)
+                if self.print_val:
+                    state_dict = self.state.state_values(ind)
+                else:
+                    state_dict = self.state.state_ind(ind)
                 dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(state_dict.items())])
                 if self.mapper:
                     self._output[key_out][dir_nm_el] = (state_dict, os.path.join(self.workingdir, dir_nm_el, key_out + ".txt"))
                 else:
-                    self._output[key_out] = (state_dict, os.path.join(self.workingdir, key_out + ".txt"))
+                    if is_function_interface(self.interface):
+                        self._output[key_out] = (state_dict, os.path.join(self.workingdir, key_out + ".txt"))
+                    elif is_current_interface(self.interface):
+                        self._output[key_out] = (state_dict, os.path.join(self.workingdir, self.interface.nn.name, filename))
         return self._output
 
 
@@ -1327,13 +1365,21 @@ class NewNode(NewBase):
     def _check_all_results(self):
         """checking if all files that should be created are present"""
         for ind in itertools.product(*self.state.all_elements):
-            state_dict = self.state.state_values(ind)
+            if self.print_val:
+                state_dict = self.state.state_values(ind)
+            else:
+                state_dict = self.state.state_ind(ind)
             dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(state_dict.items())])
             if not self.mapper:
                 dir_nm_el = ""
             for key_out in self.output_names:
-                if not os.path.isfile(os.path.join(self.workingdir, dir_nm_el, key_out+".txt")):
-                    return False
+                if is_function_interface(self.interface):
+                    if not os.path.isfile(os.path.join(self.workingdir, dir_nm_el, key_out+".txt")):
+                        return False
+                elif is_current_interface(self.interface):
+                    if not os.path.isfile(os.path.join(os.getcwd(), self.workingdir,
+                                                       dir_nm_el, self.interface.nn.name, key_out[0])):
+                        return False
         self._is_complete = True
         return True
 
@@ -1369,9 +1415,9 @@ class NewNode(NewBase):
 
 class NewWorkflow(NewBase):
     def __init__(self, name, inputs=None, wf_output_names=None, mapper=None, #join_by=None,
-                 nodes=None, workingdir=None, mem_gb=None, cache_location=None, *args, **kwargs):
+                 nodes=None, workingdir=None, mem_gb=None, cache_location=None, print_val=True, *args, **kwargs):
         super(NewWorkflow, self).__init__(name=name, mapper=mapper, inputs=inputs, mem_gb=mem_gb,
-                                          cache_location=cache_location, *args, **kwargs)
+                                          cache_location=cache_location, print_val=print_val, *args, **kwargs)
 
         self.graph = nx.DiGraph()
         # all nodes in the workflow (probably will be removed)
@@ -1459,8 +1505,12 @@ class NewWorkflow(NewBase):
                     if self.mapper:
                         self._output[out_wf_nm] = {}
                         for (i, ind) in enumerate(itertools.product(*self.state.all_elements)):
-                            wf_inputs_dict = self.state.state_values(ind)
-                            dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(wf_inputs_dict.items())])
+                            if self.print_val:
+                                wf_inputs_dict = self.state.state_values(ind)
+                                dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(wf_inputs_dict.items())])
+                            else:
+                                wf_ind_dict = self.state.state_ind(ind)
+                                dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(wf_ind_dict.items())])
                             self._output[out_wf_nm][dir_nm_el] = self.node_outputs[node_nm][i][out_nd_nm]
                     else:
                         self._output[out_wf_nm] = self.node_outputs[node_nm][out_nd_nm]
@@ -1495,7 +1545,10 @@ class NewWorkflow(NewBase):
                 self._result[key_out] = []
                 if self.mapper:
                     for (i, ind) in enumerate(itertools.product(*self.state.all_elements)):
-                        wf_inputs_dict = self.state.state_values(ind)
+                        if self.print_val:
+                            wf_inputs_dict = self.state.state_values(ind)
+                        else:
+                            wf_inputs_dict = self.state.state_ind(ind)
                         dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(wf_inputs_dict.items())])
                         res_l= []
                         val_l = self._dict_tuple2list(self.output[key_out][dir_nm_el])
@@ -1539,7 +1592,7 @@ class NewWorkflow(NewBase):
                 workingdir = name
             node = NewNode(interface=interface, workingdir=workingdir, name=name, inputs=inputs, mapper=mapper,
                            other_mappers=self._node_mappers, mem_gb=mem_gb)
-        elif is_interface(runnable):
+        elif is_function_interface(runnable): # TODO: add current_dir
             if not name:
                 raise Exception("you have to specify name for the node")
             if not workingdir:
@@ -1581,7 +1634,7 @@ class NewWorkflow(NewBase):
         self.needed_inp_wf.append((node_nm, inp_wf, inp_nd))
 
 
-    def preparing(self, wf_inputs=None):
+    def preparing(self, wf_inputs=None, wf_inputs_ind=None):
         """preparing nodes which are connected: setting the final mapper and state_inputs"""
         #pdb.set_trace()
         for node_nm, inp_wf, inp_nd in self.needed_inp_wf:
@@ -1592,7 +1645,10 @@ class NewWorkflow(NewBase):
             else:
                 raise Exception("{}.{} not in the workflow inputs".format(self.name, inp_wf))
         for nn in self.graph_sorted:
-            dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(wf_inputs.items())])
+            if self.print_val:
+                dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(wf_inputs.items())])
+            else:
+                dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(wf_inputs_ind.items())])
             if not self.mapper:
                 dir_nm_el = ""
             nn.workingdir = os.path.join(self.workingdir, dir_nm_el, nn.name)
@@ -1628,8 +1684,11 @@ class NewWorkflow(NewBase):
 def is_function(obj):
     return hasattr(obj, '__call__')
 
-def is_interface(obj):
+def is_function_interface(obj):
     return type(obj) is aux.Function_Interface
+
+def is_current_interface(obj):
+    return type(obj) is aux.CurrentInterface
 
 
 def is_node(obj):
