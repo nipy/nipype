@@ -1353,6 +1353,61 @@ def test_current_wf_1(change_dir, plugin):
 @pytest.mark.skipif(not os.path.exists("/Users/dorota/nipype_workshop/data/ds000114"), reason="adding data")
 @pytest.mark.parametrize("plugin", Plugins)
 @python35_only
+def test_current_wf_1a(change_dir, plugin):
+    """Wf with a current interface, no mapper"""
+    interf_bet = CurrentInterface(interface=fsl.BET(), name="fsl")
+
+    nn = NewNode(name="fsl", inputs={"in_file": "/Users/dorota/nipype_workshop/data/ds000114/sub-01/ses-test/anat/sub-01_ses-test_T1w.nii.gz"}, interface=interf_bet,
+                 workingdir="nn", output_names=[("brain.nii.gz", "out_file", "fsl_out")], print_val=False)
+
+    wf = NewWorkflow(workingdir="test_cwf_1a_{}".format(plugin), name="cw1", wf_output_names=[("fsl", "fsl_out")], print_val=False)
+    wf.add(runnable=nn)
+
+    sub = Submitter(plugin=plugin, runnable=wf)
+    sub.run()
+    sub.close()
+
+    assert "fsl_out" in wf.output.keys()
+
+
+@pytest.mark.skipif(not os.path.exists("/Users/dorota/nipype_workshop/data/ds000114"), reason="adding data")
+@pytest.mark.parametrize("plugin", Plugins)
+@python35_only
+def test_current_wf_1b(change_dir, plugin):
+    """Wf with a current interface, no mapper; using wf.add(nipype CurrentInterface)"""
+    interf_bet = CurrentInterface(interface=fsl.BET(), name="fsl")
+
+    wf = NewWorkflow(workingdir="test_cwf_1b_{}".format(plugin), name="cw1", wf_output_names=[("fsl", "fsl_out")], print_val=False)
+    wf.add(runnable=interf_bet, name="fsl", workingdir="nn", output_names=[("brain.nii.gz", "out_file", "fsl_out")], print_val=False,
+           inputs={"in_file": "/Users/dorota/nipype_workshop/data/ds000114/sub-01/ses-test/anat/sub-01_ses-test_T1w.nii.gz"})
+
+    sub = Submitter(plugin=plugin, runnable=wf)
+    sub.run()
+    sub.close()
+
+    assert "fsl_out" in wf.output.keys()
+
+
+@pytest.mark.skipif(not os.path.exists("/Users/dorota/nipype_workshop/data/ds000114"), reason="adding data")
+@pytest.mark.parametrize("plugin", Plugins)
+@python35_only
+def test_current_wf_1c(change_dir, plugin):
+    """Wf with a current interface, no mapper; using wf.add(nipype interface) """
+
+    wf = NewWorkflow(workingdir="test_cwf_1c_{}".format(plugin), name="cw1", wf_output_names=[("fsl", "fsl_out")], print_val=False)
+    wf.add(runnable=fsl.BET(), name="fsl", workingdir="nn", output_names=[("brain.nii.gz", "out_file", "fsl_out")], print_val=False,
+           inputs={"in_file": "/Users/dorota/nipype_workshop/data/ds000114/sub-01/ses-test/anat/sub-01_ses-test_T1w.nii.gz"})
+
+    sub = Submitter(plugin=plugin, runnable=wf)
+    sub.run()
+    sub.close()
+
+    assert "fsl_out" in wf.output.keys()
+
+
+@pytest.mark.skipif(not os.path.exists("/Users/dorota/nipype_workshop/data/ds000114"), reason="adding data")
+@pytest.mark.parametrize("plugin", Plugins)
+@python35_only
 def test_current_wf_2(change_dir, plugin):
     """Wf with a current interface and mapper"""
     interf_bet = CurrentInterface(interface=fsl.BET(), name="fsl")
@@ -1375,4 +1430,5 @@ def test_current_wf_2(change_dir, plugin):
     assert "fsl_out" in wf.output.keys()
     assert 'cw2.in_file:0' in wf.output["fsl_out"].keys()
     assert 'cw2.in_file:1' in wf.output["fsl_out"].keys()
+
 

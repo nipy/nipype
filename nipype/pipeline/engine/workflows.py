@@ -1580,25 +1580,35 @@ class NewWorkflow(NewBase):
             self._node_mappers[nn.name] = nn.mapper
 
 
-    def add(self, runnable, name=None, workingdir=None, inputs=None, output_nm=None, mapper=None,
-            mem_gb=None, **kwargs):
+    def add(self, runnable, name=None, workingdir=None, inputs=None, output_names=None, mapper=None,
+            mem_gb=None, print_val=True, **kwargs):
         if is_function(runnable):
-            if not output_nm:
-                output_nm = ["out"]
-            interface = aux.Function_Interface(function=runnable, output_nm=output_nm)
+            if not output_names:
+                output_names = ["out"]
+            interface = aux.Function_Interface(function=runnable, output_nm=output_names)
             if not name:
                 raise Exception("you have to specify name for the node")
             if not workingdir:
                 workingdir = name
             node = NewNode(interface=interface, workingdir=workingdir, name=name, inputs=inputs, mapper=mapper,
                            other_mappers=self._node_mappers, mem_gb=mem_gb)
-        elif is_function_interface(runnable): # TODO: add current_dir
+        elif is_function_interface(runnable) or is_current_interface(runnable):
             if not name:
                 raise Exception("you have to specify name for the node")
             if not workingdir:
                 workingdir = name
             node = NewNode(interface=runnable, workingdir=workingdir, name=name, inputs=inputs, mapper=mapper,
-                           other_mappers=self._node_mappers, mem_gb_node=mem_gb)
+                           other_mappers=self._node_mappers, mem_gb_node=mem_gb, output_names=output_names,
+                           print_val=print_val)
+        elif is_nipype_interface(runnable):
+            ci = aux.CurrentInterface(interface=runnable, name=name)
+            if not name:
+                raise Exception("you have to specify name for the node")
+            if not workingdir:
+                workingdir = name
+            node = NewNode(interface=ci, workingdir=workingdir, name=name, inputs=inputs, mapper=mapper,
+                           other_mappers=self._node_mappers, mem_gb_node=mem_gb, output_names=output_names,
+                           print_val=print_val)
         elif is_node(runnable):
             node = runnable
         elif is_workflow(runnable):
@@ -1690,6 +1700,8 @@ def is_function_interface(obj):
 def is_current_interface(obj):
     return type(obj) is aux.CurrentInterface
 
+def is_nipype_interface(obj):
+    return hasattr(obj, "_run_interface")
 
 def is_node(obj):
     return type(obj) is NewNode
