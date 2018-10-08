@@ -89,7 +89,7 @@ class Submitter(object):
                 if workflow.print_val:
                         workflow.preparing(wf_inputs=workflow.inputs)
                 else:
-                    inputs_ind = dict((key, None) for (key, _) in workflow.inputs)
+                    inputs_ind = dict((key, None) for (key, _) in workflow.inputs.items())
                     workflow.preparing(wf_inputs=workflow.inputs, wf_inputs_ind=inputs_ind)
                 self._run_workflow_nd(workflow=workflow)
             else:
@@ -133,7 +133,7 @@ class Submitter(object):
                 workflow.parent_wf.inner_nodes[node.name].append(node)
             node.prepare_state_input()
             self._to_finish.append(node)
-            # submitting all the nodes who are self sufficient (self.workflow.graph is already sorted)
+             # submitting all the nodes who are self sufficient (self.workflow.graph is already sorted)
             if node.ready2run:
                 if hasattr(node, 'interface'):
                     self._submit_node(node)
@@ -163,6 +163,7 @@ class Submitter(object):
         _to_remove = []
         for (to_node, i, ind) in self.node_line:
             if hasattr(to_node, 'interface'):
+                print("_NODES_CHECK INPUT", to_node.name, to_node.checking_input_el(ind))
                 if to_node.checking_input_el(ind):
                     self._submit_node_el(to_node, i, ind)
                     _to_remove.append((to_node, i, ind))
@@ -175,7 +176,6 @@ class Submitter(object):
                 else:
                     pass
 
-        # can't remove during iterating
         for rn in _to_remove:
             self.node_line.remove(rn)
         return self.node_line
@@ -186,7 +186,7 @@ class Submitter(object):
         """"checking if all nodes are done"""
         _to_remove = []
         for node in self._to_finish:
-            print("_output check node", node, node.is_complete)
+            print("_output check node", node, node.name, node.is_complete)
             if node.is_complete:
                 _to_remove.append(node)
         for rn in _to_remove:

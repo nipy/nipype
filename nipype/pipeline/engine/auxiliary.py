@@ -192,9 +192,9 @@ def _add_name(mlist, name):
 
 #Function interface
 
-class Function_Interface(object):
+class FunctionInterface(object):
     """ A new function interface """
-    def __init__(self, function, output_nm, input_map=None):
+    def __init__(self, function, output_nm, out_read=False, input_map=None):
         self.function = function
         if type(output_nm) is list:
             self._output_nm = output_nm
@@ -206,6 +206,8 @@ class Function_Interface(object):
         for key in inspect.getargspec(function)[0]:
             if key not in self.input_map.keys():
                 self.input_map[key] = key
+        # flags if we want to read the txt file to save in node.output
+        self.out_read = out_read
 
 
     def run(self, input):
@@ -255,15 +257,12 @@ class CurrentInterface(object):
         self.nn = Node(interface=interface, name=name)
         self.output = {}
 
-    def run(self, inputs, base_dir, set_out_nm, dir_nm_el):
+    def run(self, inputs, base_dir, dir_nm_el):
         self.nn.base_dir = os.path.join(base_dir, dir_nm_el)
         for key, val in inputs.items():
             key = key.split(".")[-1]
             setattr(self.nn.inputs, key, val)
-        for key, val in set_out_nm.items():
-            key = key.split(".")[-1]
-            setattr(self.nn.inputs, key, os.path.join(self.nn.base_dir, self.nn.name, val))
-            #have to set again self._output_dir
-            self.nn._output_dir = os.path.join(self.nn.base_dir, self.nn.name)
+        #have to set again self._output_dir in case of mapper
+        self.nn._output_dir = os.path.join(self.nn.base_dir, self.nn.name)
         res = self.nn.run()
         return res

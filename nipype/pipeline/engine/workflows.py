@@ -29,7 +29,7 @@ from ...utils.functions import (getsource, create_function_from_source)
 
 from ...interfaces.base import (traits, TraitedSpec, TraitDictObject,
                                 TraitListObject)
-from ...utils.filemanip import save_json, makedirs, to_str
+from ...utils.filemanip import save_json, makedirs, to_str, loadpkl
 from .utils import (generate_expanded_graph, export_graph, write_workflow_prov,
                     write_workflow_resources, format_dot, topological_sort,
                     get_print_name, merge_dict, format_node)
@@ -1189,19 +1189,49 @@ class NewBase(object):
         """collecting all inputs required to run the node (for specific state element)"""
         state_dict = self.state.state_values(ind)
         inputs_dict = {k: state_dict[k] for k in self._inputs.keys()}
+        if not self.print_val:
+            state_dict = self.state.state_ind(ind)
         # reading extra inputs that come from previous nodes
         for (from_node, from_socket, to_socket) in self.needed_outputs:
             dir_nm_el_from = "_".join(["{}:{}".format(i, j) for i, j in list(state_dict.items())
                                        if i in list(from_node._state_inputs.keys())])
             if not from_node.mapper:
                 dir_nm_el_from = ""
-            file_from = os.path.join(from_node.workingdir, dir_nm_el_from, from_socket+".txt")
-            with open(file_from) as f:
-                inputs_dict["{}.{}".format(self.name, to_socket)] = eval(f.readline())
+
+            if is_node(from_node) and is_current_interface(from_node.interface):
+                file_from = self._reading_ci_output(node=from_node, dir_nm_el=dir_nm_el_from, out_nm=from_socket)
+                if file_from and os.path.exists(file_from):
+                    inputs_dict["{}.{}".format(self.name, to_socket)] = file_from
+                else:
+                    raise Exception("{} doesnt exist".format(file_from))
+            else: # assuming here that I want to read the file (will not be used with the current interfaces)
+                file_from = os.path.join(from_node.workingdir, dir_nm_el_from, from_socket+".txt")
+                with open(file_from) as f:
+                    content = f.readline()
+                    try:
+                        inputs_dict["{}.{}".format(self.name, to_socket)] = eval(content)
+                    except NameError:
+                        inputs_dict["{}.{}".format(self.name, to_socket)] = content
+
         return state_dict, inputs_dict
 
+    def _reading_ci_output(self, dir_nm_el, out_nm, node=None):
+        """used for current interfaces: checking if the output exists and returns the path if it does"""
+        if not node:
+            node = self
+        result_pklfile = os.path.join(os.getcwd(), node.workingdir, dir_nm_el,
+                                      node.interface.nn.name, "result_{}.pklz".format(node.interface.nn.name))
+        if os.path.exists(result_pklfile):
+            out_file = getattr(loadpkl(result_pklfile).outputs, out_nm)
+            if os.path.exists(out_file):
+                return out_file
+            else:
+                return False
+        else:
+            return False
 
-   # checking if all outputs are saved
+
+    # checking if all outputs are saved
     @property
     def is_complete(self):
         # once _is_complete os True, this should not change
@@ -1245,20 +1275,17 @@ class NewNode(NewBase):
         self.workingdir = workingdir
         self.interface = interface
 
-        # TODO: fixing mess with outputs_names etc.
         if is_function_interface(self.interface):
             # adding node name to the interface's name mapping
             self.interface.input_map = dict((key, "{}.{}".format(self.name, value))
                                              for (key, value) in self.interface.input_map.items())
-            # output names taken from interface output name
+            # list of output names taken from interface output name
             self.output_names = self.interface._output_nm
         elif is_current_interface(self.interface):
-            # TODO: assuming file_name, inter_key_out, node_key_out
-            # used to define name of the output file of current interface
+            # list of  interf_key_out
             self.output_names = output_names
-
-        self.print_val = print_val
-
+        if not self.output_names:
+            self.output_names = []
 
 
 
@@ -1307,17 +1334,10 @@ class NewNode(NewBase):
             logger.debug("Run fun interface el, output={}".format(output))
             self._writting_results_tmp(state_dict, dir_nm_el, output)
         elif is_current_interface(self.interface):
-            set_nm = {}
-            for out_nm in self.output_names:
-                if len(out_nm) == 2:
-                    out_nm = (out_nm[0], out_nm[1], out_nm[1])
-                if out_nm[2] not in self._output.keys():
-                    self._output[out_nm[2]] = {}
-                set_nm[out_nm[1]] = out_nm[0]
             if not self.mapper:
                 dir_nm_el = ""
             res = self.interface.run(inputs=inputs_dict, base_dir=os.path.join(os.getcwd(), self.workingdir),
-                                     set_out_nm=set_nm, dir_nm_el=dir_nm_el)
+                                     dir_nm_el=dir_nm_el)
 
         # TODO when join
         #if self._joinByKey:
@@ -1342,8 +1362,6 @@ class NewNode(NewBase):
 
     def get_output(self):
         for key_out in self.output_names:
-            if is_current_interface(self.interface):
-                key_out, filename = key_out[-1], key_out[0]
             self._output[key_out] = {}
             for (i, ind) in enumerate(itertools.product(*self.state.all_elements)):
                 if self.print_val:
@@ -1352,12 +1370,32 @@ class NewNode(NewBase):
                     state_dict = self.state.state_ind(ind)
                 dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(state_dict.items())])
                 if self.mapper:
-                    self._output[key_out][dir_nm_el] = (state_dict, os.path.join(self.workingdir, dir_nm_el, key_out + ".txt"))
+                    if is_function_interface(self.interface):
+                        output = os.path.join(self.workingdir, dir_nm_el, key_out + ".txt")
+                        if self.interface.out_read:
+                            with open(output) as fout:
+                                content = fout.readline()
+                                try:
+                                    output = eval(content)
+                                except NameError:
+                                    output = content
+                        self._output[key_out][dir_nm_el] = (state_dict, output)
+                    elif is_current_interface(self.interface):
+                        self._output[key_out][dir_nm_el] = \
+                            (state_dict, (state_dict, self._reading_ci_output(dir_nm_el=dir_nm_el, out_nm=key_out)))
                 else:
                     if is_function_interface(self.interface):
-                        self._output[key_out] = (state_dict, os.path.join(self.workingdir, key_out + ".txt"))
+                        output = os.path.join(self.workingdir, key_out + ".txt")
+                        if self.interface.out_read:
+                            with open(output) as fout:
+                                try:
+                                    output = eval(fout.readline())
+                                except NewWorkflow:
+                                    output = fout.readline()
+                        self._output[key_out] = (state_dict, output)
                     elif is_current_interface(self.interface):
-                        self._output[key_out] = (state_dict, os.path.join(self.workingdir, self.interface.nn.name, filename))
+                        self._output[key_out] = \
+                            (state_dict, self._reading_ci_output(dir_nm_el="", out_nm=key_out))
         return self._output
 
 
@@ -1372,13 +1410,13 @@ class NewNode(NewBase):
             dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(state_dict.items())])
             if not self.mapper:
                 dir_nm_el = ""
+
             for key_out in self.output_names:
                 if is_function_interface(self.interface):
                     if not os.path.isfile(os.path.join(self.workingdir, dir_nm_el, key_out+".txt")):
                         return False
                 elif is_current_interface(self.interface):
-                    if not os.path.isfile(os.path.join(os.getcwd(), self.workingdir,
-                                                       dir_nm_el, self.interface.nn.name, key_out[0])):
+                    if not self._reading_ci_output(dir_nm_el, key_out):
                         return False
         self._is_complete = True
         return True
@@ -1581,17 +1619,17 @@ class NewWorkflow(NewBase):
 
 
     def add(self, runnable, name=None, workingdir=None, inputs=None, output_names=None, mapper=None,
-            mem_gb=None, print_val=True, **kwargs):
+            mem_gb=None, print_val=True, out_read=False, **kwargs):
         if is_function(runnable):
             if not output_names:
                 output_names = ["out"]
-            interface = aux.Function_Interface(function=runnable, output_nm=output_names)
+            interface = aux.FunctionInterface(function=runnable, output_nm=output_names, out_read=out_read)
             if not name:
                 raise Exception("you have to specify name for the node")
             if not workingdir:
                 workingdir = name
             node = NewNode(interface=interface, workingdir=workingdir, name=name, inputs=inputs, mapper=mapper,
-                           other_mappers=self._node_mappers, mem_gb=mem_gb)
+                           other_mappers=self._node_mappers, mem_gb=mem_gb, print_val=print_val)
         elif is_function_interface(runnable) or is_current_interface(runnable):
             if not name:
                 raise Exception("you have to specify name for the node")
@@ -1695,7 +1733,7 @@ def is_function(obj):
     return hasattr(obj, '__call__')
 
 def is_function_interface(obj):
-    return type(obj) is aux.Function_Interface
+    return type(obj) is aux.FunctionInterface
 
 def is_current_interface(obj):
     return type(obj) is aux.CurrentInterface
