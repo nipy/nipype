@@ -347,7 +347,7 @@ connected.
     # Input-Output access
     @property
     def inputs(self):
-        return self._get_inputs()
+        return self.get_inputs()
 
     @property
     def outputs(self):
@@ -770,7 +770,7 @@ connected.
     def _check_inputs(self, parameter):
         return self._has_attr(parameter, subtype='in')
 
-    def _get_inputs(self):
+    def get_inputs(self):
         """Returns the inputs of a workflow
 
         This function does not return any input ports that are already
@@ -1178,14 +1178,14 @@ class NewBase(object):
     def checking_input_el(self, ind):
         """checking if all inputs are available (for specific state element)"""
         try:
-            self._collecting_input_el(ind)
+            self.get_input_el(ind)
             return True
         except: #TODO specify
             return False
 
 
     # dj: this is not used for a single node
-    def _collecting_input_el(self, ind):
+    def get_input_el(self, ind):
         """collecting all inputs required to run the node (for specific state element)"""
         state_dict = self.state.state_values(ind)
         inputs_dict = {k: state_dict[k] for k in self._inputs.keys()}
@@ -1320,7 +1320,7 @@ class NewNode(NewBase):
     def run_interface_el(self, i, ind):
         """ running interface one element generated from node_state."""
         logger.debug("Run interface el, name={}, i={}, ind={}".format(self.name, i, ind))
-        state_dict, inputs_dict = self._collecting_input_el(ind)
+        state_dict, inputs_dict = self.get_input_el(ind)
         if not self.print_val:
             state_dict = self.state.state_ind(ind)
         dir_nm_el = "_".join(["{}:{}".format(i, j) for i, j in list(state_dict.items())])
@@ -1361,6 +1361,7 @@ class NewNode(NewBase):
 
 
     def get_output(self):
+        """collecting all outputs and updating self._output"""
         for key_out in self.output_names:
             self._output[key_out] = {}
             for (i, ind) in enumerate(itertools.product(*self.state.all_elements)):

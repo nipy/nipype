@@ -115,7 +115,7 @@ class Submitter(object):
         """running one internal workflow (if workflow has a mapper)"""
         # TODO: can I simplify and remove collect inp? where should it be?
         if collect_inp:
-            st_inputs, wf_inputs = workflow._collecting_input_el(ind)
+            st_inputs, wf_inputs = workflow.get_input_el(ind)
         else:
             wf_inputs = workflow.state.state_values(ind)
         if workflow.print_val:
