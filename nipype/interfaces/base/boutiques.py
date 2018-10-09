@@ -48,19 +48,19 @@ class BoutiqueInterface(CommandLine):
         self._load_groups(boutique_spec.get('groups', []))
 
         self._populate_input_spec(boutique_spec.get('inputs', []))
-        #self._populate_output_spec(boutique_spec.get('output-files', []))
+        self._populate_output_spec(boutique_spec.get('output-files', []))
         self.inputs.trait_set(trait_change_notify=False, **inputs)
 
     def _load_groups(self, groups):
         for group in groups:
             members = group['members']
-            if group['all-or-none']:
+            if group.get('all-or-none'):
                 for member in members:
                     self._requires[member].extend(members)
-            elif group['mutually-exclusive']:
+            elif group.get('mutually-exclusive'):
                 for member in members:
                     self._xors[member].extend(members)
-            elif group['one-is-required']:
+            elif group.get('one-is-required'):
                 for member in members:
                     self._one_required[member].extend(members)
 
@@ -73,7 +73,6 @@ class BoutiqueInterface(CommandLine):
             metadata = {}
 
             # Establish trait type
-
             typestr = input_dict['type']
             if 'value-choices' in input_dict:
                 ttype = traits.Enum
@@ -100,7 +99,7 @@ class BoutiqueInterface(CommandLine):
                 metadata['usedefault'] = True
 
             if input_dict.get('list'):
-                if args:
+                if len(args) > 0:
                     ttype = ttype(*args)
                     args = []
                 metadata['trait'] = ttype
@@ -146,7 +145,7 @@ class BoutiqueInterface(CommandLine):
                                     []).extend(self._requires[trait_name])
             if trait_name in self._xors:
                 metadata.setdefault('xor',
-                                    []).extend(self._xor[trait_name])
+                                    []).extend(self._xors[trait_name])
 
             trait = ttype(*args, **metadata)
             self.inputs.add_trait(trait_name, trait)
@@ -158,13 +157,78 @@ class BoutiqueInterface(CommandLine):
                               **undefined_traits)
         self.value_keys = value_keys
 
+    def _populate_output_spec(self, output_list):
+        self.outputs = self.output_spec()
+        value_keys = {}
+        for output_dict in output_list:
+            trait_name = output_dict['id']
+            ttype = traits.File
+            metadata = {}
+            args = [Undefined]
+
+            if output_dict.get('list'):
+                metadata['trait'] = ttype
+                ttype = traits.List
+                args = []
+
+            if output_dict.get('description') is not None:
+                metadata['desc'] = output_dict['description']
+
+            metadata['mandatory'] = not output_dict.get('optional', False)
+
+            if 'command-line-flag' in output_dict:
+                argstr = output_dict['command-line-flag']
+                argstr += output_dict.get('command-line-flag-separator', ' ')
+                argstr += '%s'  # May be insufficient for some
+                metadata['argstr'] = argstr
+
+            trait = ttype(*args, **metadata)
+            self.outputs.add_trait(trait_name, trait)
+
+            if 'value-key' in output_dict:
+                value_keys[output_dict['value-key']] = trait_name
+
+        self.value_keys.update(value_keys)
+
+    def _list_outputs(self):
+        # NOTE
+        # currently, boutiques doesn't provide a mechanism to determine which
+        # input parameters will cause generation of output files if the outputs
+        # are set as optional. this makes handling which outputs should be
+        # defined a bit difficult... for now, i'm defining everything and will
+        # think about a better way to handle this in the future
+        output_list = self.boutique_spec.get('output-files', [])
+        outputs = self.outputs.get()
+
+        for n, out in enumerate([f['id'] for f in output_list]):
+            output_dict = output_list[n]
+            # get path template + stripped extensions
+            output_filename = output_dict['path-template']
+            strip = output_dict.get('path-template-stripped-extensions', [])
+
+            # replace all value-keys in output name
+            for valkey, name in self.value_keys.items():
+                repl = self.inputs.trait_get().get(name)
+                # if input is specified, strip extensions + replace in output
+                if repl is not None and isdefined(repl):
+                    for ext in strip:
+                        repl = repl[:-len(ext)] if repl.endswith(ext) else repl
+                    output_filename = output_filename.replace(valkey, repl)
+
+            # TODO: check whether output should actually be defined (see above)
+            outputs[out] = output_filename
+
+        return outputs
+
     def cmdline(self):
         args = self._argspec
-        inputs = self.inputs.trait_get()
+        inputs = {**self.inputs.trait_get(), **self._list_outputs()}
         for valkey, name in self.value_keys.items():
-            spec = self.inputs.traits()[name]
+            try:
+                spec = self.inputs.traits()[name]
+            except KeyError:
+                spec = self.outputs.traits()[name]
             value = inputs[name]
-
             if not isdefined(value):
                 value = ''
             elif spec.argstr:
