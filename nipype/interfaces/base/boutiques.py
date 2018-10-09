@@ -1,15 +1,20 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-import os
-import json
-from collections import defaultdict
 
+from collections import defaultdict
+import glob
+from itertools import chain
+import json
+import os
+
+from .core import CommandLine
+from .specs import DynamicTraitedSpec
+from .traits_extension import (
+    File, isdefined, OutputMultiPath, Str, traits, Undefined)
 from ... import logging
-from ..base import (
-    traits, File, Str, isdefined, Undefined,
-    DynamicTraitedSpec, CommandLine)
 from ...utils.misc import trim
+
 
 iflogger = logging.getLogger('nipype.interface')
 
@@ -76,6 +81,8 @@ class BoutiqueInterface(CommandLine):
         self.inputs.trait_set(trait_change_notify=False, **inputs)
 
     def _populate_input_spec(self, input_list):
+        """ Generates input specification class
+        """
         input_spec = {}
         value_keys = {}
         for input_dict in input_list:
@@ -95,6 +102,8 @@ class BoutiqueInterface(CommandLine):
                 ttype = traits.Int
             else:
                 ttype = self.trait_map[typestr]
+                if typestr == 'File':
+                    metadata['exists'] = True
 
             if 'default-value' in input_dict:
                 nipype_key = 'default_value'
@@ -163,7 +172,7 @@ class BoutiqueInterface(CommandLine):
 
             value_keys[input_dict['value-key']] = trait_name
 
-        self.input_spec = type('{}InputSpec'.format(self._cmd),
+        self.input_spec = type('{}InputSpec'.format(self._cmd.capitalize()),
                                (self.input_spec,),
                                input_spec)
 
@@ -171,6 +180,8 @@ class BoutiqueInterface(CommandLine):
         self.value_keys = value_keys
 
     def _populate_output_spec(self, output_list):
+        """ Creates output specification class
+        """
         output_spec = {}
         value_keys = {}
         for output_dict in output_list:
@@ -179,15 +190,14 @@ class BoutiqueInterface(CommandLine):
             metadata = {}
             args = [Undefined]
 
-            if output_dict.get('list'):
-                metadata['trait'] = ttype
-                ttype = traits.List
-                args = []
-
             if output_dict.get('description') is not None:
                 metadata['desc'] = output_dict['description']
 
-            metadata['mandatory'] = not output_dict.get('optional', False)
+            metadata['exists'] = not output_dict.get('optional', True)
+
+            if output_dict.get('list'):
+                args = [ttype(Undefined, **metadata)]
+                ttype = OutputMultiPath
 
             if 'command-line-flag' in output_dict:
                 argstr = output_dict['command-line-flag']
@@ -202,13 +212,15 @@ class BoutiqueInterface(CommandLine):
                 value_keys[output_dict['value-key']] = trait_name
 
         # reassign output spec class based on compiled outputs
-        self.output_spec = type('{}OutputSpec'.format(self._cmd),
+        self.output_spec = type('{}OutputSpec'.format(self._cmd.capitalize()),
                                 (self.output_spec,),
                                 output_spec)
 
         self.value_keys.update(value_keys)
 
     def _list_outputs(self):
+        """ Generate list of predicted outputs based on defined inputs
+        """
         output_list = self.boutique_spec.get('output-files', [])
         outputs = self.output_spec().get()
 
@@ -227,12 +239,38 @@ class BoutiqueInterface(CommandLine):
                         repl = repl[:-len(ext)] if repl.endswith(ext) else repl
                     output_filename = output_filename.replace(valkey, repl)
 
-            # TODO: check whether output should actually be defined (see above)
-            outputs[out] = output_filename
+            outputs[out] = os.path.abspath(output_filename)
+
+            if output_dict.get('list'):
+                outputs[out] = [outputs[out]]
+
+        return outputs
+
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+        """ Collate expected outputs and check for existence
+        """
+        outputs = super().aggregate_outputs(runtime=runtime,
+                                            needed_outputs=needed_outputs)
+        for key, val in outputs.get().items():
+            # since we can't know if the output will be generated based on the
+            # boutiques spec, reset all non-existent outputs to undefined
+            if isinstance(val, list):
+                # glob expected output path template and flatten list
+                val = list(chain.from_iterable([glob.glob(v) for v in val]))
+                if len(val) == 0:
+                    val = Undefined
+                setattr(outputs, key, val)
+            else:
+                if not os.path.exists(val):
+                    val = Undefined
+            if not os.path.exists(val):
+                setattr(outputs, key, Undefined)
 
         return outputs
 
     def cmdline(self):
+        """ Prints command line with all specified arguments
+        """
         args = self._argspec
         inputs = {**self.inputs.trait_get(), **self._list_outputs()}
         for valkey, name in self.value_keys.items():
