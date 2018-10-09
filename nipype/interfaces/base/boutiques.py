@@ -21,6 +21,17 @@ iflogger = logging.getLogger('nipype.interface')
 
 class BoutiqueInterface(CommandLine):
     """Convert Boutique specification to Nipype interface
+
+    Examples
+    --------
+    >>> from nipype.interfaces.base import BoutiqueInterface
+    >>> bet = BoutiqueInterface('boutiques_fslbet.json')
+    >>> bet.inputs.in_file = 'structural.nii'
+    >>> bet.inputs.frac = 0.7
+    >>> bet.inputs.out_file = 'brain_anat.nii'
+    >>> bet.cmdline
+    'bet structural.nii brain_anat.nii -f 0.70'
+    >>> res = bet.run() # doctest: +SKIP
     """
 
     input_spec = DynamicTraitedSpec
@@ -66,10 +77,10 @@ class BoutiqueInterface(CommandLine):
             if group.get('all-or-none'):
                 for member in members:
                     self._requires[member].extend(members)
-            elif group.get('mutually-exclusive'):
+            if group.get('mutually-exclusive'):
                 for member in members:
                     self._xors[member].extend(members)
-            elif group.get('one-is-required'):
+            if group.get('one-is-required'):
                 for member in members:
                     self._one_required[member].extend(members)
 
@@ -170,7 +181,7 @@ class BoutiqueInterface(CommandLine):
             trait = ttype(*args, **metadata)
             input_spec[trait_name] = trait
 
-            value_keys[input_dict['value-key']] = trait_name
+            value_keys[trait_name] = input_dict['value-key']
 
         self.input_spec = type('{}InputSpec'.format(self._cmd.capitalize()),
                                (self.input_spec,),
@@ -209,7 +220,7 @@ class BoutiqueInterface(CommandLine):
             output_spec[trait_name] = trait
 
             if 'value-key' in output_dict:
-                value_keys[output_dict['value-key']] = trait_name
+                value_keys[trait_name] = output_dict['value-key']
 
         # reassign output spec class based on compiled outputs
         self.output_spec = type('{}OutputSpec'.format(self._cmd.capitalize()),
@@ -231,7 +242,7 @@ class BoutiqueInterface(CommandLine):
             strip = output_dict.get('path-template-stripped-extensions', [])
 
             # replace all value-keys in output name
-            for valkey, name in self.value_keys.items():
+            for name, valkey in self.value_keys.items():
                 repl = self.inputs.trait_get().get(name)
                 # if input is specified, strip extensions + replace in output
                 if repl is not None and isdefined(repl):
@@ -273,7 +284,7 @@ class BoutiqueInterface(CommandLine):
         """
         args = self._argspec
         inputs = {**self.inputs.trait_get(), **self._list_outputs()}
-        for valkey, name in self.value_keys.items():
+        for name, valkey in self.value_keys.items():
             try:
                 spec = self.inputs.traits()[name]
             except KeyError:
