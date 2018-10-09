@@ -15,7 +15,6 @@ iflogger = logging.getLogger('nipype.interface')
 
 class BoutiqueInterface(CommandLine):
     """Convert Boutique specification to Nipype interface
-
     """
 
     input_spec = DynamicTraitedSpec
@@ -40,16 +39,20 @@ class BoutiqueInterface(CommandLine):
         self._cmd = split_cmd[0]
         self._argspec = split_cmd[1] if len(split_cmd) > 1 else None
 
-        super().__init__()
-
         self._xors = defaultdict(list)
         self._requires = defaultdict(list)
         self._one_required = defaultdict(list)
-        self._load_groups(boutique_spec.get('groups', []))
 
+        # we're going to actually generate input_spec and output_spec classes
+        # so we want this to occur before the super().__init__() call
+        self._load_groups(boutique_spec.get('groups', []))
         self._populate_input_spec(boutique_spec.get('inputs', []))
         self._populate_output_spec(boutique_spec.get('output-files', []))
-        self.inputs.trait_set(trait_change_notify=False, **inputs)
+
+        super().__init__()
+
+        # now set all the traits that don't have defaults/inputs to undefined
+        self._set_undefined(**inputs)
 
     def _load_groups(self, groups):
         for group in groups:
@@ -64,9 +67,16 @@ class BoutiqueInterface(CommandLine):
                 for member in members:
                     self._one_required[member].extend(members)
 
+    def _set_undefined(self, **inputs):
+        usedefault = self.inputs.traits(usedefault=True)
+        undefined = {k: Undefined for k in
+                     set(self.inputs.get()) - set(usedefault)}
+        self.inputs.trait_set(trait_change_notify=False, **undefined)
+        self.inputs.trait_set(trait_change_notify=False, **inputs)
+
     def _populate_input_spec(self, input_list):
+        input_spec = {}
         value_keys = {}
-        undefined_traits = {}
         for input_dict in input_list:
             trait_name = input_dict['id']
             args = []
@@ -148,17 +158,19 @@ class BoutiqueInterface(CommandLine):
                                     []).extend(self._xors[trait_name])
 
             trait = ttype(*args, **metadata)
-            self.inputs.add_trait(trait_name, trait)
-            if not trait.usedefault:
-                undefined_traits[trait_name] = Undefined
+            input_spec[trait_name] = trait
+
             value_keys[input_dict['value-key']] = trait_name
 
-        self.inputs.trait_set(trait_change_notify=False,
-                              **undefined_traits)
+        self.input_spec = type('{}InputSpec'.format(self._cmd),
+                               (self.input_spec,),
+                               input_spec)
+
+        # TODO: value-keys aren't necessarily mutually exclusive; use id as key
         self.value_keys = value_keys
 
     def _populate_output_spec(self, output_list):
-        self.outputs = self.output_spec()
+        output_spec = {}
         value_keys = {}
         for output_dict in output_list:
             trait_name = output_dict['id']
@@ -183,22 +195,21 @@ class BoutiqueInterface(CommandLine):
                 metadata['argstr'] = argstr
 
             trait = ttype(*args, **metadata)
-            self.outputs.add_trait(trait_name, trait)
+            output_spec[trait_name] = trait
 
             if 'value-key' in output_dict:
                 value_keys[output_dict['value-key']] = trait_name
 
+        # reassign output spec class based on compiled outputs
+        self.output_spec = type('{}OutputSpec'.format(self._cmd),
+                                (self.output_spec,),
+                                output_spec)
+
         self.value_keys.update(value_keys)
 
     def _list_outputs(self):
-        # NOTE
-        # currently, boutiques doesn't provide a mechanism to determine which
-        # input parameters will cause generation of output files if the outputs
-        # are set as optional. this makes handling which outputs should be
-        # defined a bit difficult... for now, i'm defining everything and will
-        # think about a better way to handle this in the future
         output_list = self.boutique_spec.get('output-files', [])
-        outputs = self.outputs.get()
+        outputs = self.output_spec().get()
 
         for n, out in enumerate([f['id'] for f in output_list]):
             output_dict = output_list[n]
