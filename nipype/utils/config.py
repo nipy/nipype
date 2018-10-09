@@ -71,6 +71,7 @@ xvfb_max_wait = 10
 
 [monitoring]
 enabled = false
+telemetry = false
 sample_frequency = 1
 summary_append = true
 

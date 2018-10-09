@@ -32,6 +32,7 @@ from textwrap import wrap
 import simplejson as json
 from dateutil.parser import parse as parseutc
 
+from ...utils.telemetry import prepare_execution_stats, submit_telemetry
 from ... import config, logging, LooseVersion
 from ...utils.provenance import write_provenance
 from ...utils.misc import trim, str2bool, rgetcwd
@@ -583,6 +584,13 @@ class BaseInterface(Interface):
                         'rss_GiB': (vals[:, 2] / 1024).tolist(),
                         'vms_GiB': (vals[:, 3] / 1024).tolist(),
                     }
+
+                    runtime.interface_class_name = '{}.{}'.format(self.__module__,
+                                                                  self.__class__.__name__)
+                    if config.getboolean('monitoring', 'telemetry'):
+                        # it only makes sense to send execution stats if profiler is enabled
+                        payload = prepare_execution_stats(results)
+                        submit_telemetry(payload)
             os.chdir(syscwd)
 
         return results
