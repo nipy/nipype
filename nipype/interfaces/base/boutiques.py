@@ -9,6 +9,7 @@ from ... import logging
 from ..base import (
     traits, File, Str, isdefined, Undefined,
     DynamicTraitedSpec, CommandLine)
+from ...utils.misc import trim
 
 iflogger = logging.getLogger('nipype.interface')
 
@@ -246,3 +247,71 @@ class BoutiqueInterface(CommandLine):
                 value = self._format_arg(name, spec, value)
             args = args.replace(valkey, value)
         return self._cmd + ' ' + args
+
+    def help(self, returnhelp=False):
+        """ Prints interface help
+        """
+
+        docs = self.boutique_spec.get('description')
+        if docs is not None:
+            docstring = trim(docs).split('\n') + ['']
+        else:
+            docstring = [self.__class__.__doc__]
+
+        allhelp = '\n'.join(docstring +
+                            self._inputs_help() + [''] +
+                            self._outputs_help() + [''] +
+                            self._refs_help() + [''])
+        if returnhelp:
+            return allhelp
+        else:
+            print(allhelp)
+
+    def _inputs_help(self):
+        """ Prints description for input parameters
+        """
+        helpstr = ['Inputs::']
+
+        inputs = self.input_spec()
+        if len(list(inputs.traits(transient=None).items())) == 0:
+            helpstr += ['', '\tNone']
+            return helpstr
+
+        manhelpstr = ['', '\t[Mandatory]']
+        mandatory_items = inputs.traits(mandatory=True)
+        for name, spec in sorted(mandatory_items.items()):
+            manhelpstr += self.__class__._get_trait_desc(inputs, name, spec)
+
+        opthelpstr = ['', '\t[Optional]']
+        for name, spec in sorted(inputs.traits(transient=None).items()):
+            if name in mandatory_items:
+                continue
+            opthelpstr += self.__class__._get_trait_desc(inputs, name, spec)
+
+        if manhelpstr:
+            helpstr += manhelpstr
+        if opthelpstr:
+            helpstr += opthelpstr
+        return helpstr
+
+    def _outputs_help(self):
+        """ Prints description for output parameters
+        """
+        helpstr = ['Outputs::', '']
+        if self.output_spec:
+            outputs = self.output_spec()
+            for name, spec in sorted(outputs.traits(transient=None).items()):
+                helpstr += self.__class__._get_trait_desc(outputs, name, spec)
+        if len(helpstr) == 2:
+            helpstr += ['\tNone']
+        return helpstr
+
+    def _refs_help(self):
+        """ Prints interface references.
+        """
+        if self.boutique_spec.get('tool-doi') is None:
+            return []
+
+        helpstr = ['References::', self.boutique_spec.get('tool-doi')]
+
+        return helpstr
