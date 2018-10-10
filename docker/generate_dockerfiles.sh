@@ -67,7 +67,7 @@ function generate_base_dockerfile() {
   docker run --rm "$NEURODOCKER_IMAGE" generate docker \
   --base "$BASE_IMAGE" --pkg-manager "$PKG_MANAGER" \
   --label maintainer="The nipype developers https://github.com/nipy/nipype" \
-  --spm version=12 matlab_version=R2017a \
+  --spm12 version=r7219 \
   --afni version=latest install_python2=true \
   --freesurfer version=6.0.0 min=true \
   --run 'echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tXG41MTcyXG4gKkN2dW12RVYzelRmZ1xuRlM1Si8yYzFhZ2c0RVxuIiA+IC9vcHQvZnJlZXN1cmZlci9saWNlbnNlLnR4dAo=" | base64 -d | sh' \
@@ -75,8 +75,7 @@ function generate_base_dockerfile() {
             fusefat g++ git graphviz make ruby unzip xvfb \
   --add-to-entrypoint "source /etc/fsl/fsl.sh" \
   --env ANTSPATH='/usr/lib/ants' PATH='/usr/lib/ants:$PATH' \
-  --run "gem install fakes3" \
-  --no-check-urls > "$DIR/Dockerfile.base"
+  --run "gem install fakes3" > "$DIR/Dockerfile.base"
 }
 
 
@@ -86,7 +85,7 @@ function generate_main_dockerfile() {
   --label maintainer="The nipype developers https://github.com/nipy/nipype" \
   --env MKL_NUM_THREADS=1 OMP_NUM_THREADS=1 \
   --user neuro \
-  --miniconda env_name=neuro \
+  --miniconda create_env=neuro \
               activate=true \
   --copy docker/files/run_builddocs.sh docker/files/run_examples.sh \
          docker/files/run_pytests.sh nipype/external/fsl_imglob.py /usr/bin/ \
@@ -100,13 +99,13 @@ function generate_main_dockerfile() {
 && chown neuro /work' \
   --user neuro \
   --arg PYTHON_VERSION_MAJOR=3 PYTHON_VERSION_MINOR=6 BUILD_DATE VCS_REF VERSION \
-  --miniconda env_name=neuro \
+  --miniconda create_env=neuro \
               conda_install='python=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
                              icu=58.1 libxml2 libxslt matplotlib mkl numpy paramiko
                              pandas psutil scikit-learn scipy traits=4.6.0' \
               pip_opts="-e" \
               pip_install="/src/nipype[all]" \
-  --miniconda env_name=neuro \
+  --miniconda create_env=neuro \
               pip_install="grabbit==0.1.2" \
   --run-bash "mkdir -p /src/pybids
          && curl -sSL --retry 5 https://github.com/INCF/pybids/tarball/0.6.5
@@ -121,8 +120,7 @@ function generate_main_dockerfile() {
           org.label-schema.vcs-ref='$VCS_REF' \
           org.label-schema.vcs-url="https://github.com/nipy/nipype" \
           org.label-schema.version='$VERSION' \
-          org.label-schema.schema-version="1.0" \
-  --no-check-urls
+          org.label-schema.schema-version="1.0"
 }
 
 
