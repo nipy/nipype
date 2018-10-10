@@ -86,6 +86,7 @@ function generate_main_dockerfile() {
   --env MKL_NUM_THREADS=1 OMP_NUM_THREADS=1 \
   --user neuro \
   --miniconda create_env=neuro \
+              conda_install='python=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}' \
               activate=true \
   --copy docker/files/run_builddocs.sh docker/files/run_examples.sh \
          docker/files/run_pytests.sh nipype/external/fsl_imglob.py /usr/bin/ \
@@ -99,13 +100,12 @@ function generate_main_dockerfile() {
 && chown neuro /work' \
   --user neuro \
   --arg PYTHON_VERSION_MAJOR=3 PYTHON_VERSION_MINOR=6 BUILD_DATE VCS_REF VERSION \
-  --miniconda create_env=neuro \
-              conda_install='python=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
-                             icu=58.1 libxml2 libxslt matplotlib mkl numpy paramiko
+  --miniconda use_env=neuro \
+              conda_install='icu=58.1 libxml2 libxslt matplotlib mkl numpy paramiko
                              pandas psutil scikit-learn scipy traits=4.6.0' \
               pip_opts="-e" \
               pip_install="/src/nipype[all]" \
-  --miniconda create_env=neuro \
+  --miniconda use_env=neuro \
               pip_install="grabbit==0.1.2" \
   --run-bash "mkdir -p /src/pybids
          && curl -sSL --retry 5 https://github.com/INCF/pybids/tarball/0.6.5
