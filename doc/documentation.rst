@@ -23,13 +23,6 @@ Previous versions: `1.1.3 <http://nipype.readthedocs.io/en/1.1.3/>`_ `1.1.2 <htt
     .. hlist::
        :columns: 2
 
-       * User
-
-         .. toctree::
-            :maxdepth: 1
-
-            changes
-
        * Developer
 
          .. toctree::
