@@ -53,11 +53,11 @@ do
 done
 
 
-# neurodocker version 0.3.1-22-gb0ee069
-NEURODOCKER_IMAGE="kaczmarj/neurodocker@sha256:f15ca90803f4b89acfca55cd1c7269bf2ec2dfd95b3de1118b08afa34b87d9d1"
+# neurodocker:master pulled on October 9, 2018
+NEURODOCKER_IMAGE="kaczmarj/neurodocker@sha256:c5c10fc11cbd7efe18ac10d2370742b8ecb3588c3aa9b2c15ca7e18363bfa9dc"
 
-# neurodebian:stretch-non-free pulled on November 3, 2017
-BASE_IMAGE="neurodebian@sha256:7590552afd0e7a481a33314724ae27f76ccedd05ffd7ac06ec38638872427b9b"
+# neurodebian:stretch-non-free pulled on October 9, 2018
+BASE_IMAGE="neurodebian@sha256:7cd978427d7ad215834fee221d0536ed7825b3cddebc481eba2d792dfc2f7332"
 
 NIPYPE_BASE_IMAGE="nipype/nipype:base"
 PKG_MANAGER="apt"
