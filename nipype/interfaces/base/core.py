@@ -587,6 +587,11 @@ class BaseInterface(Interface):
 
         return results
 
+    def __call__(self, **kwargs):
+        """Make interface into a callable function"""
+        results = self.run(**kwargs)
+        return results.outputs
+
     def _list_outputs(self):
         """ List the expected outputs
         """
