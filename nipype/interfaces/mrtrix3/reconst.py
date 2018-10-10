@@ -39,8 +39,8 @@ class FitTensorInputSpec(MRTrix3BaseInputSpec):
         argstr='-method %s',
         desc=('select method used to perform the fitting'))
     reg_term = traits.Float(
-        5.e3, usedefault=True,
         argstr='-regularisation %f',
+        max_ver='0.3.13',
         desc=('specify the strength of the regularisation term on the '
               'magnitude of the tensor elements (default = 5000). This '
               'only applies to the non-linear methods'))
