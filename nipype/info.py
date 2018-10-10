@@ -154,7 +154,7 @@ REQUIRES = [
 if sys.version_info <= (3, 4):
     REQUIRES.append('configparser')
 
-TESTS_REQUIRES = ['pytest-cov', 'codecov<5', 'pytest-env']
+TESTS_REQUIRES = ['pytest-cov', 'codecov', 'pytest-env', 'coverage<5']
 
 EXTRA_REQUIRES = {
     'doc': ['Sphinx>=1.4', 'numpydoc', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],
