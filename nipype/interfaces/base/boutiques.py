@@ -7,6 +7,7 @@ import glob
 from itertools import chain
 import json
 import os
+import re
 
 from .core import CommandLine
 from .specs import DynamicTraitedSpec
@@ -187,7 +188,6 @@ class BoutiqueInterface(CommandLine):
                                (self.input_spec,),
                                input_spec)
 
-        # TODO: value-keys aren't necessarily mutually exclusive; use id as key
         self.value_keys = value_keys
 
     def _populate_output_spec(self, output_list):
@@ -243,8 +243,10 @@ class BoutiqueInterface(CommandLine):
 
             # replace all value-keys in output name
             for name, valkey in self.value_keys.items():
+                if valkey not in output_filename:
+                    continue
                 repl = self.inputs.trait_get().get(name)
-                # if input is specified, strip extensions + replace in output
+                # if input is specified, strip ext + replace value in output
                 if repl is not None and isdefined(repl):
                     for ext in strip:
                         repl = repl[:-len(ext)] if repl.endswith(ext) else repl
@@ -271,14 +273,13 @@ class BoutiqueInterface(CommandLine):
                 if len(val) == 0:
                     val = Undefined
                 setattr(outputs, key, val)
-            else:
+            if isdefined(val):
                 if not os.path.exists(val):
-                    val = Undefined
-            if not os.path.exists(val):
-                setattr(outputs, key, Undefined)
+                    setattr(outputs, key, Undefined)
 
         return outputs
 
+    @property
     def cmdline(self):
         """ Prints command line with all specified arguments
         """
@@ -295,12 +296,12 @@ class BoutiqueInterface(CommandLine):
             elif spec.argstr:
                 value = self._format_arg(name, spec, value)
             args = args.replace(valkey, value)
-        return self._cmd + ' ' + args
+        # normalize excessive whitespace before returning
+        return re.sub(r'\s\s+', ' ', self._cmd + ' ' + args).strip()
 
     def help(self, returnhelp=False):
         """ Prints interface help
         """
-
         docs = self.boutique_spec.get('description')
         if docs is not None:
             docstring = trim(docs).split('\n') + ['']
