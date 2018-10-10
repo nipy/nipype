@@ -64,7 +64,7 @@ PKG_MANAGER="apt"
 DIR="$(dirname "$0")"
 
 function generate_base_dockerfile() {
-  docker run --rm "$NEURODOCKER_IMAGE" generate \
+  docker run --rm "$NEURODOCKER_IMAGE" generate docker \
   --base "$BASE_IMAGE" --pkg-manager "$PKG_MANAGER" \
   --label maintainer="The nipype developers https://github.com/nipy/nipype" \
   --spm version=12 matlab_version=R2017a \
@@ -81,7 +81,7 @@ function generate_base_dockerfile() {
 
 
 function generate_main_dockerfile() {
-  docker run --rm "$NEURODOCKER_IMAGE" generate \
+  docker run --rm "$NEURODOCKER_IMAGE" generate docker \
   --base "$NIPYPE_BASE_IMAGE" --pkg-manager "$PKG_MANAGER" \
   --label maintainer="The nipype developers https://github.com/nipy/nipype" \
   --env MKL_NUM_THREADS=1 OMP_NUM_THREADS=1 \
