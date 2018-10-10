@@ -3596,31 +3596,41 @@ class Qwarp(AFNICommand):
             else:
                 ext = prefix[ext_ind:]
                 suffix = ''
+
+        # All outputs should be in the same directory as the prefix
+        out_dir = os.path.dirname(os.path.abspath(prefix))
+
         outputs['warped_source'] = fname_presuffix(
-            prefix, suffix=suffix, use_ext=False) + ext
+            prefix, suffix=suffix, use_ext=False, newpath=out_dir) + ext
         if not self.inputs.nowarp:
             outputs['source_warp'] = fname_presuffix(
-                prefix, suffix='_WARP' + suffix, use_ext=False) + ext
+                prefix, suffix='_WARP' + suffix, use_ext=False,
+                newpath=out_dir) + ext
         if self.inputs.iwarp:
             outputs['base_warp'] = fname_presuffix(
-                prefix, suffix='_WARPINV' + suffix, use_ext=False) + ext
+                prefix, suffix='_WARPINV' + suffix, use_ext=False,
+                newpath=out_dir) + ext
         if isdefined(self.inputs.out_weight_file):
             outputs['weights'] = os.path.abspath(self.inputs.out_weight_file)
 
         if self.inputs.plusminus:
             outputs['warped_source'] = fname_presuffix(
-                prefix, suffix='_PLUS' + suffix, use_ext=False) + ext
+                prefix, suffix='_PLUS' + suffix, use_ext=False,
+                newpath=out_dir) + ext
             outputs['warped_base'] = fname_presuffix(
-                prefix, suffix='_MINUS' + suffix, use_ext=False) + ext
+                prefix, suffix='_MINUS' + suffix, use_ext=False,
+                newpath=out_dir) + ext
             outputs['source_warp'] = fname_presuffix(
-                prefix, suffix='_PLUS_WARP' + suffix, use_ext=False) + ext
+                prefix, suffix='_PLUS_WARP' + suffix, use_ext=False,
+                newpath=out_dir) + ext
             outputs['base_warp'] = fname_presuffix(
-                prefix, suffix='_MINUS_WARP' + suffix, use_ext=False) + ext
+                prefix, suffix='_MINUS_WARP' + suffix, use_ext=False,
+                newpath=out_dir) + ext
         return outputs
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._gen_fname(self.inputs.source_file, suffix='_QW')
+            return self._gen_fname(self.inputs.in_file, suffix='_QW')
 
 
 class QwarpPlusMinusInputSpec(QwarpInputSpec):

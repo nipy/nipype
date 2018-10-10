@@ -11,7 +11,7 @@ import sys
 # full release.  '.dev' as a version_extra string means this is a development
 # version
 # Remove -dev for release
-__version__ = '1.1.3-dev'
+__version__ = '1.1.4-dev'
 
 
 def get_nipype_gitversion():
@@ -164,7 +164,7 @@ EXTRA_REQUIRES = {
     'profiler': ['psutil>=5.0'],
     'duecredit': ['duecredit'],
     'xvfbwrapper': ['xvfbwrapper'],
-    'pybids': ['pybids'],
+    'pybids': ['pybids==0.6.5'],
     'ssh': ['paramiko'],
     # 'mesh': ['mayavi']  # Enable when it works
 }
