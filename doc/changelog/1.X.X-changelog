@@ -1,3 +1,20 @@
+1.1.3 (September 24, 2018)
+==========================
+
+##### [Full changelog](https://github.com/nipy/nipype/milestone/24?closed=1)
+
+  * FIX: Return afni.Qwarp outputs as absolute paths (https://github.com/nipy/nipype/pull/2705)
+  * FIX: Add informative error for interfaces that fail to return valid runtime object (https://github.com/nipy/nipype/pull/2692)
+  * FIX: Construct MCFLIRT output paths relative to out_file (https://github.com/nipy/nipype/pull/2703)
+  * FIX: SLURM plugin polling (https://github.com/nipy/nipype/pull/2693)
+  * FIX: Handle missing substring in SPM docs (https://github.com/nipy/nipype/pull/2691)
+  * ENH: Add colorFA output to DIPY DTI interface (https://github.com/nipy/nipype/pull/2695)
+  * RF: Use runtime.cwd in Rename (https://github.com/nipy/nipype/pull/2688)
+  * DOC: Fix naming of motion parameters (roll/yaw swapped) (https://github.com/nipy/nipype/pull/2696)
+  * DOC: Update links to user and developer help forums (https://github.com/nipy/nipype/pull/2686)
+  * CI: Test 3.7, resume testing nipy extras (https://github.com/nipy/nipype/pull/2682)
+
+
 1.1.2 (August 11, 2018)
 =======================
 
