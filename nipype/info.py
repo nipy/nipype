@@ -150,7 +150,7 @@ REQUIRES = [
 if sys.version_info <= (3, 4):
     REQUIRES.append('configparser')
 
-TESTS_REQUIRES = ['pytest-cov', 'codecov', 'pytest-env']
+TESTS_REQUIRES = ['pytest-cov', 'codecov', 'pytest-env', 'coverage<5']
 
 EXTRA_REQUIRES = {
     'doc': ['Sphinx>=1.4', 'numpydoc', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],
@@ -160,7 +160,7 @@ EXTRA_REQUIRES = {
     'profiler': ['psutil>=5.0'],
     'duecredit': ['duecredit'],
     'xvfbwrapper': ['xvfbwrapper'],
-    'pybids': ['pybids'],
+    'pybids': ['pybids==0.6.5'],
     'ssh': ['paramiko'],
     # 'mesh': ['mayavi']  # Enable when it works
 }
