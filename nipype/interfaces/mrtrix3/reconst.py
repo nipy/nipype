@@ -64,8 +64,7 @@ class FitTensor(MRTrix3Base):
     >>> tsr.inputs.in_mask = 'mask.nii.gz'
     >>> tsr.inputs.grad_fsl = ('bvecs', 'bvals')
     >>> tsr.cmdline                               # doctest: +ELLIPSIS
-    'dwi2tensor -fslgrad bvecs bvals -mask mask.nii.gz \
--regularisation 5000.000000 dwi.mif dti.mif'
+    'dwi2tensor -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif dti.mif'
     >>> tsr.run()                                 # doctest: +SKIP
     """
 
