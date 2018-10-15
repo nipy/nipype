@@ -84,8 +84,10 @@ class BaseTraitedSpec(traits.HasTraits):
         """ Return a well-formatted representation of the traits """
         outstr = []
         for name, value in sorted(self.trait_get().items()):
-            outstr.append('%s = %s' % (name, value))
+            if not name == '__all__':
+                outstr.append('%s = %s' % (name, value))
         return '\n{}\n'.format('\n'.join(outstr))
+
 
     def _generate_handlers(self):
         """Find all traits with the 'xor' metadata and attach an event
@@ -352,7 +354,7 @@ class DynamicTraitedSpec(BaseTraitedSpec):
         # clone twice
         dup = self.clone_traits(memo=memo)
         dup.trait_set(**dup_dict)
-        self.__all__ = super(BaseTraitedSpec,self).__all__
+        self.__all__ = self.class_editable_traits()
         return dup
 
 
