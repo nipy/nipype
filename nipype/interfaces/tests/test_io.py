@@ -633,9 +633,9 @@ def test_bids_infields_outfields(tmpdir):
     for outfield in outfields:
         assert(outfield in bg._outputs().traits())
 
-    # now try without defining outfields, we should get anat and func for free
+    # now try without defining outfields
     bg = nio.BIDSDataGrabber()
-    for outfield in ['anat', 'func']:
+    for outfield in ['T1w', 'bold']:
         assert outfield in bg._outputs().traits()
 
 
