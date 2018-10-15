@@ -591,9 +591,9 @@ def test_bids_grabber(tmpdir):
     bg.inputs.base_dir = os.path.join(datadir, 'ds005')
     bg.inputs.subject = '01'
     results = bg.run()
-    assert 'sub-01_T1w.nii.gz' in map(os.path.basename, results.outputs.anat)
+    assert 'sub-01_T1w.nii.gz' in map(os.path.basename, results.outputs.T1w)
     assert 'sub-01_task-mixedgamblestask_run-01_bold.nii.gz' in \
-        map(os.path.basename, results.outputs.func)
+        map(os.path.basename, results.outputs.bold)
 
 
 @pytest.mark.skipif(not have_pybids,

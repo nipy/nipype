@@ -2761,8 +2761,10 @@ class BIDSDataGrabberInputSpec(DynamicTraitedSpec):
                                  desc='Generate exception if list is empty '
                                  'for a given field')
     return_type = traits.Enum('file', 'namedtuple', usedefault=True)
-    strict = traits.Bool(desc='Return only BIDS "proper" files (e.g., '
-                              'ignore derivatives/, sourcedata/, etc.)')
+    index_derivatives = traits.Bool(False, usedefault=True,
+            desc='Index derivatives/ sub-directory')
+    extra_derivatives = traits.List(Directory(exists=True),
+            desc='Additional derivative directories to index')
 
 
 class BIDSDataGrabber(IOBase):
@@ -2788,7 +2790,7 @@ class BIDSDataGrabber(IOBase):
     are filtered on common entities, which can be explicitly defined as
     infields.
 
-    >>> bg = BIDSDataGrabber(infields = ['subject'], outfields = ['dwi'])
+    >>> bg = BIDSDataGrabber(infields = ['subject'])
     >>> bg.inputs.base_dir = 'ds005/'
     >>> bg.inputs.subject = '01'
     >>> bg.inputs.output_query['dwi'] = dict(modality='dwi')
@@ -2810,8 +2812,10 @@ class BIDSDataGrabber(IOBase):
 
         if not isdefined(self.inputs.output_query):
             self.inputs.output_query = {
-                "func": {"modality": "func", 'extensions': ['nii', '.nii.gz']},
-                "anat": {"modality": "anat", 'extensions': ['nii', '.nii.gz']},
+                "bold": {"datatype": "func", "suffix": "bold",
+                         "extensions": ["nii", ".nii.gz"]},
+                "T1w": {"datatype": "anat", "suffix": "T1w",
+                         "extensions": ["nii", ".nii.gz"]},
                 }
 
         # If infields is empty, use all BIDS entities
@@ -2838,10 +2842,11 @@ class BIDSDataGrabber(IOBase):
         return runtime
 
     def _list_outputs(self):
-        exclude = None
-        if self.inputs.strict:
-            exclude = ['derivatives/', 'code/', 'sourcedata/']
-        layout = bidslayout.BIDSLayout(self.inputs.base_dir, exclude=exclude)
+        layout = bidslayout.BIDSLayout(self.inputs.base_dir,
+                                       derivatives=self.inputs.derivatives)
+
+        if isdefined(self.inputs.extra_derivatives):
+            layout.add_derivatives(self.inputs.extra_derivatives)
 
         # If infield is not given nm input value, silently ignore
         filters = {}
