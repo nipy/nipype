@@ -18,8 +18,14 @@ from ...base import traits, CommandLine, CommandLineInputSpec
 from ... import utility as niu
 
 # Try to enable the resource monitor
-config.enable_resource_monitor()
 run_profile = config.resource_monitor
+
+
+@pytest.fixture(scope="module")
+def use_resource_monitor():
+    config.enable_resource_monitor()
+    yield
+    config.disable_resource_monitor()
 
 
 class UseResourcesInputSpec(CommandLineInputSpec):
@@ -51,7 +57,7 @@ class UseResources(CommandLine):
     os.getenv('CI_SKIP_TEST', False), reason='disabled in CI tests')
 @pytest.mark.parametrize("mem_gb,n_procs", [(0.5, 3), (2.2, 8), (0.8, 4),
                                             (1.5, 1)])
-def test_cmdline_profiling(tmpdir, mem_gb, n_procs):
+def test_cmdline_profiling(tmpdir, mem_gb, n_procs, use_resource_monitor):
     """
     Test runtime profiler correctly records workflow RAM/CPUs consumption
     of a CommandLine-derived interface
@@ -73,7 +79,7 @@ def test_cmdline_profiling(tmpdir, mem_gb, n_procs):
     True, reason='test disabled temporarily, until funcion profiling works')
 @pytest.mark.parametrize("mem_gb,n_procs", [(0.5, 3), (2.2, 8), (0.8, 4),
                                             (1.5, 1)])
-def test_function_profiling(tmpdir, mem_gb, n_procs):
+def test_function_profiling(tmpdir, mem_gb, n_procs, use_resource_monitor):
     """
     Test runtime profiler correctly records workflow RAM/CPUs consumption
     of a Function interface

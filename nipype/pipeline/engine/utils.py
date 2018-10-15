@@ -1473,7 +1473,8 @@ def clean_working_directory(outputs,
         needed_files += [path for path, type in input_files if type == 'f']
     for extra in [
             '_0x*.json', 'provenance.*', 'pyscript*.m', 'pyjobs*.mat',
-            'command.txt', 'result*.pklz', '_inputs.pklz', '_node.pklz'
+            'command.txt', 'result*.pklz', '_inputs.pklz', '_node.pklz',
+            '.proc-*',
     ]:
         needed_files.extend(glob(os.path.join(cwd, extra)))
     if files2keep:
