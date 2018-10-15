@@ -291,6 +291,10 @@ class NipypeConfig(object):
         """Sets the resource monitor on"""
         self.resource_monitor = True
 
+    def disable_resource_monitor(self):
+        """Sets the resource monitor off"""
+        self.resource_monitor = False
+
     def get_display(self):
         """Returns the first display available"""
 
