@@ -106,7 +106,7 @@ def test_DynamicTraitedSpec_tab_completion():
     assert(sorted(list_extract.outputs.__all__) == expected_output)
 
     # Add trait and retest
-    list_extract.outputs.add_trait("added_out_trait","val")
+    list_extract._interface._output_names.append('added_out_trait')
     expected_output = sorted(['added_out_trait',*expected_output])
     assert(sorted(list_extract.outputs.__all__) == expected_output)
 
