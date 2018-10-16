@@ -83,10 +83,8 @@ class BaseTraitedSpec(traits.HasTraits):
         """ Return a well-formatted representation of the traits """
         outstr = []
         for name, value in sorted(self.trait_get().items()):
-            if not name == '__all__':
-                outstr.append('%s = %s' % (name, value))
+            outstr.append('%s = %s' % (name, value))
         return '\n{}\n'.format('\n'.join(outstr))
-
 
     def _generate_handlers(self):
         """Find all traits with the 'xor' metadata and attach an event
@@ -236,7 +234,6 @@ class BaseTraitedSpec(traits.HasTraits):
             The md5 hash value of the traited spec
 
         """
-
         list_withhash = []
         list_nofilename = []
         for name, val in sorted(self.trait_get().items()):
@@ -313,8 +310,7 @@ class BaseTraitedSpec(traits.HasTraits):
 
     @property
     def __all__(self):
-        return [k for k,v in self.items() if not k == "__all__"]
-
+        return self.copyable_trait_names()
 
 
 class TraitedSpec(BaseTraitedSpec):

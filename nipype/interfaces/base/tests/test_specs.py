@@ -58,11 +58,11 @@ def test_TraitedSpec_tab_completion():
     bet_outputs = bet_nd.outputs.class_editable_traits() 
     
     # Check __all__ for bet node and interface inputs
-    assert bet_nd.inputs.__all__ == bet_inputs
-    assert bet_interface.inputs.__all__ == bet_inputs
+    assert set(bet_nd.inputs.__all__) == set(bet_inputs)
+    assert set(bet_interface.inputs.__all__) == set(bet_inputs)
 
     # Check __all__ for bet node outputs
-    assert bet_nd.outputs.__all__ == bet_outputs
+    assert set(bet_nd.outputs.__all__) == set(bet_outputs)
 
 
 @pytest.mark.skip
