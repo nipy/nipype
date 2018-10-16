@@ -72,7 +72,6 @@ class BaseTraitedSpec(traits.HasTraits):
         self.trait_set(trait_change_notify=False, **undefined_traits)
         self._generate_handlers()
         self.trait_set(**kwargs)
-        self.__all__ = self.class_editable_traits()
 
     def items(self):
         """ Name, trait generator for user modifiable traits
@@ -311,6 +310,11 @@ class BaseTraitedSpec(traits.HasTraits):
                 else:
                     out = objekt
         return out
+
+    @property
+    def __all__(self):
+        return [k for k,v in self.items() if not k == "__all__"]
+
 
 
 class TraitedSpec(BaseTraitedSpec):

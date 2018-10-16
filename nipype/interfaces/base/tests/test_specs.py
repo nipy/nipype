@@ -55,17 +55,14 @@ def test_TraitedSpec_tab_completion():
     bet_nd = Node(fsl.BET(), name = 'bet')
     bet_interface = fsl.BET()
     bet_inputs = bet_nd.inputs.class_editable_traits()
-    bet_outputs = bet_nd.outputs.class_editable_traits()
+    bet_outputs = bet_nd.outputs.class_editable_traits() 
     
     # Check __all__ for bet node and interface inputs
-    assert bet_nd.inputs.__all__ == [
-    x for x in bet_inputs if not x == "__all__"]
-    assert bet_interface.inputs.__all__ == [
-    x for x in bet_inputs if not x == "__all__"]
+    assert bet_nd.inputs.__all__ == bet_inputs
+    assert bet_interface.inputs.__all__ == bet_inputs
 
     # Check __all__ for bet node outputs
-    assert bet_nd.outputs.__all__ == [
-    x for x in bet_outputs if not x == "__all__"]
+    assert bet_nd.outputs.__all__ == bet_outputs
 
 
 @pytest.mark.skip
@@ -91,20 +88,26 @@ def test_DynamicTraitedSpec_tab_completion():
     func_interface = Function(input_names=["list_out"],
                              output_names=["out_file","another_file"],
                              function=extract_func)
-    # Check __all__ for interface inputs
-    assert func_interface.inputs.__all__ == func_interface._input_names
-
     # Define node
     list_extract = Node(Function(
         input_names=["list_out"],output_names=["out_file"],
         function=extract_func), name="list_extract")
 
+    # Check __all__ for interface inputs
+    expected_input = sorted(list_extract.inputs.editable_traits())
+    assert(sorted(func_interface.inputs.__all__) == expected_input)
+
     # Check __all__ for node inputs
-    assert list_extract.inputs.__all__ == list_extract._interface._input_names
+    assert(sorted(list_extract.inputs.__all__) == expected_input)
+
     # Check __all__ for node outputs
-    outputs_dict = list_extract._interface._outputs().get().items()
-    outputs = [k for k,v in outputs_dict if not k == "__all__"]
-    assert list_extract.outputs.__all__ == outputs
+    expected_output = sorted(list_extract.outputs.editable_traits())
+    assert(sorted(list_extract.outputs.__all__) == expected_output)
+
+    # Add trait and retest
+    list_extract.outputs.add_trait("added_out_trait","val")
+    expected_output = sorted(['added_out_trait',*expected_output])
+    assert(sorted(list_extract.outputs.__all__) == expected_output)
 
 
 def test_TraitedSpec_logic():
