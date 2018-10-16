@@ -358,7 +358,6 @@ class DynamicTraitedSpec(BaseTraitedSpec):
         # clone twice
         dup = self.clone_traits(memo=memo)
         dup.trait_set(**dup_dict)
-        self.__all__ = self.class_editable_traits()
         return dup
 
 
