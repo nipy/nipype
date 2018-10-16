@@ -2843,7 +2843,7 @@ class BIDSDataGrabber(IOBase):
 
     def _list_outputs(self):
         layout = bidslayout.BIDSLayout(self.inputs.base_dir,
-                                       derivatives=self.inputs.derivatives)
+                                       derivatives=self.inputs.index_derivatives)
 
         if isdefined(self.inputs.extra_derivatives):
             layout.add_derivatives(self.inputs.extra_derivatives)
