@@ -82,7 +82,8 @@ def test_TraitedSpec_dynamic():
 
 
 def test_DynamicTraitedSpec_tab_completion():
-    extract_func = lambda list_out: list_out[0]
+    def extract_func(list_out):
+        return list_out[0]
 
     # Define interface
     func_interface = Function(input_names=["list_out"],
