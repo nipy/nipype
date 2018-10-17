@@ -52,7 +52,7 @@ def test_TraitedSpec():
 
 
 def test_TraitedSpec_tab_completion():
-    bet_nd = Node(fsl.BET(), name = 'bet')
+    bet_nd = Node(fsl.BET(), name='bet')
     bet_interface = fsl.BET()
     bet_inputs = bet_nd.inputs.class_editable_traits()
     bet_outputs = bet_nd.outputs.class_editable_traits() 
@@ -87,28 +87,28 @@ def test_DynamicTraitedSpec_tab_completion():
 
     # Define interface
     func_interface = Function(input_names=["list_out"],
-                             output_names=["out_file","another_file"],
-                             function=extract_func)
+                              output_names=["out_file", "another_file"],
+                              function=extract_func)
     # Define node
     list_extract = Node(Function(
-        input_names=["list_out"],output_names=["out_file"],
+        input_names=["list_out"], output_names=["out_file"],
         function=extract_func), name="list_extract")
 
     # Check __all__ for interface inputs
-    expected_input = sorted(list_extract.inputs.editable_traits())
-    assert(sorted(func_interface.inputs.__all__) == expected_input)
+    expected_input = set(list_extract.inputs.editable_traits())
+    assert(set(func_interface.inputs.__all__) == expected_input)
 
     # Check __all__ for node inputs
-    assert(sorted(list_extract.inputs.__all__) == expected_input)
+    assert(set(list_extract.inputs.__all__) == expected_input)
 
     # Check __all__ for node outputs
-    expected_output = sorted(list_extract.outputs.editable_traits())
-    assert(sorted(list_extract.outputs.__all__) == expected_output)
+    expected_output = set(list_extract.outputs.editable_traits())
+    assert(set(list_extract.outputs.__all__) == expected_output)
 
     # Add trait and retest
     list_extract._interface._output_names.append('added_out_trait')
-    expected_output = sorted(['added_out_trait',*expected_output])
-    assert(sorted(list_extract.outputs.__all__) == expected_output)
+    expected_output.add('added_out_trait')
+    assert(set(list_extract.outputs.__all__) == expected_output)
 
 
 def test_TraitedSpec_logic():
