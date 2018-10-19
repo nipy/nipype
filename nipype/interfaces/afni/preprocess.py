@@ -1836,10 +1836,10 @@ class ROIStatsInputSpec(CommandLineInputSpec):
              'output as \'8 20 2\'',
         argstr='-roisel %s')
     debug = traits.Bool(
-        desc='print debug information', 
+        desc='print debug information',
         argstr='-debug')
     quiet = traits.Bool(
-        desc='execute quietly', 
+        desc='execute quietly',
         argstr='-quiet')
     nomeanout = traits.Bool(
         desc='Do not include the (zero-inclusive) mean among computed stats',
@@ -1900,12 +1900,12 @@ class ROIStatsOutputSpec(TraitedSpec):
 class ROIStats(AFNICommandBase):
     """Display statistics over masked regions
 
-    For complete details, see the `3dROIstats Documentation.
+    For complete details, see the `3dROIstats Documentation
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dROIstats.html>`_
 
     Examples
     ========
-    
+
     >>> from nipype.interfaces import afni
     >>> roistats = afni.ROIStats()
     >>> roistats.inputs.in_file = 'functional.nii'
@@ -1914,8 +1914,8 @@ class ROIStats(AFNICommandBase):
     >>> roistats.cmdline
     '3dROIstats -quiet -mask skeleton_mask.nii.gz functional.nii'
     >>> res = roistats.run()  # doctest: +SKIP
-    """
 
+    """
     _cmd = '3dROIstats'
     _terminal_output = 'allatonce'
     input_spec = ROIStatsInputSpec

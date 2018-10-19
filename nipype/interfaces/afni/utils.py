@@ -1476,10 +1476,10 @@ class LocalstatInputSpec(AFNICommandInputSpec):
     _stat_names = ['mean', 'stdev', 'var', 'cvar', 'median', 'MAD', 'min',
                    'max', 'absmax', 'num', 'sum', 'FWHM', 'FWHMbar', 'rank',
                    'frank', 'P2skew', 'ALL', 'mMP2s', 'mmMP2s']
-    stat = InputMultiObject(
+    stat = InputMultiPath(
         traits.Either(
         traits.Enum(_stat_names),
-        traits.Tuple(traits.Enum('perc'), 
+        traits.Tuple(traits.Enum('perc'),
                      traits.Tuple(traits.Float, traits.Float, traits.Float))),
         mandatory=True,
         desc='statistics to compute. Possible names are :'
