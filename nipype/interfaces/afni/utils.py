@@ -1594,6 +1594,7 @@ class LocalstatInputSpec(AFNICommandInputSpec):
 class Localstat(AFNICommand):
     """3dLocalstat - computes statistics at each voxel,
     based on a local neighborhood of that voxel.
+    
     For complete details, see the `3dLocalstat Documentation.
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dLocalstat.html>`_
 
@@ -2299,6 +2300,129 @@ class Refit(AFNICommandBase):
         outputs = self.output_spec().get()
         outputs['out_file'] = os.path.abspath(self.inputs.in_file)
         return outputs
+
+
+class ReHoInputSpec(CommandLineInputSpec):
+    in_file = File(
+        desc='input dataset',
+        argstr='-inset %s',
+        position=1,
+        mandatory=True,
+        exists=True)
+    out_file = traits.File(
+        desc='Output dataset.',
+        argstr='-prefix %s',
+        name_source='in_file',
+        name_template='%s_localstat',
+        keep_extension=True,
+        position=0)
+    chi_sq = traits.Bool(
+        argstr='-chi_sq',
+        desc='Output the Friedman chi-squared value in addition to the '
+             'Kendall\'s W.')
+    mask = traits.File(
+        desc='Mask within which ReHo should be calculated voxelwise',
+        argstr='-mask %s')
+    neighborhood = traits.Enum(
+        'faces',
+        'edges',
+        'vertices',
+        xor=['sphere', 'ellipsoid'],
+        argstr='-nneigh %s',
+        desc='voxels in neighborhood. can be: '
+        'faces      (for voxel and 6 facewise neighbors, only),'
+        'edges      (for voxel and 18 face- and edge-wise neighbors),'
+        'vertices   (for voxel and 26 face-, edge-, and node-wise neighbors).')
+    sphere = traits.Float(
+        argstr='-neigh_RAD %s',
+        xor=['neighborhood', 'ellipsoid'],
+        desc='for additional voxelwise neighborhood control, the '
+             'radius R of a desired neighborhood can be put in; R is '
+             'a floating point number, and must be >1. Examples of '
+             'the numbers of voxels in a given radius are as follows '
+             '(you can roughly approximate with the ol\' 4*PI*(R^3)/3 '
+             'thing):'
+             '        R=2.0 -> V=33,'
+             '        R=2.3 -> V=57, '
+             '        R=2.9 -> V=93, '
+             '        R=3.1 -> V=123, '
+             '        R=3.9 -> V=251, '
+             '        R=4.5 -> V=389, '
+             '        R=6.1 -> V=949, '
+             'but you can choose most any value.')
+    ellipsoid = traits.Tuple(
+        traits.Float,
+        traits.Float,
+        traits.Float,
+        xor=['sphere', 'neighborhood'],
+        argstr='-neigh_X %s -neigh_Y %s -neigh_Z %s',
+        desc='Tuple indicating the x, y, and z radius of an ellipsoid '
+             'defining the neighbourhood of each voxel.'
+             'The \'hood is then made according to the following relation:'
+             '(i/A)^2 + (j/B)^2 + (k/C)^2 <=1.'
+             'which will have approx. V=4*PI*A*B*C/3. The impetus for '
+             'this freedom was for use with data having anisotropic '
+             'voxel edge lengths.')
+    label_set = File(
+        exists=True,
+        argstr='-in_rois %s',
+        desc='a set of ROIs, each labelled with distinct '
+             'integers. ReHo will then be calculated per ROI.')
+    overwrite = traits.Bool(
+        desc='overwrite output file if it already exists',
+        argstr='-overwrite')
+
+
+class ReHoOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='Voxelwise regional homogeneity map')
+    out_vals = File(desc='Table of labelwise regional homogenity values')
+
+
+class ReHo(AFNICommandBase):
+    """Compute regional homogenity for a given neighbourhood.l,
+    based on a local neighborhood of that voxel.
+
+    For complete details, see the `3dReHo Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dReHo.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> reho = afni.ReHo()
+    >>> reho.inputs.in_file = 'bold.nii.gz'
+    >>> reho.inputs.neighborhood = 'vertices'
+    >>> reho.inputs.label_set = 'power264.nii.gz'
+    >>> reho.cmdline
+    "3dReHo -prefix bold_reho.nii.gz \
+            -nneigh 27 \
+            -in_rois power264.nii.gz"
+    >>> rh = reho.run()  # doctest: +SKIP
+    """
+    _cmd = '3dReHo'
+    input_spec = ReHoInputSpec
+    output_spec = ReHoOutputSpec
+
+    def _list_outputs(self):
+
+        outputs = super(ReHo, self)._list_outputs()
+
+        if self.inputs.label_set:
+            outputs['out_vals'] = outputs['out_file'] + '_ROI_reho.vals'
+
+        return outputs
+
+    def _format_arg(self, name, spec, value):
+
+        _neigh_dict =   {
+                            'faces': 7,
+                            'edges': 19,
+                            'vertices': 27,
+                        }
+        if name == 'neighborhood':
+            value = _neigh_dict[value]
+
+        return super(ReHo, self)._format_arg(name, spec, value)
 
 
 class ResampleInputSpec(AFNICommandInputSpec):
