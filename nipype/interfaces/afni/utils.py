@@ -1453,6 +1453,188 @@ class LocalBistat(AFNICommand):
         return super(LocalBistat, self)._format_arg(name, spec, value)
 
 
+class LocalstatInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        exists=True,
+        mandatory=True,
+        argstr='%s',
+        position=-1,
+        desc='input dataset')
+    neighborhood = traits.Either(
+        traits.Tuple(traits.Enum('SPHERE', 'RHDD', 'TOHD'), traits.Float()),
+        traits.Tuple(traits.Enum('RECT'), traits.Tuple(traits.Float(),
+                                                       traits.Float(),
+                                                       traits.Float())),
+        mandatory=True,
+        desc='The region around each voxel that will be extracted for '
+             'the statistics calculation. Possible regions are: '
+             '\'SPHERE\', \'RHDD\' (rhombic dodecahedron), \'TOHD\' '
+             '(truncated octahedron) with a given radius in mm or '
+             '\'RECT\' (rectangular block) with dimensions to specify in mm.',
+        argstr="-nbhd '%s(%s)'")
+    _stat_names = ['mean', 'stdev', 'var', 'cvar', 'median', 'MAD', 'min',
+                   'max', 'absmax', 'num', 'sum', 'FWHM', 'FWHMbar', 'rank',
+                   'frank', 'P2skew', 'ALL', 'mMP2s', 'mmMP2s']
+    stat = InputMultiObject(
+        traits.Either(
+        traits.Enum(_stat_names),
+        traits.Tuple(traits.Enum('perc'), 
+                     traits.Tuple(traits.Float, traits.Float, traits.Float))),
+        mandatory=True,
+        desc='statistics to compute. Possible names are :'
+             ' * mean   = average of the values'
+             ' * stdev  = standard deviation'
+             ' * var    = variance (stdev*stdev)'
+             ' * cvar   = coefficient of variation = stdev/fabs(mean)'
+             ' * median = median of the values'
+             ' * MAD    = median absolute deviation'
+             ' * min    = minimum'
+             ' * max    = maximum'
+             ' * absmax = maximum of the absolute values'
+             ' * num    = number of the values in the region:'
+             '            with the use of -mask or -automask,'
+             '            the size of the region around any given'
+             '            voxel will vary; this option lets you'
+             '            map that size.  It may be useful if you'
+             '            plan to compute a t-statistic (say) from'
+             '            the mean and stdev outputs.'
+             ' * sum    = sum of the values in the region:'
+             ' * FWHM   = compute (like 3dFWHM) image smoothness'
+             '            inside each voxel\'s neighborhood.  Results'
+             '            are in 3 sub-bricks: FWHMx, FHWMy, and FWHMz.'
+             '            Places where an output is -1 are locations'
+             '            where the FWHM value could not be computed'
+             '            (e.g., outside the mask).'
+             ' * FWHMbar= Compute just the average of the 3 FWHM values'
+             '            (normally would NOT do this with FWHM also).'
+             ' * perc:P0:P1:Pstep = '
+             '            Compute percentiles between P0 and P1 with a '
+             '            step of Pstep.'
+             '            Default P1 is equal to P0 and default P2 = 1'
+             ' * rank   = rank of the voxel\'s intensity'
+             ' * frank  = rank / number of voxels in neighborhood'
+             ' * P2skew = Pearson\'s second skewness coefficient'
+             '             3 * (mean - median) / stdev '
+             ' * ALL    = all of the above, in that order '
+             '            (except for FWHMbar and perc).'
+             ' * mMP2s  = Exactly the same output as:'
+             '            median, MAD, P2skew'
+             '            but it a little faster'
+             ' * mmMP2s = Exactly the same output as:'
+             '            mean, median, MAD, P2skew'
+             'More than one option can be used.',
+        argstr='-stat %s...')
+    mask_file = traits.File(
+        exists=True,
+        desc='Mask image file name. Voxels NOT in the mask will not be used '
+             'in the neighborhood of any voxel. Also, a voxel NOT in the '
+             'mask will have its statistic(s) computed as zero (0) unless '
+             'the parameter \'nonmask\' is set to true.',
+        argstr='-mask %s')
+    automask = traits.Bool(
+        desc='Compute the mask as in program 3dAutomask.',
+        argstr='-automask')
+    nonmask = traits.Bool(
+        desc='Voxels not in the mask WILL have their local statistics '
+             'computed from all voxels in their neighborhood that ARE in '
+             'the mask.'
+             ' * For instance, this option can be used to compute the '
+             '   average local white matter time series, even at non-WM '
+             '   voxels.',
+        argstr='-use_nonmask')
+    reduce_grid = traits.Either(
+        traits.Float,
+        traits.Tuple(traits.Float, traits.Float, traits.Float),
+        argstr='-reduce_grid %s',
+        desc='Compute output on a grid that is reduced by the specified '
+             'factors. If a single value is passed, output is resampled '
+             'to the specified isotropic grid. Otherwise, the 3 inputs '
+             'describe the reduction in the X, Y, and Z directions. This '
+             'option speeds up computations at the expense of resolution. '
+             'It should only be used when the nbhd is quite large with '
+             'respect to the input\'s resolution, and the resultant stats '
+             'are expected to be smooth.')
+    reduce_restore_grid = traits.Either(
+        traits.Float,
+        traits.Tuple(traits.Float, traits.Float, traits.Float),
+        argstr='-reduce_restore_grid %s',
+        desc='Like reduce_grid, but also resample output back to input'
+             'grid.')
+    reduce_max_vox = traits.Float(
+        argstr='-reduce_max_vox %s',
+        desc='Like reduce_restore_grid, but automatically set Rx Ry Rz so'
+             'that the computation grid is at a resolution of nbhd/MAX_VOX'
+             'voxels.')
+    grid_rmode = traits.Enum(
+        'NN',
+        'Li',
+        'Cu',
+        'Bk',
+        argstr='grid_rmode %s',
+        desc='Interpolant to use when resampling the output with the'
+             'reduce_restore_grid option. The resampling method string '
+             'RESAM should come from the set {\'NN\', \'Li\', \'Cu\', '
+             '\'Bk\'}. These stand for \'Nearest Neighbor\', \'Linear\', '
+             '\'Cubic\', and \'Blocky\' interpolation, respectively.')
+    quiet = traits.Bool(
+        argstr='-quiet',
+        desc='Stop the highly informative progress reports.')
+    overwrite = traits.Bool(
+        desc='overwrite output file if it already exists',
+        argstr='-overwrite')
+    out_file = traits.File(
+        desc='Output dataset.',
+        argstr='-prefix %s',
+        name_source='in_file',
+        name_template='%s_localstat',
+        keep_extension=True,
+        position=0)
+
+
+class Localstat(AFNICommand):
+    """3dLocalstat - computes statistics at each voxel,
+    based on a local neighborhood of that voxel.
+    For complete details, see the `3dLocalstat Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dLocalstat.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> localstat = afni.Localstat()
+    >>> localstat.inputs.in_file = 'bold.nii.gz'
+    >>> localstat.inputs.mask_file = 'label-WM_desc-eroded_roi.nii.gz'
+    >>> localstat.inputs.neighborhood = ('SPHERE', 45)
+    >>> localstat.inputs.stat = 'mean'
+    >>> localstat.inputs.nonmask=True
+    >>> localstat.inputs.outputtype = 'NIFTI_GZ'
+    >>> localstat.cmdline
+    "3dLocalstat -prefix bold_localstat.nii.gz \
+                 -mask label-WM_desc-eroded_roi.nii.gz \
+                 -nbhd 'SPHERE(45.0)' \
+                 -use_nonmask \
+                 -stat mean \
+                 bold.nii.gz"
+    >>> wmlocal = localstat.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = '3dLocalstat'
+    input_spec = LocalstatInputSpec
+    output_spec = AFNICommandOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'neighborhood' and value[0] == 'RECT':
+            value = ('RECT', '%s,%s,%s' % value[1])
+        if name == 'stat':
+            value = ['perc:%s:%s:%s' % v[1] if len(v) == 2 else v for v in value]
+        if name == 'reduce_grid' or name == 'reduce_restore_grid':
+            if len(value) == 3:
+                value = '%s %s %s' % value
+
+        return super(Localstat, self)._format_arg(name, spec, value)
+
+
 class MaskToolInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc='input file or files to 3dmask_tool',
