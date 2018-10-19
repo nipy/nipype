@@ -18,7 +18,8 @@ import numpy as np
 
 from ...utils.filemanip import (load_json, save_json, split_filename)
 from ..base import (CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
-                    traits, isdefined, File, InputMultiPath, Undefined, Str)
+                    traits, isdefined, File, InputMultiObject, InputMultiPath,
+                    Undefined, Str)
 from ...external.due import BibTeX
 from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec,
                    AFNICommandOutputSpec, AFNIPythonCommandInputSpec,
@@ -1546,6 +1547,7 @@ class LocalstatInputSpec(AFNICommandInputSpec):
         traits.Float,
         traits.Tuple(traits.Float, traits.Float, traits.Float),
         argstr='-reduce_grid %s',
+        xor=['reduce_restore_grid', 'reduce_max_vox'],
         desc='Compute output on a grid that is reduced by the specified '
              'factors. If a single value is passed, output is resampled '
              'to the specified isotropic grid. Otherwise, the 3 inputs '
@@ -1558,10 +1560,12 @@ class LocalstatInputSpec(AFNICommandInputSpec):
         traits.Float,
         traits.Tuple(traits.Float, traits.Float, traits.Float),
         argstr='-reduce_restore_grid %s',
+        xor=['reduce_max_vox', 'reduce_grid'],
         desc='Like reduce_grid, but also resample output back to input'
              'grid.')
     reduce_max_vox = traits.Float(
         argstr='-reduce_max_vox %s',
+        xor=['reduce_restore_grid', 'reduce_grid'],
         desc='Like reduce_restore_grid, but automatically set Rx Ry Rz so'
              'that the computation grid is at a resolution of nbhd/MAX_VOX'
              'voxels.')
@@ -1570,7 +1574,8 @@ class LocalstatInputSpec(AFNICommandInputSpec):
         'Li',
         'Cu',
         'Bk',
-        argstr='grid_rmode %s',
+        argstr='-grid_rmode %s',
+        requires=['reduce_restore_grid'],
         desc='Interpolant to use when resampling the output with the'
              'reduce_restore_grid option. The resampling method string '
              'RESAM should come from the set {\'NN\', \'Li\', \'Cu\', '
@@ -1594,7 +1599,7 @@ class LocalstatInputSpec(AFNICommandInputSpec):
 class Localstat(AFNICommand):
     """3dLocalstat - computes statistics at each voxel,
     based on a local neighborhood of that voxel.
-    
+
     For complete details, see the `3dLocalstat Documentation.
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dLocalstat.html>`_
 
@@ -1607,7 +1612,7 @@ class Localstat(AFNICommand):
     >>> localstat.inputs.mask_file = 'label-WM_desc-eroded_roi.nii.gz'
     >>> localstat.inputs.neighborhood = ('SPHERE', 45)
     >>> localstat.inputs.stat = 'mean'
-    >>> localstat.inputs.nonmask=True
+    >>> localstat.inputs.nonmask = True
     >>> localstat.inputs.outputtype = 'NIFTI_GZ'
     >>> localstat.cmdline
     "3dLocalstat -prefix bold_localstat.nii.gz \
@@ -1619,7 +1624,6 @@ class Localstat(AFNICommand):
     >>> wmlocal = localstat.run()  # doctest: +SKIP
 
     """
-
     _cmd = '3dLocalstat'
     input_spec = LocalstatInputSpec
     output_spec = AFNICommandOutputSpec
@@ -2398,6 +2402,7 @@ class ReHo(AFNICommandBase):
             -nneigh 27 \
             -in_rois power264.nii.gz"
     >>> rh = reho.run()  # doctest: +SKIP
+
     """
     _cmd = '3dReHo'
     input_spec = ReHoInputSpec
