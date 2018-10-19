@@ -18,8 +18,7 @@ import numpy as np
 
 from ...utils.filemanip import (load_json, save_json, split_filename)
 from ..base import (CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
-                    traits, isdefined, File, InputMultiObject, InputMultiPath,
-                    Undefined, Str)
+                    traits, isdefined, File, InputMultiPath, Undefined, Str)
 from ...external.due import BibTeX
 from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec,
                    AFNICommandOutputSpec, AFNIPythonCommandInputSpec,
