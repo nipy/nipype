@@ -1826,7 +1826,8 @@ class ROIStatsInputSpec(CommandLineInputSpec):
     zerofill = traits.Str(
         requires=['num_roi'],
         desc='For ROI labels not found, use the provided string instead of '
-             'a \'0\' in the output file. Only active if zerofill is active.',
+             'a \'0\' in the output file. Only active if `num_roi` is '
+             'enabled.',
         argstr='-zerofill %s')
     roisel = traits.File(
         exists=True,
@@ -1908,11 +1909,14 @@ class ROIStats(AFNICommandBase):
 
     >>> from nipype.interfaces import afni
     >>> roistats = afni.ROIStats()
-    >>> roistats.inputs.in_file = 'functional.nii'
-    >>> roistats.inputs.mask = 'skeleton_mask.nii.gz'
-    >>> roistats.inputs.quiet = True
+    >>> roistats.inputs.in_file = 'func.nii'
+    >>> roistats.inputs.mask_file = 'label-schaefer400_atlas.nii.gz'
+    >>> roistats.inputs.stat = ['mean', 'median', 'voxels']
+    >>> roistats.inputs.nomeanout = True
     >>> roistats.cmdline
-    '3dROIstats -quiet -mask skeleton_mask.nii.gz functional.nii'
+    '3dROIstats -quiet -mask label-schaefer400_atlas.nii.gz \
+        -nzmean -nzmedian -nzvoxels -nomeanout func.nii \
+        > func_roistat.1D'
     >>> res = roistats.run()  # doctest: +SKIP
 
     """
