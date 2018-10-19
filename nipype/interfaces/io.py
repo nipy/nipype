@@ -2793,7 +2793,7 @@ class BIDSDataGrabber(IOBase):
     >>> bg = BIDSDataGrabber(infields = ['subject'])
     >>> bg.inputs.base_dir = 'ds005/'
     >>> bg.inputs.subject = '01'
-    >>> bg.inputs.output_query['dwi'] = dict(modality='dwi')
+    >>> bg.inputs.output_query['dwi'] = dict(datatype='dwi')
     >>> results = bg.run() # doctest: +SKIP
 
     """
