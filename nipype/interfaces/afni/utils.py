@@ -1481,47 +1481,47 @@ class LocalstatInputSpec(AFNICommandInputSpec):
         traits.Tuple(traits.Enum('perc'),
                      traits.Tuple(traits.Float, traits.Float, traits.Float))),
         mandatory=True,
-        desc='statistics to compute. Possible names are :'
-             ' * mean   = average of the values'
-             ' * stdev  = standard deviation'
-             ' * var    = variance (stdev*stdev)'
-             ' * cvar   = coefficient of variation = stdev/fabs(mean)'
-             ' * median = median of the values'
-             ' * MAD    = median absolute deviation'
-             ' * min    = minimum'
-             ' * max    = maximum'
-             ' * absmax = maximum of the absolute values'
-             ' * num    = number of the values in the region:'
+        desc='statistics to compute. Possible names are :\n'
+             ' * mean   = average of the values\n'
+             ' * stdev  = standard deviation\n'
+             ' * var    = variance (stdev*stdev)\n'
+             ' * cvar   = coefficient of variation = stdev/fabs(mean)\n'
+             ' * median = median of the values\n'
+             ' * MAD    = median absolute deviation\n'
+             ' * min    = minimum\n'
+             ' * max    = maximum\n'
+             ' * absmax = maximum of the absolute values\n'
+             ' * num    = number of the values in the region:\n'
              '            with the use of -mask or -automask,'
              '            the size of the region around any given'
              '            voxel will vary; this option lets you'
              '            map that size.  It may be useful if you'
              '            plan to compute a t-statistic (say) from'
-             '            the mean and stdev outputs.'
-             ' * sum    = sum of the values in the region:'
+             '            the mean and stdev outputs.\n'
+             ' * sum    = sum of the values in the region\n'
              ' * FWHM   = compute (like 3dFWHM) image smoothness'
              '            inside each voxel\'s neighborhood.  Results'
              '            are in 3 sub-bricks: FWHMx, FHWMy, and FWHMz.'
              '            Places where an output is -1 are locations'
              '            where the FWHM value could not be computed'
-             '            (e.g., outside the mask).'
+             '            (e.g., outside the mask).\n'
              ' * FWHMbar= Compute just the average of the 3 FWHM values'
-             '            (normally would NOT do this with FWHM also).'
-             ' * perc:P0:P1:Pstep = '
+             '            (normally would NOT do this with FWHM also).\n'
+             ' * perc:P0:P1:Pstep = \n'
              '            Compute percentiles between P0 and P1 with a '
-             '            step of Pstep.'
-             '            Default P1 is equal to P0 and default P2 = 1'
-             ' * rank   = rank of the voxel\'s intensity'
-             ' * frank  = rank / number of voxels in neighborhood'
+             '            step of Pstep.\n'
+             '            Default P1 is equal to P0 and default P2 = 1\n'
+             ' * rank   = rank of the voxel\'s intensity\n'
+             ' * frank  = rank / number of voxels in neighborhood\n'
              ' * P2skew = Pearson\'s second skewness coefficient'
-             '             3 * (mean - median) / stdev '
+             '             3 * (mean - median) / stdev\n'
              ' * ALL    = all of the above, in that order '
-             '            (except for FWHMbar and perc).'
+             '            (except for FWHMbar and perc).\n'
              ' * mMP2s  = Exactly the same output as:'
-             '            median, MAD, P2skew'
-             '            but it a little faster'
+             '            median, MAD, P2skew,'
+             '            but a little faster\n'
              ' * mmMP2s = Exactly the same output as:'
-             '            mean, median, MAD, P2skew'
+             '            mean, median, MAD, P2skew\n'
              'More than one option can be used.',
         argstr='-stat %s...')
     mask_file = traits.File(
@@ -1537,7 +1537,7 @@ class LocalstatInputSpec(AFNICommandInputSpec):
     nonmask = traits.Bool(
         desc='Voxels not in the mask WILL have their local statistics '
              'computed from all voxels in their neighborhood that ARE in '
-             'the mask.'
+             'the mask.\n'
              ' * For instance, this option can be used to compute the '
              '   average local white matter time series, even at non-WM '
              '   voxels.',
@@ -2328,9 +2328,10 @@ class ReHoInputSpec(CommandLineInputSpec):
         xor=['sphere', 'ellipsoid'],
         argstr='-nneigh %s',
         desc='voxels in neighborhood. can be: '
-        'faces      (for voxel and 6 facewise neighbors, only),'
-        'edges      (for voxel and 18 face- and edge-wise neighbors),'
-        'vertices   (for voxel and 26 face-, edge-, and node-wise neighbors).')
+        '* faces      (for voxel and 6 facewise neighbors, only),\n'
+        '* edges      (for voxel and 18 face- and edge-wise neighbors),\n'
+        '* vertices   (for voxel and 26 face-, edge-, and node-wise '
+        'neighbors).\n')
     sphere = traits.Float(
         argstr='-neigh_RAD %s',
         xor=['neighborhood', 'ellipsoid'],
@@ -2339,14 +2340,14 @@ class ReHoInputSpec(CommandLineInputSpec):
              'a floating point number, and must be >1. Examples of '
              'the numbers of voxels in a given radius are as follows '
              '(you can roughly approximate with the ol\' 4*PI*(R^3)/3 '
-             'thing):'
-             '        R=2.0 -> V=33,'
-             '        R=2.3 -> V=57, '
-             '        R=2.9 -> V=93, '
-             '        R=3.1 -> V=123, '
-             '        R=3.9 -> V=251, '
-             '        R=4.5 -> V=389, '
-             '        R=6.1 -> V=949, '
+             'thing):\n'
+             '        R=2.0 -> V=33,\n'
+             '        R=2.3 -> V=57, \n'
+             '        R=2.9 -> V=93, \n'
+             '        R=3.1 -> V=123, \n'
+             '        R=3.9 -> V=251, \n'
+             '        R=4.5 -> V=389, \n'
+             '        R=6.1 -> V=949, \n'
              'but you can choose most any value.')
     ellipsoid = traits.Tuple(
         traits.Float,
@@ -2355,9 +2356,9 @@ class ReHoInputSpec(CommandLineInputSpec):
         xor=['sphere', 'neighborhood'],
         argstr='-neigh_X %s -neigh_Y %s -neigh_Z %s',
         desc='Tuple indicating the x, y, and z radius of an ellipsoid '
-             'defining the neighbourhood of each voxel.'
+             'defining the neighbourhood of each voxel.\n'
              'The \'hood is then made according to the following relation:'
-             '(i/A)^2 + (j/B)^2 + (k/C)^2 <=1.'
+             '(i/A)^2 + (j/B)^2 + (k/C)^2 <=1.\n'
              'which will have approx. V=4*PI*A*B*C/3. The impetus for '
              'this freedom was for use with data having anisotropic '
              'voxel edge lengths.')
