@@ -1914,9 +1914,7 @@ class ROIStats(AFNICommandBase):
     >>> roistats.inputs.stat = ['mean', 'median', 'voxels']
     >>> roistats.inputs.nomeanout = True
     >>> roistats.cmdline
-    '3dROIstats -quiet -mask label-schaefer400_atlas.nii.gz \
-        -nzmean -nzmedian -nzvoxels -nomeanout func.nii \
-        > func_roistat.1D'
+    '3dROIstats -quiet -mask label-schaefer400_atlas.nii.gz -nzmean -nzmedian -nzvoxels -nomeanout func.nii > func_roistat.1D'
     >>> res = roistats.run()  # doctest: +SKIP
 
     """

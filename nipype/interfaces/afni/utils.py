@@ -1614,12 +1614,7 @@ class Localstat(AFNICommand):
     >>> localstat.inputs.nonmask = True
     >>> localstat.inputs.outputtype = 'NIFTI_GZ'
     >>> localstat.cmdline
-    "3dLocalstat -prefix bold_localstat.nii.gz \
-                 -mask label-WM_desc-eroded_roi.nii.gz \
-                 -nbhd 'SPHERE(45.0)' \
-                 -use_nonmask \
-                 -stat mean \
-                 bold.nii.gz"
+    "3dLocalstat -prefix bold_localstat.nii.gz -mask label-WM_desc-eroded_roi.nii.gz -nbhd 'SPHERE(45.0)' -use_nonmask -stat mean bold.nii.gz"
     >>> wmlocal = localstat.run()  # doctest: +SKIP
 
     """
@@ -2397,9 +2392,7 @@ class ReHo(AFNICommandBase):
     >>> reho.inputs.neighborhood = 'vertices'
     >>> reho.inputs.label_set = 'power264.nii.gz'
     >>> reho.cmdline
-    "3dReHo -prefix bold_reho.nii.gz \
-            -nneigh 27 \
-            -in_rois power264.nii.gz"
+    "3dReHo -prefix bold_reho.nii.gz -nneigh 27 -in_rois power264.nii.gz"
     >>> rh = reho.run()  # doctest: +SKIP
 
     """
