@@ -18,7 +18,8 @@ import numpy as np
 
 from ...utils.filemanip import (load_json, save_json, split_filename)
 from ..base import (CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
-                    traits, isdefined, File, InputMultiPath, Undefined, Str)
+                    traits, isdefined, File, InputMultiObject, InputMultiPath,
+                    Undefined, Str)
 from ...external.due import BibTeX
 from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec,
                    AFNICommandOutputSpec, AFNIPythonCommandInputSpec,
@@ -1475,7 +1476,7 @@ class LocalstatInputSpec(AFNICommandInputSpec):
     _stat_names = ['mean', 'stdev', 'var', 'cvar', 'median', 'MAD', 'min',
                    'max', 'absmax', 'num', 'sum', 'FWHM', 'FWHMbar', 'rank',
                    'frank', 'P2skew', 'ALL', 'mMP2s', 'mmMP2s']
-    stat = InputMultiPath(
+    stat = InputMultiObject(
         traits.Either(
         traits.Enum(_stat_names),
         traits.Tuple(traits.Enum('perc'),

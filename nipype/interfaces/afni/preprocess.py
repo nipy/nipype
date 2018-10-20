@@ -1910,12 +1910,12 @@ class ROIStats(AFNICommandBase):
 
     >>> from nipype.interfaces import afni
     >>> roistats = afni.ROIStats()
-    >>> roistats.inputs.in_file = 'func.nii'
+    >>> roistats.inputs.in_file = 'bold.nii.gz'
     >>> roistats.inputs.mask_file = 'label-schaefer400_atlas.nii.gz'
     >>> roistats.inputs.stat = ['mean', 'median', 'voxels']
     >>> roistats.inputs.nomeanout = True
     >>> roistats.cmdline
-    '3dROIstats -quiet -mask label-schaefer400_atlas.nii.gz -nzmean -nzmedian -nzvoxels -nomeanout func.nii > func_roistat.1D'
+    '3dROIstats -quiet -mask label-schaefer400_atlas.nii.gz -nzmean -nzmedian -nzvoxels -nomeanout bold.nii.gz > func_roistat.1D'
     >>> res = roistats.run()  # doctest: +SKIP
 
     """
