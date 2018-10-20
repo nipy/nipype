@@ -1608,15 +1608,15 @@ class Localstat(AFNICommand):
 
     >>> from nipype.interfaces import afni
     >>> localstat = afni.Localstat()
-    >>> localstat.inputs.in_file = 'bold.nii.gz'
-    >>> localstat.inputs.mask_file = 'label-WM_desc-eroded_roi.nii.gz'
+    >>> localstat.inputs.in_file = 'functional.nii'
+    >>> localstat.inputs.mask_file = 'skeleton_mask.nii.gz'
     >>> localstat.inputs.neighborhood = ('SPHERE', 45)
     >>> localstat.inputs.stat = 'mean'
     >>> localstat.inputs.nonmask = True
     >>> localstat.inputs.outputtype = 'NIFTI_GZ'
     >>> localstat.cmdline
-    "3dLocalstat -prefix bold_localstat.nii.gz -mask label-WM_desc-eroded_roi.nii.gz -nbhd 'SPHERE(45.0)' -use_nonmask -stat mean bold.nii.gz"
-    >>> wmlocal = localstat.run()  # doctest: +SKIP
+    "3dLocalstat -prefix functional_localstat.nii -mask skeleton_mask.nii.gz -nbhd 'SPHERE(45.0)' -use_nonmask -stat mean functional.nii"
+    >>> res = localstat.run()  # doctest: +SKIP
 
     """
     _cmd = '3dLocalstat'
@@ -2312,7 +2312,7 @@ class ReHoInputSpec(CommandLineInputSpec):
         desc='Output dataset.',
         argstr='-prefix %s',
         name_source='in_file',
-        name_template='%s_localstat',
+        name_template='%s_reho',
         keep_extension=True,
         position=0)
     chi_sq = traits.Bool(
@@ -2390,12 +2390,12 @@ class ReHo(AFNICommandBase):
 
     >>> from nipype.interfaces import afni
     >>> reho = afni.ReHo()
-    >>> reho.inputs.in_file = 'bold.nii.gz'
+    >>> reho.inputs.in_file = 'functional.nii'
+    >>> reho.inputs.out_file = 'reho.nii.gz'
     >>> reho.inputs.neighborhood = 'vertices'
-    >>> reho.inputs.label_set = 'power264.nii.gz'
     >>> reho.cmdline
-    "3dReHo -prefix bold_reho.nii.gz -nneigh 27 -in_rois power264.nii.gz"
-    >>> rh = reho.run()  # doctest: +SKIP
+    '3dReHo -prefix reho.nii.gz -inset functional.nii -nneigh 27'
+    >>> res = reho.run()  # doctest: +SKIP
 
     """
     _cmd = '3dReHo'

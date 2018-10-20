@@ -30,7 +30,7 @@ def test_ReHo_inputs():
             argstr='-prefix %s',
             keep_extension=True,
             name_source='in_file',
-            name_template='%s_localstat',
+            name_template='%s_reho',
             position=0,
         ),
         overwrite=dict(argstr='-overwrite', ),
