@@ -249,9 +249,9 @@ class LaplacianThickness(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        _, name, ext = split_filename(os.path.abspath(self.inputs.input_wm))
-        outputs['output_image'] = os.path.join(os.getcwd(), ''.join(
-            (name, self.inputs.output_image, ext)))
+        if not outputs.get('output_image', None) \
+                or not isdefined(outputs['output_image']):
+            outputs['output_image'] = self._gen_filename('output_image')
         return outputs
 
 
