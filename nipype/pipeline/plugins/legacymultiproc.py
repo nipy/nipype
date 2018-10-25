@@ -90,7 +90,16 @@ class NonDaemonProcess(Process):
 class NonDaemonPool(pool.Pool):
     """A process pool with non-daemon processes.
     """
-    Process = NonDaemonProcess
+    def Process(self, *args, **kwds):
+        if hasattr(self, '_ctx'):
+            ctx = self._ctx
+            if isinstance(args[0], multiprocessing.context.BaseContext):
+                ctx = args.pop(0)
+            process = ctx.Process
+            kwds['daemon'] = False
+        else:
+            process = NonDaemonProcess
+        return process(*args, **kwds)
 
 
 class LegacyMultiProcPlugin(DistributedPluginBase):
