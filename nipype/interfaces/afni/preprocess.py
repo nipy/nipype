@@ -2619,7 +2619,8 @@ class TShiftInputSpec(AFNICommandInputSpec):
         argstr='-tpattern @%s',
         xor=['tpattern'])
     slice_encoding_direction = traits.Enum(
-        ('k', 'k-'),
+        'k', 'k-',
+        usedefault=True,
         desc='Direction in which slice_timing is specified (default: k). If negative,'
              'slice_timing is defined in reverse order -- see BIDS specification for details.',)
     rlt = traits.Bool(
@@ -2728,13 +2729,9 @@ class TShift(AFNICommand):
 
     def _write_slice_timing(self):
         slice_timing = self.inputs.slice_timing.copy()
-        if not self.inputs.slice_encoding_direction:
-            slice_encoding_direction = "k"
-        else:
-            slice_encoding_direction = self.inputs.slice_encoding_direction
-        if slice_encoding_direction.endswith("-"):
+        if self.inputs.slice_encoding_direction.endswith("-"):
             slice_timing.reverse()
-            
+
         fname = 'slice_timing.1D'
         with open(fname, 'w') as fobj:
             fobj.write('\t'.join(map(str, slice_timing)))
