@@ -75,32 +75,22 @@ def run_node(node, updatehash, taskid):
     return result
 
 
-class NonDaemonProcess(mp.Process):
-    """A non-daemon process to support internal multiprocessing.
-    """
-
-    def _get_daemon(self):
-        return False
-
-    def _set_daemon(self, value):
-        pass
-
-    daemon = property(_get_daemon, _set_daemon)
-
-
 class NonDaemonPool(pool.Pool):
     """A process pool with non-daemon processes.
     """
     def Process(self, *args, **kwds):
-        if hasattr(self, '_ctx'):
-            ctx = self._ctx
-            if args and isinstance(args[0], mp.context.BaseContext):
-                ctx = args.pop(0)
-            process = ctx.Process
-            kwds['daemon'] = False
-        else:
-            process = NonDaemonProcess
-        return process(*args, **kwds)
+        proc = super(NonDaemonPool, self).Process(*args, **kwds)
+        class NonDaemonProcess(proc.__class__):
+            """Monkey-patch process to ensure it is never daemonized"""
+            @property
+            def daemon(self):
+                return False
+
+            @daemon.setter
+            def daemon(self, val):
+                pass
+        proc.__class__ = NonDaemonProcess
+        return proc
 
 
 class LegacyMultiProcPlugin(DistributedPluginBase):
