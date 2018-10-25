@@ -2665,6 +2665,17 @@ class TShift(AFNICommand):
     >>> tshift._list_outputs()['timing_file']  # doctest: +ELLIPSIS
     '.../slice_timing.1D'
 
+    >>> np.loadtxt(tshift._list_outputs()['timing_file'])[:5]
+    [0.0, 0.4, 0.8, 1.2, 1.6]
+
+    If ``slice_encoding_direction`` is set to ``'k-'``, the slice timing is reversed:
+
+    >>> tshift.inputs.slice_encoding_direction = 'k-'
+    >>> tshift.cmdline
+    '3dTshift -prefix functional_tshift -tpattern @slice_timing.1D -TR 2.5s -tzero 0.0 functional.nii'
+    >>> np.loadtxt(tshift._list_outputs()['timing_file'])[:5]
+    [15.6, 15.2, 14.8, 14.4, 14.0]
+
     This method creates a ``slice_timing.1D`` file to be passed to ``3dTshift``.
     A pre-existing slice-timing file may be used in the same way:
 
