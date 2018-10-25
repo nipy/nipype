@@ -2742,7 +2742,7 @@ class TShift(AFNICommand):
         return super(TShift, self)._format_arg(name, trait_spec, value)
 
     def _write_slice_timing(self):
-        slice_timing = self.inputs.slice_timing.copy()
+        slice_timing = list(self.inputs.slice_timing)
         if self.inputs.slice_encoding_direction.endswith("-"):
             slice_timing.reverse()
 
