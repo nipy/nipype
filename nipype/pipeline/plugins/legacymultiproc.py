@@ -11,7 +11,6 @@ from __future__ import (print_function, division, unicode_literals,
 
 # Import packages
 import os
-import multiprocessing as mp
 from multiprocessing import Pool, cpu_count, pool
 from traceback import format_exception
 import sys
@@ -80,6 +79,7 @@ class NonDaemonPool(pool.Pool):
     """
     def Process(self, *args, **kwds):
         proc = super(NonDaemonPool, self).Process(*args, **kwds)
+
         class NonDaemonProcess(proc.__class__):
             """Monkey-patch process to ensure it is never daemonized"""
             @property
