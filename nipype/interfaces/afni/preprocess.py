@@ -2622,7 +2622,10 @@ class TShiftInputSpec(AFNICommandInputSpec):
         'k', 'k-',
         usedefault=True,
         desc='Direction in which slice_timing is specified (default: k). If negative,'
-             'slice_timing is defined in reverse order -- see BIDS specification for details.',)
+             'slice_timing is defined in reverse order, that is, the first entry '
+             'corresponds to the slice with the largest index, and the final entry '
+             'corresponds to slice index zero. Only in effect when slice_timing is '
+             'passed as list, not when it is passed as file.',)
     rlt = traits.Bool(
         desc='Before shifting, remove the mean and linear trend',
         argstr='-rlt')
