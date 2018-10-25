@@ -67,9 +67,9 @@ def test_MeshFix_inputs():
         ),
         save_as_stl=dict(
             argstr='--stl',
-            xor=['save_as_vmrl', 'save_as_freesurfer_mesh'],
+            xor=['save_as_vrml', 'save_as_freesurfer_mesh'],
         ),
-        save_as_vmrl=dict(
+        save_as_vrml=dict(
             argstr='--wrl',
             xor=['save_as_stl', 'save_as_freesurfer_mesh'],
         ),
