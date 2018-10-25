@@ -34,7 +34,7 @@ def test_FitTensor_inputs():
         ),
         reg_term=dict(
             argstr='-regularisation %f',
-            usedefault=True,
+            max_ver='0.3.13',
         ),
     )
     inputs = FitTensor.input_spec()
