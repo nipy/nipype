@@ -11,7 +11,8 @@ from __future__ import (print_function, division, unicode_literals,
 
 # Import packages
 import os
-from multiprocessing import Process, Pool, cpu_count, pool
+import multiprocessing as mp
+from multiprocessing import Pool, cpu_count, pool
 from traceback import format_exception
 import sys
 from logging import INFO
@@ -74,7 +75,7 @@ def run_node(node, updatehash, taskid):
     return result
 
 
-class NonDaemonProcess(Process):
+class NonDaemonProcess(mp.Process):
     """A non-daemon process to support internal multiprocessing.
     """
 
@@ -93,7 +94,7 @@ class NonDaemonPool(pool.Pool):
     def Process(self, *args, **kwds):
         if hasattr(self, '_ctx'):
             ctx = self._ctx
-            if isinstance(args[0], multiprocessing.context.BaseContext):
+            if args and isinstance(args[0], mp.context.BaseContext):
                 ctx = args.pop(0)
             process = ctx.Process
             kwds['daemon'] = False
