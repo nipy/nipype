@@ -2618,6 +2618,14 @@ class TShiftInputSpec(AFNICommandInputSpec):
         desc='time offsets from the volume acquisition onset for each slice',
         argstr='-tpattern @%s',
         xor=['tpattern'])
+    slice_encoding_direction = traits.Enum(
+        'k', 'k-',
+        usedefault=True,
+        desc='Direction in which slice_timing is specified (default: k). If negative,'
+             'slice_timing is defined in reverse order, that is, the first entry '
+             'corresponds to the slice with the largest index, and the final entry '
+             'corresponds to slice index zero. Only in effect when slice_timing is '
+             'passed as list, not when it is passed as file.',)
     rlt = traits.Bool(
         desc='Before shifting, remove the mean and linear trend',
         argstr='-rlt')
@@ -2659,6 +2667,17 @@ class TShift(AFNICommand):
 
     >>> tshift._list_outputs()['timing_file']  # doctest: +ELLIPSIS
     '.../slice_timing.1D'
+
+    >>> np.loadtxt(tshift._list_outputs()['timing_file']).tolist()[:5]
+    [0.0, 0.4, 0.8, 1.2, 1.6]
+
+    If ``slice_encoding_direction`` is set to ``'k-'``, the slice timing is reversed:
+
+    >>> tshift.inputs.slice_encoding_direction = 'k-'
+    >>> tshift.cmdline
+    '3dTshift -prefix functional_tshift -tpattern @slice_timing.1D -TR 2.5s -tzero 0.0 functional.nii'
+    >>> np.loadtxt(tshift._list_outputs()['timing_file']).tolist()[:5]
+    [15.6, 15.2, 14.8, 14.4, 14.0]
 
     This method creates a ``slice_timing.1D`` file to be passed to ``3dTshift``.
     A pre-existing slice-timing file may be used in the same way:
@@ -2723,9 +2742,13 @@ class TShift(AFNICommand):
         return super(TShift, self)._format_arg(name, trait_spec, value)
 
     def _write_slice_timing(self):
+        slice_timing = list(self.inputs.slice_timing)
+        if self.inputs.slice_encoding_direction.endswith("-"):
+            slice_timing.reverse()
+
         fname = 'slice_timing.1D'
         with open(fname, 'w') as fobj:
-            fobj.write('\t'.join(map(str, self.inputs.slice_timing)))
+            fobj.write('\t'.join(map(str, slice_timing)))
         return fname
 
     def _list_outputs(self):
