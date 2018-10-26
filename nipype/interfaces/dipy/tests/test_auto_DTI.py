@@ -20,6 +20,7 @@ def test_DTI_inputs():
 def test_DTI_outputs():
     output_map = dict(
         ad_file=dict(),
+        color_fa_file=dict(),
         fa_file=dict(),
         md_file=dict(),
         out_file=dict(),
