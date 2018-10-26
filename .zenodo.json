@@ -297,8 +297,9 @@
       "orcid": "0000-0001-6392-6634"
     },
     {
-      "affiliation": "Child Mind Institute",
-      "name": "Giavasis, Steven"
+      "affiliation": "University of Zurich",
+      "name": "Liem, Franz",
+      "orcid": "0000-0003-0646-4810"
     },
     {
       "affiliation": "UniversityHospital Heidelberg, Germany",
@@ -311,6 +312,10 @@
       "name": "K\u00fcttner, Ren\u00e9"
     },
     {
+      "affiliation": "Child Mind Institute",
+      "name": "Giavasis, Steven"
+    },
+    {
       "name": "Haselgrove, Christian"
     },
     {
@@ -318,11 +323,6 @@
     },
     {
       "name": "Ghayoor, Ali"
-    },
-    {
-      "affiliation": "University of Zurich",
-      "name": "Liem, Franz",
-      "orcid": "0000-0003-0646-4810"
     },
     {
       "name": "Millman, Jarrod"
@@ -386,10 +386,6 @@
       "orcid": "0000-0003-2767-6310"
     },
     {
-      "affiliation": "Institute of Imaging & Computer Vision, RWTH Aachen University, Germany",
-      "name": "Weninger, Leon"
-    },
-    {
       "name": "Salvatore, John"
     },
     {
@@ -413,6 +409,10 @@
       "affiliation": "University of Newcastle, Australia",
       "name": "Cooper, Gavin",
       "orcid": "0000-0002-7186-5293"
+    },
+    {
+      "affiliation": "Institute of Imaging & Computer Vision, RWTH Aachen University, Germany",
+      "name": "Weninger, Leon"
     },
     {
       "affiliation": "Boston University",
@@ -466,6 +466,11 @@
       "orcid": "0000-0003-2076-5329"
     },
     {
+      "affiliation": "University of Texas at Austin",
+      "name": "De La Vega, Alejandro",
+      "orcid": "0000-0001-9062-3778"
+    },
+    {
       "affiliation": "University of illinois urbana champaign",
       "name": "Sharp, Paul"
     },
@@ -517,11 +522,6 @@
     },
     {
       "name": "Tarbert, Claire"
-    },
-    {
-      "affiliation": "University of Texas at Austin",
-      "name": "De La Vega, Alejandro",
-      "orcid": "0000-0001-9062-3778"
     },
     {
       "affiliation": "Vrije Universiteit Amsterdam",
