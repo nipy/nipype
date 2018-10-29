@@ -108,7 +108,7 @@ DATEUTIL_MIN_VERSION = '2.2'
 PYTEST_MIN_VERSION = '3.0'
 FUTURE_MIN_VERSION = '0.16.0'
 SIMPLEJSON_MIN_VERSION = '3.8.0'
-PROV_VERSION = '1.5.0'
+PROV_VERSION = '1.5.2'
 CLICK_MIN_VERSION = '6.6.0'
 PYDOT_MIN_VERSION = '1.2.3'
 
@@ -139,7 +139,8 @@ REQUIRES = [
     'traits>=%s' % TRAITS_MIN_VERSION,
     'future>=%s' % FUTURE_MIN_VERSION,
     'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
-    'prov==%s' % PROV_VERSION,
+    'prov>=%s' % PROV_VERSION,
+    'neurdflib',
     'click>=%s' % CLICK_MIN_VERSION,
     'funcsigs',
     'pytest>=%s' % PYTEST_MIN_VERSION,
@@ -154,7 +155,7 @@ REQUIRES = [
 if sys.version_info <= (3, 4):
     REQUIRES.append('configparser')
 
-TESTS_REQUIRES = ['pytest-cov', 'codecov', 'pytest-env']
+TESTS_REQUIRES = ['pytest-cov', 'codecov', 'pytest-env', 'coverage<5']
 
 EXTRA_REQUIRES = {
     'doc': ['Sphinx>=1.4', 'numpydoc', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],

@@ -38,10 +38,10 @@ class MeshFixInputSpec(CommandLineInputSpec):
     dont_clean = traits.Bool(argstr='--no-clean', desc="Don't Clean")
 
     save_as_stl = traits.Bool(
-        xor=['save_as_vmrl', 'save_as_freesurfer_mesh'],
+        xor=['save_as_vrml', 'save_as_freesurfer_mesh'],
         argstr='--stl',
         desc="Result is saved in stereolithographic format (.stl)")
-    save_as_vmrl = traits.Bool(
+    save_as_vrml = traits.Bool(
         argstr='--wrl',
         xor=['save_as_stl', 'save_as_freesurfer_mesh'],
         desc="Result is saved in VRML1.0 format (.wrl)")
@@ -210,7 +210,7 @@ class MeshFix(CommandLine):
         if self.inputs.save_as_stl or self.inputs.output_type == 'stl':
             self.inputs.output_type = 'stl'
             self.inputs.save_as_stl = True
-        if self.inputs.save_as_vmrl or self.inputs.output_type == 'vmrl':
-            self.inputs.output_type = 'vmrl'
-            self.inputs.save_as_vmrl = True
+        if self.inputs.save_as_vrml or self.inputs.output_type == 'vrml':
+            self.inputs.output_type = 'vrml'
+            self.inputs.save_as_vrml = True
         return name + '_fixed.' + self.inputs.output_type

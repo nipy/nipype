@@ -234,7 +234,6 @@ class BaseTraitedSpec(traits.HasTraits):
             The md5 hash value of the traited spec
 
         """
-
         list_withhash = []
         list_nofilename = []
         for name, val in sorted(self.trait_get().items()):
@@ -308,6 +307,10 @@ class BaseTraitedSpec(traits.HasTraits):
                 else:
                     out = objekt
         return out
+
+    @property
+    def __all__(self):
+        return self.copyable_trait_names()
 
 
 class TraitedSpec(BaseTraitedSpec):

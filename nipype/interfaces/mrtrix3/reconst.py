@@ -39,8 +39,8 @@ class FitTensorInputSpec(MRTrix3BaseInputSpec):
         argstr='-method %s',
         desc=('select method used to perform the fitting'))
     reg_term = traits.Float(
-        5.e3, usedefault=True,
         argstr='-regularisation %f',
+        max_ver='0.3.13',
         desc=('specify the strength of the regularisation term on the '
               'magnitude of the tensor elements (default = 5000). This '
               'only applies to the non-linear methods'))
@@ -64,8 +64,7 @@ class FitTensor(MRTrix3Base):
     >>> tsr.inputs.in_mask = 'mask.nii.gz'
     >>> tsr.inputs.grad_fsl = ('bvecs', 'bvals')
     >>> tsr.cmdline                               # doctest: +ELLIPSIS
-    'dwi2tensor -fslgrad bvecs bvals -mask mask.nii.gz \
--regularisation 5000.000000 dwi.mif dti.mif'
+    'dwi2tensor -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif dti.mif'
     >>> tsr.run()                                 # doctest: +SKIP
     """
 
