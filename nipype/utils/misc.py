@@ -241,6 +241,9 @@ def normalize_mc_params(params, source):
     elif source.upper() in ('AFNI', 'FSFAST'):
         params = params[np.asarray([4, 5, 3, 1, 2, 0]) + (len(params) > 6)]
         params[3:] = params[3:] * np.pi / 180.
+    elif source.upper() == '4DFP':
+        params = params[np.arange(1, 7)]
+        params[3:] = params[3:] * np.pi / 180.
     elif source.upper() == 'NIPY':
         from nipy.algorithms.registration import to_matrix44, aff2euler
         matrix = to_matrix44(params)

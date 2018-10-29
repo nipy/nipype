@@ -234,6 +234,7 @@ class FramewiseDisplacementInputSpec(BaseInterfaceInputSpec):
         "SPM",
         "FSFAST",
         "NIPY",
+        "4DFP",
         desc="Source of movement parameters",
         mandatory=True)
     radius = traits.Float(

@@ -39,7 +39,7 @@ def _get_affine_matrix(params, source):
 
     params : np.array (upto 12 long) in native package format
     source : the package that generated the parameters
-             supports SPM, AFNI, FSFAST, FSL, NIPY
+             supports SPM, AFNI, FSFAST, FSL, NIPY, 4DFP
     """
     if source == 'NIPY':
         # nipy does not store typical euler angles, use nipy to convert
@@ -174,6 +174,7 @@ class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
         "AFNI",
         "NiPy",
         "FSFAST",
+        "4DFP",
         desc="Source of movement parameters",
         mandatory=True)
     use_differences = traits.ListBool(
