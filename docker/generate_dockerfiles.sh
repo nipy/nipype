@@ -99,9 +99,8 @@ function generate_main_dockerfile() {
     --copy . /src/nipype \
     --user root \
     --run 'chown -R neuro /src
-  && chmod +x /usr/bin/fsl_imglob.py /usr/bin/run_*.sh
-  && . /etc/fsl/fsl.sh
-  && ln -sf /usr/bin/fsl_imglob.py ${FSLDIR}/bin/imglob
+  && chmod +x /usr/bin/run_*.sh
+  && . ${FSLDIR}/etc/fslconf/fsl.sh
   && mkdir /work
   && chown neuro /work' \
     --user neuro \
