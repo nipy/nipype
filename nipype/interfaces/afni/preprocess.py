@@ -1808,7 +1808,7 @@ class ROIStatsInputSpec(CommandLineInputSpec):
         mandatory=True,
         exists=True)
     mask = File(desc='input mask', argstr='-mask %s', position=3, exists=True,
-                deprecated='1.1.5', new_name='mask_file')
+                deprecated='1.1.4', new_name='mask_file')
     mask_file = File(desc='input mask', argstr='-mask %s', exists=True)
     mask_f2short = traits.Bool(
         desc='Tells the program to convert a float mask to short integers, '

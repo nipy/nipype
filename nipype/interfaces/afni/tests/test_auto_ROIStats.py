@@ -26,7 +26,7 @@ def test_ROIStats_inputs():
         ),
         mask=dict(
             argstr='-mask %s',
-            deprecated='1.1.5',
+            deprecated='1.1.4',
             new_name='mask_file',
             position=3,
         ),
