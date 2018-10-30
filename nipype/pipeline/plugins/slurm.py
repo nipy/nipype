@@ -17,7 +17,7 @@ from ... import logging
 from ...interfaces.base import CommandLine
 from .base import SGELikeBatchManagerBase, logger
 
-iflogger = logging.getLogger('nipype.workflow')
+iflogger = logging.getLogger('nipype.interface')
 
 
 class SLURMPlugin(SGELikeBatchManagerBase):
