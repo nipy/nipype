@@ -17,7 +17,7 @@ from ... import logging
 from ...interfaces.base import CommandLine
 from .base import SGELikeBatchManagerBase, logger
 
-iflogger = logging.getLogger('nipype.interface')
+iflogger = logging.getLogger('nipype.workflow')
 
 
 class SLURMPlugin(SGELikeBatchManagerBase):
@@ -73,6 +73,10 @@ class SLURMPlugin(SGELikeBatchManagerBase):
             if any(ss in str(e) for ss
                    in ['Socket timed out', 'not available at the moment']):
                 # do not raise error and allow recheck
+                logger.warning(
+                    "SLURM timeout encountered while checking job status,
+                    "treating job %d as pending", taskid
+                )
                 return True
             if 'Invalid job id' not in str(e):
                 raise(e)
