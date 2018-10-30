@@ -1807,6 +1807,8 @@ class ROIStatsInputSpec(CommandLineInputSpec):
         position=-2,
         mandatory=True,
         exists=True)
+    mask = File(desc='input mask', argstr='-mask %s', position=3, exists=True,
+                deprecated='1.1.5', new_name='mask_file')
     mask_file = File(desc='input mask', argstr='-mask %s', exists=True)
     mask_f2short = traits.Bool(
         desc='Tells the program to convert a float mask to short integers, '
@@ -1925,24 +1927,22 @@ class ROIStats(AFNICommandBase):
     output_spec = ROIStatsOutputSpec
 
     def _format_arg(self, name, spec, value):
-
-        _stat_dict  =   {
-                            'mean': '-nzmean',
-                            'median': '-nzmedian',
-                            'mode': '-nzmode',
-                            'minmax': '-nzminmax',
-                            'sigma': '-nzsigma',
-                            'voxels': '-nzvoxels',
-                            'sum': '-nzsum',
-                            'summary': '-summary',
-                            'zerominmax': '-minmax',
-                            'zeromedian': '-median',
-                            'zerosigma': '-sigma',
-                            'zeromode': '-mode'
-                        }
+        _stat_dict = {
+            'mean': '-nzmean',
+            'median': '-nzmedian',
+            'mode': '-nzmode',
+            'minmax': '-nzminmax',
+            'sigma': '-nzsigma',
+            'voxels': '-nzvoxels',
+            'sum': '-nzsum',
+            'summary': '-summary',
+            'zerominmax': '-minmax',
+            'zeromedian': '-median',
+            'zerosigma': '-sigma',
+            'zeromode': '-mode'
+            }
         if name == 'stat':
             value = [_stat_dict[v] for v in value]
-
         return super(ROIStats, self)._format_arg(name, spec, value)
 
 

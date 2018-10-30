@@ -21,7 +21,7 @@ def test_ReHo_inputs():
             position=1,
         ),
         label_set=dict(argstr='-in_rois %s', ),
-        mask=dict(argstr='-mask %s', ),
+        mask_file=dict(argstr='-mask %s', ),
         neighborhood=dict(
             argstr='-nneigh %s',
             xor=['sphere', 'ellipsoid'],

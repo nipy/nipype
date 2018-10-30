@@ -24,6 +24,12 @@ def test_ROIStats_inputs():
             mandatory=True,
             position=-2,
         ),
+        mask=dict(
+            argstr='-mask %s',
+            deprecated='1.1.5',
+            new_name='mask_file',
+            position=3,
+        ),
         mask_f2short=dict(argstr='-mask_f2short', ),
         mask_file=dict(argstr='-mask %s', ),
         nobriklab=dict(argstr='-nobriklab', ),

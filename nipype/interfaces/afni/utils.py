@@ -2318,8 +2318,10 @@ class ReHoInputSpec(CommandLineInputSpec):
     chi_sq = traits.Bool(
         argstr='-chi_sq',
         desc='Output the Friedman chi-squared value in addition to the '
-             'Kendall\'s W.')
-    mask = traits.File(
+             'Kendall\'s W. This option is currently compatible only with '
+             'the AFNI (BRIK/HEAD) output type; the chi-squared value will '
+             'be the second sub-brick of the output dataset.')
+    mask_file = traits.File(
         desc='Mask within which ReHo should be calculated voxelwise',
         argstr='-mask %s')
     neighborhood = traits.Enum(
@@ -2403,24 +2405,19 @@ class ReHo(AFNICommandBase):
     output_spec = ReHoOutputSpec
 
     def _list_outputs(self):
-
         outputs = super(ReHo, self)._list_outputs()
-
         if self.inputs.label_set:
             outputs['out_vals'] = outputs['out_file'] + '_ROI_reho.vals'
-
         return outputs
 
     def _format_arg(self, name, spec, value):
-
-        _neigh_dict =   {
-                            'faces': 7,
-                            'edges': 19,
-                            'vertices': 27,
-                        }
+        _neigh_dict = {
+            'faces': 7,
+            'edges': 19,
+            'vertices': 27,
+            }
         if name == 'neighborhood':
             value = _neigh_dict[value]
-
         return super(ReHo, self)._format_arg(name, spec, value)
 
 
