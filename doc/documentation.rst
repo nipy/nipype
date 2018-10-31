@@ -18,32 +18,6 @@ Previous versions: `1.1.3 <http://nipype.readthedocs.io/en/1.1.3/>`_ `1.1.2 <htt
 
     Be sure to read `Michael's excellent tutorials <https://miykael.github.io/nipype_tutorial/>`_.
 
-  .. admonition:: Guides
-
-    .. hlist::
-       :columns: 2
-
-       * User
-
-         .. toctree::
-            :maxdepth: 2
-
-            users/index
-
-         .. toctree::
-            :maxdepth: 1
-
-            changes
-
-       * Developer
-
-         .. toctree::
-            :maxdepth: 2
-
-            api/index
-            devel/index
-
-
   .. admonition:: Interfaces, Workflows and Examples
 
     .. hlist::
@@ -71,5 +45,24 @@ Previous versions: `1.1.3 <http://nipype.readthedocs.io/en/1.1.3/>`_ `1.1.2 <htt
 
             interfaces/generated/*algorithms*
             interfaces/generated/*interfaces*
+
+  .. admonition:: Developer Guides
+
+    .. hlist::
+       :columns: 2
+
+       * API
+
+         .. toctree::
+            :maxdepth: 2
+
+            api/index
+
+       * Developer Guide
+
+         .. toctree::
+            :maxdepth: 2
+
+            devel/index
 
 .. include:: links_names.txt
