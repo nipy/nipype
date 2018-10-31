@@ -66,6 +66,7 @@ function generate_base_dockerfile() {
     --base "$BASE_IMAGE" --pkg-manager "$PKG_MANAGER" \
     --label maintainer="The nipype developers https://github.com/nipy/nipype" \
     --spm12 version=r7219 \
+    --env 'LD_LIBRARY_PATH=/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH' \
     --freesurfer version=6.0.0-min \
     --run 'echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tCjUxNzIKICpDdnVtdkVWM3pUZmcKRlM1Si8yYzFhZ2c0RQoiID4gL29wdC9mcmVlc3VyZmVyLTYuMC4wLW1pbi9saWNlbnNlLnR4dA==" | base64 -d | sh' \
     --install afni ants apt-utils bzip2 convert3d file fsl-core \
