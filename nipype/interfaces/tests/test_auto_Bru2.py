@@ -8,6 +8,7 @@ def test_Bru2_inputs():
         actual_size=dict(argstr='-a', ),
         append_protocol_name=dict(argstr='-p', ),
         args=dict(argstr='%s', ),
+        compress=dict(argstr='-z', ),
         environ=dict(
             nohash=True,
             usedefault=True,
