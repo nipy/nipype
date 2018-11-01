@@ -1,3 +1,31 @@
+1.1.4 (October 31, 2018)
+========================
+
+##### [Full changelog](https://github.com/nipy/nipype/milestone/25?closed=1)
+
+  * FIX: Python 2.7-3.7.1 compatible NonDaemonPool (https://github.com/nipy/nipype/pull/2754)
+  * FIX: VRML typo (VMRL) in MeshFix (https://github.com/nipy/nipype/pull/2757)
+  * FIX: Refine FSL.split output identification (https://github.com/nipy/nipype/pull/2746)
+  * FIX: Reuse _gen_filename logic in ants.LaplacianThickness (https://github.com/nipy/nipype/pull/2734)
+  * FIX: Remove 'reg_term' default from dwi2tensor interface (https://github.com/nipy/nipype/pull/2731)
+  * FIX: Keep profile files when ``remove_unnecessary_outputs = true`` (https://github.com/nipy/nipype/pull/2718)
+  * ENH: Add afni.LocalStat and afni.ReHo, update afni.ROIStats inputs (https://github.com/nipy/nipype/pull/2740)
+  * ENH: Add compression option for bru2nii (https://github.com/nipy/nipype/pull/2762)
+  * ENH: Add slice_encoding_direction input to TShift (https://github.com/nipy/nipype/pull/2753)
+  * ENH: Add 'sse' output to FSL DTIFit interface (https://github.com/nipy/nipype/pull/2749)
+  * ENH: Update ``ants.LaplacianThickness`` to use ``name_source`` (https://github.com/nipy/nipype/pull/2747)
+  * ENH: Add tab completion for node and interface inputs properties (https://github.com/nipy/nipype/pull/2735)
+  * ENH: enable/disable resource monitor in the fixture per test (https://github.com/nipy/nipype/pull/2725)
+  * TEST: Update expected dotfile text for networkx 1.x (https://github.com/nipy/nipype/pull/2730)
+  * DOC: Move user docs from nipype to nipype_tutorial (https://github.com/nipy/nipype/pull/2726)
+  * DOC: Use consistent name in reconall workflow docstring (https://github.com/nipy/nipype/pull/2758)
+  * MAINT: Use neurodocker 0.4.1 + apt install afni (https://github.com/nipy/nipype/pull/2707)
+  * MAINT: Fix prov and rdflib in nipype (https://github.com/nipy/nipype/pull/2701)
+  * MAINT: Correct readthedocs build error (https://github.com/nipy/nipype/pull/2723)
+  * MAINT: Pin codecov to <5.0 so Travis is fixed (https://github.com/nipy/nipype/pull/2728)
+  * CI: Lock travis pybids 0.6.5 (https://github.com/nipy/nipype/pull/2720)
+
+
 1.1.3 (September 24, 2018)
 ==========================
 
