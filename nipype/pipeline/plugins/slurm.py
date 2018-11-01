@@ -74,8 +74,8 @@ class SLURMPlugin(SGELikeBatchManagerBase):
                    in ['Socket timed out', 'not available at the moment']):
                 # do not raise error and allow recheck
                 logger.warning(
-                    "SLURM timeout encountered while checking job status,
-                    "treating job %d as pending", taskid
+                    "SLURM timeout encountered while checking job status,"
+                    " treating job %d as pending", taskid
                 )
                 return True
             if 'Invalid job id' not in str(e):
