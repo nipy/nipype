@@ -73,22 +73,25 @@ def run_node(node, updatehash, taskid):
     # Return the result dictionary
     return result
 
+# Pythons 2.7, 3.4-3.7.0, and 3.7.1 have three different implementations of
+# pool.Pool().Process(), but a common interface, so construct a Process and
+# subclass its __class__
+class NonDaemonProcess(pool.Pool().Process().__class__):
+    @property
+    def daemon(self):
+        return False
+    
+    @daemon.setter
+    def daemon(self, val):
+        pass
+
 
 class NonDaemonPool(pool.Pool):
     """A process pool with non-daemon processes.
     """
     def Process(self, *args, **kwds):
         proc = super(NonDaemonPool, self).Process(*args, **kwds)
-
-        class NonDaemonProcess(proc.__class__):
-            """Monkey-patch process to ensure it is never daemonized"""
-            @property
-            def daemon(self):
-                return False
-
-            @daemon.setter
-            def daemon(self, val):
-                pass
+        # Monkey-patch newly created processes to ensure they are never daemonized
         proc.__class__ = NonDaemonProcess
         return proc
 
