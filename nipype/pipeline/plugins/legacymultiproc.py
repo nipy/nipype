@@ -74,9 +74,9 @@ def run_node(node, updatehash, taskid):
     return result
 
 # Pythons 2.7, 3.4-3.7.0, and 3.7.1 have three different implementations of
-# pool.Pool().Process(), but a common interface, so construct a Process and
-# subclass its __class__
-class NonDaemonProcess(pool.Pool().Process().__class__):
+# pool.Pool().Process(), and the type of the result varies based on the default
+# multiprocessing context, so we need to dynamically patch the daemon property
+class NonDaemonMixin(object):
     @property
     def daemon(self):
         return False
@@ -92,7 +92,7 @@ class NonDaemonPool(pool.Pool):
     def Process(self, *args, **kwds):
         proc = super(NonDaemonPool, self).Process(*args, **kwds)
         # Monkey-patch newly created processes to ensure they are never daemonized
-        proc.__class__ = NonDaemonProcess
+        proc.__class__ = type('NonDaemonProcess', (NonDaemonMixin, proc.__class__), {})
         return proc
 
 
