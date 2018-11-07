@@ -11,6 +11,7 @@ from __future__ import (print_function, division, unicode_literals,
 
 # Import packages
 import os
+import multiprocessing as mp
 from multiprocessing import Pool, cpu_count, pool
 from traceback import format_exception
 import sys
@@ -85,15 +86,53 @@ class NonDaemonMixin(object):
     def daemon(self, val):
         pass
 
+try:
+    from multiprocessing import context
+    # Exists on all platforms
+    class NonDaemonSpawnProcess(NonDaemonMixin, context.SpawnProcess):
+        pass
+    class NonDaemonSpawnContext(context.SpawnContext):
+        Process = NonDaemonSpawnProcess
+    _nondaemon_context_mapper = {
+        'spawn': NonDaemonSpawnContext()
+        }
 
-class NonDaemonPool(pool.Pool):
-    """A process pool with non-daemon processes.
-    """
-    def Process(self, *args, **kwds):
-        proc = super(NonDaemonPool, self).Process(*args, **kwds)
-        # Monkey-patch newly created processes to ensure they are never daemonized
-        proc.__class__ = type(str('NonDaemonProcess'), (NonDaemonMixin, proc.__class__), {})
-        return proc
+    # POSIX only
+    try:
+        class NonDaemonForkProcess(NonDaemonMixin, context.ForkProcess):
+            pass
+        class NonDaemonForkContext(context.ForkContext):
+            Process = NonDaemonForkProcess
+        _nondaemon_context_mapper['fork'] = NonDaemonForkContext()
+    except AttributeError:
+        pass
+    # POSIX only
+    try:
+        class NonDaemonForkServerProcess(NonDaemonMixin, context.ForkServerProcess):
+            pass
+        class NonDaemonForkServerContext(context.ForkServerContext):
+            Process = NonDaemonForkServerProcess
+        _nondaemon_context_mapper['forkserver'] = NonDaemonForkServerContext()
+    except AttributeError:
+        pass
+
+    class NonDaemonPool(pool.Pool):
+        def __init__(self, processes=None, initializer=None, initargs=(),
+                     maxtasksperchild=None, context=None):
+            if context is None:
+                context = mp.get_context()
+            context = _nondaemon_context_mapper[context._name]
+            super(NonDaemonPool, self).__init__(processes=processes,
+                                                initializer=initializer,
+                                                initargs=initargs,
+                                                maxtasksperchild=maxtasksperchild,
+                                                context=context)
+
+except ImportError:
+    class NonDaemonProcess(NonDaemonMixin, mp.Process):
+        pass
+    class NonDaemonPool(pool.Pool):
+        Process = NonDaemonProcess
 
 
 class LegacyMultiProcPlugin(DistributedPluginBase):
