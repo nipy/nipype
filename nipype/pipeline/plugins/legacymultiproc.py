@@ -92,7 +92,7 @@ class NonDaemonPool(pool.Pool):
     def Process(self, *args, **kwds):
         proc = super(NonDaemonPool, self).Process(*args, **kwds)
         # Monkey-patch newly created processes to ensure they are never daemonized
-        proc.__class__ = type('NonDaemonProcess', (NonDaemonMixin, proc.__class__), {})
+        proc.__class__ = type(str('NonDaemonProcess'), (NonDaemonMixin, proc.__class__), {})
         return proc
 
 
