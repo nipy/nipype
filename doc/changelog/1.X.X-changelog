@@ -1,3 +1,14 @@
+1.1.5 (November 08, 2018)
+=========================
+
+Hotfix release.
+
+##### [Full changelog](https://github.com/nipy/nipype/milestone/26?closed=1)
+
+  * ENH: Allow timeouts during SLURM job status checks (https://github.com/nipy/nipype/pull/2767)
+  * RF: Subclass non-daemon variants of all multiprocessing contexts (https://github.com/nipy/nipype/pull/2771)
+
+
 1.1.4 (October 31, 2018)
 ========================
 
