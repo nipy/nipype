@@ -12,7 +12,7 @@ from __future__ import (print_function, division, unicode_literals,
 # Import packages
 import os
 import multiprocessing as mp
-from multiprocessing import Pool, cpu_count, pool
+from multiprocessing import Pool, cpu_count
 from traceback import format_exception
 import sys
 from logging import INFO
@@ -20,8 +20,10 @@ import gc
 
 from copy import deepcopy
 import numpy as np
+
 from ... import logging
 from ...utils.profiler import get_system_total_memory_gb
+from ...external import patchedpool as pool
 from ..engine import MapNode
 from .base import DistributedPluginBase
 
@@ -81,7 +83,7 @@ class NonDaemonMixin(object):
     @property
     def daemon(self):
         return False
-    
+
     @daemon.setter
     def daemon(self, val):
         pass
