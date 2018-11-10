@@ -220,9 +220,9 @@ class DistributedPluginBase(PluginBase):
             result = {'result': None,
                       'traceback': '\n'.join(format_exception(*sys.exc_info()))}
 
+        crashfile = self._report_crash(self.procs[jobid], result=result)
         if str2bool(self._config['execution']['stop_on_first_crash']):
             raise RuntimeError("".join(result['traceback']))
-        crashfile = self._report_crash(self.procs[jobid], result=result)
         if jobid in self.mapnodesubids:
             # remove current jobid
             self.proc_pending[jobid] = False
