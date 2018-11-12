@@ -11,10 +11,10 @@ from __future__ import (print_function, division, unicode_literals,
 
 # Import packages
 import os
-import multiprocessing as mp
-from multiprocessing import Pool, cpu_count
-from traceback import format_exception
 import sys
+import multiprocessing as mp
+from multiprocessing import cpu_count
+from traceback import format_exception
 from logging import INFO
 import gc
 
@@ -23,9 +23,13 @@ import numpy as np
 
 from ... import logging
 from ...utils.profiler import get_system_total_memory_gb
-from ...external import patchedpool as pool
 from ..engine import MapNode
 from .base import DistributedPluginBase
+
+if sys.version_info > (3, 6):
+    from ...external import patchedpool as pool
+else:
+    from multiprocessing import pool
 
 try:
     from textwrap import indent
@@ -197,7 +201,7 @@ class LegacyMultiProcPlugin(DistributedPluginBase):
                      'mem_gb=%0.2f, cwd=%s)', 'non' * int(non_daemon),
                      self.processors, self.memory_gb, self._cwd)
 
-        NipypePool = NonDaemonPool if non_daemon else Pool
+        NipypePool = NonDaemonPool if non_daemon else pool.Pool
         try:
             self.pool = NipypePool(
                 processes=self.processors,
