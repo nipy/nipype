@@ -370,10 +370,11 @@ class Dcm2niix(CommandLine):
     'dcm2niix -b y -z y -5 -x n -t n -m n -o ds005 -s n -v n dicomdir'
     >>> converter.run() # doctest: +SKIP
 
-    # In the example below, we note that the current version of dcm2niix
-    # converts any files in the directory containing the files in the list. We
-    # also do not support nested filenames with this option. Thus all files
-    # should have a common root directory.
+    In the example below, we note that the current version of dcm2niix
+    converts any files in the directory containing the files in the list. We
+    also do not support nested filenames with this option. **Thus all files
+    must have a common root directory.**
+    
     >>> converter = Dcm2niix()
     >>> converter.inputs.source_names = ['functional_1.dcm', 'functional_2.dcm']
     >>> converter.inputs.compression = 5
