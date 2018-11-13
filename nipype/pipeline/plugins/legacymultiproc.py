@@ -26,7 +26,7 @@ from ...utils.profiler import get_system_total_memory_gb
 from ..engine import MapNode
 from .base import DistributedPluginBase
 
-if sys.version_info > (3, 6):
+if sys.version_info >= (3, 7):
     from ...external import patchedpool as pool
 else:
     from multiprocessing import pool
