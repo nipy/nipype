@@ -199,7 +199,9 @@ class LaplacianThicknessInputSpec(ANTSCommandInputSpec):
         desc='name of output file',
         argstr='%s',
         position=3,
-        genfile=True,
+        name_source=['input_wm'],
+        name_template='%s_thickness',
+        keep_extension=True,
         hash_files=False)
     smooth_param = traits.Float(argstr='smoothparam=%d', desc='', position=4)
     prior_thickness = traits.Float(
@@ -224,6 +226,9 @@ class LaplacianThickness(ANTSCommand):
     >>> cort_thick = LaplacianThickness()
     >>> cort_thick.inputs.input_wm = 'white_matter.nii.gz'
     >>> cort_thick.inputs.input_gm = 'gray_matter.nii.gz'
+    >>> cort_thick.cmdline
+    'LaplacianThickness white_matter.nii.gz gray_matter.nii.gz white_matter_thickness.nii.gz'
+
     >>> cort_thick.inputs.output_image = 'output_thickness.nii.gz'
     >>> cort_thick.cmdline
     'LaplacianThickness white_matter.nii.gz gray_matter.nii.gz output_thickness.nii.gz'
@@ -233,22 +238,6 @@ class LaplacianThickness(ANTSCommand):
     _cmd = 'LaplacianThickness'
     input_spec = LaplacianThicknessInputSpec
     output_spec = LaplacianThicknessOutputSpec
-
-    def _gen_filename(self, name):
-        if name == 'output_image':
-            output = self.inputs.output_image
-            if not isdefined(output):
-                _, name, ext = split_filename(self.inputs.input_wm)
-                output = name + '_thickness' + ext
-            return output
-        return None
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        _, name, ext = split_filename(os.path.abspath(self.inputs.input_wm))
-        outputs['output_image'] = os.path.join(os.getcwd(), ''.join(
-            (name, self.inputs.output_image, ext)))
-        return outputs
 
 
 class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):

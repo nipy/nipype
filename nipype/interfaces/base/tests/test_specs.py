@@ -9,6 +9,10 @@ import pytest
 from ....utils.filemanip import split_filename
 from ... import base as nib
 from ...base import traits, Undefined
+from ....interfaces import fsl
+from ...utility.wrappers import Function
+from ....pipeline import Node
+
 
 
 @pytest.fixture(scope="module")
@@ -43,6 +47,20 @@ def test_TraitedSpec():
     assert infields.__repr__() == '\nfoo = 1\ngoo = 0.0\n'
 
 
+def test_TraitedSpec_tab_completion():
+    bet_nd = Node(fsl.BET(), name='bet')
+    bet_interface = fsl.BET()
+    bet_inputs = bet_nd.inputs.class_editable_traits()
+    bet_outputs = bet_nd.outputs.class_editable_traits() 
+    
+    # Check __all__ for bet node and interface inputs
+    assert set(bet_nd.inputs.__all__) == set(bet_inputs)
+    assert set(bet_interface.inputs.__all__) == set(bet_inputs)
+
+    # Check __all__ for bet node outputs
+    assert set(bet_nd.outputs.__all__) == set(bet_outputs)
+
+
 @pytest.mark.skip
 def test_TraitedSpec_dynamic():
     from pickle import dumps, loads
@@ -57,6 +75,36 @@ def test_TraitedSpec_dynamic():
     assign_a_again = lambda: setattr(unpkld_a, 'foo', 'a')
     with pytest.raises(Exception):
         assign_a_again
+
+
+def test_DynamicTraitedSpec_tab_completion():
+    def extract_func(list_out):
+        return list_out[0]
+
+    # Define interface
+    func_interface = Function(input_names=["list_out"],
+                              output_names=["out_file", "another_file"],
+                              function=extract_func)
+    # Define node
+    list_extract = Node(Function(
+        input_names=["list_out"], output_names=["out_file"],
+        function=extract_func), name="list_extract")
+
+    # Check __all__ for interface inputs
+    expected_input = set(list_extract.inputs.editable_traits())
+    assert(set(func_interface.inputs.__all__) == expected_input)
+
+    # Check __all__ for node inputs
+    assert(set(list_extract.inputs.__all__) == expected_input)
+
+    # Check __all__ for node outputs
+    expected_output = set(list_extract.outputs.editable_traits())
+    assert(set(list_extract.outputs.__all__) == expected_output)
+
+    # Add trait and retest
+    list_extract._interface._output_names.append('added_out_trait')
+    expected_output.add('added_out_trait')
+    assert(set(list_extract.outputs.__all__) == expected_output)
 
 
 def test_TraitedSpec_logic():
