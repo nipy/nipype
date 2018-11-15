@@ -888,14 +888,21 @@ def get_dependencies(name, environ):
     else:
         return 'Platform %s not supported' % sys.platform
 
-    proc = sp.Popen(
-        command,
-        stdout=sp.PIPE,
-        stderr=sp.PIPE,
-        shell=True,
-        env=environ)
-    o, e = proc.communicate()
-    return o.rstrip()
+    deps = None
+    try:
+        proc = sp.Popen(
+            command,
+            stdout=sp.PIPE,
+            stderr=sp.PIPE,
+            shell=True,
+            env=environ)
+        o, e = proc.communicate()
+        deps = o.rstrip()
+    except Exception as ex:
+        deps = '"%s" failed' % command
+        fmlogger.warning('Could not get dependencies of %s. Error:\n%s',
+                         name, ex.message)
+    return deps
 
 
 def canonicalize_env(env):
