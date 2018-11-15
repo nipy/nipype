@@ -103,7 +103,7 @@ class MeshFixInputSpec(CommandLineInputSpec):
         argstr='--fineTuneIn ',
         requires=['finetuning_distance', 'finetuning_substeps'])
     finetuning_outwards = traits.Bool(
-        argstr='--fineTuneIn ',
+        argstr='--fineTuneOut ',
         requires=['finetuning_distance', 'finetuning_substeps'],
         xor=['finetuning_inwards'],
         desc=
