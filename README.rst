@@ -98,3 +98,8 @@ Contributing to the project
 ---------------------------
 
 If you'd like to contribute to the project please read our `guidelines <https://github.com/nipy/nipype/blob/master/CONTRIBUTING.md>`_. Please also read through our `code of conduct <https://github.com/nipy/nipype/blob/master/CODE_OF_CONDUCT.md>`_.
+
+
+.. image:: https://api.codacy.com/project/badge/Grade/e66a468de16b466b8052a568cf515c95
+   :alt: Codacy Badge
+   :target: https://app.codacy.com/app/nipype/nipype_2?utm_source=github.com&utm_medium=referral&utm_content=nipy/nipype&utm_campaign=Badge_Grade_Dashboard
