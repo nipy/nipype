@@ -880,22 +880,20 @@ def get_dependencies(name, environ):
     Uses otool on darwin, ldd on linux. Currently doesn't support windows.
 
     """
+    command = None
     if sys.platform == 'darwin':
-        proc = sp.Popen(
-            'otool -L `which %s`' % name,
-            stdout=sp.PIPE,
-            stderr=sp.PIPE,
-            shell=True,
-            env=environ)
+        command = 'otool -L `which %s`' % name
     elif 'linux' in sys.platform:
-        proc = sp.Popen(
-            'ldd `which %s`' % name,
-            stdout=sp.PIPE,
-            stderr=sp.PIPE,
-            shell=True,
-            env=environ)
+        command = 'ldd `which %s`' % name
     else:
         return 'Platform %s not supported' % sys.platform
+
+    proc = sp.Popen(
+        command,
+        stdout=sp.PIPE,
+        stderr=sp.PIPE,
+        shell=True,
+        env=environ)
     o, e = proc.communicate()
     return o.rstrip()
 
