@@ -9,13 +9,10 @@ Miscellaneous tools to support Interface functionality
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
-from builtins import range, object, str
+from builtins import object, str
 
 import os
 from copy import deepcopy
-
-import datetime
-import locale
 
 from ... import logging
 from ...utils.misc import is_container
@@ -236,58 +233,6 @@ class InterfaceResult(object):
     @property
     def version(self):
         return self._version
-
-
-class Stream(object):
-    """Function to capture stdout and stderr streams with timestamps
-
-    stackoverflow.com/questions/4984549/merge-and-sync-stdout-and-stderr/5188359
-    """
-
-    def __init__(self, name, impl):
-        self._name = name
-        self._impl = impl
-        self._buf = ''
-        self._rows = []
-        self._lastidx = 0
-        self.default_encoding = locale.getdefaultlocale()[1] or 'UTF-8'
-
-    def fileno(self):
-        "Pass-through for file descriptor."
-        return self._impl.fileno()
-
-    def read(self, drain=0):
-        "Read from the file descriptor. If 'drain' set, read until EOF."
-        while self._read(drain) is not None:
-            if not drain:
-                break
-
-    def _read(self, drain):
-        "Read from the file descriptor"
-        fd = self.fileno()
-        buf = os.read(fd, 4096).decode(self.default_encoding)
-        if not buf and not self._buf:
-            return None
-        if '\n' not in buf:
-            if not drain:
-                self._buf += buf
-                return []
-
-        # prepend any data previously read, then split into lines and format
-        buf = self._buf + buf
-        if '\n' in buf:
-            tmp, rest = buf.rsplit('\n', 1)
-        else:
-            tmp = buf
-            rest = None
-        self._buf = rest
-        now = datetime.datetime.now().isoformat()
-        rows = tmp.split('\n')
-        self._rows += [(now, '%s %s:%s' % (self._name, now, r), r)
-                       for r in rows]
-        for idx in range(self._lastidx, len(self._rows)):
-            iflogger.info(self._rows[idx][1])
-        self._lastidx = len(self._rows)
 
 
 def load_template(name):

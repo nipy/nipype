@@ -11,7 +11,8 @@ from __future__ import (print_function, division, unicode_literals,
 
 # Import packages
 import os
-from multiprocessing import Process, Pool, cpu_count, pool
+import multiprocessing as mp
+from multiprocessing import Pool, cpu_count, pool
 from traceback import format_exception
 import sys
 from logging import INFO
@@ -73,24 +74,65 @@ def run_node(node, updatehash, taskid):
     # Return the result dictionary
     return result
 
-
-class NonDaemonProcess(Process):
-    """A non-daemon process to support internal multiprocessing.
-    """
-
-    def _get_daemon(self):
+# Pythons 2.7, 3.4-3.7.0, and 3.7.1 have three different implementations of
+# pool.Pool().Process(), and the type of the result varies based on the default
+# multiprocessing context, so we need to dynamically patch the daemon property
+class NonDaemonMixin(object):
+    @property
+    def daemon(self):
         return False
-
-    def _set_daemon(self, value):
+    
+    @daemon.setter
+    def daemon(self, val):
         pass
 
-    daemon = property(_get_daemon, _set_daemon)
+try:
+    from multiprocessing import context
+    # Exists on all platforms
+    class NonDaemonSpawnProcess(NonDaemonMixin, context.SpawnProcess):
+        pass
+    class NonDaemonSpawnContext(context.SpawnContext):
+        Process = NonDaemonSpawnProcess
+    _nondaemon_context_mapper = {
+        'spawn': NonDaemonSpawnContext()
+        }
 
+    # POSIX only
+    try:
+        class NonDaemonForkProcess(NonDaemonMixin, context.ForkProcess):
+            pass
+        class NonDaemonForkContext(context.ForkContext):
+            Process = NonDaemonForkProcess
+        _nondaemon_context_mapper['fork'] = NonDaemonForkContext()
+    except AttributeError:
+        pass
+    # POSIX only
+    try:
+        class NonDaemonForkServerProcess(NonDaemonMixin, context.ForkServerProcess):
+            pass
+        class NonDaemonForkServerContext(context.ForkServerContext):
+            Process = NonDaemonForkServerProcess
+        _nondaemon_context_mapper['forkserver'] = NonDaemonForkServerContext()
+    except AttributeError:
+        pass
 
-class NonDaemonPool(pool.Pool):
-    """A process pool with non-daemon processes.
-    """
-    Process = NonDaemonProcess
+    class NonDaemonPool(pool.Pool):
+        def __init__(self, processes=None, initializer=None, initargs=(),
+                     maxtasksperchild=None, context=None):
+            if context is None:
+                context = mp.get_context()
+            context = _nondaemon_context_mapper[context._name]
+            super(NonDaemonPool, self).__init__(processes=processes,
+                                                initializer=initializer,
+                                                initargs=initargs,
+                                                maxtasksperchild=maxtasksperchild,
+                                                context=context)
+
+except ImportError:
+    class NonDaemonProcess(NonDaemonMixin, mp.Process):
+        pass
+    class NonDaemonPool(pool.Pool):
+        Process = NonDaemonProcess
 
 
 class LegacyMultiProcPlugin(DistributedPluginBase):

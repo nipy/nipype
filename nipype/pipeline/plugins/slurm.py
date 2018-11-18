@@ -70,6 +70,14 @@ class SLURMPlugin(SGELikeBatchManagerBase):
                 terminal_output='allatonce').run()
             return res.runtime.stdout.find(str(taskid)) > -1
         except RuntimeError as e:
+            if any(ss in str(e) for ss
+                   in ['Socket timed out', 'not available at the moment']):
+                # do not raise error and allow recheck
+                logger.warning(
+                    "SLURM timeout encountered while checking job status,"
+                    " treating job %d as pending", taskid
+                )
+                return True
             if 'Invalid job id' not in str(e):
                 raise(e)
             return False

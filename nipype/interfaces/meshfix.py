@@ -38,10 +38,10 @@ class MeshFixInputSpec(CommandLineInputSpec):
     dont_clean = traits.Bool(argstr='--no-clean', desc="Don't Clean")
 
     save_as_stl = traits.Bool(
-        xor=['save_as_vmrl', 'save_as_freesurfer_mesh'],
+        xor=['save_as_vrml', 'save_as_freesurfer_mesh'],
         argstr='--stl',
         desc="Result is saved in stereolithographic format (.stl)")
-    save_as_vmrl = traits.Bool(
+    save_as_vrml = traits.Bool(
         argstr='--wrl',
         xor=['save_as_stl', 'save_as_freesurfer_mesh'],
         desc="Result is saved in VRML1.0 format (.wrl)")
@@ -70,8 +70,7 @@ class MeshFixInputSpec(CommandLineInputSpec):
 
     x_shift = traits.Int(
         argstr='--smooth %d',
-        desc=
-        "Shifts the coordinates of the vertices when saving. Output must be in FreeSurfer format"
+        desc="Shifts the coordinates of the vertices when saving. Output must be in FreeSurfer format"
     )
 
     # Cutting, decoupling, dilation
@@ -80,8 +79,7 @@ class MeshFixInputSpec(CommandLineInputSpec):
         desc="Remove triangles of 1st that are outside of the 2nd shell.")
     cut_inner = traits.Int(
         argstr='--cut-inner %d',
-        desc=
-        "Remove triangles of 1st that are inside of the 2nd shell. Dilate 2nd by N; Fill holes and keep only 1st afterwards."
+        desc="Remove triangles of 1st that are inside of the 2nd shell. Dilate 2nd by N; Fill holes and keep only 1st afterwards."
     )
     decouple_inin = traits.Int(
         argstr='--decouple-inin %d',
@@ -101,23 +99,28 @@ class MeshFixInputSpec(CommandLineInputSpec):
 
     finetuning_inwards = traits.Bool(
         argstr='--fineTuneIn ',
-        requires=['finetuning_distance', 'finetuning_substeps'])
-    finetuning_outwards = traits.Bool(
-        argstr='--fineTuneIn ',
         requires=['finetuning_distance', 'finetuning_substeps'],
+        position=-3,
+        desc="Used to fine-tune the minimal distance between surfaces."
+    )
+    finetuning_outwards = traits.Bool(
+        argstr='--fineTuneOut ',
+        requires=['finetuning_distance', 'finetuning_substeps'],
+        position=-3,
         xor=['finetuning_inwards'],
-        desc=
-        'Similar to finetuning_inwards, but ensures minimal distance in the other direction'
+        desc='Similar to finetuning_inwards, but ensures minimal distance in the other direction'
     )
     finetuning_distance = traits.Float(
         argstr='%f',
         requires=['finetuning_substeps'],
+        position=-2,
         desc="Used to fine-tune the minimal distance between surfaces."
         "A minimal distance d is ensured, and reached in n substeps. When using the surfaces for subsequent volume meshing by gmsh, this step prevent too flat tetrahedra2)"
     )
     finetuning_substeps = traits.Int(
         argstr='%d',
         requires=['finetuning_distance'],
+        position=-1,
         desc="Used to fine-tune the minimal distance between surfaces."
         "A minimal distance d is ensured, and reached in n substeps. When using the surfaces for subsequent volume meshing by gmsh, this step prevent too flat tetrahedra2)"
     )
@@ -210,7 +213,7 @@ class MeshFix(CommandLine):
         if self.inputs.save_as_stl or self.inputs.output_type == 'stl':
             self.inputs.output_type = 'stl'
             self.inputs.save_as_stl = True
-        if self.inputs.save_as_vmrl or self.inputs.output_type == 'vmrl':
-            self.inputs.output_type = 'vmrl'
-            self.inputs.save_as_vmrl = True
+        if self.inputs.save_as_vrml or self.inputs.output_type == 'vrml':
+            self.inputs.output_type = 'vrml'
+            self.inputs.save_as_vrml = True
         return name + '_fixed.' + self.inputs.output_type

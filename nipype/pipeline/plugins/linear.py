@@ -46,11 +46,11 @@ class LinearPlugin(PluginBase):
                     self._status_callback(node, 'end')
             except:
                 os.chdir(old_wd)
-                if str2bool(config['execution']['stop_on_first_crash']):
-                    raise
                 # bare except, but i really don't know where a
                 # node might fail
                 crashfile = report_crash(node)
+                if str2bool(config['execution']['stop_on_first_crash']):
+                    raise
                 # remove dependencies from queue
                 subnodes = [s for s in dfs_preorder(graph, node)]
                 notrun.append(

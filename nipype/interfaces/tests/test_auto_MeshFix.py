@@ -27,7 +27,7 @@ def test_MeshFix_inputs():
             requires=['finetuning_distance', 'finetuning_substeps'],
         ),
         finetuning_outwards=dict(
-            argstr='--fineTuneIn ',
+            argstr='--fineTuneOut ',
             requires=['finetuning_distance', 'finetuning_substeps'],
             xor=['finetuning_inwards'],
         ),
@@ -67,9 +67,9 @@ def test_MeshFix_inputs():
         ),
         save_as_stl=dict(
             argstr='--stl',
-            xor=['save_as_vmrl', 'save_as_freesurfer_mesh'],
+            xor=['save_as_vrml', 'save_as_freesurfer_mesh'],
         ),
-        save_as_vmrl=dict(
+        save_as_vrml=dict(
             argstr='--wrl',
             xor=['save_as_stl', 'save_as_freesurfer_mesh'],
         ),
@@ -89,6 +89,8 @@ def test_MeshFix_inputs():
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
+
+
 def test_MeshFix_outputs():
     output_map = dict(mesh_file=dict(), )
     outputs = MeshFix.output_spec()
