@@ -22,7 +22,7 @@ from datetime import datetime as dt
 import os
 import re
 import platform
-import subprocess as sp
+from tempfile import TemporaryDirectory
 import shlex
 import sys
 from textwrap import wrap
@@ -845,26 +845,6 @@ class CommandLine(BaseInterface):
     def _get_environ(self):
         return getattr(self.inputs, 'environ', {})
 
-    def version_from_command(self, flag='-v', cmd=None):
-        iflogger.warning('version_from_command member of CommandLine was '
-                         'Deprecated in nipype-1.0.0 and deleted in 1.1.0')
-        if cmd is None:
-            cmd = self.cmd.split()[0]
-
-        env = dict(os.environ)
-        if which(cmd, env=env):
-            out_environ = self._get_environ()
-            env.update(out_environ)
-            proc = sp.Popen(
-                ' '.join((cmd, flag)),
-                shell=True,
-                env=env,
-                stdout=sp.PIPE,
-                stderr=sp.PIPE,
-            )
-            o, e = proc.communicate()
-            return o
-
     def _run_interface(self, runtime, correct_return_codes=(0, )):
         """Execute command via subprocess
 
@@ -881,10 +861,9 @@ class CommandLine(BaseInterface):
 
         out_environ = self._get_environ()
         # Initialize runtime Bunch
-        runtime.stdout = None
-        runtime.stderr = None
         runtime.cmdline = self.cmdline
         runtime.environ.update(out_environ)
+        runtime.shell = True
 
         # which $cmd
         executable_name = shlex.split(self._cmd_prefix + self.cmd)[0]
@@ -900,7 +879,7 @@ class CommandLine(BaseInterface):
         runtime.dependencies = (get_dependencies(executable_name,
                                                  runtime.environ)
                                 if self._ldd else '<skipped>')
-        runtime = run_command(runtime, output=self.terminal_output)
+        runtime = run_command(runtime, output=self.terminal_output).runtime
         if runtime.returncode is None or \
                 runtime.returncode not in correct_return_codes:
             self.raise_exception(runtime)
@@ -1203,15 +1182,16 @@ class PackageInfo(object):
     def version(klass):
         if klass._version is None:
             if klass.version_cmd is not None:
-                try:
-                    clout = CommandLine(
-                        command=klass.version_cmd,
-                        resource_monitor=False,
-                        terminal_output='allatonce').run()
-                except IOError:
-                    return None
+                with TemporaryDirectory() as tmp_folder:
+                    runtime = run_command(
+                        Bunch(cmdline=klass.version_cmd,
+                              cwd=tmp_folder)).runtime
 
-                raw_info = clout.runtime.stdout
+                    if runtime.returncode != 0:
+                        return None
+
+                    with open(runtime.stdout) as stdout:
+                        raw_info = stdout.read()
             elif klass.version_file is not None:
                 try:
                     with open(klass.version_file, 'rt') as fobj:

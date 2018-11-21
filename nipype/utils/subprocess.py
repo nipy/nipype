@@ -9,195 +9,220 @@ import os
 import sys
 import gc
 import errno
-import select
-import locale
-import datetime
-from subprocess import Popen, STDOUT, PIPE
-from .filemanip import canonicalize_env, read_stream
+import threading
+from time import time, sleep
+from subprocess import Popen
+from .filemanip import canonicalize_env
 
 from .. import logging
-
-from builtins import range, object
 
 iflogger = logging.getLogger('nipype.interface')
 
 
-class Stream(object):
-    """Function to capture stdout and stderr streams with timestamps
+def run_command(runtime, background=False, output=None, period=0.01,
+                callback_fn=None, callback_args=None, callback_kwargs=None):
+    r"""
+    Run a command in a subprocess, handling output and allowing for
+    background processes.
 
-    stackoverflow.com/questions/4984549/merge-and-sync-stdout-and-stderr/5188359
+    Parameters
+    ----------
+    runtime: :class:`~nipype.interfaces.support.Bunch`
+        runtime object encapsulating the command line, current working
+        directory, environment, etc.
+    background: bool
+        whether the command line should be waited for, or run in background
+        otherwise.
+    output: str or None
+        accepts the keyword ``stream`` when the command's outputs should
+        be also printed out to the terminal.
+    period: float
+        process polling period (in seconds).
+    callback_fn: callable
+        a function to be called when the process has terminated.
+    callback_args: tuple or None
+        positional arguments to be passed over to ``callback_fn()``.
+    callback_kwargs: dict or None
+        keyword arguments to be passed over to ``callback_fn()``.
+
+    Returns
+    -------
+
+    rtmon: :class:`.RuntimeMonitor`
+        the runtime monitor thread
+
+
+    >>> from time import sleep
+    >>> from nipype.interfaces.base.support import Bunch
+    >>> from nipype.utils.subprocess import run_command
+    >>> rt = run_command(Bunch(cmdline='echo hello!')).runtime
+    >>> rt.returncode
+    0
+    >>> with open(rt.stdout) as stdout:
+    ...     data = stdout.read()
+    >>> data
+    'hello!\n'
+    >>> rt = run_command(Bunch(cmdline='sleep 2'), background=True).runtime
+    >>> rt.returncode is None
+    True
+    >>> sleep(5)
+    >>> rt.returncode
+    0
+
     """
 
-    def __init__(self, name, impl):
-        self._name = name
-        self._impl = impl
-        self._buf = ''
-        self._rows = []
-        self._lastidx = 0
-        self.default_encoding = locale.getdefaultlocale()[1] or 'UTF-8'
+    rtmon = RuntimeMonitor(runtime, output,
+                           period=period,
+                           callback_fn=callback_fn,
+                           callback_args=callback_args,
+                           callback_kwargs=callback_kwargs)
+    rtmon.start()
 
-    def fileno(self):
-        "Pass-through for file descriptor."
-        return self._impl.fileno()
+    if not background:
+        rtmon.join()
 
-    def read(self, drain=0):
-        "Read from the file descriptor. If 'drain' set, read until EOF."
-        while self._read(drain) is not None:
-            if not drain:
-                break
-
-    def _read(self, drain):
-        "Read from the file descriptor"
-        fd = self.fileno()
-        buf = os.read(fd, 4096).decode(self.default_encoding)
-        if not buf and not self._buf:
-            return None
-        if '\n' not in buf:
-            if not drain:
-                self._buf += buf
-                return []
-
-        # prepend any data previously read, then split into lines and format
-        buf = self._buf + buf
-        if '\n' in buf:
-            tmp, rest = buf.rsplit('\n', 1)
-        else:
-            tmp = buf
-            rest = None
-        self._buf = rest
-        now = datetime.datetime.now().isoformat()
-        rows = tmp.split('\n')
-        self._rows += [(now, '%s %s:%s' % (self._name, now, r), r)
-                       for r in rows]
-        for idx in range(self._lastidx, len(self._rows)):
-            iflogger.info(self._rows[idx][1])
-        self._lastidx = len(self._rows)
+    return rtmon
 
 
-def run_command(runtime, output=None, timeout=0.01):
-    """Run a command, read stdout and stderr, prefix with timestamp.
-
-    The returned runtime contains a merged stdout+stderr log with timestamps
+class RuntimeMonitor(threading.Thread):
     """
+    A ``Thread`` to monitor a subprocess with a certain polling
+    period
+    """
+    __slots__ = ['_proc', '_output', '_stdoutfh', '_stderrfh', '_runtime',
+                 '_callback_fn', '_calback_args', '_callback_kwargs']
 
-    # Init variables
-    cmdline = runtime.cmdline
-    env = canonicalize_env(runtime.environ)
+    def __init__(self, runtime, output=None, period=0.1,
+                 callback_fn=None, callback_args=None, callback_kwargs=None):
+        """
+        Initialize a self-monitored process.
 
-    errfile = None
-    outfile = None
-    stdout = PIPE
-    stderr = PIPE
 
-    if output == 'file':
-        outfile = os.path.join(runtime.cwd, 'output.nipype')
-        stdout = open(outfile, 'wb')  # t=='text'===default
-        stderr = STDOUT
-    elif output == 'file_split':
-        outfile = os.path.join(runtime.cwd, 'stdout.nipype')
-        stdout = open(outfile, 'wb')
-        errfile = os.path.join(runtime.cwd, 'stderr.nipype')
-        stderr = open(errfile, 'wb')
-    elif output == 'file_stdout':
-        outfile = os.path.join(runtime.cwd, 'stdout.nipype')
-        stdout = open(outfile, 'wb')
-    elif output == 'file_stderr':
-        errfile = os.path.join(runtime.cwd, 'stderr.nipype')
-        stderr = open(errfile, 'wb')
+        Parameters
+        ----------
+        runtime: :class:`~nipype.interfaces.support.Bunch`
+            runtime object encapsulating the command line, current working
+            directory, environment, etc.
+        output: str or None
+            accepts the keyword ``stream`` when the command's outputs should
+            be also printed out to the terminal.
+        period: float
+            process polling period (in seconds).
+        callback_fn: callable
+            a function to be called when the process has terminated.
+        callback_args: tuple or None
+            positional arguments to be passed over to ``callback_fn()``.
+        callback_kwargs: dict or None
+            keyword arguments to be passed over to ``callback_fn()``.
 
-    proc = Popen(
-        cmdline,
-        stdout=stdout,
-        stderr=stderr,
-        shell=True,
-        cwd=runtime.cwd,
-        env=env,
-        close_fds=(not sys.platform.startswith('win')),
-    )
 
-    result = {
-        'stdout': [],
-        'stderr': [],
-        'merged': [],
-    }
+        """
+        self._proc = None
+        self._output = output
+        self._period = period
+        self._stdoutfh = None
+        self._stderrfh = None
+        self._runtime = runtime
+        self._runtime.returncode = None
+        self._callback_fn = callback_fn
+        self._callback_args = callback_args or tuple()
+        self._callback_kwargs = callback_kwargs or {}
 
-    if output == 'stream':
-        streams = [
-            Stream('stdout', proc.stdout),
-            Stream('stderr', proc.stderr)
-        ]
+        cwd = getattr(self._runtime, 'cwd', os.getcwd())
+        self._runtime.cwd = cwd
+        self._runtime.stdout = getattr(
+            self._runtime, 'stdout', os.path.join(cwd, '.nipype.out'))
+        self._runtime.stderr = getattr(
+            self._runtime, 'stderr', os.path.join(cwd, '.nipype.err'))
 
-        def _process(drain=0):
-            try:
-                res = select.select(streams, [], [], timeout)
-            except select.error as e:
-                iflogger.info(e)
-                if e[0] == errno.EINTR:
-                    return
-                else:
-                    raise
-            else:
-                for stream in res[0]:
-                    stream.read(drain)
+        # Open file descriptors and get number
+        self._stdoutfh = open(self._runtime.stdout, 'wb')
+        self._stderrfh = open(self._runtime.stderr, 'wb')
 
-        while proc.returncode is None:
-            proc.poll()
-            _process()
+        # Start thread
+        threading.Thread.__init__(self)
 
-        _process(drain=1)
+    @property
+    def runtime(self):
+        return self._runtime
 
-        # collect results, merge and return
-        result = {}
-        temp = []
-        for stream in streams:
-            rows = stream._rows
-            temp += rows
-            result[stream._name] = [r[2] for r in rows]
-        temp.sort()
-        result['merged'] = [r[1] for r in temp]
+    def _update_output(self, tracker=None):
+        """When the ``stream`` output is selected, just keeps
+        track of the logs backing up the process' outputs and
+        sends them to the standard i/o streams"""
+        if self._output == 'stream':
+            self._stdoutfh.flush()
+            self._stderrfh.flush()
+            if tracker is None:
+                tracker = (0, 0)
 
-    if output.startswith('file'):
-        proc.wait()
-        if outfile is not None:
-            stdout.flush()
-            stdout.close()
-            with open(outfile, 'rb') as ofh:
-                stdoutstr = ofh.read()
-            result['stdout'] = read_stream(stdoutstr, logger=iflogger)
-            del stdoutstr
+            out_size = os.stat(self._runtime.stdout).st_size
+            err_size = os.stat(self._runtime.stderr).st_size
 
-        if errfile is not None:
-            stderr.flush()
-            stderr.close()
-            with open(errfile, 'rb') as efh:
-                stderrstr = efh.read()
-            result['stderr'] = read_stream(stderrstr, logger=iflogger)
-            del stderrstr
+            if out_size > tracker[0]:
+                data = None
+                with open(self._runtime.stdout) as out:
+                    out.seek(tracker[0] + int(tracker[0] > 0))
+                    data = out.read()
+                tracker = (out_size, tracker[1])
+                if data:
+                    print(data)
 
-        if output == 'file':
-            result['merged'] = result['stdout']
-            result['stdout'] = []
-    else:
-        stdout, stderr = proc.communicate()
-        if output == 'allatonce':  # Discard stdout and stderr otherwise
-            result['stdout'] = read_stream(stdout, logger=iflogger)
-            result['stderr'] = read_stream(stderr, logger=iflogger)
+            if err_size > tracker[1]:
+                data = None
+                with open(self._runtime.stderr) as err:
+                    err.seek(tracker[1] + int(tracker[1] > 0))
+                    data = err.read()
+                tracker = (tracker[0], err_size)
+                if data:
+                    print(err.read(), file=sys.stderr)
+        return tracker
 
-    runtime.returncode = proc.returncode
-    try:
-        proc.terminate()  # Ensure we are done
-    except OSError as error:
-        # Python 2 raises when the process is already gone
-        if error.errno != errno.ESRCH:
-            raise
+    def run(self):
+        """Monitor the process and fill in the runtime object"""
 
-    # Dereference & force GC for a cleanup
-    del proc
-    del stdout
-    del stderr
-    gc.collect()
+        # Init variables
+        cmdline = self._runtime.cmdline
+        env = canonicalize_env(
+            getattr(self._runtime, 'environ', os.environ))
 
-    runtime.stderr = '\n'.join(result['stderr'])
-    runtime.stdout = '\n'.join(result['stdout'])
-    runtime.merged = '\n'.join(result['merged'])
-    return runtime
+        tracker = None
+        start_time = time()
+        self._proc = Popen(
+            cmdline,
+            stdout=self._stdoutfh.fileno(),
+            stderr=self._stderrfh.fileno(),
+            shell=getattr(self._runtime, 'shell', True),
+            cwd=self._runtime.cwd,
+            env=env,
+            close_fds=False,
+        )
+        wait_til = start_time
+        while self._proc.returncode is None:
+            self._proc.poll()
+            tracker = self._update_output(tracker)
+            wait_til += self._period
+            sleep(max(0, wait_til - time()))
+        self._runtime.returncode = self._proc.returncode
+
+        try:
+            self._proc.terminate()  # Ensure we are done
+        except OSError as error:
+            # Python 2 raises when the process is already gone
+            if error.errno != errno.ESRCH:
+                raise
+
+        # Close open file descriptors
+        self._stdoutfh.flush()
+        self._stdoutfh.close()
+        self._stderrfh.flush()
+        self._stderrfh.close()
+
+        # Run callback
+        if self._callback_fn and hasattr(self._callback_fn, '__call__'):
+            self._callback_fn(*self._callback_args,
+                              **self._callback_kwargs)
+
+        # Dereference & force GC for a cleanup
+        del self._proc
+        gc.collect()
