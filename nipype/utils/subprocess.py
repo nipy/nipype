@@ -192,7 +192,7 @@ class RuntimeMonitor(threading.Thread):
             cmdline,
             stdout=self._stdoutfh.fileno(),
             stderr=self._stderrfh.fileno(),
-            shell=getattr(self._runtime, 'shell', True),
+            shell=getattr(self._runtime, 'shell', False),
             cwd=self._runtime.cwd,
             env=env,
             close_fds=False,

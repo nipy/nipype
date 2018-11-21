@@ -1185,7 +1185,7 @@ class PackageInfo(object):
                 with TemporaryDirectory() as tmp_folder:
                     runtime = run_command(
                         Bunch(cmdline=klass.version_cmd,
-                              cwd=tmp_folder)).runtime
+                              cwd=tmp_folder, shell=True)).runtime
 
                     if runtime.returncode != 0:
                         return None
