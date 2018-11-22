@@ -55,14 +55,16 @@ def run_command(runtime, background=False, output=None, period=0.01,
     >>> from time import sleep
     >>> from nipype.interfaces.base.support import Bunch
     >>> from nipype.utils.subprocess import run_command
-    >>> rt = run_command(Bunch(cmdline='echo hello!')).runtime
+    >>> rt = run_command(Bunch(cmdline='echo hello!',
+    ...                  shell=True)).runtime
     >>> rt.returncode
     0
     >>> with open(rt.stdout) as stdout:
     ...     data = stdout.read()
     >>> data
     'hello!\n'
-    >>> rt = run_command(Bunch(cmdline='sleep 2'), background=True).runtime
+    >>> rt = run_command(Bunch(cmdline='sleep 2', shell=True),
+    ...                  background=True).runtime
     >>> rt.returncode is None
     True
     >>> sleep(5)
