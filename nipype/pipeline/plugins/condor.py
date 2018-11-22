@@ -49,14 +49,16 @@ class CondorPlugin(SGELikeBatchManagerBase):
 
     def _is_pending(self, taskid):
         cmd = CommandLine(
-            'condor_q', resource_monitor=False, terminal_output='allatonce')
+            'condor_q', resource_monitor=False, terminal_output='default')
         cmd.inputs.args = '%d' % taskid
         # check condor cluster
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName('CRITICAL'))
         result = cmd.run(ignore_exception=True)
         iflogger.setLevel(oldlevel)
-        if result.runtime.stdout.count('\n%d' % taskid):
+        with open(result.runtime.stdout, 'rt') as f:
+            stdout = f.read()
+        if stdout.count('\n%d' % taskid):
             return True
         return False
 
@@ -65,7 +67,7 @@ class CondorPlugin(SGELikeBatchManagerBase):
             'condor_qsub',
             environ=dict(os.environ),
             resource_monitor=False,
-            terminal_output='allatonce')
+            terminal_output='default')
         path = os.path.dirname(scriptfile)
         qsubargs = ''
         if self._qsub_args:
@@ -111,7 +113,9 @@ class CondorPlugin(SGELikeBatchManagerBase):
                 break
         iflogger.setLevel(oldlevel)
         # retrieve condor clusterid
-        taskid = int(result.runtime.stdout.split(' ')[2])
+        with open(result.runtime.stdout, 'rt') as f:
+            stdout = f.read()
+        taskid = int(stdout.split(' ')[2])
         self._pending[taskid] = node.output_dir()
         logger.debug('submitted condor cluster: %d for node %s' % (taskid,
                                                                    node._id))

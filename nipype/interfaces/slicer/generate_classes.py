@@ -433,13 +433,6 @@ def grab_xml(module, launcher, mipav_hacks=False):
         raise e
     return dom
 
-
-#        if ret.runtime.returncode == 0:
-#            return xml.dom.minidom.parseString(ret.runtime.stdout)
-#        else:
-#            raise Exception(cmd.cmdline + " failed:\n%s"%ret.runtime.stderr)
-
-
 def parse_params(params):
     list = []
     for key, value in params.items():

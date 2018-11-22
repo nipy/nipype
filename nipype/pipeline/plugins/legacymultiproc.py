@@ -81,7 +81,7 @@ class NonDaemonMixin(object):
     @property
     def daemon(self):
         return False
-    
+
     @daemon.setter
     def daemon(self, val):
         pass
@@ -227,7 +227,7 @@ class LegacyMultiProcPlugin(DistributedPluginBase):
 
         # Don't allow streaming outputs
         if getattr(node.interface, 'terminal_output', '') == 'stream':
-            node.interface.terminal_output = 'allatonce'
+            node.interface.terminal_output = 'default'
 
         self._task_obj[self._taskid] = self.pool.apply_async(
             run_node, (node, updatehash, self._taskid),

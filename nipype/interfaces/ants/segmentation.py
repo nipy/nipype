@@ -818,8 +818,11 @@ class BrainExtraction(ANTSCommand):
         runtime = super(BrainExtraction, self)._run_interface(runtime)
 
         # Still, double-check if it didn't found N4
-        if 'we cant find' in runtime.stdout:
-            for line in runtime.stdout.split('\n'):
+        with open(runtime.stdout) as stdoutfh:
+            stdout = stdoutfh.read()
+
+        if 'we cant find' in stdout:
+            for line in stdout.split('\n'):
                 if line.strip().startswith('we cant find'):
                     tool = line.strip().replace('we cant find the',
                                                 '').split(' ')[0]
@@ -828,10 +831,11 @@ class BrainExtraction(ANTSCommand):
             errmsg = (
                 'antsBrainExtraction.sh requires "%s" to be found in $ANTSPATH '
                 '($ANTSPATH="%s").') % (tool, ants_path)
-            if runtime.stderr is None:
-                runtime.stderr = errmsg
-            else:
-                runtime.stderr += '\n' + errmsg
+
+            # Append errmsg to stderr file
+            with open(runtime.stderr, 'w+') as stderrfh:
+                stderrfh.write(errmsg)
+
             runtime.returncode = 1
             self.raise_exception(runtime)
 

@@ -162,7 +162,7 @@ class MultiProcPlugin(DistributedPluginBase):
 
         # Don't allow streaming outputs
         if getattr(node.interface, 'terminal_output', '') == 'stream':
-            node.interface.terminal_output = 'allatonce'
+            node.interface.terminal_output = 'default'
 
         result_future = self.pool.submit(run_node, node, updatehash, self._taskid)
         result_future.add_done_callback(self._async_callback)

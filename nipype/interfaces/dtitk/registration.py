@@ -81,10 +81,15 @@ class Rigid(CommandLineDtitk):
             value = 1
         return super(Rigid, self)._format_arg(name, spec, value)'''
 
-    def _run_interface(self, runtime):
-        runtime = super(Rigid, self)._run_interface(runtime)
-        if '''.aff doesn't exist or can't be opened''' in runtime.stderr:
-            self.raise_exception(runtime)
+    def _run_interface(self, runtime, correct_return_codes=(0, )):
+        runtime = super(Rigid, self)._run_interface(
+            runtime, correct_return_codes=correct_return_codes)
+
+        with open(runtime.stderr) as stderrfh:
+            stderr = stderrfh.read()
+
+        if ".aff doesn't exist or can't be opened" in stderr:
+            runtime.returncode = 1
         return runtime
 
     def _list_outputs(self):

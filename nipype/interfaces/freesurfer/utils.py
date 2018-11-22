@@ -919,7 +919,7 @@ class SurfaceSnapshots(FSCommand):
             return "-annotation %s" % value
         return super(SurfaceSnapshots, self)._format_arg(name, spec, value)
 
-    def _run_interface(self, runtime):
+    def _run_interface(self, runtime, correct_return_codes=(0, )):
         if not isdefined(self.inputs.screenshot_stem):
             stem = "%s_%s_%s" % (self.inputs.subject_id, self.inputs.hemi,
                                  self.inputs.surface)
@@ -935,7 +935,8 @@ class SurfaceSnapshots(FSCommand):
                 "Graphics are not enabled -- cannot run tksurfer")
         runtime.environ["_SNAPSHOT_STEM"] = stem
         self._write_tcl_script()
-        runtime = super(SurfaceSnapshots, self)._run_interface(runtime)
+        runtime = super(SurfaceSnapshots, self)._run_interface(
+            runtime, correct_return_codes=correct_return_codes)
         # If a display window can't be opened, this will crash on
         # aggregate_outputs.  Let's try to parse stderr and raise a
         # better exception here if that happened.
@@ -943,9 +944,16 @@ class SurfaceSnapshots(FSCommand):
             "surfer: failed, no suitable display found",
             "Fatal Error in tksurfer.bin: could not open display"
         ]
+
+        with open(runtime.stderr) as stderrfh:
+            stderr = stderrfh.read()
+
         for err in errors:
-            if err in runtime.stderr:
+            if err in stderr:
+                if runtime.returncode == 0:
+                    runtime.returncode = 1
                 self.raise_exception(runtime)
+
         # Tksurfer always (or at least always when you run a tcl script)
         # exits with a nonzero returncode.  We have to force it to 0 here.
         runtime.returncode = 0
@@ -1622,12 +1630,15 @@ class SmoothTessellation(FSCommand):
             _, name, ext = split_filename(self.inputs.in_file)
             return os.path.abspath(name + '_smoothed' + ext)
 
-    def _run_interface(self, runtime):
-        # The returncode is meaningless in BET.  So check the output
-        # in stderr and if it's set, then update the returncode
-        # accordingly.
-        runtime = super(SmoothTessellation, self)._run_interface(runtime)
-        if "failed" in runtime.stderr:
+    def _run_interface(self, runtime, correct_return_codes=(0, )):
+        runtime = super(SmoothTessellation, self)._run_interface(
+            runtime, correct_return_codes=correct_return_codes)
+
+        with open(runtime.stderr) as stderrfh:
+            stderr = stderrfh.read()
+
+        if "failed" in stderr:
+            runtime.returncode = 1
             self.raise_exception(runtime)
         return runtime
 

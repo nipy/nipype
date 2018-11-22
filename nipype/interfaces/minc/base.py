@@ -57,11 +57,13 @@ class Info(object):
             clout = CommandLine(
                 command='mincinfo',
                 args='-version',
-                terminal_output='allatonce').run()
+                resource_monitor=False,
+                terminal_output='default').run()
         except IOError:
             return None
 
-        out = clout.runtime.stdout
+        with open(clout.runtime.stdout, 'rt') as f:
+            out = f.read()
 
         def read_program_version(s):
             if 'program' in s:

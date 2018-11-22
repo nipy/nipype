@@ -135,13 +135,18 @@ class BET(FSLCommand):
     input_spec = BETInputSpec
     output_spec = BETOutputSpec
 
-    def _run_interface(self, runtime):
+    def _run_interface(self, runtime, correct_return_codes=(0, )):
         # The returncode is meaningless in BET.  So check the output
         # in stderr and if it's set, then update the returncode
         # accordingly.
-        runtime = super(BET, self)._run_interface(runtime)
-        if runtime.stderr:
-            self.raise_exception(runtime)
+        runtime = super(BET, self)._run_interface(
+            runtime, correct_return_codes=correct_return_codes)
+
+        with open(runtime.stderr) as stderrfh:
+            stderr = stderrfh.read()
+
+        if stderr.strip():
+            runtime.returncode = 1
         return runtime
 
     def _gen_outfilename(self):

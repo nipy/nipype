@@ -156,7 +156,7 @@ class SLURMGraphPlugin(GraphPluginBase):
             'bash',
             environ=dict(os.environ),
             resource_monitor=False,
-            terminal_output='allatonce')
+            terminal_output='default')
         cmd.inputs.args = '%s' % submitjobsfile
         cmd.run()
         logger.info('submitted all jobs to queue')

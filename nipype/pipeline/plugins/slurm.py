@@ -67,8 +67,10 @@ class SLURMPlugin(SGELikeBatchManagerBase):
                 'squeue',
                 args=' '.join(['-j', '%s' % taskid]),
                 resource_monitor=False,
-                terminal_output='allatonce').run()
-            return res.runtime.stdout.find(str(taskid)) > -1
+                terminal_output='default').run()
+            with open(result.runtime.stdout, 'rt') as f:
+                stdout = f.read()
+            return stdout.find(str(taskid)) > -1
         except RuntimeError as e:
             if any(ss in str(e) for ss
                    in ['Socket timed out', 'not available at the moment']):
@@ -92,7 +94,7 @@ class SLURMPlugin(SGELikeBatchManagerBase):
             'sbatch',
             environ=dict(os.environ),
             resource_monitor=False,
-            terminal_output='allatonce')
+            terminal_output='default')
         path = os.path.dirname(scriptfile)
 
         sbatch_args = ''
@@ -140,7 +142,9 @@ class SLURMPlugin(SGELikeBatchManagerBase):
         logger.debug('Ran command ({0})'.format(cmd.cmdline))
         iflogger.setLevel(oldlevel)
         # retrieve taskid
-        lines = [line for line in result.runtime.stdout.split('\n') if line]
+        with open(result.runtime.stdout, 'rt') as f:
+            stdout = f.read()
+        lines = [line.strip() for line in stdout.splitlines() if line.strip()]
         taskid = int(re.match(self._jobid_re, lines[-1]).groups()[0])
         self._pending[taskid] = node.output_dir()
         logger.debug('submitted sbatch task: %d for node %s' % (taskid,

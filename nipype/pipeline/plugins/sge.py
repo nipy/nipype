@@ -393,7 +393,7 @@ class SGEPlugin(SGELikeBatchManagerBase):
             'qsub',
             environ=dict(os.environ),
             resource_monitor=False,
-            terminal_output='allatonce')
+            terminal_output='default')
         path = os.path.dirname(scriptfile)
         qsubargs = ''
         if self._qsub_args:
@@ -439,7 +439,9 @@ class SGEPlugin(SGELikeBatchManagerBase):
                 break
         iflogger.setLevel(oldlevel)
         # retrieve sge taskid
-        lines = [line for line in result.runtime.stdout.split('\n') if line]
+        with open(result.runtime.stdout, 'rt') as f:
+            stdout = f.read()
+        lines = [line.strip() for line in stdout.splitlines() if line.strip()]
         taskid = int(
             re.match("Your job ([0-9]*) .* has been submitted",
                      lines[-1]).groups()[0])

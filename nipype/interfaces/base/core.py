@@ -51,8 +51,8 @@ iflogger = logging.getLogger('nipype.interface')
 PY35 = sys.version_info >= (3, 5)
 PY3 = sys.version_info[0] > 2
 VALID_TERMINAL_OUTPUT = [
-    'stream', 'allatonce', 'file', 'file_split', 'file_stdout', 'file_stderr',
-    'none'
+    'stream', 'default',
+    'allatonce', 'file', 'file_split', 'file_stdout', 'file_stderr', 'none'
 ]
 __docformat__ = 'restructuredtext'
 
@@ -837,10 +837,23 @@ class CommandLine(BaseInterface):
         self._terminal_output = value
 
     def raise_exception(self, runtime):
+        with open(runtime.stdout) as stdoutfh:
+            stdout = stdoutfh.read()
+
+        if not stdout:
+            stdout = '<no standard output collected>'
+
+        with open(runtime.stderr) as stderrfh:
+            stderr = stderrfh.read()
+
+        if not stderr:
+            stderr = '<no standard error collected>'
+
         raise RuntimeError(
             ('Command:\n{cmdline}\nStandard output:\n{stdout}\n'
              'Standard error:\n{stderr}\nReturn code: {returncode}'
-             ).format(**runtime.dictcopy()))
+             ).format(cmdline=runtime.cmdline, stdout=stdout,
+                      stderr=stderr, returncode=runtime.returncode))
 
     def _get_environ(self):
         return getattr(self.inputs, 'environ', {})
