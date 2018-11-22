@@ -566,8 +566,6 @@ connected.
             plugin = config.get('execution', 'plugin')
         if not isinstance(plugin, (str, bytes)):
             runner = plugin
-            plugin = runner.__class__.__name__[:-len('Plugin')]
-            plugin_args = runner.plugin_args
         else:
             name = '.'.join(__name__.split('.')[:-2] + ['plugins'])
             try:
