@@ -307,13 +307,13 @@ def save_resultfile(result, cwd, name):
             tosave = _uncollapse(outputs.copy(), collapsed)
         except AttributeError:
             tosave = outputs = result.outputs.dictcopy()  # outputs was a bunch
-        result.outputs.set(**modify_paths(tosave, relative=True, basedir=cwd))
+        result.outputs.trait_set(**modify_paths(tosave, relative=True, basedir=cwd))
 
     savepkl(resultsfile, result)
     logger.debug('saved results in %s', resultsfile)
 
     if result.outputs:
-        result.outputs.set(**outputs)
+        result.outputs.trait_set(**outputs)
 
 
 def load_resultfile(path, name):
@@ -363,7 +363,7 @@ def load_resultfile(path, name):
                 except AttributeError:
                     outputs = result.outputs.dictcopy()  # outputs == Bunch
                 try:
-                    result.outputs.set(
+                    result.outputs.trait_set(
                         **modify_paths(outputs, relative=False, basedir=path))
                 except FileNotFoundError:
                     logger.debug('conversion to full path results in '
