@@ -211,10 +211,12 @@ class Autobox(AFNICommand):
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = super(Autobox, self).aggregate_outputs(
             runtime, needed_outputs)
-        pattern = 'x=(?P<x_min>-?\d+)\.\.(?P<x_max>-?\d+)  '\
-                  'y=(?P<y_min>-?\d+)\.\.(?P<y_max>-?\d+)  '\
-                  'z=(?P<z_min>-?\d+)\.\.(?P<z_max>-?\d+)'
-        for line in runtime.stderr.split('\n'):
+        pattern = r'x=(?P<x_min>-?\d+)\.\.(?P<x_max>-?\d+)  '\
+                  r'y=(?P<y_min>-?\d+)\.\.(?P<y_max>-?\d+)  '\
+                  r'z=(?P<z_min>-?\d+)\.\.(?P<z_max>-?\d+)'
+        with open(runtime.stderr) as f:
+            stderr = f.read()
+        for line in stderr.splitlines():
             m = re.search(pattern, line)
             if m:
                 d = m.groupdict()

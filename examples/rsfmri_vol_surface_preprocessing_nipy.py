@@ -51,7 +51,7 @@ from builtins import open, range, str
 import os
 
 from nipype.interfaces.base import CommandLine
-CommandLine.set_default_terminal_output('allatonce')
+CommandLine.set_default_terminal_output('default')
 
 # https://github.com/moloney/dcmstack
 from dcmstack.extract import default_extractor

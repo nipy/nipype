@@ -370,18 +370,19 @@ class SPMCommand(BaseInterface):
         if not isdefined(self.inputs.use_mcr) and self._use_mcr:
             self.inputs.use_mcr = self._use_mcr
 
-    def _run_interface(self, runtime):
+    def _run_interface(self, runtime, correct_return_codes=(0,)):
         """Executes the SPM function using MATLAB."""
         self.mlab.inputs.script = self._make_matlab_command(
             deepcopy(self._parse_inputs()))
         results = self.mlab.run()
         runtime.returncode = results.runtime.returncode
         if self.mlab.inputs.uses_mcr:
-            if 'Skipped' in results.runtime.stdout:
-                self.raise_exception(runtime)
-        runtime.stdout = results.runtime.stdout
-        runtime.stderr = results.runtime.stderr
-        runtime.merged = results.runtime.merged
+            with open(runtime.stdout) as stdoutfh:
+                stdout = stdoutfh.read()
+
+            if 'Skipped' in stdout:
+                runtime.returncode = 1
+
         return runtime
 
     def _list_outputs(self):

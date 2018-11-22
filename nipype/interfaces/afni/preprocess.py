@@ -1013,7 +1013,9 @@ class ClipLevel(AFNICommandBase):
                 return self.run().outputs
         else:
             clip_val = []
-            for line in runtime.stdout.split('\n'):
+            with open(runtime.stdout) as f:
+                stdout = f.read()
+            for line in stdout.splitlines():
                 if line:
                     values = line.split()
                     if len(values) > 1:
@@ -1688,27 +1690,18 @@ class OutlierCount(CommandLine):
     _cmd = '3dToutcount'
     input_spec = OutlierCountInputSpec
     output_spec = OutlierCountOutputSpec
-    _terminal_output = 'file_split'
 
     def _parse_inputs(self, skip=None):
         if skip is None:
             skip = []
-
-        # This is not strictly an input, but needs be
-        # set before run() is called.
-        if self.terminal_output == 'none':
-            self.terminal_output = 'file_split'
 
         if not self.inputs.save_outliers:
             skip += ['outliers_file']
         return super(OutlierCount, self)._parse_inputs(skip)
 
     def _run_interface(self, runtime):
+        runtime.stdout = op.abspath(self.inputs.out_file)
         runtime = super(OutlierCount, self)._run_interface(runtime)
-
-        # Read from runtime.stdout or runtime.merged
-        with open(op.abspath(self.inputs.out_file), 'w') as outfh:
-            outfh.write(runtime.stdout or runtime.merged)
         return runtime
 
     def _list_outputs(self):
@@ -1922,7 +1915,6 @@ class ROIStats(AFNICommandBase):
 
     """
     _cmd = '3dROIstats'
-    _terminal_output = 'allatonce'
     input_spec = ROIStatsInputSpec
     output_spec = ROIStatsOutputSpec
 
@@ -3055,7 +3047,9 @@ class Warp(AFNICommand):
         if self.inputs.save_warp:
             import numpy as np
             warp_file = self._list_outputs()['warp_file']
-            np.savetxt(warp_file, [runtime.stdout], fmt=str('%s'))
+            with open(runtime.stdout) as f:
+                stdout = f.read().strip()
+            np.savetxt(warp_file, [stdout], fmt=str('%s'))
         return runtime
 
     def _list_outputs(self):

@@ -2,10 +2,11 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from __future__ import print_function, unicode_literals
-from future import standard_library
-from builtins import open
 import os
+from builtins import open
 import simplejson as json
+from future import standard_library
+from IPython.utils.io import capture_output
 
 import pytest
 
@@ -406,59 +407,20 @@ def test_CommandLine_output(tmpdir):
     file.write('123456\n')
     name = os.path.basename(file.strpath)
 
+    # Default: output written to stdout file.
     ci = nib.CommandLine(command='ls -l')
-    ci.terminal_output = 'allatonce'
+    ci.terminal_output = 'default'
     res = ci.run()
-    assert res.runtime.merged == ''
-    assert name in res.runtime.stdout
+    with open(res.runtime.stdout) as f:
+        stdout = f.read().strip()
+    assert name in stdout
 
-    # Check stdout is written
-    ci = nib.CommandLine(command='ls -l')
-    ci.terminal_output = 'file_stdout'
-    res = ci.run()
-    assert os.path.isfile('stdout.nipype')
-    assert name in res.runtime.stdout
-    tmpdir.join('stdout.nipype').remove(ignore_errors=True)
+    # Test streamed output
+    with capture_output() as captured:
+        ci.terminal_output = 'stream'
+        res = ci.run()
 
-    # Check stderr is written
-    ci = nib.CommandLine(command='ls -l')
-    ci.terminal_output = 'file_stderr'
-    res = ci.run()
-    assert os.path.isfile('stderr.nipype')
-    tmpdir.join('stderr.nipype').remove(ignore_errors=True)
-
-    # Check outputs are thrown away
-    ci = nib.CommandLine(command='ls -l')
-    ci.terminal_output = 'none'
-    res = ci.run()
-    assert res.runtime.stdout == '' and \
-        res.runtime.stderr == '' and \
-        res.runtime.merged == ''
-
-    # Check that new interfaces are set to default 'stream'
-    ci = nib.CommandLine(command='ls -l')
-    res = ci.run()
-    assert ci.terminal_output == 'stream'
-    assert name in res.runtime.stdout and \
-        res.runtime.stderr == ''
-
-    # Check only one file is generated
-    ci = nib.CommandLine(command='ls -l')
-    ci.terminal_output = 'file'
-    res = ci.run()
-    assert os.path.isfile('output.nipype')
-    assert name in res.runtime.merged and \
-        res.runtime.stdout == '' and \
-        res.runtime.stderr == ''
-    tmpdir.join('output.nipype').remove(ignore_errors=True)
-
-    # Check split files are generated
-    ci = nib.CommandLine(command='ls -l')
-    ci.terminal_output = 'file_split'
-    res = ci.run()
-    assert os.path.isfile('stdout.nipype')
-    assert os.path.isfile('stderr.nipype')
-    assert name in res.runtime.stdout
+    assert name in captured.stdout
 
 
 def test_global_CommandLine_output(tmpdir):
@@ -471,9 +433,9 @@ def test_global_CommandLine_output(tmpdir):
     ci = BET()
     assert ci.terminal_output == 'stream'  # default case
 
-    nib.CommandLine.set_default_terminal_output('allatonce')
+    nib.CommandLine.set_default_terminal_output('none')
     ci = nib.CommandLine(command='ls -l')
-    assert ci.terminal_output == 'allatonce'
+    assert ci.terminal_output == 'none'
 
     nib.CommandLine.set_default_terminal_output('file')
     ci = nib.CommandLine(command='ls -l')

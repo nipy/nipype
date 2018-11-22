@@ -49,7 +49,7 @@ from builtins import open, range, str
 import os
 
 from nipype.interfaces.base import CommandLine
-CommandLine.set_default_terminal_output('allatonce')
+CommandLine.set_default_terminal_output('default')
 
 from dicom import read_file
 

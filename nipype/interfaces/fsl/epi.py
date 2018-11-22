@@ -1111,10 +1111,15 @@ class EPIDeWarp(FSLCommand):
                       DeprecationWarning)
         return super(EPIDeWarp, self).__init__(**inputs)
 
-    def _run_interface(self, runtime):
-        runtime = super(EPIDeWarp, self)._run_interface(runtime)
-        if runtime.stderr:
-            self.raise_exception(runtime)
+    def _run_interface(self, runtime, correct_return_codes=(0, )):
+        runtime = super(EPIDeWarp, self)._run_interface(
+            runtime, correct_return_codes=correct_return_codes)
+
+        with open(runtime.stderr) as stderrfh:
+            stderr = stderrfh.read()
+
+        if stderr.strip():
+            runtime.returncode = 1
         return runtime
 
     def _gen_filename(self, name):
@@ -1209,8 +1214,13 @@ class EddyCorrect(FSLCommand):
                        "instead"), DeprecationWarning)
         return super(EddyCorrect, self).__init__(**inputs)
 
-    def _run_interface(self, runtime):
-        runtime = super(EddyCorrect, self)._run_interface(runtime)
-        if runtime.stderr:
-            self.raise_exception(runtime)
+    def _run_interface(self, runtime, correct_return_codes=(0, )):
+        runtime = super(EddyCorrect, self)._run_interface(
+            runtime, correct_return_codes=correct_return_codes)
+
+        with open(runtime.stderr) as stderrfh:
+            stderr = stderrfh.read()
+
+        if stderr.strip():
+            runtime.returncode = 1
         return runtime

@@ -279,11 +279,16 @@ class FSLXCommand(FSLCommand):
     input_spec = FSLXCommandInputSpec
     output_spec = FSLXCommandOutputSpec
 
-    def _run_interface(self, runtime):
-        self._out_dir = os.getcwd()
-        runtime = super(FSLXCommand, self)._run_interface(runtime)
-        if runtime.stderr:
-            self.raise_exception(runtime)
+    def _run_interface(self, runtime, correct_return_codes=(0, )):
+        self._out_dir = runtime.cwd
+        runtime = super(FSLXCommand, self)._run_interface(
+            runtime, correct_return_codes=correct_return_codes)
+
+        with open(runtime.stderr) as stderrfh:
+            stderr = stderrfh.read()
+
+        if stderr.strip():
+            runtime.returncode = 1
         return runtime
 
     def _list_outputs(self, out_dir=None):
@@ -755,7 +760,7 @@ class ProbTrackX(FSLCommand):
                        "instead"), DeprecationWarning)
         return super(ProbTrackX, self).__init__(**inputs)
 
-    def _run_interface(self, runtime):
+    def _run_interface(self, runtime, correct_return_codes=(0, )):
         for i in range(1, len(self.inputs.thsamples) + 1):
             _, _, ext = split_filename(self.inputs.thsamples[i - 1])
             copyfile(
@@ -787,9 +792,15 @@ class ProbTrackX(FSLCommand):
                     f.write("%s\n" % seed)
             f.close()
 
-        runtime = super(ProbTrackX, self)._run_interface(runtime)
-        if runtime.stderr:
-            self.raise_exception(runtime)
+        runtime = super(ProbTrackX, self)._run_interface(
+            runtime, correct_return_codes=correct_return_codes)
+
+        with open(runtime.stderr) as stderrfh:
+            stderr = stderrfh.read()
+
+        if stderr.strip():
+            runtime.returncode = 1
+
         return runtime
 
     def _format_arg(self, name, spec, value):

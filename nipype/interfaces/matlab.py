@@ -26,8 +26,9 @@ def get_matlab_command():
             command='which',
             args=matlab_cmd,
             resource_monitor=False,
-            terminal_output='allatonce').run()
-        matlab_path = res.runtime.stdout.strip()
+            terminal_output='default').run()
+        with open(res.runtime.stdout, 'rt') as f:
+            matlab_path = f.read().strip()
     except Exception:
         return None
     return matlab_cmd
@@ -120,9 +121,6 @@ class MatlabCommand(CommandLine):
                 not isdefined(self.inputs.uses_mcr):
             if config.getboolean('execution', 'single_thread_matlab'):
                 self.inputs.single_comp_thread = True
-        # For matlab commands force all output to be returned since matlab
-        # does not have a clean way of notifying an error
-        self.terminal_output = 'allatonce'
 
     @classmethod
     def set_default_matlab_cmd(cls, matlab_cmd):
@@ -157,17 +155,22 @@ class MatlabCommand(CommandLine):
         """
         cls._default_paths = paths
 
-    def _run_interface(self, runtime):
-        self.terminal_output = 'allatonce'
-        runtime = super(MatlabCommand, self)._run_interface(runtime)
+    def _run_interface(self, runtime, correct_return_codes=(0, )):
+        runtime = super(MatlabCommand, self)._run_interface(
+            runtime, correct_return_codes=correct_return_codes)
         try:
             # Matlab can leave the terminal in a barbbled state
             os.system('stty sane')
         except:
             # We might be on a system where stty doesn't exist
             pass
-        if 'MATLAB code threw an exception' in runtime.stderr:
-            self.raise_exception(runtime)
+
+        with open(runtime.stderr) as stderrfh:
+            stderr = stderrfh.read()
+
+        if 'MATLAB code threw an exception' in stderr:
+            runtime.returncode = 1
+
         return runtime
 
     def _format_arg(self, name, trait_spec, value):

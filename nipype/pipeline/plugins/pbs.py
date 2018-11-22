@@ -51,12 +51,13 @@ class PBSPlugin(SGELikeBatchManagerBase):
     def _is_pending(self, taskid):
         result = CommandLine('qstat -f {}'.format(taskid),
                              environ=dict(os.environ),
-                             terminal_output='file_split',
                              resource_monitor=False,
                              ignore_exception=True).run()
 
-        stdout = result.runtime.stdout
-        stderr = result.runtime.stderr
+        with open(result.runtime.stdout, 'rt') as f:
+            stdout = f.read()
+        with open(result.runtime.stderr, 'rt') as f:
+            stderr = f.read()
         errmsg = 'Unknown Job Id'
         success = 'Job has finished'
         if (success in stderr) or ('job_state = C' in stdout):
@@ -69,7 +70,7 @@ class PBSPlugin(SGELikeBatchManagerBase):
             'qsub',
             environ=dict(os.environ),
             resource_monitor=False,
-            terminal_output='allatonce')
+            terminal_output='default')
         path = os.path.dirname(scriptfile)
         qsubargs = ''
         if self._qsub_args:
@@ -115,7 +116,9 @@ class PBSPlugin(SGELikeBatchManagerBase):
                 break
         iflogger.setLevel(oldlevel)
         # retrieve pbs taskid
-        taskid = result.runtime.stdout.split('.')[0]
+        with open(result.runtime.stdout, 'rt') as f:
+            stdout = f.read()
+        taskid = stdout.split('.')[0]
         self._pending[taskid] = node.output_dir()
         logger.debug('submitted pbs task: {} for node {}'.format(
             taskid, node._id))

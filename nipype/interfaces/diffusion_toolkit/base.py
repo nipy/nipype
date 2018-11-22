@@ -49,12 +49,13 @@ class Info(object):
 
         """
         clout = CommandLine(
-            command='dti_recon', terminal_output='allatonce').run()
+            command='dti_recon', terminal_output='default').run()
 
         if clout.runtime.returncode is not 0:
             return None
 
-        dtirecon = clout.runtime.stdout
+        with open(clout.runtime.stdout, 'rt') as f:
+            dtirecon = f.read()
         result = re.search('dti_recon (.*)\n', dtirecon)
         version = result.group(0).split()[1]
         return version

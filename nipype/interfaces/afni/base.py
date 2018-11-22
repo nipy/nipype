@@ -87,13 +87,14 @@ class Info(PackageInfo):
         Could be made more fancy to allow for more relocatability'''
         clout = CommandLine(
             'which afni',
+            terminal_output='default',
             ignore_exception=True,
-            resource_monitor=False,
-            terminal_output='allatonce').run()
+            resource_monitor=False).run()
         if clout.runtime.returncode is not 0:
             return None
 
-        out = clout.runtime.stdout
+        with open(clout.runtime.stdout, 'rt') as f:
+            out = f.read().strip()
         basedir = os.path.split(out)[0]
         return os.path.join(basedir, img_name)
 
@@ -104,10 +105,11 @@ class AFNICommandBase(CommandLine):
     See http://afni.nimh.nih.gov/afni/community/board/read.php?1,145346,145347#msg-145347
     """
 
-    def _run_interface(self, runtime):
+    def _run_interface(self, runtime, correct_return_codes=(0, )):
         if platform == 'darwin':
             runtime.environ['DYLD_FALLBACK_LIBRARY_PATH'] = '/usr/local/afni/'
-        return super(AFNICommandBase, self)._run_interface(runtime)
+        return super(AFNICommandBase, self)._run_interface(
+            runtime, correct_return_codes=correct_return_codes)
 
 
 class AFNICommandInputSpec(CommandLineInputSpec):

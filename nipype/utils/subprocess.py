@@ -175,7 +175,7 @@ class RuntimeMonitor(threading.Thread):
                     data = err.read()
                 tracker = (tracker[0], err_size)
                 if data:
-                    print(err.read(), file=sys.stderr)
+                    print(data, file=sys.stderr)
         return tracker
 
     def run(self):

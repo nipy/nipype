@@ -136,12 +136,16 @@ ants_Affine.txt'
             (name, self.inputs.out_postfix, ext)))
         return outputs
 
-    def _run_interface(self, runtime, correct_return_codes=[0]):
-        runtime = super(WarpTimeSeriesImageMultiTransform,
-                        self)._run_interface(
-                            runtime, correct_return_codes=[0, 1])
-        if "100 % complete" not in runtime.stdout:
-            self.raise_exception(runtime)
+    def _run_interface(self, runtime, correct_return_codes=(0, 1)):
+        runtime = super(
+            WarpTimeSeriesImageMultiTransform, self)._run_interface(
+                runtime, correct_return_codes=correct_return_codes)
+
+        with open(runtime.stdout) as stdoutfh:
+            output_str = stdoutfh.read()
+
+            if "100 % complete" not in output_str:
+                self.raise_exception(runtime)
         return runtime
 
 

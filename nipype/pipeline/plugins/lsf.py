@@ -49,7 +49,7 @@ class LSFPlugin(SGELikeBatchManagerBase):
         ready to be checked for completeness. So return True if status is
         either 'PEND' or 'RUN'"""
         cmd = CommandLine(
-            'bjobs', resource_monitor=False, terminal_output='allatonce')
+            'bjobs', resource_monitor=False, terminal_output='default')
         cmd.inputs.args = '%d' % taskid
         # check lsf task
         oldlevel = iflogger.level
@@ -57,17 +57,16 @@ class LSFPlugin(SGELikeBatchManagerBase):
         result = cmd.run(ignore_exception=True)
         iflogger.setLevel(oldlevel)
         # logger.debug(result.runtime.stdout)
-        if 'DONE' in result.runtime.stdout or 'EXIT' in result.runtime.stdout:
-            return False
-        else:
-            return True
+        with open(result.runtime.stdout, 'rt') as f:
+            stdout = f.read()
+        return 'DONE' not in stdout and 'EXIT' not in stdout
 
     def _submit_batchtask(self, scriptfile, node):
         cmd = CommandLine(
             'bsub',
             environ=dict(os.environ),
             resource_monitor=False,
-            terminal_output='allatonce')
+            terminal_output='default')
         bsubargs = ''
         if self._bsub_args:
             bsubargs = self._bsub_args
@@ -113,12 +112,14 @@ class LSFPlugin(SGELikeBatchManagerBase):
                 break
         iflogger.setLevel(oldlevel)
         # retrieve lsf taskid
-        match = re.search('<(\d*)>', result.runtime.stdout)
+        with open(result.runtime.stdout, 'rt') as f:
+            stdout = f.read()
+        match = re.search(r'<(\d*)>', stdout)
         if match:
             taskid = int(match.groups()[0])
         else:
             raise ScriptError("Can't parse submission job output id: %s" %
-                              result.runtime.stdout)
+                              stdout)
         self._pending[taskid] = node.output_dir()
         logger.debug('submitted lsf task: %d for node %s' % (taskid, node._id))
         return taskid

@@ -70,7 +70,7 @@ class OARPlugin(SGELikeBatchManagerBase):
             'oarsub',
             environ=dict(os.environ),
             resource_monitor=False,
-            terminal_output='allatonce')
+            terminal_output='default')
         path = os.path.dirname(scriptfile)
         oarsubargs = ''
         if self._oarsub_args:
@@ -127,7 +127,9 @@ class OARPlugin(SGELikeBatchManagerBase):
 
         o = ''
         add = False
-        for line in result.runtime.stdout.splitlines():
+        with open(result.runtime.stdout, 'rt') as f:
+            stdout = f.read()
+        for line in stdout.splitlines():
             if line.strip().startswith('{'):
                 add = True
             if add:

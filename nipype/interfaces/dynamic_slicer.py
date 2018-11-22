@@ -28,13 +28,16 @@ class SlicerCommandLine(CommandLine):
     def _grab_xml(self, module):
         cmd = CommandLine(
             command="Slicer3",
+            terminal_output='default',
             resource_monitor=False,
             args="--launch %s --xml" % module)
         ret = cmd.run()
         if ret.runtime.returncode == 0:
-            return xml.dom.minidom.parseString(ret.runtime.stdout)
+            with open(ret.runtime.stdout) as f:
+                stdout = f.read()
+            return xml.dom.minidom.parseString(stdout)
         else:
-            raise Exception(cmd.cmdline + " failed:\n%s" % ret.runtime.stderr)
+            self.raise_exception(ret.runtime)
 
     def _outputs(self):
         base = super(SlicerCommandLine, self)._outputs()
@@ -221,5 +224,4 @@ class SlicerCommandLine(CommandLine):
 #    test.inputs.warpTransform = "/home/filo/workspace/nipype/nipype/interfaces/outputTransform.mat"
 #    print test.cmdline
 #    ret = test.run()
-#    print ret.runtime.stderr
 #    print ret.runtime.returncode

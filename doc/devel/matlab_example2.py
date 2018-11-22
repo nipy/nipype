@@ -44,7 +44,9 @@ class HelloWorld(MatlabCommand):
         # Inject your script
         self.inputs.script = self._my_script()
         results = super(MatlabCommand, self).run(**inputs)
-        stdout = results.runtime.stdout
+
+        with open(results.runtime.stdout, 'rt') as f:
+            stdout = f.read()
         # Attach stdout to outputs to access matlab results
         results.outputs.matlab_output = stdout
         return results

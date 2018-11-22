@@ -940,9 +940,11 @@ class Registration(ANTSCommand):
         runtime = super(Registration, self)._run_interface(runtime)
 
         # Parse some profiling info
-        output = runtime.stdout or runtime.merged
+        with open(runtime.stdout) as f:
+            output = f.read().strip()
+
         if output:
-            lines = output.split('\n')
+            lines = output.splitlines()
             for l in lines[::-1]:
                 # This should be the last line
                 if l.strip().startswith('Total elapsed time:'):
