@@ -1207,8 +1207,8 @@ class LibraryBaseInterface(BaseInterface):
                 except ImportError:
                     failed_imports.append(pkg)
             if failed_imports:
-                iflogger.warn('Unable to import %s; %s interface may fail to '
-                              'run', failed_imports, self.__class__.__name__)
+                iflogger.warning('Unable to import %s; %s interface may fail to '
+                                 'run', failed_imports, self.__class__.__name__)
 
     @property
     def version(self):

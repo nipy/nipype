@@ -471,7 +471,7 @@ def copyfile(originalfile,
             fmlogger.debug('Copying File: %s->%s', newfile, originalfile)
             shutil.copyfile(originalfile, newfile)
         except shutil.Error as e:
-            fmlogger.warn(e.message)
+            fmlogger.warning(e.message)
 
     # Associated files
     if copy_related_files:

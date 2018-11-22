@@ -316,8 +316,8 @@ class SampleToSurface(FSCommand):
                             "Cannot create {} file with extension "
                             "{}".format(value, ext))
                     else:
-                        logger.warn('Creating %s file with extension %s: %s%s',
-                                    value, ext, base, ext)
+                        logger.warning('Creating %s file with extension %s: %s%s',
+                                       value, ext, base, ext)
 
             if value in implicit_filetypes:
                 return ""
@@ -554,8 +554,8 @@ class SurfaceTransform(FSCommand):
                             "Cannot create {} file with extension "
                             "{}".format(value, ext))
                     else:
-                        logger.warn('Creating %s file with extension %s: %s%s',
-                                    value, ext, base, ext)
+                        logger.warning('Creating %s file with extension %s: %s%s',
+                                       value, ext, base, ext)
             if value in implicit_filetypes:
                 return ""
         return super(SurfaceTransform, self)._format_arg(name, spec, value)
