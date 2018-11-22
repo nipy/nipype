@@ -625,10 +625,12 @@ class BaseInterface(Interface):
 
     @property
     def version(self):
-        if self._version is None:
-            if str2bool(config.get('execution', 'stop_on_unknown_version')):
-                raise ValueError('Interface %s has no version information' %
-                                 self.__class__.__name__)
+        if self._version:
+            return self._version
+
+        if str2bool(config.get('execution', 'stop_on_unknown_version')):
+            raise ValueError('Interface %s has no version information' %
+                             self.__class__.__name__)
         return self._version
 
     def load_inputs_from_json(self, json_file, overwrite=True):
@@ -767,6 +769,7 @@ class CommandLine(BaseInterface):
     _cmd_prefix = ''
     _cmd = None
     _version = None
+    _version_cmd_flag = None
     _terminal_output = 'stream'
 
     @classmethod
@@ -857,6 +860,38 @@ class CommandLine(BaseInterface):
 
     def _get_environ(self):
         return getattr(self.inputs, 'environ', {})
+
+    @property
+    def version(self):
+        if self._version:
+            return self._version
+
+        if self._version_cmd_flag:
+            self._version = self._version_from_command(
+                flag=self._version_cmd_flag)
+
+        if self._version is None:
+            if str2bool(config.get('execution', 'stop_on_unknown_version')):
+                raise ValueError('Interface %s has no version information' %
+                                 self.__class__.__name__)
+        return self._version
+
+    def _version_from_command(self, flag='-v', cmd=None):
+        env = dict(os.environ)
+        env.update(self._get_environ())
+        with TemporaryDirectory() as tmp_folder:
+            cmdline = ' '.join([cmd or self.cmd.split()[0], flag])
+            rt = run_command(
+                Bunch(cmdline=cmdline, environ=env,
+                      cwd=tmp_folder, shell=True)).runtime
+
+            if rt.returncode != 0:
+                return None
+
+            with open(rt.stdout, 'rt') as f:
+                ver_str = f.read()
+
+        return ver_str
 
     def _run_interface(self, runtime, correct_return_codes=(0, )):
         """Execute command via subprocess

@@ -55,9 +55,11 @@ class StatsCommand(NiftySegCommand):
     input_spec = StatsInput
     output_spec = StatsOutput
 
-    def _parse_stdout(self, stdout):
+    def _parse_stdout(self, stdout_file):
         out = []
-        for string_line in stdout.split("\n"):
+        with open(stdout_file, 'rt') as f:
+            stdout = f.read()
+        for string_line in stdout.splitlines():
             if string_line.startswith('#'):
                 continue
             if len(string_line) <= 1:

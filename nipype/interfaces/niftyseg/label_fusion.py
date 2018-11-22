@@ -318,14 +318,16 @@ class CalcTopNCC(NiftySegCommand):
         outputs = self._outputs()
         # local caching for backward compatibility
         outfile = os.path.join(os.getcwd(), 'CalcTopNCC.json')
-        if runtime is None or not runtime.stdout:
+        if runtime is None:
             try:
                 out_files = load_json(outfile)['files']
             except IOError:
                 return self.run().outputs
         else:
             out_files = []
-            for line in runtime.stdout.split('\n'):
+            with open(runtime.stdout, 'rt') as f:
+                stdout = f.read()
+            for line in stdout.splitlines():
                 if line:
                     values = line.split()
                     if len(values) > 1:

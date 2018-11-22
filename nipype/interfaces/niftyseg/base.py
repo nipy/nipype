@@ -27,10 +27,17 @@ class NiftySegCommand(NiftyFitCommand):
     """
     _suffix = '_ns'
     _min_version = None
+    _version_cmd_flag = '--version'
 
     def __init__(self, **inputs):
         super(NiftySegCommand, self).__init__(**inputs)
 
-    def get_version(self):
-        return super(NiftySegCommand, self).version_from_command(
-            cmd='seg_EM', flag='--version')
+    @property
+    def version(self):
+        if self._version:
+            return self._version
+
+        if self._version_cmd_flag:
+            self._version = self._version_from_command(
+                cmd='seg_EM')
+        return self._version

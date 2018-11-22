@@ -788,7 +788,9 @@ class ImageStats(FSLCommand):
                 return self.run().outputs
         else:
             out_stat = []
-            for line in runtime.stdout.split('\n'):
+            with open(runtime.stdout, 'rt') as f:
+                stdout = f.read()
+            for line in stdout.splitlines():
                 if line:
                     values = line.split()
                     if len(values) > 1:
@@ -863,7 +865,9 @@ class AvScale(CommandLine):
             '(?P<fwd_half_xfm>[0-9\.\ \n-]+)[\s\n]*'
             'Backward\ half\ transform\ =[\s]*\n'
             '(?P<bwd_half_xfm>[0-9\.\ \n-]+)[\s\n]*')
-        out = expr.search(runtime.stdout).groupdict()
+        with open(runtime.stdout, 'rt') as f:
+            stdout = f.read()
+        out = expr.search(stdout).groupdict()
         outputs = {}
         outputs['rotation_translation_matrix'] = [[
             float(v) for v in r.strip().split(' ')
@@ -2488,8 +2492,10 @@ class WarpPoints(CommandLine):
             self._trk_to_coords(fname, out_file=tmpfile)
 
         runtime = super(WarpPoints, self)._run_interface(runtime)
+        with open(runtime.stdout, 'rt') as f:
+            stdout = f.read()
         newpoints = np.fromstring(
-            '\n'.join(runtime.stdout.split('\n')[1:]), sep=' ')
+            '\n'.join(stdout.splitlines()[1:]), sep=' ')
 
         if tmpfile is not None:
             try:
@@ -2624,9 +2630,9 @@ class WarpPointsFromStd(CommandLine):
     output_spec = WarpPointsOutputSpec
     _cmd = 'std2imgcoord'
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath('stdout.nipype')
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+        outputs = self._outputs()
+        outputs['out_file'] = runtime.stdout
         return outputs
 
 

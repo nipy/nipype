@@ -49,6 +49,7 @@ class NiftyRegCommand(CommandLine):
     """
     _suffix = '_nr'
     _min_version = '1.5.30'
+    _version_cmd_flag = '-v'
 
     input_spec = NiftyRegCommandInputSpec
 
@@ -56,7 +57,7 @@ class NiftyRegCommand(CommandLine):
         self.num_threads = 1
         super(NiftyRegCommand, self).__init__(**inputs)
         self.required_version = required_version
-        _version = self.version_from_command()
+        _version = self.version
         if _version:
             _version = _version.decode("utf-8")
             if self._min_version is not None and \
@@ -93,7 +94,7 @@ class NiftyRegCommand(CommandLine):
             self.inputs.omp_core_val = Undefined
 
     def check_version(self):
-        _version = self.version_from_command()
+        _version = self.version
         if not _version:
             raise Exception('Niftyreg not found')
         # Decoding to string:
@@ -107,12 +108,8 @@ class NiftyRegCommand(CommandLine):
                 err += '(%s != %s)'
                 raise ValueError(err % (_version, self.required_version))
 
-    @property
-    def version(self):
-        return self.version_from_command()
-
     def exists(self):
-        return self.version_from_command() is not None
+        return self.version is not None
 
     def _format_arg(self, name, spec, value):
         if name == 'omp_core_val':

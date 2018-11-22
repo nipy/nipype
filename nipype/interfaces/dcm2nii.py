@@ -147,7 +147,7 @@ class Dcm2nii(CommandLine):
             os.remove('config.ini')
         return new_runtime
 
-    def _parse_stdout(self, stdout):
+    def _parse_stdout(self, stdout_file):
         files = []
         reoriented_files = []
         reoriented_and_cropped_files = []
@@ -155,7 +155,9 @@ class Dcm2nii(CommandLine):
         bvals = []
         skip = False
         last_added_file = None
-        for line in stdout.split("\n"):
+        with open(stdout_file, 'rt') as f:
+            stdout = f.read()
+        for line in stdout.splitlines():
             if not skip:
                 out_file = None
                 if line.startswith("Saving "):
@@ -374,7 +376,7 @@ class Dcm2niix(CommandLine):
     converts any files in the directory containing the files in the list. We
     also do not support nested filenames with this option. **Thus all files
     must have a common root directory.**
-    
+
     >>> converter = Dcm2niix()
     >>> converter.inputs.source_names = ['functional_1.dcm', 'functional_2.dcm']
     >>> converter.inputs.compression = 5
@@ -418,14 +420,16 @@ class Dcm2niix(CommandLine):
                 runtime.stdout)
         return runtime
 
-    def _parse_stdout(self, stdout):
+    def _parse_stdout(self, stdout_file):
         files = []
         bvecs = []
         bvals = []
         bids = []
         skip = False
         find_b = False
-        for line in stdout.split("\n"):
+        with open(stdout_file, 'rt') as f:
+            stdout = f.read()
+        for line in stdout.splitlines():
             if not skip:
                 out_file = None
                 if line.startswith("Convert "):  # output

@@ -1491,8 +1491,10 @@ class MeasureImageSimilarity(ANTSCommand):
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = self._outputs()
-        stdout = runtime.stdout.split('\n')
-        outputs.similarity = float(stdout[0])
+        if runtime is not None and runtime.stdout:
+            with open(runtime.stdout, 'rf') as f:
+                stdout = f.read().splitlines()[0]
+            outputs.similarity = float(stdout[0])
         return outputs
 
 

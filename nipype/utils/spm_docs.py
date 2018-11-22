@@ -36,7 +36,9 @@ def grab_doc(task_name):
     cmd.inputs.script_lines = mcmd
     # Run the command and get the documentation out of the result.
     out = cmd.run()
-    return _strip_header(out.runtime.stdout)
+    with open(out.runtime.stdout, 'rt') as f:
+        stdout = f.read()
+    return _strip_header(stdout)
 
 
 def _strip_header(doc):

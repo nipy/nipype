@@ -228,7 +228,9 @@ exit;
             klass._paths = paths
             return None
 
-        out = sd._strip_header(out.runtime.stdout)
+        with open(out.runtime.stdout, 'rt') as f:
+            stdout = f.read()
+        out = sd._strip_header(stdout)
         out_dict = {}
         for part in out.split('|'):
             key, val = part.split(':')

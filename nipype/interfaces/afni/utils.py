@@ -299,7 +299,9 @@ class BrickStat(AFNICommandBase):
                 return self.run().outputs
         else:
             min_val = []
-            for line in runtime.stdout.split('\n'):
+            with open(runtime.stdout, 'rt') as f:
+                stdout = f.read()
+            for line in stdout.splitlines():
                 if line:
                     values = line.split()
                     if len(values) > 1:
@@ -3049,8 +3051,10 @@ class GCOR(CommandLine):
     def _run_interface(self, runtime):
         runtime = super(GCOR, self)._run_interface(runtime)
 
+        with open(runtime.stdout, 'rt') as f:
+            stdout = f.read()
         gcor_line = [
-            line.strip() for line in runtime.stdout.split('\n')
+            line.strip() for line in stdout.splitlines()
             if line.strip().startswith('GCOR = ')
         ][-1]
         setattr(self, '_gcor', float(gcor_line[len('GCOR = '):]))

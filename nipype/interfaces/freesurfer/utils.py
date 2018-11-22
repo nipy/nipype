@@ -1041,7 +1041,8 @@ class ImageInfo(FSCommand):
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = self._outputs()
-        info = runtime.stdout
+        with open(runtime.stdout, 'rt') as f:
+            info = f.read()
         outputs.info = info
 
         # Pulse sequence parameters

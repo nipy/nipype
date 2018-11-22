@@ -713,7 +713,9 @@ fprintf('cluster_forming_thr = %f\\n',cluster_forming_thr);
         setattr(outputs, 'thresholded_map',
                 self._gen_thresholded_map_filename())
         setattr(outputs, 'pre_topo_fdr_map', self._gen_pre_topo_map_filename())
-        for line in runtime.stdout.split('\n'):
+        with open(runtime.stdout, 'rt') as f:
+            stdout = f.read()
+        for line in stdout.splitlines():
             if line.startswith("activation_forced = "):
                 setattr(outputs, 'activation_forced',
                         line[len("activation_forced = "):].strip() == "1")
@@ -836,7 +838,9 @@ clusterwise_P_FDR = spm_P_clusterFDR(extent_threshold*V2R,df,STAT,R,n,cluster_fo
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = self._outputs()
         cur_output = ""
-        for line in runtime.stdout.split('\n'):
+        with open(runtime.stdout, 'rt') as f:
+            stdout = f.read()
+        for line in stdout.splitlines():
             if cur_output != "" and len(line.split()) != 0:
                 setattr(outputs, cur_output, float(line))
                 cur_output = ""

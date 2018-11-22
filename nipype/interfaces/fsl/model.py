@@ -1827,7 +1827,8 @@ class SmoothEstimate(FSLCommand):
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = self._outputs()
-        stdout = runtime.stdout.split('\n')
+        with open(runtime.stdout, 'rt') as f:
+            stdout = f.read().splitlines()
         outputs.dlh = float(stdout[0].split()[1])
         outputs.volume = int(stdout[1].split()[1])
         outputs.resels = float(stdout[2].split()[1])
