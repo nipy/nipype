@@ -12,6 +12,9 @@ import errno
 import threading
 from time import time, sleep
 from subprocess import Popen
+from tempfile import mkdtemp
+from shutil import rmtree
+
 from .filemanip import canonicalize_env
 
 from .. import logging
@@ -92,7 +95,7 @@ class RuntimeMonitor(threading.Thread):
     period
     """
     __slots__ = ['_proc', '_output', '_stdoutfh', '_stderrfh', '_runtime',
-                 '_callback_fn', '_calback_args', '_callback_kwargs']
+                 '_callback_fn', '_calback_args', '_callback_kwargs', '_tmpdir']
 
     def __init__(self, runtime, output=None, period=0.1,
                  callback_fn=None, callback_args=None, callback_kwargs=None):
@@ -129,8 +132,13 @@ class RuntimeMonitor(threading.Thread):
         self._callback_fn = callback_fn
         self._callback_args = callback_args or tuple()
         self._callback_kwargs = callback_kwargs or {}
+        self._tmpdir = False
 
-        cwd = getattr(self._runtime, 'cwd', os.getcwd())
+        cwd = getattr(runtime, 'cwd', None)
+        if not cwd:
+            self._tmpdir = True
+            cwd = mkdtemp()
+
         self._runtime.cwd = cwd
         self._runtime.stdout = getattr(
             self._runtime, 'stdout', os.path.join(cwd, '.nipype.out'))
@@ -146,7 +154,13 @@ class RuntimeMonitor(threading.Thread):
 
     @property
     def runtime(self):
+        """The nipype runtime object"""
         return self._runtime
+
+    @property
+    def tmpdir(self):
+        """Whether a temporal directory was created"""
+        return self._tmpdir
 
     def _update_output(self, tracker=None):
         """When the ``stream`` output is selected, just keeps

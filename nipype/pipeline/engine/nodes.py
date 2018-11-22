@@ -622,9 +622,8 @@ class Node(EngineBase):
                 with indirectory(outdir):
                     cmd = self._interface.cmdline
             except Exception as msg:
-                # append cmdline exception to errorlog
-                with open(result.runtime.stderr, 'wt+') as f:
-                    f.write('\n\n%s' % msg)
+                # insert cmdline exception to runtime object
+                result.runtime.cmderr = msg
                 _save_resultfile(result, outdir, self.name)
                 raise
             cmdfile = op.join(outdir, 'command.txt')
@@ -635,9 +634,7 @@ class Node(EngineBase):
         try:
             result = self._interface.run(cwd=outdir)
         except Exception as msg:
-            # append cmdline exception to errorlog
-            with open(result.runtime.stderr, 'wt+') as f:
-                f.write('\n\n%s' % msg)
+            result.runtime.exception = msg
             _save_resultfile(result, outdir, self.name)
             raise
 
