@@ -51,6 +51,7 @@ class PBSPlugin(SGELikeBatchManagerBase):
     def _is_pending(self, taskid):
         result = CommandLine('qstat -f {}'.format(taskid),
                              environ=dict(os.environ),
+                             terminal_output='default',
                              resource_monitor=False,
                              ignore_exception=True).run()
 
