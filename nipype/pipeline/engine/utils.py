@@ -205,24 +205,21 @@ def write_report(node, report_type=None, is_mapnode=False):
     lines.append(write_rst_dict(rst_dict))
 
     # Collect terminal output
+    if hasattr(result.runtime, 'merged'):
+        lines += [
+            write_rst_header('Terminal output', level=2),
+            write_rst_list(result.runtime.merged),
+        ]
     if hasattr(result.runtime, 'stdout'):
-        with open(result.runtime.stdout) as f:
-            stdout = f.read().strip()
-
-        if stdout:
-            lines += [
-                write_rst_header('Terminal - standard output', level=2),
-                write_rst_list(stdout),
-            ]
+        lines += [
+            write_rst_header('Terminal - standard output', level=2),
+            write_rst_list(result.runtime.stdout),
+        ]
     if hasattr(result.runtime, 'stderr'):
-        with open(result.runtime.stderr) as f:
-            stderr = f.read().strip()
-
-        if stderr:
-            lines += [
-                write_rst_header('Terminal - standard error', level=2),
-                write_rst_list(stderr),
-            ]
+        lines += [
+            write_rst_header('Terminal - standard error', level=2),
+            write_rst_list(result.runtime.stderr),
+        ]
 
     # Store environment
     if hasattr(result.runtime, 'environ'):
@@ -307,13 +304,15 @@ def save_resultfile(result, cwd, name):
             tosave = _uncollapse(outputs.copy(), collapsed)
         except AttributeError:
             tosave = outputs = result.outputs.dictcopy()  # outputs was a bunch
-        result.outputs.set(**modify_paths(tosave, relative=True, basedir=cwd))
+        for k, v in list(modify_paths(tosave, relative=True, basedir=cwd).items()):
+            setattr(result.outputs, k, v)
 
     savepkl(resultsfile, result)
     logger.debug('saved results in %s', resultsfile)
 
     if result.outputs:
-        result.outputs.set(**outputs)
+        for k, v in list(outputs.items()):
+            setattr(result.outputs, k, v)
 
 
 def load_resultfile(path, name):
@@ -363,8 +362,9 @@ def load_resultfile(path, name):
                 except AttributeError:
                     outputs = result.outputs.dictcopy()  # outputs == Bunch
                 try:
-                    result.outputs.set(
-                        **modify_paths(outputs, relative=False, basedir=path))
+                    for k, v in list(modify_paths(outputs, relative=False,
+                                                  basedir=path).items()):
+                        setattr(result.outputs, k, v)
                 except FileNotFoundError:
                     logger.debug('conversion to full path results in '
                                  'non existent file')
@@ -1366,9 +1366,7 @@ def export_graph(graph_in,
     # Convert .dot if format != 'dot'
     outfname, res = _run_dot(out_dot, format_ext=format)
     if res is not None and res.runtime.returncode:
-        with open(res.runtime.stderr, 'rt') as f:
-            errmsg = f.read()
-        logger.warning('dot2png: %s', errmsg)
+        logger.warning('dot2png: %s', res.runtime.stderr)
 
     pklgraph = _create_dot_graph(graph, show_connectinfo, simple_form)
     simple_dot = fname_presuffix(
@@ -1378,9 +1376,7 @@ def export_graph(graph_in,
     # Convert .dot if format != 'dot'
     simplefname, res = _run_dot(simple_dot, format_ext=format)
     if res is not None and res.runtime.returncode:
-        with open(res.runtime.stderr, 'rt') as f:
-            errmsg = f.read()
-        logger.warning('dot2png: %s', errmsg)
+        logger.warning('dot2png: %s', res.runtime.stderr)
 
     if show:
         pos = nx.graphviz_layout(pklgraph, prog='dot')
@@ -1410,7 +1406,7 @@ def _run_dot(dotfilename, format_ext):
     dot_base =  os.path.splitext(dotfilename)[0]
     formatted_dot = '{}.{}'.format(dot_base, format_ext)
     cmd = 'dot -T{} -o"{}" "{}"'.format(format_ext, formatted_dot, dotfilename)
-    res = CommandLine(cmd, terminal_output='default',
+    res = CommandLine(cmd, terminal_output='allatonce',
                       resource_monitor=False).run()
     return formatted_dot, res
 
