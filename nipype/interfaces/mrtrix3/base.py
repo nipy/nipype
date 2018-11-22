@@ -77,7 +77,7 @@ class MRTrix3Base(CommandLine):
                 from multiprocessing import cpu_count
                 value = cpu_count()
             except:
-                iflogger.warn('Number of threads could not be computed')
+                iflogger.warning('Number of threads could not be computed')
                 pass
             return trait_spec.argstr % value
 
