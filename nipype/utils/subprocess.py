@@ -164,7 +164,7 @@ class RuntimeMonitor(threading.Thread):
             if out_size > tracker[0]:
                 data = None
                 with open(self._runtime.stdout) as out:
-                    out.seek(tracker[0] + int(tracker[0] > 0))
+                    out.seek(tracker[0])
                     data = out.read()
                 tracker = (out_size, tracker[1])
                 if data:
@@ -173,7 +173,7 @@ class RuntimeMonitor(threading.Thread):
             if err_size > tracker[1]:
                 data = None
                 with open(self._runtime.stderr) as err:
-                    err.seek(tracker[1] + int(tracker[1] > 0))
+                    err.seek(tracker[1])
                     data = err.read()
                 tracker = (tracker[0], err_size)
                 if data:
