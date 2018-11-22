@@ -422,5 +422,5 @@ class P2PDistance(ComputeMeshWarp):
 
     def __init__(self, **inputs):
         super(P2PDistance, self).__init__(**inputs)
-        IFLOGGER.warn('This interface has been deprecated since 1.0, please '
-                      'use ComputeMeshWarp')
+        IFLOGGER.warning('This interface has been deprecated since 1.0, please '
+                         'use ComputeMeshWarp')
