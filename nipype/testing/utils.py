@@ -8,10 +8,13 @@ from __future__ import (print_function, division, unicode_literals,
 from builtins import range, object, open
 
 import os
+import sys
 import time
 import shutil
 import signal
 import subprocess
+from contextlib import contextmanager
+from io import StringIO
 from subprocess import CalledProcessError
 from tempfile import mkdtemp
 from future.utils import raise_from
@@ -22,6 +25,16 @@ __docformat__ = 'restructuredtext'
 import numpy as np
 import nibabel as nb
 
+
+@contextmanager
+def capture_sys_output():
+    caputure_out, capture_err = StringIO(), StringIO()
+    current_out, current_err = sys.stdout, sys.stderr
+    try:
+        sys.stdout, sys.stderr = caputure_out, capture_err
+        yield caputure_out, capture_err
+    finally:
+        sys.stdout, sys.stderr = current_out, current_err
 
 class TempFATFS(object):
     def __init__(self, size_in_mbytes=8, delay=0.5):

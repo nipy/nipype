@@ -2,28 +2,15 @@
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
-from future import standard_library
-standard_library.install_aliases()
-
-import pytest
 import sys
-from contextlib import contextmanager
+import pytest
+from future import standard_library
 
-from io import StringIO
+from ...testing.utils import capture_sys_output
 from ...utils import nipype_cmd
 
+standard_library.install_aliases()
 PY2 = sys.version_info[0] < 3
-
-
-@contextmanager
-def capture_sys_output():
-    caputure_out, capture_err = StringIO(), StringIO()
-    current_out, current_err = sys.stdout, sys.stderr
-    try:
-        sys.stdout, sys.stderr = caputure_out, capture_err
-        yield caputure_out, capture_err
-    finally:
-        sys.stdout, sys.stderr = current_out, current_err
 
 
 class TestNipypeCMD():

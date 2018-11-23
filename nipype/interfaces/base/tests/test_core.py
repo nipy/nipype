@@ -6,12 +6,12 @@ import os
 from builtins import open
 import simplejson as json
 from future import standard_library
-from IPython.utils.io import capture_output
 
 import pytest
 
 from .... import config
 from ....testing import example_data
+from ....testing.utils import capture_sys_output
 from ... import base as nib
 
 standard_library.install_aliases()
@@ -308,7 +308,8 @@ def test_output_version():
         obj.run()
 
 
-def test_Commandline():
+def test_Commandline(tmpdir):
+    tmpdir.chdir()
     with pytest.raises(Exception):
         nib.CommandLine()
     ci = nib.CommandLine(command='which')
@@ -416,11 +417,11 @@ def test_CommandLine_output(tmpdir):
     assert name in stdout
 
     # Test streamed output
-    with capture_output() as captured:
+    with capture_sys_output() as (stdout, stderr):
         ci.terminal_output = 'stream'
         res = ci.run()
 
-    assert name in captured.stdout
+    assert name in stdout.getvalue()
 
 
 def test_global_CommandLine_output(tmpdir):
