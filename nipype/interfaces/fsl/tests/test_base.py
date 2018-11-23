@@ -34,9 +34,10 @@ def test_outputtype_to_ext():
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_FSLCommand():
+def test_FSLCommand(tmpdir):
     # Most methods in FSLCommand are tested in the subclasses.  Only
     # testing the one item that is not.
+    tmpdir.chdir()
     cmd = fsl.FSLCommand(command='ls')
     res = cmd.run()
     assert type(res) == InterfaceResult
