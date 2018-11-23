@@ -22,7 +22,6 @@ from datetime import datetime as dt
 import os
 import re
 import platform
-from tempfile import TemporaryDirectory
 import shlex
 import sys
 from textwrap import wrap
@@ -33,7 +32,7 @@ from ... import config, logging, LooseVersion
 from ...utils.provenance import write_provenance
 from ...utils.misc import trim, str2bool, rgetcwd
 from ...utils.filemanip import (FileNotFoundError, split_filename,
-                                which, get_dependencies)
+                                which, get_dependencies, TemporaryDirectory)
 from ...utils.subprocess import run_command
 
 from ...external.due import due

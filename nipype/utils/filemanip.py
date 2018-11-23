@@ -21,16 +21,15 @@ import shutil
 import contextlib
 import posixpath
 import simplejson as json
-import numpy as np
 
 from builtins import str, bytes, open
 
 from .. import logging, config
 from .misc import is_container
 from future import standard_library
-standard_library.install_aliases()
 
-fmlogger = logging.getLogger('nipype.utils')
+
+standard_library.install_aliases()
 
 related_filetype_sets = [
     ('.hdr', '.img', '.mat'),
@@ -39,6 +38,39 @@ related_filetype_sets = [
 ]
 
 PY3 = sys.version_info[0] >= 3
+fmlogger = logging.getLogger('nipype.utils')
+
+try:
+    from tempfile import TemporaryDirectory
+except ImportError:
+    from tempfile import mkdtemp
+    from builtins import object
+
+    class TemporaryDirectory(object):
+        """Create and return a temporary directory.  This has the same
+        behavior as mkdtemp but can be used as a context manager.  For
+        example:
+            with TemporaryDirectory() as tmpdir:
+                ...
+        Upon exiting the context, the directory and everything contained
+        in it are removed.
+        """
+
+        def __init__(self, suffix=None, prefix=None, dir=None):
+            self.name = mkdtemp(suffix, prefix, dir)
+
+        def __repr__(self):
+            return "<{} {!r}>".format(self.__class__.__name__, self.name)
+
+        def __enter__(self):
+            return self.name
+
+        def __exit__(self, exc, value, tb):
+            self.cleanup()
+
+        def cleanup(self):
+            shutil.rmtree(self.name)
+
 
 class FileNotFoundError(Exception):
     pass
