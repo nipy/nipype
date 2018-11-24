@@ -71,12 +71,14 @@ class Interface(object):
 
     @property
     def can_resume(self):
-        """defines if the interface can reuse partial results after interruption"""
+        """Defines if the interface can reuse partial results after interruption.
+        Only applies to interfaces being run within a workflow context."""
         return self._can_resume
 
     @property
     def always_run(self):
-        """should the interface be always run even if the inputs were not changed?"""
+        """Should the interface be always run even if the inputs were not changed?
+        Only applies to interfaces being run within a workflow context."""
         return self._always_run
 
     @property
