@@ -239,7 +239,20 @@ class InterfaceResult(object):
 
 
 def format_help(cls):
-    """Prints help text of a Nipype interface"""
+    """
+    Prints help text of a Nipype interface
+
+    >>> from nipype.interfaces.afni import GCOR
+    >>> GCOR.help()  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    Wraps the executable command ``@compute_gcor``.
+    <BLANKLINE>
+    Computes the average correlation between every voxel
+    and ever other voxel, over any give mask.
+    <BLANKLINE>
+    <BLANKLINE>
+    For complete details, ...
+
+    """
     from ...utils.misc import trim
 
     docstring = []
@@ -260,7 +273,14 @@ def format_help(cls):
 
 
 def _inputs_help(cls):
-    """Prints description for input parameters"""
+    r"""
+    Prints description for input parameters
+
+    >>> from nipype.interfaces.afni import GCOR
+    >>> _inputs_help(GCOR)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    ['Inputs::', '', '\t[Mandatory]', '\tin_file: (an existing file name)', ...
+
+    """
     helpstr = ['Inputs::', '']
     mandatory_keys = []
     optional_items = []
@@ -286,7 +306,14 @@ def _inputs_help(cls):
 
 
 def _outputs_help(cls):
-    """Prints description for output parameters"""
+    r"""
+    Prints description for output parameters
+
+    >>> from nipype.interfaces.afni import GCOR
+    >>> _outputs_help(GCOR)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    ['Outputs::', '', '\tout: (a float)\n\t\tglobal correlation value']
+
+    """
     helpstr = ['Outputs::', '', '\tNone']
     if cls.output_spec:
         outputs = cls.output_spec()
@@ -346,13 +373,13 @@ def _get_trait_desc(inputs, name, spec):
         pos = spec.position
         if pos is not None:
             manhelpstr += wrap(
-                'flag: %s, position: %s' % (argstr, pos),
+                'argument: ``%s``, position: %s' % (argstr, pos),
                 HELP_LINEWIDTH,
                 initial_indent='\t\t',
                 subsequent_indent='\t\t')
         else:
             manhelpstr += wrap(
-                'flag: %s' % argstr,
+                'argument: ``%s``' % argstr,
                 HELP_LINEWIDTH,
                 initial_indent='\t\t',
                 subsequent_indent='\t\t')
