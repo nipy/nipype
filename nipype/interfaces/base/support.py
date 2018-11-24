@@ -291,10 +291,10 @@ def _inputs_help(cls):
         if mandatory_items:
             helpstr += ['\t[Mandatory]']
             for name, spec in sorted(mandatory_items):
-                helpstr += _get_trait_desc(inputs, name, spec)
+                helpstr += get_trait_desc(inputs, name, spec)
 
         mandatory_keys = [item[0] for item in mandatory_items]
-        optional_items = ['\n'.join(_get_trait_desc(inputs, name, val))
+        optional_items = ['\n'.join(get_trait_desc(inputs, name, val))
                           for name, val in inputs.traits(transient=None).items()
                           if name not in mandatory_keys]
         if optional_items:
@@ -318,7 +318,7 @@ def _outputs_help(cls):
     if cls.output_spec:
         outputs = cls.output_spec()
         outhelpstr = [
-            '\n'.join(_get_trait_desc(outputs, name, spec))
+            '\n'.join(get_trait_desc(outputs, name, spec))
             for name, spec in sorted(outputs.traits(transient=None).items())]
         if outhelpstr:
             helpstr = helpstr[:-1] + outhelpstr
@@ -338,7 +338,7 @@ def _refs_help(cls):
     return helpstr
 
 
-def _get_trait_desc(inputs, name, spec):
+def get_trait_desc(inputs, name, spec):
     """Parses a HasTraits object into a nipype documentation string"""
     desc = spec.desc
     xor = spec.xor
