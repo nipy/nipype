@@ -100,6 +100,10 @@ class Interface(object):
         print(allhelp)
         return None  # R1710
 
+    def __init__(self):
+        """Subclasses must implement __init__"""
+        raise NotImplementedError
+
     def run(self):
         """Execute the command."""
         raise NotImplementedError
