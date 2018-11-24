@@ -13,12 +13,15 @@ from builtins import object, str
 
 import os
 from copy import deepcopy
+from textwrap import wrap
+import re
 
 from ... import logging
 from ...utils.misc import is_container
 from ...utils.filemanip import md5, to_str, hash_infile
 iflogger = logging.getLogger('nipype.interface')
 
+HELP_LINEWIDTH = 70
 
 class NipypeInterfaceError(Exception):
     """Custom error for interfaces"""
@@ -235,14 +238,139 @@ class InterfaceResult(object):
         return self._version
 
 
-def load_template(name):
-    """
-    Deprecated stub for backwards compatibility,
-    please use nipype.interfaces.fsl.model.load_template
+def format_help(cls):
+    """Prints help text of a Nipype interface"""
+    from ...utils.misc import trim
 
-    """
-    from ..fsl.model import load_template
-    iflogger.warning(
-        'Deprecated in 1.0.0, and will be removed in 1.1.0, '
-        'please use nipype.interfaces.fsl.model.load_template instead.')
-    return load_template(name)
+    docstring = []
+    cmd = getattr(cls, '_cmd', None)
+    if cmd:
+        docstring += ['Wraps the executable command ``%s``.' % cmd, '']
+
+    if cls.__doc__:
+        docstring += trim(cls.__doc__).split('\n') + ['']
+
+    allhelp = '\n'.join(
+        docstring +
+        _inputs_help(cls) + [''] +
+        _outputs_help(cls) + ['']  +
+        _refs_help(cls)
+    )
+    return allhelp.expandtabs(4)
+
+
+def _inputs_help(cls):
+    """Prints description for input parameters"""
+    helpstr = ['Inputs::', '']
+    mandatory_keys = []
+    optional_items = []
+
+    if cls.input_spec:
+        inputs = cls.input_spec()
+        mandatory_items = list(inputs.traits(mandatory=True).items())
+        if mandatory_items:
+            helpstr += ['\t[Mandatory]']
+            for name, spec in sorted(mandatory_items):
+                helpstr += _get_trait_desc(inputs, name, spec)
+
+        mandatory_keys = [item[0] for item in mandatory_items]
+        optional_items = ['\n'.join(_get_trait_desc(inputs, name, val))
+                          for name, val in inputs.traits(transient=None).items()
+                          if name not in mandatory_keys]
+        if optional_items:
+            helpstr += ['\t[Optional]'] + optional_items
+
+    if not mandatory_keys and not optional_items:
+        helpstr += ['\tNone']
+    return helpstr
+
+
+def _outputs_help(cls):
+    """Prints description for output parameters"""
+    helpstr = ['Outputs::', '', '\tNone']
+    if cls.output_spec:
+        outputs = cls.output_spec()
+        outhelpstr = [
+            '\n'.join(_get_trait_desc(outputs, name, spec))
+            for name, spec in sorted(outputs.traits(transient=None).items())]
+        if outhelpstr:
+            helpstr = helpstr[:-1] + outhelpstr
+    return helpstr
+
+
+def _refs_help(cls):
+    """Prints interface references."""
+    references = getattr(cls, '_references', None)
+    if not references:
+        return []
+
+    helpstr = ['References:', '-----------']
+    for r in references:
+        helpstr += ['{}'.format(r['entry'])]
+
+    return helpstr
+
+
+def _get_trait_desc(inputs, name, spec):
+    """Parses a HasTraits object into a nipype documentation string"""
+    desc = spec.desc
+    xor = spec.xor
+    requires = spec.requires
+    argstr = spec.argstr
+
+    manhelpstr = ['\t%s' % name]
+
+    type_info = spec.full_info(inputs, name, None)
+
+    default = ''
+    if spec.usedefault:
+        default = ', nipype default value: %s' % str(
+            spec.default_value()[1])
+    line = "(%s%s)" % (type_info, default)
+
+    manhelpstr = wrap(
+        line,
+        HELP_LINEWIDTH,
+        initial_indent=manhelpstr[0] + ': ',
+        subsequent_indent='\t\t  ')
+
+    if desc:
+        for line in desc.split('\n'):
+            line = re.sub(r"\s+", " ", line)
+            manhelpstr += wrap(
+                line, HELP_LINEWIDTH,
+                initial_indent='\t\t',
+                subsequent_indent='\t\t')
+
+    if argstr:
+        pos = spec.position
+        if pos is not None:
+            manhelpstr += wrap(
+                'flag: %s, position: %s' % (argstr, pos),
+                HELP_LINEWIDTH,
+                initial_indent='\t\t',
+                subsequent_indent='\t\t')
+        else:
+            manhelpstr += wrap(
+                'flag: %s' % argstr,
+                HELP_LINEWIDTH,
+                initial_indent='\t\t',
+                subsequent_indent='\t\t')
+
+    if xor:
+        line = '%s' % ', '.join(xor)
+        manhelpstr += wrap(
+            line,
+            HELP_LINEWIDTH,
+            initial_indent='\t\tmutually_exclusive: ',
+            subsequent_indent='\t\t  ')
+
+    if requires:
+        others = [field for field in requires if field != name]
+        line = '%s' % ', '.join(others)
+        manhelpstr += wrap(
+            line,
+            HELP_LINEWIDTH,
+            initial_indent='\t\trequires: ',
+            subsequent_indent='\t\t  ')
+    return manhelpstr
