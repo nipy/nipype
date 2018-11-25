@@ -172,135 +172,14 @@ def test_BaseInterface_load_save_inputs(tmpdir):
     assert '8562a5623562a871115eb14822ee8d02' == hashvalue
 
 
-class MinVerInputSpec(nib.TraitedSpec):
-    foo = nib.traits.Int(desc='a random int', min_ver='0.9')
-
-class MaxVerInputSpec(nib.TraitedSpec):
-    foo = nib.traits.Int(desc='a random int', max_ver='0.7')
-
-
-def test_input_version_1():
-    class DerivedInterface1(nib.BaseInterface):
-        input_spec = MinVerInputSpec
-
-    obj = DerivedInterface1()
-    obj._check_version_requirements(obj.inputs)
-
+def test_stop_on_unknown_version():
     config.set('execution', 'stop_on_unknown_version', True)
 
+    ci = nib.CommandLine(command='which')
     with pytest.raises(ValueError) as excinfo:
-        obj._check_version_requirements(obj.inputs)
+        _ = ci.version
     assert "no version information" in str(excinfo.value)
-
     config.set_default_config()
-
-
-def test_input_version_2():
-    class DerivedInterface1(nib.BaseInterface):
-        input_spec = MinVerInputSpec
-        _version = '0.8'
-
-    obj = DerivedInterface1()
-    obj.inputs.foo = 1
-    with pytest.raises(Exception) as excinfo:
-        obj._check_version_requirements(obj.inputs)
-    assert "version 0.8 < required 0.9" in str(excinfo.value)
-
-
-def test_input_version_3():
-    class DerivedInterface1(nib.BaseInterface):
-        input_spec = MinVerInputSpec
-        _version = '0.10'
-
-    obj = DerivedInterface1()
-    obj._check_version_requirements(obj.inputs)
-
-
-def test_input_version_4():
-    class DerivedInterface1(nib.BaseInterface):
-        input_spec = MinVerInputSpec
-        _version = '0.9'
-
-    obj = DerivedInterface1()
-    obj.inputs.foo = 1
-    obj._check_version_requirements(obj.inputs)
-
-
-def test_input_version_5():
-    class DerivedInterface2(nib.BaseInterface):
-        input_spec = MaxVerInputSpec
-        _version = '0.8'
-
-    obj = DerivedInterface2()
-    obj.inputs.foo = 1
-    with pytest.raises(Exception) as excinfo:
-        obj._check_version_requirements(obj.inputs)
-    assert "version 0.8 > required 0.7" in str(excinfo.value)
-
-
-def test_input_version_6():
-    class DerivedInterface1(nib.BaseInterface):
-        input_spec = MaxVerInputSpec
-        _version = '0.7'
-
-    obj = DerivedInterface1()
-    obj.inputs.foo = 1
-    obj._check_version_requirements(obj.inputs)
-
-
-def test_output_version():
-    class InputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int')
-
-    class OutputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int', min_ver='0.9')
-
-    class DerivedInterface1(nib.BaseInterface):
-        input_spec = InputSpec
-        output_spec = OutputSpec
-        _version = '0.10'
-        resource_monitor = False
-
-    obj = DerivedInterface1()
-    assert obj._check_version_requirements(obj._outputs()) == []
-
-    class InputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int')
-
-    class OutputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int', min_ver='0.11')
-
-    class DerivedInterface1(nib.BaseInterface):
-        input_spec = InputSpec
-        output_spec = OutputSpec
-        _version = '0.10'
-        resource_monitor = False
-
-    obj = DerivedInterface1()
-    assert obj._check_version_requirements(obj._outputs()) == ['foo']
-
-    class InputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int')
-
-    class OutputSpec(nib.TraitedSpec):
-        foo = nib.traits.Int(desc='a random int', min_ver='0.11')
-
-    class DerivedInterface1(nib.BaseInterface):
-        input_spec = InputSpec
-        output_spec = OutputSpec
-        _version = '0.10'
-        resource_monitor = False
-
-        def _run_interface(self, runtime):
-            return runtime
-
-        def _list_outputs(self):
-            return {'foo': 1}
-
-    obj = DerivedInterface1()
-    with pytest.raises(KeyError):
-        obj.run()
-
 
 def test_Commandline():
     with pytest.raises(Exception):

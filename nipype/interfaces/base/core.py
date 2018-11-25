@@ -29,7 +29,7 @@ from textwrap import wrap
 import simplejson as json
 from dateutil.parser import parse as parseutc
 
-from ... import config, logging, LooseVersion
+from ... import config, logging
 from ...utils.provenance import write_provenance
 from ...utils.misc import trim, str2bool, rgetcwd
 from ...utils.filemanip import (FileNotFoundError, split_filename,
@@ -41,7 +41,7 @@ from ...external.due import due
 from .traits_extension import traits, isdefined, TraitError
 from .specs import (BaseInterfaceInputSpec, CommandLineInputSpec,
                     StdOutCommandLineInputSpec, MpiCommandLineInputSpec,
-                    check_mandatory_inputs)
+                    check_mandatory_inputs, check_version)
 from .support import (Bunch, InterfaceResult, NipypeInterfaceError)
 
 from future import standard_library
@@ -344,46 +344,6 @@ class BaseInterface(Interface):
             info.append(dict(key=name, copy=spec.copyfile))
         return info
 
-    def _check_version_requirements(self, trait_object, raise_exception=True):
-        """ Raises an exception on version mismatch
-        """
-        unavailable_traits = []
-        # check minimum version
-        check = dict(min_ver=lambda t: t is not None)
-        names = trait_object.trait_names(**check)
-
-        if names and self.version:
-            version = LooseVersion(str(self.version))
-            for name in names:
-                min_ver = LooseVersion(
-                    str(trait_object.traits()[name].min_ver))
-                if min_ver > version:
-                    unavailable_traits.append(name)
-                    if not isdefined(getattr(trait_object, name)):
-                        continue
-                    if raise_exception:
-                        raise Exception(
-                            'Trait %s (%s) (version %s < required %s)' %
-                            (name, self.__class__.__name__, version, min_ver))
-
-        # check maximum version
-        check = dict(max_ver=lambda t: t is not None)
-        names = trait_object.trait_names(**check)
-        if names and self.version:
-            version = LooseVersion(str(self.version))
-            for name in names:
-                max_ver = LooseVersion(
-                    str(trait_object.traits()[name].max_ver))
-                if max_ver < version:
-                    unavailable_traits.append(name)
-                    if not isdefined(getattr(trait_object, name)):
-                        continue
-                    if raise_exception:
-                        raise Exception(
-                            'Trait %s (%s) (version %s > required %s)' %
-                            (name, self.__class__.__name__, version, max_ver))
-        return unavailable_traits
-
     def _run_interface(self, runtime):
         """ Core function that executes interface
         """
@@ -429,7 +389,7 @@ class BaseInterface(Interface):
         enable_rm = config.resource_monitor and self.resource_monitor
         self.inputs.trait_set(**inputs)
         check_mandatory_inputs(self.inputs)
-        self._check_version_requirements(self.inputs)
+        check_version(self.inputs, version=self.version)
         interface = self.__class__
         self._duecredit_cite()
 
@@ -555,8 +515,8 @@ class BaseInterface(Interface):
         if predicted_outputs:
             _unavailable_outputs = []
             if outputs:
-                _unavailable_outputs = \
-                    self._check_version_requirements(self._outputs())
+                _unavailable_outputs = check_version(
+                    self._outputs(), self.version)
             for key, val in list(predicted_outputs.items()):
                 if needed_outputs and key not in needed_outputs:
                     continue

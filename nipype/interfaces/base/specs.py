@@ -20,7 +20,8 @@ from packaging.version import Version
 
 from ...utils.filemanip import md5, hash_infile, hash_timestamp, to_str
 from ...utils.errors import (
-    MandatoryInputError, MutuallyExclusiveInputError, RequiredInputError)
+    MandatoryInputError, MutuallyExclusiveInputError, RequiredInputError,
+    VersionIOError)
 from .traits_extension import (
     traits,
     Undefined,
@@ -434,3 +435,51 @@ def check_mandatory_inputs(inputs, raise_exc=True):
                 raise RequiredInputError(inputs, name)
 
     return True
+
+def check_version(traited_spec, version=None, raise_exc=True):
+    """ Raises an exception on version mismatch
+    """
+
+    # no version passed on to check against
+    if not version:
+        return []
+
+    # check minimum version
+    names = traited_spec.trait_names(
+        min_ver=lambda t: t is not None) + \
+        traited_spec.trait_names(
+        max_ver=lambda t: t is not None)
+
+    # no traits defined any versions
+    if not names:
+        return []
+
+    version = Version(str(version))
+    unavailable_traits = []
+    for name in names:
+        value_set = isdefined(getattr(traited_spec, name))
+        min_ver = traited_spec.traits()[name].min_ver
+        if min_ver:
+            min_ver = Version(str(min_ver))
+
+        max_ver = traited_spec.traits()[name].max_ver
+        if max_ver:
+            max_ver = Version(str(max_ver))
+
+        if min_ver and max_ver:
+            if max_ver < min_ver:
+                raise AssertionError(
+                    'Trait "%s" (%s) has incongruent version metadata '
+                    '(``max_ver`` is lower than ``min_ver``).' % (
+                        traited_spec.__class__.__name__, name))
+
+        if min_ver and (min_ver > version):
+            unavailable_traits.append(name)
+            if value_set and raise_exc:
+                raise VersionIOError(traited_spec, name, version)
+        if max_ver and (max_ver < version):
+            unavailable_traits.append(name)
+            if value_set and raise_exc:
+                raise VersionIOError(traited_spec, name, version)
+
+    return list(set(unavailable_traits))

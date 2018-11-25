@@ -12,7 +12,7 @@ class MandatoryInputError(ValueError):
     not defined."""
     def __init__(self, inputspec, name):
         classname = inputspec.__class__.__name__
-        if classname.endswith('InputSpec'):
+        if classname.endswith('InputSpec') and classname != 'InputSpec':
             classname = classname[:len('InputSpec')]
         msg = (
             'Interface "{classname}" requires a value for input {name}. '
@@ -48,7 +48,7 @@ class RequiredInputError(ValueError):
     those are ``Undefined``."""
     def __init__(self, inputspec, name):
         classname = inputspec.__class__.__name__
-        if classname.endswith('InputSpec'):
+        if classname.endswith('InputSpec') and classname != 'InputSpec':
             classname = classname[:-len('InputSpec')]
         requires = inputspec.traits()[name].requires
 
@@ -58,3 +58,27 @@ class RequiredInputError(ValueError):
                     classname=classname, name=name,
                     requires=', '.join(requires))
         super(RequiredInputError, self).__init__(msg)
+
+class VersionIOError(ValueError):
+    """Raised when one input with the ``mandatory`` metadata set to ``True`` is
+    not defined."""
+    def __init__(self, spec, name, version):
+        classname = spec.__class__.__name__
+        if classname.endswith('InputSpec') and classname != 'InputSpec':
+            classname = classname[:len('InputSpec')]
+        if classname.endswith('OutputSpec') and classname != 'OutputSpec':
+            classname = classname[:len('OutputSpec')]
+
+        max_ver = spec.traits()[name].max_ver
+        min_ver = spec.traits()[name].min_ver
+
+        msg = ('Interface "{classname}" has version requirements for '
+               '{name}, but version {version} was found. ').format(
+               classname=classname, name=name, version=version)
+
+        if min_ver:
+            msg += 'Minimum version is %s. ' % min_ver
+        if max_ver:
+            msg += 'Maximum version is %s. ' % max_ver
+
+        super(VersionIOError, self).__init__(msg)

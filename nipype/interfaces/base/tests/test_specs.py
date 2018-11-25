@@ -11,8 +11,9 @@ from ....utils.filemanip import split_filename
 from ... import base as nib
 from ...base import traits, Undefined
 from ..specs import (
-    check_mandatory_inputs, MandatoryInputError,
-    MutuallyExclusiveInputError, RequiredInputError
+    check_mandatory_inputs, check_version,
+    MandatoryInputError, MutuallyExclusiveInputError,
+    RequiredInputError, VersionIOError
 )
 from ....interfaces import fsl
 from ...utility.wrappers import Function
@@ -137,7 +138,7 @@ def test_TraitedSpec_logic():
     myif.inputs.foo = 1
     assert myif.inputs.foo == 1
     set_bar = lambda: setattr(myif.inputs, 'bar', 1)
-    with pytest.raises(IOError):
+    with pytest.raises(MutuallyExclusiveInputError):
         set_bar()
     assert myif.inputs.foo == 1
     myif.inputs.kung = 2
@@ -499,3 +500,86 @@ def test_inputs_checks():
             DerivedInterface(goo=1, woo=1).inputs)
     with pytest.raises(MutuallyExclusiveInputError):
         DerivedInterface(goo=1, woo=1).run()
+
+
+
+def test_input_version():
+    class MinVerInputSpec(nib.TraitedSpec):
+        foo = nib.traits.Int(desc='a random int', min_ver='0.5')
+
+
+    assert check_version(MinVerInputSpec(), '0.6') == []
+    assert check_version(MinVerInputSpec(), '0.4') == ['foo']
+    with pytest.raises(VersionIOError):
+        check_version(MinVerInputSpec(foo=1), '0.4')
+
+
+    class MaxVerInputSpec(nib.TraitedSpec):
+        foo = nib.traits.Int(desc='a random int', max_ver='0.7')
+
+
+    assert check_version(MaxVerInputSpec(), '0.6') == []
+    assert check_version(MaxVerInputSpec(), '0.8') == ['foo']
+    with pytest.raises(VersionIOError):
+        check_version(MaxVerInputSpec(foo=1), '0.8')
+
+
+    class MinMaxVerInputSpec(nib.TraitedSpec):
+        foo = nib.traits.Int(desc='a random int', max_ver='0.7',
+                             min_ver='0.5')
+
+
+    assert check_version(MinMaxVerInputSpec(), '0.6') == []
+    assert check_version(MinMaxVerInputSpec(), '0.4') == ['foo']
+    assert check_version(MinMaxVerInputSpec(), '0.8') == ['foo']
+    with pytest.raises(VersionIOError):
+        check_version(MinMaxVerInputSpec(foo=1), '0.8')
+    with pytest.raises(VersionIOError):
+        check_version(MinMaxVerInputSpec(foo=1), '0.4')
+
+
+    class FixedVerInputSpec(nib.TraitedSpec):
+        foo = nib.traits.Int(desc='a random int', max_ver='0.6.2',
+                             min_ver='0.6.2')
+
+
+    assert check_version(FixedVerInputSpec(), '0.6.2') == []
+    assert check_version(FixedVerInputSpec(), '0.6.1') == ['foo']
+    assert check_version(FixedVerInputSpec(), '0.6.3') == ['foo']
+    with pytest.raises(VersionIOError):
+        check_version(FixedVerInputSpec(foo=1), '0.6.1')
+    with pytest.raises(VersionIOError):
+        check_version(FixedVerInputSpec(foo=1), '0.6.3')
+
+
+    class IncongruentVerInputSpec(nib.TraitedSpec):
+        foo = nib.traits.Int(desc='a random int', max_ver='0.5',
+                             min_ver='0.7')
+
+    with pytest.raises(AssertionError):
+        check_version(IncongruentVerInputSpec(), '0.6')
+    with pytest.raises(AssertionError):
+        check_version(IncongruentVerInputSpec(foo=1), '0.6')
+
+
+    class InputSpec(nib.TraitedSpec):
+        foo = nib.traits.Int(desc='a random int')
+
+    class OutputSpec(nib.TraitedSpec):
+        foo = nib.traits.Int(desc='a random int', min_ver='0.11')
+
+    class DerivedInterface1(nib.BaseInterface):
+        input_spec = InputSpec
+        output_spec = OutputSpec
+        _version = '0.10'
+        resource_monitor = False
+
+        def _run_interface(self, runtime):
+            return runtime
+
+        def _list_outputs(self):
+            return {'foo': 1}
+
+    obj = DerivedInterface1()
+    with pytest.raises(KeyError):
+        obj.run()
