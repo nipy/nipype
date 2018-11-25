@@ -304,13 +304,15 @@ def save_resultfile(result, cwd, name):
             tosave = _uncollapse(outputs.copy(), collapsed)
         except AttributeError:
             tosave = outputs = result.outputs.dictcopy()  # outputs was a bunch
-        result.outputs.set(**modify_paths(tosave, relative=True, basedir=cwd))
+        for k, v in list(modify_paths(tosave, relative=True, basedir=cwd).items()):
+            setattr(result.outputs, k, v)
 
     savepkl(resultsfile, result)
     logger.debug('saved results in %s', resultsfile)
 
     if result.outputs:
-        result.outputs.set(**outputs)
+        for k, v in list(outputs.items()):
+            setattr(result.outputs, k, v)
 
 
 def load_resultfile(path, name):
@@ -360,8 +362,9 @@ def load_resultfile(path, name):
                 except AttributeError:
                     outputs = result.outputs.dictcopy()  # outputs == Bunch
                 try:
-                    result.outputs.set(
-                        **modify_paths(outputs, relative=False, basedir=path))
+                    for k, v in list(modify_paths(outputs, relative=False,
+                                                  basedir=path).items()):
+                        setattr(result.outputs, k, v)
                 except FileNotFoundError:
                     logger.debug('conversion to full path results in '
                                  'non existent file')

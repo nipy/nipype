@@ -602,7 +602,7 @@ class SpecifySPMModel(SpecifyModel):
                 try:
                     out = np.loadtxt(filename)
                 except IOError:
-                    iflogger.warn('Error reading outliers file %s', filename)
+                    iflogger.warning('Error reading outliers file %s', filename)
                     out = np.array([])
 
                 if out.size > 0:

@@ -589,7 +589,7 @@ class MergeCSVFiles(BaseInterface):
             extraheadingBool = True
 
         if len(self.inputs.in_files) == 1:
-            iflogger.warn('Only one file input!')
+            iflogger.warning('Only one file input!')
 
         if isdefined(self.inputs.row_headings):
             iflogger.info('Row headings have been provided. Adding "labels"'
