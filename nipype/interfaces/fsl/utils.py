@@ -238,15 +238,15 @@ class Smooth(FSLCommand):
     >>> sm.cmdline # doctest: +ELLIPSIS
     'fslmaths functional2.nii -kernel gauss 3.397 -fmean functional2_smooth.nii.gz'
 
-    One of sigma or fwhm must be set. Printing the ``cmdline`` will issue
-    a warning:
+    One of sigma or fwhm must be set. Accessing the ``cmdline`` property
+    will return ``None`` and issue a warning:
 
     >>> from nipype.interfaces.fsl import Smooth
     >>> sm = Smooth()
     >>> sm.inputs.output_type = 'NIFTI_GZ'
     >>> sm.inputs.in_file = 'functional2.nii'
-    >>> sm.cmdline  # doctest: +ELLIPSIS
-    'fslmaths functional2.nii functional2_smooth.nii.gz'
+    >>> sm.cmdline is None  # doctest: +ELLIPSIS
+    True
 
     The warning is: ::
         181125-08:12:09,489 nipype.interface WARNING:

@@ -726,9 +726,11 @@ class CommandLine(BaseInterface):
         validates arguments and generates command line"""
         if not check_mandatory_inputs(self.inputs, raise_exc=False):
             iflogger.warning(
-                'Some inputs are not valid. Please make sure all mandatory '
-                'inputs, required inputs and mutually-exclusive inputs are '
-                'set or in a sane state.')
+                'Command line could not be generated because some inputs '
+                'are not valid. Please make sure all mandatory inputs, '
+                'required inputs and mutually-exclusive inputs are set '
+                'or in a sane state.')
+            return None
 
         allargs = [self._cmd_prefix + self.cmd] + self._parse_inputs()
         return ' '.join(allargs)
