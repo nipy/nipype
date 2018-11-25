@@ -40,7 +40,8 @@ from ...external.due import due
 
 from .traits_extension import traits, isdefined, TraitError
 from .specs import (BaseInterfaceInputSpec, CommandLineInputSpec,
-                    StdOutCommandLineInputSpec, MpiCommandLineInputSpec)
+                    StdOutCommandLineInputSpec, MpiCommandLineInputSpec,
+                    check_mandatory_inputs)
 from .support import (Bunch, InterfaceResult, NipypeInterfaceError)
 
 from future import standard_library
@@ -343,53 +344,6 @@ class BaseInterface(Interface):
             info.append(dict(key=name, copy=spec.copyfile))
         return info
 
-    def _check_requires(self, spec, name, value):
-        """ check if required inputs are satisfied
-        """
-        if spec.requires:
-            values = [
-                not isdefined(getattr(self.inputs, field))
-                for field in spec.requires
-            ]
-            if any(values) and isdefined(value):
-                msg = ("%s requires a value for input '%s' because one of %s "
-                       "is set. For a list of required inputs, see %s.help()" %
-                       (self.__class__.__name__, name,
-                        ', '.join(spec.requires), self.__class__.__name__))
-                raise ValueError(msg)
-
-    def _check_xor(self, spec, name, value):
-        """ check if mutually exclusive inputs are satisfied
-        """
-        if spec.xor:
-            values = [
-                isdefined(getattr(self.inputs, field)) for field in spec.xor
-            ]
-            if not any(values) and not isdefined(value):
-                msg = ("%s requires a value for one of the inputs '%s'. "
-                       "For a list of required inputs, see %s.help()" %
-                       (self.__class__.__name__, ', '.join(spec.xor),
-                        self.__class__.__name__))
-                raise ValueError(msg)
-
-    def _check_mandatory_inputs(self):
-        """ Raises an exception if a mandatory input is Undefined
-        """
-        for name, spec in list(self.inputs.traits(mandatory=True).items()):
-            value = getattr(self.inputs, name)
-            self._check_xor(spec, name, value)
-            if not isdefined(value) and spec.xor is None:
-                msg = ("%s requires a value for input '%s'. "
-                       "For a list of required inputs, see %s.help()" %
-                       (self.__class__.__name__, name,
-                        self.__class__.__name__))
-                raise ValueError(msg)
-            if isdefined(value):
-                self._check_requires(spec, name, value)
-        for name, spec in list(
-                self.inputs.traits(mandatory=None, transient=None).items()):
-            self._check_requires(spec, name, getattr(self.inputs, name))
-
     def _check_version_requirements(self, trait_object, raise_exception=True):
         """ Raises an exception on version mismatch
         """
@@ -474,7 +428,7 @@ class BaseInterface(Interface):
 
         enable_rm = config.resource_monitor and self.resource_monitor
         self.inputs.trait_set(**inputs)
-        self._check_mandatory_inputs()
+        check_mandatory_inputs(self.inputs)
         self._check_version_requirements(self.inputs)
         interface = self.__class__
         self._duecredit_cite()
@@ -818,7 +772,12 @@ class CommandLine(BaseInterface):
     def cmdline(self):
         """ `command` plus any arguments (args)
         validates arguments and generates command line"""
-        self._check_mandatory_inputs()
+        if not check_mandatory_inputs(self.inputs, raise_exc=False):
+            iflogger.warning(
+                'Some inputs are not valid. Please make sure all mandatory '
+                'inputs, required inputs and mutually-exclusive inputs are '
+                'set or in a sane state.')
+
         allargs = [self._cmd_prefix + self.cmd] + self._parse_inputs()
         return ' '.join(allargs)
 

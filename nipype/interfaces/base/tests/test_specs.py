@@ -2,15 +2,18 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from __future__ import print_function, unicode_literals
-from future import standard_library
 import os
 import warnings
-
 import pytest
+from future import standard_library
 
 from ....utils.filemanip import split_filename
 from ... import base as nib
 from ...base import traits, Undefined
+from ..specs import (
+    check_mandatory_inputs, MandatoryInputError,
+    MutuallyExclusiveInputError, RequiredInputError
+)
 from ....interfaces import fsl
 from ...utility.wrappers import Function
 from ....pipeline import Node
@@ -55,8 +58,8 @@ def test_TraitedSpec_tab_completion():
     bet_nd = Node(fsl.BET(), name='bet')
     bet_interface = fsl.BET()
     bet_inputs = bet_nd.inputs.class_editable_traits()
-    bet_outputs = bet_nd.outputs.class_editable_traits() 
-    
+    bet_outputs = bet_nd.outputs.class_editable_traits()
+
     # Check __all__ for bet node and interface inputs
     assert set(bet_nd.inputs.__all__) == set(bet_inputs)
     assert set(bet_interface.inputs.__all__) == set(bet_inputs)
@@ -433,3 +436,66 @@ def test_ImageFile():
     with pytest.raises(nib.TraitError):
         x.nocompress = 'test.nii.gz'
     x.nocompress = 'test.mgh'
+
+
+def test_inputs_checks():
+
+    class InputSpec(nib.TraitedSpec):
+        goo = nib.traits.Int(desc='a random int', mandatory=True)
+
+    class DerivedInterface(nib.BaseInterface):
+        input_spec = InputSpec
+        resource_monitor = False
+
+    assert check_mandatory_inputs(
+        DerivedInterface(goo=1).inputs)
+    with pytest.raises(MandatoryInputError):
+        check_mandatory_inputs(
+            DerivedInterface().inputs)
+    with pytest.raises(MandatoryInputError):
+        DerivedInterface().run()
+
+    class InputSpec(nib.TraitedSpec):
+        goo = nib.traits.Int(desc='a random int', mandatory=True,
+                             requires=['woo'])
+        woo = nib.traits.Int(desc='required by goo')
+
+    class DerivedInterface(nib.BaseInterface):
+        input_spec = InputSpec
+        resource_monitor = False
+
+    assert check_mandatory_inputs(
+        DerivedInterface(goo=1, woo=1).inputs)
+    with pytest.raises(RequiredInputError):
+        check_mandatory_inputs(
+            DerivedInterface(goo=1).inputs)
+    with pytest.raises(RequiredInputError):
+        DerivedInterface(goo=1).run()
+
+    class InputSpec(nib.TraitedSpec):
+        goo = nib.traits.Int(desc='a random int', mandatory=True,
+                             xor=['woo'])
+        woo = nib.traits.Int(desc='a random int', mandatory=True,
+                             xor=['goo'])
+
+    class DerivedInterface(nib.BaseInterface):
+        input_spec = InputSpec
+        resource_monitor = False
+
+    # If either goo or woo are set, then okay!
+    assert check_mandatory_inputs(
+        DerivedInterface(goo=1).inputs)
+    assert check_mandatory_inputs(
+        DerivedInterface(woo=1).inputs)
+
+    # None are set, raise MandatoryInputError
+    with pytest.raises(MutuallyExclusiveInputError):
+        check_mandatory_inputs(
+            DerivedInterface().inputs)
+
+    # Both are set, raise MutuallyExclusiveInputError
+    with pytest.raises(MutuallyExclusiveInputError):
+        check_mandatory_inputs(
+            DerivedInterface(goo=1, woo=1).inputs)
+    with pytest.raises(MutuallyExclusiveInputError):
+        DerivedInterface(goo=1, woo=1).run()

@@ -21,6 +21,7 @@ from ..io import FreeSurferSource
 from ..base import (TraitedSpec, File, traits, Directory, InputMultiPath,
                     OutputMultiPath, CommandLine, CommandLineInputSpec,
                     isdefined)
+from ..base.specs import check_mandatory_inputs
 from .base import (FSCommand, FSTraitedSpec, FSTraitedSpecOpenMP,
                    FSCommandOpenMP, Info)
 from .utils import copy2subjdir
@@ -634,7 +635,12 @@ class DICOMConvert(FSCommand):
     def cmdline(self):
         """ `command` plus any arguments (args)
         validates arguments and generates command line"""
-        self._check_mandatory_inputs()
+        if not check_mandatory_inputs(self.inputs, raise_exc=False):
+            iflogger.warning(
+                'Some inputs are not valid. Please make sure all mandatory '
+                'inputs, required inputs and mutually-exclusive inputs are '
+                'set or in a sane state.')
+
         outdir = self._get_outdir()
         cmd = []
         if not os.path.exists(outdir):

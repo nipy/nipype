@@ -19,6 +19,8 @@ from builtins import str, bytes
 from packaging.version import Version
 
 from ...utils.filemanip import md5, hash_infile, hash_timestamp, to_str
+from ...utils.errors import (
+    MandatoryInputError, MutuallyExclusiveInputError, RequiredInputError)
 from .traits_extension import (
     traits,
     Undefined,
@@ -114,9 +116,8 @@ class BaseTraitedSpec(traits.HasTraits):
                         trait_change_notify=False, **{
                             '%s' % name: Undefined
                         })
-                    msg = ('Input "%s" is mutually exclusive with input "%s", '
-                           'which is already set') % (name, trait_name)
-                    raise IOError(msg)
+                    raise MutuallyExclusiveInputError(
+                        self, name, name_other=trait_name)
 
     def _deprecated_warn(self, obj, name, old, new):
         """Checks if a user assigns a value to a deprecated trait
@@ -375,3 +376,61 @@ class MpiCommandLineInputSpec(CommandLineInputSpec):
     n_procs = traits.Int(desc="Num processors to specify to mpiexec. Do not "
                          "specify if this is managed externally (e.g. through "
                          "SGE)")
+
+
+def check_requires(inputs, spec, value):
+    """check if required inputs are satisfied
+    """
+    if not spec.requires:
+        return True
+
+    # Check value and all required inputs' values defined
+    values = [isdefined(value)] + [
+        isdefined(getattr(inputs, field))
+        for field in spec.requires]
+    return all(values)
+
+def check_xor(inputs, spec, value):
+    """ check if mutually exclusive inputs are satisfied
+    """
+    if not spec.xor:
+        return True
+
+    print(inputs)
+    values = [isdefined(value)] + [
+        isdefined(getattr(inputs, field)) for field in spec.xor]
+    return sum(values)
+
+def check_mandatory_inputs(inputs, raise_exc=True):
+    """ Raises an exception if a mandatory input is Undefined
+    """
+    # Check mandatory, not xor-ed inputs.
+    for name, spec in list(inputs.traits(mandatory=True).items()):
+        value = getattr(inputs, name)
+        # Mandatory field is defined, check xor'ed inputs
+        cxor = check_xor(inputs, spec, value)
+        if cxor != 1:
+            if raise_exc:
+                raise MutuallyExclusiveInputError(inputs, name, cxor)
+            return False
+
+        # Simplest case: no xor metadata and not defined
+        if cxor is True and not isdefined(value):
+            if raise_exc:
+                raise MandatoryInputError(inputs, name)
+            return False
+
+        # Check whether mandatory inputs require others
+        if not check_requires(inputs, spec, value):
+            if raise_exc:
+                raise RequiredInputError(inputs, name)
+            return False
+
+    # Check requirements of non-mandatory inputs
+    for name, spec in list(
+            inputs.traits(mandatory=None, transient=None).items()):
+        if not check_requires(inputs, spec, getattr(inputs, name)):
+            if raise_exc:
+                raise RequiredInputError(inputs, name)
+
+    return True

@@ -95,11 +95,6 @@ def test_BaseInterface():
     assert DerivedInterface._get_filecopy_info()[1]['key'] == 'zoo'
     assert not DerivedInterface._get_filecopy_info()[1]['copy']
     assert DerivedInterface().inputs.foo == nib.Undefined
-    with pytest.raises(ValueError):
-        DerivedInterface()._check_mandatory_inputs()
-    assert DerivedInterface(goo=1)._check_mandatory_inputs() is None
-    with pytest.raises(ValueError):
-        DerivedInterface().run()
     with pytest.raises(NotImplementedError):
         DerivedInterface(goo=1).run()
 
