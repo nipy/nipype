@@ -406,7 +406,7 @@ def check_mandatory_inputs(inputs, raise_exc=True):
     for name, spec in list(inputs.traits(mandatory=True).items()):
         value = getattr(inputs, name)
         # Mandatory field is defined, check xor'ed inputs
-        xor = list(set([name] + spec.xor))
+        xor = list(set([name] + spec.xor or []))
         cxor = check_xor(inputs, xor)
         if cxor != 1:
             if raise_exc:
