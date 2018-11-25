@@ -32,6 +32,8 @@ from ...utils.filemanip import (md5, FileNotFoundError, ensure_list,
 from ...interfaces.base import (traits, InputMultiPath, CommandLine, Undefined,
                                 DynamicTraitedSpec, Bunch, InterfaceResult,
                                 Interface, isdefined)
+from ...interfaces.base.specs import get_filecopy_info
+
 from .utils import (
     _parameterization_dir, save_hashfile as _save_hashfile, load_resultfile as
     _load_resultfile, save_resultfile as _save_resultfile, nodelist_runner as
@@ -656,7 +658,8 @@ class Node(EngineBase):
 
     def _copyfiles_to_wd(self, execute=True, linksonly=False):
         """copy files over and change the inputs"""
-        if not hasattr(self._interface, '_get_filecopy_info'):
+        filecopy_info = get_filecopy_info(self.interface)
+        if not filecopy_info:
             # Nothing to be done
             return
 
@@ -669,7 +672,7 @@ class Node(EngineBase):
             outdir = op.join(outdir, '_tempinput')
             makedirs(outdir, exist_ok=True)
 
-        for info in self._interface._get_filecopy_info():
+        for info in filecopy_info:
             files = self.inputs.trait_get().get(info['key'])
             if not isdefined(files) or not files:
                 continue
