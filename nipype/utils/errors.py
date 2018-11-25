@@ -11,9 +11,7 @@ class MandatoryInputError(ValueError):
     """Raised when one input with the ``mandatory`` metadata set to ``True`` is
     not defined."""
     def __init__(self, inputspec, name):
-        classname = inputspec.__class__.__name__
-        if classname.endswith('InputSpec') and classname != 'InputSpec':
-            classname = classname[:len('InputSpec')]
+        classname = _classname_from_spec(inputspec)
         msg = (
             'Interface "{classname}" requires a value for input {name}. '
             'For a list of required inputs, see {classname}.help().').format(
@@ -23,9 +21,7 @@ class MandatoryInputError(ValueError):
 class MutuallyExclusiveInputError(ValueError):
     """Raised when none or more than one mutually-exclusive inputs are set."""
     def __init__(self, inputspec, name, values_defined=None, name_other=None):
-        classname = inputspec.__class__.__name__
-        if classname.endswith('InputSpec') and classname != 'InputSpec':
-            classname = classname[:-len('InputSpec')]
+        classname = _classname_from_spec(inputspec)
 
         if values_defined is not None:
             xor = list(set([name]+ inputspec.traits()[name].xor))
@@ -47,9 +43,7 @@ class RequiredInputError(ValueError):
     """Raised when one input requires some other and those or some of
     those are ``Undefined``."""
     def __init__(self, inputspec, name):
-        classname = inputspec.__class__.__name__
-        if classname.endswith('InputSpec') and classname != 'InputSpec':
-            classname = classname[:-len('InputSpec')]
+        classname = _classname_from_spec(inputspec)
         requires = inputspec.traits()[name].requires
 
         msg = ('Interface "{classname}" requires a value for input {name} '
@@ -63,12 +57,7 @@ class VersionIOError(ValueError):
     """Raised when one input with the ``mandatory`` metadata set to ``True`` is
     not defined."""
     def __init__(self, spec, name, version):
-        classname = spec.__class__.__name__
-        if classname.endswith('InputSpec') and classname != 'InputSpec':
-            classname = classname[:len('InputSpec')]
-        if classname.endswith('OutputSpec') and classname != 'OutputSpec':
-            classname = classname[:len('OutputSpec')]
-
+        classname = _classname_from_spec(spec)
         max_ver = spec.traits()[name].max_ver
         min_ver = spec.traits()[name].min_ver
 
@@ -82,3 +71,17 @@ class VersionIOError(ValueError):
             msg += 'Maximum version is %s. ' % max_ver
 
         super(VersionIOError, self).__init__(msg)
+
+def _classname_from_spec(spec):
+    classname = spec.__class__.__name__
+
+    kind = 'Output' if 'Output' in classname else 'Input'
+    # General pattern is that spec ends in KindSpec
+    if classname.endswith(kind + 'Spec') and classname != (kind + 'Spec'):
+        classname = classname[:-len(kind + 'Spec')]
+
+    # Catch some special cases such as ANTS
+    if classname.endswith(kind) and classname != kind:
+        classname = classname[:-len(kind)]
+
+    return classname
