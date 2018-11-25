@@ -408,15 +408,15 @@ def check_requires(inputs, requires):
               for field in requires]
     return all(values)
 
-def check_xor(inputs, xor):
+def check_xor(inputs, name, xor):
     """ check if mutually exclusive inputs are satisfied
     """
-    if len(xor) == 1:
+    if len(xor) == 0:
         return True
 
-    values = [isdefined(getattr(inputs, xor[0]))]
+    values = [isdefined(getattr(inputs, name))]
     values += [any([isdefined(getattr(inputs, field))
-               for field in xor[1:]])]
+               for field in xor])]
     return sum(values)
 
 def check_mandatory_inputs(inputs, raise_exc=True):
@@ -436,10 +436,11 @@ def check_mandatory_inputs(inputs, raise_exc=True):
                 raise MandatoryInputError(inputs, name)
             return False
 
-        xor = list(xor) if isinstance(xor, (list, tuple)) \
-            else [xor]
-        xor = list(set([name] + xor))
-        cxor = check_xor(inputs, xor)
+        xor = set(list(xor) if isinstance(xor, (list, tuple))
+                  else [xor])
+        xor.discard(name)
+        xor = list(xor)
+        cxor = check_xor(inputs, name, xor)
         if cxor != 1:
             if raise_exc:
                 raise MutuallyExclusiveInputError(

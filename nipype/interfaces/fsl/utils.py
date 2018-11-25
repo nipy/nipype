@@ -260,9 +260,7 @@ class Smooth(FSLCommand):
     >>> sm.run()  # doctest: +ELLIPSIS
     Traceback (most recent call last):
      ...
-    nipype.utils.errors.MutuallyExclusiveInputError: \
-    Interface "Smooth" has mutually-exclusive inputs. \
-    Exactly one of (fwhm|sigma) should be set...
+    MutuallyExclusiveInputError: Interface ...
 
     """
 

@@ -25,12 +25,15 @@ class MutuallyExclusiveInputError(ValueError):
 
         if values_defined is not None:
             xor = list(set([name]+ inputspec.traits()[name].xor))
-            msg = ('Interface "{classname}" has mutually-exclusive inputs. '
+            msg = ('Interface "{classname}" has mutually-exclusive inputs '
+                   '(processing "{name}", with value={value}). '
                    'Exactly one of ({xor}) should be set, but {n:d} were set. '
                    'For a list of mutually-exclusive inputs, see '
                    '{classname}.help().').format(classname=classname,
                                                  xor='|'.join(xor),
-                                                 n=values_defined)
+                                                 n=values_defined,
+                                                 name=name,
+                                                 value=getattr(inputspec, name))
 
         else:
             msg = ('Interface "{classname}" has mutually-exclusive inputs. '
