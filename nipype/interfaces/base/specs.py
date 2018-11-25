@@ -378,26 +378,25 @@ class MpiCommandLineInputSpec(CommandLineInputSpec):
                          "SGE)")
 
 
-def check_requires(inputs, spec, value):
+def check_requires(inputs, requires, value):
     """check if required inputs are satisfied
     """
-    if not spec.requires:
+    if not requires:
         return True
 
     # Check value and all required inputs' values defined
     values = [isdefined(value)] + [
         isdefined(getattr(inputs, field))
-        for field in spec.requires]
+        for field in requires]
     return all(values)
 
-def check_xor(inputs, spec, value):
+def check_xor(inputs, xor):
     """ check if mutually exclusive inputs are satisfied
     """
-    if not spec.xor:
+    if len(xor) == 1:
         return True
 
-    values = [isdefined(value)] + [
-        isdefined(getattr(inputs, field)) for field in spec.xor]
+    values = [isdefined(getattr(inputs, field)) for field in xor]
     return sum(values)
 
 def check_mandatory_inputs(inputs, raise_exc=True):
@@ -407,10 +406,12 @@ def check_mandatory_inputs(inputs, raise_exc=True):
     for name, spec in list(inputs.traits(mandatory=True).items()):
         value = getattr(inputs, name)
         # Mandatory field is defined, check xor'ed inputs
-        cxor = check_xor(inputs, spec, value)
+        xor = list(set([name] + spec.xor))
+        cxor = check_xor(inputs, xor)
         if cxor != 1:
             if raise_exc:
-                raise MutuallyExclusiveInputError(inputs, name, cxor)
+                raise MutuallyExclusiveInputError(
+                    inputs, name, values_defined=cxor)
             return False
 
         # Simplest case: no xor metadata and not defined
@@ -420,7 +421,7 @@ def check_mandatory_inputs(inputs, raise_exc=True):
             return False
 
         # Check whether mandatory inputs require others
-        if not check_requires(inputs, spec, value):
+        if not check_requires(inputs, spec.requires, value):
             if raise_exc:
                 raise RequiredInputError(inputs, name)
             return False
@@ -428,7 +429,7 @@ def check_mandatory_inputs(inputs, raise_exc=True):
     # Check requirements of non-mandatory inputs
     for name, spec in list(
             inputs.traits(mandatory=None, transient=None).items()):
-        if not check_requires(inputs, spec, getattr(inputs, name)):
+        if not check_requires(inputs, spec.requires, getattr(inputs, name)):
             if raise_exc:
                 raise RequiredInputError(inputs, name)
 
