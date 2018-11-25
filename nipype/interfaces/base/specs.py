@@ -386,9 +386,8 @@ def check_requires(inputs, requires, value):
         return True
 
     # Check value and all required inputs' values defined
-    values = [isdefined(value)] + [
-        isdefined(getattr(inputs, field))
-        for field in requires]
+    values = [isdefined(getattr(inputs, field))
+              for field in requires]
     return all(values)
 
 def check_xor(inputs, xor):
@@ -432,7 +431,8 @@ def check_mandatory_inputs(inputs, raise_exc=True):
     # Check requirements of non-mandatory inputs
     for name, spec in list(
             inputs.traits(mandatory=None, transient=None).items()):
-        if not check_requires(inputs, spec.requires, getattr(inputs, name)):
+        value = getattr(inputs, name)  # value must be set to follow requires
+        if isdefined(value) and not check_requires(inputs, spec.requires, value):
             if raise_exc:
                 raise RequiredInputError(inputs, name)
 
