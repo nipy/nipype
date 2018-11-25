@@ -397,7 +397,9 @@ def check_xor(inputs, xor):
     if len(xor) == 1:
         return True
 
-    values = [isdefined(getattr(inputs, field)) for field in xor]
+    values = [isdefined(getattr(inputs, xor[0]))]
+    values += [any([isdefined(getattr(inputs, field))
+               for field in xor[1:]])]
     return sum(values)
 
 def check_mandatory_inputs(inputs, raise_exc=True):
