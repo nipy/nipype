@@ -427,6 +427,15 @@ def check_mandatory_inputs(inputs, raise_exc=True):
         value = getattr(inputs, name)
         # Mandatory field is defined, check xor'ed inputs
         xor = spec.xor or []
+        has_xor = bool(xor)
+        has_value = isdefined(value)
+
+        # Simplest case: no xor metadata and not defined
+        if not has_xor and not has_value:
+            if raise_exc:
+                raise MandatoryInputError(inputs, name)
+            return False
+
         xor = list(xor) if isinstance(xor, (list, tuple)) \
             else [xor]
         xor = list(set([name] + xor))
@@ -437,14 +446,8 @@ def check_mandatory_inputs(inputs, raise_exc=True):
                     inputs, name, values_defined=cxor)
             return False
 
-        # Simplest case: no xor metadata and not defined
-        if cxor is True and not isdefined(value):
-            if raise_exc:
-                raise MandatoryInputError(inputs, name)
-            return False
-
         # Check whether mandatory inputs require others
-        if not check_requires(inputs, spec.requires):
+        if has_value and not check_requires(inputs, spec.requires):
             if raise_exc:
                 raise RequiredInputError(inputs, name)
             return False
