@@ -11,7 +11,6 @@ from nipype.interfaces import freesurfer as fs
 from nipype.interfaces.freesurfer import Info
 from nipype import LooseVersion
 from nipype.utils import errors as nue
-from nipype.utils.tests.test_cmd import capture_sys_output
 
 
 @pytest.mark.skipif(
@@ -156,7 +155,7 @@ def test_mandatory_outvol(create_files_in_directory):
 
 @pytest.mark.skipif(
     fs.no_freesurfer(), reason="freesurfer is not installed")
-def test_bbregister(create_files_in_directory):
+def test_bbregister(caplog, create_files_in_directory):
     filelist, outdir = create_files_in_directory
     bbr = fs.BBRegister()
 
@@ -164,11 +163,9 @@ def test_bbregister(create_files_in_directory):
     assert bbr.cmd == "bbregister"
 
     # cmdline issues a warning in this stats
-    with capture_sys_output() as (stdout, stderr):
-        assert bbr.cmdline is None
+    assert bbr.cmdline is None
 
-    captured = stdout.getvalue()
-    assert 'WARNING' in captured
+    captured = caplog.text
     assert 'Command line could not be generated' in captured
 
     # test raising error with mandatory args absent
@@ -181,9 +178,8 @@ def test_bbregister(create_files_in_directory):
 
     # Check that 'init' is mandatory in FS < 6, but not in 6+
     if Info.looseversion() < LooseVersion("6.0.0"):
-        with capture_sys_output() as (stdout, stderr):
-            assert bbr.cmdline is None
-        captured = stdout.getvalue()
+        assert bbr.cmdline is None
+        captured = caplog.text
         assert 'Command line could not be generated' in captured
 
         with pytest.raises(nue.VersionIOError):
