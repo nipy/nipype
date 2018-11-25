@@ -396,7 +396,6 @@ def check_xor(inputs, spec, value):
     if not spec.xor:
         return True
 
-    print(inputs)
     values = [isdefined(value)] + [
         isdefined(getattr(inputs, field)) for field in spec.xor]
     return sum(values)
