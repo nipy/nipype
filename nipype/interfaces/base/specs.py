@@ -408,7 +408,10 @@ def check_mandatory_inputs(inputs, raise_exc=True):
     for name, spec in list(inputs.traits(mandatory=True).items()):
         value = getattr(inputs, name)
         # Mandatory field is defined, check xor'ed inputs
-        xor = list(set([name] + (spec.xor or [])))
+        xor = spec.xor or []
+        xor = list(xor) if isinstance(xor, (list, tuple)) \
+            else [xor]
+        xor = list(set([name] + xor))
         cxor = check_xor(inputs, xor)
         if cxor != 1:
             if raise_exc:
