@@ -43,6 +43,7 @@ from .specs import (BaseInterfaceInputSpec, CommandLineInputSpec,
                     StdOutCommandLineInputSpec, MpiCommandLineInputSpec,
                     check_mandatory_inputs, check_version)
 from .support import (Bunch, InterfaceResult, NipypeInterfaceError)
+from .specs import get_filecopy_info
 
 from future import standard_library
 standard_library.install_aliases()
@@ -123,11 +124,15 @@ class Interface(object):
         """ List expected outputs"""
         raise NotImplementedError
 
-    def _get_filecopy_info(self):
-        """ Provides information about file inputs to copy or link to cwd.
-            Necessary for pipeline operation
+    @classmethod
+    def _get_filecopy_info(cls):
+        """Provides information about file inputs to copy or link to cwd.
+        Necessary for pipeline operation
         """
-        raise NotImplementedError
+        iflogger.warning(
+            '_get_filecopy_info member of Interface was deprecated '
+            'in nipype-1.1.6 and will be removed in 1.2.0')
+        return get_filecopy_info(cls)
 
 
 class BaseInterface(Interface):
@@ -330,19 +335,6 @@ class BaseInterface(Interface):
             outputs = self.output_spec()
 
         return outputs
-
-    @classmethod
-    def _get_filecopy_info(cls):
-        """ Provides information about file inputs to copy or link to cwd.
-            Necessary for pipeline operation
-        """
-        info = []
-        if cls.input_spec is None:
-            return info
-        metadata = dict(copyfile=lambda t: t is not None)
-        for name, spec in sorted(cls.input_spec().traits(**metadata).items()):
-            info.append(dict(key=name, copy=spec.copyfile))
-        return info
 
     def _run_interface(self, runtime):
         """ Core function that executes interface

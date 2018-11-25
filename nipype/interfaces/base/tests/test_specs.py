@@ -18,7 +18,7 @@ from ..specs import (
 from ....interfaces import fsl
 from ...utility.wrappers import Function
 from ....pipeline import Node
-
+from ..specs import get_filecopy_info
 
 standard_library.install_aliases()
 
@@ -439,6 +439,47 @@ def test_ImageFile():
     x.nocompress = 'test.mgh'
 
 
+def test_filecopy_info():
+    class InputSpec(nib.TraitedSpec):
+        foo = nib.traits.Int(desc='a random int')
+        goo = nib.traits.Int(desc='a random int', mandatory=True)
+        moo = nib.traits.Int(desc='a random int', mandatory=False)
+        hoo = nib.traits.Int(desc='a random int', usedefault=True)
+        zoo = nib.File(desc='a file', copyfile=False)
+        woo = nib.File(desc='a file', copyfile=True)
+
+    class DerivedInterface(nib.BaseInterface):
+        input_spec = InputSpec
+        resource_monitor = False
+        def normalize_filenames(self):
+            """A mock normalize_filenames for freesurfer interfaces that have one"""
+            self.inputs.zoo = 'normalized_filename.ext'
+
+    assert get_filecopy_info(nib.BaseInterface) == []
+
+    # Test on interface class, not instantiated
+    info = get_filecopy_info(DerivedInterface)
+    assert info[0]['key'] == 'woo'
+    assert info[0]['copy']
+    assert info[1]['key'] == 'zoo'
+    assert not info[1]['copy']
+    info = None
+
+    # Test with instantiated interface
+    derived = DerivedInterface()
+    # First check that zoo is not defined
+    assert derived.inputs.zoo == Undefined
+    # After the first call to get_filecopy_info zoo is defined
+    info = get_filecopy_info(derived)
+    # Ensure that normalize_filenames was called
+    assert derived.inputs.zoo == 'normalized_filename.ext'
+    # Check the results are consistent
+    assert info[0]['key'] == 'woo'
+    assert info[0]['copy']
+    assert info[1]['key'] == 'zoo'
+    assert not info[1]['copy']
+
+
 def test_inputs_checks():
 
     class InputSpec(nib.TraitedSpec):
@@ -500,7 +541,6 @@ def test_inputs_checks():
             DerivedInterface(goo=1, woo=1).inputs)
     with pytest.raises(MutuallyExclusiveInputError):
         DerivedInterface(goo=1, woo=1).run()
-
 
 
 def test_input_version():

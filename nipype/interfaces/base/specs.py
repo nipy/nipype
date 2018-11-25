@@ -13,6 +13,7 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
 import os
+from inspect import isclass
 from copy import deepcopy
 from warnings import warn
 from builtins import str, bytes
@@ -379,7 +380,24 @@ class MpiCommandLineInputSpec(CommandLineInputSpec):
                          "SGE)")
 
 
-def check_requires(inputs, requires, value):
+def get_filecopy_info(cls):
+    """Provides information about file inputs to copy or link to cwd.
+    Necessary for pipeline operation
+    """
+    if cls.input_spec is None:
+        return None
+
+    # normalize_filenames is not a classmethod, hence check first
+    if not isclass(cls) and hasattr(cls, 'normalize_filenames'):
+        cls.normalize_filenames()
+    info = []
+    inputs = cls.input_spec() if isclass(cls) else cls.inputs
+    metadata = dict(copyfile=lambda t: t is not None)
+    for name, spec in sorted(inputs.traits(**metadata).items()):
+        info.append(dict(key=name, copy=spec.copyfile))
+    return info
+
+def check_requires(inputs, requires):
     """check if required inputs are satisfied
     """
     if not requires:
@@ -426,7 +444,7 @@ def check_mandatory_inputs(inputs, raise_exc=True):
             return False
 
         # Check whether mandatory inputs require others
-        if not check_requires(inputs, spec.requires, value):
+        if not check_requires(inputs, spec.requires):
             if raise_exc:
                 raise RequiredInputError(inputs, name)
             return False
@@ -435,7 +453,7 @@ def check_mandatory_inputs(inputs, raise_exc=True):
     for name, spec in list(
             inputs.traits(mandatory=None, transient=None).items()):
         value = getattr(inputs, name)  # value must be set to follow requires
-        if isdefined(value) and not check_requires(inputs, spec.requires, value):
+        if isdefined(value) and not check_requires(inputs, spec.requires):
             if raise_exc:
                 raise RequiredInputError(inputs, name)
 
