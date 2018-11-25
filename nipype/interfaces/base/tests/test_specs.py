@@ -14,7 +14,7 @@ from ...base import traits, Undefined
 from ....interfaces import fsl
 from ...utility.wrappers import Function
 from ....pipeline import Node
-from ..spec import get_filecopy_info
+from ..specs import get_filecopy_info
 
 standard_library.install_aliases()
 
