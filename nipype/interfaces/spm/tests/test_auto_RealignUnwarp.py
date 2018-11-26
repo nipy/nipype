@@ -8,11 +8,11 @@ def test_RealignUnwarp_inputs():
         est_basis_func=dict(field='uweoptions.basfcn', ),
         est_first_order_effects=dict(field='uweoptions.fot', ),
         est_jacobian_deformations=dict(field='uweoptions.jm', ),
-        est_num_of_interations=dict(
+        est_num_of_iterations=dict(
             field='uweoptions.noi',
             maxlen=1,
             minlen=1,
-            usedfault=True,
+            usedefault=True,
         ),
         est_re_est_mov_par=dict(field='uweoptions.rem', ),
         est_reg_factor=dict(
