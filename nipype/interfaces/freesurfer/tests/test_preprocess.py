@@ -162,7 +162,7 @@ def test_bbregister(caplog, create_files_in_directory):
     # make sure command gets called
     assert bbr.cmd == "bbregister"
 
-    # cmdline issues a warning in this stats
+    # cmdline issues a warning: mandatory inputs missing
     assert bbr.cmdline is None
 
     captured = caplog.text
