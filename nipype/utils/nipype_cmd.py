@@ -8,6 +8,7 @@ import inspect
 import sys
 
 from ..interfaces.base import Interface, InputMultiPath, traits
+from ..interfaces.base.support import get_trait_desc
 from .misc import str2bool
 
 
@@ -30,8 +31,7 @@ def add_options(parser=None, module=None, function=None):
         inputs = interface.input_spec()
         for name, spec in sorted(
                 interface.inputs.traits(transient=None).items()):
-            desc = "\n".join(interface._get_trait_desc(inputs, name,
-                                                       spec))[len(name) + 2:]
+            desc = "\n".join(get_trait_desc(inputs, name, spec))[len(name) + 2:]
             args = {}
 
             if spec.is_trait_type(traits.Bool):
