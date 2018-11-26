@@ -7,24 +7,26 @@ import os
 import pytest
 from nipype.testing.fixtures import create_files_in_directory
 
-from nipype.interfaces import freesurfer
+from nipype.interfaces import freesurfer as fs
 from nipype.interfaces.freesurfer import Info
 from nipype import LooseVersion
+from nipype.utils import errors as nue
 
 
 @pytest.mark.skipif(
-    freesurfer.no_freesurfer(), reason="freesurfer is not installed")
+    fs.no_freesurfer(), reason="freesurfer is not installed")
 def test_robustregister(create_files_in_directory):
     filelist, outdir = create_files_in_directory
 
-    reg = freesurfer.RobustRegister()
+    reg = fs.RobustRegister()
     cwd = os.getcwd()
 
     # make sure command gets called
     assert reg.cmd == 'mri_robust_register'
 
+    assert reg.cmdline is None
     # test raising error with mandatory args absent
-    with pytest.raises(ValueError):
+    with pytest.raises(nue.MandatoryInputError):
         reg.run()
 
     # .inputs based parameters setting
@@ -36,7 +38,7 @@ def test_robustregister(create_files_in_directory):
                            (cwd, filelist[0][:-4], filelist[0], filelist[1]))
 
     # constructor based parameter setting
-    reg2 = freesurfer.RobustRegister(
+    reg2 = fs.RobustRegister(
         source_file=filelist[0],
         target_file=filelist[1],
         outlier_sens=3.0,
@@ -49,17 +51,18 @@ def test_robustregister(create_files_in_directory):
 
 
 @pytest.mark.skipif(
-    freesurfer.no_freesurfer(), reason="freesurfer is not installed")
+    fs.no_freesurfer(), reason="freesurfer is not installed")
 def test_fitmsparams(create_files_in_directory):
     filelist, outdir = create_files_in_directory
 
-    fit = freesurfer.FitMSParams()
+    fit = fs.FitMSParams()
 
     # make sure command gets called
     assert fit.cmd == 'mri_ms_fitparms'
 
+    assert fit.cmdline is None
     # test raising error with mandatory args absent
-    with pytest.raises(ValueError):
+    with pytest.raises(nue.MandatoryInputError):
         fit.run()
 
     # .inputs based parameters setting
@@ -69,7 +72,7 @@ def test_fitmsparams(create_files_in_directory):
                                                          filelist[1], outdir)
 
     # constructor based parameter setting
-    fit2 = freesurfer.FitMSParams(
+    fit2 = fs.FitMSParams(
         in_files=filelist,
         te_list=[1.5, 3.5],
         flip_list=[20, 30],
@@ -80,17 +83,18 @@ def test_fitmsparams(create_files_in_directory):
 
 
 @pytest.mark.skipif(
-    freesurfer.no_freesurfer(), reason="freesurfer is not installed")
+    fs.no_freesurfer(), reason="freesurfer is not installed")
 def test_synthesizeflash(create_files_in_directory):
     filelist, outdir = create_files_in_directory
 
-    syn = freesurfer.SynthesizeFLASH()
+    syn = fs.SynthesizeFLASH()
 
     # make sure command gets called
     assert syn.cmd == 'mri_synthesize'
 
+    assert syn.cmdline is None
     # test raising error with mandatory args absent
-    with pytest.raises(ValueError):
+    with pytest.raises(nue.MandatoryInputError):
         syn.run()
 
     # .inputs based parameters setting
@@ -105,7 +109,7 @@ def test_synthesizeflash(create_files_in_directory):
                             os.path.join(outdir, 'synth-flash_30.mgz')))
 
     # constructor based parameters setting
-    syn2 = freesurfer.SynthesizeFLASH(
+    syn2 = fs.SynthesizeFLASH(
         t1_image=filelist[0], pd_image=filelist[1], flip_angle=20, te=5, tr=25)
     assert syn2.cmdline == ('mri_synthesize 25.00 20.00 5.000 %s %s %s' %
                             (filelist[0], filelist[1],
@@ -113,17 +117,18 @@ def test_synthesizeflash(create_files_in_directory):
 
 
 @pytest.mark.skipif(
-    freesurfer.no_freesurfer(), reason="freesurfer is not installed")
+    fs.no_freesurfer(), reason="freesurfer is not installed")
 def test_mandatory_outvol(create_files_in_directory):
     filelist, outdir = create_files_in_directory
-    mni = freesurfer.MNIBiasCorrection()
+    mni = fs.MNIBiasCorrection()
 
     # make sure command gets called
     assert mni.cmd == "mri_nu_correct.mni"
 
+    assert mni.cmdline is None
     # test raising error with mandatory args absent
-    with pytest.raises(ValueError):
-        mni.cmdline
+    with pytest.raises(nue.MandatoryInputError):
+        mni.run()
 
     # test with minimal args
     mni.inputs.in_file = filelist[0]
@@ -141,7 +146,7 @@ def test_mandatory_outvol(create_files_in_directory):
         'mri_nu_correct.mni --i %s --n 4 --o new_corrected_file.mgz' % (filelist[0]))
 
     # constructor based tests
-    mni2 = freesurfer.MNIBiasCorrection(
+    mni2 = fs.MNIBiasCorrection(
         in_file=filelist[0], out_file='bias_corrected_output', iterations=2)
     assert mni2.cmdline == (
         'mri_nu_correct.mni --i %s --n 2 --o bias_corrected_output' %
@@ -149,17 +154,23 @@ def test_mandatory_outvol(create_files_in_directory):
 
 
 @pytest.mark.skipif(
-    freesurfer.no_freesurfer(), reason="freesurfer is not installed")
-def test_bbregister(create_files_in_directory):
+    fs.no_freesurfer(), reason="freesurfer is not installed")
+def test_bbregister(caplog, create_files_in_directory):
     filelist, outdir = create_files_in_directory
-    bbr = freesurfer.BBRegister()
+    bbr = fs.BBRegister()
 
     # make sure command gets called
     assert bbr.cmd == "bbregister"
 
+    # cmdline issues a warning: mandatory inputs missing
+    assert bbr.cmdline is None
+
+    captured = caplog.text
+    assert 'Command line could not be generated' in captured
+
     # test raising error with mandatory args absent
-    with pytest.raises(ValueError):
-        bbr.cmdline
+    with pytest.raises(nue.MandatoryInputError):
+        bbr.run()
 
     bbr.inputs.subject_id = 'fsaverage'
     bbr.inputs.source_file = filelist[0]
@@ -167,10 +178,14 @@ def test_bbregister(create_files_in_directory):
 
     # Check that 'init' is mandatory in FS < 6, but not in 6+
     if Info.looseversion() < LooseVersion("6.0.0"):
-        with pytest.raises(ValueError):
-            bbr.cmdline
+        assert bbr.cmdline is None
+        captured = caplog.text
+        assert 'Command line could not be generated' in captured
+
+        with pytest.raises(nue.VersionIOError):
+            bbr.run()
     else:
-        bbr.cmdline
+        assert bbr.cmdline is not None
 
     bbr.inputs.init = 'fsl'
 
@@ -187,5 +202,5 @@ def test_bbregister(create_files_in_directory):
 def test_FSVersion():
     """Check that FSVersion is a string that can be compared with LooseVersion
     """
-    assert isinstance(freesurfer.preprocess.FSVersion, str)
-    assert LooseVersion(freesurfer.preprocess.FSVersion) >= LooseVersion("0")
+    assert isinstance(fs.preprocess.FSVersion, str)
+    assert LooseVersion(fs.preprocess.FSVersion) >= LooseVersion("0")

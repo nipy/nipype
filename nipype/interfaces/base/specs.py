@@ -20,6 +20,9 @@ from builtins import str, bytes
 from packaging.version import Version
 
 from ...utils.filemanip import md5, hash_infile, hash_timestamp, to_str
+from ...utils.errors import (
+    MandatoryInputError, MutuallyExclusiveInputError, RequiredInputError,
+    VersionIOError)
 from .traits_extension import (
     traits,
     Undefined,
@@ -115,9 +118,8 @@ class BaseTraitedSpec(traits.HasTraits):
                         trait_change_notify=False, **{
                             '%s' % name: Undefined
                         })
-                    msg = ('Input "%s" is mutually exclusive with input "%s", '
-                           'which is already set') % (name, trait_name)
-                    raise IOError(msg)
+                    raise MutuallyExclusiveInputError(
+                        self, name, name_other=trait_name)
 
     def _deprecated_warn(self, obj, name, old, new):
         """Checks if a user assigns a value to a deprecated trait
@@ -394,3 +396,117 @@ def get_filecopy_info(cls):
     for name, spec in sorted(inputs.traits(**metadata).items()):
         info.append(dict(key=name, copy=spec.copyfile))
     return info
+
+def check_requires(inputs, requires):
+    """check if required inputs are satisfied
+    """
+    if not requires:
+        return True
+
+    # Check value and all required inputs' values defined
+    values = [isdefined(getattr(inputs, field))
+              for field in requires]
+    return all(values)
+
+def check_xor(inputs, name, xor):
+    """ check if mutually exclusive inputs are satisfied
+    """
+    if len(xor) == 0:
+        return True
+
+    values = [isdefined(getattr(inputs, name))]
+    values += [any([isdefined(getattr(inputs, field))
+               for field in xor])]
+    return sum(values)
+
+def check_mandatory_inputs(inputs, raise_exc=True):
+    """ Raises an exception if a mandatory input is Undefined
+    """
+    # Check mandatory, not xor-ed inputs.
+    for name, spec in list(inputs.traits(mandatory=True).items()):
+        value = getattr(inputs, name)
+        # Mandatory field is defined, check xor'ed inputs
+        xor = spec.xor or []
+        has_xor = bool(xor)
+        has_value = isdefined(value)
+
+        # Simplest case: no xor metadata and not defined
+        if not has_xor and not has_value:
+            if raise_exc:
+                raise MandatoryInputError(inputs, name)
+            return False
+
+        xor = set(list(xor) if isinstance(xor, (list, tuple))
+                  else [xor])
+        xor.discard(name)
+        xor = list(xor)
+        cxor = check_xor(inputs, name, xor)
+        if cxor != 1:
+            if raise_exc:
+                raise MutuallyExclusiveInputError(
+                    inputs, name, values_defined=cxor)
+            return False
+
+        # Check whether mandatory inputs require others
+        if has_value and not check_requires(inputs, spec.requires):
+            if raise_exc:
+                raise RequiredInputError(inputs, name)
+            return False
+
+    # Check requirements of non-mandatory inputs
+    for name, spec in list(
+            inputs.traits(mandatory=None, transient=None).items()):
+        value = getattr(inputs, name)  # value must be set to follow requires
+        if isdefined(value) and not check_requires(inputs, spec.requires):
+            if raise_exc:
+                raise RequiredInputError(inputs, name)
+
+    return True
+
+def check_version(traited_spec, version=None, raise_exc=True):
+    """ Raises an exception on version mismatch
+    """
+
+    # no version passed on to check against
+    if not version:
+        return []
+
+    # check minimum version
+    names = traited_spec.trait_names(
+        min_ver=lambda t: t is not None) + \
+        traited_spec.trait_names(
+        max_ver=lambda t: t is not None)
+
+    # no traits defined any versions
+    if not names:
+        return []
+
+    version = Version(str(version))
+    unavailable_traits = []
+    for name in names:
+        value_set = isdefined(getattr(traited_spec, name))
+        min_ver = traited_spec.traits()[name].min_ver
+        if min_ver:
+            min_ver = Version(str(min_ver))
+
+        max_ver = traited_spec.traits()[name].max_ver
+        if max_ver:
+            max_ver = Version(str(max_ver))
+
+        if min_ver and max_ver:
+            if max_ver < min_ver:
+                raise AssertionError(
+                    'Trait "%s" (%s) has incongruent version metadata '
+                    '(``max_ver`` is lower than ``min_ver``).' % (
+                        traited_spec.__class__.__name__, name))
+
+        if min_ver and (min_ver > version):
+            unavailable_traits.append(name)
+            if value_set and raise_exc:
+                raise VersionIOError(traited_spec, name, version)
+        if max_ver and (max_ver < version):
+            unavailable_traits.append(name)
+            if value_set and raise_exc:
+                raise VersionIOError(traited_spec, name, version)
+
+    return list(set(unavailable_traits))

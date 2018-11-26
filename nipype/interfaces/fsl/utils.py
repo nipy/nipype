@@ -238,16 +238,29 @@ class Smooth(FSLCommand):
     >>> sm.cmdline # doctest: +ELLIPSIS
     'fslmaths functional2.nii -kernel gauss 3.397 -fmean functional2_smooth.nii.gz'
 
-    One of sigma or fwhm must be set:
+    One of sigma or fwhm must be set. Accessing the ``cmdline`` property
+    will return ``None`` and issue a warning:
 
     >>> from nipype.interfaces.fsl import Smooth
     >>> sm = Smooth()
     >>> sm.inputs.output_type = 'NIFTI_GZ'
     >>> sm.inputs.in_file = 'functional2.nii'
-    >>> sm.cmdline #doctest: +ELLIPSIS
+    >>> sm.cmdline is None  # doctest: +ELLIPSIS
+    True
+
+    The warning is: ::
+        181125-08:12:09,489 nipype.interface WARNING:
+            Some inputs are not valid. Please make sure all mandatory
+            inputs, required inputs and mutually-exclusive inputs are
+            set or in a sane state.
+
+    Attempting to run the interface without the necessary inputs will
+    lead to an error (in this case, a ``MutuallyExclusiveInputError``):
+
+    >>> sm.run()  # doctest: +ELLIPSIS
     Traceback (most recent call last):
-     ...
-    ValueError: Smooth requires a value for one of the inputs ...
+        ...
+    MutuallyExclusiveInputError: Interface ...
 
     """
 

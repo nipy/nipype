@@ -107,7 +107,7 @@ NUMPY_MIN_VERSION = '1.9.0' if sys.version_info < (3, 7) else '1.15.4'
 SCIPY_MIN_VERSION = '0.14'
 TRAITS_MIN_VERSION = '4.6'
 DATEUTIL_MIN_VERSION = '2.2'
-PYTEST_MIN_VERSION = '3.0'
+PYTEST_MIN_VERSION = '3.4'
 FUTURE_MIN_VERSION = '0.16.0'
 SIMPLEJSON_MIN_VERSION = '3.8.0'
 PROV_VERSION = '1.5.2'
@@ -157,7 +157,12 @@ REQUIRES = [
 if sys.version_info <= (3, 4):
     REQUIRES.append('configparser')
 
-TESTS_REQUIRES = ['pytest-cov', 'codecov', 'pytest-env', 'coverage<5']
+TESTS_REQUIRES = [
+    'pytest-cov',
+    'pytest-env',
+    'codecov',
+    'coverage<5',
+]
 
 EXTRA_REQUIRES = {
     'doc': ['Sphinx>=1.4', 'numpydoc', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],

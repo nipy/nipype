@@ -28,7 +28,7 @@ from textwrap import wrap
 import simplejson as json
 from dateutil.parser import parse as parseutc
 
-from ... import config, logging, LooseVersion
+from ... import config, logging
 from ...utils.provenance import write_provenance
 from ...utils.misc import trim, str2bool, rgetcwd
 from ...utils.filemanip import (FileNotFoundError, split_filename,
@@ -39,7 +39,8 @@ from ...external.due import due
 
 from .traits_extension import traits, isdefined, TraitError
 from .specs import (BaseInterfaceInputSpec, CommandLineInputSpec,
-                    StdOutCommandLineInputSpec, MpiCommandLineInputSpec)
+                    StdOutCommandLineInputSpec, MpiCommandLineInputSpec,
+                    check_mandatory_inputs, check_version)
 from .support import (Bunch, InterfaceResult, NipypeInterfaceError)
 from .specs import get_filecopy_info
 
@@ -334,93 +335,6 @@ class BaseInterface(Interface):
 
         return outputs
 
-    def _check_requires(self, spec, name, value):
-        """ check if required inputs are satisfied
-        """
-        if spec.requires:
-            values = [
-                not isdefined(getattr(self.inputs, field))
-                for field in spec.requires
-            ]
-            if any(values) and isdefined(value):
-                msg = ("%s requires a value for input '%s' because one of %s "
-                       "is set. For a list of required inputs, see %s.help()" %
-                       (self.__class__.__name__, name,
-                        ', '.join(spec.requires), self.__class__.__name__))
-                raise ValueError(msg)
-
-    def _check_xor(self, spec, name, value):
-        """ check if mutually exclusive inputs are satisfied
-        """
-        if spec.xor:
-            values = [
-                isdefined(getattr(self.inputs, field)) for field in spec.xor
-            ]
-            if not any(values) and not isdefined(value):
-                msg = ("%s requires a value for one of the inputs '%s'. "
-                       "For a list of required inputs, see %s.help()" %
-                       (self.__class__.__name__, ', '.join(spec.xor),
-                        self.__class__.__name__))
-                raise ValueError(msg)
-
-    def _check_mandatory_inputs(self):
-        """ Raises an exception if a mandatory input is Undefined
-        """
-        for name, spec in list(self.inputs.traits(mandatory=True).items()):
-            value = getattr(self.inputs, name)
-            self._check_xor(spec, name, value)
-            if not isdefined(value) and spec.xor is None:
-                msg = ("%s requires a value for input '%s'. "
-                       "For a list of required inputs, see %s.help()" %
-                       (self.__class__.__name__, name,
-                        self.__class__.__name__))
-                raise ValueError(msg)
-            if isdefined(value):
-                self._check_requires(spec, name, value)
-        for name, spec in list(
-                self.inputs.traits(mandatory=None, transient=None).items()):
-            self._check_requires(spec, name, getattr(self.inputs, name))
-
-    def _check_version_requirements(self, trait_object, raise_exception=True):
-        """ Raises an exception on version mismatch
-        """
-        unavailable_traits = []
-        # check minimum version
-        check = dict(min_ver=lambda t: t is not None)
-        names = trait_object.trait_names(**check)
-
-        if names and self.version:
-            version = LooseVersion(str(self.version))
-            for name in names:
-                min_ver = LooseVersion(
-                    str(trait_object.traits()[name].min_ver))
-                if min_ver > version:
-                    unavailable_traits.append(name)
-                    if not isdefined(getattr(trait_object, name)):
-                        continue
-                    if raise_exception:
-                        raise Exception(
-                            'Trait %s (%s) (version %s < required %s)' %
-                            (name, self.__class__.__name__, version, min_ver))
-
-        # check maximum version
-        check = dict(max_ver=lambda t: t is not None)
-        names = trait_object.trait_names(**check)
-        if names and self.version:
-            version = LooseVersion(str(self.version))
-            for name in names:
-                max_ver = LooseVersion(
-                    str(trait_object.traits()[name].max_ver))
-                if max_ver < version:
-                    unavailable_traits.append(name)
-                    if not isdefined(getattr(trait_object, name)):
-                        continue
-                    if raise_exception:
-                        raise Exception(
-                            'Trait %s (%s) (version %s > required %s)' %
-                            (name, self.__class__.__name__, version, max_ver))
-        return unavailable_traits
-
     def _run_interface(self, runtime):
         """ Core function that executes interface
         """
@@ -465,8 +379,8 @@ class BaseInterface(Interface):
 
         enable_rm = config.resource_monitor and self.resource_monitor
         self.inputs.trait_set(**inputs)
-        self._check_mandatory_inputs()
-        self._check_version_requirements(self.inputs)
+        check_mandatory_inputs(self.inputs)
+        check_version(self.inputs, version=self.version)
         interface = self.__class__
         self._duecredit_cite()
 
@@ -592,8 +506,8 @@ class BaseInterface(Interface):
         if predicted_outputs:
             _unavailable_outputs = []
             if outputs:
-                _unavailable_outputs = \
-                    self._check_version_requirements(self._outputs())
+                _unavailable_outputs = check_version(
+                    self._outputs(), self.version)
             for key, val in list(predicted_outputs.items()):
                 if needed_outputs and key not in needed_outputs:
                     continue
@@ -812,7 +726,14 @@ class CommandLine(BaseInterface):
     def cmdline(self):
         """ `command` plus any arguments (args)
         validates arguments and generates command line"""
-        self._check_mandatory_inputs()
+        if not check_mandatory_inputs(self.inputs, raise_exc=False):
+            iflogger.warning(
+                'Command line could not be generated because some inputs '
+                'are not valid. Please make sure all mandatory inputs, '
+                'required inputs and mutually-exclusive inputs are set '
+                'or in a sane state.')
+            return None
+
         allargs = [self._cmd_prefix + self.cmd] + self._parse_inputs()
         return ' '.join(allargs)
 
