@@ -24,7 +24,10 @@ class MutuallyExclusiveInputError(ValueError):
         classname = _classname_from_spec(inputspec)
 
         if values_defined is not None:
-            xor = list(set([name]+ inputspec.traits()[name].xor))
+            xor = inputspec.traits()[name].xor or []
+            xor = set(list(xor) if isinstance(xor, (list, tuple))
+                      else [xor])
+            xor.add(name)
             msg = ('Interface "{classname}" has mutually-exclusive inputs '
                    '(processing "{name}", with value={value}). '
                    'Exactly one of ({xor}) should be set, but {n:d} were set. '

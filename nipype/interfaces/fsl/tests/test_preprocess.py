@@ -15,6 +15,7 @@ from .. import preprocess as fsl
 from nipype.interfaces.fsl import Info
 from nipype.interfaces.base import File, TraitError, Undefined, isdefined
 from nipype.interfaces.fsl import no_fsl
+from nipype.utils import errors as nue
 
 
 def fsl_name(obj, fname):
@@ -39,7 +40,7 @@ def test_bet(setup_infile):
     assert better.cmd == 'bet'
 
     # Test raising error with mandatory args absent
-    with pytest.raises(ValueError):
+    with pytest.raises(nue.MandatoryInputError):
         better.run()
 
     # Test generated outfile name
@@ -195,7 +196,7 @@ def setup_flirt(tmpdir):
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
-def test_flirt(setup_flirt):
+def test_flirt(caplog, setup_flirt):
     # setup
     tmpdir, infile, reffile = setup_flirt
 
@@ -230,12 +231,24 @@ def test_flirt(setup_flirt):
 
     flirter = fsl.FLIRT()
     # infile not specified
-    with pytest.raises(ValueError):
-        flirter.cmdline
+    assert flirter.cmdline is None
+    captured = caplog.text
+    assert 'Command line could not be generated' in captured
+
+    # interface should raise error with mandatory inputs unset
+    with pytest.raises(nue.MandatoryInputError):
+        flirter.run()
+
     flirter.inputs.in_file = infile
     # reference not specified
-    with pytest.raises(ValueError):
-        flirter.cmdline
+    assert flirter.cmdline is None
+    captured = caplog.text
+    assert 'Command line could not be generated' in captured
+
+    # interface should raise error with reference still unset
+    with pytest.raises(nue.MandatoryInputError):
+        flirter.run()
+
     flirter.inputs.reference = reffile
 
     # Generate outfile and outmatrix
@@ -380,10 +393,10 @@ def test_mcflirt_opt(setup_flirt):
 def test_mcflirt_noinput():
     # Test error is raised when missing required args
     fnt = fsl.MCFLIRT()
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(nue.MandatoryInputError) as excinfo:
         fnt.run()
     assert str(excinfo.value).startswith(
-        "MCFLIRT requires a value for input 'in_file'")
+        'Interface "MCFLIRT" requires a value for input in_file.')
 
 
 # test fnirt
@@ -441,9 +454,9 @@ def test_fnirt(setup_flirt):
                                                 iout)
         assert fnirt.cmdline == cmd
 
-    # Test ValueError is raised when missing mandatory args
+    # Test nue.MandatoryInputError is raised when missing mandatory args
     fnirt = fsl.FNIRT()
-    with pytest.raises(ValueError):
+    with pytest.raises(nue.MandatoryInputError):
         fnirt.run()
     fnirt.inputs.in_file = infile
     fnirt.inputs.ref_file = reffile
