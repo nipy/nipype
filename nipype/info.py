@@ -136,7 +136,7 @@ PROVIDES = ['nipype']
 REQUIRES = [
     'nibabel>=%s' % NIBABEL_MIN_VERSION,
     'networkx>=%s' % NETWORKX_MIN_VERSION,
-    'numpy>=%s' % NUMPY_MIN_VERSION,
+    'numpy>=%s ; python_version < "3.7"' % NUMPY_MIN_VERSION,
     'numpy>=%s ; python_version >= "3.7"' % NUMPY_MIN_VERSION_37,
     'python-dateutil>=%s' % DATEUTIL_MIN_VERSION,
     'scipy>=%s' % SCIPY_MIN_VERSION,
