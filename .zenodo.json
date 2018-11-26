@@ -381,6 +381,11 @@
       "name": "Hallquist, Michael"
     },
     {
+      "affiliation": "GIGA Institute",
+      "name": "Grignard, Martin",
+      "orcid": "0000-0001-5549-1861"
+    },
+    {
       "affiliation": "Donders Institute for Brain, Cognition and Behavior, Center for Cognitive Neuroimaging",
       "name": "Chetverikov, Andrey",
       "orcid": "0000-0003-2767-6310"
@@ -455,9 +460,6 @@
       "name": "Mertz, Fred"
     },
     {
-      "name": "Haehn, Daniel"
-    },
-    {
       "affiliation": "Technische Universit\u00e4t Dresden, Faculty of Medicine, Department of Child and Adolescent Psychiatry",
       "name": "Geisler, Daniel",
       "orcid": "0000-0003-2076-5329"
@@ -480,6 +482,9 @@
       "affiliation": "Technical University Munich",
       "name": "Molina-Romero, Miguel",
       "orcid": "0000-0001-8054-0426"
+    },
+    {
+      "name": "Haehn, Daniel"
     },
     {
       "name": "Weinstein, Alejandro"
@@ -587,11 +592,6 @@
       "affiliation": "MIT, HMS",
       "name": "Ghosh, Satrajit",
       "orcid": "0000-0002-5312-6729"
-    },
-    {
-      "affiliation": "GIGA Institute",
-      "name": "Grignard, Martin",
-      "orcid": "0000-0001-5549-1861"
     }
   ],
   "keywords": [
