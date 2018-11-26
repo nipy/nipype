@@ -15,10 +15,10 @@ docstring = docparse.get_doc(better.cmd, better.opt_map)
 """
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
-from builtins import str, open, bytes
-
 import subprocess
-from ..interfaces.base import CommandLine
+from builtins import str, bytes
+
+from .filemanip import which
 from .misc import is_container
 
 
@@ -252,15 +252,10 @@ def get_doc(cmd, opt_map, help_flag=None, trap_error=True):
         The formated docstring
 
     """
-    res = CommandLine(
-        'which %s' % cmd.split(' ')[0],
-        resource_monitor=False,
-        terminal_output='default').run()
-    with open(res.runtime.stdout, 'rt') as f:
-        stdout = f.read()
-    cmd_path = stdout.strip()
-    if cmd_path == '':
-        raise Exception('Command %s not found' % cmd.split(' ')[0])
+    cmd_exec = cmd.split()[0]
+    cmd_path = which(cmd_exec)
+    if not cmd_path:
+        raise Exception('Command %s not found' % cmd_exec)
     if help_flag:
         cmd = ' '.join((cmd, help_flag))
     doc = grab_doc(cmd, trap_error)
@@ -334,14 +329,9 @@ def get_params_from_doc(cmd, style='--', help_flag=None, trap_error=True):
         Contains a mapping from input to command line variables
 
     """
-    res = CommandLine(
-        'which %s' % cmd.split(' ')[0],
-        resource_monitor=False,
-        terminal_output='default').run()
-    with open(res.runtime.stdout, 'rt') as f:
-        stdout = f.read()
-    cmd_path = stdout.strip()
-    if cmd_path == '':
+    cmd_exec = cmd.split()[0]
+    cmd_path = which(cmd_exec)
+    if not cmd_path:
         raise Exception('Command %s not found' % cmd.split(' ')[0])
     if help_flag:
         cmd = ' '.join((cmd, help_flag))

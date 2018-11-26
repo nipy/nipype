@@ -4,7 +4,6 @@
 """Provide interface to AFNI commands."""
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
-from builtins import object, str
 from future.utils import raise_from
 
 import os
@@ -12,7 +11,7 @@ from sys import platform
 from distutils import spawn
 
 from ... import logging, LooseVersion
-from ...utils.filemanip import split_filename, fname_presuffix
+from ...utils.filemanip import split_filename, fname_presuffix, which
 
 from ..base import (CommandLine, traits, CommandLineInputSpec, isdefined, File,
                     TraitedSpec, PackageInfo)
@@ -85,17 +84,12 @@ class Info(PackageInfo):
         '''Grab an image from the standard location.
 
         Could be made more fancy to allow for more relocatability'''
-        clout = CommandLine(
-            'which afni',
-            terminal_output='default',
-            ignore_exception=True,
-            resource_monitor=False).run()
-        if clout.runtime.returncode is not 0:
+
+        afni_path = which('afni')
+        if not afni_path:
             return None
 
-        with open(clout.runtime.stdout, 'rt') as f:
-            out = f.read().strip()
-        basedir = os.path.split(out)[0]
+        basedir = os.path.split(afni_path)[0]
         return os.path.join(basedir, img_name)
 
 

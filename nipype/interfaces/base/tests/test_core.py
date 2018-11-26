@@ -159,7 +159,8 @@ def test_BaseInterface_load_save_inputs(tmpdir):
     assert '8562a5623562a871115eb14822ee8d02' == hashvalue
 
 
-def test_stop_on_unknown_version():
+def test_stop_on_unknown_version(tmpdir):
+    tmpdir.chdir()
     config.set('execution', 'stop_on_unknown_version', True)
 
     ci = nib.CommandLine(command='which')

@@ -140,10 +140,11 @@ class RuntimeMonitor(threading.Thread):
             cwd = mkdtemp()
 
         self._runtime.cwd = cwd
+        name = self._runtime.cmdline.split()[0].split('/')[-1]
         self._runtime.stdout = getattr(
-            self._runtime, 'stdout', os.path.join(cwd, '.nipype.out'))
+            self._runtime, 'stdout', os.path.join(cwd, '.%s.out' % name))
         self._runtime.stderr = getattr(
-            self._runtime, 'stderr', os.path.join(cwd, '.nipype.err'))
+            self._runtime, 'stderr', os.path.join(cwd, '.%s.err' % name))
 
         # Open file descriptors and get number
         self._stdoutfh = open(self._runtime.stdout, 'wb')
