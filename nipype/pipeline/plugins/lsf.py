@@ -117,8 +117,8 @@ class LSFPlugin(SGELikeBatchManagerBase):
         if match:
             taskid = int(match.groups()[0])
         else:
-            raise ScriptError("Can't parse submission job output id: %s" %
-                              result.runtime.stdout)
+            raise IOError("Can't parse submission job output id: %s" %
+                          result.runtime.stdout)
         self._pending[taskid] = node.output_dir()
         logger.debug('submitted lsf task: %d for node %s' % (taskid, node._id))
         return taskid
