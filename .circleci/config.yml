@@ -360,8 +360,11 @@ jobs:
           name: Validate Python 3.7 installation
           command: |
             pyenv local 3.7.0
+            pip install --upgrade pip
+            # Pre-install a version of numpy that will not pass
+            pip install numpy==1.15.0
             pip install dist/nipype-*-py2.py3-none-any.whl
-            # Futures should not install in Python 3
+            # Numpy should be upgraded to >= 1.15.3
             test "$(pip show numpy | grep Version)" \> "Version: 1.15.2"
       - store_artifacts:
           path: /home/circleci/nipype/dist
