@@ -113,7 +113,7 @@ class LSFPlugin(SGELikeBatchManagerBase):
                 break
         iflogger.setLevel(oldlevel)
         # retrieve lsf taskid
-        match = re.search('<(\d*)>', result.runtime.stdout)
+        match = re.search(r'<(\d*)>', result.runtime.stdout)
         if match:
             taskid = int(match.groups()[0])
         else:
