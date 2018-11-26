@@ -1298,9 +1298,11 @@ class MRIsCombine(FSSurfaceCommand):
 
         return outputs
 
-    def _normalize_filenames(self):
-        """ In a Node context, interpret out_file as a literal path to
-        reduce surprise.
+    def normalize_filenames(self):
+        """
+        Filename normalization routine to perform only when run in Node
+        context.
+        Interpret out_file as a literal path to reduce surprise.
         """
         if isdefined(self.inputs.out_file):
             self.inputs.out_file = os.path.abspath(self.inputs.out_file)
@@ -3849,8 +3851,11 @@ class MRIsExpand(FSSurfaceCommand):
                                                     self.inputs.out_name)
         return outputs
 
-    def _normalize_filenames(self):
-        """ Find full paths for pial, thickness and sphere files for copying
+    def normalize_filenames(self):
+        """
+        Filename normalization routine to perform only when run in Node
+        context.
+        Find full paths for pial, thickness and sphere files for copying.
         """
         in_file = self.inputs.in_file
 

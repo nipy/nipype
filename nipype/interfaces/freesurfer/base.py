@@ -189,16 +189,6 @@ class FSSurfaceCommand(FSCommand):
     including the full path in the filename, we can also avoid this behavior.
     """
 
-    def _get_filecopy_info(self):
-        self._normalize_filenames()
-        return super(FSSurfaceCommand, self)._get_filecopy_info()
-
-    def _normalize_filenames(self):
-        """Filename normalization routine to perform only when run in Node
-        context
-        """
-        pass
-
     @staticmethod
     def _associated_file(in_file, out_name):
         """Based on MRIsBuildFileName in freesurfer/utils/mrisurf.c
