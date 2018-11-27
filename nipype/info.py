@@ -11,7 +11,7 @@ import sys
 # full release.  '.dev' as a version_extra string means this is a development
 # version
 # Remove -dev for release
-__version__ = '1.1.6-dev'
+__version__ = '1.1.7-dev'
 
 
 def get_nipype_gitversion():
@@ -101,9 +101,10 @@ existing pipeline systems.
 # versions
 NIBABEL_MIN_VERSION = '2.1.0'
 NETWORKX_MIN_VERSION = '1.9'
+NUMPY_MIN_VERSION = '1.9.0'
 # Numpy bug in python 3.7:
 # https://www.opensourceanswers.com/blog/you-shouldnt-use-python-37-for-data-science-right-now.html
-NUMPY_MIN_VERSION = '1.9.0' if sys.version_info < (3, 7) else '1.15.4'
+NUMPY_MIN_VERSION_37 = '1.15.3'
 SCIPY_MIN_VERSION = '0.14'
 TRAITS_MIN_VERSION = '4.6'
 DATEUTIL_MIN_VERSION = '2.2'
@@ -135,7 +136,8 @@ PROVIDES = ['nipype']
 REQUIRES = [
     'nibabel>=%s' % NIBABEL_MIN_VERSION,
     'networkx>=%s' % NETWORKX_MIN_VERSION,
-    'numpy>=%s' % NUMPY_MIN_VERSION,
+    'numpy>=%s ; python_version < "3.7"' % NUMPY_MIN_VERSION,
+    'numpy>=%s ; python_version >= "3.7"' % NUMPY_MIN_VERSION_37,
     'python-dateutil>=%s' % DATEUTIL_MIN_VERSION,
     'scipy>=%s' % SCIPY_MIN_VERSION,
     'traits>=%s' % TRAITS_MIN_VERSION,
