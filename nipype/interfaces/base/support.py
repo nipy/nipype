@@ -54,14 +54,24 @@ class InterfaceRuntime(object):
     >>> import pickle
     >>> pickleds = pickle.dumps(rt)
     >>> newrt = pickle.loads(pickleds)
+    >>> newrt
+    Bunch(cmdline='/bin/echo', cwd='/scratch/workflow', returncode=0)
+
+    Runtime objects can be compared
+
     >>> newrt == rt
     True
 
     >>> newrt != rt
     False
 
-    >>> newrt
-    Bunch(cmdline='/bin/echo', cwd='/scratch/workflow', returncode=0)
+
+    >>> newrt != 'other'
+    True
+
+    >>> newrt == 'other'
+    False
+
 
     """
 
@@ -143,8 +153,9 @@ class InterfaceRuntime(object):
         """representation of the runtime object"""
         return _repr_formatter(self)
 
-    def __str__(self):
-        return '%s' % self.__getstate__()
+    # Enable when Python 2 support is dropped
+    # def __str__(self):
+    #     return '%s' % self.__getstate__()
 
     def __eq__(self, other):
         """Overrides the default implementation"""
