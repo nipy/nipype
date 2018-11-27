@@ -41,7 +41,6 @@ from .traits_extension import traits, isdefined, TraitError
 from .specs import (BaseInterfaceInputSpec, CommandLineInputSpec,
                     StdOutCommandLineInputSpec, MpiCommandLineInputSpec,
                     get_filecopy_info)
-
 from .support import (Bunch, InterfaceResult, NipypeInterfaceError,
                       format_help)
 

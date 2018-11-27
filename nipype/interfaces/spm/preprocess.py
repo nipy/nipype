@@ -524,12 +524,12 @@ class RealignUnwarpInputSpec(SPMCommandInputSpec):
     est_re_est_mov_par = traits.Bool(
         field='uweoptions.rem',
         desc='Re-estimate movement parameters at each unwarping iteration.')
-    est_num_of_interations = traits.ListInt(
+    est_num_of_iterations = traits.ListInt(
         [5], 
         field='uweoptions.noi',
         minlen=1, 
         maxlen=1, 
-        usedfault=True,
+        usedefault=True,
         desc='Number of iterations.')
     est_taylor_expansion_point = traits.String(
         'Average', 
