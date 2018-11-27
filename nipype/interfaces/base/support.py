@@ -141,22 +141,7 @@ class InterfaceRuntime(object):
 
     def __repr__(self):
         """representation of the runtime object"""
-        outstr = ['Bunch(']
-        first = True
-        for k, v in sorted(self.items()):
-            if not first:
-                outstr.append(', ')
-            if isinstance(v, dict):
-                pairs = []
-                for key, value in sorted(v.items()):
-                    pairs.append("'%s': %s" % (key, value))
-                v = '{' + ', '.join(pairs) + '}'
-                outstr.append('%s=%s' % (k, v))
-            else:
-                outstr.append('%s=%r' % (k, v))
-            first = False
-        outstr.append(')')
-        return ''.join(outstr)
+        return _repr_formatter(self)
 
     def __str__(self):
         return '%s' % self.__getstate__()
@@ -200,6 +185,17 @@ class InterfaceResult(object):
         * stderr : Any error messages output from running ``cmdline``.
         * returncode : The code returned from running the ``cmdline``.
 
+
+    >>> rt = InterfaceRuntime(cmdline='/bin/echo', returncode=0)
+    >>> result = InterfaceResult(interface='CommandLine',
+    ...                          runtime=rt)
+    >>> import pickle
+    >>> pickleds = pickle.dumps(result)
+    >>> newresult = pickle.loads(pickleds)
+    >>> newresult  # doctest: +ELLIPSIS
+    InterfaceResult(interface='CommandLine', runtime=\
+Bunch(cmdline='/bin/echo', returncode=0), version=...)
+
     """
     __slots__ = ['interface', 'runtime', 'inputs', 'outputs', 'provenance']
     version = __version__
@@ -215,3 +211,42 @@ class InterfaceResult(object):
         self.inputs = inputs
         self.outputs = outputs
         self.provenance = provenance
+
+
+    def __setstate__(self, state):
+        """Necessary for un-pickling"""
+        for key in self.__class__.__slots__:
+            setattr(self, key, state.get(key, None))
+
+    def __getstate__(self):
+        """Necessary for pickling"""
+        outdict = {'version': self.version}
+        for key in self.__class__.__slots__:
+            value = getattr(self, key, None)
+            if value is not None:
+                outdict[key] = value
+        return outdict
+
+    def __repr__(self):
+        return _repr_formatter(
+            self.__getstate__(), self.__class__.__name__)
+
+
+def _repr_formatter(instance, classname=None):
+    classname = classname or 'Bunch'
+    outstr = ['%s(' % classname]
+    first = True
+    for k, v in sorted(instance.items()):
+        if not first:
+            outstr.append(', ')
+        if isinstance(v, dict):
+            pairs = []
+            for key, value in sorted(v.items()):
+                pairs.append("'%s': %s" % (key, value))
+            v = '{' + ', '.join(pairs) + '}'
+            outstr.append('%s=%s' % (k, v))
+        else:
+            outstr.append('%s=%r' % (k, v))
+        first = False
+    outstr.append(')')
+    return ''.join(outstr)
