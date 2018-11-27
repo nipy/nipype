@@ -220,7 +220,7 @@ def test_mapnode_crash3(tmpdir):
     wf = pe.Workflow('testmapnodecrash')
     wf.add_nodes([node])
     wf.base_dir = tmpdir.strpath
-    # changing crashdump dir to cwl (to avoid problems with read-only systems)
+    # changing crashdump dir to cwd (to avoid problems with read-only systems)
     wf.config["execution"]["crashdump_dir"] = os.getcwd()
-    with pytest.raises(RuntimeError):
+    with pytest.raises(Exception):
         wf.run(plugin='Linear')

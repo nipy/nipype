@@ -18,9 +18,10 @@ import scipy.io as sio
 
 # Local imports
 from ... import logging
+from ...utils.misc import Bunch
 from ...utils.filemanip import (ensure_list, simplify_list,
                                 split_filename)
-from ..base import (Bunch, traits, TraitedSpec, File, Directory,
+from ..base import (traits, TraitedSpec, File, Directory,
                     OutputMultiPath, InputMultiPath, isdefined)
 from .base import (SPMCommand, SPMCommandInputSpec, scans_for_fnames,
                    ImageFileSPM)

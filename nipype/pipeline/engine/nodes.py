@@ -23,14 +23,14 @@ from tempfile import mkdtemp
 from future import standard_library
 
 from ... import config, logging
-from ...utils.misc import flatten, unflatten, str2bool, dict_diff
+from ...utils.misc import Bunch, flatten, unflatten, str2bool, dict_diff
 from ...utils.filemanip import (md5, FileNotFoundError, ensure_list,
                                 simplify_list, copyfiles, fnames_presuffix,
                                 loadpkl, split_filename, load_json, makedirs,
                                 emptydirs, savepkl, to_str, indirectory)
 
 from ...interfaces.base import (traits, InputMultiPath, CommandLine, Undefined,
-                                DynamicTraitedSpec, Bunch, InterfaceResult,
+                                DynamicTraitedSpec, InterfaceResult,
                                 Interface, isdefined)
 from ...interfaces.base.specs import get_filecopy_info
 

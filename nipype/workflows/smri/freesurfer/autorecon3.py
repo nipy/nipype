@@ -847,7 +847,7 @@ def create_AutoRecon3(name="AutoRecon3",
                      [('out_file', meas_config['preproc']['out_name'])]),
                 ])
 
-                for value, val_config in meas_config['smooth'].iteritems():
+                for value, val_config in meas_config['smooth'].items():
                     surf2surf = pe.Node(
                         SurfaceSmooth(), name=val_config['name'])
                     surf2surf.inputs.fwhm = value

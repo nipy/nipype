@@ -14,7 +14,7 @@ from builtins import object, str
 import os
 from copy import deepcopy
 
-from ... import logging
+from ... import logging, __version__
 from ...utils.misc import is_container
 from ...utils.filemanip import md5, to_str, hash_infile
 iflogger = logging.getLogger('nipype.interface')
@@ -30,164 +30,51 @@ class NipypeInterfaceError(Exception):
         return '{}'.format(self.value)
 
 
-class Bunch(object):
-    """Dictionary-like class that provides attribute-style access to it's items.
-
-    A `Bunch` is a simple container that stores it's items as class
-    attributes.  Internally all items are stored in a dictionary and
-    the class exposes several of the dictionary methods.
-
-    Examples
-    --------
-    >>> from nipype.interfaces.base import Bunch
-    >>> inputs = Bunch(infile='subj.nii', fwhm=6.0, register_to_mean=True)
-    >>> inputs
-    Bunch(fwhm=6.0, infile='subj.nii', register_to_mean=True)
-    >>> inputs.register_to_mean = False
-    >>> inputs
-    Bunch(fwhm=6.0, infile='subj.nii', register_to_mean=False)
-
-    Notes
-    -----
-    The Bunch pattern came from the Python Cookbook:
-
-    .. [1] A. Martelli, D. Hudgeon, "Collecting a Bunch of Named
-           Items", Python Cookbook, 2nd Ed, Chapter 4.18, 2005.
-
+class InterfaceRuntime(object):
     """
 
-    def __init__(self, *args, **kwargs):
-        self.__dict__.update(*args, **kwargs)
+    """
+    __slots__ = [
+        'cwd',
+        'prevcwd',
+        'returncode',
+        'duration',
+        'environ',
+        'startTime',
+        'endTime',
+        'platform',
+        'hostname',
+        'version',
+        'traceback',
+        'traceback_args',
+        'mem_peak_gb',
+        'cpu_percent',
+        'prof_dict',
+        'cmdline',
+        'stdout',
+        'stderr',
+        'merged',
+        'command_path',
+        'dependencies',
+    ]
 
-    def update(self, *args, **kwargs):
-        """update existing attribute, or create new attribute
-
-        Note: update is very much like HasTraits.set"""
-        self.__dict__.update(*args, **kwargs)
-
-    def items(self):
-        """iterates over bunch attributes as key, value pairs"""
-        return list(self.__dict__.items())
-
-    def iteritems(self):
-        """iterates over bunch attributes as key, value pairs"""
-        iflogger.warning('iteritems is deprecated, use items instead')
-        return list(self.items())
-
-    def get(self, *args):
-        """Support dictionary get() functionality
-        """
-        return self.__dict__.get(*args)
-
-    def set(self, **kwargs):
-        """Support dictionary get() functionality
-        """
-        return self.__dict__.update(**kwargs)
+    def __init__(self, **inputs):
+        for key in self.__class__.__slots__:
+            setattr(self, key, inputs.get(key, None))
 
     def dictcopy(self):
-        """returns a deep copy of existing Bunch as a dictionary"""
-        return deepcopy(self.__dict__)
+        outdict = {}
+        for key in self.__class__.__slots__:
+            value = getattr(self, key, None)
+            if value is not None:
+                outdict[key] = value
+        return outdict
 
-    def __repr__(self):
-        """representation of the sorted Bunch as a string
-
-        Currently, this string representation of the `inputs` Bunch of
-        interfaces is hashed to determine if the process' dirty-bit
-        needs setting or not. Till that mechanism changes, only alter
-        this after careful consideration.
-        """
-        outstr = ['Bunch(']
-        first = True
-        for k, v in sorted(self.items()):
-            if not first:
-                outstr.append(', ')
-            if isinstance(v, dict):
-                pairs = []
-                for key, value in sorted(v.items()):
-                    pairs.append("'%s': %s" % (key, value))
-                v = '{' + ', '.join(pairs) + '}'
-                outstr.append('%s=%s' % (k, v))
-            else:
-                outstr.append('%s=%r' % (k, v))
-            first = False
-        outstr.append(')')
-        return ''.join(outstr)
-
-    def _get_bunch_hash(self):
-        """Return a dictionary of our items with hashes for each file.
-
-        Searches through dictionary items and if an item is a file, it
-        calculates the md5 hash of the file contents and stores the
-        file name and hash value as the new key value.
-
-        However, the overall bunch hash is calculated only on the hash
-        value of a file. The path and name of the file are not used in
-        the overall hash calculation.
-
-        Returns
-        -------
-        dict_withhash : dict
-            Copy of our dictionary with the new file hashes included
-            with each file.
-        hashvalue : str
-            The md5 hash value of the `dict_withhash`
-
-        """
-
-        infile_list = []
-        for key, val in list(self.items()):
-            if is_container(val):
-                # XXX - SG this probably doesn't catch numpy arrays
-                # containing embedded file names either.
-                if isinstance(val, dict):
-                    # XXX - SG should traverse dicts, but ignoring for now
-                    item = None
-                else:
-                    if len(val) == 0:
-                        raise AttributeError('%s attribute is empty' % key)
-                    item = val[0]
-            else:
-                item = val
-            try:
-                if isinstance(item, str) and os.path.isfile(item):
-                    infile_list.append(key)
-            except TypeError:
-                # `item` is not a file or string.
-                continue
-        dict_withhash = self.dictcopy()
-        dict_nofilename = self.dictcopy()
-        for item in infile_list:
-            dict_withhash[item] = _hash_bunch_dict(dict_withhash, item)
-            dict_nofilename[item] = [val[1] for val in dict_withhash[item]]
-        # Sort the items of the dictionary, before hashing the string
-        # representation so we get a predictable order of the
-        # dictionary.
-        sorted_dict = to_str(sorted(dict_nofilename.items()))
-        return dict_withhash, md5(sorted_dict.encode()).hexdigest()
-
-    def _repr_pretty_(self, p, cycle):
-        """Support for the pretty module from ipython.externals"""
-        if cycle:
-            p.text('Bunch(...)')
-        else:
-            p.begin_group(6, 'Bunch(')
-            first = True
-            for k, v in sorted(self.items()):
-                if not first:
-                    p.text(',')
-                    p.breakable()
-                p.text(k + '=')
-                p.pretty(v)
-                first = False
-            p.end_group(6, ')')
-
-
-def _hash_bunch_dict(adict, key):
-    """Inject file hashes into adict[key]"""
-    stuff = adict[key]
-    if not is_container(stuff):
-        stuff = [stuff]
-    return [(afile, hash_infile(afile)) for afile in stuff]
+    def items(self):
+        for key in self.__class__.__slots__:
+            value = getattr(self, key, None)
+            if value is not None:
+                yield (key, value)
 
 
 class InterfaceResult(object):
@@ -216,6 +103,8 @@ class InterfaceResult(object):
         * returncode : The code returned from running the ``cmdline``.
 
     """
+    __slots__ = ['interface', 'runtime', 'inputs', 'outputs', 'provenance']
+    version = __version__
 
     def __init__(self,
                  interface,
@@ -223,26 +112,8 @@ class InterfaceResult(object):
                  inputs=None,
                  outputs=None,
                  provenance=None):
-        self._version = 2.0
         self.interface = interface
         self.runtime = runtime
         self.inputs = inputs
         self.outputs = outputs
         self.provenance = provenance
-
-    @property
-    def version(self):
-        return self._version
-
-
-def load_template(name):
-    """
-    Deprecated stub for backwards compatibility,
-    please use nipype.interfaces.fsl.model.load_template
-
-    """
-    from ..fsl.model import load_template
-    iflogger.warning(
-        'Deprecated in 1.0.0, and will be removed in 1.1.0, '
-        'please use nipype.interfaces.fsl.model.load_template instead.')
-    return load_template(name)

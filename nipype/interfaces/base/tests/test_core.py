@@ -528,7 +528,7 @@ def test_runtime_checks():
 
     class BrokenRuntime(TestInterface):
         def _run_interface(self, runtime):
-            del runtime.__dict__['cwd']
+            del runtime.cwd
             return runtime
 
     with pytest.raises(RuntimeError):

@@ -14,7 +14,7 @@ import nipype.interfaces.io as nio  # Data i/o
 import nipype.interfaces.spm as spm  # spm
 import nipype.pipeline.engine as pe  # pypeline engine
 import nipype.algorithms.modelgen as model  # model specification
-from nipype.interfaces.base import Bunch
+from nipype.utils.misc import Bunch
 import os  # system functions
 """In the following section, to showcase NiPyPe, we will describe how to create
 and extend a typical fMRI processing pipeline. We will begin with a basic

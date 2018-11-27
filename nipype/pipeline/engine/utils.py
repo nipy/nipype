@@ -39,9 +39,9 @@ from ...utils.filemanip import (
     write_rst_dict,
     write_rst_list,
 )
-from ...utils.misc import str2bool
+from ...utils.misc import Bunch, str2bool
 from ...utils.functions import create_function_from_source
-from ...interfaces.base import (Bunch, CommandLine, isdefined, Undefined,
+from ...interfaces.base import (CommandLine, isdefined, Undefined,
                                 InterfaceResult, traits)
 from ...interfaces.utility import IdentityInterface
 from ...utils.provenance import ProvStore, pm, nipype_ns, get_id
@@ -192,37 +192,37 @@ def write_report(node, report_type=None, is_mapnode=False):
         'prev_wd': getattr(result.runtime, 'prevcwd', '<not-set>'),
     }
 
-    if hasattr(result.runtime, 'cmdline'):
+    if result.runtime.cmdline:
         rst_dict['command'] = result.runtime.cmdline
 
     # Try and insert memory/threads usage if available
-    if hasattr(result.runtime, 'mem_peak_gb'):
+    if result.runtime.mem_peak_gb:
         rst_dict['mem_peak_gb'] = result.runtime.mem_peak_gb
 
-    if hasattr(result.runtime, 'cpu_percent'):
+    if result.runtime.cpu_percent:
         rst_dict['cpu_percent'] = result.runtime.cpu_percent
 
     lines.append(write_rst_dict(rst_dict))
 
     # Collect terminal output
-    if hasattr(result.runtime, 'merged'):
+    if result.runtime.merged:
         lines += [
             write_rst_header('Terminal output', level=2),
             write_rst_list(result.runtime.merged),
         ]
-    if hasattr(result.runtime, 'stdout'):
+    if result.runtime.stdout:
         lines += [
             write_rst_header('Terminal - standard output', level=2),
             write_rst_list(result.runtime.stdout),
         ]
-    if hasattr(result.runtime, 'stderr'):
+    if result.runtime.stderr:
         lines += [
             write_rst_header('Terminal - standard error', level=2),
             write_rst_list(result.runtime.stderr),
         ]
 
     # Store environment
-    if hasattr(result.runtime, 'environ'):
+    if result.runtime.environ:
         lines += [
             write_rst_header('Environment', level=2),
             write_rst_dict(result.runtime.environ),

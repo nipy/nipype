@@ -8,6 +8,7 @@ Nipype base interfaces
 This module defines the API of all nipype interfaces.
 
 """
+from ...utils.misc import Bunch
 from .core import (Interface, BaseInterface, SimpleInterface, CommandLine,
                    StdOutCommandLine, MpiCommandLine, SEMLikeCommandLine,
                    LibraryBaseInterface, PackageInfo)
@@ -22,5 +23,42 @@ from .traits_extension import (
     OutputMultiObject, InputMultiObject,
     OutputMultiPath, InputMultiPath)
 
-from .support import (Bunch, InterfaceResult, load_template,
-                      NipypeInterfaceError)
+from .support import (InterfaceRuntime, InterfaceResult, NipypeInterfaceError)
+
+__all__ = [
+    'Bunch',
+    'Interface',
+    'BaseInterface',
+    'SimpleInterface',
+    'CommandLine',
+    'StdOutCommandLine',
+    'MpiCommandLine',
+    'SEMLikeCommandLine',
+    'LibraryBaseInterface',
+    'PackageInfo',
+    'BaseTraitedSpec',
+    'TraitedSpec',
+    'DynamicTraitedSpec',
+    'BaseInterfaceInputSpec',
+    'CommandLineInputSpec',
+    'StdOutCommandLineInputSpec',
+    'traits',
+    'Undefined',
+    'TraitDictObject',
+    'TraitListObject',
+    'TraitError',
+    'isdefined',
+    'File',
+    'Directory',
+    'Str',
+    'DictStrStr',
+    'has_metadata',
+    'ImageFile',
+    'OutputMultiObject',
+    'InputMultiObject',
+    'OutputMultiPath',
+    'InputMultiPath',
+    'InterfaceRuntime',
+    'InterfaceResult',
+    'NipypeInterfaceError',
+]

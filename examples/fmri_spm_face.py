@@ -259,7 +259,7 @@ about the experimental paradigm. This is used by the
 necessary to generate an SPM design matrix.
 """
 
-from nipype.interfaces.base import Bunch
+from nipype.utils.misc import Bunch
 """We're importing the onset times from a mat file (found on
 http://www.fil.ion.ucl.ac.uk/spm/data/face_rep/)
 """

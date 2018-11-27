@@ -42,7 +42,7 @@ from .traits_extension import traits, isdefined, TraitError
 from .specs import (BaseInterfaceInputSpec, CommandLineInputSpec,
                     StdOutCommandLineInputSpec, MpiCommandLineInputSpec,
                     get_filecopy_info)
-from .support import (Bunch, InterfaceResult, NipypeInterfaceError)
+from .support import (InterfaceRuntime, InterfaceResult, NipypeInterfaceError)
 
 from future import standard_library
 standard_library.install_aliases()
@@ -478,7 +478,7 @@ class BaseInterface(Interface):
         if self._redirect_x:
             env['DISPLAY'] = config.get_display()
 
-        runtime = Bunch(
+        runtime = InterfaceRuntime(
             cwd=cwd,
             prevcwd=syscwd,
             returncode=None,
@@ -872,9 +872,7 @@ class CommandLine(BaseInterface):
         """
 
         out_environ = self._get_environ()
-        # Initialize runtime Bunch
-        runtime.stdout = None
-        runtime.stderr = None
+        # Initialize runtime InterfaceRuntime
         runtime.cmdline = self.cmdline
         runtime.environ.update(out_environ)
 
