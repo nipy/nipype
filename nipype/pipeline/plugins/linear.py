@@ -7,11 +7,9 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
 import os
-
-import networkx as nx
 from .base import (PluginBase, logger, report_crash, report_nodes_not_run,
                    str2bool)
-from ..engine.utils import dfs_preorder, topological_sort
+from ..engine.utils import topological_sort
 
 
 class LinearPlugin(PluginBase):
@@ -27,6 +25,11 @@ class LinearPlugin(PluginBase):
         graph : networkx digraph
             defines order of execution
         """
+        import networkx as nx
+        try:
+            dfs_preorder = nx.dfs_preorder
+        except AttributeError:
+            dfs_preorder = nx.dfs_preorder_nodes
 
         if not isinstance(graph, nx.DiGraph):
             raise ValueError('Input must be a networkx digraph object')
