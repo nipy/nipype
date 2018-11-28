@@ -41,9 +41,8 @@ from ...external.due import due
 from .traits_extension import traits, isdefined, TraitError
 from .specs import (BaseInterfaceInputSpec, CommandLineInputSpec,
                     StdOutCommandLineInputSpec, MpiCommandLineInputSpec,
-                    check_mandatory_inputs, check_version)
+                    get_filecopy_info, check_mandatory_inputs, check_version)
 from .support import (Bunch, InterfaceResult, NipypeInterfaceError)
-from .specs import get_filecopy_info
 
 from future import standard_library
 standard_library.install_aliases()

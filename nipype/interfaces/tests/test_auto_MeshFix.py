@@ -20,19 +20,23 @@ def test_MeshFix_inputs():
         epsilon_angle=dict(argstr='-a %f', ),
         finetuning_distance=dict(
             argstr='%f',
+            position=-2,
             requires=['finetuning_substeps'],
         ),
         finetuning_inwards=dict(
             argstr='--fineTuneIn ',
+            position=-3,
             requires=['finetuning_distance', 'finetuning_substeps'],
         ),
         finetuning_outwards=dict(
             argstr='--fineTuneOut ',
+            position=-3,
             requires=['finetuning_distance', 'finetuning_substeps'],
             xor=['finetuning_inwards'],
         ),
         finetuning_substeps=dict(
             argstr='%d',
+            position=-1,
             requires=['finetuning_distance'],
         ),
         in_file1=dict(
@@ -89,8 +93,6 @@ def test_MeshFix_inputs():
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
-
-
 def test_MeshFix_outputs():
     output_map = dict(mesh_file=dict(), )
     outputs = MeshFix.output_spec()

@@ -736,17 +736,17 @@ class Registration(ANTSCommand):
     >>> reg4.inputs.collapse_output_transforms = True
     >>> outputs = reg4._list_outputs()
     >>> pprint.pprint(outputs)  # doctest: +ELLIPSIS,
-    {'composite_transform': '.../nipype/testing/data/output_Composite.h5',
+    {'composite_transform': '...data/output_Composite.h5',
      'elapsed_time': <undefined>,
      'forward_invert_flags': [],
      'forward_transforms': [],
-     'inverse_composite_transform': '.../nipype/testing/data/output_InverseComposite.h5',
+     'inverse_composite_transform': '...data/output_InverseComposite.h5',
      'inverse_warped_image': <undefined>,
      'metric_value': <undefined>,
      'reverse_invert_flags': [],
      'reverse_transforms': [],
-     'save_state': '.../nipype/testing/data/trans.mat',
-     'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz'}
+     'save_state': '...data/trans.mat',
+     'warped_image': '...data/output_warped_image.nii.gz'}
     >>> reg4.cmdline
     'antsRegistration --collapse-output-transforms 1 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
 --initialize-transforms-per-stage 1 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
@@ -767,16 +767,16 @@ class Registration(ANTSCommand):
     {'composite_transform': <undefined>,
      'elapsed_time': <undefined>,
      'forward_invert_flags': [False, False],
-     'forward_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat',
-     '.../nipype/testing/data/output_1Warp.nii.gz'],
+     'forward_transforms': ['...data/output_0GenericAffine.mat',
+     '...data/output_1Warp.nii.gz'],
      'inverse_composite_transform': <undefined>,
      'inverse_warped_image': <undefined>,
      'metric_value': <undefined>,
      'reverse_invert_flags': [True, False],
-     'reverse_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', \
-    '.../nipype/testing/data/output_1InverseWarp.nii.gz'],
-     'save_state': '.../nipype/testing/data/trans.mat',
-     'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz'}
+     'reverse_transforms': ['...data/output_0GenericAffine.mat', \
+    '...data/output_1InverseWarp.nii.gz'],
+     'save_state': '...data/trans.mat',
+     'warped_image': '...data/output_warped_image.nii.gz'}
     >>> reg4b.aggregate_outputs()  # doctest: +SKIP
     >>> reg4b.cmdline
     'antsRegistration --collapse-output-transforms 1 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
