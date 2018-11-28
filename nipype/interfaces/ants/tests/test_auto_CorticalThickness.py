@@ -75,6 +75,7 @@ def test_CorticalThickness_outputs():
         BrainVolumes=dict(),
         CorticalThickness=dict(),
         CorticalThicknessNormedToTemplate=dict(),
+        ExtractedBrainN4=dict(),
         SubjectToTemplate0GenericAffine=dict(),
         SubjectToTemplate1Warp=dict(),
         SubjectToTemplateLogJacobian=dict(),

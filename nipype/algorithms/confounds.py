@@ -327,7 +327,7 @@ Bradley L. and Petersen, Steven E.},
                 tr = self.inputs.series_tr
 
             if self.inputs.normalize and tr is None:
-                IFLOGGER.warn('FD plot cannot be normalized if TR is not set')
+                IFLOGGER.warning('FD plot cannot be normalized if TR is not set')
 
             self._results['out_figure'] = op.abspath(self.inputs.out_figure)
             fig = plot_confound(
@@ -1267,7 +1267,7 @@ def _full_rank(X, cmax=1e15):
     c = smax / smin
     if c < cmax:
         return X, c
-    IFLOGGER.warn('Matrix is singular at working precision, regularizing...')
+    IFLOGGER.warning('Matrix is singular at working precision, regularizing...')
     lda = (smax - cmax * smin) / (cmax - 1)
     s = s + lda
     X = np.dot(U, np.dot(np.diag(s), V))

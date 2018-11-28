@@ -17,14 +17,11 @@ from __future__ import (print_function, division, unicode_literals,
 
 from builtins import object, open, str, bytes
 
-import gc
 from copy import deepcopy
 from datetime import datetime as dt
-import errno
 import os
 import re
 import platform
-import select
 import subprocess as sp
 import shlex
 import sys
@@ -35,16 +32,17 @@ from dateutil.parser import parse as parseutc
 from ... import config, logging, LooseVersion
 from ...utils.provenance import write_provenance
 from ...utils.misc import trim, str2bool, rgetcwd
-from ...utils.filemanip import (FileNotFoundError, split_filename, read_stream,
-                                which, get_dependencies, canonicalize_env as
-                                _canonicalize_env)
+from ...utils.filemanip import (FileNotFoundError, split_filename,
+                                which, get_dependencies)
+from ...utils.subprocess import run_command
 
 from ...external.due import due
 
 from .traits_extension import traits, isdefined, TraitError
 from .specs import (BaseInterfaceInputSpec, CommandLineInputSpec,
-                    StdOutCommandLineInputSpec, MpiCommandLineInputSpec)
-from .support import (Bunch, Stream, InterfaceResult, NipypeInterfaceError)
+                    StdOutCommandLineInputSpec, MpiCommandLineInputSpec,
+                    get_filecopy_info)
+from .support import (Bunch, InterfaceResult, NipypeInterfaceError)
 
 from future import standard_library
 standard_library.install_aliases()
@@ -125,11 +123,15 @@ class Interface(object):
         """ List expected outputs"""
         raise NotImplementedError
 
-    def _get_filecopy_info(self):
-        """ Provides information about file inputs to copy or link to cwd.
-            Necessary for pipeline operation
+    @classmethod
+    def _get_filecopy_info(cls):
+        """Provides information about file inputs to copy or link to cwd.
+        Necessary for pipeline operation
         """
-        raise NotImplementedError
+        iflogger.warning(
+            '_get_filecopy_info member of Interface was deprecated '
+            'in nipype-1.1.6 and will be removed in 1.2.0')
+        return get_filecopy_info(cls)
 
 
 class BaseInterface(Interface):
@@ -332,19 +334,6 @@ class BaseInterface(Interface):
             outputs = self.output_spec()
 
         return outputs
-
-    @classmethod
-    def _get_filecopy_info(cls):
-        """ Provides information about file inputs to copy or link to cwd.
-            Necessary for pipeline operation
-        """
-        info = []
-        if cls.input_spec is None:
-            return info
-        metadata = dict(copyfile=lambda t: t is not None)
-        for name, spec in sorted(cls.input_spec().traits(**metadata).items()):
-            info.append(dict(key=name, copy=spec.copyfile))
-        return info
 
     def _check_requires(self, spec, name, value):
         """ check if required inputs are satisfied
@@ -730,135 +719,6 @@ class SimpleInterface(BaseInterface):
 
     def _list_outputs(self):
         return self._results
-
-
-def run_command(runtime, output=None, timeout=0.01):
-    """Run a command, read stdout and stderr, prefix with timestamp.
-
-    The returned runtime contains a merged stdout+stderr log with timestamps
-    """
-
-    # Init variables
-    cmdline = runtime.cmdline
-    env = _canonicalize_env(runtime.environ)
-
-    errfile = None
-    outfile = None
-    stdout = sp.PIPE
-    stderr = sp.PIPE
-
-    if output == 'file':
-        outfile = os.path.join(runtime.cwd, 'output.nipype')
-        stdout = open(outfile, 'wb')  # t=='text'===default
-        stderr = sp.STDOUT
-    elif output == 'file_split':
-        outfile = os.path.join(runtime.cwd, 'stdout.nipype')
-        stdout = open(outfile, 'wb')
-        errfile = os.path.join(runtime.cwd, 'stderr.nipype')
-        stderr = open(errfile, 'wb')
-    elif output == 'file_stdout':
-        outfile = os.path.join(runtime.cwd, 'stdout.nipype')
-        stdout = open(outfile, 'wb')
-    elif output == 'file_stderr':
-        errfile = os.path.join(runtime.cwd, 'stderr.nipype')
-        stderr = open(errfile, 'wb')
-
-    proc = sp.Popen(
-        cmdline,
-        stdout=stdout,
-        stderr=stderr,
-        shell=True,
-        cwd=runtime.cwd,
-        env=env,
-        close_fds=(not sys.platform.startswith('win')),
-    )
-
-    result = {
-        'stdout': [],
-        'stderr': [],
-        'merged': [],
-    }
-
-    if output == 'stream':
-        streams = [
-            Stream('stdout', proc.stdout),
-            Stream('stderr', proc.stderr)
-        ]
-
-        def _process(drain=0):
-            try:
-                res = select.select(streams, [], [], timeout)
-            except select.error as e:
-                iflogger.info(e)
-                if e[0] == errno.EINTR:
-                    return
-                else:
-                    raise
-            else:
-                for stream in res[0]:
-                    stream.read(drain)
-
-        while proc.returncode is None:
-            proc.poll()
-            _process()
-
-        _process(drain=1)
-
-        # collect results, merge and return
-        result = {}
-        temp = []
-        for stream in streams:
-            rows = stream._rows
-            temp += rows
-            result[stream._name] = [r[2] for r in rows]
-        temp.sort()
-        result['merged'] = [r[1] for r in temp]
-
-    if output.startswith('file'):
-        proc.wait()
-        if outfile is not None:
-            stdout.flush()
-            stdout.close()
-            with open(outfile, 'rb') as ofh:
-                stdoutstr = ofh.read()
-            result['stdout'] = read_stream(stdoutstr, logger=iflogger)
-            del stdoutstr
-
-        if errfile is not None:
-            stderr.flush()
-            stderr.close()
-            with open(errfile, 'rb') as efh:
-                stderrstr = efh.read()
-            result['stderr'] = read_stream(stderrstr, logger=iflogger)
-            del stderrstr
-
-        if output == 'file':
-            result['merged'] = result['stdout']
-            result['stdout'] = []
-    else:
-        stdout, stderr = proc.communicate()
-        if output == 'allatonce':  # Discard stdout and stderr otherwise
-            result['stdout'] = read_stream(stdout, logger=iflogger)
-            result['stderr'] = read_stream(stderr, logger=iflogger)
-
-    runtime.returncode = proc.returncode
-    try:
-        proc.terminate()  # Ensure we are done
-    except OSError as error:
-        # Python 2 raises when the process is already gone
-        if error.errno != errno.ESRCH:
-            raise
-
-    # Dereference & force GC for a cleanup
-    del proc
-    del stdout
-    del stderr
-    gc.collect()
-
-    runtime.stderr = '\n'.join(result['stderr'])
-    runtime.stdout = '\n'.join(result['stdout'])
-    runtime.merged = '\n'.join(result['merged'])
-    return runtime
 
 
 class CommandLine(BaseInterface):
@@ -1312,8 +1172,8 @@ class LibraryBaseInterface(BaseInterface):
                 except ImportError:
                     failed_imports.append(pkg)
             if failed_imports:
-                iflogger.warn('Unable to import %s; %s interface may fail to '
-                              'run', failed_imports, self.__class__.__name__)
+                iflogger.warning('Unable to import %s; %s interface may fail to '
+                                 'run', failed_imports, self.__class__.__name__)
 
     @property
     def version(self):
