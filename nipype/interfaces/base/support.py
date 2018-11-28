@@ -10,7 +10,7 @@ Miscellaneous tools to support Interface functionality
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 from builtins import object
-from ... import logger, __version__
+from ... import logging, __version__
 
 iflogger = logging.getLogger('nipype.interface')
 
