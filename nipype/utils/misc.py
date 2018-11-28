@@ -196,10 +196,10 @@ def str2bool(v):
     Convert strings (and bytearrays) to boolean values
 
     >>> all([str2bool(v) for v in (True, "yes", "true",
-    ...      "t", "Yes", "True", "1", "on", "On")])
+    ...      "y", "t", "Yes", "True", "1", "on", "On")])
     True
     >>> all([str2bool(v.encode('utf-8'))
-    ...      for v in ("yes", "true", "t", "1", "Yes", "on", "On")])
+    ...      for v in ("yes", "true", "y", "t", "1", "Yes", "on", "On")])
     True
     >>> any([str2bool(v) for v in (False, "no", "false", "n", "f",
     ...      "False", "0", "off", "Off")])
@@ -237,7 +237,7 @@ def str2bool(v):
 
     if isinstance(v, str):
         lower = v.lower()
-        if lower in ("yes", "true", "t", "1", "on"):
+        if lower in ("yes", "true", "y", "t", "1", "on"):
             return True
         elif lower in ("no", "false", "n", "f", "0", "off"):
             return False
