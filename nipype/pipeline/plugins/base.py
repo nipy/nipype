@@ -16,7 +16,6 @@ from time import sleep, time
 from traceback import format_exception
 
 import numpy as np
-import scipy.sparse as ssp
 
 from ... import logging
 from ...utils.filemanip import loadpkl
@@ -235,6 +234,7 @@ class DistributedPluginBase(PluginBase):
         return self._remove_node_deps(jobid, crashfile, graph)
 
     def _submit_mapnode(self, jobid):
+        import scipy.sparse as ssp
         if jobid in self.mapnodes:
             return True
         self.mapnodes.append(jobid)
