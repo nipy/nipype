@@ -10,11 +10,12 @@ Miscellaneous tools to support Interface functionality
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 from builtins import object
+from ... import logger, __version__
 
-from ... import __version__
+iflogger = logging.getLogger('nipype.interface')
 
 
-class NipypeInterfaceError(RuntimeError):
+class NipypeInterfaceError(Exception):
     """Custom error for interfaces"""
     pass
 
@@ -223,9 +224,13 @@ Bunch(cmdline='/bin/echo', returncode=0), version=...)
         self.outputs = outputs
         self.provenance = provenance
 
-
     def __setstate__(self, state):
         """Necessary for un-pickling"""
+        if state.get('version', None) != self.version:
+            iflogger.warning(
+                'Restoring an ``InterfaceResult`` from a different '
+                'nipype version (current version %s, object\'s %s',
+                self.version, state.get('version', '<unknown>'))
         for key in self.__class__.__slots__:
             setattr(self, key, state.get(key, None))
 

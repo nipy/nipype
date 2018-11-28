@@ -110,7 +110,7 @@ def nodelist_runner(nodes, updatehash=False, stop_first=False):
 
             result = node.result
             err = []
-            if result.runtime and hasattr(result.runtime, 'traceback'):
+            if result.runtime and result.runtime.traceback is not None:
                 err = [result.runtime.traceback]
 
             err += format_exception(*sys.exc_info())
@@ -192,14 +192,14 @@ def write_report(node, report_type=None, is_mapnode=False):
         'prev_wd': getattr(result.runtime, 'prevcwd', '<not-set>'),
     }
 
-    if result.runtime.cmdline:
+    if result.runtime.cmdline is not None:
         rst_dict['command'] = result.runtime.cmdline
 
     # Try and insert memory/threads usage if available
-    if result.runtime.mem_peak_gb:
+    if result.runtime.mem_peak_gb is not None:
         rst_dict['mem_peak_gb'] = result.runtime.mem_peak_gb
 
-    if result.runtime.cpu_percent:
+    if result.runtime.cpu_percent is not None:
         rst_dict['cpu_percent'] = result.runtime.cpu_percent
 
     lines.append(write_rst_dict(rst_dict))
@@ -208,24 +208,24 @@ def write_report(node, report_type=None, is_mapnode=False):
     if result.runtime.merged:
         lines += [
             write_rst_header('Terminal output', level=2),
-            write_rst_list(result.runtime.merged),
+            write_rst_list(result.runtime.merged or []),
         ]
     if result.runtime.stdout:
         lines += [
             write_rst_header('Terminal - standard output', level=2),
-            write_rst_list(result.runtime.stdout),
+            write_rst_list(result.runtime.stdout or []),
         ]
     if result.runtime.stderr:
         lines += [
             write_rst_header('Terminal - standard error', level=2),
-            write_rst_list(result.runtime.stderr),
+            write_rst_list(result.runtime.stderr or []),
         ]
 
     # Store environment
     if result.runtime.environ:
         lines += [
             write_rst_header('Environment', level=2),
-            write_rst_dict(result.runtime.environ),
+            write_rst_dict(result.runtime.environ or {}),
         ]
 
     with open(report_file, 'at') as fp:

@@ -322,10 +322,8 @@ def draw_resource_bar(start_time, finish_time, time_series,
     space_between_minutes = space_between_minutes / scale
 
     # Iterate through time series
-    ts_items = list(time_series.items())
-
     ts_len = len(time_series)
-    for idx, (ts_start, amount) in enumerate(ts_items):
+    for idx, (ts_start, amount) in enumerate(time_series.items()):
         if idx < ts_len - 1:
             ts_end = time_series.index[idx + 1]
         else:
