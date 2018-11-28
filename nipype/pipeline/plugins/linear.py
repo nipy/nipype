@@ -57,11 +57,12 @@ class LinearPlugin(PluginBase):
                 donotrun.extend(subnodes)
                 # Delay raising the crash until we cleaned the house
                 if str2bool(config['execution']['stop_on_first_crash']):
+                    os.chdir(old_wd)  # Return wherever we were before
                     report_nodes_not_run(notrun)  # report before raising
                     raise
             finally:
-                # Return wherever we were before
-                os.chdir(old_wd)
                 if self._status_callback:
                     self._status_callback(node, endstatus)
+
+        os.chdir(old_wd)  # Return wherever we were before
         report_nodes_not_run(notrun)
