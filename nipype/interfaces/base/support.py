@@ -56,7 +56,7 @@ class InterfaceRuntime(object):
     >>> pickleds = pickle.dumps(rt)
     >>> newrt = pickle.loads(pickleds)
     >>> newrt
-    Bunch(cmdline='/bin/echo', cwd='/scratch/workflow', returncode=0)
+    InterfaceRuntime(cmdline='/bin/echo', cwd='/scratch/workflow', returncode=0)
 
     Runtime objects can be compared
 
@@ -152,7 +152,7 @@ class InterfaceRuntime(object):
 
     def __repr__(self):
         """representation of the runtime object"""
-        return _repr_formatter(self)
+        return _repr_formatter(self, self.__class__.__name__)
 
     # Enable when Python 2 support is dropped
     # def __str__(self):
@@ -206,7 +206,7 @@ class InterfaceResult(object):
     >>> newresult = pickle.loads(pickleds)
     >>> newresult  # doctest: +ELLIPSIS
     InterfaceResult(interface='CommandLine', runtime=\
-Bunch(cmdline='/bin/echo', returncode=0), version=...)
+InterfaceRuntime(cmdline='/bin/echo', returncode=0), version=...)
 
     """
     __slots__ = ['interface', 'runtime', 'inputs', 'outputs', 'provenance']
