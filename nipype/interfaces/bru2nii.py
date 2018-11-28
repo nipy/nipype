@@ -47,7 +47,7 @@ class Bru2(CommandLine):
     >>> converter = Bru2()
     >>> converter.inputs.input_dir = "brukerdir"
     >>> converter.cmdline  # doctest: +ELLIPSIS
-    'Bru2 -o .../nipype/testing/data/brukerdir brukerdir'
+    'Bru2 -o .../data/brukerdir brukerdir'
     """
     input_spec = Bru2InputSpec
     output_spec = Bru2OutputSpec
