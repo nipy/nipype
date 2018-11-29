@@ -24,7 +24,7 @@ from nipype.pipeline import engine as pe  # pypeline engine
 from nipype.algorithms import modelgen as model  # model generation
 from nipype.workflows.fmri.fsl import (
     create_featreg_preproc, create_modelfit_workflow, create_reg_workflow)
-from nipype.utils.misc import Bunch
+from nipype.utils.bunch import Bunch
 """
 Preliminaries
 -------------

@@ -267,7 +267,7 @@ about the experimental paradigm. This is used by the
 necessary to generate an SPM design matrix.
 """
 
-from nipype.utils.misc import Bunch
+from nipype.utils.bunch import Bunch
 subjectinfo = [
     Bunch(
         conditions=['Task'], onsets=[list(range(6, 84, 12))], durations=[[6]])

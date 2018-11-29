@@ -171,7 +171,7 @@ paradigm was used for every participant.
 
 
 def subjectinfo(subject_id):
-    from nipype.utils.misc import Bunch
+    from nipype.utils.bunch import Bunch
     from copy import deepcopy
     print("Subject ID: %s\n" % str(subject_id))
     output = []
