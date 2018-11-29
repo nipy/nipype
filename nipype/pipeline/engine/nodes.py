@@ -31,7 +31,7 @@ from ...utils.filemanip import (md5, FileNotFoundError, ensure_list,
                                 emptydirs, savepkl, to_str, indirectory)
 
 from ...interfaces.base import (traits, InputMultiPath, CommandLine, Undefined,
-                                DynamicTraitedSpec, InterfaceResult,
+                                DynamicTraitedSpec, InterfaceResult, InterfaceRuntime,
                                 Interface, isdefined)
 from ...interfaces.base.specs import get_filecopy_info
 
@@ -570,7 +570,7 @@ class Node(EngineBase):
                 self._copyfiles_to_wd(linksonly=True)
                 aggouts = self._interface.aggregate_outputs(
                     needed_outputs=self.needed_outputs)
-                runtime = Bunch(
+                runtime = InterfaceRuntime(
                     cwd=cwd,
                     returncode=0,
                     environ=dict(os.environ),
@@ -605,7 +605,7 @@ class Node(EngineBase):
         # Run command: either execute is true or load_results failed.
         result = InterfaceResult(
             interface=self._interface.__class__,
-            runtime=Bunch(
+            runtime=InterfaceRuntime(
                 cwd=outdir,
                 returncode=1,
                 environ=dict(os.environ),
