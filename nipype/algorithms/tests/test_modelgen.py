@@ -11,7 +11,7 @@ import numpy as np
 
 import pytest
 import numpy.testing as npt
-from nipype.utils.misc import Bunch
+from nipype.utils.bunch import Bunch
 from nipype.interfaces.base import TraitError
 from nipype.algorithms.modelgen import (SpecifyModel, SpecifySparseModel,
                                         SpecifySPMModel)

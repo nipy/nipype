@@ -8,7 +8,7 @@ Nipype base interfaces
 This module defines the API of all nipype interfaces.
 
 """
-from ...utils.misc import Bunch
+from ...utils.bunch import Bunch
 from .core import (Interface, BaseInterface, SimpleInterface, CommandLine,
                    StdOutCommandLine, MpiCommandLine, SEMLikeCommandLine,
                    LibraryBaseInterface, PackageInfo)

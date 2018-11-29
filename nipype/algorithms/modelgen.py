@@ -23,7 +23,8 @@ import numpy as np
 from scipy.special import gammaln
 
 from ..utils import NUMPY_MMAP
-from ..utils.misc import Bunch, normalize_mc_params
+from ..utils.bunch import Bunch
+from ..utils.misc import normalize_mc_params
 from ..utils.filemanip import ensure_list
 from ..interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
                                traits, File, BaseInterfaceInputSpec, isdefined)
@@ -279,7 +280,7 @@ class SpecifyModel(BaseInterface):
     --------
 
     >>> from nipype.algorithms import modelgen
-    >>> from nipype.utils.misc import Bunch
+    >>> from nipype.utils.bunch import Bunch
     >>> s = modelgen.SpecifyModel()
     >>> s.inputs.input_units = 'secs'
     >>> s.inputs.functional_runs = ['functional2.nii', 'functional3.nii']
@@ -480,7 +481,7 @@ class SpecifySPMModel(SpecifyModel):
     --------
 
     >>> from nipype.algorithms import modelgen
-    >>> from nipype.utils.misc import Bunch
+    >>> from nipype.utils.bunch import Bunch
     >>> s = modelgen.SpecifySPMModel()
     >>> s.inputs.input_units = 'secs'
     >>> s.inputs.output_units = 'scans'
@@ -666,7 +667,7 @@ class SpecifySparseModel(SpecifyModel):
     --------
 
     >>> from nipype.algorithms import modelgen
-    >>> from nipype.utils.misc import Bunch
+    >>> from nipype.utils.bunch import Bunch
     >>> s = modelgen.SpecifySparseModel()
     >>> s.inputs.input_units = 'secs'
     >>> s.inputs.functional_runs = ['functional2.nii', 'functional3.nii']

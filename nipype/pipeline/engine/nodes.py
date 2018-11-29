@@ -23,7 +23,8 @@ from tempfile import mkdtemp
 from future import standard_library
 
 from ... import config, logging
-from ...utils.misc import Bunch, flatten, unflatten, str2bool, dict_diff
+from ...utils.bunch import Bunch
+from ...utils.misc import flatten, unflatten, str2bool, dict_diff
 from ...utils.filemanip import (md5, FileNotFoundError, ensure_list,
                                 simplify_list, copyfiles, fnames_presuffix,
                                 loadpkl, split_filename, load_json, makedirs,

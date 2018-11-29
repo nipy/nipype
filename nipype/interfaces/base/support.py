@@ -11,6 +11,7 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 from builtins import object
 from ... import logging, __version__
+from ...utils.bunch import bunch_repr
 
 iflogger = logging.getLogger('nipype.interface')
 
@@ -152,7 +153,7 @@ class InterfaceRuntime(object):
 
     def __repr__(self):
         """representation of the runtime object"""
-        return _repr_formatter(self, self.__class__.__name__)
+        return bunch_repr(self, self.__class__.__name__)
 
     # Enable when Python 2 support is dropped
     # def __str__(self):
@@ -244,25 +245,5 @@ InterfaceRuntime(cmdline='/bin/echo', returncode=0), version=...)
         return outdict
 
     def __repr__(self):
-        return _repr_formatter(
+        return bunch_repr(
             self.__getstate__(), self.__class__.__name__)
-
-
-def _repr_formatter(instance, classname=None):
-    classname = classname or 'Bunch'
-    outstr = ['%s(' % classname]
-    first = True
-    for k, v in sorted(instance.items()):
-        if not first:
-            outstr.append(', ')
-        if isinstance(v, dict):
-            pairs = []
-            for key, value in sorted(v.items()):
-                pairs.append("'%s': %s" % (key, value))
-            v = '{' + ', '.join(pairs) + '}'
-            outstr.append('%s=%s' % (k, v))
-        else:
-            outstr.append('%s=%r' % (k, v))
-        first = False
-    outstr.append(')')
-    return ''.join(outstr)

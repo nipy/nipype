@@ -7,7 +7,7 @@ import numpy as np
 
 import numpy.testing as npt
 from .. import rapidart as ra
-from ...utils.misc import Bunch
+from ...utils.bunch import Bunch
 
 
 def test_ad_init():

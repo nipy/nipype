@@ -39,7 +39,8 @@ from ...utils.filemanip import (
     write_rst_dict,
     write_rst_list,
 )
-from ...utils.misc import Bunch, str2bool
+from ...utils.bunch import Bunch
+from ...utils.misc import str2bool
 from ...utils.functions import create_function_from_source
 from ...interfaces.base import (CommandLine, isdefined, Undefined,
                                 InterfaceResult, traits)

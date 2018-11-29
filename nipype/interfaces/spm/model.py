@@ -18,7 +18,7 @@ import scipy.io as sio
 
 # Local imports
 from ... import logging
-from ...utils.misc import Bunch
+from ...utils.bunch import Bunch
 from ...utils.filemanip import (ensure_list, simplify_list,
                                 split_filename)
 from ..base import (traits, TraitedSpec, File, Directory,
