@@ -834,7 +834,6 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
     output_spec = DynamicTraitedSpec
     _always_run = True
     _pkg = 'boto'
-    imports = ('botocore',)
 
     def __init__(self, infields=None, outfields=None, **kwargs):
         """
@@ -2014,7 +2013,7 @@ class XNATSink(LibraryBaseInterface, IOBase):
         fields.
     """
     input_spec = XNATSinkInputSpec
-    _pkg = 'xnat'
+    _pkg = 'pyxnat'
 
     def _list_outputs(self):
         """Execute this module.
