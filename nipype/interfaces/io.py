@@ -28,6 +28,7 @@ import copy
 import tempfile
 from os.path import join, dirname
 from warnings import warn
+from packaging import version
 
 import sqlite3
 
@@ -43,6 +44,7 @@ from .base import (
 have_pybids = True
 try:
     import bids
+    pybids_ver = version.parse(bids.__version__)
 except ImportError:
     have_pybids = False
 
@@ -2763,6 +2765,10 @@ class BIDSDataGrabberInputSpec(DynamicTraitedSpec):
     return_type = traits.Enum('file', 'namedtuple', usedefault=True)
     strict = traits.Bool(desc='Return only BIDS "proper" files (e.g., '
                               'ignore derivatives/, sourcedata/, etc.)')
+    domains = traits.Either(None, traits.List(),
+                            usedefault=True,
+                            desc='(Optional): Pass list of domains '
+                            '(e.g. ["bids", "derivatives"]) for file searching.')
 
 
 class BIDSDataGrabber(IOBase):
@@ -2841,7 +2847,20 @@ class BIDSDataGrabber(IOBase):
         exclude = None
         if self.inputs.strict:
             exclude = ['derivatives/', 'code/', 'sourcedata/']
-        layout = bidslayout.BIDSLayout(self.inputs.base_dir, exclude=exclude)
+        
+        if pybids_ver < version.parse('0.5'):
+            raise ImportError("pybids must be >= 0.5, "
+            "installed version: {ver}".format(ver=pybids_ver))
+        elif pybids_ver >= version.parse('0.5') and pybids_ver < version.parse('0.6'):
+            layout = bidslayout.BIDSLayout(self.inputs.base_dir,
+                                           config=self.inputs.domains,
+                                           exclude=exclude)
+        else:
+            # pybids >= 0.6.0
+            if self.inputs.domains is None:
+                self.inputs.domains = ['bids']
+            layout = bidslayout.BIDSLayout((self.inputs.base_dir, self.inputs.domains), 
+                                           exclude=exclude)
 
         # If infield is not given nm input value, silently ignore
         filters = {}
