@@ -2847,7 +2847,7 @@ class BIDSDataGrabber(IOBase):
         exclude = None
         if self.inputs.strict:
             exclude = ['derivatives/', 'code/', 'sourcedata/']
-        
+
         if pybids_ver < version.parse('0.5'):
             raise ImportError("pybids must be >= 0.5, "
             "installed version: {ver}".format(ver=pybids_ver))
@@ -2859,7 +2859,7 @@ class BIDSDataGrabber(IOBase):
             # pybids >= 0.6.0
             if self.inputs.domains is None:
                 self.inputs.domains = ['bids']
-            layout = bidslayout.BIDSLayout((self.inputs.base_dir, self.inputs.domains), 
+            layout = bidslayout.BIDSLayout((self.inputs.base_dir, self.inputs.domains),
                                            exclude=exclude)
 
         # If infield is not given nm input value, silently ignore

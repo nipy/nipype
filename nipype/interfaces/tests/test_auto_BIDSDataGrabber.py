@@ -6,6 +6,7 @@ from ..io import BIDSDataGrabber
 def test_BIDSDataGrabber_inputs():
     input_map = dict(
         base_dir=dict(mandatory=True, ),
+        domains=dict(usedefault=True, ),
         output_query=dict(),
         raise_on_empty=dict(usedefault=True, ),
         return_type=dict(usedefault=True, ),
