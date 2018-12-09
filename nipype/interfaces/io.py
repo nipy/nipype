@@ -2820,7 +2820,7 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
         except ImportError:
             from bids.grabbids import BIDSLayout
 
-       pybids_ver = version.parse(bids.__version__)
+        pybids_ver = version.parse(bids.__version__)
         exclude = None
         if self.inputs.strict:
             exclude = ['derivatives/', 'code/', 'sourcedata/']
