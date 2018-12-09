@@ -11,7 +11,6 @@ import os.path as op
 import numpy as np
 import nibabel as nb
 import networkx as nx
-import scipy.io as sio
 
 from ... import logging
 from ...utils.filemanip import split_filename
@@ -178,6 +177,7 @@ def cmat(track_file,
          endpoint_name,
          intersections=False):
     """ Create the connection matrix for each resolution using fibers and ROIs. """
+    import scipy.io as sio
 
     stats = {}
     iflogger.info('Running cmat function')

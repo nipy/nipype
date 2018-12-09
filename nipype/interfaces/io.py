@@ -30,45 +30,15 @@ from os.path import join, dirname
 from warnings import warn
 from packaging import version
 
-import sqlite3
-
 from .. import config, logging
 from ..utils.filemanip import (
     copyfile, simplify_list, ensure_list,
-    get_related_files, related_filetype_sets)
+    get_related_files)
 from ..utils.misc import human_order_sorted, str2bool
 from .base import (
     TraitedSpec, traits, Str, File, Directory, BaseInterface, InputMultiPath,
-    isdefined, OutputMultiPath, DynamicTraitedSpec, Undefined, BaseInterfaceInputSpec)
-
-have_pybids = True
-try:
-    import bids
-    pybids_ver = version.parse(bids.__version__)
-except ImportError:
-    have_pybids = False
-
-if have_pybids:
-    try:
-        from bids import layout as bidslayout
-    except ImportError:
-        from bids import grabbids as bidslayout
-
-try:
-    import pyxnat
-except:
-    pass
-
-try:
-    import paramiko
-except:
-    pass
-
-try:
-    import boto
-    from boto.s3.connection import S3Connection, OrdinaryCallingFormat
-except:
-    pass
+    isdefined, OutputMultiPath, DynamicTraitedSpec, Undefined, BaseInterfaceInputSpec,
+    LibraryBaseInterface)
 
 iflogger = logging.getLogger('nipype.interface')
 
@@ -538,8 +508,6 @@ class DataSink(IOBase):
         '''
 
         # Import packages
-        import logging
-
         try:
             import boto3
             import botocore
@@ -609,7 +577,6 @@ class DataSink(IOBase):
 
         # Import packages
         import hashlib
-        import logging
         import os
 
         from botocore.exceptions import ClientError
@@ -851,7 +818,7 @@ class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         desc='Information to plug into template')
 
 
-class S3DataGrabber(IOBase):
+class S3DataGrabber(LibraryBaseInterface, IOBase):
     """ Generic datagrabber module that wraps around glob in an
         intelligent way for neuroimaging tasks to grab files from
         Amazon S3
@@ -867,6 +834,7 @@ class S3DataGrabber(IOBase):
     input_spec = S3DataGrabberInputSpec
     output_spec = DynamicTraitedSpec
     _always_run = True
+    _pkg = 'boto'
 
     def __init__(self, infields=None, outfields=None, **kwargs):
         """
@@ -921,6 +889,7 @@ class S3DataGrabber(IOBase):
     def _list_outputs(self):
         # infields are mandatory, however I could not figure out how to set 'mandatory' flag dynamically
         # hence manual check
+        import boto
         if self._infields:
             for key in self._infields:
                 value = getattr(self.inputs, key)
@@ -1037,6 +1006,7 @@ class S3DataGrabber(IOBase):
     # Takes an s3 address and downloads the file to a local
     # directory, returning the local path.
     def s3tolocal(self, s3path, bkt):
+        import boto
         # path formatting
         if not os.path.split(self.inputs.local_directory)[1] == '':
             self.inputs.local_directory += '/'
@@ -1819,7 +1789,7 @@ class XNATSourceInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     cache_dir = Directory(desc='Cache directory')
 
 
-class XNATSource(IOBase):
+class XNATSource(LibraryBaseInterface, IOBase):
     """ Generic XNATSource module that wraps around the pyxnat module in
         an intelligent way for neuroimaging tasks to grab files and data
         from an XNAT server.
@@ -1854,6 +1824,7 @@ class XNATSource(IOBase):
     """
     input_spec = XNATSourceInputSpec
     output_spec = DynamicTraitedSpec
+    _pkg = 'pyxnat'
 
     def __init__(self, infields=None, outfields=None, **kwargs):
         """
@@ -1903,6 +1874,7 @@ class XNATSource(IOBase):
     def _list_outputs(self):
         # infields are mandatory, however I could not figure out
         # how to set 'mandatory' flag dynamically, hence manual check
+        import pyxnat
 
         cache_dir = self.inputs.cache_dir or tempfile.gettempdir()
 
@@ -2036,16 +2008,18 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
             super(XNATSinkInputSpec, self).__setattr__(key, value)
 
 
-class XNATSink(IOBase):
+class XNATSink(LibraryBaseInterface, IOBase):
     """ Generic datasink module that takes a directory containing a
         list of nifti files and provides a set of structured output
         fields.
     """
     input_spec = XNATSinkInputSpec
+    _pkg = 'pyxnat'
 
     def _list_outputs(self):
         """Execute this module.
         """
+        import pyxnat
 
         # setup XNAT connection
         cache_dir = self.inputs.cache_dir or tempfile.gettempdir()
@@ -2204,7 +2178,7 @@ class SQLiteSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     table_name = Str(mandatory=True)
 
 
-class SQLiteSink(IOBase):
+class SQLiteSink(LibraryBaseInterface, IOBase):
     """ Very simple frontend for storing values into SQLite database.
 
         .. warning::
@@ -2224,6 +2198,7 @@ class SQLiteSink(IOBase):
 
     """
     input_spec = SQLiteSinkInputSpec
+    _pkg = 'sqlite3'
 
     def __init__(self, input_names, **inputs):
 
@@ -2235,6 +2210,7 @@ class SQLiteSink(IOBase):
     def _list_outputs(self):
         """Execute this module.
         """
+        import sqlite3
         conn = sqlite3.connect(
             self.inputs.database_file, check_same_thread=False)
         c = conn.cursor()
@@ -2335,7 +2311,7 @@ class SSHDataGrabberInputSpec(DataGrabberInputSpec):
         desc='If set SSH commands will be logged to the given file')
 
 
-class SSHDataGrabber(DataGrabber):
+class SSHDataGrabber(LibraryBaseInterface, DataGrabber):
     """ Extension of DataGrabber module that downloads the file list and
         optionally the files from a SSH server. The SSH operation must
         not need user and password so an SSH agent must be active in
@@ -2399,6 +2375,7 @@ class SSHDataGrabber(DataGrabber):
     input_spec = SSHDataGrabberInputSpec
     output_spec = DynamicTraitedSpec
     _always_run = False
+    _pkg = 'paramiko'
 
     def __init__(self, infields=None, outfields=None, **kwargs):
         """
@@ -2413,11 +2390,6 @@ class SSHDataGrabber(DataGrabber):
         See class examples for usage
 
         """
-        try:
-            paramiko
-        except NameError:
-            warn("The library paramiko needs to be installed"
-                 " for this module to run.")
         if not outfields:
             outfields = ['outfiles']
         kwargs = kwargs.copy()
@@ -2492,11 +2464,7 @@ class SSHDataGrabber(DataGrabber):
         return outfiles
 
     def _list_outputs(self):
-        try:
-            paramiko
-        except NameError:
-            raise ImportError("The library paramiko needs to be installed"
-                              " for this module to run.")
+        import paramiko
 
         if len(self.inputs.ssh_log_to_file) > 0:
             paramiko.util.log_to_file(self.inputs.ssh_log_to_file)
@@ -2576,6 +2544,7 @@ class SSHDataGrabber(DataGrabber):
         return outputs
 
     def _get_ssh_client(self):
+        import paramiko
         config = paramiko.SSHConfig()
         config.parse(open(os.path.expanduser('~/.ssh/config')))
         host = config.lookup(self.inputs.hostname)
@@ -2771,7 +2740,7 @@ class BIDSDataGrabberInputSpec(DynamicTraitedSpec):
                             '(e.g. ["bids", "derivatives"]) for file searching.')
 
 
-class BIDSDataGrabber(IOBase):
+class BIDSDataGrabber(LibraryBaseInterface, IOBase):
 
     """ BIDS datagrabber module that wraps around pybids to allow arbitrary
     querying of BIDS datasets.
@@ -2804,6 +2773,7 @@ class BIDSDataGrabber(IOBase):
     input_spec = BIDSDataGrabberInputSpec
     output_spec = DynamicTraitedSpec
     _always_run = True
+    _pkg = 'bids'
 
     def __init__(self, infields=None, **kwargs):
         """
@@ -2821,7 +2791,12 @@ class BIDSDataGrabber(IOBase):
                 }
 
         # If infields is empty, use all BIDS entities
-        if infields is None and have_pybids:
+        if infields is None:
+            # Version resilience
+            try:
+                from bids import layout as bidslayout
+            except ImportError:
+                from bids import grabbids as bidslayout
             bids_config = join(dirname(bidslayout.__file__), 'config', 'bids.json')
             bids_config = json.load(open(bids_config, 'r'))
             infields = [i['name'] for i in bids_config['entities']]
@@ -2836,14 +2811,16 @@ class BIDSDataGrabber(IOBase):
 
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 
-    def _run_interface(self, runtime):
-        if not have_pybids:
-            raise ImportError(
-                "The BIDSEventsGrabber interface requires pybids."
-                " Please make sure it is installed.")
-        return runtime
-
     def _list_outputs(self):
+        # Version resilience
+        import bids
+        from packaging import version
+        try:
+            from bids import BIDSLayout
+        except ImportError:
+            from bids.grabbids import BIDSLayout
+
+       pybids_ver = version.parse(bids.__version__)
         exclude = None
         if self.inputs.strict:
             exclude = ['derivatives/', 'code/', 'sourcedata/']
@@ -2852,15 +2829,15 @@ class BIDSDataGrabber(IOBase):
             raise ImportError("pybids must be >= 0.5, "
             "installed version: {ver}".format(ver=pybids_ver))
         elif pybids_ver >= version.parse('0.5') and pybids_ver < version.parse('0.6'):
-            layout = bidslayout.BIDSLayout(self.inputs.base_dir,
-                                           config=self.inputs.domains,
-                                           exclude=exclude)
+            layout = BIDSLayout(self.inputs.base_dir,
+                                config=self.inputs.domains,
+                                exclude=exclude)
         else:
             # pybids >= 0.6.0
             if self.inputs.domains is None:
                 self.inputs.domains = ['bids']
-            layout = bidslayout.BIDSLayout((self.inputs.base_dir, self.inputs.domains),
-                                           exclude=exclude)
+            layout = BIDSLayout((self.inputs.base_dir, self.inputs.domains),
+                                exclude=exclude)
 
         # If infield is not given nm input value, silently ignore
         filters = {}
