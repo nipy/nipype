@@ -659,8 +659,10 @@ class EddyInputSpec(FSLCommandInputSpec):
         "the field specified by --field and first volume "
         "in file --imain")
     use_cuda = traits.Bool(False, desc="Run eddy using cuda gpu")
-    cnr_maps = traits.Bool(False, desc='Output CNR-Maps', argstr='--cnr_maps')
-    residuals = traits.Bool(False, desc='Output Residuals', argstr='--residuals')
+    cnr_maps = traits.Bool(
+        False, desc='Output CNR-Maps', argstr='--cnr_maps', min_ver='5.0.10')
+    residuals = traits.Bool(
+        False, desc='Output Residuals', argstr='--residuals', min_ver='5.0.10')
 
 
 class EddyOutputSpec(TraitedSpec):

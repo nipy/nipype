@@ -74,8 +74,8 @@ def test_Eddy_inputs():
         session=dict(argstr='--session=%s', ),
         slm=dict(argstr='--slm=%s', ),
         use_cuda=dict(),
-        cnr_maps=dict(argstr='--cnr_maps', ),
-        residuals=dict(argstr='--residuals', ),
+        cnr_maps=dict(argstr='--cnr_maps', min_ver='5.0.10', ),
+        residuals=dict(argstr='--residuals', min_ver='5.0.10', ),
     )
     inputs = Eddy.input_spec()
 
