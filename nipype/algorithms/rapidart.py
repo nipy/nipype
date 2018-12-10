@@ -21,8 +21,6 @@ from copy import deepcopy
 
 from nibabel import load, funcs, Nifti1Image
 import numpy as np
-from scipy import signal
-import scipy.io as sio
 
 from ..utils import NUMPY_MMAP
 from ..interfaces.base import (BaseInterface, traits, InputMultiPath,
@@ -151,7 +149,8 @@ def _calc_norm_affine(affines, use_differences, brain_pts=None):
                                (3, all_pts.shape[1])),
                     axis=0)))
     else:
-        newpos = np.abs(signal.detrend(newpos, axis=0, type='constant'))
+        from scipy.signal import detrend
+        newpos = np.abs(detrend(newpos, axis=0, type='constant'))
         normdata = np.sqrt(np.mean(np.power(newpos, 2), axis=1))
     return normdata, displacement
 
@@ -411,6 +410,7 @@ class ArtifactDetect(BaseInterface):
         """
         Core routine for detecting outliers
         """
+        from scipy import signal
         if not cwd:
             cwd = os.getcwd()
 
@@ -750,6 +750,7 @@ class StimulusCorrelation(BaseInterface):
     def _run_interface(self, runtime):
         """Execute this module.
         """
+        import scipy.io as sio
         motparamlist = self.inputs.realignment_parameters
         intensityfiles = self.inputs.intensity_values
         spmmat = sio.loadmat(self.inputs.spm_mat_file, struct_as_record=False)
