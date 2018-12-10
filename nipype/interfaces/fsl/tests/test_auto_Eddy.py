@@ -74,6 +74,8 @@ def test_Eddy_inputs():
         session=dict(argstr='--session=%s', ),
         slm=dict(argstr='--slm=%s', ),
         use_cuda=dict(),
+        cnr_maps=dict(argstr='--cnr_maps', min_ver='5.0.10', ),
+        residuals=dict(argstr='--residuals', min_ver='5.0.10', ),
     )
     inputs = Eddy.input_spec()
 
@@ -89,6 +91,8 @@ def test_Eddy_outputs():
         out_restricted_movement_rms=dict(),
         out_rotated_bvecs=dict(),
         out_shell_alignment_parameters=dict(),
+        out_cnr_maps=dict(),
+        out_residuals=dict(),
     )
     outputs = Eddy.output_spec()
 
