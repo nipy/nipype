@@ -1378,21 +1378,19 @@ class EddyQuad(FSLCommand):
 
     >>> from nipype.interfaces.fsl import EddyQuad
     >>> quad = EddyQuad()
-    >>> quad.inputs.in_file = 'epi.nii'
-    >>> quad.inputs.in_mask  = 'epi_mask.nii'
-    >>> quad.inputs.in_index = 'epi_index.txt'
-    >>> quad.inputs.in_acqp  = 'epi_acqp.txt'
-    >>> quad.inputs.in_bvec  = 'bvecs.scheme'
-    >>> quad.inputs.in_bval  = 'bvals.scheme'
-    >>> quad.inputs.use_cuda = True
+    >>> quad.inputs.base_name  = 'eddy_corrected'
+    >>> quad.inputs.idx_file   = 'index.txt'
+    >>> quad.inputs.param_file = 'encfile.txt'
+    >>> quad.inputs.mask_file  = 'mask.nii.gz'
+    >>> quad.inputs.bval_file  = 'dwi.bval'
+    >>> quad.inputs.bvec_file  = 'dwi.bvec'
+    >>> quad.inputs.output_dir = 'eddy_corrected.qc'
+    >>> quad.inputs.field      = 'field.nii.gz'
+    >>> quad.verbose           = True
     >>> quad.cmdline # doctest: +ELLIPSIS
-    'eddy_cuda --ff=10.0 --acqp=epi_acqp.txt --bvals=bvals.scheme \
---bvecs=bvecs.scheme --imain=epi.nii --index=epi_index.txt \
---mask=epi_mask.nii --niter=5 --nvoxhp=1000 --out=.../eddy_corrected'
-    >>> quad.cmdline # doctest: +ELLIPSIS
-    'eddy_openmp --ff=10.0 --acqp=epi_acqp.txt --bvals=bvals.scheme \
---bvecs=bvecs.scheme --imain=epi.nii --index=epi_index.txt \
---mask=epi_mask.nii --niter=5 --nvoxhp=1000 --out=.../eddy_corrected'
+    'eddy_quad eddy_corrected --eddyIdx=index.txt --eddyParams=encfile.txt \
+--mask=mask.nii.gz --bvals=dwi.bval --bvecs=dwi.bvec \
+--output-dir=eddy_corrected.qc --field=field.nii.gz --verbose'
     >>> res = quad.run() # doctest: +SKIP
 
     """
