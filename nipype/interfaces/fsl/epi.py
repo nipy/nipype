@@ -1275,7 +1275,8 @@ class EddyQuadInputSpec(FSLCommandInputSpec):
     )
     output_dir = traits.Str(
         'eddy_corrected.qc',
-        mandatory=False,
+        mandatory=True,
+        usedefault=True,
         argstr='--output-dir=%s',
         desc="Output directory - default = '<base_name>.qc'",
     )
