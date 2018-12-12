@@ -1232,3 +1232,217 @@ class EddyCorrect(FSLCommand):
         if runtime.stderr:
             self.raise_exception(runtime)
         return runtime
+
+
+class EddyQuadInputSpec(FSLCommandInputSpec):
+    base_name = traits.Str(
+        'eddy_corrected',
+        argstr='%s',
+        desc="Basename (including path) specified when running EDDY",
+        position=0,
+    )
+    idx_file = File(
+        exists=True,
+        mandatory=True,
+        argstr="--eddyIdx=%s",
+        desc=("File containing indices for all volumes into acquisition "
+              "parameters")
+    )
+    param_file = File(
+        exists=True,
+        mandatory=True,
+        argstr="--eddyParams=%s",
+        desc="File containing acquisition parameters"
+    )
+    mask_file = File(
+        exists=True,
+        mandatory=True,
+        argstr="--mask=%s",
+        desc="Binary mask file"
+    )
+    bval_file = File(
+        exists=True,
+        mandatory=True,
+        argstr="--bvals=%s",
+        desc="b-values file"
+    )
+    bvec_file = File(
+        exists=True,
+        mandatory=False,
+        argstr="--bvecs=%s",
+        desc=("b-vectors file - only used when <base_name>.eddy_residuals "
+              "file is present")
+    )
+    output_dir = traits.Str(
+        'eddy_corrected.qc',
+        mandatory=False,
+        argstr='--output-dir=%s',
+        desc="Output directory - default = '<base_name>.qc'",
+    )
+    field = File(
+        mandatory=False,
+        argstr='--field=%s',
+        desc="TOPUP estimated field (in Hz)",
+    )
+    slspec = File(
+        mandatory=False,
+        argstr='--slspec=%s',
+        desc="Text file specifying slice/group acquisition",
+    )
+    verbose = traits.Bool(
+        False,
+        mandatory=False,
+        argstr='--verbose',
+        desc="Display debug messages",
+    )
+
+
+class EddyQuadOutputSpec(TraitedSpec):
+    out_qc_json = File(
+        exists=True,
+        mandatory=True,
+        desc=("Single subject database containing quality metrics and data "
+              "info.")
+    )
+    out_qc_pdf = File(
+        exists=True,
+        mandatory=True,
+        desc="Single subject QC report."
+    )
+    out_avg_b_png = traits.List(
+        File(
+            exists=True,
+            mandatory=True,
+            desc=("Image showing mid-sagittal, -coronal and -axial slices of "
+                  "each averaged b-shell volume.")
+        )
+    )
+    out_avg_b0_png = traits.List(
+        File(
+            exists=True,
+            mandatory=False,
+            desc=("Image showing mid-sagittal, -coronal and -axial slices of "
+                  "each averaged pe-direction b0 volume. Generated when using "
+                  "the -f option.")
+        )
+    )
+    out_cnr_png = traits.List(
+        File(
+            exists=True,
+            mandatory=False,
+            desc=("Image showing mid-sagittal, -coronal and -axial slices of "
+                  "each b-shell CNR volume. Generated when CNR maps are "
+                  "available.")
+        )
+    )
+    out_vdm_png = File(
+        exists=True,
+        mandatory=False,
+        desc=("Image showing mid-sagittal, -coronal and -axial slices of "
+              "the voxel displacement map. Generated when using the -f "
+              "option.")
+    )
+    out_residuals = File(
+        exists=True,
+        mandatory=False,
+        desc=("Text file containing the volume-wise mask-averaged squared "
+              "residuals. Generated when residual maps are available.")
+    )
+    out_clean_volumes = File(
+        exists=True,
+        mandatory=False,
+        desc=("Text file containing a list of clean volumes, based on "
+              "the eddy squared residuals. To generate a version of the "
+              "pre-processed dataset without outlier volumes, use: "
+              "`fslselectvols -i <eddy_corrected_data> -o "
+              "eddy_corrected_data_clean --vols=vols_no_outliers.txt`")
+    )
+
+
+class EddyQuad(FSLCommand):
+    """
+    Interface for FSL eddy_quad, a tool for generating single subject reports
+    and storing the quality assessment indices for each subject.
+    `User guide <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddyqc/UsersGuide>`_
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.fsl import EddyQuad
+    >>> quad = EddyQuad()
+    >>> quad.inputs.in_file = 'epi.nii'
+    >>> quad.inputs.in_mask  = 'epi_mask.nii'
+    >>> quad.inputs.in_index = 'epi_index.txt'
+    >>> quad.inputs.in_acqp  = 'epi_acqp.txt'
+    >>> quad.inputs.in_bvec  = 'bvecs.scheme'
+    >>> quad.inputs.in_bval  = 'bvals.scheme'
+    >>> quad.inputs.use_cuda = True
+    >>> quad.cmdline # doctest: +ELLIPSIS
+    'eddy_cuda --ff=10.0 --acqp=epi_acqp.txt --bvals=bvals.scheme \
+--bvecs=bvecs.scheme --imain=epi.nii --index=epi_index.txt \
+--mask=epi_mask.nii --niter=5 --nvoxhp=1000 --out=.../eddy_corrected'
+    >>> quad.cmdline # doctest: +ELLIPSIS
+    'eddy_openmp --ff=10.0 --acqp=epi_acqp.txt --bvals=bvals.scheme \
+--bvecs=bvecs.scheme --imain=epi.nii --index=epi_index.txt \
+--mask=epi_mask.nii --niter=5 --nvoxhp=1000 --out=.../eddy_corrected'
+    >>> res = quad.run() # doctest: +SKIP
+
+    """
+    _cmd = 'eddy_quad'
+    input_spec = EddyQuadInputSpec
+    output_spec = EddyQuadOutputSpec
+
+    def __init__(self, **inputs):
+        super(EddyQuad, self).__init__(**inputs)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        out_dir = self.inputs.output_dir
+        outputs['out_qc_json'] = os.path.abspath(
+            os.path.join(self.inputs.output_dir, 'out.json')
+        )
+        outputs['out_qc_json'] = os.path.abspath(
+            os.path.join(self.inputs.output_dir, 'out.json')
+        )
+        outputs['out_parameter'] = os.path.abspath(
+            '%s.eddy_parameters' % self.inputs.out_base)
+
+        # File generation might depend on the version of EDDY
+        out_rotated_bvecs = os.path.abspath(
+            '%s.eddy_rotated_bvecs' % self.inputs.out_base)
+        out_movement_rms = os.path.abspath(
+            '%s.eddy_movement_rms' % self.inputs.out_base)
+        out_restricted_movement_rms = os.path.abspath(
+            '%s.eddy_restricted_movement_rms' % self.inputs.out_base)
+        out_shell_alignment_parameters = os.path.abspath(
+            '%s.eddy_post_eddy_shell_alignment_parameters' %
+            self.inputs.out_base)
+        out_outlier_report = os.path.abspath(
+            '%s.eddy_outlier_report' % self.inputs.out_base)
+        if isdefined(self.inputs.cnr_maps) and self.inputs.cnr_maps:
+            out_cnr_maps = os.path.abspath(
+                '%s.eddy_cnr_maps.nii.gz' % self.inputs.out_base)
+            if os.path.exists(out_cnr_maps):
+                outputs['out_cnr_maps'] = out_cnr_maps
+        if isdefined(self.inputs.residuals) and self.inputs.residuals:
+            out_residuals = os.path.abspath(
+                '%s.eddy_residuals.nii.gz' % self.inputs.out_base)
+            if os.path.exists(out_residuals):
+                outputs['out_residuals'] = out_residuals
+
+        if os.path.exists(out_rotated_bvecs):
+            outputs['out_rotated_bvecs'] = out_rotated_bvecs
+        if os.path.exists(out_movement_rms):
+            outputs['out_movement_rms'] = out_movement_rms
+        if os.path.exists(out_restricted_movement_rms):
+            outputs['out_restricted_movement_rms'] = \
+                out_restricted_movement_rms
+        if os.path.exists(out_shell_alignment_parameters):
+            outputs['out_shell_alignment_parameters'] = \
+                out_shell_alignment_parameters
+        if os.path.exists(out_outlier_report):
+            outputs['out_outlier_report'] = out_outlier_report
+
+        return outputs
+
+
