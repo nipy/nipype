@@ -1304,11 +1304,13 @@ class EddyQuadOutputSpec(TraitedSpec):
         desc=("Single subject database containing quality metrics and data "
               "info.")
     )
+
     out_qc_pdf = File(
         exists=True,
         mandatory=True,
         desc="Single subject QC report."
     )
+
     out_avg_b_png = traits.List(
         File(
             exists=True,
@@ -1317,6 +1319,7 @@ class EddyQuadOutputSpec(TraitedSpec):
                   "each averaged b-shell volume.")
         )
     )
+
     out_avg_b0_png = traits.List(
         File(
             exists=True,
@@ -1326,6 +1329,7 @@ class EddyQuadOutputSpec(TraitedSpec):
                   "the -f option.")
         )
     )
+
     out_cnr_png = traits.List(
         File(
             exists=True,
@@ -1335,6 +1339,7 @@ class EddyQuadOutputSpec(TraitedSpec):
                   "available.")
         )
     )
+
     out_vdm_png = File(
         exists=True,
         mandatory=False,
@@ -1342,12 +1347,14 @@ class EddyQuadOutputSpec(TraitedSpec):
               "the voxel displacement map. Generated when using the -f "
               "option.")
     )
+
     out_residuals = File(
         exists=True,
         mandatory=False,
         desc=("Text file containing the volume-wise mask-averaged squared "
               "residuals. Generated when residual maps are available.")
     )
+
     out_clean_volumes = File(
         exists=True,
         mandatory=False,
@@ -1396,52 +1403,48 @@ class EddyQuad(FSLCommand):
         super(EddyQuad, self).__init__(**inputs)
 
     def _list_outputs(self):
+        from glob import glob
         outputs = self.output_spec().get()
         out_dir = self.inputs.output_dir
         outputs['out_qc_json'] = os.path.abspath(
-            os.path.join(self.inputs.output_dir, 'out.json')
+            os.path.join(out_dir, 'qc.json')
         )
-        outputs['out_qc_json'] = os.path.abspath(
-            os.path.join(self.inputs.output_dir, 'out.json')
+        outputs['out_qc_pdf'] = os.path.abspath(
+            os.path.join(out_dir, 'qc.pdf')
         )
-        outputs['out_parameter'] = os.path.abspath(
-            '%s.eddy_parameters' % self.inputs.out_base)
 
-        # File generation might depend on the version of EDDY
-        out_rotated_bvecs = os.path.abspath(
-            '%s.eddy_rotated_bvecs' % self.inputs.out_base)
-        out_movement_rms = os.path.abspath(
-            '%s.eddy_movement_rms' % self.inputs.out_base)
-        out_restricted_movement_rms = os.path.abspath(
-            '%s.eddy_restricted_movement_rms' % self.inputs.out_base)
-        out_shell_alignment_parameters = os.path.abspath(
-            '%s.eddy_post_eddy_shell_alignment_parameters' %
-            self.inputs.out_base)
-        out_outlier_report = os.path.abspath(
-            '%s.eddy_outlier_report' % self.inputs.out_base)
-        if isdefined(self.inputs.cnr_maps) and self.inputs.cnr_maps:
-            out_cnr_maps = os.path.abspath(
-                '%s.eddy_cnr_maps.nii.gz' % self.inputs.out_base)
-            if os.path.exists(out_cnr_maps):
-                outputs['out_cnr_maps'] = out_cnr_maps
-        if isdefined(self.inputs.residuals) and self.inputs.residuals:
-            out_residuals = os.path.abspath(
-                '%s.eddy_residuals.nii.gz' % self.inputs.out_base)
-            if os.path.exists(out_residuals):
-                outputs['out_residuals'] = out_residuals
+        outputs['out_avg_b0_png'] = glob(os.path.abspath(
+            os.path.join(out_dir, 'avg_b0_pe*.png')
+        ))
 
-        if os.path.exists(out_rotated_bvecs):
-            outputs['out_rotated_bvecs'] = out_rotated_bvecs
-        if os.path.exists(out_movement_rms):
-            outputs['out_movement_rms'] = out_movement_rms
-        if os.path.exists(out_restricted_movement_rms):
-            outputs['out_restricted_movement_rms'] = \
-                out_restricted_movement_rms
-        if os.path.exists(out_shell_alignment_parameters):
-            outputs['out_shell_alignment_parameters'] = \
-                out_shell_alignment_parameters
-        if os.path.exists(out_outlier_report):
-            outputs['out_outlier_report'] = out_outlier_report
+        outputs['out_avg_b_png'] = [b for b in glob(os.path.abspath(
+            os.path.join(out_dir, 'avg_b*.png')
+        )) if b not in outputs['out_avg_b0_png']]
+
+        outputs['out_cnr_png'] = glob(os.path.abspath(
+            os.path.join(out_dir, 'cnr*.png')
+        ))
+
+        vdm = os.path.abspath(
+            os.path.join(out_dir, 'vdm.png')
+        )
+
+        if os.path.exists(vdm):
+            outputs['out_vdm_png'] = vdm
+
+        residuals = os.path.abspath(
+            os.path.join(out_dir, 'eddy_msr.txt')
+        )
+
+        if os.path.exists(residuals):
+            outputs['out_residuals'] = residuals
+
+        outlier_vols = os.path.abspath(
+            os.path.join(out_dir, 'vols_no_outliers.txt')
+        )
+
+        if os.path.exists(outlier_vols):
+            outputs['out_clean_volumes'] = outlier_vols
 
         return outputs
 
