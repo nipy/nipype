@@ -443,7 +443,7 @@ class RealignUnwarpInputSpec(SPMCommandInputSpec):
         traits.Either(ImageFileSPM(exists=True),
                       traits.List(ImageFileSPM(exists=True))),
         field='data.scans',
-        mandatory=True, 
+        mandatory=True,
         copyfile=True,
         desc='list of filenames to realign and unwarp')
     phase_map = File(
@@ -452,52 +452,52 @@ class RealignUnwarpInputSpec(SPMCommandInputSpec):
              'behaviour, the same map will be used for all sessions',
         copyfile=False)
     quality = traits.Range(
-        low=0.0, 
-        high=1.0, 
+        low=0.0,
+        high=1.0,
         field='eoptions.quality',
         desc='0.1 = fast, 1.0 = precise')
     fwhm = traits.Range(
-        low=0.0, 
+        low=0.0,
         field='eoptions.fwhm',
         desc='gaussian smoothing kernel width')
     separation = traits.Range(
-        low=0.0, 
+        low=0.0,
         field='eoptions.sep',
         desc='sampling separation in mm')
     register_to_mean = traits.Bool(
         field='eoptions.rtm',
         desc='Indicate whether realignment is done to the mean image')
     weight_img = File(
-        exists=True, 
+        exists=True,
         field='eoptions.weight',
         desc='filename of weighting image')
     interp = traits.Range(
-        low=0, 
-        high=7, 
+        low=0,
+        high=7,
         field='eoptions.einterp',
         desc='degree of b-spline used for interpolation')
     wrap = traits.List(
-        traits.Int(), 
-        minlen=3, 
+        traits.Int(),
+        minlen=3,
         maxlen=3,
         field='eoptions.ewrap',
         desc='Check if interpolation should wrap in [x,y,z]')
     est_basis_func = traits.List(
-        traits.Int(), 
-        minlen=2, 
+        traits.Int(),
+        minlen=2,
         maxlen=2,
         field='uweoptions.basfcn',
         desc='Number of basis functions to use for each dimension')
     est_reg_order = traits.Range(
-        low=0, 
-        high=3, 
+        low=0,
+        high=3,
         field='uweoptions.regorder',
         desc=('This parameter determines how to balance the compromise between likelihood '
               'maximization and smoothness maximization of the estimated field.'))
     est_reg_factor = traits.ListInt(
-        [100000], 
+        [100000],
         field='uweoptions.lambda',
-        minlen=1, 
+        minlen=1,
         maxlen=1,
         usedefault=True,
         desc='Regularisation factor. Default: 100000 (medium).')
@@ -506,51 +506,51 @@ class RealignUnwarpInputSpec(SPMCommandInputSpec):
         desc=('Jacobian deformations. In theory a good idea to include them, '
              ' in practice a bad idea. Default: No.'))
     est_first_order_effects = traits.List(
-        traits.Int(), 
-        minlen=1, 
+        traits.Int(),
+        minlen=1,
         maxlen=6,
         field='uweoptions.fot',
         desc='First order effects should only depend on pitch and roll, i.e. [4 5]')
     est_second_order_effects = traits.List(
-        traits.Int(), 
-        minlen=1, 
+        traits.Int(),
+        minlen=1,
         maxlen=6,
         field='uweoptions.sot',
         desc='List of second order terms to model second derivatives of.')
     est_unwarp_fwhm = traits.Range(
-        low=0.0, 
+        low=0.0,
         field='uweoptions.uwfwhm',
         desc='gaussian smoothing kernel width for unwarp')
     est_re_est_mov_par = traits.Bool(
         field='uweoptions.rem',
         desc='Re-estimate movement parameters at each unwarping iteration.')
     est_num_of_iterations = traits.ListInt(
-        [5], 
+        [5],
         field='uweoptions.noi',
-        minlen=1, 
-        maxlen=1, 
+        minlen=1,
+        maxlen=1,
         usedefault=True,
         desc='Number of iterations.')
     est_taylor_expansion_point = traits.String(
-        'Average', 
+        'Average',
         field='uweoptions.expround',
         usedefault=True,
         desc='Point in position space to perform Taylor-expansion around.')
     reslice_which = traits.ListInt(
-        [2, 1], 
+        [2, 1],
         field='uwroptions.uwwhich',
-        minlen=2, 
-        maxlen=2, 
+        minlen=2,
+        maxlen=2,
         usedefault=True,
         desc='determines which images to reslice')
     reslice_interp = traits.Range(
-        low=0, 
-        high=7, 
+        low=0,
+        high=7,
         field='uwroptions.rinterp',
         desc='degree of b-spline used for interpolation')
     reslice_wrap = traits.List(
-        traits.Int(), 
-        minlen=3, 
+        traits.Int(),
+        minlen=3,
         maxlen=3,
         field='uwroptions.wrap',
         desc='Check if interpolation should wrap in [x,y,z]')
@@ -558,8 +558,8 @@ class RealignUnwarpInputSpec(SPMCommandInputSpec):
         field='uwroptions.mask',
         desc='True/False mask output image')
     out_prefix = traits.String(
-        'u', 
-        field='uwroptions.prefix', 
+        'u',
+        field='uwroptions.prefix',
         usedefault=True,
         desc='realigned and unwarped output prefix')
 
@@ -585,7 +585,7 @@ class RealignUnwarpOutputSpec(TraitedSpec):
 
 class RealignUnwarp(SPMCommand):
     """Use spm_uw_estimate for estimating within subject registration and unwarping
-    of time series. Function accepts only one single field map. If in_files is a 
+    of time series. Function accepts only one single field map. If in_files is a
     list of files they will be treated as separate sessions but associated to the
     same fieldmap.
 
@@ -617,7 +617,7 @@ class RealignUnwarp(SPMCommand):
                                     keep4d=False,
                                     separate_sessions=True)
         return super(RealignUnwarp, self)._format_arg(opt, spec, val)
-   
+
 
     def _parse_inputs(self, skip=()):
 
@@ -630,7 +630,7 @@ class RealignUnwarp(SPMCommand):
 
         if isdefined(self.inputs.in_files):
             if isinstance(self.inputs.in_files, list):
-                data = [dict(scans = sess, pmscan = pmscan) 
+                data = [dict(scans = sess, pmscan = pmscan)
                                           for sess in spmdict['data']['scans']]
             else:
                 data = [dict(scans = spmdict['data']['scans'], pmscan = pmscan)]
