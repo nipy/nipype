@@ -1379,18 +1379,19 @@ class EddyQuad(FSLCommand):
     >>> from nipype.interfaces.fsl import EddyQuad
     >>> quad = EddyQuad()
     >>> quad.inputs.base_name  = 'eddy_corrected'
-    >>> quad.inputs.idx_file   = 'index.txt'
-    >>> quad.inputs.param_file = 'encfile.txt'
-    >>> quad.inputs.mask_file  = 'mask.nii.gz'
-    >>> quad.inputs.bval_file  = 'dwi.bval'
-    >>> quad.inputs.bvec_file  = 'dwi.bvec'
+    >>> quad.inputs.idx_file   = 'epi_index.txt'
+    >>> quad.inputs.param_file = 'epi_acqp.txt'
+    >>> quad.inputs.mask_file  = 'epi_mask.nii'
+    >>> quad.inputs.bval_file  = 'bvals.scheme'
+    >>> quad.inputs.bvec_file  = 'bvecs.scheme'
     >>> quad.inputs.output_dir = 'eddy_corrected.qc'
-    >>> quad.inputs.field      = 'field.nii.gz'
-    >>> quad.verbose           = True
+    >>> quad.inputs.field      = 'fieldmap_phase_fslprepared.nii'
+    >>> quad.inputs.verbose    = True
     >>> quad.cmdline # doctest: +ELLIPSIS
-    'eddy_quad eddy_corrected --eddyIdx=index.txt --eddyParams=encfile.txt \
---mask=mask.nii.gz --bvals=dwi.bval --bvecs=dwi.bvec \
---output-dir=eddy_corrected.qc --field=field.nii.gz --verbose'
+    'eddy_quad eddy_corrected --bvals=bvals.scheme --bvecs=bvecs.scheme \
+--field=fieldmap_phase_fslprepared.nii --eddyIdx=epi_index.txt \
+--mask=epi_mask.nii --output-dir=eddy_corrected.qc --eddyParams=epi_acqp.txt \
+--verbose'
     >>> res = quad.run() # doctest: +SKIP
 
     """
