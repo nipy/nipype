@@ -75,7 +75,7 @@ class TractographyInputSpec(MRTrix3BaseInputSpec):
         desc=('set the maximum angle between successive steps (default '
               'is 90deg x stepsize / voxelsize)'))
     n_tracks = traits.Int(
-        argstr='-number %d',
+        argstr='-select %d',
         desc=('set the desired number of tracks. The program will continue'
               ' to generate tracks until this number of tracks have been '
               'selected and written to the output file'))

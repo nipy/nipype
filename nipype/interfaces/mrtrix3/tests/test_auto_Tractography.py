@@ -40,7 +40,7 @@ def test_Tractography_inputs():
             argstr='-samples %d',
             usedefault=True,
         ),
-        n_tracks=dict(argstr='-number %d', ),
+        n_tracks=dict(argstr='-select %d', ),
         n_trials=dict(argstr='-trials %d', ),
         noprecompt=dict(argstr='-noprecomputed', ),
         nthreads=dict(
