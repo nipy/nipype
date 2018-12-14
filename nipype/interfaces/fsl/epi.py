@@ -1237,8 +1237,10 @@ class EddyCorrect(FSLCommand):
 class EddyQuadInputSpec(FSLCommandInputSpec):
     base_name = traits.Str(
         'eddy_corrected',
+        usedefault=True,
         argstr='%s',
-        desc="Basename (including path) specified when running EDDY",
+        desc=("Basename (including path) for EDDY output files, i.e., "
+              "corrected images and QC files"),
         position=0,
     )
     idx_file = File(
@@ -1268,31 +1270,26 @@ class EddyQuadInputSpec(FSLCommandInputSpec):
     )
     bvec_file = File(
         exists=True,
-        mandatory=False,
         argstr="--bvecs=%s",
         desc=("b-vectors file - only used when <base_name>.eddy_residuals "
               "file is present")
     )
     output_dir = traits.Str(
-        'eddy_corrected.qc',
-        mandatory=True,
-        usedefault=True,
+        name_template='%s.qc',
+        name_source=['base_name'],
         argstr='--output-dir=%s',
         desc="Output directory - default = '<base_name>.qc'",
     )
     field = File(
-        mandatory=False,
         argstr='--field=%s',
         desc="TOPUP estimated field (in Hz)",
     )
-    slspec = File(
-        mandatory=False,
+    slice_spec = File(
         argstr='--slspec=%s',
         desc="Text file specifying slice/group acquisition",
     )
     verbose = traits.Bool(
         False,
-        mandatory=False,
         argstr='--verbose',
         desc="Display debug messages",
     )
@@ -1321,7 +1318,7 @@ class EddyQuadOutputSpec(TraitedSpec):
         )
     )
 
-    out_avg_b0_png = traits.List(
+    out_avg_b0_pe_png = traits.List(
         File(
             exists=True,
             mandatory=False,
@@ -1399,52 +1396,41 @@ class EddyQuad(FSLCommand):
     input_spec = EddyQuadInputSpec
     output_spec = EddyQuadOutputSpec
 
-    def __init__(self, **inputs):
-        super(EddyQuad, self).__init__(**inputs)
-
     def _list_outputs(self):
-        from glob import glob
+        import json
         outputs = self.output_spec().get()
-        out_dir = self.inputs.output_dir
-        outputs['out_qc_json'] = os.path.abspath(
-            os.path.join(out_dir, 'qc.json')
-        )
-        outputs['out_qc_pdf'] = os.path.abspath(
-            os.path.join(out_dir, 'qc.pdf')
-        )
+        out_dir = os.path.abspath(self.inputs.output_dir)
+        outputs['out_qc_json'] = os.path.join(out_dir, 'qc.json')
+        outputs['out_qc_pdf'] = os.path.join(out_dir, 'qc.pdf')
 
-        outputs['out_avg_b0_png'] = glob(os.path.abspath(
-            os.path.join(out_dir, 'avg_b0_pe*.png')
-        ))
+        with open(outputs['out_qc_json']) as fp:
+            qc = json.load(fp)
 
-        outputs['out_avg_b_png'] = [b for b in glob(os.path.abspath(
-            os.path.join(out_dir, 'avg_b*.png')
-        )) if b not in outputs['out_avg_b0_png']]
+        outputs['out_avg_b_png'] = [
+            os.path.join(out_dir, 'avg_b{bval:d}.png'.format(bval=bval))
+            for bval in list(set([0] + qc.get('data_unique_bvals')))
+        ]
 
-        outputs['out_cnr_png'] = glob(os.path.abspath(
-            os.path.join(out_dir, 'cnr*.png')
-        ))
+        if qc.get('qc_field_flag'):
+            outputs['out_avg_b0_pe_png'] = [
+                os.path.join(out_dir, 'avg_b0_pe{i:d}'.format(i=i))
+                for i in range(qc.get('data_no_PE_dirs'))
+            ]
 
-        vdm = os.path.abspath(
-            os.path.join(out_dir, 'vdm.png')
-        )
+            outputs['out_vdm_png'] = os.path.join(out_dir, 'vdm.png')
 
-        if os.path.exists(vdm):
-            outputs['out_vdm_png'] = vdm
+        if qc.get('qc_cnr_flag'):
+            outputs['out_cnr_png'] = [
+                os.path.join(out_dir, 'cnr{i:04d}.nii.gz.png')
+                for i, _ in enumerate(qc.get('qc_cnr_avg'))
+            ]
 
-        residuals = os.path.abspath(
-            os.path.join(out_dir, 'eddy_msr.txt')
-        )
+        if qc.get('qc_rss_flag'):
+            outputs['out_residuals'] = os.path.join(out_dir, 'eddy_msr.txt')
 
-        if os.path.exists(residuals):
-            outputs['out_residuals'] = residuals
-
-        outlier_vols = os.path.abspath(
-            os.path.join(out_dir, 'vols_no_outliers.txt')
-        )
-
-        if os.path.exists(outlier_vols):
-            outputs['out_clean_volumes'] = outlier_vols
+        if qc.get('qc_ol_flag'):
+            outputs['out_clean_volumes'] = os.path.join(out_dir,
+                                                        'vols_no_outliers.txt')
 
         return outputs
 
