@@ -4,6 +4,7 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
 import os.path as op
+import inspect
 import numpy as np
 from ... import logging
 from ..base import (traits, File, isdefined, LibraryBaseInterface,
@@ -130,17 +131,25 @@ def create_interface_specs(class_name, params=None, BaseClass=TraitedSpec):
     """
     attr = {}
     if params is not None:
-        for name, dipy_type, desc in params:
+        for p in params:
+            name, dipy_type, desc = p[0], p[1], p[2]
             is_file = bool("files" in name or "out_" in name)
             traits_type, is_mandatory = convert_to_traits_type(dipy_type,
                                                                is_file)
             # print(name, dipy_type, desc, is_file, traits_type, is_mandatory)
-            if isinstance(BaseClass, BaseInterfaceInputSpec):
-                attr[name] = traits_type(desc=desc[-1], mandatory=is_mandatory)
+            if BaseClass.__name__ == BaseInterfaceInputSpec.__name__:
+                if len(p) > 3:
+                    attr[name] = traits_type(p[3], desc=desc[-1],
+                                             usedefault=True,
+                                             mandatory=is_mandatory)
+                else:
+                    attr[name] = traits_type(desc=desc[-1],
+                                             mandatory=is_mandatory)
             else:
-                attr[name] = traits_type(desc=desc[-1], exists=True)
+                attr[name] = traits_type(p[3], desc=desc[-1], exists=True,
+                                         usedefault=True,)
 
-    newclass = type(class_name, (BaseClass, ), attr)
+    newclass = type(str(class_name), (BaseClass, ), attr)
     return newclass
 
 
@@ -166,15 +175,21 @@ def dipy_to_nipype_interface(cls_name, dipy_flow, BaseClass=DipyBaseInterface):
 
     """
     parser = IntrospectiveArgumentParser()
-    parser.add_workflow(dipy_flow())
-    input_parameters = parser.positional_parameters + parser.optional_parameters
+    flow = dipy_flow()
+    parser.add_workflow(flow)
+    default_values = inspect.getargspec(flow.run).defaults
+    optional_params = [args + (val,) for args, val in zip(parser.optional_parameters, default_values)]
+    start = len(parser.optional_parameters) - len(parser.output_parameters)
+
+    output_parameters = [args + (val,) for args, val in zip(parser.output_parameters, default_values[start:])]
+    input_parameters = parser.positional_parameters + optional_params
 
     input_spec = create_interface_specs("{}InputSpec".format(cls_name),
                                         input_parameters,
                                         BaseClass=BaseInterfaceInputSpec)
 
     output_spec = create_interface_specs("{}OutputSpec".format(cls_name),
-                                         parser.output_parameters,
+                                         output_parameters,
                                          BaseClass=TraitedSpec)
 
     def _run_interface(self, runtime):
@@ -190,7 +205,7 @@ def dipy_to_nipype_interface(cls_name, dipy_flow, BaseClass=DipyBaseInterface):
 
         return outputs
 
-    newclass = type(cls_name, (BaseClass, ),
+    newclass = type(str(cls_name), (BaseClass, ),
                     {"input_spec": input_spec,
                      "output_spec": output_spec,
                      "_run_interface": _run_interface,
