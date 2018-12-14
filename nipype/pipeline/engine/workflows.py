@@ -878,7 +878,7 @@ connected.
         if not nx.is_directed_acyclic_graph(self._graph):
             raise Exception(('Workflow: %s is not a directed acyclic graph '
                              '(DAG)') % self.name)
-        nodes = nx.topological_sort(self._graph)
+        nodes = list(nx.topological_sort(self._graph))
         for node in nodes:
             logger.debug('processing node: %s', node)
             if isinstance(node, Workflow):
