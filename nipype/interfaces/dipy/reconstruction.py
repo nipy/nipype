@@ -27,7 +27,7 @@ if HAVE_DIPY and LooseVersion(dipy_version()) >= LooseVersion('0.15'):
     from dipy.workflows.reconst import (ReconstDkiFlow, ReconstCSAFlow,
                                         ReconstCSDFlow, ReconstMAPMRIFlow,
                                         ReconstDtiFlow)
-    import ipdb; ipdb.set_trace()
+                               
     DKIModel = dipy_to_nipype_interface("DKIModel", ReconstDkiFlow)
     MapmriModel = dipy_to_nipype_interface("MapmriModel", ReconstMAPMRIFlow)
     DTIModel = dipy_to_nipype_interface("DTIModel", ReconstDtiFlow)
