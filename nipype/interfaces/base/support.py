@@ -269,7 +269,7 @@ def format_help(cls):
         _outputs_help(cls) + ['']  +
         _refs_help(cls)
     )
-    return allhelp.expandtabs(4)
+    return allhelp.expandtabs(8)
 
 
 def _inputs_help(cls):
@@ -281,7 +281,7 @@ def _inputs_help(cls):
     ['Inputs::', '', '\t[Mandatory]', '\tin_file: (an existing file name)', ...
 
     """
-    helpstr = ['Inputs::', '']
+    helpstr = ['Inputs::']
     mandatory_keys = []
     optional_items = []
 
@@ -289,19 +289,19 @@ def _inputs_help(cls):
         inputs = cls.input_spec()
         mandatory_items = list(inputs.traits(mandatory=True).items())
         if mandatory_items:
-            helpstr += ['\t[Mandatory]']
-            for name, spec in sorted(mandatory_items):
+            helpstr += ['', '\t[Mandatory]']
+            for name, spec in mandatory_items:
                 helpstr += get_trait_desc(inputs, name, spec)
 
-        mandatory_keys = [item[0] for item in mandatory_items]
+        mandatory_keys = {item[0] for item in mandatory_items}
         optional_items = ['\n'.join(get_trait_desc(inputs, name, val))
                           for name, val in inputs.traits(transient=None).items()
                           if name not in mandatory_keys]
         if optional_items:
-            helpstr += ['\t[Optional]'] + optional_items
+            helpstr += ['', '\t[Optional]'] + optional_items
 
     if not mandatory_keys and not optional_items:
-        helpstr += ['\tNone']
+        helpstr += ['', '\tNone']
     return helpstr
 
 
@@ -319,7 +319,7 @@ def _outputs_help(cls):
         outputs = cls.output_spec()
         outhelpstr = [
             '\n'.join(get_trait_desc(outputs, name, spec))
-            for name, spec in sorted(outputs.traits(transient=None).items())]
+            for name, spec in outputs.traits(transient=None).items()]
         if outhelpstr:
             helpstr = helpstr[:-1] + outhelpstr
     return helpstr
@@ -327,7 +327,7 @@ def _outputs_help(cls):
 
 def _refs_help(cls):
     """Prints interface references."""
-    references = getattr(cls, '_references', None)
+    references = getattr(cls, 'references_', None)
     if not references:
         return []
 
