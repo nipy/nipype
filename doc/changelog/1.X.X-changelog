@@ -8,10 +8,12 @@
   * FIX: Indices were swapped for memory and cpu profile data (https://github.com/nipy/nipype/pull/2816)
   * FIX: ``status_callback`` not called with ``stop_on_first_crash`` (https://github.com/nipy/nipype/pull/2810)
   * FIX: Change undefined ScriptError on LFS plugin to IOError (https://github.com/nipy/nipype/pull/2803)
+  * ENH: Add NaN failure mode to CompCor interfaces (https://github.com/nipy/nipype/pull/2819)
   * ENH: Enable cnr_maps and residuals outputs for FSL eddy (https://github.com/nipy/nipype/pull/2750)
   * ENH: Improve ``str2bool`` + doctests (https://github.com/nipy/nipype/pull/2807)
   * TST: Improve py.test configuration of doctests (https://github.com/nipy/nipype/pull/2802)
   * DOC: Update DOI badge to point to all versions (https://github.com/nipy/nipype/pull/2804)
+  * MAINT: Offload interfaces with help formatting (https://github.com/nipy/nipype/pull/2797)
   * MAINT: Reduce minimal code redundancy in filemanip.get_dependencies (https://github.com/nipy/nipype/pull/2782)
   * MAINT: Delayed imports to reduce import time (https://github.com/nipy/nipype/pull/2809)
 
