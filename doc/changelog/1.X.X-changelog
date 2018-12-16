@@ -36,7 +36,7 @@
   * MAINT: DeprecationWarning: use ``HasTraits.trait_set`` instead (https://github.com/nipy/nipype/pull/2792)
   * MAINT: Stop using deprecated ``logger.warn()`` (https://github.com/nipy/nipype/pull/2788)
   * MAINT: Move ``interfaces.base.run_command`` to ``nipype.utils.subprocess`` (https://github.com/nipy/nipype/pull/2777)
-  * MAINT: Force numpy>=1:15:4 when Python>=3:7 (https://github.com/nipy/nipype/pull/2775)
+  * MAINT: Force numpy>=1.15.4 when Python>=3.7 (https://github.com/nipy/nipype/pull/2775)
 
 
 1.1.5 (November 08, 2018)
