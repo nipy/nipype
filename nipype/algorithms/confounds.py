@@ -412,6 +412,11 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         low=0,
         usedefault=True,
         desc='Number of volumes at start of series to ignore')
+    failure_mode = traits.Enum(
+        'error', 'NaN',
+        usedefault=True,
+        desc='When no components are found or convergence fails, raise an error '
+             'or silently return columns of NaNs.')
 
 
 class CompCorOutputSpec(TraitedSpec):
@@ -1185,13 +1190,20 @@ def compute_noise_components(imgseries, mask_images, num_components,
 
         # "The covariance matrix C = MMT was constructed and decomposed into its
         # principal components using a singular value decomposition."
-        u, _, _ = np.linalg.svd(M, full_matrices=False)
+        try:
+            u, _, _ = np.linalg.svd(M, full_matrices=False)
+        except np.linalg.LinAlgError:
+            if self.inputs.failure_mode == 'error':
+                raise
+            u = np.ones((M.shape[0], num_components), dtype=np.float32) * np.nan
         if components is None:
             components = u[:, :num_components]
         else:
             components = np.hstack((components, u[:, :num_components]))
     if components is None and num_components > 0:
-        raise ValueError('No components found')
+        if self.inputs.failure_mode == 'error':
+            raise ValueError('No components found')
+        components = np.ones((M.shape[0], num_components), dtype=np.float32) * np.nan
     return components, basis
 
 
