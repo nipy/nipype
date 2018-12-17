@@ -14,7 +14,7 @@ import re
 
 from ... import logging
 from ...utils.misc import is_container
-from ...utils.filemanip import md5, to_str, hash_infile
+from ...utils.filemanip import md5, hash_infile
 iflogger = logging.getLogger('nipype.interface')
 
 HELP_LINEWIDTH = 70
@@ -161,7 +161,7 @@ class Bunch(object):
         # Sort the items of the dictionary, before hashing the string
         # representation so we get a predictable order of the
         # dictionary.
-        sorted_dict = to_str(sorted(dict_nofilename.items()))
+        sorted_dict = str(sorted(dict_nofilename.items()))
         return dict_withhash, md5(sorted_dict.encode()).hexdigest()
 
     def _repr_pretty_(self, p, cycle):

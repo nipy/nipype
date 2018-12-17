@@ -15,7 +15,7 @@ from copy import deepcopy
 from warnings import warn
 from packaging.version import Version
 
-from ...utils.filemanip import md5, hash_infile, hash_timestamp, to_str
+from ...utils.filemanip import md5, hash_infile, hash_timestamp
 from .traits_extension import (
     traits,
     Undefined,
@@ -251,7 +251,7 @@ class BaseTraitedSpec(traits.HasTraits):
                                       True,
                                       hash_method=hash_method,
                                       hash_files=hash_files)))
-        return list_withhash, md5(to_str(list_nofilename).encode()).hexdigest()
+        return list_withhash, md5(str(list_nofilename).encode()).hexdigest()
 
     def _get_sorteddict(self,
                         objekt,

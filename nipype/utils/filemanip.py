@@ -86,14 +86,6 @@ def split_filename(fname):
     return pth, fname, ext
 
 
-def to_str(value):
-    """
-    Manipulates ordered dicts before they are hashed (Py2/3 compat.)
-
-    """
-    return str(value)
-
-
 def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     """Manipulates path and name of input filename
 
@@ -711,31 +703,6 @@ def dist_is_editable(dist):
     return False
 
 
-def makedirs(path, exist_ok=False):
-    """
-    Create path, if it doesn't exist.
-
-    Parameters
-    ----------
-    path : output directory to create
-
-    """
-    if not exist_ok:  # The old makedirs
-        os.makedirs(path)
-        return path
-
-    # this odd approach deals with concurrent directory cureation
-    if not op.exists(op.abspath(path)):
-        fmlogger.debug("Creating directory %s", path)
-        try:
-            os.makedirs(path)
-        except OSError:
-            fmlogger.debug("Problem creating directory %s", path)
-            if not op.exists(path):
-                raise OSError('Could not create directory %s' % path)
-    return path
-
-
 def emptydirs(path, noexist_ok=False):
     """
     Empty an existing directory, without deleting it. Do not
@@ -769,7 +736,7 @@ def emptydirs(path, noexist_ok=False):
         else:
             raise ex
 
-    makedirs(path)
+    os.makedirs(path)
 
 
 def which(cmd, env=None, pathext=None):
