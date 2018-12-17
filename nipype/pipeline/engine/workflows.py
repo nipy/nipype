@@ -410,7 +410,7 @@ connected.
                     base_dir = op.join(base_dir, self.name)
             else:
                 base_dir = os.getcwd()
-        base_dir = os.makedirs(base_dir, exist_ok=True)
+        os.makedirs(base_dir, exist_ok=True)
         if graph2use in ['hierarchical', 'colored']:
             if self.name[:1].isdigit():  # these graphs break if int
                 raise ValueError('{} graph failed, workflow name cannot begin '
