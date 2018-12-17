@@ -4,6 +4,7 @@
 """
 Utilities to keep track of performance
 """
+import os
 import threading
 from time import time
 try:
