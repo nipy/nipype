@@ -3,8 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous utility functions
 """
-from __future__ import (print_function, unicode_literals, division,
-                        absolute_import)
 import os
 import sys
 import gc
@@ -16,8 +14,6 @@ from subprocess import Popen, STDOUT, PIPE
 from .filemanip import canonicalize_env, read_stream
 
 from .. import logging
-
-from builtins import range, object
 
 iflogger = logging.getLogger('nipype.interface')
 
