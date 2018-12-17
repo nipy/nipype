@@ -18,7 +18,7 @@ from .svm import (SVMTest, SVMTrain)
 from .utils import (
     ABoverlap, AFNItoNIFTI, Autobox, Axialize, BrickStat, Bucket, Calc, Cat,
     CatMatvec, CenterMass, ConvertDset, Copy, Dot, Edge3, Eval, FWHMx,
-    LocalBistat, MaskTool, Merge, Notes, NwarpApply, NwarpAdjust, NwarpCat,
-    OneDToolPy, Refit, Resample, TCat, TCatSubBrick, TStat, To3D, Unifize,
-    Undump, ZCutUp, GCOR, Zcat, Zeropad)
+    LocalBistat, Localstat, MaskTool, Merge, Notes, NwarpApply, NwarpAdjust,
+    NwarpCat, OneDToolPy, Refit, ReHo, Resample, TCat, TCatSubBrick, TStat,
+    To3D, Unifize, Undump, ZCutUp, GCOR, Zcat, Zeropad)
 from .model import (Deconvolve, Remlfit, Synthesize)

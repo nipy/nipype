@@ -10,7 +10,6 @@ import pickle
 
 import numpy as np
 import networkx as nx
-import scipy.io as sio
 
 from ... import logging
 from ...utils.filemanip import split_filename
@@ -94,6 +93,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
     """
     import networkx as nx
     import os.path as op
+    import scipy.io as sio
     iflogger.info('Creating average network for group: %s', group_id)
     matlab_network_list = []
     if len(in_files) == 1:
@@ -442,6 +442,7 @@ class NetworkXMetrics(BaseInterface):
     output_spec = NetworkXMetricsOutputSpec
 
     def _run_interface(self, runtime):
+        import scipy.io as sio
         global gpickled, nodentwks, edgentwks, kntwks, matlab
         gpickled = list()
         nodentwks = list()

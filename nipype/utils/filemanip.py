@@ -471,7 +471,7 @@ def copyfile(originalfile,
             fmlogger.debug('Copying File: %s->%s', newfile, originalfile)
             shutil.copyfile(originalfile, newfile)
         except shutil.Error as e:
-            fmlogger.warn(e.message)
+            fmlogger.warning(e.message)
 
     # Associated files
     if copy_related_files:
@@ -880,24 +880,29 @@ def get_dependencies(name, environ):
     Uses otool on darwin, ldd on linux. Currently doesn't support windows.
 
     """
+    command = None
     if sys.platform == 'darwin':
-        proc = sp.Popen(
-            'otool -L `which %s`' % name,
-            stdout=sp.PIPE,
-            stderr=sp.PIPE,
-            shell=True,
-            env=environ)
+        command = 'otool -L `which %s`' % name
     elif 'linux' in sys.platform:
-        proc = sp.Popen(
-            'ldd `which %s`' % name,
-            stdout=sp.PIPE,
-            stderr=sp.PIPE,
-            shell=True,
-            env=environ)
+        command = 'ldd `which %s`' % name
     else:
         return 'Platform %s not supported' % sys.platform
-    o, e = proc.communicate()
-    return o.rstrip()
+
+    deps = None
+    try:
+        proc = sp.Popen(
+            command,
+            stdout=sp.PIPE,
+            stderr=sp.PIPE,
+            shell=True,
+            env=environ)
+        o, e = proc.communicate()
+        deps = o.rstrip()
+    except Exception as ex:
+        deps = '"%s" failed' % command
+        fmlogger.warning('Could not get dependencies of %s. Error:\n%s',
+                         name, ex.message)
+    return deps
 
 
 def canonicalize_env(env):

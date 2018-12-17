@@ -21,7 +21,6 @@ import gzip
 from functools import reduce
 
 import numpy as np
-import networkx as nx
 from future import standard_library
 
 from ... import logging, config, LooseVersion
@@ -54,12 +53,6 @@ except ImportError:
 standard_library.install_aliases()
 logger = logging.getLogger('nipype.workflow')
 PY3 = sys.version_info[0] > 2
-
-try:
-    dfs_preorder = nx.dfs_preorder
-except AttributeError:
-    dfs_preorder = nx.dfs_preorder_nodes
-    logger.debug('networkx 1.4 dev or higher detected')
 
 
 def _parameterization_dir(param):
@@ -304,13 +297,15 @@ def save_resultfile(result, cwd, name):
             tosave = _uncollapse(outputs.copy(), collapsed)
         except AttributeError:
             tosave = outputs = result.outputs.dictcopy()  # outputs was a bunch
-        result.outputs.set(**modify_paths(tosave, relative=True, basedir=cwd))
+        for k, v in list(modify_paths(tosave, relative=True, basedir=cwd).items()):
+            setattr(result.outputs, k, v)
 
     savepkl(resultsfile, result)
     logger.debug('saved results in %s', resultsfile)
 
     if result.outputs:
-        result.outputs.set(**outputs)
+        for k, v in list(outputs.items()):
+            setattr(result.outputs, k, v)
 
 
 def load_resultfile(path, name):
@@ -360,8 +355,9 @@ def load_resultfile(path, name):
                 except AttributeError:
                     outputs = result.outputs.dictcopy()  # outputs == Bunch
                 try:
-                    result.outputs.set(
-                        **modify_paths(outputs, relative=False, basedir=path))
+                    for k, v in list(modify_paths(outputs, relative=False,
+                                                  basedir=path).items()):
+                        setattr(result.outputs, k, v)
                 except FileNotFoundError:
                     logger.debug('conversion to full path results in '
                                  'non existent file')
@@ -540,6 +536,7 @@ def _create_dot_graph(graph, show_connectinfo=False, simple_form=True):
     Ensures that edge info is pickleable.
     """
     logger.debug('creating dot graph')
+    import networkx as nx
     pklgraph = nx.DiGraph()
     for edge in graph.edges():
         data = graph.get_edge_data(*edge)
@@ -566,6 +563,7 @@ def _write_detailed_dot(graph, dotfilename):
         struct1:f2 -> struct3:here;
         }
     """
+    import networkx as nx
     text = ['digraph structs {', 'node [shape=record];']
     # write nodes
     edges = []
@@ -745,6 +743,7 @@ def evaluate_connect_function(function_source, args, first_arg):
 
 
 def get_levels(G):
+    import networkx as nx
     levels = {}
     for n in nx.topological_sort(G):
         levels[n] = 0
@@ -888,6 +887,7 @@ def _identity_nodes(graph, include_iterables):
     are included if and only if the include_iterables flag is set
     to True.
     """
+    import networkx as nx
     return [
         node for node in nx.topological_sort(graph)
         if isinstance(node.interface, IdentityInterface) and (
@@ -991,6 +991,12 @@ def generate_expanded_graph(graph_in):
     and b=[3,4] this procedure will generate a graph with sub-graphs
     parameterized as (a=1,b=3), (a=1,b=4), (a=2,b=3) and (a=2,b=4).
     """
+    import networkx as nx
+    try:
+        dfs_preorder = nx.dfs_preorder
+    except AttributeError:
+        dfs_preorder = nx.dfs_preorder_nodes
+
     logger.debug("PE: expanding iterables")
     graph_in = _remove_nonjoin_identity_nodes(graph_in, keep_iterables=True)
     # standardize the iterables as {(field, function)} dictionaries
@@ -1219,6 +1225,7 @@ def _iterable_nodes(graph_in):
 
     Return the iterable nodes list
     """
+    import networkx as nx
     nodes = nx.topological_sort(graph_in)
     inodes = [node for node in nodes if node.iterables is not None]
     inodes_no_src = [node for node in inodes if not node.itersource]
@@ -1346,6 +1353,7 @@ def export_graph(graph_in,
     Indicates whether to show the edge data on the graph. This
     makes the graph rather cluttered. default [False]
     """
+    import networkx as nx
     graph = deepcopy(graph_in)
     if use_execgraph:
         graph = generate_expanded_graph(graph)
@@ -1473,7 +1481,8 @@ def clean_working_directory(outputs,
         needed_files += [path for path, type in input_files if type == 'f']
     for extra in [
             '_0x*.json', 'provenance.*', 'pyscript*.m', 'pyjobs*.mat',
-            'command.txt', 'result*.pklz', '_inputs.pklz', '_node.pklz'
+            'command.txt', 'result*.pklz', '_inputs.pklz', '_node.pklz',
+            '.proc-*',
     ]:
         needed_files.extend(glob(os.path.join(cwd, extra)))
     if files2keep:
@@ -1712,6 +1721,7 @@ def write_workflow_resources(graph, filename=None, append=None):
 def topological_sort(graph, depth_first=False):
     """Returns a depth first sorted order if depth_first is True
     """
+    import networkx as nx
     nodesort = list(nx.topological_sort(graph))
     if not depth_first:
         return nodesort, None

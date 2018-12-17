@@ -12,6 +12,7 @@ import pytest
 from .... import config
 from ....testing import example_data
 from ... import base as nib
+from ..support import _inputs_help
 
 standard_library.install_aliases()
 
@@ -42,14 +43,6 @@ def test_Interface():
     assert nib.Interface.output_spec is None
     with pytest.raises(NotImplementedError):
         nib.Interface()
-    with pytest.raises(NotImplementedError):
-        nib.Interface.help()
-    with pytest.raises(NotImplementedError):
-        nib.Interface._inputs_help()
-    with pytest.raises(NotImplementedError):
-        nib.Interface._outputs_help()
-    with pytest.raises(NotImplementedError):
-        nib.Interface._outputs()
 
     class DerivedInterface(nib.Interface):
         def __init__(self):
@@ -62,15 +55,12 @@ def test_Interface():
         nif.aggregate_outputs()
     with pytest.raises(NotImplementedError):
         nif._list_outputs()
-    with pytest.raises(NotImplementedError):
-        nif._get_filecopy_info()
 
 
 def test_BaseInterface():
     config.set('monitoring', 'enable', '0')
 
     assert nib.BaseInterface.help() is None
-    assert nib.BaseInterface._get_filecopy_info() == []
 
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int')
@@ -88,12 +78,8 @@ def test_BaseInterface():
         resource_monitor = False
 
     assert DerivedInterface.help() is None
-    assert 'moo' in ''.join(DerivedInterface._inputs_help())
+    assert 'moo' in ''.join(_inputs_help(DerivedInterface))
     assert DerivedInterface()._outputs() is None
-    assert DerivedInterface._get_filecopy_info()[0]['key'] == 'woo'
-    assert DerivedInterface._get_filecopy_info()[0]['copy']
-    assert DerivedInterface._get_filecopy_info()[1]['key'] == 'zoo'
-    assert not DerivedInterface._get_filecopy_info()[1]['copy']
     assert DerivedInterface().inputs.foo == nib.Undefined
     with pytest.raises(ValueError):
         DerivedInterface()._check_mandatory_inputs()
@@ -517,3 +503,29 @@ def test_CommandLine_prefix(tmpdir):
     ci = OOPBadShell(command=script_name)
     with pytest.raises(IOError):
         ci.run()
+
+
+def test_runtime_checks():
+    class TestInterface(nib.BaseInterface):
+        class input_spec(nib.TraitedSpec):
+            a = nib.traits.Any()
+        class output_spec(nib.TraitedSpec):
+            b = nib.traits.Any()
+
+        def _run_interface(self, runtime):
+            return runtime
+
+    class NoRuntime(TestInterface):
+        def _run_interface(self, runtime):
+            return None
+
+    class BrokenRuntime(TestInterface):
+        def _run_interface(self, runtime):
+            del runtime.__dict__['cwd']
+            return runtime
+
+    with pytest.raises(RuntimeError):
+        NoRuntime().run()
+
+    with pytest.raises(RuntimeError):
+        BrokenRuntime().run()

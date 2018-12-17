@@ -16,7 +16,8 @@ image from Docker hub::
     docker pull nipype/nipype
 
 You may also build custom docker containers with specific versions of software
-using Neurodocker_ (see the :doc:`neurodocker`).
+using Neurodocker_ (see the `Neurodocker tutorial
+<https://miykael.github.io/nipype_tutorial/notebooks/introduction_neurodocker.html>`_).
 
 Using conda
 ~~~~~~~~~~~

@@ -14,7 +14,6 @@ from glob import glob
 
 # Third-party imports
 import numpy as np
-import scipy.io as sio
 
 # Local imports
 from ... import logging
@@ -273,6 +272,7 @@ class EstimateModel(SPMCommand):
         return einputs
 
     def _list_outputs(self):
+        import scipy.io as sio
         outputs = self._outputs().get()
         pth = os.path.dirname(self.inputs.spm_mat_file)
         outtype = 'nii' if '12' in self.version.split('.')[0] else 'img'
@@ -475,6 +475,7 @@ class EstimateContrast(SPMCommand):
         return script
 
     def _list_outputs(self):
+        import scipy.io as sio
         outputs = self._outputs().get()
         pth, _ = os.path.split(self.inputs.spm_mat_file)
         spm = sio.loadmat(self.inputs.spm_mat_file, struct_as_record=False)

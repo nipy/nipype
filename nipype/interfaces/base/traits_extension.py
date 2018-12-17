@@ -25,7 +25,7 @@ from __future__ import (print_function, division, unicode_literals,
 
 from builtins import str, bytes
 import os
-import collections
+from collections import Sequence
 import weakref
 
 # perform all external trait imports here
@@ -325,7 +325,7 @@ class MultiObject(traits.List):
 
         # want to treat range and other sequences (except str) as list
         if not isinstance(value, (str, bytes)) and isinstance(
-                value, collections.Sequence):
+                value, Sequence):
             value = list(value)
 
         if not isdefined(value) or \
