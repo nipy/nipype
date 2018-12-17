@@ -91,56 +91,7 @@ def to_str(value):
     Manipulates ordered dicts before they are hashed (Py2/3 compat.)
 
     """
-    if sys.version_info[0] > 2:
-        retval = str(value)
-    else:
-        retval = to_str_py27(value)
-    return retval
-
-
-def to_str_py27(value):
-    """
-    Encode dictionary for python 2
-    """
-
-    if isinstance(value, dict):
-        entry = '{}: {}'.format
-        retval = '{'
-        for key, val in list(value.items()):
-            if len(retval) > 1:
-                retval += ', '
-            kenc = repr(key)
-            if kenc.startswith(("u'", 'u"')):
-                kenc = kenc[1:]
-            venc = to_str_py27(val)
-            if venc.startswith(("u'", 'u"')):
-                venc = venc[1:]
-            retval += entry(kenc, venc)
-        retval += '}'
-        return retval
-
-    istuple = isinstance(value, tuple)
-    if isinstance(value, (tuple, list)):
-        retval = '(' if istuple else '['
-        nels = len(value)
-        for i, v in enumerate(value):
-            venc = to_str_py27(v)
-            if venc.startswith(("u'", 'u"')):
-                venc = venc[1:]
-            retval += venc
-
-            if i < nels - 1:
-                retval += ', '
-
-        if istuple and nels == 1:
-            retval += ','
-        retval += ')' if istuple else ']'
-        return retval
-
-    retval = repr(value).decode()
-    if retval.startswith(("u'", 'u"')):
-        retval = retval[1:]
-    return retval
+    return str(value)
 
 
 def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
@@ -593,8 +544,6 @@ def save_json(filename, data):
 
     """
     mode = 'w'
-    if sys.version_info[0] < 3:
-        mode = 'wb'
     with open(filename, mode) as fp:
         json.dump(data, fp, sort_keys=True, indent=4)
 
@@ -841,27 +790,10 @@ def which(cmd, env=None, pathext=None):
     if env and 'PATH' in env:
         path = env.get("PATH")
 
-    if sys.version_info >= (3, 3):
-        for ext in pathext:
-            filename = shutil.which(cmd + ext, path=path)
-            if filename:
-                return filename
-        return None
-
-    def isexec(path):
-        return os.path.isfile(path) and os.access(path, os.X_OK)
-
     for ext in pathext:
-        extcmd = cmd + ext
-        fpath, fname = os.path.split(extcmd)
-        if fpath:
-            if isexec(extcmd):
-                return extcmd
-        else:
-            for directory in path.split(os.pathsep):
-                filename = op.join(directory, extcmd)
-                if isexec(filename):
-                    return filename
+        filename = shutil.which(cmd + ext, path=path)
+        if filename:
+            return filename
     return None
 
 

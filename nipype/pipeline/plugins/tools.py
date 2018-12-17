@@ -115,8 +115,7 @@ pklfile = '%s'
 batchdir = '%s'
 from nipype.utils.filemanip import loadpkl, savepkl
 try:
-    if not sys.version_info < (2, 7):
-        from collections import OrderedDict
+    from collections import OrderedDict
     config_dict=%s
     config.update_config(config_dict)
     ## Only configure matplotlib if it was successfully imported,
