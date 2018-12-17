@@ -5,7 +5,7 @@
 """
 from __future__ import (print_function, unicode_literals, division,
                         absolute_import)
-from builtins import next, str
+from builtins import next, bytes, str
 
 import os
 import sys
@@ -192,15 +192,57 @@ def package_check(pkg_name,
 
 
 def str2bool(v):
+    """
+    Convert strings (and bytearrays) to boolean values
+
+    >>> all([str2bool(v) for v in (True, "yes", "true",
+    ...      "y", "t", "Yes", "True", "1", "on", "On")])
+    True
+    >>> all([str2bool(v.encode('utf-8'))
+    ...      for v in ("yes", "true", "y", "t", "1", "Yes", "on", "On")])
+    True
+    >>> any([str2bool(v) for v in (False, "no", "false", "n", "f",
+    ...      "False", "0", "off", "Off")])
+    False
+    >>> any([str2bool(v.encode('utf-8'))
+    ...      for v in ("no", "false", "n", "f", "0", "off", "Off")])
+    False
+    >>> str2bool(None)  # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+        ...
+    ValueError: ...
+    >>> str2bool('/some/path')  # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+        ...
+    ValueError: ...
+    >>> str2bool('Agg')  # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+        ...
+    ValueError: ...
+    >>> str2bool('INFO')  # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+        ...
+    ValueError: ...
+    >>> str2bool('/some/bytes/path'.encode('utf-8'))  # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+        ...
+    ValueError: ...
+
+    """
     if isinstance(v, bool):
         return v
-    lower = v.lower()
-    if lower in ("yes", "true", "t", "1"):
-        return True
-    elif lower in ("no", "false", "n", "f", "0"):
-        return False
-    else:
-        raise ValueError("%s cannot be converted to bool" % v)
+
+    if isinstance(v, bytes):
+        v = v.decode('utf-8')
+
+    if isinstance(v, str):
+        lower = v.lower()
+        if lower in ("yes", "true", "y", "t", "1", "on"):
+            return True
+        elif lower in ("no", "false", "n", "f", "0", "off"):
+            return False
+
+    raise ValueError("%r cannot be converted to bool" % v)
 
 
 def flatten(S):

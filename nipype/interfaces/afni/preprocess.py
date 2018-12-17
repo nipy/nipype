@@ -1802,28 +1802,109 @@ class QualityIndex(CommandLine):
 
 class ROIStatsInputSpec(CommandLineInputSpec):
     in_file = File(
-        desc='input file to 3dROIstats',
+        desc='input dataset',
         argstr='%s',
-        position=-1,
+        position=-2,
         mandatory=True,
         exists=True)
-    mask = File(desc='input mask', argstr='-mask %s', position=3, exists=True)
+    mask = File(desc='input mask', argstr='-mask %s', position=3, exists=True,
+                deprecated='1.1.4', new_name='mask_file')
+    mask_file = File(desc='input mask', argstr='-mask %s', exists=True)
     mask_f2short = traits.Bool(
         desc='Tells the program to convert a float mask to short integers, '
         'by simple rounding.',
-        argstr='-mask_f2short',
-        position=2)
-    quiet = traits.Bool(desc='execute quietly', argstr='-quiet', position=1)
+        argstr='-mask_f2short')
+    num_roi = traits.Int(
+        desc='Forces the assumption that the mask dataset\'s ROIs are '
+             'denoted by 1 to n inclusive.  Normally, the program '
+             'figures out the ROIs on its own.  This option is '
+             'useful if a) you are certain that the mask dataset '
+             'has no values outside the range [0 n], b) there may '
+             'be some ROIs missing between [1 n] in the mask data-'
+             'set and c) you want those columns in the output any-'
+             'way so the output lines up with the output from other '
+             'invocations of 3dROIstats.',
+        argstr='-numroi %s')
+    zerofill = traits.Str(
+        requires=['num_roi'],
+        desc='For ROI labels not found, use the provided string instead of '
+             'a \'0\' in the output file. Only active if `num_roi` is '
+             'enabled.',
+        argstr='-zerofill %s')
+    roisel = traits.File(
+        exists=True,
+        desc='Only considers ROIs denoted by values found in the specified '
+             'file. Note that the order of the ROIs as specified in the file '
+             'is not preserved. So an SEL.1D of \'2 8 20\' produces the same '
+             'output as \'8 20 2\'',
+        argstr='-roisel %s')
+    debug = traits.Bool(
+        desc='print debug information',
+        argstr='-debug')
+    quiet = traits.Bool(
+        desc='execute quietly',
+        argstr='-quiet')
+    nomeanout = traits.Bool(
+        desc='Do not include the (zero-inclusive) mean among computed stats',
+        argstr='-nomeanout')
+    nobriklab = traits.Bool(
+        desc='Do not print the sub-brick label next to its index',
+        argstr='-nobriklab')
+    format1D = traits.Bool(
+        xor=['format1DR'],
+        desc='Output results in a 1D format that includes commented labels',
+        argstr='-1Dformat')
+    format1DR = traits.Bool(
+        xor=['format1D'],
+        desc='Output results in a 1D format that includes uncommented '
+             'labels. May not work optimally with typical 1D functions, '
+             'but is useful for R functions.',
+        argstr='-1DRformat')
+    _stat_names = ['mean', 'sum', 'voxels', 'minmax', 'sigma', 'median',
+                   'mode', 'summary', 'zerominmax', 'zerosigma', 'zeromedian',
+                   'zeromode']
+    stat = InputMultiObject(
+        traits.Enum(_stat_names),
+        desc='statistics to compute. Options include: '
+             ' * mean       =   Compute the mean using only non_zero voxels.'
+             '                  Implies the opposite for the mean computed '
+             '                  by default.\n'
+             ' * median     =   Compute the median of nonzero voxels\n'
+             ' * mode       =   Compute the mode of nonzero voxels.'
+             '                  (integral valued sets only)\n'
+             ' * minmax     =   Compute the min/max of nonzero voxels\n'
+             ' * sum        =   Compute the sum using only nonzero voxels.\n'
+             ' * voxels     =   Compute the number of nonzero voxels\n'
+             ' * sigma      =   Compute the standard deviation of nonzero'
+             '                  voxels\n'
+             'Statistics that include zero-valued voxels:\n'
+             ' * zerominmax =   Compute the min/max of all voxels.\n'
+             ' * zerosigma  =   Compute the standard deviation of all'
+             '                  voxels.\n'
+             ' * zeromedian =   Compute the median of all voxels.\n'
+             ' * zeromode   =   Compute the mode of all voxels.\n'
+             ' * summary    =   Only output a summary line with the grand '
+             '                  mean across all briks in the input dataset.'
+             '                  This option cannot be used with nomeanout.\n'
+             'More that one option can be specified.',
+        argstr='%s...')
+    out_file = File(
+        name_template='%s_roistat.1D',
+        desc='output file',
+        keep_extension=False,
+        argstr='> %s',
+        name_source='in_file',
+        position=-1)
 
 
 class ROIStatsOutputSpec(TraitedSpec):
-    stats = File(desc='output tab separated values file', exists=True)
+    out_file = File(desc='output tab-separated values file', exists=True)
 
 
 class ROIStats(AFNICommandBase):
     """Display statistics over masked regions
 
-    For complete details, see the `3dROIstats Documentation.
+    For complete details, see the `3dROIstats Documentation
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dROIstats.html>`_
 
     Examples
@@ -1832,10 +1913,11 @@ class ROIStats(AFNICommandBase):
     >>> from nipype.interfaces import afni
     >>> roistats = afni.ROIStats()
     >>> roistats.inputs.in_file = 'functional.nii'
-    >>> roistats.inputs.mask = 'skeleton_mask.nii.gz'
-    >>> roistats.inputs.quiet = True
+    >>> roistats.inputs.mask_file = 'skeleton_mask.nii.gz'
+    >>> roistats.inputs.stat = ['mean', 'median', 'voxels']
+    >>> roistats.inputs.nomeanout = True
     >>> roistats.cmdline
-    '3dROIstats -quiet -mask skeleton_mask.nii.gz functional.nii'
+    '3dROIstats -mask skeleton_mask.nii.gz -nomeanout -nzmean -nzmedian -nzvoxels functional.nii > functional_roistat.1D'
     >>> res = roistats.run()  # doctest: +SKIP
 
     """
@@ -1844,14 +1926,24 @@ class ROIStats(AFNICommandBase):
     input_spec = ROIStatsInputSpec
     output_spec = ROIStatsOutputSpec
 
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
-        outputs = self._outputs()
-        output_filename = 'roi_stats.csv'
-        with open(output_filename, 'w') as f:
-            f.write(runtime.stdout)
-
-        outputs.stats = os.path.abspath(output_filename)
-        return outputs
+    def _format_arg(self, name, spec, value):
+        _stat_dict = {
+            'mean': '-nzmean',
+            'median': '-nzmedian',
+            'mode': '-nzmode',
+            'minmax': '-nzminmax',
+            'sigma': '-nzsigma',
+            'voxels': '-nzvoxels',
+            'sum': '-nzsum',
+            'summary': '-summary',
+            'zerominmax': '-minmax',
+            'zeromedian': '-median',
+            'zerosigma': '-sigma',
+            'zeromode': '-mode'
+            }
+        if name == 'stat':
+            value = [_stat_dict[v] for v in value]
+        return super(ROIStats, self)._format_arg(name, spec, value)
 
 
 class RetroicorInputSpec(AFNICommandInputSpec):

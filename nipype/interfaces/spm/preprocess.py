@@ -524,12 +524,12 @@ class RealignUnwarpInputSpec(SPMCommandInputSpec):
     est_re_est_mov_par = traits.Bool(
         field='uweoptions.rem',
         desc='Re-estimate movement parameters at each unwarping iteration.')
-    est_num_of_interations = traits.ListInt(
+    est_num_of_iterations = traits.ListInt(
         [5], 
         field='uweoptions.noi',
         minlen=1, 
         maxlen=1, 
-        usedfault=True,
+        usedefault=True,
         desc='Number of iterations.')
     est_taylor_expansion_point = traits.String(
         'Average', 
@@ -1487,7 +1487,7 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
         desc="""A tuple with the following fields:
             - bias reguralisation (0-10)
             - FWHM of Gaussian smoothness of bias
-            - which maps to save (Corrected, Field) - a tuple of two boolean values""",
+            - which maps to save (Field, Corrected) - a tuple of two boolean values""",
         field='channel')
     tissues = traits.List(
         traits.Tuple(
@@ -1681,11 +1681,11 @@ class NewSegment(SPMCommand):
 
             if isdefined(self.inputs.channel_info):
                 if self.inputs.channel_info[2][0]:
-                    outputs['bias_corrected_images'].append(
-                        os.path.join(pth, "m%s.nii" % (base)))
-                if self.inputs.channel_info[2][1]:
                     outputs['bias_field_images'].append(
                         os.path.join(pth, "BiasField_%s.nii" % (base)))
+                if self.inputs.channel_info[2][1]:
+                    outputs['bias_corrected_images'].append(
+                        os.path.join(pth, "m%s.nii" % (base)))
         return outputs
 
 

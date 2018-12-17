@@ -19,7 +19,6 @@ import pickle
 import shutil
 
 import numpy as np
-import networkx as nx
 
 from ... import config, logging
 from ...utils.misc import str2bool
@@ -56,6 +55,7 @@ class Workflow(EngineBase):
             path to workflow storage
 
         """
+        import networkx as nx
         super(Workflow, self).__init__(name, base_dir)
         self._graph = nx.DiGraph()
 
@@ -366,6 +366,7 @@ connected.
     def list_node_names(self):
         """List names of all nodes in a workflow
         """
+        import networkx as nx
         outlist = []
         for node in nx.topological_sort(self._graph):
             if isinstance(node, Workflow):
@@ -482,6 +483,7 @@ connected.
            whether to include node and workflow config values
 
         """
+        import networkx as nx
         formats = ["python"]
         if format not in formats:
             raise ValueError('format must be one of: %s' % '|'.join(formats))
@@ -566,6 +568,8 @@ connected.
             plugin = config.get('execution', 'plugin')
         if not isinstance(plugin, (str, bytes)):
             runner = plugin
+            plugin = runner.__class__.__name__[:-len('Plugin')]
+            plugin_args = runner.plugin_args
         else:
             name = '.'.join(__name__.split('.')[:-2] + ['plugins'])
             try:
@@ -868,12 +872,13 @@ connected.
     def _generate_flatgraph(self):
         """Generate a graph containing only Nodes or MapNodes
         """
+        import networkx as nx
         logger.debug('expanding workflow: %s', self)
         nodes2remove = []
         if not nx.is_directed_acyclic_graph(self._graph):
             raise Exception(('Workflow: %s is not a directed acyclic graph '
                              '(DAG)') % self.name)
-        nodes = nx.topological_sort(self._graph)
+        nodes = list(nx.topological_sort(self._graph))
         for node in nodes:
             logger.debug('processing node: %s', node)
             if isinstance(node, Workflow):
@@ -940,6 +945,7 @@ connected.
                  level=0):
         """Create a dot file with connection info
         """
+        import networkx as nx
         if prefix is None:
             prefix = '  '
         if hierarchy is None:

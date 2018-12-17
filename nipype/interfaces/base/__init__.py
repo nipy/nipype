@@ -22,5 +22,4 @@ from .traits_extension import (
     OutputMultiObject, InputMultiObject,
     OutputMultiPath, InputMultiPath)
 
-from .support import (Bunch, InterfaceResult, load_template,
-                      NipypeInterfaceError)
+from .support import (Bunch, InterfaceResult, NipypeInterfaceError)

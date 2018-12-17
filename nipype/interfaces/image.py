@@ -2,9 +2,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-import numpy as np
-import nibabel as nb
-
 from ..utils.filemanip import fname_presuffix
 from .base import (SimpleInterface, TraitedSpec, BaseInterfaceInputSpec,
                    traits, File)
@@ -63,6 +60,9 @@ class Rescale(SimpleInterface):
     output_spec = RescaleOutputSpec
 
     def _run_interface(self, runtime):
+        import numpy as np
+        import nibabel as nb
+
         img = nb.load(self.inputs.in_file)
         data = img.get_data()
         ref_data = nb.load(self.inputs.ref_file).get_data()
@@ -171,6 +171,8 @@ If an image is not reoriented, the original file is not modified
     output_spec = ReorientOutputSpec
 
     def _run_interface(self, runtime):
+        import numpy as np
+        import nibabel as nb
         from nibabel.orientations import (
             axcodes2ornt, ornt_transform, inv_ornt_aff)
 
@@ -211,6 +213,8 @@ If an image is not reoriented, the original file is not modified
 
 def _as_reoriented_backport(img, ornt):
     """Backport of img.as_reoriented as of nibabel 2.2.0"""
+    import numpy as np
+    import nibabel as nb
     from nibabel.orientations import inv_ornt_aff
     if np.array_equal(ornt, [[0, 1], [1, 1], [2, 1]]):
         return img
