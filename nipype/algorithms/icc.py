@@ -2,8 +2,8 @@
 import os
 import numpy as np
 from numpy import ones, kron, mean, eye, hstack, dot, tile
+from numpy.linalg import pinv
 import nibabel as nb
-from scipy.linalg import pinv
 from ..interfaces.base import BaseInterfaceInputSpec, TraitedSpec, \
     BaseInterface, traits, File
 from ..utils import NUMPY_MMAP

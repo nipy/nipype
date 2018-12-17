@@ -64,6 +64,7 @@ def test_DTIFit_outputs():
         V1=dict(),
         V2=dict(),
         V3=dict(),
+        sse=dict(),
         tensor=dict(),
     )
     outputs = DTIFit.output_spec()

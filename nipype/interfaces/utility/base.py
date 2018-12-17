@@ -9,7 +9,6 @@
 import os
 import re
 import numpy as np
-import nibabel as nb
 
 from ..base import (traits, TraitedSpec, DynamicTraitedSpec, File, Undefined,
                     isdefined, OutputMultiPath, InputMultiPath, BaseInterface,
@@ -409,7 +408,7 @@ class AssertEqual(BaseInterface):
     input_spec = AssertEqualInputSpec
 
     def _run_interface(self, runtime):
-
+        import nibabel as nb
         data1 = nb.load(self.inputs.volume1).get_data()
         data2 = nb.load(self.inputs.volume2).get_data()
 

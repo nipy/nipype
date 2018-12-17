@@ -2,9 +2,37 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 # -*- coding: utf-8 -*-
 
-from ... import logging
-from ..base import (CommandLineInputSpec, CommandLine, traits, File, isdefined)
+from ... import logging, LooseVersion
+from ...utils.filemanip import which
+from ..base import (CommandLineInputSpec, CommandLine, traits, File, isdefined, PackageInfo)
 iflogger = logging.getLogger('nipype.interface')
+
+
+class Info(PackageInfo):
+    version_cmd = 'mrconvert --version'
+
+    @staticmethod
+    def parse_version(raw_info):
+        # info is like: "== mrconvert 0.3.15-githash"
+        for line in raw_info.splitlines():
+            if line.startswith('== mrconvert '):
+                v_string = line.split()[2]
+                break
+        else:
+            return None
+
+        # -githash may or may not be appended
+        v_string = v_string.split('-')[0]
+
+        return '.'.join(v_string.split('.')[:3])
+
+    @classmethod
+    def looseversion(cls):
+        """ Return a comparable version object
+
+        If no version found, use LooseVersion('0.0.0')
+        """
+        return LooseVersion(cls.version() or '0.0.0')
 
 
 class MRTrix3BaseInputSpec(CommandLineInputSpec):
@@ -47,7 +75,7 @@ class MRTrix3Base(CommandLine):
                 from multiprocessing import cpu_count
                 value = cpu_count()
             except:
-                iflogger.warn('Number of threads could not be computed')
+                iflogger.warning('Number of threads could not be computed')
                 pass
             return trait_spec.argstr % value
 
@@ -76,3 +104,7 @@ class MRTrix3Base(CommandLine):
             pass
 
         return super(MRTrix3Base, self)._parse_inputs(skip=skip)
+
+    @property
+    def version(self):
+        return Info.version()

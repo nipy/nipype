@@ -21,7 +21,7 @@ all of these bugs and they've been fixed in enthought svn repository
 
 """
 import os
-import collections
+from collections import Sequence
 
 # perform all external trait imports here
 from traits import __version__ as traits_version
@@ -316,7 +316,7 @@ class MultiObject(traits.List):
 
         # want to treat range and other sequences (except str) as list
         if not isinstance(value, (str, bytes)) and isinstance(
-                value, collections.Sequence):
+                value, Sequence):
             value = list(value)
 
         if not isdefined(value) or \
