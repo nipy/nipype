@@ -12,7 +12,7 @@ from ...base import traits, Undefined
 from ....interfaces import fsl
 from ...utility.wrappers import Function
 from ....pipeline import Node
-
+from ..specs import get_filecopy_info
 
 
 @pytest.fixture(scope="module")
@@ -51,8 +51,8 @@ def test_TraitedSpec_tab_completion():
     bet_nd = Node(fsl.BET(), name='bet')
     bet_interface = fsl.BET()
     bet_inputs = bet_nd.inputs.class_editable_traits()
-    bet_outputs = bet_nd.outputs.class_editable_traits() 
-    
+    bet_outputs = bet_nd.outputs.class_editable_traits()
+
     # Check __all__ for bet node and interface inputs
     assert set(bet_nd.inputs.__all__) == set(bet_inputs)
     assert set(bet_interface.inputs.__all__) == set(bet_inputs)
@@ -429,3 +429,45 @@ def test_ImageFile():
     with pytest.raises(nib.TraitError):
         x.nocompress = 'test.nii.gz'
     x.nocompress = 'test.mgh'
+
+
+def test_filecopy_info():
+    class InputSpec(nib.TraitedSpec):
+        foo = nib.traits.Int(desc='a random int')
+        goo = nib.traits.Int(desc='a random int', mandatory=True)
+        moo = nib.traits.Int(desc='a random int', mandatory=False)
+        hoo = nib.traits.Int(desc='a random int', usedefault=True)
+        zoo = nib.File(desc='a file', copyfile=False)
+        woo = nib.File(desc='a file', copyfile=True)
+
+    class DerivedInterface(nib.BaseInterface):
+        input_spec = InputSpec
+        resource_monitor = False
+
+        def normalize_filenames(self):
+            """A mock normalize_filenames for freesurfer interfaces that have one"""
+            self.inputs.zoo = 'normalized_filename.ext'
+
+    assert get_filecopy_info(nib.BaseInterface) == []
+
+    # Test on interface class, not instantiated
+    info = get_filecopy_info(DerivedInterface)
+    assert info[0]['key'] == 'woo'
+    assert info[0]['copy']
+    assert info[1]['key'] == 'zoo'
+    assert not info[1]['copy']
+    info = None
+
+    # Test with instantiated interface
+    derived = DerivedInterface()
+    # First check that zoo is not defined
+    assert derived.inputs.zoo == Undefined
+    # After the first call to get_filecopy_info zoo is defined
+    info = get_filecopy_info(derived)
+    # Ensure that normalize_filenames was called
+    assert derived.inputs.zoo == 'normalized_filename.ext'
+    # Check the results are consistent
+    assert info[0]['key'] == 'woo'
+    assert info[0]['copy']
+    assert info[1]['key'] == 'zoo'
+    assert not info[1]['copy']

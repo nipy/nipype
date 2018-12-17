@@ -10,9 +10,6 @@ import os.path as op
 
 import nibabel as nb
 import numpy as np
-from scipy.ndimage.morphology import binary_erosion
-from scipy.spatial.distance import cdist, euclidean, dice, jaccard
-from scipy.ndimage.measurements import center_of_mass, label
 
 from .. import config, logging
 
@@ -70,6 +67,7 @@ class Distance(BaseInterface):
     _hist_filename = "hist.pdf"
 
     def _find_border(self, data):
+        from scipy.ndimage.morphology import binary_erosion
         eroded = binary_erosion(data)
         border = np.logical_and(data, np.logical_not(eroded))
         return border
@@ -83,6 +81,7 @@ class Distance(BaseInterface):
         return coordinates[:3, :]
 
     def _eucl_min(self, nii1, nii2):
+        from scipy.spatial.distance import cdist, euclidean
         origdata1 = nii1.get_data().astype(np.bool)
         border1 = self._find_border(origdata1)
 
@@ -101,6 +100,8 @@ class Distance(BaseInterface):
                 set1_coordinates.T[point1, :], set2_coordinates.T[point2, :])
 
     def _eucl_cog(self, nii1, nii2):
+        from scipy.spatial.distance import cdist
+        from scipy.ndimage.measurements import center_of_mass, label
         origdata1 = np.logical_and(nii1.get_data() != 0,
                                    np.logical_not(np.isnan(nii1.get_data())))
         cog_t = np.array(center_of_mass(origdata1.copy())).reshape(-1, 1)
@@ -124,6 +125,7 @@ class Distance(BaseInterface):
         return np.mean(dist_matrix)
 
     def _eucl_mean(self, nii1, nii2, weighted=False):
+        from scipy.spatial.distance import cdist
         origdata1 = nii1.get_data().astype(np.bool)
         border1 = self._find_border(origdata1)
 
@@ -150,6 +152,7 @@ class Distance(BaseInterface):
             return np.mean(min_dist_matrix)
 
     def _eucl_max(self, nii1, nii2):
+        from scipy.spatial.distance import cdist
         origdata1 = nii1.get_data()
         origdata1 = np.logical_not(
             np.logical_or(origdata1 == 0, np.isnan(origdata1)))
@@ -283,6 +286,7 @@ class Overlap(BaseInterface):
     output_spec = OverlapOutputSpec
 
     def _bool_vec_dissimilarity(self, booldata1, booldata2, method):
+        from scipy.spatial.distance import dice, jaccard
         methods = {'dice': dice, 'jaccard': jaccard}
         if not (np.any(booldata1) or np.any(booldata2)):
             return 0

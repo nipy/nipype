@@ -105,8 +105,8 @@ class Info(PackageInfo):
         try:
             return os.environ['FSLOUTPUTTYPE']
         except KeyError:
-            IFLOGGER.warn('FSLOUTPUTTYPE environment variable is not set. '
-                          'Setting FSLOUTPUTTYPE=NIFTI')
+            IFLOGGER.warning('FSLOUTPUTTYPE environment variable is not set. '
+                             'Setting FSLOUTPUTTYPE=NIFTI')
             return 'NIFTI'
 
     @staticmethod

@@ -556,6 +556,7 @@ class CorticalThicknessInputSpec(ANTSCommandInputSpec):
 
 class CorticalThicknessOutputSpec(TraitedSpec):
     BrainExtractionMask = File(exists=True, desc='brain extraction mask')
+    ExtractedBrainN4 = File(exists=True, desc='extracted brain from N4 image')
     BrainSegmentation = File(exists=True, desc='brain segmentaion image')
     BrainSegmentationN4 = File(exists=True, desc='N4 corrected image')
     BrainSegmentationPosteriors = OutputMultiPath(
@@ -640,6 +641,9 @@ class CorticalThickness(ANTSCommand):
         outputs = self._outputs().get()
         outputs['BrainExtractionMask'] = os.path.join(
             os.getcwd(), self.inputs.out_prefix + 'BrainExtractionMask.' +
+            self.inputs.image_suffix)
+        outputs['ExtractedBrainN4'] = os.path.join(
+            os.getcwd(), self.inputs.out_prefix + 'ExtractedBrain0N4.' +
             self.inputs.image_suffix)
         outputs['BrainSegmentation'] = os.path.join(
             os.getcwd(), self.inputs.out_prefix + 'BrainSegmentation.' +

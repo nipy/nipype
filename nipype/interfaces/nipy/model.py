@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
 
-import nibabel as nb
-import numpy as np
-
 from ...utils import NUMPY_MMAP
 
-from .base import NipyBaseInterface, have_nipy
+from .base import NipyBaseInterface
 from ..base import (TraitedSpec, traits, File, OutputMultiPath,
                     BaseInterfaceInputSpec, isdefined)
 
@@ -83,6 +80,8 @@ class FitGLM(NipyBaseInterface):
     output_spec = FitGLMOutputSpec
 
     def _run_interface(self, runtime):
+        import nibabel as nb
+        import numpy as np
         import nipy.modalities.fmri.glm as GLM
         import nipy.modalities.fmri.design_matrix as dm
         try:
@@ -278,6 +277,8 @@ class EstimateContrast(NipyBaseInterface):
     output_spec = EstimateContrastOutputSpec
 
     def _run_interface(self, runtime):
+        import nibabel as nb
+        import numpy as np
         import nipy.modalities.fmri.glm as GLM
 
         beta_nii = nb.load(self.inputs.beta)

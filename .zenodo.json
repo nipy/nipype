@@ -90,14 +90,14 @@
       "orcid": "0000-0002-8121-8954"
     },
     {
-      "affiliation": "Department of Electrical and Computer Engineering, Johns Hopkins University",
-      "name": "Dewey, Blake E",
-      "orcid": "0000-0003-4554-5058"
-    },
-    {
       "affiliation": "National Institute of Mental Health",
       "name": "Nielson, Dylan M.",
       "orcid": "0000-0003-4613-6643"
+    },
+    {
+      "affiliation": "Department of Electrical and Computer Engineering, Johns Hopkins University",
+      "name": "Dewey, Blake E",
+      "orcid": "0000-0003-4554-5058"
     },
     {
       "name": "Madison, Cindee"
@@ -107,13 +107,13 @@
       "name": "Bougacha, Salma"
     },
     {
+      "affiliation": "National Institutes of Health",
+      "name": "Clark, Michael G. "
+    },
+    {
       "affiliation": "Dartmouth College",
       "name": "Visconti di Oleggio Castello, Matteo",
       "orcid": "0000-0001-7931-5272"
-    },
-    {
-      "affiliation": "National Institutes of Health",
-      "name": "Clark, Michael G. "
     },
     {
       "affiliation": "Mayo Clinic, Neurology, Rochester, MN, USA",
@@ -200,12 +200,12 @@
       "orcid": "0000-0003-1988-5091"
     },
     {
+      "name": "Mordom, David"
+    },
+    {
       "affiliation": "Australian eHealth Research Centre, Commonwealth Scientific and Industrial Research Organisation; University of Queensland",
       "name": "Gillman, Ashley",
       "orcid": "0000-0001-9130-1092"
-    },
-    {
-      "name": "Mordom, David"
     },
     {
       "name": "Buchanan, Colin"
@@ -219,11 +219,6 @@
       "orcid": "0000-0002-0966-0254"
     },
     {
-      "affiliation": "Duke University",
-      "name": "Iqbal, Shariq",
-      "orcid": "0000-0003-2766-8425"
-    },
-    {
       "affiliation": "Nathan s Kline institute for psychiatric research",
       "name": "Sikka, Sharad"
     },
@@ -234,6 +229,11 @@
     },
     {
       "name": "Forbes, Jessica"
+    },
+    {
+      "affiliation": "Duke University",
+      "name": "Iqbal, Shariq",
+      "orcid": "0000-0003-2766-8425"
     },
     {
       "name": "Schwartz, Yannick"
@@ -279,17 +279,17 @@
       "orcid": "0000-0002-6652-3512"
     },
     {
-      "affiliation": "Harvard University - Psychology",
-      "name": "Kastman, Erik",
-      "orcid": "0000-0001-7221-9042"
-    },
-    {
       "name": "Ginsburg, Daniel"
     },
     {
       "affiliation": "National University Singapore",
       "name": "Schaefer, Alexander",
       "orcid": "0000-0001-6488-4739"
+    },
+    {
+      "affiliation": "Harvard University - Psychology",
+      "name": "Kastman, Erik",
+      "orcid": "0000-0001-7221-9042"
     },
     {
       "affiliation": "Washington University in St Louis",
@@ -313,9 +313,6 @@
       "name": "Giavasis, Steven"
     },
     {
-      "name": "Haselgrove, Christian"
-    },
-    {
       "name": "Correa, Carlos"
     },
     {
@@ -335,6 +332,9 @@
     },
     {
       "name": "Blair, Ross"
+    },
+    {
+      "name": "Haselgrove, Christian"
     },
     {
       "affiliation": "1 McGill Centre for Integrative Neuroscience (MCIN), Ludmer Centre for Neuroinformatics and Mental Health, Montreal Neurological Institute (MNI), McGill University, Montr\u00e9al, 3801 University Street, WB-208, H3A 2B4, Qu\u00e9bec, Canada. 2 University of Lyon, CNRS, INSERM, CREATIS., Villeurbanne, 7, avenue Jean Capelle, 69621, France.",
@@ -384,6 +384,11 @@
       "affiliation": "Donders Institute for Brain, Cognition and Behavior, Center for Cognitive Neuroimaging",
       "name": "Chetverikov, Andrey",
       "orcid": "0000-0003-2767-6310"
+    },
+    {
+      "affiliation": "GIGA Institute",
+      "name": "Grignard, Martin",
+      "orcid": "0000-0001-5549-1861"
     },
     {
       "name": "Salvatore, John"
@@ -452,12 +457,6 @@
       "orcid": "0000-0001-9030-2202"
     },
     {
-      "name": "Mertz, Fred"
-    },
-    {
-      "name": "Haehn, Daniel"
-    },
-    {
       "affiliation": "Technische Universit\u00e4t Dresden, Faculty of Medicine, Department of Child and Adolescent Psychiatry",
       "name": "Geisler, Daniel",
       "orcid": "0000-0003-2076-5329"
@@ -480,6 +479,9 @@
       "affiliation": "Technical University Munich",
       "name": "Molina-Romero, Miguel",
       "orcid": "0000-0001-8054-0426"
+    },
+    {
+      "name": "Haehn, Daniel"
     },
     {
       "name": "Weinstein, Alejandro"

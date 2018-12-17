@@ -37,7 +37,7 @@ class ResourceMonitor(threading.Thread):
 
         if fname is None:
             fname = '.proc-%d_time-%s_freq-%0.2f' % (pid, time(), freq)
-        self._fname = fname
+        self._fname = os.path.abspath(fname)
         self._logfile = open(self._fname, 'w')
         self._freq = freq
         self._python = python
