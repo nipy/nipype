@@ -2,8 +2,7 @@ import pytest
 from collections import namedtuple
 from ...base import traits, TraitedSpec, BaseInterfaceInputSpec
 from ..base import (convert_to_traits_type, create_interface_specs,
-                    dipy_to_nipype_interface, DipyBaseInterface)
-from dipy.workflows.workflow import Workflow
+                    dipy_to_nipype_interface, DipyBaseInterface, no_dipy)
 
 
 def test_convert_to_traits_type():
@@ -84,35 +83,36 @@ def test_create_interface_specs():
     assert 'out_params' in current_params.keys()
 
 
-class DummyWorkflow(Workflow):
-
-    @classmethod
-    def get_short_name(cls):
-        return 'dwf1'
-
-    def run(self, in_files, param1=1, out_dir='', out_ref='out1.txt'):
-        """Workflow used to test basic workflows.
-
-        Parameters
-        ----------
-        in_files : string
-            fake input string param
-        param1 : int, optional
-            fake positional param (default 1)
-        out_dir : string, optional
-            fake output directory (default '')
-        out_ref : string, optional
-            fake out file (default out1.txt)
-
-        References
-        -----------
-        dummy references
-
-        """
-        return param1
-
-
+@pytest.mark.skipif(no_dipy(), reason="DIPY is not installed")
 def test_dipy_to_nipype_interface():
+    from dipy.workflows.workflow import Workflow
+
+    class DummyWorkflow(Workflow):
+
+        @classmethod
+        def get_short_name(cls):
+            return 'dwf1'
+
+        def run(self, in_files, param1=1, out_dir='', out_ref='out1.txt'):
+            """Workflow used to test basic workflows.
+
+            Parameters
+            ----------
+            in_files : string
+                fake input string param
+            param1 : int, optional
+                fake positional param (default 1)
+            out_dir : string, optional
+                fake output directory (default '')
+            out_ref : string, optional
+                fake out file (default out1.txt)
+
+            References
+            -----------
+            dummy references
+
+            """
+            return param1
 
     new_specs = dipy_to_nipype_interface("MyModelSpec", DummyWorkflow)
     assert new_specs.__base__ == DipyBaseInterface
