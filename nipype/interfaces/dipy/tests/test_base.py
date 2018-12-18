@@ -78,8 +78,10 @@ def test_create_interface_specs():
     assert new_interface.__name__ == "MyInterface"
     current_params = new_interface().get()
     assert len(current_params) == 4
-    for key, expected in zip(current_params.keys(), params):
-        assert key == expected[0]
+    assert 'params1' in current_params.keys()
+    assert 'params2_files' in current_params.keys()
+    assert 'params3' in current_params.keys()
+    assert 'out_params' in current_params.keys()
 
 
 class DummyWorkflow(Workflow):
@@ -134,6 +136,7 @@ def test_dipy_to_nipype_interface():
         new_specs().run()
 
 
-# test_convert_to_traits_type()
-# test_create_interface_specs()
-# test_dipy_to_nipype_interface()
+if __name__ == "__main__":
+    test_convert_to_traits_type()
+    test_create_interface_specs()
+    test_dipy_to_nipype_interface()
