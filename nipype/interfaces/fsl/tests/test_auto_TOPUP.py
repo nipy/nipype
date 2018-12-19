@@ -6,6 +6,7 @@ from ..epi import TOPUP
 def test_TOPUP_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
+        checksize=dict(usedefault=True, ),
         config=dict(
             argstr='--config=%s',
             usedefault=True,
@@ -29,6 +30,7 @@ def test_TOPUP_inputs():
         fwhm=dict(argstr='--fwhm=%f', ),
         in_file=dict(
             argstr='--imain=%s',
+            checksize=True,
             mandatory=True,
         ),
         interp=dict(argstr='--interp=%s', ),
@@ -97,9 +99,9 @@ def test_TOPUP_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TOPUP_outputs():
     output_map = dict(
-        out_corrected=dict(),
+        out_corrected=dict(checksize=True, ),
         out_enc_file=dict(),
-        out_field=dict(),
+        out_field=dict(checksize=True, ),
         out_fieldcoef=dict(),
         out_jacs=dict(),
         out_logfile=dict(),
