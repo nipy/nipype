@@ -139,7 +139,7 @@ class SpaceTimeRealigner(NipyBaseInterface):
        application to joint correction of motion and slice timing \
        in fMRI. IEEE Trans Med Imaging. 2011 Aug;30(8):1546-54. DOI_.
 
-    .. _DOI: http://dx.doi.org/10.1109/TMI.2011.2131152
+    .. _DOI: https://doi.org/10.1109/TMI.2011.2131152
 
     """
 

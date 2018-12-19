@@ -271,7 +271,7 @@ class FramewiseDisplacement(BaseInterface):
     .. [Power2012] Power et al., Spurious but systematic correlations in functional
          connectivity MRI networks arise from subject motion, NeuroImage 59(3),
          2012. doi:`10.1016/j.neuroimage.2011.10.018
-         <http://dx.doi.org/10.1016/j.neuroimage.2011.10.018>`_.
+         <https://doi.org/10.1016/j.neuroimage.2011.10.018>`_.
 
 
     """

@@ -123,7 +123,7 @@ class Denoise(DipyBaseInterface):
 
     .. [Coupe2008] Coupe P et al., `An Optimized Blockwise Non Local Means
       Denoising Filter for 3D Magnetic Resonance Images
-      <http://dx.doi.org/10.1109%2FTMI.2007.906087>`_,
+      <https://doi.org/10.1109%2FTMI.2007.906087>`_,
       IEEE Transactions on Medical Imaging, 27(4):425-441, 2008.
 
 
