@@ -164,7 +164,7 @@ class PETPVC(CommandLine):
             "number={22},"
             "pages={7975},"
             "url={http://stacks.iop.org/0031-9155/61/i=22/a=7975},"
-            "doi={http://dx.doi.org/10.1088/0031-9155/61/22/7975},"
+            "doi={https://doi.org/10.1088/0031-9155/61/22/7975},"
             "year={2016},"
             "}"),
         'description':

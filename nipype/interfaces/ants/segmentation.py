@@ -1587,7 +1587,7 @@ class KellyKapowski(ANTSCommand):
             "year={2009},"
             "issn={1053-8119},"
             "url={http://www.sciencedirect.com/science/article/pii/S1053811908012780},"
-            "doi={http://dx.doi.org/10.1016/j.neuroimage.2008.12.016}"
+            "doi={https://doi.org/10.1016/j.neuroimage.2008.12.016}"
             "}"),
         'description':
         'The details on the implementation of DiReCT.',
