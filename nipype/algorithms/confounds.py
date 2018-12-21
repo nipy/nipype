@@ -14,6 +14,7 @@ import os.path as op
 import nibabel as nb
 import numpy as np
 from numpy.polynomial import Legendre
+from scipy import linalg
 
 from .. import config, logging
 from ..external.due import BibTeX
@@ -1193,9 +1194,12 @@ def compute_noise_components(imgseries, mask_images, num_components,
         try:
             u, _, _ = np.linalg.svd(M, full_matrices=False)
         except np.linalg.LinAlgError:
-            if self.inputs.failure_mode == 'error':
-                raise
-            u = np.ones((M.shape[0], num_components), dtype=np.float32) * np.nan
+            try:
+                u, _, _ = linalg.svd(M, full_matrices=False, lapack_driver='gesvd')
+            except linalg.LinAlgError:
+                if self.inputs.failure_mode == 'error':
+                    raise
+                u = np.ones((M.shape[0], num_components), dtype=np.float32) * np.nan
         if components is None:
             components = u[:, :num_components]
         else:
