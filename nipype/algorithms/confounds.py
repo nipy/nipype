@@ -14,7 +14,6 @@ import os.path as op
 import nibabel as nb
 import numpy as np
 from numpy.polynomial import Legendre
-from scipy import linalg
 
 from .. import config, logging
 from ..external.due import BibTeX
