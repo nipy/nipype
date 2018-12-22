@@ -26,6 +26,16 @@ from ..utils.misc import normalize_mc_params
 IFLOGGER = logging.getLogger('nipype.interface')
 
 
+def fallback_svd(a, full_matrices=True, compute_uv=True):
+    try:
+        return np.linalg.svd(a, full_matrices=full_matrices, compute_uv=compute_uv)
+    except np.linalg.LinAlgError:
+        pass
+
+    from scipy.linalg import svd
+    return svd(a, full_matrices=full_matrices, compute_uv=compute_uv, lapack_driver='gesvd')
+
+
 class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
     in_file = File(
         exists=True, mandatory=True, desc='functional data, after HMC')
@@ -1191,7 +1201,7 @@ def compute_noise_components(imgseries, mask_images, num_components,
         # "The covariance matrix C = MMT was constructed and decomposed into its
         # principal components using a singular value decomposition."
         try:
-            u, _, _ = np.linalg.svd(M, full_matrices=False)
+            u, _, _ = fallback_svd(M, full_matrices=False)
         except np.linalg.LinAlgError:
             if self.inputs.failure_mode == 'error':
                 raise
@@ -1273,7 +1283,7 @@ def _full_rank(X, cmax=1e15):
     X: array of shape(nrows, ncols) after regularization
     cmax=1.e-15, float tolerance for condition number
     """
-    U, s, V = np.linalg.svd(X, 0)
+    U, s, V = fallback_svd(X, full_matrices=False)
     smax, smin = s.max(), s.min()
     c = smax / smin
     if c < cmax:
