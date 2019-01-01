@@ -86,63 +86,6 @@ def split_filename(fname):
     return pth, fname, ext
 
 
-def to_str(value):
-    """
-    Manipulates ordered dicts before they are hashed (Py2/3 compat.)
-
-    """
-    if sys.version_info[0] > 2:
-        retval = str(value)
-    else:
-        retval = to_str_py27(value)
-    return retval
-
-
-def to_str_py27(value):
-    """
-    Encode dictionary for python 2
-    """
-
-    if isinstance(value, dict):
-        entry = '{}: {}'.format
-        retval = '{'
-        for key, val in list(value.items()):
-            if len(retval) > 1:
-                retval += ', '
-            kenc = repr(key)
-            if kenc.startswith(("u'", 'u"')):
-                kenc = kenc[1:]
-            venc = to_str_py27(val)
-            if venc.startswith(("u'", 'u"')):
-                venc = venc[1:]
-            retval += entry(kenc, venc)
-        retval += '}'
-        return retval
-
-    istuple = isinstance(value, tuple)
-    if isinstance(value, (tuple, list)):
-        retval = '(' if istuple else '['
-        nels = len(value)
-        for i, v in enumerate(value):
-            venc = to_str_py27(v)
-            if venc.startswith(("u'", 'u"')):
-                venc = venc[1:]
-            retval += venc
-
-            if i < nels - 1:
-                retval += ', '
-
-        if istuple and nels == 1:
-            retval += ','
-        retval += ')' if istuple else ']'
-        return retval
-
-    retval = repr(value).decode()
-    if retval.startswith(("u'", 'u"')):
-        retval = retval[1:]
-    return retval
-
-
 def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     """Manipulates path and name of input filename
 
@@ -593,8 +536,6 @@ def save_json(filename, data):
 
     """
     mode = 'w'
-    if sys.version_info[0] < 3:
-        mode = 'wb'
     with open(filename, mode) as fp:
         json.dump(data, fp, sort_keys=True, indent=4)
 
@@ -762,31 +703,6 @@ def dist_is_editable(dist):
     return False
 
 
-def makedirs(path, exist_ok=False):
-    """
-    Create path, if it doesn't exist.
-
-    Parameters
-    ----------
-    path : output directory to create
-
-    """
-    if not exist_ok:  # The old makedirs
-        os.makedirs(path)
-        return path
-
-    # this odd approach deals with concurrent directory cureation
-    if not op.exists(op.abspath(path)):
-        fmlogger.debug("Creating directory %s", path)
-        try:
-            os.makedirs(path)
-        except OSError:
-            fmlogger.debug("Problem creating directory %s", path)
-            if not op.exists(path):
-                raise OSError('Could not create directory %s' % path)
-    return path
-
-
 def emptydirs(path, noexist_ok=False):
     """
     Empty an existing directory, without deleting it. Do not
@@ -820,7 +736,7 @@ def emptydirs(path, noexist_ok=False):
         else:
             raise ex
 
-    makedirs(path)
+    os.makedirs(path)
 
 
 def which(cmd, env=None, pathext=None):
@@ -841,27 +757,10 @@ def which(cmd, env=None, pathext=None):
     if env and 'PATH' in env:
         path = env.get("PATH")
 
-    if sys.version_info >= (3, 3):
-        for ext in pathext:
-            filename = shutil.which(cmd + ext, path=path)
-            if filename:
-                return filename
-        return None
-
-    def isexec(path):
-        return os.path.isfile(path) and os.access(path, os.X_OK)
-
     for ext in pathext:
-        extcmd = cmd + ext
-        fpath, fname = os.path.split(extcmd)
-        if fpath:
-            if isexec(extcmd):
-                return extcmd
-        else:
-            for directory in path.split(os.pathsep):
-                filename = op.join(directory, extcmd)
-                if isexec(filename):
-                    return filename
+        filename = shutil.which(cmd + ext, path=path)
+        if filename:
+            return filename
     return None
 
 

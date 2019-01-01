@@ -22,7 +22,7 @@ from ...utils.functions import (getsource, create_function_from_source)
 
 from ...interfaces.base import (traits, TraitedSpec, TraitDictObject,
                                 TraitListObject)
-from ...utils.filemanip import save_json, makedirs, to_str
+from ...utils.filemanip import save_json
 from .utils import (generate_expanded_graph, export_graph, write_workflow_prov,
                     write_workflow_resources, format_dot, topological_sort,
                     get_print_name, merge_dict, format_node)
@@ -218,12 +218,12 @@ connected.
             edge_data = self._graph.get_edge_data(srcnode, destnode, None)
             if edge_data:
                 logger.debug('(%s, %s): Edge data exists: %s', srcnode,
-                             destnode, to_str(edge_data))
+                             destnode, str(edge_data))
                 for data in connects:
                     if data not in edge_data['connect']:
                         edge_data['connect'].append(data)
                     if disconnect:
-                        logger.debug('Removing connection: %s', to_str(data))
+                        logger.debug('Removing connection: %s', str(data))
                         edge_data['connect'].remove(data)
                 if edge_data['connect']:
                     self._graph.add_edges_from([(srcnode, destnode,
@@ -240,7 +240,7 @@ connected.
                 })])
             edge_data = self._graph.get_edge_data(srcnode, destnode)
             logger.debug('(%s, %s): new edge data: %s', srcnode, destnode,
-                         to_str(edge_data))
+                         str(edge_data))
 
     def disconnect(self, *args):
         """Disconnect nodes
@@ -256,7 +256,7 @@ connected.
 
         for srcnode, dstnode, conn in connection_list:
             logger.debug('disconnect(): %s->%s %s', srcnode, dstnode,
-                         to_str(conn))
+                         str(conn))
             if self in [srcnode, dstnode]:
                 raise IOError(
                     'Workflow connect cannot contain itself as node: src[%s] '
@@ -277,10 +277,10 @@ connected.
                     # idx = ed_conns.index(edge)
                     remove.append((edge[0], edge[1]))
 
-            logger.debug('disconnect(): remove list %s', to_str(remove))
+            logger.debug('disconnect(): remove list %s', str(remove))
             for el in remove:
                 edge_data['connect'].remove(el)
-                logger.debug('disconnect(): removed connection %s', to_str(el))
+                logger.debug('disconnect(): removed connection %s', str(el))
 
             if not edge_data['connect']:
                 self._graph.remove_edge(srcnode, dstnode)
@@ -410,7 +410,7 @@ connected.
                     base_dir = op.join(base_dir, self.name)
             else:
                 base_dir = os.getcwd()
-        base_dir = makedirs(base_dir, exist_ok=True)
+        os.makedirs(base_dir, exist_ok=True)
         if graph2use in ['hierarchical', 'colored']:
             if self.name[:1].isdigit():  # these graphs break if int
                 raise ValueError('{} graph failed, workflow name cannot begin '
@@ -576,7 +576,7 @@ connected.
         flatgraph = self._create_flat_graph()
         self.config = merge_dict(deepcopy(config._sections), self.config)
         logger.info('Workflow %s settings: %s', self.name,
-                    to_str(sorted(self.config)))
+                    str(sorted(self.config)))
         self._set_needed_outputs(flatgraph)
         execgraph = generate_expanded_graph(deepcopy(flatgraph))
         for index, node in enumerate(execgraph.nodes()):
@@ -609,7 +609,7 @@ connected.
         if workingdir is None:
             workingdir = os.getcwd()
         report_dir = op.join(workingdir, name)
-        makedirs(report_dir, exist_ok=True)
+        os.makedirs(report_dir, exist_ok=True)
         shutil.copyfile(
             op.join(op.dirname(__file__), 'report_template.html'),
             op.join(report_dir, 'index.html'))
@@ -821,7 +821,7 @@ connected.
             newval = dict(val)
         if isinstance(val, TraitListObject):
             newval = val[:]
-        logger.debug('setting node input: %s->%s', param, to_str(newval))
+        logger.debug('setting node input: %s->%s', param, str(newval))
         node.set_input(param, deepcopy(newval))
 
     def _get_all_nodes(self):
@@ -881,9 +881,9 @@ connected.
                 # dj: added list() for networkx ver.2
                 for u, _, d in list(
                         self._graph.in_edges(nbunch=node, data=True)):
-                    logger.debug('in: connections-> %s', to_str(d['connect']))
+                    logger.debug('in: connections-> %s', str(d['connect']))
                     for cd in deepcopy(d['connect']):
-                        logger.debug("in: %s", to_str(cd))
+                        logger.debug("in: %s", str(cd))
                         dstnode = node._get_parameter_node(cd[1], subtype='in')
                         srcnode = u
                         srcout = cd[0]
@@ -896,9 +896,9 @@ connected.
                 # dj: for ver 2 use list(out_edges)
                 for _, v, d in list(
                         self._graph.out_edges(nbunch=node, data=True)):
-                    logger.debug('out: connections-> %s', to_str(d['connect']))
+                    logger.debug('out: connections-> %s', str(d['connect']))
                     for cd in deepcopy(d['connect']):
-                        logger.debug("out: %s", to_str(cd))
+                        logger.debug("out: %s", str(cd))
                         dstnode = v
                         if isinstance(cd[0], tuple):
                             parameter = cd[0][0]

@@ -21,8 +21,8 @@ from ... import config, logging
 from ...utils.misc import flatten, unflatten, str2bool, dict_diff
 from ...utils.filemanip import (md5, FileNotFoundError, ensure_list,
                                 simplify_list, copyfiles, fnames_presuffix,
-                                loadpkl, split_filename, load_json, makedirs,
-                                emptydirs, savepkl, to_str, indirectory)
+                                loadpkl, split_filename, load_json,
+                                emptydirs, savepkl, indirectory)
 
 from ...interfaces.base import (traits, InputMultiPath, CommandLine, Undefined,
                                 DynamicTraitedSpec, Bunch, InterfaceResult,
@@ -267,7 +267,7 @@ class Node(EngineBase):
     def set_input(self, parameter, val):
         """Set interface input value"""
         logger.debug('[Node] %s - setting input %s = %s', self.name, parameter,
-                     to_str(val))
+                     str(val))
         setattr(self.inputs, parameter, deepcopy(val))
 
     def get_output(self, parameter):
@@ -453,7 +453,7 @@ class Node(EngineBase):
                 os.remove(filename)
 
         # Make sure outdir is created
-        makedirs(outdir, exist_ok=True)
+        os.makedirs(outdir, exist_ok=True)
 
         # Store runtime-hashfile, pre-execution report, the node and the inputs set.
         _save_hashfile(hashfile_unfinished, self._hashed_inputs)
@@ -663,7 +663,7 @@ class Node(EngineBase):
         if execute and linksonly:
             olddir = outdir
             outdir = op.join(outdir, '_tempinput')
-            makedirs(outdir, exist_ok=True)
+            os.makedirs(outdir, exist_ok=True)
 
         for info in filecopy_info:
             files = self.inputs.trait_get().get(info['key'])
@@ -1019,13 +1019,13 @@ class MapNode(Node):
         Set interface input value or nodewrapper attribute
         Priority goes to interface.
         """
-        logger.debug('setting nodelevel(%s) input %s = %s', to_str(self),
-                     parameter, to_str(val))
+        logger.debug('setting nodelevel(%s) input %s = %s', str(self),
+                     parameter, str(val))
         self._set_mapnode_input(parameter, deepcopy(val))
 
     def _set_mapnode_input(self, name, newvalue):
-        logger.debug('setting mapnode(%s) input: %s -> %s', to_str(self), name,
-                     to_str(newvalue))
+        logger.debug('setting mapnode(%s) input: %s -> %s', str(self), name,
+                     str(newvalue))
         if name in self.iterfield:
             setattr(self._inputs, name, newvalue)
         else:

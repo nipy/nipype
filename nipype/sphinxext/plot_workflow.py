@@ -144,23 +144,6 @@ except ImportError as e:
 
 
 
-def _mkdirp(folder):
-    """
-    Equivalent to bash's mkdir -p
-    """
-    if sys.version_info > (3, 4, 1):
-        os.makedirs(folder, exist_ok=True)
-        return folder
-
-    try:
-        os.makedirs(folder)
-    except OSError as exc:
-        if exc.errno != EEXIST or not os.path.isdir(folder):
-            raise
-
-    return folder
-
-
 def wf_directive(name, arguments, options, content, lineno, content_offset,
                  block_text, state, state_machine):
     if len(missing_imports) == 0:
@@ -737,7 +720,7 @@ def run(arguments, content, options, state_machine, state, lineno):
         state_machine.insert_input(total_lines, source=source_file_name)
 
     # copy image files to builder's output directory, if necessary
-    _mkdirp(dest_dir)
+    os.makedirs(dest_dir, exist_ok=True)
     for code_piece, images in results:
         for img in images:
             for fn in img.filenames():

@@ -21,9 +21,7 @@ import numpy as np
 from ... import logging, config, LooseVersion
 from ...utils.filemanip import (
     relpath,
-    makedirs,
     fname_presuffix,
-    to_str,
     ensure_list,
     get_related_files,
     FileNotFoundError,
@@ -117,7 +115,7 @@ def write_report(node, report_type=None, is_mapnode=False):
     cwd = node.output_dir()
     report_dir = os.path.join(cwd, '_report')
     report_file = os.path.join(report_dir, 'report.rst')
-    makedirs(report_dir, exist_ok=True)
+    os.makedirs(report_dir, exist_ok=True)
 
     logger.debug('[Node] Writing %s-exec report to "%s"', report_type[:-4],
                  report_file)
@@ -627,7 +625,7 @@ def _get_valid_pathstr(pathstr):
     Replaces: ',' -> '.'
     """
     if not isinstance(pathstr, (str, bytes)):
-        pathstr = to_str(pathstr)
+        pathstr = str(pathstr)
     pathstr = pathstr.replace(os.sep, '..')
     pathstr = re.sub(r'''[][ (){}?:<>#!|"';]''', '', pathstr)
     pathstr = pathstr.replace(',', '.')
@@ -1355,7 +1353,7 @@ def export_graph(graph_in,
     if base_dir is None:
         base_dir = os.getcwd()
 
-    makedirs(base_dir, exist_ok=True)
+    os.makedirs(base_dir, exist_ok=True)
     out_dot = fname_presuffix(
         dotfilename, suffix='_detailed.dot', use_ext=False, newpath=base_dir)
     _write_detailed_dot(graph, out_dot)

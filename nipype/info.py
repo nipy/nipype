@@ -2,7 +2,6 @@
 settings in setup.py, the nipy top-level docstring, and for building the
 docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 """
-import sys
 
 # nipype version information.  An empty version_extra corresponds to a
 # full release.  '.dev' as a version_extra string means this is a development
@@ -151,9 +150,6 @@ REQUIRES = [
     'packaging',
     'futures; python_version == "2.7"',
 ]
-
-if sys.version_info <= (3, 4):
-    REQUIRES.append('configparser')
 
 TESTS_REQUIRES = ['pytest-cov', 'codecov', 'pytest-env', 'coverage<5']
 

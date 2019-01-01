@@ -12,7 +12,7 @@ from time import strftime
 from traceback import format_exception
 
 from ... import logging
-from ...utils.filemanip import savepkl, crash2txt, makedirs
+from ...utils.filemanip import savepkl, crash2txt
 
 logger = logging.getLogger('nipype.workflow')
 
@@ -42,7 +42,7 @@ def report_crash(node, traceback=None, hostname=None):
                                        str(uuid.uuid4()))
     crashdir = node.config['execution'].get('crashdump_dir', os.getcwd())
 
-    makedirs(crashdir, exist_ok=True)
+    os.makedirs(crashdir, exist_ok=True)
     crashfile = os.path.join(crashdir, crashfile)
 
     if node.config['execution']['crashfile_format'].lower() in ['text', 'txt']:
@@ -115,8 +115,7 @@ pklfile = '%s'
 batchdir = '%s'
 from nipype.utils.filemanip import loadpkl, savepkl
 try:
-    if not sys.version_info < (2, 7):
-        from collections import OrderedDict
+    from collections import OrderedDict
     config_dict=%s
     config.update_config(config_dict)
     ## Only configure matplotlib if it was successfully imported,
