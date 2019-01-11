@@ -38,3 +38,12 @@ def test_LaplacianThickness_defaults(change_dir, create_lt):
     assert lt.cmdline == base_cmd + " 4.5"
     lt.inputs.prior_thickness = 5.9
     assert lt.cmdline == base_cmd + " 4.5 5.9"
+
+
+def test_LaplacianThickness_wrongargs(change_dir, create_lt):
+    lt = create_lt
+    lt.inputs.prior_thickness = 5.9
+    # 500 must not be placed as smooth_param
+    assert lt.cmdline != 'LaplacianThickness functional.nii diffusion_weighted.nii functional_thickness.nii 5.9'
+    # probably should have just raised an exception that "smooth_param"
+    # should also be defined
