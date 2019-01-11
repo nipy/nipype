@@ -92,7 +92,7 @@ function generate_main_dockerfile() {
                 conda_install='python=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
                                icu=58.1 libxml2 libxslt matplotlib mkl numpy paramiko
                                pandas psutil scikit-learn scipy traits=4.6.0' \
-                pip_install="grabbit==0.1.2 https://github.com/INCF/pybids/tarball/0.6.5" \
+                pip_install="grabbit==0.2.6 https://github.com/bids-standard/pybids/tarball/0.7.0" \
                 activate=true \
     --copy docker/files/run_builddocs.sh docker/files/run_examples.sh \
            docker/files/run_pytests.sh nipype/external/fsl_imglob.py /usr/bin/ \
