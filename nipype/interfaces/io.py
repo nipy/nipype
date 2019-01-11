@@ -2721,20 +2721,25 @@ class JSONFileSink(IOBase):
 
 
 class BIDSDataGrabberInputSpec(DynamicTraitedSpec):
-    base_dir = Directory(exists=True,
-                         desc='Path to BIDS Directory.',
-                         mandatory=True)
-    output_query = traits.Dict(key_trait=Str,
-                               value_trait=traits.Dict,
-                               desc='Queries for outfield outputs')
-    raise_on_empty = traits.Bool(True, usedefault=True,
-                                 desc='Generate exception if list is empty '
-                                 'for a given field')
-    return_type = traits.Enum('file', 'namedtuple', usedefault=True)
-    index_derivatives = traits.Bool(False, usedefault=True,
-            desc='Index derivatives/ sub-directory')
-    extra_derivatives = traits.List(Directory(exists=True),
-            desc='Additional derivative directories to index')
+    base_dir = Directory(
+        exists=True,
+        desc='Path to BIDS Directory.',
+        mandatory=True)
+    output_query = traits.Dict(
+        key_trait=Str,
+        value_trait=traits.Dict,
+        desc='Queries for outfield outputs')
+    raise_on_empty = traits.Bool(
+        True, usedefault=True,
+        desc='Generate exception if list is empty for a given field')
+    return_type = traits.Enum(
+        'file', 'namedtuple', usedefault=True)
+    index_derivatives = traits.Bool(
+        False, usedefault=True,
+        desc='Index derivatives/ sub-directory')
+    extra_derivatives = traits.List(
+        Directory(exists=True),
+        desc='Additional derivative directories to index')
 
 
 class BIDSDataGrabber(LibraryBaseInterface, IOBase):
@@ -2786,13 +2791,14 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
                 "bold": {"datatype": "func", "suffix": "bold",
                          "extensions": ["nii", ".nii.gz"]},
                 "T1w": {"datatype": "anat", "suffix": "T1w",
-                         "extensions": ["nii", ".nii.gz"]},
+                        "extensions": ["nii", ".nii.gz"]},
                 }
 
         # If infields is empty, use all BIDS entities
         if infields is None:
             from bids import layout as bidslayout
-            bids_config = join(dirname(bidslayout.__file__), 'config', 'bids.json')
+            bids_config = join(
+                dirname(bidslayout.__file__), 'config', 'bids.json')
             bids_config = json.load(open(bids_config, 'r'))
             infields = [i['name'] for i in bids_config['entities']]
 
@@ -2809,7 +2815,7 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
     def _list_outputs(self):
         from bids import BIDSLayout
         layout = BIDSLayout(self.inputs.base_dir,
-                                       derivatives=self.inputs.index_derivatives)
+                            derivatives=self.inputs.index_derivatives)
 
         if isdefined(self.inputs.extra_derivatives):
             layout.add_derivatives(self.inputs.extra_derivatives)
