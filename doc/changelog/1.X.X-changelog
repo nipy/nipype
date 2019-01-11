@@ -1,3 +1,83 @@
+1.1.7 (December 17, 2018)
+=========================
+
+  * FIX: Copy node list before generating a flat graph (https://github.com/nipy/nipype/pull/2828)
+  * FIX: Update pytest req'd version to 3.6 (https://github.com/nipy/nipype/pull/2827)
+  * FIX: Set ResourceMonitor.fname to an absolute path (https://github.com/nipy/nipype/pull/2824)
+  * FIX: Order of SPM.NewSegment channel_info boolean tuple is (Field, Corrected) (https://github.com/nipy/nipype/pull/2817)
+  * FIX: Indices were swapped for memory and cpu profile data (https://github.com/nipy/nipype/pull/2816)
+  * FIX: ``status_callback`` not called with ``stop_on_first_crash`` (https://github.com/nipy/nipype/pull/2810)
+  * FIX: Change undefined ScriptError on LFS plugin to IOError (https://github.com/nipy/nipype/pull/2803)
+  * ENH: Add NaN failure mode to CompCor interfaces (https://github.com/nipy/nipype/pull/2819)
+  * ENH: Enable cnr_maps and residuals outputs for FSL eddy (https://github.com/nipy/nipype/pull/2750)
+  * ENH: Improve ``str2bool`` + doctests (https://github.com/nipy/nipype/pull/2807)
+  * TST: Improve py.test configuration of doctests (https://github.com/nipy/nipype/pull/2802)
+  * DOC: Update DOI badge to point to all versions (https://github.com/nipy/nipype/pull/2804)
+  * MAINT: Offload interfaces with help formatting (https://github.com/nipy/nipype/pull/2797)
+  * MAINT: Reduce minimal code redundancy in filemanip.get_dependencies (https://github.com/nipy/nipype/pull/2782)
+  * MAINT: Delayed imports to reduce import time (https://github.com/nipy/nipype/pull/2809)
+
+
+1.1.6 (November 26, 2018)
+=========================
+
+##### [Full changelog](https://github.com/nipy/nipype/milestone/27?closed=1)
+
+  * FIX: MapNodes fail when ``MultiProcPlugin`` passed by instance (https://github.com/nipy/nipype/pull/2786)
+  * FIX: --fineTune arguments order for MeshFix command (https://github.com/nipy/nipype/pull/2780)
+  * ENH: Add mp_context plugin arg for MultiProc (https://github.com/nipy/nipype/pull/2778)
+  * ENH: Create a crashfile even if 'stop_on_first_crash' is set (https://github.com/nipy/nipype/pull/2774)
+  * ENH: Add ExtractedBrainN4 output to ANTs CorticalThickness interface (https://github.com/nipy/nipype/pull/2784)
+  * STY: Combine split import (https://github.com/nipy/nipype/pull/2801)
+  * DOC: use https in css stylesheet url (https://github.com/nipy/nipype/pull/2779)
+  * MAINT: Outsource ``get_filecopy_info()`` from interfaces (https://github.com/nipy/nipype/pull/2798)
+  * MAINT: Import only Sequence to avoid DeprecationWarning (https://github.com/nipy/nipype/pull/2793)
+  * MAINT: One less DeprecationWarning (configparser) (https://github.com/nipy/nipype/pull/2794)
+  * MAINT: DeprecationWarning: use ``HasTraits.trait_set`` instead (https://github.com/nipy/nipype/pull/2792)
+  * MAINT: Stop using deprecated ``logger.warn()`` (https://github.com/nipy/nipype/pull/2788)
+  * MAINT: Move ``interfaces.base.run_command`` to ``nipype.utils.subprocess`` (https://github.com/nipy/nipype/pull/2777)
+  * MAINT: Force numpy>=1.15.4 when Python>=3.7 (https://github.com/nipy/nipype/pull/2775)
+
+
+1.1.5 (November 08, 2018)
+=========================
+
+Hotfix release.
+
+##### [Full changelog](https://github.com/nipy/nipype/milestone/26?closed=1)
+
+  * ENH: Allow timeouts during SLURM job status checks (https://github.com/nipy/nipype/pull/2767)
+  * RF: Subclass non-daemon variants of all multiprocessing contexts (https://github.com/nipy/nipype/pull/2771)
+
+
+1.1.4 (October 31, 2018)
+========================
+
+##### [Full changelog](https://github.com/nipy/nipype/milestone/25?closed=1)
+
+  * FIX: Python 2.7-3.7.1 compatible NonDaemonPool (https://github.com/nipy/nipype/pull/2754)
+  * FIX: VRML typo (VMRL) in MeshFix (https://github.com/nipy/nipype/pull/2757)
+  * FIX: Refine FSL.split output identification (https://github.com/nipy/nipype/pull/2746)
+  * FIX: Reuse _gen_filename logic in ants.LaplacianThickness (https://github.com/nipy/nipype/pull/2734)
+  * FIX: Remove 'reg_term' default from dwi2tensor interface (https://github.com/nipy/nipype/pull/2731)
+  * FIX: Keep profile files when ``remove_unnecessary_outputs = true`` (https://github.com/nipy/nipype/pull/2718)
+  * ENH: Add afni.LocalStat and afni.ReHo, update afni.ROIStats inputs (https://github.com/nipy/nipype/pull/2740)
+  * ENH: Add compression option for bru2nii (https://github.com/nipy/nipype/pull/2762)
+  * ENH: Add slice_encoding_direction input to TShift (https://github.com/nipy/nipype/pull/2753)
+  * ENH: Add 'sse' output to FSL DTIFit interface (https://github.com/nipy/nipype/pull/2749)
+  * ENH: Update ``ants.LaplacianThickness`` to use ``name_source`` (https://github.com/nipy/nipype/pull/2747)
+  * ENH: Add tab completion for node and interface inputs properties (https://github.com/nipy/nipype/pull/2735)
+  * ENH: enable/disable resource monitor in the fixture per test (https://github.com/nipy/nipype/pull/2725)
+  * TEST: Update expected dotfile text for networkx 1.x (https://github.com/nipy/nipype/pull/2730)
+  * DOC: Move user docs from nipype to nipype_tutorial (https://github.com/nipy/nipype/pull/2726)
+  * DOC: Use consistent name in reconall workflow docstring (https://github.com/nipy/nipype/pull/2758)
+  * MAINT: Use neurodocker 0.4.1 + apt install afni (https://github.com/nipy/nipype/pull/2707)
+  * MAINT: Fix prov and rdflib in nipype (https://github.com/nipy/nipype/pull/2701)
+  * MAINT: Correct readthedocs build error (https://github.com/nipy/nipype/pull/2723)
+  * MAINT: Pin codecov to <5.0 so Travis is fixed (https://github.com/nipy/nipype/pull/2728)
+  * CI: Lock travis pybids 0.6.5 (https://github.com/nipy/nipype/pull/2720)
+
+
 1.1.3 (September 24, 2018)
 ==========================
 

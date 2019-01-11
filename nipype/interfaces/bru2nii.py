@@ -23,11 +23,13 @@ class Bru2InputSpec(CommandLineInputSpec):
         argstr='-f',
         desc="Force conversion of localizers images (multiple slice "
         "orientations).")
+    compress = traits.Bool(
+        argstr='-z', desc='gz compress images (".nii.gz").')
     append_protocol_name = traits.Bool(
         argstr='-p', desc="Append protocol name to output filename.")
     output_filename = traits.Str(
         argstr="-o %s",
-        desc="Output filename ('.nii' will be appended)",
+        desc='Output filename (".nii" will be appended, or ".nii.gz" if the "-z" compress option is selected)',
         genfile=True)
 
 
@@ -45,7 +47,7 @@ class Bru2(CommandLine):
     >>> converter = Bru2()
     >>> converter.inputs.input_dir = "brukerdir"
     >>> converter.cmdline  # doctest: +ELLIPSIS
-    'Bru2 -o .../nipype/testing/data/brukerdir brukerdir'
+    'Bru2 -o .../data/brukerdir brukerdir'
     """
     input_spec = Bru2InputSpec
     output_spec = Bru2OutputSpec
@@ -57,7 +59,10 @@ class Bru2(CommandLine):
             output_filename1 = os.path.abspath(self.inputs.output_filename)
         else:
             output_filename1 = self._gen_filename('output_filename')
-        outputs["nii_file"] = output_filename1 + ".nii"
+        if self.inputs.compress:
+            outputs["nii_file"] = output_filename1 + ".nii.gz"
+        else:
+            outputs["nii_file"] = output_filename1 + ".nii"
         return outputs
 
     def _gen_filename(self, name):

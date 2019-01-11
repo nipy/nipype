@@ -13,6 +13,7 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
 import os
+from inspect import isclass
 from copy import deepcopy
 from warnings import warn
 from builtins import str, bytes
@@ -234,7 +235,6 @@ class BaseTraitedSpec(traits.HasTraits):
             The md5 hash value of the traited spec
 
         """
-
         list_withhash = []
         list_nofilename = []
         for name, val in sorted(self.trait_get().items()):
@@ -309,6 +309,10 @@ class BaseTraitedSpec(traits.HasTraits):
                     out = objekt
         return out
 
+    @property
+    def __all__(self):
+        return self.copyable_trait_names()
+
 
 class TraitedSpec(BaseTraitedSpec):
     """ Create a subclass with strict traits.
@@ -372,3 +376,21 @@ class MpiCommandLineInputSpec(CommandLineInputSpec):
     n_procs = traits.Int(desc="Num processors to specify to mpiexec. Do not "
                          "specify if this is managed externally (e.g. through "
                          "SGE)")
+
+
+def get_filecopy_info(cls):
+    """Provides information about file inputs to copy or link to cwd.
+    Necessary for pipeline operation
+    """
+    if cls.input_spec is None:
+        return None
+
+    # normalize_filenames is not a classmethod, hence check first
+    if not isclass(cls) and hasattr(cls, 'normalize_filenames'):
+        cls.normalize_filenames()
+    info = []
+    inputs = cls.input_spec() if isclass(cls) else cls.inputs
+    metadata = dict(copyfile=lambda t: t is not None)
+    for name, spec in sorted(inputs.traits(**metadata).items()):
+        info.append(dict(key=name, copy=spec.copyfile))
+    return info

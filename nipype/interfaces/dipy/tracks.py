@@ -73,8 +73,8 @@ class TrackDensityMap(DipyBaseInterface):
             data_dims = refnii.shape[:3]
             kwargs = dict(affine=affine)
         else:
-            IFLOGGER.warn('voxel_dims and data_dims are deprecated as of dipy '
-                          '0.7.1. Please use reference input instead')
+            IFLOGGER.warning('voxel_dims and data_dims are deprecated as of dipy '
+                             '0.7.1. Please use reference input instead')
 
             if not isdefined(self.inputs.data_dims):
                 data_dims = header['dim']

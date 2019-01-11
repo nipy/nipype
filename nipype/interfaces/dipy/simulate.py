@@ -288,7 +288,7 @@ def _compute_voxel(args):
     .. [Alexander2002] Alexander et al., Detection and modeling of non-Gaussian
       apparent diffusion coefficient profiles in human brain data, MRM
       48(2):331-340, 2002, doi: `10.1002/mrm.10209
-      <http://dx.doi.org/10.1002/mrm.10209>`_.
+      <https://doi.org/10.1002/mrm.10209>`_.
     .. [Pierpaoli1996] Pierpaoli et al., Diffusion tensor MR imaging
       of the human brain, Radiology 201:637-648. 1996.
     """

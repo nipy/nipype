@@ -7,11 +7,9 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
 import os
-
-import networkx as nx
 from .base import (PluginBase, logger, report_crash, report_nodes_not_run,
                    str2bool)
-from ..engine.utils import dfs_preorder, topological_sort
+from ..engine.utils import topological_sort
 
 
 class LinearPlugin(PluginBase):
@@ -27,6 +25,11 @@ class LinearPlugin(PluginBase):
         graph : networkx digraph
             defines order of execution
         """
+        import networkx as nx
+        try:
+            dfs_preorder = nx.dfs_preorder
+        except AttributeError:
+            dfs_preorder = nx.dfs_preorder_nodes
 
         if not isinstance(graph, nx.DiGraph):
             raise ValueError('Input must be a networkx digraph object')
@@ -36,26 +39,33 @@ class LinearPlugin(PluginBase):
         donotrun = []
         nodes, _ = topological_sort(graph)
         for node in nodes:
+            endstatus = 'end'
             try:
                 if node in donotrun:
                     continue
                 if self._status_callback:
                     self._status_callback(node, 'start')
                 node.run(updatehash=updatehash)
-                if self._status_callback:
-                    self._status_callback(node, 'end')
             except:
-                os.chdir(old_wd)
-                if str2bool(config['execution']['stop_on_first_crash']):
-                    raise
+                endstatus = 'exception'
                 # bare except, but i really don't know where a
                 # node might fail
                 crashfile = report_crash(node)
+                if str2bool(config['execution']['stop_on_first_crash']):
+                    raise
                 # remove dependencies from queue
                 subnodes = [s for s in dfs_preorder(graph, node)]
-                notrun.append(
-                    dict(node=node, dependents=subnodes, crashfile=crashfile))
+                notrun.append({'node': node, 'dependents': subnodes,
+                               'crashfile': crashfile})
                 donotrun.extend(subnodes)
+                # Delay raising the crash until we cleaned the house
+                if str2bool(config['execution']['stop_on_first_crash']):
+                    os.chdir(old_wd)  # Return wherever we were before
+                    report_nodes_not_run(notrun)  # report before raising
+                    raise
+            finally:
                 if self._status_callback:
-                    self._status_callback(node, 'exception')
+                    self._status_callback(node, endstatus)
+
+        os.chdir(old_wd)  # Return wherever we were before
         report_nodes_not_run(notrun)

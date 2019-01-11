@@ -6,6 +6,7 @@ from ..confounds import TCompCor
 def test_TCompCor_inputs():
     input_map = dict(
         components_file=dict(usedefault=True, ),
+        failure_mode=dict(usedefault=True, ),
         header_prefix=dict(),
         high_pass_cutoff=dict(usedefault=True, ),
         ignore_initial_volumes=dict(usedefault=True, ),

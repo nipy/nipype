@@ -659,6 +659,10 @@ class EddyInputSpec(FSLCommandInputSpec):
         "the field specified by --field and first volume "
         "in file --imain")
     use_cuda = traits.Bool(False, desc="Run eddy using cuda gpu")
+    cnr_maps = traits.Bool(
+        False, desc='Output CNR-Maps', argstr='--cnr_maps', min_ver='5.0.10')
+    residuals = traits.Bool(
+        False, desc='Output Residuals', argstr='--residuals', min_ver='5.0.10')
 
 
 class EddyOutputSpec(TraitedSpec):
@@ -685,6 +689,10 @@ class EddyOutputSpec(TraitedSpec):
         exists=True,
         desc=('Text-file with a plain language report on what '
               'outlier slices eddy has found'))
+    out_cnr_maps = File(
+        exists=True, desc='path/name of file with the cnr_maps')
+    out_residuals = File(
+        exists=True, desc='path/name of file with the residuals')
 
 
 class Eddy(FSLCommand):
@@ -787,6 +795,16 @@ class Eddy(FSLCommand):
             self.inputs.out_base)
         out_outlier_report = os.path.abspath(
             '%s.eddy_outlier_report' % self.inputs.out_base)
+        if isdefined(self.inputs.cnr_maps) and self.inputs.cnr_maps:
+            out_cnr_maps = os.path.abspath(
+                '%s.eddy_cnr_maps.nii.gz' % self.inputs.out_base)
+            if os.path.exists(out_cnr_maps):
+                outputs['out_cnr_maps'] = out_cnr_maps
+        if isdefined(self.inputs.residuals) and self.inputs.residuals:
+            out_residuals = os.path.abspath(
+                '%s.eddy_residuals.nii.gz' % self.inputs.out_base)
+            if os.path.exists(out_residuals):
+                outputs['out_residuals'] = out_residuals
 
         if os.path.exists(out_rotated_bvecs):
             outputs['out_rotated_bvecs'] = out_rotated_bvecs

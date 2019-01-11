@@ -15,10 +15,7 @@ import os.path as op
 import nibabel as nb
 import numpy as np
 from math import floor, ceil
-from scipy.ndimage.morphology import grey_dilation
-import scipy.io as sio
 import itertools
-import scipy.stats as stats
 import warnings
 
 from .. import logging
@@ -103,6 +100,7 @@ class PickAtlas(BaseInterface):
             newdata[:int(ceil(float(origdata.shape[0]) / 2)), :, :] = 0
 
         if self.inputs.dilation_size != 0:
+            from scipy.ndimage.morphology import grey_dilation
             newdata = grey_dilation(newdata,
                                     (2 * self.inputs.dilation_size + 1,
                                      2 * self.inputs.dilation_size + 1,
@@ -356,6 +354,7 @@ class Matlab2CSV(BaseInterface):
     output_spec = Matlab2CSVOutputSpec
 
     def _run_interface(self, runtime):
+        import scipy.io as sio
         in_dict = sio.loadmat(op.abspath(self.inputs.in_file))
 
         # Check if the file has multiple variables in it. If it does, loop
@@ -393,6 +392,7 @@ class Matlab2CSV(BaseInterface):
         return runtime
 
     def _list_outputs(self):
+        import scipy.io as sio
         outputs = self.output_spec().get()
         in_dict = sio.loadmat(op.abspath(self.inputs.in_file))
         saved_variables = list()
@@ -589,7 +589,7 @@ class MergeCSVFiles(BaseInterface):
             extraheadingBool = True
 
         if len(self.inputs.in_files) == 1:
-            iflogger.warn('Only one file input!')
+            iflogger.warning('Only one file input!')
 
         if isdefined(self.inputs.row_headings):
             iflogger.info('Row headings have been provided. Adding "labels"'
@@ -909,6 +909,7 @@ def calc_moments(timeseries_file, moment):
     timeseries_file -- text file with white space separated timepoints in rows
 
     """
+    import scipy.stats as stats
     timeseries = np.genfromtxt(timeseries_file)
 
     m2 = stats.moment(timeseries, 2, axis=0)
