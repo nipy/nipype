@@ -832,7 +832,7 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
         Examples
         --------
 
-        >>> s3grab = S3DataGrabber(infields=['subj_id'], outfields=["func", "anat"]))
+        >>> s3grab = S3DataGrabber(infields=['subj_id'], outfields=["func", "anat"])
         >>> s3grab.inputs.bucket = 'openneuro'
         >>> s3grab.inputs.sort_filelist = True
         >>> s3grab.inputs.template = '*' 
