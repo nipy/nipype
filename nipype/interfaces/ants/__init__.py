@@ -5,7 +5,7 @@
 
 # Registraiton programs
 from .registration import (ANTS, Registration, RegistrationSynQuick,
-                           MeasureImageSimilarity)
+                           CompositeTransformUtil, MeasureImageSimilarity)
 
 # Resampling Programs
 from .resampling import (ApplyTransforms, ApplyTransformsToPoints,
