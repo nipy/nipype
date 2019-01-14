@@ -581,8 +581,6 @@ def test_jsonsink(tmpdir, inputs_attributes):
 # There are three reasons these tests will be skipped:
 @pytest.mark.skipif(not have_pybids,
                     reason="Pybids is not installed")
-@pytest.mark.skipif(sys.version_info < (3, 0),
-                    reason="Pybids no longer supports Python 2")
 @pytest.mark.skipif(not dist_is_editable('pybids'),
                     reason="Pybids is not installed in editable mode")
 def test_bids_grabber(tmpdir):
@@ -598,8 +596,6 @@ def test_bids_grabber(tmpdir):
 
 @pytest.mark.skipif(not have_pybids,
                     reason="Pybids is not installed")
-@pytest.mark.skipif(sys.version_info < (3, 0),
-                    reason="Pybids no longer supports Python 2")
 @pytest.mark.skipif(not dist_is_editable('pybids'),
                     reason="Pybids is not installed in editable mode")
 def test_bids_fields(tmpdir):
@@ -614,8 +610,6 @@ def test_bids_fields(tmpdir):
 
 @pytest.mark.skipif(not have_pybids,
                     reason="Pybids is not installed")
-@pytest.mark.skipif(sys.version_info < (3, 0),
-                    reason="Pybids no longer supports Python 2")
 @pytest.mark.skipif(not dist_is_editable('pybids'),
                     reason="Pybids is not installed in editable mode")
 def test_bids_infields_outfields(tmpdir):
