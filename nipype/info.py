@@ -147,7 +147,6 @@ REQUIRES = [
     'neurdflib',
     'click>=%s' % CLICK_MIN_VERSION,
     'funcsigs',
-    'mock',
     'pydotplus',
     'pydot>=%s' % PYDOT_MIN_VERSION,
     'packaging',
@@ -158,6 +157,7 @@ if sys.version_info <= (3, 4):
     REQUIRES.append('configparser')
 
 TESTS_REQUIRES = [
+    'mock',
     'pytest>=%s' % PYTEST_MIN_VERSION,
     'pytest-xdist',
     'pytest-cov',
