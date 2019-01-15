@@ -20,18 +20,17 @@ from builtins import object, open, str, bytes
 from copy import deepcopy
 from datetime import datetime as dt
 import os
-import re
 import platform
 import subprocess as sp
 import shlex
 import sys
-from textwrap import wrap
 import simplejson as json
 from dateutil.parser import parse as parseutc
+from future import standard_library
 
 from ... import config, logging, LooseVersion
 from ...utils.provenance import write_provenance
-from ...utils.misc import trim, str2bool, rgetcwd
+from ...utils.misc import str2bool, rgetcwd
 from ...utils.filemanip import (FileNotFoundError, split_filename,
                                 which, get_dependencies)
 from ...utils.subprocess import run_command
@@ -42,9 +41,9 @@ from .traits_extension import traits, isdefined, TraitError
 from .specs import (BaseInterfaceInputSpec, CommandLineInputSpec,
                     StdOutCommandLineInputSpec, MpiCommandLineInputSpec,
                     get_filecopy_info)
-from .support import (Bunch, InterfaceResult, NipypeInterfaceError)
+from .support import (Bunch, InterfaceResult, NipypeInterfaceError,
+                      format_help)
 
-from future import standard_library
 standard_library.install_aliases()
 
 iflogger = logging.getLogger('nipype.interface')
@@ -68,38 +67,24 @@ class Interface(object):
 
     input_spec = None  # A traited input specification
     output_spec = None  # A traited output specification
-
-    # defines if the interface can reuse partial results after interruption
-    _can_resume = False
+    _can_resume = False  # See property below
+    _always_run = False  # See property below
 
     @property
     def can_resume(self):
+        """Defines if the interface can reuse partial results after interruption.
+        Only applies to interfaces being run within a workflow context."""
         return self._can_resume
-
-    # should the interface be always run even if the inputs were not changed?
-    _always_run = False
 
     @property
     def always_run(self):
+        """Should the interface be always run even if the inputs were not changed?
+        Only applies to interfaces being run within a workflow context."""
         return self._always_run
 
-    def __init__(self, **inputs):
-        """Initialize command with given args and inputs."""
-        raise NotImplementedError
-
-    @classmethod
-    def help(cls):
-        """ Prints class help"""
-        raise NotImplementedError
-
-    @classmethod
-    def _inputs_help(cls):
-        """ Prints inputs help"""
-        raise NotImplementedError
-
-    @classmethod
-    def _outputs_help(cls):
-        """ Prints outputs help"""
+    @property
+    def version(self):
+        """interfaces should implement a version property"""
         raise NotImplementedError
 
     @classmethod
@@ -107,8 +92,17 @@ class Interface(object):
         """ Initializes outputs"""
         raise NotImplementedError
 
-    @property
-    def version(self):
+    @classmethod
+    def help(cls, returnhelp=False):
+        """ Prints class help """
+        allhelp = format_help(cls)
+        if returnhelp:
+            return allhelp
+        print(allhelp)
+        return None  # R1710
+
+    def __init__(self):
+        """Subclasses must implement __init__"""
         raise NotImplementedError
 
     def run(self):
@@ -189,142 +183,6 @@ class BaseInterface(Interface):
 
             for name, value in list(inputs.items()):
                 setattr(self.inputs, name, value)
-
-    @classmethod
-    def help(cls, returnhelp=False):
-        """ Prints class help
-        """
-
-        if cls.__doc__:
-            # docstring = cls.__doc__.split('\n')
-            # docstring = [trim(line, '') for line in docstring]
-            docstring = trim(cls.__doc__).split('\n') + ['']
-        else:
-            docstring = ['']
-
-        allhelp = '\n'.join(docstring + cls._inputs_help(
-        ) + [''] + cls._outputs_help() + [''] + cls._refs_help() + [''])
-        if returnhelp:
-            return allhelp
-        else:
-            print(allhelp)
-
-    @classmethod
-    def _refs_help(cls):
-        """ Prints interface references.
-        """
-        if not cls.references_:
-            return []
-
-        helpstr = ['References::']
-
-        for r in cls.references_:
-            helpstr += ['{}'.format(r['entry'])]
-
-        return helpstr
-
-    @classmethod
-    def _get_trait_desc(self, inputs, name, spec):
-        desc = spec.desc
-        xor = spec.xor
-        requires = spec.requires
-        argstr = spec.argstr
-
-        manhelpstr = ['\t%s' % name]
-
-        type_info = spec.full_info(inputs, name, None)
-
-        default = ''
-        if spec.usedefault:
-            default = ', nipype default value: %s' % str(
-                spec.default_value()[1])
-        line = "(%s%s)" % (type_info, default)
-
-        manhelpstr = wrap(
-            line,
-            70,
-            initial_indent=manhelpstr[0] + ': ',
-            subsequent_indent='\t\t ')
-
-        if desc:
-            for line in desc.split('\n'):
-                line = re.sub("\s+", " ", line)
-                manhelpstr += wrap(
-                    line, 70, initial_indent='\t\t', subsequent_indent='\t\t')
-
-        if argstr:
-            pos = spec.position
-            if pos is not None:
-                manhelpstr += wrap(
-                    'flag: %s, position: %s' % (argstr, pos),
-                    70,
-                    initial_indent='\t\t',
-                    subsequent_indent='\t\t')
-            else:
-                manhelpstr += wrap(
-                    'flag: %s' % argstr,
-                    70,
-                    initial_indent='\t\t',
-                    subsequent_indent='\t\t')
-
-        if xor:
-            line = '%s' % ', '.join(xor)
-            manhelpstr += wrap(
-                line,
-                70,
-                initial_indent='\t\tmutually_exclusive: ',
-                subsequent_indent='\t\t ')
-
-        if requires:
-            others = [field for field in requires if field != name]
-            line = '%s' % ', '.join(others)
-            manhelpstr += wrap(
-                line,
-                70,
-                initial_indent='\t\trequires: ',
-                subsequent_indent='\t\t ')
-        return manhelpstr
-
-    @classmethod
-    def _inputs_help(cls):
-        """ Prints description for input parameters
-        """
-        helpstr = ['Inputs::']
-
-        inputs = cls.input_spec()
-        if len(list(inputs.traits(transient=None).items())) == 0:
-            helpstr += ['', '\tNone']
-            return helpstr
-
-        manhelpstr = ['', '\t[Mandatory]']
-        mandatory_items = inputs.traits(mandatory=True)
-        for name, spec in sorted(mandatory_items.items()):
-            manhelpstr += cls._get_trait_desc(inputs, name, spec)
-
-        opthelpstr = ['', '\t[Optional]']
-        for name, spec in sorted(inputs.traits(transient=None).items()):
-            if name in mandatory_items:
-                continue
-            opthelpstr += cls._get_trait_desc(inputs, name, spec)
-
-        if manhelpstr:
-            helpstr += manhelpstr
-        if opthelpstr:
-            helpstr += opthelpstr
-        return helpstr
-
-    @classmethod
-    def _outputs_help(cls):
-        """ Prints description for output parameters
-        """
-        helpstr = ['Outputs::', '']
-        if cls.output_spec:
-            outputs = cls.output_spec()
-            for name, spec in sorted(outputs.traits(transient=None).items()):
-                helpstr += cls._get_trait_desc(outputs, name, spec)
-        if len(helpstr) == 2:
-            helpstr += ['\tNone']
-        return helpstr
 
     def _outputs(self):
         """ Returns a bunch containing output fields for the class
@@ -563,8 +421,8 @@ class BaseInterface(Interface):
                 vals = np.loadtxt(mon_sp.fname, delimiter=',')
                 if vals.size:
                     vals = np.atleast_2d(vals)
-                    runtime.mem_peak_gb = vals[:, 1].max() / 1024
-                    runtime.cpu_percent = vals[:, 2].max()
+                    runtime.mem_peak_gb = vals[:, 2].max() / 1024
+                    runtime.cpu_percent = vals[:, 1].max()
 
                     runtime.prof_dict = {
                         'time': vals[:, 0].tolist(),
@@ -645,7 +503,7 @@ class BaseInterface(Interface):
         A convenient way to save current inputs to a JSON file.
         """
         inputs = self.inputs.get_traitsfree()
-        iflogger.debug('saving inputs {}', inputs)
+        iflogger.debug('saving inputs %s', inputs)
         with open(json_file, 'w' if PY3 else 'wb') as fhandle:
             json.dump(inputs, fhandle, indent=4, ensure_ascii=False)
 
@@ -777,14 +635,6 @@ class CommandLine(BaseInterface):
             raise AttributeError(
                 'Invalid terminal output_type: %s' % output_type)
 
-    @classmethod
-    def help(cls, returnhelp=False):
-        allhelp = 'Wraps command **{cmd}**\n\n{help}'.format(
-            cmd=cls._cmd, help=super(CommandLine, cls).help(returnhelp=True))
-        if returnhelp:
-            return allhelp
-        print(allhelp)
-
     def __init__(self, command=None, terminal_output=None, **inputs):
         super(CommandLine, self).__init__(**inputs)
         self._environ = None
@@ -804,6 +654,10 @@ class CommandLine(BaseInterface):
     @property
     def cmd(self):
         """sets base command, immutable"""
+        if not self._cmd:
+            raise NotImplementedError(
+                'CommandLineInterface should wrap an executable, but '
+                'none has been set.')
         return self._cmd
 
     @property

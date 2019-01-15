@@ -388,12 +388,12 @@ def hmc_pipeline(name='motion_correct'):
 
       .. [Leemans09] Leemans A, and Jones DK, `The B-matrix must be rotated
         when correcting for subject motion in DTI data
-        <http://dx.doi.org/10.1002/mrm.21890>`_,
+        <https://doi.org/10.1002/mrm.21890>`_,
         Magn Reson Med. 61(6):1336-49. 2009. doi: 10.1002/mrm.21890.
 
       .. [Yendiki13] Yendiki A et al., `Spurious group differences due to head
         motion in a diffusion MRI study
-        <http://dx.doi.org/10.1016/j.neuroimage.2013.11.027>`_.
+        <https://doi.org/10.1016/j.neuroimage.2013.11.027>`_.
         Neuroimage. 21(88C):79-90. 2013. doi: 10.1016/j.neuroimage.2013.11.027
 
     Example
@@ -656,11 +656,11 @@ def sdc_fmb(name='fmb_correction',
 
       .. [Jezzard95] Jezzard P, and Balaban RS, `Correction for geometric
         distortion in echo planar images from B0 field variations
-        <http://dx.doi.org/10.1002/mrm.1910340111>`_,
+        <https://doi.org/10.1002/mrm.1910340111>`_,
         MRM 34(1):65-73. (1995). doi: 10.1002/mrm.1910340111.
 
       .. [Jenkinson03] Jenkinson M., `Fast, automated, N-dimensional
-        phase-unwrapping algorithm <http://dx.doi.org/10.1002/mrm.10354>`_,
+        phase-unwrapping algorithm <https://doi.org/10.1002/mrm.10354>`_,
         MRM 49(1):193-197, 2003, doi: 10.1002/mrm.10354.
 
     """
@@ -873,7 +873,7 @@ def sdc_peb(name='peb_correction',
 
       .. [Andersson2003] Andersson JL et al., `How to correct susceptibility
         distortions in spin-echo echo-planar images: application to diffusion
-        tensor imaging <http://dx.doi.org/10.1016/S1053-8119(03)00336-7>`_.
+        tensor imaging <https://doi.org/10.1016/S1053-8119(03)00336-7>`_.
         Neuroimage. 2003 Oct;20(2):870-88. doi: 10.1016/S1053-8119(03)00336-7
 
       .. [Cordes2000] Cordes D et al., Geometric distortion correction in EPI
@@ -951,7 +951,7 @@ def remove_bias(name='bias_correct'):
 
       .. [Jeurissen2014] Jeurissen B. et al., `Multi-tissue constrained
         spherical deconvolution for improved analysis of multi-shell diffusion
-        MRI data <http://dx.doi.org/10.1016/j.neuroimage.2014.07.061>`_.
+        MRI data <https://doi.org/10.1016/j.neuroimage.2014.07.061>`_.
         NeuroImage (2014). doi: 10.1016/j.neuroimage.2014.07.061
 
 
