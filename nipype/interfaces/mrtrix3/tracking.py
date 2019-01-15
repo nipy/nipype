@@ -76,7 +76,7 @@ class TractographyInputSpec(MRTrix3BaseInputSpec):
               'is 90deg x stepsize / voxelsize)'))
     n_tracks = traits.Int(
         argstr='-number %d',
-        max_ver=0.4,
+        max_ver='0.4',
         desc=('set the desired number of tracks. The program will continue'
               ' to generate tracks until this number of tracks have been '
               'selected and written to the output file'))
