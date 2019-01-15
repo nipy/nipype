@@ -42,7 +42,7 @@ def test_Tractography_inputs():
         ),
         n_tracks=dict(
             argstr='-number %d',
-            max_ver=0.4,
+            max_ver='0.4',
         ),
         n_trials=dict(argstr='-trials %d', ),
         noprecompt=dict(argstr='-noprecomputed', ),
@@ -82,7 +82,7 @@ def test_Tractography_inputs():
         seed_sphere=dict(argstr='-seed_sphere %f,%f,%f,%f', ),
         select=dict(
             argstr='-select %d',
-            min_ver=3,
+            min_ver='3',
         ),
         sph_trait=dict(argstr='%f,%f,%f,%f', ),
         step_size=dict(argstr='-step %f', ),
