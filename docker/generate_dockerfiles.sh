@@ -108,6 +108,8 @@ function generate_main_dockerfile() {
     --miniconda use_env=neuro \
                 pip_opts="-e" \
                 pip_install="/src/nipype[all]" \
+    --miniconda use_env=neuro \
+                pip_install="pytest-xdist" \
     --workdir /work \
     --label org.label-schema.build-date='$BUILD_DATE' \
             org.label-schema.name="NIPYPE" \

@@ -95,8 +95,11 @@ before_install:
 install:
 - travis_retry pip install $EXTRA_PIP_FLAGS -e .[$NIPYPE_EXTRAS]
 
+after_install:
+- travis_retry pip install pytest-xdist
+
 script:
-- py.test -v --cov nipype --cov-config .coveragerc --cov-report xml:cov.xml -c nipype/pytest.ini --doctest-modules nipype
+- py.test -v --cov nipype --cov-config .coveragerc --cov-report xml:cov.xml -c nipype/pytest.ini --doctest-modules nipype -n auto
 
 after_script:
 - codecov --file cov.xml --flags unittests -e TRAVIS_JOB_NUMBER
