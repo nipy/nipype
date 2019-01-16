@@ -7,7 +7,7 @@ def test_LaplacianThickness_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
         dT=dict(
-            argstr='dT=%d',
+            argstr='%f',
             position=6,
         ),
         environ=dict(
@@ -30,10 +30,6 @@ def test_LaplacianThickness_inputs():
             nohash=True,
             usedefault=True,
         ),
-        opt_tolerance=dict(
-            argstr='optional-laplacian-tolerance=%d',
-            position=8,
-        ),
         output_image=dict(
             argstr='%s',
             hash_files=False,
@@ -43,16 +39,20 @@ def test_LaplacianThickness_inputs():
             position=3,
         ),
         prior_thickness=dict(
-            argstr='priorthickval=%d',
+            argstr='%f',
             position=5,
         ),
         smooth_param=dict(
-            argstr='smoothparam=%d',
+            argstr='%f',
             position=4,
         ),
         sulcus_prior=dict(
-            argstr='use-sulcus-prior',
+            argstr='%f',
             position=7,
+        ),
+        tolerance=dict(
+            argstr='%f',
+            position=8,
         ),
     )
     inputs = LaplacianThickness.input_spec()
