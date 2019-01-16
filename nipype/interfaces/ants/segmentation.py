@@ -207,13 +207,27 @@ class LaplacianThicknessInputSpec(ANTSCommandInputSpec):
         name_template='%s_thickness',
         keep_extension=True,
         hash_files=False)
-    smooth_param = traits.Float(argstr='smoothparam=%d', desc='', position=4)
+    smooth_param = traits.Float(
+        argstr='%f',
+        desc='Sigma of the Laplacian Recursive Image Filter (defaults to 1)',
+        position=4)
     prior_thickness = traits.Float(
-        argstr='priorthickval=%d', desc='', position=5)
-    dT = traits.Float(argstr='dT=%d', desc='', position=6)
-    sulcus_prior = traits.Bool(argstr='use-sulcus-prior', desc='', position=7)
-    opt_tolerance = traits.Float(
-        argstr='optional-laplacian-tolerance=%d', desc='', position=8)
+        argstr='%f',
+        desc='Prior thickness (defaults to 500)',
+        position=5)
+    dT = traits.Float(
+        argstr='%f',
+        desc='Time delta used during integration (defaults to 0.01)',
+        position=6)
+    sulcus_prior = traits.Float(
+        argstr='%f',
+        desc='Positive floating point number for sulcus prior. '
+             'Authors said that 0.15 might be a reasonable value',
+        position=7)
+    tolerance = traits.Float(
+        argstr='%f',
+        desc='Tolerance to reach during optimization (defaults to 0.001)',
+        position=8)
 
 
 class LaplacianThicknessOutputSpec(TraitedSpec):
