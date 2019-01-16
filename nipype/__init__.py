@@ -25,16 +25,21 @@ logging = Logging(config)
 
 
 class NipypeTester(object):
-    def __call__(self, doctests=True, parallel=True):
+    def __call__(self, doctests=True, parallel=False):
         try:
             import pytest
-        except:
+        except ImportError:
             raise RuntimeError(
                 'py.test not installed, run: pip install pytest')
         args = []
         if not doctests:
             args.extend(['-p', 'no:doctest'])
-        if not parallel:
+        if parallel:
+            try:
+                import xdist
+            except ImportError:
+                raise RuntimeError(
+                    "pytest-xdist required for parallel run")
             args.append('-n0')
         args.append(os.path.dirname(__file__))
         pytest.main(args=args)
