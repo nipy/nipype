@@ -152,10 +152,8 @@ REQUIRES = [
     'pydot>=%s' % PYDOT_MIN_VERSION,
     'packaging',
     'futures; python_version == "2.7"',
+    'configparser; python_version <= "3.4"',
 ]
-
-if sys.version_info <= (3, 4):
-    REQUIRES.append('configparser')
 
 TESTS_REQUIRES = [
     'mock',
