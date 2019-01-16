@@ -51,7 +51,10 @@ def pkg_commit_hash(pkg_path):
         raise IOError('Missing commit info file %s' % pth)
     cfg_parser = configparser.RawConfigParser()
     with open(pth, encoding='utf-8') as fp:
-        cfg_parser.readfp(fp)
+        if sys.version_info >= (3, 2):
+            cfg_parser.read_file(fp)
+        else:
+            cfg_parser.readfp(fp)
     archive_subst = cfg_parser.get('commit hash', 'archive_subst_hash')
     if not archive_subst.startswith('$Format'):  # it has been substituted
         return 'archive substitution', archive_subst

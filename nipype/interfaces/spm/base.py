@@ -25,7 +25,6 @@ from copy import deepcopy
 # Third-party imports
 from nibabel import load
 import numpy as np
-from scipy.io import savemat
 
 # Local imports
 from ... import logging
@@ -572,6 +571,7 @@ class SPMCommand(BaseInterface):
                                                   (self.jobtype,
                                                    self.jobname), contents[0])
         else:
+            from scipy.io import savemat
             jobdef = {
                 'jobs': [{
                     self.jobtype: [{

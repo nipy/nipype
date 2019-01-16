@@ -736,17 +736,17 @@ class Registration(ANTSCommand):
     >>> reg4.inputs.collapse_output_transforms = True
     >>> outputs = reg4._list_outputs()
     >>> pprint.pprint(outputs)  # doctest: +ELLIPSIS,
-    {'composite_transform': '.../nipype/testing/data/output_Composite.h5',
+    {'composite_transform': '...data/output_Composite.h5',
      'elapsed_time': <undefined>,
      'forward_invert_flags': [],
      'forward_transforms': [],
-     'inverse_composite_transform': '.../nipype/testing/data/output_InverseComposite.h5',
+     'inverse_composite_transform': '...data/output_InverseComposite.h5',
      'inverse_warped_image': <undefined>,
      'metric_value': <undefined>,
      'reverse_invert_flags': [],
      'reverse_transforms': [],
-     'save_state': '.../nipype/testing/data/trans.mat',
-     'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz'}
+     'save_state': '...data/trans.mat',
+     'warped_image': '...data/output_warped_image.nii.gz'}
     >>> reg4.cmdline
     'antsRegistration --collapse-output-transforms 1 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
 --initialize-transforms-per-stage 1 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
@@ -767,16 +767,16 @@ class Registration(ANTSCommand):
     {'composite_transform': <undefined>,
      'elapsed_time': <undefined>,
      'forward_invert_flags': [False, False],
-     'forward_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat',
-     '.../nipype/testing/data/output_1Warp.nii.gz'],
+     'forward_transforms': ['...data/output_0GenericAffine.mat',
+     '...data/output_1Warp.nii.gz'],
      'inverse_composite_transform': <undefined>,
      'inverse_warped_image': <undefined>,
      'metric_value': <undefined>,
      'reverse_invert_flags': [True, False],
-     'reverse_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', \
-    '.../nipype/testing/data/output_1InverseWarp.nii.gz'],
-     'save_state': '.../nipype/testing/data/trans.mat',
-     'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz'}
+     'reverse_transforms': ['...data/output_0GenericAffine.mat', \
+    '...data/output_1InverseWarp.nii.gz'],
+     'save_state': '...data/trans.mat',
+     'warped_image': '...data/output_warped_image.nii.gz'}
     >>> reg4b.aggregate_outputs()  # doctest: +SKIP
     >>> reg4b.cmdline
     'antsRegistration --collapse-output-transforms 1 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
@@ -1595,4 +1595,78 @@ class RegistrationSynQuick(ANTSCommand):
         if self.inputs.transform_type not in ('t', 'r', 'a'):
             outputs['forward_warp_field'] = out_base + '1Warp.nii.gz'
             outputs['inverse_warp_field'] = out_base + '1InverseWarp.nii.gz'
+        return outputs
+
+class CompositeTransformUtilInputSpec(ANTSCommandInputSpec):
+    process = traits.Enum('assemble', 'disassemble', argstr='--%s',
+        position=1, usedefault=True,
+        desc='What to do with the transform inputs (assemble or disassemble)',
+        )
+    out_file = File(exists=False, argstr='%s', position=2,
+          desc='Output file path (only used for disassembly).')
+    in_file = InputMultiPath(File(exists=True), mandatory=True, argstr='%s...',
+        position=3, desc='Input transform file(s)')
+    output_prefix = Str("transform", usedefault=True, argstr='%s', position=4,
+          desc="A prefix that is prepended to all output files (only used for assembly).")
+
+class CompositeTransformUtilOutputSpec(TraitedSpec):
+    affine_transform = File(desc="Affine transform component")
+    displacement_field = File(desc="Displacement field component")
+    out_file = File(desc="Compound transformation file")
+
+class CompositeTransformUtil(ANTSCommand):
+    """
+    ANTs utility which can combine or break apart transform files into their individual
+    constituent components.
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.ants import CompositeTransformUtil
+    >>> tran = CompositeTransformUtil()
+    >>> tran.inputs.process = 'disassemble'
+    >>> tran.inputs.in_file = 'output_Composite.h5'
+    >>> tran.cmdline
+    'CompositeTransformUtil --disassemble output_Composite.h5 transform'
+    >>> tran.run()  # doctest: +SKIP
+
+    example for assembling transformation files
+
+    >>> from nipype.interfaces.ants import CompositeTransformUtil
+    >>> tran = CompositeTransformUtil()
+    >>> tran.inputs.process = 'assemble'
+    >>> tran.inputs.out_file = 'my.h5'
+    >>> tran.inputs.in_file = ['AffineTransform.mat', 'DisplacementFieldTransform.nii.gz']
+    >>> tran.cmdline
+    'CompositeTransformUtil --assemble my.h5 AffineTransform.mat DisplacementFieldTransform.nii.gz '
+    >>> tran.run()  # doctest: +SKIP
+    """
+
+    _cmd = 'CompositeTransformUtil'
+    input_spec = CompositeTransformUtilInputSpec
+    output_spec = CompositeTransformUtilOutputSpec
+
+    def _num_threads_update(self):
+        """
+        CompositeTransformUtil ignores environment variables,
+        so override environment update from ANTSCommand class
+        """
+        pass
+
+    def _format_arg(self, name, spec, value):
+        if name == 'output_prefix' and self.inputs.process == 'assemble':
+            return ''
+        if name == 'out_file' and self.inputs.process == 'disassemble':
+            return ''
+        return super(CompositeTransformUtil, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if self.inputs.process == 'disassemble':
+            outputs['affine_transform'] = os.path.abspath(
+                '00_{}_AffineTransform.mat'.format(self.inputs.output_prefix))
+            outputs['displacement_field'] = os.path.abspath(
+                '01_{}_DisplacementFieldTransform.nii.gz'.format(self.inputs.output_prefix))
+        if self.inputs.process == 'assemble':
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs

@@ -41,6 +41,7 @@ if __name__ == '__main__':
         '\.pipeline\.s3_node_wrapper$',
         '\.testing',
         '\.scripts',
+        '\.conftest',
     ]
     docwriter.class_skip_patterns += [
         'AFNICommand',

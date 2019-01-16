@@ -551,9 +551,9 @@ class Split(FSLCommand):
         """
         outputs = self._outputs().get()
         ext = Info.output_type_to_ext(self.inputs.output_type)
-        outbase = 'vol*'
+        outbase = 'vol[0-9]*'
         if isdefined(self.inputs.out_base_name):
-            outbase = '%s*' % self.inputs.out_base_name
+            outbase = '%s[0-9]*' % self.inputs.out_base_name
         outputs['out_files'] = sorted(
             glob(os.path.join(os.getcwd(), outbase + ext)))
         return outputs

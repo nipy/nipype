@@ -85,6 +85,8 @@ class DTIFitOutputSpec(TraitedSpec):
               'diffusion weighting'))
     tensor = File(
         exists=True, desc='path/name of file with the 4D tensor volume')
+    sse = File(
+        exists=True, desc='path/name of file with the summed squared error')
 
 
 class DTIFit(FSLCommand):
@@ -111,13 +113,21 @@ class DTIFit(FSLCommand):
     output_spec = DTIFitOutputSpec
 
     def _list_outputs(self):
+        keys_to_ignore = {'outputtype', 'environ', 'args'}
+        # Optional output: Map output name to input flag
+        opt_output = {'tensor': self.inputs.save_tensor,
+                      'sse': self.inputs.sse}
+        # Ignore optional output, whose corresponding input-flag is not defined
+        # or set to False
+        for output, input_flag in opt_output.items():
+            if isdefined(input_flag) and input_flag:
+                # this is wanted output, do not ignore
+                continue
+            keys_to_ignore.add(output)
+
         outputs = self.output_spec().get()
-        for k in list(outputs.keys()):
-            if k not in ('outputtype', 'environ', 'args'):
-                if k != 'tensor' or (isdefined(self.inputs.save_tensor)
-                                     and self.inputs.save_tensor):
-                    outputs[k] = self._gen_fname(
-                        self.inputs.base_name, suffix='_' + k)
+        for k in set(outputs.keys()) - keys_to_ignore:
+            outputs[k] = self._gen_fname(self.inputs.base_name, suffix='_' + k)
         return outputs
 
 

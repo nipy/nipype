@@ -20,7 +20,6 @@ import os
 
 from nibabel import load
 import numpy as np
-from scipy.special import gammaln
 
 from ..utils import NUMPY_MMAP
 from ..interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
@@ -84,6 +83,7 @@ def spm_hrf(RT, P=None, fMRI_T=16):
       -1.46257507e-04]
 
     """
+    from scipy.special import gammaln
     p = np.array([6, 16, 1, 1, 6, 0, 32], dtype=float)
     if P is not None:
         p[0:len(P)] = P
@@ -602,7 +602,7 @@ class SpecifySPMModel(SpecifyModel):
                 try:
                     out = np.loadtxt(filename)
                 except IOError:
-                    iflogger.warn('Error reading outliers file %s', filename)
+                    iflogger.warning('Error reading outliers file %s', filename)
                     out = np.array([])
 
                 if out.size > 0:

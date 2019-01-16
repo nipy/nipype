@@ -6,6 +6,10 @@ from ..epi import Eddy
 def test_Eddy_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
+        cnr_maps=dict(
+            argstr='--cnr_maps',
+            min_ver='5.0.10',
+        ),
         dont_peas=dict(argstr='--dont_peas', ),
         dont_sep_offs_move=dict(argstr='--dont_sep_offs_move', ),
         environ=dict(
@@ -71,6 +75,10 @@ def test_Eddy_inputs():
         ),
         output_type=dict(),
         repol=dict(argstr='--repol', ),
+        residuals=dict(
+            argstr='--residuals',
+            min_ver='5.0.10',
+        ),
         session=dict(argstr='--session=%s', ),
         slm=dict(argstr='--slm=%s', ),
         use_cuda=dict(),
@@ -82,10 +90,12 @@ def test_Eddy_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Eddy_outputs():
     output_map = dict(
+        out_cnr_maps=dict(),
         out_corrected=dict(),
         out_movement_rms=dict(),
         out_outlier_report=dict(),
         out_parameter=dict(),
+        out_residuals=dict(),
         out_restricted_movement_rms=dict(),
         out_rotated_bvecs=dict(),
         out_shell_alignment_parameters=dict(),

@@ -20,19 +20,23 @@ def test_MeshFix_inputs():
         epsilon_angle=dict(argstr='-a %f', ),
         finetuning_distance=dict(
             argstr='%f',
+            position=-2,
             requires=['finetuning_substeps'],
         ),
         finetuning_inwards=dict(
             argstr='--fineTuneIn ',
+            position=-3,
             requires=['finetuning_distance', 'finetuning_substeps'],
         ),
         finetuning_outwards=dict(
-            argstr='--fineTuneIn ',
+            argstr='--fineTuneOut ',
+            position=-3,
             requires=['finetuning_distance', 'finetuning_substeps'],
             xor=['finetuning_inwards'],
         ),
         finetuning_substeps=dict(
             argstr='%d',
+            position=-1,
             requires=['finetuning_distance'],
         ),
         in_file1=dict(
@@ -67,9 +71,9 @@ def test_MeshFix_inputs():
         ),
         save_as_stl=dict(
             argstr='--stl',
-            xor=['save_as_vmrl', 'save_as_freesurfer_mesh'],
+            xor=['save_as_vrml', 'save_as_freesurfer_mesh'],
         ),
-        save_as_vmrl=dict(
+        save_as_vrml=dict(
             argstr='--wrl',
             xor=['save_as_stl', 'save_as_freesurfer_mesh'],
         ),
