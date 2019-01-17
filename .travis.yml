@@ -94,8 +94,6 @@ before_install:
 
 install:
 - travis_retry pip install $EXTRA_PIP_FLAGS -e .[$NIPYPE_EXTRAS]
-
-after_install:
 - travis_retry pip install pytest-xdist
 
 script:
