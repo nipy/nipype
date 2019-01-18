@@ -40,7 +40,7 @@ class NipypeTester(object):
             except ImportError:
                 raise RuntimeError(
                     "pytest-xdist required for parallel run")
-            args.append('-n0')
+             args.append('-n auto')
         args.append(os.path.dirname(__file__))
         pytest.main(args=args)
 
