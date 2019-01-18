@@ -1385,7 +1385,14 @@ class EddyQuad(FSLCommand):
     def _list_outputs(self):
         from glob import glob
         outputs = self.output_spec().get()
-        out_dir = os.path.abspath(self.inputs.output_dir)
+
+        # If the output directory isn't defined, the interface seems to use
+        # the default but not set its value in `self.inputs.output_dir`
+        if not isdefined(self.inputs.output_dir):
+            out_dir = os.path.abspath(self.inputs.base_name + '.qc.nii.gz')
+        else:
+            out_dir = os.path.abspath(self.inputs.output_dir)
+
         outputs['out_qc_json'] = os.path.join(out_dir, 'qc.json')
         outputs['out_qc_pdf'] = os.path.join(out_dir, 'qc.pdf')
 
