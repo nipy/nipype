@@ -1298,49 +1298,37 @@ class EddyQuadInputSpec(FSLCommandInputSpec):
 class EddyQuadOutputSpec(TraitedSpec):
     out_qc_json = File(
         exists=True,
-        mandatory=True,
         desc=("Single subject database containing quality metrics and data "
               "info.")
     )
 
     out_qc_pdf = File(
         exists=True,
-        mandatory=True,
         desc="Single subject QC report."
     )
 
     out_avg_b_png = traits.List(
-        File(
-            exists=True,
-            mandatory=True,
-            desc=("Image showing mid-sagittal, -coronal and -axial slices of "
-                  "each averaged b-shell volume.")
-        )
+        File(exists=True),
+        desc=("Image showing mid-sagittal, -coronal and -axial slices of "
+              "each averaged b-shell volume.")
     )
 
     out_avg_b0_pe_png = traits.List(
-        File(
-            exists=True,
-            mandatory=False,
-            desc=("Image showing mid-sagittal, -coronal and -axial slices of "
-                  "each averaged pe-direction b0 volume. Generated when using "
-                  "the -f option.")
-        )
+        File(exists=True),
+        desc=("Image showing mid-sagittal, -coronal and -axial slices of "
+              "each averaged pe-direction b0 volume. Generated when using "
+              "the -f option.")
     )
 
     out_cnr_png = traits.List(
-        File(
-            exists=True,
-            mandatory=False,
-            desc=("Image showing mid-sagittal, -coronal and -axial slices of "
-                  "each b-shell CNR volume. Generated when CNR maps are "
-                  "available.")
-        )
+        File(exists=True),
+        desc=("Image showing mid-sagittal, -coronal and -axial slices of "
+              "each b-shell CNR volume. Generated when CNR maps are "
+              "available.")
     )
 
     out_vdm_png = File(
         exists=True,
-        mandatory=False,
         desc=("Image showing mid-sagittal, -coronal and -axial slices of "
               "the voxel displacement map. Generated when using the -f "
               "option.")
@@ -1348,14 +1336,12 @@ class EddyQuadOutputSpec(TraitedSpec):
 
     out_residuals = File(
         exists=True,
-        mandatory=False,
         desc=("Text file containing the volume-wise mask-averaged squared "
               "residuals. Generated when residual maps are available.")
     )
 
     out_clean_volumes = File(
         exists=True,
-        mandatory=False,
         desc=("Text file containing a list of clean volumes, based on "
               "the eddy squared residuals. To generate a version of the "
               "pre-processed dataset without outlier volumes, use: "
@@ -1397,41 +1383,46 @@ class EddyQuad(FSLCommand):
     output_spec = EddyQuadOutputSpec
 
     def _list_outputs(self):
-        import json
+        from glob import glob
         outputs = self.output_spec().get()
         out_dir = os.path.abspath(self.inputs.output_dir)
         outputs['out_qc_json'] = os.path.join(out_dir, 'qc.json')
         outputs['out_qc_pdf'] = os.path.join(out_dir, 'qc.pdf')
-
-        with open(outputs['out_qc_json']) as fp:
-            qc = json.load(fp)
 
         outputs['out_avg_b_png'] = [
             os.path.join(out_dir, 'avg_b{bval:d}.png'.format(bval=bval))
             for bval in list(set([0] + qc.get('data_unique_bvals')))
         ]
 
-        if qc.get('qc_field_flag'):
-            outputs['out_avg_b0_pe_png'] = [
-                os.path.join(out_dir, 'avg_b0_pe{i:d}'.format(i=i))
-                for i in range(qc.get('data_no_PE_dirs'))
-            ]
+        # Grab all b* files here. This will also grab the b0_pe* files
+        # as well, but only if the field input was provided. So we'll remove
+        # them later in the next conditional.
+        outputs['out_avg_b_png'] = sorted(glob(
+            os.path.join(out_dir, 'avg_b*.png')
+        ))
+
+        if isdefined(self.inputs.field):
+            outputs['out_avg_b0_pe_png'] = sorted(glob(
+                os.path.join(out_dir, 'avg_b0_pe*.png')
+            ))
+
+            # The previous glob for `out_avg_b_png` also grabbed the
+            # `out_avg_b0_pe_png` files so we have to remove them
+            # from `out_avg_b_png`.
+            for fname in outputs['out_avg_b0_pe_png']:
+                outputs['out_avg_b_png'].remove(fname)
 
             outputs['out_vdm_png'] = os.path.join(out_dir, 'vdm.png')
 
-        if qc.get('qc_cnr_flag'):
-            outputs['out_cnr_png'] = [
-                os.path.join(out_dir, 'cnr{i:04d}.nii.gz.png')
-                for i, _ in enumerate(qc.get('qc_cnr_avg'))
-            ]
+        outputs['out_cnr_png'] = sorted(glob(os.path.join(out_dir, 'cnr*.png')))
 
-        if qc.get('qc_rss_flag'):
-            outputs['out_residuals'] = os.path.join(out_dir, 'eddy_msr.txt')
+        residuals = os.path.join(out_dir, 'eddy_msr.txt')
+        if os.path.isfile(residuals):
+            outputs['out_residuals'] = residuals
 
-        if qc.get('qc_ol_flag'):
-            outputs['out_clean_volumes'] = os.path.join(out_dir,
-                                                        'vols_no_outliers.txt')
+        clean_volumes = os.path.join(out_dir, 'vols_no_outliers.txt')
+        if os.path.isfile(clean_volumes):
+            outputs['out_clean_volumes'] = clean_volumes
 
         return outputs
-
 
