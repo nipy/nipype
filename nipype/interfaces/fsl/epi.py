@@ -19,6 +19,7 @@ from ...utils import NUMPY_MMAP
 
 from ..base import (traits, TraitedSpec, InputMultiPath, File, isdefined)
 from .base import FSLCommand, FSLCommandInputSpec, Info
+from nipype.utils.filemanip import fname_presuffix
 
 
 class PrepareFieldmapInputSpec(FSLCommandInputSpec):
@@ -134,31 +135,20 @@ class TOPUPBase(FSLCommand):
         super(TOPUPBase, self).__init__(**inputs)
 
     def _cropfile(self, fname, postfix=''):
-        import nibabel as nb
         im = nb.load(fname)
         data = im.get_data()
         sizes = np.array(data.shape[:3])
 
         if self._offsets is None:
-            self._offsets = np.array(sizes % 2)
+            self._offsets = sizes % 2
 
-        if np.any(self._offsets == 1):
-            from shutil import copy2 as copy
-            import os.path as op
+        #if np.any(self._offsets == 1):
+        if self._offsets.any():
             self._size_fixed = True
 
-            for i, o in enumerate(self._offsets):
-                if o == 1:
-                    data = data.take(range(sizes[i] - 1), axis=i)
-
-            crop_file, ext = op.splitext(op.basename(fname))
-            if ext == '.gz':
-                crop_file, ext2 = op.splitext(crop_file)
-                ext = ext2 + ext
-            crop_file = op.abspath(crop_file + '_cropped' + postfix + ext)
-            hdr = im.get_header().copy()
-            hdr.set_data_shape(data.shape)
-            nb.Nifti1Image(data, im.get_affine(), hdr).to_filename(crop_file)
+            cropped = im.slicer[:self._offsets[0], :self._offsets[1], :self._offsets[2]]
+            crop_file = fname_presuffix(fname, suffix="_cropped", newpath=os.getcwd())
+            cropped._to_filename(crop_file)
             # iflogger.warn(('One or more dimensions have odd size. '
             #                'Input data matrix %s has been cropped '
             #                'to these new sizes: %s.') % (str(tuple(sizes)),
@@ -181,26 +171,17 @@ class TOPUPBase(FSLCommand):
         return out_value
 
     def _fixsize(self, fname):
-        import nibabel as nb
-        import os.path as op
         im = nb.load(fname)
         imdata = im.get_data()
         s = imdata.shape
         dests = np.array(s)
         dests[:3] = s[:3] + self._offsets
-        data = np.zeros(dests, dtype=im.get_data_dtype())
-        data[0:s[0], 0:s[1], 0:s[2], ...] = imdata
+        data = np.zeros(dests, dtype=imdata.dtype)
+        data[:s[0], :s[1], :s[2], ...] = imdata
 
-        fixfname, ext = op.splitext(op.basename(fname))
-        if ext == '.gz':
-            fixfname, ext2 = op.splitext(fixfname)
-            ext = ext2 + ext
+        fixfname = fname_presuffix(fname, suffix="_file", newpath=os.getcwd())
 
-        fixfname = op.abspath(fixfname + '_fix' + ext)
-
-        hdr = im.get_header().copy()
-        hdr.set_data_shape(data.shape)
-        nb.Nifti1Image(data, im.get_affine(), hdr).to_filename(fixfname)
+        nb.Nifti1Image(data, im.affine).to_filename(fixfname)
         return fixfname
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
