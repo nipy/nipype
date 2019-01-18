@@ -567,6 +567,8 @@ class SpecifySPMModel(SpecifyModel):
             infoout.regressors.insert(
                 len(infoout.regressors),
                 onelist.tolist()[0])
+            # insert session regressor name
+            infoout.regressor_names.extend(['run' + str(i + 1)])
         return [infoout], nscans
 
     def _generate_design(self, infolist=None):
