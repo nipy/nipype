@@ -148,7 +148,7 @@ class TOPUPBase(FSLCommand):
 
             cropped = im.slicer[:self._offsets[0], :self._offsets[1], :self._offsets[2]]
             crop_file = fname_presuffix(fname, suffix="_cropped", newpath=os.getcwd())
-            cropped._to_filename(crop_file)
+            cropped.to_filename(crop_file)
             # iflogger.warn(('One or more dimensions have odd size. '
             #                'Input data matrix %s has been cropped '
             #                'to these new sizes: %s.') % (str(tuple(sizes)),
@@ -766,6 +766,12 @@ class EddyInputSpec(FSLCommandInputSpec):
         False, desc='Output CNR-Maps', argstr='--cnr_maps', min_ver='5.0.10')
     residuals = traits.Bool(
         False, desc='Output Residuals', argstr='--residuals', min_ver='5.0.10')
+    checksize = traits.Bool(False,
+                        usedefault=True,
+                        desc=("Before running eddy, check that the size of the inputs"
+                                " have no odd number of slices in the x,y,z direction. If"
+                                " there is an odd number, add a slice in that dimension before"
+                                " running eddy"))
 
 
 class EddyOutputSpec(TraitedSpec):
@@ -798,7 +804,7 @@ class EddyOutputSpec(TraitedSpec):
         exists=True, desc='path/name of file with the residuals')
 
 
-class Eddy(FSLCommand):
+class Eddy(TOPUPBase):
     """
     Interface for FSL eddy, a tool for estimating and correcting eddy
     currents induced distortions. `User guide
@@ -1396,6 +1402,12 @@ class EddyQuadInputSpec(FSLCommandInputSpec):
         argstr='--verbose',
         desc="Display debug messages",
     )
+    checksize = traits.Bool(False,
+                        usedefault=True,
+                        desc=("Before running eddyquad, check that the size of the inputs"
+                                " have no odd number of slices in the x,y,z direction. If"
+                                " there is an odd number, add a slice in that dimension before"
+                                " running eddyquad"))
 
 
 class EddyQuadOutputSpec(TraitedSpec):
@@ -1453,7 +1465,7 @@ class EddyQuadOutputSpec(TraitedSpec):
     )
 
 
-class EddyQuad(FSLCommand):
+class EddyQuad(TOPUPBase):
     """
     Interface for FSL eddy_quad, a tool for generating single subject reports
     and storing the quality assessment indices for each subject.
@@ -1491,11 +1503,6 @@ class EddyQuad(FSLCommand):
         out_dir = os.path.abspath(self.inputs.output_dir)
         outputs['out_qc_json'] = os.path.join(out_dir, 'qc.json')
         outputs['out_qc_pdf'] = os.path.join(out_dir, 'qc.pdf')
-
-        outputs['out_avg_b_png'] = [
-            os.path.join(out_dir, 'avg_b{bval:d}.png'.format(bval=bval))
-            for bval in list(set([0] + qc.get('data_unique_bvals')))
-        ]
 
         # Grab all b* files here. This will also grab the b0_pe* files
         # as well, but only if the field input was provided. So we'll remove
