@@ -1389,11 +1389,6 @@ class EddyQuad(FSLCommand):
         outputs['out_qc_json'] = os.path.join(out_dir, 'qc.json')
         outputs['out_qc_pdf'] = os.path.join(out_dir, 'qc.pdf')
 
-        outputs['out_avg_b_png'] = [
-            os.path.join(out_dir, 'avg_b{bval:d}.png'.format(bval=bval))
-            for bval in list(set([0] + qc.get('data_unique_bvals')))
-        ]
-
         # Grab all b* files here. This will also grab the b0_pe* files
         # as well, but only if the field input was provided. So we'll remove
         # them later in the next conditional.
