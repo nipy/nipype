@@ -1335,3 +1335,197 @@ class EddyCorrect(FSLCommand):
         if runtime.stderr:
             self.raise_exception(runtime)
         return runtime
+
+
+class EddyQuadInputSpec(FSLCommandInputSpec):
+    base_name = traits.Str(
+        'eddy_corrected',
+        usedefault=True,
+        argstr='%s',
+        desc=("Basename (including path) for EDDY output files, i.e., "
+              "corrected images and QC files"),
+        position=0,
+    )
+    idx_file = File(
+        exists=True,
+        mandatory=True,
+        argstr="--eddyIdx=%s",
+        desc=("File containing indices for all volumes into acquisition "
+              "parameters")
+    )
+    param_file = File(
+        exists=True,
+        mandatory=True,
+        argstr="--eddyParams=%s",
+        desc="File containing acquisition parameters"
+    )
+    mask_file = File(
+        exists=True,
+        mandatory=True,
+        argstr="--mask=%s",
+        desc="Binary mask file"
+    )
+    bval_file = File(
+        exists=True,
+        mandatory=True,
+        argstr="--bvals=%s",
+        desc="b-values file"
+    )
+    bvec_file = File(
+        exists=True,
+        argstr="--bvecs=%s",
+        desc=("b-vectors file - only used when <base_name>.eddy_residuals "
+              "file is present")
+    )
+    output_dir = traits.Str(
+        name_template='%s.qc',
+        name_source=['base_name'],
+        argstr='--output-dir=%s',
+        desc="Output directory - default = '<base_name>.qc'",
+    )
+    field = File(
+        argstr='--field=%s',
+        desc="TOPUP estimated field (in Hz)",
+    )
+    slice_spec = File(
+        argstr='--slspec=%s',
+        desc="Text file specifying slice/group acquisition",
+    )
+    verbose = traits.Bool(
+        False,
+        argstr='--verbose',
+        desc="Display debug messages",
+    )
+
+
+class EddyQuadOutputSpec(TraitedSpec):
+    out_qc_json = File(
+        exists=True,
+        desc=("Single subject database containing quality metrics and data "
+              "info.")
+    )
+
+    out_qc_pdf = File(
+        exists=True,
+        desc="Single subject QC report."
+    )
+
+    out_avg_b_png = traits.List(
+        File(exists=True),
+        desc=("Image showing mid-sagittal, -coronal and -axial slices of "
+              "each averaged b-shell volume.")
+    )
+
+    out_avg_b0_pe_png = traits.List(
+        File(exists=True),
+        desc=("Image showing mid-sagittal, -coronal and -axial slices of "
+              "each averaged pe-direction b0 volume. Generated when using "
+              "the -f option.")
+    )
+
+    out_cnr_png = traits.List(
+        File(exists=True),
+        desc=("Image showing mid-sagittal, -coronal and -axial slices of "
+              "each b-shell CNR volume. Generated when CNR maps are "
+              "available.")
+    )
+
+    out_vdm_png = File(
+        exists=True,
+        desc=("Image showing mid-sagittal, -coronal and -axial slices of "
+              "the voxel displacement map. Generated when using the -f "
+              "option.")
+    )
+
+    out_residuals = File(
+        exists=True,
+        desc=("Text file containing the volume-wise mask-averaged squared "
+              "residuals. Generated when residual maps are available.")
+    )
+
+    out_clean_volumes = File(
+        exists=True,
+        desc=("Text file containing a list of clean volumes, based on "
+              "the eddy squared residuals. To generate a version of the "
+              "pre-processed dataset without outlier volumes, use: "
+              "`fslselectvols -i <eddy_corrected_data> -o "
+              "eddy_corrected_data_clean --vols=vols_no_outliers.txt`")
+    )
+
+
+class EddyQuad(FSLCommand):
+    """
+    Interface for FSL eddy_quad, a tool for generating single subject reports
+    and storing the quality assessment indices for each subject.
+    `User guide <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddyqc/UsersGuide>`_
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.fsl import EddyQuad
+    >>> quad = EddyQuad()
+    >>> quad.inputs.base_name  = 'eddy_corrected'
+    >>> quad.inputs.idx_file   = 'epi_index.txt'
+    >>> quad.inputs.param_file = 'epi_acqp.txt'
+    >>> quad.inputs.mask_file  = 'epi_mask.nii'
+    >>> quad.inputs.bval_file  = 'bvals.scheme'
+    >>> quad.inputs.bvec_file  = 'bvecs.scheme'
+    >>> quad.inputs.output_dir = 'eddy_corrected.qc'
+    >>> quad.inputs.field      = 'fieldmap_phase_fslprepared.nii'
+    >>> quad.inputs.verbose    = True
+    >>> quad.cmdline # doctest: +ELLIPSIS
+    'eddy_quad eddy_corrected --bvals=bvals.scheme --bvecs=bvecs.scheme \
+--field=fieldmap_phase_fslprepared.nii --eddyIdx=epi_index.txt \
+--mask=epi_mask.nii --output-dir=eddy_corrected.qc --eddyParams=epi_acqp.txt \
+--verbose'
+    >>> res = quad.run() # doctest: +SKIP
+
+    """
+    _cmd = 'eddy_quad'
+    input_spec = EddyQuadInputSpec
+    output_spec = EddyQuadOutputSpec
+
+    def _list_outputs(self):
+        from glob import glob
+        outputs = self.output_spec().get()
+        out_dir = os.path.abspath(self.inputs.output_dir)
+        outputs['out_qc_json'] = os.path.join(out_dir, 'qc.json')
+        outputs['out_qc_pdf'] = os.path.join(out_dir, 'qc.pdf')
+
+        outputs['out_avg_b_png'] = [
+            os.path.join(out_dir, 'avg_b{bval:d}.png'.format(bval=bval))
+            for bval in list(set([0] + qc.get('data_unique_bvals')))
+        ]
+
+        # Grab all b* files here. This will also grab the b0_pe* files
+        # as well, but only if the field input was provided. So we'll remove
+        # them later in the next conditional.
+        outputs['out_avg_b_png'] = sorted(glob(
+            os.path.join(out_dir, 'avg_b*.png')
+        ))
+
+        if isdefined(self.inputs.field):
+            outputs['out_avg_b0_pe_png'] = sorted(glob(
+                os.path.join(out_dir, 'avg_b0_pe*.png')
+            ))
+
+            # The previous glob for `out_avg_b_png` also grabbed the
+            # `out_avg_b0_pe_png` files so we have to remove them
+            # from `out_avg_b_png`.
+            for fname in outputs['out_avg_b0_pe_png']:
+                outputs['out_avg_b_png'].remove(fname)
+
+            outputs['out_vdm_png'] = os.path.join(out_dir, 'vdm.png')
+
+        outputs['out_cnr_png'] = sorted(glob(os.path.join(out_dir, 'cnr*.png')))
+
+        residuals = os.path.join(out_dir, 'eddy_msr.txt')
+        if os.path.isfile(residuals):
+            outputs['out_residuals'] = residuals
+
+        clean_volumes = os.path.join(out_dir, 'vols_no_outliers.txt')
+        if os.path.isfile(clean_volumes):
+            outputs['out_clean_volumes'] = clean_volumes
+
+        return outputs
+
