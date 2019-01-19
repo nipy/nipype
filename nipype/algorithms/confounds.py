@@ -390,7 +390,16 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         'components_file.txt',
         usedefault=True,
         desc='Filename to store physiological components')
-    num_components = traits.Int(6, usedefault=True)  # 6 for BOLD, 4 for ASL
+    num_components = traits.Float(6, usedefault=True,
+        desc='Number of components to return from the decomposition.'
+             'If `num_components` is a positive integer, then '
+             '`num_components` components will be retained. If '
+             '`num_components` is a fractional value between 0 and 1, then '
+             'the number of components retained will be equal to the minimum '
+             'number of components necessary to explain the provided '
+             'fraction of variance in the masked time series. If '
+             '`num_components` is -1, then all components will be retained.')
+             # 6 for BOLD, 4 for ASL
     pre_filter = traits.Enum(
         'polynomial',
         'cosine',
@@ -418,6 +427,8 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         'unspecified')
     save_pre_filter = traits.Either(
         traits.Bool, File, desc='Save pre-filter basis as text file')
+    save_metadata = traits.Either(
+        traits.Bool, File, desc='Save component metadata as text file')
     ignore_initial_volumes = traits.Range(
         low=0,
         usedefault=True,
@@ -433,6 +444,7 @@ class CompCorOutputSpec(TraitedSpec):
     components_file = File(
         exists=True, desc='text file containing the noise components')
     pre_filter_file = File(desc='text file containing high-pass filter basis')
+    metadata_file = File(desc='text file containing component metadata')
 
 
 class CompCor(BaseInterface):
@@ -548,7 +560,7 @@ class CompCor(BaseInterface):
                         '{} cannot detect repetition time from image - '
                         'Set the repetition_time input'.format(self._header))
 
-        components, filter_basis = compute_noise_components(
+        components, filter_basis, metadata = compute_noise_components(
             imgseries.get_data(), mask_images, self.inputs.num_components,
             self.inputs.pre_filter, degree, self.inputs.high_pass_cutoff, TR)
 
@@ -597,6 +609,16 @@ class CompCor(BaseInterface):
                 header='\t'.join(header),
                 comments='')
 
+        if self.inputs.save_metadata:
+            metadata_file = self._list_outputs()['metadata_file']
+            np.savetxt(
+                metadata_file,
+                np.vstack(metadata.values()).T,
+                fmt=['%s', b'%.10f', b'%.10f', b'%.10f'],
+                delimiter='\t',
+                header='\t'.join(list(metadata.keys())),
+                comments='')
+
         return runtime
 
     def _process_masks(self, mask_images, timeseries=None):
@@ -612,6 +634,12 @@ class CompCor(BaseInterface):
             if isinstance(save_pre_filter, bool):
                 save_pre_filter = os.path.abspath('pre_filter.tsv')
             outputs['pre_filter_file'] = save_pre_filter
+
+        save_metadata = self.inputs.save_metadata
+        if save_metadata:
+            if isinstance(save_metadata, bool):
+                save_metadata = os.path.abspath('component_metadata.tsv')
+            outputs['metadata_file'] = save_metadata
 
         return outputs
 
@@ -1139,7 +1167,7 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
         return [img]
 
 
-def compute_noise_components(imgseries, mask_images, num_components=0.5,
+def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
                              filter_type=False, degree=0, period_cut=128,
                              repetition_time=None, failure_mode='error'):
     """Compute the noise components from the imgseries for each mask
@@ -1153,11 +1181,11 @@ def compute_noise_components(imgseries, mask_images, num_components=0.5,
         according to the spatial extent of each mask, and the subset data is
         then decomposed using principal component analysis. Masks should be
         coextensive with either anatomical or spatial noise ROIs.
-    num_components: float
+    components_criterion: float
         Number of noise components to return. If this is a decimal value
         between 0 and 1, then `create_noise_components` will instead return
         the smallest number of components necessary to explain the indicated
-        fraction of variance. If `num_components` is -1, then all
+        fraction of variance. If `components_criterion` is -1, then all
         components will be returned.
     filter_type: str
         Type of filter to apply to time series before computing
@@ -1204,38 +1232,40 @@ def compute_noise_components(imgseries, mask_images, num_components=0.5,
                 voxel_timecourses, repetition_time, period_cut)
         elif filter_type in ('polynomial', False):
             # from paper:
-            # "The constant and linear trends of the columns in the matrix M were
-            # removed [prior to ...]"
+            # "The constant and linear trends of the columns in the matrix M
+            # were removed [prior to ...]"
             voxel_timecourses, basis = regress_poly(degree, voxel_timecourses)
 
-        # "Voxel time series from the noise ROI (either anatomical or tSTD) were
-        # placed in a matrix M of size Nxm, with time along the row dimension
-        # and voxels along the column dimension."
+        # "Voxel time series from the noise ROI (either anatomical or tSTD)
+        # were placed in a matrix M of size Nxm, with time along the row
+        # dimension and voxels along the column dimension."
         M = voxel_timecourses.T
 
         # "[... were removed] prior to column-wise variance normalization."
         M = M / _compute_tSTD(M, 1.)
 
-        # "The covariance matrix C = MMT was constructed and decomposed into its
-        # principal components using a singular value decomposition."
+        # "The covariance matrix C = MMT was constructed and decomposed into
+        # its principal components using a singular value decomposition."
         try:
             u, s, _ = fallback_svd(M, full_matrices=False)
         except np.linalg.LinAlgError:
             if self.inputs.failure_mode == 'error':
                 raise
-            if num_components >= 1:
-                u = np.empty((M.shape[0], num_components),
+            if components_criterion >= 1:
+                u = np.empty((M.shape[0], components_criterion),
                              dtype=np.float32) * np.nan
             else:
                 continue
 
         variance_explained = np.array([value**2/np.sum(s**2) for value in s])
         cumulative_variance_explained = np.cumsum(variance_explained)
-        if 0 < num_components < 1:
+        if 0 < components_criterion < 1:
             num_components = np.searchsorted(cumulative_variance_explained,
-                                             num_components) + 1
-        elif num_components == -1:
+                                             components_criterion) + 1
+        elif components_criterion == -1:
             num_components = len(s)
+        else:
+            num_components = components_criterion
         if components is None:
             components = u[:, :num_components]
             metadata = {
@@ -1258,7 +1288,8 @@ def compute_noise_components(imgseries, mask_images, num_components=0.5,
     if components is None and num_components != 0:
         if self.inputs.failure_mode == 'error':
             raise ValueError('No components found')
-        components = np.ones((M.shape[0], num_components), dtype=np.float32) * np.nan
+        components = np.ones((M.shape[0], num_components),
+                             dtype=np.float32) * np.nan
     return components, basis, metadata
 
 
