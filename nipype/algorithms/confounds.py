@@ -1139,15 +1139,29 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
         return [img]
 
 
-def compute_noise_components(imgseries, mask_images, num_components,
-                             filter_type, degree, period_cut, repetition_time):
+def compute_noise_components(imgseries, mask_images, num_components=0.5,
+                             filter_type=False, degree=0, period_cut=128,
+                             repetition_time=None, failure_mode='error'):
     """Compute the noise components from the imgseries for each mask
 
-    imgseries: a nibabel img
-    mask_images: a list of nibabel images
-    num_components: number of noise components to return
-    filter_type: type off filter to apply to time series before computing
-                 noise components.
+    Parameters
+    ----------
+    imgseries: nibabel NIfTI object
+        Time series data to be decomposed.
+    mask_images: list
+        List of nibabel images. Time series data from `img_series` is subset
+        according to the spatial extent of each mask, and the subset data is
+        then decomposed using principal component analysis. Masks should be
+        coextensive with either anatomical or spatial noise ROIs.
+    num_components: float
+        Number of noise components to return. If this is a decimal value
+        between 0 and 1, then `create_noise_components` will instead return
+        the smallest number of components necessary to explain the indicated
+        fraction of variance. If `num_components` is -1, then all
+        components will be returned.
+    filter_type: str
+        Type of filter to apply to time series before computing
+                noise components.
         'polynomial' - Legendre polynomial basis
         'cosine' - Discrete cosine (DCT) basis
         False - None (mean-removal only)
@@ -1158,16 +1172,20 @@ def compute_noise_components(imgseries, mask_images, num_components,
     period_cut: minimum period (in sec) for DCT high-pass filter
     repetition_time: time (in sec) between volume acquisitions
 
-    returns:
-
-    components: a numpy array
-    basis: a numpy array containing the (non-constant) filter regressors
-
+    Outputs
+    -------
+    components: numpy array
+        Numpy array containing the requested set of noise components
+    basis: numpy array
+        Numpy array containing the (non-constant) filter regressors
+    metadata: dict(numpy array)
+        Dictionary of eigenvalues, fractional explained variances, and
+        cumulative explained variances.
     """
     components = None
     basis = np.array([])
-    for img in mask_images:
-        mask = img.get_data().astype(np.bool)
+    for i, img in enumerate(mask_images):
+        mask = img.get_data().astype(np.bool).squeeze()
         if imgseries.shape[:3] != mask.shape:
             raise ValueError(
                 'Inputs for CompCor, timeseries and mask, do not have '
@@ -1201,20 +1219,47 @@ def compute_noise_components(imgseries, mask_images, num_components,
         # "The covariance matrix C = MMT was constructed and decomposed into its
         # principal components using a singular value decomposition."
         try:
-            u, _, _ = fallback_svd(M, full_matrices=False)
+            u, s, _ = fallback_svd(M, full_matrices=False)
         except np.linalg.LinAlgError:
             if self.inputs.failure_mode == 'error':
                 raise
-            u = np.ones((M.shape[0], num_components), dtype=np.float32) * np.nan
+            if num_components >= 1:
+                u = np.empty((M.shape[0], num_components),
+                             dtype=np.float32) * np.nan
+            else:
+                continue
+
+        variance_explained = np.array([value**2/np.sum(s**2) for value in s])
+        cumulative_variance_explained = np.cumsum(variance_explained)
+        if 0 < num_components < 1:
+            num_components = np.searchsorted(cumulative_variance_explained,
+                                             num_components) + 1
+        elif num_components == -1:
+            num_components = len(s)
         if components is None:
             components = u[:, :num_components]
+            metadata = {
+                'mask': np.array([i] * len(s)),
+                'singular_values': s,
+                'variance_explained': variance_explained,
+                'cumulative_variance_explained': cumulative_variance_explained
+            }
         else:
             components = np.hstack((components, u[:, :num_components]))
-    if components is None and num_components > 0:
+            metadata['mask'] = np.hstack((metadata['mask'], [i] * len(s)))
+            metadata['singular_values'] = (
+                np.hstack((metadata['singular_values'], s)))
+            metadata['variance_explained'] = (
+                np.hstack((metadata['variance_explained'],
+                           variance_explained)))
+            metadata['cumulative_variance_explained'] = (
+                np.hstack((metadata['cumulative_variance_explained'],
+                           cumulative_variance_explained)))
+    if components is None and num_components != 0:
         if self.inputs.failure_mode == 'error':
             raise ValueError('No components found')
         components = np.ones((M.shape[0], num_components), dtype=np.float32) * np.nan
-    return components, basis
+    return components, basis, metadata
 
 
 def _compute_tSTD(M, x, axis=0):
