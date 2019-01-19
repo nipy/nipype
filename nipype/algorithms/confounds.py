@@ -562,7 +562,8 @@ class CompCor(BaseInterface):
 
         components, filter_basis, metadata = compute_noise_components(
             imgseries.get_data(), mask_images, self.inputs.num_components,
-            self.inputs.pre_filter, degree, self.inputs.high_pass_cutoff, TR)
+            self.inputs.pre_filter, degree, self.inputs.high_pass_cutoff, TR,
+            self.inputs.failure_mode)
 
         if skip_vols:
             old_comp = components
