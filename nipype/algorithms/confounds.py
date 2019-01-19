@@ -578,12 +578,13 @@ class CompCor(BaseInterface):
 
         components_file = os.path.join(os.getcwd(),
                                        self.inputs.components_file)
+        components_header = self._make_headers(components.shape[1])
         np.savetxt(
             components_file,
             components,
             fmt=b"%.10f",
             delimiter='\t',
-            header=self._make_headers(components.shape[1]),
+            header='\t'.join(components_header),
             comments='')
 
         if self.inputs.pre_filter and self.inputs.save_pre_filter:
@@ -617,10 +618,11 @@ class CompCor(BaseInterface):
         if self.inputs.save_metadata:
             metadata_file = self._list_outputs()['metadata_file']
             with open(metadata_file, 'w') as f:
-                f.write('{}\t{}\t{}\t{}\n'.format(*list(metadata.keys())))
-                for i in zip(*metadata.values()):
-                    f.write('{0[0]}\t{0[1]:.10f}\t{0[2]:.10f}\t'
-                            '{0[3]:.10f}\n'.format(i))
+                f.write('{}\t{}\t{}\t{}\t{}\n'.format('component',
+                        *list(metadata.keys())))
+                for i in zip(components_header, *metadata.values()):
+                    f.write('{0[0]}\t{0[1]}\t{0[2]:.10f}\t'
+                            '{0[3]:.10f}\t{0[4]:.10f}\n'.format(i))
 
         return runtime
 
@@ -650,10 +652,7 @@ class CompCor(BaseInterface):
         header = self.inputs.header_prefix if \
             isdefined(self.inputs.header_prefix) else self._header
         headers = ['{}{:02d}'.format(header, i) for i in range(num_col)]
-        return '\t'.join(headers)
-
-    def _print_metadata(self, x, f):
-        f.write('{0[0]}\t{0[1]:.10f}\t{0[2]:.10f}\t{0[3]:.10f}\n'.format(x))
+        return headers
 
 
 class ACompCor(CompCor):
@@ -1274,26 +1273,28 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
         elif components_criterion == -1:
             num_components = len(s)
         else:
-            num_components = components_criterion
+            num_components = int(components_criterion)
         if components is None:
             components = u[:, :num_components]
             metadata = {
-                'mask': np.array([i] * len(s)),
-                'singular_values': s,
-                'variance_explained': variance_explained,
-                'cumulative_variance_explained': cumulative_variance_explained
+                'mask': np.array([i] * num_components),
+                'singular_values': s[:num_components],
+                'variance_explained': variance_explained[:num_components],
+                'cumulative_variance_explained':
+                    cumulative_variance_explained[:num_components]
             }
         else:
             components = np.hstack((components, u[:, :num_components]))
-            metadata['mask'] = np.hstack((metadata['mask'], [i] * len(s)))
+            metadata['mask'] = np.hstack((metadata['mask'],
+                                          [i] * num_components))
             metadata['singular_values'] = (
-                np.hstack((metadata['singular_values'], s)))
+                np.hstack((metadata['singular_values'], s[:num_components])))
             metadata['variance_explained'] = (
                 np.hstack((metadata['variance_explained'],
-                           variance_explained)))
+                           variance_explained[:num_components])))
             metadata['cumulative_variance_explained'] = (
                 np.hstack((metadata['cumulative_variance_explained'],
-                           cumulative_variance_explained)))
+                           cumulative_variance_explained[:num_components])))
     if components is None and num_components != 0:
         if self.inputs.failure_mode == 'error':
             raise ValueError('No components found')
