@@ -386,6 +386,10 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         requires=['mask_files'],
         desc=('Position of mask in `mask_files` to use - '
               'first is the default.'))
+    mask_names = traits.List(traits.Str,
+        desc='Names for provided masks (for printing into metadata). '
+             'If provided, it must be as long as the final mask list '
+             '(after any merge and indexing operations).')
     components_file = traits.Str(
         'components_file.txt',
         usedefault=True,
@@ -563,7 +567,7 @@ class CompCor(BaseInterface):
         components, filter_basis, metadata = compute_noise_components(
             imgseries.get_data(), mask_images, self.inputs.num_components,
             self.inputs.pre_filter, degree, self.inputs.high_pass_cutoff, TR,
-            self.inputs.failure_mode)
+            self.inputs.failure_mode, self.inputs.mask_names)
 
         if skip_vols:
             old_comp = components
@@ -612,13 +616,11 @@ class CompCor(BaseInterface):
 
         if self.inputs.save_metadata:
             metadata_file = self._list_outputs()['metadata_file']
-            np.savetxt(
-                metadata_file,
-                np.vstack(metadata.values()).T,
-                fmt=['%s', b'%.10f', b'%.10f', b'%.10f'],
-                delimiter='\t',
-                header='\t'.join(list(metadata.keys())),
-                comments='')
+            with open(metadata_file, 'w') as f:
+                f.write('{}\t{}\t{}\t{}\n'.format(*list(metadata.keys())))
+                for i in zip(*metadata.values()):
+                    f.write('{0[0]}\t{0[1]:.10f}\t{0[2]:.10f}\t'
+                            '{0[3]:.10f}\n'.format(i))
 
         return runtime
 
@@ -649,6 +651,9 @@ class CompCor(BaseInterface):
             isdefined(self.inputs.header_prefix) else self._header
         headers = ['{}{:02d}'.format(header, i) for i in range(num_col)]
         return '\t'.join(headers)
+
+    def _print_metadata(self, x, f):
+        f.write('{0[0]}\t{0[1]:.10f}\t{0[2]:.10f}\t{0[3]:.10f}\n'.format(x))
 
 
 class ACompCor(CompCor):
@@ -1170,7 +1175,8 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
 
 def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
                              filter_type=False, degree=0, period_cut=128,
-                             repetition_time=None, failure_mode='error'):
+                             repetition_time=None, failure_mode='error',
+                             mask_names=''):
     """Compute the noise components from the imgseries for each mask
 
     Parameters
@@ -1213,7 +1219,9 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
     """
     components = None
     basis = np.array([])
-    for i, img in enumerate(mask_images):
+    if not mask_names:
+        mask_names = range(len(mask_images))
+    for i, img in zip(mask_names, mask_images):
         mask = img.get_data().astype(np.bool).squeeze()
         if imgseries.shape[:3] != mask.shape:
             raise ValueError(
