@@ -15,6 +15,7 @@ def test_TCompCor_inputs():
             requires=['mask_files'],
             xor=['merge_method'],
         ),
+        mask_names=dict(),
         merge_method=dict(
             requires=['mask_files'],
             xor=['mask_index'],
@@ -25,6 +26,7 @@ def test_TCompCor_inputs():
         realigned_file=dict(mandatory=True, ),
         regress_poly_degree=dict(usedefault=True, ),
         repetition_time=dict(),
+        save_metadata=dict(),
         save_pre_filter=dict(),
         use_regress_poly=dict(
             deprecated='0.15.0',
@@ -40,6 +42,7 @@ def test_TCompCor_outputs():
     output_map = dict(
         components_file=dict(),
         high_variance_masks=dict(),
+        metadata_file=dict(),
         pre_filter_file=dict(),
     )
     outputs = TCompCor.output_spec()
