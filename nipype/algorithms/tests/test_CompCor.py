@@ -48,12 +48,14 @@ class TestCompCor():
 
         self.run_cc(
             CompCor(
+                num_components=6,
                 realigned_file=self.realigned_file,
                 mask_files=self.mask_files,
                 mask_index=0), expected_components)
 
         self.run_cc(
             ACompCor(
+                num_components=6,
                 realigned_file=self.realigned_file,
                 mask_files=self.mask_files,
                 mask_index=0,
@@ -61,7 +63,7 @@ class TestCompCor():
             'aCompCor')
 
     def test_tcompcor(self):
-        ccinterface = TCompCor(
+        ccinterface = TCompCor(num_components=6,
             realigned_file=self.realigned_file, percentile_threshold=0.75)
         self.run_cc(ccinterface, [['-0.1114536190', '-0.4632908609'], [
             '0.4566907310', '0.6983205193'
@@ -70,7 +72,8 @@ class TestCompCor():
         ], ['-0.1342351356', '0.1407855119']], 'tCompCor')
 
     def test_tcompcor_no_percentile(self):
-        ccinterface = TCompCor(realigned_file=self.realigned_file)
+        ccinterface = TCompCor(num_components=6,
+            realigned_file=self.realigned_file)
         ccinterface.run()
 
         mask = nb.load('mask_000.nii.gz').get_data()
@@ -80,6 +83,7 @@ class TestCompCor():
     def test_compcor_no_regress_poly(self):
         self.run_cc(
             CompCor(
+                num_components=6,
                 realigned_file=self.realigned_file,
                 mask_files=self.mask_files,
                 mask_index=0,
@@ -160,7 +164,6 @@ class TestCompCor():
         assert ccresult.outputs.components_file == expected_file
         assert os.path.exists(expected_file)
         assert os.path.getsize(expected_file) > 0
-        assert ccinterface.inputs.num_components == 6
 
         with open(ccresult.outputs.components_file, 'r') as components_file:
             expected_n_components = min(ccinterface.inputs.num_components,
