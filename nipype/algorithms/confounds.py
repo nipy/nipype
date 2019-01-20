@@ -394,16 +394,22 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         'components_file.txt',
         usedefault=True,
         desc='Filename to store physiological components')
-    num_components = traits.Float(6, usedefault=True,
-        desc='Number of components to return from the decomposition.'
-             'If `num_components` is a positive integer, then '
-             '`num_components` components will be retained. If '
-             '`num_components` is a fractional value between 0 and 1, then '
+    num_components = traits.Either('all', traits.Int,
+        xor=['variance_threshold'],
+        desc='Number of components to return from the decomposition. If '
+             '`num_components` is `all`, then all components will be '
+             'retained.')
+             # 6 for BOLD, 4 for ASL
+             # automatically instantiated to 6 in CompCor below if neither
+             # `num_components` nor `variance_threshold` is defined (for
+             # backward compatibility)
+    variance_threshold = traits.Float(xor=['num_components'],
+        desc='Select the number of components to be returned automatically '
+             'based on their ability to explain variance in the dataset. '
+             '`variance_threshold` is a fractional value between 0 and 1; '
              'the number of components retained will be equal to the minimum '
              'number of components necessary to explain the provided '
-             'fraction of variance in the masked time series. If '
-             '`num_components` is -1, then all components will be retained.')
-             # 6 for BOLD, 4 for ASL
+             'fraction of variance in the masked time series.')
     pre_filter = traits.Enum(
         'polynomial',
         'cosine',
@@ -564,8 +570,20 @@ class CompCor(BaseInterface):
                         '{} cannot detect repetition time from image - '
                         'Set the repetition_time input'.format(self._header))
 
+        if isdefined(self.inputs.variance_threshold):
+            components_criterion = self.inputs.variance_threshold
+        elif isdefined(self.inputs.num_components):
+            components_criterion = self.inputs.num_components
+        else:
+            components_criterion = 6
+            IFLOGGER.warning('`num_components` and `variance_threshold` are '
+                             'not defined. Setting number of components to 6 '
+                             'for backward compatibility. Please set either '
+                             '`num_components` or `variance_threshold`, as '
+                             'this feature may be deprecated in the future.')
+
         components, filter_basis, metadata = compute_noise_components(
-            imgseries.get_data(), mask_images, self.inputs.num_components,
+            imgseries.get_data(), mask_images, components_criterion,
             self.inputs.pre_filter, degree, self.inputs.high_pass_cutoff, TR,
             self.inputs.failure_mode, self.inputs.mask_names)
 
@@ -1191,7 +1209,7 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
         Number of noise components to return. If this is a decimal value
         between 0 and 1, then `create_noise_components` will instead return
         the smallest number of components necessary to explain the indicated
-        fraction of variance. If `components_criterion` is -1, then all
+        fraction of variance. If `components_criterion` is `all`, then all
         components will be returned.
     filter_type: str
         Type of filter to apply to time series before computing
@@ -1218,6 +1236,8 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
     """
     components = None
     basis = np.array([])
+    if components_criterion == 'all':
+        components_criterion = -1
     if not mask_names:
         mask_names = range(len(mask_images))
     for i, img in zip(mask_names, mask_images):

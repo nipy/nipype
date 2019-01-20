@@ -20,7 +20,7 @@ def test_TCompCor_inputs():
             requires=['mask_files'],
             xor=['mask_index'],
         ),
-        num_components=dict(usedefault=True, ),
+        num_components=dict(xor=['variance_threshold'], ),
         percentile_threshold=dict(usedefault=True, ),
         pre_filter=dict(usedefault=True, ),
         realigned_file=dict(mandatory=True, ),
@@ -32,6 +32,7 @@ def test_TCompCor_inputs():
             deprecated='0.15.0',
             new_name='pre_filter',
         ),
+        variance_threshold=dict(xor=['num_components'], ),
     )
     inputs = TCompCor.input_spec()
 

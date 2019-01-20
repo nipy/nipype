@@ -20,7 +20,7 @@ def test_ACompCor_inputs():
             requires=['mask_files'],
             xor=['mask_index'],
         ),
-        num_components=dict(usedefault=True, ),
+        num_components=dict(xor=['variance_threshold'], ),
         pre_filter=dict(usedefault=True, ),
         realigned_file=dict(mandatory=True, ),
         regress_poly_degree=dict(usedefault=True, ),
@@ -31,6 +31,7 @@ def test_ACompCor_inputs():
             deprecated='0.15.0',
             new_name='pre_filter',
         ),
+        variance_threshold=dict(xor=['num_components'], ),
     )
     inputs = ACompCor.input_spec()
 
