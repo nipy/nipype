@@ -109,7 +109,6 @@ NUMPY_BAD_VERSION_27 = '1.16.0'
 SCIPY_MIN_VERSION = '0.14'
 TRAITS_MIN_VERSION = '4.6'
 DATEUTIL_MIN_VERSION = '2.2'
-PYTEST_MIN_VERSION = '3.6'
 FUTURE_MIN_VERSION = '0.16.0'
 SIMPLEJSON_MIN_VERSION = '3.8.0'
 PROV_VERSION = '1.5.2'
@@ -149,19 +148,16 @@ REQUIRES = [
     'neurdflib',
     'click>=%s' % CLICK_MIN_VERSION,
     'funcsigs',
-    'mock',
     'pydotplus',
     'pydot>=%s' % PYDOT_MIN_VERSION,
     'packaging',
     'futures; python_version == "2.7"',
+    'configparser; python_version <= "3.4"',
 ]
 
-if sys.version_info <= (3, 4):
-    REQUIRES.append('configparser')
-
 TESTS_REQUIRES = [
-    'pytest>=%s' % PYTEST_MIN_VERSION,
-    'pytest-xdist',
+    'mock',
+    'pytest',
     'pytest-cov',
     'codecov',
     'pytest-env',
