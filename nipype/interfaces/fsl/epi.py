@@ -1281,15 +1281,16 @@ class EddyQuadInputSpec(FSLCommandInputSpec):
         desc="Output directory - default = '<base_name>.qc'",
     )
     field = File(
+        exists=True,
         argstr='--field=%s',
         desc="TOPUP estimated field (in Hz)",
     )
     slice_spec = File(
+        exists=True,
         argstr='--slspec=%s',
         desc="Text file specifying slice/group acquisition",
     )
     verbose = traits.Bool(
-        False,
         argstr='--verbose',
         desc="Display debug messages",
     )
@@ -1301,45 +1302,38 @@ class EddyQuadOutputSpec(TraitedSpec):
         desc=("Single subject database containing quality metrics and data "
               "info.")
     )
-
     out_qc_pdf = File(
         exists=True,
         desc="Single subject QC report."
     )
-
     out_avg_b_png = traits.List(
         File(exists=True),
         desc=("Image showing mid-sagittal, -coronal and -axial slices of "
               "each averaged b-shell volume.")
     )
-
     out_avg_b0_pe_png = traits.List(
         File(exists=True),
         desc=("Image showing mid-sagittal, -coronal and -axial slices of "
               "each averaged pe-direction b0 volume. Generated when using "
               "the -f option.")
     )
-
     out_cnr_png = traits.List(
         File(exists=True),
         desc=("Image showing mid-sagittal, -coronal and -axial slices of "
               "each b-shell CNR volume. Generated when CNR maps are "
               "available.")
     )
-
     out_vdm_png = File(
         exists=True,
         desc=("Image showing mid-sagittal, -coronal and -axial slices of "
               "the voxel displacement map. Generated when using the -f "
               "option.")
     )
-
     out_residuals = File(
         exists=True,
         desc=("Text file containing the volume-wise mask-averaged squared "
               "residuals. Generated when residual maps are available.")
     )
-
     out_clean_volumes = File(
         exists=True,
         desc=("Text file containing a list of clean volumes, based on "
@@ -1370,7 +1364,7 @@ class EddyQuad(FSLCommand):
     >>> quad.inputs.output_dir = 'eddy_corrected.qc'
     >>> quad.inputs.field      = 'fieldmap_phase_fslprepared.nii'
     >>> quad.inputs.verbose    = True
-    >>> quad.cmdline # doctest: +ELLIPSIS
+    >>> quad.cmdline
     'eddy_quad eddy_corrected --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --field=fieldmap_phase_fslprepared.nii --eddyIdx=epi_index.txt \
 --mask=epi_mask.nii --output-dir=eddy_corrected.qc --eddyParams=epi_acqp.txt \
