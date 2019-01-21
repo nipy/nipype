@@ -71,7 +71,7 @@ class TestCompCor():
                                ['-0.4500578942', '0.0778209345']]
         expected_metadata = {
             'component': 'CompCor00',
-            'mask': '0',
+            'mask': 'mask',
             'singular_value': '4.0720553036',
             'variance_explained': '0.5527211465',
             'cumulative_variance_explained': '0.5527211465'
@@ -80,6 +80,7 @@ class TestCompCor():
                 variance_threshold=0.7,
                 realigned_file=self.realigned_file,
                 mask_files=self.mask_files,
+                mask_names=['mask'],
                 mask_index=1,
                 save_metadata=True)
         self.run_cc(ccinterface=ccinterface,
