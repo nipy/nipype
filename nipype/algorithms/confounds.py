@@ -8,6 +8,11 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 from builtins import range
 
+# Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
+from future import standard_library
+standard_library.install_aliases()
+from collections import OrderedDict
+
 import os
 import os.path as op
 
@@ -1230,7 +1235,7 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
         Numpy array containing the requested set of noise components
     basis: numpy array
         Numpy array containing the (non-constant) filter regressors
-    metadata: dict(numpy array)
+    metadata: OrderedDict{str: numpy array}
         Dictionary of eigenvalues, fractional explained variances, and
         cumulative explained variances.
     """
@@ -1296,13 +1301,12 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
             num_components = int(components_criterion)
         if components is None:
             components = u[:, :num_components]
-            metadata = {
-                'mask': np.array([i] * num_components),
-                'singular_value': s[:num_components],
-                'variance_explained': variance_explained[:num_components],
-                'cumulative_variance_explained':
-                    cumulative_variance_explained[:num_components]
-            }
+            metadata = OrderedDict()
+            metadata['mask'] = np.array([i] * num_components)
+            metadata['singular_value'] = s[:num_components]
+            metadata['variance_explained'] = variance_explained[:num_components]
+            metadata['cumulative_variance_explained'] = (
+                cumulative_variance_explained[:num_components])
         else:
             components = np.hstack((components, u[:, :num_components]))
             metadata['mask'] = np.hstack((metadata['mask'],
