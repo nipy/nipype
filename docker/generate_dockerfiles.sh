@@ -92,7 +92,7 @@ function generate_main_dockerfile() {
                 conda_install='python=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
                                icu=58.1 libxml2 libxslt matplotlib mkl numpy paramiko
                                pandas psutil scikit-learn scipy traits=4.6.0' \
-                pip_install="grabbit==0.2.6 https://github.com/bids-standard/pybids/tarball/0.7.0" \
+                pip_install="pytest-xdist" \
                 activate=true \
     --copy docker/files/run_builddocs.sh docker/files/run_examples.sh \
            docker/files/run_pytests.sh nipype/external/fsl_imglob.py /usr/bin/ \
@@ -107,7 +107,7 @@ function generate_main_dockerfile() {
     --user neuro \
     --miniconda use_env=neuro \
                 pip_opts="-e" \
-                pip_install="/src/nipype[all]" \
+                pip_install="/src/nipype[all] https://github.com/bids-standard/pybids/tarball/0.7.0" \
     --workdir /work \
     --label org.label-schema.build-date='$BUILD_DATE' \
             org.label-schema.name="NIPYPE" \
