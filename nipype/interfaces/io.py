@@ -2733,7 +2733,7 @@ class BIDSDataGrabberInputSpec(DynamicTraitedSpec):
         True, usedefault=True,
         desc='Generate exception if list is empty for a given field')
     index_derivatives = traits.Bool(
-        False, usedefault=True,
+        False, mandatory=True, usedefault=True,
         desc='Index derivatives/ sub-directory')
     extra_derivatives = traits.List(
         Directory(exists=True),
