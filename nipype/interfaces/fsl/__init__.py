@@ -21,7 +21,7 @@ from .utils import (
     WarpPointsFromStd, RobustFOV, CopyGeom, MotionOutliers)
 
 from .epi import (PrepareFieldmap, TOPUP, ApplyTOPUP, Eddy, EPIDeWarp, SigLoss,
-                  EddyCorrect, EpiReg)
+                  EddyCorrect, EpiReg, EddyQuad)
 from .dti import (BEDPOSTX, XFibres, DTIFit, ProbTrackX, ProbTrackX2, VecReg,
                   ProjThresh, FindTheBiggest, DistanceMap, TractSkeleton,
                   MakeDyadicVectors, BEDPOSTX5, XFibres5)

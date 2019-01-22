@@ -105,10 +105,10 @@ NUMPY_MIN_VERSION = '1.9.0'
 # Numpy bug in python 3.7:
 # https://www.opensourceanswers.com/blog/you-shouldnt-use-python-37-for-data-science-right-now.html
 NUMPY_MIN_VERSION_37 = '1.15.3'
+NUMPY_BAD_VERSION_27 = '1.16.0'
 SCIPY_MIN_VERSION = '0.14'
 TRAITS_MIN_VERSION = '4.6'
 DATEUTIL_MIN_VERSION = '2.2'
-PYTEST_MIN_VERSION = '3.6'
 FUTURE_MIN_VERSION = '0.16.0'
 SIMPLEJSON_MIN_VERSION = '3.8.0'
 PROV_VERSION = '1.5.2'
@@ -136,7 +136,8 @@ PROVIDES = ['nipype']
 REQUIRES = [
     'nibabel>=%s' % NIBABEL_MIN_VERSION,
     'networkx>=%s' % NETWORKX_MIN_VERSION,
-    'numpy>=%s ; python_version < "3.7"' % NUMPY_MIN_VERSION,
+    'numpy>=%s,!=%s ; python_version == "2.7"' % (NUMPY_MIN_VERSION, NUMPY_BAD_VERSION_27),
+    'numpy>=%s ; python_version > "3.0" and python_version < "3.7"' % NUMPY_MIN_VERSION,
     'numpy>=%s ; python_version >= "3.7"' % NUMPY_MIN_VERSION_37,
     'python-dateutil>=%s' % DATEUTIL_MIN_VERSION,
     'scipy>=%s' % SCIPY_MIN_VERSION,
@@ -147,19 +148,21 @@ REQUIRES = [
     'neurdflib',
     'click>=%s' % CLICK_MIN_VERSION,
     'funcsigs',
-    'pytest>=%s' % PYTEST_MIN_VERSION,
-    'pytest-xdist',
-    'mock',
     'pydotplus',
     'pydot>=%s' % PYDOT_MIN_VERSION,
     'packaging',
     'futures; python_version == "2.7"',
+    'configparser; python_version <= "3.4"',
 ]
 
-if sys.version_info <= (3, 4):
-    REQUIRES.append('configparser')
-
-TESTS_REQUIRES = ['pytest-cov', 'codecov', 'pytest-env', 'coverage<5']
+TESTS_REQUIRES = [
+    'mock',
+    'pytest',
+    'pytest-cov',
+    'codecov',
+    'pytest-env',
+    'coverage<5'
+]
 
 EXTRA_REQUIRES = {
     'doc': ['Sphinx>=1.4', 'numpydoc', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],
