@@ -2735,7 +2735,7 @@ class BIDSDataGrabberInputSpec(DynamicTraitedSpec):
     return_type = traits.Enum(
         'file', 'namedtuple', usedefault=True)
     index_derivatives = traits.Bool(
-        False, usedefault=True,
+        False, mandatory=True, usedefault=True,
         desc='Index derivatives/ sub-directory')
     extra_derivatives = traits.List(
         Directory(exists=True),
