@@ -2732,8 +2732,6 @@ class BIDSDataGrabberInputSpec(DynamicTraitedSpec):
     raise_on_empty = traits.Bool(
         True, usedefault=True,
         desc='Generate exception if list is empty for a given field')
-    return_type = traits.Enum(
-        'file', 'namedtuple', usedefault=True)
     index_derivatives = traits.Bool(
         False, usedefault=True,
         desc='Index derivatives/ sub-directory')
@@ -2831,7 +2829,7 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
         for key, query in self.inputs.output_query.items():
             args = query.copy()
             args.update(filters)
-            filelist = layout.get(return_type=self.inputs.return_type, **args)
+            filelist = layout.get(return_type='file', **args)
             if len(filelist) == 0:
                 msg = 'Output key: %s returned no files' % key
                 if self.inputs.raise_on_empty:
