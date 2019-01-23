@@ -829,7 +829,24 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
         "template" uses regex style formatting, rather than the
         glob-style found in the original DataGrabber.
 
+        Examples
+        --------
+
+        >>> s3grab = S3DataGrabber(infields=['subj_id'], outfields=["func", "anat"])
+        >>> s3grab.inputs.bucket = 'openneuro'
+        >>> s3grab.inputs.sort_filelist = True
+        >>> s3grab.inputs.template = '*'
+        >>> s3grab.inputs.anon = True
+        >>> s3grab.inputs.bucket_path = 'ds000101/ds000101_R2.0.0/uncompressed/'
+        >>> s3grab.inputs.local_directory = '/tmp'
+        >>> s3grab.inputs.field_template = {'anat': '%s/anat/%s_T1w.nii.gz',
+        ...                                 'func': '%s/func/%s_task-simon_run-1_bold.nii.gz'}
+        >>> s3grab.inputs.template_args = {'anat': [['subj_id', 'subj_id']],
+        ...                                'func': [['subj_id', 'subj_id']]}
+        >>> s3grab.inputs.subj_id = 'sub-01'
+        >>> s3grab.run()  # doctest: +SKIP
     """
+
     input_spec = S3DataGrabberInputSpec
     output_spec = DynamicTraitedSpec
     _always_run = True
