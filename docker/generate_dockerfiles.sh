@@ -90,7 +90,7 @@ function generate_main_dockerfile() {
     --user neuro \
     --miniconda create_env=neuro \
                 conda_install='python=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
-                               icu=58.1 libxml2 libxslt matplotlib mkl numpy paramiko
+                               icu=58.1 libxml2 libxslt matplotlib mkl "numpy!=1.16.0" paramiko
                                pandas psutil scikit-learn scipy traits=4.6.0' \
                 pip_install="pytest-xdist" \
                 activate=true \
