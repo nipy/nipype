@@ -35,7 +35,7 @@ if HAVE_DIPY and LooseVersion(dipy_version()) >= LooseVersion('0.15'):
     CSDModel = dipy_to_nipype_interface("CSDModel", ReconstCSDFlow)
 else:
     IFLOGGER.info("We advise you to upgrade DIPY version. This upgrade will"
-                  " activate DKIModel, MapmriModel, DTIModel, CSAModel.")
+                  " activate DKIModel, MapmriModel, DTIModel, CSAModel, CSDModel.")
 
 
 class RESTOREInputSpec(DipyBaseInterfaceInputSpec):
