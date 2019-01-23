@@ -30,7 +30,7 @@ if HAVE_DIPY and LooseVersion(dipy_version()) >= LooseVersion('0.15'):
 
 else:
     IFLOGGER.info("We advise you to upgrade DIPY version. This upgrade will"
-                  " activate RecoBundles, LabelsBundles, DetTrackPAMFlow.")
+                  " activate RecoBundles, LabelsBundles, DeterministicTracking.")
 
 
 class TrackDensityMapInputSpec(BaseInterfaceInputSpec):
