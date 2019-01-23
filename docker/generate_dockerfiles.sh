@@ -107,7 +107,7 @@ function generate_main_dockerfile() {
     --user neuro \
     --miniconda use_env=neuro \
                 pip_opts="-e" \
-                pip_install="/src/nipype[all]" \
+                pip_install="/src/nipype[all] https://github.com/bids-standard/pybids/tarball/0.7.0" \
     --workdir /work \
     --label org.label-schema.build-date='$BUILD_DATE' \
             org.label-schema.name="NIPYPE" \
