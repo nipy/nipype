@@ -1,5 +1,29 @@
+1.1.8 (January 28, 2019)
+========================
+
+##### [Full changelog](https://github.com/nipy/nipype/milestone/29?closed=1)
+
+  * FIX: ANTS LaplacianThickness cmdline opts fixed up (https://github.com/nipy/nipype/pull/2846)
+  * FIX: Resolve LinAlgError during SVD (https://github.com/nipy/nipype/pull/2838)
+  * ENH: Add interfaces wrapping DIPY worflows (https://github.com/nipy/nipype/pull/2830)
+  * ENH: Update BIDSDataGrabber for pybids 0.7 (https://github.com/nipy/nipype/pull/2737)
+  * ENH: Add FSL `eddy_quad` interface (https://github.com/nipy/nipype/pull/2825)
+  * ENH: Support tckgen -select in MRtrix3 v3+ (https://github.com/nipy/nipype/pull/2823)
+  * ENH: Support for BIDS event files (https://github.com/nipy/nipype/pull/2845)
+  * ENH: CompositeTransformUtil, new ANTs interface (https://github.com/nipy/nipype/pull/2785)
+  * RF: Move pytest and pytest-xdist from general requirement into tests_required (https://github.com/nipy/nipype/pull/2850)
+  * DOC: Add S3DataGrabber example (https://github.com/nipy/nipype/pull/2849)
+  * DOC: Skip conftest module in API generation (https://github.com/nipy/nipype/pull/2852)
+  * DOC: Hyperlink DOIs to preferred resolver (https://github.com/nipy/nipype/pull/2833)
+  * MAINT: Install numpy!=1.16.0 from conda in Docker (https://github.com/nipy/nipype/pull/2862)
+  * MAINT: Drop pytest-xdist requirement, minimum pytest version  (https://github.com/nipy/nipype/pull/2856)
+  * MAINT: Disable numpy 1.16.0 for Py2.7 (https://github.com/nipy/nipype/pull/2855)
+
+
 1.1.7 (December 17, 2018)
 =========================
+
+##### [Full changelog](https://github.com/nipy/nipype/milestone/28?closed=1)
 
   * FIX: Copy node list before generating a flat graph (https://github.com/nipy/nipype/pull/2828)
   * FIX: Update pytest req'd version to 3.6 (https://github.com/nipy/nipype/pull/2827)
