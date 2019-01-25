@@ -4,14 +4,16 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
 import os.path as op
+import inspect
 import numpy as np
 from ... import logging
 from ..base import (traits, File, isdefined, LibraryBaseInterface,
-                    BaseInterfaceInputSpec)
+                    BaseInterfaceInputSpec, TraitedSpec)
 
 HAVE_DIPY = True
 try:
     import dipy
+    from dipy.workflows.base import IntrospectiveArgumentParser
 except ImportError:
     HAVE_DIPY = False
 
@@ -75,3 +77,137 @@ class DipyDiffusionInterface(DipyBaseInterface):
             ext = fext
 
         return out_prefix + '_' + name + ext
+
+
+def convert_to_traits_type(dipy_type, is_file=False):
+    """Convert DIPY type to Traits type."""
+    dipy_type = dipy_type.lower()
+    is_mandatory = bool("optional" not in dipy_type)
+    if "variable" in dipy_type and "string" in dipy_type:
+        return traits.ListStr, is_mandatory
+    elif "variable" in dipy_type and "int" in dipy_type:
+        return traits.ListInt, is_mandatory
+    elif "variable" in dipy_type and "float" in dipy_type:
+        return traits.ListFloat, is_mandatory
+    elif "variable" in dipy_type and "bool" in dipy_type:
+        return traits.ListBool, is_mandatory
+    elif "variable" in dipy_type and "complex" in dipy_type:
+        return traits.ListComplex, is_mandatory
+    elif "string" in dipy_type and not is_file:
+        return traits.Str, is_mandatory
+    elif "string" in dipy_type and is_file:
+        return traits.File, is_mandatory
+    elif "int" in dipy_type:
+        return traits.Int, is_mandatory
+    elif "float" in dipy_type:
+        return traits.Float, is_mandatory
+    elif "bool" in dipy_type:
+        return traits.Bool, is_mandatory
+    elif "complex" in dipy_type:
+        return traits.Complex, is_mandatory
+    else:
+        msg = "Error during convert_to_traits_type({0}).".format(dipy_type) + \
+              "Unknown DIPY type."
+        raise IOError(msg)
+
+
+def create_interface_specs(class_name, params=None, BaseClass=TraitedSpec):
+    """Create IN/Out interface specifications dynamically.
+
+    Parameters
+    ----------
+    class_name: str
+        The future class name(e.g, (MyClassInSpec))
+    params: list of tuple
+        dipy argument list
+    BaseClass: TraitedSpec object
+        parent class
+
+    Returns
+    -------
+    newclass: object
+        new nipype interface specification class
+
+    """
+    attr = {}
+    if params is not None:
+        for p in params:
+            name, dipy_type, desc = p[0], p[1], p[2]
+            is_file = bool("files" in name or "out_" in name)
+            traits_type, is_mandatory = convert_to_traits_type(dipy_type,
+                                                               is_file)
+            # print(name, dipy_type, desc, is_file, traits_type, is_mandatory)
+            if BaseClass.__name__ == BaseInterfaceInputSpec.__name__:
+                if len(p) > 3:
+                    attr[name] = traits_type(p[3], desc=desc[-1],
+                                             usedefault=True,
+                                             mandatory=is_mandatory)
+                else:
+                    attr[name] = traits_type(desc=desc[-1],
+                                             mandatory=is_mandatory)
+            else:
+                attr[name] = traits_type(p[3], desc=desc[-1], exists=True,
+                                         usedefault=True,)
+
+    newclass = type(str(class_name), (BaseClass, ), attr)
+    return newclass
+
+
+def dipy_to_nipype_interface(cls_name, dipy_flow, BaseClass=DipyBaseInterface):
+    """Construct a class in order to respect nipype interface specifications.
+
+    This convenient class factory convert a DIPY Workflow to a nipype
+    interface.
+
+    Parameters
+    ----------
+    cls_name: string
+        new class name
+    dipy_flow: Workflow class type.
+        It should be any children class of `dipy.workflows.workflow.Worflow`
+    BaseClass: object
+        nipype instance object
+
+    Returns
+    -------
+    newclass: object
+        new nipype interface specification class
+
+    """
+    parser = IntrospectiveArgumentParser()
+    flow = dipy_flow()
+    parser.add_workflow(flow)
+    default_values = inspect.getargspec(flow.run).defaults
+    optional_params = [args + (val,) for args, val in zip(parser.optional_parameters, default_values)]
+    start = len(parser.optional_parameters) - len(parser.output_parameters)
+
+    output_parameters = [args + (val,) for args, val in zip(parser.output_parameters, default_values[start:])]
+    input_parameters = parser.positional_parameters + optional_params
+
+    input_spec = create_interface_specs("{}InputSpec".format(cls_name),
+                                        input_parameters,
+                                        BaseClass=BaseInterfaceInputSpec)
+
+    output_spec = create_interface_specs("{}OutputSpec".format(cls_name),
+                                         output_parameters,
+                                         BaseClass=TraitedSpec)
+
+    def _run_interface(self, runtime):
+        flow = dipy_flow()
+        args = self.inputs.get()
+        flow.run(**args)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        out_dir = outputs.get("out_dir", ".")
+        for key, values in outputs.items():
+            outputs[key] = op.join(out_dir, values)
+
+        return outputs
+
+    newclass = type(str(cls_name), (BaseClass, ),
+                    {"input_spec": input_spec,
+                     "output_spec": output_spec,
+                     "_run_interface": _run_interface,
+                     "_list_outputs:": _list_outputs})
+    return newclass

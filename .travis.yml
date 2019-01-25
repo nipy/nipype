@@ -60,6 +60,9 @@ matrix:
           NIPYPE_EXTRAS="doc,tests,nipy,profiler"
           EXTRA_PIP_FLAGS="--pre $EXTRA_PIP_FLAGS --find-links $PRE_WHEELS"
           CI_SKIP_TEST=1
+  allow_failures:
+    - python: 2.7
+      env: INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,nipy,profiler" EXTRA_PIP_FLAGS="--pre $EXTRA_PIP_FLAGS --find-links $PRE_WHEELS" CI_SKIP_TEST=1
 
 addons:
   apt:
@@ -86,14 +89,15 @@ before_install:
   fi;
 
 - travis_retry pip install -r requirements.txt
-- travis_retry pip install grabbit==0.1.2
-- travis_retry git clone -b 0.6.5 https://github.com/INCF/pybids.git ${HOME}/pybids && pip install -e ${HOME}/pybids
+- travis_retry pip install grabbit==0.2.6
+- travis_retry pip install -e git+https://github.com/bids-standard/pybids.git@0.7.0#egg=pybids
 
 install:
 - travis_retry pip install $EXTRA_PIP_FLAGS -e .[$NIPYPE_EXTRAS]
+- travis_retry pip install pytest-xdist
 
 script:
-- py.test -v --cov nipype --cov-config .coveragerc --cov-report xml:cov.xml -c nipype/pytest.ini --doctest-modules nipype
+- py.test -v --cov nipype --cov-config .coveragerc --cov-report xml:cov.xml -c nipype/pytest.ini --doctest-modules nipype -n auto
 
 after_script:
 - codecov --file cov.xml --flags unittests -e TRAVIS_JOB_NUMBER

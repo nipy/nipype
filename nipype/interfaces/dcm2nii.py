@@ -374,7 +374,7 @@ class Dcm2niix(CommandLine):
     converts any files in the directory containing the files in the list. We
     also do not support nested filenames with this option. **Thus all files
     must have a common root directory.**
-    
+
     >>> converter = Dcm2niix()
     >>> converter.inputs.source_names = ['functional_1.dcm', 'functional_2.dcm']
     >>> converter.inputs.compression = 5

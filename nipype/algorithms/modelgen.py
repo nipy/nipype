@@ -144,6 +144,61 @@ def scale_timings(timelist, input_units, output_units, time_repetition):
     timelist = [np.max([0., _scalefactor * t]) for t in timelist]
     return timelist
 
+def bids_gen_info(bids_event_files,
+                  condition_column='trial_type',
+                  amplitude_column=None,
+                  time_repetition=False,
+                  ):
+    """Generate subject_info structure from a list of BIDS .tsv event files.
+
+    Parameters
+    ----------
+
+    bids_event_files : list of str
+        Filenames of BIDS .tsv event files containing columns including:
+        'onset', 'duration', and 'trial_type' or the `condition_column` value.
+    condition_column : str
+        Column of files in `bids_event_files` based on the values of which
+        events will be sorted into different regressors
+    amplitude_column : str
+        Column of files in `bids_event_files` based on the values of which
+        to apply amplitudes to events. If unspecified, all events will be
+        represented with an amplitude of 1.
+
+    Returns
+    -------
+
+    list of Bunch
+    """
+    info = []
+    for bids_event_file in bids_event_files:
+        with open(bids_event_file) as f:
+            f_events = csv.DictReader(f, skipinitialspace=True, delimiter='\t')
+            events = [{k: v for k, v in row.items()} for row in f_events]
+        conditions = list(set([i[condition_column] for i in events]))
+        runinfo = Bunch(conditions=[], onsets=[], durations=[], amplitudes=[])
+        for condition in conditions:
+            selected_events = [i for i in events if i[condition_column]==condition]
+            onsets = [float(i['onset']) for i in selected_events]
+            durations = [float(i['duration']) for i in selected_events]
+            if time_repetition:
+                decimals = math.ceil(-math.log10(time_repetition))
+                onsets = [np.round(i, decimals) for i in onsets]
+                durations = [np.round(i ,decimals) for i in durations]
+            if condition:
+                runinfo.conditions.append(condition)
+            else:
+                runinfo.conditions.append('e0')
+            runinfo.onsets.append(onsets)
+            runinfo.durations.append(durations)
+            try:
+                amplitudes = [float(i[amplitude_column]) for i in selected_events]
+                runinfo.amplitudes.append(amplitudes)
+            except KeyError:
+                runinfo.amplitudes.append([1] * len(onsets))
+        info.append(runinfo)
+    return info
+
 
 def gen_info(run_event_files):
     """Generate subject_info structure from a list of event files
@@ -190,6 +245,23 @@ class SpecifyModelInputSpec(BaseInterfaceInputSpec):
         desc='List of event description files 1, 2 or 3 '
         'column format corresponding to onsets, '
         'durations and amplitudes')
+    bids_event_file = InputMultiPath(
+        File(exists=True),
+        mandatory=True,
+        xor=['subject_info', 'event_files', 'bids_event_file'],
+        desc='TSV event file containing common BIDS fields: `onset`,'
+        '`duration`, and categorization and amplitude columns')
+    bids_condition_column = traits.Str(exists=True,
+        mandatory=False,
+        default_value='trial_type',
+        usedefault=True,
+        desc='Column of the file passed to `bids_event_file` to the '
+        'unique values of which events will be assigned'
+        'to regressors')
+    bids_amplitude_column = traits.Str(exists=True,
+        mandatory=False,
+        desc='Column of the file passed to `bids_event_file` '
+        'according to which to assign amplitudes to events')
     realignment_parameters = InputMultiPath(
         File(exists=True),
         desc='Realignment parameters returned '
@@ -432,8 +504,15 @@ None])
         if infolist is None:
             if isdefined(self.inputs.subject_info):
                 infolist = self.inputs.subject_info
-            else:
+            elif isdefined(self.inputs.event_files):
                 infolist = gen_info(self.inputs.event_files)
+            elif isdefined(self.inputs.bids_event_file):
+                infolist = bids_gen_info(
+                    self.inputs.bids_event_file,
+                    self.inputs.bids_condition_column,
+                    self.inputs.bids_amplitude_column,
+                    self.inputs.time_repetition,
+                    )
         self._sessinfo = self._generate_standard_design(
             infolist,
             functional_runs=self.inputs.functional_runs,

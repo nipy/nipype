@@ -441,7 +441,7 @@ def test_write_graph_runs(tmpdir):
 
             assert os.path.exists('graph.dot') or os.path.exists(
                 'graph_detailed.dot')
-       
+
             try:
                 os.remove('graph.dot')
             except OSError:

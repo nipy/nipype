@@ -97,6 +97,7 @@
 .. _MRtrix3: http://www.mrtrix.org/
 .. _MNE: https://martinos.org/mne/index.html
 .. _ANTS: http://stnava.github.io/ANTs/
+.. _DIPY: http://dipy.org
 
 .. General software
 .. _gcc: http://gcc.gnu.org
