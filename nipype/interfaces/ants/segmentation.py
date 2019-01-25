@@ -214,19 +214,23 @@ class LaplacianThicknessInputSpec(ANTSCommandInputSpec):
     prior_thickness = traits.Float(
         argstr='%s',
         desc='Prior thickness (defaults to 500)',
+        requires=['smooth_param'],
         position=5)
     dT = traits.Float(
         argstr='%s',
         desc='Time delta used during integration (defaults to 0.01)',
+        requires=['prior_thickness'],
         position=6)
     sulcus_prior = traits.Float(
         argstr='%s',
         desc='Positive floating point number for sulcus prior. '
              'Authors said that 0.15 might be a reasonable value',
+        requires=['dT'],
         position=7)
     tolerance = traits.Float(
         argstr='%s',
         desc='Tolerance to reach during optimization (defaults to 0.001)',
+        requires=['sulcus_prior'],
         position=8)
 
 
