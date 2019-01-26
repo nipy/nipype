@@ -233,7 +233,7 @@ class SpecifyModelInputSpec(BaseInterfaceInputSpec):
     subject_info = InputMultiPath(
         Bunch,
         mandatory=True,
-        xor=['subject_info', 'event_files'],
+        xor=['subject_info', 'event_files', 'bids_event_file'],
         desc='Bunch or List(Bunch) subject-specific '
         'condition information. see '
         ':ref:`SpecifyModel` or '
@@ -241,7 +241,7 @@ class SpecifyModelInputSpec(BaseInterfaceInputSpec):
     event_files = InputMultiPath(
         traits.List(File(exists=True)),
         mandatory=True,
-        xor=['subject_info', 'event_files'],
+        xor=['subject_info', 'event_files', 'bids_event_file'],
         desc='List of event description files 1, 2 or 3 '
         'column format corresponding to onsets, '
         'durations and amplitudes')

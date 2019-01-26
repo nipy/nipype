@@ -20,7 +20,7 @@ def test_SpecifyModel_inputs():
         ),
         event_files=dict(
             mandatory=True,
-            xor=['subject_info', 'event_files'],
+            xor=['subject_info', 'event_files', 'bids_event_file'],
         ),
         functional_runs=dict(
             copyfile=False,
@@ -33,7 +33,7 @@ def test_SpecifyModel_inputs():
         realignment_parameters=dict(copyfile=False, ),
         subject_info=dict(
             mandatory=True,
-            xor=['subject_info', 'event_files'],
+            xor=['subject_info', 'event_files', 'bids_event_file'],
         ),
         time_repetition=dict(mandatory=True, ),
     )
