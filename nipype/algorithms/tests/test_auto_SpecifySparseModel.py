@@ -20,7 +20,7 @@ def test_SpecifySparseModel_inputs():
         ),
         event_files=dict(
             mandatory=True,
-            xor=['subject_info', 'event_files'],
+            xor=['subject_info', 'event_files', 'bids_event_file'],
         ),
         functional_runs=dict(
             copyfile=False,
@@ -38,7 +38,7 @@ def test_SpecifySparseModel_inputs():
         stimuli_as_impulses=dict(usedefault=True, ),
         subject_info=dict(
             mandatory=True,
-            xor=['subject_info', 'event_files'],
+            xor=['subject_info', 'event_files', 'bids_event_file'],
         ),
         time_acquisition=dict(mandatory=True, ),
         time_repetition=dict(mandatory=True, ),
