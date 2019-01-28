@@ -79,7 +79,7 @@ class NonDaemonMixin(object):
     @property
     def daemon(self):
         return False
-    
+
     @daemon.setter
     def daemon(self, val):
         pass

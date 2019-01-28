@@ -12,8 +12,8 @@ In case of trouble, we encourage you to post on `NeuroStars <https://neurostars.
 NeuroStars.org is a platform similar to StackOverflow but dedicated to neuroinformatics.
 You can also post on the nipype developers mailing list: http://mail.python.org/mailman/listinfo/neuroimaging.
 As we are sharing a mailing list with the nipy community, please add ``[nipype]`` to the message title.
-Alternatively, you're welcome to chat with us in the Nipype 
-`Gitter <https://gitter.im/nipy/nipype>`_ channel or in the 
+Alternatively, you're welcome to chat with us in the Nipype
+`Gitter <https://gitter.im/nipy/nipype>`_ channel or in the
 BrainHack `Slack <https://brainhack.slack.com/messages/C1FR76RAL>`_ channel.
 (Click `here <https://brainhack-slack-invite.herokuapp.com>`_ to join the Slack workspace.)
 

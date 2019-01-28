@@ -111,14 +111,14 @@
       "name": "Clark, Michael G. "
     },
     {
-      "affiliation": "Dartmouth College",
-      "name": "Visconti di Oleggio Castello, Matteo",
-      "orcid": "0000-0001-7931-5272"
-    },
-    {
       "affiliation": "Mayo Clinic, Neurology, Rochester, MN, USA",
       "name": "Dayan, Michael",
       "orcid": "0000-0002-2666-0969"
+    },
+    {
+      "affiliation": "Dartmouth College",
+      "name": "Visconti di Oleggio Castello, Matteo",
+      "orcid": "0000-0001-7931-5272"
     },
     {
       "affiliation": "UC Berkeley",
@@ -142,14 +142,19 @@
       "name": "Berleant, Shoshana"
     },
     {
-      "affiliation": "UC San Diego",
-      "name": "Cipollini, Ben",
-      "orcid": "0000-0002-7782-0790"
+      "affiliation": "Institute for Biomedical Engineering, ETH and University of Zurich",
+      "name": "Horea, Christian",
+      "orcid": "0000-0001-7037-2449"
     },
     {
       "affiliation": "Dartmouth College: Hanover, NH, United States",
       "name": "Halchenko, Yaroslav O.",
       "orcid": "0000-0003-3456-2493"
+    },
+    {
+      "affiliation": "UC San Diego",
+      "name": "Cipollini, Ben",
+      "orcid": "0000-0002-7782-0790"
     },
     {
       "affiliation": "Montreal Neurological Institute and Hospital",
@@ -178,11 +183,6 @@
       "affiliation": "INRIA",
       "name": "Varoquaux, Gael",
       "orcid": "0000-0003-1076-5122"
-    },
-    {
-      "affiliation": "Institute for Biomedical Engineering, ETH and University of Zurich",
-      "name": "Horea, Christian",
-      "orcid": "0000-0001-7037-2449"
     },
     {
       "affiliation": "Athena EPI, Inria Sophia-Antipolis",
@@ -236,6 +236,11 @@
       "orcid": "0000-0003-2766-8425"
     },
     {
+      "affiliation": "University of Washington",
+      "name": "Richie-Halford, Adam",
+      "orcid": "0000-0001-9276-9084"
+    },
+    {
       "name": "Schwartz, Yannick"
     },
     {
@@ -256,6 +261,11 @@
     },
     {
       "name": "Kent, James"
+    },
+    {
+      "affiliation": "University of Texas at Austin",
+      "name": "De La Vega, Alejandro",
+      "orcid": "0000-0001-9062-3778"
     },
     {
       "name": "Watanabe, Aimi"
@@ -381,6 +391,16 @@
       "name": "Hallquist, Michael"
     },
     {
+      "affiliation": "Dartmouth College",
+      "name": "Ma, Feilong",
+      "orcid": "0000-0002-6838-3971"
+    },
+    {
+      "affiliation": "TIB \u2013 Leibniz Information Centre for Science and Technology and University Library, Hannover, Germany",
+      "name": "Leinweber, Katrin",
+      "orcid": "0000-0001-5135-5758"
+    },
+    {
       "affiliation": "Donders Institute for Brain, Cognition and Behavior, Center for Cognitive Neuroimaging",
       "name": "Chetverikov, Andrey",
       "orcid": "0000-0003-2767-6310"
@@ -460,11 +480,6 @@
       "affiliation": "Technische Universit\u00e4t Dresden, Faculty of Medicine, Department of Child and Adolescent Psychiatry",
       "name": "Geisler, Daniel",
       "orcid": "0000-0003-2076-5329"
-    },
-    {
-      "affiliation": "University of Texas at Austin",
-      "name": "De La Vega, Alejandro",
-      "orcid": "0000-0001-9062-3778"
     },
     {
       "affiliation": "University of illinois urbana champaign",

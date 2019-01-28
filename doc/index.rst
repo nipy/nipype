@@ -16,7 +16,7 @@
         these packages within a single workflow. Nipype provides an environment
         that encourages interactive exploration of algorithms from different
         packages (e.g., ANTS_, SPM_, FSL_, FreeSurfer_, Camino_, MRtrix_, MNE_, AFNI_,
-        Slicer_), eases the design of workflows within and between packages, and
+        Slicer_, DIPY_), eases the design of workflows within and between packages, and
         reduces the learning curve necessary to use different packages. Nipype is
         creating a collaborative platform for neuroimaging software development
         in a high-level language and addressing limitations of existing pipeline
