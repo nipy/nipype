@@ -263,6 +263,11 @@
       "name": "Kent, James"
     },
     {
+      "affiliation": "University of Texas at Austin",
+      "name": "De La Vega, Alejandro",
+      "orcid": "0000-0001-9062-3778"
+    },
+    {
       "name": "Watanabe, Aimi"
     },
     {
@@ -373,6 +378,11 @@
       "name": "Lampe, Leonie"
     },
     {
+      "affiliation": "TIB \u2013 Leibniz Information Centre for Science and Technology and University Library, Hannover, Germany",
+      "name": "Leinweber, Katrin",
+      "orcid": "0000-0001-5135-5758"
+    },
+    {
       "affiliation": "Leibniz Institute for Neurobiology",
       "name": "Stadler, J\u00f6rg",
       "orcid": "0000-0003-4313-129X"
@@ -384,11 +394,6 @@
     },
     {
       "name": "Hallquist, Michael"
-    },
-    {
-      "affiliation": "University of Texas at Austin",
-      "name": "De La Vega, Alejandro",
-      "orcid": "0000-0001-9062-3778"
     },
     {
       "affiliation": "Donders Institute for Brain, Cognition and Behavior, Center for Cognitive Neuroimaging",
@@ -594,11 +599,6 @@
       "affiliation": "MIT, HMS",
       "name": "Ghosh, Satrajit",
       "orcid": "0000-0002-5312-6729"
-    },
-    {
-      "affiliation": "TIB – Leibniz Information Centre for Science and Technology and University Library, Hannover, Germany",
-      "name": "Leinweber, Katrin",
-      "orcid": "0000-0001-5135-5758"
     }
   ],
   "keywords": [
