@@ -176,7 +176,6 @@ def bids_gen_info(bids_event_files,
             f_events = csv.DictReader(f, skipinitialspace=True, delimiter='\t')
             events = [{k: v for k, v in row.items()} for row in f_events]
         conditions = list(set([i[condition_column] for i in events]))
-        conditions = sorted(conditions)
         runinfo = Bunch(conditions=[], onsets=[], durations=[], amplitudes=[])
         for condition in conditions:
             selected_events = [i for i in events if i[condition_column]==condition]
