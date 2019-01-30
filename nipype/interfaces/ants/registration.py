@@ -305,8 +305,8 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     initial_moving_transform = InputMultiPath(
         File(exists=True),
         argstr='%s',
-        desc='A transform or a list of transforms that should be applied'
-        'before the registration begins. Note that, when a list is given,'
+        desc='A transform or a list of transforms that should be applied '
+        'before the registration begins. Note that, when a list is given, '
         'the transformations are applied in reverse order.',
         xor=['initial_moving_transform_com'])
     invert_initial_moving_transform = InputMultiPath(
@@ -323,9 +323,9 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         2,
         argstr='%s',
         xor=['initial_moving_transform'],
-        desc="Align the moving_image nad fixed_image befor registration using"
-        "the geometric center of the images (=0), the image intensities (=1),"
-        "or the origin of the images (=2)")
+        desc="Align the moving_image and fixed_image before registration using "
+        "the geometric center of the images (=0), the image intensities (=1), "
+        "or the origin of the images (=2).")
     metric_item_trait = traits.Enum("CC", "MeanSquares", "Demons", "GC", "MI",
                                     "Mattes")
     metric_stage_trait = traits.Either(metric_item_trait,
