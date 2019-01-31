@@ -4,7 +4,6 @@
 """This module provides interfaces for workbench CIFTI commands"""
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
-import os
 
 from ..base import (TraitedSpec, File, traits, CommandLineInputSpec)
 from .base import WBCommand
