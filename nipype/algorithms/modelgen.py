@@ -331,8 +331,7 @@ class SpecifyModel(BaseInterface):
      - amplitudes : lists of amplitudes for each event. This will be ignored by
        SPM's Level1Design.
 
-     The following two (tmod, pmod) will be ignored by any Level1Design class
-     other than SPM:
+     The following three (tmod, pmod, orth) will be ignored by any Level1Design class other than SPM:
 
      - tmod : lists of conditions that should be temporally modulated. Should
        default to None if not being used.
@@ -340,6 +339,11 @@ class SpecifyModel(BaseInterface):
        - name : name of parametric modulator
        - param : values of the modulator
        - poly : degree of modulation
+     - orth : lists of instructions to orthogonolise parametric regressors or 
+       not. Same as in SPM, use 'Yes' to indicate orthogonalisation, and 'No' 
+       to explicitly prevent it. Use None for conditions where it is not being 
+       used. Note that by default SPM will orthogonalise parametric regressors 
+       in the order in which they are entered.
 
     Alternatively, you can provide information through event files.
 
@@ -369,7 +373,7 @@ durations=[[0], [0]], pmod=[Bunch(name=['amp'], poly=[2], param=[[1, 2]]), \
 None])
     >>> evs_run3 = Bunch(conditions=['cond1', 'cond2'], onsets=[[20, 120], [80, 160]], \
 durations=[[0], [0]], pmod=[Bunch(name=['amp'], poly=[2], param=[[1, 2]]), \
-None])
+None], orth=['No', None])
     >>> s.inputs.subject_info = [evs_run2, evs_run3]
 
     """
@@ -414,6 +418,12 @@ None])
                     if hasattr(info, 'tmod') and info.tmod and \
                             len(info.tmod) > cid:
                         sessinfo[i]['cond'][cid]['tmod'] = info.tmod[cid]
+                    
+                    if hasattr(info, 'orth') and info.orth:
+                        if info.orth[cid] == 'Yes':
+                            sessinfo[i]['cond'][cid]['orth'] = 1
+                        elif info.orth[cid] == 'No':
+                            sessinfo[i]['cond'][cid]['orth'] = 0
 
                     if hasattr(info, 'pmod') and info.pmod and \
                             len(info.pmod) > cid:
