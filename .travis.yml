@@ -60,9 +60,6 @@ matrix:
           NIPYPE_EXTRAS="doc,tests,nipy,profiler"
           EXTRA_PIP_FLAGS="--pre $EXTRA_PIP_FLAGS --find-links $PRE_WHEELS"
           CI_SKIP_TEST=1
-  allow_failures:
-    - python: 2.7
-      env: INSTALL_DEB_DEPENDECIES=true NIPYPE_EXTRAS="doc,tests,nipy,profiler" EXTRA_PIP_FLAGS="--pre $EXTRA_PIP_FLAGS --find-links $PRE_WHEELS" CI_SKIP_TEST=1
 
 addons:
   apt:
