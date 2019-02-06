@@ -11,7 +11,8 @@ def test_generate():
     generate_boutiques_descriptor(module='nipype.interfaces.ants.registration',
                                   interface_name='ANTS',
                                   ignored_template_inputs=(),
-                                  docker_image=None,
-                                  docker_index=None,
+                                  container_image=None,
+                                  container_index=None,
+                                  container_type=None,
                                   verbose=False,
                                   ignore_template_numbers=False)

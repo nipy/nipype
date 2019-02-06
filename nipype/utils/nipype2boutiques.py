@@ -25,15 +25,18 @@ from ..scripts.instance import import_module
 
 
 def generate_boutiques_descriptor(
-        module, interface_name, ignored_template_inputs, docker_image,
-        docker_index, verbose, ignore_template_numbers):
+        module, interface_name, ignored_template_inputs, container_image,
+        container_index, container_type, verbose, ignore_template_numbers):
     '''
     Returns a JSON string containing a JSON Boutiques description of a Nipype interface.
     Arguments:
     * module: module where the Nipype interface is declared.
-    * interface: Nipype interface.
+    * interface_name: name of Nipype interface.
     * ignored_template_inputs: a list of input names that should be ignored in the generation of output path templates.
     * ignore_template_numbers: True if numbers must be ignored in output path creations.
+    * container_image: name of the container image where the tool is installed
+    * container_index: optional index where the image is available
+    * container_type: type of container image (Docker or Singularity)
     '''
 
     if not module:
@@ -59,13 +62,15 @@ def generate_boutiques_descriptor(
     tool_desc[
         'description'] = interface_name + ", as implemented in Nipype (module: " + module_name + ", interface: " + interface_name + ")."
     tool_desc['inputs'] = []
-    tool_desc['outputs'] = []
-    tool_desc['tool-version'] = interface.version
-    tool_desc['schema-version'] = '0.2-snapshot'
-    if docker_image:
-        tool_desc['docker-image'] = docker_image
-    if docker_index:
-        tool_desc['docker-index'] = docker_index
+    tool_desc['output-files'] = []
+    tool_desc['tool-version'] = interface.version if interface.version is not None else 'undefined'
+    tool_desc['schema-version'] = '0.5'
+    if container_image:
+        tool_desc['container-image'] = {}
+        tool_desc['container-image']['image'] = container_image
+        tool_desc['container-image']['type'] = container_type
+        if container_index:
+            tool_desc['container-image']['index'] = container_index
 
     # Generates tool inputs
     for name, spec in sorted(interface.inputs.traits(transient=None).items()):
@@ -73,7 +78,7 @@ def generate_boutiques_descriptor(
                                     ignored_template_inputs, verbose,
                                     ignore_template_numbers)
         tool_desc['inputs'].append(input)
-        tool_desc['command-line'] += input['command-line-key'] + " "
+        tool_desc['command-line'] += input['value-key'] + " "
         if verbose:
             print("-> Adding input " + input['name'])
 
@@ -82,13 +87,13 @@ def generate_boutiques_descriptor(
         output = get_boutiques_output(name, interface, tool_desc['inputs'],
                                       verbose)
         if output['path-template'] != "":
-            tool_desc['outputs'].append(output)
+            tool_desc['output-files'].append(output)
             if verbose:
                 print("-> Adding output " + output['name'])
         elif verbose:
             print("xx Skipping output " + output['name'] +
                   " with no path template.")
-    if tool_desc['outputs'] == []:
+    if tool_desc['output-files'] == []:
         raise Exception("Tool has no output.")
 
     # Removes all temporary values from inputs (otherwise they will
@@ -125,7 +130,7 @@ def get_boutiques_input(inputs, interface, input_name, spec,
     input['name'] = input_name.replace('_', ' ').capitalize()
     input['type'] = get_type_from_spec_info(spec_info)
     input['list'] = is_list(spec_info)
-    input['command-line-key'] = "[" + input_name.upper(
+    input['value-key'] = "[" + input_name.upper(
     ) + "]"  # assumes that input names are unique
     input['command-line-flag'] = ("--%s" % input_name + " ").strip()
     input['tempvalue'] = None
@@ -178,7 +183,6 @@ def get_boutiques_output(name, interface, tool_inputs, verbose=False):
     output = {}
     output['name'] = name.replace('_', ' ').capitalize()
     output['id'] = name
-    output['type'] = "File"
     output['path-template'] = ""
     output[
         'optional'] = True  # no real way to determine if an output is always produced, regardless of the input values.
@@ -201,7 +205,7 @@ def get_boutiques_output(name, interface, tool_inputs, verbose=False):
             if str(input_value) in output_value:
                 output_value = os.path.basename(
                     output_value.replace(input_value,
-                                         input['command-line-key'])
+                                         input['value-key'])
                 )  # FIXME: this only works if output is written in the current directory
         output['path-template'] = os.path.basename(output_value)
     return output
