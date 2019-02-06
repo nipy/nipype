@@ -182,7 +182,16 @@ def get_boutiques_output(name, interface, tool_inputs, verbose=False):
     """
     output = {}
     output['name'] = name.replace('_', ' ').capitalize()
-    output['id'] = name
+
+    # Check if the output name was already used as an input name
+    # If so, append '_outfile' to the end of the ID
+    unique_id = True
+    for inp in tool_inputs:
+        if inp['id'] == name:
+            unique_id = False
+            break
+    output['id'] = name if unique_id else name + '_outfile'
+
     output['path-template'] = ""
     output[
         'optional'] = True  # no real way to determine if an output is always produced, regardless of the input values.
