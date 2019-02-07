@@ -101,6 +101,10 @@ def generate_boutiques_descriptor(
     for input in tool_desc['inputs']:
         del input['tempvalue']
 
+    # Save descriptor to a file
+    with open(interface_name + '.json', 'w') as outfile:
+        json.dump(tool_desc, outfile)
+
     return json.dumps(tool_desc, indent=4, separators=(',', ': '))
 
 
@@ -128,7 +132,10 @@ def get_boutiques_input(inputs, interface, input_name, spec,
     input = {}
     input['id'] = input_name
     input['name'] = input_name.replace('_', ' ').capitalize()
-    input['type'] = get_type_from_spec_info(spec_info)
+
+    # Figure out the input type from its handler type
+    input['type'] = get_type_from_handler_type(spec.handler)
+
     input['list'] = is_list(spec_info)
     input['value-key'] = "[" + input_name.upper(
     ) + "]"  # assumes that input names are unique
@@ -145,6 +152,14 @@ def get_boutiques_input(inputs, interface, input_name, spec,
     if spec.usedefault:
         input['default-value'] = spec.default_value()[1]
 
+    try:
+        value_choices = spec.handler.values
+    except AttributeError:
+        pass
+    else:
+        if value_choices is not None:
+            input['value-choices'] = value_choices
+
     # Create unique, temporary value.
     temp_value = must_generate_value(input_name, input['type'],
                                      ignored_template_inputs, spec_info, spec,
@@ -158,9 +173,9 @@ def get_boutiques_input(inputs, interface, input_name, spec,
                   str(tempvalue))
 
     # Now that temp values have been generated, set Boolean types to
-    # Number (there is no Boolean type in Boutiques)
+    # Flag (there is no Boolean type in Boutiques)
     if input['type'] == "Boolean":
-        input['type'] = "Number"
+        input['type'] = "Flag"
 
     return input
 
@@ -217,9 +232,16 @@ def get_boutiques_output(name, interface, tool_inputs, verbose=False):
                                          input['value-key'])
                 )  # FIXME: this only works if output is written in the current directory
         output['path-template'] = os.path.basename(output_value)
+
+    if not output_value:
+        # Look for an input with the same name and use this as the path template
+        for input in tool_inputs:
+            if input['id'] == name:
+                output['path-template'] = input['value-key']
     return output
 
 
+# TODO remove this once we know get_type_from_handler_type works well
 def get_type_from_spec_info(spec_info):
     '''
     Returns an input type from the spec info. There must be a better
@@ -234,6 +256,17 @@ def get_type_from_spec_info(spec_info):
         return "Boolean"
     return "String"
 
+
+def get_type_from_handler_type(handler):
+    handler_type = type(handler).__name__
+    if handler_type == "File" or handler_type == "Directory":
+        return "File"
+    elif handler_type == "Int" or handler_type == "Float":
+        return "Number"
+    elif handler_type == "Bool":
+        return "Flag"
+    else:
+        return "String"
 
 def is_list(spec_info):
     '''
