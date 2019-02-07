@@ -63,7 +63,7 @@ def generate_boutiques_descriptor(
         'description'] = interface_name + ", as implemented in Nipype (module: " + module_name + ", interface: " + interface_name + ")."
     tool_desc['inputs'] = []
     tool_desc['output-files'] = []
-    tool_desc['tool-version'] = interface.version if interface.version is not None else 'undefined'
+    tool_desc['tool-version'] = interface.version if interface.version is not None else "No version provided."
     tool_desc['schema-version'] = '0.5'
     if container_image:
         tool_desc['container-image'] = {}
@@ -84,7 +84,7 @@ def generate_boutiques_descriptor(
 
     # Generates tool outputs
     for name, spec in sorted(outputs.traits(transient=None).items()):
-        output = get_boutiques_output(name, interface, tool_desc['inputs'],
+        output = get_boutiques_output(outputs, name, spec, interface, tool_desc['inputs'],
                                       verbose)
         if output['path-template'] != "":
             tool_desc['output-files'].append(output)
@@ -105,6 +105,8 @@ def generate_boutiques_descriptor(
     with open(interface_name + '.json', 'w') as outfile:
         json.dump(tool_desc, outfile)
 
+    print("NOTE: Descriptors produced by this script may not entirely conform to the Nipype interface "
+          "specs. Please check that the descriptor is correct before using it.")
     return json.dumps(tool_desc, indent=4, separators=(',', ': '))
 
 
@@ -125,8 +127,6 @@ def get_boutiques_input(inputs, interface, input_name, spec,
     Assumes that:
       * Input names are unique.
     """
-    if not spec.desc:
-        spec.desc = "No description provided."
     spec_info = spec.full_info(inputs, input_name, None)
 
     input = {}
@@ -134,17 +134,17 @@ def get_boutiques_input(inputs, interface, input_name, spec,
     input['name'] = input_name.replace('_', ' ').capitalize()
 
     # Figure out the input type from its handler type
-    input['type'] = get_type_from_handler_type(spec.handler)
+    input_type = get_type_from_handler_type(spec.handler)
+    input['type'] = input_type[0]
+    if input_type[1]:
+        input['integer'] = True
 
     input['list'] = is_list(spec_info)
     input['value-key'] = "[" + input_name.upper(
     ) + "]"  # assumes that input names are unique
     input['command-line-flag'] = ("--%s" % input_name + " ").strip()
     input['tempvalue'] = None
-    input['description'] = spec_info.capitalize(
-    ) + ". " + spec.desc.capitalize()
-    if not input['description'].endswith('.'):
-        input['description'] += '.'
+    input['description'] = get_description_from_spec(inputs, input_name, spec)
     if not (hasattr(spec, "mandatory") and spec.mandatory):
         input['optional'] = True
     else:
@@ -180,12 +180,14 @@ def get_boutiques_input(inputs, interface, input_name, spec,
     return input
 
 
-def get_boutiques_output(name, interface, tool_inputs, verbose=False):
+def get_boutiques_output(outputs, name, spec, interface, tool_inputs, verbose=False):
     """
     Returns a dictionary containing the Boutiques output corresponding to a Nipype output.
 
     Args:
+      * outputs: outputs of the Nipype interface.
       * name: name of the Nipype output.
+      * spec: Nipype output spec.
       * interface: Nipype interface.
       * tool_inputs: list of tool inputs (as produced by method get_boutiques_input).
 
@@ -211,9 +213,13 @@ def get_boutiques_output(name, interface, tool_inputs, verbose=False):
     output[
         'optional'] = True  # no real way to determine if an output is always produced, regardless of the input values.
 
+    output['description'] = get_description_from_spec(outputs, name, spec)
+
     # Path template creation.
 
     output_value = interface._list_outputs()[name]
+
+    # If output value is defined, use its basename
     if output_value != "" and isinstance(
             output_value,
             str):  # FIXME: this crashes when there are multiple output values.
@@ -233,11 +239,20 @@ def get_boutiques_output(name, interface, tool_inputs, verbose=False):
                 )  # FIXME: this only works if output is written in the current directory
         output['path-template'] = os.path.basename(output_value)
 
+    # If output value is undefined, create a placeholder for the path template
     if not output_value:
         # Look for an input with the same name and use this as the path template
+        found = False
         for input in tool_inputs:
             if input['id'] == name:
                 output['path-template'] = input['value-key']
+                found = True
+                break
+        # If no input with the same name was found, warn the user they should provide it manually
+        if not found:
+            print("WARNING: Could not determine path template for output %s. Please provide one for the "
+                  "descriptor manually." % name)
+            output['path-template'] = "WARNING: No path template provided."
     return output
 
 
@@ -258,15 +273,21 @@ def get_type_from_spec_info(spec_info):
 
 
 def get_type_from_handler_type(handler):
+    '''
+    Gets the input type from the spec handler type.
+    Returns a tuple containing the type and a boolean to specify
+    if the type is an integer.
+    '''
     handler_type = type(handler).__name__
+    print("TYPE", handler_type)
     if handler_type == "File" or handler_type == "Directory":
-        return "File"
+        return "File", False
     elif handler_type == "Int" or handler_type == "Float":
-        return "Number"
+        return "Number", handler_type == "Int"
     elif handler_type == "Bool":
-        return "Flag"
+        return "Flag", False
     else:
-        return "String"
+        return "String", False
 
 def is_list(spec_info):
     '''
@@ -336,3 +357,20 @@ def must_generate_value(name, type, ignored_template_inputs, spec_info, spec,
     if not ignored_template_inputs:
         return True
     return not (name in ignored_template_inputs)
+
+
+def get_description_from_spec(object, name, spec):
+    '''
+    Generates a description based on the input or output spec.
+    '''
+    if not spec.desc:
+        spec.desc = "No description provided."
+    spec_info = spec.full_info(object, name, None)
+
+    boutiques_description = (spec_info.capitalize(
+    ) + ". " + spec.desc.capitalize()).replace("\n", '')
+
+    if not boutiques_description.endswith('.'):
+        boutiques_description += '.'
+
+    return boutiques_description
