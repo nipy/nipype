@@ -26,7 +26,7 @@ from ..scripts.instance import import_module
 
 def generate_boutiques_descriptor(
         module, interface_name, ignored_template_inputs, container_image,
-        container_index, container_type, verbose, ignore_template_numbers):
+        container_index, container_type, verbose, ignore_template_numbers, save):
     '''
     Returns a JSON string containing a JSON Boutiques description of a Nipype interface.
     Arguments:
@@ -37,6 +37,7 @@ def generate_boutiques_descriptor(
     * container_image: name of the container image where the tool is installed
     * container_index: optional index where the image is available
     * container_type: type of container image (Docker or Singularity)
+    * save: True if you want to save descriptor to a file
     '''
 
     if not module:
@@ -102,8 +103,11 @@ def generate_boutiques_descriptor(
         del input['tempvalue']
 
     # Save descriptor to a file
-    with open(interface_name + '.json', 'w') as outfile:
-        json.dump(tool_desc, outfile)
+    if save:
+        with open(interface_name + '.json', 'w') as outfile:
+            json.dump(tool_desc, outfile, indent=4, separators=(',', ': '))
+        if verbose:
+            print("-> Descriptor saved to file " + outfile.name)
 
     print("NOTE: Descriptors produced by this script may not entirely conform to the Nipype interface "
           "specs. Please check that the descriptor is correct before using it.")
@@ -142,7 +146,14 @@ def get_boutiques_input(inputs, interface, input_name, spec,
     input['list'] = is_list(spec_info)
     input['value-key'] = "[" + input_name.upper(
     ) + "]"  # assumes that input names are unique
-    input['command-line-flag'] = ("--%s" % input_name + " ").strip()
+
+    # Add the command line flag specified by argstr
+    # If no argstr is provided and input type is Flag, create a flag from the name
+    if spec.argstr and spec.argstr.split("%")[0]:
+        input['command-line-flag'] = spec.argstr.split("%")[0].strip()
+    elif input['type'] == "Flag":
+        input['command-line-flag'] = ("--%s" % input_name + " ").strip()
+
     input['tempvalue'] = None
     input['description'] = get_description_from_spec(inputs, input_name, spec)
     if not (hasattr(spec, "mandatory") and spec.mandatory):
@@ -159,6 +170,12 @@ def get_boutiques_input(inputs, interface, input_name, spec,
     else:
         if value_choices is not None:
             input['value-choices'] = value_choices
+
+    if spec.requires is not None:
+        input['requires-inputs'] = spec.requires
+
+    if spec.xor is not None:
+        input['disables-inputs'] = spec.xor
 
     # Create unique, temporary value.
     temp_value = must_generate_value(input_name, input['type'],
@@ -279,7 +296,6 @@ def get_type_from_handler_type(handler):
     if the type is an integer.
     '''
     handler_type = type(handler).__name__
-    print("TYPE", handler_type)
     if handler_type == "File" or handler_type == "Directory":
         return "File", False
     elif handler_type == "Int" or handler_type == "Float":
