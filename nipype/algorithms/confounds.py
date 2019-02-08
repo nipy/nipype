@@ -400,7 +400,7 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         'components_file.txt',
         usedefault=True,
         desc='Filename to store physiological components')
-    num_components = traits.Either('all', traits.Int,
+    num_components = traits.Either('all', traits.Range(low=1),
         xor=['variance_threshold'],
         desc='Number of components to return from the decomposition. If '
              '`num_components` is `all`, then all components will be '
@@ -1280,7 +1280,7 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
         try:
             u, s, _ = fallback_svd(M, full_matrices=False)
         except np.linalg.LinAlgError:
-            if self.inputs.failure_mode == 'error':
+            if failure_mode == 'error':
                 raise
             if components_criterion >= 1:
                 u = np.empty((M.shape[0], components_criterion),
@@ -1288,26 +1288,28 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
             else:
                 continue
 
-        variance_explained = np.array([value**2/np.sum(s**2) for value in s])
+        variance_explained = [value ** 2 / np.sum(s ** 2) for value in s]
         cumulative_variance_explained = np.cumsum(variance_explained)
+
+        num_components = int(components_criterion)
         if 0 < components_criterion < 1:
             num_components = np.searchsorted(cumulative_variance_explained,
                                              components_criterion) + 1
         elif components_criterion == -1:
             num_components = len(s)
-        else:
-            num_components = int(components_criterion)
+
+        num_components = int(num_components)
+        # check whether num_components == 0, break if so
         if components is None:
             components = u[:, :num_components]
             metadata = OrderedDict()
-            metadata['mask'] = np.array([i] * len(s))
+            metadata['mask'] = [i] * len(s)
             metadata['singular_value'] = s
             metadata['variance_explained'] = variance_explained
             metadata['cumulative_variance_explained'] = (
                 cumulative_variance_explained)
-            metadata['retained'] = np.array(
-                [True if i < num_components
-                 else False for i in range(len(s))], dtype='bool')
+            metadata['retained'] = [
+                i < num_components for i in range(len(s))]
         else:
             components = np.hstack((components, u[:, :num_components]))
             metadata['mask'] = np.hstack((metadata['mask'],
@@ -1324,8 +1326,8 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
                                               [True if i < num_components
                                                else False
                                                for i in range(len(s))]))
-    if components is None and num_components != 0:
-        if self.inputs.failure_mode == 'error':
+    if components is None:
+        if failure_mode == 'error':
             raise ValueError('No components found')
         components = np.ones((M.shape[0], num_components),
                              dtype=np.float32) * np.nan
