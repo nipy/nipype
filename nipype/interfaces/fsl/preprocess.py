@@ -2020,6 +2020,9 @@ class FIRST(FSLCommand):
 
     def _gen_fname(self, basename):
         path, outname, ext = split_filename(self.inputs.out_file)
+        outpath = os.getcwd()
+        if path:
+            outpath = op.abspath(path)
 
         method = 'none'
         if isdefined(self.inputs.method) and self.inputs.method != 'none':
@@ -2033,24 +2036,28 @@ class FIRST(FSLCommand):
             method = thres.replace('.', '')
 
         if basename == 'original_segmentations':
-            return op.abspath('%s_all_%s_origsegs.nii.gz' % (outname, method))
+            return op.join(outpath, '%s_all_%s_origsegs.nii.gz' % (outname, method))
         if basename == 'segmentation_file':
-            return op.abspath('%s_all_%s_firstseg.nii.gz' % (outname, method))
+            return op.join(outpath, '%s_all_%s_firstseg.nii.gz' % (outname, method))
 
         return None
 
     def _gen_mesh_names(self, name, structures):
         path, prefix, ext = split_filename(self.inputs.out_file)
+        outpath = os.getcwd()
+        if path:
+            outpath = op.abspath(path)
+
         if name == 'vtk_surfaces':
             vtks = list()
             for struct in structures:
                 vtk = prefix + '-' + struct + '_first.vtk'
-                vtks.append(op.abspath(vtk))
+                vtks.append(op.join(outpath, vtk))
             return vtks
         if name == 'bvars':
             bvars = list()
             for struct in structures:
                 bvar = prefix + '-' + struct + '_first.bvars'
-                bvars.append(op.abspath(bvar))
+                bvars.append(op.join(outpath, bvar))
             return bvars
         return None
