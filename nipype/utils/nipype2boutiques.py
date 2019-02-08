@@ -138,12 +138,48 @@ def get_boutiques_input(inputs, interface, input_name, spec,
     input['name'] = input_name.replace('_', ' ').capitalize()
 
     # Figure out the input type from its handler type
-    input_type = get_type_from_handler_type(spec.handler)
-    input['type'] = input_type[0]
-    if input_type[1]:
-        input['integer'] = True
+    handler_type = type(spec.handler).__name__
 
-    input['list'] = is_list(spec_info)
+    if handler_type == "File" or handler_type == "Directory":
+        input['type'] = "File"
+    elif handler_type == "Int":
+        input['type'] = "Number"
+        input['integer'] = True
+    elif handler_type == "Float":
+        input['type'] = "Number"
+    elif handler_type == "Bool":
+        input['type'] = "Flag"
+    else:
+        input['type'] = "String"
+
+    # Deal with range inputs
+    if handler_type == "Range":
+        input['type'] = "Number"
+        if spec.handler.low is not None:
+            input['minimum'] = spec.handler.low
+        if spec.handler.high is not None:
+            input['maximum'] = spec.handler.high
+        if spec.handler.exclude_low is not None:
+            input['exclusive-minimum'] = spec.handler.exclude_low
+        if spec.handler.exclude_high is not None:
+            input['exclusive-maximum'] = spec.handler.exclude_high
+
+    # Deal with list inputs
+    if handler_type == "List":
+        input['list'] = True
+        trait_type = type(spec.handler.item_trait.trait_type).__name__
+        if trait_type == "Int":
+            input['integer'] = True
+            input['type'] = "Number"
+        elif trait_type == "Float":
+            input['type'] = "Number"
+        else:
+            input['type'] = "String"
+        if spec.handler.minlen is not None:
+            input['min-list-entries'] = spec.handler.minlen
+        if spec.handler.maxlen is not None:
+            input['max-list-entries'] = spec.handler.maxlen
+
     input['value-key'] = "[" + input_name.upper(
     ) + "]"  # assumes that input names are unique
 
@@ -234,7 +270,10 @@ def get_boutiques_output(outputs, name, spec, interface, tool_inputs, verbose=Fa
 
     # Path template creation.
 
-    output_value = interface._list_outputs()[name]
+    try:
+        output_value = interface._list_outputs()[name]
+    except TypeError:
+        output_value = None
 
     # If output value is defined, use its basename
     if output_value != "" and isinstance(
@@ -273,7 +312,7 @@ def get_boutiques_output(outputs, name, spec, interface, tool_inputs, verbose=Fa
     return output
 
 
-# TODO remove this once we know get_type_from_handler_type works well
+# TODO remove this
 def get_type_from_spec_info(spec_info):
     '''
     Returns an input type from the spec info. There must be a better
@@ -289,22 +328,7 @@ def get_type_from_spec_info(spec_info):
     return "String"
 
 
-def get_type_from_handler_type(handler):
-    '''
-    Gets the input type from the spec handler type.
-    Returns a tuple containing the type and a boolean to specify
-    if the type is an integer.
-    '''
-    handler_type = type(handler).__name__
-    if handler_type == "File" or handler_type == "Directory":
-        return "File", False
-    elif handler_type == "Int" or handler_type == "Float":
-        return "Number", handler_type == "Int"
-    elif handler_type == "Bool":
-        return "Flag", False
-    else:
-        return "String", False
-
+# TODO remove this
 def is_list(spec_info):
     '''
     Returns True if the spec info looks like it describes a list
