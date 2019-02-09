@@ -24,7 +24,8 @@ from .. import config, logging
 from ..external.due import BibTeX
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
                                BaseInterfaceInputSpec, File, isdefined,
-                               InputMultiPath, OutputMultiPath)
+                               InputMultiPath, OutputMultiPath,
+                               SimpleInterface)
 from ..utils import NUMPY_MMAP
 from ..utils.misc import normalize_mc_params
 
@@ -462,7 +463,7 @@ class CompCorOutputSpec(TraitedSpec):
     metadata_file = File(desc='text file containing component metadata')
 
 
-class CompCor(BaseInterface):
+class CompCor(SimpleInterface):
     """
     Interface with core CompCor computation, used in aCompCor and tCompCor
 
@@ -609,9 +610,17 @@ class CompCor(BaseInterface):
             delimiter='\t',
             header='\t'.join(components_header),
             comments='')
+        self._results['components_file'] = os.path.abspath(
+            self.inputs.components_file)
 
-        if self.inputs.pre_filter and self.inputs.save_pre_filter:
-            pre_filter_file = self._list_outputs()['pre_filter_file']
+        save_pre_filter = self.inputs.save_pre_filter
+        if save_pre_filter:
+            if isinstance(save_pre_filter, bool):
+                pre_filter_file = os.path.abspath('pre_filter.tsv')
+            else:
+                pre_filter_file = save_pre_filter
+            self._results['pre_filter_file'] = pre_filter_file
+        if self.inputs.pre_filter and save_pre_filter:
             ftype = {
                 'polynomial': 'Legendre',
                 'cosine': 'Cosine'
@@ -638,8 +647,12 @@ class CompCor(BaseInterface):
                 header='\t'.join(header),
                 comments='')
 
-        if self.inputs.save_metadata:
-            metadata_file = self._list_outputs()['metadata_file']
+        save_metadata = self.inputs.save_metadata
+        if save_metadata:
+            if isinstance(save_metadata, bool):
+                metadata_file = os.path.abspath('component_metadata.tsv')
+            else:
+                metadata_file = save_metadata
             components_names = np.empty(len(metadata['mask']),
                 dtype='object_')
             retained = np.where(metadata['retained'])
@@ -647,6 +660,7 @@ class CompCor(BaseInterface):
             components_names[retained] = components_header
             components_names[not_retained] = ([
                 'dropped{}'.format(i) for i in range(len(not_retained[0]))])
+            self._results['metadata_file'] = metadata_file
             with open(metadata_file, 'w') as f:
                 f.write('{}\t{}\t{}\t{}\t{}\n'.format('component',
                         *list(metadata.keys())))
@@ -658,26 +672,6 @@ class CompCor(BaseInterface):
 
     def _process_masks(self, mask_images, timeseries=None):
         return mask_images
-
-    def _list_outputs(self):
-
-        outputs = self._outputs().get()
-        outputs['components_file'] = os.path.abspath(
-            self.inputs.components_file)
-
-        save_pre_filter = self.inputs.save_pre_filter
-        if save_pre_filter:
-            if isinstance(save_pre_filter, bool):
-                save_pre_filter = os.path.abspath('pre_filter.tsv')
-            outputs['pre_filter_file'] = save_pre_filter
-
-        save_metadata = self.inputs.save_metadata
-        if save_metadata:
-            if isinstance(save_metadata, bool):
-                save_metadata = os.path.abspath('component_metadata.tsv')
-            outputs['metadata_file'] = save_metadata
-
-        return outputs
 
     def _make_headers(self, num_col):
         header = self.inputs.header_prefix if \
