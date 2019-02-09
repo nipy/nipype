@@ -610,7 +610,8 @@ class CompCor(SimpleInterface):
             delimiter='\t',
             header='\t'.join(components_header),
             comments='')
-        self._results['components_file'] = components_file
+        self._results['components_file'] = os.path.abspath(
+            self.inputs.components_file)
 
         save_pre_filter = self.inputs.save_pre_filter
         if save_pre_filter:
