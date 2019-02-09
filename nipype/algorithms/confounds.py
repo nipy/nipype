@@ -652,10 +652,13 @@ class CompCor(SimpleInterface):
                 metadata_file = os.path.abspath('component_metadata.tsv')
             else:
                 metadata_file = save_metadata
-            components_names = np.array(dtype='object_',
-                object=['dropped' for i in range(len(metadata['mask']))])
-            components_names[np.where(metadata['retained'])] = (
-                components_header)
+            components_names = np.empty(len(metadata['mask']),
+                dtype='object_')
+            retained = np.where(metadata['retained'])
+            not_retained = np.where(np.logical_not(metadata['retained']))
+            components_names[retained] = components_header
+            components_names[not_retained] = ([
+                'dropped{}'.format(i) for i in range(len(not_retained[0]))])
             self._results['metadata_file'] = metadata_file
             with open(metadata_file, 'w') as f:
                 f.write('{}\t{}\t{}\t{}\t{}\n'.format('component',
@@ -1288,7 +1291,7 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
             else:
                 continue
 
-        variance_explained = [value ** 2 / np.sum(s ** 2) for value in s]
+        variance_explained = (s ** 2) / np.sum(s ** 2)
         cumulative_variance_explained = np.cumsum(variance_explained)
 
         num_components = int(components_criterion)
@@ -1299,7 +1302,8 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
             num_components = len(s)
 
         num_components = int(num_components)
-        # check whether num_components == 0, break if so
+        if num_components == 0:
+            break
         if components is None:
             components = u[:, :num_components]
             metadata = OrderedDict()
@@ -1308,12 +1312,10 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
             metadata['variance_explained'] = variance_explained
             metadata['cumulative_variance_explained'] = (
                 cumulative_variance_explained)
-            metadata['retained'] = [
-                i < num_components for i in range(len(s))]
+            metadata['retained'] = [i < num_components for i in range(len(s))]
         else:
             components = np.hstack((components, u[:, :num_components]))
-            metadata['mask'] = np.hstack((metadata['mask'],
-                                          [i] * len(s)))
+            metadata['mask'] = metadata['mask'] + [i] * len(s)
             metadata['singular_value'] = (
                 np.hstack((metadata['singular_value'], s)))
             metadata['variance_explained'] = (
@@ -1322,15 +1324,13 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
             metadata['cumulative_variance_explained'] = (
                 np.hstack((metadata['cumulative_variance_explained'],
                            cumulative_variance_explained)))
-            metadata['retained'] = np.hstack((metadata['retained'],
-                                              [True if i < num_components
-                                               else False
-                                               for i in range(len(s))]))
+            metadata['retained'] = (metadata['retained']
+                                    + [i < num_components
+                                       for i in range(len(s))])
     if components is None:
         if failure_mode == 'error':
             raise ValueError('No components found')
-        components = np.ones((M.shape[0], num_components),
-                             dtype=np.float32) * np.nan
+        components = np.full((M.shape[0], num_components), np.NaN)
     return components, basis, metadata
 
 
