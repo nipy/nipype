@@ -15,4 +15,5 @@ def test_generate():
                                   container_index=None,
                                   container_type=None,
                                   verbose=False,
-                                  ignore_template_numbers=False)
+                                  ignore_template_numbers=False,
+                                  save=False)

@@ -78,10 +78,17 @@ def generate_boutiques_descriptor(
         input = get_boutiques_input(inputs, interface, name, spec,
                                     ignored_template_inputs, verbose,
                                     ignore_template_numbers)
-        tool_desc['inputs'].append(input)
-        tool_desc['command-line'] += input['value-key'] + " "
-        if verbose:
-            print("-> Adding input " + input['name'])
+        if isinstance(input, list):
+            for i in input:
+                tool_desc['inputs'].append(i)
+                tool_desc['command-line'] += i['value-key'] + " "
+                if verbose:
+                    print("-> Adding input " + i['name'])
+        else:
+            tool_desc['inputs'].append(input)
+            tool_desc['command-line'] += input['value-key'] + " "
+            if verbose:
+                print("-> Adding input " + input['name'])
 
     # Generates tool outputs
     for name, spec in sorted(outputs.traits(transient=None).items()):
@@ -116,7 +123,7 @@ def generate_boutiques_descriptor(
 
 def get_boutiques_input(inputs, interface, input_name, spec,
                         ignored_template_inputs, verbose,
-                        ignore_template_numbers):
+                        ignore_template_numbers, handler=None, input_number=None):
     """
     Returns a dictionary containing the Boutiques input corresponding to a Nipype intput.
 
@@ -134,11 +141,32 @@ def get_boutiques_input(inputs, interface, input_name, spec,
     spec_info = spec.full_info(inputs, input_name, None)
 
     input = {}
-    input['id'] = input_name
+
+    if input_number is not None:
+        input['id'] = input_name + "_" + str(input_number + 1)
+    else:
+        input['id'] = input_name
+
     input['name'] = input_name.replace('_', ' ').capitalize()
 
+    if handler is None:
+        trait_handler = spec.handler
+    else:
+        trait_handler = handler
+
     # Figure out the input type from its handler type
-    handler_type = type(spec.handler).__name__
+    handler_type = type(trait_handler).__name__
+
+    # Deal with compound traits
+    # TODO create a mutually exclusive group for members of compound traits
+    if handler_type == "TraitCompound":
+        input_list = []
+        # Recursively create an input for each trait
+        for i in range(0, len(trait_handler.handlers)):
+            input_list.append(get_boutiques_input(inputs, interface, input_name, spec,
+                                                  ignored_template_inputs, verbose,
+                                                  ignore_template_numbers, trait_handler.handlers[i], i))
+        return input_list
 
     if handler_type == "File" or handler_type == "Directory":
         input['type'] = "File"
@@ -155,19 +183,19 @@ def get_boutiques_input(inputs, interface, input_name, spec,
     # Deal with range inputs
     if handler_type == "Range":
         input['type'] = "Number"
-        if spec.handler.low is not None:
-            input['minimum'] = spec.handler.low
-        if spec.handler.high is not None:
-            input['maximum'] = spec.handler.high
-        if spec.handler.exclude_low is not None:
-            input['exclusive-minimum'] = spec.handler.exclude_low
-        if spec.handler.exclude_high is not None:
-            input['exclusive-maximum'] = spec.handler.exclude_high
+        if trait_handler.low is not None:
+            input['minimum'] = trait_handler.low
+        if trait_handler.high is not None:
+            input['maximum'] = trait_handler.high
+        if trait_handler.exclude_low is not None:
+            input['exclusive-minimum'] = trait_handler.exclude_low
+        if trait_handler.exclude_high is not None:
+            input['exclusive-maximum'] = trait_handler.exclude_high
 
     # Deal with list inputs
     if handler_type == "List":
         input['list'] = True
-        trait_type = type(spec.handler.item_trait.trait_type).__name__
+        trait_type = type(trait_handler.item_trait.trait_type).__name__
         if trait_type == "Int":
             input['integer'] = True
             input['type'] = "Number"
@@ -175,10 +203,10 @@ def get_boutiques_input(inputs, interface, input_name, spec,
             input['type'] = "Number"
         else:
             input['type'] = "String"
-        if spec.handler.minlen is not None:
-            input['min-list-entries'] = spec.handler.minlen
-        if spec.handler.maxlen is not None:
-            input['max-list-entries'] = spec.handler.maxlen
+        if trait_handler.minlen is not None:
+            input['min-list-entries'] = trait_handler.minlen
+        if trait_handler.maxlen is not None:
+            input['max-list-entries'] = trait_handler.maxlen
 
     input['value-key'] = "[" + input_name.upper(
     ) + "]"  # assumes that input names are unique
@@ -200,7 +228,7 @@ def get_boutiques_input(inputs, interface, input_name, spec,
         input['default-value'] = spec.default_value()[1]
 
     try:
-        value_choices = spec.handler.values
+        value_choices = trait_handler.values
     except AttributeError:
         pass
     else:
@@ -211,7 +239,10 @@ def get_boutiques_input(inputs, interface, input_name, spec,
         input['requires-inputs'] = spec.requires
 
     if spec.xor is not None:
-        input['disables-inputs'] = spec.xor
+        input['disables-inputs'] = list(spec.xor)
+        # Make sure input does not disable itself
+        if input['id'] in input['disables-inputs']:
+            input['disables-inputs'].remove(input['id'])
 
     # Create unique, temporary value.
     temp_value = must_generate_value(input_name, input['type'],
@@ -304,11 +335,9 @@ def get_boutiques_output(outputs, name, spec, interface, tool_inputs, verbose=Fa
                 output['path-template'] = input['value-key']
                 found = True
                 break
-        # If no input with the same name was found, warn the user they should provide it manually
+        # If no input with the same name was found, use the output ID
         if not found:
-            print("WARNING: Could not determine path template for output %s. Please provide one for the "
-                  "descriptor manually." % name)
-            output['path-template'] = "WARNING: No path template provided."
+            output['path-template'] = output['id']
     return output
 
 
