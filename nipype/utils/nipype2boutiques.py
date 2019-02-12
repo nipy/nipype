@@ -64,6 +64,7 @@ def generate_boutiques_descriptor(
         'description'] = interface_name + ", as implemented in Nipype (module: " + module_name + ", interface: " + interface_name + ")."
     tool_desc['inputs'] = []
     tool_desc['output-files'] = []
+    tool_desc['groups'] = []
     tool_desc['tool-version'] = interface.version if interface.version is not None else "No version provided."
     tool_desc['schema-version'] = '0.5'
     if container_image:
@@ -88,15 +89,20 @@ def generate_boutiques_descriptor(
                 if verbose:
                     print("-> Adding input " + i['name'])
             # Put inputs into a mutually exclusive group
-            tool_desc['groups'] = [{'id': input[0]['id'] + "_group",
-                                    'name': input[0]['name'],
-                                    'members': mutex_group_members,
-                                    'mutually-exclusive': True}]
+            tool_desc['groups'].append({'id': input[0]['id'] + "_group",
+                                        'name': input[0]['name'] + " group",
+                                        'members': mutex_group_members,
+                                        'mutually-exclusive': True})
         else:
             tool_desc['inputs'].append(input)
             tool_desc['command-line'] += input['value-key'] + " "
             if verbose:
                 print("-> Adding input " + input['name'])
+
+    # Generates input groups
+    tool_desc['groups'] += get_boutiques_groups(interface.inputs.traits(transient=None).items())
+    if len(tool_desc['groups']) == 0:
+        del tool_desc['groups']
 
     # Generates tool outputs
     for name, spec in sorted(outputs.traits(transient=None).items()):
@@ -245,15 +251,6 @@ def get_boutiques_input(inputs, interface, input_name, spec,
         if value_choices is not None:
             input['value-choices'] = value_choices
 
-    if spec.requires is not None:
-        input['requires-inputs'] = spec.requires
-
-    if spec.xor is not None:
-        input['disables-inputs'] = list(spec.xor)
-        # Make sure input does not disable itself
-        if input['id'] in input['disables-inputs']:
-            input['disables-inputs'].remove(input['id'])
-
     # Create unique, temporary value.
     temp_value = must_generate_value(input_name, input['type'],
                                      ignored_template_inputs, spec_info, spec,
@@ -350,6 +347,37 @@ def get_boutiques_output(outputs, name, spec, interface, tool_inputs, verbose=Fa
             output['path-template'] = output['id']
     return output
 
+
+def get_boutiques_groups(input_traits):
+    desc_groups = []
+    all_or_none_input_sets = []
+    mutex_input_sets = []
+
+    # Get all the groups
+    for name, spec in input_traits:
+        if spec.requires is not None:
+            group_members = set([name] + list(spec.requires))
+            if group_members not in all_or_none_input_sets:
+                all_or_none_input_sets.append(group_members)
+        if spec.xor is not None:
+            group_members = set([name] + list(spec.xor))
+            if group_members not in mutex_input_sets:
+                mutex_input_sets.append(group_members)
+
+    # Create a dictionary for each one
+    for i in range(0, len(all_or_none_input_sets)):
+        desc_groups.append({'id': "all_or_none_group" + ("_" + str(i + 1) if i != 0 else ""),
+                            'name': "All or none group" + (" " + str(i + 1) if i != 0 else ""),
+                            'members': list(all_or_none_input_sets[i]),
+                            'all-or-none': True})
+
+    for i in range(0, len(mutex_input_sets)):
+        desc_groups.append({'id': "mutex_group" + ("_" + str(i + 1) if i != 0 else ""),
+                            'name': "Mutex group" + (" " + str(i + 1) if i != 0 else ""),
+                            'members': list(mutex_input_sets[i]),
+                            'mutually-exclusive': True})
+
+    return desc_groups
 
 def get_unique_value(type, id):
     '''
