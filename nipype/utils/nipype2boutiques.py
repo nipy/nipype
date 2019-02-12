@@ -78,12 +78,20 @@ def generate_boutiques_descriptor(
         input = get_boutiques_input(inputs, interface, name, spec,
                                     ignored_template_inputs, verbose,
                                     ignore_template_numbers)
+        # Handle compound inputs (inputs that can be of multiple types and are mutually exclusive)
         if isinstance(input, list):
+            mutex_group_members = []
             for i in input:
                 tool_desc['inputs'].append(i)
                 tool_desc['command-line'] += i['value-key'] + " "
+                mutex_group_members.append(i['id'])
                 if verbose:
                     print("-> Adding input " + i['name'])
+            # Put inputs into a mutually exclusive group
+            tool_desc['groups'] = [{'id': input[0]['id'] + "_group",
+                                    'name': input[0]['name'],
+                                    'members': mutex_group_members,
+                                    'mutually-exclusive': True}]
         else:
             tool_desc['inputs'].append(input)
             tool_desc['command-line'] += input['value-key'] + " "
@@ -123,7 +131,8 @@ def generate_boutiques_descriptor(
 
 def get_boutiques_input(inputs, interface, input_name, spec,
                         ignored_template_inputs, verbose,
-                        ignore_template_numbers, handler=None, input_number=None):
+                        ignore_template_numbers, handler=None,
+                        input_number=None):
     """
     Returns a dictionary containing the Boutiques input corresponding to a Nipype intput.
 
@@ -134,6 +143,8 @@ def get_boutiques_input(inputs, interface, input_name, spec,
       * spec: Nipype input spec.
       * ignored_template_inputs: input names for which no temporary value must be generated.
       * ignore_template_numbers: True if numbers must be ignored in output path creations.
+      * handler: used when handling compound inputs, which don't have their own input spec
+      * input_number: used when handling compound inputs to assign each a unique ID
 
     Assumes that:
       * Input names are unique.
@@ -142,7 +153,7 @@ def get_boutiques_input(inputs, interface, input_name, spec,
 
     input = {}
 
-    if input_number is not None:
+    if input_number is not None and input_number != 0:  # No need to append a number to the first of a list of compound inputs
         input['id'] = input_name + "_" + str(input_number + 1)
     else:
         input['id'] = input_name
@@ -158,7 +169,6 @@ def get_boutiques_input(inputs, interface, input_name, spec,
     handler_type = type(trait_handler).__name__
 
     # Deal with compound traits
-    # TODO create a mutually exclusive group for members of compound traits
     if handler_type == "TraitCompound":
         input_list = []
         # Recursively create an input for each trait
@@ -339,34 +349,6 @@ def get_boutiques_output(outputs, name, spec, interface, tool_inputs, verbose=Fa
         if not found:
             output['path-template'] = output['id']
     return output
-
-
-# TODO remove this
-def get_type_from_spec_info(spec_info):
-    '''
-    Returns an input type from the spec info. There must be a better
-    way to get an input type in Nipype than to parse the spec info.
-    '''
-    if ("an existing file name" in spec_info) or (
-            "input volumes" in spec_info):
-        return "File"
-    elif ("an integer" in spec_info or "a float" in spec_info):
-        return "Number"
-    elif "a boolean" in spec_info:
-        return "Boolean"
-    return "String"
-
-
-# TODO remove this
-def is_list(spec_info):
-    '''
-    Returns True if the spec info looks like it describes a list
-    parameter. There must be a better way in Nipype to check if an input
-    is a list.
-    '''
-    if "a list" in spec_info:
-        return True
-    return False
 
 
 def get_unique_value(type, id):
