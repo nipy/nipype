@@ -16,7 +16,7 @@ from __future__ import (print_function, division, unicode_literals,
 from builtins import range, str, bytes, int
 
 from copy import deepcopy
-import os
+import os, math, csv
 
 from nibabel import load
 import numpy as np
