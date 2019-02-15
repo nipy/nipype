@@ -8,13 +8,9 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 from builtins import range
 
-# Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
-from future import standard_library
-standard_library.install_aliases()
-from collections import OrderedDict
-
 import os
 import os.path as op
+from collections import OrderedDict
 
 import nibabel as nb
 import numpy as np
@@ -615,44 +611,41 @@ class CompCor(SimpleInterface):
 
         save_pre_filter = self.inputs.save_pre_filter
         if save_pre_filter:
-            if isinstance(save_pre_filter, bool):
+            self._results['pre_filter_file'] = save_pre_filter
+            if save_pre_filter is True:
                 pre_filter_file = os.path.abspath('pre_filter.tsv')
-            else:
-                pre_filter_file = save_pre_filter
-            self._results['pre_filter_file'] = pre_filter_file
-        if self.inputs.pre_filter and save_pre_filter:
-            ftype = {
-                'polynomial': 'Legendre',
-                'cosine': 'Cosine'
-            }[self.inputs.pre_filter]
-            ncols = filter_basis.shape[1] if filter_basis.size > 0 else 0
-            header = ['{}{:02d}'.format(ftype, i) for i in range(ncols)]
-            if skip_vols:
-                old_basis = filter_basis
-                # nrows defined above
-                filter_basis = np.zeros(
-                    (nrows, ncols + skip_vols), dtype=filter_basis.dtype)
-                if old_basis.size > 0:
-                    filter_basis[skip_vols:, :ncols] = old_basis
-                filter_basis[:skip_vols, -skip_vols:] = np.eye(skip_vols)
-                header.extend([
-                    'NonSteadyStateOutlier{:02d}'.format(i)
-                    for i in range(skip_vols)
-                ])
-            np.savetxt(
-                pre_filter_file,
-                filter_basis,
-                fmt=b'%.10f',
-                delimiter='\t',
-                header='\t'.join(header),
-                comments='')
+            if self.inputs.pre_filter:
+                ftype = {
+                    'polynomial': 'Legendre',
+                    'cosine': 'Cosine'
+                }[self.inputs.pre_filter]
+                ncols = filter_basis.shape[1] if filter_basis.size > 0 else 0
+                header = ['{}{:02d}'.format(ftype, i) for i in range(ncols)]
+                if skip_vols:
+                    old_basis = filter_basis
+                    # nrows defined above
+                    filter_basis = np.zeros(
+                        (nrows, ncols + skip_vols), dtype=filter_basis.dtype)
+                    if old_basis.size > 0:
+                        filter_basis[skip_vols:, :ncols] = old_basis
+                    filter_basis[:skip_vols, -skip_vols:] = np.eye(skip_vols)
+                    header.extend([
+                        'NonSteadyStateOutlier{:02d}'.format(i)
+                        for i in range(skip_vols)
+                    ])
+                np.savetxt(
+                    self._results['pre_filter_file'],
+                    filter_basis,
+                    fmt=b'%.10f',
+                    delimiter='\t',
+                    header='\t'.join(header),
+                    comments='')
 
-        save_metadata = self.inputs.save_metadata
-        if save_metadata:
-            if isinstance(save_metadata, bool):
+        metadata_file = self.inputs.save_metadata
+        if metadata_file:
+            self._results['metadata_file'] = metadata_file
+            if metadata_file is True:
                 metadata_file = os.path.abspath('component_metadata.tsv')
-            else:
-                metadata_file = save_metadata
             components_names = np.empty(len(metadata['mask']),
                 dtype='object_')
             retained = np.where(metadata['retained'])
@@ -660,7 +653,6 @@ class CompCor(SimpleInterface):
             components_names[retained] = components_header
             components_names[not_retained] = ([
                 'dropped{}'.format(i) for i in range(len(not_retained[0]))])
-            self._results['metadata_file'] = metadata_file
             with open(metadata_file, 'w') as f:
                 f.write('{}\t{}\t{}\t{}\t{}\n'.format('component',
                         *list(metadata.keys())))
@@ -1200,7 +1192,7 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
 def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
                              filter_type=False, degree=0, period_cut=128,
                              repetition_time=None, failure_mode='error',
-                             mask_names=''):
+                             mask_names=None):
     """Compute the noise components from the imgseries for each mask
 
     Parameters
@@ -1245,9 +1237,8 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
     basis = np.array([])
     if components_criterion == 'all':
         components_criterion = -1
-    if not mask_names:
-        mask_names = range(len(mask_images))
-    for i, img in zip(mask_names, mask_images):
+    mask_names = mask_names or range(len(mask_images))
+    for name, img in zip(mask_names, mask_images):
         mask = img.get_data().astype(np.bool).squeeze()
         if imgseries.shape[:3] != mask.shape:
             raise ValueError(
@@ -1267,20 +1258,20 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
                 voxel_timecourses, repetition_time, period_cut)
         elif filter_type in ('polynomial', False):
             # from paper:
-            # "The constant and linear trends of the columns in the matrix M
-            # were removed [prior to ...]"
+            # "The constant and linear trends of the columns in the matrix M were
+            # removed [prior to ...]"
             voxel_timecourses, basis = regress_poly(degree, voxel_timecourses)
 
-        # "Voxel time series from the noise ROI (either anatomical or tSTD)
-        # were placed in a matrix M of size Nxm, with time along the row
-        # dimension and voxels along the column dimension."
+        # "Voxel time series from the noise ROI (either anatomical or tSTD) were
+        # placed in a matrix M of size Nxm, with time along the row dimension
+        # and voxels along the column dimension."
         M = voxel_timecourses.T
 
         # "[... were removed] prior to column-wise variance normalization."
         M = M / _compute_tSTD(M, 1.)
 
-        # "The covariance matrix C = MMT was constructed and decomposed into
-        # its principal components using a singular value decomposition."
+        # "The covariance matrix C = MMT was constructed and decomposed into its
+        # principal components using a singular value decomposition."
         try:
             u, s, _ = fallback_svd(M, full_matrices=False)
         except np.linalg.LinAlgError:
@@ -1308,7 +1299,7 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
         if components is None:
             components = u[:, :num_components]
             metadata = OrderedDict()
-            metadata['mask'] = [i] * len(s)
+            metadata['mask'] = [name] * len(s)
             metadata['singular_value'] = s
             metadata['variance_explained'] = variance_explained
             metadata['cumulative_variance_explained'] = (
@@ -1316,7 +1307,7 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
             metadata['retained'] = [i < num_components for i in range(len(s))]
         else:
             components = np.hstack((components, u[:, :num_components]))
-            metadata['mask'] = metadata['mask'] + [i] * len(s)
+            metadata['mask'] = metadata['mask'] + [name] * len(s)
             metadata['singular_value'] = (
                 np.hstack((metadata['singular_value'], s)))
             metadata['variance_explained'] = (
