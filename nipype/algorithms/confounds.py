@@ -613,7 +613,7 @@ class CompCor(SimpleInterface):
         if save_pre_filter:
             self._results['pre_filter_file'] = save_pre_filter
             if save_pre_filter is True:
-                pre_filter_file = os.path.abspath('pre_filter.tsv')
+                self._results['pre_filter_file'] = os.path.abspath('pre_filter.tsv')
             if self.inputs.pre_filter:
                 ftype = {
                     'polynomial': 'Legendre',
@@ -654,7 +654,7 @@ class CompCor(SimpleInterface):
             components_names[retained] = components_header
             components_names[not_retained] = ([
                 'dropped{}'.format(i) for i in range(len(not_retained[0]))])
-            with open(metadata_file, 'w') as f:
+            with open(self._results['metadata_file'], 'w') as f:
                 f.write('{}\t{}\t{}\t{}\t{}\n'.format('component',
                         *list(metadata.keys())))
                 for i in zip(components_names, *metadata.values()):
