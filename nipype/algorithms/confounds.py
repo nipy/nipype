@@ -645,7 +645,8 @@ class CompCor(SimpleInterface):
         if metadata_file:
             self._results['metadata_file'] = metadata_file
             if metadata_file is True:
-                metadata_file = os.path.abspath('component_metadata.tsv')
+                self._results['metadata_file'] = (
+                    os.path.abspath('component_metadata.tsv'))
             components_names = np.empty(len(metadata['mask']),
                 dtype='object_')
             retained = np.where(metadata['retained'])
