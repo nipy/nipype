@@ -89,16 +89,17 @@ class TestResting():
         # assert
         expected_file = os.path.abspath(self.out_filenames['components_file'])
         with open(expected_file, 'r') as components_file:
-            components_data = [line.split() for line in components_file]
-            num_got_components = len(components_data)
-            assert (num_got_components == self.num_noise_components
-                    or num_got_components == self.fake_data.shape[3])
-            first_two = [row[:2] for row in components_data[1:]]
-            assert first_two == [['-0.5172356654', '-0.6973053243'], [
-                '0.2574722644', '0.1645270737'
-            ], ['-0.0806469590',
-                '0.5156853779'], ['0.7187176051', '-0.3235820287'],
-                                 ['-0.3783072450', '0.3406749013']]
+            components_data = [line.split()
+                               for line in components_file.read().splitlines()]
+        num_got_components = len(components_data)
+        assert (num_got_components == self.num_noise_components or
+                num_got_components == self.fake_data.shape[3])
+        first_two = [row[:2] for row in components_data[1:]]
+        assert first_two == [['-0.5172356654', '-0.6973053243'],
+                             ['0.2574722644', '0.1645270737'],
+                             ['-0.0806469590', '0.5156853779'],
+                             ['0.7187176051', '-0.3235820287'],
+                             ['-0.3783072450', '0.3406749013']]
 
     fake_data = np.array([[[[2, 4, 3, 9, 1], [3, 6, 4, 7, 4]],
                            [[8, 3, 4, 6, 2], [4, 0, 4, 4, 2]]],

@@ -388,7 +388,8 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         requires=['mask_files'],
         desc=('Position of mask in `mask_files` to use - '
               'first is the default.'))
-    mask_names = traits.List(traits.Str,
+    mask_names = traits.List(
+        traits.Str,
         desc='Names for provided masks (for printing into metadata). '
              'If provided, it must be as long as the final mask list '
              '(after any merge and indexing operations).')
@@ -396,16 +397,17 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         'components_file.txt',
         usedefault=True,
         desc='Filename to store physiological components')
-    num_components = traits.Either('all', traits.Range(low=1),
-        xor=['variance_threshold'],
+    num_components = traits.Either(
+        'all', traits.Range(low=1), xor=['variance_threshold'],
         desc='Number of components to return from the decomposition. If '
              '`num_components` is `all`, then all components will be '
              'retained.')
-             # 6 for BOLD, 4 for ASL
-             # automatically instantiated to 6 in CompCor below if neither
-             # `num_components` nor `variance_threshold` is defined (for
-             # backward compatibility)
-    variance_threshold = traits.Float(xor=['num_components'],
+    # 6 for BOLD, 4 for ASL
+    # automatically instantiated to 6 in CompCor below if neither
+    # `num_components` nor `variance_threshold` is defined (for
+    # backward compatibility)
+    variance_threshold = traits.Range(
+        low=0.0, high=1.0, exclude_low=True, exclude_high=True, xor=['num_components'],
         desc='Select the number of components to be returned automatically '
              'based on their ability to explain variance in the dataset. '
              '`variance_threshold` is a fractional value between 0 and 1; '
@@ -438,9 +440,11 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         desc='Repetition time (TR) of series - derived from image header if '
         'unspecified')
     save_pre_filter = traits.Either(
-        traits.Bool, File, desc='Save pre-filter basis as text file')
+        traits.Bool, File, default=False, usedefault=True,
+        desc='Save pre-filter basis as text file')
     save_metadata = traits.Either(
-        traits.Bool, File, desc='Save component metadata as text file')
+        traits.Bool, File, default=False, usedefault=True,
+        desc='Save component metadata as text file')
     ignore_initial_volumes = traits.Range(
         low=0,
         usedefault=True,
@@ -497,20 +501,20 @@ class CompCor(SimpleInterface):
     input_spec = CompCorInputSpec
     output_spec = CompCorOutputSpec
     references_ = [{
+        'tags': ['method', 'implementation'],
         'entry':
-        BibTeX(
-            "@article{compcor_2007,"
-            "title = {A component based noise correction method (CompCor) for BOLD and perfusion based},"
-            "volume = {37},"
-            "number = {1},"
-            "doi = {10.1016/j.neuroimage.2007.04.042},"
-            "urldate = {2016-08-13},"
-            "journal = {NeuroImage},"
-            "author = {Behzadi, Yashar and Restom, Khaled and Liau, Joy and Liu, Thomas T.},"
-            "year = {2007},"
-            "pages = {90-101},}"),
-        'tags': ['method', 'implementation']
-    }]
+            BibTeX("""\
+@article{compcor_2007,
+    title = {A component based noise correction method (CompCor) for BOLD and perfusion based},
+    volume = {37},
+    number = {1},
+    doi = {10.1016/j.neuroimage.2007.04.042},
+    urldate = {2016-08-13},
+    journal = {NeuroImage},
+    author = {Behzadi, Yashar and Restom, Khaled and Liau, Joy and Liu, Thomas T.},
+    year = {2007},
+    pages = {90-101}
+}""")}]
 
     def __init__(self, *args, **kwargs):
         ''' exactly the same as compcor except the header '''
@@ -606,57 +610,60 @@ class CompCor(SimpleInterface):
             delimiter='\t',
             header='\t'.join(components_header),
             comments='')
-        self._results['components_file'] = os.path.abspath(
-            self.inputs.components_file)
+        self._results['components_file'] = os.path.join(
+            runtime.cwd, self.inputs.components_file)
 
-        save_pre_filter = self.inputs.save_pre_filter
+        save_pre_filter = False
+        if self.inputs.pre_filter in ['polynomial', 'cosine']:
+            save_pre_filter = self.inputs.save_pre_filter
+
         if save_pre_filter:
             self._results['pre_filter_file'] = save_pre_filter
             if save_pre_filter is True:
-                self._results['pre_filter_file'] = os.path.abspath('pre_filter.tsv')
-            if self.inputs.pre_filter:
-                ftype = {
-                    'polynomial': 'Legendre',
-                    'cosine': 'Cosine'
-                }[self.inputs.pre_filter]
-                ncols = filter_basis.shape[1] if filter_basis.size > 0 else 0
-                header = ['{}{:02d}'.format(ftype, i) for i in range(ncols)]
-                if skip_vols:
-                    old_basis = filter_basis
-                    # nrows defined above
-                    filter_basis = np.zeros(
-                        (nrows, ncols + skip_vols), dtype=filter_basis.dtype)
-                    if old_basis.size > 0:
-                        filter_basis[skip_vols:, :ncols] = old_basis
-                    filter_basis[:skip_vols, -skip_vols:] = np.eye(skip_vols)
-                    header.extend([
-                        'NonSteadyStateOutlier{:02d}'.format(i)
-                        for i in range(skip_vols)
-                    ])
-                np.savetxt(
-                    self._results['pre_filter_file'],
-                    filter_basis,
-                    fmt=b'%.10f',
-                    delimiter='\t',
-                    header='\t'.join(header),
-                    comments='')
+                self._results['pre_filter_file'] = os.path.join(
+                    runtime.cwd, 'pre_filter.tsv')
+
+            ftype = {
+                'polynomial': 'Legendre',
+                'cosine': 'Cosine'
+            }[self.inputs.pre_filter]
+            ncols = filter_basis.shape[1] if filter_basis.size > 0 else 0
+            header = ['{}{:02d}'.format(ftype, i) for i in range(ncols)]
+            if skip_vols:
+                old_basis = filter_basis
+                # nrows defined above
+                filter_basis = np.zeros(
+                    (nrows, ncols + skip_vols), dtype=filter_basis.dtype)
+                if old_basis.size > 0:
+                    filter_basis[skip_vols:, :ncols] = old_basis
+                filter_basis[:skip_vols, -skip_vols:] = np.eye(skip_vols)
+                header.extend([
+                    'NonSteadyStateOutlier{:02d}'.format(i)
+                    for i in range(skip_vols)
+                ])
+            np.savetxt(
+                self._results['pre_filter_file'],
+                filter_basis,
+                fmt=b'%.10f',
+                delimiter='\t',
+                header='\t'.join(header),
+                comments='')
 
         metadata_file = self.inputs.save_metadata
         if metadata_file:
             self._results['metadata_file'] = metadata_file
             if metadata_file is True:
                 self._results['metadata_file'] = (
-                    os.path.abspath('component_metadata.tsv'))
+                    os.path.join(runtime.cwd, 'component_metadata.tsv'))
             components_names = np.empty(len(metadata['mask']),
-                dtype='object_')
+                                        dtype='object_')
             retained = np.where(metadata['retained'])
             not_retained = np.where(np.logical_not(metadata['retained']))
             components_names[retained] = components_header
             components_names[not_retained] = ([
                 'dropped{}'.format(i) for i in range(len(not_retained[0]))])
             with open(self._results['metadata_file'], 'w') as f:
-                f.write('{}\t{}\t{}\t{}\t{}\n'.format('component',
-                        *list(metadata.keys())))
+                f.write('\t'.join(['component'] + list(metadata.keys())) + '\n')
                 for i in zip(components_names, *metadata.values()):
                     f.write('{0[0]}\t{0[1]}\t{0[2]:.10f}\t'
                             '{0[3]:.10f}\t{0[4]:.10f}\n'.format(i))
@@ -1317,9 +1324,8 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
             metadata['cumulative_variance_explained'] = (
                 np.hstack((metadata['cumulative_variance_explained'],
                            cumulative_variance_explained)))
-            metadata['retained'] = (metadata['retained']
-                                    + [i < num_components
-                                       for i in range(len(s))])
+            metadata['retained'] = (
+                metadata['retained'] + [i < num_components for i in range(len(s))])
     if components is None:
         if failure_mode == 'error':
             raise ValueError('No components found')
