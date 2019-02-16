@@ -78,8 +78,7 @@ class TestResting():
     def test_create_resting_preproc(self, mock_node, mock_realign_wf):
         wflow = create_resting_preproc(base_dir=os.getcwd())
 
-        # wflow.inputs.inputspec.num_noise_components = self.num_noise_components
-        wflow.inputs.compcor.variance_threshold = 0.15
+        wflow.inputs.inputspec.num_noise_components = self.num_noise_components
         mask_in = wflow.get_node('threshold').inputs
         mask_in.out_file = self.in_filenames['mask_file']
         func_in = wflow.get_node('slicetimer').inputs
