@@ -799,8 +799,9 @@ class TSNR(BaseInterface):
         meanimg = np.mean(data, axis=3)
         stddevimg = np.std(data, axis=3)
         tsnr = np.zeros_like(meanimg)
-        tsnr[stddevimg > 1.e-3] = meanimg[stddevimg > 1.e-3] / stddevimg[
-            stddevimg > 1.e-3]
+        stddevimg_nonzero = stddevimg > 1.e-3
+        tsnr[stddevimg_nonzero] = meanimg[stddevimg_nonzero] / stddevimg[
+            stddevimg_nonzero]
         img = nb.Nifti1Image(tsnr, img.affine, header)
         nb.save(img, op.abspath(self.inputs.tsnr_file))
         img = nb.Nifti1Image(meanimg, img.affine, header)
