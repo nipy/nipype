@@ -145,8 +145,7 @@ class TOPUPBase(FSLCommand):
         #if np.any(self._offsets == 1):
         if self._offsets.any():
             self._size_fixed = True
-
-            cropped = im.slicer[:self._offsets[0], :self._offsets[1], :self._offsets[2]]
+            cropped = im.slicer[tuple(slice(-1) if o else slice(None) for o in self._offsets)]
             crop_file = fname_presuffix(fname, suffix="_cropped", newpath=os.getcwd())
             cropped.to_filename(crop_file)
             # iflogger.warn(('One or more dimensions have odd size. '
@@ -179,7 +178,7 @@ class TOPUPBase(FSLCommand):
         data = np.zeros(dests, dtype=imdata.dtype)
         data[:s[0], :s[1], :s[2], ...] = imdata
 
-        fixfname = fname_presuffix(fname, suffix="_file", newpath=os.getcwd())
+        fixfname = fname_presuffix(fname, suffix="_fix", newpath=os.getcwd())
 
         nb.Nifti1Image(data, im.affine).to_filename(fixfname)
         return fixfname
@@ -624,12 +623,14 @@ class EddyInputSpec(FSLCommandInputSpec):
         exists=True,
         mandatory=True,
         argstr='--imain=%s',
+        checksize=True,
         desc=('File containing all the images to estimate '
               'distortions for'))
     in_mask = File(
         exists=True,
         mandatory=True,
         argstr='--mask=%s',
+        checksize=True,
         desc='Mask to indicate brain')
     in_index = File(
         exists=True,
@@ -776,7 +777,8 @@ class EddyInputSpec(FSLCommandInputSpec):
 
 class EddyOutputSpec(TraitedSpec):
     out_corrected = File(
-        exists=True, desc='4D image file containing all the corrected volumes')
+        exists=True, desc='4D image file containing all the corrected volumes',
+        checksize=True)
     out_parameter = File(
         exists=True,
         desc=('text file with parameters definining the field and'
@@ -799,9 +801,11 @@ class EddyOutputSpec(TraitedSpec):
         desc=('Text-file with a plain language report on what '
               'outlier slices eddy has found'))
     out_cnr_maps = File(
-        exists=True, desc='path/name of file with the cnr_maps')
+        exists=True, desc='path/name of file with the cnr_maps',
+        checksize=True)
     out_residuals = File(
-        exists=True, desc='path/name of file with the residuals')
+        exists=True, desc='path/name of file with the residuals',
+        checksize=True)
 
 
 class Eddy(TOPUPBase):
@@ -1369,6 +1373,7 @@ class EddyQuadInputSpec(FSLCommandInputSpec):
         exists=True,
         mandatory=True,
         argstr="--mask=%s",
+        checksize=True,
         desc="Binary mask file"
     )
     bval_file = File(
@@ -1504,7 +1509,7 @@ class EddyQuad(TOPUPBase):
         # If the output directory isn't defined, the interface seems to use
         # the default but not set its value in `self.inputs.output_dir`
         if not isdefined(self.inputs.output_dir):
-            out_dir = os.path.abspath(self.inputs.base_name + '.qc.nii.gz')
+            out_dir = os.path.abspath(os.path.basename(self.inputs.base_name) + '.qc.nii.gz')
         else:
             out_dir = os.path.abspath(self.inputs.output_dir)
 
