@@ -339,10 +339,10 @@ class SpecifyModel(BaseInterface):
        - name : name of parametric modulator
        - param : values of the modulator
        - poly : degree of modulation
-     - orth : lists of instructions to orthogonolise parametric regressors or 
-       not. Same as in SPM, use 'Yes' to indicate orthogonalisation, and 'No' 
-       to explicitly prevent it. Use None for conditions where it is not being 
-       used. Note that by default SPM will orthogonalise parametric regressors 
+     - orth : lists of instructions to orthogonolise parametric regressors or
+       not. Same as in SPM, use 'Yes' to indicate orthogonalisation, and 'No'
+       to explicitly prevent it. Use None for conditions where it is not being
+       used. Note that by default SPM will orthogonalise parametric regressors
        in the order in which they are entered.
 
     Alternatively, you can provide information through event files.
@@ -419,11 +419,14 @@ None], orth=['No', None])
                             len(info.tmod) > cid:
                         sessinfo[i]['cond'][cid]['tmod'] = info.tmod[cid]
                     
-                    if hasattr(info, 'orth') and info.orth:
+                    if hasattr(info, 'orth') and info.orth and\
+                            len(info.orth) > cid:
                         if info.orth[cid] == 'Yes':
                             sessinfo[i]['cond'][cid]['orth'] = 1
                         elif info.orth[cid] == 'No':
                             sessinfo[i]['cond'][cid]['orth'] = 0
+                        elif info.orth[cid] is not None:
+                            raise ValueError("Unknown orthogonalization option {0}. Must be one of 'Yes', 'No', or None.".format(info.orth[cid]))
 
                     if hasattr(info, 'pmod') and info.pmod and \
                             len(info.pmod) > cid:
