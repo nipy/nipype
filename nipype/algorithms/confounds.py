@@ -1205,7 +1205,7 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
 
     Parameters
     ----------
-    imgseries: nibabel NIfTI object
+    imgseries: nibabel image
         Time series data to be decomposed.
     mask_images: list
         List of nibabel images. Time series data from `img_series` is subset
@@ -1247,7 +1247,7 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
         components_criterion = -1
     mask_names = mask_names or range(len(mask_images))
     for name, img in zip(mask_names, mask_images):
-        mask = img.get_data().astype(np.bool).squeeze()
+        mask = img.get_data().astype(np.bool)
         if imgseries.shape[:3] != mask.shape:
             raise ValueError(
                 'Inputs for CompCor, timeseries and mask, do not have '
