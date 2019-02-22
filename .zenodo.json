@@ -469,11 +469,6 @@
       "name": "Cheung, Brian"
     },
     {
-      "affiliation": "The University of Texas at Austin",
-      "name": "Floren, Andrew",
-      "orcid": "0000-0003-3618-2056"
-    },
-    {
       "name": "Urchs, Sebastian"
     },
     {
@@ -487,13 +482,18 @@
       "orcid": "0000-0003-2076-5329"
     },
     {
-      "affiliation": "University of illinois urbana champaign",
-      "name": "Sharp, Paul"
+      "affiliation": "The University of Texas at Austin",
+      "name": "Floren, Andrew",
+      "orcid": "0000-0003-3618-2056"
     },
     {
       "affiliation": "Institute of Neuroinformatics, ETH/University of Zurich",
       "name": "Gerhard, Stephan",
       "orcid": "0000-0003-4454-6171"
+    },
+    {
+      "affiliation": "University of Illinois Urbana Champaign",
+      "name": "Sharp, Paul"
     },
     {
       "affiliation": "Technical University Munich",
@@ -546,10 +546,6 @@
       "name": "Tarbert, Claire"
     },
     {
-      "affiliation": "Vrije Universiteit Amsterdam",
-      "name": "Ort, Eduard"
-    },
-    {
       "name": "Nickson, Thomas"
     },
     {
@@ -568,6 +564,10 @@
     },
     {
       "name": "Flandin, Guillaume"
+    },
+    {
+      "affiliation": "Vrije Universiteit Amsterdam",
+      "name": "Ort, Eduard"
     },
     {
       "name": "Shachnev, Dmitry"
