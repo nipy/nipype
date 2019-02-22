@@ -1224,12 +1224,26 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
         'polynomial' - Legendre polynomial basis
         'cosine' - Discrete cosine (DCT) basis
         False - None (mean-removal only)
+    failure_mode: str
+        Action to be taken in the event that any decomposition fails to
+        identify any components. `error` indicates that the routine should
+        raise an exception and exit, while any other value indicates that the
+        routine should return a matrix of NaN values equal in size to the
+        requested decomposition matrix.
+    mask_names: list or None
+        List of names for each image in `mask_images`. This should be equal in
+        length to `mask_images`, with the ith element of `mask_names` naming
+        the ith element of `mask_images`.
 
     Filter options:
 
-    degree: order of polynomial used to remove trends from the timeseries
-    period_cut: minimum period (in sec) for DCT high-pass filter
-    repetition_time: time (in sec) between volume acquisitions
+    degree: int
+        Order of polynomial used to remove trends from the timeseries
+    period_cut: float
+        Minimum period (in sec) for DCT high-pass filter
+    repetition_time: float
+        Time (in sec) between volume acquisitions. This must be defined if
+        the `filter_type` is `cosine`.
 
     Returns
     -------
@@ -1262,6 +1276,9 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
         # Currently support Legendre-polynomial or cosine or detrending
         # With no filter, the mean is nonetheless removed (poly w/ degree 0)
         if filter_type == 'cosine':
+            if repetition_time is None:
+                raise ValueError(
+                    'Repetition time must be provided for cosine filter')
             voxel_timecourses, basis = cosine_filter(
                 voxel_timecourses, repetition_time, period_cut)
         elif filter_type in ('polynomial', False):
@@ -1286,8 +1303,8 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
             if failure_mode == 'error':
                 raise
             if components_criterion >= 1:
-                u = np.empty((M.shape[0], components_criterion),
-                             dtype=np.float32) * np.nan
+                u = np.full((M.shape[0], components_criterion),
+                            np.nan, dtype=np.float32)
             else:
                 continue
 
@@ -1329,7 +1346,7 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
     if components is None:
         if failure_mode == 'error':
             raise ValueError('No components found')
-        components = np.full((M.shape[0], num_components), np.NaN)
+        components = np.full((M.shape[0], num_components), np.nan)
     return components, basis, metadata
 
 
