@@ -975,7 +975,7 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
                     filledtemplate = template
                     if argtuple:
                         try:
-                            filledtemplate = template % tuple(argtuple)
+                            filledtemplate = template.format(*argtuple)
                         except TypeError as e:
                             raise TypeError(
                                 e.message +
@@ -1233,7 +1233,7 @@ class DataGrabber(IOBase):
                     filledtemplate = template
                     if argtuple:
                         try:
-                            filledtemplate = template % tuple(argtuple)
+                            filledtemplate = template.format(*argtuple)
                         except TypeError as e:
                             raise TypeError(
                                 e.message +
@@ -1949,7 +1949,7 @@ class XNATSource(LibraryBaseInterface, IOBase):
                         else:
                             argtuple.append(arg)
                     if argtuple:
-                        target = template % tuple(argtuple)
+                        target = template.format(*argtuple)
                         file_objects = xnat.select(target).get('obj')
 
                         if file_objects == []:
@@ -2533,7 +2533,7 @@ class SSHDataGrabber(LibraryBaseInterface, DataGrabber):
                     filledtemplate = template
                     if argtuple:
                         try:
-                            filledtemplate = template % tuple(argtuple)
+                            filledtemplate = template.format(*argtuple)
                         except TypeError as e:
                             raise TypeError(
                                 e.message +
