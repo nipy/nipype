@@ -142,19 +142,24 @@
       "name": "Berleant, Shoshana"
     },
     {
-      "affiliation": "Institute for Biomedical Engineering, ETH and University of Zurich",
-      "name": "Horea, Christian",
-      "orcid": "0000-0001-7037-2449"
-    },
-    {
       "affiliation": "Dartmouth College: Hanover, NH, United States",
       "name": "Halchenko, Yaroslav O.",
       "orcid": "0000-0003-3456-2493"
     },
     {
+      "affiliation": "Institute for Biomedical Engineering, ETH and University of Zurich",
+      "name": "Christian, Horea",
+      "orcid": "0000-0001-7037-2449"
+    },
+    {
       "affiliation": "UC San Diego",
       "name": "Cipollini, Ben",
       "orcid": "0000-0002-7782-0790"
+    },
+    {
+      "affiliation": "ARAMIS LAB, Brain and Spine Institute (ICM), Paris, France.",
+      "name": "Guillon, Je\u0301re\u0301my",
+      "orcid": "0000-0002-2672-7510"
     },
     {
       "affiliation": "Montreal Neurological Institute and Hospital",
@@ -186,7 +191,7 @@
     },
     {
       "affiliation": "Athena EPI, Inria Sophia-Antipolis",
-      "name": "Wassermann , Demian",
+      "name": "Wassermann, Demian",
       "orcid": "0000-0001-5194-6056"
     },
     {
@@ -196,7 +201,7 @@
     },
     {
       "affiliation": "Vrije Universiteit, Amsterdam",
-      "name": "Gilles de Hollander",
+      "name": "de Hollander, Gilles",
       "orcid": "0000-0003-1988-5091"
     },
     {
@@ -359,6 +364,11 @@
       "name": "Liu, Siqi"
     },
     {
+      "affiliation": "Leibniz Institute for Neurobiology",
+      "name": "Stadler, J\u00f6rg",
+      "orcid": "0000-0003-4313-129X"
+    },
+    {
       "affiliation": "University of Pennsylvania",
       "name": "Kahn, Ari E.",
       "orcid": "0000-0002-2127-0507"
@@ -376,11 +386,6 @@
     {
       "affiliation": "MPI CBS Leipzig, Germany",
       "name": "Lampe, Leonie"
-    },
-    {
-      "affiliation": "Leibniz Institute for Neurobiology",
-      "name": "Stadler, J\u00f6rg",
-      "orcid": "0000-0003-4313-129X"
     },
     {
       "affiliation": "State Key Laboratory of Cognitive Neuroscience and Learning & IDG/McGovern Institute for Brain Research, Beijing Normal University, Beijing, China; Max Planck Institute for Psycholinguistics, Nijmegen, the Netherlands",
@@ -604,11 +609,6 @@
       "affiliation": "MIT, HMS",
       "name": "Ghosh, Satrajit",
       "orcid": "0000-0002-5312-6729"
-    },
-    {
-      "affiliation": "ARAMIS LAB, Brain and Spine Institute (ICM), Paris, France.",
-      "name": "Guillon, Jeremy",
-      "orcid": "0000-0002-2672-7510"
     }
   ],
   "keywords": [
