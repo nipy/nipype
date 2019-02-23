@@ -106,7 +106,9 @@ class Level1DesignInputSpec(SPMCommandInputSpec):
         desc=('Model serial correlations '
               'AR(1), FAST or none. FAST '
               'is available in SPM12'))
-    flags = traits.Dict(desc='Additional arguments to the job, e.g. a common SPm operation is to modify the default masking threshold (mthresh)')
+    flags = traits.Dict(
+        desc='Additional arguments to the job, e.g., a common SPM operation is to '
+             'modify the default masking threshold (mthresh)')
 
 
 class Level1DesignOutputSpec(TraitedSpec):
