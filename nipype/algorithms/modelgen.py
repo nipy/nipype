@@ -418,7 +418,7 @@ None], orth=['No', None])
                     if hasattr(info, 'tmod') and info.tmod and \
                             len(info.tmod) > cid:
                         sessinfo[i]['cond'][cid]['tmod'] = info.tmod[cid]
-                    
+
                     if hasattr(info, 'orth') and info.orth and\
                             len(info.orth) > cid:
                         if info.orth[cid] == 'Yes':
