@@ -89,8 +89,8 @@ class TestResting():
         # assert
         expected_file = os.path.abspath(self.out_filenames['components_file'])
         with open(expected_file, 'r') as components_file:
-            components_data = [line.split()
-                               for line in components_file.read().splitlines()]
+            components_data = [line.rstrip().split()
+                               for line in components_file]
         num_got_components = len(components_data)
         assert (num_got_components == self.num_noise_components or
                 num_got_components == self.fake_data.shape[3])

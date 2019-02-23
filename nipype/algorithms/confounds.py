@@ -1306,7 +1306,7 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
                 u = np.full((M.shape[0], components_criterion),
                             np.nan, dtype=np.float32)
             else:
-                continue
+                u = np.full((M.shape[0], 1), np.nan, dtype=np.float32)
 
         variance_explained = (s ** 2) / np.sum(s ** 2)
         cumulative_variance_explained = np.cumsum(variance_explained)
