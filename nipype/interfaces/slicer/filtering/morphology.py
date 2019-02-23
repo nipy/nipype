@@ -8,8 +8,18 @@ import os
 
 
 class GrayscaleGrindPeakImageFilterInputSpec(CommandLineInputSpec):
-    inputVolume = File(position=-2, desc="Input volume to be filtered", exists=True, argstr="%s")
-    outputVolume = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Output filtered", argstr="%s")
+    inputVolume = File(
+        position=-2,
+        desc="Input volume to be filtered",
+        exists=True,
+        argstr="%s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        position=-1,
+        hash_files=False,
+        desc="Output filtered",
+        argstr="%s")
 
 
 class GrayscaleGrindPeakImageFilterOutputSpec(TraitedSpec):
@@ -50,8 +60,18 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 
 class GrayscaleFillHoleImageFilterInputSpec(CommandLineInputSpec):
-    inputVolume = File(position=-2, desc="Input volume to be filtered", exists=True, argstr="%s")
-    outputVolume = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Output filtered", argstr="%s")
+    inputVolume = File(
+        position=-2,
+        desc="Input volume to be filtered",
+        exists=True,
+        argstr="%s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        position=-1,
+        hash_files=False,
+        desc="Output filtered",
+        argstr="%s")
 
 
 class GrayscaleFillHoleImageFilterOutputSpec(TraitedSpec):

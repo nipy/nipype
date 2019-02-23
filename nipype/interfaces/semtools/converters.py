@@ -11,9 +11,17 @@ from ..base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
 
 
 class DWISimpleCompareInputSpec(CommandLineInputSpec):
-    inputVolume1 = File(desc="First input volume (.nhdr or .nrrd)", exists=True, argstr="--inputVolume1 %s")
-    inputVolume2 = File(desc="Second input volume (.nhdr or .nrrd)", exists=True, argstr="--inputVolume2 %s")
-    checkDWIData = traits.Bool(desc="check for existence of DWI data, and if present, compare it", argstr="--checkDWIData ")
+    inputVolume1 = File(
+        desc="First input volume (.nhdr or .nrrd)",
+        exists=True,
+        argstr="--inputVolume1 %s")
+    inputVolume2 = File(
+        desc="Second input volume (.nhdr or .nrrd)",
+        exists=True,
+        argstr="--inputVolume2 %s")
+    checkDWIData = traits.Bool(
+        desc="check for existence of DWI data, and if present, compare it",
+        argstr="--checkDWIData ")
 
 
 class DWISimpleCompareOutputSpec(TraitedSpec):
@@ -21,7 +29,6 @@ class DWISimpleCompareOutputSpec(TraitedSpec):
 
 
 class DWISimpleCompare(SEMLikeCommandLine):
-
     """title: Nrrd DWI comparison
 
 category: Converters
@@ -48,8 +55,14 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 
 class DWICompareInputSpec(CommandLineInputSpec):
-    inputVolume1 = File(desc="First input volume (.nhdr or .nrrd)", exists=True, argstr="--inputVolume1 %s")
-    inputVolume2 = File(desc="Second input volume (.nhdr or .nrrd)", exists=True, argstr="--inputVolume2 %s")
+    inputVolume1 = File(
+        desc="First input volume (.nhdr or .nrrd)",
+        exists=True,
+        argstr="--inputVolume1 %s")
+    inputVolume2 = File(
+        desc="Second input volume (.nhdr or .nrrd)",
+        exists=True,
+        argstr="--inputVolume2 %s")
 
 
 class DWICompareOutputSpec(TraitedSpec):
@@ -57,7 +70,6 @@ class DWICompareOutputSpec(TraitedSpec):
 
 
 class DWICompare(SEMLikeCommandLine):
-
     """title: Nrrd DWI comparison
 
 category: Converters

@@ -39,9 +39,9 @@ def main():
                  help="Phantom import modules from a file")
     p.add_option("-o", "--output-dir", action="store", type="string",
                  dest="output_dir", default=None,
-                 help=("Write all output files to the given directory (instead "
-                       "of writing them as specified in the autosummary:: "
-                       "directives)"))
+                 help=("Write all output files to the given directory "
+                       "(instead of writing them as specified in the "
+                       "autosummary:: directives)"))
     options, args = p.parse_args()
 
     if len(args) == 0:
@@ -161,9 +161,12 @@ def get_documented_in_lines(lines, module=None, filename=None):
 
     """
     title_underline_re = re.compile("^[-=*_^#]{3,}\s*$")
-    autodoc_re = re.compile(".. auto(function|method|attribute|class|exception|module)::\s*([A-Za-z0-9_.]+)\s*$")
+    autodoc_re = re.compile(
+        ".. auto(function|method|attribute|class|exception|module)::"
+        "\s*([A-Za-z0-9_.]+)\s*$")
     autosummary_re = re.compile(r'^\.\.\s+autosummary::\s*')
-    module_re = re.compile(r'^\.\.\s+(current)?module::\s*([a-zA-Z0-9_.]+)\s*$')
+    module_re = re.compile(
+        r'^\.\.\s+(current)?module::\s*([a-zA-Z0-9_.]+)\s*$')
     autosummary_item_re = re.compile(r'^\s+([_a-zA-Z][a-zA-Z0-9_.]*)\s*.*?')
     toctree_arg_re = re.compile(r'^\s+:toctree:\s*(.*?)\s*$')
 
@@ -189,7 +192,8 @@ def get_documented_in_lines(lines, module=None, filename=None):
                 m = autosummary_item_re.match(line)
                 if m:
                     name = m.group(1).strip()
-                    if current_module and not name.startswith(current_module + '.'):
+                    if current_module and not name.startswith(
+                            current_module + '.'):
                         name = "%s.%s" % (current_module, name)
                     documented.setdefault(name, []).append(
                         (filename, current_title, 'autosummary', toctree))
@@ -210,7 +214,8 @@ def get_documented_in_lines(lines, module=None, filename=None):
                     current_module = name
                     documented.update(get_documented_in_docstring(
                         name, filename=filename))
-                elif current_module and not name.startswith(current_module + '.'):
+                elif current_module and not name.startswith(
+                        current_module + '.'):
                     name = "%s.%s" % (current_module, name)
                 documented.setdefault(name, []).append(
                     (filename, current_title, "auto" + m.group(1), None))
@@ -229,6 +234,7 @@ def get_documented_in_lines(lines, module=None, filename=None):
             last_line = line
 
     return documented
+
 
 if __name__ == "__main__":
     main()

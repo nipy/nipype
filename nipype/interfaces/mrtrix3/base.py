@@ -1,36 +1,62 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 # -*- coding: utf-8 -*-
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
-"""
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname(os.path.realpath(__file__ ))
-    >>> datadir = os.path.realpath(os.path.join(filepath,
-    ...                            '../../testing/data'))
-    >>> os.chdir(datadir)
+from ... import logging, LooseVersion
+from ...utils.filemanip import which
+from ..base import (CommandLineInputSpec, CommandLine, traits, File, isdefined, PackageInfo)
+iflogger = logging.getLogger('nipype.interface')
 
-"""
-from __future__ import print_function, division, unicode_literals, absolute_import
 
-from ... import logging
-from ..traits_extension import isdefined
-from ..base import (CommandLineInputSpec, CommandLine, traits, File)
-logger = logging.getLogger('interface')
+class Info(PackageInfo):
+    version_cmd = 'mrconvert --version'
+
+    @staticmethod
+    def parse_version(raw_info):
+        # info is like: "== mrconvert 0.3.15-githash"
+        for line in raw_info.splitlines():
+            if line.startswith('== mrconvert '):
+                v_string = line.split()[2]
+                break
+        else:
+            return None
+
+        # -githash may or may not be appended
+        v_string = v_string.split('-')[0]
+
+        return '.'.join(v_string.split('.')[:3])
+
+    @classmethod
+    def looseversion(cls):
+        """ Return a comparable version object
+
+        If no version found, use LooseVersion('0.0.0')
+        """
+        return LooseVersion(cls.version() or '0.0.0')
 
 
 class MRTrix3BaseInputSpec(CommandLineInputSpec):
     nthreads = traits.Int(
-        argstr='-nthreads %d', desc='number of threads. if zero, the number'
-        ' of available cpus will be used', nohash=True)
+        argstr='-nthreads %d',
+        desc='number of threads. if zero, the number'
+        ' of available cpus will be used',
+        nohash=True)
     # DW gradient table import options
-    grad_file = File(exists=True, argstr='-grad %s',
-                     desc='dw gradient scheme (MRTrix format')
+    grad_file = File(
+        exists=True,
+        argstr='-grad %s',
+        desc='dw gradient scheme (MRTrix format')
     grad_fsl = traits.Tuple(
-        File(exists=True), File(exists=True), argstr='-fslgrad %s %s',
+        File(exists=True),
+        File(exists=True),
+        argstr='-fslgrad %s %s',
         desc='(bvecs, bvals) dw gradient scheme (FSL format')
     bval_scale = traits.Enum(
-        'yes', 'no', argstr='-bvalue_scaling %s',
+        'yes',
+        'no',
+        argstr='-bvalue_scaling %s',
         desc='specifies whether the b - values should be scaled by the square'
         ' of the corresponding DW gradient norm, as often required for '
         'multishell or DSI DW acquisition schemes. The default action '
@@ -38,13 +64,12 @@ class MRTrix3BaseInputSpec(CommandLineInputSpec):
         'BValueScaling entry. Valid choices are yes / no, true / '
         'false, 0 / 1 (default: true).')
 
-    in_bvec = File(exists=True, argstr='-fslgrad %s %s',
-                   desc='bvecs file in FSL format')
+    in_bvec = File(
+        exists=True, argstr='-fslgrad %s %s', desc='bvecs file in FSL format')
     in_bval = File(exists=True, desc='bvals file in FSL format')
 
 
 class MRTrix3Base(CommandLine):
-
     def _format_arg(self, name, trait_spec, value):
         if name == 'nthreads' and value == 0:
             value = 1
@@ -52,7 +77,7 @@ class MRTrix3Base(CommandLine):
                 from multiprocessing import cpu_count
                 value = cpu_count()
             except:
-                logger.warn('Number of threads could not be computed')
+                iflogger.warning('Number of threads could not be computed')
                 pass
             return trait_spec.argstr % value
 
@@ -66,8 +91,8 @@ class MRTrix3Base(CommandLine):
             skip = []
 
         try:
-            if (isdefined(self.inputs.grad_file) or
-                    isdefined(self.inputs.grad_fsl)):
+            if (isdefined(self.inputs.grad_file)
+                    or isdefined(self.inputs.grad_fsl)):
                 skip += ['in_bvec', 'in_bval']
 
             is_bvec = isdefined(self.inputs.in_bvec)
@@ -81,3 +106,7 @@ class MRTrix3Base(CommandLine):
             pass
 
         return super(MRTrix3Base, self)._parse_inputs(skip=skip)
+
+    @property
+    def version(self):
+        return Info.version()

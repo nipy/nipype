@@ -1,11 +1,5 @@
 # -*- coding: utf-8 -*-
 """ Quickshear is a simple geometric defacing algorithm
-
-   Change directory to provide relative paths for doctests
-   >>> import os
-   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-   >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
-   >>> os.chdir(datadir)
 """
 from __future__ import unicode_literals
 
@@ -14,16 +8,30 @@ from ..external.due import BibTeX
 
 
 class QuickshearInputSpec(CommandLineInputSpec):
-    in_file = File(exists=True, position=1, argstr='%s', mandatory=True,
-                   desc="neuroimage to deface")
-    mask_file = File(exists=True, position=2, argstr='%s', desc="brain mask",
-                     mandatory=True)
-    out_file = File(name_template="%s_defaced", name_source='in_file',
-                    position=3, argstr='%s', desc="defaced output image",
-                    keep_extension=True)
-    buff = traits.Int(position=4, argstr='%d',
-                      desc='buffer size (in voxels) between shearing '
-                      'plane and the brain')
+    in_file = File(
+        exists=True,
+        position=1,
+        argstr='%s',
+        mandatory=True,
+        desc="neuroimage to deface")
+    mask_file = File(
+        exists=True,
+        position=2,
+        argstr='%s',
+        desc="brain mask",
+        mandatory=True)
+    out_file = File(
+        name_template="%s_defaced",
+        name_source='in_file',
+        position=3,
+        argstr='%s',
+        desc="defaced output image",
+        keep_extension=True)
+    buff = traits.Int(
+        position=4,
+        argstr='%d',
+        desc='buffer size (in voxels) between shearing '
+        'plane and the brain')
 
 
 class QuickshearOutputSpec(TraitedSpec):
@@ -40,7 +48,7 @@ class Quickshear(CommandLine):
 
     >>> from nipype.interfaces.quickshear import Quickshear
     >>> qs = Quickshear(in_file='T1.nii', mask_file='brain_mask.nii')
-    >>> qs.cmdline  # doctest: +ALLOW_UNICODE
+    >>> qs.cmdline
     'quickshear T1.nii brain_mask.nii T1_defaced.nii'
 
     In the absence of a precomputed mask, a simple pipeline can be generated
@@ -69,15 +77,15 @@ class Quickshear(CommandLine):
     input_spec = QuickshearInputSpec
     output_spec = QuickshearOutputSpec
 
-    references_ = [
-        {'entry':
-            BibTeX('@inproceedings{Schimke2011,'
-                   'address = {San Francisco},'
-                   'author = {Schimke, Nakeisha and Hale, John},'
-                   'booktitle = {Proceedings of the 2nd USENIX Conference on '
-                   'Health Security and Privacy},'
-                   'title = {{Quickshear Defacing for Neuroimages}},'
-                   'year = {2011},'
-                   'month = sep}'),
-         'tags': ['implementation'],
-         }]
+    references_ = [{
+        'entry':
+        BibTeX('@inproceedings{Schimke2011,'
+               'address = {San Francisco},'
+               'author = {Schimke, Nakeisha and Hale, John},'
+               'booktitle = {Proceedings of the 2nd USENIX Conference on '
+               'Health Security and Privacy},'
+               'title = {{Quickshear Defacing for Neuroimages}},'
+               'year = {2011},'
+               'month = sep}'),
+        'tags': ['implementation'],
+    }]

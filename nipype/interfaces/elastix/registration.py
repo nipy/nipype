@@ -2,13 +2,13 @@
 # coding: utf-8
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-
 """
 Interfaces to perform image registrations and to apply the resulting
 displacement maps to images and points.
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import open
 
 import os.path as op
@@ -18,29 +18,38 @@ from ... import logging
 from .base import ElastixBaseInputSpec
 from ..base import CommandLine, TraitedSpec, File, traits, InputMultiPath
 
-logger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 class RegistrationInputSpec(ElastixBaseInputSpec):
-    fixed_image = File(exists=True, mandatory=True, argstr='-f %s',
-                       desc='fixed image')
-    moving_image = File(exists=True, mandatory=True, argstr='-m %s',
-                        desc='moving image')
-    parameters = InputMultiPath(File(exists=True), mandatory=True, argstr='-p %s...',
-                                desc='parameter file, elastix handles 1 or more -p')
-    fixed_mask = File(exists=True, argstr='-fMask %s', desc='mask for fixed image')
-    moving_mask = File(exists=True, argstr='-mMask %s', desc='mask for moving image')
-    initial_transform = File(exists=True, argstr='-t0 %s',
-                             desc='parameter file for initial transform')
+    fixed_image = File(
+        exists=True, mandatory=True, argstr='-f %s', desc='fixed image')
+    moving_image = File(
+        exists=True, mandatory=True, argstr='-m %s', desc='moving image')
+    parameters = InputMultiPath(
+        File(exists=True),
+        mandatory=True,
+        argstr='-p %s...',
+        desc='parameter file, elastix handles 1 or more -p')
+    fixed_mask = File(
+        exists=True, argstr='-fMask %s', desc='mask for fixed image')
+    moving_mask = File(
+        exists=True, argstr='-mMask %s', desc='mask for moving image')
+    initial_transform = File(
+        exists=True,
+        argstr='-t0 %s',
+        desc='parameter file for initial transform')
 
 
 class RegistrationOutputSpec(TraitedSpec):
     transform = InputMultiPath(File(exists=True), desc='output transform')
     warped_file = File(desc='input moving image warped to fixed image')
-    warped_files = InputMultiPath(File(exists=False),
-                                  desc=('input moving image warped to fixed image at each level'))
-    warped_files_flags = traits.List(traits.Bool(False),
-                                     desc='flag indicating if warped image was generated')
+    warped_files = InputMultiPath(
+        File(exists=False),
+        desc=('input moving image warped to fixed image at each level'))
+    warped_files_flags = traits.List(
+        traits.Bool(False),
+        desc='flag indicating if warped image was generated')
 
 
 class Registration(CommandLine):
@@ -55,8 +64,8 @@ class Registration(CommandLine):
     >>> reg.inputs.fixed_image = 'fixed1.nii'
     >>> reg.inputs.moving_image = 'moving1.nii'
     >>> reg.inputs.parameters = ['elastix.txt']
-    >>> reg.cmdline  # doctest: +ALLOW_UNICODE
-    'elastix -f fixed1.nii -m moving1.nii -out ./ -p elastix.txt'
+    >>> reg.cmdline
+    'elastix -f fixed1.nii -m moving1.nii -threads 1 -out ./ -p elastix.txt'
 
 
     """
@@ -70,7 +79,6 @@ class Registration(CommandLine):
 
         out_dir = op.abspath(self.inputs.output_path)
 
-        opts = ['WriteResultImage', 'ResultImageFormat']
         regex = re.compile(r'^\((\w+)\s(.+)\)$')
 
         outputs['transform'] = []
@@ -89,13 +97,13 @@ class Registration(CommandLine):
                             value = self._cast(m.group(2).strip())
                             config[m.group(1).strip()] = value
 
-            outputs['transform'].append(op.join(out_dir,
-                                                'TransformParameters.%01d.txt' % i))
+            outputs['transform'].append(
+                op.join(out_dir, 'TransformParameters.%01d.txt' % i))
 
             warped_file = None
             if config['WriteResultImage']:
-                warped_file = op.join(out_dir,
-                                      'result.%01d.%s' % (i, config['ResultImageFormat']))
+                warped_file = op.join(out_dir, 'result.%01d.%s' %
+                                      (i, config['ResultImageFormat']))
 
             outputs['warped_files'].append(warped_file)
             outputs['warped_files_flags'].append(config['WriteResultImage'])
@@ -124,11 +132,17 @@ class Registration(CommandLine):
 
 
 class ApplyWarpInputSpec(ElastixBaseInputSpec):
-    transform_file = File(exists=True, mandatory=True, argstr='-tp %s',
-                          desc='transform-parameter file, only 1')
+    transform_file = File(
+        exists=True,
+        mandatory=True,
+        argstr='-tp %s',
+        desc='transform-parameter file, only 1')
 
-    moving_image = File(exists=True, argstr='-in %s', mandatory=True,
-                        desc='input image to deform')
+    moving_image = File(
+        exists=True,
+        argstr='-in %s',
+        mandatory=True,
+        desc='input image to deform')
 
 
 class ApplyWarpOutputSpec(TraitedSpec):
@@ -147,8 +161,8 @@ class ApplyWarp(CommandLine):
     >>> reg = ApplyWarp()
     >>> reg.inputs.moving_image = 'moving1.nii'
     >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
-    >>> reg.cmdline  # doctest: +ALLOW_UNICODE
-    'transformix -in moving1.nii -out ./ -tp TransformParameters.0.txt'
+    >>> reg.cmdline
+    'transformix -in moving1.nii -threads 1 -out ./ -tp TransformParameters.0.txt'
 
 
     """
@@ -164,10 +178,28 @@ class ApplyWarp(CommandLine):
         return outputs
 
 
-class AnalyzeWarpInputSpec(ElastixBaseInputSpec):
-    transform_file = File(exists=True, mandatory=True, argstr='-tp %s',
-                          desc='transform-parameter file, only 1')
-
+class AnalyzeWarpInputSpec(ApplyWarpInputSpec):
+    points = traits.Enum(
+        'all',
+        usedefault=True,
+        position=0,
+        argstr='-def %s',
+        desc='transform all points from the input-image, which effectively'
+             ' generates a deformation field.')
+    jac = traits.Enum(
+        'all',
+        usedefault=True,
+        argstr='-jac %s',
+        desc='generate an image with the determinant of the spatial Jacobian')
+    jacmat = traits.Enum(
+        'all',
+        usedefault=True,
+        argstr='-jacmat %s',
+        desc='generate an image with the spatial Jacobian matrix at each voxel')
+    moving_image = File(
+        exists=True,
+        argstr='-in %s',
+        desc='input image to deform (not used)')
 
 class AnalyzeWarpOutputSpec(TraitedSpec):
     disp_field = File(desc='displacements field')
@@ -175,7 +207,7 @@ class AnalyzeWarpOutputSpec(TraitedSpec):
     jacmat_map = File(desc='Jacobian matrix map')
 
 
-class AnalyzeWarp(CommandLine):
+class AnalyzeWarp(ApplyWarp):
     """
     Use transformix to get details from the input transform (generate
     the corresponding deformation field, generate the determinant of the
@@ -187,13 +219,12 @@ class AnalyzeWarp(CommandLine):
     >>> from nipype.interfaces.elastix import AnalyzeWarp
     >>> reg = AnalyzeWarp()
     >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
-    >>> reg.cmdline  # doctest: +ALLOW_UNICODE
-    'transformix -def all -jac all -jacmat all -out ./ -tp TransformParameters.0.txt'
+    >>> reg.cmdline
+    'transformix -def all -jac all -jacmat all -threads 1 -out ./ -tp TransformParameters.0.txt'
 
 
     """
 
-    _cmd = 'transformix -def all -jac all -jacmat all'
     input_spec = AnalyzeWarpInputSpec
     output_spec = AnalyzeWarpOutputSpec
 
@@ -207,10 +238,16 @@ class AnalyzeWarp(CommandLine):
 
 
 class PointsWarpInputSpec(ElastixBaseInputSpec):
-    points_file = File(exists=True, argstr='-def %s', mandatory=True,
-                       desc='input points (accepts .vtk triangular meshes).')
-    transform_file = File(exists=True, mandatory=True, argstr='-tp %s',
-                          desc='transform-parameter file, only 1')
+    points_file = File(
+        exists=True,
+        argstr='-def %s',
+        mandatory=True,
+        desc='input points (accepts .vtk triangular meshes).')
+    transform_file = File(
+        exists=True,
+        mandatory=True,
+        argstr='-tp %s',
+        desc='transform-parameter file, only 1')
 
 
 class PointsWarpOutputSpec(TraitedSpec):
@@ -228,8 +265,8 @@ class PointsWarp(CommandLine):
     >>> reg = PointsWarp()
     >>> reg.inputs.points_file = 'surf1.vtk'
     >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
-    >>> reg.cmdline  # doctest: +ALLOW_UNICODE
-    'transformix -out ./ -def surf1.vtk -tp TransformParameters.0.txt'
+    >>> reg.cmdline
+    'transformix -threads 1 -out ./ -def surf1.vtk -tp TransformParameters.0.txt'
 
 
     """

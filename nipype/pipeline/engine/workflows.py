@@ -5,61 +5,41 @@
 """Defines functionality for pipelined execution of interfaces
 
 The `Workflow` class provides core functionality for batch processing.
-
-  .. testsetup::
-     # Change directory to provide relative paths for doctests
-     import os
-     filepath = os.path.dirname(os.path.realpath( __file__ ))
-     datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-     os.chdir(datadir)
-
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import range, object, str, bytes, open
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
+from builtins import str, bytes, open
+
+import os
+import os.path as op
+import sys
+from datetime import datetime
+from copy import deepcopy
+import pickle
+import shutil
+
+import numpy as np
+
+from ... import config, logging
+from ...utils.misc import str2bool
+from ...utils.functions import (getsource, create_function_from_source)
+
+from ...interfaces.base import (traits, TraitedSpec, TraitDictObject,
+                                TraitListObject)
+from ...utils.filemanip import save_json, makedirs, to_str
+from .utils import (generate_expanded_graph, export_graph, write_workflow_prov,
+                    write_workflow_resources, format_dot, topological_sort,
+                    get_print_name, merge_dict, format_node)
+
+from .base import EngineBase
+from .nodes import MapNode
 
 # Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
 from future import standard_library
 standard_library.install_aliases()
 
-from datetime import datetime
+logger = logging.getLogger('nipype.workflow')
 
-from copy import deepcopy
-import pickle
-import os
-import os.path as op
-import shutil
-import sys
-from warnings import warn
-
-import numpy as np
-import networkx as nx
-
-
-from ... import config, logging
-from ...utils.misc import (unflatten, package_check, str2bool,
-                               getsource, create_function_from_source)
-from ...interfaces.base import (traits, InputMultiPath, CommandLine,
-                                Undefined, TraitedSpec, DynamicTraitedSpec,
-                                Bunch, InterfaceResult, md5, Interface,
-                                TraitDictObject, TraitListObject, isdefined)
-
-from ...utils.filemanip import (save_json, FileNotFoundError,
-                                filename_to_list, list_to_filename,
-                                copyfiles, fnames_presuffix, loadpkl,
-                                split_filename, load_json, savepkl,
-                                write_rst_header, write_rst_dict,
-                                write_rst_list, to_str)
-from .utils import (generate_expanded_graph, modify_paths,
-                    export_graph, make_output_dir, write_workflow_prov,
-                    clean_working_directory, format_dot, topological_sort,
-                    get_print_name, merge_dict, evaluate_connect_function,
-                    _write_inputs, format_node)
-
-from .base import EngineBase
-from .nodes import Node, MapNode
-
-package_check('networkx', '1.3')
-logger = logging.getLogger('workflow')
 
 class Workflow(EngineBase):
     """Controls the setup and execution of a pipeline of processes."""
@@ -75,9 +55,9 @@ class Workflow(EngineBase):
             path to workflow storage
 
         """
+        import networkx as nx
         super(Workflow, self).__init__(name, base_dir)
         self._graph = nx.DiGraph()
-        self.config = deepcopy(config._sections)
 
     # PUBLIC API
     def clone(self, name):
@@ -163,8 +143,7 @@ class Workflow(EngineBase):
         for srcnode, destnode, _ in connection_list:
             if self in [srcnode, destnode]:
                 msg = ('Workflow connect cannot contain itself as node:'
-                       ' src[%s] dest[%s] workflow[%s]') % (srcnode,
-                                                            destnode,
+                       ' src[%s] dest[%s] workflow[%s]') % (srcnode, destnode,
                                                             self.name)
 
                 raise IOError(msg)
@@ -185,7 +164,7 @@ class Workflow(EngineBase):
             # check to see which ports of destnode are already
             # connected.
             if not disconnect and (destnode in self._graph.nodes()):
-                for edge in self._graph.in_edges_iter(destnode):
+                for edge in self._graph.in_edges(destnode):
                     data = self._graph.get_edge_data(*edge)
                     for sourceinfo, destname in data['connect']:
                         if destname not in connected_ports[destnode]:
@@ -195,21 +174,22 @@ class Workflow(EngineBase):
                 # determine their inputs/outputs depending on
                 # connection settings.  Skip these modules in the check
                 if dest in connected_ports[destnode]:
-                    raise Exception("""
+                    raise Exception("""\
 Trying to connect %s:%s to %s:%s but input '%s' of node '%s' is already
 connected.
 """ % (srcnode, source, destnode, dest, dest, destnode))
                 if not (hasattr(destnode, '_interface') and
-                            ('.io' in str(destnode._interface.__class__) or
-                                any(['.io' in str(val) for val in
-                                     destnode._interface.__class__.__bases__]))
-                        ):
+                        ('.io' in str(destnode._interface.__class__) or any([
+                            '.io' in str(val)
+                            for val in destnode._interface.__class__.__bases__
+                        ]))):
                     if not destnode._check_inputs(dest):
                         not_found.append(['in', destnode.name, dest])
                 if not (hasattr(srcnode, '_interface') and
-                            ('.io' in str(srcnode._interface.__class__)
-                             or any(['.io' in str(val) for val in
-                                     srcnode._interface.__class__.__bases__]))):
+                        ('.io' in str(srcnode._interface.__class__) or any([
+                            '.io' in str(val)
+                            for val in srcnode._interface.__class__.__bases__
+                        ]))):
                     if isinstance(source, tuple):
                         # handles the case that source is specified
                         # with a function
@@ -217,25 +197,27 @@ connected.
                     elif isinstance(source, (str, bytes)):
                         sourcename = source
                     else:
-                        raise Exception(('Unknown source specification in '
-                                         'connection from output of %s') %
-                                        srcnode.name)
+                        raise Exception(
+                            ('Unknown source specification in '
+                             'connection from output of %s') % srcnode.name)
                     if sourcename and not srcnode._check_outputs(sourcename):
                         not_found.append(['out', srcnode.name, sourcename])
                 connected_ports[destnode] += [dest]
         infostr = []
         for info in not_found:
-            infostr += ["Module %s has no %sput called %s\n" % (info[1],
-                                                                info[0],
-                                                                info[2])]
+            infostr += [
+                "Module %s has no %sput called %s\n" % (info[1], info[0],
+                                                        info[2])
+            ]
         if not_found:
-            raise Exception('\n'.join(['Some connections were not found'] +
-                                      infostr))
+            raise Exception(
+                '\n'.join(['Some connections were not found'] + infostr))
 
         # turn functions into strings
         for srcnode, destnode, connects in connection_list:
             for idx, (src, dest) in enumerate(connects):
-                if isinstance(src, tuple) and not isinstance(src[1], (str, bytes)):
+                if isinstance(src,
+                              tuple) and not isinstance(src[1], (str, bytes)):
                     function_source = getsource(src[1])
                     connects[idx] = ((src[0], function_source, src[2:]), dest)
 
@@ -243,8 +225,8 @@ connected.
         for srcnode, destnode, connects in connection_list:
             edge_data = self._graph.get_edge_data(srcnode, destnode, None)
             if edge_data:
-                logger.debug('(%s, %s): Edge data exists: %s', srcnode, destnode,
-                             to_str(edge_data))
+                logger.debug('(%s, %s): Edge data exists: %s', srcnode,
+                             destnode, to_str(edge_data))
                 for data in connects:
                     if data not in edge_data['connect']:
                         edge_data['connect'].append(data)
@@ -252,19 +234,21 @@ connected.
                         logger.debug('Removing connection: %s', to_str(data))
                         edge_data['connect'].remove(data)
                 if edge_data['connect']:
-                    self._graph.add_edges_from([(srcnode,
-                                                 destnode,
+                    self._graph.add_edges_from([(srcnode, destnode,
                                                  edge_data)])
                 else:
                     # pass
-                    logger.debug('Removing connection: %s->%s', srcnode, destnode)
+                    logger.debug('Removing connection: %s->%s', srcnode,
+                                 destnode)
                     self._graph.remove_edges_from([(srcnode, destnode)])
             elif not disconnect:
                 logger.debug('(%s, %s): No edge data', srcnode, destnode)
-                self._graph.add_edges_from([(srcnode, destnode,
-                                             {'connect': connects})])
+                self._graph.add_edges_from([(srcnode, destnode, {
+                    'connect': connects
+                })])
             edge_data = self._graph.get_edge_data(srcnode, destnode)
-            logger.debug('(%s, %s): new edge data: %s', srcnode, destnode, to_str(edge_data))
+            logger.debug('(%s, %s): new edge data: %s', srcnode, destnode,
+                         to_str(edge_data))
 
     def disconnect(self, *args):
         """Disconnect nodes
@@ -279,7 +263,8 @@ connected.
                             'of connection tuples (%d args given)' % len(args))
 
         for srcnode, dstnode, conn in connection_list:
-            logger.debug('disconnect(): %s->%s %s', srcnode, dstnode, to_str(conn))
+            logger.debug('disconnect(): %s->%s %s', srcnode, dstnode,
+                         to_str(conn))
             if self in [srcnode, dstnode]:
                 raise IOError(
                     'Workflow connect cannot contain itself as node: src[%s] '
@@ -289,14 +274,15 @@ connected.
             if not self._has_node(srcnode) or not self._has_node(dstnode):
                 continue
 
-            edge_data = self._graph.get_edge_data(
-                srcnode, dstnode, {'connect': []})
+            edge_data = self._graph.get_edge_data(srcnode, dstnode, {
+                'connect': []
+            })
             ed_conns = [(c[0], c[1]) for c in edge_data['connect']]
 
             remove = []
             for edge in conn:
                 if edge in ed_conns:
-                    idx = ed_conns.index(edge)
+                    # idx = ed_conns.index(edge)
                     remove.append((edge[0], edge[1]))
 
             logger.debug('disconnect(): remove list %s', to_str(remove))
@@ -333,7 +319,8 @@ connected.
             return
         for node in newnodes:
             if not issubclass(node.__class__, EngineBase):
-                raise Exception('Node %s must be a subclass of EngineBase', node)
+                raise Exception('Node %s must be a subclass of EngineBase',
+                                node)
         self._check_nodes(newnodes)
         for node in newnodes:
             if node._hierarchy is None:
@@ -364,8 +351,10 @@ connected.
         """
         nodenames = name.split('.')
         nodename = nodenames[0]
-        outnode = [node for node in self._graph.nodes() if
-                   str(node).endswith('.' + nodename)]
+        outnode = [
+            node for node in self._graph.nodes()
+            if str(node).endswith('.' + nodename)
+        ]
         if outnode:
             outnode = outnode[0]
             if nodenames[1:] and issubclass(outnode.__class__, Workflow):
@@ -377,17 +366,23 @@ connected.
     def list_node_names(self):
         """List names of all nodes in a workflow
         """
+        import networkx as nx
         outlist = []
         for node in nx.topological_sort(self._graph):
             if isinstance(node, Workflow):
-                outlist.extend(['.'.join((node.name, nodename)) for nodename in
-                                node.list_node_names()])
+                outlist.extend([
+                    '.'.join((node.name, nodename))
+                    for nodename in node.list_node_names()
+                ])
             else:
                 outlist.append(node.name)
         return sorted(outlist)
 
-    def write_graph(self, dotfilename='graph.dot', graph2use='hierarchical',
-                    format="png", simple_form=True):
+    def write_graph(self,
+                    dotfilename='graph.dot',
+                    graph2use='hierarchical',
+                    format="png",
+                    simple_form=True):
         """Generates a graphviz dot file and a png file
 
         Parameters
@@ -423,15 +418,16 @@ connected.
                     base_dir = op.join(base_dir, self.name)
             else:
                 base_dir = os.getcwd()
-        base_dir = make_output_dir(base_dir)
+        base_dir = makedirs(base_dir, exist_ok=True)
         if graph2use in ['hierarchical', 'colored']:
-            if self.name[:1].isdigit(): # these graphs break if int
+            if self.name[:1].isdigit():  # these graphs break if int
                 raise ValueError('{} graph failed, workflow name cannot begin '
                                  'with a number'.format(graph2use))
             dotfilename = op.join(base_dir, dotfilename)
-            self.write_hierarchical_dotfile(dotfilename=dotfilename,
-                                            colored=graph2use == "colored",
-                                            simple_form=simple_form)
+            self.write_hierarchical_dotfile(
+                dotfilename=dotfilename,
+                colored=graph2use == "colored",
+                simple_form=simple_form)
             outfname = format_dot(dotfilename, format=format)
         else:
             graph = self._graph
@@ -439,18 +435,26 @@ connected.
                 graph = self._create_flat_graph()
             if graph2use == 'exec':
                 graph = generate_expanded_graph(deepcopy(graph))
-            outfname = export_graph(graph, base_dir, dotfilename=dotfilename,
-                                    format=format, simple_form=simple_form)
+            outfname = export_graph(
+                graph,
+                base_dir,
+                dotfilename=dotfilename,
+                format=format,
+                simple_form=simple_form)
 
-        logger.info('Generated workflow graph: %s (graph2use=%s, simple_form=%s).' % (
-            outfname, graph2use, simple_form))
+        logger.info(
+            'Generated workflow graph: %s (graph2use=%s, simple_form=%s).' %
+            (outfname, graph2use, simple_form))
         return outfname
 
-    def write_hierarchical_dotfile(self, dotfilename=None, colored=False,
+    def write_hierarchical_dotfile(self,
+                                   dotfilename=None,
+                                   colored=False,
                                    simple_form=True):
         dotlist = ['digraph %s{' % self.name]
-        dotlist.append(self._get_dot(prefix='  ', colored=colored,
-                                     simple_form=simple_form))
+        dotlist.append(
+            self._get_dot(
+                prefix='  ', colored=colored, simple_form=simple_form))
         dotlist.append('}')
         dotstr = '\n'.join(dotlist)
         if dotfilename:
@@ -460,7 +464,10 @@ connected.
         else:
             logger.info(dotstr)
 
-    def export(self, filename=None, prefix="output", format="python",
+    def export(self,
+               filename=None,
+               prefix="output",
+               format="python",
                include_config=False):
         """Export object into a different format
 
@@ -476,15 +483,19 @@ connected.
            whether to include node and workflow config values
 
         """
+        import networkx as nx
         formats = ["python"]
         if format not in formats:
             raise ValueError('format must be one of: %s' % '|'.join(formats))
         flatgraph = self._create_flat_graph()
         nodes = nx.topological_sort(flatgraph)
 
+        all_lines = None
         lines = ['# Workflow']
-        importlines = ['from nipype.pipeline.engine import Workflow, '
-                       'Node, MapNode']
+        importlines = [
+            'from nipype.pipeline.engine import Workflow, '
+            'Node, MapNode'
+        ]
         functions = {}
         if format == "python":
             connect_template = '%s.connect(%%s, %%s, %%s, "%%s")' % self.name
@@ -497,8 +508,8 @@ connected.
             for idx, node in enumerate(nodes):
                 nodename = node.fullname.replace('.', '_')
                 # write nodes
-                nodelines = format_node(node, format='python',
-                                        include_config=include_config)
+                nodelines = format_node(
+                    node, format='python', include_config=include_config)
                 for line in nodelines:
                     if line.startswith('from'):
                         if line not in importlines:
@@ -506,8 +517,7 @@ connected.
                     else:
                         lines.append(line)
                 # write connections
-                for u, _, d in flatgraph.in_edges_iter(nbunch=node,
-                                                       data=True):
+                for u, _, d in flatgraph.in_edges(nbunch=node, data=True):
                     for cd in d['connect']:
                         if isinstance(cd[0], tuple):
                             args = list(cd[0])
@@ -515,19 +525,21 @@ connected.
                                 funcname = functions[args[1]]
                             else:
                                 func = create_function_from_source(args[1])
-                                funcname = [name for name in func.__globals__
-                                            if name != '__builtins__'][0]
+                                funcname = [
+                                    name for name in func.__globals__
+                                    if name != '__builtins__'
+                                ][0]
                                 functions[args[1]] = funcname
                             args[1] = funcname
                             args = tuple([arg for arg in args if arg])
-                            line_args = (u.fullname.replace('.', '_'),
-                                         args, nodename, cd[1])
+                            line_args = (u.fullname.replace('.', '_'), args,
+                                         nodename, cd[1])
                             line = connect_template % line_args
                             line = line.replace("'%s'" % funcname, funcname)
                             lines.append(line)
                         else:
-                            line_args = (u.fullname.replace('.', '_'),
-                                         cd[0], nodename, cd[1])
+                            line_args = (u.fullname.replace('.', '_'), cd[0],
+                                         nodename, cd[1])
                             lines.append(connect_template2 % line_args)
             functionlines = ['# Functions']
             for function in functions:
@@ -556,6 +568,8 @@ connected.
             plugin = config.get('execution', 'plugin')
         if not isinstance(plugin, (str, bytes)):
             runner = plugin
+            plugin = runner.__class__.__name__[:-len('Plugin')]
+            plugin_args = runner.plugin_args
         else:
             name = '.'.join(__name__.split('.')[:-2] + ['plugins'])
             try:
@@ -569,13 +583,8 @@ connected.
                 runner = plugin_mod(plugin_args=plugin_args)
         flatgraph = self._create_flat_graph()
         self.config = merge_dict(deepcopy(config._sections), self.config)
-        if 'crashdump_dir' in self.config:
-            warn(("Deprecated: workflow.config['crashdump_dir']\n"
-                  "Please use config['execution']['crashdump_dir']"))
-            crash_dir = self.config['crashdump_dir']
-            self.config['execution']['crashdump_dir'] = crash_dir
-            del self.config['crashdump_dir']
-        logger.info('Workflow %s settings: %s', self.name, to_str(sorted(self.config)))
+        logger.info('Workflow %s settings: %s', self.name,
+                    to_str(sorted(self.config)))
         self._set_needed_outputs(flatgraph)
         execgraph = generate_expanded_graph(deepcopy(flatgraph))
         for index, node in enumerate(execgraph.nodes()):
@@ -594,6 +603,12 @@ connected.
                                 'workflow_provenance_%s' % datestr)
             logger.info('Provenance file prefix: %s' % prov_base)
             write_workflow_prov(execgraph, prov_base, format='all')
+
+        if config.resource_monitor:
+            base_dir = self.base_dir or os.getcwd()
+            write_workflow_resources(
+                execgraph,
+                filename=op.join(base_dir, self.name, 'resource_monitor.json'))
         return execgraph
 
     # PRIVATE API AND FUNCTIONS
@@ -602,14 +617,13 @@ connected.
         if workingdir is None:
             workingdir = os.getcwd()
         report_dir = op.join(workingdir, name)
-        if not op.exists(report_dir):
-            os.makedirs(report_dir)
-        shutil.copyfile(op.join(op.dirname(__file__),
-                                'report_template.html'),
-                        op.join(report_dir, 'index.html'))
-        shutil.copyfile(op.join(op.dirname(__file__),
-                                '..', '..', 'external', 'd3.js'),
-                        op.join(report_dir, 'd3.js'))
+        makedirs(report_dir, exist_ok=True)
+        shutil.copyfile(
+            op.join(op.dirname(__file__), 'report_template.html'),
+            op.join(report_dir, 'index.html'))
+        shutil.copyfile(
+            op.join(op.dirname(__file__), '..', '..', 'external', 'd3.js'),
+            op.join(report_dir, 'd3.js'))
         nodes, groups = topological_sort(graph, depth_first=True)
         graph_file = op.join(report_dir, 'graph1.json')
         json_dict = {'nodes': [], 'links': [], 'groups': [], 'maxN': 0}
@@ -619,30 +633,30 @@ connected.
             result_file = "%s/result_%s.pklz" % \
                           (node.output_dir().replace(report_dir, ''),
                            node.name)
-            json_dict['nodes'].append(dict(name='%d_%s' % (i, node.name),
-                                           report=report_file,
-                                           result=result_file,
-                                           group=groups[i]))
+            json_dict['nodes'].append(
+                dict(
+                    name='%d_%s' % (i, node.name),
+                    report=report_file,
+                    result=result_file,
+                    group=groups[i]))
         maxN = 0
         for gid in np.unique(groups):
             procs = [i for i, val in enumerate(groups) if val == gid]
             N = len(procs)
             if N > maxN:
                 maxN = N
-            json_dict['groups'].append(dict(procs=procs,
-                                            total=N,
-                                            name='Group_%05d' % gid))
+            json_dict['groups'].append(
+                dict(procs=procs, total=N, name='Group_%05d' % gid))
         json_dict['maxN'] = maxN
-        for u, v in graph.in_edges_iter():
-            json_dict['links'].append(dict(source=nodes.index(u),
-                                           target=nodes.index(v),
-                                           value=1))
+        for u, v in graph.in_edges():
+            json_dict['links'].append(
+                dict(source=nodes.index(u), target=nodes.index(v), value=1))
         save_json(graph_file, json_dict)
         graph_file = op.join(report_dir, 'graph.json')
         # Avoid RuntimeWarning: divide by zero encountered in log10
         num_nodes = len(nodes)
         if num_nodes > 0:
-           index_name = np.ceil(np.log10(num_nodes)).astype(int)
+            index_name = np.ceil(np.log10(num_nodes)).astype(int)
         else:
             index_name = 0
         template = '%%0%dd_' % index_name
@@ -651,15 +665,18 @@ connected.
             name_parts = u.fullname.split('.')
             # return '.'.join(name_parts[:-1] + [template % i + name_parts[-1]])
             return template % i + name_parts[-1]
+
         json_dict = []
         for i, node in enumerate(nodes):
             imports = []
-            for u, v in graph.in_edges_iter(nbunch=node):
+            for u, v in graph.in_edges(nbunch=node):
                 imports.append(getname(u, nodes.index(u)))
-            json_dict.append(dict(name=getname(node, i),
-                                  size=1,
-                                  group=groups[i],
-                                  imports=imports))
+            json_dict.append(
+                dict(
+                    name=getname(node, i),
+                    size=1,
+                    group=groups[i],
+                    imports=imports))
         save_json(graph_file, json_dict)
 
     def _set_needed_outputs(self, graph):
@@ -669,12 +686,15 @@ connected.
             return
         for node in graph.nodes():
             node.needed_outputs = []
-            for edge in graph.out_edges_iter(node):
+            for edge in graph.out_edges(node):
                 data = graph.get_edge_data(*edge)
-                sourceinfo = [v1[0] if isinstance(v1, tuple) else v1
-                              for v1, v2 in data['connect']]
-                node.needed_outputs += [v for v in sourceinfo
-                                        if v not in node.needed_outputs]
+                sourceinfo = [
+                    v1[0] if isinstance(v1, tuple) else v1
+                    for v1, v2 in data['connect']
+                ]
+                node.needed_outputs += [
+                    v for v in sourceinfo if v not in node.needed_outputs
+                ]
             if node.needed_outputs:
                 node.needed_outputs = sorted(node.needed_outputs)
 
@@ -683,7 +703,7 @@ connected.
         """
         for node in graph.nodes():
             node.input_source = {}
-            for edge in graph.in_edges_iter(node):
+            for edge in graph.in_edges(node):
                 data = graph.get_edge_data(*edge)
                 for sourceinfo, field in data['connect']:
                     node.input_source[field] = \
@@ -700,8 +720,15 @@ connected.
         for node in nodes:
             if node.name in node_names:
                 idx = node_names.index(node.name)
-                if node_lineage[idx] in [node._hierarchy, self.name]:
-                    raise IOError('Duplicate node name %s found.' % node.name)
+                try:
+                    this_node_lineage = node_lineage[idx]
+                except IndexError:
+                    raise IOError(
+                        'Duplicate node name "%s" found.' % node.name)
+                else:
+                    if this_node_lineage in [node._hierarchy, self.name]:
+                        raise IOError(
+                            'Duplicate node name "%s" found.' % node.name)
             else:
                 node_names.append(node.name)
 
@@ -753,16 +780,15 @@ connected.
                 setattr(inputdict, node.name, node.inputs)
             else:
                 taken_inputs = []
-                for _, _, d in self._graph.in_edges_iter(nbunch=node,
-                                                         data=True):
+                for _, _, d in self._graph.in_edges(nbunch=node, data=True):
                     for cd in d['connect']:
                         taken_inputs.append(cd[1])
                 unconnectedinputs = TraitedSpec()
                 for key, trait in list(node.inputs.items()):
                     if key not in taken_inputs:
                         unconnectedinputs.add_trait(key,
-                                                    traits.Trait(trait,
-                                                                 node=node))
+                                                    traits.Trait(
+                                                        trait, node=node))
                         value = getattr(node.inputs, key)
                         setattr(unconnectedinputs, key, value)
                 setattr(inputdict, node.name, unconnectedinputs)
@@ -785,10 +811,10 @@ connected.
                 setattr(outputdict, node.name, outputs)
         return outputdict
 
-    def _set_input(self, object, name, newvalue):
+    def _set_input(self, objekt, name, newvalue):
         """Trait callback function to update a node input
         """
-        object.traits()[name].node.set_input(name, newvalue)
+        objekt.traits()[name].node.set_input(name, newvalue)
 
     def _set_node_input(self, node, param, source, sourceinfo):
         """Set inputs of a node given the edge connection"""
@@ -846,12 +872,13 @@ connected.
     def _generate_flatgraph(self):
         """Generate a graph containing only Nodes or MapNodes
         """
+        import networkx as nx
         logger.debug('expanding workflow: %s', self)
         nodes2remove = []
         if not nx.is_directed_acyclic_graph(self._graph):
             raise Exception(('Workflow: %s is not a directed acyclic graph '
                              '(DAG)') % self.name)
-        nodes = nx.topological_sort(self._graph)
+        nodes = list(nx.topological_sort(self._graph))
         for node in nodes:
             logger.debug('processing node: %s', node)
             if isinstance(node, Workflow):
@@ -859,7 +886,9 @@ connected.
                 # use in_edges instead of in_edges_iter to allow
                 # disconnections to take place properly. otherwise, the
                 # edge dict is modified.
-                for u, _, d in self._graph.in_edges(nbunch=node, data=True):
+                # dj: added list() for networkx ver.2
+                for u, _, d in list(
+                        self._graph.in_edges(nbunch=node, data=True)):
                     logger.debug('in: connections-> %s', to_str(d['connect']))
                     for cd in deepcopy(d['connect']):
                         logger.debug("in: %s", to_str(cd))
@@ -872,7 +901,9 @@ connected.
                         self.disconnect(u, cd[0], node, cd[1])
                         self.connect(srcnode, srcout, dstnode, dstin)
                 # do not use out_edges_iter for reasons stated in in_edges
-                for _, v, d in self._graph.out_edges(nbunch=node, data=True):
+                # dj: for ver 2 use list(out_edges)
+                for _, v, d in list(
+                        self._graph.out_edges(nbunch=node, data=True)):
                     logger.debug('out: connections-> %s', to_str(d['connect']))
                     for cd in deepcopy(d['connect']):
                         logger.debug("out: %s", to_str(cd))
@@ -881,8 +912,8 @@ connected.
                             parameter = cd[0][0]
                         else:
                             parameter = cd[0]
-                        srcnode = node._get_parameter_node(parameter,
-                                                           subtype='out')
+                        srcnode = node._get_parameter_node(
+                            parameter, subtype='out')
                         if isinstance(cd[0], tuple):
                             srcout = list(cd[0])
                             srcout[0] = parameter.split('.')[-1]
@@ -890,8 +921,8 @@ connected.
                         else:
                             srcout = parameter.split('.')[-1]
                         dstin = cd[1]
-                        logger.debug('out edges: %s %s %s %s',
-                                     srcnode, srcout, dstnode, dstin)
+                        logger.debug('out edges: %s %s %s %s', srcnode, srcout,
+                                     dstnode, dstin)
                         self.disconnect(node, cd[0], v, cd[1])
                         self.connect(srcnode, srcout, dstnode, dstin)
                 # expand the workflow node
@@ -906,21 +937,35 @@ connected.
             self._graph.remove_nodes_from(nodes2remove)
         logger.debug('finished expanding workflow: %s', self)
 
-    def _get_dot(self, prefix=None, hierarchy=None, colored=False,
-                 simple_form=True, level=0):
+    def _get_dot(self,
+                 prefix=None,
+                 hierarchy=None,
+                 colored=False,
+                 simple_form=True,
+                 level=0):
         """Create a dot file with connection info
         """
+        import networkx as nx
         if prefix is None:
             prefix = '  '
         if hierarchy is None:
             hierarchy = []
-        colorset = ['#FFFFC8',                       # Y
-                    '#0000FF', '#B4B4FF', '#E6E6FF', # B
-                    '#FF0000', '#FFB4B4', '#FFE6E6', # R
-                    '#00A300', '#B4FFB4', '#E6FFE6', # G
-                    '#0000FF', '#B4B4FF'] # loop B
+        colorset = [
+            '#FFFFC8',  # Y
+            '#0000FF',
+            '#B4B4FF',
+            '#E6E6FF',  # B
+            '#FF0000',
+            '#FFB4B4',
+            '#FFE6E6',  # R
+            '#00A300',
+            '#B4FFB4',
+            '#E6FFE6',  # G
+            '#0000FF',
+            '#B4B4FF'
+        ]  # loop B
         if level > len(colorset) - 2:
-            level = 3 # Loop back to blue
+            level = 3  # Loop back to blue
 
         dotlist = ['%slabel="%s";' % (prefix, self.name)]
         for node in nx.topological_sort(self._graph):
@@ -933,17 +978,17 @@ connected.
                 if hasattr(node, 'iterables') and node.iterables:
                     dotlist.append(('%s[label="%s", shape=box3d,'
                                     'style=filled, color=black, colorscheme'
-                                    '=greys7 fillcolor=2];') % (nodename,
-                                                                node_class_name))
+                                    '=greys7 fillcolor=2];') %
+                                   (nodename, node_class_name))
                 else:
                     if colored:
-                        dotlist.append(('%s[label="%s", style=filled,'
-                                        ' fillcolor="%s"];')
-                                       % (nodename, node_class_name,
-                                           colorset[level]))
+                        dotlist.append(
+                            ('%s[label="%s", style=filled,'
+                             ' fillcolor="%s"];') % (nodename, node_class_name,
+                                                     colorset[level]))
                     else:
-                        dotlist.append(('%s[label="%s"];')
-                                       % (nodename, node_class_name))
+                        dotlist.append(('%s[label="%s"];') % (nodename,
+                                                              node_class_name))
 
         for node in nx.topological_sort(self._graph):
             if isinstance(node, Workflow):
@@ -951,22 +996,27 @@ connected.
                 nodename = fullname.replace('.', '_')
                 dotlist.append('subgraph cluster_%s {' % nodename)
                 if colored:
-                    dotlist.append(prefix + prefix + 'edge [color="%s"];' % (colorset[level + 1]))
+                    dotlist.append(prefix + prefix + 'edge [color="%s"];' %
+                                   (colorset[level + 1]))
                     dotlist.append(prefix + prefix + 'style=filled;')
-                    dotlist.append(prefix + prefix + 'fillcolor="%s";' % (colorset[level + 2]))
-                dotlist.append(node._get_dot(prefix=prefix + prefix,
-                                             hierarchy=hierarchy + [self.name],
-                                             colored=colored,
-                                             simple_form=simple_form, level=level + 3))
+                    dotlist.append(prefix + prefix + 'fillcolor="%s";' %
+                                   (colorset[level + 2]))
+                dotlist.append(
+                    node._get_dot(
+                        prefix=prefix + prefix,
+                        hierarchy=hierarchy + [self.name],
+                        colored=colored,
+                        simple_form=simple_form,
+                        level=level + 3))
                 dotlist.append('}')
             else:
-                for subnode in self._graph.successors_iter(node):
+                for subnode in self._graph.successors(node):
                     if node._hierarchy != subnode._hierarchy:
                         continue
                     if not isinstance(subnode, Workflow):
                         nodefullname = '.'.join(hierarchy + [node.fullname])
-                        subnodefullname = '.'.join(hierarchy +
-                                                   [subnode.fullname])
+                        subnodefullname = '.'.join(
+                            hierarchy + [subnode.fullname])
                         nodename = nodefullname.replace('.', '_')
                         subnodename = subnodefullname.replace('.', '_')
                         for _ in self._graph.get_edge_data(node,
@@ -975,7 +1025,7 @@ connected.
                                                           subnodename))
                         logger.debug('connection: %s', dotlist[-1])
         # add between workflow connections
-        for u, v, d in self._graph.edges_iter(data=True):
+        for u, v, d in self._graph.edges(data=True):
             uname = '.'.join(hierarchy + [u.fullname])
             vname = '.'.join(hierarchy + [v.fullname])
             for src, dest in d['connect']:

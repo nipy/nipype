@@ -3,13 +3,14 @@
 
 import pytest
 
-from nipype.interfaces.niftyreg import no_nifty_package, get_custom_path
-from nipype.interfaces.niftyseg import UnaryStats, BinaryStats
-from nipype.testing import example_data
+from ....testing import example_data
+from ...niftyreg import get_custom_path
+from ...niftyreg.tests.test_regutils import no_nifty_tool
+from .. import UnaryStats, BinaryStats
 
 
-@pytest.mark.skipif(no_nifty_package(cmd='seg_stats'),
-                    reason="niftyseg is not installed")
+@pytest.mark.skipif(
+    no_nifty_tool(cmd='seg_stats'), reason="niftyseg is not installed")
 def test_unary_stats():
     """ Test for the seg_stats interfaces """
     # Create a node object
@@ -28,15 +29,13 @@ def test_unary_stats():
     unarys.inputs.in_file = in_file
     unarys.inputs.operation = 'a'
 
-    expected_cmd = '{cmd} {in_file} -a'.format(
-        cmd=cmd,
-        in_file=in_file)
+    expected_cmd = '{cmd} {in_file} -a'.format(cmd=cmd, in_file=in_file)
 
     assert unarys.cmdline == expected_cmd
 
 
-@pytest.mark.skipif(no_nifty_package(cmd='seg_stats'),
-                    reason="niftyseg is not installed")
+@pytest.mark.skipif(
+    no_nifty_tool(cmd='seg_stats'), reason="niftyseg is not installed")
 def test_binary_stats():
     """ Test for the seg_stats interfaces """
     # Create a node object
@@ -57,7 +56,6 @@ def test_binary_stats():
     binarys.inputs.operation = 'sa'
 
     expected_cmd = '{cmd} {in_file} -sa 2.00000000'.format(
-        cmd=cmd,
-        in_file=in_file)
+        cmd=cmd, in_file=in_file)
 
     assert binarys.cmdline == expected_cmd

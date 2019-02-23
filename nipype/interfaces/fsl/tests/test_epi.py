@@ -30,7 +30,8 @@ def test_eddy_correct2(create_files_in_directory):
     assert eddy.cmdline == 'eddy_correct %s foo_eddc.nii 100' % filelist[0]
 
     # .run based parameter setting
-    eddy2 = fsl.EddyCorrect(in_file=filelist[0], out_file='foo_ec.nii', ref_num=20)
+    eddy2 = fsl.EddyCorrect(
+        in_file=filelist[0], out_file='foo_ec.nii', ref_num=20)
     assert eddy2.cmdline == 'eddy_correct %s foo_ec.nii 20' % filelist[0]
 
     # test arguments for opt_map

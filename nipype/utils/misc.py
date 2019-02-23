@@ -3,23 +3,39 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous utility functions
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
-from future import standard_library
-standard_library.install_aliases()
-from builtins import next, str
-from future.utils import raise_from
+from __future__ import (print_function, unicode_literals, division,
+                        absolute_import)
+from builtins import next, bytes, str
 
+import os
 import sys
 import re
 from collections import Iterator
-import inspect
+from warnings import warn
 
 from distutils.version import LooseVersion
-from textwrap import dedent
+
 import numpy as np
+from future.utils import raise_from
+from future import standard_library
+try:
+    from textwrap import indent as textwrap_indent
+except ImportError:
+
+    def textwrap_indent(text, prefix):
+        """ A textwrap.indent replacement for Python < 3.3 """
+        if not prefix:
+            return text
+        splittext = text.splitlines(True)
+        return prefix + prefix.join(splittext)
+
+
+standard_library.install_aliases()
+
 
 def human_order_sorted(l):
     """Sorts string in human order (i.e. 'stat10' will go after 'stat2')"""
+
     def atoi(text):
         return int(text) if text.isdigit() else text
 
@@ -64,47 +80,6 @@ def trim(docstring, marker=None):
         trimmed.pop(0)
     # Return a single string:
     return '\n'.join(trimmed)
-
-
-def getsource(function):
-    """Returns the source code of a function"""
-    src = dedent(inspect.getsource(function))
-    return src
-
-
-def create_function_from_source(function_source, imports=None):
-    """Return a function object from a function source
-
-    Parameters
-    ----------
-    function_source : pickled string
-        string in pickled form defining a function
-    imports : list of strings
-        list of import statements in string form that allow the function
-        to be executed in an otherwise empty namespace
-    """
-    ns = {}
-    import_keys = []
-    try:
-        if imports is not None:
-            for statement in imports:
-                exec(statement, ns)
-            import_keys = list(ns.keys())
-        exec(function_source, ns)
-
-    except Exception as e:
-        msg = '\nError executing function:\n %s\n' % function_source
-        msg += '\n'.join(["Functions in connection strings have to be standalone.",
-                          "They cannot be declared either interactively or inside",
-                          "another function or inline in the connect string. Any",
-                          "imports should be done inside the function"
-                          ])
-        raise_from(RuntimeError(msg), e)
-    ns_funcs = list(set(ns) - set(import_keys + ['__builtins__']))
-    assert len(ns_funcs) == 1, "Function or inputs are ill-defined"
-    funcname = ns_funcs[0]
-    func = ns[funcname]
-    return func
 
 
 def find_indices(condition):
@@ -162,7 +137,10 @@ def container_to_string(cont):
 
 # Dependency checks.  Copied this from Nipy, with some modificiations
 # (added app as a parameter).
-def package_check(pkg_name, version=None, app=None, checker=LooseVersion,
+def package_check(pkg_name,
+                  version=None,
+                  app=None,
+                  checker=LooseVersion,
                   exc_failed_import=ImportError,
                   exc_failed_check=RuntimeError):
     """Check that the minimal version of the required package is installed.
@@ -188,7 +166,7 @@ def package_check(pkg_name, version=None, app=None, checker=LooseVersion,
     Examples
     --------
     package_check('numpy', '1.3')
-    package_check('networkx', '1.0', 'tutorial1')
+    package_check('scipy', '0.7', 'tutorial1')
 
     """
 
@@ -197,7 +175,7 @@ def package_check(pkg_name, version=None, app=None, checker=LooseVersion,
     else:
         msg = 'Nipype requires %s' % pkg_name
     if version:
-        msg += ' with version >= %s' % (version,)
+        msg += ' with version >= %s' % (version, )
     try:
         mod = __import__(pkg_name)
     except ImportError as e:
@@ -207,21 +185,64 @@ def package_check(pkg_name, version=None, app=None, checker=LooseVersion,
     try:
         have_version = mod.__version__
     except AttributeError as e:
-        raise_from(exc_failed_check('Cannot find version for %s' % pkg_name), e)
+        raise_from(
+            exc_failed_check('Cannot find version for %s' % pkg_name), e)
     if checker(have_version) < checker(version):
         raise exc_failed_check(msg)
 
 
 def str2bool(v):
+    """
+    Convert strings (and bytearrays) to boolean values
+
+    >>> all([str2bool(v) for v in (True, "yes", "true",
+    ...      "y", "t", "Yes", "True", "1", "on", "On")])
+    True
+    >>> all([str2bool(v.encode('utf-8'))
+    ...      for v in ("yes", "true", "y", "t", "1", "Yes", "on", "On")])
+    True
+    >>> any([str2bool(v) for v in (False, "no", "false", "n", "f",
+    ...      "False", "0", "off", "Off")])
+    False
+    >>> any([str2bool(v.encode('utf-8'))
+    ...      for v in ("no", "false", "n", "f", "0", "off", "Off")])
+    False
+    >>> str2bool(None)  # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+        ...
+    ValueError: ...
+    >>> str2bool('/some/path')  # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+        ...
+    ValueError: ...
+    >>> str2bool('Agg')  # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+        ...
+    ValueError: ...
+    >>> str2bool('INFO')  # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+        ...
+    ValueError: ...
+    >>> str2bool('/some/bytes/path'.encode('utf-8'))  # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+        ...
+    ValueError: ...
+
+    """
     if isinstance(v, bool):
         return v
-    lower = v.lower()
-    if lower in ("yes", "true", "t", "1"):
-        return True
-    elif lower in ("no", "false", "n", "f", "0"):
-        return False
-    else:
-        raise ValueError("%s cannot be converted to bool" % v)
+
+    if isinstance(v, bytes):
+        v = v.decode('utf-8')
+
+    if isinstance(v, str):
+        lower = v.lower()
+        if lower in ("yes", "true", "y", "t", "1", "on"):
+            return True
+        elif lower in ("no", "false", "n", "f", "0", "off"):
+            return False
+
+    raise ValueError("%r cannot be converted to bool" % v)
 
 
 def flatten(S):
@@ -238,11 +259,11 @@ def unflatten(in_list, prev_structure):
 
     if not isinstance(prev_structure, list):
         return next(in_list)
-    else:
-        out = []
-        for item in prev_structure:
-            out.append(unflatten(in_list, item))
-        return out
+
+    out = []
+    for item in prev_structure:
+        out.append(unflatten(in_list, item))
+    return out
 
 
 def normalize_mc_params(params, source):
@@ -254,8 +275,8 @@ def normalize_mc_params(params, source):
         y   Anterior-Posterior  (mm)
         z   Superior-Inferior   (mm)
         rx  Pitch               (rad)
-        ry  Yaw                 (rad)
-        rz  Roll                (rad)
+        ry  Roll                (rad)
+        rz  Yaw                 (rad)
     """
     if source.upper() == 'FSL':
         params = params[[3, 4, 5, 0, 1, 2]]
@@ -270,3 +291,78 @@ def normalize_mc_params(params, source):
         params[-1:2:-1] = aff2euler(matrix)
 
     return params
+
+
+def dict_diff(dold, dnew, indent=0):
+    """Helper to log what actually changed from old to new values of
+    dictionaries.
+
+    typical use -- log difference for hashed_inputs
+    """
+    # First check inputs, since they usually are lists of tuples
+    # and dicts are required.
+    if isinstance(dnew, list):
+        dnew = dict(dnew)
+    if isinstance(dold, list):
+        dold = dict(dold)
+
+    # Compare against hashed_inputs
+    # Keys: should rarely differ
+    new_keys = set(dnew.keys())
+    old_keys = set(dold.keys())
+
+    diff = []
+    if new_keys - old_keys:
+        diff += ["  * keys not previously seen: %s" % (new_keys - old_keys)]
+
+    if old_keys - new_keys:
+        diff += ["  * keys not presently seen: %s" % (old_keys - new_keys)]
+
+    # Add topical message
+    if diff:
+        diff.insert(0, "Dictionaries had differing keys:")
+
+    diffkeys = len(diff)
+
+    # Values in common keys would differ quite often,
+    # so we need to join the messages together
+    for k in new_keys.intersection(old_keys):
+        try:
+            new, old = dnew[k], dold[k]
+            same = new == old
+            if not same:
+                # Since JSON does not discriminate between lists and
+                # tuples, we might need to cast them into the same type
+                # as the last resort.  And lets try to be more generic
+                same = old.__class__(new) == old
+        except Exception:
+            same = False
+        if not same:
+            diff += ["  * %s: %r != %r" % (k, dnew[k], dold[k])]
+
+    if len(diff) > diffkeys:
+        diff.insert(diffkeys, "Some dictionary entries had differing values:")
+
+    return textwrap_indent('\n'.join(diff), ' ' * indent)
+
+
+def rgetcwd(error=True):
+    """
+    Robust replacement for getcwd when folders get removed
+    If error==True, this is just an alias for os.getcwd()
+    """
+    if error:
+        return os.getcwd()
+
+    try:
+        cwd = os.getcwd()
+    except OSError as exc:
+        # Changing back to cwd is probably not necessary
+        # but this makes sure there's somewhere to change to.
+        cwd = os.getenv('PWD')
+        if cwd is None:
+            raise OSError((
+                exc.errno, 'Current directory does not exist anymore, '
+                'and nipype was not able to guess it from the environment'))
+        warn('Current folder does not exist, replacing with "%s" instead.' % cwd)
+    return cwd

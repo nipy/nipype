@@ -38,7 +38,7 @@
 .. _`nipy launchpad`: https://launchpad.net/nipy
 .. _launchpad: https://launchpad.net/
 .. _`nipy trunk`: https://code.launchpad.net/~nipy-developers/nipy/trunk
-.. _`nipy mailing list`: http://projects.scipy.org/mailman/listinfo/nipy-devel
+.. _`nipy mailing list`: https://mail.python.org/mailman/listinfo/neuroimaging
 .. _`nipy bugs`: https://bugs.launchpad.net/nipy
 
 .. Code support stuff
@@ -56,7 +56,6 @@
 .. _doctest-mode: http://www.cis.upenn.edu/~edloper/projects/doctestmode/
 .. _bazaar: http://bazaar-vcs.org/
 .. _subversion: http://subversion.tigris.org/
-.. _nose: http://nose.readthedocs.io/en/latest/
 .. _`python coverage tester`: http://nedbatchelder.com/code/modules/coverage.html
 
 .. Other python projects
@@ -75,6 +74,7 @@
 .. _EPD: http://www.enthought.com/products/epd.php
 .. _Traits: http://code.enthought.com/projects/traits/
 .. _Miniconda: https://conda.io/miniconda.html
+.. _neurodocker: https://github.com/kaczmarj/neurodocker
 
 .. Python imaging projects
 .. _PyMVPA: http://www.pymvpa.org
@@ -97,6 +97,7 @@
 .. _MRtrix3: http://www.mrtrix.org/
 .. _MNE: https://martinos.org/mne/index.html
 .. _ANTS: http://stnava.github.io/ANTs/
+.. _DIPY: http://dipy.org
 
 .. General software
 .. _gcc: http://gcc.gnu.org
@@ -104,7 +105,8 @@
 .. _mingw: http://www.mingw.org
 .. _macports: http://www.macports.org/
 .. _Vagrant: http://www.vagrantup.com/
-.. _Docker: http://www.docker.io/
+.. _Docker: http://www.docker.com/
+.. _Singularity: https://www.sylabs.io/singularity/
 .. _Virtualbox: https://www.virtualbox.org/
 
 .. Functional imaging labs

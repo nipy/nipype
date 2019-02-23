@@ -9,11 +9,6 @@ def test_SEMLikeCommandLine_inputs():
     environ=dict(nohash=True,
     usedefault=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
-    ),
     )
     inputs = SEMLikeCommandLine.input_spec()
 

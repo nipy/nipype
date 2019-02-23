@@ -10,32 +10,25 @@ experiments.
 These functions include:
 
   * SpecifyModel: allows specification of sparse and non-sparse models
-
-   Change directory to provide relative paths for doctests
-   >>> import os
-   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-   >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
-   >>> os.chdir(datadir)
-
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import range, str, bytes, int
 
 from copy import deepcopy
-import os
+import os, math, csv
 
 from nibabel import load
 import numpy as np
-from scipy.special import gammaln
 
 from ..utils import NUMPY_MMAP
 from ..interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
                                traits, File, Bunch, BaseInterfaceInputSpec,
                                isdefined)
-from ..utils.filemanip import filename_to_list
+from ..utils.filemanip import ensure_list
 from ..utils.misc import normalize_mc_params
 from .. import config, logging
-iflogger = logging.getLogger('interface')
+iflogger = logging.getLogger('nipype.interface')
 
 
 def gcd(a, b):
@@ -90,6 +83,7 @@ def spm_hrf(RT, P=None, fMRI_T=16):
       -1.46257507e-04]
 
     """
+    from scipy.special import gammaln
     p = np.array([6, 16, 1, 1, 6, 0, 32], dtype=float)
     if P is not None:
         p[0:len(P)] = P
@@ -99,8 +93,8 @@ def spm_hrf(RT, P=None, fMRI_T=16):
     dt = RT / float(fMRI_T)
     u = np.arange(0, int(p[6] / dt + 1)) - p[5] / dt
     with np.errstate(divide='ignore'):  # Known division-by-zero
-        hrf = _spm_Gpdf(u, p[0] / p[2], dt / p[2]) - _spm_Gpdf(u, p[1] / p[3],
-                                                               dt / p[3]) / p[4]
+        hrf = _spm_Gpdf(u, p[0] / p[2], dt / p[2]) - _spm_Gpdf(
+            u, p[1] / p[3], dt / p[3]) / p[4]
     idx = np.arange(0, int((p[6] / RT) + 1)) * fMRI_T
     hrf = hrf[idx]
     hrf = hrf / np.sum(hrf)
@@ -150,6 +144,61 @@ def scale_timings(timelist, input_units, output_units, time_repetition):
     timelist = [np.max([0., _scalefactor * t]) for t in timelist]
     return timelist
 
+def bids_gen_info(bids_event_files,
+                  condition_column='trial_type',
+                  amplitude_column=None,
+                  time_repetition=False,
+                  ):
+    """Generate subject_info structure from a list of BIDS .tsv event files.
+
+    Parameters
+    ----------
+
+    bids_event_files : list of str
+        Filenames of BIDS .tsv event files containing columns including:
+        'onset', 'duration', and 'trial_type' or the `condition_column` value.
+    condition_column : str
+        Column of files in `bids_event_files` based on the values of which
+        events will be sorted into different regressors
+    amplitude_column : str
+        Column of files in `bids_event_files` based on the values of which
+        to apply amplitudes to events. If unspecified, all events will be
+        represented with an amplitude of 1.
+
+    Returns
+    -------
+
+    list of Bunch
+    """
+    info = []
+    for bids_event_file in bids_event_files:
+        with open(bids_event_file) as f:
+            f_events = csv.DictReader(f, skipinitialspace=True, delimiter='\t')
+            events = [{k: v for k, v in row.items()} for row in f_events]
+        conditions = list(set([i[condition_column] for i in events]))
+        runinfo = Bunch(conditions=[], onsets=[], durations=[], amplitudes=[])
+        for condition in conditions:
+            selected_events = [i for i in events if i[condition_column]==condition]
+            onsets = [float(i['onset']) for i in selected_events]
+            durations = [float(i['duration']) for i in selected_events]
+            if time_repetition:
+                decimals = math.ceil(-math.log10(time_repetition))
+                onsets = [np.round(i, decimals) for i in onsets]
+                durations = [np.round(i ,decimals) for i in durations]
+            if condition:
+                runinfo.conditions.append(condition)
+            else:
+                runinfo.conditions.append('e0')
+            runinfo.onsets.append(onsets)
+            runinfo.durations.append(durations)
+            try:
+                amplitudes = [float(i[amplitude_column]) for i in selected_events]
+                runinfo.amplitudes.append(amplitudes)
+            except KeyError:
+                runinfo.amplitudes.append([1] * len(onsets))
+        info.append(runinfo)
+    return info
+
 
 def gen_info(run_event_files):
     """Generate subject_info structure from a list of event files
@@ -181,43 +230,75 @@ def gen_info(run_event_files):
 
 
 class SpecifyModelInputSpec(BaseInterfaceInputSpec):
-    subject_info = InputMultiPath(Bunch, mandatory=True,
-                                  xor=['subject_info', 'event_files'],
-                                  desc='Bunch or List(Bunch) subject-specific '
-                                       'condition information. see '
-                                       ':ref:`SpecifyModel` or '
-                                       'SpecifyModel.__doc__ for details')
-    event_files = InputMultiPath(traits.List(File(exists=True)), mandatory=True,
-                                 xor=['subject_info', 'event_files'],
-                                 desc='List of event description files 1, 2 or 3 '
-                                      'column format corresponding to onsets, '
-                                      'durations and amplitudes')
-    realignment_parameters = InputMultiPath(File(exists=True),
-                                            desc='Realignment parameters returned '
-                                                 'by motion correction algorithm',
-                                            copyfile=False)
-    parameter_source = traits.Enum("SPM", "FSL", "AFNI", "FSFAST", "NIPY",
-                                   usedefault=True,
-                                   desc="Source of motion parameters")
-    outlier_files = InputMultiPath(File(exists=True),
-                                   desc='Files containing scan outlier indices '
-                                        'that should be tossed',
-                                   copyfile=False)
-    functional_runs = InputMultiPath(traits.Either(traits.List(File(exists=True)),
-                                                   File(exists=True)),
-                                     mandatory=True,
-                                     desc='Data files for model. List of 4D '
-                                          'files or list of list of 3D '
-                                          'files per session',
-                                     copyfile=False)
-    input_units = traits.Enum('secs', 'scans', mandatory=True,
-                              desc='Units of event onsets and durations (secs '
-                                   'or scans). Output units are always in secs')
-    high_pass_filter_cutoff = traits.Float(mandatory=True,
-                                           desc='High-pass filter cutoff in secs')
-    time_repetition = traits.Float(mandatory=True,
-                                   desc='Time between the start of one volume '
-                                        'to the start of  the next image volume.')
+    subject_info = InputMultiPath(
+        Bunch,
+        mandatory=True,
+        xor=['subject_info', 'event_files', 'bids_event_file'],
+        desc='Bunch or List(Bunch) subject-specific '
+        'condition information. see '
+        ':ref:`SpecifyModel` or '
+        'SpecifyModel.__doc__ for details')
+    event_files = InputMultiPath(
+        traits.List(File(exists=True)),
+        mandatory=True,
+        xor=['subject_info', 'event_files', 'bids_event_file'],
+        desc='List of event description files 1, 2 or 3 '
+        'column format corresponding to onsets, '
+        'durations and amplitudes')
+    bids_event_file = InputMultiPath(
+        File(exists=True),
+        mandatory=True,
+        xor=['subject_info', 'event_files', 'bids_event_file'],
+        desc='TSV event file containing common BIDS fields: `onset`,'
+        '`duration`, and categorization and amplitude columns')
+    bids_condition_column = traits.Str(exists=True,
+        mandatory=False,
+        default_value='trial_type',
+        usedefault=True,
+        desc='Column of the file passed to `bids_event_file` to the '
+        'unique values of which events will be assigned'
+        'to regressors')
+    bids_amplitude_column = traits.Str(exists=True,
+        mandatory=False,
+        desc='Column of the file passed to `bids_event_file` '
+        'according to which to assign amplitudes to events')
+    realignment_parameters = InputMultiPath(
+        File(exists=True),
+        desc='Realignment parameters returned '
+        'by motion correction algorithm',
+        copyfile=False)
+    parameter_source = traits.Enum(
+        "SPM",
+        "FSL",
+        "AFNI",
+        "FSFAST",
+        "NIPY",
+        usedefault=True,
+        desc="Source of motion parameters")
+    outlier_files = InputMultiPath(
+        File(exists=True),
+        desc='Files containing scan outlier indices '
+        'that should be tossed',
+        copyfile=False)
+    functional_runs = InputMultiPath(
+        traits.Either(traits.List(File(exists=True)), File(exists=True)),
+        mandatory=True,
+        desc='Data files for model. List of 4D '
+        'files or list of list of 3D '
+        'files per session',
+        copyfile=False)
+    input_units = traits.Enum(
+        'secs',
+        'scans',
+        mandatory=True,
+        desc='Units of event onsets and durations (secs '
+        'or scans). Output units are always in secs')
+    high_pass_filter_cutoff = traits.Float(
+        mandatory=True, desc='High-pass filter cutoff in secs')
+    time_repetition = traits.Float(
+        mandatory=True,
+        desc='Time between the start of one volume '
+        'to the start of  the next image volume.')
     # Not implemented yet
     # polynomial_order = traits.Range(0, low=0,
     #        desc ='Number of polynomial functions to model high pass filter.')
@@ -295,8 +376,11 @@ None])
     input_spec = SpecifyModelInputSpec
     output_spec = SpecifyModelOutputSpec
 
-    def _generate_standard_design(self, infolist, functional_runs=None,
-                                  realignment_parameters=None, outliers=None):
+    def _generate_standard_design(self,
+                                  infolist,
+                                  functional_runs=None,
+                                  realignment_parameters=None,
+                                  outliers=None):
         """ Generates a standard design matrix paradigm given information about
             each run
         """
@@ -315,15 +399,13 @@ None])
                 for cid, cond in enumerate(info.conditions):
                     sessinfo[i]['cond'].insert(cid, dict())
                     sessinfo[i]['cond'][cid]['name'] = info.conditions[cid]
-                    scaled_onset = scale_timings(info.onsets[cid],
-                                                 self.inputs.input_units,
-                                                 output_units,
-                                                 self.inputs.time_repetition)
+                    scaled_onset = scale_timings(
+                        info.onsets[cid], self.inputs.input_units,
+                        output_units, self.inputs.time_repetition)
                     sessinfo[i]['cond'][cid]['onset'] = scaled_onset
-                    scaled_duration = scale_timings(info.durations[cid],
-                                                    self.inputs.input_units,
-                                                    output_units,
-                                                    self.inputs.time_repetition)
+                    scaled_duration = scale_timings(
+                        info.durations[cid], self.inputs.input_units,
+                        output_units, self.inputs.time_repetition)
                     sessinfo[i]['cond'][cid]['duration'] = scaled_duration
                     if hasattr(info, 'amplitudes') and info.amplitudes:
                         sessinfo[i]['cond'][cid]['amplitudes'] = \
@@ -364,27 +446,31 @@ None])
                 mc = realignment_parameters[i]
                 for col in range(mc.shape[1]):
                     colidx = len(sessinfo[i]['regress'])
-                    sessinfo[i]['regress'].insert(colidx, dict(name='', val=[]))
-                    sessinfo[i]['regress'][colidx]['name'] = 'Realign%d' % (col + 1)
+                    sessinfo[i]['regress'].insert(colidx, dict(
+                        name='', val=[]))
+                    sessinfo[i]['regress'][colidx]['name'] = 'Realign%d' % (
+                        col + 1)
                     sessinfo[i]['regress'][colidx]['val'] = mc[:, col].tolist()
 
         if outliers is not None:
             for i, out in enumerate(outliers):
                 numscans = 0
-                for f in filename_to_list(sessinfo[i]['scans']):
+                for f in ensure_list(sessinfo[i]['scans']):
                     shape = load(f, mmap=NUMPY_MMAP).shape
                     if len(shape) == 3 or shape[3] == 1:
-                        iflogger.warning(('You are using 3D instead of 4D '
-                                          'files. Are you sure this was '
-                                          'intended?'))
+                        iflogger.warning('You are using 3D instead of 4D '
+                                         'files. Are you sure this was '
+                                         'intended?')
                         numscans += 1
                     else:
                         numscans += shape[3]
 
                 for j, scanno in enumerate(out):
                     colidx = len(sessinfo[i]['regress'])
-                    sessinfo[i]['regress'].insert(colidx, dict(name='', val=[]))
-                    sessinfo[i]['regress'][colidx]['name'] = 'Outlier%d' % (j + 1)
+                    sessinfo[i]['regress'].insert(colidx, dict(
+                        name='', val=[]))
+                    sessinfo[i]['regress'][colidx]['name'] = 'Outlier%d' % (
+                        j + 1)
                     sessinfo[i]['regress'][colidx]['val'] = \
                         np.zeros((1, numscans))[0].tolist()
                     sessinfo[i]['regress'][colidx]['val'][int(scanno)] = 1
@@ -397,9 +483,11 @@ None])
         if isdefined(self.inputs.realignment_parameters):
             for parfile in self.inputs.realignment_parameters:
                 realignment_parameters.append(
-                    np.apply_along_axis(func1d=normalize_mc_params,
-                                        axis=1, arr=np.loadtxt(parfile),
-                                        source=self.inputs.parameter_source))
+                    np.apply_along_axis(
+                        func1d=normalize_mc_params,
+                        axis=1,
+                        arr=np.loadtxt(parfile),
+                        source=self.inputs.parameter_source))
         outliers = []
         if isdefined(self.inputs.outlier_files):
             for filename in self.inputs.outlier_files:
@@ -416,12 +504,20 @@ None])
         if infolist is None:
             if isdefined(self.inputs.subject_info):
                 infolist = self.inputs.subject_info
-            else:
+            elif isdefined(self.inputs.event_files):
                 infolist = gen_info(self.inputs.event_files)
-        self._sessinfo = self._generate_standard_design(infolist,
-                                                        functional_runs=self.inputs.functional_runs,
-                                                        realignment_parameters=realignment_parameters,
-                                                        outliers=outliers)
+            elif isdefined(self.inputs.bids_event_file):
+                infolist = bids_gen_info(
+                    self.inputs.bids_event_file,
+                    self.inputs.bids_condition_column,
+                    self.inputs.bids_amplitude_column,
+                    self.inputs.time_repetition,
+                    )
+        self._sessinfo = self._generate_standard_design(
+            infolist,
+            functional_runs=self.inputs.functional_runs,
+            realignment_parameters=realignment_parameters,
+            outliers=outliers)
 
     def _run_interface(self, runtime):
         """
@@ -440,12 +536,17 @@ None])
 
 
 class SpecifySPMModelInputSpec(SpecifyModelInputSpec):
-    concatenate_runs = traits.Bool(False, usedefault=True,
-                                   desc='Concatenate all runs to look like a '
-                                        'single session.')
-    output_units = traits.Enum('secs', 'scans', usedefault=True,
-                               desc='Units of design event onsets and durations '
-                                    '(secs or scans)')
+    concatenate_runs = traits.Bool(
+        False,
+        usedefault=True,
+        desc='Concatenate all runs to look like a '
+        'single session.')
+    output_units = traits.Enum(
+        'secs',
+        'scans',
+        usedefault=True,
+        desc='Units of design event onsets and durations '
+        '(secs or scans)')
 
 
 class SpecifySPMModel(SpecifyModel):
@@ -493,8 +594,8 @@ class SpecifySPMModel(SpecifyModel):
         infoout = infolist[0]
         for j, val in enumerate(infolist[0].durations):
             if len(infolist[0].onsets[j]) > 1 and len(val) == 1:
-                infoout.durations[j] = (infolist[0].durations[j] *
-                                        len(infolist[0].onsets[j]))
+                infoout.durations[j] = (
+                    infolist[0].durations[j] * len(infolist[0].onsets[j]))
 
         for i, info in enumerate(infolist[1:]):
             # info.[conditions, tmod] remain the same
@@ -512,8 +613,8 @@ class SpecifySPMModel(SpecifyModel):
 
                 for j, val in enumerate(info.durations):
                     if len(info.onsets[j]) > 1 and len(val) == 1:
-                        infoout.durations[j].extend(info.durations[j] *
-                                                    len(info.onsets[j]))
+                        infoout.durations[j].extend(
+                            info.durations[j] * len(info.onsets[j]))
                     elif len(info.onsets[j]) == len(val):
                         infoout.durations[j].extend(info.durations[j])
                     else:
@@ -542,8 +643,9 @@ class SpecifySPMModel(SpecifyModel):
                 infoout.regressors = []
             onelist = np.zeros((1, sum(nscans)))
             onelist[0, sum(nscans[0:i]):sum(nscans[0:(i + 1)])] = 1
-            infoout.regressors.insert(len(infoout.regressors),
-                                      onelist.tolist()[0])
+            infoout.regressors.insert(
+                len(infoout.regressors),
+                onelist.tolist()[0])
         return [infoout], nscans
 
     def _generate_design(self, infolist=None):
@@ -557,14 +659,16 @@ class SpecifySPMModel(SpecifyModel):
         else:
             infolist = gen_info(self.inputs.event_files)
         concatlist, nscans = self._concatenate_info(infolist)
-        functional_runs = [filename_to_list(self.inputs.functional_runs)]
+        functional_runs = [ensure_list(self.inputs.functional_runs)]
         realignment_parameters = []
         if isdefined(self.inputs.realignment_parameters):
             realignment_parameters = []
             for parfile in self.inputs.realignment_parameters:
-                mc = np.apply_along_axis(func1d=normalize_mc_params,
-                                         axis=1, arr=np.loadtxt(parfile),
-                                         source=self.inputs.parameter_source)
+                mc = np.apply_along_axis(
+                    func1d=normalize_mc_params,
+                    axis=1,
+                    arr=np.loadtxt(parfile),
+                    source=self.inputs.parameter_source)
                 if not realignment_parameters:
                     realignment_parameters.insert(0, mc)
                 else:
@@ -577,45 +681,50 @@ class SpecifySPMModel(SpecifyModel):
                 try:
                     out = np.loadtxt(filename)
                 except IOError:
-                    iflogger.warn('Error reading outliers file %s', filename)
+                    iflogger.warning('Error reading outliers file %s', filename)
                     out = np.array([])
 
                 if out.size > 0:
-                    iflogger.debug('fname=%s, out=%s, nscans=%d',
-                                   filename, out, sum(nscans[0:i]))
+                    iflogger.debug('fname=%s, out=%s, nscans=%d', filename,
+                                   out, sum(nscans[0:i]))
                     sumscans = out.astype(int) + sum(nscans[0:i])
 
                     if out.size == 1:
-                        outliers[0]+= [np.array(sumscans, dtype=int).tolist()]
+                        outliers[0] += [np.array(sumscans, dtype=int).tolist()]
                     else:
-                        outliers[0]+= np.array(sumscans, dtype=int).tolist()
+                        outliers[0] += np.array(sumscans, dtype=int).tolist()
 
-        self._sessinfo = self._generate_standard_design(concatlist,
-                                                        functional_runs=functional_runs,
-                                                        realignment_parameters=realignment_parameters,
-                                                        outliers=outliers)
+        self._sessinfo = self._generate_standard_design(
+            concatlist,
+            functional_runs=functional_runs,
+            realignment_parameters=realignment_parameters,
+            outliers=outliers)
 
 
 class SpecifySparseModelInputSpec(SpecifyModelInputSpec):
-    time_acquisition = traits.Float(0, mandatory=True,
-                                    desc='Time in seconds to acquire a single '
-                                         'image volume')
-    volumes_in_cluster = traits.Range(1, usedefault=True,
-                                      desc='Number of scan volumes in a cluster')
+    time_acquisition = traits.Float(
+        0,
+        mandatory=True,
+        desc='Time in seconds to acquire a single '
+        'image volume')
+    volumes_in_cluster = traits.Range(
+        1, usedefault=True, desc='Number of scan volumes in a cluster')
     model_hrf = traits.Bool(desc='Model sparse events with hrf')
-    stimuli_as_impulses = traits.Bool(True,
-                                      desc='Treat each stimulus to be impulse-like',
-                                      usedefault=True)
-    use_temporal_deriv = traits.Bool(requires=['model_hrf'],
-                                     desc='Create a temporal derivative in '
-                                          'addition to regular regressor')
-    scale_regressors = traits.Bool(True, desc='Scale regressors by the peak',
-                                   usedefault=True)
-    scan_onset = traits.Float(0.0,
-                              desc='Start of scanning relative to onset of run in secs',
-                              usedefault=True)
-    save_plot = traits.Bool(desc=('Save plot of sparse design calculation '
-                                  '(requires matplotlib)'))
+    stimuli_as_impulses = traits.Bool(
+        True, desc='Treat each stimulus to be impulse-like', usedefault=True)
+    use_temporal_deriv = traits.Bool(
+        requires=['model_hrf'],
+        desc='Create a temporal derivative in '
+        'addition to regular regressor')
+    scale_regressors = traits.Bool(
+        True, desc='Scale regressors by the peak', usedefault=True)
+    scan_onset = traits.Float(
+        0.0,
+        desc='Start of scanning relative to onset of run in secs',
+        usedefault=True)
+    save_plot = traits.Bool(
+        desc=('Save plot of sparse design calculation '
+              '(requires matplotlib)'))
 
 
 class SpecifySparseModelOutputSpec(SpecifyModelOutputSpec):
@@ -686,7 +795,7 @@ durations=[[1]])
 
         if dt < 1:
             raise Exception('Time multiple less than 1 ms')
-        iflogger.info('Setting dt = %d ms\n' % dt)
+        iflogger.info('Setting dt = %d ms\n', dt)
         npts = int(np.ceil(total_time / dt))
         times = np.arange(0, total_time, dt) * 1e-3
         timeline = np.zeros((npts))
@@ -705,9 +814,9 @@ durations=[[1]])
             if isdefined(self.inputs.model_hrf) and self.inputs.model_hrf:
                 response = np.convolve(boxcar, hrf)
                 reg_scale = 1.0 / response.max()
-                iflogger.info('response sum: %.4f max: %.4f' % (response.sum(),
-                                                                response.max()))
-            iflogger.info('reg_scale: %.4f' % reg_scale)
+                iflogger.info('response sum: %.4f max: %.4f', response.sum(),
+                              response.max())
+            iflogger.info('reg_scale: %.4f', reg_scale)
 
         for i, t in enumerate(onsets):
             idx = int(np.round(t / dt))
@@ -791,17 +900,13 @@ durations=[[1]])
                 amplitudes = None
             regnames.insert(len(regnames), cond)
             scaled_onsets = scale_timings(info.onsets[i],
-                                          self.inputs.input_units,
-                                          'secs',
+                                          self.inputs.input_units, 'secs',
                                           self.inputs.time_repetition)
             scaled_durations = scale_timings(info.durations[i],
-                                             self.inputs.input_units,
-                                             'secs',
+                                             self.inputs.input_units, 'secs',
                                              self.inputs.time_repetition)
-            regressor = self._gen_regress(scaled_onsets,
-                                          scaled_durations,
-                                          amplitudes,
-                                          nscans)
+            regressor = self._gen_regress(scaled_onsets, scaled_durations,
+                                          amplitudes, nscans)
             if isdefined(self.inputs.use_temporal_deriv) and \
                     self.inputs.use_temporal_deriv:
                 reg.insert(len(reg), regressor[0])
@@ -863,6 +968,8 @@ durations=[[1]])
         outputs['session_info'] = self._sessinfo
 
         if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
-            outputs['sparse_png_file'] = os.path.join(os.getcwd(), 'sparse.png')
-            outputs['sparse_svg_file'] = os.path.join(os.getcwd(), 'sparse.svg')
+            outputs['sparse_png_file'] = os.path.join(os.getcwd(),
+                                                      'sparse.png')
+            outputs['sparse_svg_file'] = os.path.join(os.getcwd(),
+                                                      'sparse.svg')
         return outputs

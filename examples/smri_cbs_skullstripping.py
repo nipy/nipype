@@ -6,19 +6,21 @@
 sMRI: USing CBS Tools for skullstripping
 ========================================
 
-This simple workflow uses SPECTRE2010 algorithm to skullstrip an MP2RAGE anatomical scan.
+This simple workflow uses SPECTRE2010 algorithm to skullstrip an MP2RAGE
+anatomical scan.
 """
 
-
 import nipype.pipeline.engine as pe
-from nipype.interfaces.mipav.developer import JistIntensityMp2rageMasking, MedicAlgorithmSPECTRE2010
+from nipype.interfaces.mipav.developer import (JistIntensityMp2rageMasking,
+                                               MedicAlgorithmSPECTRE2010)
 
 wf = pe.Workflow("skullstripping")
 
 mask = pe.Node(JistIntensityMp2rageMasking(), name="masking")
-mask.inputs.inSecond = "/Users/filo/7t_trt/niftis/sub001/session_1/MP2RAGE_INV2.nii.gz"
-mask.inputs.inQuantitative = "/Users/filo/7t_trt/niftis/sub001/session_1/MP2RAGE_UNI.nii.gz"
-mask.inputs.inT1weighted = "/Users/filo/7t_trt/niftis/sub001/session_1/MP2RAGE_T1.nii.gz"
+folder_path = '/Users/filo/7t_trt/niftis/sub001/session_1/'
+mask.inputs.inSecond = folder_path + "MP2RAGE_INV2.nii.gz"
+mask.inputs.inQuantitative = folder_path + "MP2RAGE_UNI.nii.gz"
+mask.inputs.inT1weighted = folder_path + "MP2RAGE_T1.nii.gz"
 mask.inputs.outMasked = True
 mask.inputs.outMasked2 = True
 mask.inputs.outSignal = True

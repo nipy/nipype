@@ -16,12 +16,7 @@ import nipype.interfaces.matlab as mlab
 from nipype.interfaces.spm.base import SPMCommandInputSpec
 from nipype.interfaces.base import traits
 
-try:
-    matlab_cmd = os.environ['MATLABCMD']
-except:
-    matlab_cmd = 'matlab'
-
-mlab.MatlabCommand.set_default_matlab_cmd(matlab_cmd)
+mlab.MatlabCommand.set_default_matlab_cmd(os.getenv('MATLABCMD', 'matlab'))
 
 
 def test_scan_for_fnames(create_files_in_directory):
@@ -33,17 +28,19 @@ def test_scan_for_fnames(create_files_in_directory):
 
 save_time = False
 if not save_time:
+
     @pytest.mark.skipif(no_spm(), reason="spm is not installed")
     def test_spm_path():
-        spm_path = spm.Info.version()['path']
+        spm_path = spm.Info.path()
         if spm_path is not None:
             assert isinstance(spm_path, (str, bytes))
-            assert 'spm' in spm_path
+            assert 'spm' in spm_path.lower()
 
 
 def test_use_mfile():
     class TestClass(spm.SPMCommand):
         input_spec = spm.SPMCommandInputSpec
+
     dc = TestClass()  # dc = derived_class
     assert dc.inputs.mfile
 
@@ -53,6 +50,7 @@ def test_find_mlab_cmd_defaults():
 
     class TestClass(spm.SPMCommand):
         pass
+
     # test without FORCE_SPMMCR, SPMMCRCMD set
     for varname in ['FORCE_SPMMCR', 'SPMMCRCMD']:
         try:
@@ -60,17 +58,17 @@ def test_find_mlab_cmd_defaults():
         except KeyError:
             pass
     dc = TestClass()
-    assert dc._use_mcr == None
-    assert dc._matlab_cmd == None
+    assert dc._use_mcr is None
+    assert dc._matlab_cmd is None
     # test with only FORCE_SPMMCR set
     os.environ['FORCE_SPMMCR'] = '1'
     dc = TestClass()
-    assert dc._use_mcr == True
-    assert dc._matlab_cmd == None
+    assert dc._use_mcr
+    assert dc._matlab_cmd is None
     # test with both, FORCE_SPMMCR and SPMMCRCMD set
     os.environ['SPMMCRCMD'] = 'spmcmd'
     dc = TestClass()
-    assert dc._use_mcr == True
+    assert dc._use_mcr
     assert dc._matlab_cmd == 'spmcmd'
     # restore environment
     os.environ.clear()
@@ -81,6 +79,7 @@ def test_find_mlab_cmd_defaults():
 def test_cmd_update():
     class TestClass(spm.SPMCommand):
         input_spec = spm.SPMCommandInputSpec
+
     dc = TestClass()  # dc = derived_class
     dc.inputs.matlab_cmd = 'foo'
     assert dc.mlab._cmd == 'foo'
@@ -91,6 +90,7 @@ def test_cmd_update2():
         _jobtype = 'jobtype'
         _jobname = 'jobname'
         input_spec = spm.SPMCommandInputSpec
+
     dc = TestClass()  # dc = derived_class
     assert dc.jobtype == 'jobtype'
     assert dc.jobname == 'jobname'
@@ -99,6 +99,7 @@ def test_cmd_update2():
 def test_reformat_dict_for_savemat():
     class TestClass(spm.SPMCommand):
         input_spec = spm.SPMCommandInputSpec
+
     dc = TestClass()  # dc = derived_class
     out = dc._reformat_dict_for_savemat({'a': {'b': {'c': []}}})
     assert out == [{'a': [{'b': [{'c': []}]}]}]
@@ -107,6 +108,7 @@ def test_reformat_dict_for_savemat():
 def test_generate_job(create_files_in_directory):
     class TestClass(spm.SPMCommand):
         input_spec = spm.SPMCommandInputSpec
+
     dc = TestClass()  # dc = derived_class
     out = dc._generate_job()
     assert out == ''
@@ -126,7 +128,7 @@ def test_generate_job(create_files_in_directory):
     out = dc._generate_job(prefix='test', contents=contents)
     assert out == "test = 'foo';\n"
     # cell array of vectors
-    contents = {'onsets': np.array((1,), dtype=object)}
+    contents = {'onsets': np.array((1, ), dtype=object)}
     contents['onsets'][0] = [1, 2, 3, 4]
     out = dc._generate_job(prefix='test', contents=contents)
     assert out == 'test.onsets = {...\n[1, 2, 3, 4];...\n};\n'
@@ -140,6 +142,7 @@ def test_bool():
         input_spec = TestClassInputSpec
         _jobtype = 'jobtype'
         _jobname = 'jobname'
+
     dc = TestClass()  # dc = derived_class
     dc.inputs.test_in = True
     out = dc._make_matlab_command(dc._parse_inputs())
@@ -154,6 +157,7 @@ def test_make_matlab_command(create_files_in_directory):
         _jobtype = 'jobtype'
         _jobname = 'jobname'
         input_spec = spm.SPMCommandInputSpec
+
     dc = TestClass()  # dc = derived_class
     filelist, outdir = create_files_in_directory
     contents = {'contents': [1, 2, 3, 4]}

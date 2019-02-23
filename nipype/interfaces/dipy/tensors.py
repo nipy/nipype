@@ -1,11 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Change directory to provide relative paths for doctests
-   >>> import os
-   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-   >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-   >>> os.chdir(datadir)
-"""
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import nibabel as nb
 
@@ -13,12 +8,11 @@ from ... import logging
 from ..base import TraitedSpec, File, isdefined
 from .base import DipyDiffusionInterface, DipyBaseInterfaceInputSpec
 
-IFLOGGER = logging.getLogger('interface')
+IFLOGGER = logging.getLogger('nipype.interface')
 
 
 class DTIInputSpec(DipyBaseInterfaceInputSpec):
-    mask_file = File(exists=True,
-                     desc='An optional white matter mask')
+    mask_file = File(exists=True, desc='An optional white matter mask')
 
 
 class DTIOutputSpec(TraitedSpec):
@@ -27,6 +21,7 @@ class DTIOutputSpec(TraitedSpec):
     md_file = File(exists=True)
     rd_file = File(exists=True)
     ad_file = File(exists=True)
+    color_fa_file = File(exists=True)
 
 
 class DTI(DipyDiffusionInterface):
@@ -65,14 +60,14 @@ class DTI(DipyDiffusionInterface):
         img = nifti1_symmat(lower_triangular, affine)
         out_file = self._gen_filename('dti')
         nb.save(img, out_file)
-        IFLOGGER.info('DTI parameters image saved as {i}'.format(i=out_file))
+        IFLOGGER.info('DTI parameters image saved as %s', out_file)
 
-        #FA MD RD and AD
-        for metric in ["fa", "md", "rd", "ad"]:
-            data = getattr(ten_fit,metric).astype("float32")
+        # FA MD RD and AD
+        for metric in ["fa", "md", "rd", "ad", "color_fa"]:
+            data = getattr(ten_fit, metric).astype("float32")
             out_name = self._gen_filename(metric)
             nb.Nifti1Image(data, affine).to_filename(out_name)
-            IFLOGGER.info('DTI {metric} image saved as {i}'.format(i=out_name, metric=metric))
+            IFLOGGER.info('DTI %s image saved as %s', metric, out_name)
 
         return runtime
 
@@ -80,15 +75,14 @@ class DTI(DipyDiffusionInterface):
         outputs = self._outputs().get()
         outputs['out_file'] = self._gen_filename('dti')
 
-        for metric in ["fa", "md", "rd", "ad"]:
+        for metric in ["fa", "md", "rd", "ad", "color_fa"]:
             outputs["{}_file".format(metric)] = self._gen_filename(metric)
 
         return outputs
 
 
 class TensorModeInputSpec(DipyBaseInterfaceInputSpec):
-    mask_file = File(exists=True,
-                     desc='An optional white matter mask')
+    mask_file = File(exists=True, desc='An optional white matter mask')
 
 
 class TensorModeOutputSpec(TraitedSpec):
@@ -96,7 +90,6 @@ class TensorModeOutputSpec(TraitedSpec):
 
 
 class TensorMode(DipyDiffusionInterface):
-
     """
     Creates a map of the mode of the diffusion tensors given a set of
     diffusion-weighted images, as well as their associated b-values and
@@ -147,7 +140,7 @@ class TensorMode(DipyDiffusionInterface):
         img = nb.Nifti1Image(mode_data, affine)
         out_file = self._gen_filename('mode')
         nb.save(img, out_file)
-        IFLOGGER.info('Tensor mode image saved as {i}'.format(i=out_file))
+        IFLOGGER.info('Tensor mode image saved as %s', out_file)
         return runtime
 
     def _list_outputs(self):

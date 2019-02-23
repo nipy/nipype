@@ -14,21 +14,21 @@ Examples
 See the docstrings for the individual classes for 'working' examples.
 
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from builtins import open, object, str
 
 import os
 
 from ... import LooseVersion
 from ...utils.filemanip import fname_presuffix
-from ..base import (CommandLine, Directory,
-                    CommandLineInputSpec, isdefined,
-                    traits, TraitedSpec, File)
+from ..base import (CommandLine, Directory, CommandLineInputSpec, isdefined,
+                    traits, TraitedSpec, File, PackageInfo)
 
 __docformat__ = 'restructuredtext'
 
 
-class Info(object):
+class Info(PackageInfo):
     """ Freesurfer subject directory and version information.
 
     Examples
@@ -39,32 +39,13 @@ class Info(object):
     >>> Info.subjectsdir()  # doctest: +SKIP
 
     """
+    if os.getenv('FREESURFER_HOME'):
+        version_file = os.path.join(
+            os.getenv('FREESURFER_HOME'), 'build-stamp.txt')
 
     @staticmethod
-    def version():
-        """Check for freesurfer version on system
-
-        Find which freesurfer is being used....and get version from
-        /path/to/freesurfer/build-stamp.txt
-
-        Returns
-        -------
-
-        version : string
-           version number as string
-           or None if freesurfer version not found
-
-        """
-        fs_home = os.getenv('FREESURFER_HOME')
-        if fs_home is None:
-            return None
-        versionfile = os.path.join(fs_home, 'build-stamp.txt')
-        if not os.path.exists(versionfile):
-            return None
-        fid = open(versionfile, 'rt')
-        version = fid.readline()
-        fid.close()
-        return version
+    def parse_version(raw_info):
+        return raw_info.splitlines()[0]
 
     @classmethod
     def looseversion(cls):
@@ -148,8 +129,9 @@ class FSCommand(CommandLine):
 
     def _subjects_dir_update(self):
         if self.inputs.subjects_dir:
-            self.inputs.environ.update({'SUBJECTS_DIR':
-                                        self.inputs.subjects_dir})
+            self.inputs.environ.update({
+                'SUBJECTS_DIR': self.inputs.subjects_dir
+            })
 
     @classmethod
     def set_default_subjects_dir(cls, subjects_dir):
@@ -161,7 +143,11 @@ class FSCommand(CommandLine):
         self._subjects_dir_update()
         return super(FSCommand, self).run(**inputs)
 
-    def _gen_fname(self, basename, fname=None, cwd=None, suffix='_fs',
+    def _gen_fname(self,
+                   basename,
+                   fname=None,
+                   cwd=None,
+                   suffix='_fs',
                    use_ext=True):
         '''Define a generic mapping for a single outfile
 
@@ -184,8 +170,8 @@ class FSCommand(CommandLine):
             raise ValueError(msg)
         if cwd is None:
             cwd = os.getcwd()
-        fname = fname_presuffix(basename, suffix=suffix,
-                                use_ext=use_ext, newpath=cwd)
+        fname = fname_presuffix(
+            basename, suffix=suffix, use_ext=use_ext, newpath=cwd)
         return fname
 
     @property
@@ -197,20 +183,11 @@ class FSCommand(CommandLine):
 
 class FSSurfaceCommand(FSCommand):
     """Support for FreeSurfer surface-related functions.
-    For some functions, if the output file is not specified starting with
-    'lh.' or 'rh.', FreeSurfer prepends the prefix from the input file to the
-    output filename. Output out_file must be adjusted to accommodate this.
-    By including the full path in the filename, we can also avoid this behavior.
+    For some functions, if the output file is not specified starting with 'lh.'
+    or 'rh.', FreeSurfer prepends the prefix from the input file to the output
+    filename. Output out_file must be adjusted to accommodate this. By
+    including the full path in the filename, we can also avoid this behavior.
     """
-    def _get_filecopy_info(self):
-        self._normalize_filenames()
-        return super(FSSurfaceCommand, self)._get_filecopy_info()
-
-    def _normalize_filenames(self):
-        """Filename normalization routine to perform only when run in Node
-        context
-        """
-        pass
 
     @staticmethod
     def _associated_file(in_file, out_name):
@@ -232,24 +209,20 @@ class FSSurfaceCommand(FSCommand):
 
 
 class FSScriptCommand(FSCommand):
-    """ Support for Freesurfer script commands with log inputs.terminal_output
+    """ Support for Freesurfer script commands with log terminal_output
     """
     _terminal_output = 'file'
     _always_run = False
 
-    def __init__(self, **inputs):
-        super(FSScriptCommand, self).__init__(**inputs)
-        self.set_default_terminal_output(self._terminal_output)
-
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['log_file'] = os.path.abspath('stdout.nipype')
+        outputs['log_file'] = os.path.abspath('output.nipype')
         return outputs
 
 
 class FSScriptOutputSpec(TraitedSpec):
-    log_file = File('stdout.nipype', usedefault=True,
-                    exists=True, desc="The output log")
+    log_file = File(
+        'output.nipype', usedefault=True, exists=True, desc="The output log")
 
 
 class FSTraitedSpecOpenMP(FSTraitedSpec):
@@ -280,8 +253,10 @@ class FSCommandOpenMP(FSCommand):
 
     def _num_threads_update(self):
         if self.inputs.num_threads:
-            self.inputs.environ.update(
-                {'OMP_NUM_THREADS': str(self.inputs.num_threads)})
+            self.inputs.environ.update({
+                'OMP_NUM_THREADS':
+                str(self.inputs.num_threads)
+            })
 
     def run(self, **inputs):
         if 'num_threads' in inputs:

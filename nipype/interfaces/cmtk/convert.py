@@ -1,13 +1,6 @@
 # -*- coding: utf-8 -*-
-"""
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-    >>> os.chdir(datadir)
-
-"""
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import os
 import os.path as op
@@ -15,32 +8,34 @@ import datetime
 import string
 import networkx as nx
 
-from ...utils.misc import package_check
 from ...utils.filemanip import split_filename
-from ..base import (BaseInterface, BaseInterfaceInputSpec, traits,
-                    File, TraitedSpec, InputMultiPath, isdefined)
-
-have_cfflib = True
-try:
-    package_check('cfflib')
-except Exception as e:
-    have_cfflib = False
-else:
-    import cfflib as cf
+from ..base import (BaseInterfaceInputSpec, traits, File,
+                    TraitedSpec, InputMultiPath, isdefined)
+from .base import CFFBaseInterface, have_cfflib
 
 
 class CFFConverterInputSpec(BaseInterfaceInputSpec):
-    graphml_networks = InputMultiPath(File(exists=True), desc='list of graphML networks')
-    gpickled_networks = InputMultiPath(File(exists=True), desc='list of gpickled Networkx graphs')
+    graphml_networks = InputMultiPath(
+        File(exists=True), desc='list of graphML networks')
+    gpickled_networks = InputMultiPath(
+        File(exists=True), desc='list of gpickled Networkx graphs')
 
-    gifti_surfaces = InputMultiPath(File(exists=True), desc='list of GIFTI surfaces')
-    gifti_labels = InputMultiPath(File(exists=True), desc='list of GIFTI labels')
-    nifti_volumes = InputMultiPath(File(exists=True), desc='list of NIFTI volumes')
-    tract_files = InputMultiPath(File(exists=True), desc='list of Trackvis fiber files')
+    gifti_surfaces = InputMultiPath(
+        File(exists=True), desc='list of GIFTI surfaces')
+    gifti_labels = InputMultiPath(
+        File(exists=True), desc='list of GIFTI labels')
+    nifti_volumes = InputMultiPath(
+        File(exists=True), desc='list of NIFTI volumes')
+    tract_files = InputMultiPath(
+        File(exists=True), desc='list of Trackvis fiber files')
 
-    timeseries_files = InputMultiPath(File(exists=True), desc='list of HDF5 timeseries files')
-    script_files = InputMultiPath(File(exists=True), desc='list of script files to include')
-    data_files = InputMultiPath(File(exists=True), desc='list of external data files (i.e. Numpy, HD5, XML) ')
+    timeseries_files = InputMultiPath(
+        File(exists=True), desc='list of HDF5 timeseries files')
+    script_files = InputMultiPath(
+        File(exists=True), desc='list of script files to include')
+    data_files = InputMultiPath(
+        File(exists=True),
+        desc='list of external data files (i.e. Numpy, HD5, XML) ')
 
     title = traits.Str(desc='Connectome Title')
     creator = traits.Str(desc='Creator')
@@ -51,16 +46,20 @@ class CFFConverterInputSpec(BaseInterfaceInputSpec):
     references = traits.Str(desc='References')
     relation = traits.Str(desc='Relation')
     species = traits.Str('Homo sapiens', desc='Species', usedefault=True)
-    description = traits.Str('Created with the Nipype CFF converter', desc='Description', usedefault=True)
+    description = traits.Str(
+        'Created with the Nipype CFF converter',
+        desc='Description',
+        usedefault=True)
 
-    out_file = File('connectome.cff', usedefault=True, desc='Output connectome file')
+    out_file = File(
+        'connectome.cff', usedefault=True, desc='Output connectome file')
 
 
 class CFFConverterOutputSpec(TraitedSpec):
     connectome_file = File(exists=True, desc='Output connectome file')
 
 
-class CFFConverter(BaseInterface):
+class CFFConverter(CFFBaseInterface):
     """
     Creates a Connectome File Format (CFF) file from input networks, surfaces, volumes, tracts, etcetera....
 
@@ -80,6 +79,7 @@ class CFFConverter(BaseInterface):
     output_spec = CFFConverterOutputSpec
 
     def _run_interface(self, runtime):
+        import cfflib as cf
         a = cf.connectome()
 
         if isdefined(self.inputs.title):
@@ -150,7 +150,8 @@ class CFFConverter(BaseInterface):
         if isdefined(self.inputs.gifti_surfaces):
             for surf in self.inputs.gifti_surfaces:
                 _, surf_name, _ = split_filename(surf)
-                csurf = cf.CSurface.create_from_gifti("Surface %d - %s" % (count, surf_name), surf)
+                csurf = cf.CSurface.create_from_gifti("Surface %d - %s" %
+                                                      (count, surf_name), surf)
                 csurf.fileformat = 'Gifti'
                 csurf.dtype = 'Surfaceset'
                 a.add_connectome_surface(csurf)
@@ -160,7 +161,8 @@ class CFFConverter(BaseInterface):
         if isdefined(self.inputs.gifti_labels):
             for label in self.inputs.gifti_labels:
                 _, label_name, _ = split_filename(label)
-                csurf = cf.CSurface.create_from_gifti("Surface Label %d - %s" % (count, label_name), label)
+                csurf = cf.CSurface.create_from_gifti(
+                    "Surface Label %d - %s" % (count, label_name), label)
                 csurf.fileformat = 'Gifti'
                 csurf.dtype = 'Labels'
                 a.add_connectome_surface(csurf)
@@ -208,15 +210,22 @@ class CFFConverter(BaseInterface):
 
 
 class MergeCNetworksInputSpec(BaseInterfaceInputSpec):
-    in_files = InputMultiPath(File(exists=True), mandatory=True, desc='List of CFF files to extract networks from')
-    out_file = File('merged_network_connectome.cff', usedefault=True, desc='Output CFF file with all the networks added')
+    in_files = InputMultiPath(
+        File(exists=True),
+        mandatory=True,
+        desc='List of CFF files to extract networks from')
+    out_file = File(
+        'merged_network_connectome.cff',
+        usedefault=True,
+        desc='Output CFF file with all the networks added')
 
 
 class MergeCNetworksOutputSpec(TraitedSpec):
-    connectome_file = File(exists=True, desc='Output CFF file with all the networks added')
+    connectome_file = File(
+        exists=True, desc='Output CFF file with all the networks added')
 
 
-class MergeCNetworks(BaseInterface):
+class MergeCNetworks(CFFBaseInterface):
     """ Merges networks from multiple CFF files into one new CFF file.
 
     Example
@@ -232,6 +241,7 @@ class MergeCNetworks(BaseInterface):
     output_spec = MergeCNetworksOutputSpec
 
     def _run_interface(self, runtime):
+        import cfflib as cf
         extracted_networks = []
 
         for i, con in enumerate(self.inputs.in_files):
@@ -247,7 +257,8 @@ class MergeCNetworks(BaseInterface):
                 extracted_networks.append(ne)
 
         # Add networks to new connectome
-        newcon = cf.connectome(title='All CNetworks', connectome_network=extracted_networks)
+        newcon = cf.connectome(
+            title='All CNetworks', connectome_network=extracted_networks)
         # Setting additional metadata
         metadata = newcon.get_connectome_meta()
         metadata.set_creator('My Name')

@@ -80,7 +80,7 @@ symbols. For an input defined in InputSpec to be included into the executed
 commandline ``argstr`` has to be included. Additionally inside the main
 interface class you need to specify the name of the executable by assigning it
 to the ``_cmd`` field. Also the main interface class needs to inherit from
-:class:`nipype.interfaces.base.CommandLine`:
+:class:`CommandLine <nipype.interfaces.base.core.CommandLine>`:
 
 .. testcode::
 

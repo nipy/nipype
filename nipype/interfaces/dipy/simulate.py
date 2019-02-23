@@ -1,41 +1,48 @@
 # -*- coding: utf-8 -*-
-"""Change directory to provide relative paths for doctests
-   >>> import os
-   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-   >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-   >>> os.chdir(datadir)
-"""
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 from multiprocessing import (Pool, cpu_count)
 import os.path as op
 from builtins import range
 
+import numpy as np
 import nibabel as nb
 
 from ... import logging
 from ...utils import NUMPY_MMAP
-from ..base import (traits, TraitedSpec, BaseInterfaceInputSpec,
-                    File, InputMultiPath, isdefined)
+from ..base import (traits, TraitedSpec, BaseInterfaceInputSpec, File,
+                    InputMultiPath, isdefined)
 from .base import DipyBaseInterface
-IFLOGGER = logging.getLogger('interface')
+IFLOGGER = logging.getLogger('nipype.interface')
 
 
 class SimulateMultiTensorInputSpec(BaseInterfaceInputSpec):
-    in_dirs = InputMultiPath(File(exists=True), mandatory=True,
-                             desc='list of fibers (principal directions)')
-    in_frac = InputMultiPath(File(exists=True), mandatory=True,
-                             desc=('volume fraction of each fiber'))
-    in_vfms = InputMultiPath(File(exists=True), mandatory=True,
-                             desc=('volume fractions of isotropic '
-                                   'compartiments'))
+    in_dirs = InputMultiPath(
+        File(exists=True),
+        mandatory=True,
+        desc='list of fibers (principal directions)')
+    in_frac = InputMultiPath(
+        File(exists=True),
+        mandatory=True,
+        desc=('volume fraction of each fiber'))
+    in_vfms = InputMultiPath(
+        File(exists=True),
+        mandatory=True,
+        desc=('volume fractions of isotropic '
+              'compartiments'))
     in_mask = File(exists=True, desc='mask to simulate data')
 
     diff_iso = traits.List(
-        [3000e-6, 960e-6, 680e-6], traits.Float, usedefault=True,
+        [3000e-6, 960e-6, 680e-6],
+        traits.Float,
+        usedefault=True,
         desc='Diffusivity of isotropic compartments')
     diff_sf = traits.Tuple(
         (1700e-6, 200e-6, 200e-6),
-        traits.Float, traits.Float, traits.Float, usedefault=True,
+        traits.Float,
+        traits.Float,
+        traits.Float,
+        usedefault=True,
         desc='Single fiber tensor')
 
     n_proc = traits.Int(0, usedefault=True, desc='number of processes')
@@ -43,16 +50,23 @@ class SimulateMultiTensorInputSpec(BaseInterfaceInputSpec):
     gradients = File(exists=True, desc='gradients file')
     in_bvec = File(exists=True, desc='input bvecs file')
     in_bval = File(exists=True, desc='input bvals file')
-    num_dirs = traits.Int(32, usedefault=True,
-                          desc=('number of gradient directions (when table '
-                                'is automatically generated)'))
-    bvalues = traits.List(traits.Int, value=[1000, 3000], usedefault=True,
-                          desc=('list of b-values (when table '
-                                'is automatically generated)'))
-    out_file = File('sim_dwi.nii.gz', usedefault=True,
-                    desc='output file with fractions to be simluated')
-    out_mask = File('sim_msk.nii.gz', usedefault=True,
-                    desc='file with the mask simulated')
+    num_dirs = traits.Int(
+        32,
+        usedefault=True,
+        desc=('number of gradient directions (when table '
+              'is automatically generated)'))
+    bvalues = traits.List(
+        traits.Int,
+        value=[1000, 3000],
+        usedefault=True,
+        desc=('list of b-values (when table '
+              'is automatically generated)'))
+    out_file = File(
+        'sim_dwi.nii.gz',
+        usedefault=True,
+        desc='output file with fractions to be simluated')
+    out_mask = File(
+        'sim_msk.nii.gz', usedefault=True, desc='file with the mask simulated')
     out_bvec = File('bvec.sim', usedefault=True, desc='simulated b vectors')
     out_bval = File('bval.sim', usedefault=True, desc='simulated b values')
     snr = traits.Int(0, usedefault=True, desc='signal-to-noise ratio (dB)')
@@ -66,7 +80,6 @@ class SimulateMultiTensorOutputSpec(TraitedSpec):
 
 
 class SimulateMultiTensor(DipyBaseInterface):
-
     """
     Interface to MultiTensor model simulator in dipy
     http://nipy.org/dipy/examples_built/simulate_multi_tensor.html
@@ -118,8 +131,10 @@ class SimulateMultiTensor(DipyBaseInterface):
 
         # Volume fractions of isotropic compartments
         nballs = len(self.inputs.in_vfms)
-        vfs = np.squeeze(nb.concat_images(
-            [nb.load(f, mmap=NUMPY_MMAP) for f in self.inputs.in_vfms]).get_data())
+        vfs = np.squeeze(
+            nb.concat_images([
+                nb.load(f, mmap=NUMPY_MMAP) for f in self.inputs.in_vfms
+            ]).get_data())
         if nballs == 1:
             vfs = vfs[..., np.newaxis]
         total_vf = np.sum(vfs, axis=3)
@@ -137,7 +152,8 @@ class SimulateMultiTensor(DipyBaseInterface):
         nvox = len(msk[msk > 0])
 
         # Fiber fractions
-        ffsim = nb.concat_images([nb.load(f, mmap=NUMPY_MMAP) for f in self.inputs.in_frac])
+        ffsim = nb.concat_images(
+            [nb.load(f, mmap=NUMPY_MMAP) for f in self.inputs.in_frac])
         ffs = np.nan_to_num(np.squeeze(ffsim.get_data()))  # fiber fractions
         ffs = np.clip(ffs, 0., 1.)
         if nsticks == 1:
@@ -164,8 +180,8 @@ class SimulateMultiTensor(DipyBaseInterface):
         fractions = np.concatenate((ffs, vfs), axis=3)
 
         nb.Nifti1Image(fractions, aff, None).to_filename('fractions.nii.gz')
-        nb.Nifti1Image(np.sum(fractions, axis=3), aff, None).to_filename(
-            'total_vf.nii.gz')
+        nb.Nifti1Image(np.sum(fractions, axis=3), aff,
+                       None).to_filename('total_vf.nii.gz')
 
         mhdr = hdr.copy()
         mhdr.set_data_dtype(np.uint8)
@@ -207,15 +223,20 @@ class SimulateMultiTensor(DipyBaseInterface):
         b0 = b0_im.get_data()[msk > 0]
         args = []
         for i in range(nvox):
-            args.append(
-                {'fractions': fracs[i, ...].tolist(),
-                 'sticks': [tuple(dirs[i, j:j + 3])
-                            for j in range(nsticks + nballs)],
-                 'gradients': gtab,
-                 'mevals': mevals,
-                 'S0': b0[i],
-                 'snr': self.inputs.snr
-                 })
+            args.append({
+                'fractions':
+                fracs[i, ...].tolist(),
+                'sticks':
+                [tuple(dirs[i, j:j + 3]) for j in range(nsticks + nballs)],
+                'gradients':
+                gtab,
+                'mevals':
+                mevals,
+                'S0':
+                b0[i],
+                'snr':
+                self.inputs.snr
+            })
 
         n_proc = self.inputs.n_proc
         if n_proc == 0:
@@ -227,8 +248,9 @@ class SimulateMultiTensor(DipyBaseInterface):
             pool = Pool(processes=n_proc)
 
         # Simulate sticks using dipy
-        IFLOGGER.info(('Starting simulation of %d voxels, %d diffusion'
-                       ' directions.') % (len(args), ndirs))
+        IFLOGGER.info(
+            'Starting simulation of %d voxels, %d diffusion directions.',
+            len(args), ndirs)
         result = np.array(pool.map(_compute_voxel, args))
         if np.shape(result)[1] != ndirs:
             raise RuntimeError(('Computed directions do not match number'
@@ -240,8 +262,8 @@ class SimulateMultiTensor(DipyBaseInterface):
         simhdr = hdr.copy()
         simhdr.set_data_dtype(np.float32)
         simhdr.set_xyzt_units('mm', 'sec')
-        nb.Nifti1Image(signal.astype(np.float32), aff,
-                       simhdr).to_filename(op.abspath(self.inputs.out_file))
+        nb.Nifti1Image(signal.astype(np.float32), aff, simhdr).to_filename(
+            op.abspath(self.inputs.out_file))
 
         return runtime
 
@@ -266,7 +288,7 @@ def _compute_voxel(args):
     .. [Alexander2002] Alexander et al., Detection and modeling of non-Gaussian
       apparent diffusion coefficient profiles in human brain data, MRM
       48(2):331-340, 2002, doi: `10.1002/mrm.10209
-      <http://dx.doi.org/10.1002/mrm.10209>`_.
+      <https://doi.org/10.1002/mrm.10209>`_.
     .. [Pierpaoli1996] Pierpaoli et al., Diffusion tensor MR imaging
       of the human brain, Radiology 201:637-648. 1996.
     """
@@ -284,11 +306,14 @@ def _compute_voxel(args):
 
         try:
             signal, _ = multi_tensor(
-                gtab, args['mevals'], S0=args['S0'],
-                angles=args['sticks'], fractions=ffs, snr=snr)
-        except Exception as e:
+                gtab,
+                args['mevals'],
+                S0=args['S0'],
+                angles=args['sticks'],
+                fractions=ffs,
+                snr=snr)
+        except Exception:
             pass
-            # IFLOGGER.warn('Exception simulating dwi signal: %s' % e)
 
     return signal.tolist()
 

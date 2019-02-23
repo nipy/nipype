@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 """Parallel workflow execution via LSF
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 import os
 import re
 from time import sleep
 
-from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
+from ... import logging
 from ...interfaces.base import CommandLine
+from .base import SGELikeBatchManagerBase, logger
+iflogger = logging.getLogger('nipype.interface')
 
 
 class LSFPlugin(SGELikeBatchManagerBase):
@@ -40,12 +43,13 @@ class LSFPlugin(SGELikeBatchManagerBase):
         super(LSFPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
-        """LSF lists a status of 'PEND' when a job has been submitted but is waiting to be picked up,
-        and 'RUN' when it is actively being processed. But _is_pending should return True until a job has
-        finished and is ready to be checked for completeness. So return True if status is either 'PEND'
-        or 'RUN'"""
-        cmd = CommandLine('bjobs',
-                          terminal_output='allatonce')
+        """LSF lists a status of 'PEND' when a job has been submitted but is
+        waiting to be picked up, and 'RUN' when it is actively being processed.
+        But _is_pending should return True until a job has finished and is
+        ready to be checked for completeness. So return True if status is
+        either 'PEND' or 'RUN'"""
+        cmd = CommandLine(
+            'bjobs', resource_monitor=False, terminal_output='allatonce')
         cmd.inputs.args = '%d' % taskid
         # check lsf task
         oldlevel = iflogger.level
@@ -59,9 +63,11 @@ class LSFPlugin(SGELikeBatchManagerBase):
             return True
 
     def _submit_batchtask(self, scriptfile, node):
-        cmd = CommandLine('bsub', environ=dict(os.environ),
-                          terminal_output='allatonce')
-        path = os.path.dirname(scriptfile)
+        cmd = CommandLine(
+            'bsub',
+            environ=dict(os.environ),
+            resource_monitor=False,
+            terminal_output='allatonce')
         bsubargs = ''
         if self._bsub_args:
             bsubargs = self._bsub_args
@@ -74,19 +80,17 @@ class LSFPlugin(SGELikeBatchManagerBase):
         if '-o' not in bsubargs:  # -o outfile
             bsubargs = '%s -o %s' % (bsubargs, scriptfile + ".log")
         if '-e' not in bsubargs:
-            bsubargs = '%s -e %s' % (bsubargs, scriptfile + ".log")  # -e error file
+            # -e error file
+            bsubargs = '%s -e %s' % (bsubargs, scriptfile + ".log")
         if node._hierarchy:
-            jobname = '.'.join((dict(os.environ)['LOGNAME'],
-                                node._hierarchy,
+            jobname = '.'.join((dict(os.environ)['LOGNAME'], node._hierarchy,
                                 node._id))
         else:
-            jobname = '.'.join((dict(os.environ)['LOGNAME'],
-                                node._id))
+            jobname = '.'.join((dict(os.environ)['LOGNAME'], node._id))
         jobnameitems = jobname.split('.')
         jobnameitems.reverse()
         jobname = '.'.join(jobnameitems)
-        cmd.inputs.args = '%s -J %s sh %s' % (bsubargs,
-                                              jobname,
+        cmd.inputs.args = '%s -J %s sh %s' % (bsubargs, jobname,
                                               scriptfile)  # -J job_name_spec
         logger.debug('bsub ' + cmd.inputs.args)
         oldlevel = iflogger.level
@@ -109,12 +113,12 @@ class LSFPlugin(SGELikeBatchManagerBase):
                 break
         iflogger.setLevel(oldlevel)
         # retrieve lsf taskid
-        match = re.search('<(\d*)>', result.runtime.stdout)
+        match = re.search(r'<(\d*)>', result.runtime.stdout)
         if match:
             taskid = int(match.groups()[0])
         else:
-            raise ScriptError("Can't parse submission job output id: %s" %
-                              result.runtime.stdout)
+            raise IOError("Can't parse submission job output id: %s" %
+                          result.runtime.stdout)
         self._pending[taskid] = node.output_dir()
         logger.debug('submitted lsf task: %d for node %s' % (taskid, node._id))
         return taskid

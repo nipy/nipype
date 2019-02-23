@@ -11,32 +11,79 @@ from ...base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
 
 
 class BRAINSConstellationModelerInputSpec(CommandLineInputSpec):
-    verbose = traits.Bool(desc=",               Show more verbose output,             ", argstr="--verbose ")
-    inputTrainingList = File(desc=",               Setup file, giving all parameters for training up a template model for each landmark.,             ", exists=True, argstr="--inputTrainingList %s")
-    outputModel = traits.Either(traits.Bool, File(), hash_files=False, desc=",               The full filename of the output model file.,             ", argstr="--outputModel %s")
+    verbose = traits.Bool(
+        desc=",               Show more verbose output,             ",
+        argstr="--verbose ")
+    inputTrainingList = File(
+        desc=
+        ",               Setup file, giving all parameters for training up a template model for each landmark.,             ",
+        exists=True,
+        argstr="--inputTrainingList %s")
+    outputModel = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        ",               The full filename of the output model file.,             ",
+        argstr="--outputModel %s")
     saveOptimizedLandmarks = traits.Bool(
-        desc=",               Flag to make a new subject-specific landmark definition file in the same format produced by Slicer3 with the optimized landmark (the detected RP, AC, and PC) in it.  Useful to tighten the variances in the ConstellationModeler.,             ", argstr="--saveOptimizedLandmarks ")
+        desc=
+        ",               Flag to make a new subject-specific landmark definition file in the same format produced by Slicer3 with the optimized landmark (the detected RP, AC, and PC) in it.  Useful to tighten the variances in the ConstellationModeler.,             ",
+        argstr="--saveOptimizedLandmarks ")
     optimizedLandmarksFilenameExtender = traits.Str(
-        desc=",                If the trainingList is (indexFullPathName) and contains landmark data filenames [path]/[filename].fcsv ,  make the optimized landmarks filenames out of [path]/[filename](thisExtender) and the optimized version of the input trainingList out of (indexFullPathName)(thisExtender) , when you rewrite all the landmarks according to the saveOptimizedLandmarks flag.,             ", argstr="--optimizedLandmarksFilenameExtender %s")
-    resultsDir = traits.Either(traits.Bool, Directory(), hash_files=False, desc=",               The directory for the results to be written.,             ", argstr="--resultsDir %s")
-    mspQualityLevel = traits.Int(desc=",                 Flag cotrols how agressive the MSP is estimated.  0=quick estimate (9 seconds), 1=normal estimate (11 seconds), 2=great estimate (22 seconds), 3=best estimate (58 seconds).,             ", argstr="--mspQualityLevel %d")
-    rescaleIntensities = traits.Bool(desc=",                 Flag to turn on rescaling image intensities on input.,             ", argstr="--rescaleIntensities ")
+        desc=
+        ",                If the trainingList is (indexFullPathName) and contains landmark data filenames [path]/[filename].fcsv ,  make the optimized landmarks filenames out of [path]/[filename](thisExtender) and the optimized version of the input trainingList out of (indexFullPathName)(thisExtender) , when you rewrite all the landmarks according to the saveOptimizedLandmarks flag.,             ",
+        argstr="--optimizedLandmarksFilenameExtender %s")
+    resultsDir = traits.Either(
+        traits.Bool,
+        Directory(),
+        hash_files=False,
+        desc=
+        ",               The directory for the results to be written.,             ",
+        argstr="--resultsDir %s")
+    mspQualityLevel = traits.Int(
+        desc=
+        ",                 Flag cotrols how agressive the MSP is estimated.  0=quick estimate (9 seconds), 1=normal estimate (11 seconds), 2=great estimate (22 seconds), 3=best estimate (58 seconds).,             ",
+        argstr="--mspQualityLevel %d")
+    rescaleIntensities = traits.Bool(
+        desc=
+        ",                 Flag to turn on rescaling image intensities on input.,             ",
+        argstr="--rescaleIntensities ")
     trimRescaledIntensities = traits.Float(
-        desc=",                 Turn on clipping the rescaled image one-tailed on input.  Units of standard deviations above the mean.  Very large values are very permissive.  Non-positive value turns clipping off.  Defaults to removing 0.00001 of a normal tail above the mean.,             ", argstr="--trimRescaledIntensities %f")
+        desc=
+        ",                 Turn on clipping the rescaled image one-tailed on input.  Units of standard deviations above the mean.  Very large values are very permissive.  Non-positive value turns clipping off.  Defaults to removing 0.00001 of a normal tail above the mean.,             ",
+        argstr="--trimRescaledIntensities %f")
     rescaleIntensitiesOutputRange = InputMultiPath(
-        traits.Int, desc=",                 This pair of integers gives the lower and upper bounds on the signal portion of the output image.  Out-of-field voxels are taken from BackgroundFillValue.,             ", sep=",", argstr="--rescaleIntensitiesOutputRange %s")
-    BackgroundFillValue = traits.Str(desc="Fill the background of image with specified short int value. Enter number or use BIGNEG for a large negative number.", argstr="--BackgroundFillValue %s")
-    writedebuggingImagesLevel = traits.Int(desc=",                 This flag controls if debugging images are produced.  By default value of 0 is no images.  Anything greater than zero will be increasing level of debugging images.,             ", argstr="--writedebuggingImagesLevel %d")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+        traits.Int,
+        desc=
+        ",                 This pair of integers gives the lower and upper bounds on the signal portion of the output image.  Out-of-field voxels are taken from BackgroundFillValue.,             ",
+        sep=",",
+        argstr="--rescaleIntensitiesOutputRange %s")
+    BackgroundFillValue = traits.Str(
+        desc=
+        "Fill the background of image with specified short int value. Enter number or use BIGNEG for a large negative number.",
+        argstr="--BackgroundFillValue %s")
+    writedebuggingImagesLevel = traits.Int(
+        desc=
+        ",                 This flag controls if debugging images are produced.  By default value of 0 is no images.  Anything greater than zero will be increasing level of debugging images.,             ",
+        argstr="--writedebuggingImagesLevel %d")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class BRAINSConstellationModelerOutputSpec(TraitedSpec):
-    outputModel = File(desc=",               The full filename of the output model file.,             ", exists=True)
-    resultsDir = Directory(desc=",               The directory for the results to be written.,             ", exists=True)
+    outputModel = File(
+        desc=
+        ",               The full filename of the output model file.,             ",
+        exists=True)
+    resultsDir = Directory(
+        desc=
+        ",               The directory for the results to be written.,             ",
+        exists=True)
 
 
 class BRAINSConstellationModeler(SEMLikeCommandLine):
-
     """title: Generate Landmarks Model (BRAINS)
 
 category: Utilities.BRAINS
@@ -48,23 +95,44 @@ description: Train up a model for BRAINSConstellationDetector
     input_spec = BRAINSConstellationModelerInputSpec
     output_spec = BRAINSConstellationModelerOutputSpec
     _cmd = " BRAINSConstellationModeler "
-    _outputs_filenames = {'outputModel': 'outputModel.mdl', 'resultsDir': 'resultsDir'}
+    _outputs_filenames = {
+        'outputModel': 'outputModel.mdl',
+        'resultsDir': 'resultsDir'
+    }
     _redirect_x = False
 
 
 class landmarksConstellationWeightsInputSpec(CommandLineInputSpec):
-    inputTrainingList = File(desc=",                 Setup file, giving all parameters for training up a Weight list for landmark.,             ", exists=True, argstr="--inputTrainingList %s")
-    inputTemplateModel = File(desc="User-specified template model.,             ", exists=True, argstr="--inputTemplateModel %s")
-    LLSModel = File(desc="Linear least squares model filename in HD5 format", exists=True, argstr="--LLSModel %s")
-    outputWeightsList = traits.Either(traits.Bool, File(), hash_files=False, desc=",                 The filename of a csv file which is a list of landmarks and their corresponding weights.,             ", argstr="--outputWeightsList %s")
+    inputTrainingList = File(
+        desc=
+        ",                 Setup file, giving all parameters for training up a Weight list for landmark.,             ",
+        exists=True,
+        argstr="--inputTrainingList %s")
+    inputTemplateModel = File(
+        desc="User-specified template model.,             ",
+        exists=True,
+        argstr="--inputTemplateModel %s")
+    LLSModel = File(
+        desc="Linear least squares model filename in HD5 format",
+        exists=True,
+        argstr="--LLSModel %s")
+    outputWeightsList = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        ",                 The filename of a csv file which is a list of landmarks and their corresponding weights.,             ",
+        argstr="--outputWeightsList %s")
 
 
 class landmarksConstellationWeightsOutputSpec(TraitedSpec):
-    outputWeightsList = File(desc=",                 The filename of a csv file which is a list of landmarks and their corresponding weights.,             ", exists=True)
+    outputWeightsList = File(
+        desc=
+        ",                 The filename of a csv file which is a list of landmarks and their corresponding weights.,             ",
+        exists=True)
 
 
 class landmarksConstellationWeights(SEMLikeCommandLine):
-
     """title: Generate Landmarks Weights (BRAINS)
 
 category: Utilities.BRAINS
@@ -81,22 +149,50 @@ description: Train up a list of Weights for the Landmarks in BRAINSConstellation
 
 
 class BRAINSTrimForegroundInDirectionInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Input image to trim off the neck (and also air-filling noise.)", exists=True, argstr="--inputVolume %s")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Output image with neck and air-filling noise trimmed isotropic image with AC at center of image.", argstr="--outputVolume %s")
-    directionCode = traits.Int(desc=",                 This flag chooses which dimension to compare.  The sign lets you flip direction.,             ", argstr="--directionCode %d")
-    otsuPercentileThreshold = traits.Float(desc=",                 This is a parameter to FindLargestForegroundFilledMask, which is employed to trim off air-filling noise.,             ", argstr="--otsuPercentileThreshold %f")
-    closingSize = traits.Int(desc=",                 This is a parameter to FindLargestForegroundFilledMask,             ", argstr="--closingSize %d")
-    headSizeLimit = traits.Float(desc=",                 Use this to vary from the command line our search for how much upper tissue is head for the center-of-mass calculation.  Units are CCs, not cubic millimeters.,             ", argstr="--headSizeLimit %f")
-    BackgroundFillValue = traits.Str(desc="Fill the background of image with specified short int value. Enter number or use BIGNEG for a large negative number.", argstr="--BackgroundFillValue %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputVolume = File(
+        desc="Input image to trim off the neck (and also air-filling noise.)",
+        exists=True,
+        argstr="--inputVolume %s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Output image with neck and air-filling noise trimmed isotropic image with AC at center of image.",
+        argstr="--outputVolume %s")
+    directionCode = traits.Int(
+        desc=
+        ",                 This flag chooses which dimension to compare.  The sign lets you flip direction.,             ",
+        argstr="--directionCode %d")
+    otsuPercentileThreshold = traits.Float(
+        desc=
+        ",                 This is a parameter to FindLargestForegroundFilledMask, which is employed to trim off air-filling noise.,             ",
+        argstr="--otsuPercentileThreshold %f")
+    closingSize = traits.Int(
+        desc=
+        ",                 This is a parameter to FindLargestForegroundFilledMask,             ",
+        argstr="--closingSize %d")
+    headSizeLimit = traits.Float(
+        desc=
+        ",                 Use this to vary from the command line our search for how much upper tissue is head for the center-of-mass calculation.  Units are CCs, not cubic millimeters.,             ",
+        argstr="--headSizeLimit %f")
+    BackgroundFillValue = traits.Str(
+        desc=
+        "Fill the background of image with specified short int value. Enter number or use BIGNEG for a large negative number.",
+        argstr="--BackgroundFillValue %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class BRAINSTrimForegroundInDirectionOutputSpec(TraitedSpec):
-    outputVolume = File(desc="Output image with neck and air-filling noise trimmed isotropic image with AC at center of image.", exists=True)
+    outputVolume = File(
+        desc=
+        "Output image with neck and air-filling noise trimmed isotropic image with AC at center of image.",
+        exists=True)
 
 
 class BRAINSTrimForegroundInDirection(SEMLikeCommandLine):
-
     """title: Trim Foreground In Direction (BRAINS)
 
 category: Utilities.BRAINS
@@ -117,22 +213,48 @@ documentation-url: http://www.nitrc.org/projects/art/
 
 
 class BRAINSLmkTransformInputSpec(CommandLineInputSpec):
-    inputMovingLandmarks = File(desc="Input Moving Landmark list file in fcsv,             ", exists=True, argstr="--inputMovingLandmarks %s")
-    inputFixedLandmarks = File(desc="Input Fixed Landmark list file in fcsv,             ", exists=True, argstr="--inputFixedLandmarks %s")
-    outputAffineTransform = traits.Either(traits.Bool, File(), hash_files=False, desc="The filename for the estimated affine transform,             ", argstr="--outputAffineTransform %s")
-    inputMovingVolume = File(desc="The filename of input moving volume", exists=True, argstr="--inputMovingVolume %s")
-    inputReferenceVolume = File(desc="The filename of the reference volume", exists=True, argstr="--inputReferenceVolume %s")
-    outputResampledVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="The filename of the output resampled volume", argstr="--outputResampledVolume %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputMovingLandmarks = File(
+        desc="Input Moving Landmark list file in fcsv,             ",
+        exists=True,
+        argstr="--inputMovingLandmarks %s")
+    inputFixedLandmarks = File(
+        desc="Input Fixed Landmark list file in fcsv,             ",
+        exists=True,
+        argstr="--inputFixedLandmarks %s")
+    outputAffineTransform = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="The filename for the estimated affine transform,             ",
+        argstr="--outputAffineTransform %s")
+    inputMovingVolume = File(
+        desc="The filename of input moving volume",
+        exists=True,
+        argstr="--inputMovingVolume %s")
+    inputReferenceVolume = File(
+        desc="The filename of the reference volume",
+        exists=True,
+        argstr="--inputReferenceVolume %s")
+    outputResampledVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="The filename of the output resampled volume",
+        argstr="--outputResampledVolume %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class BRAINSLmkTransformOutputSpec(TraitedSpec):
-    outputAffineTransform = File(desc="The filename for the estimated affine transform,             ", exists=True)
-    outputResampledVolume = File(desc="The filename of the output resampled volume", exists=True)
+    outputAffineTransform = File(
+        desc="The filename for the estimated affine transform,             ",
+        exists=True)
+    outputResampledVolume = File(
+        desc="The filename of the output resampled volume", exists=True)
 
 
 class BRAINSLmkTransform(SEMLikeCommandLine):
-
     """title: Landmark Transform (BRAINS)
 
 category: Utilities.BRAINS
@@ -148,37 +270,96 @@ documentation-url: http://www.nitrc.org/projects/brainscdetector/
     input_spec = BRAINSLmkTransformInputSpec
     output_spec = BRAINSLmkTransformOutputSpec
     _cmd = " BRAINSLmkTransform "
-    _outputs_filenames = {'outputResampledVolume': 'outputResampledVolume.nii', 'outputAffineTransform': 'outputAffineTransform.h5'}
+    _outputs_filenames = {
+        'outputResampledVolume': 'outputResampledVolume.nii',
+        'outputAffineTransform': 'outputAffineTransform.h5'
+    }
     _redirect_x = False
 
 
 class BRAINSMushInputSpec(CommandLineInputSpec):
-    inputFirstVolume = File(desc="Input image (1) for mixture optimization", exists=True, argstr="--inputFirstVolume %s")
-    inputSecondVolume = File(desc="Input image (2) for mixture optimization", exists=True, argstr="--inputSecondVolume %s")
-    inputMaskVolume = File(desc="Input label image for mixture optimization", exists=True, argstr="--inputMaskVolume %s")
-    outputWeightsFile = traits.Either(traits.Bool, File(), hash_files=False, desc="Output Weights File", argstr="--outputWeightsFile %s")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="The MUSH image produced from the T1 and T2 weighted images", argstr="--outputVolume %s")
-    outputMask = traits.Either(traits.Bool, File(), hash_files=False, desc="The brain volume mask generated from the MUSH image", argstr="--outputMask %s")
-    seed = InputMultiPath(traits.Int, desc="Seed Point for Brain Region Filling", sep=",", argstr="--seed %s")
-    desiredMean = traits.Float(desc="Desired mean within the mask for weighted sum of both images.", argstr="--desiredMean %f")
-    desiredVariance = traits.Float(desc="Desired variance within the mask for weighted sum of both images.", argstr="--desiredVariance %f")
-    lowerThresholdFactorPre = traits.Float(desc="Lower threshold factor for finding an initial brain mask", argstr="--lowerThresholdFactorPre %f")
-    upperThresholdFactorPre = traits.Float(desc="Upper threshold factor for finding an initial brain mask", argstr="--upperThresholdFactorPre %f")
-    lowerThresholdFactor = traits.Float(desc="Lower threshold factor for defining the brain mask", argstr="--lowerThresholdFactor %f")
-    upperThresholdFactor = traits.Float(desc="Upper threshold factor for defining the brain mask", argstr="--upperThresholdFactor %f")
-    boundingBoxSize = InputMultiPath(traits.Int, desc="Size of the cubic bounding box mask used when no brain mask is present", sep=",", argstr="--boundingBoxSize %s")
-    boundingBoxStart = InputMultiPath(traits.Int, desc="XYZ point-coordinate for the start of the cubic bounding box mask used when no brain mask is present", sep=",", argstr="--boundingBoxStart %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputFirstVolume = File(
+        desc="Input image (1) for mixture optimization",
+        exists=True,
+        argstr="--inputFirstVolume %s")
+    inputSecondVolume = File(
+        desc="Input image (2) for mixture optimization",
+        exists=True,
+        argstr="--inputSecondVolume %s")
+    inputMaskVolume = File(
+        desc="Input label image for mixture optimization",
+        exists=True,
+        argstr="--inputMaskVolume %s")
+    outputWeightsFile = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Output Weights File",
+        argstr="--outputWeightsFile %s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="The MUSH image produced from the T1 and T2 weighted images",
+        argstr="--outputVolume %s")
+    outputMask = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="The brain volume mask generated from the MUSH image",
+        argstr="--outputMask %s")
+    seed = InputMultiPath(
+        traits.Int,
+        desc="Seed Point for Brain Region Filling",
+        sep=",",
+        argstr="--seed %s")
+    desiredMean = traits.Float(
+        desc="Desired mean within the mask for weighted sum of both images.",
+        argstr="--desiredMean %f")
+    desiredVariance = traits.Float(
+        desc=
+        "Desired variance within the mask for weighted sum of both images.",
+        argstr="--desiredVariance %f")
+    lowerThresholdFactorPre = traits.Float(
+        desc="Lower threshold factor for finding an initial brain mask",
+        argstr="--lowerThresholdFactorPre %f")
+    upperThresholdFactorPre = traits.Float(
+        desc="Upper threshold factor for finding an initial brain mask",
+        argstr="--upperThresholdFactorPre %f")
+    lowerThresholdFactor = traits.Float(
+        desc="Lower threshold factor for defining the brain mask",
+        argstr="--lowerThresholdFactor %f")
+    upperThresholdFactor = traits.Float(
+        desc="Upper threshold factor for defining the brain mask",
+        argstr="--upperThresholdFactor %f")
+    boundingBoxSize = InputMultiPath(
+        traits.Int,
+        desc=
+        "Size of the cubic bounding box mask used when no brain mask is present",
+        sep=",",
+        argstr="--boundingBoxSize %s")
+    boundingBoxStart = InputMultiPath(
+        traits.Int,
+        desc=
+        "XYZ point-coordinate for the start of the cubic bounding box mask used when no brain mask is present",
+        sep=",",
+        argstr="--boundingBoxStart %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class BRAINSMushOutputSpec(TraitedSpec):
     outputWeightsFile = File(desc="Output Weights File", exists=True)
-    outputVolume = File(desc="The MUSH image produced from the T1 and T2 weighted images", exists=True)
-    outputMask = File(desc="The brain volume mask generated from the MUSH image", exists=True)
+    outputVolume = File(
+        desc="The MUSH image produced from the T1 and T2 weighted images",
+        exists=True)
+    outputMask = File(
+        desc="The brain volume mask generated from the MUSH image",
+        exists=True)
 
 
 class BRAINSMush(SEMLikeCommandLine):
-
     """title: Brain Extraction from T1/T2 image (BRAINS)
 
 category: Utilities.BRAINS
@@ -200,17 +381,40 @@ acknowledgements: This work was developed by the University of Iowa Departments 
     input_spec = BRAINSMushInputSpec
     output_spec = BRAINSMushOutputSpec
     _cmd = " BRAINSMush "
-    _outputs_filenames = {'outputMask': 'outputMask.nii.gz', 'outputWeightsFile': 'outputWeightsFile.txt', 'outputVolume': 'outputVolume.nii.gz'}
+    _outputs_filenames = {
+        'outputMask': 'outputMask.nii.gz',
+        'outputWeightsFile': 'outputWeightsFile.txt',
+        'outputVolume': 'outputVolume.nii.gz'
+    }
     _redirect_x = False
 
 
 class BRAINSTransformConvertInputSpec(CommandLineInputSpec):
     inputTransform = File(exists=True, argstr="--inputTransform %s")
     referenceVolume = File(exists=True, argstr="--referenceVolume %s")
-    outputTransformType = traits.Enum("Affine", "VersorRigid", "ScaleVersor", "ScaleSkewVersor", "DisplacementField", "Same", desc="The target transformation type. Must be conversion-compatible with the input transform type", argstr="--outputTransformType %s")
-    outputPrecisionType = traits.Enum("double", "float", desc="Precision type of the output transform. It can be either single precision or double precision", argstr="--outputPrecisionType %s")
-    displacementVolume = traits.Either(traits.Bool, File(), hash_files=False, argstr="--displacementVolume %s")
-    outputTransform = traits.Either(traits.Bool, File(), hash_files=False, argstr="--outputTransform %s")
+    outputTransformType = traits.Enum(
+        "Affine",
+        "VersorRigid",
+        "ScaleVersor",
+        "ScaleSkewVersor",
+        "DisplacementField",
+        "Same",
+        desc=
+        "The target transformation type. Must be conversion-compatible with the input transform type",
+        argstr="--outputTransformType %s")
+    outputPrecisionType = traits.Enum(
+        "double",
+        "float",
+        desc=
+        "Precision type of the output transform. It can be either single precision or double precision",
+        argstr="--outputPrecisionType %s")
+    displacementVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        argstr="--displacementVolume %s")
+    outputTransform = traits.Either(
+        traits.Bool, File(), hash_files=False, argstr="--outputTransform %s")
 
 
 class BRAINSTransformConvertOutputSpec(TraitedSpec):
@@ -219,7 +423,6 @@ class BRAINSTransformConvertOutputSpec(TraitedSpec):
 
 
 class BRAINSTransformConvert(SEMLikeCommandLine):
-
     """title: BRAINS Transform Convert
 
 category: Utilities.BRAINS
@@ -239,21 +442,32 @@ contributor: Hans J. Johnson,Kent Williams, Ali Ghayoor
     input_spec = BRAINSTransformConvertInputSpec
     output_spec = BRAINSTransformConvertOutputSpec
     _cmd = " BRAINSTransformConvert "
-    _outputs_filenames = {'displacementVolume': 'displacementVolume.nii', 'outputTransform': 'outputTransform.mat'}
+    _outputs_filenames = {
+        'displacementVolume': 'displacementVolume.nii',
+        'outputTransform': 'outputTransform.mat'
+    }
     _redirect_x = False
 
 
 class landmarksConstellationAlignerInputSpec(CommandLineInputSpec):
-    inputLandmarksPaired = File(desc="Input landmark file (.fcsv)", exists=True, argstr="--inputLandmarksPaired %s")
-    outputLandmarksPaired = traits.Either(traits.Bool, File(), hash_files=False, desc="Output landmark file (.fcsv)", argstr="--outputLandmarksPaired %s")
+    inputLandmarksPaired = File(
+        desc="Input landmark file (.fcsv)",
+        exists=True,
+        argstr="--inputLandmarksPaired %s")
+    outputLandmarksPaired = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Output landmark file (.fcsv)",
+        argstr="--outputLandmarksPaired %s")
 
 
 class landmarksConstellationAlignerOutputSpec(TraitedSpec):
-    outputLandmarksPaired = File(desc="Output landmark file (.fcsv)", exists=True)
+    outputLandmarksPaired = File(
+        desc="Output landmark file (.fcsv)", exists=True)
 
 
 class landmarksConstellationAligner(SEMLikeCommandLine):
-
     """title: MidACPC Landmark Insertion
 
 category: Utilities.BRAINS
@@ -272,10 +486,19 @@ contributor: Ali Ghayoor
 
 
 class BRAINSEyeDetectorInputSpec(CommandLineInputSpec):
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
-    inputVolume = File(desc="The input volume", exists=True, argstr="--inputVolume %s")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="The output volume", argstr="--outputVolume %s")
-    debugDir = traits.Str(desc="A place for debug information", argstr="--debugDir %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
+    inputVolume = File(
+        desc="The input volume", exists=True, argstr="--inputVolume %s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="The output volume",
+        argstr="--outputVolume %s")
+    debugDir = traits.Str(
+        desc="A place for debug information", argstr="--debugDir %s")
 
 
 class BRAINSEyeDetectorOutputSpec(TraitedSpec):
@@ -283,7 +506,6 @@ class BRAINSEyeDetectorOutputSpec(TraitedSpec):
 
 
 class BRAINSEyeDetector(SEMLikeCommandLine):
-
     """title: Eye Detector (BRAINS)
 
 category: Utilities.BRAINS
@@ -302,8 +524,13 @@ documentation-url: http://www.nitrc.org/projects/brainscdetector/
 
 
 class BRAINSLinearModelerEPCAInputSpec(CommandLineInputSpec):
-    inputTrainingList = File(desc="Input Training Landmark List Filename,             ", exists=True, argstr="--inputTrainingList %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputTrainingList = File(
+        desc="Input Training Landmark List Filename,             ",
+        exists=True,
+        argstr="--inputTrainingList %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class BRAINSLinearModelerEPCAOutputSpec(TraitedSpec):
@@ -311,7 +538,6 @@ class BRAINSLinearModelerEPCAOutputSpec(TraitedSpec):
 
 
 class BRAINSLinearModelerEPCA(SEMLikeCommandLine):
-
     """title: Landmark Linear Modeler (BRAINS)
 
 category: Utilities.BRAINS
@@ -332,12 +558,31 @@ documentation-url: http://www.nitrc.org/projects/brainscdetector/
 
 
 class BRAINSInitializedControlPointsInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Input Volume", exists=True, argstr="--inputVolume %s")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Output Volume", argstr="--outputVolume %s")
-    splineGridSize = InputMultiPath(traits.Int, desc="The number of subdivisions of the BSpline Grid to be centered on the image space.  Each dimension must have at least 3 subdivisions for the BSpline to be correctly computed. ", sep=",", argstr="--splineGridSize %s")
-    permuteOrder = InputMultiPath(traits.Int, desc="The permutation order for the images.  The default is 0,1,2 (i.e. no permutation)", sep=",", argstr="--permuteOrder %s")
-    outputLandmarksFile = traits.Str(desc="Output filename", argstr="--outputLandmarksFile %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputVolume = File(
+        desc="Input Volume", exists=True, argstr="--inputVolume %s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Output Volume",
+        argstr="--outputVolume %s")
+    splineGridSize = InputMultiPath(
+        traits.Int,
+        desc=
+        "The number of subdivisions of the BSpline Grid to be centered on the image space.  Each dimension must have at least 3 subdivisions for the BSpline to be correctly computed. ",
+        sep=",",
+        argstr="--splineGridSize %s")
+    permuteOrder = InputMultiPath(
+        traits.Int,
+        desc=
+        "The permutation order for the images.  The default is 0,1,2 (i.e. no permutation)",
+        sep=",",
+        argstr="--permuteOrder %s")
+    outputLandmarksFile = traits.Str(
+        desc="Output filename", argstr="--outputLandmarksFile %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class BRAINSInitializedControlPointsOutputSpec(TraitedSpec):
@@ -345,7 +590,6 @@ class BRAINSInitializedControlPointsOutputSpec(TraitedSpec):
 
 
 class BRAINSInitializedControlPoints(SEMLikeCommandLine):
-
     """title: Initialized Control Points (BRAINS)
 
 category: Utilities.BRAINS
@@ -370,16 +614,29 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 
 class CleanUpOverlapLabelsInputSpec(CommandLineInputSpec):
-    inputBinaryVolumes = InputMultiPath(File(exists=True), desc="The list of binary images to be checked and cleaned up. Order is important. Binary volume given first always wins out. ", argstr="--inputBinaryVolumes %s...")
-    outputBinaryVolumes = traits.Either(traits.Bool, InputMultiPath(File(), ), hash_files=False, desc="The output label map images, with integer values in it. Each label value specified in the inputLabels is combined into this output label map volume", argstr="--outputBinaryVolumes %s...")
+    inputBinaryVolumes = InputMultiPath(
+        File(exists=True),
+        desc=
+        "The list of binary images to be checked and cleaned up. Order is important. Binary volume given first always wins out. ",
+        argstr="--inputBinaryVolumes %s...")
+    outputBinaryVolumes = traits.Either(
+        traits.Bool,
+        InputMultiPath(File(), ),
+        hash_files=False,
+        desc=
+        "The output label map images, with integer values in it. Each label value specified in the inputLabels is combined into this output label map volume",
+        argstr="--outputBinaryVolumes %s...")
 
 
 class CleanUpOverlapLabelsOutputSpec(TraitedSpec):
-    outputBinaryVolumes = OutputMultiPath(File(exists=True), desc="The output label map images, with integer values in it. Each label value specified in the inputLabels is combined into this output label map volume")
+    outputBinaryVolumes = OutputMultiPath(
+        File(exists=True),
+        desc=
+        "The output label map images, with integer values in it. Each label value specified in the inputLabels is combined into this output label map volume"
+    )
 
 
 class CleanUpOverlapLabels(SEMLikeCommandLine):
-
     """title: Clean Up Overla Labels
 
 category: Utilities.BRAINS
@@ -400,20 +657,38 @@ contributor: Eun Young Kim
 
 
 class BRAINSClipInferiorInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Input image to make a clipped short int copy from.", exists=True, argstr="--inputVolume %s")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Output image, a short int copy of the upper portion of the input image, filled with BackgroundFillValue.", argstr="--outputVolume %s")
+    inputVolume = File(
+        desc="Input image to make a clipped short int copy from.",
+        exists=True,
+        argstr="--inputVolume %s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "Output image, a short int copy of the upper portion of the input image, filled with BackgroundFillValue.",
+        argstr="--outputVolume %s")
     acLowerBound = traits.Float(
-        desc=",                 When the input image to the output image, replace the image with the BackgroundFillValue everywhere below the plane This Far in physical units (millimeters) below (inferior to) the AC point (assumed to be the voxel field middle.)  The oversize default was chosen to have no effect.  Based on visualizing a thousand masks in the IPIG study, we recommend a limit no smaller than 80.0 mm.,             ", argstr="--acLowerBound %f")
-    BackgroundFillValue = traits.Str(desc="Fill the background of image with specified short int value. Enter number or use BIGNEG for a large negative number.", argstr="--BackgroundFillValue %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+        desc=
+        ",                 When the input image to the output image, replace the image with the BackgroundFillValue everywhere below the plane This Far in physical units (millimeters) below (inferior to) the AC point (assumed to be the voxel field middle.)  The oversize default was chosen to have no effect.  Based on visualizing a thousand masks in the IPIG study, we recommend a limit no smaller than 80.0 mm.,             ",
+        argstr="--acLowerBound %f")
+    BackgroundFillValue = traits.Str(
+        desc=
+        "Fill the background of image with specified short int value. Enter number or use BIGNEG for a large negative number.",
+        argstr="--BackgroundFillValue %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class BRAINSClipInferiorOutputSpec(TraitedSpec):
-    outputVolume = File(desc="Output image, a short int copy of the upper portion of the input image, filled with BackgroundFillValue.", exists=True)
+    outputVolume = File(
+        desc=
+        "Output image, a short int copy of the upper portion of the input image, filled with BackgroundFillValue.",
+        exists=True)
 
 
 class BRAINSClipInferior(SEMLikeCommandLine):
-
     """title: Clip Inferior of Center of Brain (BRAINS)
 
 category: Utilities.BRAINS
@@ -432,17 +707,27 @@ version: 1.0
 
 
 class GenerateLabelMapFromProbabilityMapInputSpec(CommandLineInputSpec):
-    inputVolumes = InputMultiPath(File(exists=True), desc="The Input probaiblity images to be computed for lable maps", argstr="--inputVolumes %s...")
-    outputLabelVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="The Input binary image for region of interest", argstr="--outputLabelVolume %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputVolumes = InputMultiPath(
+        File(exists=True),
+        desc="The Input probaiblity images to be computed for lable maps",
+        argstr="--inputVolumes %s...")
+    outputLabelVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="The Input binary image for region of interest",
+        argstr="--outputLabelVolume %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class GenerateLabelMapFromProbabilityMapOutputSpec(TraitedSpec):
-    outputLabelVolume = File(desc="The Input binary image for region of interest", exists=True)
+    outputLabelVolume = File(
+        desc="The Input binary image for region of interest", exists=True)
 
 
 class GenerateLabelMapFromProbabilityMap(SEMLikeCommandLine):
-
     """title: Label Map from Probability Images
 
 category: Utilities.BRAINS
@@ -463,29 +748,78 @@ contributor: University of Iowa Department of Psychiatry, http:://www.psychiatry
 
 
 class BRAINSAlignMSPInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc=",         The Image to be resampled,       ", exists=True, argstr="--inputVolume %s")
-    OutputresampleMSP = traits.Either(traits.Bool, File(), hash_files=False, desc=",         The image to be output.,       ", argstr="--OutputresampleMSP %s")
-    verbose = traits.Bool(desc=",         Show more verbose output,       ", argstr="--verbose ")
-    resultsDir = traits.Either(traits.Bool, Directory(), hash_files=False, desc=",         The directory for the results to be written.,       ", argstr="--resultsDir %s")
-    writedebuggingImagesLevel = traits.Int(desc=",           This flag controls if debugging images are produced.  By default value of 0 is no images.  Anything greater than zero will be increasing level of debugging images.,       ", argstr="--writedebuggingImagesLevel %d")
-    mspQualityLevel = traits.Int(desc=",           Flag cotrols how agressive the MSP is estimated.  0=quick estimate (9 seconds), 1=normal estimate (11 seconds), 2=great estimate (22 seconds), 3=best estimate (58 seconds).,       ", argstr="--mspQualityLevel %d")
-    rescaleIntensities = traits.Bool(desc=",           Flag to turn on rescaling image intensities on input.,       ", argstr="--rescaleIntensities ")
+    inputVolume = File(
+        desc=",         The Image to be resampled,       ",
+        exists=True,
+        argstr="--inputVolume %s")
+    OutputresampleMSP = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=",         The image to be output.,       ",
+        argstr="--OutputresampleMSP %s")
+    verbose = traits.Bool(
+        desc=",         Show more verbose output,       ", argstr="--verbose ")
+    resultsDir = traits.Either(
+        traits.Bool,
+        Directory(),
+        hash_files=False,
+        desc=",         The directory for the results to be written.,       ",
+        argstr="--resultsDir %s")
+    writedebuggingImagesLevel = traits.Int(
+        desc=
+        ",           This flag controls if debugging images are produced.  By default value of 0 is no images.  Anything greater than zero will be increasing level of debugging images.,       ",
+        argstr="--writedebuggingImagesLevel %d")
+    mspQualityLevel = traits.Int(
+        desc=
+        ",           Flag cotrols how agressive the MSP is estimated.  0=quick estimate (9 seconds), 1=normal estimate (11 seconds), 2=great estimate (22 seconds), 3=best estimate (58 seconds).,       ",
+        argstr="--mspQualityLevel %d")
+    rescaleIntensities = traits.Bool(
+        desc=
+        ",           Flag to turn on rescaling image intensities on input.,       ",
+        argstr="--rescaleIntensities ")
     trimRescaledIntensities = traits.Float(
-        desc=",           Turn on clipping the rescaled image one-tailed on input.  Units of standard deviations above the mean.  Very large values are very permissive.  Non-positive value turns clipping off.  Defaults to removing 0.00001 of a normal tail above the mean.,       ", argstr="--trimRescaledIntensities %f")
-    rescaleIntensitiesOutputRange = InputMultiPath(traits.Int, desc=",           This pair of integers gives the lower and upper bounds on the signal portion of the output image.  Out-of-field voxels are taken from BackgroundFillValue.,       ", sep=",", argstr="--rescaleIntensitiesOutputRange %s")
-    BackgroundFillValue = traits.Str(desc="Fill the background of image with specified short int value. Enter number or use BIGNEG for a large negative number.", argstr="--BackgroundFillValue %s")
-    interpolationMode = traits.Enum("NearestNeighbor", "Linear", "ResampleInPlace", "BSpline", "WindowedSinc", "Hamming", "Cosine", "Welch", "Lanczos", "Blackman",
-                                    desc="Type of interpolation to be used when applying transform to moving volume.  Options are Linear, ResampleInPlace, NearestNeighbor, BSpline, or WindowedSinc", argstr="--interpolationMode %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+        desc=
+        ",           Turn on clipping the rescaled image one-tailed on input.  Units of standard deviations above the mean.  Very large values are very permissive.  Non-positive value turns clipping off.  Defaults to removing 0.00001 of a normal tail above the mean.,       ",
+        argstr="--trimRescaledIntensities %f")
+    rescaleIntensitiesOutputRange = InputMultiPath(
+        traits.Int,
+        desc=
+        ",           This pair of integers gives the lower and upper bounds on the signal portion of the output image.  Out-of-field voxels are taken from BackgroundFillValue.,       ",
+        sep=",",
+        argstr="--rescaleIntensitiesOutputRange %s")
+    BackgroundFillValue = traits.Str(
+        desc=
+        "Fill the background of image with specified short int value. Enter number or use BIGNEG for a large negative number.",
+        argstr="--BackgroundFillValue %s")
+    interpolationMode = traits.Enum(
+        "NearestNeighbor",
+        "Linear",
+        "ResampleInPlace",
+        "BSpline",
+        "WindowedSinc",
+        "Hamming",
+        "Cosine",
+        "Welch",
+        "Lanczos",
+        "Blackman",
+        desc=
+        "Type of interpolation to be used when applying transform to moving volume.  Options are Linear, ResampleInPlace, NearestNeighbor, BSpline, or WindowedSinc",
+        argstr="--interpolationMode %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class BRAINSAlignMSPOutputSpec(TraitedSpec):
-    OutputresampleMSP = File(desc=",         The image to be output.,       ", exists=True)
-    resultsDir = Directory(desc=",         The directory for the results to be written.,       ", exists=True)
+    OutputresampleMSP = File(
+        desc=",         The image to be output.,       ", exists=True)
+    resultsDir = Directory(
+        desc=",         The directory for the results to be written.,       ",
+        exists=True)
 
 
 class BRAINSAlignMSP(SEMLikeCommandLine):
-
     """title: Align Mid Saggital Brain (BRAINS)
 
 category: Utilities.BRAINS
@@ -497,23 +831,42 @@ description: Resample an image into ACPC alignement ACPCDetect
     input_spec = BRAINSAlignMSPInputSpec
     output_spec = BRAINSAlignMSPOutputSpec
     _cmd = " BRAINSAlignMSP "
-    _outputs_filenames = {'OutputresampleMSP': 'OutputresampleMSP.nii', 'resultsDir': 'resultsDir'}
+    _outputs_filenames = {
+        'OutputresampleMSP': 'OutputresampleMSP.nii',
+        'resultsDir': 'resultsDir'
+    }
     _redirect_x = False
 
 
 class BRAINSLandmarkInitializerInputSpec(CommandLineInputSpec):
-    inputFixedLandmarkFilename = File(desc="input fixed landmark. *.fcsv", exists=True, argstr="--inputFixedLandmarkFilename %s")
-    inputMovingLandmarkFilename = File(desc="input moving landmark. *.fcsv", exists=True, argstr="--inputMovingLandmarkFilename %s")
-    inputWeightFilename = File(desc="Input weight file name for landmarks. Higher weighted landmark will be considered more heavily. Weights are propotional, that is the magnitude of weights will be normalized by its minimum and maximum value. ", exists=True, argstr="--inputWeightFilename %s")
-    outputTransformFilename = traits.Either(traits.Bool, File(), hash_files=False, desc="output transform file name (ex: ./outputTransform.mat) ", argstr="--outputTransformFilename %s")
+    inputFixedLandmarkFilename = File(
+        desc="input fixed landmark. *.fcsv",
+        exists=True,
+        argstr="--inputFixedLandmarkFilename %s")
+    inputMovingLandmarkFilename = File(
+        desc="input moving landmark. *.fcsv",
+        exists=True,
+        argstr="--inputMovingLandmarkFilename %s")
+    inputWeightFilename = File(
+        desc=
+        "Input weight file name for landmarks. Higher weighted landmark will be considered more heavily. Weights are propotional, that is the magnitude of weights will be normalized by its minimum and maximum value. ",
+        exists=True,
+        argstr="--inputWeightFilename %s")
+    outputTransformFilename = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="output transform file name (ex: ./outputTransform.mat) ",
+        argstr="--outputTransformFilename %s")
 
 
 class BRAINSLandmarkInitializerOutputSpec(TraitedSpec):
-    outputTransformFilename = File(desc="output transform file name (ex: ./outputTransform.mat) ", exists=True)
+    outputTransformFilename = File(
+        desc="output transform file name (ex: ./outputTransform.mat) ",
+        exists=True)
 
 
 class BRAINSLandmarkInitializer(SEMLikeCommandLine):
-
     """title: BRAINSLandmarkInitializer
 
 category: Utilities.BRAINS
@@ -536,8 +889,16 @@ contributor: Eunyoung Regina Kim
 
 
 class insertMidACPCpointInputSpec(CommandLineInputSpec):
-    inputLandmarkFile = File(desc="Input landmark file (.fcsv)", exists=True, argstr="--inputLandmarkFile %s")
-    outputLandmarkFile = traits.Either(traits.Bool, File(), hash_files=False, desc="Output landmark file (.fcsv)", argstr="--outputLandmarkFile %s")
+    inputLandmarkFile = File(
+        desc="Input landmark file (.fcsv)",
+        exists=True,
+        argstr="--inputLandmarkFile %s")
+    outputLandmarkFile = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Output landmark file (.fcsv)",
+        argstr="--outputLandmarkFile %s")
 
 
 class insertMidACPCpointOutputSpec(TraitedSpec):
@@ -545,7 +906,6 @@ class insertMidACPCpointOutputSpec(TraitedSpec):
 
 
 class insertMidACPCpoint(SEMLikeCommandLine):
-
     """title: MidACPC Landmark Insertion
 
 category: Utilities.BRAINS
@@ -564,21 +924,54 @@ contributor: Ali Ghayoor
 
 
 class BRAINSSnapShotWriterInputSpec(CommandLineInputSpec):
-    inputVolumes = InputMultiPath(File(exists=True), desc="Input image volume list to be extracted as 2D image. Multiple input is possible. At least one input is required.", argstr="--inputVolumes %s...")
-    inputBinaryVolumes = InputMultiPath(File(exists=True), desc="Input mask (binary) volume list to be extracted as 2D image. Multiple input is possible.", argstr="--inputBinaryVolumes %s...")
-    inputSliceToExtractInPhysicalPoint = InputMultiPath(traits.Float, desc="2D slice number of input images. For autoWorkUp output, which AC-PC aligned, 0,0,0 will be the center.", sep=",", argstr="--inputSliceToExtractInPhysicalPoint %s")
-    inputSliceToExtractInIndex = InputMultiPath(traits.Int, desc="2D slice number of input images. For size of 256*256*256 image, 128 is usually used.", sep=",", argstr="--inputSliceToExtractInIndex %s")
-    inputSliceToExtractInPercent = InputMultiPath(traits.Int, desc="2D slice number of input images. Percentage input from 0%-100%. (ex. --inputSliceToExtractInPercent 50,50,50", sep=",", argstr="--inputSliceToExtractInPercent %s")
-    inputPlaneDirection = InputMultiPath(traits.Int, desc="Plane to display. In general, 0=saggital, 1=coronal, and 2=axial plane.", sep=",", argstr="--inputPlaneDirection %s")
-    outputFilename = traits.Either(traits.Bool, File(), hash_files=False, desc="2D file name of input images. Required.", argstr="--outputFilename %s")
+    inputVolumes = InputMultiPath(
+        File(exists=True),
+        desc=
+        "Input image volume list to be extracted as 2D image. Multiple input is possible. At least one input is required.",
+        argstr="--inputVolumes %s...")
+    inputBinaryVolumes = InputMultiPath(
+        File(exists=True),
+        desc=
+        "Input mask (binary) volume list to be extracted as 2D image. Multiple input is possible.",
+        argstr="--inputBinaryVolumes %s...")
+    inputSliceToExtractInPhysicalPoint = InputMultiPath(
+        traits.Float,
+        desc=
+        "2D slice number of input images. For autoWorkUp output, which AC-PC aligned, 0,0,0 will be the center.",
+        sep=",",
+        argstr="--inputSliceToExtractInPhysicalPoint %s")
+    inputSliceToExtractInIndex = InputMultiPath(
+        traits.Int,
+        desc=
+        "2D slice number of input images. For size of 256*256*256 image, 128 is usually used.",
+        sep=",",
+        argstr="--inputSliceToExtractInIndex %s")
+    inputSliceToExtractInPercent = InputMultiPath(
+        traits.Int,
+        desc=
+        "2D slice number of input images. Percentage input from 0%-100%. (ex. --inputSliceToExtractInPercent 50,50,50",
+        sep=",",
+        argstr="--inputSliceToExtractInPercent %s")
+    inputPlaneDirection = InputMultiPath(
+        traits.Int,
+        desc=
+        "Plane to display. In general, 0=saggital, 1=coronal, and 2=axial plane.",
+        sep=",",
+        argstr="--inputPlaneDirection %s")
+    outputFilename = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="2D file name of input images. Required.",
+        argstr="--outputFilename %s")
 
 
 class BRAINSSnapShotWriterOutputSpec(TraitedSpec):
-    outputFilename = File(desc="2D file name of input images. Required.", exists=True)
+    outputFilename = File(
+        desc="2D file name of input images. Required.", exists=True)
 
 
 class BRAINSSnapShotWriter(SEMLikeCommandLine):
-
     """title: BRAINSSnapShotWriter
 
 category: Utilities.BRAINS
@@ -601,12 +994,30 @@ contributor: Eunyoung Regina Kim
 
 
 class JointHistogramInputSpec(CommandLineInputSpec):
-    inputVolumeInXAxis = File(desc="The Input image to be computed for statistics", exists=True, argstr="--inputVolumeInXAxis %s")
-    inputVolumeInYAxis = File(desc="The Input image to be computed for statistics", exists=True, argstr="--inputVolumeInYAxis %s")
-    inputMaskVolumeInXAxis = File(desc="Input mask volume for inputVolumeInXAxis. Histogram will be computed just for the masked region", exists=True, argstr="--inputMaskVolumeInXAxis %s")
-    inputMaskVolumeInYAxis = File(desc="Input mask volume for inputVolumeInYAxis. Histogram will be computed just for the masked region", exists=True, argstr="--inputMaskVolumeInYAxis %s")
-    outputJointHistogramImage = traits.Str(desc=" output joint histogram image file name. Histogram is usually 2D image. ", argstr="--outputJointHistogramImage %s")
-    verbose = traits.Bool(desc=" print debugging information,       ", argstr="--verbose ")
+    inputVolumeInXAxis = File(
+        desc="The Input image to be computed for statistics",
+        exists=True,
+        argstr="--inputVolumeInXAxis %s")
+    inputVolumeInYAxis = File(
+        desc="The Input image to be computed for statistics",
+        exists=True,
+        argstr="--inputVolumeInYAxis %s")
+    inputMaskVolumeInXAxis = File(
+        desc=
+        "Input mask volume for inputVolumeInXAxis. Histogram will be computed just for the masked region",
+        exists=True,
+        argstr="--inputMaskVolumeInXAxis %s")
+    inputMaskVolumeInYAxis = File(
+        desc=
+        "Input mask volume for inputVolumeInYAxis. Histogram will be computed just for the masked region",
+        exists=True,
+        argstr="--inputMaskVolumeInYAxis %s")
+    outputJointHistogramImage = traits.Str(
+        desc=
+        " output joint histogram image file name. Histogram is usually 2D image. ",
+        argstr="--outputJointHistogramImage %s")
+    verbose = traits.Bool(
+        desc=" print debugging information,       ", argstr="--verbose ")
 
 
 class JointHistogramOutputSpec(TraitedSpec):
@@ -614,7 +1025,6 @@ class JointHistogramOutputSpec(TraitedSpec):
 
 
 class JointHistogram(SEMLikeCommandLine):
-
     """title: Write Out Image Intensities
 
 category: Utilities.BRAINS
@@ -635,17 +1045,32 @@ contributor: University of Iowa Department of Psychiatry, http:://www.psychiatry
 
 
 class ShuffleVectorsModuleInputSpec(CommandLineInputSpec):
-    inputVectorFileBaseName = File(desc="input vector file name prefix. Usually end with .txt and header file has prost fix of .txt.hdr", exists=True, argstr="--inputVectorFileBaseName %s")
-    outputVectorFileBaseName = traits.Either(traits.Bool, File(), hash_files=False, desc="output vector file name prefix. Usually end with .txt and header file has prost fix of .txt.hdr", argstr="--outputVectorFileBaseName %s")
-    resampleProportion = traits.Float(desc="downsample size of 1 will be the same size as the input images, downsample size of 3 will throw 2/3 the vectors away.", argstr="--resampleProportion %f")
+    inputVectorFileBaseName = File(
+        desc=
+        "input vector file name prefix. Usually end with .txt and header file has prost fix of .txt.hdr",
+        exists=True,
+        argstr="--inputVectorFileBaseName %s")
+    outputVectorFileBaseName = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        "output vector file name prefix. Usually end with .txt and header file has prost fix of .txt.hdr",
+        argstr="--outputVectorFileBaseName %s")
+    resampleProportion = traits.Float(
+        desc=
+        "downsample size of 1 will be the same size as the input images, downsample size of 3 will throw 2/3 the vectors away.",
+        argstr="--resampleProportion %f")
 
 
 class ShuffleVectorsModuleOutputSpec(TraitedSpec):
-    outputVectorFileBaseName = File(desc="output vector file name prefix. Usually end with .txt and header file has prost fix of .txt.hdr", exists=True)
+    outputVectorFileBaseName = File(
+        desc=
+        "output vector file name prefix. Usually end with .txt and header file has prost fix of .txt.hdr",
+        exists=True)
 
 
 class ShuffleVectorsModule(SEMLikeCommandLine):
-
     """title: ShuffleVectors
 
 category: Utilities.BRAINS
@@ -663,20 +1088,42 @@ contributor: Hans Johnson
     input_spec = ShuffleVectorsModuleInputSpec
     output_spec = ShuffleVectorsModuleOutputSpec
     _cmd = " ShuffleVectorsModule "
-    _outputs_filenames = {'outputVectorFileBaseName': 'outputVectorFileBaseName'}
+    _outputs_filenames = {
+        'outputVectorFileBaseName': 'outputVectorFileBaseName'
+    }
     _redirect_x = False
 
 
 class ImageRegionPlotterInputSpec(CommandLineInputSpec):
-    inputVolume1 = File(desc="The Input image to be computed for statistics", exists=True, argstr="--inputVolume1 %s")
-    inputVolume2 = File(desc="The Input image to be computed for statistics", exists=True, argstr="--inputVolume2 %s")
-    inputBinaryROIVolume = File(desc="The Input binary image for region of interest", exists=True, argstr="--inputBinaryROIVolume %s")
-    inputLabelVolume = File(desc="The Label Image", exists=True, argstr="--inputLabelVolume %s")
-    numberOfHistogramBins = traits.Int(desc=" the number of histogram levels", argstr="--numberOfHistogramBins %d")
-    outputJointHistogramData = traits.Str(desc=" output data file name", argstr="--outputJointHistogramData %s")
-    useROIAUTO = traits.Bool(desc=" Use ROIAUTO to compute region of interest. This cannot be used with inputLabelVolume", argstr="--useROIAUTO ")
-    useIntensityForHistogram = traits.Bool(desc=" Create Intensity Joint Histogram instead of Quantile Joint Histogram", argstr="--useIntensityForHistogram ")
-    verbose = traits.Bool(desc=" print debugging information,       ", argstr="--verbose ")
+    inputVolume1 = File(
+        desc="The Input image to be computed for statistics",
+        exists=True,
+        argstr="--inputVolume1 %s")
+    inputVolume2 = File(
+        desc="The Input image to be computed for statistics",
+        exists=True,
+        argstr="--inputVolume2 %s")
+    inputBinaryROIVolume = File(
+        desc="The Input binary image for region of interest",
+        exists=True,
+        argstr="--inputBinaryROIVolume %s")
+    inputLabelVolume = File(
+        desc="The Label Image", exists=True, argstr="--inputLabelVolume %s")
+    numberOfHistogramBins = traits.Int(
+        desc=" the number of histogram levels",
+        argstr="--numberOfHistogramBins %d")
+    outputJointHistogramData = traits.Str(
+        desc=" output data file name", argstr="--outputJointHistogramData %s")
+    useROIAUTO = traits.Bool(
+        desc=
+        " Use ROIAUTO to compute region of interest. This cannot be used with inputLabelVolume",
+        argstr="--useROIAUTO ")
+    useIntensityForHistogram = traits.Bool(
+        desc=
+        " Create Intensity Joint Histogram instead of Quantile Joint Histogram",
+        argstr="--useIntensityForHistogram ")
+    verbose = traits.Bool(
+        desc=" print debugging information,       ", argstr="--verbose ")
 
 
 class ImageRegionPlotterOutputSpec(TraitedSpec):
@@ -684,7 +1131,6 @@ class ImageRegionPlotterOutputSpec(TraitedSpec):
 
 
 class ImageRegionPlotter(SEMLikeCommandLine):
-
     """title: Write Out Image Intensities
 
 category: Utilities.BRAINS
@@ -705,21 +1151,46 @@ contributor: University of Iowa Department of Psychiatry, http:://www.psychiatry
 
 
 class fcsv_to_hdf5InputSpec(CommandLineInputSpec):
-    versionID = traits.Str(desc=",         Current version ID. It should be match with the version of BCD that will be using the output model file,       ", argstr="--versionID %s")
-    landmarksInformationFile = traits.Either(traits.Bool, File(), hash_files=False, desc=",         name of HDF5 file to write matrices into,       ", argstr="--landmarksInformationFile %s")
-    landmarkTypesList = File(desc=",         file containing list of landmark types,       ", exists=True, argstr="--landmarkTypesList %s")
-    modelFile = traits.Either(traits.Bool, File(), hash_files=False, desc=",         name of HDF5 file containing BRAINSConstellationDetector Model file (LLSMatrices, LLSMeans and LLSSearchRadii),       ", argstr="--modelFile %s")
-    landmarkGlobPattern = traits.Str(desc="Glob pattern to select fcsv files", argstr="--landmarkGlobPattern %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    versionID = traits.Str(
+        desc=
+        ",         Current version ID. It should be match with the version of BCD that will be using the output model file,       ",
+        argstr="--versionID %s")
+    landmarksInformationFile = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=",         name of HDF5 file to write matrices into,       ",
+        argstr="--landmarksInformationFile %s")
+    landmarkTypesList = File(
+        desc=",         file containing list of landmark types,       ",
+        exists=True,
+        argstr="--landmarkTypesList %s")
+    modelFile = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc=
+        ",         name of HDF5 file containing BRAINSConstellationDetector Model file (LLSMatrices, LLSMeans and LLSSearchRadii),       ",
+        argstr="--modelFile %s")
+    landmarkGlobPattern = traits.Str(
+        desc="Glob pattern to select fcsv files",
+        argstr="--landmarkGlobPattern %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class fcsv_to_hdf5OutputSpec(TraitedSpec):
-    landmarksInformationFile = File(desc=",         name of HDF5 file to write matrices into,       ", exists=True)
-    modelFile = File(desc=",         name of HDF5 file containing BRAINSConstellationDetector Model file (LLSMatrices, LLSMeans and LLSSearchRadii),       ", exists=True)
+    landmarksInformationFile = File(
+        desc=",         name of HDF5 file to write matrices into,       ",
+        exists=True)
+    modelFile = File(
+        desc=
+        ",         name of HDF5 file containing BRAINSConstellationDetector Model file (LLSMatrices, LLSMeans and LLSSearchRadii),       ",
+        exists=True)
 
 
 class fcsv_to_hdf5(SEMLikeCommandLine):
-
     """title: fcsv_to_hdf5 (BRAINS)
 
 category: Utilities.BRAINS
@@ -731,27 +1202,49 @@ description: Convert a collection of fcsv files to a HDF5 format file
     input_spec = fcsv_to_hdf5InputSpec
     output_spec = fcsv_to_hdf5OutputSpec
     _cmd = " fcsv_to_hdf5 "
-    _outputs_filenames = {'modelFile': 'modelFile', 'landmarksInformationFile': 'landmarksInformationFile.h5'}
+    _outputs_filenames = {
+        'modelFile': 'modelFile',
+        'landmarksInformationFile': 'landmarksInformationFile.h5'
+    }
     _redirect_x = False
 
 
 class FindCenterOfBrainInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="The image in which to find the center.", exists=True, argstr="--inputVolume %s")
+    inputVolume = File(
+        desc="The image in which to find the center.",
+        exists=True,
+        argstr="--inputVolume %s")
     imageMask = File(exists=True, argstr="--imageMask %s")
-    clippedImageMask = traits.Either(traits.Bool, File(), hash_files=False, argstr="--clippedImageMask %s")
+    clippedImageMask = traits.Either(
+        traits.Bool, File(), hash_files=False, argstr="--clippedImageMask %s")
     maximize = traits.Bool(argstr="--maximize ")
     axis = traits.Int(argstr="--axis %d")
-    otsuPercentileThreshold = traits.Float(argstr="--otsuPercentileThreshold %f")
+    otsuPercentileThreshold = traits.Float(
+        argstr="--otsuPercentileThreshold %f")
     closingSize = traits.Int(argstr="--closingSize %d")
     headSizeLimit = traits.Float(argstr="--headSizeLimit %f")
     headSizeEstimate = traits.Float(argstr="--headSizeEstimate %f")
     backgroundValue = traits.Int(argstr="--backgroundValue %d")
     generateDebugImages = traits.Bool(argstr="--generateDebugImages ")
-    debugDistanceImage = traits.Either(traits.Bool, File(), hash_files=False, argstr="--debugDistanceImage %s")
-    debugGridImage = traits.Either(traits.Bool, File(), hash_files=False, argstr="--debugGridImage %s")
-    debugAfterGridComputationsForegroundImage = traits.Either(traits.Bool, File(), hash_files=False, argstr="--debugAfterGridComputationsForegroundImage %s")
-    debugClippedImageMask = traits.Either(traits.Bool, File(), hash_files=False, argstr="--debugClippedImageMask %s")
-    debugTrimmedImage = traits.Either(traits.Bool, File(), hash_files=False, argstr="--debugTrimmedImage %s")
+    debugDistanceImage = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        argstr="--debugDistanceImage %s")
+    debugGridImage = traits.Either(
+        traits.Bool, File(), hash_files=False, argstr="--debugGridImage %s")
+    debugAfterGridComputationsForegroundImage = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        argstr="--debugAfterGridComputationsForegroundImage %s")
+    debugClippedImageMask = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        argstr="--debugClippedImageMask %s")
+    debugTrimmedImage = traits.Either(
+        traits.Bool, File(), hash_files=False, argstr="--debugTrimmedImage %s")
 
 
 class FindCenterOfBrainOutputSpec(TraitedSpec):
@@ -764,7 +1257,6 @@ class FindCenterOfBrainOutputSpec(TraitedSpec):
 
 
 class FindCenterOfBrain(SEMLikeCommandLine):
-
     """title: Center Of Brain (BRAINS)
 
 category: Utilities.BRAINS
@@ -784,6 +1276,18 @@ acknowledgements: Hans Johnson(1,3,4); Kent Williams(1);  (1=University of Iowa 
     input_spec = FindCenterOfBrainInputSpec
     output_spec = FindCenterOfBrainOutputSpec
     _cmd = " FindCenterOfBrain "
-    _outputs_filenames = {'debugClippedImageMask': 'debugClippedImageMask.nii', 'debugTrimmedImage': 'debugTrimmedImage.nii', 'debugDistanceImage': 'debugDistanceImage.nii',
-                          'debugGridImage': 'debugGridImage.nii', 'clippedImageMask': 'clippedImageMask.nii', 'debugAfterGridComputationsForegroundImage': 'debugAfterGridComputationsForegroundImage.nii'}
+    _outputs_filenames = {
+        'debugClippedImageMask':
+        'debugClippedImageMask.nii',
+        'debugTrimmedImage':
+        'debugTrimmedImage.nii',
+        'debugDistanceImage':
+        'debugDistanceImage.nii',
+        'debugGridImage':
+        'debugGridImage.nii',
+        'clippedImageMask':
+        'clippedImageMask.nii',
+        'debugAfterGridComputationsForegroundImage':
+        'debugAfterGridComputationsForegroundImage.nii'
+    }
     _redirect_x = False

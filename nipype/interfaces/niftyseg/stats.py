@@ -1,16 +1,8 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-
 """
 The stats module provides higher-level interfaces to some of the operations
 that can be performed with the niftyseg stats (seg_stats) command-line program.
-
-Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/\
-data'))
-    >>> os.chdir(datadir)
 """
 from __future__ import print_function
 import numpy as np
@@ -22,22 +14,22 @@ from ..niftyreg.base import get_custom_path
 
 class StatsInput(CommandLineInputSpec):
     """Input Spec for seg_stats interfaces."""
-    in_file = File(position=2,
-                   argstr='%s',
-                   exists=True,
-                   mandatory=True,
-                   desc='image to operate on')
+    in_file = File(
+        position=2,
+        argstr='%s',
+        exists=True,
+        mandatory=True,
+        desc='image to operate on')
 
     # Constrains
-    mask_file = File(exists=True,
-                     position=-2,
-                     argstr='-m %s',
-                     desc='statistics within the masked area')
+    mask_file = File(
+        exists=True,
+        position=-2,
+        argstr='-m %s',
+        desc='statistics within the masked area')
 
     desc = 'Only estimate statistics if voxel is larger than <float>'
-    larger_voxel = traits.Float(argstr='-t %f',
-                                position=-3,
-                                desc=desc)
+    larger_voxel = traits.Float(argstr='-t %f', position=-3, desc=desc)
 
 
 class StatsOutput(TraitedSpec):
@@ -87,12 +79,28 @@ class StatsCommand(NiftySegCommand):
 
 class UnaryStatsInput(StatsInput):
     """Input Spec for seg_stats unary operations."""
-    operation = traits.Enum('r', 'R', 'a', 's', 'v', 'vl', 'vp', 'n', 'np',
-                            'e', 'ne', 'x', 'X', 'c', 'B', 'xvox', 'xdim',
-                            argstr='-%s',
-                            position=4,
-                            mandatory=True,
-                            desc='operation to perform')
+    operation = traits.Enum(
+        'r',
+        'R',
+        'a',
+        's',
+        'v',
+        'vl',
+        'vp',
+        'n',
+        'np',
+        'e',
+        'ne',
+        'x',
+        'X',
+        'c',
+        'B',
+        'xvox',
+        'xdim',
+        argstr='-%s',
+        position=4,
+        mandatory=True,
+        desc='operation to perform')
 
 
 class UnaryStats(StatsCommand):
@@ -154,19 +162,19 @@ y/z for other directions.
     >>> # Test v operation
     >>> unary_v = copy.deepcopy(unary)
     >>> unary_v.inputs.operation = 'v'
-    >>> unary_v.cmdline  # doctest: +ALLOW_UNICODE
+    >>> unary_v.cmdline
     'seg_stats im1.nii -v'
     >>> unary_v.run()  # doctest: +SKIP
     >>> # Test vl operation
     >>> unary_vl = copy.deepcopy(unary)
     >>> unary_vl.inputs.operation = 'vl'
-    >>> unary_vl.cmdline  # doctest: +ALLOW_UNICODE
+    >>> unary_vl.cmdline
     'seg_stats im1.nii -vl'
     >>> unary_vl.run()  # doctest: +SKIP
     >>> # Test x operation
     >>> unary_x = copy.deepcopy(unary)
     >>> unary_x.inputs.operation = 'x'
-    >>> unary_x.cmdline  # doctest: +ALLOW_UNICODE
+    >>> unary_x.cmdline
     'seg_stats im1.nii -x'
     >>> unary_x.run()  # doctest: +SKIP
 
@@ -176,25 +184,36 @@ y/z for other directions.
 
 class BinaryStatsInput(StatsInput):
     """Input Spec for seg_stats Binary operations."""
-    operation = traits.Enum('p', 'sa', 'ss', 'svp', 'al', 'd', 'ncc', 'nmi',
-                            'Vl', 'Nl',
-                            mandatory=True,
-                            argstr='-%s',
-                            position=4,
-                            desc='operation to perform')
+    operation = traits.Enum(
+        'p',
+        'sa',
+        'ss',
+        'svp',
+        'al',
+        'd',
+        'ncc',
+        'nmi',
+        'Vl',
+        'Nl',
+        mandatory=True,
+        argstr='-%s',
+        position=4,
+        desc='operation to perform')
 
-    operand_file = File(exists=True,
-                        argstr="%s",
-                        mandatory=True,
-                        position=5,
-                        xor=["operand_value"],
-                        desc="second image to perform operation with")
+    operand_file = File(
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=5,
+        xor=["operand_value"],
+        desc="second image to perform operation with")
 
-    operand_value = traits.Float(argstr='%.8f',
-                                 mandatory=True,
-                                 position=5,
-                                 xor=["operand_file"],
-                                 desc='value to perform operation with')
+    operand_value = traits.Float(
+        argstr='%.8f',
+        mandatory=True,
+        position=5,
+        xor=["operand_file"],
+        desc='value to perform operation with')
 
 
 class BinaryStats(StatsCommand):
@@ -243,21 +262,21 @@ and <in2>
     >>> binary_sa = copy.deepcopy(binary)
     >>> binary_sa.inputs.operation = 'sa'
     >>> binary_sa.inputs.operand_value = 2.0
-    >>> binary_sa.cmdline  # doctest: +ALLOW_UNICODE
+    >>> binary_sa.cmdline
     'seg_stats im1.nii -sa 2.00000000'
     >>> binary_sa.run()  # doctest: +SKIP
     >>> # Test ncc operation
     >>> binary_ncc = copy.deepcopy(binary)
     >>> binary_ncc.inputs.operation = 'ncc'
     >>> binary_ncc.inputs.operand_file = 'im2.nii'
-    >>> binary_ncc.cmdline  # doctest: +ALLOW_UNICODE
+    >>> binary_ncc.cmdline
     'seg_stats im1.nii -ncc im2.nii'
     >>> binary_ncc.run()  # doctest: +SKIP
     >>> # Test Nl operation
     >>> binary_nl = copy.deepcopy(binary)
     >>> binary_nl.inputs.operation = 'Nl'
     >>> binary_nl.inputs.operand_file = 'output.csv'
-    >>> binary_nl.cmdline  # doctest: +ALLOW_UNICODE
+    >>> binary_nl.cmdline
     'seg_stats im1.nii -Nl output.csv'
     >>> binary_nl.run()  # doctest: +SKIP
 

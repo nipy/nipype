@@ -2,7 +2,7 @@
 NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 ========================================================
 
-.. image:: https://travis-ci.org/nipy/nipype.png?branch=master
+.. image:: https://travis-ci.org/nipy/nipype.svg?branch=master
   :target: https://travis-ci.org/nipy/nipype
 
 .. image:: https://circleci.com/gh/nipy/nipype/tree/master.svg?style=svg
@@ -11,8 +11,8 @@ NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 .. image:: https://codecov.io/gh/nipy/nipype/branch/master/graph/badge.svg
   :target: https://codecov.io/gh/nipy/nipype
 
-.. image:: https://www.codacy.com/project/badge/182f27944c51474490b369d0a23e2f32
-  :target: https://www.codacy.com/app/krzysztof-gorgolewski/nipy_nipype
+.. image:: https://api.codacy.com/project/badge/Grade/452bfc0d4de342c99b177d2c29abda7b
+  :target: https://www.codacy.com/app/nipype/nipype?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nipy/nipype&amp;utm_campaign=Badge_Grade
 
 .. image:: https://img.shields.io/pypi/v/nipype.svg
     :target: https://pypi.python.org/pypi/nipype/
@@ -34,8 +34,9 @@ NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
     :target: http://gitter.im/nipy/nipype
     :alt: Chat
 
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.581704.svg
-   :target: https://doi.org/10.5281/zenodo.581704
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.596855.svg
+   :target: https://doi.org/10.5281/zenodo.596855
+   :alt: Citable DOI
 
 Current neuroimaging software offer users an incredible opportunity to
 analyze data using a variety of different algorithms. However, this has
@@ -90,33 +91,11 @@ To participate in the Nipype development related discussions please use the foll
 
 Please add *[nipype]* to the subject line when posting on the mailing list.
 
+You can even hangout with the Nipype developers in their
+`Gitter <https://gitter.im/nipy/nipype>`_ channel or in the BrainHack `Slack <https://brainhack.slack.com/messages/C1FR76RAL>`_ channel. (Click `here <https://brainhack-slack-invite.herokuapp.com>`_ to join the Slack workspace.)
 
-Nipype structure
-----------------
 
-Currently Nipype consists of the following files and directories:
+Contributing to the project
+---------------------------
 
-  INSTALL
-    NIPYPE prerequisites, installation, development, testing, and
-    troubleshooting.
-
-  README
-    This document.
-
-  THANKS
-    NIPYPE developers and contributors. Please keep it up to date!!
-
-  LICENSE
-    NIPYPE license terms.
-
-  doc/
-    Sphinx/reST documentation
-
-  examples/
-
-  nipype/
-    Contains the source code.
-
-  setup.py
-    Script for building and installing NIPYPE.
-
+If you'd like to contribute to the project please read our `guidelines <https://github.com/nipy/nipype/blob/master/CONTRIBUTING.md>`_. Please also read through our `code of conduct <https://github.com/nipy/nipype/blob/master/CODE_OF_CONDUCT.md>`_.

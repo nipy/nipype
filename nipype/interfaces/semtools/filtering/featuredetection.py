@@ -11,11 +11,27 @@ from ...base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
 
 
 class GenerateSummedGradientImageInputSpec(CommandLineInputSpec):
-    inputVolume1 = File(desc="input volume 1, usally t1 image", exists=True, argstr="--inputVolume1 %s")
-    inputVolume2 = File(desc="input volume 2, usally t2 image", exists=True, argstr="--inputVolume2 %s")
-    outputFileName = traits.Either(traits.Bool, File(), hash_files=False, desc="(required) output file name", argstr="--outputFileName %s")
-    MaximumGradient = traits.Bool(desc="If set this flag, it will compute maximum gradient between two input volumes instead of sum of it.", argstr="--MaximumGradient ")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputVolume1 = File(
+        desc="input volume 1, usally t1 image",
+        exists=True,
+        argstr="--inputVolume1 %s")
+    inputVolume2 = File(
+        desc="input volume 2, usally t2 image",
+        exists=True,
+        argstr="--inputVolume2 %s")
+    outputFileName = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="(required) output file name",
+        argstr="--outputFileName %s")
+    MaximumGradient = traits.Bool(
+        desc=
+        "If set this flag, it will compute maximum gradient between two input volumes instead of sum of it.",
+        argstr="--MaximumGradient ")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class GenerateSummedGradientImageOutputSpec(TraitedSpec):
@@ -23,7 +39,6 @@ class GenerateSummedGradientImageOutputSpec(TraitedSpec):
 
 
 class GenerateSummedGradientImage(SEMLikeCommandLine):
-
     """title: GenerateSummedGradient
 
 category: Filtering.FeatureDetection
@@ -48,12 +63,22 @@ contributor: Greg Harris, Eun Young Kim
 class CannySegmentationLevelSetImageFilterInputSpec(CommandLineInputSpec):
     inputVolume = File(exists=True, argstr="--inputVolume %s")
     initialModel = File(exists=True, argstr="--initialModel %s")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, argstr="--outputVolume %s")
-    outputSpeedVolume = traits.Either(traits.Bool, File(), hash_files=False, argstr="--outputSpeedVolume %s")
-    cannyThreshold = traits.Float(desc="Canny Threshold Value", argstr="--cannyThreshold %f")
-    cannyVariance = traits.Float(desc="Canny variance", argstr="--cannyVariance %f")
-    advectionWeight = traits.Float(desc="Controls the smoothness of the resulting mask, small number are more smooth, large numbers allow more sharp corners.  ", argstr="--advectionWeight %f")
-    initialModelIsovalue = traits.Float(desc="The identification of the input model iso-surface.  (for a binary image with 0s and 1s use 0.5) (for a binary image with 0s and 255's use 127.5).", argstr="--initialModelIsovalue %f")
+    outputVolume = traits.Either(
+        traits.Bool, File(), hash_files=False, argstr="--outputVolume %s")
+    outputSpeedVolume = traits.Either(
+        traits.Bool, File(), hash_files=False, argstr="--outputSpeedVolume %s")
+    cannyThreshold = traits.Float(
+        desc="Canny Threshold Value", argstr="--cannyThreshold %f")
+    cannyVariance = traits.Float(
+        desc="Canny variance", argstr="--cannyVariance %f")
+    advectionWeight = traits.Float(
+        desc=
+        "Controls the smoothness of the resulting mask, small number are more smooth, large numbers allow more sharp corners.  ",
+        argstr="--advectionWeight %f")
+    initialModelIsovalue = traits.Float(
+        desc=
+        "The identification of the input model iso-surface.  (for a binary image with 0s and 1s use 0.5) (for a binary image with 0s and 255's use 127.5).",
+        argstr="--initialModelIsovalue %f")
     maxIterations = traits.Int(desc="The", argstr="--maxIterations %d")
 
 
@@ -63,7 +88,6 @@ class CannySegmentationLevelSetImageFilterOutputSpec(TraitedSpec):
 
 
 class CannySegmentationLevelSetImageFilter(SEMLikeCommandLine):
-
     """title: Canny Level Set Image Filter
 
 category: Filtering.FeatureDetection
@@ -83,15 +107,28 @@ acknowledgements: This command module was derived from Insight/Examples/Segmenta
     input_spec = CannySegmentationLevelSetImageFilterInputSpec
     output_spec = CannySegmentationLevelSetImageFilterOutputSpec
     _cmd = " CannySegmentationLevelSetImageFilter "
-    _outputs_filenames = {'outputVolume': 'outputVolume.nii', 'outputSpeedVolume': 'outputSpeedVolume.nii'}
+    _outputs_filenames = {
+        'outputVolume': 'outputVolume.nii',
+        'outputSpeedVolume': 'outputSpeedVolume.nii'
+    }
     _redirect_x = False
 
 
 class DilateImageInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Required: input image", exists=True, argstr="--inputVolume %s")
-    inputMaskVolume = File(desc="Required: input brain mask image", exists=True, argstr="--inputMaskVolume %s")
-    inputRadius = traits.Int(desc="Required: input neighborhood radius", argstr="--inputRadius %d")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: output image", argstr="--outputVolume %s")
+    inputVolume = File(
+        desc="Required: input image", exists=True, argstr="--inputVolume %s")
+    inputMaskVolume = File(
+        desc="Required: input brain mask image",
+        exists=True,
+        argstr="--inputMaskVolume %s")
+    inputRadius = traits.Int(
+        desc="Required: input neighborhood radius", argstr="--inputRadius %d")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Required: output image",
+        argstr="--outputVolume %s")
 
 
 class DilateImageOutputSpec(TraitedSpec):
@@ -99,7 +136,6 @@ class DilateImageOutputSpec(TraitedSpec):
 
 
 class DilateImage(SEMLikeCommandLine):
-
     """title: Dilate Image
 
 category: Filtering.FeatureDetection
@@ -124,9 +160,16 @@ contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
 
 
 class TextureFromNoiseImageFilterInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Required: input image", exists=True, argstr="--inputVolume %s")
-    inputRadius = traits.Int(desc="Required: input neighborhood radius", argstr="--inputRadius %d")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: output image", argstr="--outputVolume %s")
+    inputVolume = File(
+        desc="Required: input image", exists=True, argstr="--inputVolume %s")
+    inputRadius = traits.Int(
+        desc="Required: input neighborhood radius", argstr="--inputRadius %d")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Required: output image",
+        argstr="--outputVolume %s")
 
 
 class TextureFromNoiseImageFilterOutputSpec(TraitedSpec):
@@ -134,7 +177,6 @@ class TextureFromNoiseImageFilterOutputSpec(TraitedSpec):
 
 
 class TextureFromNoiseImageFilter(SEMLikeCommandLine):
-
     """title: TextureFromNoiseImageFilter
 
 category: Filtering.FeatureDetection
@@ -159,9 +201,18 @@ contributor: This tool was developed by Eunyoung Regina Kim
 
 
 class FlippedDifferenceInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Required: input image", exists=True, argstr="--inputVolume %s")
-    inputMaskVolume = File(desc="Required: input brain mask image", exists=True, argstr="--inputMaskVolume %s")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: output image", argstr="--outputVolume %s")
+    inputVolume = File(
+        desc="Required: input image", exists=True, argstr="--inputVolume %s")
+    inputMaskVolume = File(
+        desc="Required: input brain mask image",
+        exists=True,
+        argstr="--inputMaskVolume %s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Required: output image",
+        argstr="--outputVolume %s")
 
 
 class FlippedDifferenceOutputSpec(TraitedSpec):
@@ -169,7 +220,6 @@ class FlippedDifferenceOutputSpec(TraitedSpec):
 
 
 class FlippedDifference(SEMLikeCommandLine):
-
     """title: Flip Image
 
 category: Filtering.FeatureDetection
@@ -194,10 +244,20 @@ contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
 
 
 class ErodeImageInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Required: input image", exists=True, argstr="--inputVolume %s")
-    inputMaskVolume = File(desc="Required: input brain mask image", exists=True, argstr="--inputMaskVolume %s")
-    inputRadius = traits.Int(desc="Required: input neighborhood radius", argstr="--inputRadius %d")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: output image", argstr="--outputVolume %s")
+    inputVolume = File(
+        desc="Required: input image", exists=True, argstr="--inputVolume %s")
+    inputMaskVolume = File(
+        desc="Required: input brain mask image",
+        exists=True,
+        argstr="--inputMaskVolume %s")
+    inputRadius = traits.Int(
+        desc="Required: input neighborhood radius", argstr="--inputRadius %d")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Required: output image",
+        argstr="--outputVolume %s")
 
 
 class ErodeImageOutputSpec(TraitedSpec):
@@ -205,7 +265,6 @@ class ErodeImageOutputSpec(TraitedSpec):
 
 
 class ErodeImage(SEMLikeCommandLine):
-
     """title: Erode Image
 
 category: Filtering.FeatureDetection
@@ -230,10 +289,23 @@ contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
 
 
 class GenerateBrainClippedImageInputSpec(CommandLineInputSpec):
-    inputImg = File(desc="input volume 1, usally t1 image", exists=True, argstr="--inputImg %s")
-    inputMsk = File(desc="input volume 2, usally t2 image", exists=True, argstr="--inputMsk %s")
-    outputFileName = traits.Either(traits.Bool, File(), hash_files=False, desc="(required) output file name", argstr="--outputFileName %s")
-    numberOfThreads = traits.Int(desc="Explicitly specify the maximum number of threads to use.", argstr="--numberOfThreads %d")
+    inputImg = File(
+        desc="input volume 1, usally t1 image",
+        exists=True,
+        argstr="--inputImg %s")
+    inputMsk = File(
+        desc="input volume 2, usally t2 image",
+        exists=True,
+        argstr="--inputMsk %s")
+    outputFileName = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="(required) output file name",
+        argstr="--outputFileName %s")
+    numberOfThreads = traits.Int(
+        desc="Explicitly specify the maximum number of threads to use.",
+        argstr="--numberOfThreads %d")
 
 
 class GenerateBrainClippedImageOutputSpec(TraitedSpec):
@@ -241,7 +313,6 @@ class GenerateBrainClippedImageOutputSpec(TraitedSpec):
 
 
 class GenerateBrainClippedImage(SEMLikeCommandLine):
-
     """title: GenerateBrainClippedImage
 
 category: Filtering.FeatureDetection
@@ -264,10 +335,20 @@ contributor: Eun Young Kim
 
 
 class NeighborhoodMedianInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Required: input image", exists=True, argstr="--inputVolume %s")
-    inputMaskVolume = File(desc="Required: input brain mask image", exists=True, argstr="--inputMaskVolume %s")
-    inputRadius = traits.Int(desc="Required: input neighborhood radius", argstr="--inputRadius %d")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: output image", argstr="--outputVolume %s")
+    inputVolume = File(
+        desc="Required: input image", exists=True, argstr="--inputVolume %s")
+    inputMaskVolume = File(
+        desc="Required: input brain mask image",
+        exists=True,
+        argstr="--inputMaskVolume %s")
+    inputRadius = traits.Int(
+        desc="Required: input neighborhood radius", argstr="--inputRadius %d")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Required: output image",
+        argstr="--outputVolume %s")
 
 
 class NeighborhoodMedianOutputSpec(TraitedSpec):
@@ -275,7 +356,6 @@ class NeighborhoodMedianOutputSpec(TraitedSpec):
 
 
 class NeighborhoodMedian(SEMLikeCommandLine):
-
     """title: Neighborhood Median
 
 category: Filtering.FeatureDetection
@@ -300,11 +380,22 @@ contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
 
 
 class GenerateTestImageInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="input volume 1, usally t1 image", exists=True, argstr="--inputVolume %s")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="(required) output file name", argstr="--outputVolume %s")
-    lowerBoundOfOutputVolume = traits.Float(argstr="--lowerBoundOfOutputVolume %f")
-    upperBoundOfOutputVolume = traits.Float(argstr="--upperBoundOfOutputVolume %f")
-    outputVolumeSize = traits.Float(desc="output Volume Size", argstr="--outputVolumeSize %f")
+    inputVolume = File(
+        desc="input volume 1, usally t1 image",
+        exists=True,
+        argstr="--inputVolume %s")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="(required) output file name",
+        argstr="--outputVolume %s")
+    lowerBoundOfOutputVolume = traits.Float(
+        argstr="--lowerBoundOfOutputVolume %f")
+    upperBoundOfOutputVolume = traits.Float(
+        argstr="--upperBoundOfOutputVolume %f")
+    outputVolumeSize = traits.Float(
+        desc="output Volume Size", argstr="--outputVolumeSize %f")
 
 
 class GenerateTestImageOutputSpec(TraitedSpec):
@@ -312,7 +403,6 @@ class GenerateTestImageOutputSpec(TraitedSpec):
 
 
 class GenerateTestImage(SEMLikeCommandLine):
-
     """title: DownSampleImage
 
 category: Filtering.FeatureDetection
@@ -335,10 +425,20 @@ contributor: Eun Young Kim
 
 
 class NeighborhoodMeanInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Required: input image", exists=True, argstr="--inputVolume %s")
-    inputMaskVolume = File(desc="Required: input brain mask image", exists=True, argstr="--inputMaskVolume %s")
-    inputRadius = traits.Int(desc="Required: input neighborhood radius", argstr="--inputRadius %d")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: output image", argstr="--outputVolume %s")
+    inputVolume = File(
+        desc="Required: input image", exists=True, argstr="--inputVolume %s")
+    inputMaskVolume = File(
+        desc="Required: input brain mask image",
+        exists=True,
+        argstr="--inputMaskVolume %s")
+    inputRadius = traits.Int(
+        desc="Required: input neighborhood radius", argstr="--inputRadius %d")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Required: output image",
+        argstr="--outputVolume %s")
 
 
 class NeighborhoodMeanOutputSpec(TraitedSpec):
@@ -346,7 +446,6 @@ class NeighborhoodMeanOutputSpec(TraitedSpec):
 
 
 class NeighborhoodMean(SEMLikeCommandLine):
-
     """title: Neighborhood Mean
 
 category: Filtering.FeatureDetection
@@ -372,11 +471,24 @@ contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
 
 class HammerAttributeCreatorInputSpec(CommandLineInputSpec):
     Scale = traits.Int(desc="Determine Scale of Ball", argstr="--Scale %d")
-    Strength = traits.Float(desc="Determine Strength of Edges", argstr="--Strength %f")
-    inputGMVolume = File(desc="Required: input grey matter posterior image", exists=True, argstr="--inputGMVolume %s")
-    inputWMVolume = File(desc="Required: input white matter posterior image", exists=True, argstr="--inputWMVolume %s")
-    inputCSFVolume = File(desc="Required: input CSF posterior image", exists=True, argstr="--inputCSFVolume %s")
-    outputVolumeBase = traits.Str(desc="Required: output image base name to be appended for each feature vector.", argstr="--outputVolumeBase %s")
+    Strength = traits.Float(
+        desc="Determine Strength of Edges", argstr="--Strength %f")
+    inputGMVolume = File(
+        desc="Required: input grey matter posterior image",
+        exists=True,
+        argstr="--inputGMVolume %s")
+    inputWMVolume = File(
+        desc="Required: input white matter posterior image",
+        exists=True,
+        argstr="--inputWMVolume %s")
+    inputCSFVolume = File(
+        desc="Required: input CSF posterior image",
+        exists=True,
+        argstr="--inputCSFVolume %s")
+    outputVolumeBase = traits.Str(
+        desc=
+        "Required: output image base name to be appended for each feature vector.",
+        argstr="--outputVolumeBase %s")
 
 
 class HammerAttributeCreatorOutputSpec(TraitedSpec):
@@ -384,7 +496,6 @@ class HammerAttributeCreatorOutputSpec(TraitedSpec):
 
 
 class HammerAttributeCreator(SEMLikeCommandLine):
-
     """title: HAMMER Feature Vectors
 
 category: Filtering.FeatureDetection
@@ -413,7 +524,8 @@ class TextureMeasureFilterInputSpec(CommandLineInputSpec):
     inputMaskVolume = File(exists=True, argstr="--inputMaskVolume %s")
     distance = traits.Int(argstr="--distance %d")
     insideROIValue = traits.Float(argstr="--insideROIValue %f")
-    outputFilename = traits.Either(traits.Bool, File(), hash_files=False, argstr="--outputFilename %s")
+    outputFilename = traits.Either(
+        traits.Bool, File(), hash_files=False, argstr="--outputFilename %s")
 
 
 class TextureMeasureFilterOutputSpec(TraitedSpec):
@@ -421,7 +533,6 @@ class TextureMeasureFilterOutputSpec(TraitedSpec):
 
 
 class TextureMeasureFilter(SEMLikeCommandLine):
-
     """title: Canny Level Set Image Filter
 
 category: Filtering.FeatureDetection
@@ -446,11 +557,24 @@ acknowledgements: This command module was derived from Insight/Examples/Segmenta
 
 
 class DilateMaskInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Required: input image", exists=True, argstr="--inputVolume %s")
-    inputBinaryVolume = File(desc="Required: input brain mask image", exists=True, argstr="--inputBinaryVolume %s")
-    sizeStructuralElement = traits.Int(desc="size of structural element. sizeStructuralElement=1 means that 3x3x3 structuring element for 3D", argstr="--sizeStructuralElement %d")
-    lowerThreshold = traits.Float(desc="Required: lowerThreshold value", argstr="--lowerThreshold %f")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: output image", argstr="--outputVolume %s")
+    inputVolume = File(
+        desc="Required: input image", exists=True, argstr="--inputVolume %s")
+    inputBinaryVolume = File(
+        desc="Required: input brain mask image",
+        exists=True,
+        argstr="--inputBinaryVolume %s")
+    sizeStructuralElement = traits.Int(
+        desc=
+        "size of structural element. sizeStructuralElement=1 means that 3x3x3 structuring element for 3D",
+        argstr="--sizeStructuralElement %d")
+    lowerThreshold = traits.Float(
+        desc="Required: lowerThreshold value", argstr="--lowerThreshold %f")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Required: output image",
+        argstr="--outputVolume %s")
 
 
 class DilateMaskOutputSpec(TraitedSpec):
@@ -458,7 +582,6 @@ class DilateMaskOutputSpec(TraitedSpec):
 
 
 class DilateMask(SEMLikeCommandLine):
-
     """title: Dilate Image
 
 category: Filtering.FeatureDetection
@@ -483,8 +606,14 @@ contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
 
 
 class DumpBinaryTrainingVectorsInputSpec(CommandLineInputSpec):
-    inputHeaderFilename = File(desc="Required: input header file name", exists=True, argstr="--inputHeaderFilename %s")
-    inputVectorFilename = File(desc="Required: input vector filename", exists=True, argstr="--inputVectorFilename %s")
+    inputHeaderFilename = File(
+        desc="Required: input header file name",
+        exists=True,
+        argstr="--inputHeaderFilename %s")
+    inputVectorFilename = File(
+        desc="Required: input vector filename",
+        exists=True,
+        argstr="--inputVectorFilename %s")
 
 
 class DumpBinaryTrainingVectorsOutputSpec(TraitedSpec):
@@ -492,7 +621,6 @@ class DumpBinaryTrainingVectorsOutputSpec(TraitedSpec):
 
 
 class DumpBinaryTrainingVectors(SEMLikeCommandLine):
-
     """title: Erode Image
 
 category: Filtering.FeatureDetection
@@ -517,10 +645,24 @@ contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
 
 
 class DistanceMapsInputSpec(CommandLineInputSpec):
-    inputLabelVolume = File(desc="Required: input tissue label image", exists=True, argstr="--inputLabelVolume %s")
-    inputMaskVolume = File(desc="Required: input brain mask image", exists=True, argstr="--inputMaskVolume %s")
-    inputTissueLabel = traits.Int(desc="Required: input integer value of tissue type used to calculate distance", argstr="--inputTissueLabel %d")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: output image", argstr="--outputVolume %s")
+    inputLabelVolume = File(
+        desc="Required: input tissue label image",
+        exists=True,
+        argstr="--inputLabelVolume %s")
+    inputMaskVolume = File(
+        desc="Required: input brain mask image",
+        exists=True,
+        argstr="--inputMaskVolume %s")
+    inputTissueLabel = traits.Int(
+        desc=
+        "Required: input integer value of tissue type used to calculate distance",
+        argstr="--inputTissueLabel %d")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Required: output image",
+        argstr="--outputVolume %s")
 
 
 class DistanceMapsOutputSpec(TraitedSpec):
@@ -528,7 +670,6 @@ class DistanceMapsOutputSpec(TraitedSpec):
 
 
 class DistanceMaps(SEMLikeCommandLine):
-
     """title: Mauerer Distance
 
 category: Filtering.FeatureDetection
@@ -553,9 +694,19 @@ contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
 
 
 class STAPLEAnalysisInputSpec(CommandLineInputSpec):
-    inputDimension = traits.Int(desc="Required: input image Dimension 2 or 3", argstr="--inputDimension %d")
-    inputLabelVolume = InputMultiPath(File(exists=True), desc="Required: input label volume", argstr="--inputLabelVolume %s...")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: output image", argstr="--outputVolume %s")
+    inputDimension = traits.Int(
+        desc="Required: input image Dimension 2 or 3",
+        argstr="--inputDimension %d")
+    inputLabelVolume = InputMultiPath(
+        File(exists=True),
+        desc="Required: input label volume",
+        argstr="--inputLabelVolume %s...")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Required: output image",
+        argstr="--outputVolume %s")
 
 
 class STAPLEAnalysisOutputSpec(TraitedSpec):
@@ -563,7 +714,6 @@ class STAPLEAnalysisOutputSpec(TraitedSpec):
 
 
 class STAPLEAnalysis(SEMLikeCommandLine):
-
     """title: Dilate Image
 
 category: Filtering.FeatureDetection
@@ -588,11 +738,21 @@ contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
 
 
 class GradientAnisotropicDiffusionImageFilterInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Required: input image", exists=True, argstr="--inputVolume %s")
-    numberOfIterations = traits.Int(desc="Optional value for number of Iterations", argstr="--numberOfIterations %d")
-    timeStep = traits.Float(desc="Time step for diffusion process", argstr="--timeStep %f")
-    conductance = traits.Float(desc="Conductance for diffusion process", argstr="--conductance %f")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: output image", argstr="--outputVolume %s")
+    inputVolume = File(
+        desc="Required: input image", exists=True, argstr="--inputVolume %s")
+    numberOfIterations = traits.Int(
+        desc="Optional value for number of Iterations",
+        argstr="--numberOfIterations %d")
+    timeStep = traits.Float(
+        desc="Time step for diffusion process", argstr="--timeStep %f")
+    conductance = traits.Float(
+        desc="Conductance for diffusion process", argstr="--conductance %f")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Required: output image",
+        argstr="--outputVolume %s")
 
 
 class GradientAnisotropicDiffusionImageFilterOutputSpec(TraitedSpec):
@@ -600,7 +760,6 @@ class GradientAnisotropicDiffusionImageFilterOutputSpec(TraitedSpec):
 
 
 class GradientAnisotropicDiffusionImageFilter(SEMLikeCommandLine):
-
     """title: GradientAnisopropicDiffusionFilter
 
 category: Filtering.FeatureDetection
@@ -619,13 +778,28 @@ contributor: This tool was developed by Eun Young Kim by modifying ITK Example
 
 
 class CannyEdgeInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Required: input tissue label image", exists=True, argstr="--inputVolume %s")
-    variance = traits.Float(desc="Variance and Maximum error are used in the Gaussian smoothing of the input image.  See  itkDiscreteGaussianImageFilter for information on these parameters.", argstr="--variance %f")
+    inputVolume = File(
+        desc="Required: input tissue label image",
+        exists=True,
+        argstr="--inputVolume %s")
+    variance = traits.Float(
+        desc=
+        "Variance and Maximum error are used in the Gaussian smoothing of the input image.  See  itkDiscreteGaussianImageFilter for information on these parameters.",
+        argstr="--variance %f")
     upperThreshold = traits.Float(
-        desc="Threshold is the lowest allowed value in the output image.  Its data type is the same as the data type of the output image. Any values below the Threshold level will be replaced with the OutsideValue parameter value, whose default is zero.  ", argstr="--upperThreshold %f")
+        desc=
+        "Threshold is the lowest allowed value in the output image.  Its data type is the same as the data type of the output image. Any values below the Threshold level will be replaced with the OutsideValue parameter value, whose default is zero.  ",
+        argstr="--upperThreshold %f")
     lowerThreshold = traits.Float(
-        desc="Threshold is the lowest allowed value in the output image.  Its data type is the same as the data type of the output image. Any values below the Threshold level will be replaced with the OutsideValue parameter value, whose default is zero.  ", argstr="--lowerThreshold %f")
-    outputVolume = traits.Either(traits.Bool, File(), hash_files=False, desc="Required: output image", argstr="--outputVolume %s")
+        desc=
+        "Threshold is the lowest allowed value in the output image.  Its data type is the same as the data type of the output image. Any values below the Threshold level will be replaced with the OutsideValue parameter value, whose default is zero.  ",
+        argstr="--lowerThreshold %f")
+    outputVolume = traits.Either(
+        traits.Bool,
+        File(),
+        hash_files=False,
+        desc="Required: output image",
+        argstr="--outputVolume %s")
 
 
 class CannyEdgeOutputSpec(TraitedSpec):
@@ -633,7 +807,6 @@ class CannyEdgeOutputSpec(TraitedSpec):
 
 
 class CannyEdge(SEMLikeCommandLine):
-
     """title: Canny Edge Detection
 
 category: Filtering.FeatureDetection

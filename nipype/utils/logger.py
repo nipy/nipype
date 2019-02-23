@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, division, unicode_literals, absolute_import
+from __future__ import (print_function, division, unicode_literals,
+                        absolute_import)
 
 from builtins import object
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
 import logging
+from warnings import warn
 import os
 import sys
 from .misc import str2bool
@@ -15,7 +17,6 @@ try:
         RFHandler
 except ImportError:
     # Next 2 lines are optional:  issue a warning to the user
-    from warnings import warn
     warn("ConcurrentLogHandler not installed. Using builtin log handler")
     from logging.handlers import RotatingFileHandler as RFHandler
 
@@ -29,54 +30,69 @@ class Logging(object):
 
     def __init__(self, config):
         self._config = config
-        logging.basicConfig(format=self.fmt, datefmt=self.datefmt,
-                            stream=sys.stdout)
-        # logging.basicConfig(stream=sys.stdout)
-        self._logger = logging.getLogger('workflow')
-        self._fmlogger = logging.getLogger('filemanip')
-        self._iflogger = logging.getLogger('interface')
+        # scope our logger to not interfere with user
+        _nipype_logger = logging.getLogger('nipype')
+        _nipype_hdlr = logging.StreamHandler(stream=sys.stdout)
+        _nipype_hdlr.setFormatter(logging.Formatter(fmt=self.fmt,
+                                                    datefmt=self.datefmt))
+        # if StreamHandler was added, do not stack
+        if not len(_nipype_logger.handlers):
+            _nipype_logger.addHandler(_nipype_hdlr)
 
-        self.loggers = {'workflow': self._logger,
-                        'filemanip': self._fmlogger,
-                        'interface': self._iflogger}
+        self._logger = logging.getLogger('nipype.workflow')
+        self._utlogger = logging.getLogger('nipype.utils')
+        self._fmlogger = logging.getLogger('nipype.filemanip')
+        self._iflogger = logging.getLogger('nipype.interface')
+
+        self.loggers = {
+            'nipype.workflow': self._logger,
+            'nipype.utils': self._utlogger,
+            'nipype.filemanip': self._fmlogger,
+            'nipype.interface': self._iflogger
+        }
         self._hdlr = None
         self.update_logging(self._config)
 
     def enable_file_logging(self):
         config = self._config
-        LOG_FILENAME = os.path.join(config.get('logging', 'log_directory'),
-                                    'pypeline.log')
-        hdlr = RFHandler(LOG_FILENAME,
-                         maxBytes=int(config.get('logging', 'log_size')),
-                         backupCount=int(config.get('logging',
-                                                    'log_rotate')))
+        LOG_FILENAME = os.path.join(
+            config.get('logging', 'log_directory'), 'pypeline.log')
+        hdlr = RFHandler(
+            LOG_FILENAME,
+            maxBytes=int(config.get('logging', 'log_size')),
+            backupCount=int(config.get('logging', 'log_rotate')))
         formatter = logging.Formatter(fmt=self.fmt, datefmt=self.datefmt)
         hdlr.setFormatter(formatter)
         self._logger.addHandler(hdlr)
-        self._fmlogger.addHandler(hdlr)
+        self._utlogger.addHandler(hdlr)
         self._iflogger.addHandler(hdlr)
+        self._fmlogger.addHandler(hdlr)
         self._hdlr = hdlr
 
     def disable_file_logging(self):
         if self._hdlr:
             self._logger.removeHandler(self._hdlr)
-            self._fmlogger.removeHandler(self._hdlr)
+            self._utlogger.removeHandler(self._hdlr)
             self._iflogger.removeHandler(self._hdlr)
+            self._fmlogger.removeHandler(self._hdlr)
             self._hdlr = None
 
     def update_logging(self, config):
         self._config = config
         self.disable_file_logging()
-        self._logger.setLevel(logging.getLevelName(config.get('logging',
-                                                              'workflow_level')))
-        self._fmlogger.setLevel(logging.getLevelName(config.get('logging',
-                                                                'filemanip_level')))
-        self._iflogger.setLevel(logging.getLevelName(config.get('logging',
-                                                                'interface_level')))
+        self._logger.setLevel(
+            logging.getLevelName(config.get('logging', 'workflow_level')))
+        self._utlogger.setLevel(
+            logging.getLevelName(config.get('logging', 'utils_level')))
+        self._iflogger.setLevel(
+            logging.getLevelName(config.get('logging', 'interface_level')))
         if str2bool(config.get('logging', 'log_to_file')):
             self.enable_file_logging()
 
     def getLogger(self, name):
+        if name == 'filemanip':
+            warn('The "filemanip" logger has been deprecated and replaced by '
+                 'the "utils" logger as of nipype 1.0')
         if name in self.loggers:
             return self.loggers[name]
         return None
@@ -90,42 +106,8 @@ class Logging(object):
 
         typical use -- log difference for hashed_inputs
         """
-        # First check inputs, since they usually are lists of tuples
-        # and dicts are required.
-        if isinstance(dnew, list):
-            dnew = dict(dnew)
-        if isinstance(dold, list):
-            dold = dict(dold)
-
-        # Compare against hashed_inputs
-        # Keys: should rarely differ
-        new_keys = set(dnew.keys())
-        old_keys = set(dold.keys())
-        if len(new_keys - old_keys):
-            self._logger.debug("%s not previously seen: %s"
-                               % (prefix, new_keys - old_keys))
-        if len(old_keys - new_keys):
-            self._logger.debug("%s not presently seen: %s"
-                               % (prefix, old_keys - new_keys))
-
-        # Values in common keys would differ quite often,
-        # so we need to join the messages together
-        msgs = []
-        for k in new_keys.intersection(old_keys):
-            same = False
-            try:
-                new, old = dnew[k], dold[k]
-                same = new == old
-                if not same:
-                    # Since JSON does not discriminate between lists and
-                    # tuples, we might need to cast them into the same type
-                    # as the last resort.  And lets try to be more generic
-                    same = old.__class__(new) == old
-            except Exception as e:
-                same = False
-            if not same:
-                msgs += ["%s: %r != %r"
-                         % (k, dnew[k], dold[k])]
-        if len(msgs):
-            self._logger.debug("%s values differ in fields: %s" % (prefix,
-                                                                   ", ".join(msgs)))
+        from .misc import dict_diff
+        self._logger.warning(
+            "logdebug_dict_differences has been deprecated, please use "
+            "nipype.utils.misc.dict_diff.")
+        self._logger.debug(dict_diff(dold, dnew))

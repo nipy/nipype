@@ -6,23 +6,23 @@ from builtins import str, bytes
 from future import standard_library
 standard_library.install_aliases()
 
-
 import os
 
 from nipype.utils.provenance import ProvStore, safe_encode
 
-def test_provenance():
-    ps = ProvStore()
+
+def test_provenance(tmpdir):
     from nipype.interfaces.base import CommandLine
+    tmpdir.chdir()
+    ps = ProvStore()
     results = CommandLine('echo hello').run()
     ps.add_results(results)
     provn = ps.g.get_provn()
-    prov_json = ps.g.serialize(format='json')
     assert 'echo hello' in provn
 
+
 def test_provenance_exists(tmpdir):
-    tempdir = str(tmpdir)
-    os.chdir(tempdir)
+    tmpdir.chdir()
     from nipype import config
     from nipype.interfaces.base import CommandLine
     provenance_state = config.get('execution', 'write_provenance')
@@ -31,8 +31,8 @@ def test_provenance_exists(tmpdir):
     CommandLine('echo hello').run()
     config.set('execution', 'write_provenance', provenance_state)
     config.set('execution', 'hash_method', hash_state)
-    provenance_exists = os.path.exists(os.path.join(tempdir, 'provenance.provn'))
-    assert provenance_exists
+    assert tmpdir.join('provenance.provn').check()
+
 
 def test_safe_encode():
     a = '\xc3\xa9lg'
