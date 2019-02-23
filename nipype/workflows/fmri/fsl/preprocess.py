@@ -20,20 +20,6 @@ def getthreshop(thresh):
 def pickrun(files, whichrun):
     """pick file from list of files"""
 
-<<<<<<< HEAD
-    filemap = {'first': 0, 'last': -1, 'middle' :len(files) // 2}
-
-    if isinstance(whichrun, str):
-        if whichrun not in filemap.keys():
-            raise(KeyError, 'Sorry, whichrun must be either integer index'
-                            'or string in form of "first", "last" or "middle')
-        else:
-            return files[filemap[whichrun]]
-
-    if isinstance(files, list):
-        return files[whichrun]
-    else:
-=======
     filemap = {'first': 0, 'last': -1, 'middle': len(files) // 2}
 
     if isinstance(files, list):
@@ -50,7 +36,6 @@ def pickrun(files, whichrun):
                 return files[filemap[whichrun]]
     else:
         # in case single file name is given
->>>>>>> f079ed286d456b531f4f325ddc689f2572654edd
         return files
 
 
@@ -426,14 +411,10 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     return featpreproc
 
 
-<<<<<<< HEAD
-def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle', whichrun=0):
-=======
 def create_featreg_preproc(name='featpreproc',
                            highpass=True,
                            whichvol='middle',
                            whichrun=0):
->>>>>>> f079ed286d456b531f4f325ddc689f2572654edd
     """Create a FEAT preprocessing workflow with registration to one volume of the first run
 
     Parameters
@@ -444,11 +425,7 @@ def create_featreg_preproc(name='featpreproc',
         name : name of workflow (default: featpreproc)
         highpass : boolean (default: True)
         whichvol : which volume of the first run to register to ('first', 'middle', 'last', 'mean')
-<<<<<<< HEAD
-        whichrun : which of the runs to draw reference volume from (indexed by int)
-=======
         whichrun : which run to draw reference volume from (integer index or 'first', 'middle', 'last')
->>>>>>> f079ed286d456b531f4f325ddc689f2572654edd
 
     Inputs::
 
@@ -537,13 +514,6 @@ def create_featreg_preproc(name='featpreproc',
     """
 
     if whichvol != 'mean':
-<<<<<<< HEAD
-        extract_ref = pe.Node(interface=fsl.ExtractROI(t_size=1),
-                              iterfield=['in_file'],
-                              name='extractref')
-        featpreproc.connect(img2float, ('out_file', pickrun, whichrun), extract_ref, 'in_file')
-        featpreproc.connect(img2float, ('out_file', pickvol, 0, whichvol), extract_ref, 't_min')
-=======
         extract_ref = pe.Node(
             interface=fsl.ExtractROI(t_size=1),
             iterfield=['in_file'],
@@ -552,7 +522,6 @@ def create_featreg_preproc(name='featpreproc',
                             extract_ref, 'in_file')
         featpreproc.connect(img2float, ('out_file', pickvol, 0, whichvol),
                             extract_ref, 't_min')
->>>>>>> f079ed286d456b531f4f325ddc689f2572654edd
         featpreproc.connect(extract_ref, 'roi_file', outputnode, 'reference')
     """
     Realign the functional runs to the reference (`whichvol` volume of first run)
@@ -569,15 +538,8 @@ def create_featreg_preproc(name='featpreproc',
                             'ref_file')
     else:
         motion_correct.inputs.mean_vol = True
-<<<<<<< HEAD
-        featpreproc.connect(motion_correct, ('mean_img', pickrun, whichrun), outputnode, 'reference')
-
-    featpreproc.connect(motion_correct, 'par_file', outputnode, 'motion_parameters')
-    featpreproc.connect(motion_correct, 'out_file', outputnode, 'realigned_files')
-=======
         featpreproc.connect(motion_correct, ('mean_img', pickrun, whichrun),
                             outputnode, 'reference')
->>>>>>> f079ed286d456b531f4f325ddc689f2572654edd
 
     featpreproc.connect(motion_correct, 'par_file', outputnode,
                         'motion_parameters')
@@ -598,19 +560,11 @@ def create_featreg_preproc(name='featpreproc',
     Extract the mean volume of the first functional run
     """
 
-<<<<<<< HEAD
-    meanfunc = pe.Node(interface=fsl.ImageMaths(op_string='-Tmean',
-                                                suffix='_mean'),
-                       name='meanfunc')
-    featpreproc.connect(motion_correct, ('out_file', pickrun, whichrun), meanfunc, 'in_file')
-
-=======
     meanfunc = pe.Node(
         interface=fsl.ImageMaths(op_string='-Tmean', suffix='_mean'),
         name='meanfunc')
     featpreproc.connect(motion_correct, ('out_file', pickrun, whichrun),
                         meanfunc, 'in_file')
->>>>>>> f079ed286d456b531f4f325ddc689f2572654edd
     """
     Strip the skull from the mean functional to generate a mask
     """
@@ -746,12 +700,8 @@ def create_featreg_preproc(name='featpreproc',
         iterfield=['in_file'],
         name='meanfunc3')
 
-<<<<<<< HEAD
-    featpreproc.connect(meanscale, ('out_file', pickrun, whichrun), meanfunc3, 'in_file')
-=======
     featpreproc.connect(meanscale, ('out_file', pickrun, whichrun), meanfunc3,
                         'in_file')
->>>>>>> f079ed286d456b531f4f325ddc689f2572654edd
     featpreproc.connect(meanfunc3, 'out_file', outputnode, 'mean')
     """
     Perform temporal highpass filtering on the data
