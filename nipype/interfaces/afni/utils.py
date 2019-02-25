@@ -1636,12 +1636,12 @@ class Localstat(AFNICommand):
 
 
 class MaskToolInputSpec(AFNICommandInputSpec):
-    in_file = File(
+    in_file = InputMultiPath(
+        File(exists=True),
         desc='input file or files to 3dmask_tool',
         argstr='-input %s',
         position=-1,
         mandatory=True,
-        exists=True,
         copyfile=False)
     out_file = File(
         name_template='%s_mask',
