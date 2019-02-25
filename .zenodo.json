@@ -213,12 +213,12 @@
       "orcid": "0000-0001-9130-1092"
     },
     {
+      "name": "Buchanan, Colin"
+    },
+    {
       "affiliation": "Max Planck Institute for Human Cognitive and Brain Sciences, Leipzig, Germany.",
       "name": "Tabas, Alejandro",
       "orcid": "0000-0002-8643-1543"
-    },
-    {
-      "name": "Buchanan, Colin"
     },
     {
       "name": "Tungaraza, Rosalia"
@@ -260,6 +260,10 @@
     },
     {
       "name": "Dubois, Mathieu"
+    },
+    {
+      "name": "Heinsfeld, Anibal S\u00f3lon",
+      "orcid": "0000-0002-2050-0614"
     },
     {
       "affiliation": "Child Mind Institute",
@@ -424,6 +428,11 @@
       "affiliation": "GIGA Institute",
       "name": "Grignard, Martin",
       "orcid": "0000-0001-5549-1861"
+    },
+    {
+      "affiliation": "INRIA-Saclay, Team Parietal",
+      "name": "Chawla, Kshitij",
+      "orcid": "0000-0002-7517-6321"
     },
     {
       "name": "Salvatore, John"
@@ -614,10 +623,6 @@
     },
     {
       "name": "McDermottroe, Conor"
-    },
-    {
-      "name": "Heinsfeld, Anibal S\u00f3lon",
-      "orcid": "0000-0002-2050-0614"
     },
     {
       "affiliation": "MIT, HMS",
