@@ -53,6 +53,11 @@ missing_entries = [
      "name": "Pannetier, Nicolas",
      "orcid": "0000-0002-0744-5155"},
     {"name": "McDermottroe, Conor"},
+    {"affiliation":
+        "Max Planck Institute for Human Cognitive and Brain Sciences, "
+        "Leipzig, Germany.",
+     "name": "Mihai, Paul Glad",
+     "orcid": "0000-0001-5715-6442"},
 ]
 
 for entry in missing_entries:
