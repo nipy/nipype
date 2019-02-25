@@ -1,3 +1,19 @@
+1.1.9 (February 25, 2019)
+=========================
+
+##### [Full changelog](https://github.com/nipy/nipype/milestone/30?closed=1)
+
+  * FIX: Make positional arguments to LaplacianThickness require previous argument (https://github.com/nipy/nipype/pull/2848)
+  * FIX: Import math and csv modules for bids_gen_info (https://github.com/nipy/nipype/pull/2881)
+  * FIX: Ensure outputs can be listed in camino.ProcStreamlines by defining instance variable (https://github.com/nipy/nipype/pull/2739)
+  * ENH: Allow afni.MaskTool to take multiple input files (https://github.com/nipy/nipype/pull/2892)
+  * ENH: Add flags dictionary input to spm.Level1Design (https://github.com/nipy/nipype/pull/2861)
+  * ENH: Threshold stddev once only in TSNR (https://github.com/nipy/nipype/pull/2883)
+  * ENH: Add workbench.CiftiSmooth interface (https://github.com/nipy/nipype/pull/2871)
+  * DOC: Replace initialism typo in comment with intended phrase (https://github.com/nipy/nipype/pull/2875)
+  * DOC: Fix typos in ANTs Registration input documentation (https://github.com/nipy/nipype/pull/2869)
+
+
 1.1.8 (January 28, 2019)
 ========================
 

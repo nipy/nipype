@@ -9,6 +9,7 @@ def test_Level1Design_inputs():
             mandatory=True,
         ),
         factor_info=dict(field='fact', ),
+        flags=dict(),
         global_intensity_normalization=dict(field='global', ),
         interscan_interval=dict(
             field='timing.RT',

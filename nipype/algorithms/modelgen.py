@@ -12,7 +12,7 @@ These functions include:
   * SpecifyModel: allows specification of sparse and non-sparse models
 """
 from copy import deepcopy
-import os
+import os, math, csv
 
 from nibabel import load
 import numpy as np
