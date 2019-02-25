@@ -609,7 +609,17 @@
       "affiliation": "ARAMIS LAB, Brain and Spine Institute (ICM), Paris, France.",
       "name": "Guillon, Jeremy",
       "orcid": "0000-0002-2672-7510"
-    }
+    },
+    {
+      "affiliation": "Max Planck Institute for Human Cognitive and Brain Sciences, Leipzig, Germany.",
+      "name": "Tabas, Alejandro",
+      "orcid": "0000-0002-8643-1543"
+    },
+    {
+      "affiliation": "Max Planck Institute for Human Cognitive and Brain Sciences, Leipzig, Germany.",
+      "name": "Mihai, Paul Glad", 
+      "orcid": "0000-0001-5715-6442"
+    } 
   ],
   "keywords": [
     "neuroimaging",
