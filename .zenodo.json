@@ -213,6 +213,11 @@
       "orcid": "0000-0001-9130-1092"
     },
     {
+      "affiliation": "Max Planck Institute for Human Cognitive and Brain Sciences, Leipzig, Germany.",
+      "name": "Tabas, Alejandro",
+      "orcid": "0000-0002-8643-1543"
+    },
+    {
       "name": "Buchanan, Colin"
     },
     {
@@ -328,15 +333,15 @@
       "name": "Giavasis, Steven"
     },
     {
-      "affiliation": "Otto-von-Guericke-University Magdeburg, Germany",
-      "name": "Contier, Oliver",
-      "orcid": "0000-0002-2983-4709"
-    },
-    {
       "name": "Correa, Carlos"
     },
     {
       "name": "Ghayoor, Ali"
+    },
+    {
+      "affiliation": "Otto-von-Guericke-University Magdeburg, Germany",
+      "name": "Contier, Oliver",
+      "orcid": "0000-0002-2983-4709"
     },
     {
       "name": "K\u00fcttner, Ren\u00e9"
@@ -614,17 +619,7 @@
       "affiliation": "MIT, HMS",
       "name": "Ghosh, Satrajit",
       "orcid": "0000-0002-5312-6729"
-    },
-    {
-      "affiliation": "Max Planck Institute for Human Cognitive and Brain Sciences, Leipzig, Germany.",
-      "name": "Tabas, Alejandro",
-      "orcid": "0000-0002-8643-1543"
-    },
-    {
-      "affiliation": "Max Planck Institute for Human Cognitive and Brain Sciences, Leipzig, Germany.",
-      "name": "Mihai, Paul Glad", 
-      "orcid": "0000-0001-5715-6442"
-    } 
+    }
   ],
   "keywords": [
     "neuroimaging",
