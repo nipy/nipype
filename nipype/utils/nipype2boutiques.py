@@ -25,18 +25,19 @@ from ..scripts.instance import import_module
 
 
 def generate_boutiques_descriptor(
-        module, interface_name, ignored_template_inputs, container_image,
-        container_index, container_type, verbose, ignore_template_numbers, save):
+        module, interface_name, container_image, container_type, container_index=None,
+        ignored_template_inputs=(), ignore_template_numbers=False, verbose=False, save=False):
     '''
     Returns a JSON string containing a JSON Boutiques description of a Nipype interface.
     Arguments:
     * module: module where the Nipype interface is declared.
     * interface_name: name of Nipype interface.
+    * container_image: name of the container image where the tool is installed
+    * container_type: type of container image (Docker or Singularity)
+    * container_index: optional index where the image is available
     * ignored_template_inputs: a list of input names that should be ignored in the generation of output path templates.
     * ignore_template_numbers: True if numbers must be ignored in output path creations.
-    * container_image: name of the container image where the tool is installed
-    * container_index: optional index where the image is available
-    * container_type: type of container image (Docker or Singularity)
+    * verbose: print information messages
     * save: True if you want to save descriptor to a file
     '''
 
@@ -105,23 +106,21 @@ def generate_boutiques_descriptor(
         del tool_desc['groups']
 
     # Generates tool outputs
-    for name, spec in sorted(outputs.traits(transient=None).items()):
-        output = get_boutiques_output(outputs, name, spec, interface, tool_desc['inputs'],
-                                      verbose)
-        if output['path-template'] != "":
-            tool_desc['output-files'].append(output)
-            if verbose:
-                print("-> Adding output " + output['name'])
-        elif verbose:
-            print("xx Skipping output " + output['name'] +
-                  " with no path template.")
-    if tool_desc['output-files'] == []:
-        raise Exception("Tool has no output.")
+    generate_tool_outputs(outputs, interface, tool_desc, verbose, True)
 
-    # Removes all temporary values from inputs (otherwise they will
-    # appear in the JSON output)
-    for input in tool_desc['inputs']:
-        del input['tempvalue']
+    # Generate outputs with various different inputs to try to generate
+    # as many output values as possible
+    custom_inputs = generate_custom_inputs(tool_desc['inputs'])
+
+    for input_dict in custom_inputs:
+        interface = getattr(module, interface_name)(**input_dict)
+        outputs = interface.output_spec()
+        generate_tool_outputs(outputs, interface, tool_desc, verbose, False)
+
+    # Fill in all missing output paths
+    for output in tool_desc['output-files']:
+        if output['path-template'] == "":
+            fill_in_missing_output_path(output, output['name'], tool_desc['inputs'])
 
     # Save descriptor to a file
     if save:
@@ -133,6 +132,26 @@ def generate_boutiques_descriptor(
     print("NOTE: Descriptors produced by this script may not entirely conform to the Nipype interface "
           "specs. Please check that the descriptor is correct before using it.")
     return json.dumps(tool_desc, indent=4, separators=(',', ': '))
+
+
+def generate_tool_outputs(outputs, interface, tool_desc, verbose, first_run):
+    for name, spec in sorted(outputs.traits(transient=None).items()):
+        output = get_boutiques_output(outputs, name, spec, interface, tool_desc['inputs'],
+                                      verbose)
+        # If this is the first time we are generating outputs, add the full output to the descriptor.
+        # Otherwise, find the existing output and update its path template if it's still undefined.
+        if first_run:
+            tool_desc['output-files'].append(output)
+        else:
+            for existing_output in tool_desc['output-files']:
+                if output['id'] == existing_output['id'] and existing_output['path-template'] == "":
+                    existing_output['path-template'] = output['path-template']
+                    break
+        if verbose:
+            print("-> Adding output " + output['name'])
+
+    if len(tool_desc['output-files']) == 0:
+        raise Exception("Tool has no output.")
 
 
 def get_boutiques_input(inputs, interface, input_name, spec,
@@ -155,7 +174,6 @@ def get_boutiques_input(inputs, interface, input_name, spec,
     Assumes that:
       * Input names are unique.
     """
-    spec_info = spec.full_info(inputs, input_name, None)
 
     input = {}
 
@@ -234,7 +252,6 @@ def get_boutiques_input(inputs, interface, input_name, spec,
     elif input['type'] == "Flag":
         input['command-line-flag'] = ("--%s" % input_name + " ").strip()
 
-    input['tempvalue'] = None
     input['description'] = get_description_from_spec(inputs, input_name, spec)
     if not (hasattr(spec, "mandatory") and spec.mandatory):
         input['optional'] = True
@@ -251,20 +268,7 @@ def get_boutiques_input(inputs, interface, input_name, spec,
         if value_choices is not None:
             input['value-choices'] = value_choices
 
-    # Create unique, temporary value.
-    temp_value = must_generate_value(input_name, input['type'],
-                                     ignored_template_inputs, spec_info, spec,
-                                     ignore_template_numbers)
-    if temp_value:
-        tempvalue = get_unique_value(input['type'], input_name)
-        setattr(interface.inputs, input_name, tempvalue)
-        input['tempvalue'] = tempvalue
-        if verbose:
-            print("oo Path-template creation using " + input['id'] + "=" +
-                  str(tempvalue))
-
-    # Now that temp values have been generated, set Boolean types to
-    # Flag (there is no Boolean type in Boutiques)
+    # Set Boolean types to Flag (there is no Boolean type in Boutiques)
     if input['type'] == "Boolean":
         input['type'] = "Flag"
 
@@ -313,38 +317,13 @@ def get_boutiques_output(outputs, name, spec, interface, tool_inputs, verbose=Fa
     except TypeError:
         output_value = None
 
-    # If output value is defined, use its basename
-    if output_value != "" and isinstance(
-            output_value,
-            str):  # FIXME: this crashes when there are multiple output values.
-        # Go find from which input value it was built
-        for input in tool_inputs:
-            if not input['tempvalue']:
-                continue
-            input_value = input['tempvalue']
-            if input['type'] == "File":
-                # Take the base name
-                input_value = os.path.splitext(
-                    os.path.basename(input_value))[0]
-            if str(input_value) in output_value:
-                output_value = os.path.basename(
-                    output_value.replace(input_value,
-                                         input['value-key'])
-                )  # FIXME: this only works if output is written in the current directory
-        output['path-template'] = os.path.basename(output_value)
+    # If an output value is defined, use its relative path
+    # Otherwise, put blank string and try to fill it on another iteration
+    if output_value:
+        output['path-template'] = os.path.relpath(output_value)
+    else:
+        output['path-template'] = ""
 
-    # If output value is undefined, create a placeholder for the path template
-    if not output_value:
-        # Look for an input with the same name and use this as the path template
-        found = False
-        for input in tool_inputs:
-            if input['id'] == name:
-                output['path-template'] = input['value-key']
-                found = True
-                break
-        # If no input with the same name was found, use the output ID
-        if not found:
-            output['path-template'] = output['id']
     return output
 
 
@@ -378,6 +357,7 @@ def get_boutiques_groups(input_traits):
                             'mutually-exclusive': True})
 
     return desc_groups
+
 
 def get_unique_value(type, id):
     '''
@@ -453,3 +433,63 @@ def get_description_from_spec(object, name, spec):
         boutiques_description += '.'
 
     return boutiques_description
+
+
+def fill_in_missing_output_path(output, output_name, tool_inputs):
+    '''
+    Creates a path template for outputs that are missing one
+    This is needed for the descriptor to be valid (path template is required)
+    '''
+    # Look for an input with the same name as the output and use its value key
+    found = False
+    for input in tool_inputs:
+        if input['name'] == output_name:
+            output['path-template'] = input['value-key']
+            found = True
+            break
+    # If no input with the same name was found, use the output ID
+    if not found:
+        output['path-template'] = output['id']
+    return output
+
+
+
+def generate_custom_inputs(desc_inputs):
+    '''
+    Generates a bunch of custom input dictionaries in order to generate as many outputs as possible
+    (to get their path templates)
+    Limitations:
+       -Does not support String inputs since some interfaces require specific strings
+       -Does not support File inputs since the file has to actually exist or the interface will fail
+       -Does not support list inputs yet
+    '''
+    custom_input_dicts = []
+    for desc_input in desc_inputs:
+        if desc_input.get('list'):  # TODO support list inputs
+            continue
+        if desc_input['type'] == 'Flag':
+            custom_input_dicts.append({desc_input['id']: True})
+        elif desc_input['type'] == 'Number':
+            custom_input_dicts.append({desc_input['id']: generate_random_number_input(desc_input)})
+        elif desc_input.get('value-choices'):
+            for value in desc_input['value-choices']:
+                custom_input_dicts.append({desc_input['id']: value})
+    return custom_input_dicts
+
+
+def generate_random_number_input(desc_input):
+    '''
+    Generates a random number input based on the input spec
+    '''
+    if not desc_input.get('minimum') and not desc_input.get('maximum'):
+        return 1
+
+    if desc_input.get('integer'):
+        offset = 1
+    else:
+        offset = 0.1
+
+    if desc_input.get('minimum'):
+        return desc_input['minimum'] if desc_input.get('exclusive-minimum') else desc_input['minimum'] + offset
+    if desc_input.get('maximum'):
+        return desc_input['maximum'] if desc_input.get('exclusive-maximum') else desc_input['maximum'] - offset
