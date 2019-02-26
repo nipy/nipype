@@ -20,6 +20,8 @@ import argparse
 import sys
 import tempfile
 import simplejson as json
+import copy
+import six
 
 from ..scripts.instance import import_module
 
@@ -83,9 +85,9 @@ def generate_boutiques_descriptor(
         # Handle compound inputs (inputs that can be of multiple types and are mutually exclusive)
         if isinstance(input, list):
             mutex_group_members = []
+            tool_desc['command-line'] += input[0]['value-key'] + " "
             for i in input:
                 tool_desc['inputs'].append(i)
-                tool_desc['command-line'] += i['value-key'] + " "
                 mutex_group_members.append(i['id'])
                 if verbose:
                     print("-> Adding input " + i['name'])
@@ -99,6 +101,9 @@ def generate_boutiques_descriptor(
             tool_desc['command-line'] += input['value-key'] + " "
             if verbose:
                 print("-> Adding input " + input['name'])
+
+    # Remove the extra space at the end of the command line
+    tool_desc['command-line'] = tool_desc['command-line'].strip()
 
     # Generates input groups
     tool_desc['groups'] += get_boutiques_groups(interface.inputs.traits(transient=None).items())
@@ -141,14 +146,20 @@ def generate_tool_outputs(outputs, interface, tool_desc, verbose, first_run):
         # If this is the first time we are generating outputs, add the full output to the descriptor.
         # Otherwise, find the existing output and update its path template if it's still undefined.
         if first_run:
-            tool_desc['output-files'].append(output)
+            if isinstance(output, list):
+                tool_desc['output-files'].extend(output)
+                if verbose:
+                    print("-> Adding output " + output[0]['name'])
+            else:
+                tool_desc['output-files'].append(output)
+                if verbose:
+                    print("-> Adding output " + output['name'])
         else:
             for existing_output in tool_desc['output-files']:
-                if output['id'] == existing_output['id'] and existing_output['path-template'] == "":
+                if not isinstance(output, list) and output['id'] == existing_output['id'] \
+                        and existing_output['path-template'] == "":
                     existing_output['path-template'] = output['path-template']
                     break
-        if verbose:
-            print("-> Adding output " + output['name'])
 
     if len(tool_desc['output-files']) == 0:
         raise Exception("Tool has no output.")
@@ -197,9 +208,11 @@ def get_boutiques_input(inputs, interface, input_name, spec,
         input_list = []
         # Recursively create an input for each trait
         for i in range(0, len(trait_handler.handlers)):
-            input_list.append(get_boutiques_input(inputs, interface, input_name, spec,
-                                                  ignored_template_inputs, verbose,
-                                                  ignore_template_numbers, trait_handler.handlers[i], i))
+            inp = get_boutiques_input(inputs, interface, input_name, spec,
+                                      ignored_template_inputs, verbose,
+                                      ignore_template_numbers, trait_handler.handlers[i], i)
+            inp['optional'] = True
+            input_list.append(inp)
         return input_list
 
     if handler_type == "File" or handler_type == "Directory":
@@ -227,6 +240,7 @@ def get_boutiques_input(inputs, interface, input_name, spec,
             input['exclusive-maximum'] = trait_handler.exclude_high
 
     # Deal with list inputs
+    # TODO handle lists of lists (e.g. FSL ProbTrackX seed input)
     if handler_type == "List":
         input['list'] = True
         trait_type = type(trait_handler.item_trait.trait_type).__name__
@@ -235,11 +249,13 @@ def get_boutiques_input(inputs, interface, input_name, spec,
             input['type'] = "Number"
         elif trait_type == "Float":
             input['type'] = "Number"
+        elif trait_type == "File":
+            input['type'] = "File"
         else:
             input['type'] = "String"
-        if trait_handler.minlen is not None:
+        if trait_handler.minlen != 0:
             input['min-list-entries'] = trait_handler.minlen
-        if trait_handler.maxlen is not None:
+        if trait_handler.maxlen != six.MAXSIZE:
             input['max-list-entries'] = trait_handler.maxlen
 
     input['value-key'] = "[" + input_name.upper(
@@ -266,6 +282,11 @@ def get_boutiques_input(inputs, interface, input_name, spec,
         pass
     else:
         if value_choices is not None:
+            if all(isinstance(n, int) for n in value_choices):
+                input['type'] = "Number"
+                input['integer'] = True
+            elif all(isinstance(n, float) for n in value_choices):
+                input['type'] = "Number"
             input['value-choices'] = value_choices
 
     # Set Boolean types to Flag (there is no Boolean type in Boutiques)
@@ -316,6 +337,18 @@ def get_boutiques_output(outputs, name, spec, interface, tool_inputs, verbose=Fa
         output_value = interface._list_outputs()[name]
     except TypeError:
         output_value = None
+    except AttributeError:
+        output_value = None
+
+    # Handle multi-outputs
+    if isinstance(output_value, list):
+        output_list = []
+        for i in range(0, len(output_value)):
+            output_copy = copy.deepcopy(output)
+            output_copy['path-template'] = os.path.relpath(output_value[i])
+            output_copy['id'] += ("_" + str(i+1)) if i > 0 else ""
+            output_list.append(output_copy)
+        return output_list
 
     # If an output value is defined, use its relative path
     # Otherwise, put blank string and try to fill it on another iteration
