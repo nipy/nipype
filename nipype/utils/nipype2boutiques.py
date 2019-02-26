@@ -226,14 +226,14 @@ def get_boutiques_input(inputs, interface, input_name, spec,
     # Deal with range inputs
     if handler_type == "Range":
         input['type'] = "Number"
-        if trait_handler.low is not None:
-            input['minimum'] = trait_handler.low
-        if trait_handler.high is not None:
-            input['maximum'] = trait_handler.high
-        if trait_handler.exclude_low is not None:
-            input['exclusive-minimum'] = trait_handler.exclude_low
-        if trait_handler.exclude_high is not None:
-            input['exclusive-maximum'] = trait_handler.exclude_high
+        if trait_handler._low is not None:
+            input['minimum'] = trait_handler._low
+        if trait_handler._high is not None:
+            input['maximum'] = trait_handler._high
+        if trait_handler._exclude_low:
+            input['exclusive-minimum'] = True
+        if trait_handler._exclude_high:
+            input['exclusive-maximum'] = True
 
     # Deal with list inputs
     # TODO handle lists of lists (e.g. FSL ProbTrackX seed input)
@@ -492,24 +492,16 @@ def fill_in_missing_output_path(output, output_name, tool_inputs):
     return output
 
 
-
 def generate_custom_inputs(desc_inputs):
     '''
     Generates a bunch of custom input dictionaries in order to generate as many outputs as possible
     (to get their path templates)
-    Limitations:
-       -Does not support String inputs since some interfaces require specific strings
-       -Does not support File inputs since the file has to actually exist or the interface will fail
-       -Does not support list inputs yet
+    Currently only works with flag inputs and inputs with defined value choices.
     '''
     custom_input_dicts = []
     for desc_input in desc_inputs:
-        if desc_input.get('list'):  # TODO support list inputs
-            continue
         if desc_input['type'] == 'Flag':
             custom_input_dicts.append({desc_input['id']: True})
-        elif desc_input['type'] == 'Number':
-            custom_input_dicts.append({desc_input['id']: generate_random_number_input(desc_input)})
         elif desc_input.get('value-choices'):
             for value in desc_input['value-choices']:
                 custom_input_dicts.append({desc_input['id']: value})
