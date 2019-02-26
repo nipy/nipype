@@ -7,20 +7,12 @@ from builtins import str, open, bytes
 # Boutiques tools can be imported in CBRAIN (https://github.com/aces/cbrain) among other platforms.
 #
 # Limitations:
-#   * List outputs are not supported.
-#   * Default values are not extracted from the documentation of the Nipype interface.
-#   * The following input types must be ignored for the output path template creation (see option -t):
-#     ** String restrictions, i.e. String inputs that accept only a restricted set of values.
-#     ** mutually exclusive inputs.
-#   * Path-templates are wrong when output files are not created in the execution directory (e.g. when a sub-directory is created).
-#   * Optional outputs, i.e. outputs that not always produced, may not be detected.
+#   * Optional outputs, i.e. outputs that not always produced, may not be detected. They will, however, still be listed
+#     with a placeholder for the path template (either a value key or the output ID) that should be verified and corrected.
 
 import os
-import argparse
 import sys
-import tempfile
 import simplejson as json
-import copy
 import six
 
 from ..scripts.instance import import_module
@@ -28,7 +20,7 @@ from ..scripts.instance import import_module
 
 def generate_boutiques_descriptor(
         module, interface_name, container_image, container_type, container_index=None,
-        ignored_template_inputs=(), ignore_template_numbers=False, verbose=False, save=False, save_path=None):
+        verbose=False, save=False, save_path=None):
     '''
     Returns a JSON string containing a JSON Boutiques description of a Nipype interface.
     Arguments:
@@ -37,8 +29,6 @@ def generate_boutiques_descriptor(
     * container_image: name of the container image where the tool is installed
     * container_type: type of container image (Docker or Singularity)
     * container_index: optional index where the image is available
-    * ignored_template_inputs: a list of input names that should be ignored in the generation of output path templates.
-    * ignore_template_numbers: True if numbers must be ignored in output path creations.
     * verbose: print information messages
     * save: True if you want to save descriptor to a file
     * save_path: file path for the saved descriptor (defaults to name of the interface in current directory)
@@ -80,9 +70,7 @@ def generate_boutiques_descriptor(
 
     # Generates tool inputs
     for name, spec in sorted(interface.inputs.traits(transient=None).items()):
-        input = get_boutiques_input(inputs, interface, name, spec,
-                                    ignored_template_inputs, verbose,
-                                    ignore_template_numbers)
+        input = get_boutiques_input(inputs, interface, name, spec, verbose)
         # Handle compound inputs (inputs that can be of multiple types and are mutually exclusive)
         if isinstance(input, list):
             mutex_group_members = []
@@ -162,9 +150,7 @@ def generate_tool_outputs(outputs, interface, tool_desc, verbose, first_run):
 
 
 def get_boutiques_input(inputs, interface, input_name, spec,
-                        ignored_template_inputs, verbose,
-                        ignore_template_numbers, handler=None,
-                        input_number=None):
+                        verbose, handler=None, input_number=None):
     """
     Returns a dictionary containing the Boutiques input corresponding to a Nipype intput.
 
@@ -173,8 +159,7 @@ def get_boutiques_input(inputs, interface, input_name, spec,
       * interface: Nipype interface.
       * input_name: name of the Nipype input.
       * spec: Nipype input spec.
-      * ignored_template_inputs: input names for which no temporary value must be generated.
-      * ignore_template_numbers: True if numbers must be ignored in output path creations.
+      * verbose: print information messages.
       * handler: used when handling compound inputs, which don't have their own input spec
       * input_number: used when handling compound inputs to assign each a unique ID
 
@@ -205,8 +190,7 @@ def get_boutiques_input(inputs, interface, input_name, spec,
         # Recursively create an input for each trait
         for i in range(0, len(trait_handler.handlers)):
             inp = get_boutiques_input(inputs, interface, input_name, spec,
-                                      ignored_template_inputs, verbose,
-                                      ignore_template_numbers, trait_handler.handlers[i], i)
+                                      verbose, trait_handler.handlers[i], i)
             inp['optional'] = True
             input_list.append(inp)
         return input_list
@@ -297,7 +281,7 @@ def get_boutiques_input(inputs, interface, input_name, spec,
     return input
 
 
-def get_boutiques_output(outputs, name, spec, interface, tool_inputs, verbose=False):
+def get_boutiques_output(outputs, name, spec, interface, tool_inputs):
     """
     Returns a dictionary containing the Boutiques output corresponding to a Nipype output.
 
@@ -367,6 +351,9 @@ def get_boutiques_output(outputs, name, spec, interface, tool_inputs, verbose=Fa
 
 
 def get_boutiques_groups(input_traits):
+    """
+    Returns a list of dictionaries containing Boutiques groups for the mutually exclusive and all-or-none Nipype inputs.
+    """
     desc_groups = []
     all_or_none_input_sets = []
     mutex_input_sets = []
@@ -396,65 +383,6 @@ def get_boutiques_groups(input_traits):
                             'mutually-exclusive': True})
 
     return desc_groups
-
-
-def get_unique_value(type, id):
-    '''
-    Returns a unique value of type 'type', for input with id 'id',
-    assuming id is unique.
-    '''
-    return {
-        "File": os.path.abspath(create_tempfile()),
-        "Boolean": True,
-        "Number": abs(hash(id)),  # abs in case input param must be positive...
-        "String": id
-    }[type]
-
-
-def create_tempfile():
-    '''
-    Creates a temp file and returns its name.
-    '''
-    fileTemp = tempfile.NamedTemporaryFile(delete=False)
-    fileTemp.write(b"hello")
-    fileTemp.close()
-    return fileTemp.name
-
-
-def must_generate_value(name, type, ignored_template_inputs, spec_info, spec,
-                        ignore_template_numbers):
-    '''
-    Return True if a temporary value must be generated for this input.
-    Arguments:
-    * name: input name.
-    * type: input_type.
-    * ignored_template_inputs: a list of inputs names for which no value must be generated.
-    * spec_info: spec info of the Nipype input
-    * ignore_template_numbers: True if numbers must be ignored.
-    '''
-    # Return false when type is number and numbers must be ignored.
-    if ignore_template_numbers and type == "Number":
-        return False
-    # Only generate value for the first element of mutually exclusive inputs.
-    if spec.xor and spec.xor[0] != name:
-        return False
-    # Directory types are not supported
-    if "an existing directory name" in spec_info:
-        return False
-    # Don't know how to generate a list.
-    if "a list" in spec_info or "a tuple" in spec_info:
-        return False
-    # Don't know how to generate a dictionary.
-    if "a dictionary" in spec_info:
-        return False
-    # Best guess to detect string restrictions...
-    if "' or '" in spec_info:
-        return False
-    if spec.default or spec.default_value():
-        return False
-    if not ignored_template_inputs:
-        return True
-    return not (name in ignored_template_inputs)
 
 
 def get_description_from_spec(object, name, spec):
@@ -506,21 +434,3 @@ def generate_custom_inputs(desc_inputs):
             for value in desc_input['value-choices']:
                 custom_input_dicts.append({desc_input['id']: value})
     return custom_input_dicts
-
-
-def generate_random_number_input(desc_input):
-    '''
-    Generates a random number input based on the input spec
-    '''
-    if not desc_input.get('minimum') and not desc_input.get('maximum'):
-        return 1
-
-    if desc_input.get('integer'):
-        offset = 1
-    else:
-        offset = 0.1
-
-    if desc_input.get('minimum'):
-        return desc_input['minimum'] if desc_input.get('exclusive-minimum') else desc_input['minimum'] + offset
-    if desc_input.get('maximum'):
-        return desc_input['maximum'] if desc_input.get('exclusive-maximum') else desc_input['maximum'] - offset
