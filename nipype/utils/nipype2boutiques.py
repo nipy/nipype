@@ -28,7 +28,7 @@ from ..scripts.instance import import_module
 
 def generate_boutiques_descriptor(
         module, interface_name, container_image, container_type, container_index=None,
-        ignored_template_inputs=(), ignore_template_numbers=False, verbose=False, save=False):
+        ignored_template_inputs=(), ignore_template_numbers=False, verbose=False, save=False, save_path=None):
     '''
     Returns a JSON string containing a JSON Boutiques description of a Nipype interface.
     Arguments:
@@ -41,6 +41,7 @@ def generate_boutiques_descriptor(
     * ignore_template_numbers: True if numbers must be ignored in output path creations.
     * verbose: print information messages
     * save: True if you want to save descriptor to a file
+    * save_path: file path for the saved descriptor (defaults to name of the interface in current directory)
     '''
 
     if not module:
@@ -129,7 +130,8 @@ def generate_boutiques_descriptor(
 
     # Save descriptor to a file
     if save:
-        with open(interface_name + '.json', 'w') as outfile:
+        path = save_path if save_path is not None else os.path.join(os.getcwd(), interface_name + '.json')
+        with open(path, 'w') as outfile:
             json.dump(tool_desc, outfile, indent=4, separators=(',', ': '))
         if verbose:
             print("-> Descriptor saved to file " + outfile.name)
@@ -146,18 +148,12 @@ def generate_tool_outputs(outputs, interface, tool_desc, verbose, first_run):
         # If this is the first time we are generating outputs, add the full output to the descriptor.
         # Otherwise, find the existing output and update its path template if it's still undefined.
         if first_run:
-            if isinstance(output, list):
-                tool_desc['output-files'].extend(output)
-                if verbose:
-                    print("-> Adding output " + output[0]['name'])
-            else:
-                tool_desc['output-files'].append(output)
-                if verbose:
-                    print("-> Adding output " + output['name'])
+            tool_desc['output-files'].append(output)
+            if verbose:
+                print("-> Adding output " + output['name'])
         else:
             for existing_output in tool_desc['output-files']:
-                if not isinstance(output, list) and output['id'] == existing_output['id'] \
-                        and existing_output['path-template'] == "":
+                if output['id'] == existing_output['id'] and existing_output['path-template'] == "":
                     existing_output['path-template'] = output['path-template']
                     break
 
@@ -258,6 +254,11 @@ def get_boutiques_input(inputs, interface, input_name, spec,
         if trait_handler.maxlen != six.MAXSIZE:
             input['max-list-entries'] = trait_handler.maxlen
 
+    # Deal with multi-input
+    if handler_type == "InputMultiObject":
+        input['type'] = "File"
+        input['list'] = True
+
     input['value-key'] = "[" + input_name.upper(
     ) + "]"  # assumes that input names are unique
 
@@ -342,13 +343,18 @@ def get_boutiques_output(outputs, name, spec, interface, tool_inputs, verbose=Fa
 
     # Handle multi-outputs
     if isinstance(output_value, list):
-        output_list = []
-        for i in range(0, len(output_value)):
-            output_copy = copy.deepcopy(output)
-            output_copy['path-template'] = os.path.relpath(output_value[i])
-            output_copy['id'] += ("_" + str(i+1)) if i > 0 else ""
-            output_list.append(output_copy)
-        return output_list
+        output['list'] = True
+        # Check if all extensions are the same
+        extensions = []
+        for val in output_value:
+            extensions.append(os.path.splitext(val)[1])
+        # If extensions all the same, set path template as wildcard + extension
+        # Otherwise just use a wildcard
+        if len(set(extensions)) == 1:
+            output['path-template'] = "*" + extensions[0]
+        else:
+            output['path-template'] = "*"
+        return output
 
     # If an output value is defined, use its relative path
     # Otherwise, put blank string and try to fill it on another iteration
