@@ -131,8 +131,7 @@ def generate_boutiques_descriptor(
 
 def generate_tool_outputs(outputs, interface, tool_desc, verbose, first_run):
     for name, spec in sorted(outputs.traits(transient=None).items()):
-        output = get_boutiques_output(outputs, name, spec, interface, tool_desc['inputs'],
-                                      verbose)
+        output = get_boutiques_output(outputs, name, spec, interface, tool_desc['inputs'])
         # If this is the first time we are generating outputs, add the full output to the descriptor.
         # Otherwise, find the existing output and update its path template if it's still undefined.
         if first_run:
