@@ -1299,9 +1299,10 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
         # principal components using a singular value decomposition."
         try:
             u, s, _ = fallback_svd(M, full_matrices=False)
-        except np.linalg.LinAlgError:
+        except (np.linalg.LinAlgError, ValueError):
             if failure_mode == 'error':
                 raise
+            s = np.full(M.shape[0], np.nan, dtype=np.float32)
             if components_criterion >= 1:
                 u = np.full((M.shape[0], components_criterion),
                             np.nan, dtype=np.float32)
