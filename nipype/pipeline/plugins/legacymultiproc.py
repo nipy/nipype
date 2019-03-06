@@ -184,7 +184,7 @@ class LegacyMultiProcPlugin(DistributedPluginBase):
         non_daemon = self.plugin_args.get('non_daemon', True)
         maxtasks = self.plugin_args.get('maxtasksperchild', 10)
         self.processors = self.plugin_args.get('n_procs', cpu_count())
-        if self.plugin_args.get('max_jobs') < self.processors:
+        if self.plugin_args.get('max_jobs', np.inf) < self.processors:
             logger.warning("To limit processes, use n_procs")
         self.memory_gb = self.plugin_args.get(
             'memory_gb',  # Allocate 90% of system memory
