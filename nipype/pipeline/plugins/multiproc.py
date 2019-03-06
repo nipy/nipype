@@ -121,6 +121,8 @@ class MultiProcPlugin(DistributedPluginBase):
 
         # Read in options or set defaults.
         self.processors = self.plugin_args.get('n_procs', mp.cpu_count())
+        if self.plugin_args.get('max_jobs') < self.processors:
+            logger.warning("To limit processes, use n_procs")
         self.memory_gb = self.plugin_args.get(
             'memory_gb',  # Allocate 90% of system memory
             get_system_total_memory_gb() * 0.9)
