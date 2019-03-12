@@ -20,7 +20,7 @@ from ..scripts.instance import import_module
 
 def generate_boutiques_descriptor(
         module, interface_name, container_image, container_type, container_index=None,
-        verbose=False, save=False, save_path=None):
+        verbose=False, save=False, save_path=None, author=None, ignore_inputs=None):
     '''
     Returns a JSON string containing a JSON Boutiques description of a Nipype interface.
     Arguments:
@@ -32,6 +32,8 @@ def generate_boutiques_descriptor(
     * verbose: print information messages
     * save: True if you want to save descriptor to a file
     * save_path: file path for the saved descriptor (defaults to name of the interface in current directory)
+    * author: author of the tool (required for publishing)
+    * ignore_inputs: list of interface inputs to not include in the descriptor
     '''
 
     if not module:
@@ -53,7 +55,10 @@ def generate_boutiques_descriptor(
     tool_desc = {}
     tool_desc['name'] = interface_name
     tool_desc[
-        'command-line'] = "nipype_cmd " + module_name + " " + interface_name + " "
+        'command-line'] = interface_name + " "
+    tool_desc['author'] = "Nipype (interface)"
+    if author is not None:
+        tool_desc['author'] = tool_desc['author'] + ", " + author + " (tool)"
     tool_desc[
         'description'] = interface_name + ", as implemented in Nipype (module: " + module_name + ", interface: " + interface_name + ")."
     tool_desc['inputs'] = []
@@ -70,8 +75,10 @@ def generate_boutiques_descriptor(
 
     # Generates tool inputs
     for name, spec in sorted(interface.inputs.traits(transient=None).items()):
-        input = get_boutiques_input(inputs, interface, name, spec, verbose)
+        input = get_boutiques_input(inputs, interface, name, spec, verbose, ignore_inputs=ignore_inputs)
         # Handle compound inputs (inputs that can be of multiple types and are mutually exclusive)
+        if input is None:
+            continue
         if isinstance(input, list):
             mutex_group_members = []
             tool_desc['command-line'] += input[0]['value-key'] + " "
@@ -90,9 +97,6 @@ def generate_boutiques_descriptor(
             tool_desc['command-line'] += input['value-key'] + " "
             if verbose:
                 print("-> Adding input " + input['name'])
-
-    # Remove the extra space at the end of the command line
-    tool_desc['command-line'] = tool_desc['command-line'].strip()
 
     # Generates input groups
     tool_desc['groups'] += get_boutiques_groups(interface.inputs.traits(transient=None).items())
@@ -116,6 +120,9 @@ def generate_boutiques_descriptor(
         if output['path-template'] == "":
             fill_in_missing_output_path(output, output['name'], tool_desc['inputs'])
 
+    # Remove the extra space at the end of the command line
+    tool_desc['command-line'] = tool_desc['command-line'].strip()
+
     # Save descriptor to a file
     if save:
         path = save_path if save_path is not None else os.path.join(os.getcwd(), interface_name + '.json')
@@ -136,6 +143,8 @@ def generate_tool_outputs(outputs, interface, tool_desc, verbose, first_run):
         # Otherwise, find the existing output and update its path template if it's still undefined.
         if first_run:
             tool_desc['output-files'].append(output)
+            if output.get('value-key'):
+                tool_desc['command-line'] += output['value-key'] + " "
             if verbose:
                 print("-> Adding output " + output['name'])
         else:
@@ -143,13 +152,15 @@ def generate_tool_outputs(outputs, interface, tool_desc, verbose, first_run):
                 if output['id'] == existing_output['id'] and existing_output['path-template'] == "":
                     existing_output['path-template'] = output['path-template']
                     break
+            if output.get('value-key') and output['value-key'] not in tool_desc['command-line']:
+                tool_desc['command-line'] += output['value-key'] + " "
 
     if len(tool_desc['output-files']) == 0:
         raise Exception("Tool has no output.")
 
 
-def get_boutiques_input(inputs, interface, input_name, spec,
-                        verbose, handler=None, input_number=None):
+def get_boutiques_input(inputs, interface, input_name, spec, verbose, handler=None,
+                        input_number=None, ignore_inputs=None):
     """
     Returns a dictionary containing the Boutiques input corresponding to a Nipype intput.
 
@@ -161,10 +172,16 @@ def get_boutiques_input(inputs, interface, input_name, spec,
       * verbose: print information messages.
       * handler: used when handling compound inputs, which don't have their own input spec
       * input_number: used when handling compound inputs to assign each a unique ID
+      * ignore_inputs: list of interface inputs to not include in the descriptor
 
     Assumes that:
       * Input names are unique.
     """
+
+    # If spec has a name source, means it's an output, so skip it here.
+    # Also skip any ignored inputs
+    if spec.name_source or ignore_inputs is not None and input_name in ignore_inputs:
+        return None
 
     input = {}
 
@@ -339,12 +356,26 @@ def get_boutiques_output(outputs, name, spec, interface, tool_inputs):
             output['path-template'] = "*"
         return output
 
-    # If an output value is defined, use its relative path
-    # Otherwise, put blank string and try to fill it on another iteration
+    # If an output value is defined, use its relative path, if one exists.
+    # If no relative path, look for an input with the same name containing a name source
+    # and name template. Otherwise, put blank string as placeholder and try to fill it on
+    # another iteration.
+    output['path-template'] = ""
+
     if output_value:
         output['path-template'] = os.path.relpath(output_value)
     else:
-        output['path-template'] = ""
+        for inp_name, inp_spec in sorted(interface.inputs.traits(transient=None).items()):
+            if inp_name == name and inp_spec.name_source and inp_spec.name_template:
+                if isinstance(inp_spec.name_source, list):
+                    source = inp_spec.name_source[0]
+                else:
+                    source = inp_spec.name_source
+                output['path-template'] = inp_spec.name_template.replace("%s", "[" + source.upper() + "]")
+                output['value-key'] = "[" + name.upper() + "]"
+                if inp_spec.argstr and inp_spec.argstr.split("%")[0]:
+                    output['command-line-flag'] = inp_spec.argstr.split("%")[0].strip()
+                break
 
     return output
 
