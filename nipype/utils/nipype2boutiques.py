@@ -75,28 +75,28 @@ def generate_boutiques_descriptor(
 
     # Generates tool inputs
     for name, spec in sorted(interface.inputs.traits(transient=None).items()):
-        input = get_boutiques_input(inputs, interface, name, spec, verbose, ignore_inputs=ignore_inputs)
+        inp = get_boutiques_input(inputs, interface, name, spec, verbose, ignore_inputs=ignore_inputs)
         # Handle compound inputs (inputs that can be of multiple types and are mutually exclusive)
-        if input is None:
+        if inp is None:
             continue
-        if isinstance(input, list):
+        if isinstance(inp, list):
             mutex_group_members = []
-            tool_desc['command-line'] += input[0]['value-key'] + " "
-            for i in input:
+            tool_desc['command-line'] += inp[0]['value-key'] + " "
+            for i in inp:
                 tool_desc['inputs'].append(i)
                 mutex_group_members.append(i['id'])
                 if verbose:
                     print("-> Adding input " + i['name'])
             # Put inputs into a mutually exclusive group
-            tool_desc['groups'].append({'id': input[0]['id'] + "_group",
-                                        'name': input[0]['name'] + " group",
+            tool_desc['groups'].append({'id': inp[0]['id'] + "_group",
+                                        'name': inp[0]['name'] + " group",
                                         'members': mutex_group_members,
                                         'mutually-exclusive': True})
         else:
-            tool_desc['inputs'].append(input)
-            tool_desc['command-line'] += input['value-key'] + " "
+            tool_desc['inputs'].append(inp)
+            tool_desc['command-line'] += inp['value-key'] + " "
             if verbose:
-                print("-> Adding input " + input['name'])
+                print("-> Adding input " + inp['name'])
 
     # Generates input groups
     tool_desc['groups'] += get_boutiques_groups(interface.inputs.traits(transient=None).items())
@@ -183,14 +183,14 @@ def get_boutiques_input(inputs, interface, input_name, spec, verbose, handler=No
     if spec.name_source or ignore_inputs is not None and input_name in ignore_inputs:
         return None
 
-    input = {}
+    inp = {}
 
     if input_number is not None and input_number != 0:  # No need to append a number to the first of a list of compound inputs
-        input['id'] = input_name + "_" + str(input_number + 1)
+        inp['id'] = input_name + "_" + str(input_number + 1)
     else:
-        input['id'] = input_name
+        inp['id'] = input_name
 
-    input['name'] = input_name.replace('_', ' ').capitalize()
+    inp['name'] = input_name.replace('_', ' ').capitalize()
 
     if handler is None:
         trait_handler = spec.handler
@@ -212,70 +212,70 @@ def get_boutiques_input(inputs, interface, input_name, spec, verbose, handler=No
         return input_list
 
     if handler_type == "File" or handler_type == "Directory":
-        input['type'] = "File"
+        inp['type'] = "File"
     elif handler_type == "Int":
-        input['type'] = "Number"
-        input['integer'] = True
+        inp['type'] = "Number"
+        inp['integer'] = True
     elif handler_type == "Float":
-        input['type'] = "Number"
+        inp['type'] = "Number"
     elif handler_type == "Bool":
-        input['type'] = "Flag"
+        inp['type'] = "Flag"
     else:
-        input['type'] = "String"
+        inp['type'] = "String"
 
     # Deal with range inputs
     if handler_type == "Range":
-        input['type'] = "Number"
+        inp['type'] = "Number"
         if trait_handler._low is not None:
-            input['minimum'] = trait_handler._low
+            inp['minimum'] = trait_handler._low
         if trait_handler._high is not None:
-            input['maximum'] = trait_handler._high
+            inp['maximum'] = trait_handler._high
         if trait_handler._exclude_low:
-            input['exclusive-minimum'] = True
+            inp['exclusive-minimum'] = True
         if trait_handler._exclude_high:
-            input['exclusive-maximum'] = True
+            inp['exclusive-maximum'] = True
 
     # Deal with list inputs
     # TODO handle lists of lists (e.g. FSL ProbTrackX seed input)
     if handler_type == "List":
-        input['list'] = True
+        inp['list'] = True
         trait_type = type(trait_handler.item_trait.trait_type).__name__
         if trait_type == "Int":
-            input['integer'] = True
-            input['type'] = "Number"
+            inp['integer'] = True
+            inp['type'] = "Number"
         elif trait_type == "Float":
-            input['type'] = "Number"
+            inp['type'] = "Number"
         elif trait_type == "File":
-            input['type'] = "File"
+            inp['type'] = "File"
         else:
-            input['type'] = "String"
+            inp['type'] = "String"
         if trait_handler.minlen != 0:
-            input['min-list-entries'] = trait_handler.minlen
+            inp['min-list-entries'] = trait_handler.minlen
         if trait_handler.maxlen != six.MAXSIZE:
-            input['max-list-entries'] = trait_handler.maxlen
+            inp['max-list-entries'] = trait_handler.maxlen
 
     # Deal with multi-input
     if handler_type == "InputMultiObject":
-        input['type'] = "File"
-        input['list'] = True
+        inp['type'] = "File"
+        inp['list'] = True
 
-    input['value-key'] = "[" + input_name.upper(
+    inp['value-key'] = "[" + input_name.upper(
     ) + "]"  # assumes that input names are unique
 
     # Add the command line flag specified by argstr
     # If no argstr is provided and input type is Flag, create a flag from the name
     if spec.argstr and spec.argstr.split("%")[0]:
-        input['command-line-flag'] = spec.argstr.split("%")[0].strip()
-    elif input['type'] == "Flag":
-        input['command-line-flag'] = ("--%s" % input_name + " ").strip()
+        inp['command-line-flag'] = spec.argstr.split("%")[0].strip()
+    elif inp['type'] == "Flag":
+        inp['command-line-flag'] = ("--%s" % input_name + " ").strip()
 
-    input['description'] = get_description_from_spec(inputs, input_name, spec)
+    inp['description'] = get_description_from_spec(inputs, input_name, spec)
     if not (hasattr(spec, "mandatory") and spec.mandatory):
-        input['optional'] = True
+        inp['optional'] = True
     else:
-        input['optional'] = False
+        inp['optional'] = False
     if spec.usedefault:
-        input['default-value'] = spec.default_value()[1]
+        inp['default-value'] = spec.default_value()[1]
 
     try:
         value_choices = trait_handler.values
@@ -284,17 +284,17 @@ def get_boutiques_input(inputs, interface, input_name, spec, verbose, handler=No
     else:
         if value_choices is not None:
             if all(isinstance(n, int) for n in value_choices):
-                input['type'] = "Number"
-                input['integer'] = True
+                inp['type'] = "Number"
+                inp['integer'] = True
             elif all(isinstance(n, float) for n in value_choices):
-                input['type'] = "Number"
-            input['value-choices'] = value_choices
+                inp['type'] = "Number"
+            inp['value-choices'] = value_choices
 
     # Set Boolean types to Flag (there is no Boolean type in Boutiques)
-    if input['type'] == "Boolean":
-        input['type'] = "Flag"
+    if inp['type'] == "Boolean":
+        inp['type'] = "Flag"
 
-    return input
+    return inp
 
 
 def get_boutiques_output(outputs, name, spec, interface, tool_inputs):
@@ -400,28 +400,28 @@ def get_boutiques_groups(input_traits):
                 mutex_input_sets.append(group_members)
 
     # Create a dictionary for each one
-    for i in range(0, len(all_or_none_input_sets)):
-        desc_groups.append({'id': "all_or_none_group" + ("_" + str(i + 1) if i != 0 else ""),
-                            'name': "All or none group" + (" " + str(i + 1) if i != 0 else ""),
-                            'members': list(all_or_none_input_sets[i]),
+    for i, inp_set in enumerate(all_or_none_input_sets, 1):
+        desc_groups.append({'id': "all_or_none_group" + ("_" + str(i) if i != 1 else ""),
+                            'name': "All or none group" + (" " + str(i) if i != 1 else ""),
+                            'members': list(inp_set),
                             'all-or-none': True})
 
-    for i in range(0, len(mutex_input_sets)):
-        desc_groups.append({'id': "mutex_group" + ("_" + str(i + 1) if i != 0 else ""),
-                            'name': "Mutex group" + (" " + str(i + 1) if i != 0 else ""),
-                            'members': list(mutex_input_sets[i]),
+    for i, inp_set in enumerate(mutex_input_sets, 1):
+        desc_groups.append({'id': "mutex_group" + ("_" + str(i) if i != 1 else ""),
+                            'name': "Mutex group" + (" " + str(i) if i != 1 else ""),
+                            'members': list(inp_set),
                             'mutually-exclusive': True})
 
     return desc_groups
 
 
-def get_description_from_spec(object, name, spec):
+def get_description_from_spec(obj, name, spec):
     '''
     Generates a description based on the input or output spec.
     '''
     if not spec.desc:
         spec.desc = "No description provided."
-    spec_info = spec.full_info(object, name, None)
+    spec_info = spec.full_info(obj, name, None)
 
     boutiques_description = (spec_info.capitalize(
     ) + ". " + spec.desc.capitalize()).replace("\n", '')
