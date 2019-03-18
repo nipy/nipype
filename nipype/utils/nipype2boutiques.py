@@ -20,7 +20,7 @@ from ..scripts.instance import import_module
 
 def generate_boutiques_descriptor(
         module, interface_name, container_image, container_type, container_index=None,
-        verbose=False, save=False, save_path=None, author=None, ignore_inputs=None):
+        verbose=False, save=False, save_path=None, author=None, ignore_inputs=None, tags=None):
     '''
     Returns a JSON string containing a JSON Boutiques description of a Nipype interface.
     Arguments:
@@ -34,6 +34,8 @@ def generate_boutiques_descriptor(
     * save_path: file path for the saved descriptor (defaults to name of the interface in current directory)
     * author: author of the tool (required for publishing)
     * ignore_inputs: list of interface inputs to not include in the descriptor
+    * tags: JSON object containing tags to include in the descriptor, e.g. "{/"key1/": /"value1/"}"
+            (note: the tags 'domain:neuroinformatics' and 'interface-type:nipype' are included by default)
     '''
 
     if not module:
@@ -64,7 +66,7 @@ def generate_boutiques_descriptor(
     tool_desc['inputs'] = []
     tool_desc['output-files'] = []
     tool_desc['groups'] = []
-    tool_desc['tool-version'] = interface.version if interface.version is not None else "No version provided."
+    tool_desc['tool-version'] = interface.version if interface.version is not None else "1.0.0"
     tool_desc['schema-version'] = '0.5'
     if container_image:
         tool_desc['container-image'] = {}
@@ -119,6 +121,24 @@ def generate_boutiques_descriptor(
     for output in tool_desc['output-files']:
         if output['path-template'] == "":
             fill_in_missing_output_path(output, output['name'], tool_desc['inputs'])
+
+    # Add tags
+    desc_tags = {
+        'domain': 'neuroinformatics',
+        'source': 'nipype-interface'
+    }
+
+    if tags is not None:
+        tags_dict = json.loads(tags)
+        for k, v in tags_dict.items():
+            if k in desc_tags:
+                if not isinstance(desc_tags[k], list):
+                    desc_tags[k] = [desc_tags[k]]
+                desc_tags[k].append(v)
+            else:
+                desc_tags[k] = v
+
+    tool_desc['tags'] = desc_tags
 
     # Remove the extra space at the end of the command line
     tool_desc['command-line'] = tool_desc['command-line'].strip()
@@ -219,7 +239,13 @@ def get_boutiques_input(inputs, interface, input_name, spec, verbose, handler=No
     elif handler_type == "Float":
         inp['type'] = "Number"
     elif handler_type == "Bool":
-        inp['type'] = "Flag"
+        if spec.argstr and len(spec.argstr.split("=")) > 1 and (spec.argstr.split("=")[1] == '0' or spec.argstr.split("=")[1] == '1'):
+            inp['type'] = "Number"
+            inp['integer'] = True
+            inp['minimum'] = 0
+            inp['maximum'] = 1
+        else:
+            inp['type'] = "Flag"
     else:
         inp['type'] = "String"
 
@@ -253,6 +279,21 @@ def get_boutiques_input(inputs, interface, input_name, spec, verbose, handler=No
             inp['min-list-entries'] = trait_handler.minlen
         if trait_handler.maxlen != six.MAXSIZE:
             inp['max-list-entries'] = trait_handler.maxlen
+        if spec.sep:
+            inp['list-separator'] = spec.sep
+
+    if handler_type == "Tuple":
+        inp['list'] = True
+        inp['min-list-entries'] = len(spec.default)
+        inp['max-list-entries'] = len(spec.default)
+        input_type = type(spec.default[0]).__name__
+        if input_type == 'int':
+            inp['type'] = "Number"
+            inp['integer'] = True
+        elif input_type == 'float':
+            inp['type'] = "Number"
+        else:
+            inp['type'] = "String"
 
     # Deal with multi-input
     if handler_type == "InputMultiObject":
@@ -264,8 +305,12 @@ def get_boutiques_input(inputs, interface, input_name, spec, verbose, handler=No
 
     # Add the command line flag specified by argstr
     # If no argstr is provided and input type is Flag, create a flag from the name
-    if spec.argstr and spec.argstr.split("%")[0]:
-        inp['command-line-flag'] = spec.argstr.split("%")[0].strip()
+    if spec.argstr:
+        if "=" in spec.argstr:
+            inp['command-line-flag'] = spec.argstr.split("=")[0].strip()
+            inp['command-line-flag-separator'] = "="
+        elif spec.argstr.split("%")[0]:
+            inp['command-line-flag'] = spec.argstr.split("%")[0].strip()
     elif inp['type'] == "Flag":
         inp['command-line-flag'] = ("--%s" % input_name + " ").strip()
 
@@ -289,10 +334,6 @@ def get_boutiques_input(inputs, interface, input_name, spec, verbose, handler=No
             elif all(isinstance(n, float) for n in value_choices):
                 inp['type'] = "Number"
             inp['value-choices'] = value_choices
-
-    # Set Boolean types to Flag (there is no Boolean type in Boutiques)
-    if inp['type'] == "Boolean":
-        inp['type'] = "Flag"
 
     return inp
 
