@@ -140,6 +140,9 @@ def generate_boutiques_descriptor(
 
     tool_desc['tags'] = desc_tags
 
+    # Check for positional arguments and reorder command line args if necessary
+    tool_desc['command-line'] = reorder_cmd_line_args(tool_desc['command-line'], interface, ignore_inputs)
+
     # Remove the extra space at the end of the command line
     tool_desc['command-line'] = tool_desc['command-line'].strip()
 
@@ -505,3 +508,31 @@ def generate_custom_inputs(desc_inputs):
             for value in desc_input['value-choices']:
                 custom_input_dicts.append({desc_input['id']: value})
     return custom_input_dicts
+
+
+def reorder_cmd_line_args(cmd_line, interface, ignore_inputs=None):
+    '''
+    Generates a new command line with the positional arguments in the correct order
+    '''
+    interface_name = cmd_line.split()[0]
+    positional_arg_dict = {}
+    positional_args = []
+    non_positional_args = []
+
+    for name, spec in sorted(interface.inputs.traits(transient=None).items()):
+        if ignore_inputs is not None and name in ignore_inputs:
+            continue
+        value_key = "[" + name.upper() + "]"
+        if spec.position is not None:
+            positional_arg_dict[spec.position] = value_key
+        else:
+            non_positional_args.append(value_key)
+
+    last_arg = None
+    for item in sorted(positional_arg_dict.items()):
+        if item[0] == -1:
+            last_arg = item[1]
+            continue
+        positional_args.append(item[1])
+
+    return interface_name + " " + " ".join(positional_args) + " " + ((last_arg + " ") if last_arg else "") + " ".join(non_positional_args)
