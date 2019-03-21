@@ -202,10 +202,16 @@ class BaseInterface(Interface):
                 for field in spec.requires
             ]
             if any(values) and isdefined(value):
-                msg = ("%s requires a value for input '%s' because one of %s "
-                       "is set. For a list of required inputs, see %s.help()" %
-                       (self.__class__.__name__, name,
-                        ', '.join(spec.requires), self.__class__.__name__))
+                if len(values) > 1:
+                    fmt = ("%s requires values for inputs %s because '%s' is set. " 
+                           "For a list of required inputs, see %s.help()")
+                else:
+                    fmt = ("%s requires a value for input %s because '%s' is set. " 
+                           "For a list of required inputs, see %s.help()")
+                msg = fmt % (self.__class__.__name__,
+                             ', '.join("'%s'" % req for req in spec.requires),
+                             name,
+                             self.__class__.__name__)
                 raise ValueError(msg)
 
     def _check_xor(self, spec, name, value):

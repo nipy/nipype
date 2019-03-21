@@ -106,6 +106,9 @@ class Level1DesignInputSpec(SPMCommandInputSpec):
         desc=('Model serial correlations '
               'AR(1), FAST or none. FAST '
               'is available in SPM12'))
+    flags = traits.Dict(
+        desc='Additional arguments to the job, e.g., a common SPM operation is to '
+             'modify the default masking threshold (mthresh)')
 
 
 class Level1DesignOutputSpec(TraitedSpec):
@@ -125,6 +128,7 @@ class Level1Design(SPMCommand):
     >>> level1design.inputs.interscan_interval = 2.5
     >>> level1design.inputs.bases = {'hrf':{'derivs': [0,0]}}
     >>> level1design.inputs.session_info = 'session_info.npz'
+    >>> level1design.inputs.flags = {'mthresh': 0.4}
     >>> level1design.run() # doctest: +SKIP
 
     """
@@ -151,7 +155,11 @@ class Level1Design(SPMCommand):
         """validate spm realign options if set to None ignore
         """
         einputs = super(Level1Design,
-                        self)._parse_inputs(skip=('mask_threshold'))
+                        self)._parse_inputs(skip=('mask_threshold', 'flags'))
+        if isdefined(self.inputs.flags):
+            einputs[0].update(
+                {flag: val
+                 for (flag, val) in self.inputs.flags.items()})
         for sessinfo in einputs[0]['sess']:
             sessinfo['scans'] = scans_for_fnames(
                 ensure_list(sessinfo['scans']), keep4d=False)

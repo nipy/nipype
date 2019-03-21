@@ -3,3 +3,4 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
 from .metric import MetricResample
+from .cifti import CiftiSmooth
