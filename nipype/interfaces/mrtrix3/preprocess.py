@@ -21,7 +21,7 @@ class DWIDenoiseInputSpec(MRTrix3BaseInputSpec):
     mask = File(
         exists=True,
         argstr='-mask %s',
-        #osition=1,
+        position=1,
         desc='mask image')
     extent = traits.Tuple((traits.Int, traits.Int, traits.Int),
         argstr='-extent %d,%d,%d',
@@ -71,7 +71,7 @@ class DWIDenoise(MRTrix3Base):
     >>> denoise.inputs.in_file = 'dwi.mif'
     >>> denoise.inputs.mask = 'mask.mif'
     >>> denoise.cmdline                               # doctest: +ELLIPSIS
-    'dwidenoise -mask mask.mif dwi.mif dwi_denoised.mif'
+    'dwidenoise -mask mask.mif -noise dwi_noisemap.mif dwi.mif dwi_denoised.mif'
     >>> denoise.run()                                 # doctest: +SKIP
     """
 
@@ -156,7 +156,7 @@ class MRDeGibbs(MRTrix3Base):
     >>> unring = mrt.MRDeGibbs()
     >>> unring.inputs.in_file = 'dwi.mif'
     >>> unring.cmdline                               # doctest: +ELLIPSIS
-    'mrdegibbs dwi.mif dwi_unr.mif'
+    'mrdegibbs -axes 0,1 -maxW 3 -minW 1 -nshifts 20 dwi.mif dwi_unr.mif'
     >>> unring.run()                                 # doctest: +SKIP
     """
 
@@ -228,7 +228,7 @@ class DWIBiasCorrect(MRTrix3Base):
     >>> bias_correct = mrt.DWIBiasCorrect()
     >>> bias_correct.inputs.in_file = 'dwi.mif'
     >>> bias_correct.cmdline                           # doctest: +ELLIPSIS
-    'dwibiascorrect -ants dwi.mif dwi_biascorr.mif'
+    'dwibiascorrect -ants -bias dwi_biasfield.mif dwi.mif dwi_biascorr.mif'
     >>> bias_correct.run()                             # doctest: +SKIP
     """
 
