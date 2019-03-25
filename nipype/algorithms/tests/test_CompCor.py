@@ -109,16 +109,14 @@ class TestCompCor():
             interface = CompCor(
                 realigned_file=data_file, mask_files=self.mask_files[0])
             with pytest.raises(ValueError):
-                interface.run()
-                pytest.fail("Dimension mismatch")
+                interface.run()  # Dimension mismatch
 
     def test_tcompcor_bad_input_dim(self):
         bad_dims = (2, 2, 2)
         data_file = utils.save_toy_nii(np.zeros(bad_dims), 'temp.nii')
         interface = TCompCor(realigned_file=data_file)
         with pytest.raises(ValueError):
-            interface.run()
-            pytest.fail("Not a 4D file")
+            interface.run()  # Not a 4D file
 
     def test_tcompcor_merge_intersect_masks(self):
         for method in ['union', 'intersect']:
@@ -148,8 +146,7 @@ class TestCompCor():
         interface = TCompCor(
             realigned_file=self.realigned_file, mask_files=self.mask_files)
         with pytest.raises(ValueError):
-            interface.run()
-            pytest.fail("more than one mask file")
+            interface.run()  # more than one mask file
 
     def run_cc(self,
                ccinterface,
