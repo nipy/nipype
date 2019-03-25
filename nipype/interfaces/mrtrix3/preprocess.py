@@ -26,7 +26,7 @@ class DWIDenoiseInputSpec(MRTrix3BaseInputSpec):
     extent = traits.Tuple((traits.Int, traits.Int, traits.Int),
         argstr='-extent %d,%d,%d',
         desc='set the window size of the denoising filter. (default = 5,5,5)')
-    out_noise = File(name_template='%s_noise',
+    out_noisemap = File(name_template='%s_noisemap',
         name_source='in_file',
         keep_extension=True,
         argstr='-noise %s',
@@ -41,7 +41,7 @@ class DWIDenoiseInputSpec(MRTrix3BaseInputSpec):
         genfile=True)
 
 class DWIDenoiseOutputSpec(TraitedSpec):
-    out_noise = File(desc="the output noise map", exists=True)
+    out_noisemap = File(desc="the output noise map", exists=True)
     out_file = File(desc="the output denoised DWI image", exists=True)
 
 class DWIDenoise(MRTrix3Base):
@@ -87,28 +87,27 @@ class MRDeGibbsInputSpec(MRTrix3BaseInputSpec):
         position=-2,
         mandatory=True,
         desc='input DWI image')
-    axes = InputMultiObject(
-        traits.Int,
-        value=[0,1],
+    axes = traits.ListInt(
+        default_value=[0,1],
+        sep=',',
+        minlen=1,
+        maxlen=4,
         usedefault=True,
-        argstr='-axes %s', # how to define list?
+        argstr='-axes %s',
         desc='select the slice axes (default = 0,1)')
-    nshifts = InputMultiObject(
-        traits.Int,
-        value=[20],
+    nshifts = traits.Int(
+        default_value=20,
         usedefault=True,
         argstr='-nshifts %d',
         desc='discretizaiton of subpixel spacing (default = 20)')
-    minW = InputMultiObject(
-        traits.Int,
-        value=[1],
+    minW = traits.Int(
+        default_value=1,
         usedefault=True,
         argstr='-minW %d',
         desc='left border of window used for total variation (TV) computation '
              '(default = 1)')
-    maxW = InputMultiObject(
-        traits.Int,
-        value=[3],
+    maxW = traits.Int(
+        default_value=3,
         usedefault=True,
         argstr='-maxW %d',
         desc='right border of window used for total variation (TV) computation '
@@ -174,15 +173,16 @@ class DWIBiasCorrectInputSpec(MRTrix3BaseInputSpec):
         desc='input DWI image')
     in_mask = File(
         argstr='-mask %s',
-        desc='mask image')
-    ants = traits.Bool(
-        True,
+        desc='input mask image for bias field estimation')
+    _xor_inputs = ('use_ants', 'use_fsl')
+    use_ants = traits.Bool(
         argstr='-ants',
-        desc='use ANTS N4 to estimate the inhomogeneity field')
-    fsl = traits.Bool(
-        False,
+        desc='use ANTS N4 to estimate the inhomogeneity field',
+        xor=_xor_inputs)
+    use_fsl = traits.Bool(
         argstr='-fsl',
         desc='use FSL FAST to estimate the inhomogeneity field',
+        xor=_xor_inputs,
         min_ver='5.0.10')
     # only one of either grad or fslgrad should be supplied
     grad = File(
@@ -206,6 +206,7 @@ class DWIBiasCorrectInputSpec(MRTrix3BaseInputSpec):
         genfile=True)
 
 class DWIBiasCorrectOutputSpec(TraitedSpec):
+    out_bias = File(desc="the output estimated bias field")
     out_file = File(desc="the output bias corrected DWI image", exists=True)
 
 class DWIBiasCorrect(MRTrix3Base):
