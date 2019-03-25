@@ -441,6 +441,10 @@ class ProcStreamlines(StdOutCommandLine):
             return spec.argstr % self._get_actual_outputroot(value)
         return super(ProcStreamlines, self)._format_arg(name, spec, value)
 
+    def __init__(self, *args, **kwargs):
+            super(ProcStreamlines, self).__init__(*args, **kwargs)
+            self.outputroot_files = []
+
     def _run_interface(self, runtime):
         outputroot = self.inputs.outputroot
         if isdefined(outputroot):

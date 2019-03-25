@@ -13,6 +13,7 @@ import json
 
 from .instance import import_module
 from ..interfaces.base import InputMultiPath, traits
+from ..interfaces.base.support import get_trait_desc
 
 # different context options
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -61,8 +62,7 @@ def add_args_options(arg_parser, interface):
     """Add arguments to `arg_parser` to create a CLI for `interface`."""
     inputs = interface.input_spec()
     for name, spec in sorted(interface.inputs.traits(transient=None).items()):
-        desc = "\n".join(interface._get_trait_desc(inputs, name,
-                                                   spec))[len(name) + 2:]
+        desc = "\n".join(get_trait_desc(inputs, name, spec))[len(name) + 2:]
         # Escape any % signs with a %
         desc = desc.replace('%', '%%')
         args = {}

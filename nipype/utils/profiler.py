@@ -7,6 +7,7 @@ Utilities to keep track of performance
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
+import os
 import threading
 from time import time
 try:
@@ -40,7 +41,7 @@ class ResourceMonitor(threading.Thread):
 
         if fname is None:
             fname = '.proc-%d_time-%s_freq-%0.2f' % (pid, time(), freq)
-        self._fname = fname
+        self._fname = os.path.abspath(fname)
         self._logfile = open(self._fname, 'w')
         self._freq = freq
         self._python = python

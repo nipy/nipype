@@ -215,7 +215,7 @@ this way you can use the initial paper published in 2011 (see below).
 	month            = "08",
 	doi              = "10.3389/fninf.2011.00013",
 	pubmed           = "21897815",
-	url              = "http://dx.doi.org/10.3389/fninf.2011.00013",
+	url              = "https://doi.org/10.3389/fninf.2011.00013",
 	issn             = "1662-5196"}
 
 

@@ -207,13 +207,31 @@ class LaplacianThicknessInputSpec(ANTSCommandInputSpec):
         name_template='%s_thickness',
         keep_extension=True,
         hash_files=False)
-    smooth_param = traits.Float(argstr='smoothparam=%d', desc='', position=4)
+    smooth_param = traits.Float(
+        argstr='%s',
+        desc='Sigma of the Laplacian Recursive Image Filter (defaults to 1)',
+        position=4)
     prior_thickness = traits.Float(
-        argstr='priorthickval=%d', desc='', position=5)
-    dT = traits.Float(argstr='dT=%d', desc='', position=6)
-    sulcus_prior = traits.Bool(argstr='use-sulcus-prior', desc='', position=7)
-    opt_tolerance = traits.Float(
-        argstr='optional-laplacian-tolerance=%d', desc='', position=8)
+        argstr='%s',
+        desc='Prior thickness (defaults to 500)',
+        requires=['smooth_param'],
+        position=5)
+    dT = traits.Float(
+        argstr='%s',
+        desc='Time delta used during integration (defaults to 0.01)',
+        requires=['prior_thickness'],
+        position=6)
+    sulcus_prior = traits.Float(
+        argstr='%s',
+        desc='Positive floating point number for sulcus prior. '
+             'Authors said that 0.15 might be a reasonable value',
+        requires=['dT'],
+        position=7)
+    tolerance = traits.Float(
+        argstr='%s',
+        desc='Tolerance to reach during optimization (defaults to 0.001)',
+        requires=['sulcus_prior'],
+        position=8)
 
 
 class LaplacianThicknessOutputSpec(TraitedSpec):
@@ -1587,7 +1605,7 @@ class KellyKapowski(ANTSCommand):
             "year={2009},"
             "issn={1053-8119},"
             "url={http://www.sciencedirect.com/science/article/pii/S1053811908012780},"
-            "doi={http://dx.doi.org/10.1016/j.neuroimage.2008.12.016}"
+            "doi={https://doi.org/10.1016/j.neuroimage.2008.12.016}"
             "}"),
         'description':
         'The details on the implementation of DiReCT.',

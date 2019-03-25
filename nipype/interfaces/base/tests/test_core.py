@@ -12,6 +12,7 @@ import pytest
 from .... import config
 from ....testing import example_data
 from ... import base as nib
+from ..support import _inputs_help
 
 standard_library.install_aliases()
 
@@ -42,14 +43,6 @@ def test_Interface():
     assert nib.Interface.output_spec is None
     with pytest.raises(NotImplementedError):
         nib.Interface()
-    with pytest.raises(NotImplementedError):
-        nib.Interface.help()
-    with pytest.raises(NotImplementedError):
-        nib.Interface._inputs_help()
-    with pytest.raises(NotImplementedError):
-        nib.Interface._outputs_help()
-    with pytest.raises(NotImplementedError):
-        nib.Interface._outputs()
 
     class DerivedInterface(nib.Interface):
         def __init__(self):
@@ -85,7 +78,7 @@ def test_BaseInterface():
         resource_monitor = False
 
     assert DerivedInterface.help() is None
-    assert 'moo' in ''.join(DerivedInterface._inputs_help())
+    assert 'moo' in ''.join(_inputs_help(DerivedInterface))
     assert DerivedInterface()._outputs() is None
     assert DerivedInterface().inputs.foo == nib.Undefined
     with pytest.raises(ValueError):

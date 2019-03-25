@@ -5,10 +5,23 @@ from ..modelgen import SpecifySPMModel
 
 def test_SpecifySPMModel_inputs():
     input_map = dict(
+        bids_amplitude_column=dict(
+            exists=True,
+            mandatory=False,
+        ),
+        bids_condition_column=dict(
+            exists=True,
+            mandatory=False,
+            usedefault=True,
+        ),
+        bids_event_file=dict(
+            mandatory=True,
+            xor=['subject_info', 'event_files', 'bids_event_file'],
+        ),
         concatenate_runs=dict(usedefault=True, ),
         event_files=dict(
             mandatory=True,
-            xor=['subject_info', 'event_files'],
+            xor=['subject_info', 'event_files', 'bids_event_file'],
         ),
         functional_runs=dict(
             copyfile=False,
@@ -22,7 +35,7 @@ def test_SpecifySPMModel_inputs():
         realignment_parameters=dict(copyfile=False, ),
         subject_info=dict(
             mandatory=True,
-            xor=['subject_info', 'event_files'],
+            xor=['subject_info', 'event_files', 'bids_event_file'],
         ),
         time_repetition=dict(mandatory=True, ),
     )
