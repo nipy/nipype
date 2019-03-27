@@ -9,6 +9,7 @@ from builtins import str, open, bytes
 # Limitations:
 #   * Optional outputs, i.e. outputs that not always produced, may not be detected. They will, however, still be listed
 #     with a placeholder for the path template (either a value key or the output ID) that should be verified and corrected.
+#   * Still need to add some fields to the descriptor manually, e.g. url, descriptor-url, path-template-stripped-extensions, etc.
 
 import os
 import sys
@@ -77,28 +78,34 @@ def generate_boutiques_descriptor(
 
     # Generates tool inputs
     for name, spec in sorted(interface.inputs.traits(transient=None).items()):
-        inp = get_boutiques_input(inputs, interface, name, spec, verbose, ignore_inputs=ignore_inputs)
-        # Handle compound inputs (inputs that can be of multiple types and are mutually exclusive)
-        if inp is None:
+        # Skip ignored inputs
+        if ignore_inputs is not None and name in ignore_inputs:
             continue
-        if isinstance(inp, list):
-            mutex_group_members = []
-            tool_desc['command-line'] += inp[0]['value-key'] + " "
-            for i in inp:
-                tool_desc['inputs'].append(i)
-                mutex_group_members.append(i['id'])
-                if verbose:
-                    print("-> Adding input " + i['name'])
-            # Put inputs into a mutually exclusive group
-            tool_desc['groups'].append({'id': inp[0]['id'] + "_group",
-                                        'name': inp[0]['name'] + " group",
-                                        'members': mutex_group_members,
-                                        'mutually-exclusive': True})
+        # If spec has a name source, this means it actually represents an output, so create a
+        # Boutiques output from it
+        elif spec.name_source and spec.name_template:
+            tool_desc['output-files'].append(get_boutiques_output_from_inp(inputs, spec, name))
         else:
-            tool_desc['inputs'].append(inp)
-            tool_desc['command-line'] += inp['value-key'] + " "
-            if verbose:
-                print("-> Adding input " + inp['name'])
+            inp = get_boutiques_input(inputs, interface, name, spec, verbose, ignore_inputs=ignore_inputs)
+            # Handle compound inputs (inputs that can be of multiple types and are mutually exclusive)
+            if isinstance(inp, list):
+                mutex_group_members = []
+                tool_desc['command-line'] += inp[0]['value-key'] + " "
+                for i in inp:
+                    tool_desc['inputs'].append(i)
+                    mutex_group_members.append(i['id'])
+                    if verbose:
+                        print("-> Adding input " + i['name'])
+                # Put inputs into a mutually exclusive group
+                tool_desc['groups'].append({'id': inp[0]['id'] + "_group",
+                                            'name': inp[0]['name'] + " group",
+                                            'members': mutex_group_members,
+                                            'mutually-exclusive': True})
+            else:
+                tool_desc['inputs'].append(inp)
+                tool_desc['command-line'] += inp['value-key'] + " "
+                if verbose:
+                    print("-> Adding input " + inp['name'])
 
     # Generates input groups
     tool_desc['groups'] += get_boutiques_groups(interface.inputs.traits(transient=None).items())
@@ -148,7 +155,7 @@ def generate_boutiques_descriptor(
 
     # Save descriptor to a file
     if save:
-        path = save_path if save_path is not None else os.path.join(os.getcwd(), interface_name + '.json')
+        path = save_path or os.path.join(os.getcwd(), interface_name + '.json')
         with open(path, 'w') as outfile:
             json.dump(tool_desc, outfile, indent=4, separators=(',', ': '))
         if verbose:
@@ -200,15 +207,9 @@ def get_boutiques_input(inputs, interface, input_name, spec, verbose, handler=No
     Assumes that:
       * Input names are unique.
     """
-
-    # If spec has a name source, means it's an output, so skip it here.
-    # Also skip any ignored inputs
-    if spec.name_source or ignore_inputs is not None and input_name in ignore_inputs:
-        return None
-
     inp = {}
 
-    if input_number is not None and input_number != 0:  # No need to append a number to the first of a list of compound inputs
+    if input_number:  # No need to append a number to the first of a list of compound inputs
         inp['id'] = input_name + "_" + str(input_number + 1)
     else:
         inp['id'] = input_name
@@ -302,20 +303,18 @@ def get_boutiques_input(inputs, interface, input_name, spec, verbose, handler=No
     if handler_type == "InputMultiObject":
         inp['type'] = "File"
         inp['list'] = True
+        if spec.sep:
+            inp['list-separator'] = spec.sep
 
     inp['value-key'] = "[" + input_name.upper(
     ) + "]"  # assumes that input names are unique
 
-    # Add the command line flag specified by argstr
-    # If no argstr is provided and input type is Flag, create a flag from the name
-    if spec.argstr:
-        if "=" in spec.argstr:
-            inp['command-line-flag'] = spec.argstr.split("=")[0].strip()
-            inp['command-line-flag-separator'] = "="
-        elif spec.argstr.split("%")[0]:
-            inp['command-line-flag'] = spec.argstr.split("%")[0].strip()
-    elif inp['type'] == "Flag":
-        inp['command-line-flag'] = ("--%s" % input_name + " ").strip()
+    flag, flag_sep = get_command_line_flag(spec, inp['type'] == "Flag", input_name)
+
+    if flag is not None:
+        inp['command-line-flag'] = flag
+    if flag_sep is not None:
+        inp['command-line-flag-separator'] = flag_sep
 
     inp['description'] = get_description_from_spec(inputs, input_name, spec)
     if not (hasattr(spec, "mandatory") and spec.mandatory):
@@ -384,42 +383,32 @@ def get_boutiques_output(outputs, name, spec, interface, tool_inputs):
         output_value = None
     except AttributeError:
         output_value = None
+    except KeyError:
+        output_value = None
 
     # Handle multi-outputs
-    if isinstance(output_value, list):
+    if isinstance(output_value, list) or type(spec.handler).__name__ == "OutputMultiObject":
         output['list'] = True
-        # Check if all extensions are the same
-        extensions = []
-        for val in output_value:
-            extensions.append(os.path.splitext(val)[1])
-        # If extensions all the same, set path template as wildcard + extension
-        # Otherwise just use a wildcard
-        if len(set(extensions)) == 1:
-            output['path-template'] = "*" + extensions[0]
-        else:
-            output['path-template'] = "*"
-        return output
+        if output_value:
+            # Check if all extensions are the same
+            extensions = []
+            for val in output_value:
+                extensions.append(os.path.splitext(val)[1])
+            # If extensions all the same, set path template as wildcard + extension
+            # Otherwise just use a wildcard
+            if len(set(extensions)) == 1:
+                output['path-template'] = "*" + extensions[0]
+            else:
+                output['path-template'] = "*"
+            return output
 
     # If an output value is defined, use its relative path, if one exists.
-    # If no relative path, look for an input with the same name containing a name source
-    # and name template. Otherwise, put blank string as placeholder and try to fill it on
+    # Otherwise, put blank string as placeholder and try to fill it on
     # another iteration.
-    output['path-template'] = ""
-
     if output_value:
         output['path-template'] = os.path.relpath(output_value)
     else:
-        for inp_name, inp_spec in sorted(interface.inputs.traits(transient=None).items()):
-            if inp_name == name and inp_spec.name_source and inp_spec.name_template:
-                if isinstance(inp_spec.name_source, list):
-                    source = inp_spec.name_source[0]
-                else:
-                    source = inp_spec.name_source
-                output['path-template'] = inp_spec.name_template.replace("%s", "[" + source.upper() + "]")
-                output['value-key'] = "[" + name.upper() + "]"
-                if inp_spec.argstr and inp_spec.argstr.split("%")[0]:
-                    output['command-line-flag'] = inp_spec.argstr.split("%")[0].strip()
-                break
+        output['path-template'] = ""
 
     return output
 
@@ -535,4 +524,52 @@ def reorder_cmd_line_args(cmd_line, interface, ignore_inputs=None):
             continue
         positional_args.append(item[1])
 
-    return interface_name + " " + " ".join(positional_args) + " " + ((last_arg + " ") if last_arg else "") + " ".join(non_positional_args)
+    return interface_name + " " +\
+           ((" ".join(positional_args) + " ") if len(positional_args) > 0 else "") +\
+           ((last_arg + " ") if last_arg else "") +\
+           " ".join(non_positional_args)
+
+
+def get_command_line_flag(input_spec, is_flag_type=False, input_name=None):
+    '''
+    Generates the command line flag for a given input
+    '''
+    flag, flag_sep = None, None
+    if input_spec.argstr:
+        if "=" in input_spec.argstr:
+            flag = input_spec.argstr.split("=")[0].strip()
+            flag_sep = "="
+        elif input_spec.argstr.split("%")[0]:
+            flag = input_spec.argstr.split("%")[0].strip()
+    elif is_flag_type:
+        flag = ("--%s" % input_name + " ").strip()
+    return flag, flag_sep
+
+
+def get_boutiques_output_from_inp(inputs, inp_spec, inp_name):
+    '''
+    Takes a Nipype input representing an output file and generates a Boutiques output for it
+    '''
+    output = {}
+    output['name'] = inp_name.replace('_', ' ').capitalize()
+    output['id'] = inp_name
+    output['optional'] = True
+    output['description'] = get_description_from_spec(inputs, inp_name, inp_spec)
+    if not (hasattr(inp_spec, "mandatory") and inp_spec.mandatory):
+        output['optional'] = True
+    else:
+        output['optional'] = False
+    if inp_spec.usedefault:
+        output['default-value'] = inp_spec.default_value()[1]
+    if isinstance(inp_spec.name_source, list):
+        source = inp_spec.name_source[0]
+    else:
+        source = inp_spec.name_source
+    output['path-template'] = inp_spec.name_template.replace("%s", "[" + source.upper() + "]")
+    output['value-key'] = "[" + inp_name.upper() + "]"
+    flag, flag_sep = get_command_line_flag(inp_spec)
+    if flag is not None:
+        output['command-line-flag'] = flag
+    if flag_sep is not None:
+        output['command-line-flag-separator'] = flag_sep
+    return output
