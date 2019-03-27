@@ -1084,6 +1084,8 @@ def is_outlier(points, thresh=3.5):
 def cosine_filter(data, timestep, period_cut, remove_mean=True, axis=-1):
     datashape = data.shape
     timepoints = datashape[axis]
+    if datashape[0] == 0:
+        return data, np.array([])
 
     data = data.reshape((-1, timepoints))
 
@@ -1115,6 +1117,8 @@ def regress_poly(degree, data, remove_mean=True, axis=-1):
 
     datashape = data.shape
     timepoints = datashape[axis]
+    if datashape[0] == 0:
+        return data, np.array([])
 
     # Rearrange all voxel-wise time-series in rows
     data = data.reshape((-1, timepoints))
@@ -1261,7 +1265,7 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
         components_criterion = -1
     mask_names = mask_names or range(len(mask_images))
     for name, img in zip(mask_names, mask_images):
-        mask = img.get_data().astype(np.bool)
+        mask = nb.squeeze_image(img).get_data().astype(np.bool)
         if imgseries.shape[:3] != mask.shape:
             raise ValueError(
                 'Inputs for CompCor, timeseries and mask, do not have '
