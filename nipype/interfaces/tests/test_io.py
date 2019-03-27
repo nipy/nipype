@@ -581,8 +581,6 @@ def test_jsonsink(tmpdir, inputs_attributes):
 # There are three reasons these tests will be skipped:
 @pytest.mark.skipif(not have_pybids,
                     reason="Pybids is not installed")
-@pytest.mark.skipif(sys.version_info < (3, 0),
-                    reason="Pybids no longer supports Python 2")
 @pytest.mark.skipif(not dist_is_editable('pybids'),
                     reason="Pybids is not installed in editable mode")
 def test_bids_grabber(tmpdir):
@@ -591,15 +589,13 @@ def test_bids_grabber(tmpdir):
     bg.inputs.base_dir = os.path.join(datadir, 'ds005')
     bg.inputs.subject = '01'
     results = bg.run()
-    assert 'sub-01_T1w.nii.gz' in map(os.path.basename, results.outputs.anat)
+    assert 'sub-01_T1w.nii.gz' in map(os.path.basename, results.outputs.T1w)
     assert 'sub-01_task-mixedgamblestask_run-01_bold.nii.gz' in \
-        map(os.path.basename, results.outputs.func)
+        map(os.path.basename, results.outputs.bold)
 
 
 @pytest.mark.skipif(not have_pybids,
                     reason="Pybids is not installed")
-@pytest.mark.skipif(sys.version_info < (3, 0),
-                    reason="Pybids no longer supports Python 2")
 @pytest.mark.skipif(not dist_is_editable('pybids'),
                     reason="Pybids is not installed in editable mode")
 def test_bids_fields(tmpdir):
@@ -607,15 +603,13 @@ def test_bids_fields(tmpdir):
     bg = nio.BIDSDataGrabber(infields = ['subject'], outfields = ['dwi'])
     bg.inputs.base_dir = os.path.join(datadir, 'ds005')
     bg.inputs.subject = '01'
-    bg.inputs.output_query['dwi'] = dict(modality='dwi')
+    bg.inputs.output_query['dwi'] = dict(datatype='dwi')
     results = bg.run()
     assert 'sub-01_dwi.nii.gz' in map(os.path.basename, results.outputs.dwi)
 
 
 @pytest.mark.skipif(not have_pybids,
                     reason="Pybids is not installed")
-@pytest.mark.skipif(sys.version_info < (3, 0),
-                    reason="Pybids no longer supports Python 2")
 @pytest.mark.skipif(not dist_is_editable('pybids'),
                     reason="Pybids is not installed in editable mode")
 def test_bids_infields_outfields(tmpdir):
@@ -633,9 +627,9 @@ def test_bids_infields_outfields(tmpdir):
     for outfield in outfields:
         assert(outfield in bg._outputs().traits())
 
-    # now try without defining outfields, we should get anat and func for free
+    # now try without defining outfields
     bg = nio.BIDSDataGrabber()
-    for outfield in ['anat', 'func']:
+    for outfield in ['T1w', 'bold']:
         assert outfield in bg._outputs().traits()
 
 

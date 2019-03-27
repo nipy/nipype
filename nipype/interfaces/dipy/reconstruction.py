@@ -13,12 +13,29 @@ import os.path as op
 
 import numpy as np
 import nibabel as nb
+from distutils.version import LooseVersion
 
 from ... import logging
 from ..base import TraitedSpec, File, traits, isdefined
-from .base import DipyDiffusionInterface, DipyBaseInterfaceInputSpec
+from .base import (DipyDiffusionInterface, DipyBaseInterfaceInputSpec,
+                   HAVE_DIPY, dipy_version, dipy_to_nipype_interface)
+
 
 IFLOGGER = logging.getLogger('nipype.interface')
+
+if HAVE_DIPY and LooseVersion(dipy_version()) >= LooseVersion('0.15'):
+    from dipy.workflows.reconst import (ReconstDkiFlow, ReconstCSAFlow,
+                                        ReconstCSDFlow, ReconstMAPMRIFlow,
+                                        ReconstDtiFlow)
+
+    DKIModel = dipy_to_nipype_interface("DKIModel", ReconstDkiFlow)
+    MapmriModel = dipy_to_nipype_interface("MapmriModel", ReconstMAPMRIFlow)
+    DTIModel = dipy_to_nipype_interface("DTIModel", ReconstDtiFlow)
+    CSAModel = dipy_to_nipype_interface("CSAModel", ReconstCSAFlow)
+    CSDModel = dipy_to_nipype_interface("CSDModel", ReconstCSDFlow)
+else:
+    IFLOGGER.info("We advise you to upgrade DIPY version. This upgrade will"
+                  " activate DKIModel, MapmriModel, DTIModel, CSAModel, CSDModel.")
 
 
 class RESTOREInputSpec(DipyBaseInterfaceInputSpec):

@@ -6,12 +6,31 @@ import os.path as op
 import numpy as np
 import nibabel as nb
 import nibabel.trackvis as nbt
+from distutils.version import LooseVersion
 
 from ... import logging
 from ..base import (TraitedSpec, BaseInterfaceInputSpec, File, isdefined,
                     traits)
-from .base import DipyBaseInterface
+from .base import (DipyBaseInterface, HAVE_DIPY, dipy_version,
+                   dipy_to_nipype_interface)
+
 IFLOGGER = logging.getLogger('nipype.interface')
+
+
+if HAVE_DIPY and LooseVersion(dipy_version()) >= LooseVersion('0.15'):
+
+    from dipy.workflows.segment import RecoBundlesFlow, LabelsBundlesFlow
+    from dipy.workflows.tracking import DetTrackPAMFlow
+
+    RecoBundles = dipy_to_nipype_interface("RecoBundles", RecoBundlesFlow)
+    LabelsBundles = dipy_to_nipype_interface("LabelsBundles",
+                                             LabelsBundlesFlow)
+    DeterministicTracking = dipy_to_nipype_interface("DeterministicTracking",
+                                                     DetTrackPAMFlow)
+
+else:
+    IFLOGGER.info("We advise you to upgrade DIPY version. This upgrade will"
+                  " activate RecoBundles, LabelsBundles, DeterministicTracking.")
 
 
 class TrackDensityMapInputSpec(BaseInterfaceInputSpec):

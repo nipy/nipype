@@ -11,7 +11,7 @@ import sys
 # full release.  '.dev' as a version_extra string means this is a development
 # version
 # Remove -dev for release
-__version__ = '1.1.8-dev'
+__version__ = '1.2.0-dev'
 
 
 def get_nipype_gitversion():
@@ -109,7 +109,6 @@ NUMPY_BAD_VERSION_27 = '1.16.0'
 SCIPY_MIN_VERSION = '0.14'
 TRAITS_MIN_VERSION = '4.6'
 DATEUTIL_MIN_VERSION = '2.2'
-PYTEST_MIN_VERSION = '3.6'
 FUTURE_MIN_VERSION = '0.16.0'
 SIMPLEJSON_MIN_VERSION = '3.8.0'
 PROV_VERSION = '1.5.2'
@@ -150,19 +149,16 @@ REQUIRES = [
     'neurdflib',
     'click>=%s' % CLICK_MIN_VERSION,
     'funcsigs',
-    'mock',
     'pydotplus',
     'pydot>=%s' % PYDOT_MIN_VERSION,
     'packaging',
     'futures; python_version == "2.7"',
+    'configparser; python_version <= "3.4"',
 ]
 
-if sys.version_info <= (3, 4):
-    REQUIRES.append('configparser')
-
 TESTS_REQUIRES = [
-    'pytest>=%s' % PYTEST_MIN_VERSION,
-    'pytest-xdist',
+    'mock',
+    'pytest',
     'pytest-cov',
     'codecov',
     'pytest-env',
@@ -177,7 +173,7 @@ EXTRA_REQUIRES = {
     'profiler': ['psutil>=5.0'],
     'duecredit': ['duecredit'],
     'xvfbwrapper': ['xvfbwrapper'],
-    'pybids': ['pybids==0.6.5'],
+    'pybids': ['pybids>=0.7.0'],
     'ssh': ['paramiko'],
     # 'mesh': ['mayavi']  # Enable when it works
 }

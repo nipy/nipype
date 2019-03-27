@@ -11,10 +11,6 @@ neurdflib
 click>=6.6.0
 funcsigs
 configparser
-pytest>=3.0
-pytest-xdist
-pytest-env
-mock
 pydotplus
 pydot>=1.2.3
 packaging

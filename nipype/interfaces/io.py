@@ -829,7 +829,24 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
         "template" uses regex style formatting, rather than the
         glob-style found in the original DataGrabber.
 
+        Examples
+        --------
+
+        >>> s3grab = S3DataGrabber(infields=['subj_id'], outfields=["func", "anat"])
+        >>> s3grab.inputs.bucket = 'openneuro'
+        >>> s3grab.inputs.sort_filelist = True
+        >>> s3grab.inputs.template = '*'
+        >>> s3grab.inputs.anon = True
+        >>> s3grab.inputs.bucket_path = 'ds000101/ds000101_R2.0.0/uncompressed/'
+        >>> s3grab.inputs.local_directory = '/tmp'
+        >>> s3grab.inputs.field_template = {'anat': '%s/anat/%s_T1w.nii.gz',
+        ...                                 'func': '%s/func/%s_task-simon_run-1_bold.nii.gz'}
+        >>> s3grab.inputs.template_args = {'anat': [['subj_id', 'subj_id']],
+        ...                                'func': [['subj_id', 'subj_id']]}
+        >>> s3grab.inputs.subj_id = 'sub-01'
+        >>> s3grab.run()  # doctest: +SKIP
     """
+
     input_spec = S3DataGrabberInputSpec
     output_spec = DynamicTraitedSpec
     _always_run = True
@@ -2721,18 +2738,23 @@ class JSONFileSink(IOBase):
 
 
 class BIDSDataGrabberInputSpec(DynamicTraitedSpec):
-    base_dir = Directory(exists=True,
-                         desc='Path to BIDS Directory.',
-                         mandatory=True)
-    output_query = traits.Dict(key_trait=Str,
-                               value_trait=traits.Dict,
-                               desc='Queries for outfield outputs')
-    raise_on_empty = traits.Bool(True, usedefault=True,
-                                 desc='Generate exception if list is empty '
-                                 'for a given field')
-    return_type = traits.Enum('file', 'namedtuple', usedefault=True)
-    strict = traits.Bool(desc='Return only BIDS "proper" files (e.g., '
-                              'ignore derivatives/, sourcedata/, etc.)')
+    base_dir = Directory(
+        exists=True,
+        desc='Path to BIDS Directory.',
+        mandatory=True)
+    output_query = traits.Dict(
+        key_trait=Str,
+        value_trait=traits.Dict,
+        desc='Queries for outfield outputs')
+    raise_on_empty = traits.Bool(
+        True, usedefault=True,
+        desc='Generate exception if list is empty for a given field')
+    index_derivatives = traits.Bool(
+        False, mandatory=True, usedefault=True,
+        desc='Index derivatives/ sub-directory')
+    extra_derivatives = traits.List(
+        Directory(exists=True),
+        desc='Additional derivative directories to index')
 
 
 class BIDSDataGrabber(LibraryBaseInterface, IOBase):
@@ -2758,10 +2780,10 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
     are filtered on common entities, which can be explicitly defined as
     infields.
 
-    >>> bg = BIDSDataGrabber(infields = ['subject'], outfields = ['dwi'])
+    >>> bg = BIDSDataGrabber(infields = ['subject'])
     >>> bg.inputs.base_dir = 'ds005/'
     >>> bg.inputs.subject = '01'
-    >>> bg.inputs.output_query['dwi'] = dict(modality='dwi')
+    >>> bg.inputs.output_query['dwi'] = dict(datatype='dwi')
     >>> results = bg.run() # doctest: +SKIP
 
     """
@@ -2781,18 +2803,17 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
 
         if not isdefined(self.inputs.output_query):
             self.inputs.output_query = {
-                "func": {"modality": "func", 'extensions': ['nii', '.nii.gz']},
-                "anat": {"modality": "anat", 'extensions': ['nii', '.nii.gz']},
+                "bold": {"datatype": "func", "suffix": "bold",
+                         "extensions": ["nii", ".nii.gz"]},
+                "T1w": {"datatype": "anat", "suffix": "T1w",
+                        "extensions": ["nii", ".nii.gz"]},
                 }
 
         # If infields is empty, use all BIDS entities
         if infields is None:
-            # Version resilience
-            try:
-                from bids import layout as bidslayout
-            except ImportError:
-                from bids import grabbids as bidslayout
-            bids_config = join(dirname(bidslayout.__file__), 'config', 'bids.json')
+            from bids import layout as bidslayout
+            bids_config = join(
+                dirname(bidslayout.__file__), 'config', 'bids.json')
             bids_config = json.load(open(bids_config, 'r'))
             infields = [i['name'] for i in bids_config['entities']]
 
@@ -2807,15 +2828,12 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 
     def _list_outputs(self):
-        # Version resilience
-        try:
-            from bids import BIDSLayout
-        except ImportError:
-            from bids.grabbids import BIDSLayout
-        exclude = None
-        if self.inputs.strict:
-            exclude = ['derivatives/', 'code/', 'sourcedata/']
-        layout = BIDSLayout(self.inputs.base_dir, exclude=exclude)
+        from bids import BIDSLayout
+        layout = BIDSLayout(self.inputs.base_dir,
+                            derivatives=self.inputs.index_derivatives)
+
+        if isdefined(self.inputs.extra_derivatives):
+            layout.add_derivatives(self.inputs.extra_derivatives)
 
         # If infield is not given nm input value, silently ignore
         filters = {}
@@ -2828,7 +2846,7 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
         for key, query in self.inputs.output_query.items():
             args = query.copy()
             args.update(filters)
-            filelist = layout.get(return_type=self.inputs.return_type, **args)
+            filelist = layout.get(return_type='file', **args)
             if len(filelist) == 0:
                 msg = 'Output key: %s returned no files' % key
                 if self.inputs.raise_on_empty:
