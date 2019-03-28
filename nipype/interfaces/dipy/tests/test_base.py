@@ -144,7 +144,7 @@ def test_get_dipy_workflows():
     l_wkflw = get_dipy_workflows(align)
     for name, obj in l_wkflw:
         assert name.endswith('Flow')
-        assert issubclass(align.Workflow)
+        assert issubclass(obj, align.Workflow)
 
 
 if __name__ == "__main__":
