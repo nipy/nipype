@@ -211,48 +211,55 @@ def convert():
     help="JSON file name where the Boutiques descriptor will be "
     "written.")
 @click.option(
-    "-t",
-    "--ignored-template-inputs",
+    "-c",
+    "--container-image",
+    required=True,
     type=str,
-    multiple=True,
-    help="Interface inputs ignored in path template creations.")
+    help="Name of the container image where the tool is installed.")
 @click.option(
-    "-d",
-    "--docker-image",
+    "-p",
+    "--container-type",
+    required=True,
     type=str,
-    help="Name of the Docker image where the Nipype interface is "
-    "available.")
+    help="Type of container image (Docker or Singularity).")
 @click.option(
-    "-r",
-    "--docker-index",
+    "-x",
+    "--container-index",
     type=str,
-    help="Docker index where the Docker image is stored (e.g. "
+    help="Optional index where the image is available (e.g. "
     "http://index.docker.io).")
 @click.option(
-    "-n",
-    "--ignore-template-numbers",
-    is_flag=True,
-    flag_value=True,
-    help="Ignore all numbers in path template creations.")
+    "-g",
+    "--ignore-inputs",
+    type=str,
+    multiple=True,
+    help="List of interface inputs to not include in the descriptor.")
 @click.option(
     "-v",
     "--verbose",
     is_flag=True,
     flag_value=True,
-    help="Enable verbose output.")
-def boutiques(interface, module, output, ignored_template_inputs, docker_image,
-              docker_index, ignore_template_numbers, verbose):
+    help="Print information messages.")
+@click.option(
+    "-a",
+    "--author",
+    type=str,
+    help="Author of the tool (required for publishing).")
+@click.option(
+    "-t",
+    "--tags",
+    type=str,
+    help="JSON string containing tags to include in the descriptor,"
+         "e.g. \"{\"key1\": \"value1\"}\"")
+def boutiques(module, interface, container_image, container_type, output,
+              container_index, verbose, author, ignore_inputs, tags):
     """Nipype to Boutiques exporter.
 
     See Boutiques specification at https://github.com/boutiques/schema.
     """
     from nipype.utils.nipype2boutiques import generate_boutiques_descriptor
 
-    # Generates JSON string
-    json_string = generate_boutiques_descriptor(
-        module, interface, ignored_template_inputs, docker_image, docker_index,
-        verbose, ignore_template_numbers)
-
-    # Writes JSON string to file
-    with open(output, 'w') as f:
-        f.write(json_string)
+    # Generates JSON string and saves it to file
+    generate_boutiques_descriptor(
+        module, interface, container_image, container_type, container_index,
+        verbose, True, output, author, ignore_inputs, tags)

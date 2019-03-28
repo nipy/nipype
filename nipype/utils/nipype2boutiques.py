@@ -3,13 +3,18 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
 from builtins import str, open, bytes
-# This tool exports a Nipype interface in the Boutiques (https://github.com/boutiques) JSON format.
-# Boutiques tools can be imported in CBRAIN (https://github.com/aces/cbrain) among other platforms.
+# This tool exports a Nipype interface in the Boutiques
+# (https://github.com/boutiques) JSON format. Boutiques tools
+# can be imported in CBRAIN (https://github.com/aces/cbrain)
+# among other platforms.
 #
 # Limitations:
-#   * Optional outputs, i.e. outputs that not always produced, may not be detected. They will, however, still be listed
-#     with a placeholder for the path template (either a value key or the output ID) that should be verified and corrected.
-#   * Still need to add some fields to the descriptor manually, e.g. url, descriptor-url, path-template-stripped-extensions, etc.
+#   * Optional outputs, i.e. outputs that not always produced, may not be
+#     detected. They will, however, still be listed with a placeholder for
+#     the path template (either a value key or the output ID) that should
+#     be verified and corrected.
+#   * Still need to add some fields to the descriptor manually, e.g. url,
+#     descriptor-url, path-template-stripped-extensions, etc.
 
 import os
 import sys
@@ -20,10 +25,12 @@ from ..scripts.instance import import_module
 
 
 def generate_boutiques_descriptor(
-        module, interface_name, container_image, container_type, container_index=None,
-        verbose=False, save=False, save_path=None, author=None, ignore_inputs=None, tags=None):
+        module, interface_name, container_image, container_type,
+        container_index=None, verbose=False, save=False, save_path=None,
+        author=None, ignore_inputs=None, tags=None):
     '''
-    Returns a JSON string containing a JSON Boutiques description of a Nipype interface.
+    Returns a JSON string containing a JSON Boutiques description of a
+    Nipype interface.
     Arguments:
     * module: module where the Nipype interface is declared.
     * interface_name: name of Nipype interface.
@@ -32,11 +39,13 @@ def generate_boutiques_descriptor(
     * container_index: optional index where the image is available
     * verbose: print information messages
     * save: True if you want to save descriptor to a file
-    * save_path: file path for the saved descriptor (defaults to name of the interface in current directory)
+    * save_path: file path for the saved descriptor (defaults to name of the
+      interface in current directory)
     * author: author of the tool (required for publishing)
     * ignore_inputs: list of interface inputs to not include in the descriptor
-    * tags: JSON object containing tags to include in the descriptor, e.g. "{/"key1/": /"value1/"}"
-            (note: the tags 'domain:neuroinformatics' and 'interface-type:nipype' are included by default)
+    * tags: JSON object containing tags to include in the descriptor,
+      e.g. "{\"key1\": \"value1\"}" (note: the tags 'domain:neuroinformatics'
+      and 'interface-type:nipype' are included by default)
     '''
 
     if not module:
@@ -62,12 +71,15 @@ def generate_boutiques_descriptor(
     tool_desc['author'] = "Nipype (interface)"
     if author is not None:
         tool_desc['author'] = tool_desc['author'] + ", " + author + " (tool)"
-    tool_desc[
-        'description'] = interface_name + ", as implemented in Nipype (module: " + module_name + ", interface: " + interface_name + ")."
+    tool_desc['description'] = (interface_name +
+                                ", as implemented in Nipype (module: " +
+                                module_name + ", interface: " +
+                                interface_name + ").")
     tool_desc['inputs'] = []
     tool_desc['output-files'] = []
     tool_desc['groups'] = []
-    tool_desc['tool-version'] = interface.version if interface.version is not None else "1.0.0"
+    tool_desc['tool-version'] = interface.version \
+        if interface.version is not None else "1.0.0"
     tool_desc['schema-version'] = '0.5'
     if container_image:
         tool_desc['container-image'] = {}
@@ -81,13 +93,15 @@ def generate_boutiques_descriptor(
         # Skip ignored inputs
         if ignore_inputs is not None and name in ignore_inputs:
             continue
-        # If spec has a name source, this means it actually represents an output, so create a
-        # Boutiques output from it
+        # If spec has a name source, this means it actually represents an
+        # output, so create a Boutiques output from it
         elif spec.name_source and spec.name_template:
-            tool_desc['output-files'].append(get_boutiques_output_from_inp(inputs, spec, name))
+            tool_desc['output-files']\
+                .append(get_boutiques_output_from_inp(inputs, spec, name))
         else:
-            inp = get_boutiques_input(inputs, interface, name, spec, verbose, ignore_inputs=ignore_inputs)
-            # Handle compound inputs (inputs that can be of multiple types and are mutually exclusive)
+            inp = get_boutiques_input(inputs, interface, name, spec, verbose)
+            # Handle compound inputs (inputs that can be of multiple types
+            # and are mutually exclusive)
             if isinstance(inp, list):
                 mutex_group_members = []
                 tool_desc['command-line'] += inp[0]['value-key'] + " "
@@ -108,7 +122,8 @@ def generate_boutiques_descriptor(
                     print("-> Adding input " + inp['name'])
 
     # Generates input groups
-    tool_desc['groups'] += get_boutiques_groups(interface.inputs.traits(transient=None).items())
+    tool_desc['groups'] +=\
+        get_boutiques_groups(interface.inputs.traits(transient=None).items())
     if len(tool_desc['groups']) == 0:
         del tool_desc['groups']
 
@@ -127,7 +142,8 @@ def generate_boutiques_descriptor(
     # Fill in all missing output paths
     for output in tool_desc['output-files']:
         if output['path-template'] == "":
-            fill_in_missing_output_path(output, output['name'], tool_desc['inputs'])
+            fill_in_missing_output_path(output, output['name'],
+                                        tool_desc['inputs'])
 
     # Add tags
     desc_tags = {
@@ -148,7 +164,8 @@ def generate_boutiques_descriptor(
     tool_desc['tags'] = desc_tags
 
     # Check for positional arguments and reorder command line args if necessary
-    tool_desc['command-line'] = reorder_cmd_line_args(tool_desc['command-line'], interface, ignore_inputs)
+    tool_desc['command-line'] = reorder_cmd_line_args(
+        tool_desc['command-line'], interface, ignore_inputs)
 
     # Remove the extra space at the end of the command line
     tool_desc['command-line'] = tool_desc['command-line'].strip()
@@ -161,16 +178,19 @@ def generate_boutiques_descriptor(
         if verbose:
             print("-> Descriptor saved to file " + outfile.name)
 
-    print("NOTE: Descriptors produced by this script may not entirely conform to the Nipype interface "
-          "specs. Please check that the descriptor is correct before using it.")
+    print("NOTE: Descriptors produced by this script may not entirely conform "
+          "to the Nipype interface specs. Please check that the descriptor is "
+          "correct before using it.")
     return json.dumps(tool_desc, indent=4, separators=(',', ': '))
 
 
 def generate_tool_outputs(outputs, interface, tool_desc, verbose, first_run):
     for name, spec in sorted(outputs.traits(transient=None).items()):
-        output = get_boutiques_output(outputs, name, spec, interface, tool_desc['inputs'])
-        # If this is the first time we are generating outputs, add the full output to the descriptor.
-        # Otherwise, find the existing output and update its path template if it's still undefined.
+        output = get_boutiques_output(outputs, name, spec, interface,
+                                      tool_desc['inputs'])
+        # If this is the first time we are generating outputs, add the full
+        # output to the descriptor. Otherwise, find the existing output and
+        # update its path template if it's still undefined.
         if first_run:
             tool_desc['output-files'].append(output)
             if output.get('value-key'):
@@ -179,20 +199,23 @@ def generate_tool_outputs(outputs, interface, tool_desc, verbose, first_run):
                 print("-> Adding output " + output['name'])
         else:
             for existing_output in tool_desc['output-files']:
-                if output['id'] == existing_output['id'] and existing_output['path-template'] == "":
+                if (output['id'] == existing_output['id'] and
+                        existing_output['path-template'] == ""):
                     existing_output['path-template'] = output['path-template']
                     break
-            if output.get('value-key') and output['value-key'] not in tool_desc['command-line']:
+            if (output.get('value-key') and
+                    output['value-key'] not in tool_desc['command-line']):
                 tool_desc['command-line'] += output['value-key'] + " "
 
     if len(tool_desc['output-files']) == 0:
         raise Exception("Tool has no output.")
 
 
-def get_boutiques_input(inputs, interface, input_name, spec, verbose, handler=None,
-                        input_number=None, ignore_inputs=None):
+def get_boutiques_input(inputs, interface, input_name, spec, verbose,
+                        handler=None, input_number=None):
     """
-    Returns a dictionary containing the Boutiques input corresponding to a Nipype intput.
+    Returns a dictionary containing the Boutiques input corresponding
+    to a Nipype input.
 
     Args:
       * inputs: inputs of the Nipype interface.
@@ -200,16 +223,18 @@ def get_boutiques_input(inputs, interface, input_name, spec, verbose, handler=No
       * input_name: name of the Nipype input.
       * spec: Nipype input spec.
       * verbose: print information messages.
-      * handler: used when handling compound inputs, which don't have their own input spec
-      * input_number: used when handling compound inputs to assign each a unique ID
-      * ignore_inputs: list of interface inputs to not include in the descriptor
+      * handler: used when handling compound inputs, which don't have their
+        own input spec
+      * input_number: used when handling compound inputs to assign each a
+        unique ID
 
     Assumes that:
       * Input names are unique.
     """
     inp = {}
 
-    if input_number:  # No need to append a number to the first of a list of compound inputs
+    # No need to append a number to the first of a list of compound inputs
+    if input_number:
         inp['id'] = input_name + "_" + str(input_number + 1)
     else:
         inp['id'] = input_name
@@ -243,7 +268,9 @@ def get_boutiques_input(inputs, interface, input_name, spec, verbose, handler=No
     elif handler_type == "Float":
         inp['type'] = "Number"
     elif handler_type == "Bool":
-        if spec.argstr and len(spec.argstr.split("=")) > 1 and (spec.argstr.split("=")[1] == '0' or spec.argstr.split("=")[1] == '1'):
+        if (spec.argstr and len(spec.argstr.split("=")) > 1 and
+                (spec.argstr.split("=")[1] == '0'
+                 or spec.argstr.split("=")[1] == '1')):
             inp['type'] = "Number"
             inp['integer'] = True
             inp['minimum'] = 0
@@ -309,7 +336,8 @@ def get_boutiques_input(inputs, interface, input_name, spec, verbose, handler=No
     inp['value-key'] = "[" + input_name.upper(
     ) + "]"  # assumes that input names are unique
 
-    flag, flag_sep = get_command_line_flag(spec, inp['type'] == "Flag", input_name)
+    flag, flag_sep = get_command_line_flag(spec, inp['type'] == "Flag",
+                                           input_name)
 
     if flag is not None:
         inp['command-line-flag'] = flag
@@ -342,14 +370,16 @@ def get_boutiques_input(inputs, interface, input_name, spec, verbose, handler=No
 
 def get_boutiques_output(outputs, name, spec, interface, tool_inputs):
     """
-    Returns a dictionary containing the Boutiques output corresponding to a Nipype output.
+    Returns a dictionary containing the Boutiques output corresponding
+    to a Nipype output.
 
     Args:
       * outputs: outputs of the Nipype interface.
       * name: name of the Nipype output.
       * spec: Nipype output spec.
       * interface: Nipype interface.
-      * tool_inputs: list of tool inputs (as produced by method get_boutiques_input).
+      * tool_inputs: list of tool inputs (as produced by method
+        get_boutiques_input).
 
     Assumes that:
       * Output names are unique.
@@ -370,8 +400,10 @@ def get_boutiques_output(outputs, name, spec, interface, tool_inputs):
     output['id'] = name if unique_id else name + '_outfile'
 
     output['path-template'] = ""
-    output[
-        'optional'] = True  # no real way to determine if an output is always produced, regardless of the input values.
+
+    # No real way to determine if an output is always
+    # produced, regardless of the input values.
+    output['optional'] = True
 
     output['description'] = get_description_from_spec(outputs, name, spec)
 
@@ -387,15 +419,16 @@ def get_boutiques_output(outputs, name, spec, interface, tool_inputs):
         output_value = None
 
     # Handle multi-outputs
-    if isinstance(output_value, list) or type(spec.handler).__name__ == "OutputMultiObject":
+    if (isinstance(output_value, list) or
+            type(spec.handler).__name__ == "OutputMultiObject"):
         output['list'] = True
         if output_value:
             # Check if all extensions are the same
             extensions = []
             for val in output_value:
                 extensions.append(os.path.splitext(val)[1])
-            # If extensions all the same, set path template as wildcard + extension
-            # Otherwise just use a wildcard
+            # If extensions all the same, set path template as
+            # wildcard + extension. Otherwise just use a wildcard
             if len(set(extensions)) == 1:
                 output['path-template'] = "*" + extensions[0]
             else:
@@ -415,7 +448,8 @@ def get_boutiques_output(outputs, name, spec, interface, tool_inputs):
 
 def get_boutiques_groups(input_traits):
     """
-    Returns a list of dictionaries containing Boutiques groups for the mutually exclusive and all-or-none Nipype inputs.
+    Returns a list of dictionaries containing Boutiques groups for the mutually
+    exclusive and all-or-none Nipype inputs.
     """
     desc_groups = []
     all_or_none_input_sets = []
@@ -434,14 +468,18 @@ def get_boutiques_groups(input_traits):
 
     # Create a dictionary for each one
     for i, inp_set in enumerate(all_or_none_input_sets, 1):
-        desc_groups.append({'id': "all_or_none_group" + ("_" + str(i) if i != 1 else ""),
-                            'name': "All or none group" + (" " + str(i) if i != 1 else ""),
+        desc_groups.append({'id': "all_or_none_group" +
+                                  ("_" + str(i) if i != 1 else ""),
+                            'name': "All or none group" +
+                                    (" " + str(i) if i != 1 else ""),
                             'members': list(inp_set),
                             'all-or-none': True})
 
     for i, inp_set in enumerate(mutex_input_sets, 1):
-        desc_groups.append({'id': "mutex_group" + ("_" + str(i) if i != 1 else ""),
-                            'name': "Mutex group" + (" " + str(i) if i != 1 else ""),
+        desc_groups.append({'id': "mutex_group" +
+                                  ("_" + str(i) if i != 1 else ""),
+                            'name': "Mutex group" +
+                                    (" " + str(i) if i != 1 else ""),
                             'members': list(inp_set),
                             'mutually-exclusive': True})
 
@@ -485,9 +523,10 @@ def fill_in_missing_output_path(output, output_name, tool_inputs):
 
 def generate_custom_inputs(desc_inputs):
     '''
-    Generates a bunch of custom input dictionaries in order to generate as many outputs as possible
-    (to get their path templates)
-    Currently only works with flag inputs and inputs with defined value choices.
+    Generates a bunch of custom input dictionaries in order to generate
+    as many outputs as possible (to get their path templates).
+    Currently only works with flag inputs and inputs with defined value
+    choices.
     '''
     custom_input_dicts = []
     for desc_input in desc_inputs:
@@ -501,7 +540,8 @@ def generate_custom_inputs(desc_inputs):
 
 def reorder_cmd_line_args(cmd_line, interface, ignore_inputs=None):
     '''
-    Generates a new command line with the positional arguments in the correct order
+    Generates a new command line with the positional arguments in the
+    correct order
     '''
     interface_name = cmd_line.split()[0]
     positional_arg_dict = {}
@@ -524,10 +564,11 @@ def reorder_cmd_line_args(cmd_line, interface, ignore_inputs=None):
             continue
         positional_args.append(item[1])
 
-    return interface_name + " " +\
-           ((" ".join(positional_args) + " ") if len(positional_args) > 0 else "") +\
-           ((last_arg + " ") if last_arg else "") +\
-           " ".join(non_positional_args)
+    return (interface_name + " " +
+            ((" ".join(positional_args) + " ")
+                if len(positional_args) > 0 else "") +
+            ((last_arg + " ") if last_arg else "") +
+            " ".join(non_positional_args))
 
 
 def get_command_line_flag(input_spec, is_flag_type=False, input_name=None):
@@ -548,13 +589,15 @@ def get_command_line_flag(input_spec, is_flag_type=False, input_name=None):
 
 def get_boutiques_output_from_inp(inputs, inp_spec, inp_name):
     '''
-    Takes a Nipype input representing an output file and generates a Boutiques output for it
+    Takes a Nipype input representing an output file and generates a
+    Boutiques output for it
     '''
     output = {}
     output['name'] = inp_name.replace('_', ' ').capitalize()
     output['id'] = inp_name
     output['optional'] = True
-    output['description'] = get_description_from_spec(inputs, inp_name, inp_spec)
+    output['description'] = get_description_from_spec(inputs, inp_name,
+                                                      inp_spec)
     if not (hasattr(inp_spec, "mandatory") and inp_spec.mandatory):
         output['optional'] = True
     else:
@@ -565,7 +608,8 @@ def get_boutiques_output_from_inp(inputs, inp_spec, inp_name):
         source = inp_spec.name_source[0]
     else:
         source = inp_spec.name_source
-    output['path-template'] = inp_spec.name_template.replace("%s", "[" + source.upper() + "]")
+    output['path-template'] = inp_spec.name_template.replace(
+        "%s", "[" + source.upper() + "]")
     output['value-key'] = "[" + inp_name.upper() + "]"
     flag, flag_sep = get_command_line_flag(inp_spec)
     if flag is not None:
