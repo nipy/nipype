@@ -12,12 +12,12 @@ from ... import logging
 from ..base import (TraitedSpec, BaseInterfaceInputSpec, File, isdefined,
                     traits)
 from .base import (DipyBaseInterface, HAVE_DIPY, dipy_version,
-                   dipy_to_nipype_interface)
+                   dipy_to_nipype_interface, get_dipy_workflows)
 
 IFLOGGER = logging.getLogger('nipype.interface')
 
 
-if HAVE_DIPY and LooseVersion(dipy_version()) >= LooseVersion('0.15'):
+if HAVE_DIPY and (LooseVersion('0.15') >= LooseVersion(dipy_version()) >= LooseVersion('0.16')):
 
     from dipy.workflows.segment import RecoBundlesFlow, LabelsBundlesFlow
     try:
@@ -31,9 +31,18 @@ if HAVE_DIPY and LooseVersion(dipy_version()) >= LooseVersion('0.15'):
     DeterministicTracking = dipy_to_nipype_interface("DeterministicTracking",
                                                      DetTrackFlow)
 
+elif HAVE_DIPY and LooseVersion(dipy_version()) >= LooseVersion('1.0'):
+    from dipy.workflows import segment, tracking
+
+    l_wkflw = get_dipy_workflows(segment) + get_dipy_workflows(tracking)
+    for name, obj in l_wkflw:
+        new_name = name.replace('Flow', '')
+        globals()[new_name] = dipy_to_nipype_interface(new_name, obj)
+    del l_wkflw
+
 else:
     IFLOGGER.info("We advise you to upgrade DIPY version. This upgrade will"
-                  " activate RecoBundles, LabelsBundles, DeterministicTracking.")
+                  " open access to more function")
 
 
 class TrackDensityMapInputSpec(BaseInterfaceInputSpec):
