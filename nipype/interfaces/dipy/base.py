@@ -230,7 +230,7 @@ def get_dipy_workflows(module):
     Examples
     --------
     >>> from dipy.workflows import align
-    >>> get_dipy_workflows(align)
+    >>> get_dipy_workflows(align)  # doctest: +SKIP
 
     """
     return [(m, obj) for m, obj in inspect.getmembers(module)
