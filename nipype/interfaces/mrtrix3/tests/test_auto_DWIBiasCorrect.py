@@ -6,6 +6,7 @@ from ..preprocess import DWIBiasCorrect
 def test_DWIBiasCorrect_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
+        bias=dict(argstr='-bias %s', ),
         bval_scale=dict(argstr='-bvalue_scaling %s', ),
         environ=dict(
             nohash=True,
@@ -33,13 +34,6 @@ def test_DWIBiasCorrect_inputs():
             argstr='-nthreads %d',
             nohash=True,
         ),
-        out_bias=dict(
-            argstr='-bias %s',
-            genfile=True,
-            keep_extension=True,
-            name_source='in_file',
-            name_template='%s_biasfield',
-        ),
         out_file=dict(
             argstr='%s',
             genfile=True,
@@ -65,10 +59,7 @@ def test_DWIBiasCorrect_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DWIBiasCorrect_outputs():
-    output_map = dict(
-        out_bias=dict(),
-        out_file=dict(),
-    )
+    output_map = dict(out_file=dict(), )
     outputs = DWIBiasCorrect.output_spec()
 
     for key, metadata in list(output_map.items()):

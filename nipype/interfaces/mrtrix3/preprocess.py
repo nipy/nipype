@@ -26,12 +26,9 @@ class DWIDenoiseInputSpec(MRTrix3BaseInputSpec):
     extent = traits.Tuple((traits.Int, traits.Int, traits.Int),
         argstr='-extent %d,%d,%d',
         desc='set the window size of the denoising filter. (default = 5,5,5)')
-    out_noisemap = File(name_template='%s_noisemap',
-        name_source='in_file',
-        keep_extension=True,
+    noise = File(
         argstr='-noise %s',
-        desc='the output noise map',
-        genfile=True)
+        desc='the output noise map')
     out_file = File(name_template='%s_denoised',
         name_source='in_file',
         keep_extension=True,
@@ -41,7 +38,6 @@ class DWIDenoiseInputSpec(MRTrix3BaseInputSpec):
         genfile=True)
 
 class DWIDenoiseOutputSpec(TraitedSpec):
-    out_noisemap = File(desc='the output noise map', exists=True)
     out_file = File(desc='the output denoised DWI image', exists=True)
 
 class DWIDenoise(MRTrix3Base):
@@ -71,7 +67,7 @@ class DWIDenoise(MRTrix3Base):
     >>> denoise.inputs.in_file = 'dwi.mif'
     >>> denoise.inputs.mask = 'mask.mif'
     >>> denoise.cmdline                               # doctest: +ELLIPSIS
-    'dwidenoise -mask mask.mif -noise dwi_noisemap.mif dwi.mif dwi_denoised.mif'
+    'dwidenoise -mask mask.mif dwi.mif dwi_denoised.mif'
     >>> denoise.run()                                 # doctest: +SKIP
     """
 
@@ -155,7 +151,7 @@ class MRDeGibbs(MRTrix3Base):
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> unring = mrt.MRDeGibbs()
     >>> unring.inputs.in_file = 'dwi.mif'
-    >>> unring.cmdline                               # doctest: +ELLIPSIS
+    >>> unring.cmdline
     'mrdegibbs -axes 0,1 -maxW 3 -minW 1 -nshifts 20 dwi.mif dwi_unr.mif'
     >>> unring.run()                                 # doctest: +SKIP
     """
@@ -196,12 +192,9 @@ class DWIBiasCorrectInputSpec(MRTrix3BaseInputSpec):
         argstr='-fslgrad %s %s',
         desc='diffusion gradient table in FSL bvecs/bvals format',
         xor=_xor_grads)
-    out_bias = File(name_template='%s_biasfield',
-        name_source='in_file',
-        keep_extension=True,
+    bias = File(
         argstr='-bias %s',
-        desc='bias field',
-        genfile=True)
+        desc='bias field')
     out_file = File(name_template='%s_biascorr',
         name_source='in_file',
         keep_extension=True,
@@ -211,7 +204,6 @@ class DWIBiasCorrectInputSpec(MRTrix3BaseInputSpec):
         genfile=True)
 
 class DWIBiasCorrectOutputSpec(TraitedSpec):
-    out_bias = File(desc='the output estimated bias field')
     out_file = File(desc='the output bias corrected DWI image', exists=True)
 
 class DWIBiasCorrect(MRTrix3Base):
@@ -227,8 +219,8 @@ class DWIBiasCorrect(MRTrix3Base):
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> bias_correct = mrt.DWIBiasCorrect()
     >>> bias_correct.inputs.in_file = 'dwi.mif'
-    >>> bias_correct.cmdline                           # doctest: +ELLIPSIS
-    'dwibiascorrect -ants -bias dwi_biasfield.mif dwi.mif dwi_biascorr.mif'
+    >>> bias_correct.cmdline
+    'dwibiascorrect -ants dwi.mif dwi_biascorr.mif'
     >>> bias_correct.run()                             # doctest: +SKIP
     """
 
