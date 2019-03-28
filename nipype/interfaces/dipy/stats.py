@@ -6,7 +6,7 @@ from .base import (HAVE_DIPY, dipy_version, dipy_to_nipype_interface,
 
 IFLOGGER = logging.getLogger('nipype.interface')
 
-if HAVE_DIPY and LooseVersion(dipy_version()) >= LooseVersion('0.15'):
+if HAVE_DIPY and LooseVersion(dipy_version()) >= LooseVersion('0.16'):
     from dipy.workflows import stats
 
     l_wkflw = get_dipy_workflows(stats)
