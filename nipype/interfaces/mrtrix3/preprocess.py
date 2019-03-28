@@ -38,6 +38,7 @@ class DWIDenoiseInputSpec(MRTrix3BaseInputSpec):
         genfile=True)
 
 class DWIDenoiseOutputSpec(TraitedSpec):
+    noise = File(desc='the output noise map', exists=True)
     out_file = File(desc='the output denoised DWI image', exists=True)
 
 class DWIDenoise(MRTrix3Base):
@@ -74,6 +75,13 @@ class DWIDenoise(MRTrix3Base):
     _cmd = 'dwidenoise'
     input_spec = DWIDenoiseInputSpec
     output_spec = DWIDenoiseOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        if self.inputs.noise != Undefined:
+            outputs['noise'] = op.abspath(self.inputs.noise)
+        return outputs
 
 
 class MRDeGibbsInputSpec(MRTrix3BaseInputSpec):
@@ -204,6 +212,7 @@ class DWIBiasCorrectInputSpec(MRTrix3BaseInputSpec):
         genfile=True)
 
 class DWIBiasCorrectOutputSpec(TraitedSpec):
+    bias = File(desc='the output bias field', exists=True)
     out_file = File(desc='the output bias corrected DWI image', exists=True)
 
 class DWIBiasCorrect(MRTrix3Base):
@@ -227,6 +236,13 @@ class DWIBiasCorrect(MRTrix3Base):
     _cmd = 'dwibiascorrect'
     input_spec = DWIBiasCorrectInputSpec
     output_spec = DWIBiasCorrectOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        if self.inputs.bias != Undefined:
+            outputs['bias'] = op.abspath(self.inputs.bias)
+        return outputs
 
 
 class ResponseSDInputSpec(MRTrix3BaseInputSpec):
