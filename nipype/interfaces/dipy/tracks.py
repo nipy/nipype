@@ -20,13 +20,16 @@ IFLOGGER = logging.getLogger('nipype.interface')
 if HAVE_DIPY and LooseVersion(dipy_version()) >= LooseVersion('0.15'):
 
     from dipy.workflows.segment import RecoBundlesFlow, LabelsBundlesFlow
-    from dipy.workflows.tracking import DetTrackPAMFlow
+    try:
+        from dipy.workflows.tracking import LocalFiberTrackingPAMFlow as DetTrackFlow
+    except ImportError:  # different name in 0.15
+        from dipy.workflows.tracking import DetTrackPAMFlow as DetTrackFlow
 
     RecoBundles = dipy_to_nipype_interface("RecoBundles", RecoBundlesFlow)
     LabelsBundles = dipy_to_nipype_interface("LabelsBundles",
                                              LabelsBundlesFlow)
     DeterministicTracking = dipy_to_nipype_interface("DeterministicTracking",
-                                                     DetTrackPAMFlow)
+                                                     DetTrackFlow)
 
 else:
     IFLOGGER.info("We advise you to upgrade DIPY version. This upgrade will"
