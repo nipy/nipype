@@ -1082,10 +1082,11 @@ def is_outlier(points, thresh=3.5):
     return timepoints_to_discard
 
 
-def cosine_filter(data, timestep, period_cut, remove_mean=True, axis=-1):
+def cosine_filter(data, timestep, period_cut, remove_mean=True, axis=-1,
+                  failure_mode='error'):
     datashape = data.shape
     timepoints = datashape[axis]
-    if datashape[0] == 0:
+    if datashape[0] == 0 and failure_mode != 'error':
         return data, np.array([])
 
     data = data.reshape((-1, timepoints))
@@ -1105,7 +1106,8 @@ def cosine_filter(data, timestep, period_cut, remove_mean=True, axis=-1):
     return residuals.reshape(datashape), non_constant_regressors
 
 
-def regress_poly(degree, data, remove_mean=True, axis=-1):
+def regress_poly(degree, data, remove_mean=True, axis=-1,
+                 failure_mode='error'):
     """
     Returns data with degree polynomial regressed out.
 
@@ -1118,7 +1120,7 @@ def regress_poly(degree, data, remove_mean=True, axis=-1):
 
     datashape = data.shape
     timepoints = datashape[axis]
-    if datashape[0] == 0:
+    if datashape[0] == 0 and failure_mode != 'error':
         return data, np.array([])
 
     # Rearrange all voxel-wise time-series in rows
@@ -1285,12 +1287,14 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
                 raise ValueError(
                     'Repetition time must be provided for cosine filter')
             voxel_timecourses, basis = cosine_filter(
-                voxel_timecourses, repetition_time, period_cut)
+                voxel_timecourses, repetition_time, period_cut,
+                failure_mode=failure_mode)
         elif filter_type in ('polynomial', False):
             # from paper:
             # "The constant and linear trends of the columns in the matrix M were
             # removed [prior to ...]"
-            voxel_timecourses, basis = regress_poly(degree, voxel_timecourses)
+            voxel_timecourses, basis = regress_poly(degree, voxel_timecourses,
+                                                    failure_mode=failure_mode)
 
         # "Voxel time series from the noise ROI (either anatomical or tSTD) were
         # placed in a matrix M of size Nxm, with time along the row dimension
