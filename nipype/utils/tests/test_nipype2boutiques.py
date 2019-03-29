@@ -25,7 +25,7 @@ def test_generate():
                                          author=("Oxford Centre for Functional"
                                                  " MRI of the Brain (FMRIB)"))
 
-    with open('nipype/utils/nipype2boutiques_example.json', 'r',
+    with open('utils/nipype2boutiques_example.json', 'r',
               encoding='utf-8') as desc_file:
         assert ordered(json.loads(desc)) == ordered(json.load(desc_file))
 
