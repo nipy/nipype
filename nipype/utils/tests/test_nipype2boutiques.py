@@ -3,6 +3,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from future import standard_library
 from ..nipype2boutiques import generate_boutiques_descriptor
+from nipype.testing import example_data
 import json
 standard_library.install_aliases()
 
@@ -25,8 +26,7 @@ def test_generate():
                                          author=("Oxford Centre for Functional"
                                                  " MRI of the Brain (FMRIB)"))
 
-    with open('utils/nipype2boutiques_example.json', 'r',
-              encoding='utf-8') as desc_file:
+    with open(example_data('nipype2boutiques_example.json'), 'r') as desc_file:
         assert ordered(json.loads(desc)) == ordered(json.load(desc_file))
 
 
