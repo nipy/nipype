@@ -229,7 +229,7 @@ def get_dipy_workflows(module):
 
     Examples
     --------
-    >>> from dipy.workflows import align
+    >>> from dipy.workflows import align  # doctest: +SKIP
     >>> get_dipy_workflows(align)  # doctest: +SKIP
 
     """
