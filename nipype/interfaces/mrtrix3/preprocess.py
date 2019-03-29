@@ -140,11 +140,11 @@ class MRDeGibbs(MRTrix3Base):
     taken place. You should not run this command after any form of motion
     correction (e.g. not after dwipreproc). Similarly, if you intend running
     dwidenoise, you should run this command afterwards, since it has the
-    potential to alter the noise structure, which would impact on dwidenoise’s
+    potential to alter the noise structure, which would impact on dwidenoise's
     performance.
 
     Note that this method is designed to work on images acquired with full
-    k-space coverage. Running this method on partial Fourier (‘half-scan’) data
+    k-space coverage. Running this method on partial Fourier ('half-scan') data
     may lead to suboptimal and/or biased results, as noted in the original
     reference below. There is currently no means of dealing with this; users
     should exercise caution when using this method on partial Fourier data, and
