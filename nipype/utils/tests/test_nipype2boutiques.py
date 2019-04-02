@@ -27,7 +27,21 @@ def test_generate():
                                                  " MRI of the Brain (FMRIB)"))
 
     with open(example_data('nipype2boutiques_example.json'), 'r') as desc_file:
-        assert ordered(json.loads(desc)) == ordered(json.load(desc_file))
+        # Make sure that output descriptor matches the expected descriptor.
+        output_desc = json.loads(desc)
+        expected_desc = json.load(desc_file)
+        assert (output_desc.get('name') ==
+                expected_desc.get('name'))
+        assert (output_desc.get('author') ==
+                expected_desc.get('author'))
+        assert (output_desc.get('command-line') ==
+                expected_desc.get('command-line'))
+        assert (output_desc.get('description') ==
+                expected_desc.get('description'))
+        assert (ordered(output_desc.get('inputs')) ==
+                ordered(expected_desc.get('inputs')))
+        assert (ordered(output_desc.get('container-image')) ==
+                ordered(expected_desc.get('container-image')))
 
 
 # Recursively sorts all items in a JSON object
