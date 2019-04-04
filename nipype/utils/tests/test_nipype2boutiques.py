@@ -38,18 +38,9 @@ def test_generate():
                 expected_desc.get('command-line'))
         assert (output_desc.get('description') ==
                 expected_desc.get('description'))
-        assert (ordered(output_desc.get('inputs')) ==
-                ordered(expected_desc.get('inputs')))
-        assert (ordered(output_desc.get('container-image')) ==
-                ordered(expected_desc.get('container-image')))
-
-
-# Recursively sorts all items in a JSON object
-# Used when comparing two JSON objects whose ordering may differ
-def ordered(obj):
-    if isinstance(obj, dict):
-        return sorted((k, ordered(v)) for k, v in obj.items())
-    if isinstance(obj, list):
-        return sorted(ordered(x) for x in obj)
-    else:
-        return obj
+        assert (len(output_desc.get('inputs')) ==
+                len(expected_desc.get('inputs')))
+        assert(len(output_desc.get('output-files')) ==
+               len(expected_desc.get('output-files')))
+        assert (output_desc.get('container-image').get('image') ==
+                expected_desc.get('container-image').get('image'))
