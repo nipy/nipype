@@ -168,10 +168,12 @@ class AlignEpiAnatPy(AFNIPythonCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        anat_prefix = ''.join(
-            self._gen_fname(self.inputs.anat).split('+')[:-1])
-        epi_prefix = ''.join(
-            self._gen_fname(self.inputs.in_file).split('+')[:-1])
+        anat_prefix = self._gen_fname(self.inputs.anat)
+        epi_prefix = self._gen_fname(self.inputs.in_file)
+        if '+' in anat_prefix:
+            anat_prefix = ''.join(anat_prefix.split('+')[:-1])
+        if '+' in epi_prefix:
+            epi_prefix = ''.join(epi_prefix.split('+')[:-1])
         outputtype = self.inputs.outputtype
         if outputtype == 'AFNI':
             ext = '.HEAD'
