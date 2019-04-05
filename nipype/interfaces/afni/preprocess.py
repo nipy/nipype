@@ -178,7 +178,7 @@ class AlignEpiAnatPy(AFNIPythonCommand):
         if outputtype == 'AFNI':
             ext = '.HEAD'
         else:
-            Info.output_type_to_ext(outputtype)
+            ext = Info.output_type_to_ext(outputtype)
         matext = '.1D'
         suffix = self.inputs.suffix
         if self.inputs.anat2epi:
