@@ -28,16 +28,18 @@ class DWIDenoiseInputSpec(MRTrix3BaseInputSpec):
         desc='set the window size of the denoising filter. (default = 5,5,5)')
     noise = File(
         argstr='-noise %s',
-        desc='noise map')
+        desc='the output noise map')
     out_file = File(name_template='%s_denoised',
         name_source='in_file',
         keep_extension=True,
-        argstr="%s",
+        argstr='%s',
         position=-1,
-        desc="the output denoised DWI image")
+        desc='the output denoised DWI image',
+        genfile=True)
 
 class DWIDenoiseOutputSpec(TraitedSpec):
-    out_file = File(desc="the output denoised DWI image", exists=True)
+    noise = File(desc='the output noise map', exists=True)
+    out_file = File(desc='the output denoised DWI image', exists=True)
 
 class DWIDenoise(MRTrix3Base):
     """
@@ -73,6 +75,174 @@ class DWIDenoise(MRTrix3Base):
     _cmd = 'dwidenoise'
     input_spec = DWIDenoiseInputSpec
     output_spec = DWIDenoiseOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        if self.inputs.noise != Undefined:
+            outputs['noise'] = op.abspath(self.inputs.noise)
+        return outputs
+
+
+class MRDeGibbsInputSpec(MRTrix3BaseInputSpec):
+    in_file = File(
+        exists=True,
+        argstr='%s',
+        position=-2,
+        mandatory=True,
+        desc='input DWI image')
+    axes = traits.ListInt(
+        default_value=[0,1],
+        usedefault=True,
+        sep=',',
+        minlen=2,
+        maxlen=2,
+        argstr='-axes %s',
+        desc='indicate the plane in which the data was acquired (axial = 0,1; '
+             'coronal = 0,2; sagittal = 1,2')
+    nshifts = traits.Int(
+        default_value=20,
+        usedefault=True,
+        argstr='-nshifts %d',
+        desc='discretization of subpixel spacing (default = 20)')
+    minW = traits.Int(
+        default_value=1,
+        usedefault=True,
+        argstr='-minW %d',
+        desc='left border of window used for total variation (TV) computation '
+             '(default = 1)')
+    maxW = traits.Int(
+        default_value=3,
+        usedefault=True,
+        argstr='-maxW %d',
+        desc='right border of window used for total variation (TV) computation '
+             '(default = 3)')
+    out_file = File(name_template='%s_unr',
+        name_source='in_file',
+        keep_extension=True,
+        argstr='%s',
+        position=-1,
+        desc='the output unringed DWI image',
+        genfile=True)
+
+class MRDeGibbsOutputSpec(TraitedSpec):
+    out_file = File(desc='the output unringed DWI image', exists=True)
+
+class MRDeGibbs(MRTrix3Base):
+    """
+    Remove Gibbs ringing artifacts.
+
+    This application attempts to remove Gibbs ringing artefacts from MRI images
+    using the method of local subvoxel-shifts proposed by Kellner et al.
+
+    This command is designed to run on data directly after it has been
+    reconstructed by the scanner, before any interpolation of any kind has
+    taken place. You should not run this command after any form of motion
+    correction (e.g. not after dwipreproc). Similarly, if you intend running
+    dwidenoise, you should run this command afterwards, since it has the
+    potential to alter the noise structure, which would impact on dwidenoise's
+    performance.
+
+    Note that this method is designed to work on images acquired with full
+    k-space coverage. Running this method on partial Fourier ('half-scan') data
+    may lead to suboptimal and/or biased results, as noted in the original
+    reference below. There is currently no means of dealing with this; users
+    should exercise caution when using this method on partial Fourier data, and
+    inspect its output for any obvious artefacts.
+
+    For more information, see
+    <https://mrtrix.readthedocs.io/en/latest/reference/commands/mrdegibbs.html>
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> unring = mrt.MRDeGibbs()
+    >>> unring.inputs.in_file = 'dwi.mif'
+    >>> unring.cmdline
+    'mrdegibbs -axes 0,1 -maxW 3 -minW 1 -nshifts 20 dwi.mif dwi_unr.mif'
+    >>> unring.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = 'mrdegibbs'
+    input_spec = MRDeGibbsInputSpec
+    output_spec = MRDeGibbsOutputSpec
+
+
+class DWIBiasCorrectInputSpec(MRTrix3BaseInputSpec):
+    in_file = File(
+        exists=True,
+        argstr='%s',
+        position=-2,
+        mandatory=True,
+        desc='input DWI image')
+    in_mask = File(
+        argstr='-mask %s',
+        desc='input mask image for bias field estimation')
+    _xor_methods = ('use_ants', 'use_fsl')
+    use_ants = traits.Bool(
+        default_value=True,
+        usedefault=True,
+        argstr='-ants',
+        desc='use ANTS N4 to estimate the inhomogeneity field',
+        xor=_xor_methods)
+    use_fsl = traits.Bool(
+        argstr='-fsl',
+        desc='use FSL FAST to estimate the inhomogeneity field',
+        xor=_xor_methods,
+        min_ver='5.0.10')
+    _xor_grads = ('mrtrix_grad', 'fsl_grad')
+    mrtrix_grad = File(
+        argstr='-grad %s',
+        desc='diffusion gradient table in MRtrix format',
+        xor=_xor_grads)
+    fsl_grad = File(
+        argstr='-fslgrad %s %s',
+        desc='diffusion gradient table in FSL bvecs/bvals format',
+        xor=_xor_grads)
+    bias = File(
+        argstr='-bias %s',
+        desc='bias field')
+    out_file = File(name_template='%s_biascorr',
+        name_source='in_file',
+        keep_extension=True,
+        argstr='%s',
+        position=-1,
+        desc='the output bias corrected DWI image',
+        genfile=True)
+
+class DWIBiasCorrectOutputSpec(TraitedSpec):
+    bias = File(desc='the output bias field', exists=True)
+    out_file = File(desc='the output bias corrected DWI image', exists=True)
+
+class DWIBiasCorrect(MRTrix3Base):
+    """
+    Perform B1 field inhomogeneity correction for a DWI volume series.
+
+    For more information, see
+    <https://mrtrix.readthedocs.io/en/latest/reference/scripts/dwibiascorrect.html>
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> bias_correct = mrt.DWIBiasCorrect()
+    >>> bias_correct.inputs.in_file = 'dwi.mif'
+    >>> bias_correct.cmdline
+    'dwibiascorrect -ants dwi.mif dwi_biascorr.mif'
+    >>> bias_correct.run()                             # doctest: +SKIP
+    """
+
+    _cmd = 'dwibiascorrect'
+    input_spec = DWIBiasCorrectInputSpec
+    output_spec = DWIBiasCorrectOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        if self.inputs.bias != Undefined:
+            outputs['bias'] = op.abspath(self.inputs.bias)
+        return outputs
 
 
 class ResponseSDInputSpec(MRTrix3BaseInputSpec):

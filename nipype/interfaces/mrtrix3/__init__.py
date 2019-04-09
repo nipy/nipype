@@ -6,7 +6,7 @@ from __future__ import absolute_import
 from .utils import (Mesh2PVE, Generate5tt, BrainMask, TensorMetrics,
                     ComputeTDI, TCK2VTK, MRMath, MRConvert, DWIExtract)
 from .preprocess import (ResponseSD, ACTPrepareFSL, ReplaceFSwithFIRST,
-                         DWIDenoise)
+                         DWIDenoise, MRDeGibbs, DWIBiasCorrect)
 from .tracking import Tractography
 from .reconst import FitTensor, EstimateFOD
 from .connectivity import LabelConfig, LabelConvert, BuildConnectome
