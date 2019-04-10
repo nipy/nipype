@@ -268,15 +268,7 @@ def get_boutiques_input(inputs, interface, input_name, spec, verbose,
     elif handler_type == "Float":
         inp['type'] = "Number"
     elif handler_type == "Bool":
-        if (spec.argstr and len(spec.argstr.split("=")) > 1 and
-                (spec.argstr.split("=")[1] == '0'
-                 or spec.argstr.split("=")[1] == '1')):
-            inp['type'] = "Number"
-            inp['integer'] = True
-            inp['minimum'] = 0
-            inp['maximum'] = 1
-        else:
-            inp['type'] = "Flag"
+        inp['type'] = "Flag"
     else:
         inp['type'] = "String"
 
@@ -296,14 +288,24 @@ def get_boutiques_input(inputs, interface, input_name, spec, verbose,
     # TODO handle lists of lists (e.g. FSL ProbTrackX seed input)
     if handler_type == "List":
         inp['list'] = True
-        trait_type = type(trait_handler.item_trait.trait_type).__name__
-        if trait_type == "Int":
+        item_type = trait_handler.item_trait.trait_type
+        item_type_name = type(item_type).__name__
+        if item_type_name == "Int":
             inp['integer'] = True
             inp['type'] = "Number"
-        elif trait_type == "Float":
+        elif item_type_name == "Float":
             inp['type'] = "Number"
-        elif trait_type == "File":
+        elif item_type_name == "File":
             inp['type'] = "File"
+        elif item_type_name == "Enum":
+            value_choices = item_type.values
+            if value_choices is not None:
+                if all(isinstance(n, int) for n in value_choices):
+                    inp['type'] = "Number"
+                    inp['integer'] = True
+                elif all(isinstance(n, float) for n in value_choices):
+                    inp['type'] = "Number"
+                inp['value-choices'] = value_choices
         else:
             inp['type'] = "String"
         if trait_handler.minlen != 0:
@@ -532,7 +534,7 @@ def generate_custom_inputs(desc_inputs):
     for desc_input in desc_inputs:
         if desc_input['type'] == 'Flag':
             custom_input_dicts.append({desc_input['id']: True})
-        elif desc_input.get('value-choices'):
+        elif desc_input.get('value-choices') and not desc_input.get('list'):
             for value in desc_input['value-choices']:
                 custom_input_dicts.append({desc_input['id']: value})
     return custom_input_dicts
@@ -578,8 +580,12 @@ def get_command_line_flag(input_spec, is_flag_type=False, input_name=None):
     flag, flag_sep = None, None
     if input_spec.argstr:
         if "=" in input_spec.argstr:
-            flag = input_spec.argstr.split("=")[0].strip()
-            flag_sep = "="
+            if (input_spec.argstr.split("=")[1] == '0'
+                    or input_spec.argstr.split("=")[1] == '1'):
+                flag = input_spec.argstr
+            else:
+                flag = input_spec.argstr.split("=")[0].strip()
+                flag_sep = "="
         elif input_spec.argstr.split("%")[0]:
             flag = input_spec.argstr.split("%")[0].strip()
     elif is_flag_type:
