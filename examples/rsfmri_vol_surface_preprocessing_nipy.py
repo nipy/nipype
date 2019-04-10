@@ -65,6 +65,7 @@ fsl.FSLCommand.set_default_output_type('NIFTI_GZ')
 
 from nipype import Workflow, Node, MapNode
 
+from nipype.algorithms.filters import Bandpass
 from nipype.algorithms.rapidart import ArtifactDetect
 from nipype.algorithms.misc import TSNR, CalculateMedian
 from nipype.algorithms.confounds import ACompCor
@@ -140,42 +141,6 @@ def median(in_files):
     filename = os.path.join(os.getcwd(), 'median.nii.gz')
     median_img.to_filename(filename)
     return filename
-
-
-def bandpass_filter(files, lowpass_freq, highpass_freq, fs):
-    """Bandpass filter the input files
-
-    Parameters
-    ----------
-    files: list of 4d nifti files
-    lowpass_freq: cutoff frequency for the low pass filter (in Hz)
-    highpass_freq: cutoff frequency for the high pass filter (in Hz)
-    fs: sampling rate (in Hz)
-    """
-    out_files = []
-    for filename in filename_to_list(files):
-        path, name, ext = split_filename(filename)
-        out_file = os.path.join(os.getcwd(), name + '_bp' + ext)
-        img = nb.load(filename, mmap=NUMPY_MMAP)
-        timepoints = img.shape[-1]
-        F = np.zeros((timepoints))
-        lowidx = int(timepoints / 2) + 1
-        if lowpass_freq > 0:
-            lowidx = np.round(float(lowpass_freq) / fs * timepoints)
-        highidx = 0
-        if highpass_freq > 0:
-            highidx = np.round(float(highpass_freq) / fs * timepoints)
-        F[highidx:lowidx] = 1
-        F = ((F + F[::-1]) > 0).astype(int)
-        data = img.get_data()
-        if np.all(F == 1):
-            filtered_data = data
-        else:
-            filtered_data = np.real(np.fft.ifftn(np.fft.fftn(data) * F))
-        img_out = nb.Nifti1Image(filtered_data, img.affine, img.header)
-        img_out.to_filename(out_file)
-        out_files.append(out_file)
-    return list_to_filename(out_files)
 
 
 def motion_regressors(motion_params, order=0, derivatives=1):
@@ -700,30 +665,24 @@ def create_workflow(files,
     wf.connect(createfilter2, 'components_file', filter2, 'design')
     wf.connect(mask, 'mask_file', filter2, 'mask')
 
-    bandpass = Node(
-        Function(
-            input_names=['files', 'lowpass_freq', 'highpass_freq', 'fs'],
-            output_names=['out_files'],
-            function=bandpass_filter,
-            imports=imports),
-        name='bandpass_unsmooth')
-    bandpass.inputs.fs = 1. / TR
-    bandpass.inputs.highpass_freq = highpass_freq
-    bandpass.inputs.lowpass_freq = lowpass_freq
-    wf.connect(filter2, 'out_res', bandpass, 'files')
+    bandpass = MapNode(Bandpass(
+        repetition_time=TR, freq_low=lowpass_freq, freq_hi=highpass_freq),
+        iterfield=['in_file'], name='bandpass_unsmooth')
+
+    wf.connect(filter2, 'out_res', bandpass, 'in_file')
+
     """Smooth the functional data using
     :class:`nipype.interfaces.fsl.IsotropicSmooth`.
     """
-
     smooth = MapNode(
         interface=fsl.IsotropicSmooth(), name="smooth", iterfield=["in_file"])
     smooth.inputs.fwhm = vol_fwhm
 
-    wf.connect(bandpass, 'out_files', smooth, 'in_file')
+    wf.connect(bandpass, 'out_file', smooth, 'in_file')
 
     collector = Node(Merge(2), name='collect_streams')
     wf.connect(smooth, 'out_file', collector, 'in1')
-    wf.connect(bandpass, 'out_files', collector, 'in2')
+    wf.connect(bandpass, 'out_file', collector, 'in2')
     """
     Transform the remaining images. First to anatomical and then to target
     """
@@ -914,7 +873,7 @@ def create_workflow(files,
                  [('avgwf_txt_file', 'resting.qa.tsnr'),
                   ('summary_file', 'resting.qa.tsnr.@summary')])])
 
-    wf.connect(bandpass, 'out_files', datasink,
+    wf.connect(bandpass, 'out_file', datasink,
                'resting.timeseries.@bandpassed')
     wf.connect(smooth, 'out_file', datasink, 'resting.timeseries.@smoothed')
     wf.connect(createfilter1, 'out_files', datasink,
