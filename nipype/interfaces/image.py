@@ -5,6 +5,7 @@
 from ..utils.filemanip import fname_presuffix
 from .base import (SimpleInterface, TraitedSpec, BaseInterfaceInputSpec,
                    traits, File)
+from .. import LooseVersion
 
 
 class RescaleInputSpec(BaseInterfaceInputSpec):
@@ -186,8 +187,8 @@ If an image is not reoriented, the original file is not modified
         transform = ornt_transform(orig_ornt, targ_ornt)
         affine_xfm = inv_ornt_aff(transform, orig_img.shape)
 
-        # Check can be eliminated when minimum nibabel version >= 2.2
-        if hasattr(orig_img, 'as_reoriented'):
+        # Check can be eliminated when minimum nibabel version >= 2.4
+        if LooseVersion(nb.__version__) >= LooseVersion('2.4.0'):
             reoriented = orig_img.as_reoriented(transform)
         else:
             reoriented = _as_reoriented_backport(orig_img, transform)
@@ -212,7 +213,7 @@ If an image is not reoriented, the original file is not modified
 
 
 def _as_reoriented_backport(img, ornt):
-    """Backport of img.as_reoriented as of nibabel 2.2.0"""
+    """Backport of img.as_reoriented as of nibabel 2.4.0"""
     import numpy as np
     import nibabel as nb
     from nibabel.orientations import inv_ornt_aff
@@ -225,13 +226,8 @@ def _as_reoriented_backport(img, ornt):
 
     if isinstance(reoriented, nb.Nifti1Pair):
         # Also apply the transform to the dim_info fields
-        new_dim = list(reoriented.header.get_dim_info())
-        for idx, value in enumerate(new_dim):
-            # For each value, leave as None if it was that way,
-            # otherwise check where we have mapped it to
-            if value is None:
-                continue
-            new_dim[idx] = np.where(ornt[:, 0] == idx)[0]
+        new_dim = [None if orig_dim is None else int(ornt[orig_dim, 0])
+                   for orig_dim in img.header.get_dim_info()]
 
         reoriented.header.set_dim_info(*new_dim)
 
