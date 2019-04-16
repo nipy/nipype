@@ -94,7 +94,11 @@ def _bandpass_filter(in_file, tr=None, freq_low=0, freq_hi=0, out_file=None):
 
     F[highidx:lowidx] = 1
     F = ((F + F[::-1]) > 0).astype(int)
-    data = img.get_fdata()
+    try:
+        data = img.get_fdata()
+    except AttributeError:
+        data = img.get_data()
+
     if np.all(F):
         filtered_data = data
         return in_file
