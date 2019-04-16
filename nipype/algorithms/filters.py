@@ -14,8 +14,12 @@ from ..interfaces.base import (traits, TraitedSpec, SimpleInterface,
 
 class BandpassInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='functional data')
-    freq_low = traits.Range(0.0, min=0.0, usedefault=True, desc='low frequency cutoff')
-    freq_hi = traits.Range(0.0, min=0.0, usedefault=True, desc='high frequency cutoff')
+    freq_low = traits.Range(0.0, min=0.0, usedefault=True,
+                            desc='low frequency cutoff (in Hz); '
+                                 'the default of 0 sets low pass cutoff to Nyquist')
+    freq_hi = traits.Range(0.0, min=0.0, usedefault=True,
+                           desc='high frequency cutoff (in Hz); '
+                                'the default of 0 sets high pass cutoff to 0')
     repetition_time = traits.Either(None, traits.Range(
         0.0, min=0.0, exclude_low=True), desc='repetition_time')
 
@@ -54,8 +58,10 @@ def _bandpass_filter(in_file, tr=None, freq_low=0, freq_hi=0, out_file=None):
             4D NIfTI file
         freq_low : float
             cutoff frequency for the low pass filter (in Hz)
+            the default of 0 sets low pass cutoff to Nyquist
         freq_hi : float
             cutoff frequency for the high pass filter (in Hz)
+            the default of 0 sets high pass cutoff to 0
         tr : float
             repetition time (in seconds)
         out_file : str
@@ -88,7 +94,7 @@ def _bandpass_filter(in_file, tr=None, freq_low=0, freq_hi=0, out_file=None):
 
     F[highidx:lowidx] = 1
     F = ((F + F[::-1]) > 0).astype(int)
-    data = img.get_data()
+    data = img.get_fdata()
     if np.all(F):
         filtered_data = data
         return in_file
