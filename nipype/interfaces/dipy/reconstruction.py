@@ -24,18 +24,7 @@ from .base import (DipyDiffusionInterface, DipyBaseInterfaceInputSpec,
 
 IFLOGGER = logging.getLogger('nipype.interface')
 
-if HAVE_DIPY and (LooseVersion('0.15') >= LooseVersion(dipy_version()) >= LooseVersion('0.16')):
-    from dipy.workflows.reconst import (ReconstDkiFlow, ReconstCSAFlow,
-                                        ReconstCSDFlow, ReconstMAPMRIFlow,
-                                        ReconstDtiFlow)
-
-    DKIModel = dipy_to_nipype_interface("DKIModel", ReconstDkiFlow)
-    MapmriModel = dipy_to_nipype_interface("MapmriModel", ReconstMAPMRIFlow)
-    DTIModel = dipy_to_nipype_interface("DTIModel", ReconstDtiFlow)
-    CSAModel = dipy_to_nipype_interface("CSAModel", ReconstCSAFlow)
-    CSDModel = dipy_to_nipype_interface("CSDModel", ReconstCSDFlow)
-
-elif HAVE_DIPY and LooseVersion(dipy_version()) >= LooseVersion('1.0'):
+if HAVE_DIPY and LooseVersion(dipy_version()) >= LooseVersion('0.15'):
     from dipy.workflows import reconst
 
     l_wkflw = get_dipy_workflows(reconst)

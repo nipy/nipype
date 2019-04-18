@@ -6,15 +6,8 @@ from .base import (HAVE_DIPY, dipy_version, dipy_to_nipype_interface,
 
 IFLOGGER = logging.getLogger('nipype.interface')
 
-if HAVE_DIPY and (LooseVersion('0.15') >= LooseVersion(dipy_version()) >= LooseVersion('0.16')):
 
-    from dipy.workflows.align import ResliceFlow, SlrWithQbxFlow
-
-    Reslice = dipy_to_nipype_interface("Reslice", ResliceFlow)
-    StreamlineRegistration = dipy_to_nipype_interface("StreamlineRegistration",
-                                                      SlrWithQbxFlow)
-
-elif HAVE_DIPY and LooseVersion(dipy_version()) >= LooseVersion('1.0'):
+if HAVE_DIPY and LooseVersion(dipy_version()) >= LooseVersion('0.15'):
     from dipy.workflows import align
 
     l_wkflw = get_dipy_workflows(align)

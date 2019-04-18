@@ -10,7 +10,11 @@ from ... import logging
 from ..base import (traits, File, isdefined, LibraryBaseInterface,
                     BaseInterfaceInputSpec, TraitedSpec)
 
+# List of workflows to ignore
+SKIP_WORKFLOWS_LIST = ['Workflow', 'CombinedWorkflow']
+
 HAVE_DIPY = True
+
 try:
     import dipy
     from dipy.workflows.base import IntrospectiveArgumentParser
@@ -236,4 +240,4 @@ def get_dipy_workflows(module):
     return [(m, obj) for m, obj in inspect.getmembers(module)
             if inspect.isclass(obj) and
             issubclass(obj, module.Workflow) and
-            m not in ['Workflow', 'CombinedWorkflow']]
+            m not in SKIP_WORKFLOWS_LIST]
