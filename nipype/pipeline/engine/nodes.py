@@ -440,7 +440,6 @@ class Node(EngineBase):
             for outdatedhash in glob(op.join(self.output_dir(), '_0x*.json')):
                 os.remove(outdatedhash)
 
-
         # Hashfile while running
         hashfile_unfinished = op.join(
             outdir, '_0x%s_unfinished.json' % self._hashvalue)
@@ -475,8 +474,10 @@ class Node(EngineBase):
             logger.warning('[Node] Error on "%s" (%s)', self.fullname, outdir)
             # Tear-up after error
             if not silentrm(hashfile_unfinished):
-                logger.debug('Unfinished hashfile %s does not exist',
-                             hashfile_unfinished)
+                logger.warning("""\
+Interface finished unexpectedly and the corresponding unfinished hashfile %s \
+does not exist. Another nipype instance may be running against the same work \
+directory. Please ensure no other concurrent workflows are racing""", hashfile_unfinished)
             raise
 
         # Tear-up after success
