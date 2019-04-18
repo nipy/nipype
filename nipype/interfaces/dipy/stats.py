@@ -6,11 +6,10 @@ from .base import (HAVE_DIPY, dipy_version, dipy_to_nipype_interface,
 
 IFLOGGER = logging.getLogger('nipype.interface')
 
+if HAVE_DIPY and LooseVersion(dipy_version()) >= LooseVersion('0.16'):
+    from dipy.workflows import stats
 
-if HAVE_DIPY and LooseVersion(dipy_version()) >= LooseVersion('0.15'):
-    from dipy.workflows import align
-
-    l_wkflw = get_dipy_workflows(align)
+    l_wkflw = get_dipy_workflows(stats)
     for name, obj in l_wkflw:
         new_name = name.replace('Flow', '')
         globals()[new_name] = dipy_to_nipype_interface(new_name, obj)
