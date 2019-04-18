@@ -143,7 +143,7 @@ class AFNItoNIFTI(AFNICommand):
     input_spec = AFNItoNIFTIInputSpec
     output_spec = AFNICommandOutputSpec
 
-    def _overload_extension(self, value):
+    def _overload_extension(self, value, name=None):
         path, base, ext = split_filename(value)
         if ext.lower() not in ['.nii', '.nii.gz', '.1d', '.1D']:
             ext += '.nii'
