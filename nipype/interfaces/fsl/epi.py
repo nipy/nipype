@@ -1383,7 +1383,7 @@ class EddyQuad(FSLCommand):
         # If the output directory isn't defined, the interface seems to use
         # the default but not set its value in `self.inputs.output_dir`
         if not isdefined(self.inputs.output_dir):
-            out_dir = os.path.abspath(os.path.basename(self.inputs.base_name) + '.qc.nii.gz')
+            out_dir = os.path.abspath(os.path.basename(self.inputs.base_name) + '.qc')
         else:
             out_dir = os.path.abspath(self.inputs.output_dir)
 
@@ -1421,4 +1421,3 @@ class EddyQuad(FSLCommand):
             outputs['clean_volumes'] = clean_volumes
 
         return outputs
-
