@@ -3784,7 +3784,7 @@ warp+tlrc.HEAD -prefix Q11'
             prefix = self.inputs.out_file
             ext_ind = max([
                 prefix.lower().rfind('.nii.gz'),
-                prefix.lower().rfind('.nii.')
+                prefix.lower().rfind('.nii')
             ])
             if ext_ind == -1:
                 ext = '.HEAD'
