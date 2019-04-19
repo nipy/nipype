@@ -11,6 +11,7 @@ from builtins import range
 import os
 import os.path as op
 from collections import OrderedDict
+from itertools import chain
 
 import nibabel as nb
 import numpy as np
@@ -1262,11 +1263,18 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
         Dictionary of eigenvalues, fractional explained variances, and
         cumulative explained variances.
     """
-    components = None
     basis = np.array([])
     if components_criterion == 'all':
         components_criterion = -1
     mask_names = mask_names or range(len(mask_images))
+
+    comp_list = []
+    md_mask = []
+    md_sv = []
+    md_var = []
+    md_cumvar = []
+    md_retained = []
+
     for name, img in zip(mask_names, mask_images):
         mask = nb.squeeze_image(img).get_data().astype(np.bool)
         if imgseries.shape[:3] != mask.shape:
@@ -1331,32 +1339,30 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
         num_components = int(num_components)
         if num_components == 0:
             break
-        if components is None:
-            components = u[:, :num_components]
-            metadata = OrderedDict()
-            metadata['mask'] = [name] * len(s)
-            metadata['singular_value'] = s
-            metadata['variance_explained'] = variance_explained
-            metadata['cumulative_variance_explained'] = (
-                cumulative_variance_explained)
-            metadata['retained'] = [i < num_components for i in range(len(s))]
-        else:
-            components = np.hstack((components, u[:, :num_components]))
-            metadata['mask'] = metadata['mask'] + [name] * len(s)
-            metadata['singular_value'] = (
-                np.hstack((metadata['singular_value'], s)))
-            metadata['variance_explained'] = (
-                np.hstack((metadata['variance_explained'],
-                           variance_explained)))
-            metadata['cumulative_variance_explained'] = (
-                np.hstack((metadata['cumulative_variance_explained'],
-                           cumulative_variance_explained)))
-            metadata['retained'] = (
-                metadata['retained'] + [i < num_components for i in range(len(s))])
-    if components is None:
+
+        components.append(u[:, :num_components])
+        md_mask.append([name] * len(s))
+        md_sv.append(s)
+        md_var.append(variance_explained)
+        md_cumvar.append(cumulative_variance_explained)
+        md_retained.append(i < num_components for i in range(len(s)))
+    
+    if len(components) > 0:
+        components = np.hstack(components)
+    else:
         if failure_mode == 'error':
             raise ValueError('No components found')
-        components = np.full((M.shape[0], num_components), np.nan)
+        components = np.full((M.shape[0], num_components),
+                             np.nan, dtype=np.float32)
+
+    metadata = OrderedDict(
+        ('mask', list(chain(*md_mask))),
+        ('singular_value', np.hstack(md_sv)),
+        ('variance_explained', np.hstack(md_var)),
+        ('cumulative_variance_explained', np.hstack(md_cumvar)),
+        ('retained', list(chain(*md_retained)))
+    )
+
     return components, basis, metadata
 
 

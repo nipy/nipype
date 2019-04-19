@@ -1,7 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
-import re
 
 import nibabel as nb
 import numpy as np
@@ -198,7 +197,7 @@ class TestCompCor():
                 expected_n_components = min(ccinterface.inputs.num_components,
                                             self.fake_data.shape[3])
 
-            components_data = [re.sub('\n', '', line).split('\t')
+            components_data = [line.rstrip().split('\t')
                                for line in components_file]
 
             # the first item will be '#', we can throw it out
@@ -224,7 +223,7 @@ class TestCompCor():
             assert os.path.getsize(expected_metadata_file) > 0
 
             with open(ccresult.outputs.metadata_file, 'r') as metadata_file:
-                components_metadata = [re.sub('\n', '', line).split('\t')
+                components_metadata = [line.rstrip().split('\t')
                                        for line in metadata_file]
                 components_metadata = {i: j for i, j in
                                         zip(components_metadata[0],
