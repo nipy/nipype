@@ -667,7 +667,7 @@ class CompCor(SimpleInterface):
                 f.write('\t'.join(['component'] + list(metadata.keys())) + '\n')
                 for i in zip(components_names, *metadata.values()):
                     f.write('{0[0]}\t{0[1]}\t{0[2]:.10f}\t'
-                            '{0[3]:.10f}\t{0[4]:.10f}\n'.format(i))
+                            '{0[3]:.10f}\t{0[4]:.10f}\t{0[5]}\n'.format(i))
 
         return runtime
 
@@ -1268,7 +1268,7 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
         components_criterion = -1
     mask_names = mask_names or range(len(mask_images))
 
-    comp_list = []
+    components = []
     md_mask = []
     md_sv = []
     md_var = []
@@ -1345,8 +1345,8 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
         md_sv.append(s)
         md_var.append(variance_explained)
         md_cumvar.append(cumulative_variance_explained)
-        md_retained.append(i < num_components for i in range(len(s)))
-    
+        md_retained.append([i < num_components for i in range(len(s))])
+
     if len(components) > 0:
         components = np.hstack(components)
     else:
@@ -1355,13 +1355,13 @@ def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
         components = np.full((M.shape[0], num_components),
                              np.nan, dtype=np.float32)
 
-    metadata = OrderedDict(
+    metadata = OrderedDict([
         ('mask', list(chain(*md_mask))),
         ('singular_value', np.hstack(md_sv)),
         ('variance_explained', np.hstack(md_var)),
         ('cumulative_variance_explained', np.hstack(md_cumvar)),
         ('retained', list(chain(*md_retained)))
-    )
+    ])
 
     return components, basis, metadata
 
