@@ -73,7 +73,8 @@ class TestCompCor():
             'mask': 'mask',
             'singular_value': '4.0720553036',
             'variance_explained': '0.5527211465',
-            'cumulative_variance_explained': '0.5527211465'
+            'cumulative_variance_explained': '0.5527211465',
+            'retained': 'True',
         }
         ccinterface = CompCor(
                 variance_threshold=0.7,
