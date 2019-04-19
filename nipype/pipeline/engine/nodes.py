@@ -514,32 +514,35 @@ class Node(EngineBase):
             logger.debug('input: %s', key)
             results_file = info[0]
             logger.debug('results file: %s', results_file)
-            results = loadpkl(results_file)
+            outputs = loadpkl(results_file).outputs
+            if outputs is None:
+                raise RuntimeError("""\
+Error populating the input "%s" of node "%s": the results file of the source node \
+(%s) does not contain any outputs.""" % (key, self.name, results_file))
             output_value = Undefined
             if isinstance(info[1], tuple):
                 output_name = info[1][0]
-                value = getattr(results.outputs, output_name)
+                value = getattr(outputs, output_name)
                 if isdefined(value):
                     output_value = evaluate_connect_function(
                         info[1][1], info[1][2], value)
             else:
                 output_name = info[1]
                 try:
-                    output_value = results.outputs.trait_get()[output_name]
+                    output_value = outputs.trait_get()[output_name]
                 except AttributeError:
-                    output_value = results.outputs.dictcopy()[output_name]
+                    output_value = outputs.dictcopy()[output_name]
             logger.debug('output: %s', output_name)
             try:
                 self.set_input(key, deepcopy(output_value))
             except traits.TraitError as e:
-                msg = [
-                    'Error setting node input:',
-                    'Node: %s' % self.name,
-                    'input: %s' % key,
+                msg = (
+                    e.args[0], '', 'Error setting node input:',
+                    'Node: %s' % self.name, 'input: %s' % key,
                     'results_file: %s' % results_file,
-                    'value: %s' % str(output_value)
-                ]
-                e.args = (e.args[0] + "\n" + '\n'.join(msg), )
+                    'value: %s' % str(output_value),
+                )
+                e.args = ('\n'.join(msg), )
                 raise
 
         # Successfully set inputs
