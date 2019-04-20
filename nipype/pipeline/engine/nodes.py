@@ -27,7 +27,7 @@ from ...utils.misc import flatten, unflatten, str2bool, dict_diff
 from ...utils.filemanip import (md5, FileNotFoundError, ensure_list,
                                 simplify_list, copyfiles, fnames_presuffix,
                                 loadpkl, split_filename, load_json, makedirs,
-                                emptydirs, savepkl, to_str, indirectory)
+                                emptydirs, savepkl, to_str, indirectory, silentrm)
 
 from ...interfaces.base import (traits, InputMultiPath, CommandLine, Undefined,
                                 DynamicTraitedSpec, Bunch, InterfaceResult,
@@ -440,7 +440,6 @@ class Node(EngineBase):
             for outdatedhash in glob(op.join(self.output_dir(), '_0x*.json')):
                 os.remove(outdatedhash)
 
-
         # Hashfile while running
         hashfile_unfinished = op.join(
             outdir, '_0x%s_unfinished.json' % self._hashvalue)
@@ -474,7 +473,11 @@ class Node(EngineBase):
         except Exception:
             logger.warning('[Node] Error on "%s" (%s)', self.fullname, outdir)
             # Tear-up after error
-            os.remove(hashfile_unfinished)
+            if not silentrm(hashfile_unfinished):
+                logger.warning("""\
+Interface finished unexpectedly and the corresponding unfinished hashfile %s \
+does not exist. Another nipype instance may be running against the same work \
+directory. Please ensure no other concurrent workflows are racing""", hashfile_unfinished)
             raise
 
         # Tear-up after success
