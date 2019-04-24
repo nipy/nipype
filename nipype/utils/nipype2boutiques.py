@@ -19,7 +19,6 @@ from builtins import str, open, bytes
 import os
 import sys
 import simplejson as json
-import six
 
 from ..scripts.instance import import_module
 
@@ -310,7 +309,7 @@ def get_boutiques_input(inputs, interface, input_name, spec, verbose,
             inp['type'] = "String"
         if trait_handler.minlen != 0:
             inp['min-list-entries'] = trait_handler.minlen
-        if trait_handler.maxlen != six.MAXSIZE:
+        if trait_handler.maxlen != sys.maxsize:
             inp['max-list-entries'] = trait_handler.maxlen
         if spec.sep:
             inp['list-separator'] = spec.sep
@@ -353,6 +352,8 @@ def get_boutiques_input(inputs, interface, input_name, spec, verbose,
         inp['optional'] = False
     if spec.usedefault:
         inp['default-value'] = spec.default_value()[1]
+    if spec.requires is not None:
+        inp['requires-inputs'] = spec.requires
 
     try:
         value_choices = trait_handler.values
@@ -422,7 +423,8 @@ def get_boutiques_output(outputs, name, spec, interface, tool_inputs):
 
     # Handle multi-outputs
     if (isinstance(output_value, list) or
-            type(spec.handler).__name__ == "OutputMultiObject"):
+            type(spec.handler).__name__ == "OutputMultiObject" or
+            type(spec.handler).__name__ == "List"):
         output['list'] = True
         if output_value:
             # Check if all extensions are the same
@@ -451,32 +453,19 @@ def get_boutiques_output(outputs, name, spec, interface, tool_inputs):
 def get_boutiques_groups(input_traits):
     """
     Returns a list of dictionaries containing Boutiques groups for the mutually
-    exclusive and all-or-none Nipype inputs.
+    exclusive Nipype inputs.
     """
     desc_groups = []
-    all_or_none_input_sets = []
     mutex_input_sets = []
 
     # Get all the groups
     for name, spec in input_traits:
-        if spec.requires is not None:
-            group_members = set([name] + list(spec.requires))
-            if group_members not in all_or_none_input_sets:
-                all_or_none_input_sets.append(group_members)
         if spec.xor is not None:
             group_members = set([name] + list(spec.xor))
             if group_members not in mutex_input_sets:
                 mutex_input_sets.append(group_members)
 
     # Create a dictionary for each one
-    for i, inp_set in enumerate(all_or_none_input_sets, 1):
-        desc_groups.append({'id': "all_or_none_group" +
-                                  ("_" + str(i) if i != 1 else ""),
-                            'name': "All or none group" +
-                                    (" " + str(i) if i != 1 else ""),
-                            'members': list(inp_set),
-                            'all-or-none': True})
-
     for i, inp_set in enumerate(mutex_input_sets, 1):
         desc_groups.append({'id': "mutex_group" +
                                   ("_" + str(i) if i != 1 else ""),
