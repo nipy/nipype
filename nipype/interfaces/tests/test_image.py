@@ -9,10 +9,10 @@ from nibabel.orientations import axcodes2ornt, ornt_transform
 from ..image import _as_reoriented_backport, _orientations
 from ... import LooseVersion
 
-nibabel22 = LooseVersion(nb.__version__) >= LooseVersion('2.2.0')
+nibabel24 = LooseVersion(nb.__version__) >= LooseVersion('2.4.0')
 
 
-@pytest.mark.skipif(not nibabel22,
+@pytest.mark.skipif(not nibabel24,
                     reason="Old nibabel - can't directly compare")
 def test_reorientation_backport():
     pixdims = ((1, 1, 1), (2, 2, 3))

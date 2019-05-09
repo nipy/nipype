@@ -3,14 +3,29 @@
 import os.path as op
 import nibabel as nb
 import numpy as np
+from distutils.version import LooseVersion
 
 from ...utils import NUMPY_MMAP
 
 from ... import logging
 from ..base import (traits, TraitedSpec, File, isdefined)
-from .base import DipyBaseInterface
+from .base import (HAVE_DIPY, dipy_version, dipy_to_nipype_interface,
+                   get_dipy_workflows, DipyBaseInterface)
 
 IFLOGGER = logging.getLogger('nipype.interface')
+
+if HAVE_DIPY and LooseVersion(dipy_version()) >= LooseVersion('0.15'):
+    from dipy.workflows import denoise, mask
+
+    l_wkflw = get_dipy_workflows(denoise) + get_dipy_workflows(mask)
+    for name, obj in l_wkflw:
+        new_name = name.replace('Flow', '')
+        globals()[new_name] = dipy_to_nipype_interface(new_name, obj)
+    del l_wkflw
+
+else:
+    IFLOGGER.info("We advise you to upgrade DIPY version. This upgrade will"
+                  " open access to more function")
 
 
 class ResampleInputSpec(TraitedSpec):

@@ -12,7 +12,7 @@ These functions include:
   * SpecifyModel: allows specification of sparse and non-sparse models
 """
 from copy import deepcopy
-import os, math, csv
+import csv, math, os
 
 from nibabel import load
 import numpy as np
@@ -141,7 +141,7 @@ def scale_timings(timelist, input_units, output_units, time_repetition):
     return timelist
 
 def bids_gen_info(bids_event_files,
-                  condition_column='trial_type',
+                  condition_column='',
                   amplitude_column=None,
                   time_repetition=False,
                   ):
@@ -169,9 +169,13 @@ def bids_gen_info(bids_event_files,
     info = []
     for bids_event_file in bids_event_files:
         with open(bids_event_file) as f:
-            f_events = csv.DictReader(f, skipinitialspace=True, delimiter='\t')
+            f_events = csv.DictReader(f, skipinitialspace=True, delimiter=str_basetype('\t'))
             events = [{k: v for k, v in row.items()} for row in f_events]
-        conditions = list(set([i[condition_column] for i in events]))
+        if not condition_column:
+            condition_column = '_trial_type'
+            for i in events:
+                i.update({condition_column: 'ev0'})
+        conditions = sorted(set([i[condition_column] for i in events]))
         runinfo = Bunch(conditions=[], onsets=[], durations=[], amplitudes=[])
         for condition in conditions:
             selected_events = [i for i in events if i[condition_column]==condition]
@@ -181,10 +185,7 @@ def bids_gen_info(bids_event_files,
                 decimals = math.ceil(-math.log10(time_repetition))
                 onsets = [np.round(i, decimals) for i in onsets]
                 durations = [np.round(i ,decimals) for i in durations]
-            if condition:
-                runinfo.conditions.append(condition)
-            else:
-                runinfo.conditions.append('e0')
+            runinfo.conditions.append(condition)
             runinfo.onsets.append(onsets)
             runinfo.durations.append(durations)
             try:

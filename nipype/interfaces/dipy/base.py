@@ -8,7 +8,11 @@ from ... import logging
 from ..base import (traits, File, isdefined, LibraryBaseInterface,
                     BaseInterfaceInputSpec, TraitedSpec)
 
+# List of workflows to ignore
+SKIP_WORKFLOWS_LIST = ['Workflow', 'CombinedWorkflow']
+
 HAVE_DIPY = True
+
 try:
     import dipy
     from dipy.workflows.base import IntrospectiveArgumentParser
@@ -209,3 +213,29 @@ def dipy_to_nipype_interface(cls_name, dipy_flow, BaseClass=DipyBaseInterface):
                      "_run_interface": _run_interface,
                      "_list_outputs:": _list_outputs})
     return newclass
+
+
+def get_dipy_workflows(module):
+    """Search for DIPY workflow class.
+
+    Parameters
+    ----------
+    module : object
+        module object
+
+    Returns
+    -------
+    l_wkflw : list of tuple
+        This a list of tuple containing 2 elements:
+        Worflow name, Workflow class obj
+
+    Examples
+    --------
+    >>> from dipy.workflows import align  # doctest: +SKIP
+    >>> get_dipy_workflows(align)  # doctest: +SKIP
+
+    """
+    return [(m, obj) for m, obj in inspect.getmembers(module)
+            if inspect.isclass(obj) and
+            issubclass(obj, module.Workflow) and
+            m not in SKIP_WORKFLOWS_LIST]

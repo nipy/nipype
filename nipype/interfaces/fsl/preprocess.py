@@ -1156,7 +1156,7 @@ class FNIRT(FSLCommand):
                 if suffix.endswith('.txt'):
                     change_ext = False
                 if isdefined(inval):
-                    outputs[key] = inval
+                    outputs[key] = os.path.abspath(inval)
                 else:
                     outputs[key] = self._gen_fname(
                         self.inputs.in_file,

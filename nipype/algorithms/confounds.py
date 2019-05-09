@@ -6,6 +6,8 @@ Algorithms to compute confounds in :abbr:`fMRI (functional MRI)`
 '''
 import os
 import os.path as op
+from collections import OrderedDict
+from itertools import chain
 
 import nibabel as nb
 import numpy as np
@@ -15,7 +17,8 @@ from .. import config, logging
 from ..external.due import BibTeX
 from ..interfaces.base import (traits, TraitedSpec, BaseInterface,
                                BaseInterfaceInputSpec, File, isdefined,
-                               InputMultiPath, OutputMultiPath)
+                               InputMultiPath, OutputMultiPath,
+                               SimpleInterface)
 from ..utils import NUMPY_MMAP
 from ..utils.misc import normalize_mc_params
 
@@ -382,11 +385,32 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         requires=['mask_files'],
         desc=('Position of mask in `mask_files` to use - '
               'first is the default.'))
+    mask_names = traits.List(
+        traits.Str,
+        desc='Names for provided masks (for printing into metadata). '
+             'If provided, it must be as long as the final mask list '
+             '(after any merge and indexing operations).')
     components_file = traits.Str(
         'components_file.txt',
         usedefault=True,
         desc='Filename to store physiological components')
-    num_components = traits.Int(6, usedefault=True)  # 6 for BOLD, 4 for ASL
+    num_components = traits.Either(
+        'all', traits.Range(low=1), xor=['variance_threshold'],
+        desc='Number of components to return from the decomposition. If '
+             '`num_components` is `all`, then all components will be '
+             'retained.')
+    # 6 for BOLD, 4 for ASL
+    # automatically instantiated to 6 in CompCor below if neither
+    # `num_components` nor `variance_threshold` is defined (for
+    # backward compatibility)
+    variance_threshold = traits.Range(
+        low=0.0, high=1.0, exclude_low=True, exclude_high=True, xor=['num_components'],
+        desc='Select the number of components to be returned automatically '
+             'based on their ability to explain variance in the dataset. '
+             '`variance_threshold` is a fractional value between 0 and 1; '
+             'the number of components retained will be equal to the minimum '
+             'number of components necessary to explain the provided '
+             'fraction of variance in the masked time series.')
     pre_filter = traits.Enum(
         'polynomial',
         'cosine',
@@ -413,7 +437,11 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         desc='Repetition time (TR) of series - derived from image header if '
         'unspecified')
     save_pre_filter = traits.Either(
-        traits.Bool, File, desc='Save pre-filter basis as text file')
+        traits.Bool, File, default=False, usedefault=True,
+        desc='Save pre-filter basis as text file')
+    save_metadata = traits.Either(
+        traits.Bool, File, default=False, usedefault=True,
+        desc='Save component metadata as text file')
     ignore_initial_volumes = traits.Range(
         low=0,
         usedefault=True,
@@ -429,9 +457,10 @@ class CompCorOutputSpec(TraitedSpec):
     components_file = File(
         exists=True, desc='text file containing the noise components')
     pre_filter_file = File(desc='text file containing high-pass filter basis')
+    metadata_file = File(desc='text file containing component metadata')
 
 
-class CompCor(BaseInterface):
+class CompCor(SimpleInterface):
     """
     Interface with core CompCor computation, used in aCompCor and tCompCor
 
@@ -469,20 +498,20 @@ class CompCor(BaseInterface):
     input_spec = CompCorInputSpec
     output_spec = CompCorOutputSpec
     references_ = [{
+        'tags': ['method', 'implementation'],
         'entry':
-        BibTeX(
-            "@article{compcor_2007,"
-            "title = {A component based noise correction method (CompCor) for BOLD and perfusion based},"
-            "volume = {37},"
-            "number = {1},"
-            "doi = {10.1016/j.neuroimage.2007.04.042},"
-            "urldate = {2016-08-13},"
-            "journal = {NeuroImage},"
-            "author = {Behzadi, Yashar and Restom, Khaled and Liau, Joy and Liu, Thomas T.},"
-            "year = {2007},"
-            "pages = {90-101},}"),
-        'tags': ['method', 'implementation']
-    }]
+            BibTeX("""\
+@article{compcor_2007,
+    title = {A component based noise correction method (CompCor) for BOLD and perfusion based},
+    volume = {37},
+    number = {1},
+    doi = {10.1016/j.neuroimage.2007.04.042},
+    urldate = {2016-08-13},
+    journal = {NeuroImage},
+    author = {Behzadi, Yashar and Restom, Khaled and Liau, Joy and Liu, Thomas T.},
+    year = {2007},
+    pages = {90-101}
+}""")}]
 
     def __init__(self, *args, **kwargs):
         ''' exactly the same as compcor except the header '''
@@ -544,9 +573,22 @@ class CompCor(BaseInterface):
                         '{} cannot detect repetition time from image - '
                         'Set the repetition_time input'.format(self._header))
 
-        components, filter_basis = compute_noise_components(
-            imgseries.get_data(), mask_images, self.inputs.num_components,
-            self.inputs.pre_filter, degree, self.inputs.high_pass_cutoff, TR)
+        if isdefined(self.inputs.variance_threshold):
+            components_criterion = self.inputs.variance_threshold
+        elif isdefined(self.inputs.num_components):
+            components_criterion = self.inputs.num_components
+        else:
+            components_criterion = 6
+            IFLOGGER.warning('`num_components` and `variance_threshold` are '
+                             'not defined. Setting number of components to 6 '
+                             'for backward compatibility. Please set either '
+                             '`num_components` or `variance_threshold`, as '
+                             'this feature may be deprecated in the future.')
+
+        components, filter_basis, metadata = compute_noise_components(
+            imgseries.get_data(), mask_images, components_criterion,
+            self.inputs.pre_filter, degree, self.inputs.high_pass_cutoff, TR,
+            self.inputs.failure_mode, self.inputs.mask_names)
 
         if skip_vols:
             old_comp = components
@@ -557,16 +599,27 @@ class CompCor(BaseInterface):
 
         components_file = os.path.join(os.getcwd(),
                                        self.inputs.components_file)
+        components_header = self._make_headers(components.shape[1])
         np.savetxt(
             components_file,
             components,
             fmt=b"%.10f",
             delimiter='\t',
-            header=self._make_headers(components.shape[1]),
+            header='\t'.join(components_header),
             comments='')
+        self._results['components_file'] = os.path.join(
+            runtime.cwd, self.inputs.components_file)
 
-        if self.inputs.pre_filter and self.inputs.save_pre_filter:
-            pre_filter_file = self._list_outputs()['pre_filter_file']
+        save_pre_filter = False
+        if self.inputs.pre_filter in ['polynomial', 'cosine']:
+            save_pre_filter = self.inputs.save_pre_filter
+
+        if save_pre_filter:
+            self._results['pre_filter_file'] = save_pre_filter
+            if save_pre_filter is True:
+                self._results['pre_filter_file'] = os.path.join(
+                    runtime.cwd, 'pre_filter.tsv')
+
             ftype = {
                 'polynomial': 'Legendre',
                 'cosine': 'Cosine'
@@ -586,36 +639,42 @@ class CompCor(BaseInterface):
                     for i in range(skip_vols)
                 ])
             np.savetxt(
-                pre_filter_file,
+                self._results['pre_filter_file'],
                 filter_basis,
                 fmt=b'%.10f',
                 delimiter='\t',
                 header='\t'.join(header),
                 comments='')
 
+        metadata_file = self.inputs.save_metadata
+        if metadata_file:
+            self._results['metadata_file'] = metadata_file
+            if metadata_file is True:
+                self._results['metadata_file'] = (
+                    os.path.join(runtime.cwd, 'component_metadata.tsv'))
+            components_names = np.empty(len(metadata['mask']),
+                                        dtype='object_')
+            retained = np.where(metadata['retained'])
+            not_retained = np.where(np.logical_not(metadata['retained']))
+            components_names[retained] = components_header
+            components_names[not_retained] = ([
+                'dropped{}'.format(i) for i in range(len(not_retained[0]))])
+            with open(self._results['metadata_file'], 'w') as f:
+                f.write('\t'.join(['component'] + list(metadata.keys())) + '\n')
+                for i in zip(components_names, *metadata.values()):
+                    f.write('{0[0]}\t{0[1]}\t{0[2]:.10f}\t'
+                            '{0[3]:.10f}\t{0[4]:.10f}\t{0[5]}\n'.format(i))
+
         return runtime
 
     def _process_masks(self, mask_images, timeseries=None):
         return mask_images
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['components_file'] = os.path.abspath(
-            self.inputs.components_file)
-
-        save_pre_filter = self.inputs.save_pre_filter
-        if save_pre_filter:
-            if isinstance(save_pre_filter, bool):
-                save_pre_filter = os.path.abspath('pre_filter.tsv')
-            outputs['pre_filter_file'] = save_pre_filter
-
-        return outputs
-
     def _make_headers(self, num_col):
         header = self.inputs.header_prefix if \
             isdefined(self.inputs.header_prefix) else self._header
         headers = ['{}{:02d}'.format(header, i) for i in range(num_col)]
-        return '\t'.join(headers)
+        return headers
 
 
 class ACompCor(CompCor):
@@ -1020,9 +1079,12 @@ def is_outlier(points, thresh=3.5):
     return timepoints_to_discard
 
 
-def cosine_filter(data, timestep, period_cut, remove_mean=True, axis=-1):
+def cosine_filter(data, timestep, period_cut, remove_mean=True, axis=-1,
+                  failure_mode='error'):
     datashape = data.shape
     timepoints = datashape[axis]
+    if datashape[0] == 0 and failure_mode != 'error':
+        return data, np.array([])
 
     data = data.reshape((-1, timepoints))
 
@@ -1041,7 +1103,8 @@ def cosine_filter(data, timestep, period_cut, remove_mean=True, axis=-1):
     return residuals.reshape(datashape), non_constant_regressors
 
 
-def regress_poly(degree, data, remove_mean=True, axis=-1):
+def regress_poly(degree, data, remove_mean=True, axis=-1,
+                 failure_mode='error'):
     """
     Returns data with degree polynomial regressed out.
 
@@ -1054,6 +1117,8 @@ def regress_poly(degree, data, remove_mean=True, axis=-1):
 
     datashape = data.shape
     timepoints = datashape[axis]
+    if datashape[0] == 0 and failure_mode != 'error':
+        return data, np.array([])
 
     # Rearrange all voxel-wise time-series in rows
     data = data.reshape((-1, timepoints))
@@ -1136,35 +1201,78 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
         return [img]
 
 
-def compute_noise_components(imgseries, mask_images, num_components,
-                             filter_type, degree, period_cut, repetition_time):
+def compute_noise_components(imgseries, mask_images, components_criterion=0.5,
+                             filter_type=False, degree=0, period_cut=128,
+                             repetition_time=None, failure_mode='error',
+                             mask_names=None):
     """Compute the noise components from the imgseries for each mask
 
-    imgseries: a nibabel img
-    mask_images: a list of nibabel images
-    num_components: number of noise components to return
-    filter_type: type off filter to apply to time series before computing
-                 noise components.
+    Parameters
+    ----------
+    imgseries: nibabel image
+        Time series data to be decomposed.
+    mask_images: list
+        List of nibabel images. Time series data from `img_series` is subset
+        according to the spatial extent of each mask, and the subset data is
+        then decomposed using principal component analysis. Masks should be
+        coextensive with either anatomical or spatial noise ROIs.
+    components_criterion: float
+        Number of noise components to return. If this is a decimal value
+        between 0 and 1, then `create_noise_components` will instead return
+        the smallest number of components necessary to explain the indicated
+        fraction of variance. If `components_criterion` is `all`, then all
+        components will be returned.
+    filter_type: str
+        Type of filter to apply to time series before computing
+                noise components.
         'polynomial' - Legendre polynomial basis
         'cosine' - Discrete cosine (DCT) basis
         False - None (mean-removal only)
+    failure_mode: str
+        Action to be taken in the event that any decomposition fails to
+        identify any components. `error` indicates that the routine should
+        raise an exception and exit, while any other value indicates that the
+        routine should return a matrix of NaN values equal in size to the
+        requested decomposition matrix.
+    mask_names: list or None
+        List of names for each image in `mask_images`. This should be equal in
+        length to `mask_images`, with the ith element of `mask_names` naming
+        the ith element of `mask_images`.
 
     Filter options:
 
-    degree: order of polynomial used to remove trends from the timeseries
-    period_cut: minimum period (in sec) for DCT high-pass filter
-    repetition_time: time (in sec) between volume acquisitions
+    degree: int
+        Order of polynomial used to remove trends from the timeseries
+    period_cut: float
+        Minimum period (in sec) for DCT high-pass filter
+    repetition_time: float
+        Time (in sec) between volume acquisitions. This must be defined if
+        the `filter_type` is `cosine`.
 
-    returns:
-
-    components: a numpy array
-    basis: a numpy array containing the (non-constant) filter regressors
-
+    Returns
+    -------
+    components: numpy array
+        Numpy array containing the requested set of noise components
+    basis: numpy array
+        Numpy array containing the (non-constant) filter regressors
+    metadata: OrderedDict{str: numpy array}
+        Dictionary of eigenvalues, fractional explained variances, and
+        cumulative explained variances.
     """
-    components = None
     basis = np.array([])
-    for img in mask_images:
-        mask = img.get_data().astype(np.bool)
+    if components_criterion == 'all':
+        components_criterion = -1
+    mask_names = mask_names or range(len(mask_images))
+
+    components = []
+    md_mask = []
+    md_sv = []
+    md_var = []
+    md_cumvar = []
+    md_retained = []
+
+    for name, img in zip(mask_names, mask_images):
+        mask = nb.squeeze_image(img).get_data().astype(np.bool)
         if imgseries.shape[:3] != mask.shape:
             raise ValueError(
                 'Inputs for CompCor, timeseries and mask, do not have '
@@ -1179,13 +1287,18 @@ def compute_noise_components(imgseries, mask_images, num_components,
         # Currently support Legendre-polynomial or cosine or detrending
         # With no filter, the mean is nonetheless removed (poly w/ degree 0)
         if filter_type == 'cosine':
+            if repetition_time is None:
+                raise ValueError(
+                    'Repetition time must be provided for cosine filter')
             voxel_timecourses, basis = cosine_filter(
-                voxel_timecourses, repetition_time, period_cut)
+                voxel_timecourses, repetition_time, period_cut,
+                failure_mode=failure_mode)
         elif filter_type in ('polynomial', False):
             # from paper:
             # "The constant and linear trends of the columns in the matrix M were
             # removed [prior to ...]"
-            voxel_timecourses, basis = regress_poly(degree, voxel_timecourses)
+            voxel_timecourses, basis = regress_poly(degree, voxel_timecourses,
+                                                    failure_mode=failure_mode)
 
         # "Voxel time series from the noise ROI (either anatomical or tSTD) were
         # placed in a matrix M of size Nxm, with time along the row dimension
@@ -1198,20 +1311,55 @@ def compute_noise_components(imgseries, mask_images, num_components,
         # "The covariance matrix C = MMT was constructed and decomposed into its
         # principal components using a singular value decomposition."
         try:
-            u, _, _ = fallback_svd(M, full_matrices=False)
-        except np.linalg.LinAlgError:
-            if self.inputs.failure_mode == 'error':
+            u, s, _ = fallback_svd(M, full_matrices=False)
+        except (np.linalg.LinAlgError, ValueError):
+            if failure_mode == 'error':
                 raise
-            u = np.ones((M.shape[0], num_components), dtype=np.float32) * np.nan
-        if components is None:
-            components = u[:, :num_components]
-        else:
-            components = np.hstack((components, u[:, :num_components]))
-    if components is None and num_components > 0:
-        if self.inputs.failure_mode == 'error':
+            s = np.full(M.shape[0], np.nan, dtype=np.float32)
+            if components_criterion >= 1:
+                u = np.full((M.shape[0], components_criterion),
+                            np.nan, dtype=np.float32)
+            else:
+                u = np.full((M.shape[0], 1), np.nan, dtype=np.float32)
+
+        variance_explained = (s ** 2) / np.sum(s ** 2)
+        cumulative_variance_explained = np.cumsum(variance_explained)
+
+        num_components = int(components_criterion)
+        if 0 < components_criterion < 1:
+            num_components = np.searchsorted(cumulative_variance_explained,
+                                             components_criterion) + 1
+        elif components_criterion == -1:
+            num_components = len(s)
+
+        num_components = int(num_components)
+        if num_components == 0:
+            break
+
+        components.append(u[:, :num_components])
+        md_mask.append([name] * len(s))
+        md_sv.append(s)
+        md_var.append(variance_explained)
+        md_cumvar.append(cumulative_variance_explained)
+        md_retained.append([i < num_components for i in range(len(s))])
+
+    if len(components) > 0:
+        components = np.hstack(components)
+    else:
+        if failure_mode == 'error':
             raise ValueError('No components found')
-        components = np.ones((M.shape[0], num_components), dtype=np.float32) * np.nan
-    return components, basis
+        components = np.full((M.shape[0], num_components),
+                             np.nan, dtype=np.float32)
+
+    metadata = OrderedDict([
+        ('mask', list(chain(*md_mask))),
+        ('singular_value', np.hstack(md_sv)),
+        ('variance_explained', np.hstack(md_var)),
+        ('cumulative_variance_explained', np.hstack(md_cumvar)),
+        ('retained', list(chain(*md_retained)))
+    ])
+
+    return components, basis, metadata
 
 
 def _compute_tSTD(M, x, axis=0):
