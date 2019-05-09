@@ -172,13 +172,13 @@
       "orcid": "0000-0003-1057-1336"
     },
     {
-      "affiliation": "Indiana University, IN, USA",
-      "name": "Koudoro, Serge"
-    },
-    {
       "affiliation": "The University of Washington eScience Institute",
       "name": "Rokem, Ariel",
       "orcid": "0000-0003-0679-1985"
+    },
+    {
+      "affiliation": "Indiana University, IN, USA",
+      "name": "Koudoro, Serge"
     },
     {
       "affiliation": "Montreal Neurological Institute and Hospital",
@@ -590,6 +590,10 @@
     },
     {
       "name": "Nickson, Thomas"
+    },
+    {
+      "name": "Crusoe, Michael R.",
+      "orcid": "0000-0002-2961-9670"
     },
     {
       "name": "Brett, Matthew"
