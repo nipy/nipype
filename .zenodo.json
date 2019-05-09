@@ -90,14 +90,14 @@
       "orcid": "0000-0002-8121-8954"
     },
     {
-      "affiliation": "National Institute of Mental Health",
-      "name": "Nielson, Dylan M.",
-      "orcid": "0000-0003-4613-6643"
-    },
-    {
       "affiliation": "Department of Electrical and Computer Engineering, Johns Hopkins University",
       "name": "Dewey, Blake E",
       "orcid": "0000-0003-4554-5058"
+    },
+    {
+      "affiliation": "National Institute of Mental Health",
+      "name": "Nielson, Dylan M.",
+      "orcid": "0000-0003-4613-6643"
     },
     {
       "name": "Madison, Cindee"
@@ -105,6 +105,11 @@
     {
       "affiliation": "Molecular Imaging Research Center, CEA, France",
       "name": "Bougacha, Salma"
+    },
+    {
+      "affiliation": "Stanford University",
+      "name": "\u0106iri\u0107 , Rastko",
+      "orcid": "0000-0001-6347-7939"
     },
     {
       "affiliation": "National Institutes of Health",
@@ -116,14 +121,14 @@
       "orcid": "0000-0002-2666-0969"
     },
     {
-      "affiliation": "Dartmouth College",
-      "name": "Visconti di Oleggio Castello, Matteo",
-      "orcid": "0000-0001-7931-5272"
-    },
-    {
       "affiliation": "UC Berkeley",
       "name": "Clark, Dav",
       "orcid": "0000-0002-3982-4416"
+    },
+    {
+      "affiliation": "Dartmouth College",
+      "name": "Visconti di Oleggio Castello, Matteo",
+      "orcid": "0000-0001-7931-5272"
     },
     {
       "affiliation": "UC Berkeley - UCSF Graduate Program in Bioengineering",
@@ -142,14 +147,14 @@
       "name": "Berleant, Shoshana"
     },
     {
-      "affiliation": "Dartmouth College: Hanover, NH, United States",
-      "name": "Halchenko, Yaroslav O.",
-      "orcid": "0000-0003-3456-2493"
-    },
-    {
       "affiliation": "Institute for Biomedical Engineering, ETH and University of Zurich",
       "name": "Christian, Horea",
       "orcid": "0000-0001-7037-2449"
+    },
+    {
+      "affiliation": "Dartmouth College: Hanover, NH, United States",
+      "name": "Halchenko, Yaroslav O.",
+      "orcid": "0000-0003-3456-2493"
     },
     {
       "affiliation": "UC San Diego",
@@ -172,6 +177,10 @@
       "orcid": "0000-0003-0679-1985"
     },
     {
+      "affiliation": "Indiana University, IN, USA",
+      "name": "Koudoro, Serge"
+    },
+    {
       "affiliation": "Montreal Neurological Institute and Hospital",
       "name": "DuPre, Elizabeth",
       "orcid": "0000-0003-1358-196X"
@@ -188,6 +197,11 @@
       "affiliation": "INRIA",
       "name": "Varoquaux, Gael",
       "orcid": "0000-0003-1076-5122"
+    },
+    {
+      "affiliation": "The Centre for Addiction and Mental Health",
+      "name": "Joseph, Michael",
+      "orcid": "0000-0002-0068-230X"
     },
     {
       "affiliation": "Athena EPI, Inria Sophia-Antipolis",
@@ -246,12 +260,12 @@
       "orcid": "0000-0003-2766-8425"
     },
     {
+      "name": "Schwartz, Yannick"
+    },
+    {
       "affiliation": "University of Washington",
       "name": "Richie-Halford, Adam",
       "orcid": "0000-0001-9276-9084"
-    },
-    {
-      "name": "Schwartz, Yannick"
     },
     {
       "affiliation": "University College London",
@@ -331,16 +345,6 @@
       "orcid": "0000-0003-0646-4810"
     },
     {
-      "affiliation": "Stanford University",
-      "name": "Ciric, Rastko",
-      "orcid": "0000-0001-6347-7939"
-    },
-    {
-      "affiliation": "The Centre for Addiction and Mental Health",
-      "name": "Joseph, Michael",
-      "orcid": "0000-0002-0068-230X"
-    },
-    {
       "affiliation": "UniversityHospital Heidelberg, Germany",
       "name": "Kleesiek, Jens"
     },
@@ -379,10 +383,6 @@
     },
     {
       "name": "Haselgrove, Christian"
-    },
-    {
-      "name": "Koudoro, Serge",
-      "affiliation": "Indiana University, IN, USA"
     },
     {
       "affiliation": "1 McGill Centre for Integrative Neuroscience (MCIN), Ludmer Centre for Neuroinformatics and Mental Health, Montreal Neurological Institute (MNI), McGill University, Montr\u00e9al, 3801 University Street, WB-208, H3A 2B4, Qu\u00e9bec, Canada. 2 University of Lyon, CNRS, INSERM, CREATIS., Villeurbanne, 7, avenue Jean Capelle, 69621, France.",
@@ -429,11 +429,6 @@
       "name": "Hallquist, Michael"
     },
     {
-      "affiliation": "Dartmouth College",
-      "name": "Ma, Feilong",
-      "orcid": "0000-0002-6838-3971"
-    },
-    {
       "affiliation": "TIB \u2013 Leibniz Information Centre for Science and Technology and University Library, Hannover, Germany",
       "name": "Leinweber, Katrin",
       "orcid": "0000-0001-5135-5758"
@@ -447,6 +442,11 @@
       "affiliation": "GIGA Institute",
       "name": "Grignard, Martin",
       "orcid": "0000-0001-5549-1861"
+    },
+    {
+      "affiliation": "Dartmouth College",
+      "name": "Ma, Feilong",
+      "orcid": "0000-0002-6838-3971"
     },
     {
       "affiliation": "INRIA-Saclay, Team Parietal",
@@ -590,6 +590,10 @@
     },
     {
       "name": "Nickson, Thomas"
+    },
+    {
+      "name": "Crusoe, Michael R.",
+      "orcid": "0000-0002-2961-9670"
     },
     {
       "name": "Brett, Matthew"
