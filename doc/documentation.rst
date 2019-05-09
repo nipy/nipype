@@ -9,7 +9,7 @@ Documentation
    :Release: |version|
    :Date: |today|
 
-Previous versions: `1.1.9 <http://nipype.readthedocs.io/en/1.1.9/>`_ `1.1.8 <http://nipype.readthedocs.io/en/1.1.8/>`_
+Previous versions: `1.2.0 <http://nipype.readthedocs.io/en/1.2.0/>`_ `1.1.9 <http://nipype.readthedocs.io/en/1.1.9/>`_
 
 
 .. container:: doc2
