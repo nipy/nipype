@@ -8,6 +8,8 @@ Nipype base interfaces
 This module defines the API of all nipype interfaces.
 
 """
+from .boutiques import (BoutiqueInterface)
+
 from .core import (Interface, BaseInterface, SimpleInterface, CommandLine,
                    StdOutCommandLine, MpiCommandLine, SEMLikeCommandLine,
                    LibraryBaseInterface, PackageInfo)
