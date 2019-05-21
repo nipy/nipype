@@ -2,7 +2,8 @@ import pytest
 from collections import namedtuple
 from ...base import traits, TraitedSpec, BaseInterfaceInputSpec
 from ..base import (convert_to_traits_type, create_interface_specs,
-                    dipy_to_nipype_interface, DipyBaseInterface, no_dipy)
+                    dipy_to_nipype_interface, DipyBaseInterface, no_dipy,
+                    get_dipy_workflows)
 
 
 def test_convert_to_traits_type():
@@ -134,6 +135,16 @@ def test_dipy_to_nipype_interface():
 
     with pytest.raises(ValueError):
         new_specs().run()
+
+
+@pytest.mark.skipif(no_dipy(), reason="DIPY is not installed")
+def test_get_dipy_workflows():
+    from dipy.workflows import align
+
+    l_wkflw = get_dipy_workflows(align)
+    for name, obj in l_wkflw:
+        assert name.endswith('Flow')
+        assert issubclass(obj, align.Workflow)
 
 
 if __name__ == "__main__":

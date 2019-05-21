@@ -1,3 +1,22 @@
+1.2.0 (May 09, 2019)
+====================
+
+##### [Full changelog](https://github.com/nipy/nipype/milestone/31?closed=1)
+
+  * FIX: Parsing of filename in AlignEpiAnatPy when filename does not have + (https://github.com/nipy/nipype/pull/2909)
+  * FIX: Import nibabel reorientation bug fix (https://github.com/nipy/nipype/pull/2912)
+  * FIX: Update FNIRT outputs for warped_file log_file to include cwd (https://github.com/nipy/nipype/pull/2900)
+  * FIX: Sort conditions in bids_gen_info to ensure consistent order (https://github.com/nipy/nipype/pull/2867)
+  * FIX: Some traits-5.0.0 don't work with Python 2.7 (https://github.com/nipy/nipype/pull/1)
+  * ENH: CompCor enhancement (https://github.com/nipy/nipype/pull/2878)
+  * ENH: Do not override caught exceptions with FileNotFoundError from unfinished hashfile (https://github.com/nipy/nipype/pull/2919)
+  * ENH: More verbose description when a faulty results file is loaded (https://github.com/nipy/nipype/pull/2920)
+  * ENH: Add all DIPY workflows dynamically  (https://github.com/nipy/nipype/pull/2905)
+  * ENH: Add mrdegibbs and dwibiascorrect from mrtrix3 (https://github.com/nipy/nipype/pull/2904)
+  * TEST: Fix CI builds (https://github.com/nipy/nipype/pull/2927)
+  * MAINT: Reduce deprecation warnings (https://github.com/nipy/nipype/pull/2903)
+
+
 1.1.9 (February 25, 2019)
 =========================
 

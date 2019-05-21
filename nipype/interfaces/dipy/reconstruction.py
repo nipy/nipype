@@ -18,24 +18,24 @@ from distutils.version import LooseVersion
 from ... import logging
 from ..base import TraitedSpec, File, traits, isdefined
 from .base import (DipyDiffusionInterface, DipyBaseInterfaceInputSpec,
-                   HAVE_DIPY, dipy_version, dipy_to_nipype_interface)
+                   HAVE_DIPY, dipy_version, dipy_to_nipype_interface,
+                   get_dipy_workflows)
 
 
 IFLOGGER = logging.getLogger('nipype.interface')
 
 if HAVE_DIPY and LooseVersion(dipy_version()) >= LooseVersion('0.15'):
-    from dipy.workflows.reconst import (ReconstDkiFlow, ReconstCSAFlow,
-                                        ReconstCSDFlow, ReconstMAPMRIFlow,
-                                        ReconstDtiFlow)
+    from dipy.workflows import reconst
 
-    DKIModel = dipy_to_nipype_interface("DKIModel", ReconstDkiFlow)
-    MapmriModel = dipy_to_nipype_interface("MapmriModel", ReconstMAPMRIFlow)
-    DTIModel = dipy_to_nipype_interface("DTIModel", ReconstDtiFlow)
-    CSAModel = dipy_to_nipype_interface("CSAModel", ReconstCSAFlow)
-    CSDModel = dipy_to_nipype_interface("CSDModel", ReconstCSDFlow)
+    l_wkflw = get_dipy_workflows(reconst)
+    for name, obj in l_wkflw:
+        new_name = name.replace('Flow', '')
+        globals()[new_name] = dipy_to_nipype_interface(new_name, obj)
+    del l_wkflw
+
 else:
     IFLOGGER.info("We advise you to upgrade DIPY version. This upgrade will"
-                  " activate DKIModel, MapmriModel, DTIModel, CSAModel, CSDModel.")
+                  " open access to more models")
 
 
 class RESTOREInputSpec(DipyBaseInterfaceInputSpec):

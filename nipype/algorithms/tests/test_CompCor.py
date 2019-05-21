@@ -48,20 +48,48 @@ class TestCompCor():
 
         self.run_cc(
             CompCor(
+                num_components=6,
                 realigned_file=self.realigned_file,
                 mask_files=self.mask_files,
                 mask_index=0), expected_components)
 
         self.run_cc(
             ACompCor(
+                num_components=6,
                 realigned_file=self.realigned_file,
                 mask_files=self.mask_files,
                 mask_index=0,
                 components_file='acc_components_file'), expected_components,
             'aCompCor')
 
+    def test_compcor_variance_threshold_and_metadata(self):
+        expected_components = [['-0.2027150345', '-0.4954813834'],
+                               ['0.2565929051', '0.7866217875'],
+                               ['-0.3550986008', '-0.0089784905'],
+                               ['0.7512786244', '-0.3599828482'],
+                               ['-0.4500578942', '0.0778209345']]
+        expected_metadata = {
+            'component': 'CompCor00',
+            'mask': 'mask',
+            'singular_value': '4.0720553036',
+            'variance_explained': '0.5527211465',
+            'cumulative_variance_explained': '0.5527211465',
+            'retained': 'True',
+        }
+        ccinterface = CompCor(
+                variance_threshold=0.7,
+                realigned_file=self.realigned_file,
+                mask_files=self.mask_files,
+                mask_names=['mask'],
+                mask_index=1,
+                save_metadata=True)
+        self.run_cc(ccinterface=ccinterface,
+                    expected_components=expected_components,
+                    expected_n_components=2,
+                    expected_metadata=expected_metadata)
+
     def test_tcompcor(self):
-        ccinterface = TCompCor(
+        ccinterface = TCompCor(num_components=6,
             realigned_file=self.realigned_file, percentile_threshold=0.75)
         self.run_cc(ccinterface, [['-0.1114536190', '-0.4632908609'], [
             '0.4566907310', '0.6983205193'
@@ -70,7 +98,8 @@ class TestCompCor():
         ], ['-0.1342351356', '0.1407855119']], 'tCompCor')
 
     def test_tcompcor_no_percentile(self):
-        ccinterface = TCompCor(realigned_file=self.realigned_file)
+        ccinterface = TCompCor(num_components=6,
+            realigned_file=self.realigned_file)
         ccinterface.run()
 
         mask = nb.load('mask_000.nii.gz').get_data()
@@ -80,6 +109,7 @@ class TestCompCor():
     def test_compcor_no_regress_poly(self):
         self.run_cc(
             CompCor(
+                num_components=6,
                 realigned_file=self.realigned_file,
                 mask_files=self.mask_files,
                 mask_index=0,
@@ -151,7 +181,9 @@ class TestCompCor():
     def run_cc(self,
                ccinterface,
                expected_components,
-               expected_header='CompCor'):
+               expected_header='CompCor',
+               expected_n_components=None,
+               expected_metadata=None):
         # run
         ccresult = ccinterface.run()
 
@@ -160,13 +192,14 @@ class TestCompCor():
         assert ccresult.outputs.components_file == expected_file
         assert os.path.exists(expected_file)
         assert os.path.getsize(expected_file) > 0
-        assert ccinterface.inputs.num_components == 6
 
         with open(ccresult.outputs.components_file, 'r') as components_file:
-            expected_n_components = min(ccinterface.inputs.num_components,
-                                        self.fake_data.shape[3])
+            if expected_n_components is None:
+                expected_n_components = min(ccinterface.inputs.num_components,
+                                            self.fake_data.shape[3])
 
-            components_data = [line.split('\t') for line in components_file]
+            components_data = [line.rstrip().split('\t')
+                               for line in components_file]
 
             # the first item will be '#', we can throw it out
             header = components_data.pop(0)
@@ -180,9 +213,24 @@ class TestCompCor():
             num_got_timepoints = len(components_data)
             assert num_got_timepoints == self.fake_data.shape[3]
             for index, timepoint in enumerate(components_data):
-                assert (len(timepoint) == ccinterface.inputs.num_components
-                        or len(timepoint) == self.fake_data.shape[3])
+                assert (len(timepoint) == expected_n_components)
                 assert timepoint[:2] == expected_components[index]
+
+        if ccinterface.inputs.save_metadata:
+            expected_metadata_file = (
+                ccinterface._list_outputs()['metadata_file'])
+            assert ccresult.outputs.metadata_file == expected_metadata_file
+            assert os.path.exists(expected_metadata_file)
+            assert os.path.getsize(expected_metadata_file) > 0
+
+            with open(ccresult.outputs.metadata_file, 'r') as metadata_file:
+                components_metadata = [line.rstrip().split('\t')
+                                       for line in metadata_file]
+                components_metadata = {i: j for i, j in
+                                        zip(components_metadata[0],
+                                            components_metadata[1])}
+                assert components_metadata == expected_metadata
+
         return ccresult
 
     @staticmethod

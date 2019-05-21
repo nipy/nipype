@@ -3,7 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
-from builtins import str
 
 from ....interfaces import fsl as fsl  # fsl
 from ....interfaces import utility as util  # utility
