@@ -6,6 +6,7 @@ from ..epi import ApplyTOPUP
 def test_ApplyTOPUP_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
+        checksize=dict(usedefault=True, ),
         datatype=dict(argstr='-d=%s', ),
         encoding_file=dict(
             argstr='--datain=%s',
@@ -17,6 +18,7 @@ def test_ApplyTOPUP_inputs():
         ),
         in_files=dict(
             argstr='--imain=%s',
+            checksize=True,
             mandatory=True,
             sep=',',
         ),
@@ -48,7 +50,7 @@ def test_ApplyTOPUP_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ApplyTOPUP_outputs():
-    output_map = dict(out_corrected=dict(), )
+    output_map = dict(out_corrected=dict(checksize=True, ), )
     outputs = ApplyTOPUP.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -19,6 +19,7 @@ from ...utils import NUMPY_MMAP
 
 from ..base import (traits, TraitedSpec, InputMultiPath, File, isdefined)
 from .base import FSLCommand, FSLCommandInputSpec, Info
+from nipype.utils.filemanip import fname_presuffix
 
 
 class PrepareFieldmapInputSpec(FSLCommandInputSpec):
@@ -124,11 +125,97 @@ class PrepareFieldmap(FSLCommand):
         return runtime
 
 
+class TOPUPBase(FSLCommand):
+    """
+    A base class to perform preliminary checkpoints
+    """
+    def __init__(self, **inputs):
+        self._size_fixed = False
+        self._offsets = None
+        super(TOPUPBase, self).__init__(**inputs)
+
+    def _cropfile(self, fname, postfix=''):
+        im = nb.load(fname)
+        data = im.get_data()
+        sizes = np.array(data.shape[:3])
+
+        if self._offsets is None:
+            self._offsets = sizes % 2
+
+        #if np.any(self._offsets == 1):
+        if self._offsets.any():
+            self._size_fixed = True
+            cropped = im.slicer[tuple(slice(-1) if o else slice(None) for o in self._offsets)]
+            crop_file = fname_presuffix(fname, suffix="_cropped", newpath=os.getcwd())
+            cropped.to_filename(crop_file)
+            # iflogger.warn(('One or more dimensions have odd size. '
+            #                'Input data matrix %s has been cropped '
+            #                'to these new sizes: %s.') % (str(tuple(sizes)),
+            #               str(data.shape[:3])))
+            return crop_file
+        else:
+            return fname
+
+    def _checksize(self, name):
+        value = getattr(self.inputs, name)
+        islist = isinstance(value, list)
+
+        out_value = []
+        for i, fname in enumerate(np.atleast_1d(value)):
+            postfix = ('%05d' % i) if islist else ''
+            out_value.append(self._cropfile(fname, postfix))
+
+        if not islist:
+            out_value = out_value[0]
+        return out_value
+
+    def _fixsize(self, fname):
+        im = nb.load(fname)
+        imdata = im.get_data()
+        s = imdata.shape
+        dests = np.array(s)
+        dests[:3] = s[:3] + self._offsets
+        data = np.zeros(dests, dtype=imdata.dtype)
+        data[:s[0], :s[1], :s[2], ...] = imdata
+
+        fixfname = fname_presuffix(fname, suffix="_fix", newpath=os.getcwd())
+
+        nb.Nifti1Image(data, im.affine).to_filename(fixfname)
+        return fixfname
+
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+        outputs = super(TOPUPBase,
+                        self).aggregate_outputs(runtime, needed_outputs)
+        predicted_outputs = self._list_outputs()
+
+        if self._size_fixed:
+            check = dict(checksize=lambda t: t is not None)
+            for key, value in predicted_outputs.items():
+                try:
+                    spec = outputs.traits(**check)[key]
+                    if spec.checksize and self.inputs.checksize:
+                        newval = self._fixsize(value)
+                        setattr(outputs, key, newval)
+                except KeyError:
+                    pass
+        return outputs
+
+    def _run_interface(self, runtime):
+        check = dict(checksize=lambda t: t is not None)
+        for name, spec in sorted(self.inputs.traits(**check).items()):
+            if spec.checksize and self.inputs.checksize:
+                value = self._checksize(name)
+                setattr(self.inputs, name, value)
+
+        return super(TOPUPBase, self)._run_interface(runtime)
+
+
 class TOPUPInputSpec(FSLCommandInputSpec):
     in_file = File(
         exists=True,
         mandatory=True,
         desc='name of 4D file with images',
+        checksize=True,
         argstr='--imain=%s')
     encoding_file = File(
         exists=True,
@@ -280,6 +367,12 @@ class TOPUPInputSpec(FSLCommandInputSpec):
         argstr='--regrid=%d',
         desc=('If set (=1), the calculations are done in a '
               'different grid'))
+    checksize = traits.Bool(False,
+                            usedefault=True,
+                            desc=("Before running topup, check that the size of the inputs"
+                                  " have no odd number of slices in the x,y,z direction. If"
+                                  " there is an odd number, add a slice in that dimension before"
+                                  " running topup"))
 
 
 class TOPUPOutputSpec(TraitedSpec):
@@ -287,15 +380,15 @@ class TOPUPOutputSpec(TraitedSpec):
         exists=True, desc='file containing the field coefficients')
     out_movpar = File(exists=True, desc='movpar.txt output file')
     out_enc_file = File(desc='encoding directions file output for applytopup')
-    out_field = File(desc='name of image file with field (Hz)')
+    out_field = File(desc='name of image file with field (Hz)', checksize=True)
     out_warps = traits.List(File(exists=True), desc='warpfield images')
     out_jacs = traits.List(File(exists=True), desc='Jacobian images')
     out_mats = traits.List(File(exists=True), desc='realignment matrices')
-    out_corrected = File(desc='name of 4D image file with unwarped images')
+    out_corrected = File(desc='name of 4D image file with unwarped images', checksize=True)
     out_logfile = File(desc='name of log-file')
 
 
-class TOPUP(FSLCommand):
+class TOPUP(TOPUPBase):
     """
     Interface for FSL topup, a tool for estimating and correcting
     susceptibility induced distortions. See FSL documentation for
@@ -377,7 +470,8 @@ class TOPUP(FSLCommand):
         return out_file
 
     def _generate_encfile(self):
-        """Generate a topup compatible encoding file based on given directions
+        """
+        Generate a topup compatible encoding file based on given directions
         """
         out_file = self._get_encfilename()
         durations = self.inputs.readout_times
@@ -412,6 +506,7 @@ class ApplyTOPUPInputSpec(FSLCommandInputSpec):
         mandatory=True,
         desc='name of file with images',
         argstr='--imain=%s',
+        checksize=True,
         sep=',')
     encoding_file = File(
         exists=True,
@@ -459,15 +554,22 @@ class ApplyTOPUPInputSpec(FSLCommandInputSpec):
         'double',
         argstr='-d=%s',
         desc='force output data type')
+    checksize = traits.Bool(False,
+                            usedefault=True,
+                            desc=("Before applying topup, check that the size of the inputs"
+                                  " have no odd number of slices in the x,y,z direction. If"
+                                  " there is an odd number, add a slice in that dimension before"
+                                  " running applytopup"))
 
 
 class ApplyTOPUPOutputSpec(TraitedSpec):
     out_corrected = File(
         exists=True, desc=('name of 4D image file with '
-                           'unwarped images'))
+                           'unwarped images'),
+        checksize=True)
 
 
-class ApplyTOPUP(FSLCommand):
+class ApplyTOPUP(TOPUPBase):
     """
     Interface for FSL topup, a tool for estimating and correcting
     susceptibility induced distortions.
@@ -521,12 +623,14 @@ class EddyInputSpec(FSLCommandInputSpec):
         exists=True,
         mandatory=True,
         argstr='--imain=%s',
+        checksize=True,
         desc=('File containing all the images to estimate '
               'distortions for'))
     in_mask = File(
         exists=True,
         mandatory=True,
         argstr='--mask=%s',
+        checksize=True,
         desc='Mask to indicate brain')
     in_index = File(
         exists=True,
@@ -663,11 +767,18 @@ class EddyInputSpec(FSLCommandInputSpec):
         False, desc='Output CNR-Maps', argstr='--cnr_maps', min_ver='5.0.10')
     residuals = traits.Bool(
         False, desc='Output Residuals', argstr='--residuals', min_ver='5.0.10')
+    checksize = traits.Bool(False,
+                        usedefault=True,
+                        desc=("Before running eddy, check that the size of the inputs"
+                                " have no odd number of slices in the x,y,z direction. If"
+                                " there is an odd number, add a slice in that dimension before"
+                                " running eddy"))
 
 
 class EddyOutputSpec(TraitedSpec):
     out_corrected = File(
-        exists=True, desc='4D image file containing all the corrected volumes')
+        exists=True, desc='4D image file containing all the corrected volumes',
+        checksize=True)
     out_parameter = File(
         exists=True,
         desc=('text file with parameters definining the field and'
@@ -690,12 +801,14 @@ class EddyOutputSpec(TraitedSpec):
         desc=('Text-file with a plain language report on what '
               'outlier slices eddy has found'))
     out_cnr_maps = File(
-        exists=True, desc='path/name of file with the cnr_maps')
+        exists=True, desc='path/name of file with the cnr_maps',
+        checksize=True)
     out_residuals = File(
-        exists=True, desc='path/name of file with the residuals')
+        exists=True, desc='path/name of file with the residuals',
+        checksize=True)
 
 
-class Eddy(FSLCommand):
+class Eddy(TOPUPBase):
     """
     Interface for FSL eddy, a tool for estimating and correcting eddy
     currents induced distortions. `User guide
@@ -1260,6 +1373,7 @@ class EddyQuadInputSpec(FSLCommandInputSpec):
         exists=True,
         mandatory=True,
         argstr="--mask=%s",
+        checksize=True,
         desc="Binary mask file"
     )
     bval_file = File(
@@ -1291,9 +1405,16 @@ class EddyQuadInputSpec(FSLCommandInputSpec):
         desc="Text file specifying slice/group acquisition",
     )
     verbose = traits.Bool(
+        False,
         argstr='--verbose',
         desc="Display debug messages",
     )
+    checksize = traits.Bool(False,
+                        usedefault=True,
+                        desc=("Before running eddyquad, check that the size of the inputs"
+                                " have no odd number of slices in the x,y,z direction. If"
+                                " there is an odd number, add a slice in that dimension before"
+                                " running eddyquad"))
 
 
 class EddyQuadOutputSpec(TraitedSpec):
@@ -1344,7 +1465,7 @@ class EddyQuadOutputSpec(TraitedSpec):
     )
 
 
-class EddyQuad(FSLCommand):
+class EddyQuad(TOPUPBase):
     """
     Interface for FSL eddy_quad, a tool for generating single subject reports
     and storing the quality assessment indices for each subject.
