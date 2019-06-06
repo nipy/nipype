@@ -12,25 +12,25 @@ def test_EddyQuad_inputs():
             usedefault=True,
         ),
         bval_file=dict(
-            argstr='--bvals=%s',
+            argstr='--bvals %s',
             mandatory=True,
         ),
-        bvec_file=dict(argstr='--bvecs=%s', ),
+        bvec_file=dict(argstr='--bvecs %s', ),
         environ=dict(
             nohash=True,
             usedefault=True,
         ),
-        field=dict(argstr='--field=%s', ),
+        field=dict(argstr='--field %s', ),
         idx_file=dict(
-            argstr='--eddyIdx=%s',
+            argstr='--eddyIdx %s',
             mandatory=True,
         ),
         mask_file=dict(
-            argstr='--mask=%s',
+            argstr='--mask %s',
             mandatory=True,
         ),
         output_dir=dict(
-            argstr='--output-dir=%s',
+            argstr='--output-dir %s',
             name_source=['base_name'],
             name_template='%s.qc',
         ),
@@ -39,7 +39,7 @@ def test_EddyQuad_inputs():
             argstr='--eddyParams=%s',
             mandatory=True,
         ),
-        slice_spec=dict(argstr='--slspec=%s', ),
+        slice_spec=dict(argstr='--slspec %s', ),
         verbose=dict(argstr='--verbose', ),
     )
     inputs = EddyQuad.input_spec()
