@@ -36,7 +36,7 @@ def test_EddyQuad_inputs():
         ),
         output_type=dict(),
         param_file=dict(
-            argstr='--eddyParams=%s',
+            argstr='--eddyParams %s',
             mandatory=True,
         ),
         slice_spec=dict(argstr='--slspec %s', ),
