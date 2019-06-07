@@ -1253,7 +1253,7 @@ class EddyQuadInputSpec(FSLCommandInputSpec):
     param_file = File(
         exists=True,
         mandatory=True,
-        argstr="--eddyParams=%s",
+        argstr="--eddyParams %s",
         desc="File containing acquisition parameters"
     )
     mask_file = File(
