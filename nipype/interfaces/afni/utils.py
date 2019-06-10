@@ -617,10 +617,14 @@ class CatMatvec(AFNICommand):
 
     def _format_arg(self, name, spec, value):
         if name == 'in_file':
-            return spec.argstr % (' '.join([i[0] + ' -' + i[1]
-                                            for i in value]))
+            xfm_args=''
+            for v in value:
+                if len(v[1])>0:
+                    xfm_args += ' ' +  v[0] + ' -' + v[1] + ' '
+                else:
+                    xfm_args += ' ' + v[0] + ' '
+            return spec.argstr % (xfm_args)
         return super(CatMatvec, self)._format_arg(name, spec, value)
-
 
 class CenterMassInputSpec(CommandLineInputSpec):
     in_file = File(
