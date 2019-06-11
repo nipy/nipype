@@ -37,7 +37,6 @@ def test_ResponseSD_inputs():
         max_sh=dict(
             argstr='-lmax %s',
             sep=',',
-            usedefault=True,
         ),
         mtt_file=dict(
             argstr='%s',

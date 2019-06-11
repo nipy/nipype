@@ -276,8 +276,6 @@ class ResponseSDInputSpec(MRTrix3BaseInputSpec):
         exists=True, argstr='-mask %s', desc='provide initial mask image')
     max_sh = InputMultiObject(
         traits.Int,
-        value=[8],
-        usedefault=True,
         argstr='-lmax %s',
         sep=',',
         desc=('maximum harmonic degree of response function - single value for '
@@ -303,7 +301,7 @@ class ResponseSD(MRTrix3Base):
     >>> resp.inputs.algorithm = 'tournier'
     >>> resp.inputs.grad_fsl = ('bvecs', 'bvals')
     >>> resp.cmdline                               # doctest: +ELLIPSIS
-    'dwi2response tournier -fslgrad bvecs bvals -lmax 8 dwi.mif wm.txt'
+    'dwi2response tournier -fslgrad bvecs bvals dwi.mif wm.txt'
     >>> resp.run()                                 # doctest: +SKIP
 
     # We can also pass in multiple harmonic degrees in the case of multi-shell
