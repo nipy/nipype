@@ -21,10 +21,9 @@ def test_Cat_inputs():
             usedefault=True,
         ),
         omitconst=dict(argstr='-nonconst', ),
-        out_cint=dict(
-            xor=[
-                'out_format', 'out_nice', 'out_double', 'out_fint', 'out_int'
-            ], ),
+        out_cint=dict(xor=[
+            'out_format', 'out_nice', 'out_double', 'out_fint', 'out_int'
+        ], ),
         out_double=dict(
             argstr='-d',
             xor=['out_format', 'out_nice', 'out_int', 'out_fint', 'out_cint'],
