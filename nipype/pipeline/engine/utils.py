@@ -486,7 +486,7 @@ def modify_paths(object, relative=True, basedir=None):
             out = tuple(out)
     else:
         if isdefined(object):
-            if isinstance(object, (str, bytes)) and os.path.isfile(object):
+            if isinstance(object, (str, bytes)) and os.path.isfile(os.path.join(basedir, object)):
                 if relative:
                     if config.getboolean('execution', 'use_relative_paths'):
                         out = relpath(object, start=basedir)
