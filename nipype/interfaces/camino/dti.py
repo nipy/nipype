@@ -995,7 +995,7 @@ class TrackBedpostxProba(Track):
     input_spec = TrackBedpostxProbaInputSpec
 
     def __init__(self, command=None, **inputs):
-        inputs["inputmodel"] = "bedpostx_dyad"
+        inputs["inputmodel"] = "bedpostx"
         return super(TrackBedpostxProba, self).__init__(command, **inputs)
 
 
