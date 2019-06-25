@@ -2853,6 +2853,53 @@ class TShift(AFNICommand):
         return outputs
 
 
+class TSmoothInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dTSmooth',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='%s_smooth',
+        desc='output file from 3dTSmooth',
+        argstr='-prefix %s',
+        position=1,
+        name_source='in_file',
+        genfile=True)
+    adaptive = traits.Int(
+        desc='adaptive',
+        argstr='-adaptive %d',
+        position=-2,
+        mandatory=False)
+
+
+class TSmooth(AFNICommand):
+    """Smooths each voxel time series in a 3D+time dataset and produces
+    as output a new 3D+time dataset (e.g., lowpass filter in time).
+
+    For complete details, see the `3dBandpass Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTSmooth.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> from nipype.testing import  example_data
+    >>> smooth = afni.TSmooth()
+    >>> smooth.inputs.in_file = 'functional.nii'
+    >>> smooth.inputs.adaptive = 5
+    >>> smooth.cmdline
+    '3dTsmooth -prefix functional_smooth -adaptive 5 functional.nii'
+    >>> res = smooth.run()  # doctest: +SKIP
+
+    """
+    _cmd = '3dTsmooth'
+    input_spec = TSmoothInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
 class VolregInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc='input file to 3dvolreg',
