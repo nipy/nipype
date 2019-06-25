@@ -25,8 +25,8 @@ def test_ACompCor_inputs():
         realigned_file=dict(mandatory=True, ),
         regress_poly_degree=dict(usedefault=True, ),
         repetition_time=dict(),
-        save_metadata=dict(),
-        save_pre_filter=dict(),
+        save_metadata=dict(usedefault=True, ),
+        save_pre_filter=dict(usedefault=True, ),
         use_regress_poly=dict(
             deprecated='0.15.0',
             new_name='pre_filter',
