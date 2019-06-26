@@ -961,40 +961,22 @@ def canonicalize_env(env):
     return out_env
 
 
+def resolve_path(path, start=None, relative=False):
+    if relative:
+        return op.relpath(resolve_path(path, start), start)
+
+    if op.isabs(path):
+        return path
+    if start is None:
+        start = os.getcwd()
+    return op.abspath(op.join(start, path))
+
+
 def relpath(path, start=None):
     """Return a relative version of a path"""
-
-    try:
-        return op.relpath(path, start)
-    except AttributeError:
-        pass
-
-    if start is None:
-        start = os.curdir
-    if not path:
-        raise ValueError("no path specified")
-    start_list = op.abspath(start).split(op.sep)
-    path_list = op.abspath(path).split(op.sep)
-    if start_list[0].lower() != path_list[0].lower():
-        unc_path, rest = op.splitunc(path)
-        unc_start, rest = op.splitunc(start)
-        if bool(unc_path) ^ bool(unc_start):
-            raise ValueError(("Cannot mix UNC and non-UNC paths "
-                              "(%s and %s)") % (path, start))
-        else:
-            raise ValueError("path is on drive %s, start on drive %s" %
-                             (path_list[0], start_list[0]))
-    # Work out how much of the filepath is shared by start and path.
-    for i in range(min(len(start_list), len(path_list))):
-        if start_list[i].lower() != path_list[i].lower():
-            break
-    else:
-        i += 1
-
-    rel_list = [op.pardir] * (len(start_list) - i) + path_list[i:]
-    if not rel_list:
-        return os.curdir
-    return op.join(*rel_list)
+    warnings.warn('nipype.utils.filemanip.relpath will be removed; please us os.path.relpath',
+                  FutureWarning)
+    return op.relpath(path, start)
 
 
 @contextlib.contextmanager
