@@ -2865,21 +2865,48 @@ class TSmoothInputSpec(AFNICommandInputSpec):
         name_template='%s_smooth',
         desc='output file from 3dTSmooth',
         argstr='-prefix %s',
-        position=1,
         name_source='in_file',
         genfile=True)
+    datum = traits.Str(
+        desc='Sets the data type of the output dataset',
+        argstr='-datum %s')
+    lin = traits.Bool(
+        desc='3 point linear filter: 0.15*a + 0.70*b + 0.15*c'
+        '[This is the default smoother]',
+        argstr='-lin')
+    med = traits.Bool(
+        desc='3 point median filter: median(a,b,c)',
+        argstr='-med')
+    osf = traits.Bool(
+        desc='3 point order statistics filter:'
+        '0.15*min(a,b,c) + 0.70*median(a,b,c) + 0.15*max(a,b,c)',
+        argstr='-osf')
+    lin3 = traits.Int(
+        desc='3 point linear filter: 0.5*(1-m)*a + m*b + 0.5*(1-m)*c'
+        "Here, 'm' is a number strictly between 0 and 1.",
+        argstr='-3lin %d')
+    hamming = traits.Int(
+        argstr='-hamming %d',
+        desc='Use N point Hamming windows.'
+        '(N must be odd and bigger than 1.)')
+    blackman = traits.Int(
+        argstr='-blackman %d',
+        desc='Use N point Blackman windows.'
+        '(N must be odd and bigger than 1.)')
+    custom = File(
+        argstr='-custom %s',
+        desc='odd # of coefficients must be in a single column in ASCII file')
     adaptive = traits.Int(
-        desc='adaptive',
         argstr='-adaptive %d',
-        position=-2,
-        mandatory=False)
+        desc='use adaptive mean filtering of width N '
+        '(where N must be odd and bigger than 3).')
 
 
 class TSmooth(AFNICommand):
     """Smooths each voxel time series in a 3D+time dataset and produces
     as output a new 3D+time dataset (e.g., lowpass filter in time).
 
-    For complete details, see the `3dBandpass Documentation.
+    For complete details, see the `3dTsmooth Documentation.
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTSmooth.html>`_
 
     Examples
