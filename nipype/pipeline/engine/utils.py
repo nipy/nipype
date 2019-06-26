@@ -25,7 +25,7 @@ from future import standard_library
 
 from ... import logging, config, LooseVersion
 from ...utils.filemanip import (
-    relpath,
+    resolve_path,
     makedirs,
     fname_presuffix,
     to_str,
@@ -41,7 +41,7 @@ from ...utils.filemanip import (
 from ...utils.misc import str2bool
 from ...utils.functions import create_function_from_source
 from ...interfaces.base import (Bunch, CommandLine, isdefined, Undefined,
-                                InterfaceResult, traits)
+                                InterfaceResult, traits, File)
 from ...interfaces.utility import IdentityInterface
 from ...utils.provenance import ProvStore, pm, nipype_ns, get_id
 
@@ -297,7 +297,15 @@ def save_resultfile(result, cwd, name):
             tosave = _uncollapse(outputs.copy(), collapsed)
         except AttributeError:
             tosave = outputs = result.outputs.dictcopy()  # outputs was a bunch
-        for k, v in list(modify_paths(tosave, relative=True, basedir=cwd).items()):
+        type_hints = {}
+        try:
+            type_hints = result.outputs.traits()
+        except AttributeError:
+            pass
+        for k, v in modify_paths(tosave,
+                                 relative=config.getboolean('execution', 'use_relative_paths'),
+                                 type_hints=type_hints,
+                                 basedir=cwd).items():
             setattr(result.outputs, k, v)
 
     savepkl(resultsfile, result)
@@ -352,10 +360,13 @@ def load_resultfile(path, name):
             if result.outputs:
                 try:
                     outputs = _protect_collapses(result.outputs)
+                    type_hints = result.outputs.traits()
                 except AttributeError:
                     outputs = result.outputs.dictcopy()  # outputs == Bunch
+                    type_hints = {}
                 try:
                     for k, v in list(modify_paths(outputs, relative=False,
+                                                  type_hints=type_hints,
                                                   basedir=path).items()):
                         setattr(result.outputs, k, v)
                 except FileNotFoundError:
@@ -455,7 +466,7 @@ def format_node(node, format='python', include_config=False):
     return lines
 
 
-def modify_paths(object, relative=True, basedir=None):
+def modify_paths(object, relative=True, basedir=None, type_hints=None):
     """Convert paths in data structure to either full paths or relative paths
 
     Supports combinations of lists, dicts, tuples, strs
@@ -472,34 +483,44 @@ def modify_paths(object, relative=True, basedir=None):
         basedir = os.getcwd()
     if isinstance(object, dict):
         out = {}
+        if isinstance(type_hints, traits.CTrait) and isinstance(type_hints.trait_type, traits.Dict):
+            type_hints_ = type_hints.trait_type.value_trait
         for key, val in sorted(object.items()):
+            if isinstance(type_hints, dict):
+                type_hints_ = type_hints.get(key)
             if isdefined(val):
                 out[key] = modify_paths(
-                    val, relative=relative, basedir=basedir)
+                    val, relative=relative, basedir=basedir,
+                    type_hints=type_hints_)
     elif isinstance(object, (list, tuple)):
         out = []
-        for val in object:
+        type_hints_ = [None] * len(object)
+        if type_hints is not None:
+            if isinstance(type_hints.trait_type, traits.List):
+                type_hints_ = [type_hints.trait_type.item_trait] * len(object)
+            elif isinstance(type_hints.trait_type, traits.Tuple):
+                type_hints_ = type_hints.trait_type.types
+        for val, type_hint in zip(object, type_hints_):
             if isdefined(val):
                 out.append(
-                    modify_paths(val, relative=relative, basedir=basedir))
+                    modify_paths(val, relative=relative, basedir=basedir,
+                                 type_hints=type_hint))
         if isinstance(object, tuple):
             out = tuple(out)
     else:
-        if isdefined(object):
-            if isinstance(object, (str, bytes)) and os.path.isfile(object):
-                if relative:
-                    if config.getboolean('execution', 'use_relative_paths'):
-                        out = relpath(object, start=basedir)
-                    else:
-                        out = object
-                else:
-                    out = os.path.abspath(os.path.join(basedir, object))
-                if not os.path.exists(out):
-                    raise IOError('File %s not found' % out)
-            else:
-                out = object
-        else:
+        if not isdefined(object):
             raise TypeError("Object {} is undefined".format(object))
+        out = object
+        check_path = type_hints is None or isinstance(type_hints.trait_type, File)
+        if (check_path and
+                isinstance(object, (str, bytes)) and
+                os.path.isfile(resolve_path(object, start=basedir))):
+            out = resolve_path(
+                object, start=basedir,
+                relative=relative and config.getboolean('execution', 'use_relative_paths'))
+            # I don't think this can be reached
+            if not os.path.exists(out):
+                raise IOError('File %s not found' % out)
     return out
 
 
