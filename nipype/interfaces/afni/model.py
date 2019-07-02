@@ -916,6 +916,7 @@ class MemaOutputSpec(AFNICommandOutputSpec):
         desc='...',
         exists=True
     )
+
     args = File(
         desc='Arguments file for debugging, generated if -dbArgs is set')
 
@@ -931,8 +932,32 @@ class Mema(AFNICommand):
 
     >>> from nipype.interfaces import afni
     >>> mema = afni.Mema()
-    >>> mema.inputs.in_files = [...]
-    ...
+    >>> mema.inputs.sets = ['analysis_name', [[subject_1, s1_betas, s1_t, numb1, numt1], [subject2, s2_bets, s2_ts, numb2, numt2], ...]]
+    >>> mema.inputs.max_zeros = 4
+    >>> mema.inputs.model_outliers = True
+    >>> mema.inputs.residual_z = True
+    >>> mema.inputs.out_file = 'Results.BRIK'
+
+    >>> from nipype.interfaces import afni
+    >>> mema = afni.Mema()
+    >>> mema.inputs.missing_data['File1', 'File2']
+    >>> mema.inputs.sets = ['analysis_name', [[subject_1, s1_betas, s1_ts], [subject2, s2_bets, s2_ts], ...]]
+    >>> mema.inputs.out_file = 'Results.BRIK'
+
+    >>> from nipype.interfaces import afni
+    >>> mema = afni.Mema()
+    >>> mema.inputs.groups = ['group1', 'group2']
+    >>> mema.inputs.sets = ['analysis1_name', [[subject_1, s1_betas, s1_ts], [subject2, s2_bets, s2_ts], ...]]
+    >>> mema.inputs.sets = ['analysis2_name', [[subject_1, s1_betas, s1_ts], [subject2, s2_bets, s2_ts], ...]]
+    >>> mema.inputs.n_nonzero = 18
+    >>> mema.inputs.hktest = True
+    >>> mema.inputs.outliers = True
+    >>> mema.inputs.equal_variance = False
+    >>> mema.inputs.residual_z = True
+    >>> mema.inputs.covariates = 'CovFile.txt'
+    >>> mema.inputs.covariates_center = 'age = 25 13 weight = 100 150'
+    >>> mema.inputs.covariates_model = ['different', 'same']
+    >>> mema.inputs.out_file = 'Results.BRIK'
 
     """
 
