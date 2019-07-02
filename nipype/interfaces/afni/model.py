@@ -668,12 +668,17 @@ class Synthesize(AFNICommand):
 
 class MemaInputSpec(AFNICommandInputSpec):
     # mandatory inputs
-    subject_trait = traits.Tuple(
-        Str, File(exists=True), File(exists=True), Str(''), Str('')
+    _subject_trait = traits.Either(
+        traits.Tuple(
+            Str(minlen=1), File(exists=True), File(exists=True)
+        ),
+        traits.Tuple(
+            Str(minlen=1), File(exists=True), File(exists=True), Str(''), Str('')
+        )
     )
 
     sets = traits.List(
-        traits.Tuple(Str(minlen=1), traits.List(subject_trait, minlen=2)),
+        traits.Tuple(Str(minlen=1), traits.List(_subject_trait, minlen=2)),
         desc="""\
 Specify the data for one of two test variables (either group, contrast/GLTs) A & B.
 
@@ -695,7 +700,7 @@ T_DSET is the name of the dataset containing the Tstat
 e.g: -set Placebo Jane pb05.Jane.Regression+tlrc'[face#0_Beta]'
                      pb05.Jane.Regression+tlrc'[face#0_Tstat]'
 """,
-        argstr='-set %s ...',
+        argstr='-set %s...',
         mandatory=True,
         minlen=1,
         maxlen=2,
@@ -814,7 +819,7 @@ with t-statistic output.""",
         argstr='-mask %s'
     )
 
-    max_zeros = traits.Range(  # Please revise all the other possible settings
+    max_zeros = traits.Range(  # Please revise all the other possible settings\
         desc="""\
 Do not compute statistics at any voxel that has \
 more than MM zero beta coefficients or GLTs. Voxels around \
@@ -829,8 +834,7 @@ missing values allowed). MM can be a positive integer \
 less than the number of subjects, or a fraction \
 between 0 and 1. Alternatively option -missing_data \
 can be used to handle missing data.""",
-
-        min=0.0, max=1.0,
+        low=0.0, high=1.0,
         argstr='-max_zeros %f',
         xor=['missing_data'],
     )
@@ -899,11 +903,12 @@ can be used to handle missing data.""",
         argstr='-rio')
 
     verbosity = traits.Range(
-        1,
+        value=1,
         usedefault=True,
-        min=0,
+        low=0,
         desc='An integer specifying verbosity level. 0 is quiet, 1+ is talkative.',
-        argstr='-verb %d')
+        argstr='-verb %d'
+    )
 
 
 class MemaOutputSpec(AFNICommandOutputSpec):
@@ -919,7 +924,7 @@ class Mema(AFNICommand):
     """Description of 3dMEMA
 
     For complete details, see the `3dMEMA Documentation.
-    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dMEMA.html>
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dMEMA.html>`__
 
     Examples
     ========
@@ -934,6 +939,28 @@ class Mema(AFNICommand):
     _cmd = '3dMEMA'
     input_spec = MemaInputSpec
     output_spec = MemaOutputSpec
+
+    def _format_arg(self, name, trait_spec, value):
+        if name == "sets":
+            self._n_sets = len(value)
+            formatted_values = []
+            for setname, setopts in value:
+                formatted_subject = []
+                for this_set in setopts:
+                    if len(this_set) == 4:
+                        subid, beta_file, ttst_file, beta_opts, ttst_opts = this_set
+                        if beta_opts:
+                            beta_file = "%s'%s'" % (beta_file, beta_opts)
+                        if ttst_opts:
+                            ttst_file = "%s'%s'" % (ttst_file, ttst_opts)
+                    else:
+                        subid, beta_file, ttst_file = this_set
+                    formatted_subject.append(' '.join((subid, beta_file, ttst_file)))
+                formatted_values.append(' '.join([setname] + formatted_subject))
+            value = formatted_values
+
+        return super(Mema, self)._format_arg(name, trait_spec, value)
+
 
     def _parse_inputs(self, skip=None):
         if skip is None:
