@@ -13,7 +13,7 @@ from __future__ import (print_function, division, unicode_literals,
 import os
 
 from ..base import (CommandLineInputSpec, CommandLine, Directory, TraitedSpec,
-                    traits, isdefined, File, InputMultiPath, Undefined, Str)
+                    traits, isdefined, File, InputMultiObject, Undefined, Str)
 from ...external.due import BibTeX
 
 from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec,
@@ -21,7 +21,7 @@ from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec,
 
 
 class DeconvolveInputSpec(AFNICommandInputSpec):
-    in_files = InputMultiPath(
+    in_files = InputMultiObject(
         File(exists=True),
         desc='filenames of 3D+time input datasets. More than one filename can '
         'be given and the datasets will be auto-catenated in time. '
@@ -309,7 +309,7 @@ class Deconvolve(AFNICommand):
 
 class RemlfitInputSpec(AFNICommandInputSpec):
     # mandatory files
-    in_files = InputMultiPath(
+    in_files = InputMultiObject(
         File(exists=True),
         desc='Read time series dataset',
         argstr='-input "%s"',
@@ -356,7 +356,7 @@ class RemlfitInputSpec(AFNICommandInputSpec):
         '(only with \'mask\' or \'automask\' options).',
         argstr='-STATmask %s',
         exists=True)
-    addbase = InputMultiPath(
+    addbase = InputMultiObject(
         File(
             exists=True,
             desc='file containing columns to add to regression matrix'),
@@ -367,7 +367,7 @@ class RemlfitInputSpec(AFNICommandInputSpec):
         copyfile=False,
         sep=" ",
         argstr='-addbase %s')
-    slibase = InputMultiPath(
+    slibase = InputMultiObject(
         File(
             exists=True,
             desc='file containing columns to add to regression matrix'),
@@ -384,7 +384,7 @@ class RemlfitInputSpec(AFNICommandInputSpec):
         'will slow the program down, and make it use a lot more memory '
         '(to hold all the matrix stuff).',
         argstr='-slibase %s')
-    slibase_sm = InputMultiPath(
+    slibase_sm = InputMultiObject(
         File(
             exists=True,
             desc='file containing columns to add to regression matrix'),
@@ -667,48 +667,49 @@ class Synthesize(AFNICommand):
 
 
 class MemaInputSpec(AFNICommandInputSpec):
-    #mandatory files
-    in_files = InputMultiPath(
-            File(exists=True),
-        desc='Specify the data for one of two test variables (either group,'
-              ' contrast/GLTs) A & B.', 
-        argstr='-set ...',
-        mandatory=True
-        )
+    # mandatory inputs
+    subject_trait = traits.Tuple(
+        Str, File(exists=True), File(exists=True), Str(''), Str('')
+    )
 
-""""
-   -set SETNAME                         \
-               SUBJ_1 BETA_DSET T_DSET \
-               SUBJ_2 BETA_DSET T_DSET \
-               ...   ...       ...     \
-               SUBJ_N BETA_DSET T_DSET \
-      Specify the data for one of two test variables (either group,
-              contrast/GLTs) A & B. 
-      SETNAME is the name assigned to the set, which is only for the
-              user's information, and not used by the program. When
-              there are two groups, the 1st and 2nd datasets are
-              associated with the 1st and 2nd labels specified
-              through option -set, and the group difference is
-              the second group minus the first one, similar to
-              3dttest but different from 3dttest++.
-      SUBJ_K is the label for the subject K whose datasets will be 
-             listed next
-      BETA_DSET is the name of the dataset of the beta coefficient or GLT.
-      T_DSET is the name of the dataset containing the Tstat 
-             corresponding to BETA_DSET. 
-         To specify BETA_DSET, and T_DSET, you can use the standard AFNI 
-         notation, which, in addition to sub-brick indices, now allows for
-         the use of sub-brick labels as selectors
-      e.g: -set Placebo Jane pb05.Jane.Regression+tlrc'[face#0_Beta]'  \
-                             pb05.Jane.Regression+tlrc'[face#0_Tstat]' \
+    sets = traits.List(
+        traits.Tuple(Str(minlen=1), traits.List(subject_trait, minlen=2)),
+        desc="""\
+Specify the data for one of two test variables (either group, contrast/GLTs) A & B.
 
-    """
+SETNAME is the name assigned to the set, which is only for the
+      user's information, and not used by the program. When
+      there are two groups, the 1st and 2nd datasets are
+      associated with the 1st and 2nd labels specified
+      through option -set, and the group difference is
+      the second group minus the first one, similar to
+      3dttest but different from 3dttest++.
+SUBJ_K is the label for the subject K whose datasets will be
+     listed next
+BETA_DSET is the name of the dataset of the beta coefficient or GLT.
+T_DSET is the name of the dataset containing the Tstat
+     corresponding to BETA_DSET.
+ To specify BETA_DSET, and T_DSET, you can use the standard AFNI
+ notation, which, in addition to sub-brick indices, now allows for
+ the use of sub-brick labels as selectors
+e.g: -set Placebo Jane pb05.Jane.Regression+tlrc'[face#0_Beta]'
+                     pb05.Jane.Regression+tlrc'[face#0_Tstat]'
+""",
+        argstr='-set %s ...',
+        mandatory=True,
+        minlen=1,
+        maxlen=2,
+    )
 
-    #conditionally mandatory arguments
-    groups = traits.Str(
+    # conditionally mandatory arguments
+    groups = traits.List(
+        ['G1'],
+        Str(minlen=1),
         desc='Name of 1 or 2 groups. This option must be used when comparing two groups.',
-        argstr='-groups %s'
-        )
+        argstr='-groups %s',
+        minlen=1,
+        maxlen=2,
+    )
 
     """"
    -groups GROUP1 [GROUP2]: Name of 1 or 2 groups. This option must be used
@@ -725,17 +726,18 @@ class MemaInputSpec(AFNICommandInputSpec):
 
     equal_variance = traits.Bool(
         True,
-        desc='Assume same cross-subjects variability between GROUP1 and GROUP2'
-             ' (homoskedasticity) (Default); or'
-              ' Model cross-subjects variability difference between'
-              ' GROUP1 and GROUP2 (heteroskedasticity). This option'
-              ' may NOT be invoked when covariate is present in the'
-              ' model.',
-        argstr='-equal_variance', #-unequal_variance
         usedefault=True,
-        )
-    
-    #Other arguments
+        argstr=['-unequal_variance', '-equal_variance'],
+        xor=['covariates'],
+        desc="""\
+[-equal_variance] Assume same cross-subjects variability between GROUP1 and GROUP2
+(homoskedasticity) (Default); or [-unequal_variance] Model cross-subjects variability
+difference between GROUP1 and GROUP2 (heteroskedasticity).
+This option may NOT be invoked when covariate is present in the
+model.""",
+    )
+
+    # Other arguments
     cio = traits.Bool(
         desc='use AFNIs C io functions',
         argstr='-cio')
@@ -751,17 +753,17 @@ class MemaInputSpec(AFNICommandInputSpec):
         ' the values of these covariates for each subject. It is recommended to use the'
         ' covariates file generated by 3dREMLfit.',
         argstr='-covariates %s',
-        )
+    )
 
     covariates_center = traits.Str(
         desc="""\
-Centering rule for covariates. You can provide centering rules for each coveriate, 
+Centering rule for covariates. You can provide centering rules for each coveriate,
 or specify mean centering or no centering (using 0). If no specification is made each
 covariate will be centered about its own mean.
--covariates_center COV_1=CEN_1 [COV_2=CEN_2 ... ]: (for 1 group) 
--covariates_center COV_1=CEN_1.A CEN_1.B [COV_2=CEN_2.A CEN_2.B ... ]: 
-                                                 (for 2 groups) 
- where COV_K is the name assigned to the K-th covariate, 
+-covariates_center COV_1=CEN_1 [COV_2=CEN_2 ... ]: (for 1 group)
+-covariates_center COV_1=CEN_1.A CEN_1.B [COV_2=CEN_2.A CEN_2.B ... ]:
+                                                 (for 2 groups)
+ where COV_K is the name assigned to the K-th covariate,
  either from the header of the covariates file, or from the option
  -covariates_name. This makes clear which center belongs to which
  covariate. When two groups are used, you need to specify a center for
@@ -769,23 +771,18 @@ covariate will be centered about its own mean.
  Example: If you had covariates age, and weight, you would use:
         -covariates_center age = 78 55 weight = 165 198""",
         argstr='covariates_center %s'
-        )
+    )
 
     covariates_model = traits.Tuple(
-            traits.Enum('same', 'different', desc='Specify the center'),
-            traits.Enum('same', 'different', desc='Specify the slope'),
+        traits.Enum('same', 'different', desc='Specify the center'),
+        traits.Enum('same', 'different', desc='Specify the slope'),
         desc='Specify whether to use the same or different intercepts for each of the covariates.'
-        ' Similarly for the slope.',
+             ' Similarly for the slope.',
         argstr='-covariates_model center=%s slope=%s'
-        )
+    )
 
-    """"
-   -covariates_model center=different/same slope=different/same:
-          Specify whether to use the same or different intercepts
-          for each of the covariates. Similarly for the slope.
-    """
-
-    covariates_name = traits.List(Str,
+    covariates_name = traits.List(
+        Str(minlen=1),
         desc='Specify the name of each of the N covariates. Only needed if covariate file does'
         ' not have a header. Default is to name covariates cov1, cov2, ...',
         argstr='-covariates_names %s')
@@ -794,130 +791,108 @@ covariate will be centered about its own mean.
         desc='Enable R to save parameters in a file called .3dMEMA.dbg.AFNI.args in the current'
         ' directory for debugging.',
         argstr='-dbArgs'
-        )
+    )
 
-    HKtest = traits.Bool(
-        desc='Perform Hartung-Knapp adjustment for the output t-statistic.' 
-          'This approach is more robust when the number of subjects'
-          'is small, and is generally preferred. -KHtest is the default' 
-          'with t-statistic output.',
-        argstr='-HKtest'
-        )
+    hk_test = traits.Bool(
+        desc="""\
+Perform Hartung-Knapp adjustment for the output t-statistic. \
+This approach is more robust when the number of subjects \
+is small, and is generally preferred. -KHtest is the default \
+with t-statistic output.""",
+        argstr=['-no_HKtest', '-HKtest'],
+    )
 
     num_threads = traits.Int(
         desc='run the program with provided number of sub-processes',
         argstr='-jobs %d',
         nohash=True
-        )
+    )
 
     mask = File(
+        exists=True,
         desc='Process voxels from inside this mask only. Default is no masking',
         argstr='-mask %s'
-        )
+    )
 
     max_zeros = traits.Range(  # Please revise all the other possible settings
-        desc='Do not compute statistics at any voxel that has' 
-              ' more than MM zero beta coefficients or GLTs.'
-              'Setting -max_zeros to 0.25 means process data only at voxels'
-              ' where no more than 1/4 of the data is missing. The default'
-              ' value is 0 (no missing values allowed). MM can be a positive'
-              ' integer less than the number of subjects, or a fraction' 
-              ' between 0 and 1. Alternatively option -missing_data'
-              ' can be used to handle missing data.',
+        desc="""\
+Do not compute statistics at any voxel that has \
+more than MM zero beta coefficients or GLTs. Voxels around \
+the edges of the group brain will not have data from \
+some of the subjects. Therefore, some of their beta's or \
+GLTs and t-stats are masked with 0. 3dMEMA can handle \
+missing data at those voxels but obviously too much \
+missing data is not good. Setting -max_zeros to 0.25 \
+means process data only at voxels where no more than 1/4 \
+of the data is missing. The default value is 0 (no \
+missing values allowed). MM can be a positive integer \
+less than the number of subjects, or a fraction \
+between 0 and 1. Alternatively option -missing_data \
+can be used to handle missing data.""",
+
         min=0.0, max=1.0,
         argstr='-max_zeros %f',
         xor=['missing_data'],
-        )
-
-    """"
-   -max_zeros MM: Do not compute statistics at any voxel that has 
-                more than MM zero beta coefficients or GLTs. Voxels around
-                the edges of the group brain will not have data from
-                some of the subjects. Therefore, some of their beta's or
-                GLTs and t-stats are masked with 0. 3dMEMA can handle
-                missing data at those voxels but obviously too much
-                missing data is not good. Setting -max_zeros to 0.25
-                means process data only at voxels where no more than 1/4
-                of the data is missing. The default value is 0 (no
-                missing values allowed). MM can be a positive integer
-                less than the number of subjects, or a fraction 
-                between 0 and 1. Alternatively option -missing_data
-                can be used to handle missing data.
-    """
+    )
 
     missing_data = traits.Either(
         0,
         traits.List(File(exists=True), minlen=1, maxlen=2,),
-        desc='This option corrects for inflated statistics for the voxels where'
-              ' some subjects do not have any data available due to imperfect'
-              ' spatial alignment or other reasons. The absence of this option'
-              ' means no missing data will be assumed.',
+        desc="""\
+This option corrects for inflated statistics for the voxels where
+some subjects do not have any data available due to imperfect
+spatial alignment or other reasons. The absence of this option
+means no missing data will be assumed.""",
         argstr='-missing_data %s',
         xor=['max_zeros']
     )
 
-    """"
-   -missing_data: This option corrects for inflated statistics for the voxels where
-               some subjects do not have any data available due to imperfect
-               spatial alignment or other reasons. The absence of this option
-               means no missing data will be assumed. Two formats of option
-               setting exist as shown below.
-   -missing_data 0: With this format the zero value at a voxel of each subject
-                 will be interpreted as missing data.
-   -missing_data File1 [File2]: Information about missing data is specified
-                               with file of 1 or 2 groups (the number 1 or 2
-                               and file order should be consistent with those
-                               in option -groups). The voxel value of each file
-                               indicates the number of sujects with missing data
-                               in that group. 
-    """
+    # -missing_data: This option corrects for inflated statistics for the voxels where
+    #             some subjects do not have any data available due to imperfect
+    #             spatial alignment or other reasons. The absence of this option
+    #             means no missing data will be assumed. Two formats of option
+    #             setting exist as shown below.
+    # -missing_data 0: With this format the zero value at a voxel of each subject
+    #               will be interpreted as missing data.
+    # -missing_data File1 [File2]: Information about missing data is specified
+    #                             with file of 1 or 2 groups (the number 1 or 2
+    #                             and file order should be consistent with those
+    #                             in option -groups). The voxel value of each file
+    #                             indicates the number of sujects with missing data
+    #                             in that group.
 
-    outliers = traits.Bool(  # Please combine with -no_model_outliers
-        desc = 'Model outlier betas with a Laplace distribution of'
-               '  of subject-specific error. Default is -no_model_outliers',
-        argstr ='-model_outliers'
-        )
+    outliers = traits.Bool(
+        False,
+        usedefault=True,
+        desc='Model outlier betas with a Laplace distribution of '
+             'subject-specific error. Default is -no_model_outliers',
+        argstr=['-no_model_outliers', '-model_outliers'],
+    )
 
     nonzeros = traits.Float(
-        desc = 'Do not compute statistics at any voxel that has'
-                ' less than NN non-zero beta values. This options is'
-                ' complimentary to -max_zeros, and matches an option in'
-                ' the interactive 3dMEMA mode. NN is basically (number of'
-                ' unique subjects - MM). Alternatively option -missing_data'
-                ' can be used to handle missing data.',
-        argstr = '-n_nonzero %f',
+        desc="""\
+Do not compute statistics at any voxel that has \
+less than NN non-zero beta values. This options is \
+complimentary to -max_zeros, and matches an option in \
+the interactive 3dMEMA mode. NN is basically (number of \
+unique subjects - MM). Alternatively option -missing_data \
+can be used to handle missing data.""",
+        argstr='-n_nonzero %f',
         xor=['missing_data']
-        )
+    )
 
-    noHKtest = traits.Bool(  # Please combine with -KHtest
-        desc='Do not make the Hartung-Knapp adjustment. -KHtest is' 
-          ' the default with t-statistic output.',
-        argstr='-no_HKtest'
-        )
+    residualZ = traits.Bool(
+        False,
+        usedefault=True,
+        desc='Output residuals and their Z values used in identifying '
+             'outliers at voxel level. Default is -no_residual_Z',
+        argstr=['-no_residual_Z', '-residual_Z']
+    )
 
-    nooutliers = traits.Bool(
-        desc = 'No modeling of outlier betas/GLTs (Default)',
-        argstr ='-no_model_outliers'
-        )
-
-    noresidualZ = traits.Bool(  # Combine with -residualZ
-        desc='Do not output residuals and their  Z values (Default).',
-        argstr='-no_residual_Z'
-        )
-
+    # -prefix PREFIX: Output prefix (just prefix, no view+suffix needed)
     out_file = File(
         desc='output dataset prefix name',
         argstr='-prefix %s')
-
-    """"
-   -prefix PREFIX: Output prefix (just prefix, no view+suffix needed)
-    """
-
-    residualZ = traits.Bool(
-        desc='Output residuals and their Z values used in identifying'
-              ' outliers at voxel level. Default is -no_residual_Z',
-        argstr='-residual_Z'
-        )
 
     rio = traits.Bool(
         desc='use R\'s io functions',
@@ -935,7 +910,7 @@ class MemaOutputSpec(AFNICommandOutputSpec):
     out_file = File(
         desc='...',
         exists=True
-        )
+    )
     args = File(
         desc='Arguments file for debugging, generated if -dbArgs is set')
 
@@ -953,7 +928,7 @@ class Mema(AFNICommand):
     >>> mema = afni.Mema()
     >>> mema.inputs.in_files = [...]
     ...
-    
+
     """
 
     _cmd = '3dMEMA'
@@ -973,4 +948,3 @@ class Mema(AFNICommand):
                 outputs[key] = os.path.abspath(self.inputs.get()[key])
 
         return outputs
-

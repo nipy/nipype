@@ -203,10 +203,10 @@ class BaseInterface(Interface):
             ]
             if any(values) and isdefined(value):
                 if len(values) > 1:
-                    fmt = ("%s requires values for inputs %s because '%s' is set. " 
+                    fmt = ("%s requires values for inputs %s because '%s' is set. "
                            "For a list of required inputs, see %s.help()")
                 else:
-                    fmt = ("%s requires a value for input %s because '%s' is set. " 
+                    fmt = ("%s requires a value for input %s because '%s' is set. "
                            "For a list of required inputs, see %s.help()")
                 msg = fmt % (self.__class__.__name__,
                              ', '.join("'%s'" % req for req in spec.requires),
@@ -766,7 +766,10 @@ class CommandLine(BaseInterface):
         """
         argstr = trait_spec.argstr
         iflogger.debug('%s_%s', name, value)
-        if trait_spec.is_trait_type(traits.Bool) and "%" not in argstr:
+        if trait_spec.is_trait_type(traits.Bool) and isinstance(argstr, (list, tuple, dict)):
+            return argstr[value]
+
+        elif trait_spec.is_trait_type(traits.Bool) and "%" not in argstr:
             # Boolean options have no format string. Just append options if True.
             return argstr if value else None
         # traits.Either turns into traits.TraitCompound and does not have any
