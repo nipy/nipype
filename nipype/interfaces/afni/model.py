@@ -723,18 +723,16 @@ class MemaInputSpec(AFNICommandInputSpec):
                           different from 3dttest++.
     """
 
-    unequal_variance = traits.Bool(
-        desc='Model cross-subjects variability difference between'
+    equal_variance = traits.Bool(
+        True,
+        desc='Assume same cross-subjects variability between GROUP1 and GROUP2'
+             ' (homoskedasticity) (Default); or'
+              ' Model cross-subjects variability difference between'
               ' GROUP1 and GROUP2 (heteroskedasticity). This option'
               ' may NOT be invoked when covariate is present in the'
               ' model.',
-        argstr='-unequal_variance'
-        )
-
-    equal_variance = traits.Bool(
-        desc='Assume same cross-subjects variability between GROUP1 and GROUP2'
-        ' (homoskedasticity) (Default)',
-        argstr='-equal_variance'
+        argstr='-equal_variance', #-unequal_variance
+        usedefault=True,
         )
     
     #Other arguments
@@ -756,24 +754,22 @@ class MemaInputSpec(AFNICommandInputSpec):
         )
 
     covariates_center = traits.Str(
-        desc='Centering rule for covariates. You can provide centering rules for each coveriate,'
-        ' or specify mean centering or no centering (using 0). If no specification is made each'
-        ' covariate will be centered about its own mean. See AFNI documentation for usage.',
+        desc="""\
+Centering rule for covariates. You can provide centering rules for each coveriate, 
+or specify mean centering or no centering (using 0). If no specification is made each
+covariate will be centered about its own mean.
+-covariates_center COV_1=CEN_1 [COV_2=CEN_2 ... ]: (for 1 group) 
+-covariates_center COV_1=CEN_1.A CEN_1.B [COV_2=CEN_2.A CEN_2.B ... ]: 
+                                                 (for 2 groups) 
+ where COV_K is the name assigned to the K-th covariate, 
+ either from the header of the covariates file, or from the option
+ -covariates_name. This makes clear which center belongs to which
+ covariate. When two groups are used, you need to specify a center for
+ each of the groups (CEN_K.A, CEN_K.B).
+ Example: If you had covariates age, and weight, you would use:
+        -covariates_center age = 78 55 weight = 165 198""",
         argstr='covariates_center %s'
         )
-
-    """"
-   -covariates_center COV_1=CEN_1 [COV_2=CEN_2 ... ]: (for 1 group) 
-   -covariates_center COV_1=CEN_1.A CEN_1.B [COV_2=CEN_2.A CEN_2.B ... ]: 
-                                                     (for 2 groups) 
-     where COV_K is the name assigned to the K-th covariate, 
-     either from the header of the covariates file, or from the option
-     -covariates_name. This makes clear which center belongs to which
-     covariate. When two groups are used, you need to specify a center for
-     each of the groups (CEN_K.A, CEN_K.B).
-     Example: If you had covariates age, and weight, you would use:
-            -covariates_center age = 78 55 weight = 165 198
-    """
 
     covariates_model = traits.Tuple(
             traits.Enum('same', 'different', desc='Specify the center'),
@@ -789,10 +785,10 @@ class MemaInputSpec(AFNICommandInputSpec):
           for each of the covariates. Similarly for the slope.
     """
 
-    covariates_name = traits.Str(
+    covariates_name = traits.List(Str,
         desc='Specify the name of each of the N covariates. Only needed if covariate file does'
         ' not have a header. Default is to name covariates cov1, cov2, ...',
-        argstr='-coveriates_names %s')
+        argstr='-covariates_names %s')
 
     debugArgs = traits.Bool(
         desc='Enable R to save parameters in a file called .3dMEMA.dbg.AFNI.args in the current'
@@ -819,7 +815,7 @@ class MemaInputSpec(AFNICommandInputSpec):
         argstr='-mask %s'
         )
 
-    max_zeros = traits.Float(
+    max_zeros = traits.Range(  # Please revise all the other possible settings
         desc='Do not compute statistics at any voxel that has' 
               ' more than MM zero beta coefficients or GLTs.'
               'Setting -max_zeros to 0.25 means process data only at voxels'
@@ -828,7 +824,9 @@ class MemaInputSpec(AFNICommandInputSpec):
               ' integer less than the number of subjects, or a fraction' 
               ' between 0 and 1. Alternatively option -missing_data'
               ' can be used to handle missing data.',
-        argstr='-max_zeros %f'
+        min=0.0, max=1.0,
+        argstr='-max_zeros %f',
+        xor=['missing_data'],
         )
 
     """"
@@ -847,13 +845,16 @@ class MemaInputSpec(AFNICommandInputSpec):
                 can be used to handle missing data.
     """
 
-    missing_data = traits.Str(
+    missing_data = traits.Either(
+        0,
+        traits.List(File(exists=True), minlen=1, maxlen=2,),
         desc='This option corrects for inflated statistics for the voxels where'
               ' some subjects do not have any data available due to imperfect'
               ' spatial alignment or other reasons. The absence of this option'
               ' means no missing data will be assumed.',
-        argstr='-missing_data %s'
-        )
+        argstr='-missing_data %s',
+        xor=['max_zeros']
+    )
 
     """"
    -missing_data: This option corrects for inflated statistics for the voxels where
@@ -871,7 +872,7 @@ class MemaInputSpec(AFNICommandInputSpec):
                                in that group. 
     """
 
-    outliers = traits.Bool(
+    outliers = traits.Bool(  # Please combine with -no_model_outliers
         desc = 'Model outlier betas with a Laplace distribution of'
                '  of subject-specific error. Default is -no_model_outliers',
         argstr ='-model_outliers'
@@ -880,14 +881,15 @@ class MemaInputSpec(AFNICommandInputSpec):
     nonzeros = traits.Float(
         desc = 'Do not compute statistics at any voxel that has'
                 ' less than NN non-zero beta values. This options is'
-                ' complimentary to -max_zeroes, and matches an option in'
+                ' complimentary to -max_zeros, and matches an option in'
                 ' the interactive 3dMEMA mode. NN is basically (number of'
                 ' unique subjects - MM). Alternatively option -missing_data'
                 ' can be used to handle missing data.',
-        argstr = '-n_nonzero %f'
+        argstr = '-n_nonzero %f',
+        xor=['missing_data']
         )
 
-    noHKtest = traits.Bool(
+    noHKtest = traits.Bool(  # Please combine with -KHtest
         desc='Do not make the Hartung-Knapp adjustment. -KHtest is' 
           ' the default with t-statistic output.',
         argstr='-no_HKtest'
@@ -898,7 +900,7 @@ class MemaInputSpec(AFNICommandInputSpec):
         argstr ='-no_model_outliers'
         )
 
-    noresidualZ = traits.Bool(
+    noresidualZ = traits.Bool(  # Combine with -residualZ
         desc='Do not output residuals and their  Z values (Default).',
         argstr='-no_residual_Z'
         )
@@ -918,10 +920,13 @@ class MemaInputSpec(AFNICommandInputSpec):
         )
 
     rio = traits.Bool(
-        desc='use R's' io functions',
+        desc='use R\'s io functions',
         argstr='-rio')
 
-    verbosity = traits.Int(
+    verbosity = traits.Range(
+        1,
+        usedefault=True,
+        min=0,
         desc='An integer specifying verbosity level. 0 is quiet, 1+ is talkative.',
         argstr='-verb %d')
 
@@ -932,7 +937,7 @@ class MemaOutputSpec(AFNICommandOutputSpec):
         exists=True
         )
     args = File(
-        desc='Arguments file for debugging, generated if -debugArgs is set')
+        desc='Arguments file for debugging, generated if -dbArgs is set')
 
 
 class Mema(AFNICommand):
