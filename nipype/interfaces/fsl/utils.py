@@ -1700,7 +1700,28 @@ class SigLoss(FSLCommand):
             return self._list_outputs()['out_file']
         return None
 
+      
+class FslOrientInputSpec(FSLCommandInputSpec):
+    in_file = File(exists=True, desc='input file', argstr='%s', position=2, mandatory=True)
+    main_option = traits.Str(desc='main option', argstr='-%s', position=0, mandatory=True)
+    code = traits.Int(argstr='%d', desc='code for setsformcode', position=1)
 
+    
+class FslOrientOutputSpec(TraitedSpec):
+    out_file = File(desc = "out file", exists = True)
+
+    
+class FslOrient(FSLCommand):
+    _cmd = 'fslorient'
+    input_spec = FslOrientInputSpec
+    output_spec = FslOrientOutputSpec
+
+    def _list_outputs(self):
+            outputs = self.output_spec().get()
+            outputs['out_file'] = os.path.abspath(self.inputs.in_file)
+            return outputs      
+      
+      
 class Reorient2StdInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, mandatory=True, argstr="%s")
     out_file = File(genfile=True, hash_files=False, argstr="%s")
