@@ -142,7 +142,13 @@ class BasePath(TraitType):
                 self.error(object, name, str(value))
 
         if self.resolve:
-            value = value.resolve()
+            try:
+                value = value.resolve(strict=self.exists)
+            except TypeError:
+                if self.exists:
+                    value = value.resolve()
+                elif not value.is_absolute():
+                    value = Path() / value
 
         if not return_pathlike and not self.pathlike:
             value = str(value)
