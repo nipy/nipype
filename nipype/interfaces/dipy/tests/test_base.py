@@ -3,7 +3,7 @@ from collections import namedtuple
 from ...base import traits, TraitedSpec, BaseInterfaceInputSpec
 from ..base import (convert_to_traits_type, create_interface_specs,
                     dipy_to_nipype_interface, DipyBaseInterface, no_dipy,
-                    get_dipy_workflows)
+                    get_dipy_workflows, check_version)
 
 
 def test_convert_to_traits_type():
@@ -85,6 +85,7 @@ def test_create_interface_specs():
 
 
 @pytest.mark.skipif(no_dipy(), reason="DIPY is not installed")
+@pytest.mark.skipif(not check_version('0.16'), reason='dipy must be >=0.16')
 def test_dipy_to_nipype_interface():
     from dipy.workflows.workflow import Workflow
 

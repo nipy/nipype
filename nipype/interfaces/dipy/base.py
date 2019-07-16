@@ -6,7 +6,6 @@ from __future__ import (print_function, division, unicode_literals,
 import os.path as op
 import inspect
 import numpy as np
-from ... import logging
 from ..base import (traits, File, isdefined, LibraryBaseInterface,
                     BaseInterfaceInputSpec, TraitedSpec)
 
@@ -23,17 +22,25 @@ except ImportError:
 
 
 def no_dipy():
-    """ Check if dipy is available """
+    """Check if dipy is available."""
     global HAVE_DIPY
     return not HAVE_DIPY
 
 
 def dipy_version():
-    """ Check dipy version """
+    """Return dipy version."""
     if no_dipy():
         return None
 
     return dipy.__version__
+
+
+def check_version(minversion):
+    """Check version is greater or equal to a given version."""
+    from packaging.version import Version
+    if no_dipy():
+        return None
+    return Version(dipy.__version__) >= Version(minversion)
 
 
 class DipyBaseInterface(LibraryBaseInterface):

@@ -171,7 +171,7 @@ EXTRA_REQUIRES = {
     'doc': ['Sphinx>=1.4', 'numpydoc', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],
     'tests': TESTS_REQUIRES,
     'specs': ['yapf'],
-    'nipy': ['nitime', 'nilearn<0.5.0', 'dipy', 'nipy', 'matplotlib'],
+    'nipy': ['nitime', 'nilearn<0.5.0', 'dipy!=0.15,>=0.14', 'nipy', 'matplotlib'],
     'profiler': ['psutil>=5.0'],
     'duecredit': ['duecredit'],
     'xvfbwrapper': ['xvfbwrapper'],
