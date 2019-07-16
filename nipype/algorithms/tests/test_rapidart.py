@@ -79,12 +79,13 @@ def test_sc_init():
 
 def test_sc_populate_inputs():
     sc = ra.StimulusCorrelation()
-    inputs = Bunch(
-        realignment_parameters=None,
-        intensity_values=None,
-        spm_mat_file=None,
-        concatenated_design=None)
-    assert set(sc.inputs.__dict__.keys()) == set(inputs.__dict__.keys())
+    expected = [
+        'concatenated_design',
+        'intensity_values',
+        'realignment_parameters',
+        'spm_mat_file',
+    ]
+    assert sorted(sc.inputs.get().keys()) == expected
 
 
 def test_sc_output_filenames():
