@@ -319,7 +319,7 @@ Unknown value(s) %s for metadata type of an ImageFile input.\
 
         super(ImageFile, self).__init__(
             default_value=default_value, exists=exists, extensions=extensions,
-            pathlike=pathlike, resolve=True, **metadata)
+            pathlike=pathlike, resolve=resolve, **metadata)
 
 
 def isdefined(object):

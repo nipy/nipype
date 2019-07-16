@@ -32,6 +32,7 @@ from ...utils import spm_docs as sd, NUMPY_MMAP
 from ..base import (BaseInterface, traits, isdefined, InputMultiPath,
                     BaseInterfaceInputSpec, Directory, Undefined, ImageFile,
                     PackageInfo)
+from ..base.traits_extension import NoDefaultSpecified
 from ..matlab import MatlabCommand
 from ...external.due import due, Doi, BibTeX
 
@@ -601,15 +602,8 @@ class ImageFileSPM(ImageFile):
     Defines an ImageFile trait specific to SPM interfaces.
     """
 
-    def __init__(self,
-                 value='',
-                 filter=None,
-                 auto_set=False,
-                 entries=0,
-                 exists=False,
-                 types=['nifti1', 'nifti2'],
-                 allow_compressed=False,
-                 **metadata):
+    def __init__(self, default_value=NoDefaultSpecified, exists=False,
+                 pathlike=False, resolve=False, **metadata):
         """ Trait handles neuroimaging files.
 
         Parameters
@@ -619,8 +613,6 @@ class ImageFileSPM(ImageFile):
         compressed : boolean
             Indicates whether the file format can compressed
         """
-        self.types = types
-        self.allow_compressed = allow_compressed
-        super(ImageFileSPM,
-              self).__init__(value, filter, auto_set, entries, exists, types,
-                             allow_compressed, **metadata)
+        super(ImageFileSPM, self).__init__(
+            default_value=default_value, exists=exists, types=['nifti1', 'nifti2'],
+            pathlike=pathlike, resolve=resolve, **metadata)
