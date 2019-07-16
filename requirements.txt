@@ -11,6 +11,7 @@ neurdflib
 click>=6.6.0
 funcsigs
 configparser
+pathlib2
 pydotplus
 pydot>=1.2.3
 packaging
