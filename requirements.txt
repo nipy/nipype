@@ -14,3 +14,4 @@ configparser
 pydotplus
 pydot>=1.2.3
 packaging
+pathlib2
