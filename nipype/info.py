@@ -135,47 +135,47 @@ ISRELEASE = (len(__version__.replace('-', '.').split('.')) == 3
 VERSION = __version__
 PROVIDES = ['nipype']
 REQUIRES = [
-    'nibabel>=%s' % NIBABEL_MIN_VERSION,
-    'networkx>=%s,<=%s ; python_version < "3.0"' % (NETWORKX_MIN_VERSION, NETWORKX_MAX_VERSION_27),
+    'click>=%s' % CLICK_MIN_VERSION,
+    'configparser; python_version <= "3.4"',
+    'funcsigs',
+    'future>=%s' % FUTURE_MIN_VERSION,
+    'futures; python_version == "2.7"',
     'networkx>=%s ; python_version >= "3.0"' % NETWORKX_MIN_VERSION,
-    'numpy>=%s,!=%s ; python_version == "2.7"' % (NUMPY_MIN_VERSION, NUMPY_BAD_VERSION_27),
+    'networkx>=%s,<=%s ; python_version < "3.0"' % (NETWORKX_MIN_VERSION, NETWORKX_MAX_VERSION_27),
+    'neurdflib',
+    'nibabel>=%s' % NIBABEL_MIN_VERSION,
     'numpy>=%s ; python_version > "3.0" and python_version < "3.7"' % NUMPY_MIN_VERSION,
     'numpy>=%s ; python_version >= "3.7"' % NUMPY_MIN_VERSION_37,
+    'numpy>=%s,!=%s ; python_version == "2.7"' % (NUMPY_MIN_VERSION, NUMPY_BAD_VERSION_27),
+    'packaging',
+    'prov>=%s' % PROV_VERSION,
+    'pydot>=%s' % PYDOT_MIN_VERSION,
+    'pydotplus',
     'python-dateutil>=%s' % DATEUTIL_MIN_VERSION,
     'scipy>=%s' % SCIPY_MIN_VERSION,
-    'traits>=%s,!=5.0' % TRAITS_MIN_VERSION,
-    'future>=%s' % FUTURE_MIN_VERSION,
     'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
-    'prov>=%s' % PROV_VERSION,
-    'neurdflib',
-    'click>=%s' % CLICK_MIN_VERSION,
-    'funcsigs',
-    'pydotplus',
-    'pydot>=%s' % PYDOT_MIN_VERSION,
-    'packaging',
-    'futures; python_version == "2.7"',
-    'configparser; python_version <= "3.4"',
+    'traits>=%s,!=5.0' % TRAITS_MIN_VERSION,
 ]
 
 TESTS_REQUIRES = [
+    'codecov',
+    'coverage<5',
     'mock',
     'pytest',
     'pytest-cov',
-    'codecov',
     'pytest-env',
-    'coverage<5'
 ]
 
 EXTRA_REQUIRES = {
     'doc': ['Sphinx>=1.4', 'numpydoc', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],
-    'tests': TESTS_REQUIRES,
-    'specs': ['yapf'],
+    'duecredit': ['duecredit'],
     'nipy': ['nitime', 'nilearn<0.5.0', 'dipy', 'nipy', 'matplotlib'],
     'profiler': ['psutil>=5.0'],
-    'duecredit': ['duecredit'],
-    'xvfbwrapper': ['xvfbwrapper'],
     'pybids': ['pybids>=0.7.0'],
+    'specs': ['yapf'],
     'ssh': ['paramiko'],
+    'tests': TESTS_REQUIRES,
+    'xvfbwrapper': ['xvfbwrapper'],
     # 'mesh': ['mayavi']  # Enable when it works
 }
 
