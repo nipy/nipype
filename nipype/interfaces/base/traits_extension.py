@@ -152,7 +152,7 @@ class BasePath(TraitType):
                 if self.exists:
                     value = value.resolve()
                 elif not value.is_absolute():
-                    value = Path() / value
+                    value = Path().resolve() / value
 
         if not return_pathlike and not self.pathlike:
             value = str(value)
