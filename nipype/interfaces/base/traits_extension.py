@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -25,7 +24,6 @@ from __future__ import (print_function, division, unicode_literals,
 
 from builtins import str, bytes
 from collections import Sequence
-from pathlib import Path
 
 # perform all external trait imports here
 from traits import __version__ as traits_version
@@ -36,6 +34,12 @@ from traits.trait_base import _Undefined
 
 from traits.api import Unicode
 from future import standard_library
+
+try:
+    from pathlib import Path
+except ImportError:
+    from pathlib2 import Path
+
 
 if traits_version < '3.7.0':
     raise ImportError('Traits version 3.7.0 or higher must be installed')
