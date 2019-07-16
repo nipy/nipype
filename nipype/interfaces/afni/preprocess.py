@@ -13,7 +13,7 @@ import os.path as op
 from ...utils.filemanip import (load_json, save_json, split_filename,
                                 fname_presuffix)
 from ..base import (CommandLineInputSpec, CommandLine, TraitedSpec, traits,
-                    isdefined, File, InputMultiPath, Undefined, Str,
+                    isdefined, File, Directory, InputMultiPath, Undefined, Str,
                     InputMultiObject)
 
 from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec,
@@ -757,8 +757,7 @@ class BandpassInputSpec(AFNICommandInputSpec):
         desc='output file from 3dBandpass',
         argstr='-prefix %s',
         position=1,
-        name_source='in_file',
-        genfile=True)
+        name_source='in_file')
     lowpass = traits.Float(
         desc='lowpass', argstr='%f', position=-2, mandatory=True)
     highpass = traits.Float(
@@ -909,6 +908,11 @@ class BlurToFWHMInputSpec(AFNICommandInputSpec):
         argstr='-input %s',
         mandatory=True,
         exists=True)
+    out_file = File(
+        name_template='%s_afni',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
     automask = traits.Bool(
         desc='Create an automask from the input dataset.', argstr='-automask')
     fwhm = traits.Float(
@@ -1042,6 +1046,11 @@ class DegreeCentralityInputSpec(CentralityInputSpec):
         mandatory=True,
         exists=True,
         copyfile=False)
+    out_file = File(
+        name_template='%s_afni',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
     sparsity = traits.Float(
         desc='only take the top percent of connections', argstr='-sparsity %f')
     oned_file = Str(
@@ -1188,6 +1197,11 @@ class ECMInputSpec(CentralityInputSpec):
         mandatory=True,
         exists=True,
         copyfile=False)
+    out_file = File(
+        name_template='%s_afni',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
     sparsity = traits.Float(
         desc='only take the top percent of connections', argstr='-sparsity %f')
     full = traits.Bool(
@@ -1453,6 +1467,11 @@ class LFCDInputSpec(CentralityInputSpec):
         mandatory=True,
         exists=True,
         copyfile=False)
+    out_file = File(
+        name_template='%s_afni',
+        desc='output image file name',
+        argstr='-prefix %s',
+        name_source='in_file')
 
 
 class LFCD(AFNICommand):
@@ -3072,15 +3091,13 @@ class Warp(AFNICommand):
 
 class QwarpInputSpec(AFNICommandInputSpec):
     in_file = File(
-        desc=
-        'Source image (opposite phase encoding direction than base image).',
+        desc='Source image (opposite phase encoding direction than base image).',
         argstr='-source %s',
         mandatory=True,
         exists=True,
         copyfile=False)
     base_file = File(
-        desc=
-        'Base image (opposite phase encoding direction than source image).',
+        desc='Base image (opposite phase encoding direction than source image).',
         argstr='-base %s',
         mandatory=True,
         exists=True,
@@ -3088,42 +3105,42 @@ class QwarpInputSpec(AFNICommandInputSpec):
     out_file = File(
         argstr='-prefix %s',
         name_template='%s_QW',
-        name_source=['in_file'],
-        genfile=True,
-        desc='out_file ppp'
-        'Sets the prefix for the output datasets.'
-        '* The source dataset is warped to match the base'
-        'and gets prefix \'ppp\'. (Except if \'-plusminus\' is used.)'
-        '* The final interpolation to this output dataset is'
-        'done using the \'wsinc5\' method.  See the output of'
-        ' 3dAllineate -HELP'
-        '(in the "Modifying \'-final wsinc5\'" section) for'
-        'the lengthy technical details.'
-        '* The 3D warp used is saved in a dataset with'
-        'prefix \'ppp_WARP\' -- this dataset can be used'
-        'with 3dNwarpApply and 3dNwarpCat, for example.'
-        '* To be clear, this is the warp from source dataset'
-        ' coordinates to base dataset coordinates, where the'
-        ' values at each base grid point are the xyz displacments'
-        ' needed to move that grid point\'s xyz values to the'
-        ' corresponding xyz values in the source dataset:'
-        '   base( (x,y,z) + WARP(x,y,z) ) matches source(x,y,z)'
-        ' Another way to think of this warp is that it \'pulls\''
-        ' values back from source space to base space.'
-        '* 3dNwarpApply would use \'ppp_WARP\' to transform datasets'
-        'aligned with the source dataset to be aligned with the'
-        'base dataset.'
-        '** If you do NOT want this warp saved, use the option \'-nowarp\'.'
-        '-->> (However, this warp is usually the most valuable possible output!)'
-        '* If you want to calculate and save the inverse 3D warp,'
-        'use the option \'-iwarp\'.  This inverse warp will then be'
-        'saved in a dataset with prefix \'ppp_WARPINV\'.'
-        '* This inverse warp could be used to transform data from base'
-        'space to source space, if you need to do such an operation.'
-        '* You can easily compute the inverse later, say by a command like'
-        ' 3dNwarpCat -prefix Z_WARPINV \'INV(Z_WARP+tlrc)\''
-        'or the inverse can be computed as needed in 3dNwarpApply, like'
-        ' 3dNwarpApply -nwarp \'INV(Z_WARP+tlrc)\' -source Dataset.nii ...')
+        name_source='in_file',
+        desc="""\
+out_file ppp\
+Sets the prefix for the output datasets.\
+* The source dataset is warped to match the base\
+and gets prefix \'ppp\'. (Except if \'-plusminus\' is used.)\
+* The final interpolation to this output dataset is\
+done using the \'wsinc5\' method.  See the output of\
+ 3dAllineate -HELP\
+(in the "Modifying \'-final wsinc5\'" section) for\
+the lengthy technical details.\
+* The 3D warp used is saved in a dataset with\
+prefix \'ppp_WARP\' -- this dataset can be used\
+with 3dNwarpApply and 3dNwarpCat, for example.\
+* To be clear, this is the warp from source dataset\
+ coordinates to base dataset coordinates, where the\
+ values at each base grid point are the xyz displacments\
+ needed to move that grid point\'s xyz values to the\
+ corresponding xyz values in the source dataset:\
+   base( (x,y,z) + WARP(x,y,z) ) matches source(x,y,z)\
+ Another way to think of this warp is that it \'pulls\'\
+ values back from source space to base space.\
+* 3dNwarpApply would use \'ppp_WARP\' to transform datasets\
+aligned with the source dataset to be aligned with the\
+base dataset.\
+** If you do NOT want this warp saved, use the option \'-nowarp\'.\
+-->> (However, this warp is usually the most valuable possible output!)\
+* If you want to calculate and save the inverse 3D warp,\
+use the option \'-iwarp\'.  This inverse warp will then be\
+saved in a dataset with prefix \'ppp_WARPINV\'.\
+* This inverse warp could be used to transform data from base\
+space to source space, if you need to do such an operation.\
+* You can easily compute the inverse later, say by a command like\
+ 3dNwarpCat -prefix Z_WARPINV \'INV(Z_WARP+tlrc)\'\
+or the inverse can be computed as needed in 3dNwarpApply, like\
+ 3dNwarpApply -nwarp \'INV(Z_WARP+tlrc)\' -source Dataset.nii ...""")
     resample = traits.Bool(
         desc='This option simply resamples the source dataset to match the'
         'base dataset grid.  You can use this if the two datasets'

@@ -598,21 +598,11 @@ class SPMCommand(BaseInterface):
 
 
 class ImageFileSPM(ImageFile):
-    """
-    Defines an ImageFile trait specific to SPM interfaces.
-    """
+    """Defines a trait whose value must be a NIfTI file."""
 
-    def __init__(self, default_value=NoDefaultSpecified, exists=False,
+    def __init__(self, value=NoDefaultSpecified, exists=False,
                  pathlike=False, resolve=False, **metadata):
-        """ Trait handles neuroimaging files.
-
-        Parameters
-        ----------
-        types : list
-            Strings of file format types accepted
-        compressed : boolean
-            Indicates whether the file format can compressed
-        """
+        """Create an ImageFileSPM trait."""
         super(ImageFileSPM, self).__init__(
-            default_value=default_value, exists=exists, types=['nifti1', 'nifti2'],
+            value=value, exists=exists, types=['nifti1', 'nifti2'],
             pathlike=pathlike, resolve=resolve, **metadata)

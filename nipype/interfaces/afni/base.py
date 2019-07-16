@@ -115,12 +115,6 @@ class AFNICommandInputSpec(CommandLineInputSpec):
         1, usedefault=True, nohash=True, desc='set number of threads')
     outputtype = traits.Enum(
         'AFNI', list(Info.ftypes.keys()), desc='AFNI output filetype')
-    out_file = File(
-        name_template="%s_afni",
-        desc='output image file name',
-        argstr='-prefix %s',
-        name_source=["in_file"])
-
 
 class AFNICommandOutputSpec(TraitedSpec):
     out_file = File(desc='output file', exists=True)
