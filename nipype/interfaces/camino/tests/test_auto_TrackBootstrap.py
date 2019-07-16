@@ -5,16 +5,10 @@ from ..dti import TrackBootstrap
 
 def test_TrackBootstrap_inputs():
     input_map = dict(
-        anisfile=dict(
-            argstr='-anisfile %s',
-            usedefault=True,
-        ),
+        anisfile=dict(argstr='-anisfile %s', ),
         anisthresh=dict(argstr='-anisthresh %f', ),
         args=dict(argstr='%s', ),
-        bgmask=dict(
-            argstr='-bgmask %s',
-            usedefault=True,
-        ),
+        bgmask=dict(argstr='-bgmask %s', ),
         bsdatafiles=dict(
             argstr='-bsdatafile %s',
             mandatory=True,
@@ -36,7 +30,6 @@ def test_TrackBootstrap_inputs():
         in_file=dict(
             argstr='-inputfile %s',
             position=1,
-            usedefault=True,
         ),
         inputdatatype=dict(argstr='-inputdatatype %s', ),
         inputmodel=dict(
@@ -62,23 +55,19 @@ def test_TrackBootstrap_inputs():
             argstr='-outputfile %s',
             genfile=True,
             position=-1,
-            usedefault=True,
         ),
         output_root=dict(
             argstr='-outputroot %s',
             position=-1,
-            usedefault=True,
         ),
         outputtracts=dict(argstr='-outputtracts %s', ),
         scheme_file=dict(
             argstr='-schemefile %s',
             mandatory=True,
-            usedefault=True,
         ),
         seed_file=dict(
             argstr='-seedfile %s',
             position=2,
-            usedefault=True,
         ),
         stepsize=dict(
             argstr='-stepsize %f',
@@ -99,7 +88,7 @@ def test_TrackBootstrap_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TrackBootstrap_outputs():
-    output_map = dict(tracked=dict(usedefault=True, ), )
+    output_map = dict(tracked=dict(), )
     outputs = TrackBootstrap.output_spec()
 
     for key, metadata in list(output_map.items()):

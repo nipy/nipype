@@ -10,12 +10,10 @@ def test_ConstrainedSphericalDeconvolution_inputs():
         directions_file=dict(
             argstr='-directions %s',
             position=-2,
-            usedefault=True,
         ),
         encoding_file=dict(
             argstr='-grad %s',
             position=1,
-            usedefault=True,
         ),
         environ=dict(
             nohash=True,
@@ -24,20 +22,17 @@ def test_ConstrainedSphericalDeconvolution_inputs():
         filter_file=dict(
             argstr='-filter %s',
             position=-2,
-            usedefault=True,
         ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
             position=-3,
-            usedefault=True,
         ),
         iterations=dict(argstr='-niter %s', ),
         lambda_value=dict(argstr='-lambda %s', ),
         mask_image=dict(
             argstr='-mask %s',
             position=2,
-            usedefault=True,
         ),
         maximum_harmonic_order=dict(argstr='-lmax %s', ),
         normalise=dict(
@@ -48,13 +43,11 @@ def test_ConstrainedSphericalDeconvolution_inputs():
             argstr='%s',
             genfile=True,
             position=-1,
-            usedefault=True,
         ),
         response_file=dict(
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         threshold_value=dict(argstr='-threshold %s', ),
     )
@@ -64,7 +57,7 @@ def test_ConstrainedSphericalDeconvolution_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ConstrainedSphericalDeconvolution_outputs():
-    output_map = dict(spherical_harmonics_image=dict(usedefault=True, ), )
+    output_map = dict(spherical_harmonics_image=dict(), )
     outputs = ConstrainedSphericalDeconvolution.output_spec()
 
     for key, metadata in list(output_map.items()):

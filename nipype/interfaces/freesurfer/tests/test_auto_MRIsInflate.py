@@ -15,7 +15,6 @@ def test_MRIsInflate_inputs():
             copyfile=True,
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         no_save_sulc=dict(
             argstr='-no-save-sulc',
@@ -28,13 +27,9 @@ def test_MRIsInflate_inputs():
             name_source=['in_file'],
             name_template='%s.inflated',
             position=-1,
-            usedefault=True,
         ),
-        out_sulc=dict(
-            usedefault=True,
-            xor=['no_save_sulc'],
-        ),
-        subjects_dir=dict(usedefault=True, ),
+        out_sulc=dict(xor=['no_save_sulc'], ),
+        subjects_dir=dict(),
     )
     inputs = MRIsInflate.input_spec()
 
@@ -43,8 +38,8 @@ def test_MRIsInflate_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRIsInflate_outputs():
     output_map = dict(
-        out_file=dict(usedefault=True, ),
-        out_sulc=dict(usedefault=True, ),
+        out_file=dict(),
+        out_sulc=dict(),
     )
     outputs = MRIsInflate.output_spec()
 

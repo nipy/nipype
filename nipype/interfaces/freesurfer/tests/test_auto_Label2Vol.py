@@ -10,7 +10,6 @@ def test_Label2Vol_inputs():
             copyfile=False,
             mandatory=True,
             requires=('subject_id', 'hemi'),
-            usedefault=True,
             xor=('label_file', 'annot_file', 'seg_file', 'aparc_aseg'),
         ),
         aparc_aseg=dict(
@@ -36,15 +35,9 @@ def test_Label2Vol_inputs():
             mandatory=True,
             xor=('label_file', 'annot_file', 'seg_file', 'aparc_aseg'),
         ),
-        label_hit_file=dict(
-            argstr='--hits %s',
-            usedefault=True,
-        ),
+        label_hit_file=dict(argstr='--hits %s', ),
         label_voxel_volume=dict(argstr='--labvoxvol %f', ),
-        map_label_stat=dict(
-            argstr='--label-stat %s',
-            usedefault=True,
-        ),
+        map_label_stat=dict(argstr='--label-stat %s', ),
         native_vox2ras=dict(argstr='--native-vox2ras', ),
         proj=dict(
             argstr='--proj %s %f %f %f',
@@ -52,33 +45,28 @@ def test_Label2Vol_inputs():
         ),
         reg_file=dict(
             argstr='--reg %s',
-            usedefault=True,
             xor=('reg_file', 'reg_header', 'identity'),
         ),
         reg_header=dict(
             argstr='--regheader %s',
-            usedefault=True,
             xor=('reg_file', 'reg_header', 'identity'),
         ),
         seg_file=dict(
             argstr='--seg %s',
             copyfile=False,
             mandatory=True,
-            usedefault=True,
             xor=('label_file', 'annot_file', 'seg_file', 'aparc_aseg'),
         ),
         subject_id=dict(argstr='--subject %s', ),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
         surface=dict(argstr='--surf %s', ),
         template_file=dict(
             argstr='--temp %s',
             mandatory=True,
-            usedefault=True,
         ),
         vol_label_file=dict(
             argstr='--o %s',
             genfile=True,
-            usedefault=True,
         ),
     )
     inputs = Label2Vol.input_spec()
@@ -87,7 +75,7 @@ def test_Label2Vol_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Label2Vol_outputs():
-    output_map = dict(vol_label_file=dict(usedefault=True, ), )
+    output_map = dict(vol_label_file=dict(), )
     outputs = Label2Vol.output_spec()
 
     for key, metadata in list(output_map.items()):

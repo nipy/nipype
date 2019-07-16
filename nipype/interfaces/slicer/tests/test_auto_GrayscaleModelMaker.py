@@ -8,7 +8,6 @@ def test_GrayscaleModelMaker_inputs():
         InputVolume=dict(
             argstr='%s',
             position=-2,
-            usedefault=True,
         ),
         OutputGeometry=dict(
             argstr='%s',
@@ -33,11 +32,7 @@ def test_GrayscaleModelMaker_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_GrayscaleModelMaker_outputs():
-    output_map = dict(
-        OutputGeometry=dict(
-            position=-1,
-            usedefault=True,
-        ), )
+    output_map = dict(OutputGeometry=dict(position=-1, ), )
     outputs = GrayscaleModelMaker.output_spec()
 
     for key, metadata in list(output_map.items()):

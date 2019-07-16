@@ -12,7 +12,7 @@ def test_DcmStack_inputs():
         include_regexes=dict(),
         out_ext=dict(usedefault=True, ),
         out_format=dict(),
-        out_path=dict(usedefault=True, ),
+        out_path=dict(),
     )
     inputs = DcmStack.input_spec()
 
@@ -20,7 +20,7 @@ def test_DcmStack_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DcmStack_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = DcmStack.output_spec()
 
     for key, metadata in list(output_map.items()):

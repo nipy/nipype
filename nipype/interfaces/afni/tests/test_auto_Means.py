@@ -16,12 +16,10 @@ def test_Means_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         in_file_b=dict(
             argstr='%s',
             position=-1,
-            usedefault=True,
         ),
         mask_inter=dict(argstr='-mask_inter', ),
         mask_union=dict(argstr='-mask_union', ),
@@ -34,7 +32,6 @@ def test_Means_inputs():
             argstr='-prefix %s',
             name_source='in_file_a',
             name_template='%s_mean',
-            usedefault=True,
         ),
         outputtype=dict(),
         scale=dict(argstr='-%sscale', ),
@@ -48,7 +45,7 @@ def test_Means_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Means_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = Means.output_spec()
 
     for key, metadata in list(output_map.items()):

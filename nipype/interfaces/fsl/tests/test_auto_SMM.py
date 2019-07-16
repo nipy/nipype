@@ -15,7 +15,6 @@ def test_SMM_inputs():
             copyfile=False,
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
         no_deactivation_class=dict(
             argstr='--zfstatmode',
@@ -27,7 +26,6 @@ def test_SMM_inputs():
             copyfile=False,
             mandatory=True,
             position=0,
-            usedefault=True,
         ),
     )
     inputs = SMM.input_spec()
@@ -37,9 +35,9 @@ def test_SMM_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SMM_outputs():
     output_map = dict(
-        activation_p_map=dict(usedefault=True, ),
-        deactivation_p_map=dict(usedefault=True, ),
-        null_p_map=dict(usedefault=True, ),
+        activation_p_map=dict(),
+        deactivation_p_map=dict(),
+        null_p_map=dict(),
     )
     outputs = SMM.output_spec()
 

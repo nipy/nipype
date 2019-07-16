@@ -6,10 +6,7 @@ from ..model import Label2Annot
 def test_Label2Annot_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        color_table=dict(
-            argstr='--ctab %s',
-            usedefault=True,
-        ),
+        color_table=dict(argstr='--ctab %s', ),
         copy_inputs=dict(),
         environ=dict(
             nohash=True,
@@ -24,10 +21,7 @@ def test_Label2Annot_inputs():
             mandatory=True,
         ),
         keep_max=dict(argstr='--maxstatwinner', ),
-        orig=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
+        orig=dict(mandatory=True, ),
         out_annot=dict(
             argstr='--a %s',
             mandatory=True,
@@ -37,7 +31,7 @@ def test_Label2Annot_inputs():
             mandatory=True,
             usedefault=True,
         ),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
         verbose_off=dict(argstr='--noverbose', ),
     )
     inputs = Label2Annot.input_spec()
@@ -46,7 +40,7 @@ def test_Label2Annot_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Label2Annot_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = Label2Annot.output_spec()
 
     for key, metadata in list(output_map.items()):

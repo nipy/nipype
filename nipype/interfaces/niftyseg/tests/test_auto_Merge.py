@@ -15,7 +15,6 @@ def test_Merge_inputs():
             argstr='%s',
             mandatory=True,
             position=2,
-            usedefault=True,
         ),
         merge_files=dict(
             argstr='%s',
@@ -27,7 +26,6 @@ def test_Merge_inputs():
             name_source=['in_file'],
             name_template='%s',
             position=-2,
-            usedefault=True,
         ),
         output_datatype=dict(
             argstr='-odt %s',
@@ -40,7 +38,7 @@ def test_Merge_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Merge_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = Merge.output_spec()
 
     for key, metadata in list(output_map.items()):

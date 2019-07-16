@@ -10,7 +10,6 @@ def test_RelabelHypointensities_inputs():
             argstr='%s',
             mandatory=True,
             position=-3,
-            usedefault=True,
         ),
         environ=dict(
             nohash=True,
@@ -19,7 +18,6 @@ def test_RelabelHypointensities_inputs():
         lh_white=dict(
             copyfile=True,
             mandatory=True,
-            usedefault=True,
         ),
         out_file=dict(
             argstr='%s',
@@ -28,14 +26,12 @@ def test_RelabelHypointensities_inputs():
             name_source=['aseg'],
             name_template='%s.hypos.mgz',
             position=-1,
-            usedefault=True,
         ),
         rh_white=dict(
             copyfile=True,
             mandatory=True,
-            usedefault=True,
         ),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
         surf_directory=dict(
             argstr='%s',
             position=-2,
@@ -48,11 +44,7 @@ def test_RelabelHypointensities_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_RelabelHypointensities_outputs():
-    output_map = dict(
-        out_file=dict(
-            argstr='%s',
-            usedefault=True,
-        ), )
+    output_map = dict(out_file=dict(argstr='%s', ), )
     outputs = RelabelHypointensities.output_spec()
 
     for key, metadata in list(output_map.items()):

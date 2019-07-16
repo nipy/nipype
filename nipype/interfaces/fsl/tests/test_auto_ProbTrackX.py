@@ -6,10 +6,7 @@ from ..dti import ProbTrackX
 def test_ProbTrackX_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        avoid_mp=dict(
-            argstr='--avoid=%s',
-            usedefault=True,
-        ),
+        avoid_mp=dict(argstr='--avoid=%s', ),
         c_thresh=dict(argstr='--cthr=%.3f', ),
         correct_path_distribution=dict(argstr='--pd', ),
         dist_thresh=dict(argstr='--distthresh=%.3f', ),
@@ -23,24 +20,14 @@ def test_ProbTrackX_inputs():
             usedefault=True,
         ),
         fsamples=dict(mandatory=True, ),
-        inv_xfm=dict(
-            argstr='--invxfm=%s',
-            usedefault=True,
-        ),
+        inv_xfm=dict(argstr='--invxfm=%s', ),
         loop_check=dict(argstr='--loopcheck', ),
         mask=dict(
             argstr='-m %s',
             mandatory=True,
-            usedefault=True,
         ),
-        mask2=dict(
-            argstr='--mask2=%s',
-            usedefault=True,
-        ),
-        mesh=dict(
-            argstr='--mesh=%s',
-            usedefault=True,
-        ),
+        mask2=dict(argstr='--mask2=%s', ),
+        mesh=dict(argstr='--mesh=%s', ),
         mod_euler=dict(argstr='--modeuler', ),
         mode=dict(
             argstr='--mode=%s',
@@ -60,7 +47,6 @@ def test_ProbTrackX_inputs():
         out_dir=dict(
             argstr='--dir=%s',
             genfile=True,
-            usedefault=True,
         ),
         output_type=dict(),
         phsamples=dict(mandatory=True, ),
@@ -76,27 +62,15 @@ def test_ProbTrackX_inputs():
             argstr='--seed=%s',
             mandatory=True,
         ),
-        seed_ref=dict(
-            argstr='--seedref=%s',
-            usedefault=True,
-        ),
+        seed_ref=dict(argstr='--seedref=%s', ),
         step_length=dict(argstr='--steplength=%.3f', ),
-        stop_mask=dict(
-            argstr='--stop=%s',
-            usedefault=True,
-        ),
+        stop_mask=dict(argstr='--stop=%s', ),
         target_masks=dict(argstr='--targetmasks=%s', ),
         thsamples=dict(mandatory=True, ),
         use_anisotropy=dict(argstr='--usef', ),
         verbose=dict(argstr='--verbose=%d', ),
-        waypoints=dict(
-            argstr='--waypoints=%s',
-            usedefault=True,
-        ),
-        xfm=dict(
-            argstr='--xfm=%s',
-            usedefault=True,
-        ),
+        waypoints=dict(argstr='--waypoints=%s', ),
+        xfm=dict(argstr='--xfm=%s', ),
     )
     inputs = ProbTrackX.input_spec()
 
@@ -106,10 +80,10 @@ def test_ProbTrackX_inputs():
 def test_ProbTrackX_outputs():
     output_map = dict(
         fdt_paths=dict(),
-        log=dict(usedefault=True, ),
+        log=dict(),
         particle_files=dict(),
         targets=dict(),
-        way_total=dict(usedefault=True, ),
+        way_total=dict(),
     )
     outputs = ProbTrackX.output_spec()
 

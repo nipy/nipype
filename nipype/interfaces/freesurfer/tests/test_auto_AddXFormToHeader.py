@@ -15,19 +15,17 @@ def test_AddXFormToHeader_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         out_file=dict(
             argstr='%s',
             position=-1,
             usedefault=True,
         ),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
         transform=dict(
             argstr='%s',
             mandatory=True,
             position=-3,
-            usedefault=True,
         ),
         verbose=dict(argstr='-v', ),
     )
@@ -37,7 +35,7 @@ def test_AddXFormToHeader_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_AddXFormToHeader_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = AddXFormToHeader.output_spec()
 
     for key, metadata in list(output_map.items()):

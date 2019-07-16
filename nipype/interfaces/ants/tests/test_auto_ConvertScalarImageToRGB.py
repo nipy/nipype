@@ -31,7 +31,6 @@ def test_ConvertScalarImageToRGB_inputs():
             argstr='%s',
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
         mask_image=dict(
             argstr='%s',
@@ -74,7 +73,7 @@ def test_ConvertScalarImageToRGB_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ConvertScalarImageToRGB_outputs():
-    output_map = dict(output_image=dict(usedefault=True, ), )
+    output_map = dict(output_image=dict(), )
     outputs = ConvertScalarImageToRGB.output_spec()
 
     for key, metadata in list(output_map.items()):

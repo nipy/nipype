@@ -25,7 +25,6 @@ def test_C3d_inputs():
         out_file=dict(
             argstr='-o %s',
             position=-1,
-            usedefault=True,
             xor=['out_files'],
         ),
         out_files=dict(

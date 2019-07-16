@@ -16,12 +16,8 @@ def test_CreateTiledMosaic_inputs():
         input_image=dict(
             argstr='-i %s',
             mandatory=True,
-            usedefault=True,
         ),
-        mask_image=dict(
-            argstr='-x %s',
-            usedefault=True,
-        ),
+        mask_image=dict(argstr='-x %s', ),
         num_threads=dict(
             nohash=True,
             usedefault=True,
@@ -35,7 +31,6 @@ def test_CreateTiledMosaic_inputs():
         rgb_image=dict(
             argstr='-r %s',
             mandatory=True,
-            usedefault=True,
         ),
         slices=dict(argstr='-s %s', ),
         tile_geometry=dict(argstr='-t %s', ),
@@ -46,7 +41,7 @@ def test_CreateTiledMosaic_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_CreateTiledMosaic_outputs():
-    output_map = dict(output_image=dict(usedefault=True, ), )
+    output_map = dict(output_image=dict(), )
     outputs = CreateTiledMosaic.output_spec()
 
     for key, metadata in list(output_map.items()):

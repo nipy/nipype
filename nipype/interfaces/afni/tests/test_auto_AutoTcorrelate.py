@@ -16,19 +16,14 @@ def test_AutoTcorrelate_inputs():
             copyfile=False,
             mandatory=True,
             position=-1,
-            usedefault=True,
         ),
-        mask=dict(
-            argstr='-mask %s',
-            usedefault=True,
-        ),
+        mask=dict(argstr='-mask %s', ),
         mask_only_targets=dict(
             argstr='-mask_only_targets',
             xor=['mask_source'],
         ),
         mask_source=dict(
             argstr='-mask_source %s',
-            usedefault=True,
             xor=['mask_only_targets'],
         ),
         num_threads=dict(
@@ -39,7 +34,6 @@ def test_AutoTcorrelate_inputs():
             argstr='-prefix %s',
             name_source='in_file',
             name_template='%s_similarity_matrix.1D',
-            usedefault=True,
         ),
         outputtype=dict(),
         polort=dict(argstr='-polort %d', ),
@@ -50,7 +44,7 @@ def test_AutoTcorrelate_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_AutoTcorrelate_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = AutoTcorrelate.output_spec()
 
     for key, metadata in list(output_map.items()):

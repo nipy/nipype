@@ -12,7 +12,6 @@ def test_MRISPreproc_inputs():
         ),
         fsgd_file=dict(
             argstr='--fsgd %s',
-            usedefault=True,
             xor=('subjects', 'fsgd_file', 'subject_file'),
         ),
         fwhm=dict(
@@ -38,21 +37,19 @@ def test_MRISPreproc_inputs():
         out_file=dict(
             argstr='--out %s',
             genfile=True,
-            usedefault=True,
         ),
         proj_frac=dict(argstr='--projfrac %s', ),
         smooth_cortex_only=dict(argstr='--smooth-cortex-only', ),
         source_format=dict(argstr='--srcfmt %s', ),
         subject_file=dict(
             argstr='--f %s',
-            usedefault=True,
             xor=('subjects', 'fsgd_file', 'subject_file'),
         ),
         subjects=dict(
             argstr='--s %s...',
             xor=('subjects', 'fsgd_file', 'subject_file'),
         ),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
         surf_area=dict(
             argstr='--area %s',
             xor=('surf_measure', 'surf_measure_file', 'surf_area'),
@@ -78,7 +75,7 @@ def test_MRISPreproc_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRISPreproc_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = MRISPreproc.output_spec()
 
     for key, metadata in list(output_map.items()):

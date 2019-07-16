@@ -8,7 +8,6 @@ def test_Allineate_inputs():
         allcostx=dict(
             argstr='-allcostx |& tee %s',
             position=-1,
-            usedefault=True,
             xor=[
                 'out_file', 'out_matrix', 'out_param_file', 'out_weight_file'
             ],
@@ -32,24 +31,18 @@ def test_Allineate_inputs():
             argstr='-source %s',
             copyfile=False,
             mandatory=True,
-            usedefault=True,
         ),
         in_matrix=dict(
             argstr='-1Dmatrix_apply %s',
             position=-3,
-            usedefault=True,
             xor=['out_matrix'],
         ),
         in_param_file=dict(
             argstr='-1Dparam_apply %s',
-            usedefault=True,
             xor=['out_param_file'],
         ),
         interpolation=dict(argstr='-interp %s', ),
-        master=dict(
-            argstr='-master %s',
-            usedefault=True,
-        ),
+        master=dict(argstr='-master %s', ),
         maxrot=dict(argstr='-maxrot %f', ),
         maxscl=dict(argstr='-maxscl %f', ),
         maxshf=dict(argstr='-maxshf %f', ),
@@ -71,17 +64,14 @@ def test_Allineate_inputs():
             hash_files=False,
             name_source='in_file',
             name_template='%s_allineate',
-            usedefault=True,
             xor=['allcostx'],
         ),
         out_matrix=dict(
             argstr='-1Dmatrix_save %s',
-            usedefault=True,
             xor=['in_matrix', 'allcostx'],
         ),
         out_param_file=dict(
             argstr='-1Dparam_save %s',
-            usedefault=True,
             xor=['in_param_file', 'allcostx'],
         ),
         out_weight_file=dict(
@@ -91,17 +81,11 @@ def test_Allineate_inputs():
         outputtype=dict(),
         overwrite=dict(argstr='-overwrite', ),
         quiet=dict(argstr='-quiet', ),
-        reference=dict(
-            argstr='-base %s',
-            usedefault=True,
-        ),
+        reference=dict(argstr='-base %s', ),
         replacebase=dict(argstr='-replacebase', ),
         replacemeth=dict(argstr='-replacemeth %s', ),
         source_automask=dict(argstr='-source_automask+%d', ),
-        source_mask=dict(
-            argstr='-source_mask %s',
-            usedefault=True,
-        ),
+        source_mask=dict(argstr='-source_mask %s', ),
         two_best=dict(argstr='-twobest %d', ),
         two_blur=dict(argstr='-twoblur %f', ),
         two_first=dict(argstr='-twofirst', ),
@@ -115,7 +99,6 @@ def test_Allineate_inputs():
             argstr='-weight %s',
             deprecated='1.0.0',
             new_name='weight',
-            usedefault=True,
         ),
         zclip=dict(argstr='-zclip', ),
     )
@@ -126,11 +109,11 @@ def test_Allineate_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Allineate_outputs():
     output_map = dict(
-        allcostx=dict(usedefault=True, ),
-        out_file=dict(usedefault=True, ),
-        out_matrix=dict(usedefault=True, ),
-        out_param_file=dict(usedefault=True, ),
-        out_weight_file=dict(usedefault=True, ),
+        allcostx=dict(),
+        out_file=dict(),
+        out_matrix=dict(),
+        out_param_file=dict(),
+        out_weight_file=dict(),
     )
     outputs = Allineate.output_spec()
 

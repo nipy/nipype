@@ -14,7 +14,6 @@ def test_MRTrixInfo_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
     )
     inputs = MRTrixInfo.input_spec()

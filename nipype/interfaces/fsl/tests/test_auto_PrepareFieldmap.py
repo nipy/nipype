@@ -20,13 +20,11 @@ def test_PrepareFieldmap_inputs():
             argstr='%s',
             mandatory=True,
             position=3,
-            usedefault=True,
         ),
         in_phase=dict(
             argstr='%s',
             mandatory=True,
             position=2,
-            usedefault=True,
         ),
         nocheck=dict(
             argstr='--nocheck',
@@ -36,7 +34,6 @@ def test_PrepareFieldmap_inputs():
         out_fieldmap=dict(
             argstr='%s',
             position=4,
-            usedefault=True,
         ),
         output_type=dict(),
         scanner=dict(
@@ -51,7 +48,7 @@ def test_PrepareFieldmap_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_PrepareFieldmap_outputs():
-    output_map = dict(out_fieldmap=dict(usedefault=True, ), )
+    output_map = dict(out_fieldmap=dict(), )
     outputs = PrepareFieldmap.output_spec()
 
     for key, metadata in list(output_map.items()):

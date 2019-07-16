@@ -14,20 +14,14 @@ def test_BRAINSTransformConvert_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputTransform=dict(
-            argstr='--inputTransform %s',
-            usedefault=True,
-        ),
+        inputTransform=dict(argstr='--inputTransform %s', ),
         outputPrecisionType=dict(argstr='--outputPrecisionType %s', ),
         outputTransform=dict(
             argstr='--outputTransform %s',
             hash_files=False,
         ),
         outputTransformType=dict(argstr='--outputTransformType %s', ),
-        referenceVolume=dict(
-            argstr='--referenceVolume %s',
-            usedefault=True,
-        ),
+        referenceVolume=dict(argstr='--referenceVolume %s', ),
     )
     inputs = BRAINSTransformConvert.input_spec()
 
@@ -36,8 +30,8 @@ def test_BRAINSTransformConvert_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BRAINSTransformConvert_outputs():
     output_map = dict(
-        displacementVolume=dict(usedefault=True, ),
-        outputTransform=dict(usedefault=True, ),
+        displacementVolume=dict(),
+        outputTransform=dict(),
     )
     outputs = BRAINSTransformConvert.output_spec()
 

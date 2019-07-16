@@ -15,7 +15,6 @@ def test_VtkStreamlines_inputs():
             argstr=' < %s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         inputmodel=dict(
             argstr='-inputmodel %s',
@@ -31,17 +30,14 @@ def test_VtkStreamlines_inputs():
         scalar_file=dict(
             argstr='-scalarfile %s',
             position=3,
-            usedefault=True,
         ),
         seed_file=dict(
             argstr='-seedfile %s',
             position=1,
-            usedefault=True,
         ),
         target_file=dict(
             argstr='-targetfile %s',
             position=2,
-            usedefault=True,
         ),
         voxeldims=dict(
             argstr='-voxeldims %s',
@@ -55,7 +51,7 @@ def test_VtkStreamlines_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_VtkStreamlines_outputs():
-    output_map = dict(vtk=dict(usedefault=True, ), )
+    output_map = dict(vtk=dict(), )
     outputs = VtkStreamlines.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -8,7 +8,6 @@ def test_ModelToLabelMap_inputs():
         InputVolume=dict(
             argstr='%s',
             position=-3,
-            usedefault=True,
         ),
         OutputVolume=dict(
             argstr='%s',
@@ -24,7 +23,6 @@ def test_ModelToLabelMap_inputs():
         surface=dict(
             argstr='%s',
             position=-2,
-            usedefault=True,
         ),
     )
     inputs = ModelToLabelMap.input_spec()
@@ -33,11 +31,7 @@ def test_ModelToLabelMap_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ModelToLabelMap_outputs():
-    output_map = dict(
-        OutputVolume=dict(
-            position=-1,
-            usedefault=True,
-        ), )
+    output_map = dict(OutputVolume=dict(position=-1, ), )
     outputs = ModelToLabelMap.output_spec()
 
     for key, metadata in list(output_map.items()):

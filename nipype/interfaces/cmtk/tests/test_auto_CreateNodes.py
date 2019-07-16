@@ -6,14 +6,8 @@ from ..cmtk import CreateNodes
 def test_CreateNodes_inputs():
     input_map = dict(
         out_filename=dict(usedefault=True, ),
-        resolution_network_file=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
-        roi_file=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
+        resolution_network_file=dict(mandatory=True, ),
+        roi_file=dict(mandatory=True, ),
     )
     inputs = CreateNodes.input_spec()
 
@@ -21,7 +15,7 @@ def test_CreateNodes_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_CreateNodes_outputs():
-    output_map = dict(node_network=dict(usedefault=True, ), )
+    output_map = dict(node_network=dict(), )
     outputs = CreateNodes.output_spec()
 
     for key, metadata in list(output_map.items()):

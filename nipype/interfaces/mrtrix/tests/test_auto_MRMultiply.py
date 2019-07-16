@@ -23,7 +23,6 @@ def test_MRMultiply_inputs():
             argstr='%s',
             genfile=True,
             position=-1,
-            usedefault=True,
         ),
         quiet=dict(
             argstr='-quiet',
@@ -36,7 +35,7 @@ def test_MRMultiply_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRMultiply_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = MRMultiply.output_spec()
 
     for key, metadata in list(output_map.items()):

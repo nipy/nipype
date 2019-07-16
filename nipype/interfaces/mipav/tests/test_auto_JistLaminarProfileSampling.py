@@ -10,18 +10,9 @@ def test_JistLaminarProfileSampling_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inCortex=dict(
-            argstr='--inCortex %s',
-            usedefault=True,
-        ),
-        inIntensity=dict(
-            argstr='--inIntensity %s',
-            usedefault=True,
-        ),
-        inProfile=dict(
-            argstr='--inProfile %s',
-            usedefault=True,
-        ),
+        inCortex=dict(argstr='--inCortex %s', ),
+        inIntensity=dict(argstr='--inIntensity %s', ),
+        inProfile=dict(argstr='--inProfile %s', ),
         null=dict(argstr='--null %s', ),
         outProfile2=dict(
             argstr='--outProfile2 %s',
@@ -45,8 +36,8 @@ def test_JistLaminarProfileSampling_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_JistLaminarProfileSampling_outputs():
     output_map = dict(
-        outProfile2=dict(usedefault=True, ),
-        outProfilemapped=dict(usedefault=True, ),
+        outProfile2=dict(),
+        outProfilemapped=dict(),
     )
     outputs = JistLaminarProfileSampling.output_spec()
 

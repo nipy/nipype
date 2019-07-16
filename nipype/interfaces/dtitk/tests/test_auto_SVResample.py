@@ -18,7 +18,6 @@ def test_SVResample_inputs():
         in_file=dict(
             argstr='-in %s',
             mandatory=True,
-            usedefault=True,
         ),
         origin=dict(
             argstr='-origin %g %g %g',
@@ -29,11 +28,9 @@ def test_SVResample_inputs():
             keep_extension=True,
             name_source='in_file',
             name_template='%s_resampled',
-            usedefault=True,
         ),
         target_file=dict(
             argstr='-target %s',
-            usedefault=True,
             xor=['array_size', 'voxel_size', 'origin'],
         ),
         voxel_size=dict(
@@ -47,7 +44,7 @@ def test_SVResample_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SVResample_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = SVResample.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -11,26 +11,16 @@ def test_FitTensor_inputs():
             nohash=True,
             usedefault=True,
         ),
-        grad_file=dict(
-            argstr='-grad %s',
-            usedefault=True,
-        ),
+        grad_file=dict(argstr='-grad %s', ),
         grad_fsl=dict(argstr='-fslgrad %s %s', ),
-        in_bval=dict(usedefault=True, ),
-        in_bvec=dict(
-            argstr='-fslgrad %s %s',
-            usedefault=True,
-        ),
+        in_bval=dict(),
+        in_bvec=dict(argstr='-fslgrad %s %s', ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
-        in_mask=dict(
-            argstr='-mask %s',
-            usedefault=True,
-        ),
+        in_mask=dict(argstr='-mask %s', ),
         method=dict(argstr='-method %s', ),
         nthreads=dict(
             argstr='-nthreads %d',
@@ -53,7 +43,7 @@ def test_FitTensor_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FitTensor_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = FitTensor.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -21,16 +21,9 @@ def test_BlurInMask_inputs():
             copyfile=False,
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
-        mask=dict(
-            argstr='-mask %s',
-            usedefault=True,
-        ),
-        multimask=dict(
-            argstr='-Mmask %s',
-            usedefault=True,
-        ),
+        mask=dict(argstr='-mask %s', ),
+        multimask=dict(argstr='-Mmask %s', ),
         num_threads=dict(
             nohash=True,
             usedefault=True,
@@ -44,7 +37,6 @@ def test_BlurInMask_inputs():
             name_source='in_file',
             name_template='%s_blur',
             position=-1,
-            usedefault=True,
         ),
         outputtype=dict(),
         preserve=dict(argstr='-preserve', ),
@@ -55,7 +47,7 @@ def test_BlurInMask_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BlurInMask_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = BlurInMask.output_spec()
 
     for key, metadata in list(output_map.items()):

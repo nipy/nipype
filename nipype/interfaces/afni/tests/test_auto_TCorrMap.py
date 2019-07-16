@@ -9,7 +9,6 @@ def test_TCorrMap_inputs():
             argstr='-Thresh %f %s',
             name_source='in_file',
             suffix='_thresh',
-            usedefault=True,
             xor=('absolute_threshold', 'var_absolute_threshold',
                  'var_absolute_threshold_normalize'),
         ),
@@ -19,14 +18,12 @@ def test_TCorrMap_inputs():
             argstr='-Aexpr %s %s',
             name_source='in_file',
             suffix='_aexpr',
-            usedefault=True,
             xor=('average_expr', 'average_expr_nonzero', 'sum_expr'),
         ),
         average_expr_nonzero=dict(
             argstr='-Cexpr %s %s',
             name_source='in_file',
             suffix='_cexpr',
-            usedefault=True,
             xor=('average_expr', 'average_expr_nonzero', 'sum_expr'),
         ),
         bandpass=dict(argstr='-bpass %f %f', ),
@@ -34,12 +31,10 @@ def test_TCorrMap_inputs():
         correlation_maps=dict(
             argstr='-CorrMap %s',
             name_source='in_file',
-            usedefault=True,
         ),
         correlation_maps_masked=dict(
             argstr='-CorrMask %s',
             name_source='in_file',
-            usedefault=True,
         ),
         environ=dict(
             nohash=True,
@@ -50,24 +45,18 @@ def test_TCorrMap_inputs():
             argstr='-Hist %d %s',
             name_source='in_file',
             suffix='_hist',
-            usedefault=True,
         ),
         histogram_bin_numbers=dict(),
         in_file=dict(
             argstr='-input %s',
             copyfile=False,
             mandatory=True,
-            usedefault=True,
         ),
-        mask=dict(
-            argstr='-mask %s',
-            usedefault=True,
-        ),
+        mask=dict(argstr='-mask %s', ),
         mean_file=dict(
             argstr='-Mean %s',
             name_source='in_file',
             suffix='_mean',
-            usedefault=True,
         ),
         num_threads=dict(
             nohash=True,
@@ -78,19 +67,16 @@ def test_TCorrMap_inputs():
             argstr='-Pmean %s',
             name_source='in_file',
             suffix='_pmean',
-            usedefault=True,
         ),
         polort=dict(argstr='-polort %d', ),
         qmean=dict(
             argstr='-Qmean %s',
             name_source='in_file',
             suffix='_qmean',
-            usedefault=True,
         ),
         regress_out_timeseries=dict(argstr='-ort %s', ),
         seeds=dict(
             argstr='-seed %s',
-            usedefault=True,
             xor='seeds_width',
         ),
         seeds_width=dict(
@@ -101,7 +87,6 @@ def test_TCorrMap_inputs():
             argstr='-Sexpr %s %s',
             name_source='in_file',
             suffix='_sexpr',
-            usedefault=True,
             xor=('average_expr', 'average_expr_nonzero', 'sum_expr'),
         ),
         thresholds=dict(),
@@ -109,7 +94,6 @@ def test_TCorrMap_inputs():
             argstr='-VarThresh %f %f %f %s',
             name_source='in_file',
             suffix='_varthresh',
-            usedefault=True,
             xor=('absolute_threshold', 'var_absolute_threshold',
                  'var_absolute_threshold_normalize'),
         ),
@@ -117,7 +101,6 @@ def test_TCorrMap_inputs():
             argstr='-VarThreshN %f %f %f %s',
             name_source='in_file',
             suffix='_varthreshn',
-            usedefault=True,
             xor=('absolute_threshold', 'var_absolute_threshold',
                  'var_absolute_threshold_normalize'),
         ),
@@ -125,7 +108,6 @@ def test_TCorrMap_inputs():
             argstr='-Zmean %s',
             name_source='in_file',
             suffix='_zmean',
-            usedefault=True,
         ),
     )
     inputs = TCorrMap.input_spec()
@@ -135,19 +117,19 @@ def test_TCorrMap_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TCorrMap_outputs():
     output_map = dict(
-        absolute_threshold=dict(usedefault=True, ),
-        average_expr=dict(usedefault=True, ),
-        average_expr_nonzero=dict(usedefault=True, ),
-        correlation_maps=dict(usedefault=True, ),
-        correlation_maps_masked=dict(usedefault=True, ),
-        histogram=dict(usedefault=True, ),
-        mean_file=dict(usedefault=True, ),
-        pmean=dict(usedefault=True, ),
-        qmean=dict(usedefault=True, ),
-        sum_expr=dict(usedefault=True, ),
-        var_absolute_threshold=dict(usedefault=True, ),
-        var_absolute_threshold_normalize=dict(usedefault=True, ),
-        zmean=dict(usedefault=True, ),
+        absolute_threshold=dict(),
+        average_expr=dict(),
+        average_expr_nonzero=dict(),
+        correlation_maps=dict(),
+        correlation_maps_masked=dict(),
+        histogram=dict(),
+        mean_file=dict(),
+        pmean=dict(),
+        qmean=dict(),
+        sum_expr=dict(),
+        var_absolute_threshold=dict(),
+        var_absolute_threshold_normalize=dict(),
+        zmean=dict(),
     )
     outputs = TCorrMap.output_spec()
 

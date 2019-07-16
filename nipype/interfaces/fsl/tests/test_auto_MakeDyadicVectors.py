@@ -13,7 +13,6 @@ def test_MakeDyadicVectors_inputs():
         mask=dict(
             argstr='%s',
             position=2,
-            usedefault=True,
         ),
         output=dict(
             argstr='%s',
@@ -30,13 +29,11 @@ def test_MakeDyadicVectors_inputs():
             argstr='%s',
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
         theta_vol=dict(
             argstr='%s',
             mandatory=True,
             position=0,
-            usedefault=True,
         ),
     )
     inputs = MakeDyadicVectors.input_spec()
@@ -46,8 +43,8 @@ def test_MakeDyadicVectors_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MakeDyadicVectors_outputs():
     output_map = dict(
-        dispersion=dict(usedefault=True, ),
-        dyads=dict(usedefault=True, ),
+        dispersion=dict(),
+        dyads=dict(),
     )
     outputs = MakeDyadicVectors.output_spec()
 

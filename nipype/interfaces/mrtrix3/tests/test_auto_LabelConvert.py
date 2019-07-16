@@ -13,19 +13,16 @@ def test_LabelConvert_inputs():
         in_config=dict(
             argstr='%s',
             position=-2,
-            usedefault=True,
         ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
             position=-4,
-            usedefault=True,
         ),
         in_lut=dict(
             argstr='%s',
             mandatory=True,
             position=-3,
-            usedefault=True,
         ),
         num_threads=dict(
             argstr='-nthreads %d',
@@ -37,10 +34,7 @@ def test_LabelConvert_inputs():
             position=-1,
             usedefault=True,
         ),
-        spine=dict(
-            argstr='-spine %s',
-            usedefault=True,
-        ),
+        spine=dict(argstr='-spine %s', ),
     )
     inputs = LabelConvert.input_spec()
 
@@ -48,7 +42,7 @@ def test_LabelConvert_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_LabelConvert_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = LabelConvert.output_spec()
 
     for key, metadata in list(output_map.items()):

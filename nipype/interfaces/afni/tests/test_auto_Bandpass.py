@@ -23,7 +23,6 @@ def test_Bandpass_inputs():
             copyfile=False,
             mandatory=True,
             position=-1,
-            usedefault=True,
         ),
         localPV=dict(argstr='-localPV %f', ),
         lowpass=dict(
@@ -34,7 +33,6 @@ def test_Bandpass_inputs():
         mask=dict(
             argstr='-mask %s',
             position=2,
-            usedefault=True,
         ),
         nfft=dict(argstr='-nfft %d', ),
         no_detrend=dict(argstr='-nodetrend', ),
@@ -44,17 +42,13 @@ def test_Bandpass_inputs():
             nohash=True,
             usedefault=True,
         ),
-        orthogonalize_dset=dict(
-            argstr='-dsort %s',
-            usedefault=True,
-        ),
+        orthogonalize_dset=dict(argstr='-dsort %s', ),
         orthogonalize_file=dict(argstr='-ort %s', ),
         out_file=dict(
             argstr='-prefix %s',
             name_source='in_file',
             name_template='%s_bp',
             position=1,
-            usedefault=True,
         ),
         outputtype=dict(),
         tr=dict(argstr='-dt %f', ),
@@ -65,7 +59,7 @@ def test_Bandpass_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Bandpass_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = Bandpass.output_spec()
 
     for key, metadata in list(output_map.items()):

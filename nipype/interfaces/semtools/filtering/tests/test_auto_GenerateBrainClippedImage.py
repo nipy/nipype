@@ -10,14 +10,8 @@ def test_GenerateBrainClippedImage_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputImg=dict(
-            argstr='--inputImg %s',
-            usedefault=True,
-        ),
-        inputMsk=dict(
-            argstr='--inputMsk %s',
-            usedefault=True,
-        ),
+        inputImg=dict(argstr='--inputImg %s', ),
+        inputMsk=dict(argstr='--inputMsk %s', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         outputFileName=dict(
             argstr='--outputFileName %s',
@@ -30,7 +24,7 @@ def test_GenerateBrainClippedImage_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_GenerateBrainClippedImage_outputs():
-    output_map = dict(outputFileName=dict(usedefault=True, ), )
+    output_map = dict(outputFileName=dict(), )
     outputs = GenerateBrainClippedImage.output_spec()
 
     for key, metadata in list(output_map.items()):

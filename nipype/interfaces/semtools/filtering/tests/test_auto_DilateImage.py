@@ -10,15 +10,9 @@ def test_DilateImage_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputMaskVolume=dict(
-            argstr='--inputMaskVolume %s',
-            usedefault=True,
-        ),
+        inputMaskVolume=dict(argstr='--inputMaskVolume %s', ),
         inputRadius=dict(argstr='--inputRadius %d', ),
-        inputVolume=dict(
-            argstr='--inputVolume %s',
-            usedefault=True,
-        ),
+        inputVolume=dict(argstr='--inputVolume %s', ),
         outputVolume=dict(
             argstr='--outputVolume %s',
             hash_files=False,
@@ -30,7 +24,7 @@ def test_DilateImage_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DilateImage_outputs():
-    output_map = dict(outputVolume=dict(usedefault=True, ), )
+    output_map = dict(outputVolume=dict(), )
     outputs = DilateImage.output_spec()
 
     for key, metadata in list(output_map.items()):

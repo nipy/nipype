@@ -14,12 +14,8 @@ def test_DWIToDTIEstimation_inputs():
         inputVolume=dict(
             argstr='%s',
             position=-3,
-            usedefault=True,
         ),
-        mask=dict(
-            argstr='--mask %s',
-            usedefault=True,
-        ),
+        mask=dict(argstr='--mask %s', ),
         outputBaseline=dict(
             argstr='%s',
             hash_files=False,
@@ -39,14 +35,8 @@ def test_DWIToDTIEstimation_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DWIToDTIEstimation_outputs():
     output_map = dict(
-        outputBaseline=dict(
-            position=-1,
-            usedefault=True,
-        ),
-        outputTensor=dict(
-            position=-2,
-            usedefault=True,
-        ),
+        outputBaseline=dict(position=-1, ),
+        outputTensor=dict(position=-2, ),
     )
     outputs = DWIToDTIEstimation.output_spec()
 

@@ -12,31 +12,20 @@ def test_DWIDenoise_inputs():
             usedefault=True,
         ),
         extent=dict(argstr='-extent %d,%d,%d', ),
-        grad_file=dict(
-            argstr='-grad %s',
-            usedefault=True,
-        ),
+        grad_file=dict(argstr='-grad %s', ),
         grad_fsl=dict(argstr='-fslgrad %s %s', ),
-        in_bval=dict(usedefault=True, ),
-        in_bvec=dict(
-            argstr='-fslgrad %s %s',
-            usedefault=True,
-        ),
+        in_bval=dict(),
+        in_bvec=dict(argstr='-fslgrad %s %s', ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         mask=dict(
             argstr='-mask %s',
             position=1,
-            usedefault=True,
         ),
-        noise=dict(
-            argstr='-noise %s',
-            usedefault=True,
-        ),
+        noise=dict(argstr='-noise %s', ),
         nthreads=dict(
             argstr='-nthreads %d',
             nohash=True,
@@ -48,7 +37,6 @@ def test_DWIDenoise_inputs():
             name_source='in_file',
             name_template='%s_denoised',
             position=-1,
-            usedefault=True,
         ),
     )
     inputs = DWIDenoise.input_spec()
@@ -58,8 +46,8 @@ def test_DWIDenoise_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DWIDenoise_outputs():
     output_map = dict(
-        noise=dict(usedefault=True, ),
-        out_file=dict(usedefault=True, ),
+        noise=dict(),
+        out_file=dict(),
     )
     outputs = DWIDenoise.output_spec()
 

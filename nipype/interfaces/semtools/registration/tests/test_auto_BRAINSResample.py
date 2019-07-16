@@ -7,10 +7,7 @@ def test_BRAINSResample_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
         defaultValue=dict(argstr='--defaultValue %f', ),
-        deformationVolume=dict(
-            argstr='--deformationVolume %s',
-            usedefault=True,
-        ),
+        deformationVolume=dict(argstr='--deformationVolume %s', ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -19,10 +16,7 @@ def test_BRAINSResample_inputs():
             argstr='--gridSpacing %s',
             sep=',',
         ),
-        inputVolume=dict(
-            argstr='--inputVolume %s',
-            usedefault=True,
-        ),
+        inputVolume=dict(argstr='--inputVolume %s', ),
         interpolationMode=dict(argstr='--interpolationMode %s', ),
         inverseTransform=dict(argstr='--inverseTransform ', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
@@ -31,14 +25,8 @@ def test_BRAINSResample_inputs():
             hash_files=False,
         ),
         pixelType=dict(argstr='--pixelType %s', ),
-        referenceVolume=dict(
-            argstr='--referenceVolume %s',
-            usedefault=True,
-        ),
-        warpTransform=dict(
-            argstr='--warpTransform %s',
-            usedefault=True,
-        ),
+        referenceVolume=dict(argstr='--referenceVolume %s', ),
+        warpTransform=dict(argstr='--warpTransform %s', ),
     )
     inputs = BRAINSResample.input_spec()
 
@@ -46,7 +34,7 @@ def test_BRAINSResample_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BRAINSResample_outputs():
-    output_map = dict(outputVolume=dict(usedefault=True, ), )
+    output_map = dict(outputVolume=dict(), )
     outputs = BRAINSResample.output_spec()
 
     for key, metadata in list(output_map.items()):

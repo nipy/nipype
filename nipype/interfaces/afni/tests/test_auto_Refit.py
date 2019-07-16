@@ -11,10 +11,7 @@ def test_Refit_inputs():
         atrint=dict(argstr='-atrint %s %s', ),
         atrstring=dict(argstr='-atrstring %s %s', ),
         deoblique=dict(argstr='-deoblique', ),
-        duporigin_file=dict(
-            argstr='-duporigin %s',
-            usedefault=True,
-        ),
+        duporigin_file=dict(argstr='-duporigin %s', ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -24,7 +21,6 @@ def test_Refit_inputs():
             copyfile=True,
             mandatory=True,
             position=-1,
-            usedefault=True,
         ),
         nosaveatr=dict(argstr='-nosaveatr', ),
         saveatr=dict(argstr='-saveatr', ),
@@ -43,7 +39,7 @@ def test_Refit_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Refit_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = Refit.output_spec()
 
     for key, metadata in list(output_map.items()):

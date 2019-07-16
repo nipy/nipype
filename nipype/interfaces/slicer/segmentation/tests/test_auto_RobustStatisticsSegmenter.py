@@ -16,14 +16,12 @@ def test_RobustStatisticsSegmenter_inputs():
         labelImageFileName=dict(
             argstr='%s',
             position=-2,
-            usedefault=True,
         ),
         labelValue=dict(argstr='--labelValue %d', ),
         maxRunningTime=dict(argstr='--maxRunningTime %f', ),
         originalImageFileName=dict(
             argstr='%s',
             position=-3,
-            usedefault=True,
         ),
         segmentedImageFileName=dict(
             argstr='%s',
@@ -37,11 +35,7 @@ def test_RobustStatisticsSegmenter_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_RobustStatisticsSegmenter_outputs():
-    output_map = dict(
-        segmentedImageFileName=dict(
-            position=-1,
-            usedefault=True,
-        ), )
+    output_map = dict(segmentedImageFileName=dict(position=-1, ), )
     outputs = RobustStatisticsSegmenter.output_spec()
 
     for key, metadata in list(output_map.items()):

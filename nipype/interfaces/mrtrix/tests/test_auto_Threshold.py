@@ -19,7 +19,6 @@ def test_Threshold_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         invert=dict(
             argstr='-invert',
@@ -29,7 +28,6 @@ def test_Threshold_inputs():
             argstr='%s',
             genfile=True,
             position=-1,
-            usedefault=True,
         ),
         percentage_threshold_value=dict(argstr='-percent %s', ),
         quiet=dict(
@@ -47,7 +45,7 @@ def test_Threshold_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Threshold_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = Threshold.output_spec()
 
     for key, metadata in list(output_map.items()):

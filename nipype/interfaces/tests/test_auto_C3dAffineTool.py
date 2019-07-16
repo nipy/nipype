@@ -22,17 +22,14 @@ def test_C3dAffineTool_inputs():
         reference_file=dict(
             argstr='-ref %s',
             position=1,
-            usedefault=True,
         ),
         source_file=dict(
             argstr='-src %s',
             position=2,
-            usedefault=True,
         ),
         transform_file=dict(
             argstr='%s',
             position=3,
-            usedefault=True,
         ),
     )
     inputs = C3dAffineTool.input_spec()
@@ -41,7 +38,7 @@ def test_C3dAffineTool_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_C3dAffineTool_outputs():
-    output_map = dict(itk_transform=dict(usedefault=True, ), )
+    output_map = dict(itk_transform=dict(), )
     outputs = C3dAffineTool.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -7,10 +7,7 @@ def test_BlurToFWHM_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
         automask=dict(argstr='-automask', ),
-        blurmaster=dict(
-            argstr='-blurmaster %s',
-            usedefault=True,
-        ),
+        blurmaster=dict(argstr='-blurmaster %s', ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -20,12 +17,8 @@ def test_BlurToFWHM_inputs():
         in_file=dict(
             argstr='-input %s',
             mandatory=True,
-            usedefault=True,
         ),
-        mask=dict(
-            argstr='-mask %s',
-            usedefault=True,
-        ),
+        mask=dict(argstr='-mask %s', ),
         num_threads=dict(
             nohash=True,
             usedefault=True,
@@ -34,7 +27,6 @@ def test_BlurToFWHM_inputs():
             argstr='-prefix %s',
             name_source='in_file',
             name_template='%s_afni',
-            usedefault=True,
         ),
         outputtype=dict(),
     )
@@ -44,7 +36,7 @@ def test_BlurToFWHM_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BlurToFWHM_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = BlurToFWHM.output_spec()
 
     for key, metadata in list(output_map.items()):

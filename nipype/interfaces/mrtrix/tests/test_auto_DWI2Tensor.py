@@ -13,7 +13,6 @@ def test_DWI2Tensor_inputs():
         encoding_file=dict(
             argstr='-grad %s',
             position=2,
-            usedefault=True,
         ),
         environ=dict(
             nohash=True,
@@ -40,7 +39,6 @@ def test_DWI2Tensor_inputs():
             name_template='%s_tensor.mif',
             output_name='tensor',
             position=-1,
-            usedefault=True,
         ),
         quiet=dict(
             argstr='-quiet',
@@ -53,7 +51,7 @@ def test_DWI2Tensor_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DWI2Tensor_outputs():
-    output_map = dict(tensor=dict(usedefault=True, ), )
+    output_map = dict(tensor=dict(), )
     outputs = DWI2Tensor.output_spec()
 
     for key, metadata in list(output_map.items()):

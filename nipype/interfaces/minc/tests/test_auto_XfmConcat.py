@@ -28,7 +28,6 @@ def test_XfmConcat_inputs():
             name_source=['input_files'],
             name_template='%s_xfmconcat.xfm',
             position=-1,
-            usedefault=True,
         ),
         verbose=dict(argstr='-verbose', ),
     )
@@ -39,7 +38,7 @@ def test_XfmConcat_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_XfmConcat_outputs():
     output_map = dict(
-        output_file=dict(usedefault=True, ),
+        output_file=dict(),
         output_grids=dict(),
     )
     outputs = XfmConcat.output_spec()

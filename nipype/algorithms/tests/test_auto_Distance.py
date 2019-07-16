@@ -5,16 +5,10 @@ from ..misc import Distance
 
 def test_Distance_inputs():
     input_map = dict(
-        mask_volume=dict(usedefault=True, ),
+        mask_volume=dict(),
         method=dict(usedefault=True, ),
-        volume1=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
-        volume2=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
+        volume1=dict(mandatory=True, ),
+        volume2=dict(mandatory=True, ),
     )
     inputs = Distance.input_spec()
 
@@ -24,7 +18,7 @@ def test_Distance_inputs():
 def test_Distance_outputs():
     output_map = dict(
         distance=dict(),
-        histogram=dict(usedefault=True, ),
+        histogram=dict(),
         point1=dict(),
         point2=dict(),
     )

@@ -13,7 +13,6 @@ def test_Binarize_inputs():
         binary_file=dict(
             argstr='--o %s',
             genfile=True,
-            usedefault=True,
         ),
         count_file=dict(argstr='--count %s', ),
         dilate=dict(argstr='--dilate %d', ),
@@ -28,23 +27,16 @@ def test_Binarize_inputs():
             argstr='--i %s',
             copyfile=False,
             mandatory=True,
-            usedefault=True,
         ),
         invert=dict(argstr='--inv', ),
-        mask_file=dict(
-            argstr='--mask maskvol',
-            usedefault=True,
-        ),
+        mask_file=dict(argstr='--mask maskvol', ),
         mask_thresh=dict(argstr='--mask-thresh %f', ),
         match=dict(argstr='--match %d...', ),
         max=dict(
             argstr='--max %f',
             xor=['wm_ven_csf'],
         ),
-        merge_file=dict(
-            argstr='--merge %s',
-            usedefault=True,
-        ),
+        merge_file=dict(argstr='--merge %s', ),
         min=dict(
             argstr='--min %f',
             xor=['wm_ven_csf'],
@@ -52,7 +44,7 @@ def test_Binarize_inputs():
         out_type=dict(argstr='', ),
         rmax=dict(argstr='--rmax %f', ),
         rmin=dict(argstr='--rmin %f', ),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
         ventricles=dict(argstr='--ventricles', ),
         wm=dict(argstr='--wm', ),
         wm_ven_csf=dict(
@@ -69,8 +61,8 @@ def test_Binarize_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Binarize_outputs():
     output_map = dict(
-        binary_file=dict(usedefault=True, ),
-        count_file=dict(usedefault=True, ),
+        binary_file=dict(),
+        count_file=dict(),
     )
     outputs = Binarize.output_spec()
 

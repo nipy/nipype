@@ -6,14 +6,8 @@ from ..preprocess import SliceTimer
 def test_SliceTimer_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        custom_order=dict(
-            argstr='--ocustom=%s',
-            usedefault=True,
-        ),
-        custom_timings=dict(
-            argstr='--tcustom=%s',
-            usedefault=True,
-        ),
+        custom_order=dict(argstr='--ocustom=%s', ),
+        custom_timings=dict(argstr='--tcustom=%s', ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -23,7 +17,6 @@ def test_SliceTimer_inputs():
             argstr='--in=%s',
             mandatory=True,
             position=0,
-            usedefault=True,
         ),
         index_dir=dict(argstr='--down', ),
         interleaved=dict(argstr='--odd', ),
@@ -31,7 +24,6 @@ def test_SliceTimer_inputs():
             argstr='--out=%s',
             genfile=True,
             hash_files=False,
-            usedefault=True,
         ),
         output_type=dict(),
         slice_direction=dict(argstr='--direction=%d', ),
@@ -43,7 +35,7 @@ def test_SliceTimer_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SliceTimer_outputs():
-    output_map = dict(slice_time_corrected_file=dict(usedefault=True, ), )
+    output_map = dict(slice_time_corrected_file=dict(), )
     outputs = SliceTimer.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -5,10 +5,7 @@ from ..dti import VecReg
 
 def test_VecReg_inputs():
     input_map = dict(
-        affine_mat=dict(
-            argstr='-t %s',
-            usedefault=True,
-        ),
+        affine_mat=dict(argstr='-t %s', ),
         args=dict(argstr='%s', ),
         environ=dict(
             nohash=True,
@@ -17,41 +14,23 @@ def test_VecReg_inputs():
         in_file=dict(
             argstr='-i %s',
             mandatory=True,
-            usedefault=True,
         ),
         interpolation=dict(argstr='--interp=%s', ),
-        mask=dict(
-            argstr='-m %s',
-            usedefault=True,
-        ),
+        mask=dict(argstr='-m %s', ),
         out_file=dict(
             argstr='-o %s',
             genfile=True,
             hash_files=False,
-            usedefault=True,
         ),
         output_type=dict(),
-        ref_mask=dict(
-            argstr='--refmask=%s',
-            usedefault=True,
-        ),
+        ref_mask=dict(argstr='--refmask=%s', ),
         ref_vol=dict(
             argstr='-r %s',
             mandatory=True,
-            usedefault=True,
         ),
-        rotation_mat=dict(
-            argstr='--rotmat=%s',
-            usedefault=True,
-        ),
-        rotation_warp=dict(
-            argstr='--rotwarp=%s',
-            usedefault=True,
-        ),
-        warp_field=dict(
-            argstr='-w %s',
-            usedefault=True,
-        ),
+        rotation_mat=dict(argstr='--rotmat=%s', ),
+        rotation_warp=dict(argstr='--rotwarp=%s', ),
+        warp_field=dict(argstr='-w %s', ),
     )
     inputs = VecReg.input_spec()
 
@@ -59,7 +38,7 @@ def test_VecReg_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_VecReg_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = VecReg.output_spec()
 
     for key, metadata in list(output_map.items()):

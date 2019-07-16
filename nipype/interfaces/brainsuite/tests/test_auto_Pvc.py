@@ -13,21 +13,15 @@ def test_Pvc_inputs():
         inputMRIFile=dict(
             argstr='-i %s',
             mandatory=True,
-            usedefault=True,
         ),
-        inputMaskFile=dict(
-            argstr='-m %s',
-            usedefault=True,
-        ),
+        inputMaskFile=dict(argstr='-m %s', ),
         outputLabelFile=dict(
             argstr='-o %s',
             genfile=True,
-            usedefault=True,
         ),
         outputTissueFractionFile=dict(
             argstr='-f %s',
             genfile=True,
-            usedefault=True,
         ),
         spatialPrior=dict(argstr='-l %f', ),
         threeClassFlag=dict(argstr='-3', ),
@@ -41,8 +35,8 @@ def test_Pvc_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Pvc_outputs():
     output_map = dict(
-        outputLabelFile=dict(usedefault=True, ),
-        outputTissueFractionFile=dict(usedefault=True, ),
+        outputLabelFile=dict(),
+        outputTissueFractionFile=dict(),
     )
     outputs = Pvc.output_spec()
 

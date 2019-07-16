@@ -127,7 +127,6 @@ def test_Math_inputs():
             name_source=['input_files'],
             name_template='%s_mincmath.mnc',
             position=-1,
-            usedefault=True,
         ),
         output_illegal=dict(
             argstr='-illegal_value',
@@ -162,7 +161,7 @@ def test_Math_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Math_outputs():
-    output_map = dict(output_file=dict(usedefault=True, ), )
+    output_map = dict(output_file=dict(), )
     outputs = Math.output_spec()
 
     for key, metadata in list(output_map.items()):

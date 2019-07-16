@@ -10,7 +10,6 @@ def test_EditWMwithAseg_inputs():
             argstr='%s',
             mandatory=True,
             position=-3,
-            usedefault=True,
         ),
         environ=dict(
             nohash=True,
@@ -20,22 +19,19 @@ def test_EditWMwithAseg_inputs():
             argstr='%s',
             mandatory=True,
             position=-4,
-            usedefault=True,
         ),
         keep_in=dict(argstr='-keep-in', ),
         out_file=dict(
             argstr='%s',
             mandatory=True,
             position=-1,
-            usedefault=True,
         ),
         seg_file=dict(
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
     )
     inputs = EditWMwithAseg.input_spec()
 
@@ -43,7 +39,7 @@ def test_EditWMwithAseg_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_EditWMwithAseg_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = EditWMwithAseg.output_spec()
 
     for key, metadata in list(output_map.items()):

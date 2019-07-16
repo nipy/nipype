@@ -14,14 +14,8 @@ def test_MeasureImageSimilarity_inputs():
             nohash=True,
             usedefault=True,
         ),
-        fixed_image=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
-        fixed_image_mask=dict(
-            argstr='%s',
-            usedefault=True,
-        ),
+        fixed_image=dict(mandatory=True, ),
+        fixed_image_mask=dict(argstr='%s', ),
         metric=dict(
             argstr='%s',
             mandatory=True,
@@ -30,14 +24,8 @@ def test_MeasureImageSimilarity_inputs():
             requires=['metric'],
             usedefault=True,
         ),
-        moving_image=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
-        moving_image_mask=dict(
-            requires=['fixed_image_mask'],
-            usedefault=True,
-        ),
+        moving_image=dict(mandatory=True, ),
+        moving_image_mask=dict(requires=['fixed_image_mask'], ),
         num_threads=dict(
             nohash=True,
             usedefault=True,

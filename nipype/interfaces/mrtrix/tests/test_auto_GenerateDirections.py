@@ -24,7 +24,6 @@ def test_GenerateDirections_inputs():
             name_source=['num_dirs'],
             name_template='directions_%d.txt',
             position=-1,
-            usedefault=True,
         ),
         power=dict(argstr='-power %s', ),
         quiet_display=dict(argstr='-quiet', ),
@@ -35,7 +34,7 @@ def test_GenerateDirections_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_GenerateDirections_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = GenerateDirections.output_spec()
 
     for key, metadata in list(output_map.items()):

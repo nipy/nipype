@@ -14,13 +14,11 @@ def test_FSL2Scheme_inputs():
             argstr='-bvalfile %s',
             mandatory=True,
             position=2,
-            usedefault=True,
         ),
         bvec_file=dict(
             argstr='-bvecfile %s',
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
         diffusiontime=dict(
             argstr='-diffusiontime %f',
@@ -51,7 +49,7 @@ def test_FSL2Scheme_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FSL2Scheme_outputs():
-    output_map = dict(scheme=dict(usedefault=True, ), )
+    output_map = dict(scheme=dict(), )
     outputs = FSL2Scheme.output_spec()
 
     for key, metadata in list(output_map.items()):

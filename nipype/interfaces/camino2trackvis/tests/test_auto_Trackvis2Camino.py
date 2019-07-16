@@ -8,7 +8,6 @@ def test_Trackvis2Camino_inputs():
         append_file=dict(
             argstr='-a %s',
             position=2,
-            usedefault=True,
         ),
         args=dict(argstr='%s', ),
         environ=dict(
@@ -19,13 +18,11 @@ def test_Trackvis2Camino_inputs():
             argstr='-i %s',
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
         out_file=dict(
             argstr='-o %s',
             genfile=True,
             position=2,
-            usedefault=True,
         ),
     )
     inputs = Trackvis2Camino.input_spec()
@@ -34,7 +31,7 @@ def test_Trackvis2Camino_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Trackvis2Camino_outputs():
-    output_map = dict(camino=dict(usedefault=True, ), )
+    output_map = dict(camino=dict(), )
     outputs = Trackvis2Camino.output_spec()
 
     for key, metadata in list(output_map.items()):

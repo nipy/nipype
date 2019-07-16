@@ -19,7 +19,6 @@ def test_Voliso_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         maxstep=dict(argstr='--maxstep %s', ),
         minstep=dict(argstr='--minstep %s', ),
@@ -30,7 +29,6 @@ def test_Voliso_inputs():
             name_source=['input_file'],
             name_template='%s_voliso.mnc',
             position=-1,
-            usedefault=True,
         ),
         verbose=dict(argstr='--verbose', ),
     )
@@ -40,7 +38,7 @@ def test_Voliso_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Voliso_outputs():
-    output_map = dict(output_file=dict(usedefault=True, ), )
+    output_map = dict(output_file=dict(), )
     outputs = Voliso.output_spec()
 
     for key, metadata in list(output_map.items()):

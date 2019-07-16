@@ -21,7 +21,6 @@ def test_Label2Label_inputs():
             keep_extension=True,
             name_source=['source_label'],
             name_template='%s_converted',
-            usedefault=True,
         ),
         registration_method=dict(
             argstr='--regmethod %s',
@@ -30,34 +29,21 @@ def test_Label2Label_inputs():
         source_label=dict(
             argstr='--srclabel %s',
             mandatory=True,
-            usedefault=True,
         ),
-        source_sphere_reg=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
+        source_sphere_reg=dict(mandatory=True, ),
         source_subject=dict(
             argstr='--srcsubject %s',
             mandatory=True,
         ),
-        source_white=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
-        sphere_reg=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
+        source_white=dict(mandatory=True, ),
+        sphere_reg=dict(mandatory=True, ),
         subject_id=dict(
             argstr='--trgsubject %s',
             mandatory=True,
             usedefault=True,
         ),
-        subjects_dir=dict(usedefault=True, ),
-        white=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
+        subjects_dir=dict(),
+        white=dict(mandatory=True, ),
     )
     inputs = Label2Label.input_spec()
 
@@ -65,7 +51,7 @@ def test_Label2Label_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Label2Label_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = Label2Label.output_spec()
 
     for key, metadata in list(output_map.items()):

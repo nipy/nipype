@@ -14,7 +14,6 @@ def test_TCK2VTK_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         nthreads=dict(
             argstr='-nthreads %d',
@@ -25,14 +24,8 @@ def test_TCK2VTK_inputs():
             position=-1,
             usedefault=True,
         ),
-        reference=dict(
-            argstr='-image %s',
-            usedefault=True,
-        ),
-        voxel=dict(
-            argstr='-image %s',
-            usedefault=True,
-        ),
+        reference=dict(argstr='-image %s', ),
+        voxel=dict(argstr='-image %s', ),
     )
     inputs = TCK2VTK.input_spec()
 
@@ -40,7 +33,7 @@ def test_TCK2VTK_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TCK2VTK_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = TCK2VTK.output_spec()
 
     for key, metadata in list(output_map.items()):

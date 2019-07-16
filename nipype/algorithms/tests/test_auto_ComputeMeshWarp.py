@@ -8,14 +8,8 @@ def test_ComputeMeshWarp_inputs():
         metric=dict(usedefault=True, ),
         out_file=dict(usedefault=True, ),
         out_warp=dict(usedefault=True, ),
-        surface1=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
-        surface2=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
+        surface1=dict(mandatory=True, ),
+        surface2=dict(mandatory=True, ),
         weighting=dict(usedefault=True, ),
     )
     inputs = ComputeMeshWarp.input_spec()
@@ -26,8 +20,8 @@ def test_ComputeMeshWarp_inputs():
 def test_ComputeMeshWarp_outputs():
     output_map = dict(
         distance=dict(),
-        out_file=dict(usedefault=True, ),
-        out_warp=dict(usedefault=True, ),
+        out_file=dict(),
+        out_warp=dict(),
     )
     outputs = ComputeMeshWarp.output_spec()
 

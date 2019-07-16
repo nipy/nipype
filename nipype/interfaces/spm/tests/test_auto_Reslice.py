@@ -5,19 +5,13 @@ from ..utils import Reslice
 
 def test_Reslice_inputs():
     input_map = dict(
-        in_file=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
+        in_file=dict(mandatory=True, ),
         interp=dict(usedefault=True, ),
         matlab_cmd=dict(),
         mfile=dict(usedefault=True, ),
-        out_file=dict(usedefault=True, ),
+        out_file=dict(),
         paths=dict(),
-        space_defining=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
+        space_defining=dict(mandatory=True, ),
         use_mcr=dict(),
         use_v8struct=dict(
             min_ver='8',
@@ -30,7 +24,7 @@ def test_Reslice_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Reslice_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = Reslice.output_spec()
 
     for key, metadata in list(output_map.items()):

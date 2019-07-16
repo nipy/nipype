@@ -8,13 +8,9 @@ def test_ModelMaker_inputs():
         InputVolume=dict(
             argstr='%s',
             position=-1,
-            usedefault=True,
         ),
         args=dict(argstr='%s', ),
-        color=dict(
-            argstr='--color %s',
-            usedefault=True,
-        ),
+        color=dict(argstr='--color %s', ),
         debug=dict(argstr='--debug ', ),
         decimate=dict(argstr='--decimate %f', ),
         end=dict(argstr='--end %d', ),

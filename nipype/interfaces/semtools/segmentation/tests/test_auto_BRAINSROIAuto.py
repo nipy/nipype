@@ -13,10 +13,7 @@ def test_BRAINSROIAuto_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputVolume=dict(
-            argstr='--inputVolume %s',
-            usedefault=True,
-        ),
+        inputVolume=dict(argstr='--inputVolume %s', ),
         maskOutput=dict(argstr='--maskOutput ', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         otsuPercentileThreshold=dict(argstr='--otsuPercentileThreshold %f', ),
@@ -39,8 +36,8 @@ def test_BRAINSROIAuto_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BRAINSROIAuto_outputs():
     output_map = dict(
-        outputROIMaskVolume=dict(usedefault=True, ),
-        outputVolume=dict(usedefault=True, ),
+        outputROIMaskVolume=dict(),
+        outputVolume=dict(),
     )
     outputs = BRAINSROIAuto.output_spec()
 

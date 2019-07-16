@@ -7,10 +7,7 @@ def test_FramewiseDisplacement_inputs():
     input_map = dict(
         figdpi=dict(usedefault=True, ),
         figsize=dict(usedefault=True, ),
-        in_file=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
+        in_file=dict(mandatory=True, ),
         normalize=dict(usedefault=True, ),
         out_figure=dict(usedefault=True, ),
         out_file=dict(usedefault=True, ),
@@ -27,8 +24,8 @@ def test_FramewiseDisplacement_inputs():
 def test_FramewiseDisplacement_outputs():
     output_map = dict(
         fd_average=dict(),
-        out_figure=dict(usedefault=True, ),
-        out_file=dict(usedefault=True, ),
+        out_figure=dict(),
+        out_file=dict(),
     )
     outputs = FramewiseDisplacement.output_spec()
 

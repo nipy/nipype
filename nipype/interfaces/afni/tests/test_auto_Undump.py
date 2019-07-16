@@ -20,12 +20,8 @@ def test_Undump_inputs():
             copyfile=False,
             mandatory=True,
             position=-1,
-            usedefault=True,
         ),
-        mask_file=dict(
-            argstr='-mask %s',
-            usedefault=True,
-        ),
+        mask_file=dict(argstr='-mask %s', ),
         num_threads=dict(
             nohash=True,
             usedefault=True,
@@ -34,7 +30,6 @@ def test_Undump_inputs():
         out_file=dict(
             argstr='-prefix %s',
             name_source='in_file',
-            usedefault=True,
         ),
         outputtype=dict(),
         srad=dict(argstr='-srad %f', ),
@@ -45,7 +40,7 @@ def test_Undump_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Undump_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = Undump.output_spec()
 
     for key, metadata in list(output_map.items()):

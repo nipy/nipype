@@ -14,7 +14,6 @@ def test_StatsCommand_inputs():
             argstr='%s',
             mandatory=True,
             position=2,
-            usedefault=True,
         ),
         larger_voxel=dict(
             argstr='-t %f',
@@ -23,7 +22,6 @@ def test_StatsCommand_inputs():
         mask_file=dict(
             argstr='-m %s',
             position=-2,
-            usedefault=True,
         ),
     )
     inputs = StatsCommand.input_spec()

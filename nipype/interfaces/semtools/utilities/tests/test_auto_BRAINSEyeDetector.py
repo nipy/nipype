@@ -11,10 +11,7 @@ def test_BRAINSEyeDetector_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputVolume=dict(
-            argstr='--inputVolume %s',
-            usedefault=True,
-        ),
+        inputVolume=dict(argstr='--inputVolume %s', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         outputVolume=dict(
             argstr='--outputVolume %s',
@@ -27,7 +24,7 @@ def test_BRAINSEyeDetector_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BRAINSEyeDetector_outputs():
-    output_map = dict(outputVolume=dict(usedefault=True, ), )
+    output_map = dict(outputVolume=dict(), )
     outputs = BRAINSEyeDetector.output_spec()
 
     for key, metadata in list(output_map.items()):

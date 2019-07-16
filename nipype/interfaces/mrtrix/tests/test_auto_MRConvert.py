@@ -27,7 +27,6 @@ def test_MRConvert_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         layout=dict(
             argstr='-output %s',
@@ -42,7 +41,6 @@ def test_MRConvert_inputs():
             argstr='%s',
             genfile=True,
             position=-1,
-            usedefault=True,
         ),
         output_datatype=dict(
             argstr='-output %s',
@@ -73,7 +71,7 @@ def test_MRConvert_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRConvert_outputs():
-    output_map = dict(converted=dict(usedefault=True, ), )
+    output_map = dict(converted=dict(), )
     outputs = MRConvert.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -10,10 +10,7 @@ def test_GenerateCsfClippedFromClassifiedImage_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputCassifiedVolume=dict(
-            argstr='--inputCassifiedVolume %s',
-            usedefault=True,
-        ),
+        inputCassifiedVolume=dict(argstr='--inputCassifiedVolume %s', ),
         outputVolume=dict(
             argstr='--outputVolume %s',
             hash_files=False,
@@ -25,7 +22,7 @@ def test_GenerateCsfClippedFromClassifiedImage_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_GenerateCsfClippedFromClassifiedImage_outputs():
-    output_map = dict(outputVolume=dict(usedefault=True, ), )
+    output_map = dict(outputVolume=dict(), )
     outputs = GenerateCsfClippedFromClassifiedImage.output_spec()
 
     for key, metadata in list(output_map.items()):

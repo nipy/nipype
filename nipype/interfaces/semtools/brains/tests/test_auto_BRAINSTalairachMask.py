@@ -12,22 +12,13 @@ def test_BRAINSTalairachMask_inputs():
         ),
         expand=dict(argstr='--expand ', ),
         hemisphereMode=dict(argstr='--hemisphereMode %s', ),
-        inputVolume=dict(
-            argstr='--inputVolume %s',
-            usedefault=True,
-        ),
+        inputVolume=dict(argstr='--inputVolume %s', ),
         outputVolume=dict(
             argstr='--outputVolume %s',
             hash_files=False,
         ),
-        talairachBox=dict(
-            argstr='--talairachBox %s',
-            usedefault=True,
-        ),
-        talairachParameters=dict(
-            argstr='--talairachParameters %s',
-            usedefault=True,
-        ),
+        talairachBox=dict(argstr='--talairachBox %s', ),
+        talairachParameters=dict(argstr='--talairachParameters %s', ),
     )
     inputs = BRAINSTalairachMask.input_spec()
 
@@ -35,7 +26,7 @@ def test_BRAINSTalairachMask_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BRAINSTalairachMask_outputs():
-    output_map = dict(outputVolume=dict(usedefault=True, ), )
+    output_map = dict(outputVolume=dict(), )
     outputs = BRAINSTalairachMask.output_spec()
 
     for key, metadata in list(output_map.items()):

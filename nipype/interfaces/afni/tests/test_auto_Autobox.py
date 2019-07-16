@@ -14,7 +14,6 @@ def test_Autobox_inputs():
             argstr='-input %s',
             copyfile=False,
             mandatory=True,
-            usedefault=True,
         ),
         no_clustering=dict(argstr='-noclust', ),
         num_threads=dict(
@@ -25,7 +24,6 @@ def test_Autobox_inputs():
             argstr='-prefix %s',
             name_source='in_file',
             name_template='%s_autobox',
-            usedefault=True,
         ),
         outputtype=dict(),
         padding=dict(argstr='-npad %d', ),
@@ -37,7 +35,7 @@ def test_Autobox_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Autobox_outputs():
     output_map = dict(
-        out_file=dict(usedefault=True, ),
+        out_file=dict(),
         x_max=dict(),
         x_min=dict(),
         y_max=dict(),

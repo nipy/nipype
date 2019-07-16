@@ -15,23 +15,14 @@ def test_dtiestim_inputs():
         ),
         DTI_double=dict(argstr='--DTI_double ', ),
         args=dict(argstr='%s', ),
-        bad_region_mask=dict(
-            argstr='--bad_region_mask %s',
-            usedefault=True,
-        ),
-        brain_mask=dict(
-            argstr='--brain_mask %s',
-            usedefault=True,
-        ),
+        bad_region_mask=dict(argstr='--bad_region_mask %s', ),
+        brain_mask=dict(argstr='--brain_mask %s', ),
         correction=dict(argstr='--correction %s', ),
         defaultTensor=dict(
             argstr='--defaultTensor %s',
             sep=',',
         ),
-        dwi_image=dict(
-            argstr='--dwi_image %s',
-            usedefault=True,
-        ),
+        dwi_image=dict(argstr='--dwi_image %s', ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -60,10 +51,10 @@ def test_dtiestim_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_dtiestim_outputs():
     output_map = dict(
-        B0=dict(usedefault=True, ),
-        B0_mask_output=dict(usedefault=True, ),
-        idwi=dict(usedefault=True, ),
-        tensor_output=dict(usedefault=True, ),
+        B0=dict(),
+        B0_mask_output=dict(),
+        idwi=dict(),
+        tensor_output=dict(),
     )
     outputs = dtiestim.output_spec()
 

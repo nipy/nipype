@@ -14,7 +14,6 @@ def test_ComputeTensorTrace_inputs():
             argstr='< %s',
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
         inputdatatype=dict(argstr='-inputdatatype %s', ),
         inputmodel=dict(argstr='-inputmodel %s', ),
@@ -27,7 +26,6 @@ def test_ComputeTensorTrace_inputs():
         scheme_file=dict(
             argstr='%s',
             position=2,
-            usedefault=True,
         ),
     )
     inputs = ComputeTensorTrace.input_spec()
@@ -36,7 +34,7 @@ def test_ComputeTensorTrace_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ComputeTensorTrace_outputs():
-    output_map = dict(trace=dict(usedefault=True, ), )
+    output_map = dict(trace=dict(), )
     outputs = ComputeTensorTrace.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -13,12 +13,9 @@ def test_AddNoise_inputs():
             mandatory=True,
             usedefault=True,
         ),
-        in_file=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
-        in_mask=dict(usedefault=True, ),
-        out_file=dict(usedefault=True, ),
+        in_file=dict(mandatory=True, ),
+        in_mask=dict(),
+        out_file=dict(),
         snr=dict(usedefault=True, ),
     )
     inputs = AddNoise.input_spec()
@@ -27,7 +24,7 @@ def test_AddNoise_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_AddNoise_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = AddNoise.output_spec()
 
     for key, metadata in list(output_map.items()):

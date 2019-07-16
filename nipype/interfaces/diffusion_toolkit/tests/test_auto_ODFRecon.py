@@ -9,7 +9,6 @@ def test_ODFRecon_inputs():
             argstr='%s',
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
         args=dict(argstr='%s', ),
         dsi=dict(argstr='-dsi', ),
@@ -22,7 +21,6 @@ def test_ODFRecon_inputs():
         matrix=dict(
             argstr='-mat %s',
             mandatory=True,
-            usedefault=True,
         ),
         n_b0=dict(
             argstr='-b0 %s',
@@ -59,11 +57,11 @@ def test_ODFRecon_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ODFRecon_outputs():
     output_map = dict(
-        B0=dict(usedefault=True, ),
-        DWI=dict(usedefault=True, ),
-        ODF=dict(usedefault=True, ),
-        entropy=dict(usedefault=True, ),
-        max=dict(usedefault=True, ),
+        B0=dict(),
+        DWI=dict(),
+        ODF=dict(),
+        entropy=dict(),
+        max=dict(),
     )
     outputs = ODFRecon.output_spec()
 

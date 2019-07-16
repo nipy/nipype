@@ -10,18 +10,9 @@ def test_JistLaminarROIAveraging_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inIntensity=dict(
-            argstr='--inIntensity %s',
-            usedefault=True,
-        ),
-        inMask=dict(
-            argstr='--inMask %s',
-            usedefault=True,
-        ),
-        inROI=dict(
-            argstr='--inROI %s',
-            usedefault=True,
-        ),
+        inIntensity=dict(argstr='--inIntensity %s', ),
+        inMask=dict(argstr='--inMask %s', ),
+        inROI=dict(argstr='--inROI %s', ),
         inROI2=dict(argstr='--inROI2 %s', ),
         null=dict(argstr='--null %s', ),
         outROI3=dict(
@@ -41,7 +32,7 @@ def test_JistLaminarROIAveraging_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_JistLaminarROIAveraging_outputs():
-    output_map = dict(outROI3=dict(usedefault=True, ), )
+    output_map = dict(outROI3=dict(), )
     outputs = JistLaminarROIAveraging.output_spec()
 
     for key, metadata in list(output_map.items()):

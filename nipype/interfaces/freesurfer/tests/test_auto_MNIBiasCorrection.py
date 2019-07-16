@@ -14,16 +14,12 @@ def test_MNIBiasCorrection_inputs():
         in_file=dict(
             argstr='--i %s',
             mandatory=True,
-            usedefault=True,
         ),
         iterations=dict(
             argstr='--n %d',
             usedefault=True,
         ),
-        mask=dict(
-            argstr='--mask %s',
-            usedefault=True,
-        ),
+        mask=dict(argstr='--mask %s', ),
         no_rescale=dict(argstr='--no-rescale', ),
         out_file=dict(
             argstr='--o %s',
@@ -31,16 +27,12 @@ def test_MNIBiasCorrection_inputs():
             keep_extension=True,
             name_source=['in_file'],
             name_template='%s_output',
-            usedefault=True,
         ),
         protocol_iterations=dict(argstr='--proto-iters %d', ),
         shrink=dict(argstr='--shrink %d', ),
         stop=dict(argstr='--stop %f', ),
-        subjects_dir=dict(usedefault=True, ),
-        transform=dict(
-            argstr='--uchar %s',
-            usedefault=True,
-        ),
+        subjects_dir=dict(),
+        transform=dict(argstr='--uchar %s', ),
     )
     inputs = MNIBiasCorrection.input_spec()
 
@@ -48,7 +40,7 @@ def test_MNIBiasCorrection_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MNIBiasCorrection_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = MNIBiasCorrection.output_spec()
 
     for key, metadata in list(output_map.items()):

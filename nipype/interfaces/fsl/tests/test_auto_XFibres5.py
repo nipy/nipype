@@ -21,12 +21,10 @@ def test_XFibres5_inputs():
         bvals=dict(
             argstr='--bvals=%s',
             mandatory=True,
-            usedefault=True,
         ),
         bvecs=dict(
             argstr='--bvecs=%s',
             mandatory=True,
-            usedefault=True,
         ),
         cnlinear=dict(
             argstr='--cnonlinear',
@@ -35,7 +33,6 @@ def test_XFibres5_inputs():
         dwi=dict(
             argstr='--data=%s',
             mandatory=True,
-            usedefault=True,
         ),
         environ=dict(
             nohash=True,
@@ -54,10 +51,7 @@ def test_XFibres5_inputs():
             usedefault=True,
         ),
         fudge=dict(argstr='--fudge=%d', ),
-        gradnonlin=dict(
-            argstr='--gradnonlin=%s',
-            usedefault=True,
-        ),
+        gradnonlin=dict(argstr='--gradnonlin=%s', ),
         logdir=dict(
             argstr='--logdir=%s',
             usedefault=True,
@@ -65,7 +59,6 @@ def test_XFibres5_inputs():
         mask=dict(
             argstr='--mask=%s',
             mandatory=True,
-            usedefault=True,
         ),
         model=dict(argstr='--model=%d', ),
         n_fibres=dict(
@@ -110,10 +103,10 @@ def test_XFibres5_outputs():
     output_map = dict(
         dyads=dict(),
         fsamples=dict(),
-        mean_S0samples=dict(usedefault=True, ),
-        mean_dsamples=dict(usedefault=True, ),
+        mean_S0samples=dict(),
+        mean_dsamples=dict(),
         mean_fsamples=dict(),
-        mean_tausamples=dict(usedefault=True, ),
+        mean_tausamples=dict(),
         phsamples=dict(),
         thsamples=dict(),
     )

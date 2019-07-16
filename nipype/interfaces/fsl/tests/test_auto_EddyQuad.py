@@ -14,29 +14,20 @@ def test_EddyQuad_inputs():
         bval_file=dict(
             argstr='--bvals %s',
             mandatory=True,
-            usedefault=True,
         ),
-        bvec_file=dict(
-            argstr='--bvecs %s',
-            usedefault=True,
-        ),
+        bvec_file=dict(argstr='--bvecs %s', ),
         environ=dict(
             nohash=True,
             usedefault=True,
         ),
-        field=dict(
-            argstr='--field %s',
-            usedefault=True,
-        ),
+        field=dict(argstr='--field %s', ),
         idx_file=dict(
             argstr='--eddyIdx %s',
             mandatory=True,
-            usedefault=True,
         ),
         mask_file=dict(
             argstr='--mask %s',
             mandatory=True,
-            usedefault=True,
         ),
         output_dir=dict(
             argstr='--output-dir %s',
@@ -47,12 +38,8 @@ def test_EddyQuad_inputs():
         param_file=dict(
             argstr='--eddyParams %s',
             mandatory=True,
-            usedefault=True,
         ),
-        slice_spec=dict(
-            argstr='--slspec %s',
-            usedefault=True,
-        ),
+        slice_spec=dict(argstr='--slspec %s', ),
         verbose=dict(argstr='--verbose', ),
     )
     inputs = EddyQuad.input_spec()
@@ -64,12 +51,12 @@ def test_EddyQuad_outputs():
     output_map = dict(
         avg_b0_pe_png=dict(),
         avg_b_png=dict(),
-        clean_volumes=dict(usedefault=True, ),
+        clean_volumes=dict(),
         cnr_png=dict(),
-        qc_json=dict(usedefault=True, ),
-        qc_pdf=dict(usedefault=True, ),
-        residuals=dict(usedefault=True, ),
-        vdm_png=dict(usedefault=True, ),
+        qc_json=dict(),
+        qc_pdf=dict(),
+        residuals=dict(),
+        vdm_png=dict(),
     )
     outputs = EddyQuad.output_spec()
 

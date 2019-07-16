@@ -14,7 +14,6 @@ def test_BinThresh_inputs():
             argstr='%s',
             mandatory=True,
             position=0,
-            usedefault=True,
         ),
         inside_value=dict(
             argstr='%g',
@@ -34,7 +33,6 @@ def test_BinThresh_inputs():
             name_source='in_file',
             name_template='%s_thrbin',
             position=1,
-            usedefault=True,
         ),
         outside_value=dict(
             argstr='%g',
@@ -55,7 +53,7 @@ def test_BinThresh_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BinThresh_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = BinThresh.output_spec()
 
     for key, metadata in list(output_map.items()):

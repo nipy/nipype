@@ -13,10 +13,7 @@ def test_MedicAlgorithmN3_inputs():
         inAutomatic=dict(argstr='--inAutomatic %s', ),
         inEnd=dict(argstr='--inEnd %f', ),
         inField=dict(argstr='--inField %f', ),
-        inInput=dict(
-            argstr='--inInput %s',
-            usedefault=True,
-        ),
+        inInput=dict(argstr='--inInput %s', ),
         inKernel=dict(argstr='--inKernel %f', ),
         inMaximum=dict(argstr='--inMaximum %d', ),
         inSignal=dict(argstr='--inSignal %f', ),
@@ -45,8 +42,8 @@ def test_MedicAlgorithmN3_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MedicAlgorithmN3_outputs():
     output_map = dict(
-        outInhomogeneity=dict(usedefault=True, ),
-        outInhomogeneity2=dict(usedefault=True, ),
+        outInhomogeneity=dict(),
+        outInhomogeneity2=dict(),
     )
     outputs = MedicAlgorithmN3.output_spec()
 

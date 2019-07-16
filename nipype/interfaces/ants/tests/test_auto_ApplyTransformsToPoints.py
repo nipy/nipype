@@ -14,7 +14,6 @@ def test_ApplyTransformsToPoints_inputs():
         input_file=dict(
             argstr='--input %s',
             mandatory=True,
-            usedefault=True,
         ),
         invert_transform_flags=dict(),
         num_threads=dict(
@@ -38,7 +37,7 @@ def test_ApplyTransformsToPoints_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ApplyTransformsToPoints_outputs():
-    output_map = dict(output_file=dict(usedefault=True, ), )
+    output_map = dict(output_file=dict(), )
     outputs = ApplyTransformsToPoints.output_spec()
 
     for key, metadata in list(output_map.items()):

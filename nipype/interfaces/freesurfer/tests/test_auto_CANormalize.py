@@ -10,12 +10,8 @@ def test_CANormalize_inputs():
             argstr='%s',
             mandatory=True,
             position=-3,
-            usedefault=True,
         ),
-        control_points=dict(
-            argstr='-c %s',
-            usedefault=True,
-        ),
+        control_points=dict(argstr='-c %s', ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -24,16 +20,9 @@ def test_CANormalize_inputs():
             argstr='%s',
             mandatory=True,
             position=-4,
-            usedefault=True,
         ),
-        long_file=dict(
-            argstr='-long %s',
-            usedefault=True,
-        ),
-        mask=dict(
-            argstr='-mask %s',
-            usedefault=True,
-        ),
+        long_file=dict(argstr='-long %s', ),
+        mask=dict(argstr='-mask %s', ),
         out_file=dict(
             argstr='%s',
             hash_files=False,
@@ -41,14 +30,12 @@ def test_CANormalize_inputs():
             name_source=['in_file'],
             name_template='%s_norm',
             position=-1,
-            usedefault=True,
         ),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
         transform=dict(
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
     )
     inputs = CANormalize.input_spec()
@@ -58,7 +45,7 @@ def test_CANormalize_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_CANormalize_outputs():
     output_map = dict(
-        control_points=dict(usedefault=True, ),
+        control_points=dict(),
         out_file=dict(),
     )
     outputs = CANormalize.output_spec()

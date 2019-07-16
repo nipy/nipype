@@ -14,7 +14,6 @@ def test_ToRaw_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         nonormalize=dict(
             argstr='-nonormalize',
@@ -35,7 +34,6 @@ def test_ToRaw_inputs():
             name_source=['input_file'],
             name_template='%s.raw',
             position=-1,
-            usedefault=True,
         ),
         write_byte=dict(
             argstr='-byte',
@@ -83,7 +81,7 @@ def test_ToRaw_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ToRaw_outputs():
-    output_map = dict(output_file=dict(usedefault=True, ), )
+    output_map = dict(output_file=dict(), )
     outputs = ToRaw.output_spec()
 
     for key, metadata in list(output_map.items()):

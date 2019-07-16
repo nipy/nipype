@@ -24,21 +24,12 @@ def test_RobustRegister_inputs():
         half_targ_xfm=dict(argstr='--halfdstlta %s', ),
         half_weights=dict(argstr='--halfweights %s', ),
         high_iterations=dict(argstr='--highit %d', ),
-        in_xfm_file=dict(
-            argstr='--transform',
-            usedefault=True,
-        ),
+        in_xfm_file=dict(argstr='--transform', ),
         init_orient=dict(argstr='--initorient', ),
         iteration_thresh=dict(argstr='--epsit %.3f', ),
         least_squares=dict(argstr='--leastsquares', ),
-        mask_source=dict(
-            argstr='--maskmov %s',
-            usedefault=True,
-        ),
-        mask_target=dict(
-            argstr='--maskdst %s',
-            usedefault=True,
-        ),
+        mask_source=dict(argstr='--maskmov %s', ),
+        mask_target=dict(argstr='--maskdst %s', ),
         max_iterations=dict(argstr='--maxit %d', ),
         no_init=dict(argstr='--noinit', ),
         no_multi=dict(argstr='--nomulti', ),
@@ -56,14 +47,12 @@ def test_RobustRegister_inputs():
         source_file=dict(
             argstr='--mov %s',
             mandatory=True,
-            usedefault=True,
         ),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
         subsample_thresh=dict(argstr='--subsample %d', ),
         target_file=dict(
             argstr='--dst %s',
             mandatory=True,
-            usedefault=True,
         ),
         trans_only=dict(argstr='--transonly', ),
         weights_file=dict(argstr='--weights %s', ),
@@ -76,14 +65,14 @@ def test_RobustRegister_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_RobustRegister_outputs():
     output_map = dict(
-        half_source=dict(usedefault=True, ),
-        half_source_xfm=dict(usedefault=True, ),
-        half_targ=dict(usedefault=True, ),
-        half_targ_xfm=dict(usedefault=True, ),
-        half_weights=dict(usedefault=True, ),
-        out_reg_file=dict(usedefault=True, ),
-        registered_file=dict(usedefault=True, ),
-        weights_file=dict(usedefault=True, ),
+        half_source=dict(),
+        half_source_xfm=dict(),
+        half_targ=dict(),
+        half_targ_xfm=dict(),
+        half_weights=dict(),
+        out_reg_file=dict(),
+        registered_file=dict(),
+        weights_file=dict(),
     )
     outputs = RobustRegister.output_spec()
 

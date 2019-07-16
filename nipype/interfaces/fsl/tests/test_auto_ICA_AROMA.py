@@ -20,40 +20,31 @@ def test_ICA_AROMA_inputs():
         feat_dir=dict(
             argstr='-feat %s',
             mandatory=True,
-            usedefault=True,
             xor=[
                 'in_file', 'mat_file', 'fnirt_warp_file', 'motion_parameters'
             ],
         ),
         fnirt_warp_file=dict(
             argstr='-warp %s',
-            usedefault=True,
             xor=['feat_dir'],
         ),
         in_file=dict(
             argstr='-i %s',
             mandatory=True,
-            usedefault=True,
             xor=['feat_dir'],
         ),
         mask=dict(
             argstr='-m %s',
-            usedefault=True,
             xor=['feat_dir'],
         ),
         mat_file=dict(
             argstr='-affmat %s',
-            usedefault=True,
             xor=['feat_dir'],
         ),
-        melodic_dir=dict(
-            argstr='-meldir %s',
-            usedefault=True,
-        ),
+        melodic_dir=dict(argstr='-meldir %s', ),
         motion_parameters=dict(
             argstr='-mc %s',
             mandatory=True,
-            usedefault=True,
             xor=['feat_dir'],
         ),
         out_dir=dict(
@@ -69,9 +60,9 @@ def test_ICA_AROMA_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ICA_AROMA_outputs():
     output_map = dict(
-        aggr_denoised_file=dict(usedefault=True, ),
-        nonaggr_denoised_file=dict(usedefault=True, ),
-        out_dir=dict(usedefault=True, ),
+        aggr_denoised_file=dict(),
+        nonaggr_denoised_file=dict(),
+        out_dir=dict(),
     )
     outputs = ICA_AROMA.output_spec()
 

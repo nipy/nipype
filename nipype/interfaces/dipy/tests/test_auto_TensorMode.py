@@ -6,19 +6,10 @@ from ..tensors import TensorMode
 def test_TensorMode_inputs():
     input_map = dict(
         b0_thres=dict(usedefault=True, ),
-        in_bval=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
-        in_bvec=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
-        in_file=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
-        mask_file=dict(usedefault=True, ),
+        in_bval=dict(mandatory=True, ),
+        in_bvec=dict(mandatory=True, ),
+        in_file=dict(mandatory=True, ),
+        mask_file=dict(),
         out_prefix=dict(),
     )
     inputs = TensorMode.input_spec()
@@ -27,7 +18,7 @@ def test_TensorMode_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TensorMode_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = TensorMode.output_spec()
 
     for key, metadata in list(output_map.items()):

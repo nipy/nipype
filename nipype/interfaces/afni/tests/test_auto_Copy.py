@@ -15,7 +15,6 @@ def test_Copy_inputs():
             copyfile=False,
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         num_threads=dict(
             nohash=True,
@@ -26,7 +25,6 @@ def test_Copy_inputs():
             name_source='in_file',
             name_template='%s_copy',
             position=-1,
-            usedefault=True,
         ),
         outputtype=dict(),
         verbose=dict(argstr='-verb', ),
@@ -37,7 +35,7 @@ def test_Copy_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Copy_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = Copy.output_spec()
 
     for key, metadata in list(output_map.items()):

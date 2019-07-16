@@ -24,7 +24,6 @@ def test_DARTELNorm2MNI_inputs():
             copyfile=False,
             field='mni_norm.template',
             mandatory=True,
-            usedefault=True,
         ),
         use_mcr=dict(),
         use_v8struct=dict(
@@ -40,7 +39,7 @@ def test_DARTELNorm2MNI_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DARTELNorm2MNI_outputs():
     output_map = dict(
-        normalization_parameter_file=dict(usedefault=True, ),
+        normalization_parameter_file=dict(),
         normalized_files=dict(),
     )
     outputs = DARTELNorm2MNI.output_spec()

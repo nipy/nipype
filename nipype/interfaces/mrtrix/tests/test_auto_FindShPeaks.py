@@ -10,7 +10,6 @@ def test_FindShPeaks_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         display_debug=dict(argstr='-debug', ),
         display_info=dict(argstr='-info', ),
@@ -22,7 +21,6 @@ def test_FindShPeaks_inputs():
             argstr='%s',
             mandatory=True,
             position=-3,
-            usedefault=True,
         ),
         num_peaks=dict(argstr='-num %s', ),
         out_file=dict(
@@ -32,17 +30,13 @@ def test_FindShPeaks_inputs():
             name_source=['in_file'],
             name_template='%s_peak_dirs.mif',
             position=-1,
-            usedefault=True,
         ),
         peak_directions=dict(
             argstr='-direction %s',
             sep=' ',
         ),
         peak_threshold=dict(argstr='-threshold %s', ),
-        peaks_image=dict(
-            argstr='-peaks %s',
-            usedefault=True,
-        ),
+        peaks_image=dict(argstr='-peaks %s', ),
         quiet_display=dict(argstr='-quiet', ),
     )
     inputs = FindShPeaks.input_spec()
@@ -51,7 +45,7 @@ def test_FindShPeaks_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FindShPeaks_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = FindShPeaks.output_spec()
 
     for key, metadata in list(output_map.items()):

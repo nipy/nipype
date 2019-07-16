@@ -40,18 +40,13 @@ def test_FWHMx_inputs():
         in_file=dict(
             argstr='-input %s',
             mandatory=True,
-            usedefault=True,
         ),
-        mask=dict(
-            argstr='-mask %s',
-            usedefault=True,
-        ),
+        mask=dict(argstr='-mask %s', ),
         out_detrend=dict(
             argstr='-detprefix %s',
             keep_extension=False,
             name_source='in_file',
             name_template='%s_detrend',
-            usedefault=True,
         ),
         out_file=dict(
             argstr='> %s',
@@ -59,14 +54,12 @@ def test_FWHMx_inputs():
             name_source='in_file',
             name_template='%s_fwhmx.out',
             position=-1,
-            usedefault=True,
         ),
         out_subbricks=dict(
             argstr='-out %s',
             keep_extension=False,
             name_source='in_file',
             name_template='%s_subbricks.out',
-            usedefault=True,
         ),
         unif=dict(argstr='-unif', ),
     )
@@ -79,10 +72,10 @@ def test_FWHMx_outputs():
     output_map = dict(
         acf_param=dict(),
         fwhm=dict(),
-        out_acf=dict(usedefault=True, ),
-        out_detrend=dict(usedefault=True, ),
-        out_file=dict(usedefault=True, ),
-        out_subbricks=dict(usedefault=True, ),
+        out_acf=dict(),
+        out_detrend=dict(),
+        out_file=dict(),
+        out_subbricks=dict(),
     )
     outputs = FWHMx.output_spec()
 

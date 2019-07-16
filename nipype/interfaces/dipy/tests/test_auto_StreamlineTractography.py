@@ -9,12 +9,9 @@ def test_StreamlineTractography_inputs():
             mandatory=True,
             usedefault=True,
         ),
-        in_file=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
-        in_model=dict(usedefault=True, ),
-        in_peaks=dict(usedefault=True, ),
+        in_file=dict(mandatory=True, ),
+        in_model=dict(),
+        in_peaks=dict(),
         min_angle=dict(
             mandatory=True,
             usedefault=True,
@@ -36,9 +33,9 @@ def test_StreamlineTractography_inputs():
             mandatory=True,
             usedefault=True,
         ),
-        seed_coord=dict(usedefault=True, ),
-        seed_mask=dict(usedefault=True, ),
-        tracking_mask=dict(usedefault=True, ),
+        seed_coord=dict(),
+        seed_mask=dict(),
+        tracking_mask=dict(),
     )
     inputs = StreamlineTractography.input_spec()
 
@@ -47,10 +44,10 @@ def test_StreamlineTractography_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_StreamlineTractography_outputs():
     output_map = dict(
-        gfa=dict(usedefault=True, ),
-        odf_peaks=dict(usedefault=True, ),
-        out_seeds=dict(usedefault=True, ),
-        tracks=dict(usedefault=True, ),
+        gfa=dict(),
+        odf_peaks=dict(),
+        out_seeds=dict(),
+        tracks=dict(),
     )
     outputs = StreamlineTractography.output_spec()
 

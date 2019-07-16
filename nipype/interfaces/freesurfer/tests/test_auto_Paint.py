@@ -15,7 +15,6 @@ def test_Paint_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         out_file=dict(
             argstr='%s',
@@ -24,14 +23,12 @@ def test_Paint_inputs():
             name_source=['in_surf'],
             name_template='%s.avg_curv',
             position=-1,
-            usedefault=True,
         ),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
         template=dict(
             argstr='%s',
             mandatory=True,
             position=-3,
-            usedefault=True,
         ),
         template_param=dict(),
     )
@@ -41,7 +38,7 @@ def test_Paint_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Paint_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = Paint.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -20,14 +20,12 @@ def test_LaplacianThickness_inputs():
             copyfile=True,
             mandatory=True,
             position=2,
-            usedefault=True,
         ),
         input_wm=dict(
             argstr='%s',
             copyfile=True,
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
         num_threads=dict(
             nohash=True,
@@ -40,7 +38,6 @@ def test_LaplacianThickness_inputs():
             name_source=['input_wm'],
             name_template='%s_thickness',
             position=3,
-            usedefault=True,
         ),
         prior_thickness=dict(
             argstr='%s',
@@ -68,7 +65,7 @@ def test_LaplacianThickness_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_LaplacianThickness_outputs():
-    output_map = dict(output_image=dict(usedefault=True, ), )
+    output_map = dict(output_image=dict(), )
     outputs = LaplacianThickness.output_spec()
 
     for key, metadata in list(output_map.items()):

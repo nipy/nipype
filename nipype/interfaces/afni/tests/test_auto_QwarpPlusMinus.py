@@ -25,7 +25,6 @@ def test_QwarpPlusMinus_inputs():
             argstr='-base %s',
             copyfile=False,
             mandatory=True,
-            usedefault=True,
         ),
         baxopt=dict(
             argstr='-boxopt',
@@ -42,7 +41,6 @@ def test_QwarpPlusMinus_inputs():
         emask=dict(
             argstr='-emask %s',
             copyfile=False,
-            usedefault=True,
         ),
         environ=dict(
             nohash=True,
@@ -55,7 +53,6 @@ def test_QwarpPlusMinus_inputs():
         gridlist=dict(
             argstr='-gridlist %s',
             copyfile=False,
-            usedefault=True,
             xor=['duplo', 'plusminus'],
         ),
         hel=dict(
@@ -66,7 +63,6 @@ def test_QwarpPlusMinus_inputs():
             argstr='-source %s',
             copyfile=False,
             mandatory=True,
-            usedefault=True,
         ),
         inilev=dict(
             argstr='-inilev %d',
@@ -146,17 +142,13 @@ def test_QwarpPlusMinus_inputs():
             copyfile=False,
             deprecated='1.1.2',
             new_name='in_file',
-            usedefault=True,
         ),
         verb=dict(
             argstr='-verb',
             xor=['quiet'],
         ),
         wball=dict(argstr='-wball %s', ),
-        weight=dict(
-            argstr='-weight %s',
-            usedefault=True,
-        ),
+        weight=dict(argstr='-weight %s', ),
         wmask=dict(argstr='-wpass %s %f', ),
         workhard=dict(
             argstr='-workhard',
@@ -170,11 +162,11 @@ def test_QwarpPlusMinus_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_QwarpPlusMinus_outputs():
     output_map = dict(
-        base_warp=dict(usedefault=True, ),
-        source_warp=dict(usedefault=True, ),
-        warped_base=dict(usedefault=True, ),
-        warped_source=dict(usedefault=True, ),
-        weights=dict(usedefault=True, ),
+        base_warp=dict(),
+        source_warp=dict(),
+        warped_base=dict(),
+        warped_source=dict(),
+        weights=dict(),
     )
     outputs = QwarpPlusMinus.output_spec()
 

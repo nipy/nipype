@@ -13,7 +13,6 @@ def test_RegResample_inputs():
         flo_file=dict(
             argstr='-flo %s',
             mandatory=True,
-            usedefault=True,
         ),
         inter_val=dict(argstr='-inter %d', ),
         omp_core_val=dict(
@@ -25,7 +24,6 @@ def test_RegResample_inputs():
             name_source=['flo_file'],
             name_template='%s',
             position=-1,
-            usedefault=True,
         ),
         pad_val=dict(argstr='-pad %f', ),
         psf_alg=dict(argstr='-psf_alg %d', ),
@@ -33,13 +31,9 @@ def test_RegResample_inputs():
         ref_file=dict(
             argstr='-ref %s',
             mandatory=True,
-            usedefault=True,
         ),
         tensor_flag=dict(argstr='-tensor ', ),
-        trans_file=dict(
-            argstr='-trans %s',
-            usedefault=True,
-        ),
+        trans_file=dict(argstr='-trans %s', ),
         type=dict(
             argstr='-%s',
             position=-2,
@@ -53,7 +47,7 @@ def test_RegResample_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_RegResample_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = RegResample.output_spec()
 
     for key, metadata in list(output_map.items()):

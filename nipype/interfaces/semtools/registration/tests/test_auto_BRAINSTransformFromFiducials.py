@@ -11,15 +11,9 @@ def test_BRAINSTransformFromFiducials_inputs():
             usedefault=True,
         ),
         fixedLandmarks=dict(argstr='--fixedLandmarks %s...', ),
-        fixedLandmarksFile=dict(
-            argstr='--fixedLandmarksFile %s',
-            usedefault=True,
-        ),
+        fixedLandmarksFile=dict(argstr='--fixedLandmarksFile %s', ),
         movingLandmarks=dict(argstr='--movingLandmarks %s...', ),
-        movingLandmarksFile=dict(
-            argstr='--movingLandmarksFile %s',
-            usedefault=True,
-        ),
+        movingLandmarksFile=dict(argstr='--movingLandmarksFile %s', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         saveTransform=dict(
             argstr='--saveTransform %s',
@@ -33,7 +27,7 @@ def test_BRAINSTransformFromFiducials_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BRAINSTransformFromFiducials_outputs():
-    output_map = dict(saveTransform=dict(usedefault=True, ), )
+    output_map = dict(saveTransform=dict(), )
     outputs = BRAINSTransformFromFiducials.output_spec()
 
     for key, metadata in list(output_map.items()):

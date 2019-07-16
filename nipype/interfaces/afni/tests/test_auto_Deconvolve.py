@@ -5,19 +5,13 @@ from ..model import Deconvolve
 
 def test_Deconvolve_inputs():
     input_map = dict(
-        STATmask=dict(
-            argstr='-STATmask %s',
-            usedefault=True,
-        ),
+        STATmask=dict(argstr='-STATmask %s', ),
         TR_1D=dict(argstr='-TR_1D %f', ),
         allzero_OK=dict(argstr='-allzero_OK', ),
         args=dict(argstr='%s', ),
         automask=dict(argstr='-automask', ),
         cbucket=dict(argstr='-cbucket %s', ),
-        censor=dict(
-            argstr='-censor %s',
-            usedefault=True,
-        ),
+        censor=dict(argstr='-censor %s', ),
         dmbase=dict(argstr='-dmbase', ),
         dname=dict(argstr='-D%s=%s', ),
         environ=dict(
@@ -49,19 +43,13 @@ def test_Deconvolve_inputs():
             position=1,
             sep=' ',
         ),
-        input1D=dict(
-            argstr='-input1D %s',
-            usedefault=True,
-        ),
+        input1D=dict(argstr='-input1D %s', ),
         legendre=dict(argstr='-legendre', ),
         local_times=dict(
             argstr='-local_times',
             xor=['global_times'],
         ),
-        mask=dict(
-            argstr='-mask %s',
-            usedefault=True,
-        ),
+        mask=dict(argstr='-mask %s', ),
         noblock=dict(argstr='-noblock', ),
         nocond=dict(argstr='-nocond', ),
         nodmbase=dict(argstr='-nodmbase', ),
@@ -81,10 +69,7 @@ def test_Deconvolve_inputs():
             nohash=True,
         ),
         ortvec=dict(argstr='-ortvec %s %s', ),
-        out_file=dict(
-            argstr='-bucket %s',
-            usedefault=True,
-        ),
+        out_file=dict(argstr='-bucket %s', ),
         outputtype=dict(),
         polort=dict(argstr='-polort %d', ),
         rmsmin=dict(argstr='-rmsmin %f', ),
@@ -111,10 +96,7 @@ def test_Deconvolve_inputs():
             xor=['sat'],
         ),
         vout=dict(argstr='-vout', ),
-        x1D=dict(
-            argstr='-x1D %s',
-            usedefault=True,
-        ),
+        x1D=dict(argstr='-x1D %s', ),
         x1D_stop=dict(argstr='-x1D_stop', ),
     )
     inputs = Deconvolve.input_spec()
@@ -124,10 +106,10 @@ def test_Deconvolve_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Deconvolve_outputs():
     output_map = dict(
-        cbucket=dict(usedefault=True, ),
-        out_file=dict(usedefault=True, ),
-        reml_script=dict(usedefault=True, ),
-        x1D=dict(usedefault=True, ),
+        cbucket=dict(),
+        out_file=dict(),
+        reml_script=dict(),
+        x1D=dict(),
     )
     outputs = Deconvolve.output_spec()
 

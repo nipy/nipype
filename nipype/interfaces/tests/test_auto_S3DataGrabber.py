@@ -8,7 +8,7 @@ def test_S3DataGrabber_inputs():
         anon=dict(usedefault=True, ),
         bucket=dict(mandatory=True, ),
         bucket_path=dict(usedefault=True, ),
-        local_directory=dict(usedefault=True, ),
+        local_directory=dict(),
         raise_on_empty=dict(usedefault=True, ),
         region=dict(usedefault=True, ),
         sort_filelist=dict(mandatory=True, ),

@@ -8,19 +8,16 @@ def test_BrainExtraction_inputs():
         anatomical_image=dict(
             argstr='-a %s',
             mandatory=True,
-            usedefault=True,
         ),
         args=dict(argstr='%s', ),
         brain_probability_mask=dict(
             argstr='-m %s',
             copyfile=False,
             mandatory=True,
-            usedefault=True,
         ),
         brain_template=dict(
             argstr='-e %s',
             mandatory=True,
-            usedefault=True,
         ),
         debug=dict(argstr='-z 1', ),
         dimension=dict(
@@ -31,10 +28,7 @@ def test_BrainExtraction_inputs():
             nohash=True,
             usedefault=True,
         ),
-        extraction_registration_mask=dict(
-            argstr='-f %s',
-            usedefault=True,
-        ),
+        extraction_registration_mask=dict(argstr='-f %s', ),
         image_suffix=dict(
             argstr='-s %s',
             usedefault=True,
@@ -58,24 +52,24 @@ def test_BrainExtraction_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BrainExtraction_outputs():
     output_map = dict(
-        BrainExtractionBrain=dict(usedefault=True, ),
-        BrainExtractionCSF=dict(usedefault=True, ),
-        BrainExtractionGM=dict(usedefault=True, ),
-        BrainExtractionInitialAffine=dict(usedefault=True, ),
-        BrainExtractionInitialAffineFixed=dict(usedefault=True, ),
-        BrainExtractionInitialAffineMoving=dict(usedefault=True, ),
-        BrainExtractionLaplacian=dict(usedefault=True, ),
-        BrainExtractionMask=dict(usedefault=True, ),
-        BrainExtractionPrior0GenericAffine=dict(usedefault=True, ),
-        BrainExtractionPrior1InverseWarp=dict(usedefault=True, ),
-        BrainExtractionPrior1Warp=dict(usedefault=True, ),
-        BrainExtractionPriorWarped=dict(usedefault=True, ),
-        BrainExtractionSegmentation=dict(usedefault=True, ),
-        BrainExtractionTemplateLaplacian=dict(usedefault=True, ),
-        BrainExtractionTmp=dict(usedefault=True, ),
-        BrainExtractionWM=dict(usedefault=True, ),
-        N4Corrected0=dict(usedefault=True, ),
-        N4Truncated0=dict(usedefault=True, ),
+        BrainExtractionBrain=dict(),
+        BrainExtractionCSF=dict(),
+        BrainExtractionGM=dict(),
+        BrainExtractionInitialAffine=dict(),
+        BrainExtractionInitialAffineFixed=dict(),
+        BrainExtractionInitialAffineMoving=dict(),
+        BrainExtractionLaplacian=dict(),
+        BrainExtractionMask=dict(),
+        BrainExtractionPrior0GenericAffine=dict(),
+        BrainExtractionPrior1InverseWarp=dict(),
+        BrainExtractionPrior1Warp=dict(),
+        BrainExtractionPriorWarped=dict(),
+        BrainExtractionSegmentation=dict(),
+        BrainExtractionTemplateLaplacian=dict(),
+        BrainExtractionTmp=dict(),
+        BrainExtractionWM=dict(),
+        N4Corrected0=dict(),
+        N4Truncated0=dict(),
     )
     outputs = BrainExtraction.output_spec()
 

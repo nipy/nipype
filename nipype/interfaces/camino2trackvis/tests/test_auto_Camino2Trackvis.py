@@ -20,7 +20,6 @@ def test_Camino2Trackvis_inputs():
             argstr='-i %s',
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
         min_length=dict(
             argstr='-l %d',
@@ -30,13 +29,11 @@ def test_Camino2Trackvis_inputs():
         nifti_file=dict(
             argstr='--nifti %s',
             position=7,
-            usedefault=True,
         ),
         out_file=dict(
             argstr='-o %s',
             genfile=True,
             position=2,
-            usedefault=True,
         ),
         voxel_dims=dict(
             argstr='-x %s',
@@ -48,7 +45,6 @@ def test_Camino2Trackvis_inputs():
             argstr='--voxel-order %s',
             mandatory=True,
             position=6,
-            usedefault=True,
         ),
     )
     inputs = Camino2Trackvis.input_spec()
@@ -57,7 +53,7 @@ def test_Camino2Trackvis_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Camino2Trackvis_outputs():
-    output_map = dict(trackvis=dict(usedefault=True, ), )
+    output_map = dict(trackvis=dict(), )
     outputs = Camino2Trackvis.output_spec()
 
     for key, metadata in list(output_map.items()):

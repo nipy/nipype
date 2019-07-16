@@ -15,7 +15,6 @@ def test_SFPICOCalibData_inputs():
             genfile=True,
             hash_files=False,
             mandatory=True,
-            usedefault=True,
         ),
         onedtfarange=dict(
             argstr='-onedtfarange %s',
@@ -33,7 +32,6 @@ def test_SFPICOCalibData_inputs():
         scheme_file=dict(
             argstr='-schemefile %s',
             mandatory=True,
-            usedefault=True,
         ),
         seed=dict(
             argstr='-seed %f',
@@ -79,8 +77,8 @@ def test_SFPICOCalibData_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SFPICOCalibData_outputs():
     output_map = dict(
-        PICOCalib=dict(usedefault=True, ),
-        calib_info=dict(usedefault=True, ),
+        PICOCalib=dict(),
+        calib_info=dict(),
     )
     outputs = SFPICOCalibData.output_spec()
 

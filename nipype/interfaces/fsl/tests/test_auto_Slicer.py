@@ -15,7 +15,6 @@ def test_Slicer_inputs():
         colour_map=dict(
             argstr='-l %s',
             position=4,
-            usedefault=True,
         ),
         dither_edges=dict(
             argstr='-t',
@@ -28,7 +27,6 @@ def test_Slicer_inputs():
         image_edges=dict(
             argstr='%s',
             position=2,
-            usedefault=True,
         ),
         image_width=dict(
             argstr='%d',
@@ -38,7 +36,6 @@ def test_Slicer_inputs():
             argstr='%s',
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
         intensity_range=dict(
             argstr='-i %.3f %.3f',
@@ -63,7 +60,6 @@ def test_Slicer_inputs():
             genfile=True,
             hash_files=False,
             position=-1,
-            usedefault=True,
         ),
         output_type=dict(),
         sample_axial=dict(
@@ -102,7 +98,7 @@ def test_Slicer_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Slicer_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = Slicer.output_spec()
 
     for key, metadata in list(output_map.items()):

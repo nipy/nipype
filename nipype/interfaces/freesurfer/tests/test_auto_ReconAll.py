@@ -8,13 +8,11 @@ def test_ReconAll_inputs():
         FLAIR_file=dict(
             argstr='-FLAIR %s',
             min_ver='5.3.0',
-            usedefault=True,
         ),
         T1_files=dict(argstr='-i %s...', ),
         T2_file=dict(
             argstr='-T2 %s',
             min_ver='5.3.0',
-            usedefault=True,
         ),
         args=dict(argstr='%s', ),
         big_ventricles=dict(argstr='-bigventricles', ),
@@ -28,10 +26,7 @@ def test_ReconAll_inputs():
             nohash=True,
             usedefault=True,
         ),
-        expert=dict(
-            argstr='-expert %s',
-            usedefault=True,
-        ),
+        expert=dict(argstr='-expert %s', ),
         flags=dict(argstr='%s', ),
         hemi=dict(argstr='-hemi %s', ),
         hippocampal_subfields_T1=dict(
@@ -82,7 +77,6 @@ def test_ReconAll_inputs():
             argstr='-sd %s',
             genfile=True,
             hash_files=False,
-            usedefault=True,
         ),
         talairach=dict(xor=['expert'], ),
         use_FLAIR=dict(
@@ -108,10 +102,7 @@ def test_ReconAll_outputs():
             altkey='BA',
             loc='stats',
         ),
-        T1=dict(
-            loc='mri',
-            usedefault=True,
-        ),
+        T1=dict(loc='mri', ),
         annot=dict(
             altkey='*annot',
             loc='label',
@@ -132,23 +123,14 @@ def test_ReconAll_outputs():
             altkey='area.pial',
             loc='surf',
         ),
-        aseg=dict(
-            loc='mri',
-            usedefault=True,
-        ),
+        aseg=dict(loc='mri', ),
         aseg_stats=dict(
             altkey='aseg',
             loc='stats',
         ),
         avg_curv=dict(loc='surf', ),
-        brain=dict(
-            loc='mri',
-            usedefault=True,
-        ),
-        brainmask=dict(
-            loc='mri',
-            usedefault=True,
-        ),
+        brain=dict(loc='mri', ),
+        brainmask=dict(loc='mri', ),
         curv=dict(loc='surf', ),
         curv_pial=dict(
             altkey='curv.pial',
@@ -162,10 +144,7 @@ def test_ReconAll_outputs():
             altkey='entorhinal_exvivo',
             loc='stats',
         ),
-        filled=dict(
-            loc='mri',
-            usedefault=True,
-        ),
+        filled=dict(loc='mri', ),
         graymid=dict(
             altkey=['graymid', 'midthickness'],
             loc='surf',
@@ -176,23 +155,11 @@ def test_ReconAll_outputs():
             altkey='*label',
             loc='label',
         ),
-        norm=dict(
-            loc='mri',
-            usedefault=True,
-        ),
-        nu=dict(
-            loc='mri',
-            usedefault=True,
-        ),
-        orig=dict(
-            loc='mri',
-            usedefault=True,
-        ),
+        norm=dict(loc='mri', ),
+        nu=dict(loc='mri', ),
+        orig=dict(loc='mri', ),
         pial=dict(loc='surf', ),
-        rawavg=dict(
-            loc='mri',
-            usedefault=True,
-        ),
+        rawavg=dict(loc='mri', ),
         ribbon=dict(
             altkey='*ribbon',
             loc='mri',
@@ -204,19 +171,13 @@ def test_ReconAll_outputs():
             loc='surf',
         ),
         subject_id=dict(),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
         sulc=dict(loc='surf', ),
         thickness=dict(loc='surf', ),
         volume=dict(loc='surf', ),
         white=dict(loc='surf', ),
-        wm=dict(
-            loc='mri',
-            usedefault=True,
-        ),
-        wmparc=dict(
-            loc='mri',
-            usedefault=True,
-        ),
+        wm=dict(loc='mri', ),
+        wmparc=dict(loc='mri', ),
         wmparc_stats=dict(
             altkey='wmparc',
             loc='stats',

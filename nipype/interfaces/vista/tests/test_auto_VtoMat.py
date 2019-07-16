@@ -14,7 +14,6 @@ def test_VtoMat_inputs():
             argstr='-in %s',
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
         out_file=dict(
             argstr='-out %s',
@@ -23,7 +22,6 @@ def test_VtoMat_inputs():
             name_source=['in_file'],
             name_template='%s.mat',
             position=-1,
-            usedefault=True,
         ),
     )
     inputs = VtoMat.input_spec()
@@ -32,7 +30,7 @@ def test_VtoMat_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_VtoMat_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = VtoMat.output_spec()
 
     for key, metadata in list(output_map.items()):

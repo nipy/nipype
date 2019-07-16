@@ -12,10 +12,7 @@ def test_ESLR_inputs():
             usedefault=True,
         ),
         high=dict(argstr='--high %d', ),
-        inputVolume=dict(
-            argstr='--inputVolume %s',
-            usedefault=True,
-        ),
+        inputVolume=dict(argstr='--inputVolume %s', ),
         low=dict(argstr='--low %d', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         openingSize=dict(argstr='--openingSize %d', ),
@@ -32,7 +29,7 @@ def test_ESLR_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ESLR_outputs():
-    output_map = dict(outputVolume=dict(usedefault=True, ), )
+    output_map = dict(outputVolume=dict(), )
     outputs = ESLR.output_spec()
 
     for key, metadata in list(output_map.items()):

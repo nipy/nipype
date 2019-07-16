@@ -7,7 +7,6 @@ def test_MySQLSink_inputs():
     input_map = dict(
         config=dict(
             mandatory=True,
-            usedefault=True,
             xor=['host'],
         ),
         database_name=dict(mandatory=True, ),

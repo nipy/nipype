@@ -8,12 +8,10 @@ def test_ProbeVolumeWithModel_inputs():
         InputModel=dict(
             argstr='%s',
             position=-2,
-            usedefault=True,
         ),
         InputVolume=dict(
             argstr='%s',
             position=-3,
-            usedefault=True,
         ),
         OutputModel=dict(
             argstr='%s',
@@ -32,11 +30,7 @@ def test_ProbeVolumeWithModel_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ProbeVolumeWithModel_outputs():
-    output_map = dict(
-        OutputModel=dict(
-            position=-1,
-            usedefault=True,
-        ), )
+    output_map = dict(OutputModel=dict(position=-1, ), )
     outputs = ProbeVolumeWithModel.output_spec()
 
     for key, metadata in list(output_map.items()):

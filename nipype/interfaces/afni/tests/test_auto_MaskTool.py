@@ -38,7 +38,6 @@ def test_MaskTool_inputs():
             argstr='-prefix %s',
             name_source='in_file',
             name_template='%s_mask',
-            usedefault=True,
         ),
         outputtype=dict(),
         union=dict(argstr='-union', ),
@@ -50,7 +49,7 @@ def test_MaskTool_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MaskTool_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = MaskTool.output_spec()
 
     for key, metadata in list(output_map.items()):

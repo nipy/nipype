@@ -10,14 +10,8 @@ def test_gtractInvertBSplineTransform_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputReferenceVolume=dict(
-            argstr='--inputReferenceVolume %s',
-            usedefault=True,
-        ),
-        inputTransform=dict(
-            argstr='--inputTransform %s',
-            usedefault=True,
-        ),
+        inputReferenceVolume=dict(argstr='--inputReferenceVolume %s', ),
+        inputTransform=dict(argstr='--inputTransform %s', ),
         landmarkDensity=dict(
             argstr='--landmarkDensity %s',
             sep=',',
@@ -34,7 +28,7 @@ def test_gtractInvertBSplineTransform_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_gtractInvertBSplineTransform_outputs():
-    output_map = dict(outputTransform=dict(usedefault=True, ), )
+    output_map = dict(outputTransform=dict(), )
     outputs = gtractInvertBSplineTransform.output_spec()
 
     for key, metadata in list(output_map.items()):

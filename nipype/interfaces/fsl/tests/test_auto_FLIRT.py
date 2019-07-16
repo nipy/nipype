@@ -42,12 +42,10 @@ def test_FLIRT_inputs():
         fieldmap=dict(
             argstr='-fieldmap %s',
             min_ver='5.0.0',
-            usedefault=True,
         ),
         fieldmapmask=dict(
             argstr='-fieldmapmask %s',
             min_ver='5.0.0',
-            usedefault=True,
         ),
         fine_search=dict(
             argstr='-finesearch %d',
@@ -58,16 +56,9 @@ def test_FLIRT_inputs():
             argstr='-in %s',
             mandatory=True,
             position=0,
-            usedefault=True,
         ),
-        in_matrix_file=dict(
-            argstr='-init %s',
-            usedefault=True,
-        ),
-        in_weight=dict(
-            argstr='-inweight %s',
-            usedefault=True,
-        ),
+        in_matrix_file=dict(argstr='-init %s', ),
+        in_weight=dict(argstr='-inweight %s', ),
         interp=dict(argstr='-interp %s', ),
         min_sampling=dict(
             argstr='-minsampling %f',
@@ -83,14 +74,12 @@ def test_FLIRT_inputs():
             name_source=['in_file'],
             name_template='%s_flirt',
             position=2,
-            usedefault=True,
         ),
         out_log=dict(
             keep_extension=True,
             name_source=['in_file'],
             name_template='%s_flirt.log',
             requires=['save_log'],
-            usedefault=True,
         ),
         out_matrix_file=dict(
             argstr='-omat %s',
@@ -99,7 +88,6 @@ def test_FLIRT_inputs():
             name_source=['in_file'],
             name_template='%s_flirt.mat',
             position=3,
-            usedefault=True,
         ),
         output_type=dict(),
         padding_size=dict(
@@ -110,22 +98,15 @@ def test_FLIRT_inputs():
             argstr='-pedir %d',
             min_ver='5.0.0',
         ),
-        ref_weight=dict(
-            argstr='-refweight %s',
-            usedefault=True,
-        ),
+        ref_weight=dict(argstr='-refweight %s', ),
         reference=dict(
             argstr='-ref %s',
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
         rigid2D=dict(argstr='-2D', ),
         save_log=dict(),
-        schedule=dict(
-            argstr='-schedule %s',
-            usedefault=True,
-        ),
+        schedule=dict(argstr='-schedule %s', ),
         searchr_x=dict(
             argstr='-searchrx %s',
             units='degrees',
@@ -148,17 +129,14 @@ def test_FLIRT_inputs():
         wm_seg=dict(
             argstr='-wmseg %s',
             min_ver='5.0.0',
-            usedefault=True,
         ),
         wmcoords=dict(
             argstr='-wmcoords %s',
             min_ver='5.0.0',
-            usedefault=True,
         ),
         wmnorms=dict(
             argstr='-wmnorms %s',
             min_ver='5.0.0',
-            usedefault=True,
         ),
     )
     inputs = FLIRT.input_spec()
@@ -168,9 +146,9 @@ def test_FLIRT_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FLIRT_outputs():
     output_map = dict(
-        out_file=dict(usedefault=True, ),
-        out_log=dict(usedefault=True, ),
-        out_matrix_file=dict(usedefault=True, ),
+        out_file=dict(),
+        out_log=dict(),
+        out_matrix_file=dict(),
     )
     outputs = FLIRT.output_spec()
 

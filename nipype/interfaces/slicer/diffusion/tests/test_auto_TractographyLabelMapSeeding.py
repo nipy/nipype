@@ -8,7 +8,6 @@ def test_TractographyLabelMapSeeding_inputs():
         InputVolume=dict(
             argstr='%s',
             position=-2,
-            usedefault=True,
         ),
         OutputFibers=dict(
             argstr='%s',
@@ -21,10 +20,7 @@ def test_TractographyLabelMapSeeding_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputroi=dict(
-            argstr='--inputroi %s',
-            usedefault=True,
-        ),
+        inputroi=dict(argstr='--inputroi %s', ),
         integrationsteplength=dict(argstr='--integrationsteplength %f', ),
         label=dict(argstr='--label %d', ),
         maximumlength=dict(argstr='--maximumlength %f', ),
@@ -49,11 +45,8 @@ def test_TractographyLabelMapSeeding_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TractographyLabelMapSeeding_outputs():
     output_map = dict(
-        OutputFibers=dict(
-            position=-1,
-            usedefault=True,
-        ),
-        outputdirectory=dict(usedefault=True, ),
+        OutputFibers=dict(position=-1, ),
+        outputdirectory=dict(),
     )
     outputs = TractographyLabelMapSeeding.output_spec()
 

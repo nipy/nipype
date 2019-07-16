@@ -13,15 +13,9 @@ def test_CannySegmentationLevelSetImageFilter_inputs():
             nohash=True,
             usedefault=True,
         ),
-        initialModel=dict(
-            argstr='--initialModel %s',
-            usedefault=True,
-        ),
+        initialModel=dict(argstr='--initialModel %s', ),
         initialModelIsovalue=dict(argstr='--initialModelIsovalue %f', ),
-        inputVolume=dict(
-            argstr='--inputVolume %s',
-            usedefault=True,
-        ),
+        inputVolume=dict(argstr='--inputVolume %s', ),
         maxIterations=dict(argstr='--maxIterations %d', ),
         outputSpeedVolume=dict(
             argstr='--outputSpeedVolume %s',
@@ -39,8 +33,8 @@ def test_CannySegmentationLevelSetImageFilter_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_CannySegmentationLevelSetImageFilter_outputs():
     output_map = dict(
-        outputSpeedVolume=dict(usedefault=True, ),
-        outputVolume=dict(usedefault=True, ),
+        outputSpeedVolume=dict(),
+        outputVolume=dict(),
     )
     outputs = CannySegmentationLevelSetImageFilter.output_spec()
 

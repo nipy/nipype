@@ -10,10 +10,7 @@ def test_BRAINSLinearModelerEPCA_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputTrainingList=dict(
-            argstr='--inputTrainingList %s',
-            usedefault=True,
-        ),
+        inputTrainingList=dict(argstr='--inputTrainingList %s', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
     )
     inputs = BRAINSLinearModelerEPCA.input_spec()

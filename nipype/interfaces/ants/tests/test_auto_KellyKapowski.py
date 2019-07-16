@@ -16,7 +16,6 @@ def test_KellyKapowski_inputs():
             keep_extension=True,
             name_source=['segmentation_image'],
             name_template='%s_cortical_thickness',
-            usedefault=True,
         ),
         dimension=dict(
             argstr='--image-dimensionality %d',
@@ -32,9 +31,7 @@ def test_KellyKapowski_inputs():
         ),
         gray_matter_label=dict(usedefault=True, ),
         gray_matter_prob_image=dict(
-            argstr='--gray-matter-probability-image "%s"',
-            usedefault=True,
-        ),
+            argstr='--gray-matter-probability-image "%s"', ),
         max_invert_displacement_field_iters=dict(
             argstr=
             '--maximum-number-of-invert-displacement-field-iterations %d',
@@ -51,7 +48,6 @@ def test_KellyKapowski_inputs():
         segmentation_image=dict(
             argstr='--segmentation-image "%s"',
             mandatory=True,
-            usedefault=True,
         ),
         smoothing_variance=dict(
             argstr='--smoothing-variance %f',
@@ -65,23 +61,17 @@ def test_KellyKapowski_inputs():
             argstr='--thickness-prior-estimate %f',
             usedefault=True,
         ),
-        thickness_prior_image=dict(
-            argstr='--thickness-prior-image "%s"',
-            usedefault=True,
-        ),
+        thickness_prior_image=dict(argstr='--thickness-prior-image "%s"', ),
         use_bspline_smoothing=dict(argstr='--use-bspline-smoothing 1', ),
         warped_white_matter=dict(
             hash_files=False,
             keep_extension=True,
             name_source=['segmentation_image'],
             name_template='%s_warped_white_matter',
-            usedefault=True,
         ),
         white_matter_label=dict(usedefault=True, ),
         white_matter_prob_image=dict(
-            argstr='--white-matter-probability-image "%s"',
-            usedefault=True,
-        ),
+            argstr='--white-matter-probability-image "%s"', ),
     )
     inputs = KellyKapowski.input_spec()
 
@@ -90,8 +80,8 @@ def test_KellyKapowski_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_KellyKapowski_outputs():
     output_map = dict(
-        cortical_thickness=dict(usedefault=True, ),
-        warped_white_matter=dict(usedefault=True, ),
+        cortical_thickness=dict(),
+        warped_white_matter=dict(),
     )
     outputs = KellyKapowski.output_spec()
 

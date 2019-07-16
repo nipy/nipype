@@ -21,7 +21,6 @@ def test_MRIsExpand_inputs():
             copyfile=False,
             mandatory=True,
             position=-3,
-            usedefault=True,
         ),
         nsurfaces=dict(argstr='-N %d', ),
         out_name=dict(
@@ -39,7 +38,7 @@ def test_MRIsExpand_inputs():
             usedefault=True,
         ),
         spring=dict(argstr='-S %g', ),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
         thickness=dict(argstr='-thickness', ),
         thickness_name=dict(
             argstr='-thickness_name %s',
@@ -53,7 +52,7 @@ def test_MRIsExpand_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRIsExpand_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = MRIsExpand.output_spec()
 
     for key, metadata in list(output_map.items()):

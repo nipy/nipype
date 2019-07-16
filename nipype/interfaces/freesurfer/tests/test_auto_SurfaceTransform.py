@@ -17,20 +17,17 @@ def test_SurfaceTransform_inputs():
         out_file=dict(
             argstr='--tval %s',
             genfile=True,
-            usedefault=True,
         ),
         reshape=dict(argstr='--reshape', ),
         reshape_factor=dict(argstr='--reshape-factor', ),
         source_annot_file=dict(
             argstr='--sval-annot %s',
             mandatory=True,
-            usedefault=True,
             xor=['source_file'],
         ),
         source_file=dict(
             argstr='--sval %s',
             mandatory=True,
-            usedefault=True,
             xor=['source_annot_file'],
         ),
         source_subject=dict(
@@ -41,7 +38,7 @@ def test_SurfaceTransform_inputs():
             argstr='--sfmt %s',
             requires=['source_file'],
         ),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
         target_ico_order=dict(argstr='--trgicoorder %d', ),
         target_subject=dict(
             argstr='--trgsubject %s',
@@ -55,7 +52,7 @@ def test_SurfaceTransform_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SurfaceTransform_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = SurfaceTransform.output_spec()
 
     for key, metadata in list(output_map.items()):

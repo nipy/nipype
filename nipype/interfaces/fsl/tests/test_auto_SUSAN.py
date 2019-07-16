@@ -29,14 +29,12 @@ def test_SUSAN_inputs():
             argstr='%s',
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
         out_file=dict(
             argstr='%s',
             genfile=True,
             hash_files=False,
             position=-1,
-            usedefault=True,
         ),
         output_type=dict(),
         usans=dict(
@@ -56,7 +54,7 @@ def test_SUSAN_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SUSAN_outputs():
-    output_map = dict(smoothed_file=dict(usedefault=True, ), )
+    output_map = dict(smoothed_file=dict(), )
     outputs = SUSAN.output_spec()
 
     for key, metadata in list(output_map.items()):

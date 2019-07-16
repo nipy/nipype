@@ -35,10 +35,7 @@ def test_WatershedBEM_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_WatershedBEM_outputs():
     output_map = dict(
-        brain_surface=dict(
-            loc='bem/watershed',
-            usedefault=True,
-        ),
+        brain_surface=dict(loc='bem/watershed', ),
         cor_files=dict(
             altkey='COR',
             loc='bem/watershed/ws',
@@ -46,21 +43,11 @@ def test_WatershedBEM_outputs():
         fif_file=dict(
             altkey='fif',
             loc='bem',
-            usedefault=True,
         ),
-        inner_skull_surface=dict(
-            loc='bem/watershed',
-            usedefault=True,
-        ),
+        inner_skull_surface=dict(loc='bem/watershed', ),
         mesh_files=dict(),
-        outer_skin_surface=dict(
-            loc='bem/watershed',
-            usedefault=True,
-        ),
-        outer_skull_surface=dict(
-            loc='bem/watershed',
-            usedefault=True,
-        ),
+        outer_skin_surface=dict(loc='bem/watershed', ),
+        outer_skull_surface=dict(loc='bem/watershed', ),
     )
     outputs = WatershedBEM.output_spec()
 

@@ -14,12 +14,8 @@ def test_EMRegister_inputs():
             argstr='%s',
             mandatory=True,
             position=-3,
-            usedefault=True,
         ),
-        mask=dict(
-            argstr='-mask %s',
-            usedefault=True,
-        ),
+        mask=dict(argstr='-mask %s', ),
         nbrspacing=dict(argstr='-uns %d', ),
         num_threads=dict(),
         out_file=dict(
@@ -29,20 +25,15 @@ def test_EMRegister_inputs():
             name_source=['in_file'],
             name_template='%s_transform.lta',
             position=-1,
-            usedefault=True,
         ),
         skull=dict(argstr='-skull', ),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
         template=dict(
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
-        transform=dict(
-            argstr='-t %s',
-            usedefault=True,
-        ),
+        transform=dict(argstr='-t %s', ),
     )
     inputs = EMRegister.input_spec()
 
@@ -50,7 +41,7 @@ def test_EMRegister_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_EMRegister_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = EMRegister.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -5,10 +5,7 @@ from ..image import Reorient
 
 def test_Reorient_inputs():
     input_map = dict(
-        in_file=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
+        in_file=dict(mandatory=True, ),
         orientation=dict(usedefault=True, ),
     )
     inputs = Reorient.input_spec()
@@ -18,8 +15,8 @@ def test_Reorient_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Reorient_outputs():
     output_map = dict(
-        out_file=dict(usedefault=True, ),
-        transform=dict(usedefault=True, ),
+        out_file=dict(),
+        transform=dict(),
     )
     outputs = Reorient.output_spec()
 

@@ -5,16 +5,12 @@ from ..dti import TrackBedpostxDeter
 
 def test_TrackBedpostxDeter_inputs():
     input_map = dict(
-        anisfile=dict(
-            argstr='-anisfile %s',
-            usedefault=True,
-        ),
+        anisfile=dict(argstr='-anisfile %s', ),
         anisthresh=dict(argstr='-anisthresh %f', ),
         args=dict(argstr='%s', ),
         bedpostxdir=dict(
             argstr='-bedpostxdir %s',
             mandatory=True,
-            usedefault=True,
         ),
         curveinterval=dict(
             argstr='-curveinterval %f',
@@ -33,7 +29,6 @@ def test_TrackBedpostxDeter_inputs():
         in_file=dict(
             argstr='-inputfile %s',
             position=1,
-            usedefault=True,
         ),
         inputdatatype=dict(argstr='-inputdatatype %s', ),
         inputmodel=dict(
@@ -58,18 +53,15 @@ def test_TrackBedpostxDeter_inputs():
             argstr='-outputfile %s',
             genfile=True,
             position=-1,
-            usedefault=True,
         ),
         output_root=dict(
             argstr='-outputroot %s',
             position=-1,
-            usedefault=True,
         ),
         outputtracts=dict(argstr='-outputtracts %s', ),
         seed_file=dict(
             argstr='-seedfile %s',
             position=2,
-            usedefault=True,
         ),
         stepsize=dict(
             argstr='-stepsize %f',
@@ -90,7 +82,7 @@ def test_TrackBedpostxDeter_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TrackBedpostxDeter_outputs():
-    output_map = dict(tracked=dict(usedefault=True, ), )
+    output_map = dict(tracked=dict(), )
     outputs = TrackBedpostxDeter.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -14,7 +14,6 @@ def test_BinaryMathsInteger_inputs():
             argstr='%s',
             mandatory=True,
             position=2,
-            usedefault=True,
         ),
         operand_value=dict(
             argstr='%d',
@@ -31,7 +30,6 @@ def test_BinaryMathsInteger_inputs():
             name_source=['in_file'],
             name_template='%s',
             position=-2,
-            usedefault=True,
         ),
         output_datatype=dict(
             argstr='-odt %s',
@@ -44,7 +42,7 @@ def test_BinaryMathsInteger_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BinaryMathsInteger_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = BinaryMathsInteger.output_spec()
 
     for key, metadata in list(output_map.items()):

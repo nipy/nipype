@@ -9,7 +9,6 @@ def test_WatershedSkullStrip_inputs():
         brain_atlas=dict(
             argstr='-brain_atlas %s',
             position=-4,
-            usedefault=True,
         ),
         environ=dict(
             nohash=True,
@@ -19,7 +18,6 @@ def test_WatershedSkullStrip_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         out_file=dict(
             argstr='%s',
@@ -27,12 +25,11 @@ def test_WatershedSkullStrip_inputs():
             position=-1,
             usedefault=True,
         ),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
         t1=dict(argstr='-T1', ),
         transform=dict(
             argstr='%s',
             position=-3,
-            usedefault=True,
         ),
     )
     inputs = WatershedSkullStrip.input_spec()
@@ -41,7 +38,7 @@ def test_WatershedSkullStrip_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_WatershedSkullStrip_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = WatershedSkullStrip.output_spec()
 
     for key, metadata in list(output_map.items()):

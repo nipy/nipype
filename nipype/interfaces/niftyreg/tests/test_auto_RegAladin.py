@@ -10,7 +10,6 @@ def test_RegAladin_inputs():
             argstr='-aff %s',
             name_source=['flo_file'],
             name_template='%s_aff.txt',
-            usedefault=True,
         ),
         args=dict(argstr='%s', ),
         cog_flag=dict(argstr='-cog', ),
@@ -21,20 +20,13 @@ def test_RegAladin_inputs():
         flo_file=dict(
             argstr='-flo %s',
             mandatory=True,
-            usedefault=True,
         ),
         flo_low_val=dict(argstr='-floLowThr %f', ),
         flo_up_val=dict(argstr='-floUpThr %f', ),
-        fmask_file=dict(
-            argstr='-fmask %s',
-            usedefault=True,
-        ),
+        fmask_file=dict(argstr='-fmask %s', ),
         gpuid_val=dict(argstr='-gpuid %i', ),
         i_val=dict(argstr='-pi %d', ),
-        in_aff_file=dict(
-            argstr='-inaff %s',
-            usedefault=True,
-        ),
+        in_aff_file=dict(argstr='-inaff %s', ),
         ln_val=dict(argstr='-ln %d', ),
         lp_val=dict(argstr='-lp %d', ),
         maxit_val=dict(argstr='-maxit %d', ),
@@ -48,7 +40,6 @@ def test_RegAladin_inputs():
         ref_file=dict(
             argstr='-ref %s',
             mandatory=True,
-            usedefault=True,
         ),
         ref_low_val=dict(argstr='-refLowThr %f', ),
         ref_up_val=dict(argstr='-refUpThr %f', ),
@@ -56,13 +47,9 @@ def test_RegAladin_inputs():
             argstr='-res %s',
             name_source=['flo_file'],
             name_template='%s_res.nii.gz',
-            usedefault=True,
         ),
         rig_only_flag=dict(argstr='-rigOnly', ),
-        rmask_file=dict(
-            argstr='-rmask %s',
-            usedefault=True,
-        ),
+        rmask_file=dict(argstr='-rmask %s', ),
         smoo_f_val=dict(argstr='-smooF %f', ),
         smoo_r_val=dict(argstr='-smooR %f', ),
         v_val=dict(argstr='-pv %d', ),
@@ -75,9 +62,9 @@ def test_RegAladin_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_RegAladin_outputs():
     output_map = dict(
-        aff_file=dict(usedefault=True, ),
+        aff_file=dict(),
         avg_output=dict(),
-        res_file=dict(usedefault=True, ),
+        res_file=dict(),
     )
     outputs = RegAladin.output_spec()
 

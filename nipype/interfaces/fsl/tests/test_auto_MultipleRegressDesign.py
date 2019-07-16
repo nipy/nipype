@@ -16,10 +16,10 @@ def test_MultipleRegressDesign_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MultipleRegressDesign_outputs():
     output_map = dict(
-        design_con=dict(usedefault=True, ),
-        design_fts=dict(usedefault=True, ),
-        design_grp=dict(usedefault=True, ),
-        design_mat=dict(usedefault=True, ),
+        design_con=dict(),
+        design_fts=dict(),
+        design_grp=dict(),
+        design_mat=dict(),
     )
     outputs = MultipleRegressDesign.output_spec()
 

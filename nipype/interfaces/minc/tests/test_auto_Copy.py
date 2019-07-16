@@ -14,7 +14,6 @@ def test_Copy_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         output_file=dict(
             argstr='%s',
@@ -23,7 +22,6 @@ def test_Copy_inputs():
             name_source=['input_file'],
             name_template='%s_copy.mnc',
             position=-1,
-            usedefault=True,
         ),
         pixel_values=dict(
             argstr='-pixel_values',
@@ -40,7 +38,7 @@ def test_Copy_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Copy_outputs():
-    output_map = dict(output_file=dict(usedefault=True, ), )
+    output_map = dict(output_file=dict(), )
     outputs = Copy.output_spec()
 
     for key, metadata in list(output_map.items()):

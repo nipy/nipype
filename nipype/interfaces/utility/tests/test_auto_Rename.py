@@ -6,10 +6,7 @@ from ..base import Rename
 def test_Rename_inputs():
     input_map = dict(
         format_string=dict(mandatory=True, ),
-        in_file=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
+        in_file=dict(mandatory=True, ),
         keep_ext=dict(),
         parse_string=dict(),
         use_fullpath=dict(usedefault=True, ),

@@ -6,10 +6,7 @@ from ..preprocess import DWIBiasCorrect
 def test_DWIBiasCorrect_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        bias=dict(
-            argstr='-bias %s',
-            usedefault=True,
-        ),
+        bias=dict(argstr='-bias %s', ),
         bval_scale=dict(argstr='-bvalue_scaling %s', ),
         environ=dict(
             nohash=True,
@@ -17,32 +14,20 @@ def test_DWIBiasCorrect_inputs():
         ),
         fsl_grad=dict(
             argstr='-fslgrad %s %s',
-            usedefault=True,
             xor=('mrtrix_grad', 'fsl_grad'),
         ),
-        grad_file=dict(
-            argstr='-grad %s',
-            usedefault=True,
-        ),
+        grad_file=dict(argstr='-grad %s', ),
         grad_fsl=dict(argstr='-fslgrad %s %s', ),
-        in_bval=dict(usedefault=True, ),
-        in_bvec=dict(
-            argstr='-fslgrad %s %s',
-            usedefault=True,
-        ),
+        in_bval=dict(),
+        in_bvec=dict(argstr='-fslgrad %s %s', ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
-        in_mask=dict(
-            argstr='-mask %s',
-            usedefault=True,
-        ),
+        in_mask=dict(argstr='-mask %s', ),
         mrtrix_grad=dict(
             argstr='-grad %s',
-            usedefault=True,
             xor=('mrtrix_grad', 'fsl_grad'),
         ),
         nthreads=dict(
@@ -56,7 +41,6 @@ def test_DWIBiasCorrect_inputs():
             name_source='in_file',
             name_template='%s_biascorr',
             position=-1,
-            usedefault=True,
         ),
         use_ants=dict(
             argstr='-ants',
@@ -76,8 +60,8 @@ def test_DWIBiasCorrect_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DWIBiasCorrect_outputs():
     output_map = dict(
-        bias=dict(usedefault=True, ),
-        out_file=dict(usedefault=True, ),
+        bias=dict(),
+        out_file=dict(),
     )
     outputs = DWIBiasCorrect.output_spec()
 

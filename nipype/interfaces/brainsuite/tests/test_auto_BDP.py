@@ -16,7 +16,6 @@ def test_BDP_inputs():
             argstr='--bmat %s',
             mandatory=True,
             position=-1,
-            usedefault=True,
             xor=['BVecBValPair'],
         ),
         bValRatioThreshold=dict(argstr='--bval-ratio-threshold %f', ),
@@ -24,28 +23,15 @@ def test_BDP_inputs():
             argstr='%s',
             mandatory=True,
             position=0,
-            usedefault=True,
             xor=['noStructuralRegistration'],
         ),
-        customDiffusionLabel=dict(
-            argstr='--custom-diffusion-label %s',
-            usedefault=True,
-        ),
-        customLabelXML=dict(
-            argstr='--custom-label-xml %s',
-            usedefault=True,
-        ),
-        customT1Label=dict(
-            argstr='--custom-t1-label %s',
-            usedefault=True,
-        ),
+        customDiffusionLabel=dict(argstr='--custom-diffusion-label %s', ),
+        customLabelXML=dict(argstr='--custom-label-xml %s', ),
+        customT1Label=dict(argstr='--custom-t1-label %s', ),
         dataSinkDelay=dict(argstr='%s', ),
         dcorrRegMeasure=dict(argstr='--dcorr-reg-method %s', ),
         dcorrWeight=dict(argstr='--dcorr-regularization-wt %f', ),
-        dwiMask=dict(
-            argstr='--dwi-mask %s',
-            usedefault=True,
-        ),
+        dwiMask=dict(argstr='--dwi-mask %s', ),
         echoSpacing=dict(argstr='--echo-spacing=%f', ),
         environ=dict(
             nohash=True,
@@ -58,17 +44,13 @@ def test_BDP_inputs():
         fieldmapCorrection=dict(
             argstr='--fieldmap-correction %s',
             requires=['echoSpacing'],
-            usedefault=True,
         ),
         fieldmapCorrectionMethod=dict(
             argstr='--fieldmap-correction-method %s',
             xor=['skipIntensityCorr'],
         ),
         fieldmapSmooth=dict(argstr='--fieldmap-smooth3=%f', ),
-        flagConfigFile=dict(
-            argstr='--flag-conf-file %s',
-            usedefault=True,
-        ),
+        flagConfigFile=dict(argstr='--flag-conf-file %s', ),
         forcePartialROIStats=dict(argstr='--force-partial-roi-stats', ),
         generateStats=dict(argstr='--generate-stats', ),
         ignoreFieldmapFOV=dict(argstr='--ignore-fieldmap-fov', ),
@@ -77,7 +59,6 @@ def test_BDP_inputs():
             argstr='--nii %s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         lowMemory=dict(argstr='--low-memory', ),
         noStructuralRegistration=dict(
@@ -100,29 +81,16 @@ def test_BDP_inputs():
             xor=['fieldmapCorrectionMethod'],
         ),
         skipNonuniformityCorr=dict(argstr='--no-nonuniformity-correction', ),
-        t1Mask=dict(
-            argstr='--t1-mask %s',
-            usedefault=True,
-        ),
+        t1Mask=dict(argstr='--t1-mask %s', ),
         threads=dict(argstr='--threads=%d', ),
         transformDataOnly=dict(argstr='--transform-data-only', ),
         transformDiffusionSurface=dict(
-            argstr='--transform-diffusion-surface %s',
-            usedefault=True,
-        ),
+            argstr='--transform-diffusion-surface %s', ),
         transformDiffusionVolume=dict(
-            argstr='--transform-diffusion-volume %s',
-            usedefault=True,
-        ),
+            argstr='--transform-diffusion-volume %s', ),
         transformInterpolation=dict(argstr='--transform-interpolation %s', ),
-        transformT1Surface=dict(
-            argstr='--transform-t1-surface %s',
-            usedefault=True,
-        ),
-        transformT1Volume=dict(
-            argstr='--transform-t1-volume %s',
-            usedefault=True,
-        ),
+        transformT1Surface=dict(argstr='--transform-t1-surface %s', ),
+        transformT1Volume=dict(argstr='--transform-t1-volume %s', ),
     )
     inputs = BDP.input_spec()
 

@@ -19,12 +19,8 @@ def test_ReHo_inputs():
             argstr='-inset %s',
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
-        label_set=dict(
-            argstr='-in_rois %s',
-            usedefault=True,
-        ),
+        label_set=dict(argstr='-in_rois %s', ),
         mask_file=dict(argstr='-mask %s', ),
         neighborhood=dict(
             argstr='-nneigh %s',
@@ -50,8 +46,8 @@ def test_ReHo_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ReHo_outputs():
     output_map = dict(
-        out_file=dict(usedefault=True, ),
-        out_vals=dict(usedefault=True, ),
+        out_file=dict(),
+        out_vals=dict(),
     )
     outputs = ReHo.output_spec()
 

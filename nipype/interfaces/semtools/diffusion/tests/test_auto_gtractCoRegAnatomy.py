@@ -17,18 +17,9 @@ def test_gtractCoRegAnatomy_inputs():
             argstr='--gridSize %s',
             sep=',',
         ),
-        inputAnatomicalVolume=dict(
-            argstr='--inputAnatomicalVolume %s',
-            usedefault=True,
-        ),
-        inputRigidTransform=dict(
-            argstr='--inputRigidTransform %s',
-            usedefault=True,
-        ),
-        inputVolume=dict(
-            argstr='--inputVolume %s',
-            usedefault=True,
-        ),
+        inputAnatomicalVolume=dict(argstr='--inputAnatomicalVolume %s', ),
+        inputRigidTransform=dict(argstr='--inputRigidTransform %s', ),
+        inputVolume=dict(argstr='--inputVolume %s', ),
         maxBSplineDisplacement=dict(argstr='--maxBSplineDisplacement %f', ),
         maximumStepSize=dict(argstr='--maximumStepSize %f', ),
         minimumStepSize=dict(argstr='--minimumStepSize %f', ),
@@ -56,7 +47,7 @@ def test_gtractCoRegAnatomy_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_gtractCoRegAnatomy_outputs():
-    output_map = dict(outputTransformName=dict(usedefault=True, ), )
+    output_map = dict(outputTransformName=dict(), )
     outputs = gtractCoRegAnatomy.output_spec()
 
     for key, metadata in list(output_map.items()):

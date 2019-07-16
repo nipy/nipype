@@ -11,7 +11,7 @@ def test_FSCommandOpenMP_inputs():
             usedefault=True,
         ),
         num_threads=dict(),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
     )
     inputs = FSCommandOpenMP.input_spec()
 

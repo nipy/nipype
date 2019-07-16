@@ -24,24 +24,15 @@ def test_FAST_inputs():
             position=-1,
         ),
         init_seg_smooth=dict(argstr='-f %.3f', ),
-        init_transform=dict(
-            argstr='-a %s',
-            usedefault=True,
-        ),
+        init_transform=dict(argstr='-a %s', ),
         iters_afterbias=dict(argstr='-O %d', ),
-        manual_seg=dict(
-            argstr='-s %s',
-            usedefault=True,
-        ),
+        manual_seg=dict(argstr='-s %s', ),
         mixel_smooth=dict(argstr='-R %.2f', ),
         no_bias=dict(argstr='-N', ),
         no_pve=dict(argstr='--nopve', ),
         number_classes=dict(argstr='-n %d', ),
         other_priors=dict(argstr='-A %s', ),
-        out_basename=dict(
-            argstr='-o %s',
-            usedefault=True,
-        ),
+        out_basename=dict(argstr='-o %s', ),
         output_biascorrected=dict(argstr='-B', ),
         output_biasfield=dict(argstr='-b', ),
         output_type=dict(),
@@ -59,13 +50,13 @@ def test_FAST_inputs():
 def test_FAST_outputs():
     output_map = dict(
         bias_field=dict(),
-        mixeltype=dict(usedefault=True, ),
+        mixeltype=dict(),
         partial_volume_files=dict(),
-        partial_volume_map=dict(usedefault=True, ),
+        partial_volume_map=dict(),
         probability_maps=dict(),
         restored_image=dict(),
         tissue_class_files=dict(),
-        tissue_class_map=dict(usedefault=True, ),
+        tissue_class_map=dict(),
     )
     outputs = FAST.output_spec()
 

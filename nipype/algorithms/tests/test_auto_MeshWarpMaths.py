@@ -6,10 +6,7 @@ from ..mesh import MeshWarpMaths
 def test_MeshWarpMaths_inputs():
     input_map = dict(
         float_trait=dict(),
-        in_surf=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
+        in_surf=dict(mandatory=True, ),
         operation=dict(usedefault=True, ),
         operator=dict(
             mandatory=True,
@@ -25,8 +22,8 @@ def test_MeshWarpMaths_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MeshWarpMaths_outputs():
     output_map = dict(
-        out_file=dict(usedefault=True, ),
-        out_warp=dict(usedefault=True, ),
+        out_file=dict(),
+        out_warp=dict(),
     )
     outputs = MeshWarpMaths.output_spec()
 

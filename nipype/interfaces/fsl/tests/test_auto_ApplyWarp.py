@@ -15,45 +15,30 @@ def test_ApplyWarp_inputs():
             nohash=True,
             usedefault=True,
         ),
-        field_file=dict(
-            argstr='--warp=%s',
-            usedefault=True,
-        ),
+        field_file=dict(argstr='--warp=%s', ),
         in_file=dict(
             argstr='--in=%s',
             mandatory=True,
             position=0,
-            usedefault=True,
         ),
         interp=dict(
             argstr='--interp=%s',
             position=-2,
         ),
-        mask_file=dict(
-            argstr='--mask=%s',
-            usedefault=True,
-        ),
+        mask_file=dict(argstr='--mask=%s', ),
         out_file=dict(
             argstr='--out=%s',
             genfile=True,
             hash_files=False,
             position=2,
-            usedefault=True,
         ),
         output_type=dict(),
-        postmat=dict(
-            argstr='--postmat=%s',
-            usedefault=True,
-        ),
-        premat=dict(
-            argstr='--premat=%s',
-            usedefault=True,
-        ),
+        postmat=dict(argstr='--postmat=%s', ),
+        premat=dict(argstr='--premat=%s', ),
         ref_file=dict(
             argstr='--ref=%s',
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
         relwarp=dict(
             argstr='--rel',
@@ -69,7 +54,7 @@ def test_ApplyWarp_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ApplyWarp_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = ApplyWarp.output_spec()
 
     for key, metadata in list(output_map.items()):

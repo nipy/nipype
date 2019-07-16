@@ -19,15 +19,10 @@ def test_BRAINSCut_inputs():
         histogramEqualization=dict(argstr='--histogramEqualization ', ),
         method=dict(argstr='--method %s', ),
         modelConfigurationFilename=dict(
-            argstr='--modelConfigurationFilename %s',
-            usedefault=True,
-        ),
+            argstr='--modelConfigurationFilename %s', ),
         modelFilename=dict(argstr='--modelFilename %s', ),
         multiStructureThreshold=dict(argstr='--multiStructureThreshold ', ),
-        netConfiguration=dict(
-            argstr='--netConfiguration %s',
-            usedefault=True,
-        ),
+        netConfiguration=dict(argstr='--netConfiguration %s', ),
         numberOfTrees=dict(argstr='--numberOfTrees %d', ),
         randomTreeDepth=dict(argstr='--randomTreeDepth %d', ),
         trainModel=dict(argstr='--trainModel ', ),

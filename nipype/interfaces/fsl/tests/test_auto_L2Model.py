@@ -12,9 +12,9 @@ def test_L2Model_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_L2Model_outputs():
     output_map = dict(
-        design_con=dict(usedefault=True, ),
-        design_grp=dict(usedefault=True, ),
-        design_mat=dict(usedefault=True, ),
+        design_con=dict(),
+        design_grp=dict(),
+        design_mat=dict(),
     )
     outputs = L2Model.output_spec()
 

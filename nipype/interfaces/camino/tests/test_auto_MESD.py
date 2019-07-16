@@ -6,10 +6,7 @@ from ..odf import MESD
 def test_MESD_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        bgmask=dict(
-            argstr='-bgmask %s',
-            usedefault=True,
-        ),
+        bgmask=dict(argstr='-bgmask %s', ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -22,7 +19,6 @@ def test_MESD_inputs():
             argstr='-inputfile %s',
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
         inputdatatype=dict(argstr='-inputdatatype %s', ),
         inverter=dict(
@@ -48,7 +44,6 @@ def test_MESD_inputs():
         scheme_file=dict(
             argstr='-schemefile %s',
             mandatory=True,
-            usedefault=True,
         ),
     )
     inputs = MESD.input_spec()
@@ -57,7 +52,7 @@ def test_MESD_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MESD_outputs():
-    output_map = dict(mesd_data=dict(usedefault=True, ), )
+    output_map = dict(mesd_data=dict(), )
     outputs = MESD.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -5,10 +5,7 @@ from ..reg import RegF3D
 
 def test_RegF3D_inputs():
     input_map = dict(
-        aff_file=dict(
-            argstr='-aff %s',
-            usedefault=True,
-        ),
+        aff_file=dict(argstr='-aff %s', ),
         amc_flag=dict(argstr='-amc', ),
         args=dict(argstr='%s', ),
         be_val=dict(argstr='-be %f', ),
@@ -16,7 +13,6 @@ def test_RegF3D_inputs():
             argstr='-cpp %s',
             name_source=['flo_file'],
             name_template='%s_cpp.nii.gz',
-            usedefault=True,
         ),
         environ=dict(
             nohash=True,
@@ -27,21 +23,14 @@ def test_RegF3D_inputs():
         flo_file=dict(
             argstr='-flo %s',
             mandatory=True,
-            usedefault=True,
         ),
         flo_smooth_val=dict(argstr='-smooF %f', ),
         flwth2_thr_val=dict(argstr='-fLwTh %d %f', ),
         flwth_thr_val=dict(argstr='--fLwTh %f', ),
-        fmask_file=dict(
-            argstr='-fmask %s',
-            usedefault=True,
-        ),
+        fmask_file=dict(argstr='-fmask %s', ),
         fupth2_thr_val=dict(argstr='-fUpTh %d %f', ),
         fupth_thr_val=dict(argstr='--fUpTh %f', ),
-        incpp_file=dict(
-            argstr='-incpp %s',
-            usedefault=True,
-        ),
+        incpp_file=dict(argstr='-incpp %s', ),
         jl_val=dict(argstr='-jl %f', ),
         kld2_flag=dict(argstr='-kld %d', ),
         kld_flag=dict(argstr='--kld', ),
@@ -69,21 +58,16 @@ def test_RegF3D_inputs():
         ref_file=dict(
             argstr='-ref %s',
             mandatory=True,
-            usedefault=True,
         ),
         ref_smooth_val=dict(argstr='-smooR %f', ),
         res_file=dict(
             argstr='-res %s',
             name_source=['flo_file'],
             name_template='%s_res.nii.gz',
-            usedefault=True,
         ),
         rlwth2_thr_val=dict(argstr='-rLwTh %d %f', ),
         rlwth_thr_val=dict(argstr='--rLwTh %f', ),
-        rmask_file=dict(
-            argstr='-rmask %s',
-            usedefault=True,
-        ),
+        rmask_file=dict(argstr='-rmask %s', ),
         rupth2_thr_val=dict(argstr='-rUpTh %d %f', ),
         rupth_thr_val=dict(argstr='--rUpTh %f', ),
         smooth_grad_val=dict(argstr='-smoothGrad %f', ),
@@ -103,10 +87,10 @@ def test_RegF3D_inputs():
 def test_RegF3D_outputs():
     output_map = dict(
         avg_output=dict(),
-        cpp_file=dict(usedefault=True, ),
-        invcpp_file=dict(usedefault=True, ),
-        invres_file=dict(usedefault=True, ),
-        res_file=dict(usedefault=True, ),
+        cpp_file=dict(),
+        invcpp_file=dict(),
+        invres_file=dict(),
+        res_file=dict(),
     )
     outputs = RegF3D.output_spec()
 

@@ -22,10 +22,7 @@ def test_Dot_inputs():
             argstr='%s ...',
             position=-2,
         ),
-        mask=dict(
-            argstr='-mask %s',
-            usedefault=True,
-        ),
+        mask=dict(argstr='-mask %s', ),
         mrange=dict(argstr='-mrange %s %s', ),
         num_threads=dict(
             nohash=True,
@@ -34,7 +31,6 @@ def test_Dot_inputs():
         out_file=dict(
             argstr=' |& tee %s',
             position=-1,
-            usedefault=True,
         ),
         outputtype=dict(),
         show_labels=dict(argstr='-show_labels', ),
@@ -46,7 +42,7 @@ def test_Dot_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Dot_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = Dot.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -11,7 +11,6 @@ def test_PatchMatch_inputs():
             argstr='-db %s',
             mandatory=True,
             position=3,
-            usedefault=True,
         ),
         environ=dict(
             nohash=True,
@@ -21,14 +20,12 @@ def test_PatchMatch_inputs():
             argstr='-i %s',
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
         it_num=dict(argstr='-it %i', ),
         mask_file=dict(
             argstr='-m %s',
             mandatory=True,
             position=2,
-            usedefault=True,
         ),
         match_num=dict(argstr='-match %i', ),
         out_file=dict(
@@ -36,7 +33,6 @@ def test_PatchMatch_inputs():
             name_source=['in_file'],
             name_template='%s_pm.nii.gz',
             position=4,
-            usedefault=True,
         ),
         patch_size=dict(argstr='-size %i', ),
         pm_num=dict(argstr='-pm %i', ),
@@ -47,7 +43,7 @@ def test_PatchMatch_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_PatchMatch_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = PatchMatch.output_spec()
 
     for key, metadata in list(output_map.items()):

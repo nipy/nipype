@@ -5,10 +5,9 @@ from ..io import XNATSource
 
 def test_XNATSource_inputs():
     input_map = dict(
-        cache_dir=dict(usedefault=True, ),
+        cache_dir=dict(),
         config=dict(
             mandatory=True,
-            usedefault=True,
             xor=['server'],
         ),
         pwd=dict(),

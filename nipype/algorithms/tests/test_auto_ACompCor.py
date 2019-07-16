@@ -22,10 +22,7 @@ def test_ACompCor_inputs():
         ),
         num_components=dict(xor=['variance_threshold'], ),
         pre_filter=dict(usedefault=True, ),
-        realigned_file=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
+        realigned_file=dict(mandatory=True, ),
         regress_poly_degree=dict(usedefault=True, ),
         repetition_time=dict(),
         save_metadata=dict(usedefault=True, ),
@@ -43,9 +40,9 @@ def test_ACompCor_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ACompCor_outputs():
     output_map = dict(
-        components_file=dict(usedefault=True, ),
-        metadata_file=dict(usedefault=True, ),
-        pre_filter_file=dict(usedefault=True, ),
+        components_file=dict(),
+        metadata_file=dict(),
+        pre_filter_file=dict(),
     )
     outputs = ACompCor.output_spec()
 

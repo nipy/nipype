@@ -30,7 +30,6 @@ def test_Registration_inputs():
         fixed_image_mask=dict(
             argstr='%s',
             max_ver='2.1.0',
-            usedefault=True,
             xor=['fixed_image_masks'],
         ),
         fixed_image_masks=dict(
@@ -73,7 +72,6 @@ def test_Registration_inputs():
         moving_image_mask=dict(
             max_ver='2.1.0',
             requires=['fixed_image_mask'],
-            usedefault=True,
             xor=['moving_image_masks'],
         ),
         moving_image_masks=dict(
@@ -100,10 +98,7 @@ def test_Registration_inputs():
             requires=['metric_weight'],
             usedefault=True,
         ),
-        restore_state=dict(
-            argstr='--restore-state %s',
-            usedefault=True,
-        ),
+        restore_state=dict(argstr='--restore-state %s', ),
         restrict_deformation=dict(),
         sampling_percentage=dict(requires=['sampling_strategy'], ),
         sampling_percentage_item_trait=dict(),
@@ -111,10 +106,7 @@ def test_Registration_inputs():
         sampling_strategy=dict(requires=['metric_weight'], ),
         sampling_strategy_item_trait=dict(),
         sampling_strategy_stage_trait=dict(),
-        save_state=dict(
-            argstr='--save-state %s',
-            usedefault=True,
-        ),
+        save_state=dict(argstr='--save-state %s', ),
         shrink_factors=dict(mandatory=True, ),
         sigma_units=dict(requires=['smoothing_sigmas'], ),
         smoothing_sigmas=dict(mandatory=True, ),
@@ -149,17 +141,17 @@ def test_Registration_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Registration_outputs():
     output_map = dict(
-        composite_transform=dict(usedefault=True, ),
+        composite_transform=dict(),
         elapsed_time=dict(),
         forward_invert_flags=dict(),
         forward_transforms=dict(),
-        inverse_composite_transform=dict(usedefault=True, ),
-        inverse_warped_image=dict(usedefault=True, ),
+        inverse_composite_transform=dict(),
+        inverse_warped_image=dict(),
         metric_value=dict(),
         reverse_invert_flags=dict(),
         reverse_transforms=dict(),
-        save_state=dict(usedefault=True, ),
-        warped_image=dict(usedefault=True, ),
+        save_state=dict(),
+        warped_image=dict(),
     )
     outputs = Registration.output_spec()
 

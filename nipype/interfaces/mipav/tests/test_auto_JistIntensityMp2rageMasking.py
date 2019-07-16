@@ -12,19 +12,10 @@ def test_JistIntensityMp2rageMasking_inputs():
         ),
         inBackground=dict(argstr='--inBackground %s', ),
         inMasking=dict(argstr='--inMasking %s', ),
-        inQuantitative=dict(
-            argstr='--inQuantitative %s',
-            usedefault=True,
-        ),
-        inSecond=dict(
-            argstr='--inSecond %s',
-            usedefault=True,
-        ),
+        inQuantitative=dict(argstr='--inQuantitative %s', ),
+        inSecond=dict(argstr='--inSecond %s', ),
         inSkip=dict(argstr='--inSkip %s', ),
-        inT1weighted=dict(
-            argstr='--inT1weighted %s',
-            usedefault=True,
-        ),
+        inT1weighted=dict(argstr='--inT1weighted %s', ),
         null=dict(argstr='--null %s', ),
         outMasked=dict(
             argstr='--outMasked_T1_Map %s',
@@ -56,10 +47,10 @@ def test_JistIntensityMp2rageMasking_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_JistIntensityMp2rageMasking_outputs():
     output_map = dict(
-        outMasked=dict(usedefault=True, ),
-        outMasked2=dict(usedefault=True, ),
-        outSignal=dict(usedefault=True, ),
-        outSignal2=dict(usedefault=True, ),
+        outMasked=dict(),
+        outMasked2=dict(),
+        outSignal=dict(),
+        outSignal2=dict(),
     )
     outputs = JistIntensityMp2rageMasking.output_spec()
 

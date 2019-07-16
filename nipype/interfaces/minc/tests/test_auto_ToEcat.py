@@ -23,7 +23,6 @@ def test_ToEcat_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         no_decay_corr_fctr=dict(argstr='-no_decay_corr_fctr', ),
         output_file=dict(
@@ -34,7 +33,6 @@ def test_ToEcat_inputs():
             name_source=['input_file'],
             name_template='%s_to_ecat.v',
             position=-1,
-            usedefault=True,
         ),
         voxels_as_integers=dict(argstr='-label', ),
     )
@@ -44,7 +42,7 @@ def test_ToEcat_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ToEcat_outputs():
-    output_map = dict(output_file=dict(usedefault=True, ), )
+    output_map = dict(output_file=dict(), )
     outputs = ToEcat.output_spec()
 
     for key, metadata in list(output_map.items()):

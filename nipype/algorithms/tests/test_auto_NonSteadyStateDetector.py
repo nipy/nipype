@@ -4,11 +4,7 @@ from ..confounds import NonSteadyStateDetector
 
 
 def test_NonSteadyStateDetector_inputs():
-    input_map = dict(
-        in_file=dict(
-            mandatory=True,
-            usedefault=True,
-        ), )
+    input_map = dict(in_file=dict(mandatory=True, ), )
     inputs = NonSteadyStateDetector.input_spec()
 
     for key, metadata in list(input_map.items()):

@@ -5,10 +5,7 @@ from ..model import Remlfit
 
 def test_Remlfit_inputs():
     input_map = dict(
-        STATmask=dict(
-            argstr='-STATmask %s',
-            usedefault=True,
-        ),
+        STATmask=dict(argstr='-STATmask %s', ),
         addbase=dict(
             argstr='-addbase %s',
             copyfile=False,
@@ -22,7 +19,6 @@ def test_Remlfit_inputs():
         dsort=dict(
             argstr='-dsort %s',
             copyfile=False,
-            usedefault=True,
         ),
         dsort_nods=dict(
             argstr='-dsort_nods',
@@ -32,19 +28,10 @@ def test_Remlfit_inputs():
             nohash=True,
             usedefault=True,
         ),
-        errts_file=dict(
-            argstr='-Rerrts %s',
-            usedefault=True,
-        ),
-        fitts_file=dict(
-            argstr='-Rfitts %s',
-            usedefault=True,
-        ),
+        errts_file=dict(argstr='-Rerrts %s', ),
+        fitts_file=dict(argstr='-Rfitts %s', ),
         fout=dict(argstr='-fout', ),
-        glt_file=dict(
-            argstr='-Rglt %s',
-            usedefault=True,
-        ),
+        glt_file=dict(argstr='-Rglt %s', ),
         gltsym=dict(argstr='-gltsym "%s" %s...', ),
         in_files=dict(
             argstr='-input "%s"',
@@ -52,10 +39,7 @@ def test_Remlfit_inputs():
             mandatory=True,
             sep=' ',
         ),
-        mask=dict(
-            argstr='-mask %s',
-            usedefault=True,
-        ),
+        mask=dict(argstr='-mask %s', ),
         matim=dict(
             argstr='-matim %s',
             xor=['matrix'],
@@ -63,7 +47,6 @@ def test_Remlfit_inputs():
         matrix=dict(
             argstr='-matrix %s',
             mandatory=True,
-            usedefault=True,
         ),
         nobout=dict(argstr='-nobout', ),
         nodmbase=dict(
@@ -75,58 +58,28 @@ def test_Remlfit_inputs():
             nohash=True,
             usedefault=True,
         ),
-        obeta=dict(
-            argstr='-Obeta %s',
-            usedefault=True,
-        ),
-        obuck=dict(
-            argstr='-Obuck %s',
-            usedefault=True,
-        ),
-        oerrts=dict(
-            argstr='-Oerrts %s',
-            usedefault=True,
-        ),
-        ofitts=dict(
-            argstr='-Ofitts %s',
-            usedefault=True,
-        ),
-        oglt=dict(
-            argstr='-Oglt %s',
-            usedefault=True,
-        ),
-        out_file=dict(
-            argstr='-Rbuck %s',
-            usedefault=True,
-        ),
+        obeta=dict(argstr='-Obeta %s', ),
+        obuck=dict(argstr='-Obuck %s', ),
+        oerrts=dict(argstr='-Oerrts %s', ),
+        ofitts=dict(argstr='-Ofitts %s', ),
+        oglt=dict(argstr='-Oglt %s', ),
+        out_file=dict(argstr='-Rbuck %s', ),
         outputtype=dict(),
-        ovar=dict(
-            argstr='-Ovar %s',
-            usedefault=True,
-        ),
+        ovar=dict(argstr='-Ovar %s', ),
         polort=dict(
             argstr='-polort %d',
             xor=['matrix'],
         ),
         quiet=dict(argstr='-quiet', ),
-        rbeta_file=dict(
-            argstr='-Rbeta %s',
-            usedefault=True,
-        ),
+        rbeta_file=dict(argstr='-Rbeta %s', ),
         rout=dict(argstr='-rout', ),
         slibase=dict(argstr='-slibase %s', ),
         slibase_sm=dict(argstr='-slibase_sm %s', ),
         tout=dict(argstr='-tout', ),
         usetemp=dict(argstr='-usetemp', ),
-        var_file=dict(
-            argstr='-Rvar %s',
-            usedefault=True,
-        ),
+        var_file=dict(argstr='-Rvar %s', ),
         verb=dict(argstr='-verb', ),
-        wherr_file=dict(
-            argstr='-Rwherr %s',
-            usedefault=True,
-        ),
+        wherr_file=dict(argstr='-Rwherr %s', ),
     )
     inputs = Remlfit.input_spec()
 
@@ -135,19 +88,19 @@ def test_Remlfit_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Remlfit_outputs():
     output_map = dict(
-        errts_file=dict(usedefault=True, ),
-        fitts_file=dict(usedefault=True, ),
-        glt_file=dict(usedefault=True, ),
-        obeta=dict(usedefault=True, ),
-        obuck=dict(usedefault=True, ),
-        oerrts=dict(usedefault=True, ),
-        ofitts=dict(usedefault=True, ),
-        oglt=dict(usedefault=True, ),
-        out_file=dict(usedefault=True, ),
-        ovar=dict(usedefault=True, ),
-        rbeta_file=dict(usedefault=True, ),
-        var_file=dict(usedefault=True, ),
-        wherr_file=dict(usedefault=True, ),
+        errts_file=dict(),
+        fitts_file=dict(),
+        glt_file=dict(),
+        obeta=dict(),
+        obuck=dict(),
+        oerrts=dict(),
+        ofitts=dict(),
+        oglt=dict(),
+        out_file=dict(),
+        ovar=dict(),
+        rbeta_file=dict(),
+        var_file=dict(),
+        wherr_file=dict(),
     )
     outputs = Remlfit.output_spec()
 

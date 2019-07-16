@@ -24,7 +24,6 @@ def test_ClipLevel_inputs():
             argstr='%s',
             mandatory=True,
             position=-1,
-            usedefault=True,
         ),
         mfrac=dict(
             argstr='-mfrac %s',

@@ -18,7 +18,6 @@ def test_DiffusionTensorStreamlineTrack_inputs():
         ),
         exclude_file=dict(
             argstr='-exclude %s',
-            usedefault=True,
             xor=['exclude_file', 'exclude_spec'],
         ),
         exclude_spec=dict(
@@ -32,17 +31,14 @@ def test_DiffusionTensorStreamlineTrack_inputs():
             argstr='-grad %s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         include_file=dict(
             argstr='-include %s',
-            usedefault=True,
             xor=['include_file', 'include_spec'],
         ),
         include_spec=dict(
@@ -67,7 +63,6 @@ def test_DiffusionTensorStreamlineTrack_inputs():
         ),
         mask_file=dict(
             argstr='-mask %s',
-            usedefault=True,
             xor=['mask_file', 'mask_spec'],
         ),
         mask_spec=dict(
@@ -97,11 +92,9 @@ def test_DiffusionTensorStreamlineTrack_inputs():
             name_template='%s_tracked.tck',
             output_name='tracked',
             position=-1,
-            usedefault=True,
         ),
         seed_file=dict(
             argstr='-seed %s',
-            usedefault=True,
             xor=['seed_file', 'seed_spec'],
         ),
         seed_spec=dict(
@@ -124,7 +117,7 @@ def test_DiffusionTensorStreamlineTrack_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DiffusionTensorStreamlineTrack_outputs():
-    output_map = dict(tracked=dict(usedefault=True, ), )
+    output_map = dict(tracked=dict(), )
     outputs = DiffusionTensorStreamlineTrack.output_spec()
 
     for key, metadata in list(output_map.items()):

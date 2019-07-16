@@ -14,7 +14,6 @@ def test_FeatureExtractor_inputs():
             argstr='%s',
             copyfile=False,
             position=-1,
-            usedefault=True,
         ),
     )
     inputs = FeatureExtractor.input_spec()
@@ -28,7 +27,6 @@ def test_FeatureExtractor_outputs():
             argstr='%s',
             copyfile=False,
             position=-1,
-            usedefault=True,
         ), )
     outputs = FeatureExtractor.output_spec()
 

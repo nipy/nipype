@@ -11,10 +11,7 @@ def test_PETStandardUptakeValueComputation_inputs():
         SUVMean=dict(argstr='--SUVMean %s', ),
         SUVMin=dict(argstr='--SUVMin %s', ),
         args=dict(argstr='%s', ),
-        color=dict(
-            argstr='--color %s',
-            usedefault=True,
-        ),
+        color=dict(argstr='--color %s', ),
         csvFile=dict(
             argstr='--csvFile %s',
             hash_files=False,
@@ -23,18 +20,9 @@ def test_PETStandardUptakeValueComputation_inputs():
             nohash=True,
             usedefault=True,
         ),
-        labelMap=dict(
-            argstr='--labelMap %s',
-            usedefault=True,
-        ),
-        petDICOMPath=dict(
-            argstr='--petDICOMPath %s',
-            usedefault=True,
-        ),
-        petVolume=dict(
-            argstr='--petVolume %s',
-            usedefault=True,
-        ),
+        labelMap=dict(argstr='--labelMap %s', ),
+        petDICOMPath=dict(argstr='--petDICOMPath %s', ),
+        petVolume=dict(argstr='--petVolume %s', ),
     )
     inputs = PETStandardUptakeValueComputation.input_spec()
 
@@ -42,7 +30,7 @@ def test_PETStandardUptakeValueComputation_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_PETStandardUptakeValueComputation_outputs():
-    output_map = dict(csvFile=dict(usedefault=True, ), )
+    output_map = dict(csvFile=dict(), )
     outputs = PETStandardUptakeValueComputation.output_spec()
 
     for key, metadata in list(output_map.items()):

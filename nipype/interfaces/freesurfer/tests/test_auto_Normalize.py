@@ -15,12 +15,8 @@ def test_Normalize_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
-        mask=dict(
-            argstr='-mask %s',
-            usedefault=True,
-        ),
+        mask=dict(argstr='-mask %s', ),
         out_file=dict(
             argstr='%s',
             hash_files=False,
@@ -28,14 +24,10 @@ def test_Normalize_inputs():
             name_source=['in_file'],
             name_template='%s_norm',
             position=-1,
-            usedefault=True,
         ),
-        segmentation=dict(
-            argstr='-aseg %s',
-            usedefault=True,
-        ),
-        subjects_dir=dict(usedefault=True, ),
-        transform=dict(usedefault=True, ),
+        segmentation=dict(argstr='-aseg %s', ),
+        subjects_dir=dict(),
+        transform=dict(),
     )
     inputs = Normalize.input_spec()
 

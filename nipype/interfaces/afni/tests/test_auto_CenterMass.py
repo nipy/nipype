@@ -15,7 +15,6 @@ def test_CenterMass_inputs():
             name_source='in_file',
             name_template='%s_cm.out',
             position=-1,
-            usedefault=True,
         ),
         environ=dict(
             nohash=True,
@@ -26,13 +25,9 @@ def test_CenterMass_inputs():
             copyfile=True,
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         local_ijk=dict(argstr='-local_ijk', ),
-        mask_file=dict(
-            argstr='-mask %s',
-            usedefault=True,
-        ),
+        mask_file=dict(argstr='-mask %s', ),
         roi_vals=dict(argstr='-roi_vals %s', ),
         set_cm=dict(argstr='-set %f %f %f', ),
     )
@@ -44,8 +39,8 @@ def test_CenterMass_inputs():
 def test_CenterMass_outputs():
     output_map = dict(
         cm=dict(),
-        cm_file=dict(usedefault=True, ),
-        out_file=dict(usedefault=True, ),
+        cm_file=dict(),
+        out_file=dict(),
     )
     outputs = CenterMass.output_spec()
 

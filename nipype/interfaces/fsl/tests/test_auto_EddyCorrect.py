@@ -14,7 +14,6 @@ def test_EddyCorrect_inputs():
             argstr='%s',
             mandatory=True,
             position=0,
-            usedefault=True,
         ),
         out_file=dict(
             argstr='%s',
@@ -22,7 +21,6 @@ def test_EddyCorrect_inputs():
             name_template='%s_edc',
             output_name='eddy_corrected',
             position=1,
-            usedefault=True,
         ),
         output_type=dict(),
         ref_num=dict(
@@ -38,7 +36,7 @@ def test_EddyCorrect_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_EddyCorrect_outputs():
-    output_map = dict(eddy_corrected=dict(usedefault=True, ), )
+    output_map = dict(eddy_corrected=dict(), )
     outputs = EddyCorrect.output_spec()
 
     for key, metadata in list(output_map.items()):

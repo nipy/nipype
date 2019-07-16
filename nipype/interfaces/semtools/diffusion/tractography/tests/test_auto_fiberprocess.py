@@ -6,35 +6,23 @@ from ..fiberprocess import fiberprocess
 def test_fiberprocess_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        displacement_field=dict(
-            argstr='--displacement_field %s',
-            usedefault=True,
-        ),
+        displacement_field=dict(argstr='--displacement_field %s', ),
         environ=dict(
             nohash=True,
             usedefault=True,
         ),
-        fiber_file=dict(
-            argstr='--fiber_file %s',
-            usedefault=True,
-        ),
+        fiber_file=dict(argstr='--fiber_file %s', ),
         fiber_output=dict(
             argstr='--fiber_output %s',
             hash_files=False,
         ),
         fiber_radius=dict(argstr='--fiber_radius %f', ),
-        h_field=dict(
-            argstr='--h_field %s',
-            usedefault=True,
-        ),
+        h_field=dict(argstr='--h_field %s', ),
         index_space=dict(argstr='--index_space ', ),
         noDataChange=dict(argstr='--noDataChange ', ),
         no_warp=dict(argstr='--no_warp ', ),
         saveProperties=dict(argstr='--saveProperties ', ),
-        tensor_volume=dict(
-            argstr='--tensor_volume %s',
-            usedefault=True,
-        ),
+        tensor_volume=dict(argstr='--tensor_volume %s', ),
         verbose=dict(argstr='--verbose ', ),
         voxel_label=dict(argstr='--voxel_label %d', ),
         voxelize=dict(
@@ -50,8 +38,8 @@ def test_fiberprocess_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_fiberprocess_outputs():
     output_map = dict(
-        fiber_output=dict(usedefault=True, ),
-        voxelize=dict(usedefault=True, ),
+        fiber_output=dict(),
+        voxelize=dict(),
     )
     outputs = fiberprocess.output_spec()
 

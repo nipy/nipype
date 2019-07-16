@@ -55,11 +55,11 @@ def test_RegistrationSynQuick_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_RegistrationSynQuick_outputs():
     output_map = dict(
-        forward_warp_field=dict(usedefault=True, ),
-        inverse_warp_field=dict(usedefault=True, ),
-        inverse_warped_image=dict(usedefault=True, ),
-        out_matrix=dict(usedefault=True, ),
-        warped_image=dict(usedefault=True, ),
+        forward_warp_field=dict(),
+        inverse_warp_field=dict(),
+        inverse_warped_image=dict(),
+        out_matrix=dict(),
+        warped_image=dict(),
     )
     outputs = RegistrationSynQuick.output_spec()
 

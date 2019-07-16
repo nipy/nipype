@@ -11,22 +11,11 @@ def test_gtractFastMarchingTracking_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputAnisotropyVolume=dict(
-            argstr='--inputAnisotropyVolume %s',
-            usedefault=True,
-        ),
-        inputCostVolume=dict(
-            argstr='--inputCostVolume %s',
-            usedefault=True,
-        ),
+        inputAnisotropyVolume=dict(argstr='--inputAnisotropyVolume %s', ),
+        inputCostVolume=dict(argstr='--inputCostVolume %s', ),
         inputStartingSeedsLabelMapVolume=dict(
-            argstr='--inputStartingSeedsLabelMapVolume %s',
-            usedefault=True,
-        ),
-        inputTensorVolume=dict(
-            argstr='--inputTensorVolume %s',
-            usedefault=True,
-        ),
+            argstr='--inputStartingSeedsLabelMapVolume %s', ),
+        inputTensorVolume=dict(argstr='--inputTensorVolume %s', ),
         maximumStepSize=dict(argstr='--maximumStepSize %f', ),
         minimumStepSize=dict(argstr='--minimumStepSize %f', ),
         numberOfIterations=dict(argstr='--numberOfIterations %d', ),
@@ -46,7 +35,7 @@ def test_gtractFastMarchingTracking_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_gtractFastMarchingTracking_outputs():
-    output_map = dict(outputTract=dict(usedefault=True, ), )
+    output_map = dict(outputTract=dict(), )
     outputs = gtractFastMarchingTracking.output_spec()
 
     for key, metadata in list(output_map.items()):

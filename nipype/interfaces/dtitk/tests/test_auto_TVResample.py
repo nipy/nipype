@@ -18,7 +18,6 @@ def test_TVResample_inputs():
         in_file=dict(
             argstr='-in %s',
             mandatory=True,
-            usedefault=True,
         ),
         interpolation=dict(argstr='-interp %s', ),
         origin=dict(
@@ -30,11 +29,9 @@ def test_TVResample_inputs():
             keep_extension=True,
             name_source='in_file',
             name_template='%s_resampled',
-            usedefault=True,
         ),
         target_file=dict(
             argstr='-target %s',
-            usedefault=True,
             xor=['array_size', 'voxel_size', 'origin'],
         ),
         voxel_size=dict(
@@ -48,7 +45,7 @@ def test_TVResample_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TVResample_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = TVResample.output_spec()
 
     for key, metadata in list(output_map.items()):

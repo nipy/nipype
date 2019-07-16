@@ -6,24 +6,12 @@ from ..specialized import BRAINSConstellationDetector
 def test_BRAINSConstellationDetector_inputs():
     input_map = dict(
         BackgroundFillValue=dict(argstr='--BackgroundFillValue %s', ),
-        LLSModel=dict(
-            argstr='--LLSModel %s',
-            usedefault=True,
-        ),
+        LLSModel=dict(argstr='--LLSModel %s', ),
         acLowerBound=dict(argstr='--acLowerBound %f', ),
         args=dict(argstr='%s', ),
-        atlasLandmarkWeights=dict(
-            argstr='--atlasLandmarkWeights %s',
-            usedefault=True,
-        ),
-        atlasLandmarks=dict(
-            argstr='--atlasLandmarks %s',
-            usedefault=True,
-        ),
-        atlasVolume=dict(
-            argstr='--atlasVolume %s',
-            usedefault=True,
-        ),
+        atlasLandmarkWeights=dict(argstr='--atlasLandmarkWeights %s', ),
+        atlasLandmarks=dict(argstr='--atlasLandmarks %s', ),
+        atlasVolume=dict(argstr='--atlasVolume %s', ),
         cutOutHeadInOutputVolume=dict(argstr='--cutOutHeadInOutputVolume ', ),
         debug=dict(argstr='--debug ', ),
         environ=dict(
@@ -49,18 +37,9 @@ def test_BRAINSConstellationDetector_inputs():
             sep=',',
         ),
         houghEyeDetectorMode=dict(argstr='--houghEyeDetectorMode %d', ),
-        inputLandmarksEMSP=dict(
-            argstr='--inputLandmarksEMSP %s',
-            usedefault=True,
-        ),
-        inputTemplateModel=dict(
-            argstr='--inputTemplateModel %s',
-            usedefault=True,
-        ),
-        inputVolume=dict(
-            argstr='--inputVolume %s',
-            usedefault=True,
-        ),
+        inputLandmarksEMSP=dict(argstr='--inputLandmarksEMSP %s', ),
+        inputTemplateModel=dict(argstr='--inputTemplateModel %s', ),
+        inputVolume=dict(argstr='--inputVolume %s', ),
         interpolationMode=dict(argstr='--interpolationMode %s', ),
         mspQualityLevel=dict(argstr='--mspQualityLevel %d', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
@@ -126,16 +105,16 @@ def test_BRAINSConstellationDetector_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BRAINSConstellationDetector_outputs():
     output_map = dict(
-        outputLandmarksInACPCAlignedSpace=dict(usedefault=True, ),
-        outputLandmarksInInputSpace=dict(usedefault=True, ),
-        outputMRML=dict(usedefault=True, ),
-        outputResampledVolume=dict(usedefault=True, ),
-        outputTransform=dict(usedefault=True, ),
-        outputUntransformedClippedVolume=dict(usedefault=True, ),
-        outputVerificationScript=dict(usedefault=True, ),
-        outputVolume=dict(usedefault=True, ),
-        resultsDir=dict(usedefault=True, ),
-        writeBranded2DImage=dict(usedefault=True, ),
+        outputLandmarksInACPCAlignedSpace=dict(),
+        outputLandmarksInInputSpace=dict(),
+        outputMRML=dict(),
+        outputResampledVolume=dict(),
+        outputTransform=dict(),
+        outputUntransformedClippedVolume=dict(),
+        outputVerificationScript=dict(),
+        outputVolume=dict(),
+        resultsDir=dict(),
+        writeBranded2DImage=dict(),
     )
     outputs = BRAINSConstellationDetector.output_spec()
 

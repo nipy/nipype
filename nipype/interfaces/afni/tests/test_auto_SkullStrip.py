@@ -15,7 +15,6 @@ def test_SkullStrip_inputs():
             copyfile=False,
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
         num_threads=dict(
             nohash=True,
@@ -25,7 +24,6 @@ def test_SkullStrip_inputs():
             argstr='-prefix %s',
             name_source='in_file',
             name_template='%s_skullstrip',
-            usedefault=True,
         ),
         outputtype=dict(),
     )
@@ -35,7 +33,7 @@ def test_SkullStrip_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SkullStrip_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = SkullStrip.output_spec()
 
     for key, metadata in list(output_map.items()):

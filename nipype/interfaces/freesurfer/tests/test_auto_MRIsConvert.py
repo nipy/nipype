@@ -5,34 +5,21 @@ from ..utils import MRIsConvert
 
 def test_MRIsConvert_inputs():
     input_map = dict(
-        annot_file=dict(
-            argstr='--annot %s',
-            usedefault=True,
-        ),
+        annot_file=dict(argstr='--annot %s', ),
         args=dict(argstr='%s', ),
         dataarray_num=dict(argstr='--da_num %d', ),
         environ=dict(
             nohash=True,
             usedefault=True,
         ),
-        functional_file=dict(
-            argstr='-f %s',
-            usedefault=True,
-        ),
+        functional_file=dict(argstr='-f %s', ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
-        label_file=dict(
-            argstr='--label %s',
-            usedefault=True,
-        ),
-        labelstats_outfile=dict(
-            argstr='--labelstats %s',
-            usedefault=True,
-        ),
+        label_file=dict(argstr='--label %s', ),
+        labelstats_outfile=dict(argstr='--labelstats %s', ),
         normal=dict(argstr='-n', ),
         origname=dict(argstr='-o %s', ),
         out_datatype=dict(
@@ -44,21 +31,14 @@ def test_MRIsConvert_inputs():
             genfile=True,
             mandatory=True,
             position=-1,
-            usedefault=True,
             xor=['out_datatype'],
         ),
-        parcstats_file=dict(
-            argstr='--parcstats %s',
-            usedefault=True,
-        ),
+        parcstats_file=dict(argstr='--parcstats %s', ),
         patch=dict(argstr='-p', ),
         rescale=dict(argstr='-r', ),
-        scalarcurv_file=dict(
-            argstr='-c %s',
-            usedefault=True,
-        ),
+        scalarcurv_file=dict(argstr='-c %s', ),
         scale=dict(argstr='-s %.3f', ),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
         talairachxfm_subjid=dict(argstr='-t %s', ),
         to_scanner=dict(argstr='--to-scanner', ),
         to_tkr=dict(argstr='--to-tkr', ),
@@ -71,7 +51,7 @@ def test_MRIsConvert_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRIsConvert_outputs():
-    output_map = dict(converted=dict(usedefault=True, ), )
+    output_map = dict(converted=dict(), )
     outputs = MRIsConvert.output_spec()
 
     for key, metadata in list(output_map.items()):

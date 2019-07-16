@@ -17,10 +17,7 @@ def test_ConvertWarp_inputs():
         ),
         jacobian_max=dict(argstr='--jmax=%f', ),
         jacobian_min=dict(argstr='--jmin=%f', ),
-        midmat=dict(
-            argstr='--midmat=%s',
-            usedefault=True,
-        ),
+        midmat=dict(argstr='--midmat=%s', ),
         out_abswarp=dict(
             argstr='--absout',
             xor=['out_relwarp'],
@@ -31,26 +28,18 @@ def test_ConvertWarp_inputs():
             name_template='%s_concatwarp',
             output_name='out_file',
             position=-1,
-            usedefault=True,
         ),
         out_relwarp=dict(
             argstr='--relout',
             xor=['out_abswarp'],
         ),
         output_type=dict(),
-        postmat=dict(
-            argstr='--postmat=%s',
-            usedefault=True,
-        ),
-        premat=dict(
-            argstr='--premat=%s',
-            usedefault=True,
-        ),
+        postmat=dict(argstr='--postmat=%s', ),
+        premat=dict(argstr='--premat=%s', ),
         reference=dict(
             argstr='--ref=%s',
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
         relwarp=dict(
             argstr='--rel',
@@ -60,18 +49,9 @@ def test_ConvertWarp_inputs():
             argstr='--shiftdir=%s',
             requires=['shift_in_file'],
         ),
-        shift_in_file=dict(
-            argstr='--shiftmap=%s',
-            usedefault=True,
-        ),
-        warp1=dict(
-            argstr='--warp1=%s',
-            usedefault=True,
-        ),
-        warp2=dict(
-            argstr='--warp2=%s',
-            usedefault=True,
-        ),
+        shift_in_file=dict(argstr='--shiftmap=%s', ),
+        warp1=dict(argstr='--warp1=%s', ),
+        warp2=dict(argstr='--warp2=%s', ),
     )
     inputs = ConvertWarp.input_spec()
 
@@ -79,7 +59,7 @@ def test_ConvertWarp_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ConvertWarp_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = ConvertWarp.output_spec()
 
     for key, metadata in list(output_map.items()):

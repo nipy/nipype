@@ -16,18 +16,12 @@ def test_N4ITKBiasFieldCorrection_inputs():
             argstr='--histogramsharpening %s',
             sep=',',
         ),
-        inputimage=dict(
-            argstr='--inputimage %s',
-            usedefault=True,
-        ),
+        inputimage=dict(argstr='--inputimage %s', ),
         iterations=dict(
             argstr='--iterations %s',
             sep=',',
         ),
-        maskimage=dict(
-            argstr='--maskimage %s',
-            usedefault=True,
-        ),
+        maskimage=dict(argstr='--maskimage %s', ),
         meshresolution=dict(
             argstr='--meshresolution %s',
             sep=',',
@@ -42,10 +36,7 @@ def test_N4ITKBiasFieldCorrection_inputs():
         ),
         shrinkfactor=dict(argstr='--shrinkfactor %d', ),
         splinedistance=dict(argstr='--splinedistance %f', ),
-        weightimage=dict(
-            argstr='--weightimage %s',
-            usedefault=True,
-        ),
+        weightimage=dict(argstr='--weightimage %s', ),
     )
     inputs = N4ITKBiasFieldCorrection.input_spec()
 
@@ -54,8 +45,8 @@ def test_N4ITKBiasFieldCorrection_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_N4ITKBiasFieldCorrection_outputs():
     output_map = dict(
-        outputbiasfield=dict(usedefault=True, ),
-        outputimage=dict(usedefault=True, ),
+        outputbiasfield=dict(),
+        outputimage=dict(),
     )
     outputs = N4ITKBiasFieldCorrection.output_spec()
 

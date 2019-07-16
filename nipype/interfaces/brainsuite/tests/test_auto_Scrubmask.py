@@ -21,13 +21,11 @@ def test_Scrubmask_inputs():
         inputMaskFile=dict(
             argstr='-i %s',
             mandatory=True,
-            usedefault=True,
         ),
         numberIterations=dict(argstr='-n %d', ),
         outputMaskFile=dict(
             argstr='-o %s',
             genfile=True,
-            usedefault=True,
         ),
         timer=dict(argstr='--timer', ),
         verbosity=dict(argstr='-v %d', ),
@@ -38,7 +36,7 @@ def test_Scrubmask_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Scrubmask_outputs():
-    output_map = dict(outputMaskFile=dict(usedefault=True, ), )
+    output_map = dict(outputMaskFile=dict(), )
     outputs = Scrubmask.output_spec()
 
     for key, metadata in list(output_map.items()):

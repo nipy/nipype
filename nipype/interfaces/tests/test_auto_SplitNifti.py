@@ -5,13 +5,10 @@ from ..dcmstack import SplitNifti
 
 def test_SplitNifti_inputs():
     input_map = dict(
-        in_file=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
+        in_file=dict(mandatory=True, ),
         out_ext=dict(usedefault=True, ),
         out_format=dict(),
-        out_path=dict(usedefault=True, ),
+        out_path=dict(),
         split_dim=dict(),
     )
     inputs = SplitNifti.input_spec()

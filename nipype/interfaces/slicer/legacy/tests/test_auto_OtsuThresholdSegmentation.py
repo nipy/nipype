@@ -15,7 +15,6 @@ def test_OtsuThresholdSegmentation_inputs():
         inputVolume=dict(
             argstr='%s',
             position=-2,
-            usedefault=True,
         ),
         minimumObjectSize=dict(argstr='--minimumObjectSize %d', ),
         numberOfBins=dict(argstr='--numberOfBins %d', ),
@@ -31,11 +30,7 @@ def test_OtsuThresholdSegmentation_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_OtsuThresholdSegmentation_outputs():
-    output_map = dict(
-        outputVolume=dict(
-            position=-1,
-            usedefault=True,
-        ), )
+    output_map = dict(outputVolume=dict(position=-1, ), )
     outputs = OtsuThresholdSegmentation.output_spec()
 
     for key, metadata in list(output_map.items()):

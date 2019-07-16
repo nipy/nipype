@@ -9,7 +9,6 @@ def test_UnpackSDICOMDir_inputs():
         config=dict(
             argstr='-cfg %s',
             mandatory=True,
-            usedefault=True,
             xor=('run_info', 'config', 'seq_config'),
         ),
         dir_structure=dict(argstr='-%s', ),
@@ -17,38 +16,27 @@ def test_UnpackSDICOMDir_inputs():
             nohash=True,
             usedefault=True,
         ),
-        log_file=dict(
-            argstr='-log %s',
-            usedefault=True,
-        ),
+        log_file=dict(argstr='-log %s', ),
         no_info_dump=dict(argstr='-noinfodump', ),
         no_unpack_err=dict(argstr='-no-unpackerr', ),
-        output_dir=dict(
-            argstr='-targ %s',
-            usedefault=True,
-        ),
+        output_dir=dict(argstr='-targ %s', ),
         run_info=dict(
             argstr='-run %d %s %s %s',
             mandatory=True,
             xor=('run_info', 'config', 'seq_config'),
         ),
-        scan_only=dict(
-            argstr='-scanonly %s',
-            usedefault=True,
-        ),
+        scan_only=dict(argstr='-scanonly %s', ),
         seq_config=dict(
             argstr='-seqcfg %s',
             mandatory=True,
-            usedefault=True,
             xor=('run_info', 'config', 'seq_config'),
         ),
         source_dir=dict(
             argstr='-src %s',
             mandatory=True,
-            usedefault=True,
         ),
         spm_zeropad=dict(argstr='-nspmzeropad %d', ),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
     )
     inputs = UnpackSDICOMDir.input_spec()
 

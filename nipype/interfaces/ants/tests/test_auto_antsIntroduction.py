@@ -21,7 +21,6 @@ def test_antsIntroduction_inputs():
             argstr='-i %s',
             copyfile=False,
             mandatory=True,
-            usedefault=True,
         ),
         inverse_warp_template_labels=dict(argstr='-l', ),
         max_iterations=dict(
@@ -41,7 +40,6 @@ def test_antsIntroduction_inputs():
             argstr='-r %s',
             copyfile=True,
             mandatory=True,
-            usedefault=True,
         ),
         similarity_metric=dict(argstr='-s %s', ),
         transformation_model=dict(
@@ -56,11 +54,11 @@ def test_antsIntroduction_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_antsIntroduction_outputs():
     output_map = dict(
-        affine_transformation=dict(usedefault=True, ),
-        input_file=dict(usedefault=True, ),
-        inverse_warp_field=dict(usedefault=True, ),
-        output_file=dict(usedefault=True, ),
-        warp_field=dict(usedefault=True, ),
+        affine_transformation=dict(),
+        input_file=dict(),
+        inverse_warp_field=dict(),
+        output_file=dict(),
+        warp_field=dict(),
     )
     outputs = antsIntroduction.output_spec()
 

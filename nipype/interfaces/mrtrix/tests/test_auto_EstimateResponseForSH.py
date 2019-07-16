@@ -11,7 +11,6 @@ def test_EstimateResponseForSH_inputs():
             argstr='-grad %s',
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
         environ=dict(
             nohash=True,
@@ -21,13 +20,11 @@ def test_EstimateResponseForSH_inputs():
             argstr='%s',
             mandatory=True,
             position=-3,
-            usedefault=True,
         ),
         mask_image=dict(
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         maximum_harmonic_order=dict(argstr='-lmax %s', ),
         normalise=dict(argstr='-normalise', ),
@@ -35,7 +32,6 @@ def test_EstimateResponseForSH_inputs():
             argstr='%s',
             genfile=True,
             position=-1,
-            usedefault=True,
         ),
         quiet=dict(argstr='-quiet', ),
     )
@@ -45,7 +41,7 @@ def test_EstimateResponseForSH_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_EstimateResponseForSH_outputs():
-    output_map = dict(response=dict(usedefault=True, ), )
+    output_map = dict(response=dict(), )
     outputs = EstimateResponseForSH.output_spec()
 
     for key, metadata in list(output_map.items()):

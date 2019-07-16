@@ -8,7 +8,6 @@ def test_ApplyDeformations_inputs():
         deformation_field=dict(
             field='comp{1}.def',
             mandatory=True,
-            usedefault=True,
         ),
         in_files=dict(
             field='fnames',
@@ -21,7 +20,6 @@ def test_ApplyDeformations_inputs():
         reference_volume=dict(
             field='comp{2}.id.space',
             mandatory=True,
-            usedefault=True,
         ),
         use_mcr=dict(),
         use_v8struct=dict(

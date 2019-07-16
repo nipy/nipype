@@ -5,14 +5,8 @@ from ..base import AssertEqual
 
 def test_AssertEqual_inputs():
     input_map = dict(
-        volume1=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
-        volume2=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
+        volume1=dict(mandatory=True, ),
+        volume2=dict(mandatory=True, ),
     )
     inputs = AssertEqual.input_spec()
 

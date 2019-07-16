@@ -13,7 +13,6 @@ def test_Smooth_inputs():
         in_file=dict(
             argstr='--i %s',
             mandatory=True,
-            usedefault=True,
         ),
         num_iters=dict(
             argstr='--niters %d',
@@ -31,14 +30,12 @@ def test_Smooth_inputs():
         reg_file=dict(
             argstr='--reg %s',
             mandatory=True,
-            usedefault=True,
         ),
         smoothed_file=dict(
             argstr='--o %s',
             genfile=True,
-            usedefault=True,
         ),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
         surface_fwhm=dict(
             argstr='--fwhm %f',
             mandatory=True,
@@ -53,7 +50,7 @@ def test_Smooth_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Smooth_outputs():
-    output_map = dict(smoothed_file=dict(usedefault=True, ), )
+    output_map = dict(smoothed_file=dict(), )
     outputs = Smooth.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -52,7 +52,6 @@ def test_Dcm2niix_inputs():
             argstr='%s',
             mandatory=True,
             position=-1,
-            usedefault=True,
             xor=['source_names'],
         ),
         source_names=dict(

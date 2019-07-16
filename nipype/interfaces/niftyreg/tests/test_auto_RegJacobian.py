@@ -19,16 +19,11 @@ def test_RegJacobian_inputs():
             name_source=['trans_file'],
             name_template='%s',
             position=-1,
-            usedefault=True,
         ),
-        ref_file=dict(
-            argstr='-ref %s',
-            usedefault=True,
-        ),
+        ref_file=dict(argstr='-ref %s', ),
         trans_file=dict(
             argstr='-trans %s',
             mandatory=True,
-            usedefault=True,
         ),
         type=dict(
             argstr='-%s',
@@ -42,7 +37,7 @@ def test_RegJacobian_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_RegJacobian_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = RegJacobian.output_spec()
 
     for key, metadata in list(output_map.items()):

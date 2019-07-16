@@ -24,7 +24,6 @@ def test_Edge3_inputs():
             copyfile=False,
             mandatory=True,
             position=0,
-            usedefault=True,
         ),
         nscale=dict(
             argstr='-nscale',
@@ -37,7 +36,6 @@ def test_Edge3_inputs():
         out_file=dict(
             argstr='-prefix %s',
             position=-1,
-            usedefault=True,
         ),
         outputtype=dict(),
         scale_floats=dict(
@@ -52,7 +50,7 @@ def test_Edge3_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Edge3_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = Edge3.output_spec()
 
     for key, metadata in list(output_map.items()):

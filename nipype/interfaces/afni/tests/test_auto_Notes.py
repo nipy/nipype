@@ -21,16 +21,12 @@ def test_Notes_inputs():
             copyfile=False,
             mandatory=True,
             position=-1,
-            usedefault=True,
         ),
         num_threads=dict(
             nohash=True,
             usedefault=True,
         ),
-        out_file=dict(
-            argstr='%s',
-            usedefault=True,
-        ),
+        out_file=dict(argstr='%s', ),
         outputtype=dict(),
         rep_history=dict(
             argstr='-HH "%s"',
@@ -44,7 +40,7 @@ def test_Notes_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Notes_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = Notes.output_spec()
 
     for key, metadata in list(output_map.items()):

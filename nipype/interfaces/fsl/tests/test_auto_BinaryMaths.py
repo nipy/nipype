@@ -14,7 +14,6 @@ def test_BinaryMaths_inputs():
             argstr='%s',
             mandatory=True,
             position=2,
-            usedefault=True,
         ),
         internal_datatype=dict(
             argstr='-dt %s',
@@ -28,7 +27,6 @@ def test_BinaryMaths_inputs():
             argstr='%s',
             mandatory=True,
             position=5,
-            usedefault=True,
             xor=['operand_value'],
         ),
         operand_value=dict(
@@ -47,7 +45,6 @@ def test_BinaryMaths_inputs():
             genfile=True,
             hash_files=False,
             position=-2,
-            usedefault=True,
         ),
         output_datatype=dict(
             argstr='-odt %s',
@@ -61,7 +58,7 @@ def test_BinaryMaths_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BinaryMaths_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = BinaryMaths.output_spec()
 
     for key, metadata in list(output_map.items()):

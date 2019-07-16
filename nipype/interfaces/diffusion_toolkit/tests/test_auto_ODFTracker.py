@@ -5,10 +5,7 @@ from ..odf import ODFTracker
 
 def test_ODFTracker_inputs():
     input_map = dict(
-        ODF=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
+        ODF=dict(mandatory=True, ),
         angle_threshold=dict(argstr='-at %f', ),
         args=dict(argstr='%s', ),
         disc=dict(argstr='-disc', ),
@@ -35,19 +32,14 @@ def test_ODFTracker_inputs():
             argstr='-m %s',
             mandatory=True,
             position=2,
-            usedefault=True,
         ),
         mask1_threshold=dict(position=3, ),
         mask2_file=dict(
             argstr='-m2 %s',
             position=4,
-            usedefault=True,
         ),
         mask2_threshold=dict(position=5, ),
-        max=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
+        max=dict(mandatory=True, ),
         out_file=dict(
             argstr='%s',
             position=1,
@@ -68,7 +60,7 @@ def test_ODFTracker_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ODFTracker_outputs():
-    output_map = dict(track_file=dict(usedefault=True, ), )
+    output_map = dict(track_file=dict(), )
     outputs = ODFTracker.output_spec()
 
     for key, metadata in list(output_map.items()):

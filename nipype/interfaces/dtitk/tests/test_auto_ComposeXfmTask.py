@@ -13,17 +13,14 @@ def test_ComposeXfmTask_inputs():
         in_aff=dict(
             argstr='-aff %s',
             mandatory=True,
-            usedefault=True,
         ),
         in_df=dict(
             argstr='-df %s',
             mandatory=True,
-            usedefault=True,
         ),
         out_file=dict(
             argstr='-out %s',
             genfile=True,
-            usedefault=True,
         ),
     )
     inputs = ComposeXfmTask.input_spec()
@@ -32,7 +29,7 @@ def test_ComposeXfmTask_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ComposeXfmTask_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = ComposeXfmTask.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -17,7 +17,6 @@ def test_BBox_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         one_line=dict(
             argstr='-one_line',
@@ -34,7 +33,6 @@ def test_BBox_inputs():
             name_source=['input_file'],
             name_template='%s_bbox.txt',
             position=-1,
-            usedefault=True,
         ),
         threshold=dict(argstr='-threshold', ),
         two_lines=dict(
@@ -48,7 +46,7 @@ def test_BBox_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BBox_outputs():
-    output_map = dict(output_file=dict(usedefault=True, ), )
+    output_map = dict(output_file=dict(), )
     outputs = BBox.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -18,7 +18,7 @@ def test_MPRtoMNI305_inputs():
             mandatory=True,
             usedefault=True,
         ),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
         target=dict(
             mandatory=True,
             usedefault=True,
@@ -32,7 +32,7 @@ def test_MPRtoMNI305_inputs():
 def test_MPRtoMNI305_outputs():
     output_map = dict(
         log_file=dict(usedefault=True, ),
-        out_file=dict(usedefault=True, ),
+        out_file=dict(),
     )
     outputs = MPRtoMNI305.output_spec()
 

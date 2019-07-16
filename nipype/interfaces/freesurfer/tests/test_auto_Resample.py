@@ -14,15 +14,13 @@ def test_Resample_inputs():
             argstr='-i %s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         resampled_file=dict(
             argstr='-o %s',
             genfile=True,
             position=-1,
-            usedefault=True,
         ),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
         voxel_size=dict(
             argstr='-vs %.2f %.2f %.2f',
             mandatory=True,
@@ -34,7 +32,7 @@ def test_Resample_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Resample_outputs():
-    output_map = dict(resampled_file=dict(usedefault=True, ), )
+    output_map = dict(resampled_file=dict(), )
     outputs = Resample.output_spec()
 
     for key, metadata in list(output_map.items()):

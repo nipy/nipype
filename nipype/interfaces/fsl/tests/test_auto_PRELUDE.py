@@ -9,7 +9,6 @@ def test_PRELUDE_inputs():
         complex_phase_file=dict(
             argstr='--complex=%s',
             mandatory=True,
-            usedefault=True,
             xor=['magnitude_file', 'phase_file'],
         ),
         end=dict(argstr='--end=%d', ),
@@ -20,25 +19,19 @@ def test_PRELUDE_inputs():
         label_file=dict(
             argstr='--labels=%s',
             hash_files=False,
-            usedefault=True,
         ),
         labelprocess2d=dict(argstr='--labelslices', ),
         magnitude_file=dict(
             argstr='--abs=%s',
             mandatory=True,
-            usedefault=True,
             xor=['complex_phase_file'],
         ),
-        mask_file=dict(
-            argstr='--mask=%s',
-            usedefault=True,
-        ),
+        mask_file=dict(argstr='--mask=%s', ),
         num_partitions=dict(argstr='--numphasesplit=%d', ),
         output_type=dict(),
         phase_file=dict(
             argstr='--phase=%s',
             mandatory=True,
-            usedefault=True,
             xor=['complex_phase_file'],
         ),
         process2d=dict(
@@ -52,13 +45,11 @@ def test_PRELUDE_inputs():
         rawphase_file=dict(
             argstr='--rawphase=%s',
             hash_files=False,
-            usedefault=True,
         ),
         removeramps=dict(argstr='--removeramps', ),
         savemask_file=dict(
             argstr='--savemask=%s',
             hash_files=False,
-            usedefault=True,
         ),
         start=dict(argstr='--start=%d', ),
         threshold=dict(argstr='--thresh=%.10f', ),
@@ -66,7 +57,6 @@ def test_PRELUDE_inputs():
             argstr='--unwrap=%s',
             genfile=True,
             hash_files=False,
-            usedefault=True,
         ),
     )
     inputs = PRELUDE.input_spec()
@@ -75,7 +65,7 @@ def test_PRELUDE_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_PRELUDE_outputs():
-    output_map = dict(unwrapped_phase_file=dict(usedefault=True, ), )
+    output_map = dict(unwrapped_phase_file=dict(), )
     outputs = PRELUDE.output_spec()
 
     for key, metadata in list(output_map.items()):

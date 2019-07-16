@@ -15,7 +15,6 @@ def test_Rigid_inputs():
             copyfile=False,
             mandatory=True,
             position=0,
-            usedefault=True,
         ),
         ftol=dict(
             argstr='%g',
@@ -27,14 +26,12 @@ def test_Rigid_inputs():
             argstr='%s',
             copyfile=True,
             position=5,
-            usedefault=True,
         ),
         moving_file=dict(
             argstr='%s',
             copyfile=False,
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
         sampling_xyz=dict(
             argstr='%g %g %g',
@@ -56,8 +53,8 @@ def test_Rigid_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Rigid_outputs():
     output_map = dict(
-        out_file=dict(usedefault=True, ),
-        out_file_xfm=dict(usedefault=True, ),
+        out_file=dict(),
+        out_file_xfm=dict(),
     )
     outputs = Rigid.output_spec()
 

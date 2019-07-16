@@ -11,10 +11,7 @@ def test_GenerateEdgeMapImage_inputs():
             usedefault=True,
         ),
         inputMRVolumes=dict(argstr='--inputMRVolumes %s...', ),
-        inputMask=dict(
-            argstr='--inputMask %s',
-            usedefault=True,
-        ),
+        inputMask=dict(argstr='--inputMask %s', ),
         lowerPercentileMatching=dict(argstr='--lowerPercentileMatching %f', ),
         maximumOutputRange=dict(argstr='--maximumOutputRange %d', ),
         minimumOutputRange=dict(argstr='--minimumOutputRange %d', ),
@@ -36,8 +33,8 @@ def test_GenerateEdgeMapImage_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_GenerateEdgeMapImage_outputs():
     output_map = dict(
-        outputEdgeMap=dict(usedefault=True, ),
-        outputMaximumGradientImage=dict(usedefault=True, ),
+        outputEdgeMap=dict(),
+        outputMaximumGradientImage=dict(),
     )
     outputs = GenerateEdgeMapImage.output_spec()
 

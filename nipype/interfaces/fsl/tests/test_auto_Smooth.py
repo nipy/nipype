@@ -20,7 +20,6 @@ def test_Smooth_inputs():
             argstr='%s',
             mandatory=True,
             position=0,
-            usedefault=True,
         ),
         output_type=dict(),
         sigma=dict(
@@ -35,7 +34,6 @@ def test_Smooth_inputs():
             name_source=['in_file'],
             name_template='%s_smooth',
             position=2,
-            usedefault=True,
         ),
     )
     inputs = Smooth.input_spec()
@@ -44,7 +42,7 @@ def test_Smooth_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Smooth_outputs():
-    output_map = dict(smoothed_file=dict(usedefault=True, ), )
+    output_map = dict(smoothed_file=dict(), )
     outputs = Smooth.output_spec()
 
     for key, metadata in list(output_map.items()):

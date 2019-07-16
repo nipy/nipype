@@ -9,12 +9,10 @@ def test_IntensityDifferenceMetric_inputs():
         baselineSegmentationVolume=dict(
             argstr='%s',
             position=-3,
-            usedefault=True,
         ),
         baselineVolume=dict(
             argstr='%s',
             position=-4,
-            usedefault=True,
         ),
         changingBandSize=dict(argstr='--changingBandSize %d', ),
         environ=dict(
@@ -24,7 +22,6 @@ def test_IntensityDifferenceMetric_inputs():
         followupVolume=dict(
             argstr='%s',
             position=-2,
-            usedefault=True,
         ),
         outputVolume=dict(
             argstr='%s',
@@ -44,11 +41,8 @@ def test_IntensityDifferenceMetric_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_IntensityDifferenceMetric_outputs():
     output_map = dict(
-        outputVolume=dict(
-            position=-1,
-            usedefault=True,
-        ),
-        reportFileName=dict(usedefault=True, ),
+        outputVolume=dict(position=-1, ),
+        reportFileName=dict(),
     )
     outputs = IntensityDifferenceMetric.output_spec()
 

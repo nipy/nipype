@@ -14,10 +14,7 @@ def test_Bfc_inputs():
         convergenceThreshold=dict(argstr='--eps %f', ),
         correctWholeVolume=dict(argstr='--extrapolate', ),
         correctedImagesOutputPrefix=dict(argstr='--prefix %s', ),
-        correctionScheduleFile=dict(
-            argstr='--schedule %s',
-            usedefault=True,
-        ),
+        correctionScheduleFile=dict(argstr='--schedule %s', ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -27,12 +24,10 @@ def test_Bfc_inputs():
         inputMRIFile=dict(
             argstr='-i %s',
             mandatory=True,
-            usedefault=True,
         ),
         inputMaskFile=dict(
             argstr='-m %s',
             hash_files=False,
-            usedefault=True,
         ),
         intermediate_file_type=dict(argstr='%s', ),
         iterativeMode=dict(argstr='--iterate', ),
@@ -47,18 +42,15 @@ def test_Bfc_inputs():
         outputBiasField=dict(
             argstr='--bias %s',
             hash_files=False,
-            usedefault=True,
         ),
         outputMRIVolume=dict(
             argstr='-o %s',
             genfile=True,
             hash_files=False,
-            usedefault=True,
         ),
         outputMaskedBiasField=dict(
             argstr='--maskedbias %s',
             hash_files=False,
-            usedefault=True,
         ),
         splineLambda=dict(argstr='-w %f', ),
         timer=dict(argstr='--timer', ),
@@ -71,10 +63,10 @@ def test_Bfc_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Bfc_outputs():
     output_map = dict(
-        correctionScheduleFile=dict(usedefault=True, ),
-        outputBiasField=dict(usedefault=True, ),
-        outputMRIVolume=dict(usedefault=True, ),
-        outputMaskedBiasField=dict(usedefault=True, ),
+        correctionScheduleFile=dict(),
+        outputBiasField=dict(),
+        outputMRIVolume=dict(),
+        outputMaskedBiasField=dict(),
     )
     outputs = Bfc.output_spec()
 

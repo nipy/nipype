@@ -19,22 +19,14 @@ def test_VBRAINSDemonWarp_inputs():
             nohash=True,
             usedefault=True,
         ),
-        fixedBinaryVolume=dict(
-            argstr='--fixedBinaryVolume %s',
-            usedefault=True,
-        ),
+        fixedBinaryVolume=dict(argstr='--fixedBinaryVolume %s', ),
         fixedVolume=dict(argstr='--fixedVolume %s...', ),
         gradient_type=dict(argstr='--gradient_type %s', ),
         gui=dict(argstr='--gui ', ),
         histogramMatch=dict(argstr='--histogramMatch ', ),
         initializeWithDisplacementField=dict(
-            argstr='--initializeWithDisplacementField %s',
-            usedefault=True,
-        ),
-        initializeWithTransform=dict(
-            argstr='--initializeWithTransform %s',
-            usedefault=True,
-        ),
+            argstr='--initializeWithDisplacementField %s', ),
+        initializeWithTransform=dict(argstr='--initializeWithTransform %s', ),
         inputPixelType=dict(argstr='--inputPixelType %s', ),
         interpolationMode=dict(argstr='--interpolationMode %s', ),
         lowerThresholdForBOBF=dict(argstr='--lowerThresholdForBOBF %d', ),
@@ -52,10 +44,7 @@ def test_VBRAINSDemonWarp_inputs():
             argstr='--minimumMovingPyramid %s',
             sep=',',
         ),
-        movingBinaryVolume=dict(
-            argstr='--movingBinaryVolume %s',
-            usedefault=True,
-        ),
+        movingBinaryVolume=dict(argstr='--movingBinaryVolume %s', ),
         movingVolume=dict(argstr='--movingVolume %s...', ),
         neighborhoodForBOBF=dict(
             argstr='--neighborhoodForBOBF %s',
@@ -107,9 +96,9 @@ def test_VBRAINSDemonWarp_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_VBRAINSDemonWarp_outputs():
     output_map = dict(
-        outputCheckerboardVolume=dict(usedefault=True, ),
-        outputDisplacementFieldVolume=dict(usedefault=True, ),
-        outputVolume=dict(usedefault=True, ),
+        outputCheckerboardVolume=dict(),
+        outputDisplacementFieldVolume=dict(),
+        outputVolume=dict(),
     )
     outputs = VBRAINSDemonWarp.output_spec()
 

@@ -6,15 +6,9 @@ from ..preprocess import DICOMConvert
 def test_DICOMConvert_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        base_output_dir=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
-        dicom_dir=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
-        dicom_info=dict(usedefault=True, ),
+        base_output_dir=dict(mandatory=True, ),
+        dicom_dir=dict(mandatory=True, ),
+        dicom_info=dict(),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -25,7 +19,7 @@ def test_DICOMConvert_inputs():
         seq_list=dict(requires=['dicom_info'], ),
         subject_dir_template=dict(usedefault=True, ),
         subject_id=dict(),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
     )
     inputs = DICOMConvert.input_spec()
 

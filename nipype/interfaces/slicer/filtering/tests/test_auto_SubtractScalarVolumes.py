@@ -13,12 +13,10 @@ def test_SubtractScalarVolumes_inputs():
         inputVolume1=dict(
             argstr='%s',
             position=-3,
-            usedefault=True,
         ),
         inputVolume2=dict(
             argstr='%s',
             position=-2,
-            usedefault=True,
         ),
         order=dict(argstr='--order %s', ),
         outputVolume=dict(
@@ -33,11 +31,7 @@ def test_SubtractScalarVolumes_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SubtractScalarVolumes_outputs():
-    output_map = dict(
-        outputVolume=dict(
-            position=-1,
-            usedefault=True,
-        ), )
+    output_map = dict(outputVolume=dict(position=-1, ), )
     outputs = SubtractScalarVolumes.output_spec()
 
     for key, metadata in list(output_map.items()):

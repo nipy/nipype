@@ -6,14 +6,8 @@ from ..misc import CreateNifti
 def test_CreateNifti_inputs():
     input_map = dict(
         affine=dict(),
-        data_file=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
-        header_file=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
+        data_file=dict(mandatory=True, ),
+        header_file=dict(mandatory=True, ),
     )
     inputs = CreateNifti.input_spec()
 
@@ -21,7 +15,7 @@ def test_CreateNifti_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_CreateNifti_outputs():
-    output_map = dict(nifti_file=dict(usedefault=True, ), )
+    output_map = dict(nifti_file=dict(), )
     outputs = CreateNifti.output_spec()
 
     for key, metadata in list(output_map.items()):

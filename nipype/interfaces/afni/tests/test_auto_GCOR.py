@@ -15,12 +15,10 @@ def test_GCOR_inputs():
             copyfile=False,
             mandatory=True,
             position=-1,
-            usedefault=True,
         ),
         mask=dict(
             argstr='-mask %s',
             copyfile=False,
-            usedefault=True,
         ),
         nfirst=dict(argstr='-nfirst %d', ),
         no_demean=dict(argstr='-no_demean', ),

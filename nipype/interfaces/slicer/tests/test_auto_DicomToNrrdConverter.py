@@ -10,10 +10,7 @@ def test_DicomToNrrdConverter_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputDicomDirectory=dict(
-            argstr='--inputDicomDirectory %s',
-            usedefault=True,
-        ),
+        inputDicomDirectory=dict(argstr='--inputDicomDirectory %s', ),
         outputDirectory=dict(
             argstr='--outputDirectory %s',
             hash_files=False,
@@ -33,7 +30,7 @@ def test_DicomToNrrdConverter_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DicomToNrrdConverter_outputs():
-    output_map = dict(outputDirectory=dict(usedefault=True, ), )
+    output_map = dict(outputDirectory=dict(), )
     outputs = DicomToNrrdConverter.output_spec()
 
     for key, metadata in list(output_map.items()):

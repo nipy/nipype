@@ -8,11 +8,8 @@ def test_ComputeMask_inputs():
         M=dict(),
         cc=dict(),
         m=dict(),
-        mean_volume=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
-        reference_volume=dict(usedefault=True, ),
+        mean_volume=dict(mandatory=True, ),
+        reference_volume=dict(),
     )
     inputs = ComputeMask.input_spec()
 
@@ -20,7 +17,7 @@ def test_ComputeMask_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ComputeMask_outputs():
-    output_map = dict(brain_mask=dict(usedefault=True, ), )
+    output_map = dict(brain_mask=dict(), )
     outputs = ComputeMask.output_spec()
 
     for key, metadata in list(output_map.items()):

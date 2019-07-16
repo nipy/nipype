@@ -14,7 +14,6 @@ def test_DiffusionTensorScalarMeasurements_inputs():
         inputVolume=dict(
             argstr='%s',
             position=-3,
-            usedefault=True,
         ),
         outputScalar=dict(
             argstr='%s',
@@ -28,11 +27,7 @@ def test_DiffusionTensorScalarMeasurements_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DiffusionTensorScalarMeasurements_outputs():
-    output_map = dict(
-        outputScalar=dict(
-            position=-1,
-            usedefault=True,
-        ), )
+    output_map = dict(outputScalar=dict(position=-1, ), )
     outputs = DiffusionTensorScalarMeasurements.output_spec()
 
     for key, metadata in list(output_map.items()):

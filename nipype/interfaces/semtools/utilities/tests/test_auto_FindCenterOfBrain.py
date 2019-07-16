@@ -40,14 +40,8 @@ def test_FindCenterOfBrain_inputs():
         generateDebugImages=dict(argstr='--generateDebugImages ', ),
         headSizeEstimate=dict(argstr='--headSizeEstimate %f', ),
         headSizeLimit=dict(argstr='--headSizeLimit %f', ),
-        imageMask=dict(
-            argstr='--imageMask %s',
-            usedefault=True,
-        ),
-        inputVolume=dict(
-            argstr='--inputVolume %s',
-            usedefault=True,
-        ),
+        imageMask=dict(argstr='--imageMask %s', ),
+        inputVolume=dict(argstr='--inputVolume %s', ),
         maximize=dict(argstr='--maximize ', ),
         otsuPercentileThreshold=dict(argstr='--otsuPercentileThreshold %f', ),
     )
@@ -58,12 +52,12 @@ def test_FindCenterOfBrain_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FindCenterOfBrain_outputs():
     output_map = dict(
-        clippedImageMask=dict(usedefault=True, ),
-        debugAfterGridComputationsForegroundImage=dict(usedefault=True, ),
-        debugClippedImageMask=dict(usedefault=True, ),
-        debugDistanceImage=dict(usedefault=True, ),
-        debugGridImage=dict(usedefault=True, ),
-        debugTrimmedImage=dict(usedefault=True, ),
+        clippedImageMask=dict(),
+        debugAfterGridComputationsForegroundImage=dict(),
+        debugClippedImageMask=dict(),
+        debugDistanceImage=dict(),
+        debugGridImage=dict(),
+        debugTrimmedImage=dict(),
     )
     outputs = FindCenterOfBrain.output_spec()
 

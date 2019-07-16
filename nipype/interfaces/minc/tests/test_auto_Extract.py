@@ -72,7 +72,6 @@ def test_Extract_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         nonormalize=dict(
             argstr='-nonormalize',
@@ -93,7 +92,6 @@ def test_Extract_inputs():
             name_source=['input_file'],
             name_template='%s.raw',
             position=-1,
-            usedefault=True,
         ),
         start=dict(
             argstr='-start %s',
@@ -157,7 +155,7 @@ def test_Extract_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Extract_outputs():
-    output_map = dict(output_file=dict(usedefault=True, ), )
+    output_map = dict(output_file=dict(), )
     outputs = Extract.output_spec()
 
     for key, metadata in list(output_map.items()):

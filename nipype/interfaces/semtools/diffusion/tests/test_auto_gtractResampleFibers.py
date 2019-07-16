@@ -11,17 +11,10 @@ def test_gtractResampleFibers_inputs():
             usedefault=True,
         ),
         inputForwardDeformationFieldVolume=dict(
-            argstr='--inputForwardDeformationFieldVolume %s',
-            usedefault=True,
-        ),
+            argstr='--inputForwardDeformationFieldVolume %s', ),
         inputReverseDeformationFieldVolume=dict(
-            argstr='--inputReverseDeformationFieldVolume %s',
-            usedefault=True,
-        ),
-        inputTract=dict(
-            argstr='--inputTract %s',
-            usedefault=True,
-        ),
+            argstr='--inputReverseDeformationFieldVolume %s', ),
+        inputTract=dict(argstr='--inputTract %s', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         outputTract=dict(
             argstr='--outputTract %s',
@@ -35,7 +28,7 @@ def test_gtractResampleFibers_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_gtractResampleFibers_outputs():
-    output_map = dict(outputTract=dict(usedefault=True, ), )
+    output_map = dict(outputTract=dict(), )
     outputs = gtractResampleFibers.output_spec()
 
     for key, metadata in list(output_map.items()):

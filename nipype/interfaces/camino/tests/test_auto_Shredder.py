@@ -19,7 +19,6 @@ def test_Shredder_inputs():
             argstr='< %s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         offset=dict(
             argstr='%d',
@@ -43,7 +42,7 @@ def test_Shredder_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Shredder_outputs():
-    output_map = dict(shredded=dict(usedefault=True, ), )
+    output_map = dict(shredded=dict(), )
     outputs = Shredder.output_spec()
 
     for key, metadata in list(output_map.items()):

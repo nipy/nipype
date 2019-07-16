@@ -5,24 +5,12 @@ from ..preprocess import MRIConvert
 
 def test_MRIConvert_inputs():
     input_map = dict(
-        apply_inv_transform=dict(
-            argstr='--apply_inverse_transform %s',
-            usedefault=True,
-        ),
-        apply_transform=dict(
-            argstr='--apply_transform %s',
-            usedefault=True,
-        ),
+        apply_inv_transform=dict(argstr='--apply_inverse_transform %s', ),
+        apply_transform=dict(argstr='--apply_transform %s', ),
         args=dict(argstr='%s', ),
         ascii=dict(argstr='--ascii', ),
-        autoalign_matrix=dict(
-            argstr='--autoalign %s',
-            usedefault=True,
-        ),
-        color_file=dict(
-            argstr='--color_file %s',
-            usedefault=True,
-        ),
+        autoalign_matrix=dict(argstr='--autoalign %s', ),
+        color_file=dict(argstr='--color_file %s', ),
         conform=dict(argstr='--conform', ),
         conform_min=dict(argstr='--conform_min', ),
         conform_size=dict(argstr='--conform_size %s', ),
@@ -47,7 +35,6 @@ def test_MRIConvert_inputs():
             argstr='--input_volume %s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         in_i_dir=dict(argstr='--in_i_direction %f %f %f', ),
         in_i_size=dict(argstr='--in_i_size %d', ),
@@ -56,10 +43,7 @@ def test_MRIConvert_inputs():
         in_j_size=dict(argstr='--in_j_size %d', ),
         in_k_dir=dict(argstr='--in_k_direction %f %f %f', ),
         in_k_size=dict(argstr='--in_k_size %d', ),
-        in_like=dict(
-            argstr='--in_like %s',
-            usedefault=True,
-        ),
+        in_like=dict(argstr='--in_like %s', ),
         in_matrix=dict(argstr='--in_matrix', ),
         in_orientation=dict(argstr='--in_orientation %s', ),
         in_scale=dict(argstr='--scale %f', ),
@@ -77,7 +61,6 @@ def test_MRIConvert_inputs():
             argstr='--output_volume %s',
             genfile=True,
             position=-1,
-            usedefault=True,
         ),
         out_i_count=dict(argstr='--out_i_count %d', ),
         out_i_dir=dict(argstr='--out_i_direction %f %f %f', ),
@@ -98,14 +81,8 @@ def test_MRIConvert_inputs():
         read_only=dict(argstr='--read_only', ),
         reorder=dict(argstr='--reorder %d %d %d', ),
         resample_type=dict(argstr='--resample_type %s', ),
-        reslice_like=dict(
-            argstr='--reslice_like %s',
-            usedefault=True,
-        ),
-        sdcm_list=dict(
-            argstr='--sdcmlist %s',
-            usedefault=True,
-        ),
+        reslice_like=dict(argstr='--reslice_like %s', ),
+        sdcm_list=dict(argstr='--sdcmlist %s', ),
         skip_n=dict(argstr='--nskip %d', ),
         slice_bias=dict(argstr='--slice-bias %f', ),
         slice_crop=dict(argstr='--slice-crop %d %d', ),
@@ -113,12 +90,9 @@ def test_MRIConvert_inputs():
         smooth_parcellation=dict(argstr='--smooth_parcellation', ),
         sphinx=dict(argstr='--sphinx', ),
         split=dict(argstr='--split', ),
-        status_file=dict(
-            argstr='--status %s',
-            usedefault=True,
-        ),
+        status_file=dict(argstr='--status %s', ),
         subject_name=dict(argstr='--subject_name %s', ),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
         te=dict(argstr='-te %d', ),
         template_info=dict(argstr='--template_info', ),
         template_type=dict(argstr='--template_type %s', ),

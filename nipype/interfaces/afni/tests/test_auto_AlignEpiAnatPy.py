@@ -9,7 +9,6 @@ def test_AlignEpiAnatPy_inputs():
             argstr='-anat %s',
             copyfile=False,
             mandatory=True,
-            usedefault=True,
         ),
         anat2epi=dict(argstr='-anat2epi', ),
         args=dict(argstr='%s', ),
@@ -27,7 +26,6 @@ def test_AlignEpiAnatPy_inputs():
             argstr='-epi %s',
             copyfile=False,
             mandatory=True,
-            usedefault=True,
         ),
         outputtype=dict(),
         py27_path=dict(usedefault=True, ),
@@ -52,16 +50,16 @@ def test_AlignEpiAnatPy_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_AlignEpiAnatPy_outputs():
     output_map = dict(
-        anat_al_mat=dict(usedefault=True, ),
-        anat_al_orig=dict(usedefault=True, ),
-        epi_al_mat=dict(usedefault=True, ),
-        epi_al_orig=dict(usedefault=True, ),
-        epi_al_tlrc_mat=dict(usedefault=True, ),
-        epi_reg_al_mat=dict(usedefault=True, ),
-        epi_tlrc_al=dict(usedefault=True, ),
-        epi_vr_al_mat=dict(usedefault=True, ),
-        epi_vr_motion=dict(usedefault=True, ),
-        skullstrip=dict(usedefault=True, ),
+        anat_al_mat=dict(),
+        anat_al_orig=dict(),
+        epi_al_mat=dict(),
+        epi_al_orig=dict(),
+        epi_al_tlrc_mat=dict(),
+        epi_reg_al_mat=dict(),
+        epi_tlrc_al=dict(),
+        epi_vr_al_mat=dict(),
+        epi_vr_motion=dict(),
+        skullstrip=dict(),
     )
     outputs = AlignEpiAnatPy.output_spec()
 

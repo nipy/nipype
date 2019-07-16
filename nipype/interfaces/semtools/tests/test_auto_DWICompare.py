@@ -10,14 +10,8 @@ def test_DWICompare_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputVolume1=dict(
-            argstr='--inputVolume1 %s',
-            usedefault=True,
-        ),
-        inputVolume2=dict(
-            argstr='--inputVolume2 %s',
-            usedefault=True,
-        ),
+        inputVolume1=dict(argstr='--inputVolume1 %s', ),
+        inputVolume2=dict(argstr='--inputVolume2 %s', ),
     )
     inputs = DWICompare.input_spec()
 

@@ -14,7 +14,6 @@ def test_ApplyMask_inputs():
             argstr='%s',
             mandatory=True,
             position=2,
-            usedefault=True,
         ),
         internal_datatype=dict(
             argstr='-dt %s',
@@ -24,7 +23,6 @@ def test_ApplyMask_inputs():
             argstr='-mas %s',
             mandatory=True,
             position=4,
-            usedefault=True,
         ),
         nan2zeros=dict(
             argstr='-nan',
@@ -35,7 +33,6 @@ def test_ApplyMask_inputs():
             genfile=True,
             hash_files=False,
             position=-2,
-            usedefault=True,
         ),
         output_datatype=dict(
             argstr='-odt %s',
@@ -49,7 +46,7 @@ def test_ApplyMask_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ApplyMask_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = ApplyMask.output_spec()
 
     for key, metadata in list(output_map.items()):

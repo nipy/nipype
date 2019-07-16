@@ -13,9 +13,8 @@ def test_ImageInfo_inputs():
         in_file=dict(
             argstr='%s',
             position=1,
-            usedefault=True,
         ),
-        subjects_dir=dict(usedefault=True, ),
+        subjects_dir=dict(),
     )
     inputs = ImageInfo.input_spec()
 
@@ -32,7 +31,7 @@ def test_ImageInfo_outputs():
         file_format=dict(),
         info=dict(),
         orientation=dict(),
-        out_file=dict(usedefault=True, ),
+        out_file=dict(),
         ph_enc_dir=dict(),
         vox_sizes=dict(),
     )

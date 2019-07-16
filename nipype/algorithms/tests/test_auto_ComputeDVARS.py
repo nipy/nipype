@@ -8,14 +8,8 @@ def test_ComputeDVARS_inputs():
         figdpi=dict(usedefault=True, ),
         figformat=dict(usedefault=True, ),
         figsize=dict(usedefault=True, ),
-        in_file=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
-        in_mask=dict(
-            mandatory=True,
-            usedefault=True,
-        ),
+        in_file=dict(mandatory=True, ),
+        in_mask=dict(mandatory=True, ),
         intensity_normalization=dict(usedefault=True, ),
         remove_zerovariance=dict(usedefault=True, ),
         save_all=dict(usedefault=True, ),
@@ -35,13 +29,13 @@ def test_ComputeDVARS_outputs():
         avg_nstd=dict(),
         avg_std=dict(),
         avg_vxstd=dict(),
-        fig_nstd=dict(usedefault=True, ),
-        fig_std=dict(usedefault=True, ),
-        fig_vxstd=dict(usedefault=True, ),
-        out_all=dict(usedefault=True, ),
-        out_nstd=dict(usedefault=True, ),
-        out_std=dict(usedefault=True, ),
-        out_vxstd=dict(usedefault=True, ),
+        fig_nstd=dict(),
+        fig_std=dict(),
+        fig_vxstd=dict(),
+        out_all=dict(),
+        out_nstd=dict(),
+        out_std=dict(),
+        out_vxstd=dict(),
     )
     outputs = ComputeDVARS.output_spec()
 

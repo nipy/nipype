@@ -14,7 +14,6 @@ def test_UnbiasedNonLocalMeans_inputs():
         inputVolume=dict(
             argstr='%s',
             position=-2,
-            usedefault=True,
         ),
         outputVolume=dict(
             argstr='%s',
@@ -38,11 +37,7 @@ def test_UnbiasedNonLocalMeans_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_UnbiasedNonLocalMeans_outputs():
-    output_map = dict(
-        outputVolume=dict(
-            position=-1,
-            usedefault=True,
-        ), )
+    output_map = dict(outputVolume=dict(position=-1, ), )
     outputs = UnbiasedNonLocalMeans.output_spec()
 
     for key, metadata in list(output_map.items()):

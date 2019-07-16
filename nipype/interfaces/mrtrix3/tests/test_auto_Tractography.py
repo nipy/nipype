@@ -5,10 +5,7 @@ from ..tracking import Tractography
 
 def test_Tractography_inputs():
     input_map = dict(
-        act_file=dict(
-            argstr='-act %s',
-            usedefault=True,
-        ),
+        act_file=dict(argstr='-act %s', ),
         algorithm=dict(
             argstr='-algorithm %s',
             usedefault=True,
@@ -25,21 +22,14 @@ def test_Tractography_inputs():
             nohash=True,
             usedefault=True,
         ),
-        grad_file=dict(
-            argstr='-grad %s',
-            usedefault=True,
-        ),
+        grad_file=dict(argstr='-grad %s', ),
         grad_fsl=dict(argstr='-fslgrad %s %s', ),
-        in_bval=dict(usedefault=True, ),
-        in_bvec=dict(
-            argstr='-fslgrad %s %s',
-            usedefault=True,
-        ),
+        in_bval=dict(),
+        in_bvec=dict(argstr='-fslgrad %s %s', ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
             position=-2,
-            usedefault=True,
         ),
         init_dir=dict(argstr='-initdirection %f,%f,%f', ),
         max_length=dict(argstr='-maxlength %f', ),
@@ -74,27 +64,17 @@ def test_Tractography_inputs():
         roi_excl=dict(argstr='-exclude %s', ),
         roi_incl=dict(argstr='-include %s', ),
         roi_mask=dict(argstr='-mask %s', ),
-        seed_dynamic=dict(
-            argstr='-seed_dynamic %s',
-            usedefault=True,
-        ),
+        seed_dynamic=dict(argstr='-seed_dynamic %s', ),
         seed_gmwmi=dict(
             argstr='-seed_gmwmi %s',
             requires=['act_file'],
-            usedefault=True,
         ),
         seed_grid_voxel=dict(
             argstr='-seed_grid_per_voxel %s %d',
             xor=['seed_image', 'seed_rnd_voxel'],
         ),
-        seed_image=dict(
-            argstr='-seed_image %s',
-            usedefault=True,
-        ),
-        seed_rejection=dict(
-            argstr='-seed_rejection %s',
-            usedefault=True,
-        ),
+        seed_image=dict(argstr='-seed_image %s', ),
+        seed_rejection=dict(argstr='-seed_rejection %s', ),
         seed_rnd_voxel=dict(
             argstr='-seed_random_per_voxel %s %d',
             xor=['seed_image', 'seed_grid_voxel'],
@@ -117,8 +97,8 @@ def test_Tractography_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Tractography_outputs():
     output_map = dict(
-        out_file=dict(usedefault=True, ),
-        out_seeds=dict(usedefault=True, ),
+        out_file=dict(),
+        out_seeds=dict(),
     )
     outputs = Tractography.output_spec()
 

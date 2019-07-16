@@ -10,10 +10,7 @@ def test_JistCortexSurfaceMeshInflation_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inLevelset=dict(
-            argstr='--inLevelset %s',
-            usedefault=True,
-        ),
+        inLevelset=dict(argstr='--inLevelset %s', ),
         inLorentzian=dict(argstr='--inLorentzian %s', ),
         inMax=dict(argstr='--inMax %d', ),
         inMean=dict(argstr='--inMean %f', ),
@@ -43,8 +40,8 @@ def test_JistCortexSurfaceMeshInflation_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_JistCortexSurfaceMeshInflation_outputs():
     output_map = dict(
-        outInflated=dict(usedefault=True, ),
-        outOriginal=dict(usedefault=True, ),
+        outInflated=dict(),
+        outOriginal=dict(),
     )
     outputs = JistCortexSurfaceMeshInflation.output_spec()
 

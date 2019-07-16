@@ -12,7 +12,7 @@ def test_GroupAndStack_inputs():
         include_regexes=dict(),
         out_ext=dict(usedefault=True, ),
         out_format=dict(),
-        out_path=dict(usedefault=True, ),
+        out_path=dict(),
     )
     inputs = GroupAndStack.input_spec()
 

@@ -10,17 +10,14 @@ def test_CiftiSmooth_inputs():
             argstr='cerebellum-corrected-areas %s',
             position=10,
             requires=['cerebellum_surf'],
-            usedefault=True,
         ),
         cerebellum_surf=dict(
             argstr='-cerebellum-surface %s',
             position=9,
-            usedefault=True,
         ),
         cifti_roi=dict(
             argstr='-cifti-roi %s',
             position=11,
-            usedefault=True,
         ),
         direction=dict(
             argstr='%s',
@@ -43,18 +40,15 @@ def test_CiftiSmooth_inputs():
             argstr='%s',
             mandatory=True,
             position=0,
-            usedefault=True,
         ),
         left_corrected_areas=dict(
             argstr='-left-corrected-areas %s',
             position=6,
-            usedefault=True,
         ),
         left_surf=dict(
             argstr='-left-surface %s',
             mandatory=True,
             position=5,
-            usedefault=True,
         ),
         merged_volume=dict(
             argstr='-merged-volume',
@@ -66,18 +60,15 @@ def test_CiftiSmooth_inputs():
             name_source=['in_file'],
             name_template='smoothed_%s.nii',
             position=4,
-            usedefault=True,
         ),
         right_corrected_areas=dict(
             argstr='-right-corrected-areas %s',
             position=8,
-            usedefault=True,
         ),
         right_surf=dict(
             argstr='-right-surface %s',
             mandatory=True,
             position=7,
-            usedefault=True,
         ),
         sigma_surf=dict(
             argstr='%s',
@@ -96,7 +87,7 @@ def test_CiftiSmooth_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_CiftiSmooth_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = CiftiSmooth.output_spec()
 
     for key, metadata in list(output_map.items()):

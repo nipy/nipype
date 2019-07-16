@@ -16,10 +16,7 @@ def test_Level1Design_inputs():
             field='timing.RT',
             mandatory=True,
         ),
-        mask_image=dict(
-            field='mask',
-            usedefault=True,
-        ),
+        mask_image=dict(field='mask', ),
         mask_threshold=dict(usedefault=True, ),
         matlab_cmd=dict(),
         mfile=dict(usedefault=True, ),
@@ -31,10 +28,7 @@ def test_Level1Design_inputs():
             field='sess',
             mandatory=True,
         ),
-        spm_mat_dir=dict(
-            field='dir',
-            usedefault=True,
-        ),
+        spm_mat_dir=dict(field='dir', ),
         timing_units=dict(
             field='timing.units',
             mandatory=True,
@@ -52,7 +46,7 @@ def test_Level1Design_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Level1Design_outputs():
-    output_map = dict(spm_mat_file=dict(usedefault=True, ), )
+    output_map = dict(spm_mat_file=dict(), )
     outputs = Level1Design.output_spec()
 
     for key, metadata in list(output_map.items()):

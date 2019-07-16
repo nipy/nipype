@@ -14,12 +14,8 @@ def test_ImageStats_inputs():
             argstr='%s',
             mandatory=True,
             position=2,
-            usedefault=True,
         ),
-        mask_file=dict(
-            argstr='',
-            usedefault=True,
-        ),
+        mask_file=dict(argstr='', ),
         op_string=dict(
             argstr='%s',
             mandatory=True,

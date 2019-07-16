@@ -10,13 +10,9 @@ def test_SVMTrain_inputs():
             name_source='in_file',
             name_template='%s_alphas',
             suffix='_alphas',
-            usedefault=True,
         ),
         args=dict(argstr='%s', ),
-        censor=dict(
-            argstr='-censor %s',
-            usedefault=True,
-        ),
+        censor=dict(argstr='-censor %s', ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -25,14 +21,12 @@ def test_SVMTrain_inputs():
             argstr='-trainvol %s',
             copyfile=False,
             mandatory=True,
-            usedefault=True,
         ),
         kernel=dict(argstr='-kernel %s', ),
         mask=dict(
             argstr='-mask %s',
             copyfile=False,
             position=-1,
-            usedefault=True,
         ),
         max_iterations=dict(argstr='-max_iterations %d', ),
         model=dict(
@@ -40,7 +34,6 @@ def test_SVMTrain_inputs():
             name_source='in_file',
             name_template='%s_model',
             suffix='_model',
-            usedefault=True,
         ),
         nomodelmask=dict(argstr='-nomodelmask', ),
         num_threads=dict(
@@ -53,13 +46,9 @@ def test_SVMTrain_inputs():
             name_source='in_file',
             name_template='%s_vectors',
             suffix='_bucket',
-            usedefault=True,
         ),
         outputtype=dict(),
-        trainlabels=dict(
-            argstr='-trainlabels %s',
-            usedefault=True,
-        ),
+        trainlabels=dict(argstr='-trainlabels %s', ),
         ttype=dict(
             argstr='-type %s',
             mandatory=True,
@@ -73,9 +62,9 @@ def test_SVMTrain_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SVMTrain_outputs():
     output_map = dict(
-        alphas=dict(usedefault=True, ),
-        model=dict(usedefault=True, ),
-        out_file=dict(usedefault=True, ),
+        alphas=dict(),
+        model=dict(),
+        out_file=dict(),
     )
     outputs = SVMTrain.output_spec()
 

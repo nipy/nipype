@@ -9,7 +9,6 @@ def test_Volreg_inputs():
         basefile=dict(
             argstr='-base %s',
             position=-6,
-            usedefault=True,
         ),
         copyorigin=dict(argstr='-twodup', ),
         environ=dict(
@@ -21,7 +20,6 @@ def test_Volreg_inputs():
             copyfile=False,
             mandatory=True,
             position=-1,
-            usedefault=True,
         ),
         in_weight_volume=dict(argstr="-weight '%s[%d]'", ),
         interp=dict(argstr='-%s', ),
@@ -31,7 +29,6 @@ def test_Volreg_inputs():
             name_source='in_file',
             name_template='%s_md.1D',
             position=-4,
-            usedefault=True,
         ),
         num_threads=dict(
             nohash=True,
@@ -42,20 +39,17 @@ def test_Volreg_inputs():
             keep_extension=True,
             name_source='in_file',
             name_template='%s.1D',
-            usedefault=True,
         ),
         oned_matrix_save=dict(
             argstr='-1Dmatrix_save %s',
             keep_extension=True,
             name_source='in_file',
             name_template='%s.aff12.1D',
-            usedefault=True,
         ),
         out_file=dict(
             argstr='-prefix %s',
             name_source='in_file',
             name_template='%s_volreg',
-            usedefault=True,
         ),
         outputtype=dict(),
         timeshift=dict(argstr='-tshift 0', ),
@@ -72,10 +66,10 @@ def test_Volreg_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Volreg_outputs():
     output_map = dict(
-        md1d_file=dict(usedefault=True, ),
-        oned_file=dict(usedefault=True, ),
-        oned_matrix_save=dict(usedefault=True, ),
-        out_file=dict(usedefault=True, ),
+        md1d_file=dict(),
+        oned_file=dict(),
+        oned_matrix_save=dict(),
+        out_file=dict(),
     )
     outputs = Volreg.output_spec()
 

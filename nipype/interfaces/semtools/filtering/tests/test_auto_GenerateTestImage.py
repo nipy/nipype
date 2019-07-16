@@ -10,10 +10,7 @@ def test_GenerateTestImage_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputVolume=dict(
-            argstr='--inputVolume %s',
-            usedefault=True,
-        ),
+        inputVolume=dict(argstr='--inputVolume %s', ),
         lowerBoundOfOutputVolume=dict(
             argstr='--lowerBoundOfOutputVolume %f', ),
         outputVolume=dict(
@@ -30,7 +27,7 @@ def test_GenerateTestImage_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_GenerateTestImage_outputs():
-    output_map = dict(outputVolume=dict(usedefault=True, ), )
+    output_map = dict(outputVolume=dict(), )
     outputs = GenerateTestImage.output_spec()
 
     for key, metadata in list(output_map.items()):

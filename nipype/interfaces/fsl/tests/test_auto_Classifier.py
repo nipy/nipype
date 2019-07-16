@@ -6,7 +6,7 @@ from ..fix import Classifier
 def test_Classifier_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        artifacts_list_file=dict(usedefault=True, ),
+        artifacts_list_file=dict(),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -15,7 +15,6 @@ def test_Classifier_inputs():
             argstr='%s',
             copyfile=False,
             position=1,
-            usedefault=True,
         ),
         thresh=dict(
             argstr='%d',
@@ -27,7 +26,6 @@ def test_Classifier_inputs():
             copyfile=False,
             mandatory=True,
             position=2,
-            usedefault=True,
         ),
     )
     inputs = Classifier.input_spec()
@@ -36,7 +34,7 @@ def test_Classifier_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Classifier_outputs():
-    output_map = dict(artifacts_list_file=dict(usedefault=True, ), )
+    output_map = dict(artifacts_list_file=dict(), )
     outputs = Classifier.output_spec()
 
     for key, metadata in list(output_map.items()):

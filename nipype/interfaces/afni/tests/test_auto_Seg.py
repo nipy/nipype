@@ -20,7 +20,6 @@ def test_Seg_inputs():
             copyfile=True,
             mandatory=True,
             position=-1,
-            usedefault=True,
         ),
         main_N=dict(argstr='-main_N %d', ),
         mask=dict(
@@ -38,7 +37,7 @@ def test_Seg_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Seg_outputs():
-    output_map = dict(out_file=dict(usedefault=True, ), )
+    output_map = dict(out_file=dict(), )
     outputs = Seg.output_spec()
 
     for key, metadata in list(output_map.items()):

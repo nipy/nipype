@@ -10,10 +10,7 @@ def test_landmarksConstellationAligner_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputLandmarksPaired=dict(
-            argstr='--inputLandmarksPaired %s',
-            usedefault=True,
-        ),
+        inputLandmarksPaired=dict(argstr='--inputLandmarksPaired %s', ),
         outputLandmarksPaired=dict(
             argstr='--outputLandmarksPaired %s',
             hash_files=False,
@@ -25,7 +22,7 @@ def test_landmarksConstellationAligner_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_landmarksConstellationAligner_outputs():
-    output_map = dict(outputLandmarksPaired=dict(usedefault=True, ), )
+    output_map = dict(outputLandmarksPaired=dict(), )
     outputs = landmarksConstellationAligner.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -5,23 +5,14 @@ from ..segmentation import SimilarityIndex
 
 def test_SimilarityIndex_inputs():
     input_map = dict(
-        ANNContinuousVolume=dict(
-            argstr='--ANNContinuousVolume %s',
-            usedefault=True,
-        ),
+        ANNContinuousVolume=dict(argstr='--ANNContinuousVolume %s', ),
         args=dict(argstr='%s', ),
         environ=dict(
             nohash=True,
             usedefault=True,
         ),
-        inputManualVolume=dict(
-            argstr='--inputManualVolume %s',
-            usedefault=True,
-        ),
-        outputCSVFilename=dict(
-            argstr='--outputCSVFilename %s',
-            usedefault=True,
-        ),
+        inputManualVolume=dict(argstr='--inputManualVolume %s', ),
+        outputCSVFilename=dict(argstr='--outputCSVFilename %s', ),
         thresholdInterval=dict(argstr='--thresholdInterval %f', ),
     )
     inputs = SimilarityIndex.input_spec()

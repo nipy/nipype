@@ -11,28 +11,16 @@ def test_HistogramMatchingFilter_inputs():
             usedefault=True,
         ),
         histogramAlgorithm=dict(argstr='--histogramAlgorithm %s', ),
-        inputBinaryVolume=dict(
-            argstr='--inputBinaryVolume %s',
-            usedefault=True,
-        ),
-        inputVolume=dict(
-            argstr='--inputVolume %s',
-            usedefault=True,
-        ),
+        inputBinaryVolume=dict(argstr='--inputBinaryVolume %s', ),
+        inputVolume=dict(argstr='--inputVolume %s', ),
         numberOfHistogramBins=dict(argstr='--numberOfHistogramBins %d', ),
         numberOfMatchPoints=dict(argstr='--numberOfMatchPoints %d', ),
         outputVolume=dict(
             argstr='--outputVolume %s',
             hash_files=False,
         ),
-        referenceBinaryVolume=dict(
-            argstr='--referenceBinaryVolume %s',
-            usedefault=True,
-        ),
-        referenceVolume=dict(
-            argstr='--referenceVolume %s',
-            usedefault=True,
-        ),
+        referenceBinaryVolume=dict(argstr='--referenceBinaryVolume %s', ),
+        referenceVolume=dict(argstr='--referenceVolume %s', ),
         verbose=dict(argstr='--verbose ', ),
         writeHistogram=dict(argstr='--writeHistogram %s', ),
     )
@@ -42,7 +30,7 @@ def test_HistogramMatchingFilter_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_HistogramMatchingFilter_outputs():
-    output_map = dict(outputVolume=dict(usedefault=True, ), )
+    output_map = dict(outputVolume=dict(), )
     outputs = HistogramMatchingFilter.output_spec()
 
     for key, metadata in list(output_map.items()):

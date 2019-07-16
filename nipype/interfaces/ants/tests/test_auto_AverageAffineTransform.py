@@ -23,7 +23,6 @@ def test_AverageAffineTransform_inputs():
             argstr='%s',
             mandatory=True,
             position=1,
-            usedefault=True,
         ),
         transforms=dict(
             argstr='%s',
@@ -37,7 +36,7 @@ def test_AverageAffineTransform_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_AverageAffineTransform_outputs():
-    output_map = dict(affine_transform=dict(usedefault=True, ), )
+    output_map = dict(affine_transform=dict(), )
     outputs = AverageAffineTransform.output_spec()
 
     for key, metadata in list(output_map.items()):

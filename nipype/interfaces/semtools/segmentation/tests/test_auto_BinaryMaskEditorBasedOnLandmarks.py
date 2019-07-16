@@ -10,10 +10,7 @@ def test_BinaryMaskEditorBasedOnLandmarks_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputBinaryVolume=dict(
-            argstr='--inputBinaryVolume %s',
-            usedefault=True,
-        ),
+        inputBinaryVolume=dict(argstr='--inputBinaryVolume %s', ),
         inputLandmarkNames=dict(
             argstr='--inputLandmarkNames %s',
             sep=',',
@@ -22,10 +19,7 @@ def test_BinaryMaskEditorBasedOnLandmarks_inputs():
             argstr='--inputLandmarkNamesForObliquePlane %s',
             sep=',',
         ),
-        inputLandmarksFilename=dict(
-            argstr='--inputLandmarksFilename %s',
-            usedefault=True,
-        ),
+        inputLandmarksFilename=dict(argstr='--inputLandmarksFilename %s', ),
         outputBinaryVolume=dict(
             argstr='--outputBinaryVolume %s',
             hash_files=False,
@@ -45,7 +39,7 @@ def test_BinaryMaskEditorBasedOnLandmarks_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BinaryMaskEditorBasedOnLandmarks_outputs():
-    output_map = dict(outputBinaryVolume=dict(usedefault=True, ), )
+    output_map = dict(outputBinaryVolume=dict(), )
     outputs = BinaryMaskEditorBasedOnLandmarks.output_spec()
 
     for key, metadata in list(output_map.items()):

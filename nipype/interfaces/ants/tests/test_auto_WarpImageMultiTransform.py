@@ -19,7 +19,6 @@ def test_WarpImageMultiTransform_inputs():
             argstr='%s',
             mandatory=True,
             position=2,
-            usedefault=True,
         ),
         invert_affine=dict(),
         num_threads=dict(
@@ -36,12 +35,10 @@ def test_WarpImageMultiTransform_inputs():
             genfile=True,
             hash_files=False,
             position=3,
-            usedefault=True,
             xor=['out_postfix'],
         ),
         reference_image=dict(
             argstr='-R %s',
-            usedefault=True,
             xor=['tightest_box'],
         ),
         reslice_by_header=dict(argstr='--reslice-by-header', ),
@@ -63,7 +60,7 @@ def test_WarpImageMultiTransform_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_WarpImageMultiTransform_outputs():
-    output_map = dict(output_image=dict(usedefault=True, ), )
+    output_map = dict(output_image=dict(), )
     outputs = WarpImageMultiTransform.output_spec()
 
     for key, metadata in list(output_map.items()):

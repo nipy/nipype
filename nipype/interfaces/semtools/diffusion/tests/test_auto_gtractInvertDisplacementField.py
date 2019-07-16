@@ -6,14 +6,8 @@ from ..gtract import gtractInvertDisplacementField
 def test_gtractInvertDisplacementField_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        baseImage=dict(
-            argstr='--baseImage %s',
-            usedefault=True,
-        ),
-        deformationImage=dict(
-            argstr='--deformationImage %s',
-            usedefault=True,
-        ),
+        baseImage=dict(argstr='--baseImage %s', ),
+        deformationImage=dict(argstr='--deformationImage %s', ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -31,7 +25,7 @@ def test_gtractInvertDisplacementField_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_gtractInvertDisplacementField_outputs():
-    output_map = dict(outputVolume=dict(usedefault=True, ), )
+    output_map = dict(outputVolume=dict(), )
     outputs = gtractInvertDisplacementField.output_spec()
 
     for key, metadata in list(output_map.items()):

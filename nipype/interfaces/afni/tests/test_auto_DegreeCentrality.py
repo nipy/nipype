@@ -17,12 +17,8 @@ def test_DegreeCentrality_inputs():
             copyfile=False,
             mandatory=True,
             position=-1,
-            usedefault=True,
         ),
-        mask=dict(
-            argstr='-mask %s',
-            usedefault=True,
-        ),
+        mask=dict(argstr='-mask %s', ),
         num_threads=dict(
             nohash=True,
             usedefault=True,
@@ -32,7 +28,6 @@ def test_DegreeCentrality_inputs():
             argstr='-prefix %s',
             name_source='in_file',
             name_template='%s_afni',
-            usedefault=True,
         ),
         outputtype=dict(),
         polort=dict(argstr='-polort %d', ),
@@ -46,8 +41,8 @@ def test_DegreeCentrality_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DegreeCentrality_outputs():
     output_map = dict(
-        oned_file=dict(usedefault=True, ),
-        out_file=dict(usedefault=True, ),
+        oned_file=dict(),
+        out_file=dict(),
     )
     outputs = DegreeCentrality.output_spec()
 
