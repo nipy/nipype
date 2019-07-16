@@ -42,6 +42,18 @@ if traits_version < '3.7.0':
 
 standard_library.install_aliases()
 
+IMG_FORMATS = {
+    'afni': ('.HEAD', '.BRIK'),
+    'cifti2': ('.nii', '.nii.gz'),
+    'dicom': ('.dcm', '.IMA', '.tar', '.tar.gz'),
+    'gifti': ('.gii', '.gii.gz'),
+    'mgh': ('.mgh', '.mgz', '.mgh.gz'),
+    'nifti1': ('.nii', '.nii.gz', '.hdr', '.img', '.img.gz'),
+    'nifti2': ('.nii', '.nii.gz'),
+    'nrrd': ('.nrrd', '.nhdr'),
+}
+IMG_ZIP_FMT = set(['.nii.gz', 'tar.gz', '.gii.gz', '.mgz', '.mgh.gz', 'img.gz'])
+
 
 class Str(Unicode):
     """Replaces the default traits.Str based in bytes."""
@@ -64,8 +76,7 @@ class BasePath(TraitType):
     _is_file = False
     _is_dir = False
 
-    def __init__(self, default_value=NoDefaultSpecified, exists=False,
-                 pathlike=False, resolve=False, **metadata):
+    def __init__(self, exists=False, pathlike=False, resolve=False, **metadata):
         """Create a BasePath trait."""
         self.exists = exists
         self.resolve = resolve
@@ -82,9 +93,9 @@ class BasePath(TraitType):
             else:
                 self.info_text += ' file or directory'
 
-        super(BasePath, self).__init__(default_value=default_value, **metadata)
+        super(BasePath, self).__init__(**metadata)
 
-    def validate(self, object, name, value):
+    def validate(self, object, name, value, return_pathlike=False):
         """Validate a value change."""
         try:
             value = Path(value)  # Use pathlib's validation
@@ -104,7 +115,7 @@ class BasePath(TraitType):
         if self.resolve:
             value = value.resolve()
 
-        if not self.pathlike:
+        if not return_pathlike and not self.pathlike:
             value = str(value)
 
         return value
@@ -114,7 +125,9 @@ class Directory(BasePath):
     """
     Defines a trait whose value must be a directory path.
 
-    >>> from nipype.interfaces.base import Directory, TraitedSpec
+    Examples::
+
+    >>> from nipype.interfaces.base import Directory, TraitedSpec, TraitError
     >>> class A(TraitedSpec):
     ...     foo = Directory(exists=False)
     >>> a = A()
@@ -122,7 +135,28 @@ class Directory(BasePath):
     <undefined>
 
     >>> a.foo = '/some/made/out/path'
+    >>> a.foo
     '/some/made/out/path'
+
+    >>> class A(TraitedSpec):
+    ...     foo = Directory(exists=False, resolve=True)
+    >>> a = A(foo='relative_dir')
+    >>> a.foo  # doctest: +ELLIPSIS
+    '.../relative_dir'
+
+    >>> class A(TraitedSpec):
+    ...     foo = Directory(exists=True, resolve=True)
+    >>> a = A()
+    >>> a.foo = 'relative_dir'  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+    TraitError:
+
+    >>> from os import mkdir
+    >>> mkdir('relative_dir')
+    >>> a.foo = 'relative_dir'
+    >>> a.foo  # doctest: +ELLIPSIS
+    '.../relative_dir'
+
 
     """
 
@@ -130,95 +164,105 @@ class Directory(BasePath):
 
 
 class File(BasePath):
-    """Defines a trait whose value must be a file path."""
+    """
+    Defines a trait whose value must be a file path.
+
+    >>> from nipype.interfaces.base import File, TraitedSpec, TraitError
+    >>> class A(TraitedSpec):
+    ...     foo = File()
+    >>> a = A()
+    >>> a.foo
+    <undefined>
+
+    >>> a.foo = '/some/made/out/path/to/file'
+    >>> a.foo
+    '/some/made/out/path/to/file'
+
+    >>> class A(TraitedSpec):
+    ...     foo = File(exists=False, resolve=True)
+    >>> a = A(foo='idontexist.txt')
+    >>> a.foo  # doctest: +ELLIPSIS
+    '.../idontexist.txt'
+
+    >>> class A(TraitedSpec):
+    ...     foo = File(exists=True, resolve=True)
+    >>> a = A()
+    >>> a.foo = 'idontexist.txt'  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+    TraitError:
+
+    >>> open('idoexist.txt', 'w').close()
+    >>> a.foo = 'idoexist.txt'
+    >>> a.foo  # doctest: +ELLIPSIS
+    '.../idoexist.txt'
+
+    >>> class A(TraitedSpec):
+    ...     foo = File(exists=True, resolve=True, extensions=['.txt', 'txt.gz'])
+    >>> a = A()
+    >>> a.foo = 'idoexist.badtxt'  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+    TraitError:
+
+    >>> a.foo = 'idoexist.txt'
+    >>> a.foo  # doctest: +ELLIPSIS
+    '.../idoexist.txt'
+
+    """
 
     _is_file = True
+    _exts = None
 
+    def __init__(self, exists=False, pathlike=False, resolve=False, allow_compressed=True,
+                 extensions=None, **metadata):
+        """Create a File trait."""
+        if extensions is not None:
+            if isinstance(extensions, (bytes, str)):
+                extensions = [extensions]
 
-# lists of tuples
-# each element consists of :
-# - uncompressed (tuple[0]) extension
-# - compressed (tuple[1]) extension
-img_fmt_types = {
-    'nifti1': [('.nii', '.nii.gz'), (('.hdr', '.img'), ('.hdr', '.img.gz'))],
-    'mgh': [('.mgh', '.mgz'), ('.mgh', '.mgh.gz')],
-    'nifti2': [('.nii', '.nii.gz')],
-    'cifti2': [('.nii', '.nii.gz')],
-    'gifti': [('.gii', '.gii.gz')],
-    'dicom': [('.dcm', '.dcm'), ('.IMA', '.IMA'), ('.tar', '.tar.gz')],
-    'nrrd': [('.nrrd', 'nrrd'), ('nhdr', 'nhdr')],
-    'afni': [('.HEAD', '.HEAD'), ('.BRIK', '.BRIK')]
-}
+            if allow_compressed is False:
+                extensions = list(set(extensions) - IMG_ZIP_FMT)
+
+            self._exts = sorted(set(['.%s' % ext if not ext.startswith('.') else ext
+                                     for ext in extensions]))
+
+        super(File, self).__init__(exists=exists, pathlike=pathlike,
+                                   resolve=True, **metadata)
+
+    def validate(self, object, name, value):
+        """Validate a value change."""
+        value = super(File, self).validate(object, name, value, return_pathlike=True)
+        if self._exts:
+            ext = ''.join(value.suffixes)
+            if ext not in self._exts:
+                self.error(object, name, str(value))
+
+        if not self.pathlike:
+            value = str(value)
+
+        return value
 
 
 class ImageFile(File):
-    """ Defines a trait of specific neuroimaging files """
+    """Defines a trait whose value must be a known neuroimaging file."""
 
-    def __init__(self,
-                 value='',
-                 filter=None,
-                 auto_set=False,
-                 entries=0,
-                 exists=False,
-                 types=[],
-                 allow_compressed=True,
-                 **metadata):
-        """ Trait handles neuroimaging files.
+    def __init__(self, exists=False, pathlike=False, resolve=False,
+                 types=None, **metadata):
+        """Create an ImageFile trait."""
+        extensions = None
+        if types is not None:
+            if isinstance(types, (bytes, str)):
+                types = [types]
 
-        Parameters
-        ----------
-        types : list
-            Strings of file format types accepted
-        compressed : boolean
-            Indicates whether the file format can compressed
-        """
-        self.types = types
-        self.allow_compressed = allow_compressed
-        super(ImageFile, self).__init__(value, filter, auto_set, entries,
-                                        exists, **metadata)
+            if set(types) - set(IMG_FORMATS.keys()):
+                invalid = set(types) - set(IMG_FORMATS.keys())
+                raise ValueError("""\
+Unknown value(s) %s for metadata type of an ImageFile input.\
+""" % ', '.join(['"%s"' % t for t in invalid]))
+            extensions = [ext for t in types for ext in IMG_FORMATS[t]]
 
-    def info(self):
-        existing = 'n existing' if self.exists else ''
-        comma = ',' if self.exists and not self.allow_compressed else ''
-        uncompressed = ' uncompressed' if not self.allow_compressed else ''
-        with_ext = ' (valid extensions: [{}])'.format(
-            ', '.join(self.grab_exts())) if self.types else ''
-        return 'a{existing}{comma}{uncompressed} file{with_ext}'.format(
-            existing=existing, comma=comma, uncompressed=uncompressed,
-            with_ext=with_ext)
-
-    def grab_exts(self):
-        # TODO: file type validation
-        exts = []
-        for fmt in self.types:
-            if fmt in img_fmt_types:
-                exts.extend(
-                    sum([[u for u in y[0]]
-                         if isinstance(y[0], tuple) else [y[0]]
-                         for y in img_fmt_types[fmt]], []))
-                if self.allow_compressed:
-                    exts.extend(
-                        sum([[u for u in y[-1]]
-                             if isinstance(y[-1], tuple) else [y[-1]]
-                             for y in img_fmt_types[fmt]], []))
-            else:
-                raise AttributeError(
-                    'Information has not been added for format'
-                    ' type {} yet. Supported formats include: '
-                    '{}'.format(fmt, ', '.join(img_fmt_types.keys())))
-        return list(set(exts))
-
-    def validate(self, object, name, value):
-        """ Validates that a specified value is valid for this trait.
-        """
-        validated_value = super(ImageFile, self).validate(object, name, value)
-        if validated_value and self.types:
-            _exts = self.grab_exts()
-            if not any(validated_value.endswith(x) for x in _exts):
-                raise TraitError(
-                    args="{} is not included in allowed types: {}".format(
-                        validated_value, ', '.join(_exts)))
-        return validated_value
+        super(ImageFile, self).__init__(
+            exists=exists, extensions=extensions,
+            pathlike=pathlike, resolve=True, **metadata)
 
 
 """
