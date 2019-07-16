@@ -105,7 +105,7 @@ class BasePath(TraitType):
     _is_file = False
     _is_dir = False
 
-    def __init__(self, default_value=Undefined,
+    def __init__(self, value=Undefined,
                  exists=False, pathlike=False, resolve=False, **metadata):
         """Create a BasePath trait."""
         self.exists = exists
@@ -123,7 +123,7 @@ class BasePath(TraitType):
                 self.info_text += ' file or directory'
 
         metadata['usedefault'] = True
-        super(BasePath, self).__init__(default_value, **metadata)
+        super(BasePath, self).__init__(value, **metadata)
 
     def validate(self, object, name, value, return_pathlike=False):
         """Validate a value change."""
@@ -269,7 +269,7 @@ class File(BasePath):
     _is_file = True
     _exts = None
 
-    def __init__(self, default_value=NoDefaultSpecified, exists=False, pathlike=False,
+    def __init__(self, value=NoDefaultSpecified, exists=False, pathlike=False,
                  resolve=False, allow_compressed=True, extensions=None, **metadata):
         """Create a File trait."""
         if extensions is not None:
@@ -282,7 +282,7 @@ class File(BasePath):
             self._exts = sorted(set(['.%s' % ext if not ext.startswith('.') else ext
                                      for ext in extensions]))
 
-        super(File, self).__init__(default_value=default_value, exists=exists,
+        super(File, self).__init__(value=value, exists=exists,
                                    pathlike=pathlike, resolve=resolve, **metadata)
 
     def validate(self, object, name, value):
@@ -302,7 +302,7 @@ class File(BasePath):
 class ImageFile(File):
     """Defines a trait whose value must be a known neuroimaging file."""
 
-    def __init__(self, default_value=NoDefaultSpecified, exists=False,
+    def __init__(self, value=NoDefaultSpecified, exists=False,
                  pathlike=False, resolve=False, types=None, **metadata):
         """Create an ImageFile trait."""
         extensions = None
@@ -318,7 +318,7 @@ Unknown value(s) %s for metadata type of an ImageFile input.\
             extensions = [ext for t in types for ext in IMG_FORMATS[t]]
 
         super(ImageFile, self).__init__(
-            default_value=default_value, exists=exists, extensions=extensions,
+            value=value, exists=exists, extensions=extensions,
             pathlike=pathlike, resolve=resolve, **metadata)
 
 
