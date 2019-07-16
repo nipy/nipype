@@ -27,6 +27,7 @@ import sys
 import simplejson as json
 from dateutil.parser import parse as parseutc
 from future import standard_library
+from traits.trait_errors import TraitError
 
 from ... import config, logging, LooseVersion
 from ...utils.provenance import write_provenance
@@ -37,7 +38,7 @@ from ...utils.subprocess import run_command
 
 from ...external.due import due
 
-from .traits_extension import traits, isdefined, TraitError
+from .traits_extension import traits, isdefined
 from .specs import (BaseInterfaceInputSpec, CommandLineInputSpec,
                     StdOutCommandLineInputSpec, MpiCommandLineInputSpec,
                     get_filecopy_info)
