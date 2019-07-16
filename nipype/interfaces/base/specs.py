@@ -32,6 +32,14 @@ from .traits_extension import (
 
 from ... import config, __version__
 
+
+USING_PATHLIB2 = False
+try:
+    from pathlib import Path
+except ImportError:
+    from pathlib2 import Path  # noqa
+    USING_PATHLIB2 = True
+
 FLOAT_FORMAT = '{:.10f}'.format
 nipype_version = Version(__version__)
 
@@ -314,26 +322,8 @@ class BaseTraitedSpec(traits.HasTraits):
         return self.copyable_trait_names()
 
 
-class TraitedSpec(BaseTraitedSpec):
-    """ Create a subclass with strict traits.
-
-    This is used in 90% of the cases.
-    """
-    _ = traits.Disallow
-
-
-class BaseInterfaceInputSpec(TraitedSpec):
-    pass
-
-
-class DynamicTraitedSpec(BaseTraitedSpec):
-    """ A subclass to handle dynamic traits
-
-    This class is a workaround for add_traits and clone_traits not
-    functioning well together.
-    """
-
-    def __deepcopy__(self, memo):
+if USING_PATHLIB2:
+    def _py2deepcopy(self, memo):
         """ bug in deepcopy for HasTraits results in weird cloning behavior for
         added traits
         """
@@ -356,6 +346,28 @@ class DynamicTraitedSpec(BaseTraitedSpec):
         dup = self.clone_traits(memo=memo)
         dup.trait_set(**dup_dict)
         return dup
+
+    BaseTraitedSpec.__deepcopy__ = _py2deepcopy
+
+
+class TraitedSpec(BaseTraitedSpec):
+    """ Create a subclass with strict traits.
+
+    This is used in 90% of the cases.
+    """
+    _ = traits.Disallow
+
+
+class BaseInterfaceInputSpec(TraitedSpec):
+    pass
+
+
+class DynamicTraitedSpec(BaseTraitedSpec):
+    """ A subclass to handle dynamic traits
+
+    This class is a workaround for add_traits and clone_traits not
+    functioning well together.
+    """
 
 
 class CommandLineInputSpec(BaseInterfaceInputSpec):

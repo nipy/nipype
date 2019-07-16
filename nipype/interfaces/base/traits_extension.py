@@ -131,7 +131,7 @@ class BasePath(TraitType):
     def validate(self, object, name, value, return_pathlike=False):
         """Validate a value change."""
         try:
-            value = Path(value)  # Use pathlib's validation
+            value = Path('%s' % value)  # Use pathlib's validation
         except Exception:
             self.error(object, name, str(value))
 
