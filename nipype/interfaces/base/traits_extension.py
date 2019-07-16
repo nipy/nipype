@@ -54,6 +54,35 @@ IMG_FORMATS = {
 }
 IMG_ZIP_FMT = set(['.nii.gz', 'tar.gz', '.gii.gz', '.mgz', '.mgh.gz', 'img.gz'])
 
+"""
+The functions that pop-up the Traits GUIs, edit_traits and
+configure_traits, were failing because all of our inputs default to
+Undefined deep and down in traits/ui/wx/list_editor.py it checks for
+the len() of the elements of the list.  The _Undefined class in traits
+does not define the __len__ method and would error.  I tried defining
+our own Undefined and even sublassing Undefined, but both of those
+failed with a TraitError in our initializer when we assign the
+Undefined to the inputs because of an incompatible type:
+
+TraitError: The 'vertical_gradient' trait of a BetInputSpec instance must be \
+a float, but a value of <undefined> <class 'nipype.interfaces.traits._Undefined'> was specified.
+
+So... in order to keep the same type but add the missing method, I
+monkey patched.
+"""
+
+
+def _length(self):
+    return 0
+
+
+##########################################################################
+# Apply monkeypatch here
+_Undefined.__len__ = _length
+##########################################################################
+
+Undefined = _Undefined()
+
 
 class Str(Unicode):
     """Replaces the default traits.Str based in bytes."""
@@ -76,12 +105,12 @@ class BasePath(TraitType):
     _is_file = False
     _is_dir = False
 
-    def __init__(self, exists=False, pathlike=False, resolve=False, **metadata):
+    def __init__(self, default_value=Undefined,
+                 exists=False, pathlike=False, resolve=False, **metadata):
         """Create a BasePath trait."""
         self.exists = exists
         self.resolve = resolve
-        self.pathlike = pathlike  # For backwards compatibility for now
-        # self.pathlike = pathlike or exists
+        self.pathlike = pathlike
         if any((exists, self._is_file, self._is_dir)):
             self.info_text += ' representing a'
             if exists:
@@ -93,7 +122,8 @@ class BasePath(TraitType):
             else:
                 self.info_text += ' file or directory'
 
-        super(BasePath, self).__init__(**metadata)
+        metadata['usedefault'] = True
+        super(BasePath, self).__init__(default_value, **metadata)
 
     def validate(self, object, name, value, return_pathlike=False):
         """Validate a value change."""
@@ -119,6 +149,15 @@ class BasePath(TraitType):
             value = str(value)
 
         return value
+
+    def get_value(self, object, name, trait=None):
+        value = super(BasePath, self).get_value(object, name)
+        if value is Undefined:
+            return self.default_value
+
+        if self.pathlike:
+            return value
+        return str(value)
 
 
 class Directory(BasePath):
@@ -157,6 +196,12 @@ class Directory(BasePath):
     >>> a.foo  # doctest: +ELLIPSIS
     '.../relative_dir'
 
+
+    >>> class A(TraitedSpec):
+    ...     foo = Directory('tmpdir', resolve=True)
+    >>> a = A()
+    >>> a.foo  # doctest: +ELLIPSIS
+    'tmpdir'
 
     """
 
@@ -212,8 +257,8 @@ class File(BasePath):
     _is_file = True
     _exts = None
 
-    def __init__(self, exists=False, pathlike=False, resolve=False, allow_compressed=True,
-                 extensions=None, **metadata):
+    def __init__(self, default_value=NoDefaultSpecified, exists=False, pathlike=False,
+                 resolve=False, allow_compressed=True, extensions=None, **metadata):
         """Create a File trait."""
         if extensions is not None:
             if isinstance(extensions, (bytes, str)):
@@ -225,8 +270,8 @@ class File(BasePath):
             self._exts = sorted(set(['.%s' % ext if not ext.startswith('.') else ext
                                      for ext in extensions]))
 
-        super(File, self).__init__(exists=exists, pathlike=pathlike,
-                                   resolve=True, **metadata)
+        super(File, self).__init__(default_value=default_value, exists=exists,
+                                   pathlike=pathlike, resolve=True, **metadata)
 
     def validate(self, object, name, value):
         """Validate a value change."""
@@ -245,8 +290,8 @@ class File(BasePath):
 class ImageFile(File):
     """Defines a trait whose value must be a known neuroimaging file."""
 
-    def __init__(self, exists=False, pathlike=False, resolve=False,
-                 types=None, **metadata):
+    def __init__(self, default_value=NoDefaultSpecified, exists=False,
+                 pathlike=False, resolve=False, types=None, **metadata):
         """Create an ImageFile trait."""
         extensions = None
         if types is not None:
@@ -261,37 +306,8 @@ Unknown value(s) %s for metadata type of an ImageFile input.\
             extensions = [ext for t in types for ext in IMG_FORMATS[t]]
 
         super(ImageFile, self).__init__(
-            exists=exists, extensions=extensions,
+            default_value=default_value, exists=exists, extensions=extensions,
             pathlike=pathlike, resolve=True, **metadata)
-
-
-"""
-The functions that pop-up the Traits GUIs, edit_traits and
-configure_traits, were failing because all of our inputs default to
-Undefined deep and down in traits/ui/wx/list_editor.py it checks for
-the len() of the elements of the list.  The _Undefined class in traits
-does not define the __len__ method and would error.  I tried defining
-our own Undefined and even sublassing Undefined, but both of those
-failed with a TraitError in our initializer when we assign the
-Undefined to the inputs because of an incompatible type:
-
-TraitError: The 'vertical_gradient' trait of a BetInputSpec instance must be a float, but a value of <undefined> <class 'nipype.interfaces.traits._Undefined'> was specified.
-
-So... in order to keep the same type but add the missing method, I
-monkey patched.
-"""
-
-
-def length(self):
-    return 0
-
-
-##########################################################################
-# Apply monkeypatch here
-_Undefined.__len__ = length
-##########################################################################
-
-Undefined = _Undefined()
 
 
 def isdefined(object):
