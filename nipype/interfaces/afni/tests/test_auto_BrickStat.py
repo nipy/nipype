@@ -14,10 +14,12 @@ def test_BrickStat_inputs():
             argstr='%s',
             mandatory=True,
             position=-1,
+            usedefault=True,
         ),
         mask=dict(
             argstr='-mask %s',
             position=2,
+            usedefault=True,
         ),
         max=dict(argstr='-max', ),
         mean=dict(argstr='-mean', ),

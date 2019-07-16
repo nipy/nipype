@@ -16,11 +16,15 @@ def test_PlotTimeSeries_inputs():
             position=1,
         ),
         labels=dict(argstr='%s', ),
-        legend_file=dict(argstr='--legend=%s', ),
+        legend_file=dict(
+            argstr='--legend=%s',
+            usedefault=True,
+        ),
         out_file=dict(
             argstr='-o %s',
             genfile=True,
             hash_files=False,
+            usedefault=True,
         ),
         output_type=dict(),
         plot_finish=dict(
@@ -62,7 +66,7 @@ def test_PlotTimeSeries_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_PlotTimeSeries_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = PlotTimeSeries.output_spec()
 
     for key, metadata in list(output_map.items()):

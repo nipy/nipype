@@ -19,25 +19,32 @@ def test_Eval_inputs():
             argstr='-a %s',
             mandatory=True,
             position=0,
+            usedefault=True,
         ),
         in_file_b=dict(
             argstr='-b %s',
             position=1,
+            usedefault=True,
         ),
         in_file_c=dict(
             argstr='-c %s',
             position=2,
+            usedefault=True,
         ),
         num_threads=dict(
             nohash=True,
             usedefault=True,
         ),
-        other=dict(argstr='', ),
+        other=dict(
+            argstr='',
+            usedefault=True,
+        ),
         out1D=dict(argstr='-1D', ),
         out_file=dict(
             argstr='-prefix %s',
             name_source='in_file_a',
             name_template='%s_calc',
+            usedefault=True,
         ),
         outputtype=dict(),
         single_idx=dict(),
@@ -50,7 +57,7 @@ def test_Eval_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Eval_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = Eval.output_spec()
 
     for key, metadata in list(output_map.items()):

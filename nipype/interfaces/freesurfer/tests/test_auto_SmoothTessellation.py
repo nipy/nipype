@@ -19,19 +19,27 @@ def test_SmoothTessellation_inputs():
             copyfile=True,
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         normalize_area=dict(argstr='-area', ),
-        out_area_file=dict(argstr='-b %s', ),
-        out_curvature_file=dict(argstr='-c %s', ),
+        out_area_file=dict(
+            argstr='-b %s',
+            usedefault=True,
+        ),
+        out_curvature_file=dict(
+            argstr='-c %s',
+            usedefault=True,
+        ),
         out_file=dict(
             argstr='%s',
             genfile=True,
             position=-1,
+            usedefault=True,
         ),
         seed=dict(argstr='-seed %d', ),
         smoothing_iterations=dict(argstr='-n %d', ),
         snapshot_writing_iterations=dict(argstr='-w %d', ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         use_gaussian_curvature_smoothing=dict(argstr='-g', ),
         use_momentum=dict(argstr='-m', ),
     )
@@ -41,7 +49,7 @@ def test_SmoothTessellation_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SmoothTessellation_outputs():
-    output_map = dict(surface=dict(), )
+    output_map = dict(surface=dict(usedefault=True, ), )
     outputs = SmoothTessellation.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -24,6 +24,7 @@ def test_TCorr1D_inputs():
             keep_extension=True,
             name_source='xset',
             name_template='%s_correlation.nii.gz',
+            usedefault=True,
         ),
         outputtype=dict(),
         pearson=dict(
@@ -46,11 +47,13 @@ def test_TCorr1D_inputs():
             copyfile=False,
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         y_1d=dict(
             argstr=' %s',
             mandatory=True,
             position=-1,
+            usedefault=True,
         ),
     )
     inputs = TCorr1D.input_spec()
@@ -59,7 +62,7 @@ def test_TCorr1D_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TCorr1D_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = TCorr1D.output_spec()
 
     for key, metadata in list(output_map.items()):

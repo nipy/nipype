@@ -6,7 +6,10 @@ from ..specialized import BRAINSABC
 def test_BRAINSABC_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        atlasDefinition=dict(argstr='--atlasDefinition %s', ),
+        atlasDefinition=dict(
+            argstr='--atlasDefinition %s',
+            usedefault=True,
+        ),
         atlasToSubjectInitialTransform=dict(
             argstr='--atlasToSubjectInitialTransform %s',
             hash_files=False,
@@ -71,7 +74,10 @@ def test_BRAINSABC_inputs():
         ),
         posteriorTemplate=dict(argstr='--posteriorTemplate %s', ),
         purePlugsThreshold=dict(argstr='--purePlugsThreshold %f', ),
-        restoreState=dict(argstr='--restoreState %s', ),
+        restoreState=dict(
+            argstr='--restoreState %s',
+            usedefault=True,
+        ),
         saveState=dict(
             argstr='--saveState %s',
             hash_files=False,
@@ -88,14 +94,14 @@ def test_BRAINSABC_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BRAINSABC_outputs():
     output_map = dict(
-        atlasToSubjectInitialTransform=dict(),
-        atlasToSubjectTransform=dict(),
+        atlasToSubjectInitialTransform=dict(usedefault=True, ),
+        atlasToSubjectTransform=dict(usedefault=True, ),
         implicitOutputs=dict(),
-        outputDir=dict(),
-        outputDirtyLabels=dict(),
-        outputLabels=dict(),
+        outputDir=dict(usedefault=True, ),
+        outputDirtyLabels=dict(usedefault=True, ),
+        outputLabels=dict(usedefault=True, ),
         outputVolumes=dict(),
-        saveState=dict(),
+        saveState=dict(usedefault=True, ),
     )
     outputs = BRAINSABC.output_spec()
 

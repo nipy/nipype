@@ -16,9 +16,16 @@ def test_CALabel_inputs():
             argstr='%s',
             mandatory=True,
             position=-4,
+            usedefault=True,
         ),
-        in_vol=dict(argstr='-r %s', ),
-        intensities=dict(argstr='-r %s', ),
+        in_vol=dict(
+            argstr='-r %s',
+            usedefault=True,
+        ),
+        intensities=dict(
+            argstr='-r %s',
+            usedefault=True,
+        ),
         label=dict(argstr='-l %s', ),
         no_big_ventricles=dict(argstr='-nobigventricles', ),
         num_threads=dict(),
@@ -26,19 +33,22 @@ def test_CALabel_inputs():
             argstr='%s',
             mandatory=True,
             position=-1,
+            usedefault=True,
         ),
         prior=dict(argstr='-prior %.1f', ),
         relabel_unlikely=dict(argstr='-relabel_unlikely %d %.1f', ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         template=dict(
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         transform=dict(
             argstr='%s',
             mandatory=True,
             position=-3,
+            usedefault=True,
         ),
     )
     inputs = CALabel.input_spec()
@@ -47,7 +57,7 @@ def test_CALabel_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_CALabel_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = CALabel.output_spec()
 
     for key, metadata in list(output_map.items()):

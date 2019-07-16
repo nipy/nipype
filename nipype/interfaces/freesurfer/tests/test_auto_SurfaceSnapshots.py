@@ -7,6 +7,7 @@ def test_SurfaceSnapshots_inputs():
     input_map = dict(
         annot_file=dict(
             argstr='-annotation %s',
+            usedefault=True,
             xor=['annot_name'],
         ),
         annot_name=dict(
@@ -14,7 +15,10 @@ def test_SurfaceSnapshots_inputs():
             xor=['annot_file'],
         ),
         args=dict(argstr='%s', ),
-        colortable=dict(argstr='-colortable %s', ),
+        colortable=dict(
+            argstr='-colortable %s',
+            usedefault=True,
+        ),
         demean_overlay=dict(argstr='-zm', ),
         environ=dict(
             nohash=True,
@@ -32,6 +36,7 @@ def test_SurfaceSnapshots_inputs():
         invert_overlay=dict(argstr='-invphaseflag 1', ),
         label_file=dict(
             argstr='-label %s',
+            usedefault=True,
             xor=['label_name'],
         ),
         label_name=dict(
@@ -48,6 +53,7 @@ def test_SurfaceSnapshots_inputs():
         overlay=dict(
             argstr='-overlay %s',
             requires=['overlay_range'],
+            usedefault=True,
         ),
         overlay_range=dict(argstr='%s', ),
         overlay_range_offset=dict(argstr='-foffset %.3f', ),
@@ -55,7 +61,10 @@ def test_SurfaceSnapshots_inputs():
             argstr='-overlay-reg %s',
             xor=['overlay_reg', 'identity_reg', 'mni152_reg'],
         ),
-        patch_file=dict(argstr='-patch %s', ),
+        patch_file=dict(
+            argstr='-patch %s',
+            usedefault=True,
+        ),
         reverse_overlay=dict(argstr='-revphaseflag 1', ),
         screenshot_stem=dict(),
         show_color_scale=dict(argstr='-colscalebarflag 1', ),
@@ -76,7 +85,7 @@ def test_SurfaceSnapshots_inputs():
             mandatory=True,
             position=1,
         ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         surface=dict(
             argstr='%s',
             mandatory=True,
@@ -85,6 +94,7 @@ def test_SurfaceSnapshots_inputs():
         tcl_script=dict(
             argstr='%s',
             genfile=True,
+            usedefault=True,
         ),
         truncate_overlay=dict(argstr='-truncphaseflag 1', ),
     )

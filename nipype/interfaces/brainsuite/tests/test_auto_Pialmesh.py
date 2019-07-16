@@ -14,14 +14,17 @@ def test_Pialmesh_inputs():
         inputMaskFile=dict(
             argstr='-m %s',
             mandatory=True,
+            usedefault=True,
         ),
         inputSurfaceFile=dict(
             argstr='-i %s',
             mandatory=True,
+            usedefault=True,
         ),
         inputTissueFractionFile=dict(
             argstr='-f %s',
             mandatory=True,
+            usedefault=True,
         ),
         laplacianSmoothing=dict(
             argstr='--smooth %f',
@@ -46,6 +49,7 @@ def test_Pialmesh_inputs():
         outputSurfaceFile=dict(
             argstr='-o %s',
             genfile=True,
+            usedefault=True,
         ),
         recomputeNormals=dict(argstr='--norm', ),
         searchRadius=dict(
@@ -70,7 +74,7 @@ def test_Pialmesh_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Pialmesh_outputs():
-    output_map = dict(outputSurfaceFile=dict(), )
+    output_map = dict(outputSurfaceFile=dict(usedefault=True, ), )
     outputs = Pialmesh.output_spec()
 
     for key, metadata in list(output_map.items()):

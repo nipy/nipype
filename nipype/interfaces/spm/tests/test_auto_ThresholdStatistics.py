@@ -14,10 +14,12 @@ def test_ThresholdStatistics_inputs():
         spm_mat_file=dict(
             copyfile=True,
             mandatory=True,
+            usedefault=True,
         ),
         stat_image=dict(
             copyfile=False,
             mandatory=True,
+            usedefault=True,
         ),
         use_mcr=dict(),
         use_v8struct=dict(

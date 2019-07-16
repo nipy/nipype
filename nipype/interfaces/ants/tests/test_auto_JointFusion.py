@@ -26,7 +26,10 @@ def test_JointFusion_inputs():
             nohash=True,
             usedefault=True,
         ),
-        exclusion_region=dict(argstr='-x %s', ),
+        exclusion_region=dict(
+            argstr='-x %s',
+            usedefault=True,
+        ),
         method=dict(
             argstr='-m %s',
             usedefault=True,
@@ -46,6 +49,7 @@ def test_JointFusion_inputs():
             name_template='%s',
             output_name='output_label_image',
             position=-1,
+            usedefault=True,
         ),
         patch_radius=dict(
             argstr='-rp %s',
@@ -76,7 +80,7 @@ def test_JointFusion_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_JointFusion_outputs():
-    output_map = dict(output_label_image=dict(), )
+    output_map = dict(output_label_image=dict(usedefault=True, ), )
     outputs = JointFusion.output_spec()
 
     for key, metadata in list(output_map.items()):

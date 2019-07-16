@@ -5,14 +5,23 @@ from ..brains import landmarksConstellationWeights
 
 def test_landmarksConstellationWeights_inputs():
     input_map = dict(
-        LLSModel=dict(argstr='--LLSModel %s', ),
+        LLSModel=dict(
+            argstr='--LLSModel %s',
+            usedefault=True,
+        ),
         args=dict(argstr='%s', ),
         environ=dict(
             nohash=True,
             usedefault=True,
         ),
-        inputTemplateModel=dict(argstr='--inputTemplateModel %s', ),
-        inputTrainingList=dict(argstr='--inputTrainingList %s', ),
+        inputTemplateModel=dict(
+            argstr='--inputTemplateModel %s',
+            usedefault=True,
+        ),
+        inputTrainingList=dict(
+            argstr='--inputTrainingList %s',
+            usedefault=True,
+        ),
         outputWeightsList=dict(
             argstr='--outputWeightsList %s',
             hash_files=False,
@@ -24,7 +33,7 @@ def test_landmarksConstellationWeights_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_landmarksConstellationWeights_outputs():
-    output_map = dict(outputWeightsList=dict(), )
+    output_map = dict(outputWeightsList=dict(usedefault=True, ), )
     outputs = landmarksConstellationWeights.output_spec()
 
     for key, metadata in list(output_map.items()):

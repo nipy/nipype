@@ -20,8 +20,9 @@ def test_MRIsCombine_inputs():
             genfile=True,
             mandatory=True,
             position=-1,
+            usedefault=True,
         ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
     )
     inputs = MRIsCombine.input_spec()
 
@@ -29,7 +30,7 @@ def test_MRIsCombine_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRIsCombine_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = MRIsCombine.output_spec()
 
     for key, metadata in list(output_map.items()):

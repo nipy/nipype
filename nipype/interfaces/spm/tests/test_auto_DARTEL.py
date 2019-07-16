@@ -34,7 +34,7 @@ def test_DARTEL_inputs():
 def test_DARTEL_outputs():
     output_map = dict(
         dartel_flow_fields=dict(),
-        final_template_file=dict(),
+        final_template_file=dict(usedefault=True, ),
         template_files=dict(),
     )
     outputs = DARTEL.output_spec()

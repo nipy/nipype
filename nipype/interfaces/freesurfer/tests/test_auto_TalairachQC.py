@@ -14,8 +14,9 @@ def test_TalairachQC_inputs():
             argstr='%s',
             mandatory=True,
             position=0,
+            usedefault=True,
         ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
     )
     inputs = TalairachQC.input_spec()
 

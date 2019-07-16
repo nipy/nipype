@@ -5,16 +5,20 @@ from ..utils import CalcCoregAffine
 
 def test_CalcCoregAffine_inputs():
     input_map = dict(
-        invmat=dict(),
-        mat=dict(),
+        invmat=dict(usedefault=True, ),
+        mat=dict(usedefault=True, ),
         matlab_cmd=dict(),
         mfile=dict(usedefault=True, ),
         moving=dict(
             copyfile=False,
             mandatory=True,
+            usedefault=True,
         ),
         paths=dict(),
-        target=dict(mandatory=True, ),
+        target=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
         use_mcr=dict(),
         use_v8struct=dict(
             min_ver='8',
@@ -28,8 +32,8 @@ def test_CalcCoregAffine_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_CalcCoregAffine_outputs():
     output_map = dict(
-        invmat=dict(),
-        mat=dict(),
+        invmat=dict(usedefault=True, ),
+        mat=dict(usedefault=True, ),
     )
     outputs = CalcCoregAffine.output_spec()
 

@@ -11,10 +11,18 @@ def test_gtractCostFastMarching_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputAnisotropyVolume=dict(argstr='--inputAnisotropyVolume %s', ),
+        inputAnisotropyVolume=dict(
+            argstr='--inputAnisotropyVolume %s',
+            usedefault=True,
+        ),
         inputStartingSeedsLabelMapVolume=dict(
-            argstr='--inputStartingSeedsLabelMapVolume %s', ),
-        inputTensorVolume=dict(argstr='--inputTensorVolume %s', ),
+            argstr='--inputStartingSeedsLabelMapVolume %s',
+            usedefault=True,
+        ),
+        inputTensorVolume=dict(
+            argstr='--inputTensorVolume %s',
+            usedefault=True,
+        ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         outputCostVolume=dict(
             argstr='--outputCostVolume %s',
@@ -35,8 +43,8 @@ def test_gtractCostFastMarching_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_gtractCostFastMarching_outputs():
     output_map = dict(
-        outputCostVolume=dict(),
-        outputSpeedVolume=dict(),
+        outputCostVolume=dict(usedefault=True, ),
+        outputSpeedVolume=dict(usedefault=True, ),
     )
     outputs = gtractCostFastMarching.output_spec()
 

@@ -10,13 +10,19 @@ def test_JistLaminarVolumetricLayering_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inInner=dict(argstr='--inInner %s', ),
+        inInner=dict(
+            argstr='--inInner %s',
+            usedefault=True,
+        ),
         inLayering=dict(argstr='--inLayering %s', ),
         inLayering2=dict(argstr='--inLayering2 %s', ),
         inMax=dict(argstr='--inMax %d', ),
         inMin=dict(argstr='--inMin %f', ),
         inNumber=dict(argstr='--inNumber %d', ),
-        inOuter=dict(argstr='--inOuter %s', ),
+        inOuter=dict(
+            argstr='--inOuter %s',
+            usedefault=True,
+        ),
         inTopology=dict(argstr='--inTopology %s', ),
         incurvature=dict(argstr='--incurvature %d', ),
         inpresmooth=dict(argstr='--inpresmooth %s', ),
@@ -48,9 +54,9 @@ def test_JistLaminarVolumetricLayering_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_JistLaminarVolumetricLayering_outputs():
     output_map = dict(
-        outContinuous=dict(),
-        outDiscrete=dict(),
-        outLayer=dict(),
+        outContinuous=dict(usedefault=True, ),
+        outDiscrete=dict(usedefault=True, ),
+        outLayer=dict(usedefault=True, ),
     )
     outputs = JistLaminarVolumetricLayering.output_spec()
 

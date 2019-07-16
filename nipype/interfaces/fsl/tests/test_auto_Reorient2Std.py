@@ -13,11 +13,13 @@ def test_Reorient2Std_inputs():
         in_file=dict(
             argstr='%s',
             mandatory=True,
+            usedefault=True,
         ),
         out_file=dict(
             argstr='%s',
             genfile=True,
             hash_files=False,
+            usedefault=True,
         ),
         output_type=dict(),
     )
@@ -27,7 +29,7 @@ def test_Reorient2Std_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Reorient2Std_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = Reorient2Std.output_spec()
 
     for key, metadata in list(output_map.items()):

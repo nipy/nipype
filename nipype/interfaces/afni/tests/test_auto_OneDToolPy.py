@@ -17,9 +17,11 @@ def test_OneDToolPy_inputs():
         in_file=dict(
             argstr='-infile %s',
             mandatory=True,
+            usedefault=True,
         ),
         out_file=dict(
             argstr='-write %s',
+            usedefault=True,
             xor=['show_cormat_warnings'],
         ),
         outputtype=dict(),
@@ -41,7 +43,7 @@ def test_OneDToolPy_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_OneDToolPy_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = OneDToolPy.output_spec()
 
     for key, metadata in list(output_map.items()):

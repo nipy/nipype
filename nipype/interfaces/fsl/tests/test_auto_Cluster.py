@@ -24,6 +24,7 @@ def test_Cluster_inputs():
         in_file=dict(
             argstr='--in=%s',
             mandatory=True,
+            usedefault=True,
         ),
         minclustersize=dict(
             argstr='--minclustersize',
@@ -72,7 +73,10 @@ def test_Cluster_inputs():
             argstr='--pthresh=%.10f',
             requires=['dlh', 'volume'],
         ),
-        std_space_file=dict(argstr='--stdvol=%s', ),
+        std_space_file=dict(
+            argstr='--stdvol=%s',
+            usedefault=True,
+        ),
         threshold=dict(
             argstr='--thresh=%.10f',
             mandatory=True,
@@ -82,8 +86,14 @@ def test_Cluster_inputs():
             usedefault=True,
         ),
         volume=dict(argstr='--volume=%d', ),
-        warpfield_file=dict(argstr='--warpvol=%s', ),
-        xfm_file=dict(argstr='--xfm=%s', ),
+        warpfield_file=dict(
+            argstr='--warpvol=%s',
+            usedefault=True,
+        ),
+        xfm_file=dict(
+            argstr='--xfm=%s',
+            usedefault=True,
+        ),
     )
     inputs = Cluster.input_spec()
 
@@ -92,14 +102,14 @@ def test_Cluster_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Cluster_outputs():
     output_map = dict(
-        index_file=dict(),
-        localmax_txt_file=dict(),
-        localmax_vol_file=dict(),
-        max_file=dict(),
-        mean_file=dict(),
-        pval_file=dict(),
-        size_file=dict(),
-        threshold_file=dict(),
+        index_file=dict(usedefault=True, ),
+        localmax_txt_file=dict(usedefault=True, ),
+        localmax_vol_file=dict(usedefault=True, ),
+        max_file=dict(usedefault=True, ),
+        mean_file=dict(usedefault=True, ),
+        pval_file=dict(usedefault=True, ),
+        size_file=dict(usedefault=True, ),
+        threshold_file=dict(usedefault=True, ),
     )
     outputs = Cluster.output_spec()
 

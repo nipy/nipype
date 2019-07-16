@@ -5,7 +5,10 @@ from ..icc import ICC
 
 def test_ICC_inputs():
     input_map = dict(
-        mask=dict(mandatory=True, ),
+        mask=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
         subjects_sessions=dict(mandatory=True, ),
     )
     inputs = ICC.input_spec()
@@ -15,9 +18,9 @@ def test_ICC_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ICC_outputs():
     output_map = dict(
-        icc_map=dict(),
-        session_var_map=dict(),
-        subject_var_map=dict(),
+        icc_map=dict(usedefault=True, ),
+        session_var_map=dict(usedefault=True, ),
+        subject_var_map=dict(usedefault=True, ),
     )
     outputs = ICC.output_spec()
 

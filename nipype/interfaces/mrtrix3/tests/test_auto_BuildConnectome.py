@@ -14,13 +14,21 @@ def test_BuildConnectome_inputs():
             argstr='%s',
             mandatory=True,
             position=-3,
+            usedefault=True,
         ),
         in_parc=dict(
             argstr='%s',
             position=-2,
+            usedefault=True,
         ),
-        in_scalar=dict(argstr='-image %s', ),
-        in_weights=dict(argstr='-tck_weights_in %s', ),
+        in_scalar=dict(
+            argstr='-image %s',
+            usedefault=True,
+        ),
+        in_weights=dict(
+            argstr='-tck_weights_in %s',
+            usedefault=True,
+        ),
         keep_unassigned=dict(argstr='-keep_unassigned', ),
         metric=dict(argstr='-metric %s', ),
         nthreads=dict(
@@ -45,7 +53,7 @@ def test_BuildConnectome_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BuildConnectome_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = BuildConnectome.output_spec()
 
     for key, metadata in list(output_map.items()):

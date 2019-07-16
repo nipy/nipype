@@ -6,13 +6,25 @@ from ..nx import NetworkXMetrics
 def test_NetworkXMetrics_inputs():
     input_map = dict(
         compute_clique_related_measures=dict(usedefault=True, ),
-        in_file=dict(mandatory=True, ),
-        out_edge_metrics_matlab=dict(genfile=True, ),
-        out_global_metrics_matlab=dict(genfile=True, ),
+        in_file=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        out_edge_metrics_matlab=dict(
+            genfile=True,
+            usedefault=True,
+        ),
+        out_global_metrics_matlab=dict(
+            genfile=True,
+            usedefault=True,
+        ),
         out_k_core=dict(usedefault=True, ),
         out_k_crust=dict(usedefault=True, ),
         out_k_shell=dict(usedefault=True, ),
-        out_node_metrics_matlab=dict(genfile=True, ),
+        out_node_metrics_matlab=dict(
+            genfile=True,
+            usedefault=True,
+        ),
         out_pickled_extra_measures=dict(usedefault=True, ),
         treat_as_weighted_graph=dict(usedefault=True, ),
     )
@@ -24,18 +36,18 @@ def test_NetworkXMetrics_inputs():
 def test_NetworkXMetrics_outputs():
     output_map = dict(
         edge_measure_networks=dict(),
-        edge_measures_matlab=dict(),
-        global_measures_matlab=dict(),
+        edge_measures_matlab=dict(usedefault=True, ),
+        global_measures_matlab=dict(usedefault=True, ),
         gpickled_network_files=dict(),
-        k_core=dict(),
-        k_crust=dict(),
+        k_core=dict(usedefault=True, ),
+        k_crust=dict(usedefault=True, ),
         k_networks=dict(),
-        k_shell=dict(),
+        k_shell=dict(usedefault=True, ),
         matlab_dict_measures=dict(),
         matlab_matrix_files=dict(),
         node_measure_networks=dict(),
-        node_measures_matlab=dict(),
-        pickled_extra_measures=dict(),
+        node_measures_matlab=dict(usedefault=True, ),
+        pickled_extra_measures=dict(usedefault=True, ),
     )
     outputs = NetworkXMetrics.output_spec()
 

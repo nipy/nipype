@@ -6,13 +6,22 @@ from ..reconstruction import CSD
 def test_CSD_inputs():
     input_map = dict(
         b0_thres=dict(usedefault=True, ),
-        in_bval=dict(mandatory=True, ),
-        in_bvec=dict(mandatory=True, ),
-        in_file=dict(mandatory=True, ),
-        in_mask=dict(),
-        out_fods=dict(),
+        in_bval=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        in_bvec=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        in_mask=dict(usedefault=True, ),
+        out_fods=dict(usedefault=True, ),
         out_prefix=dict(),
-        response=dict(),
+        response=dict(usedefault=True, ),
         save_fods=dict(usedefault=True, ),
         sh_order=dict(usedefault=True, ),
     )
@@ -23,8 +32,8 @@ def test_CSD_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_CSD_outputs():
     output_map = dict(
-        model=dict(),
-        out_fods=dict(),
+        model=dict(usedefault=True, ),
+        out_fods=dict(usedefault=True, ),
     )
     outputs = CSD.output_spec()
 

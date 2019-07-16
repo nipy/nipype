@@ -21,6 +21,7 @@ def test_AffSymTensor3DVol_inputs():
         in_file=dict(
             argstr='-in %s',
             mandatory=True,
+            usedefault=True,
         ),
         interpolation=dict(
             argstr='-interp %s',
@@ -31,6 +32,7 @@ def test_AffSymTensor3DVol_inputs():
             keep_extension=True,
             name_source='in_file',
             name_template='%s_affxfmd',
+            usedefault=True,
         ),
         reorient=dict(
             argstr='-reorient %s',
@@ -38,10 +40,12 @@ def test_AffSymTensor3DVol_inputs():
         ),
         target=dict(
             argstr='-target %s',
+            usedefault=True,
             xor=['transform'],
         ),
         transform=dict(
             argstr='-trans %s',
+            usedefault=True,
             xor=['target', 'translation', 'euler', 'deformation'],
         ),
         translation=dict(
@@ -55,7 +59,7 @@ def test_AffSymTensor3DVol_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_AffSymTensor3DVol_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = AffSymTensor3DVol.output_spec()
 
     for key, metadata in list(output_map.items()):

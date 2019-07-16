@@ -18,11 +18,13 @@ def test_MedianFilter3D_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         out_filename=dict(
             argstr='%s',
             genfile=True,
             position=-1,
+            usedefault=True,
         ),
         quiet=dict(
             argstr='-quiet',
@@ -35,7 +37,7 @@ def test_MedianFilter3D_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MedianFilter3D_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = MedianFilter3D.output_spec()
 
     for key, metadata in list(output_map.items()):

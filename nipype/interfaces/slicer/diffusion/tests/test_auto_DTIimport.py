@@ -13,6 +13,7 @@ def test_DTIimport_inputs():
         inputFile=dict(
             argstr='%s',
             position=-2,
+            usedefault=True,
         ),
         outputTensor=dict(
             argstr='%s',
@@ -27,7 +28,11 @@ def test_DTIimport_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DTIimport_outputs():
-    output_map = dict(outputTensor=dict(position=-1, ), )
+    output_map = dict(
+        outputTensor=dict(
+            position=-1,
+            usedefault=True,
+        ), )
     outputs = DTIimport.output_spec()
 
     for key, metadata in list(output_map.items()):

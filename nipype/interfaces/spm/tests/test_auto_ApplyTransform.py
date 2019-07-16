@@ -8,11 +8,18 @@ def test_ApplyTransform_inputs():
         in_file=dict(
             copyfile=True,
             mandatory=True,
+            usedefault=True,
         ),
-        mat=dict(mandatory=True, ),
+        mat=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
         matlab_cmd=dict(),
         mfile=dict(usedefault=True, ),
-        out_file=dict(genfile=True, ),
+        out_file=dict(
+            genfile=True,
+            usedefault=True,
+        ),
         paths=dict(),
         use_mcr=dict(),
         use_v8struct=dict(
@@ -26,7 +33,7 @@ def test_ApplyTransform_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ApplyTransform_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = ApplyTransform.output_spec()
 
     for key, metadata in list(output_map.items()):

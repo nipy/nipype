@@ -14,8 +14,14 @@ def test_BSplineToDeformationField_inputs():
             nohash=True,
             usedefault=True,
         ),
-        refImage=dict(argstr='--refImage %s', ),
-        tfm=dict(argstr='--tfm %s', ),
+        refImage=dict(
+            argstr='--refImage %s',
+            usedefault=True,
+        ),
+        tfm=dict(
+            argstr='--tfm %s',
+            usedefault=True,
+        ),
     )
     inputs = BSplineToDeformationField.input_spec()
 
@@ -23,7 +29,7 @@ def test_BSplineToDeformationField_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BSplineToDeformationField_outputs():
-    output_map = dict(defImage=dict(), )
+    output_map = dict(defImage=dict(usedefault=True, ), )
     outputs = BSplineToDeformationField.output_spec()
 
     for key, metadata in list(output_map.items()):

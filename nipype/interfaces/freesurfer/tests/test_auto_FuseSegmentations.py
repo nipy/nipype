@@ -25,12 +25,13 @@ def test_FuseSegmentations_inputs():
         out_file=dict(
             mandatory=True,
             position=-1,
+            usedefault=True,
         ),
         subject_id=dict(
             argstr='%s',
             position=-3,
         ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         timepoints=dict(
             argstr='%s',
             mandatory=True,
@@ -43,7 +44,7 @@ def test_FuseSegmentations_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FuseSegmentations_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = FuseSegmentations.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -8,10 +8,12 @@ def test_BSplineDeformableRegistration_inputs():
         FixedImageFileName=dict(
             argstr='%s',
             position=-2,
+            usedefault=True,
         ),
         MovingImageFileName=dict(
             argstr='%s',
             position=-1,
+            usedefault=True,
         ),
         args=dict(argstr='%s', ),
         constrain=dict(argstr='--constrain ', ),
@@ -22,7 +24,10 @@ def test_BSplineDeformableRegistration_inputs():
         ),
         gridSize=dict(argstr='--gridSize %d', ),
         histogrambins=dict(argstr='--histogrambins %d', ),
-        initialtransform=dict(argstr='--initialtransform %s', ),
+        initialtransform=dict(
+            argstr='--initialtransform %s',
+            usedefault=True,
+        ),
         iterations=dict(argstr='--iterations %d', ),
         maximumDeformation=dict(argstr='--maximumDeformation %f', ),
         outputtransform=dict(
@@ -46,9 +51,9 @@ def test_BSplineDeformableRegistration_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BSplineDeformableRegistration_outputs():
     output_map = dict(
-        outputtransform=dict(),
-        outputwarp=dict(),
-        resampledmovingfilename=dict(),
+        outputtransform=dict(usedefault=True, ),
+        outputwarp=dict(usedefault=True, ),
+        resampledmovingfilename=dict(usedefault=True, ),
     )
     outputs = BSplineDeformableRegistration.output_spec()
 

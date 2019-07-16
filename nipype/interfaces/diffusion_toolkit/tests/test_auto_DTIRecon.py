@@ -9,13 +9,18 @@ def test_DTIRecon_inputs():
             argstr='%s',
             mandatory=True,
             position=1,
+            usedefault=True,
         ),
         args=dict(argstr='%s', ),
         b0_threshold=dict(argstr='-b0_th', ),
-        bvals=dict(mandatory=True, ),
+        bvals=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
         bvecs=dict(
             argstr='-gm %s',
             mandatory=True,
+            usedefault=True,
         ),
         environ=dict(
             nohash=True,
@@ -41,18 +46,18 @@ def test_DTIRecon_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DTIRecon_outputs():
     output_map = dict(
-        ADC=dict(),
-        B0=dict(),
-        FA=dict(),
-        FA_color=dict(),
-        L1=dict(),
-        L2=dict(),
-        L3=dict(),
-        V1=dict(),
-        V2=dict(),
-        V3=dict(),
-        exp=dict(),
-        tensor=dict(),
+        ADC=dict(usedefault=True, ),
+        B0=dict(usedefault=True, ),
+        FA=dict(usedefault=True, ),
+        FA_color=dict(usedefault=True, ),
+        L1=dict(usedefault=True, ),
+        L2=dict(usedefault=True, ),
+        L3=dict(usedefault=True, ),
+        V1=dict(usedefault=True, ),
+        V2=dict(usedefault=True, ),
+        V3=dict(usedefault=True, ),
+        exp=dict(usedefault=True, ),
+        tensor=dict(usedefault=True, ),
     )
     outputs = DTIRecon.output_spec()
 

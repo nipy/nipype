@@ -16,14 +16,21 @@ def test_Generate5tt_inputs():
             nohash=True,
             usedefault=True,
         ),
-        grad_file=dict(argstr='-grad %s', ),
+        grad_file=dict(
+            argstr='-grad %s',
+            usedefault=True,
+        ),
         grad_fsl=dict(argstr='-fslgrad %s %s', ),
-        in_bval=dict(),
-        in_bvec=dict(argstr='-fslgrad %s %s', ),
+        in_bval=dict(usedefault=True, ),
+        in_bvec=dict(
+            argstr='-fslgrad %s %s',
+            usedefault=True,
+        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         nthreads=dict(
             argstr='-nthreads %d',
@@ -33,6 +40,7 @@ def test_Generate5tt_inputs():
             argstr='%s',
             mandatory=True,
             position=-1,
+            usedefault=True,
         ),
     )
     inputs = Generate5tt.input_spec()
@@ -41,7 +49,7 @@ def test_Generate5tt_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Generate5tt_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = Generate5tt.output_spec()
 
     for key, metadata in list(output_map.items()):

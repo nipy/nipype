@@ -28,13 +28,22 @@ def test_BRAINSFit_inputs():
             usedefault=True,
         ),
         failureExitCode=dict(argstr='--failureExitCode %d', ),
-        fixedBinaryVolume=dict(argstr='--fixedBinaryVolume %s', ),
-        fixedVolume=dict(argstr='--fixedVolume %s', ),
+        fixedBinaryVolume=dict(
+            argstr='--fixedBinaryVolume %s',
+            usedefault=True,
+        ),
+        fixedVolume=dict(
+            argstr='--fixedVolume %s',
+            usedefault=True,
+        ),
         fixedVolumeTimeIndex=dict(argstr='--fixedVolumeTimeIndex %d', ),
         forceMINumberOfThreads=dict(argstr='--forceMINumberOfThreads %d', ),
         gui=dict(argstr='--gui ', ),
         histogramMatch=dict(argstr='--histogramMatch ', ),
-        initialTransform=dict(argstr='--initialTransform %s', ),
+        initialTransform=dict(
+            argstr='--initialTransform %s',
+            usedefault=True,
+        ),
         initializeTransformMode=dict(argstr='--initializeTransformMode %s', ),
         interpolationMode=dict(argstr='--interpolationMode %s', ),
         linearTransform=dict(
@@ -54,8 +63,14 @@ def test_BRAINSFit_inputs():
             argstr='--minimumStepLength %s',
             sep=',',
         ),
-        movingBinaryVolume=dict(argstr='--movingBinaryVolume %s', ),
-        movingVolume=dict(argstr='--movingVolume %s', ),
+        movingBinaryVolume=dict(
+            argstr='--movingBinaryVolume %s',
+            usedefault=True,
+        ),
+        movingVolume=dict(
+            argstr='--movingVolume %s',
+            usedefault=True,
+        ),
         movingVolumeTimeIndex=dict(argstr='--movingVolumeTimeIndex %d', ),
         numberOfHistogramBins=dict(argstr='--numberOfHistogramBins %d', ),
         numberOfIterations=dict(
@@ -127,13 +142,13 @@ def test_BRAINSFit_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BRAINSFit_outputs():
     output_map = dict(
-        bsplineTransform=dict(),
-        linearTransform=dict(),
-        outputFixedVolumeROI=dict(),
-        outputMovingVolumeROI=dict(),
-        outputTransform=dict(),
-        outputVolume=dict(),
-        strippedOutputTransform=dict(),
+        bsplineTransform=dict(usedefault=True, ),
+        linearTransform=dict(usedefault=True, ),
+        outputFixedVolumeROI=dict(usedefault=True, ),
+        outputMovingVolumeROI=dict(usedefault=True, ),
+        outputTransform=dict(usedefault=True, ),
+        outputVolume=dict(usedefault=True, ),
+        strippedOutputTransform=dict(usedefault=True, ),
     )
     outputs = BRAINSFit.output_spec()
 

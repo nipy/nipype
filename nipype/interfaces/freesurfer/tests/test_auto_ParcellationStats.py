@@ -6,10 +6,16 @@ from ..utils import ParcellationStats
 def test_ParcellationStats_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        aseg=dict(mandatory=True, ),
-        brainmask=dict(mandatory=True, ),
+        aseg=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        brainmask=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
         copy_inputs=dict(),
-        cortex_label=dict(),
+        cortex_label=dict(usedefault=True, ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -28,8 +34,14 @@ def test_ParcellationStats_inputs():
             argstr='-l %s',
             xor=['in_annotatoin', 'out_color'],
         ),
-        lh_pial=dict(mandatory=True, ),
-        lh_white=dict(mandatory=True, ),
+        lh_pial=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        lh_white=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
         mgz=dict(argstr='-mgz', ),
         out_color=dict(
             argstr='-c %s',
@@ -41,16 +53,25 @@ def test_ParcellationStats_inputs():
             genfile=True,
             requires=['tabular_output'],
         ),
-        rh_pial=dict(mandatory=True, ),
-        rh_white=dict(mandatory=True, ),
-        ribbon=dict(mandatory=True, ),
+        rh_pial=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        rh_white=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        ribbon=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
         subject_id=dict(
             argstr='%s',
             mandatory=True,
             position=-3,
             usedefault=True,
         ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         surface=dict(
             argstr='%s',
             position=-1,
@@ -60,9 +81,18 @@ def test_ParcellationStats_inputs():
             argstr='-th3',
             requires=['cortex_label'],
         ),
-        thickness=dict(mandatory=True, ),
-        transform=dict(mandatory=True, ),
-        wm=dict(mandatory=True, ),
+        thickness=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        transform=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        wm=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
     )
     inputs = ParcellationStats.input_spec()
 
@@ -71,8 +101,8 @@ def test_ParcellationStats_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ParcellationStats_outputs():
     output_map = dict(
-        out_color=dict(),
-        out_table=dict(),
+        out_color=dict(usedefault=True, ),
+        out_table=dict(usedefault=True, ),
     )
     outputs = ParcellationStats.output_spec()
 

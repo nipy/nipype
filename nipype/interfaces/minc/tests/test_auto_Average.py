@@ -120,6 +120,7 @@ def test_Average_inputs():
             name_source=['input_files'],
             name_template='%s_averaged.mnc',
             position=-1,
+            usedefault=True,
         ),
         quiet=dict(
             argstr='-quiet',
@@ -147,7 +148,7 @@ def test_Average_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Average_outputs():
-    output_map = dict(output_file=dict(), )
+    output_map = dict(output_file=dict(usedefault=True, ), )
     outputs = Average.output_spec()
 
     for key, metadata in list(output_map.items()):

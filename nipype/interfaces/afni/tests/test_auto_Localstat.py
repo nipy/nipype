@@ -19,6 +19,7 @@ def test_Localstat_inputs():
             argstr='%s',
             mandatory=True,
             position=-1,
+            usedefault=True,
         ),
         mask_file=dict(argstr='-mask %s', ),
         neighborhood=dict(
@@ -63,7 +64,7 @@ def test_Localstat_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Localstat_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = Localstat.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -5,7 +5,7 @@ from ..misc import FuzzyOverlap
 
 def test_FuzzyOverlap_inputs():
     input_map = dict(
-        in_mask=dict(),
+        in_mask=dict(usedefault=True, ),
         in_ref=dict(mandatory=True, ),
         in_tst=dict(mandatory=True, ),
         out_file=dict(usedefault=True, ),

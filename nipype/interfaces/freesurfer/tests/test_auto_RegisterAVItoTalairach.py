@@ -14,22 +14,25 @@ def test_RegisterAVItoTalairach_inputs():
             argstr='%s',
             mandatory=True,
             position=0,
+            usedefault=True,
         ),
         out_file=dict(
             argstr='%s',
             position=3,
             usedefault=True,
         ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         target=dict(
             argstr='%s',
             mandatory=True,
             position=1,
+            usedefault=True,
         ),
         vox2vox=dict(
             argstr='%s',
             mandatory=True,
             position=2,
+            usedefault=True,
         ),
     )
     inputs = RegisterAVItoTalairach.input_spec()

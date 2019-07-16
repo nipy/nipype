@@ -9,6 +9,7 @@ def test_ParseDICOMDir_inputs():
         dicom_dir=dict(
             argstr='--d %s',
             mandatory=True,
+            usedefault=True,
         ),
         dicom_info_file=dict(
             argstr='--o %s',
@@ -19,7 +20,7 @@ def test_ParseDICOMDir_inputs():
             usedefault=True,
         ),
         sortbyrun=dict(argstr='--sortbyrun', ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         summarize=dict(argstr='--summarize', ),
     )
     inputs = ParseDICOMDir.input_spec()
@@ -28,7 +29,7 @@ def test_ParseDICOMDir_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ParseDICOMDir_outputs():
-    output_map = dict(dicom_info_file=dict(), )
+    output_map = dict(dicom_info_file=dict(usedefault=True, ), )
     outputs = ParseDICOMDir.output_spec()
 
     for key, metadata in list(output_map.items()):

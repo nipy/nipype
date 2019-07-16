@@ -10,8 +10,14 @@ def test_JistLaminarProfileCalculator_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inIntensity=dict(argstr='--inIntensity %s', ),
-        inMask=dict(argstr='--inMask %s', ),
+        inIntensity=dict(
+            argstr='--inIntensity %s',
+            usedefault=True,
+        ),
+        inMask=dict(
+            argstr='--inMask %s',
+            usedefault=True,
+        ),
         incomputed=dict(argstr='--incomputed %s', ),
         null=dict(argstr='--null %s', ),
         outResult=dict(
@@ -31,7 +37,7 @@ def test_JistLaminarProfileCalculator_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_JistLaminarProfileCalculator_outputs():
-    output_map = dict(outResult=dict(), )
+    output_map = dict(outResult=dict(usedefault=True, ), )
     outputs = JistLaminarProfileCalculator.output_spec()
 
     for key, metadata in list(output_map.items()):

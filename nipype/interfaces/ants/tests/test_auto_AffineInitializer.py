@@ -19,6 +19,7 @@ def test_AffineInitializer_inputs():
             argstr='%s',
             mandatory=True,
             position=1,
+            usedefault=True,
         ),
         local_search=dict(
             argstr='%d',
@@ -29,6 +30,7 @@ def test_AffineInitializer_inputs():
             argstr='%s',
             mandatory=True,
             position=2,
+            usedefault=True,
         ),
         num_threads=dict(
             nohash=True,
@@ -61,7 +63,7 @@ def test_AffineInitializer_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_AffineInitializer_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = AffineInitializer.output_spec()
 
     for key, metadata in list(output_map.items()):

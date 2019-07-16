@@ -10,11 +10,23 @@ def test_JistBrainMp2rageSkullStripping_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inFilter=dict(argstr='--inFilter %s', ),
-        inSecond=dict(argstr='--inSecond %s', ),
+        inFilter=dict(
+            argstr='--inFilter %s',
+            usedefault=True,
+        ),
+        inSecond=dict(
+            argstr='--inSecond %s',
+            usedefault=True,
+        ),
         inSkip=dict(argstr='--inSkip %s', ),
-        inT1=dict(argstr='--inT1 %s', ),
-        inT1weighted=dict(argstr='--inT1weighted %s', ),
+        inT1=dict(
+            argstr='--inT1 %s',
+            usedefault=True,
+        ),
+        inT1weighted=dict(
+            argstr='--inT1weighted %s',
+            usedefault=True,
+        ),
         null=dict(argstr='--null %s', ),
         outBrain=dict(
             argstr='--outBrain %s',
@@ -46,10 +58,10 @@ def test_JistBrainMp2rageSkullStripping_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_JistBrainMp2rageSkullStripping_outputs():
     output_map = dict(
-        outBrain=dict(),
-        outMasked=dict(),
-        outMasked2=dict(),
-        outMasked3=dict(),
+        outBrain=dict(usedefault=True, ),
+        outMasked=dict(usedefault=True, ),
+        outMasked2=dict(usedefault=True, ),
+        outMasked3=dict(usedefault=True, ),
     )
     outputs = JistBrainMp2rageSkullStripping.output_spec()
 

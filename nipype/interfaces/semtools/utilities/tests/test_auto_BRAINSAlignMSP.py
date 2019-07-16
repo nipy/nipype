@@ -15,7 +15,10 @@ def test_BRAINSAlignMSP_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputVolume=dict(argstr='--inputVolume %s', ),
+        inputVolume=dict(
+            argstr='--inputVolume %s',
+            usedefault=True,
+        ),
         interpolationMode=dict(argstr='--interpolationMode %s', ),
         mspQualityLevel=dict(argstr='--mspQualityLevel %d', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
@@ -40,8 +43,8 @@ def test_BRAINSAlignMSP_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BRAINSAlignMSP_outputs():
     output_map = dict(
-        OutputresampleMSP=dict(),
-        resultsDir=dict(),
+        OutputresampleMSP=dict(usedefault=True, ),
+        resultsDir=dict(usedefault=True, ),
     )
     outputs = BRAINSAlignMSP.output_spec()
 

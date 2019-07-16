@@ -21,6 +21,7 @@ def test_Volpad_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         output_file=dict(
             argstr='%s',
@@ -29,6 +30,7 @@ def test_Volpad_inputs():
             name_source=['input_file'],
             name_template='%s_volpad.mnc',
             position=-1,
+            usedefault=True,
         ),
         smooth=dict(argstr='-smooth', ),
         smooth_distance=dict(argstr='-smooth_distance %s', ),
@@ -40,7 +42,7 @@ def test_Volpad_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Volpad_outputs():
-    output_map = dict(output_file=dict(), )
+    output_map = dict(output_file=dict(usedefault=True, ), )
     outputs = Volpad.output_spec()
 
     for key, metadata in list(output_map.items()):

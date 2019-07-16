@@ -11,7 +11,10 @@ def test_GradientAnisotropicDiffusionImageFilter_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputVolume=dict(argstr='--inputVolume %s', ),
+        inputVolume=dict(
+            argstr='--inputVolume %s',
+            usedefault=True,
+        ),
         numberOfIterations=dict(argstr='--numberOfIterations %d', ),
         outputVolume=dict(
             argstr='--outputVolume %s',
@@ -25,7 +28,7 @@ def test_GradientAnisotropicDiffusionImageFilter_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_GradientAnisotropicDiffusionImageFilter_outputs():
-    output_map = dict(outputVolume=dict(), )
+    output_map = dict(outputVolume=dict(usedefault=True, ), )
     outputs = GradientAnisotropicDiffusionImageFilter.output_spec()
 
     for key, metadata in list(output_map.items()):

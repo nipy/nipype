@@ -16,6 +16,7 @@ def test_TShift_inputs():
             copyfile=False,
             mandatory=True,
             position=-1,
+            usedefault=True,
         ),
         interp=dict(argstr='-%s', ),
         num_threads=dict(
@@ -26,6 +27,7 @@ def test_TShift_inputs():
             argstr='-prefix %s',
             name_source='in_file',
             name_template='%s_tshift',
+            usedefault=True,
         ),
         outputtype=dict(),
         rlt=dict(argstr='-rlt', ),
@@ -56,8 +58,8 @@ def test_TShift_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TShift_outputs():
     output_map = dict(
-        out_file=dict(),
-        timing_file=dict(),
+        out_file=dict(usedefault=True, ),
+        timing_file=dict(usedefault=True, ),
     )
     outputs = TShift.output_spec()
 

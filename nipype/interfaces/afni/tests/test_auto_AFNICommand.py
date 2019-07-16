@@ -14,11 +14,6 @@ def test_AFNICommand_inputs():
             nohash=True,
             usedefault=True,
         ),
-        out_file=dict(
-            argstr='-prefix %s',
-            name_source=['in_file'],
-            name_template='%s_afni',
-        ),
         outputtype=dict(),
     )
     inputs = AFNICommand.input_spec()

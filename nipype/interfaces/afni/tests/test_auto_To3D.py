@@ -18,6 +18,7 @@ def test_To3D_inputs():
             argstr='%s/*.dcm',
             mandatory=True,
             position=-1,
+            usedefault=True,
         ),
         num_threads=dict(
             nohash=True,
@@ -27,6 +28,7 @@ def test_To3D_inputs():
             argstr='-prefix %s',
             name_source=['in_folder'],
             name_template='%s',
+            usedefault=True,
         ),
         outputtype=dict(),
         skipoutliers=dict(argstr='-skip_outliers', ),
@@ -37,7 +39,7 @@ def test_To3D_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_To3D_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = To3D.output_spec()
 
     for key, metadata in list(output_map.items()):

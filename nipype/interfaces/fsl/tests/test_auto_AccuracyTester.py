@@ -20,11 +20,13 @@ def test_AccuracyTester_inputs():
             argstr='%s',
             mandatory=True,
             position=2,
+            usedefault=True,
         ),
         trained_wts_file=dict(
             argstr='%s',
             mandatory=True,
             position=1,
+            usedefault=True,
         ),
     )
     inputs = AccuracyTester.input_spec()
@@ -37,6 +39,7 @@ def test_AccuracyTester_outputs():
         output_directory=dict(
             argstr='%s',
             position=1,
+            usedefault=True,
         ), )
     outputs = AccuracyTester.output_spec()
 

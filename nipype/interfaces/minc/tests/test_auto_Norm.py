@@ -23,6 +23,7 @@ def test_Norm_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         lower=dict(argstr='-lower %s', ),
         mask=dict(argstr='-mask %s', ),
@@ -35,6 +36,7 @@ def test_Norm_inputs():
             name_source=['input_file'],
             name_template='%s_norm.mnc',
             position=-1,
+            usedefault=True,
         ),
         output_threshold_mask=dict(
             argstr='-threshold_mask %s',
@@ -55,8 +57,8 @@ def test_Norm_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Norm_outputs():
     output_map = dict(
-        output_file=dict(),
-        output_threshold_mask=dict(),
+        output_file=dict(usedefault=True, ),
+        output_threshold_mask=dict(usedefault=True, ),
     )
     outputs = Norm.output_spec()
 

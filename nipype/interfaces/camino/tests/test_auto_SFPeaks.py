@@ -17,6 +17,7 @@ def test_SFPeaks_inputs():
         in_file=dict(
             argstr='-inputfile %s',
             mandatory=True,
+            usedefault=True,
         ),
         inputmodel=dict(
             argstr='-inputmodel %s',
@@ -52,7 +53,10 @@ def test_SFPeaks_inputs():
             argstr='-rbfpointset %d',
             units='NA',
         ),
-        scheme_file=dict(argstr='%s', ),
+        scheme_file=dict(
+            argstr='%s',
+            usedefault=True,
+        ),
         searchradius=dict(
             argstr='-searchradius %f',
             units='NA',
@@ -68,7 +72,7 @@ def test_SFPeaks_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SFPeaks_outputs():
-    output_map = dict(peaks=dict(), )
+    output_map = dict(peaks=dict(usedefault=True, ), )
     outputs = SFPeaks.output_spec()
 
     for key, metadata in list(output_map.items()):

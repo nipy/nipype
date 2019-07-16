@@ -29,6 +29,7 @@ def test_NwarpCat_inputs():
             argstr='-prefix %s',
             name_source='in_files',
             name_template='%s_NwarpCat',
+            usedefault=True,
         ),
         outputtype=dict(),
         space=dict(argstr='-space %s', ),
@@ -40,7 +41,7 @@ def test_NwarpCat_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_NwarpCat_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = NwarpCat.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -6,7 +6,10 @@ from ..dti import DTIFit
 def test_DTIFit_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        bgmask=dict(argstr='-bgmask %s', ),
+        bgmask=dict(
+            argstr='-bgmask %s',
+            usedefault=True,
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -15,6 +18,7 @@ def test_DTIFit_inputs():
             argstr='%s',
             mandatory=True,
             position=1,
+            usedefault=True,
         ),
         non_linear=dict(
             argstr='-nonlinear',
@@ -29,6 +33,7 @@ def test_DTIFit_inputs():
             argstr='%s',
             mandatory=True,
             position=2,
+            usedefault=True,
         ),
     )
     inputs = DTIFit.input_spec()
@@ -37,7 +42,7 @@ def test_DTIFit_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DTIFit_outputs():
-    output_map = dict(tensor_fitted=dict(), )
+    output_map = dict(tensor_fitted=dict(usedefault=True, ), )
     outputs = DTIFit.output_spec()
 
     for key, metadata in list(output_map.items()):

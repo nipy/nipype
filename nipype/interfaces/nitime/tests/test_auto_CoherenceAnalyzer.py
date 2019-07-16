@@ -10,10 +10,13 @@ def test_CoherenceAnalyzer_inputs():
         figure_type=dict(usedefault=True, ),
         frequency_range=dict(usedefault=True, ),
         in_TS=dict(),
-        in_file=dict(requires=('TR', ), ),
+        in_file=dict(
+            requires=('TR', ),
+            usedefault=True,
+        ),
         n_overlap=dict(usedefault=True, ),
-        output_csv_file=dict(),
-        output_figure_file=dict(),
+        output_csv_file=dict(usedefault=True, ),
+        output_figure_file=dict(usedefault=True, ),
     )
     inputs = CoherenceAnalyzer.input_spec()
 
@@ -23,11 +26,11 @@ def test_CoherenceAnalyzer_inputs():
 def test_CoherenceAnalyzer_outputs():
     output_map = dict(
         coherence_array=dict(),
-        coherence_csv=dict(),
-        coherence_fig=dict(),
+        coherence_csv=dict(usedefault=True, ),
+        coherence_fig=dict(usedefault=True, ),
         timedelay_array=dict(),
-        timedelay_csv=dict(),
-        timedelay_fig=dict(),
+        timedelay_csv=dict(usedefault=True, ),
+        timedelay_fig=dict(usedefault=True, ),
     )
     outputs = CoherenceAnalyzer.output_spec()
 

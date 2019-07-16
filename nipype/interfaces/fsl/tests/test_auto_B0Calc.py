@@ -34,6 +34,7 @@ def test_B0Calc_inputs():
             argstr='-i %s',
             mandatory=True,
             position=0,
+            usedefault=True,
         ),
         out_file=dict(
             argstr='-o %s',
@@ -41,6 +42,7 @@ def test_B0Calc_inputs():
             name_template='%s_b0field',
             output_name='out_file',
             position=1,
+            usedefault=True,
         ),
         output_type=dict(),
         x_b0=dict(
@@ -81,7 +83,7 @@ def test_B0Calc_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_B0Calc_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = B0Calc.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -17,6 +17,7 @@ def test_Dcm2nii_inputs():
         config_file=dict(
             argstr='-b %s',
             genfile=True,
+            usedefault=True,
         ),
         convert_all_pars=dict(
             argstr='-v',
@@ -49,6 +50,7 @@ def test_Dcm2nii_inputs():
         output_dir=dict(
             argstr='-o %s',
             genfile=True,
+            usedefault=True,
         ),
         protocol_in_filename=dict(
             argstr='-p',
@@ -63,6 +65,7 @@ def test_Dcm2nii_inputs():
             argstr='%s',
             mandatory=True,
             position=-1,
+            usedefault=True,
             xor=['source_names'],
         ),
         source_in_filename=dict(

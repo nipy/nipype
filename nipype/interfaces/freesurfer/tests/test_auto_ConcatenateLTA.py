@@ -14,6 +14,7 @@ def test_ConcatenateLTA_inputs():
             argstr='%s',
             mandatory=True,
             position=-3,
+            usedefault=True,
         ),
         in_lta2=dict(
             argstr='%s',
@@ -30,10 +31,11 @@ def test_ConcatenateLTA_inputs():
             name_source=['in_lta1'],
             name_template='%s_concat',
             position=-1,
+            usedefault=True,
         ),
         out_type=dict(argstr='-out_type %d', ),
         subject=dict(argstr='-subject %s', ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         tal_source_file=dict(
             argstr='-tal %s',
             position=-5,
@@ -51,7 +53,7 @@ def test_ConcatenateLTA_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ConcatenateLTA_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = ConcatenateLTA.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -14,10 +14,12 @@ def test_AvScale_inputs():
         mat_file=dict(
             argstr='%s',
             position=-2,
+            usedefault=True,
         ),
         ref_file=dict(
             argstr='%s',
             position=-1,
+            usedefault=True,
         ),
     )
     inputs = AvScale.input_spec()

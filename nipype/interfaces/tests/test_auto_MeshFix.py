@@ -43,10 +43,12 @@ def test_MeshFix_inputs():
             argstr='%s',
             mandatory=True,
             position=1,
+            usedefault=True,
         ),
         in_file2=dict(
             argstr='%s',
             position=2,
+            usedefault=True,
         ),
         join_closest_components=dict(
             argstr='-jc',
@@ -61,6 +63,7 @@ def test_MeshFix_inputs():
         out_filename=dict(
             argstr='-o %s',
             genfile=True,
+            usedefault=True,
         ),
         output_type=dict(usedefault=True, ),
         quiet_mode=dict(argstr='-q', ),
@@ -94,7 +97,7 @@ def test_MeshFix_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MeshFix_outputs():
-    output_map = dict(mesh_file=dict(), )
+    output_map = dict(mesh_file=dict(usedefault=True, ), )
     outputs = MeshFix.output_spec()
 
     for key, metadata in list(output_map.items()):

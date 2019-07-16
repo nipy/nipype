@@ -10,10 +10,22 @@ def test_JointHistogram_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputMaskVolumeInXAxis=dict(argstr='--inputMaskVolumeInXAxis %s', ),
-        inputMaskVolumeInYAxis=dict(argstr='--inputMaskVolumeInYAxis %s', ),
-        inputVolumeInXAxis=dict(argstr='--inputVolumeInXAxis %s', ),
-        inputVolumeInYAxis=dict(argstr='--inputVolumeInYAxis %s', ),
+        inputMaskVolumeInXAxis=dict(
+            argstr='--inputMaskVolumeInXAxis %s',
+            usedefault=True,
+        ),
+        inputMaskVolumeInYAxis=dict(
+            argstr='--inputMaskVolumeInYAxis %s',
+            usedefault=True,
+        ),
+        inputVolumeInXAxis=dict(
+            argstr='--inputVolumeInXAxis %s',
+            usedefault=True,
+        ),
+        inputVolumeInYAxis=dict(
+            argstr='--inputVolumeInYAxis %s',
+            usedefault=True,
+        ),
         outputJointHistogramImage=dict(
             argstr='--outputJointHistogramImage %s', ),
         verbose=dict(argstr='--verbose ', ),

@@ -12,14 +12,21 @@ def test_DWIExtract_inputs():
             nohash=True,
             usedefault=True,
         ),
-        grad_file=dict(argstr='-grad %s', ),
+        grad_file=dict(
+            argstr='-grad %s',
+            usedefault=True,
+        ),
         grad_fsl=dict(argstr='-fslgrad %s %s', ),
-        in_bval=dict(),
-        in_bvec=dict(argstr='-fslgrad %s %s', ),
+        in_bval=dict(usedefault=True, ),
+        in_bvec=dict(
+            argstr='-fslgrad %s %s',
+            usedefault=True,
+        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         nobzero=dict(argstr='-no_bzero', ),
         nthreads=dict(
@@ -30,6 +37,7 @@ def test_DWIExtract_inputs():
             argstr='%s',
             mandatory=True,
             position=-1,
+            usedefault=True,
         ),
         shell=dict(
             argstr='-shell %s',
@@ -43,7 +51,7 @@ def test_DWIExtract_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DWIExtract_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = DWIExtract.output_spec()
 
     for key, metadata in list(output_map.items()):

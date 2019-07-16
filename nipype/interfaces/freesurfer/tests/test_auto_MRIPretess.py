@@ -14,11 +14,13 @@ def test_MRIPretess_inputs():
             argstr='%s',
             mandatory=True,
             position=-4,
+            usedefault=True,
         ),
         in_norm=dict(
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         keep=dict(argstr='-keep', ),
         label=dict(
@@ -34,8 +36,9 @@ def test_MRIPretess_inputs():
             name_source=['in_filled'],
             name_template='%s_pretesswm',
             position=-1,
+            usedefault=True,
         ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         test=dict(argstr='-test', ),
     )
     inputs = MRIPretess.input_spec()
@@ -44,7 +47,7 @@ def test_MRIPretess_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRIPretess_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = MRIPretess.output_spec()
 
     for key, metadata in list(output_map.items()):

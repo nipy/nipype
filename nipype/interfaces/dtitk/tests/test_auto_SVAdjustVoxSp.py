@@ -13,6 +13,7 @@ def test_SVAdjustVoxSp_inputs():
         in_file=dict(
             argstr='-in %s',
             mandatory=True,
+            usedefault=True,
         ),
         origin=dict(
             argstr='-origin %g %g %g',
@@ -23,9 +24,11 @@ def test_SVAdjustVoxSp_inputs():
             keep_extension=True,
             name_source='in_file',
             name_template='%s_avs',
+            usedefault=True,
         ),
         target_file=dict(
             argstr='-target %s',
+            usedefault=True,
             xor=['voxel_size', 'origin'],
         ),
         voxel_size=dict(
@@ -39,7 +42,7 @@ def test_SVAdjustVoxSp_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SVAdjustVoxSp_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = SVAdjustVoxSp.output_spec()
 
     for key, metadata in list(output_map.items()):

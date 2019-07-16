@@ -44,6 +44,7 @@ def test_MRICoreg_inputs():
             argstr='--ref %s',
             copyfile=False,
             mandatory=True,
+            usedefault=True,
             xor=['subject_id'],
         ),
         reference_mask=dict(
@@ -56,6 +57,7 @@ def test_MRICoreg_inputs():
             argstr='--mov %s',
             copyfile=False,
             mandatory=True,
+            usedefault=True,
         ),
         source_mask=dict(argstr='--mov-mask', ),
         source_oob=dict(argstr='--mov-oob', ),
@@ -66,7 +68,10 @@ def test_MRICoreg_inputs():
             requires=['subjects_dir'],
             xor=['reference_file'],
         ),
-        subjects_dir=dict(argstr='--sd %s', ),
+        subjects_dir=dict(
+            argstr='--sd %s',
+            usedefault=True,
+        ),
     )
     inputs = MRICoreg.input_spec()
 
@@ -75,9 +80,9 @@ def test_MRICoreg_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRICoreg_outputs():
     output_map = dict(
-        out_lta_file=dict(),
-        out_params_file=dict(),
-        out_reg_file=dict(),
+        out_lta_file=dict(usedefault=True, ),
+        out_params_file=dict(usedefault=True, ),
+        out_reg_file=dict(usedefault=True, ),
     )
     outputs = MRICoreg.output_spec()
 

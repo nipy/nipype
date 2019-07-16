@@ -6,7 +6,10 @@ from ..model import OneSampleTTestDesign
 def test_OneSampleTTestDesign_inputs():
     input_map = dict(
         covariates=dict(field='cov', ),
-        explicit_mask_file=dict(field='masking.em', ),
+        explicit_mask_file=dict(
+            field='masking.em',
+            usedefault=True,
+        ),
         global_calc_mean=dict(
             field='globalc.g_mean',
             xor=['global_calc_omit', 'global_calc_values'],
@@ -28,7 +31,10 @@ def test_OneSampleTTestDesign_inputs():
         mfile=dict(usedefault=True, ),
         no_grand_mean_scaling=dict(field='globalm.gmsca.gmsca_no', ),
         paths=dict(),
-        spm_mat_dir=dict(field='dir', ),
+        spm_mat_dir=dict(
+            field='dir',
+            usedefault=True,
+        ),
         threshold_mask_absolute=dict(
             field='masking.tm.tma.athresh',
             xor=['threshold_mask_none', 'threshold_mask_relative'],
@@ -54,7 +60,7 @@ def test_OneSampleTTestDesign_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_OneSampleTTestDesign_outputs():
-    output_map = dict(spm_mat_file=dict(), )
+    output_map = dict(spm_mat_file=dict(usedefault=True, ), )
     outputs = OneSampleTTestDesign.output_spec()
 
     for key, metadata in list(output_map.items()):

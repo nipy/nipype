@@ -22,6 +22,7 @@ def test_ExtractROI_inputs():
             argstr='%s',
             mandatory=True,
             position=0,
+            usedefault=True,
         ),
         output_type=dict(),
         roi_file=dict(
@@ -29,6 +30,7 @@ def test_ExtractROI_inputs():
             genfile=True,
             hash_files=False,
             position=1,
+            usedefault=True,
         ),
         t_min=dict(
             argstr='%d',
@@ -69,7 +71,7 @@ def test_ExtractROI_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ExtractROI_outputs():
-    output_map = dict(roi_file=dict(), )
+    output_map = dict(roi_file=dict(usedefault=True, ), )
     outputs = ExtractROI.output_spec()
 
     for key, metadata in list(output_map.items()):

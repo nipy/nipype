@@ -10,10 +10,22 @@ def test_ImageRegionPlotter_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputBinaryROIVolume=dict(argstr='--inputBinaryROIVolume %s', ),
-        inputLabelVolume=dict(argstr='--inputLabelVolume %s', ),
-        inputVolume1=dict(argstr='--inputVolume1 %s', ),
-        inputVolume2=dict(argstr='--inputVolume2 %s', ),
+        inputBinaryROIVolume=dict(
+            argstr='--inputBinaryROIVolume %s',
+            usedefault=True,
+        ),
+        inputLabelVolume=dict(
+            argstr='--inputLabelVolume %s',
+            usedefault=True,
+        ),
+        inputVolume1=dict(
+            argstr='--inputVolume1 %s',
+            usedefault=True,
+        ),
+        inputVolume2=dict(
+            argstr='--inputVolume2 %s',
+            usedefault=True,
+        ),
         numberOfHistogramBins=dict(argstr='--numberOfHistogramBins %d', ),
         outputJointHistogramData=dict(
             argstr='--outputJointHistogramData %s', ),

@@ -17,7 +17,10 @@ def test_Segment_inputs():
         ),
         gaussians_per_class=dict(field='opts.ngaus', ),
         gm_output_type=dict(field='output.GM', ),
-        mask_image=dict(field='opts.msk', ),
+        mask_image=dict(
+            field='opts.msk',
+            usedefault=True,
+        ),
         matlab_cmd=dict(),
         mfile=dict(usedefault=True, ),
         paths=dict(),
@@ -40,22 +43,23 @@ def test_Segment_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Segment_outputs():
     output_map = dict(
-        bias_corrected_image=dict(),
-        inverse_transformation_mat=dict(),
-        modulated_csf_image=dict(),
-        modulated_gm_image=dict(),
+        bias_corrected_image=dict(usedefault=True, ),
+        inverse_transformation_mat=dict(usedefault=True, ),
+        modulated_csf_image=dict(usedefault=True, ),
+        modulated_gm_image=dict(usedefault=True, ),
         modulated_input_image=dict(
             deprecated='0.10',
             new_name='bias_corrected_image',
+            usedefault=True,
         ),
-        modulated_wm_image=dict(),
-        native_csf_image=dict(),
-        native_gm_image=dict(),
-        native_wm_image=dict(),
-        normalized_csf_image=dict(),
-        normalized_gm_image=dict(),
-        normalized_wm_image=dict(),
-        transformation_mat=dict(),
+        modulated_wm_image=dict(usedefault=True, ),
+        native_csf_image=dict(usedefault=True, ),
+        native_gm_image=dict(usedefault=True, ),
+        native_wm_image=dict(usedefault=True, ),
+        normalized_csf_image=dict(usedefault=True, ),
+        normalized_gm_image=dict(usedefault=True, ),
+        normalized_wm_image=dict(usedefault=True, ),
+        transformation_mat=dict(usedefault=True, ),
     )
     outputs = Segment.output_spec()
 

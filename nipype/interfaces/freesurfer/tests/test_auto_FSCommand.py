@@ -10,7 +10,7 @@ def test_FSCommand_inputs():
             nohash=True,
             usedefault=True,
         ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
     )
     inputs = FSCommand.input_spec()
 

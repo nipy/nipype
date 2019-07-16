@@ -10,7 +10,10 @@ def test_MatlabCommand_inputs():
             nohash=True,
             usedefault=True,
         ),
-        logfile=dict(argstr='-logfile %s', ),
+        logfile=dict(
+            argstr='-logfile %s',
+            usedefault=True,
+        ),
         mfile=dict(usedefault=True, ),
         nodesktop=dict(
             argstr='-nodesktop',

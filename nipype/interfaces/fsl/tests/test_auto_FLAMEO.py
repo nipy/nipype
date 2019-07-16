@@ -10,21 +10,30 @@ def test_FLAMEO_inputs():
         cope_file=dict(
             argstr='--copefile=%s',
             mandatory=True,
+            usedefault=True,
         ),
         cov_split_file=dict(
             argstr='--covsplitfile=%s',
             mandatory=True,
+            usedefault=True,
         ),
         design_file=dict(
             argstr='--designfile=%s',
             mandatory=True,
+            usedefault=True,
         ),
-        dof_var_cope_file=dict(argstr='--dofvarcopefile=%s', ),
+        dof_var_cope_file=dict(
+            argstr='--dofvarcopefile=%s',
+            usedefault=True,
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
         ),
-        f_con_file=dict(argstr='--fcontrastsfile=%s', ),
+        f_con_file=dict(
+            argstr='--fcontrastsfile=%s',
+            usedefault=True,
+        ),
         fix_mean=dict(argstr='--fixmean', ),
         infer_outliers=dict(argstr='--inferoutliers', ),
         log_dir=dict(
@@ -34,6 +43,7 @@ def test_FLAMEO_inputs():
         mask_file=dict(
             argstr='--maskfile=%s',
             mandatory=True,
+            usedefault=True,
         ),
         n_jumps=dict(argstr='--njumps=%d', ),
         no_pe_outputs=dict(argstr='--nopeoutput', ),
@@ -48,8 +58,12 @@ def test_FLAMEO_inputs():
         t_con_file=dict(
             argstr='--tcontrastsfile=%s',
             mandatory=True,
+            usedefault=True,
         ),
-        var_cope_file=dict(argstr='--varcopefile=%s', ),
+        var_cope_file=dict(
+            argstr='--varcopefile=%s',
+            usedefault=True,
+        ),
     )
     inputs = FLAMEO.input_spec()
 
@@ -63,7 +77,7 @@ def test_FLAMEO_outputs():
         mrefvars=dict(),
         pes=dict(),
         res4d=dict(),
-        stats_dir=dict(),
+        stats_dir=dict(usedefault=True, ),
         tdof=dict(),
         tstats=dict(),
         var_copes=dict(),

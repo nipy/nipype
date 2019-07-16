@@ -16,6 +16,7 @@ def test_FilterTracks_inputs():
         ),
         exclude_file=dict(
             argstr='-exclude %s',
+            usedefault=True,
             xor=['exclude_file', 'exclude_spec'],
         ),
         exclude_spec=dict(
@@ -29,9 +30,11 @@ def test_FilterTracks_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         include_file=dict(
             argstr='-include %s',
+            usedefault=True,
             xor=['include_file', 'include_spec'],
         ),
         include_spec=dict(
@@ -53,6 +56,7 @@ def test_FilterTracks_inputs():
             name_source=['in_file'],
             name_template='%s_filt',
             position=-1,
+            usedefault=True,
         ),
         quiet=dict(
             argstr='-quiet',
@@ -65,7 +69,7 @@ def test_FilterTracks_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FilterTracks_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = FilterTracks.output_spec()
 
     for key, metadata in list(output_map.items()):

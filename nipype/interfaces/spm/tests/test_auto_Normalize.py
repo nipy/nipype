@@ -24,6 +24,7 @@ def test_Normalize_inputs():
             copyfile=False,
             field='subj.matname',
             mandatory=True,
+            usedefault=True,
             xor=['source', 'template'],
         ),
         paths=dict(),
@@ -37,17 +38,20 @@ def test_Normalize_inputs():
         source_weight=dict(
             copyfile=False,
             field='subj.wtsrc',
+            usedefault=True,
         ),
         template=dict(
             copyfile=False,
             field='eoptions.template',
             mandatory=True,
+            usedefault=True,
             xor=['parameter_file'],
         ),
         template_image_smoothing=dict(field='eoptions.smoref', ),
         template_weight=dict(
             copyfile=False,
             field='eoptions.weight',
+            usedefault=True,
         ),
         use_mcr=dict(),
         use_v8struct=dict(

@@ -14,6 +14,7 @@ def test_CopyGeom_inputs():
             name_template='%s',
             output_name='out_file',
             position=1,
+            usedefault=True,
         ),
         environ=dict(
             nohash=True,
@@ -27,6 +28,7 @@ def test_CopyGeom_inputs():
             argstr='%s',
             mandatory=True,
             position=0,
+            usedefault=True,
         ),
         output_type=dict(),
     )
@@ -36,7 +38,7 @@ def test_CopyGeom_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_CopyGeom_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = CopyGeom.output_spec()
 
     for key, metadata in list(output_map.items()):

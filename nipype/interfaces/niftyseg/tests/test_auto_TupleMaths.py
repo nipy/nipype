@@ -14,17 +14,20 @@ def test_TupleMaths_inputs():
             argstr='%s',
             mandatory=True,
             position=2,
+            usedefault=True,
         ),
         operand_file1=dict(
             argstr='%s',
             mandatory=True,
             position=5,
+            usedefault=True,
             xor=['operand_value1'],
         ),
         operand_file2=dict(
             argstr='%s',
             mandatory=True,
             position=6,
+            usedefault=True,
             xor=['operand_value2'],
         ),
         operand_value1=dict(
@@ -49,6 +52,7 @@ def test_TupleMaths_inputs():
             name_source=['in_file'],
             name_template='%s',
             position=-2,
+            usedefault=True,
         ),
         output_datatype=dict(
             argstr='-odt %s',
@@ -61,7 +65,7 @@ def test_TupleMaths_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TupleMaths_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = TupleMaths.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -14,7 +14,7 @@ def test_MakeAverageSubject_inputs():
             argstr='--out %s',
             usedefault=True,
         ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         subjects_ids=dict(
             argstr='--subjects %s',
             mandatory=True,

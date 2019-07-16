@@ -10,6 +10,7 @@ def test_ApplyTOPUP_inputs():
         encoding_file=dict(
             argstr='--datain=%s',
             mandatory=True,
+            usedefault=True,
         ),
         environ=dict(
             nohash=True,
@@ -28,10 +29,12 @@ def test_ApplyTOPUP_inputs():
             argstr='--topup=%s',
             copyfile=False,
             requires=['in_topup_movpar'],
+            usedefault=True,
         ),
         in_topup_movpar=dict(
             copyfile=False,
             requires=['in_topup_fieldcoef'],
+            usedefault=True,
         ),
         interp=dict(argstr='--interp=%s', ),
         method=dict(argstr='--method=%s', ),
@@ -39,6 +42,7 @@ def test_ApplyTOPUP_inputs():
             argstr='--out=%s',
             name_source=['in_files'],
             name_template='%s_corrected',
+            usedefault=True,
         ),
         output_type=dict(),
     )
@@ -48,7 +52,7 @@ def test_ApplyTOPUP_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ApplyTOPUP_outputs():
-    output_map = dict(out_corrected=dict(), )
+    output_map = dict(out_corrected=dict(usedefault=True, ), )
     outputs = ApplyTOPUP.output_spec()
 
     for key, metadata in list(output_map.items()):

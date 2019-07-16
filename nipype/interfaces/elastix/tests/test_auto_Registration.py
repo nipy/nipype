@@ -13,14 +13,25 @@ def test_Registration_inputs():
         fixed_image=dict(
             argstr='-f %s',
             mandatory=True,
+            usedefault=True,
         ),
-        fixed_mask=dict(argstr='-fMask %s', ),
-        initial_transform=dict(argstr='-t0 %s', ),
+        fixed_mask=dict(
+            argstr='-fMask %s',
+            usedefault=True,
+        ),
+        initial_transform=dict(
+            argstr='-t0 %s',
+            usedefault=True,
+        ),
         moving_image=dict(
             argstr='-m %s',
             mandatory=True,
+            usedefault=True,
         ),
-        moving_mask=dict(argstr='-mMask %s', ),
+        moving_mask=dict(
+            argstr='-mMask %s',
+            usedefault=True,
+        ),
         num_threads=dict(
             argstr='-threads %01d',
             nohash=True,
@@ -44,7 +55,7 @@ def test_Registration_inputs():
 def test_Registration_outputs():
     output_map = dict(
         transform=dict(),
-        warped_file=dict(),
+        warped_file=dict(usedefault=True, ),
         warped_files=dict(),
         warped_files_flags=dict(),
     )

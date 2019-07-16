@@ -7,36 +7,70 @@ def test_Aparc2Aseg_inputs():
     input_map = dict(
         a2009s=dict(argstr='--a2009s', ),
         args=dict(argstr='%s', ),
-        aseg=dict(argstr='--aseg %s', ),
+        aseg=dict(
+            argstr='--aseg %s',
+            usedefault=True,
+        ),
         copy_inputs=dict(),
-        ctxseg=dict(argstr='--ctxseg %s', ),
+        ctxseg=dict(
+            argstr='--ctxseg %s',
+            usedefault=True,
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
         ),
-        filled=dict(),
+        filled=dict(usedefault=True, ),
         hypo_wm=dict(argstr='--hypo-as-wm', ),
         label_wm=dict(argstr='--labelwm', ),
-        lh_annotation=dict(mandatory=True, ),
-        lh_pial=dict(mandatory=True, ),
-        lh_ribbon=dict(mandatory=True, ),
-        lh_white=dict(mandatory=True, ),
+        lh_annotation=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        lh_pial=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        lh_ribbon=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        lh_white=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
         out_file=dict(
             argstr='--o %s',
             mandatory=True,
+            usedefault=True,
         ),
-        rh_annotation=dict(mandatory=True, ),
-        rh_pial=dict(mandatory=True, ),
-        rh_ribbon=dict(mandatory=True, ),
-        rh_white=dict(mandatory=True, ),
-        ribbon=dict(mandatory=True, ),
+        rh_annotation=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        rh_pial=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        rh_ribbon=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        rh_white=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        ribbon=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
         rip_unknown=dict(argstr='--rip-unknown', ),
         subject_id=dict(
             argstr='--s %s',
             mandatory=True,
             usedefault=True,
         ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         volmask=dict(argstr='--volmask', ),
     )
     inputs = Aparc2Aseg.input_spec()
@@ -45,7 +79,11 @@ def test_Aparc2Aseg_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Aparc2Aseg_outputs():
-    output_map = dict(out_file=dict(argstr='%s', ), )
+    output_map = dict(
+        out_file=dict(
+            argstr='%s',
+            usedefault=True,
+        ), )
     outputs = Aparc2Aseg.output_spec()
 
     for key, metadata in list(output_map.items()):

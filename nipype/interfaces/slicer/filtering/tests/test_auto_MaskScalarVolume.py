@@ -8,10 +8,12 @@ def test_MaskScalarVolume_inputs():
         InputVolume=dict(
             argstr='%s',
             position=-3,
+            usedefault=True,
         ),
         MaskVolume=dict(
             argstr='%s',
             position=-2,
+            usedefault=True,
         ),
         OutputVolume=dict(
             argstr='%s',
@@ -32,7 +34,11 @@ def test_MaskScalarVolume_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MaskScalarVolume_outputs():
-    output_map = dict(OutputVolume=dict(position=-1, ), )
+    output_map = dict(
+        OutputVolume=dict(
+            position=-1,
+            usedefault=True,
+        ), )
     outputs = MaskScalarVolume.output_spec()
 
     for key, metadata in list(output_map.items()):

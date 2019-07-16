@@ -6,11 +6,14 @@ from ..parcellation import Parcellate
 def test_Parcellate_inputs():
     input_map = dict(
         dilation=dict(usedefault=True, ),
-        freesurfer_dir=dict(),
-        out_roi_file=dict(genfile=True, ),
+        freesurfer_dir=dict(usedefault=True, ),
+        out_roi_file=dict(
+            genfile=True,
+            usedefault=True,
+        ),
         parcellation_name=dict(usedefault=True, ),
         subject_id=dict(mandatory=True, ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
     )
     inputs = Parcellate.input_spec()
 
@@ -19,14 +22,14 @@ def test_Parcellate_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Parcellate_outputs():
     output_map = dict(
-        aseg_file=dict(),
-        cc_unknown_file=dict(),
-        dilated_roi_file_in_structural_space=dict(),
-        ribbon_file=dict(),
-        roi_file=dict(),
-        roi_file_in_structural_space=dict(),
-        roiv_file=dict(),
-        white_matter_mask_file=dict(),
+        aseg_file=dict(usedefault=True, ),
+        cc_unknown_file=dict(usedefault=True, ),
+        dilated_roi_file_in_structural_space=dict(usedefault=True, ),
+        ribbon_file=dict(usedefault=True, ),
+        roi_file=dict(usedefault=True, ),
+        roi_file_in_structural_space=dict(usedefault=True, ),
+        roiv_file=dict(usedefault=True, ),
+        white_matter_mask_file=dict(usedefault=True, ),
     )
     outputs = Parcellate.output_spec()
 

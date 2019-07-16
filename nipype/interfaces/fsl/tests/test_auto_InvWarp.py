@@ -19,6 +19,7 @@ def test_InvWarp_inputs():
             hash_files=False,
             name_source=['warp'],
             name_template='%s_inverse',
+            usedefault=True,
         ),
         jacobian_max=dict(argstr='--jmax=%f', ),
         jacobian_min=dict(argstr='--jmin=%f', ),
@@ -28,6 +29,7 @@ def test_InvWarp_inputs():
         reference=dict(
             argstr='--ref=%s',
             mandatory=True,
+            usedefault=True,
         ),
         regularise=dict(argstr='--regularise=%f', ),
         relative=dict(
@@ -37,6 +39,7 @@ def test_InvWarp_inputs():
         warp=dict(
             argstr='--warp=%s',
             mandatory=True,
+            usedefault=True,
         ),
     )
     inputs = InvWarp.input_spec()
@@ -45,7 +48,7 @@ def test_InvWarp_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_InvWarp_outputs():
-    output_map = dict(inverse_warp=dict(), )
+    output_map = dict(inverse_warp=dict(usedefault=True, ), )
     outputs = InvWarp.output_spec()
 
     for key, metadata in list(output_map.items()):

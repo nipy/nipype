@@ -9,6 +9,7 @@ def test_Vnifti2Image_inputs():
         attributes=dict(
             argstr='-attr %s',
             position=2,
+            usedefault=True,
         ),
         environ=dict(
             nohash=True,
@@ -18,6 +19,7 @@ def test_Vnifti2Image_inputs():
             argstr='-in %s',
             mandatory=True,
             position=1,
+            usedefault=True,
         ),
         out_file=dict(
             argstr='-out %s',
@@ -26,6 +28,7 @@ def test_Vnifti2Image_inputs():
             name_source=['in_file'],
             name_template='%s.v',
             position=-1,
+            usedefault=True,
         ),
     )
     inputs = Vnifti2Image.input_spec()
@@ -34,7 +37,7 @@ def test_Vnifti2Image_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Vnifti2Image_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = Vnifti2Image.output_spec()
 
     for key, metadata in list(output_map.items()):

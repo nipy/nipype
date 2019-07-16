@@ -16,6 +16,7 @@ def test_Directions2Amplitude_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         num_peaks=dict(argstr='-num %s', ),
         out_file=dict(
@@ -25,12 +26,16 @@ def test_Directions2Amplitude_inputs():
             name_source=['in_file'],
             name_template='%s_amplitudes.mif',
             position=-1,
+            usedefault=True,
         ),
         peak_directions=dict(
             argstr='-direction %s',
             sep=' ',
         ),
-        peaks_image=dict(argstr='-peaks %s', ),
+        peaks_image=dict(
+            argstr='-peaks %s',
+            usedefault=True,
+        ),
         quiet_display=dict(argstr='-quiet', ),
     )
     inputs = Directions2Amplitude.input_spec()
@@ -39,7 +44,7 @@ def test_Directions2Amplitude_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Directions2Amplitude_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = Directions2Amplitude.output_spec()
 
     for key, metadata in list(output_map.items()):

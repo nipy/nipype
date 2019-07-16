@@ -14,6 +14,7 @@ def test_MRITessellate_inputs():
             argstr='%s',
             mandatory=True,
             position=-3,
+            usedefault=True,
         ),
         label_value=dict(
             argstr='%d',
@@ -24,8 +25,9 @@ def test_MRITessellate_inputs():
             argstr='%s',
             genfile=True,
             position=-1,
+            usedefault=True,
         ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         tesselate_all_voxels=dict(argstr='-a', ),
         use_real_RAS_coordinates=dict(argstr='-n', ),
     )
@@ -35,7 +37,7 @@ def test_MRITessellate_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRITessellate_outputs():
-    output_map = dict(surface=dict(), )
+    output_map = dict(surface=dict(usedefault=True, ), )
     outputs = MRITessellate.output_spec()
 
     for key, metadata in list(output_map.items()):

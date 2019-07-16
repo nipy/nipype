@@ -8,6 +8,7 @@ def test_FIRST_inputs():
         affine_file=dict(
             argstr='-a %s',
             position=6,
+            usedefault=True,
         ),
         args=dict(argstr='%s', ),
         brain_extracted=dict(
@@ -23,6 +24,7 @@ def test_FIRST_inputs():
             copyfile=False,
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         list_of_specific_structures=dict(
             argstr='-s %s',
@@ -64,8 +66,8 @@ def test_FIRST_inputs():
 def test_FIRST_outputs():
     output_map = dict(
         bvars=dict(),
-        original_segmentations=dict(),
-        segmentation_file=dict(),
+        original_segmentations=dict(usedefault=True, ),
+        segmentation_file=dict(usedefault=True, ),
         vtk_surfaces=dict(),
     )
     outputs = FIRST.output_spec()

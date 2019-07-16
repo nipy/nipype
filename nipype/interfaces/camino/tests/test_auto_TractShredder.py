@@ -19,6 +19,7 @@ def test_TractShredder_inputs():
             argstr='< %s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         offset=dict(
             argstr='%d',
@@ -42,7 +43,7 @@ def test_TractShredder_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TractShredder_outputs():
-    output_map = dict(shredded=dict(), )
+    output_map = dict(shredded=dict(usedefault=True, ), )
     outputs = TractShredder.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -12,6 +12,7 @@ def test_FitQt1_inputs():
             argstr='-comp %s',
             name_source=['source_file'],
             name_template='%s_comp.nii.gz',
+            usedefault=True,
         ),
         environ=dict(
             nohash=True,
@@ -21,6 +22,7 @@ def test_FitQt1_inputs():
             argstr='-error %s',
             name_source=['source_file'],
             name_template='%s_error.nii.gz',
+            usedefault=True,
         ),
         flips=dict(
             argstr='-flips %s',
@@ -43,10 +45,12 @@ def test_FitQt1_inputs():
             argstr='-m0map %s',
             name_source=['source_file'],
             name_template='%s_m0map.nii.gz',
+            usedefault=True,
         ),
         mask=dict(
             argstr='-mask %s',
             position=2,
+            usedefault=True,
         ),
         maxit=dict(
             argstr='-maxit %d',
@@ -56,6 +60,7 @@ def test_FitQt1_inputs():
             argstr='-mcmap %s',
             name_source=['source_file'],
             name_template='%s_mcmap.nii.gz',
+            usedefault=True,
         ),
         mcmaxit=dict(argstr='-mcmaxit %d', ),
         mcout=dict(argstr='-mcout %s', ),
@@ -67,11 +72,13 @@ def test_FitQt1_inputs():
         prior=dict(
             argstr='-prior %s',
             position=3,
+            usedefault=True,
         ),
         res_file=dict(
             argstr='-res %s',
             name_source=['source_file'],
             name_template='%s_res.nii.gz',
+            usedefault=True,
         ),
         slice_no=dict(
             argstr='-slice %d',
@@ -81,6 +88,7 @@ def test_FitQt1_inputs():
             argstr='-source %s',
             mandatory=True,
             position=1,
+            usedefault=True,
         ),
         spgr=dict(argstr='-SPGR', ),
         sr_flag=dict(
@@ -91,12 +99,14 @@ def test_FitQt1_inputs():
             argstr='-syn %s',
             name_source=['source_file'],
             name_template='%s_syn.nii.gz',
+            usedefault=True,
         ),
         t1_list=dict(argstr='-T1list %s', ),
         t1map_file=dict(
             argstr='-t1map %s',
             name_source=['source_file'],
             name_template='%s_t1map.nii.gz',
+            usedefault=True,
         ),
         t1max=dict(argstr='-T1max %f', ),
         t1min=dict(argstr='-T1min %f', ),
@@ -126,13 +136,13 @@ def test_FitQt1_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FitQt1_outputs():
     output_map = dict(
-        comp_file=dict(),
-        error_file=dict(),
-        m0map_file=dict(),
-        mcmap_file=dict(),
-        res_file=dict(),
-        syn_file=dict(),
-        t1map_file=dict(),
+        comp_file=dict(usedefault=True, ),
+        error_file=dict(usedefault=True, ),
+        m0map_file=dict(usedefault=True, ),
+        mcmap_file=dict(usedefault=True, ),
+        res_file=dict(usedefault=True, ),
+        syn_file=dict(usedefault=True, ),
+        t1map_file=dict(usedefault=True, ),
     )
     outputs = FitQt1.output_spec()
 

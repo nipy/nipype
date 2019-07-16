@@ -10,8 +10,14 @@ def test_DumpBinaryTrainingVectors_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputHeaderFilename=dict(argstr='--inputHeaderFilename %s', ),
-        inputVectorFilename=dict(argstr='--inputVectorFilename %s', ),
+        inputHeaderFilename=dict(
+            argstr='--inputHeaderFilename %s',
+            usedefault=True,
+        ),
+        inputVectorFilename=dict(
+            argstr='--inputVectorFilename %s',
+            usedefault=True,
+        ),
     )
     inputs = DumpBinaryTrainingVectors.input_spec()
 

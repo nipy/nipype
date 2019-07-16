@@ -22,6 +22,7 @@ def test_Unifize_inputs():
             copyfile=False,
             mandatory=True,
             position=-1,
+            usedefault=True,
         ),
         no_duplo=dict(argstr='-noduplo', ),
         num_threads=dict(
@@ -32,11 +33,15 @@ def test_Unifize_inputs():
             argstr='-prefix %s',
             name_source='in_file',
             name_template='%s_unifized',
+            usedefault=True,
         ),
         outputtype=dict(),
         quiet=dict(argstr='-quiet', ),
         rbt=dict(argstr='-rbt %f %f %f', ),
-        scale_file=dict(argstr='-ssave %s', ),
+        scale_file=dict(
+            argstr='-ssave %s',
+            usedefault=True,
+        ),
         t2=dict(argstr='-T2', ),
         t2_up=dict(argstr='-T2up %f', ),
         urad=dict(argstr='-Urad %s', ),
@@ -48,8 +53,8 @@ def test_Unifize_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Unifize_outputs():
     output_map = dict(
-        out_file=dict(),
-        scale_file=dict(),
+        out_file=dict(usedefault=True, ),
+        scale_file=dict(usedefault=True, ),
     )
     outputs = Unifize.output_spec()
 

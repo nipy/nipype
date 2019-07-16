@@ -24,6 +24,7 @@ def test_TCat_inputs():
             argstr='-prefix %s',
             name_source='in_files',
             name_template='%s_tcat',
+            usedefault=True,
         ),
         outputtype=dict(),
         rlt=dict(
@@ -38,7 +39,7 @@ def test_TCat_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TCat_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = TCat.output_spec()
 
     for key, metadata in list(output_map.items()):

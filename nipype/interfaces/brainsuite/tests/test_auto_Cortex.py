@@ -22,14 +22,17 @@ def test_Cortex_inputs():
         inputHemisphereLabelFile=dict(
             argstr='-h %s',
             mandatory=True,
+            usedefault=True,
         ),
         inputTissueFractionFile=dict(
             argstr='-f %s',
             mandatory=True,
+            usedefault=True,
         ),
         outputCerebrumMask=dict(
             argstr='-o %s',
             genfile=True,
+            usedefault=True,
         ),
         timer=dict(argstr='--timer', ),
         tissueFractionThreshold=dict(
@@ -44,7 +47,7 @@ def test_Cortex_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Cortex_outputs():
-    output_map = dict(outputCerebrumMask=dict(), )
+    output_map = dict(outputCerebrumMask=dict(usedefault=True, ), )
     outputs = Cortex.output_spec()
 
     for key, metadata in list(output_map.items()):

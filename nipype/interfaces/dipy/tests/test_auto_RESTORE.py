@@ -6,11 +6,20 @@ from ..reconstruction import RESTORE
 def test_RESTORE_inputs():
     input_map = dict(
         b0_thres=dict(usedefault=True, ),
-        in_bval=dict(mandatory=True, ),
-        in_bvec=dict(mandatory=True, ),
-        in_file=dict(mandatory=True, ),
-        in_mask=dict(),
-        noise_mask=dict(),
+        in_bval=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        in_bvec=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        in_mask=dict(usedefault=True, ),
+        noise_mask=dict(usedefault=True, ),
         out_prefix=dict(),
     )
     inputs = RESTORE.input_spec()
@@ -20,13 +29,13 @@ def test_RESTORE_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_RESTORE_outputs():
     output_map = dict(
-        evals=dict(),
-        evecs=dict(),
-        fa=dict(),
-        md=dict(),
-        mode=dict(),
-        rd=dict(),
-        trace=dict(),
+        evals=dict(usedefault=True, ),
+        evecs=dict(usedefault=True, ),
+        fa=dict(usedefault=True, ),
+        md=dict(usedefault=True, ),
+        mode=dict(usedefault=True, ),
+        rd=dict(usedefault=True, ),
+        trace=dict(usedefault=True, ),
     )
     outputs = RESTORE.output_spec()
 

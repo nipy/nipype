@@ -10,6 +10,7 @@ def test_DWI2SphericalHarmonicsImage_inputs():
             argstr='-grad %s',
             mandatory=True,
             position=1,
+            usedefault=True,
         ),
         environ=dict(
             nohash=True,
@@ -19,6 +20,7 @@ def test_DWI2SphericalHarmonicsImage_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         maximum_harmonic_order=dict(argstr='-lmax %s', ),
         normalise=dict(
@@ -29,6 +31,7 @@ def test_DWI2SphericalHarmonicsImage_inputs():
             argstr='%s',
             genfile=True,
             position=-1,
+            usedefault=True,
         ),
     )
     inputs = DWI2SphericalHarmonicsImage.input_spec()
@@ -37,7 +40,7 @@ def test_DWI2SphericalHarmonicsImage_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DWI2SphericalHarmonicsImage_outputs():
-    output_map = dict(spherical_harmonics_image=dict(), )
+    output_map = dict(spherical_harmonics_image=dict(usedefault=True, ), )
     outputs = DWI2SphericalHarmonicsImage.output_spec()
 
     for key, metadata in list(output_map.items()):

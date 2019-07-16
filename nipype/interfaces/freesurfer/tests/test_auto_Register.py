@@ -14,27 +14,34 @@ def test_Register_inputs():
             nohash=True,
             usedefault=True,
         ),
-        in_smoothwm=dict(copyfile=True, ),
+        in_smoothwm=dict(
+            copyfile=True,
+            usedefault=True,
+        ),
         in_sulc=dict(
             copyfile=True,
             mandatory=True,
+            usedefault=True,
         ),
         in_surf=dict(
             argstr='%s',
             copyfile=True,
             mandatory=True,
             position=-3,
+            usedefault=True,
         ),
         out_file=dict(
             argstr='%s',
             genfile=True,
             position=-1,
+            usedefault=True,
         ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         target=dict(
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
     )
     inputs = Register.input_spec()
@@ -43,7 +50,7 @@ def test_Register_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Register_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = Register.output_spec()
 
     for key, metadata in list(output_map.items()):

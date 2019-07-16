@@ -14,6 +14,7 @@ def test_ApplyMask_inputs():
             argstr='%s',
             mandatory=True,
             position=-3,
+            usedefault=True,
         ),
         invert_xfm=dict(argstr='-invert', ),
         keep_mask_deletion_edits=dict(argstr='-keep_mask_deletion_edits', ),
@@ -21,6 +22,7 @@ def test_ApplyMask_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         mask_thresh=dict(argstr='-T %.4f', ),
         out_file=dict(
@@ -30,13 +32,23 @@ def test_ApplyMask_inputs():
             name_source=['in_file'],
             name_template='%s_masked',
             position=-1,
+            usedefault=True,
         ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         transfer=dict(argstr='-transfer %d', ),
         use_abs=dict(argstr='-abs', ),
-        xfm_file=dict(argstr='-xform %s', ),
-        xfm_source=dict(argstr='-lta_src %s', ),
-        xfm_target=dict(argstr='-lta_dst %s', ),
+        xfm_file=dict(
+            argstr='-xform %s',
+            usedefault=True,
+        ),
+        xfm_source=dict(
+            argstr='-lta_src %s',
+            usedefault=True,
+        ),
+        xfm_target=dict(
+            argstr='-lta_dst %s',
+            usedefault=True,
+        ),
     )
     inputs = ApplyMask.input_spec()
 
@@ -44,7 +56,7 @@ def test_ApplyMask_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ApplyMask_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = ApplyMask.output_spec()
 
     for key, metadata in list(output_map.items()):

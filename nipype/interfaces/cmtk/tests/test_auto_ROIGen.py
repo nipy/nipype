@@ -5,11 +5,26 @@ from ..cmtk import ROIGen
 
 def test_ROIGen_inputs():
     input_map = dict(
-        LUT_file=dict(xor=['use_freesurfer_LUT'], ),
-        aparc_aseg_file=dict(mandatory=True, ),
-        freesurfer_dir=dict(requires=['use_freesurfer_LUT'], ),
-        out_dict_file=dict(genfile=True, ),
-        out_roi_file=dict(genfile=True, ),
+        LUT_file=dict(
+            usedefault=True,
+            xor=['use_freesurfer_LUT'],
+        ),
+        aparc_aseg_file=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        freesurfer_dir=dict(
+            requires=['use_freesurfer_LUT'],
+            usedefault=True,
+        ),
+        out_dict_file=dict(
+            genfile=True,
+            usedefault=True,
+        ),
+        out_roi_file=dict(
+            genfile=True,
+            usedefault=True,
+        ),
         use_freesurfer_LUT=dict(xor=['LUT_file'], ),
     )
     inputs = ROIGen.input_spec()
@@ -19,8 +34,8 @@ def test_ROIGen_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ROIGen_outputs():
     output_map = dict(
-        dict_file=dict(),
-        roi_file=dict(),
+        dict_file=dict(usedefault=True, ),
+        roi_file=dict(usedefault=True, ),
     )
     outputs = ROIGen.output_spec()
 

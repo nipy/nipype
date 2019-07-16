@@ -6,7 +6,10 @@ from ..odf import LinRecon
 def test_LinRecon_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        bgmask=dict(argstr='-bgmask %s', ),
+        bgmask=dict(
+            argstr='-bgmask %s',
+            usedefault=True,
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -15,6 +18,7 @@ def test_LinRecon_inputs():
             argstr='%s',
             mandatory=True,
             position=1,
+            usedefault=True,
         ),
         log=dict(argstr='-log', ),
         normalize=dict(argstr='-normalize', ),
@@ -27,11 +31,13 @@ def test_LinRecon_inputs():
             argstr='%s',
             mandatory=True,
             position=3,
+            usedefault=True,
         ),
         scheme_file=dict(
             argstr='%s',
             mandatory=True,
             position=2,
+            usedefault=True,
         ),
     )
     inputs = LinRecon.input_spec()
@@ -40,7 +46,7 @@ def test_LinRecon_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_LinRecon_outputs():
-    output_map = dict(recon_data=dict(), )
+    output_map = dict(recon_data=dict(usedefault=True, ), )
     outputs = LinRecon.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -20,6 +20,7 @@ def test_PlotMotionParams_inputs():
             argstr='-o %s',
             genfile=True,
             hash_files=False,
+            usedefault=True,
         ),
         output_type=dict(),
         plot_size=dict(argstr='%s', ),
@@ -34,7 +35,7 @@ def test_PlotMotionParams_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_PlotMotionParams_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = PlotMotionParams.output_spec()
 
     for key, metadata in list(output_map.items()):

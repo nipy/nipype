@@ -10,9 +10,18 @@ def test_gtractResampleB0_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputAnatomicalVolume=dict(argstr='--inputAnatomicalVolume %s', ),
-        inputTransform=dict(argstr='--inputTransform %s', ),
-        inputVolume=dict(argstr='--inputVolume %s', ),
+        inputAnatomicalVolume=dict(
+            argstr='--inputAnatomicalVolume %s',
+            usedefault=True,
+        ),
+        inputTransform=dict(
+            argstr='--inputTransform %s',
+            usedefault=True,
+        ),
+        inputVolume=dict(
+            argstr='--inputVolume %s',
+            usedefault=True,
+        ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         outputVolume=dict(
             argstr='--outputVolume %s',
@@ -27,7 +36,7 @@ def test_gtractResampleB0_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_gtractResampleB0_outputs():
-    output_map = dict(outputVolume=dict(), )
+    output_map = dict(outputVolume=dict(usedefault=True, ), )
     outputs = gtractResampleB0.output_spec()
 
     for key, metadata in list(output_map.items()):

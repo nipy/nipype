@@ -13,10 +13,12 @@ def test_MultiplyScalarVolumes_inputs():
         inputVolume1=dict(
             argstr='%s',
             position=-3,
+            usedefault=True,
         ),
         inputVolume2=dict(
             argstr='%s',
             position=-2,
+            usedefault=True,
         ),
         order=dict(argstr='--order %s', ),
         outputVolume=dict(
@@ -31,7 +33,11 @@ def test_MultiplyScalarVolumes_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MultiplyScalarVolumes_outputs():
-    output_map = dict(outputVolume=dict(position=-1, ), )
+    output_map = dict(
+        outputVolume=dict(
+            position=-1,
+            usedefault=True,
+        ), )
     outputs = MultiplyScalarVolumes.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -15,7 +15,10 @@ def test_Gennlxfm_inputs():
             usedefault=True,
         ),
         ident=dict(argstr='-ident', ),
-        like=dict(argstr='-like %s', ),
+        like=dict(
+            argstr='-like %s',
+            usedefault=True,
+        ),
         output_file=dict(
             argstr='%s',
             genfile=True,
@@ -23,6 +26,7 @@ def test_Gennlxfm_inputs():
             name_source=['like'],
             name_template='%s_gennlxfm.xfm',
             position=-1,
+            usedefault=True,
         ),
         step=dict(argstr='-step %s', ),
         verbose=dict(argstr='-verbose', ),
@@ -34,8 +38,8 @@ def test_Gennlxfm_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Gennlxfm_outputs():
     output_map = dict(
-        output_file=dict(),
-        output_grid=dict(),
+        output_file=dict(usedefault=True, ),
+        output_grid=dict(usedefault=True, ),
     )
     outputs = Gennlxfm.output_spec()
 

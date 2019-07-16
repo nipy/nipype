@@ -19,6 +19,7 @@ def test_Split_inputs():
             argstr='%s',
             mandatory=True,
             position=0,
+            usedefault=True,
         ),
         out_base_name=dict(
             argstr='%s',

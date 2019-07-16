@@ -20,6 +20,7 @@ def test_Volcentre_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         output_file=dict(
             argstr='%s',
@@ -28,6 +29,7 @@ def test_Volcentre_inputs():
             name_source=['input_file'],
             name_template='%s_volcentre.mnc',
             position=-1,
+            usedefault=True,
         ),
         verbose=dict(argstr='-verbose', ),
         zero_dircos=dict(argstr='-zero_dircos', ),
@@ -38,7 +40,7 @@ def test_Volcentre_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Volcentre_outputs():
-    output_map = dict(output_file=dict(), )
+    output_map = dict(output_file=dict(usedefault=True, ), )
     outputs = Volcentre.output_spec()
 
     for key, metadata in list(output_map.items()):

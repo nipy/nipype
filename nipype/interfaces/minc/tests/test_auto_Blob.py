@@ -15,6 +15,7 @@ def test_Blob_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         magnitude=dict(argstr='-magnitude', ),
         output_file=dict(
@@ -24,6 +25,7 @@ def test_Blob_inputs():
             name_source=['input_file'],
             name_template='%s_blob.mnc',
             position=-1,
+            usedefault=True,
         ),
         trace=dict(argstr='-trace', ),
         translation=dict(argstr='-translation', ),
@@ -34,7 +36,7 @@ def test_Blob_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Blob_outputs():
-    output_map = dict(output_file=dict(), )
+    output_map = dict(output_file=dict(usedefault=True, ), )
     outputs = Blob.output_spec()
 
     for key, metadata in list(output_map.items()):

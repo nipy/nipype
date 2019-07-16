@@ -7,7 +7,10 @@ def test_FEATRegister_inputs():
     input_map = dict(
         feat_dirs=dict(mandatory=True, ),
         reg_dof=dict(usedefault=True, ),
-        reg_image=dict(mandatory=True, ),
+        reg_image=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
     )
     inputs = FEATRegister.input_spec()
 
@@ -15,7 +18,7 @@ def test_FEATRegister_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FEATRegister_outputs():
-    output_map = dict(fsf_file=dict(), )
+    output_map = dict(fsf_file=dict(usedefault=True, ), )
     outputs = FEATRegister.output_spec()
 
     for key, metadata in list(output_map.items()):

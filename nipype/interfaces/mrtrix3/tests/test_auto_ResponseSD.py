@@ -15,6 +15,7 @@ def test_ResponseSD_inputs():
         csf_file=dict(
             argstr='%s',
             position=-1,
+            usedefault=True,
         ),
         environ=dict(
             nohash=True,
@@ -23,17 +24,28 @@ def test_ResponseSD_inputs():
         gm_file=dict(
             argstr='%s',
             position=-2,
+            usedefault=True,
         ),
-        grad_file=dict(argstr='-grad %s', ),
+        grad_file=dict(
+            argstr='-grad %s',
+            usedefault=True,
+        ),
         grad_fsl=dict(argstr='-fslgrad %s %s', ),
-        in_bval=dict(),
-        in_bvec=dict(argstr='-fslgrad %s %s', ),
+        in_bval=dict(usedefault=True, ),
+        in_bvec=dict(
+            argstr='-fslgrad %s %s',
+            usedefault=True,
+        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
             position=-5,
+            usedefault=True,
         ),
-        in_mask=dict(argstr='-mask %s', ),
+        in_mask=dict(
+            argstr='-mask %s',
+            usedefault=True,
+        ),
         max_sh=dict(
             argstr='-lmax %s',
             sep=',',
@@ -41,6 +53,7 @@ def test_ResponseSD_inputs():
         mtt_file=dict(
             argstr='%s',
             position=-4,
+            usedefault=True,
         ),
         nthreads=dict(
             argstr='-nthreads %d',
@@ -59,9 +72,18 @@ def test_ResponseSD_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ResponseSD_outputs():
     output_map = dict(
-        csf_file=dict(argstr='%s', ),
-        gm_file=dict(argstr='%s', ),
-        wm_file=dict(argstr='%s', ),
+        csf_file=dict(
+            argstr='%s',
+            usedefault=True,
+        ),
+        gm_file=dict(
+            argstr='%s',
+            usedefault=True,
+        ),
+        wm_file=dict(
+            argstr='%s',
+            usedefault=True,
+        ),
     )
     outputs = ResponseSD.output_spec()
 

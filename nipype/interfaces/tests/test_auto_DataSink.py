@@ -6,7 +6,7 @@ from ..io import DataSink
 def test_DataSink_inputs():
     input_map = dict(
         _outputs=dict(usedefault=True, ),
-        base_directory=dict(),
+        base_directory=dict(usedefault=True, ),
         bucket=dict(),
         container=dict(),
         creds_path=dict(),
@@ -15,7 +15,7 @@ def test_DataSink_inputs():
         parameterization=dict(usedefault=True, ),
         regexp_substitutions=dict(),
         remove_dest_dir=dict(usedefault=True, ),
-        strip_dir=dict(),
+        strip_dir=dict(usedefault=True, ),
         substitutions=dict(),
     )
     inputs = DataSink.input_spec()

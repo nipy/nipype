@@ -29,6 +29,7 @@ def test_Atropos_inputs():
         mask_image=dict(
             argstr='--mask-image %s',
             mandatory=True,
+            usedefault=True,
         ),
         maximum_number_of_icm_terations=dict(
             requires=['icm_use_synchronous_update'], ),
@@ -44,6 +45,7 @@ def test_Atropos_inputs():
             argstr='%s',
             genfile=True,
             hash_files=False,
+            usedefault=True,
         ),
         output_posteriors_name_template=dict(usedefault=True, ),
         posterior_formulation=dict(argstr='%s', ),
@@ -65,7 +67,7 @@ def test_Atropos_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Atropos_outputs():
     output_map = dict(
-        classified_image=dict(),
+        classified_image=dict(usedefault=True, ),
         posteriors=dict(),
     )
     outputs = Atropos.output_spec()

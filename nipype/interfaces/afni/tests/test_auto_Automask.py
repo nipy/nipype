@@ -10,6 +10,7 @@ def test_Automask_inputs():
             argstr='-apply_prefix %s',
             name_source='in_file',
             name_template='%s_masked',
+            usedefault=True,
         ),
         clfrac=dict(argstr='-clfrac %s', ),
         dilate=dict(argstr='-dilate %s', ),
@@ -23,6 +24,7 @@ def test_Automask_inputs():
             copyfile=False,
             mandatory=True,
             position=-1,
+            usedefault=True,
         ),
         num_threads=dict(
             nohash=True,
@@ -32,6 +34,7 @@ def test_Automask_inputs():
             argstr='-prefix %s',
             name_source='in_file',
             name_template='%s_mask',
+            usedefault=True,
         ),
         outputtype=dict(),
     )
@@ -42,8 +45,8 @@ def test_Automask_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Automask_outputs():
     output_map = dict(
-        brain_file=dict(),
-        out_file=dict(),
+        brain_file=dict(usedefault=True, ),
+        out_file=dict(usedefault=True, ),
     )
     outputs = Automask.output_spec()
 

@@ -18,6 +18,7 @@ def test_DiffeoSymTensor3DVol_inputs():
         in_file=dict(
             argstr='-in %s',
             mandatory=True,
+            usedefault=True,
         ),
         interpolation=dict(
             argstr='-interp %s',
@@ -28,6 +29,7 @@ def test_DiffeoSymTensor3DVol_inputs():
             keep_extension=True,
             name_source='in_file',
             name_template='%s_diffeoxfmd',
+            usedefault=True,
         ),
         reorient=dict(
             argstr='-reorient %s',
@@ -36,11 +38,13 @@ def test_DiffeoSymTensor3DVol_inputs():
         resampling_type=dict(argstr='-type %s', ),
         target=dict(
             argstr='-target %s',
+            usedefault=True,
             xor=['voxel_size'],
         ),
         transform=dict(
             argstr='-trans %s',
             mandatory=True,
+            usedefault=True,
         ),
         voxel_size=dict(
             argstr='-vsize %g %g %g',
@@ -53,7 +57,7 @@ def test_DiffeoSymTensor3DVol_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DiffeoSymTensor3DVol_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = DiffeoSymTensor3DVol.output_spec()
 
     for key, metadata in list(output_map.items()):

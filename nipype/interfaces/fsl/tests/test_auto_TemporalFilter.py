@@ -19,6 +19,7 @@ def test_TemporalFilter_inputs():
             argstr='%s',
             mandatory=True,
             position=2,
+            usedefault=True,
         ),
         internal_datatype=dict(
             argstr='-dt %s',
@@ -38,6 +39,7 @@ def test_TemporalFilter_inputs():
             genfile=True,
             hash_files=False,
             position=-2,
+            usedefault=True,
         ),
         output_datatype=dict(
             argstr='-odt %s',
@@ -51,7 +53,7 @@ def test_TemporalFilter_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TemporalFilter_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = TemporalFilter.output_spec()
 
     for key, metadata in list(output_map.items()):

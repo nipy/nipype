@@ -6,10 +6,19 @@ from ..tensors import DTI
 def test_DTI_inputs():
     input_map = dict(
         b0_thres=dict(usedefault=True, ),
-        in_bval=dict(mandatory=True, ),
-        in_bvec=dict(mandatory=True, ),
-        in_file=dict(mandatory=True, ),
-        mask_file=dict(),
+        in_bval=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        in_bvec=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        mask_file=dict(usedefault=True, ),
         out_prefix=dict(),
     )
     inputs = DTI.input_spec()
@@ -19,12 +28,12 @@ def test_DTI_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DTI_outputs():
     output_map = dict(
-        ad_file=dict(),
-        color_fa_file=dict(),
-        fa_file=dict(),
-        md_file=dict(),
-        out_file=dict(),
-        rd_file=dict(),
+        ad_file=dict(usedefault=True, ),
+        color_fa_file=dict(usedefault=True, ),
+        fa_file=dict(usedefault=True, ),
+        md_file=dict(usedefault=True, ),
+        out_file=dict(usedefault=True, ),
+        rd_file=dict(usedefault=True, ),
     )
     outputs = DTI.output_spec()
 

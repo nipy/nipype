@@ -7,8 +7,11 @@ def test_Trim_inputs():
     input_map = dict(
         begin_index=dict(usedefault=True, ),
         end_index=dict(usedefault=True, ),
-        in_file=dict(mandatory=True, ),
-        out_file=dict(),
+        in_file=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        out_file=dict(usedefault=True, ),
         suffix=dict(usedefault=True, ),
     )
     inputs = Trim.input_spec()
@@ -17,7 +20,7 @@ def test_Trim_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Trim_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = Trim.output_spec()
 
     for key, metadata in list(output_map.items()):

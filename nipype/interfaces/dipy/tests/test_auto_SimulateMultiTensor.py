@@ -5,16 +5,19 @@ from ..simulate import SimulateMultiTensor
 
 def test_SimulateMultiTensor_inputs():
     input_map = dict(
-        baseline=dict(mandatory=True, ),
+        baseline=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
         bvalues=dict(usedefault=True, ),
         diff_iso=dict(usedefault=True, ),
         diff_sf=dict(usedefault=True, ),
-        gradients=dict(),
-        in_bval=dict(),
-        in_bvec=dict(),
+        gradients=dict(usedefault=True, ),
+        in_bval=dict(usedefault=True, ),
+        in_bvec=dict(usedefault=True, ),
         in_dirs=dict(mandatory=True, ),
         in_frac=dict(mandatory=True, ),
-        in_mask=dict(),
+        in_mask=dict(usedefault=True, ),
         in_vfms=dict(mandatory=True, ),
         n_proc=dict(usedefault=True, ),
         num_dirs=dict(usedefault=True, ),
@@ -31,10 +34,10 @@ def test_SimulateMultiTensor_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SimulateMultiTensor_outputs():
     output_map = dict(
-        out_bval=dict(),
-        out_bvec=dict(),
-        out_file=dict(),
-        out_mask=dict(),
+        out_bval=dict(usedefault=True, ),
+        out_bvec=dict(usedefault=True, ),
+        out_file=dict(usedefault=True, ),
+        out_mask=dict(usedefault=True, ),
     )
     outputs = SimulateMultiTensor.output_spec()
 

@@ -14,6 +14,7 @@ def test_DWIUnbiasedNonLocalMeansFilter_inputs():
         inputVolume=dict(
             argstr='%s',
             position=-2,
+            usedefault=True,
         ),
         ng=dict(argstr='--ng %d', ),
         outputVolume=dict(
@@ -40,7 +41,11 @@ def test_DWIUnbiasedNonLocalMeansFilter_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DWIUnbiasedNonLocalMeansFilter_outputs():
-    output_map = dict(outputVolume=dict(position=-1, ), )
+    output_map = dict(
+        outputVolume=dict(
+            position=-1,
+            usedefault=True,
+        ), )
     outputs = DWIUnbiasedNonLocalMeansFilter.output_spec()
 
     for key, metadata in list(output_map.items()):

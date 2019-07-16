@@ -5,7 +5,10 @@ from ..io import BIDSDataGrabber
 
 def test_BIDSDataGrabber_inputs():
     input_map = dict(
-        base_dir=dict(mandatory=True, ),
+        base_dir=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
         extra_derivatives=dict(),
         index_derivatives=dict(
             mandatory=True,

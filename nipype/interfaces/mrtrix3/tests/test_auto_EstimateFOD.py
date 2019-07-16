@@ -20,6 +20,7 @@ def test_EstimateFOD_inputs():
         csf_txt=dict(
             argstr='%s',
             position=-2,
+            usedefault=True,
         ),
         environ=dict(
             nohash=True,
@@ -33,18 +34,32 @@ def test_EstimateFOD_inputs():
         gm_txt=dict(
             argstr='%s',
             position=-4,
+            usedefault=True,
         ),
-        grad_file=dict(argstr='-grad %s', ),
+        grad_file=dict(
+            argstr='-grad %s',
+            usedefault=True,
+        ),
         grad_fsl=dict(argstr='-fslgrad %s %s', ),
-        in_bval=dict(),
-        in_bvec=dict(argstr='-fslgrad %s %s', ),
-        in_dirs=dict(argstr='-directions %s', ),
+        in_bval=dict(usedefault=True, ),
+        in_bvec=dict(
+            argstr='-fslgrad %s %s',
+            usedefault=True,
+        ),
+        in_dirs=dict(
+            argstr='-directions %s',
+            usedefault=True,
+        ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
             position=-7,
+            usedefault=True,
         ),
-        mask_file=dict(argstr='-mask %s', ),
+        mask_file=dict(
+            argstr='-mask %s',
+            usedefault=True,
+        ),
         max_sh=dict(
             argstr='-lmax %d',
             usedefault=True,
@@ -67,6 +82,7 @@ def test_EstimateFOD_inputs():
             argstr='%s',
             mandatory=True,
             position=-6,
+            usedefault=True,
         ),
     )
     inputs = EstimateFOD.input_spec()
@@ -76,9 +92,18 @@ def test_EstimateFOD_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_EstimateFOD_outputs():
     output_map = dict(
-        csf_odf=dict(argstr='%s', ),
-        gm_odf=dict(argstr='%s', ),
-        wm_odf=dict(argstr='%s', ),
+        csf_odf=dict(
+            argstr='%s',
+            usedefault=True,
+        ),
+        gm_odf=dict(
+            argstr='%s',
+            usedefault=True,
+        ),
+        wm_odf=dict(
+            argstr='%s',
+            usedefault=True,
+        ),
     )
     outputs = EstimateFOD.output_spec()
 

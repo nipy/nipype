@@ -16,6 +16,7 @@ def test_CARegister_inputs():
             argstr='%s',
             mandatory=True,
             position=-3,
+            usedefault=True,
         ),
         invert_and_save=dict(
             argstr='-invert-and-save',
@@ -23,20 +24,28 @@ def test_CARegister_inputs():
         ),
         l_files=dict(argstr='-l %s', ),
         levels=dict(argstr='-levels %d', ),
-        mask=dict(argstr='-mask %s', ),
+        mask=dict(
+            argstr='-mask %s',
+            usedefault=True,
+        ),
         no_big_ventricles=dict(argstr='-nobigventricles', ),
         num_threads=dict(),
         out_file=dict(
             argstr='%s',
             genfile=True,
             position=-1,
+            usedefault=True,
         ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         template=dict(
             argstr='%s',
             position=-2,
+            usedefault=True,
         ),
-        transform=dict(argstr='-T %s', ),
+        transform=dict(
+            argstr='-T %s',
+            usedefault=True,
+        ),
     )
     inputs = CARegister.input_spec()
 

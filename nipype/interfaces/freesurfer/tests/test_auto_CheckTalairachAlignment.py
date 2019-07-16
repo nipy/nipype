@@ -14,6 +14,7 @@ def test_CheckTalairachAlignment_inputs():
             argstr='-xfm %s',
             mandatory=True,
             position=-1,
+            usedefault=True,
             xor=['subject'],
         ),
         subject=dict(
@@ -22,7 +23,7 @@ def test_CheckTalairachAlignment_inputs():
             position=-1,
             xor=['in_file'],
         ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         threshold=dict(
             argstr='-T %.3f',
             usedefault=True,

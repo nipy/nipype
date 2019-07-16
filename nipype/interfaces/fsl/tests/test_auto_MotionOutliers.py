@@ -14,8 +14,12 @@ def test_MotionOutliers_inputs():
         in_file=dict(
             argstr='-i %s',
             mandatory=True,
+            usedefault=True,
         ),
-        mask=dict(argstr='-m %s', ),
+        mask=dict(
+            argstr='-m %s',
+            usedefault=True,
+        ),
         metric=dict(argstr='--%s', ),
         no_motion_correction=dict(argstr='--nomoco', ),
         out_file=dict(
@@ -24,6 +28,7 @@ def test_MotionOutliers_inputs():
             keep_extension=True,
             name_source='in_file',
             name_template='%s_outliers.txt',
+            usedefault=True,
         ),
         out_metric_plot=dict(
             argstr='-p %s',
@@ -31,6 +36,7 @@ def test_MotionOutliers_inputs():
             keep_extension=True,
             name_source='in_file',
             name_template='%s_metrics.png',
+            usedefault=True,
         ),
         out_metric_values=dict(
             argstr='-s %s',
@@ -38,6 +44,7 @@ def test_MotionOutliers_inputs():
             keep_extension=True,
             name_source='in_file',
             name_template='%s_metrics.txt',
+            usedefault=True,
         ),
         output_type=dict(),
         threshold=dict(argstr='--thresh=%g', ),
@@ -49,9 +56,9 @@ def test_MotionOutliers_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MotionOutliers_outputs():
     output_map = dict(
-        out_file=dict(),
-        out_metric_plot=dict(),
-        out_metric_values=dict(),
+        out_file=dict(usedefault=True, ),
+        out_metric_plot=dict(usedefault=True, ),
+        out_metric_values=dict(usedefault=True, ),
     )
     outputs = MotionOutliers.output_spec()
 

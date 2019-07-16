@@ -16,17 +16,24 @@ def test_ProcStreamlines_inputs():
             units='NA',
         ),
         discardloops=dict(argstr='-discardloops', ),
-        endpointfile=dict(argstr='-endpointfile %s', ),
+        endpointfile=dict(
+            argstr='-endpointfile %s',
+            usedefault=True,
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
         ),
-        exclusionfile=dict(argstr='-exclusionfile %s', ),
+        exclusionfile=dict(
+            argstr='-exclusionfile %s',
+            usedefault=True,
+        ),
         gzip=dict(argstr='-gzip', ),
         in_file=dict(
             argstr='-inputfile %s',
             mandatory=True,
             position=1,
+            usedefault=True,
         ),
         inputmodel=dict(
             argstr='-inputmodel %s',
@@ -70,7 +77,10 @@ def test_ProcStreamlines_inputs():
             argstr='-outputcp',
             requires=['outputroot', 'seedfile'],
         ),
-        outputroot=dict(argstr='-outputroot %s', ),
+        outputroot=dict(
+            argstr='-outputroot %s',
+            usedefault=True,
+        ),
         outputsc=dict(
             argstr='-outputsc',
             requires=['outputroot', 'seedfile'],
@@ -84,7 +94,10 @@ def test_ProcStreamlines_inputs():
             argstr='-resamplestepsize %d',
             units='NA',
         ),
-        seedfile=dict(argstr='-seedfile %s', ),
+        seedfile=dict(
+            argstr='-seedfile %s',
+            usedefault=True,
+        ),
         seedpointmm=dict(
             argstr='-seedpointmm %s',
             units='mm',
@@ -93,14 +106,20 @@ def test_ProcStreamlines_inputs():
             argstr='-seedpointvox %s',
             units='voxels',
         ),
-        targetfile=dict(argstr='-targetfile %s', ),
+        targetfile=dict(
+            argstr='-targetfile %s',
+            usedefault=True,
+        ),
         truncateinexclusion=dict(argstr='-truncateinexclusion', ),
         truncateloops=dict(argstr='-truncateloops', ),
         voxeldims=dict(
             argstr='-voxeldims %s',
             units='mm',
         ),
-        waypointfile=dict(argstr='-waypointfile %s', ),
+        waypointfile=dict(
+            argstr='-waypointfile %s',
+            usedefault=True,
+        ),
     )
     inputs = ProcStreamlines.input_spec()
 
@@ -110,7 +129,7 @@ def test_ProcStreamlines_inputs():
 def test_ProcStreamlines_outputs():
     output_map = dict(
         outputroot_files=dict(),
-        proc=dict(),
+        proc=dict(usedefault=True, ),
     )
     outputs = ProcStreamlines.output_spec()
 

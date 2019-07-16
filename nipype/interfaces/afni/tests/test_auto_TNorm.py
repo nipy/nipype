@@ -16,6 +16,7 @@ def test_TNorm_inputs():
             copyfile=False,
             mandatory=True,
             position=-1,
+            usedefault=True,
         ),
         norm1=dict(argstr='-norm1', ),
         norm2=dict(argstr='-norm2', ),
@@ -29,6 +30,7 @@ def test_TNorm_inputs():
             argstr='-prefix %s',
             name_source='in_file',
             name_template='%s_tnorm',
+            usedefault=True,
         ),
         outputtype=dict(),
         polort=dict(argstr='-polort %s', ),
@@ -39,7 +41,7 @@ def test_TNorm_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TNorm_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = TNorm.output_spec()
 
     for key, metadata in list(output_map.items()):

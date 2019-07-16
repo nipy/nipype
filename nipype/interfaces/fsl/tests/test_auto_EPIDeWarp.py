@@ -10,12 +10,16 @@ def test_EPIDeWarp_inputs():
         dph_file=dict(
             argstr='--dph %s',
             mandatory=True,
+            usedefault=True,
         ),
         environ=dict(
             nohash=True,
             usedefault=True,
         ),
-        epi_file=dict(argstr='--epi %s', ),
+        epi_file=dict(
+            argstr='--epi %s',
+            usedefault=True,
+        ),
         epidw=dict(
             argstr='--epidw %s',
             genfile=False,
@@ -24,7 +28,10 @@ def test_EPIDeWarp_inputs():
             argstr='--esp %s',
             usedefault=True,
         ),
-        exf_file=dict(argstr='--exf %s', ),
+        exf_file=dict(
+            argstr='--exf %s',
+            usedefault=True,
+        ),
         exfdw=dict(
             argstr='--exfdw %s',
             genfile=True,
@@ -33,6 +40,7 @@ def test_EPIDeWarp_inputs():
             argstr='--mag %s',
             mandatory=True,
             position=0,
+            usedefault=True,
         ),
         nocleanup=dict(
             argstr='--nocleanup',
@@ -63,10 +71,10 @@ def test_EPIDeWarp_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_EPIDeWarp_outputs():
     output_map = dict(
-        exf_mask=dict(),
-        exfdw=dict(),
-        unwarped_file=dict(),
-        vsm_file=dict(),
+        exf_mask=dict(usedefault=True, ),
+        exfdw=dict(usedefault=True, ),
+        unwarped_file=dict(usedefault=True, ),
+        vsm_file=dict(usedefault=True, ),
     )
     outputs = EPIDeWarp.output_spec()
 

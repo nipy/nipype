@@ -28,7 +28,10 @@ def test_Realign_inputs():
             min_ver='8',
             usedefault=True,
         ),
-        weight_img=dict(field='eoptions.weight', ),
+        weight_img=dict(
+            field='eoptions.weight',
+            usedefault=True,
+        ),
         wrap=dict(field='eoptions.wrap', ),
         write_interp=dict(field='roptions.interp', ),
         write_mask=dict(field='roptions.mask', ),
@@ -47,7 +50,7 @@ def test_Realign_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Realign_outputs():
     output_map = dict(
-        mean_image=dict(),
+        mean_image=dict(usedefault=True, ),
         modified_in_files=dict(),
         realigned_files=dict(),
         realignment_parameters=dict(),

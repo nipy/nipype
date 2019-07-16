@@ -29,33 +29,40 @@ def test_Bse_inputs():
         inputMRIFile=dict(
             argstr='-i %s',
             mandatory=True,
+            usedefault=True,
         ),
         noRotate=dict(argstr='--norotate', ),
         outputCortexFile=dict(
             argstr='--cortex %s',
             hash_files=False,
+            usedefault=True,
         ),
         outputDetailedBrainMask=dict(
             argstr='--hires %s',
             hash_files=False,
+            usedefault=True,
         ),
         outputDiffusionFilter=dict(
             argstr='--adf %s',
             hash_files=False,
+            usedefault=True,
         ),
         outputEdgeMap=dict(
             argstr='--edge %s',
             hash_files=False,
+            usedefault=True,
         ),
         outputMRIVolume=dict(
             argstr='-o %s',
             genfile=True,
             hash_files=False,
+            usedefault=True,
         ),
         outputMaskFile=dict(
             argstr='--mask %s',
             genfile=True,
             hash_files=False,
+            usedefault=True,
         ),
         radius=dict(
             argstr='-r %f',
@@ -78,12 +85,12 @@ def test_Bse_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Bse_outputs():
     output_map = dict(
-        outputCortexFile=dict(),
-        outputDetailedBrainMask=dict(),
-        outputDiffusionFilter=dict(),
-        outputEdgeMap=dict(),
-        outputMRIVolume=dict(),
-        outputMaskFile=dict(),
+        outputCortexFile=dict(usedefault=True, ),
+        outputDetailedBrainMask=dict(usedefault=True, ),
+        outputDiffusionFilter=dict(usedefault=True, ),
+        outputEdgeMap=dict(usedefault=True, ),
+        outputMRIVolume=dict(usedefault=True, ),
+        outputMaskFile=dict(usedefault=True, ),
     )
     outputs = Bse.output_spec()
 

@@ -15,6 +15,7 @@ def test_DWIRicianLMMSEFilter_inputs():
         inputVolume=dict(
             argstr='%s',
             position=-2,
+            usedefault=True,
         ),
         iter=dict(argstr='--iter %d', ),
         maxnstd=dict(argstr='--maxnstd %d', ),
@@ -42,7 +43,11 @@ def test_DWIRicianLMMSEFilter_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DWIRicianLMMSEFilter_outputs():
-    output_map = dict(outputVolume=dict(position=-1, ), )
+    output_map = dict(
+        outputVolume=dict(
+            position=-1,
+            usedefault=True,
+        ), )
     outputs = DWIRicianLMMSEFilter.output_spec()
 
     for key, metadata in list(output_map.items()):

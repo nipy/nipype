@@ -18,6 +18,7 @@ def test_Bru2_inputs():
             argstr='%s',
             mandatory=True,
             position=-1,
+            usedefault=True,
         ),
         output_filename=dict(
             argstr='-o %s',
@@ -30,7 +31,7 @@ def test_Bru2_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Bru2_outputs():
-    output_map = dict(nii_file=dict(), )
+    output_map = dict(nii_file=dict(usedefault=True, ), )
     outputs = Bru2.output_spec()
 
     for key, metadata in list(output_map.items()):

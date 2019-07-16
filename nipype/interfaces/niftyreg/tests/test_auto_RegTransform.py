@@ -8,6 +8,7 @@ def test_RegTransform_inputs():
         aff_2_rig_input=dict(
             argstr='-aff2rig %s',
             position=-2,
+            usedefault=True,
             xor=[
                 'def_input', 'disp_input', 'flow_input', 'comp_input',
                 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input',
@@ -19,6 +20,7 @@ def test_RegTransform_inputs():
             argstr='-comp %s',
             position=-3,
             requires=['comp_input2'],
+            usedefault=True,
             xor=[
                 'def_input', 'disp_input', 'flow_input', 'upd_s_form_input',
                 'inv_aff_input', 'inv_nrr_input', 'half_input',
@@ -28,10 +30,12 @@ def test_RegTransform_inputs():
         comp_input2=dict(
             argstr='%s',
             position=-2,
+            usedefault=True,
         ),
         def_input=dict(
             argstr='-def %s',
             position=-2,
+            usedefault=True,
             xor=[
                 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input',
                 'inv_aff_input', 'inv_nrr_input', 'half_input',
@@ -41,6 +45,7 @@ def test_RegTransform_inputs():
         disp_input=dict(
             argstr='-disp %s',
             position=-2,
+            usedefault=True,
             xor=[
                 'def_input', 'flow_input', 'comp_input', 'upd_s_form_input',
                 'inv_aff_input', 'inv_nrr_input', 'half_input',
@@ -63,6 +68,7 @@ def test_RegTransform_inputs():
         flow_input=dict(
             argstr='-flow %s',
             position=-2,
+            usedefault=True,
             xor=[
                 'def_input', 'disp_input', 'comp_input', 'upd_s_form_input',
                 'inv_aff_input', 'inv_nrr_input', 'half_input',
@@ -72,6 +78,7 @@ def test_RegTransform_inputs():
         half_input=dict(
             argstr='-half %s',
             position=-2,
+            usedefault=True,
             xor=[
                 'def_input', 'disp_input', 'flow_input', 'comp_input',
                 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input',
@@ -81,6 +88,7 @@ def test_RegTransform_inputs():
         inv_aff_input=dict(
             argstr='-invAff %s',
             position=-2,
+            usedefault=True,
             xor=[
                 'def_input', 'disp_input', 'flow_input', 'comp_input',
                 'upd_s_form_input', 'inv_nrr_input', 'half_input',
@@ -113,20 +121,24 @@ def test_RegTransform_inputs():
             argstr='%s',
             genfile=True,
             position=-1,
+            usedefault=True,
         ),
         ref1_file=dict(
             argstr='-ref %s',
             position=0,
+            usedefault=True,
         ),
         ref2_file=dict(
             argstr='-ref2 %s',
             position=1,
             requires=['ref1_file'],
+            usedefault=True,
         ),
         upd_s_form_input=dict(
             argstr='-updSform %s',
             position=-3,
             requires=['upd_s_form_input2'],
+            usedefault=True,
             xor=[
                 'def_input', 'disp_input', 'flow_input', 'comp_input',
                 'inv_aff_input', 'inv_nrr_input', 'half_input',
@@ -137,6 +149,7 @@ def test_RegTransform_inputs():
             argstr='%s',
             position=-2,
             requires=['upd_s_form_input'],
+            usedefault=True,
         ),
     )
     inputs = RegTransform.input_spec()
@@ -145,7 +158,7 @@ def test_RegTransform_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_RegTransform_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = RegTransform.output_spec()
 
     for key, metadata in list(output_map.items()):

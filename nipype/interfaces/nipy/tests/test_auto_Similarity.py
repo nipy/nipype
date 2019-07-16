@@ -5,11 +5,17 @@ from ..utils import Similarity
 
 def test_Similarity_inputs():
     input_map = dict(
-        mask1=dict(),
-        mask2=dict(),
+        mask1=dict(usedefault=True, ),
+        mask2=dict(usedefault=True, ),
         metric=dict(usedefault=True, ),
-        volume1=dict(mandatory=True, ),
-        volume2=dict(mandatory=True, ),
+        volume1=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        volume2=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
     )
     inputs = Similarity.input_spec()
 

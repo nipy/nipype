@@ -21,28 +21,37 @@ def test_WarpPointsToStd_inputs():
         img_file=dict(
             argstr='-img %s',
             mandatory=True,
+            usedefault=True,
         ),
         in_coords=dict(
             argstr='%s',
             mandatory=True,
             position=-1,
+            usedefault=True,
         ),
         out_file=dict(
             name_source='in_coords',
             name_template='%s_warped',
             output_name='out_file',
+            usedefault=True,
         ),
-        premat_file=dict(argstr='-premat %s', ),
+        premat_file=dict(
+            argstr='-premat %s',
+            usedefault=True,
+        ),
         std_file=dict(
             argstr='-std %s',
             mandatory=True,
+            usedefault=True,
         ),
         warp_file=dict(
             argstr='-warp %s',
+            usedefault=True,
             xor=['xfm_file'],
         ),
         xfm_file=dict(
             argstr='-xfm %s',
+            usedefault=True,
             xor=['warp_file'],
         ),
     )
@@ -52,7 +61,7 @@ def test_WarpPointsToStd_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_WarpPointsToStd_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = WarpPointsToStd.output_spec()
 
     for key, metadata in list(output_map.items()):

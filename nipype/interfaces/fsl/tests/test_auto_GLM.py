@@ -6,7 +6,10 @@ from ..model import GLM
 def test_GLM_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        contrasts=dict(argstr='-c %s', ),
+        contrasts=dict(
+            argstr='-c %s',
+            usedefault=True,
+        ),
         dat_norm=dict(argstr='--dat_norm', ),
         demean=dict(argstr='--demean', ),
         des_norm=dict(argstr='--des_norm', ),
@@ -14,6 +17,7 @@ def test_GLM_inputs():
             argstr='-d %s',
             mandatory=True,
             position=2,
+            usedefault=True,
         ),
         dof=dict(argstr='--dof=%d', ),
         environ=dict(
@@ -24,26 +28,64 @@ def test_GLM_inputs():
             argstr='-i %s',
             mandatory=True,
             position=1,
+            usedefault=True,
         ),
-        mask=dict(argstr='-m %s', ),
-        out_cope=dict(argstr='--out_cope=%s', ),
-        out_data_name=dict(argstr='--out_data=%s', ),
-        out_f_name=dict(argstr='--out_f=%s', ),
+        mask=dict(
+            argstr='-m %s',
+            usedefault=True,
+        ),
+        out_cope=dict(
+            argstr='--out_cope=%s',
+            usedefault=True,
+        ),
+        out_data_name=dict(
+            argstr='--out_data=%s',
+            usedefault=True,
+        ),
+        out_f_name=dict(
+            argstr='--out_f=%s',
+            usedefault=True,
+        ),
         out_file=dict(
             argstr='-o %s',
             keep_extension=True,
             name_source='in_file',
             name_template='%s_glm',
             position=3,
+            usedefault=True,
         ),
-        out_p_name=dict(argstr='--out_p=%s', ),
-        out_pf_name=dict(argstr='--out_pf=%s', ),
-        out_res_name=dict(argstr='--out_res=%s', ),
-        out_sigsq_name=dict(argstr='--out_sigsq=%s', ),
-        out_t_name=dict(argstr='--out_t=%s', ),
-        out_varcb_name=dict(argstr='--out_varcb=%s', ),
-        out_vnscales_name=dict(argstr='--out_vnscales=%s', ),
-        out_z_name=dict(argstr='--out_z=%s', ),
+        out_p_name=dict(
+            argstr='--out_p=%s',
+            usedefault=True,
+        ),
+        out_pf_name=dict(
+            argstr='--out_pf=%s',
+            usedefault=True,
+        ),
+        out_res_name=dict(
+            argstr='--out_res=%s',
+            usedefault=True,
+        ),
+        out_sigsq_name=dict(
+            argstr='--out_sigsq=%s',
+            usedefault=True,
+        ),
+        out_t_name=dict(
+            argstr='--out_t=%s',
+            usedefault=True,
+        ),
+        out_varcb_name=dict(
+            argstr='--out_varcb=%s',
+            usedefault=True,
+        ),
+        out_vnscales_name=dict(
+            argstr='--out_vnscales=%s',
+            usedefault=True,
+        ),
+        out_z_name=dict(
+            argstr='--out_z=%s',
+            usedefault=True,
+        ),
         output_type=dict(),
         var_norm=dict(argstr='--vn', ),
     )
@@ -57,7 +99,7 @@ def test_GLM_outputs():
         out_cope=dict(),
         out_data=dict(),
         out_f=dict(),
-        out_file=dict(),
+        out_file=dict(usedefault=True, ),
         out_p=dict(),
         out_pf=dict(),
         out_res=dict(),

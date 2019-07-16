@@ -25,7 +25,7 @@ def test_MS_LDA_inputs():
         ),
         mask_file=dict(argstr='-mask %s', ),
         shift=dict(argstr='-shift %d', ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         use_weights=dict(argstr='-W', ),
         vol_synth_file=dict(
             argstr='-synth %s',
@@ -43,8 +43,8 @@ def test_MS_LDA_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MS_LDA_outputs():
     output_map = dict(
-        vol_synth_file=dict(),
-        weight_file=dict(),
+        vol_synth_file=dict(usedefault=True, ),
+        weight_file=dict(usedefault=True, ),
     )
     outputs = MS_LDA.output_spec()
 

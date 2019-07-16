@@ -10,6 +10,7 @@ def test_FilterRegressor_inputs():
             argstr='-d %s',
             mandatory=True,
             position=3,
+            usedefault=True,
         ),
         environ=dict(
             nohash=True,
@@ -31,13 +32,18 @@ def test_FilterRegressor_inputs():
             argstr='-i %s',
             mandatory=True,
             position=1,
+            usedefault=True,
         ),
-        mask=dict(argstr='-m %s', ),
+        mask=dict(
+            argstr='-m %s',
+            usedefault=True,
+        ),
         out_file=dict(
             argstr='-o %s',
             genfile=True,
             hash_files=False,
             position=2,
+            usedefault=True,
         ),
         out_vnscales=dict(argstr='--out_vnscales', ),
         output_type=dict(),
@@ -49,7 +55,7 @@ def test_FilterRegressor_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FilterRegressor_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = FilterRegressor.output_spec()
 
     for key, metadata in list(output_map.items()):

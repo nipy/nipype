@@ -14,13 +14,17 @@ def test_CalcTopNCC_inputs():
             argstr='-target %s',
             mandatory=True,
             position=1,
+            usedefault=True,
         ),
         in_templates=dict(
             argstr='%s',
             mandatory=True,
             position=3,
         ),
-        mask_file=dict(argstr='-mask %s', ),
+        mask_file=dict(
+            argstr='-mask %s',
+            usedefault=True,
+        ),
         num_templates=dict(
             argstr='-templates %s',
             mandatory=True,

@@ -10,17 +10,22 @@ def test_ContrastMgr_inputs():
         corrections=dict(
             copyfile=False,
             mandatory=True,
+            usedefault=True,
         ),
         dof_file=dict(
             argstr='',
             copyfile=False,
             mandatory=True,
+            usedefault=True,
         ),
         environ=dict(
             nohash=True,
             usedefault=True,
         ),
-        fcon_file=dict(argstr='-f %s', ),
+        fcon_file=dict(
+            argstr='-f %s',
+            usedefault=True,
+        ),
         output_type=dict(),
         param_estimates=dict(
             argstr='',
@@ -32,12 +37,14 @@ def test_ContrastMgr_inputs():
             copyfile=False,
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         suffix=dict(argstr='-suffix %s', ),
         tcon_file=dict(
             argstr='%s',
             mandatory=True,
             position=-1,
+            usedefault=True,
         ),
     )
     inputs = ContrastMgr.input_spec()

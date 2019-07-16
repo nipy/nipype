@@ -51,6 +51,7 @@ def test_Zeropad_inputs():
             copyfile=False,
             mandatory=True,
             position=-1,
+            usedefault=True,
         ),
         master=dict(
             argstr='-master %s',
@@ -67,6 +68,7 @@ def test_Zeropad_inputs():
         out_file=dict(
             argstr='-prefix %s',
             name_template='zeropad',
+            usedefault=True,
         ),
         outputtype=dict(),
         z=dict(
@@ -80,7 +82,7 @@ def test_Zeropad_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Zeropad_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = Zeropad.output_spec()
 
     for key, metadata in list(output_map.items()):

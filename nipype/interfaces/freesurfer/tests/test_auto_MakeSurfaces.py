@@ -17,16 +17,32 @@ def test_MakeSurfaces_inputs():
             mandatory=True,
             position=-1,
         ),
-        in_T1=dict(argstr='-T1 %s', ),
-        in_aseg=dict(argstr='-aseg %s', ),
-        in_filled=dict(mandatory=True, ),
-        in_label=dict(xor=['noaparc'], ),
+        in_T1=dict(
+            argstr='-T1 %s',
+            usedefault=True,
+        ),
+        in_aseg=dict(
+            argstr='-aseg %s',
+            usedefault=True,
+        ),
+        in_filled=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        in_label=dict(
+            usedefault=True,
+            xor=['noaparc'],
+        ),
         in_orig=dict(
             argstr='-orig %s',
             mandatory=True,
+            usedefault=True,
         ),
-        in_white=dict(),
-        in_wm=dict(mandatory=True, ),
+        in_white=dict(usedefault=True, ),
+        in_wm=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
         longitudinal=dict(argstr='-long', ),
         maximum=dict(argstr='-max %.1f', ),
         mgz=dict(argstr='-mgz', ),
@@ -38,15 +54,19 @@ def test_MakeSurfaces_inputs():
         orig_pial=dict(
             argstr='-orig_pial %s',
             requires=['in_label'],
+            usedefault=True,
         ),
-        orig_white=dict(argstr='-orig_white %s', ),
+        orig_white=dict(
+            argstr='-orig_white %s',
+            usedefault=True,
+        ),
         subject_id=dict(
             argstr='%s',
             mandatory=True,
             position=-2,
             usedefault=True,
         ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         white=dict(argstr='-white %s', ),
         white_only=dict(argstr='-whiteonly', ),
     )
@@ -57,12 +77,12 @@ def test_MakeSurfaces_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MakeSurfaces_outputs():
     output_map = dict(
-        out_area=dict(),
-        out_cortex=dict(),
-        out_curv=dict(),
-        out_pial=dict(),
-        out_thickness=dict(),
-        out_white=dict(),
+        out_area=dict(usedefault=True, ),
+        out_cortex=dict(usedefault=True, ),
+        out_curv=dict(usedefault=True, ),
+        out_pial=dict(usedefault=True, ),
+        out_thickness=dict(usedefault=True, ),
+        out_white=dict(usedefault=True, ),
     )
     outputs = MakeSurfaces.output_spec()
 

@@ -11,8 +11,14 @@ def test_GenerateSummedGradientImage_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputVolume1=dict(argstr='--inputVolume1 %s', ),
-        inputVolume2=dict(argstr='--inputVolume2 %s', ),
+        inputVolume1=dict(
+            argstr='--inputVolume1 %s',
+            usedefault=True,
+        ),
+        inputVolume2=dict(
+            argstr='--inputVolume2 %s',
+            usedefault=True,
+        ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         outputFileName=dict(
             argstr='--outputFileName %s',
@@ -25,7 +31,7 @@ def test_GenerateSummedGradientImage_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_GenerateSummedGradientImage_outputs():
-    output_map = dict(outputFileName=dict(), )
+    output_map = dict(outputFileName=dict(usedefault=True, ), )
     outputs = GenerateSummedGradientImage.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -32,6 +32,7 @@ def test_SampleToSurface_inputs():
         interp_method=dict(argstr='--interp %s', ),
         mask_label=dict(
             argstr='--mask %s',
+            usedefault=True,
             xor=['cortex_mask'],
         ),
         mni152reg=dict(
@@ -46,6 +47,7 @@ def test_SampleToSurface_inputs():
         out_file=dict(
             argstr='--o %s',
             genfile=True,
+            usedefault=True,
         ),
         out_type=dict(argstr='--out_type %s', ),
         override_reg_subj=dict(
@@ -56,10 +58,14 @@ def test_SampleToSurface_inputs():
             mandatory=True,
             xor=['sampling_method'],
         ),
-        reference_file=dict(argstr='--ref %s', ),
+        reference_file=dict(
+            argstr='--ref %s',
+            usedefault=True,
+        ),
         reg_file=dict(
             argstr='--reg %s',
             mandatory=True,
+            usedefault=True,
             xor=['reg_file', 'reg_header', 'mni152reg'],
         ),
         reg_header=dict(
@@ -87,9 +93,10 @@ def test_SampleToSurface_inputs():
         source_file=dict(
             argstr='--mov %s',
             mandatory=True,
+            usedefault=True,
         ),
         subject_id=dict(),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         surf_reg=dict(
             argstr='--surfreg %s',
             requires=['target_subject'],
@@ -105,9 +112,9 @@ def test_SampleToSurface_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SampleToSurface_outputs():
     output_map = dict(
-        hits_file=dict(),
-        out_file=dict(),
-        vox_file=dict(),
+        hits_file=dict(usedefault=True, ),
+        out_file=dict(usedefault=True, ),
+        vox_file=dict(usedefault=True, ),
     )
     outputs = SampleToSurface.output_spec()
 

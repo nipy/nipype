@@ -17,10 +17,12 @@ def test_CheckerBoardFilter_inputs():
         inputVolume1=dict(
             argstr='%s',
             position=-3,
+            usedefault=True,
         ),
         inputVolume2=dict(
             argstr='%s',
             position=-2,
+            usedefault=True,
         ),
         outputVolume=dict(
             argstr='%s',
@@ -34,7 +36,11 @@ def test_CheckerBoardFilter_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_CheckerBoardFilter_outputs():
-    output_map = dict(outputVolume=dict(position=-1, ), )
+    output_map = dict(
+        outputVolume=dict(
+            position=-1,
+            usedefault=True,
+        ), )
     outputs = CheckerBoardFilter.output_spec()
 
     for key, metadata in list(output_map.items()):

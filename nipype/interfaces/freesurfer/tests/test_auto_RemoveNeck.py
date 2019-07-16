@@ -14,6 +14,7 @@ def test_RemoveNeck_inputs():
             argstr='%s',
             mandatory=True,
             position=-4,
+            usedefault=True,
         ),
         out_file=dict(
             argstr='%s',
@@ -22,18 +23,21 @@ def test_RemoveNeck_inputs():
             name_source=['in_file'],
             name_template='%s_noneck',
             position=-1,
+            usedefault=True,
         ),
         radius=dict(argstr='-radius %d', ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         template=dict(
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         transform=dict(
             argstr='%s',
             mandatory=True,
             position=-3,
+            usedefault=True,
         ),
     )
     inputs = RemoveNeck.input_spec()
@@ -42,7 +46,7 @@ def test_RemoveNeck_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_RemoveNeck_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = RemoveNeck.output_spec()
 
     for key, metadata in list(output_map.items()):

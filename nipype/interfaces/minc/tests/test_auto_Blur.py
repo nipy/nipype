@@ -34,11 +34,13 @@ def test_Blur_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         no_apodize=dict(argstr='-no_apodize', ),
         output_file_base=dict(
             argstr='%s',
             position=-1,
+            usedefault=True,
         ),
         partial=dict(argstr='-partial', ),
         rect=dict(
@@ -58,12 +60,12 @@ def test_Blur_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Blur_outputs():
     output_map = dict(
-        gradient_dxyz=dict(),
-        output_file=dict(),
-        partial_dx=dict(),
-        partial_dxyz=dict(),
-        partial_dy=dict(),
-        partial_dz=dict(),
+        gradient_dxyz=dict(usedefault=True, ),
+        output_file=dict(usedefault=True, ),
+        partial_dx=dict(usedefault=True, ),
+        partial_dxyz=dict(usedefault=True, ),
+        partial_dy=dict(usedefault=True, ),
+        partial_dz=dict(usedefault=True, ),
     )
     outputs = Blur.output_spec()
 

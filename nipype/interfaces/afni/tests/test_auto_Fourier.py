@@ -19,6 +19,7 @@ def test_Fourier_inputs():
             copyfile=False,
             mandatory=True,
             position=-1,
+            usedefault=True,
         ),
         lowpass=dict(
             argstr='-lowpass %f',
@@ -32,6 +33,7 @@ def test_Fourier_inputs():
             argstr='-prefix %s',
             name_source='in_file',
             name_template='%s_fourier',
+            usedefault=True,
         ),
         outputtype=dict(),
         retrend=dict(argstr='-retrend', ),
@@ -42,7 +44,7 @@ def test_Fourier_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Fourier_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = Fourier.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -23,15 +23,15 @@ def test_FitGLM_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FitGLM_outputs():
     output_map = dict(
-        a=dict(),
+        a=dict(usedefault=True, ),
         axis=dict(),
-        beta=dict(),
+        beta=dict(usedefault=True, ),
         constants=dict(),
         dof=dict(),
         nvbeta=dict(),
         reg_names=dict(),
         residuals=dict(),
-        s2=dict(),
+        s2=dict(usedefault=True, ),
     )
     outputs = FitGLM.output_spec()
 

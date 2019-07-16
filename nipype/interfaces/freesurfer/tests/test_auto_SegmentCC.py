@@ -14,18 +14,24 @@ def test_SegmentCC_inputs():
         in_file=dict(
             argstr='-aseg %s',
             mandatory=True,
+            usedefault=True,
         ),
-        in_norm=dict(mandatory=True, ),
+        in_norm=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
         out_file=dict(
             argstr='-o %s',
             hash_files=False,
             keep_extension=False,
             name_source=['in_file'],
             name_template='%s.auto.mgz',
+            usedefault=True,
         ),
         out_rotation=dict(
             argstr='-lta %s',
             mandatory=True,
+            usedefault=True,
         ),
         subject_id=dict(
             argstr='%s',
@@ -33,7 +39,7 @@ def test_SegmentCC_inputs():
             position=-1,
             usedefault=True,
         ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
     )
     inputs = SegmentCC.input_spec()
 
@@ -42,8 +48,8 @@ def test_SegmentCC_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SegmentCC_outputs():
     output_map = dict(
-        out_file=dict(),
-        out_rotation=dict(),
+        out_file=dict(usedefault=True, ),
+        out_rotation=dict(usedefault=True, ),
     )
     outputs = SegmentCC.output_spec()
 

@@ -16,12 +16,14 @@ def test_Normalize12_inputs():
             copyfile=False,
             field='subj.def',
             mandatory=True,
+            usedefault=True,
             xor=['image_to_align', 'tpm'],
         ),
         image_to_align=dict(
             copyfile=True,
             field='subj.vol',
             mandatory=True,
+            usedefault=True,
             xor=['deformation_file'],
         ),
         jobtype=dict(usedefault=True, ),
@@ -37,6 +39,7 @@ def test_Normalize12_inputs():
         tpm=dict(
             copyfile=False,
             field='eoptions.tpm',
+            usedefault=True,
             xor=['deformation_file'],
         ),
         use_mcr=dict(),

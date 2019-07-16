@@ -5,7 +5,7 @@ from ..io import SelectFiles
 
 def test_SelectFiles_inputs():
     input_map = dict(
-        base_directory=dict(),
+        base_directory=dict(usedefault=True, ),
         force_lists=dict(usedefault=True, ),
         raise_on_empty=dict(usedefault=True, ),
         sort_filelist=dict(usedefault=True, ),

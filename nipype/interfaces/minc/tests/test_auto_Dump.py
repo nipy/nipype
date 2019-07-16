@@ -30,6 +30,7 @@ def test_Dump_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         line_length=dict(argstr='-l %d', ),
         netcdf_name=dict(argstr='-n %s', ),
@@ -44,6 +45,7 @@ def test_Dump_inputs():
             name_source=['input_file'],
             name_template='%s_dump.txt',
             position=-1,
+            usedefault=True,
         ),
         precision=dict(argstr='%s', ),
         variables=dict(
@@ -57,7 +59,7 @@ def test_Dump_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Dump_outputs():
-    output_map = dict(output_file=dict(), )
+    output_map = dict(output_file=dict(usedefault=True, ), )
     outputs = Dump.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -5,7 +5,10 @@ from ..dti import TrackBayesDirac
 
 def test_TrackBayesDirac_inputs():
     input_map = dict(
-        anisfile=dict(argstr='-anisfile %s', ),
+        anisfile=dict(
+            argstr='-anisfile %s',
+            usedefault=True,
+        ),
         anisthresh=dict(argstr='-anisthresh %f', ),
         args=dict(argstr='%s', ),
         curveinterval=dict(
@@ -25,11 +28,15 @@ def test_TrackBayesDirac_inputs():
             usedefault=True,
         ),
         extpriordatatype=dict(argstr='-extpriordatatype %s', ),
-        extpriorfile=dict(argstr='-extpriorfile %s', ),
+        extpriorfile=dict(
+            argstr='-extpriorfile %s',
+            usedefault=True,
+        ),
         gzip=dict(argstr='-gzip', ),
         in_file=dict(
             argstr='-inputfile %s',
             position=1,
+            usedefault=True,
         ),
         inputdatatype=dict(argstr='-inputdatatype %s', ),
         inputmodel=dict(
@@ -54,10 +61,12 @@ def test_TrackBayesDirac_inputs():
             argstr='-outputfile %s',
             genfile=True,
             position=-1,
+            usedefault=True,
         ),
         output_root=dict(
             argstr='-outputroot %s',
             position=-1,
+            usedefault=True,
         ),
         outputtracts=dict(argstr='-outputtracts %s', ),
         pdf=dict(argstr='-pdf %s', ),
@@ -65,10 +74,12 @@ def test_TrackBayesDirac_inputs():
         scheme_file=dict(
             argstr='-schemefile %s',
             mandatory=True,
+            usedefault=True,
         ),
         seed_file=dict(
             argstr='-seedfile %s',
             position=2,
+            usedefault=True,
         ),
         stepsize=dict(
             argstr='-stepsize %f',
@@ -89,7 +100,7 @@ def test_TrackBayesDirac_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TrackBayesDirac_outputs():
-    output_map = dict(tracked=dict(), )
+    output_map = dict(tracked=dict(usedefault=True, ), )
     outputs = TrackBayesDirac.output_spec()
 
     for key, metadata in list(output_map.items()):

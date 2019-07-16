@@ -13,6 +13,7 @@ def test_WarpUtils_inputs():
         in_file=dict(
             argstr='--in=%s',
             mandatory=True,
+            usedefault=True,
         ),
         knot_space=dict(argstr='--knotspace=%d,%d,%d', ),
         out_file=dict(
@@ -20,13 +21,18 @@ def test_WarpUtils_inputs():
             name_source=['in_file'],
             output_name='out_file',
             position=-1,
+            usedefault=True,
         ),
         out_format=dict(argstr='--outformat=%s', ),
-        out_jacobian=dict(argstr='--jac=%s', ),
+        out_jacobian=dict(
+            argstr='--jac=%s',
+            usedefault=True,
+        ),
         output_type=dict(),
         reference=dict(
             argstr='--ref=%s',
             mandatory=True,
+            usedefault=True,
         ),
         warp_resolution=dict(argstr='--warpres=%0.4f,%0.4f,%0.4f', ),
         with_affine=dict(argstr='--withaff', ),
@@ -42,8 +48,8 @@ def test_WarpUtils_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_WarpUtils_outputs():
     output_map = dict(
-        out_file=dict(),
-        out_jacobian=dict(),
+        out_file=dict(usedefault=True, ),
+        out_jacobian=dict(usedefault=True, ),
     )
     outputs = WarpUtils.output_spec()
 

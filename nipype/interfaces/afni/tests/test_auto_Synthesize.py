@@ -11,6 +11,7 @@ def test_Synthesize_inputs():
             argstr='-cbucket %s',
             copyfile=False,
             mandatory=True,
+            usedefault=True,
         ),
         cenfill=dict(argstr='-cenfill %s', ),
         dry_run=dict(argstr='-dry', ),
@@ -22,6 +23,7 @@ def test_Synthesize_inputs():
             argstr='-matrix %s',
             copyfile=False,
             mandatory=True,
+            usedefault=True,
         ),
         num_threads=dict(
             nohash=True,
@@ -30,6 +32,7 @@ def test_Synthesize_inputs():
         out_file=dict(
             argstr='-prefix %s',
             name_template='syn',
+            usedefault=True,
         ),
         outputtype=dict(),
         select=dict(
@@ -43,7 +46,7 @@ def test_Synthesize_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Synthesize_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = Synthesize.output_spec()
 
     for key, metadata in list(output_map.items()):

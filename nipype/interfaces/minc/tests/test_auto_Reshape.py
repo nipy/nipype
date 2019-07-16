@@ -26,6 +26,7 @@ def test_Reshape_inputs():
             name_source=['input_file'],
             name_template='%s_reshape.mnc',
             position=-1,
+            usedefault=True,
         ),
         verbose=dict(argstr='-verbose', ),
         write_short=dict(argstr='-short', ),
@@ -36,7 +37,7 @@ def test_Reshape_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Reshape_outputs():
-    output_map = dict(output_file=dict(), )
+    output_map = dict(output_file=dict(usedefault=True, ), )
     outputs = Reshape.output_spec()
 
     for key, metadata in list(output_map.items()):

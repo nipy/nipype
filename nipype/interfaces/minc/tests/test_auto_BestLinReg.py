@@ -22,6 +22,7 @@ def test_BestLinReg_inputs():
             name_source=['source'],
             name_template='%s_bestlinreg.mnc',
             position=-1,
+            usedefault=True,
         ),
         output_xfm=dict(
             argstr='%s',
@@ -31,16 +32,19 @@ def test_BestLinReg_inputs():
             name_source=['source'],
             name_template='%s_bestlinreg.xfm',
             position=-2,
+            usedefault=True,
         ),
         source=dict(
             argstr='%s',
             mandatory=True,
             position=-4,
+            usedefault=True,
         ),
         target=dict(
             argstr='%s',
             mandatory=True,
             position=-3,
+            usedefault=True,
         ),
         verbose=dict(argstr='-verbose', ),
     )
@@ -51,8 +55,8 @@ def test_BestLinReg_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BestLinReg_outputs():
     output_map = dict(
-        output_mnc=dict(),
-        output_xfm=dict(),
+        output_mnc=dict(usedefault=True, ),
+        output_xfm=dict(usedefault=True, ),
     )
     outputs = BestLinReg.output_spec()
 

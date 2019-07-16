@@ -17,10 +17,12 @@ def test_Threshold_inputs():
         spm_mat_file=dict(
             copyfile=True,
             mandatory=True,
+            usedefault=True,
         ),
         stat_image=dict(
             copyfile=False,
             mandatory=True,
+            usedefault=True,
         ),
         use_fwe_correction=dict(usedefault=True, ),
         use_mcr=dict(),
@@ -40,9 +42,9 @@ def test_Threshold_outputs():
         activation_forced=dict(),
         cluster_forming_thr=dict(),
         n_clusters=dict(),
-        pre_topo_fdr_map=dict(),
+        pre_topo_fdr_map=dict(usedefault=True, ),
         pre_topo_n_clusters=dict(),
-        thresholded_map=dict(),
+        thresholded_map=dict(usedefault=True, ),
     )
     outputs = Threshold.output_spec()
 

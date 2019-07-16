@@ -10,13 +10,34 @@ def test_BRAINSPosteriorToContinuousClass_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputBasalGmVolume=dict(argstr='--inputBasalGmVolume %s', ),
-        inputCrblGmVolume=dict(argstr='--inputCrblGmVolume %s', ),
-        inputCrblWmVolume=dict(argstr='--inputCrblWmVolume %s', ),
-        inputCsfVolume=dict(argstr='--inputCsfVolume %s', ),
-        inputSurfaceGmVolume=dict(argstr='--inputSurfaceGmVolume %s', ),
-        inputVbVolume=dict(argstr='--inputVbVolume %s', ),
-        inputWhiteVolume=dict(argstr='--inputWhiteVolume %s', ),
+        inputBasalGmVolume=dict(
+            argstr='--inputBasalGmVolume %s',
+            usedefault=True,
+        ),
+        inputCrblGmVolume=dict(
+            argstr='--inputCrblGmVolume %s',
+            usedefault=True,
+        ),
+        inputCrblWmVolume=dict(
+            argstr='--inputCrblWmVolume %s',
+            usedefault=True,
+        ),
+        inputCsfVolume=dict(
+            argstr='--inputCsfVolume %s',
+            usedefault=True,
+        ),
+        inputSurfaceGmVolume=dict(
+            argstr='--inputSurfaceGmVolume %s',
+            usedefault=True,
+        ),
+        inputVbVolume=dict(
+            argstr='--inputVbVolume %s',
+            usedefault=True,
+        ),
+        inputWhiteVolume=dict(
+            argstr='--inputWhiteVolume %s',
+            usedefault=True,
+        ),
         outputVolume=dict(
             argstr='--outputVolume %s',
             hash_files=False,
@@ -28,7 +49,7 @@ def test_BRAINSPosteriorToContinuousClass_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BRAINSPosteriorToContinuousClass_outputs():
-    output_map = dict(outputVolume=dict(), )
+    output_map = dict(outputVolume=dict(usedefault=True, ), )
     outputs = BRAINSPosteriorToContinuousClass.output_spec()
 
     for key, metadata in list(output_map.items()):

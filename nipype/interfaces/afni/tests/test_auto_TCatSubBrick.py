@@ -23,6 +23,7 @@ def test_TCatSubBrick_inputs():
         out_file=dict(
             argstr='-prefix %s',
             genfile=True,
+            usedefault=True,
         ),
         outputtype=dict(),
         rlt=dict(
@@ -36,7 +37,7 @@ def test_TCatSubBrick_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TCatSubBrick_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = TCatSubBrick.output_spec()
 
     for key, metadata in list(output_map.items()):

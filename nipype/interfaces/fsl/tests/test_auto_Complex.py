@@ -17,10 +17,12 @@ def test_Complex_inputs():
         complex_in_file=dict(
             argstr='%s',
             position=2,
+            usedefault=True,
         ),
         complex_in_file2=dict(
             argstr='%s',
             position=3,
+            usedefault=True,
         ),
         complex_merge=dict(
             argstr='-complexmerge',
@@ -35,6 +37,7 @@ def test_Complex_inputs():
             argstr='%s',
             genfile=True,
             position=-3,
+            usedefault=True,
             xor=[
                 'complex_out_file', 'magnitude_out_file', 'phase_out_file',
                 'real_out_file', 'imaginary_out_file', 'real_polar',
@@ -68,11 +71,13 @@ def test_Complex_inputs():
         imaginary_in_file=dict(
             argstr='%s',
             position=3,
+            usedefault=True,
         ),
         imaginary_out_file=dict(
             argstr='%s',
             genfile=True,
             position=-3,
+            usedefault=True,
             xor=[
                 'complex_out_file', 'magnitude_out_file', 'phase_out_file',
                 'real_polar', 'complex_cartesian', 'complex_polar',
@@ -82,11 +87,13 @@ def test_Complex_inputs():
         magnitude_in_file=dict(
             argstr='%s',
             position=2,
+            usedefault=True,
         ),
         magnitude_out_file=dict(
             argstr='%s',
             genfile=True,
             position=-4,
+            usedefault=True,
             xor=[
                 'complex_out_file', 'real_out_file', 'imaginary_out_file',
                 'real_cartesian', 'complex_cartesian', 'complex_polar',
@@ -97,11 +104,13 @@ def test_Complex_inputs():
         phase_in_file=dict(
             argstr='%s',
             position=3,
+            usedefault=True,
         ),
         phase_out_file=dict(
             argstr='%s',
             genfile=True,
             position=-3,
+            usedefault=True,
             xor=[
                 'complex_out_file', 'real_out_file', 'imaginary_out_file',
                 'real_cartesian', 'complex_cartesian', 'complex_polar',
@@ -119,11 +128,13 @@ def test_Complex_inputs():
         real_in_file=dict(
             argstr='%s',
             position=2,
+            usedefault=True,
         ),
         real_out_file=dict(
             argstr='%s',
             genfile=True,
             position=-4,
+            usedefault=True,
             xor=[
                 'complex_out_file', 'magnitude_out_file', 'phase_out_file',
                 'real_polar', 'complex_cartesian', 'complex_polar',
@@ -150,11 +161,11 @@ def test_Complex_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Complex_outputs():
     output_map = dict(
-        complex_out_file=dict(),
-        imaginary_out_file=dict(),
-        magnitude_out_file=dict(),
-        phase_out_file=dict(),
-        real_out_file=dict(),
+        complex_out_file=dict(usedefault=True, ),
+        imaginary_out_file=dict(usedefault=True, ),
+        magnitude_out_file=dict(usedefault=True, ),
+        phase_out_file=dict(usedefault=True, ),
+        real_out_file=dict(usedefault=True, ),
     )
     outputs = Complex.output_spec()
 

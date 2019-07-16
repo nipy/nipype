@@ -14,6 +14,7 @@ def test_ComputeMeanDiffusivity_inputs():
             argstr='< %s',
             mandatory=True,
             position=1,
+            usedefault=True,
         ),
         inputdatatype=dict(argstr='-inputdatatype %s', ),
         inputmodel=dict(argstr='-inputmodel %s', ),
@@ -21,11 +22,13 @@ def test_ComputeMeanDiffusivity_inputs():
             argstr='> %s',
             genfile=True,
             position=-1,
+            usedefault=True,
         ),
         outputdatatype=dict(argstr='-outputdatatype %s', ),
         scheme_file=dict(
             argstr='%s',
             position=2,
+            usedefault=True,
         ),
     )
     inputs = ComputeMeanDiffusivity.input_spec()
@@ -34,7 +37,7 @@ def test_ComputeMeanDiffusivity_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ComputeMeanDiffusivity_outputs():
-    output_map = dict(md=dict(), )
+    output_map = dict(md=dict(usedefault=True, ), )
     outputs = ComputeMeanDiffusivity.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -14,6 +14,7 @@ def test_SwapDimensions_inputs():
             argstr='%s',
             mandatory=True,
             position='1',
+            usedefault=True,
         ),
         new_dims=dict(
             argstr='%s %s %s',
@@ -23,6 +24,7 @@ def test_SwapDimensions_inputs():
             argstr='%s',
             genfile=True,
             hash_files=False,
+            usedefault=True,
         ),
         output_type=dict(),
     )
@@ -32,7 +34,7 @@ def test_SwapDimensions_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SwapDimensions_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = SwapDimensions.output_spec()
 
     for key, metadata in list(output_map.items()):

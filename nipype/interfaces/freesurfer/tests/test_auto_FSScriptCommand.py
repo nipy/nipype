@@ -10,7 +10,7 @@ def test_FSScriptCommand_inputs():
             nohash=True,
             usedefault=True,
         ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
     )
     inputs = FSScriptCommand.input_spec()
 

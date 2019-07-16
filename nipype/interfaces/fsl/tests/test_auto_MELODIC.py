@@ -5,10 +5,16 @@ from ..model import MELODIC
 
 def test_MELODIC_inputs():
     input_map = dict(
-        ICs=dict(argstr='--ICs=%s', ),
+        ICs=dict(
+            argstr='--ICs=%s',
+            usedefault=True,
+        ),
         approach=dict(argstr='-a %s', ),
         args=dict(argstr='%s', ),
-        bg_image=dict(argstr='--bgimage=%s', ),
+        bg_image=dict(
+            argstr='--bgimage=%s',
+            usedefault=True,
+        ),
         bg_threshold=dict(argstr='--bgthreshold=%f', ),
         cov_weight=dict(argstr='--covarweight=%f', ),
         dim=dict(argstr='-d %d', ),
@@ -26,14 +32,20 @@ def test_MELODIC_inputs():
             sep=',',
         ),
         log_power=dict(argstr='--logPower', ),
-        mask=dict(argstr='-m %s', ),
+        mask=dict(
+            argstr='-m %s',
+            usedefault=True,
+        ),
         max_restart=dict(argstr='--maxrestart=%d', ),
         maxit=dict(argstr='--maxit=%d', ),
         migp=dict(argstr='--migp', ),
         migpN=dict(argstr='--migpN %d', ),
         migp_factor=dict(argstr='--migp_factor %d', ),
         migp_shuffle=dict(argstr='--migp_shuffle', ),
-        mix=dict(argstr='--mix=%s', ),
+        mix=dict(
+            argstr='--mix=%s',
+            usedefault=True,
+        ),
         mm_thresh=dict(argstr='--mmthresh=%f', ),
         no_bet=dict(argstr='--nobet', ),
         no_mask=dict(argstr='--nomask', ),
@@ -44,6 +56,7 @@ def test_MELODIC_inputs():
         out_dir=dict(
             argstr='-o %s',
             genfile=True,
+            usedefault=True,
         ),
         out_mean=dict(argstr='--Omean', ),
         out_orig=dict(argstr='--Oorig', ),
@@ -57,13 +70,28 @@ def test_MELODIC_inputs():
         remove_deriv=dict(argstr='--remove_deriv', ),
         report=dict(argstr='--report', ),
         report_maps=dict(argstr='--report_maps=%s', ),
-        s_con=dict(argstr='--Scon=%s', ),
-        s_des=dict(argstr='--Sdes=%s', ),
+        s_con=dict(
+            argstr='--Scon=%s',
+            usedefault=True,
+        ),
+        s_des=dict(
+            argstr='--Sdes=%s',
+            usedefault=True,
+        ),
         sep_vn=dict(argstr='--sep_vn', ),
         sep_whiten=dict(argstr='--sep_whiten', ),
-        smode=dict(argstr='--smode=%s', ),
-        t_con=dict(argstr='--Tcon=%s', ),
-        t_des=dict(argstr='--Tdes=%s', ),
+        smode=dict(
+            argstr='--smode=%s',
+            usedefault=True,
+        ),
+        t_con=dict(
+            argstr='--Tcon=%s',
+            usedefault=True,
+        ),
+        t_des=dict(
+            argstr='--Tdes=%s',
+            usedefault=True,
+        ),
         tr_sec=dict(argstr='--tr=%f', ),
         update_mask=dict(argstr='--update_mask', ),
         var_norm=dict(argstr='--vn', ),
@@ -75,8 +103,8 @@ def test_MELODIC_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MELODIC_outputs():
     output_map = dict(
-        out_dir=dict(),
-        report_dir=dict(),
+        out_dir=dict(usedefault=True, ),
+        report_dir=dict(usedefault=True, ),
     )
     outputs = MELODIC.output_spec()
 

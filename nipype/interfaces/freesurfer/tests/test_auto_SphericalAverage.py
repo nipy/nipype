@@ -26,22 +26,27 @@ def test_SphericalAverage_inputs():
             genfile=True,
             position=-2,
         ),
-        in_orig=dict(argstr='-orig %s', ),
+        in_orig=dict(
+            argstr='-orig %s',
+            usedefault=True,
+        ),
         in_surf=dict(
             argstr='%s',
             mandatory=True,
             position=-3,
+            usedefault=True,
         ),
         out_file=dict(
             argstr='%s',
             genfile=True,
             position=-1,
+            usedefault=True,
         ),
         subject_id=dict(
             argstr='-o %s',
             mandatory=True,
         ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         threshold=dict(argstr='-t %.1f', ),
         which=dict(
             argstr='%s',
@@ -55,7 +60,7 @@ def test_SphericalAverage_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SphericalAverage_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = SphericalAverage.output_spec()
 
     for key, metadata in list(output_map.items()):

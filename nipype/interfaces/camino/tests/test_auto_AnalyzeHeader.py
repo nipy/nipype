@@ -31,10 +31,12 @@ def test_AnalyzeHeader_inputs():
             argstr='< %s',
             mandatory=True,
             position=1,
+            usedefault=True,
         ),
         initfromheader=dict(
             argstr='-initfromheader %s',
             position=3,
+            usedefault=True,
         ),
         intelbyteorder=dict(argstr='-intelbyteorder', ),
         networkbyteorder=dict(argstr='-networkbyteorder', ),
@@ -58,22 +60,27 @@ def test_AnalyzeHeader_inputs():
         printbigendian=dict(
             argstr='-printbigendian %s',
             position=3,
+            usedefault=True,
         ),
         printimagedims=dict(
             argstr='-printimagedims %s',
             position=3,
+            usedefault=True,
         ),
         printintelbyteorder=dict(
             argstr='-printintelbyteorder %s',
             position=3,
+            usedefault=True,
         ),
         printprogargs=dict(
             argstr='-printprogargs %s',
             position=3,
+            usedefault=True,
         ),
         readheader=dict(
             argstr='-readheader %s',
             position=3,
+            usedefault=True,
         ),
         scaleinter=dict(
             argstr='-scaleinter %d',
@@ -86,6 +93,7 @@ def test_AnalyzeHeader_inputs():
         scheme_file=dict(
             argstr='%s',
             position=2,
+            usedefault=True,
         ),
         voxel_dims=dict(
             argstr='-voxeldims %s',
@@ -98,7 +106,7 @@ def test_AnalyzeHeader_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_AnalyzeHeader_outputs():
-    output_map = dict(header=dict(), )
+    output_map = dict(header=dict(usedefault=True, ), )
     outputs = AnalyzeHeader.output_spec()
 
     for key, metadata in list(output_map.items()):

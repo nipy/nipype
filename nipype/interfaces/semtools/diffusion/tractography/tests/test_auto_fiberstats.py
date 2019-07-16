@@ -10,7 +10,10 @@ def test_fiberstats_inputs():
             nohash=True,
             usedefault=True,
         ),
-        fiber_file=dict(argstr='--fiber_file %s', ),
+        fiber_file=dict(
+            argstr='--fiber_file %s',
+            usedefault=True,
+        ),
         verbose=dict(argstr='--verbose ', ),
     )
     inputs = fiberstats.input_spec()

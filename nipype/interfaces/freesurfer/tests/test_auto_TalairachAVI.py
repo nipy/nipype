@@ -14,12 +14,14 @@ def test_TalairachAVI_inputs():
         in_file=dict(
             argstr='--i %s',
             mandatory=True,
+            usedefault=True,
         ),
         out_file=dict(
             argstr='--xfm %s',
             mandatory=True,
+            usedefault=True,
         ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
     )
     inputs = TalairachAVI.input_spec()
 

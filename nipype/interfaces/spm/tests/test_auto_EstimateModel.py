@@ -17,6 +17,7 @@ def test_EstimateModel_inputs():
             copyfile=True,
             field='spmmat',
             mandatory=True,
+            usedefault=True,
         ),
         use_mcr=dict(),
         use_v8struct=dict(
@@ -34,15 +35,15 @@ def test_EstimateModel_outputs():
     output_map = dict(
         ARcoef=dict(),
         Cbetas=dict(),
-        RPVimage=dict(),
+        RPVimage=dict(usedefault=True, ),
         SDbetas=dict(),
         SDerror=dict(),
         beta_images=dict(),
-        labels=dict(),
-        mask_image=dict(),
-        residual_image=dict(),
+        labels=dict(usedefault=True, ),
+        mask_image=dict(usedefault=True, ),
+        residual_image=dict(usedefault=True, ),
         residual_images=dict(),
-        spm_mat_file=dict(),
+        spm_mat_file=dict(usedefault=True, ),
     )
     outputs = EstimateModel.output_spec()
 

@@ -14,12 +14,14 @@ def test_MathsCommand_inputs():
             argstr='%s',
             mandatory=True,
             position=2,
+            usedefault=True,
         ),
         out_file=dict(
             argstr='%s',
             name_source=['in_file'],
             name_template='%s',
             position=-2,
+            usedefault=True,
         ),
         output_datatype=dict(
             argstr='-odt %s',
@@ -32,7 +34,7 @@ def test_MathsCommand_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MathsCommand_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = MathsCommand.output_spec()
 
     for key, metadata in list(output_map.items()):

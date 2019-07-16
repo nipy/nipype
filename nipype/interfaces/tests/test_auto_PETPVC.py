@@ -33,10 +33,12 @@ def test_PETPVC_inputs():
         in_file=dict(
             argstr='-i %s',
             mandatory=True,
+            usedefault=True,
         ),
         mask_file=dict(
             argstr='-m %s',
             mandatory=True,
+            usedefault=True,
         ),
         n_deconv=dict(
             argstr='-k %d',
@@ -50,6 +52,7 @@ def test_PETPVC_inputs():
             argstr='-o %s',
             genfile=True,
             hash_files=False,
+            usedefault=True,
         ),
         pvc=dict(
             argstr='-p %s',
@@ -66,7 +69,7 @@ def test_PETPVC_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_PETPVC_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = PETPVC.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -14,6 +14,7 @@ def test_BinaryStats_inputs():
             argstr='%s',
             mandatory=True,
             position=2,
+            usedefault=True,
         ),
         larger_voxel=dict(
             argstr='-t %f',
@@ -22,11 +23,13 @@ def test_BinaryStats_inputs():
         mask_file=dict(
             argstr='-m %s',
             position=-2,
+            usedefault=True,
         ),
         operand_file=dict(
             argstr='%s',
             mandatory=True,
             position=5,
+            usedefault=True,
             xor=['operand_value'],
         ),
         operand_value=dict(

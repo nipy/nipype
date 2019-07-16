@@ -12,8 +12,14 @@ def test_fibertrack_inputs():
         ),
         forbidden_label=dict(argstr='--forbidden_label %d', ),
         force=dict(argstr='--force ', ),
-        input_roi_file=dict(argstr='--input_roi_file %s', ),
-        input_tensor_file=dict(argstr='--input_tensor_file %s', ),
+        input_roi_file=dict(
+            argstr='--input_roi_file %s',
+            usedefault=True,
+        ),
+        input_tensor_file=dict(
+            argstr='--input_tensor_file %s',
+            usedefault=True,
+        ),
         max_angle=dict(argstr='--max_angle %f', ),
         min_fa=dict(argstr='--min_fa %f', ),
         output_fiber_file=dict(
@@ -33,7 +39,7 @@ def test_fibertrack_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_fibertrack_outputs():
-    output_map = dict(output_fiber_file=dict(), )
+    output_map = dict(output_fiber_file=dict(usedefault=True, ), )
     outputs = fibertrack.output_spec()
 
     for key, metadata in list(output_map.items()):

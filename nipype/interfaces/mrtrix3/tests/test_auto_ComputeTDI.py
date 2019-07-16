@@ -8,7 +8,10 @@ def test_ComputeTDI_inputs():
         args=dict(argstr='%s', ),
         contrast=dict(argstr='-constrast %s', ),
         data_type=dict(argstr='-datatype %s', ),
-        dixel=dict(argstr='-dixel %s', ),
+        dixel=dict(
+            argstr='-dixel %s',
+            usedefault=True,
+        ),
         ends_only=dict(argstr='-ends_only', ),
         environ=dict(
             nohash=True,
@@ -19,8 +22,12 @@ def test_ComputeTDI_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
-        in_map=dict(argstr='-image %s', ),
+        in_map=dict(
+            argstr='-image %s',
+            usedefault=True,
+        ),
         map_zero=dict(argstr='-map_zero', ),
         max_tod=dict(argstr='-tod %d', ),
         nthreads=dict(
@@ -33,10 +40,16 @@ def test_ComputeTDI_inputs():
             usedefault=True,
         ),
         precise=dict(argstr='-precise', ),
-        reference=dict(argstr='-template %s', ),
+        reference=dict(
+            argstr='-template %s',
+            usedefault=True,
+        ),
         stat_tck=dict(argstr='-stat_tck %s', ),
         stat_vox=dict(argstr='-stat_vox %s', ),
-        tck_weights=dict(argstr='-tck_weights_in %s', ),
+        tck_weights=dict(
+            argstr='-tck_weights_in %s',
+            usedefault=True,
+        ),
         upsample=dict(argstr='-upsample %d', ),
         use_dec=dict(argstr='-dec', ),
         vox_size=dict(
@@ -50,7 +63,7 @@ def test_ComputeTDI_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ComputeTDI_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = ComputeTDI.output_spec()
 
     for key, metadata in list(output_map.items()):

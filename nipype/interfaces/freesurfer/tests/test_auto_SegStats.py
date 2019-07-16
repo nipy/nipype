@@ -14,11 +14,15 @@ def test_SegStats_inputs():
         avgwf_file=dict(argstr='--avgwfvol %s', ),
         avgwf_txt_file=dict(argstr='--avgwf %s', ),
         brain_vol=dict(argstr='--%s', ),
-        brainmask_file=dict(argstr='--brainmask %s', ),
+        brainmask_file=dict(
+            argstr='--brainmask %s',
+            usedefault=True,
+        ),
         calc_power=dict(argstr='--%s', ),
         calc_snr=dict(argstr='--snr', ),
         color_table_file=dict(
             argstr='--ctab %s',
+            usedefault=True,
             xor=('color_table_file', 'default_color_table', 'gca_color_table'),
         ),
         cortex_vol_from_surf=dict(argstr='--surf-ctx-vol', ),
@@ -39,36 +43,51 @@ def test_SegStats_inputs():
         frame=dict(argstr='--frame %d', ),
         gca_color_table=dict(
             argstr='--ctab-gca %s',
+            usedefault=True,
             xor=('color_table_file', 'default_color_table', 'gca_color_table'),
         ),
-        in_file=dict(argstr='--i %s', ),
-        in_intensity=dict(argstr='--in %s --in-intensity-name %s', ),
+        in_file=dict(
+            argstr='--i %s',
+            usedefault=True,
+        ),
+        in_intensity=dict(
+            argstr='--in %s --in-intensity-name %s',
+            usedefault=True,
+        ),
         intensity_units=dict(
             argstr='--in-intensity-units %s',
             requires=['in_intensity'],
         ),
         mask_erode=dict(argstr='--maskerode %d', ),
-        mask_file=dict(argstr='--mask %s', ),
+        mask_file=dict(
+            argstr='--mask %s',
+            usedefault=True,
+        ),
         mask_frame=dict(requires=['mask_file'], ),
         mask_invert=dict(argstr='--maskinvert', ),
         mask_sign=dict(),
         mask_thresh=dict(argstr='--maskthresh %f', ),
         multiply=dict(argstr='--mul %f', ),
         non_empty_only=dict(argstr='--nonempty', ),
-        partial_volume_file=dict(argstr='--pv %s', ),
+        partial_volume_file=dict(
+            argstr='--pv %s',
+            usedefault=True,
+        ),
         segment_id=dict(argstr='--id %s...', ),
         segmentation_file=dict(
             argstr='--seg %s',
             mandatory=True,
+            usedefault=True,
             xor=('segmentation_file', 'annot', 'surf_label'),
         ),
         sf_avg_file=dict(argstr='--sfavg %s', ),
         subcort_gm=dict(argstr='--subcortgray', ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         summary_file=dict(
             argstr='--sum %s',
             genfile=True,
             position=-1,
+            usedefault=True,
         ),
         supratent=dict(argstr='--supratent', ),
         surf_label=dict(
@@ -87,10 +106,10 @@ def test_SegStats_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SegStats_outputs():
     output_map = dict(
-        avgwf_file=dict(),
-        avgwf_txt_file=dict(),
-        sf_avg_file=dict(),
-        summary_file=dict(),
+        avgwf_file=dict(usedefault=True, ),
+        avgwf_txt_file=dict(usedefault=True, ),
+        sf_avg_file=dict(usedefault=True, ),
+        summary_file=dict(usedefault=True, ),
     )
     outputs = SegStats.output_spec()
 

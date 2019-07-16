@@ -13,6 +13,7 @@ def test_Diffeo_inputs():
         fixed_file=dict(
             argstr='%s',
             position=0,
+            usedefault=True,
         ),
         ftol=dict(
             argstr='%g',
@@ -29,11 +30,13 @@ def test_Diffeo_inputs():
         mask_file=dict(
             argstr='%s',
             position=2,
+            usedefault=True,
         ),
         moving_file=dict(
             argstr='%s',
             copyfile=False,
             position=1,
+            usedefault=True,
         ),
         n_iters=dict(
             argstr='%d',
@@ -49,8 +52,8 @@ def test_Diffeo_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Diffeo_outputs():
     output_map = dict(
-        out_file=dict(),
-        out_file_xfm=dict(),
+        out_file=dict(usedefault=True, ),
+        out_file_xfm=dict(usedefault=True, ),
     )
     outputs = Diffeo.output_spec()
 

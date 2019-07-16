@@ -6,7 +6,10 @@ from ..segmentation import N4BiasFieldCorrection
 def test_N4BiasFieldCorrection_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        bias_image=dict(hash_files=False, ),
+        bias_image=dict(
+            hash_files=False,
+            usedefault=True,
+        ),
         bspline_fitting_distance=dict(argstr='--bspline-fitting %s', ),
         bspline_order=dict(requires=['bspline_fitting_distance'], ),
         convergence_threshold=dict(requires=['n_iterations'], ),
@@ -25,8 +28,12 @@ def test_N4BiasFieldCorrection_inputs():
         input_image=dict(
             argstr='--input-image %s',
             mandatory=True,
+            usedefault=True,
         ),
-        mask_image=dict(argstr='--mask-image %s', ),
+        mask_image=dict(
+            argstr='--mask-image %s',
+            usedefault=True,
+        ),
         n_iterations=dict(argstr='--convergence %s', ),
         num_threads=dict(
             nohash=True,
@@ -43,7 +50,10 @@ def test_N4BiasFieldCorrection_inputs():
             xor=['bias_image'],
         ),
         shrink_factor=dict(argstr='--shrink-factor %d', ),
-        weight_image=dict(argstr='--weight-image %s', ),
+        weight_image=dict(
+            argstr='--weight-image %s',
+            usedefault=True,
+        ),
     )
     inputs = N4BiasFieldCorrection.input_spec()
 
@@ -52,8 +62,8 @@ def test_N4BiasFieldCorrection_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_N4BiasFieldCorrection_outputs():
     output_map = dict(
-        bias_image=dict(),
-        output_image=dict(),
+        bias_image=dict(usedefault=True, ),
+        output_image=dict(usedefault=True, ),
     )
     outputs = N4BiasFieldCorrection.output_spec()
 

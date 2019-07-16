@@ -11,8 +11,14 @@ def test_DWISimpleCompare_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputVolume1=dict(argstr='--inputVolume1 %s', ),
-        inputVolume2=dict(argstr='--inputVolume2 %s', ),
+        inputVolume1=dict(
+            argstr='--inputVolume1 %s',
+            usedefault=True,
+        ),
+        inputVolume2=dict(
+            argstr='--inputVolume2 %s',
+            usedefault=True,
+        ),
     )
     inputs = DWISimpleCompare.input_spec()
 

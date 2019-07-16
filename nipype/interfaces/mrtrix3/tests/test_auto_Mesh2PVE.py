@@ -14,8 +14,12 @@ def test_Mesh2PVE_inputs():
             argstr='%s',
             mandatory=True,
             position=-3,
+            usedefault=True,
         ),
-        in_first=dict(argstr='-first %s', ),
+        in_first=dict(
+            argstr='-first %s',
+            usedefault=True,
+        ),
         out_file=dict(
             argstr='%s',
             mandatory=True,
@@ -26,6 +30,7 @@ def test_Mesh2PVE_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
     )
     inputs = Mesh2PVE.input_spec()
@@ -34,7 +39,7 @@ def test_Mesh2PVE_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Mesh2PVE_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = Mesh2PVE.output_spec()
 
     for key, metadata in list(output_map.items()):

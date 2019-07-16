@@ -12,9 +12,18 @@ def test_HammerAttributeCreator_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputCSFVolume=dict(argstr='--inputCSFVolume %s', ),
-        inputGMVolume=dict(argstr='--inputGMVolume %s', ),
-        inputWMVolume=dict(argstr='--inputWMVolume %s', ),
+        inputCSFVolume=dict(
+            argstr='--inputCSFVolume %s',
+            usedefault=True,
+        ),
+        inputGMVolume=dict(
+            argstr='--inputGMVolume %s',
+            usedefault=True,
+        ),
+        inputWMVolume=dict(
+            argstr='--inputWMVolume %s',
+            usedefault=True,
+        ),
         outputVolumeBase=dict(argstr='--outputVolumeBase %s', ),
     )
     inputs = HammerAttributeCreator.input_spec()

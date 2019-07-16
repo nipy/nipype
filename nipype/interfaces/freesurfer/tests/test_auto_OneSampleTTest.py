@@ -19,6 +19,7 @@ def test_OneSampleTTest_inputs():
         debug=dict(argstr='--debug', ),
         design=dict(
             argstr='--X %s',
+            usedefault=True,
             xor=('fsgd', 'design', 'one_sample'),
         ),
         diag=dict(argstr='--diag %d', ),
@@ -33,9 +34,13 @@ def test_OneSampleTTest_inputs():
         ),
         fixed_fx_dof_file=dict(
             argstr='--ffxdofdat %d',
+            usedefault=True,
             xor=['fixed_fx_dof'],
         ),
-        fixed_fx_var=dict(argstr='--yffxvar %s', ),
+        fixed_fx_var=dict(
+            argstr='--yffxvar %s',
+            usedefault=True,
+        ),
         force_perm=dict(argstr='--perm-force', ),
         fsgd=dict(
             argstr='--fsgd %s %s',
@@ -51,13 +56,18 @@ def test_OneSampleTTest_inputs():
             argstr='--y %s',
             copyfile=False,
             mandatory=True,
+            usedefault=True,
         ),
         invert_mask=dict(argstr='--mask-inv', ),
         label_file=dict(
             argstr='--label %s',
+            usedefault=True,
             xor=['cortex'],
         ),
-        mask_file=dict(argstr='--mask %s', ),
+        mask_file=dict(
+            argstr='--mask %s',
+            usedefault=True,
+        ),
         no_contrast_ok=dict(argstr='--no-contrasts-ok', ),
         no_est_fwhm=dict(argstr='--no-est-fwhm', ),
         no_mask_smooth=dict(argstr='--no-mask-smooth', ),
@@ -84,11 +94,14 @@ def test_OneSampleTTest_inputs():
         save_residual=dict(argstr='--eres-save', ),
         seed=dict(argstr='--seed %d', ),
         self_reg=dict(argstr='--selfreg %d %d %d', ),
-        sim_done_file=dict(argstr='--sim-done %s', ),
+        sim_done_file=dict(
+            argstr='--sim-done %s',
+            usedefault=True,
+        ),
         sim_sign=dict(argstr='--sim-sign %s', ),
         simulation=dict(argstr='--sim %s %d %f %s', ),
         subject_id=dict(),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         surf=dict(
             argstr='--surf %s %s %s',
             requires=['subject_id', 'hemi'],
@@ -98,7 +111,10 @@ def test_OneSampleTTest_inputs():
         uniform=dict(argstr='--uniform %f %f', ),
         var_fwhm=dict(argstr='--var-fwhm %f', ),
         vox_dump=dict(argstr='--voxdump %d %d %d', ),
-        weight_file=dict(xor=['weighted_ls'], ),
+        weight_file=dict(
+            usedefault=True,
+            xor=['weighted_ls'],
+        ),
         weight_inv=dict(
             argstr='--w-inv',
             xor=['weighted_ls'],
@@ -109,6 +125,7 @@ def test_OneSampleTTest_inputs():
         ),
         weighted_ls=dict(
             argstr='--wls %s',
+            usedefault=True,
             xor=('weight_file', 'weight_inv', 'weight_sqrt'),
         ),
     )
@@ -119,23 +136,23 @@ def test_OneSampleTTest_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_OneSampleTTest_outputs():
     output_map = dict(
-        beta_file=dict(),
-        dof_file=dict(),
-        error_file=dict(),
-        error_stddev_file=dict(),
-        error_var_file=dict(),
-        estimate_file=dict(),
-        frame_eigenvectors=dict(),
+        beta_file=dict(usedefault=True, ),
+        dof_file=dict(usedefault=True, ),
+        error_file=dict(usedefault=True, ),
+        error_stddev_file=dict(usedefault=True, ),
+        error_var_file=dict(usedefault=True, ),
+        estimate_file=dict(usedefault=True, ),
+        frame_eigenvectors=dict(usedefault=True, ),
         ftest_file=dict(),
-        fwhm_file=dict(),
+        fwhm_file=dict(usedefault=True, ),
         gamma_file=dict(),
         gamma_var_file=dict(),
-        glm_dir=dict(),
-        mask_file=dict(),
+        glm_dir=dict(usedefault=True, ),
+        mask_file=dict(usedefault=True, ),
         sig_file=dict(),
-        singular_values=dict(),
-        spatial_eigenvectors=dict(),
-        svd_stats_file=dict(),
+        singular_values=dict(usedefault=True, ),
+        spatial_eigenvectors=dict(usedefault=True, ),
+        svd_stats_file=dict(usedefault=True, ),
     )
     outputs = OneSampleTTest.output_spec()
 

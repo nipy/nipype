@@ -18,11 +18,13 @@ def test_Quickshear_inputs():
             argstr='%s',
             mandatory=True,
             position=1,
+            usedefault=True,
         ),
         mask_file=dict(
             argstr='%s',
             mandatory=True,
             position=2,
+            usedefault=True,
         ),
         out_file=dict(
             argstr='%s',
@@ -30,6 +32,7 @@ def test_Quickshear_inputs():
             name_source='in_file',
             name_template='%s_defaced',
             position=3,
+            usedefault=True,
         ),
     )
     inputs = Quickshear.input_spec()
@@ -38,7 +41,7 @@ def test_Quickshear_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Quickshear_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = Quickshear.output_spec()
 
     for key, metadata in list(output_map.items()):

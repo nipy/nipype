@@ -14,12 +14,14 @@ def test_DenoiseImage_inputs():
         input_image=dict(
             argstr='-i %s',
             mandatory=True,
+            usedefault=True,
         ),
         noise_image=dict(
             hash_files=False,
             keep_extension=True,
             name_source=['input_image'],
             name_template='%s_noise',
+            usedefault=True,
         ),
         noise_model=dict(
             argstr='-n %s',
@@ -35,6 +37,7 @@ def test_DenoiseImage_inputs():
             keep_extension=True,
             name_source=['input_image'],
             name_template='%s_noise_corrected',
+            usedefault=True,
         ),
         save_noise=dict(
             mandatory=True,
@@ -54,8 +57,8 @@ def test_DenoiseImage_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DenoiseImage_outputs():
     output_map = dict(
-        noise_image=dict(),
-        output_image=dict(),
+        noise_image=dict(usedefault=True, ),
+        output_image=dict(usedefault=True, ),
     )
     outputs = DenoiseImage.output_spec()
 

@@ -14,12 +14,14 @@ def test_ExtractMainComponent_inputs():
             argstr='%s',
             mandatory=True,
             position=1,
+            usedefault=True,
         ),
         out_file=dict(
             argstr='%s',
             name_source='in_file',
             name_template='%s.maincmp',
             position=2,
+            usedefault=True,
         ),
     )
     inputs = ExtractMainComponent.input_spec()
@@ -28,7 +30,7 @@ def test_ExtractMainComponent_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ExtractMainComponent_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = ExtractMainComponent.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -14,6 +14,7 @@ def test_ConvertDset_inputs():
             argstr='-input %s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         num_threads=dict(
             nohash=True,
@@ -23,6 +24,7 @@ def test_ConvertDset_inputs():
             argstr='-prefix %s',
             mandatory=True,
             position=-1,
+            usedefault=True,
         ),
         out_type=dict(
             argstr='-o_%s',
@@ -37,7 +39,7 @@ def test_ConvertDset_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ConvertDset_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = ConvertDset.output_spec()
 
     for key, metadata in list(output_map.items()):

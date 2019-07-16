@@ -13,6 +13,7 @@ def test_MRISPreprocReconAll_inputs():
         ),
         fsgd_file=dict(
             argstr='--fsgd %s',
+            usedefault=True,
             xor=('subjects', 'fsgd_file', 'subject_file'),
         ),
         fwhm=dict(
@@ -27,7 +28,10 @@ def test_MRISPreprocReconAll_inputs():
             argstr='--hemi %s',
             mandatory=True,
         ),
-        lh_surfreg_target=dict(requires=['surfreg_files'], ),
+        lh_surfreg_target=dict(
+            requires=['surfreg_files'],
+            usedefault=True,
+        ),
         num_iters=dict(
             argstr='--niters %d',
             xor=['fwhm'],
@@ -39,13 +43,18 @@ def test_MRISPreprocReconAll_inputs():
         out_file=dict(
             argstr='--out %s',
             genfile=True,
+            usedefault=True,
         ),
         proj_frac=dict(argstr='--projfrac %s', ),
-        rh_surfreg_target=dict(requires=['surfreg_files'], ),
+        rh_surfreg_target=dict(
+            requires=['surfreg_files'],
+            usedefault=True,
+        ),
         smooth_cortex_only=dict(argstr='--smooth-cortex-only', ),
         source_format=dict(argstr='--srcfmt %s', ),
         subject_file=dict(
             argstr='--f %s',
+            usedefault=True,
             xor=('subjects', 'fsgd_file', 'subject_file'),
         ),
         subject_id=dict(
@@ -57,7 +66,7 @@ def test_MRISPreprocReconAll_inputs():
             argstr='--s %s...',
             xor=('subjects', 'fsgd_file', 'subject_file'),
         ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         surf_area=dict(
             argstr='--area %s',
             xor=('surf_measure', 'surf_measure_file', 'surf_area'),
@@ -69,6 +78,7 @@ def test_MRISPreprocReconAll_inputs():
         ),
         surf_measure_file=dict(
             argstr='--meas %s',
+            usedefault=True,
             xor=('surf_measure', 'surf_measure_file', 'surf_area'),
         ),
         surfreg_files=dict(
@@ -87,7 +97,7 @@ def test_MRISPreprocReconAll_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRISPreprocReconAll_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = MRISPreprocReconAll.output_spec()
 
     for key, metadata in list(output_map.items()):

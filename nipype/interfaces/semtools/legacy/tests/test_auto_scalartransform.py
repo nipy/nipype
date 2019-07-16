@@ -6,13 +6,19 @@ from ..registration import scalartransform
 def test_scalartransform_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        deformation=dict(argstr='--deformation %s', ),
+        deformation=dict(
+            argstr='--deformation %s',
+            usedefault=True,
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
         ),
         h_field=dict(argstr='--h_field ', ),
-        input_image=dict(argstr='--input_image %s', ),
+        input_image=dict(
+            argstr='--input_image %s',
+            usedefault=True,
+        ),
         interpolation=dict(argstr='--interpolation %s', ),
         invert=dict(argstr='--invert ', ),
         output_image=dict(
@@ -31,8 +37,8 @@ def test_scalartransform_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_scalartransform_outputs():
     output_map = dict(
-        output_image=dict(),
-        transformation=dict(),
+        output_image=dict(usedefault=True, ),
+        transformation=dict(usedefault=True, ),
     )
     outputs = scalartransform.output_spec()
 

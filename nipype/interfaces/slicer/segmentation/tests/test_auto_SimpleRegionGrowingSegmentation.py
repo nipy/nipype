@@ -13,6 +13,7 @@ def test_SimpleRegionGrowingSegmentation_inputs():
         inputVolume=dict(
             argstr='%s',
             position=-2,
+            usedefault=True,
         ),
         iterations=dict(argstr='--iterations %d', ),
         labelvalue=dict(argstr='--labelvalue %d', ),
@@ -33,7 +34,11 @@ def test_SimpleRegionGrowingSegmentation_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SimpleRegionGrowingSegmentation_outputs():
-    output_map = dict(outputVolume=dict(position=-1, ), )
+    output_map = dict(
+        outputVolume=dict(
+            position=-1,
+            usedefault=True,
+        ), )
     outputs = SimpleRegionGrowingSegmentation.output_spec()
 
     for key, metadata in list(output_map.items()):

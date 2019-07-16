@@ -11,7 +11,10 @@ def test_MedicAlgorithmSPECTRE2010_inputs():
             usedefault=True,
         ),
         inApply=dict(argstr='--inApply %s', ),
-        inAtlas=dict(argstr='--inAtlas %s', ),
+        inAtlas=dict(
+            argstr='--inAtlas %s',
+            usedefault=True,
+        ),
         inBackground=dict(argstr='--inBackground %f', ),
         inCoarse=dict(argstr='--inCoarse %f', ),
         inCost=dict(argstr='--inCost %s', ),
@@ -22,7 +25,10 @@ def test_MedicAlgorithmSPECTRE2010_inputs():
         inInhomogeneity=dict(argstr='--inInhomogeneity %s', ),
         inInitial=dict(argstr='--inInitial %d', ),
         inInitial2=dict(argstr='--inInitial2 %f', ),
-        inInput=dict(argstr='--inInput %s', ),
+        inInput=dict(
+            argstr='--inInput %s',
+            usedefault=True,
+        ),
         inMMC=dict(argstr='--inMMC %d', ),
         inMMC2=dict(argstr='--inMMC2 %d', ),
         inMaximum=dict(argstr='--inMaximum %f', ),
@@ -95,15 +101,15 @@ def test_MedicAlgorithmSPECTRE2010_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MedicAlgorithmSPECTRE2010_outputs():
     output_map = dict(
-        outFANTASM=dict(),
-        outMask=dict(),
-        outMidsagittal=dict(),
-        outOriginal=dict(),
-        outPrior=dict(),
-        outSegmentation=dict(),
-        outSplitHalves=dict(),
-        outStripped=dict(),
-        outd0=dict(),
+        outFANTASM=dict(usedefault=True, ),
+        outMask=dict(usedefault=True, ),
+        outMidsagittal=dict(usedefault=True, ),
+        outOriginal=dict(usedefault=True, ),
+        outPrior=dict(usedefault=True, ),
+        outSegmentation=dict(usedefault=True, ),
+        outSplitHalves=dict(usedefault=True, ),
+        outStripped=dict(usedefault=True, ),
+        outd0=dict(usedefault=True, ),
     )
     outputs = MedicAlgorithmSPECTRE2010.output_spec()
 

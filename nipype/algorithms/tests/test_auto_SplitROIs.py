@@ -5,8 +5,11 @@ from ..misc import SplitROIs
 
 def test_SplitROIs_inputs():
     input_map = dict(
-        in_file=dict(mandatory=True, ),
-        in_mask=dict(),
+        in_file=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        in_mask=dict(usedefault=True, ),
         roi_size=dict(),
     )
     inputs = SplitROIs.input_spec()

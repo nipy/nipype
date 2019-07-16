@@ -15,6 +15,7 @@ def test_Despike_inputs():
             copyfile=False,
             mandatory=True,
             position=-1,
+            usedefault=True,
         ),
         num_threads=dict(
             nohash=True,
@@ -24,6 +25,7 @@ def test_Despike_inputs():
             argstr='-prefix %s',
             name_source='in_file',
             name_template='%s_despike',
+            usedefault=True,
         ),
         outputtype=dict(),
     )
@@ -33,7 +35,7 @@ def test_Despike_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Despike_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = Despike.output_spec()
 
     for key, metadata in list(output_map.items()):

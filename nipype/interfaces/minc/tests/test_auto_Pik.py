@@ -32,6 +32,7 @@ def test_Pik_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         jpg=dict(xor=('jpg', 'png'), ),
         lookup=dict(argstr='--lookup %s', ),
@@ -44,6 +45,7 @@ def test_Pik_inputs():
             name_source=['input_file'],
             name_template='%s.png',
             position=-1,
+            usedefault=True,
         ),
         png=dict(xor=('jpg', 'png'), ),
         sagittal_offset=dict(argstr='--sagittal_offset %s', ),
@@ -84,7 +86,7 @@ def test_Pik_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Pik_outputs():
-    output_map = dict(output_file=dict(), )
+    output_map = dict(output_file=dict(usedefault=True, ), )
     outputs = Pik.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -5,7 +5,10 @@ from ..misc import Matlab2CSV
 
 def test_Matlab2CSV_inputs():
     input_map = dict(
-        in_file=dict(mandatory=True, ),
+        in_file=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
         reshape_matrix=dict(usedefault=True, ),
     )
     inputs = Matlab2CSV.input_spec()

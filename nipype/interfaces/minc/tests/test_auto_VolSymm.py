@@ -10,7 +10,10 @@ def test_VolSymm_inputs():
             argstr='-clobber',
             usedefault=True,
         ),
-        config_file=dict(argstr='-config_file %s', ),
+        config_file=dict(
+            argstr='-config_file %s',
+            usedefault=True,
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -31,6 +34,7 @@ def test_VolSymm_inputs():
             name_source=['input_file'],
             name_template='%s_vol_symm.mnc',
             position=-1,
+            usedefault=True,
         ),
         trans_file=dict(
             argstr='%s',
@@ -53,9 +57,9 @@ def test_VolSymm_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_VolSymm_outputs():
     output_map = dict(
-        output_file=dict(),
-        output_grid=dict(),
-        trans_file=dict(),
+        output_file=dict(usedefault=True, ),
+        output_grid=dict(usedefault=True, ),
+        trans_file=dict(usedefault=True, ),
     )
     outputs = VolSymm.output_spec()
 

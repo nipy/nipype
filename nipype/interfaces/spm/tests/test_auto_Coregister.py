@@ -29,6 +29,7 @@ def test_Coregister_inputs():
             copyfile=False,
             field='ref',
             mandatory=True,
+            usedefault=True,
         ),
         tolerance=dict(field='eoptions.tol', ),
         use_mcr=dict(),

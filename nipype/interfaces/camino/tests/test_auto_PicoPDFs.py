@@ -15,6 +15,7 @@ def test_PicoPDFs_inputs():
             argstr='< %s',
             mandatory=True,
             position=1,
+            usedefault=True,
         ),
         inputmodel=dict(
             argstr='-inputmodel %s',
@@ -50,7 +51,7 @@ def test_PicoPDFs_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_PicoPDFs_outputs():
-    output_map = dict(pdfs=dict(), )
+    output_map = dict(pdfs=dict(usedefault=True, ), )
     outputs = PicoPDFs.output_spec()
 
     for key, metadata in list(output_map.items()):

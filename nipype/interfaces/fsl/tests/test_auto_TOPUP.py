@@ -19,6 +19,7 @@ def test_TOPUP_inputs():
         encoding_file=dict(
             argstr='--datain=%s',
             mandatory=True,
+            usedefault=True,
             xor=['encoding_direction'],
         ),
         environ=dict(
@@ -30,6 +31,7 @@ def test_TOPUP_inputs():
         in_file=dict(
             argstr='--imain=%s',
             mandatory=True,
+            usedefault=True,
         ),
         interp=dict(argstr='--interp=%s', ),
         max_iter=dict(argstr='--miter=%d', ),
@@ -40,18 +42,21 @@ def test_TOPUP_inputs():
             hash_files=False,
             name_source=['in_file'],
             name_template='%s_base',
+            usedefault=True,
         ),
         out_corrected=dict(
             argstr='--iout=%s',
             hash_files=False,
             name_source=['in_file'],
             name_template='%s_corrected',
+            usedefault=True,
         ),
         out_field=dict(
             argstr='--fout=%s',
             hash_files=False,
             name_source=['in_file'],
             name_template='%s_field',
+            usedefault=True,
         ),
         out_jac_prefix=dict(
             argstr='--jacout=%s',
@@ -64,6 +69,7 @@ def test_TOPUP_inputs():
             keep_extension=True,
             name_source=['in_file'],
             name_template='%s_topup.log',
+            usedefault=True,
         ),
         out_mat_prefix=dict(
             argstr='--rbmout=%s',
@@ -97,14 +103,14 @@ def test_TOPUP_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TOPUP_outputs():
     output_map = dict(
-        out_corrected=dict(),
-        out_enc_file=dict(),
-        out_field=dict(),
-        out_fieldcoef=dict(),
+        out_corrected=dict(usedefault=True, ),
+        out_enc_file=dict(usedefault=True, ),
+        out_field=dict(usedefault=True, ),
+        out_fieldcoef=dict(usedefault=True, ),
         out_jacs=dict(),
-        out_logfile=dict(),
+        out_logfile=dict(usedefault=True, ),
         out_mats=dict(),
-        out_movpar=dict(),
+        out_movpar=dict(usedefault=True, ),
         out_warps=dict(),
     )
     outputs = TOPUP.output_spec()

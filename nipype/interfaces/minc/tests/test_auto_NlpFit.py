@@ -13,6 +13,7 @@ def test_NlpFit_inputs():
         config_file=dict(
             argstr='-config_file %s',
             mandatory=True,
+            usedefault=True,
         ),
         environ=dict(
             nohash=True,
@@ -21,26 +22,31 @@ def test_NlpFit_inputs():
         init_xfm=dict(
             argstr='-init_xfm %s',
             mandatory=True,
+            usedefault=True,
         ),
         input_grid_files=dict(),
         output_xfm=dict(
             argstr='%s',
             genfile=True,
             position=-1,
+            usedefault=True,
         ),
         source=dict(
             argstr='%s',
             mandatory=True,
             position=-3,
+            usedefault=True,
         ),
         source_mask=dict(
             argstr='-source_mask %s',
             mandatory=True,
+            usedefault=True,
         ),
         target=dict(
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         verbose=dict(argstr='-verbose', ),
     )
@@ -51,8 +57,8 @@ def test_NlpFit_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_NlpFit_outputs():
     output_map = dict(
-        output_grid=dict(),
-        output_xfm=dict(),
+        output_grid=dict(usedefault=True, ),
+        output_xfm=dict(usedefault=True, ),
     )
     outputs = NlpFit.output_spec()
 

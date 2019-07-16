@@ -14,16 +14,19 @@ def test_DT2NIfTI_inputs():
             argstr='-header %s',
             mandatory=True,
             position=3,
+            usedefault=True,
         ),
         in_file=dict(
             argstr='-inputfile %s',
             mandatory=True,
             position=1,
+            usedefault=True,
         ),
         output_root=dict(
             argstr='-outputroot %s',
             genfile=True,
             position=2,
+            usedefault=True,
         ),
     )
     inputs = DT2NIfTI.input_spec()
@@ -33,9 +36,9 @@ def test_DT2NIfTI_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DT2NIfTI_outputs():
     output_map = dict(
-        dt=dict(),
-        exitcode=dict(),
-        lns0=dict(),
+        dt=dict(usedefault=True, ),
+        exitcode=dict(usedefault=True, ),
+        lns0=dict(usedefault=True, ),
     )
     outputs = DT2NIfTI.output_spec()
 

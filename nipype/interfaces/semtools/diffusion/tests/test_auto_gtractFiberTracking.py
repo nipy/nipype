@@ -16,13 +16,26 @@ def test_gtractFiberTracking_inputs():
         ),
         guidedCurvatureThreshold=dict(
             argstr='--guidedCurvatureThreshold %f', ),
-        inputAnisotropyVolume=dict(argstr='--inputAnisotropyVolume %s', ),
+        inputAnisotropyVolume=dict(
+            argstr='--inputAnisotropyVolume %s',
+            usedefault=True,
+        ),
         inputEndingSeedsLabelMapVolume=dict(
-            argstr='--inputEndingSeedsLabelMapVolume %s', ),
+            argstr='--inputEndingSeedsLabelMapVolume %s',
+            usedefault=True,
+        ),
         inputStartingSeedsLabelMapVolume=dict(
-            argstr='--inputStartingSeedsLabelMapVolume %s', ),
-        inputTensorVolume=dict(argstr='--inputTensorVolume %s', ),
-        inputTract=dict(argstr='--inputTract %s', ),
+            argstr='--inputStartingSeedsLabelMapVolume %s',
+            usedefault=True,
+        ),
+        inputTensorVolume=dict(
+            argstr='--inputTensorVolume %s',
+            usedefault=True,
+        ),
+        inputTract=dict(
+            argstr='--inputTract %s',
+            usedefault=True,
+        ),
         maximumBranchPoints=dict(argstr='--maximumBranchPoints %d', ),
         maximumGuideDistance=dict(argstr='--maximumGuideDistance %f', ),
         maximumLength=dict(argstr='--maximumLength %f', ),
@@ -51,7 +64,7 @@ def test_gtractFiberTracking_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_gtractFiberTracking_outputs():
-    output_map = dict(outputTract=dict(), )
+    output_map = dict(outputTract=dict(usedefault=True, ), )
     outputs = gtractFiberTracking.output_spec()
 
     for key, metadata in list(output_map.items()):

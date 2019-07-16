@@ -22,17 +22,25 @@ def test_ExpertAutomatedRegistration_inputs():
         fixedImage=dict(
             argstr='%s',
             position=-2,
+            usedefault=True,
         ),
-        fixedImageMask=dict(argstr='--fixedImageMask %s', ),
+        fixedImageMask=dict(
+            argstr='--fixedImageMask %s',
+            usedefault=True,
+        ),
         fixedLandmarks=dict(argstr='--fixedLandmarks %s...', ),
         initialization=dict(argstr='--initialization %s', ),
         interpolation=dict(argstr='--interpolation %s', ),
-        loadTransform=dict(argstr='--loadTransform %s', ),
+        loadTransform=dict(
+            argstr='--loadTransform %s',
+            usedefault=True,
+        ),
         metric=dict(argstr='--metric %s', ),
         minimizeMemory=dict(argstr='--minimizeMemory ', ),
         movingImage=dict(
             argstr='%s',
             position=-1,
+            usedefault=True,
         ),
         movingLandmarks=dict(argstr='--movingLandmarks %s...', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
@@ -58,8 +66,8 @@ def test_ExpertAutomatedRegistration_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ExpertAutomatedRegistration_outputs():
     output_map = dict(
-        resampledImage=dict(),
-        saveTransform=dict(),
+        resampledImage=dict(usedefault=True, ),
+        saveTransform=dict(usedefault=True, ),
     )
     outputs = ExpertAutomatedRegistration.output_spec()
 

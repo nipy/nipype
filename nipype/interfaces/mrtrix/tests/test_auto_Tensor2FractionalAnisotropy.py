@@ -18,11 +18,13 @@ def test_Tensor2FractionalAnisotropy_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         out_filename=dict(
             argstr='%s',
             genfile=True,
             position=-1,
+            usedefault=True,
         ),
         quiet=dict(
             argstr='-quiet',
@@ -35,7 +37,7 @@ def test_Tensor2FractionalAnisotropy_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Tensor2FractionalAnisotropy_outputs():
-    output_map = dict(FA=dict(), )
+    output_map = dict(FA=dict(usedefault=True, ), )
     outputs = Tensor2FractionalAnisotropy.output_spec()
 
     for key, metadata in list(output_map.items()):

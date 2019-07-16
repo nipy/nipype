@@ -20,6 +20,7 @@ def test_FindTheBiggest_inputs():
             genfile=True,
             hash_files=False,
             position=2,
+            usedefault=True,
         ),
         output_type=dict(),
     )
@@ -29,7 +30,11 @@ def test_FindTheBiggest_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FindTheBiggest_outputs():
-    output_map = dict(out_file=dict(argstr='%s', ), )
+    output_map = dict(
+        out_file=dict(
+            argstr='%s',
+            usedefault=True,
+        ), )
     outputs = FindTheBiggest.output_spec()
 
     for key, metadata in list(output_map.items()):

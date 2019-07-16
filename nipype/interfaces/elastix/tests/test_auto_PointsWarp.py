@@ -23,10 +23,12 @@ def test_PointsWarp_inputs():
         points_file=dict(
             argstr='-def %s',
             mandatory=True,
+            usedefault=True,
         ),
         transform_file=dict(
             argstr='-tp %s',
             mandatory=True,
+            usedefault=True,
         ),
     )
     inputs = PointsWarp.input_spec()
@@ -35,7 +37,7 @@ def test_PointsWarp_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_PointsWarp_outputs():
-    output_map = dict(warped_file=dict(), )
+    output_map = dict(warped_file=dict(usedefault=True, ), )
     outputs = PointsWarp.output_spec()
 
     for key, metadata in list(output_map.items()):

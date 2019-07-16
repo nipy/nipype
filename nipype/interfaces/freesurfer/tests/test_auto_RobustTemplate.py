@@ -38,7 +38,7 @@ def test_RobustTemplate_inputs():
             xor=['auto_detect_sensitivity'],
         ),
         scaled_intensity_outputs=dict(argstr='--iscaleout %s', ),
-        subjects_dir=dict(),
+        subjects_dir=dict(usedefault=True, ),
         subsample_threshold=dict(argstr='--subsample %d', ),
         transform_outputs=dict(argstr='--lta %s', ),
     )
@@ -49,7 +49,7 @@ def test_RobustTemplate_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_RobustTemplate_outputs():
     output_map = dict(
-        out_file=dict(),
+        out_file=dict(usedefault=True, ),
         scaled_intensity_outputs=dict(),
         transform_outputs=dict(),
     )

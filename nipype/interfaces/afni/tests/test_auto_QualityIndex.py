@@ -25,6 +25,7 @@ def test_QualityIndex_inputs():
             argstr='%s',
             mandatory=True,
             position=-2,
+            usedefault=True,
         ),
         interval=dict(
             argstr='-range',
@@ -32,6 +33,7 @@ def test_QualityIndex_inputs():
         ),
         mask=dict(
             argstr='-mask %s',
+            usedefault=True,
             xor=['autoclip', 'automask'],
         ),
         out_file=dict(
@@ -40,6 +42,7 @@ def test_QualityIndex_inputs():
             name_source=['in_file'],
             name_template='%s_tqual',
             position=-1,
+            usedefault=True,
         ),
         quadrant=dict(
             argstr='-quadrant',
@@ -56,7 +59,7 @@ def test_QualityIndex_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_QualityIndex_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = QualityIndex.output_spec()
 
     for key, metadata in list(output_map.items()):

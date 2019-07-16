@@ -7,9 +7,10 @@ def test_XNATSink_inputs():
     input_map = dict(
         _outputs=dict(usedefault=True, ),
         assessor_id=dict(xor=['reconstruction_id'], ),
-        cache_dir=dict(),
+        cache_dir=dict(usedefault=True, ),
         config=dict(
             mandatory=True,
+            usedefault=True,
             xor=['server'],
         ),
         experiment_id=dict(mandatory=True, ),

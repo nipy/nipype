@@ -13,16 +13,30 @@ def test_LabelConfig_inputs():
         in_config=dict(
             argstr='%s',
             position=-2,
+            usedefault=True,
         ),
         in_file=dict(
             argstr='%s',
             mandatory=True,
             position=-3,
+            usedefault=True,
         ),
-        lut_aal=dict(argstr='-lut_aal %s', ),
-        lut_basic=dict(argstr='-lut_basic %s', ),
-        lut_fs=dict(argstr='-lut_freesurfer %s', ),
-        lut_itksnap=dict(argstr='-lut_itksnap %s', ),
+        lut_aal=dict(
+            argstr='-lut_aal %s',
+            usedefault=True,
+        ),
+        lut_basic=dict(
+            argstr='-lut_basic %s',
+            usedefault=True,
+        ),
+        lut_fs=dict(
+            argstr='-lut_freesurfer %s',
+            usedefault=True,
+        ),
+        lut_itksnap=dict(
+            argstr='-lut_itksnap %s',
+            usedefault=True,
+        ),
         nthreads=dict(
             argstr='-nthreads %d',
             nohash=True,
@@ -33,7 +47,10 @@ def test_LabelConfig_inputs():
             position=-1,
             usedefault=True,
         ),
-        spine=dict(argstr='-spine %s', ),
+        spine=dict(
+            argstr='-spine %s',
+            usedefault=True,
+        ),
     )
     inputs = LabelConfig.input_spec()
 
@@ -41,7 +58,7 @@ def test_LabelConfig_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_LabelConfig_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(usedefault=True, ), )
     outputs = LabelConfig.output_spec()
 
     for key, metadata in list(output_map.items()):
