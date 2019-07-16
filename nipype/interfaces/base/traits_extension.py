@@ -24,17 +24,16 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
 from builtins import str, bytes
-import os
 from collections import Sequence
+from pathlib import Path
 
 # perform all external trait imports here
 from traits import __version__ as traits_version
 import traits.api as traits
-from traits.trait_handlers import TraitDictObject, TraitListObject
+from traits.trait_handlers import TraitType, NoDefaultSpecified, TraitDictObject, TraitListObject
 from traits.trait_errors import TraitError
-from traits.trait_base import _Undefined, class_of
+from traits.trait_base import _Undefined
 
-from traits.api import BaseUnicode
 from traits.api import Unicode
 from future import standard_library
 
@@ -45,7 +44,7 @@ standard_library.install_aliases()
 
 
 class Str(Unicode):
-    """Replacement for the default traits.Str based in bytes"""
+    """Replaces the default traits.Str based in bytes."""
 
 
 # Monkeypatch Str and DictStrStr for Python 2 compatibility
@@ -54,125 +53,86 @@ DictStrStr = traits.Dict((bytes, str), (bytes, str))
 traits.DictStrStr = DictStrStr
 
 
-class File(BaseUnicode):
-    """ Defines a trait whose value must be the name of a file.
-    """
+class BasePath(TraitType):
+    """Defines a trait whose value must be a valid filesystem path."""
 
     # A description of the type of value this trait accepts:
-    info_text = 'a file name'
+    info_text = 'a pathlike object or string'
+    exists = False
+    pathlike = False
+    resolve = False
+    _is_file = False
+    _is_dir = False
 
-    def __init__(self,
-                 value='',
-                 filter=None,
-                 auto_set=False,
-                 entries=0,
-                 exists=False,
-                 **metadata):
-        """ Creates a File trait.
-
-        Parameters
-        ----------
-        value : string
-            The default value for the trait
-        filter : string
-            A wildcard string to filter filenames in the file dialog box used by
-            the attribute trait editor.
-        auto_set : boolean
-            Indicates whether the file editor updates the trait value after
-            every key stroke.
-        exists : boolean
-            Indicates whether the trait value must be an existing file or
-            not.
-
-        Default Value
-        -------------
-        *value* or ''
-        """
-        self.filter = filter
-        self.auto_set = auto_set
-        self.entries = entries
+    def __init__(self, default_value=NoDefaultSpecified, exists=False,
+                 pathlike=False, resolve=False, **metadata):
+        """Create a BasePath trait."""
         self.exists = exists
-
-        if exists:
-            self.info_text = 'an existing file name'
-
-        super(File, self).__init__(value, **metadata)
-
-    def validate(self, object, name, value):
-        """ Validates that a specified value is valid for this trait."""
-        validated_value = super(File, self).validate(object, name, value)
-        if not self.exists:
-            return validated_value
-        elif os.path.isfile(value):
-            return validated_value
-        else:
-            raise TraitError(
-                args='The trait \'{}\' of {} instance is {}, but the path '
-                ' \'{}\' does not exist.'.format(name, class_of(object),
-                                                 self.info_text, value))
-
-        self.error(object, name, value)
-
-
-# -------------------------------------------------------------------------------
-#  'Directory' trait
-# -------------------------------------------------------------------------------
-
-
-class Directory(BaseUnicode):
-    """
-    Defines a trait whose value must be the name of a directory.
-    """
-
-    # A description of the type of value this trait accepts:
-    info_text = 'a directory name'
-
-    def __init__(self,
-                 value='',
-                 auto_set=False,
-                 entries=0,
-                 exists=False,
-                 **metadata):
-        """ Creates a Directory trait.
-
-        Parameters
-        ----------
-        value : string
-            The default value for the trait
-        auto_set : boolean
-            Indicates whether the directory editor updates the trait value
-            after every key stroke.
-        exists : boolean
-            Indicates whether the trait value must be an existing directory or
-            not.
-
-        Default Value
-        -------------
-        *value* or ''
-        """
-        self.entries = entries
-        self.auto_set = auto_set
-        self.exists = exists
-
-        if exists:
-            self.info_text = 'an existing directory name'
-
-        super(Directory, self).__init__(value, **metadata)
-
-    def validate(self, object, name, value):
-        """ Validates that a specified value is valid for this trait."""
-        if isinstance(value, (str, bytes)):
-            if not self.exists:
-                return value
-            if os.path.isdir(value):
-                return value
+        self.resolve = resolve
+        self.pathlike = pathlike  # For backwards compatibility for now
+        # self.pathlike = pathlike or exists
+        if any((exists, self._is_file, self._is_dir)):
+            self.info_text += ' representing a'
+            if exists:
+                self.info_text += 'n existing'
+            if self._is_file:
+                self.info_text += ' file'
+            elif self._is_dir:
+                self.info_text += ' directory'
             else:
-                raise TraitError(
-                    args='The trait \'{}\' of {} instance is {}, but the path '
-                    ' \'{}\' does not exist.'.format(name, class_of(object),
-                                                     self.info_text, value))
+                self.info_text += ' file or directory'
 
-        self.error(object, name, value)
+        super(BasePath, self).__init__(default_value=default_value, **metadata)
+
+    def validate(self, object, name, value):
+        """Validate a value change."""
+        try:
+            value = Path(value)  # Use pathlib's validation
+        except Exception:
+            self.error(object, name, str(value))
+
+        if self.exists:
+            if self.exists and not value.exists():
+                self.error(object, name, str(value))
+
+            if self._is_file and not value.is_file():
+                self.error(object, name, str(value))
+
+            if self._is_dir and not value.is_dir():
+                self.error(object, name, str(value))
+
+        if self.resolve:
+            value = value.resolve()
+
+        if not self.pathlike:
+            value = str(value)
+
+        return value
+
+
+class Directory(BasePath):
+    """
+    Defines a trait whose value must be a directory path.
+
+    >>> from nipype.interfaces.base import Directory, TraitedSpec
+    >>> class A(TraitedSpec):
+    ...     foo = Directory(exists=False)
+    >>> a = A()
+    >>> a.foo
+    <undefined>
+
+    >>> a.foo = '/some/made/out/path'
+    '/some/made/out/path'
+
+    """
+
+    _is_dir = True
+
+
+class File(BasePath):
+    """Defines a trait whose value must be a file path."""
+
+    _is_file = True
 
 
 # lists of tuples
