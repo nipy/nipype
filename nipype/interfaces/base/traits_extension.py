@@ -38,6 +38,12 @@ from ...utils.filemanip import Path, USING_PATHLIB2
 if USING_PATHLIB2:
     from future.types.newstr import newstr
 
+try:
+    from pathlib import Path
+except ImportError:
+    from pathlib2 import Path
+
+
 if traits_version < '3.7.0':
     raise ImportError('Traits version 3.7.0 or higher must be installed')
 
@@ -153,7 +159,6 @@ class BasePath(TraitType):
 
         return value
 
-
 class Directory(BasePath):
     """
     Defines a trait whose value must be a directory path.
@@ -194,13 +199,11 @@ class Directory(BasePath):
     >>> a.foo
     'relative_dir'
 
-
     >>> class A(TraitedSpec):
     ...     foo = Directory('tmpdir')
     >>> a = A()
     >>> a.foo  # doctest: +ELLIPSIS
     <undefined>
-
 
     >>> class A(TraitedSpec):
     ...     foo = Directory('tmpdir', usedefault=True)

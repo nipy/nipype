@@ -605,3 +605,4 @@ class ImageFileSPM(ImageFile):
         super(ImageFileSPM, self).__init__(
             value=value, exists=exists, types=['nifti1', 'nifti2'],
             allow_compressed=False, resolve=resolve, **metadata)
+
