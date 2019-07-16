@@ -150,14 +150,14 @@ class BasePath(TraitType):
 
         return value
 
-    def get_value(self, object, name, trait=None):
-        value = super(BasePath, self).get_value(object, name)
-        if value is Undefined:
-            return self.default_value
+    # def get_value(self, object, name, trait=None):
+    #     value = super(BasePath, self).get_value(object, name)
+    #     if value is Undefined:
+    #         return self.default_value
 
-        if self.pathlike:
-            return value
-        return str(value)
+    #     if self.pathlike:
+    #         return value
+    #     return str(value)
 
 
 class Directory(BasePath):
@@ -195,6 +195,12 @@ class Directory(BasePath):
     >>> a.foo = 'relative_dir'
     >>> a.foo  # doctest: +ELLIPSIS
     '.../relative_dir'
+
+    >>> class A(TraitedSpec):
+    ...     foo = Directory(exists=True, resolve=False)
+    >>> a = A(foo='relative_dir')
+    >>> a.foo
+    'relative_dir'
 
 
     >>> class A(TraitedSpec):
@@ -242,6 +248,12 @@ class File(BasePath):
     '.../idoexist.txt'
 
     >>> class A(TraitedSpec):
+    ...     foo = File(exists=True, resolve=False)
+    >>> a = A(foo='idoexist.txt')
+    >>> a.foo
+    'idoexist.txt'
+
+    >>> class A(TraitedSpec):
     ...     foo = File(exists=True, resolve=True, extensions=['.txt', 'txt.gz'])
     >>> a = A()
     >>> a.foo = 'idoexist.badtxt'  # doctest: +IGNORE_EXCEPTION_DETAIL
@@ -271,7 +283,7 @@ class File(BasePath):
                                      for ext in extensions]))
 
         super(File, self).__init__(default_value=default_value, exists=exists,
-                                   pathlike=pathlike, resolve=True, **metadata)
+                                   pathlike=pathlike, resolve=resolve, **metadata)
 
     def validate(self, object, name, value):
         """Validate a value change."""
