@@ -122,7 +122,6 @@ class BasePath(TraitType):
             else:
                 self.info_text += ' file or directory'
 
-        metadata['usedefault'] = True
         super(BasePath, self).__init__(value, **metadata)
 
     def validate(self, object, name, value, return_pathlike=False):
@@ -204,7 +203,14 @@ class Directory(BasePath):
 
 
     >>> class A(TraitedSpec):
-    ...     foo = Directory('tmpdir', resolve=True)
+    ...     foo = Directory('tmpdir')
+    >>> a = A()
+    >>> a.foo  # doctest: +ELLIPSIS
+    <undefined>
+
+
+    >>> class A(TraitedSpec):
+    ...     foo = Directory('tmpdir', usedefault=True)
     >>> a = A()
     >>> a.foo  # doctest: +ELLIPSIS
     'tmpdir'
@@ -248,8 +254,14 @@ class File(BasePath):
     '.../idoexist.txt'
 
     >>> class A(TraitedSpec):
-    ...     foo = File(exists=True, resolve=False)
-    >>> a = A(foo='idoexist.txt')
+    ...     foo = File('idoexist.txt')
+    >>> a = A()
+    >>> a.foo
+    <undefined>
+
+    >>> class A(TraitedSpec):
+    ...     foo = File('idoexist.txt', usedefault=True)
+    >>> a = A()
     >>> a.foo
     'idoexist.txt'
 
