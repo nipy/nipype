@@ -600,9 +600,8 @@ class SPMCommand(BaseInterface):
 class ImageFileSPM(ImageFile):
     """Defines a trait whose value must be a NIfTI file."""
 
-    def __init__(self, value=NoDefaultSpecified, exists=False,
-                 pathlike=False, resolve=False, **metadata):
+    def __init__(self, value=NoDefaultSpecified, exists=False, resolve=False, **metadata):
         """Create an ImageFileSPM trait."""
         super(ImageFileSPM, self).__init__(
-            value=value, exists=exists, types=['nifti1', 'nifti2'], allow_compressed=False,
-            pathlike=pathlike, resolve=resolve, **metadata)
+            value=value, exists=exists, types=['nifti1', 'nifti2'],
+            allow_compressed=False, resolve=resolve, **metadata)
