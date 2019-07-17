@@ -52,8 +52,8 @@ do
   esac
 done
 
-# neurodocker version 0.4.1-22-g7c44e01
-NEURODOCKER_IMAGE="kaczmarj/neurodocker:master@sha256:858632a7533cac100f70932749b4cfc77fc40f667f41fca208f406215cff8a27"
+# neurodocker version 0.5.0
+NEURODOCKER_IMAGE="kaczmarj/neurodocker:0.5.0"
 # neurodebian:stretch-non-free pulled on September 19, 2018
 BASE_IMAGE="neurodebian:stretch-non-free@sha256:7cd978427d7ad215834fee221d0536ed7825b3cddebc481eba2d792dfc2f7332"
 
