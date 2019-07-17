@@ -142,7 +142,6 @@ REQUIRES = [
     'futures; python_version == "2.7"',
     'networkx>=%s ; python_version >= "3.0"' % NETWORKX_MIN_VERSION,
     'networkx>=%s,<=%s ; python_version < "3.0"' % (NETWORKX_MIN_VERSION, NETWORKX_MAX_VERSION_27),
-    'neurdflib',
     'nibabel>=%s' % NIBABEL_MIN_VERSION,
     'numpy>=%s ; python_version > "3.0" and python_version < "3.7"' % NUMPY_MIN_VERSION,
     'numpy>=%s ; python_version >= "3.7"' % NUMPY_MIN_VERSION_37,
@@ -156,6 +155,10 @@ REQUIRES = [
     'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
     'traits>=%s,!=5.0' % TRAITS_MIN_VERSION,
 ]
+
+# neurdflib has to come after prov
+# https://github.com/nipy/nipype/pull/2961#issuecomment-512035484
+REQUIRES += ['neurdflib']
 
 TESTS_REQUIRES = [
     'codecov',
