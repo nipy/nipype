@@ -604,5 +604,5 @@ class ImageFileSPM(ImageFile):
                  pathlike=False, resolve=False, **metadata):
         """Create an ImageFileSPM trait."""
         super(ImageFileSPM, self).__init__(
-            value=value, exists=exists, types=['nifti1', 'nifti2'],
+            value=value, exists=exists, types=['nifti1', 'nifti2'], allow_compressed=False,
             pathlike=pathlike, resolve=resolve, **metadata)
