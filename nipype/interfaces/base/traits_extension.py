@@ -33,9 +33,10 @@ from traits.trait_base import _Undefined
 
 from traits.api import Unicode
 from future import standard_library
+from ...utils.filemanip import Path, USING_PATHLIB2
 
-from ...utils.filemanip import Path
-
+if USING_PATHLIB2:
+    from future.types.newstr import newstr
 
 if traits_version < '3.7.0':
     raise ImportError('Traits version 3.7.0 or higher must be installed')
@@ -127,7 +128,9 @@ class BasePath(TraitType):
     def validate(self, objekt, name, value, return_pathlike=False):
         """Validate a value change."""
         try:
-            value = Path('%s' % value)  # Use pathlib's validation
+            if USING_PATHLIB2 and isinstance(value, newstr):
+                value = '%s' % value  # pathlib2 doesn't like newstr
+            value = Path(value)  # Use pathlib's validation
         except Exception:
             self.error(objekt, name, str(value))
 

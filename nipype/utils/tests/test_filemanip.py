@@ -585,5 +585,5 @@ def test_Path_strict_resolve(tmpdir):
         testfile.resolve(strict=True)
 
     # If the file is created, it should not raise
-    testfile.write_text('')
+    open('somefile.txt', 'w').close()
     assert '%s/somefile.txt' % tmpdir == '%s' % testfile.resolve(strict=True)

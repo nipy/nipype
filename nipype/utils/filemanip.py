@@ -41,7 +41,7 @@ PY3 = sys.version_info[0] >= 3
 
 
 class FileNotFoundError(OSError):
-    """Defines the expception for Python 2."""
+    """Defines the exception for Python 2."""
 
     def __init__(self, path):
         """Initialize the exception."""
@@ -75,7 +75,7 @@ except FileNotFoundError:
     pass
 except OSError:
     def _patch_resolve(self, strict=False):
-        """Add the argument strict to signature for pathlib2."""
+        """Raise FileNotFoundError instead of OSError with pathlib2."""
         try:
             resolved = self.old_resolve(strict=strict)
         except OSError:
