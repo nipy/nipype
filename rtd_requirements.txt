@@ -9,6 +9,7 @@ numpy>=1.9.0
 numpydoc
 packaging
 prov>=1.5.2
+neurdflib
 psutil
 pydot>=1.2.3
 pydotplus
