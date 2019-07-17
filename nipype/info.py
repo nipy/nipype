@@ -155,6 +155,7 @@ REQUIRES = [
     'packaging',
     'futures; python_version == "2.7"',
     'configparser; python_version <= "3.4"',
+    'pathlib2; python_version <= "3.4"',
 ]
 
 TESTS_REQUIRES = [

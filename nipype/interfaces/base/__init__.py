@@ -8,6 +8,9 @@ Nipype base interfaces
 This module defines the API of all nipype interfaces.
 
 """
+from traits.trait_handlers import TraitDictObject, TraitListObject
+from traits.trait_errors import TraitError
+
 from .core import (Interface, BaseInterface, SimpleInterface, CommandLine,
                    StdOutCommandLine, MpiCommandLine, SEMLikeCommandLine,
                    LibraryBaseInterface, PackageInfo)
@@ -17,7 +20,7 @@ from .specs import (BaseTraitedSpec, TraitedSpec, DynamicTraitedSpec,
                     StdOutCommandLineInputSpec)
 
 from .traits_extension import (
-    traits, Undefined, TraitDictObject, TraitListObject, TraitError, isdefined,
+    traits, Undefined, isdefined,
     File, Directory, Str, DictStrStr, has_metadata, ImageFile,
     OutputMultiObject, InputMultiObject,
     OutputMultiPath, InputMultiPath)

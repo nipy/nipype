@@ -16,7 +16,7 @@ from ...utils.filemanip import (
     check_forhash, _parse_mount_table, _cifs_table, on_cifs, copyfile,
     copyfiles, ensure_list, simplify_list, check_depends,
     split_filename, get_related_files, indirectory,
-    loadpkl, loadcrash, savepkl)
+    loadpkl, loadcrash, savepkl, FileNotFoundError, Path)
 
 
 def _ignore_atime(stat):
@@ -570,3 +570,20 @@ def test_unversioned_pklization(tmpdir):
     with pytest.raises(Exception):
         with mock.patch('nipype.utils.tests.test_filemanip.Pickled', PickledBreaker):
             loadpkl('./pickled.pkz', versioning=True)
+
+
+def test_Path_strict_resolve(tmpdir):
+    """Check the monkeypatch to test strict resolution of Path."""
+    tmpdir.chdir()
+
+    # Default strict=False should work out out of the box
+    testfile = Path('somefile.txt')
+    assert '%s/somefile.txt' % tmpdir == '%s' % testfile.resolve()
+
+    # Switching to strict=True must raise FileNotFoundError (also in Python2)
+    with pytest.raises(FileNotFoundError):
+        testfile.resolve(strict=True)
+
+    # If the file is created, it should not raise
+    open('somefile.txt', 'w').close()
+    assert '%s/somefile.txt' % tmpdir == '%s' % testfile.resolve(strict=True)
