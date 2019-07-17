@@ -147,6 +147,7 @@ REQUIRES = [
     'numpy>=%s ; python_version >= "3.7"' % NUMPY_MIN_VERSION_37,
     'numpy>=%s,!=%s ; python_version == "2.7"' % (NUMPY_MIN_VERSION, NUMPY_BAD_VERSION_27),
     'packaging',
+    'pathlib2; python_version <= "3.4"',
     'prov>=%s' % PROV_VERSION,
     'pydot>=%s' % PYDOT_MIN_VERSION,
     'pydotplus',

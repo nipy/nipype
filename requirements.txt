@@ -3,11 +3,12 @@ configparser
 funcsigs
 future>=0.16.0
 networkx>=1.9
-neurdflib
 nibabel>=2.1.0
 numpy>=1.9.0
 packaging
+pathlib2
 prov>=1.5.2
+neurdflib
 pydot>=1.2.3
 pydotplus
 python-dateutil>=2.2
