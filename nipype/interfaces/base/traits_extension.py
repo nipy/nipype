@@ -99,12 +99,27 @@ class BasePath(TraitType):
     """Defines a trait whose value must be a valid filesystem path."""
 
     # A description of the type of value this trait accepts:
-    info_text = 'a pathlike object or string'
     exists = False
     pathlike = False
     resolve = False
     _is_file = False
     _is_dir = False
+
+    @property
+    def info_text(self):
+        """Create the trait's general description."""
+        info_text = 'a pathlike object or string'
+        if any((self.exists, self._is_file, self._is_dir)):
+            info_text += ' representing a'
+            if self.exists:
+                info_text += 'n existing'
+            if self._is_file:
+                info_text += ' file'
+            elif self._is_dir:
+                info_text += ' directory'
+            else:
+                info_text += ' file or directory'
+        return info_text
 
     def __init__(self, value=Undefined,
                  exists=False, pathlike=False, resolve=False, **metadata):
@@ -112,17 +127,6 @@ class BasePath(TraitType):
         self.exists = exists
         self.resolve = resolve
         self.pathlike = pathlike
-        if any((exists, self._is_file, self._is_dir)):
-            self.info_text += ' representing a'
-            if exists:
-                self.info_text += 'n existing'
-            if self._is_file:
-                self.info_text += ' file'
-            elif self._is_dir:
-                self.info_text += ' directory'
-            else:
-                self.info_text += ' file or directory'
-
         super(BasePath, self).__init__(value, **metadata)
 
     def validate(self, objekt, name, value, return_pathlike=False):
