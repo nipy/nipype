@@ -10,7 +10,10 @@ def test_gtractCreateGuideFiber_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputFiber=dict(argstr='--inputFiber %s', ),
+        inputFiber=dict(
+            argstr='--inputFiber %s',
+            extensions=None,
+        ),
         numberOfPoints=dict(argstr='--numberOfPoints %d', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         outputFiber=dict(
@@ -25,7 +28,7 @@ def test_gtractCreateGuideFiber_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_gtractCreateGuideFiber_outputs():
-    output_map = dict(outputFiber=dict(), )
+    output_map = dict(outputFiber=dict(extensions=None, ), )
     outputs = gtractCreateGuideFiber.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -12,6 +12,7 @@ def test_MRISPreproc_inputs():
         ),
         fsgd_file=dict(
             argstr='--fsgd %s',
+            extensions=None,
             xor=('subjects', 'fsgd_file', 'subject_file'),
         ),
         fwhm=dict(
@@ -36,6 +37,7 @@ def test_MRISPreproc_inputs():
         ),
         out_file=dict(
             argstr='--out %s',
+            extensions=None,
             genfile=True,
         ),
         proj_frac=dict(argstr='--projfrac %s', ),
@@ -43,6 +45,7 @@ def test_MRISPreproc_inputs():
         source_format=dict(argstr='--srcfmt %s', ),
         subject_file=dict(
             argstr='--f %s',
+            extensions=None,
             xor=('subjects', 'fsgd_file', 'subject_file'),
         ),
         subjects=dict(
@@ -75,7 +78,7 @@ def test_MRISPreproc_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRISPreproc_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = MRISPreproc.output_spec()
 
     for key, metadata in list(output_map.items()):

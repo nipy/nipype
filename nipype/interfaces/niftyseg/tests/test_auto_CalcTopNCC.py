@@ -12,6 +12,7 @@ def test_CalcTopNCC_inputs():
         ),
         in_file=dict(
             argstr='-target %s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
@@ -20,7 +21,10 @@ def test_CalcTopNCC_inputs():
             mandatory=True,
             position=3,
         ),
-        mask_file=dict(argstr='-mask %s', ),
+        mask_file=dict(
+            argstr='-mask %s',
+            extensions=None,
+        ),
         num_templates=dict(
             argstr='-templates %s',
             mandatory=True,

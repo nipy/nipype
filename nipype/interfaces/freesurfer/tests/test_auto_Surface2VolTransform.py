@@ -21,12 +21,14 @@ def test_Surface2VolTransform_inputs():
         projfrac=dict(argstr='--projfrac %s', ),
         reg_file=dict(
             argstr='--volreg %s',
+            extensions=None,
             mandatory=True,
             xor=['subject_id'],
         ),
         source_file=dict(
             argstr='--surfval %s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             xor=['mkmask'],
         ),
@@ -36,15 +38,20 @@ def test_Surface2VolTransform_inputs():
         ),
         subjects_dir=dict(argstr='--sd %s', ),
         surf_name=dict(argstr='--surf %s', ),
-        template_file=dict(argstr='--template %s', ),
+        template_file=dict(
+            argstr='--template %s',
+            extensions=None,
+        ),
         transformed_file=dict(
             argstr='--outvol %s',
+            extensions=None,
             hash_files=False,
             name_source=['source_file'],
             name_template='%s_asVol.nii',
         ),
         vertexvol_file=dict(
             argstr='--vtxvol %s',
+            extensions=None,
             hash_files=False,
             name_source=['source_file'],
             name_template='%s_asVol_vertex.nii',
@@ -57,8 +64,8 @@ def test_Surface2VolTransform_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Surface2VolTransform_outputs():
     output_map = dict(
-        transformed_file=dict(),
-        vertexvol_file=dict(),
+        transformed_file=dict(extensions=None, ),
+        vertexvol_file=dict(extensions=None, ),
     )
     outputs = Surface2VolTransform.output_spec()
 

@@ -8,6 +8,7 @@ def test_Automask_inputs():
         args=dict(argstr='%s', ),
         brain_file=dict(
             argstr='-apply_prefix %s',
+            extensions=None,
             name_source='in_file',
             name_template='%s_masked',
         ),
@@ -21,6 +22,7 @@ def test_Automask_inputs():
         in_file=dict(
             argstr='%s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=-1,
         ),
@@ -30,6 +32,7 @@ def test_Automask_inputs():
         ),
         out_file=dict(
             argstr='-prefix %s',
+            extensions=None,
             name_source='in_file',
             name_template='%s_mask',
         ),
@@ -42,8 +45,8 @@ def test_Automask_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Automask_outputs():
     output_map = dict(
-        brain_file=dict(),
-        out_file=dict(),
+        brain_file=dict(extensions=None, ),
+        out_file=dict(extensions=None, ),
     )
     outputs = Automask.output_spec()
 

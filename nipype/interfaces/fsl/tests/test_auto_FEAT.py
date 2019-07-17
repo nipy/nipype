@@ -12,6 +12,7 @@ def test_FEAT_inputs():
         ),
         fsf_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=0,
         ),

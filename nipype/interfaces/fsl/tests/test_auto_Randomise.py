@@ -16,6 +16,7 @@ def test_Randomise_inputs():
         demean=dict(argstr='-D', ),
         design_mat=dict(
             argstr='-d %s',
+            extensions=None,
             position=2,
         ),
         environ=dict(
@@ -25,13 +26,20 @@ def test_Randomise_inputs():
         f_c_thresh=dict(argstr='-F %.2f', ),
         f_cm_thresh=dict(argstr='-S %.2f', ),
         f_only=dict(argstr='--f_only', ),
-        fcon=dict(argstr='-f %s', ),
+        fcon=dict(
+            argstr='-f %s',
+            extensions=None,
+        ),
         in_file=dict(
             argstr='-i %s',
+            extensions=None,
             mandatory=True,
             position=0,
         ),
-        mask=dict(argstr='-m %s', ),
+        mask=dict(
+            argstr='-m %s',
+            extensions=None,
+        ),
         num_perm=dict(argstr='-n %d', ),
         one_sample_group_mean=dict(argstr='-1', ),
         output_type=dict(),
@@ -42,6 +50,7 @@ def test_Randomise_inputs():
         show_total_perms=dict(argstr='-q', ),
         tcon=dict(
             argstr='-t %s',
+            extensions=None,
             position=3,
         ),
         tfce=dict(argstr='-T', ),
@@ -51,7 +60,10 @@ def test_Randomise_inputs():
         tfce_H=dict(argstr='--tfce_H=%.2f', ),
         var_smooth=dict(argstr='-v %d', ),
         vox_p_values=dict(argstr='-x', ),
-        x_block_labels=dict(argstr='-e %s', ),
+        x_block_labels=dict(
+            argstr='-e %s',
+            extensions=None,
+        ),
     )
     inputs = Randomise.input_spec()
 

@@ -18,10 +18,14 @@ def test_ECM_inputs():
         in_file=dict(
             argstr='%s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=-1,
         ),
-        mask=dict(argstr='-mask %s', ),
+        mask=dict(
+            argstr='-mask %s',
+            extensions=None,
+        ),
         max_iter=dict(argstr='-max_iter %d', ),
         memory=dict(argstr='-memory %f', ),
         num_threads=dict(
@@ -30,6 +34,7 @@ def test_ECM_inputs():
         ),
         out_file=dict(
             argstr='-prefix %s',
+            extensions=None,
             name_source=['in_file'],
             name_template='%s_afni',
         ),
@@ -46,7 +51,7 @@ def test_ECM_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ECM_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = ECM.output_spec()
 
     for key, metadata in list(output_map.items()):

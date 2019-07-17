@@ -17,6 +17,7 @@ def test_AutoTLRC_inputs():
         in_file=dict(
             argstr='-input %s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
         ),
         no_ss=dict(argstr='-no_ss', ),
@@ -28,7 +29,7 @@ def test_AutoTLRC_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_AutoTLRC_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = AutoTLRC.output_spec()
 
     for key, metadata in list(output_map.items()):

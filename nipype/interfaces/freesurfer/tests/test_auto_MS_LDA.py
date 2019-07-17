@@ -43,8 +43,8 @@ def test_MS_LDA_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MS_LDA_outputs():
     output_map = dict(
-        vol_synth_file=dict(),
-        weight_file=dict(),
+        vol_synth_file=dict(extensions=None, ),
+        weight_file=dict(extensions=None, ),
     )
     outputs = MS_LDA.output_spec()
 

@@ -13,21 +13,29 @@ def test_Normalize_inputs():
         gradient=dict(argstr='-g %d', ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
-        mask=dict(argstr='-mask %s', ),
+        mask=dict(
+            argstr='-mask %s',
+            extensions=None,
+        ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             hash_files=False,
             keep_extension=True,
             name_source=['in_file'],
             name_template='%s_norm',
             position=-1,
         ),
-        segmentation=dict(argstr='-aseg %s', ),
+        segmentation=dict(
+            argstr='-aseg %s',
+            extensions=None,
+        ),
         subjects_dir=dict(),
-        transform=dict(),
+        transform=dict(extensions=None, ),
     )
     inputs = Normalize.input_spec()
 

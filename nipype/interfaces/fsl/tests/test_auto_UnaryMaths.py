@@ -12,6 +12,7 @@ def test_UnaryMaths_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=2,
         ),
@@ -30,6 +31,7 @@ def test_UnaryMaths_inputs():
         ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             hash_files=False,
             position=-2,
@@ -46,7 +48,7 @@ def test_UnaryMaths_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_UnaryMaths_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = UnaryMaths.output_spec()
 
     for key, metadata in list(output_map.items()):

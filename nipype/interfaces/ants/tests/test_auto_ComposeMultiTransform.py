@@ -21,6 +21,7 @@ def test_ComposeMultiTransform_inputs():
         ),
         output_transform=dict(
             argstr='%s',
+            extensions=None,
             keep_extension=True,
             name_source=['transforms'],
             name_template='%s_composed',
@@ -28,6 +29,7 @@ def test_ComposeMultiTransform_inputs():
         ),
         reference_image=dict(
             argstr='%s',
+            extensions=None,
             position=2,
         ),
         transforms=dict(
@@ -42,7 +44,7 @@ def test_ComposeMultiTransform_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ComposeMultiTransform_outputs():
-    output_map = dict(output_transform=dict(), )
+    output_map = dict(output_transform=dict(extensions=None, ), )
     outputs = ComposeMultiTransform.output_spec()
 
     for key, metadata in list(output_map.items()):

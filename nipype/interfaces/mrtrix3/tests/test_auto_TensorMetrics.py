@@ -17,15 +17,31 @@ def test_TensorMetrics_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-1,
         ),
-        in_mask=dict(argstr='-mask %s', ),
+        in_mask=dict(
+            argstr='-mask %s',
+            extensions=None,
+        ),
         modulate=dict(argstr='-modulate %s', ),
-        out_adc=dict(argstr='-adc %s', ),
-        out_eval=dict(argstr='-value %s', ),
-        out_evec=dict(argstr='-vector %s', ),
-        out_fa=dict(argstr='-fa %s', ),
+        out_adc=dict(
+            argstr='-adc %s',
+            extensions=None,
+        ),
+        out_eval=dict(
+            argstr='-value %s',
+            extensions=None,
+        ),
+        out_evec=dict(
+            argstr='-vector %s',
+            extensions=None,
+        ),
+        out_fa=dict(
+            argstr='-fa %s',
+            extensions=None,
+        ),
     )
     inputs = TensorMetrics.input_spec()
 
@@ -34,10 +50,10 @@ def test_TensorMetrics_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TensorMetrics_outputs():
     output_map = dict(
-        out_adc=dict(),
-        out_eval=dict(),
-        out_evec=dict(),
-        out_fa=dict(),
+        out_adc=dict(extensions=None, ),
+        out_eval=dict(extensions=None, ),
+        out_evec=dict(extensions=None, ),
+        out_fa=dict(extensions=None, ),
     )
     outputs = TensorMetrics.output_spec()
 

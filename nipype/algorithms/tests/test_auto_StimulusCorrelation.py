@@ -8,7 +8,10 @@ def test_StimulusCorrelation_inputs():
         concatenated_design=dict(mandatory=True, ),
         intensity_values=dict(mandatory=True, ),
         realignment_parameters=dict(mandatory=True, ),
-        spm_mat_file=dict(mandatory=True, ),
+        spm_mat_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
     )
     inputs = StimulusCorrelation.input_spec()
 

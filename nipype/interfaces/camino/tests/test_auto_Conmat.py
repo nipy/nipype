@@ -12,21 +12,28 @@ def test_Conmat_inputs():
         ),
         in_file=dict(
             argstr='-inputfile %s',
+            extensions=None,
             mandatory=True,
         ),
         output_root=dict(
             argstr='-outputroot %s',
+            extensions=None,
             genfile=True,
         ),
         scalar_file=dict(
             argstr='-scalarfile %s',
+            extensions=None,
             requires=['tract_stat'],
         ),
         target_file=dict(
             argstr='-targetfile %s',
+            extensions=None,
             mandatory=True,
         ),
-        targetname_file=dict(argstr='-targetnamefile %s', ),
+        targetname_file=dict(
+            argstr='-targetnamefile %s',
+            extensions=None,
+        ),
         tract_prop=dict(
             argstr='-tractstat %s',
             units='NA',
@@ -46,8 +53,8 @@ def test_Conmat_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Conmat_outputs():
     output_map = dict(
-        conmat_sc=dict(),
-        conmat_ts=dict(),
+        conmat_sc=dict(extensions=None, ),
+        conmat_ts=dict(extensions=None, ),
     )
     outputs = Conmat.output_spec()
 

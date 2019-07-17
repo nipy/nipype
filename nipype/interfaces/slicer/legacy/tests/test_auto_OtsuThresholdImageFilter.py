@@ -12,6 +12,7 @@ def test_OtsuThresholdImageFilter_inputs():
         ),
         inputVolume=dict(
             argstr='%s',
+            extensions=None,
             position=-2,
         ),
         insideValue=dict(argstr='--insideValue %d', ),
@@ -29,7 +30,11 @@ def test_OtsuThresholdImageFilter_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_OtsuThresholdImageFilter_outputs():
-    output_map = dict(outputVolume=dict(position=-1, ), )
+    output_map = dict(
+        outputVolume=dict(
+            extensions=None,
+            position=-1,
+        ), )
     outputs = OtsuThresholdImageFilter.output_spec()
 
     for key, metadata in list(output_map.items()):

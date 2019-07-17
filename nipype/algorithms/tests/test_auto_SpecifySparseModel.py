@@ -53,8 +53,8 @@ def test_SpecifySparseModel_inputs():
 def test_SpecifySparseModel_outputs():
     output_map = dict(
         session_info=dict(),
-        sparse_png_file=dict(),
-        sparse_svg_file=dict(),
+        sparse_png_file=dict(extensions=None, ),
+        sparse_svg_file=dict(extensions=None, ),
     )
     outputs = SpecifySparseModel.output_spec()
 

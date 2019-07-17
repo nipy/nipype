@@ -24,6 +24,7 @@ def test_Qwarp_inputs():
         base_file=dict(
             argstr='-base %s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
         ),
         baxopt=dict(
@@ -41,6 +42,7 @@ def test_Qwarp_inputs():
         emask=dict(
             argstr='-emask %s',
             copyfile=False,
+            extensions=None,
         ),
         environ=dict(
             nohash=True,
@@ -53,6 +55,7 @@ def test_Qwarp_inputs():
         gridlist=dict(
             argstr='-gridlist %s',
             copyfile=False,
+            extensions=None,
             xor=['duplo', 'plusminus'],
         ),
         hel=dict(
@@ -62,6 +65,7 @@ def test_Qwarp_inputs():
         in_file=dict(
             argstr='-source %s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
         ),
         inilev=dict(
@@ -117,9 +121,9 @@ def test_Qwarp_inputs():
         ),
         out_file=dict(
             argstr='-prefix %s',
-            genfile=True,
+            extensions=None,
             name_source=['in_file'],
-            name_template='%s_QW',
+            name_template='ppp_%s',
         ),
         out_weight_file=dict(argstr='-wtprefix %s', ),
         outputtype=dict(),
@@ -141,7 +145,10 @@ def test_Qwarp_inputs():
             xor=['quiet'],
         ),
         wball=dict(argstr='-wball %s', ),
-        weight=dict(argstr='-weight %s', ),
+        weight=dict(
+            argstr='-weight %s',
+            extensions=None,
+        ),
         wmask=dict(argstr='-wpass %s %f', ),
         workhard=dict(
             argstr='-workhard',
@@ -155,11 +162,11 @@ def test_Qwarp_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Qwarp_outputs():
     output_map = dict(
-        base_warp=dict(),
-        source_warp=dict(),
-        warped_base=dict(),
-        warped_source=dict(),
-        weights=dict(),
+        base_warp=dict(extensions=None, ),
+        source_warp=dict(extensions=None, ),
+        warped_base=dict(extensions=None, ),
+        warped_source=dict(extensions=None, ),
+        weights=dict(extensions=None, ),
     )
     outputs = Qwarp.output_spec()
 

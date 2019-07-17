@@ -6,23 +6,33 @@ from ..convert import NIfTIDT2Camino
 def test_NIfTIDT2Camino_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        bgmask=dict(argstr='-bgmask %s', ),
+        bgmask=dict(
+            argstr='-bgmask %s',
+            extensions=None,
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
         ),
         in_file=dict(
             argstr='-inputfile %s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
-        lns0_file=dict(argstr='-lns0 %s', ),
+        lns0_file=dict(
+            argstr='-lns0 %s',
+            extensions=None,
+        ),
         out_file=dict(
             argstr='> %s',
             genfile=True,
             position=-1,
         ),
-        s0_file=dict(argstr='-s0 %s', ),
+        s0_file=dict(
+            argstr='-s0 %s',
+            extensions=None,
+        ),
         scaleinter=dict(argstr='-scaleinter %s', ),
         scaleslope=dict(argstr='-scaleslope %s', ),
         uppertriangular=dict(argstr='-uppertriangular %s', ),
@@ -33,7 +43,7 @@ def test_NIfTIDT2Camino_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_NIfTIDT2Camino_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = NIfTIDT2Camino.output_spec()
 
     for key, metadata in list(output_map.items()):

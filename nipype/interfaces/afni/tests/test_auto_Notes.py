@@ -19,6 +19,7 @@ def test_Notes_inputs():
         in_file=dict(
             argstr='%s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=-1,
         ),
@@ -26,7 +27,10 @@ def test_Notes_inputs():
             nohash=True,
             usedefault=True,
         ),
-        out_file=dict(argstr='%s', ),
+        out_file=dict(
+            argstr='%s',
+            extensions=None,
+        ),
         outputtype=dict(),
         rep_history=dict(
             argstr='-HH "%s"',
@@ -40,7 +44,7 @@ def test_Notes_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Notes_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = Notes.output_spec()
 
     for key, metadata in list(output_map.items()):

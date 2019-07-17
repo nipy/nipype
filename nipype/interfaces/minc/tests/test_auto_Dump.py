@@ -28,6 +28,7 @@ def test_Dump_inputs():
         ),
         input_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
@@ -39,6 +40,7 @@ def test_Dump_inputs():
             position=-1,
         ),
         output_file=dict(
+            extensions=None,
             hash_files=False,
             keep_extension=False,
             name_source=['input_file'],
@@ -57,7 +59,7 @@ def test_Dump_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Dump_outputs():
-    output_map = dict(output_file=dict(), )
+    output_map = dict(output_file=dict(extensions=None, ), )
     outputs = Dump.output_spec()
 
     for key, metadata in list(output_map.items()):

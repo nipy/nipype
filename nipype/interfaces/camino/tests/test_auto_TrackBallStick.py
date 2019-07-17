@@ -5,7 +5,10 @@ from ..dti import TrackBallStick
 
 def test_TrackBallStick_inputs():
     input_map = dict(
-        anisfile=dict(argstr='-anisfile %s', ),
+        anisfile=dict(
+            argstr='-anisfile %s',
+            extensions=None,
+        ),
         anisthresh=dict(argstr='-anisthresh %f', ),
         args=dict(argstr='%s', ),
         curveinterval=dict(
@@ -24,6 +27,7 @@ def test_TrackBallStick_inputs():
         gzip=dict(argstr='-gzip', ),
         in_file=dict(
             argstr='-inputfile %s',
+            extensions=None,
             position=1,
         ),
         inputdatatype=dict(argstr='-inputdatatype %s', ),
@@ -43,16 +47,19 @@ def test_TrackBallStick_inputs():
         ),
         out_file=dict(
             argstr='-outputfile %s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
         output_root=dict(
             argstr='-outputroot %s',
+            extensions=None,
             position=-1,
         ),
         outputtracts=dict(argstr='-outputtracts %s', ),
         seed_file=dict(
             argstr='-seedfile %s',
+            extensions=None,
             position=2,
         ),
         stepsize=dict(
@@ -74,7 +81,7 @@ def test_TrackBallStick_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TrackBallStick_outputs():
-    output_map = dict(tracked=dict(), )
+    output_map = dict(tracked=dict(extensions=None, ), )
     outputs = TrackBallStick.output_spec()
 
     for key, metadata in list(output_map.items()):

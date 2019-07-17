@@ -11,10 +11,17 @@ def test_BRAINSLandmarkInitializer_inputs():
             usedefault=True,
         ),
         inputFixedLandmarkFilename=dict(
-            argstr='--inputFixedLandmarkFilename %s', ),
+            argstr='--inputFixedLandmarkFilename %s',
+            extensions=None,
+        ),
         inputMovingLandmarkFilename=dict(
-            argstr='--inputMovingLandmarkFilename %s', ),
-        inputWeightFilename=dict(argstr='--inputWeightFilename %s', ),
+            argstr='--inputMovingLandmarkFilename %s',
+            extensions=None,
+        ),
+        inputWeightFilename=dict(
+            argstr='--inputWeightFilename %s',
+            extensions=None,
+        ),
         outputTransformFilename=dict(
             argstr='--outputTransformFilename %s',
             hash_files=False,
@@ -26,7 +33,7 @@ def test_BRAINSLandmarkInitializer_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BRAINSLandmarkInitializer_outputs():
-    output_map = dict(outputTransformFilename=dict(), )
+    output_map = dict(outputTransformFilename=dict(extensions=None, ), )
     outputs = BRAINSLandmarkInitializer.output_spec()
 
     for key, metadata in list(output_map.items()):

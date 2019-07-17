@@ -33,6 +33,7 @@ def test_CatMatvec_inputs():
         ),
         out_file=dict(
             argstr=' > %s',
+            extensions=None,
             keep_extension=False,
             mandatory=True,
             name_source='in_file',
@@ -47,7 +48,7 @@ def test_CatMatvec_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_CatMatvec_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = CatMatvec.output_spec()
 
     for key, metadata in list(output_map.items()):

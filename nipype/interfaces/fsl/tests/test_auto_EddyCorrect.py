@@ -12,11 +12,13 @@ def test_EddyCorrect_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=0,
         ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             name_source=['in_file'],
             name_template='%s_edc',
             output_name='eddy_corrected',
@@ -36,7 +38,7 @@ def test_EddyCorrect_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_EddyCorrect_outputs():
-    output_map = dict(eddy_corrected=dict(), )
+    output_map = dict(eddy_corrected=dict(extensions=None, ), )
     outputs = EddyCorrect.output_spec()
 
     for key, metadata in list(output_map.items()):

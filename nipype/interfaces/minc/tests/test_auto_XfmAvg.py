@@ -27,6 +27,7 @@ def test_XfmAvg_inputs():
         input_grid_files=dict(),
         output_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
@@ -39,8 +40,8 @@ def test_XfmAvg_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_XfmAvg_outputs():
     output_map = dict(
-        output_file=dict(),
-        output_grid=dict(),
+        output_file=dict(extensions=None, ),
+        output_grid=dict(extensions=None, ),
     )
     outputs = XfmAvg.output_spec()
 

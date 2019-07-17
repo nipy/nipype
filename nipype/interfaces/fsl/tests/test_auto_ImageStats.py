@@ -12,10 +12,14 @@ def test_ImageStats_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=2,
         ),
-        mask_file=dict(argstr='', ),
+        mask_file=dict(
+            argstr='',
+            extensions=None,
+        ),
         op_string=dict(
             argstr='%s',
             mandatory=True,

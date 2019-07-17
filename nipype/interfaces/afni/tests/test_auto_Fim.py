@@ -16,12 +16,14 @@ def test_Fim_inputs():
         ),
         ideal_file=dict(
             argstr='-ideal_file %s',
+            extensions=None,
             mandatory=True,
             position=2,
         ),
         in_file=dict(
             argstr='-input %s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=1,
         ),
@@ -35,6 +37,7 @@ def test_Fim_inputs():
         ),
         out_file=dict(
             argstr='-bucket %s',
+            extensions=None,
             name_source='in_file',
             name_template='%s_fim',
         ),
@@ -46,7 +49,7 @@ def test_Fim_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Fim_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = Fim.output_spec()
 
     for key, metadata in list(output_map.items()):

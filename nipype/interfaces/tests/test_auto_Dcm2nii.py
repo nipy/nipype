@@ -16,6 +16,7 @@ def test_Dcm2nii_inputs():
         ),
         config_file=dict(
             argstr='-b %s',
+            extensions=None,
             genfile=True,
         ),
         convert_all_pars=dict(

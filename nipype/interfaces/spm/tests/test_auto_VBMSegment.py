@@ -46,7 +46,9 @@ def test_VBMSegment_inputs():
             usedefault=True,
         ),
         dartel_template=dict(
-            field='estwrite.extopts.dartelwarp.normhigh.darteltpm', ),
+            extensions=['.hdr', '.img', '.img.gz', '.nii'],
+            field='estwrite.extopts.dartelwarp.normhigh.darteltpm',
+        ),
         deformation_field=dict(
             field='estwrite.output.warps',
             usedefault=True,
@@ -105,7 +107,10 @@ def test_VBMSegment_inputs():
             usedefault=True,
         ),
         spatial_normalization=dict(usedefault=True, ),
-        tissues=dict(field='estwrite.tpm', ),
+        tissues=dict(
+            extensions=['.hdr', '.img', '.img.gz', '.nii'],
+            field='estwrite.tpm',
+        ),
         use_mcr=dict(),
         use_sanlm_denoising_filter=dict(
             field='estwrite.extopts.sanlm',

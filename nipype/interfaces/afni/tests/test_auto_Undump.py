@@ -18,10 +18,14 @@ def test_Undump_inputs():
         in_file=dict(
             argstr='-master %s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=-1,
         ),
-        mask_file=dict(argstr='-mask %s', ),
+        mask_file=dict(
+            argstr='-mask %s',
+            extensions=None,
+        ),
         num_threads=dict(
             nohash=True,
             usedefault=True,
@@ -29,6 +33,7 @@ def test_Undump_inputs():
         orient=dict(argstr='-orient %s', ),
         out_file=dict(
             argstr='-prefix %s',
+            extensions=None,
             name_source='in_file',
         ),
         outputtype=dict(),
@@ -40,7 +45,7 @@ def test_Undump_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Undump_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = Undump.output_spec()
 
     for key, metadata in list(output_map.items()):

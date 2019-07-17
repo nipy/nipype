@@ -17,16 +17,28 @@ def test_Contrast_inputs():
             argstr='--%s-only',
             mandatory=True,
         ),
-        orig=dict(mandatory=True, ),
-        rawavg=dict(mandatory=True, ),
+        orig=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        rawavg=dict(
+            extensions=None,
+            mandatory=True,
+        ),
         subject_id=dict(
             argstr='--s %s',
             mandatory=True,
             usedefault=True,
         ),
         subjects_dir=dict(),
-        thickness=dict(mandatory=True, ),
-        white=dict(mandatory=True, ),
+        thickness=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        white=dict(
+            extensions=None,
+            mandatory=True,
+        ),
     )
     inputs = Contrast.input_spec()
 
@@ -35,9 +47,9 @@ def test_Contrast_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Contrast_outputs():
     output_map = dict(
-        out_contrast=dict(),
-        out_log=dict(),
-        out_stats=dict(),
+        out_contrast=dict(extensions=None, ),
+        out_log=dict(extensions=None, ),
+        out_stats=dict(extensions=None, ),
     )
     outputs = Contrast.output_spec()
 

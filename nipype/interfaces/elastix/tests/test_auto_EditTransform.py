@@ -9,11 +9,14 @@ def test_EditTransform_inputs():
             argstr='FinalBSplineInterpolationOrder',
             usedefault=True,
         ),
-        output_file=dict(),
+        output_file=dict(extensions=None, ),
         output_format=dict(argstr='ResultImageFormat', ),
         output_type=dict(argstr='ResultImagePixelType', ),
-        reference_image=dict(),
-        transform_file=dict(mandatory=True, ),
+        reference_image=dict(extensions=None, ),
+        transform_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
     )
     inputs = EditTransform.input_spec()
 
@@ -21,7 +24,7 @@ def test_EditTransform_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_EditTransform_outputs():
-    output_map = dict(output_file=dict(), )
+    output_map = dict(output_file=dict(extensions=None, ), )
     outputs = EditTransform.output_spec()
 
     for key, metadata in list(output_map.items()):

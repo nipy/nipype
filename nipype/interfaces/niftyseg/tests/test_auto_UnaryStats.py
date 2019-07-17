@@ -12,6 +12,7 @@ def test_UnaryStats_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=2,
         ),
@@ -21,6 +22,7 @@ def test_UnaryStats_inputs():
         ),
         mask_file=dict(
             argstr='-m %s',
+            extensions=None,
             position=-2,
         ),
         operation=dict(
