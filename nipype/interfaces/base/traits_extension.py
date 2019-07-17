@@ -34,10 +34,7 @@ from traits.trait_base import _Undefined
 from traits.api import Unicode
 from future import standard_library
 
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path
+from ...utils.filemanip import Path
 
 
 if traits_version < '3.7.0':
@@ -145,34 +142,17 @@ class BasePath(TraitType):
                 self.error(objekt, name, str(value))
 
         if self.resolve:
-            try:
-                value = value.resolve(strict=self.exists)
-            except TypeError:
-                if self.exists:
-                    value = value.resolve()
-                elif not value.is_absolute():
-                    value = Path().resolve() / value
+            value = value.resolve(strict=self.exists)
 
         if not return_pathlike and not self.pathlike:
             value = str(value)
 
         return value
 
-    # def get_value(self, objekt, name, trait=None):
-    #     value = super(BasePath, self).get_value(objekt, name)
-    #     if value is Undefined:
-    #         return self.default_value
-
-    #     if self.pathlike:
-    #         return value
-    #     return str(value)
-
 
 class Directory(BasePath):
     """
     Defines a trait whose value must be a directory path.
-
-    Examples::
 
     >>> from nipype.interfaces.base import Directory, TraitedSpec, TraitError
     >>> class A(TraitedSpec):

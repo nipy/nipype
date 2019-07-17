@@ -21,7 +21,6 @@ import shutil
 import contextlib
 import posixpath
 import simplejson as json
-import numpy as np
 
 from builtins import str, bytes, open
 
@@ -40,8 +39,52 @@ related_filetype_sets = [
 
 PY3 = sys.version_info[0] >= 3
 
-class FileNotFoundError(Exception):
+
+class FileNotFoundError(OSError):
+    """Defines the expception for Python 2."""
+
+    def __init__(self, path):
+        """Initialize the exception."""
+        super(FileNotFoundError, self).__init__(
+            2, 'No such file or directory', '%s' % path)
+
+
+USING_PATHLIB2 = False
+USING_PATHLIB_PATCHED = False
+try:
+    from pathlib import Path
+except ImportError:
+    from pathlib2 import Path
+    USING_PATHLIB2 = True
+
+try:
+    Path('/invented/file/path').resolve(strict=True)
+except TypeError:
+    def _patch_resolve(self, strict=False):
+        """Add the argument strict to signature in Python>3,<3.6."""
+        resolved = Path().old_resolve() / self
+
+        if strict and not resolved.exists():
+            raise FileNotFoundError(resolved)
+        return resolved
+
+    Path.old_resolve = Path.resolve
+    Path.resolve = _patch_resolve
+    USING_PATHLIB_PATCHED = True
+except FileNotFoundError:
     pass
+except OSError:
+    def _patch_resolve(self, strict=False):
+        """Add the argument strict to signature for pathlib2."""
+        try:
+            resolved = self.old_resolve(strict=strict)
+        except OSError:
+            raise FileNotFoundError(self.old_resolve())
+
+        return resolved
+
+    Path.old_resolve = Path.resolve
+    Path.resolve = _patch_resolve
 
 
 def split_filename(fname):

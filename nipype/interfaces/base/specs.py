@@ -21,7 +21,8 @@ from packaging.version import Version
 
 from traits.trait_errors import TraitError
 from traits.trait_handlers import TraitDictObject, TraitListObject
-from ...utils.filemanip import md5, hash_infile, hash_timestamp, to_str
+from ...utils.filemanip import (
+    md5, hash_infile, hash_timestamp, to_str, USING_PATHLIB2)
 from .traits_extension import (
     traits,
     Undefined,
@@ -31,13 +32,6 @@ from .traits_extension import (
 
 from ... import config, __version__
 
-
-USING_PATHLIB2 = False
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path  # noqa
-    USING_PATHLIB2 = True
 
 FLOAT_FORMAT = '{:.10f}'.format
 nipype_version = Version(__version__)
