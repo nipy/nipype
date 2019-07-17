@@ -40,7 +40,7 @@ related_filetype_sets = [
 PY3 = sys.version_info[0] >= 3
 
 
-class FileNotFoundError(OSError):
+class FileNotFoundError(OSError):  # noqa
     """Defines the exception for Python 2."""
 
     def __init__(self, path):
