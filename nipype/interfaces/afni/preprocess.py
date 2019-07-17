@@ -3088,39 +3088,39 @@ class QwarpInputSpec(AFNICommandInputSpec):
         name_template='ppp_%s',
         name_source=['in_file'],
         desc="""\
-Sets the prefix/suffix for the output datasets. \
-* The source dataset is warped to match the base \
-and gets prefix 'ppp'. (Except if '-plusminus' is used.)
-* The final interpolation to this output dataset is \
-done using the \'wsinc5\' method.  See the output of \
- 3dAllineate -HELP \
-(in the "Modifying \'-final wsinc5\'" section) for \
-the lengthy technical details. \
-* The 3D warp used is saved in a dataset with \
-prefix \'ppp_WARP\' -- this dataset can be used \
-with 3dNwarpApply and 3dNwarpCat, for example. \
-* To be clear, this is the warp from source dataset \
- coordinates to base dataset coordinates, where the \
- values at each base grid point are the xyz displacments \
- needed to move that grid point\'s xyz values to the \
- corresponding xyz values in the source dataset: \
-   base( (x,y,z) + WARP(x,y,z) ) matches source(x,y,z) \
- Another way to think of this warp is that it \'pulls\' \
- values back from source space to base space. \
-* 3dNwarpApply would use \'ppp_WARP\' to transform datasets \
-aligned with the source dataset to be aligned with the \
-base dataset. \
-** If you do NOT want this warp saved, use the option \'-nowarp\'. \
--->> (However, this warp is usually the most valuable possible output!) \
-* If you want to calculate and save the inverse 3D warp, \
-use the option \'-iwarp\'.  This inverse warp will then be \
-saved in a dataset with prefix \'ppp_WARPINV\'. \
-* This inverse warp could be used to transform data from base \
-space to source space, if you need to do such an operation. \
-* You can easily compute the inverse later, say by a command like \
- 3dNwarpCat -prefix Z_WARPINV \'INV(Z_WARP+tlrc)\' \
-or the inverse can be computed as needed in 3dNwarpApply, like \
- 3dNwarpApply -nwarp \'INV(Z_WARP+tlrc)\' -source Dataset.nii ...""")
+Sets the prefix/suffix for the output datasets.
+* The source dataset is warped to match the base
+and gets prefix 'ppp'. (Except if '-plusminus' is used
+* The final interpolation to this output dataset is
+done using the 'wsinc5' method.  See the output of
+ 3dAllineate -HELP
+(in the "Modifying '-final wsinc5'" section) for
+the lengthy technical details.
+* The 3D warp used is saved in a dataset with
+prefix 'ppp_WARP' -- this dataset can be used
+with 3dNwarpApply and 3dNwarpCat, for example.
+* To be clear, this is the warp from source dataset
+ coordinates to base dataset coordinates, where the
+ values at each base grid point are the xyz displacments
+ needed to move that grid point's xyz values to the
+ corresponding xyz values in the source dataset:
+   base( (x,y,z) + WARP(x,y,z) ) matches source(x,y,z)
+ Another way to think of this warp is that it 'pulls'
+ values back from source space to base space.
+* 3dNwarpApply would use 'ppp_WARP' to transform datasets
+aligned with the source dataset to be aligned with the
+base dataset.
+** If you do NOT want this warp saved, use the option '-nowarp'.
+-->> (However, this warp is usually the most valuable possible output!)
+* If you want to calculate and save the inverse 3D warp,
+use the option '-iwarp'.  This inverse warp will then be
+saved in a dataset with prefix 'ppp_WARPINV'.
+* This inverse warp could be used to transform data from base
+space to source space, if you need to do such an operation.
+* You can easily compute the inverse later, say by a command like
+ 3dNwarpCat -prefix Z_WARPINV 'INV(Z_WARP+tlrc)'
+or the inverse can be computed as needed in 3dNwarpApply, like
+ 3dNwarpApply -nwarp 'INV(Z_WARP+tlrc)' -source Dataset.nii ...""")
     resample = traits.Bool(
         desc='This option simply resamples the source dataset to match the'
         'base dataset grid.  You can use this if the two datasets'
