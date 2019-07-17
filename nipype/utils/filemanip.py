@@ -50,7 +50,6 @@ class FileNotFoundError(OSError):
 
 
 USING_PATHLIB2 = False
-USING_PATHLIB_PATCHED = False
 try:
     from pathlib import Path
 except ImportError:
@@ -70,7 +69,6 @@ except TypeError:
 
     Path.old_resolve = Path.resolve
     Path.resolve = _patch_resolve
-    USING_PATHLIB_PATCHED = True
 except FileNotFoundError:
     pass
 except OSError:
