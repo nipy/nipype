@@ -13,12 +13,14 @@ def test_ABoverlap_inputs():
         in_file_a=dict(
             argstr='%s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=-3,
         ),
         in_file_b=dict(
             argstr='%s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
@@ -29,6 +31,7 @@ def test_ABoverlap_inputs():
         ),
         out_file=dict(
             argstr=' |& tee %s',
+            extensions=None,
             position=-1,
         ),
         outputtype=dict(),
@@ -41,7 +44,7 @@ def test_ABoverlap_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ABoverlap_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = ABoverlap.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -18,6 +18,7 @@ def test_Smooth_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=0,
         ),
@@ -30,6 +31,7 @@ def test_Smooth_inputs():
         ),
         smoothed_file=dict(
             argstr='%s',
+            extensions=None,
             hash_files=False,
             name_source=['in_file'],
             name_template='%s_smooth',
@@ -42,7 +44,7 @@ def test_Smooth_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Smooth_outputs():
-    output_map = dict(smoothed_file=dict(), )
+    output_map = dict(smoothed_file=dict(extensions=None, ), )
     outputs = Smooth.output_spec()
 
     for key, metadata in list(output_map.items()):

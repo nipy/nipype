@@ -99,30 +99,31 @@ class BasePath(TraitType):
     """Defines a trait whose value must be a valid filesystem path."""
 
     # A description of the type of value this trait accepts:
-    info_text = 'a pathlike object or string'
     exists = False
-    pathlike = False
     resolve = False
     _is_file = False
     _is_dir = False
 
-    def __init__(self, value=Undefined,
-                 exists=False, pathlike=False, resolve=False, **metadata):
+    @property
+    def info_text(self):
+        """Create the trait's general description."""
+        info_text = 'a pathlike object or string'
+        if any((self.exists, self._is_file, self._is_dir)):
+            info_text += ' representing a'
+            if self.exists:
+                info_text += 'n existing'
+            if self._is_file:
+                info_text += ' file'
+            elif self._is_dir:
+                info_text += ' directory'
+            else:
+                info_text += ' file or directory'
+        return info_text
+
+    def __init__(self, value=Undefined, exists=False, resolve=False, **metadata):
         """Create a BasePath trait."""
         self.exists = exists
         self.resolve = resolve
-        self.pathlike = pathlike
-        if any((exists, self._is_file, self._is_dir)):
-            self.info_text += ' representing a'
-            if exists:
-                self.info_text += 'n existing'
-            if self._is_file:
-                self.info_text += ' file'
-            elif self._is_dir:
-                self.info_text += ' directory'
-            else:
-                self.info_text += ' file or directory'
-
         super(BasePath, self).__init__(value, **metadata)
 
     def validate(self, objekt, name, value, return_pathlike=False):
@@ -135,7 +136,7 @@ class BasePath(TraitType):
             self.error(objekt, name, str(value))
 
         if self.exists:
-            if self.exists and not value.exists():
+            if not value.exists():
                 self.error(objekt, name, str(value))
 
             if self._is_file and not value.is_file():
@@ -147,7 +148,7 @@ class BasePath(TraitType):
         if self.resolve:
             value = value.resolve(strict=self.exists)
 
-        if not return_pathlike and not self.pathlike:
+        if not return_pathlike:
             value = str(value)
 
         return value
@@ -273,8 +274,8 @@ class File(BasePath):
     _is_file = True
     _exts = None
 
-    def __init__(self, value=NoDefaultSpecified, exists=False, pathlike=False,
-                 resolve=False, allow_compressed=True, extensions=None, **metadata):
+    def __init__(self, value=NoDefaultSpecified, exists=False, resolve=False,
+                 allow_compressed=True, extensions=None, **metadata):
         """Create a File trait."""
         if extensions is not None:
             if isinstance(extensions, (bytes, str)):
@@ -286,8 +287,8 @@ class File(BasePath):
             self._exts = sorted(set(['.%s' % ext if not ext.startswith('.') else ext
                                      for ext in extensions]))
 
-        super(File, self).__init__(value=value, exists=exists,
-                                   pathlike=pathlike, resolve=resolve, **metadata)
+        super(File, self).__init__(value=value, exists=exists, resolve=resolve,
+                                   extensions=self._exts, **metadata)
 
     def validate(self, objekt, name, value, return_pathlike=False):
         """Validate a value change."""
@@ -297,7 +298,7 @@ class File(BasePath):
             if ext not in self._exts:
                 self.error(objekt, name, str(value))
 
-        if not return_pathlike and not self.pathlike:
+        if not return_pathlike:
             value = str(value)
 
         return value
@@ -307,7 +308,7 @@ class ImageFile(File):
     """Defines a trait whose value must be a known neuroimaging file."""
 
     def __init__(self, value=NoDefaultSpecified, exists=False,
-                 pathlike=False, resolve=False, types=None, **metadata):
+                 resolve=False, types=None, **metadata):
         """Create an ImageFile trait."""
         extensions = None
         if types is not None:
@@ -323,7 +324,7 @@ Unknown value(s) %s for metadata type of an ImageFile input.\
 
         super(ImageFile, self).__init__(
             value=value, exists=exists, extensions=extensions,
-            pathlike=pathlike, resolve=resolve, **metadata)
+            resolve=resolve, **metadata)
 
 
 def isdefined(objekt):

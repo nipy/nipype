@@ -8,10 +8,12 @@ def test_Retroicor_inputs():
         args=dict(argstr='%s', ),
         card=dict(
             argstr='-card %s',
+            extensions=None,
             position=-2,
         ),
         cardphase=dict(
             argstr='-cardphase %s',
+            extensions=None,
             hash_files=False,
             position=-6,
         ),
@@ -22,6 +24,7 @@ def test_Retroicor_inputs():
         in_file=dict(
             argstr='%s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=-1,
         ),
@@ -35,6 +38,7 @@ def test_Retroicor_inputs():
         ),
         out_file=dict(
             argstr='-prefix %s',
+            extensions=None,
             name_source=['in_file'],
             name_template='%s_retroicor',
             position=1,
@@ -42,10 +46,12 @@ def test_Retroicor_inputs():
         outputtype=dict(),
         resp=dict(
             argstr='-resp %s',
+            extensions=None,
             position=-3,
         ),
         respphase=dict(
             argstr='-respphase %s',
+            extensions=None,
             hash_files=False,
             position=-7,
         ),
@@ -60,7 +66,7 @@ def test_Retroicor_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Retroicor_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = Retroicor.output_spec()
 
     for key, metadata in list(output_map.items()):

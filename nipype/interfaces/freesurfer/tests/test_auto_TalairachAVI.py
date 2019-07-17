@@ -13,10 +13,12 @@ def test_TalairachAVI_inputs():
         ),
         in_file=dict(
             argstr='--i %s',
+            extensions=None,
             mandatory=True,
         ),
         out_file=dict(
             argstr='--xfm %s',
+            extensions=None,
             mandatory=True,
         ),
         subjects_dir=dict(),

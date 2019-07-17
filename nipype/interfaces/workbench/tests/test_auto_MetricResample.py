@@ -18,10 +18,12 @@ def test_MetricResample_inputs():
         args=dict(argstr='%s', ),
         current_area=dict(
             argstr='%s',
+            extensions=None,
             position=6,
         ),
         current_sphere=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
@@ -31,6 +33,7 @@ def test_MetricResample_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=0,
         ),
@@ -45,15 +48,18 @@ def test_MetricResample_inputs():
         ),
         new_area=dict(
             argstr='%s',
+            extensions=None,
             position=7,
         ),
         new_sphere=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=2,
         ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             keep_extension=True,
             name_source=['new_sphere'],
             name_template='%s.out',
@@ -61,6 +67,7 @@ def test_MetricResample_inputs():
         ),
         roi_metric=dict(
             argstr='-current-roi %s',
+            extensions=None,
             position=8,
         ),
         valid_roi_out=dict(
@@ -75,8 +82,8 @@ def test_MetricResample_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MetricResample_outputs():
     output_map = dict(
-        out_file=dict(),
-        roi_file=dict(),
+        out_file=dict(extensions=None, ),
+        roi_file=dict(extensions=None, ),
     )
     outputs = MetricResample.output_spec()
 

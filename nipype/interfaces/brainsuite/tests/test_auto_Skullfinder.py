@@ -14,15 +14,18 @@ def test_Skullfinder_inputs():
         ),
         inputMRIFile=dict(
             argstr='-i %s',
+            extensions=None,
             mandatory=True,
         ),
         inputMaskFile=dict(
             argstr='-m %s',
+            extensions=None,
             mandatory=True,
         ),
         lowerThreshold=dict(argstr='-l %d', ),
         outputLabelFile=dict(
             argstr='-o %s',
+            extensions=None,
             genfile=True,
         ),
         performFinalOpening=dict(argstr='--finalOpening', ),
@@ -39,7 +42,7 @@ def test_Skullfinder_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Skullfinder_outputs():
-    output_map = dict(outputLabelFile=dict(), )
+    output_map = dict(outputLabelFile=dict(extensions=None, ), )
     outputs = Skullfinder.output_spec()
 
     for key, metadata in list(output_map.items()):

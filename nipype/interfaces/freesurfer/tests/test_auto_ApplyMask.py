@@ -12,6 +12,7 @@ def test_ApplyMask_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-3,
         ),
@@ -19,12 +20,14 @@ def test_ApplyMask_inputs():
         keep_mask_deletion_edits=dict(argstr='-keep_mask_deletion_edits', ),
         mask_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
         mask_thresh=dict(argstr='-T %.4f', ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             hash_files=True,
             keep_extension=True,
             name_source=['in_file'],
@@ -34,9 +37,18 @@ def test_ApplyMask_inputs():
         subjects_dir=dict(),
         transfer=dict(argstr='-transfer %d', ),
         use_abs=dict(argstr='-abs', ),
-        xfm_file=dict(argstr='-xform %s', ),
-        xfm_source=dict(argstr='-lta_src %s', ),
-        xfm_target=dict(argstr='-lta_dst %s', ),
+        xfm_file=dict(
+            argstr='-xform %s',
+            extensions=None,
+        ),
+        xfm_source=dict(
+            argstr='-lta_src %s',
+            extensions=None,
+        ),
+        xfm_target=dict(
+            argstr='-lta_dst %s',
+            extensions=None,
+        ),
     )
     inputs = ApplyMask.input_spec()
 
@@ -44,7 +56,7 @@ def test_ApplyMask_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ApplyMask_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = ApplyMask.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -14,16 +14,24 @@ def test_CALabel_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-4,
         ),
-        in_vol=dict(argstr='-r %s', ),
-        intensities=dict(argstr='-r %s', ),
+        in_vol=dict(
+            argstr='-r %s',
+            extensions=None,
+        ),
+        intensities=dict(
+            argstr='-r %s',
+            extensions=None,
+        ),
         label=dict(argstr='-l %s', ),
         no_big_ventricles=dict(argstr='-nobigventricles', ),
         num_threads=dict(),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-1,
         ),
@@ -32,11 +40,13 @@ def test_CALabel_inputs():
         subjects_dir=dict(),
         template=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
         transform=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-3,
         ),
@@ -47,7 +57,7 @@ def test_CALabel_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_CALabel_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = CALabel.output_spec()
 
     for key, metadata in list(output_map.items()):

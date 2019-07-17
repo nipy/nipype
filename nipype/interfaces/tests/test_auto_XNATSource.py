@@ -7,6 +7,7 @@ def test_XNATSource_inputs():
     input_map = dict(
         cache_dir=dict(),
         config=dict(
+            extensions=None,
             mandatory=True,
             xor=['server'],
         ),

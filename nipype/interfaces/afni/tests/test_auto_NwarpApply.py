@@ -23,6 +23,7 @@ def test_NwarpApply_inputs():
         master=dict(argstr='-master %s', ),
         out_file=dict(
             argstr='-prefix %s',
+            extensions=None,
             name_source='in_file',
             name_template='%s_Nwarp',
         ),
@@ -46,7 +47,7 @@ def test_NwarpApply_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_NwarpApply_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = NwarpApply.output_spec()
 
     for key, metadata in list(output_map.items()):

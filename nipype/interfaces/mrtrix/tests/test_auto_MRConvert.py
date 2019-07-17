@@ -25,6 +25,7 @@ def test_MRConvert_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
@@ -39,6 +40,7 @@ def test_MRConvert_inputs():
         ),
         out_filename=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
@@ -71,7 +73,7 @@ def test_MRConvert_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRConvert_outputs():
-    output_map = dict(converted=dict(), )
+    output_map = dict(converted=dict(extensions=None, ), )
     outputs = MRConvert.output_spec()
 
     for key, metadata in list(output_map.items()):

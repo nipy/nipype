@@ -18,7 +18,10 @@ def test_AnalyzeWarp_inputs():
             argstr='-jacmat %s',
             usedefault=True,
         ),
-        moving_image=dict(argstr='-in %s', ),
+        moving_image=dict(
+            argstr='-in %s',
+            extensions=None,
+        ),
         num_threads=dict(
             argstr='-threads %01d',
             nohash=True,
@@ -36,6 +39,7 @@ def test_AnalyzeWarp_inputs():
         ),
         transform_file=dict(
             argstr='-tp %s',
+            extensions=None,
             mandatory=True,
         ),
     )
@@ -46,9 +50,9 @@ def test_AnalyzeWarp_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_AnalyzeWarp_outputs():
     output_map = dict(
-        disp_field=dict(),
-        jacdet_map=dict(),
-        jacmat_map=dict(),
+        disp_field=dict(extensions=None, ),
+        jacdet_map=dict(extensions=None, ),
+        jacmat_map=dict(extensions=None, ),
     )
     outputs = AnalyzeWarp.output_spec()
 

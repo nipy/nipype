@@ -26,6 +26,7 @@ def test_RegAverage_inputs():
         ),
         avg_ref_file=dict(
             argstr='-avg_tran %s',
+            extensions=None,
             position=1,
             requires=['warp_files'],
             xor=[
@@ -35,6 +36,7 @@ def test_RegAverage_inputs():
         ),
         demean1_ref_file=dict(
             argstr='-demean1 %s',
+            extensions=None,
             position=1,
             requires=['warp_files'],
             xor=[
@@ -44,6 +46,7 @@ def test_RegAverage_inputs():
         ),
         demean2_ref_file=dict(
             argstr='-demean2 %s',
+            extensions=None,
             position=1,
             requires=['warp_files'],
             xor=[
@@ -53,6 +56,7 @@ def test_RegAverage_inputs():
         ),
         demean3_ref_file=dict(
             argstr='-demean3 %s',
+            extensions=None,
             position=1,
             requires=['warp_files'],
             xor=[
@@ -70,6 +74,7 @@ def test_RegAverage_inputs():
         ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             position=0,
         ),
@@ -86,7 +91,7 @@ def test_RegAverage_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_RegAverage_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = RegAverage.output_spec()
 
     for key, metadata in list(output_map.items()):

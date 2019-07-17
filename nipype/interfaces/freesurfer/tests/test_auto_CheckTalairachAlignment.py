@@ -12,6 +12,7 @@ def test_CheckTalairachAlignment_inputs():
         ),
         in_file=dict(
             argstr='-xfm %s',
+            extensions=None,
             mandatory=True,
             position=-1,
             xor=['subject'],

@@ -21,17 +21,25 @@ def test_ExpertAutomatedRegistration_inputs():
         expectedSkew=dict(argstr='--expectedSkew %f', ),
         fixedImage=dict(
             argstr='%s',
+            extensions=None,
             position=-2,
         ),
-        fixedImageMask=dict(argstr='--fixedImageMask %s', ),
+        fixedImageMask=dict(
+            argstr='--fixedImageMask %s',
+            extensions=None,
+        ),
         fixedLandmarks=dict(argstr='--fixedLandmarks %s...', ),
         initialization=dict(argstr='--initialization %s', ),
         interpolation=dict(argstr='--interpolation %s', ),
-        loadTransform=dict(argstr='--loadTransform %s', ),
+        loadTransform=dict(
+            argstr='--loadTransform %s',
+            extensions=None,
+        ),
         metric=dict(argstr='--metric %s', ),
         minimizeMemory=dict(argstr='--minimizeMemory ', ),
         movingImage=dict(
             argstr='%s',
+            extensions=None,
             position=-1,
         ),
         movingLandmarks=dict(argstr='--movingLandmarks %s...', ),
@@ -58,8 +66,8 @@ def test_ExpertAutomatedRegistration_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ExpertAutomatedRegistration_outputs():
     output_map = dict(
-        resampledImage=dict(),
-        saveTransform=dict(),
+        resampledImage=dict(extensions=None, ),
+        saveTransform=dict(extensions=None, ),
     )
     outputs = ExpertAutomatedRegistration.output_spec()
 

@@ -17,11 +17,15 @@ def test_RegTools_inputs():
         ),
         in_file=dict(
             argstr='-in %s',
+            extensions=None,
             mandatory=True,
         ),
         inter_val=dict(argstr='-interp %d', ),
         iso_flag=dict(argstr='-iso', ),
-        mask_file=dict(argstr='-nan %s', ),
+        mask_file=dict(
+            argstr='-nan %s',
+            extensions=None,
+        ),
         mul_val=dict(argstr='-mul %s', ),
         noscl_flag=dict(argstr='-noscl', ),
         omp_core_val=dict(
@@ -30,10 +34,14 @@ def test_RegTools_inputs():
         ),
         out_file=dict(
             argstr='-out %s',
+            extensions=None,
             name_source=['in_file'],
             name_template='%s_tools.nii.gz',
         ),
-        rms_val=dict(argstr='-rms %s', ),
+        rms_val=dict(
+            argstr='-rms %s',
+            extensions=None,
+        ),
         smo_g_val=dict(argstr='-smoG %f %f %f', ),
         smo_s_val=dict(argstr='-smoS %f %f %f', ),
         sub_val=dict(argstr='-sub %s', ),
@@ -45,7 +53,7 @@ def test_RegTools_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_RegTools_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = RegTools.output_spec()
 
     for key, metadata in list(output_map.items()):

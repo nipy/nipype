@@ -7,7 +7,7 @@ def test_JSONFileSink_inputs():
     input_map = dict(
         _outputs=dict(usedefault=True, ),
         in_dict=dict(usedefault=True, ),
-        out_file=dict(),
+        out_file=dict(extensions=None, ),
     )
     inputs = JSONFileSink.input_spec()
 
@@ -15,7 +15,7 @@ def test_JSONFileSink_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_JSONFileSink_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = JSONFileSink.output_spec()
 
     for key, metadata in list(output_map.items()):

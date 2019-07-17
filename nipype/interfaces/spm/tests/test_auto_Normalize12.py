@@ -14,12 +14,14 @@ def test_Normalize12_inputs():
         bias_regularization=dict(field='eoptions.biasreg', ),
         deformation_file=dict(
             copyfile=False,
+            extensions=['.hdr', '.img', '.img.gz', '.nii'],
             field='subj.def',
             mandatory=True,
             xor=['image_to_align', 'tpm'],
         ),
         image_to_align=dict(
             copyfile=True,
+            extensions=['.hdr', '.img', '.img.gz', '.nii'],
             field='subj.vol',
             mandatory=True,
             xor=['deformation_file'],
@@ -36,6 +38,7 @@ def test_Normalize12_inputs():
         smoothness=dict(field='eoptions.fwhm', ),
         tpm=dict(
             copyfile=False,
+            extensions=None,
             field='eoptions.tpm',
             xor=['deformation_file'],
         ),

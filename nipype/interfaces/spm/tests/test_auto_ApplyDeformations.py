@@ -6,6 +6,7 @@ from ..preprocess import ApplyDeformations
 def test_ApplyDeformations_inputs():
     input_map = dict(
         deformation_field=dict(
+            extensions=None,
             field='comp{1}.def',
             mandatory=True,
         ),
@@ -18,6 +19,7 @@ def test_ApplyDeformations_inputs():
         mfile=dict(usedefault=True, ),
         paths=dict(),
         reference_volume=dict(
+            extensions=['.hdr', '.img', '.img.gz', '.nii'],
             field='comp{2}.id.space',
             mandatory=True,
         ),

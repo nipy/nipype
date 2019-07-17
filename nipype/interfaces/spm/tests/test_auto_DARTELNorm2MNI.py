@@ -22,6 +22,7 @@ def test_DARTELNorm2MNI_inputs():
         paths=dict(),
         template_file=dict(
             copyfile=False,
+            extensions=['.hdr', '.img', '.img.gz', '.nii'],
             field='mni_norm.template',
             mandatory=True,
         ),
@@ -39,7 +40,7 @@ def test_DARTELNorm2MNI_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DARTELNorm2MNI_outputs():
     output_map = dict(
-        normalization_parameter_file=dict(),
+        normalization_parameter_file=dict(extensions=None, ),
         normalized_files=dict(),
     )
     outputs = DARTELNorm2MNI.output_spec()

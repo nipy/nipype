@@ -22,6 +22,7 @@ def test_BigAverage_inputs():
         ),
         output_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             hash_files=False,
             name_source=['input_files'],
@@ -32,6 +33,7 @@ def test_BigAverage_inputs():
         robust=dict(argstr='-robust', ),
         sd_file=dict(
             argstr='--sdfile %s',
+            extensions=None,
             hash_files=False,
             name_source=['input_files'],
             name_template='%s_bigaverage_stdev.mnc',
@@ -46,8 +48,8 @@ def test_BigAverage_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BigAverage_outputs():
     output_map = dict(
-        output_file=dict(),
-        sd_file=dict(),
+        output_file=dict(extensions=None, ),
+        sd_file=dict(extensions=None, ),
     )
     outputs = BigAverage.output_spec()
 

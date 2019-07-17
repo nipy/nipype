@@ -44,10 +44,12 @@ def test_ApplyXFM_inputs():
         ),
         fieldmap=dict(
             argstr='-fieldmap %s',
+            extensions=None,
             min_ver='5.0.0',
         ),
         fieldmapmask=dict(
             argstr='-fieldmapmask %s',
+            extensions=None,
             min_ver='5.0.0',
         ),
         fine_search=dict(
@@ -57,11 +59,18 @@ def test_ApplyXFM_inputs():
         force_scaling=dict(argstr='-forcescaling', ),
         in_file=dict(
             argstr='-in %s',
+            extensions=None,
             mandatory=True,
             position=0,
         ),
-        in_matrix_file=dict(argstr='-init %s', ),
-        in_weight=dict(argstr='-inweight %s', ),
+        in_matrix_file=dict(
+            argstr='-init %s',
+            extensions=None,
+        ),
+        in_weight=dict(
+            argstr='-inweight %s',
+            extensions=None,
+        ),
         interp=dict(argstr='-interp %s', ),
         min_sampling=dict(
             argstr='-minsampling %f',
@@ -73,12 +82,14 @@ def test_ApplyXFM_inputs():
         no_search=dict(argstr='-nosearch', ),
         out_file=dict(
             argstr='-out %s',
+            extensions=None,
             hash_files=False,
             name_source=['in_file'],
             name_template='%s_flirt',
             position=2,
         ),
         out_log=dict(
+            extensions=None,
             keep_extension=True,
             name_source=['in_file'],
             name_template='%s_flirt.log',
@@ -86,6 +97,7 @@ def test_ApplyXFM_inputs():
         ),
         out_matrix_file=dict(
             argstr='-omat %s',
+            extensions=None,
             hash_files=False,
             keep_extension=True,
             name_source=['in_file'],
@@ -101,15 +113,22 @@ def test_ApplyXFM_inputs():
             argstr='-pedir %d',
             min_ver='5.0.0',
         ),
-        ref_weight=dict(argstr='-refweight %s', ),
+        ref_weight=dict(
+            argstr='-refweight %s',
+            extensions=None,
+        ),
         reference=dict(
             argstr='-ref %s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
         rigid2D=dict(argstr='-2D', ),
         save_log=dict(),
-        schedule=dict(argstr='-schedule %s', ),
+        schedule=dict(
+            argstr='-schedule %s',
+            extensions=None,
+        ),
         searchr_x=dict(
             argstr='-searchrx %s',
             units='degrees',
@@ -131,14 +150,17 @@ def test_ApplyXFM_inputs():
         verbose=dict(argstr='-verbose %d', ),
         wm_seg=dict(
             argstr='-wmseg %s',
+            extensions=None,
             min_ver='5.0.0',
         ),
         wmcoords=dict(
             argstr='-wmcoords %s',
+            extensions=None,
             min_ver='5.0.0',
         ),
         wmnorms=dict(
             argstr='-wmnorms %s',
+            extensions=None,
             min_ver='5.0.0',
         ),
     )
@@ -149,9 +171,9 @@ def test_ApplyXFM_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ApplyXFM_outputs():
     output_map = dict(
-        out_file=dict(),
-        out_log=dict(),
-        out_matrix_file=dict(),
+        out_file=dict(extensions=None, ),
+        out_log=dict(extensions=None, ),
+        out_matrix_file=dict(extensions=None, ),
     )
     outputs = ApplyXFM.output_spec()
 

@@ -10,10 +10,22 @@ def test_BRAINSLmkTransform_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputFixedLandmarks=dict(argstr='--inputFixedLandmarks %s', ),
-        inputMovingLandmarks=dict(argstr='--inputMovingLandmarks %s', ),
-        inputMovingVolume=dict(argstr='--inputMovingVolume %s', ),
-        inputReferenceVolume=dict(argstr='--inputReferenceVolume %s', ),
+        inputFixedLandmarks=dict(
+            argstr='--inputFixedLandmarks %s',
+            extensions=None,
+        ),
+        inputMovingLandmarks=dict(
+            argstr='--inputMovingLandmarks %s',
+            extensions=None,
+        ),
+        inputMovingVolume=dict(
+            argstr='--inputMovingVolume %s',
+            extensions=None,
+        ),
+        inputReferenceVolume=dict(
+            argstr='--inputReferenceVolume %s',
+            extensions=None,
+        ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         outputAffineTransform=dict(
             argstr='--outputAffineTransform %s',
@@ -31,8 +43,8 @@ def test_BRAINSLmkTransform_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BRAINSLmkTransform_outputs():
     output_map = dict(
-        outputAffineTransform=dict(),
-        outputResampledVolume=dict(),
+        outputAffineTransform=dict(extensions=None, ),
+        outputResampledVolume=dict(extensions=None, ),
     )
     outputs = BRAINSLmkTransform.output_spec()
 

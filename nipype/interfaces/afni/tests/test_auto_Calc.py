@@ -17,24 +17,31 @@ def test_Calc_inputs():
         ),
         in_file_a=dict(
             argstr='-a %s',
+            extensions=None,
             mandatory=True,
             position=0,
         ),
         in_file_b=dict(
             argstr='-b %s',
+            extensions=None,
             position=1,
         ),
         in_file_c=dict(
             argstr='-c %s',
+            extensions=None,
             position=2,
         ),
         num_threads=dict(
             nohash=True,
             usedefault=True,
         ),
-        other=dict(argstr='', ),
+        other=dict(
+            argstr='',
+            extensions=None,
+        ),
         out_file=dict(
             argstr='-prefix %s',
+            extensions=None,
             name_source='in_file_a',
             name_template='%s_calc',
         ),
@@ -50,7 +57,7 @@ def test_Calc_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Calc_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = Calc.output_spec()
 
     for key, metadata in list(output_map.items()):

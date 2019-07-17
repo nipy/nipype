@@ -6,7 +6,10 @@ from ..misc import CalculateNormalizedMoments
 def test_CalculateNormalizedMoments_inputs():
     input_map = dict(
         moment=dict(mandatory=True, ),
-        timeseries_file=dict(mandatory=True, ),
+        timeseries_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
     )
     inputs = CalculateNormalizedMoments.input_spec()
 

@@ -13,17 +13,23 @@ def test_DTIFit_inputs():
         ),
         bvals=dict(
             argstr='-b %s',
+            extensions=None,
             mandatory=True,
             position=4,
         ),
         bvecs=dict(
             argstr='-r %s',
+            extensions=None,
             mandatory=True,
             position=3,
         ),
-        cni=dict(argstr='--cni=%s', ),
+        cni=dict(
+            argstr='--cni=%s',
+            extensions=None,
+        ),
         dwi=dict(
             argstr='-k %s',
+            extensions=None,
             mandatory=True,
             position=0,
         ),
@@ -31,10 +37,14 @@ def test_DTIFit_inputs():
             nohash=True,
             usedefault=True,
         ),
-        gradnonlin=dict(argstr='--gradnonlin=%s', ),
+        gradnonlin=dict(
+            argstr='--gradnonlin=%s',
+            extensions=None,
+        ),
         little_bit=dict(argstr='--littlebit', ),
         mask=dict(
             argstr='-m %s',
+            extensions=None,
             mandatory=True,
             position=2,
         ),
@@ -55,18 +65,18 @@ def test_DTIFit_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DTIFit_outputs():
     output_map = dict(
-        FA=dict(),
-        L1=dict(),
-        L2=dict(),
-        L3=dict(),
-        MD=dict(),
-        MO=dict(),
-        S0=dict(),
-        V1=dict(),
-        V2=dict(),
-        V3=dict(),
-        sse=dict(),
-        tensor=dict(),
+        FA=dict(extensions=None, ),
+        L1=dict(extensions=None, ),
+        L2=dict(extensions=None, ),
+        L3=dict(extensions=None, ),
+        MD=dict(extensions=None, ),
+        MO=dict(extensions=None, ),
+        S0=dict(extensions=None, ),
+        V1=dict(extensions=None, ),
+        V2=dict(extensions=None, ),
+        V3=dict(extensions=None, ),
+        sse=dict(extensions=None, ),
+        tensor=dict(extensions=None, ),
     )
     outputs = DTIFit.output_spec()
 

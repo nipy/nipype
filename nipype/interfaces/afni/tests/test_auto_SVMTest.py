@@ -13,6 +13,7 @@ def test_SVMTest_inputs():
         ),
         in_file=dict(
             argstr='-testvol %s',
+            extensions=None,
             mandatory=True,
         ),
         model=dict(
@@ -29,10 +30,14 @@ def test_SVMTest_inputs():
         options=dict(argstr='%s', ),
         out_file=dict(
             argstr='-predictions %s',
+            extensions=None,
             name_template='%s_predictions',
         ),
         outputtype=dict(),
-        testlabels=dict(argstr='-testlabels %s', ),
+        testlabels=dict(
+            argstr='-testlabels %s',
+            extensions=None,
+        ),
     )
     inputs = SVMTest.input_spec()
 
@@ -40,7 +45,7 @@ def test_SVMTest_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SVMTest_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = SVMTest.output_spec()
 
     for key, metadata in list(output_map.items()):

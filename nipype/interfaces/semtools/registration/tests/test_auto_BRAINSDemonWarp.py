@@ -19,14 +19,25 @@ def test_BRAINSDemonWarp_inputs():
             nohash=True,
             usedefault=True,
         ),
-        fixedBinaryVolume=dict(argstr='--fixedBinaryVolume %s', ),
-        fixedVolume=dict(argstr='--fixedVolume %s', ),
+        fixedBinaryVolume=dict(
+            argstr='--fixedBinaryVolume %s',
+            extensions=None,
+        ),
+        fixedVolume=dict(
+            argstr='--fixedVolume %s',
+            extensions=None,
+        ),
         gradient_type=dict(argstr='--gradient_type %s', ),
         gui=dict(argstr='--gui ', ),
         histogramMatch=dict(argstr='--histogramMatch ', ),
         initializeWithDisplacementField=dict(
-            argstr='--initializeWithDisplacementField %s', ),
-        initializeWithTransform=dict(argstr='--initializeWithTransform %s', ),
+            argstr='--initializeWithDisplacementField %s',
+            extensions=None,
+        ),
+        initializeWithTransform=dict(
+            argstr='--initializeWithTransform %s',
+            extensions=None,
+        ),
         inputPixelType=dict(argstr='--inputPixelType %s', ),
         interpolationMode=dict(argstr='--interpolationMode %s', ),
         lowerThresholdForBOBF=dict(argstr='--lowerThresholdForBOBF %d', ),
@@ -44,8 +55,14 @@ def test_BRAINSDemonWarp_inputs():
             argstr='--minimumMovingPyramid %s',
             sep=',',
         ),
-        movingBinaryVolume=dict(argstr='--movingBinaryVolume %s', ),
-        movingVolume=dict(argstr='--movingVolume %s', ),
+        movingBinaryVolume=dict(
+            argstr='--movingBinaryVolume %s',
+            extensions=None,
+        ),
+        movingVolume=dict(
+            argstr='--movingVolume %s',
+            extensions=None,
+        ),
         neighborhoodForBOBF=dict(
             argstr='--neighborhoodForBOBF %s',
             sep=',',
@@ -92,9 +109,9 @@ def test_BRAINSDemonWarp_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BRAINSDemonWarp_outputs():
     output_map = dict(
-        outputCheckerboardVolume=dict(),
-        outputDisplacementFieldVolume=dict(),
-        outputVolume=dict(),
+        outputCheckerboardVolume=dict(extensions=None, ),
+        outputDisplacementFieldVolume=dict(extensions=None, ),
+        outputVolume=dict(extensions=None, ),
     )
     outputs = BRAINSDemonWarp.output_spec()
 
