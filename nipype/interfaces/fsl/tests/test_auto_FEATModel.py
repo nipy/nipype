@@ -19,6 +19,7 @@ def test_FEATModel_inputs():
         fsf_file=dict(
             argstr='%s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=0,
         ),
@@ -31,11 +32,11 @@ def test_FEATModel_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FEATModel_outputs():
     output_map = dict(
-        con_file=dict(),
-        design_cov=dict(),
-        design_file=dict(),
-        design_image=dict(),
-        fcon_file=dict(),
+        con_file=dict(extensions=None, ),
+        design_cov=dict(extensions=None, ),
+        design_file=dict(extensions=None, ),
+        design_image=dict(extensions=None, ),
+        fcon_file=dict(extensions=None, ),
     )
     outputs = FEATModel.output_spec()
 

@@ -12,16 +12,19 @@ def test_Jacobian_inputs():
         ),
         in_mappedsurf=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
         in_origsurf=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-3,
         ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             hash_files=False,
             keep_extension=False,
             name_source=['in_origsurf'],
@@ -36,7 +39,7 @@ def test_Jacobian_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Jacobian_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = Jacobian.output_spec()
 
     for key, metadata in list(output_map.items()):

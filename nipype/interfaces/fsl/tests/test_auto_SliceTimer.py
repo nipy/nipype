@@ -6,8 +6,14 @@ from ..preprocess import SliceTimer
 def test_SliceTimer_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        custom_order=dict(argstr='--ocustom=%s', ),
-        custom_timings=dict(argstr='--tcustom=%s', ),
+        custom_order=dict(
+            argstr='--ocustom=%s',
+            extensions=None,
+        ),
+        custom_timings=dict(
+            argstr='--tcustom=%s',
+            extensions=None,
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -15,6 +21,7 @@ def test_SliceTimer_inputs():
         global_shift=dict(argstr='--tglobal', ),
         in_file=dict(
             argstr='--in=%s',
+            extensions=None,
             mandatory=True,
             position=0,
         ),
@@ -22,6 +29,7 @@ def test_SliceTimer_inputs():
         interleaved=dict(argstr='--odd', ),
         out_file=dict(
             argstr='--out=%s',
+            extensions=None,
             genfile=True,
             hash_files=False,
         ),
@@ -35,7 +43,7 @@ def test_SliceTimer_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SliceTimer_outputs():
-    output_map = dict(slice_time_corrected_file=dict(), )
+    output_map = dict(slice_time_corrected_file=dict(extensions=None, ), )
     outputs = SliceTimer.output_spec()
 
     for key, metadata in list(output_map.items()):

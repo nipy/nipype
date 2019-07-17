@@ -7,6 +7,7 @@ def test_CorticalThickness_inputs():
     input_map = dict(
         anatomical_image=dict(
             argstr='-a %s',
+            extensions=None,
             mandatory=True,
         ),
         args=dict(argstr='%s', ),
@@ -14,13 +15,15 @@ def test_CorticalThickness_inputs():
         brain_probability_mask=dict(
             argstr='-m %s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
         ),
         brain_template=dict(
             argstr='-e %s',
+            extensions=None,
             mandatory=True,
         ),
-        cortical_label_image=dict(),
+        cortical_label_image=dict(extensions=None, ),
         debug=dict(argstr='-z 1', ),
         dimension=dict(
             argstr='-d %d',
@@ -30,7 +33,10 @@ def test_CorticalThickness_inputs():
             nohash=True,
             usedefault=True,
         ),
-        extraction_registration_mask=dict(argstr='-f %s', ),
+        extraction_registration_mask=dict(
+            argstr='-f %s',
+            extensions=None,
+        ),
         image_suffix=dict(
             argstr='-s %s',
             usedefault=True,
@@ -56,6 +62,7 @@ def test_CorticalThickness_inputs():
         ),
         t1_registration_template=dict(
             argstr='-t %s',
+            extensions=None,
             mandatory=True,
         ),
         use_floatingpoint_precision=dict(argstr='-j %d', ),
@@ -68,19 +75,19 @@ def test_CorticalThickness_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_CorticalThickness_outputs():
     output_map = dict(
-        BrainExtractionMask=dict(),
-        BrainSegmentation=dict(),
-        BrainSegmentationN4=dict(),
+        BrainExtractionMask=dict(extensions=None, ),
+        BrainSegmentation=dict(extensions=None, ),
+        BrainSegmentationN4=dict(extensions=None, ),
         BrainSegmentationPosteriors=dict(),
-        BrainVolumes=dict(),
-        CorticalThickness=dict(),
-        CorticalThicknessNormedToTemplate=dict(),
-        ExtractedBrainN4=dict(),
-        SubjectToTemplate0GenericAffine=dict(),
-        SubjectToTemplate1Warp=dict(),
-        SubjectToTemplateLogJacobian=dict(),
-        TemplateToSubject0Warp=dict(),
-        TemplateToSubject1GenericAffine=dict(),
+        BrainVolumes=dict(extensions=None, ),
+        CorticalThickness=dict(extensions=None, ),
+        CorticalThicknessNormedToTemplate=dict(extensions=None, ),
+        ExtractedBrainN4=dict(extensions=None, ),
+        SubjectToTemplate0GenericAffine=dict(extensions=None, ),
+        SubjectToTemplate1Warp=dict(extensions=None, ),
+        SubjectToTemplateLogJacobian=dict(extensions=None, ),
+        TemplateToSubject0Warp=dict(extensions=None, ),
+        TemplateToSubject1GenericAffine=dict(extensions=None, ),
     )
     outputs = CorticalThickness.output_spec()
 

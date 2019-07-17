@@ -14,7 +14,10 @@ def test_Bfc_inputs():
         convergenceThreshold=dict(argstr='--eps %f', ),
         correctWholeVolume=dict(argstr='--extrapolate', ),
         correctedImagesOutputPrefix=dict(argstr='--prefix %s', ),
-        correctionScheduleFile=dict(argstr='--schedule %s', ),
+        correctionScheduleFile=dict(
+            argstr='--schedule %s',
+            extensions=None,
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -23,10 +26,12 @@ def test_Bfc_inputs():
         histogramType=dict(argstr='%s', ),
         inputMRIFile=dict(
             argstr='-i %s',
+            extensions=None,
             mandatory=True,
         ),
         inputMaskFile=dict(
             argstr='-m %s',
+            extensions=None,
             hash_files=False,
         ),
         intermediate_file_type=dict(argstr='%s', ),
@@ -41,15 +46,18 @@ def test_Bfc_inputs():
         ),
         outputBiasField=dict(
             argstr='--bias %s',
+            extensions=None,
             hash_files=False,
         ),
         outputMRIVolume=dict(
             argstr='-o %s',
+            extensions=None,
             genfile=True,
             hash_files=False,
         ),
         outputMaskedBiasField=dict(
             argstr='--maskedbias %s',
+            extensions=None,
             hash_files=False,
         ),
         splineLambda=dict(argstr='-w %f', ),
@@ -63,10 +71,10 @@ def test_Bfc_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Bfc_outputs():
     output_map = dict(
-        correctionScheduleFile=dict(),
-        outputBiasField=dict(),
-        outputMRIVolume=dict(),
-        outputMaskedBiasField=dict(),
+        correctionScheduleFile=dict(extensions=None, ),
+        outputBiasField=dict(extensions=None, ),
+        outputMRIVolume=dict(extensions=None, ),
+        outputMaskedBiasField=dict(extensions=None, ),
     )
     outputs = Bfc.output_spec()
 

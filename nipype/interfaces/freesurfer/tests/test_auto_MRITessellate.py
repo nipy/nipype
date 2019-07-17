@@ -12,6 +12,7 @@ def test_MRITessellate_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-3,
         ),
@@ -22,6 +23,7 @@ def test_MRITessellate_inputs():
         ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
@@ -35,7 +37,7 @@ def test_MRITessellate_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRITessellate_outputs():
-    output_map = dict(surface=dict(), )
+    output_map = dict(surface=dict(extensions=None, ), )
     outputs = MRITessellate.output_spec()
 
     for key, metadata in list(output_map.items()):

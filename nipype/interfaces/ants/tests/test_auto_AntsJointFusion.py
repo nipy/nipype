@@ -36,7 +36,10 @@ def test_AntsJointFusion_inputs():
             argstr='-e %s',
             requires=['exclusion_image'],
         ),
-        mask_image=dict(argstr='-x %s', ),
+        mask_image=dict(
+            argstr='-x %s',
+            extensions=None,
+        ),
         num_threads=dict(
             nohash=True,
             usedefault=True,
@@ -49,6 +52,7 @@ def test_AntsJointFusion_inputs():
         out_intensity_fusion_name_format=dict(argstr='', ),
         out_label_fusion=dict(
             argstr='%s',
+            extensions=None,
             hash_files=False,
         ),
         out_label_post_prob_name_format=dict(
@@ -88,7 +92,7 @@ def test_AntsJointFusion_outputs():
     output_map = dict(
         out_atlas_voting_weight_name_format=dict(),
         out_intensity_fusion_name_format=dict(),
-        out_label_fusion=dict(),
+        out_label_fusion=dict(extensions=None, ),
         out_label_post_prob_name_format=dict(),
     )
     outputs = AntsJointFusion.output_spec()

@@ -16,6 +16,7 @@ def test_AFNICommand_inputs():
         ),
         out_file=dict(
             argstr='-prefix %s',
+            extensions=None,
             name_source=['in_file'],
             name_template='%s_afni',
         ),

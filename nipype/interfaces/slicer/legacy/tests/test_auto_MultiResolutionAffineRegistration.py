@@ -12,13 +12,18 @@ def test_MultiResolutionAffineRegistration_inputs():
         ),
         fixedImage=dict(
             argstr='%s',
+            extensions=None,
             position=-2,
         ),
-        fixedImageMask=dict(argstr='--fixedImageMask %s', ),
+        fixedImageMask=dict(
+            argstr='--fixedImageMask %s',
+            extensions=None,
+        ),
         fixedImageROI=dict(argstr='--fixedImageROI %s', ),
         metricTolerance=dict(argstr='--metricTolerance %f', ),
         movingImage=dict(
             argstr='%s',
+            extensions=None,
             position=-1,
         ),
         numIterations=dict(argstr='--numIterations %d', ),
@@ -41,8 +46,8 @@ def test_MultiResolutionAffineRegistration_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MultiResolutionAffineRegistration_outputs():
     output_map = dict(
-        resampledImage=dict(),
-        saveTransform=dict(),
+        resampledImage=dict(extensions=None, ),
+        saveTransform=dict(extensions=None, ),
     )
     outputs = MultiResolutionAffineRegistration.output_spec()
 

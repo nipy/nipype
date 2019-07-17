@@ -12,6 +12,7 @@ def test_ApplyWarp_inputs():
         ),
         moving_image=dict(
             argstr='-in %s',
+            extensions=None,
             mandatory=True,
         ),
         num_threads=dict(
@@ -26,6 +27,7 @@ def test_ApplyWarp_inputs():
         ),
         transform_file=dict(
             argstr='-tp %s',
+            extensions=None,
             mandatory=True,
         ),
     )
@@ -35,7 +37,7 @@ def test_ApplyWarp_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ApplyWarp_outputs():
-    output_map = dict(warped_file=dict(), )
+    output_map = dict(warped_file=dict(extensions=None, ), )
     outputs = ApplyWarp.output_spec()
 
     for key, metadata in list(output_map.items()):

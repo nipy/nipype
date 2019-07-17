@@ -37,6 +37,7 @@ def test_DTLUTGen_inputs():
         ),
         scheme_file=dict(
             argstr='-schemefile %s',
+            extensions=None,
             mandatory=True,
             position=2,
         ),
@@ -60,7 +61,7 @@ def test_DTLUTGen_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DTLUTGen_outputs():
-    output_map = dict(dtLUT=dict(), )
+    output_map = dict(dtLUT=dict(extensions=None, ), )
     outputs = DTLUTGen.output_spec()
 
     for key, metadata in list(output_map.items()):

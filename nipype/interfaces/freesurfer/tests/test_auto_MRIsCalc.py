@@ -17,11 +17,13 @@ def test_MRIsCalc_inputs():
         ),
         in_file1=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-3,
         ),
         in_file2=dict(
             argstr='%s',
+            extensions=None,
             position=-1,
             xor=['in_float', 'in_int'],
         ),
@@ -37,6 +39,7 @@ def test_MRIsCalc_inputs():
         ),
         out_file=dict(
             argstr='-o %s',
+            extensions=None,
             mandatory=True,
         ),
         subjects_dir=dict(),
@@ -47,7 +50,7 @@ def test_MRIsCalc_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRIsCalc_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = MRIsCalc.output_spec()
 
     for key, metadata in list(output_map.items()):

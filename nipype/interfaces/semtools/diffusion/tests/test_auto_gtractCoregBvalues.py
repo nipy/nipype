@@ -12,11 +12,17 @@ def test_gtractCoregBvalues_inputs():
             nohash=True,
             usedefault=True,
         ),
-        fixedVolume=dict(argstr='--fixedVolume %s', ),
+        fixedVolume=dict(
+            argstr='--fixedVolume %s',
+            extensions=None,
+        ),
         fixedVolumeIndex=dict(argstr='--fixedVolumeIndex %d', ),
         maximumStepSize=dict(argstr='--maximumStepSize %f', ),
         minimumStepSize=dict(argstr='--minimumStepSize %f', ),
-        movingVolume=dict(argstr='--movingVolume %s', ),
+        movingVolume=dict(
+            argstr='--movingVolume %s',
+            extensions=None,
+        ),
         numberOfIterations=dict(argstr='--numberOfIterations %d', ),
         numberOfSpatialSamples=dict(argstr='--numberOfSpatialSamples %d', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
@@ -40,8 +46,8 @@ def test_gtractCoregBvalues_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_gtractCoregBvalues_outputs():
     output_map = dict(
-        outputTransform=dict(),
-        outputVolume=dict(),
+        outputTransform=dict(extensions=None, ),
+        outputVolume=dict(extensions=None, ),
     )
     outputs = gtractCoregBvalues.output_spec()
 

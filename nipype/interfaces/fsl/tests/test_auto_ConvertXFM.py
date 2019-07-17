@@ -24,11 +24,13 @@ def test_ConvertXFM_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-1,
         ),
         in_file2=dict(
             argstr='%s',
+            extensions=None,
             position=-2,
         ),
         invert_xfm=dict(
@@ -38,6 +40,7 @@ def test_ConvertXFM_inputs():
         ),
         out_file=dict(
             argstr='-omat %s',
+            extensions=None,
             genfile=True,
             hash_files=False,
             position=1,
@@ -50,7 +53,7 @@ def test_ConvertXFM_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ConvertXFM_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = ConvertXFM.output_spec()
 
     for key, metadata in list(output_map.items()):

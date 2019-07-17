@@ -7,6 +7,7 @@ def test_FieldMap_inputs():
     input_map = dict(
         anat_file=dict(
             copyfile=False,
+            extensions=None,
             field='subj.anat',
         ),
         blip_direction=dict(
@@ -19,6 +20,7 @@ def test_FieldMap_inputs():
         ),
         epi_file=dict(
             copyfile=False,
+            extensions=None,
             field='subj.session.epi',
             mandatory=True,
         ),
@@ -33,6 +35,7 @@ def test_FieldMap_inputs():
         jobtype=dict(usedefault=True, ),
         magnitude_file=dict(
             copyfile=False,
+            extensions=None,
             field='subj.data.presubphasemag.magnitude',
             mandatory=True,
         ),
@@ -73,6 +76,7 @@ def test_FieldMap_inputs():
         paths=dict(),
         phase_file=dict(
             copyfile=False,
+            extensions=None,
             field='subj.data.presubphasemag.phase',
             mandatory=True,
         ),
@@ -86,6 +90,7 @@ def test_FieldMap_inputs():
         ),
         template=dict(
             copyfile=False,
+            extensions=None,
             field='subj.defaults.defaultsval.mflags.template',
         ),
         thresh=dict(
@@ -120,7 +125,7 @@ def test_FieldMap_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FieldMap_outputs():
-    output_map = dict(vdm=dict(), )
+    output_map = dict(vdm=dict(extensions=None, ), )
     outputs = FieldMap.output_spec()
 
     for key, metadata in list(output_map.items()):

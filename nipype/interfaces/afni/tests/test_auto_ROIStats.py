@@ -21,22 +21,28 @@ def test_ROIStats_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
         mask=dict(
             argstr='-mask %s',
             deprecated='1.1.4',
+            extensions=None,
             new_name='mask_file',
             position=3,
         ),
         mask_f2short=dict(argstr='-mask_f2short', ),
-        mask_file=dict(argstr='-mask %s', ),
+        mask_file=dict(
+            argstr='-mask %s',
+            extensions=None,
+        ),
         nobriklab=dict(argstr='-nobriklab', ),
         nomeanout=dict(argstr='-nomeanout', ),
         num_roi=dict(argstr='-numroi %s', ),
         out_file=dict(
             argstr='> %s',
+            extensions=None,
             keep_extension=False,
             name_source='in_file',
             name_template='%s_roistat.1D',
@@ -56,7 +62,7 @@ def test_ROIStats_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ROIStats_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = ROIStats.output_spec()
 
     for key, metadata in list(output_map.items()):

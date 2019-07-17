@@ -61,7 +61,7 @@ def test_buildtemplateparallel_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_buildtemplateparallel_outputs():
     output_map = dict(
-        final_template_file=dict(),
+        final_template_file=dict(extensions=None, ),
         subject_outfiles=dict(),
         template_files=dict(),
     )

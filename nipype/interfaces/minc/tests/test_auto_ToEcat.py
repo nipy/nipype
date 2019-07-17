@@ -21,12 +21,14 @@ def test_ToEcat_inputs():
         ignore_study_variable=dict(argstr='-ignore_study_variable', ),
         input_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
         no_decay_corr_fctr=dict(argstr='-no_decay_corr_fctr', ),
         output_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             hash_files=False,
             keep_extension=False,
@@ -42,7 +44,7 @@ def test_ToEcat_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ToEcat_outputs():
-    output_map = dict(output_file=dict(), )
+    output_map = dict(output_file=dict(extensions=None, ), )
     outputs = ToEcat.output_spec()
 
     for key, metadata in list(output_map.items()):

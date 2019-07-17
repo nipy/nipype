@@ -27,6 +27,7 @@ def test_Coregister_inputs():
         ),
         target=dict(
             copyfile=False,
+            extensions=['.hdr', '.img', '.img.gz', '.nii'],
             field='ref',
             mandatory=True,
         ),

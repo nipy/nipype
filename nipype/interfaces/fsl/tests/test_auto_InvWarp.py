@@ -16,6 +16,7 @@ def test_InvWarp_inputs():
         ),
         inverse_warp=dict(
             argstr='--out=%s',
+            extensions=None,
             hash_files=False,
             name_source=['warp'],
             name_template='%s_inverse',
@@ -27,6 +28,7 @@ def test_InvWarp_inputs():
         output_type=dict(),
         reference=dict(
             argstr='--ref=%s',
+            extensions=None,
             mandatory=True,
         ),
         regularise=dict(argstr='--regularise=%f', ),
@@ -36,6 +38,7 @@ def test_InvWarp_inputs():
         ),
         warp=dict(
             argstr='--warp=%s',
+            extensions=None,
             mandatory=True,
         ),
     )
@@ -45,7 +48,7 @@ def test_InvWarp_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_InvWarp_outputs():
-    output_map = dict(inverse_warp=dict(), )
+    output_map = dict(inverse_warp=dict(extensions=None, ), )
     outputs = InvWarp.output_spec()
 
     for key, metadata in list(output_map.items()):

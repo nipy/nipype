@@ -12,6 +12,7 @@ def test_MPRtoMNI305_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             usedefault=True,
         ),
         reference_dir=dict(
@@ -31,8 +32,11 @@ def test_MPRtoMNI305_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MPRtoMNI305_outputs():
     output_map = dict(
-        log_file=dict(usedefault=True, ),
-        out_file=dict(),
+        log_file=dict(
+            extensions=None,
+            usedefault=True,
+        ),
+        out_file=dict(extensions=None, ),
     )
     outputs = MPRtoMNI305.output_spec()
 

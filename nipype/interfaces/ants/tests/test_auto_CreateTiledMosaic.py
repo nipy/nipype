@@ -15,9 +15,13 @@ def test_CreateTiledMosaic_inputs():
         flip_slice=dict(argstr='-f %s', ),
         input_image=dict(
             argstr='-i %s',
+            extensions=None,
             mandatory=True,
         ),
-        mask_image=dict(argstr='-x %s', ),
+        mask_image=dict(
+            argstr='-x %s',
+            extensions=None,
+        ),
         num_threads=dict(
             nohash=True,
             usedefault=True,
@@ -30,6 +34,7 @@ def test_CreateTiledMosaic_inputs():
         permute_axes=dict(argstr='-g', ),
         rgb_image=dict(
             argstr='-r %s',
+            extensions=None,
             mandatory=True,
         ),
         slices=dict(argstr='-s %s', ),
@@ -41,7 +46,7 @@ def test_CreateTiledMosaic_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_CreateTiledMosaic_outputs():
-    output_map = dict(output_image=dict(), )
+    output_map = dict(output_image=dict(extensions=None, ), )
     outputs = CreateTiledMosaic.output_spec()
 
     for key, metadata in list(output_map.items()):

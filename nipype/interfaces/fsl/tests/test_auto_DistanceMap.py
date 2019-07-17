@@ -8,6 +8,7 @@ def test_DistanceMap_inputs():
         args=dict(argstr='%s', ),
         distance_map=dict(
             argstr='--out=%s',
+            extensions=None,
             genfile=True,
             hash_files=False,
         ),
@@ -17,6 +18,7 @@ def test_DistanceMap_inputs():
         ),
         in_file=dict(
             argstr='--in=%s',
+            extensions=None,
             mandatory=True,
         ),
         invert_input=dict(argstr='--invert', ),
@@ -24,7 +26,10 @@ def test_DistanceMap_inputs():
             argstr='--localmax=%s',
             hash_files=False,
         ),
-        mask_file=dict(argstr='--mask=%s', ),
+        mask_file=dict(
+            argstr='--mask=%s',
+            extensions=None,
+        ),
         output_type=dict(),
     )
     inputs = DistanceMap.input_spec()
@@ -34,8 +39,8 @@ def test_DistanceMap_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DistanceMap_outputs():
     output_map = dict(
-        distance_map=dict(),
-        local_max_file=dict(),
+        distance_map=dict(extensions=None, ),
+        local_max_file=dict(extensions=None, ),
     )
     outputs = DistanceMap.output_spec()
 

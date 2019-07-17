@@ -14,21 +14,27 @@ def test_Hist_inputs():
         in_file=dict(
             argstr='-input %s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=1,
         ),
-        mask=dict(argstr='-mask %s', ),
+        mask=dict(
+            argstr='-mask %s',
+            extensions=None,
+        ),
         max_value=dict(argstr='-max %f', ),
         min_value=dict(argstr='-min %f', ),
         nbin=dict(argstr='-nbin %d', ),
         out_file=dict(
             argstr='-prefix %s',
+            extensions=None,
             keep_extension=False,
             name_source=['in_file'],
             name_template='%s_hist',
         ),
         out_show=dict(
             argstr='> %s',
+            extensions=None,
             keep_extension=False,
             name_source='in_file',
             name_template='%s_hist.out',
@@ -46,8 +52,8 @@ def test_Hist_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Hist_outputs():
     output_map = dict(
-        out_file=dict(),
-        out_show=dict(),
+        out_file=dict(extensions=None, ),
+        out_show=dict(extensions=None, ),
     )
     outputs = Hist.output_spec()
 

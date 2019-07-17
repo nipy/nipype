@@ -9,11 +9,13 @@ def test_CurvatureStats_inputs():
         copy_inputs=dict(),
         curvfile1=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
         curvfile2=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-1,
         ),
@@ -29,6 +31,7 @@ def test_CurvatureStats_inputs():
         min_max=dict(argstr='-m', ),
         out_file=dict(
             argstr='-o %s',
+            extensions=None,
             hash_files=False,
             name_source=['hemisphere'],
             name_template='%s.curv.stats',
@@ -40,7 +43,10 @@ def test_CurvatureStats_inputs():
             usedefault=True,
         ),
         subjects_dir=dict(),
-        surface=dict(argstr='-F %s', ),
+        surface=dict(
+            argstr='-F %s',
+            extensions=None,
+        ),
         values=dict(argstr='-G', ),
         write=dict(argstr='--writeCurvatureFiles', ),
     )
@@ -50,7 +56,7 @@ def test_CurvatureStats_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_CurvatureStats_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = CurvatureStats.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -23,28 +23,34 @@ def test_DTITracker_inputs():
         invert_z=dict(argstr='-iz', ),
         mask1_file=dict(
             argstr='-m %s',
+            extensions=None,
             mandatory=True,
             position=2,
         ),
         mask1_threshold=dict(position=3, ),
         mask2_file=dict(
             argstr='-m2 %s',
+            extensions=None,
             position=4,
         ),
         mask2_threshold=dict(position=5, ),
         output_file=dict(
             argstr='%s',
+            extensions=None,
             position=1,
             usedefault=True,
         ),
-        output_mask=dict(argstr='-om %s', ),
+        output_mask=dict(
+            argstr='-om %s',
+            extensions=None,
+        ),
         primary_vector=dict(argstr='-%s', ),
         random_seed=dict(argstr='-rseed %d', ),
         step_length=dict(argstr='-l %f', ),
         swap_xy=dict(argstr='-sxy', ),
         swap_yz=dict(argstr='-syz', ),
         swap_zx=dict(argstr='-szx', ),
-        tensor_file=dict(),
+        tensor_file=dict(extensions=None, ),
         tracking_method=dict(argstr='-%s', ),
     )
     inputs = DTITracker.input_spec()
@@ -54,8 +60,8 @@ def test_DTITracker_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DTITracker_outputs():
     output_map = dict(
-        mask_file=dict(),
-        track_file=dict(),
+        mask_file=dict(extensions=None, ),
+        track_file=dict(extensions=None, ),
     )
     outputs = DTITracker.output_spec()
 

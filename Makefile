@@ -56,7 +56,7 @@ inplace:
 	$(PYTHON) setup.py build_ext -i
 
 test-code: in
-	py.test --doctest-module nipype
+	py.test --doctest-modules nipype
 
 test-coverage: clean-tests in
 	py.test --doctest-modules --cov-config .coveragerc --cov=nipype nipype

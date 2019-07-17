@@ -41,11 +41,13 @@ def test_MeshFix_inputs():
         ),
         in_file1=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
         in_file2=dict(
             argstr='%s',
+            extensions=None,
             position=2,
         ),
         join_closest_components=dict(
@@ -60,6 +62,7 @@ def test_MeshFix_inputs():
         number_of_biggest_shells=dict(argstr='--shells %d', ),
         out_filename=dict(
             argstr='-o %s',
+            extensions=None,
             genfile=True,
         ),
         output_type=dict(usedefault=True, ),
@@ -94,7 +97,7 @@ def test_MeshFix_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MeshFix_outputs():
-    output_map = dict(mesh_file=dict(), )
+    output_map = dict(mesh_file=dict(extensions=None, ), )
     outputs = MeshFix.output_spec()
 
     for key, metadata in list(output_map.items()):

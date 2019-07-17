@@ -16,10 +16,12 @@ def test_Complex_inputs():
         ),
         complex_in_file=dict(
             argstr='%s',
+            extensions=None,
             position=2,
         ),
         complex_in_file2=dict(
             argstr='%s',
+            extensions=None,
             position=3,
         ),
         complex_merge=dict(
@@ -33,6 +35,7 @@ def test_Complex_inputs():
         ),
         complex_out_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             position=-3,
             xor=[
@@ -67,10 +70,12 @@ def test_Complex_inputs():
         ),
         imaginary_in_file=dict(
             argstr='%s',
+            extensions=None,
             position=3,
         ),
         imaginary_out_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             position=-3,
             xor=[
@@ -81,10 +86,12 @@ def test_Complex_inputs():
         ),
         magnitude_in_file=dict(
             argstr='%s',
+            extensions=None,
             position=2,
         ),
         magnitude_out_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             position=-4,
             xor=[
@@ -96,10 +103,12 @@ def test_Complex_inputs():
         output_type=dict(),
         phase_in_file=dict(
             argstr='%s',
+            extensions=None,
             position=3,
         ),
         phase_out_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             position=-3,
             xor=[
@@ -118,10 +127,12 @@ def test_Complex_inputs():
         ),
         real_in_file=dict(
             argstr='%s',
+            extensions=None,
             position=2,
         ),
         real_out_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             position=-4,
             xor=[
@@ -150,11 +161,11 @@ def test_Complex_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Complex_outputs():
     output_map = dict(
-        complex_out_file=dict(),
-        imaginary_out_file=dict(),
-        magnitude_out_file=dict(),
-        phase_out_file=dict(),
-        real_out_file=dict(),
+        complex_out_file=dict(extensions=None, ),
+        imaginary_out_file=dict(extensions=None, ),
+        magnitude_out_file=dict(extensions=None, ),
+        phase_out_file=dict(extensions=None, ),
+        real_out_file=dict(extensions=None, ),
     )
     outputs = Complex.output_spec()
 

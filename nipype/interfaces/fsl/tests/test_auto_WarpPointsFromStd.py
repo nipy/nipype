@@ -20,23 +20,28 @@ def test_WarpPointsFromStd_inputs():
         ),
         img_file=dict(
             argstr='-img %s',
+            extensions=None,
             mandatory=True,
         ),
         in_coords=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
         std_file=dict(
             argstr='-std %s',
+            extensions=None,
             mandatory=True,
         ),
         warp_file=dict(
             argstr='-warp %s',
+            extensions=None,
             xor=['xfm_file'],
         ),
         xfm_file=dict(
             argstr='-xfm %s',
+            extensions=None,
             xor=['warp_file'],
         ),
     )
@@ -46,7 +51,7 @@ def test_WarpPointsFromStd_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_WarpPointsFromStd_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = WarpPointsFromStd.output_spec()
 
     for key, metadata in list(output_map.items()):

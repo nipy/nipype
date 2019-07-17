@@ -13,10 +13,12 @@ def test_AvScale_inputs():
         ),
         mat_file=dict(
             argstr='%s',
+            extensions=None,
             position=-2,
         ),
         ref_file=dict(
             argstr='%s',
+            extensions=None,
             position=-1,
         ),
     )

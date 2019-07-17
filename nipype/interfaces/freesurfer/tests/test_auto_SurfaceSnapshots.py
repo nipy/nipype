@@ -7,6 +7,7 @@ def test_SurfaceSnapshots_inputs():
     input_map = dict(
         annot_file=dict(
             argstr='-annotation %s',
+            extensions=None,
             xor=['annot_name'],
         ),
         annot_name=dict(
@@ -14,7 +15,10 @@ def test_SurfaceSnapshots_inputs():
             xor=['annot_file'],
         ),
         args=dict(argstr='%s', ),
-        colortable=dict(argstr='-colortable %s', ),
+        colortable=dict(
+            argstr='-colortable %s',
+            extensions=None,
+        ),
         demean_overlay=dict(argstr='-zm', ),
         environ=dict(
             nohash=True,
@@ -32,6 +36,7 @@ def test_SurfaceSnapshots_inputs():
         invert_overlay=dict(argstr='-invphaseflag 1', ),
         label_file=dict(
             argstr='-label %s',
+            extensions=None,
             xor=['label_name'],
         ),
         label_name=dict(
@@ -47,6 +52,7 @@ def test_SurfaceSnapshots_inputs():
         orig_suffix=dict(argstr='-orig %s', ),
         overlay=dict(
             argstr='-overlay %s',
+            extensions=None,
             requires=['overlay_range'],
         ),
         overlay_range=dict(argstr='%s', ),
@@ -55,7 +61,10 @@ def test_SurfaceSnapshots_inputs():
             argstr='-overlay-reg %s',
             xor=['overlay_reg', 'identity_reg', 'mni152_reg'],
         ),
-        patch_file=dict(argstr='-patch %s', ),
+        patch_file=dict(
+            argstr='-patch %s',
+            extensions=None,
+        ),
         reverse_overlay=dict(argstr='-revphaseflag 1', ),
         screenshot_stem=dict(),
         show_color_scale=dict(argstr='-colscalebarflag 1', ),
@@ -84,6 +93,7 @@ def test_SurfaceSnapshots_inputs():
         ),
         tcl_script=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
         ),
         truncate_overlay=dict(argstr='-truncphaseflag 1', ),

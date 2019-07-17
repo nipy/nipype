@@ -13,6 +13,7 @@ def test_SMM_inputs():
         mask=dict(
             argstr='--mask="%s"',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=1,
         ),
@@ -24,6 +25,7 @@ def test_SMM_inputs():
         spatial_data_file=dict(
             argstr='--sdf="%s"',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=0,
         ),
@@ -35,9 +37,9 @@ def test_SMM_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SMM_outputs():
     output_map = dict(
-        activation_p_map=dict(),
-        deactivation_p_map=dict(),
-        null_p_map=dict(),
+        activation_p_map=dict(extensions=None, ),
+        deactivation_p_map=dict(extensions=None, ),
+        null_p_map=dict(extensions=None, ),
     )
     outputs = SMM.output_spec()
 

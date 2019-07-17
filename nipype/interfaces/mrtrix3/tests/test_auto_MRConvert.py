@@ -19,12 +19,19 @@ def test_MRConvert_inputs():
             nohash=True,
             usedefault=True,
         ),
-        grad_file=dict(argstr='-grad %s', ),
+        grad_file=dict(
+            argstr='-grad %s',
+            extensions=None,
+        ),
         grad_fsl=dict(argstr='-fslgrad %s %s', ),
-        in_bval=dict(),
-        in_bvec=dict(argstr='-fslgrad %s %s', ),
+        in_bval=dict(extensions=None, ),
+        in_bvec=dict(
+            argstr='-fslgrad %s %s',
+            extensions=None,
+        ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
@@ -34,6 +41,7 @@ def test_MRConvert_inputs():
         ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-1,
             usedefault=True,
@@ -53,7 +61,7 @@ def test_MRConvert_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRConvert_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = MRConvert.output_spec()
 
     for key, metadata in list(output_map.items()):
