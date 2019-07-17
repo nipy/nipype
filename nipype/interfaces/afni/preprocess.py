@@ -3090,7 +3090,7 @@ class QwarpInputSpec(AFNICommandInputSpec):
         desc="""\
 Sets the prefix/suffix for the output datasets. \
 * The source dataset is warped to match the base \
-and gets prefix \'ppp\'. (Except if \'-plusminus\' is used.) \
+and gets prefix 'ppp'. (Except if '-plusminus' is used.)
 * The final interpolation to this output dataset is \
 done using the \'wsinc5\' method.  See the output of \
  3dAllineate -HELP \
