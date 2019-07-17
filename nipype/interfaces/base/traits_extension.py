@@ -135,7 +135,7 @@ class BasePath(TraitType):
             self.error(objekt, name, str(value))
 
         if self.exists:
-            if self.exists and not value.exists():
+            if not value.exists():
                 self.error(objekt, name, str(value))
 
             if self._is_file and not value.is_file():
