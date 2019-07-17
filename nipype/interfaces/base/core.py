@@ -33,12 +33,12 @@ from ... import config, logging, LooseVersion
 from ...utils.provenance import write_provenance
 from ...utils.misc import str2bool, rgetcwd
 from ...utils.filemanip import (FileNotFoundError, split_filename,
-                                which, get_dependencies)
+                                which, get_dependencies, Path)
 from ...utils.subprocess import run_command
 
 from ...external.due import due
 
-from .traits_extension import traits, isdefined
+from .traits_extension import traits, isdefined, BasePath
 from .specs import (BaseInterfaceInputSpec, CommandLineInputSpec,
                     StdOutCommandLineInputSpec, MpiCommandLineInputSpec,
                     get_filecopy_info)
@@ -110,7 +110,7 @@ class Interface(object):
         """Execute the command."""
         raise NotImplementedError
 
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+    def aggregate_outputs(self, runtime=None, needed_outputs=None, rebase_cwd=None):
         """Called to populate outputs"""
         raise NotImplementedError
 
@@ -204,10 +204,10 @@ class BaseInterface(Interface):
             ]
             if any(values) and isdefined(value):
                 if len(values) > 1:
-                    fmt = ("%s requires values for inputs %s because '%s' is set. " 
+                    fmt = ("%s requires values for inputs %s because '%s' is set. "
                            "For a list of required inputs, see %s.help()")
                 else:
-                    fmt = ("%s requires a value for input %s because '%s' is set. " 
+                    fmt = ("%s requires a value for input %s because '%s' is set. "
                            "For a list of required inputs, see %s.help()")
                 msg = fmt % (self.__class__.__name__,
                              ', '.join("'%s'" % req for req in spec.requires),
@@ -299,7 +299,7 @@ class BaseInterface(Interface):
             r['path'] = self.__module__
             due.cite(**r)
 
-    def run(self, cwd=None, ignore_exception=None, **inputs):
+    def run(self, cwd=None, ignore_exception=None, rebase_cwd=None, **inputs):
         """Execute this interface.
 
         This interface will not raise an exception if runtime.returncode is
@@ -326,6 +326,9 @@ class BaseInterface(Interface):
         syscwd = rgetcwd(error=False)  # Recover when wd does not exist
         if cwd is None:
             cwd = syscwd
+
+        if rebase_cwd:
+            rebase_cwd = cwd
 
         os.chdir(cwd)  # Change to the interface wd
 
@@ -375,7 +378,7 @@ class BaseInterface(Interface):
             runtime = self._pre_run_hook(runtime)
             runtime = self._run_interface(runtime)
             runtime = self._post_run_hook(runtime)
-            outputs = self.aggregate_outputs(runtime)
+            outputs = self.aggregate_outputs(runtime, rebase_cwd=rebase_cwd)
         except Exception as e:
             import traceback
             # Retrieve the maximum info fast
@@ -449,34 +452,47 @@ class BaseInterface(Interface):
         else:
             return None
 
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
-        """ Collate expected outputs and check for existence
-        """
+    def aggregate_outputs(self, runtime=None, needed_outputs=None, rebase_cwd=None):
+        """Collate expected outputs and check for existence."""
+        outputs = self._outputs()  # Generate an output spec object
+        if needed_outputs is not None and not needed_outputs:
+            return outputs
 
-        predicted_outputs = self._list_outputs()
-        outputs = self._outputs()
-        if predicted_outputs:
-            _unavailable_outputs = []
-            if outputs:
-                _unavailable_outputs = \
-                    self._check_version_requirements(self._outputs())
-            for key, val in list(predicted_outputs.items()):
-                if needed_outputs and key not in needed_outputs:
-                    continue
-                if key in _unavailable_outputs:
-                    raise KeyError(('Output trait %s not available in version '
-                                    '%s of interface %s. Please inform '
-                                    'developers.') % (key, self.version,
-                                                      self.__class__.__name__))
-                try:
-                    setattr(outputs, key, val)
-                except TraitError as error:
-                    if getattr(error, 'info',
-                               'default').startswith('an existing'):
-                        msg = ("File/Directory '%s' not found for %s output "
-                               "'%s'." % (val, self.__class__.__name__, key))
-                        raise FileNotFoundError(msg)
-                    raise error
+        predicted_outputs = self._list_outputs()  # Predictions from _list_outputs
+        if not predicted_outputs:
+            return outputs
+
+        # Precalculate the list of output trait names that should be
+        # aggregated
+        aggregate_names = set(predicted_outputs.keys())
+        if needed_outputs:
+            aggregate_names = set(needed_outputs).intersection(aggregate_names)
+
+        if outputs and aggregate_names:
+            _na_outputs = self._check_version_requirements(outputs)
+            na_names = aggregate_names.intersection(set(_na_outputs))
+            if na_names:
+                raise TypeError("""\
+Output trait(s) %s not available in version %s of interface %s.\
+""" % (', '.join(na_names), self.version, self.__class__.__name__))
+
+        for key in aggregate_names:
+            val = predicted_outputs[key]
+
+            # All the magic to fix #2944 resides here:
+            # TODO: test compounds/lists/tuples
+            if rebase_cwd and outputs.trait(key).is_trait_type(BasePath):
+                val = Path(val)
+                if val.is_absolute():
+                    val = Path(val).relative_to(rebase_cwd)
+            try:
+                setattr(outputs, key, val)
+            except TraitError as error:
+                if 'an existing' in getattr(error, 'info', 'default'):
+                    msg = "No such file or directory for output '%s' of a %s interface" % \
+                        (key, self.__class__.__name__)
+                    raise OSError(2, msg, val)
+                raise error
 
         return outputs
 

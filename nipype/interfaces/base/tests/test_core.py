@@ -10,6 +10,7 @@ import simplejson as json
 import pytest
 
 from .... import config
+from ....utils.filemanip import Path
 from ....testing import example_data
 from ... import base as nib
 from ..support import _inputs_help
@@ -289,7 +290,7 @@ def test_output_version():
             return {'foo': 1}
 
     obj = DerivedInterface1()
-    with pytest.raises(KeyError):
+    with pytest.raises(TypeError):
         obj.run()
 
 
@@ -529,3 +530,62 @@ def test_runtime_checks():
 
     with pytest.raises(RuntimeError):
         BrokenRuntime().run()
+
+
+def test_aggregate_outputs(tmpdir):
+    tmpdir.chdir()
+    b_value = '%s' % tmpdir.join('filename.txt')
+    c_value = '%s' % tmpdir.join('sub')
+
+    class TestInterface(nib.BaseInterface):
+        class input_spec(nib.TraitedSpec):
+            a = nib.traits.Any()
+        class output_spec(nib.TraitedSpec):
+            b = nib.File()
+            c = nib.Directory(exists=True)
+            d = nib.File()
+
+        def _list_outputs(self):
+            return {'b': b_value, 'c': c_value, 'd': './log.txt'}
+
+    # Test aggregate_outputs without needed_outputs
+    outputs = TestInterface().aggregate_outputs(needed_outputs=[])
+    assert outputs.b is nib.Undefined
+
+    # Test that only those in needed_outputs are returned
+    outputs = TestInterface().aggregate_outputs(
+        needed_outputs=['b', 'd'])
+    assert outputs.c is nib.Undefined
+    assert outputs.b == b_value
+    assert Path(outputs.b).is_absolute()
+    assert not Path(outputs.d).is_absolute()
+
+    # Test that traits are actually validated at aggregation
+    with pytest.raises(OSError):
+        outputs = TestInterface().aggregate_outputs(
+            needed_outputs=['b', 'c'], rebase_cwd='%s' % tmpdir)
+
+    # Test that rebase_cwd actually returns relative paths
+    tmpdir.mkdir('sub')
+    outputs = TestInterface().aggregate_outputs(rebase_cwd='%s' % tmpdir)
+
+    assert outputs.b == 'filename.txt'
+    assert not Path(outputs.b).is_absolute()
+    assert not Path(outputs.c).is_absolute()
+    assert not Path(outputs.d).is_absolute()
+
+
+def test_aggregate_outputs_compounds(tmpdir):
+    tmpdir.chdir()
+
+    class TestInterface(nib.BaseInterface):
+        class input_spec(nib.TraitedSpec):
+            a = nib.traits.Any()
+        class output_spec(nib.TraitedSpec):
+            b = nib.traits.Tuple(nib.File(), nib.File())
+            c = nib.List(nib.File())
+            d = nib.Either(nib.File(), nib.Float())
+            e = nib.OutputMultiObject(nib.File())
+
+        def _list_outputs(self):
+            return {'b': b_value, 'c': c_value, 'd': './log.txt'}
