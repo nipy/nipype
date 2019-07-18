@@ -43,10 +43,11 @@ PY3 = sys.version_info[0] >= 3
 class FileNotFoundError(OSError):  # noqa
     """Defines the exception for Python 2."""
 
-    def __init__(self, path):
+    def __init__(self, path, errno=2, message=None):
         """Initialize the exception."""
-        super(FileNotFoundError, self).__init__(
-            2, 'No such file or directory', '%s' % path)
+        message = message or 'No such file or directory'
+
+        super(FileNotFoundError, self).__init__(errno, message, '%s' % path)
 
 
 USING_PATHLIB2 = False

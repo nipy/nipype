@@ -30,6 +30,7 @@ from traits import __version__ as traits_version
 import traits.api as traits
 from traits.trait_handlers import TraitType, NoDefaultSpecified
 from traits.trait_base import _Undefined
+from traits.traits import _TraitMaker, trait_from
 
 from traits.api import Unicode
 from future import standard_library
@@ -304,6 +305,11 @@ class File(BasePath):
         return value
 
 
+# Patch in traits these two new
+traits.File = File
+traits.Directory = Directory
+
+
 class ImageFile(File):
     """Defines a trait whose value must be a known neuroimaging file."""
 
@@ -465,3 +471,71 @@ class InputMultiObject(MultiObject):
 
 InputMultiPath = InputMultiObject
 OutputMultiPath = OutputMultiObject
+
+
+class Tuple(traits.BaseTuple):
+    """Defines a new type of Tuple trait that reports inner types."""
+
+    def init_fast_validator(self, *args):
+        """Set up the C-level fast validator."""
+        super(Tuple, self).init_fast_validator(*args)
+        self.fast_validate = args
+
+    def inner_traits(self):
+        """Return the *inner trait* (or traits) for this trait."""
+        return self.types
+
+
+class PatchedEither(TraitType):
+    """Defines a trait whose value can be any of of a specified list of traits."""
+
+    def __init__(self, *traits, **metadata):
+        """Create a trait whose value can be any of of a specified list of traits."""
+        metadata['alternatives'] = tuple(trait_from(t) for t in traits)
+        self.trait_maker = _TraitMaker(
+            metadata.pop("default", None), *traits, **metadata)
+
+    def as_ctrait(self):
+        """Return a CTrait corresponding to the trait defined by this class."""
+        return self.trait_maker.as_ctrait()
+
+
+traits.Tuple = Tuple
+traits.Either = PatchedEither
+
+
+def rebase_path_traits(thistrait, value, cwd):
+    """Rebase a BasePath-derived trait given an interface spec."""
+    if thistrait.is_trait_type(BasePath):
+        try:
+            value = Path(value)
+        except TypeError:
+            pass
+        else:
+            try:
+                value = Path(value).relative_to(cwd)
+            except ValueError:
+                pass
+    elif thistrait.is_trait_type(traits.List):
+        innertrait, = thistrait.inner_traits
+        if not isinstance(value, (list, tuple)):
+            value = rebase_path_traits(innertrait, value, cwd)
+        else:
+            value = [rebase_path_traits(innertrait, v, cwd)
+                     for v in value]
+    elif thistrait.is_trait_type(traits.Dict):
+        _, innertrait = thistrait.inner_traits
+        value = {k: rebase_path_traits(innertrait, v, cwd)
+                 for k, v in value.items()}
+    elif thistrait.is_trait_type(Tuple):
+        value = tuple([rebase_path_traits(subtrait, v, cwd)
+                       for subtrait, v in zip(thistrait.inner_traits, value)])
+    elif thistrait.alternatives:
+        is_str = [f.is_trait_type((traits.String, traits.BaseStr, traits.BaseBytes, Str))
+                  for f in thistrait.alternatives]
+        print(is_str)
+        if any(is_str) and isinstance(value, (bytes, str)) and not value.startswith('/'):
+            return value
+        for subtrait in thistrait.alternatives:
+            value = rebase_path_traits(subtrait, value, cwd)
+    return value

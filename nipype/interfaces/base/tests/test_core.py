@@ -578,14 +578,29 @@ def test_aggregate_outputs(tmpdir):
 def test_aggregate_outputs_compounds(tmpdir):
     tmpdir.chdir()
 
+    outputs_dict = {
+        'b': tuple(['/some/folder/f%d.txt' % d
+                    for d in range(1, 3)]),
+        'c': ['/some/folder/f%d.txt' % d for d in range(1, 5)],
+        'd': 2.0,
+        'e': ['/some/folder/f%d.txt' % d for d in range(1, 4)]
+    }
+
     class TestInterface(nib.BaseInterface):
         class input_spec(nib.TraitedSpec):
             a = nib.traits.Any()
         class output_spec(nib.TraitedSpec):
-            b = nib.traits.Tuple(nib.File(), nib.File())
-            c = nib.List(nib.File())
-            d = nib.Either(nib.File(), nib.Float())
+            b = nib.traits.Tuple(nib.File(extensions=['.txt']),
+                                 nib.File(extensions=['.txt']))
+            c = nib.traits.List(nib.File())
+            d = nib.traits.Either(nib.File(), nib.traits.Float())
             e = nib.OutputMultiObject(nib.File())
 
         def _list_outputs(self):
-            return {'b': b_value, 'c': c_value, 'd': './log.txt'}
+            return outputs_dict
+
+    outputs = TestInterface().aggregate_outputs(rebase_cwd='%s' % tmpdir)
+    assert outputs.d == 2.0
+    assert outputs.b == ('f1.txt', 'f2.txt')
+    assert outputs.e == ['f%d.txt' % (d + 1)
+                         for d in range(len(outputs_dict['e']))]

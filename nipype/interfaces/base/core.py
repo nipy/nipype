@@ -32,13 +32,13 @@ from traits.trait_errors import TraitError
 from ... import config, logging, LooseVersion
 from ...utils.provenance import write_provenance
 from ...utils.misc import str2bool, rgetcwd
-from ...utils.filemanip import (FileNotFoundError, split_filename,
-                                which, get_dependencies, Path)
+from ...utils.filemanip import (split_filename, which, get_dependencies,
+                                FileNotFoundError)
 from ...utils.subprocess import run_command
 
 from ...external.due import due
 
-from .traits_extension import traits, isdefined, BasePath
+from .traits_extension import traits, isdefined, rebase_path_traits
 from .specs import (BaseInterfaceInputSpec, CommandLineInputSpec,
                     StdOutCommandLineInputSpec, MpiCommandLineInputSpec,
                     get_filecopy_info)
@@ -445,8 +445,7 @@ class BaseInterface(Interface):
         return results
 
     def _list_outputs(self):
-        """ List the expected outputs
-        """
+        """List the expected outputs."""
         if self.output_spec:
             raise NotImplementedError
         else:
@@ -480,18 +479,15 @@ Output trait(s) %s not available in version %s of interface %s.\
             val = predicted_outputs[key]
 
             # All the magic to fix #2944 resides here:
-            # TODO: test compounds/lists/tuples
-            if rebase_cwd and outputs.trait(key).is_trait_type(BasePath):
-                val = Path(val)
-                if val.is_absolute():
-                    val = Path(val).relative_to(rebase_cwd)
+            if rebase_cwd:
+                val = rebase_path_traits(outputs, key, val, rebase_cwd)
             try:
                 setattr(outputs, key, val)
             except TraitError as error:
                 if 'an existing' in getattr(error, 'info', 'default'):
                     msg = "No such file or directory for output '%s' of a %s interface" % \
                         (key, self.__class__.__name__)
-                    raise OSError(2, msg, val)
+                    raise FileNotFoundError(val, message=msg)
                 raise error
 
         return outputs
