@@ -480,7 +480,7 @@ Output trait(s) %s not available in version %s of interface %s.\
 
             # All the magic to fix #2944 resides here:
             if rebase_cwd:
-                val = rebase_path_traits(outputs, key, val, rebase_cwd)
+                val = rebase_path_traits(outputs.trait(key), val, rebase_cwd)
             try:
                 setattr(outputs, key, val)
             except TraitError as error:
