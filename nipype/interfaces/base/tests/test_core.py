@@ -575,9 +575,7 @@ def test_aggregate_outputs(tmpdir):
     assert not Path(outputs.d).is_absolute()
 
 
-def test_aggregate_outputs_compounds(tmpdir):
-    tmpdir.chdir()
-
+def test_aggregate_outputs_compounds():
     outputs_dict = {
         'b': tuple(['/some/folder/f%d.txt' % d
                     for d in range(1, 3)]),
@@ -599,7 +597,7 @@ def test_aggregate_outputs_compounds(tmpdir):
         def _list_outputs(self):
             return outputs_dict
 
-    outputs = TestInterface().aggregate_outputs(rebase_cwd='%s' % tmpdir)
+    outputs = TestInterface().aggregate_outputs(rebase_cwd='/some/folder')
     assert outputs.d == 2.0
     assert outputs.b == ('f1.txt', 'f2.txt')
     assert outputs.e == ['f%d.txt' % (d + 1)
