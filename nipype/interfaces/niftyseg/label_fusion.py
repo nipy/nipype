@@ -11,7 +11,7 @@ import warnings
 
 from ..base import (TraitedSpec, File, traits, isdefined, CommandLineInputSpec,
                     NipypeInterfaceError)
-from ..base.trats_extension import rebase_path_traits
+from ..base.traits_extension import rebase_path_traits
 from .base import NiftySegCommand
 from ..niftyreg.base import get_custom_path
 from ...utils.filemanip import load_json, save_json, split_filename
