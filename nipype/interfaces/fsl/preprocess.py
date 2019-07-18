@@ -661,9 +661,9 @@ class FLIRT(FSLCommand):
     output_spec = FLIRTOutputSpec
     _log_written = False
 
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+    def aggregate_outputs(self, runtime=None, needed_outputs=None, rebase_cwd=None):
         outputs = super(FLIRT, self).aggregate_outputs(
-            runtime=runtime, needed_outputs=needed_outputs)
+            runtime=runtime, needed_outputs=needed_outputs, rebase_cwd=rebase_cwd)
         if self.inputs.save_log and not self._log_written:
             with open(outputs.out_log, "a") as text_file:
                 text_file.write(runtime.stdout + '\n')

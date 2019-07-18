@@ -1031,8 +1031,9 @@ class ImageInfo(FSCommand):
         else:
             return None
 
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
-        outputs = self._outputs()
+    def aggregate_outputs(self, runtime=None, needed_outputs=None, rebase_cwd=None):
+        outputs = super(ImageInfo, self).aggregate_outputs(
+            runtime, needed_outputs, rebase_cwd)
         info = runtime.stdout
         outputs.info = info
 

@@ -2815,7 +2815,7 @@ class SegmentCC(FSCommand):
                 copy2subjdir(self, originalfile, folder='mri')
         return super(SegmentCC, self).run(**inputs)
 
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+    def aggregate_outputs(self, runtime=None, needed_outputs=None, rebase_cwd=None):
         # it is necessary to find the output files and move
         # them to the correct loacation
         predicted_outputs = self._list_outputs()
@@ -2842,7 +2842,7 @@ class SegmentCC(FSCommand):
                         os.makedirs(os.path.dirname(out_tmp))
                     shutil.move(out_tmp, out_file)
         return super(SegmentCC, self).aggregate_outputs(
-            runtime, needed_outputs)
+            runtime, needed_outputs, rebase_cwd)
 
 
 class SegmentWMInputSpec(FSTraitedSpec):

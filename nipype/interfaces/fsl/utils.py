@@ -777,8 +777,9 @@ class ImageStats(FSLCommand):
                         '-k %s option in op_string requires mask_file')
         return super(ImageStats, self)._format_arg(name, trait_spec, value)
 
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
-        outputs = self._outputs()
+    def aggregate_outputs(self, runtime=None, needed_outputs=None, rebase_cwd=None):
+        outputs = super(ImageStats, self).aggregate_outputs(
+            runtime, needed_outputs, rebase_cwd)
         # local caching for backward compatibility
         outfile = os.path.join(os.getcwd(), 'stat_result.json')
         if runtime is None:

@@ -717,11 +717,10 @@ fprintf('cluster_forming_thr = %f\\n',cluster_forming_thr);
 
         return script
 
-    def aggregate_outputs(self, runtime=None):
-        outputs = self._outputs()
-        setattr(outputs, 'thresholded_map',
-                self._gen_thresholded_map_filename())
-        setattr(outputs, 'pre_topo_fdr_map', self._gen_pre_topo_map_filename())
+    def aggregate_outputs(self, runtime=None, needed_outputs=None, rebase_cwd=None):
+        outputs = super(Threshold, self).aggregate_outputs(
+            runtime, needed_outputs, rebase_cwd)
+
         for line in runtime.stdout.split('\n'):
             if line.startswith("activation_forced = "):
                 setattr(outputs, 'activation_forced',
@@ -842,7 +841,7 @@ clusterwise_P_FDR = spm_P_clusterFDR(extent_threshold*V2R,df,STAT,R,n,cluster_fo
 """
         return script
 
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+    def aggregate_outputs(self, runtime=None, needed_outputs=None, rebase_cwd=None):
         outputs = self._outputs()
         cur_output = ""
         for line in runtime.stdout.split('\n'):

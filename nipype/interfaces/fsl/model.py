@@ -1820,7 +1820,7 @@ class SmoothEstimate(FSLCommand):
     output_spec = SmoothEstimateOutputSpec
     _cmd = 'smoothest'
 
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+    def aggregate_outputs(self, runtime=None, needed_outputs=None, rebase_cwd=None):
         outputs = self._outputs()
         stdout = runtime.stdout.split('\n')
         outputs.dlh = float(stdout[0].split()[1])

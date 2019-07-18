@@ -1487,7 +1487,7 @@ class MeasureImageSimilarity(ANTSCommand):
             return self._mask_constructor()
         return super(MeasureImageSimilarity, self)._format_arg(opt, spec, val)
 
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+    def aggregate_outputs(self, runtime=None, needed_outputs=None, rebase_cwd=None):
         outputs = self._outputs()
         stdout = runtime.stdout.split('\n')
         outputs.similarity = float(stdout[0])

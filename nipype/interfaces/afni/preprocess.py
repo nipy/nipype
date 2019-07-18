@@ -1000,7 +1000,7 @@ class ClipLevel(AFNICommandBase):
     input_spec = ClipLevelInputSpec
     output_spec = ClipLevelOutputSpec
 
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+    def aggregate_outputs(self, runtime=None, needed_outputs=None, rebase_cwd=None):
 
         outputs = self._outputs()
 
@@ -2115,21 +2115,15 @@ class Seg(AFNICommandBase):
     input_spec = SegInputSpec
     output_spec = AFNICommandOutputSpec
 
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+    def _list_outputs(self):
+        from nipype.utils.filemanip import Path
 
-        import glob
-
-        outputs = self._outputs()
-
+        prefix = 'Segsy'
         if isdefined(self.inputs.prefix):
-            outfile = os.path.join(os.getcwd(), self.inputs.prefix,
-                                   'Classes+*.BRIK')
-        else:
-            outfile = os.path.join(os.getcwd(), 'Segsy', 'Classes+*.BRIK')
+            prefix = self.inputs.prefix
 
-        outputs.out_file = glob.glob(outfile)[0]
-
-        return outputs
+        return {'out_file': str(
+            sorted(Path() / prefix).glob('Classes+*.BRIK')[0])}
 
 
 class SkullStripInputSpec(AFNICommandInputSpec):

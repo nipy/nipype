@@ -11,6 +11,7 @@ import warnings
 
 from ..base import (TraitedSpec, File, traits, isdefined, CommandLineInputSpec,
                     NipypeInterfaceError)
+from ..base.trats_extension import rebase_path_traits
 from .base import NiftySegCommand
 from ..niftyreg.base import get_custom_path
 from ...utils.filemanip import load_json, save_json, split_filename
@@ -314,7 +315,7 @@ class CalcTopNCC(NiftySegCommand):
     input_spec = CalcTopNCCInputSpec
     output_spec = CalcTopNCCOutputSpec
 
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+    def aggregate_outputs(self, runtime=None, needed_outputs=None, rebase_cwd=None):
         outputs = self._outputs()
         # local caching for backward compatibility
         outfile = os.path.join(os.getcwd(), 'CalcTopNCC.json')
@@ -335,5 +336,9 @@ class CalcTopNCC(NiftySegCommand):
             if len(out_files) == 1:
                 out_files = out_files[0]
             save_json(outfile, dict(files=out_files))
+
+        if rebase_cwd:
+            out_files = rebase_path_traits(outputs.trait('out_files'),
+                                           out_files, rebase_cwd)
         outputs.out_files = out_files
         return outputs
