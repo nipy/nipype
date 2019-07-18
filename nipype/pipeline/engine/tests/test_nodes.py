@@ -153,7 +153,7 @@ def test_mapnode_nested(tmpdir):
         Function(input_names=['in1'], output_names=['out'], function=func1),
         iterfield=['in1'],
         nested=False,
-        name='n1')
+        name='n2')
     n2.inputs.in1 = [[1, [2]], 3, [4, 5]]
 
     with pytest.raises(Exception) as excinfo:

@@ -25,6 +25,7 @@ from future import standard_library
 
 from ... import logging, config, LooseVersion
 from ...utils.filemanip import (
+    indirectory,
     relpath,
     makedirs,
     fname_presuffix,
@@ -40,7 +41,7 @@ from ...utils.filemanip import (
 )
 from ...utils.misc import str2bool
 from ...utils.functions import create_function_from_source
-from ...interfaces.base.traits_extension import resolve_path_traits
+from ...interfaces.base.traits_extension import rebase_path_traits, resolve_path_traits
 from ...interfaces.base import (Bunch, CommandLine, isdefined, Undefined,
                                 InterfaceResult, traits)
 from ...interfaces.utility import IdentityInterface
@@ -101,7 +102,6 @@ def nodelist_runner(nodes, updatehash=False, stop_first=False):
         except Exception:
             if stop_first:
                 raise
-
             result = node.result
             err = []
             if result.runtime and hasattr(result.runtime, 'traceback'):
@@ -189,7 +189,7 @@ def write_report(node, report_type=None, is_mapnode=False):
     # Init rst dictionary of runtime stats
     rst_dict = {
         'hostname': result.runtime.hostname,
-        'duration': result.runtime.duration,
+        'duration': getattr(result.runtime, 'duration', '<not-set>'),
         'working_dir': result.runtime.cwd,
         'prev_wd': getattr(result.runtime, 'prevcwd', '<not-set>'),
     }
@@ -293,85 +293,96 @@ def _protect_collapses(hastraits):
     return _uncollapse(hastraits.trait_get(), collapsed)
 
 
-def save_resultfile(result, cwd, name):
-    """Save a result pklz file to ``cwd``"""
+def save_resultfile(result, cwd, name, rebase=True):
+    """Save a result pklz file to ``cwd``."""
+    cwd = os.path.abspath(cwd)
     resultsfile = os.path.join(cwd, 'result_%s.pklz' % name)
     logger.debug("Saving results file: '%s'", resultsfile)
-    # if result.outputs:
-    #     try:
-    #         collapsed = _identify_collapses(result.outputs)
-    #         outputs = _uncollapse(result.outputs.trait_get(), collapsed)
-    #         # Double-protect tosave so that the original, uncollapsed trait
-    #         # is saved in the pickle file. Thus, when the loading process
-    #         # collapses, the original correct value is loaded.
-    #         tosave = _uncollapse(outputs.copy(), collapsed)
-    #     except AttributeError:
-    #         tosave = outputs = result.outputs.dictcopy()  # outputs was a bunch
 
-    savepkl(resultsfile, result)
-    if result.outputs:
-        pass
+    if result.outputs is None:
+        logger.warn('Storing result file without outputs')
+        savepkl(resultsfile, result)
+        return
 
-    # if result.outputs:
-    #     for k, v in list(outputs.items()):
-    #         setattr(result.outputs, k, v)
+    try:
+        outputs = result.outputs.trait_get()
+    except AttributeError:
+        logger.debug('Storing non-traited results, skipping rebase of paths')
+        savepkl(resultsfile, result)
+        return
+
+    try:
+        with indirectory(cwd):
+            # All the magic to fix #2944 resides here:
+            for key, val in list(outputs.items()):
+                val = rebase_path_traits(result.outputs.trait(key), val, cwd)
+                setattr(result.outputs, key, val)
+        savepkl(resultsfile, result)
+    finally:
+        # Reset resolved paths from the outputs dict no matter what
+        for key, val in list(outputs.items()):
+            setattr(result.outputs, key, val)
 
 
 def load_resultfile(path, name, resolve=True):
     """
-    Load InterfaceResult file from path
+    Load InterfaceResult file from path.
 
     Parameter
     ---------
-
     path : base_dir of node
     name : name of node
 
     Returns
     -------
-
     result : InterfaceResult structure
-    aggregate : boolean indicating whether node should aggregate_outputs
     attribute error : boolean indicating whether there was some mismatch in
         versions of traits used to store result and hence node needs to
         rerun
+
     """
-    aggregate = True
-    resultsoutputfile = os.path.join(path, 'result_%s.pklz' % name)
     result = None
     attribute_error = False
 
-    logger.info("Loading results file: '%s'", resultsoutputfile)
-    if os.path.exists(resultsoutputfile):
-        pkl_file = gzip.open(resultsoutputfile, 'rb')
+    if not os.path.exists(os.path.join(path, 'result_%s.pklz' % name)):
+        logger.warning("Error loading results file, no such file: '%s'",
+                       os.path.join(path, 'result_%s.pklz' % name))
+        return result, False
+
+    with indirectory(path):
+        pkl_file = gzip.open('result_%s.pklz' % name, 'rb')
         try:
             result = pickle.load(pkl_file)
         except UnicodeDecodeError:
             # Was this pickle created with Python 2.x?
-            pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
-            logger.warning('Successfully loaded pkl in compatibility mode')
-        except (traits.TraitError, AttributeError, ImportError,
-                EOFError) as err:
-            if isinstance(err, (AttributeError, ImportError)):
-                attribute_error = True
-                logger.debug('attribute error: %s probably using '
-                             'different trait pickled file', str(err))
-            else:
-                logger.debug(
-                    'some file does not exist. hence trait cannot be set')
-        else:
-            if result is not None and result.outputs:
-                aggregate = False
+            result = pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
+            logger.warning('Successfully loaded pkl in compatibility mode.')
+        except traits.TraitError as err:
+            logger.warning('Error restoring outputs while loading results.\n%s.',
+                           err)
+        except (AttributeError, ImportError, EOFError) as err:
+            attribute_error = True
+            logger.warning(
+                'Error loading results file (probably using different trait pickled file).\n%s',
+                err)
+        finally:
+            pkl_file.close()
 
-        if resolve and not aggregate:
-            for name in list(result.outputs.get().keys()):
-                value = getattr(result.outputs, name)
-                if isdefined(value):
-                    value = resolve_path_traits(result.outputs.trait(name),
-                                                value, path)
-        pkl_file.close()
-    logger.debug('Aggregate: %s', aggregate)
-    return result, aggregate, attribute_error
+    if result is None:
+        return result, attribute_error
+
+    if result.error:
+        return result, attribute_error
+
+    if result is not None and resolve:
+        outputs = result.outputs
+        for name in list(result.outputs.get().keys()):
+            old_value = getattr(outputs, name)
+            value = resolve_path_traits(outputs.trait(name), old_value, path)
+            setattr(outputs, name, value)
+        result.outputs = outputs
+
+    return result, attribute_error
 
 
 def strip_temp(files, wd):
@@ -1525,10 +1536,9 @@ def clean_working_directory(outputs,
     logger.debug('Removing files: %s', ';'.join(files2remove))
     for f in files2remove:
         os.remove(f)
-    for key in outputs.copyable_trait_names():
-        if key not in outputs_to_keep:
-            setattr(outputs, key, Undefined)
-    return outputs
+
+    unset_outputs = set(outputs.copyable_trait_names()) - set(outputs_to_keep)
+    return unset_outputs
 
 
 def merge_dict(d1, d2, merge=lambda x, y: y):

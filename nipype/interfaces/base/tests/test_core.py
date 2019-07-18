@@ -532,73 +532,73 @@ def test_runtime_checks():
         BrokenRuntime().run()
 
 
-def test_aggregate_outputs(tmpdir):
-    tmpdir.chdir()
-    b_value = '%s' % tmpdir.join('filename.txt')
-    c_value = '%s' % tmpdir.join('sub')
+# def test_aggregate_outputs(tmpdir):
+#     tmpdir.chdir()
+#     b_value = '%s' % tmpdir.join('filename.txt')
+#     c_value = '%s' % tmpdir.join('sub')
 
-    class TestInterface(nib.BaseInterface):
-        class input_spec(nib.TraitedSpec):
-            a = nib.traits.Any()
-        class output_spec(nib.TraitedSpec):
-            b = nib.File()
-            c = nib.Directory(exists=True)
-            d = nib.File()
+#     class TestInterface(nib.BaseInterface):
+#         class input_spec(nib.TraitedSpec):
+#             a = nib.traits.Any()
+#         class output_spec(nib.TraitedSpec):
+#             b = nib.File()
+#             c = nib.Directory(exists=True)
+#             d = nib.File()
 
-        def _list_outputs(self):
-            return {'b': b_value, 'c': c_value, 'd': './log.txt'}
+#         def _list_outputs(self):
+#             return {'b': b_value, 'c': c_value, 'd': './log.txt'}
 
-    # Test aggregate_outputs without needed_outputs
-    outputs = TestInterface().aggregate_outputs(needed_outputs=[])
-    assert outputs.b is nib.Undefined
+#     # Test aggregate_outputs without needed_outputs
+#     outputs = TestInterface().aggregate_outputs(needed_outputs=[])
+#     assert outputs.b is nib.Undefined
 
-    # Test that only those in needed_outputs are returned
-    outputs = TestInterface().aggregate_outputs(
-        needed_outputs=['b', 'd'])
-    assert outputs.c is nib.Undefined
-    assert outputs.b == b_value
-    assert Path(outputs.b).is_absolute()
-    assert not Path(outputs.d).is_absolute()
+#     # Test that only those in needed_outputs are returned
+#     outputs = TestInterface().aggregate_outputs(
+#         needed_outputs=['b', 'd'])
+#     assert outputs.c is nib.Undefined
+#     assert outputs.b == b_value
+#     assert Path(outputs.b).is_absolute()
+#     assert not Path(outputs.d).is_absolute()
 
-    # Test that traits are actually validated at aggregation
-    with pytest.raises(OSError):
-        outputs = TestInterface().aggregate_outputs(
-            needed_outputs=['b', 'c'], rebase_cwd='%s' % tmpdir)
+#     # Test that traits are actually validated at aggregation
+#     with pytest.raises(OSError):
+#         outputs = TestInterface().aggregate_outputs(
+#             needed_outputs=['b', 'c'], rebase_cwd='%s' % tmpdir)
 
-    # Test that rebase_cwd actually returns relative paths
-    tmpdir.mkdir('sub')
-    outputs = TestInterface().aggregate_outputs(rebase_cwd='%s' % tmpdir)
+#     # Test that rebase_cwd actually returns relative paths
+#     tmpdir.mkdir('sub')
+#     outputs = TestInterface().aggregate_outputs(rebase_cwd='%s' % tmpdir)
 
-    assert outputs.b == 'filename.txt'
-    assert not Path(outputs.b).is_absolute()
-    assert not Path(outputs.c).is_absolute()
-    assert not Path(outputs.d).is_absolute()
+#     assert outputs.b == 'filename.txt'
+#     assert not Path(outputs.b).is_absolute()
+#     assert not Path(outputs.c).is_absolute()
+#     assert not Path(outputs.d).is_absolute()
 
 
-def test_aggregate_outputs_compounds():
-    outputs_dict = {
-        'b': tuple(['/some/folder/f%d.txt' % d
-                    for d in range(1, 3)]),
-        'c': ['/some/folder/f%d.txt' % d for d in range(1, 5)],
-        'd': 2.0,
-        'e': ['/some/folder/f%d.txt' % d for d in range(1, 4)]
-    }
+# def test_aggregate_outputs_compounds():
+#     outputs_dict = {
+#         'b': tuple(['/some/folder/f%d.txt' % d
+#                     for d in range(1, 3)]),
+#         'c': ['/some/folder/f%d.txt' % d for d in range(1, 5)],
+#         'd': 2.0,
+#         'e': ['/some/folder/f%d.txt' % d for d in range(1, 4)]
+#     }
 
-    class TestInterface(nib.BaseInterface):
-        class input_spec(nib.TraitedSpec):
-            a = nib.traits.Any()
-        class output_spec(nib.TraitedSpec):
-            b = nib.traits.Tuple(nib.File(extensions=['.txt']),
-                                 nib.File(extensions=['.txt']))
-            c = nib.traits.List(nib.File())
-            d = nib.traits.Either(nib.File(), nib.traits.Float())
-            e = nib.OutputMultiObject(nib.File())
+#     class TestInterface(nib.BaseInterface):
+#         class input_spec(nib.TraitedSpec):
+#             a = nib.traits.Any()
+#         class output_spec(nib.TraitedSpec):
+#             b = nib.traits.Tuple(nib.File(extensions=['.txt']),
+#                                  nib.File(extensions=['.txt']))
+#             c = nib.traits.List(nib.File())
+#             d = nib.traits.Either(nib.File(), nib.traits.Float())
+#             e = nib.OutputMultiObject(nib.File())
 
-        def _list_outputs(self):
-            return outputs_dict
+#         def _list_outputs(self):
+#             return outputs_dict
 
-    outputs = TestInterface().aggregate_outputs(rebase_cwd='/some/folder')
-    assert outputs.d == 2.0
-    assert outputs.b == ('f1.txt', 'f2.txt')
-    assert outputs.e == ['f%d.txt' % (d + 1)
-                         for d in range(len(outputs_dict['e']))]
+#     outputs = TestInterface().aggregate_outputs(rebase_cwd='/some/folder')
+#     assert outputs.d == 2.0
+#     assert outputs.b == ('f1.txt', 'f2.txt')
+#     assert outputs.e == ['f%d.txt' % (d + 1)
+#                          for d in range(len(outputs_dict['e']))]

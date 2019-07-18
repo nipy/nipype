@@ -378,7 +378,7 @@ class BaseInterface(Interface):
             runtime = self._pre_run_hook(runtime)
             runtime = self._run_interface(runtime)
             runtime = self._post_run_hook(runtime)
-            outputs = self.aggregate_outputs(runtime, rebase_cwd=rebase_cwd)
+            outputs = self.aggregate_outputs(runtime)
         except Exception as e:
             import traceback
             # Retrieve the maximum info fast
@@ -451,7 +451,7 @@ class BaseInterface(Interface):
         else:
             return None
 
-    def aggregate_outputs(self, runtime=None, needed_outputs=None, rebase_cwd=None):
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
         """Collate expected outputs and check for existence."""
         outputs = self._outputs()  # Generate an output spec object
         if needed_outputs is not None and not needed_outputs:
@@ -477,10 +477,6 @@ Output trait(s) %s not available in version %s of interface %s.\
 
         for key in aggregate_names:
             val = predicted_outputs[key]
-
-            # All the magic to fix #2944 resides here:
-            if rebase_cwd:
-                val = rebase_path_traits(outputs.trait(key), val, rebase_cwd)
             try:
                 setattr(outputs, key, val)
             except TraitError as error:
@@ -489,7 +485,6 @@ Output trait(s) %s not available in version %s of interface %s.\
                         (key, self.__class__.__name__)
                     raise FileNotFoundError(val, message=msg)
                 raise error
-
         return outputs
 
     @property

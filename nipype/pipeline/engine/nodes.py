@@ -194,7 +194,7 @@ class Node(EngineBase):
     @property
     def result(self):
         """Get result from result file (do not hold it in memory)"""
-        return _load_resultfile(self.output_dir(), self.name)[0]
+        return self._load_results()
 
     @property
     def inputs(self):
@@ -483,6 +483,7 @@ directory. Please ensure no other concurrent workflows are racing""", hashfile_u
         # Tear-up after success
         shutil.move(hashfile_unfinished,
                     hashfile_unfinished.replace('_unfinished', ''))
+
         write_report(
             self, report_type='postexec', is_mapnode=isinstance(self, MapNode))
         logger.info('[Node] Finished "%s".', self.fullname)
@@ -564,14 +565,16 @@ Error populating the input "%s" of node "%s": the results file of the source nod
 
     def _load_results(self):
         cwd = self.output_dir()
-        result, aggregate, attribute_error = _load_resultfile(cwd, self.name)
+        is_mapnode = isinstance(self, MapNode)
+        result, attribute_error = _load_resultfile(
+            cwd, self.name, resolve=not is_mapnode)
         # try aggregating first
-        if aggregate:
+        if result is None:
             logger.debug('aggregating results')
             if attribute_error:
                 old_inputs = loadpkl(op.join(cwd, '_inputs.pklz'))
                 self.inputs.trait_set(**old_inputs)
-            if not isinstance(self, MapNode):
+            if not is_mapnode:
                 self._copyfiles_to_wd(linksonly=True)
                 aggouts = self._interface.aggregate_outputs(
                     needed_outputs=self.needed_outputs)
@@ -630,6 +633,7 @@ Error populating the input "%s" of node "%s": the results file of the source nod
                 with indirectory(outdir):
                     cmd = self._interface.cmdline
             except Exception as msg:
+                result.error = True
                 result.runtime.stderr = '{}\n\n{}'.format(
                     getattr(result.runtime, 'stderr', ''), msg)
                 _save_resultfile(result, outdir, self.name)
@@ -642,6 +646,7 @@ Error populating the input "%s" of node "%s": the results file of the source nod
         try:
             result = self._interface.run(cwd=outdir, rebase_cwd=True)
         except Exception as msg:
+            result.error = True
             result.runtime.stderr = '%s\n\n%s'.format(
                 getattr(result.runtime, 'stderr', ''), msg)
             _save_resultfile(result, outdir, self.name)
@@ -651,15 +656,18 @@ Error populating the input "%s" of node "%s": the results file of the source nod
         if isinstance(self, MapNode):
             dirs2keep = [op.join(outdir, 'mapflow')]
 
-        result.outputs = clean_working_directory(
+        unset_outputs = clean_working_directory(
             result.outputs,
             outdir,
             self._interface.inputs,
             self.needed_outputs,
             self.config,
             dirs2keep=dirs2keep)
-        _save_resultfile(result, outdir, self.name)
 
+        for name in unset_outputs:
+            setattr(result.outputs, name, Undefined)
+
+        _save_resultfile(result, outdir, self.name)
         return result
 
     def _copyfiles_to_wd(self, execute=True, linksonly=False):
@@ -1131,9 +1139,12 @@ class MapNode(Node):
             inputs=[],
             outputs=self.outputs)
         returncode = []
+        error_msgs = []
         for i, nresult, err in nodes:
             finalresult.runtime.insert(i, None)
             returncode.insert(i, err)
+            if err is not None:
+                error_msgs += ['Subnode %d failed with error:\n%s' % (i, err)]
 
             if nresult:
                 if hasattr(nresult, 'runtime'):
@@ -1171,14 +1182,10 @@ class MapNode(Node):
                                                    self.iterfield[0])))
                 setattr(finalresult.outputs, key, values)
 
-        if returncode and any([code is not None for code in returncode]):
-            msg = []
-            for i, code in enumerate(returncode):
-                if code is not None:
-                    msg += ['Subnode %d failed' % i]
-                    msg += ['Error: %s' % str(code)]
-            raise Exception('Subnodes of node: %s failed:\n%s' %
-                            (self.name, '\n'.join(msg)))
+        if error_msgs:
+            error_msgs.insert(0, 'Subnodes of node: %s failed:' % self.name)
+            logger.critical('\n\t\t'.join(error_msgs))
+            raise Exception('\n\t\t'.join(error_msgs))
 
         return finalresult
 
@@ -1229,7 +1236,8 @@ class MapNode(Node):
                          "have the same length. %s") % str(self.inputs))
 
     def _run_interface(self, execute=True, updatehash=False):
-        """Run the mapnode interface
+        """
+        Run the mapnode interface.
 
         This is primarily intended for serial execution of mapnode. A parallel
         execution requires creation of new nodes that can be spawned
@@ -1258,7 +1266,7 @@ class MapNode(Node):
                 stop_first=str2bool(
                     self.config['execution']['stop_on_first_crash'])))
         # And store results
-        _save_resultfile(result, cwd, self.name)
+        _save_resultfile(result, cwd, self.name, rebase=False)
         # remove any node directories no longer required
         dirs2remove = []
         for path in glob(op.join(cwd, 'mapflow', '*')):

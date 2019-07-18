@@ -225,13 +225,15 @@ class InterfaceResult(object):
                  runtime,
                  inputs=None,
                  outputs=None,
-                 provenance=None):
+                 provenance=None,
+                 error=None):
         self._version = 2.0
         self.interface = interface
         self.runtime = runtime
         self.inputs = inputs
         self.outputs = outputs
         self.provenance = provenance
+        self.error = error
 
     @property
     def version(self):
