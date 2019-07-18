@@ -546,3 +546,45 @@ def rebase_path_traits(thistrait, value, cwd):
         for subtrait in thistrait.alternatives:
             value = rebase_path_traits(subtrait, value, cwd)
     return value
+
+
+def _resolve_path(value, cwd):
+    if isinstance(value, list):
+        return [_resolve_path(v, cwd) for v in value]
+
+    try:
+        value = Path(value)
+    except TypeError:
+        pass
+    else:
+        if not value.is_absolute():
+            value = Path(cwd) / value
+    return value
+
+
+def resolve_path_traits(thistrait, value, cwd):
+    """Resolve a BasePath-derived trait given an interface spec."""
+    if thistrait.is_trait_type(BasePath):
+        value = _resolve_path(value, cwd)
+    elif thistrait.is_trait_type(traits.List):
+        innertrait, = thistrait.inner_traits
+        if not isinstance(value, (list, tuple)):
+            value = resolve_path_traits(innertrait, value, cwd)
+        else:
+            value = [resolve_path_traits(innertrait, v, cwd)
+                     for v in value]
+    elif thistrait.is_trait_type(traits.Dict):
+        _, innertrait = thistrait.inner_traits
+        value = {k: resolve_path_traits(innertrait, v, cwd)
+                 for k, v in value.items()}
+    elif thistrait.is_trait_type(Tuple):
+        value = tuple([resolve_path_traits(subtrait, v, cwd)
+                       for subtrait, v in zip(thistrait.inner_traits, value)])
+    elif thistrait.alternatives:
+        is_str = [f.is_trait_type((traits.String, traits.BaseStr, traits.BaseBytes, Str))
+                  for f in thistrait.alternatives]
+        if any(is_str) and isinstance(value, (bytes, str)) and not value.startswith('/'):
+            return value
+        for subtrait in thistrait.alternatives:
+            value = resolve_path_traits(subtrait, value, cwd)
+    return value

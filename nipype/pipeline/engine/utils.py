@@ -40,6 +40,7 @@ from ...utils.filemanip import (
 )
 from ...utils.misc import str2bool
 from ...utils.functions import create_function_from_source
+from ...interfaces.base.traits_extension import resolve_path_traits
 from ...interfaces.base import (Bunch, CommandLine, isdefined, Undefined,
                                 InterfaceResult, traits)
 from ...interfaces.utility import IdentityInterface
@@ -146,16 +147,24 @@ def write_report(node, report_type=None, is_mapnode=False):
         write_rst_dict(node.inputs.trait_get()),
     ]
 
-    result = node.result  # Locally cache result
-    outputs = result.outputs
-
-    if outputs is None:
+    # Preexec reports should stop here
+    if report_type == 'preexec':
         with open(report_file, 'at') as fp:
             fp.write('\n'.join(lines))
         return
 
     lines.append(write_rst_header('Execution Outputs', level=1))
+    result = node.result  # Locally cache result
 
+    # Premature end of report
+    if result is None:
+        logger.critical('[Node] Recovered InterfaceResult is None.')
+        lines += ['', 'CRITICAL - InterfaceResult is None.']
+        with open(report_file, 'at') as fp:
+            fp.write('\n'.join(lines))
+        return
+
+    outputs = result.outputs
     if isinstance(outputs, Bunch):
         lines.append(write_rst_dict(outputs.dictcopy()))
     elif outputs:
@@ -287,6 +296,7 @@ def _protect_collapses(hastraits):
 def save_resultfile(result, cwd, name):
     """Save a result pklz file to ``cwd``"""
     resultsfile = os.path.join(cwd, 'result_%s.pklz' % name)
+    logger.debug("Saving results file: '%s'", resultsfile)
     # if result.outputs:
     #     try:
     #         collapsed = _identify_collapses(result.outputs)
@@ -299,14 +309,15 @@ def save_resultfile(result, cwd, name):
     #         tosave = outputs = result.outputs.dictcopy()  # outputs was a bunch
 
     savepkl(resultsfile, result)
-    logger.debug('saved results in %s', resultsfile)
+    if result.outputs:
+        pass
 
     # if result.outputs:
     #     for k, v in list(outputs.items()):
     #         setattr(result.outputs, k, v)
 
 
-def load_resultfile(path, name):
+def load_resultfile(path, name, resolve=True):
     """
     Load InterfaceResult file from path
 
@@ -329,6 +340,8 @@ def load_resultfile(path, name):
     resultsoutputfile = os.path.join(path, 'result_%s.pklz' % name)
     result = None
     attribute_error = False
+
+    logger.info("Loading results file: '%s'", resultsoutputfile)
     if os.path.exists(resultsoutputfile):
         pkl_file = gzip.open(resultsoutputfile, 'rb')
         try:
@@ -347,9 +360,15 @@ def load_resultfile(path, name):
                 logger.debug(
                     'some file does not exist. hence trait cannot be set')
         else:
-            if result.outputs:
-                pass  # TODO: resolve BasePath traits
-            aggregate = False
+            if result is not None and result.outputs:
+                aggregate = False
+
+        if resolve and not aggregate:
+            for name in list(result.outputs.get().keys()):
+                value = getattr(result.outputs, name)
+                if isdefined(value):
+                    value = resolve_path_traits(result.outputs.trait(name),
+                                                value, path)
         pkl_file.close()
     logger.debug('Aggregate: %s', aggregate)
     return result, aggregate, attribute_error

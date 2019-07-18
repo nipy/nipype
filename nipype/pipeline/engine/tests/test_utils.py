@@ -241,6 +241,7 @@ class StrPathConfuser(nib.SimpleInterface):
     def _run_interface(self, runtime):
         out_path = os.path.abspath(os.path.basename(self.inputs.in_str) + '_path')
         open(out_path, 'w').close()
+        print(out_path)
 
         self._results['out_str'] = self.inputs.in_str
         self._results['out_path'] = out_path
@@ -267,17 +268,18 @@ def test_modify_paths_bug(tmpdir):
 
     open('2', 'w').close()
 
-    results = spc.run()
+    outputs = spc.run().outputs
 
     # Basic check that string was not manipulated and path exists
-    out_path = results.outputs.out_path
-    out_str = results.outputs.out_str
+    out_path = outputs.out_path
+    print(out_path)
+    out_str = outputs.out_str
     assert out_str == '2'
     assert os.path.basename(out_path) == '2_path'
-    assert os.path.isfile(out_path)
 
     # Assert data structures pass through correctly
-    assert results.outputs.out_tuple == (out_path, out_str)
-    assert results.outputs.out_dict_path == {out_str: out_path}
-    assert results.outputs.out_dict_str == {out_str: out_str}
-    assert results.outputs.out_list == [out_str] * 2
+    assert outputs.out_tuple == (out_path, out_str)
+    assert outputs.out_dict_path == {out_str: out_path}
+    assert outputs.out_dict_str == {out_str: out_str}
+    assert outputs.out_list == [out_str] * 2
+    assert out_path.is_file()
