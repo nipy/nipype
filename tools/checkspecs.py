@@ -198,7 +198,7 @@ class InterfaceChecker(object):
         ]
         in_built = [
             'type', 'copy', 'parent', 'instance_handler', 'comparison_mode',
-            'array', 'default', 'editor'
+            'array', 'default', 'editor', 'alternatives'
         ]
         bad_specs = []
         for c in classes:
