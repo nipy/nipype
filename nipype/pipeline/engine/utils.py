@@ -287,25 +287,23 @@ def _protect_collapses(hastraits):
 def save_resultfile(result, cwd, name):
     """Save a result pklz file to ``cwd``"""
     resultsfile = os.path.join(cwd, 'result_%s.pklz' % name)
-    if result.outputs:
-        try:
-            collapsed = _identify_collapses(result.outputs)
-            outputs = _uncollapse(result.outputs.trait_get(), collapsed)
-            # Double-protect tosave so that the original, uncollapsed trait
-            # is saved in the pickle file. Thus, when the loading process
-            # collapses, the original correct value is loaded.
-            tosave = _uncollapse(outputs.copy(), collapsed)
-        except AttributeError:
-            tosave = outputs = result.outputs.dictcopy()  # outputs was a bunch
-        for k, v in list(modify_paths(tosave, relative=True, basedir=cwd).items()):
-            setattr(result.outputs, k, v)
+    # if result.outputs:
+    #     try:
+    #         collapsed = _identify_collapses(result.outputs)
+    #         outputs = _uncollapse(result.outputs.trait_get(), collapsed)
+    #         # Double-protect tosave so that the original, uncollapsed trait
+    #         # is saved in the pickle file. Thus, when the loading process
+    #         # collapses, the original correct value is loaded.
+    #         tosave = _uncollapse(outputs.copy(), collapsed)
+    #     except AttributeError:
+    #         tosave = outputs = result.outputs.dictcopy()  # outputs was a bunch
 
     savepkl(resultsfile, result)
     logger.debug('saved results in %s', resultsfile)
 
-    if result.outputs:
-        for k, v in list(outputs.items()):
-            setattr(result.outputs, k, v)
+    # if result.outputs:
+    #     for k, v in list(outputs.items()):
+    #         setattr(result.outputs, k, v)
 
 
 def load_resultfile(path, name):
@@ -350,17 +348,7 @@ def load_resultfile(path, name):
                     'some file does not exist. hence trait cannot be set')
         else:
             if result.outputs:
-                try:
-                    outputs = _protect_collapses(result.outputs)
-                except AttributeError:
-                    outputs = result.outputs.dictcopy()  # outputs == Bunch
-                try:
-                    for k, v in list(modify_paths(outputs, relative=False,
-                                                  basedir=path).items()):
-                        setattr(result.outputs, k, v)
-                except FileNotFoundError:
-                    logger.debug('conversion to full path results in '
-                                 'non existent file')
+                pass  # TODO: resolve BasePath traits
             aggregate = False
         pkl_file.close()
     logger.debug('Aggregate: %s', aggregate)

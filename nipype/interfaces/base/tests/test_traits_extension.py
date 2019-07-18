@@ -17,6 +17,7 @@ class _test_spec(nib.TraitedSpec):
     f = nib.traits.Dict(nib.Str, nib.File())
     g = nib.traits.Either(nib.File, nib.Str)
     h = nib.Str
+    ee = nib.OutputMultiObject(nib.Str)
 
 
 def test_rebase_path_traits():
@@ -36,15 +37,6 @@ def test_rebase_path_traits():
         '/some/path')
     assert c == [Path('f1.txt'), Path('f2.txt'), Path('f3.txt')]
 
-    e = rebase_path_traits(
-        spec.trait('e'), ['/some/path/f1.txt', '/some/path/f2.txt', '/some/path/f3.txt'],
-        '/some/path')
-    assert e == [Path('f1.txt'), Path('f2.txt'), Path('f3.txt')]
-
-    f = rebase_path_traits(
-        spec.trait('f'), {'1': '/some/path/f1.txt'}, '/some/path')
-    assert f == {'1': Path('f1.txt')}
-
     d = rebase_path_traits(
         spec.trait('d'), 2.0, '/some/path')
     assert d == 2.0
@@ -52,6 +44,20 @@ def test_rebase_path_traits():
     d = rebase_path_traits(
         spec.trait('d'), '/some/path/either.txt', '/some/path')
     assert '%s' % d == 'either.txt'
+
+    e = rebase_path_traits(
+        spec.trait('e'), ['/some/path/f1.txt', '/some/path/f2.txt', '/some/path/f3.txt'],
+        '/some/path')
+    assert e == [Path('f1.txt'), Path('f2.txt'), Path('f3.txt')]
+
+    e = rebase_path_traits(
+        spec.trait('e'), [['/some/path/f1.txt', '/some/path/f2.txt'], [['/some/path/f3.txt']]],
+        '/some/path')
+    assert e == [[Path('f1.txt'), Path('f2.txt')], [[Path('f3.txt')]]]
+
+    f = rebase_path_traits(
+        spec.trait('f'), {'1': '/some/path/f1.txt'}, '/some/path')
+    assert f == {'1': Path('f1.txt')}
 
     g = rebase_path_traits(
         spec.trait('g'), 'some/path/either.txt', '/some/path')
@@ -69,3 +75,8 @@ def test_rebase_path_traits():
 
     h = rebase_path_traits(spec.trait('h'), '2', '/some/path')
     assert h == '2'
+
+    ee = rebase_path_traits(
+        spec.trait('ee'), [['/some/path/f1.txt', '/some/path/f2.txt'], [['/some/path/f3.txt']]],
+        '/some/path')
+    assert ee == [['/some/path/f1.txt', '/some/path/f2.txt'], [['/some/path/f3.txt']]]

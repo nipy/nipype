@@ -640,7 +640,7 @@ Error populating the input "%s" of node "%s": the results file of the source nod
             message += ', a CommandLine Interface with command:\n{}'.format(cmd)
         logger.info(message)
         try:
-            result = self._interface.run(cwd=outdir)
+            result = self._interface.run(cwd=outdir, rebase_cwd=True)
         except Exception as msg:
             result.runtime.stderr = '%s\n\n%s'.format(
                 getattr(result.runtime, 'stderr', ''), msg)

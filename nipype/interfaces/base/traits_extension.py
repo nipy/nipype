@@ -504,18 +504,26 @@ traits.Tuple = Tuple
 traits.Either = PatchedEither
 
 
+def _rebase_path(value, cwd):
+    if isinstance(value, list):
+        return [_rebase_path(v, cwd) for v in value]
+
+    try:
+        value = Path(value)
+    except TypeError:
+        pass
+    else:
+        try:
+            value = Path(value).relative_to(cwd)
+        except ValueError:
+            pass
+    return value
+
+
 def rebase_path_traits(thistrait, value, cwd):
     """Rebase a BasePath-derived trait given an interface spec."""
     if thistrait.is_trait_type(BasePath):
-        try:
-            value = Path(value)
-        except TypeError:
-            pass
-        else:
-            try:
-                value = Path(value).relative_to(cwd)
-            except ValueError:
-                pass
+        value = _rebase_path(value, cwd)
     elif thistrait.is_trait_type(traits.List):
         innertrait, = thistrait.inner_traits
         if not isinstance(value, (list, tuple)):
@@ -533,7 +541,6 @@ def rebase_path_traits(thistrait, value, cwd):
     elif thistrait.alternatives:
         is_str = [f.is_trait_type((traits.String, traits.BaseStr, traits.BaseBytes, Str))
                   for f in thistrait.alternatives]
-        print(is_str)
         if any(is_str) and isinstance(value, (bytes, str)) and not value.startswith('/'):
             return value
         for subtrait in thistrait.alternatives:

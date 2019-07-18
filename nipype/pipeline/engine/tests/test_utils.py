@@ -16,7 +16,7 @@ from ... import engine as pe
 from ....interfaces import base as nib
 from ....interfaces import utility as niu
 from .... import config
-from ..utils import clean_working_directory, write_workflow_prov, modify_paths
+from ..utils import clean_working_directory, write_workflow_prov
 
 
 class InputSpec(nib.TraitedSpec):
