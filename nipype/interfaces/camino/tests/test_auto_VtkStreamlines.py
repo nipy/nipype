@@ -25,6 +25,7 @@ def test_VtkStreamlines_inputs():
         interpolatescalars=dict(argstr='-interpolatescalars', ),
         out_file=dict(
             argstr='> %s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),

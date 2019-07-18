@@ -24,6 +24,7 @@ def test_ComputeEigensystem_inputs():
         maxcomponents=dict(argstr='-maxcomponents %d', ),
         out_file=dict(
             argstr='> %s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),

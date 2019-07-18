@@ -27,11 +27,16 @@ def test_ParcellationStats_inputs():
         ),
         in_annotation=dict(
             argstr='-a %s',
+            extensions=None,
             xor=['in_label'],
         ),
-        in_cortex=dict(argstr='-cortex %s', ),
+        in_cortex=dict(
+            argstr='-cortex %s',
+            extensions=None,
+        ),
         in_label=dict(
             argstr='-l %s',
+            extensions=None,
             xor=['in_annotatoin', 'out_color'],
         ),
         lh_pial=dict(
@@ -45,11 +50,13 @@ def test_ParcellationStats_inputs():
         mgz=dict(argstr='-mgz', ),
         out_color=dict(
             argstr='-c %s',
+            extensions=None,
             genfile=True,
             xor=['in_label'],
         ),
         out_table=dict(
             argstr='-f %s',
+            extensions=None,
             genfile=True,
             requires=['tabular_output'],
         ),

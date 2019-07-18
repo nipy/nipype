@@ -29,6 +29,7 @@ def test_Average_inputs():
         ),
         filelist=dict(
             argstr='-filelist %s',
+            extensions=None,
             mandatory=True,
             xor=('input_files', 'filelist'),
         ),
@@ -126,7 +127,10 @@ def test_Average_inputs():
             argstr='-quiet',
             xor=('verbose', 'quiet'),
         ),
-        sdfile=dict(argstr='-sdfile %s', ),
+        sdfile=dict(
+            argstr='-sdfile %s',
+            extensions=None,
+        ),
         two=dict(argstr='-2', ),
         verbose=dict(
             argstr='-verbose',

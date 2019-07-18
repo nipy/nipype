@@ -55,6 +55,7 @@ def test_Zeropad_inputs():
         ),
         master=dict(
             argstr='-master %s',
+            extensions=None,
             xor=['I', 'S', 'A', 'P', 'L', 'R', 'z', 'RL', 'AP', 'IS', 'mm'],
         ),
         mm=dict(

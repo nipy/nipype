@@ -59,7 +59,7 @@ def test_CANormalize_inputs():
 def test_CANormalize_outputs():
     output_map = dict(
         control_points=dict(extensions=None, ),
-        out_file=dict(),
+        out_file=dict(extensions=None, ),
     )
     outputs = CANormalize.output_spec()
 

@@ -93,7 +93,10 @@ def test_TCorrMap_inputs():
             name_source='in_file',
             suffix='_qmean',
         ),
-        regress_out_timeseries=dict(argstr='-ort %s', ),
+        regress_out_timeseries=dict(
+            argstr='-ort %s',
+            extensions=None,
+        ),
         seeds=dict(
             argstr='-seed %s',
             extensions=None,
