@@ -26,7 +26,7 @@ def test_rebase_path_traits():
 
     a = rebase_path_traits(
         spec.trait('a'), '/some/path/f1.txt', '/some/path')
-    assert '%s' % a == 'f1.txt'
+    assert a == Path('f1.txt')
 
     b = rebase_path_traits(
         spec.trait('b'), ('/some/path/f1.txt', '/some/path/f2.txt'), '/some/path')
