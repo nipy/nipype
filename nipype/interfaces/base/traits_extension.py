@@ -539,10 +539,10 @@ def _recurse_on_path_traits(func, thistrait, value, cwd):
     elif thistrait.is_trait_type(traits.List):
         innertrait, = thistrait.inner_traits
         if not isinstance(value, (list, tuple)):
-            value = _recurse_on_path_traits(func, innertrait, value, cwd)
-        else:
-            value = [_recurse_on_path_traits(func, innertrait, v, cwd)
-                     for v in value]
+            value = [value]
+
+        value = [_recurse_on_path_traits(func, innertrait, v, cwd)
+                 for v in value]
     elif thistrait.is_trait_type(traits.Dict):
         _, innertrait = thistrait.inner_traits
         value = {k: _recurse_on_path_traits(func, innertrait, v, cwd)
