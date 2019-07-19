@@ -224,3 +224,62 @@ def test_mapnode_crash3(tmpdir):
     wf.config["execution"]["crashdump_dir"] = os.getcwd()
     with pytest.raises(RuntimeError):
         wf.run(plugin='Linear')
+
+class StrPathConfuserInputSpec(nib.TraitedSpec):
+    in_str = nib.traits.String()
+
+
+class StrPathConfuserOutputSpec(nib.TraitedSpec):
+    out_tuple = nib.traits.Tuple(nib.File, nib.traits.String)
+    out_dict_path = nib.traits.Dict(nib.traits.String, nib.File(exists=True))
+    out_dict_str = nib.traits.DictStrStr()
+    out_list = nib.traits.List(nib.traits.String)
+    out_str = nib.traits.String()
+    out_path = nib.File(exists=True)
+
+
+class StrPathConfuser(nib.SimpleInterface):
+    input_spec = StrPathConfuserInputSpec
+    output_spec = StrPathConfuserOutputSpec
+
+    def _run_interface(self, runtime):
+        out_path = os.path.abspath(os.path.basename(self.inputs.in_str) + '_path')
+        open(out_path, 'w').close()
+        self._results['out_str'] = self.inputs.in_str
+        self._results['out_path'] = out_path
+        self._results['out_tuple'] = (out_path, self.inputs.in_str)
+        self._results['out_dict_path'] = {self.inputs.in_str: out_path}
+        self._results['out_dict_str'] = {self.inputs.in_str: self.inputs.in_str}
+        self._results['out_list'] = [self.inputs.in_str] * 2
+        return runtime
+
+
+def test_modify_paths_bug(tmpdir):
+    """
+    There was a bug in which, if the current working directory contained a file with the name
+    of an output String, the string would get transformed into a path, and generally wreak havoc.
+    This attempts to replicate that condition, using an object with strings and paths in various
+    trait configurations, to ensure that the guards added resolve the issue.
+    Please see https://github.com/nipy/nipype/issues/2944 for more details.
+    """
+    tmpdir.chdir()
+
+    spc = pe.Node(StrPathConfuser(in_str='2'), name='spc')
+
+    open('2', 'w').close()
+
+    outputs = spc.run().outputs
+
+    # Basic check that string was not manipulated
+    out_str = outputs.out_str
+    assert out_str == '2'
+
+    # Check path exists and is absolute
+    out_path = outputs.out_path
+    assert os.path.isabs(out_path)
+
+    # Assert data structures pass through correctly
+    assert outputs.out_tuple == (out_path, out_str)
+    assert outputs.out_dict_path == {out_str: out_path}
+    assert outputs.out_dict_str == {out_str: out_str}
+    assert outputs.out_list == [out_str] * 2

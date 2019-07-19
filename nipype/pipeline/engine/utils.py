@@ -25,13 +25,13 @@ from future import standard_library
 from ... import logging, config, LooseVersion
 from ...utils.filemanip import (
     Path,
+    indirectory,
     relpath,
     makedirs,
     fname_presuffix,
     to_str,
     ensure_list,
     get_related_files,
-    FileNotFoundError,
     save_json,
     savepkl,
     loadpkl,
@@ -41,6 +41,7 @@ from ...utils.filemanip import (
 )
 from ...utils.misc import str2bool
 from ...utils.functions import create_function_from_source
+from ...interfaces.base.traits_extension import rebase_path_traits, resolve_path_traits
 from ...interfaces.base import (Bunch, CommandLine, isdefined, Undefined,
                                 InterfaceResult, traits)
 from ...interfaces.utility import IdentityInterface
@@ -227,52 +228,82 @@ def write_report(node, report_type=None, is_mapnode=False):
     return
 
 
-def save_resultfile(result, cwd, name):
-    """Save a result pklz file to ``cwd``"""
+def save_resultfile(result, cwd, name, rebase=True):
+    """Save a result pklz file to ``cwd``."""
+    cwd = os.path.abspath(cwd)
     resultsfile = os.path.join(cwd, 'result_%s.pklz' % name)
-    savepkl(resultsfile, result)
-    logger.debug('saved results in %s', resultsfile)
+    logger.debug("Saving results file: '%s'", resultsfile)
+
+    if result.outputs is None:
+        logger.warn('Storing result file without outputs')
+        savepkl(resultsfile, result)
+        return
+    try:
+        outputs = result.outputs.trait_get()
+    except AttributeError:
+        logger.debug('Storing non-traited results, skipping rebase of paths')
+        savepkl(resultsfile, result)
+        return
+
+    try:
+        with indirectory(cwd):
+            # All the magic to fix #2944 resides here:
+            for key, val in list(outputs.items()):
+                val = rebase_path_traits(result.outputs.trait(key), val, cwd)
+                setattr(result.outputs, key, val)
+        savepkl(resultsfile, result)
+    finally:
+        # Reset resolved paths from the outputs dict no matter what
+        for key, val in list(outputs.items()):
+            setattr(result.outputs, key, val)
 
 
-def load_resultfile(results_file):
+def load_resultfile(results_file, resolve=True):
     """
-    Load InterfaceResult file from path
+    Load InterfaceResult file from path.
 
     Parameter
     ---------
-
     path : base_dir of node
     name : name of node
 
     Returns
     -------
-
     result : InterfaceResult structure
     aggregate : boolean indicating whether node should aggregate_outputs
     attribute error : boolean indicating whether there was some mismatch in
         versions of traits used to store result and hence node needs to
         rerun
+
     """
-    aggregate = True
     results_file = Path(results_file)
+    aggregate = True
     result = None
     attribute_error = False
-    if results_file.exists():
+
+    if not results_file.exists():
+        return result, aggregate, attribute_error
+
+    with indirectory(str(results_file.parent)):
         try:
             result = loadpkl(results_file)
-        except (traits.TraitError, AttributeError, ImportError,
-                EOFError) as err:
-            if isinstance(err, (AttributeError, ImportError)):
-                attribute_error = True
-                logger.debug('attribute error: %s probably using '
-                             'different trait pickled file', str(err))
-            else:
-                logger.debug(
-                    'some file does not exist. hence trait cannot be set')
+        except (traits.TraitError, EOFError):
+            logger.debug(
+                'some file does not exist. hence trait cannot be set')
+        except (AttributeError, ImportError) as err:
+            attribute_error = True
+            logger.debug('attribute error: %s probably using '
+                         'different trait pickled file', str(err))
         else:
             aggregate = False
 
-    logger.debug('Aggregate: %s', aggregate)
+    if resolve and not aggregate:
+        logger.debug('Resolving paths in outputs loaded from results file.')
+        for trait_name, old_value in list(result.outputs.get().items()):
+            value = resolve_path_traits(result.outputs.trait(trait_name), old_value,
+                                        results_file.parent)
+            setattr(result.outputs, trait_name, value)
+
     return result, aggregate, attribute_error
 
 
