@@ -988,7 +988,7 @@ class SegStatsReconAllInputSpec(SegStatsInputSpec):
         mandatory=True,
         desc="Subject id being processed")
     # implicit
-    ribbon = traits.File(
+    ribbon = File(
         mandatory=True, exists=True, desc="Input file mri/ribbon.mgz")
     presurf_seg = File(exists=True, desc="Input segmentation volume")
     transform = File(mandatory=True, exists=True, desc="Input transform file")
@@ -1216,19 +1216,19 @@ class MS_LDAInputSpec(FSTraitedSpec):
         maxlen=2,
         sep=' ',
         desc='pair of class labels to optimize')
-    weight_file = traits.File(
+    weight_file = File(
         argstr='-weight %s',
         mandatory=True,
         desc='filename for the LDA weights (input or output)')
-    vol_synth_file = traits.File(
+    vol_synth_file = File(
         exists=False,
         argstr='-synth %s',
         mandatory=True,
         desc=('filename for the synthesized output '
               'volume'))
-    label_file = traits.File(
+    label_file = File(
         exists=True, argstr='-label %s', desc='filename of the label volume')
-    mask_file = traits.File(
+    mask_file = File(
         exists=True,
         argstr='-mask %s',
         desc='filename of the brain mask volume')
@@ -1532,7 +1532,7 @@ class SphericalAverageInputSpec(FSTraitedSpec):
         exists=False,
         position=-1,
         desc="Output filename")
-    in_average = traits.Directory(
+    in_average = Directory(
         argstr="%s",
         exists=True,
         genfile=True,
