@@ -517,7 +517,7 @@ def _rebase_path(value, cwd):
         pass
     else:
         try:
-            value = Path(value).relative_to(cwd)
+            value = value.relative_to(cwd)
         except ValueError:
             pass
     return value
@@ -561,7 +561,7 @@ def _resolve_path(value, cwd):
         pass
     else:
         if not value.is_absolute():
-            value = Path(cwd) / value
+            value = Path(cwd).absolute() / value
     return value
 
 
