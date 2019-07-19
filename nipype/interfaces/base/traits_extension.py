@@ -308,11 +308,6 @@ class File(BasePath):
         return value
 
 
-# Patch in traits these two new
-traits.File = File
-traits.Directory = Directory
-
-
 class ImageFile(File):
     """Defines a trait whose value must be a known neuroimaging file."""
 
@@ -489,7 +484,7 @@ class Tuple(traits.BaseTuple):
         return self.types
 
 
-class PatchedEither(TraitType):
+class Either(TraitType):
     """Defines a trait whose value can be any of of a specified list of traits."""
 
     def __init__(self, *traits, **metadata):
@@ -504,7 +499,7 @@ class PatchedEither(TraitType):
 
 
 traits.Tuple = Tuple
-traits.Either = PatchedEither
+traits.Either = Either
 
 
 def _rebase_path(value, cwd):
@@ -523,34 +518,6 @@ def _rebase_path(value, cwd):
     return value
 
 
-def rebase_path_traits(thistrait, value, cwd):
-    """Rebase a BasePath-derived trait given an interface spec."""
-    if thistrait.is_trait_type(BasePath):
-        value = _rebase_path(value, cwd)
-    elif thistrait.is_trait_type(traits.List):
-        innertrait, = thistrait.inner_traits
-        if not isinstance(value, (list, tuple)):
-            value = rebase_path_traits(innertrait, value, cwd)
-        else:
-            value = [rebase_path_traits(innertrait, v, cwd)
-                     for v in value]
-    elif thistrait.is_trait_type(traits.Dict):
-        _, innertrait = thistrait.inner_traits
-        value = {k: rebase_path_traits(innertrait, v, cwd)
-                 for k, v in value.items()}
-    elif thistrait.is_trait_type(Tuple):
-        value = tuple([rebase_path_traits(subtrait, v, cwd)
-                       for subtrait, v in zip(thistrait.inner_traits, value)])
-    elif thistrait.alternatives:
-        is_str = [f.is_trait_type((traits.String, traits.BaseStr, traits.BaseBytes, Str))
-                  for f in thistrait.alternatives]
-        if any(is_str) and isinstance(value, (bytes, str)) and not value.startswith('/'):
-            return value
-        for subtrait in thistrait.alternatives:
-            value = rebase_path_traits(subtrait, value, cwd)
-    return value
-
-
 def _resolve_path(value, cwd):
     if isinstance(value, list):
         return [_resolve_path(v, cwd) for v in value]
@@ -565,29 +532,41 @@ def _resolve_path(value, cwd):
     return value
 
 
-def resolve_path_traits(thistrait, value, cwd):
-    """Resolve a BasePath-derived trait given an interface spec."""
+def _recurse_on_path_traits(func, thistrait, value, cwd):
+    """Run func recursively on BasePath-derived traits."""
     if thistrait.is_trait_type(BasePath):
-        value = _resolve_path(value, cwd)
+        value = func(value, cwd)
     elif thistrait.is_trait_type(traits.List):
         innertrait, = thistrait.inner_traits
         if not isinstance(value, (list, tuple)):
-            value = resolve_path_traits(innertrait, value, cwd)
+            value = _recurse_on_path_traits(func, innertrait, value, cwd)
         else:
-            value = [resolve_path_traits(innertrait, v, cwd)
+            value = [_recurse_on_path_traits(func, innertrait, v, cwd)
                      for v in value]
     elif thistrait.is_trait_type(traits.Dict):
         _, innertrait = thistrait.inner_traits
-        value = {k: resolve_path_traits(innertrait, v, cwd)
+        value = {k: _recurse_on_path_traits(func, innertrait, v, cwd)
                  for k, v in value.items()}
     elif thistrait.is_trait_type(Tuple):
-        value = tuple([resolve_path_traits(subtrait, v, cwd)
+        value = tuple([_recurse_on_path_traits(func, subtrait, v, cwd)
                        for subtrait, v in zip(thistrait.inner_traits, value)])
     elif thistrait.alternatives:
         is_str = [f.is_trait_type((traits.String, traits.BaseStr, traits.BaseBytes, Str))
                   for f in thistrait.alternatives]
         if any(is_str) and isinstance(value, (bytes, str)) and not value.startswith('/'):
             return value
-        for subtrait in thistrait.alternatives:
-            value = resolve_path_traits(subtrait, value, cwd)
+        is_basepath = [f.is_trait_type(BasePath) for f in thistrait.alternatives]
+        if any(is_basepath):
+            subtrait = thistrait.alternatives[is_basepath.index(True)]
+            value = _recurse_on_path_traits(func, subtrait, value, cwd)
     return value
+
+
+def rebase_path_traits(thistrait, value, cwd):
+    """Rebase a BasePath-derived trait given an interface spec."""
+    return _recurse_on_path_traits(_rebase_path, thistrait, value, cwd)
+
+
+def resolve_path_traits(thistrait, value, cwd):
+    """Resolve a BasePath-derived trait given an interface spec."""
+    return _recurse_on_path_traits(_resolve_path, thistrait, value, cwd)

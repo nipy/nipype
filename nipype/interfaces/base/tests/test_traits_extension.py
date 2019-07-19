@@ -8,14 +8,13 @@ from ..traits_extension import rebase_path_traits, resolve_path_traits, Path
 
 
 class _test_spec(nib.TraitedSpec):
-    a = nib.traits.File()
-    b = nib.traits.Tuple(nib.File(),
-                         nib.File())
+    a = nib.File()
+    b = nib.Tuple(nib.File(), nib.File())
     c = nib.traits.List(nib.File())
-    d = nib.traits.Either(nib.File(), nib.traits.Float())
+    d = nib.Either(nib.File(), nib.traits.Float())
     e = nib.OutputMultiObject(nib.File())
     f = nib.traits.Dict(nib.Str, nib.File())
-    g = nib.traits.Either(nib.File, nib.Str)
+    g = nib.Either(nib.File, nib.Str)
     h = nib.Str
     ee = nib.OutputMultiObject(nib.Str)
 
@@ -27,6 +26,10 @@ def test_rebase_path_traits():
     a = rebase_path_traits(
         spec.trait('a'), '/some/path/f1.txt', '/some/path')
     assert a == Path('f1.txt')
+
+    a = rebase_path_traits(
+        spec.trait('a'), '/some/path/f1.txt', '/some/other/path')
+    assert a == Path('/some/path/f1.txt')
 
     b = rebase_path_traits(
         spec.trait('b'), ('/some/path/f1.txt', '/some/path/f2.txt'), '/some/path')
@@ -90,6 +93,10 @@ def test_resolve_path_traits():
         spec.trait('a'), 'f1.txt', '/some/path')
     assert a == Path('/some/path/f1.txt')
 
+    a = resolve_path_traits(
+        spec.trait('a'), '/already/absolute/f1.txt', '/some/path')
+    assert a == Path('/already/absolute/f1.txt')
+
     b = resolve_path_traits(
         spec.trait('b'), ('f1.txt', 'f2.txt'), '/some/path')
     assert b == (Path('/some/path/f1.txt'), Path('/some/path/f2.txt'))
@@ -128,10 +135,10 @@ def test_resolve_path_traits():
 
     # This is a problematic case, it is impossible to know whether this
     # was meant to be a string or a file.
-    # Commented out because in this implementation, strings take precedence
-    # g = resolve_path_traits(
-    #     spec.trait('g'), 'path/either.txt', '/some')
-    # assert g == Path('/some/path/either.txt')
+    # In this implementation, strings take precedence
+    g = resolve_path_traits(
+        spec.trait('g'), 'path/either.txt', '/some')
+    assert g == 'path/either.txt'
 
     # This is a problematic case, it is impossible to know whether this
     # was meant to be a string or a file.

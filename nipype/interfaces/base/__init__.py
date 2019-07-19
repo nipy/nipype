@@ -20,8 +20,9 @@ from .specs import (BaseTraitedSpec, TraitedSpec, DynamicTraitedSpec,
                     StdOutCommandLineInputSpec)
 
 from .traits_extension import (
-    traits, Undefined, isdefined,
-    File, Directory, Str, DictStrStr, has_metadata, ImageFile,
+    traits, Undefined, isdefined, has_metadata,
+    File, ImageFile, Directory,
+    Tuple, Either, Str, DictStrStr,
     OutputMultiObject, InputMultiObject,
     OutputMultiPath, InputMultiPath)
 
