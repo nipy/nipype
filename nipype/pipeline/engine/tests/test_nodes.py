@@ -295,13 +295,13 @@ def test_inputs_removal(tmpdir):
 def test_outputmultipath_collapse(tmpdir):
     """Test an OutputMultiPath whose initial value is ``[[x]]`` to ensure that
     it is returned as ``[x]``, regardless of how accessed."""
-    select_if = niu.Select(inlist=[[1, 2, 3], [4]], index=1)
-    select_nd = pe.Node(niu.Select(inlist=[[1, 2, 3], [4]], index=1),
+    select_if = niu.Select(inlist=[[1, 2, 3], [4, 5]], index=1)
+    select_nd = pe.Node(niu.Select(inlist=[[1, 2, 3], [4, 5]], index=1),
                         name='select_nd')
 
     ifres = select_if.run()
     ndres = select_nd.run()
 
-    assert ifres.outputs.out == [4]
-    assert ndres.outputs.out == [4]
-    assert select_nd.result.outputs.out == [4]
+    assert ifres.outputs.out == [4, 5]
+    assert ndres.outputs.out == [4, 5]
+    assert select_nd.result.outputs.out == [4, 5]

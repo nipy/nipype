@@ -297,9 +297,14 @@ def load_resultfile(results_file, resolve=True):
         else:
             aggregate = False
 
-    if resolve and not aggregate:
+    if resolve and result.outputs:
+        try:
+            outputs = result.outputs.get()
+        except TypeError:  # This is a Bunch
+            return result, aggregate, attribute_error
+
         logger.debug('Resolving paths in outputs loaded from results file.')
-        for trait_name, old_value in list(result.outputs.get().items()):
+        for trait_name, old_value in list(outputs.items()):
             value = resolve_path_traits(result.outputs.trait(trait_name), old_value,
                                         results_file.parent)
             setattr(result.outputs, trait_name, value)

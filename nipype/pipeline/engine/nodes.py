@@ -1260,7 +1260,7 @@ class MapNode(Node):
                 stop_first=str2bool(
                     self.config['execution']['stop_on_first_crash'])))
         # And store results
-        _save_resultfile(result, cwd, self.name)
+        _save_resultfile(result, cwd, self.name, rebase=False)
         # remove any node directories no longer required
         dirs2remove = []
         for path in glob(op.join(cwd, 'mapflow', '*')):
