@@ -226,17 +226,22 @@ def test_mapnode_crash3(tmpdir):
         wf.run(plugin='Linear')
 
 
-class StrPathConfuser(nib.SimpleInterface):
-    class input_spec(nib.TraitedSpec):
-        in_str = nib.traits.String()
+class StrPathConfuserInputSpec(nib.TraitedSpec):
+    in_str = nib.traits.String()
 
-    class output_spec(nib.TraitedSpec):
-        out_tuple = nib.traits.Tuple(nib.File, nib.traits.String)
-        out_dict_path = nib.traits.Dict(nib.traits.String, nib.File(exists=True))
-        out_dict_str = nib.traits.DictStrStr()
-        out_list = nib.traits.List(nib.traits.String)
-        out_str = nib.traits.String()
-        out_path = nib.File(exists=True)
+
+class StrPathConfuserOutputSpec(nib.TraitedSpec):
+    out_tuple = nib.traits.Tuple(nib.File, nib.traits.String)
+    out_dict_path = nib.traits.Dict(nib.traits.String, nib.File(exists=True))
+    out_dict_str = nib.traits.DictStrStr()
+    out_list = nib.traits.List(nib.traits.String)
+    out_str = nib.traits.String()
+    out_path = nib.File(exists=True)
+
+
+class StrPathConfuser(nib.SimpleInterface):
+    input_spec = StrPathConfuserInputSpec
+    output_spec = StrPathConfuserOutputSpec
 
     def _run_interface(self, runtime):
         out_path = os.path.abspath(os.path.basename(self.inputs.in_str) + '_path')
@@ -266,20 +271,18 @@ def test_modify_paths_bug(tmpdir):
 
     open('2', 'w').close()
 
-    results = spc.run()
-
-    print(results.outputs)
+    outputs = spc.run().outputs
 
     # Basic check that string was not manipulated
-    out_str = results.outputs.out_str
+    out_str = outputs.out_str
     assert out_str == '2'
 
     # Check path exists and is absolute
-    out_path = results.outputs.out_path
+    out_path = outputs.out_path
     assert os.path.isabs(out_path)
 
     # Assert data structures pass through correctly
-    assert results.outputs.out_tuple == (out_path, out_str)
-    assert results.outputs.out_dict_path == {out_str: out_path}
-    assert results.outputs.out_dict_str == {out_str: out_str}
-    assert results.outputs.out_list == [out_str] * 2
+    assert outputs.out_tuple == (out_path, out_str)
+    assert outputs.out_dict_path == {out_str: out_path}
+    assert outputs.out_dict_str == {out_str: out_str}
+    assert outputs.out_list == [out_str] * 2
