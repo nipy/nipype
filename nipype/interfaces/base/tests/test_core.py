@@ -289,7 +289,7 @@ def test_output_version():
             return {'foo': 1}
 
     obj = DerivedInterface1()
-    with pytest.raises(KeyError):
+    with pytest.raises(TypeError):
         obj.run()
 
 
