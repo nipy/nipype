@@ -74,8 +74,9 @@ class DWIDenoise(MRTrix3Base):
     >>> denoise = mrt.DWIDenoise()
     >>> denoise.inputs.in_file = 'dwi.mif'
     >>> denoise.inputs.mask = 'mask.mif'
+    >>> denoise.inputs.noise = 'noise.mif'
     >>> denoise.cmdline                               # doctest: +ELLIPSIS
-    'dwidenoise -mask mask.mif dwi.mif dwi_denoised.mif'
+    'dwidenoise -mask mask.mif -noise noise.mif dwi.mif dwi_denoised.mif'
     >>> denoise.run()                                 # doctest: +SKIP
     """
 
@@ -213,6 +214,7 @@ class DWIBiasCorrect(MRTrix3Base):
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> bias_correct = mrt.DWIBiasCorrect()
     >>> bias_correct.inputs.in_file = 'dwi.mif'
+    >>> bias_correct.inputs.use_ants = True
     >>> bias_correct.cmdline
     'dwibiascorrect -ants dwi.mif dwi_biascorr.mif'
     >>> bias_correct.run()                             # doctest: +SKIP
