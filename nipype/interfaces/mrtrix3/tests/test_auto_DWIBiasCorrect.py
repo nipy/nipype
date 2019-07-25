@@ -15,11 +15,6 @@ def test_DWIBiasCorrect_inputs():
             nohash=True,
             usedefault=True,
         ),
-        fsl_grad=dict(
-            argstr='-fslgrad %s %s',
-            extensions=None,
-            xor=('mrtrix_grad', 'fsl_grad'),
-        ),
         grad_file=dict(
             argstr='-grad %s',
             extensions=None,
@@ -40,11 +35,6 @@ def test_DWIBiasCorrect_inputs():
             argstr='-mask %s',
             extensions=None,
         ),
-        mrtrix_grad=dict(
-            argstr='-grad %s',
-            extensions=None,
-            xor=('mrtrix_grad', 'fsl_grad'),
-        ),
         nthreads=dict(
             argstr='-nthreads %d',
             nohash=True,
@@ -60,13 +50,12 @@ def test_DWIBiasCorrect_inputs():
         ),
         use_ants=dict(
             argstr='-ants',
-            usedefault=True,
-            xor=('use_ants', 'use_fsl'),
+            xor=['use_fsl'],
         ),
         use_fsl=dict(
             argstr='-fsl',
             min_ver='5.0.10',
-            xor=('use_ants', 'use_fsl'),
+            xor=['use_ants'],
         ),
     )
     inputs = DWIBiasCorrect.input_spec()

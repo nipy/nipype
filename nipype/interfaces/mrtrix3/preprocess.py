@@ -179,27 +179,16 @@ class DWIBiasCorrectInputSpec(MRTrix3BaseInputSpec):
     in_mask = File(
         argstr='-mask %s',
         desc='input mask image for bias field estimation')
-    _xor_methods = ('use_ants', 'use_fsl')
     use_ants = traits.Bool(
-        default_value=True,
-        usedefault=True,
         argstr='-ants',
         desc='use ANTS N4 to estimate the inhomogeneity field',
-        xor=_xor_methods)
+        xor=['use_fsl'])
     use_fsl = traits.Bool(
         argstr='-fsl',
         desc='use FSL FAST to estimate the inhomogeneity field',
-        xor=_xor_methods,
+        xor=['use_ants'],
         min_ver='5.0.10')
-    _xor_grads = ('mrtrix_grad', 'fsl_grad')
-    mrtrix_grad = File(
-        argstr='-grad %s',
-        desc='diffusion gradient table in MRtrix format',
-        xor=_xor_grads)
-    fsl_grad = File(
-        argstr='-fslgrad %s %s',
-        desc='diffusion gradient table in FSL bvecs/bvals format',
-        xor=_xor_grads)
+    _xor_grads = ('grad_file', 'grad_fsl')
     bias = File(
         argstr='-bias %s',
         desc='bias field')
@@ -236,13 +225,6 @@ class DWIBiasCorrect(MRTrix3Base):
     _cmd = 'dwibiascorrect'
     input_spec = DWIBiasCorrectInputSpec
     output_spec = DWIBiasCorrectOutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        if self.inputs.bias != Undefined:
-            outputs['bias'] = op.abspath(self.inputs.bias)
-        return outputs
 
 
 class ResponseSDInputSpec(MRTrix3BaseInputSpec):
