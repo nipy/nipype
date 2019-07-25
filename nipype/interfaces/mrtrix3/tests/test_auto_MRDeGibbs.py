@@ -11,7 +11,6 @@ def test_MRDeGibbs_inputs():
             maxlen=2,
             minlen=2,
             sep=',',
-            usedefault=True,
         ),
         bval_scale=dict(argstr='-bvalue_scaling %s', ),
         environ=dict(
@@ -21,8 +20,12 @@ def test_MRDeGibbs_inputs():
         grad_file=dict(
             argstr='-grad %s',
             extensions=None,
+            xor=['grad_fsl'],
         ),
-        grad_fsl=dict(argstr='-fslgrad %s %s', ),
+        grad_fsl=dict(
+            argstr='-fslgrad %s %s',
+            xor=['grad_file'],
+        ),
         in_bval=dict(extensions=None, ),
         in_bvec=dict(
             argstr='-fslgrad %s %s',
@@ -34,18 +37,9 @@ def test_MRDeGibbs_inputs():
             mandatory=True,
             position=-2,
         ),
-        maxW=dict(
-            argstr='-maxW %d',
-            usedefault=True,
-        ),
-        minW=dict(
-            argstr='-minW %d',
-            usedefault=True,
-        ),
-        nshifts=dict(
-            argstr='-nshifts %d',
-            usedefault=True,
-        ),
+        maxW=dict(argstr='-maxW %d', ),
+        minW=dict(argstr='-minW %d', ),
+        nshifts=dict(argstr='-nshifts %d', ),
         nthreads=dict(
             argstr='-nthreads %d',
             nohash=True,

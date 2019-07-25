@@ -23,19 +23,26 @@ class DWIDenoiseInputSpec(MRTrix3BaseInputSpec):
         argstr='-mask %s',
         position=1,
         desc='mask image')
-    extent = traits.Tuple((traits.Int, traits.Int, traits.Int),
+    extent = traits.Tuple(
+        (traits.Int, traits.Int, traits.Int),
         argstr='-extent %d,%d,%d',
         desc='set the window size of the denoising filter. (default = 5,5,5)')
     noise = File(
         argstr='-noise %s',
-        desc='the output noise map')
-    out_file = File(name_template='%s_denoised',
+        name_template='%s_noise',
         name_source='in_file',
         keep_extension=True,
+        desc='the output noise map',
+        genfile=True)
+    out_file = File(
         argstr='%s',
         position=-1,
+        name_template='%s_denoised',
+        name_source='in_file',
+        keep_extension=True,
         desc='the output denoised DWI image',
         genfile=True)
+
 
 class DWIDenoiseOutputSpec(TraitedSpec):
     noise = File(desc='the output noise map', exists=True)
@@ -76,13 +83,6 @@ class DWIDenoise(MRTrix3Base):
     input_spec = DWIDenoiseInputSpec
     output_spec = DWIDenoiseOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        if self.inputs.noise != Undefined:
-            outputs['noise'] = op.abspath(self.inputs.noise)
-        return outputs
-
 
 class MRDeGibbsInputSpec(MRTrix3BaseInputSpec):
     in_file = File(
@@ -92,8 +92,7 @@ class MRDeGibbsInputSpec(MRTrix3BaseInputSpec):
         mandatory=True,
         desc='input DWI image')
     axes = traits.ListInt(
-        default_value=[0,1],
-        usedefault=True,
+        [0,1],
         sep=',',
         minlen=2,
         maxlen=2,
@@ -101,23 +100,21 @@ class MRDeGibbsInputSpec(MRTrix3BaseInputSpec):
         desc='indicate the plane in which the data was acquired (axial = 0,1; '
              'coronal = 0,2; sagittal = 1,2')
     nshifts = traits.Int(
-        default_value=20,
-        usedefault=True,
+        20,
         argstr='-nshifts %d',
         desc='discretization of subpixel spacing (default = 20)')
     minW = traits.Int(
-        default_value=1,
-        usedefault=True,
+        1,
         argstr='-minW %d',
         desc='left border of window used for total variation (TV) computation '
              '(default = 1)')
     maxW = traits.Int(
-        default_value=3,
-        usedefault=True,
+        3,
         argstr='-maxW %d',
         desc='right border of window used for total variation (TV) computation '
              '(default = 3)')
-    out_file = File(name_template='%s_unr',
+    out_file = File(
+        name_template='%s_unr',
         name_source='in_file',
         keep_extension=True,
         argstr='%s',
@@ -160,7 +157,7 @@ class MRDeGibbs(MRTrix3Base):
     >>> unring = mrt.MRDeGibbs()
     >>> unring.inputs.in_file = 'dwi.mif'
     >>> unring.cmdline
-    'mrdegibbs -axes 0,1 -maxW 3 -minW 1 -nshifts 20 dwi.mif dwi_unr.mif'
+    'mrdegibbs dwi.mif dwi_unr.mif'
     >>> unring.run()                                 # doctest: +SKIP
     """
 
@@ -179,31 +176,19 @@ class DWIBiasCorrectInputSpec(MRTrix3BaseInputSpec):
     in_mask = File(
         argstr='-mask %s',
         desc='input mask image for bias field estimation')
-    _xor_methods = ('use_ants', 'use_fsl')
     use_ants = traits.Bool(
-        default_value=True,
-        usedefault=True,
         argstr='-ants',
         desc='use ANTS N4 to estimate the inhomogeneity field',
-        xor=_xor_methods)
+        xor=['use_fsl'])
     use_fsl = traits.Bool(
         argstr='-fsl',
         desc='use FSL FAST to estimate the inhomogeneity field',
-        xor=_xor_methods,
-        min_ver='5.0.10')
-    _xor_grads = ('mrtrix_grad', 'fsl_grad')
-    mrtrix_grad = File(
-        argstr='-grad %s',
-        desc='diffusion gradient table in MRtrix format',
-        xor=_xor_grads)
-    fsl_grad = File(
-        argstr='-fslgrad %s %s',
-        desc='diffusion gradient table in FSL bvecs/bvals format',
-        xor=_xor_grads)
+        xor=['use_ants'])
     bias = File(
         argstr='-bias %s',
         desc='bias field')
-    out_file = File(name_template='%s_biascorr',
+    out_file = File(
+        name_template='%s_biascorr',
         name_source='in_file',
         keep_extension=True,
         argstr='%s',
@@ -236,13 +221,6 @@ class DWIBiasCorrect(MRTrix3Base):
     _cmd = 'dwibiascorrect'
     input_spec = DWIBiasCorrectInputSpec
     output_spec = DWIBiasCorrectOutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        if self.inputs.bias != Undefined:
-            outputs['bias'] = op.abspath(self.inputs.bias)
-        return outputs
 
 
 class ResponseSDInputSpec(MRTrix3BaseInputSpec):
