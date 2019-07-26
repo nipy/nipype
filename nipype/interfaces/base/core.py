@@ -465,7 +465,8 @@ class BaseInterface(Interface):
             _na_outputs = self._check_version_requirements(outputs)
             na_names = aggregate_names.intersection(_na_outputs)
             if na_names:
-                raise TypeError("""\
+                # XXX Change to TypeError in Nipype 2.0
+                raise KeyError("""\
 Output trait(s) %s not available in version %s of interface %s.\
 """ % (', '.join(na_names), self.version, self.__class__.__name__))
 
