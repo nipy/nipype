@@ -457,13 +457,13 @@ class BaseInterface(Interface):
             return outputs
 
         # Precalculate the list of output trait names that should be aggregated
-        aggregate_names = set(predicted_outputs.keys())
+        aggregate_names = set(predicted_outputs)
         if needed_outputs is not None:
             aggregate_names = set(needed_outputs).intersection(aggregate_names)
 
         if aggregate_names:  # Make sure outputs are compatible
             _na_outputs = self._check_version_requirements(outputs)
-            na_names = aggregate_names.intersection(set(_na_outputs))
+            na_names = aggregate_names.intersection(_na_outputs)
             if na_names:
                 raise TypeError("""\
 Output trait(s) %s not available in version %s of interface %s.\
