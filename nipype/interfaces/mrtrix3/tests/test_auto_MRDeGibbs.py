@@ -11,7 +11,7 @@ def test_MRDeGibbs_inputs():
             maxlen=2,
             minlen=2,
             sep=',',
-            use_default=True,
+            usedefault=True,
         ),
         bval_scale=dict(argstr='-bvalue_scaling %s', ),
         environ=dict(
@@ -40,15 +40,15 @@ def test_MRDeGibbs_inputs():
         ),
         maxW=dict(
             argstr='-maxW %d',
-            use_default=True,
+            usedefault=True,
         ),
         minW=dict(
             argstr='-minW %d',
-            use_default=True,
+            usedefault=True,
         ),
         nshifts=dict(
             argstr='-nshifts %d',
-            use_default=True,
+            usedefault=True,
         ),
         nthreads=dict(
             argstr='-nthreads %d',

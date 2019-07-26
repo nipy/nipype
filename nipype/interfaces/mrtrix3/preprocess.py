@@ -92,7 +92,7 @@ class MRDeGibbsInputSpec(MRTrix3BaseInputSpec):
         desc='input DWI image')
     axes = traits.ListInt(
         default_value=[0, 1],
-        use_default=True,
+        usedefault=True,
         sep=',',
         minlen=2,
         maxlen=2,
@@ -101,18 +101,18 @@ class MRDeGibbsInputSpec(MRTrix3BaseInputSpec):
              'coronal = 0,2; sagittal = 1,2')
     nshifts = traits.Int(
         default_value=20,
-        use_default=True,
+        usedefault=True,
         argstr='-nshifts %d',
         desc='discretization of subpixel spacing (default = 20)')
     minW = traits.Int(
         default_value=1,
-        use_default=True,
+        usedefault=True,
         argstr='-minW %d',
         desc='left border of window used for total variation (TV) computation '
              '(default = 1)')
     maxW = traits.Int(
         default_value=3,
-        use_default=True,
+        usedefault=True,
         argstr='-maxW %d',
         desc='right border of window used for total variation (TV) computation '
              '(default = 3)')
@@ -159,7 +159,7 @@ class MRDeGibbs(MRTrix3Base):
     >>> unring = mrt.MRDeGibbs()
     >>> unring.inputs.in_file = 'dwi.mif'
     >>> unring.cmdline
-    'mrdegibbs dwi.mif dwi_unr.mif'
+    'mrdegibbs -axes 0,1 -maxW 3 -minW 1 -nshifts 20 dwi.mif dwi_unr.mif'
     >>> unring.run()                                 # doctest: +SKIP
     """
 
@@ -180,10 +180,12 @@ class DWIBiasCorrectInputSpec(MRTrix3BaseInputSpec):
         desc='input mask image for bias field estimation')
     use_ants = traits.Bool(
         argstr='-ants',
+        mandatory=True,
         desc='use ANTS N4 to estimate the inhomogeneity field',
         xor=['use_fsl'])
     use_fsl = traits.Bool(
         argstr='-fsl',
+        mandatory=True,
         desc='use FSL FAST to estimate the inhomogeneity field',
         xor=['use_ants'])
     bias = File(
