@@ -32,16 +32,14 @@ class DWIDenoiseInputSpec(MRTrix3BaseInputSpec):
         name_template='%s_noise',
         name_source='in_file',
         keep_extension=True,
-        desc='the output noise map',
-        genfile=True)
+        desc='the output noise map')
     out_file = File(
         argstr='%s',
         position=-1,
         name_template='%s_denoised',
         name_source='in_file',
         keep_extension=True,
-        desc='the output denoised DWI image',
-        genfile=True)
+        desc='the output denoised DWI image')
 
 
 class DWIDenoiseOutputSpec(TraitedSpec):
@@ -93,7 +91,8 @@ class MRDeGibbsInputSpec(MRTrix3BaseInputSpec):
         mandatory=True,
         desc='input DWI image')
     axes = traits.ListInt(
-        [0,1],
+        default_value=[0, 1],
+        use_default=True,
         sep=',',
         minlen=2,
         maxlen=2,
@@ -101,16 +100,19 @@ class MRDeGibbsInputSpec(MRTrix3BaseInputSpec):
         desc='indicate the plane in which the data was acquired (axial = 0,1; '
              'coronal = 0,2; sagittal = 1,2')
     nshifts = traits.Int(
-        20,
+        default_value=20,
+        use_default=True,
         argstr='-nshifts %d',
         desc='discretization of subpixel spacing (default = 20)')
     minW = traits.Int(
-        1,
+        default_value=1,
+        use_default=True,
         argstr='-minW %d',
         desc='left border of window used for total variation (TV) computation '
              '(default = 1)')
     maxW = traits.Int(
-        3,
+        default_value=3,
+        use_default=True,
         argstr='-maxW %d',
         desc='right border of window used for total variation (TV) computation '
              '(default = 3)')
@@ -120,8 +122,7 @@ class MRDeGibbsInputSpec(MRTrix3BaseInputSpec):
         keep_extension=True,
         argstr='%s',
         position=-1,
-        desc='the output unringed DWI image',
-        genfile=True)
+        desc='the output unringed DWI image')
 
 class MRDeGibbsOutputSpec(TraitedSpec):
     out_file = File(desc='the output unringed DWI image', exists=True)
@@ -158,7 +159,7 @@ class MRDeGibbs(MRTrix3Base):
     >>> unring = mrt.MRDeGibbs()
     >>> unring.inputs.in_file = 'dwi.mif'
     >>> unring.cmdline
-    'mrdegibbs dwi.mif dwi_unr.mif'
+    'mrdegibbs -axes 0,1 -maxW 3 -minW 1 -nshifts 20 dwi.mif dwi_unr.mif'
     >>> unring.run()                                 # doctest: +SKIP
     """
 

@@ -40,7 +40,6 @@ def test_DWIDenoise_inputs():
         noise=dict(
             argstr='-noise %s',
             extensions=None,
-            genfile=True,
             keep_extension=True,
             name_source='in_file',
             name_template='%s_noise',
@@ -52,7 +51,6 @@ def test_DWIDenoise_inputs():
         out_file=dict(
             argstr='%s',
             extensions=None,
-            genfile=True,
             keep_extension=True,
             name_source='in_file',
             name_template='%s_denoised',
