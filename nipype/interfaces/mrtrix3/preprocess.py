@@ -159,7 +159,7 @@ class MRDeGibbs(MRTrix3Base):
     >>> unring = mrt.MRDeGibbs()
     >>> unring.inputs.in_file = 'dwi.mif'
     >>> unring.cmdline
-    'mrdegibbs -axes 0,1 -maxW 3 -minW 1 -nshifts 20 dwi.mif dwi_unr.mif'
+    'mrdegibbs dwi.mif dwi_unr.mif'
     >>> unring.run()                                 # doctest: +SKIP
     """
 
