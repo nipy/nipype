@@ -204,10 +204,10 @@ class BaseInterface(Interface):
             ]
             if any(values) and isdefined(value):
                 if len(values) > 1:
-                    fmt = ("%s requires values for inputs %s because '%s' is set. " 
+                    fmt = ("%s requires values for inputs %s because '%s' is set. "
                            "For a list of required inputs, see %s.help()")
                 else:
-                    fmt = ("%s requires a value for input %s because '%s' is set. " 
+                    fmt = ("%s requires a value for input %s because '%s' is set. "
                            "For a list of required inputs, see %s.help()")
                 msg = fmt % (self.__class__.__name__,
                              ', '.join("'%s'" % req for req in spec.requires),
@@ -450,34 +450,36 @@ class BaseInterface(Interface):
             return None
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
-        """ Collate expected outputs and check for existence
-        """
+        """Collate expected outputs and apply output traits validation."""
+        outputs = self._outputs()  # Generate an empty output spec object
+        predicted_outputs = self._list_outputs()  # Predictions from _list_outputs
+        if not predicted_outputs:
+            return outputs
 
-        predicted_outputs = self._list_outputs()
-        outputs = self._outputs()
-        if predicted_outputs:
-            _unavailable_outputs = []
-            if outputs:
-                _unavailable_outputs = \
-                    self._check_version_requirements(self._outputs())
-            for key, val in list(predicted_outputs.items()):
-                if needed_outputs and key not in needed_outputs:
-                    continue
-                if key in _unavailable_outputs:
-                    raise KeyError(('Output trait %s not available in version '
-                                    '%s of interface %s. Please inform '
-                                    'developers.') % (key, self.version,
-                                                      self.__class__.__name__))
-                try:
-                    setattr(outputs, key, val)
-                except TraitError as error:
-                    if getattr(error, 'info',
-                               'default').startswith('an existing'):
-                        msg = ("File/Directory '%s' not found for %s output "
-                               "'%s'." % (val, self.__class__.__name__, key))
-                        raise FileNotFoundError(msg)
-                    raise error
+        # Precalculate the list of output trait names that should be aggregated
+        aggregate_names = set(predicted_outputs)
+        if needed_outputs is not None:
+            aggregate_names = set(needed_outputs).intersection(aggregate_names)
 
+        if aggregate_names:  # Make sure outputs are compatible
+            _na_outputs = self._check_version_requirements(outputs)
+            na_names = aggregate_names.intersection(_na_outputs)
+            if na_names:
+                # XXX Change to TypeError in Nipype 2.0
+                raise KeyError("""\
+Output trait(s) %s not available in version %s of interface %s.\
+""" % (', '.join(na_names), self.version, self.__class__.__name__))
+
+        for key in aggregate_names:  # Final aggregation
+            val = predicted_outputs[key]
+            try:
+                setattr(outputs, key, val)
+            except TraitError as error:
+                if 'an existing' in getattr(error, 'info', 'default'):
+                    msg = "No such file or directory for output '%s' of a %s interface" % \
+                        (key, self.__class__.__name__)
+                    raise FileNotFoundError(val, message=msg)
+                raise error
         return outputs
 
     @property
