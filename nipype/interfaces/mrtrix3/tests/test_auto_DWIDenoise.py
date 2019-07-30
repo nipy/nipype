@@ -15,8 +15,12 @@ def test_DWIDenoise_inputs():
         grad_file=dict(
             argstr='-grad %s',
             extensions=None,
+            xor=['grad_fsl'],
         ),
-        grad_fsl=dict(argstr='-fslgrad %s %s', ),
+        grad_fsl=dict(
+            argstr='-fslgrad %s %s',
+            xor=['grad_file'],
+        ),
         in_bval=dict(extensions=None, ),
         in_bvec=dict(
             argstr='-fslgrad %s %s',
@@ -36,6 +40,9 @@ def test_DWIDenoise_inputs():
         noise=dict(
             argstr='-noise %s',
             extensions=None,
+            keep_extension=True,
+            name_source='in_file',
+            name_template='%s_noise',
         ),
         nthreads=dict(
             argstr='-nthreads %d',
@@ -44,7 +51,6 @@ def test_DWIDenoise_inputs():
         out_file=dict(
             argstr='%s',
             extensions=None,
-            genfile=True,
             keep_extension=True,
             name_source='in_file',
             name_template='%s_denoised',

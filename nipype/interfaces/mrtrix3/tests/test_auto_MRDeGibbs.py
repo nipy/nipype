@@ -21,8 +21,12 @@ def test_MRDeGibbs_inputs():
         grad_file=dict(
             argstr='-grad %s',
             extensions=None,
+            xor=['grad_fsl'],
         ),
-        grad_fsl=dict(argstr='-fslgrad %s %s', ),
+        grad_fsl=dict(
+            argstr='-fslgrad %s %s',
+            xor=['grad_file'],
+        ),
         in_bval=dict(extensions=None, ),
         in_bvec=dict(
             argstr='-fslgrad %s %s',
@@ -53,7 +57,6 @@ def test_MRDeGibbs_inputs():
         out_file=dict(
             argstr='%s',
             extensions=None,
-            genfile=True,
             keep_extension=True,
             name_source='in_file',
             name_template='%s_unr',
