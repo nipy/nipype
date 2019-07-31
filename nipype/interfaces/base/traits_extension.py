@@ -489,13 +489,18 @@ class Either(TraitType):
 
     def __init__(self, *traits, **metadata):
         """Create a trait whose value can be any of of a specified list of traits."""
-        metadata['alternatives'] = tuple(trait_from(t) for t in traits)
+        _either_traits = tuple(trait_from(t) for t in traits)
         self.trait_maker = _TraitMaker(
             metadata.pop("default", None), *traits, **metadata)
+        self.either_traits = _either_traits
 
     def as_ctrait(self):
         """Return a CTrait corresponding to the trait defined by this class."""
         return self.trait_maker.as_ctrait()
+
+    def inner_traits(self):
+        """Return the *inner trait* (or traits) for this trait."""
+        return self.either_traits
 
 
 traits.Tuple = Tuple
@@ -550,14 +555,14 @@ def _recurse_on_path_traits(func, thistrait, value, cwd):
     elif thistrait.is_trait_type(Tuple):
         value = tuple([_recurse_on_path_traits(func, subtrait, v, cwd)
                        for subtrait, v in zip(thistrait.inner_traits, value)])
-    elif thistrait.alternatives:
+    elif thistrait.is_trait_type(Either):
         is_str = [f.is_trait_type((traits.String, traits.BaseStr, traits.BaseBytes, Str))
-                  for f in thistrait.alternatives]
+                  for f in thistrait.inner_traits]
         if any(is_str) and isinstance(value, (bytes, str)) and not value.startswith('/'):
             return value
-        is_basepath = [f.is_trait_type(BasePath) for f in thistrait.alternatives]
+        is_basepath = [f.is_trait_type(BasePath) for f in thistrait.inner_traits]
         if any(is_basepath):
-            subtrait = thistrait.alternatives[is_basepath.index(True)]
+            subtrait = thistrait.inner_traits[is_basepath.index(True)]
             value = _recurse_on_path_traits(func, subtrait, value, cwd)
     return value
 
