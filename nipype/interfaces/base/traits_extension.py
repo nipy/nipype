@@ -471,36 +471,12 @@ InputMultiPath = InputMultiObject
 OutputMultiPath = OutputMultiObject
 
 
-class Tuple(traits.BaseTuple):
-    """Defines a new type of Tuple trait that reports inner types."""
-
-    def init_fast_validator(self, *args):
-        """Set up the C-level fast validator."""
-        super(Tuple, self).init_fast_validator(*args)
-        self.fast_validate = args
-
-    def inner_traits(self):
-        """Return the *inner trait* (or traits) for this trait."""
-        return self.types
+class Tuple(traits.Tuple):
+    pass
 
 
-class Either(TraitType):
-    """Defines a trait whose value can be any of of a specified list of traits."""
-
-    def __init__(self, *traits, **metadata):
-        """Create a trait whose value can be any of of a specified list of traits."""
-        _either_traits = tuple(trait_from(t) for t in traits)
-        self.trait_maker = _TraitMaker(
-            metadata.pop("default", None), *traits, **metadata)
-        self.either_traits = _either_traits
-
-    def as_ctrait(self):
-        """Return a CTrait corresponding to the trait defined by this class."""
-        return self.trait_maker.as_ctrait()
-
-    def inner_traits(self):
-        """Return the *inner trait* (or traits) for this trait."""
-        return self.either_traits
+class Either(traits.Either):
+    pass
 
 
 traits.Tuple = Tuple
@@ -548,22 +524,22 @@ def _recurse_on_path_traits(func, thistrait, value, cwd):
 
         value = [_recurse_on_path_traits(func, innertrait, v, cwd)
                  for v in value]
-    elif thistrait.is_trait_type(traits.Dict):
+    elif isinstance(value, dict) and thistrait.is_trait_type(traits.Dict):
         _, innertrait = thistrait.inner_traits
         value = {k: _recurse_on_path_traits(func, innertrait, v, cwd)
                  for k, v in value.items()}
-    elif thistrait.is_trait_type(Tuple):
+    elif isinstance(value, tuple) and thistrait.is_trait_type(Tuple):
         value = tuple([_recurse_on_path_traits(func, subtrait, v, cwd)
-                       for subtrait, v in zip(thistrait.inner_traits, value)])
-    elif thistrait.is_trait_type(Either):
-        is_str = [f.is_trait_type((traits.String, traits.BaseStr, traits.BaseBytes, Str))
-                  for f in thistrait.inner_traits]
+                       for subtrait, v in zip(thistrait.handler.types, value)])
+    elif thistrait.is_trait_type(traits.TraitCompound):
+        is_str = [isinstance(f, (traits.String, traits.BaseStr, traits.BaseBytes, Str))
+                  for f in thistrait.handler.handlers]
         if any(is_str) and isinstance(value, (bytes, str)) and not value.startswith('/'):
             return value
-        is_basepath = [f.is_trait_type(BasePath) for f in thistrait.inner_traits]
-        if any(is_basepath):
-            subtrait = thistrait.inner_traits[is_basepath.index(True)]
-            value = _recurse_on_path_traits(func, subtrait, value, cwd)
+
+        for subtrait in thistrait.handler.handlers:
+            value = _recurse_on_path_traits(func, subtrait(), value, cwd)
+
     return value
 
 
