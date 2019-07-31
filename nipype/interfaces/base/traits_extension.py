@@ -30,7 +30,6 @@ from traits import __version__ as traits_version
 import traits.api as traits
 from traits.trait_handlers import TraitType, NoDefaultSpecified
 from traits.trait_base import _Undefined
-from traits.traits import _TraitMaker, trait_from
 
 from traits.api import Unicode
 from future import standard_library
@@ -38,11 +37,6 @@ from ...utils.filemanip import Path, USING_PATHLIB2
 
 if USING_PATHLIB2:
     from future.types.newstr import newstr
-
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path
 
 
 if traits_version < '3.7.0':
@@ -471,18 +465,6 @@ InputMultiPath = InputMultiObject
 OutputMultiPath = OutputMultiObject
 
 
-class Tuple(traits.Tuple):
-    pass
-
-
-class Either(traits.Either):
-    pass
-
-
-traits.Tuple = Tuple
-traits.Either = Either
-
-
 def _rebase_path(value, cwd):
     if isinstance(value, list):
         return [_rebase_path(v, cwd) for v in value]
@@ -528,7 +510,7 @@ def _recurse_on_path_traits(func, thistrait, value, cwd):
         _, innertrait = thistrait.inner_traits
         value = {k: _recurse_on_path_traits(func, innertrait, v, cwd)
                  for k, v in value.items()}
-    elif isinstance(value, tuple) and thistrait.is_trait_type(Tuple):
+    elif isinstance(value, tuple) and thistrait.is_trait_type(traits.Tuple):
         value = tuple([_recurse_on_path_traits(func, subtrait, v, cwd)
                        for subtrait, v in zip(thistrait.handler.types, value)])
     elif thistrait.is_trait_type(traits.TraitCompound):

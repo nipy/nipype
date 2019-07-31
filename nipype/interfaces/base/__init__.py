@@ -22,7 +22,7 @@ from .specs import (BaseTraitedSpec, TraitedSpec, DynamicTraitedSpec,
 from .traits_extension import (
     traits, Undefined, isdefined, has_metadata,
     File, ImageFile, Directory,
-    Tuple, Either, Str, DictStrStr,
+    Str, DictStrStr,
     OutputMultiObject, InputMultiObject,
     OutputMultiPath, InputMultiPath)
 
