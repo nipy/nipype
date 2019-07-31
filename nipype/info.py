@@ -140,6 +140,7 @@ REQUIRES = [
     'funcsigs',
     'future>=%s' % FUTURE_MIN_VERSION,
     'futures; python_version == "2.7"',
+    'lxml<4.4.0; python_version == "3.4"',
     'networkx>=%s ; python_version >= "3.0"' % NETWORKX_MIN_VERSION,
     'networkx>=%s,<=%s ; python_version < "3.0"' % (NETWORKX_MIN_VERSION, NETWORKX_MAX_VERSION_27),
     'nibabel>=%s' % NIBABEL_MIN_VERSION,
