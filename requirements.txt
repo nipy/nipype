@@ -8,6 +8,7 @@ numpy>=1.9.0
 packaging
 pathlib2
 prov>=1.5.2
+lxml<4.4.0 ; python_version == "3.4"
 neurdflib
 pydot>=1.2.3
 pydotplus
