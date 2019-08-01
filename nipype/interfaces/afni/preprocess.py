@@ -369,7 +369,7 @@ class AllineateInputSpec(AFNICommandInputSpec):
         'larger weights mean that voxel count more in the cost function. '
         'If an image file is given, the volume must be defined on the '
         'same grid as the base dataset')
-    out_weight_file = traits.File(
+    out_weight_file = File(
         argstr='-wtprefix %s',
         desc='Write the weight volume to disk as a dataset',
         xor=['allcostx'])
@@ -966,7 +966,7 @@ class ClipLevelInputSpec(CommandLineInputSpec):
         argstr='-doall',
         position=3,
         xor=('grad'))
-    grad = traits.File(
+    grad = File(
         desc='Also compute a \'gradual\' clip level as a function of voxel '
         'position, and output that to a dataset.',
         argstr='-grad %s',
@@ -1831,7 +1831,7 @@ class ROIStatsInputSpec(CommandLineInputSpec):
              'a \'0\' in the output file. Only active if `num_roi` is '
              'enabled.',
         argstr='-zerofill %s')
-    roisel = traits.File(
+    roisel = File(
         exists=True,
         desc='Only considers ROIs denoted by values found in the specified '
              'file. Note that the order of the ROIs as specified in the file '
@@ -2260,7 +2260,7 @@ class TCorrMapInputSpec(AFNICommandInputSpec):
     polort = traits.Int(argstr='-polort %d')
     bandpass = traits.Tuple(
         (traits.Float(), traits.Float()), argstr='-bpass %f %f')
-    regress_out_timeseries = traits.File(exists=True, argstr='-ort %s')
+    regress_out_timeseries = File(exists=True, argstr='-ort %s')
     blur_fwhm = traits.Float(argstr='-Gblur %f')
     seeds_width = traits.Float(argstr='-Mseed %f', xor=('seeds'))
 
@@ -3249,7 +3249,7 @@ or the inverse can be computed as needed in 3dNwarpApply, like
         '* As with \'-wball\', the factor \'f\' should be between 1 and 100.'
         '* You cannot use \'-wball\' and \'-wmask\' together!',
         argstr='-wpass %s %f')
-    out_weight_file = traits.File(
+    out_weight_file = File(
         argstr='-wtprefix %s',
         desc='Write the weight volume to disk as a dataset')
     blur = traits.List(

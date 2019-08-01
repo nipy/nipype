@@ -383,7 +383,7 @@ class RemlfitInputSpec(AFNICommandInputSpec):
         'produces a matrix with a single column of all ones',
         argstr='-polort %d',
         xor=['matrix'])
-    matim = traits.File(
+    matim = File(
         desc='read a standard file as the matrix. You can use only Col as '
         'a name in GLTs with these nonstandard matrix input methods, '
         'since the other names come from the \'matrix\' file. '

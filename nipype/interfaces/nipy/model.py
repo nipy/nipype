@@ -51,7 +51,7 @@ class FitGLMInputSpec(BaseInterfaceInputSpec):
               "is more time consuming but it supports "
               "autoregressive model"),
         usedefault=True)
-    mask = traits.File(
+    mask = File(
         exists=True,
         desc=("restrict the fitting only to the region defined "
               "by this mask"))
@@ -72,7 +72,7 @@ class FitGLMOutputSpec(TraitedSpec):
     constants = traits.Any()
     axis = traits.Any()
     reg_names = traits.List()
-    residuals = traits.File()
+    residuals = File()
     a = File(exists=True)
 
 
@@ -264,7 +264,7 @@ class EstimateContrastInputSpec(BaseInterfaceInputSpec):
     constants = traits.Any(mandatory=True)
     axis = traits.Any(mandatory=True)
     reg_names = traits.List(mandatory=True)
-    mask = traits.File(exists=True)
+    mask = File(exists=True)
 
 
 class EstimateContrastOutputSpec(TraitedSpec):

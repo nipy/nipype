@@ -13,7 +13,7 @@ from ... import engine as pe
 class InputSpec(nib.TraitedSpec):
     input1 = nib.traits.Int(desc='a random int')
     input2 = nib.traits.Int(desc='a random int')
-    input_file = nib.traits.File(desc='Random File')
+    input_file = nib.File(desc='Random File')
 
 
 class OutputSpec(nib.TraitedSpec):

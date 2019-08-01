@@ -38,6 +38,7 @@ from ...utils.filemanip import Path, USING_PATHLIB2
 if USING_PATHLIB2:
     from future.types.newstr import newstr
 
+
 if traits_version < '3.7.0':
     raise ImportError('Traits version 3.7.0 or higher must be installed')
 
@@ -153,7 +154,6 @@ class BasePath(TraitType):
 
         return value
 
-
 class Directory(BasePath):
     """
     Defines a trait whose value must be a directory path.
@@ -194,13 +194,11 @@ class Directory(BasePath):
     >>> a.foo
     'relative_dir'
 
-
     >>> class A(TraitedSpec):
     ...     foo = Directory('tmpdir')
     >>> a = A()
     >>> a.foo  # doctest: +ELLIPSIS
     <undefined>
-
 
     >>> class A(TraitedSpec):
     ...     foo = Directory('tmpdir', usedefault=True)
@@ -465,3 +463,78 @@ class InputMultiObject(MultiObject):
 
 InputMultiPath = InputMultiObject
 OutputMultiPath = OutputMultiObject
+
+
+def _rebase_path(value, cwd):
+    if isinstance(value, list):
+        return [_rebase_path(v, cwd) for v in value]
+
+    try:
+        value = Path(value)
+    except TypeError:
+        pass
+    else:
+        try:
+            value = value.relative_to(cwd)
+        except ValueError:
+            pass
+    return value
+
+
+def _resolve_path(value, cwd):
+    if isinstance(value, list):
+        return [_resolve_path(v, cwd) for v in value]
+
+    try:
+        value = Path(value)
+    except TypeError:
+        pass
+    else:
+        if not value.is_absolute():
+            value = Path(cwd).absolute() / value
+    return value
+
+
+def _recurse_on_path_traits(func, thistrait, value, cwd):
+    """Run func recursively on BasePath-derived traits."""
+    if thistrait.is_trait_type(BasePath):
+        value = func(value, cwd)
+    elif thistrait.is_trait_type(traits.List):
+        innertrait, = thistrait.inner_traits
+        if not isinstance(value, (list, tuple)):
+            value = [value]
+
+        value = [_recurse_on_path_traits(func, innertrait, v, cwd)
+                 for v in value]
+    elif isinstance(value, dict) and thistrait.is_trait_type(traits.Dict):
+        _, innertrait = thistrait.inner_traits
+        value = {k: _recurse_on_path_traits(func, innertrait, v, cwd)
+                 for k, v in value.items()}
+    elif isinstance(value, tuple) and thistrait.is_trait_type(traits.Tuple):
+        value = tuple([_recurse_on_path_traits(func, subtrait, v, cwd)
+                       for subtrait, v in zip(thistrait.handler.types, value)])
+    elif thistrait.is_trait_type(traits.TraitCompound):
+        is_str = [isinstance(f, (traits.String, traits.BaseStr, traits.BaseBytes, Str))
+                  for f in thistrait.handler.handlers]
+        if any(is_str) and isinstance(value, (bytes, str)) and not value.startswith('/'):
+            return value
+
+        for subtrait in thistrait.handler.handlers:
+            try:
+                sb_instance = subtrait()
+            except TypeError:
+                return value
+            else:
+                value = _recurse_on_path_traits(func, sb_instance, value, cwd)
+
+    return value
+
+
+def rebase_path_traits(thistrait, value, cwd):
+    """Rebase a BasePath-derived trait given an interface spec."""
+    return _recurse_on_path_traits(_rebase_path, thistrait, value, cwd)
+
+
+def resolve_path_traits(thistrait, value, cwd):
+    """Resolve a BasePath-derived trait given an interface spec."""
+    return _recurse_on_path_traits(_resolve_path, thistrait, value, cwd)

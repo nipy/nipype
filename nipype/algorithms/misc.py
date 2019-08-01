@@ -727,7 +727,7 @@ class AddCSVColumn(BaseInterface):
 
 
 class AddCSVRowInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    in_file = traits.File(
+    in_file = File(
         mandatory=True, desc='Input comma-separated value (CSV) files')
     _outputs = traits.Dict(traits.Any, value={}, usedefault=True)
 

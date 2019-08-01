@@ -25,6 +25,8 @@ from ...utils.filemanip import (
     md5, hash_infile, hash_timestamp, to_str, USING_PATHLIB2)
 from .traits_extension import (
     traits,
+    File,
+    Str,
     Undefined,
     isdefined,
     has_metadata,
@@ -373,13 +375,13 @@ if not USING_PATHLIB2:
 
 
 class CommandLineInputSpec(BaseInterfaceInputSpec):
-    args = traits.Str(argstr='%s', desc='Additional parameters to the command')
+    args = Str(argstr='%s', desc='Additional parameters to the command')
     environ = traits.DictStrStr(
         desc='Environment variables', usedefault=True, nohash=True)
 
 
 class StdOutCommandLineInputSpec(CommandLineInputSpec):
-    out_file = traits.File(argstr="> %s", position=-1, genfile=True)
+    out_file = File(argstr="> %s", position=-1, genfile=True)
 
 
 class MpiCommandLineInputSpec(CommandLineInputSpec):
