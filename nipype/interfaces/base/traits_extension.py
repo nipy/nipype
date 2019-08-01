@@ -520,7 +520,12 @@ def _recurse_on_path_traits(func, thistrait, value, cwd):
             return value
 
         for subtrait in thistrait.handler.handlers:
-            value = _recurse_on_path_traits(func, subtrait(), value, cwd)
+            try:
+                sb_instance = subtrait()
+            except TypeError:
+                return value
+            else:
+                value = _recurse_on_path_traits(func, sb_instance, value, cwd)
 
     return value
 

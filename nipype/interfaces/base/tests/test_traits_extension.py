@@ -20,6 +20,7 @@ class _test_spec(nib.TraitedSpec):
     i = nib.traits.Either(nib.File, nib.traits.Tuple(nib.File, nib.traits.Int))
     j = nib.traits.Either(nib.File, nib.traits.Tuple(nib.File, nib.traits.Int),
                           nib.traits.Dict(nib.Str, nib.File()))
+    k = nib.DictStrStr
 
 
 def test_rebase_resolve_path_traits():
@@ -209,7 +210,6 @@ def test_rebase_resolve_path_traits():
     # Idempotence
     assert resolve_path_traits(spec.trait('g'), g, '/some') == g
 
-    v = v
     g = rebase_path_traits(spec.trait('g'), v, '/some/path')
     assert g == v  # You dont want this one to be a Path
 
@@ -300,3 +300,13 @@ def test_rebase_resolve_path_traits():
 
     # Idempotence
     assert resolve_path_traits(spec.trait('j'), j, '/some/path') == j
+
+    v = {'path': '/some/path/f1.txt'}
+    k = rebase_path_traits(spec.trait('k'), v, '/some/path')
+    assert k == v
+
+    # Idempotence
+    assert rebase_path_traits(spec.trait('k'), k, '/some/path') == k
+
+    k = resolve_path_traits(spec.trait('k'), k, '/some/path')
+    assert k == v
