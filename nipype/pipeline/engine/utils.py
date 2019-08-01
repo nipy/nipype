@@ -245,19 +245,21 @@ def save_resultfile(result, cwd, name, rebase=True):
         savepkl(resultsfile, result)
         return
 
+    backup_traits = {}
     try:
         with indirectory(cwd):
             # All the magic to fix #2944 resides here:
             for key, old in list(outputs.items()):
                 if isdefined(old):
+                    old = result.outputs.trait(key).handler.get_value(result.outputs, key)
+                    backup_traits[key] = old
                     val = rebase_path_traits(result.outputs.trait(key), old, cwd)
                     setattr(result.outputs, key, val)
         savepkl(resultsfile, result)
     finally:
         # Restore resolved paths from the outputs dict no matter what
-        for key, val in list(outputs.items()):
-            if isdefined(val):
-                setattr(result.outputs, key, val)
+        for key, val in list(backup_traits.items()):
+            setattr(result.outputs, key, val)
 
 
 def load_resultfile(results_file, resolve=True):
@@ -308,6 +310,8 @@ def load_resultfile(results_file, resolve=True):
             logger.debug('Resolving paths in outputs loaded from results file.')
             for trait_name, old in list(outputs.items()):
                 if isdefined(old):
+                    old = result.outputs.trait(trait_name).handler.get_value(
+                        result.outputs, trait_name)
                     value = resolve_path_traits(result.outputs.trait(trait_name), old,
                                                 results_file.parent)
                     setattr(result.outputs, trait_name, value)
