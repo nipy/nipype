@@ -142,7 +142,7 @@ class ProductInterface(nib.BaseInterface):
         return outputs
 
 
-@pytest.mark.parametrize('needed_outputs', [True, False])
+@pytest.mark.parametrize('needed_outputs', ['true', 'false'])
 def test_join_expansion(tmpdir, needed_outputs):
     global _sums
     global _sum_operands
@@ -154,7 +154,7 @@ def test_join_expansion(tmpdir, needed_outputs):
     _sum_operands = []
     _sums = []
 
-    config.set('execution', 'remove_unnecessary_outputs', ['false', 'true'][needed_outputs])
+    config.set('execution', 'remove_unnecessary_outputs', needed_outputs)
     # Make the workflow.
     wf = pe.Workflow(name='test')
     # the iterated input node
