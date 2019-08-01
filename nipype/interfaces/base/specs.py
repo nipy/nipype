@@ -340,7 +340,7 @@ class BaseTraitedSpec(traits.HasTraits):
         state = super(BaseTraitedSpec, self).__getstate__()
         for key in self.__all__:
             _trait_spec = self.trait(key)
-            if _trait_spec.is_trait_type((OutputMultiObject, OutputMultiPath)):
+            if _trait_spec.is_trait_type(OutputMultiObject):
                 state[key] = _trait_spec.handler.get_value(self, key)
         return state
 
