@@ -41,9 +41,10 @@ from ...utils.filemanip import (
 )
 from ...utils.misc import str2bool
 from ...utils.functions import create_function_from_source
-from ...interfaces.base.traits_extension import rebase_path_traits, resolve_path_traits
-from ...interfaces.base import (Bunch, CommandLine, isdefined, Undefined,
-                                InterfaceResult, traits)
+from ...interfaces.base.traits_extension import (
+    rebase_path_traits, resolve_path_traits, OutputMultiPath, isdefined, Undefined, traits)
+from ...interfaces.base.support import Bunch, InterfaceResult
+from ...interfaces.base import CommandLine
 from ...interfaces.utility import IdentityInterface
 from ...utils.provenance import ProvStore, pm, nipype_ns, get_id
 
@@ -239,7 +240,7 @@ def save_resultfile(result, cwd, name, rebase=True):
         savepkl(resultsfile, result)
         return
     try:
-        outputs = result.outputs.trait_get()
+        output_names = result.outputs.copyable_trait_names()
     except AttributeError:
         logger.debug('Storing non-traited results, skipping rebase of paths')
         savepkl(resultsfile, result)
@@ -249,9 +250,12 @@ def save_resultfile(result, cwd, name, rebase=True):
     try:
         with indirectory(cwd):
             # All the magic to fix #2944 resides here:
-            for key, old in list(outputs.items()):
+            for key in output_names:
+                old = getattr(result.outputs, key)
                 if isdefined(old):
-                    old = result.outputs.trait(key).handler.get_value(result.outputs, key)
+                    if result.outputs.trait(key).is_trait_type(OutputMultiPath):
+                        old = result.outputs.trait(key).handler.get_value(
+                            result.outputs, key)
                     backup_traits[key] = old
                     val = rebase_path_traits(result.outputs.trait(key), old, cwd)
                     setattr(result.outputs, key, val)
@@ -310,8 +314,9 @@ def load_resultfile(results_file, resolve=True):
             logger.debug('Resolving paths in outputs loaded from results file.')
             for trait_name, old in list(outputs.items()):
                 if isdefined(old):
-                    old = result.outputs.trait(trait_name).handler.get_value(
-                        result.outputs, trait_name)
+                    if result.outputs.trait(trait_name).is_trait_type(OutputMultiPath):
+                        old = result.outputs.trait(trait_name).handler.get_value(
+                            result.outputs, trait_name)
                     value = resolve_path_traits(result.outputs.trait(trait_name), old,
                                                 results_file.parent)
                     setattr(result.outputs, trait_name, value)
