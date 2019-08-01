@@ -154,6 +154,7 @@ def test_join_expansion(tmpdir, needed_outputs):
     _sum_operands = []
     _sums = []
 
+    prev_state = config.get('execution', 'remove_unnecessary_outputs')
     config.set('execution', 'remove_unnecessary_outputs', needed_outputs)
     # Make the workflow.
     wf = pe.Workflow(name='test')
@@ -203,7 +204,7 @@ def test_join_expansion(tmpdir, needed_outputs):
     # there are two iterations of the post-join node in the iterable path
     assert len(_products) == 2,\
         "The number of iterated post-join outputs is incorrect"
-
+    config.set('execution', 'remove_unnecessary_outputs', prev_state)
 
 
 def test_node_joinsource(tmpdir):
