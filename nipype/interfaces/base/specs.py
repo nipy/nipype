@@ -31,7 +31,6 @@ from .traits_extension import (
     isdefined,
     has_metadata,
     OutputMultiObject,
-    OutputMultiPath,
 )
 
 from ... import config, __version__
