@@ -226,86 +226,11 @@ def write_report(node, report_type=None, is_mapnode=False):
     return
 
 
-def _identify_collapses(hastraits):
-    """ Identify traits that will collapse when being set to themselves.
-
-    ``OutputMultiObject``s automatically unwrap a list of length 1 to directly
-    reference the element of that list.
-    If that element is itself a list of length 1, then the following will
-    result in modified values.
-
-        hastraits.trait_set(**hastraits.trait_get())
-
-    Cloning performs this operation on a copy of the original traited object,
-    allowing us to identify traits that will be affected.
-    """
-    raw = hastraits.trait_get()
-    cloned = hastraits.clone_traits().trait_get()
-
-    collapsed = set()
-    for key in cloned:
-        orig = raw[key]
-        new = cloned[key]
-        # Allow numpy to handle the equality checks, as mixed lists and arrays
-        # can be problematic.
-        if isinstance(orig, list) and len(orig) == 1 and (
-                not np.array_equal(orig, new) and np.array_equal(orig[0], new)):
-            collapsed.add(key)
-
-    return collapsed
-
-
-def _uncollapse(indexable, collapsed):
-    """ Wrap collapsible values in a list to prevent double-collapsing.
-
-    Should be used with _identify_collapses to provide the following
-    idempotent operation:
-
-        collapsed = _identify_collapses(hastraits)
-        hastraits.trait_set(**_uncollapse(hastraits.trait_get(), collapsed))
-
-    NOTE: Modifies object in-place, in addition to returning it.
-    """
-
-    for key in indexable:
-        if key in collapsed:
-            indexable[key] = [indexable[key]]
-    return indexable
-
-
-def _protect_collapses(hastraits):
-    """ A collapse-protected replacement for hastraits.trait_get()
-
-    May be used as follows to provide an idempotent trait_set:
-
-        hastraits.trait_set(**_protect_collapses(hastraits))
-    """
-    collapsed = _identify_collapses(hastraits)
-    return _uncollapse(hastraits.trait_get(), collapsed)
-
-
 def save_resultfile(result, cwd, name):
     """Save a result pklz file to ``cwd``"""
     resultsfile = os.path.join(cwd, 'result_%s.pklz' % name)
-    if result.outputs:
-        try:
-            collapsed = _identify_collapses(result.outputs)
-            outputs = _uncollapse(result.outputs.trait_get(), collapsed)
-            # Double-protect tosave so that the original, uncollapsed trait
-            # is saved in the pickle file. Thus, when the loading process
-            # collapses, the original correct value is loaded.
-            tosave = _uncollapse(outputs.copy(), collapsed)
-        except AttributeError:
-            tosave = outputs = result.outputs.dictcopy()  # outputs was a bunch
-        for k, v in list(modify_paths(tosave, relative=True, basedir=cwd).items()):
-            setattr(result.outputs, k, v)
-
     savepkl(resultsfile, result)
     logger.debug('saved results in %s', resultsfile)
-
-    if result.outputs:
-        for k, v in list(outputs.items()):
-            setattr(result.outputs, k, v)
 
 
 def load_resultfile(path, name):
@@ -349,20 +274,10 @@ def load_resultfile(path, name):
                 logger.debug(
                     'some file does not exist. hence trait cannot be set')
         else:
-            if result.outputs:
-                try:
-                    outputs = _protect_collapses(result.outputs)
-                except AttributeError:
-                    outputs = result.outputs.dictcopy()  # outputs == Bunch
-                try:
-                    for k, v in list(modify_paths(outputs, relative=False,
-                                                  basedir=path).items()):
-                        setattr(result.outputs, k, v)
-                except FileNotFoundError:
-                    logger.debug('conversion to full path results in '
-                                 'non existent file')
             aggregate = False
-        pkl_file.close()
+        finally:
+            pkl_file.close()
+
     logger.debug('Aggregate: %s', aggregate)
     return result, aggregate, attribute_error
 

@@ -30,6 +30,8 @@ from .traits_extension import (
     Undefined,
     isdefined,
     has_metadata,
+    OutputMultiObject,
+    OutputMultiPath,
 )
 
 from ... import config, __version__
@@ -315,6 +317,32 @@ class BaseTraitedSpec(traits.HasTraits):
     @property
     def __all__(self):
         return self.copyable_trait_names()
+
+    def __getstate__(self):
+        """
+        Override __getstate__ so that OutputMultiObjects are correctly pickled.
+
+        >>> class OutputSpec(TraitedSpec):
+        ...     out = OutputMultiObject(traits.List(traits.Int))
+        >>> spec = OutputSpec()
+        >>> spec.out = [[4]]
+        >>> spec.out
+        [4]
+
+        >>> spec.__getstate__()['out']
+        [[4]]
+
+        >>> spec.__setstate__(spec.__getstate__())
+        >>> spec.out
+        [4]
+
+        """
+        state = super(BaseTraitedSpec, self).__getstate__()
+        for key in self.__all__:
+            _trait_spec = self.trait(key)
+            if _trait_spec.is_trait_type((OutputMultiObject, OutputMultiPath)):
+                state[key] = _trait_spec.handler.get_value(self, key)
+        return state
 
 
 def _deepcopypatch(self, memo):
