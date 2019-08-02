@@ -255,8 +255,6 @@ def load_resultfile(results_file):
     """
     aggregate = True
     results_file = Path(results_file)
-    path = '%s' % results_file.parents
-
     result = None
     attribute_error = False
     if results_file.exists():
