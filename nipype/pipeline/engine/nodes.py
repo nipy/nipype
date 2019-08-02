@@ -194,7 +194,8 @@ class Node(EngineBase):
     @property
     def result(self):
         """Get result from result file (do not hold it in memory)"""
-        return _load_resultfile(self.output_dir(), self.name)[0]
+        return _load_resultfile(
+            op.join(self.output_dir(), 'result_%s.pklz' % self.name))[0]
 
     @property
     def inputs(self):
@@ -517,7 +518,7 @@ directory. Please ensure no other concurrent workflows are racing""", hashfile_u
             logger.debug('input: %s', key)
             results_file = info[0]
             logger.debug('results file: %s', results_file)
-            outputs = loadpkl(results_file).outputs
+            outputs = _load_resultfile(results_file)[0].outputs
             if outputs is None:
                 raise RuntimeError("""\
 Error populating the input "%s" of node "%s": the results file of the source node \
@@ -564,7 +565,8 @@ Error populating the input "%s" of node "%s": the results file of the source nod
 
     def _load_results(self):
         cwd = self.output_dir()
-        result, aggregate, attribute_error = _load_resultfile(cwd, self.name)
+        result, aggregate, attribute_error = _load_resultfile(
+            op.join(cwd, 'result_%s.pklz' % self.name))
         # try aggregating first
         if aggregate:
             logger.debug('aggregating results')
