@@ -267,6 +267,30 @@ class File(BasePath):
     >>> a.foo  # doctest: +ELLIPSIS
     '.../idoexist.txt'
 
+    >>> class A(TraitedSpec):
+    ...     foo = File(extensions=['.nii', '.nii.gz'])
+    >>> a = A()
+    >>> a.foo = 'badext.txt'  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+    TraitError:
+
+    >>> class A(TraitedSpec):
+    ...     foo = File(extensions=['.nii', '.nii.gz'])
+    >>> a = A()
+    >>> a.foo = 'goodext.nii'
+    >>> a.foo
+    'goodext.nii'
+
+    >>> a = A()
+    >>> a.foo = 'idontexist.000.nii'
+    >>> a.foo  # doctest: +ELLIPSIS
+    'idontexist.000.nii'
+
+    >>> a = A()
+    >>> a.foo = 'idontexist.000.nii.gz'
+    >>> a.foo  # doctest: +ELLIPSIS
+    'idontexist.000.nii.gz'
+
     """
 
     _is_file = True
@@ -292,8 +316,8 @@ class File(BasePath):
         """Validate a value change."""
         value = super(File, self).validate(objekt, name, value, return_pathlike=True)
         if self._exts:
-            ext = ''.join(value.suffixes)
-            if ext not in self._exts:
+            fname = value.name
+            if not any((fname.endswith(e) for e in self._exts)):
                 self.error(objekt, name, str(value))
 
         if not return_pathlike:
