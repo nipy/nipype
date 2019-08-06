@@ -16,7 +16,6 @@ from glob import glob
 
 from traceback import format_exception
 from hashlib import sha1
-import gzip
 
 from functools import reduce
 
@@ -25,6 +24,7 @@ from future import standard_library
 
 from ... import logging, config, LooseVersion
 from ...utils.filemanip import (
+    Path,
     relpath,
     makedirs,
     fname_presuffix,
@@ -34,6 +34,7 @@ from ...utils.filemanip import (
     FileNotFoundError,
     save_json,
     savepkl,
+    loadpkl,
     write_rst_header,
     write_rst_dict,
     write_rst_list,
@@ -233,7 +234,7 @@ def save_resultfile(result, cwd, name):
     logger.debug('saved results in %s', resultsfile)
 
 
-def load_resultfile(path, name):
+def load_resultfile(results_file):
     """
     Load InterfaceResult file from path
 
@@ -253,17 +254,12 @@ def load_resultfile(path, name):
         rerun
     """
     aggregate = True
-    resultsoutputfile = os.path.join(path, 'result_%s.pklz' % name)
+    results_file = Path(results_file)
     result = None
     attribute_error = False
-    if os.path.exists(resultsoutputfile):
-        pkl_file = gzip.open(resultsoutputfile, 'rb')
+    if results_file.exists():
         try:
-            result = pickle.load(pkl_file)
-        except UnicodeDecodeError:
-            # Was this pickle created with Python 2.x?
-            pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
-            logger.warning('Successfully loaded pkl in compatibility mode')
+            result = loadpkl(results_file)
         except (traits.TraitError, AttributeError, ImportError,
                 EOFError) as err:
             if isinstance(err, (AttributeError, ImportError)):
@@ -275,8 +271,6 @@ def load_resultfile(path, name):
                     'some file does not exist. hence trait cannot be set')
         else:
             aggregate = False
-        finally:
-            pkl_file.close()
 
     logger.debug('Aggregate: %s', aggregate)
     return result, aggregate, attribute_error
