@@ -682,7 +682,7 @@ def loadpkl(infile, versioning=False):
     pklopen = gzip.open if infile.suffix == '.pklz' else open
     pkl_metadata = None
 
-    with indirectory(str(infile.parent)):
+    with indirectory(infile.parent):
         pkl_file = pklopen(infile.name, 'rb')
 
         try:  # Look if pkl file contains version file
@@ -1039,7 +1039,7 @@ def relpath(path, start=None):
 @contextlib.contextmanager
 def indirectory(path):
     cwd = os.getcwd()
-    os.chdir(path)
+    os.chdir(str(path))
     try:
         yield
     finally:
