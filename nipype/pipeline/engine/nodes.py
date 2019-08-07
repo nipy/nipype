@@ -587,7 +587,9 @@ Error populating the input "%s" of node "%s": the results file of the source nod
                     runtime=runtime,
                     inputs=self._interface.inputs.get_traitsfree(),
                     outputs=aggouts)
-                _save_resultfile(result, cwd, self.name)
+                _save_resultfile(
+                    result, cwd, self.name,
+                    rebase=str2bool(self.config['execution']['use_relative_paths']))
             else:
                 logger.debug('aggregating mapnode results')
                 result = self._run_interface()
@@ -634,7 +636,9 @@ Error populating the input "%s" of node "%s": the results file of the source nod
             except Exception as msg:
                 result.runtime.stderr = '{}\n\n{}'.format(
                     getattr(result.runtime, 'stderr', ''), msg)
-                _save_resultfile(result, outdir, self.name)
+                _save_resultfile(
+                    result, outdir, self.name,
+                    rebase=str2bool(self.config['execution']['use_relative_paths']))
                 raise
             cmdfile = op.join(outdir, 'command.txt')
             with open(cmdfile, 'wt') as fd:
@@ -646,7 +650,9 @@ Error populating the input "%s" of node "%s": the results file of the source nod
         except Exception as msg:
             result.runtime.stderr = '%s\n\n%s'.format(
                 getattr(result.runtime, 'stderr', ''), msg)
-            _save_resultfile(result, outdir, self.name)
+            _save_resultfile(
+                result, outdir, self.name,
+                rebase=str2bool(self.config['execution']['use_relative_paths']))
             raise
 
         dirs2keep = None
@@ -660,7 +666,9 @@ Error populating the input "%s" of node "%s": the results file of the source nod
             self.needed_outputs,
             self.config,
             dirs2keep=dirs2keep)
-        _save_resultfile(result, outdir, self.name)
+        _save_resultfile(
+            result, outdir, self.name,
+            rebase=str2bool(self.config['execution']['use_relative_paths']))
 
         return result
 

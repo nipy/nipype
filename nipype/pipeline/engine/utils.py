@@ -229,8 +229,11 @@ def write_report(node, report_type=None, is_mapnode=False):
     return
 
 
-def save_resultfile(result, cwd, name, rebase=True):
+def save_resultfile(result, cwd, name, rebase=None):
     """Save a result pklz file to ``cwd``."""
+    if rebase is None:
+        rebase = config.getboolean('execution', 'use_relative_paths')
+
     cwd = os.path.abspath(cwd)
     resultsfile = os.path.join(cwd, 'result_%s.pklz' % name)
     logger.debug("Saving results file: '%s'", resultsfile)
