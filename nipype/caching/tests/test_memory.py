@@ -15,8 +15,7 @@ class SideEffectInterface(EngineTestInterface):
     def _run_interface(self, runtime):
         global nb_runs
         nb_runs += 1
-        runtime.returncode = 0
-        return runtime
+        return super(SideEffectInterface, self)._run_interface(runtime)
 
 
 def test_caching(tmpdir):
