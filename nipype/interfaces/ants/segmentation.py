@@ -306,6 +306,23 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
         usedefault=True,
         desc='copy headers of the original image into the '
         'output (corrected) file')
+    rescale_intensities = traits.Bool(
+        argstr='--rescale-intensities %d',
+        desc='Constrain intensities of bias-corrected images by rescaling '
+        'them to [min, max] of the input image intensities within the mask '
+        'region')
+    histogram_fwhm = traits.Float(
+        0.15, usedefault=True,
+        argstr='--histogram-sharpening %s',
+        desc='Histogram sharpening parameter: FWHM')
+    histogram_wiener_noise = traits.Float(
+        0.01, usedefault=True,
+        requires=['histogram_fwhm'],
+        desc='Histogram sharpening parameter: Wiener noise')
+    histogram_bins = traits.Int(
+        200, usedefault=True,
+        requires=['histogram_fwhm', 'histogram_wiener_noise'],
+        desc='Histogram sharpening parameter: number of bins')
 
 
 class N4BiasFieldCorrectionOutputSpec(TraitedSpec):
@@ -412,6 +429,16 @@ class N4BiasFieldCorrection(ANTSCommand):
             else:
                 newval = '[ %s ]' % self._format_xarray(
                     [str(elt) for elt in value])
+            return trait_spec.argstr % newval
+
+        if name == 'histogram_fwhm':
+            newval = '[ %f' % value
+            if isdefined(self.inputs.histogram_wiener_noise):
+                newval = '%s, %f' % (
+                    newval, self.inputs.histogram_wiener_noise)
+            if isdefined(self.inputs.histogram_bins):
+                newval = '%s, %d' % (newval, self.inputs.histogram_bins)
+            newval = '%s ]' % newval
             return trait_spec.argstr % newval
 
         return super(N4BiasFieldCorrection, self)._format_arg(

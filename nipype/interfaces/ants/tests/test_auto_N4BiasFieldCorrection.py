@@ -25,6 +25,18 @@ def test_N4BiasFieldCorrection_inputs():
             nohash=True,
             usedefault=True,
         ),
+        histogram_bins=dict(
+            requires=['histogram_fwhm', 'histogram_wiener_noise'],
+            usedefault=True,
+        ),
+        histogram_fwhm=dict(
+            argstr='--histogram-sharpening %s',
+            usedefault=True,
+        ),
+        histogram_wiener_noise=dict(
+            requires=['histogram_fwhm'],
+            usedefault=True,
+        ),
         input_image=dict(
             argstr='--input-image %s',
             extensions=None,
@@ -44,6 +56,7 @@ def test_N4BiasFieldCorrection_inputs():
             genfile=True,
             hash_files=False,
         ),
+        rescale_intensities=dict(argstr='--rescale-intensities %d', ),
         save_bias=dict(
             mandatory=True,
             usedefault=True,
