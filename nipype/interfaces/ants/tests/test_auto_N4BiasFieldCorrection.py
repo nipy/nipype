@@ -25,6 +25,8 @@ def test_N4BiasFieldCorrection_inputs():
             nohash=True,
             usedefault=True,
         ),
+        histogram_sharpening=dict(
+            argstr='--histogram-sharpening [%g,%g,%d]', ),
         input_image=dict(
             argstr='--input-image %s',
             extensions=None,
