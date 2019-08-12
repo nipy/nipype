@@ -121,7 +121,7 @@ class EstimateFODInputSpec(MRTrix3BaseInputSpec):
         usedefault=True,
         argstr='-lmax %d',
         sep=',',
-        desc=('maximum harmonic degree of response function - single value for single-shell response, list for multi-shell response')
+        desc=('maximum harmonic degree of response function - single value for single-shell response, list for multi-shell response'))
     in_dirs = File(
         exists=True,
         argstr='-directions %s',
