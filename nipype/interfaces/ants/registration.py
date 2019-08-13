@@ -923,6 +923,7 @@ class Registration(ANTSCommand):
     DEF_SAMPLING_STRATEGY = 'None'
     """The default sampling strategy argument."""
 
+    _cmd = 'antsRegistration'
     input_spec = RegistrationInputSpec
     output_spec = RegistrationOutputSpec
     _quantilesDone = False
