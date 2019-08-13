@@ -923,7 +923,6 @@ class Registration(ANTSCommand):
     DEF_SAMPLING_STRATEGY = 'None'
     """The default sampling strategy argument."""
 
-    _cmd = 'antsRegistration'
     input_spec = RegistrationInputSpec
     output_spec = RegistrationOutputSpec
     _quantilesDone = False
@@ -1099,6 +1098,14 @@ class Registration(ANTSCommand):
                                                if len(moving_masks) > 1 else 0]
                 else:
                     moving_mask = 'NULL'
+                if (fixed_mask == 'NULL' or
+                        isinstance(fixed_mask, list) and 'NULL' in fixed_mask or
+                        moving_mask == 'NULL' or
+                        isinstance(moving_mask, list) and 'NULL' in moving_mask):
+                    print("CURRENT PATH: {}".format(os.getcwd()))
+                    if os.path.exists('NULL'):
+                        raise RuntimeError('NULL used as placeholder for no mask '
+                                           'but a file named NULL exists')
                 retval.append('--masks [ %s, %s ]' % (fixed_mask, moving_mask))
         return " ".join(retval)
 
