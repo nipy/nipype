@@ -41,8 +41,12 @@ def test_EstimateFOD_inputs():
         grad_file=dict(
             argstr='-grad %s',
             extensions=None,
+            xor=['grad_fsl'],
         ),
-        grad_fsl=dict(argstr='-fslgrad %s %s', ),
+        grad_fsl=dict(
+            argstr='-fslgrad %s %s',
+            xor=['grad_file'],
+        ),
         in_bval=dict(extensions=None, ),
         in_bvec=dict(
             argstr='-fslgrad %s %s',
@@ -64,6 +68,7 @@ def test_EstimateFOD_inputs():
         ),
         max_sh=dict(
             argstr='-lmax %d',
+            sep=',',
             usedefault=True,
         ),
         nthreads=dict(
