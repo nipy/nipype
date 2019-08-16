@@ -110,6 +110,8 @@ NUMPY_BAD_VERSION_27 = '1.16.0'
 # Numpy drops 2.7 support in 1.17
 NUMPY_MAX_VERSION_27 = '1.17.0'
 SCIPY_MIN_VERSION = '0.14'
+# Scipy drops 2.7 and 3.4 support in 1.3
+SCIPY_MAX_VERSION_34 = '1.3.0'
 TRAITS_MIN_VERSION = '4.6'
 DATEUTIL_MIN_VERSION = '2.2'
 FUTURE_MIN_VERSION = '0.16.0'
@@ -157,7 +159,8 @@ REQUIRES = [
     'pydot>=%s' % PYDOT_MIN_VERSION,
     'pydotplus',
     'python-dateutil>=%s' % DATEUTIL_MIN_VERSION,
-    'scipy>=%s' % SCIPY_MIN_VERSION,
+    'scipy>=%s ; python_version >= "3.5"' % SCIPY_MIN_VERSION,
+    'scipy>=%s,<%s ; python_version <= "3.4"' % (SCIPY_MIN_VERSION, SCIPY_MAX_VERSION_34),
     'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
     'traits>=%s,!=5.0' % TRAITS_MIN_VERSION,
 ]
