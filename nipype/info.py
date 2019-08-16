@@ -107,6 +107,8 @@ NUMPY_MIN_VERSION = '1.9.0'
 # https://www.opensourceanswers.com/blog/you-shouldnt-use-python-37-for-data-science-right-now.html
 NUMPY_MIN_VERSION_37 = '1.15.3'
 NUMPY_BAD_VERSION_27 = '1.16.0'
+# Numpy drops 2.7 support in 1.17
+NUMPY_MAX_VERSION_27 = '1.17.0'
 SCIPY_MIN_VERSION = '0.14'
 TRAITS_MIN_VERSION = '4.6'
 DATEUTIL_MIN_VERSION = '2.2'
@@ -146,7 +148,9 @@ REQUIRES = [
     'nibabel>=%s' % NIBABEL_MIN_VERSION,
     'numpy>=%s ; python_version > "3.0" and python_version < "3.7"' % NUMPY_MIN_VERSION,
     'numpy>=%s ; python_version >= "3.7"' % NUMPY_MIN_VERSION_37,
-    'numpy>=%s,!=%s ; python_version == "2.7"' % (NUMPY_MIN_VERSION, NUMPY_BAD_VERSION_27),
+    'numpy>=%s,!=%s,<%s ; python_version == "2.7"' % (NUMPY_MIN_VERSION,
+                                                      NUMPY_BAD_VERSION_27,
+                                                      NUMPY_MAX_VERSION_27),
     'packaging',
     'pathlib2; python_version <= "3.4"',
     'prov>=%s' % PROV_VERSION,
