@@ -67,7 +67,7 @@ def test_EstimateFOD_inputs():
             extensions=None,
         ),
         max_sh=dict(
-            argstr='-lmax %d',
+            argstr='-lmax %s',
             sep=',',
             usedefault=True,
         ),
