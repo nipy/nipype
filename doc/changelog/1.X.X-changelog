@@ -12,6 +12,7 @@
   * FIX: Remove '=' signs from EddyQuad argument specifications (https://github.com/nipy/nipype/pull/2941)
   * FIX: Set input model to bedpostx for camino.TrackBedpostxProba (https://github.com/nipy/nipype/pull/2947)
   * FIX: Allow ``max_sh``not to be set (auto mode) (https://github.com/nipy/nipype/pull/2940)
+  * ENH: Update mrtrix reconst.py EstimateFOD max_sh to be able to accept list (https://github.com/nipy/nipype/pull/2990)
   * ENH: Let ``indirectory`` handle ``nipype.utils.filemanip.Path`` (https://github.com/nipy/nipype/pull/2989)
   * ENH: Add resolve/rebase ``BasePath`` traits methods & tests (https://github.com/nipy/nipype/pull/2970)
   * ENH: Modify ``Directory`` and ``File`` traits to get along with pathlib (https://github.com/nipy/nipype/pull/2962)
