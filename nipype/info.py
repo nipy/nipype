@@ -59,7 +59,9 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
-    'Programming Language :: Python :: 3.6', 'Topic :: Scientific/Engineering'
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Topic :: Scientific/Engineering'
 ]
 
 description = 'Neuroimaging in Python: Pipelines and Interfaces'
