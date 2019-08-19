@@ -7,11 +7,9 @@ from __future__ import (print_function, division, unicode_literals,
 
 import sys
 
-# nipype version information.  An empty version_extra corresponds to a
-# full release.  '.dev' as a version_extra string means this is a development
-# version
+# nipype version information
 # Remove -dev for release
-__version__ = '1.2.1'
+__version__ = '1.2.2-dev'
 
 
 def get_nipype_gitversion():
