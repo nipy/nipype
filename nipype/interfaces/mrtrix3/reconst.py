@@ -118,7 +118,6 @@ class EstimateFODInputSpec(MRTrix3BaseInputSpec):
     max_sh = InputMultiObject(
         traits.Int,
         value=[8],
-        usedefault=True,
         argstr='-lmax %s',
         sep=',',
         desc=('maximum harmonic degree of response function - single value for single-shell response, list for multi-shell response'))
