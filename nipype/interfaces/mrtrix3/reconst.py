@@ -150,7 +150,7 @@ class EstimateFOD(MRTrix3Base):
     >>> fod.inputs.wm_txt = 'wm.txt'
     >>> fod.inputs.grad_fsl = ('bvecs', 'bvals')
     >>> fod.cmdline                               # doctest: +ELLIPSIS
-    'dwi2fod -fslgrad bvecs bvals -lmax 8 csd dwi.mif wm.txt wm.mif gm.mif csf.mif'
+    'dwi2fod -fslgrad bvecs bvals csd dwi.mif wm.txt wm.mif'
     >>> fod.run()                                 # doctest: +SKIP
     """
 
