@@ -31,14 +31,14 @@
       "orcid": "0000-0003-1857-8129"
     },
     {
-      "affiliation": "The Laboratory for Investigative Neurophysiology (The LINE), Department of Radiology and Department of Clinical Neurosciences, Lausanne, Switzerland; Center for Biomedical Imaging (CIBM), Lausanne, Switzerland",
-      "name": "Notter, Michael Philipp",
-      "orcid": "0000-0002-5866-047X"
-    },
-    {
       "affiliation": "University of Iowa",
       "name": "Johnson, Hans",
       "orcid": "0000-0001-9513-2660"
+    },
+    {
+      "affiliation": "The Laboratory for Investigative Neurophysiology (The LINE), Department of Radiology and Department of Clinical Neurosciences, Lausanne, Switzerland; Center for Biomedical Imaging (CIBM), Lausanne, Switzerland",
+      "name": "Notter, Michael Philipp",
+      "orcid": "0000-0002-5866-047X"
     },
     {
       "name": "Burns, Christopher"
@@ -79,15 +79,19 @@
       "name": "Wong, Jason"
     },
     {
-      "name": "Modat, Marc"
+      "affiliation": "Concordia University",
+      "name": "Benderoff, Erin"
     },
     {
-      "name": "Loney, Fred"
+      "name": "Modat, Marc"
     },
     {
       "affiliation": "Developer",
       "name": "Clark, Daniel",
       "orcid": "0000-0002-8121-8954"
+    },
+    {
+      "name": "Loney, Fred"
     },
     {
       "affiliation": "Department of Electrical and Computer Engineering, Johns Hopkins University",
@@ -126,14 +130,14 @@
       "orcid": "0000-0002-3982-4416"
     },
     {
-      "affiliation": "Dartmouth College",
-      "name": "Visconti di Oleggio Castello, Matteo",
-      "orcid": "0000-0001-7931-5272"
-    },
-    {
       "affiliation": "UC Berkeley - UCSF Graduate Program in Bioengineering",
       "name": "Keshavan, Anisha",
       "orcid": "0000-0003-3554-043X"
+    },
+    {
+      "affiliation": "Dartmouth College",
+      "name": "Visconti di Oleggio Castello, Matteo",
+      "orcid": "0000-0001-7931-5272"
     },
     {
       "name": "Pinsard, Basile"
@@ -167,11 +171,6 @@
       "orcid": "0000-0002-2672-7510"
     },
     {
-      "affiliation": "Montreal Neurological Institute and Hospital",
-      "name": "Markello, Ross",
-      "orcid": "0000-0003-1057-1336"
-    },
-    {
       "affiliation": "The University of Washington eScience Institute",
       "name": "Rokem, Ariel",
       "orcid": "0000-0003-0679-1985"
@@ -184,6 +183,11 @@
       "affiliation": "Montreal Neurological Institute and Hospital",
       "name": "DuPre, Elizabeth",
       "orcid": "0000-0003-1358-196X"
+    },
+    {
+      "affiliation": "Montreal Neurological Institute and Hospital",
+      "name": "Markello, Ross",
+      "orcid": "0000-0003-1057-1336"
     },
     {
       "affiliation": "MIT",
@@ -276,10 +280,6 @@
       "name": "Dubois, Mathieu"
     },
     {
-      "name": "Heinsfeld, Anibal S\u00f3lon",
-      "orcid": "0000-0002-2050-0614"
-    },
-    {
       "affiliation": "Child Mind Institute",
       "name": "Frohlich, Caroline"
     },
@@ -293,12 +293,11 @@
       "orcid": "0000-0002-7796-8795"
     },
     {
-      "name": "Kent, James"
+      "name": "Heinsfeld, Anibal S\u00f3lon",
+      "orcid": "0000-0002-2050-0614"
     },
     {
-      "affiliation": "University of Texas at Austin",
-      "name": "De La Vega, Alejandro",
-      "orcid": "0000-0001-9062-3778"
+      "name": "Kent, James"
     },
     {
       "name": "Watanabe, Aimi"
@@ -315,6 +314,11 @@
       "affiliation": "SRI International",
       "name": "Nichols, B. Nolan",
       "orcid": "0000-0003-1099-3328"
+    },
+    {
+      "affiliation": "University of Texas at Austin",
+      "name": "De La Vega, Alejandro",
+      "orcid": "0000-0001-9062-3778"
     },
     {
       "affiliation": "University College London",
@@ -390,11 +394,6 @@
       "name": "Haselgrove, Christian"
     },
     {
-      "affiliation": "1 McGill Centre for Integrative Neuroscience (MCIN), Ludmer Centre for Neuroinformatics and Mental Health, Montreal Neurological Institute (MNI), McGill University, Montr\u00e9al, 3801 University Street, WB-208, H3A 2B4, Qu\u00e9bec, Canada. 2 University of Lyon, CNRS, INSERM, CREATIS., Villeurbanne, 7, avenue Jean Capelle, 69621, France.",
-      "name": "Glatard, Tristan",
-      "orcid": "0000-0003-2620-5883"
-    },
-    {
       "name": "Renfro, Mandy"
     },
     {
@@ -434,6 +433,11 @@
       "name": "Hallquist, Michael"
     },
     {
+      "affiliation": "Yale University; New Haven, CT, United States",
+      "name": "Sisk, Lucinda M.",
+      "orcid": "0000-0003-4900-9770"
+    },
+    {
       "affiliation": "TIB \u2013 Leibniz Information Centre for Science and Technology and University Library, Hannover, Germany",
       "name": "Leinweber, Katrin",
       "orcid": "0000-0001-5135-5758"
@@ -470,6 +474,11 @@
       "name": "Park, Anne"
     },
     {
+      "affiliation": "1 McGill Centre for Integrative Neuroscience (MCIN), Ludmer Centre for Neuroinformatics and Mental Health, Montreal Neurological Institute (MNI), McGill University, Montr\u00e9al, 3801 University Street, WB-208, H3A 2B4, Qu\u00e9bec, Canada. 2 University of Lyon, CNRS, INSERM, CREATIS., Villeurbanne, 7, avenue Jean Capelle, 69621, France.",
+      "name": "Glatard, Tristan",
+      "orcid": "0000-0003-2620-5883"
+    },
+    {
       "name": "Poldrack, Russell"
     },
     {
@@ -486,10 +495,6 @@
       "orcid": "0000-0002-7186-5293"
     },
     {
-      "affiliation": "Institute of Imaging & Computer Vision, RWTH Aachen University, Germany",
-      "name": "Weninger, Leon"
-    },
-    {
       "name": "Inati, Souheil"
     },
     {
@@ -500,6 +505,15 @@
       "affiliation": "University of Amsterdam",
       "name": "Lukas Snoek",
       "orcid": "0000-0001-8972-204X"
+    },
+    {
+      "affiliation": "Institute of Imaging & Computer Vision, RWTH Aachen University, Germany",
+      "name": "Weninger, Leon"
+    },
+    {
+      "affiliation": "Stanford University",
+      "name": "Lerma-Usabiaga, Garikoitz",
+      "orcid": "0000-0001-9800-4816"
     },
     {
       "name": "Marina, Ana"
@@ -638,6 +652,11 @@
       "affiliation": "University of Pittsburgh",
       "name": "Meyers, Benjamin",
       "orcid": "0000-0001-9137-4363"
+    },
+    {
+      "affiliation": "Washington University in St Louis",
+      "name": "Van, Andrew",
+      "orcid": "0000-0002-8787-0943"
     },
     {
       "name": "Davison, Andrew"

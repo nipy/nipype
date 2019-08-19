@@ -339,13 +339,14 @@ jobs:
       - run:
           name: Check pypi preconditions
           command: |
-            pip install --upgrade twine future wheel readme_renderer setuptools
+            pip install --upgrade pip twine future wheel readme_renderer setuptools
             python setup.py check -r -s
             python setup.py sdist bdist_wheel
       - run:
           name: Validate Python 2 installation
           command: |
             pyenv local 2.7.12
+            pip install --upgrade pip
             pip install dist/nipype-*-py2.py3-none-any.whl
             # Futures should install in Python 2
             pip show futures 2>/dev/null | grep "Name: futures"
@@ -353,6 +354,7 @@ jobs:
           name: Validate Python 3 installation
           command: |
             pyenv local 3.5.2
+            pip install --upgrade pip
             pip install dist/nipype-*-py2.py3-none-any.whl
             # Futures should not install in Python 3
             test $(pip show futures 2>/dev/null | wc -l) = "0"
