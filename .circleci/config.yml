@@ -340,8 +340,8 @@ jobs:
           name: Check pypi preconditions
           command: |
             pip install --upgrade pip twine future wheel readme_renderer setuptools
-            python setup.py check -r -s
             python setup.py sdist bdist_wheel
+            twine check dist/*
       - run:
           name: Validate Python 2 installation
           command: |
