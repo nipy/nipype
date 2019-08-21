@@ -139,6 +139,7 @@ def main():
         author_email=ldict['AUTHOR_EMAIL'],
         platforms=ldict['PLATFORMS'],
         version=ldict['VERSION'],
+        python_requires=ldict['PYTHON_REQUIRES'],
         install_requires=ldict['REQUIRES'],
         setup_requires=SETUP_REQUIRES,
         provides=ldict['PROVIDES'],
