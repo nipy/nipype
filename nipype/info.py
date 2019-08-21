@@ -129,22 +129,22 @@ ISRELEASE = (len(__version__.replace('-', '.').split('.')) == 3
 VERSION = __version__
 PROVIDES = ['nipype']
 REQUIRES = [
-    'nibabel>=%s' % NIBABEL_MIN_VERSION,
-    'networkx>=%s' % NETWORKX_MIN_VERSION,
-    'numpy>=%s ; python_version < "3.7"' % NUMPY_MIN_VERSION,
-    'numpy>=%s ; python_version >= "3.7"' % NUMPY_MIN_VERSION_37,
-    'python-dateutil>=%s' % DATEUTIL_MIN_VERSION,
-    'scipy>=%s' % SCIPY_MIN_VERSION,
-    'traits>=%s,!=5.0' % TRAITS_MIN_VERSION,
-    'future>=%s' % FUTURE_MIN_VERSION,
-    'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
-    'prov>=%s' % PROV_VERSION,
-    'neurdflib',
     'click>=%s' % CLICK_MIN_VERSION,
     'funcsigs',
-    'pydotplus',
-    'pydot>=%s' % PYDOT_MIN_VERSION,
+    'future>=%s' % FUTURE_MIN_VERSION,
+    'networkx>=%s' % NETWORKX_MIN_VERSION,
+    'neurdflib',
+    'nibabel>=%s' % NIBABEL_MIN_VERSION,
+    'numpy>=%s ; python_version < "3.7"' % NUMPY_MIN_VERSION,
+    'numpy>=%s ; python_version >= "3.7"' % NUMPY_MIN_VERSION_37,
     'packaging',
+    'prov>=%s' % PROV_VERSION,
+    'pydot>=%s' % PYDOT_MIN_VERSION,
+    'pydotplus',
+    'python-dateutil>=%s' % DATEUTIL_MIN_VERSION,
+    'scipy>=%s' % SCIPY_MIN_VERSION,
+    'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
+    'traits>=%s,!=5.0' % TRAITS_MIN_VERSION,
 ]
 
 TESTS_REQUIRES = [
