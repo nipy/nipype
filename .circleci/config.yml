@@ -368,6 +368,14 @@ jobs:
             pip install dist/nipype-*-py2.py3-none-any.whl
             # Numpy should be upgraded to >= 1.15.3
             test "$(pip show numpy | grep Version)" \> "Version: 1.15.2"
+      - run:
+          name: Check python_requires prevents installation on Python 3.3
+          command: |
+            pyenv install 3.3.7
+            pyenv local 3.3.7
+            FAIL=false
+            pip install dist/nipype-*-py2.py3-none-any.whl || FAIL=true
+            $FAIL
       - store_artifacts:
           path: /home/circleci/nipype/dist
 
