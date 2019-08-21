@@ -12,8 +12,14 @@ def test_compareTractInclusion_inputs():
         ),
         numberOfPoints=dict(argstr='--numberOfPoints %d', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
-        standardFiber=dict(argstr='--standardFiber %s', ),
-        testFiber=dict(argstr='--testFiber %s', ),
+        standardFiber=dict(
+            argstr='--standardFiber %s',
+            extensions=None,
+        ),
+        testFiber=dict(
+            argstr='--testFiber %s',
+            extensions=None,
+        ),
         testForBijection=dict(argstr='--testForBijection ', ),
         testForFiberCardinality=dict(argstr='--testForFiberCardinality ', ),
         writeXMLPolyDataFile=dict(argstr='--writeXMLPolyDataFile ', ),

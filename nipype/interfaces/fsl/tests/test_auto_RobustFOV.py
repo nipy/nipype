@@ -12,17 +12,20 @@ def test_RobustFOV_inputs():
         ),
         in_file=dict(
             argstr='-i %s',
+            extensions=None,
             mandatory=True,
             position=0,
         ),
         out_roi=dict(
             argstr='-r %s',
+            extensions=None,
             hash_files=False,
             name_source=['in_file'],
             name_template='%s_ROI',
         ),
         out_transform=dict(
             argstr='-m %s',
+            extensions=None,
             hash_files=False,
             name_source=['in_file'],
             name_template='%s_to_ROI',
@@ -36,8 +39,8 @@ def test_RobustFOV_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_RobustFOV_outputs():
     output_map = dict(
-        out_roi=dict(),
-        out_transform=dict(),
+        out_roi=dict(extensions=None, ),
+        out_transform=dict(extensions=None, ),
     )
     outputs = RobustFOV.output_spec()
 

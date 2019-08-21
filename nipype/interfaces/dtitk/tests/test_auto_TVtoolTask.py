@@ -11,11 +11,13 @@ def test_TVtoolTask_inputs():
         ),
         in_file=dict(
             argstr='-in %s',
+            extensions=None,
             mandatory=True,
         ),
         in_flag=dict(argstr='-%s', ),
         out_file=dict(
             argstr='-out %s',
+            extensions=None,
             genfile=True,
         ),
     )
@@ -25,7 +27,7 @@ def test_TVtoolTask_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TVtoolTask_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = TVtoolTask.output_spec()
 
     for key, metadata in list(output_map.items()):

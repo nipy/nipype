@@ -7,23 +7,35 @@ def test_CANormalize_inputs():
         args=dict(argstr='%s', ),
         atlas=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-3,
         ),
-        control_points=dict(argstr='-c %s', ),
+        control_points=dict(
+            argstr='-c %s',
+            extensions=None,
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-4,
         ),
-        long_file=dict(argstr='-long %s', ),
-        mask=dict(argstr='-mask %s', ),
+        long_file=dict(
+            argstr='-long %s',
+            extensions=None,
+        ),
+        mask=dict(
+            argstr='-mask %s',
+            extensions=None,
+        ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             hash_files=False,
             keep_extension=True,
             name_source=['in_file'],
@@ -33,6 +45,7 @@ def test_CANormalize_inputs():
         subjects_dir=dict(),
         transform=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
@@ -44,8 +57,8 @@ def test_CANormalize_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_CANormalize_outputs():
     output_map = dict(
-        control_points=dict(),
-        out_file=dict(),
+        control_points=dict(extensions=None, ),
+        out_file=dict(extensions=None, ),
     )
     outputs = CANormalize.output_spec()
 

@@ -15,10 +15,12 @@ def test_EstimateContrast_inputs():
         paths=dict(),
         residual_image=dict(
             copyfile=False,
+            extensions=None,
             mandatory=True,
         ),
         spm_mat_file=dict(
             copyfile=True,
+            extensions=None,
             field='spmmat',
             mandatory=True,
         ),
@@ -40,7 +42,7 @@ def test_EstimateContrast_outputs():
         ess_images=dict(),
         spmF_images=dict(),
         spmT_images=dict(),
-        spm_mat_file=dict(),
+        spm_mat_file=dict(extensions=None, ),
     )
     outputs = EstimateContrast.output_spec()
 

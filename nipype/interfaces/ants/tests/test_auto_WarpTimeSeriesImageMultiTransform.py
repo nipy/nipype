@@ -17,6 +17,7 @@ def test_WarpTimeSeriesImageMultiTransform_inputs():
         input_image=dict(
             argstr='%s',
             copyfile=True,
+            extensions=None,
             mandatory=True,
         ),
         invert_affine=dict(),
@@ -30,6 +31,7 @@ def test_WarpTimeSeriesImageMultiTransform_inputs():
         ),
         reference_image=dict(
             argstr='-R %s',
+            extensions=None,
             xor=['tightest_box'],
         ),
         reslice_by_header=dict(argstr='--reslice-by-header', ),
@@ -51,7 +53,7 @@ def test_WarpTimeSeriesImageMultiTransform_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_WarpTimeSeriesImageMultiTransform_outputs():
-    output_map = dict(output_image=dict(), )
+    output_map = dict(output_image=dict(extensions=None, ), )
     outputs = WarpTimeSeriesImageMultiTransform.output_spec()
 
     for key, metadata in list(output_map.items()):

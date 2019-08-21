@@ -187,7 +187,8 @@ class Node(EngineBase):
     @property
     def result(self):
         """Get result from result file (do not hold it in memory)"""
-        return _load_resultfile(self.output_dir(), self.name)[0]
+        return _load_resultfile(
+            op.join(self.output_dir(), 'result_%s.pklz' % self.name))[0]
 
     @property
     def inputs(self):
@@ -510,7 +511,7 @@ directory. Please ensure no other concurrent workflows are racing""", hashfile_u
             logger.debug('input: %s', key)
             results_file = info[0]
             logger.debug('results file: %s', results_file)
-            outputs = loadpkl(results_file).outputs
+            outputs = _load_resultfile(results_file)[0].outputs
             if outputs is None:
                 raise RuntimeError("""\
 Error populating the input "%s" of node "%s": the results file of the source node \
@@ -557,7 +558,8 @@ Error populating the input "%s" of node "%s": the results file of the source nod
 
     def _load_results(self):
         cwd = self.output_dir()
-        result, aggregate, attribute_error = _load_resultfile(cwd, self.name)
+        result, aggregate, attribute_error = _load_resultfile(
+            op.join(cwd, 'result_%s.pklz' % self.name))
         # try aggregating first
         if aggregate:
             logger.debug('aggregating results')
@@ -578,7 +580,9 @@ Error populating the input "%s" of node "%s": the results file of the source nod
                     runtime=runtime,
                     inputs=self._interface.inputs.get_traitsfree(),
                     outputs=aggouts)
-                _save_resultfile(result, cwd, self.name)
+                _save_resultfile(
+                    result, cwd, self.name,
+                    rebase=str2bool(self.config['execution']['use_relative_paths']))
             else:
                 logger.debug('aggregating mapnode results')
                 result = self._run_interface()
@@ -625,7 +629,9 @@ Error populating the input "%s" of node "%s": the results file of the source nod
             except Exception as msg:
                 result.runtime.stderr = '{}\n\n{}'.format(
                     getattr(result.runtime, 'stderr', ''), msg)
-                _save_resultfile(result, outdir, self.name)
+                _save_resultfile(
+                    result, outdir, self.name,
+                    rebase=str2bool(self.config['execution']['use_relative_paths']))
                 raise
             cmdfile = op.join(outdir, 'command.txt')
             with open(cmdfile, 'wt') as fd:
@@ -637,7 +643,9 @@ Error populating the input "%s" of node "%s": the results file of the source nod
         except Exception as msg:
             result.runtime.stderr = '%s\n\n%s'.format(
                 getattr(result.runtime, 'stderr', ''), msg)
-            _save_resultfile(result, outdir, self.name)
+            _save_resultfile(
+                result, outdir, self.name,
+                rebase=str2bool(self.config['execution']['use_relative_paths']))
             raise
 
         dirs2keep = None
@@ -651,7 +659,9 @@ Error populating the input "%s" of node "%s": the results file of the source nod
             self.needed_outputs,
             self.config,
             dirs2keep=dirs2keep)
-        _save_resultfile(result, outdir, self.name)
+        _save_resultfile(
+            result, outdir, self.name,
+            rebase=str2bool(self.config['execution']['use_relative_paths']))
 
         return result
 
@@ -1251,7 +1261,7 @@ class MapNode(Node):
                 stop_first=str2bool(
                     self.config['execution']['stop_on_first_crash'])))
         # And store results
-        _save_resultfile(result, cwd, self.name)
+        _save_resultfile(result, cwd, self.name, rebase=False)
         # remove any node directories no longer required
         dirs2remove = []
         for path in glob(op.join(cwd, 'mapflow', '*')):

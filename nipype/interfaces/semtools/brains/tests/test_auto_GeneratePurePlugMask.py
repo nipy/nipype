@@ -26,7 +26,7 @@ def test_GeneratePurePlugMask_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_GeneratePurePlugMask_outputs():
-    output_map = dict(outputMaskFile=dict(), )
+    output_map = dict(outputMaskFile=dict(extensions=None, ), )
     outputs = GeneratePurePlugMask.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -4,17 +4,24 @@ from ..dti import TractSkeleton
 
 def test_TractSkeleton_inputs():
     input_map = dict(
-        alt_data_file=dict(argstr='-a %s', ),
-        alt_skeleton=dict(argstr='-s %s', ),
+        alt_data_file=dict(
+            argstr='-a %s',
+            extensions=None,
+        ),
+        alt_skeleton=dict(
+            argstr='-s %s',
+            extensions=None,
+        ),
         args=dict(argstr='%s', ),
-        data_file=dict(),
-        distance_map=dict(),
+        data_file=dict(extensions=None, ),
+        distance_map=dict(extensions=None, ),
         environ=dict(
             nohash=True,
             usedefault=True,
         ),
         in_file=dict(
             argstr='-i %s',
+            extensions=None,
             mandatory=True,
         ),
         output_type=dict(),
@@ -22,8 +29,11 @@ def test_TractSkeleton_inputs():
             argstr='-p %.3f %s %s %s %s',
             requires=['threshold', 'distance_map', 'data_file'],
         ),
-        projected_data=dict(),
-        search_mask_file=dict(xor=['use_cingulum_mask'], ),
+        projected_data=dict(extensions=None, ),
+        search_mask_file=dict(
+            extensions=None,
+            xor=['use_cingulum_mask'],
+        ),
         skeleton_file=dict(argstr='-o %s', ),
         threshold=dict(),
         use_cingulum_mask=dict(
@@ -38,8 +48,8 @@ def test_TractSkeleton_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TractSkeleton_outputs():
     output_map = dict(
-        projected_data=dict(),
-        skeleton_file=dict(),
+        projected_data=dict(extensions=None, ),
+        skeleton_file=dict(extensions=None, ),
     )
     outputs = TractSkeleton.output_spec()
 

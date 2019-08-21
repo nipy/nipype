@@ -7,7 +7,7 @@ def test_DICOMConvert_inputs():
         args=dict(argstr='%s', ),
         base_output_dir=dict(mandatory=True, ),
         dicom_dir=dict(mandatory=True, ),
-        dicom_info=dict(),
+        dicom_info=dict(extensions=None, ),
         environ=dict(
             nohash=True,
             usedefault=True,

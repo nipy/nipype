@@ -17,13 +17,22 @@ def test_BEDPOSTX5_inputs():
             argstr='--burnin_noard=%d',
             usedefault=True,
         ),
-        bvals=dict(mandatory=True, ),
-        bvecs=dict(mandatory=True, ),
+        bvals=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        bvecs=dict(
+            extensions=None,
+            mandatory=True,
+        ),
         cnlinear=dict(
             argstr='--cnonlinear',
             xor=('no_spat', 'non_linear', 'cnlinear'),
         ),
-        dwi=dict(mandatory=True, ),
+        dwi=dict(
+            extensions=None,
+            mandatory=True,
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -41,10 +50,13 @@ def test_BEDPOSTX5_inputs():
             usedefault=True,
         ),
         fudge=dict(argstr='-w %d', ),
-        grad_dev=dict(),
+        grad_dev=dict(extensions=None, ),
         gradnonlin=dict(argstr='-g', ),
         logdir=dict(argstr='--logdir=%s', ),
-        mask=dict(mandatory=True, ),
+        mask=dict(
+            extensions=None,
+            mandatory=True,
+        ),
         model=dict(argstr='-model %d', ),
         n_fibres=dict(
             argstr='-n %d',
@@ -95,8 +107,8 @@ def test_BEDPOSTX5_outputs():
     output_map = dict(
         dyads=dict(),
         dyads_dispersion=dict(),
-        mean_S0samples=dict(),
-        mean_dsamples=dict(),
+        mean_S0samples=dict(extensions=None, ),
+        mean_dsamples=dict(extensions=None, ),
         mean_fsamples=dict(),
         mean_phsamples=dict(),
         mean_thsamples=dict(),

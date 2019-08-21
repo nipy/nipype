@@ -7,15 +7,33 @@ def test_EstimateResponseSH_inputs():
         auto=dict(xor=['recursive'], ),
         b0_thres=dict(usedefault=True, ),
         fa_thresh=dict(usedefault=True, ),
-        in_bval=dict(mandatory=True, ),
-        in_bvec=dict(mandatory=True, ),
-        in_evals=dict(mandatory=True, ),
-        in_file=dict(mandatory=True, ),
-        in_mask=dict(),
-        out_mask=dict(usedefault=True, ),
+        in_bval=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        in_bvec=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        in_evals=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        in_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        in_mask=dict(extensions=None, ),
+        out_mask=dict(
+            extensions=None,
+            usedefault=True,
+        ),
         out_prefix=dict(),
         recursive=dict(xor=['auto'], ),
-        response=dict(usedefault=True, ),
+        response=dict(
+            extensions=None,
+            usedefault=True,
+        ),
         roi_radius=dict(usedefault=True, ),
     )
     inputs = EstimateResponseSH.input_spec()
@@ -25,8 +43,8 @@ def test_EstimateResponseSH_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_EstimateResponseSH_outputs():
     output_map = dict(
-        out_mask=dict(),
-        response=dict(),
+        out_mask=dict(extensions=None, ),
+        response=dict(extensions=None, ),
     )
     outputs = EstimateResponseSH.output_spec()
 

@@ -9,8 +9,14 @@ def test_FlippedDifference_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputMaskVolume=dict(argstr='--inputMaskVolume %s', ),
-        inputVolume=dict(argstr='--inputVolume %s', ),
+        inputMaskVolume=dict(
+            argstr='--inputMaskVolume %s',
+            extensions=None,
+        ),
+        inputVolume=dict(
+            argstr='--inputVolume %s',
+            extensions=None,
+        ),
         outputVolume=dict(
             argstr='--outputVolume %s',
             hash_files=False,
@@ -22,7 +28,7 @@ def test_FlippedDifference_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FlippedDifference_outputs():
-    output_map = dict(outputVolume=dict(), )
+    output_map = dict(outputVolume=dict(extensions=None, ), )
     outputs = FlippedDifference.output_spec()
 
     for key, metadata in list(output_map.items()):

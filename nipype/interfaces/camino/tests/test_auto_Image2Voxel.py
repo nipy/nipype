@@ -11,11 +11,13 @@ def test_Image2Voxel_inputs():
         ),
         in_file=dict(
             argstr='-4dimage %s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
         out_file=dict(
             argstr='> %s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
@@ -31,7 +33,7 @@ def test_Image2Voxel_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Image2Voxel_outputs():
-    output_map = dict(voxel_order=dict(), )
+    output_map = dict(voxel_order=dict(extensions=None, ), )
     outputs = Image2Voxel.output_spec()
 
     for key, metadata in list(output_map.items()):

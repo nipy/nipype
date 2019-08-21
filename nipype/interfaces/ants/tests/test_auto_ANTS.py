@@ -83,11 +83,11 @@ def test_ANTS_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ANTS_outputs():
     output_map = dict(
-        affine_transform=dict(),
-        inverse_warp_transform=dict(),
-        metaheader=dict(),
-        metaheader_raw=dict(),
-        warp_transform=dict(),
+        affine_transform=dict(extensions=None, ),
+        inverse_warp_transform=dict(extensions=None, ),
+        metaheader=dict(extensions=None, ),
+        metaheader_raw=dict(extensions=None, ),
+        warp_transform=dict(extensions=None, ),
     )
     outputs = ANTS.output_spec()
 

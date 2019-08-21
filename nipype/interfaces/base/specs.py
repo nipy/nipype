@@ -15,18 +15,21 @@ from copy import deepcopy
 from warnings import warn
 from packaging.version import Version
 
-from ...utils.filemanip import md5, hash_infile, hash_timestamp
+from traits.trait_errors import TraitError
+from traits.trait_handlers import TraitDictObject, TraitListObject
+from ...utils.filemanip import (md5, hash_infile, hash_timestamp, USING_PATHLIB2)
 from .traits_extension import (
     traits,
+    File,
+    Str,
     Undefined,
     isdefined,
-    TraitError,
-    TraitDictObject,
-    TraitListObject,
     has_metadata,
+    OutputMultiObject,
 )
 
 from ... import config, __version__
+
 
 FLOAT_FORMAT = '{:.10f}'.format
 nipype_version = Version(__version__)
@@ -309,6 +312,65 @@ class BaseTraitedSpec(traits.HasTraits):
     def __all__(self):
         return self.copyable_trait_names()
 
+    def __getstate__(self):
+        """
+        Override __getstate__ so that OutputMultiObjects are correctly pickled.
+
+        >>> class OutputSpec(TraitedSpec):
+        ...     out = OutputMultiObject(traits.List(traits.Int))
+        >>> spec = OutputSpec()
+        >>> spec.out = [[4]]
+        >>> spec.out
+        [4]
+
+        >>> spec.__getstate__()['out']
+        [[4]]
+
+        >>> spec.__setstate__(spec.__getstate__())
+        >>> spec.out
+        [4]
+
+        """
+        state = super(BaseTraitedSpec, self).__getstate__()
+        for key in self.__all__:
+            _trait_spec = self.trait(key)
+            if _trait_spec.is_trait_type(OutputMultiObject):
+                state[key] = _trait_spec.handler.get_value(self, key)
+        return state
+
+
+def _deepcopypatch(self, memo):
+    """
+    Replace the ``__deepcopy__`` member with a traits-friendly implementation.
+
+    A bug in ``__deepcopy__`` for ``HasTraits`` results in weird cloning behaviors.
+    Occurs for all specs in Python<3 and only for DynamicTraitedSpec in Python>2.
+
+    """
+    id_self = id(self)
+    if id_self in memo:
+        return memo[id_self]
+    dup_dict = deepcopy(self.trait_get(), memo)
+    # access all keys
+    for key in self.copyable_trait_names():
+        if key in self.__dict__.keys():
+            _ = getattr(self, key)
+    # clone once
+    dup = self.clone_traits(memo=memo)
+    for key in self.copyable_trait_names():
+        try:
+            _ = getattr(dup, key)
+        except:
+            pass
+    # clone twice
+    dup = self.clone_traits(memo=memo)
+    dup.trait_set(**dup_dict)
+    return dup
+
+
+if USING_PATHLIB2:
+    BaseTraitedSpec.__deepcopy__ = _deepcopypatch
+
 
 class TraitedSpec(BaseTraitedSpec):
     """ Create a subclass with strict traits.
@@ -329,39 +391,19 @@ class DynamicTraitedSpec(BaseTraitedSpec):
     functioning well together.
     """
 
-    def __deepcopy__(self, memo):
-        """ bug in deepcopy for HasTraits results in weird cloning behavior for
-        added traits
-        """
-        id_self = id(self)
-        if id_self in memo:
-            return memo[id_self]
-        dup_dict = deepcopy(self.trait_get(), memo)
-        # access all keys
-        for key in self.copyable_trait_names():
-            if key in self.__dict__.keys():
-                _ = getattr(self, key)
-        # clone once
-        dup = self.clone_traits(memo=memo)
-        for key in self.copyable_trait_names():
-            try:
-                _ = getattr(dup, key)
-            except:
-                pass
-        # clone twice
-        dup = self.clone_traits(memo=memo)
-        dup.trait_set(**dup_dict)
-        return dup
+
+if not USING_PATHLIB2:
+    DynamicTraitedSpec.__deepcopy__ = _deepcopypatch
 
 
 class CommandLineInputSpec(BaseInterfaceInputSpec):
-    args = traits.Str(argstr='%s', desc='Additional parameters to the command')
+    args = Str(argstr='%s', desc='Additional parameters to the command')
     environ = traits.DictStrStr(
         desc='Environment variables', usedefault=True, nohash=True)
 
 
 class StdOutCommandLineInputSpec(CommandLineInputSpec):
-    out_file = traits.File(argstr="> %s", position=-1, genfile=True)
+    out_file = File(argstr="> %s", position=-1, genfile=True)
 
 
 class MpiCommandLineInputSpec(CommandLineInputSpec):

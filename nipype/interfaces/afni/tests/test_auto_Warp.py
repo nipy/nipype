@@ -10,24 +10,35 @@ def test_Warp_inputs():
             nohash=True,
             usedefault=True,
         ),
-        gridset=dict(argstr='-gridset %s', ),
+        gridset=dict(
+            argstr='-gridset %s',
+            extensions=None,
+        ),
         in_file=dict(
             argstr='%s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=-1,
         ),
         interp=dict(argstr='-%s', ),
-        matparent=dict(argstr='-matparent %s', ),
+        matparent=dict(
+            argstr='-matparent %s',
+            extensions=None,
+        ),
         mni2tta=dict(argstr='-mni2tta', ),
         newgrid=dict(argstr='-newgrid %f', ),
         num_threads=dict(
             nohash=True,
             usedefault=True,
         ),
-        oblique_parent=dict(argstr='-oblique_parent %s', ),
+        oblique_parent=dict(
+            argstr='-oblique_parent %s',
+            extensions=None,
+        ),
         out_file=dict(
             argstr='-prefix %s',
+            extensions=None,
             keep_extension=True,
             name_source='in_file',
             name_template='%s_warp',
@@ -45,8 +56,8 @@ def test_Warp_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Warp_outputs():
     output_map = dict(
-        out_file=dict(),
-        warp_file=dict(),
+        out_file=dict(extensions=None, ),
+        warp_file=dict(extensions=None, ),
     )
     outputs = Warp.output_spec()
 

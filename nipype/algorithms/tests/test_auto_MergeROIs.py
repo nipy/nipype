@@ -6,7 +6,7 @@ def test_MergeROIs_inputs():
     input_map = dict(
         in_files=dict(),
         in_index=dict(),
-        in_reference=dict(),
+        in_reference=dict(extensions=None, ),
     )
     inputs = MergeROIs.input_spec()
 
@@ -14,7 +14,7 @@ def test_MergeROIs_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MergeROIs_outputs():
-    output_map = dict(merged_file=dict(), )
+    output_map = dict(merged_file=dict(extensions=None, ), )
     outputs = MergeROIs.output_spec()
 
     for key, metadata in list(output_map.items()):

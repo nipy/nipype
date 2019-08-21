@@ -16,22 +16,30 @@ def test_MS_LDA_inputs():
             mandatory=True,
             position=-1,
         ),
-        label_file=dict(argstr='-label %s', ),
+        label_file=dict(
+            argstr='-label %s',
+            extensions=None,
+        ),
         lda_labels=dict(
             argstr='-lda %s',
             mandatory=True,
             sep=' ',
         ),
-        mask_file=dict(argstr='-mask %s', ),
+        mask_file=dict(
+            argstr='-mask %s',
+            extensions=None,
+        ),
         shift=dict(argstr='-shift %d', ),
         subjects_dir=dict(),
         use_weights=dict(argstr='-W', ),
         vol_synth_file=dict(
             argstr='-synth %s',
+            extensions=None,
             mandatory=True,
         ),
         weight_file=dict(
             argstr='-weight %s',
+            extensions=None,
             mandatory=True,
         ),
     )
@@ -42,8 +50,8 @@ def test_MS_LDA_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MS_LDA_outputs():
     output_map = dict(
-        vol_synth_file=dict(),
-        weight_file=dict(),
+        vol_synth_file=dict(extensions=None, ),
+        weight_file=dict(extensions=None, ),
     )
     outputs = MS_LDA.output_spec()
 

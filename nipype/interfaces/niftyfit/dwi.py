@@ -4,7 +4,7 @@
 The dwi module of niftyfit, which wraps the fitting methods in NiftyFit.
 """
 
-from ..base import TraitedSpec, traits, isdefined, CommandLineInputSpec
+from ..base import File, TraitedSpec, traits, isdefined, CommandLineInputSpec
 from .base import NiftyFitCommand
 from ..niftyreg.base import get_custom_path
 
@@ -12,61 +12,61 @@ from ..niftyreg.base import get_custom_path
 class FitDwiInputSpec(CommandLineInputSpec):
     """ Input Spec for FitDwi. """
     # Inputs options
-    source_file = traits.File(
+    source_file = File(
         position=1,
         exists=True,
         argstr='-source %s',
         mandatory=True,
         desc='The source image containing the dwi data.')
     desc = 'The file containing the bvalues of the source DWI.'
-    bval_file = traits.File(
+    bval_file = File(
         position=2, exists=True, argstr='-bval %s', mandatory=True, desc=desc)
     desc = 'The file containing the bvectors of the source DWI.'
-    bvec_file = traits.File(
+    bvec_file = File(
         position=3, exists=True, argstr='-bvec %s', mandatory=True, desc=desc)
-    te_file = traits.File(
+    te_file = File(
         exists=True,
         argstr='-TE %s',
         desc='Filename of TEs (ms).',
         xor=['te_file'])
-    te_value = traits.File(
+    te_value = File(
         exists=True,
         argstr='-TE %s',
         desc='Value of TEs (ms).',
         xor=['te_file'])
-    mask_file = traits.File(
+    mask_file = File(
         exists=True, desc='The image mask', argstr='-mask %s')
     desc = 'Filename of parameter priors for -ball and -nod.'
-    prior_file = traits.File(exists=True, argstr='-prior %s', desc=desc)
+    prior_file = File(exists=True, argstr='-prior %s', desc=desc)
     desc = 'Rotate the output tensors according to the q/s form of the image \
 (resulting tensors will be in mm coordinates, default: 0).'
 
     rot_sform_flag = traits.Int(desc=desc, argstr='-rotsform %d')
 
     # generic output options:
-    error_file = traits.File(
+    error_file = File(
         name_source=['source_file'],
         name_template='%s_error.nii.gz',
         desc='Filename of parameter error maps.',
         argstr='-error %s')
-    res_file = traits.File(
+    res_file = File(
         name_source=['source_file'],
         name_template='%s_resmap.nii.gz',
         desc='Filename of model residual map.',
         argstr='-res %s')
-    syn_file = traits.File(
+    syn_file = File(
         name_source=['source_file'],
         name_template='%s_syn.nii.gz',
         desc='Filename of synthetic image.',
         argstr='-syn %s')
-    nodiff_file = traits.File(
+    nodiff_file = File(
         name_source=['source_file'],
         name_template='%s_no_diff.nii.gz',
         desc='Filename of average no diffusion image.',
         argstr='-nodiff %s')
 
     # Output options, with templated output names based on the source image
-    mcmap_file = traits.File(
+    mcmap_file = File(
         name_source=['source_file'],
         name_template='%s_mcmap.nii.gz',
         desc='Filename of multi-compartment model parameter map '
@@ -75,22 +75,22 @@ class FitDwiInputSpec(CommandLineInputSpec):
         requires=['nodv_flag'])
 
     # Model Specific Output options:
-    mdmap_file = traits.File(
+    mdmap_file = File(
         name_source=['source_file'],
         name_template='%s_mdmap.nii.gz',
         desc='Filename of MD map/ADC',
         argstr='-mdmap %s')
-    famap_file = traits.File(
+    famap_file = File(
         name_source=['source_file'],
         name_template='%s_famap.nii.gz',
         desc='Filename of FA map',
         argstr='-famap %s')
-    v1map_file = traits.File(
+    v1map_file = File(
         name_source=['source_file'],
         name_template='%s_v1map.nii.gz',
         desc='Filename of PDD map [x,y,z]',
         argstr='-v1map %s')
-    rgbmap_file = traits.File(
+    rgbmap_file = File(
         name_source=['source_file'],
         name_template='%s_rgbmap.nii.gz',
         desc='Filename of colour-coded FA map',
@@ -103,13 +103,13 @@ format'
     ten_type = traits.Enum(
         'lower-tri', 'diag-off-diag', desc=desc, usedefault=True)
 
-    tenmap_file = traits.File(
+    tenmap_file = File(
         name_source=['source_file'],
         name_template='%s_tenmap.nii.gz',
         desc='Filename of tensor map [diag,offdiag].',
         argstr='-tenmap %s',
         requires=['dti_flag'])
-    tenmap2_file = traits.File(
+    tenmap2_file = File(
         name_source=['source_file'],
         name_template='%s_tenmap2.nii.gz',
         desc='Filename of tensor map [lower tri]',
@@ -195,7 +195,7 @@ no b-vectors]'
 identity covariance...).'
 
     vb_flag = traits.Bool(desc=desc, argstr='-vb')
-    cov_file = traits.File(
+    cov_file = File(
         exists=True,
         desc='Filename of ithe nc*nc covariance matrix [I]',
         argstr='-cov %s')
@@ -221,7 +221,7 @@ identity covariance...).'
     perf_thr = traits.Float(desc=desc, argstr='-perfthreshold %f')
 
     # MCMC options:
-    mcout = traits.File(
+    mcout = File(
         name_source=['source_file'],
         name_template='%s_mcout.txt',
         desc='Filename of mc samples (ascii text file)',
@@ -238,20 +238,20 @@ identity covariance...).'
 class FitDwiOutputSpec(TraitedSpec):
     """ Output Spec for FitDwi. """
 
-    error_file = traits.File(desc='Filename of parameter error maps')
-    res_file = traits.File(desc='Filename of model residual map')
-    syn_file = traits.File(desc='Filename of synthetic image')
-    nodiff_file = traits.File(desc='Filename of average no diffusion image.')
-    mdmap_file = traits.File(desc='Filename of MD map/ADC')
-    famap_file = traits.File(desc='Filename of FA map')
-    v1map_file = traits.File(desc='Filename of PDD map [x,y,z]')
-    rgbmap_file = traits.File(desc='Filename of colour FA map')
-    tenmap_file = traits.File(desc='Filename of tensor map')
-    tenmap2_file = traits.File(desc='Filename of tensor map [lower tri]')
+    error_file = File(desc='Filename of parameter error maps')
+    res_file = File(desc='Filename of model residual map')
+    syn_file = File(desc='Filename of synthetic image')
+    nodiff_file = File(desc='Filename of average no diffusion image.')
+    mdmap_file = File(desc='Filename of MD map/ADC')
+    famap_file = File(desc='Filename of FA map')
+    v1map_file = File(desc='Filename of PDD map [x,y,z]')
+    rgbmap_file = File(desc='Filename of colour FA map')
+    tenmap_file = File(desc='Filename of tensor map')
+    tenmap2_file = File(desc='Filename of tensor map [lower tri]')
 
-    mcmap_file = traits.File(desc='Filename of multi-compartment model '
+    mcmap_file = File(desc='Filename of multi-compartment model '
                                   'parameter map (-ivim,-ball,-nod).')
-    mcout = traits.File(desc='Filename of mc samples (ascii text file)')
+    mcout = File(desc='Filename of mc samples (ascii text file)')
 
 
 class FitDwi(NiftyFitCommand):
@@ -297,63 +297,63 @@ class FitDwi(NiftyFitCommand):
 class DwiToolInputSpec(CommandLineInputSpec):
     """ Input Spec for DwiTool. """
     desc = 'The source image containing the fitted model.'
-    source_file = traits.File(
+    source_file = File(
         position=1,
         exists=True,
         desc=desc,
         argstr='-source %s',
         mandatory=True)
     desc = 'The file containing the bvalues of the source DWI.'
-    bval_file = traits.File(
+    bval_file = File(
         position=2, exists=True, desc=desc, argstr='-bval %s', mandatory=True)
     desc = 'The file containing the bvectors of the source DWI.'
-    bvec_file = traits.File(
+    bvec_file = File(
         position=3, exists=True, desc=desc, argstr='-bvec %s')
-    b0_file = traits.File(
+    b0_file = File(
         position=4,
         exists=True,
         desc='The B0 image corresponding to the source DWI',
         argstr='-b0 %s')
-    mask_file = traits.File(
+    mask_file = File(
         position=5, exists=True, desc='The image mask', argstr='-mask %s')
 
     # Output options, with templated output names based on the source image
     desc = 'Filename of multi-compartment model parameter map \
 (-ivim,-ball,-nod)'
 
-    mcmap_file = traits.File(
+    mcmap_file = File(
         name_source=['source_file'],
         name_template='%s_mcmap.nii.gz',
         desc=desc,
         argstr='-mcmap %s')
     desc = 'Filename of synthetic image. Requires: bvec_file/b0_file.'
-    syn_file = traits.File(
+    syn_file = File(
         name_source=['source_file'],
         name_template='%s_syn.nii.gz',
         desc=desc,
         argstr='-syn %s',
         requires=['bvec_file', 'b0_file'])
-    mdmap_file = traits.File(
+    mdmap_file = File(
         name_source=['source_file'],
         name_template='%s_mdmap.nii.gz',
         desc='Filename of MD map/ADC',
         argstr='-mdmap %s')
-    famap_file = traits.File(
+    famap_file = File(
         name_source=['source_file'],
         name_template='%s_famap.nii.gz',
         desc='Filename of FA map',
         argstr='-famap %s')
-    v1map_file = traits.File(
+    v1map_file = File(
         name_source=['source_file'],
         name_template='%s_v1map.nii.gz',
         desc='Filename of PDD map [x,y,z]',
         argstr='-v1map %s')
-    rgbmap_file = traits.File(
+    rgbmap_file = File(
         name_source=['source_file'],
         name_template='%s_rgbmap.nii.gz',
         desc='Filename of colour FA map.',
         argstr='-rgbmap %s')
-    logdti_file = traits.File(
+    logdti_file = File(
         name_source=['source_file'],
         name_template='%s_logdti2.nii.gz',
         desc='Filename of output logdti map.',
@@ -442,13 +442,13 @@ class DwiToolOutputSpec(TraitedSpec):
     desc = 'Filename of multi-compartment model parameter map \
 (-ivim,-ball,-nod)'
 
-    mcmap_file = traits.File(desc=desc)
-    syn_file = traits.File(desc='Filename of synthetic image')
-    mdmap_file = traits.File(desc='Filename of MD map/ADC')
-    famap_file = traits.File(desc='Filename of FA map')
-    v1map_file = traits.File(desc='Filename of PDD map [x,y,z]')
-    rgbmap_file = traits.File(desc='Filename of colour FA map')
-    logdti_file = traits.File(desc='Filename of output logdti map')
+    mcmap_file = File(desc=desc)
+    syn_file = File(desc='Filename of synthetic image')
+    mdmap_file = File(desc='Filename of MD map/ADC')
+    famap_file = File(desc='Filename of FA map')
+    v1map_file = File(desc='Filename of PDD map [x,y,z]')
+    rgbmap_file = File(desc='Filename of colour FA map')
+    logdti_file = File(desc='Filename of output logdti map')
 
 
 class DwiTool(NiftyFitCommand):

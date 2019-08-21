@@ -16,18 +16,26 @@ def test_LabelFusion_inputs():
             nohash=True,
             usedefault=True,
         ),
-        file_to_seg=dict(mandatory=True, ),
+        file_to_seg=dict(
+            extensions=None,
+            mandatory=True,
+        ),
         in_file=dict(
             argstr='-in %s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
         kernel_size=dict(),
-        mask_file=dict(argstr='-mask %s', ),
+        mask_file=dict(
+            argstr='-mask %s',
+            extensions=None,
+        ),
         max_iter=dict(argstr='-max_iter %d', ),
         mrf_value=dict(argstr='-MRF_beta %f', ),
         out_file=dict(
             argstr='-out %s',
+            extensions=None,
             name_source=['in_file'],
             name_template='%s',
         ),
@@ -40,7 +48,7 @@ def test_LabelFusion_inputs():
             position=3,
             usedefault=True,
         ),
-        template_file=dict(),
+        template_file=dict(extensions=None, ),
         template_num=dict(),
         unc=dict(argstr='-unc', ),
         unc_thresh=dict(argstr='-uncthres %f', ),
@@ -52,7 +60,7 @@ def test_LabelFusion_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_LabelFusion_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = LabelFusion.output_spec()
 
     for key, metadata in list(output_map.items()):

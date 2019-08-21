@@ -2309,7 +2309,7 @@ class NormalizeInputSpec(FSTraitedSpec):
 
 
 class NormalizeOutputSpec(TraitedSpec):
-    out_file = traits.File(exists=False, desc="The output file for Normalize")
+    out_file = File(exists=False, desc="The output file for Normalize")
 
 
 class Normalize(FSCommand):
@@ -2375,7 +2375,7 @@ class CANormalizeInputSpec(FSTraitedSpec):
 
 
 class CANormalizeOutputSpec(TraitedSpec):
-    out_file = traits.File(exists=False, desc="The output file for Normalize")
+    out_file = File(exists=False, desc="The output file for Normalize")
     control_points = File(
         exists=False, desc="The output control points for Normalize")
 
@@ -2456,7 +2456,7 @@ class CARegisterInputSpec(FSTraitedSpecOpenMP):
 
 
 class CARegisterOutputSpec(TraitedSpec):
-    out_file = traits.File(exists=False, desc="The output file for CARegister")
+    out_file = File(exists=False, desc="The output file for CARegister")
 
 
 class CARegister(FSCommandOpenMP):
@@ -2536,13 +2536,13 @@ class CALabelInputSpec(FSTraitedSpecOpenMP):
         desc=("Reclassify voxels at least some std"
               " devs from the mean using some size"
               " Gaussian window"))
-    label = traits.File(
+    label = File(
         argstr="-l %s",
         exists=True,
         desc=
         "Undocumented flag. Autorecon3 uses ../label/{hemisphere}.cortex.label as input file"
     )
-    aseg = traits.File(
+    aseg = File(
         argstr="-aseg %s",
         exists=True,
         desc=
@@ -2626,13 +2626,13 @@ class MRIsCALabelInputSpec(FSTraitedSpecOpenMP):
         name_template="%s.aparc.annot",
         desc="Annotated surface output file")
     # optional
-    label = traits.File(
+    label = File(
         argstr="-l %s",
         exists=True,
         desc=
         "Undocumented flag. Autorecon3 uses ../label/{hemisphere}.cortex.label as input file"
     )
-    aseg = traits.File(
+    aseg = File(
         argstr="-aseg %s",
         exists=True,
         desc=
@@ -2981,13 +2981,13 @@ class ConcatenateLTAInputSpec(FSTraitedSpec):
         'VOX2VOX', 'RAS2RAS', argstr='-out_type %d', desc='set final LTA type')
 
     # Talairach options
-    tal_source_file = traits.File(
+    tal_source_file = File(
         exists=True,
         argstr='-tal %s',
         position=-5,
         requires=['tal_template_file'],
         desc='if in_lta2 is talairach.xfm, specify source for talairach')
-    tal_template_file = traits.File(
+    tal_template_file = File(
         exists=True,
         argstr='%s',
         position=-4,

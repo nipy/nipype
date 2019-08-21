@@ -4,7 +4,10 @@ from ..utils import Analyze2nii
 
 def test_Analyze2nii_inputs():
     input_map = dict(
-        analyze_file=dict(mandatory=True, ),
+        analyze_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
         matlab_cmd=dict(),
         mfile=dict(usedefault=True, ),
         paths=dict(),
@@ -23,7 +26,7 @@ def test_Analyze2nii_outputs():
     output_map = dict(
         matlab_cmd=dict(),
         mfile=dict(usedefault=True, ),
-        nifti_file=dict(),
+        nifti_file=dict(extensions=None, ),
         paths=dict(),
         use_mcr=dict(),
         use_v8struct=dict(

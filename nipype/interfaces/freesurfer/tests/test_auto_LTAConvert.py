@@ -11,12 +11,14 @@ def test_LTAConvert_inputs():
         ),
         in_fsl=dict(
             argstr='--infsl %s',
+            extensions=None,
             mandatory=True,
             xor=('in_lta', 'in_fsl', 'in_mni', 'in_reg', 'in_niftyreg',
                  'in_itk'),
         ),
         in_itk=dict(
             argstr='--initk %s',
+            extensions=None,
             mandatory=True,
             xor=('in_lta', 'in_fsl', 'in_mni', 'in_reg', 'in_niftyreg',
                  'in_itk'),
@@ -29,18 +31,21 @@ def test_LTAConvert_inputs():
         ),
         in_mni=dict(
             argstr='--inmni %s',
+            extensions=None,
             mandatory=True,
             xor=('in_lta', 'in_fsl', 'in_mni', 'in_reg', 'in_niftyreg',
                  'in_itk'),
         ),
         in_niftyreg=dict(
             argstr='--inniftyreg %s',
+            extensions=None,
             mandatory=True,
             xor=('in_lta', 'in_fsl', 'in_mni', 'in_reg', 'in_niftyreg',
                  'in_itk'),
         ),
         in_reg=dict(
             argstr='--inreg %s',
+            extensions=None,
             mandatory=True,
             xor=('in_lta', 'in_fsl', 'in_mni', 'in_reg', 'in_niftyreg',
                  'in_itk'),
@@ -55,9 +60,15 @@ def test_LTAConvert_inputs():
         out_lta=dict(argstr='--outlta %s', ),
         out_mni=dict(argstr='--outmni %s', ),
         out_reg=dict(argstr='--outreg %s', ),
-        source_file=dict(argstr='--src %s', ),
+        source_file=dict(
+            argstr='--src %s',
+            extensions=None,
+        ),
         target_conform=dict(argstr='--trgconform', ),
-        target_file=dict(argstr='--trg %s', ),
+        target_file=dict(
+            argstr='--trg %s',
+            extensions=None,
+        ),
     )
     inputs = LTAConvert.input_spec()
 
@@ -66,11 +77,11 @@ def test_LTAConvert_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_LTAConvert_outputs():
     output_map = dict(
-        out_fsl=dict(),
-        out_itk=dict(),
-        out_lta=dict(),
-        out_mni=dict(),
-        out_reg=dict(),
+        out_fsl=dict(extensions=None, ),
+        out_itk=dict(extensions=None, ),
+        out_lta=dict(extensions=None, ),
+        out_mni=dict(extensions=None, ),
+        out_reg=dict(extensions=None, ),
     )
     outputs = LTAConvert.output_spec()
 

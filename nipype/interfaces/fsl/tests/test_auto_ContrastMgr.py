@@ -8,18 +8,23 @@ def test_ContrastMgr_inputs():
         contrast_num=dict(argstr='-cope', ),
         corrections=dict(
             copyfile=False,
+            extensions=None,
             mandatory=True,
         ),
         dof_file=dict(
             argstr='',
             copyfile=False,
+            extensions=None,
             mandatory=True,
         ),
         environ=dict(
             nohash=True,
             usedefault=True,
         ),
-        fcon_file=dict(argstr='-f %s', ),
+        fcon_file=dict(
+            argstr='-f %s',
+            extensions=None,
+        ),
         output_type=dict(),
         param_estimates=dict(
             argstr='',
@@ -29,12 +34,14 @@ def test_ContrastMgr_inputs():
         sigmasquareds=dict(
             argstr='',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
         suffix=dict(argstr='-suffix %s', ),
         tcon_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-1,
         ),

@@ -29,7 +29,10 @@ def test_BRAINSTalairach_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputVolume=dict(argstr='--inputVolume %s', ),
+        inputVolume=dict(
+            argstr='--inputVolume %s',
+            extensions=None,
+        ),
         outputBox=dict(
             argstr='--outputBox %s',
             hash_files=False,
@@ -46,8 +49,8 @@ def test_BRAINSTalairach_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BRAINSTalairach_outputs():
     output_map = dict(
-        outputBox=dict(),
-        outputGrid=dict(),
+        outputBox=dict(extensions=None, ),
+        outputGrid=dict(extensions=None, ),
     )
     outputs = BRAINSTalairach.output_spec()
 

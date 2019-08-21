@@ -12,6 +12,7 @@ def test_AffineTask_inputs():
         fixed_file=dict(
             argstr='%s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=0,
         ),
@@ -24,11 +25,13 @@ def test_AffineTask_inputs():
         initialize_xfm=dict(
             argstr='%s',
             copyfile=True,
+            extensions=None,
             position=5,
         ),
         moving_file=dict(
             argstr='%s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=1,
         ),
@@ -52,8 +55,8 @@ def test_AffineTask_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_AffineTask_outputs():
     output_map = dict(
-        out_file=dict(),
-        out_file_xfm=dict(),
+        out_file=dict(extensions=None, ),
+        out_file_xfm=dict(extensions=None, ),
     )
     outputs = AffineTask.output_spec()
 

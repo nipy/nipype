@@ -317,13 +317,14 @@ jobs:
           name: Check pypi preconditions
           command: |
             pyenv local 3.5.2
-            pip install --upgrade twine wheel readme_renderer setuptools
+            pip install --upgrade pip twine future wheel readme_renderer setuptools
             python setup.py check -r -s
             python setup.py sdist bdist_wheel
       - run:
           name: Validate Python 3 installation
           command: |
             pyenv local 3.5.2
+            pip install --upgrade pip
             pip install dist/nipype-*-py3-none-any.whl
       - run:
           name: Validate Python 3.7 installation

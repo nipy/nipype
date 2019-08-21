@@ -15,6 +15,7 @@ def test_Curvature_inputs():
         in_file=dict(
             argstr='%s',
             copyfile=True,
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
@@ -30,8 +31,8 @@ def test_Curvature_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Curvature_outputs():
     output_map = dict(
-        out_gauss=dict(),
-        out_mean=dict(),
+        out_gauss=dict(extensions=None, ),
+        out_mean=dict(extensions=None, ),
     )
     outputs = Curvature.output_spec()
 

@@ -17,9 +17,15 @@ def test_gtractTensor_inputs():
             argstr='--ignoreIndex %s',
             sep=',',
         ),
-        inputVolume=dict(argstr='--inputVolume %s', ),
+        inputVolume=dict(
+            argstr='--inputVolume %s',
+            extensions=None,
+        ),
         maskProcessingMode=dict(argstr='--maskProcessingMode %s', ),
-        maskVolume=dict(argstr='--maskVolume %s', ),
+        maskVolume=dict(
+            argstr='--maskVolume %s',
+            extensions=None,
+        ),
         medianFilterSize=dict(
             argstr='--medianFilterSize %s',
             sep=',',
@@ -38,7 +44,7 @@ def test_gtractTensor_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_gtractTensor_outputs():
-    output_map = dict(outputVolume=dict(), )
+    output_map = dict(outputVolume=dict(extensions=None, ), )
     outputs = gtractTensor.output_spec()
 
     for key, metadata in list(output_map.items()):

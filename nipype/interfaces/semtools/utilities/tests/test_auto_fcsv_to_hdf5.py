@@ -10,7 +10,10 @@ def test_fcsv_to_hdf5_inputs():
             usedefault=True,
         ),
         landmarkGlobPattern=dict(argstr='--landmarkGlobPattern %s', ),
-        landmarkTypesList=dict(argstr='--landmarkTypesList %s', ),
+        landmarkTypesList=dict(
+            argstr='--landmarkTypesList %s',
+            extensions=None,
+        ),
         landmarksInformationFile=dict(
             argstr='--landmarksInformationFile %s',
             hash_files=False,
@@ -29,8 +32,8 @@ def test_fcsv_to_hdf5_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_fcsv_to_hdf5_outputs():
     output_map = dict(
-        landmarksInformationFile=dict(),
-        modelFile=dict(),
+        landmarksInformationFile=dict(extensions=None, ),
+        modelFile=dict(extensions=None, ),
     )
     outputs = fcsv_to_hdf5.output_spec()
 

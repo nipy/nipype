@@ -21,6 +21,7 @@ def test_Normalize_inputs():
         ),
         parameter_file=dict(
             copyfile=False,
+            extensions=None,
             field='subj.matname',
             mandatory=True,
             xor=['source', 'template'],
@@ -35,10 +36,12 @@ def test_Normalize_inputs():
         source_image_smoothing=dict(field='eoptions.smosrc', ),
         source_weight=dict(
             copyfile=False,
+            extensions=None,
             field='subj.wtsrc',
         ),
         template=dict(
             copyfile=False,
+            extensions=None,
             field='eoptions.template',
             mandatory=True,
             xor=['parameter_file'],
@@ -46,6 +49,7 @@ def test_Normalize_inputs():
         template_image_smoothing=dict(field='eoptions.smoref', ),
         template_weight=dict(
             copyfile=False,
+            extensions=None,
             field='eoptions.weight',
         ),
         use_mcr=dict(),

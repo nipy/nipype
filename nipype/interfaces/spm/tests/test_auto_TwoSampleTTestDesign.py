@@ -6,7 +6,10 @@ def test_TwoSampleTTestDesign_inputs():
     input_map = dict(
         covariates=dict(field='cov', ),
         dependent=dict(field='des.t2.dept', ),
-        explicit_mask_file=dict(field='masking.em', ),
+        explicit_mask_file=dict(
+            extensions=None,
+            field='masking.em',
+        ),
         global_calc_mean=dict(
             field='globalc.g_mean',
             xor=['global_calc_omit', 'global_calc_values'],
@@ -59,7 +62,7 @@ def test_TwoSampleTTestDesign_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TwoSampleTTestDesign_outputs():
-    output_map = dict(spm_mat_file=dict(), )
+    output_map = dict(spm_mat_file=dict(extensions=None, ), )
     outputs = TwoSampleTTestDesign.output_spec()
 
     for key, metadata in list(output_map.items()):

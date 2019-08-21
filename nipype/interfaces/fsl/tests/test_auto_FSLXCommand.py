@@ -19,10 +19,12 @@ def test_FSLXCommand_inputs():
         ),
         bvals=dict(
             argstr='--bvals=%s',
+            extensions=None,
             mandatory=True,
         ),
         bvecs=dict(
             argstr='--bvecs=%s',
+            extensions=None,
             mandatory=True,
         ),
         cnlinear=dict(
@@ -31,6 +33,7 @@ def test_FSLXCommand_inputs():
         ),
         dwi=dict(
             argstr='--data=%s',
+            extensions=None,
             mandatory=True,
         ),
         environ=dict(
@@ -56,6 +59,7 @@ def test_FSLXCommand_inputs():
         ),
         mask=dict(
             argstr='--mask=%s',
+            extensions=None,
             mandatory=True,
         ),
         model=dict(argstr='--model=%d', ),
@@ -101,10 +105,10 @@ def test_FSLXCommand_outputs():
     output_map = dict(
         dyads=dict(),
         fsamples=dict(),
-        mean_S0samples=dict(),
-        mean_dsamples=dict(),
+        mean_S0samples=dict(extensions=None, ),
+        mean_dsamples=dict(extensions=None, ),
         mean_fsamples=dict(),
-        mean_tausamples=dict(),
+        mean_tausamples=dict(extensions=None, ),
         phsamples=dict(),
         thsamples=dict(),
     )

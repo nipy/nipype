@@ -12,6 +12,7 @@ def test_LabelMapSmoothing_inputs():
         gaussianSigma=dict(argstr='--gaussianSigma %f', ),
         inputVolume=dict(
             argstr='%s',
+            extensions=None,
             position=-2,
         ),
         labelToSmooth=dict(argstr='--labelToSmooth %d', ),
@@ -29,7 +30,11 @@ def test_LabelMapSmoothing_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_LabelMapSmoothing_outputs():
-    output_map = dict(outputVolume=dict(position=-1, ), )
+    output_map = dict(
+        outputVolume=dict(
+            extensions=None,
+            position=-1,
+        ), )
     outputs = LabelMapSmoothing.output_spec()
 
     for key, metadata in list(output_map.items()):

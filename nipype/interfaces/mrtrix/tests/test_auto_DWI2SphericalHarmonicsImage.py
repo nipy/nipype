@@ -7,6 +7,7 @@ def test_DWI2SphericalHarmonicsImage_inputs():
         args=dict(argstr='%s', ),
         encoding_file=dict(
             argstr='-grad %s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
@@ -16,6 +17,7 @@ def test_DWI2SphericalHarmonicsImage_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
@@ -26,6 +28,7 @@ def test_DWI2SphericalHarmonicsImage_inputs():
         ),
         out_filename=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
@@ -36,7 +39,7 @@ def test_DWI2SphericalHarmonicsImage_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DWI2SphericalHarmonicsImage_outputs():
-    output_map = dict(spherical_harmonics_image=dict(), )
+    output_map = dict(spherical_harmonics_image=dict(extensions=None, ), )
     outputs = DWI2SphericalHarmonicsImage.output_spec()
 
     for key, metadata in list(output_map.items()):

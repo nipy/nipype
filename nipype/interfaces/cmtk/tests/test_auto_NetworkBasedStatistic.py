@@ -7,10 +7,10 @@ def test_NetworkBasedStatistic_inputs():
         edge_key=dict(usedefault=True, ),
         in_group1=dict(mandatory=True, ),
         in_group2=dict(mandatory=True, ),
-        node_position_network=dict(),
+        node_position_network=dict(extensions=None, ),
         number_of_permutations=dict(usedefault=True, ),
-        out_nbs_network=dict(),
-        out_nbs_pval_network=dict(),
+        out_nbs_network=dict(extensions=None, ),
+        out_nbs_pval_network=dict(extensions=None, ),
         t_tail=dict(usedefault=True, ),
         threshold=dict(usedefault=True, ),
     )
@@ -21,8 +21,8 @@ def test_NetworkBasedStatistic_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_NetworkBasedStatistic_outputs():
     output_map = dict(
-        nbs_network=dict(),
-        nbs_pval_network=dict(),
+        nbs_network=dict(extensions=None, ),
+        nbs_pval_network=dict(extensions=None, ),
         network_files=dict(),
     )
     outputs = NetworkBasedStatistic.output_spec()

@@ -11,14 +11,19 @@ def test_EMRegister_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-3,
         ),
-        mask=dict(argstr='-mask %s', ),
+        mask=dict(
+            argstr='-mask %s',
+            extensions=None,
+        ),
         nbrspacing=dict(argstr='-uns %d', ),
         num_threads=dict(),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             hash_files=False,
             keep_extension=False,
             name_source=['in_file'],
@@ -29,10 +34,14 @@ def test_EMRegister_inputs():
         subjects_dir=dict(),
         template=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
-        transform=dict(argstr='-t %s', ),
+        transform=dict(
+            argstr='-t %s',
+            extensions=None,
+        ),
     )
     inputs = EMRegister.input_spec()
 
@@ -40,7 +49,7 @@ def test_EMRegister_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_EMRegister_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = EMRegister.output_spec()
 
     for key, metadata in list(output_map.items()):

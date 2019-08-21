@@ -12,6 +12,7 @@ def test_VtkStreamlines_inputs():
         ),
         in_file=dict(
             argstr=' < %s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
@@ -23,19 +24,23 @@ def test_VtkStreamlines_inputs():
         interpolatescalars=dict(argstr='-interpolatescalars', ),
         out_file=dict(
             argstr='> %s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
         scalar_file=dict(
             argstr='-scalarfile %s',
+            extensions=None,
             position=3,
         ),
         seed_file=dict(
             argstr='-seedfile %s',
+            extensions=None,
             position=1,
         ),
         target_file=dict(
             argstr='-targetfile %s',
+            extensions=None,
             position=2,
         ),
         voxeldims=dict(
@@ -50,7 +55,7 @@ def test_VtkStreamlines_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_VtkStreamlines_outputs():
-    output_map = dict(vtk=dict(), )
+    output_map = dict(vtk=dict(extensions=None, ), )
     outputs = VtkStreamlines.output_spec()
 
     for key, metadata in list(output_map.items()):

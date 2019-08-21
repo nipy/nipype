@@ -16,7 +16,10 @@ def test_MedicAlgorithmMipavReorient_inputs():
             argstr='--inSource %s',
             sep=';',
         ),
-        inTemplate=dict(argstr='--inTemplate %s', ),
+        inTemplate=dict(
+            argstr='--inTemplate %s',
+            extensions=None,
+        ),
         inUser=dict(argstr='--inUser %s', ),
         inUser2=dict(argstr='--inUser2 %s', ),
         inUser3=dict(argstr='--inUser3 %s', ),

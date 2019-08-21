@@ -11,6 +11,7 @@ def test_SplineFilter_inputs():
         ),
         output_file=dict(
             argstr='%s',
+            extensions=None,
             position=2,
             usedefault=True,
         ),
@@ -21,6 +22,7 @@ def test_SplineFilter_inputs():
         ),
         track_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=0,
         ),
@@ -31,7 +33,7 @@ def test_SplineFilter_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SplineFilter_outputs():
-    output_map = dict(smoothed_track_file=dict(), )
+    output_map = dict(smoothed_track_file=dict(extensions=None, ), )
     outputs = SplineFilter.output_spec()
 
     for key, metadata in list(output_map.items()):

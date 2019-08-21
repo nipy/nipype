@@ -15,15 +15,20 @@ def test_LocalBistat_inputs():
         ),
         in_file1=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
         in_file2=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-1,
         ),
-        mask_file=dict(argstr='-mask %s', ),
+        mask_file=dict(
+            argstr='-mask %s',
+            extensions=None,
+        ),
         neighborhood=dict(
             argstr="-nbhd '%s(%s)'",
             mandatory=True,
@@ -34,6 +39,7 @@ def test_LocalBistat_inputs():
         ),
         out_file=dict(
             argstr='-prefix %s',
+            extensions=None,
             keep_extension=True,
             name_source='in_file1',
             name_template='%s_bistat',
@@ -46,6 +52,7 @@ def test_LocalBistat_inputs():
         ),
         weight_file=dict(
             argstr='-weight %s',
+            extensions=None,
             xor=['automask'],
         ),
     )
@@ -55,7 +62,7 @@ def test_LocalBistat_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_LocalBistat_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = LocalBistat.output_spec()
 
     for key, metadata in list(output_map.items()):

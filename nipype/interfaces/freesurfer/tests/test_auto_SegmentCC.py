@@ -12,11 +12,16 @@ def test_SegmentCC_inputs():
         ),
         in_file=dict(
             argstr='-aseg %s',
+            extensions=None,
             mandatory=True,
         ),
-        in_norm=dict(mandatory=True, ),
+        in_norm=dict(
+            extensions=None,
+            mandatory=True,
+        ),
         out_file=dict(
             argstr='-o %s',
+            extensions=None,
             hash_files=False,
             keep_extension=False,
             name_source=['in_file'],
@@ -24,6 +29,7 @@ def test_SegmentCC_inputs():
         ),
         out_rotation=dict(
             argstr='-lta %s',
+            extensions=None,
             mandatory=True,
         ),
         subject_id=dict(
@@ -41,8 +47,8 @@ def test_SegmentCC_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SegmentCC_outputs():
     output_map = dict(
-        out_file=dict(),
-        out_rotation=dict(),
+        out_file=dict(extensions=None, ),
+        out_rotation=dict(extensions=None, ),
     )
     outputs = SegmentCC.output_spec()
 

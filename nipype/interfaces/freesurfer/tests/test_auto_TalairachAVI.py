@@ -12,10 +12,12 @@ def test_TalairachAVI_inputs():
         ),
         in_file=dict(
             argstr='--i %s',
+            extensions=None,
             mandatory=True,
         ),
         out_file=dict(
             argstr='--xfm %s',
+            extensions=None,
             mandatory=True,
         ),
         subjects_dir=dict(),
@@ -27,9 +29,9 @@ def test_TalairachAVI_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TalairachAVI_outputs():
     output_map = dict(
-        out_file=dict(),
-        out_log=dict(),
-        out_txt=dict(),
+        out_file=dict(extensions=None, ),
+        out_log=dict(extensions=None, ),
+        out_txt=dict(extensions=None, ),
     )
     outputs = TalairachAVI.output_spec()
 

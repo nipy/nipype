@@ -32,9 +32,9 @@ def test_FitMSParams_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FitMSParams_outputs():
     output_map = dict(
-        pd_image=dict(),
-        t1_image=dict(),
-        t2star_image=dict(),
+        pd_image=dict(extensions=None, ),
+        t1_image=dict(extensions=None, ),
+        t2star_image=dict(extensions=None, ),
     )
     outputs = FitMSParams.output_spec()
 

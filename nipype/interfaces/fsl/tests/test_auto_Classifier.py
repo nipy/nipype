@@ -5,7 +5,7 @@ from ..fix import Classifier
 def test_Classifier_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        artifacts_list_file=dict(),
+        artifacts_list_file=dict(extensions=None, ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -23,6 +23,7 @@ def test_Classifier_inputs():
         trained_wts_file=dict(
             argstr='%s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=2,
         ),
@@ -33,7 +34,7 @@ def test_Classifier_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Classifier_outputs():
-    output_map = dict(artifacts_list_file=dict(), )
+    output_map = dict(artifacts_list_file=dict(extensions=None, ), )
     outputs = Classifier.output_spec()
 
     for key, metadata in list(output_map.items()):

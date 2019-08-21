@@ -14,19 +14,27 @@ def test_MCFLIRT_inputs():
         ),
         in_file=dict(
             argstr='-in %s',
+            extensions=None,
             mandatory=True,
             position=0,
         ),
-        init=dict(argstr='-init %s', ),
+        init=dict(
+            argstr='-init %s',
+            extensions=None,
+        ),
         interpolation=dict(argstr='-%s_final', ),
         mean_vol=dict(argstr='-meanvol', ),
         out_file=dict(
             argstr='-out %s',
+            extensions=None,
             genfile=True,
             hash_files=False,
         ),
         output_type=dict(),
-        ref_file=dict(argstr='-reffile %s', ),
+        ref_file=dict(
+            argstr='-reffile %s',
+            extensions=None,
+        ),
         ref_vol=dict(argstr='-refvol %d', ),
         rotation=dict(argstr='-rotation %d', ),
         save_mats=dict(argstr='-mats', ),
@@ -47,12 +55,12 @@ def test_MCFLIRT_inputs():
 def test_MCFLIRT_outputs():
     output_map = dict(
         mat_file=dict(),
-        mean_img=dict(),
-        out_file=dict(),
-        par_file=dict(),
+        mean_img=dict(extensions=None, ),
+        out_file=dict(extensions=None, ),
+        par_file=dict(extensions=None, ),
         rms_files=dict(),
-        std_img=dict(),
-        variance_img=dict(),
+        std_img=dict(extensions=None, ),
+        variance_img=dict(extensions=None, ),
     )
     outputs = MCFLIRT.output_spec()
 

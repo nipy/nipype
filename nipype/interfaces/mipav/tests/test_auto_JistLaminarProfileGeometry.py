@@ -9,7 +9,10 @@ def test_JistLaminarProfileGeometry_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inProfile=dict(argstr='--inProfile %s', ),
+        inProfile=dict(
+            argstr='--inProfile %s',
+            extensions=None,
+        ),
         incomputed=dict(argstr='--incomputed %s', ),
         inoutside=dict(argstr='--inoutside %f', ),
         inregularization=dict(argstr='--inregularization %s', ),
@@ -32,7 +35,7 @@ def test_JistLaminarProfileGeometry_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_JistLaminarProfileGeometry_outputs():
-    output_map = dict(outResult=dict(), )
+    output_map = dict(outResult=dict(extensions=None, ), )
     outputs = JistLaminarProfileGeometry.output_spec()
 
     for key, metadata in list(output_map.items()):

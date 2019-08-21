@@ -12,10 +12,14 @@ def test_ImageMeants_inputs():
         ),
         in_file=dict(
             argstr='-i %s',
+            extensions=None,
             mandatory=True,
             position=0,
         ),
-        mask=dict(argstr='-m %s', ),
+        mask=dict(
+            argstr='-m %s',
+            extensions=None,
+        ),
         nobin=dict(argstr='--no_bin', ),
         order=dict(
             argstr='--order=%d',
@@ -23,6 +27,7 @@ def test_ImageMeants_inputs():
         ),
         out_file=dict(
             argstr='-o %s',
+            extensions=None,
             genfile=True,
             hash_files=False,
         ),
@@ -38,7 +43,7 @@ def test_ImageMeants_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ImageMeants_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = ImageMeants.output_spec()
 
     for key, metadata in list(output_map.items()):

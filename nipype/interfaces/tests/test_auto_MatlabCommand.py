@@ -9,7 +9,10 @@ def test_MatlabCommand_inputs():
             nohash=True,
             usedefault=True,
         ),
-        logfile=dict(argstr='-logfile %s', ),
+        logfile=dict(
+            argstr='-logfile %s',
+            extensions=None,
+        ),
         mfile=dict(usedefault=True, ),
         nodesktop=dict(
             argstr='-nodesktop',
@@ -29,7 +32,10 @@ def test_MatlabCommand_inputs():
             mandatory=True,
             position=-1,
         ),
-        script_file=dict(usedefault=True, ),
+        script_file=dict(
+            extensions=None,
+            usedefault=True,
+        ),
         single_comp_thread=dict(
             argstr='-singleCompThread',
             nohash=True,

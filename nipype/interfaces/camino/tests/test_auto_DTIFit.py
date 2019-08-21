@@ -5,13 +5,17 @@ from ..dti import DTIFit
 def test_DTIFit_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        bgmask=dict(argstr='-bgmask %s', ),
+        bgmask=dict(
+            argstr='-bgmask %s',
+            extensions=None,
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
@@ -21,11 +25,13 @@ def test_DTIFit_inputs():
         ),
         out_file=dict(
             argstr='> %s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
         scheme_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=2,
         ),
@@ -36,7 +42,7 @@ def test_DTIFit_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DTIFit_outputs():
-    output_map = dict(tensor_fitted=dict(), )
+    output_map = dict(tensor_fitted=dict(extensions=None, ), )
     outputs = DTIFit.output_spec()
 
     for key, metadata in list(output_map.items()):

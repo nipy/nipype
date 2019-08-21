@@ -16,6 +16,7 @@ def test_Split_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=0,
         ),

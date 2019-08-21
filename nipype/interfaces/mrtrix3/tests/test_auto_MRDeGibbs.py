@@ -17,12 +17,23 @@ def test_MRDeGibbs_inputs():
             nohash=True,
             usedefault=True,
         ),
-        grad_file=dict(argstr='-grad %s', ),
-        grad_fsl=dict(argstr='-fslgrad %s %s', ),
-        in_bval=dict(),
-        in_bvec=dict(argstr='-fslgrad %s %s', ),
+        grad_file=dict(
+            argstr='-grad %s',
+            extensions=None,
+            xor=['grad_fsl'],
+        ),
+        grad_fsl=dict(
+            argstr='-fslgrad %s %s',
+            xor=['grad_file'],
+        ),
+        in_bval=dict(extensions=None, ),
+        in_bvec=dict(
+            argstr='-fslgrad %s %s',
+            extensions=None,
+        ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
@@ -44,7 +55,7 @@ def test_MRDeGibbs_inputs():
         ),
         out_file=dict(
             argstr='%s',
-            genfile=True,
+            extensions=None,
             keep_extension=True,
             name_source='in_file',
             name_template='%s_unr',
@@ -57,7 +68,7 @@ def test_MRDeGibbs_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRDeGibbs_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = MRDeGibbs.output_spec()
 
     for key, metadata in list(output_map.items()):

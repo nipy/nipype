@@ -19,7 +19,10 @@ def test_FreeSurferSource_outputs():
             altkey='BA',
             loc='stats',
         ),
-        T1=dict(loc='mri', ),
+        T1=dict(
+            extensions=None,
+            loc='mri',
+        ),
         annot=dict(
             altkey='*annot',
             loc='label',
@@ -40,14 +43,23 @@ def test_FreeSurferSource_outputs():
             altkey='area.pial',
             loc='surf',
         ),
-        aseg=dict(loc='mri', ),
+        aseg=dict(
+            extensions=None,
+            loc='mri',
+        ),
         aseg_stats=dict(
             altkey='aseg',
             loc='stats',
         ),
         avg_curv=dict(loc='surf', ),
-        brain=dict(loc='mri', ),
-        brainmask=dict(loc='mri', ),
+        brain=dict(
+            extensions=None,
+            loc='mri',
+        ),
+        brainmask=dict(
+            extensions=None,
+            loc='mri',
+        ),
         curv=dict(loc='surf', ),
         curv_pial=dict(
             altkey='curv.pial',
@@ -61,7 +73,10 @@ def test_FreeSurferSource_outputs():
             altkey='entorhinal_exvivo',
             loc='stats',
         ),
-        filled=dict(loc='mri', ),
+        filled=dict(
+            extensions=None,
+            loc='mri',
+        ),
         graymid=dict(
             altkey=['graymid', 'midthickness'],
             loc='surf',
@@ -72,11 +87,23 @@ def test_FreeSurferSource_outputs():
             altkey='*label',
             loc='label',
         ),
-        norm=dict(loc='mri', ),
-        nu=dict(loc='mri', ),
-        orig=dict(loc='mri', ),
+        norm=dict(
+            extensions=None,
+            loc='mri',
+        ),
+        nu=dict(
+            extensions=None,
+            loc='mri',
+        ),
+        orig=dict(
+            extensions=None,
+            loc='mri',
+        ),
         pial=dict(loc='surf', ),
-        rawavg=dict(loc='mri', ),
+        rawavg=dict(
+            extensions=None,
+            loc='mri',
+        ),
         ribbon=dict(
             altkey='*ribbon',
             loc='mri',
@@ -91,8 +118,14 @@ def test_FreeSurferSource_outputs():
         thickness=dict(loc='surf', ),
         volume=dict(loc='surf', ),
         white=dict(loc='surf', ),
-        wm=dict(loc='mri', ),
-        wmparc=dict(loc='mri', ),
+        wm=dict(
+            extensions=None,
+            loc='mri',
+        ),
+        wmparc=dict(
+            extensions=None,
+            loc='mri',
+        ),
         wmparc_stats=dict(
             altkey='wmparc',
             loc='stats',

@@ -20,6 +20,7 @@ def test_Axialize_inputs():
         in_file=dict(
             argstr='%s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
@@ -30,6 +31,7 @@ def test_Axialize_inputs():
         orientation=dict(argstr='-orient %s', ),
         out_file=dict(
             argstr='-prefix %s',
+            extensions=None,
             name_source='in_file',
             name_template='%s_axialize',
         ),
@@ -46,7 +48,7 @@ def test_Axialize_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Axialize_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = Axialize.output_spec()
 
     for key, metadata in list(output_map.items()):

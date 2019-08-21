@@ -13,6 +13,7 @@ def test_AFNItoNIFTI_inputs():
         in_file=dict(
             argstr='%s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=-1,
         ),
@@ -30,6 +31,7 @@ def test_AFNItoNIFTI_inputs():
         ),
         out_file=dict(
             argstr='-prefix %s',
+            extensions=None,
             hash_files=False,
             name_source='in_file',
             name_template='%s.nii',
@@ -43,7 +45,7 @@ def test_AFNItoNIFTI_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_AFNItoNIFTI_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = AFNItoNIFTI.output_spec()
 
     for key, metadata in list(output_map.items()):

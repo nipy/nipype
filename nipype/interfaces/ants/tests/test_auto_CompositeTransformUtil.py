@@ -20,6 +20,7 @@ def test_CompositeTransformUtil_inputs():
         ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             position=2,
         ),
         output_prefix=dict(
@@ -40,9 +41,9 @@ def test_CompositeTransformUtil_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_CompositeTransformUtil_outputs():
     output_map = dict(
-        affine_transform=dict(),
-        displacement_field=dict(),
-        out_file=dict(),
+        affine_transform=dict(extensions=None, ),
+        displacement_field=dict(extensions=None, ),
+        out_file=dict(extensions=None, ),
     )
     outputs = CompositeTransformUtil.output_spec()
 

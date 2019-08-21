@@ -23,7 +23,7 @@ def test_gtractConcatDwi_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_gtractConcatDwi_outputs():
-    output_map = dict(outputVolume=dict(), )
+    output_map = dict(outputVolume=dict(extensions=None, ), )
     outputs = gtractConcatDwi.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -28,6 +28,7 @@ def test_RobustTemplate_inputs():
         num_threads=dict(),
         out_file=dict(
             argstr='--template %s',
+            extensions=None,
             mandatory=True,
             usedefault=True,
         ),
@@ -48,7 +49,7 @@ def test_RobustTemplate_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_RobustTemplate_outputs():
     output_map = dict(
-        out_file=dict(),
+        out_file=dict(extensions=None, ),
         scaled_intensity_outputs=dict(),
         transform_outputs=dict(),
     )

@@ -17,7 +17,10 @@ def test_Beast_inputs():
             argstr='-alpha %s',
             usedefault=True,
         ),
-        configuration_file=dict(argstr='-configuration %s', ),
+        configuration_file=dict(
+            argstr='-configuration %s',
+            extensions=None,
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -26,6 +29,7 @@ def test_Beast_inputs():
         flip_images=dict(argstr='-flip', ),
         input_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
@@ -43,6 +47,7 @@ def test_Beast_inputs():
         ),
         output_file=dict(
             argstr='%s',
+            extensions=None,
             hash_files=False,
             name_source=['input_file'],
             name_template='%s_beast_mask.mnc',
@@ -77,7 +82,7 @@ def test_Beast_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Beast_outputs():
-    output_map = dict(output_file=dict(), )
+    output_map = dict(output_file=dict(extensions=None, ), )
     outputs = Beast.output_spec()
 
     for key, metadata in list(output_map.items()):

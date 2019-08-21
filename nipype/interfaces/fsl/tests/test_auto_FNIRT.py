@@ -4,7 +4,10 @@ from ..preprocess import FNIRT
 
 def test_FNIRT_inputs():
     input_map = dict(
-        affine_file=dict(argstr='--aff=%s', ),
+        affine_file=dict(
+            argstr='--aff=%s',
+            extensions=None,
+        ),
         apply_inmask=dict(
             argstr='--applyinmask=%s',
             sep=',',
@@ -37,6 +40,7 @@ def test_FNIRT_inputs():
         hessian_precision=dict(argstr='--numprec=%s', ),
         in_file=dict(
             argstr='--in=%s',
+            extensions=None,
             mandatory=True,
         ),
         in_fwhm=dict(
@@ -47,11 +51,17 @@ def test_FNIRT_inputs():
             argstr='--intin=%s',
             copyfile=False,
         ),
-        inmask_file=dict(argstr='--inmask=%s', ),
+        inmask_file=dict(
+            argstr='--inmask=%s',
+            extensions=None,
+        ),
         inmask_val=dict(argstr='--impinval=%f', ),
         intensity_mapping_model=dict(argstr='--intmod=%s', ),
         intensity_mapping_order=dict(argstr='--intorder=%d', ),
-        inwarp_file=dict(argstr='--inwarp=%s', ),
+        inwarp_file=dict(
+            argstr='--inwarp=%s',
+            extensions=None,
+        ),
         jacobian_file=dict(
             argstr='--jout=%s',
             hash_files=False,
@@ -59,6 +69,7 @@ def test_FNIRT_inputs():
         jacobian_range=dict(argstr='--jacrange=%f,%f', ),
         log_file=dict(
             argstr='--logout=%s',
+            extensions=None,
             genfile=True,
             hash_files=False,
         ),
@@ -77,13 +88,17 @@ def test_FNIRT_inputs():
         output_type=dict(),
         ref_file=dict(
             argstr='--ref=%s',
+            extensions=None,
             mandatory=True,
         ),
         ref_fwhm=dict(
             argstr='--reffwhm=%s',
             sep=',',
         ),
-        refmask_file=dict(argstr='--refmask=%s', ),
+        refmask_file=dict(
+            argstr='--refmask=%s',
+            extensions=None,
+        ),
         refmask_val=dict(argstr='--imprefval=%f', ),
         regularization_lambda=dict(
             argstr='--lambda=%s',
@@ -113,6 +128,7 @@ def test_FNIRT_inputs():
         warp_resolution=dict(argstr='--warpres=%d,%d,%d', ),
         warped_file=dict(
             argstr='--iout=%s',
+            extensions=None,
             genfile=True,
             hash_files=False,
         ),
@@ -124,13 +140,13 @@ def test_FNIRT_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FNIRT_outputs():
     output_map = dict(
-        field_file=dict(),
-        fieldcoeff_file=dict(),
-        jacobian_file=dict(),
-        log_file=dict(),
-        modulatedref_file=dict(),
+        field_file=dict(extensions=None, ),
+        fieldcoeff_file=dict(extensions=None, ),
+        jacobian_file=dict(extensions=None, ),
+        log_file=dict(extensions=None, ),
+        modulatedref_file=dict(extensions=None, ),
         out_intensitymap_file=dict(),
-        warped_file=dict(),
+        warped_file=dict(extensions=None, ),
     )
     outputs = FNIRT.output_spec()
 

@@ -12,15 +12,27 @@ def test_DWIConvert_inputs():
             usedefault=True,
         ),
         fMRI=dict(argstr='--fMRI ', ),
-        fslNIFTIFile=dict(argstr='--fslNIFTIFile %s', ),
+        fslNIFTIFile=dict(
+            argstr='--fslNIFTIFile %s',
+            extensions=None,
+        ),
         gradientVectorFile=dict(
             argstr='--gradientVectorFile %s',
             hash_files=False,
         ),
-        inputBValues=dict(argstr='--inputBValues %s', ),
-        inputBVectors=dict(argstr='--inputBVectors %s', ),
+        inputBValues=dict(
+            argstr='--inputBValues %s',
+            extensions=None,
+        ),
+        inputBVectors=dict(
+            argstr='--inputBVectors %s',
+            extensions=None,
+        ),
         inputDicomDirectory=dict(argstr='--inputDicomDirectory %s', ),
-        inputVolume=dict(argstr='--inputVolume %s', ),
+        inputVolume=dict(
+            argstr='--inputVolume %s',
+            extensions=None,
+        ),
         outputBValues=dict(
             argstr='--outputBValues %s',
             hash_files=False,
@@ -53,11 +65,11 @@ def test_DWIConvert_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DWIConvert_outputs():
     output_map = dict(
-        gradientVectorFile=dict(),
-        outputBValues=dict(),
-        outputBVectors=dict(),
+        gradientVectorFile=dict(extensions=None, ),
+        outputBValues=dict(extensions=None, ),
+        outputBVectors=dict(extensions=None, ),
         outputDirectory=dict(),
-        outputVolume=dict(),
+        outputVolume=dict(extensions=None, ),
     )
     outputs = DWIConvert.output_spec()
 

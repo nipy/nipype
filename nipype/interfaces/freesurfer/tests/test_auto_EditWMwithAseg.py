@@ -7,6 +7,7 @@ def test_EditWMwithAseg_inputs():
         args=dict(argstr='%s', ),
         brain_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-3,
         ),
@@ -16,17 +17,20 @@ def test_EditWMwithAseg_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-4,
         ),
         keep_in=dict(argstr='-keep-in', ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-1,
         ),
         seg_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
@@ -38,7 +42,7 @@ def test_EditWMwithAseg_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_EditWMwithAseg_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = EditWMwithAseg.output_spec()
 
     for key, metadata in list(output_map.items()):

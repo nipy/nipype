@@ -13,6 +13,7 @@ def test_CARegister_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-3,
         ),
@@ -22,20 +23,28 @@ def test_CARegister_inputs():
         ),
         l_files=dict(argstr='-l %s', ),
         levels=dict(argstr='-levels %d', ),
-        mask=dict(argstr='-mask %s', ),
+        mask=dict(
+            argstr='-mask %s',
+            extensions=None,
+        ),
         no_big_ventricles=dict(argstr='-nobigventricles', ),
         num_threads=dict(),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
         subjects_dir=dict(),
         template=dict(
             argstr='%s',
+            extensions=None,
             position=-2,
         ),
-        transform=dict(argstr='-T %s', ),
+        transform=dict(
+            argstr='-T %s',
+            extensions=None,
+        ),
     )
     inputs = CARegister.input_spec()
 
@@ -43,7 +52,7 @@ def test_CARegister_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_CARegister_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = CARegister.output_spec()
 
     for key, metadata in list(output_map.items()):

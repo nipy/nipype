@@ -673,7 +673,7 @@ class AverageInputSpec(CommandLineInputSpec):
     _xor_input_files = ('input_files', 'filelist')
 
     input_files = InputMultiPath(
-        traits.File(exists=True),
+        File(exists=True),
         desc='input file(s)',
         mandatory=True,
         sep=' ',
@@ -681,7 +681,7 @@ class AverageInputSpec(CommandLineInputSpec):
         position=-2,
         xor=_xor_input_files)
 
-    filelist = traits.File(
+    filelist = File(
         desc='Specify the name of a file containing input file names.',
         argstr='-filelist %s',
         exists=True,
@@ -802,7 +802,7 @@ class AverageInputSpec(CommandLineInputSpec):
         argstr='-range %d %d',
         desc='Valid range for output data.')
 
-    sdfile = traits.File(
+    sdfile = File(
         desc='Specify an output sd file (default=none).', argstr='-sdfile %s')
 
     _xor_copy_header = ('copy_header', 'no_copy_header')
@@ -934,7 +934,7 @@ class CalcInputSpec(CommandLineInputSpec):
     _xor_input_files = ('input_files', 'filelist')
 
     input_files = InputMultiPath(
-        traits.File(exists=True),
+        File(exists=True),
         desc='input file(s) for calculation',
         mandatory=True,
         sep=' ',
@@ -975,7 +975,7 @@ class CalcInputSpec(CommandLineInputSpec):
 
     debug = traits.Bool(desc='Print out debugging messages.', argstr='-debug')
 
-    filelist = traits.File(
+    filelist = File(
         desc='Specify the name of a file containing input file names.',
         argstr='-filelist %s',
         mandatory=True,
@@ -1091,7 +1091,7 @@ class CalcInputSpec(CommandLineInputSpec):
         argstr='-expression \'%s\'',
         xor=_xor_expression,
         mandatory=True)
-    expfile = traits.File(
+    expfile = File(
         desc='Name of file containing expression.',
         argstr='-expfile %s',
         xor=_xor_expression,
@@ -1102,7 +1102,7 @@ class CalcInputSpec(CommandLineInputSpec):
     outfiles = traits.List(
         traits.Tuple(
             traits.Str,
-            traits.File,
+            File,
             argstr='-outfile %s %s',
             desc=
             ('List of (symbol, file) tuples indicating that output should be written'
@@ -1296,7 +1296,7 @@ class BeastInputSpec(CommandLineInputSpec):
         usedefault=True,
         default_value=True)
 
-    configuration_file = traits.File(
+    configuration_file = File(
         desc='Specify configuration file.', argstr='-configuration %s')
 
     voxel_size = traits.Int(
@@ -1345,11 +1345,11 @@ class BeastInputSpec(CommandLineInputSpec):
         desc='Output final mask with the same resolution as input file.',
         argstr='-same_resolution')
 
-    library_dir = traits.Directory(
+    library_dir = Directory(
         desc='library directory', position=-3, argstr='%s', mandatory=True)
-    input_file = traits.File(
+    input_file = File(
         desc='input file', position=-2, argstr='%s', mandatory=True)
-    output_file = traits.File(
+    output_file = File(
         desc='output file',
         position=-1,
         argstr='%s',
@@ -1737,7 +1737,7 @@ class MathInputSpec(CommandLineInputSpec):
     _xor_input_files = ('input_files', 'filelist')
 
     input_files = InputMultiPath(
-        traits.File(exists=True),
+        File(exists=True),
         desc='input file(s) for calculation',
         mandatory=True,
         sep=' ',
@@ -1754,7 +1754,7 @@ class MathInputSpec(CommandLineInputSpec):
         hash_files=False,
         name_template='%s_mincmath.mnc')
 
-    filelist = traits.File(
+    filelist = File(
         desc='Specify the name of a file containing input file names.',
         argstr='-filelist %s',
         exists=True,
@@ -2189,7 +2189,7 @@ class ResampleInputSpec(CommandLineInputSpec):
 
     # This is a dummy input.
     input_grid_files = InputMultiPath(
-        traits.File,
+        File,
         desc='input grid file(s)',
     )
 
@@ -2253,7 +2253,7 @@ class ResampleInputSpec(CommandLineInputSpec):
         xor=_xor_sinc_window_type,
         requires=['sinc_interpolation'])
 
-    transformation = traits.File(
+    transformation = File(
         desc='File giving world transformation. (Default = identity).',
         exists=True,
         argstr='-transformation %s')
@@ -2274,7 +2274,7 @@ class ResampleInputSpec(CommandLineInputSpec):
         argstr='-use_input_sampling',
         xor=_xor_input_sampling)
 
-    like = traits.File(
+    like = File(
         desc='Specifies a model file for the resampling.',
         argstr='-like %s',
         exists=True)
@@ -2574,7 +2574,7 @@ class NormInputSpec(CommandLineInputSpec):
         hash_files=False,
         name_template='%s_norm.mnc')
 
-    output_threshold_mask = traits.File(
+    output_threshold_mask = File(
         desc='File in which to store the threshold mask.',
         argstr='-threshold_mask %s',
         name_source=['input_file'],
@@ -2588,7 +2588,7 @@ class NormInputSpec(CommandLineInputSpec):
         default_value=True)
 
     # Normalisation Options
-    mask = traits.File(
+    mask = File(
         desc='Calculate the image normalisation within a mask.',
         argstr='-mask %s',
         exists=True)
@@ -2984,7 +2984,7 @@ class Gennlxfm(CommandLine):
 
 class XfmConcatInputSpec(CommandLineInputSpec):
     input_files = InputMultiPath(
-        traits.File(exists=True),
+        File(exists=True),
         desc='input file(s)',
         mandatory=True,
         sep=' ',
@@ -2993,7 +2993,7 @@ class XfmConcatInputSpec(CommandLineInputSpec):
 
     # This is a dummy input.
     input_grid_files = InputMultiPath(
-        traits.File,
+        File,
         desc='input grid file(s)',
     )
 
@@ -3161,7 +3161,7 @@ class NlpFitInputSpec(CommandLineInputSpec):
 
     # This is a dummy input.
     input_grid_files = InputMultiPath(
-        traits.File,
+        File,
         desc='input grid file(s)',
     )
 
@@ -3252,7 +3252,7 @@ class NlpFit(CommandLine):
 
 class XfmAvgInputSpec(CommandLineInputSpec):
     input_files = InputMultiPath(
-        traits.File(exists=True),
+        File(exists=True),
         desc='input file(s)',
         mandatory=True,
         sep=' ',
@@ -3261,7 +3261,7 @@ class XfmAvgInputSpec(CommandLineInputSpec):
 
     # This is a dummy input.
     input_grid_files = InputMultiPath(
-        traits.File,
+        File,
         desc='input grid file(s)',
     )
 
@@ -3351,7 +3351,7 @@ class XfmAvg(CommandLine):
 
 
 class XfmInvertInputSpec(CommandLineInputSpec):
-    input_file = traits.File(
+    input_file = File(
         desc='input file',
         exists=True,
         mandatory=True,
@@ -3426,7 +3426,7 @@ class XfmInvert(CommandLine):
 
 class BigAverageInputSpec(CommandLineInputSpec):
     input_files = InputMultiPath(
-        traits.File(exists=True),
+        File(exists=True),
         desc='input file(s)',
         mandatory=True,
         sep=' ',
@@ -3516,7 +3516,7 @@ class BigAverage(CommandLine):
 
 
 class ReshapeInputSpec(CommandLineInputSpec):
-    input_file = traits.File(
+    input_file = File(
         desc='input file',
         exists=True,
         mandatory=True,
@@ -3574,14 +3574,14 @@ class Reshape(CommandLine):
 
 
 class VolSymmInputSpec(CommandLineInputSpec):
-    input_file = traits.File(
+    input_file = File(
         desc='input file',
         exists=True,
         mandatory=True,
         argstr='%s',
         position=-3)
 
-    trans_file = traits.File(
+    trans_file = File(
         desc='output xfm trans file',
         genfile=True,
         argstr='%s',
@@ -3602,7 +3602,7 @@ class VolSymmInputSpec(CommandLineInputSpec):
 
     # This is a dummy input.
     input_grid_files = InputMultiPath(
-        traits.File,
+        File,
         desc='input grid file(s)',
     )
 

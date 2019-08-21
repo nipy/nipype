@@ -13,9 +13,13 @@ def test_Dfs_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputShadingVolume=dict(argstr='-c %s', ),
+        inputShadingVolume=dict(
+            argstr='-c %s',
+            extensions=None,
+        ),
         inputVolumeFile=dict(
             argstr='-i %s',
+            extensions=None,
             mandatory=True,
         ),
         noNormalsFlag=dict(argstr='--nonormals', ),
@@ -25,6 +29,7 @@ def test_Dfs_inputs():
         ),
         outputSurfaceFile=dict(
             argstr='-o %s',
+            extensions=None,
             genfile=True,
         ),
         postSmoothFlag=dict(argstr='--postsmooth', ),
@@ -54,7 +59,7 @@ def test_Dfs_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Dfs_outputs():
-    output_map = dict(outputSurfaceFile=dict(), )
+    output_map = dict(outputSurfaceFile=dict(extensions=None, ), )
     outputs = Dfs.output_spec()
 
     for key, metadata in list(output_map.items()):

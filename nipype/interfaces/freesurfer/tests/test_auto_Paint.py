@@ -12,11 +12,13 @@ def test_Paint_inputs():
         ),
         in_surf=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             hash_files=False,
             keep_extension=False,
             name_source=['in_surf'],
@@ -26,6 +28,7 @@ def test_Paint_inputs():
         subjects_dir=dict(),
         template=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-3,
         ),
@@ -37,7 +40,7 @@ def test_Paint_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Paint_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = Paint.output_spec()
 
     for key, metadata in list(output_map.items()):

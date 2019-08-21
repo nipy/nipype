@@ -11,6 +11,7 @@ def test_ConcatenateLTA_inputs():
         ),
         in_lta1=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-3,
         ),
@@ -24,6 +25,7 @@ def test_ConcatenateLTA_inputs():
         invert_out=dict(argstr='-invertout', ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             hash_files=False,
             keep_extension=True,
             name_source=['in_lta1'],
@@ -35,11 +37,13 @@ def test_ConcatenateLTA_inputs():
         subjects_dir=dict(),
         tal_source_file=dict(
             argstr='-tal %s',
+            extensions=None,
             position=-5,
             requires=['tal_template_file'],
         ),
         tal_template_file=dict(
             argstr='%s',
+            extensions=None,
             position=-4,
             requires=['tal_source_file'],
         ),
@@ -50,7 +54,7 @@ def test_ConcatenateLTA_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ConcatenateLTA_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = ConcatenateLTA.output_spec()
 
     for key, metadata in list(output_map.items()):

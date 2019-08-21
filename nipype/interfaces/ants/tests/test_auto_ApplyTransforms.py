@@ -20,6 +20,7 @@ def test_ApplyTransforms_inputs():
         ),
         input_image=dict(
             argstr='--input %s',
+            extensions=None,
             mandatory=True,
         ),
         input_image_type=dict(argstr='--input-image-type %d', ),
@@ -42,6 +43,7 @@ def test_ApplyTransforms_inputs():
         print_out_composite_warp_file=dict(requires=['output_image'], ),
         reference_image=dict(
             argstr='--reference-image %s',
+            extensions=None,
             mandatory=True,
         ),
         transforms=dict(
@@ -55,7 +57,7 @@ def test_ApplyTransforms_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ApplyTransforms_outputs():
-    output_map = dict(output_image=dict(), )
+    output_map = dict(output_image=dict(extensions=None, ), )
     outputs = ApplyTransforms.output_spec()
 
     for key, metadata in list(output_map.items()):

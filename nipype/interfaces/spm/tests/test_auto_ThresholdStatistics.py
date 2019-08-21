@@ -12,10 +12,12 @@ def test_ThresholdStatistics_inputs():
         paths=dict(),
         spm_mat_file=dict(
             copyfile=True,
+            extensions=None,
             mandatory=True,
         ),
         stat_image=dict(
             copyfile=False,
+            extensions=None,
             mandatory=True,
         ),
         use_mcr=dict(),

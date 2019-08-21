@@ -19,9 +19,18 @@ def test_BRAINSMush_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputFirstVolume=dict(argstr='--inputFirstVolume %s', ),
-        inputMaskVolume=dict(argstr='--inputMaskVolume %s', ),
-        inputSecondVolume=dict(argstr='--inputSecondVolume %s', ),
+        inputFirstVolume=dict(
+            argstr='--inputFirstVolume %s',
+            extensions=None,
+        ),
+        inputMaskVolume=dict(
+            argstr='--inputMaskVolume %s',
+            extensions=None,
+        ),
+        inputSecondVolume=dict(
+            argstr='--inputSecondVolume %s',
+            extensions=None,
+        ),
         lowerThresholdFactor=dict(argstr='--lowerThresholdFactor %f', ),
         lowerThresholdFactorPre=dict(argstr='--lowerThresholdFactorPre %f', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
@@ -51,9 +60,9 @@ def test_BRAINSMush_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BRAINSMush_outputs():
     output_map = dict(
-        outputMask=dict(),
-        outputVolume=dict(),
-        outputWeightsFile=dict(),
+        outputMask=dict(extensions=None, ),
+        outputVolume=dict(extensions=None, ),
+        outputWeightsFile=dict(extensions=None, ),
     )
     outputs = BRAINSMush.output_spec()
 

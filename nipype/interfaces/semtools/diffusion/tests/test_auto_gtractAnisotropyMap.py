@@ -10,7 +10,10 @@ def test_gtractAnisotropyMap_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputTensorVolume=dict(argstr='--inputTensorVolume %s', ),
+        inputTensorVolume=dict(
+            argstr='--inputTensorVolume %s',
+            extensions=None,
+        ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         outputVolume=dict(
             argstr='--outputVolume %s',
@@ -23,7 +26,7 @@ def test_gtractAnisotropyMap_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_gtractAnisotropyMap_outputs():
-    output_map = dict(outputVolume=dict(), )
+    output_map = dict(outputVolume=dict(extensions=None, ), )
     outputs = gtractAnisotropyMap.output_spec()
 
     for key, metadata in list(output_map.items()):

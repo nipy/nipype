@@ -23,10 +23,12 @@ def test_SurfaceSmooth_inputs():
         ),
         in_file=dict(
             argstr='--sval %s',
+            extensions=None,
             mandatory=True,
         ),
         out_file=dict(
             argstr='--tval %s',
+            extensions=None,
             genfile=True,
         ),
         reshape=dict(argstr='--reshape', ),
@@ -46,7 +48,7 @@ def test_SurfaceSmooth_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SurfaceSmooth_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = SurfaceSmooth.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft = python sts = 4 ts = 4 sw = 4 et:
-"""AFNI utility interfaces
+"""
+AFNI utility interfaces.
 
 Examples
 --------
 See the docstrings of the individual classes for examples.
+
 """
 import os
 import os.path as op
@@ -1391,7 +1393,7 @@ class LocalBistatInputSpec(AFNICommandInputSpec):
              '  * ALL      = all of the above, in that order'
              'More than one option can be used.',
         argstr='-stat %s...')
-    mask_file = traits.File(
+    mask_file = File(
         exists=True,
         desc='mask image file name. Voxels NOT in the mask will not be used '
              'in the neighborhood of any voxel. Also, a voxel NOT in the mask '
@@ -1401,13 +1403,13 @@ class LocalBistatInputSpec(AFNICommandInputSpec):
         desc='Compute the mask as in program 3dAutomask.',
         argstr='-automask',
         xor=['weight_file'])
-    weight_file = traits.File(
+    weight_file = File(
         exists=True,
         desc='File name of an image to use as a weight.  Only applies to '
              '\'pearson\' statistics.',
         argstr='-weight %s',
         xor=['automask'])
-    out_file = traits.File(
+    out_file = File(
         desc='Output dataset.',
         argstr='-prefix %s',
         name_source='in_file1',
@@ -1521,7 +1523,7 @@ class LocalstatInputSpec(AFNICommandInputSpec):
              '            mean, median, MAD, P2skew\n'
              'More than one option can be used.',
         argstr='-stat %s...')
-    mask_file = traits.File(
+    mask_file = File(
         exists=True,
         desc='Mask image file name. Voxels NOT in the mask will not be used '
              'in the neighborhood of any voxel. Also, a voxel NOT in the '
@@ -1583,7 +1585,7 @@ class LocalstatInputSpec(AFNICommandInputSpec):
     overwrite = traits.Bool(
         desc='overwrite output file if it already exists',
         argstr='-overwrite')
-    out_file = traits.File(
+    out_file = File(
         desc='Output dataset.',
         argstr='-prefix %s',
         name_source='in_file',
@@ -1899,7 +1901,7 @@ class NwarpApplyInputSpec(CommandLineInputSpec):
     inv_warp = traits.Bool(
         desc='After the warp specified in \'-nwarp\' is computed, invert it',
         argstr='-iwarp')
-    master = traits.File(
+    master = File(
         exists=True,
         desc='the name of the master dataset, which defines the output grid',
         argstr='-master %s')
@@ -1974,10 +1976,10 @@ class NwarpApply(AFNICommandBase):
 
 class NwarpCatInputSpec(AFNICommandInputSpec):
     in_files = traits.List(
-        traits.Either(traits.File(),
+        traits.Either(File(),
                       traits.Tuple(
                           traits.Enum('IDENT', 'INV', 'SQRT', 'SQRTINV'),
-                          traits.File())),
+                          File())),
         desc="list of tuples of 3D warps and associated functions",
         mandatory=True,
         argstr="%s",
@@ -2131,7 +2133,7 @@ class OneDToolPyInputSpec(AFNIPythonCommandInputSpec):
         desc=
         'display a list of TRs which were not censored in the specified style',
         argstr='-show_trs_uncensored %s')
-    show_cormat_warnings = traits.File(
+    show_cormat_warnings = File(
         desc='Write cormat warnings to a file',
         argstr="-show_cormat_warnings |& tee %s",
         position=-1,
@@ -2220,7 +2222,7 @@ class RefitInputSpec(CommandLineInputSpec):
         desc='Associates the dataset with a specific template type, e.g. '
         'TLRC, MNI, ORIG')
     atrcopy = traits.Tuple(
-        traits.File(exists=True),
+        File(exists=True),
         traits.Str(),
         argstr='-atrcopy %s %s',
         desc='Copy AFNI header attribute from the given file into the header '
@@ -2304,7 +2306,7 @@ class ReHoInputSpec(CommandLineInputSpec):
         position=1,
         mandatory=True,
         exists=True)
-    out_file = traits.File(
+    out_file = File(
         desc='Output dataset.',
         argstr='-prefix %s',
         name_source='in_file',
@@ -2317,7 +2319,7 @@ class ReHoInputSpec(CommandLineInputSpec):
              'Kendall\'s W. This option is currently compatible only with '
              'the AFNI (BRIK/HEAD) output type; the chi-squared value will '
              'be the second sub-brick of the output dataset.')
-    mask_file = traits.File(
+    mask_file = File(
         desc='Mask within which ReHo should be calculated voxelwise',
         argstr='-mask %s')
     neighborhood = traits.Enum(
@@ -2445,7 +2447,7 @@ class ResampleInputSpec(AFNICommandInputSpec):
         *[traits.Float()] * 3,
         argstr='-dxyz %f %f %f',
         desc='resample to new dx, dy and dz')
-    master = traits.File(
+    master = File(
         argstr='-master %s', desc='align dataset grid to a reference file')
 
 
@@ -3241,7 +3243,7 @@ class ZeropadInputSpec(AFNICommandInputSpec):
         'and slice thickness = 2.5 mm ==> 2 slices added',
         argstr='-mm',
         xor=['master'])
-    master = traits.File(
+    master = File(
         desc='match the volume described in dataset '
         '\'mset\', where mset must have the same '
         'orientation and grid spacing as dataset to be '

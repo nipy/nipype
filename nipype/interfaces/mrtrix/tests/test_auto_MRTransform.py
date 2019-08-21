@@ -28,6 +28,7 @@ def test_MRTransform_inputs():
         ),
         out_filename=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
@@ -37,6 +38,7 @@ def test_MRTransform_inputs():
         ),
         reference_image=dict(
             argstr='-reference %s',
+            extensions=None,
             position=1,
         ),
         replace_transform=dict(
@@ -45,10 +47,12 @@ def test_MRTransform_inputs():
         ),
         template_image=dict(
             argstr='-template %s',
+            extensions=None,
             position=1,
         ),
         transformation_file=dict(
             argstr='-transform %s',
+            extensions=None,
             position=1,
         ),
     )
@@ -58,7 +62,7 @@ def test_MRTransform_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRTransform_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = MRTransform.output_spec()
 
     for key, metadata in list(output_map.items()):

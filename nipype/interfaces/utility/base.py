@@ -209,7 +209,7 @@ class RenameInputSpec(DynamicTraitedSpec):
 
 
 class RenameOutputSpec(TraitedSpec):
-    out_file = traits.File(
+    out_file = File(
         exists=True, desc="softlink to original file with new name")
 
 

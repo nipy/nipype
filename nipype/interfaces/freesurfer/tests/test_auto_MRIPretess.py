@@ -11,11 +11,13 @@ def test_MRIPretess_inputs():
         ),
         in_filled=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-4,
         ),
         in_norm=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
@@ -29,6 +31,7 @@ def test_MRIPretess_inputs():
         nocorners=dict(argstr='-nocorners', ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             keep_extension=True,
             name_source=['in_filled'],
             name_template='%s_pretesswm',
@@ -43,7 +46,7 @@ def test_MRIPretess_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRIPretess_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = MRIPretess.output_spec()
 
     for key, metadata in list(output_map.items()):

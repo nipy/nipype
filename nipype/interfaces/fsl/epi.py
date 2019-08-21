@@ -1242,48 +1242,48 @@ class EddyQuadInputSpec(FSLCommandInputSpec):
     idx_file = File(
         exists=True,
         mandatory=True,
-        argstr="--eddyIdx=%s",
+        argstr="--eddyIdx %s",
         desc=("File containing indices for all volumes into acquisition "
               "parameters")
     )
     param_file = File(
         exists=True,
         mandatory=True,
-        argstr="--eddyParams=%s",
+        argstr="--eddyParams %s",
         desc="File containing acquisition parameters"
     )
     mask_file = File(
         exists=True,
         mandatory=True,
-        argstr="--mask=%s",
+        argstr="--mask %s",
         desc="Binary mask file"
     )
     bval_file = File(
         exists=True,
         mandatory=True,
-        argstr="--bvals=%s",
+        argstr="--bvals %s",
         desc="b-values file"
     )
     bvec_file = File(
         exists=True,
-        argstr="--bvecs=%s",
+        argstr="--bvecs %s",
         desc=("b-vectors file - only used when <base_name>.eddy_residuals "
               "file is present")
     )
     output_dir = traits.Str(
         name_template='%s.qc',
         name_source=['base_name'],
-        argstr='--output-dir=%s',
+        argstr='--output-dir %s',
         desc="Output directory - default = '<base_name>.qc'",
     )
     field = File(
         exists=True,
-        argstr='--field=%s',
+        argstr='--field %s',
         desc="TOPUP estimated field (in Hz)",
     )
     slice_spec = File(
         exists=True,
-        argstr='--slspec=%s',
+        argstr='--slspec %s',
         desc="Text file specifying slice/group acquisition",
     )
     verbose = traits.Bool(
@@ -1361,9 +1361,9 @@ class EddyQuad(FSLCommand):
     >>> quad.inputs.field      = 'fieldmap_phase_fslprepared.nii'
     >>> quad.inputs.verbose    = True
     >>> quad.cmdline
-    'eddy_quad eddy_corrected --bvals=bvals.scheme --bvecs=bvecs.scheme \
---field=fieldmap_phase_fslprepared.nii --eddyIdx=epi_index.txt \
---mask=epi_mask.nii --output-dir=eddy_corrected.qc --eddyParams=epi_acqp.txt \
+    'eddy_quad eddy_corrected --bvals bvals.scheme --bvecs bvecs.scheme \
+--field fieldmap_phase_fslprepared.nii --eddyIdx epi_index.txt \
+--mask epi_mask.nii --output-dir eddy_corrected.qc --eddyParams epi_acqp.txt \
 --verbose'
     >>> res = quad.run() # doctest: +SKIP
 

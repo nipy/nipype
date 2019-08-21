@@ -12,6 +12,7 @@ def test_Detrend_inputs():
         in_file=dict(
             argstr='%s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=-1,
         ),
@@ -21,6 +22,7 @@ def test_Detrend_inputs():
         ),
         out_file=dict(
             argstr='-prefix %s',
+            extensions=None,
             name_source='in_file',
             name_template='%s_detrend',
         ),
@@ -32,7 +34,7 @@ def test_Detrend_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Detrend_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = Detrend.output_spec()
 
     for key, metadata in list(output_map.items()):

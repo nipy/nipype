@@ -13,6 +13,7 @@ def test_Overlay_inputs():
         ),
         background_image=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=4,
         ),
@@ -34,6 +35,7 @@ def test_Overlay_inputs():
         ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             hash_files=False,
             position=-1,
@@ -51,11 +53,13 @@ def test_Overlay_inputs():
         ),
         stat_image=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=6,
         ),
         stat_image2=dict(
             argstr='%s',
+            extensions=None,
             position=9,
             xor=['show_negative_stats'],
         ),
@@ -84,7 +88,7 @@ def test_Overlay_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Overlay_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = Overlay.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -5,7 +5,10 @@ from ..utils import VolumeMask
 def test_VolumeMask_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        aseg=dict(xor=['in_aseg'], ),
+        aseg=dict(
+            extensions=None,
+            xor=['in_aseg'],
+        ),
         copy_inputs=dict(),
         environ=dict(
             nohash=True,
@@ -13,6 +16,7 @@ def test_VolumeMask_inputs():
         ),
         in_aseg=dict(
             argstr='--aseg_name %s',
+            extensions=None,
             xor=['aseg'],
         ),
         left_ribbonlabel=dict(
@@ -23,10 +27,22 @@ def test_VolumeMask_inputs():
             argstr='--label_left_white %d',
             mandatory=True,
         ),
-        lh_pial=dict(mandatory=True, ),
-        lh_white=dict(mandatory=True, ),
-        rh_pial=dict(mandatory=True, ),
-        rh_white=dict(mandatory=True, ),
+        lh_pial=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        lh_white=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        rh_pial=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        rh_white=dict(
+            extensions=None,
+            mandatory=True,
+        ),
         right_ribbonlabel=dict(
             argstr='--label_right_ribbon %d',
             mandatory=True,
@@ -51,9 +67,9 @@ def test_VolumeMask_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_VolumeMask_outputs():
     output_map = dict(
-        lh_ribbon=dict(),
-        out_ribbon=dict(),
-        rh_ribbon=dict(),
+        lh_ribbon=dict(extensions=None, ),
+        out_ribbon=dict(extensions=None, ),
+        rh_ribbon=dict(extensions=None, ),
     )
     outputs = VolumeMask.output_spec()
 

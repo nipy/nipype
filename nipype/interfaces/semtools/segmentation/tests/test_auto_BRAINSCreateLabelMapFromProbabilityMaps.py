@@ -23,7 +23,10 @@ def test_BRAINSCreateLabelMapFromProbabilityMaps_inputs():
         ),
         inclusionThreshold=dict(argstr='--inclusionThreshold %f', ),
         inputProbabilityVolume=dict(argstr='--inputProbabilityVolume %s...', ),
-        nonAirRegionMask=dict(argstr='--nonAirRegionMask %s', ),
+        nonAirRegionMask=dict(
+            argstr='--nonAirRegionMask %s',
+            extensions=None,
+        ),
         priorLabelCodes=dict(
             argstr='--priorLabelCodes %s',
             sep=',',
@@ -36,8 +39,8 @@ def test_BRAINSCreateLabelMapFromProbabilityMaps_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BRAINSCreateLabelMapFromProbabilityMaps_outputs():
     output_map = dict(
-        cleanLabelVolume=dict(),
-        dirtyLabelVolume=dict(),
+        cleanLabelVolume=dict(extensions=None, ),
+        dirtyLabelVolume=dict(extensions=None, ),
     )
     outputs = BRAINSCreateLabelMapFromProbabilityMaps.output_spec()
 

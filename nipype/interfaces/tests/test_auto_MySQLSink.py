@@ -5,6 +5,7 @@ from ..io import MySQLSink
 def test_MySQLSink_inputs():
     input_map = dict(
         config=dict(
+            extensions=None,
             mandatory=True,
             xor=['host'],
         ),

@@ -9,7 +9,7 @@ import shutil
 
 from ... import logging
 from ...utils.filemanip import fname_presuffix, split_filename
-from ..base import (TraitedSpec, File, traits, OutputMultiPath, isdefined,
+from ..base import (TraitedSpec, Directory, File, traits, OutputMultiPath, isdefined,
                     CommandLine, CommandLineInputSpec)
 from .base import (FSCommand, FSTraitedSpec, FSSurfaceCommand, FSScriptCommand,
                    FSScriptOutputSpec, FSTraitedSpecOpenMP, FSCommandOpenMP)
@@ -765,7 +765,7 @@ class SurfaceSnapshotsInputSpec(FSTraitedSpec):
         desc="load an overlay volume/surface",
         requires=["overlay_range"])
     reg_xors = ["overlay_reg", "identity_reg", "mni152_reg"]
-    overlay_reg = traits.File(
+    overlay_reg = File(
         exists=True,
         argstr="-overlay-reg %s",
         xor=reg_xors,
@@ -1952,7 +1952,7 @@ class CheckTalairachAlignmentInputSpec(FSTraitedSpec):
 
 
 class CheckTalairachAlignmentOutputSpec(TraitedSpec):
-    out_file = traits.File(
+    out_file = File(
         exists=True, desc="The input file for CheckTalairachAlignment")
 
 
@@ -1998,11 +1998,11 @@ class TalairachAVIInputSpec(FSTraitedSpec):
 
 
 class TalairachAVIOutputSpec(TraitedSpec):
-    out_file = traits.File(
+    out_file = File(
         exists=False, desc="The output transform for TalairachAVI")
-    out_log = traits.File(
+    out_log = File(
         exists=False, desc="The output log file for TalairachAVI")
-    out_txt = traits.File(
+    out_txt = File(
         exists=False, desc="The output text file for TaliarachAVI")
 
 
@@ -2344,7 +2344,7 @@ class FixTopologyInputSpec(FSTraitedSpec):
         desc=
         "No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu"
     )
-    sphere = traits.File(argstr="-sphere %s", desc="Sphere input file")
+    sphere = File(argstr="-sphere %s", desc="Sphere input file")
 
 
 class FixTopologyOutputSpec(TraitedSpec):
@@ -3211,27 +3211,27 @@ class ParcellationStatsInputSpec(FSTraitedSpec):
     surface = traits.String(
         position=-1, argstr="%s", desc="Input surface (e.g. 'white')")
     mgz = traits.Bool(argstr="-mgz", desc="Look for mgz files")
-    in_cortex = traits.File(
+    in_cortex = File(
         argstr="-cortex %s", exists=True, desc="Input cortex label")
-    in_annotation = traits.File(
+    in_annotation = File(
         argstr="-a %s",
         exists=True,
         xor=['in_label'],
         desc=
         "compute properties for each label in the annotation file separately")
-    in_label = traits.File(
+    in_label = File(
         argstr="-l %s",
         exists=True,
         xor=['in_annotatoin', 'out_color'],
         desc="limit calculations to specified label")
     tabular_output = traits.Bool(argstr="-b", desc="Tabular output")
-    out_table = traits.File(
+    out_table = File(
         argstr="-f %s",
         exists=False,
         genfile=True,
         requires=['tabular_output'],
         desc="Table output to tablefile")
-    out_color = traits.File(
+    out_color = File(
         argstr="-c %s",
         exists=False,
         genfile=True,
@@ -3391,13 +3391,13 @@ class ContrastInputSpec(FSTraitedSpec):
         mandatory=True,
         exists=True,
         desc="Input file must be <subject_id>/surf/<hemisphere>.white")
-    annotation = traits.File(
+    annotation = File(
         mandatory=True,
         exists=True,
         desc=
         "Input annotation file must be <subject_id>/label/<hemisphere>.aparc.annot"
     )
-    cortex = traits.File(
+    cortex = File(
         mandatory=True,
         exists=True,
         desc=
@@ -3496,7 +3496,7 @@ class RelabelHypointensitiesInputSpec(FSTraitedSpec):
         mandatory=True,
         exists=True,
         desc="Input aseg file")
-    surf_directory = traits.Directory(
+    surf_directory = Directory(
         '.',
         argstr="%s",
         position=-2,
@@ -3800,7 +3800,7 @@ class MRIsExpandInputSpec(FSTraitedSpec):
     #     desc=('Tuple of (n_averages, min_averages) parameters '
     #           '(implicit: (16, 0))'))
     # target_intensity = traits.Tuple(
-    #     traits.Float, traits.File(exists=True),
+    #     traits.Float, File(exists=True),
     #     argstr='-intensity %g %s',
     #     desc='Tuple of intensity and brain volume to crop to target intensity')
 

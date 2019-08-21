@@ -50,7 +50,7 @@ def test_function(tmpdir):
 
 
 def make_random_array(size):
-    return np.random.randn(size, size)
+    return np.random.randn(size, size)  # noqa
 
 
 def should_fail(tmp):

@@ -10,8 +10,14 @@ def test_TextureMeasureFilter_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputMaskVolume=dict(argstr='--inputMaskVolume %s', ),
-        inputVolume=dict(argstr='--inputVolume %s', ),
+        inputMaskVolume=dict(
+            argstr='--inputMaskVolume %s',
+            extensions=None,
+        ),
+        inputVolume=dict(
+            argstr='--inputVolume %s',
+            extensions=None,
+        ),
         insideROIValue=dict(argstr='--insideROIValue %f', ),
         outputFilename=dict(
             argstr='--outputFilename %s',
@@ -24,7 +30,7 @@ def test_TextureMeasureFilter_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TextureMeasureFilter_outputs():
-    output_map = dict(outputFilename=dict(), )
+    output_map = dict(outputFilename=dict(extensions=None, ), )
     outputs = TextureMeasureFilter.output_spec()
 
     for key, metadata in list(output_map.items()):

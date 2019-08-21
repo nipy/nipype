@@ -9,7 +9,10 @@ def test_UKFTractography_inputs():
         Qw=dict(argstr='--Qw %f', ),
         Rs=dict(argstr='--Rs %f', ),
         args=dict(argstr='%s', ),
-        dwiFile=dict(argstr='--dwiFile %s', ),
+        dwiFile=dict(
+            argstr='--dwiFile %s',
+            extensions=None,
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -20,7 +23,10 @@ def test_UKFTractography_inputs():
             argstr='--labels %s',
             sep=',',
         ),
-        maskFile=dict(argstr='--maskFile %s', ),
+        maskFile=dict(
+            argstr='--maskFile %s',
+            extensions=None,
+        ),
         maxBranchingAngle=dict(argstr='--maxBranchingAngle %f', ),
         maxHalfFiberLength=dict(argstr='--maxHalfFiberLength %f', ),
         minBranchingAngle=dict(argstr='--minBranchingAngle %f', ),
@@ -37,7 +43,10 @@ def test_UKFTractography_inputs():
         recordTensors=dict(argstr='--recordTensors ', ),
         recordTrace=dict(argstr='--recordTrace ', ),
         seedFALimit=dict(argstr='--seedFALimit %f', ),
-        seedsFile=dict(argstr='--seedsFile %s', ),
+        seedsFile=dict(
+            argstr='--seedsFile %s',
+            extensions=None,
+        ),
         seedsPerVoxel=dict(argstr='--seedsPerVoxel %d', ),
         stepLength=dict(argstr='--stepLength %f', ),
         storeGlyphs=dict(argstr='--storeGlyphs ', ),
@@ -59,8 +68,8 @@ def test_UKFTractography_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_UKFTractography_outputs():
     output_map = dict(
-        tracts=dict(),
-        tractsWithSecondTensor=dict(),
+        tracts=dict(extensions=None, ),
+        tractsWithSecondTensor=dict(extensions=None, ),
     )
     outputs = UKFTractography.output_spec()
 

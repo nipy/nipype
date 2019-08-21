@@ -7,6 +7,7 @@ def test_CreateJacobianDeterminantImage_inputs():
         args=dict(argstr='%s', ),
         deformationField=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
@@ -29,6 +30,7 @@ def test_CreateJacobianDeterminantImage_inputs():
         ),
         outputImage=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=2,
         ),
@@ -43,7 +45,7 @@ def test_CreateJacobianDeterminantImage_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_CreateJacobianDeterminantImage_outputs():
-    output_map = dict(jacobian_image=dict(), )
+    output_map = dict(jacobian_image=dict(extensions=None, ), )
     outputs = CreateJacobianDeterminantImage.output_spec()
 
     for key, metadata in list(output_map.items()):

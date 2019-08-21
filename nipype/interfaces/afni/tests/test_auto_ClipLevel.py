@@ -16,11 +16,13 @@ def test_ClipLevel_inputs():
         ),
         grad=dict(
             argstr='-grad %s',
+            extensions=None,
             position=3,
             xor='doall',
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-1,
         ),

@@ -24,7 +24,10 @@ def test_EMSegmentCommandLine_inputs():
         keepTempFiles=dict(argstr='--keepTempFiles ', ),
         loadAtlasNonCentered=dict(argstr='--loadAtlasNonCentered ', ),
         loadTargetCentered=dict(argstr='--loadTargetCentered ', ),
-        mrmlSceneFileName=dict(argstr='--mrmlSceneFileName %s', ),
+        mrmlSceneFileName=dict(
+            argstr='--mrmlSceneFileName %s',
+            extensions=None,
+        ),
         parametersMRMLNodeName=dict(argstr='--parametersMRMLNodeName %s', ),
         registrationAffineType=dict(argstr='--registrationAffineType %d', ),
         registrationDeformableType=dict(
@@ -35,7 +38,9 @@ def test_EMSegmentCommandLine_inputs():
             hash_files=False,
         ),
         resultStandardVolumeFileName=dict(
-            argstr='--resultStandardVolumeFileName %s', ),
+            argstr='--resultStandardVolumeFileName %s',
+            extensions=None,
+        ),
         resultVolumeFileName=dict(
             argstr='--resultVolumeFileName %s',
             hash_files=False,
@@ -52,9 +57,9 @@ def test_EMSegmentCommandLine_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_EMSegmentCommandLine_outputs():
     output_map = dict(
-        generateEmptyMRMLSceneAndQuit=dict(),
-        resultMRMLSceneFileName=dict(),
-        resultVolumeFileName=dict(),
+        generateEmptyMRMLSceneAndQuit=dict(extensions=None, ),
+        resultMRMLSceneFileName=dict(extensions=None, ),
+        resultVolumeFileName=dict(extensions=None, ),
     )
     outputs = EMSegmentCommandLine.output_spec()
 

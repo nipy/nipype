@@ -4,7 +4,7 @@
 
 import os.path as op
 
-from ..base import traits, TraitedSpec, File, Undefined
+from ..base import traits, TraitedSpec, File, Undefined, InputMultiObject
 from .base import MRTrix3BaseInputSpec, MRTrix3Base
 
 
@@ -113,10 +113,13 @@ class EstimateFODInputSpec(MRTrix3BaseInputSpec):
         sep=',',
         argstr='-shell %s',
         desc='specify one or more dw gradient shells')
-    max_sh = traits.Int(
-        8, usedefault=True,
-        argstr='-lmax %d',
-        desc='maximum harmonic degree of response function')
+    max_sh = InputMultiObject(
+        traits.Int,
+        value=[8],
+        usedefault=True,
+        argstr='-lmax %s',
+        sep=',',
+        desc=('maximum harmonic degree of response function - single value for single-shell response, list for multi-shell response'))
     in_dirs = File(
         exists=True,
         argstr='-directions %s',

@@ -14,6 +14,7 @@ def test_EstimateModel_inputs():
         paths=dict(),
         spm_mat_file=dict(
             copyfile=True,
+            extensions=None,
             field='spmmat',
             mandatory=True,
         ),
@@ -33,15 +34,15 @@ def test_EstimateModel_outputs():
     output_map = dict(
         ARcoef=dict(),
         Cbetas=dict(),
-        RPVimage=dict(),
+        RPVimage=dict(extensions=['.hdr', '.img', '.img.gz', '.nii'], ),
         SDbetas=dict(),
         SDerror=dict(),
         beta_images=dict(),
-        labels=dict(),
-        mask_image=dict(),
-        residual_image=dict(),
+        labels=dict(extensions=['.hdr', '.img', '.img.gz', '.nii'], ),
+        mask_image=dict(extensions=['.hdr', '.img', '.img.gz', '.nii'], ),
+        residual_image=dict(extensions=['.hdr', '.img', '.img.gz', '.nii'], ),
         residual_images=dict(),
-        spm_mat_file=dict(),
+        spm_mat_file=dict(extensions=None, ),
     )
     outputs = EstimateModel.output_spec()
 

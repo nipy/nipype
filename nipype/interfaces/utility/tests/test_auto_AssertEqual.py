@@ -4,8 +4,14 @@ from ..base import AssertEqual
 
 def test_AssertEqual_inputs():
     input_map = dict(
-        volume1=dict(mandatory=True, ),
-        volume2=dict(mandatory=True, ),
+        volume1=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        volume2=dict(
+            extensions=None,
+            mandatory=True,
+        ),
     )
     inputs = AssertEqual.input_spec()
 

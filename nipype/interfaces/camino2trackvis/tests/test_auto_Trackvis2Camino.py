@@ -6,6 +6,7 @@ def test_Trackvis2Camino_inputs():
     input_map = dict(
         append_file=dict(
             argstr='-a %s',
+            extensions=None,
             position=2,
         ),
         args=dict(argstr='%s', ),
@@ -15,11 +16,13 @@ def test_Trackvis2Camino_inputs():
         ),
         in_file=dict(
             argstr='-i %s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
         out_file=dict(
             argstr='-o %s',
+            extensions=None,
             genfile=True,
             position=2,
         ),
@@ -30,7 +33,7 @@ def test_Trackvis2Camino_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Trackvis2Camino_outputs():
-    output_map = dict(camino=dict(), )
+    output_map = dict(camino=dict(extensions=None, ), )
     outputs = Trackvis2Camino.output_spec()
 
     for key, metadata in list(output_map.items()):

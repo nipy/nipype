@@ -19,10 +19,14 @@ def test_EM_inputs():
         ),
         in_file=dict(
             argstr='-in %s',
+            extensions=None,
             mandatory=True,
             position=4,
         ),
-        mask_file=dict(argstr='-mask %s', ),
+        mask_file=dict(
+            argstr='-mask %s',
+            extensions=None,
+        ),
         max_iter=dict(
             argstr='-max_iter %s',
             usedefault=True,
@@ -39,22 +43,26 @@ def test_EM_inputs():
         ),
         out_bc_file=dict(
             argstr='-bc_out %s',
+            extensions=None,
             name_source=['in_file'],
             name_template='%s_bc_em.nii.gz',
         ),
         out_file=dict(
             argstr='-out %s',
+            extensions=None,
             name_source=['in_file'],
             name_template='%s_em.nii.gz',
         ),
         out_outlier_file=dict(
             argstr='-out_outlier %s',
+            extensions=None,
             name_source=['in_file'],
             name_template='%s_outlier_em.nii.gz',
         ),
         outlier_val=dict(argstr='-outlier %s %s', ),
         prior_4D=dict(
             argstr='-prior4D %s',
+            extensions=None,
             mandatory=True,
             xor=['no_prior', 'priors'],
         ),
@@ -73,9 +81,9 @@ def test_EM_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_EM_outputs():
     output_map = dict(
-        out_bc_file=dict(),
-        out_file=dict(),
-        out_outlier_file=dict(),
+        out_bc_file=dict(extensions=None, ),
+        out_file=dict(extensions=None, ),
+        out_outlier_file=dict(extensions=None, ),
     )
     outputs = EM.output_spec()
 

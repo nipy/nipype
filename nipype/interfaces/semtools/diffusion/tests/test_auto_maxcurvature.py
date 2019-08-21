@@ -9,7 +9,10 @@ def test_maxcurvature_inputs():
             nohash=True,
             usedefault=True,
         ),
-        image=dict(argstr='--image %s', ),
+        image=dict(
+            argstr='--image %s',
+            extensions=None,
+        ),
         output=dict(
             argstr='--output %s',
             hash_files=False,
@@ -23,7 +26,7 @@ def test_maxcurvature_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_maxcurvature_outputs():
-    output_map = dict(output=dict(), )
+    output_map = dict(output=dict(extensions=None, ), )
     outputs = maxcurvature.output_spec()
 
     for key, metadata in list(output_map.items()):

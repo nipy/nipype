@@ -12,6 +12,7 @@ def test_Threshold_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=2,
         ),
@@ -25,6 +26,7 @@ def test_Threshold_inputs():
         ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             hash_files=False,
             position=-2,
@@ -48,7 +50,7 @@ def test_Threshold_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Threshold_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = Threshold.output_spec()
 
     for key, metadata in list(output_map.items()):

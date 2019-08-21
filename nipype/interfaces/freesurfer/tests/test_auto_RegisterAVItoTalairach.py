@@ -11,22 +11,26 @@ def test_RegisterAVItoTalairach_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=0,
         ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             position=3,
             usedefault=True,
         ),
         subjects_dir=dict(),
         target=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
         vox2vox=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=2,
         ),
@@ -38,8 +42,11 @@ def test_RegisterAVItoTalairach_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_RegisterAVItoTalairach_outputs():
     output_map = dict(
-        log_file=dict(usedefault=True, ),
-        out_file=dict(),
+        log_file=dict(
+            extensions=None,
+            usedefault=True,
+        ),
+        out_file=dict(extensions=None, ),
     )
     outputs = RegisterAVItoTalairach.output_spec()
 

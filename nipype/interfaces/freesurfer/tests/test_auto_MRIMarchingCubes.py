@@ -16,6 +16,7 @@ def test_MRIMarchingCubes_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
@@ -26,6 +27,7 @@ def test_MRIMarchingCubes_inputs():
         ),
         out_file=dict(
             argstr='./%s',
+            extensions=None,
             genfile=True,
             position=-2,
         ),
@@ -37,7 +39,7 @@ def test_MRIMarchingCubes_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRIMarchingCubes_outputs():
-    output_map = dict(surface=dict(), )
+    output_map = dict(surface=dict(extensions=None, ), )
     outputs = MRIMarchingCubes.output_spec()
 
     for key, metadata in list(output_map.items()):

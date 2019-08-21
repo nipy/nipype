@@ -14,8 +14,14 @@ def test_FUGUE_inputs():
             nohash=True,
             usedefault=True,
         ),
-        fmap_in_file=dict(argstr='--loadfmap=%s', ),
-        fmap_out_file=dict(argstr='--savefmap=%s', ),
+        fmap_in_file=dict(
+            argstr='--loadfmap=%s',
+            extensions=None,
+        ),
+        fmap_out_file=dict(
+            argstr='--savefmap=%s',
+            extensions=None,
+        ),
         forward_warping=dict(usedefault=True, ),
         fourier_order=dict(argstr='--fourier=%d', ),
         icorr=dict(
@@ -26,8 +32,14 @@ def test_FUGUE_inputs():
             argstr='--icorronly',
             requires=['unwarped_file'],
         ),
-        in_file=dict(argstr='--in=%s', ),
-        mask_file=dict(argstr='--mask=%s', ),
+        in_file=dict(
+            argstr='--in=%s',
+            extensions=None,
+        ),
+        mask_file=dict(
+            argstr='--mask=%s',
+            extensions=None,
+        ),
         median_2dfilter=dict(argstr='--median', ),
         no_extend=dict(argstr='--noextend', ),
         no_gap_fill=dict(argstr='--nofill', ),
@@ -35,7 +47,10 @@ def test_FUGUE_inputs():
         output_type=dict(),
         pava=dict(argstr='--pava', ),
         phase_conjugate=dict(argstr='--phaseconj', ),
-        phasemap_in_file=dict(argstr='--phasemap=%s', ),
+        phasemap_in_file=dict(
+            argstr='--phasemap=%s',
+            extensions=None,
+        ),
         poly_order=dict(argstr='--poly=%d', ),
         save_fmap=dict(xor=['save_unmasked_fmap'], ),
         save_shift=dict(xor=['save_unmasked_shift'], ),
@@ -47,18 +62,26 @@ def test_FUGUE_inputs():
             argstr='--unmaskshift',
             xor=['save_shift'],
         ),
-        shift_in_file=dict(argstr='--loadshift=%s', ),
-        shift_out_file=dict(argstr='--saveshift=%s', ),
+        shift_in_file=dict(
+            argstr='--loadshift=%s',
+            extensions=None,
+        ),
+        shift_out_file=dict(
+            argstr='--saveshift=%s',
+            extensions=None,
+        ),
         smooth2d=dict(argstr='--smooth2=%.2f', ),
         smooth3d=dict(argstr='--smooth3=%.2f', ),
         unwarp_direction=dict(argstr='--unwarpdir=%s', ),
         unwarped_file=dict(
             argstr='--unwarp=%s',
+            extensions=None,
             requires=['in_file'],
             xor=['warped_file'],
         ),
         warped_file=dict(
             argstr='--warp=%s',
+            extensions=None,
             requires=['in_file'],
             xor=['unwarped_file'],
         ),
@@ -70,10 +93,10 @@ def test_FUGUE_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FUGUE_outputs():
     output_map = dict(
-        fmap_out_file=dict(),
-        shift_out_file=dict(),
-        unwarped_file=dict(),
-        warped_file=dict(),
+        fmap_out_file=dict(extensions=None, ),
+        shift_out_file=dict(extensions=None, ),
+        unwarped_file=dict(extensions=None, ),
+        warped_file=dict(extensions=None, ),
     )
     outputs = FUGUE.output_spec()
 

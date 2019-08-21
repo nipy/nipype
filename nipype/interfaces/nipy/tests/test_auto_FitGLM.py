@@ -7,7 +7,7 @@ def test_FitGLM_inputs():
         TR=dict(mandatory=True, ),
         drift_model=dict(usedefault=True, ),
         hrf_model=dict(usedefault=True, ),
-        mask=dict(),
+        mask=dict(extensions=None, ),
         method=dict(usedefault=True, ),
         model=dict(usedefault=True, ),
         normalize_design_matrix=dict(usedefault=True, ),
@@ -22,15 +22,15 @@ def test_FitGLM_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FitGLM_outputs():
     output_map = dict(
-        a=dict(),
+        a=dict(extensions=None, ),
         axis=dict(),
-        beta=dict(),
+        beta=dict(extensions=None, ),
         constants=dict(),
         dof=dict(),
         nvbeta=dict(),
         reg_names=dict(),
-        residuals=dict(),
-        s2=dict(),
+        residuals=dict(extensions=None, ),
+        s2=dict(extensions=None, ),
     )
     outputs = FitGLM.output_spec()
 

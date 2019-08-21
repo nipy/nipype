@@ -9,8 +9,14 @@ def test_DilateMask_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputBinaryVolume=dict(argstr='--inputBinaryVolume %s', ),
-        inputVolume=dict(argstr='--inputVolume %s', ),
+        inputBinaryVolume=dict(
+            argstr='--inputBinaryVolume %s',
+            extensions=None,
+        ),
+        inputVolume=dict(
+            argstr='--inputVolume %s',
+            extensions=None,
+        ),
         lowerThreshold=dict(argstr='--lowerThreshold %f', ),
         outputVolume=dict(
             argstr='--outputVolume %s',
@@ -24,7 +30,7 @@ def test_DilateMask_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DilateMask_outputs():
-    output_map = dict(outputVolume=dict(), )
+    output_map = dict(outputVolume=dict(extensions=None, ), )
     outputs = DilateMask.output_spec()
 
     for key, metadata in list(output_map.items()):

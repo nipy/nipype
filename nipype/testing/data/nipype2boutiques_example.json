@@ -1,0 +1,549 @@
+{
+    "name": "FLIRT",
+    "command-line": "FLIRT [IN_FILE] [REFERENCE] [OUT_FILE] [OUT_MATRIX_FILE] [ANGLE_REP] [APPLY_ISOXFM] [APPLY_XFM] [BBRSLOPE] [BBRTYPE] [BGVALUE] [BINS] [COARSE_SEARCH] [COST] [COST_FUNC] [DATATYPE] [DISPLAY_INIT] [DOF] [ECHOSPACING] [FIELDMAP] [FIELDMAPMASK] [FINE_SEARCH] [FORCE_SCALING] [IN_MATRIX_FILE] [IN_WEIGHT] [INTERP] [MIN_SAMPLING] [NO_CLAMP] [NO_RESAMPLE] [NO_RESAMPLE_BLUR] [NO_SEARCH] [OUT_LOG] [PADDING_SIZE] [PEDIR] [REF_WEIGHT] [RIGID2D] [SAVE_LOG] [SCHEDULE] [SEARCHR_X] [SEARCHR_Y] [SEARCHR_Z] [SINC_WIDTH] [SINC_WINDOW] [USES_QFORM] [VERBOSE] [WM_SEG] [WMCOORDS] [WMNORMS]",
+    "author": "Nipype (interface), Oxford Centre for Functional MRI of the Brain (FMRIB) (tool)",
+    "description": "FLIRT, as implemented in Nipype (module: nipype.interfaces.fsl, interface: FLIRT).",
+    "inputs": [
+        {
+            "id": "angle_rep",
+            "name": "Angle rep",
+            "type": "String",
+            "value-key": "[ANGLE_REP]",
+            "command-line-flag": "-anglerep",
+            "description": "'quaternion' or 'euler'. Representation of rotation angles.",
+            "optional": true,
+            "value-choices": [
+                "quaternion",
+                "euler"
+            ]
+        },
+        {
+            "id": "apply_isoxfm",
+            "name": "Apply isoxfm",
+            "type": "Number",
+            "value-key": "[APPLY_ISOXFM]",
+            "command-line-flag": "-applyisoxfm",
+            "description": "A float. As applyxfm but forces isotropic resampling.",
+            "optional": true
+        },
+        {
+            "id": "apply_xfm",
+            "name": "Apply xfm",
+            "type": "Flag",
+            "value-key": "[APPLY_XFM]",
+            "command-line-flag": "-applyxfm",
+            "description": "A boolean. Apply transformation supplied by in_matrix_file or uses_qform to use the affine matrix stored in the reference header.",
+            "optional": true
+        },
+        {
+            "id": "bbrslope",
+            "name": "Bbrslope",
+            "type": "Number",
+            "value-key": "[BBRSLOPE]",
+            "command-line-flag": "-bbrslope",
+            "description": "A float. Value of bbr slope.",
+            "optional": true
+        },
+        {
+            "id": "bbrtype",
+            "name": "Bbrtype",
+            "type": "String",
+            "value-key": "[BBRTYPE]",
+            "command-line-flag": "-bbrtype",
+            "description": "'signed' or 'global_abs' or 'local_abs'. Type of bbr cost function: signed [default], global_abs, local_abs.",
+            "optional": true,
+            "value-choices": [
+                "signed",
+                "global_abs",
+                "local_abs"
+            ]
+        },
+        {
+            "id": "bgvalue",
+            "name": "Bgvalue",
+            "type": "Number",
+            "value-key": "[BGVALUE]",
+            "command-line-flag": "-setbackground",
+            "description": "A float. Use specified background value for points outside fov.",
+            "optional": true
+        },
+        {
+            "id": "bins",
+            "name": "Bins",
+            "type": "Number",
+            "integer": true,
+            "value-key": "[BINS]",
+            "command-line-flag": "-bins",
+            "description": "An integer (int or long). Number of histogram bins.",
+            "optional": true
+        },
+        {
+            "id": "coarse_search",
+            "name": "Coarse search",
+            "type": "Number",
+            "integer": true,
+            "value-key": "[COARSE_SEARCH]",
+            "command-line-flag": "-coarsesearch",
+            "description": "An integer (int or long). Coarse search delta angle.",
+            "optional": true
+        },
+        {
+            "id": "cost",
+            "name": "Cost",
+            "type": "String",
+            "value-key": "[COST]",
+            "command-line-flag": "-cost",
+            "description": "'mutualinfo' or 'corratio' or 'normcorr' or 'normmi' or 'leastsq' or 'labeldiff' or 'bbr'. Cost function.",
+            "optional": true,
+            "value-choices": [
+                "mutualinfo",
+                "corratio",
+                "normcorr",
+                "normmi",
+                "leastsq",
+                "labeldiff",
+                "bbr"
+            ]
+        },
+        {
+            "id": "cost_func",
+            "name": "Cost func",
+            "type": "String",
+            "value-key": "[COST_FUNC]",
+            "command-line-flag": "-searchcost",
+            "description": "'mutualinfo' or 'corratio' or 'normcorr' or 'normmi' or 'leastsq' or 'labeldiff' or 'bbr'. Cost function.",
+            "optional": true,
+            "value-choices": [
+                "mutualinfo",
+                "corratio",
+                "normcorr",
+                "normmi",
+                "leastsq",
+                "labeldiff",
+                "bbr"
+            ]
+        },
+        {
+            "id": "datatype",
+            "name": "Datatype",
+            "type": "String",
+            "value-key": "[DATATYPE]",
+            "command-line-flag": "-datatype",
+            "description": "'char' or 'short' or 'int' or 'float' or 'double'. Force output data type.",
+            "optional": true,
+            "value-choices": [
+                "char",
+                "short",
+                "int",
+                "float",
+                "double"
+            ]
+        },
+        {
+            "id": "display_init",
+            "name": "Display init",
+            "type": "Flag",
+            "value-key": "[DISPLAY_INIT]",
+            "command-line-flag": "-displayinit",
+            "description": "A boolean. Display initial matrix.",
+            "optional": true
+        },
+        {
+            "id": "dof",
+            "name": "Dof",
+            "type": "Number",
+            "integer": true,
+            "value-key": "[DOF]",
+            "command-line-flag": "-dof",
+            "description": "An integer (int or long). Number of transform degrees of freedom.",
+            "optional": true
+        },
+        {
+            "id": "echospacing",
+            "name": "Echospacing",
+            "type": "Number",
+            "value-key": "[ECHOSPACING]",
+            "command-line-flag": "-echospacing",
+            "description": "A float. Value of epi echo spacing - units of seconds.",
+            "optional": true
+        },
+        {
+            "id": "fieldmap",
+            "name": "Fieldmap",
+            "type": "File",
+            "value-key": "[FIELDMAP]",
+            "command-line-flag": "-fieldmap",
+            "description": "A file name. Fieldmap image in rads/s - must be already registered to the reference image.",
+            "optional": true
+        },
+        {
+            "id": "fieldmapmask",
+            "name": "Fieldmapmask",
+            "type": "File",
+            "value-key": "[FIELDMAPMASK]",
+            "command-line-flag": "-fieldmapmask",
+            "description": "A file name. Mask for fieldmap image.",
+            "optional": true
+        },
+        {
+            "id": "fine_search",
+            "name": "Fine search",
+            "type": "Number",
+            "integer": true,
+            "value-key": "[FINE_SEARCH]",
+            "command-line-flag": "-finesearch",
+            "description": "An integer (int or long). Fine search delta angle.",
+            "optional": true
+        },
+        {
+            "id": "force_scaling",
+            "name": "Force scaling",
+            "type": "Flag",
+            "value-key": "[FORCE_SCALING]",
+            "command-line-flag": "-forcescaling",
+            "description": "A boolean. Force rescaling even for low-res images.",
+            "optional": true
+        },
+        {
+            "id": "in_file",
+            "name": "In file",
+            "type": "File",
+            "value-key": "[IN_FILE]",
+            "command-line-flag": "-in",
+            "description": "An existing file name. Input file.",
+            "optional": false
+        },
+        {
+            "id": "in_matrix_file",
+            "name": "In matrix file",
+            "type": "File",
+            "value-key": "[IN_MATRIX_FILE]",
+            "command-line-flag": "-init",
+            "description": "A file name. Input 4x4 affine matrix.",
+            "optional": true
+        },
+        {
+            "id": "in_weight",
+            "name": "In weight",
+            "type": "File",
+            "value-key": "[IN_WEIGHT]",
+            "command-line-flag": "-inweight",
+            "description": "An existing file name. File for input weighting volume.",
+            "optional": true
+        },
+        {
+            "id": "interp",
+            "name": "Interp",
+            "type": "String",
+            "value-key": "[INTERP]",
+            "command-line-flag": "-interp",
+            "description": "'trilinear' or 'nearestneighbour' or 'sinc' or 'spline'. Final interpolation method used in reslicing.",
+            "optional": true,
+            "value-choices": [
+                "trilinear",
+                "nearestneighbour",
+                "sinc",
+                "spline"
+            ]
+        },
+        {
+            "id": "min_sampling",
+            "name": "Min sampling",
+            "type": "Number",
+            "value-key": "[MIN_SAMPLING]",
+            "command-line-flag": "-minsampling",
+            "description": "A float. Set minimum voxel dimension for sampling.",
+            "optional": true
+        },
+        {
+            "id": "no_clamp",
+            "name": "No clamp",
+            "type": "Flag",
+            "value-key": "[NO_CLAMP]",
+            "command-line-flag": "-noclamp",
+            "description": "A boolean. Do not use intensity clamping.",
+            "optional": true
+        },
+        {
+            "id": "no_resample",
+            "name": "No resample",
+            "type": "Flag",
+            "value-key": "[NO_RESAMPLE]",
+            "command-line-flag": "-noresample",
+            "description": "A boolean. Do not change input sampling.",
+            "optional": true
+        },
+        {
+            "id": "no_resample_blur",
+            "name": "No resample blur",
+            "type": "Flag",
+            "value-key": "[NO_RESAMPLE_BLUR]",
+            "command-line-flag": "-noresampblur",
+            "description": "A boolean. Do not use blurring on downsampling.",
+            "optional": true
+        },
+        {
+            "id": "no_search",
+            "name": "No search",
+            "type": "Flag",
+            "value-key": "[NO_SEARCH]",
+            "command-line-flag": "-nosearch",
+            "description": "A boolean. Set all angular searches to ranges 0 to 0.",
+            "optional": true
+        },
+        {
+            "id": "padding_size",
+            "name": "Padding size",
+            "type": "Number",
+            "integer": true,
+            "value-key": "[PADDING_SIZE]",
+            "command-line-flag": "-paddingsize",
+            "description": "An integer (int or long). For applyxfm: interpolates outside image by size.",
+            "optional": true
+        },
+        {
+            "id": "pedir",
+            "name": "Pedir",
+            "type": "Number",
+            "integer": true,
+            "value-key": "[PEDIR]",
+            "command-line-flag": "-pedir",
+            "description": "An integer (int or long). Phase encode direction of epi - 1/2/3=x/y/z & -1/-2/-3=-x/-y/-z.",
+            "optional": true
+        },
+        {
+            "id": "ref_weight",
+            "name": "Ref weight",
+            "type": "File",
+            "value-key": "[REF_WEIGHT]",
+            "command-line-flag": "-refweight",
+            "description": "An existing file name. File for reference weighting volume.",
+            "optional": true
+        },
+        {
+            "id": "reference",
+            "name": "Reference",
+            "type": "File",
+            "value-key": "[REFERENCE]",
+            "command-line-flag": "-ref",
+            "description": "An existing file name. Reference file.",
+            "optional": false
+        },
+        {
+            "id": "rigid2D",
+            "name": "Rigid2d",
+            "type": "Flag",
+            "value-key": "[RIGID2D]",
+            "command-line-flag": "-2D",
+            "description": "A boolean. Use 2d rigid body mode - ignores dof.",
+            "optional": true
+        },
+        {
+            "id": "save_log",
+            "name": "Save log",
+            "type": "Flag",
+            "value-key": "[SAVE_LOG]",
+            "command-line-flag": "--save_log",
+            "description": "A boolean. Save to log file.",
+            "optional": true
+        },
+        {
+            "id": "schedule",
+            "name": "Schedule",
+            "type": "File",
+            "value-key": "[SCHEDULE]",
+            "command-line-flag": "-schedule",
+            "description": "An existing file name. Replaces default schedule.",
+            "optional": true
+        },
+        {
+            "id": "searchr_x",
+            "name": "Searchr x",
+            "type": "Number",
+            "list": true,
+            "integer": true,
+            "min-list-entries": 2,
+            "max-list-entries": 2,
+            "value-key": "[SEARCHR_X]",
+            "command-line-flag": "-searchrx",
+            "description": "A list of from 2 to 2 items which are an integer (int or long). Search angles along x-axis, in degrees.",
+            "optional": true
+        },
+        {
+            "id": "searchr_y",
+            "name": "Searchr y",
+            "type": "Number",
+            "list": true,
+            "integer": true,
+            "min-list-entries": 2,
+            "max-list-entries": 2,
+            "value-key": "[SEARCHR_Y]",
+            "command-line-flag": "-searchry",
+            "description": "A list of from 2 to 2 items which are an integer (int or long). Search angles along y-axis, in degrees.",
+            "optional": true
+        },
+        {
+            "id": "searchr_z",
+            "name": "Searchr z",
+            "type": "Number",
+            "list": true,
+            "integer": true,
+            "min-list-entries": 2,
+            "max-list-entries": 2,
+            "value-key": "[SEARCHR_Z]",
+            "command-line-flag": "-searchrz",
+            "description": "A list of from 2 to 2 items which are an integer (int or long). Search angles along z-axis, in degrees.",
+            "optional": true
+        },
+        {
+            "id": "sinc_width",
+            "name": "Sinc width",
+            "type": "Number",
+            "integer": true,
+            "value-key": "[SINC_WIDTH]",
+            "command-line-flag": "-sincwidth",
+            "description": "An integer (int or long). Full-width in voxels.",
+            "optional": true
+        },
+        {
+            "id": "sinc_window",
+            "name": "Sinc window",
+            "type": "String",
+            "value-key": "[SINC_WINDOW]",
+            "command-line-flag": "-sincwindow",
+            "description": "'rectangular' or 'hanning' or 'blackman'. Sinc window.",
+            "optional": true,
+            "value-choices": [
+                "rectangular",
+                "hanning",
+                "blackman"
+            ]
+        },
+        {
+            "id": "uses_qform",
+            "name": "Uses qform",
+            "type": "Flag",
+            "value-key": "[USES_QFORM]",
+            "command-line-flag": "-usesqform",
+            "description": "A boolean. Initialize using sform or qform.",
+            "optional": true
+        },
+        {
+            "id": "verbose",
+            "name": "Verbose",
+            "type": "Number",
+            "integer": true,
+            "value-key": "[VERBOSE]",
+            "command-line-flag": "-verbose",
+            "description": "An integer (int or long). Verbose mode, 0 is least.",
+            "optional": true
+        },
+        {
+            "id": "wm_seg",
+            "name": "Wm seg",
+            "type": "File",
+            "value-key": "[WM_SEG]",
+            "command-line-flag": "-wmseg",
+            "description": "A file name. White matter segmentation volume needed by bbr cost function.",
+            "optional": true
+        },
+        {
+            "id": "wmcoords",
+            "name": "Wmcoords",
+            "type": "File",
+            "value-key": "[WMCOORDS]",
+            "command-line-flag": "-wmcoords",
+            "description": "A file name. White matter boundary coordinates for bbr cost function.",
+            "optional": true
+        },
+        {
+            "id": "wmnorms",
+            "name": "Wmnorms",
+            "type": "File",
+            "value-key": "[WMNORMS]",
+            "command-line-flag": "-wmnorms",
+            "description": "A file name. White matter boundary normals for bbr cost function.",
+            "optional": true
+        }
+    ],
+    "output-files": [
+        {
+            "name": "Out file",
+            "id": "out_file",
+            "optional": true,
+            "description": "A file name. Registered output file.",
+            "path-template": "[IN_FILE]_flirt",
+            "value-key": "[OUT_FILE]",
+            "command-line-flag": "-out"
+        },
+        {
+            "name": "Out log",
+            "id": "out_log",
+            "optional": true,
+            "description": "A file name. Output log.",
+            "path-template": "[IN_FILE]_flirt.log",
+            "value-key": "[OUT_LOG]"
+        },
+        {
+            "name": "Out matrix file",
+            "id": "out_matrix_file",
+            "optional": true,
+            "description": "A file name. Output affine matrix in 4x4 asciii format.",
+            "path-template": "[IN_FILE]_flirt.mat",
+            "value-key": "[OUT_MATRIX_FILE]",
+            "command-line-flag": "-omat"
+        },
+        {
+            "name": "Out file",
+            "id": "out_file",
+            "path-template": "out_file",
+            "optional": true,
+            "description": "An existing file name. Path/name of registered file (if generated)."
+        },
+        {
+            "name": "Out log",
+            "id": "out_log",
+            "path-template": "out_log",
+            "optional": true,
+            "description": "A file name. Path/name of output log (if generated)."
+        },
+        {
+            "name": "Out matrix file",
+            "id": "out_matrix_file",
+            "path-template": "out_matrix_file",
+            "optional": true,
+            "description": "An existing file name. Path/name of calculated affine transform (if generated)."
+        }
+    ],
+    "groups": [
+        {
+            "id": "all_or_none_group",
+            "name": "All or none group",
+            "members": [
+                "save_log",
+                "out_log"
+            ],
+            "all-or-none": true
+        },
+        {
+            "id": "mutex_group",
+            "name": "Mutex group",
+            "members": [
+                "apply_isoxfm",
+                "apply_xfm"
+            ],
+            "mutually-exclusive": true
+        }
+    ],
+    "tool-version": "1.0.0",
+    "schema-version": "0.5",
+    "container-image": {
+        "image": "mcin/docker-fsl:latest",
+        "type": "docker",
+        "index": "index.docker.io"
+    },
+    "tags": {
+        "domain": "neuroinformatics",
+        "source": "nipype-interface"
+    }
+}

@@ -20,16 +20,19 @@ def test_SynthesizeFLASH_inputs():
         ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
         ),
         pd_image=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=6,
         ),
         subjects_dir=dict(),
         t1_image=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=5,
         ),
@@ -50,7 +53,7 @@ def test_SynthesizeFLASH_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SynthesizeFLASH_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = SynthesizeFLASH.output_spec()
 
     for key, metadata in list(output_map.items()):

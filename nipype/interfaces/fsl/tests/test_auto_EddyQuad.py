@@ -11,34 +11,47 @@ def test_EddyQuad_inputs():
             usedefault=True,
         ),
         bval_file=dict(
-            argstr='--bvals=%s',
+            argstr='--bvals %s',
+            extensions=None,
             mandatory=True,
         ),
-        bvec_file=dict(argstr='--bvecs=%s', ),
+        bvec_file=dict(
+            argstr='--bvecs %s',
+            extensions=None,
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
         ),
-        field=dict(argstr='--field=%s', ),
+        field=dict(
+            argstr='--field %s',
+            extensions=None,
+        ),
         idx_file=dict(
-            argstr='--eddyIdx=%s',
+            argstr='--eddyIdx %s',
+            extensions=None,
             mandatory=True,
         ),
         mask_file=dict(
-            argstr='--mask=%s',
+            argstr='--mask %s',
+            extensions=None,
             mandatory=True,
         ),
         output_dir=dict(
-            argstr='--output-dir=%s',
+            argstr='--output-dir %s',
             name_source=['base_name'],
             name_template='%s.qc',
         ),
         output_type=dict(),
         param_file=dict(
-            argstr='--eddyParams=%s',
+            argstr='--eddyParams %s',
+            extensions=None,
             mandatory=True,
         ),
-        slice_spec=dict(argstr='--slspec=%s', ),
+        slice_spec=dict(
+            argstr='--slspec %s',
+            extensions=None,
+        ),
         verbose=dict(argstr='--verbose', ),
     )
     inputs = EddyQuad.input_spec()
@@ -50,12 +63,12 @@ def test_EddyQuad_outputs():
     output_map = dict(
         avg_b0_pe_png=dict(),
         avg_b_png=dict(),
-        clean_volumes=dict(),
+        clean_volumes=dict(extensions=None, ),
         cnr_png=dict(),
-        qc_json=dict(),
-        qc_pdf=dict(),
-        residuals=dict(),
-        vdm_png=dict(),
+        qc_json=dict(extensions=None, ),
+        qc_pdf=dict(extensions=None, ),
+        residuals=dict(extensions=None, ),
+        vdm_png=dict(extensions=None, ),
     )
     outputs = EddyQuad.output_spec()
 

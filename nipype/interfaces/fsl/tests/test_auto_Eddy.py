@@ -17,7 +17,10 @@ def test_Eddy_inputs():
         ),
         fep=dict(argstr='--fep', ),
         field=dict(argstr='--field=%s', ),
-        field_mat=dict(argstr='--field_mat=%s', ),
+        field_mat=dict(
+            argstr='--field_mat=%s',
+            extensions=None,
+        ),
         flm=dict(argstr='--flm=%s', ),
         fudge_factor=dict(
             argstr='--ff=%s',
@@ -26,33 +29,43 @@ def test_Eddy_inputs():
         fwhm=dict(argstr='--fwhm=%s', ),
         in_acqp=dict(
             argstr='--acqp=%s',
+            extensions=None,
             mandatory=True,
         ),
         in_bval=dict(
             argstr='--bvals=%s',
+            extensions=None,
             mandatory=True,
         ),
         in_bvec=dict(
             argstr='--bvecs=%s',
+            extensions=None,
             mandatory=True,
         ),
         in_file=dict(
             argstr='--imain=%s',
+            extensions=None,
             mandatory=True,
         ),
         in_index=dict(
             argstr='--index=%s',
+            extensions=None,
             mandatory=True,
         ),
         in_mask=dict(
             argstr='--mask=%s',
+            extensions=None,
             mandatory=True,
         ),
         in_topup_fieldcoef=dict(
             argstr='--topup=%s',
+            extensions=None,
             requires=['in_topup_movpar'],
         ),
-        in_topup_movpar=dict(requires=['in_topup_fieldcoef'], ),
+        in_topup_movpar=dict(
+            extensions=None,
+            requires=['in_topup_fieldcoef'],
+        ),
         interp=dict(argstr='--interp=%s', ),
         is_shelled=dict(argstr='--data_is_shelled', ),
         method=dict(argstr='--resamp=%s', ),
@@ -78,7 +91,10 @@ def test_Eddy_inputs():
             argstr='--residuals',
             min_ver='5.0.10',
         ),
-        session=dict(argstr='--session=%s', ),
+        session=dict(
+            argstr='--session=%s',
+            extensions=None,
+        ),
         slm=dict(argstr='--slm=%s', ),
         use_cuda=dict(),
     )
@@ -89,15 +105,15 @@ def test_Eddy_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Eddy_outputs():
     output_map = dict(
-        out_cnr_maps=dict(),
-        out_corrected=dict(),
-        out_movement_rms=dict(),
-        out_outlier_report=dict(),
-        out_parameter=dict(),
-        out_residuals=dict(),
-        out_restricted_movement_rms=dict(),
-        out_rotated_bvecs=dict(),
-        out_shell_alignment_parameters=dict(),
+        out_cnr_maps=dict(extensions=None, ),
+        out_corrected=dict(extensions=None, ),
+        out_movement_rms=dict(extensions=None, ),
+        out_outlier_report=dict(extensions=None, ),
+        out_parameter=dict(extensions=None, ),
+        out_residuals=dict(extensions=None, ),
+        out_restricted_movement_rms=dict(extensions=None, ),
+        out_rotated_bvecs=dict(extensions=None, ),
+        out_shell_alignment_parameters=dict(extensions=None, ),
     )
     outputs = Eddy.output_spec()
 

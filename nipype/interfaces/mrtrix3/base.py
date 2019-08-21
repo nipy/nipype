@@ -45,12 +45,14 @@ class MRTrix3BaseInputSpec(CommandLineInputSpec):
     grad_file = File(
         exists=True,
         argstr='-grad %s',
-        desc='dw gradient scheme (MRTrix format')
+        desc='dw gradient scheme (MRTrix format)',
+        xor=['grad_fsl'])
     grad_fsl = traits.Tuple(
         File(exists=True),
         File(exists=True),
         argstr='-fslgrad %s %s',
-        desc='(bvecs, bvals) dw gradient scheme (FSL format')
+        desc='(bvecs, bvals) dw gradient scheme (FSL format)',
+        xor=['grad_file'])
     bval_scale = traits.Enum(
         'yes',
         'no',

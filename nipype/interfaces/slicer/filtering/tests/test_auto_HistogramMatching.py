@@ -11,6 +11,7 @@ def test_HistogramMatching_inputs():
         ),
         inputVolume=dict(
             argstr='%s',
+            extensions=None,
             position=-3,
         ),
         numberOfHistogramLevels=dict(argstr='--numberOfHistogramLevels %d', ),
@@ -22,6 +23,7 @@ def test_HistogramMatching_inputs():
         ),
         referenceVolume=dict(
             argstr='%s',
+            extensions=None,
             position=-2,
         ),
         threshold=dict(argstr='--threshold ', ),
@@ -32,7 +34,11 @@ def test_HistogramMatching_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_HistogramMatching_outputs():
-    output_map = dict(outputVolume=dict(position=-1, ), )
+    output_map = dict(
+        outputVolume=dict(
+            extensions=None,
+            position=-1,
+        ), )
     outputs = HistogramMatching.output_spec()
 
     for key, metadata in list(output_map.items()):

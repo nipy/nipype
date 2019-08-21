@@ -13,7 +13,10 @@ def test_ResliceToReference_inputs():
         matlab_cmd=dict(),
         mfile=dict(usedefault=True, ),
         paths=dict(),
-        target=dict(field='comp{1}.id.space', ),
+        target=dict(
+            extensions=None,
+            field='comp{1}.id.space',
+        ),
         use_mcr=dict(),
         use_v8struct=dict(
             min_ver='8',

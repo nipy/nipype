@@ -416,7 +416,8 @@ def test_ImageFile():
     # setup traits
     x.add_trait('nifti', nib.ImageFile(types=['nifti1', 'dicom']))
     x.add_trait('anytype', nib.ImageFile())
-    x.add_trait('newtype', nib.ImageFile(types=['nifti10']))
+    with pytest.raises(ValueError):
+        x.add_trait('newtype', nib.ImageFile(types=['nifti10']))
     x.add_trait('nocompress',
                 nib.ImageFile(types=['mgh'], allow_compressed=False))
 
@@ -424,10 +425,8 @@ def test_ImageFile():
         x.nifti = 'test.mgz'
     x.nifti = 'test.nii'
     x.anytype = 'test.xml'
-    with pytest.raises(AttributeError):
-        x.newtype = 'test.nii'
     with pytest.raises(nib.TraitError):
-        x.nocompress = 'test.nii.gz'
+        x.nocompress = 'test.mgz'
     x.nocompress = 'test.mgh'
 
 

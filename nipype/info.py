@@ -3,9 +3,7 @@ settings in setup.py, the nipy top-level docstring, and for building the
 docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 """
 
-# nipype version information.  An empty version_extra corresponds to a
-# full release.  '.dev' as a version_extra string means this is a development
-# version
+# nipype version information
 # Remove -dev for release
 __version__ = '2.0.0-dev'
 
@@ -54,7 +52,9 @@ CLASSIFIERS = [
     'Operating System :: POSIX :: Linux',
     'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
-    'Programming Language :: Python :: 3.6', 'Topic :: Scientific/Engineering'
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Topic :: Scientific/Engineering'
 ]
 
 description = 'Neuroimaging in Python: Pipelines and Interfaces'
@@ -102,6 +102,8 @@ NUMPY_MIN_VERSION = '1.9.0'
 # https://www.opensourceanswers.com/blog/you-shouldnt-use-python-37-for-data-science-right-now.html
 NUMPY_MIN_VERSION_37 = '1.15.3'
 SCIPY_MIN_VERSION = '0.14'
+# Scipy drops 2.7 and 3.4 support in 1.3
+SCIPY_MAX_VERSION_34 = '1.3.0'
 TRAITS_MIN_VERSION = '4.6'
 DATEUTIL_MIN_VERSION = '2.2'
 FUTURE_MIN_VERSION = '0.16.0'
@@ -133,7 +135,6 @@ REQUIRES = [
     'funcsigs',
     'future>=%s' % FUTURE_MIN_VERSION,
     'networkx>=%s' % NETWORKX_MIN_VERSION,
-    'neurdflib',
     'nibabel>=%s' % NIBABEL_MIN_VERSION,
     'numpy>=%s ; python_version < "3.7"' % NUMPY_MIN_VERSION,
     'numpy>=%s ; python_version >= "3.7"' % NUMPY_MIN_VERSION_37,
@@ -142,30 +143,35 @@ REQUIRES = [
     'pydot>=%s' % PYDOT_MIN_VERSION,
     'pydotplus',
     'python-dateutil>=%s' % DATEUTIL_MIN_VERSION,
-    'scipy>=%s' % SCIPY_MIN_VERSION,
+    'scipy>=%s ; python_version >= "3.5"' % SCIPY_MIN_VERSION,
+    'scipy>=%s,<%s ; python_version <= "3.4"' % (SCIPY_MIN_VERSION, SCIPY_MAX_VERSION_34),
     'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
     'traits>=%s,!=5.0' % TRAITS_MIN_VERSION,
 ]
 
+# neurdflib has to come after prov
+# https://github.com/nipy/nipype/pull/2961#issuecomment-512035484
+REQUIRES += ['neurdflib']
+
 TESTS_REQUIRES = [
+    'codecov',
+    'coverage<5',
     'mock',
     'pytest',
     'pytest-cov',
-    'codecov',
     'pytest-env',
-    'coverage<5'
 ]
 
 EXTRA_REQUIRES = {
     'doc': ['Sphinx>=1.4', 'numpydoc', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],
-    'tests': TESTS_REQUIRES,
-    'specs': ['yapf'],
+    'duecredit': ['duecredit'],
     'nipy': ['nitime', 'nilearn<0.5.0', 'dipy', 'nipy', 'matplotlib'],
     'profiler': ['psutil>=5.0'],
-    'duecredit': ['duecredit'],
-    'xvfbwrapper': ['xvfbwrapper'],
     'pybids': ['pybids>=0.7.0'],
+    'specs': ['yapf'],
     'ssh': ['paramiko'],
+    'tests': TESTS_REQUIRES,
+    'xvfbwrapper': ['xvfbwrapper'],
     # 'mesh': ['mayavi']  # Enable when it works
 }
 

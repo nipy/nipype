@@ -12,12 +12,22 @@ def test_EpiReg_inputs():
         ),
         epi=dict(
             argstr='--epi=%s',
+            extensions=None,
             mandatory=True,
             position=-4,
         ),
-        fmap=dict(argstr='--fmap=%s', ),
-        fmapmag=dict(argstr='--fmapmag=%s', ),
-        fmapmagbrain=dict(argstr='--fmapmagbrain=%s', ),
+        fmap=dict(
+            argstr='--fmap=%s',
+            extensions=None,
+        ),
+        fmapmag=dict(
+            argstr='--fmapmag=%s',
+            extensions=None,
+        ),
+        fmapmagbrain=dict(
+            argstr='--fmapmagbrain=%s',
+            extensions=None,
+        ),
         no_clean=dict(
             argstr='--noclean',
             usedefault=True,
@@ -32,16 +42,24 @@ def test_EpiReg_inputs():
         pedir=dict(argstr='--pedir=%s', ),
         t1_brain=dict(
             argstr='--t1brain=%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
         t1_head=dict(
             argstr='--t1=%s',
+            extensions=None,
             mandatory=True,
             position=-3,
         ),
-        weight_image=dict(argstr='--weight=%s', ),
-        wmseg=dict(argstr='--wmseg=%s', ),
+        weight_image=dict(
+            argstr='--weight=%s',
+            extensions=None,
+        ),
+        wmseg=dict(
+            argstr='--wmseg=%s',
+            extensions=None,
+        ),
     )
     inputs = EpiReg.input_spec()
 
@@ -50,20 +68,20 @@ def test_EpiReg_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_EpiReg_outputs():
     output_map = dict(
-        epi2str_inv=dict(),
-        epi2str_mat=dict(),
-        fmap2epi_mat=dict(),
-        fmap2str_mat=dict(),
-        fmap_epi=dict(),
-        fmap_str=dict(),
-        fmapmag_str=dict(),
-        fullwarp=dict(),
-        out_1vol=dict(),
-        out_file=dict(),
-        seg=dict(),
-        shiftmap=dict(),
-        wmedge=dict(),
-        wmseg=dict(),
+        epi2str_inv=dict(extensions=None, ),
+        epi2str_mat=dict(extensions=None, ),
+        fmap2epi_mat=dict(extensions=None, ),
+        fmap2str_mat=dict(extensions=None, ),
+        fmap_epi=dict(extensions=None, ),
+        fmap_str=dict(extensions=None, ),
+        fmapmag_str=dict(extensions=None, ),
+        fullwarp=dict(extensions=None, ),
+        out_1vol=dict(extensions=None, ),
+        out_file=dict(extensions=None, ),
+        seg=dict(extensions=None, ),
+        shiftmap=dict(extensions=None, ),
+        wmedge=dict(extensions=None, ),
+        wmseg=dict(extensions=None, ),
     )
     outputs = EpiReg.output_spec()
 

@@ -5,9 +5,15 @@ from ..dti import ProbTrackX2
 def test_ProbTrackX2_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        avoid_mp=dict(argstr='--avoid=%s', ),
+        avoid_mp=dict(
+            argstr='--avoid=%s',
+            extensions=None,
+        ),
         c_thresh=dict(argstr='--cthr=%.3f', ),
-        colmask4=dict(argstr='--colmask4=%s', ),
+        colmask4=dict(
+            argstr='--colmask4=%s',
+            extensions=None,
+        ),
         correct_path_distribution=dict(argstr='--pd', ),
         dist_thresh=dict(argstr='--distthresh=%.3f', ),
         distthresh1=dict(argstr='--distthresh1=%.3f', ),
@@ -17,17 +23,27 @@ def test_ProbTrackX2_inputs():
             usedefault=True,
         ),
         fibst=dict(argstr='--fibst=%d', ),
-        fopd=dict(argstr='--fopd=%s', ),
+        fopd=dict(
+            argstr='--fopd=%s',
+            extensions=None,
+        ),
         force_dir=dict(
             argstr='--forcedir',
             usedefault=True,
         ),
         fsamples=dict(mandatory=True, ),
-        inv_xfm=dict(argstr='--invxfm=%s', ),
+        inv_xfm=dict(
+            argstr='--invxfm=%s',
+            extensions=None,
+        ),
         loop_check=dict(argstr='--loopcheck', ),
-        lrtarget3=dict(argstr='--lrtarget3=%s', ),
+        lrtarget3=dict(
+            argstr='--lrtarget3=%s',
+            extensions=None,
+        ),
         mask=dict(
             argstr='-m %s',
+            extensions=None,
             mandatory=True,
         ),
         meshspace=dict(argstr='--meshspace=%s', ),
@@ -72,21 +88,42 @@ def test_ProbTrackX2_inputs():
             argstr='--seed=%s',
             mandatory=True,
         ),
-        seed_ref=dict(argstr='--seedref=%s', ),
+        seed_ref=dict(
+            argstr='--seedref=%s',
+            extensions=None,
+        ),
         simple=dict(argstr='--simple', ),
         step_length=dict(argstr='--steplength=%.3f', ),
-        stop_mask=dict(argstr='--stop=%s', ),
-        target2=dict(argstr='--target2=%s', ),
-        target3=dict(argstr='--target3=%s', ),
-        target4=dict(argstr='--target4=%s', ),
+        stop_mask=dict(
+            argstr='--stop=%s',
+            extensions=None,
+        ),
+        target2=dict(
+            argstr='--target2=%s',
+            extensions=None,
+        ),
+        target3=dict(
+            argstr='--target3=%s',
+            extensions=None,
+        ),
+        target4=dict(
+            argstr='--target4=%s',
+            extensions=None,
+        ),
         target_masks=dict(argstr='--targetmasks=%s', ),
         thsamples=dict(mandatory=True, ),
         use_anisotropy=dict(argstr='--usef', ),
         verbose=dict(argstr='--verbose=%d', ),
         waycond=dict(argstr='--waycond=%s', ),
         wayorder=dict(argstr='--wayorder', ),
-        waypoints=dict(argstr='--waypoints=%s', ),
-        xfm=dict(argstr='--xfm=%s', ),
+        waypoints=dict(
+            argstr='--waypoints=%s',
+            extensions=None,
+        ),
+        xfm=dict(
+            argstr='--xfm=%s',
+            extensions=None,
+        ),
     )
     inputs = ProbTrackX2.input_spec()
 
@@ -96,15 +133,15 @@ def test_ProbTrackX2_inputs():
 def test_ProbTrackX2_outputs():
     output_map = dict(
         fdt_paths=dict(),
-        log=dict(),
-        lookup_tractspace=dict(),
-        matrix1_dot=dict(),
-        matrix2_dot=dict(),
-        matrix3_dot=dict(),
-        network_matrix=dict(),
+        log=dict(extensions=None, ),
+        lookup_tractspace=dict(extensions=None, ),
+        matrix1_dot=dict(extensions=None, ),
+        matrix2_dot=dict(extensions=None, ),
+        matrix3_dot=dict(extensions=None, ),
+        network_matrix=dict(extensions=None, ),
         particle_files=dict(),
         targets=dict(),
-        way_total=dict(),
+        way_total=dict(extensions=None, ),
     )
     outputs = ProbTrackX2.output_spec()
 

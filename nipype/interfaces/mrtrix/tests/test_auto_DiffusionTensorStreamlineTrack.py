@@ -17,6 +17,7 @@ def test_DiffusionTensorStreamlineTrack_inputs():
         ),
         exclude_file=dict(
             argstr='-exclude %s',
+            extensions=None,
             xor=['exclude_file', 'exclude_spec'],
         ),
         exclude_spec=dict(
@@ -28,16 +29,19 @@ def test_DiffusionTensorStreamlineTrack_inputs():
         ),
         gradient_encoding_file=dict(
             argstr='-grad %s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
         include_file=dict(
             argstr='-include %s',
+            extensions=None,
             xor=['include_file', 'include_spec'],
         ),
         include_spec=dict(
@@ -62,6 +66,7 @@ def test_DiffusionTensorStreamlineTrack_inputs():
         ),
         mask_file=dict(
             argstr='-mask %s',
+            extensions=None,
             xor=['mask_file', 'mask_spec'],
         ),
         mask_spec=dict(
@@ -87,6 +92,7 @@ def test_DiffusionTensorStreamlineTrack_inputs():
         no_mask_interpolation=dict(argstr='-nomaskinterp', ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             name_source=['in_file'],
             name_template='%s_tracked.tck',
             output_name='tracked',
@@ -94,6 +100,7 @@ def test_DiffusionTensorStreamlineTrack_inputs():
         ),
         seed_file=dict(
             argstr='-seed %s',
+            extensions=None,
             xor=['seed_file', 'seed_spec'],
         ),
         seed_spec=dict(
@@ -116,7 +123,7 @@ def test_DiffusionTensorStreamlineTrack_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DiffusionTensorStreamlineTrack_outputs():
-    output_map = dict(tracked=dict(), )
+    output_map = dict(tracked=dict(extensions=None, ), )
     outputs = DiffusionTensorStreamlineTrack.output_spec()
 
     for key, metadata in list(output_map.items()):

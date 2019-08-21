@@ -10,14 +10,26 @@ def test_MedicAlgorithmLesionToads_inputs():
             usedefault=True,
         ),
         inAtlas=dict(argstr='--inAtlas %s', ),
-        inAtlas2=dict(argstr='--inAtlas2 %s', ),
-        inAtlas3=dict(argstr='--inAtlas3 %s', ),
-        inAtlas4=dict(argstr='--inAtlas4 %s', ),
+        inAtlas2=dict(
+            argstr='--inAtlas2 %s',
+            extensions=None,
+        ),
+        inAtlas3=dict(
+            argstr='--inAtlas3 %s',
+            extensions=None,
+        ),
+        inAtlas4=dict(
+            argstr='--inAtlas4 %s',
+            extensions=None,
+        ),
         inAtlas5=dict(argstr='--inAtlas5 %f', ),
         inAtlas6=dict(argstr='--inAtlas6 %s', ),
         inConnectivity=dict(argstr='--inConnectivity %s', ),
         inCorrect=dict(argstr='--inCorrect %s', ),
-        inFLAIR=dict(argstr='--inFLAIR %s', ),
+        inFLAIR=dict(
+            argstr='--inFLAIR %s',
+            extensions=None,
+        ),
         inInclude=dict(argstr='--inInclude %s', ),
         inMaximum=dict(argstr='--inMaximum %d', ),
         inMaximum2=dict(argstr='--inMaximum2 %d', ),
@@ -28,8 +40,14 @@ def test_MedicAlgorithmLesionToads_inputs():
         inOutput2=dict(argstr='--inOutput2 %s', ),
         inOutput3=dict(argstr='--inOutput3 %s', ),
         inSmooting=dict(argstr='--inSmooting %f', ),
-        inT1_MPRAGE=dict(argstr='--inT1_MPRAGE %s', ),
-        inT1_SPGR=dict(argstr='--inT1_SPGR %s', ),
+        inT1_MPRAGE=dict(
+            argstr='--inT1_MPRAGE %s',
+            extensions=None,
+        ),
+        inT1_SPGR=dict(
+            argstr='--inT1_SPGR %s',
+            extensions=None,
+        ),
         null=dict(argstr='--null %s', ),
         outCortical=dict(
             argstr='--outCortical %s',
@@ -81,15 +99,15 @@ def test_MedicAlgorithmLesionToads_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MedicAlgorithmLesionToads_outputs():
     output_map = dict(
-        outCortical=dict(),
-        outFilled=dict(),
-        outHard=dict(),
-        outHard2=dict(),
-        outInhomogeneity=dict(),
-        outLesion=dict(),
-        outMembership=dict(),
-        outSulcal=dict(),
-        outWM=dict(),
+        outCortical=dict(extensions=None, ),
+        outFilled=dict(extensions=None, ),
+        outHard=dict(extensions=None, ),
+        outHard2=dict(extensions=None, ),
+        outInhomogeneity=dict(extensions=None, ),
+        outLesion=dict(extensions=None, ),
+        outMembership=dict(extensions=None, ),
+        outSulcal=dict(extensions=None, ),
+        outWM=dict(extensions=None, ),
     )
     outputs = MedicAlgorithmLesionToads.output_spec()
 

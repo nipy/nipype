@@ -11,6 +11,7 @@ def test_ParseDICOMDir_inputs():
         ),
         dicom_info_file=dict(
             argstr='--o %s',
+            extensions=None,
             usedefault=True,
         ),
         environ=dict(
@@ -27,7 +28,7 @@ def test_ParseDICOMDir_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ParseDICOMDir_outputs():
-    output_map = dict(dicom_info_file=dict(), )
+    output_map = dict(dicom_info_file=dict(extensions=None, ), )
     outputs = ParseDICOMDir.output_spec()
 
     for key, metadata in list(output_map.items()):

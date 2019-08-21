@@ -19,6 +19,7 @@ def test_affScalarVolTask_inputs():
         ),
         in_file=dict(
             argstr='-in %s',
+            extensions=None,
             mandatory=True,
         ),
         interpolation=dict(
@@ -27,16 +28,19 @@ def test_affScalarVolTask_inputs():
         ),
         out_file=dict(
             argstr='-out %s',
+            extensions=None,
             keep_extension=True,
             name_source='in_file',
             name_template='%s_affxfmd',
         ),
         target=dict(
             argstr='-target %s',
+            extensions=None,
             xor=['transform'],
         ),
         transform=dict(
             argstr='-trans %s',
+            extensions=None,
             xor=['target', 'translation', 'euler', 'deformation'],
         ),
         translation=dict(
@@ -50,7 +54,7 @@ def test_affScalarVolTask_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_affScalarVolTask_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = affScalarVolTask.output_spec()
 
     for key, metadata in list(output_map.items()):

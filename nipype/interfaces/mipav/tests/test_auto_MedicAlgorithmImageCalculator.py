@@ -10,8 +10,14 @@ def test_MedicAlgorithmImageCalculator_inputs():
             usedefault=True,
         ),
         inOperation=dict(argstr='--inOperation %s', ),
-        inVolume=dict(argstr='--inVolume %s', ),
-        inVolume2=dict(argstr='--inVolume2 %s', ),
+        inVolume=dict(
+            argstr='--inVolume %s',
+            extensions=None,
+        ),
+        inVolume2=dict(
+            argstr='--inVolume2 %s',
+            extensions=None,
+        ),
         null=dict(argstr='--null %s', ),
         outResult=dict(
             argstr='--outResult %s',
@@ -30,7 +36,7 @@ def test_MedicAlgorithmImageCalculator_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MedicAlgorithmImageCalculator_outputs():
-    output_map = dict(outResult=dict(), )
+    output_map = dict(outResult=dict(extensions=None, ), )
     outputs = MedicAlgorithmImageCalculator.output_spec()
 
     for key, metadata in list(output_map.items()):

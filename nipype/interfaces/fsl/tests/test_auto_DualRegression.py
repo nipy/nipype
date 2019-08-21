@@ -7,6 +7,7 @@ def test_DualRegression_inputs():
         args=dict(argstr='%s', ),
         con_file=dict(
             argstr='%s',
+            extensions=None,
             position=4,
         ),
         des_norm=dict(
@@ -16,6 +17,7 @@ def test_DualRegression_inputs():
         ),
         design_file=dict(
             argstr='%s',
+            extensions=None,
             position=3,
         ),
         environ=dict(
@@ -24,6 +26,7 @@ def test_DualRegression_inputs():
         ),
         group_IC_maps_4D=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),

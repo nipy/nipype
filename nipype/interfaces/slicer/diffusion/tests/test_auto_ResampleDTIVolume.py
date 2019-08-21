@@ -6,11 +6,17 @@ def test_ResampleDTIVolume_inputs():
     input_map = dict(
         Inverse_ITK_Transformation=dict(
             argstr='--Inverse_ITK_Transformation ', ),
-        Reference=dict(argstr='--Reference %s', ),
+        Reference=dict(
+            argstr='--Reference %s',
+            extensions=None,
+        ),
         args=dict(argstr='%s', ),
         centered_transform=dict(argstr='--centered_transform ', ),
         correction=dict(argstr='--correction %s', ),
-        defField=dict(argstr='--defField %s', ),
+        defField=dict(
+            argstr='--defField %s',
+            extensions=None,
+        ),
         default_pixel_value=dict(argstr='--default_pixel_value %f', ),
         direction_matrix=dict(
             argstr='--direction_matrix %s',
@@ -24,6 +30,7 @@ def test_ResampleDTIVolume_inputs():
         image_center=dict(argstr='--image_center %s', ),
         inputVolume=dict(
             argstr='%s',
+            extensions=None,
             position=-2,
         ),
         interpolation=dict(argstr='--interpolation %s', ),
@@ -53,7 +60,10 @@ def test_ResampleDTIVolume_inputs():
         ),
         transform_order=dict(argstr='--transform_order %s', ),
         transform_tensor_method=dict(argstr='--transform_tensor_method %s', ),
-        transformationFile=dict(argstr='--transformationFile %s', ),
+        transformationFile=dict(
+            argstr='--transformationFile %s',
+            extensions=None,
+        ),
         window_function=dict(argstr='--window_function %s', ),
     )
     inputs = ResampleDTIVolume.input_spec()
@@ -62,7 +72,11 @@ def test_ResampleDTIVolume_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ResampleDTIVolume_outputs():
-    output_map = dict(outputVolume=dict(position=-1, ), )
+    output_map = dict(
+        outputVolume=dict(
+            extensions=None,
+            position=-1,
+        ), )
     outputs = ResampleDTIVolume.output_spec()
 
     for key, metadata in list(output_map.items()):

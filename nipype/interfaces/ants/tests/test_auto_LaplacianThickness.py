@@ -17,12 +17,14 @@ def test_LaplacianThickness_inputs():
         input_gm=dict(
             argstr='%s',
             copyfile=True,
+            extensions=None,
             mandatory=True,
             position=2,
         ),
         input_wm=dict(
             argstr='%s',
             copyfile=True,
+            extensions=None,
             mandatory=True,
             position=1,
         ),
@@ -32,6 +34,7 @@ def test_LaplacianThickness_inputs():
         ),
         output_image=dict(
             argstr='%s',
+            extensions=None,
             hash_files=False,
             keep_extension=True,
             name_source=['input_wm'],
@@ -64,7 +67,7 @@ def test_LaplacianThickness_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_LaplacianThickness_outputs():
-    output_map = dict(output_image=dict(), )
+    output_map = dict(output_image=dict(extensions=None, ), )
     outputs = LaplacianThickness.output_spec()
 
     for key, metadata in list(output_map.items()):

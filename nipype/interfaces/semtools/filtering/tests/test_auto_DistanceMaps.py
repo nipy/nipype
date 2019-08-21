@@ -9,8 +9,14 @@ def test_DistanceMaps_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputLabelVolume=dict(argstr='--inputLabelVolume %s', ),
-        inputMaskVolume=dict(argstr='--inputMaskVolume %s', ),
+        inputLabelVolume=dict(
+            argstr='--inputLabelVolume %s',
+            extensions=None,
+        ),
+        inputMaskVolume=dict(
+            argstr='--inputMaskVolume %s',
+            extensions=None,
+        ),
         inputTissueLabel=dict(argstr='--inputTissueLabel %d', ),
         outputVolume=dict(
             argstr='--outputVolume %s',
@@ -23,7 +29,7 @@ def test_DistanceMaps_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DistanceMaps_outputs():
-    output_map = dict(outputVolume=dict(), )
+    output_map = dict(outputVolume=dict(extensions=None, ), )
     outputs = DistanceMaps.output_spec()
 
     for key, metadata in list(output_map.items()):

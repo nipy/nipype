@@ -6,9 +6,13 @@ def test_FitQt1_inputs():
     input_map = dict(
         acceptance=dict(argstr='-acceptance %f', ),
         args=dict(argstr='%s', ),
-        b1map=dict(argstr='-b1map %s', ),
+        b1map=dict(
+            argstr='-b1map %s',
+            extensions=None,
+        ),
         comp_file=dict(
             argstr='-comp %s',
+            extensions=None,
             name_source=['source_file'],
             name_template='%s_comp.nii.gz',
         ),
@@ -18,6 +22,7 @@ def test_FitQt1_inputs():
         ),
         error_file=dict(
             argstr='-error %s',
+            extensions=None,
             name_source=['source_file'],
             name_template='%s_error.nii.gz',
         ),
@@ -25,7 +30,10 @@ def test_FitQt1_inputs():
             argstr='-flips %s',
             sep=' ',
         ),
-        flips_list=dict(argstr='-fliplist %s', ),
+        flips_list=dict(
+            argstr='-fliplist %s',
+            extensions=None,
+        ),
         gn_flag=dict(
             argstr='-gn',
             position=8,
@@ -40,11 +48,13 @@ def test_FitQt1_inputs():
         ),
         m0map_file=dict(
             argstr='-m0map %s',
+            extensions=None,
             name_source=['source_file'],
             name_template='%s_m0map.nii.gz',
         ),
         mask=dict(
             argstr='-mask %s',
+            extensions=None,
             position=2,
         ),
         maxit=dict(
@@ -53,11 +63,15 @@ def test_FitQt1_inputs():
         ),
         mcmap_file=dict(
             argstr='-mcmap %s',
+            extensions=None,
             name_source=['source_file'],
             name_template='%s_mcmap.nii.gz',
         ),
         mcmaxit=dict(argstr='-mcmaxit %d', ),
-        mcout=dict(argstr='-mcout %s', ),
+        mcout=dict(
+            argstr='-mcout %s',
+            extensions=None,
+        ),
         mcsamples=dict(argstr='-mcsamples %d', ),
         nb_comp=dict(
             argstr='-nc %d',
@@ -65,10 +79,12 @@ def test_FitQt1_inputs():
         ),
         prior=dict(
             argstr='-prior %s',
+            extensions=None,
             position=3,
         ),
         res_file=dict(
             argstr='-res %s',
+            extensions=None,
             name_source=['source_file'],
             name_template='%s_res.nii.gz',
         ),
@@ -78,6 +94,7 @@ def test_FitQt1_inputs():
         ),
         source_file=dict(
             argstr='-source %s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
@@ -88,12 +105,17 @@ def test_FitQt1_inputs():
         ),
         syn_file=dict(
             argstr='-syn %s',
+            extensions=None,
             name_source=['source_file'],
             name_template='%s_syn.nii.gz',
         ),
-        t1_list=dict(argstr='-T1list %s', ),
+        t1_list=dict(
+            argstr='-T1list %s',
+            extensions=None,
+        ),
         t1map_file=dict(
             argstr='-t1map %s',
+            extensions=None,
             name_source=['source_file'],
             name_template='%s_t1map.nii.gz',
         ),
@@ -108,7 +130,10 @@ def test_FitQt1_inputs():
             position=14,
             sep=' ',
         ),
-        tis_list=dict(argstr='-TIlist %s', ),
+        tis_list=dict(
+            argstr='-TIlist %s',
+            extensions=None,
+        ),
         tr_value=dict(
             argstr='-TR %f',
             position=5,
@@ -125,13 +150,13 @@ def test_FitQt1_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FitQt1_outputs():
     output_map = dict(
-        comp_file=dict(),
-        error_file=dict(),
-        m0map_file=dict(),
-        mcmap_file=dict(),
-        res_file=dict(),
-        syn_file=dict(),
-        t1map_file=dict(),
+        comp_file=dict(extensions=None, ),
+        error_file=dict(extensions=None, ),
+        m0map_file=dict(extensions=None, ),
+        mcmap_file=dict(extensions=None, ),
+        res_file=dict(extensions=None, ),
+        syn_file=dict(extensions=None, ),
+        t1map_file=dict(extensions=None, ),
     )
     outputs = FitQt1.output_spec()
 

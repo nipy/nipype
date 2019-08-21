@@ -10,7 +10,10 @@ def test_TextureFromNoiseImageFilter_inputs():
             usedefault=True,
         ),
         inputRadius=dict(argstr='--inputRadius %d', ),
-        inputVolume=dict(argstr='--inputVolume %s', ),
+        inputVolume=dict(
+            argstr='--inputVolume %s',
+            extensions=None,
+        ),
         outputVolume=dict(
             argstr='--outputVolume %s',
             hash_files=False,
@@ -22,7 +25,7 @@ def test_TextureFromNoiseImageFilter_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TextureFromNoiseImageFilter_outputs():
-    output_map = dict(outputVolume=dict(), )
+    output_map = dict(outputVolume=dict(extensions=None, ), )
     outputs = TextureFromNoiseImageFilter.output_spec()
 
     for key, metadata in list(output_map.items()):

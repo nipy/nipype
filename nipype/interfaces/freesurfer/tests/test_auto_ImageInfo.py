@@ -11,6 +11,7 @@ def test_ImageInfo_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             position=1,
         ),
         subjects_dir=dict(),
@@ -30,7 +31,7 @@ def test_ImageInfo_outputs():
         file_format=dict(),
         info=dict(),
         orientation=dict(),
-        out_file=dict(),
+        out_file=dict(extensions=None, ),
         ph_enc_dir=dict(),
         vox_sizes=dict(),
     )

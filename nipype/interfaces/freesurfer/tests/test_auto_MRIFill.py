@@ -11,18 +11,29 @@ def test_MRIFill_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
-        log_file=dict(argstr='-a %s', ),
+        log_file=dict(
+            argstr='-a %s',
+            extensions=None,
+        ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-1,
         ),
-        segmentation=dict(argstr='-segmentation %s', ),
+        segmentation=dict(
+            argstr='-segmentation %s',
+            extensions=None,
+        ),
         subjects_dir=dict(),
-        transform=dict(argstr='-xform %s', ),
+        transform=dict(
+            argstr='-xform %s',
+            extensions=None,
+        ),
     )
     inputs = MRIFill.input_spec()
 
@@ -31,8 +42,8 @@ def test_MRIFill_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRIFill_outputs():
     output_map = dict(
-        log_file=dict(),
-        out_file=dict(),
+        log_file=dict(extensions=None, ),
+        out_file=dict(extensions=None, ),
     )
     outputs = MRIFill.output_spec()
 

@@ -11,11 +11,13 @@ def test_BrickStat_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-1,
         ),
         mask=dict(
             argstr='-mask %s',
+            extensions=None,
             position=2,
         ),
         max=dict(argstr='-max', ),

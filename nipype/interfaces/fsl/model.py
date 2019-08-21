@@ -1887,7 +1887,7 @@ class ClusterInputSpec(FSLCommandInputSpec):
     peak_distance = traits.Float(
         argstr='--peakdist=%.10f',
         desc='minimum distance between local maxima/minima, in mm (default 0)')
-    cope_file = traits.File(argstr='--cope=%s', desc='cope volume')
+    cope_file = File(argstr='--cope=%s', desc='cope volume')
     volume = traits.Int(
         argstr='--volume=%d', desc='number of voxels in the mask')
     dlh = traits.Float(

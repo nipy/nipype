@@ -5,19 +5,27 @@ from ..preprocess import MRIsCALabel
 def test_MRIsCALabel_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        aseg=dict(argstr='-aseg %s', ),
+        aseg=dict(
+            argstr='-aseg %s',
+            extensions=None,
+        ),
         canonsurf=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-3,
         ),
         classifier=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
         copy_inputs=dict(),
-        curv=dict(mandatory=True, ),
+        curv=dict(
+            extensions=None,
+            mandatory=True,
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -27,10 +35,14 @@ def test_MRIsCALabel_inputs():
             mandatory=True,
             position=-4,
         ),
-        label=dict(argstr='-l %s', ),
+        label=dict(
+            argstr='-l %s',
+            extensions=None,
+        ),
         num_threads=dict(),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             hash_files=False,
             keep_extension=True,
             name_source=['hemisphere'],
@@ -38,7 +50,10 @@ def test_MRIsCALabel_inputs():
             position=-1,
         ),
         seed=dict(argstr='-seed %d', ),
-        smoothwm=dict(mandatory=True, ),
+        smoothwm=dict(
+            extensions=None,
+            mandatory=True,
+        ),
         subject_id=dict(
             argstr='%s',
             mandatory=True,
@@ -46,7 +61,10 @@ def test_MRIsCALabel_inputs():
             usedefault=True,
         ),
         subjects_dir=dict(),
-        sulc=dict(mandatory=True, ),
+        sulc=dict(
+            extensions=None,
+            mandatory=True,
+        ),
     )
     inputs = MRIsCALabel.input_spec()
 
@@ -54,7 +72,7 @@ def test_MRIsCALabel_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRIsCALabel_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = MRIsCALabel.output_spec()
 
     for key, metadata in list(output_map.items()):

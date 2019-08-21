@@ -11,11 +11,13 @@ def test_Dewisp_inputs():
         ),
         inputMaskFile=dict(
             argstr='-i %s',
+            extensions=None,
             mandatory=True,
         ),
         maximumIterations=dict(argstr='-n %d', ),
         outputMaskFile=dict(
             argstr='-o %s',
+            extensions=None,
             genfile=True,
         ),
         sizeThreshold=dict(argstr='-t %d', ),
@@ -28,7 +30,7 @@ def test_Dewisp_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Dewisp_outputs():
-    output_map = dict(outputMaskFile=dict(), )
+    output_map = dict(outputMaskFile=dict(extensions=None, ), )
     outputs = Dewisp.output_spec()
 
     for key, metadata in list(output_map.items()):

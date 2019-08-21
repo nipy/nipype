@@ -22,6 +22,7 @@ def test_AccuracyTester_inputs():
         ),
         trained_wts_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),

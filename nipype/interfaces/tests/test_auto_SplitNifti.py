@@ -4,7 +4,10 @@ from ..dcmstack import SplitNifti
 
 def test_SplitNifti_inputs():
     input_map = dict(
-        in_file=dict(mandatory=True, ),
+        in_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
         out_ext=dict(usedefault=True, ),
         out_format=dict(),
         out_path=dict(),

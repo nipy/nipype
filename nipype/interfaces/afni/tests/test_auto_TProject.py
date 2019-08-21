@@ -13,9 +13,15 @@ def test_TProject_inputs():
         bandpass=dict(argstr='-bandpass %g %g', ),
         blur=dict(argstr='-blur %g', ),
         cenmode=dict(argstr='-cenmode %s', ),
-        censor=dict(argstr='-censor %s', ),
+        censor=dict(
+            argstr='-censor %s',
+            extensions=None,
+        ),
         censortr=dict(argstr='-CENSORTR %s', ),
-        concat=dict(argstr='-concat %s', ),
+        concat=dict(
+            argstr='-concat %s',
+            extensions=None,
+        ),
         dsort=dict(argstr='-dsort %s...', ),
         environ=dict(
             nohash=True,
@@ -24,19 +30,27 @@ def test_TProject_inputs():
         in_file=dict(
             argstr='-input %s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=1,
         ),
-        mask=dict(argstr='-mask %s', ),
+        mask=dict(
+            argstr='-mask %s',
+            extensions=None,
+        ),
         noblock=dict(argstr='-noblock', ),
         norm=dict(argstr='-norm', ),
         num_threads=dict(
             nohash=True,
             usedefault=True,
         ),
-        ort=dict(argstr='-ort %s', ),
+        ort=dict(
+            argstr='-ort %s',
+            extensions=None,
+        ),
         out_file=dict(
             argstr='-prefix %s',
+            extensions=None,
             name_source='in_file',
             name_template='%s_tproject',
             position=-1,
@@ -51,7 +65,7 @@ def test_TProject_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TProject_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = TProject.output_spec()
 
     for key, metadata in list(output_map.items()):

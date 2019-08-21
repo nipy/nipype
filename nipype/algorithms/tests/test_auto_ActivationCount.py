@@ -14,9 +14,9 @@ def test_ActivationCount_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ActivationCount_outputs():
     output_map = dict(
-        acm_neg=dict(),
-        acm_pos=dict(),
-        out_file=dict(),
+        acm_neg=dict(extensions=None, ),
+        acm_pos=dict(extensions=None, ),
+        out_file=dict(extensions=None, ),
     )
     outputs = ActivationCount.output_spec()
 

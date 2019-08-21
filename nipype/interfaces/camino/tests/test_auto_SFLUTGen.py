@@ -16,10 +16,12 @@ def test_SFLUTGen_inputs():
         ),
         in_file=dict(
             argstr='-inputfile %s',
+            extensions=None,
             mandatory=True,
         ),
         info_file=dict(
             argstr='-infofile %s',
+            extensions=None,
             mandatory=True,
         ),
         minvectsperbin=dict(
@@ -32,6 +34,7 @@ def test_SFLUTGen_inputs():
         ),
         out_file=dict(
             argstr='> %s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
@@ -51,8 +54,8 @@ def test_SFLUTGen_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SFLUTGen_outputs():
     output_map = dict(
-        lut_one_fibre=dict(),
-        lut_two_fibres=dict(),
+        lut_one_fibre=dict(extensions=None, ),
+        lut_two_fibres=dict(extensions=None, ),
     )
     outputs = SFLUTGen.output_spec()
 

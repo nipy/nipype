@@ -13,6 +13,7 @@ def test_OtsuThresholdSegmentation_inputs():
         faceConnected=dict(argstr='--faceConnected ', ),
         inputVolume=dict(
             argstr='%s',
+            extensions=None,
             position=-2,
         ),
         minimumObjectSize=dict(argstr='--minimumObjectSize %d', ),
@@ -29,7 +30,11 @@ def test_OtsuThresholdSegmentation_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_OtsuThresholdSegmentation_outputs():
-    output_map = dict(outputVolume=dict(position=-1, ), )
+    output_map = dict(
+        outputVolume=dict(
+            extensions=None,
+            position=-1,
+        ), )
     outputs = OtsuThresholdSegmentation.output_spec()
 
     for key, metadata in list(output_map.items()):

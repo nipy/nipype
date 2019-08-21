@@ -9,7 +9,10 @@ def test_BRAINSResize_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputVolume=dict(argstr='--inputVolume %s', ),
+        inputVolume=dict(
+            argstr='--inputVolume %s',
+            extensions=None,
+        ),
         outputVolume=dict(
             argstr='--outputVolume %s',
             hash_files=False,
@@ -23,7 +26,7 @@ def test_BRAINSResize_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BRAINSResize_outputs():
-    output_map = dict(outputVolume=dict(), )
+    output_map = dict(outputVolume=dict(extensions=None, ), )
     outputs = BRAINSResize.output_spec()
 
     for key, metadata in list(output_map.items()):

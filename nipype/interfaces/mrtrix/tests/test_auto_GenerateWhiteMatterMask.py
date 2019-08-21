@@ -7,11 +7,13 @@ def test_GenerateWhiteMatterMask_inputs():
         args=dict(argstr='%s', ),
         binary_mask=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
         encoding_file=dict(
             argstr='-grad %s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
@@ -21,12 +23,14 @@ def test_GenerateWhiteMatterMask_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-3,
         ),
         noise_level_margin=dict(argstr='-margin %s', ),
         out_WMProb_filename=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
@@ -37,7 +41,7 @@ def test_GenerateWhiteMatterMask_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_GenerateWhiteMatterMask_outputs():
-    output_map = dict(WMprobabilitymap=dict(), )
+    output_map = dict(WMprobabilitymap=dict(extensions=None, ), )
     outputs = GenerateWhiteMatterMask.output_spec()
 
     for key, metadata in list(output_map.items()):

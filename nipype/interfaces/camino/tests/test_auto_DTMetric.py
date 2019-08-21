@@ -5,9 +5,13 @@ from ..dti import DTMetric
 def test_DTMetric_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        data_header=dict(argstr='-header %s', ),
+        data_header=dict(
+            argstr='-header %s',
+            extensions=None,
+        ),
         eigen_data=dict(
             argstr='-inputfile %s',
+            extensions=None,
             mandatory=True,
         ),
         environ=dict(
@@ -28,6 +32,7 @@ def test_DTMetric_inputs():
         ),
         outputfile=dict(
             argstr='-outputfile %s',
+            extensions=None,
             genfile=True,
         ),
     )
@@ -37,7 +42,7 @@ def test_DTMetric_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DTMetric_outputs():
-    output_map = dict(metric_stats=dict(), )
+    output_map = dict(metric_stats=dict(extensions=None, ), )
     outputs = DTMetric.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -11,6 +11,7 @@ def test_RegMeasure_inputs():
         ),
         flo_file=dict(
             argstr='-flo %s',
+            extensions=None,
             mandatory=True,
         ),
         measure_type=dict(
@@ -23,11 +24,13 @@ def test_RegMeasure_inputs():
         ),
         out_file=dict(
             argstr='-out %s',
+            extensions=None,
             name_source=['flo_file'],
             name_template='%s',
         ),
         ref_file=dict(
             argstr='-ref %s',
+            extensions=None,
             mandatory=True,
         ),
     )
@@ -37,7 +40,7 @@ def test_RegMeasure_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_RegMeasure_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = RegMeasure.output_spec()
 
     for key, metadata in list(output_map.items()):

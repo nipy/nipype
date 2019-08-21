@@ -13,6 +13,7 @@ def test_VotingBinaryHoleFillingImageFilter_inputs():
         foreground=dict(argstr='--foreground %d', ),
         inputVolume=dict(
             argstr='%s',
+            extensions=None,
             position=-2,
         ),
         majorityThreshold=dict(argstr='--majorityThreshold %d', ),
@@ -32,7 +33,11 @@ def test_VotingBinaryHoleFillingImageFilter_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_VotingBinaryHoleFillingImageFilter_outputs():
-    output_map = dict(outputVolume=dict(position=-1, ), )
+    output_map = dict(
+        outputVolume=dict(
+            extensions=None,
+            position=-1,
+        ), )
     outputs = VotingBinaryHoleFillingImageFilter.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -17,11 +17,13 @@ def test_PrepareFieldmap_inputs():
         ),
         in_magnitude=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=3,
         ),
         in_phase=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=2,
         ),
@@ -32,6 +34,7 @@ def test_PrepareFieldmap_inputs():
         ),
         out_fieldmap=dict(
             argstr='%s',
+            extensions=None,
             position=4,
         ),
         output_type=dict(),
@@ -47,7 +50,7 @@ def test_PrepareFieldmap_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_PrepareFieldmap_outputs():
-    output_map = dict(out_fieldmap=dict(), )
+    output_map = dict(out_fieldmap=dict(extensions=None, ), )
     outputs = PrepareFieldmap.output_spec()
 
     for key, metadata in list(output_map.items()):

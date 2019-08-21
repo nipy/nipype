@@ -5,10 +5,16 @@ from ..utils import ParcellationStats
 def test_ParcellationStats_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        aseg=dict(mandatory=True, ),
-        brainmask=dict(mandatory=True, ),
+        aseg=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        brainmask=dict(
+            extensions=None,
+            mandatory=True,
+        ),
         copy_inputs=dict(),
-        cortex_label=dict(),
+        cortex_label=dict(extensions=None, ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -20,29 +26,51 @@ def test_ParcellationStats_inputs():
         ),
         in_annotation=dict(
             argstr='-a %s',
+            extensions=None,
             xor=['in_label'],
         ),
-        in_cortex=dict(argstr='-cortex %s', ),
+        in_cortex=dict(
+            argstr='-cortex %s',
+            extensions=None,
+        ),
         in_label=dict(
             argstr='-l %s',
+            extensions=None,
             xor=['in_annotatoin', 'out_color'],
         ),
-        lh_pial=dict(mandatory=True, ),
-        lh_white=dict(mandatory=True, ),
+        lh_pial=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        lh_white=dict(
+            extensions=None,
+            mandatory=True,
+        ),
         mgz=dict(argstr='-mgz', ),
         out_color=dict(
             argstr='-c %s',
+            extensions=None,
             genfile=True,
             xor=['in_label'],
         ),
         out_table=dict(
             argstr='-f %s',
+            extensions=None,
             genfile=True,
             requires=['tabular_output'],
         ),
-        rh_pial=dict(mandatory=True, ),
-        rh_white=dict(mandatory=True, ),
-        ribbon=dict(mandatory=True, ),
+        rh_pial=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        rh_white=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        ribbon=dict(
+            extensions=None,
+            mandatory=True,
+        ),
         subject_id=dict(
             argstr='%s',
             mandatory=True,
@@ -59,9 +87,18 @@ def test_ParcellationStats_inputs():
             argstr='-th3',
             requires=['cortex_label'],
         ),
-        thickness=dict(mandatory=True, ),
-        transform=dict(mandatory=True, ),
-        wm=dict(mandatory=True, ),
+        thickness=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        transform=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        wm=dict(
+            extensions=None,
+            mandatory=True,
+        ),
     )
     inputs = ParcellationStats.input_spec()
 
@@ -70,8 +107,8 @@ def test_ParcellationStats_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ParcellationStats_outputs():
     output_map = dict(
-        out_color=dict(),
-        out_table=dict(),
+        out_color=dict(extensions=None, ),
+        out_table=dict(extensions=None, ),
     )
     outputs = ParcellationStats.output_spec()
 

@@ -5,7 +5,10 @@ from ..csv import CSVReader
 def test_CSVReader_inputs():
     input_map = dict(
         header=dict(usedefault=True, ),
-        in_file=dict(mandatory=True, ),
+        in_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
     )
     inputs = CSVReader.input_spec()
 

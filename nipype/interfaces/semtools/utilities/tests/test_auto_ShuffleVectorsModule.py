@@ -9,7 +9,10 @@ def test_ShuffleVectorsModule_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputVectorFileBaseName=dict(argstr='--inputVectorFileBaseName %s', ),
+        inputVectorFileBaseName=dict(
+            argstr='--inputVectorFileBaseName %s',
+            extensions=None,
+        ),
         outputVectorFileBaseName=dict(
             argstr='--outputVectorFileBaseName %s',
             hash_files=False,
@@ -22,7 +25,7 @@ def test_ShuffleVectorsModule_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ShuffleVectorsModule_outputs():
-    output_map = dict(outputVectorFileBaseName=dict(), )
+    output_map = dict(outputVectorFileBaseName=dict(extensions=None, ), )
     outputs = ShuffleVectorsModule.output_spec()
 
     for key, metadata in list(output_map.items()):

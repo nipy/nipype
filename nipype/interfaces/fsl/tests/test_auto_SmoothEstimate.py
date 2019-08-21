@@ -16,15 +16,18 @@ def test_SmoothEstimate_inputs():
         ),
         mask_file=dict(
             argstr='--mask=%s',
+            extensions=None,
             mandatory=True,
         ),
         output_type=dict(),
         residual_fit_file=dict(
             argstr='--res=%s',
+            extensions=None,
             requires=['dof'],
         ),
         zstat_file=dict(
             argstr='--zstat=%s',
+            extensions=None,
             xor=['dof'],
         ),
     )

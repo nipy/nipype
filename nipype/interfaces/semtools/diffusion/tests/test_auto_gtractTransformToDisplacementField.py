@@ -9,8 +9,14 @@ def test_gtractTransformToDisplacementField_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputReferenceVolume=dict(argstr='--inputReferenceVolume %s', ),
-        inputTransform=dict(argstr='--inputTransform %s', ),
+        inputReferenceVolume=dict(
+            argstr='--inputReferenceVolume %s',
+            extensions=None,
+        ),
+        inputTransform=dict(
+            argstr='--inputTransform %s',
+            extensions=None,
+        ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         outputDeformationFieldVolume=dict(
             argstr='--outputDeformationFieldVolume %s',
@@ -23,7 +29,7 @@ def test_gtractTransformToDisplacementField_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_gtractTransformToDisplacementField_outputs():
-    output_map = dict(outputDeformationFieldVolume=dict(), )
+    output_map = dict(outputDeformationFieldVolume=dict(extensions=None, ), )
     outputs = gtractTransformToDisplacementField.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -7,8 +7,7 @@ from sys import platform
 from distutils import spawn
 
 from ... import logging, LooseVersion
-from ...utils.filemanip import split_filename, fname_presuffix
-
+from ...utils.filemanip import split_filename
 from ..base import (CommandLine, traits, CommandLineInputSpec, isdefined, File,
                     TraitedSpec, PackageInfo)
 from ...external.due import BibTeX
@@ -18,14 +17,15 @@ IFLOGGER = logging.getLogger('nipype.interface')
 
 
 class Info(PackageInfo):
-    """Handle afni output type and version information.
-    """
+    """Handle afni output type and version information."""
+
     __outputtype = 'AFNI'
     ftypes = {'NIFTI': '.nii', 'AFNI': '', 'NIFTI_GZ': '.nii.gz'}
     version_cmd = 'afni --version'
 
     @staticmethod
     def parse_version(raw_info):
+        """Check and parse AFNI's version."""
         version_stamp = raw_info.split('\n')[0].split('Version ')[1]
         if version_stamp.startswith('AFNI'):
             version_stamp = version_stamp.split('AFNI_')[1]
@@ -41,7 +41,8 @@ class Info(PackageInfo):
 
     @classmethod
     def output_type_to_ext(cls, outputtype):
-        """Get the file extension for the given output type.
+        """
+        Get the file extension for the given output type.
 
         Parameters
         ----------
@@ -52,8 +53,8 @@ class Info(PackageInfo):
         -------
         extension : str
             The file extension for the output type.
-        """
 
+        """
         try:
             return cls.ftypes[outputtype]
         except KeyError as e:
@@ -62,24 +63,28 @@ class Info(PackageInfo):
 
     @classmethod
     def outputtype(cls):
-        """AFNI has no environment variables,
-        Output filetypes get set in command line calls
-        Nipype uses AFNI as default
+        """
+        Set default output filetype.
+
+        AFNI has no environment variables, Output filetypes get set in command line calls
+        Nipype uses ``AFNI`` as default
 
 
         Returns
         -------
         None
+
         """
-        # warn(('AFNI has no environment variable that sets filetype '
-        #      'Nipype uses NIFTI_GZ as default'))
         return 'AFNI'
 
     @staticmethod
     def standard_image(img_name):
-        '''Grab an image from the standard location.
+        """
+        Grab an image from the standard location.
 
-        Could be made more fancy to allow for more relocatability'''
+        Could be made more fancy to allow for more relocatability
+
+        """
         clout = CommandLine(
             'which afni',
             ignore_exception=True,
@@ -96,6 +101,7 @@ class Info(PackageInfo):
 class AFNICommandBase(CommandLine):
     """
     A base class to fix a linking problem in OSX and afni.
+
     See http://afni.nimh.nih.gov/afni/community/board/read.php?1,145346,145347#msg-145347
     """
 
@@ -122,7 +128,8 @@ class AFNICommandOutputSpec(TraitedSpec):
 
 
 class AFNICommand(AFNICommandBase):
-    """Shared options for several AFNI commands """
+    """Shared options for several AFNI commands."""
+
     input_spec = AFNICommandInputSpec
     _outputtype = None
 
@@ -157,6 +164,7 @@ class AFNICommand(AFNICommandBase):
 
     @property
     def num_threads(self):
+        """Get number of threads."""
         return self.inputs.num_threads
 
     @num_threads.setter
@@ -165,20 +173,21 @@ class AFNICommand(AFNICommandBase):
 
     @classmethod
     def set_default_output_type(cls, outputtype):
-        """Set the default output type for AFNI classes.
+        """
+        Set the default output type for AFNI classes.
 
         This method is used to set the default output type for all afni
         subclasses.  However, setting this will not update the output
         type for any existing instances.  For these, assign the
         <instance>.inputs.outputtype.
         """
-
         if outputtype in Info.ftypes:
             cls._outputtype = outputtype
         else:
             raise AttributeError('Invalid AFNI outputtype: %s' % outputtype)
 
     def __init__(self, **inputs):
+        """Instantiate an AFNI command tool wrapper."""
         super(AFNICommand, self).__init__(**inputs)
         self.inputs.on_trait_change(self._output_update, 'outputtype')
 
@@ -194,13 +203,16 @@ class AFNICommand(AFNICommandBase):
             self._output_update()
 
     def _nthreads_update(self):
-        """Update environment with new number of threads"""
+        """Update environment with new number of threads."""
         self.inputs.environ['OMP_NUM_THREADS'] = '%d' % self.inputs.num_threads
 
     def _output_update(self):
-        """ i think? updates class private attribute based on instance input
-         in fsl also updates ENVIRON variable....not valid in afni
-         as it uses no environment variables
+        """
+        Update the internal property with the provided input.
+
+        i think? updates class private attribute based on instance input
+        in fsl also updates ENVIRON variable....not valid in afni
+        as it uses no environment variables
         """
         self._outputtype = self.inputs.outputtype
 
@@ -221,59 +233,9 @@ class AFNICommand(AFNICommandBase):
                         outputs[name] = outputs[name] + "+orig.BRIK"
         return outputs
 
-    def _gen_fname(self,
-                   basename,
-                   cwd=None,
-                   suffix=None,
-                   change_ext=True,
-                   ext=None):
-        """Generate a filename based on the given parameters.
-
-        The filename will take the form: cwd/basename<suffix><ext>.
-        If change_ext is True, it will use the extentions specified in
-        <instance>intputs.output_type.
-
-        Parameters
-        ----------
-        basename : str
-            Filename to base the new filename on.
-        cwd : str
-            Path to prefix to the new filename. (default is os.getcwd())
-        suffix : str
-            Suffix to add to the `basename`.  (defaults is '' )
-        change_ext : bool
-            Flag to change the filename extension to the FSL output type.
-            (default True)
-
-        Returns
-        -------
-        fname : str
-            New filename based on given parameters.
-
-        """
-
-        if basename == '':
-            msg = 'Unable to generate filename for command %s. ' % self.cmd
-            msg += 'basename is not set!'
-            raise ValueError(msg)
-        if cwd is None:
-            cwd = os.getcwd()
-        if ext is None:
-            ext = Info.output_type_to_ext(self.inputs.outputtype)
-        if change_ext:
-            if suffix:
-                suffix = ''.join((suffix, ext))
-            else:
-                suffix = ext
-        if suffix is None:
-            suffix = ''
-        fname = fname_presuffix(
-            basename, suffix=suffix, use_ext=False, newpath=cwd)
-        return fname
-
 
 def no_afni():
-    """ Checks if AFNI is available """
+    """Check whether AFNI is not available."""
     if Info.version() is None:
         return True
     return False
@@ -287,8 +249,11 @@ class AFNIPythonCommandInputSpec(CommandLineInputSpec):
 
 
 class AFNIPythonCommand(AFNICommand):
+    """A subtype of AFNI command line for Python scripts."""
+
     @property
     def cmd(self):
+        """Revise the command path."""
         orig_cmd = super(AFNIPythonCommand, self).cmd
         found = spawn.find_executable(orig_cmd)
         return found if found is not None else orig_cmd

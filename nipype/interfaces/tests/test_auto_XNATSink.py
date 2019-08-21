@@ -8,6 +8,7 @@ def test_XNATSink_inputs():
         assessor_id=dict(xor=['reconstruction_id'], ),
         cache_dir=dict(),
         config=dict(
+            extensions=None,
             mandatory=True,
             xor=['server'],
         ),

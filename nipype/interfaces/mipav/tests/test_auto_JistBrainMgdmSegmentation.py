@@ -10,18 +10,36 @@ def test_JistBrainMgdmSegmentation_inputs():
             usedefault=True,
         ),
         inAdjust=dict(argstr='--inAdjust %s', ),
-        inAtlas=dict(argstr='--inAtlas %s', ),
+        inAtlas=dict(
+            argstr='--inAtlas %s',
+            extensions=None,
+        ),
         inCompute=dict(argstr='--inCompute %s', ),
         inCurvature=dict(argstr='--inCurvature %f', ),
         inData=dict(argstr='--inData %f', ),
-        inFLAIR=dict(argstr='--inFLAIR %s', ),
-        inMP2RAGE=dict(argstr='--inMP2RAGE %s', ),
-        inMP2RAGE2=dict(argstr='--inMP2RAGE2 %s', ),
-        inMPRAGE=dict(argstr='--inMPRAGE %s', ),
+        inFLAIR=dict(
+            argstr='--inFLAIR %s',
+            extensions=None,
+        ),
+        inMP2RAGE=dict(
+            argstr='--inMP2RAGE %s',
+            extensions=None,
+        ),
+        inMP2RAGE2=dict(
+            argstr='--inMP2RAGE2 %s',
+            extensions=None,
+        ),
+        inMPRAGE=dict(
+            argstr='--inMPRAGE %s',
+            extensions=None,
+        ),
         inMax=dict(argstr='--inMax %d', ),
         inMin=dict(argstr='--inMin %f', ),
         inOutput=dict(argstr='--inOutput %s', ),
-        inPV=dict(argstr='--inPV %s', ),
+        inPV=dict(
+            argstr='--inPV %s',
+            extensions=None,
+        ),
         inPosterior=dict(argstr='--inPosterior %f', ),
         inSteps=dict(argstr='--inSteps %d', ),
         inTopology=dict(argstr='--inTopology %s', ),
@@ -56,10 +74,10 @@ def test_JistBrainMgdmSegmentation_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_JistBrainMgdmSegmentation_outputs():
     output_map = dict(
-        outLevelset=dict(),
-        outPosterior2=dict(),
-        outPosterior3=dict(),
-        outSegmented=dict(),
+        outLevelset=dict(extensions=None, ),
+        outPosterior2=dict(extensions=None, ),
+        outPosterior3=dict(extensions=None, ),
+        outSegmented=dict(extensions=None, ),
     )
     outputs = JistBrainMgdmSegmentation.output_spec()
 

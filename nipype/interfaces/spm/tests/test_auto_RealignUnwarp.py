@@ -43,6 +43,7 @@ def test_RealignUnwarp_inputs():
         paths=dict(),
         phase_map=dict(
             copyfile=False,
+            extensions=None,
             field='data.pmscan',
         ),
         quality=dict(field='eoptions.quality', ),
@@ -62,7 +63,10 @@ def test_RealignUnwarp_inputs():
             min_ver='8',
             usedefault=True,
         ),
-        weight_img=dict(field='eoptions.weight', ),
+        weight_img=dict(
+            extensions=None,
+            field='eoptions.weight',
+        ),
         wrap=dict(field='eoptions.ewrap', ),
     )
     inputs = RealignUnwarp.input_spec()
@@ -72,7 +76,7 @@ def test_RealignUnwarp_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_RealignUnwarp_outputs():
     output_map = dict(
-        mean_image=dict(),
+        mean_image=dict(extensions=None, ),
         modified_in_files=dict(),
         realigned_unwarped_files=dict(),
         realignment_parameters=dict(),

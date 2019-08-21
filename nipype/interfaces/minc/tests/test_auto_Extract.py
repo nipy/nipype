@@ -69,6 +69,7 @@ def test_Extract_inputs():
         image_range=dict(argstr='-image_range %s %s', ),
         input_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
@@ -82,10 +83,12 @@ def test_Extract_inputs():
         ),
         out_file=dict(
             argstr='> %s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
         output_file=dict(
+            extensions=None,
             hash_files=False,
             keep_extension=False,
             name_source=['input_file'],
@@ -154,7 +157,7 @@ def test_Extract_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Extract_outputs():
-    output_map = dict(output_file=dict(), )
+    output_map = dict(output_file=dict(extensions=None, ), )
     outputs = Extract.output_spec()
 
     for key, metadata in list(output_map.items()):

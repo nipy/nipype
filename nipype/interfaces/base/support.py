@@ -274,7 +274,7 @@ def _inputs_help(cls):
 
     >>> from nipype.interfaces.afni import GCOR
     >>> _inputs_help(GCOR)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    ['Inputs::', '', '\t[Mandatory]', '\tin_file: (an existing file name)', ...
+    ['Inputs::', '', '\t[Mandatory]', '\tin_file: (a pathlike object or string...
 
     """
     helpstr = ['Inputs::']

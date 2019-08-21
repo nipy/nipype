@@ -21,6 +21,7 @@ def test_BET_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=0,
         ),
@@ -29,6 +30,7 @@ def test_BET_inputs():
         no_output=dict(argstr='-n', ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             hash_files=False,
             position=1,
@@ -67,6 +69,7 @@ def test_BET_inputs():
         ),
         t2_guided=dict(
             argstr='-A2 %s',
+            extensions=None,
             xor=('functional', 'reduce_bias', 'robust', 'padding',
                  'remove_eyes', 'surfaces', 't2_guided'),
         ),
@@ -80,17 +83,17 @@ def test_BET_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BET_outputs():
     output_map = dict(
-        inskull_mask_file=dict(),
-        inskull_mesh_file=dict(),
-        mask_file=dict(),
-        meshfile=dict(),
-        out_file=dict(),
-        outline_file=dict(),
-        outskin_mask_file=dict(),
-        outskin_mesh_file=dict(),
-        outskull_mask_file=dict(),
-        outskull_mesh_file=dict(),
-        skull_mask_file=dict(),
+        inskull_mask_file=dict(extensions=None, ),
+        inskull_mesh_file=dict(extensions=None, ),
+        mask_file=dict(extensions=None, ),
+        meshfile=dict(extensions=None, ),
+        out_file=dict(extensions=None, ),
+        outline_file=dict(extensions=None, ),
+        outskin_mask_file=dict(extensions=None, ),
+        outskin_mesh_file=dict(extensions=None, ),
+        outskull_mask_file=dict(extensions=None, ),
+        outskull_mesh_file=dict(extensions=None, ),
+        skull_mask_file=dict(extensions=None, ),
     )
     outputs = BET.output_spec()
 

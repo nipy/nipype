@@ -12,6 +12,7 @@ def test_Merge_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=2,
         ),
@@ -22,6 +23,7 @@ def test_Merge_inputs():
         ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             name_source=['in_file'],
             name_template='%s',
             position=-2,
@@ -37,7 +39,7 @@ def test_Merge_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Merge_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = Merge.output_spec()
 
     for key, metadata in list(output_map.items()):

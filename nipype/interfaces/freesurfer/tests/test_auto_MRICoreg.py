@@ -42,6 +42,7 @@ def test_MRICoreg_inputs():
         reference_file=dict(
             argstr='--ref %s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             xor=['subject_id'],
         ),
@@ -54,6 +55,7 @@ def test_MRICoreg_inputs():
         source_file=dict(
             argstr='--mov %s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
         ),
         source_mask=dict(argstr='--mov-mask', ),
@@ -74,9 +76,9 @@ def test_MRICoreg_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MRICoreg_outputs():
     output_map = dict(
-        out_lta_file=dict(),
-        out_params_file=dict(),
-        out_reg_file=dict(),
+        out_lta_file=dict(extensions=None, ),
+        out_params_file=dict(extensions=None, ),
+        out_reg_file=dict(extensions=None, ),
     )
     outputs = MRICoreg.output_spec()
 

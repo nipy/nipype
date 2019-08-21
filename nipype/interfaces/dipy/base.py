@@ -98,7 +98,7 @@ def convert_to_traits_type(dipy_type, is_file=False):
     elif "string" in dipy_type and not is_file:
         return traits.Str, is_mandatory
     elif "string" in dipy_type and is_file:
-        return traits.File, is_mandatory
+        return File, is_mandatory
     elif "int" in dipy_type:
         return traits.Int, is_mandatory
     elif "float" in dipy_type:

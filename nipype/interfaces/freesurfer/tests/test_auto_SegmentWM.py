@@ -11,11 +11,13 @@ def test_SegmentWM_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-1,
         ),
@@ -27,7 +29,7 @@ def test_SegmentWM_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SegmentWM_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = SegmentWM.output_spec()
 
     for key, metadata in list(output_map.items()):

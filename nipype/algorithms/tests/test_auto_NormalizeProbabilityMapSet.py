@@ -5,7 +5,7 @@ from ..misc import NormalizeProbabilityMapSet
 def test_NormalizeProbabilityMapSet_inputs():
     input_map = dict(
         in_files=dict(),
-        in_mask=dict(),
+        in_mask=dict(extensions=None, ),
     )
     inputs = NormalizeProbabilityMapSet.input_spec()
 

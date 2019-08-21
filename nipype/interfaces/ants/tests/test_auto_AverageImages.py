@@ -30,6 +30,7 @@ def test_AverageImages_inputs():
         ),
         output_average_image=dict(
             argstr='%s',
+            extensions=None,
             hash_files=False,
             position=1,
             usedefault=True,
@@ -41,7 +42,7 @@ def test_AverageImages_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_AverageImages_outputs():
-    output_map = dict(output_average_image=dict(), )
+    output_map = dict(output_average_image=dict(extensions=None, ), )
     outputs = AverageImages.output_spec()
 
     for key, metadata in list(output_map.items()):

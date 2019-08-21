@@ -9,7 +9,10 @@ def test_BRAINSMultiSTAPLE_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputCompositeT1Volume=dict(argstr='--inputCompositeT1Volume %s', ),
+        inputCompositeT1Volume=dict(
+            argstr='--inputCompositeT1Volume %s',
+            extensions=None,
+        ),
         inputLabelVolume=dict(argstr='--inputLabelVolume %s...', ),
         inputTransform=dict(argstr='--inputTransform %s...', ),
         labelForUndecidedPixels=dict(argstr='--labelForUndecidedPixels %d', ),
@@ -31,8 +34,8 @@ def test_BRAINSMultiSTAPLE_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BRAINSMultiSTAPLE_outputs():
     output_map = dict(
-        outputConfusionMatrix=dict(),
-        outputMultiSTAPLE=dict(),
+        outputConfusionMatrix=dict(extensions=None, ),
+        outputMultiSTAPLE=dict(extensions=None, ),
     )
     outputs = BRAINSMultiSTAPLE.output_spec()
 

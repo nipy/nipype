@@ -6,10 +6,14 @@ def test_ModelMaker_inputs():
     input_map = dict(
         InputVolume=dict(
             argstr='%s',
+            extensions=None,
             position=-1,
         ),
         args=dict(argstr='%s', ),
-        color=dict(argstr='--color %s', ),
+        color=dict(
+            argstr='--color %s',
+            extensions=None,
+        ),
         debug=dict(argstr='--debug ', ),
         decimate=dict(argstr='--decimate %f', ),
         end=dict(argstr='--end %d', ),

@@ -9,7 +9,10 @@ def test_gtractInvertRigidTransform_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputTransform=dict(argstr='--inputTransform %s', ),
+        inputTransform=dict(
+            argstr='--inputTransform %s',
+            extensions=None,
+        ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         outputTransform=dict(
             argstr='--outputTransform %s',
@@ -22,7 +25,7 @@ def test_gtractInvertRigidTransform_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_gtractInvertRigidTransform_outputs():
-    output_map = dict(outputTransform=dict(), )
+    output_map = dict(outputTransform=dict(extensions=None, ), )
     outputs = gtractInvertRigidTransform.output_spec()
 
     for key, metadata in list(output_map.items()):

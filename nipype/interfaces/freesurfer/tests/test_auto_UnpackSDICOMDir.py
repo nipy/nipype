@@ -7,6 +7,7 @@ def test_UnpackSDICOMDir_inputs():
         args=dict(argstr='%s', ),
         config=dict(
             argstr='-cfg %s',
+            extensions=None,
             mandatory=True,
             xor=('run_info', 'config', 'seq_config'),
         ),
@@ -15,7 +16,10 @@ def test_UnpackSDICOMDir_inputs():
             nohash=True,
             usedefault=True,
         ),
-        log_file=dict(argstr='-log %s', ),
+        log_file=dict(
+            argstr='-log %s',
+            extensions=None,
+        ),
         no_info_dump=dict(argstr='-noinfodump', ),
         no_unpack_err=dict(argstr='-no-unpackerr', ),
         output_dir=dict(argstr='-targ %s', ),
@@ -24,9 +28,13 @@ def test_UnpackSDICOMDir_inputs():
             mandatory=True,
             xor=('run_info', 'config', 'seq_config'),
         ),
-        scan_only=dict(argstr='-scanonly %s', ),
+        scan_only=dict(
+            argstr='-scanonly %s',
+            extensions=None,
+        ),
         seq_config=dict(
             argstr='-seqcfg %s',
+            extensions=None,
             mandatory=True,
             xor=('run_info', 'config', 'seq_config'),
         ),

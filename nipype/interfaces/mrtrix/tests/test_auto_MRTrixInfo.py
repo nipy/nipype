@@ -11,6 +11,7 @@ def test_MRTrixInfo_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),

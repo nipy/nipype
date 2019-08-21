@@ -25,6 +25,7 @@ def test_Calc_inputs():
         eval_width=dict(argstr='-eval_width %s', ),
         expfile=dict(
             argstr='-expfile %s',
+            extensions=None,
             mandatory=True,
             xor=('expression', 'expfile'),
         ),
@@ -35,6 +36,7 @@ def test_Calc_inputs():
         ),
         filelist=dict(
             argstr='-filelist %s',
+            extensions=None,
             mandatory=True,
             xor=('input_files', 'filelist'),
         ),
@@ -111,6 +113,7 @@ def test_Calc_inputs():
         outfiles=dict(),
         output_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             hash_files=False,
             name_source=['input_files'],
@@ -147,7 +150,7 @@ def test_Calc_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Calc_outputs():
-    output_map = dict(output_file=dict(), )
+    output_map = dict(output_file=dict(extensions=None, ), )
     outputs = Calc.output_spec()
 
     for key, metadata in list(output_map.items()):

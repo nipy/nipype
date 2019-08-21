@@ -27,32 +27,39 @@ def test_Bse_inputs():
         ),
         inputMRIFile=dict(
             argstr='-i %s',
+            extensions=None,
             mandatory=True,
         ),
         noRotate=dict(argstr='--norotate', ),
         outputCortexFile=dict(
             argstr='--cortex %s',
+            extensions=None,
             hash_files=False,
         ),
         outputDetailedBrainMask=dict(
             argstr='--hires %s',
+            extensions=None,
             hash_files=False,
         ),
         outputDiffusionFilter=dict(
             argstr='--adf %s',
+            extensions=None,
             hash_files=False,
         ),
         outputEdgeMap=dict(
             argstr='--edge %s',
+            extensions=None,
             hash_files=False,
         ),
         outputMRIVolume=dict(
             argstr='-o %s',
+            extensions=None,
             genfile=True,
             hash_files=False,
         ),
         outputMaskFile=dict(
             argstr='--mask %s',
+            extensions=None,
             genfile=True,
             hash_files=False,
         ),
@@ -77,12 +84,12 @@ def test_Bse_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Bse_outputs():
     output_map = dict(
-        outputCortexFile=dict(),
-        outputDetailedBrainMask=dict(),
-        outputDiffusionFilter=dict(),
-        outputEdgeMap=dict(),
-        outputMRIVolume=dict(),
-        outputMaskFile=dict(),
+        outputCortexFile=dict(extensions=None, ),
+        outputDetailedBrainMask=dict(extensions=None, ),
+        outputDiffusionFilter=dict(extensions=None, ),
+        outputEdgeMap=dict(extensions=None, ),
+        outputMRIVolume=dict(extensions=None, ),
+        outputMaskFile=dict(extensions=None, ),
     )
     outputs = Bse.output_spec()
 

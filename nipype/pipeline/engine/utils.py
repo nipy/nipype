@@ -12,7 +12,6 @@ from glob import glob
 
 from traceback import format_exception
 from hashlib import sha1
-import gzip
 
 from functools import reduce
 
@@ -20,21 +19,25 @@ import numpy as np
 
 from ... import logging, config, LooseVersion
 from ...utils.filemanip import (
+    Path,
+    indirectory,
     relpath,
     fname_presuffix,
     ensure_list,
     get_related_files,
-    FileNotFoundError,
     save_json,
     savepkl,
+    loadpkl,
     write_rst_header,
     write_rst_dict,
     write_rst_list,
 )
 from ...utils.misc import str2bool
 from ...utils.functions import create_function_from_source
-from ...interfaces.base import (Bunch, CommandLine, isdefined, Undefined,
-                                InterfaceResult, traits)
+from ...interfaces.base.traits_extension import (
+    rebase_path_traits, resolve_path_traits, OutputMultiPath, isdefined, Undefined, traits)
+from ...interfaces.base.support import Bunch, InterfaceResult
+from ...interfaces.base import CommandLine
 from ...interfaces.utility import IdentityInterface
 from ...utils.provenance import ProvStore, pm, nipype_ns, get_id
 
@@ -217,144 +220,101 @@ def write_report(node, report_type=None, is_mapnode=False):
     return
 
 
-def _identify_collapses(hastraits):
-    """ Identify traits that will collapse when being set to themselves.
+def save_resultfile(result, cwd, name, rebase=None):
+    """Save a result pklz file to ``cwd``."""
+    if rebase is None:
+        rebase = config.getboolean('execution', 'use_relative_paths')
 
-    ``OutputMultiObject``s automatically unwrap a list of length 1 to directly
-    reference the element of that list.
-    If that element is itself a list of length 1, then the following will
-    result in modified values.
-
-        hastraits.trait_set(**hastraits.trait_get())
-
-    Cloning performs this operation on a copy of the original traited object,
-    allowing us to identify traits that will be affected.
-    """
-    raw = hastraits.trait_get()
-    cloned = hastraits.clone_traits().trait_get()
-
-    collapsed = set()
-    for key in cloned:
-        orig = raw[key]
-        new = cloned[key]
-        # Allow numpy to handle the equality checks, as mixed lists and arrays
-        # can be problematic.
-        if isinstance(orig, list) and len(orig) == 1 and (
-                not np.array_equal(orig, new) and np.array_equal(orig[0], new)):
-            collapsed.add(key)
-
-    return collapsed
-
-
-def _uncollapse(indexable, collapsed):
-    """ Wrap collapsible values in a list to prevent double-collapsing.
-
-    Should be used with _identify_collapses to provide the following
-    idempotent operation:
-
-        collapsed = _identify_collapses(hastraits)
-        hastraits.trait_set(**_uncollapse(hastraits.trait_get(), collapsed))
-
-    NOTE: Modifies object in-place, in addition to returning it.
-    """
-
-    for key in indexable:
-        if key in collapsed:
-            indexable[key] = [indexable[key]]
-    return indexable
-
-
-def _protect_collapses(hastraits):
-    """ A collapse-protected replacement for hastraits.trait_get()
-
-    May be used as follows to provide an idempotent trait_set:
-
-        hastraits.trait_set(**_protect_collapses(hastraits))
-    """
-    collapsed = _identify_collapses(hastraits)
-    return _uncollapse(hastraits.trait_get(), collapsed)
-
-
-def save_resultfile(result, cwd, name):
-    """Save a result pklz file to ``cwd``"""
+    cwd = os.path.abspath(cwd)
     resultsfile = os.path.join(cwd, 'result_%s.pklz' % name)
-    if result.outputs:
-        try:
-            collapsed = _identify_collapses(result.outputs)
-            outputs = _uncollapse(result.outputs.trait_get(), collapsed)
-            # Double-protect tosave so that the original, uncollapsed trait
-            # is saved in the pickle file. Thus, when the loading process
-            # collapses, the original correct value is loaded.
-            tosave = _uncollapse(outputs.copy(), collapsed)
-        except AttributeError:
-            tosave = outputs = result.outputs.dictcopy()  # outputs was a bunch
-        for k, v in list(modify_paths(tosave, relative=True, basedir=cwd).items()):
-            setattr(result.outputs, k, v)
+    logger.debug("Saving results file: '%s'", resultsfile)
 
-    savepkl(resultsfile, result)
-    logger.debug('saved results in %s', resultsfile)
+    if result.outputs is None:
+        logger.warn('Storing result file without outputs')
+        savepkl(resultsfile, result)
+        return
+    try:
+        output_names = result.outputs.copyable_trait_names()
+    except AttributeError:
+        logger.debug('Storing non-traited results, skipping rebase of paths')
+        savepkl(resultsfile, result)
+        return
 
-    if result.outputs:
-        for k, v in list(outputs.items()):
-            setattr(result.outputs, k, v)
+    backup_traits = {}
+    try:
+        with indirectory(cwd):
+            # All the magic to fix #2944 resides here:
+            for key in output_names:
+                old = getattr(result.outputs, key)
+                if isdefined(old):
+                    if result.outputs.trait(key).is_trait_type(OutputMultiPath):
+                        old = result.outputs.trait(key).handler.get_value(
+                            result.outputs, key)
+                    backup_traits[key] = old
+                    val = rebase_path_traits(result.outputs.trait(key), old, cwd)
+                    setattr(result.outputs, key, val)
+        savepkl(resultsfile, result)
+    finally:
+        # Restore resolved paths from the outputs dict no matter what
+        for key, val in list(backup_traits.items()):
+            setattr(result.outputs, key, val)
 
 
-def load_resultfile(path, name):
+def load_resultfile(results_file, resolve=True):
     """
-    Load InterfaceResult file from path
+    Load InterfaceResult file from path.
 
     Parameter
     ---------
-
     path : base_dir of node
     name : name of node
 
     Returns
     -------
-
     result : InterfaceResult structure
     aggregate : boolean indicating whether node should aggregate_outputs
     attribute error : boolean indicating whether there was some mismatch in
         versions of traits used to store result and hence node needs to
         rerun
+
     """
+    results_file = Path(results_file)
     aggregate = True
-    resultsoutputfile = os.path.join(path, 'result_%s.pklz' % name)
     result = None
     attribute_error = False
-    if os.path.exists(resultsoutputfile):
-        pkl_file = gzip.open(resultsoutputfile, 'rb')
+
+    if not results_file.exists():
+        return result, aggregate, attribute_error
+
+    with indirectory(str(results_file.parent)):
         try:
-            result = pickle.load(pkl_file)
-        except UnicodeDecodeError:
-            # Was this pickle created with Python 2.x?
-            pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
-            logger.warning('Successfully loaded pkl in compatibility mode')
-        except (traits.TraitError, AttributeError, ImportError,
-                EOFError) as err:
-            if isinstance(err, (AttributeError, ImportError)):
-                attribute_error = True
-                logger.debug('attribute error: %s probably using '
-                             'different trait pickled file', str(err))
-            else:
-                logger.debug(
-                    'some file does not exist. hence trait cannot be set')
+            result = loadpkl(results_file)
+        except (traits.TraitError, EOFError):
+            logger.debug(
+                'some file does not exist. hence trait cannot be set')
+        except (AttributeError, ImportError) as err:
+            attribute_error = True
+            logger.debug('attribute error: %s probably using '
+                         'different trait pickled file', str(err))
         else:
-            if result.outputs:
-                try:
-                    outputs = _protect_collapses(result.outputs)
-                except AttributeError:
-                    outputs = result.outputs.dictcopy()  # outputs == Bunch
-                try:
-                    for k, v in list(modify_paths(outputs, relative=False,
-                                                  basedir=path).items()):
-                        setattr(result.outputs, k, v)
-                except FileNotFoundError:
-                    logger.debug('conversion to full path results in '
-                                 'non existent file')
             aggregate = False
-        pkl_file.close()
-    logger.debug('Aggregate: %s', aggregate)
+
+        if resolve and result.outputs:
+            try:
+                outputs = result.outputs.get()
+            except TypeError:  # This is a Bunch
+                return result, aggregate, attribute_error
+
+            logger.debug('Resolving paths in outputs loaded from results file.')
+            for trait_name, old in list(outputs.items()):
+                if isdefined(old):
+                    if result.outputs.trait(trait_name).is_trait_type(OutputMultiPath):
+                        old = result.outputs.trait(trait_name).handler.get_value(
+                            result.outputs, trait_name)
+                    value = resolve_path_traits(result.outputs.trait(trait_name), old,
+                                                results_file.parent)
+                    setattr(result.outputs, trait_name, value)
+
     return result, aggregate, attribute_error
 
 

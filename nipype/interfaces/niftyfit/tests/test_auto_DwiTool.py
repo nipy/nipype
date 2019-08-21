@@ -7,6 +7,7 @@ def test_DwiTool_inputs():
         args=dict(argstr='%s', ),
         b0_file=dict(
             argstr='-b0 %s',
+            extensions=None,
             position=4,
         ),
         ball_flag=dict(
@@ -27,11 +28,13 @@ def test_DwiTool_inputs():
         ),
         bval_file=dict(
             argstr='-bval %s',
+            extensions=None,
             mandatory=True,
             position=2,
         ),
         bvec_file=dict(
             argstr='-bvec %s',
+            extensions=None,
             position=3,
         ),
         diso_val=dict(argstr='-diso %f', ),
@@ -58,6 +61,7 @@ def test_DwiTool_inputs():
         ),
         famap_file=dict(
             argstr='-famap %s',
+            extensions=None,
             name_source=['source_file'],
             name_template='%s_famap.nii.gz',
         ),
@@ -71,20 +75,24 @@ def test_DwiTool_inputs():
         ),
         logdti_file=dict(
             argstr='-logdti2 %s',
+            extensions=None,
             name_source=['source_file'],
             name_template='%s_logdti2.nii.gz',
         ),
         mask_file=dict(
             argstr='-mask %s',
+            extensions=None,
             position=5,
         ),
         mcmap_file=dict(
             argstr='-mcmap %s',
+            extensions=None,
             name_source=['source_file'],
             name_template='%s_mcmap.nii.gz',
         ),
         mdmap_file=dict(
             argstr='-mdmap %s',
+            extensions=None,
             name_source=['source_file'],
             name_template='%s_mdmap.nii.gz',
         ),
@@ -114,22 +122,26 @@ def test_DwiTool_inputs():
         ),
         rgbmap_file=dict(
             argstr='-rgbmap %s',
+            extensions=None,
             name_source=['source_file'],
             name_template='%s_rgbmap.nii.gz',
         ),
         source_file=dict(
             argstr='-source %s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
         syn_file=dict(
             argstr='-syn %s',
+            extensions=None,
             name_source=['source_file'],
             name_template='%s_syn.nii.gz',
             requires=['bvec_file', 'b0_file'],
         ),
         v1map_file=dict(
             argstr='-v1map %s',
+            extensions=None,
             name_source=['source_file'],
             name_template='%s_v1map.nii.gz',
         ),
@@ -141,13 +153,13 @@ def test_DwiTool_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DwiTool_outputs():
     output_map = dict(
-        famap_file=dict(),
-        logdti_file=dict(),
-        mcmap_file=dict(),
-        mdmap_file=dict(),
-        rgbmap_file=dict(),
-        syn_file=dict(),
-        v1map_file=dict(),
+        famap_file=dict(extensions=None, ),
+        logdti_file=dict(extensions=None, ),
+        mcmap_file=dict(extensions=None, ),
+        mdmap_file=dict(extensions=None, ),
+        rgbmap_file=dict(extensions=None, ),
+        syn_file=dict(extensions=None, ),
+        v1map_file=dict(extensions=None, ),
     )
     outputs = DwiTool.output_spec()
 

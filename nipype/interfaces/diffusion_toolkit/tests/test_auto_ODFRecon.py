@@ -6,6 +6,7 @@ def test_ODFRecon_inputs():
     input_map = dict(
         DWI=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
@@ -19,6 +20,7 @@ def test_ODFRecon_inputs():
         image_orientation_vectors=dict(argstr='-iop %f', ),
         matrix=dict(
             argstr='-mat %s',
+            extensions=None,
             mandatory=True,
         ),
         n_b0=dict(
@@ -56,11 +58,11 @@ def test_ODFRecon_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ODFRecon_outputs():
     output_map = dict(
-        B0=dict(),
-        DWI=dict(),
-        ODF=dict(),
-        entropy=dict(),
-        max=dict(),
+        B0=dict(extensions=None, ),
+        DWI=dict(extensions=None, ),
+        ODF=dict(extensions=None, ),
+        entropy=dict(extensions=None, ),
+        max=dict(extensions=None, ),
     )
     outputs = ODFRecon.output_spec()
 

@@ -9,7 +9,10 @@ def test_insertMidACPCpoint_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputLandmarkFile=dict(argstr='--inputLandmarkFile %s', ),
+        inputLandmarkFile=dict(
+            argstr='--inputLandmarkFile %s',
+            extensions=None,
+        ),
         outputLandmarkFile=dict(
             argstr='--outputLandmarkFile %s',
             hash_files=False,
@@ -21,7 +24,7 @@ def test_insertMidACPCpoint_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_insertMidACPCpoint_outputs():
-    output_map = dict(outputLandmarkFile=dict(), )
+    output_map = dict(outputLandmarkFile=dict(extensions=None, ), )
     outputs = insertMidACPCpoint.output_spec()
 
     for key, metadata in list(output_map.items()):

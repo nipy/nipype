@@ -17,6 +17,7 @@ def test_ApplyVolTransform_inputs():
         ),
         fsl_reg_file=dict(
             argstr='--fsl %s',
+            extensions=None,
             mandatory=True,
             xor=('reg_file', 'lta_file', 'lta_inv_file', 'fsl_reg_file',
                  'xfm_reg_file', 'reg_header', 'mni_152_reg', 'subject'),
@@ -29,17 +30,22 @@ def test_ApplyVolTransform_inputs():
         ),
         lta_file=dict(
             argstr='--lta %s',
+            extensions=None,
             mandatory=True,
             xor=('reg_file', 'lta_file', 'lta_inv_file', 'fsl_reg_file',
                  'xfm_reg_file', 'reg_header', 'mni_152_reg', 'subject'),
         ),
         lta_inv_file=dict(
             argstr='--lta-inv %s',
+            extensions=None,
             mandatory=True,
             xor=('reg_file', 'lta_file', 'lta_inv_file', 'fsl_reg_file',
                  'xfm_reg_file', 'reg_header', 'mni_152_reg', 'subject'),
         ),
-        m3z_file=dict(argstr='--m3z %s', ),
+        m3z_file=dict(
+            argstr='--m3z %s',
+            extensions=None,
+        ),
         mni_152_reg=dict(
             argstr='--regheader',
             mandatory=True,
@@ -53,6 +59,7 @@ def test_ApplyVolTransform_inputs():
         no_resample=dict(argstr='--no-resample', ),
         reg_file=dict(
             argstr='--reg %s',
+            extensions=None,
             mandatory=True,
             xor=('reg_file', 'lta_file', 'lta_inv_file', 'fsl_reg_file',
                  'xfm_reg_file', 'reg_header', 'mni_152_reg', 'subject'),
@@ -66,6 +73,7 @@ def test_ApplyVolTransform_inputs():
         source_file=dict(
             argstr='--mov %s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
         ),
         subject=dict(
@@ -83,15 +91,18 @@ def test_ApplyVolTransform_inputs():
         tal_resolution=dict(argstr='--talres %.10f', ),
         target_file=dict(
             argstr='--targ %s',
+            extensions=None,
             mandatory=True,
             xor=('target_file', 'tal', 'fs_target'),
         ),
         transformed_file=dict(
             argstr='--o %s',
+            extensions=None,
             genfile=True,
         ),
         xfm_reg_file=dict(
             argstr='--xfm %s',
+            extensions=None,
             mandatory=True,
             xor=('reg_file', 'lta_file', 'lta_inv_file', 'fsl_reg_file',
                  'xfm_reg_file', 'reg_header', 'mni_152_reg', 'subject'),
@@ -103,7 +114,7 @@ def test_ApplyVolTransform_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ApplyVolTransform_outputs():
-    output_map = dict(transformed_file=dict(), )
+    output_map = dict(transformed_file=dict(extensions=None, ), )
     outputs = ApplyVolTransform.output_spec()
 
     for key, metadata in list(output_map.items()):

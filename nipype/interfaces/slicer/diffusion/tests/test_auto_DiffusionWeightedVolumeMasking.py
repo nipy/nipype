@@ -11,6 +11,7 @@ def test_DiffusionWeightedVolumeMasking_inputs():
         ),
         inputVolume=dict(
             argstr='%s',
+            extensions=None,
             position=-4,
         ),
         otsuomegathreshold=dict(argstr='--otsuomegathreshold %f', ),
@@ -33,8 +34,14 @@ def test_DiffusionWeightedVolumeMasking_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DiffusionWeightedVolumeMasking_outputs():
     output_map = dict(
-        outputBaseline=dict(position=-2, ),
-        thresholdMask=dict(position=-1, ),
+        outputBaseline=dict(
+            extensions=None,
+            position=-2,
+        ),
+        thresholdMask=dict(
+            extensions=None,
+            position=-1,
+        ),
     )
     outputs = DiffusionWeightedVolumeMasking.output_spec()
 

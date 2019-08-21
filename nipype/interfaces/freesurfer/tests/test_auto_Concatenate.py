@@ -9,6 +9,7 @@ def test_Concatenate_inputs():
         combine=dict(argstr='--combine', ),
         concatenated_file=dict(
             argstr='--o %s',
+            extensions=None,
             genfile=True,
         ),
         environ=dict(
@@ -21,12 +22,18 @@ def test_Concatenate_inputs():
             mandatory=True,
         ),
         keep_dtype=dict(argstr='--keep-datatype', ),
-        mask_file=dict(argstr='--mask %s', ),
+        mask_file=dict(
+            argstr='--mask %s',
+            extensions=None,
+        ),
         max_bonfcor=dict(argstr='--max-bonfcor', ),
         max_index=dict(argstr='--max-index', ),
         mean_div_n=dict(argstr='--mean-div-n', ),
         multiply_by=dict(argstr='--mul %f', ),
-        multiply_matrix_file=dict(argstr='--mtx %s', ),
+        multiply_matrix_file=dict(
+            argstr='--mtx %s',
+            extensions=None,
+        ),
         paired_stats=dict(argstr='--paired-%s', ),
         sign=dict(argstr='--%s', ),
         sort=dict(argstr='--sort', ),
@@ -40,7 +47,7 @@ def test_Concatenate_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Concatenate_outputs():
-    output_map = dict(concatenated_file=dict(), )
+    output_map = dict(concatenated_file=dict(extensions=None, ), )
     outputs = Concatenate.output_spec()
 
     for key, metadata in list(output_map.items()):
