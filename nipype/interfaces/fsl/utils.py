@@ -738,7 +738,12 @@ class ImageStatsInputSpec(FSLCommandInputSpec):
     mask_file = File(
         exists=True, argstr="", desc='mask file used for option -k %s')
     index_mask_file = File(
-        exists=True, argstr="-K %s", position=2)
+        exists=True,
+        argstr="-K %s",
+        position=2,
+        desc="generate seperate n submasks from indexMask, "
+             "for indexvalues 1..n where n is the maximum index "
+             "value in indexMask, and generate statistics for each submask")
 
 
 class ImageStatsOutputSpec(TraitedSpec):
