@@ -26,7 +26,10 @@ def test_Norm_inputs():
             position=-2,
         ),
         lower=dict(argstr='-lower %s', ),
-        mask=dict(argstr='-mask %s', ),
+        mask=dict(
+            argstr='-mask %s',
+            extensions=None,
+        ),
         out_ceil=dict(argstr='-out_ceil %s', ),
         out_floor=dict(argstr='-out_floor %s', ),
         output_file=dict(
@@ -40,6 +43,7 @@ def test_Norm_inputs():
         ),
         output_threshold_mask=dict(
             argstr='-threshold_mask %s',
+            extensions=None,
             hash_files=False,
             name_source=['input_file'],
             name_template='%s_norm_threshold_mask.mnc',

@@ -18,7 +18,10 @@ def test_Beast_inputs():
             argstr='-alpha %s',
             usedefault=True,
         ),
-        configuration_file=dict(argstr='-configuration %s', ),
+        configuration_file=dict(
+            argstr='-configuration %s',
+            extensions=None,
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -27,6 +30,7 @@ def test_Beast_inputs():
         flip_images=dict(argstr='-flip', ),
         input_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
@@ -44,6 +48,7 @@ def test_Beast_inputs():
         ),
         output_file=dict(
             argstr='%s',
+            extensions=None,
             hash_files=False,
             name_source=['input_file'],
             name_template='%s_beast_mask.mnc',

@@ -47,7 +47,7 @@ def test_RegisterAVItoTalairach_outputs():
             extensions=None,
             usedefault=True,
         ),
-        out_file=dict(),
+        out_file=dict(extensions=None, ),
     )
     outputs = RegisterAVItoTalairach.output_spec()
 

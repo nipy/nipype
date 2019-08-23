@@ -7,7 +7,10 @@ def test_FitQt1_inputs():
     input_map = dict(
         acceptance=dict(argstr='-acceptance %f', ),
         args=dict(argstr='%s', ),
-        b1map=dict(argstr='-b1map %s', ),
+        b1map=dict(
+            argstr='-b1map %s',
+            extensions=None,
+        ),
         comp_file=dict(
             argstr='-comp %s',
             extensions=None,
@@ -28,7 +31,10 @@ def test_FitQt1_inputs():
             argstr='-flips %s',
             sep=' ',
         ),
-        flips_list=dict(argstr='-fliplist %s', ),
+        flips_list=dict(
+            argstr='-fliplist %s',
+            extensions=None,
+        ),
         gn_flag=dict(
             argstr='-gn',
             position=8,
@@ -63,7 +69,10 @@ def test_FitQt1_inputs():
             name_template='%s_mcmap.nii.gz',
         ),
         mcmaxit=dict(argstr='-mcmaxit %d', ),
-        mcout=dict(argstr='-mcout %s', ),
+        mcout=dict(
+            argstr='-mcout %s',
+            extensions=None,
+        ),
         mcsamples=dict(argstr='-mcsamples %d', ),
         nb_comp=dict(
             argstr='-nc %d',
@@ -101,7 +110,10 @@ def test_FitQt1_inputs():
             name_source=['source_file'],
             name_template='%s_syn.nii.gz',
         ),
-        t1_list=dict(argstr='-T1list %s', ),
+        t1_list=dict(
+            argstr='-T1list %s',
+            extensions=None,
+        ),
         t1map_file=dict(
             argstr='-t1map %s',
             extensions=None,
@@ -119,7 +131,10 @@ def test_FitQt1_inputs():
             position=14,
             sep=' ',
         ),
-        tis_list=dict(argstr='-TIlist %s', ),
+        tis_list=dict(
+            argstr='-TIlist %s',
+            extensions=None,
+        ),
         tr_value=dict(
             argstr='-TR %f',
             position=5,

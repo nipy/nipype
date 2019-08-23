@@ -36,6 +36,7 @@ def test_Dump_inputs():
         netcdf_name=dict(argstr='-n %s', ),
         out_file=dict(
             argstr='> %s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),

@@ -58,6 +58,7 @@ def test_Remlfit_inputs():
         ),
         matim=dict(
             argstr='-matim %s',
+            extensions=None,
             xor=['matrix'],
         ),
         matrix=dict(
