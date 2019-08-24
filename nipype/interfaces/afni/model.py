@@ -678,7 +678,7 @@ class MemaInputSpec(AFNICommandInputSpec):
     )
 
     sets = traits.List(
-        traits.Tuple(Str(minlen=1), traits.List(_subject_trait, minlen=2)),
+        traits.Tuple(Str(minlen=1), traits.List(_subject_trait, minlen=1)),
         desc="""\
 Specify the data for one of two test variables (either group, contrast/GLTs) A & B.
 
@@ -698,7 +698,7 @@ T_DSET is the name of the dataset containing the Tstat
  notation, which, in addition to sub-brick indices, now allows for
  the use of sub-brick labels as selectors
 e.g: -set Placebo Jane pb05.Jane.Regression+tlrc'[face#0_Beta]'
-                     pb05.Jane.Regression+tlrc'[face#0_Tstat]'
+                       pb05.Jane.Regression+tlrc'[face#0_Tstat]'
 """,
         argstr='-set %s...',
         mandatory=True,
@@ -932,17 +932,26 @@ class Mema(AFNICommand):
 
     >>> from nipype.interfaces import afni
     >>> mema = afni.Mema()
-    >>> mema.inputs.sets = ['analysis_name', [[subject_1, s1_betas, s1_t, numb1, numt1], [subject2, s2_bets, s2_ts, numb2, numt2], ...]]
-    >>> mema.inputs.max_zeros = 4
-    >>> mema.inputs.model_outliers = True
-    >>> mema.inputs.residual_z = True
-    >>> mema.inputs.out_file = 'Results.BRIK'
+    >>> mema.inputs.sets = [('Placebo', [
+    ...     ('Jane', 'pb05.Jane.betas.nii', 'pb05.Jane.tvals.nii'),
+    ...     ('John', 'pb05.John.betas.nii', 'pb05.John.tvals.nii'),
+    ...     ('Lisa', 'pb05.Lisa.betas.nii', 'pb05.Lisa.tvals.nii')])]
+    >>> mema.cmdline
+    "3dMEMA -equal_variance -no_model_outliers -no_residual_Z -set Placebo Jane \
+pb05.betas.nii pb05.Jane.tvals.nii John pb05.John.betas.nii pb05.John.tvals.nii \
+Lisa pb05.Lisa.betas.nii pb05.Lisa.tvals.nii -verb 1"
 
-    >>> from nipype.interfaces import afni
-    >>> mema = afni.Mema()
-    >>> mema.inputs.missing_data['File1', 'File2']
-    >>> mema.inputs.sets = ['analysis_name', [[subject_1, s1_betas, s1_ts], [subject2, s2_bets, s2_ts], ...]]
-    >>> mema.inputs.out_file = 'Results.BRIK'
+    >>> mema.inputs.sets = [('Placebo', [
+    ...     ('Jane', 'pb05.Jane.Regression+tlrc', 'pb05.Jane.Regression+tlrc',
+    ...      '[face#0_Beta]', '[face#0_Tstat]')
+    ... ])]
+    >>> mema.cmdline
+    "3dMEMA -equal_variance -no_model_outliers -no_residual_Z -set Placebo Jane \
+pb05.Jane.Regression+tlrc'[face#0_Beta]' pb05.Jane.Regression+tlrc'[face#0_Tstat]' -verb 1"
+
+    >>> mema.inputs.missing_data = 0
+    "3dMEMA -equal_variance -missing_data 0 -no_model_outliers -no_residual_Z -set Placebo \
+Jane pb05.Jane.Regression+tlrc'[face#0_Beta]' pb05.Jane.Regression+tlrc'[face#0_Tstat]' -verb 1"
 
     >>> from nipype.interfaces import afni
     >>> mema = afni.Mema()
@@ -972,7 +981,7 @@ class Mema(AFNICommand):
             for setname, setopts in value:
                 formatted_subject = []
                 for this_set in setopts:
-                    if len(this_set) == 4:
+                    if len(this_set) == 5:
                         subid, beta_file, ttst_file, beta_opts, ttst_opts = this_set
                         if beta_opts:
                             beta_file = "%s'%s'" % (beta_file, beta_opts)
@@ -986,11 +995,13 @@ class Mema(AFNICommand):
 
         return super(Mema, self)._format_arg(name, trait_spec, value)
 
-
     def _parse_inputs(self, skip=None):
         if skip is None:
             skip = []
-        return super(Mema, self)._parse_inputs(skip)
+        parsed = super(Mema, self)._parse_inputs(skip)
+
+        # TODO: Check groups
+        return parsed
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

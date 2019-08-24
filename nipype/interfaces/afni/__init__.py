@@ -21,4 +21,4 @@ from .utils import (
     LocalBistat, Localstat, MaskTool, Merge, Notes, NwarpApply, NwarpAdjust,
     NwarpCat, OneDToolPy, Refit, ReHo, Resample, TCat, TCatSubBrick, TStat,
     To3D, Unifize, Undump, ZCutUp, GCOR, Zcat, Zeropad)
-from .model import (Deconvolve, Remlfit, Synthesize)
+from .model import (Deconvolve, Remlfit, Synthesize, Mema)
