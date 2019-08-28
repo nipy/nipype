@@ -926,9 +926,13 @@ class Eddy(FSLCommand):
         if isdefined(self.inputs.repol) and self.inputs.repol:
             out_outlier_free = os.path.abspath(
                 '%s.eddy_outlier_free_data' % self.inputs.out_base)
+            if os.path.exists(out_outlier_free):
+                outputs['out_outlier_free'] = out_outlier_free
         if isdefined(self.inputs.mporder) and self.inputs.mporder > 0:
             out_movement_over_time = os.path.abspath(
                 '%s.eddy_movement_over_time' % self.inputs.out_base)
+            if os.path.exists(out_movement_over_time):
+                outputs['out_movement_over_time'] = out_movement_over_time
         if isdefined(self.inputs.cnr_maps) and self.inputs.cnr_maps:
             out_cnr_maps = os.path.abspath(
                 '%s.eddy_cnr_maps.nii.gz' % self.inputs.out_base)
