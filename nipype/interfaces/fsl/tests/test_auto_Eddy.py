@@ -16,18 +16,29 @@ def test_Eddy_inputs():
             nohash=True,
             usedefault=True,
         ),
+        estimate_move_by_susceptibility=dict(
+            argstr='--estimate_move_by_susceptibility',
+            min_ver='6.0.1',
+        ),
         fep=dict(argstr='--fep', ),
-        field=dict(argstr='--field=%s', ),
+        field=dict(
+            argstr='--field=%s',
+            extensions=None,
+        ),
         field_mat=dict(
             argstr='--field_mat=%s',
             extensions=None,
+            requires=['field'],
         ),
         flm=dict(argstr='--flm=%s', ),
         fudge_factor=dict(
             argstr='--ff=%s',
             usedefault=True,
         ),
-        fwhm=dict(argstr='--fwhm=%s', ),
+        fwhm=dict(
+            argstr='--fwhm=%s',
+            usedefault=True,
+        ),
         in_acqp=dict(
             argstr='--acqp=%s',
             extensions=None,
@@ -67,9 +78,47 @@ def test_Eddy_inputs():
             extensions=None,
             requires=['in_topup_fieldcoef'],
         ),
+        initrand=dict(
+            argstr='--initrand',
+            min_ver='5.0.10',
+        ),
         interp=dict(argstr='--interp=%s', ),
         is_shelled=dict(argstr='--data_is_shelled', ),
+        json=dict(
+            argstr='--json=%s',
+            min_ver='6.0.1',
+            xor=['slspec'],
+        ),
+        mb=dict(
+            argstr='--mb=%s',
+            min_ver='5.0.10',
+        ),
+        mb_offs=dict(
+            argstr='--mb_offs=%s',
+            min_ver='5.0.10',
+            requires=['mb'],
+        ),
+        mbs_ksp=dict(
+            argstr='--mbs_ksp=%smm',
+            min_ver='6.0.1',
+            requires=['estimate_move_by_susceptibility'],
+        ),
+        mbs_lambda=dict(
+            argstr='--mbs_lambda=%s',
+            min_ver='6.0.1',
+            requires=['estimate_move_by_susceptibility'],
+        ),
+        mbs_niter=dict(
+            argstr='--mbs_niter=%s',
+            min_ver='6.0.1',
+            requires=['estimate_move_by_susceptibility'],
+        ),
         method=dict(argstr='--resamp=%s', ),
+        mporder=dict(
+            argstr='--mporder=%s',
+            min_ver='5.0.11',
+            requires=['slspec'],
+        ),
         niter=dict(
             argstr='--niter=%s',
             usedefault=True,
@@ -86,17 +135,62 @@ def test_Eddy_inputs():
             argstr='--out=%s',
             usedefault=True,
         ),
+        outlier_nstd=dict(
+            argstr='--ol_nstd',
+            min_ver='5.0.10',
+            requires=['repol'],
+        ),
+        outlier_nvox=dict(
+            argstr='--ol_nvox',
+            min_ver='5.0.10',
+            requires=['repol'],
+        ),
+        outlier_pos=dict(
+            argstr='--ol_pos',
+            min_ver='5.0.10',
+            requires=['repol'],
+        ),
+        outlier_sqr=dict(
+            argstr='--ol_sqr',
+            min_ver='5.0.10',
+            requires=['repol'],
+        ),
+        outlier_type=dict(
+            argstr='--ol_type',
+            min_ver='5.0.10',
+            requires=['repol'],
+        ),
         output_type=dict(),
         repol=dict(argstr='--repol', ),
         residuals=dict(
             argstr='--residuals',
             min_ver='5.0.10',
         ),
+        s2v_interp=dict(
+            argstr='--s2v_interp=%s',
+            min_ver='5.0.11',
+            requires=['slspec'],
+        ),
+        s2v_lambda=dict(
+            agstr='--s2v_lambda',
+            min_ver='5.0.11',
+            requires=['slspec'],
+        ),
+        s2v_niter=dict(
+            argstr='--s2v_niter=%s',
+            min_ver='5.0.11',
+            requires=['slspec'],
+        ),
         session=dict(
             argstr='--session=%s',
             extensions=None,
         ),
         slm=dict(argstr='--slm=%s', ),
+        slspec=dict(
+            argstr='--slspec=%s',
+            min_ver='5.0.11',
+            xor=['json'],
+        ),
         use_cuda=dict(),
     )
     inputs = Eddy.input_spec()
@@ -108,13 +202,19 @@ def test_Eddy_outputs():
     output_map = dict(
         out_cnr_maps=dict(extensions=None, ),
         out_corrected=dict(extensions=None, ),
+        out_movement_over_time=dict(extensions=None, ),
         out_movement_rms=dict(extensions=None, ),
+        out_outlier_free=dict(extensions=None, ),
+        out_outlier_map=dict(extensions=None, ),
+        out_outlier_n_sqr_stdev_map=dict(extensions=None, ),
+        out_outlier_n_stdev_map=dict(extensions=None, ),
         out_outlier_report=dict(extensions=None, ),
         out_parameter=dict(extensions=None, ),
         out_residuals=dict(extensions=None, ),
         out_restricted_movement_rms=dict(extensions=None, ),
         out_rotated_bvecs=dict(extensions=None, ),
         out_shell_alignment_parameters=dict(extensions=None, ),
+        out_shell_pe_translation_parameters=dict(extensions=None, ),
     )
     outputs = Eddy.output_spec()
 
