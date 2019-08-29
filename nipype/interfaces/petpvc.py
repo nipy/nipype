@@ -56,7 +56,7 @@ class PETPVCInputSpec(CommandLineInputSpec):
         argstr="-a %.4f")
     stop_crit = traits.Float(
         desc="Stopping criterion", default_value=0.01, usedefault=True,
-        argstr="-a %.4f")
+        argstr="-s %.4f")
 
 
 class PETPVCOutputSpec(TraitedSpec):
