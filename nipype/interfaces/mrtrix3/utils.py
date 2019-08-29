@@ -754,7 +754,7 @@ class MRResize(MRTrix3Base):
     >>> resize.inputs.in_file = 'dwi.mif'
     >>> resize.inputs.voxel_size = (1, 1, 1)
     >>> resize.cmdline                               # doctest: +ELLIPSIS
-    'mrresize -voxel 1,1,1 dwi.mif dwi_resized.mif'
+    'mrresize -interp cubic -voxel 1,1,1 dwi.mif dwi_resized.mif'
     >>> resize.run()                                 # doctest: +SKIP
     """
 

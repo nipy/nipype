@@ -14,7 +14,7 @@ import numpy as np
 import nibabel as nb
 import warnings
 
-from ...utils.filemanip import split_filename
+from ...utils.filemanip import split_filename, fname_presuffix
 from ...utils import NUMPY_MMAP
 
 from ..base import (traits, TraitedSpec, InputMultiPath, File, isdefined)
@@ -833,12 +833,12 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.in_bval  = 'bvals.scheme'
     >>> eddy.inputs.use_cuda = True
     >>> eddy.cmdline # doctest: +ELLIPSIS
-    'eddy_cuda --ff=10.0 --acqp=epi_acqp.txt --bvals=bvals.scheme \
+    'eddy_cuda --ff=10.0 --fwhm=0 --acqp=epi_acqp.txt --bvals=bvals.scheme \
 --bvecs=bvecs.scheme --imain=epi.nii --index=epi_index.txt \
 --mask=epi_mask.nii --niter=5 --nvoxhp=1000 --out=.../eddy_corrected'
     >>> eddy.inputs.use_cuda = False
     >>> eddy.cmdline # doctest: +ELLIPSIS
-    'eddy_openmp --ff=10.0 --acqp=epi_acqp.txt --bvals=bvals.scheme \
+    'eddy_openmp --ff=10.0 --fwhm=0 --acqp=epi_acqp.txt --bvals=bvals.scheme \
 --bvecs=bvecs.scheme --imain=epi.nii --index=epi_index.txt \
 --mask=epi_mask.nii --niter=5 --nvoxhp=1000 --out=.../eddy_corrected'
     >>> res = eddy.run() # doctest: +SKIP
@@ -890,7 +890,7 @@ class Eddy(FSLCommand):
         if name == 'in_topup_fieldcoef':
             return spec.argstr % value.split('_fieldcoef')[0]
         if name == 'field':
-            return spec.argstr % split_filename(value)[1]
+            return spec.argstr % fname_presuffix(value, use_ext=False)
         if name == 'out_base':
             return spec.argstr % os.path.abspath(value)
         return super(Eddy, self)._format_arg(name, spec, value)
