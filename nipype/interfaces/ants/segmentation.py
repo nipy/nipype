@@ -378,9 +378,9 @@ class N4BiasFieldCorrection(ANTSCommand):
     >>> n4_4.inputs.input_image = 'structural.nii'
     >>> n4_4.inputs.save_bias = True
     >>> n4_4.inputs.dimension = 3
-    >>> n4_4.cmdline  # doctest: +ELLIPSIS
+    >>> n4_4.cmdline
     'N4BiasFieldCorrection -d 3 --input-image structural.nii \
---output [ structural_corrected.nii, ...structural_bias.nii ]'
+--output [ structural_corrected.nii, structural_bias.nii ]'
     """
 
     _cmd = 'N4BiasFieldCorrection'
@@ -388,6 +388,7 @@ class N4BiasFieldCorrection(ANTSCommand):
     output_spec = N4BiasFieldCorrectionOutputSpec
 
     def __init__(self, *args, **kwargs):
+        """Instantiate the N4BiasFieldCorrection interface."""
         self._out_bias_file = None
         super(N4BiasFieldCorrection, self).__init__(*args, **kwargs)
 
@@ -424,32 +425,28 @@ class N4BiasFieldCorrection(ANTSCommand):
             if not isdefined(bias_image):
                 bias_image = fname_presuffix(os.path.basename(self.inputs.input_image),
                                              suffix='_bias')
-            self._out_bias_file = os.path.abspath(bias_image)
+            self._out_bias_file = bias_image
         return super(N4BiasFieldCorrection, self)._parse_inputs(skip=skip)
 
     def _list_outputs(self):
         outputs = super(N4BiasFieldCorrection, self)._list_outputs()
+
+        # Fix headers
+        if self.inputs.copy_header:
+            self._copy_header(outputs['output_image'])
+
         if self._out_bias_file:
-            outputs['bias_image'] = self._out_bias_file
+            outputs['bias_image'] = os.path.abspath(self._out_bias_file)
+            if self.inputs.copy_header:
+                self._copy_header(outputs['bias_image'])
         return outputs
-
-    def _run_interface(self, runtime, correct_return_codes=(0, )):
-        runtime = super(N4BiasFieldCorrection, self)._run_interface(
-            runtime, correct_return_codes)
-
-        if self.inputs.copy_header and runtime.returncode in correct_return_codes:
-            self._copy_header(self.inputs.output_image)
-            if self._out_bias_file:
-                self._copy_header(self._out_bias_file)
-
-        return runtime
 
     def _copy_header(self, fname):
         """Copy header from input image to an output image."""
         import nibabel as nb
         in_img = nb.load(self.inputs.input_image)
         out_img = nb.load(fname, mmap=False)
-        new_img = out_img.__class__(out_img.get_data(), in_img.affine,
+        new_img = out_img.__class__(out_img.get_fdata(), in_img.affine,
                                     in_img.header)
         new_img.set_data_dtype(out_img.get_data_dtype())
         new_img.to_filename(fname)
