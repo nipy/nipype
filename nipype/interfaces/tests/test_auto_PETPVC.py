@@ -59,7 +59,7 @@ def test_PETPVC_inputs():
             mandatory=True,
         ),
         stop_crit=dict(
-            argstr='-a %.4f',
+            argstr='-s %.4f',
             usedefault=True,
         ),
     )
