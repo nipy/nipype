@@ -378,9 +378,9 @@ class N4BiasFieldCorrection(ANTSCommand):
     >>> n4_4.inputs.input_image = 'structural.nii'
     >>> n4_4.inputs.save_bias = True
     >>> n4_4.inputs.dimension = 3
-    >>> n4_4.cmdline
+    >>> n4_4.cmdline  # doctest: +ELLIPSIS
     'N4BiasFieldCorrection -d 3 --input-image structural.nii \
---output [ structural_corrected.nii, structural_bias.nii ]'
+--output [ structural_corrected.nii, ...structural_bias.nii ]'
     """
 
     _cmd = 'N4BiasFieldCorrection'
