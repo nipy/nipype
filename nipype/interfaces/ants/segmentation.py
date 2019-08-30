@@ -386,9 +386,13 @@ class N4BiasFieldCorrection(ANTSCommand):
     input_spec = N4BiasFieldCorrectionInputSpec
     output_spec = N4BiasFieldCorrectionOutputSpec
 
+    def __init__(self, *args, **kwargs):
+        self._out_bias_file = None
+        super(N4BiasFieldCorrection, self).__init__(*args, **kwargs)
+
     def _format_arg(self, name, trait_spec, value):
-        if name == 'output_image' and getattr(self, '_out_bias_file', None):
-            newval = '[ %s, %s ]' % (value, getattr(self, '_out_bias_file'))
+        if name == 'output_image' and self._out_bias_file:
+            newval = '[ %s, %s ]' % (value, self._out_bias_file)
             return trait_spec.argstr % newval
 
         if name == 'bspline_fitting_distance':
@@ -413,24 +417,19 @@ class N4BiasFieldCorrection(ANTSCommand):
 
     def _parse_inputs(self, skip=None):
         skip = (skip or []) + ['save_bias', 'bias_image']
+        self._out_bias_file = None
         if self.inputs.save_bias or isdefined(self.inputs.bias_image):
             bias_image = self.inputs.bias_image
             if not isdefined(bias_image):
                 bias_image = fname_presuffix(os.path.basename(self.inputs.input_image),
                                              suffix='_bias')
-            setattr(self, '_out_bias_file', bias_image)
-        else:
-            try:
-                delattr(self, '_out_bias_file')
-            except AttributeError:
-                pass
+            self._out_bias_file = bias_image
         return super(N4BiasFieldCorrection, self)._parse_inputs(skip=skip)
 
     def _list_outputs(self):
         outputs = super(N4BiasFieldCorrection, self)._list_outputs()
-        bias_image = getattr(self, '_out_bias_file', None)
-        if bias_image:
-            outputs['bias_image'] = bias_image
+        if self._out_bias_file:
+            outputs['bias_image'] = self._out_bias_file
         return outputs
 
     def _run_interface(self, runtime, correct_return_codes=(0, )):
@@ -439,8 +438,8 @@ class N4BiasFieldCorrection(ANTSCommand):
 
         if self.inputs.copy_header and runtime.returncode in correct_return_codes:
             self._copy_header(self.inputs.output_image)
-            if getattr(self, '_out_bias_file', None):
-                self._copy_header(getattr(self, '_out_bias_file'))
+            if self._out_bias_file:
+                self._copy_header(self._out_bias_file)
 
         return runtime
 
