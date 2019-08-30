@@ -12,11 +12,17 @@ data_dir = os.path.join(temp_folder, 'data')
 shutil.copytree(NIPYPE_DATADIR, data_dir)
 
 
+def _create_testfiles(*args):
+    for file in args:
+        open(file, 'w').close()
+
+
 @pytest.fixture(autouse=True)
 def add_np(doctest_namespace):
     doctest_namespace['np'] = numpy
     doctest_namespace['os'] = os
     doctest_namespace["datadir"] = data_dir
+    doctest_namespace["create_testfiles"] = _create_testfiles
 
 
 @pytest.fixture(autouse=True)
