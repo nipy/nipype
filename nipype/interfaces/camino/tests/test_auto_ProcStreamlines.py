@@ -62,7 +62,6 @@ def test_ProcStreamlines_inputs():
         noresample=dict(argstr='-noresample', ),
         out_file=dict(
             argstr='> %s',
-            extensions=None,
             genfile=True,
             position=-1,
         ),

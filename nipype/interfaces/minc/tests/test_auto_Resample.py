@@ -94,10 +94,7 @@ def test_Resample_inputs():
             argstr='-keep_real_range',
             xor=('keep_real_range', 'nokeep_real_range'),
         ),
-        like=dict(
-            argstr='-like %s',
-            extensions=None,
-        ),
+        like=dict(argstr='-like %s', ),
         nearest_neighbour_interpolation=dict(
             argstr='-nearest_neighbour',
             xor=('trilinear_interpolation', 'tricubic_interpolation',
@@ -160,10 +157,7 @@ def test_Resample_inputs():
             xor=('nelements', 'nelements_x_y_or_z'),
         ),
         talairach=dict(argstr='-talairach', ),
-        transformation=dict(
-            argstr='-transformation %s',
-            extensions=None,
-        ),
+        transformation=dict(argstr='-transformation %s', ),
         transverse_slices=dict(
             argstr='-transverse',
             xor=('transverse', 'sagittal', 'coronal'),

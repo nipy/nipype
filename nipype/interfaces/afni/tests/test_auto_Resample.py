@@ -17,10 +17,7 @@ def test_Resample_inputs():
             mandatory=True,
             position=-1,
         ),
-        master=dict(
-            argstr='-master %s',
-            extensions=None,
-        ),
+        master=dict(argstr='-master %s', ),
         num_threads=dict(
             nohash=True,
             usedefault=True,

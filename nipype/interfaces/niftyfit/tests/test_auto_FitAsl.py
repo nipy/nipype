@@ -8,7 +8,6 @@ def test_FitAsl_inputs():
         args=dict(argstr='%s', ),
         cbf_file=dict(
             argstr='-cbf %s',
-            extensions=None,
             name_source=['source_file'],
             name_template='%s_cbf.nii.gz',
         ),
@@ -21,33 +20,19 @@ def test_FitAsl_inputs():
         ),
         error_file=dict(
             argstr='-error %s',
-            extensions=None,
             name_source=['source_file'],
             name_template='%s_error.nii.gz',
         ),
         gm_plasma=dict(argstr='-gmL %f', ),
         gm_t1=dict(argstr='-gmT1 %f', ),
         gm_ttt=dict(argstr='-gmTTT %f', ),
-        ir_output=dict(
-            argstr='-IRoutput %s',
-            extensions=None,
-        ),
-        ir_volume=dict(
-            argstr='-IRvolume %s',
-            extensions=None,
-        ),
+        ir_output=dict(argstr='-IRoutput %s', ),
+        ir_volume=dict(argstr='-IRvolume %s', ),
         ldd=dict(argstr='-LDD %f', ),
-        m0map=dict(
-            argstr='-m0map %s',
-            extensions=None,
-        ),
-        m0mape=dict(
-            argstr='-m0mape %s',
-            extensions=None,
-        ),
+        m0map=dict(argstr='-m0map %s', ),
+        m0mape=dict(argstr='-m0mape %s', ),
         mask=dict(
             argstr='-mask %s',
-            extensions=None,
             position=2,
         ),
         mul=dict(argstr='-mul %f', ),
@@ -61,29 +46,21 @@ def test_FitAsl_inputs():
         pv2=dict(argstr='-pv2 %d', ),
         pv3=dict(argstr='-pv3 %d %d %d', ),
         pv_threshold=dict(argstr='-pvthreshold', ),
-        seg=dict(
-            argstr='-seg %s',
-            extensions=None,
-        ),
+        seg=dict(argstr='-seg %s', ),
         segstyle=dict(argstr='-segstyle', ),
         sig=dict(argstr='-sig', ),
         source_file=dict(
             argstr='-source %s',
-            extensions=None,
             mandatory=True,
             position=1,
         ),
         syn_file=dict(
             argstr='-syn %s',
-            extensions=None,
             name_source=['source_file'],
             name_template='%s_syn.nii.gz',
         ),
         t1_art_cmp=dict(argstr='-T1a %f', ),
-        t1map=dict(
-            argstr='-t1map %s',
-            extensions=None,
-        ),
+        t1map=dict(argstr='-t1map %s', ),
         t_inv1=dict(argstr='-Tinv1 %f', ),
         t_inv2=dict(argstr='-Tinv2 %f', ),
         wm_plasma=dict(argstr='-wmL %f', ),
@@ -97,9 +74,9 @@ def test_FitAsl_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FitAsl_outputs():
     output_map = dict(
-        cbf_file=dict(extensions=None, ),
-        error_file=dict(extensions=None, ),
-        syn_file=dict(extensions=None, ),
+        cbf_file=dict(),
+        error_file=dict(),
+        syn_file=dict(),
     )
     outputs = FitAsl.output_spec()
 

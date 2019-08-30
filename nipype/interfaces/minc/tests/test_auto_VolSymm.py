@@ -22,7 +22,6 @@ def test_VolSymm_inputs():
         fit_nonlinear=dict(argstr='-nonlinear', ),
         input_file=dict(
             argstr='%s',
-            extensions=None,
             mandatory=True,
             position=-3,
         ),
@@ -39,7 +38,6 @@ def test_VolSymm_inputs():
         ),
         trans_file=dict(
             argstr='%s',
-            extensions=None,
             genfile=True,
             hash_files=False,
             keep_extension=False,

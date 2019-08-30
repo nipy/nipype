@@ -16,7 +16,6 @@ def test_XfmInvert_inputs():
         ),
         input_file=dict(
             argstr='%s',
-            extensions=None,
             mandatory=True,
             position=-2,
         ),

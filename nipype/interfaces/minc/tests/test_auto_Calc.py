@@ -26,7 +26,6 @@ def test_Calc_inputs():
         eval_width=dict(argstr='-eval_width %s', ),
         expfile=dict(
             argstr='-expfile %s',
-            extensions=None,
             mandatory=True,
             xor=('expression', 'expfile'),
         ),
@@ -37,7 +36,6 @@ def test_Calc_inputs():
         ),
         filelist=dict(
             argstr='-filelist %s',
-            extensions=None,
             mandatory=True,
             xor=('input_files', 'filelist'),
         ),

@@ -17,30 +17,22 @@ def test_MS_LDA_inputs():
             mandatory=True,
             position=-1,
         ),
-        label_file=dict(
-            argstr='-label %s',
-            extensions=None,
-        ),
+        label_file=dict(argstr='-label %s', ),
         lda_labels=dict(
             argstr='-lda %s',
             mandatory=True,
             sep=' ',
         ),
-        mask_file=dict(
-            argstr='-mask %s',
-            extensions=None,
-        ),
+        mask_file=dict(argstr='-mask %s', ),
         shift=dict(argstr='-shift %d', ),
         subjects_dir=dict(),
         use_weights=dict(argstr='-W', ),
         vol_synth_file=dict(
             argstr='-synth %s',
-            extensions=None,
             mandatory=True,
         ),
         weight_file=dict(
             argstr='-weight %s',
-            extensions=None,
             mandatory=True,
         ),
     )

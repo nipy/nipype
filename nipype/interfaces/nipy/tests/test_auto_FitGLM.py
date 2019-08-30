@@ -8,7 +8,7 @@ def test_FitGLM_inputs():
         TR=dict(mandatory=True, ),
         drift_model=dict(usedefault=True, ),
         hrf_model=dict(usedefault=True, ),
-        mask=dict(extensions=None, ),
+        mask=dict(),
         method=dict(usedefault=True, ),
         model=dict(usedefault=True, ),
         normalize_design_matrix=dict(usedefault=True, ),
@@ -30,7 +30,7 @@ def test_FitGLM_outputs():
         dof=dict(),
         nvbeta=dict(),
         reg_names=dict(),
-        residuals=dict(extensions=None, ),
+        residuals=dict(),
         s2=dict(extensions=None, ),
     )
     outputs = FitGLM.output_spec()

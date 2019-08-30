@@ -5,16 +5,10 @@ from ..utils import Contrast
 
 def test_Contrast_inputs():
     input_map = dict(
-        annotation=dict(
-            extensions=None,
-            mandatory=True,
-        ),
+        annotation=dict(mandatory=True, ),
         args=dict(argstr='%s', ),
         copy_inputs=dict(),
-        cortex=dict(
-            extensions=None,
-            mandatory=True,
-        ),
+        cortex=dict(mandatory=True, ),
         environ=dict(
             nohash=True,
             usedefault=True,

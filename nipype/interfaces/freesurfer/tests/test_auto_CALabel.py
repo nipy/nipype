@@ -7,10 +7,7 @@ def test_CALabel_inputs():
     input_map = dict(
         align=dict(argstr='-align', ),
         args=dict(argstr='%s', ),
-        aseg=dict(
-            argstr='-aseg %s',
-            extensions=None,
-        ),
+        aseg=dict(argstr='-aseg %s', ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -29,10 +26,7 @@ def test_CALabel_inputs():
             argstr='-r %s',
             extensions=None,
         ),
-        label=dict(
-            argstr='-l %s',
-            extensions=None,
-        ),
+        label=dict(argstr='-l %s', ),
         no_big_ventricles=dict(argstr='-nobigventricles', ),
         num_threads=dict(),
         out_file=dict(

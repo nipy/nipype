@@ -100,10 +100,7 @@ def test_SegStatsReconAll_inputs():
             extensions=None,
             mandatory=True,
         ),
-        ribbon=dict(
-            extensions=None,
-            mandatory=True,
-        ),
+        ribbon=dict(mandatory=True, ),
         segment_id=dict(argstr='--id %s...', ),
         segmentation_file=dict(
             argstr='--seg %s',

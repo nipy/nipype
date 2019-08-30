@@ -7,10 +7,7 @@ def test_Cluster_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
         connectivity=dict(argstr='--connectivity=%d', ),
-        cope_file=dict(
-            argstr='--cope=%s',
-            extensions=None,
-        ),
+        cope_file=dict(argstr='--cope=%s', ),
         dlh=dict(argstr='--dlh=%.10f', ),
         environ=dict(
             nohash=True,

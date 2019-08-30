@@ -59,7 +59,6 @@ def test_SurfaceSnapshots_inputs():
         overlay_range_offset=dict(argstr='-foffset %.3f', ),
         overlay_reg=dict(
             argstr='-overlay-reg %s',
-            extensions=None,
             xor=['overlay_reg', 'identity_reg', 'mni152_reg'],
         ),
         patch_file=dict(

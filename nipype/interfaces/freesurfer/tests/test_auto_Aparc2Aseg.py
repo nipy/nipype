@@ -79,10 +79,11 @@ def test_Aparc2Aseg_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Aparc2Aseg_outputs():
-    output_map = dict(out_file=dict(
-        argstr='%s',
-        extensions=None,
-    ), )
+    output_map = dict(
+        out_file=dict(
+            argstr='%s',
+            extensions=None,
+        ), )
     outputs = Aparc2Aseg.output_spec()
 
     for key, metadata in list(output_map.items()):

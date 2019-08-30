@@ -44,10 +44,11 @@ def test_AntsJointFusion_inputs():
             nohash=True,
             usedefault=True,
         ),
-        out_atlas_voting_weight_name_format=dict(requires=[
-            'out_label_fusion', 'out_intensity_fusion_name_format',
-            'out_label_post_prob_name_format'
-        ], ),
+        out_atlas_voting_weight_name_format=dict(
+            requires=[
+                'out_label_fusion', 'out_intensity_fusion_name_format',
+                'out_label_post_prob_name_format'
+            ], ),
         out_intensity_fusion_name_format=dict(argstr='', ),
         out_label_fusion=dict(
             argstr='%s',

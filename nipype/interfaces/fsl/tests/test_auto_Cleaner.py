@@ -22,17 +22,14 @@ def test_Cleaner_inputs():
         ),
         confound_file=dict(
             argstr='-x %s',
-            extensions=None,
             position=4,
         ),
         confound_file_1=dict(
             argstr='-x %s',
-            extensions=None,
             position=5,
         ),
         confound_file_2=dict(
             argstr='-x %s',
-            extensions=None,
             position=6,
         ),
         environ=dict(

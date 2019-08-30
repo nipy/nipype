@@ -125,10 +125,7 @@ def test_QwarpPlusMinus_inputs():
             position=0,
             usedefault=True,
         ),
-        out_weight_file=dict(
-            argstr='-wtprefix %s',
-            extensions=None,
-        ),
+        out_weight_file=dict(argstr='-wtprefix %s', ),
         outputtype=dict(),
         overwrite=dict(argstr='-overwrite', ),
         pblur=dict(argstr='-pblur %s', ),

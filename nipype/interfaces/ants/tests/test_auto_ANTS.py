@@ -57,8 +57,8 @@ def test_ANTS_inputs():
         regularization=dict(argstr='%s', ),
         regularization_deformation_field_sigma=dict(
             requires=['regularization'], ),
-        regularization_gradient_field_sigma=dict(requires=['regularization'
-                                                           ], ),
+        regularization_gradient_field_sigma=dict(
+            requires=['regularization'], ),
         smoothing_sigmas=dict(
             argstr='--gaussian-smoothing-sigmas %s',
             sep='x',

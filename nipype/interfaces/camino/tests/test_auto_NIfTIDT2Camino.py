@@ -26,7 +26,6 @@ def test_NIfTIDT2Camino_inputs():
         ),
         out_file=dict(
             argstr='> %s',
-            extensions=None,
             genfile=True,
             position=-1,
         ),

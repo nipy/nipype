@@ -86,7 +86,6 @@ def test_Allineate_inputs():
         ),
         out_weight_file=dict(
             argstr='-wtprefix %s',
-            extensions=None,
             xor=['allcostx'],
         ),
         outputtype=dict(),

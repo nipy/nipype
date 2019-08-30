@@ -4,10 +4,11 @@ from ..misc import Gunzip
 
 
 def test_Gunzip_inputs():
-    input_map = dict(in_file=dict(
-        extensions=None,
-        mandatory=True,
-    ), )
+    input_map = dict(
+        in_file=dict(
+            extensions=None,
+            mandatory=True,
+        ), )
     inputs = Gunzip.input_spec()
 
     for key, metadata in list(input_map.items()):

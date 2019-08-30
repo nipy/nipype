@@ -25,17 +25,13 @@ def test_ReHo_inputs():
             argstr='-in_rois %s',
             extensions=None,
         ),
-        mask_file=dict(
-            argstr='-mask %s',
-            extensions=None,
-        ),
+        mask_file=dict(argstr='-mask %s', ),
         neighborhood=dict(
             argstr='-nneigh %s',
             xor=['sphere', 'ellipsoid'],
         ),
         out_file=dict(
             argstr='-prefix %s',
-            extensions=None,
             keep_extension=True,
             name_source='in_file',
             name_template='%s_reho',

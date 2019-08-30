@@ -38,13 +38,11 @@ def test_ConcatenateLTA_inputs():
         subjects_dir=dict(),
         tal_source_file=dict(
             argstr='-tal %s',
-            extensions=None,
             position=-5,
             requires=['tal_template_file'],
         ),
         tal_template_file=dict(
             argstr='%s',
-            extensions=None,
             position=-4,
             requires=['tal_source_file'],
         ),

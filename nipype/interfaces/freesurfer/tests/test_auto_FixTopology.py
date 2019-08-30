@@ -35,10 +35,7 @@ def test_FixTopology_inputs():
         ),
         mgz=dict(argstr='-mgz', ),
         seed=dict(argstr='-seed %d', ),
-        sphere=dict(
-            argstr='-sphere %s',
-            extensions=None,
-        ),
+        sphere=dict(argstr='-sphere %s', ),
         subject_id=dict(
             argstr='%s',
             mandatory=True,

@@ -17,7 +17,6 @@ def test_ClipLevel_inputs():
         ),
         grad=dict(
             argstr='-grad %s',
-            extensions=None,
             position=3,
             xor='doall',
         ),

@@ -20,7 +20,6 @@ def test_ComputeTensorTrace_inputs():
         inputmodel=dict(argstr='-inputmodel %s', ),
         out_file=dict(
             argstr='> %s',
-            extensions=None,
             genfile=True,
             position=-1,
         ),

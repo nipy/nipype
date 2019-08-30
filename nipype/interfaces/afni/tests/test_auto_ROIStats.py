@@ -49,10 +49,7 @@ def test_ROIStats_inputs():
             position=-1,
         ),
         quiet=dict(argstr='-quiet', ),
-        roisel=dict(
-            argstr='-roisel %s',
-            extensions=None,
-        ),
+        roisel=dict(argstr='-roisel %s', ),
         stat=dict(argstr='%s...', ),
         zerofill=dict(
             argstr='-zerofill %s',

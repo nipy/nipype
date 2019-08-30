@@ -24,7 +24,6 @@ def test_LinRecon_inputs():
         normalize=dict(argstr='-normalize', ),
         out_file=dict(
             argstr='> %s',
-            extensions=None,
             genfile=True,
             position=-1,
         ),

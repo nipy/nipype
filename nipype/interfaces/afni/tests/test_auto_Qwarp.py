@@ -125,10 +125,7 @@ def test_Qwarp_inputs():
             name_source=['in_file'],
             name_template='ppp_%s',
         ),
-        out_weight_file=dict(
-            argstr='-wtprefix %s',
-            extensions=None,
-        ),
+        out_weight_file=dict(argstr='-wtprefix %s', ),
         outputtype=dict(),
         overwrite=dict(argstr='-overwrite', ),
         pblur=dict(argstr='-pblur %s', ),

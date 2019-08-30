@@ -15,12 +15,8 @@ def test_DWIExtract_inputs():
         grad_file=dict(
             argstr='-grad %s',
             extensions=None,
-            xor=['grad_fsl'],
         ),
-        grad_fsl=dict(
-            argstr='-fslgrad %s %s',
-            xor=['grad_file'],
-        ),
+        grad_fsl=dict(argstr='-fslgrad %s %s', ),
         in_bval=dict(extensions=None, ),
         in_bvec=dict(
             argstr='-fslgrad %s %s',

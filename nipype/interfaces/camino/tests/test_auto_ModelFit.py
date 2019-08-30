@@ -34,7 +34,6 @@ def test_ModelFit_inputs():
         ),
         out_file=dict(
             argstr='> %s',
-            extensions=None,
             genfile=True,
             position=-1,
         ),
