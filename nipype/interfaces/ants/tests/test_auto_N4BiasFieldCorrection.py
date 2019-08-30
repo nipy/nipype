@@ -48,6 +48,7 @@ def test_N4BiasFieldCorrection_inputs():
         ),
         rescale_intensities=dict(
             argstr='-r',
+            min_ver='2.1.0',
             usedefault=True,
         ),
         save_bias=dict(

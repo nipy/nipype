@@ -309,7 +309,7 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
         desc='copy headers of the original image into the '
         'output (corrected) file')
     rescale_intensities = traits.Bool(
-        False, usedefault=True, argstr='-r',
+        False, usedefault=True, argstr='-r', min_ver='2.1.0',
         desc="""\
 [NOTE: Only ANTs>=2.1.0]
 At each iteration, a new intensity mapping is calculated and applied but there
@@ -423,8 +423,8 @@ class N4BiasFieldCorrection(ANTSCommand):
             bias_image = self.inputs.bias_image
             if not isdefined(bias_image):
                 bias_image = fname_presuffix(os.path.basename(self.inputs.input_image),
-                                             suffix='_bias', newpath=os.getcwd())
-            self._out_bias_file = bias_image
+                                             suffix='_bias')
+            self._out_bias_file = os.path.abspath(bias_image)
         return super(N4BiasFieldCorrection, self)._parse_inputs(skip=skip)
 
     def _list_outputs(self):
