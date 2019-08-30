@@ -422,7 +422,7 @@ class N4BiasFieldCorrection(ANTSCommand):
             bias_image = self.inputs.bias_image
             if not isdefined(bias_image):
                 bias_image = fname_presuffix(os.path.basename(self.inputs.input_image),
-                                             suffix='_bias')
+                                             suffix='_bias', newpath=os.getcwd())
             self._out_bias_file = bias_image
         return super(N4BiasFieldCorrection, self)._parse_inputs(skip=skip)
 
