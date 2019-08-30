@@ -89,12 +89,12 @@ class WatershedBEM(FSCommand):
     >>> bem.inputs.subject_id = 'subj1'
     >>> bem.inputs.subjects_dir = '.'
     >>> bem.cmdline
-    'mne_watershed_bem --overwrite --subject subj1 --volume T1'
+    'mne watershed_bem --overwrite --subject subj1 --volume T1'
     >>> bem.run() 				# doctest: +SKIP
 
    """
 
-    _cmd = 'mne_watershed_bem'
+    _cmd = 'mne watershed_bem'
     input_spec = WatershedBEMInputSpec
     output_spec = WatershedBEMOutputSpec
     _additional_metadata = ['loc', 'altkey']
