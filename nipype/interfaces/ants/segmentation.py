@@ -311,6 +311,7 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
     rescale_intensities = traits.Bool(
         False, usedefault=True, argstr='-r',
         desc="""\
+[NOTE: Only ANTs>=2.1.0]
 At each iteration, a new intensity mapping is calculated and applied but there
 is nothing which constrains the new intensity range to be within certain values.
 The result is that the range can "drift" from the original at each iteration.
