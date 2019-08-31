@@ -1,3 +1,30 @@
+1.2.1 (August 19, 2019)
+=======================
+
+##### [Full changelog](https://github.com/nipy/nipype/milestone/32?closed=1)
+
+  * FIX: Resolve/rebase paths from/to results files (https://github.com/nipy/nipype/pull/2971)
+  * FIX: Use ``load_resultfile`` when loading a results pickle (https://github.com/nipy/nipype/pull/2985)
+  * FIX: Incorrect extension identified when checking ``File`` traits (https://github.com/nipy/nipype/pull/2987)
+  * FIX: Correctly pickle ``OuputMultiObject`` traits (https://github.com/nipy/nipype/pull/2983)
+  * FIX: Improve output handling in DWIDenoise and DWIBiasCorrect (https://github.com/nipy/nipype/pull/2978)
+  * FIX: Docker build (https://github.com/nipy/nipype/pull/2963)
+  * FIX: Remove '=' signs from EddyQuad argument specifications (https://github.com/nipy/nipype/pull/2941)
+  * FIX: Set input model to bedpostx for camino.TrackBedpostxProba (https://github.com/nipy/nipype/pull/2947)
+  * FIX: Allow ``max_sh``not to be set (auto mode) (https://github.com/nipy/nipype/pull/2940)
+  * ENH: Update mrtrix reconst.py EstimateFOD max_sh to be able to accept list (https://github.com/nipy/nipype/pull/2990)
+  * ENH: Let ``indirectory`` handle ``nipype.utils.filemanip.Path`` (https://github.com/nipy/nipype/pull/2989)
+  * ENH: Add resolve/rebase ``BasePath`` traits methods & tests (https://github.com/nipy/nipype/pull/2970)
+  * ENH: Modify ``Directory`` and ``File`` traits to get along with pathlib (https://github.com/nipy/nipype/pull/2962)
+  * REF: Update nipype2boutiques script (https://github.com/nipy/nipype/pull/2894)
+  * TST: Parametrize JoinNode expansion tests over config ``needed_outputs`` (https://github.com/nipy/nipype/pull/2981)
+  * MAINT: Pin lxml<4.4.0 for Python 3.4 (https://github.com/nipy/nipype/pull/2980)
+  * MAINT: Refactor ``aggregate_outputs`` for readability (https://github.com/nipy/nipype/pull/2969)
+  * MAINT: Bump neurodocker version (https://github.com/nipy/nipype/pull/2965)
+  * MAINT: Various minor improvements to complement previous PR (https://github.com/nipy/nipype/pull/2964)
+  * MAINT: Sort dependencies alphabetically (https://github.com/nipy/nipype/pull/2961)
+
+
 1.2.0 (May 09, 2019)
 ====================
 

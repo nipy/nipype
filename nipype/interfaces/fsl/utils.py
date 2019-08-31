@@ -725,18 +725,25 @@ class ImageStatsInputSpec(FSLCommandInputSpec):
         exists=True,
         argstr="%s",
         mandatory=True,
-        position=2,
+        position=3,
         desc='input file to generate stats of')
     op_string = traits.Str(
         argstr="%s",
         mandatory=True,
-        position=3,
+        position=4,
         desc=("string defining the operation, options are "
               "applied in order, e.g. -M -l 10 -M will "
               "report the non-zero mean, apply a threshold "
               "and then report the new nonzero mean"))
     mask_file = File(
         exists=True, argstr="", desc='mask file used for option -k %s')
+    index_mask_file = File(
+        exists=True,
+        argstr="-K %s",
+        position=2,
+        desc="generate seperate n submasks from indexMask, "
+             "for indexvalues 1..n where n is the maximum index "
+             "value in indexMask, and generate statistics for each submask")
 
 
 class ImageStatsOutputSpec(TraitedSpec):
