@@ -41,8 +41,15 @@ def test_N4BiasFieldCorrection_inputs():
         ),
         output_image=dict(
             argstr='--output %s',
-            genfile=True,
             hash_files=False,
+            keep_extension=True,
+            name_source=['input_image'],
+            name_template='%s_corrected',
+        ),
+        rescale_intensities=dict(
+            argstr='-r',
+            min_ver='2.1.0',
+            usedefault=True,
         ),
         save_bias=dict(
             mandatory=True,
