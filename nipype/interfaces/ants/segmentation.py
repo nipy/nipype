@@ -317,6 +317,16 @@ is nothing which constrains the new intensity range to be within certain values.
 The result is that the range can "drift" from the original at each iteration.
 This option rescales to the [min,max] range of the original image intensities
 within the user-specified mask.""")
+    histogram_sharpening = traits.Tuple(
+        (0.15, 0.01, 200),
+        traits.Float, traits.Float, traits.Int,
+        argstr='--histogram-sharpening [%g,%g,%d]',
+        desc="""\
+Three-values tuple of histogram sharpening parameters \
+(FWHM, wienerNose, numberOfHistogramBins).
+These options describe the histogram sharpening parameters, i.e. the \
+deconvolution step parameters described in the original N3 algorithm.
+The default values have been shown to work fairly well.""")
 
 
 class N4BiasFieldCorrectionOutputSpec(TraitedSpec):
@@ -381,6 +391,15 @@ class N4BiasFieldCorrection(ANTSCommand):
     >>> n4_4.cmdline
     'N4BiasFieldCorrection -d 3 --input-image structural.nii \
 --output [ structural_corrected.nii, structural_bias.nii ]'
+
+    >>> n4_5 = N4BiasFieldCorrection()
+    >>> n4_5.inputs.input_image = 'structural.nii'
+    >>> n4_5.inputs.dimension = 3
+    >>> n4_5.inputs.histogram_sharpening = (0.12, 0.02, 200)
+    >>> n4_5.cmdline
+    'N4BiasFieldCorrection -d 3  --histogram-sharpening [0.12,0.02,200] \
+--input-image structural.nii --output structural_corrected.nii'
+
     """
 
     _cmd = 'N4BiasFieldCorrection'
