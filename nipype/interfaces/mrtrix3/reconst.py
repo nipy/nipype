@@ -105,7 +105,7 @@ class EstimateFODInputSpec(MRTrix3BaseInputSpec):
     gm_odf = File('gm.mif', usedefault=False, argstr='%s',
                   position=-3, desc='output GM ODF')
     csf_txt = File(argstr='%s', position=-2, desc='CSF response text file')
-    csf_odf = File('csf.mif', usedefault=False, argstr='%s',
+    csf_odf = File(argstr='%s',
                    position=-1, desc='output CSF ODF')
     mask_file = File(exists=True, argstr='-mask %s', desc='mask image')
 
