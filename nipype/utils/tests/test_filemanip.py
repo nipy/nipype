@@ -587,3 +587,13 @@ def test_Path_strict_resolve(tmpdir):
     # If the file is created, it should not raise
     open('somefile.txt', 'w').close()
     assert '%s/somefile.txt' % tmpdir == '%s' % testfile.resolve(strict=True)
+
+
+@pytest.mark.parametrize("load_versioning", [True, False])
+@pytest.mark.parametrize("save_versioning", [True, False])
+def test_pickle(tmp_path, save_versioning, load_versioning):
+    testobj = 'iamateststr'
+    pickle_fname = str(tmp_path / 'testpickle.pklz')
+    savepkl(pickle_fname, testobj, versioning=save_versioning)
+    outobj = loadpkl(pickle_fname, versioning=load_versioning)
+    assert outobj == testobj
