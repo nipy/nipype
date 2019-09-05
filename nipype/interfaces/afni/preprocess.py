@@ -2865,8 +2865,7 @@ class TSmoothInputSpec(AFNICommandInputSpec):
         name_template='%s_smooth',
         desc='output file from 3dTSmooth',
         argstr='-prefix %s',
-        name_source='in_file',
-        genfile=True)
+        name_source='in_file')
     datum = traits.Str(
         desc='Sets the data type of the output dataset',
         argstr='-datum %s')
@@ -2918,7 +2917,7 @@ class TSmooth(AFNICommand):
     >>> smooth.inputs.in_file = 'functional.nii'
     >>> smooth.inputs.adaptive = 5
     >>> smooth.cmdline
-    '3dTsmooth -prefix functional_smooth -adaptive 5 functional.nii'
+    '3dTsmooth -adaptive 5 -prefix functional_smooth functional.nii'
     >>> res = smooth.run()  # doctest: +SKIP
 
     """
