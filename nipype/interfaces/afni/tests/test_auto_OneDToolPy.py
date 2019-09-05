@@ -30,6 +30,7 @@ def test_OneDToolPy_inputs():
         show_censor_count=dict(argstr='-show_censor_count', ),
         show_cormat_warnings=dict(
             argstr='-show_cormat_warnings |& tee %s',
+            extensions=None,
             position=-1,
             xor=['out_file'],
         ),

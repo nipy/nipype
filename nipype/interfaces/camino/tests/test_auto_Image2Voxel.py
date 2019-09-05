@@ -18,6 +18,7 @@ def test_Image2Voxel_inputs():
         ),
         out_file=dict(
             argstr='> %s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),

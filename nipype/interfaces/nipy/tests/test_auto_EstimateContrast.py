@@ -13,7 +13,7 @@ def test_EstimateContrast_inputs():
         constants=dict(mandatory=True, ),
         contrasts=dict(mandatory=True, ),
         dof=dict(mandatory=True, ),
-        mask=dict(),
+        mask=dict(extensions=None, ),
         nvbeta=dict(mandatory=True, ),
         reg_names=dict(mandatory=True, ),
         s2=dict(

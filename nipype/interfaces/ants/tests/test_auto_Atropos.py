@@ -53,8 +53,8 @@ def test_Atropos_inputs():
         prior_probability_threshold=dict(requires=['prior_weighting'], ),
         prior_weighting=dict(),
         save_posteriors=dict(),
-        use_mixture_model_proportions=dict(
-            requires=['posterior_formulation'], ),
+        use_mixture_model_proportions=dict(requires=['posterior_formulation'
+                                                     ], ),
         use_random_seed=dict(
             argstr='--use-random-seed %d',
             usedefault=True,

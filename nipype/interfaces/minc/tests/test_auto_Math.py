@@ -36,6 +36,7 @@ def test_Math_inputs():
         exp=dict(argstr='-exp -const2 %s %s', ),
         filelist=dict(
             argstr='-filelist %s',
+            extensions=None,
             mandatory=True,
             xor=('input_files', 'filelist'),
         ),

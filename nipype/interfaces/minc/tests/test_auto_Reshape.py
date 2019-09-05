@@ -16,6 +16,7 @@ def test_Reshape_inputs():
         ),
         input_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),

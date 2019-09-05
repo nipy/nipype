@@ -6,7 +6,10 @@ from ..preprocess import MRIsCALabel
 def test_MRIsCALabel_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        aseg=dict(argstr='-aseg %s', ),
+        aseg=dict(
+            argstr='-aseg %s',
+            extensions=None,
+        ),
         canonsurf=dict(
             argstr='%s',
             extensions=None,
@@ -33,7 +36,10 @@ def test_MRIsCALabel_inputs():
             mandatory=True,
             position=-4,
         ),
-        label=dict(argstr='-l %s', ),
+        label=dict(
+            argstr='-l %s',
+            extensions=None,
+        ),
         num_threads=dict(),
         out_file=dict(
             argstr='%s',

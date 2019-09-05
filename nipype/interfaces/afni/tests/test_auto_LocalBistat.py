@@ -26,7 +26,10 @@ def test_LocalBistat_inputs():
             mandatory=True,
             position=-1,
         ),
-        mask_file=dict(argstr='-mask %s', ),
+        mask_file=dict(
+            argstr='-mask %s',
+            extensions=None,
+        ),
         neighborhood=dict(
             argstr="-nbhd '%s(%s)'",
             mandatory=True,
@@ -37,6 +40,7 @@ def test_LocalBistat_inputs():
         ),
         out_file=dict(
             argstr='-prefix %s',
+            extensions=None,
             keep_extension=True,
             name_source='in_file1',
             name_template='%s_bistat',
@@ -49,6 +53,7 @@ def test_LocalBistat_inputs():
         ),
         weight_file=dict(
             argstr='-weight %s',
+            extensions=None,
             xor=['automask'],
         ),
     )
