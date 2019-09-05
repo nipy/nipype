@@ -675,7 +675,7 @@ def loadcrash(infile, *args):
         raise ValueError('Only pickled crashfiles are supported')
 
 
-def loadpkl(infile):
+def loadpkl(infile, versioning=False):
     """Load a zipped or plain cPickled file."""
     infile = Path(infile)
     fmlogger.debug('Loading pkl: %s', infile)
@@ -700,6 +700,9 @@ def loadpkl(infile):
             fmlogger.info('Successfully loaded pkl in compatibility mode.')
         # Unpickling problems
         except Exception as e:
+            if not versioning:
+                raise e
+
             if pkl_metadata and 'version' in pkl_metadata:
                 from nipype import __version__ as version
                 if pkl_metadata['version'] != version:
