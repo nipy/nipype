@@ -3,6 +3,7 @@
 
 ##### [Full changelog](https://github.com/nipy/nipype/milestone/33?closed=1)
 
+  * FIX: ``loadpkl`` failed when pklz file contained versioning info (https://github.com/nipy/nipype/pull/3017)
   * FIX: Update mne.WatershedBEM command line (https://github.com/nipy/nipype/pull/3007)
   * FIX: Specify correct stop criterion flag in PETPVC (https://github.com/nipy/nipype/pull/3010)
   * ENH: Additional arguments to ANTs N4BiasFieldCorrection (https://github.com/nipy/nipype/pull/3012)
