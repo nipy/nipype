@@ -558,7 +558,7 @@ def test_versioned_pklization(tmpdir):
         with mock.patch('nipype.utils.tests.test_filemanip.Pickled', PickledBreaker), \
              mock.patch('nipype.__version__', '0.0.0'):
 
-            loadpkl('./pickled.pkz', versioning=True)
+            loadpkl('./pickled.pkz')
 
 
 def test_unversioned_pklization(tmpdir):
@@ -569,7 +569,7 @@ def test_unversioned_pklization(tmpdir):
 
     with pytest.raises(Exception):
         with mock.patch('nipype.utils.tests.test_filemanip.Pickled', PickledBreaker):
-            loadpkl('./pickled.pkz', versioning=True)
+            loadpkl('./pickled.pkz')
 
 
 def test_Path_strict_resolve(tmpdir):
@@ -589,11 +589,10 @@ def test_Path_strict_resolve(tmpdir):
     assert '%s/somefile.txt' % tmpdir == '%s' % testfile.resolve(strict=True)
 
 
-@pytest.mark.parametrize("load_versioning", [True, False])
 @pytest.mark.parametrize("save_versioning", [True, False])
-def test_pickle(tmp_path, save_versioning, load_versioning):
+def test_pickle(tmp_path, save_versioning):
     testobj = 'iamateststr'
     pickle_fname = str(tmp_path / 'testpickle.pklz')
     savepkl(pickle_fname, testobj, versioning=save_versioning)
-    outobj = loadpkl(pickle_fname, versioning=load_versioning)
+    outobj = loadpkl(pickle_fname)
     assert outobj == testobj

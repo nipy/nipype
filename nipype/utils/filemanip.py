@@ -670,12 +670,12 @@ def load_json(filename):
 
 def loadcrash(infile, *args):
     if infile.endswith('pkl') or infile.endswith('pklz'):
-        return loadpkl(infile, versioning=True)
+        return loadpkl(infile)
     else:
         raise ValueError('Only pickled crashfiles are supported')
 
 
-def loadpkl(infile, versioning=False):
+def loadpkl(infile):
     """Load a zipped or plain cPickled file."""
     infile = Path(infile)
     fmlogger.debug('Loading pkl: %s', infile)
@@ -700,9 +700,6 @@ def loadpkl(infile, versioning=False):
             fmlogger.info('Successfully loaded pkl in compatibility mode.')
         # Unpickling problems
         except Exception as e:
-            if not versioning:
-                raise e
-
             if pkl_metadata and 'version' in pkl_metadata:
                 from nipype import __version__ as version
                 if pkl_metadata['version'] != version:
