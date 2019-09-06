@@ -8,7 +8,10 @@ def test_TSmooth_inputs():
         adaptive=dict(argstr='-adaptive %d', ),
         args=dict(argstr='%s', ),
         blackman=dict(argstr='-blackman %d', ),
-        custom=dict(argstr='-custom %s', ),
+        custom=dict(
+            argstr='-custom %s',
+            extensions=None,
+        ),
         datum=dict(argstr='-datum %s', ),
         environ=dict(
             nohash=True,
@@ -18,6 +21,7 @@ def test_TSmooth_inputs():
         in_file=dict(
             argstr='%s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=-1,
         ),
@@ -31,7 +35,7 @@ def test_TSmooth_inputs():
         osf=dict(argstr='-osf', ),
         out_file=dict(
             argstr='-prefix %s',
-            genfile=True,
+            extensions=None,
             name_source='in_file',
             name_template='%s_smooth',
         ),
@@ -43,7 +47,7 @@ def test_TSmooth_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TSmooth_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = TSmooth.output_spec()
 
     for key, metadata in list(output_map.items()):
