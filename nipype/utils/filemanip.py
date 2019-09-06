@@ -682,6 +682,7 @@ def loadpkl(infile):
     pklopen = gzip.open if infile.suffix == '.pklz' else open
     pkl_metadata = None
 
+    unpkl = None
     with indirectory(infile.parent):
         pkl_file = pklopen(infile.name, 'rb')
 
@@ -711,10 +712,13 @@ with an incompatible Nipype version (%s)""", pkl_metadata['version'], version)
 No metadata was found in the pkl file. Make sure you are currently using \
 the same Nipype version from the generated pkl.""")
             raise e
-        else:
-            return unpkl
         finally:
             pkl_file.close()
+
+    if unpkl is None:
+        raise ValueError('Loading %s resulted in None.' % infile)
+
+    return unpkl
 
 
 def crash2txt(filename, record):
