@@ -689,8 +689,6 @@ def loadpkl(infile, versioning=False):
             pkl_metadata_line = pkl_file.readline()
             pkl_metadata = json.loads(pkl_metadata_line)
         except (UnicodeDecodeError, json.JSONDecodeError):
-            pass
-        finally:
             # Could not get version info
             pkl_file.seek(0)
 
