@@ -1,3 +1,17 @@
+1.2.2 (September 05, 2019)
+==========================
+
+##### [Full changelog](https://github.com/nipy/nipype/milestone/33?closed=1)
+
+  * FIX: Ensure ``loadpkl`` returns a not None value (https://github.com/nipy/nipype/pull/3020)
+  * FIX: ``loadpkl`` failed when pklz file contained versioning info (https://github.com/nipy/nipype/pull/3017)
+  * FIX: Update mne.WatershedBEM command line (https://github.com/nipy/nipype/pull/3007)
+  * FIX: Specify correct stop criterion flag in PETPVC (https://github.com/nipy/nipype/pull/3010)
+  * ENH: Additional arguments to ANTs N4BiasFieldCorrection (https://github.com/nipy/nipype/pull/3012)
+  * ENH: Add ``--rescale-intensities`` and name_source to N4BiasFieldCorrection (https://github.com/nipy/nipype/pull/3011)
+  * ENH: Add index_mask_file input to ImageStats (https://github.com/nipy/nipype/pull/3005)
+  * MAINT: Add ``python_requires`` to package metadata (https://github.com/nipy/nipype/pull/3006)
+
 1.2.1 (August 19, 2019)
 =======================
 
