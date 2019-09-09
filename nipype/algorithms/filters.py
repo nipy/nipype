@@ -74,7 +74,7 @@ def _bandpass_filter(in_file, tr=None, freq_low=0, freq_hi=0, out_file=None):
     if freq_hi > 0 and freq_low >= freq_hi:
         raise ValueError("Low-cutoff frequency can't be greater than the high-cutoff")
 
-    img = nb.load(in_file)
+    img = nb.load(in_file, mmap=NUMPY_MMAP)
     timepoints = img.shape[-1]
     F = np.zeros((timepoints))
 
