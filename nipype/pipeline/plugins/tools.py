@@ -16,7 +16,7 @@ from time import strftime
 from traceback import format_exception
 
 from ... import logging
-from ...utils.filemanip import savepkl, crash2txt, makedirs
+from ...utils.filemanip import savepkl, crash2txt, makedirs, FileNotFoundError
 
 logger = logging.getLogger('nipype.workflow')
 
@@ -26,17 +26,29 @@ def report_crash(node, traceback=None, hostname=None):
     """
     name = node._id
     host = None
-    if node.result and getattr(node.result, 'runtime'):
-        if isinstance(node.result.runtime, list):
-            host = node.result.runtime[0].hostname
+    traceback = traceback or format_exception(*sys.exc_info())
+
+    try:
+        result = node.result
+    except FileNotFoundError:
+        traceback += """
+
+When creating this crashfile, the results file corresponding
+to the node could not be found.""".splitlines(keepends=True)
+    except Exception as exc:
+        traceback += """
+
+During the creation of this crashfile triggered by the above exception,
+another exception occurred:\n\n{}.""".format(exc).splitlines(keepends=True)
+    else:
+        if isinstance(result.runtime, list):
+            host = result.runtime[0].hostname
         else:
-            host = node.result.runtime.hostname
+            host = result.runtime.hostname
 
     # Try everything to fill in the host
     host = host or hostname or gethostname()
     logger.error('Node %s failed to run on host %s.', name, host)
-    if not traceback:
-        traceback = format_exception(*sys.exc_info())
     timeofcrash = strftime('%Y%m%d-%H%M%S')
     try:
         login_name = getpass.getuser()
