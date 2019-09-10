@@ -799,11 +799,11 @@ class AddCSVRow(BaseInterface):
                             '(http://pandas.pydata.org/) to run.'), e)
 
         try:
-            import lockfile as pl
+            from filelock import SoftFileLock
             self._have_lock = True
         except ImportError:
             from warnings import warn
-            warn(('Python module lockfile was not found: AddCSVRow will not be'
+            warn(('Python module filelock was not found: AddCSVRow will not be'
                   ' thread-safe in multi-processor execution'))
 
         input_dict = {}
@@ -822,7 +822,7 @@ class AddCSVRow(BaseInterface):
         df = pd.DataFrame([input_dict])
 
         if self._have_lock:
-            self._lock = pl.FileLock(self.inputs.in_file)
+            self._lock = SoftFileLock(self.inputs.in_file + '.lock')
 
             # Acquire lock
             self._lock.acquire()
@@ -836,13 +836,6 @@ class AddCSVRow(BaseInterface):
 
         if self._have_lock:
             self._lock.release()
-
-        # Using nipype.external.portalocker this might be something like:
-        # with pl.Lock(self.inputs.in_file, timeout=1) as fh:
-        #     if op.exists(fh):
-        #         formerdf = pd.read_csv(fh, index_col=0)
-        #         df = pd.concat([formerdf, df], ignore_index=True)
-        #         df.to_csv(fh)
 
         return runtime
 

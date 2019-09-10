@@ -36,10 +36,6 @@ for each log message.) This can have potentially performance implications. In my
 testing, performance was more than adequate, but if you need a high-volume or
 low-latency solution, I suggest you look elsewhere.
 
-This module currently only support the 'nt' and 'posix' platforms due to the
-usage of the portalocker module.  I do not have access to any other platforms
-for testing, patches are welcome.
-
 See the README file for an example usage of this module.
 
 """
@@ -63,13 +59,7 @@ try:
 except ImportError:
     codecs = None
 
-# Question/TODO: Should we have a fallback mode if we can't load portalocker /
-# we should still be better off than with the standard RotattingFileHandler
-# class, right? We do some rename checking... that should prevent some file
-# clobbering that the builtin class allows.
-
-# sibling  module than handles all the ugly platform-specific details of file locking
-from .portalocker import lock, unlock, LOCK_EX, LOCK_NB, LockException
+from filelock import SoftFileLock
 
 # A client can set this to true to automatically convert relative paths to
 # absolute paths (which will also hide the absolute path warnings)
@@ -168,11 +158,8 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         self.maxBytes = maxBytes
         self.backupCount = backupCount
         # Prevent multiple extensions on the lock file (Only handles the normal "*.log" case.)
-        if filename.endswith(".log"):
-            lock_file = filename[:-4]
-        else:
-            lock_file = filename
-        self.stream_lock = open(lock_file + ".lock", "w")
+        self.lock_file = filename + '.lock'
+        self.stream_lock = SoftFileLock(self.lock_file)
 
         # For debug mode, swap out the "_degrade()" method with a more a verbose one.
         if debug:
@@ -189,7 +176,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         in 'degraded' mode. """
         # handle thread lock
         Handler.acquire(self)
-        lock(self.stream_lock, LOCK_EX)
+        self.stream_lock.acquire()
         if self.stream.closed:
             self._openFile(self.mode)
 
@@ -206,7 +193,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
                 self.stream.close()
         finally:
             try:
-                unlock(self.stream_lock)
+                self.stream_lock.release()
             finally:
                 # release thread lock
                 Handler.release(self)
