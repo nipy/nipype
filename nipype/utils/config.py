@@ -209,7 +209,7 @@ class NipypeConfig(object):
         """Read options file"""
         if not os.path.exists(self.data_file):
             return None
-        with SoftFileLock(self.data_file + '.lock'):
+        with SoftFileLock('%s.lock' % self.data_file):
             with open(self.data_file, 'rt') as file:
                 datadict = load(file)
         if key in datadict:
@@ -220,14 +220,14 @@ class NipypeConfig(object):
         """Store config flie"""
         datadict = {}
         if os.path.exists(self.data_file):
-            with SoftFileLock(self.data_file + '.lock'):
+            with SoftFileLock('%s.lock' % self.data_file):
                 with open(self.data_file, 'rt') as file:
                     datadict = load(file)
         else:
             dirname = os.path.dirname(self.data_file)
             if not os.path.exists(dirname):
                 mkdir_p(dirname)
-        with SoftFileLock(self.data_file + '.lock'):
+        with SoftFileLock('%s.lock' % self.data_file):
             with open(self.data_file, 'wt') as file:
                 datadict[key] = value
                 dump(datadict, file)

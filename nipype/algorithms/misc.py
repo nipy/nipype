@@ -822,7 +822,7 @@ class AddCSVRow(BaseInterface):
         df = pd.DataFrame([input_dict])
 
         if self._have_lock:
-            self._lock = SoftFileLock(self.inputs.in_file + '.lock')
+            self._lock = SoftFileLock('%s.lock' % self.inputs.in_file)
 
             # Acquire lock
             self._lock.acquire()

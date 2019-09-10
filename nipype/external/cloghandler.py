@@ -158,7 +158,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         self.maxBytes = maxBytes
         self.backupCount = backupCount
         # Prevent multiple extensions on the lock file (Only handles the normal "*.log" case.)
-        self.lock_file = filename + '.lock'
+        self.lock_file = '%s.lock' % filename
         self.stream_lock = SoftFileLock(self.lock_file)
 
         # For debug mode, swap out the "_degrade()" method with a more a verbose one.
