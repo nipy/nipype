@@ -274,40 +274,43 @@ def load_resultfile(results_file, resolve=True):
     """
     Load InterfaceResult file from path.
 
-    Parameter
-    ---------
-    path : base_dir of node
-    name : name of node
+    Parameters
+    ----------
+    results_file : pathlike
+        Path to an existing pickle (``result_<interface name>.pklz``) created with
+        ``save_resultfile``.
+        Raises ``FileNotFoundError`` if ``results_file`` does not exist.
+    resolve : bool
+        Determines whether relative paths will be resolved to absolute (default is ``True``).
 
     Returns
     -------
-    result : InterfaceResult structure
+    result : InterfaceResult
+        A Nipype object containing the runtime, inputs, outputs and other interface information
+        such as a traceback in the case of errors.
 
     """
     results_file = Path(results_file)
-
     if not results_file.exists():
         raise FileNotFoundError(results_file)
 
-    with indirectory(str(results_file.parent)):
-        result = loadpkl(results_file)
+    result = loadpkl(results_file)
+    if resolve and result.outputs:
+        try:
+            outputs = result.outputs.get()
+        except TypeError:  # This is a Bunch
+            logger.debug('Outputs object of loaded result %s is a Bunch.', results_file)
+            return result
 
-        if resolve and result.outputs:
-            try:
-                outputs = result.outputs.get()
-            except TypeError:  # This is a Bunch
-                logger.debug('Outputs object of loaded result %s is a Bunch.', results_file)
-                return result
-
-            logger.debug('Resolving paths in outputs loaded from results file.')
-            for trait_name, old in list(outputs.items()):
-                if isdefined(old):
-                    if result.outputs.trait(trait_name).is_trait_type(OutputMultiPath):
-                        old = result.outputs.trait(trait_name).handler.get_value(
-                            result.outputs, trait_name)
-                    value = resolve_path_traits(result.outputs.trait(trait_name), old,
-                                                results_file.parent)
-                    setattr(result.outputs, trait_name, value)
+        logger.debug('Resolving paths in outputs loaded from results file.')
+        for trait_name, old in list(outputs.items()):
+            if isdefined(old):
+                if result.outputs.trait(trait_name).is_trait_type(OutputMultiPath):
+                    old = result.outputs.trait(trait_name).handler.get_value(
+                        result.outputs, trait_name)
+                value = resolve_path_traits(result.outputs.trait(trait_name), old,
+                                            results_file.parent)
+                setattr(result.outputs, trait_name, value)
     return result
 
 

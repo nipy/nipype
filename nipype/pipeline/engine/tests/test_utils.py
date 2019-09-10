@@ -16,7 +16,7 @@ from ... import engine as pe
 from ....interfaces import base as nib
 from ....interfaces import utility as niu
 from .... import config
-from ..utils import clean_working_directory, write_workflow_prov
+from ..utils import clean_working_directory, write_workflow_prov, load_resultfile
 
 
 class InputSpec(nib.TraitedSpec):
@@ -283,3 +283,17 @@ def test_modify_paths_bug(tmpdir):
     assert outputs.out_dict_path == {out_str: out_path}
     assert outputs.out_dict_str == {out_str: out_str}
     assert outputs.out_list == [out_str] * 2
+
+
+def test_save_load_resultfile(tmpdir):
+    tmpdir.chdir()
+
+    spc = pe.Node(StrPathConfuser(in_str='2'), name='spc')
+    spc.base_dir = tmpdir.mkdir('node').strpath
+    result = spc.run()
+
+    loaded_result = load_resultfile(tmpdir.join('node').join('spc').join('result_spc.pklz'))
+
+    assert result.runtime.dictcopy() == loaded_result.runtime.dictcopy()
+    assert result.inputs == loaded_result.inputs
+    assert result.outputs.get() == loaded_result.outputs.get()
