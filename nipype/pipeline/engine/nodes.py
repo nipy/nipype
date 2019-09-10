@@ -195,7 +195,7 @@ class Node(EngineBase):
     def result(self):
         """Get result from result file (do not hold it in memory)"""
         return _load_resultfile(
-            op.join(self.output_dir(), 'result_%s.pklz' % self.name))[0]
+            op.join(self.output_dir(), 'result_%s.pklz' % self.name))
 
     @property
     def inputs(self):
@@ -518,7 +518,7 @@ directory. Please ensure no other concurrent workflows are racing""", hashfile_u
             logger.debug('input: %s', key)
             results_file = info[0]
             logger.debug('results file: %s', results_file)
-            outputs = _load_resultfile(results_file)[0].outputs
+            outputs = _load_resultfile(results_file).outputs
             if outputs is None:
                 raise RuntimeError("""\
 Error populating the input "%s" of node "%s": the results file of the source node \
@@ -565,34 +565,42 @@ Error populating the input "%s" of node "%s": the results file of the source nod
 
     def _load_results(self):
         cwd = self.output_dir()
-        result, aggregate, attribute_error = _load_resultfile(
-            op.join(cwd, 'result_%s.pklz' % self.name))
+
+        try:
+            result = _load_resultfile(
+                op.join(cwd, 'result_%s.pklz' % self.name))
+        except (traits.TraitError, EOFError):
+            logger.debug(
+                'Error populating inputs/outputs, (re)aggregating results...')
+        except (AttributeError, ImportError) as err:
+            logger.debug('attribute error: %s probably using '
+                         'different trait pickled file', str(err))
+            old_inputs = loadpkl(op.join(cwd, '_inputs.pklz'))
+            self.inputs.trait_set(**old_inputs)
+        else:
+            return result
+
         # try aggregating first
-        if aggregate:
-            logger.debug('aggregating results')
-            if attribute_error:
-                old_inputs = loadpkl(op.join(cwd, '_inputs.pklz'))
-                self.inputs.trait_set(**old_inputs)
-            if not isinstance(self, MapNode):
-                self._copyfiles_to_wd(linksonly=True)
-                aggouts = self._interface.aggregate_outputs(
-                    needed_outputs=self.needed_outputs)
-                runtime = Bunch(
-                    cwd=cwd,
-                    returncode=0,
-                    environ=dict(os.environ),
-                    hostname=socket.gethostname())
-                result = InterfaceResult(
-                    interface=self._interface.__class__,
-                    runtime=runtime,
-                    inputs=self._interface.inputs.get_traitsfree(),
-                    outputs=aggouts)
-                _save_resultfile(
-                    result, cwd, self.name,
-                    rebase=str2bool(self.config['execution']['use_relative_paths']))
-            else:
-                logger.debug('aggregating mapnode results')
-                result = self._run_interface()
+        if not isinstance(self, MapNode):
+            self._copyfiles_to_wd(linksonly=True)
+            aggouts = self._interface.aggregate_outputs(
+                needed_outputs=self.needed_outputs)
+            runtime = Bunch(
+                cwd=cwd,
+                returncode=0,
+                environ=dict(os.environ),
+                hostname=socket.gethostname())
+            result = InterfaceResult(
+                interface=self._interface.__class__,
+                runtime=runtime,
+                inputs=self._interface.inputs.get_traitsfree(),
+                outputs=aggouts)
+            _save_resultfile(
+                result, cwd, self.name,
+                rebase=str2bool(self.config['execution']['use_relative_paths']))
+        else:
+            logger.debug('aggregating mapnode results')
+            result = self._run_interface()
         return result
 
     def _run_command(self, execute, copyfiles=True):

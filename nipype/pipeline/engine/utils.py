@@ -38,11 +38,12 @@ from ...utils.filemanip import (
     write_rst_header,
     write_rst_dict,
     write_rst_list,
+    FileNotFoundError,
 )
 from ...utils.misc import str2bool
 from ...utils.functions import create_function_from_source
 from ...interfaces.base.traits_extension import (
-    rebase_path_traits, resolve_path_traits, OutputMultiPath, isdefined, Undefined, traits)
+    rebase_path_traits, resolve_path_traits, OutputMultiPath, isdefined, Undefined)
 from ...interfaces.base.support import Bunch, InterfaceResult
 from ...interfaces.base import CommandLine
 from ...interfaces.utility import IdentityInterface
@@ -281,38 +282,22 @@ def load_resultfile(results_file, resolve=True):
     Returns
     -------
     result : InterfaceResult structure
-    aggregate : boolean indicating whether node should aggregate_outputs
-    attribute error : boolean indicating whether there was some mismatch in
-        versions of traits used to store result and hence node needs to
-        rerun
 
     """
     results_file = Path(results_file)
-    aggregate = True
-    result = None
-    attribute_error = False
 
     if not results_file.exists():
-        return result, aggregate, attribute_error
+        raise FileNotFoundError(results_file)
 
     with indirectory(str(results_file.parent)):
-        try:
-            result = loadpkl(results_file)
-        except (traits.TraitError, EOFError):
-            logger.debug(
-                'some file does not exist. hence trait cannot be set')
-        except (AttributeError, ImportError) as err:
-            attribute_error = True
-            logger.debug('attribute error: %s probably using '
-                         'different trait pickled file', str(err))
-        else:
-            aggregate = False
+        result = loadpkl(results_file)
 
         if resolve and result.outputs:
             try:
                 outputs = result.outputs.get()
             except TypeError:  # This is a Bunch
-                return result, aggregate, attribute_error
+                logger.debug('Outputs object of loaded result %s is a Bunch.', results_file)
+                return result
 
             logger.debug('Resolving paths in outputs loaded from results file.')
             for trait_name, old in list(outputs.items()):
@@ -323,8 +308,7 @@ def load_resultfile(results_file, resolve=True):
                     value = resolve_path_traits(result.outputs.trait(trait_name), old,
                                                 results_file.parent)
                     setattr(result.outputs, trait_name, value)
-
-    return result, aggregate, attribute_error
+    return result
 
 
 def strip_temp(files, wd):
