@@ -164,6 +164,7 @@ REQUIRES = [
     'scipy>=%s,<%s ; python_version <= "3.4"' % (SCIPY_MIN_VERSION, SCIPY_MAX_VERSION_34),
     'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
     'traits>=%s,!=5.0' % TRAITS_MIN_VERSION,
+    'filelock>=3.0.0'
 ]
 
 # neurdflib has to come after prov

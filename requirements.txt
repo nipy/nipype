@@ -16,3 +16,4 @@ python-dateutil>=2.2
 scipy>=0.14
 simplejson>=3.8.0
 traits>=4.6
+filelock>= 3.0.0
