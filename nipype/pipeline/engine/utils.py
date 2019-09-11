@@ -123,7 +123,7 @@ def write_node_report(node, result=None, is_mapnode=False):
 
     cwd = node.output_dir()
     report_file = Path(cwd) / '_report' / 'report.rst'
-    report_file.parent.mkdir(exist_ok=True)
+    report_file.parent.mkdir(exist_ok=True, parents=True)
 
     lines = [
         write_rst_header('Node: %s' % get_print_name(node), level=0),
