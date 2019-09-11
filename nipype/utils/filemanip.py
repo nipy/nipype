@@ -80,7 +80,8 @@ except TypeError:
         Path.write_text = _write_text
 
     try:
-        (Path(gettempdir()) / 'exist_ok_test').mkdir(exist_ok=True)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            (Path(tmpdir) / 'exist_ok_test').mkdir(exist_ok=True)
     except TypeError:
         def _mkdir(self, mode=0o777, parents=False, exist_ok=False):
             if not exist_ok and self.exists():
