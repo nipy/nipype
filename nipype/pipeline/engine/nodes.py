@@ -293,26 +293,28 @@ class Node(EngineBase):
         """
         outdir = self.output_dir()
 
-        # Update hash
-        hashed_inputs, hashvalue = self._get_hashval()
-
         # The output folder does not exist: not cached
-        if not op.exists(outdir):
-            logger.debug('[Node] Directory not found "%s".', outdir)
+        if not op.exists(outdir) or \
+                not op.exists(op.join(outdir, 'result_%s.pklz' % self.name)):
+            logger.debug('[Node] Not cached "%s".', outdir)
             return False, False
 
-        hashfile = op.join(outdir, '_0x%s.json' % hashvalue)
-        cached = op.exists(hashfile)
-
-        # Check if updated
+        # Check if there are hashfiles
         globhashes = glob(op.join(outdir, '_0x*.json'))
         unfinished = [
             path for path in globhashes
             if path.endswith('_unfinished.json')
         ]
         hashfiles = list(set(globhashes) - set(unfinished))
+
+        # Update hash
+        hashed_inputs, hashvalue = self._get_hashval()
+
+        hashfile = op.join(outdir, '_0x%s.json' % hashvalue)
         logger.debug('[Node] Hashes: %s, %s, %s, %s',
                      hashed_inputs, hashvalue, hashfile, hashfiles)
+
+        cached = hashfile in hashfiles
 
         # No previous hashfiles found, we're all set.
         if cached and len(hashfiles) == 1:
@@ -387,17 +389,17 @@ class Node(EngineBase):
         return cached, self._hashvalue, hashfile, self._hashed_inputs
 
     def run(self, updatehash=False):
-        """Execute the node in its directory.
+        """
+        Execute the node in its directory.
 
         Parameters
         ----------
-
         updatehash: boolean
             When the hash stored in the output directory as a result of a previous run
             does not match that calculated for this execution, updatehash=True only
             updates the hash without re-running.
-        """
 
+        """
         if self.config is None:
             self.config = {}
         self.config = merge_dict(deepcopy(config._sections), self.config)
@@ -441,6 +443,11 @@ class Node(EngineBase):
             for outdatedhash in glob(op.join(self.output_dir(), '_0x*.json')):
                 os.remove(outdatedhash)
 
+        # _get_hashval needs to be called before running. When there is a valid (or seemingly
+        # valid cache), the is_cached() member updates the hashval via _get_hashval.
+        # However, if this node's folder doesn't exist or the result file is not found, then
+        # the hashval needs to be generated here. See #3026 for a larger context.
+        self._get_hashval()
         # Hashfile while running
         hashfile_unfinished = op.join(
             outdir, '_0x%s_unfinished.json' % self._hashvalue)
