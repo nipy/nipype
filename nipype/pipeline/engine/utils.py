@@ -38,11 +38,12 @@ from ...utils.filemanip import (
     write_rst_header,
     write_rst_dict,
     write_rst_list,
+    FileNotFoundError,
 )
 from ...utils.misc import str2bool
 from ...utils.functions import create_function_from_source
 from ...interfaces.base.traits_extension import (
-    rebase_path_traits, resolve_path_traits, OutputMultiPath, isdefined, Undefined, traits)
+    rebase_path_traits, resolve_path_traits, OutputMultiPath, isdefined, Undefined)
 from ...interfaces.base.support import Bunch, InterfaceResult
 from ...interfaces.base import CommandLine
 from ...interfaces.utility import IdentityInterface
@@ -249,6 +250,10 @@ def save_resultfile(result, cwd, name, rebase=None):
         savepkl(resultsfile, result)
         return
 
+    if not rebase:
+        savepkl(resultsfile, result)
+        return
+
     backup_traits = {}
     try:
         with indirectory(cwd):
@@ -273,58 +278,44 @@ def load_resultfile(results_file, resolve=True):
     """
     Load InterfaceResult file from path.
 
-    Parameter
-    ---------
-    path : base_dir of node
-    name : name of node
+    Parameters
+    ----------
+    results_file : pathlike
+        Path to an existing pickle (``result_<interface name>.pklz``) created with
+        ``save_resultfile``.
+        Raises ``FileNotFoundError`` if ``results_file`` does not exist.
+    resolve : bool
+        Determines whether relative paths will be resolved to absolute (default is ``True``).
 
     Returns
     -------
-    result : InterfaceResult structure
-    aggregate : boolean indicating whether node should aggregate_outputs
-    attribute error : boolean indicating whether there was some mismatch in
-        versions of traits used to store result and hence node needs to
-        rerun
+    result : InterfaceResult
+        A Nipype object containing the runtime, inputs, outputs and other interface information
+        such as a traceback in the case of errors.
 
     """
     results_file = Path(results_file)
-    aggregate = True
-    result = None
-    attribute_error = False
-
     if not results_file.exists():
-        return result, aggregate, attribute_error
+        raise FileNotFoundError(results_file)
 
-    with indirectory(str(results_file.parent)):
+    result = loadpkl(results_file)
+    if resolve and result.outputs:
         try:
-            result = loadpkl(results_file)
-        except (traits.TraitError, EOFError):
-            logger.debug(
-                'some file does not exist. hence trait cannot be set')
-        except (AttributeError, ImportError) as err:
-            attribute_error = True
-            logger.debug('attribute error: %s probably using '
-                         'different trait pickled file', str(err))
-        else:
-            aggregate = False
+            outputs = result.outputs.get()
+        except TypeError:  # This is a Bunch
+            logger.debug('Outputs object of loaded result %s is a Bunch.', results_file)
+            return result
 
-        if resolve and result.outputs:
-            try:
-                outputs = result.outputs.get()
-            except TypeError:  # This is a Bunch
-                return result, aggregate, attribute_error
-
-            logger.debug('Resolving paths in outputs loaded from results file.')
-            for trait_name, old in list(outputs.items()):
-                if isdefined(old):
-                    if result.outputs.trait(trait_name).is_trait_type(OutputMultiPath):
-                        old = result.outputs.trait(trait_name).handler.get_value(
-                            result.outputs, trait_name)
-                    value = resolve_path_traits(result.outputs.trait(trait_name), old,
-                                                results_file.parent)
-                    setattr(result.outputs, trait_name, value)
-
-    return result, aggregate, attribute_error
+        logger.debug('Resolving paths in outputs loaded from results file.')
+        for trait_name, old in list(outputs.items()):
+            if isdefined(old):
+                if result.outputs.trait(trait_name).is_trait_type(OutputMultiPath):
+                    old = result.outputs.trait(trait_name).handler.get_value(
+                        result.outputs, trait_name)
+                value = resolve_path_traits(result.outputs.trait(trait_name), old,
+                                            results_file.parent)
+                setattr(result.outputs, trait_name, value)
+    return result
 
 
 def strip_temp(files, wd):
