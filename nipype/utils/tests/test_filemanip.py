@@ -596,3 +596,19 @@ def test_pickle(tmp_path, save_versioning):
     savepkl(pickle_fname, testobj, versioning=save_versioning)
     outobj = loadpkl(pickle_fname)
     assert outobj == testobj
+
+
+def test_Path(tmpdir):
+    tmp_path = Path(tmpdir.strpath)
+
+    (tmp_path / 'textfile').write_text('some text')
+
+    with pytest.raises(OSError):
+        (tmp_path / 'no' / 'parents').mkdir(parents=False)
+
+    (tmp_path / 'no' / 'parents').mkdir(parents=True)
+
+    with pytest.raises(OSError):
+        (tmp_path / 'no' / 'parents').mkdir(parents=False)
+
+    (tmp_path / 'no' / 'parents').mkdir(parents=True, exist_ok=True)

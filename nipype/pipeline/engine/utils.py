@@ -116,68 +116,60 @@ def nodelist_runner(nodes, updatehash=False, stop_first=False):
             yield i, result, err
 
 
-def write_report(node, report_type=None, is_mapnode=False):
-    """Write a report file for a node"""
+def write_node_report(node, result=None, is_mapnode=False):
+    """Write a report file for a node."""
     if not str2bool(node.config['execution']['create_report']):
         return
 
-    if report_type not in ['preexec', 'postexec']:
-        logger.warning('[Node] Unknown report type "%s".', report_type)
-        return
-
     cwd = node.output_dir()
-    report_dir = os.path.join(cwd, '_report')
-    report_file = os.path.join(report_dir, 'report.rst')
-    makedirs(report_dir, exist_ok=True)
-
-    logger.debug('[Node] Writing %s-exec report to "%s"', report_type[:-4],
-                 report_file)
-    if report_type.startswith('pre'):
-        lines = [
-            write_rst_header('Node: %s' % get_print_name(node), level=0),
-            write_rst_list(
-                ['Hierarchy : %s' % node.fullname,
-                 'Exec ID : %s' % node._id]),
-            write_rst_header('Original Inputs', level=1),
-            write_rst_dict(node.inputs.trait_get()),
-        ]
-        with open(report_file, 'wt') as fp:
-            fp.write('\n'.join(lines))
-        return
+    report_file = Path(cwd) / '_report' / 'report.rst'
+    report_file.parent.mkdir(exist_ok=True, parents=True)
 
     lines = [
-        write_rst_header('Execution Inputs', level=1),
+        write_rst_header('Node: %s' % get_print_name(node), level=0),
+        write_rst_list(
+            ['Hierarchy : %s' % node.fullname,
+             'Exec ID : %s' % node._id]),
+        write_rst_header('Original Inputs', level=1),
         write_rst_dict(node.inputs.trait_get()),
     ]
 
-    result = node.result  # Locally cache result
-    outputs = result.outputs
-
-    if outputs is None:
-        with open(report_file, 'at') as fp:
-            fp.write('\n'.join(lines))
+    if result is None:
+        logger.debug('[Node] Writing pre-exec report to "%s"', report_file)
+        report_file.write_text('\n'.join(lines))
         return
 
-    lines.append(write_rst_header('Execution Outputs', level=1))
+    logger.debug('[Node] Writing post-exec report to "%s"', report_file)
+    lines += [
+        write_rst_header('Execution Inputs', level=1),
+        write_rst_dict(node.inputs.trait_get()),
+        write_rst_header('Execution Outputs', level=1)
+    ]
+
+    outputs = result.outputs
+    if outputs is None:
+        lines += ['None']
+        report_file.write_text('\n'.join(lines))
+        return
 
     if isinstance(outputs, Bunch):
         lines.append(write_rst_dict(outputs.dictcopy()))
     elif outputs:
         lines.append(write_rst_dict(outputs.trait_get()))
+    else:
+        lines += ['Outputs object was empty.']
 
     if is_mapnode:
         lines.append(write_rst_header('Subnode reports', level=1))
         nitems = len(ensure_list(getattr(node.inputs, node.iterfield[0])))
         subnode_report_files = []
         for i in range(nitems):
-            nodecwd = os.path.join(cwd, 'mapflow', '_%s%d' % (node.name, i),
-                                   '_report', 'report.rst')
-            subnode_report_files.append('subnode %d : %s' % (i, nodecwd))
+            subnode_file = Path(cwd) / 'mapflow' / (
+                '_%s%d' % (node.name, i)) / '_report' / 'report.rst'
+            subnode_report_files.append('subnode %d : %s' % (i, subnode_file))
 
         lines.append(write_rst_list(subnode_report_files))
-
-        with open(report_file, 'at') as fp:
-            fp.write('\n'.join(lines))
+        report_file.write_text('\n'.join(lines))
         return
 
     lines.append(write_rst_header('Runtime info', level=1))
@@ -189,15 +181,9 @@ def write_report(node, report_type=None, is_mapnode=False):
         'prev_wd': getattr(result.runtime, 'prevcwd', '<not-set>'),
     }
 
-    if hasattr(result.runtime, 'cmdline'):
-        rst_dict['command'] = result.runtime.cmdline
-
-    # Try and insert memory/threads usage if available
-    if hasattr(result.runtime, 'mem_peak_gb'):
-        rst_dict['mem_peak_gb'] = result.runtime.mem_peak_gb
-
-    if hasattr(result.runtime, 'cpu_percent'):
-        rst_dict['cpu_percent'] = result.runtime.cpu_percent
+    for prop in ('cmdline', 'mem_peak_gb', 'cpu_percent'):
+        if hasattr(result.runtime, prop):
+            rst_dict[prop] = getattr(result.runtime, prop)
 
     lines.append(write_rst_dict(rst_dict))
 
@@ -225,9 +211,17 @@ def write_report(node, report_type=None, is_mapnode=False):
             write_rst_dict(result.runtime.environ),
         ]
 
-    with open(report_file, 'at') as fp:
-        fp.write('\n'.join(lines))
-    return
+    report_file.write_text('\n'.join(lines))
+
+
+def write_report(node, report_type=None, is_mapnode=False):
+    """Write a report file for a node - DEPRECATED"""
+    if report_type not in ('preexec', 'postexec'):
+        logger.warning('[Node] Unknown report type "%s".', report_type)
+        return
+
+    write_node_report(node, is_mapnode=is_mapnode,
+                      result=node.result if report_type == 'postexec' else None)
 
 
 def save_resultfile(result, cwd, name, rebase=None):

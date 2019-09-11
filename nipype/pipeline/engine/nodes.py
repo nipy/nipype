@@ -37,7 +37,7 @@ from ...interfaces.base.specs import get_filecopy_info
 from .utils import (
     _parameterization_dir, save_hashfile as _save_hashfile, load_resultfile as
     _load_resultfile, save_resultfile as _save_resultfile, nodelist_runner as
-    _node_runner, strip_temp as _strip_temp, write_report,
+    _node_runner, strip_temp as _strip_temp, write_node_report,
     clean_working_directory, merge_dict, evaluate_connect_function)
 from .base import EngineBase
 
@@ -464,8 +464,7 @@ class Node(EngineBase):
 
         # Store runtime-hashfile, pre-execution report, the node and the inputs set.
         _save_hashfile(hashfile_unfinished, self._hashed_inputs)
-        write_report(
-            self, report_type='preexec', is_mapnode=isinstance(self, MapNode))
+        write_node_report(self, is_mapnode=isinstance(self, MapNode))
         savepkl(op.join(outdir, '_node.pklz'), self)
         savepkl(op.join(outdir, '_inputs.pklz'), self.inputs.get_traitsfree())
 
@@ -484,8 +483,7 @@ directory. Please ensure no other concurrent workflows are racing""", hashfile_u
         # Tear-up after success
         shutil.move(hashfile_unfinished,
                     hashfile_unfinished.replace('_unfinished', ''))
-        write_report(
-            self, report_type='postexec', is_mapnode=isinstance(self, MapNode))
+        write_node_report(self, result=result, is_mapnode=isinstance(self, MapNode))
         logger.info('[Node] Finished "%s".', self.fullname)
         return result
 
@@ -1204,7 +1202,7 @@ class MapNode(Node):
         """Generate subnodes of a mapnode and write pre-execution report"""
         self._get_inputs()
         self._check_iterfield()
-        write_report(self, report_type='preexec', is_mapnode=True)
+        write_node_report(self, result=None, is_mapnode=True)
         return [node for _, node in self._make_nodes()]
 
     def num_subnodes(self):
