@@ -314,7 +314,7 @@ class Node(EngineBase):
         logger.debug('[Node] Hashes: %s, %s, %s, %s',
                      hashed_inputs, hashvalue, hashfile, hashfiles)
 
-        cached = op.exists(hashfile)
+        cached = hashfile in hashfiles
 
         # No previous hashfiles found, we're all set.
         if cached and len(hashfiles) == 1:
