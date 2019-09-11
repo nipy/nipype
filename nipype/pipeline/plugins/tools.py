@@ -41,10 +41,11 @@ to the node could not be found.""".splitlines(keepends=True)
 During the creation of this crashfile triggered by the above exception,
 another exception occurred:\n\n{}.""".format(exc).splitlines(keepends=True)
     else:
-        if isinstance(result.runtime, list):
-            host = result.runtime[0].hostname
-        else:
-            host = result.runtime.hostname
+        if getattr(result, 'runtime', None):
+            if isinstance(result.runtime, list):
+                host = result.runtime[0].hostname
+            else:
+                host = result.runtime.hostname
 
     # Try everything to fill in the host
     host = host or hostname or gethostname()
@@ -61,7 +62,7 @@ another exception occurred:\n\n{}.""".format(exc).splitlines(keepends=True)
     makedirs(crashdir, exist_ok=True)
     crashfile = os.path.join(crashdir, crashfile)
 
-    if node.config['execution']['crashfile_format'].lower() in ['text', 'txt']:
+    if node.config['execution']['crashfile_format'].lower() in ('text', 'txt', '.txt'):
         crashfile += '.txt'
     else:
         crashfile += '.pklz'
