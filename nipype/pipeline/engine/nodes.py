@@ -293,26 +293,28 @@ class Node(EngineBase):
         """
         outdir = self.output_dir()
 
-        # Update hash
-        hashed_inputs, hashvalue = self._get_hashval()
-
         # The output folder does not exist: not cached
-        if not op.exists(outdir):
-            logger.debug('[Node] Directory not found "%s".', outdir)
+        if not op.exists(outdir) or \
+                not op.exists(op.join(outdir, 'result_%s.pklz' % self.name)):
+            logger.debug('[Node] Not cached "%s".', outdir)
             return False, False
 
-        hashfile = op.join(outdir, '_0x%s.json' % hashvalue)
-        cached = op.exists(hashfile)
-
-        # Check if updated
+        # Check if there are hashfiles
         globhashes = glob(op.join(outdir, '_0x*.json'))
         unfinished = [
             path for path in globhashes
             if path.endswith('_unfinished.json')
         ]
         hashfiles = list(set(globhashes) - set(unfinished))
+
+        # Update hash
+        hashed_inputs, hashvalue = self._get_hashval()
+
+        hashfile = op.join(outdir, '_0x%s.json' % hashvalue)
         logger.debug('[Node] Hashes: %s, %s, %s, %s',
                      hashed_inputs, hashvalue, hashfile, hashfiles)
+
+        cached = op.exists(hashfile)
 
         # No previous hashfiles found, we're all set.
         if cached and len(hashfiles) == 1:
@@ -441,6 +443,7 @@ class Node(EngineBase):
             for outdatedhash in glob(op.join(self.output_dir(), '_0x*.json')):
                 os.remove(outdatedhash)
 
+        self._get_hashval()
         # Hashfile while running
         hashfile_unfinished = op.join(
             outdir, '_0x%s_unfinished.json' % self._hashvalue)
