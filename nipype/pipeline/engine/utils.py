@@ -250,6 +250,10 @@ def save_resultfile(result, cwd, name, rebase=None):
         savepkl(resultsfile, result)
         return
 
+    if not rebase:
+        savepkl(resultsfile, result)
+        return
+
     backup_traits = {}
     try:
         with indirectory(cwd):
