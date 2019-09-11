@@ -601,8 +601,6 @@ def test_pickle(tmp_path, save_versioning):
 def test_Path(tmpdir):
     tmp_path = Path(tmpdir.strpath)
 
-    assert hasattr(tmp_path, 'write_text')
-
     (tmp_path / 'textfile').write_text('some text')
 
     with pytest.raises(OSError):

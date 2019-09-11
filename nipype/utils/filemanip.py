@@ -57,11 +57,9 @@ except ImportError:
     from pathlib2 import Path
     USING_PATHLIB2 = True
 
-try:
+try: # PY35 - strict mode was added in 3.6
     Path('/invented/file/path').resolve(strict=True)
 except TypeError:
-    from tempfile import gettempdir
-
     def _patch_resolve(self, strict=False):
         """Add the argument strict to signature in Python>3,<3.6."""
         resolved = Path().old_resolve() / self
@@ -72,28 +70,10 @@ except TypeError:
 
     Path.old_resolve = Path.resolve
     Path.resolve = _patch_resolve
-
-    if not hasattr(Path, 'write_text'):
-        def _write_text(self, text):
-            with open(str(self), 'w') as f:
-                f.write(text)
-        Path.write_text = _write_text
-
-    try:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            (Path(tmpdir) / 'exist_ok_test').mkdir(exist_ok=True)
-    except TypeError:
-        def _mkdir(self, mode=0o777, parents=False, exist_ok=False):
-            if not exist_ok and self.exists():
-                raise FileExistsError(str(self))
-            if not parents and not Path(str(self.parents)).exists():
-                raise FileNotFoundError(str(self.parents))
-            os.makedirs(str(self), mode=mode, exist_ok=exist_ok)
-        Path.mkdir = _mkdir
-
 except FileNotFoundError:
     pass
 except OSError:
+    # PY2
     def _patch_resolve(self, strict=False):
         """Raise FileNotFoundError instead of OSError with pathlib2."""
         try:
@@ -105,6 +85,27 @@ except OSError:
 
     Path.old_resolve = Path.resolve
     Path.resolve = _patch_resolve
+
+if not hasattr(Path, 'write_text'):
+    # PY34 - Path does not have write_text
+    def _write_text(self, text):
+        with open(str(self), 'w') as f:
+            f.write(text)
+    Path.write_text = _write_text
+
+if PY3:
+    try:  # PY34 - mkdir does not have exist_ok
+        from tempfile import TemporaryDirectory
+        with TemporaryDirectory() as tmpdir:
+            (Path(tmpdir) / 'exist_ok_test').mkdir(exist_ok=True)
+    except TypeError:
+        def _mkdir(self, mode=0o777, parents=False, exist_ok=False):
+            if parents:
+                os.makedirs(str(self), mode=mode, exist_ok=exist_ok)
+            elif not exist_ok or not self.exists():
+                os.mkdir(str(self), mode=mode)
+
+        Path.mkdir = _mkdir
 
 
 def split_filename(fname):
