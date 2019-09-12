@@ -67,7 +67,7 @@ if config.getboolean('execution', 'check_version'):
     try:
         latest = etelemetry.get_project("nipy/nipype")
     except Exception as e:
-        logger.warning("Could not check for version updates: ", e)
+        logger.warning("Could not check for version updates: \n%s", e)
     finally:
         logger.info(INIT_MSG(packname='nipype',
                              version=__version__,
