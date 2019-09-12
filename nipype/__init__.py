@@ -24,7 +24,7 @@ config = NipypeConfig()
 logging = Logging(config)
 logger = logging.getLogger('nipype.utils')
 
-INIT_MSG = "Running {packname} version {version} latest {latest}".format
+INIT_MSG = "Running {packname} version {version} (latest: {latest})".format
 
 class NipypeTester(object):
     def __call__(self, doctests=True, parallel=False):
@@ -65,7 +65,7 @@ if config.getboolean('execution', 'check_version'):
 
     latest = {"version": 'Unknown'}
     try:
-        latest = etelemetry.get_project("nipy/heudiconv")
+        latest = etelemetry.get_project("nipy/nipype")
     except Exception as e:
         logger.warning("Could not check for version updates: ", e)
     finally:
