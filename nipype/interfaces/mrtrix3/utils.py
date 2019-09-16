@@ -720,6 +720,7 @@ class MRResizeInputSpec(MRTrix3BaseInputSpec):
         'linear',
         'sinc',
         argstr='-interp %s',
+        usedefault=True,
         desc='set the interpolation method to use when resizing (choices: '
         'nearest, linear, cubic, sinc. Default: cubic).',
     )
