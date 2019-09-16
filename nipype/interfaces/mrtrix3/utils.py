@@ -698,20 +698,14 @@ class MRResizeInputSpec(MRTrix3BaseInputSpec):
         (traits.Float, traits.Float, traits.Float),
         argstr='-voxel %g,%g,%g',
         mandatory=True,
-        desc='define the new voxel size for the output image. This can be '
-        'specified either as a single value to be used for all '
-        'dimensions, or as a comma-separated list of the size for each '
-        'voxel dimension.',
+        desc='Desired voxel size in mm for the output image',
         xor=['image_size', 'scale_factor'],
     )
     scale_factor = traits.Tuple(
         (traits.Float, traits.Float, traits.Float),
         argstr='-scale %g,%g,%g',
         mandatory=True,
-        desc='scale the image resolution by the supplied factor. This can be '
-        'specified either as a single value to be used for all '
-        'dimensions, or as a comma-separated list of scale factors for '
-        'each dimension.',
+        desc='Scale factors to rescale the image by in each dimension',
         xor=['image_size', 'voxel_size'],
     )
     interpolation = traits.Enum(
@@ -752,9 +746,17 @@ class MRResize(MRTrix3Base):
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> resize = mrt.MRResize()
     >>> resize.inputs.in_file = 'dwi.mif'
+    >>> resize.inputs.image_size = (256, 256, 144)
+    >>> resize.cmdline                               # doctest: +ELLIPSIS
+    'mrresize -interp cubic -size 256,256,144 dwi.mif dwi_resized.mif'
+    >>> resize.run()                                 # doctest: +SKIP
     >>> resize.inputs.voxel_size = (1, 1, 1)
     >>> resize.cmdline                               # doctest: +ELLIPSIS
-    'mrresize -voxel 1,1,1 dwi.mif dwi_resized.mif'
+    'mrresize -interp cubic -voxel 1,1,1 dwi.mif dwi_resized.mif'
+    >>> resize.run()                                 # doctest: +SKIP
+    >>> resize.inputs.scale_factor = (2.0,2.0,2.0)
+    >>> resize.cmdline                               # doctest: +ELLIPSIS
+    'mrresize -interp cubic -scale 2.0,2.0,2.0 dwi.mif dwi_resized.mif'
     >>> resize.run()                                 # doctest: +SKIP
     """
 
