@@ -587,7 +587,7 @@ class EddyInputSpec(FSLCommandInputSpec):
         default_value="eddy_corrected",
         usedefault=True,
         argstr="--out=%s",
-        desc="Basename for output image",
+        desc="basename for output (warped) image",
     )
     session = File(
         exists=True,
@@ -598,41 +598,34 @@ class EddyInputSpec(FSLCommandInputSpec):
         exists=True,
         argstr="--topup=%s",
         requires=["in_topup_movpar"],
-        desc="Topup results file containing the field coefficients",
+        desc="topup file containing the field coefficients",
     )
     in_topup_movpar = File(
-        exists=True,
-        requires=["in_topup_fieldcoef"],
-        desc="Topup results file containing the movement parameters (movpar.txt)",
+        exists=True, requires=["in_topup_fieldcoef"], desc="topup movpar.txt file"
     )
     field = File(
-        exists=True,
         argstr="--field=%s",
-        desc="Non-topup derived fieldmap scaled in Hz",
+        desc=(
+            "NonTOPUP fieldmap scaled in Hz - filename has "
+            "to be provided without an extension. TOPUP is "
+            "strongly recommended"
+        ),
     )
     field_mat = File(
         exists=True,
         argstr="--field_mat=%s",
-        desc="Matrix specifying the relative positions of "
-        "the fieldmap, --field, and the first volume "
-        "of the input file, --imain",
+        desc=(
+            "Matrix that specifies the relative locations of "
+            "the field specified by --field and first volume "
+            "in file --imain"
+        ),
     )
 
     flm = traits.Enum(
-        "quadratic",
-        "linear",
-        "cubic",
-        usedefault=True,
-        argstr="--flm=%s",
-        desc="First level EC model",
+        "linear", "quadratic", "cubic", argstr="--flm=%s", desc="First level EC model"
     )
     slm = traits.Enum(
-        "none",
-        "linear",
-        "quadratic",
-        usedefault=True,
-        argstr="--slm=%s",
-        desc="Second level EC model",
+        "none", "linear", "quadratic", argstr="--slm=%s", desc="Second level EC model"
     )
     fep = traits.Bool(
         False, argstr="--fep", desc="Fill empty planes in x- or y-directions"
@@ -646,7 +639,6 @@ class EddyInputSpec(FSLCommandInputSpec):
     interp = traits.Enum(
         "spline",
         "trilinear",
-        usedefault=True,
         argstr="--interp=%s",
         desc="Interpolation model for estimation step",
     )
@@ -654,26 +646,26 @@ class EddyInputSpec(FSLCommandInputSpec):
         default_value=1000,
         usedefault=True,
         argstr="--nvoxhp=%s",
-        desc="# of voxels used to estimate the hyperparameters",
+        desc=("# of voxels used to estimate the " "hyperparameters"),
     )
     fudge_factor = traits.Float(
         default_value=10.0,
         usedefault=True,
         argstr="--ff=%s",
-        desc="Fudge factor for hyperparameter error variance",
+        desc=("Fudge factor for hyperparameter " "error variance"),
     )
     dont_sep_offs_move = traits.Bool(
         False,
         argstr="--dont_sep_offs_move",
-        desc="Do NOT attempt to separate field offset from subject movement",
+        desc=("Do NOT attempt to separate " "field offset from subject " "movement"),
     )
     dont_peas = traits.Bool(
         False,
         argstr="--dont_peas",
-        desc="Do NOT perform a post-eddy alignment of shells",
+        desc="Do NOT perform a post-eddy alignment of " "shells",
     )
     fwhm = traits.Float(
-        desc="FWHM for conditioning filter when estimating the parameters",
+        desc=("FWHM for conditioning filter when estimating " "the parameters"),
         argstr="--fwhm=%s",
     )
     niter = traits.Int(
@@ -682,9 +674,8 @@ class EddyInputSpec(FSLCommandInputSpec):
     method = traits.Enum(
         "jac",
         "lsr",
-        usedefault=True,
         argstr="--resamp=%s",
-        desc="Final resampling method (jacobian/least squares)",
+        desc=("Final resampling method (jacobian/least " "squares)"),
     )
 
     repol = traits.Bool(
@@ -725,50 +716,49 @@ class EddyInputSpec(FSLCommandInputSpec):
         requires=["repol"],
         min_ver="5.0.10",
     )
-    multiband_factor = traits.Int(
-        argstr="--mb=%s", desc="Multi-band factor", min_ver="5.0.10"
-    )
-    multiband_offset = traits.Enum(
+    mb = traits.Int(argstr="--mb=%s", desc="Multi-band factor", min_ver="5.0.10")
+    mb_offs = traits.Enum(
         0,
         1,
         -1,
-        argstr="--mb_offs=%d",
-        desc="Multi-band offset (-1 if bottom slice removed, 1 if top slice removed",
-        requires=["multiband_factor"],
+        argstr="--mb_offs=%s",
+        desc=(
+            "Multi-band offset (-1 if bottom slice removed, 1 if " "top slice removed"
+        ),
+        requires=["mb"],
         min_ver="5.0.10",
     )
 
     mporder = traits.Int(
         argstr="--mporder=%s",
         desc="Order of slice-to-vol movement model",
-        requires=["use_cuda"],
+        requires=["slspec"],
         min_ver="5.0.11",
     )
-    slice2vol_niter = traits.Int(
-        argstr="--s2v_niter=%d",
+    s2v_niter = traits.Int(
+        argstr="--s2v_niter=%s",
         desc="Number of iterations for slice-to-vol",
-        requires=["mporder"],
+        requires=["slspec"],
         min_ver="5.0.11",
     )
-    slice2vol_lambda = traits.Int(
-        argstr="--s2v_lambda=%d",
+    s2v_lambda = traits.Int(
+        agstr="--s2v_lambda",
         desc="Regularisation weight for slice-to-vol movement (reasonable range 1-10)",
-        requires=["mporder"],
+        requires=["slspec"],
         min_ver="5.0.11",
     )
-    slice2vol_interp = traits.Enum(
+    s2v_interp = traits.Enum(
         "trilinear",
         "spline",
         argstr="--s2v_interp=%s",
         desc="Slice-to-vol interpolation model for estimation step",
-        requires=["mporder"],
+        requires=["slspec"],
         min_ver="5.0.11",
     )
-    slice_order = traits.File(
+    slspec = traits.File(
         exists=True,
         argstr="--slspec=%s",
         desc="Name of text file completely specifying slice/group acquisition",
-        requires=["mporder"],
         xor=["json"],
         min_ver="5.0.11",
     )
@@ -776,8 +766,7 @@ class EddyInputSpec(FSLCommandInputSpec):
         exists=True,
         argstr="--json=%s",
         desc="Name of .json text file with information about slice timing",
-        requires=["mporder"],
-        xor=["slice_order"],
+        xor=["slspec"],
         min_ver="6.0.1",
     )
 
@@ -812,9 +801,11 @@ class EddyInputSpec(FSLCommandInputSpec):
     is_shelled = traits.Bool(
         False,
         argstr="--data_is_shelled",
-        desc="Override internal check to ensure that "
-        "date are acquired on a set of b-value "
-        "shells",
+        desc=(
+            "Override internal check to ensure that "
+            "date are acquired on a set of b-value "
+            "shells"
+        ),
     )
 
     use_cuda = traits.Bool(False, desc="Run eddy using cuda gpu")
@@ -832,8 +823,9 @@ class EddyOutputSpec(TraitedSpec):
     )
     out_parameter = File(
         exists=True,
-        desc="Text file with parameters defining the field and"
-        "movement for each scan",
+        desc=(
+            "Text file with parameters defining the field and" "movement for each scan"
+        ),
     )
     out_rotated_bvecs = File(
         exists=True, desc="File containing rotated b-values for all volumes"
@@ -848,56 +840,74 @@ class EddyOutputSpec(TraitedSpec):
     )
     out_shell_alignment_parameters = File(
         exists=True,
-        desc="Text file containing rigid body movement parameters "
-        "between the different shells as estimated by a "
-        "post-hoc mutual information based registration",
+        desc=(
+            "Text file containing rigid body movement parameters "
+            "between the different shells as estimated by a "
+            "post-hoc mutual information based registration"
+        ),
     )
     out_shell_pe_translation_parameters = File(
         exists=True,
-        desc="Text file containing translation along the PE-direction "
-        "between the different shells as estimated by a "
-        "post-hoc mutual information based registration",
+        desc=(
+            "Text file containing translation along the PE-direction "
+            "between the different shells as estimated by a "
+            "post-hoc mutual information based registration"
+        ),
     )
     out_shell_pe_translation_parameters = File(
         exists=True,
-        desc="Text file containing translation along the PE-direction "
-        "between the different shells as estimated by a "
-        "post-hoc mutual information based registration",
+        desc=(
+            "Text file containing translation along the PE-direction "
+            "between the different shells as estimated by a "
+            "post-hoc mutual information based registration"
+        ),
     )
     out_outlier_map = File(
         exists=True,
-        desc="Matrix where rows represent volumes and columns represent "
-        'slices. "0" indicates that scan-slice is not an outlier '
-        'and "1" indicates that it is',
+        desc=(
+            "Matrix where rows represent volumes and columns represent "
+            'slices. "0" indicates that scan-slice is not an outlier '
+            'and "1" indicates that it is'
+        ),
     )
     out_outlier_n_stdev_map = File(
         exists=True,
-        desc="Matrix where rows represent volumes and columns represent "
-        "slices. Values indicate number of standard deviations off the "
-        "mean difference between observation and prediction is",
+        desc=(
+            "Matrix where rows represent volumes and columns represent "
+            "slices. Values indicate number of standard deviations off the "
+            "mean difference between observation and prediction is"
+        ),
     )
     out_outlier_n_sqr_stdev_map = File(
         exists=True,
-        desc="Matrix where rows represent volumes and columns represent "
-        "slices. Values indicate number of standard deivations off the "
-        "square root of the mean squared difference between observation "
-        "and prediction is",
+        desc=(
+            "Matrix where rows represent volumes and columns represent "
+            "slices. Values indicate number of standard deivations off the "
+            "square root of the mean squared difference between observation "
+            "and prediction is"
+        ),
     )
     out_outlier_report = File(
         exists=True,
-        desc="Text file with a plain language report on what "
-        "outlier slices eddy has found",
+        desc=(
+            "Text file with a plain language report on what "
+            "outlier slices eddy has found"
+        ),
     )
     out_outlier_free = File(
         exists=True,
-        desc="4D image file not corrected for susceptibility or eddy-"
-        "current distortions or subject movement but with outlier "
-        "slices replaced",
+        desc=(
+            "4D image file not corrected for susceptibility or eddy-"
+            "current distortions or subject movement but with outlier "
+            "slices replaced"
+        ),
     )
     out_movement_over_time = File(
         exists=True,
-        desc="Text file containing translations (mm) and rotations "
-        "(radians) for each excitation",
+        desc=(
+            "Text file containing translations (mm) and rotations "
+            "(radians) for each excitation"
+        ),
     )
     out_cnr_maps = File(exists=True, desc="path/name of file with the cnr_maps")
     out_residuals = File(exists=True, desc="path/name of file with the residuals")
@@ -934,27 +944,15 @@ class Eddy(FSLCommand):
     Running eddy on an Nvidia GPU using cuda:
     >>> eddy.inputs.use_cuda = True
     >>> eddy.cmdline # doctest: +ELLIPSIS
-    'eddy_cuda --flm=quadratic --ff=10.0 \
---acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
---imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
---interp=spline --resamp=jac --niter=5 --nvoxhp=1000 \
---out=.../eddy_corrected --slm=none'
-
-    Running eddy with slice-to-volume motion correction:
-    >>> eddy.inputs.mporder = 6
-    >>> eddy.inputs.slice2vol_niter = 5
-    >>> eddy.inputs.slice2vol_lambda = 1
-    >>> eddy.inputs.slice2vol_interp = 'trilinear'
-    >>> eddy.inputs.slice_order = 'epi_slspec.txt'
-    >>> eddy.cmdline          # doctest: +ELLIPSIS
-    'eddy_cuda --flm=quadratic --ff=10.0 \
---acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
---imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
---interp=spline --resamp=jac --mporder=6 --niter=5 --nvoxhp=1000 \
---out=.../eddy_corrected --s2v_interp=trilinear --s2v_lambda=1 \
---s2v_niter=5 --slspec=epi_slspec.txt --slm=none'
-    >>> res = eddy.run()     # doctest: +SKIP
-
+    'eddy_cuda --ff=10.0 --fwhm=0 --acqp=epi_acqp.txt --bvals=bvals.scheme \
+--bvecs=bvecs.scheme --imain=epi.nii --index=epi_index.txt \
+--mask=epi_mask.nii --niter=5 --nvoxhp=1000 --out=.../eddy_corrected'
+    >>> eddy.inputs.use_cuda = False
+    >>> eddy.cmdline # doctest: +ELLIPSIS
+    'eddy_openmp --ff=10.0 --fwhm=0 --acqp=epi_acqp.txt --bvals=bvals.scheme \
+--bvecs=bvecs.scheme --imain=epi.nii --index=epi_index.txt \
+--mask=epi_mask.nii --niter=5 --nvoxhp=1000 --out=.../eddy_corrected'
+    >>> res = eddy.run() # doctest: +SKIP
     """
 
     _cmd = "eddy_openmp"
