@@ -22,7 +22,9 @@ except (ImportError, IOError) as e:
 
 config = NipypeConfig()
 logging = Logging(config)
+logger = logging.getLogger('nipype.utils')
 
+INIT_MSG = "Running {packname} version {version} (latest: {latest})".format
 
 class NipypeTester(object):
     def __call__(self, doctests=True, parallel=False):
@@ -56,3 +58,17 @@ def get_info():
 from .pipeline import Node, MapNode, JoinNode, Workflow
 from .interfaces import (DataGrabber, DataSink, SelectFiles, IdentityInterface,
                          Rename, Function, Select, Merge)
+
+
+if config.getboolean('execution', 'check_version'):
+    import etelemetry
+
+    latest = {"version": 'Unknown'}
+    try:
+        latest = etelemetry.get_project("nipy/nipype")
+    except Exception as e:
+        logger.warning("Could not check for version updates: \n%s", e)
+    finally:
+        logger.info(INIT_MSG(packname='nipype',
+                             version=__version__,
+                             latest=latest["version"]))

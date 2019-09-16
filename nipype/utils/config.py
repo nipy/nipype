@@ -68,6 +68,7 @@ write_provenance = false
 parameterize_dirs = true
 poll_sleep_duration = 2
 xvfb_max_wait = 10
+check_version = true
 
 [monitoring]
 enabled = false
