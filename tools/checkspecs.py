@@ -31,7 +31,7 @@ class InterfaceChecker(object):
                  package_skip_patterns=None,
                  module_skip_patterns=None,
                  class_skip_patterns=None):
-        ''' Initialize package for parsing
+        r''' Initialize package for parsing
 
         Parameters
         ----------
@@ -200,7 +200,7 @@ class InterfaceChecker(object):
             'position', 'mandatory', 'copyfile', 'usedefault', 'sep',
             'hash_files', 'deprecated', 'new_name', 'min_ver', 'max_ver',
             'name_source', 'name_template', 'keep_extension', 'units',
-            'output_name'
+            'output_name', 'extensions'
         ]
         in_built = [
             'type', 'copy', 'parent', 'instance_handler', 'comparison_mode',
