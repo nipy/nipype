@@ -521,8 +521,7 @@ class EddyInputSpec(FSLCommandInputSpec):
         exists=True,
         mandatory=True,
         argstr='--imain=%s',
-        desc=('File containing all the images to estimate '
-              'distortions for'))
+        desc='File containing all the images to estimate distortions for')
     in_mask = File(
         exists=True,
         mandatory=True,
@@ -543,30 +542,26 @@ class EddyInputSpec(FSLCommandInputSpec):
         exists=True,
         mandatory=True,
         argstr='--bvecs=%s',
-        desc=('File containing the b-vectors for all volumes in '
-              '--imain'))
+        desc='File containing the b-vectors for all volumes in --imain')
     in_bval = File(
         exists=True,
         mandatory=True,
         argstr='--bvals=%s',
-        desc=('File containing the b-values for all volumes in '
-              '--imain'))
+        desc='File containing the b-values for all volumes in --imain')
     out_base = traits.Str(
-        'eddy_corrected',
-        argstr='--out=%s',
+        default_value='eddy_corrected',
         usedefault=True,
-        desc=('basename for output (warped) image'))
+        argstr='--out=%s',
+        desc='basename for output (warped) image')
     session = File(
         exists=True,
         argstr='--session=%s',
-        desc=('File containing session indices for all volumes in '
-              '--imain'))
+        desc='File containing session indices for all volumes in --imain')
     in_topup_fieldcoef = File(
         exists=True,
         argstr='--topup=%s',
         requires=['in_topup_movpar'],
-        desc=('topup file containing the field '
-              'coefficients'))
+        desc='topup file containing the field coefficients')
     in_topup_movpar = File(
         exists=True,
         requires=['in_topup_fieldcoef'],
@@ -608,12 +603,14 @@ class EddyInputSpec(FSLCommandInputSpec):
         argstr='--interp=%s',
         desc='Interpolation model for estimation step')
     nvoxhp = traits.Int(
-        1000, usedefault=True,
+        default_value=1000,
+        usedefault=True,
         argstr='--nvoxhp=%s',
         desc=('# of voxels used to estimate the '
               'hyperparameters'))
     fudge_factor = traits.Float(
-        10.0, usedefault=True,
+        default_value=10.0,
+        usedefault=True,
         argstr='--ff=%s',
         desc=('Fudge factor for hyperparameter '
               'error variance'))
@@ -767,7 +764,7 @@ class EddyOutputSpec(TraitedSpec):
         exists=True, desc='4D image file containing all the corrected volumes')
     out_parameter = File(
         exists=True,
-        desc=('text file with parameters definining the field and'
+        desc=('Text file with parameters defining the field and'
               'movement for each scan'))
     out_rotated_bvecs = File(
         exists=True, desc='File containing rotated b-values for all volumes')
@@ -779,7 +776,12 @@ class EddyOutputSpec(TraitedSpec):
               'disregarding translation in the PE direction'))
     out_shell_alignment_parameters = File(
         exists=True,
-        desc=('File containing rigid body movement parameters '
+        desc=('Text file containing rigid body movement parameters '
+              'between the different shells as estimated by a '
+              'post-hoc mutual information based registration'))
+    out_shell_pe_translation_parameters = File(
+        exists=True,
+        desc=('Text file containing translation along the PE-direction '
               'between the different shells as estimated by a '
               'post-hoc mutual information based registration'))
     out_shell_pe_translation_parameters = File(
@@ -805,7 +807,7 @@ class EddyOutputSpec(TraitedSpec):
               'and prediction is'))
     out_outlier_report = File(
         exists=True,
-        desc=('Text-file with a plain language report on what '
+        desc=('Text file with a plain language report on what '
               'outlier slices eddy has found'))
     out_outlier_free = File(
         exists=True,
@@ -826,9 +828,9 @@ class Eddy(FSLCommand):
     """
     Interface for FSL eddy, a tool for estimating and correcting eddy
     currents induced distortions. `User guide
-    <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Eddy/UsersGuide>`_ and
+    <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy/UsersGuide>`_ and
     `more info regarding acqp file
-    <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy/Faq#How_do_I_know_what_to_put_into_my_--acqp_file>`_.
+    <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy/Faq#How_do_I_know_what_to_put_into_my_--acqp_file.3F>`_.
 
     Examples
     --------
@@ -843,12 +845,12 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.in_bval  = 'bvals.scheme'
     >>> eddy.inputs.use_cuda = True
     >>> eddy.cmdline # doctest: +ELLIPSIS
-    'eddy_cuda --ff=10.0 --acqp=epi_acqp.txt --bvals=bvals.scheme \
+    'eddy_cuda --ff=10.0 --fwhm=0 --acqp=epi_acqp.txt --bvals=bvals.scheme \
 --bvecs=bvecs.scheme --imain=epi.nii --index=epi_index.txt \
 --mask=epi_mask.nii --niter=5 --nvoxhp=1000 --out=.../eddy_corrected'
     >>> eddy.inputs.use_cuda = False
     >>> eddy.cmdline # doctest: +ELLIPSIS
-    'eddy_openmp --ff=10.0 --acqp=epi_acqp.txt --bvals=bvals.scheme \
+    'eddy_openmp --ff=10.0 --fwhm=0 --acqp=epi_acqp.txt --bvals=bvals.scheme \
 --bvecs=bvecs.scheme --imain=epi.nii --index=epi_index.txt \
 --mask=epi_mask.nii --niter=5 --nvoxhp=1000 --out=.../eddy_corrected'
     >>> res = eddy.run() # doctest: +SKIP

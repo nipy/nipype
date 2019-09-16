@@ -28,13 +28,17 @@ def test_Eddy_inputs():
         field_mat=dict(
             argstr='--field_mat=%s',
             extensions=None,
+            requires=['field'],
         ),
         flm=dict(argstr='--flm=%s', ),
         fudge_factor=dict(
             argstr='--ff=%s',
             usedefault=True,
         ),
-        fwhm=dict(argstr='--fwhm=%s', ),
+        fwhm=dict(
+            argstr='--fwhm=%s',
+            usedefault=True,
+        ),
         in_acqp=dict(
             argstr='--acqp=%s',
             extensions=None,
