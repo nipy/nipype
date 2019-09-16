@@ -691,7 +691,7 @@ class MRResizeInputSpec(MRTrix3BaseInputSpec):
         (traits.Int, traits.Int, traits.Int),
         argstr='-size %d,%d,%d',
         mandatory=True,
-        desc='Number of voxels in each dimension of output image'
+        desc='Number of voxels in each dimension of output image',
         xor=['voxel_size', 'scale_factor'],
     )
     voxel_size = traits.Tuple(
@@ -744,20 +744,30 @@ class MRResize(MRTrix3Base):
     Example
     -------
     >>> import nipype.interfaces.mrtrix3 as mrt
-    >>> resize = mrt.MRResize()
-    >>> resize.inputs.in_file = 'dwi.mif'
-    >>> resize.inputs.image_size = (256, 256, 144)
-    >>> resize.cmdline                               # doctest: +ELLIPSIS
-    'mrresize -interp cubic -size 256,256,144 dwi.mif dwi_resized.mif'
-    >>> resize.run()                                 # doctest: +SKIP
-    >>> resize.inputs.voxel_size = (1, 1, 1)
-    >>> resize.cmdline                               # doctest: +ELLIPSIS
+
+    Defining the new image resolution:
+    >>> image_resize = mrt.MRResize()
+    >>> image_resize.inputs.in_file = 'dwi.mif'
+    >>> image_resize.inputs.image_size = (256, 256, 144)
+    >>> image_resize.cmdline                               # doctest: +ELLIPSIS
+    'mrresize -size 256,256,144 -interp cubic dwi.mif dwi_resized.mif'
+    >>> image_resize.run()                                 # doctest: +SKIP
+
+    Defining the new image's voxel size:
+    >>> voxel_resize = mrt.MRResize()
+    >>> voxel_resize.inputs.in_file = 'dwi.mif'
+    >>> voxel_resize.inputs.voxel_size = (1, 1, 1)
+    >>> voxel_resize.cmdline                               # doctest: +ELLIPSIS
     'mrresize -interp cubic -voxel 1,1,1 dwi.mif dwi_resized.mif'
-    >>> resize.run()                                 # doctest: +SKIP
-    >>> resize.inputs.scale_factor = (2.0,2.0,2.0)
-    >>> resize.cmdline                               # doctest: +ELLIPSIS
-    'mrresize -interp cubic -scale 2.0,2.0,2.0 dwi.mif dwi_resized.mif'
-    >>> resize.run()                                 # doctest: +SKIP
+    >>> voxel_resize.run()                                 # doctest: +SKIP
+
+    Defining the scale factor of each image dimension:
+    >>> scale_resize = mrt.MRResize()
+    >>> scale_resize.inputs.in_file = 'dwi.mif'
+    >>> scale_resize.inputs.scale_factor = (0.5,0.5,0.5)
+    >>> scale_resize.cmdline                               # doctest: +ELLIPSIS
+    'mrresize -interp cubic -scale 0.5,0.5,0.5 dwi.mif dwi_resized.mif'
+    >>> scale_resize.run()                                 # doctest: +SKIP
     """
 
     _cmd = 'mrresize'
