@@ -10,8 +10,14 @@ import os
 import re
 import sys
 import warnings
+from distutils.version import LooseVersion
 
 from nipype.interfaces.base import BaseInterface
+
+import yapf
+if LooseVersion(yapf.__version__) < '0.27':
+    raise ImportError("Please upgrade yapf to version 0.27 or newer for stable formatting")
+
 from yapf.yapflib.yapf_api import FormatCode
 
 
