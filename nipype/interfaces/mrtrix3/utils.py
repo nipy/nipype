@@ -692,12 +692,11 @@ class MRResizeInputSpec(MRTrix3BaseInputSpec):
         argstr='-size %d,%d,%d',
         mandatory=True,
         desc='define the new image size for the output image. This should be '
-        'specified as a comma-separated list.',
         xor=['voxel_size', 'scale_factor'],
     )
     voxel_size = traits.Tuple(
         (traits.Float, traits.Float, traits.Float),
-        argstr='-voxel %d,%d,%d',
+        argstr='-voxel %g,%g,%g',
         mandatory=True,
         desc='define the new voxel size for the output image. This can be '
         'specified either as a single value to be used for all '
@@ -707,7 +706,7 @@ class MRResizeInputSpec(MRTrix3BaseInputSpec):
     )
     scale_factor = traits.Tuple(
         (traits.Float, traits.Float, traits.Float),
-        argstr='-scale %d,%d,%d',
+        argstr='-scale %g,%g,%g',
         mandatory=True,
         desc='scale the image resolution by the supplied factor. This can be '
         'specified either as a single value to be used for all '
@@ -715,7 +714,7 @@ class MRResizeInputSpec(MRTrix3BaseInputSpec):
         'each dimension.',
         xor=['image_size', 'voxel_size'],
     )
-    interp = traits.Enum(
+    interpolation = traits.Enum(
         'cubic',
         'nearest',
         'linear',
@@ -746,6 +745,7 @@ class MRResize(MRTrix3Base):
     automatically applied using Gaussian smoothing.
     For more information, see
     <https://mrtrix.readthedocs.io/en/latest/reference/commands/mrresize.html>
+
     Example
     -------
     >>> import nipype.interfaces.mrtrix3 as mrt
