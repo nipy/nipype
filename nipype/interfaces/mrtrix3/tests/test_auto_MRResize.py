@@ -36,7 +36,10 @@ def test_MRResize_inputs():
             mandatory=True,
             position=-2,
         ),
-        interp=dict(argstr='-interp %s', ),
+        interpolation=dict(
+            argstr='-interp %s',
+            usedefault=True,
+        ),
         nthreads=dict(
             argstr='-nthreads %d',
             nohash=True,
@@ -50,12 +53,12 @@ def test_MRResize_inputs():
             position=-1,
         ),
         scale_factor=dict(
-            argstr='-scale %d,%d,%d',
+            argstr='-scale %g,%g,%g',
             mandatory=True,
             xor=['image_size', 'voxel_size'],
         ),
         voxel_size=dict(
-            argstr='-voxel %d,%d,%d',
+            argstr='-voxel %g,%g,%g',
             mandatory=True,
             xor=['image_size', 'scale_factor'],
         ),
