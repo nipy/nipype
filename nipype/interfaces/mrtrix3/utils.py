@@ -691,7 +691,7 @@ class MRResizeInputSpec(MRTrix3BaseInputSpec):
         (traits.Int, traits.Int, traits.Int),
         argstr='-size %d,%d,%d',
         mandatory=True,
-        desc='define the new image size for the output image. This should be '
+        desc='Number of voxels in each dimension of output image'
         xor=['voxel_size', 'scale_factor'],
     )
     voxel_size = traits.Tuple(
