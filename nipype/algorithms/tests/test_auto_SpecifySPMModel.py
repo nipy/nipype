@@ -5,15 +5,8 @@ from ..modelgen import SpecifySPMModel
 
 def test_SpecifySPMModel_inputs():
     input_map = dict(
-        bids_amplitude_column=dict(
-            exists=True,
-            mandatory=False,
-        ),
-        bids_condition_column=dict(
-            exists=True,
-            mandatory=False,
-            usedefault=True,
-        ),
+        bids_amplitude_column=dict(),
+        bids_condition_column=dict(usedefault=True, ),
         bids_event_file=dict(
             mandatory=True,
             xor=['subject_info', 'event_files', 'bids_event_file'],
