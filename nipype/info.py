@@ -187,7 +187,7 @@ EXTRA_REQUIRES = {
     'nipy': ['nitime', 'nilearn<0.5.0', 'dipy', 'nipy', 'matplotlib'],
     'profiler': ['psutil>=5.0'],
     'pybids': ['pybids>=0.7.0'],
-    'specs': ['yapf'],
+    'specs': ['yapf>=0.27'],
     'ssh': ['paramiko'],
     'tests': TESTS_REQUIRES,
     'xvfbwrapper': ['xvfbwrapper'],
