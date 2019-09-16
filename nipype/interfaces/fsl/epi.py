@@ -612,6 +612,17 @@ class EddyInputSpec(FSLCommandInputSpec):
         ),
     )
     field_mat = File(
+        exists=True, requires=["in_topup_fieldcoef"], desc="topup movpar.txt file"
+    )
+    field = File(
+        argstr="--field=%s",
+        desc=(
+            "NonTOPUP fieldmap scaled in Hz - filename has "
+            "to be provided without an extension. TOPUP is "
+            "strongly recommended"
+        ),
+    )
+    field_mat = File(
         exists=True,
         argstr="--field_mat=%s",
         desc=(
