@@ -3773,13 +3773,18 @@ warp+tlrc.HEAD -prefix Q11'
 
         if not isdefined(self.inputs.out_file):
             prefix = self._gen_fname(self.inputs.in_file, suffix='_QW')
-            ext = '.HEAD'
-            suffix = '+tlrc'
+            outputtype = self.inputs.outputtype
+            if outputtype == 'AFNI':
+                ext = '.HEAD'
+                suffix = '+tlrc'
+            else:
+                ext = Info.output_type_to_ext(outputtype)
+                suffix = ''
         else:
             prefix = self.inputs.out_file
             ext_ind = max([
                 prefix.lower().rfind('.nii.gz'),
-                prefix.lower().rfind('.nii.')
+                prefix.lower().rfind('.nii')
             ])
             if ext_ind == -1:
                 ext = '.HEAD'
