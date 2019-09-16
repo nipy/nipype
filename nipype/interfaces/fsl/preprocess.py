@@ -16,6 +16,7 @@ from warnings import warn
 import numpy as np
 from nibabel import load
 
+from ... import LooseVersion
 from ...utils.filemanip import split_filename
 from ..base import (TraitedSpec, File, InputMultiPath, OutputMultiPath,
                     Undefined, traits, isdefined)
@@ -826,10 +827,17 @@ class MCFLIRT(FSLCommand):
         output_dir = os.path.dirname(outputs['out_file'])
 
         if isdefined(self.inputs.stats_imgs) and self.inputs.stats_imgs:
-            outputs['variance_img'] = self._gen_fname(
-                outputs['out_file'] + '_variance.ext', cwd=output_dir)
-            outputs['std_img'] = self._gen_fname(
-                outputs['out_file'] + '_sigma.ext', cwd=output_dir)
+            if LooseVersion(Info.version()) < LooseVersion('6.0.0'):
+                # FSL <6.0 outputs have .nii.gz_variance.nii.gz as extension
+                outputs['variance_img'] = self._gen_fname(
+                    outputs['out_file'] + '_variance.ext', cwd=output_dir)
+                outputs['std_img'] = self._gen_fname(
+                    outputs['out_file'] + '_sigma.ext', cwd=output_dir)
+            else:
+                outputs['variance_img'] = self._gen_fname(
+                    outputs['out_file'], suffix='_variance', cwd=output_dir)
+                outputs['std_img'] = self._gen_fname(
+                    outputs['out_file'], suffix='_sigma', cwd=output_dir)
 
         # The mean image created if -stats option is specified ('meanvol')
         # is missing the top and bottom slices. Therefore we only expose the
@@ -838,8 +846,13 @@ class MCFLIRT(FSLCommand):
         # Note that the same problem holds for the std and variance image.
 
         if isdefined(self.inputs.mean_vol) and self.inputs.mean_vol:
-            outputs['mean_img'] = self._gen_fname(
-                outputs['out_file'] + '_mean_reg.ext', cwd=output_dir)
+            if LooseVersion(Info.version()) < LooseVersion('6.0.0'):
+                # FSL <6.0 outputs have .nii.gz_mean_img.nii.gz as extension
+                outputs['mean_img'] = self._gen_fname(
+                    outputs['out_file'] + '_mean_reg.ext', cwd=output_dir)
+            else:
+                outputs['mean_img'] = self._gen_fname(
+                    outputs['out_file'], suffix='_mean_reg', cwd=output_dir)
 
         if isdefined(self.inputs.save_mats) and self.inputs.save_mats:
             _, filename = os.path.split(outputs['out_file'])
