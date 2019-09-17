@@ -125,6 +125,7 @@ def test_Eddy_inputs():
         mporder=dict(
             argstr='--mporder=%s',
             min_ver='5.0.11',
+            requires=['use_cuda'],
         ),
         niter=dict(
             argstr='--niter=%s',
