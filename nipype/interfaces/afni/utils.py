@@ -621,7 +621,7 @@ class CatMatvec(AFNICommand):
         if name == 'in_file':
             # Concatenate a series of filenames, with optional opkeys
             return ' '.join('%s -%s' % (mfile, opkey) if opkey else mfile
-                for mfile, opkey in value)
+                           for mfile, opkey in value)
         return super(CatMatvec, self)._format_arg(name, spec, value)
 
 
