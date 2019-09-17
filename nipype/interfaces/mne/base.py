@@ -3,6 +3,7 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 from builtins import str, bytes
 
+import os
 import os.path as op
 import glob
 
@@ -263,5 +264,5 @@ class SetupSourceSpace(FSCommand):
         else:
             if not (fname.endswith('_src.fif') or fname.endswith('-src.fif')):
                 fname = fname + "-src.fif"
-        outputs['source'] = fname
+        outputs['source'] = os.path.join(os.getcwd(), fname)
         return outputs
