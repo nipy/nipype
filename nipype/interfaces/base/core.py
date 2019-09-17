@@ -476,9 +476,9 @@ Output trait(s) %s not available in version %s of interface %s.\
                 setattr(outputs, key, val)
             except TraitError as error:
                 if 'an existing' in getattr(error, 'info', 'default'):
-                    msg = "No such file or directory for output '%s' of a %s interface" % \
-                        (key, self.__class__.__name__)
-                    raise FileNotFoundError(val, message=msg)
+                    msg = "No such file or directory '%s' for output '%s' of a %s interface" % \
+                        (val, key, self.__class__.__name__)
+                    raise FileNotFoundError(msg)
                 raise error
         return outputs
 
