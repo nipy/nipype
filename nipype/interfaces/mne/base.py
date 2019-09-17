@@ -134,3 +134,129 @@ class WatershedBEM(FSCommand):
                         mesh_paths.append(out_files)
         outputs['mesh_files'] = mesh_paths
         return outputs
+
+
+class SetupSourceSpaceInputSpec(FSTraitedSpec):
+    subject_id = traits.Str(
+        argstr='--subject %s',
+        mandatory=True,
+        desc='Subject name')
+    fname = traits.File(
+        argstr='--src %s',
+        default=None,
+        usedefault=True,
+        desc='Output file name. Use a name <dir>/<name>-src.fif')
+    morph = traits.Str(
+        argstr='--morph %s',
+        default=None,
+        usedefault=True,
+        desc='morph the source space to this subject')
+    surface = traits.Str(
+        argstr='--surf %s',
+        default='white',
+        usedefault=True,
+        desc='The surface to use.')
+    spacing = traits.Int(
+        argstr='--spacing %s',
+        default=7,
+        usedefault=True,
+        desc='Specifies the approximate grid spacing of the '
+             'source space in mm.',
+        xor=[oct, ico])
+    ico = traits.Int(
+        argstr='--ico %s',
+        default=None,
+        usedefault=True,
+        desc='use the recursively subdivided icosahedron '
+             'to create the source space.',
+        xor=[oct, spacing])
+    oct = traits.Int(
+        argstr='--oct %s',
+        default=None,
+        usedefault=True,
+        desc='use the recursively subdivided octahedron '
+             'to create the source space.',
+        xor=[ico, spacing])
+    subjects_dir = Directory(
+        argstr='--subjects-dir %s',
+        exists=True,
+        mandatory=True,
+        usedefault=True,
+        desc='Subjects directory')
+    cps = traits.Bool(
+        argstr='--cps',
+        default=True,
+        usedefault=True,
+        desc='Add patch information to source space.')
+    n_jobs = traits.Int(
+        argstr='--n-jobs',
+        default=1,
+        usedefault=True,
+        desc='The number of jobs to run in parallel '
+             '(default 1). Requires the joblib package. '
+             'Will use at most 2 jobs'
+             ' (one for each hemisphere).')
+    verbose = traits.Bool(
+        argstr='--verbose',
+        default=False,
+        usedefault=True,
+        desc='Turn on verbose mode.')
+    overwrite = traits.Bool(
+        argstr='--overwrite',
+        default=False,
+        usedefault=True,
+        desc='Overwrites the existing files')
+
+
+class SetupSourceSpaceOutputSpec(TraitedSpec):
+    source = traits.File(
+                     exists=True,
+                     desc='File containing the setup_source_space')
+
+
+class SetupSourceSpace(FSCommand):
+    """Uses mne_setup_source_space to create a source space.
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.mne import SetupSourceSpace
+    >>> setup_source_space = SetupSourceSpace()
+    >>> setup_source_space.inputs.subject_id = 'subj1'
+    >>> setup_source_space.inputs.subjects_dir = '.'
+    >>> setup_source_space.cmdline
+    'mne setup_source_space --subject subj1 --surface white'
+    >>> setup_source_space.run() 				# doctest: +SKIP
+
+   """
+
+    _cmd = 'mne setup_source_space'
+    input_spec = SetupSourceSpaceInputSpec
+    output_spec = SetupSourceSpaceOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        fname = self.inputs.fname
+        ico = self.inputs.ico
+        oct = self.inputs.oct
+        spacing = self.inputs.spacing
+        subject = self.inputs.subject
+        subject_to = self.inputs.subject_to
+
+        if fname is None:
+            if ico is not None:
+                use_spacing = "ico" + str(ico)
+            elif oct is not None:
+                use_spacing = "oct" + str(oct)
+            elif spacing is not None:
+                use_spacing = spacing
+            if subject_to is None:
+                fname = subject + '-' + str(use_spacing) + '-src.fif'
+            else:
+                fname = (subject_to + '-' + subject + '-' +
+                         str(use_spacing) + '-src.fif')
+        else:
+            if not (fname.endswith('_src.fif') or fname.endswith('-src.fif')):
+                fname = fname + "-src.fif"
+        outputs['source'] = fname
+        return outputs
