@@ -741,6 +741,7 @@ class EddyInputSpec(FSLCommandInputSpec):
     mporder = traits.Int(
         argstr="--mporder=%s",
         desc="Order of slice-to-vol movement model",
+        requires=["use_cuda"],
         min_ver="5.0.11",
     )
     s2v_niter = traits.Int(
@@ -959,14 +960,32 @@ class Eddy(FSLCommand):
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
 --interp=spline --resamp=jac --niter=5 --nvoxhp=1000 \
 --out=.../eddy_corrected --slm=none'
+
+    Running eddy on a CPU using OpenMP:
     >>> eddy.inputs.use_cuda = False
-    >>> eddy.cmdline # doctest: +ELLIPSIS
+    >>> eddy.cmdline          # doctest: +ELLIPSIS
     'eddy_openmp --flm=quadratic --ff=10.0 --fwhm=0.0 \
 --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
 --interp=spline --resamp=jac --niter=5 --nvoxhp=1000 \
 --out=.../eddy_corrected --slm=none'
-    >>> res = eddy.run() # doctest: +SKIP
+
+    Running eddy with slice-to-volume motion correction:
+    >>> eddy.inputs.use_cuda = True
+    >>> eddy.inputs.mporder = 6
+    >>> eddy.inputs.s2v_niter = 5
+    >>> eddy.inputs.s2v_lambda = 1
+    >>> eddy.inputs.s2v_interp = 'trilinear'
+    >>> eddy.inputs.slspec = 'epi_slspec.txt'
+    >>> eddy.cmdline          # doctest: +ELLIPSIS
+    'eddy_cuda --flm=quadratic --ff=10.0 --fwhm=0.0 \
+--acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
+--imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
+--interp=spline --resamp=jac --mporder=6 --niter=5 --nvoxhp=1000 \
+--out=.../eddy_corrected --s2v_interp=trilinear --s2v_niter=5 \
+--slm=none --slspec=epi_slspec.txt'
+    >>> res = eddy.run()     # doctest: +SKIP
+
     """
 
     _cmd = "eddy_openmp"

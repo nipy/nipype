@@ -52,7 +52,7 @@ def test_Eddy_inputs():
             requires=["estimate_move_by_susceptibility"],
         ),
         method=dict(argstr="--resamp=%s", usedefault=True,),
-        mporder=dict(argstr="--mporder=%s", min_ver="5.0.11",),
+        mporder=dict(argstr="--mporder=%s", min_ver="5.0.11", requires=["use_cuda"],),
         niter=dict(argstr="--niter=%s", usedefault=True,),
         num_threads=dict(nohash=True, usedefault=True,),
         nvoxhp=dict(argstr="--nvoxhp=%s", usedefault=True,),
