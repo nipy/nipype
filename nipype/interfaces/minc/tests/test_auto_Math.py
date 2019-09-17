@@ -36,6 +36,7 @@ def test_Math_inputs():
         exp=dict(argstr='-exp -const2 %s %s', ),
         filelist=dict(
             argstr='-filelist %s',
+            extensions=None,
             mandatory=True,
             xor=('input_files', 'filelist'),
         ),
@@ -122,6 +123,7 @@ def test_Math_inputs():
         nsegment=dict(argstr='-nsegment -const2 %s %s', ),
         output_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             hash_files=False,
             name_source=['input_files'],
@@ -161,7 +163,7 @@ def test_Math_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Math_outputs():
-    output_map = dict(output_file=dict(), )
+    output_map = dict(output_file=dict(extensions=None, ), )
     outputs = Math.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -13,11 +13,16 @@ def test_SigLoss_inputs():
         ),
         in_file=dict(
             argstr='-i %s',
+            extensions=None,
             mandatory=True,
         ),
-        mask_file=dict(argstr='-m %s', ),
+        mask_file=dict(
+            argstr='-m %s',
+            extensions=None,
+        ),
         out_file=dict(
             argstr='-s %s',
+            extensions=None,
             genfile=True,
         ),
         output_type=dict(),
@@ -29,7 +34,7 @@ def test_SigLoss_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SigLoss_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = SigLoss.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -677,3 +677,99 @@ class MRMath(MRTrix3Base):
         outputs = self.output_spec().get()
         outputs['out_file'] = op.abspath(self.inputs.out_file)
         return outputs
+
+
+class MRResizeInputSpec(MRTrix3BaseInputSpec):
+    in_file = File(
+        exists=True,
+        argstr='%s',
+        position=-2,
+        mandatory=True,
+        desc='input DWI image'
+    )
+    image_size = traits.Tuple(
+        (traits.Int, traits.Int, traits.Int),
+        argstr='-size %d,%d,%d',
+        mandatory=True,
+        desc='Number of voxels in each dimension of output image',
+        xor=['voxel_size', 'scale_factor'],
+    )
+    voxel_size = traits.Tuple(
+        (traits.Float, traits.Float, traits.Float),
+        argstr='-voxel %g,%g,%g',
+        mandatory=True,
+        desc='Desired voxel size in mm for the output image',
+        xor=['image_size', 'scale_factor'],
+    )
+    scale_factor = traits.Tuple(
+        (traits.Float, traits.Float, traits.Float),
+        argstr='-scale %g,%g,%g',
+        mandatory=True,
+        desc='Scale factors to rescale the image by in each dimension',
+        xor=['image_size', 'voxel_size'],
+    )
+    interpolation = traits.Enum(
+        'cubic',
+        'nearest',
+        'linear',
+        'sinc',
+        argstr='-interp %s',
+        usedefault=True,
+        desc='set the interpolation method to use when resizing (choices: '
+        'nearest, linear, cubic, sinc. Default: cubic).',
+    )
+    out_file = File(
+        argstr='%s',
+        name_template='%s_resized',
+        name_source=['in_file'],
+        keep_extension=True,
+        position=-1,
+        desc='the output resized DWI image',
+    )
+
+
+class MRResizeOutputSpec(TraitedSpec):
+    out_file = File(desc='the output resized DWI image', exists=True)
+
+
+class MRResize(MRTrix3Base):
+    """
+    Resize an image by defining the new image resolution, voxel size or a
+    scale factor. If the image is 4D, then only the first 3 dimensions can be
+    resized. Also, if the image is down-sampled, the appropriate smoothing is
+    automatically applied using Gaussian smoothing.
+    For more information, see
+    <https://mrtrix.readthedocs.io/en/latest/reference/commands/mrresize.html>
+
+    Example
+    -------
+    >>> import nipype.interfaces.mrtrix3 as mrt
+
+    Defining the new image resolution:
+    >>> image_resize = mrt.MRResize()
+    >>> image_resize.inputs.in_file = 'dwi.mif'
+    >>> image_resize.inputs.image_size = (256, 256, 144)
+    >>> image_resize.cmdline                               # doctest: +ELLIPSIS
+    'mrresize -size 256,256,144 -interp cubic dwi.mif dwi_resized.mif'
+    >>> image_resize.run()                                 # doctest: +SKIP
+
+    Defining the new image's voxel size:
+    >>> voxel_resize = mrt.MRResize()
+    >>> voxel_resize.inputs.in_file = 'dwi.mif'
+    >>> voxel_resize.inputs.voxel_size = (1, 1, 1)
+    >>> voxel_resize.cmdline                               # doctest: +ELLIPSIS
+    'mrresize -interp cubic -voxel 1,1,1 dwi.mif dwi_resized.mif'
+    >>> voxel_resize.run()                                 # doctest: +SKIP
+
+    Defining the scale factor of each image dimension:
+    >>> scale_resize = mrt.MRResize()
+    >>> scale_resize.inputs.in_file = 'dwi.mif'
+    >>> scale_resize.inputs.scale_factor = (0.5,0.5,0.5)
+    >>> scale_resize.cmdline                               # doctest: +ELLIPSIS
+    'mrresize -interp cubic -scale 0.5,0.5,0.5 dwi.mif dwi_resized.mif'
+    >>> scale_resize.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = 'mrresize'
+    input_spec = MRResizeInputSpec
+    output_spec = MRResizeOutputSpec

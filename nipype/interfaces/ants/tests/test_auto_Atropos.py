@@ -28,6 +28,7 @@ def test_Atropos_inputs():
         likelihood_model=dict(argstr='--likelihood-model %s', ),
         mask_image=dict(
             argstr='--mask-image %s',
+            extensions=None,
             mandatory=True,
         ),
         maximum_number_of_icm_terations=dict(
@@ -42,6 +43,7 @@ def test_Atropos_inputs():
         number_of_tissue_classes=dict(mandatory=True, ),
         out_classified_image_name=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             hash_files=False,
         ),
@@ -51,8 +53,8 @@ def test_Atropos_inputs():
         prior_probability_threshold=dict(requires=['prior_weighting'], ),
         prior_weighting=dict(),
         save_posteriors=dict(),
-        use_mixture_model_proportions=dict(
-            requires=['posterior_formulation'], ),
+        use_mixture_model_proportions=dict(requires=['posterior_formulation'
+                                                     ], ),
         use_random_seed=dict(
             argstr='--use-random-seed %d',
             usedefault=True,
@@ -65,7 +67,7 @@ def test_Atropos_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Atropos_outputs():
     output_map = dict(
-        classified_image=dict(),
+        classified_image=dict(extensions=None, ),
         posteriors=dict(),
     )
     outputs = Atropos.output_spec()

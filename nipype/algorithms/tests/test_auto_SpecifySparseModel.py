@@ -5,15 +5,8 @@ from ..modelgen import SpecifySparseModel
 
 def test_SpecifySparseModel_inputs():
     input_map = dict(
-        bids_amplitude_column=dict(
-            exists=True,
-            mandatory=False,
-        ),
-        bids_condition_column=dict(
-            exists=True,
-            mandatory=False,
-            usedefault=True,
-        ),
+        bids_amplitude_column=dict(),
+        bids_condition_column=dict(usedefault=True, ),
         bids_event_file=dict(
             mandatory=True,
             xor=['subject_info', 'event_files', 'bids_event_file'],
@@ -53,8 +46,8 @@ def test_SpecifySparseModel_inputs():
 def test_SpecifySparseModel_outputs():
     output_map = dict(
         session_info=dict(),
-        sparse_png_file=dict(),
-        sparse_svg_file=dict(),
+        sparse_png_file=dict(extensions=None, ),
+        sparse_svg_file=dict(extensions=None, ),
     )
     outputs = SpecifySparseModel.output_spec()
 

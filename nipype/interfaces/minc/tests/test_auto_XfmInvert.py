@@ -16,11 +16,13 @@ def test_XfmInvert_inputs():
         ),
         input_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
         output_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
@@ -33,8 +35,8 @@ def test_XfmInvert_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_XfmInvert_outputs():
     output_map = dict(
-        output_file=dict(),
-        output_grid=dict(),
+        output_file=dict(extensions=None, ),
+        output_grid=dict(extensions=None, ),
     )
     outputs = XfmInvert.output_spec()
 

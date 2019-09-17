@@ -25,7 +25,7 @@ from simplejson import load, dump
 from future import standard_library
 
 from .misc import str2bool
-from ..external import portalocker
+from filelock import SoftFileLock
 
 standard_library.install_aliases()
 
@@ -68,6 +68,7 @@ write_provenance = false
 parameterize_dirs = true
 poll_sleep_duration = 2
 xvfb_max_wait = 10
+check_version = true
 
 [monitoring]
 enabled = false
@@ -209,9 +210,9 @@ class NipypeConfig(object):
         """Read options file"""
         if not os.path.exists(self.data_file):
             return None
-        with open(self.data_file, 'rt') as file:
-            portalocker.lock(file, portalocker.LOCK_EX)
-            datadict = load(file)
+        with SoftFileLock('%s.lock' % self.data_file):
+            with open(self.data_file, 'rt') as file:
+                datadict = load(file)
         if key in datadict:
             return datadict[key]
         return None
@@ -220,17 +221,17 @@ class NipypeConfig(object):
         """Store config flie"""
         datadict = {}
         if os.path.exists(self.data_file):
-            with open(self.data_file, 'rt') as file:
-                portalocker.lock(file, portalocker.LOCK_EX)
-                datadict = load(file)
+            with SoftFileLock('%s.lock' % self.data_file):
+                with open(self.data_file, 'rt') as file:
+                    datadict = load(file)
         else:
             dirname = os.path.dirname(self.data_file)
             if not os.path.exists(dirname):
                 mkdir_p(dirname)
-        with open(self.data_file, 'wt') as file:
-            portalocker.lock(file, portalocker.LOCK_EX)
-            datadict[key] = value
-            dump(datadict, file)
+        with SoftFileLock('%s.lock' % self.data_file):
+            with open(self.data_file, 'wt') as file:
+                datadict[key] = value
+                dump(datadict, file)
 
     def update_config(self, config_dict):
         """Extend internal dictionary with config_dict"""

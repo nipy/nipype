@@ -23,6 +23,7 @@ def test_AccuracyTester_inputs():
         ),
         trained_wts_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
@@ -33,11 +34,10 @@ def test_AccuracyTester_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_AccuracyTester_outputs():
-    output_map = dict(
-        output_directory=dict(
-            argstr='%s',
-            position=1,
-        ), )
+    output_map = dict(output_directory=dict(
+        argstr='%s',
+        position=1,
+    ), )
     outputs = AccuracyTester.output_spec()
 
     for key, metadata in list(output_map.items()):

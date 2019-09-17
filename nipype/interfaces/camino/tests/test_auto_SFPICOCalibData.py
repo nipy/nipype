@@ -12,6 +12,7 @@ def test_SFPICOCalibData_inputs():
         ),
         info_file=dict(
             argstr='-infooutputfile %s',
+            extensions=None,
             genfile=True,
             hash_files=False,
             mandatory=True,
@@ -26,11 +27,13 @@ def test_SFPICOCalibData_inputs():
         ),
         out_file=dict(
             argstr='> %s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
         scheme_file=dict(
             argstr='-schemefile %s',
+            extensions=None,
             mandatory=True,
         ),
         seed=dict(
@@ -77,8 +80,8 @@ def test_SFPICOCalibData_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_SFPICOCalibData_outputs():
     output_map = dict(
-        PICOCalib=dict(),
-        calib_info=dict(),
+        PICOCalib=dict(extensions=None, ),
+        calib_info=dict(extensions=None, ),
     )
     outputs = SFPICOCalibData.output_spec()
 

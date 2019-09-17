@@ -1,6 +1,6 @@
 import pytest
 from collections import namedtuple
-from ...base import traits, TraitedSpec, BaseInterfaceInputSpec
+from ...base import traits, File, TraitedSpec, BaseInterfaceInputSpec
 from ..base import (convert_to_traits_type, create_interface_specs,
                     dipy_to_nipype_interface, DipyBaseInterface, no_dipy,
                     get_dipy_workflows)
@@ -35,10 +35,10 @@ def test_convert_to_traits_type():
                   Res(traits.ListStr, False), Res(traits.ListFloat, False),
                   Res(traits.ListBool, False), Res(traits.ListComplex, False),
                   Res(traits.Str, True), Res(traits.Int, True),
-                  Res(traits.File, True), Res(traits.Float, True),
+                  Res(File, True), Res(traits.Float, True),
                   Res(traits.Bool, True), Res(traits.Complex, True),
                   Res(traits.Str, False), Res(traits.Int, False),
-                  Res(traits.File, False), Res(traits.Float, False),
+                  Res(File, False), Res(traits.Float, False),
                   Res(traits.Bool, False), Res(traits.Complex, False),
                   ]
 

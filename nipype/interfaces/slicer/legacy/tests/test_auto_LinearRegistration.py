@@ -7,10 +7,12 @@ def test_LinearRegistration_inputs():
     input_map = dict(
         FixedImageFileName=dict(
             argstr='%s',
+            extensions=None,
             position=-2,
         ),
         MovingImageFileName=dict(
             argstr='%s',
+            extensions=None,
             position=-1,
         ),
         args=dict(argstr='%s', ),
@@ -20,7 +22,10 @@ def test_LinearRegistration_inputs():
         ),
         fixedsmoothingfactor=dict(argstr='--fixedsmoothingfactor %d', ),
         histogrambins=dict(argstr='--histogrambins %d', ),
-        initialtransform=dict(argstr='--initialtransform %s', ),
+        initialtransform=dict(
+            argstr='--initialtransform %s',
+            extensions=None,
+        ),
         iterations=dict(
             argstr='--iterations %s',
             sep=',',
@@ -48,8 +53,8 @@ def test_LinearRegistration_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_LinearRegistration_outputs():
     output_map = dict(
-        outputtransform=dict(),
-        resampledmovingfilename=dict(),
+        outputtransform=dict(extensions=None, ),
+        resampledmovingfilename=dict(extensions=None, ),
     )
     outputs = LinearRegistration.output_spec()
 

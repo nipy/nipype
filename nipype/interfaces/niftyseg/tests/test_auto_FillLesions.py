@@ -6,7 +6,10 @@ from ..lesions import FillLesions
 def test_FillLesions_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        bin_mask=dict(argstr='-mask %s', ),
+        bin_mask=dict(
+            argstr='-mask %s',
+            extensions=None,
+        ),
         cwf=dict(argstr='-cwf %f', ),
         debug=dict(argstr='-debug', ),
         environ=dict(
@@ -16,11 +19,13 @@ def test_FillLesions_inputs():
         in_dilation=dict(argstr='-dil %d', ),
         in_file=dict(
             argstr='-i %s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
         lesion_mask=dict(
             argstr='-l %s',
+            extensions=None,
             mandatory=True,
             position=2,
         ),
@@ -29,6 +34,7 @@ def test_FillLesions_inputs():
         out_datatype=dict(argstr='-odt %s', ),
         out_file=dict(
             argstr='-o %s',
+            extensions=None,
             name_source=['in_file'],
             name_template='%s_lesions_filled.nii.gz',
             position=3,
@@ -45,7 +51,7 @@ def test_FillLesions_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FillLesions_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = FillLesions.output_spec()
 
     for key, metadata in list(output_map.items()):

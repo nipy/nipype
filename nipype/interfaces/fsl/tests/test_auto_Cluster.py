@@ -7,7 +7,10 @@ def test_Cluster_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
         connectivity=dict(argstr='--connectivity=%d', ),
-        cope_file=dict(argstr='--cope=%s', ),
+        cope_file=dict(
+            argstr='--cope=%s',
+            extensions=None,
+        ),
         dlh=dict(argstr='--dlh=%.10f', ),
         environ=dict(
             nohash=True,
@@ -23,6 +26,7 @@ def test_Cluster_inputs():
         ),
         in_file=dict(
             argstr='--in=%s',
+            extensions=None,
             mandatory=True,
         ),
         minclustersize=dict(
@@ -72,7 +76,10 @@ def test_Cluster_inputs():
             argstr='--pthresh=%.10f',
             requires=['dlh', 'volume'],
         ),
-        std_space_file=dict(argstr='--stdvol=%s', ),
+        std_space_file=dict(
+            argstr='--stdvol=%s',
+            extensions=None,
+        ),
         threshold=dict(
             argstr='--thresh=%.10f',
             mandatory=True,
@@ -82,8 +89,14 @@ def test_Cluster_inputs():
             usedefault=True,
         ),
         volume=dict(argstr='--volume=%d', ),
-        warpfield_file=dict(argstr='--warpvol=%s', ),
-        xfm_file=dict(argstr='--xfm=%s', ),
+        warpfield_file=dict(
+            argstr='--warpvol=%s',
+            extensions=None,
+        ),
+        xfm_file=dict(
+            argstr='--xfm=%s',
+            extensions=None,
+        ),
     )
     inputs = Cluster.input_spec()
 
@@ -92,14 +105,14 @@ def test_Cluster_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Cluster_outputs():
     output_map = dict(
-        index_file=dict(),
-        localmax_txt_file=dict(),
-        localmax_vol_file=dict(),
-        max_file=dict(),
-        mean_file=dict(),
-        pval_file=dict(),
-        size_file=dict(),
-        threshold_file=dict(),
+        index_file=dict(extensions=None, ),
+        localmax_txt_file=dict(extensions=None, ),
+        localmax_vol_file=dict(extensions=None, ),
+        max_file=dict(extensions=None, ),
+        mean_file=dict(extensions=None, ),
+        pval_file=dict(extensions=None, ),
+        size_file=dict(extensions=None, ),
+        threshold_file=dict(extensions=None, ),
     )
     outputs = Cluster.output_spec()
 

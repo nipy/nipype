@@ -6,29 +6,38 @@ from ..preprocess import DWIBiasCorrect
 def test_DWIBiasCorrect_inputs():
     input_map = dict(
         args=dict(argstr='%s', ),
-        bias=dict(argstr='-bias %s', ),
+        bias=dict(
+            argstr='-bias %s',
+            extensions=None,
+        ),
         bval_scale=dict(argstr='-bvalue_scaling %s', ),
         environ=dict(
             nohash=True,
             usedefault=True,
         ),
-        fsl_grad=dict(
-            argstr='-fslgrad %s %s',
-            xor=('mrtrix_grad', 'fsl_grad'),
+        grad_file=dict(
+            argstr='-grad %s',
+            extensions=None,
+            xor=['grad_fsl'],
         ),
-        grad_file=dict(argstr='-grad %s', ),
-        grad_fsl=dict(argstr='-fslgrad %s %s', ),
-        in_bval=dict(),
-        in_bvec=dict(argstr='-fslgrad %s %s', ),
+        grad_fsl=dict(
+            argstr='-fslgrad %s %s',
+            xor=['grad_file'],
+        ),
+        in_bval=dict(extensions=None, ),
+        in_bvec=dict(
+            argstr='-fslgrad %s %s',
+            extensions=None,
+        ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
-        in_mask=dict(argstr='-mask %s', ),
-        mrtrix_grad=dict(
-            argstr='-grad %s',
-            xor=('mrtrix_grad', 'fsl_grad'),
+        in_mask=dict(
+            argstr='-mask %s',
+            extensions=None,
         ),
         nthreads=dict(
             argstr='-nthreads %d',
@@ -36,6 +45,7 @@ def test_DWIBiasCorrect_inputs():
         ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             keep_extension=True,
             name_source='in_file',
@@ -44,13 +54,13 @@ def test_DWIBiasCorrect_inputs():
         ),
         use_ants=dict(
             argstr='-ants',
-            usedefault=True,
-            xor=('use_ants', 'use_fsl'),
+            mandatory=True,
+            xor=['use_fsl'],
         ),
         use_fsl=dict(
             argstr='-fsl',
-            min_ver='5.0.10',
-            xor=('use_ants', 'use_fsl'),
+            mandatory=True,
+            xor=['use_ants'],
         ),
     )
     inputs = DWIBiasCorrect.input_spec()
@@ -60,8 +70,8 @@ def test_DWIBiasCorrect_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DWIBiasCorrect_outputs():
     output_map = dict(
-        bias=dict(),
-        out_file=dict(),
+        bias=dict(extensions=None, ),
+        out_file=dict(extensions=None, ),
     )
     outputs = DWIBiasCorrect.output_spec()
 

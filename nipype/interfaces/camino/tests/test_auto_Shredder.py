@@ -17,6 +17,7 @@ def test_Shredder_inputs():
         ),
         in_file=dict(
             argstr='< %s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
@@ -27,6 +28,7 @@ def test_Shredder_inputs():
         ),
         out_file=dict(
             argstr='> %s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
@@ -42,7 +44,7 @@ def test_Shredder_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Shredder_outputs():
-    output_map = dict(shredded=dict(), )
+    output_map = dict(shredded=dict(extensions=None, ), )
     outputs = Shredder.output_spec()
 
     for key, metadata in list(output_map.items()):

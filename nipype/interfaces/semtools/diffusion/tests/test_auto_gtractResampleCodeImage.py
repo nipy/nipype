@@ -10,9 +10,18 @@ def test_gtractResampleCodeImage_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputCodeVolume=dict(argstr='--inputCodeVolume %s', ),
-        inputReferenceVolume=dict(argstr='--inputReferenceVolume %s', ),
-        inputTransform=dict(argstr='--inputTransform %s', ),
+        inputCodeVolume=dict(
+            argstr='--inputCodeVolume %s',
+            extensions=None,
+        ),
+        inputReferenceVolume=dict(
+            argstr='--inputReferenceVolume %s',
+            extensions=None,
+        ),
+        inputTransform=dict(
+            argstr='--inputTransform %s',
+            extensions=None,
+        ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         outputVolume=dict(
             argstr='--outputVolume %s',
@@ -26,7 +35,7 @@ def test_gtractResampleCodeImage_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_gtractResampleCodeImage_outputs():
-    output_map = dict(outputVolume=dict(), )
+    output_map = dict(outputVolume=dict(extensions=None, ), )
     outputs = gtractResampleCodeImage.output_spec()
 
     for key, metadata in list(output_map.items()):

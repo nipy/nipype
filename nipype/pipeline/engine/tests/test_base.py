@@ -13,25 +13,21 @@ from ... import engine as pe
 class InputSpec(nib.TraitedSpec):
     input1 = nib.traits.Int(desc='a random int')
     input2 = nib.traits.Int(desc='a random int')
-    input_file = nib.traits.File(desc='Random File')
+    input_file = nib.File(desc='Random File')
 
 
 class OutputSpec(nib.TraitedSpec):
     output1 = nib.traits.List(nib.traits.Int, desc='outputs')
 
 
-class EngineTestInterface(nib.BaseInterface):
+class EngineTestInterface(nib.SimpleInterface):
     input_spec = InputSpec
     output_spec = OutputSpec
 
     def _run_interface(self, runtime):
         runtime.returncode = 0
+        self._results['output1'] = [1, self.inputs.input1]
         return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['output1'] = [1, self.inputs.input1]
-        return outputs
 
 
 @pytest.mark.parametrize(

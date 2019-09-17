@@ -8,6 +8,7 @@ def test_PRELUDE_inputs():
         args=dict(argstr='%s', ),
         complex_phase_file=dict(
             argstr='--complex=%s',
+            extensions=None,
             mandatory=True,
             xor=['magnitude_file', 'phase_file'],
         ),
@@ -18,19 +19,25 @@ def test_PRELUDE_inputs():
         ),
         label_file=dict(
             argstr='--labels=%s',
+            extensions=None,
             hash_files=False,
         ),
         labelprocess2d=dict(argstr='--labelslices', ),
         magnitude_file=dict(
             argstr='--abs=%s',
+            extensions=None,
             mandatory=True,
             xor=['complex_phase_file'],
         ),
-        mask_file=dict(argstr='--mask=%s', ),
+        mask_file=dict(
+            argstr='--mask=%s',
+            extensions=None,
+        ),
         num_partitions=dict(argstr='--numphasesplit=%d', ),
         output_type=dict(),
         phase_file=dict(
             argstr='--phase=%s',
+            extensions=None,
             mandatory=True,
             xor=['complex_phase_file'],
         ),
@@ -44,17 +51,20 @@ def test_PRELUDE_inputs():
         ),
         rawphase_file=dict(
             argstr='--rawphase=%s',
+            extensions=None,
             hash_files=False,
         ),
         removeramps=dict(argstr='--removeramps', ),
         savemask_file=dict(
             argstr='--savemask=%s',
+            extensions=None,
             hash_files=False,
         ),
         start=dict(argstr='--start=%d', ),
         threshold=dict(argstr='--thresh=%.10f', ),
         unwrapped_phase_file=dict(
             argstr='--unwrap=%s',
+            extensions=None,
             genfile=True,
             hash_files=False,
         ),
@@ -65,7 +75,7 @@ def test_PRELUDE_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_PRELUDE_outputs():
-    output_map = dict(unwrapped_phase_file=dict(), )
+    output_map = dict(unwrapped_phase_file=dict(extensions=None, ), )
     outputs = PRELUDE.output_spec()
 
     for key, metadata in list(output_map.items()):

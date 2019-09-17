@@ -12,6 +12,7 @@ def test_ComputeEigensystem_inputs():
         ),
         in_file=dict(
             argstr='< %s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
@@ -23,6 +24,7 @@ def test_ComputeEigensystem_inputs():
         maxcomponents=dict(argstr='-maxcomponents %d', ),
         out_file=dict(
             argstr='> %s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
@@ -37,7 +39,7 @@ def test_ComputeEigensystem_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ComputeEigensystem_outputs():
-    output_map = dict(eigen=dict(), )
+    output_map = dict(eigen=dict(extensions=None, ), )
     outputs = ComputeEigensystem.output_spec()
 
     for key, metadata in list(output_map.items()):

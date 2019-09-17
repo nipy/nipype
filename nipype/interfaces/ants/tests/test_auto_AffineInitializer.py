@@ -17,6 +17,7 @@ def test_AffineInitializer_inputs():
         ),
         fixed_image=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
@@ -27,6 +28,7 @@ def test_AffineInitializer_inputs():
         ),
         moving_image=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=2,
         ),
@@ -36,6 +38,7 @@ def test_AffineInitializer_inputs():
         ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             position=3,
             usedefault=True,
         ),
@@ -61,7 +64,7 @@ def test_AffineInitializer_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_AffineInitializer_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = AffineInitializer.output_spec()
 
     for key, metadata in list(output_map.items()):

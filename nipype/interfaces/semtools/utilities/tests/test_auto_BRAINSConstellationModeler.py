@@ -11,7 +11,10 @@ def test_BRAINSConstellationModeler_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inputTrainingList=dict(argstr='--inputTrainingList %s', ),
+        inputTrainingList=dict(
+            argstr='--inputTrainingList %s',
+            extensions=None,
+        ),
         mspQualityLevel=dict(argstr='--mspQualityLevel %d', ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         optimizedLandmarksFilenameExtender=dict(
@@ -42,7 +45,7 @@ def test_BRAINSConstellationModeler_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BRAINSConstellationModeler_outputs():
     output_map = dict(
-        outputModel=dict(),
+        outputModel=dict(extensions=None, ),
         resultsDir=dict(),
     )
     outputs = BRAINSConstellationModeler.output_spec()

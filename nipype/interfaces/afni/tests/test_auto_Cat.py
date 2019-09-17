@@ -21,16 +21,16 @@ def test_Cat_inputs():
             usedefault=True,
         ),
         omitconst=dict(argstr='-nonconst', ),
-        out_cint=dict(
-            xor=[
-                'out_format', 'out_nice', 'out_double', 'out_fint', 'out_int'
-            ], ),
+        out_cint=dict(xor=[
+            'out_format', 'out_nice', 'out_double', 'out_fint', 'out_int'
+        ], ),
         out_double=dict(
             argstr='-d',
             xor=['out_format', 'out_nice', 'out_int', 'out_fint', 'out_cint'],
         ),
         out_file=dict(
             argstr='> %s',
+            extensions=None,
             mandatory=True,
             position=-1,
             usedefault=True,
@@ -67,7 +67,7 @@ def test_Cat_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Cat_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = Cat.output_spec()
 
     for key, metadata in list(output_map.items()):

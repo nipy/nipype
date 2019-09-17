@@ -6,14 +6,20 @@ from ..model import EstimateContrast
 def test_EstimateContrast_inputs():
     input_map = dict(
         axis=dict(mandatory=True, ),
-        beta=dict(mandatory=True, ),
+        beta=dict(
+            extensions=None,
+            mandatory=True,
+        ),
         constants=dict(mandatory=True, ),
         contrasts=dict(mandatory=True, ),
         dof=dict(mandatory=True, ),
-        mask=dict(),
+        mask=dict(extensions=None, ),
         nvbeta=dict(mandatory=True, ),
         reg_names=dict(mandatory=True, ),
-        s2=dict(mandatory=True, ),
+        s2=dict(
+            extensions=None,
+            mandatory=True,
+        ),
     )
     inputs = EstimateContrast.input_spec()
 

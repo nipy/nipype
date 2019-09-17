@@ -16,6 +16,7 @@ def test_FilterTracks_inputs():
         ),
         exclude_file=dict(
             argstr='-exclude %s',
+            extensions=None,
             xor=['exclude_file', 'exclude_spec'],
         ),
         exclude_spec=dict(
@@ -27,11 +28,13 @@ def test_FilterTracks_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
         include_file=dict(
             argstr='-include %s',
+            extensions=None,
             xor=['include_file', 'include_spec'],
         ),
         include_spec=dict(
@@ -49,6 +52,7 @@ def test_FilterTracks_inputs():
         no_mask_interpolation=dict(argstr='-nomaskinterp', ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             hash_files=False,
             name_source=['in_file'],
             name_template='%s_filt',
@@ -65,7 +69,7 @@ def test_FilterTracks_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FilterTracks_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = FilterTracks.output_spec()
 
     for key, metadata in list(output_map.items()):

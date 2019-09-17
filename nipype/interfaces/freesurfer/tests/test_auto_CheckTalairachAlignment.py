@@ -12,6 +12,7 @@ def test_CheckTalairachAlignment_inputs():
         ),
         in_file=dict(
             argstr='-xfm %s',
+            extensions=None,
             mandatory=True,
             position=-1,
             xor=['subject'],
@@ -34,7 +35,7 @@ def test_CheckTalairachAlignment_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_CheckTalairachAlignment_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = CheckTalairachAlignment.output_spec()
 
     for key, metadata in list(output_map.items()):

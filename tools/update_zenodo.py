@@ -58,6 +58,7 @@ missing_entries = [
         "Leipzig, Germany.",
      "name": "Mihai, Paul Glad",
      "orcid": "0000-0001-5715-6442"},
+    {"name": "Lai, Jeff"}
 ]
 
 for entry in missing_entries:

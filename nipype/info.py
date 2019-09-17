@@ -7,11 +7,9 @@ from __future__ import (print_function, division, unicode_literals,
 
 import sys
 
-# nipype version information.  An empty version_extra corresponds to a
-# full release.  '.dev' as a version_extra string means this is a development
-# version
+# nipype version information
 # Remove -dev for release
-__version__ = '1.2.1-dev'
+__version__ = '1.2.3-dev'
 
 
 def get_nipype_gitversion():
@@ -59,8 +57,11 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
-    'Programming Language :: Python :: 3.6', 'Topic :: Scientific/Engineering'
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Topic :: Scientific/Engineering'
 ]
+PYTHON_REQUIRES = ">= 2.7, != 3.0.*, != 3.1.*, != 3.2.*, != 3.3.*"
 
 description = 'Neuroimaging in Python: Pipelines and Interfaces'
 
@@ -107,7 +108,11 @@ NUMPY_MIN_VERSION = '1.9.0'
 # https://www.opensourceanswers.com/blog/you-shouldnt-use-python-37-for-data-science-right-now.html
 NUMPY_MIN_VERSION_37 = '1.15.3'
 NUMPY_BAD_VERSION_27 = '1.16.0'
+# Numpy drops 2.7 support in 1.17
+NUMPY_MAX_VERSION_27 = '1.17.0'
 SCIPY_MIN_VERSION = '0.14'
+# Scipy drops 2.7 and 3.4 support in 1.3
+SCIPY_MAX_VERSION_34 = '1.3.0'
 TRAITS_MIN_VERSION = '4.6'
 DATEUTIL_MIN_VERSION = '2.2'
 FUTURE_MIN_VERSION = '0.16.0'
@@ -135,47 +140,57 @@ ISRELEASE = (len(__version__.replace('-', '.').split('.')) == 3
 VERSION = __version__
 PROVIDES = ['nipype']
 REQUIRES = [
-    'nibabel>=%s' % NIBABEL_MIN_VERSION,
-    'networkx>=%s,<=%s ; python_version < "3.0"' % (NETWORKX_MIN_VERSION, NETWORKX_MAX_VERSION_27),
+    'click>=%s' % CLICK_MIN_VERSION,
+    'configparser; python_version <= "3.4"',
+    'funcsigs',
+    'future>=%s' % FUTURE_MIN_VERSION,
+    'futures; python_version == "2.7"',
+    'lxml<4.4.0; python_version == "3.4"',
     'networkx>=%s ; python_version >= "3.0"' % NETWORKX_MIN_VERSION,
-    'numpy>=%s,!=%s ; python_version == "2.7"' % (NUMPY_MIN_VERSION, NUMPY_BAD_VERSION_27),
+    'networkx>=%s,<=%s ; python_version < "3.0"' % (NETWORKX_MIN_VERSION, NETWORKX_MAX_VERSION_27),
+    'nibabel>=%s' % NIBABEL_MIN_VERSION,
     'numpy>=%s ; python_version > "3.0" and python_version < "3.7"' % NUMPY_MIN_VERSION,
     'numpy>=%s ; python_version >= "3.7"' % NUMPY_MIN_VERSION_37,
-    'python-dateutil>=%s' % DATEUTIL_MIN_VERSION,
-    'scipy>=%s' % SCIPY_MIN_VERSION,
-    'traits>=%s,!=5.0' % TRAITS_MIN_VERSION,
-    'future>=%s' % FUTURE_MIN_VERSION,
-    'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
-    'prov>=%s' % PROV_VERSION,
-    'neurdflib',
-    'click>=%s' % CLICK_MIN_VERSION,
-    'funcsigs',
-    'pydotplus',
-    'pydot>=%s' % PYDOT_MIN_VERSION,
+    'numpy>=%s,!=%s,<%s ; python_version == "2.7"' % (NUMPY_MIN_VERSION,
+                                                      NUMPY_BAD_VERSION_27,
+                                                      NUMPY_MAX_VERSION_27),
     'packaging',
-    'futures; python_version == "2.7"',
-    'configparser; python_version <= "3.4"',
+    'pathlib2; python_version <= "3.4"',
+    'prov>=%s' % PROV_VERSION,
+    'pydot>=%s' % PYDOT_MIN_VERSION,
+    'pydotplus',
+    'python-dateutil>=%s' % DATEUTIL_MIN_VERSION,
+    'scipy>=%s ; python_version >= "3.5"' % SCIPY_MIN_VERSION,
+    'scipy>=%s,<%s ; python_version <= "3.4"' % (SCIPY_MIN_VERSION, SCIPY_MAX_VERSION_34),
+    'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
+    'traits>=%s,!=5.0' % TRAITS_MIN_VERSION,
+    'filelock>=3.0.0',
+    'etelemetry',
 ]
 
+# neurdflib has to come after prov
+# https://github.com/nipy/nipype/pull/2961#issuecomment-512035484
+REQUIRES += ['neurdflib']
+
 TESTS_REQUIRES = [
+    'codecov',
+    'coverage<5',
     'mock',
     'pytest',
     'pytest-cov',
-    'codecov',
     'pytest-env',
-    'coverage<5'
 ]
 
 EXTRA_REQUIRES = {
     'doc': ['Sphinx>=1.4', 'numpydoc', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],
-    'tests': TESTS_REQUIRES,
-    'specs': ['yapf'],
+    'duecredit': ['duecredit'],
     'nipy': ['nitime', 'nilearn<0.5.0', 'dipy', 'nipy', 'matplotlib'],
     'profiler': ['psutil>=5.0'],
-    'duecredit': ['duecredit'],
-    'xvfbwrapper': ['xvfbwrapper'],
     'pybids': ['pybids>=0.7.0'],
+    'specs': ['yapf>=0.27'],
     'ssh': ['paramiko'],
+    'tests': TESTS_REQUIRES,
+    'xvfbwrapper': ['xvfbwrapper'],
     # 'mesh': ['mayavi']  # Enable when it works
 }
 

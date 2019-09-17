@@ -29,6 +29,7 @@ def test_Average_inputs():
         ),
         filelist=dict(
             argstr='-filelist %s',
+            extensions=None,
             mandatory=True,
             xor=('input_files', 'filelist'),
         ),
@@ -115,6 +116,7 @@ def test_Average_inputs():
         ),
         output_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             hash_files=False,
             name_source=['input_files'],
@@ -125,7 +127,10 @@ def test_Average_inputs():
             argstr='-quiet',
             xor=('verbose', 'quiet'),
         ),
-        sdfile=dict(argstr='-sdfile %s', ),
+        sdfile=dict(
+            argstr='-sdfile %s',
+            extensions=None,
+        ),
         two=dict(argstr='-2', ),
         verbose=dict(
             argstr='-verbose',
@@ -147,7 +152,7 @@ def test_Average_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Average_outputs():
-    output_map = dict(output_file=dict(), )
+    output_map = dict(output_file=dict(extensions=None, ), )
     outputs = Average.output_spec()
 
     for key, metadata in list(output_map.items()):

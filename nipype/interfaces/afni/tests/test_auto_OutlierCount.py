@@ -26,6 +26,7 @@ def test_OutlierCount_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
@@ -39,15 +40,18 @@ def test_OutlierCount_inputs():
         ),
         mask=dict(
             argstr='-mask %s',
+            extensions=None,
             xor=['autoclip', 'automask'],
         ),
         out_file=dict(
+            extensions=None,
             keep_extension=False,
             name_source=['in_file'],
             name_template='%s_outliers',
         ),
         outliers_file=dict(
             argstr='-save %s',
+            extensions=None,
             keep_extension=True,
             name_source=['in_file'],
             name_template='%s_outliers',
@@ -67,8 +71,8 @@ def test_OutlierCount_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_OutlierCount_outputs():
     output_map = dict(
-        out_file=dict(),
-        out_outliers=dict(),
+        out_file=dict(extensions=None, ),
+        out_outliers=dict(extensions=None, ),
     )
     outputs = OutlierCount.output_spec()
 

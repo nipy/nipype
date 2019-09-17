@@ -109,11 +109,11 @@ class FitQt1InputSpec(CommandLineInputSpec):
         desc='Inversion times for T1 data [1s,2s,5s].',
         argstr='-TIs %s',
         sep=' ')
-    tis_list = traits.File(
+    tis_list = File(
         exists=True,
         argstr='-TIlist %s',
         desc='Filename of list of pre-defined TIs.')
-    t1_list = traits.File(
+    t1_list = File(
         exists=True,
         argstr='-T1list %s',
         desc='Filename of list of pre-defined T1s')
@@ -127,12 +127,12 @@ class FitQt1InputSpec(CommandLineInputSpec):
     flips = traits.List(
         traits.Float, desc='Flip angles', argstr='-flips %s', sep=' ')
     desc = 'Filename of list of pre-defined flip angles (deg).'
-    flips_list = traits.File(exists=True, argstr='-fliplist %s', desc=desc)
+    flips_list = File(exists=True, argstr='-fliplist %s', desc=desc)
     desc = 'Filename of B1 estimate for fitting (or include in prior).'
-    b1map = traits.File(exists=True, argstr='-b1map %s', desc=desc)
+    b1map = File(exists=True, argstr='-b1map %s', desc=desc)
 
     # MCMC options:
-    mcout = traits.File(
+    mcout = File(
         exists=True,
         desc='Filename of mc samples (ascii text file)',
         argstr='-mcout %s')

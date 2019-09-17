@@ -17,6 +17,7 @@ def test_TractShredder_inputs():
         ),
         in_file=dict(
             argstr='< %s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
@@ -27,6 +28,7 @@ def test_TractShredder_inputs():
         ),
         out_file=dict(
             argstr='> %s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
@@ -42,7 +44,7 @@ def test_TractShredder_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TractShredder_outputs():
-    output_map = dict(shredded=dict(), )
+    output_map = dict(shredded=dict(extensions=None, ), )
     outputs = TractShredder.output_spec()
 
     for key, metadata in list(output_map.items()):

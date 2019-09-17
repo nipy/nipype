@@ -134,7 +134,7 @@ class RegisterAVItoTalairachInputSpec(FSTraitedSpec):
 
 
 class RegisterAVItoTalairachOutputSpec(FSScriptOutputSpec):
-    out_file = traits.File(
+    out_file = File(
         exists=False, desc="The output file for RegisterAVItoTalairach")
 
 

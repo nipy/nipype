@@ -12,11 +12,13 @@ def test_FSL2Scheme_inputs():
         ),
         bval_file=dict(
             argstr='-bvalfile %s',
+            extensions=None,
             mandatory=True,
             position=2,
         ),
         bvec_file=dict(
             argstr='-bvecfile %s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
@@ -38,6 +40,7 @@ def test_FSL2Scheme_inputs():
         ),
         out_file=dict(
             argstr='> %s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
@@ -49,7 +52,7 @@ def test_FSL2Scheme_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_FSL2Scheme_outputs():
-    output_map = dict(scheme=dict(), )
+    output_map = dict(scheme=dict(extensions=None, ), )
     outputs = FSL2Scheme.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -14,11 +14,13 @@ def test_EstimateFOD_inputs():
         bval_scale=dict(argstr='-bvalue_scaling %s', ),
         csf_odf=dict(
             argstr='%s',
+            extensions=None,
             position=-1,
             usedefault=True,
         ),
         csf_txt=dict(
             argstr='%s',
+            extensions=None,
             position=-2,
         ),
         environ=dict(
@@ -27,26 +29,46 @@ def test_EstimateFOD_inputs():
         ),
         gm_odf=dict(
             argstr='%s',
+            extensions=None,
             position=-3,
             usedefault=True,
         ),
         gm_txt=dict(
             argstr='%s',
+            extensions=None,
             position=-4,
         ),
-        grad_file=dict(argstr='-grad %s', ),
-        grad_fsl=dict(argstr='-fslgrad %s %s', ),
-        in_bval=dict(),
-        in_bvec=dict(argstr='-fslgrad %s %s', ),
-        in_dirs=dict(argstr='-directions %s', ),
+        grad_file=dict(
+            argstr='-grad %s',
+            extensions=None,
+            xor=['grad_fsl'],
+        ),
+        grad_fsl=dict(
+            argstr='-fslgrad %s %s',
+            xor=['grad_file'],
+        ),
+        in_bval=dict(extensions=None, ),
+        in_bvec=dict(
+            argstr='-fslgrad %s %s',
+            extensions=None,
+        ),
+        in_dirs=dict(
+            argstr='-directions %s',
+            extensions=None,
+        ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-7,
         ),
-        mask_file=dict(argstr='-mask %s', ),
+        mask_file=dict(
+            argstr='-mask %s',
+            extensions=None,
+        ),
         max_sh=dict(
-            argstr='-lmax %d',
+            argstr='-lmax %s',
+            sep=',',
             usedefault=True,
         ),
         nthreads=dict(
@@ -59,12 +81,14 @@ def test_EstimateFOD_inputs():
         ),
         wm_odf=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-5,
             usedefault=True,
         ),
         wm_txt=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-6,
         ),
@@ -76,9 +100,18 @@ def test_EstimateFOD_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_EstimateFOD_outputs():
     output_map = dict(
-        csf_odf=dict(argstr='%s', ),
-        gm_odf=dict(argstr='%s', ),
-        wm_odf=dict(argstr='%s', ),
+        csf_odf=dict(
+            argstr='%s',
+            extensions=None,
+        ),
+        gm_odf=dict(
+            argstr='%s',
+            extensions=None,
+        ),
+        wm_odf=dict(
+            argstr='%s',
+            extensions=None,
+        ),
     )
     outputs = EstimateFOD.output_spec()
 

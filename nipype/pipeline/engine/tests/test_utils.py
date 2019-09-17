@@ -16,7 +16,8 @@ from ... import engine as pe
 from ....interfaces import base as nib
 from ....interfaces import utility as niu
 from .... import config
-from ..utils import clean_working_directory, write_workflow_prov
+from ..utils import (clean_working_directory, write_workflow_prov,
+                     load_resultfile)
 
 
 class InputSpec(nib.TraitedSpec):
@@ -224,3 +225,108 @@ def test_mapnode_crash3(tmpdir):
     wf.config["execution"]["crashdump_dir"] = os.getcwd()
     with pytest.raises(RuntimeError):
         wf.run(plugin='Linear')
+
+class StrPathConfuserInputSpec(nib.TraitedSpec):
+    in_str = nib.traits.String()
+
+
+class StrPathConfuserOutputSpec(nib.TraitedSpec):
+    out_tuple = nib.traits.Tuple(nib.File, nib.traits.String)
+    out_dict_path = nib.traits.Dict(nib.traits.String, nib.File(exists=True))
+    out_dict_str = nib.traits.DictStrStr()
+    out_list = nib.traits.List(nib.traits.String)
+    out_str = nib.traits.String()
+    out_path = nib.File(exists=True)
+
+
+class StrPathConfuser(nib.SimpleInterface):
+    input_spec = StrPathConfuserInputSpec
+    output_spec = StrPathConfuserOutputSpec
+
+    def _run_interface(self, runtime):
+        out_path = os.path.abspath(os.path.basename(self.inputs.in_str) + '_path')
+        open(out_path, 'w').close()
+        self._results['out_str'] = self.inputs.in_str
+        self._results['out_path'] = out_path
+        self._results['out_tuple'] = (out_path, self.inputs.in_str)
+        self._results['out_dict_path'] = {self.inputs.in_str: out_path}
+        self._results['out_dict_str'] = {self.inputs.in_str: self.inputs.in_str}
+        self._results['out_list'] = [self.inputs.in_str] * 2
+        return runtime
+
+
+def test_modify_paths_bug(tmpdir):
+    """
+    There was a bug in which, if the current working directory contained a file with the name
+    of an output String, the string would get transformed into a path, and generally wreak havoc.
+    This attempts to replicate that condition, using an object with strings and paths in various
+    trait configurations, to ensure that the guards added resolve the issue.
+    Please see https://github.com/nipy/nipype/issues/2944 for more details.
+    """
+    tmpdir.chdir()
+
+    spc = pe.Node(StrPathConfuser(in_str='2'), name='spc')
+
+    open('2', 'w').close()
+
+    outputs = spc.run().outputs
+
+    # Basic check that string was not manipulated
+    out_str = outputs.out_str
+    assert out_str == '2'
+
+    # Check path exists and is absolute
+    out_path = outputs.out_path
+    assert os.path.isabs(out_path)
+
+    # Assert data structures pass through correctly
+    assert outputs.out_tuple == (out_path, out_str)
+    assert outputs.out_dict_path == {out_str: out_path}
+    assert outputs.out_dict_str == {out_str: out_str}
+    assert outputs.out_list == [out_str] * 2
+
+
+@pytest.mark.xfail(sys.version_info < (3, 4),
+                   reason="rebase does not fully work with Python 2.7")
+@pytest.mark.parametrize("use_relative", [True, False])
+def test_save_load_resultfile(tmpdir, use_relative):
+    """Test minimally the save/load functions for result files."""
+    from shutil import copytree, rmtree
+    tmpdir.chdir()
+
+    old_use_relative = config.getboolean('execution', 'use_relative_paths')
+    config.set('execution', 'use_relative_paths', use_relative)
+
+    spc = pe.Node(StrPathConfuser(in_str='2'), name='spc')
+    spc.base_dir = tmpdir.mkdir('node').strpath
+
+    result = spc.run()
+
+    loaded_result = load_resultfile(
+        tmpdir.join('node').join('spc').join('result_spc.pklz').strpath)
+
+    assert result.runtime.dictcopy() == loaded_result.runtime.dictcopy()
+    assert result.inputs == loaded_result.inputs
+    assert result.outputs.get() == loaded_result.outputs.get()
+
+    # Test the mobility of the result file.
+    copytree(tmpdir.join('node').strpath, tmpdir.join('node2').strpath)
+    rmtree(tmpdir.join('node').strpath)
+
+    if use_relative:
+        loaded_result2 = load_resultfile(
+            tmpdir.join('node2').join('spc').join('result_spc.pklz').strpath)
+
+        assert result.runtime.dictcopy() == loaded_result2.runtime.dictcopy()
+        assert result.inputs == loaded_result2.inputs
+        assert loaded_result2.outputs.get() != result.outputs.get()
+        newpath = result.outputs.out_path.replace('/node/', '/node2/')
+        assert loaded_result2.outputs.out_path == newpath
+        assert loaded_result2.outputs.out_tuple[0] == newpath
+        assert loaded_result2.outputs.out_dict_path['2'] == newpath
+    else:
+        with pytest.raises(nib.TraitError):
+            load_resultfile(
+                tmpdir.join('node2').join('spc').join('result_spc.pklz').strpath)
+
+    config.set('execution', 'use_relative_paths', old_use_relative)

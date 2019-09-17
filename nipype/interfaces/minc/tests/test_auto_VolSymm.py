@@ -10,7 +10,10 @@ def test_VolSymm_inputs():
             argstr='-clobber',
             usedefault=True,
         ),
-        config_file=dict(argstr='-config_file %s', ),
+        config_file=dict(
+            argstr='-config_file %s',
+            extensions=None,
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -19,6 +22,7 @@ def test_VolSymm_inputs():
         fit_nonlinear=dict(argstr='-nonlinear', ),
         input_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-3,
         ),
@@ -26,6 +30,7 @@ def test_VolSymm_inputs():
         nofit=dict(argstr='-nofit', ),
         output_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             hash_files=False,
             name_source=['input_file'],
@@ -34,6 +39,7 @@ def test_VolSymm_inputs():
         ),
         trans_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             hash_files=False,
             keep_extension=False,
@@ -53,9 +59,9 @@ def test_VolSymm_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_VolSymm_outputs():
     output_map = dict(
-        output_file=dict(),
-        output_grid=dict(),
-        trans_file=dict(),
+        output_file=dict(extensions=None, ),
+        output_grid=dict(extensions=None, ),
+        trans_file=dict(extensions=None, ),
     )
     outputs = VolSymm.output_spec()
 

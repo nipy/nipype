@@ -10,13 +10,20 @@ def test_WarpPoints_inputs():
             usedefault=True,
         ),
         out_points=dict(
+            extensions=None,
             keep_extension=True,
             name_source='points',
             name_template='%s_warped',
             output_name='out_points',
         ),
-        points=dict(mandatory=True, ),
-        warp=dict(mandatory=True, ),
+        points=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        warp=dict(
+            extensions=None,
+            mandatory=True,
+        ),
     )
     inputs = WarpPoints.input_spec()
 
@@ -24,7 +31,7 @@ def test_WarpPoints_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_WarpPoints_outputs():
-    output_map = dict(out_points=dict(), )
+    output_map = dict(out_points=dict(extensions=None, ), )
     outputs = WarpPoints.output_spec()
 
     for key, metadata in list(output_map.items()):

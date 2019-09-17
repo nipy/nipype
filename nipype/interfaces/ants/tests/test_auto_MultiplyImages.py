@@ -17,6 +17,7 @@ def test_MultiplyImages_inputs():
         ),
         first_input=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
@@ -26,6 +27,7 @@ def test_MultiplyImages_inputs():
         ),
         output_product_image=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=3,
         ),
@@ -41,7 +43,7 @@ def test_MultiplyImages_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_MultiplyImages_outputs():
-    output_map = dict(output_product_image=dict(), )
+    output_map = dict(output_product_image=dict(extensions=None, ), )
     outputs = MultiplyImages.output_spec()
 
     for key, metadata in list(output_map.items()):

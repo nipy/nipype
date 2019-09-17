@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""AFNI preprocessing interfaces
-"""
+"""AFNI preprocessing interfaces."""
 from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 from builtins import open
@@ -370,7 +369,7 @@ class AllineateInputSpec(AFNICommandInputSpec):
         'larger weights mean that voxel count more in the cost function. '
         'If an image file is given, the volume must be defined on the '
         'same grid as the base dataset')
-    out_weight_file = traits.File(
+    out_weight_file = File(
         argstr='-wtprefix %s',
         desc='Write the weight volume to disk as a dataset',
         xor=['allcostx'])
@@ -757,8 +756,7 @@ class BandpassInputSpec(AFNICommandInputSpec):
         desc='output file from 3dBandpass',
         argstr='-prefix %s',
         position=1,
-        name_source='in_file',
-        genfile=True)
+        name_source='in_file')
     lowpass = traits.Float(
         desc='lowpass', argstr='%f', position=-2, mandatory=True)
     highpass = traits.Float(
@@ -968,7 +966,7 @@ class ClipLevelInputSpec(CommandLineInputSpec):
         argstr='-doall',
         position=3,
         xor=('grad'))
-    grad = traits.File(
+    grad = File(
         desc='Also compute a \'gradual\' clip level as a function of voxel '
         'position, and output that to a dataset.',
         argstr='-grad %s',
@@ -1833,7 +1831,7 @@ class ROIStatsInputSpec(CommandLineInputSpec):
              'a \'0\' in the output file. Only active if `num_roi` is '
              'enabled.',
         argstr='-zerofill %s')
-    roisel = traits.File(
+    roisel = File(
         exists=True,
         desc='Only considers ROIs denoted by values found in the specified '
              'file. Note that the order of the ROIs as specified in the file '
@@ -2262,7 +2260,7 @@ class TCorrMapInputSpec(AFNICommandInputSpec):
     polort = traits.Int(argstr='-polort %d')
     bandpass = traits.Tuple(
         (traits.Float(), traits.Float()), argstr='-bpass %f %f')
-    regress_out_timeseries = traits.File(exists=True, argstr='-ort %s')
+    regress_out_timeseries = File(exists=True, argstr='-ort %s')
     blur_fwhm = traits.Float(argstr='-Gblur %f')
     seeds_width = traits.Float(argstr='-Mseed %f', xor=('seeds'))
 
@@ -2855,6 +2853,79 @@ class TShift(AFNICommand):
         return outputs
 
 
+class TSmoothInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dTSmooth',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='%s_smooth',
+        desc='output file from 3dTSmooth',
+        argstr='-prefix %s',
+        name_source='in_file')
+    datum = traits.Str(
+        desc='Sets the data type of the output dataset',
+        argstr='-datum %s')
+    lin = traits.Bool(
+        desc='3 point linear filter: 0.15*a + 0.70*b + 0.15*c'
+        '[This is the default smoother]',
+        argstr='-lin')
+    med = traits.Bool(
+        desc='3 point median filter: median(a,b,c)',
+        argstr='-med')
+    osf = traits.Bool(
+        desc='3 point order statistics filter:'
+        '0.15*min(a,b,c) + 0.70*median(a,b,c) + 0.15*max(a,b,c)',
+        argstr='-osf')
+    lin3 = traits.Int(
+        desc='3 point linear filter: 0.5*(1-m)*a + m*b + 0.5*(1-m)*c'
+        "Here, 'm' is a number strictly between 0 and 1.",
+        argstr='-3lin %d')
+    hamming = traits.Int(
+        argstr='-hamming %d',
+        desc='Use N point Hamming windows.'
+        '(N must be odd and bigger than 1.)')
+    blackman = traits.Int(
+        argstr='-blackman %d',
+        desc='Use N point Blackman windows.'
+        '(N must be odd and bigger than 1.)')
+    custom = File(
+        argstr='-custom %s',
+        desc='odd # of coefficients must be in a single column in ASCII file')
+    adaptive = traits.Int(
+        argstr='-adaptive %d',
+        desc='use adaptive mean filtering of width N '
+        '(where N must be odd and bigger than 3).')
+
+
+class TSmooth(AFNICommand):
+    """Smooths each voxel time series in a 3D+time dataset and produces
+    as output a new 3D+time dataset (e.g., lowpass filter in time).
+
+    For complete details, see the `3dTsmooth Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTSmooth.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> from nipype.testing import  example_data
+    >>> smooth = afni.TSmooth()
+    >>> smooth.inputs.in_file = 'functional.nii'
+    >>> smooth.inputs.adaptive = 5
+    >>> smooth.cmdline
+    '3dTsmooth -adaptive 5 -prefix functional_smooth functional.nii'
+    >>> res = smooth.run()  # doctest: +SKIP
+
+    """
+    _cmd = '3dTsmooth'
+    input_spec = TSmoothInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
 class VolregInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc='input file to 3dvolreg',
@@ -3087,43 +3158,42 @@ class QwarpInputSpec(AFNICommandInputSpec):
         copyfile=False)
     out_file = File(
         argstr='-prefix %s',
-        name_template='%s_QW',
+        name_template='ppp_%s',
         name_source=['in_file'],
-        genfile=True,
-        desc='out_file ppp'
-        'Sets the prefix for the output datasets.'
-        '* The source dataset is warped to match the base'
-        'and gets prefix \'ppp\'. (Except if \'-plusminus\' is used.)'
-        '* The final interpolation to this output dataset is'
-        'done using the \'wsinc5\' method.  See the output of'
-        ' 3dAllineate -HELP'
-        '(in the "Modifying \'-final wsinc5\'" section) for'
-        'the lengthy technical details.'
-        '* The 3D warp used is saved in a dataset with'
-        'prefix \'ppp_WARP\' -- this dataset can be used'
-        'with 3dNwarpApply and 3dNwarpCat, for example.'
-        '* To be clear, this is the warp from source dataset'
-        ' coordinates to base dataset coordinates, where the'
-        ' values at each base grid point are the xyz displacments'
-        ' needed to move that grid point\'s xyz values to the'
-        ' corresponding xyz values in the source dataset:'
-        '   base( (x,y,z) + WARP(x,y,z) ) matches source(x,y,z)'
-        ' Another way to think of this warp is that it \'pulls\''
-        ' values back from source space to base space.'
-        '* 3dNwarpApply would use \'ppp_WARP\' to transform datasets'
-        'aligned with the source dataset to be aligned with the'
-        'base dataset.'
-        '** If you do NOT want this warp saved, use the option \'-nowarp\'.'
-        '-->> (However, this warp is usually the most valuable possible output!)'
-        '* If you want to calculate and save the inverse 3D warp,'
-        'use the option \'-iwarp\'.  This inverse warp will then be'
-        'saved in a dataset with prefix \'ppp_WARPINV\'.'
-        '* This inverse warp could be used to transform data from base'
-        'space to source space, if you need to do such an operation.'
-        '* You can easily compute the inverse later, say by a command like'
-        ' 3dNwarpCat -prefix Z_WARPINV \'INV(Z_WARP+tlrc)\''
-        'or the inverse can be computed as needed in 3dNwarpApply, like'
-        ' 3dNwarpApply -nwarp \'INV(Z_WARP+tlrc)\' -source Dataset.nii ...')
+        desc="""\
+Sets the prefix/suffix for the output datasets.
+* The source dataset is warped to match the base
+and gets prefix 'ppp'. (Except if '-plusminus' is used
+* The final interpolation to this output dataset is
+done using the 'wsinc5' method.  See the output of
+ 3dAllineate -HELP
+(in the "Modifying '-final wsinc5'" section) for
+the lengthy technical details.
+* The 3D warp used is saved in a dataset with
+prefix 'ppp_WARP' -- this dataset can be used
+with 3dNwarpApply and 3dNwarpCat, for example.
+* To be clear, this is the warp from source dataset
+ coordinates to base dataset coordinates, where the
+ values at each base grid point are the xyz displacments
+ needed to move that grid point's xyz values to the
+ corresponding xyz values in the source dataset:
+   base( (x,y,z) + WARP(x,y,z) ) matches source(x,y,z)
+ Another way to think of this warp is that it 'pulls'
+ values back from source space to base space.
+* 3dNwarpApply would use 'ppp_WARP' to transform datasets
+aligned with the source dataset to be aligned with the
+base dataset.
+** If you do NOT want this warp saved, use the option '-nowarp'.
+-->> (However, this warp is usually the most valuable possible output!)
+* If you want to calculate and save the inverse 3D warp,
+use the option '-iwarp'.  This inverse warp will then be
+saved in a dataset with prefix 'ppp_WARPINV'.
+* This inverse warp could be used to transform data from base
+space to source space, if you need to do such an operation.
+* You can easily compute the inverse later, say by a command like
+ 3dNwarpCat -prefix Z_WARPINV 'INV(Z_WARP+tlrc)'
+or the inverse can be computed as needed in 3dNwarpApply, like
+ 3dNwarpApply -nwarp 'INV(Z_WARP+tlrc)' -source Dataset.nii ...""")
     resample = traits.Bool(
         desc='This option simply resamples the source dataset to match the'
         'base dataset grid.  You can use this if the two datasets'
@@ -3252,7 +3322,7 @@ class QwarpInputSpec(AFNICommandInputSpec):
         '* As with \'-wball\', the factor \'f\' should be between 1 and 100.'
         '* You cannot use \'-wball\' and \'-wmask\' together!',
         argstr='-wpass %s %f')
-    out_weight_file = traits.File(
+    out_weight_file = File(
         argstr='-wtprefix %s',
         desc='Write the weight volume to disk as a dataset')
     blur = traits.List(
@@ -3619,7 +3689,8 @@ class Qwarp(AFNICommand):
     >>> qwarp.inputs.base_file = 'sub-01_dir-RL_epi.nii.gz'
     >>> qwarp.inputs.plusminus = True
     >>> qwarp.cmdline
-    '3dQwarp -base sub-01_dir-RL_epi.nii.gz -source sub-01_dir-LR_epi.nii.gz -nopadWARP -prefix sub-01_dir-LR_epi_QW -plusminus'
+    '3dQwarp -base sub-01_dir-RL_epi.nii.gz -source sub-01_dir-LR_epi.nii.gz -nopadWARP \
+-prefix ppp_sub-01_dir-LR_epi -plusminus'
     >>> res = qwarp.run()  # doctest: +SKIP
 
     >>> from nipype.interfaces import afni
@@ -3628,7 +3699,7 @@ class Qwarp(AFNICommand):
     >>> qwarp.inputs.base_file = 'mni.nii'
     >>> qwarp.inputs.resample = True
     >>> qwarp.cmdline
-    '3dQwarp -base mni.nii -source structural.nii -prefix structural_QW -resample'
+    '3dQwarp -base mni.nii -source structural.nii -prefix ppp_structural -resample'
     >>> res = qwarp.run()  # doctest: +SKIP
 
     >>> from nipype.interfaces import afni
@@ -3642,7 +3713,8 @@ class Qwarp(AFNICommand):
     >>> qwarp.inputs.iwarp = True
     >>> qwarp.inputs.blur = [0,3]
     >>> qwarp.cmdline
-    '3dQwarp -base epi.nii -blur 0.0 3.0 -source structural.nii -iwarp -prefix anatSSQ.nii.gz -resample -verb -lpc'
+    '3dQwarp -base epi.nii -blur 0.0 3.0 -source structural.nii -iwarp -prefix anatSSQ.nii.gz \
+-resample -verb -lpc'
     >>> res = qwarp.run()  # doctest: +SKIP
 
     >>> from nipype.interfaces import afni
@@ -3652,7 +3724,7 @@ class Qwarp(AFNICommand):
     >>> qwarp.inputs.duplo = True
     >>> qwarp.inputs.blur = [0,3]
     >>> qwarp.cmdline
-    '3dQwarp -base mni.nii -blur 0.0 3.0 -duplo -source structural.nii -prefix structural_QW'
+    '3dQwarp -base mni.nii -blur 0.0 3.0 -duplo -source structural.nii -prefix ppp_structural'
     >>> res = qwarp.run()  # doctest: +SKIP
 
     >>> from nipype.interfaces import afni
@@ -3674,7 +3746,8 @@ class Qwarp(AFNICommand):
     >>> qwarp2.inputs.inilev = 7
     >>> qwarp2.inputs.iniwarp = ['Q25_warp+tlrc.HEAD']
     >>> qwarp2.cmdline
-    '3dQwarp -base mni.nii -blur 0.0 2.0 -source structural.nii -inilev 7 -iniwarp Q25_warp+tlrc.HEAD -prefix Q11'
+    '3dQwarp -base mni.nii -blur 0.0 2.0 -source structural.nii -inilev 7 -iniwarp Q25_\
+warp+tlrc.HEAD -prefix Q11'
     >>> res2 = qwarp2.run()  # doctest: +SKIP
     >>> res2 = qwarp2.run()  # doctest: +SKIP
     >>> qwarp3 = afni.Qwarp()
@@ -3683,7 +3756,8 @@ class Qwarp(AFNICommand):
     >>> qwarp3.inputs.allineate = True
     >>> qwarp3.inputs.allineate_opts = '-cose lpa -verb'
     >>> qwarp3.cmdline
-    "3dQwarp -allineate -allineate_opts '-cose lpa -verb' -base mni.nii -source structural.nii -prefix structural_QW"
+    "3dQwarp -allineate -allineate_opts '-cose lpa -verb' -base mni.nii -source structural.nii \
+-prefix ppp_structural"
     >>> res3 = qwarp3.run()  # doctest: +SKIP    """
     _cmd = '3dQwarp'
     input_spec = QwarpInputSpec
@@ -3699,13 +3773,18 @@ class Qwarp(AFNICommand):
 
         if not isdefined(self.inputs.out_file):
             prefix = self._gen_fname(self.inputs.in_file, suffix='_QW')
-            ext = '.HEAD'
-            suffix = '+tlrc'
+            outputtype = self.inputs.outputtype
+            if outputtype == 'AFNI':
+                ext = '.HEAD'
+                suffix = '+tlrc'
+            else:
+                ext = Info.output_type_to_ext(outputtype)
+                suffix = ''
         else:
             prefix = self.inputs.out_file
             ext_ind = max([
                 prefix.lower().rfind('.nii.gz'),
-                prefix.lower().rfind('.nii.')
+                prefix.lower().rfind('.nii')
             ])
             if ext_ind == -1:
                 ext = '.HEAD'
@@ -3759,8 +3838,8 @@ class QwarpPlusMinusInputSpec(QwarpInputSpec):
         new_name='in_file',
         copyfile=False)
     out_file = File(
+        'Qwarp.nii.gz',
         argstr='-prefix %s',
-        value='Qwarp.nii.gz',
         position=0,
         usedefault=True,
         desc="Output file")

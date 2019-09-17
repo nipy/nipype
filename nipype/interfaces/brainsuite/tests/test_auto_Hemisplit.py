@@ -12,29 +12,38 @@ def test_Hemisplit_inputs():
         ),
         inputHemisphereLabelFile=dict(
             argstr='-l %s',
+            extensions=None,
             mandatory=True,
         ),
         inputSurfaceFile=dict(
             argstr='-i %s',
+            extensions=None,
             mandatory=True,
         ),
         outputLeftHemisphere=dict(
             argstr='--left %s',
+            extensions=None,
             genfile=True,
         ),
         outputLeftPialHemisphere=dict(
             argstr='-pl %s',
+            extensions=None,
             genfile=True,
         ),
         outputRightHemisphere=dict(
             argstr='--right %s',
+            extensions=None,
             genfile=True,
         ),
         outputRightPialHemisphere=dict(
             argstr='-pr %s',
+            extensions=None,
             genfile=True,
         ),
-        pialSurfaceFile=dict(argstr='-p %s', ),
+        pialSurfaceFile=dict(
+            argstr='-p %s',
+            extensions=None,
+        ),
         timer=dict(argstr='--timer', ),
         verbosity=dict(argstr='-v %d', ),
     )
@@ -45,10 +54,10 @@ def test_Hemisplit_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Hemisplit_outputs():
     output_map = dict(
-        outputLeftHemisphere=dict(),
-        outputLeftPialHemisphere=dict(),
-        outputRightHemisphere=dict(),
-        outputRightPialHemisphere=dict(),
+        outputLeftHemisphere=dict(extensions=None, ),
+        outputLeftPialHemisphere=dict(extensions=None, ),
+        outputRightHemisphere=dict(extensions=None, ),
+        outputRightPialHemisphere=dict(extensions=None, ),
     )
     outputs = Hemisplit.output_spec()
 

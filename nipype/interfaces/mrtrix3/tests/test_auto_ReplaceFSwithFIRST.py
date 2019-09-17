@@ -12,20 +12,24 @@ def test_ReplaceFSwithFIRST_inputs():
         ),
         in_config=dict(
             argstr='%s',
+            extensions=None,
             position=-2,
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-4,
         ),
         in_t1w=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-3,
         ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-1,
             usedefault=True,
@@ -37,7 +41,7 @@ def test_ReplaceFSwithFIRST_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ReplaceFSwithFIRST_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = ReplaceFSwithFIRST.output_spec()
 
     for key, metadata in list(output_map.items()):

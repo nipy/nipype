@@ -8,15 +8,18 @@ def test_CiftiSmooth_inputs():
         args=dict(argstr='%s', ),
         cerebellum_corrected_areas=dict(
             argstr='cerebellum-corrected-areas %s',
+            extensions=None,
             position=10,
             requires=['cerebellum_surf'],
         ),
         cerebellum_surf=dict(
             argstr='-cerebellum-surface %s',
+            extensions=None,
             position=9,
         ),
         cifti_roi=dict(
             argstr='-cifti-roi %s',
+            extensions=None,
             position=11,
         ),
         direction=dict(
@@ -38,15 +41,18 @@ def test_CiftiSmooth_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=0,
         ),
         left_corrected_areas=dict(
             argstr='-left-corrected-areas %s',
+            extensions=None,
             position=6,
         ),
         left_surf=dict(
             argstr='-left-surface %s',
+            extensions=None,
             mandatory=True,
             position=5,
         ),
@@ -56,6 +62,7 @@ def test_CiftiSmooth_inputs():
         ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             keep_extension=True,
             name_source=['in_file'],
             name_template='smoothed_%s.nii',
@@ -63,10 +70,12 @@ def test_CiftiSmooth_inputs():
         ),
         right_corrected_areas=dict(
             argstr='-right-corrected-areas %s',
+            extensions=None,
             position=8,
         ),
         right_surf=dict(
             argstr='-right-surface %s',
+            extensions=None,
             mandatory=True,
             position=7,
         ),
@@ -87,7 +96,7 @@ def test_CiftiSmooth_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_CiftiSmooth_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = CiftiSmooth.output_spec()
 
     for key, metadata in list(output_map.items()):

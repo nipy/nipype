@@ -329,13 +329,13 @@ class CleanerInputSpec(CommandLineInputSpec):
         'Apply aggressive (full variance) cleanup, instead of the default less-aggressive (unique variance) cleanup.',
         position=3)
 
-    confound_file = traits.File(
+    confound_file = File(
         argstr='-x %s', desc='Include additional confound file.', position=4)
 
-    confound_file_1 = traits.File(
+    confound_file_1 = File(
         argstr='-x %s', desc='Include additional confound file.', position=5)
 
-    confound_file_2 = traits.File(
+    confound_file_2 = File(
         argstr='-x %s', desc='Include additional confound file.', position=6)
 
 

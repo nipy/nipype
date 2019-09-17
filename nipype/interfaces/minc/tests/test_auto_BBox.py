@@ -15,6 +15,7 @@ def test_BBox_inputs():
         format_mincreshape=dict(argstr='-mincreshape', ),
         input_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
@@ -24,10 +25,12 @@ def test_BBox_inputs():
         ),
         out_file=dict(
             argstr='> %s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
         output_file=dict(
+            extensions=None,
             hash_files=False,
             keep_extension=False,
             name_source=['input_file'],
@@ -46,7 +49,7 @@ def test_BBox_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_BBox_outputs():
-    output_map = dict(output_file=dict(), )
+    output_map = dict(output_file=dict(extensions=None, ), )
     outputs = BBox.output_spec()
 
     for key, metadata in list(output_map.items()):

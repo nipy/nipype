@@ -16,7 +16,6 @@ from glob import glob
 
 from traceback import format_exception
 from hashlib import sha1
-import gzip
 
 from functools import reduce
 
@@ -25,23 +24,28 @@ from future import standard_library
 
 from ... import logging, config, LooseVersion
 from ...utils.filemanip import (
+    Path,
+    indirectory,
     relpath,
     makedirs,
     fname_presuffix,
     to_str,
     ensure_list,
     get_related_files,
-    FileNotFoundError,
     save_json,
     savepkl,
+    loadpkl,
     write_rst_header,
     write_rst_dict,
     write_rst_list,
+    FileNotFoundError,
 )
 from ...utils.misc import str2bool
 from ...utils.functions import create_function_from_source
-from ...interfaces.base import (Bunch, CommandLine, isdefined, Undefined,
-                                InterfaceResult, traits)
+from ...interfaces.base.traits_extension import (
+    rebase_path_traits, resolve_path_traits, OutputMultiPath, isdefined, Undefined)
+from ...interfaces.base.support import Bunch, InterfaceResult
+from ...interfaces.base import CommandLine
 from ...interfaces.utility import IdentityInterface
 from ...utils.provenance import ProvStore, pm, nipype_ns, get_id
 
@@ -112,68 +116,60 @@ def nodelist_runner(nodes, updatehash=False, stop_first=False):
             yield i, result, err
 
 
-def write_report(node, report_type=None, is_mapnode=False):
-    """Write a report file for a node"""
+def write_node_report(node, result=None, is_mapnode=False):
+    """Write a report file for a node."""
     if not str2bool(node.config['execution']['create_report']):
         return
 
-    if report_type not in ['preexec', 'postexec']:
-        logger.warning('[Node] Unknown report type "%s".', report_type)
-        return
-
     cwd = node.output_dir()
-    report_dir = os.path.join(cwd, '_report')
-    report_file = os.path.join(report_dir, 'report.rst')
-    makedirs(report_dir, exist_ok=True)
-
-    logger.debug('[Node] Writing %s-exec report to "%s"', report_type[:-4],
-                 report_file)
-    if report_type.startswith('pre'):
-        lines = [
-            write_rst_header('Node: %s' % get_print_name(node), level=0),
-            write_rst_list(
-                ['Hierarchy : %s' % node.fullname,
-                 'Exec ID : %s' % node._id]),
-            write_rst_header('Original Inputs', level=1),
-            write_rst_dict(node.inputs.trait_get()),
-        ]
-        with open(report_file, 'wt') as fp:
-            fp.write('\n'.join(lines))
-        return
+    report_file = Path(cwd) / '_report' / 'report.rst'
+    report_file.parent.mkdir(exist_ok=True, parents=True)
 
     lines = [
-        write_rst_header('Execution Inputs', level=1),
+        write_rst_header('Node: %s' % get_print_name(node), level=0),
+        write_rst_list(
+            ['Hierarchy : %s' % node.fullname,
+             'Exec ID : %s' % node._id]),
+        write_rst_header('Original Inputs', level=1),
         write_rst_dict(node.inputs.trait_get()),
     ]
 
-    result = node.result  # Locally cache result
-    outputs = result.outputs
-
-    if outputs is None:
-        with open(report_file, 'at') as fp:
-            fp.write('\n'.join(lines))
+    if result is None:
+        logger.debug('[Node] Writing pre-exec report to "%s"', report_file)
+        report_file.write_text('\n'.join(lines))
         return
 
-    lines.append(write_rst_header('Execution Outputs', level=1))
+    logger.debug('[Node] Writing post-exec report to "%s"', report_file)
+    lines += [
+        write_rst_header('Execution Inputs', level=1),
+        write_rst_dict(node.inputs.trait_get()),
+        write_rst_header('Execution Outputs', level=1)
+    ]
+
+    outputs = result.outputs
+    if outputs is None:
+        lines += ['None']
+        report_file.write_text('\n'.join(lines))
+        return
 
     if isinstance(outputs, Bunch):
         lines.append(write_rst_dict(outputs.dictcopy()))
     elif outputs:
         lines.append(write_rst_dict(outputs.trait_get()))
+    else:
+        lines += ['Outputs object was empty.']
 
     if is_mapnode:
         lines.append(write_rst_header('Subnode reports', level=1))
         nitems = len(ensure_list(getattr(node.inputs, node.iterfield[0])))
         subnode_report_files = []
         for i in range(nitems):
-            nodecwd = os.path.join(cwd, 'mapflow', '_%s%d' % (node.name, i),
-                                   '_report', 'report.rst')
-            subnode_report_files.append('subnode %d : %s' % (i, nodecwd))
+            subnode_file = Path(cwd) / 'mapflow' / (
+                '_%s%d' % (node.name, i)) / '_report' / 'report.rst'
+            subnode_report_files.append('subnode %d : %s' % (i, subnode_file))
 
         lines.append(write_rst_list(subnode_report_files))
-
-        with open(report_file, 'at') as fp:
-            fp.write('\n'.join(lines))
+        report_file.write_text('\n'.join(lines))
         return
 
     lines.append(write_rst_header('Runtime info', level=1))
@@ -185,15 +181,9 @@ def write_report(node, report_type=None, is_mapnode=False):
         'prev_wd': getattr(result.runtime, 'prevcwd', '<not-set>'),
     }
 
-    if hasattr(result.runtime, 'cmdline'):
-        rst_dict['command'] = result.runtime.cmdline
-
-    # Try and insert memory/threads usage if available
-    if hasattr(result.runtime, 'mem_peak_gb'):
-        rst_dict['mem_peak_gb'] = result.runtime.mem_peak_gb
-
-    if hasattr(result.runtime, 'cpu_percent'):
-        rst_dict['cpu_percent'] = result.runtime.cpu_percent
+    for prop in ('cmdline', 'mem_peak_gb', 'cpu_percent'):
+        if hasattr(result.runtime, prop):
+            rst_dict[prop] = getattr(result.runtime, prop)
 
     lines.append(write_rst_dict(rst_dict))
 
@@ -221,150 +211,105 @@ def write_report(node, report_type=None, is_mapnode=False):
             write_rst_dict(result.runtime.environ),
         ]
 
-    with open(report_file, 'at') as fp:
-        fp.write('\n'.join(lines))
-    return
+    report_file.write_text('\n'.join(lines))
 
 
-def _identify_collapses(hastraits):
-    """ Identify traits that will collapse when being set to themselves.
+def write_report(node, report_type=None, is_mapnode=False):
+    """Write a report file for a node - DEPRECATED"""
+    if report_type not in ('preexec', 'postexec'):
+        logger.warning('[Node] Unknown report type "%s".', report_type)
+        return
 
-    ``OutputMultiObject``s automatically unwrap a list of length 1 to directly
-    reference the element of that list.
-    If that element is itself a list of length 1, then the following will
-    result in modified values.
-
-        hastraits.trait_set(**hastraits.trait_get())
-
-    Cloning performs this operation on a copy of the original traited object,
-    allowing us to identify traits that will be affected.
-    """
-    raw = hastraits.trait_get()
-    cloned = hastraits.clone_traits().trait_get()
-
-    collapsed = set()
-    for key in cloned:
-        orig = raw[key]
-        new = cloned[key]
-        # Allow numpy to handle the equality checks, as mixed lists and arrays
-        # can be problematic.
-        if isinstance(orig, list) and len(orig) == 1 and (
-                not np.array_equal(orig, new) and np.array_equal(orig[0], new)):
-            collapsed.add(key)
-
-    return collapsed
+    write_node_report(node, is_mapnode=is_mapnode,
+                      result=node.result if report_type == 'postexec' else None)
 
 
-def _uncollapse(indexable, collapsed):
-    """ Wrap collapsible values in a list to prevent double-collapsing.
+def save_resultfile(result, cwd, name, rebase=None):
+    """Save a result pklz file to ``cwd``."""
+    if rebase is None:
+        rebase = config.getboolean('execution', 'use_relative_paths')
 
-    Should be used with _identify_collapses to provide the following
-    idempotent operation:
-
-        collapsed = _identify_collapses(hastraits)
-        hastraits.trait_set(**_uncollapse(hastraits.trait_get(), collapsed))
-
-    NOTE: Modifies object in-place, in addition to returning it.
-    """
-
-    for key in indexable:
-        if key in collapsed:
-            indexable[key] = [indexable[key]]
-    return indexable
-
-
-def _protect_collapses(hastraits):
-    """ A collapse-protected replacement for hastraits.trait_get()
-
-    May be used as follows to provide an idempotent trait_set:
-
-        hastraits.trait_set(**_protect_collapses(hastraits))
-    """
-    collapsed = _identify_collapses(hastraits)
-    return _uncollapse(hastraits.trait_get(), collapsed)
-
-
-def save_resultfile(result, cwd, name):
-    """Save a result pklz file to ``cwd``"""
+    cwd = os.path.abspath(cwd)
     resultsfile = os.path.join(cwd, 'result_%s.pklz' % name)
-    if result.outputs:
-        try:
-            collapsed = _identify_collapses(result.outputs)
-            outputs = _uncollapse(result.outputs.trait_get(), collapsed)
-            # Double-protect tosave so that the original, uncollapsed trait
-            # is saved in the pickle file. Thus, when the loading process
-            # collapses, the original correct value is loaded.
-            tosave = _uncollapse(outputs.copy(), collapsed)
-        except AttributeError:
-            tosave = outputs = result.outputs.dictcopy()  # outputs was a bunch
-        for k, v in list(modify_paths(tosave, relative=True, basedir=cwd).items()):
-            setattr(result.outputs, k, v)
+    logger.debug("Saving results file: '%s'", resultsfile)
 
-    savepkl(resultsfile, result)
-    logger.debug('saved results in %s', resultsfile)
+    if result.outputs is None:
+        logger.warn('Storing result file without outputs')
+        savepkl(resultsfile, result)
+        return
+    try:
+        output_names = result.outputs.copyable_trait_names()
+    except AttributeError:
+        logger.debug('Storing non-traited results, skipping rebase of paths')
+        savepkl(resultsfile, result)
+        return
 
-    if result.outputs:
-        for k, v in list(outputs.items()):
-            setattr(result.outputs, k, v)
+    if not rebase:
+        savepkl(resultsfile, result)
+        return
+
+    backup_traits = {}
+    try:
+        with indirectory(cwd):
+            # All the magic to fix #2944 resides here:
+            for key in output_names:
+                old = getattr(result.outputs, key)
+                if isdefined(old):
+                    if result.outputs.trait(key).is_trait_type(OutputMultiPath):
+                        old = result.outputs.trait(key).handler.get_value(
+                            result.outputs, key)
+                    backup_traits[key] = old
+                    val = rebase_path_traits(result.outputs.trait(key), old, cwd)
+                    setattr(result.outputs, key, val)
+        savepkl(resultsfile, result)
+    finally:
+        # Restore resolved paths from the outputs dict no matter what
+        for key, val in list(backup_traits.items()):
+            setattr(result.outputs, key, val)
 
 
-def load_resultfile(path, name):
+def load_resultfile(results_file, resolve=True):
     """
-    Load InterfaceResult file from path
+    Load InterfaceResult file from path.
 
-    Parameter
-    ---------
-
-    path : base_dir of node
-    name : name of node
+    Parameters
+    ----------
+    results_file : pathlike
+        Path to an existing pickle (``result_<interface name>.pklz``) created with
+        ``save_resultfile``.
+        Raises ``FileNotFoundError`` if ``results_file`` does not exist.
+    resolve : bool
+        Determines whether relative paths will be resolved to absolute (default is ``True``).
 
     Returns
     -------
+    result : InterfaceResult
+        A Nipype object containing the runtime, inputs, outputs and other interface information
+        such as a traceback in the case of errors.
 
-    result : InterfaceResult structure
-    aggregate : boolean indicating whether node should aggregate_outputs
-    attribute error : boolean indicating whether there was some mismatch in
-        versions of traits used to store result and hence node needs to
-        rerun
     """
-    aggregate = True
-    resultsoutputfile = os.path.join(path, 'result_%s.pklz' % name)
-    result = None
-    attribute_error = False
-    if os.path.exists(resultsoutputfile):
-        pkl_file = gzip.open(resultsoutputfile, 'rb')
+    results_file = Path(results_file)
+    if not results_file.exists():
+        raise FileNotFoundError(results_file)
+
+    result = loadpkl(results_file)
+    if resolve and result.outputs:
         try:
-            result = pickle.load(pkl_file)
-        except UnicodeDecodeError:
-            # Was this pickle created with Python 2.x?
-            pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
-            logger.warning('Successfully loaded pkl in compatibility mode')
-        except (traits.TraitError, AttributeError, ImportError,
-                EOFError) as err:
-            if isinstance(err, (AttributeError, ImportError)):
-                attribute_error = True
-                logger.debug('attribute error: %s probably using '
-                             'different trait pickled file', str(err))
-            else:
-                logger.debug(
-                    'some file does not exist. hence trait cannot be set')
-        else:
-            if result.outputs:
-                try:
-                    outputs = _protect_collapses(result.outputs)
-                except AttributeError:
-                    outputs = result.outputs.dictcopy()  # outputs == Bunch
-                try:
-                    for k, v in list(modify_paths(outputs, relative=False,
-                                                  basedir=path).items()):
-                        setattr(result.outputs, k, v)
-                except FileNotFoundError:
-                    logger.debug('conversion to full path results in '
-                                 'non existent file')
-            aggregate = False
-        pkl_file.close()
-    logger.debug('Aggregate: %s', aggregate)
-    return result, aggregate, attribute_error
+            outputs = result.outputs.get()
+        except TypeError:  # This is a Bunch
+            logger.debug('Outputs object of loaded result %s is a Bunch.', results_file)
+            return result
+
+        logger.debug('Resolving paths in outputs loaded from results file.')
+        for trait_name, old in list(outputs.items()):
+            if isdefined(old):
+                if result.outputs.trait(trait_name).is_trait_type(OutputMultiPath):
+                    old = result.outputs.trait(trait_name).handler.get_value(
+                        result.outputs, trait_name)
+                value = resolve_path_traits(result.outputs.trait(trait_name), old,
+                                            results_file.parent)
+                setattr(result.outputs, trait_name, value)
+    return result
 
 
 def strip_temp(files, wd):

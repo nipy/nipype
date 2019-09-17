@@ -18,9 +18,8 @@ from traceback import format_exception
 import numpy as np
 
 from ... import logging
-from ...utils.filemanip import loadpkl
 from ...utils.misc import str2bool
-from ..engine.utils import topological_sort
+from ..engine.utils import topological_sort, load_resultfile
 from ..engine import MapNode
 from .tools import report_crash, report_nodes_not_run, create_pyscript
 
@@ -504,7 +503,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
                 result_data['traceback'] = '\n'.join(format_exception(*sys.exc_info()))
         else:
             results_file = glob(os.path.join(node_dir, 'result_*.pklz'))[0]
-            result_data = loadpkl(results_file)
+            result_data = load_resultfile(results_file)
         result_out = dict(result=None, traceback=None)
         if isinstance(result_data, dict):
             result_out['result'] = result_data['result']
@@ -602,7 +601,7 @@ class GraphPluginBase(PluginBase):
         glob(os.path.join(node_dir, 'result_*.pklz')).pop()
 
         results_file = glob(os.path.join(node_dir, 'result_*.pklz'))[0]
-        result_data = loadpkl(results_file)
+        result_data = load_resultfile(results_file)
         result_out = dict(result=None, traceback=None)
 
         if isinstance(result_data, dict):

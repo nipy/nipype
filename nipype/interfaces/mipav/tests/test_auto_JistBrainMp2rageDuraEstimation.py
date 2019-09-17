@@ -11,8 +11,14 @@ def test_JistBrainMp2rageDuraEstimation_inputs():
             usedefault=True,
         ),
         inDistance=dict(argstr='--inDistance %f', ),
-        inSecond=dict(argstr='--inSecond %s', ),
-        inSkull=dict(argstr='--inSkull %s', ),
+        inSecond=dict(
+            argstr='--inSecond %s',
+            extensions=None,
+        ),
+        inSkull=dict(
+            argstr='--inSkull %s',
+            extensions=None,
+        ),
         inoutput=dict(argstr='--inoutput %s', ),
         null=dict(argstr='--null %s', ),
         outDura=dict(
@@ -32,7 +38,7 @@ def test_JistBrainMp2rageDuraEstimation_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_JistBrainMp2rageDuraEstimation_outputs():
-    output_map = dict(outDura=dict(), )
+    output_map = dict(outDura=dict(extensions=None, ), )
     outputs = JistBrainMp2rageDuraEstimation.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -52,8 +52,8 @@ do
   esac
 done
 
-# neurodocker version 0.4.1-22-g7c44e01
-NEURODOCKER_IMAGE="kaczmarj/neurodocker:master@sha256:858632a7533cac100f70932749b4cfc77fc40f667f41fca208f406215cff8a27"
+# neurodocker version 0.5.0-3-g1788917
+NEURODOCKER_IMAGE="kaczmarj/neurodocker:master@sha256:ac2085702daac716481daae5da055e2062be52075f8f3881672e958e0cd53e6b"
 # neurodebian:stretch-non-free pulled on September 19, 2018
 BASE_IMAGE="neurodebian:stretch-non-free@sha256:7cd978427d7ad215834fee221d0536ed7825b3cddebc481eba2d792dfc2f7332"
 
@@ -88,6 +88,7 @@ function generate_main_dockerfile() {
           OMP_NUM_THREADS=1 \
     --arg PYTHON_VERSION_MAJOR=3 PYTHON_VERSION_MINOR=6 BUILD_DATE VCS_REF VERSION \
     --user neuro \
+    --workdir /home/neuro \
     --miniconda create_env=neuro \
                 conda_install='python=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
                                libxml2 libxslt matplotlib mkl "numpy!=1.16.0" paramiko

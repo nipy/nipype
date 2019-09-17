@@ -12,6 +12,7 @@ def test_ToRaw_inputs():
         ),
         input_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
@@ -25,10 +26,12 @@ def test_ToRaw_inputs():
         ),
         out_file=dict(
             argstr='> %s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
         output_file=dict(
+            extensions=None,
             hash_files=False,
             keep_extension=False,
             name_source=['input_file'],
@@ -81,7 +84,7 @@ def test_ToRaw_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ToRaw_outputs():
-    output_map = dict(output_file=dict(), )
+    output_map = dict(output_file=dict(extensions=None, ), )
     outputs = ToRaw.output_spec()
 
     for key, metadata in list(output_map.items()):

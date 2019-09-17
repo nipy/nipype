@@ -15,8 +15,14 @@ def test_gtractResampleDWIInPlace_inputs():
             argstr='--imageOutputSize %s',
             sep=',',
         ),
-        inputTransform=dict(argstr='--inputTransform %s', ),
-        inputVolume=dict(argstr='--inputVolume %s', ),
+        inputTransform=dict(
+            argstr='--inputTransform %s',
+            extensions=None,
+        ),
+        inputVolume=dict(
+            argstr='--inputVolume %s',
+            extensions=None,
+        ),
         numberOfThreads=dict(argstr='--numberOfThreads %d', ),
         outputResampledB0=dict(
             argstr='--outputResampledB0 %s',
@@ -26,8 +32,14 @@ def test_gtractResampleDWIInPlace_inputs():
             argstr='--outputVolume %s',
             hash_files=False,
         ),
-        referenceVolume=dict(argstr='--referenceVolume %s', ),
-        warpDWITransform=dict(argstr='--warpDWITransform %s', ),
+        referenceVolume=dict(
+            argstr='--referenceVolume %s',
+            extensions=None,
+        ),
+        warpDWITransform=dict(
+            argstr='--warpDWITransform %s',
+            extensions=None,
+        ),
     )
     inputs = gtractResampleDWIInPlace.input_spec()
 
@@ -36,8 +48,8 @@ def test_gtractResampleDWIInPlace_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_gtractResampleDWIInPlace_outputs():
     output_map = dict(
-        outputResampledB0=dict(),
-        outputVolume=dict(),
+        outputResampledB0=dict(extensions=None, ),
+        outputVolume=dict(extensions=None, ),
     )
     outputs = gtractResampleDWIInPlace.output_spec()
 

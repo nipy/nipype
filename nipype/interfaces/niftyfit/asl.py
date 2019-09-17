@@ -4,7 +4,7 @@
 The ASL module of niftyfit, which wraps the fitting methods in NiftyFit.
 """
 
-from ..base import TraitedSpec, traits, CommandLineInputSpec
+from ..base import File, TraitedSpec, traits, CommandLineInputSpec
 from .base import NiftyFitCommand
 from ..niftyreg.base import get_custom_path
 
@@ -12,7 +12,7 @@ from ..niftyreg.base import get_custom_path
 class FitAslInputSpec(CommandLineInputSpec):
     """ Input Spec for FitAsl. """
     desc = 'Filename of the 4D ASL (control/label) source image (mandatory).'
-    source_file = traits.File(
+    source_file = File(
         position=1,
         exists=True,
         argstr='-source %s',
@@ -23,17 +23,17 @@ class FitAslInputSpec(CommandLineInputSpec):
 
     # *** Output options:
     desc = 'Filename of the Cerebral Blood Flow map (in ml/100g/min).'
-    cbf_file = traits.File(
+    cbf_file = File(
         name_source=['source_file'],
         name_template='%s_cbf.nii.gz',
         argstr='-cbf %s',
         desc=desc)
-    error_file = traits.File(
+    error_file = File(
         name_source=['source_file'],
         name_template='%s_error.nii.gz',
         argstr='-error %s',
         desc='Filename of the CBF error map.')
-    syn_file = traits.File(
+    syn_file = File(
         name_source=['source_file'],
         name_template='%s_syn.nii.gz',
         argstr='-syn %s',
@@ -41,20 +41,20 @@ class FitAslInputSpec(CommandLineInputSpec):
 
     # *** Input options (see also fit_qt1 for generic T1 fitting):
     desc = 'Filename of the estimated input T1 map (in ms).'
-    t1map = traits.File(exists=True, argstr='-t1map %s', desc=desc)
+    t1map = File(exists=True, argstr='-t1map %s', desc=desc)
     desc = 'Filename of the estimated input M0 map.'
-    m0map = traits.File(exists=True, argstr='-m0map %s', desc=desc)
+    m0map = File(exists=True, argstr='-m0map %s', desc=desc)
     desc = 'Filename of the estimated input M0 map error.'
-    m0mape = traits.File(exists=True, argstr='-m0mape %s', desc=desc)
+    m0mape = File(exists=True, argstr='-m0mape %s', desc=desc)
     desc = 'Filename of a [1,2,5]s Inversion Recovery volume (T1/M0 fitting \
 carried out internally).'
 
-    ir_volume = traits.File(exists=True, argstr='-IRvolume %s', desc=desc)
+    ir_volume = File(exists=True, argstr='-IRvolume %s', desc=desc)
     desc = 'Output of [1,2,5]s Inversion Recovery fitting.'
-    ir_output = traits.File(exists=True, argstr='-IRoutput %s', desc=desc)
+    ir_output = File(exists=True, argstr='-IRoutput %s', desc=desc)
 
     # *** Experimental options (Choose those suitable for the model!):
-    mask = traits.File(
+    mask = File(
         position=2,
         exists=True,
         desc='Filename of image mask.',
@@ -104,7 +104,7 @@ background suppression pulses are included in -eff'
     desc = 'Filename of the 4D segmentation (in ASL space) for L/T1 \
 estimation and PV correction {WM,GM,CSF}.'
 
-    seg = traits.File(exists=True, argstr='-seg %s', desc=desc)
+    seg = File(exists=True, argstr='-seg %s', desc=desc)
     desc = 'Use sigmoid to estimate L from T1: L(T1|gmL,wmL) [Off].'
     sig = traits.Bool(desc=desc, argstr='-sig')
     desc = 'Simple PV correction (CBF=vg*CBFg + vw*CBFw, with CBFw=f*CBFg) \
@@ -131,11 +131,11 @@ estimation and PV correction {WM,GM,CSF}.'
 class FitAslOutputSpec(TraitedSpec):
     """ Output Spec for FitAsl. """
     desc = 'Filename of the Cerebral Blood Flow map (in ml/100g/min).'
-    cbf_file = traits.File(exists=True, desc=desc)
+    cbf_file = File(exists=True, desc=desc)
     desc = 'Filename of the CBF error map.'
-    error_file = traits.File(exists=True, desc=desc)
+    error_file = File(exists=True, desc=desc)
     desc = 'Filename of the synthetic ASL data.'
-    syn_file = traits.File(exists=True, desc=desc)
+    syn_file = File(exists=True, desc=desc)
 
 
 class FitAsl(NiftyFitCommand):

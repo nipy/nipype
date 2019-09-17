@@ -12,6 +12,7 @@ def test_Cleaner_inputs():
         args=dict(argstr='%s', ),
         artifacts_list_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
@@ -21,14 +22,17 @@ def test_Cleaner_inputs():
         ),
         confound_file=dict(
             argstr='-x %s',
+            extensions=None,
             position=4,
         ),
         confound_file_1=dict(
             argstr='-x %s',
+            extensions=None,
             position=5,
         ),
         confound_file_2=dict(
             argstr='-x %s',
+            extensions=None,
             position=6,
         ),
         environ=dict(
@@ -47,7 +51,7 @@ def test_Cleaner_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Cleaner_outputs():
-    output_map = dict(cleaned_functional_file=dict(), )
+    output_map = dict(cleaned_functional_file=dict(extensions=None, ), )
     outputs = Cleaner.output_spec()
 
     for key, metadata in list(output_map.items()):

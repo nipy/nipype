@@ -23,11 +23,14 @@ def test_TCompCor_inputs():
         num_components=dict(xor=['variance_threshold'], ),
         percentile_threshold=dict(usedefault=True, ),
         pre_filter=dict(usedefault=True, ),
-        realigned_file=dict(mandatory=True, ),
+        realigned_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
         regress_poly_degree=dict(usedefault=True, ),
         repetition_time=dict(),
-        save_metadata=dict(),
-        save_pre_filter=dict(),
+        save_metadata=dict(usedefault=True, ),
+        save_pre_filter=dict(usedefault=True, ),
         use_regress_poly=dict(
             deprecated='0.15.0',
             new_name='pre_filter',
@@ -41,10 +44,10 @@ def test_TCompCor_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TCompCor_outputs():
     output_map = dict(
-        components_file=dict(),
+        components_file=dict(extensions=None, ),
         high_variance_masks=dict(),
-        metadata_file=dict(),
-        pre_filter_file=dict(),
+        metadata_file=dict(extensions=None, ),
+        pre_filter_file=dict(extensions=None, ),
     )
     outputs = TCompCor.output_spec()
 

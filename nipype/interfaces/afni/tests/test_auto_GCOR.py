@@ -13,12 +13,14 @@ def test_GCOR_inputs():
         in_file=dict(
             argstr='-input %s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=-1,
         ),
         mask=dict(
             argstr='-mask %s',
             copyfile=False,
+            extensions=None,
         ),
         nfirst=dict(argstr='-nfirst %d', ),
         no_demean=dict(argstr='-no_demean', ),

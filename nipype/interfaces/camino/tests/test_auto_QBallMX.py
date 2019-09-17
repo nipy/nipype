@@ -20,6 +20,7 @@ def test_QBallMX_inputs():
         ),
         out_file=dict(
             argstr='> %s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
@@ -33,6 +34,7 @@ def test_QBallMX_inputs():
         ),
         scheme_file=dict(
             argstr='-schemefile %s',
+            extensions=None,
             mandatory=True,
         ),
         smoothingsigma=dict(
@@ -46,7 +48,7 @@ def test_QBallMX_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_QBallMX_outputs():
-    output_map = dict(qmat=dict(), )
+    output_map = dict(qmat=dict(extensions=None, ), )
     outputs = QBallMX.output_spec()
 
     for key, metadata in list(output_map.items()):

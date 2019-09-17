@@ -49,11 +49,13 @@ def test_Zeropad_inputs():
         in_files=dict(
             argstr='%s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=-1,
         ),
         master=dict(
             argstr='-master %s',
+            extensions=None,
             xor=['I', 'S', 'A', 'P', 'L', 'R', 'z', 'RL', 'AP', 'IS', 'mm'],
         ),
         mm=dict(
@@ -66,6 +68,7 @@ def test_Zeropad_inputs():
         ),
         out_file=dict(
             argstr='-prefix %s',
+            extensions=None,
             name_template='zeropad',
         ),
         outputtype=dict(),
@@ -80,7 +83,7 @@ def test_Zeropad_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Zeropad_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = Zeropad.output_spec()
 
     for key, metadata in list(output_map.items()):

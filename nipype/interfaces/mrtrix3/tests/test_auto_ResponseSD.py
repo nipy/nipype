@@ -14,6 +14,7 @@ def test_ResponseSD_inputs():
         bval_scale=dict(argstr='-bvalue_scaling %s', ),
         csf_file=dict(
             argstr='%s',
+            extensions=None,
             position=-1,
         ),
         environ=dict(
@@ -22,25 +23,40 @@ def test_ResponseSD_inputs():
         ),
         gm_file=dict(
             argstr='%s',
+            extensions=None,
             position=-2,
         ),
-        grad_file=dict(argstr='-grad %s', ),
-        grad_fsl=dict(argstr='-fslgrad %s %s', ),
-        in_bval=dict(),
-        in_bvec=dict(argstr='-fslgrad %s %s', ),
+        grad_file=dict(
+            argstr='-grad %s',
+            extensions=None,
+            xor=['grad_fsl'],
+        ),
+        grad_fsl=dict(
+            argstr='-fslgrad %s %s',
+            xor=['grad_file'],
+        ),
+        in_bval=dict(extensions=None, ),
+        in_bvec=dict(
+            argstr='-fslgrad %s %s',
+            extensions=None,
+        ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-5,
         ),
-        in_mask=dict(argstr='-mask %s', ),
+        in_mask=dict(
+            argstr='-mask %s',
+            extensions=None,
+        ),
         max_sh=dict(
             argstr='-lmax %s',
             sep=',',
-            usedefault=True,
         ),
         mtt_file=dict(
             argstr='%s',
+            extensions=None,
             position=-4,
         ),
         nthreads=dict(
@@ -49,6 +65,7 @@ def test_ResponseSD_inputs():
         ),
         wm_file=dict(
             argstr='%s',
+            extensions=None,
             position=-3,
             usedefault=True,
         ),
@@ -60,9 +77,18 @@ def test_ResponseSD_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_ResponseSD_outputs():
     output_map = dict(
-        csf_file=dict(argstr='%s', ),
-        gm_file=dict(argstr='%s', ),
-        wm_file=dict(argstr='%s', ),
+        csf_file=dict(
+            argstr='%s',
+            extensions=None,
+        ),
+        gm_file=dict(
+            argstr='%s',
+            extensions=None,
+        ),
+        wm_file=dict(
+            argstr='%s',
+            extensions=None,
+        ),
     )
     outputs = ResponseSD.output_spec()
 

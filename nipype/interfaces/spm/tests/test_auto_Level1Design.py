@@ -10,12 +10,16 @@ def test_Level1Design_inputs():
             mandatory=True,
         ),
         factor_info=dict(field='fact', ),
+        flags=dict(),
         global_intensity_normalization=dict(field='global', ),
         interscan_interval=dict(
             field='timing.RT',
             mandatory=True,
         ),
-        mask_image=dict(field='mask', ),
+        mask_image=dict(
+            extensions=None,
+            field='mask',
+        ),
         mask_threshold=dict(usedefault=True, ),
         matlab_cmd=dict(),
         mfile=dict(usedefault=True, ),
@@ -45,7 +49,7 @@ def test_Level1Design_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Level1Design_outputs():
-    output_map = dict(spm_mat_file=dict(), )
+    output_map = dict(spm_mat_file=dict(extensions=None, ), )
     outputs = Level1Design.output_spec()
 
     for key, metadata in list(output_map.items()):

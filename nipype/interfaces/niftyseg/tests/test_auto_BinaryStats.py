@@ -12,6 +12,7 @@ def test_BinaryStats_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=2,
         ),
@@ -21,10 +22,12 @@ def test_BinaryStats_inputs():
         ),
         mask_file=dict(
             argstr='-m %s',
+            extensions=None,
             position=-2,
         ),
         operand_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=5,
             xor=['operand_value'],

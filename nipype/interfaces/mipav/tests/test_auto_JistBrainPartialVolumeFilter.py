@@ -10,7 +10,10 @@ def test_JistBrainPartialVolumeFilter_inputs():
             nohash=True,
             usedefault=True,
         ),
-        inInput=dict(argstr='--inInput %s', ),
+        inInput=dict(
+            argstr='--inInput %s',
+            extensions=None,
+        ),
         inPV=dict(argstr='--inPV %s', ),
         inoutput=dict(argstr='--inoutput %s', ),
         null=dict(argstr='--null %s', ),
@@ -31,7 +34,7 @@ def test_JistBrainPartialVolumeFilter_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_JistBrainPartialVolumeFilter_outputs():
-    output_map = dict(outPartial=dict(), )
+    output_map = dict(outPartial=dict(extensions=None, ), )
     outputs = JistBrainPartialVolumeFilter.output_spec()
 
     for key, metadata in list(output_map.items()):

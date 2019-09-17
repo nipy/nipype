@@ -12,6 +12,7 @@ def test_DilateImage_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=2,
         ),
@@ -21,6 +22,7 @@ def test_DilateImage_inputs():
         ),
         kernel_file=dict(
             argstr='%s',
+            extensions=None,
             position=5,
             xor=['kernel_size'],
         ),
@@ -44,6 +46,7 @@ def test_DilateImage_inputs():
         ),
         out_file=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             hash_files=False,
             position=-2,
@@ -60,7 +63,7 @@ def test_DilateImage_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DilateImage_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = DilateImage.output_spec()
 
     for key, metadata in list(output_map.items()):

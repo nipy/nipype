@@ -9,6 +9,7 @@ def test_EstimateResponseForSH_inputs():
         debug=dict(argstr='-debug', ),
         encoding_file=dict(
             argstr='-grad %s',
+            extensions=None,
             mandatory=True,
             position=1,
         ),
@@ -18,11 +19,13 @@ def test_EstimateResponseForSH_inputs():
         ),
         in_file=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-3,
         ),
         mask_image=dict(
             argstr='%s',
+            extensions=None,
             mandatory=True,
             position=-2,
         ),
@@ -30,6 +33,7 @@ def test_EstimateResponseForSH_inputs():
         normalise=dict(argstr='-normalise', ),
         out_filename=dict(
             argstr='%s',
+            extensions=None,
             genfile=True,
             position=-1,
         ),
@@ -41,7 +45,7 @@ def test_EstimateResponseForSH_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_EstimateResponseForSH_outputs():
-    output_map = dict(response=dict(), )
+    output_map = dict(response=dict(extensions=None, ), )
     outputs = EstimateResponseForSH.output_spec()
 
     for key, metadata in list(output_map.items()):

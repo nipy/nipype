@@ -13,10 +13,14 @@ def test_Resample_inputs():
         in_file=dict(
             argstr='-inset %s',
             copyfile=False,
+            extensions=None,
             mandatory=True,
             position=-1,
         ),
-        master=dict(argstr='-master %s', ),
+        master=dict(
+            argstr='-master %s',
+            extensions=None,
+        ),
         num_threads=dict(
             nohash=True,
             usedefault=True,
@@ -24,6 +28,7 @@ def test_Resample_inputs():
         orientation=dict(argstr='-orient %s', ),
         out_file=dict(
             argstr='-prefix %s',
+            extensions=None,
             name_source='in_file',
             name_template='%s_resample',
         ),
@@ -37,7 +42,7 @@ def test_Resample_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_Resample_outputs():
-    output_map = dict(out_file=dict(), )
+    output_map = dict(out_file=dict(extensions=None, ), )
     outputs = Resample.output_spec()
 
     for key, metadata in list(output_map.items()):

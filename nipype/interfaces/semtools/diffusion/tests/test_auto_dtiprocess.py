@@ -10,7 +10,10 @@ def test_dtiprocess_inputs():
             argstr='--RD_output %s',
             hash_files=False,
         ),
-        affineitk_file=dict(argstr='--affineitk_file %s', ),
+        affineitk_file=dict(
+            argstr='--affineitk_file %s',
+            extensions=None,
+        ),
         args=dict(argstr='%s', ),
         color_fa_output=dict(
             argstr='--color_fa_output %s',
@@ -21,8 +24,14 @@ def test_dtiprocess_inputs():
             argstr='--deformation_output %s',
             hash_files=False,
         ),
-        dof_file=dict(argstr='--dof_file %s', ),
-        dti_image=dict(argstr='--dti_image %s', ),
+        dof_file=dict(
+            argstr='--dof_file %s',
+            extensions=None,
+        ),
+        dti_image=dict(
+            argstr='--dti_image %s',
+            extensions=None,
+        ),
         environ=dict(
             nohash=True,
             usedefault=True,
@@ -39,7 +48,10 @@ def test_dtiprocess_inputs():
             argstr='--fa_output %s',
             hash_files=False,
         ),
-        forward=dict(argstr='--forward %s', ),
+        forward=dict(
+            argstr='--forward %s',
+            extensions=None,
+        ),
         frobenius_norm_output=dict(
             argstr='--frobenius_norm_output %s',
             hash_files=False,
@@ -58,7 +70,10 @@ def test_dtiprocess_inputs():
             argstr='--lambda3_output %s',
             hash_files=False,
         ),
-        mask=dict(argstr='--mask %s', ),
+        mask=dict(
+            argstr='--mask %s',
+            extensions=None,
+        ),
         md_output=dict(
             argstr='--md_output %s',
             hash_files=False,
@@ -67,7 +82,10 @@ def test_dtiprocess_inputs():
             argstr='--negative_eigenvector_output %s',
             hash_files=False,
         ),
-        newdof_file=dict(argstr='--newdof_file %s', ),
+        newdof_file=dict(
+            argstr='--newdof_file %s',
+            extensions=None,
+        ),
         outmask=dict(
             argstr='--outmask %s',
             hash_files=False,
@@ -92,21 +110,21 @@ def test_dtiprocess_inputs():
             assert getattr(inputs.traits()[key], metakey) == value
 def test_dtiprocess_outputs():
     output_map = dict(
-        RD_output=dict(),
-        color_fa_output=dict(),
-        deformation_output=dict(),
-        fa_gradient_output=dict(),
-        fa_gradmag_output=dict(),
-        fa_output=dict(),
-        frobenius_norm_output=dict(),
-        lambda1_output=dict(),
-        lambda2_output=dict(),
-        lambda3_output=dict(),
-        md_output=dict(),
-        negative_eigenvector_output=dict(),
-        outmask=dict(),
-        principal_eigenvector_output=dict(),
-        rot_output=dict(),
+        RD_output=dict(extensions=None, ),
+        color_fa_output=dict(extensions=None, ),
+        deformation_output=dict(extensions=None, ),
+        fa_gradient_output=dict(extensions=None, ),
+        fa_gradmag_output=dict(extensions=None, ),
+        fa_output=dict(extensions=None, ),
+        frobenius_norm_output=dict(extensions=None, ),
+        lambda1_output=dict(extensions=None, ),
+        lambda2_output=dict(extensions=None, ),
+        lambda3_output=dict(extensions=None, ),
+        md_output=dict(extensions=None, ),
+        negative_eigenvector_output=dict(extensions=None, ),
+        outmask=dict(extensions=None, ),
+        principal_eigenvector_output=dict(extensions=None, ),
+        rot_output=dict(extensions=None, ),
     )
     outputs = dtiprocess.output_spec()
 
