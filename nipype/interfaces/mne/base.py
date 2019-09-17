@@ -152,9 +152,9 @@ class SetupSourceSpaceInputSpec(FSTraitedSpec):
         default=None,
         desc='morph the source space to this subject')
     surface = traits.Str(
+        'white',
         argstr='--surf %s',
         mandatory=False,
-        default='white',
         usedefault=True,
         desc='The surface to use.')
     ico = traits.Int(
@@ -171,9 +171,9 @@ class SetupSourceSpaceInputSpec(FSTraitedSpec):
              'to create the source space.',
         xor=[ico])
     spacing = traits.Int(
+        7,
         argstr='--spacing %s',
         mandatory=False,
-        default=7,
         usedefault=True,
         desc='Specifies the approximate grid spacing of the '
              'source space in mm.',
@@ -184,29 +184,30 @@ class SetupSourceSpaceInputSpec(FSTraitedSpec):
         exists=True,
         desc='Subjects directory')
     cps = traits.Bool(
+        True,
         argstr='--cps',
         mandatory=False,
-        default=True,
         usedefault=True,
         desc='Add patch information to source space.')
     n_jobs = traits.Int(
+        1,
         argstr='--n-jobs %s',
         mandatory=False,
-        default=1,
+        usedefault=True,
         desc='The number of jobs to run in parallel '
              '(default 1). Requires the joblib package. '
              'Will use at most 2 jobs'
              ' (one for each hemisphere).')
     verbose = traits.Bool(
+        False,
         argstr='--verbose',
         mandatory=False,
-        default=False,
         usedefault=True,
         desc='Turn on verbose mode.')
     overwrite = traits.Bool(
+        False,
         argstr='--overwrite',
         mandatory=False,
-        default=False,
         usedefault=True,
         desc='Overwrites the existing files')
 
