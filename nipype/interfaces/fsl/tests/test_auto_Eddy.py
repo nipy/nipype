@@ -4,39 +4,204 @@ from ..epi import Eddy
 
 def test_Eddy_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        cnr_maps=dict(argstr="--cnr_maps", min_ver="5.0.10",),
-        dont_peas=dict(argstr="--dont_peas",),
-        dont_sep_offs_move=dict(argstr="--dont_sep_offs_move",),
-        environ=dict(nohash=True, usedefault=True,),
-        fep=dict(argstr="--fep",),
-        field=dict(argstr="--field=%s",),
-        field_mat=dict(argstr="--field_mat=%s", extensions=None,),
-        flm=dict(argstr="--flm=%s",),
-        fudge_factor=dict(argstr="--ff=%s", usedefault=True,),
-        fwhm=dict(argstr="--fwhm=%s",),
-        in_acqp=dict(argstr="--acqp=%s", extensions=None, mandatory=True,),
-        in_bval=dict(argstr="--bvals=%s", extensions=None, mandatory=True,),
-        in_bvec=dict(argstr="--bvecs=%s", extensions=None, mandatory=True,),
-        in_file=dict(argstr="--imain=%s", extensions=None, mandatory=True,),
-        in_index=dict(argstr="--index=%s", extensions=None, mandatory=True,),
-        in_mask=dict(argstr="--mask=%s", extensions=None, mandatory=True,),
-        in_topup_fieldcoef=dict(
-            argstr="--topup=%s", extensions=None, requires=["in_topup_movpar"],
+        args=dict(argstr='%s', ),
+        cnr_maps=dict(
+            argstr='--cnr_maps',
+            min_ver='5.0.10',
         ),
-        in_topup_movpar=dict(extensions=None, requires=["in_topup_fieldcoef"],),
-        interp=dict(argstr="--interp=%s",),
-        is_shelled=dict(argstr="--data_is_shelled",),
-        method=dict(argstr="--resamp=%s",),
-        niter=dict(argstr="--niter=%s", usedefault=True,),
-        num_threads=dict(nohash=True, usedefault=True,),
-        nvoxhp=dict(argstr="--nvoxhp=%s", usedefault=True,),
-        out_base=dict(argstr="--out=%s", usedefault=True,),
+        dont_peas=dict(argstr='--dont_peas', ),
+        dont_sep_offs_move=dict(argstr='--dont_sep_offs_move', ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        estimate_move_by_susceptibility=dict(
+            argstr='--estimate_move_by_susceptibility',
+            min_ver='6.0.1',
+        ),
+        fep=dict(argstr='--fep', ),
+        field=dict(
+            argstr='--field=%s',
+            extensions=None,
+        ),
+        field_mat=dict(
+            argstr='--field_mat=%s',
+            extensions=None,
+        ),
+        flm=dict(
+            argstr='--flm=%s',
+            usedefault=True,
+        ),
+        fudge_factor=dict(
+            argstr='--ff=%s',
+            usedefault=True,
+        ),
+        fwhm=dict(
+            argstr='--fwhm=%s',
+            usedefault=True,
+        ),
+        in_acqp=dict(
+            argstr='--acqp=%s',
+            extensions=None,
+            mandatory=True,
+        ),
+        in_bval=dict(
+            argstr='--bvals=%s',
+            extensions=None,
+            mandatory=True,
+        ),
+        in_bvec=dict(
+            argstr='--bvecs=%s',
+            extensions=None,
+            mandatory=True,
+        ),
+        in_file=dict(
+            argstr='--imain=%s',
+            extensions=None,
+            mandatory=True,
+        ),
+        in_index=dict(
+            argstr='--index=%s',
+            extensions=None,
+            mandatory=True,
+        ),
+        in_mask=dict(
+            argstr='--mask=%s',
+            extensions=None,
+            mandatory=True,
+        ),
+        in_topup_fieldcoef=dict(
+            argstr='--topup=%s',
+            extensions=None,
+            requires=['in_topup_movpar'],
+        ),
+        in_topup_movpar=dict(
+            extensions=None,
+            requires=['in_topup_fieldcoef'],
+        ),
+        initrand=dict(
+            argstr='--initrand',
+            min_ver='5.0.10',
+        ),
+        interp=dict(
+            argstr='--interp=%s',
+            usedefault=True,
+        ),
+        is_shelled=dict(argstr='--data_is_shelled', ),
+        json=dict(
+            argstr='--json=%s',
+            min_ver='6.0.1',
+            requires=['mporder'],
+            xor=['slspec'],
+        ),
+        mb=dict(
+            argstr='--mb=%s',
+            min_ver='5.0.10',
+        ),
+        mb_offs=dict(
+            argstr='--mb_offs=%s',
+            min_ver='5.0.10',
+            requires=['mb'],
+        ),
+        mbs_ksp=dict(
+            argstr='--mbs_ksp=%smm',
+            min_ver='6.0.1',
+            requires=['estimate_move_by_susceptibility'],
+        ),
+        mbs_lambda=dict(
+            argstr='--mbs_lambda=%s',
+            min_ver='6.0.1',
+            requires=['estimate_move_by_susceptibility'],
+        ),
+        mbs_niter=dict(
+            argstr='--mbs_niter=%s',
+            min_ver='6.0.1',
+            requires=['estimate_move_by_susceptibility'],
+        ),
+        method=dict(
+            argstr='--resamp=%s',
+            usedefault=True,
+        ),
+        mporder=dict(
+            argstr='--mporder=%s',
+            min_ver='5.0.11',
+        ),
+        niter=dict(
+            argstr='--niter=%s',
+            usedefault=True,
+        ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        nvoxhp=dict(
+            argstr='--nvoxhp=%s',
+            usedefault=True,
+        ),
+        out_base=dict(
+            argstr='--out=%s',
+            usedefault=True,
+        ),
+        outlier_nstd=dict(
+            argstr='--ol_nstd',
+            min_ver='5.0.10',
+            requires=['repol'],
+        ),
+        outlier_nvox=dict(
+            argstr='--ol_nvox',
+            min_ver='5.0.10',
+            requires=['repol'],
+        ),
+        outlier_pos=dict(
+            argstr='--ol_pos',
+            min_ver='5.0.10',
+            requires=['repol'],
+        ),
+        outlier_sqr=dict(
+            argstr='--ol_sqr',
+            min_ver='5.0.10',
+            requires=['repol'],
+        ),
+        outlier_type=dict(
+            argstr='--ol_type',
+            min_ver='5.0.10',
+            requires=['repol'],
+        ),
         output_type=dict(),
-        repol=dict(argstr="--repol",),
-        residuals=dict(argstr="--residuals", min_ver="5.0.10",),
-        session=dict(argstr="--session=%s", extensions=None,),
-        slm=dict(argstr="--slm=%s",),
+        repol=dict(argstr='--repol', ),
+        residuals=dict(
+            argstr='--residuals',
+            min_ver='5.0.10',
+        ),
+        s2v_interp=dict(
+            argstr='--s2v_interp=%s',
+            min_ver='5.0.11',
+            requires=['mporder'],
+        ),
+        s2v_lambda=dict(
+            agstr='--s2v_lambda',
+            min_ver='5.0.11',
+            requires=['mporder'],
+        ),
+        s2v_niter=dict(
+            argstr='--s2v_niter=%s',
+            min_ver='5.0.11',
+            requires=['mporder'],
+        ),
+        session=dict(
+            argstr='--session=%s',
+            extensions=None,
+        ),
+        slm=dict(
+            argstr='--slm=%s',
+            usedefault=True,
+        ),
+        slspec=dict(
+            argstr='--slspec=%s',
+            min_ver='5.0.11',
+            requires=['mporder'],
+            xor=['json'],
+        ),
         use_cuda=dict(),
     )
     inputs = Eddy.input_spec()
@@ -48,15 +213,21 @@ def test_Eddy_inputs():
 
 def test_Eddy_outputs():
     output_map = dict(
-        out_cnr_maps=dict(extensions=None,),
-        out_corrected=dict(extensions=None,),
-        out_movement_rms=dict(extensions=None,),
-        out_outlier_report=dict(extensions=None,),
-        out_parameter=dict(extensions=None,),
-        out_residuals=dict(extensions=None,),
-        out_restricted_movement_rms=dict(extensions=None,),
-        out_rotated_bvecs=dict(extensions=None,),
-        out_shell_alignment_parameters=dict(extensions=None,),
+        out_cnr_maps=dict(extensions=None, ),
+        out_corrected=dict(extensions=None, ),
+        out_movement_over_time=dict(extensions=None, ),
+        out_movement_rms=dict(extensions=None, ),
+        out_outlier_free=dict(extensions=None, ),
+        out_outlier_map=dict(extensions=None, ),
+        out_outlier_n_sqr_stdev_map=dict(extensions=None, ),
+        out_outlier_n_stdev_map=dict(extensions=None, ),
+        out_outlier_report=dict(extensions=None, ),
+        out_parameter=dict(extensions=None, ),
+        out_residuals=dict(extensions=None, ),
+        out_restricted_movement_rms=dict(extensions=None, ),
+        out_rotated_bvecs=dict(extensions=None, ),
+        out_shell_alignment_parameters=dict(extensions=None, ),
+        out_shell_pe_translation_parameters=dict(extensions=None, ),
     )
     outputs = Eddy.output_spec()
 
