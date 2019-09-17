@@ -17,7 +17,7 @@ def test_Eddy_inputs():
         field_mat=dict(argstr="--field_mat=%s", extensions=None,),
         flm=dict(argstr="--flm=%s", usedefault=True,),
         fudge_factor=dict(argstr="--ff=%s", usedefault=True,),
-        fwhm=dict(argstr="--fwhm=%s",),
+        fwhm=dict(argstr="--fwhm=%s", usedefault=True,),
         in_acqp=dict(argstr="--acqp=%s", extensions=None, mandatory=True,),
         in_bval=dict(argstr="--bvals=%s", extensions=None, mandatory=True,),
         in_bvec=dict(argstr="--bvecs=%s", extensions=None, mandatory=True,),
@@ -32,11 +32,10 @@ def test_Eddy_inputs():
         interp=dict(argstr="--interp=%s", usedefault=True,),
         is_shelled=dict(argstr="--data_is_shelled",),
         json=dict(
-            argstr="--json=%s",
-            min_ver="6.0.1",
-            requires=["mporder"],
-            xor=["slice_order"],
+            argstr="--json=%s", min_ver="6.0.1", requires=["mporder"], xor=["slspec"],
         ),
+        mb=dict(argstr="--mb=%s", min_ver="5.0.10",),
+        mb_offs=dict(argstr="--mb_offs=%s", min_ver="5.0.10", requires=["mb"],),
         mbs_ksp=dict(
             argstr="--mbs_ksp=%smm",
             min_ver="6.0.1",
@@ -53,11 +52,7 @@ def test_Eddy_inputs():
             requires=["estimate_move_by_susceptibility"],
         ),
         method=dict(argstr="--resamp=%s", usedefault=True,),
-        mporder=dict(argstr="--mporder=%s", min_ver="5.0.11", requires=["use_cuda"],),
-        multiband_factor=dict(argstr="--mb=%s", min_ver="5.0.10",),
-        multiband_offset=dict(
-            argstr="--mb_offs=%d", min_ver="5.0.10", requires=["multiband_factor"],
-        ),
+        mporder=dict(argstr="--mporder=%s", min_ver="5.0.11",),
         niter=dict(argstr="--niter=%s", usedefault=True,),
         num_threads=dict(nohash=True, usedefault=True,),
         nvoxhp=dict(argstr="--nvoxhp=%s", usedefault=True,),
@@ -70,20 +65,18 @@ def test_Eddy_inputs():
         output_type=dict(),
         repol=dict(argstr="--repol",),
         residuals=dict(argstr="--residuals", min_ver="5.0.10",),
-        session=dict(argstr="--session=%s", extensions=None,),
-        slice2vol_interp=dict(
+        s2v_interp=dict(
             argstr="--s2v_interp=%s", min_ver="5.0.11", requires=["mporder"],
         ),
-        slice2vol_lambda=dict(
-            argstr="--s2v_lambda=%d", min_ver="5.0.11", requires=["mporder"],
+        s2v_lambda=dict(agstr="--s2v_lambda", min_ver="5.0.11", requires=["mporder"],),
+        s2v_niter=dict(
+            argstr="--s2v_niter=%s", min_ver="5.0.11", requires=["mporder"],
         ),
-        slice2vol_niter=dict(
-            argstr="--s2v_niter=%d", min_ver="5.0.11", requires=["mporder"],
-        ),
-        slice_order=dict(
+        session=dict(argstr="--session=%s", extensions=None,),
+        slm=dict(argstr="--slm=%s", usedefault=True,),
+        slspec=dict(
             argstr="--slspec=%s", min_ver="5.0.11", requires=["mporder"], xor=["json"],
         ),
-        slm=dict(argstr="--slm=%s", usedefault=True,),
         use_cuda=dict(),
     )
     inputs = Eddy.input_spec()
