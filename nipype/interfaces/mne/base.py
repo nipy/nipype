@@ -137,7 +137,7 @@ class WatershedBEM(FSCommand):
 
 
 class SetupSourceSpaceInputSpec(FSTraitedSpec):
-    subject_id = traits.Str(
+    subject = traits.Str(
         argstr='--subject %s',
         mandatory=True,
         desc='Subject name')
