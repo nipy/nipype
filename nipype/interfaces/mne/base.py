@@ -146,7 +146,7 @@ class SetupSourceSpaceInputSpec(FSTraitedSpec):
         mandatory=False,
         default=None,
         desc='Output file name. Use a name <dir>/<name>-src.fif')
-    morph = traits.Str(
+    subject_to = traits.Str(
         argstr='--morph %s',
         mandatory=False,
         default=None,
