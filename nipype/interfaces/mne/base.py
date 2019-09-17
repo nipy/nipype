@@ -196,7 +196,7 @@ class SetupSourceSpaceInputSpec(FSTraitedSpec):
         usedefault=True,
         desc='Add patch information to source space.')
     n_jobs = traits.Int(
-        argstr='--n-jobs',
+        argstr='--n-jobs %s',
         mandatory=False,
         default=1,
         usedefault=True,
