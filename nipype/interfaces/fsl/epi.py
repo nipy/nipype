@@ -586,7 +586,7 @@ class EddyInputSpec(FSLCommandInputSpec):
         default_value='eddy_corrected',
         usedefault=True,
         argstr='--out=%s',
-        desc='basename for output (warped) image')
+        desc='Basename for output image')
     session = File(
         exists=True,
         argstr='--session=%s',
@@ -595,37 +595,39 @@ class EddyInputSpec(FSLCommandInputSpec):
         exists=True,
         argstr='--topup=%s',
         requires=['in_topup_movpar'],
-        desc='topup file containing the field coefficients')
+        desc='Topup results file containing the field coefficients')
     in_topup_movpar = File(
         exists=True,
         requires=['in_topup_fieldcoef'],
-        desc='topup movpar.txt file')
+        desc='Topup results file containing the movement parameters')
     field = File(
         argstr='--field=%s',
-        desc=('NonTOPUP fieldmap scaled in Hz - filename has '
-              'to be provided without an extension. TOPUP is '
-              'strongly recommended'))
+        desc=('Non-topup derived fieldmap scaled in Hz'))
     field_mat = File(
         exists=True,
         argstr='--field_mat=%s',
-        desc=('Matrix that specifies the relative locations of '
-              'the field specified by --field and first volume '
-              'in file --imain'))
+        desc=('Matrix specifying the relative positions of '
+              'the fieldmap, --field, and the first volume '
+              'of the input file, --imain'))
 
     flm = traits.Enum(
-        'linear',
         'quadratic',
+        'linear',
         'cubic',
+        usedefault=True,
         argstr='--flm=%s',
         desc='First level EC model')
     slm = traits.Enum(
         'none',
         'linear',
         'quadratic',
+        usedefault=True,
         argstr='--slm=%s',
         desc='Second level EC model')
     fep = traits.Bool(
-        False, argstr='--fep', desc='Fill empty planes in x- or y-directions')
+        False,
+        argstr='--fep',
+        desc='Fill empty planes in x- or y-directions')
     initrand = traits.Bool(
         False,
         argstr='--initrand',
@@ -634,6 +636,7 @@ class EddyInputSpec(FSLCommandInputSpec):
     interp = traits.Enum(
         'spline',
         'trilinear',
+        usedefault=True,
         argstr='--interp=%s',
         desc='Interpolation model for estimation step')
     nvoxhp = traits.Int(
@@ -660,6 +663,8 @@ class EddyInputSpec(FSLCommandInputSpec):
         desc="Do NOT perform a post-eddy alignment of "
         "shells")
     fwhm = traits.Float(
+        default_value=0.0,
+        usedefault=True,
         desc=('FWHM for conditioning filter when estimating '
               'the parameters'),
         argstr='--fwhm=%s')
@@ -668,6 +673,7 @@ class EddyInputSpec(FSLCommandInputSpec):
     method = traits.Enum(
         'jac',
         'lsr',
+        usedefault=True,
         argstr='--resamp=%s',
         desc=('Final resampling method (jacobian/least '
               'squares)'))
@@ -721,35 +727,36 @@ class EddyInputSpec(FSLCommandInputSpec):
     mporder = traits.Int(
         argstr='--mporder=%s',
         desc='Order of slice-to-vol movement model',
-        requires=['slspec'],
         min_ver='5.0.11')
     s2v_niter = traits.Int(
         argstr='--s2v_niter=%s',
         desc='Number of iterations for slice-to-vol',
-        requires=['slspec'],
+        requires=['mporder'],
         min_ver='5.0.11')
     s2v_lambda = traits.Int(
         agstr='--s2v_lambda',
         desc='Regularisation weight for slice-to-vol movement (reasonable range 1-10)',
-        requires=['slspec'],
+        requires=['mporder'],
         min_ver='5.0.11')
     s2v_interp = traits.Enum(
         'trilinear',
         'spline',
         argstr='--s2v_interp=%s',
         desc='Slice-to-vol interpolation model for estimation step',
-        requires=['slspec'],
+        requires=['mporder'],
         min_ver='5.0.11')
     slspec = traits.File(
         exists=True,
         argstr='--slspec=%s',
         desc='Name of text file completely specifying slice/group acquisition',
+        requires=['mporder'],
         xor=['json'],
         min_ver='5.0.11')
     json = traits.File(
         exists=True,
         argstr='--json=%s',
         desc='Name of .json text file with information about slice timing',
+        requires=['mporder'],
         xor=['slspec'],
         min_ver='6.0.1')
 
@@ -887,14 +894,18 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.in_bval  = 'bvals.scheme'
     >>> eddy.inputs.use_cuda = True
     >>> eddy.cmdline # doctest: +ELLIPSIS
-    'eddy_cuda --ff=10.0 --fwhm=0 --acqp=epi_acqp.txt --bvals=bvals.scheme \
---bvecs=bvecs.scheme --imain=epi.nii --index=epi_index.txt \
---mask=epi_mask.nii --niter=5 --nvoxhp=1000 --out=.../eddy_corrected'
+    'eddy_cuda --flm=quadratic --ff=10.0 --fwhm=0.0 \
+--acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
+--imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
+--interp=spline --resamp=jac --niter=5 --nvoxhp=1000 \
+--out=.../eddy_corrected --slm=none'
     >>> eddy.inputs.use_cuda = False
     >>> eddy.cmdline # doctest: +ELLIPSIS
-    'eddy_openmp --ff=10.0 --fwhm=0 --acqp=epi_acqp.txt --bvals=bvals.scheme \
---bvecs=bvecs.scheme --imain=epi.nii --index=epi_index.txt \
---mask=epi_mask.nii --niter=5 --nvoxhp=1000 --out=.../eddy_corrected'
+    'eddy_openmp --flm=quadratic --ff=10.0 --fwhm=0.0 \
+--acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
+--imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
+--interp=spline --resamp=jac --niter=5 --nvoxhp=1000 \
+--out=.../eddy_corrected --slm=none'
     >>> res = eddy.run() # doctest: +SKIP
 
     """
