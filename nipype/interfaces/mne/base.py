@@ -156,6 +156,19 @@ class SetupSourceSpaceInputSpec(FSTraitedSpec):
         default='white',
         usedefault=True,
         desc='The surface to use.')
+    ico = traits.Int(
+        argstr='--ico %s',
+        default=None,
+        usedefault=True,
+        desc='use the recursively subdivided icosahedron '
+             'to create the source space.')
+    oct = traits.Int(
+        argstr='--oct %s',
+        default=None,
+        usedefault=True,
+        desc='use the recursively subdivided octahedron '
+             'to create the source space.',
+        xor=[ico])
     spacing = traits.Int(
         argstr='--spacing %s',
         default=7,
@@ -163,20 +176,6 @@ class SetupSourceSpaceInputSpec(FSTraitedSpec):
         desc='Specifies the approximate grid spacing of the '
              'source space in mm.',
         xor=[oct, ico])
-    ico = traits.Int(
-        argstr='--ico %s',
-        default=None,
-        usedefault=True,
-        desc='use the recursively subdivided icosahedron '
-             'to create the source space.',
-        xor=[oct, spacing])
-    oct = traits.Int(
-        argstr='--oct %s',
-        default=None,
-        usedefault=True,
-        desc='use the recursively subdivided octahedron '
-             'to create the source space.',
-        xor=[ico, spacing])
     subjects_dir = Directory(
         argstr='--subjects-dir %s',
         exists=True,
