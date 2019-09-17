@@ -9,7 +9,7 @@ import glob
 from ... import logging
 from ...utils.filemanip import simplify_list
 from ..base import (traits, File, Directory, TraitedSpec, OutputMultiPath,
-                    Undefined)
+                    isdefined)
 from ..freesurfer.base import FSCommand, FSTraitedSpec
 
 iflogger = logging.getLogger('nipype.interface')
@@ -248,14 +248,14 @@ class SetupSourceSpace(FSCommand):
         subject = self.inputs.subject
         subject_to = self.inputs.subject_to
 
-        if isinstance(fname, type(Undefined)):
-            if not isinstance(ico, type(Undefined)):
+        if isdefined(fname):
+            if not isdefined(ico):
                 use_spacing = "ico" + str(ico)
-            elif not isinstance(oct, type(Undefined)):
+            elif not isdefined(oct):
                 use_spacing = "oct" + str(oct)
-            elif not isinstance(spacing, type(Undefined)):
+            elif not isdefined(spacing):
                 use_spacing = spacing
-            if isinstance(subject_to, type(Undefined)):
+            if isdefined(subject_to):
                 fname = subject + '-' + str(use_spacing) + '-src.fif'
             else:
                 fname = (subject_to + '-' + subject + '-' +
