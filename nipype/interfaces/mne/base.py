@@ -145,13 +145,11 @@ class SetupSourceSpaceInputSpec(FSTraitedSpec):
         argstr='--src %s',
         mandatory=False,
         default=None,
-        usedefault=True,
         desc='Output file name. Use a name <dir>/<name>-src.fif')
     morph = traits.Str(
         argstr='--morph %s',
         mandatory=False,
         default=None,
-        usedefault=True,
         desc='morph the source space to this subject')
     surface = traits.Str(
         argstr='--surf %s',
@@ -163,14 +161,12 @@ class SetupSourceSpaceInputSpec(FSTraitedSpec):
         argstr='--ico %s',
         mandatory=False,
         default=None,
-        usedefault=True,
         desc='use the recursively subdivided icosahedron '
              'to create the source space.')
     oct = traits.Int(
         argstr='--oct %s',
         mandatory=False,
         default=None,
-        usedefault=True,
         desc='use the recursively subdivided octahedron '
              'to create the source space.',
         xor=[ico])
@@ -186,7 +182,6 @@ class SetupSourceSpaceInputSpec(FSTraitedSpec):
         argstr='--subjects-dir %s',
         mandatory=False,
         exists=True,
-        usedefault=True,
         desc='Subjects directory')
     cps = traits.Bool(
         argstr='--cps',
@@ -198,7 +193,6 @@ class SetupSourceSpaceInputSpec(FSTraitedSpec):
         argstr='--n-jobs %s',
         mandatory=False,
         default=1,
-        usedefault=True,
         desc='The number of jobs to run in parallel '
              '(default 1). Requires the joblib package. '
              'Will use at most 2 jobs'
