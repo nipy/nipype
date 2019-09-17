@@ -10,7 +10,7 @@ import glob
 from ... import logging
 from ...utils.filemanip import simplify_list
 from ..base import (traits, File, Directory, TraitedSpec, OutputMultiPath,
-                    isdefined)
+                    isdefined, CommandLine, CommandLineInputSpec)
 from ..freesurfer.base import FSCommand, FSTraitedSpec
 
 iflogger = logging.getLogger('nipype.interface')
@@ -180,11 +180,6 @@ class SetupSourceSpaceInputSpec(FSTraitedSpec):
         desc='Specifies the approximate grid spacing of the '
              'source space in mm.',
         xor=[oct, ico])
-    subjects_dir = Directory(
-        argstr='--subjects-dir %s',
-        mandatory=False,
-        exists=True,
-        desc='Subjects directory')
     cps = traits.Bool(
         True,
         argstr='--cps',
@@ -220,7 +215,7 @@ class SetupSourceSpaceOutputSpec(TraitedSpec):
                      desc='File containing the setup_source_space')
 
 
-class SetupSourceSpace(FSCommand):
+class SetupSourceSpace(CommandLine):
     """Uses mne_setup_source_space to create a source space.
 
     Examples
