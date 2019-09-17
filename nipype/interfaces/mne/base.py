@@ -186,7 +186,6 @@ class SetupSourceSpaceInputSpec(FSTraitedSpec):
         argstr='--subjects-dir %s',
         mandatory=False,
         exists=True,
-        mandatory=True,
         usedefault=True,
         desc='Subjects directory')
     cps = traits.Bool(
