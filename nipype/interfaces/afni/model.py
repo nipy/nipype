@@ -541,6 +541,10 @@ class RemlfitInputSpec(AFNICommandInputSpec):
         desc='turns on more progress messages, including memory usage '
         'progress reports at various stages',
         argstr='-verb')
+    goforit = traits.Bool(
+        desc='With potential issues flagged in the design matrix, an attempt'
+        'will nevertheless be made to fit the model',
+        argstr='-GOFORIT')
     ovar = File(
         desc='dataset for OLSQ st.dev. parameter (kind of boring)',
         argstr='-Ovar %s')
