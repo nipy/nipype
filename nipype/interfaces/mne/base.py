@@ -248,14 +248,14 @@ class SetupSourceSpace(FSCommand):
         subject = self.inputs.subject
         subject_to = self.inputs.subject_to
 
-        if isdefined(fname):
-            if not isdefined(ico):
+        if not isdefined(fname):
+            if isdefined(ico):
                 use_spacing = "ico" + str(ico)
-            elif not isdefined(oct):
+            elif isdefined(oct):
                 use_spacing = "oct" + str(oct)
-            elif not isdefined(spacing):
+            elif isdefined(spacing):
                 use_spacing = spacing
-            if isdefined(subject_to):
+            if not isdefined(subject_to):
                 fname = subject + '-' + str(use_spacing) + '-src.fif'
             else:
                 fname = (subject_to + '-' + subject + '-' +
