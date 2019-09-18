@@ -46,7 +46,6 @@ missing_entries = [
     {"affiliation": "Child Mind Institute / Nathan Kline Institute",
      "name": "Pellman, John",
      "orcid": "0000-0001-6810-4461"},
-    {"name": "Perez-Guevara, Martin"},
     {"name": "Khanuja, Ranjeet"},
     {"affiliation":
         "Medical Imaging & Biomarkers, Bioclinica, Newark, CA, USA.",

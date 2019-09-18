@@ -79,6 +79,10 @@
       "name": "Wong, Jason"
     },
     {
+      "affiliation": "Concordia University",
+      "name": "Benderoff, Erin"
+    },
+    {
       "name": "Modat, Marc"
     },
     {
@@ -147,8 +151,9 @@
       "name": "Berleant, Shoshana"
     },
     {
-      "affiliation": "Concordia University",
-      "name": "Benderoff, Erin"
+      "affiliation": "Dartmouth College: Hanover, NH, United States",
+      "name": "Halchenko, Yaroslav O.",
+      "orcid": "0000-0003-3456-2493"
     },
     {
       "affiliation": "Institute for Biomedical Engineering, ETH and University of Zurich",
@@ -156,9 +161,9 @@
       "orcid": "0000-0001-7037-2449"
     },
     {
-      "affiliation": "Dartmouth College: Hanover, NH, United States",
-      "name": "Halchenko, Yaroslav O.",
-      "orcid": "0000-0003-3456-2493"
+      "affiliation": "The Centre for Addiction and Mental Health",
+      "name": "Joseph, Michael",
+      "orcid": "0000-0002-0068-230X"
     },
     {
       "affiliation": "UC San Diego",
@@ -201,11 +206,6 @@
       "affiliation": "INRIA",
       "name": "Varoquaux, Gael",
       "orcid": "0000-0003-1076-5122"
-    },
-    {
-      "affiliation": "The Centre for Addiction and Mental Health",
-      "name": "Joseph, Michael",
-      "orcid": "0000-0002-0068-230X"
     },
     {
       "affiliation": "Athena EPI, Inria Sophia-Antipolis",
@@ -251,12 +251,12 @@
       "name": "Sikka, Sharad"
     },
     {
+      "name": "Forbes, Jessica"
+    },
+    {
       "affiliation": "University College London",
       "name": "Mancini, Matteo",
       "orcid": "0000-0001-7194-4568"
-    },
-    {
-      "name": "Forbes, Jessica"
     },
     {
       "affiliation": "Duke University",
@@ -296,10 +296,6 @@
       "name": "Kent, James"
     },
     {
-      "name": "Heinsfeld, Anibal S\u00f3lon",
-      "orcid": "0000-0002-2050-0614"
-    },
-    {
       "name": "Watanabe, Aimi"
     },
     {
@@ -324,6 +320,10 @@
       "affiliation": "University College London",
       "name": "Eshaghi, Arman",
       "orcid": "0000-0002-6652-3512"
+    },
+    {
+      "name": "Heinsfeld, Anibal S\u00f3lon",
+      "orcid": "0000-0002-2050-0614"
     },
     {
       "name": "Ginsburg, Daniel"
@@ -379,7 +379,13 @@
       "name": "K\u00fcttner, Ren\u00e9"
     },
     {
+      "name": "Perez-Guevara, Martin"
+    },
+    {
       "name": "Millman, Jarrod"
+    },
+    {
+      "name": "Lai, Jeff"
     },
     {
       "name": "Zhou, Dale"
@@ -403,14 +409,14 @@
       "name": "Liu, Siqi"
     },
     {
-      "affiliation": "University of Pennsylvania",
-      "name": "Kahn, Ari E.",
-      "orcid": "0000-0002-2127-0507"
-    },
-    {
       "affiliation": "Leibniz Institute for Neurobiology",
       "name": "Stadler, J\u00f6rg",
       "orcid": "0000-0003-4313-129X"
+    },
+    {
+      "affiliation": "University of Pennsylvania",
+      "name": "Kahn, Ari E.",
+      "orcid": "0000-0002-2127-0507"
     },
     {
       "affiliation": "University College London",
@@ -504,15 +510,6 @@
       "name": "Perkins, L. Nathan"
     },
     {
-      "name": "Marina, Ana"
-    },
-    {
-      "name": "Mattfeld, Aaron"
-    },
-    {
-      "name": "Noel, Maxime"
-    },
-    {
       "affiliation": "University of Amsterdam",
       "name": "Lukas Snoek",
       "orcid": "0000-0001-8972-204X"
@@ -522,7 +519,16 @@
       "name": "Weninger, Leon"
     },
     {
+      "name": "Marina, Ana"
+    },
+    {
+      "name": "Mattfeld, Aaron"
+    },
+    {
       "name": "Matsubara, K"
+    },
+    {
+      "name": "Noel, Maxime"
     },
     {
       "name": "Cheung, Brian"
@@ -571,6 +577,9 @@
       "name": "Weinstein, Alejandro"
     },
     {
+      "name": "Tambini, Arielle"
+    },
+    {
       "affiliation": "Duke University",
       "name": "Broderick, William",
       "orcid": "0000-0002-8999-9003"
@@ -610,9 +619,6 @@
     },
     {
       "name": "Tarbert, Claire"
-    },
-    {
-      "name": "Tambini, Arielle"
     },
     {
       "name": "Nickson, Thomas"
@@ -678,9 +684,6 @@
       "affiliation": "Child Mind Institute / Nathan Kline Institute",
       "name": "Pellman, John",
       "orcid": "0000-0001-6810-4461"
-    },
-    {
-      "name": "Perez-Guevara, Martin"
     },
     {
       "name": "Khanuja, Ranjeet"
