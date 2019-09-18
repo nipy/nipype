@@ -95,19 +95,18 @@ if not hasattr(Path, 'write_text'):
             f.write(text)
     Path.write_text = _write_text
 
-if PY3:
-    try:  # PY34 - mkdir does not have exist_ok
-        from tempfile import TemporaryDirectory
-        with TemporaryDirectory() as tmpdir:
-            (Path(tmpdir) / 'exist_ok_test').mkdir(exist_ok=True)
-    except TypeError:
-        def _mkdir(self, mode=0o777, parents=False, exist_ok=False):
-            if parents:
-                os.makedirs(str(self), mode=mode, exist_ok=exist_ok)
-            elif not exist_ok or not self.exists():
-                os.mkdir(str(self), mode=mode)
+try:  # PY27/PY34 - mkdir does not have exist_ok
+    from .tmpdirs import TemporaryDirectory
+    with TemporaryDirectory() as tmpdir:
+        (Path(tmpdir) / 'exist_ok_test').mkdir(exist_ok=True)
+except TypeError:
+    def _mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        if parents:
+            makedirs(str(self), mode=mode, exist_ok=exist_ok)
+        elif not exist_ok or not self.exists():
+            os.mkdir(str(self), mode=mode)
 
-        Path.mkdir = _mkdir
+    Path.mkdir = _mkdir
 
 
 def split_filename(fname):
@@ -828,7 +827,7 @@ def dist_is_editable(dist):
     return False
 
 
-def makedirs(path, exist_ok=False):
+def makedirs(path, mode=0o777, exist_ok=False):
     """
     Create path, if it doesn't exist.
 
@@ -838,14 +837,14 @@ def makedirs(path, exist_ok=False):
 
     """
     if not exist_ok:  # The old makedirs
-        os.makedirs(path)
+        os.makedirs(path, mode=mode)
         return path
 
     # this odd approach deals with concurrent directory cureation
     if not op.exists(op.abspath(path)):
         fmlogger.debug("Creating directory %s", path)
         try:
-            os.makedirs(path)
+            os.makedirs(path, mode=mode)
         except OSError:
             fmlogger.debug("Problem creating directory %s", path)
             if not op.exists(path):
