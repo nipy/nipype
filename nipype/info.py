@@ -182,6 +182,7 @@ TESTS_REQUIRES = [
 ]
 
 EXTRA_REQUIRES = {
+    'data': ['datalad'],
     'doc': ['Sphinx>=1.4', 'numpydoc', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],
     'duecredit': ['duecredit'],
     'nipy': ['nitime', 'nilearn<0.5.0', 'dipy', 'nipy', 'matplotlib'],
