@@ -36,10 +36,7 @@ def test_Eddy_inputs():
             argstr='--ff=%s',
             usedefault=True,
         ),
-        fwhm=dict(
-            argstr='--fwhm=%s',
-            usedefault=True,
-        ),
+        fwhm=dict(argstr='--fwhm=%s', ),
         in_acqp=dict(
             argstr='--acqp=%s',
             extensions=None,
@@ -92,16 +89,7 @@ def test_Eddy_inputs():
             argstr='--json=%s',
             min_ver='6.0.1',
             requires=['mporder'],
-            xor=['slspec'],
-        ),
-        mb=dict(
-            argstr='--mb=%s',
-            min_ver='5.0.10',
-        ),
-        mb_offs=dict(
-            argstr='--mb_offs=%s',
-            min_ver='5.0.10',
-            requires=['mb'],
+            xor=['slice_order'],
         ),
         mbs_ksp=dict(
             argstr='--mbs_ksp=%smm',
@@ -126,6 +114,15 @@ def test_Eddy_inputs():
             argstr='--mporder=%s',
             min_ver='5.0.11',
             requires=['use_cuda'],
+        ),
+        multiband_factor=dict(
+            argstr='--mb=%s',
+            min_ver='5.0.10',
+        ),
+        multiband_offset=dict(
+            argstr='--mb_offs=%d',
+            min_ver='5.0.10',
+            requires=['multiband_factor'],
         ),
         niter=dict(
             argstr='--niter=%s',
@@ -174,34 +171,34 @@ def test_Eddy_inputs():
             argstr='--residuals',
             min_ver='5.0.10',
         ),
-        s2v_interp=dict(
-            argstr='--s2v_interp=%s',
-            min_ver='5.0.11',
-            requires=['mporder'],
-        ),
-        s2v_lambda=dict(
-            agstr='--s2v_lambda',
-            min_ver='5.0.11',
-            requires=['mporder'],
-        ),
-        s2v_niter=dict(
-            argstr='--s2v_niter=%s',
-            min_ver='5.0.11',
-            requires=['mporder'],
-        ),
         session=dict(
             argstr='--session=%s',
             extensions=None,
         ),
-        slm=dict(
-            argstr='--slm=%s',
-            usedefault=True,
+        slice2vol_interp=dict(
+            argstr='--s2v_interp=%s',
+            min_ver='5.0.11',
+            requires=['mporder'],
         ),
-        slspec=dict(
+        slice2vol_lambda=dict(
+            argstr='--s2v_lambda=%d',
+            min_ver='5.0.11',
+            requires=['mporder'],
+        ),
+        slice2vol_niter=dict(
+            argstr='--s2v_niter=%d',
+            min_ver='5.0.11',
+            requires=['mporder'],
+        ),
+        slice_order=dict(
             argstr='--slspec=%s',
             min_ver='5.0.11',
             requires=['mporder'],
             xor=['json'],
+        ),
+        slm=dict(
+            argstr='--slm=%s',
+            usedefault=True,
         ),
         use_cuda=dict(),
     )

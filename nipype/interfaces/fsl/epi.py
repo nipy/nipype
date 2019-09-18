@@ -664,8 +664,6 @@ class EddyInputSpec(FSLCommandInputSpec):
         desc="Do NOT perform a post-eddy alignment of "
         "shells")
     fwhm = traits.Float(
-        default_value=0.0,
-        usedefault=True,
         desc=('FWHM for conditioning filter when estimating '
               'the parameters'),
         argstr='--fwhm=%s')
@@ -722,7 +720,7 @@ class EddyInputSpec(FSLCommandInputSpec):
         argstr='--mb_offs=%d',
         desc=('Multi-band offset (-1 if bottom slice removed, 1 if '
               'top slice removed'),
-        requires=['mb'],
+        requires=['multiband_factor'],
         min_ver='5.0.10')
 
     mporder = traits.Int(
@@ -730,24 +728,24 @@ class EddyInputSpec(FSLCommandInputSpec):
         desc='Order of slice-to-vol movement model',
         requires=['use_cuda'],
         min_ver='5.0.11')
-    slice2vol_iterations = traits.Int(
-        argstr='--s2v_niter=%s',
+    slice2vol_niter = traits.Int(
+        argstr='--s2v_niter=%d',
         desc='Number of iterations for slice-to-vol',
         requires=['mporder'],
         min_ver='5.0.11')
-    s2v_lambda = traits.Int(
-        agstr='--s2v_lambda',
+    slice2vol_lambda = traits.Int(
+        argstr='--s2v_lambda=%d',
         desc='Regularisation weight for slice-to-vol movement (reasonable range 1-10)',
         requires=['mporder'],
         min_ver='5.0.11')
-    s2v_interp = traits.Enum(
+    slice2vol_interp = traits.Enum(
         'trilinear',
         'spline',
         argstr='--s2v_interp=%s',
         desc='Slice-to-vol interpolation model for estimation step',
         requires=['mporder'],
         min_ver='5.0.11')
-    slspec = traits.File(
+    slice_order = traits.File(
         exists=True,
         argstr='--slspec=%s',
         desc='Name of text file completely specifying slice/group acquisition',
@@ -759,7 +757,7 @@ class EddyInputSpec(FSLCommandInputSpec):
         argstr='--json=%s',
         desc='Name of .json text file with information about slice timing',
         requires=['mporder'],
-        xor=['slspec'],
+        xor=['slice_order'],
         min_ver='6.0.1')
 
     estimate_move_by_susceptibility = traits.Bool(
@@ -898,7 +896,7 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.in_bval  = 'bvals.scheme'
     >>> eddy.inputs.use_cuda = True
     >>> eddy.cmdline # doctest: +ELLIPSIS
-    'eddy_cuda --flm=quadratic --ff=10.0 --fwhm=0.0 \
+    'eddy_cuda --flm=quadratic --ff=10.0 \
 --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
 --interp=spline --resamp=jac --niter=5 --nvoxhp=1000 \
@@ -907,7 +905,7 @@ class Eddy(FSLCommand):
     Running eddy on a CPU using OpenMP:
     >>> eddy.inputs.use_cuda = False
     >>> eddy.cmdline          # doctest: +ELLIPSIS
-    'eddy_openmp --flm=quadratic --ff=10.0 --fwhm=0.0 \
+    'eddy_openmp --flm=quadratic --ff=10.0 \
 --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
 --interp=spline --resamp=jac --niter=5 --nvoxhp=1000 \
@@ -916,17 +914,17 @@ class Eddy(FSLCommand):
     Running eddy with slice-to-volume motion correction:
     >>> eddy.inputs.use_cuda = True
     >>> eddy.inputs.mporder = 6
-    >>> eddy.inputs.s2v_niter = 5
-    >>> eddy.inputs.s2v_lambda = 1
-    >>> eddy.inputs.s2v_interp = 'trilinear'
-    >>> eddy.inputs.slspec = 'epi_slspec.txt'
+    >>> eddy.inputs.slice2vol_niter = 5
+    >>> eddy.inputs.slice2vol_lambda = 1
+    >>> eddy.inputs.slice2vol_interp = 'trilinear'
+    >>> eddy.inputs.slice_order = 'epi_slspec.txt'
     >>> eddy.cmdline          # doctest: +ELLIPSIS
-    'eddy_cuda --flm=quadratic --ff=10.0 --fwhm=0.0 \
+    'eddy_cuda --flm=quadratic --ff=10.0 \
 --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
 --interp=spline --resamp=jac --mporder=6 --niter=5 --nvoxhp=1000 \
---out=.../eddy_corrected --s2v_interp=trilinear --s2v_niter=5 \
---slm=none --slspec=epi_slspec.txt'
+--out=.../eddy_corrected --s2v_interp=trilinear --s2v_lambda=1 \
+--s2v_niter=5 --slspec=epi_slspec.txt --slm=none'
     >>> res = eddy.run()     # doctest: +SKIP
 
     """
