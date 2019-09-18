@@ -603,9 +603,13 @@ class EddyInputSpec(FSLCommandInputSpec):
     in_topup_movpar = File(
         exists=True,
         requires=["in_topup_fieldcoef"],
-        desc="Topup results file containing the movement parameters",
+        desc="Topup results file containing the movement parameters (movpar.txt)",
     )
-    field = File(argstr="--field=%s", desc=("Non-topup derived fieldmap scaled in Hz"))
+    field = File(
+        exists=True,
+        argstr="--field=%s",
+        desc=("Non-topup derived fieldmap scaled in Hz"),
+    )
     field_mat = File(
         exists=True,
         argstr="--field_mat=%s",
@@ -725,12 +729,14 @@ class EddyInputSpec(FSLCommandInputSpec):
         requires=["repol"],
         min_ver="5.0.10",
     )
-    mb = traits.Int(argstr="--mb=%s", desc="Multi-band factor", min_ver="5.0.10")
-    mb_offs = traits.Enum(
+    multiband_factor = traits.Int(
+        argstr="--mb=%s", desc="Multi-band factor", min_ver="5.0.10"
+    )
+    multiband_offset = traits.Enum(
         0,
         1,
         -1,
-        argstr="--mb_offs=%s",
+        argstr="--mb_offs=%d",
         desc=(
             "Multi-band offset (-1 if bottom slice removed, 1 if " "top slice removed"
         ),
@@ -744,7 +750,7 @@ class EddyInputSpec(FSLCommandInputSpec):
         requires=["use_cuda"],
         min_ver="5.0.11",
     )
-    s2v_niter = traits.Int(
+    slice2vol_iterations = traits.Int(
         argstr="--s2v_niter=%s",
         desc="Number of iterations for slice-to-vol",
         requires=["mporder"],
