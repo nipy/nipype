@@ -619,8 +619,9 @@ class CatMatvec(AFNICommand):
 
     def _format_arg(self, name, spec, value):
         if name == 'in_file':
-            return spec.argstr % (' '.join([i[0] + ' -' + i[1]
-                                            for i in value]))
+            # Concatenate a series of filenames, with optional opkeys
+            return ' '.join('%s -%s' % (mfile, opkey) if opkey else mfile
+                           for mfile, opkey in value)
         return super(CatMatvec, self)._format_arg(name, spec, value)
 
 
