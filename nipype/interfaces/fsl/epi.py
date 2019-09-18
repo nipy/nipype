@@ -677,8 +677,8 @@ class EddyInputSpec(FSLCommandInputSpec):
         desc=('Final resampling method (jacobian/least '
               'squares)'))
 
-    repol = traits.Bool(
-        False, argstr='--repol', desc='Detect and replace outlier slices')
+    repol = traits.Enum(
+        True, argstr='--repol', desc='Detect and replace outlier slices')
     outlier_nstd = traits.Int(
         argstr='--ol_nstd',
         desc='Number of std off to qualify as outlier',
@@ -760,8 +760,8 @@ class EddyInputSpec(FSLCommandInputSpec):
         xor=['slice_order'],
         min_ver='6.0.1')
 
-    estimate_move_by_susceptibility = traits.Bool(
-        False,
+    estimate_move_by_susceptibility = traits.Enum(
+        True,
         argstr='--estimate_move_by_susceptibility',
         desc='Estimate how susceptibility field changes with subject movement',
         min_ver='6.0.1')
@@ -793,7 +793,7 @@ class EddyInputSpec(FSLCommandInputSpec):
               'date are acquired on a set of b-value '
               'shells'))
 
-    use_cuda = traits.Bool(False, desc='Run eddy using cuda gpu')
+    use_cuda = traits.Enum(True, desc='Run eddy using cuda gpu')
     cnr_maps = traits.Bool(
         False, desc="Output CNR-Maps", argstr="--cnr_maps", min_ver="5.0.10"
     )
@@ -886,7 +886,7 @@ class Eddy(FSLCommand):
 
     >>> from nipype.interfaces.fsl import Eddy
 
-    Running eddy on an Nvidia GPU using cuda:
+    Running eddy on a CPU using OpenMP:
     >>> eddy = Eddy()
     >>> eddy.inputs.in_file = 'epi.nii'
     >>> eddy.inputs.in_mask  = 'epi_mask.nii'
@@ -894,6 +894,14 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.in_acqp  = 'epi_acqp.txt'
     >>> eddy.inputs.in_bvec  = 'bvecs.scheme'
     >>> eddy.inputs.in_bval  = 'bvals.scheme'
+    >>> eddy.cmdline          # doctest: +ELLIPSIS
+    'eddy_openmp --flm=quadratic --ff=10.0 \
+--acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
+--imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
+--interp=spline --resamp=jac --niter=5 --nvoxhp=1000 \
+--out=.../eddy_corrected --slm=none'
+
+    Running eddy on an Nvidia GPU using cuda:
     >>> eddy.inputs.use_cuda = True
     >>> eddy.cmdline # doctest: +ELLIPSIS
     'eddy_cuda --flm=quadratic --ff=10.0 \
@@ -902,17 +910,7 @@ class Eddy(FSLCommand):
 --interp=spline --resamp=jac --niter=5 --nvoxhp=1000 \
 --out=.../eddy_corrected --slm=none'
 
-    Running eddy on a CPU using OpenMP:
-    >>> eddy.inputs.use_cuda = False
-    >>> eddy.cmdline          # doctest: +ELLIPSIS
-    'eddy_openmp --flm=quadratic --ff=10.0 \
---acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
---imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
---interp=spline --resamp=jac --niter=5 --nvoxhp=1000 \
---out=.../eddy_corrected --slm=none'
-
     Running eddy with slice-to-volume motion correction:
-    >>> eddy.inputs.use_cuda = True
     >>> eddy.inputs.mporder = 6
     >>> eddy.inputs.slice2vol_niter = 5
     >>> eddy.inputs.slice2vol_lambda = 1
