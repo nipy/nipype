@@ -542,7 +542,7 @@ class RemlfitInputSpec(AFNICommandInputSpec):
         'progress reports at various stages',
         argstr='-verb')
     goforit = traits.Bool(
-        desc='With potential issues flagged in the design matrix, an attempt'
+        desc='With potential issues flagged in the design matrix, an attempt '
         'will nevertheless be made to fit the model',
         argstr='-GOFORIT')
     ovar = File(
