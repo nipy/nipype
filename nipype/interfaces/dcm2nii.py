@@ -7,6 +7,8 @@ from builtins import str, open
 import os
 import re
 from copy import deepcopy
+import itertools as it
+from glob import iglob
 
 from ..utils.filemanip import split_filename
 from .base import (CommandLine, CommandLineInputSpec, InputMultiPath, traits,
@@ -328,7 +330,7 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
         False,
         argstr='-t',
         usedefault=True,
-        desc="Flag if text notes include private patient details")
+        desc="Text notes including private patient details")
     compression = traits.Enum(
         1, 2, 3, 4, 5, 6, 7, 8, 9,
         argstr='-%d',
@@ -346,6 +348,9 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
     philips_float = traits.Bool(
         argstr='-p',
         desc="Philips precise float (not display) scaling")
+    to_nrrd = traits.Bool(
+        argstr="-e",
+        desc="Export as NRRD instead of NIfTI")
 
 
 class Dcm2niixOutputSpec(TraitedSpec):
@@ -393,8 +398,11 @@ class Dcm2niix(CommandLine):
         return Info.version()
 
     def _format_arg(self, opt, spec, val):
-        bools = ['bids_format', 'merge_imgs', 'single_file', 'verbose', 'crop',
-                 'has_private', 'anon_bids', 'ignore_deriv', 'philips_float']
+        bools = [
+            'bids_format', 'merge_imgs', 'single_file', 'verbose', 'crop',
+            'has_private', 'anon_bids', 'ignore_deriv', 'philips_float',
+            'to_nrrd',
+        ]
         if opt in bools:
             spec = deepcopy(spec)
             if val:
@@ -410,52 +418,54 @@ class Dcm2niix(CommandLine):
         # may use return code 1 despite conversion
         runtime = super(Dcm2niix, self)._run_interface(
             runtime, correct_return_codes=(0, 1, ))
-        if self.inputs.bids_format:
-            (self.output_files, self.bvecs, self.bvals,
-             self.bids) = self._parse_stdout(runtime.stdout)
-        else:
-            (self.output_files, self.bvecs, self.bvals) = self._parse_stdout(
-                runtime.stdout)
+        self._parse_files(self._parse_stdout(runtime.stdout))
         return runtime
 
     def _parse_stdout(self, stdout):
-        files = []
-        bvecs = []
-        bvals = []
-        bids = []
-        skip = False
-        find_b = False
+        filenames = []
         for line in stdout.split("\n"):
-            if not skip:
-                out_file = None
-                if line.startswith("Convert "):  # output
-                    fname = str(re.search('\S+/\S+', line).group(0))
-                    out_file = os.path.abspath(fname)
-                    # extract bvals
-                    if find_b:
-                        bvecs.append(out_file + ".bvec")
-                        bvals.append(out_file + ".bval")
-                        find_b = False
-                # next scan will have bvals/bvecs
-                elif 'DTI gradients' in line or 'DTI gradient directions' in line or 'DTI vectors' in line:
-                    find_b = True
-                if out_file:
-                    ext = '.nii' if self.inputs.compress == 'n' else '.nii.gz'
-                    files.append(out_file + ext)
-                    if self.inputs.bids_format:
-                        bids.append(out_file + ".json")
-            skip = False
-        # just return what was done
-        if not bids:
-            return files, bvecs, bvals
+            if line.startswith("Convert "):  # output
+                fname = str(re.search(r'\S+/\S+', line).group(0))
+                filenames.append(os.path.abspath(fname))
+        return filenames
+
+    def _parse_files(self, filenames):
+        outfiles, bvals, bvecs, bids = [], [], [], []
+        outtypes = [".bval", ".bvec", ".json", ".txt"]
+        if self.inputs.to_nrrd:
+            outtypes += [".nrrd", ".nhdr", ".raw.gz"]
         else:
-            return files, bvecs, bvals, bids
+            outtypes += [".nii", ".nii.gz"]
+
+        for filename in filenames:
+            # search for relevant files, and sort accordingly
+            for fl in search_files(filename, outtypes):
+                if (
+                    fl.endswith(".nii") or
+                    fl.endswith(".gz") or
+                    fl.endswith(".nrrd") or
+                    fl.endswith(".nhdr")
+                ):
+                    outfiles.append(fl)
+                elif fl.endswith(".bval"):
+                    bvals.append(fl)
+                elif fl.endswith(".bvec"):
+                    bvecs.append(fl)
+                elif fl.endswith(".json") or fl.endswith(".txt"):
+                    bids.append(fl)
+        self.output_files = outfiles
+        self.bvecs = bvecs
+        self.bvals = bvals
+        self.bids = bids
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['converted_files'] = self.output_files
         outputs['bvecs'] = self.bvecs
         outputs['bvals'] = self.bvals
-        if self.inputs.bids_format:
-            outputs['bids'] = self.bids
+        outputs['bids'] = self.bids
         return outputs
+
+# https://stackoverflow.com/a/4829130
+def search_files(prefix, outtypes):
+    return it.chain.from_iterable(iglob(prefix + outtype) for outtype in outtypes)
