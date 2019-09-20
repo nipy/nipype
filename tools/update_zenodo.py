@@ -7,7 +7,8 @@ import json
 from fuzzywuzzy import fuzz, process
 import subprocess as sp
 
-CREATORS_LAST_ORCID = '0000-0002-5312-6729'  # This ORCID should go last
+# These ORCIDs should go last
+CREATORS_LAST = ['Gorgolewski, Krzysztof J.', 'Ghosh, Satrajit']
 # for entries not found in line-contributions
 MISSING_ENTRIES = [
     {"name": "Varada, Jan"},
@@ -30,24 +31,6 @@ MISSING_ENTRIES = [
     {"name": "Lai, Jeff"}
 ]
 
-
-def fix_position(creators):
-    """Place Satra last."""
-    # position first / last authors
-    l_authr = None
-
-    for info in creators:
-        if 'orcid' in info and info['orcid'] == CREATORS_LAST_ORCID:
-            l_authr = info
-
-    if l_authr is None:
-        raise AttributeError('Missing important people')
-
-    creators.remove(l_authr)
-    creators.append(l_authr)
-    return creators
-
-
 if __name__ == '__main__':
     contrib_file = Path('line-contributors.txt')
     lines = []
@@ -55,14 +38,16 @@ if __name__ == '__main__':
         print('WARNING: Reusing existing line-contributors.txt file.', file=sys.stderr)
         lines = contrib_file.read_text().splitlines()
 
-    if not lines and shutil.which('git-line-summary'):
+    git_line_summary_path = shutil.which('git-line-summary')
+    if not lines and git_line_summary_path:
         print("Running git-line-summary on nipype repo")
-        lines = sp.check_output(['git-line-summary']).decode().splitlines()
+        lines = sp.check_output([git_line_summary_path]).decode().splitlines()
         contrib_file.write_text('\n'.join(lines))
 
     if not lines:
-        raise RuntimeError('Could not find line-contributors from git repository '
-                           '(hint: please install git-extras).')
+        raise RuntimeError("""\
+Could not find line-contributors from git repository.%s""" % """ \
+git-line-summary not found, please install git-extras. """ * (git_line_summary_path is None))
 
     data = [' '.join(line.strip().split()[1:-1]) for line in lines if '%' in line]
 
@@ -71,8 +56,10 @@ if __name__ == '__main__':
     zenodo = json.loads(zenodo_file.read_text())
     zen_names = [' '.join(val['name'].split(',')[::-1]).strip()
                  for val in zenodo['creators']]
+    total_names = len(zen_names) + len(MISSING_ENTRIES)
 
     name_matches = []
+    position = 1
     for ele in data:
         matches = process.extract(ele, zen_names, scorer=fuzz.token_sort_ratio,
                                   limit=2)
@@ -85,10 +72,21 @@ if __name__ == '__main__':
             continue
 
         if val not in name_matches:
+            if val['name'] not in CREATORS_LAST:
+                val['position'] = position
+                position += 1
+            else:
+                val['position'] = total_names + CREATORS_LAST.index(val['name'])
             name_matches.append(val)
 
-    for entry in MISSING_ENTRIES:
-        name_matches.append(entry)
+    for missing in MISSING_ENTRIES:
+        missing['position'] = position
+        position += 1
+        name_matches.append(missing)
 
-    zenodo['creators'] = fix_position(name_matches)
-    zenodo_file.write_text(json.dumps(zenodo, indent=2, sort_keys=True))
+    zenodo['creators'] = sorted(name_matches, key=lambda k: k['position'])
+    # Remove position
+    for creator in zenodo['creators']:
+        del creator['position']
+
+    zenodo_file.write_text('%s\n' % json.dumps(zenodo, indent=2, sort_keys=True))
