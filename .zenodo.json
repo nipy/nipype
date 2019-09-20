@@ -2,11 +2,6 @@
   "creators": [
     {
       "affiliation": "Department of Psychology, Stanford University",
-      "name": "Gorgolewski, Krzysztof J.",
-      "orcid": "0000-0003-3321-7583"
-    },
-    {
-      "affiliation": "Department of Psychology, Stanford University",
       "name": "Esteban, Oscar",
       "orcid": "0000-0001-8435-6191"
     },
@@ -79,10 +74,6 @@
       "name": "Wong, Jason"
     },
     {
-      "affiliation": "Concordia University",
-      "name": "Benderoff, Erin"
-    },
-    {
       "name": "Modat, Marc"
     },
     {
@@ -149,6 +140,10 @@
     },
     {
       "name": "Berleant, Shoshana"
+    },
+    {
+      "affiliation": "Concordia University",
+      "name": "Benderoff, Erin"
     },
     {
       "affiliation": "Dartmouth College: Hanover, NH, United States",
@@ -353,12 +348,12 @@
       "name": "Kleesiek, Jens"
     },
     {
-      "name": "Erickson, Drew"
-    },
-    {
       "affiliation": "NIMH IRP",
       "name": "Lee, John A.",
       "orcid": "0000-0001-5884-4247"
+    },
+    {
+      "name": "Erickson, Drew"
     },
     {
       "affiliation": "Child Mind Institute",
@@ -385,9 +380,6 @@
       "name": "Millman, Jarrod"
     },
     {
-      "name": "Lai, Jeff"
-    },
-    {
       "name": "Zhou, Dale"
     },
     {
@@ -409,9 +401,9 @@
       "name": "Liu, Siqi"
     },
     {
-      "affiliation": "Korea Advanced Institute of Science and Technology",
-      "name": "Kim, Sin",
-      "orcid": "0000-0003-4652-3758"
+      "affiliation": "University of Pennsylvania",
+      "name": "Kahn, Ari E.",
+      "orcid": "0000-0002-2127-0507"
     },
     {
       "affiliation": "Leibniz Institute for Neurobiology",
@@ -419,9 +411,9 @@
       "orcid": "0000-0003-4313-129X"
     },
     {
-      "affiliation": "University of Pennsylvania",
-      "name": "Kahn, Ari E.",
-      "orcid": "0000-0002-2127-0507"
+      "affiliation": "Korea Advanced Institute of Science and Technology",
+      "name": "Kim, Sin",
+      "orcid": "0000-0003-4652-3758"
     },
     {
       "affiliation": "University College London",
@@ -515,6 +507,15 @@
       "name": "Perkins, L. Nathan"
     },
     {
+      "name": "Marina, Ana"
+    },
+    {
+      "name": "Mattfeld, Aaron"
+    },
+    {
+      "name": "Noel, Maxime"
+    },
+    {
       "affiliation": "University of Amsterdam",
       "name": "Lukas Snoek",
       "orcid": "0000-0001-8972-204X"
@@ -524,16 +525,7 @@
       "name": "Weninger, Leon"
     },
     {
-      "name": "Marina, Ana"
-    },
-    {
-      "name": "Mattfeld, Aaron"
-    },
-    {
       "name": "Matsubara, K"
-    },
-    {
-      "name": "Noel, Maxime"
     },
     {
       "affiliation": "University of Pennsylvania",
@@ -587,9 +579,6 @@
       "name": "Weinstein, Alejandro"
     },
     {
-      "name": "Tambini, Arielle"
-    },
-    {
       "affiliation": "Duke University",
       "name": "Broderick, William",
       "orcid": "0000-0002-8999-9003"
@@ -629,6 +618,9 @@
     },
     {
       "name": "Tarbert, Claire"
+    },
+    {
+      "name": "Tambini, Arielle"
     },
     {
       "name": "Nickson, Thomas"
@@ -713,6 +705,11 @@
     },
     {
       "name": "Lai, Jeff"
+    },
+    {
+      "affiliation": "Department of Psychology, Stanford University",
+      "name": "Gorgolewski, Krzysztof J.",
+      "orcid": "0000-0003-3321-7583"
     },
     {
       "affiliation": "MIT, HMS",
