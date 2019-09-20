@@ -41,17 +41,15 @@ def test_dcm2niix_dwi(tmpdir):
             # ensure all outputs are of equal lengths
             assert len(set(map(len, outputs))) == 1
         else:
-            assert not eg2.outputs.bids
+            assert not eg.outputs.bids
 
     dcm = Dcm2niix()
     dcm.inputs.source_dir = datadir
     dcm.inputs.out_filename = '%u%z'
-    eg1 = dcm.run()
-    assert_dwi(eg1, True)
+    assert_dwi(dcm.run(), True)
 
     # now run specifying output directory and removing BIDS option
     outdir = tmpdir.mkdir('conversion').strpath
     dcm.inputs.output_dir = outdir
     dcm.inputs.bids_format = False
-    eg2 = dcm.run()
-    assert_dwi(eg2, False)
+    assert_dwi(dcm.run(), False)

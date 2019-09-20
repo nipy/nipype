@@ -68,10 +68,11 @@ function generate_base_dockerfile() {
     --spm12 version=r7219 \
     --env 'LD_LIBRARY_PATH=/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH' \
     --freesurfer version=6.0.0-min \
+    --dcm2niix version=v1.0.20190902 method=source \
     --run 'echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tCjUxNzIKICpDdnVtdkVWM3pUZmcKRlM1Si8yYzFhZ2c0RQoiID4gL29wdC9mcmVlc3VyZmVyLTYuMC4wLW1pbi9saWNlbnNlLnR4dA==" | base64 -d | sh' \
     --install afni ants apt-utils bzip2 convert3d file fsl-core \
               fsl-mni152-templates fusefat g++ git graphviz make python ruby \
-              unzip xvfb \
+              unzip xvfb git-annex-standalone liblzma-dev \
     --add-to-entrypoint "source /etc/fsl/fsl.sh && source /etc/afni/afni.sh" \
     --env ANTSPATH='/usr/lib/ants' \
           PATH='/usr/lib/ants:$PATH' \

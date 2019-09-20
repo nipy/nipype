@@ -1,46 +1,16 @@
 #!/usr/bin/env python3
+"""Update and sort the creators list of the zenodo record."""
+import sys
+import shutil
+from pathlib import Path
 import json
 from fuzzywuzzy import fuzz, process
-import shutil
-import os
 import subprocess as sp
 
-if os.path.exists('line-contributions.txt'):
-    with open('line-contributions.txt', 'rt') as fp:
-        lines = fp.readlines()
-else:
-    if shutil.which('git-line-summary'):
-        print("Running git-line-summary on nipype repo")
-        lines = sp.check_output(['git-line-summary']).decode().split('\n')
-    else:
-        raise RuntimeError("Install Git Extras to view git contributors")
-
-data = [' '.join(line.strip().split()[1:-1]) for line in lines if '%' in line]
-
-# load zenodo from master
-with open('.zenodo.json', 'rt') as fp:
-    zenodo = json.load(fp)
-zen_names = [' '.join(val['name'].split(',')[::-1]).strip()
-             for val in zenodo['creators']]
-
-name_matches = []
-
-for ele in data:
-    matches = process.extract(ele, zen_names, scorer=fuzz.token_sort_ratio,
-                              limit=2)
-    # matches is a list [('First match', % Match), ('Second match', % Match)]
-    if matches[0][1] > 80:
-        val = zenodo['creators'][zen_names.index(matches[0][0])]
-    else:
-        # skip unmatched names
-        print("No entry to sort:", ele)
-        continue
-
-    if val not in name_matches:
-        name_matches.append(val)
-
+# These ORCIDs should go last
+CREATORS_LAST = ['Gorgolewski, Krzysztof J.', 'Ghosh, Satrajit']
 # for entries not found in line-contributions
-missing_entries = [
+MISSING_ENTRIES = [
     {"name": "Varada, Jan"},
     {"name": "Schwabacher, Isaac"},
     {"affiliation": "Child Mind Institute / Nathan Kline Institute",
@@ -60,31 +30,62 @@ missing_entries = [
     {"name": "Lai, Jeff"}
 ]
 
-for entry in missing_entries:
-    name_matches.append(entry)
+if __name__ == '__main__':
+    contrib_file = Path('line-contributors.txt')
+    lines = []
+    if contrib_file.exists():
+        print('WARNING: Reusing existing line-contributors.txt file.', file=sys.stderr)
+        lines = contrib_file.read_text().splitlines()
 
+    git_line_summary_path = shutil.which('git-line-summary')
+    if not lines and git_line_summary_path:
+        print("Running git-line-summary on nipype repo")
+        lines = sp.check_output([git_line_summary_path]).decode().splitlines()
+        contrib_file.write_text('\n'.join(lines))
 
-def fix_position(creators):
-    # position first / last authors
-    f_authr = None
-    l_authr = None
+    if not lines:
+        raise RuntimeError("""\
+Could not find line-contributors from git repository.%s""" % """ \
+git-line-summary not found, please install git-extras. """ * (git_line_summary_path is None))
 
-    for i, info in enumerate(creators):
-        if info['name'] == 'Gorgolewski, Krzysztof J.':
-            f_authr = i
-        if info['name'] == 'Ghosh, Satrajit':
-            l_authr = i
+    data = [' '.join(line.strip().split()[1:-1]) for line in lines if '%' in line]
 
-    if f_authr is None or l_authr is None:
-        raise AttributeError('Missing important people')
+    # load zenodo from master
+    zenodo_file = Path('.zenodo.json')
+    zenodo = json.loads(zenodo_file.read_text())
+    zen_names = [' '.join(val['name'].split(',')[::-1]).strip()
+                 for val in zenodo['creators']]
+    total_names = len(zen_names) + len(MISSING_ENTRIES)
 
-    creators.insert(0, creators.pop(f_authr))
-    creators.insert(len(creators), creators.pop(l_authr + 1))
-    return creators
+    name_matches = []
+    position = 1
+    for ele in data:
+        matches = process.extract(ele, zen_names, scorer=fuzz.token_sort_ratio,
+                                  limit=2)
+        # matches is a list [('First match', % Match), ('Second match', % Match)]
+        if matches[0][1] > 80:
+            val = zenodo['creators'][zen_names.index(matches[0][0])]
+        else:
+            # skip unmatched names
+            print("No entry to sort:", ele)
+            continue
 
+        if val not in name_matches:
+            if val['name'] not in CREATORS_LAST:
+                val['position'] = position
+                position += 1
+            else:
+                val['position'] = total_names + CREATORS_LAST.index(val['name'])
+            name_matches.append(val)
 
-zenodo['creators'] = fix_position(name_matches)
+    for missing in MISSING_ENTRIES:
+        missing['position'] = position
+        position += 1
+        name_matches.append(missing)
 
-with open('.zenodo.json', 'wt') as fp:
-    json.dump(zenodo, fp, indent=2, sort_keys=True)
-    fp.write('\n')
+    zenodo['creators'] = sorted(name_matches, key=lambda k: k['position'])
+    # Remove position
+    for creator in zenodo['creators']:
+        del creator['position']
+
+    zenodo_file.write_text('%s\n' % json.dumps(zenodo, indent=2, sort_keys=True))
