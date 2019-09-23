@@ -1,3 +1,24 @@
+1.2.3 (September 23, 2019)
+==========================
+
+Python 1.2.3 will be the last version to support Python 3.4.
+
+##### [Full changelog](https://github.com/nipy/nipype/milestone/35?closed=1)
+
+  * FIX: Patch Path.mkdir for Python 2 (https://github.com/nipy/nipype/pull/3037)
+  * FIX: Drop deprecated message argument to ``FileNotFoundError`` (https://github.com/nipy/nipype/pull/3035)
+  * FIX: Handle NIFTI extensions in ``afni.Qwarp`` (https://github.com/nipy/nipype/pull/3028)
+  * FIX: Disallow returning ``None`` in ``pipeline.utils.load_resultfile`` (https://github.com/nipy/nipype/pull/3023)
+  * ENH: Allow afni.CatMatvec to accept empty string opkeys (https://github.com/nipy/nipype/pull/2943)
+  * ENH: Add ``mrrtrix3.MRResize`` interface (https://github.com/nipy/nipype/pull/3031)
+  * ENH: Add version check / telemetry to Nipype (https://github.com/nipy/nipype/pull/3027)
+  * ENH: Update MCFLIRT outputs for FSL 6+ (https://github.com/nipy/nipype/pull/3029)
+  * ENH: Lightweight node cache checking (https://github.com/nipy/nipype/pull/3026)
+  * ENH: Avoid loading result from file when writing reports (https://github.com/nipy/nipype/pull/3024)
+  * ENH: replace portalocker with filelock (https://github.com/nipy/nipype/pull/3025)
+  * MAINT: Set minimum yapf for `checkspecs` to 0.27 (https://github.com/nipy/nipype/pull/3033)
+
+
 1.2.2 (September 07, 2019)
 ==========================
 

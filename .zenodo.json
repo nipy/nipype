@@ -2,11 +2,6 @@
   "creators": [
     {
       "affiliation": "Department of Psychology, Stanford University",
-      "name": "Gorgolewski, Krzysztof J.",
-      "orcid": "0000-0003-3321-7583"
-    },
-    {
-      "affiliation": "Department of Psychology, Stanford University",
       "name": "Esteban, Oscar",
       "orcid": "0000-0001-8435-6191"
     },
@@ -151,14 +146,19 @@
       "name": "Benderoff, Erin"
     },
     {
+      "affiliation": "Dartmouth College: Hanover, NH, United States",
+      "name": "Halchenko, Yaroslav O.",
+      "orcid": "0000-0003-3456-2493"
+    },
+    {
       "affiliation": "Institute for Biomedical Engineering, ETH and University of Zurich",
       "name": "Christian, Horea",
       "orcid": "0000-0001-7037-2449"
     },
     {
-      "affiliation": "Dartmouth College: Hanover, NH, United States",
-      "name": "Halchenko, Yaroslav O.",
-      "orcid": "0000-0003-3456-2493"
+      "affiliation": "The Centre for Addiction and Mental Health",
+      "name": "Joseph, Michael",
+      "orcid": "0000-0002-0068-230X"
     },
     {
       "affiliation": "UC San Diego",
@@ -201,11 +201,6 @@
       "affiliation": "INRIA",
       "name": "Varoquaux, Gael",
       "orcid": "0000-0003-1076-5122"
-    },
-    {
-      "affiliation": "The Centre for Addiction and Mental Health",
-      "name": "Joseph, Michael",
-      "orcid": "0000-0002-0068-230X"
     },
     {
       "affiliation": "Athena EPI, Inria Sophia-Antipolis",
@@ -251,12 +246,12 @@
       "name": "Sikka, Sharad"
     },
     {
+      "name": "Forbes, Jessica"
+    },
+    {
       "affiliation": "University College London",
       "name": "Mancini, Matteo",
       "orcid": "0000-0001-7194-4568"
-    },
-    {
-      "name": "Forbes, Jessica"
     },
     {
       "affiliation": "Duke University",
@@ -296,10 +291,6 @@
       "name": "Kent, James"
     },
     {
-      "name": "Heinsfeld, Anibal S\u00f3lon",
-      "orcid": "0000-0002-2050-0614"
-    },
-    {
       "name": "Watanabe, Aimi"
     },
     {
@@ -324,6 +315,10 @@
       "affiliation": "University College London",
       "name": "Eshaghi, Arman",
       "orcid": "0000-0002-6652-3512"
+    },
+    {
+      "name": "Heinsfeld, Anibal S\u00f3lon",
+      "orcid": "0000-0002-2050-0614"
     },
     {
       "name": "Ginsburg, Daniel"
@@ -353,12 +348,12 @@
       "name": "Kleesiek, Jens"
     },
     {
-      "name": "Erickson, Drew"
-    },
-    {
       "affiliation": "NIMH IRP",
       "name": "Lee, John A.",
       "orcid": "0000-0001-5884-4247"
+    },
+    {
+      "name": "Erickson, Drew"
     },
     {
       "affiliation": "Child Mind Institute",
@@ -377,6 +372,9 @@
     },
     {
       "name": "K\u00fcttner, Ren\u00e9"
+    },
+    {
+      "name": "Perez-Guevara, Martin"
     },
     {
       "name": "Millman, Jarrod"
@@ -411,6 +409,11 @@
       "affiliation": "Leibniz Institute for Neurobiology",
       "name": "Stadler, J\u00f6rg",
       "orcid": "0000-0003-4313-129X"
+    },
+    {
+      "affiliation": "Korea Advanced Institute of Science and Technology",
+      "name": "Kim, Sin",
+      "orcid": "0000-0003-4652-3758"
     },
     {
       "affiliation": "University College London",
@@ -523,6 +526,11 @@
     },
     {
       "name": "Matsubara, K"
+    },
+    {
+      "affiliation": "University of Pennsylvania",
+      "name": "Junhao WEN",
+      "orcid": "0000-0003-2077-3070"
     },
     {
       "name": "Cheung, Brian"
@@ -680,9 +688,6 @@
       "orcid": "0000-0001-6810-4461"
     },
     {
-      "name": "Perez-Guevara, Martin"
-    },
-    {
       "name": "Khanuja, Ranjeet"
     },
     {
@@ -700,6 +705,11 @@
     },
     {
       "name": "Lai, Jeff"
+    },
+    {
+      "affiliation": "Department of Psychology, Stanford University",
+      "name": "Gorgolewski, Krzysztof J.",
+      "orcid": "0000-0003-3321-7583"
     },
     {
       "affiliation": "MIT, HMS",
