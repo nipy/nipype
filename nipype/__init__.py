@@ -78,6 +78,6 @@ if config.getboolean('execution', 'check_version'):
                                      latest=latest["version"]))
             if latest["bad_versions"] and \
                 any([LooseVersion(__version__) == LooseVersion(ver)
-                     for ver in latest["bad_versions"]):
+                     for ver in latest["bad_versions"]]):
                 logger.critical(('You are using a version of Nipype with a critical '
                                  'bug. Please use a different version.'))
