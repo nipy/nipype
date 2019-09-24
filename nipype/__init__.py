@@ -22,9 +22,7 @@ except (ImportError, IOError) as e:
 
 config = NipypeConfig()
 logging = Logging(config)
-logger = logging.getLogger('nipype.utils')
 
-INIT_MSG = "Running {packname} version {version} (latest: {latest})".format
 
 class NipypeTester(object):
     def __call__(self, doctests=True, parallel=False):
@@ -60,8 +58,18 @@ from .interfaces import (DataGrabber, DataSink, SelectFiles, IdentityInterface,
                          Rename, Function, Select, Merge)
 
 
-if config.getboolean('execution', 'check_version'):
+def check_version(raise_exception=False):
+    """Check for the latest version of the library
+
+    parameters:
+    raise_exception: boolean
+        Raise a RuntimeError if a bad version is being used
+    """
+
     import etelemetry
+    logger = logging.getLogger('nipype.utils')
+
+    INIT_MSG = "Running {packname} version {version} (latest: {latest})".format
 
     latest = {"version": 'Unknown', "bad_versions": []}
     result = None
@@ -77,7 +85,15 @@ if config.getboolean('execution', 'check_version'):
                                      version=__version__,
                                      latest=latest["version"]))
             if latest["bad_versions"] and \
-                any([LooseVersion(__version__) == LooseVersion(ver)
-                     for ver in latest["bad_versions"]]):
-                logger.critical(('You are using a version of Nipype with a critical '
-                                 'bug. Please use a different version.'))
+                    any([LooseVersion(__version__) == LooseVersion(ver)
+                         for ver in latest["bad_versions"]]):
+                message = ('You are using a version of Nipype with a critical '
+                           'bug. Please use a different version.')
+                if raise_exception:
+                    raise RuntimeError(message)
+                else:
+                    logger.critical(message)
+
+
+if config.getboolean('execution', 'check_version'):
+    check_version()
