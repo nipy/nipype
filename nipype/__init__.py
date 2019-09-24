@@ -72,9 +72,10 @@ if config.getboolean('execution', 'check_version'):
     finally:
         if result:
             latest.update(**result)
-            logger.info(INIT_MSG(packname='nipype',
-                                 version=__version__,
-                                 latest=latest["version"]))
+            if LooseVersion(__version__) != LooseVersion(latest["version"]):
+                logger.info(INIT_MSG(packname='nipype',
+                                     version=__version__,
+                                     latest=latest["version"]))
             if latest["bad_versions"] and \
                 any([LooseVersion(__version__) == LooseVersion(ver)
                      for ver in latest["bad_versions"]):
