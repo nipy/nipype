@@ -176,7 +176,7 @@ TESTS_REQUIRES = [
     'codecov',
     'coverage<5',
     'mock',
-    'pytest',
+    'pytest <5.1.3',
     'pytest-cov',
     'pytest-env',
 ]
