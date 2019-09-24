@@ -63,12 +63,17 @@ from .interfaces import (DataGrabber, DataSink, SelectFiles, IdentityInterface,
 if config.getboolean('execution', 'check_version'):
     import etelemetry
 
-    latest = {"version": 'Unknown'}
+    latest = {"version": 'Unknown', "bad_versions": []}
     try:
-        latest = etelemetry.get_project("nipy/nipype")
+        latest.update(**etelemetry.get_project("nipy/nipype"))
     except Exception as e:
         logger.warning("Could not check for version updates: \n%s", e)
     finally:
         logger.info(INIT_MSG(packname='nipype',
                              version=__version__,
                              latest=latest["version"]))
+        if latest["bad_versions"] and \
+            any([LooseVersion(__version__) == LooseVersion(ver)
+                 for ver in latest["bad_versions"]):
+            logger.critical(('You are using a version of Nipype with a critical '
+                             'bug. Please use a different version.'))
