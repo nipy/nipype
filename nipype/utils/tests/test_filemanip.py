@@ -580,8 +580,6 @@ def test_path_strict_resolve(tmpdir):
     # Default strict=False should work out out of the box
     testfile = Path('somefile.txt')
     resolved = '%s/somefile.txt' % tmpdir
-    assert str(testfile.resolve()) == resolved
-    # path_resolve() is equivalent to Path.resolve()
     assert str(path_resolve(testfile)) == resolved
     # Strict keyword is always allowed
     assert str(path_resolve(testfile, strict=False)) == resolved

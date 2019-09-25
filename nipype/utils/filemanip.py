@@ -60,14 +60,30 @@ except ImportError:
     USING_PATHLIB2 = True
 
 
+def _resolve_with_filenotfound(path, **kwargs):
+    """ Raise FileNotFoundError instead of OSError """
+    try:
+        return path.resolve(**kwargs)
+    except OSError as e:
+        if isinstance(e, FileNotFoundError):
+            raise
+        raise FileNotFoundError(str(path))
+
+
 def path_resolve(path, strict=False):
     try:
-        return path.resolve(strict=strict)
+        return _resolve_with_filenotfound(path, strict=strict)
     except TypeError:  # PY35
-        resolved = path.resolve()
-        if strict and not resolved.exists():
-            raise FileNotFoundError(resolved)
-        return resolved
+        pass
+
+    path = path.absolute()
+    if strict or path.exists():
+        return _resolve_with_filenotfound(path)
+
+    # This is a hacky shortcut, using path.absolute() unmodified
+    # In cases where the existing part of the path contains a
+    # symlink, different results will be produced
+    return path
 
 
 def path_mkdir(path, mode=0o777, parents=False, exist_ok=False):
