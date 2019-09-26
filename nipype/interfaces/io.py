@@ -28,6 +28,7 @@ import copy
 import tempfile
 from os.path import join, dirname
 from warnings import warn
+import errno
 
 from .. import config, logging
 from ..utils.filemanip import (
@@ -2863,3 +2864,33 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
 
     def _add_output_traits(self, base):
         return add_traits(base, list(self.inputs.output_query.keys()))
+
+
+class ExportFileInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, desc='Input file name')
+    out_file = File(exists=False, desc='Output file name')
+    check_extension = traits.Bool(False, desc='Ensure that the input and output file extensions match')
+    clobber = traits.Bool(False, desc='Permit overwriting existing files')
+
+
+class ExportFileOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='Output file name')
+
+
+class ExportFile(BaseInterface):
+    input_spec = ExportFileInputSpec
+    output_spec = ExportFileOutputSpec
+
+    def _run_interface(self, runtime):
+        if not self.inputs.clobber and op.exists(self.inputs.out_file):
+            raise FileExistsError(errno.EEXIST, f'File {self.inputs.out_file} exists')
+        if (self.inputs.check_extension and
+                op.splitext(self.inputs.in_file)[1] != op.splitext(self.inputs.out_file)[1]):
+            raise RuntimeError(f'{self.inputs.in_file} and {self.inputs.out_file} have different extensions')
+        shutil.copy(str(self.inputs.in_file), str(self.inputs.out_file))
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.out_file
+        return outputs
