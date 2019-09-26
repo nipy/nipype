@@ -169,6 +169,10 @@ class BaseInterface(Interface):
 
     def __init__(self, from_file=None, resource_monitor=None,
                  ignore_exception=False, **inputs):
+        if config.getboolean('execution', 'check_version'):
+            from ... import check_version
+            check_version()
+
         if not self.input_spec:
             raise Exception(
                 'No input_spec in class: %s' % self.__class__.__name__)

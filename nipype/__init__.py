@@ -5,6 +5,7 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
 import os
+import functools
 from distutils.version import LooseVersion
 
 from .info import (LONG_DESCRIPTION as __doc__, URL as __url__, STATUS as
@@ -58,6 +59,7 @@ from .interfaces import (DataGrabber, DataSink, SelectFiles, IdentityInterface,
                          Rename, Function, Select, Merge)
 
 
+@functools.lru_cache()
 def check_version(raise_exception=False):
     """Check for the latest version of the library
 
@@ -95,5 +97,8 @@ def check_version(raise_exception=False):
                     logger.critical(message)
 
 
+# Run telemetry on import for interactive sessions, such as IPython, Jupyter notebooks, Python REPL
 if config.getboolean('execution', 'check_version'):
-    check_version()
+    import __main__
+    if not hasattr(__main__, '__file__'):
+        check_version()
