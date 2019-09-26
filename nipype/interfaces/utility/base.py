@@ -213,8 +213,6 @@ class RenameInputSpec(DynamicTraitedSpec):
                        "replacement inputs")
     use_fullpath = traits.Bool(
         False, usedefault=True, desc="Use full path as input to regex parser")
-    copy = traits.Bool(False, usedefault=True, desc="Whether to copy the file "
-                       "(True) or try to symlink it (False)")
 
 
 class RenameOutputSpec(TraitedSpec):
@@ -303,7 +301,7 @@ class Rename(SimpleInterface, IOBase):
     def _run_interface(self, runtime):
         runtime.returncode = 0
         out_file = os.path.join(runtime.cwd, self._rename())
-        _ = copyfile(self.inputs.in_file, out_file, copy=self.inputs.copy)
+        _ = copyfile(self.inputs.in_file, out_file)
         self._results['out_file'] = out_file
         return runtime
 
