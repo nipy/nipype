@@ -59,34 +59,42 @@ except ImportError:
     from pathlib2 import Path
     USING_PATHLIB2 = True
 
-try: # PY35 - strict mode was added in 3.6
-    Path('/invented/file/path').resolve(strict=True)
-except TypeError:
-    def _patch_resolve(self, strict=False):
-        """Add the argument strict to signature in Python>3,<3.6."""
-        resolved = Path().old_resolve() / self
 
-        if strict and not resolved.exists():
-            raise FileNotFoundError(resolved)
-        return resolved
+def _resolve_with_filenotfound(path, **kwargs):
+    """ Raise FileNotFoundError instead of OSError """
+    try:
+        return path.resolve(**kwargs)
+    except OSError as e:
+        if isinstance(e, FileNotFoundError):
+            raise
+        raise FileNotFoundError(str(path))
 
-    Path.old_resolve = Path.resolve
-    Path.resolve = _patch_resolve
-except FileNotFoundError:
-    pass
-except OSError:
-    # PY2
-    def _patch_resolve(self, strict=False):
-        """Raise FileNotFoundError instead of OSError with pathlib2."""
-        try:
-            resolved = self.old_resolve(strict=strict)
-        except OSError:
-            raise FileNotFoundError(self.old_resolve())
 
-        return resolved
+def path_resolve(path, strict=False):
+    try:
+        return _resolve_with_filenotfound(path, strict=strict)
+    except TypeError:  # PY35
+        pass
 
-    Path.old_resolve = Path.resolve
-    Path.resolve = _patch_resolve
+    path = path.absolute()
+    if strict or path.exists():
+        return _resolve_with_filenotfound(path)
+
+    # This is a hacky shortcut, using path.absolute() unmodified
+    # In cases where the existing part of the path contains a
+    # symlink, different results will be produced
+    return path
+
+
+def path_mkdir(path, mode=0o777, parents=False, exist_ok=False):
+    try:
+        return path.mkdir(mode=mode, parents=parents, exist_ok=exist_ok)
+    except TypeError:  # PY27/PY34
+        if parents:
+            return makedirs(str(path), mode=mode, exist_ok=exist_ok)
+        elif not exist_ok or not path.exists():
+            return os.mkdir(str(path), mode=mode)
+
 
 if not hasattr(Path, 'write_text'):
     # PY34 - Path does not have write_text
@@ -94,19 +102,6 @@ if not hasattr(Path, 'write_text'):
         with open(str(self), 'w') as f:
             f.write(text)
     Path.write_text = _write_text
-
-try:  # PY27/PY34 - mkdir does not have exist_ok
-    from .tmpdirs import TemporaryDirectory
-    with TemporaryDirectory() as tmpdir:
-        (Path(tmpdir) / 'exist_ok_test').mkdir(exist_ok=True)
-except TypeError:
-    def _mkdir(self, mode=0o777, parents=False, exist_ok=False):
-        if parents:
-            makedirs(str(self), mode=mode, exist_ok=exist_ok)
-        elif not exist_ok or not self.exists():
-            os.mkdir(str(self), mode=mode)
-
-    Path.mkdir = _mkdir
 
 
 def split_filename(fname):
