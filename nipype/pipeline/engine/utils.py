@@ -25,6 +25,7 @@ from future import standard_library
 from ... import logging, config, LooseVersion
 from ...utils.filemanip import (
     Path,
+    path_mkdir,
     indirectory,
     relpath,
     makedirs,
@@ -123,7 +124,7 @@ def write_node_report(node, result=None, is_mapnode=False):
 
     cwd = node.output_dir()
     report_file = Path(cwd) / '_report' / 'report.rst'
-    report_file.parent.mkdir(exist_ok=True, parents=True)
+    path_mkdir(report_file.parent, exist_ok=True, parents=True)
 
     lines = [
         write_rst_header('Node: %s' % get_print_name(node), level=0),
