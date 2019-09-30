@@ -62,14 +62,14 @@ from .interfaces import (DataGrabber, DataSink, SelectFiles, IdentityInterface,
 
 def sys_based_cache(condition):
     def decorator(func):
-        if not condition:
+        if condition:
             return func
         else:
             return functools.lru_cache(func)
     return decorator
 
 
-@sys_based_cache(sys.version >= 3)
+@sys_based_cache(sys.version_info < (3,))
 def check_version(raise_exception=False):
     """Check for the latest version of the library
 
