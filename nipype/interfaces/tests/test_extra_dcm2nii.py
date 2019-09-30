@@ -25,20 +25,19 @@ def fetch_data(datadir, dicoms):
 @pytest.mark.skipif(no_dcm2niix, reason="Dcm2niix required")
 def test_dcm2niix_dwi(tmpdir):
     tmpdir.chdir()
-    datadir = tmpdir / 'data'
-    datadir.mkdir()
+    datadir = tmpdir.mkdir('data').strpath
     try:
-        dicoms = fetch_data(datadir.strpath, 'Siemens_Sag_DTI_20160825_145811')
+        dicoms = fetch_data(datadir, 'Siemens_Sag_DTI_20160825_145811')
     except IncompleteResultsError as exc:
         pytest.skip("Failed to fetch test data: %s" % str(exc))
 
-    def assert_dwi(eg, bids):
+    def assert_dwi(eg):
         "Some assertions we will make"
         assert eg.outputs.converted_files
         assert eg.outputs.bvals
         assert eg.outputs.bvecs
         outputs = [y for x,y in eg.outputs.get().items()]
-        if bids:
+        if eg.inputs.get('bids_format'):
             # ensure all outputs are of equal lengths
             assert len(set(map(len, outputs))) == 1
         else:
@@ -47,10 +46,10 @@ def test_dcm2niix_dwi(tmpdir):
     dcm = Dcm2niix()
     dcm.inputs.source_dir = dicoms
     dcm.inputs.out_filename = '%u%z'
-    assert_dwi(dcm.run(), True)
+    assert_dwi(dcm.run())
 
     # now run specifying output directory and removing BIDS option
     outdir = tmpdir.mkdir('conversion').strpath
     dcm.inputs.output_dir = outdir
     dcm.inputs.bids_format = False
-    assert_dwi(dcm.run(), False)
+    assert_dwi(dcm.run())
