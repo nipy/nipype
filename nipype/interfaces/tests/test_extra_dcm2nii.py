@@ -14,11 +14,10 @@ except ImportError:
 DICOM_DIR = 'http://datasets-tests.datalad.org/dicoms/dcm2niix-tests'
 
 
-def fetch_data(tmpdir, dicoms):
+def fetch_data(datadir, dicoms):
     """Fetches some test DICOMs using datalad"""
-    data = os.path.join(tmpdir, 'data')
-    api.install(path=data, source=DICOM_DIR)
-    data = os.path.join(data, dicoms)
+    api.install(path=datadir, source=DICOM_DIR)
+    data = os.path.join(datadir, dicoms)
     api.get(path=data)
     return data
 
@@ -26,8 +25,10 @@ def fetch_data(tmpdir, dicoms):
 @pytest.mark.skipif(no_dcm2niix, reason="Dcm2niix required")
 def test_dcm2niix_dwi(tmpdir):
     tmpdir.chdir()
+    datadir = tmpdir / 'data'
+    datadir.mkdir()
     try:
-        datadir = fetch_data(tmpdir.strpath, 'Siemens_Sag_DTI_20160825_145811')
+        dicoms = fetch_data(datadir.strpath, 'Siemens_Sag_DTI_20160825_145811')
     except IncompleteResultsError as exc:
         pytest.skip("Failed to fetch test data: %s" % str(exc))
 
@@ -44,7 +45,7 @@ def test_dcm2niix_dwi(tmpdir):
             assert not eg.outputs.bids
 
     dcm = Dcm2niix()
-    dcm.inputs.source_dir = datadir
+    dcm.inputs.source_dir = dicoms
     dcm.inputs.out_filename = '%u%z'
     assert_dwi(dcm.run(), True)
 
