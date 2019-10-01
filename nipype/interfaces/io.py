@@ -2868,7 +2868,7 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
 
 class ExportFileInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='Input file name')
-    out_file = File(exists=False, desc='Output file name')
+    out_file = File(mandatory=True, desc='Output file name')
     check_extension = traits.Bool(False, desc='Ensure that the input and output file extensions match')
     clobber = traits.Bool(desc='Permit overwriting existing files')
 
