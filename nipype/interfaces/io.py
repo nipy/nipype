@@ -2870,7 +2870,7 @@ class ExportFileInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, desc='Input file name')
     out_file = File(exists=False, desc='Output file name')
     check_extension = traits.Bool(False, desc='Ensure that the input and output file extensions match')
-    clobber = traits.Bool(False, desc='Permit overwriting existing files')
+    clobber = traits.Bool(desc='Permit overwriting existing files')
 
 
 class ExportFileOutputSpec(TraitedSpec):
