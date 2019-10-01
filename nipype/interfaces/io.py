@@ -33,12 +33,12 @@ import errno
 from .. import config, logging
 from ..utils.filemanip import (
     copyfile, simplify_list, ensure_list,
-    get_related_files)
+    get_related_files, split_filename)
 from ..utils.misc import human_order_sorted, str2bool
 from .base import (
     TraitedSpec, traits, Str, File, Directory, BaseInterface, InputMultiPath,
     isdefined, OutputMultiPath, DynamicTraitedSpec, Undefined, BaseInterfaceInputSpec,
-    LibraryBaseInterface)
+    LibraryBaseInterface, SimpleInterface)
 
 iflogger = logging.getLogger('nipype.interface')
 
@@ -2869,7 +2869,7 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
 class ExportFileInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc='Input file name')
     out_file = File(mandatory=True, desc='Output file name')
-    check_extension = traits.Bool(False, desc='Ensure that the input and output file extensions match')
+    check_extension = traits.Bool(True, desc='Ensure that the input and output file extensions match')
     clobber = traits.Bool(desc='Permit overwriting existing files')
 
 
@@ -2877,20 +2877,18 @@ class ExportFileOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='Output file name')
 
 
-class ExportFile(BaseInterface):
+class ExportFile(SimpleInterface):
     input_spec = ExportFileInputSpec
     output_spec = ExportFileOutputSpec
 
     def _run_interface(self, runtime):
         if not self.inputs.clobber and op.exists(self.inputs.out_file):
             raise FileExistsError(errno.EEXIST, 'File %s exists' % self.inputs.out_file)
+        if not op.isabs(self.inputs.out_file):
+            raise ValueError('Out_file must be an absolute path.')
         if (self.inputs.check_extension and
-                op.splitext(self.inputs.in_file)[1] != op.splitext(self.inputs.out_file)[1]):
-            raise RuntimeError(f'{self.inputs.in_file} and {self.inputs.out_file} have different extensions')
+                split_filename(self.inputs.in_file)[2] != split_filename(self.inputs.out_file)[2]):
+            raise RuntimeError('%s and %s have different extensions' % (self.inputs.in_file, self.inputs.out_file))
         shutil.copy(str(self.inputs.in_file), str(self.inputs.out_file))
+        self._results['out_file'] = self.inputs.out_file
         return runtime
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-        return outputs
