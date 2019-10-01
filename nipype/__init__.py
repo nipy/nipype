@@ -59,17 +59,8 @@ from .pipeline import Node, MapNode, JoinNode, Workflow
 from .interfaces import (DataGrabber, DataSink, SelectFiles, IdentityInterface,
                          Rename, Function, Select, Merge)
 
+etelemetry_results = {}
 
-def sys_based_cache(condition):
-    def decorator(func):
-        if condition:
-            return func
-        else:
-            return functools.lru_cache()(func)
-    return decorator
-
-
-@sys_based_cache(sys.version_info < (3,))
 def check_latest_version(raise_exception=False):
     """Check for the latest version of the library
 
@@ -77,6 +68,8 @@ def check_latest_version(raise_exception=False):
     raise_exception: boolean
         Raise a RuntimeError if a bad version is being used
     """
+    if raise_exception in etelemetry_results:
+        return etelemetry_results[raise_exception]
 
     import etelemetry
     logger = logging.getLogger('nipype.utils')
@@ -105,6 +98,7 @@ def check_latest_version(raise_exception=False):
                     raise RuntimeError(message)
                 else:
                     logger.critical(message)
+    etelemetry_results[raise_exception] = latest
     return latest
 
 # Run telemetry on import for interactive sessions, such as IPython, Jupyter notebooks, Python REPL
