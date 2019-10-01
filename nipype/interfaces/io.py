@@ -2883,7 +2883,7 @@ class ExportFile(BaseInterface):
 
     def _run_interface(self, runtime):
         if not self.inputs.clobber and op.exists(self.inputs.out_file):
-            raise FileExistsError(errno.EEXIST, f'File {self.inputs.out_file} exists')
+            raise FileExistsError(errno.EEXIST, 'File %s exists' % self.inputs.out_file)
         if (self.inputs.check_extension and
                 op.splitext(self.inputs.in_file)[1] != op.splitext(self.inputs.out_file)[1]):
             raise RuntimeError(f'{self.inputs.in_file} and {self.inputs.out_file} have different extensions')
