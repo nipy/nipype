@@ -31,36 +31,6 @@ env:
       EXTRA_PIP_FLAGS="--pre $EXTRA_PIP_FLAGS --find-links $PRE_WHEELS"
       CI_SKIP_TEST=1
 
-# Python 3.4 is only available on Trusty, so we need to duplicate the
-# env matrix specifically for it.
-matrix:
-  include:
-    - python: 3.4
-      dist: trusty
-      env:
-        - INSTALL_DEB_DEPENDECIES=true
-          NIPYPE_EXTRAS="doc,tests,nipy,profiler"
-          CI_SKIP_TEST=1
-    - python: 3.4
-      dist: trusty
-      env:
-        - INSTALL_DEB_DEPENDECIES=false
-          NIPYPE_EXTRAS="doc,tests,profiler"
-          CI_SKIP_TEST=1
-    - python: 3.4
-      dist: trusty
-      env:
-        - INSTALL_DEB_DEPENDECIES=true
-          NIPYPE_EXTRAS="doc,tests,nipy,profiler,duecredit,ssh"
-          CI_SKIP_TEST=1
-    - python: 3.4
-      dist: trusty
-      env:
-        - INSTALL_DEB_DEPENDECIES=true
-          NIPYPE_EXTRAS="doc,tests,nipy,profiler"
-          EXTRA_PIP_FLAGS="--pre $EXTRA_PIP_FLAGS --find-links $PRE_WHEELS"
-          CI_SKIP_TEST=1
-
 addons:
   apt:
     packages:
