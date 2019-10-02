@@ -105,4 +105,5 @@ def check_latest_version(raise_exception=False):
 if config.getboolean('execution', 'check_version'):
     import __main__
     if not hasattr(__main__, '__file__'):
-        check_latest_version()
+        from .interfaces.base import BaseInterface
+        BaseInterface.check_version = check_latest_version()
