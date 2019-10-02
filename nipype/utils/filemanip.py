@@ -700,7 +700,7 @@ def loadpkl(infile):
     fmlogger.debug('Loading pkl: %s', infile)
     pklopen = gzip.open if infile.suffix == '.pklz' else open
 
-    with SoftFileLock('%s.lock' % infile.name):
+    with SoftFileLock('%s.lock' % infile):
         with pklopen(str(infile), 'rb') as pkl_file:
             pkl_contents = pkl_file.read()
 
