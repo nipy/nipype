@@ -55,13 +55,12 @@ CLASSIFIERS = [
     'Operating System :: MacOS :: MacOS X',
     'Operating System :: POSIX :: Linux',
     'Programming Language :: Python :: 2.7',
-    'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Topic :: Scientific/Engineering'
 ]
-PYTHON_REQUIRES = ">= 2.7, != 3.0.*, != 3.1.*, != 3.2.*, != 3.3.*"
+PYTHON_REQUIRES = ">= 2.7, != 3.0.*, != 3.1.*, != 3.2.*, != 3.3.*, != 3.4.*"
 
 description = 'Neuroimaging in Python: Pipelines and Interfaces'
 
@@ -145,7 +144,6 @@ REQUIRES = [
     'funcsigs',
     'future>=%s' % FUTURE_MIN_VERSION,
     'futures; python_version == "2.7"',
-    'lxml<4.4.0; python_version == "3.4"',
     'networkx>=%s ; python_version >= "3.0"' % NETWORKX_MIN_VERSION,
     'networkx>=%s,<=%s ; python_version < "3.0"' % (NETWORKX_MIN_VERSION, NETWORKX_MAX_VERSION_27),
     'nibabel>=%s' % NIBABEL_MIN_VERSION,
