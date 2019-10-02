@@ -5,8 +5,6 @@ from __future__ import (print_function, division, unicode_literals,
                         absolute_import)
 
 import os
-import functools
-import sys
 from distutils.version import LooseVersion
 
 from .info import (LONG_DESCRIPTION as __doc__, URL as __url__, STATUS as
@@ -59,7 +57,6 @@ from .pipeline import Node, MapNode, JoinNode, Workflow
 from .interfaces import (DataGrabber, DataSink, SelectFiles, IdentityInterface,
                          Rename, Function, Select, Merge)
 
-etelemetry_results = {}
 
 def check_latest_version(raise_exception=False):
     """Check for the latest version of the library
@@ -68,9 +65,6 @@ def check_latest_version(raise_exception=False):
     raise_exception: boolean
         Raise a RuntimeError if a bad version is being used
     """
-    if raise_exception in etelemetry_results:
-        return etelemetry_results[raise_exception]
-
     import etelemetry
     logger = logging.getLogger('nipype.utils')
 
@@ -98,7 +92,8 @@ def check_latest_version(raise_exception=False):
                     raise RuntimeError(message)
                 else:
                     logger.critical(message)
-    etelemetry_results[raise_exception] = latest
+        else:
+            latest = None
     return latest
 
 # Run telemetry on import for interactive sessions, such as IPython, Jupyter notebooks, Python REPL
@@ -106,4 +101,5 @@ if config.getboolean('execution', 'check_version'):
     import __main__
     if not hasattr(__main__, '__file__'):
         from .interfaces.base import BaseInterface
-        BaseInterface.check_version = check_latest_version()
+        if BaseInterface._etelemetry_version_data is None:
+            BaseInterface._etelemetry_version_data = check_latest_version()
