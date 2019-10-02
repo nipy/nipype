@@ -41,9 +41,6 @@ class EngineBase(object):
 
         self.base_dir = base_dir
         self.config = deepcopy(config._sections)
-        if config.getboolean('execution', 'check_version'):
-            from ... import check_latest_version
-            check_latest_version()
 
     @property
     def name(self):
