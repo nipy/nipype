@@ -92,8 +92,6 @@ def check_latest_version(raise_exception=False):
                     raise RuntimeError(message)
                 else:
                     logger.critical(message)
-        else:
-            latest = None
     return latest
 
 # Run telemetry on import for interactive sessions, such as IPython, Jupyter notebooks, Python REPL
