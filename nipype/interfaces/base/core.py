@@ -166,9 +166,15 @@ class BaseInterface(Interface):
     _redirect_x = False
     references_ = []
     resource_monitor = True  # Enabled for this interface IFF enabled in the config
+    _etelemetry_version_data = None
 
     def __init__(self, from_file=None, resource_monitor=None,
                  ignore_exception=False, **inputs):
+        if config.getboolean('execution', 'check_version'):
+            from ... import check_latest_version
+            if BaseInterface._etelemetry_version_data is None:
+                BaseInterface._etelemetry_version_data = check_latest_version()
+
         if not self.input_spec:
             raise Exception(
                 'No input_spec in class: %s' % self.__class__.__name__)
