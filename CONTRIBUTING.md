@@ -1,6 +1,6 @@
 # Contributing to Nipype
 
-Welcome to the Nipype repository! We're excited you're here and want to contribute.  
+Welcome to the Nipype repository! We're excited you're here and want to contribute.
 
 These guidelines are designed to make it as easy as possible to get involved. If you have any questions that aren't discussed below, please let us know by opening an [issue][link_issues]!
 
@@ -72,7 +72,7 @@ One way to do this is to [configure a new remote named "upstream"](https://help.
 
 **3. Make the changes you've discussed.**
 
-If you're adding a new tool from an existing neuroimaging toolkit (e.g., 3dDeconvolve from AFNI), 
+If you're adding a new tool from an existing neuroimaging toolkit (e.g., 3dDeconvolve from AFNI),
 check out the [guide for adding new interfaces to Nipype][link_new_interfaces].
 
 When you are working on your changes, test frequently to ensure you are not breaking the existing code.
@@ -82,7 +82,7 @@ Before pushing your changes to GitHub, run `make check-before-commit`. This will
 test the entire package, and build the documentation.
 If you get no errors, you're ready to submit your changes!
 
-It's a good practice to create [a new branch](https://help.github.com/articles/about-branches/) 
+It's a good practice to create [a new branch](https://help.github.com/articles/about-branches/)
 of the repository for a new set of changes.
 
 
@@ -90,19 +90,25 @@ of the repository for a new set of changes.
 
 A new pull request for your changes should be created from your fork of the repository.
 
-When opening a pull request, please use one of the following prefixes:  
+When opening a pull request, please use one of the following prefixes:
 
 
-* **[ENH]** for enhancements  
-* **[FIX]** for bug fixes  
-* **[TST]** for new or updated tests  
-* **[DOC]** for new or updated documentation  
-* **[STY]** for stylistic changes  
-* **[REF]** for refactoring existing code    
+* **[ENH]** for enhancements
+* **[FIX]** for bug fixes
+* **[TST]** for new or updated tests
+* **[DOC]** for new or updated documentation
+* **[STY]** for stylistic changes
+* **[REF]** for refactoring existing code
+
+**5. Install pre-commit.**
+
+[pre-commit]() is a git hook for running operations at commit time. To use it in
+your environment, do `pip install pre-commit` following by `pre-cmmit install`
+inside your source directory.
 
 <br>
 Pull requests should be submitted early and often (please don't mix too many unrelated changes within one PR)!
-If your pull request is not yet ready to be merged, please also include the **[WIP]** prefix (you can remove it once your PR is ready to be merged). 
+If your pull request is not yet ready to be merged, please also include the **[WIP]** prefix (you can remove it once your PR is ready to be merged).
 This tells the development team that your pull request is a "work-in-progress", and that you plan to continue working on it.
 
 Review and discussion on new code can begin well before the work is complete, and the more discussion the better!
