@@ -1,3 +1,18 @@
+1.3.0 (To Be Determined)
+========================
+
+##### [Full changelog](https://github.com/nipy/nipype/milestone/34?closed=1)
+
+  * FIX: Remove asynchronous chdir callback (https://github.com/nipy/nipype/pull/3060)
+  * FIX: Minimize scope for directory changes while loading results file (https://github.com/nipy/nipype/pull/3061)
+  * ENH: Delay etelemetry for non-interactive sessions, report bad versions (https://github.com/nipy/nipype/pull/3049)
+  * ENH: Run memoized check_version at REPL import, Node/Workflow/Interface init (https://github.com/nipy/nipype/pull/30)
+  * RF: Provide functions to augment old Path.mkdir, Path.resolve methods (https://github.com/nipy/nipype/pull/3050)
+  * TST: Skip dcm2niix test if data fails to download (https://github.com/nipy/nipype/pull/3059)
+  * TST: dcm2niix test fix (https://github.com/nipy/nipype/pull/3058)
+  * MNT: Drop Python 3.4 support (https://github.com/nipy/nipype/pull/3062)
+
+
 1.2.3 (September 23, 2019)
 ==========================
 
