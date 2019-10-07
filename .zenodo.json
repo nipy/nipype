@@ -74,6 +74,10 @@
       "name": "Wong, Jason"
     },
     {
+      "affiliation": "Concordia University",
+      "name": "Benderoff, Erin"
+    },
+    {
       "name": "Modat, Marc"
     },
     {
@@ -140,10 +144,6 @@
     },
     {
       "name": "Berleant, Shoshana"
-    },
-    {
-      "affiliation": "Concordia University",
-      "name": "Benderoff, Erin"
     },
     {
       "affiliation": "Dartmouth College: Hanover, NH, United States",
@@ -380,6 +380,9 @@
       "name": "Millman, Jarrod"
     },
     {
+      "name": "Lai, Jeff"
+    },
+    {
       "name": "Zhou, Dale"
     },
     {
@@ -401,9 +404,9 @@
       "name": "Liu, Siqi"
     },
     {
-      "affiliation": "University of Pennsylvania",
-      "name": "Kahn, Ari E.",
-      "orcid": "0000-0002-2127-0507"
+      "affiliation": "Korea Advanced Institute of Science and Technology",
+      "name": "Kim, Sin",
+      "orcid": "0000-0003-4652-3758"
     },
     {
       "affiliation": "Leibniz Institute for Neurobiology",
@@ -411,9 +414,14 @@
       "orcid": "0000-0003-4313-129X"
     },
     {
-      "affiliation": "Korea Advanced Institute of Science and Technology",
-      "name": "Kim, Sin",
-      "orcid": "0000-0003-4652-3758"
+      "affiliation": "University of Pennsylvania",
+      "name": "Kahn, Ari E.",
+      "orcid": "0000-0002-2127-0507"
+    },
+    {
+      "affiliation": "Yale University; New Haven, CT, United States",
+      "name": "Sisk, Lucinda M.",
+      "orcid": "0000-0003-4900-9770"
     },
     {
       "affiliation": "University College London",
@@ -436,11 +444,6 @@
     },
     {
       "name": "Hallquist, Michael"
-    },
-    {
-      "affiliation": "Yale University; New Haven, CT, United States",
-      "name": "Sisk, Lucinda M.",
-      "orcid": "0000-0003-4900-9770"
     },
     {
       "affiliation": "TIB \u2013 Leibniz Information Centre for Science and Technology and University Library, Hannover, Germany",
@@ -500,20 +503,16 @@
       "orcid": "0000-0002-7186-5293"
     },
     {
+      "affiliation": "National Institute on Aging, Baltimore, MD, USA",
+      "name": "Bilgel, Murat",
+      "orcid": "0000-0001-5042-7422"
+    },
+    {
       "name": "Inati, Souheil"
     },
     {
       "affiliation": "Boston University",
       "name": "Perkins, L. Nathan"
-    },
-    {
-      "name": "Marina, Ana"
-    },
-    {
-      "name": "Mattfeld, Aaron"
-    },
-    {
-      "name": "Noel, Maxime"
     },
     {
       "affiliation": "University of Amsterdam",
@@ -525,7 +524,16 @@
       "name": "Weninger, Leon"
     },
     {
+      "name": "Marina, Ana"
+    },
+    {
+      "name": "Mattfeld, Aaron"
+    },
+    {
       "name": "Matsubara, K"
+    },
+    {
+      "name": "Noel, Maxime"
     },
     {
       "affiliation": "University of Pennsylvania",
@@ -579,6 +587,9 @@
       "name": "Weinstein, Alejandro"
     },
     {
+      "name": "Tambini, Arielle"
+    },
+    {
       "affiliation": "Duke University",
       "name": "Broderick, William",
       "orcid": "0000-0002-8999-9003"
@@ -601,11 +612,6 @@
       "name": "Khanuja, Ranjeet"
     },
     {
-      "affiliation": "National Institute on Aging, Baltimore, MD, USA",
-      "name": "Bilgel, Murat",
-      "orcid": "0000-0001-5042-7422"
-    },
-    {
       "name": "Schlamp, Kai"
     },
     {
@@ -618,9 +624,6 @@
     },
     {
       "name": "Tarbert, Claire"
-    },
-    {
-      "name": "Tambini, Arielle"
     },
     {
       "name": "Nickson, Thomas"
