@@ -235,7 +235,7 @@ def save_resultfile(result, cwd, name, rebase=None):
     logger.debug("Saving results file: '%s'", resultsfile)
 
     if result.outputs is None:
-        logger.warn('Storing result file without outputs')
+        logger.warning('Storing result file without outputs')
         savepkl(resultsfile, result)
         return
     try:
