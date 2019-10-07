@@ -94,7 +94,7 @@ function generate_main_dockerfile() {
                 conda_install='python=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
                                libxml2 libxslt matplotlib mkl "numpy!=1.16.0" paramiko
                                pandas psutil scikit-learn scipy traits' \
-                pip_install="pytest-xdist" \
+                pip_install="pytest-xdist niflow-nipype1-workflows" \
                 activate=true \
     --copy docker/files/run_builddocs.sh docker/files/run_examples.sh \
            docker/files/run_pytests.sh nipype/external/fsl_imglob.py /usr/bin/ \
