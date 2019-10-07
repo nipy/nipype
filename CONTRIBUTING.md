@@ -103,7 +103,7 @@ When opening a pull request, please use one of the following prefixes:
 **5. Install pre-commit.**
 
 [pre-commit](https://pre-commit.com/) is a git hook for running operations at commit time. To use it in
-your environment, do `pip install pre-commit` following by `pre-cmmit install`
+your environment, do `pip install pre-commit` following by `pre-commit install`
 inside your source directory.
 
 <br>
