@@ -78,7 +78,7 @@ script:
     fi
 - |
     if [ "$CHECK_TYPE" = "specs" ]; then
-        make check-before-commit
+        make specs
         git add nipype
         test "$( git diff --cached | wc -l )" -eq 0 || ( git diff --cached && false )
     fi
