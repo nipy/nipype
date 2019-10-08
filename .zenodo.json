@@ -369,7 +369,9 @@
       "name": "K\u00fcttner, Ren\u00e9"
     },
     {
-      "name": "Perez-Guevara, Martin"
+      "affiliation": "Neurospin/Unicog/Inserm/CEA",
+      "name": "Perez-Guevara, Martin Felipe",
+      "orcid": "0000-0003-4497-861X"
     },
     {
       "name": "Millman, Jarrod"
@@ -501,7 +503,7 @@
     },
     {
       "affiliation": "University of Amsterdam",
-      "name": "Lukas Snoek",
+      "name": "Snoek, Lukas",
       "orcid": "0000-0001-8972-204X"
     },
     {
@@ -668,6 +670,35 @@
     },
     {
       "name": "Davison, Andrew"
+    },
+    {
+      "name": "Bielievtsov, Dmytro",
+      "orcid": "0000-0003-3846-7696"
+    },
+    {
+      "affiliation": "MPI-CBS; McGill University",
+      "name": "Steele, Christopher John",
+      "orcid": "0000-0003-1656-7928"
+    },
+    {
+      "affiliation": "State Key Laboratory of Cognitive Neuroscience and Learning & IDG/McGovern Institute for Brain Research, Beijing Normal University, Beijing, China",
+      "name": "Huang, Lijie",
+      "orcid": "0000-0002-9910-5069"
+    },
+    {
+      "affiliation": "Athinoula A. Martinos Center for Biomedical Imaging, Department of Radiology, Massachusetts General Hospital, Charlestown, MA, USA",
+      "name": "Gonzalez, Ivan",
+      "orcid": "0000-0002-6451-6909"
+    },
+    {
+      "affiliation": "Mayo Clinic",
+      "name": "Warner, Joshua",
+      "orcid": "0000-0003-3579-4835"
+    },
+    {
+      "affiliation": "Max Planck Research Group for Neuroanatomy & Connectivity, Max Planck Institute for Human Cognitive and Brain Sciences, Leipzig, Germany",
+      "name": "Margulies, Daniel S.",
+      "orcid": "0000-0002-8880-9204"
     },
     {
       "affiliation": "Otto-von-Guericke-University Magdeburg, Germany",
