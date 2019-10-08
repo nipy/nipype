@@ -16,6 +16,7 @@ env:
     - EXTRA_WHEELS="https://5cf40426d9f06eb7461d-6fe47d9331aba7cd62fc36c7196769e4.ssl.cf2.rackcdn.com"
     - PRE_WHEELS="https://7933911d6844c6c53a7d-47bd50c35cd79bd838daf386af554a83.ssl.cf2.rackcdn.com"
     - EXTRA_PIP_FLAGS="--find-links=$EXTRA_WHEELS"
+    - CHECK_TYPE=test
   matrix:
     - INSTALL_DEB_DEPENDECIES=true
       NIPYPE_EXTRAS="doc,tests,nipy,profiler"
@@ -31,35 +32,12 @@ env:
       EXTRA_PIP_FLAGS="--pre $EXTRA_PIP_FLAGS --find-links $PRE_WHEELS"
       CI_SKIP_TEST=1
 
-# Python 3.4 is only available on Trusty, so we need to duplicate the
-# env matrix specifically for it.
 matrix:
   include:
-    - python: 3.4
-      dist: trusty
+    - python: 3.7
       env:
-        - INSTALL_DEB_DEPENDECIES=true
-          NIPYPE_EXTRAS="doc,tests,nipy,profiler"
-          CI_SKIP_TEST=1
-    - python: 3.4
-      dist: trusty
-      env:
-        - INSTALL_DEB_DEPENDECIES=false
-          NIPYPE_EXTRAS="doc,tests,profiler"
-          CI_SKIP_TEST=1
-    - python: 3.4
-      dist: trusty
-      env:
-        - INSTALL_DEB_DEPENDECIES=true
-          NIPYPE_EXTRAS="doc,tests,nipy,profiler,duecredit,ssh"
-          CI_SKIP_TEST=1
-    - python: 3.4
-      dist: trusty
-      env:
-        - INSTALL_DEB_DEPENDECIES=true
-          NIPYPE_EXTRAS="doc,tests,nipy,profiler"
-          EXTRA_PIP_FLAGS="--pre $EXTRA_PIP_FLAGS --find-links $PRE_WHEELS"
-          CI_SKIP_TEST=1
+        - NIPYPE_EXTRAS=dev
+          CHECK_TYPE=specs
 
 addons:
   apt:
@@ -94,7 +72,16 @@ install:
 - travis_retry pip install pytest-xdist
 
 script:
-- py.test -v --cov nipype --cov-config .coveragerc --cov-report xml:cov.xml -c nipype/pytest.ini --doctest-modules nipype -n auto
+- |
+    if [ "$CHECK_TYPE" = "test" ]; then
+        py.test -v --cov nipype --cov-config .coveragerc --cov-report xml:cov.xml -c nipype/pytest.ini --doctest-modules nipype -n auto
+    fi
+- |
+    if [ "$CHECK_TYPE" = "specs" ]; then
+        make specs
+        git add nipype
+        test "$( git diff --cached | wc -l )" -eq 0 || ( git diff --cached && false )
+    fi
 
 after_script:
 - codecov --file cov.xml --flags unittests -e TRAVIS_JOB_NUMBER

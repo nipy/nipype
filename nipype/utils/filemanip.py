@@ -67,34 +67,42 @@ except ImportError:
     from pathlib2 import Path
     USING_PATHLIB2 = True
 
-try: # PY35 - strict mode was added in 3.6
-    Path('/invented/file/path').resolve(strict=True)
-except TypeError:
-    def _patch_resolve(self, strict=False):
-        """Add the argument strict to signature in Python>3,<3.6."""
-        resolved = Path().old_resolve() / self
 
-        if strict and not resolved.exists():
-            raise FileNotFoundError(resolved)
-        return resolved
+def _resolve_with_filenotfound(path, **kwargs):
+    """ Raise FileNotFoundError instead of OSError """
+    try:
+        return path.resolve(**kwargs)
+    except OSError as e:
+        if isinstance(e, FileNotFoundError):
+            raise
+        raise FileNotFoundError(str(path))
 
-    Path.old_resolve = Path.resolve
-    Path.resolve = _patch_resolve
-except FileNotFoundError:
-    pass
-except OSError:
-    # PY2
-    def _patch_resolve(self, strict=False):
-        """Raise FileNotFoundError instead of OSError with pathlib2."""
-        try:
-            resolved = self.old_resolve(strict=strict)
-        except OSError:
-            raise FileNotFoundError(self.old_resolve())
 
-        return resolved
+def path_resolve(path, strict=False):
+    try:
+        return _resolve_with_filenotfound(path, strict=strict)
+    except TypeError:  # PY35
+        pass
 
-    Path.old_resolve = Path.resolve
-    Path.resolve = _patch_resolve
+    path = path.absolute()
+    if strict or path.exists():
+        return _resolve_with_filenotfound(path)
+
+    # This is a hacky shortcut, using path.absolute() unmodified
+    # In cases where the existing part of the path contains a
+    # symlink, different results will be produced
+    return path
+
+
+def path_mkdir(path, mode=0o777, parents=False, exist_ok=False):
+    try:
+        return path.mkdir(mode=mode, parents=parents, exist_ok=exist_ok)
+    except TypeError:  # PY27/PY34
+        if parents:
+            return makedirs(str(path), mode=mode, exist_ok=exist_ok)
+        elif not exist_ok or not path.exists():
+            return os.mkdir(str(path), mode=mode)
+
 
 if not hasattr(Path, 'write_text'):
     # PY34 - Path does not have write_text
@@ -102,19 +110,6 @@ if not hasattr(Path, 'write_text'):
         with open(str(self), 'w') as f:
             f.write(text)
     Path.write_text = _write_text
-
-try:  # PY27/PY34 - mkdir does not have exist_ok
-    from .tmpdirs import TemporaryDirectory
-    with TemporaryDirectory() as tmpdir:
-        (Path(tmpdir) / 'exist_ok_test').mkdir(exist_ok=True)
-except TypeError:
-    def _mkdir(self, mode=0o777, parents=False, exist_ok=False):
-        if parents:
-            makedirs(str(self), mode=mode, exist_ok=exist_ok)
-        elif not exist_ok or not self.exists():
-            os.mkdir(str(self), mode=mode)
-
-    Path.mkdir = _mkdir
 
 
 def split_filename(fname):
@@ -712,37 +707,49 @@ def loadpkl(infile):
     infile = Path(infile)
     fmlogger.debug('Loading pkl: %s', infile)
     pklopen = gzip.open if infile.suffix == '.pklz' else open
+
+    with SoftFileLock('%s.lock' % infile):
+        with pklopen(str(infile), 'rb') as pkl_file:
+            pkl_contents = pkl_file.read()
+
     pkl_metadata = None
 
+    # Look if pkl file contains version metadata
+    idx = pkl_contents.find(b'\n')
+    if idx >= 0:
+        try:
+            pkl_metadata = json.loads(pkl_contents[:idx])
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            # Could not get version info
+            pass
+        else:
+            # On success, skip JSON metadata
+            pkl_contents = pkl_contents[idx + 1:]
+
+    # Pickle files may contain relative paths that must be resolved relative
+    # to the working directory, so use indirectory while attempting to load
     unpkl = None
-    with indirectory(infile.parent):
-        with SoftFileLock('%s.lock' % infile.name):
-            with pklopen(infile.name, 'rb') as pkl_file:
-                try:  # Look if pkl file contains version file
-                    pkl_metadata_line = pkl_file.readline()
-                    pkl_metadata = json.loads(pkl_metadata_line)
-                except (UnicodeDecodeError, json.JSONDecodeError):
-                    # Could not get version info
-                    pkl_file.seek(0)
-                try:
-                    unpkl = pickle.load(pkl_file)
-                except UnicodeDecodeError:
-                    # Was this pickle created with Python 2.x?
-                    unpkl = pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
-                    fmlogger.info('Successfully loaded pkl in compatibility mode.')
-                # Unpickling problems
-                except Exception as e:
-                    if pkl_metadata and 'version' in pkl_metadata:
-                        from nipype import __version__ as version
-                        if pkl_metadata['version'] != version:
-                            fmlogger.error("""\
+    try:
+        with indirectory(infile.parent):
+            unpkl = pickle.loads(pkl_contents)
+    except UnicodeDecodeError:
+        # Was this pickle created with Python 2.x?
+        with indirectory(infile.parent):
+            unpkl = pickle.loads(pkl_contents, fix_imports=True, encoding='utf-8')
+        fmlogger.info('Successfully loaded pkl in compatibility mode.')
+    # Unpickling problems
+    except Exception as e:
+        if pkl_metadata and 'version' in pkl_metadata:
+            from nipype import __version__ as version
+            if pkl_metadata['version'] != version:
+                fmlogger.error("""\
 Attempted to open a results file generated by Nipype version %s, \
 with an incompatible Nipype version (%s)""", pkl_metadata['version'], version)
-                            raise e
-                    fmlogger.warning("""\
+                raise e
+        fmlogger.warning("""\
 No metadata was found in the pkl file. Make sure you are currently using \
 the same Nipype version from the generated pkl.""")
-                    raise e
+        raise e
 
     if unpkl is None:
         raise ValueError('Loading %s resulted in None.' % infile)
