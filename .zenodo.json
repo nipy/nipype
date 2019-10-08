@@ -11,29 +11,19 @@
       "orcid": "0000-0002-6533-164X"
     },
     {
-      "affiliation": "Independent",
-      "name": "Ziegler, Erik",
+      "affiliation": "MIT",
+      "name": "Jarecka, Dorota",
       "orcid": "0000-0003-1857-8129"
     },
     {
-      "affiliation": "The University of Iowa",
-      "name": "Ellis, David Gage",
-      "orcid": "0000-0002-3718-6836"
-    },
-    {
-      "affiliation": "MIT",
-      "name": "Jarecka, Dorota",
+      "affiliation": "Independent",
+      "name": "Ziegler, Erik",
       "orcid": "0000-0003-1857-8129"
     },
     {
       "affiliation": "University of Iowa",
       "name": "Johnson, Hans",
       "orcid": "0000-0001-9513-2660"
-    },
-    {
-      "affiliation": "The Laboratory for Investigative Neurophysiology (The LINE), Department of Radiology and Department of Clinical Neurosciences, Lausanne, Switzerland; Center for Biomedical Imaging (CIBM), Lausanne, Switzerland",
-      "name": "Notter, Michael Philipp",
-      "orcid": "0000-0002-5866-047X"
     },
     {
       "name": "Burns, Christopher"
@@ -48,7 +38,17 @@
       "orcid": "0000-0001-7655-3830"
     },
     {
+      "affiliation": "The Laboratory for Investigative Neurophysiology (The LINE), Department of Radiology and Department of Clinical Neurosciences, Lausanne, Switzerland; Center for Biomedical Imaging (CIBM), Lausanne, Switzerland",
+      "name": "Notter, Michael Philipp",
+      "orcid": "0000-0002-5866-047X"
+    },
+    {
       "name": "Yvernault, Benjamin"
+    },
+    {
+      "affiliation": "The University of Iowa",
+      "name": "Ellis, David Gage",
+      "orcid": "0000-0002-3718-6836"
     },
     {
       "affiliation": "Florida International University",
@@ -74,7 +74,8 @@
       "name": "Wong, Jason"
     },
     {
-      "name": "Modat, Marc"
+      "affiliation": "Concordia University",
+      "name": "Benderoff, Erin"
     },
     {
       "affiliation": "Developer",
@@ -111,6 +112,9 @@
       "name": "Clark, Michael G. "
     },
     {
+      "name": "Modat, Marc"
+    },
+    {
       "affiliation": "Mayo Clinic, Neurology, Rochester, MN, USA",
       "name": "Dayan, Michael",
       "orcid": "0000-0002-2666-0969"
@@ -139,13 +143,6 @@
       "orcid": "0000-0001-9791-4404"
     },
     {
-      "name": "Berleant, Shoshana"
-    },
-    {
-      "affiliation": "Concordia University",
-      "name": "Benderoff, Erin"
-    },
-    {
       "affiliation": "Dartmouth College: Hanover, NH, United States",
       "name": "Halchenko, Yaroslav O.",
       "orcid": "0000-0003-3456-2493"
@@ -156,14 +153,12 @@
       "orcid": "0000-0001-7037-2449"
     },
     {
+      "name": "Berleant, Shoshana"
+    },
+    {
       "affiliation": "The Centre for Addiction and Mental Health",
       "name": "Joseph, Michael",
       "orcid": "0000-0002-0068-230X"
-    },
-    {
-      "affiliation": "UC San Diego",
-      "name": "Cipollini, Ben",
-      "orcid": "0000-0002-7782-0790"
     },
     {
       "affiliation": "ARAMIS LAB, Brain and Spine Institute (ICM), Paris, France.",
@@ -181,13 +176,13 @@
     },
     {
       "affiliation": "Montreal Neurological Institute and Hospital",
-      "name": "DuPre, Elizabeth",
-      "orcid": "0000-0003-1358-196X"
+      "name": "Markello, Ross",
+      "orcid": "0000-0003-1057-1336"
     },
     {
       "affiliation": "Montreal Neurological Institute and Hospital",
-      "name": "Markello, Ross",
-      "orcid": "0000-0003-1057-1336"
+      "name": "DuPre, Elizabeth",
+      "orcid": "0000-0003-1358-196X"
     },
     {
       "affiliation": "MIT",
@@ -196,6 +191,11 @@
     },
     {
       "name": "Moloney, Brendan"
+    },
+    {
+      "affiliation": "UC San Diego",
+      "name": "Cipollini, Ben",
+      "orcid": "0000-0002-7782-0790"
     },
     {
       "affiliation": "INRIA",
@@ -288,9 +288,6 @@
       "orcid": "0000-0002-7796-8795"
     },
     {
-      "name": "Kent, James"
-    },
-    {
       "name": "Watanabe, Aimi"
     },
     {
@@ -344,6 +341,9 @@
       "orcid": "0000-0003-0646-4810"
     },
     {
+      "name": "Kent, James"
+    },
+    {
       "affiliation": "UniversityHospital Heidelberg, Germany",
       "name": "Kleesiek, Jens"
     },
@@ -366,11 +366,6 @@
       "name": "Ghayoor, Ali"
     },
     {
-      "affiliation": "Otto-von-Guericke-University Magdeburg, Germany",
-      "name": "Contier, Oliver",
-      "orcid": "0000-0002-2983-4709"
-    },
-    {
       "name": "K\u00fcttner, Ren\u00e9"
     },
     {
@@ -378,6 +373,9 @@
     },
     {
       "name": "Millman, Jarrod"
+    },
+    {
+      "name": "Lai, Jeff"
     },
     {
       "name": "Zhou, Dale"
@@ -406,9 +404,9 @@
       "orcid": "0000-0002-2127-0507"
     },
     {
-      "affiliation": "Leibniz Institute for Neurobiology",
-      "name": "Stadler, J\u00f6rg",
-      "orcid": "0000-0003-4313-129X"
+      "affiliation": "Yale University; New Haven, CT, United States",
+      "name": "Sisk, Lucinda M.",
+      "orcid": "0000-0003-4900-9770"
     },
     {
       "affiliation": "Korea Advanced Institute of Science and Technology",
@@ -436,16 +434,6 @@
     },
     {
       "name": "Hallquist, Michael"
-    },
-    {
-      "affiliation": "Yale University; New Haven, CT, United States",
-      "name": "Sisk, Lucinda M.",
-      "orcid": "0000-0003-4900-9770"
-    },
-    {
-      "affiliation": "TIB \u2013 Leibniz Information Centre for Science and Technology and University Library, Hannover, Germany",
-      "name": "Leinweber, Katrin",
-      "orcid": "0000-0001-5135-5758"
     },
     {
       "affiliation": "Donders Institute for Brain, Cognition and Behavior, Center for Cognitive Neuroimaging",
@@ -495,9 +483,14 @@
       "name": "Hinds, Oliver"
     },
     {
-      "affiliation": "University of Newcastle, Australia",
-      "name": "Cooper, Gavin",
-      "orcid": "0000-0002-7186-5293"
+      "affiliation": "National Institute on Aging, Baltimore, MD, USA",
+      "name": "Bilgel, Murat",
+      "orcid": "0000-0001-5042-7422"
+    },
+    {
+      "affiliation": "TIB \u2013 Leibniz Information Centre for Science and Technology and University Library, Hannover, Germany",
+      "name": "Leinweber, Katrin",
+      "orcid": "0000-0001-5135-5758"
     },
     {
       "name": "Inati, Souheil"
@@ -505,15 +498,6 @@
     {
       "affiliation": "Boston University",
       "name": "Perkins, L. Nathan"
-    },
-    {
-      "name": "Marina, Ana"
-    },
-    {
-      "name": "Mattfeld, Aaron"
-    },
-    {
-      "name": "Noel, Maxime"
     },
     {
       "affiliation": "University of Amsterdam",
@@ -525,12 +509,28 @@
       "name": "Weninger, Leon"
     },
     {
+      "affiliation": "University of Newcastle, Australia",
+      "name": "Cooper, Gavin",
+      "orcid": "0000-0002-7186-5293"
+    },
+    {
+      "name": "Mattfeld, Aaron"
+    },
+    {
       "name": "Matsubara, K"
+    },
+    {
+      "name": "Noel, Maxime"
     },
     {
       "affiliation": "University of Pennsylvania",
       "name": "Junhao WEN",
       "orcid": "0000-0003-2077-3070"
+    },
+    {
+      "affiliation": "Leibniz Institute for Neurobiology",
+      "name": "Stadler, J\u00f6rg",
+      "orcid": "0000-0003-4313-129X"
     },
     {
       "name": "Cheung, Brian"
@@ -564,10 +564,6 @@
       "orcid": "0000-0003-4454-6171"
     },
     {
-      "affiliation": "University of Illinois Urbana Champaign",
-      "name": "Sharp, Paul"
-    },
-    {
       "affiliation": "Technical University Munich",
       "name": "Molina-Romero, Miguel",
       "orcid": "0000-0001-8054-0426"
@@ -579,12 +575,12 @@
       "name": "Weinstein, Alejandro"
     },
     {
+      "name": "Tambini, Arielle"
+    },
+    {
       "affiliation": "Duke University",
       "name": "Broderick, William",
       "orcid": "0000-0002-8999-9003"
-    },
-    {
-      "name": "Saase, Victor"
     },
     {
       "name": "Rothmei, Simon"
@@ -595,15 +591,7 @@
       "orcid": "0000-0002-5650-3964"
     },
     {
-      "name": "Harms, Robbert"
-    },
-    {
       "name": "Khanuja, Ranjeet"
-    },
-    {
-      "affiliation": "National Institute on Aging, Baltimore, MD, USA",
-      "name": "Bilgel, Murat",
-      "orcid": "0000-0001-5042-7422"
     },
     {
       "name": "Schlamp, Kai"
@@ -620,10 +608,11 @@
       "name": "Tarbert, Claire"
     },
     {
-      "name": "Tambini, Arielle"
+      "name": "Harms, Robbert"
     },
     {
-      "name": "Nickson, Thomas"
+      "affiliation": "University of Illinois Urbana Champaign",
+      "name": "Sharp, Paul"
     },
     {
       "name": "Crusoe, Michael R.",
@@ -675,6 +664,20 @@
     },
     {
       "name": "Davison, Andrew"
+    },
+    {
+      "affiliation": "Otto-von-Guericke-University Magdeburg, Germany",
+      "name": "Contier, Oliver",
+      "orcid": "0000-0002-2983-4709"
+    },
+    {
+      "name": "Marina, Ana"
+    },
+    {
+      "name": "Saase, Victor"
+    },
+    {
+      "name": "Nickson, Thomas"
     },
     {
       "name": "Varada, Jan"
