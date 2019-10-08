@@ -27,8 +27,7 @@ from traits.trait_errors import TraitError
 from ... import config, logging, LooseVersion
 from ...utils.provenance import write_provenance
 from ...utils.misc import str2bool, rgetcwd
-from ...utils.filemanip import (FileNotFoundError, split_filename,
-                                which, get_dependencies)
+from ...utils.filemanip import (split_filename, which, get_dependencies)
 from ...utils.subprocess import run_command
 
 from ...external.due import due
@@ -157,9 +156,15 @@ class BaseInterface(Interface):
     _redirect_x = False
     references_ = []
     resource_monitor = True  # Enabled for this interface IFF enabled in the config
+    _etelemetry_version_data = None
 
     def __init__(self, from_file=None, resource_monitor=None,
                  ignore_exception=False, **inputs):
+        if config.getboolean('execution', 'check_version'):
+            from ... import check_latest_version
+            if BaseInterface._etelemetry_version_data is None:
+                BaseInterface._etelemetry_version_data = check_latest_version()
+
         if not self.input_spec:
             raise Exception(
                 'No input_spec in class: %s' % self.__class__.__name__)
@@ -467,9 +472,9 @@ Output trait(s) %s not available in version %s of interface %s.\
                 setattr(outputs, key, val)
             except TraitError as error:
                 if 'an existing' in getattr(error, 'info', 'default'):
-                    msg = "No such file or directory for output '%s' of a %s interface" % \
-                        (key, self.__class__.__name__)
-                    raise FileNotFoundError(val, message=msg)
+                    msg = "No such file or directory '%s' for output '%s' of a %s interface" % \
+                        (val, key, self.__class__.__name__)
+                    raise FileNotFoundError(msg)
                 raise error
         return outputs
 

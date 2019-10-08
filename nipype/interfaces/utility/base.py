@@ -247,7 +247,7 @@ class Rename(SimpleInterface, IOBase):
 
     >>> rename3 = Rename(format_string="%(subject_id)s_%(seq)s_run%(run)02d.nii")
     >>> rename3.inputs.in_file = os.path.join(datadir, "func_epi_1_1.nii")
-    >>> rename3.inputs.parse_string = "func_(?P<seq>\w*)_.*"
+    >>> rename3.inputs.parse_string = r"func_(?P<seq>\w*)_.*"
     >>> rename3.inputs.subject_id = "subj_201"
     >>> rename3.inputs.run = 2
     >>> res = rename3.run()          # doctest: +SKIP

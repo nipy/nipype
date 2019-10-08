@@ -53,3 +53,48 @@ def get_info():
 from .pipeline import Node, MapNode, JoinNode, Workflow
 from .interfaces import (DataGrabber, DataSink, SelectFiles, IdentityInterface,
                          Rename, Function, Select, Merge)
+
+
+def check_latest_version(raise_exception=False):
+    """Check for the latest version of the library
+
+    parameters:
+    raise_exception: boolean
+        Raise a RuntimeError if a bad version is being used
+    """
+    import etelemetry
+    logger = logging.getLogger('nipype.utils')
+
+    INIT_MSG = "Running {packname} version {version} (latest: {latest})".format
+
+    latest = {"version": 'Unknown', "bad_versions": []}
+    result = None
+    try:
+        result = etelemetry.get_project("nipy/nipype")
+    except Exception as e:
+        logger.warning("Could not check for version updates: \n%s", e)
+    finally:
+        if result:
+            latest.update(**result)
+            if LooseVersion(__version__) != LooseVersion(latest["version"]):
+                logger.info(INIT_MSG(packname='nipype',
+                                     version=__version__,
+                                     latest=latest["version"]))
+            if latest["bad_versions"] and \
+                    any([LooseVersion(__version__) == LooseVersion(ver)
+                         for ver in latest["bad_versions"]]):
+                message = ('You are using a version of Nipype with a critical '
+                           'bug. Please use a different version.')
+                if raise_exception:
+                    raise RuntimeError(message)
+                else:
+                    logger.critical(message)
+    return latest
+
+# Run telemetry on import for interactive sessions, such as IPython, Jupyter notebooks, Python REPL
+if config.getboolean('execution', 'check_version'):
+    import __main__
+    if not hasattr(__main__, '__file__'):
+        from .interfaces.base import BaseInterface
+        if BaseInterface._etelemetry_version_data is None:
+            BaseInterface._etelemetry_version_data = check_latest_version()

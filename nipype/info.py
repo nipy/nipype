@@ -50,12 +50,12 @@ CLASSIFIERS = [
     'License :: OSI Approved :: Apache Software License',
     'Operating System :: MacOS :: MacOS X',
     'Operating System :: POSIX :: Linux',
-    'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Topic :: Scientific/Engineering'
 ]
+PYTHON_REQUIRES = ">= 3.5"
 
 description = 'Neuroimaging in Python: Pipelines and Interfaces'
 
@@ -143,10 +143,11 @@ REQUIRES = [
     'pydot>=%s' % PYDOT_MIN_VERSION,
     'pydotplus',
     'python-dateutil>=%s' % DATEUTIL_MIN_VERSION,
-    'scipy>=%s ; python_version >= "3.5"' % SCIPY_MIN_VERSION,
-    'scipy>=%s,<%s ; python_version <= "3.4"' % (SCIPY_MIN_VERSION, SCIPY_MAX_VERSION_34),
+    'scipy>=%s' % SCIPY_MIN_VERSION,
     'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
     'traits>=%s,!=5.0' % TRAITS_MIN_VERSION,
+    'filelock>=3.0.0',
+    'etelemetry',
 ]
 
 # neurdflib has to come after prov
@@ -163,12 +164,13 @@ TESTS_REQUIRES = [
 ]
 
 EXTRA_REQUIRES = {
+    'data': ['datalad'],
     'doc': ['Sphinx>=1.4', 'numpydoc', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],
     'duecredit': ['duecredit'],
     'nipy': ['nitime', 'nilearn<0.5.0', 'dipy', 'nipy', 'matplotlib'],
     'profiler': ['psutil>=5.0'],
     'pybids': ['pybids>=0.7.0'],
-    'specs': ['yapf'],
+    'specs': ['yapf>=0.27'],
     'ssh': ['paramiko'],
     'tests': TESTS_REQUIRES,
     'xvfbwrapper': ['xvfbwrapper'],

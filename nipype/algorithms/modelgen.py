@@ -248,15 +248,13 @@ class SpecifyModelInputSpec(BaseInterfaceInputSpec):
         xor=['subject_info', 'event_files', 'bids_event_file'],
         desc='TSV event file containing common BIDS fields: `onset`,'
         '`duration`, and categorization and amplitude columns')
-    bids_condition_column = traits.Str(exists=True,
-        mandatory=False,
+    bids_condition_column = traits.Str(
         default_value='trial_type',
         usedefault=True,
         desc='Column of the file passed to `bids_event_file` to the '
         'unique values of which events will be assigned'
         'to regressors')
-    bids_amplitude_column = traits.Str(exists=True,
-        mandatory=False,
+    bids_amplitude_column = traits.Str(
         desc='Column of the file passed to `bids_event_file` '
         'according to which to assign amplitudes to events')
     realignment_parameters = InputMultiPath(

@@ -23,11 +23,10 @@ def test_TalairachQC_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_TalairachQC_outputs():
-    output_map = dict(
-        log_file=dict(
-            extensions=None,
-            usedefault=True,
-        ), )
+    output_map = dict(log_file=dict(
+        extensions=None,
+        usedefault=True,
+    ), )
     outputs = TalairachQC.output_spec()
 
     for key, metadata in list(output_map.items()):

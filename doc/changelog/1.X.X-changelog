@@ -1,3 +1,59 @@
+1.3.0 (To Be Determined)
+========================
+
+##### [Full changelog](https://github.com/nipy/nipype/milestone/34?closed=1)
+
+  * FIX: Restore ``AFNICommand._get_fname``, required by some interfaces (https://github.com/nipy/nipype/pull/3071)
+  * FIX: Remove asynchronous chdir callback (https://github.com/nipy/nipype/pull/3060)
+  * FIX: Minimize scope for directory changes while loading results file (https://github.com/nipy/nipype/pull/3061)
+  * ENH: Add precommit information for contributors and pre-commit style (https://github.com/nipy/nipype/pull/3063)
+  * ENH: Delay etelemetry for non-interactive sessions, report bad versions (https://github.com/nipy/nipype/pull/3049)
+  * ENH: Run memoized check_version at REPL import, Node/Workflow/Interface init (https://github.com/nipy/nipype/pull/30)
+  * RF: Provide functions to augment old Path.mkdir, Path.resolve methods (https://github.com/nipy/nipype/pull/3050)
+  * RF: Redirect nipype.workflows to niflow.nipype1.workflows (https://github.com/nipy/nipype/pull/3067)
+  * TST: Skip dcm2niix test if data fails to download (https://github.com/nipy/nipype/pull/3059)
+  * TST: dcm2niix test fix (https://github.com/nipy/nipype/pull/3058)
+  * MAINT: Drop Python 3.4 support (https://github.com/nipy/nipype/pull/3062)
+  * CI: ``make specs`` on Travis (https://github.com/nipy/nipype/pull/3066)
+
+
+1.2.3 (September 23, 2019)
+==========================
+
+Python 1.2.3 will be the last version to support Python 3.4.
+
+##### [Full changelog](https://github.com/nipy/nipype/milestone/35?closed=1)
+
+  * FIX: Patch Path.mkdir for Python 2 (https://github.com/nipy/nipype/pull/3037)
+  * FIX: Drop deprecated message argument to ``FileNotFoundError`` (https://github.com/nipy/nipype/pull/3035)
+  * FIX: Handle NIFTI extensions in ``afni.Qwarp`` (https://github.com/nipy/nipype/pull/3028)
+  * FIX: Disallow returning ``None`` in ``pipeline.utils.load_resultfile`` (https://github.com/nipy/nipype/pull/3023)
+  * ENH: Allow afni.CatMatvec to accept empty string opkeys (https://github.com/nipy/nipype/pull/2943)
+  * ENH: Add ``mrrtrix3.MRResize`` interface (https://github.com/nipy/nipype/pull/3031)
+  * ENH: Add version check / telemetry to Nipype (https://github.com/nipy/nipype/pull/3027)
+  * ENH: Update MCFLIRT outputs for FSL 6+ (https://github.com/nipy/nipype/pull/3029)
+  * ENH: Lightweight node cache checking (https://github.com/nipy/nipype/pull/3026)
+  * ENH: Avoid loading result from file when writing reports (https://github.com/nipy/nipype/pull/3024)
+  * ENH: replace portalocker with filelock (https://github.com/nipy/nipype/pull/3025)
+  * MAINT: Set minimum yapf for `checkspecs` to 0.27 (https://github.com/nipy/nipype/pull/3033)
+
+
+1.2.2 (September 07, 2019)
+==========================
+
+##### [Full changelog](https://github.com/nipy/nipype/milestone/33?closed=1)
+
+  * FIX: Ensure ``loadpkl`` returns a not None value (https://github.com/nipy/nipype/pull/3020)
+  * FIX: ``loadpkl`` failed when pklz file contained versioning info (https://github.com/nipy/nipype/pull/3017)
+  * FIX: Update mne.WatershedBEM command line (https://github.com/nipy/nipype/pull/3007)
+  * FIX: Specify correct stop criterion flag in PETPVC (https://github.com/nipy/nipype/pull/3010)
+  * ENH: Add interface for AFNI ``3dTsmooth`` (https://github.com/nipy/nipype/pull/2948)
+  * ENH: Additional arguments to ANTs N4BiasFieldCorrection (https://github.com/nipy/nipype/pull/3012)
+  * ENH: Add ``--rescale-intensities`` and name_source to N4BiasFieldCorrection (https://github.com/nipy/nipype/pull/3011)
+  * ENH: Add index_mask_file input to ImageStats (https://github.com/nipy/nipype/pull/3005)
+  * RF: Remove versioning from ``loadpkl`` (https://github.com/nipy/nipype/pull/3019)
+  * MAINT: Add ``python_requires`` to package metadata (https://github.com/nipy/nipype/pull/3006)
+
 1.2.1 (August 19, 2019)
 =======================
 

@@ -17,7 +17,9 @@ import re
 import shutil
 import contextlib
 import posixpath
+from pathlib import Path
 import simplejson as json
+from filelock import SoftFileLock
 
 from .. import logging, config
 from .misc import is_container
@@ -31,50 +33,30 @@ related_filetype_sets = [
 ]
 
 
+def _resolve_with_filenotfound(path, **kwargs):
+    """ Raise FileNotFoundError instead of OSError """
+    try:
+        return path.resolve(**kwargs)
+    except OSError as e:
+        if isinstance(e, FileNotFoundError):
+            raise
+        raise FileNotFoundError(str(path))
 
-class FileNotFoundError(OSError):  # noqa
-    """Defines the exception for Python 2."""
 
-    def __init__(self, path):
-        """Initialize the exception."""
-        super(FileNotFoundError, self).__init__(
-            2, 'No such file or directory', '%s' % path)
+def path_resolve(path, strict=False):
+    try:
+        return _resolve_with_filenotfound(path, strict=strict)
+    except TypeError:  # PY35
+        pass
 
+    path = path.absolute()
+    if strict or path.exists():
+        return _resolve_with_filenotfound(path)
 
-USING_PATHLIB2 = False
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path
-    USING_PATHLIB2 = True
-
-try:
-    Path('/invented/file/path').resolve(strict=True)
-except TypeError:
-    def _patch_resolve(self, strict=False):
-        """Add the argument strict to signature in Python>3,<3.6."""
-        resolved = Path().old_resolve() / self
-
-        if strict and not resolved.exists():
-            raise FileNotFoundError(resolved)
-        return resolved
-
-    Path.old_resolve = Path.resolve
-    Path.resolve = _patch_resolve
-except FileNotFoundError:
-    pass
-except OSError:
-    def _patch_resolve(self, strict=False):
-        """Raise FileNotFoundError instead of OSError with pathlib2."""
-        try:
-            resolved = self.old_resolve(strict=strict)
-        except OSError:
-            raise FileNotFoundError(self.old_resolve())
-
-        return resolved
-
-    Path.old_resolve = Path.resolve
-    Path.resolve = _patch_resolve
+    # This is a hacky shortcut, using path.absolute() unmodified
+    # In cases where the existing part of the path contains a
+    # symlink, different results will be produced
+    return path
 
 
 def split_filename(fname):
@@ -603,56 +585,64 @@ def load_json(filename):
 
 def loadcrash(infile, *args):
     if infile.endswith('pkl') or infile.endswith('pklz'):
-        return loadpkl(infile, versioning=True)
+        return loadpkl(infile)
     else:
         raise ValueError('Only pickled crashfiles are supported')
 
 
-def loadpkl(infile, versioning=False):
+def loadpkl(infile):
     """Load a zipped or plain cPickled file."""
     infile = Path(infile)
     fmlogger.debug('Loading pkl: %s', infile)
     pklopen = gzip.open if infile.suffix == '.pklz' else open
+
+    with SoftFileLock('%s.lock' % infile):
+        with pklopen(str(infile), 'rb') as pkl_file:
+            pkl_contents = pkl_file.read()
+
     pkl_metadata = None
 
-    with indirectory(infile.parent):
-        pkl_file = pklopen(infile.name, 'rb')
-
-        try:  # Look if pkl file contains version file
-            pkl_metadata_line = pkl_file.readline()
-            pkl_metadata = json.loads(pkl_metadata_line)
-        except (UnicodeDecodeError, json.JSONDecodeError):
-            pass
-        finally:
-            # Could not get version info
-            pkl_file.seek(0)
-
+    # Look if pkl file contains version metadata
+    idx = pkl_contents.find(b'\n')
+    if idx >= 0:
         try:
-            unpkl = pickle.load(pkl_file)
-        except UnicodeDecodeError:
-            # Was this pickle created with Python 2.x?
-            unpkl = pickle.load(pkl_file, fix_imports=True, encoding='utf-8')
-            fmlogger.info('Successfully loaded pkl in compatibility mode.')
-        # Unpickling problems
-        except Exception as e:
-            if not versioning:
-                raise e
+            pkl_metadata = json.loads(pkl_contents[:idx])
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            # Could not get version info
+            pass
+        else:
+            # On success, skip JSON metadata
+            pkl_contents = pkl_contents[idx + 1:]
 
-            if pkl_metadata and 'version' in pkl_metadata:
-                from nipype import __version__ as version
-                if pkl_metadata['version'] != version:
-                    fmlogger.error("""\
+    # Pickle files may contain relative paths that must be resolved relative
+    # to the working directory, so use indirectory while attempting to load
+    unpkl = None
+    try:
+        with indirectory(infile.parent):
+            unpkl = pickle.loads(pkl_contents)
+    except UnicodeDecodeError:
+        # Was this pickle created with Python 2.x?
+        with indirectory(infile.parent):
+            unpkl = pickle.loads(pkl_contents, fix_imports=True, encoding='utf-8')
+        fmlogger.info('Successfully loaded pkl in compatibility mode.')
+    # Unpickling problems
+    except Exception as e:
+        if pkl_metadata and 'version' in pkl_metadata:
+            from nipype import __version__ as version
+            if pkl_metadata['version'] != version:
+                fmlogger.error("""\
 Attempted to open a results file generated by Nipype version %s, \
 with an incompatible Nipype version (%s)""", pkl_metadata['version'], version)
-                    raise e
-            fmlogger.error("""\
+                raise e
+        fmlogger.warning("""\
 No metadata was found in the pkl file. Make sure you are currently using \
 the same Nipype version from the generated pkl.""")
-            raise e
-        else:
-            return unpkl
-        finally:
-            pkl_file.close()
+        raise e
+
+    if unpkl is None:
+        raise ValueError('Loading %s resulted in None.' % infile)
+
+    return unpkl
 
 
 def crash2txt(filename, record):
@@ -688,20 +678,17 @@ def read_stream(stream, logger=None, encoding=None):
 
 
 def savepkl(filename, record, versioning=False):
-    if filename.endswith('pklz'):
-        pkl_file = gzip.open(filename, 'wb')
-    else:
-        pkl_file = open(filename, 'wb')
+    pklopen = gzip.open if filename.endswith('.pklz') else open
+    with SoftFileLock('%s.lock' % filename):
+        with pklopen(filename, 'wb') as pkl_file:
+            if versioning:
+                from nipype import __version__ as version
+                metadata = json.dumps({'version': version})
 
-    if versioning:
-        from nipype import __version__ as version
-        metadata = json.dumps({'version': version})
+                pkl_file.write(metadata.encode('utf-8'))
+                pkl_file.write('\n'.encode('utf-8'))
 
-        pkl_file.write(metadata.encode('utf-8'))
-        pkl_file.write('\n'.encode('utf-8'))
-
-    pickle.dump(record, pkl_file)
-    pkl_file.close()
+            pickle.dump(record, pkl_file)
 
 
 rst_levels = ['=', '-', '~', '+']

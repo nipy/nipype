@@ -42,11 +42,10 @@ def test_DWIRicianLMMSEFilter_inputs():
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
 def test_DWIRicianLMMSEFilter_outputs():
-    output_map = dict(
-        outputVolume=dict(
-            extensions=None,
-            position=-1,
-        ), )
+    output_map = dict(outputVolume=dict(
+        extensions=None,
+        position=-1,
+    ), )
     outputs = DWIRicianLMMSEFilter.output_spec()
 
     for key, metadata in list(output_map.items()):

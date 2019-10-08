@@ -518,7 +518,7 @@ def test_datafinder_unpack(tmpdir):
 
     df = nio.DataFinder()
     df.inputs.root_paths = outdir
-    df.inputs.match_regex = '.+/(?P<basename>.+)\.txt'
+    df.inputs.match_regex = r'.+/(?P<basename>.+)\.txt'
     df.inputs.unpack_single = True
     result = df.run()
     print(result.outputs.out_paths)

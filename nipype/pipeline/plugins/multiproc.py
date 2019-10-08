@@ -144,8 +144,6 @@ class MultiProcPlugin(DistributedPluginBase):
         self._stats = None
 
     def _async_callback(self, args):
-        # Make sure runtime is not left at a dubious working directory
-        os.chdir(self._cwd)
         result = args.result()
         self._taskresult[result['taskid']] = result
 

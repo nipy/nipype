@@ -1096,7 +1096,7 @@ class EPIDeWarp(FSLCommand):
     <http://surfer.nmr.mgh.harvard.edu/fswiki/epidewarp.fsl>`_.
 
     .. warning:: deprecated in FSL, please use
-      :func:`nipype.workflows.dmri.preprocess.epi.sdc_fmb` instead.
+      :func:`niflow.nipype1.workflows.dmri.preprocess.epi.sdc_fmb` instead.
 
     Examples
     --------

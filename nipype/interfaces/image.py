@@ -43,8 +43,8 @@ class Rescale(SimpleInterface):
     Examples
     --------
 
-    To use a high-resolution T1w image as a registration target for a T2\*
-    image, it may be useful to invert the T1w image and rescale to the T2\*
+    To use a high-resolution T1w image as a registration target for a T2\\*
+    image, it may be useful to invert the T1w image and rescale to the T2\\*
     range.
     Using the 1st and 99th percentiles may reduce the impact of outlier
     voxels.

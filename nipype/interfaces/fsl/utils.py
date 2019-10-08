@@ -721,18 +721,25 @@ class ImageStatsInputSpec(FSLCommandInputSpec):
         exists=True,
         argstr="%s",
         mandatory=True,
-        position=2,
+        position=3,
         desc='input file to generate stats of')
     op_string = traits.Str(
         argstr="%s",
         mandatory=True,
-        position=3,
+        position=4,
         desc=("string defining the operation, options are "
               "applied in order, e.g. -M -l 10 -M will "
               "report the non-zero mean, apply a threshold "
               "and then report the new nonzero mean"))
     mask_file = File(
         exists=True, argstr="", desc='mask file used for option -k %s')
+    index_mask_file = File(
+        exists=True,
+        argstr="-K %s",
+        position=2,
+        desc="generate seperate n submasks from indexMask, "
+             "for indexvalues 1..n where n is the maximum index "
+             "value in indexMask, and generate statistics for each submask")
 
 
 class ImageStatsOutputSpec(TraitedSpec):
@@ -847,18 +854,18 @@ class AvScale(CommandLine):
         runtime = super(AvScale, self)._run_interface(runtime)
 
         expr = re.compile(
-            'Rotation\ &\ Translation\ Matrix:\n(?P<rot_tran_mat>[0-9\.\ \n-]+)[\s\n]*'
-            '(Rotation\ Angles\ \(x,y,z\)\ \[rads\]\ =\ (?P<rot_angles>[0-9\.\ -]+))?[\s\n]*'
-            '(Translations\ \(x,y,z\)\ \[mm\]\ =\ (?P<translations>[0-9\.\ -]+))?[\s\n]*'
-            'Scales\ \(x,y,z\)\ =\ (?P<scales>[0-9\.\ -]+)[\s\n]*'
-            'Skews\ \(xy,xz,yz\)\ =\ (?P<skews>[0-9\.\ -]+)[\s\n]*'
-            'Average\ scaling\ =\ (?P<avg_scaling>[0-9\.-]+)[\s\n]*'
-            'Determinant\ =\ (?P<determinant>[0-9\.-]+)[\s\n]*'
-            'Left-Right\ orientation:\ (?P<lr_orientation>[A-Za-z]+)[\s\n]*'
-            'Forward\ half\ transform\ =[\s]*\n'
-            '(?P<fwd_half_xfm>[0-9\.\ \n-]+)[\s\n]*'
-            'Backward\ half\ transform\ =[\s]*\n'
-            '(?P<bwd_half_xfm>[0-9\.\ \n-]+)[\s\n]*')
+            r'Rotation & Translation Matrix:\n(?P<rot_tran_mat>[0-9\. \n-]+)[\s\n]*'
+            r'(Rotation Angles \(x,y,z\) \[rads\] = (?P<rot_angles>[0-9\. -]+))?[\s\n]*'
+            r'(Translations \(x,y,z\) \[mm\] = (?P<translations>[0-9\. -]+))?[\s\n]*'
+            r'Scales \(x,y,z\) = (?P<scales>[0-9\. -]+)[\s\n]*'
+            r'Skews \(xy,xz,yz\) = (?P<skews>[0-9\. -]+)[\s\n]*'
+            r'Average scaling = (?P<avg_scaling>[0-9\.-]+)[\s\n]*'
+            r'Determinant = (?P<determinant>[0-9\.-]+)[\s\n]*'
+            r'Left-Right orientation: (?P<lr_orientation>[A-Za-z]+)[\s\n]*'
+            r'Forward half transform =[\s]*\n'
+            r'(?P<fwd_half_xfm>[0-9\. \n-]+)[\s\n]*'
+            r'Backward half transform =[\s]*\n'
+            r'(?P<bwd_half_xfm>[0-9\. \n-]+)[\s\n]*')
         out = expr.search(runtime.stdout).groupdict()
         outputs = {}
         outputs['rotation_translation_matrix'] = [[

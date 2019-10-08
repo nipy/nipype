@@ -19,8 +19,7 @@ from tempfile import mkdtemp
 
 from ... import config, logging
 from ...utils.misc import flatten, unflatten, str2bool, dict_diff
-from ...utils.filemanip import (md5, FileNotFoundError, ensure_list,
-                                simplify_list, copyfiles, fnames_presuffix,
+from ...utils.filemanip import (md5, ensure_list, simplify_list, copyfiles, fnames_presuffix,
                                 loadpkl, split_filename, load_json,
                                 emptydirs, savepkl, indirectory, silentrm)
 
@@ -32,7 +31,7 @@ from ...interfaces.base.specs import get_filecopy_info
 from .utils import (
     _parameterization_dir, save_hashfile as _save_hashfile, load_resultfile as
     _load_resultfile, save_resultfile as _save_resultfile, nodelist_runner as
-    _node_runner, strip_temp as _strip_temp, write_report,
+    _node_runner, strip_temp as _strip_temp, write_node_report,
     clean_working_directory, merge_dict, evaluate_connect_function)
 from .base import EngineBase
 
@@ -188,7 +187,7 @@ class Node(EngineBase):
     def result(self):
         """Get result from result file (do not hold it in memory)"""
         return _load_resultfile(
-            op.join(self.output_dir(), 'result_%s.pklz' % self.name))[0]
+            op.join(self.output_dir(), 'result_%s.pklz' % self.name))
 
     @property
     def inputs(self):
@@ -286,26 +285,28 @@ class Node(EngineBase):
         """
         outdir = self.output_dir()
 
-        # Update hash
-        hashed_inputs, hashvalue = self._get_hashval()
-
         # The output folder does not exist: not cached
-        if not op.exists(outdir):
-            logger.debug('[Node] Directory not found "%s".', outdir)
+        if not op.exists(outdir) or \
+                not op.exists(op.join(outdir, 'result_%s.pklz' % self.name)):
+            logger.debug('[Node] Not cached "%s".', outdir)
             return False, False
 
-        hashfile = op.join(outdir, '_0x%s.json' % hashvalue)
-        cached = op.exists(hashfile)
-
-        # Check if updated
+        # Check if there are hashfiles
         globhashes = glob(op.join(outdir, '_0x*.json'))
         unfinished = [
             path for path in globhashes
             if path.endswith('_unfinished.json')
         ]
         hashfiles = list(set(globhashes) - set(unfinished))
+
+        # Update hash
+        hashed_inputs, hashvalue = self._get_hashval()
+
+        hashfile = op.join(outdir, '_0x%s.json' % hashvalue)
         logger.debug('[Node] Hashes: %s, %s, %s, %s',
                      hashed_inputs, hashvalue, hashfile, hashfiles)
+
+        cached = hashfile in hashfiles
 
         # No previous hashfiles found, we're all set.
         if cached and len(hashfiles) == 1:
@@ -380,17 +381,17 @@ class Node(EngineBase):
         return cached, self._hashvalue, hashfile, self._hashed_inputs
 
     def run(self, updatehash=False):
-        """Execute the node in its directory.
+        """
+        Execute the node in its directory.
 
         Parameters
         ----------
-
         updatehash: boolean
             When the hash stored in the output directory as a result of a previous run
             does not match that calculated for this execution, updatehash=True only
             updates the hash without re-running.
-        """
 
+        """
         if self.config is None:
             self.config = {}
         self.config = merge_dict(deepcopy(config._sections), self.config)
@@ -434,6 +435,11 @@ class Node(EngineBase):
             for outdatedhash in glob(op.join(self.output_dir(), '_0x*.json')):
                 os.remove(outdatedhash)
 
+        # _get_hashval needs to be called before running. When there is a valid (or seemingly
+        # valid cache), the is_cached() member updates the hashval via _get_hashval.
+        # However, if this node's folder doesn't exist or the result file is not found, then
+        # the hashval needs to be generated here. See #3026 for a larger context.
+        self._get_hashval()
         # Hashfile while running
         hashfile_unfinished = op.join(
             outdir, '_0x%s_unfinished.json' % self._hashvalue)
@@ -457,8 +463,7 @@ class Node(EngineBase):
 
         # Store runtime-hashfile, pre-execution report, the node and the inputs set.
         _save_hashfile(hashfile_unfinished, self._hashed_inputs)
-        write_report(
-            self, report_type='preexec', is_mapnode=isinstance(self, MapNode))
+        write_node_report(self, is_mapnode=isinstance(self, MapNode))
         savepkl(op.join(outdir, '_node.pklz'), self)
         savepkl(op.join(outdir, '_inputs.pklz'), self.inputs.get_traitsfree())
 
@@ -477,8 +482,7 @@ directory. Please ensure no other concurrent workflows are racing""", hashfile_u
         # Tear-up after success
         shutil.move(hashfile_unfinished,
                     hashfile_unfinished.replace('_unfinished', ''))
-        write_report(
-            self, report_type='postexec', is_mapnode=isinstance(self, MapNode))
+        write_node_report(self, result=result, is_mapnode=isinstance(self, MapNode))
         logger.info('[Node] Finished "%s".', self.fullname)
         return result
 
@@ -511,7 +515,7 @@ directory. Please ensure no other concurrent workflows are racing""", hashfile_u
             logger.debug('input: %s', key)
             results_file = info[0]
             logger.debug('results file: %s', results_file)
-            outputs = _load_resultfile(results_file)[0].outputs
+            outputs = _load_resultfile(results_file).outputs
             if outputs is None:
                 raise RuntimeError("""\
 Error populating the input "%s" of node "%s": the results file of the source node \
@@ -558,34 +562,42 @@ Error populating the input "%s" of node "%s": the results file of the source nod
 
     def _load_results(self):
         cwd = self.output_dir()
-        result, aggregate, attribute_error = _load_resultfile(
-            op.join(cwd, 'result_%s.pklz' % self.name))
+
+        try:
+            result = _load_resultfile(
+                op.join(cwd, 'result_%s.pklz' % self.name))
+        except (traits.TraitError, EOFError):
+            logger.debug(
+                'Error populating inputs/outputs, (re)aggregating results...')
+        except (AttributeError, ImportError) as err:
+            logger.debug('attribute error: %s probably using '
+                         'different trait pickled file', str(err))
+            old_inputs = loadpkl(op.join(cwd, '_inputs.pklz'))
+            self.inputs.trait_set(**old_inputs)
+        else:
+            return result
+
         # try aggregating first
-        if aggregate:
-            logger.debug('aggregating results')
-            if attribute_error:
-                old_inputs = loadpkl(op.join(cwd, '_inputs.pklz'))
-                self.inputs.trait_set(**old_inputs)
-            if not isinstance(self, MapNode):
-                self._copyfiles_to_wd(linksonly=True)
-                aggouts = self._interface.aggregate_outputs(
-                    needed_outputs=self.needed_outputs)
-                runtime = Bunch(
-                    cwd=cwd,
-                    returncode=0,
-                    environ=dict(os.environ),
-                    hostname=socket.gethostname())
-                result = InterfaceResult(
-                    interface=self._interface.__class__,
-                    runtime=runtime,
-                    inputs=self._interface.inputs.get_traitsfree(),
-                    outputs=aggouts)
-                _save_resultfile(
-                    result, cwd, self.name,
-                    rebase=str2bool(self.config['execution']['use_relative_paths']))
-            else:
-                logger.debug('aggregating mapnode results')
-                result = self._run_interface()
+        if not isinstance(self, MapNode):
+            self._copyfiles_to_wd(linksonly=True)
+            aggouts = self._interface.aggregate_outputs(
+                needed_outputs=self.needed_outputs)
+            runtime = Bunch(
+                cwd=cwd,
+                returncode=0,
+                environ=dict(os.environ),
+                hostname=socket.gethostname())
+            result = InterfaceResult(
+                interface=self._interface.__class__,
+                runtime=runtime,
+                inputs=self._interface.inputs.get_traitsfree(),
+                outputs=aggouts)
+            _save_resultfile(
+                result, cwd, self.name,
+                rebase=str2bool(self.config['execution']['use_relative_paths']))
+        else:
+            logger.debug('aggregating mapnode results')
+            result = self._run_interface()
         return result
 
     def _run_command(self, execute, copyfiles=True):
@@ -1189,7 +1201,7 @@ class MapNode(Node):
         """Generate subnodes of a mapnode and write pre-execution report"""
         self._get_inputs()
         self._check_iterfield()
-        write_report(self, report_type='preexec', is_mapnode=True)
+        write_node_report(self, result=None, is_mapnode=True)
         return [node for _, node in self._make_nodes()]
 
     def num_subnodes(self):

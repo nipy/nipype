@@ -3,7 +3,7 @@
 """
 import os
 from ...external.due import BibTeX
-from ...utils.filemanip import split_filename, copyfile, which
+from ...utils.filemanip import split_filename, copyfile, which, fname_presuffix
 from ..base import TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined
 from .base import ANTSCommand, ANTSCommandInputSpec
 
@@ -270,18 +270,20 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
         argstr='--input-image %s',
         mandatory=True,
         desc=('input for bias correction. Negative values or values close to '
-            'zero should be processed prior to correction'))
+              'zero should be processed prior to correction'))
     mask_image = File(
         argstr='--mask-image %s',
         desc=('image to specify region to perform final bias correction in'))
     weight_image = File(
         argstr='--weight-image %s',
         desc=('image for relative weighting (e.g. probability map of the white '
-            'matter) of voxels during the B-spline fitting. '))
+              'matter) of voxels during the B-spline fitting. '))
     output_image = traits.Str(
         argstr='--output %s',
         desc='output file name',
-        genfile=True,
+        name_source=['input_image'],
+        name_template='%s_corrected',
+        keep_extension=True,
         hash_files=False)
     bspline_fitting_distance = traits.Float(argstr="--bspline-fitting %s")
     bspline_order = traits.Int(requires=['bspline_fitting_distance'])
@@ -302,6 +304,25 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
         usedefault=True,
         desc='copy headers of the original image into the '
         'output (corrected) file')
+    rescale_intensities = traits.Bool(
+        False, usedefault=True, argstr='-r', min_ver='2.1.0',
+        desc="""\
+[NOTE: Only ANTs>=2.1.0]
+At each iteration, a new intensity mapping is calculated and applied but there
+is nothing which constrains the new intensity range to be within certain values.
+The result is that the range can "drift" from the original at each iteration.
+This option rescales to the [min,max] range of the original image intensities
+within the user-specified mask.""")
+    histogram_sharpening = traits.Tuple(
+        (0.15, 0.01, 200),
+        traits.Float, traits.Float, traits.Int,
+        argstr='--histogram-sharpening [%g,%g,%d]',
+        desc="""\
+Three-values tuple of histogram sharpening parameters \
+(FWHM, wienerNose, numberOfHistogramBins).
+These options describe the histogram sharpening parameters, i.e. the \
+deconvolution step parameters described in the original N3 algorithm.
+The default values have been shown to work fairly well.""")
 
 
 class N4BiasFieldCorrectionOutputSpec(TraitedSpec):
@@ -310,7 +331,10 @@ class N4BiasFieldCorrectionOutputSpec(TraitedSpec):
 
 
 class N4BiasFieldCorrection(ANTSCommand):
-    """N4 is a variant of the popular N3 (nonparameteric nonuniform normalization)
+    """
+    Bias field correction.
+
+    N4 is a variant of the popular N3 (nonparameteric nonuniform normalization)
     retrospective bias correction algorithm. Based on the assumption that the
     corruption of the low frequency bias field can be modeled as a convolution of
     the intensity histogram by a Gaussian, the basic algorithmic protocol is to
@@ -363,34 +387,29 @@ class N4BiasFieldCorrection(ANTSCommand):
     >>> n4_4.cmdline
     'N4BiasFieldCorrection -d 3 --input-image structural.nii \
 --output [ structural_corrected.nii, structural_bias.nii ]'
+
+    >>> n4_5 = N4BiasFieldCorrection()
+    >>> n4_5.inputs.input_image = 'structural.nii'
+    >>> n4_5.inputs.dimension = 3
+    >>> n4_5.inputs.histogram_sharpening = (0.12, 0.02, 200)
+    >>> n4_5.cmdline
+    'N4BiasFieldCorrection -d 3  --histogram-sharpening [0.12,0.02,200] \
+--input-image structural.nii --output structural_corrected.nii'
+
     """
 
     _cmd = 'N4BiasFieldCorrection'
     input_spec = N4BiasFieldCorrectionInputSpec
     output_spec = N4BiasFieldCorrectionOutputSpec
 
-    def _gen_filename(self, name):
-        if name == 'output_image':
-            output = self.inputs.output_image
-            if not isdefined(output):
-                _, name, ext = split_filename(self.inputs.input_image)
-                output = name + '_corrected' + ext
-            return output
-
-        if name == 'bias_image':
-            output = self.inputs.bias_image
-            if not isdefined(output):
-                _, name, ext = split_filename(self.inputs.input_image)
-                output = name + '_bias' + ext
-            return output
-        return None
+    def __init__(self, *args, **kwargs):
+        """Instantiate the N4BiasFieldCorrection interface."""
+        self._out_bias_file = None
+        super(N4BiasFieldCorrection, self).__init__(*args, **kwargs)
 
     def _format_arg(self, name, trait_spec, value):
-        if ((name == 'output_image') and
-            (self.inputs.save_bias or isdefined(self.inputs.bias_image))):
-            bias_image = self._gen_filename('bias_image')
-            output = self._gen_filename('output_image')
-            newval = '[ %s, %s ]' % (output, bias_image)
+        if name == 'output_image' and self._out_bias_file:
+            newval = '[ %s, %s ]' % (value, self._out_bias_file)
             return trait_spec.argstr % newval
 
         if name == 'bspline_fitting_distance':
@@ -414,38 +433,35 @@ class N4BiasFieldCorrection(ANTSCommand):
             name, trait_spec, value)
 
     def _parse_inputs(self, skip=None):
-        if skip is None:
-            skip = []
-        skip += ['save_bias', 'bias_image']
+        skip = (skip or []) + ['save_bias', 'bias_image']
+        self._out_bias_file = None
+        if self.inputs.save_bias or isdefined(self.inputs.bias_image):
+            bias_image = self.inputs.bias_image
+            if not isdefined(bias_image):
+                bias_image = fname_presuffix(os.path.basename(self.inputs.input_image),
+                                             suffix='_bias')
+            self._out_bias_file = bias_image
         return super(N4BiasFieldCorrection, self)._parse_inputs(skip=skip)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['output_image'] = os.path.abspath(
-            self._gen_filename('output_image'))
+        outputs = super(N4BiasFieldCorrection, self)._list_outputs()
 
-        if self.inputs.save_bias or isdefined(self.inputs.bias_image):
-            outputs['bias_image'] = os.path.abspath(
-                self._gen_filename('bias_image'))
+        # Fix headers
+        if self.inputs.copy_header:
+            self._copy_header(outputs['output_image'])
+
+        if self._out_bias_file:
+            outputs['bias_image'] = os.path.abspath(self._out_bias_file)
+            if self.inputs.copy_header:
+                self._copy_header(outputs['bias_image'])
         return outputs
 
-    def _run_interface(self, runtime, correct_return_codes=(0, )):
-        runtime = super(N4BiasFieldCorrection, self)._run_interface(
-            runtime, correct_return_codes)
-
-        if self.inputs.copy_header and runtime.returncode in correct_return_codes:
-            self._copy_header(self._gen_filename('output_image'))
-            if self.inputs.save_bias or isdefined(self.inputs.bias_image):
-                self._copy_header(self._gen_filename('bias_image'))
-
-        return runtime
-
     def _copy_header(self, fname):
-        """Copy header from input image to an output image"""
+        """Copy header from input image to an output image."""
         import nibabel as nb
         in_img = nb.load(self.inputs.input_image)
         out_img = nb.load(fname, mmap=False)
-        new_img = out_img.__class__(out_img.get_data(), in_img.affine,
+        new_img = out_img.__class__(out_img.get_fdata(), in_img.affine,
                                     in_img.header)
         new_img.set_data_dtype(out_img.get_data_dtype())
         new_img.to_filename(fname)

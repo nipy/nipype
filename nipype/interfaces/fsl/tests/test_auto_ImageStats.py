@@ -13,6 +13,11 @@ def test_ImageStats_inputs():
             argstr='%s',
             extensions=None,
             mandatory=True,
+            position=3,
+        ),
+        index_mask_file=dict(
+            argstr='-K %s',
+            extensions=None,
             position=2,
         ),
         mask_file=dict(
@@ -22,7 +27,7 @@ def test_ImageStats_inputs():
         op_string=dict(
             argstr='%s',
             mandatory=True,
-            position=3,
+            position=4,
         ),
         output_type=dict(),
         split_4d=dict(

@@ -60,6 +60,7 @@ def test_Dcm2niix_inputs():
             position=-1,
             xor=['source_dir'],
         ),
+        to_nrrd=dict(argstr='-e', ),
         verbose=dict(
             argstr='-v',
             usedefault=True,

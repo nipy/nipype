@@ -420,7 +420,7 @@ class BEDPOSTX5(FSLXCommand):
 
 
     .. note:: Consider using
-      :func:`nipype.workflows.fsl.dmri.create_bedpostx_pipeline` instead.
+      :func:`niflow.nipype1.workflows.fsl.dmri.create_bedpostx_pipeline` instead.
 
 
     Example

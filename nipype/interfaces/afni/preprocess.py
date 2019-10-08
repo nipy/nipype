@@ -2850,6 +2850,79 @@ class TShift(AFNICommand):
         return outputs
 
 
+class TSmoothInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc='input file to 3dTSmooth',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True,
+        copyfile=False)
+    out_file = File(
+        name_template='%s_smooth',
+        desc='output file from 3dTSmooth',
+        argstr='-prefix %s',
+        name_source='in_file')
+    datum = traits.Str(
+        desc='Sets the data type of the output dataset',
+        argstr='-datum %s')
+    lin = traits.Bool(
+        desc='3 point linear filter: 0.15*a + 0.70*b + 0.15*c'
+        '[This is the default smoother]',
+        argstr='-lin')
+    med = traits.Bool(
+        desc='3 point median filter: median(a,b,c)',
+        argstr='-med')
+    osf = traits.Bool(
+        desc='3 point order statistics filter:'
+        '0.15*min(a,b,c) + 0.70*median(a,b,c) + 0.15*max(a,b,c)',
+        argstr='-osf')
+    lin3 = traits.Int(
+        desc='3 point linear filter: 0.5*(1-m)*a + m*b + 0.5*(1-m)*c'
+        "Here, 'm' is a number strictly between 0 and 1.",
+        argstr='-3lin %d')
+    hamming = traits.Int(
+        argstr='-hamming %d',
+        desc='Use N point Hamming windows.'
+        '(N must be odd and bigger than 1.)')
+    blackman = traits.Int(
+        argstr='-blackman %d',
+        desc='Use N point Blackman windows.'
+        '(N must be odd and bigger than 1.)')
+    custom = File(
+        argstr='-custom %s',
+        desc='odd # of coefficients must be in a single column in ASCII file')
+    adaptive = traits.Int(
+        argstr='-adaptive %d',
+        desc='use adaptive mean filtering of width N '
+        '(where N must be odd and bigger than 3).')
+
+
+class TSmooth(AFNICommand):
+    """Smooths each voxel time series in a 3D+time dataset and produces
+    as output a new 3D+time dataset (e.g., lowpass filter in time).
+
+    For complete details, see the `3dTsmooth Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTSmooth.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni
+    >>> from nipype.testing import  example_data
+    >>> smooth = afni.TSmooth()
+    >>> smooth.inputs.in_file = 'functional.nii'
+    >>> smooth.inputs.adaptive = 5
+    >>> smooth.cmdline
+    '3dTsmooth -adaptive 5 -prefix functional_smooth functional.nii'
+    >>> res = smooth.run()  # doctest: +SKIP
+
+    """
+    _cmd = '3dTsmooth'
+    input_spec = TSmoothInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
 class VolregInputSpec(AFNICommandInputSpec):
     in_file = File(
         desc='input file to 3dvolreg',
@@ -3697,13 +3770,18 @@ warp+tlrc.HEAD -prefix Q11'
 
         if not isdefined(self.inputs.out_file):
             prefix = self._gen_fname(self.inputs.in_file, suffix='_QW')
-            ext = '.HEAD'
-            suffix = '+tlrc'
+            outputtype = self.inputs.outputtype
+            if outputtype == 'AFNI':
+                ext = '.HEAD'
+                suffix = '+tlrc'
+            else:
+                ext = Info.output_type_to_ext(outputtype)
+                suffix = ''
         else:
             prefix = self.inputs.out_file
             ext_ind = max([
                 prefix.lower().rfind('.nii.gz'),
-                prefix.lower().rfind('.nii.')
+                prefix.lower().rfind('.nii')
             ])
             if ext_ind == -1:
                 ext = '.HEAD'

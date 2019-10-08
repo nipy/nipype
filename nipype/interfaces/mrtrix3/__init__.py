@@ -3,7 +3,8 @@
 # -*- coding: utf-8 -*-
 
 from .utils import (Mesh2PVE, Generate5tt, BrainMask, TensorMetrics,
-                    ComputeTDI, TCK2VTK, MRMath, MRConvert, DWIExtract)
+                    ComputeTDI, TCK2VTK, MRMath, MRConvert, MRResize,
+                    DWIExtract)
 from .preprocess import (ResponseSD, ACTPrepareFSL, ReplaceFSwithFIRST,
                          DWIDenoise, MRDeGibbs, DWIBiasCorrect)
 from .tracking import Tractography

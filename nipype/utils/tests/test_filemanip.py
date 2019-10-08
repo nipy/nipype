@@ -4,6 +4,7 @@
 import os
 import time
 import warnings
+from pathlib import Path
 
 import mock
 import pytest
@@ -13,7 +14,7 @@ from ...utils.filemanip import (
     check_forhash, _parse_mount_table, _cifs_table, on_cifs, copyfile,
     copyfiles, ensure_list, simplify_list, check_depends,
     split_filename, get_related_files, indirectory,
-    loadpkl, loadcrash, savepkl, FileNotFoundError, Path)
+    loadpkl, loadcrash, savepkl, path_resolve)
 
 
 def _ignore_atime(stat):
@@ -555,7 +556,7 @@ def test_versioned_pklization(tmpdir):
         with mock.patch('nipype.utils.tests.test_filemanip.Pickled', PickledBreaker), \
              mock.patch('nipype.__version__', '0.0.0'):
 
-            loadpkl('./pickled.pkz', versioning=True)
+            loadpkl('./pickled.pkz')
 
 
 def test_unversioned_pklization(tmpdir):
@@ -566,21 +567,33 @@ def test_unversioned_pklization(tmpdir):
 
     with pytest.raises(Exception):
         with mock.patch('nipype.utils.tests.test_filemanip.Pickled', PickledBreaker):
-            loadpkl('./pickled.pkz', versioning=True)
+            loadpkl('./pickled.pkz')
 
 
-def test_Path_strict_resolve(tmpdir):
+def test_path_strict_resolve(tmpdir):
     """Check the monkeypatch to test strict resolution of Path."""
     tmpdir.chdir()
 
     # Default strict=False should work out out of the box
     testfile = Path('somefile.txt')
-    assert '%s/somefile.txt' % tmpdir == '%s' % testfile.resolve()
+    resolved = '%s/somefile.txt' % tmpdir
+    assert str(path_resolve(testfile)) == resolved
+    # Strict keyword is always allowed
+    assert str(path_resolve(testfile, strict=False)) == resolved
 
     # Switching to strict=True must raise FileNotFoundError (also in Python2)
     with pytest.raises(FileNotFoundError):
-        testfile.resolve(strict=True)
+        path_resolve(testfile, strict=True)
 
     # If the file is created, it should not raise
     open('somefile.txt', 'w').close()
-    assert '%s/somefile.txt' % tmpdir == '%s' % testfile.resolve(strict=True)
+    assert str(path_resolve(testfile, strict=True)) == resolved
+
+
+@pytest.mark.parametrize("save_versioning", [True, False])
+def test_pickle(tmp_path, save_versioning):
+    testobj = 'iamateststr'
+    pickle_fname = str(tmp_path / 'testpickle.pklz')
+    savepkl(pickle_fname, testobj, versioning=save_versioning)
+    outobj = loadpkl(pickle_fname)
+    assert outobj == testobj

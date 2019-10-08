@@ -3,7 +3,6 @@
 import os.path as op
 import numpy as np
 import nibabel as nb
-import nibabel.trackvis as nbt
 from distutils.version import LooseVersion
 
 from ... import logging
@@ -87,6 +86,7 @@ class TrackDensityMap(DipyBaseInterface):
     def _run_interface(self, runtime):
         from numpy import min_scalar_type
         from dipy.tracking.utils import density_map
+        import nibabel.trackvis as nbt
 
         tracks, header = nbt.read(self.inputs.in_file)
         streams = ((ii[0]) for ii in tracks)
