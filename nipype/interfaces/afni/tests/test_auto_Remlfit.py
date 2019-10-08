@@ -46,6 +46,7 @@ def test_Remlfit_inputs():
             extensions=None,
         ),
         gltsym=dict(argstr='-gltsym "%s" %s...', ),
+        goforit=dict(argstr='-GOFORIT', ),
         in_files=dict(
             argstr='-input "%s"',
             copyfile=False,

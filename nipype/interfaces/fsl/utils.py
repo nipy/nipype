@@ -858,18 +858,18 @@ class AvScale(CommandLine):
         runtime = super(AvScale, self)._run_interface(runtime)
 
         expr = re.compile(
-            'Rotation\ &\ Translation\ Matrix:\n(?P<rot_tran_mat>[0-9\.\ \n-]+)[\s\n]*'
-            '(Rotation\ Angles\ \(x,y,z\)\ \[rads\]\ =\ (?P<rot_angles>[0-9\.\ -]+))?[\s\n]*'
-            '(Translations\ \(x,y,z\)\ \[mm\]\ =\ (?P<translations>[0-9\.\ -]+))?[\s\n]*'
-            'Scales\ \(x,y,z\)\ =\ (?P<scales>[0-9\.\ -]+)[\s\n]*'
-            'Skews\ \(xy,xz,yz\)\ =\ (?P<skews>[0-9\.\ -]+)[\s\n]*'
-            'Average\ scaling\ =\ (?P<avg_scaling>[0-9\.-]+)[\s\n]*'
-            'Determinant\ =\ (?P<determinant>[0-9\.-]+)[\s\n]*'
-            'Left-Right\ orientation:\ (?P<lr_orientation>[A-Za-z]+)[\s\n]*'
-            'Forward\ half\ transform\ =[\s]*\n'
-            '(?P<fwd_half_xfm>[0-9\.\ \n-]+)[\s\n]*'
-            'Backward\ half\ transform\ =[\s]*\n'
-            '(?P<bwd_half_xfm>[0-9\.\ \n-]+)[\s\n]*')
+            r'Rotation & Translation Matrix:\n(?P<rot_tran_mat>[0-9\. \n-]+)[\s\n]*'
+            r'(Rotation Angles \(x,y,z\) \[rads\] = (?P<rot_angles>[0-9\. -]+))?[\s\n]*'
+            r'(Translations \(x,y,z\) \[mm\] = (?P<translations>[0-9\. -]+))?[\s\n]*'
+            r'Scales \(x,y,z\) = (?P<scales>[0-9\. -]+)[\s\n]*'
+            r'Skews \(xy,xz,yz\) = (?P<skews>[0-9\. -]+)[\s\n]*'
+            r'Average scaling = (?P<avg_scaling>[0-9\.-]+)[\s\n]*'
+            r'Determinant = (?P<determinant>[0-9\.-]+)[\s\n]*'
+            r'Left-Right orientation: (?P<lr_orientation>[A-Za-z]+)[\s\n]*'
+            r'Forward half transform =[\s]*\n'
+            r'(?P<fwd_half_xfm>[0-9\. \n-]+)[\s\n]*'
+            r'Backward half transform =[\s]*\n'
+            r'(?P<bwd_half_xfm>[0-9\. \n-]+)[\s\n]*')
         out = expr.search(runtime.stdout).groupdict()
         outputs = {}
         outputs['rotation_translation_matrix'] = [[
