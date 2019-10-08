@@ -41,7 +41,7 @@ related_filetype_sets = [
 PY3 = sys.version_info[0] >= 3
 
 try:
-    from builtins import FileNotFoundError
+    from builtins import FileNotFoundError, FileExistsError
 except ImportError:  # PY27
     class FileNotFoundError(OSError):  # noqa
         """Defines the exception for Python 2."""
