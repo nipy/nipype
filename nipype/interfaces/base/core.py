@@ -21,7 +21,6 @@ import shlex
 import sys
 import simplejson as json
 from dateutil.parser import parse as parseutc
-from future import standard_library
 from traits.trait_errors import TraitError
 
 from ... import config, logging, LooseVersion

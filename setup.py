@@ -16,7 +16,6 @@ import sys
 from glob import glob
 import os
 from os.path import join as pjoin
-from io import open
 
 # Commit hash writing, and dependency checking
 from setuptools.command.build_py import build_py
