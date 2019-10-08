@@ -102,7 +102,7 @@ existing pipeline systems.
 NIBABEL_MIN_VERSION = '2.1.0'
 NETWORKX_MIN_VERSION = '1.9'
 NETWORKX_MAX_VERSION_27 = '2.2'
-NUMPY_MIN_VERSION = '1.9.0'
+NUMPY_MIN_VERSION = '1.12'
 # Numpy bug in python 3.7:
 # https://www.opensourceanswers.com/blog/you-shouldnt-use-python-37-for-data-science-right-now.html
 NUMPY_MIN_VERSION_37 = '1.15.3'
