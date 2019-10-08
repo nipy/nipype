@@ -1466,7 +1466,7 @@ class DataFinder(IOBase):
     >>> from nipype.interfaces.io import DataFinder
     >>> df = DataFinder()
     >>> df.inputs.root_paths = '.'
-    >>> df.inputs.match_regex = '.+/(?P<series_dir>.+(qT1|ep2d_fid_T1).+)/(?P<basename>.+)\.nii.gz'
+    >>> df.inputs.match_regex = r'.+/(?P<series_dir>.+(qT1|ep2d_fid_T1).+)/(?P<basename>.+)\.nii.gz'
     >>> result = df.run() # doctest: +SKIP
     >>> result.outputs.out_paths  # doctest: +SKIP
     ['./027-ep2d_fid_T1_Gd4/acquisition.nii.gz',

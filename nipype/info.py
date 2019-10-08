@@ -9,7 +9,7 @@ import sys
 
 # nipype version information
 # Remove -dev for release
-__version__ = '1.3.0-dev'
+__version__ = '1.3.0-rc1.post-dev'
 
 
 def get_nipype_gitversion():
@@ -55,13 +55,12 @@ CLASSIFIERS = [
     'Operating System :: MacOS :: MacOS X',
     'Operating System :: POSIX :: Linux',
     'Programming Language :: Python :: 2.7',
-    'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Topic :: Scientific/Engineering'
 ]
-PYTHON_REQUIRES = ">= 2.7, != 3.0.*, != 3.1.*, != 3.2.*, != 3.3.*"
+PYTHON_REQUIRES = ">= 2.7, != 3.0.*, != 3.1.*, != 3.2.*, != 3.3.*, != 3.4.*"
 
 description = 'Neuroimaging in Python: Pipelines and Interfaces'
 
@@ -103,7 +102,7 @@ existing pipeline systems.
 NIBABEL_MIN_VERSION = '2.1.0'
 NETWORKX_MIN_VERSION = '1.9'
 NETWORKX_MAX_VERSION_27 = '2.2'
-NUMPY_MIN_VERSION = '1.9.0'
+NUMPY_MIN_VERSION = '1.12'
 # Numpy bug in python 3.7:
 # https://www.opensourceanswers.com/blog/you-shouldnt-use-python-37-for-data-science-right-now.html
 NUMPY_MIN_VERSION_37 = '1.15.3'
@@ -145,7 +144,6 @@ REQUIRES = [
     'funcsigs',
     'future>=%s' % FUTURE_MIN_VERSION,
     'futures; python_version == "2.7"',
-    'lxml<4.4.0; python_version == "3.4"',
     'networkx>=%s ; python_version >= "3.0"' % NETWORKX_MIN_VERSION,
     'networkx>=%s,<=%s ; python_version < "3.0"' % (NETWORKX_MIN_VERSION, NETWORKX_MAX_VERSION_27),
     'nibabel>=%s' % NIBABEL_MIN_VERSION,
