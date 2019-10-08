@@ -28,12 +28,12 @@ import copy
 import tempfile
 from os.path import join, dirname
 from warnings import warn
-import errno
 
 from .. import config, logging
 from ..utils.filemanip import (
     copyfile, simplify_list, ensure_list,
-    get_related_files, split_filename)
+    get_related_files, split_filename,
+    FileExistsError)
 from ..utils.misc import human_order_sorted, str2bool
 from .base import (
     TraitedSpec, traits, Str, File, Directory, BaseInterface, InputMultiPath,
@@ -2883,7 +2883,7 @@ class ExportFile(SimpleInterface):
 
     def _run_interface(self, runtime):
         if not self.inputs.clobber and op.exists(self.inputs.out_file):
-            raise FileExistsError(errno.EEXIST, 'File %s exists' % self.inputs.out_file)
+            raise FileExistsError(self.inputs.out_file)
         if not op.isabs(self.inputs.out_file):
             raise ValueError('Out_file must be an absolute path.')
         if (self.inputs.check_extension and

@@ -51,6 +51,14 @@ except ImportError:  # PY27
             super(FileNotFoundError, self).__init__(
                 2, 'No such file or directory', '%s' % path)
 
+    class FileExistsError(OSError):  # noqa
+        """Defines the exception for Python 2."""
+
+        def __init__(self, path):
+            """Initialize the exception."""
+            super(FileExistsError, self).__init__(
+                17, 'File or directory exists', '%s' % path)
+
 
 USING_PATHLIB2 = False
 try:
