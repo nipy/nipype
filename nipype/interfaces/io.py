@@ -2878,6 +2878,27 @@ class ExportFileOutputSpec(TraitedSpec):
 
 
 class ExportFile(SimpleInterface):
+    """Copy in_file to out_file.
+
+    This interface copies an input file to a named output file.
+    This is useful to save files to a specified location
+    (as opposed to using DataSink).
+
+    Examples
+    --------
+
+    A trivial example that copies temporary_file.nii.gz
+    to sub1_out.nii.gz. (A more realistic example would set
+    in_file as the output of another Node.)
+
+    >>> from nipype.interfaces.io import ExportFile
+    >>> import os.path as op
+    >>> ef = Node(ExportFile(), "export")
+    >>> ef.inputs.in_file = "temporary_file.nii.gz"
+    >>> ef.inputs.out_file = op.abspath("output_folder/sub1_out.nii.gz")
+    >>> ef.run()
+
+    """
     input_spec = ExportFileInputSpec
     output_spec = ExportFileOutputSpec
 
