@@ -687,7 +687,7 @@ def test_ExportFile(tmp_path):
     testin.write_text('test string')
     i = nio.ExportFile()
     i.inputs.in_file = testin
-    i.inputs.out_file = tmp_path / 'out.tsv'
+    i.inputs.out_file = str(tmp_path / 'out.tsv')
     i.inputs.check_extension = True
     with pytest.raises(RuntimeError):
         i.run()
