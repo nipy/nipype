@@ -516,15 +516,20 @@ directory. Please ensure no other concurrent workflows are racing""", hashfile_u
         This mechanism can be easily extended/replaced to retrieve data from
         other data sources (e.g., XNAT, HTTP, etc.,.)
         """
-        if self._got_inputs:
+        if self._got_inputs:  # Inputs cached
+            return
+
+        if not self.input_source:  # No previous nodes
+            self._got_inputs = True
             return
 
         prev_results = defaultdict(list)
         for key, info in list(self.input_source.items()):
             prev_results[info[0]].append((key, info[1]))
 
-        logger.debug('[Node] Setting %d connected inputs from %d previous nodes.',
-                     len(self.input_source), len(prev_results))
+        logger.debug(
+            '[Node] Setting %d connected inputs of node "%s" from %d previous nodes.',
+            len(self.input_source), self.name, len(prev_results))
 
         for results_fname, connections in list(prev_results.items()):
             outputs = None
@@ -535,7 +540,7 @@ directory. Please ensure no other concurrent workflows are racing""", hashfile_u
 
             if outputs is None:
                 raise RuntimeError("""\
-Error populating the inpus of node "%s": the results file of the source node \
+Error populating the inputs of node "%s": the results file of the source node \
 (%s) does not contain any outputs.""" % (self.name, results_fname))
 
             for key, conn in connections:
