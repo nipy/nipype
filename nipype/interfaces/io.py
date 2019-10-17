@@ -2887,14 +2887,11 @@ class ExportFile(SimpleInterface):
     Examples
     --------
 
-    A trivial example that copies temporary_file.nii.gz
-    to sub1_out.nii.gz. (A more realistic example would set
-    in_file as the output of another Node.)
-
     >>> from nipype.interfaces.io import ExportFile
     >>> import os.path as op
     >>> ef = ExportFile()
-    >>> ef.inputs.in_file = "temporary_file.nii.gz"
+    >>> ef.inputs.in_file = "T1.nii.gz"
+    >>> os.mkdir("output_folder")
     >>> ef.inputs.out_file = op.abspath("output_folder/sub1_out.nii.gz")
     >>> ef.run()
 
