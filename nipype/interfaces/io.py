@@ -2882,7 +2882,7 @@ class ExportFile(SimpleInterface):
 
     This interface copies an input file to a named output file.
     This is useful to save individual files to a specific location,
-    (as opposed to using DataSink).
+    instead of more flexible interfaces like DataSink.
 
     Examples
     --------
