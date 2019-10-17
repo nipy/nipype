@@ -2878,7 +2878,7 @@ class ExportFileOutputSpec(TraitedSpec):
 
 
 class ExportFile(SimpleInterface):
-    """Copy in_file to out_file.
+    """ Export a file to an absolute path
 
     This interface copies an input file to a named output file.
     This is useful to save files to a specified location
