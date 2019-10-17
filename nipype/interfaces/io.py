@@ -2893,7 +2893,7 @@ class ExportFile(SimpleInterface):
 
     >>> from nipype.interfaces.io import ExportFile
     >>> import os.path as op
-    >>> ef = Node(ExportFile(), "export")
+    >>> ef = ExportFile()
     >>> ef.inputs.in_file = "temporary_file.nii.gz"
     >>> ef.inputs.out_file = op.abspath("output_folder/sub1_out.nii.gz")
     >>> ef.run()
