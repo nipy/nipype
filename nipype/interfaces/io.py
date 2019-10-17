@@ -2881,7 +2881,7 @@ class ExportFile(SimpleInterface):
     """ Export a file to an absolute path
 
     This interface copies an input file to a named output file.
-    This is useful to save files to a specified location
+    This is useful to save individual files to a specific location,
     (as opposed to using DataSink).
 
     Examples
