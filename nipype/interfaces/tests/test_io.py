@@ -694,7 +694,7 @@ def test_ExportFile(tmp_path):
     i.inputs.check_extension = False
     i.run()
     assert (tmp_path / 'out.tsv').read_text() == 'test string'
-    i.inputs.out_file = tmp_path / 'out.txt'
+    i.inputs.out_file = str(tmp_path / 'out.txt')
     i.inputs.check_extension = True
     i.run()
     assert (tmp_path / 'out.txt').read_text() == 'test string'
