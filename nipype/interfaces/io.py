@@ -2894,6 +2894,8 @@ class ExportFile(SimpleInterface):
     >>> os.mkdir("output_folder")
     >>> ef.inputs.out_file = op.abspath("output_folder/sub1_out.nii.gz")
     >>> res = ef.run()
+    >>> os.path.exists(res.outputs.out_file)
+    True
 
     """
     input_spec = ExportFileInputSpec
