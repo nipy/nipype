@@ -2893,7 +2893,7 @@ class ExportFile(SimpleInterface):
     >>> ef.inputs.in_file = "T1.nii.gz"
     >>> os.mkdir("output_folder")
     >>> ef.inputs.out_file = op.abspath("output_folder/sub1_out.nii.gz")
-    >>> ef.run()
+    >>> res = ef.run()
 
     """
     input_spec = ExportFileInputSpec
