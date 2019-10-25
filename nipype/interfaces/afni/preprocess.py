@@ -24,7 +24,7 @@ iflogger = logging.getLogger('nipype.interface')
 
 
 class CentralityInputSpec(AFNICommandInputSpec):
-    """Common input spec class for all centrality-related commands 
+    """Common input spec class for all centrality-related commands
     """
 
     mask = File(
