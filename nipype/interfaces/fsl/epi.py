@@ -689,8 +689,8 @@ class EddyInputSpec(FSLCommandInputSpec):
         desc=("Final resampling method (jacobian/least " "squares)"),
     )
 
-    repol = traits.Enum(
-        True, argstr="--repol", desc="Detect and replace outlier slices"
+    repol = traits.Bool(
+        False, argstr="--repol", desc="Detect and replace outlier slices"
     )
     outlier_nstd = traits.Int(
         argstr="--ol_nstd",
@@ -785,8 +785,8 @@ class EddyInputSpec(FSLCommandInputSpec):
         min_ver="6.0.1",
     )
 
-    estimate_move_by_susceptibility = traits.Enum(
-        True,
+    estimate_move_by_susceptibility = traits.Bool(
+        False,
         argstr="--estimate_move_by_susceptibility",
         desc="Estimate how susceptibility field changes with subject movement",
         min_ver="6.0.1",
@@ -823,7 +823,7 @@ class EddyInputSpec(FSLCommandInputSpec):
         ),
     )
 
-    use_cuda = traits.Enum(True, desc="Run eddy using cuda gpu")
+    use_cuda = traits.Bool(False, desc="Run eddy using cuda gpu")
     cnr_maps = traits.Bool(
         False, desc="Output CNR-Maps", argstr="--cnr_maps", min_ver="5.0.10"
     )
