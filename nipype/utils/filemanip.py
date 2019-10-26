@@ -790,9 +790,9 @@ def read_stream(stream, logger=None, encoding=None):
 
 
 def savepkl(filename, record, versioning=False):
-    pklopen = gzip.open if filename.endswith('.pklz') else open
     with SoftFileLock('%s.lock' % filename):
-        with pklopen(filename, 'wb') as pkl_file:
+        with open(filename, 'wb') as fobj:
+            pkl_file = gzip.GzipFile(fileobj=fobj) if filename.endswith('.pklz') else fobj
             if versioning:
                 from nipype import __version__ as version
                 metadata = json.dumps({'version': version})
@@ -801,6 +801,9 @@ def savepkl(filename, record, versioning=False):
                 pkl_file.write('\n'.encode('utf-8'))
 
             pickle.dump(record, pkl_file)
+            # Pickle files need to be available immediately, so force a sync
+            fobj.flush()
+            os.fsync(fobj.fileno())
 
 
 rst_levels = ['=', '-', '~', '+']
