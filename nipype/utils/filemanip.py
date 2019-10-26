@@ -41,7 +41,7 @@ related_filetype_sets = [
 PY3 = sys.version_info[0] >= 3
 
 try:
-    from builtins import FileNotFoundError
+    from builtins import FileNotFoundError, FileExistsError
 except ImportError:  # PY27
     class FileNotFoundError(OSError):  # noqa
         """Defines the exception for Python 2."""
@@ -50,6 +50,14 @@ except ImportError:  # PY27
             """Initialize the exception."""
             super(FileNotFoundError, self).__init__(
                 2, 'No such file or directory', '%s' % path)
+
+    class FileExistsError(OSError):  # noqa
+        """Defines the exception for Python 2."""
+
+        def __init__(self, path):
+            """Initialize the exception."""
+            super(FileExistsError, self).__init__(
+                17, 'File or directory exists', '%s' % path)
 
 
 USING_PATHLIB2 = False
