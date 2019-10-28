@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
-# vi: set ft = python sts = 4 ts = 4 sw = 4 et:
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 AFNI utility interfaces.
 
@@ -213,9 +213,9 @@ class Autobox(AFNICommand):
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = super(Autobox, self).aggregate_outputs(
             runtime, needed_outputs)
-        pattern = 'x=(?P<x_min>-?\d+)\.\.(?P<x_max>-?\d+)  '\
-                  'y=(?P<y_min>-?\d+)\.\.(?P<y_max>-?\d+)  '\
-                  'z=(?P<z_min>-?\d+)\.\.(?P<z_max>-?\d+)'
+        pattern = r'x=(?P<x_min>-?\d+)\.\.(?P<x_max>-?\d+)  '\
+                  r'y=(?P<y_min>-?\d+)\.\.(?P<y_max>-?\d+)  '\
+                  r'z=(?P<z_min>-?\d+)\.\.(?P<z_max>-?\d+)'
         for line in runtime.stderr.split('\n'):
             m = re.search(pattern, line)
             if m:
@@ -619,8 +619,9 @@ class CatMatvec(AFNICommand):
 
     def _format_arg(self, name, spec, value):
         if name == 'in_file':
-            return spec.argstr % (' '.join([i[0] + ' -' + i[1]
-                                            for i in value]))
+            # Concatenate a series of filenames, with optional opkeys
+            return ' '.join('%s -%s' % (mfile, opkey) if opkey else mfile
+                           for mfile, opkey in value)
         return super(CatMatvec, self)._format_arg(name, spec, value)
 
 

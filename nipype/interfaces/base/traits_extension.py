@@ -33,7 +33,7 @@ from traits.trait_base import _Undefined
 
 from traits.api import Unicode
 from future import standard_library
-from ...utils.filemanip import Path, USING_PATHLIB2
+from ...utils.filemanip import Path, USING_PATHLIB2, path_resolve
 
 if USING_PATHLIB2:
     from future.types.newstr import newstr
@@ -147,7 +147,7 @@ class BasePath(TraitType):
                 self.error(objekt, name, str(value))
 
         if self.resolve:
-            value = value.resolve(strict=self.exists)
+            value = path_resolve(value, strict=self.exists)
 
         if not return_pathlike:
             value = str(value)

@@ -16,7 +16,8 @@ from ...utils.filemanip import (
     check_forhash, _parse_mount_table, _cifs_table, on_cifs, copyfile,
     copyfiles, ensure_list, simplify_list, check_depends,
     split_filename, get_related_files, indirectory,
-    loadpkl, loadcrash, savepkl, FileNotFoundError, Path)
+    loadpkl, loadcrash, savepkl, FileNotFoundError, Path,
+    path_mkdir, path_resolve)
 
 
 def _ignore_atime(stat):
@@ -572,21 +573,24 @@ def test_unversioned_pklization(tmpdir):
             loadpkl('./pickled.pkz')
 
 
-def test_Path_strict_resolve(tmpdir):
+def test_path_strict_resolve(tmpdir):
     """Check the monkeypatch to test strict resolution of Path."""
     tmpdir.chdir()
 
     # Default strict=False should work out out of the box
     testfile = Path('somefile.txt')
-    assert '%s/somefile.txt' % tmpdir == '%s' % testfile.resolve()
+    resolved = '%s/somefile.txt' % tmpdir
+    assert str(path_resolve(testfile)) == resolved
+    # Strict keyword is always allowed
+    assert str(path_resolve(testfile, strict=False)) == resolved
 
     # Switching to strict=True must raise FileNotFoundError (also in Python2)
     with pytest.raises(FileNotFoundError):
-        testfile.resolve(strict=True)
+        path_resolve(testfile, strict=True)
 
     # If the file is created, it should not raise
     open('somefile.txt', 'w').close()
-    assert '%s/somefile.txt' % tmpdir == '%s' % testfile.resolve(strict=True)
+    assert str(path_resolve(testfile, strict=True)) == resolved
 
 
 @pytest.mark.parametrize("save_versioning", [True, False])
@@ -598,17 +602,18 @@ def test_pickle(tmp_path, save_versioning):
     assert outobj == testobj
 
 
-def test_Path(tmpdir):
+def test_path_mkdir(tmpdir):
     tmp_path = Path(tmpdir.strpath)
 
-    (tmp_path / 'textfile').write_text('some text')
+    # PY34: Leave as monkey-patch
+    Path.write_text(tmp_path / 'textfile', 'some text')
 
     with pytest.raises(OSError):
-        (tmp_path / 'no' / 'parents').mkdir(parents=False)
+        path_mkdir(tmp_path / 'no' / 'parents', parents=False)
 
-    (tmp_path / 'no' / 'parents').mkdir(parents=True)
+    path_mkdir(tmp_path / 'no' / 'parents', parents=True)
 
     with pytest.raises(OSError):
-        (tmp_path / 'no' / 'parents').mkdir(parents=False)
+        path_mkdir(tmp_path / 'no' / 'parents', parents=False)
 
-    (tmp_path / 'no' / 'parents').mkdir(parents=True, exist_ok=True)
+    path_mkdir(tmp_path / 'no' / 'parents', parents=True, exist_ok=True)

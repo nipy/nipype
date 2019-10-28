@@ -32,12 +32,13 @@ from warnings import warn
 from .. import config, logging
 from ..utils.filemanip import (
     copyfile, simplify_list, ensure_list,
-    get_related_files)
+    get_related_files, split_filename,
+    FileExistsError)
 from ..utils.misc import human_order_sorted, str2bool
 from .base import (
     TraitedSpec, traits, Str, File, Directory, BaseInterface, InputMultiPath,
     isdefined, OutputMultiPath, DynamicTraitedSpec, Undefined, BaseInterfaceInputSpec,
-    LibraryBaseInterface)
+    LibraryBaseInterface, SimpleInterface)
 
 iflogger = logging.getLogger('nipype.interface')
 
@@ -1466,7 +1467,7 @@ class DataFinder(IOBase):
     >>> from nipype.interfaces.io import DataFinder
     >>> df = DataFinder()
     >>> df.inputs.root_paths = '.'
-    >>> df.inputs.match_regex = '.+/(?P<series_dir>.+(qT1|ep2d_fid_T1).+)/(?P<basename>.+)\.nii.gz'
+    >>> df.inputs.match_regex = r'.+/(?P<series_dir>.+(qT1|ep2d_fid_T1).+)/(?P<basename>.+)\.nii.gz'
     >>> result = df.run() # doctest: +SKIP
     >>> result.outputs.out_paths  # doctest: +SKIP
     ['./027-ep2d_fid_T1_Gd4/acquisition.nii.gz',
@@ -2863,3 +2864,51 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
 
     def _add_output_traits(self, base):
         return add_traits(base, list(self.inputs.output_query.keys()))
+
+
+class ExportFileInputSpec(BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True, desc='Input file name')
+    out_file = File(mandatory=True, desc='Output file name')
+    check_extension = traits.Bool(True, desc='Ensure that the input and output file extensions match')
+    clobber = traits.Bool(desc='Permit overwriting existing files')
+
+
+class ExportFileOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='Output file name')
+
+
+class ExportFile(SimpleInterface):
+    """ Export a file to an absolute path
+
+    This interface copies an input file to a named output file.
+    This is useful to save individual files to a specific location,
+    instead of more flexible interfaces like DataSink.
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.io import ExportFile
+    >>> import os.path as op
+    >>> ef = ExportFile()
+    >>> ef.inputs.in_file = "T1.nii.gz"
+    >>> os.mkdir("output_folder")
+    >>> ef.inputs.out_file = op.abspath("output_folder/sub1_out.nii.gz")
+    >>> res = ef.run()
+    >>> os.path.exists(res.outputs.out_file)
+    True
+
+    """
+    input_spec = ExportFileInputSpec
+    output_spec = ExportFileOutputSpec
+
+    def _run_interface(self, runtime):
+        if not self.inputs.clobber and op.exists(self.inputs.out_file):
+            raise FileExistsError(self.inputs.out_file)
+        if not op.isabs(self.inputs.out_file):
+            raise ValueError('Out_file must be an absolute path.')
+        if (self.inputs.check_extension and
+                split_filename(self.inputs.in_file)[2] != split_filename(self.inputs.out_file)[2]):
+            raise RuntimeError('%s and %s have different extensions' % (self.inputs.in_file, self.inputs.out_file))
+        shutil.copy(str(self.inputs.in_file), str(self.inputs.out_file))
+        self._results['out_file'] = self.inputs.out_file
+        return runtime
