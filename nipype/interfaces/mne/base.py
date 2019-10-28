@@ -10,7 +10,7 @@ import glob
 from ... import logging
 from ...utils.filemanip import simplify_list
 from ..base import (traits, File, Directory, TraitedSpec, OutputMultiPath,
-                    isdefined, CommandLine, CommandLineInputSpec)
+                    isdefined, CommandLine)
 from ..freesurfer.base import FSCommand, FSTraitedSpec
 
 iflogger = logging.getLogger('nipype.interface')
@@ -165,7 +165,7 @@ class SetupSourceSpaceInputSpec(FSTraitedSpec):
         default=None,
         desc='use the recursively subdivided icosahedron '
              'to create the source space.')
-    oct = traits.Int(
+    oct_ = traits.Int(
         argstr='--oct %s',
         mandatory=False,
         default=None,
@@ -239,7 +239,7 @@ class SetupSourceSpace(CommandLine):
         outputs = self.output_spec().get()
         fname = self.inputs.fname
         ico = self.inputs.ico
-        oct = self.inputs.oct
+        oct_ = self.inputs.oct_
         spacing = self.inputs.spacing
         subject = self.inputs.subject
         subject_to = self.inputs.subject_to
@@ -247,8 +247,8 @@ class SetupSourceSpace(CommandLine):
         if not isdefined(fname):
             if isdefined(ico):
                 use_spacing = "ico" + str(ico)
-            elif isdefined(oct):
-                use_spacing = "oct" + str(oct)
+            elif isdefined(oct_):
+                use_spacing = "oct" + str(oct_)
             elif isdefined(spacing):
                 use_spacing = spacing
             if not isdefined(subject_to):
