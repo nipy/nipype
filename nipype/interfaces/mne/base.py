@@ -223,7 +223,7 @@ class SetupSourceSpace(CommandLine):
 
     >>> from nipype.interfaces.mne import SetupSourceSpace
     >>> setup_source_space = SetupSourceSpace()
-    >>> setup_source_space.inputs.subject_id = 'subj1'
+    >>> setup_source_space.inputs.subject = 'subj1'
     >>> setup_source_space.inputs.subjects_dir = '.'
     >>> setup_source_space.cmdline
     'mne setup_source_space --subject subj1 --surface white'
