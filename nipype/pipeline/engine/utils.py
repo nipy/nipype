@@ -236,17 +236,17 @@ def save_resultfile(result, cwd, name, rebase=None):
 
     if result.outputs is None:
         logger.warning('Storing result file without outputs')
-        savepkl(resultsfile, result)
+        savepkl(resultsfile, result, sync=True)
         return
     try:
         output_names = result.outputs.copyable_trait_names()
     except AttributeError:
         logger.debug('Storing non-traited results, skipping rebase of paths')
-        savepkl(resultsfile, result)
+        savepkl(resultsfile, result, sync=True)
         return
 
     if not rebase:
-        savepkl(resultsfile, result)
+        savepkl(resultsfile, result, sync=True)
         return
 
     backup_traits = {}
@@ -262,7 +262,7 @@ def save_resultfile(result, cwd, name, rebase=None):
                     backup_traits[key] = old
                     val = rebase_path_traits(result.outputs.trait(key), old, cwd)
                     setattr(result.outputs, key, val)
-        savepkl(resultsfile, result)
+        savepkl(resultsfile, result, sync=True)
     finally:
         # Restore resolved paths from the outputs dict no matter what
         for key, val in list(backup_traits.items()):
