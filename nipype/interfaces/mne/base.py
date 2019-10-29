@@ -171,7 +171,7 @@ class SetupSourceSpaceInputSpec(FSTraitedSpec):
         default=None,
         desc='use the recursively subdivided octahedron '
              'to create the source space.',
-        xor=[ico])
+        xor=['ico'])
     spacing = traits.Int(
         7,
         argstr='--spacing %s',
@@ -179,7 +179,7 @@ class SetupSourceSpaceInputSpec(FSTraitedSpec):
         usedefault=True,
         desc='Specifies the approximate grid spacing of the '
              'source space in mm.',
-        xor=[oct_, ico])
+        xor=['oct_', 'ico'])
     cps = traits.Bool(
         True,
         argstr='--cps',
