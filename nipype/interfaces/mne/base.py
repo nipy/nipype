@@ -179,7 +179,7 @@ class SetupSourceSpaceInputSpec(FSTraitedSpec):
         usedefault=True,
         desc='Specifies the approximate grid spacing of the '
              'source space in mm.',
-        xor=[oct, ico])
+        xor=[oct_, ico])
     cps = traits.Bool(
         True,
         argstr='--cps',
