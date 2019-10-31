@@ -9,8 +9,8 @@ import glob
 
 from ... import logging
 from ...utils.filemanip import simplify_list
-from ..base import (traits, File, Directory, TraitedSpec, OutputMultiPath,
-                    isdefined, CommandLine)
+from ..base import (traits, File, Bool, Int, Str, Directory, TraitedSpec,
+                    OutputMultiPath, isdefined, CommandLine)
 from ..freesurfer.base import FSCommand, FSTraitedSpec
 
 iflogger = logging.getLogger('nipype.interface')
@@ -139,40 +139,40 @@ class WatershedBEM(FSCommand):
 
 
 class SetupSourceSpaceInputSpec(FSTraitedSpec):
-    subject = traits.Str(
+    subject = Str(
         argstr='--subject %s',
         mandatory=True,
         desc='Subject name')
-    fname = traits.File(
+    fname = File(
         argstr='--src %s',
         mandatory=False,
         default=None,
         desc='Output file name. Use a name <dir>/<name>-src.fif')
-    subject_to = traits.Str(
+    subject_to = Str(
         argstr='--morph %s',
         mandatory=False,
         default=None,
         desc='morph the source space to this subject')
-    surface = traits.Str(
+    surface = Str(
         'white',
         argstr='--surf %s',
         mandatory=False,
         usedefault=True,
         desc='The surface to use.')
-    ico = traits.Int(
+    ico = Int(
         argstr='--ico %s',
         mandatory=False,
         default=None,
         desc='use the recursively subdivided icosahedron '
              'to create the source space.')
-    oct_ = traits.Int(
+    oct_ = Int(
         argstr='--oct %s',
         mandatory=False,
         default=None,
         desc='use the recursively subdivided octahedron '
              'to create the source space.',
         xor=['ico'])
-    spacing = traits.Int(
+    spacing = Int(
         7,
         argstr='--spacing %s',
         mandatory=False,
@@ -180,13 +180,7 @@ class SetupSourceSpaceInputSpec(FSTraitedSpec):
         desc='Specifies the approximate grid spacing of the '
              'source space in mm.',
         xor=['oct_', 'ico'])
-    cps = traits.Bool(
-        True,
-        argstr='--cps',
-        mandatory=False,
-        usedefault=True,
-        desc='Add patch information to source space.')
-    n_jobs = traits.Int(
+    n_jobs = Int(
         1,
         argstr='--n-jobs %s',
         mandatory=False,
@@ -195,13 +189,13 @@ class SetupSourceSpaceInputSpec(FSTraitedSpec):
              '(default 1). Requires the joblib package. '
              'Will use at most 2 jobs'
              ' (one for each hemisphere).')
-    verbose = traits.Bool(
+    verbose = Bool(
         False,
         argstr='--verbose',
         mandatory=False,
         usedefault=True,
         desc='Turn on verbose mode.')
-    overwrite = traits.Bool(
+    overwrite = Bool(
         False,
         argstr='--overwrite',
         mandatory=False,
@@ -210,9 +204,8 @@ class SetupSourceSpaceInputSpec(FSTraitedSpec):
 
 
 class SetupSourceSpaceOutputSpec(TraitedSpec):
-    source = traits.File(
-                     exists=True,
-                     desc='File containing the setup_source_space')
+    source = File(exists=True,
+                  desc='File containing the setup_source_space')
 
 
 class SetupSourceSpace(CommandLine):
