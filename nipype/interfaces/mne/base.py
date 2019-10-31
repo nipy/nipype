@@ -219,7 +219,7 @@ class SetupSourceSpace(CommandLine):
     >>> setup_source_space.inputs.subject = 'subj1'
     >>> setup_source_space.inputs.subjects_dir = '.'
     >>> setup_source_space.cmdline
-    'mne setup_source_space --cps --n-jobs 1 --spacing 7 \
+    'mne setup_source_space --n-jobs 1 --spacing 7 \
     --subject subj1 --surf white'
     >>> setup_source_space.run() 				# doctest: +SKIP
 
