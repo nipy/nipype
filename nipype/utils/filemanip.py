@@ -3,8 +3,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous file manipulation functions
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
+from __future__ import print_function, division, unicode_literals, absolute_import
 
 import sys
 import pickle
@@ -21,35 +20,35 @@ import shutil
 import contextlib
 import posixpath
 import simplejson as json
-from filelock import SoftFileLock
+from time import sleep, time
+from glob import glob
 
 from builtins import str, bytes, open
 
 from .. import logging, config
 from .misc import is_container
 from future import standard_library
+
 standard_library.install_aliases()
 
-fmlogger = logging.getLogger('nipype.utils')
+fmlogger = logging.getLogger("nipype.utils")
 
-related_filetype_sets = [
-    ('.hdr', '.img', '.mat'),
-    ('.nii', '.mat'),
-    ('.BRIK', '.HEAD'),
-]
+related_filetype_sets = [(".hdr", ".img", ".mat"), (".nii", ".mat"), (".BRIK", ".HEAD")]
 
 PY3 = sys.version_info[0] >= 3
 
 try:
     from builtins import FileNotFoundError, FileExistsError
 except ImportError:  # PY27
+
     class FileNotFoundError(OSError):  # noqa
         """Defines the exception for Python 2."""
 
         def __init__(self, path):
             """Initialize the exception."""
             super(FileNotFoundError, self).__init__(
-                2, 'No such file or directory', '%s' % path)
+                2, "No such file or directory", "%s" % path
+            )
 
     class FileExistsError(OSError):  # noqa
         """Defines the exception for Python 2."""
@@ -57,7 +56,8 @@ except ImportError:  # PY27
         def __init__(self, path):
             """Initialize the exception."""
             super(FileExistsError, self).__init__(
-                17, 'File or directory exists', '%s' % path)
+                17, "File or directory exists", "%s" % path
+            )
 
 
 USING_PATHLIB2 = False
@@ -65,6 +65,7 @@ try:
     from pathlib import Path
 except ImportError:
     from pathlib2 import Path
+
     USING_PATHLIB2 = True
 
 
@@ -104,11 +105,12 @@ def path_mkdir(path, mode=0o777, parents=False, exist_ok=False):
             return os.mkdir(str(path), mode=mode)
 
 
-if not hasattr(Path, 'write_text'):
+if not hasattr(Path, "write_text"):
     # PY34 - Path does not have write_text
     def _write_text(self, text):
-        with open(str(self), 'w') as f:
+        with open(str(self), "w") as f:
             f.write(text)
+
     Path.write_text = _write_text
 
 
@@ -152,8 +154,7 @@ def split_filename(fname):
     ext = None
     for special_ext in special_extensions:
         ext_len = len(special_ext)
-        if (len(fname) > ext_len) and \
-                (fname[-ext_len:].lower() == special_ext.lower()):
+        if (len(fname) > ext_len) and (fname[-ext_len:].lower() == special_ext.lower()):
             ext = fname[-ext_len:]
             fname = fname[:-ext_len]
             break
@@ -181,11 +182,11 @@ def to_str_py27(value):
     """
 
     if isinstance(value, dict):
-        entry = '{}: {}'.format
-        retval = '{'
+        entry = "{}: {}".format
+        retval = "{"
         for key, val in list(value.items()):
             if len(retval) > 1:
-                retval += ', '
+                retval += ", "
             kenc = repr(key)
             if kenc.startswith(("u'", 'u"')):
                 kenc = kenc[1:]
@@ -193,12 +194,12 @@ def to_str_py27(value):
             if venc.startswith(("u'", 'u"')):
                 venc = venc[1:]
             retval += entry(kenc, venc)
-        retval += '}'
+        retval += "}"
         return retval
 
     istuple = isinstance(value, tuple)
     if isinstance(value, (tuple, list)):
-        retval = '(' if istuple else '['
+        retval = "(" if istuple else "["
         nels = len(value)
         for i, v in enumerate(value):
             venc = to_str_py27(v)
@@ -207,11 +208,11 @@ def to_str_py27(value):
             retval += venc
 
             if i < nels - 1:
-                retval += ', '
+                retval += ", "
 
         if istuple and nels == 1:
-            retval += ','
-        retval += ')' if istuple else ']'
+            retval += ","
+        retval += ")" if istuple else "]"
         return retval
 
     retval = repr(value).decode()
@@ -220,7 +221,7 @@ def to_str_py27(value):
     return retval
 
 
-def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
+def fname_presuffix(fname, prefix="", suffix="", newpath=None, use_ext=True):
     """Manipulates path and name of input filename
 
     Parameters
@@ -254,7 +255,7 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     """
     pth, fname, ext = split_filename(fname)
     if not use_ext:
-        ext = ''
+        ext = ""
 
     # No need for isdefined: bool(Undefined) evaluates to False
     if newpath:
@@ -262,7 +263,7 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     return op.join(pth, prefix + fname + suffix + ext)
 
 
-def fnames_presuffix(fnames, prefix='', suffix='', newpath=None, use_ext=True):
+def fnames_presuffix(fnames, prefix="", suffix="", newpath=None, use_ext=True):
     """Calls fname_presuffix for a list of files.
     """
     f2 = []
@@ -276,7 +277,7 @@ def hash_rename(filename, hashvalue):
     and sets path to output_directory
     """
     path, name, ext = split_filename(filename)
-    newfilename = ''.join((name, '_0x', hashvalue, ext))
+    newfilename = "".join((name, "_0x", hashvalue, ext))
     return op.join(path, newfilename)
 
 
@@ -285,15 +286,14 @@ def check_forhash(filename):
     if isinstance(filename, list):
         filename = filename[0]
     path, name = op.split(filename)
-    if re.search('(_0x[a-z0-9]{32})', name):
-        hashvalue = re.findall('(_0x[a-z0-9]{32})', name)
+    if re.search("(_0x[a-z0-9]{32})", name):
+        hashvalue = re.findall("(_0x[a-z0-9]{32})", name)
         return True, hashvalue
     else:
         return False, None
 
 
-def hash_infile(afile, chunk_len=8192, crypto=hashlib.md5,
-                raise_notfound=False):
+def hash_infile(afile, chunk_len=8192, crypto=hashlib.md5, raise_notfound=False):
     """
     Computes hash of a file using 'crypto' module
 
@@ -317,7 +317,7 @@ def hash_infile(afile, chunk_len=8192, crypto=hashlib.md5,
         return None
 
     crypto_obj = crypto()
-    with open(afile, 'rb') as fp:
+    with open(afile, "rb") as fp:
         while True:
             data = fp.read(chunk_len)
             if not data:
@@ -352,19 +352,19 @@ def _parse_mount_table(exit_code, output):
     #                          <PATH>^^^^      ^^^^^<FSTYPE>
     # OSX mount example:    /dev/disk2 on / (hfs, local, journaled)
     #                               <PATH>^  ^^^<FSTYPE>
-    pattern = re.compile(r'.*? on (/.*?) (?:type |\()([^\s,\)]+)')
+    pattern = re.compile(r".*? on (/.*?) (?:type |\()([^\s,\)]+)")
 
     # Keep line and match for error reporting (match == None on failure)
     # Ignore empty lines
-    matches = [(l, pattern.match(l))
-               for l in output.strip().splitlines() if l]
+    matches = [(l, pattern.match(l)) for l in output.strip().splitlines() if l]
 
     # (path, fstype) tuples, sorted by path length (longest first)
-    mount_info = sorted((match.groups() for _, match in matches
-                         if match is not None),
-                        key=lambda x: len(x[0]), reverse=True)
-    cifs_paths = [path for path, fstype in mount_info
-                  if fstype.lower() == 'cifs']
+    mount_info = sorted(
+        (match.groups() for _, match in matches if match is not None),
+        key=lambda x: len(x[0]),
+        reverse=True,
+    )
+    cifs_paths = [path for path, fstype in mount_info if fstype.lower() == "cifs"]
 
     # Report failures as warnings
     for line, match in matches:
@@ -372,7 +372,8 @@ def _parse_mount_table(exit_code, output):
             fmlogger.debug("Cannot parse mount line: '%s'", line)
 
     return [
-        mount for mount in mount_info
+        mount
+        for mount in mount_info
         if any(mount[0].startswith(path) for path in cifs_paths)
     ]
 
@@ -410,17 +411,19 @@ def on_cifs(fname):
     # Only the first match (most recent parent) counts
     for fspath, fstype in _cifs_table:
         if fname.startswith(fspath):
-            return fstype == 'cifs'
+            return fstype == "cifs"
     return False
 
 
-def copyfile(originalfile,
-             newfile,
-             copy=False,
-             create_new=False,
-             hashmethod=None,
-             use_hardlink=False,
-             copy_related_files=True):
+def copyfile(
+    originalfile,
+    newfile,
+    copy=False,
+    create_new=False,
+    hashmethod=None,
+    use_hardlink=False,
+    copy_related_files=True,
+):
     """Copy or link ``originalfile`` to ``newfile``.
 
     If ``use_hardlink`` is True, and the file can be hard-linked, then a
@@ -457,7 +460,7 @@ def copyfile(originalfile,
     if create_new:
         while op.exists(newfile):
             base, fname, ext = split_filename(newfile)
-            s = re.search('_c[0-9]{4,4}$', fname)
+            s = re.search("_c[0-9]{4,4}$", fname)
             i = 0
             if s:
                 i = int(s.group()[2:]) + 1
@@ -467,7 +470,7 @@ def copyfile(originalfile,
             newfile = base + os.sep + fname + ext
 
     if hashmethod is None:
-        hashmethod = config.get('execution', 'hash_method').lower()
+        hashmethod = config.get("execution", "hash_method").lower()
 
     # Don't try creating symlinks on CIFS
     if copy is False and on_cifs(newfile):
@@ -487,26 +490,33 @@ def copyfile(originalfile,
     keep = False
     if op.lexists(newfile):
         if op.islink(newfile):
-            if all((os.readlink(newfile) == op.realpath(originalfile),
-                    not use_hardlink, not copy)):
+            if all(
+                (
+                    os.readlink(newfile) == op.realpath(originalfile),
+                    not use_hardlink,
+                    not copy,
+                )
+            ):
                 keep = True
         elif posixpath.samefile(newfile, originalfile):
             keep = True
         else:
-            if hashmethod == 'timestamp':
+            if hashmethod == "timestamp":
                 hashfn = hash_timestamp
-            elif hashmethod == 'content':
+            elif hashmethod == "content":
                 hashfn = hash_infile
             else:
                 raise AttributeError("Unknown hash method found:", hashmethod)
             newhash = hashfn(newfile)
-            fmlogger.debug('File: %s already exists,%s, copy:%d', newfile,
-                           newhash, copy)
+            fmlogger.debug(
+                "File: %s already exists,%s, copy:%d", newfile, newhash, copy
+            )
             orighash = hashfn(originalfile)
             keep = newhash == orighash
         if keep:
-            fmlogger.debug('File: %s already exists, not overwriting, copy:%d',
-                           newfile, copy)
+            fmlogger.debug(
+                "File: %s already exists, not overwriting, copy:%d", newfile, copy
+            )
         else:
             os.unlink(newfile)
 
@@ -517,7 +527,7 @@ def copyfile(originalfile,
     # ~hardlink & ~symlink => copy
     if not keep and use_hardlink:
         try:
-            fmlogger.debug('Linking File: %s->%s', newfile, originalfile)
+            fmlogger.debug("Linking File: %s->%s", newfile, originalfile)
             # Use realpath to avoid hardlinking symlinks
             os.link(op.realpath(originalfile), newfile)
         except OSError:
@@ -525,9 +535,9 @@ def copyfile(originalfile,
         else:
             keep = True
 
-    if not keep and not copy and os.name == 'posix':
+    if not keep and not copy and os.name == "posix":
         try:
-            fmlogger.debug('Symlinking File: %s->%s', newfile, originalfile)
+            fmlogger.debug("Symlinking File: %s->%s", newfile, originalfile)
             os.symlink(originalfile, newfile)
         except OSError:
             copy = True  # Disable symlink for associated files
@@ -536,15 +546,17 @@ def copyfile(originalfile,
 
     if not keep:
         try:
-            fmlogger.debug('Copying File: %s->%s', newfile, originalfile)
+            fmlogger.debug("Copying File: %s->%s", newfile, originalfile)
             shutil.copyfile(originalfile, newfile)
         except shutil.Error as e:
             fmlogger.warning(e.message)
 
     # Associated files
     if copy_related_files:
-        related_file_pairs = (get_related_files(f, include_this_file=False)
-                              for f in (originalfile, newfile))
+        related_file_pairs = (
+            get_related_files(f, include_this_file=False)
+            for f in (originalfile, newfile)
+        )
         for alt_ofile, alt_nfile in zip(*related_file_pairs):
             if op.exists(alt_ofile):
                 copyfile(
@@ -553,7 +565,8 @@ def copyfile(originalfile,
                     copy,
                     hashmethod=hashmethod,
                     use_hardlink=use_hardlink,
-                    copy_related_files=False)
+                    copy_related_files=False,
+                )
 
     return newfile
 
@@ -606,9 +619,7 @@ def copyfiles(filelist, dest, copy=False, create_new=False):
     newfiles = []
     for i, f in enumerate(ensure_list(filelist)):
         if isinstance(f, list):
-            newfiles.insert(i,
-                            copyfiles(
-                                f, dest, copy=copy, create_new=create_new))
+            newfiles.insert(i, copyfiles(f, dest, copy=copy, create_new=create_new))
         else:
             if len(outfiles) > 1:
                 destfile = outfiles[i]
@@ -653,9 +664,9 @@ def check_depends(targets, dependencies):
     """
     tgts = ensure_list(targets)
     deps = ensure_list(dependencies)
-    return all(map(op.exists, tgts)) and \
-        min(map(op.getmtime, tgts)) > \
-        max(list(map(op.getmtime, deps)) + [0])
+    return all(map(op.exists, tgts)) and min(map(op.getmtime, tgts)) > max(
+        list(map(op.getmtime, deps)) + [0]
+    )
 
 
 def save_json(filename, data):
@@ -669,9 +680,9 @@ def save_json(filename, data):
         Dictionary to save in json file.
 
     """
-    mode = 'w'
+    mode = "w"
     if sys.version_info[0] < 3:
-        mode = 'wb'
+        mode = "wb"
     with open(filename, mode) as fp:
         json.dump(data, fp, sort_keys=True, indent=4)
 
@@ -690,32 +701,50 @@ def load_json(filename):
 
     """
 
-    with open(filename, 'r') as fp:
+    with open(filename, "r") as fp:
         data = json.load(fp)
     return data
 
 
 def loadcrash(infile, *args):
-    if infile.endswith('pkl') or infile.endswith('pklz'):
+    if infile.endswith("pkl") or infile.endswith("pklz"):
         return loadpkl(infile)
     else:
-        raise ValueError('Only pickled crashfiles are supported')
+        raise ValueError("Only pickled crashfiles are supported")
 
 
 def loadpkl(infile):
     """Load a zipped or plain cPickled file."""
     infile = Path(infile)
-    fmlogger.debug('Loading pkl: %s', infile)
-    pklopen = gzip.open if infile.suffix == '.pklz' else open
+    fmlogger.debug("Loading pkl: %s", infile)
+    pklopen = gzip.open if infile.suffix == ".pklz" else open
 
-    with SoftFileLock('%s.lock' % infile):
-        with pklopen(str(infile), 'rb') as pkl_file:
-            pkl_contents = pkl_file.read()
+    t = time()
+    timeout = float(config["execution"]["job_finished_timeout"])
+    timed_out = True
+    while (time() - t) < timeout:
+        try:
+            glob(str(infile)).pop()
+            timed_out = False
+            break
+        except Exception as e:
+            fmlogger.debug(e)
+        sleep(2)
+    if timed_out:
+        error_message = (
+            "Ressult file {0} expected, but "
+            "does not exist after ({1}) "
+            "seconds.".format(infile, timeout)
+        )
+        raise IOError(error_message)
+
+    with pklopen(str(infile), "rb") as pkl_file:
+        pkl_contents = pkl_file.read()
 
     pkl_metadata = None
 
     # Look if pkl file contains version metadata
-    idx = pkl_contents.find(b'\n')
+    idx = pkl_contents.find(b"\n")
     if idx >= 0:
         try:
             pkl_metadata = json.loads(pkl_contents[:idx])
@@ -724,7 +753,7 @@ def loadpkl(infile):
             pass
         else:
             # On success, skip JSON metadata
-            pkl_contents = pkl_contents[idx + 1:]
+            pkl_contents = pkl_contents[idx + 1 :]
 
     # Pickle files may contain relative paths that must be resolved relative
     # to the working directory, so use indirectory while attempting to load
@@ -735,38 +764,45 @@ def loadpkl(infile):
     except UnicodeDecodeError:
         # Was this pickle created with Python 2.x?
         with indirectory(infile.parent):
-            unpkl = pickle.loads(pkl_contents, fix_imports=True, encoding='utf-8')
-        fmlogger.info('Successfully loaded pkl in compatibility mode.')
+            unpkl = pickle.loads(pkl_contents, fix_imports=True, encoding="utf-8")
+        fmlogger.info("Successfully loaded pkl in compatibility mode.")
     # Unpickling problems
     except Exception as e:
-        if pkl_metadata and 'version' in pkl_metadata:
+        if pkl_metadata and "version" in pkl_metadata:
             from nipype import __version__ as version
-            if pkl_metadata['version'] != version:
-                fmlogger.error("""\
+
+            if pkl_metadata["version"] != version:
+                fmlogger.error(
+                    """\
 Attempted to open a results file generated by Nipype version %s, \
-with an incompatible Nipype version (%s)""", pkl_metadata['version'], version)
+with an incompatible Nipype version (%s)""",
+                    pkl_metadata["version"],
+                    version,
+                )
                 raise e
-        fmlogger.warning("""\
+        fmlogger.warning(
+            """\
 No metadata was found in the pkl file. Make sure you are currently using \
-the same Nipype version from the generated pkl.""")
+the same Nipype version from the generated pkl."""
+        )
         raise e
 
     if unpkl is None:
-        raise ValueError('Loading %s resulted in None.' % infile)
+        raise ValueError("Loading %s resulted in None." % infile)
 
     return unpkl
 
 
 def crash2txt(filename, record):
     """ Write out plain text crash file """
-    with open(filename, 'w') as fp:
-        if 'node' in record:
-            node = record['node']
-            fp.write('Node: {}\n'.format(node.fullname))
-            fp.write('Working directory: {}\n'.format(node.output_dir()))
-            fp.write('\n')
-            fp.write('Node inputs:\n{}\n'.format(node.inputs))
-        fp.write(''.join(record['traceback']))
+    with open(filename, "w") as fp:
+        if "node" in record:
+            node = record["node"]
+            fp.write("Node: {}\n".format(node.fullname))
+            fp.write("Working directory: {}\n".format(node.output_dir()))
+            fp.write("\n")
+            fp.write("Node inputs:\n{}\n".format(node.inputs))
+        fp.write("".join(record["traceback"]))
 
 
 def read_stream(stream, logger=None, encoding=None):
@@ -779,25 +815,26 @@ def read_stream(stream, logger=None, encoding=None):
 
 
     """
-    default_encoding = encoding or locale.getdefaultlocale()[1] or 'UTF-8'
+    default_encoding = encoding or locale.getdefaultlocale()[1] or "UTF-8"
     logger = logger or fmlogger
     try:
         out = stream.decode(default_encoding)
     except UnicodeDecodeError as err:
-        out = stream.decode(default_encoding, errors='replace')
-        logger.warning('Error decoding string: %s', err)
+        out = stream.decode(default_encoding, errors="replace")
+        logger.warning("Error decoding string: %s", err)
     return out.splitlines()
 
 
 def savepkl(filename, record, versioning=False, sync=False):
-    with open(filename, 'wb') as fobj:
-        pkl_file = gzip.GzipFile(fileobj=fobj) if filename.endswith('.pklz') else fobj
+    with open(filename, "wb") as fobj:
+        pkl_file = gzip.GzipFile(fileobj=fobj) if filename.endswith(".pklz") else fobj
         if versioning:
             from nipype import __version__ as version
-            metadata = json.dumps({'version': version})
 
-            pkl_file.write(metadata.encode('utf-8'))
-            pkl_file.write('\n'.encode('utf-8'))
+            metadata = json.dumps({"version": version})
+
+            pkl_file.write(metadata.encode("utf-8"))
+            pkl_file.write("\n".encode("utf-8"))
 
         pickle.dump(record, pkl_file)
         if sync:
@@ -805,26 +842,25 @@ def savepkl(filename, record, versioning=False, sync=False):
             os.fsync(fobj.fileno())
 
 
-rst_levels = ['=', '-', '~', '+']
+rst_levels = ["=", "-", "~", "+"]
 
 
 def write_rst_header(header, level=0):
-    return '\n'.join(
-        (header, ''.join([rst_levels[level] for _ in header]))) + '\n\n'
+    return "\n".join((header, "".join([rst_levels[level] for _ in header]))) + "\n\n"
 
 
-def write_rst_list(items, prefix=''):
+def write_rst_list(items, prefix=""):
     out = []
     for item in items:
-        out.append('{} {}'.format(prefix, str(item)))
-    return '\n'.join(out) + '\n\n'
+        out.append("{} {}".format(prefix, str(item)))
+    return "\n".join(out) + "\n\n"
 
 
-def write_rst_dict(info, prefix=''):
+def write_rst_dict(info, prefix=""):
     out = []
     for key, value in sorted(info.items()):
-        out.append('{}* {} : {}'.format(prefix, key, str(value)))
-    return '\n'.join(out) + '\n\n'
+        out.append("{}* {} : {}".format(prefix, key, str(value)))
+    return "\n".join(out) + "\n\n"
 
 
 def dist_is_editable(dist):
@@ -838,7 +874,7 @@ def dist_is_editable(dist):
     # Borrowed from `pip`'s' API
     """
     for path_item in sys.path:
-        egg_link = op.join(path_item, dist + '.egg-link')
+        egg_link = op.join(path_item, dist + ".egg-link")
         if op.isfile(egg_link):
             return True
     return False
@@ -865,7 +901,7 @@ def makedirs(path, mode=0o777, exist_ok=False):
         except OSError:
             fmlogger.debug("Problem creating directory %s", path)
             if not op.exists(path):
-                raise OSError('Could not create directory %s' % path)
+                raise OSError("Could not create directory %s" % path)
     return path
 
 
@@ -893,11 +929,12 @@ def emptydirs(path, noexist_ok=False):
         elcont = os.listdir(path)
         if ex.errno == errno.ENOTEMPTY and not elcont:
             fmlogger.warning(
-                'An exception was raised trying to remove old %s, but the path'
-                ' seems empty. Is it an NFS mount?. Passing the exception.',
-                path)
+                "An exception was raised trying to remove old %s, but the path"
+                " seems empty. Is it an NFS mount?. Passing the exception.",
+                path,
+            )
         elif ex.errno == errno.ENOTEMPTY and elcont:
-            fmlogger.debug('Folder %s contents (%d items).', path, len(elcont))
+            fmlogger.debug("Folder %s contents (%d items).", path, len(elcont))
             raise ex
         else:
             raise ex
@@ -937,11 +974,11 @@ def which(cmd, env=None, pathext=None):
     """
 
     if pathext is None:
-        pathext = os.getenv('PATHEXT', '').split(os.pathsep)
-        pathext.insert(0, '')
+        pathext = os.getenv("PATHEXT", "").split(os.pathsep)
+        pathext.insert(0, "")
 
     path = os.getenv("PATH", os.defpath)
-    if env and 'PATH' in env:
+    if env and "PATH" in env:
         path = env.get("PATH")
 
     if sys.version_info >= (3, 3):
@@ -975,27 +1012,25 @@ def get_dependencies(name, environ):
 
     """
     command = None
-    if sys.platform == 'darwin':
-        command = 'otool -L `which %s`' % name
-    elif 'linux' in sys.platform:
-        command = 'ldd `which %s`' % name
+    if sys.platform == "darwin":
+        command = "otool -L `which %s`" % name
+    elif "linux" in sys.platform:
+        command = "ldd `which %s`" % name
     else:
-        return 'Platform %s not supported' % sys.platform
+        return "Platform %s not supported" % sys.platform
 
     deps = None
     try:
         proc = sp.Popen(
-            command,
-            stdout=sp.PIPE,
-            stderr=sp.PIPE,
-            shell=True,
-            env=environ)
+            command, stdout=sp.PIPE, stderr=sp.PIPE, shell=True, env=environ
+        )
         o, e = proc.communicate()
         deps = o.rstrip()
     except Exception as ex:
         deps = '"%s" failed' % command
-        fmlogger.warning('Could not get dependencies of %s. Error:\n%s',
-                         name, ex.message)
+        fmlogger.warning(
+            "Could not get dependencies of %s. Error:\n%s", name, ex.message
+        )
     return deps
 
 
@@ -1015,7 +1050,7 @@ def canonicalize_env(env):
         Windows: environment dictionary with bytes keys and values
         Other: untouched input ``env``
     """
-    if os.name != 'nt':
+    if os.name != "nt":
         return env
 
     # convert unicode to string for python 2
@@ -1024,9 +1059,9 @@ def canonicalize_env(env):
     out_env = {}
     for key, val in env.items():
         if not isinstance(key, bytes):
-            key = key.encode('utf-8')
+            key = key.encode("utf-8")
         if not isinstance(val, bytes):
-            val = val.encode('utf-8')
+            val = val.encode("utf-8")
         if not PY3:
             key = bytes_to_native_str(key)
             val = bytes_to_native_str(val)
@@ -1052,11 +1087,13 @@ def relpath(path, start=None):
         unc_path, rest = op.splitunc(path)
         unc_start, rest = op.splitunc(start)
         if bool(unc_path) ^ bool(unc_start):
-            raise ValueError(("Cannot mix UNC and non-UNC paths "
-                              "(%s and %s)") % (path, start))
+            raise ValueError(
+                ("Cannot mix UNC and non-UNC paths " "(%s and %s)") % (path, start)
+            )
         else:
-            raise ValueError("path is on drive %s, start on drive %s" %
-                             (path_list[0], start_list[0]))
+            raise ValueError(
+                "path is on drive %s, start on drive %s" % (path_list[0], start_list[0])
+            )
     # Work out how much of the filepath is shared by start and path.
     for i in range(min(len(start_list), len(path_list))):
         if start_list[i].lower() != path_list[i].lower():
