@@ -732,7 +732,7 @@ def loadpkl(infile):
         sleep(2)
     if timed_out:
         error_message = (
-            "Ressult file {0} expected, but "
+            "Result file {0} expected, but "
             "does not exist after ({1}) "
             "seconds.".format(infile, timeout)
         )
