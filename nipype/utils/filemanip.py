@@ -723,12 +723,10 @@ def loadpkl(infile):
     timeout = float(config.get("execution", "job_finished_timeout"))
     timed_out = True
     while (time() - t) < timeout:
-        try:
-            glob(str(infile)).pop()
+        if infile.exists():
             timed_out = False
             break
-        except Exception as e:
-            fmlogger.debug(e)
+        fmlogger.debug("'{}' missing; waiting 2s".format(infile))
         sleep(2)
     if timed_out:
         error_message = (
