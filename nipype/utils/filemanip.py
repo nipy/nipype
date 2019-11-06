@@ -720,7 +720,7 @@ def loadpkl(infile):
     pklopen = gzip.open if infile.suffix == ".pklz" else open
 
     t = time()
-    timeout = float(config["execution"]["job_finished_timeout"])
+    timeout = float(config.get("execution", "job_finished_timeout"))
     timed_out = True
     while (time() - t) < timeout:
         try:
@@ -826,8 +826,8 @@ def read_stream(stream, logger=None, encoding=None):
 
 
 def savepkl(filename, record, versioning=False, sync=False):
-    with open(filename, "wb") as fobj:
-        pkl_file = gzip.GzipFile(fileobj=fobj) if filename.endswith(".pklz") else fobj
+    pkl_open = gzip.open if filename.endswith(".pklz") else open
+    with pkl_open(filename, "wb") as pkl_file:
         if versioning:
             from nipype import __version__ as version
 
@@ -837,9 +837,10 @@ def savepkl(filename, record, versioning=False, sync=False):
             pkl_file.write("\n".encode("utf-8"))
 
         pickle.dump(record, pkl_file)
+        fmlogger.info("Finished saving: {}".format(filename))
         if sync:
-            fobj.flush()
-            os.fsync(fobj.fileno())
+            pkl_file.flush()
+            os.fsync(pkl_file.fileno())
 
 
 rst_levels = ["=", "-", "~", "+"]
