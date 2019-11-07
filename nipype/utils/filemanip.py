@@ -21,11 +21,10 @@ import contextlib
 import posixpath
 import simplejson as json
 from time import sleep, time
-from glob import glob
 
 from builtins import str, bytes, open
 
-from .. import logging, config
+from .. import logging, config, __version__ as version
 from .misc import is_container
 from future import standard_library
 
@@ -823,22 +822,22 @@ def read_stream(stream, logger=None, encoding=None):
     return out.splitlines()
 
 
-def savepkl(filename, record, versioning=False, sync=False):
-    pkl_open = gzip.open if filename.endswith(".pklz") else open
-    with pkl_open(filename, "wb") as pkl_file:
+def savepkl(filename, record, versioning=False):
+    from io import BytesIO
+
+    with BytesIO() as f:
         if versioning:
-            from nipype import __version__ as version
-
             metadata = json.dumps({"version": version})
+            f.write(metadata.encode("utf-8"))
+            f.write("\n".encode("utf-8"))
+        pickle.dump(record, f)
+        content = f.getvalue()
 
-            pkl_file.write(metadata.encode("utf-8"))
-            pkl_file.write("\n".encode("utf-8"))
-
-        pickle.dump(record, pkl_file)
-        fmlogger.info("Finished saving: {}".format(filename))
-        if sync:
-            pkl_file.flush()
-            os.fsync(pkl_file.fileno())
+    pkl_open = gzip.open if filename.endswith(".pklz") else open
+    tmpfile = filename + ".tmp"
+    with pkl_open(tmpfile, "wb") as pkl_file:
+        pkl_file.write(content)
+    os.rename(tmpfile, filename)
 
 
 rst_levels = ["=", "-", "~", "+"]
