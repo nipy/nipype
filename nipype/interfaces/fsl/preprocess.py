@@ -111,6 +111,7 @@ class BETOutputSpec(TraitedSpec):
     outskin_mesh_file = File(
         desc="path/name of outskin mesh outline (if generated)")
     skull_mask_file = File(desc="path/name of skull mask (if generated)")
+    skull_file = File(desc="path/name of skull file (if generated)")
 
 
 class BET(FSLCommand):
@@ -181,6 +182,9 @@ class BET(FSLCommand):
                 outputs['out_file'], suffix='_outskin_mesh')
             outputs['skull_mask_file'] = self._gen_fname(
                 outputs['out_file'], suffix='_skull_mask')
+        if isdefined(self.inputs.skull) and self.inputs.skull:
+            outputs['skull_file'] = self._gen_fname(
+                outputs['out_file'], suffix='_skull')
         if isdefined(self.inputs.no_output) and self.inputs.no_output:
             outputs['out_file'] = Undefined
         return outputs
