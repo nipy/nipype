@@ -9,7 +9,7 @@ import sys
 
 # nipype version information
 # Remove -dev for release
-__version__ = '1.3.0'
+__version__ = '1.3.1-dev'
 
 
 def get_nipype_gitversion():
