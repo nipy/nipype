@@ -15,7 +15,7 @@ import nipype
 import nipype.interfaces.io as nio
 from nipype.interfaces.base.traits_extension import isdefined
 from nipype.interfaces.base import Undefined, TraitError
-from nipype.utils.filemanip import dist_is_editable, FileExistsError
+from nipype.utils.filemanip import dist_is_editable
 
 # Check for boto
 noboto = False
