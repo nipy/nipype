@@ -98,9 +98,8 @@ class NipypeConfig(object):
         self._display = None
         self._resource_monitor = None
 
-        if os.path.exists(config_dir):
-            self._config.read(
-                [os.path.join(config_dir, 'nipype.cfg'), 'nipype.cfg'])
+        self._config.read(
+            [os.path.join(config_dir, 'nipype.cfg'), 'nipype.cfg'])
 
         for option in CONFIG_DEPRECATIONS:
             for section in ['execution', 'logging', 'monitoring']:

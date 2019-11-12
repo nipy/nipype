@@ -3384,11 +3384,11 @@ or the inverse can be computed as needed in 3dNwarpApply, like
         exists=True,
         copyfile=False)
     noXdis = traits.Bool(
-        desc='Warp will not displace in x directoin', argstr='-noXdis')
+        desc='Warp will not displace in x direction', argstr='-noXdis')
     noYdis = traits.Bool(
-        desc='Warp will not displace in y directoin', argstr='-noYdis')
+        desc='Warp will not displace in y direction', argstr='-noYdis')
     noZdis = traits.Bool(
-        desc='Warp will not displace in z directoin', argstr='-noZdis')
+        desc='Warp will not displace in z direction', argstr='-noZdis')
     iniwarp = traits.List(
         File(exists=True, copyfile=False),
         desc='A dataset with an initial nonlinear warp to use.'

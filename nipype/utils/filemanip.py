@@ -19,9 +19,9 @@ import contextlib
 import posixpath
 from pathlib import Path
 import simplejson as json
-from filelock import SoftFileLock
+from time import sleep, time
 
-from .. import logging, config
+from .. import logging, config, __version__ as version
 from .misc import is_container
 
 fmlogger = logging.getLogger("nipype.utils")
@@ -605,9 +605,25 @@ def loadpkl(infile):
     fmlogger.debug("Loading pkl: %s", infile)
     pklopen = gzip.open if infile.suffix == ".pklz" else open
 
-    with SoftFileLock("%s.lock" % infile):
-        with pklopen(str(infile), "rb") as pkl_file:
-            pkl_contents = pkl_file.read()
+    t = time()
+    timeout = float(config.get("execution", "job_finished_timeout"))
+    timed_out = True
+    while (time() - t) < timeout:
+        if infile.exists():
+            timed_out = False
+            break
+        fmlogger.debug("'{}' missing; waiting 2s".format(infile))
+        sleep(2)
+    if timed_out:
+        error_message = (
+            "Result file {0} expected, but "
+            "does not exist after ({1}) "
+            "seconds.".format(infile, timeout)
+        )
+        raise IOError(error_message)
+
+    with pklopen(str(infile), "rb") as pkl_file:
+        pkl_contents = pkl_file.read()
 
     pkl_metadata = None
 
@@ -637,8 +653,6 @@ def loadpkl(infile):
     # Unpickling problems
     except Exception as e:
         if pkl_metadata and "version" in pkl_metadata:
-            from nipype import __version__ as version
-
             if pkl_metadata["version"] != version:
                 fmlogger.error(
                     """\
@@ -694,18 +708,21 @@ def read_stream(stream, logger=None, encoding=None):
 
 
 def savepkl(filename, record, versioning=False):
-    pklopen = gzip.open if filename.endswith(".pklz") else open
-    with SoftFileLock("%s.lock" % filename):
-        with pklopen(filename, "wb") as pkl_file:
-            if versioning:
-                from nipype import __version__ as version
+    from io import BytesIO
 
-                metadata = json.dumps({"version": version})
+    with BytesIO() as f:
+        if versioning:
+            metadata = json.dumps({"version": version})
+            f.write(metadata.encode("utf-8"))
+            f.write("\n".encode("utf-8"))
+        pickle.dump(record, f)
+        content = f.getvalue()
 
-                pkl_file.write(metadata.encode("utf-8"))
-                pkl_file.write("\n".encode("utf-8"))
-
-            pickle.dump(record, pkl_file)
+    pkl_open = gzip.open if filename.endswith(".pklz") else open
+    tmpfile = filename + ".tmp"
+    with pkl_open(tmpfile, "wb") as pkl_file:
+        pkl_file.write(content)
+    os.rename(tmpfile, filename)
 
 
 rst_levels = ["=", "-", "~", "+"]

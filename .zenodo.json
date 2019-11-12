@@ -74,10 +74,6 @@
       "name": "Wong, Jason"
     },
     {
-      "affiliation": "Concordia University",
-      "name": "Benderoff, Erin"
-    },
-    {
       "affiliation": "Developer",
       "name": "Clark, Daniel",
       "orcid": "0000-0002-8121-8954"
@@ -141,6 +137,10 @@
       "affiliation": "CNRS LTCI, Telecom ParisTech, Universit\u00e9 Paris-Saclay",
       "name": "Gramfort, Alexandre",
       "orcid": "0000-0001-9791-4404"
+    },
+    {
+      "affiliation": "Concordia University",
+      "name": "Benderoff, Erin"
     },
     {
       "affiliation": "Dartmouth College: Hanover, NH, United States",
@@ -275,6 +275,11 @@
       "name": "Dubois, Mathieu"
     },
     {
+      "affiliation": "Holland Bloorview Kids Rehabilitation Hospital",
+      "name": "Tilley II, Steven",
+      "orcid": "0000-0003-4853-5082"
+    },
+    {
       "affiliation": "Child Mind Institute",
       "name": "Frohlich, Caroline"
     },
@@ -314,10 +319,6 @@
       "orcid": "0000-0002-6652-3512"
     },
     {
-      "name": "Heinsfeld, Anibal S\u00f3lon",
-      "orcid": "0000-0002-2050-0614"
-    },
-    {
       "name": "Ginsburg, Daniel"
     },
     {
@@ -329,6 +330,10 @@
       "affiliation": "Harvard University - Psychology",
       "name": "Kastman, Erik",
       "orcid": "0000-0001-7221-9042"
+    },
+    {
+      "name": "Heinsfeld, Anibal S\u00f3lon",
+      "orcid": "0000-0002-2050-0614"
     },
     {
       "affiliation": "Washington University in St Louis",
@@ -377,9 +382,6 @@
       "name": "Millman, Jarrod"
     },
     {
-      "name": "Lai, Jeff"
-    },
-    {
       "name": "Zhou, Dale"
     },
     {
@@ -387,11 +389,6 @@
     },
     {
       "name": "Haselgrove, Christian"
-    },
-    {
-      "affiliation": "Holland Bloorview Kids Rehabilitation Hospital",
-      "name": "Tilley II, Steven",
-      "orcid": "0000-0003-4853-5082"
     },
     {
       "name": "Renfro, Mandy"
@@ -404,11 +401,6 @@
       "affiliation": "University of Pennsylvania",
       "name": "Kahn, Ari E.",
       "orcid": "0000-0002-2127-0507"
-    },
-    {
-      "affiliation": "Yale University; New Haven, CT, United States",
-      "name": "Sisk, Lucinda M.",
-      "orcid": "0000-0003-4900-9770"
     },
     {
       "affiliation": "Korea Advanced Institute of Science and Technology",
@@ -436,6 +428,11 @@
     },
     {
       "name": "Hallquist, Michael"
+    },
+    {
+      "affiliation": "Yale University; New Haven, CT, United States",
+      "name": "Sisk, Lucinda M.",
+      "orcid": "0000-0003-4900-9770"
     },
     {
       "affiliation": "Donders Institute for Brain, Cognition and Behavior, Center for Cognitive Neuroimaging",
@@ -485,11 +482,6 @@
       "name": "Hinds, Oliver"
     },
     {
-      "affiliation": "National Institute on Aging, Baltimore, MD, USA",
-      "name": "Bilgel, Murat",
-      "orcid": "0000-0001-5042-7422"
-    },
-    {
       "affiliation": "TIB \u2013 Leibniz Information Centre for Science and Technology and University Library, Hannover, Germany",
       "name": "Leinweber, Katrin",
       "orcid": "0000-0001-5135-5758"
@@ -500,15 +492,6 @@
     {
       "affiliation": "Boston University",
       "name": "Perkins, L. Nathan"
-    },
-    {
-      "affiliation": "University of Amsterdam",
-      "name": "Snoek, Lukas",
-      "orcid": "0000-0001-8972-204X"
-    },
-    {
-      "affiliation": "Institute of Imaging & Computer Vision, RWTH Aachen University, Germany",
-      "name": "Weninger, Leon"
     },
     {
       "affiliation": "University of Newcastle, Australia",
@@ -525,14 +508,18 @@
       "name": "Noel, Maxime"
     },
     {
+      "affiliation": "University of Amsterdam",
+      "name": "Snoek, Lukas",
+      "orcid": "0000-0001-8972-204X"
+    },
+    {
+      "affiliation": "Institute of Imaging & Computer Vision, RWTH Aachen University, Germany",
+      "name": "Weninger, Leon"
+    },
+    {
       "affiliation": "University of Pennsylvania",
       "name": "Junhao WEN",
       "orcid": "0000-0003-2077-3070"
-    },
-    {
-      "affiliation": "Leibniz Institute for Neurobiology",
-      "name": "Stadler, J\u00f6rg",
-      "orcid": "0000-0003-4313-129X"
     },
     {
       "name": "Cheung, Brian"
@@ -548,6 +535,11 @@
       "affiliation": "Department of Psychology, Stanford University; Parietal, INRIA",
       "name": "Durnez, Joke",
       "orcid": "0000-0001-9030-2202"
+    },
+    {
+      "affiliation": "Leibniz Institute for Neurobiology",
+      "name": "Stadler, J\u00f6rg",
+      "orcid": "0000-0003-4313-129X"
     },
     {
       "affiliation": "CNRS, UMS3552 IRMaGe",
@@ -600,10 +592,12 @@
       "name": "Khanuja, Ranjeet"
     },
     {
-      "name": "Schlamp, Kai"
+      "affiliation": "National Institute on Aging, Baltimore, MD, USA",
+      "name": "Bilgel, Murat",
+      "orcid": "0000-0001-5042-7422"
     },
     {
-      "name": "Arias, Jaime"
+      "name": "Schlamp, Kai"
     },
     {
       "affiliation": "CEA",
@@ -670,6 +664,12 @@
     },
     {
       "name": "Davison, Andrew"
+    },
+    {
+      "name": "Lai, Jeff"
+    },
+    {
+      "name": "Arias, Jaime"
     },
     {
       "name": "Bielievtsov, Dmytro",
