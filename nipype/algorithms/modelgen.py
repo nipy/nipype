@@ -274,6 +274,7 @@ class SpecifyModelInputSpec(BaseInterfaceInputSpec):
         "AFNI",
         "FSFAST",
         "NIPY",
+        "4DFP",
         usedefault=True,
         desc="Source of motion parameters")
     outlier_files = InputMultiPath(
