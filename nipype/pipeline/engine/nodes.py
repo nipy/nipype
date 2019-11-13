@@ -551,7 +551,12 @@ Error populating the inputs of node "%s": the results file of the source node \
                         output_value = evaluate_connect_function(
                             conn[1], conn[2], value)
                 else:
-                    output_value = getattr(outputs, conn)
+                    output_name = conn
+                    try:
+                        output_value = outputs.trait_get()[output_name]
+                    except AttributeError:
+                        output_value = outputs.dictcopy()[output_name]
+                    logger.debug("output: %s", output_name)
 
                 try:
                     self.set_input(key, deepcopy(output_value))
