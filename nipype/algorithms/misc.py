@@ -4,11 +4,6 @@
 '''
 Miscellaneous algorithms
 '''
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import str, zip, range, open
-from future.utils import raise_from
-
 import os
 import os.path as op
 
@@ -794,9 +789,8 @@ class AddCSVRow(BaseInterface):
         try:
             import pandas as pd
         except ImportError as e:
-            raise_from(
-                ImportError('This interface requires pandas '
-                            '(http://pandas.pydata.org/) to run.'), e)
+            raise ImportError('This interface requires pandas '
+                              '(http://pandas.pydata.org/) to run.') from e
 
         try:
             from filelock import SoftFileLock

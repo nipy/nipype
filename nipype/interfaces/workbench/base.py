@@ -10,8 +10,6 @@ The workbench module provides classes for interfacing with `connectome workbench
  Human Connectome Project.
 """
 
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 import os
 import re
 

@@ -3,8 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provides interfaces to various commands provided by diffusion toolkit
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 
 import os
 from ..base import (TraitedSpec, File, traits, CommandLine, InputMultiPath,

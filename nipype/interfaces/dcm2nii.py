@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 """The dcm2nii module provides basic functions for dicom conversion
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import str, open
 import os
 import re
 from copy import deepcopy

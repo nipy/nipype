@@ -3,13 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Parallel workflow execution via IPython controller
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
-from future import standard_library
-standard_library.install_aliases()
-from future.utils import raise_from
-
 from pickle import dumps
 
 import sys
@@ -76,20 +69,18 @@ class IPythonPlugin(DistributedPluginBase):
             __import__(name)
             self.iparallel = sys.modules[name]
         except ImportError as e:
-            raise_from(
-                ImportError("ipyparallel not found. Parallel execution "
-                            "will be unavailable"), e)
+            raise ImportError("ipyparallel not found. Parallel execution "
+                              "will be unavailable") from e
         try:
             self.taskclient = self.iparallel.Client(**self.client_args)
         except Exception as e:
             if isinstance(e, TimeoutError):
-                raise_from(Exception("No IPython clients found."), e)
+                raise Exception("No IPython clients found.") from e
             if isinstance(e, IOError):
-                raise_from(
-                    Exception("ipcluster/ipcontroller has not been started"),
-                    e)
+                raise Exception("ipcluster/ipcontroller has not been started") \
+                    from e
             if isinstance(e, ValueError):
-                raise_from(Exception("Ipython kernel not installed"), e)
+                raise Exception("Ipython kernel not installed") from e
             else:
                 raise e
         return super(IPythonPlugin, self).run(

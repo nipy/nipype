@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from __future__ import print_function, unicode_literals
 import os
 import warnings
-from future import standard_library
 
 import pytest
 
@@ -15,8 +13,6 @@ from ....interfaces import fsl
 from ...utility.wrappers import Function
 from ....pipeline import Node
 from ..specs import get_filecopy_info
-
-standard_library.install_aliases()
 
 
 @pytest.fixture(scope="module")

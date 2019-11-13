@@ -12,11 +12,6 @@ The I/O specifications corresponding to these base
 interfaces are found in the ``specs`` module.
 
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
-from builtins import object, open, str, bytes
-
 from copy import deepcopy
 from datetime import datetime as dt
 import os
@@ -26,14 +21,12 @@ import shlex
 import sys
 import simplejson as json
 from dateutil.parser import parse as parseutc
-from future import standard_library
 from traits.trait_errors import TraitError
 
 from ... import config, logging, LooseVersion
 from ...utils.provenance import write_provenance
 from ...utils.misc import str2bool, rgetcwd
-from ...utils.filemanip import (FileNotFoundError, split_filename,
-                                which, get_dependencies)
+from ...utils.filemanip import (split_filename, which, get_dependencies)
 from ...utils.subprocess import run_command
 
 from ...external.due import due
@@ -45,12 +38,8 @@ from .specs import (BaseInterfaceInputSpec, CommandLineInputSpec,
 from .support import (Bunch, InterfaceResult, NipypeInterfaceError,
                       format_help)
 
-standard_library.install_aliases()
-
 iflogger = logging.getLogger('nipype.interface')
 
-PY35 = sys.version_info >= (3, 5)
-PY3 = sys.version_info[0] > 2
 VALID_TERMINAL_OUTPUT = [
     'stream', 'allatonce', 'file', 'file_split', 'file_stdout', 'file_stderr',
     'none'
@@ -519,7 +508,7 @@ Output trait(s) %s not available in version %s of interface %s.\
         """
         inputs = self.inputs.get_traitsfree()
         iflogger.debug('saving inputs %s', inputs)
-        with open(json_file, 'w' if PY3 else 'wb') as fhandle:
+        with open(json_file, 'w') as fhandle:
             json.dump(inputs, fhandle, indent=4, ensure_ascii=False)
 
     def _pre_run_hook(self, runtime):

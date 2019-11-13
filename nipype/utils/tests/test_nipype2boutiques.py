@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from future import standard_library
 from ..nipype2boutiques import generate_boutiques_descriptor
 from nipype.testing import example_data
 import json
-standard_library.install_aliases()
 
 
 def test_generate():

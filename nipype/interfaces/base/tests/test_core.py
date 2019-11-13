@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from __future__ import print_function, unicode_literals
-from future import standard_library
-from builtins import open
 import os
 import simplejson as json
 
@@ -13,8 +10,6 @@ from .... import config
 from ....testing import example_data
 from ... import base as nib
 from ..support import _inputs_help
-
-standard_library.install_aliases()
 
 
 def check_dict(ref_dict, tst_dict):

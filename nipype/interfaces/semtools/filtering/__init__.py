@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
 from .denoising import UnbiasedNonLocalMeans
 from .featuredetection import (
     GenerateSummedGradientImage, CannySegmentationLevelSetImageFilter,

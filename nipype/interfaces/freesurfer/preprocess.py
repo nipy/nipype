@@ -3,10 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provides interfaces to various commands provided by FreeSurfer
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import range
-
 import os
 import os.path as op
 from glob import glob

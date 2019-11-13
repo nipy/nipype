@@ -6,8 +6,6 @@ vtkbase provides some helpers to use VTK through the tvtk package (mayavi)
 
 Code using tvtk should import it through this module
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 
 import os
 from .. import logging

@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 ''' Checkout gitwash repo into directory and do search replace on name '''
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import open
-
 import os
 from os.path import join as pjoin
 import shutil

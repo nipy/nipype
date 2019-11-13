@@ -3,8 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Script to auto-generate our API docs.
 """
-
-from __future__ import print_function
 # stdlib imports
 import os
 import sys

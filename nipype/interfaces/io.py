@@ -11,10 +11,6 @@
     To come :
     XNATSink
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import object, zip, filter, range, open, str
-
 import glob
 import fnmatch
 import string
@@ -32,8 +28,7 @@ from warnings import warn
 from .. import config, logging
 from ..utils.filemanip import (
     copyfile, simplify_list, ensure_list,
-    get_related_files, split_filename,
-    FileExistsError)
+    get_related_files, split_filename)
 from ..utils.misc import human_order_sorted, str2bool
 from .base import (
     TraitedSpec, traits, Str, File, Directory, BaseInterface, InputMultiPath,

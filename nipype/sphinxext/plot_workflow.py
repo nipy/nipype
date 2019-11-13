@@ -106,8 +106,6 @@ The workflow directive has the following configuration options:
         Provide a customized template for preparing restructured text.
 
 """
-from __future__ import print_function, division, absolute_import, unicode_literals
-
 import sys
 import os
 import shutil
@@ -144,27 +142,6 @@ except ImportError as e:
     except ImportError as e:
         missing_imports.append(str(e))
 
-from builtins import str, bytes
-
-PY2 = sys.version_info[0] == 2
-PY3 = sys.version_info[0] == 3
-
-
-def _mkdirp(folder):
-    """
-    Equivalent to bash's mkdir -p
-    """
-    if sys.version_info > (3, 4, 1):
-        os.makedirs(folder, exist_ok=True)
-        return folder
-
-    try:
-        os.makedirs(folder)
-    except OSError as exc:
-        if exc.errno != EEXIST or not os.path.isdir(folder):
-            raise
-
-    return folder
 
 
 def wf_directive(name, arguments, options, content, lineno, content_offset,
@@ -276,8 +253,7 @@ def setup(app):
     app.add_config_value('wf_working_directory', None, True)
     app.add_config_value('wf_template', None, True)
 
-    app.connect('doctree-read'.encode()
-                if PY2 else 'doctree-read', mark_wf_labels)
+    app.connect('doctree-read', mark_wf_labels)
 
     metadata = {'parallel_read_safe': True, 'parallel_write_safe': True}
     return metadata
@@ -458,11 +434,7 @@ def run_code(code, code_path, ns=None, function_name=None):
 
     # Redirect stdout
     stdout = sys.stdout
-    if PY3:
-        sys.stdout = io.StringIO()
-    else:
-        from cStringIO import StringIO
-        sys.stdout = StringIO()
+    sys.stdout = io.StringIO()
 
     # Assign a do-nothing print function to the namespace.  There
     # doesn't seem to be any other way to provide a way to (not) print
@@ -748,7 +720,7 @@ def run(arguments, content, options, state_machine, state, lineno):
         state_machine.insert_input(total_lines, source=source_file_name)
 
     # copy image files to builder's output directory, if necessary
-    _mkdirp(dest_dir)
+    os.makedirs(dest_dir, exist_ok=True)
     for code_piece, images in results:
         for img in images:
             for fn in img.filenames():

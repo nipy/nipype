@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 """Parallel workflow execution via OAR http://oar.imag.fr
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
-from builtins import str, open
 import os
 import stat
 from time import sleep

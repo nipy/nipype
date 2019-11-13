@@ -11,12 +11,6 @@ These functions include:
 
   * SpecifyModel: allows specification of sparse and non-sparse models
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
-str_basetype = str
-from builtins import range, str, bytes, int
-
 from copy import deepcopy
 import csv, math, os
 
@@ -175,7 +169,7 @@ def bids_gen_info(bids_event_files,
     info = []
     for bids_event_file in bids_event_files:
         with open(bids_event_file) as f:
-            f_events = csv.DictReader(f, skipinitialspace=True, delimiter=str_basetype('\t'))
+            f_events = csv.DictReader(f, skipinitialspace=True, delimiter='\t')
             events = [{k: v for k, v in row.items()} for row in f_events]
         if not condition_column:
             condition_column = '_trial_type'

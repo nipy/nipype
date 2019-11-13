@@ -3,10 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous utility functions
 """
-from __future__ import (print_function, unicode_literals, division,
-                        absolute_import)
-from builtins import next, bytes, str
-
 import os
 import sys
 import re
@@ -16,8 +12,6 @@ from warnings import warn
 from distutils.version import LooseVersion
 
 import numpy as np
-from future.utils import raise_from
-from future import standard_library
 try:
     from textwrap import indent as textwrap_indent
 except ImportError:
@@ -28,9 +22,6 @@ except ImportError:
             return text
         splittext = text.splitlines(True)
         return prefix + prefix.join(splittext)
-
-
-standard_library.install_aliases()
 
 
 def human_order_sorted(l):
@@ -179,14 +170,13 @@ def package_check(pkg_name,
     try:
         mod = __import__(pkg_name)
     except ImportError as e:
-        raise_from(exc_failed_import(msg), e)
+        raise exc_failed_import(msg) from e
     if not version:
         return
     try:
         have_version = mod.__version__
     except AttributeError as e:
-        raise_from(
-            exc_failed_check('Cannot find version for %s' % pkg_name), e)
+        raise exc_failed_check('Cannot find version for %s' % pkg_name) from e
     if checker(have_version) < checker(version):
         raise exc_failed_check(msg)
 

@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from __future__ import unicode_literals
-from builtins import open
-
 import os
 import time
 import warnings
+from pathlib import Path
 
 import mock
 import pytest
@@ -16,8 +14,7 @@ from ...utils.filemanip import (
     check_forhash, _parse_mount_table, _cifs_table, on_cifs, copyfile,
     copyfiles, ensure_list, simplify_list, check_depends,
     split_filename, get_related_files, indirectory,
-    loadpkl, loadcrash, savepkl, FileNotFoundError, Path,
-    path_mkdir, path_resolve)
+    loadpkl, loadcrash, savepkl, path_resolve)
 
 
 def _ignore_atime(stat):
@@ -600,20 +597,3 @@ def test_pickle(tmp_path, save_versioning):
     savepkl(pickle_fname, testobj, versioning=save_versioning)
     outobj = loadpkl(pickle_fname)
     assert outobj == testobj
-
-
-def test_path_mkdir(tmpdir):
-    tmp_path = Path(tmpdir.strpath)
-
-    # PY34: Leave as monkey-patch
-    Path.write_text(tmp_path / 'textfile', 'some text')
-
-    with pytest.raises(OSError):
-        path_mkdir(tmp_path / 'no' / 'parents', parents=False)
-
-    path_mkdir(tmp_path / 'no' / 'parents', parents=True)
-
-    with pytest.raises(OSError):
-        path_mkdir(tmp_path / 'no' / 'parents', parents=False)
-
-    path_mkdir(tmp_path / 'no' / 'parents', parents=True, exist_ok=True)

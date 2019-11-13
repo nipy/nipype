@@ -3,13 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """CSV Handling utilities
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import zip, range, str, open
-
-from future import standard_library
-standard_library.install_aliases()
-
 from ..base import (traits, TraitedSpec, DynamicTraitedSpec, File,
                     BaseInterface)
 from ..io import add_traits

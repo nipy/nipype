@@ -3,10 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Testing module for functions and classes from multiproc.py
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import range, open
-
 # Import packages
 import os
 import sys

@@ -2,10 +2,6 @@
 settings in setup.py, the nipy top-level docstring, and for building the
 docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
-import sys
 
 # nipype version information
 # Remove -dev for release
@@ -54,13 +50,12 @@ CLASSIFIERS = [
     'License :: OSI Approved :: Apache Software License',
     'Operating System :: MacOS :: MacOS X',
     'Operating System :: POSIX :: Linux',
-    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Topic :: Scientific/Engineering'
 ]
-PYTHON_REQUIRES = ">= 2.7, != 3.0.*, != 3.1.*, != 3.2.*, != 3.3.*, != 3.4.*"
+PYTHON_REQUIRES = ">= 3.5"
 
 description = 'Neuroimaging in Python: Pipelines and Interfaces'
 
@@ -106,9 +101,6 @@ NUMPY_MIN_VERSION = '1.12'
 # Numpy bug in python 3.7:
 # https://www.opensourceanswers.com/blog/you-shouldnt-use-python-37-for-data-science-right-now.html
 NUMPY_MIN_VERSION_37 = '1.15.3'
-NUMPY_BAD_VERSION_27 = '1.16.0'
-# Numpy drops 2.7 support in 1.17
-NUMPY_MAX_VERSION_27 = '1.17.0'
 SCIPY_MIN_VERSION = '0.14'
 # Scipy drops 2.7 and 3.4 support in 1.3
 SCIPY_MAX_VERSION_34 = '1.3.0'
@@ -140,26 +132,18 @@ VERSION = __version__
 PROVIDES = ['nipype']
 REQUIRES = [
     'click>=%s' % CLICK_MIN_VERSION,
-    'configparser; python_version <= "3.4"',
     'funcsigs',
     'future>=%s' % FUTURE_MIN_VERSION,
-    'futures; python_version == "2.7"',
-    'networkx>=%s ; python_version >= "3.0"' % NETWORKX_MIN_VERSION,
-    'networkx>=%s,<=%s ; python_version < "3.0"' % (NETWORKX_MIN_VERSION, NETWORKX_MAX_VERSION_27),
+    'networkx>=%s' % NETWORKX_MIN_VERSION,
     'nibabel>=%s' % NIBABEL_MIN_VERSION,
-    'numpy>=%s ; python_version > "3.0" and python_version < "3.7"' % NUMPY_MIN_VERSION,
+    'numpy>=%s ; python_version < "3.7"' % NUMPY_MIN_VERSION,
     'numpy>=%s ; python_version >= "3.7"' % NUMPY_MIN_VERSION_37,
-    'numpy>=%s,!=%s,<%s ; python_version == "2.7"' % (NUMPY_MIN_VERSION,
-                                                      NUMPY_BAD_VERSION_27,
-                                                      NUMPY_MAX_VERSION_27),
     'packaging',
-    'pathlib2; python_version <= "3.4"',
     'prov>=%s' % PROV_VERSION,
     'pydot>=%s' % PYDOT_MIN_VERSION,
     'pydotplus',
     'python-dateutil>=%s' % DATEUTIL_MIN_VERSION,
-    'scipy>=%s ; python_version >= "3.5"' % SCIPY_MIN_VERSION,
-    'scipy>=%s,<%s ; python_version <= "3.4"' % (SCIPY_MIN_VERSION, SCIPY_MAX_VERSION_34),
+    'scipy>=%s' % SCIPY_MIN_VERSION,
     'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
     'traits>=%s,!=5.0' % TRAITS_MIN_VERSION,
     'filelock>=3.0.0',

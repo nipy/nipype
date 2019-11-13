@@ -1,18 +1,10 @@
 #!/usr/bin/env python
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
-from future import standard_library
-standard_library.install_aliases()
-
 import pytest
 import sys
 from contextlib import contextmanager
 
 from io import StringIO
 from ...utils import nipype_cmd
-
-PY2 = sys.version_info[0] < 3
 
 
 @contextmanager
@@ -41,10 +33,6 @@ class TestNipypeCMD():
 nipype_cmd: error: the following arguments are required: module, interface
 """
 
-        if PY2:
-            msg = """usage: nipype_cmd [-h] module interface
-nipype_cmd: error: too few arguments
-"""
         assert stderr.getvalue() == msg
         assert stdout.getvalue() == ''
 

@@ -5,10 +5,6 @@
 Image assessment algorithms. Typical overlap and error computation
 measures to evaluate results from other processing units.
 '''
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import zip, range
-
 import os
 import os.path as op
 

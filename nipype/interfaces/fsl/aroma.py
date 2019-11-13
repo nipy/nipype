@@ -5,8 +5,6 @@
 `ICA-AROMA.py<https://github.com/rhr-pruim/ICA-AROMA>`_ command line tool.
 """
 
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 from ..base import (TraitedSpec, CommandLineInputSpec, CommandLine, File,
                     Directory, traits, isdefined)
 import os

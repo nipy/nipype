@@ -5,18 +5,12 @@
 Module to draw an html gantt chart from logfile produced by
 ``nipype.utils.profiler.log_nodes_cb()``
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
 # Import packages
 import sys
 import random
 import datetime
 import simplejson as json
-from builtins import str, range, open
-# Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
-from future import standard_library
-standard_library.install_aliases()
+
 from collections import OrderedDict
 
 # Pandas
@@ -26,8 +20,6 @@ except ImportError:
     print('Pandas not found; in order for full functionality of this module '
           'install the pandas package')
     pass
-
-PY3 = sys.version_info[0] > 2
 
 
 def create_event_dict(start_time, nodes_list):
@@ -322,10 +314,7 @@ def draw_resource_bar(start_time, finish_time, time_series,
     space_between_minutes = space_between_minutes / scale
 
     # Iterate through time series
-    if PY3:
-        ts_items = time_series.items()
-    else:
-        ts_items = time_series.iteritems()
+    ts_items = time_series.items()
 
     ts_len = len(time_series)
     for idx, (ts_start, amount) in enumerate(ts_items):
@@ -561,5 +550,5 @@ def generate_gantt_chart(logfile,
     </body>'''
 
     # save file
-    with open(logfile + '.html', 'w' if PY3 else 'wb') as html_file:
+    with open(logfile + '.html', 'w') as html_file:
         html_file.write(html_string)

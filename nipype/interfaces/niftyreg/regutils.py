@@ -6,10 +6,6 @@
 
 The interfaces were written to work with niftyreg version 1.5.10
 """
-
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import len, open, property, super
 import os
 
 from ..base import TraitedSpec, File, traits, isdefined

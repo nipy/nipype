@@ -15,8 +15,6 @@ Examples
 --------
 See the docstrings of the individual classes for examples.
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 
 from ..niftyfit.base import NiftyFitCommand
 

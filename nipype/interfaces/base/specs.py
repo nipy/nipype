@@ -9,20 +9,15 @@ Base I/O specifications for Nipype interfaces
 Define the API for the I/O of interfaces
 
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
 import os
 from inspect import isclass
 from copy import deepcopy
 from warnings import warn
-from builtins import str, bytes
 from packaging.version import Version
 
 from traits.trait_errors import TraitError
 from traits.trait_handlers import TraitDictObject, TraitListObject
-from ...utils.filemanip import (
-    md5, hash_infile, hash_timestamp, to_str, USING_PATHLIB2)
+from ...utils.filemanip import md5, hash_infile, hash_timestamp
 from .traits_extension import (
     traits,
     File,
@@ -259,7 +254,7 @@ class BaseTraitedSpec(traits.HasTraits):
                                       True,
                                       hash_method=hash_method,
                                       hash_files=hash_files)))
-        return list_withhash, md5(to_str(list_nofilename).encode()).hexdigest()
+        return list_withhash, md5(str(list_nofilename).encode()).hexdigest()
 
     def _get_sorteddict(self,
                         objekt,
@@ -344,39 +339,6 @@ class BaseTraitedSpec(traits.HasTraits):
         return state
 
 
-def _deepcopypatch(self, memo):
-    """
-    Replace the ``__deepcopy__`` member with a traits-friendly implementation.
-
-    A bug in ``__deepcopy__`` for ``HasTraits`` results in weird cloning behaviors.
-    Occurs for all specs in Python<3 and only for DynamicTraitedSpec in Python>2.
-
-    """
-    id_self = id(self)
-    if id_self in memo:
-        return memo[id_self]
-    dup_dict = deepcopy(self.trait_get(), memo)
-    # access all keys
-    for key in self.copyable_trait_names():
-        if key in self.__dict__.keys():
-            _ = getattr(self, key)
-    # clone once
-    dup = self.clone_traits(memo=memo)
-    for key in self.copyable_trait_names():
-        try:
-            _ = getattr(dup, key)
-        except:
-            pass
-    # clone twice
-    dup = self.clone_traits(memo=memo)
-    dup.trait_set(**dup_dict)
-    return dup
-
-
-if USING_PATHLIB2:
-    BaseTraitedSpec.__deepcopy__ = _deepcopypatch
-
-
 class TraitedSpec(BaseTraitedSpec):
     """ Create a subclass with strict traits.
 
@@ -395,10 +357,31 @@ class DynamicTraitedSpec(BaseTraitedSpec):
     This class is a workaround for add_traits and clone_traits not
     functioning well together.
     """
+    def __deepcopy__(self, memo):
+        """
+        Replace the ``__deepcopy__`` member with a traits-friendly implementation.
 
-
-if not USING_PATHLIB2:
-    DynamicTraitedSpec.__deepcopy__ = _deepcopypatch
+        A bug in ``__deepcopy__`` for ``HasTraits`` results in weird cloning behaviors.
+        """
+        id_self = id(self)
+        if id_self in memo:
+            return memo[id_self]
+        dup_dict = deepcopy(self.trait_get(), memo)
+        # access all keys
+        for key in self.copyable_trait_names():
+            if key in self.__dict__.keys():
+                _ = getattr(self, key)
+        # clone once
+        dup = self.clone_traits(memo=memo)
+        for key in self.copyable_trait_names():
+            try:
+                _ = getattr(dup, key)
+            except:
+                pass
+        # clone twice
+        dup = self.clone_traits(memo=memo)
+        dup.trait_set(**dup_dict)
+        return dup
 
 
 class CommandLineInputSpec(BaseInterfaceInputSpec):

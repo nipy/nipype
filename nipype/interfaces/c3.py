@@ -2,8 +2,6 @@
 """The ants module provides basic functions for interfacing with ants
    functions.
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 import os
 from glob import glob
 

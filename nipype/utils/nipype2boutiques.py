@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 
-from builtins import str, open, bytes
 # This tool exports a Nipype interface in the Boutiques
 # (https://github.com/boutiques) JSON format. Boutiques tools
 # can be imported in CBRAIN (https://github.com/aces/cbrain)

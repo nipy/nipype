@@ -1,11 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import open, object, str, bytes
-
-# Py2 compat: http://python-future.org/compatible_idioms.html#collections-counter-and-ordereddict
-from future import standard_library
-standard_library.install_aliases()
 from collections import OrderedDict
 
 from copy import deepcopy

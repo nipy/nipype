@@ -1,5 +1,4 @@
 # Modified 2017.04.21 by Chris Markiewicz
-from __future__ import unicode_literals
 import pytest
 
 from ..base import FSSurfaceCommand

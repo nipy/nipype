@@ -6,13 +6,6 @@
     >>> tmp = getfixture('tmpdir')
     >>> old = tmp.chdir()
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import range
-
-from future import standard_library
-standard_library.install_aliases()
-
 import os
 import re
 import numpy as np

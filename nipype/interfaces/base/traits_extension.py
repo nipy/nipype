@@ -19,10 +19,6 @@ all of these bugs and they've been fixed in enthought svn repository
 (usually by Robert Kern).
 
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
-from builtins import str, bytes
 from collections import Sequence
 
 # perform all external trait imports here
@@ -32,17 +28,11 @@ from traits.trait_handlers import TraitType, NoDefaultSpecified
 from traits.trait_base import _Undefined
 
 from traits.api import Unicode
-from future import standard_library
-from ...utils.filemanip import Path, USING_PATHLIB2, path_resolve
-
-if USING_PATHLIB2:
-    from future.types.newstr import newstr
-
+from pathlib import Path
+from ...utils.filemanip import path_resolve
 
 if traits_version < '3.7.0':
     raise ImportError('Traits version 3.7.0 or higher must be installed')
-
-standard_library.install_aliases()
 
 IMG_FORMATS = {
     'afni': ('.HEAD', '.BRIK'),
@@ -130,8 +120,6 @@ class BasePath(TraitType):
     def validate(self, objekt, name, value, return_pathlike=False):
         """Validate a value change."""
         try:
-            if USING_PATHLIB2 and isinstance(value, newstr):
-                value = '%s' % value  # pathlib2 doesn't like newstr
             value = Path(value)  # Use pathlib's validation
         except Exception:
             self.error(objekt, name, str(value))

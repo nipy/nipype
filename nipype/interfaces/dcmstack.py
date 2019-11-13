@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Provides interfaces to various commands provided by dcmstack
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 
 import os
 from os import path as op

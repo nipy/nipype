@@ -16,13 +16,9 @@ import sys
 from glob import glob
 import os
 from os.path import join as pjoin
-from io import open
 
 # Commit hash writing, and dependency checking
 from setuptools.command.build_py import build_py
-
-
-PY3 = sys.version_info[0] >= 3
 
 
 class BuildWithCommitInfoCommand(build_py):
@@ -70,20 +66,14 @@ class BuildWithCommitInfoCommand(build_py):
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
                                 shell=True)
-        repo_commit, _ = proc.communicate()
-        # Fix for python 3
-        if PY3:
-            repo_commit = repo_commit.decode()
+        repo_commit = proc.communicate()[0].decode()
 
         # We write the installation commit even if it's empty
         cfg_parser = configparser.RawConfigParser()
         cfg_parser.read(pjoin('nipype', 'COMMIT_INFO.txt'))
         cfg_parser.set('commit hash', 'install_hash', repo_commit.strip())
         out_pth = pjoin(self.build_lib, 'nipype', 'COMMIT_INFO.txt')
-        if PY3:
-            cfg_parser.write(open(out_pth, 'wt'))
-        else:
-            cfg_parser.write(open(out_pth, 'wb'))
+        cfg_parser.write(open(out_pth, 'wt'))
 
 
 def main():

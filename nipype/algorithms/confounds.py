@@ -4,10 +4,6 @@
 '''
 Algorithms to compute confounds in :abbr:`fMRI (functional MRI)`
 '''
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import range
-
 import os
 import os.path as op
 from collections import OrderedDict
