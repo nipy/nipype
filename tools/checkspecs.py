@@ -7,15 +7,10 @@ import os
 import re
 import sys
 import warnings
-from distutils.version import LooseVersion
 
 from nipype.interfaces.base import BaseInterface
 
-import yapf
-if LooseVersion(yapf.__version__) < '0.27':
-    raise ImportError("Please upgrade yapf to version 0.27 or newer for stable formatting")
-
-from yapf.yapflib.yapf_api import FormatCode
+import black
 
 
 # Functions and classes
@@ -248,12 +243,7 @@ class InterfaceChecker(object):
             assert getattr(inputs.traits()[key], metakey) == value"""
                 ]
 
-                fmt_cmd, _ = FormatCode(
-                    '\n'.join(cmd) + '\n\n',
-                    style_config={
-                        'based_on_style': 'pep8',
-                        'column_limit': 79
-                    })
+                fmt_cmd = black.format_str('\n'.join(cmd), mode=black.FileMode())
                 with open(testfile, 'wt') as fp:
                     fp.writelines(fmt_cmd)
             else:
@@ -317,14 +307,9 @@ class InterfaceChecker(object):
         for metakey, value in list(metadata.items()):
             assert getattr(outputs.traits()[key], metakey) == value"""
                 ]
-                fmt_cmd, _ = FormatCode(
-                    '\n'.join(cmd) + '\n',
-                    style_config={
-                        'based_on_style': 'pep8',
-                        'column_limit': 79
-                    })
+                fmt_cmd = black.format_str('\n'.join(cmd), mode=black.FileMode())
                 with open(testfile, 'at') as fp:
-                    fp.writelines(fmt_cmd)
+                    fp.writelines("\n\n" + fmt_cmd)
 
             for traitname, trait in sorted(
                     classinst.output_spec().traits(transient=None).items()):
