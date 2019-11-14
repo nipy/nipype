@@ -3,20 +3,17 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """CSV Handling utilities
 """
-from ..base import (traits, TraitedSpec, DynamicTraitedSpec, File,
-                    BaseInterface)
+from ..base import traits, TraitedSpec, DynamicTraitedSpec, File, BaseInterface
 from ..io import add_traits
 
 
 class CSVReaderInputSpec(DynamicTraitedSpec, TraitedSpec):
     in_file = File(
-        exists=True,
-        mandatory=True,
-        desc='Input comma-seperated value (CSV) file')
+        exists=True, mandatory=True, desc="Input comma-seperated value (CSV) file"
+    )
     header = traits.Bool(
-        False,
-        usedefault=True,
-        desc='True if the first line is a column header')
+        False, usedefault=True, desc="True if the first line is a column header"
+    )
 
 
 class CSVReader(BaseInterface):
@@ -46,6 +43,7 @@ class CSVReader(BaseInterface):
     True
 
     """
+
     input_spec = CSVReaderInputSpec
     output_spec = DynamicTraitedSpec
     _always_run = True
@@ -56,18 +54,17 @@ class CSVReader(BaseInterface):
         return outputs
 
     def _parse_line(self, line):
-        line = line.replace('\n', '')
-        entry = [x.strip() for x in line.split(',')]
+        line = line.replace("\n", "")
+        entry = [x.strip() for x in line.split(",")]
         return entry
 
     def _get_outfields(self):
-        with open(self.inputs.in_file, 'r') as fid:
+        with open(self.inputs.in_file, "r") as fid:
             entry = self._parse_line(fid.readline())
             if self.inputs.header:
                 self._outfields = tuple(entry)
             else:
-                self._outfields = tuple(
-                    ['column_' + str(x) for x in range(len(entry))])
+                self._outfields = tuple(["column_" + str(x) for x in range(len(entry))])
         return self._outfields
 
     def _run_interface(self, runtime):
@@ -85,7 +82,7 @@ class CSVReader(BaseInterface):
         isHeader = True
         for key in self._outfields:
             outputs[key] = []  # initialize outfields
-        with open(self.inputs.in_file, 'r') as fid:
+        with open(self.inputs.in_file, "r") as fid:
             for line in fid.readlines():
                 if self.inputs.header and isHeader:  # skip header line
                     isHeader = False

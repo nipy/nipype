@@ -4,50 +4,25 @@ from ..odf import QBallMX
 
 def test_QBallMX_inputs():
     input_map = dict(
-        args=dict(argstr='%s', ),
-        basistype=dict(
-            argstr='-basistype %s',
-            usedefault=True,
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        order=dict(
-            argstr='-order %d',
-            units='NA',
-        ),
-        out_file=dict(
-            argstr='> %s',
-            extensions=None,
-            genfile=True,
-            position=-1,
-        ),
-        rbfpointset=dict(
-            argstr='-rbfpointset %d',
-            units='NA',
-        ),
-        rbfsigma=dict(
-            argstr='-rbfsigma %f',
-            units='NA',
-        ),
-        scheme_file=dict(
-            argstr='-schemefile %s',
-            extensions=None,
-            mandatory=True,
-        ),
-        smoothingsigma=dict(
-            argstr='-smoothingsigma %f',
-            units='NA',
-        ),
+        args=dict(argstr="%s",),
+        basistype=dict(argstr="-basistype %s", usedefault=True,),
+        environ=dict(nohash=True, usedefault=True,),
+        order=dict(argstr="-order %d", units="NA",),
+        out_file=dict(argstr="> %s", extensions=None, genfile=True, position=-1,),
+        rbfpointset=dict(argstr="-rbfpointset %d", units="NA",),
+        rbfsigma=dict(argstr="-rbfsigma %f", units="NA",),
+        scheme_file=dict(argstr="-schemefile %s", extensions=None, mandatory=True,),
+        smoothingsigma=dict(argstr="-smoothingsigma %f", units="NA",),
     )
     inputs = QBallMX.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
+
+
 def test_QBallMX_outputs():
-    output_map = dict(qmat=dict(extensions=None, ), )
+    output_map = dict(qmat=dict(extensions=None,),)
     outputs = QBallMX.output_spec()
 
     for key, metadata in list(output_map.items()):

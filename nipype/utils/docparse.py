@@ -35,11 +35,12 @@ def grab_doc(cmd, trap_error=True):
     """
 
     proc = subprocess.Popen(
-        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+    )
     stdout, stderr = proc.communicate()
 
     if trap_error and proc.returncode:
-        msg = 'Attempting to run %s. Returned Error: %s' % (cmd, stderr)
+        msg = "Attempting to run %s. Returned Error: %s" % (cmd, stderr)
         raise IOError(msg)
 
     if stderr:
@@ -76,7 +77,7 @@ def reverse_opt_map(opt_map):
             # The value is a tuple where the first element is the
             # format string and the second element is a docstring.
             value = value[0]
-        if (key != 'flags' and value is not None):
+        if key != "flags" and value is not None:
             revdict[value.split()[0]] = key
     return revdict
 
@@ -104,21 +105,21 @@ def format_params(paramlist, otherlist=None):
         The formatted docstring.
     """
 
-    hdr = 'Parameters'
-    delim = '----------'
+    hdr = "Parameters"
+    delim = "----------"
     paramlist.insert(0, delim)
     paramlist.insert(0, hdr)
-    params = '\n'.join(paramlist)
+    params = "\n".join(paramlist)
     otherparams = []
-    doc = ''.join(params)
+    doc = "".join(params)
     if otherlist:
-        hdr = 'Others Parameters'
-        delim = '-----------------'
+        hdr = "Others Parameters"
+        delim = "-----------------"
         otherlist.insert(0, delim)
         otherlist.insert(0, hdr)
-        otherlist.insert(0, '\n')
-        otherparams = '\n'.join(otherlist)
-        doc = ''.join([doc, otherparams])
+        otherlist.insert(0, "\n")
+        otherparams = "\n".join(otherlist)
+        doc = "".join([doc, otherparams])
     return doc
 
 
@@ -159,7 +160,7 @@ def insert_doc(doc, new_items):
     """
 
     # Insert new_items after the Parameters header
-    doclist = doc.split('\n')
+    doclist = doc.split("\n")
     tmpdoc = doclist[:2]
     # Add new_items
     tmpdoc.extend(new_items)
@@ -169,10 +170,10 @@ def insert_doc(doc, new_items):
     newdoc = []
     for line in tmpdoc:
         newdoc.append(line)
-        newdoc.append('\n')
+        newdoc.append("\n")
     # We add one too many newlines, remove it.
     newdoc.pop(-1)
-    return ''.join(newdoc)
+    return "".join(newdoc)
 
 
 def build_doc(doc, opts):
@@ -196,7 +197,7 @@ def build_doc(doc, opts):
 
     # Split doc into line elements.  Generally, each line is an
     # individual flag/option.
-    doclist = doc.split('\n')
+    doclist = doc.split("\n")
     newdoc = []
     flags_doc = []
     for line in doclist:
@@ -205,17 +206,17 @@ def build_doc(doc, opts):
             # Probably an empty line
             continue
         # For lines we care about, the first item is the flag
-        if ',' in linelist[0]:  # sometimes flags are only seperated by comma
-            flag = linelist[0].split(',')[0]
+        if "," in linelist[0]:  # sometimes flags are only seperated by comma
+            flag = linelist[0].split(",")[0]
         else:
             flag = linelist[0]
         attr = opts.get(flag)
         if attr is not None:
             # newline = line.replace(flag, attr)
             # Replace the flag with our attribute name
-            linelist[0] = '%s :\n    ' % str(attr)
+            linelist[0] = "%s :\n    " % str(attr)
             # Add some line formatting
-            newline = ' '.join(linelist)
+            newline = " ".join(linelist)
             newdoc.append(newline)
         else:
             if line[0].isspace():
@@ -249,20 +250,21 @@ def get_doc(cmd, opt_map, help_flag=None, trap_error=True):
 
     """
     res = CommandLine(
-        'which %s' % cmd.split(' ')[0],
+        "which %s" % cmd.split(" ")[0],
         resource_monitor=False,
-        terminal_output='allatonce').run()
+        terminal_output="allatonce",
+    ).run()
     cmd_path = res.runtime.stdout.strip()
-    if cmd_path == '':
-        raise Exception('Command %s not found' % cmd.split(' ')[0])
+    if cmd_path == "":
+        raise Exception("Command %s not found" % cmd.split(" ")[0])
     if help_flag:
-        cmd = ' '.join((cmd, help_flag))
+        cmd = " ".join((cmd, help_flag))
     doc = grab_doc(cmd, trap_error)
     opts = reverse_opt_map(opt_map)
     return build_doc(doc, opts)
 
 
-def _parse_doc(doc, style=['--']):
+def _parse_doc(doc, style=["--"]):
     """Parses a help doc for inputs
 
     Parameters
@@ -279,16 +281,16 @@ def _parse_doc(doc, style=['--']):
 
     # Split doc into line elements.  Generally, each line is an
     # individual flag/option.
-    doclist = doc.split('\n')
+    doclist = doc.split("\n")
     optmap = {}
     if isinstance(style, (str, bytes)):
         style = [style]
     for line in doclist:
         linelist = line.split()
         flag = [
-            item for i, item in enumerate(linelist)
-            if i < 2 and any([item.startswith(s)
-                              for s in style]) and len(item) > 1
+            item
+            for i, item in enumerate(linelist)
+            if i < 2 and any([item.startswith(s) for s in style]) and len(item) > 1
         ]
         if flag:
             if len(flag) == 1:
@@ -303,11 +305,11 @@ def _parse_doc(doc, style=['--']):
                             break
                 flag = flag[style_idx.index(min(style_idx))]
                 style_idx = min(style_idx)
-            optmap[flag.split(style[style_idx])[1]] = '%s %%s' % flag
+            optmap[flag.split(style[style_idx])[1]] = "%s %%s" % flag
     return optmap
 
 
-def get_params_from_doc(cmd, style='--', help_flag=None, trap_error=True):
+def get_params_from_doc(cmd, style="--", help_flag=None, trap_error=True):
     """Auto-generate option map from command line help
 
     Parameters
@@ -329,14 +331,15 @@ def get_params_from_doc(cmd, style='--', help_flag=None, trap_error=True):
 
     """
     res = CommandLine(
-        'which %s' % cmd.split(' ')[0],
+        "which %s" % cmd.split(" ")[0],
         resource_monitor=False,
-        terminal_output='allatonce').run()
+        terminal_output="allatonce",
+    ).run()
     cmd_path = res.runtime.stdout.strip()
-    if cmd_path == '':
-        raise Exception('Command %s not found' % cmd.split(' ')[0])
+    if cmd_path == "":
+        raise Exception("Command %s not found" % cmd.split(" ")[0])
     if help_flag:
-        cmd = ' '.join((cmd, help_flag))
+        cmd = " ".join((cmd, help_flag))
     doc = grab_doc(cmd, trap_error)
     return _parse_doc(doc, style)
 

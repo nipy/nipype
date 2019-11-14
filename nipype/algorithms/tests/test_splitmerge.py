@@ -13,8 +13,8 @@ def test_split_and_merge(tmpdir):
 
     from nipype.algorithms.misc import split_rois, merge_rois
 
-    in_mask = example_data('tpms_msk.nii.gz')
-    dwfile = tmpdir.join('dwi.nii.gz').strpath
+    in_mask = example_data("tpms_msk.nii.gz")
+    dwfile = tmpdir.join("dwi.nii.gz").strpath
     mskdata = nb.load(in_mask, mmap=NUMPY_MMAP).get_data()
     aff = nb.load(in_mask, mmap=NUMPY_MMAP).affine
 

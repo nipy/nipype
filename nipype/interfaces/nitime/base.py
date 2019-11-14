@@ -7,4 +7,4 @@ from ..base import LibraryBaseInterface
 
 
 class NitimeBaseInterface(LibraryBaseInterface):
-    _pkg = 'nitime'
+    _pkg = "nitime"

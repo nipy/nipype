@@ -4,46 +4,37 @@ from ..model import Threshold
 
 def test_Threshold_inputs():
     input_map = dict(
-        contrast_index=dict(mandatory=True, ),
-        extent_fdr_p_threshold=dict(usedefault=True, ),
-        extent_threshold=dict(usedefault=True, ),
-        force_activation=dict(usedefault=True, ),
-        height_threshold=dict(usedefault=True, ),
-        height_threshold_type=dict(usedefault=True, ),
+        contrast_index=dict(mandatory=True,),
+        extent_fdr_p_threshold=dict(usedefault=True,),
+        extent_threshold=dict(usedefault=True,),
+        force_activation=dict(usedefault=True,),
+        height_threshold=dict(usedefault=True,),
+        height_threshold_type=dict(usedefault=True,),
         matlab_cmd=dict(),
-        mfile=dict(usedefault=True, ),
+        mfile=dict(usedefault=True,),
         paths=dict(),
-        spm_mat_file=dict(
-            copyfile=True,
-            extensions=None,
-            mandatory=True,
-        ),
-        stat_image=dict(
-            copyfile=False,
-            extensions=None,
-            mandatory=True,
-        ),
-        use_fwe_correction=dict(usedefault=True, ),
+        spm_mat_file=dict(copyfile=True, extensions=None, mandatory=True,),
+        stat_image=dict(copyfile=False, extensions=None, mandatory=True,),
+        use_fwe_correction=dict(usedefault=True,),
         use_mcr=dict(),
-        use_topo_fdr=dict(usedefault=True, ),
-        use_v8struct=dict(
-            min_ver='8',
-            usedefault=True,
-        ),
+        use_topo_fdr=dict(usedefault=True,),
+        use_v8struct=dict(min_ver="8", usedefault=True,),
     )
     inputs = Threshold.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
+
+
 def test_Threshold_outputs():
     output_map = dict(
         activation_forced=dict(),
         cluster_forming_thr=dict(),
         n_clusters=dict(),
-        pre_topo_fdr_map=dict(extensions=None, ),
+        pre_topo_fdr_map=dict(extensions=None,),
         pre_topo_n_clusters=dict(),
-        thresholded_map=dict(extensions=None, ),
+        thresholded_map=dict(extensions=None,),
     )
     outputs = Threshold.output_spec()
 

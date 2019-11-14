@@ -18,13 +18,13 @@ def capture_sys_output():
         sys.stdout, sys.stderr = current_out, current_err
 
 
-class TestNipypeCMD():
+class TestNipypeCMD:
     maxDiff = None
 
     def test_main_returns_2_on_empty(self):
         with pytest.raises(SystemExit) as cm:
             with capture_sys_output() as (stdout, stderr):
-                nipype_cmd.main(['nipype_cmd'])
+                nipype_cmd.main(["nipype_cmd"])
 
         exit_exception = cm.value
         assert exit_exception.code == 2
@@ -34,19 +34,20 @@ nipype_cmd: error: the following arguments are required: module, interface
 """
 
         assert stderr.getvalue() == msg
-        assert stdout.getvalue() == ''
+        assert stdout.getvalue() == ""
 
     def test_main_returns_0_on_help(self):
         with pytest.raises(SystemExit) as cm:
             with capture_sys_output() as (stdout, stderr):
-                nipype_cmd.main(['nipype_cmd', '-h'])
+                nipype_cmd.main(["nipype_cmd", "-h"])
 
         exit_exception = cm.value
         assert exit_exception.code == 0
 
-        assert stderr.getvalue() == ''
-        assert stdout.getvalue() == \
-            """usage: nipype_cmd [-h] module interface
+        assert stderr.getvalue() == ""
+        assert (
+            stdout.getvalue()
+            == """usage: nipype_cmd [-h] module interface
 
 Nipype interface runner
 
@@ -57,25 +58,28 @@ positional arguments:
 optional arguments:
   -h, --help  show this help message and exit
 """
+        )
 
     def test_list_nipy_interfacesp(self):
         with pytest.raises(SystemExit) as cm:
             with capture_sys_output() as (stdout, stderr):
-                nipype_cmd.main(['nipype_cmd', 'nipype.interfaces.nipy'])
+                nipype_cmd.main(["nipype_cmd", "nipype.interfaces.nipy"])
 
         # repeat twice in case nipy raises warnings
         with pytest.raises(SystemExit) as cm:
             with capture_sys_output() as (stdout, stderr):
-                nipype_cmd.main(['nipype_cmd', 'nipype.interfaces.nipy'])
+                nipype_cmd.main(["nipype_cmd", "nipype.interfaces.nipy"])
         exit_exception = cm.value
         assert exit_exception.code == 0
 
-        assert stderr.getvalue() == ''
-        assert stdout.getvalue() == \
-            """Available Interfaces:
+        assert stderr.getvalue() == ""
+        assert (
+            stdout.getvalue()
+            == """Available Interfaces:
 \tComputeMask
 \tEstimateContrast
 \tFitGLM
 \tSimilarity
 \tSpaceTimeRealigner
 """
+        )

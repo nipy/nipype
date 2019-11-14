@@ -5,11 +5,11 @@ import os
 import sys
 import subprocess
 
-COMMIT_INFO_FNAME = 'COMMIT_INFO.txt'
+COMMIT_INFO_FNAME = "COMMIT_INFO.txt"
 
 
 def pkg_commit_hash(pkg_path):
-    ''' Get short form of commit hash given directory `pkg_path`
+    """ Get short form of commit hash given directory `pkg_path`
 
     There should be a file called 'COMMIT_INFO.txt' in `pkg_path`.  This is a
     file in INI file format, with at least one section: ``commit hash`` and two
@@ -37,35 +37,36 @@ def pkg_commit_hash(pkg_path):
        Where we got the hash from - description
     hash_str : str
        short form of hash
-    '''
+    """
     # Try and get commit from written commit text file
     pth = os.path.join(pkg_path, COMMIT_INFO_FNAME)
     if not os.path.isfile(pth):
-        raise IOError('Missing commit info file %s' % pth)
+        raise IOError("Missing commit info file %s" % pth)
     cfg_parser = configparser.RawConfigParser()
-    with open(pth, encoding='utf-8') as fp:
+    with open(pth, encoding="utf-8") as fp:
         cfg_parser.read_file(fp)
-    archive_subst = cfg_parser.get('commit hash', 'archive_subst_hash')
-    if not archive_subst.startswith('$Format'):  # it has been substituted
-        return 'archive substitution', archive_subst
-    install_subst = cfg_parser.get('commit hash', 'install_hash')
-    if install_subst != '':
-        return 'installation', install_subst
+    archive_subst = cfg_parser.get("commit hash", "archive_subst_hash")
+    if not archive_subst.startswith("$Format"):  # it has been substituted
+        return "archive substitution", archive_subst
+    install_subst = cfg_parser.get("commit hash", "install_hash")
+    if install_subst != "":
+        return "installation", install_subst
     # maybe we are in a repository
     proc = subprocess.Popen(
-        'git rev-parse --short HEAD',
+        "git rev-parse --short HEAD",
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         cwd=pkg_path,
-        shell=True)
+        shell=True,
+    )
     repo_commit, _ = proc.communicate()
     if repo_commit:
-        return 'repository', repo_commit.decode().strip()
-    return '(none found)', '<not found>'
+        return "repository", repo_commit.decode().strip()
+    return "(none found)", "<not found>"
 
 
 def get_pkg_info(pkg_path):
-    ''' Return dict describing the context of this package
+    """ Return dict describing the context of this package
 
     Parameters
     ----------
@@ -76,7 +77,7 @@ def get_pkg_info(pkg_path):
     -------
     context : dict
        with named parameters of interest
-    '''
+    """
     src, hsh = pkg_commit_hash(pkg_path)
     from .info import VERSION
     import networkx
@@ -84,6 +85,7 @@ def get_pkg_info(pkg_path):
     import numpy
     import scipy
     import traits
+
     return dict(
         pkg_path=pkg_path,
         commit_source=src,
@@ -96,4 +98,5 @@ def get_pkg_info(pkg_path):
         scipy_version=scipy.__version__,
         networkx_version=networkx.__version__,
         nibabel_version=nibabel.__version__,
-        traits_version=traits.__version__)
+        traits_version=traits.__version__,
+    )

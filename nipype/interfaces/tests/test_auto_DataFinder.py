@@ -5,17 +5,19 @@ from ..io import DataFinder
 def test_DataFinder_inputs():
     input_map = dict(
         ignore_regexes=dict(),
-        match_regex=dict(usedefault=True, ),
+        match_regex=dict(usedefault=True,),
         max_depth=dict(),
         min_depth=dict(),
-        root_paths=dict(mandatory=True, ),
-        unpack_single=dict(usedefault=True, ),
+        root_paths=dict(mandatory=True,),
+        unpack_single=dict(usedefault=True,),
     )
     inputs = DataFinder.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
+
+
 def test_DataFinder_outputs():
     output_map = dict()
     outputs = DataFinder.output_spec()

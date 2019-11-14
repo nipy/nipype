@@ -4,126 +4,68 @@ from ..diffusion import dtiprocess
 
 def test_dtiprocess_inputs():
     input_map = dict(
-        DTI_double=dict(argstr='--DTI_double ', ),
-        RD_output=dict(
-            argstr='--RD_output %s',
-            hash_files=False,
-        ),
-        affineitk_file=dict(
-            argstr='--affineitk_file %s',
-            extensions=None,
-        ),
-        args=dict(argstr='%s', ),
-        color_fa_output=dict(
-            argstr='--color_fa_output %s',
-            hash_files=False,
-        ),
-        correction=dict(argstr='--correction %s', ),
-        deformation_output=dict(
-            argstr='--deformation_output %s',
-            hash_files=False,
-        ),
-        dof_file=dict(
-            argstr='--dof_file %s',
-            extensions=None,
-        ),
-        dti_image=dict(
-            argstr='--dti_image %s',
-            extensions=None,
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        fa_gradient_output=dict(
-            argstr='--fa_gradient_output %s',
-            hash_files=False,
-        ),
-        fa_gradmag_output=dict(
-            argstr='--fa_gradmag_output %s',
-            hash_files=False,
-        ),
-        fa_output=dict(
-            argstr='--fa_output %s',
-            hash_files=False,
-        ),
-        forward=dict(
-            argstr='--forward %s',
-            extensions=None,
-        ),
+        DTI_double=dict(argstr="--DTI_double ",),
+        RD_output=dict(argstr="--RD_output %s", hash_files=False,),
+        affineitk_file=dict(argstr="--affineitk_file %s", extensions=None,),
+        args=dict(argstr="%s",),
+        color_fa_output=dict(argstr="--color_fa_output %s", hash_files=False,),
+        correction=dict(argstr="--correction %s",),
+        deformation_output=dict(argstr="--deformation_output %s", hash_files=False,),
+        dof_file=dict(argstr="--dof_file %s", extensions=None,),
+        dti_image=dict(argstr="--dti_image %s", extensions=None,),
+        environ=dict(nohash=True, usedefault=True,),
+        fa_gradient_output=dict(argstr="--fa_gradient_output %s", hash_files=False,),
+        fa_gradmag_output=dict(argstr="--fa_gradmag_output %s", hash_files=False,),
+        fa_output=dict(argstr="--fa_output %s", hash_files=False,),
+        forward=dict(argstr="--forward %s", extensions=None,),
         frobenius_norm_output=dict(
-            argstr='--frobenius_norm_output %s',
-            hash_files=False,
+            argstr="--frobenius_norm_output %s", hash_files=False,
         ),
-        hField=dict(argstr='--hField ', ),
-        interpolation=dict(argstr='--interpolation %s', ),
-        lambda1_output=dict(
-            argstr='--lambda1_output %s',
-            hash_files=False,
-        ),
-        lambda2_output=dict(
-            argstr='--lambda2_output %s',
-            hash_files=False,
-        ),
-        lambda3_output=dict(
-            argstr='--lambda3_output %s',
-            hash_files=False,
-        ),
-        mask=dict(
-            argstr='--mask %s',
-            extensions=None,
-        ),
-        md_output=dict(
-            argstr='--md_output %s',
-            hash_files=False,
-        ),
+        hField=dict(argstr="--hField ",),
+        interpolation=dict(argstr="--interpolation %s",),
+        lambda1_output=dict(argstr="--lambda1_output %s", hash_files=False,),
+        lambda2_output=dict(argstr="--lambda2_output %s", hash_files=False,),
+        lambda3_output=dict(argstr="--lambda3_output %s", hash_files=False,),
+        mask=dict(argstr="--mask %s", extensions=None,),
+        md_output=dict(argstr="--md_output %s", hash_files=False,),
         negative_eigenvector_output=dict(
-            argstr='--negative_eigenvector_output %s',
-            hash_files=False,
+            argstr="--negative_eigenvector_output %s", hash_files=False,
         ),
-        newdof_file=dict(
-            argstr='--newdof_file %s',
-            extensions=None,
-        ),
-        outmask=dict(
-            argstr='--outmask %s',
-            hash_files=False,
-        ),
+        newdof_file=dict(argstr="--newdof_file %s", extensions=None,),
+        outmask=dict(argstr="--outmask %s", hash_files=False,),
         principal_eigenvector_output=dict(
-            argstr='--principal_eigenvector_output %s',
-            hash_files=False,
+            argstr="--principal_eigenvector_output %s", hash_files=False,
         ),
-        reorientation=dict(argstr='--reorientation %s', ),
-        rot_output=dict(
-            argstr='--rot_output %s',
-            hash_files=False,
-        ),
-        scalar_float=dict(argstr='--scalar_float ', ),
-        sigma=dict(argstr='--sigma %f', ),
-        verbose=dict(argstr='--verbose ', ),
+        reorientation=dict(argstr="--reorientation %s",),
+        rot_output=dict(argstr="--rot_output %s", hash_files=False,),
+        scalar_float=dict(argstr="--scalar_float ",),
+        sigma=dict(argstr="--sigma %f",),
+        verbose=dict(argstr="--verbose ",),
     )
     inputs = dtiprocess.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
+
+
 def test_dtiprocess_outputs():
     output_map = dict(
-        RD_output=dict(extensions=None, ),
-        color_fa_output=dict(extensions=None, ),
-        deformation_output=dict(extensions=None, ),
-        fa_gradient_output=dict(extensions=None, ),
-        fa_gradmag_output=dict(extensions=None, ),
-        fa_output=dict(extensions=None, ),
-        frobenius_norm_output=dict(extensions=None, ),
-        lambda1_output=dict(extensions=None, ),
-        lambda2_output=dict(extensions=None, ),
-        lambda3_output=dict(extensions=None, ),
-        md_output=dict(extensions=None, ),
-        negative_eigenvector_output=dict(extensions=None, ),
-        outmask=dict(extensions=None, ),
-        principal_eigenvector_output=dict(extensions=None, ),
-        rot_output=dict(extensions=None, ),
+        RD_output=dict(extensions=None,),
+        color_fa_output=dict(extensions=None,),
+        deformation_output=dict(extensions=None,),
+        fa_gradient_output=dict(extensions=None,),
+        fa_gradmag_output=dict(extensions=None,),
+        fa_output=dict(extensions=None,),
+        frobenius_norm_output=dict(extensions=None,),
+        lambda1_output=dict(extensions=None,),
+        lambda2_output=dict(extensions=None,),
+        lambda3_output=dict(extensions=None,),
+        md_output=dict(extensions=None,),
+        negative_eigenvector_output=dict(extensions=None,),
+        outmask=dict(extensions=None,),
+        principal_eigenvector_output=dict(extensions=None,),
+        rot_output=dict(extensions=None,),
     )
     outputs = dtiprocess.output_spec()
 

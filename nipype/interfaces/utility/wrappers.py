@@ -7,17 +7,22 @@
     >>> old = tmp.chdir()
 """
 from ... import logging
-from ..base import (traits, DynamicTraitedSpec, Undefined, isdefined,
-                    BaseInterfaceInputSpec)
+from ..base import (
+    traits,
+    DynamicTraitedSpec,
+    Undefined,
+    isdefined,
+    BaseInterfaceInputSpec,
+)
 from ..io import IOBase, add_traits
 from ...utils.filemanip import ensure_list
 from ...utils.functions import getsource, create_function_from_source
 
-iflogger = logging.getLogger('nipype.interface')
+iflogger = logging.getLogger("nipype.interface")
 
 
 class FunctionInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    function_str = traits.Str(mandatory=True, desc='code for function')
+    function_str = traits.Str(mandatory=True, desc="code for function")
 
 
 class Function(IOBase):
@@ -38,12 +43,14 @@ class Function(IOBase):
     input_spec = FunctionInputSpec
     output_spec = DynamicTraitedSpec
 
-    def __init__(self,
-                 input_names=None,
-                 output_names='out',
-                 function=None,
-                 imports=None,
-                 **inputs):
+    def __init__(
+        self,
+        input_names=None,
+        output_names="out",
+        function=None,
+        imports=None,
+        **inputs
+    ):
         """
 
         Parameters
@@ -66,26 +73,27 @@ class Function(IOBase):
 
         super(Function, self).__init__(**inputs)
         if function:
-            if hasattr(function, '__call__'):
+            if hasattr(function, "__call__"):
                 try:
                     self.inputs.function_str = getsource(function)
                 except IOError:
-                    raise Exception('Interface Function does not accept '
-                                    'function objects defined interactively '
-                                    'in a python session')
+                    raise Exception(
+                        "Interface Function does not accept "
+                        "function objects defined interactively "
+                        "in a python session"
+                    )
                 else:
                     if input_names is None:
                         fninfo = function.__code__
             elif isinstance(function, (str, bytes)):
                 self.inputs.function_str = function
                 if input_names is None:
-                    fninfo = create_function_from_source(function,
-                                                         imports).__code__
+                    fninfo = create_function_from_source(function, imports).__code__
             else:
-                raise Exception('Unknown type of function')
+                raise Exception("Unknown type of function")
             if input_names is None:
-                input_names = fninfo.co_varnames[:fninfo.co_argcount]
-        self.inputs.on_trait_change(self._set_function_string, 'function_str')
+                input_names = fninfo.co_varnames[: fninfo.co_argcount]
+        self.inputs.on_trait_change(self._set_function_string, "function_str")
         self._input_names = ensure_list(input_names)
         self._output_names = ensure_list(output_names)
         add_traits(self.inputs, [name for name in self._input_names])
@@ -95,20 +103,18 @@ class Function(IOBase):
             self._out[name] = None
 
     def _set_function_string(self, obj, name, old, new):
-        if name == 'function_str':
-            if hasattr(new, '__call__'):
+        if name == "function_str":
+            if hasattr(new, "__call__"):
                 function_source = getsource(new)
                 fninfo = new.__code__
             elif isinstance(new, (str, bytes)):
                 function_source = new
-                fninfo = create_function_from_source(new,
-                                                     self.imports).__code__
+                fninfo = create_function_from_source(new, self.imports).__code__
             self.inputs.trait_set(
-                trait_change_notify=False, **{
-                    '%s' % name: function_source
-                })
+                trait_change_notify=False, **{"%s" % name: function_source}
+            )
             # Update input traits
-            input_names = fninfo.co_varnames[:fninfo.co_argcount]
+            input_names = fninfo.co_varnames[: fninfo.co_argcount]
             new_names = set(input_names) - set(self._input_names)
             add_traits(self.inputs, list(new_names))
             self._input_names.extend(new_names)
@@ -123,8 +129,9 @@ class Function(IOBase):
 
     def _run_interface(self, runtime):
         # Create function handle
-        function_handle = create_function_from_source(self.inputs.function_str,
-                                                      self.imports)
+        function_handle = create_function_from_source(
+            self.inputs.function_str, self.imports
+        )
         # Get function args
         args = {}
         for name in self._input_names:
@@ -136,9 +143,8 @@ class Function(IOBase):
         if len(self._output_names) == 1:
             self._out[self._output_names[0]] = out
         else:
-            if isinstance(out, tuple) and \
-                    (len(out) != len(self._output_names)):
-                raise RuntimeError('Mismatch in number of expected outputs')
+            if isinstance(out, tuple) and (len(out) != len(self._output_names)):
+                raise RuntimeError("Mismatch in number of expected outputs")
 
             else:
                 for idx, name in enumerate(self._output_names):

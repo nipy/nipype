@@ -4,19 +4,16 @@ from ..preprocess import DICOMConvert
 
 def test_DICOMConvert_inputs():
     input_map = dict(
-        args=dict(argstr='%s', ),
-        base_output_dir=dict(mandatory=True, ),
-        dicom_dir=dict(mandatory=True, ),
-        dicom_info=dict(extensions=None, ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s",),
+        base_output_dir=dict(mandatory=True,),
+        dicom_dir=dict(mandatory=True,),
+        dicom_info=dict(extensions=None,),
+        environ=dict(nohash=True, usedefault=True,),
         file_mapping=dict(),
-        ignore_single_slice=dict(requires=['dicom_info'], ),
-        out_type=dict(usedefault=True, ),
-        seq_list=dict(requires=['dicom_info'], ),
-        subject_dir_template=dict(usedefault=True, ),
+        ignore_single_slice=dict(requires=["dicom_info"],),
+        out_type=dict(usedefault=True,),
+        seq_list=dict(requires=["dicom_info"],),
+        subject_dir_template=dict(usedefault=True,),
         subject_id=dict(),
         subjects_dir=dict(),
     )

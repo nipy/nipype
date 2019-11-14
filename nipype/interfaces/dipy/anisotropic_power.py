@@ -6,11 +6,11 @@ from ... import logging
 from ..base import TraitedSpec, File, isdefined
 from .base import DipyDiffusionInterface, DipyBaseInterfaceInputSpec
 
-IFLOGGER = logging.getLogger('nipype.interface')
+IFLOGGER = logging.getLogger("nipype.interface")
 
 
 class APMQballInputSpec(DipyBaseInterfaceInputSpec):
-    mask_file = File(exists=True, desc='An optional brain mask')
+    mask_file = File(exists=True, desc="An optional brain mask")
 
 
 class APMQballOutputSpec(TraitedSpec):
@@ -31,6 +31,7 @@ class APMQball(DipyDiffusionInterface):
     >>> apm.inputs.in_bval = 'bvals'
     >>> apm.run()                                   # doctest: +SKIP
     """
+
     input_spec = APMQballInputSpec
     output_spec = APMQballOutputSpec
 
@@ -50,23 +51,24 @@ class APMQball(DipyDiffusionInterface):
 
         # Fit it
         model = shm.QballModel(gtab, 8)
-        sphere = get_sphere('symmetric724')
+        sphere = get_sphere("symmetric724")
         peaks = peaks_from_model(
             model=model,
             data=data,
-            relative_peak_threshold=.5,
+            relative_peak_threshold=0.5,
             min_separation_angle=25,
             sphere=sphere,
-            mask=mask)
+            mask=mask,
+        )
         apm = shm.anisotropic_power(peaks.shm_coeff)
-        out_file = self._gen_filename('apm')
+        out_file = self._gen_filename("apm")
         nb.Nifti1Image(apm.astype("float32"), affine).to_filename(out_file)
-        IFLOGGER.info('APM qball image saved as %s', out_file)
+        IFLOGGER.info("APM qball image saved as %s", out_file)
 
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = self._gen_filename('apm')
+        outputs["out_file"] = self._gen_filename("apm")
 
         return outputs

@@ -22,8 +22,9 @@ def test_tempfatfs():
 
 
 @patch(
-    'subprocess.check_call',
-    MagicMock(side_effect=subprocess.CalledProcessError('', '')))
+    "subprocess.check_call",
+    MagicMock(side_effect=subprocess.CalledProcessError("", "")),
+)
 def test_tempfatfs_calledprocesserror():
     try:
         TempFATFS()
@@ -34,8 +35,8 @@ def test_tempfatfs_calledprocesserror():
         assert False
 
 
-@patch('subprocess.check_call', MagicMock())
-@patch('subprocess.Popen', MagicMock(side_effect=OSError()))
+@patch("subprocess.check_call", MagicMock())
+@patch("subprocess.Popen", MagicMock(side_effect=OSError()))
 def test_tempfatfs_oserror():
     try:
         TempFATFS()

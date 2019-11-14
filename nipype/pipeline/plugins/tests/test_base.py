@@ -14,7 +14,7 @@ def test_scipy_sparse():
     assert foo[0, 1] == 0
 
 
-'''
+"""
 Can use the following code to test that a mapnode crash continues successfully
 Need to put this into a unit-test with a timeout
 
@@ -38,4 +38,4 @@ wf.add_nodes([funkynode])
 wf.base_dir = '/tmp'
 
 wf.run(plugin='MultiProc')
-'''
+"""

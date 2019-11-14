@@ -4,58 +4,26 @@ from ..tracking import Tracks2Prob
 
 def test_Tracks2Prob_inputs():
     input_map = dict(
-        args=dict(argstr='%s', ),
-        colour=dict(
-            argstr='-colour',
-            position=3,
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        fraction=dict(
-            argstr='-fraction',
-            position=3,
-        ),
-        in_file=dict(
-            argstr='%s',
-            extensions=None,
-            mandatory=True,
-            position=-2,
-        ),
-        out_filename=dict(
-            argstr='%s',
-            extensions=None,
-            genfile=True,
-            position=-1,
-        ),
-        output_datatype=dict(
-            argstr='-datatype %s',
-            position=2,
-        ),
-        resample=dict(
-            argstr='-resample %d',
-            position=3,
-            units='mm',
-        ),
-        template_file=dict(
-            argstr='-template %s',
-            extensions=None,
-            position=1,
-        ),
-        voxel_dims=dict(
-            argstr='-vox %s',
-            position=2,
-            sep=',',
-        ),
+        args=dict(argstr="%s",),
+        colour=dict(argstr="-colour", position=3,),
+        environ=dict(nohash=True, usedefault=True,),
+        fraction=dict(argstr="-fraction", position=3,),
+        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2,),
+        out_filename=dict(argstr="%s", extensions=None, genfile=True, position=-1,),
+        output_datatype=dict(argstr="-datatype %s", position=2,),
+        resample=dict(argstr="-resample %d", position=3, units="mm",),
+        template_file=dict(argstr="-template %s", extensions=None, position=1,),
+        voxel_dims=dict(argstr="-vox %s", position=2, sep=",",),
     )
     inputs = Tracks2Prob.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
+
+
 def test_Tracks2Prob_outputs():
-    output_map = dict(tract_image=dict(extensions=None, ), )
+    output_map = dict(tract_image=dict(extensions=None,),)
     outputs = Tracks2Prob.output_spec()
 
     for key, metadata in list(output_map.items()):

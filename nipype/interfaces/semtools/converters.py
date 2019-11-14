@@ -5,23 +5,35 @@ If you spot a bug, please report it on the mailing list and/or change the genera
 
 import os
 
-from ..base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
-                    TraitedSpec, File, Directory, traits, isdefined,
-                    InputMultiPath, OutputMultiPath)
+from ..base import (
+    CommandLine,
+    CommandLineInputSpec,
+    SEMLikeCommandLine,
+    TraitedSpec,
+    File,
+    Directory,
+    traits,
+    isdefined,
+    InputMultiPath,
+    OutputMultiPath,
+)
 
 
 class DWISimpleCompareInputSpec(CommandLineInputSpec):
     inputVolume1 = File(
         desc="First input volume (.nhdr or .nrrd)",
         exists=True,
-        argstr="--inputVolume1 %s")
+        argstr="--inputVolume1 %s",
+    )
     inputVolume2 = File(
         desc="Second input volume (.nhdr or .nrrd)",
         exists=True,
-        argstr="--inputVolume2 %s")
+        argstr="--inputVolume2 %s",
+    )
     checkDWIData = traits.Bool(
         desc="check for existence of DWI data, and if present, compare it",
-        argstr="--checkDWIData ")
+        argstr="--checkDWIData ",
+    )
 
 
 class DWISimpleCompareOutputSpec(TraitedSpec):
@@ -58,11 +70,13 @@ class DWICompareInputSpec(CommandLineInputSpec):
     inputVolume1 = File(
         desc="First input volume (.nhdr or .nrrd)",
         exists=True,
-        argstr="--inputVolume1 %s")
+        argstr="--inputVolume1 %s",
+    )
     inputVolume2 = File(
         desc="Second input volume (.nhdr or .nrrd)",
         exists=True,
-        argstr="--inputVolume2 %s")
+        argstr="--inputVolume2 %s",
+    )
 
 
 class DWICompareOutputSpec(TraitedSpec):

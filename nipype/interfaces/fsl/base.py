@@ -31,11 +31,10 @@ import os
 
 from ... import logging
 from ...utils.filemanip import fname_presuffix
-from ..base import (traits, isdefined, CommandLine, CommandLineInputSpec,
-                    PackageInfo)
+from ..base import traits, isdefined, CommandLine, CommandLineInputSpec, PackageInfo
 from ...external.due import BibTeX
 
-IFLOGGER = logging.getLogger('nipype.interface')
+IFLOGGER = logging.getLogger("nipype.interface")
 
 
 class Info(PackageInfo):
@@ -56,14 +55,14 @@ class Info(PackageInfo):
     """
 
     ftypes = {
-        'NIFTI': '.nii',
-        'NIFTI_PAIR': '.img',
-        'NIFTI_GZ': '.nii.gz',
-        'NIFTI_PAIR_GZ': '.img.gz'
+        "NIFTI": ".nii",
+        "NIFTI_PAIR": ".img",
+        "NIFTI_GZ": ".nii.gz",
+        "NIFTI_PAIR_GZ": ".img.gz",
     }
 
-    if os.getenv('FSLDIR'):
-        version_file = os.path.join(os.getenv('FSLDIR'), 'etc', 'fslversion')
+    if os.getenv("FSLDIR"):
+        version_file = os.path.join(os.getenv("FSLDIR"), "etc", "fslversion")
 
     @staticmethod
     def parse_version(raw_info):
@@ -87,7 +86,7 @@ class Info(PackageInfo):
         try:
             return cls.ftypes[output_type]
         except KeyError:
-            msg = 'Invalid FSLOUTPUTTYPE: ', output_type
+            msg = "Invalid FSLOUTPUTTYPE: ", output_type
             raise KeyError(msg)
 
     @classmethod
@@ -103,28 +102,30 @@ class Info(PackageInfo):
             Represents the current environment setting of FSLOUTPUTTYPE
         """
         try:
-            return os.environ['FSLOUTPUTTYPE']
+            return os.environ["FSLOUTPUTTYPE"]
         except KeyError:
-            IFLOGGER.warning('FSLOUTPUTTYPE environment variable is not set. '
-                             'Setting FSLOUTPUTTYPE=NIFTI')
-            return 'NIFTI'
+            IFLOGGER.warning(
+                "FSLOUTPUTTYPE environment variable is not set. "
+                "Setting FSLOUTPUTTYPE=NIFTI"
+            )
+            return "NIFTI"
 
     @staticmethod
     def standard_image(img_name=None):
-        '''Grab an image from the standard location.
+        """Grab an image from the standard location.
 
         Returns a list of standard images if called without arguments.
 
-        Could be made more fancy to allow for more relocatability'''
+        Could be made more fancy to allow for more relocatability"""
         try:
-            fsldir = os.environ['FSLDIR']
+            fsldir = os.environ["FSLDIR"]
         except KeyError:
-            raise Exception('FSL environment variables not set')
-        stdpath = os.path.join(fsldir, 'data', 'standard')
+            raise Exception("FSL environment variables not set")
+        stdpath = os.path.join(fsldir, "data", "standard")
         if img_name is None:
             return [
-                filename.replace(stdpath + '/', '')
-                for filename in glob(os.path.join(stdpath, '*nii*'))
+                filename.replace(stdpath + "/", "")
+                for filename in glob(os.path.join(stdpath, "*nii*"))
             ]
         return os.path.join(stdpath, img_name)
 
@@ -140,8 +141,8 @@ class FSLCommandInputSpec(CommandLineInputSpec):
     -------
     fsl.ExtractRoi(tmin=42, tsize=1, output_type='NIFTI')
     """
-    output_type = traits.Enum(
-        'NIFTI', list(Info.ftypes.keys()), desc='FSL output type')
+
+    output_type = traits.Enum("NIFTI", list(Info.ftypes.keys()), desc="FSL output type")
 
 
 class FSLCommand(CommandLine):
@@ -152,23 +153,26 @@ class FSLCommand(CommandLine):
     input_spec = FSLCommandInputSpec
     _output_type = None
 
-    references_ = [{
-        'entry':
-        BibTeX('@article{JenkinsonBeckmannBehrensWoolrichSmith2012,'
-               'author={M. Jenkinson, C.F. Beckmann, T.E. Behrens, '
-               'M.W. Woolrich, and S.M. Smith},'
-               'title={FSL},'
-               'journal={NeuroImage},'
-               'volume={62},'
-               'pages={782-790},'
-               'year={2012},'
-               '}'),
-        'tags': ['implementation'],
-    }]
+    references_ = [
+        {
+            "entry": BibTeX(
+                "@article{JenkinsonBeckmannBehrensWoolrichSmith2012,"
+                "author={M. Jenkinson, C.F. Beckmann, T.E. Behrens, "
+                "M.W. Woolrich, and S.M. Smith},"
+                "title={FSL},"
+                "journal={NeuroImage},"
+                "volume={62},"
+                "pages={782-790},"
+                "year={2012},"
+                "}"
+            ),
+            "tags": ["implementation"],
+        }
+    ]
 
     def __init__(self, **inputs):
         super(FSLCommand, self).__init__(**inputs)
-        self.inputs.on_trait_change(self._output_update, 'output_type')
+        self.inputs.on_trait_change(self._output_update, "output_type")
 
         if self._output_type is None:
             self._output_type = Info.output_type()
@@ -180,7 +184,7 @@ class FSLCommand(CommandLine):
 
     def _output_update(self):
         self._output_type = self.inputs.output_type
-        self.inputs.environ.update({'FSLOUTPUTTYPE': self.inputs.output_type})
+        self.inputs.environ.update({"FSLOUTPUTTYPE": self.inputs.output_type})
 
     @classmethod
     def set_default_output_type(cls, output_type):
@@ -195,18 +199,13 @@ class FSLCommand(CommandLine):
         if output_type in Info.ftypes:
             cls._output_type = output_type
         else:
-            raise AttributeError('Invalid FSL output_type: %s' % output_type)
+            raise AttributeError("Invalid FSL output_type: %s" % output_type)
 
     @property
     def version(self):
         return Info.version()
 
-    def _gen_fname(self,
-                   basename,
-                   cwd=None,
-                   suffix=None,
-                   change_ext=True,
-                   ext=None):
+    def _gen_fname(self, basename, cwd=None, suffix=None, change_ext=True, ext=None):
         """Generate a filename based on the given parameters.
 
         The filename will take the form: cwd/basename<suffix><ext>.
@@ -232,9 +231,9 @@ class FSLCommand(CommandLine):
 
         """
 
-        if basename == '':
-            msg = 'Unable to generate filename for command %s. ' % self.cmd
-            msg += 'basename is not set!'
+        if basename == "":
+            msg = "Unable to generate filename for command %s. " % self.cmd
+            msg += "basename is not set!"
             raise ValueError(msg)
         if cwd is None:
             cwd = os.getcwd()
@@ -242,13 +241,12 @@ class FSLCommand(CommandLine):
             ext = Info.output_type_to_ext(self.inputs.output_type)
         if change_ext:
             if suffix:
-                suffix = ''.join((suffix, ext))
+                suffix = "".join((suffix, ext))
             else:
                 suffix = ext
         if suffix is None:
-            suffix = ''
-        fname = fname_presuffix(
-            basename, suffix=suffix, use_ext=False, newpath=cwd)
+            suffix = ""
+        fname = fname_presuffix(basename, suffix=suffix, use_ext=False, newpath=cwd)
         return fname
 
     def _overload_extension(self, value, name=None):
@@ -276,5 +274,7 @@ def no_fsl():
 
 def no_fsl_course_data():
     """check if fsl_course data is present"""
-    return not ('FSL_COURSE_DATA' in os.environ and os.path.isdir(
-        os.path.abspath(os.environ['FSL_COURSE_DATA'])))
+    return not (
+        "FSL_COURSE_DATA" in os.environ
+        and os.path.isdir(os.path.abspath(os.environ["FSL_COURSE_DATA"]))
+    )

@@ -9,7 +9,7 @@ Author: Carlo Hamalainen <carlo@carlo-hamalainen.net>
         http://carlo-hamalainen.net
 """
 
-from .base import (Info)
+from .base import Info
 
 from .minc import (
     Average,

@@ -7,4 +7,4 @@ Package contains pure python neuroimaging algorithms
 Exaples: artifactdetect
 
 """
-__docformat__ = 'restructuredtext'
+__docformat__ = "restructuredtext"

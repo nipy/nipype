@@ -4,25 +4,18 @@ from ..utils import RemoveIntersection
 
 def test_RemoveIntersection_inputs():
     input_map = dict(
-        args=dict(argstr='%s', ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s",),
+        environ=dict(nohash=True, usedefault=True,),
         in_file=dict(
-            argstr='%s',
-            copyfile=True,
-            extensions=None,
-            mandatory=True,
-            position=-2,
+            argstr="%s", copyfile=True, extensions=None, mandatory=True, position=-2,
         ),
         out_file=dict(
-            argstr='%s',
+            argstr="%s",
             extensions=None,
             hash_files=False,
             keep_extension=True,
-            name_source=['in_file'],
-            name_template='%s',
+            name_source=["in_file"],
+            name_template="%s",
             position=-1,
         ),
         subjects_dir=dict(),
@@ -32,8 +25,10 @@ def test_RemoveIntersection_inputs():
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
+
+
 def test_RemoveIntersection_outputs():
-    output_map = dict(out_file=dict(extensions=None, ), )
+    output_map = dict(out_file=dict(extensions=None,),)
     outputs = RemoveIntersection.output_spec()
 
     for key, metadata in list(output_map.items()):

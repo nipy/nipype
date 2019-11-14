@@ -4,57 +4,33 @@ from ..utils import FilterRegressor
 
 def test_FilterRegressor_inputs():
     input_map = dict(
-        args=dict(argstr='%s', ),
-        design_file=dict(
-            argstr='-d %s',
-            extensions=None,
-            mandatory=True,
-            position=3,
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s",),
+        design_file=dict(argstr="-d %s", extensions=None, mandatory=True, position=3,),
+        environ=dict(nohash=True, usedefault=True,),
         filter_all=dict(
-            argstr="-f '%s'",
-            mandatory=True,
-            position=4,
-            xor=['filter_columns'],
+            argstr="-f '%s'", mandatory=True, position=4, xor=["filter_columns"],
         ),
         filter_columns=dict(
-            argstr="-f '%s'",
-            mandatory=True,
-            position=4,
-            xor=['filter_all'],
+            argstr="-f '%s'", mandatory=True, position=4, xor=["filter_all"],
         ),
-        in_file=dict(
-            argstr='-i %s',
-            extensions=None,
-            mandatory=True,
-            position=1,
-        ),
-        mask=dict(
-            argstr='-m %s',
-            extensions=None,
-        ),
+        in_file=dict(argstr="-i %s", extensions=None, mandatory=True, position=1,),
+        mask=dict(argstr="-m %s", extensions=None,),
         out_file=dict(
-            argstr='-o %s',
-            extensions=None,
-            genfile=True,
-            hash_files=False,
-            position=2,
+            argstr="-o %s", extensions=None, genfile=True, hash_files=False, position=2,
         ),
-        out_vnscales=dict(argstr='--out_vnscales', ),
+        out_vnscales=dict(argstr="--out_vnscales",),
         output_type=dict(),
-        var_norm=dict(argstr='--vn', ),
+        var_norm=dict(argstr="--vn",),
     )
     inputs = FilterRegressor.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
+
+
 def test_FilterRegressor_outputs():
-    output_map = dict(out_file=dict(extensions=None, ), )
+    output_map = dict(out_file=dict(extensions=None,),)
     outputs = FilterRegressor.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -9,6 +9,8 @@ def test_IdentityInterface_inputs():
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
+
+
 def test_IdentityInterface_outputs():
     output_map = dict()
     outputs = IdentityInterface.output_spec()

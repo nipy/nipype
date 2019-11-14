@@ -6,11 +6,11 @@ from ... import logging
 from ..base import TraitedSpec, File, isdefined
 from .base import DipyDiffusionInterface, DipyBaseInterfaceInputSpec
 
-IFLOGGER = logging.getLogger('nipype.interface')
+IFLOGGER = logging.getLogger("nipype.interface")
 
 
 class DTIInputSpec(DipyBaseInterfaceInputSpec):
-    mask_file = File(exists=True, desc='An optional white matter mask')
+    mask_file = File(exists=True, desc="An optional white matter mask")
 
 
 class DTIOutputSpec(TraitedSpec):
@@ -36,12 +36,14 @@ class DTI(DipyDiffusionInterface):
     >>> dti.inputs.in_bval = 'bvals'
     >>> dti.run()                                   # doctest: +SKIP
     """
+
     input_spec = DTIInputSpec
     output_spec = DTIOutputSpec
 
     def _run_interface(self, runtime):
         from dipy.reconst import dti
         from dipy.io.utils import nifti1_symmat
+
         gtab = self._get_gradient_table()
 
         img = nb.load(self.inputs.in_file)
@@ -56,22 +58,22 @@ class DTI(DipyDiffusionInterface):
         ten_fit = tenmodel.fit(data, mask)
         lower_triangular = ten_fit.lower_triangular()
         img = nifti1_symmat(lower_triangular, affine)
-        out_file = self._gen_filename('dti')
+        out_file = self._gen_filename("dti")
         nb.save(img, out_file)
-        IFLOGGER.info('DTI parameters image saved as %s', out_file)
+        IFLOGGER.info("DTI parameters image saved as %s", out_file)
 
         # FA MD RD and AD
         for metric in ["fa", "md", "rd", "ad", "color_fa"]:
             data = getattr(ten_fit, metric).astype("float32")
             out_name = self._gen_filename(metric)
             nb.Nifti1Image(data, affine).to_filename(out_name)
-            IFLOGGER.info('DTI %s image saved as %s', metric, out_name)
+            IFLOGGER.info("DTI %s image saved as %s", metric, out_name)
 
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = self._gen_filename('dti')
+        outputs["out_file"] = self._gen_filename("dti")
 
         for metric in ["fa", "md", "rd", "ad", "color_fa"]:
             outputs["{}_file".format(metric)] = self._gen_filename(metric)
@@ -80,7 +82,7 @@ class DTI(DipyDiffusionInterface):
 
 
 class TensorModeInputSpec(DipyBaseInterfaceInputSpec):
-    mask_file = File(exists=True, desc='An optional white matter mask')
+    mask_file = File(exists=True, desc="An optional white matter mask")
 
 
 class TensorModeOutputSpec(TraitedSpec):
@@ -109,6 +111,7 @@ class TensorMode(DipyDiffusionInterface):
     >>> mode.inputs.in_bval = 'bvals'
     >>> mode.run()                                   # doctest: +SKIP
     """
+
     input_spec = TensorModeInputSpec
     output_spec = TensorModeOutputSpec
 
@@ -136,12 +139,12 @@ class TensorMode(DipyDiffusionInterface):
 
         # Write as a 3D Nifti image with the original affine
         img = nb.Nifti1Image(mode_data, affine)
-        out_file = self._gen_filename('mode')
+        out_file = self._gen_filename("mode")
         nb.save(img, out_file)
-        IFLOGGER.info('Tensor mode image saved as %s', out_file)
+        IFLOGGER.info("Tensor mode image saved as %s", out_file)
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = self._gen_filename('mode')
+        outputs["out_file"] = self._gen_filename("mode")
         return outputs

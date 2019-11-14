@@ -4,63 +4,32 @@ from ..utils import WarpPointsToStd
 
 def test_WarpPointsToStd_inputs():
     input_map = dict(
-        args=dict(argstr='%s', ),
-        coord_mm=dict(
-            argstr='-mm',
-            xor=['coord_vox'],
-        ),
-        coord_vox=dict(
-            argstr='-vox',
-            xor=['coord_mm'],
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        img_file=dict(
-            argstr='-img %s',
-            extensions=None,
-            mandatory=True,
-        ),
-        in_coords=dict(
-            argstr='%s',
-            extensions=None,
-            mandatory=True,
-            position=-1,
-        ),
+        args=dict(argstr="%s",),
+        coord_mm=dict(argstr="-mm", xor=["coord_vox"],),
+        coord_vox=dict(argstr="-vox", xor=["coord_mm"],),
+        environ=dict(nohash=True, usedefault=True,),
+        img_file=dict(argstr="-img %s", extensions=None, mandatory=True,),
+        in_coords=dict(argstr="%s", extensions=None, mandatory=True, position=-1,),
         out_file=dict(
             extensions=None,
-            name_source='in_coords',
-            name_template='%s_warped',
-            output_name='out_file',
+            name_source="in_coords",
+            name_template="%s_warped",
+            output_name="out_file",
         ),
-        premat_file=dict(
-            argstr='-premat %s',
-            extensions=None,
-        ),
-        std_file=dict(
-            argstr='-std %s',
-            extensions=None,
-            mandatory=True,
-        ),
-        warp_file=dict(
-            argstr='-warp %s',
-            extensions=None,
-            xor=['xfm_file'],
-        ),
-        xfm_file=dict(
-            argstr='-xfm %s',
-            extensions=None,
-            xor=['warp_file'],
-        ),
+        premat_file=dict(argstr="-premat %s", extensions=None,),
+        std_file=dict(argstr="-std %s", extensions=None, mandatory=True,),
+        warp_file=dict(argstr="-warp %s", extensions=None, xor=["xfm_file"],),
+        xfm_file=dict(argstr="-xfm %s", extensions=None, xor=["warp_file"],),
     )
     inputs = WarpPointsToStd.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
+
+
 def test_WarpPointsToStd_outputs():
-    output_map = dict(out_file=dict(extensions=None, ), )
+    output_map = dict(out_file=dict(extensions=None,),)
     outputs = WarpPointsToStd.output_spec()
 
     for key, metadata in list(output_map.items()):
