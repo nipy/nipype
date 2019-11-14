@@ -12,61 +12,65 @@ from .base import NiftySegCommand
 from ..niftyreg.base import get_custom_path
 
 warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
+warnings.filterwarnings("always", category=UserWarning)
 
 
 class PatchMatchInputSpec(CommandLineInputSpec):
     """Input Spec for PatchMatch."""
+
     # Mandatory input arguments
     in_file = File(
-        argstr='-i %s',
+        argstr="-i %s",
         exists=True,
         mandatory=True,
-        desc='Input image to segment',
-        position=1)
+        desc="Input image to segment",
+        position=1,
+    )
 
     mask_file = File(
-        argstr='-m %s',
+        argstr="-m %s",
         exists=True,
         mandatory=True,
-        desc='Input mask for the area where applies PatchMatch',
-        position=2)
+        desc="Input mask for the area where applies PatchMatch",
+        position=2,
+    )
 
     database_file = File(
-        argstr='-db %s',
+        argstr="-db %s",
         exists=True,
         mandatory=True,
-        desc='Database with the segmentations',
-        position=3)
+        desc="Database with the segmentations",
+        position=3,
+    )
 
     # Output file name
     out_file = File(
-        name_source=['in_file'],
-        name_template='%s_pm.nii.gz',
-        desc='The output filename of the patchmatch results',
-        argstr='-o %s',
-        position=4)
+        name_source=["in_file"],
+        name_template="%s_pm.nii.gz",
+        desc="The output filename of the patchmatch results",
+        argstr="-o %s",
+        position=4,
+    )
 
     # Optional arguments
-    patch_size = traits.Int(desc="Patch size, #voxels", argstr='-size %i')
+    patch_size = traits.Int(desc="Patch size, #voxels", argstr="-size %i")
 
     desc = "Constrained search area size, number of times bigger than the \
 patchsize"
 
-    cs_size = traits.Int(desc=desc, argstr='-cs %i')
+    cs_size = traits.Int(desc=desc, argstr="-cs %i")
 
-    match_num = traits.Int(
-        desc="Number of better matching", argstr='-match %i')
+    match_num = traits.Int(desc="Number of better matching", argstr="-match %i")
 
-    pm_num = traits.Int(
-        desc="Number of patchmatch executions", argstr='-pm %i')
+    pm_num = traits.Int(desc="Number of patchmatch executions", argstr="-pm %i")
 
     desc = "Number of iterations for the patchmatch algorithm"
-    it_num = traits.Int(desc=desc, argstr='-it %i')
+    it_num = traits.Int(desc=desc, argstr="-it %i")
 
 
 class PatchMatchOutputSpec(TraitedSpec):
     """OutputSpec for PatchMatch."""
+
     out_file = File(desc="Output segmentation")
 
 
@@ -99,7 +103,8 @@ class PatchMatch(NiftySegCommand):
     'seg_PatchMatch -i im1.nii -m im2.nii -db db.xml -o im1_pm.nii.gz'
 
     """
-    _cmd = get_custom_path('seg_PatchMatch', env_dir='NIFTYSEGDIR')
+
+    _cmd = get_custom_path("seg_PatchMatch", env_dir="NIFTYSEGDIR")
     input_spec = PatchMatchInputSpec
     output_spec = PatchMatchOutputSpec
-    _suffix = '_pm'
+    _suffix = "_pm"

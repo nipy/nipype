@@ -12,7 +12,7 @@ from subprocess import CalledProcessError
 from tempfile import mkdtemp
 from ..utils.misc import package_check
 
-__docformat__ = 'restructuredtext'
+__docformat__ = "restructuredtext"
 
 import numpy as np
 import nibabel as nb
@@ -37,28 +37,30 @@ class TempFATFS(object):
         """
         self.delay = delay
         self.tmpdir = mkdtemp()
-        self.dev_null = open(os.devnull, 'wb')
+        self.dev_null = open(os.devnull, "wb")
 
-        vfatfile = os.path.join(self.tmpdir, 'vfatblock')
-        self.vfatmount = os.path.join(self.tmpdir, 'vfatmount')
-        self.canary = os.path.join(self.vfatmount, '.canary')
+        vfatfile = os.path.join(self.tmpdir, "vfatblock")
+        self.vfatmount = os.path.join(self.tmpdir, "vfatmount")
+        self.canary = os.path.join(self.vfatmount, ".canary")
 
-        with open(vfatfile, 'wb') as fobj:
-            fobj.write(b'\x00' * (int(size_in_mbytes) << 20))
+        with open(vfatfile, "wb") as fobj:
+            fobj.write(b"\x00" * (int(size_in_mbytes) << 20))
         os.mkdir(self.vfatmount)
 
-        mkfs_args = ['mkfs.vfat', vfatfile]
-        mount_args = ['fusefat', '-o', 'rw+', '-f', vfatfile, self.vfatmount]
+        mkfs_args = ["mkfs.vfat", vfatfile]
+        mount_args = ["fusefat", "-o", "rw+", "-f", vfatfile, self.vfatmount]
 
         try:
             subprocess.check_call(
-                args=mkfs_args, stdout=self.dev_null, stderr=self.dev_null)
+                args=mkfs_args, stdout=self.dev_null, stderr=self.dev_null
+            )
         except CalledProcessError as e:
             raise IOError("mkfs.vfat failed") from e
 
         try:
             self.fusefat = subprocess.Popen(
-                args=mount_args, stdout=self.dev_null, stderr=self.dev_null)
+                args=mount_args, stdout=self.dev_null, stderr=self.dev_null
+            )
         except OSError as e:
             raise IOError("fusefat is not installed") from e
 
@@ -67,7 +69,7 @@ class TempFATFS(object):
         if self.fusefat.poll() is not None:
             raise IOError("fusefat terminated too soon")
 
-        open(self.canary, 'wb').close()
+        open(self.canary, "wb").close()
 
     def __enter__(self):
         return self.vfatmount

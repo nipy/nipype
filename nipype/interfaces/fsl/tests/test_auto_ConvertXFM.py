@@ -4,41 +4,29 @@ from ..utils import ConvertXFM
 
 def test_ConvertXFM_inputs():
     input_map = dict(
-        args=dict(argstr='%s', ),
+        args=dict(argstr="%s",),
         concat_xfm=dict(
-            argstr='-concat',
+            argstr="-concat",
             position=-3,
-            requires=['in_file2'],
-            xor=['invert_xfm', 'concat_xfm', 'fix_scale_skew'],
+            requires=["in_file2"],
+            xor=["invert_xfm", "concat_xfm", "fix_scale_skew"],
         ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        environ=dict(nohash=True, usedefault=True,),
         fix_scale_skew=dict(
-            argstr='-fixscaleskew',
+            argstr="-fixscaleskew",
             position=-3,
-            requires=['in_file2'],
-            xor=['invert_xfm', 'concat_xfm', 'fix_scale_skew'],
+            requires=["in_file2"],
+            xor=["invert_xfm", "concat_xfm", "fix_scale_skew"],
         ),
-        in_file=dict(
-            argstr='%s',
-            extensions=None,
-            mandatory=True,
-            position=-1,
-        ),
-        in_file2=dict(
-            argstr='%s',
-            extensions=None,
-            position=-2,
-        ),
+        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=-1,),
+        in_file2=dict(argstr="%s", extensions=None, position=-2,),
         invert_xfm=dict(
-            argstr='-inverse',
+            argstr="-inverse",
             position=-3,
-            xor=['invert_xfm', 'concat_xfm', 'fix_scale_skew'],
+            xor=["invert_xfm", "concat_xfm", "fix_scale_skew"],
         ),
         out_file=dict(
-            argstr='-omat %s',
+            argstr="-omat %s",
             extensions=None,
             genfile=True,
             hash_files=False,
@@ -51,8 +39,10 @@ def test_ConvertXFM_inputs():
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
+
+
 def test_ConvertXFM_outputs():
-    output_map = dict(out_file=dict(extensions=None, ), )
+    output_map = dict(out_file=dict(extensions=None,),)
     outputs = ConvertXFM.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -38,19 +38,21 @@ from github import get_file_url
 
 
 class InterfaceHelpWriter(object):
-    ''' Class for automatic detection and parsing of API docs
-    to Sphinx-parsable reST format'''
+    """ Class for automatic detection and parsing of API docs
+    to Sphinx-parsable reST format"""
 
     # only separating first two levels
-    rst_section_levels = ['*', '=', '-', '~', '^']
+    rst_section_levels = ["*", "=", "-", "~", "^"]
 
-    def __init__(self,
-                 package_name,
-                 rst_extension='.rst',
-                 package_skip_patterns=None,
-                 module_skip_patterns=None,
-                 class_skip_patterns=None):
-        ''' Initialize package for parsing
+    def __init__(
+        self,
+        package_name,
+        rst_extension=".rst",
+        package_skip_patterns=None,
+        module_skip_patterns=None,
+        class_skip_patterns=None,
+    ):
+        """ Initialize package for parsing
 
         Parameters
         ----------
@@ -79,11 +81,11 @@ class InterfaceHelpWriter(object):
             Sequence of strings giving classes to be excluded
             Default is: None
 
-        '''
+        """
         if package_skip_patterns is None:
-            package_skip_patterns = ['\\.tests$']
+            package_skip_patterns = ["\\.tests$"]
         if module_skip_patterns is None:
-            module_skip_patterns = ['\\.setup$', '\\._']
+            module_skip_patterns = ["\\.setup$", "\\._"]
         if class_skip_patterns:
             self.class_skip_patterns = class_skip_patterns
         else:
@@ -97,7 +99,7 @@ class InterfaceHelpWriter(object):
         return self._package_name
 
     def set_package_name(self, package_name):
-        ''' Set package_name
+        """ Set package_name
 
         >>> docwriter = ApiDocWriter('sphinx')
         >>> import sphinx
@@ -107,18 +109,19 @@ class InterfaceHelpWriter(object):
         >>> import docutils
         >>> docwriter.root_path == docutils.__path__[0]
         True
-        '''
+        """
         # It's also possible to imagine caching the module parsing here
         self._package_name = package_name
         self.root_module = __import__(package_name)
         self.root_path = self.root_module.__path__[0]
         self.written_modules = None
 
-    package_name = property(get_package_name, set_package_name, None,
-                            'get/set package_name')
+    package_name = property(
+        get_package_name, set_package_name, None, "get/set package_name"
+    )
 
     def _get_object_name(self, line):
-        ''' Get second token in line
+        """ Get second token in line
         >>> docwriter = ApiDocWriter('sphinx')
         >>> docwriter._get_object_name("  def func():  ")
         u'func'
@@ -126,14 +129,14 @@ class InterfaceHelpWriter(object):
         'Klass'
         >>> docwriter._get_object_name("  class Klass:  ")
         'Klass'
-        '''
-        name = line.split()[1].split('(')[0].strip()
+        """
+        name = line.split()[1].split("(")[0].strip()
         # in case we have classes which are not derived from object
         # ie. old style classes
-        return name.rstrip(':')
+        return name.rstrip(":")
 
     def _uri2path(self, uri):
-        ''' Convert uri to absolute filepath
+        """ Convert uri to absolute filepath
 
         Parameters
         ----------
@@ -159,55 +162,55 @@ class InterfaceHelpWriter(object):
         True
         >>> docwriter._uri2path('sphinx.does_not_exist')
 
-        '''
+        """
         if uri == self.package_name:
-            return os.path.join(self.root_path, '__init__.py')
-        path = uri.replace('.', os.path.sep)
-        path = path.replace(self.package_name + os.path.sep, '')
+            return os.path.join(self.root_path, "__init__.py")
+        path = uri.replace(".", os.path.sep)
+        path = path.replace(self.package_name + os.path.sep, "")
         path = os.path.join(self.root_path, path)
         # XXX maybe check for extensions as well?
-        if os.path.exists(path + '.py'):  # file
-            path += '.py'
-        elif os.path.exists(os.path.join(path, '__init__.py')):
-            path = os.path.join(path, '__init__.py')
+        if os.path.exists(path + ".py"):  # file
+            path += ".py"
+        elif os.path.exists(os.path.join(path, "__init__.py")):
+            path = os.path.join(path, "__init__.py")
         else:
             return None
         return path
 
     def _path2uri(self, dirpath):
-        ''' Convert directory path to uri '''
+        """ Convert directory path to uri """
         relpath = dirpath.replace(self.root_path, self.package_name)
         if relpath.startswith(os.path.sep):
             relpath = relpath[1:]
-        return relpath.replace(os.path.sep, '.')
+        return relpath.replace(os.path.sep, ".")
 
     def _parse_module(self, uri):
-        ''' Parse module defined in *uri* '''
+        """ Parse module defined in *uri* """
         filename = self._uri2path(uri)
         if filename is None:
             # nothing that we could handle here.
             return ([], [])
-        f = open(filename, 'rt')
+        f = open(filename, "rt")
         functions, classes = self._parse_lines(f, uri)
         f.close()
         return functions, classes
 
     def _parse_lines(self, linesource, module):
-        ''' Parse lines of text for functions and classes '''
+        """ Parse lines of text for functions and classes """
         functions = []
         classes = []
         for line in linesource:
-            if line.startswith('def ') and line.count('('):
+            if line.startswith("def ") and line.count("("):
                 # exclude private stuff
                 name = self._get_object_name(line)
-                if not name.startswith('_'):
+                if not name.startswith("_"):
                     functions.append(name)
-            elif line.startswith('class '):
+            elif line.startswith("class "):
                 # exclude private stuff
                 name = self._get_object_name(line)
-                if not name.startswith('_') and \
-                        self._survives_exclude('.'.join((module, name)),
-                                               'class'):
+                if not name.startswith("_") and self._survives_exclude(
+                    ".".join((module, name)), "class"
+                ):
                     classes.append(name)
             else:
                 pass
@@ -216,20 +219,20 @@ class InterfaceHelpWriter(object):
         return functions, classes
 
     def _write_graph_section(self, fname, title):
-        ad = '\n%s\n%s\n\n' % (title, self.rst_section_levels[3] * len(title))
-        ad += '.. graphviz::\n\n'
+        ad = "\n%s\n%s\n\n" % (title, self.rst_section_levels[3] * len(title))
+        ad += ".. graphviz::\n\n"
         fhandle = open(fname)
         for line in fhandle:
-            ad += '\t' + line + '\n'
+            ad += "\t" + line + "\n"
 
         fhandle.close()
         os.remove(fname)
-        bitmap_fname = '{}.png'.format(os.path.splitext(fname)[0])
+        bitmap_fname = "{}.png".format(os.path.splitext(fname)[0])
         os.remove(bitmap_fname)
         return ad
 
     def generate_api_doc(self, uri):
-        '''Make autodoc documentation template string for a module
+        """Make autodoc documentation template string for a module
 
         Parameters
         ----------
@@ -240,7 +243,7 @@ class InterfaceHelpWriter(object):
         -------
         S : string
             Contents of API doc
-        '''
+        """
         # get the names of all classes and functions
         functions, classes = self._parse_module(uri)
         workflows = []
@@ -262,19 +265,18 @@ class InterfaceHelpWriter(object):
                 workflows.append((workflow, function, finst))
 
         if not classes and not workflows and not helper_functions:
-            print('WARNING: Empty -', uri)  # dbg
-            return ''
+            print("WARNING: Empty -", uri)  # dbg
+            return ""
 
         # Make a shorter version of the uri that omits the package name for
         # titles
-        uri_short = re.sub(r'^%s\.' % self.package_name, '', uri)
+        uri_short = re.sub(r"^%s\." % self.package_name, "", uri)
         # uri_short = uri
 
-        ad = '.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n'
+        ad = ".. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n"
 
         chap_title = uri_short
-        ad += (chap_title + '\n' +
-               self.rst_section_levels[1] * len(chap_title) + '\n\n')
+        ad += chap_title + "\n" + self.rst_section_levels[1] * len(chap_title) + "\n\n"
 
         # Set the chapter title to read 'module' for all modules except for the
         # main packages
@@ -300,25 +302,25 @@ class InterfaceHelpWriter(object):
             if not issubclass(classinst, BaseInterface):
                 continue
 
-            label = uri + '.' + c + ':'
-            ad += '\n.. _%s\n\n' % label
-            ad += '\n.. index:: %s\n\n' % c
-            ad += c + '\n' + self.rst_section_levels[2] * len(c) + '\n\n'
+            label = uri + "." + c + ":"
+            ad += "\n.. _%s\n\n" % label
+            ad += "\n.. index:: %s\n\n" % c
+            ad += c + "\n" + self.rst_section_levels[2] * len(c) + "\n\n"
             ad += "`Link to code <%s>`__\n\n" % get_file_url(classinst)
-            ad += trim(
-                classinst.help(returnhelp=True),
-                self.rst_section_levels[3]) + '\n'
+            ad += (
+                trim(classinst.help(returnhelp=True), self.rst_section_levels[3]) + "\n"
+            )
 
         if workflows or helper_functions:
-            ad += '\n.. module:: %s\n\n' % uri
+            ad += "\n.. module:: %s\n\n" % uri
 
         for workflow, name, finst in workflows:
-            label = ':func:`' + name + '`'
-            ad += '\n.. _%s:\n\n' % (uri + '.' + name)
-            ad += '\n'.join((label, self.rst_section_levels[2] * len(label)))
+            label = ":func:`" + name + "`"
+            ad += "\n.. _%s:\n\n" % (uri + "." + name)
+            ad += "\n".join((label, self.rst_section_levels[2] * len(label)))
             ad += "\n\n`Link to code <%s>`__\n\n" % get_file_url(finst)
             helpstr = trim(finst.__doc__, self.rst_section_levels[3])
-            ad += '\n\n' + helpstr + '\n\n'
+            ad += "\n\n" + helpstr + "\n\n"
             """
             # use sphinx autodoc for function signature
             ad += '\n.. _%s:\n\n' % (uri + '.' + name)
@@ -326,22 +328,22 @@ class InterfaceHelpWriter(object):
             """
 
             (_, fname) = tempfile.mkstemp(suffix=".dot")
-            workflow.write_graph(dotfilename=fname, graph2use='hierarchical')
+            workflow.write_graph(dotfilename=fname, graph2use="hierarchical")
 
-            ad += self._write_graph_section(fname, 'Graph') + '\n'
+            ad += self._write_graph_section(fname, "Graph") + "\n"
 
         for name, finst in helper_functions:
-            label = ':func:`' + name + '`'
-            ad += '\n.. _%s:\n\n' % (uri + '.' + name)
-            ad += '\n'.join((label, self.rst_section_levels[2] * len(label)))
+            label = ":func:`" + name + "`"
+            ad += "\n.. _%s:\n\n" % (uri + "." + name)
+            ad += "\n".join((label, self.rst_section_levels[2] * len(label)))
             ad += "\n\n`Link to code <%s>`__\n\n" % get_file_url(finst)
             helpstr = trim(finst.__doc__, self.rst_section_levels[3])
-            ad += '\n\n' + helpstr + '\n\n'
+            ad += "\n\n" + helpstr + "\n\n"
 
         return ad
 
     def _survives_exclude(self, matchstr, match_type):
-        ''' Returns True if *matchstr* does not match patterns
+        """ Returns True if *matchstr* does not match patterns
 
         ``self.package_name`` removed from front of string if present
 
@@ -360,12 +362,12 @@ class InterfaceHelpWriter(object):
         >>> dw.module_skip_patterns.append('^\\.badmod$')
         >>> dw._survives_exclude('sphinx.badmod', 'module')
         False
-        '''
-        if match_type == 'module':
+        """
+        if match_type == "module":
             patterns = self.module_skip_patterns
-        elif match_type == 'package':
+        elif match_type == "package":
             patterns = self.package_skip_patterns
-        elif match_type == 'class':
+        elif match_type == "class":
             patterns = self.class_skip_patterns
         else:
             raise ValueError('Cannot interpret match type "%s"' % match_type)
@@ -383,7 +385,7 @@ class InterfaceHelpWriter(object):
         return True
 
     def discover_modules(self):
-        ''' Return module sequence discovered from ``self.package_name``
+        """ Return module sequence discovered from ``self.package_name``
 
 
         Parameters
@@ -405,25 +407,27 @@ class InterfaceHelpWriter(object):
         >>> 'sphinx.util' in dw.discover_modules()
         False
         >>>
-        '''
+        """
         modules = [self.package_name]
         # raw directory parsing
         for dirpath, dirnames, filenames in os.walk(self.root_path):
             # Check directory names for packages
             root_uri = self._path2uri(os.path.join(self.root_path, dirpath))
             for dirname in dirnames[:]:  # copy list - we modify inplace
-                package_uri = '.'.join((root_uri, dirname))
-                if (self._uri2path(package_uri)
-                        and self._survives_exclude(package_uri, 'package')):
+                package_uri = ".".join((root_uri, dirname))
+                if self._uri2path(package_uri) and self._survives_exclude(
+                    package_uri, "package"
+                ):
                     modules.append(package_uri)
                 else:
                     dirnames.remove(dirname)
             # Check filenames for modules
             for filename in filenames:
                 module_name = filename[:-3]
-                module_uri = '.'.join((root_uri, module_name))
-                if (self._uri2path(module_uri)
-                        and self._survives_exclude(module_uri, 'module')):
+                module_uri = ".".join((root_uri, module_name))
+                if self._uri2path(module_uri) and self._survives_exclude(
+                    module_uri, "module"
+                ):
                     modules.append(module_uri)
         return sorted(modules)
 
@@ -435,9 +439,9 @@ class InterfaceHelpWriter(object):
             if not api_str:
                 continue
             # write out to file
-            mvalues = m.split('.')
+            mvalues = m.split(".")
             if len(mvalues) > 3:
-                index_prefix = '.'.join(mvalues[1:3])
+                index_prefix = ".".join(mvalues[1:3])
                 index_dir = os.path.join(outdir, index_prefix)
                 index_file = index_dir + self.rst_extension
                 if not os.path.exists(index_dir):
@@ -453,12 +457,13 @@ class InterfaceHelpWriter(object):
 
    {name}/*
                     """.format(
-                        name=index_prefix, underline='=' * len(index_prefix))
-                    with open(index_file, 'wt') as fp:
+                        name=index_prefix, underline="=" * len(index_prefix)
+                    )
+                    with open(index_file, "wt") as fp:
                         fp.write(header)
-                m = os.path.join(index_prefix, '.'.join(mvalues[3:]))
+                m = os.path.join(index_prefix, ".".join(mvalues[3:]))
             outfile = os.path.join(outdir, m + self.rst_extension)
-            fileobj = open(outfile, 'wt')
+            fileobj = open(outfile, "wt")
             fileobj.write(api_str)
             fileobj.close()
             written_modules.append(m)
@@ -487,7 +492,7 @@ class InterfaceHelpWriter(object):
         modules = self.discover_modules()
         self.write_modules_api(modules, outdir)
 
-    def write_index(self, outdir, froot='gen', relative_to=None):
+    def write_index(self, outdir, froot="gen", relative_to=None):
         """Make a reST API index file from written files
 
         Parameters
@@ -506,19 +511,19 @@ class InterfaceHelpWriter(object):
             leave path as it is.
         """
         if self.written_modules is None:
-            raise ValueError('No modules written')
+            raise ValueError("No modules written")
         # Get full filename path
         path = os.path.join(outdir, froot + self.rst_extension)
         # Path written into index is relative to rootpath
         if relative_to is not None:
-            relpath = outdir.replace(relative_to + os.path.sep, '')
+            relpath = outdir.replace(relative_to + os.path.sep, "")
         else:
             relpath = outdir
-        idx = open(path, 'wt')
+        idx = open(path, "wt")
         w = idx.write
-        w('.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n')
-        w('.. toctree::\n')
-        w('   :maxdepth: 2\n\n')
+        w(".. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n")
+        w(".. toctree::\n")
+        w("   :maxdepth: 2\n\n")
         for f in self.written_modules:
-            w('   %s\n' % os.path.join(relpath, f))
+            w("   %s\n" % os.path.join(relpath, f))
         idx.close()

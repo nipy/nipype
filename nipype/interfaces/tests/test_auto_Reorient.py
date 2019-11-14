@@ -4,21 +4,19 @@ from ..image import Reorient
 
 def test_Reorient_inputs():
     input_map = dict(
-        in_file=dict(
-            extensions=None,
-            mandatory=True,
-        ),
-        orientation=dict(usedefault=True, ),
+        in_file=dict(extensions=None, mandatory=True,),
+        orientation=dict(usedefault=True,),
     )
     inputs = Reorient.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
+
+
 def test_Reorient_outputs():
     output_map = dict(
-        out_file=dict(extensions=None, ),
-        transform=dict(extensions=None, ),
+        out_file=dict(extensions=None,), transform=dict(extensions=None,),
     )
     outputs = Reorient.output_spec()
 

@@ -10,7 +10,7 @@ def test_csvReader(tmpdir):
     lines = ["foo,hello,300.1\n", "bar,world,5\n", "baz,goodbye,0.3\n"]
     for x in range(2):
         name = tmpdir.join("testfile.csv").strpath
-        with open(name, 'w') as fid:
+        with open(name, "w") as fid:
             reader = utility.CSVReader()
             if x % 2 == 0:
                 fid.write(header)
@@ -20,10 +20,10 @@ def test_csvReader(tmpdir):
             reader.inputs.in_file = name
             out = reader.run()
             if x % 2 == 0:
-                assert out.outputs.files == ['foo', 'bar', 'baz']
-                assert out.outputs.labels == ['hello', 'world', 'goodbye']
-                assert out.outputs.erosion == ['300.1', '5', '0.3']
+                assert out.outputs.files == ["foo", "bar", "baz"]
+                assert out.outputs.labels == ["hello", "world", "goodbye"]
+                assert out.outputs.erosion == ["300.1", "5", "0.3"]
             else:
-                assert out.outputs.column_0 == ['foo', 'bar', 'baz']
-                assert out.outputs.column_1 == ['hello', 'world', 'goodbye']
-                assert out.outputs.column_2 == ['300.1', '5', '0.3']
+                assert out.outputs.column_0 == ["foo", "bar", "baz"]
+                assert out.outputs.column_1 == ["hello", "world", "goodbye"]
+                assert out.outputs.column_2 == ["300.1", "5", "0.3"]

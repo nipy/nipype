@@ -4,103 +4,66 @@ from ..specialized import BRAINSABC
 
 def test_BRAINSABC_inputs():
     input_map = dict(
-        args=dict(argstr='%s', ),
-        atlasDefinition=dict(
-            argstr='--atlasDefinition %s',
-            extensions=None,
-        ),
+        args=dict(argstr="%s",),
+        atlasDefinition=dict(argstr="--atlasDefinition %s", extensions=None,),
         atlasToSubjectInitialTransform=dict(
-            argstr='--atlasToSubjectInitialTransform %s',
-            hash_files=False,
+            argstr="--atlasToSubjectInitialTransform %s", hash_files=False,
         ),
         atlasToSubjectTransform=dict(
-            argstr='--atlasToSubjectTransform %s',
-            hash_files=False,
+            argstr="--atlasToSubjectTransform %s", hash_files=False,
         ),
-        atlasToSubjectTransformType=dict(
-            argstr='--atlasToSubjectTransformType %s', ),
-        atlasWarpingOff=dict(argstr='--atlasWarpingOff ', ),
-        debuglevel=dict(argstr='--debuglevel %d', ),
-        defaultSuffix=dict(argstr='--defaultSuffix %s', ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        filterIteration=dict(argstr='--filterIteration %d', ),
-        filterMethod=dict(argstr='--filterMethod %s', ),
-        filterTimeStep=dict(argstr='--filterTimeStep %f', ),
-        gridSize=dict(
-            argstr='--gridSize %s',
-            sep=',',
-        ),
-        implicitOutputs=dict(
-            argstr='--implicitOutputs %s...',
-            hash_files=False,
-        ),
-        inputVolumeTypes=dict(
-            argstr='--inputVolumeTypes %s',
-            sep=',',
-        ),
-        inputVolumes=dict(argstr='--inputVolumes %s...', ),
-        interpolationMode=dict(argstr='--interpolationMode %s', ),
-        maxBiasDegree=dict(argstr='--maxBiasDegree %d', ),
-        maxIterations=dict(argstr='--maxIterations %d', ),
-        medianFilterSize=dict(
-            argstr='--medianFilterSize %s',
-            sep=',',
-        ),
+        atlasToSubjectTransformType=dict(argstr="--atlasToSubjectTransformType %s",),
+        atlasWarpingOff=dict(argstr="--atlasWarpingOff ",),
+        debuglevel=dict(argstr="--debuglevel %d",),
+        defaultSuffix=dict(argstr="--defaultSuffix %s",),
+        environ=dict(nohash=True, usedefault=True,),
+        filterIteration=dict(argstr="--filterIteration %d",),
+        filterMethod=dict(argstr="--filterMethod %s",),
+        filterTimeStep=dict(argstr="--filterTimeStep %f",),
+        gridSize=dict(argstr="--gridSize %s", sep=",",),
+        implicitOutputs=dict(argstr="--implicitOutputs %s...", hash_files=False,),
+        inputVolumeTypes=dict(argstr="--inputVolumeTypes %s", sep=",",),
+        inputVolumes=dict(argstr="--inputVolumes %s...",),
+        interpolationMode=dict(argstr="--interpolationMode %s",),
+        maxBiasDegree=dict(argstr="--maxBiasDegree %d",),
+        maxIterations=dict(argstr="--maxIterations %d",),
+        medianFilterSize=dict(argstr="--medianFilterSize %s", sep=",",),
         numberOfSubSamplesInEachPlugArea=dict(
-            argstr='--numberOfSubSamplesInEachPlugArea %s',
-            sep=',',
+            argstr="--numberOfSubSamplesInEachPlugArea %s", sep=",",
         ),
-        numberOfThreads=dict(argstr='--numberOfThreads %d', ),
-        outputDir=dict(
-            argstr='--outputDir %s',
-            hash_files=False,
-        ),
-        outputDirtyLabels=dict(
-            argstr='--outputDirtyLabels %s',
-            hash_files=False,
-        ),
-        outputFormat=dict(argstr='--outputFormat %s', ),
-        outputLabels=dict(
-            argstr='--outputLabels %s',
-            hash_files=False,
-        ),
-        outputVolumes=dict(
-            argstr='--outputVolumes %s...',
-            hash_files=False,
-        ),
-        posteriorTemplate=dict(argstr='--posteriorTemplate %s', ),
-        purePlugsThreshold=dict(argstr='--purePlugsThreshold %f', ),
-        restoreState=dict(
-            argstr='--restoreState %s',
-            extensions=None,
-        ),
-        saveState=dict(
-            argstr='--saveState %s',
-            hash_files=False,
-        ),
+        numberOfThreads=dict(argstr="--numberOfThreads %d",),
+        outputDir=dict(argstr="--outputDir %s", hash_files=False,),
+        outputDirtyLabels=dict(argstr="--outputDirtyLabels %s", hash_files=False,),
+        outputFormat=dict(argstr="--outputFormat %s",),
+        outputLabels=dict(argstr="--outputLabels %s", hash_files=False,),
+        outputVolumes=dict(argstr="--outputVolumes %s...", hash_files=False,),
+        posteriorTemplate=dict(argstr="--posteriorTemplate %s",),
+        purePlugsThreshold=dict(argstr="--purePlugsThreshold %f",),
+        restoreState=dict(argstr="--restoreState %s", extensions=None,),
+        saveState=dict(argstr="--saveState %s", hash_files=False,),
         subjectIntermodeTransformType=dict(
-            argstr='--subjectIntermodeTransformType %s', ),
-        useKNN=dict(argstr='--useKNN ', ),
-        writeLess=dict(argstr='--writeLess ', ),
+            argstr="--subjectIntermodeTransformType %s",
+        ),
+        useKNN=dict(argstr="--useKNN ",),
+        writeLess=dict(argstr="--writeLess ",),
     )
     inputs = BRAINSABC.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
+
+
 def test_BRAINSABC_outputs():
     output_map = dict(
-        atlasToSubjectInitialTransform=dict(extensions=None, ),
-        atlasToSubjectTransform=dict(extensions=None, ),
+        atlasToSubjectInitialTransform=dict(extensions=None,),
+        atlasToSubjectTransform=dict(extensions=None,),
         implicitOutputs=dict(),
         outputDir=dict(),
-        outputDirtyLabels=dict(extensions=None, ),
-        outputLabels=dict(extensions=None, ),
+        outputDirtyLabels=dict(extensions=None,),
+        outputLabels=dict(extensions=None,),
         outputVolumes=dict(),
-        saveState=dict(extensions=None, ),
+        saveState=dict(extensions=None,),
     )
     outputs = BRAINSABC.output_spec()
 

@@ -14,7 +14,7 @@ from traceback import format_exception
 from ... import logging
 from ...utils.filemanip import savepkl, crash2txt
 
-logger = logging.getLogger('nipype.workflow')
+logger = logging.getLogger("nipype.workflow")
 
 
 def report_crash(node, traceback=None, hostname=None):
@@ -30,14 +30,20 @@ def report_crash(node, traceback=None, hostname=None):
         traceback += """
 
 When creating this crashfile, the results file corresponding
-to the node could not be found.""".splitlines(keepends=True)
+to the node could not be found.""".splitlines(
+            keepends=True
+        )
     except Exception as exc:
         traceback += """
 
 During the creation of this crashfile triggered by the above exception,
-another exception occurred:\n\n{}.""".format(exc).splitlines(keepends=True)
+another exception occurred:\n\n{}.""".format(
+            exc
+        ).splitlines(
+            keepends=True
+        )
     else:
-        if getattr(result, 'runtime', None):
+        if getattr(result, "runtime", None):
             if isinstance(result.runtime, list):
                 host = result.runtime[0].hostname
             else:
@@ -45,30 +51,28 @@ another exception occurred:\n\n{}.""".format(exc).splitlines(keepends=True)
 
     # Try everything to fill in the host
     host = host or hostname or gethostname()
-    logger.error('Node %s failed to run on host %s.', name, host)
-    timeofcrash = strftime('%Y%m%d-%H%M%S')
+    logger.error("Node %s failed to run on host %s.", name, host)
+    timeofcrash = strftime("%Y%m%d-%H%M%S")
     try:
         login_name = getpass.getuser()
     except KeyError:
-        login_name = 'UID{:d}'.format(os.getuid())
-    crashfile = 'crash-%s-%s-%s-%s' % (timeofcrash, login_name, name,
-                                       str(uuid.uuid4()))
-    crashdir = node.config['execution'].get('crashdump_dir', os.getcwd())
+        login_name = "UID{:d}".format(os.getuid())
+    crashfile = "crash-%s-%s-%s-%s" % (timeofcrash, login_name, name, str(uuid.uuid4()))
+    crashdir = node.config["execution"].get("crashdump_dir", os.getcwd())
 
     os.makedirs(crashdir, exist_ok=True)
     crashfile = os.path.join(crashdir, crashfile)
 
-    if node.config['execution']['crashfile_format'].lower() in ('text', 'txt', '.txt'):
-        crashfile += '.txt'
+    if node.config["execution"]["crashfile_format"].lower() in ("text", "txt", ".txt"):
+        crashfile += ".txt"
     else:
-        crashfile += '.pklz'
+        crashfile += ".pklz"
 
-    logger.error('Saving crash info to %s\n%s', crashfile, ''.join(traceback))
-    if crashfile.endswith('.txt'):
+    logger.error("Saving crash info to %s\n%s", crashfile, "".join(traceback))
+    if crashfile.endswith(".txt"):
         crash2txt(crashfile, dict(node=node, traceback=traceback))
     else:
-        savepkl(crashfile, dict(node=node, traceback=traceback),
-                versioning=True)
+        savepkl(crashfile, dict(node=node, traceback=traceback), versioning=True)
     return crashfile
 
 
@@ -81,30 +85,32 @@ def report_nodes_not_run(notrun):
     if notrun:
         logger.info("***********************************")
         for info in notrun:
-            logger.error("could not run node: %s" % '.'.join(
-                (info['node']._hierarchy, info['node']._id)))
-            logger.info("crashfile: %s" % info['crashfile'])
+            logger.error(
+                "could not run node: %s"
+                % ".".join((info["node"]._hierarchy, info["node"]._id))
+            )
+            logger.info("crashfile: %s" % info["crashfile"])
             logger.debug("The following dependent nodes were not run")
-            for subnode in info['dependents']:
+            for subnode in info["dependents"]:
                 logger.debug(subnode._id)
         logger.info("***********************************")
-        raise RuntimeError(('Workflow did not execute cleanly. '
-                            'Check log for details'))
+        raise RuntimeError(
+            ("Workflow did not execute cleanly. " "Check log for details")
+        )
 
 
 def create_pyscript(node, updatehash=False, store_exception=True):
     # pickle node
-    timestamp = strftime('%Y%m%d_%H%M%S')
+    timestamp = strftime("%Y%m%d_%H%M%S")
     if node._hierarchy:
-        suffix = '%s_%s_%s' % (timestamp, node._hierarchy, node._id)
-        batch_dir = os.path.join(node.base_dir,
-                                 node._hierarchy.split('.')[0], 'batch')
+        suffix = "%s_%s_%s" % (timestamp, node._hierarchy, node._id)
+        batch_dir = os.path.join(node.base_dir, node._hierarchy.split(".")[0], "batch")
     else:
-        suffix = '%s_%s' % (timestamp, node._id)
-        batch_dir = os.path.join(node.base_dir, 'batch')
+        suffix = "%s_%s" % (timestamp, node._id)
+        batch_dir = os.path.join(node.base_dir, "batch")
     if not os.path.exists(batch_dir):
         os.makedirs(batch_dir)
-    pkl_file = os.path.join(batch_dir, 'node_%s.pklz' % suffix)
+    pkl_file = os.path.join(batch_dir, "node_%s.pklz" % suffix)
     savepkl(pkl_file, dict(node=node, updatehash=updatehash))
     mpl_backend = node.config["execution"]["matplotlib_backend"]
     # create python script to load and trap exception
@@ -167,7 +173,7 @@ except Exception as e:
     raise Exception(e)
 """
     cmdstr = cmdstr % (mpl_backend, pkl_file, batch_dir, node.config, suffix)
-    pyscript = os.path.join(batch_dir, 'pyscript_%s.py' % suffix)
-    with open(pyscript, 'wt') as fp:
+    pyscript = os.path.join(batch_dir, "pyscript_%s.py" % suffix)
+    with open(pyscript, "wt") as fp:
         fp.writelines(cmdstr)
     return pyscript

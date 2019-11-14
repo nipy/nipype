@@ -8,7 +8,8 @@ from time import sleep
 from ...interfaces.base import CommandLine
 from ... import logging
 from .base import SGELikeBatchManagerBase, logger
-iflogger = logging.getLogger('nipype.interface')
+
+iflogger = logging.getLogger("nipype.interface")
 
 
 class CondorPlugin(SGELikeBatchManagerBase):
@@ -38,59 +39,59 @@ class CondorPlugin(SGELikeBatchManagerBase):
         """
         self._retry_timeout = 2
         self._max_tries = 2
-        if 'plugin_args' in kwargs and kwargs['plugin_args']:
-            if 'retry_timeout' in kwargs['plugin_args']:
-                self._retry_timeout = kwargs['plugin_args']['retry_timeout']
-            if 'max_tries' in kwargs['plugin_args']:
-                self._max_tries = kwargs['plugin_args']['max_tries']
+        if "plugin_args" in kwargs and kwargs["plugin_args"]:
+            if "retry_timeout" in kwargs["plugin_args"]:
+                self._retry_timeout = kwargs["plugin_args"]["retry_timeout"]
+            if "max_tries" in kwargs["plugin_args"]:
+                self._max_tries = kwargs["plugin_args"]["max_tries"]
         super(CondorPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
         cmd = CommandLine(
-            'condor_q', resource_monitor=False, terminal_output='allatonce')
-        cmd.inputs.args = '%d' % taskid
+            "condor_q", resource_monitor=False, terminal_output="allatonce"
+        )
+        cmd.inputs.args = "%d" % taskid
         # check condor cluster
         oldlevel = iflogger.level
-        iflogger.setLevel(logging.getLevelName('CRITICAL'))
+        iflogger.setLevel(logging.getLevelName("CRITICAL"))
         result = cmd.run(ignore_exception=True)
         iflogger.setLevel(oldlevel)
-        if result.runtime.stdout.count('\n%d' % taskid):
+        if result.runtime.stdout.count("\n%d" % taskid):
             return True
         return False
 
     def _submit_batchtask(self, scriptfile, node):
         cmd = CommandLine(
-            'condor_qsub',
+            "condor_qsub",
             environ=dict(os.environ),
             resource_monitor=False,
-            terminal_output='allatonce')
+            terminal_output="allatonce",
+        )
         path = os.path.dirname(scriptfile)
-        qsubargs = ''
+        qsubargs = ""
         if self._qsub_args:
             qsubargs = self._qsub_args
-        if 'qsub_args' in node.plugin_args:
-            if 'overwrite' in node.plugin_args and\
-               node.plugin_args['overwrite']:
-                qsubargs = node.plugin_args['qsub_args']
+        if "qsub_args" in node.plugin_args:
+            if "overwrite" in node.plugin_args and node.plugin_args["overwrite"]:
+                qsubargs = node.plugin_args["qsub_args"]
             else:
-                qsubargs += (" " + node.plugin_args['qsub_args'])
+                qsubargs += " " + node.plugin_args["qsub_args"]
         if self._qsub_args:
             qsubargs = self._qsub_args
-        if '-o' not in qsubargs:
-            qsubargs = '%s -o %s' % (qsubargs, path)
-        if '-e' not in qsubargs:
-            qsubargs = '%s -e %s' % (qsubargs, path)
+        if "-o" not in qsubargs:
+            qsubargs = "%s -o %s" % (qsubargs, path)
+        if "-e" not in qsubargs:
+            qsubargs = "%s -e %s" % (qsubargs, path)
         if node._hierarchy:
-            jobname = '.'.join((dict(os.environ)['LOGNAME'], node._hierarchy,
-                                node._id))
+            jobname = ".".join((dict(os.environ)["LOGNAME"], node._hierarchy, node._id))
         else:
-            jobname = '.'.join((dict(os.environ)['LOGNAME'], node._id))
-        jobnameitems = jobname.split('.')
+            jobname = ".".join((dict(os.environ)["LOGNAME"], node._id))
+        jobnameitems = jobname.split(".")
         jobnameitems.reverse()
-        jobname = '.'.join(jobnameitems)
-        cmd.inputs.args = '%s -N %s %s' % (qsubargs, jobname, scriptfile)
+        jobname = ".".join(jobnameitems)
+        cmd.inputs.args = "%s -N %s %s" % (qsubargs, jobname, scriptfile)
         oldlevel = iflogger.level
-        iflogger.setLevel(logging.getLevelName('CRITICAL'))
+        iflogger.setLevel(logging.getLevelName("CRITICAL"))
         tries = 0
         while True:
             try:
@@ -101,16 +102,20 @@ class CondorPlugin(SGELikeBatchManagerBase):
                     sleep(self._retry_timeout)  # sleep 2 seconds and try again
                 else:
                     iflogger.setLevel(oldlevel)
-                    raise RuntimeError('\n'.join((('Could not submit condor '
-                                                   'cluster'
-                                                   ' for node %s') % node._id,
-                                                  str(e))))
+                    raise RuntimeError(
+                        "\n".join(
+                            (
+                                ("Could not submit condor " "cluster" " for node %s")
+                                % node._id,
+                                str(e),
+                            )
+                        )
+                    )
             else:
                 break
         iflogger.setLevel(oldlevel)
         # retrieve condor clusterid
-        taskid = int(result.runtime.stdout.split(' ')[2])
+        taskid = int(result.runtime.stdout.split(" ")[2])
         self._pending[taskid] = node.output_dir()
-        logger.debug('submitted condor cluster: %d for node %s' % (taskid,
-                                                                   node._id))
+        logger.debug("submitted condor cluster: %d for node %s" % (taskid, node._id))
         return taskid

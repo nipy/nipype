@@ -4,50 +4,27 @@ from ..changequantification import IntensityDifferenceMetric
 
 def test_IntensityDifferenceMetric_inputs():
     input_map = dict(
-        args=dict(argstr='%s', ),
-        baselineSegmentationVolume=dict(
-            argstr='%s',
-            extensions=None,
-            position=-3,
-        ),
-        baselineVolume=dict(
-            argstr='%s',
-            extensions=None,
-            position=-4,
-        ),
-        changingBandSize=dict(argstr='--changingBandSize %d', ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        followupVolume=dict(
-            argstr='%s',
-            extensions=None,
-            position=-2,
-        ),
-        outputVolume=dict(
-            argstr='%s',
-            hash_files=False,
-            position=-1,
-        ),
-        reportFileName=dict(
-            argstr='--reportFileName %s',
-            hash_files=False,
-        ),
-        sensitivityThreshold=dict(argstr='--sensitivityThreshold %f', ),
+        args=dict(argstr="%s",),
+        baselineSegmentationVolume=dict(argstr="%s", extensions=None, position=-3,),
+        baselineVolume=dict(argstr="%s", extensions=None, position=-4,),
+        changingBandSize=dict(argstr="--changingBandSize %d",),
+        environ=dict(nohash=True, usedefault=True,),
+        followupVolume=dict(argstr="%s", extensions=None, position=-2,),
+        outputVolume=dict(argstr="%s", hash_files=False, position=-1,),
+        reportFileName=dict(argstr="--reportFileName %s", hash_files=False,),
+        sensitivityThreshold=dict(argstr="--sensitivityThreshold %f",),
     )
     inputs = IntensityDifferenceMetric.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
+
+
 def test_IntensityDifferenceMetric_outputs():
     output_map = dict(
-        outputVolume=dict(
-            extensions=None,
-            position=-1,
-        ),
-        reportFileName=dict(extensions=None, ),
+        outputVolume=dict(extensions=None, position=-1,),
+        reportFileName=dict(extensions=None,),
     )
     outputs = IntensityDifferenceMetric.output_spec()
 

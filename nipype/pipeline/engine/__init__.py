@@ -7,7 +7,7 @@ Package contains modules for generating pipelines using interfaces
 
 """
 
-__docformat__ = 'restructuredtext'
+__docformat__ = "restructuredtext"
 from .workflows import Workflow
 from .nodes import Node, MapNode, JoinNode
 from .utils import generate_expanded_graph

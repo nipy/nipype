@@ -4,25 +4,17 @@ from ..io import XNATSink
 
 def test_XNATSink_inputs():
     input_map = dict(
-        _outputs=dict(usedefault=True, ),
-        assessor_id=dict(xor=['reconstruction_id'], ),
+        _outputs=dict(usedefault=True,),
+        assessor_id=dict(xor=["reconstruction_id"],),
         cache_dir=dict(),
-        config=dict(
-            extensions=None,
-            mandatory=True,
-            xor=['server'],
-        ),
-        experiment_id=dict(mandatory=True, ),
-        project_id=dict(mandatory=True, ),
+        config=dict(extensions=None, mandatory=True, xor=["server"],),
+        experiment_id=dict(mandatory=True,),
+        project_id=dict(mandatory=True,),
         pwd=dict(),
-        reconstruction_id=dict(xor=['assessor_id'], ),
-        server=dict(
-            mandatory=True,
-            requires=['user', 'pwd'],
-            xor=['config'],
-        ),
-        share=dict(usedefault=True, ),
-        subject_id=dict(mandatory=True, ),
+        reconstruction_id=dict(xor=["assessor_id"],),
+        server=dict(mandatory=True, requires=["user", "pwd"], xor=["config"],),
+        share=dict(usedefault=True,),
+        subject_id=dict(mandatory=True,),
         user=dict(),
     )
     inputs = XNATSink.input_spec()

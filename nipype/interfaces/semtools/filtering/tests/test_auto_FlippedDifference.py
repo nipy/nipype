@@ -4,31 +4,21 @@ from ..featuredetection import FlippedDifference
 
 def test_FlippedDifference_inputs():
     input_map = dict(
-        args=dict(argstr='%s', ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        inputMaskVolume=dict(
-            argstr='--inputMaskVolume %s',
-            extensions=None,
-        ),
-        inputVolume=dict(
-            argstr='--inputVolume %s',
-            extensions=None,
-        ),
-        outputVolume=dict(
-            argstr='--outputVolume %s',
-            hash_files=False,
-        ),
+        args=dict(argstr="%s",),
+        environ=dict(nohash=True, usedefault=True,),
+        inputMaskVolume=dict(argstr="--inputMaskVolume %s", extensions=None,),
+        inputVolume=dict(argstr="--inputVolume %s", extensions=None,),
+        outputVolume=dict(argstr="--outputVolume %s", hash_files=False,),
     )
     inputs = FlippedDifference.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
+
+
 def test_FlippedDifference_outputs():
-    output_map = dict(outputVolume=dict(extensions=None, ), )
+    output_map = dict(outputVolume=dict(extensions=None,),)
     outputs = FlippedDifference.output_spec()
 
     for key, metadata in list(output_map.items()):

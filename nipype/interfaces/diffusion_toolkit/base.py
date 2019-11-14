@@ -16,7 +16,7 @@ See the docstrings for the individual classes for 'working' examples.
 import re
 from ..base import CommandLine
 
-__docformat__ = 'restructuredtext'
+__docformat__ = "restructuredtext"
 
 
 class Info(object):
@@ -45,13 +45,12 @@ class Info(object):
            Version number as string or None if FSL not found
 
         """
-        clout = CommandLine(
-            command='dti_recon', terminal_output='allatonce').run()
+        clout = CommandLine(command="dti_recon", terminal_output="allatonce").run()
 
         if clout.runtime.returncode is not 0:
             return None
 
         dtirecon = clout.runtime.stdout
-        result = re.search('dti_recon (.*)\n', dtirecon)
+        result = re.search("dti_recon (.*)\n", dtirecon)
         version = result.group(0).split()[1]
         return version

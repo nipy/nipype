@@ -4,28 +4,21 @@ from ..misc import Distance
 
 def test_Distance_inputs():
     input_map = dict(
-        mask_volume=dict(extensions=None, ),
-        method=dict(usedefault=True, ),
-        volume1=dict(
-            extensions=None,
-            mandatory=True,
-        ),
-        volume2=dict(
-            extensions=None,
-            mandatory=True,
-        ),
+        mask_volume=dict(extensions=None,),
+        method=dict(usedefault=True,),
+        volume1=dict(extensions=None, mandatory=True,),
+        volume2=dict(extensions=None, mandatory=True,),
     )
     inputs = Distance.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
+
+
 def test_Distance_outputs():
     output_map = dict(
-        distance=dict(),
-        histogram=dict(extensions=None, ),
-        point1=dict(),
-        point2=dict(),
+        distance=dict(), histogram=dict(extensions=None,), point1=dict(), point2=dict(),
     )
     outputs = Distance.output_spec()
 

@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
-from .morphology import (GrayscaleGrindPeakImageFilter,
-                         GrayscaleFillHoleImageFilter)
-from .denoising import (GradientAnisotropicDiffusion,
-                        CurvatureAnisotropicDiffusion, GaussianBlurImageFilter,
-                        MedianImageFilter)
-from .arithmetic import (MultiplyScalarVolumes, MaskScalarVolume,
-                         SubtractScalarVolumes, AddScalarVolumes,
-                         CastScalarVolume)
+from .morphology import GrayscaleGrindPeakImageFilter, GrayscaleFillHoleImageFilter
+from .denoising import (
+    GradientAnisotropicDiffusion,
+    CurvatureAnisotropicDiffusion,
+    GaussianBlurImageFilter,
+    MedianImageFilter,
+)
+from .arithmetic import (
+    MultiplyScalarVolumes,
+    MaskScalarVolume,
+    SubtractScalarVolumes,
+    AddScalarVolumes,
+    CastScalarVolume,
+)
 from .extractskeleton import ExtractSkeleton
 from .histogrammatching import HistogramMatching
 from .thresholdscalarvolume import ThresholdScalarVolume

@@ -4,51 +4,26 @@ from ..dti import MakeDyadicVectors
 
 def test_MakeDyadicVectors_inputs():
     input_map = dict(
-        args=dict(argstr='%s', ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        mask=dict(
-            argstr='%s',
-            extensions=None,
-            position=2,
-        ),
+        args=dict(argstr="%s",),
+        environ=dict(nohash=True, usedefault=True,),
+        mask=dict(argstr="%s", extensions=None, position=2,),
         output=dict(
-            argstr='%s',
-            extensions=None,
-            hash_files=False,
-            position=3,
-            usedefault=True,
+            argstr="%s", extensions=None, hash_files=False, position=3, usedefault=True,
         ),
         output_type=dict(),
-        perc=dict(
-            argstr='%f',
-            position=4,
-        ),
-        phi_vol=dict(
-            argstr='%s',
-            extensions=None,
-            mandatory=True,
-            position=1,
-        ),
-        theta_vol=dict(
-            argstr='%s',
-            extensions=None,
-            mandatory=True,
-            position=0,
-        ),
+        perc=dict(argstr="%f", position=4,),
+        phi_vol=dict(argstr="%s", extensions=None, mandatory=True, position=1,),
+        theta_vol=dict(argstr="%s", extensions=None, mandatory=True, position=0,),
     )
     inputs = MakeDyadicVectors.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
+
+
 def test_MakeDyadicVectors_outputs():
-    output_map = dict(
-        dispersion=dict(extensions=None, ),
-        dyads=dict(extensions=None, ),
-    )
+    output_map = dict(dispersion=dict(extensions=None,), dyads=dict(extensions=None,),)
     outputs = MakeDyadicVectors.output_spec()
 
     for key, metadata in list(output_map.items()):

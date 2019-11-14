@@ -4,24 +4,20 @@ from ..preprocess import SpaceTimeRealigner
 
 def test_SpaceTimeRealigner_inputs():
     input_map = dict(
-        in_file=dict(
-            mandatory=True,
-            min_ver='0.4.0.dev',
-        ),
-        slice_info=dict(requires=['slice_times'], ),
+        in_file=dict(mandatory=True, min_ver="0.4.0.dev",),
+        slice_info=dict(requires=["slice_times"],),
         slice_times=dict(),
-        tr=dict(requires=['slice_times'], ),
+        tr=dict(requires=["slice_times"],),
     )
     inputs = SpaceTimeRealigner.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
+
+
 def test_SpaceTimeRealigner_outputs():
-    output_map = dict(
-        out_file=dict(),
-        par_file=dict(),
-    )
+    output_map = dict(out_file=dict(), par_file=dict(),)
     outputs = SpaceTimeRealigner.output_spec()
 
     for key, metadata in list(output_map.items()):

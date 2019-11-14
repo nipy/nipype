@@ -15,9 +15,11 @@ import re
 from ... import logging
 from ...utils.misc import is_container
 from ...utils.filemanip import md5, hash_infile
-iflogger = logging.getLogger('nipype.interface')
+
+iflogger = logging.getLogger("nipype.interface")
 
 HELP_LINEWIDTH = 70
+
 
 class NipypeInterfaceError(Exception):
     """Custom error for interfaces"""
@@ -26,7 +28,7 @@ class NipypeInterfaceError(Exception):
         self.value = value
 
     def __str__(self):
-        return '{}'.format(self.value)
+        return "{}".format(self.value)
 
 
 class Bunch(object):
@@ -70,7 +72,7 @@ class Bunch(object):
 
     def iteritems(self):
         """iterates over bunch attributes as key, value pairs"""
-        iflogger.warning('iteritems is deprecated, use items instead')
+        iflogger.warning("iteritems is deprecated, use items instead")
         return list(self.items())
 
     def get(self, *args):
@@ -95,22 +97,22 @@ class Bunch(object):
         needs setting or not. Till that mechanism changes, only alter
         this after careful consideration.
         """
-        outstr = ['Bunch(']
+        outstr = ["Bunch("]
         first = True
         for k, v in sorted(self.items()):
             if not first:
-                outstr.append(', ')
+                outstr.append(", ")
             if isinstance(v, dict):
                 pairs = []
                 for key, value in sorted(v.items()):
                     pairs.append("'%s': %s" % (key, value))
-                v = '{' + ', '.join(pairs) + '}'
-                outstr.append('%s=%s' % (k, v))
+                v = "{" + ", ".join(pairs) + "}"
+                outstr.append("%s=%s" % (k, v))
             else:
-                outstr.append('%s=%r' % (k, v))
+                outstr.append("%s=%r" % (k, v))
             first = False
-        outstr.append(')')
-        return ''.join(outstr)
+        outstr.append(")")
+        return "".join(outstr)
 
     def _get_bunch_hash(self):
         """Return a dictionary of our items with hashes for each file.
@@ -143,7 +145,7 @@ class Bunch(object):
                     item = None
                 else:
                     if len(val) == 0:
-                        raise AttributeError('%s attribute is empty' % key)
+                        raise AttributeError("%s attribute is empty" % key)
                     item = val[0]
             else:
                 item = val
@@ -167,18 +169,18 @@ class Bunch(object):
     def _repr_pretty_(self, p, cycle):
         """Support for the pretty module from ipython.externals"""
         if cycle:
-            p.text('Bunch(...)')
+            p.text("Bunch(...)")
         else:
-            p.begin_group(6, 'Bunch(')
+            p.begin_group(6, "Bunch(")
             first = True
             for k, v in sorted(self.items()):
                 if not first:
-                    p.text(',')
+                    p.text(",")
                     p.breakable()
-                p.text(k + '=')
+                p.text(k + "=")
                 p.pretty(v)
                 first = False
-            p.end_group(6, ')')
+            p.end_group(6, ")")
 
 
 def _hash_bunch_dict(adict, key):
@@ -216,12 +218,7 @@ class InterfaceResult(object):
 
     """
 
-    def __init__(self,
-                 interface,
-                 runtime,
-                 inputs=None,
-                 outputs=None,
-                 provenance=None):
+    def __init__(self, interface, runtime, inputs=None, outputs=None, provenance=None):
         self._version = 2.0
         self.interface = interface
         self.runtime = runtime
@@ -252,18 +249,20 @@ def format_help(cls):
     from ...utils.misc import trim
 
     docstring = []
-    cmd = getattr(cls, '_cmd', None)
+    cmd = getattr(cls, "_cmd", None)
     if cmd:
-        docstring += ['Wraps the executable command ``%s``.' % cmd, '']
+        docstring += ["Wraps the executable command ``%s``." % cmd, ""]
 
     if cls.__doc__:
-        docstring += trim(cls.__doc__).split('\n') + ['']
+        docstring += trim(cls.__doc__).split("\n") + [""]
 
-    allhelp = '\n'.join(
-        docstring +
-        _inputs_help(cls) + [''] +
-        _outputs_help(cls) + ['']  +
-        _refs_help(cls)
+    allhelp = "\n".join(
+        docstring
+        + _inputs_help(cls)
+        + [""]
+        + _outputs_help(cls)
+        + [""]
+        + _refs_help(cls)
     )
     return allhelp.expandtabs(8)
 
@@ -277,7 +276,7 @@ def _inputs_help(cls):
     ['Inputs::', '', '\t[Mandatory]', '\tin_file: (a pathlike object or string...
 
     """
-    helpstr = ['Inputs::']
+    helpstr = ["Inputs::"]
     mandatory_keys = []
     optional_items = []
 
@@ -285,19 +284,21 @@ def _inputs_help(cls):
         inputs = cls.input_spec()
         mandatory_items = list(inputs.traits(mandatory=True).items())
         if mandatory_items:
-            helpstr += ['', '\t[Mandatory]']
+            helpstr += ["", "\t[Mandatory]"]
             for name, spec in mandatory_items:
                 helpstr += get_trait_desc(inputs, name, spec)
 
         mandatory_keys = {item[0] for item in mandatory_items}
-        optional_items = ['\n'.join(get_trait_desc(inputs, name, val))
-                          for name, val in inputs.traits(transient=None).items()
-                          if name not in mandatory_keys]
+        optional_items = [
+            "\n".join(get_trait_desc(inputs, name, val))
+            for name, val in inputs.traits(transient=None).items()
+            if name not in mandatory_keys
+        ]
         if optional_items:
-            helpstr += ['', '\t[Optional]'] + optional_items
+            helpstr += ["", "\t[Optional]"] + optional_items
 
     if not mandatory_keys and not optional_items:
-        helpstr += ['', '\tNone']
+        helpstr += ["", "\tNone"]
     return helpstr
 
 
@@ -310,12 +311,13 @@ def _outputs_help(cls):
     ['Outputs::', '', '\tout: (a float)\n\t\tglobal correlation value']
 
     """
-    helpstr = ['Outputs::', '', '\tNone']
+    helpstr = ["Outputs::", "", "\tNone"]
     if cls.output_spec:
         outputs = cls.output_spec()
         outhelpstr = [
-            '\n'.join(get_trait_desc(outputs, name, spec))
-            for name, spec in outputs.traits(transient=None).items()]
+            "\n".join(get_trait_desc(outputs, name, spec))
+            for name, spec in outputs.traits(transient=None).items()
+        ]
         if outhelpstr:
             helpstr = helpstr[:-1] + outhelpstr
     return helpstr
@@ -323,13 +325,13 @@ def _outputs_help(cls):
 
 def _refs_help(cls):
     """Prints interface references."""
-    references = getattr(cls, 'references_', None)
+    references = getattr(cls, "references_", None)
     if not references:
         return []
 
-    helpstr = ['References:', '-----------']
+    helpstr = ["References:", "-----------"]
     for r in references:
-        helpstr += ['{}'.format(r['entry'])]
+        helpstr += ["{}".format(r["entry"])]
 
     return helpstr
 
@@ -341,59 +343,62 @@ def get_trait_desc(inputs, name, spec):
     requires = spec.requires
     argstr = spec.argstr
 
-    manhelpstr = ['\t%s' % name]
+    manhelpstr = ["\t%s" % name]
 
     type_info = spec.full_info(inputs, name, None)
 
-    default = ''
+    default = ""
     if spec.usedefault:
-        default = ', nipype default value: %s' % str(
-            spec.default_value()[1])
+        default = ", nipype default value: %s" % str(spec.default_value()[1])
     line = "(%s%s)" % (type_info, default)
 
     manhelpstr = wrap(
         line,
         HELP_LINEWIDTH,
-        initial_indent=manhelpstr[0] + ': ',
-        subsequent_indent='\t\t  ')
+        initial_indent=manhelpstr[0] + ": ",
+        subsequent_indent="\t\t  ",
+    )
 
     if desc:
-        for line in desc.split('\n'):
+        for line in desc.split("\n"):
             line = re.sub(r"\s+", " ", line)
             manhelpstr += wrap(
-                line, HELP_LINEWIDTH,
-                initial_indent='\t\t',
-                subsequent_indent='\t\t')
+                line, HELP_LINEWIDTH, initial_indent="\t\t", subsequent_indent="\t\t"
+            )
 
     if argstr:
         pos = spec.position
         if pos is not None:
             manhelpstr += wrap(
-                'argument: ``%s``, position: %s' % (argstr, pos),
+                "argument: ``%s``, position: %s" % (argstr, pos),
                 HELP_LINEWIDTH,
-                initial_indent='\t\t',
-                subsequent_indent='\t\t')
+                initial_indent="\t\t",
+                subsequent_indent="\t\t",
+            )
         else:
             manhelpstr += wrap(
-                'argument: ``%s``' % argstr,
+                "argument: ``%s``" % argstr,
                 HELP_LINEWIDTH,
-                initial_indent='\t\t',
-                subsequent_indent='\t\t')
+                initial_indent="\t\t",
+                subsequent_indent="\t\t",
+            )
 
     if xor:
-        line = '%s' % ', '.join(xor)
+        line = "%s" % ", ".join(xor)
         manhelpstr += wrap(
             line,
             HELP_LINEWIDTH,
-            initial_indent='\t\tmutually_exclusive: ',
-            subsequent_indent='\t\t  ')
+            initial_indent="\t\tmutually_exclusive: ",
+            subsequent_indent="\t\t  ",
+        )
 
     if requires:
         others = [field for field in requires if field != name]
-        line = '%s' % ', '.join(others)
+        line = "%s" % ", ".join(others)
         manhelpstr += wrap(
             line,
             HELP_LINEWIDTH,
-            initial_indent='\t\trequires: ',
-            subsequent_indent='\t\t  ')
+            initial_indent="\t\trequires: ",
+            subsequent_indent="\t\t  ",
+        )
     return manhelpstr

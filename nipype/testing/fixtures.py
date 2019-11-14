@@ -26,14 +26,13 @@ def analyze_pair_image_files(outdir, filelist, shape):
 def nifti_image_files(outdir, filelist, shape):
     for f in ensure_list(filelist):
         img = np.random.random(shape)
-        nb.Nifti1Image(img, np.eye(4), None).to_filename(
-            os.path.join(outdir, f))
+        nb.Nifti1Image(img, np.eye(4), None).to_filename(os.path.join(outdir, f))
 
 
 @pytest.fixture()
 def create_files_in_directory(request, tmpdir):
     cwd = tmpdir.chdir()
-    filelist = ['a.nii', 'b.nii']
+    filelist = ["a.nii", "b.nii"]
     nifti_image_files(tmpdir.strpath, filelist, shape=(3, 3, 3, 4))
 
     def change_directory():
@@ -46,7 +45,7 @@ def create_files_in_directory(request, tmpdir):
 @pytest.fixture()
 def create_analyze_pair_file_in_directory(request, tmpdir):
     cwd = tmpdir.chdir()
-    filelist = ['a.hdr']
+    filelist = ["a.hdr"]
     analyze_pair_image_files(tmpdir.strpath, filelist, shape=(3, 3, 3, 4))
 
     def change_directory():
@@ -59,11 +58,11 @@ def create_analyze_pair_file_in_directory(request, tmpdir):
 @pytest.fixture()
 def create_files_in_directory_plus_dummy_file(request, tmpdir):
     cwd = tmpdir.chdir()
-    filelist = ['a.nii', 'b.nii']
+    filelist = ["a.nii", "b.nii"]
     nifti_image_files(tmpdir.strpath, filelist, shape=(3, 3, 3, 4))
 
-    tmpdir.join('reg.dat').write('dummy file')
-    filelist.append('reg.dat')
+    tmpdir.join("reg.dat").write("dummy file")
+    filelist.append("reg.dat")
 
     def change_directory():
         cwd.chdir()
@@ -75,7 +74,7 @@ def create_files_in_directory_plus_dummy_file(request, tmpdir):
 @pytest.fixture()
 def create_surf_file_in_directory(request, tmpdir):
     cwd = tmpdir.chdir()
-    surf = 'lh.a.nii'
+    surf = "lh.a.nii"
     nifti_image_files(tmpdir.strpath, filelist=surf, shape=(1, 100, 1))
 
     def change_directory():
@@ -86,12 +85,12 @@ def create_surf_file_in_directory(request, tmpdir):
 
 
 def set_output_type(fsl_output_type):
-    prev_output_type = os.environ.get('FSLOUTPUTTYPE', None)
+    prev_output_type = os.environ.get("FSLOUTPUTTYPE", None)
 
     if fsl_output_type is not None:
-        os.environ['FSLOUTPUTTYPE'] = fsl_output_type
-    elif 'FSLOUTPUTTYPE' in os.environ:
-        del os.environ['FSLOUTPUTTYPE']
+        os.environ["FSLOUTPUTTYPE"] = fsl_output_type
+    elif "FSLOUTPUTTYPE" in os.environ:
+        del os.environ["FSLOUTPUTTYPE"]
 
     FSLCommand.set_default_output_type(Info.output_type())
     return prev_output_type
@@ -101,7 +100,7 @@ def set_output_type(fsl_output_type):
 def create_files_in_directory_plus_output_type(request, tmpdir):
     func_prev_type = set_output_type(request.param)
     origdir = tmpdir.chdir()
-    filelist = ['a.nii', 'b.nii']
+    filelist = ["a.nii", "b.nii"]
     nifti_image_files(tmpdir.strpath, filelist, shape=(3, 3, 3, 4))
 
     out_ext = Info.output_type_to_ext(Info.output_type())

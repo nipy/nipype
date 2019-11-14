@@ -14,7 +14,7 @@ import warnings
 
 from ..base import CommandLine
 
-warnings.filterwarnings('always', category=UserWarning)
+warnings.filterwarnings("always", category=UserWarning)
 
 
 def check_minc():
@@ -52,47 +52,46 @@ class Info(object):
         """
         try:
             clout = CommandLine(
-                command='mincinfo',
-                args='-version',
-                terminal_output='allatonce').run()
+                command="mincinfo", args="-version", terminal_output="allatonce"
+            ).run()
         except IOError:
             return None
 
         out = clout.runtime.stdout
 
         def read_program_version(s):
-            if 'program' in s:
-                return s.split(':')[1].strip()
+            if "program" in s:
+                return s.split(":")[1].strip()
             return None
 
         def read_libminc_version(s):
-            if 'libminc' in s:
-                return s.split(':')[1].strip()
+            if "libminc" in s:
+                return s.split(":")[1].strip()
             return None
 
         def read_netcdf_version(s):
-            if 'netcdf' in s:
-                return ' '.join(s.split(':')[1:]).strip()
+            if "netcdf" in s:
+                return " ".join(s.split(":")[1:]).strip()
             return None
 
         def read_hdf5_version(s):
-            if 'HDF5' in s:
-                return s.split(':')[1].strip()
+            if "HDF5" in s:
+                return s.split(":")[1].strip()
             return None
 
         versions = {
-            'minc': None,
-            'libminc': None,
-            'netcdf': None,
-            'hdf5': None,
+            "minc": None,
+            "libminc": None,
+            "netcdf": None,
+            "hdf5": None,
         }
 
-        for l in out.split('\n'):
+        for l in out.split("\n"):
             for (name, f) in [
-                ('minc', read_program_version),
-                ('libminc', read_libminc_version),
-                ('netcdf', read_netcdf_version),
-                ('hdf5', read_hdf5_version),
+                ("minc", read_program_version),
+                ("libminc", read_libminc_version),
+                ("netcdf", read_netcdf_version),
+                ("hdf5", read_hdf5_version),
             ]:
                 if f(l) is not None:
                     versions[name] = f(l)
@@ -126,11 +125,13 @@ def aggregate_filename(files, new_suffix):
 
     path = os.getcwd()
 
-    if common_prefix == '':
+    if common_prefix == "":
         return os.path.abspath(
             os.path.join(
-                path,
-                os.path.splitext(files[0])[0] + '_' + new_suffix + '.mnc'))
+                path, os.path.splitext(files[0])[0] + "_" + new_suffix + ".mnc"
+            )
+        )
     else:
         return os.path.abspath(
-            os.path.join(path, common_prefix + '_' + new_suffix + '.mnc'))
+            os.path.join(path, common_prefix + "_" + new_suffix + ".mnc")
+        )

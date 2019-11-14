@@ -4,159 +4,95 @@ from ..qt1 import FitQt1
 
 def test_FitQt1_inputs():
     input_map = dict(
-        acceptance=dict(argstr='-acceptance %f', ),
-        args=dict(argstr='%s', ),
-        b1map=dict(
-            argstr='-b1map %s',
-            extensions=None,
-        ),
+        acceptance=dict(argstr="-acceptance %f",),
+        args=dict(argstr="%s",),
+        b1map=dict(argstr="-b1map %s", extensions=None,),
         comp_file=dict(
-            argstr='-comp %s',
+            argstr="-comp %s",
             extensions=None,
-            name_source=['source_file'],
-            name_template='%s_comp.nii.gz',
+            name_source=["source_file"],
+            name_template="%s_comp.nii.gz",
         ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        environ=dict(nohash=True, usedefault=True,),
         error_file=dict(
-            argstr='-error %s',
+            argstr="-error %s",
             extensions=None,
-            name_source=['source_file'],
-            name_template='%s_error.nii.gz',
+            name_source=["source_file"],
+            name_template="%s_error.nii.gz",
         ),
-        flips=dict(
-            argstr='-flips %s',
-            sep=' ',
-        ),
-        flips_list=dict(
-            argstr='-fliplist %s',
-            extensions=None,
-        ),
-        gn_flag=dict(
-            argstr='-gn',
-            position=8,
-        ),
-        ir_flag=dict(
-            argstr='-IR',
-            position=13,
-        ),
-        lm_val=dict(
-            argstr='-lm %f %f',
-            position=7,
-        ),
+        flips=dict(argstr="-flips %s", sep=" ",),
+        flips_list=dict(argstr="-fliplist %s", extensions=None,),
+        gn_flag=dict(argstr="-gn", position=8,),
+        ir_flag=dict(argstr="-IR", position=13,),
+        lm_val=dict(argstr="-lm %f %f", position=7,),
         m0map_file=dict(
-            argstr='-m0map %s',
+            argstr="-m0map %s",
             extensions=None,
-            name_source=['source_file'],
-            name_template='%s_m0map.nii.gz',
+            name_source=["source_file"],
+            name_template="%s_m0map.nii.gz",
         ),
-        mask=dict(
-            argstr='-mask %s',
-            extensions=None,
-            position=2,
-        ),
-        maxit=dict(
-            argstr='-maxit %d',
-            position=11,
-        ),
+        mask=dict(argstr="-mask %s", extensions=None, position=2,),
+        maxit=dict(argstr="-maxit %d", position=11,),
         mcmap_file=dict(
-            argstr='-mcmap %s',
+            argstr="-mcmap %s",
             extensions=None,
-            name_source=['source_file'],
-            name_template='%s_mcmap.nii.gz',
+            name_source=["source_file"],
+            name_template="%s_mcmap.nii.gz",
         ),
-        mcmaxit=dict(argstr='-mcmaxit %d', ),
-        mcout=dict(
-            argstr='-mcout %s',
-            extensions=None,
-        ),
-        mcsamples=dict(argstr='-mcsamples %d', ),
-        nb_comp=dict(
-            argstr='-nc %d',
-            position=6,
-        ),
-        prior=dict(
-            argstr='-prior %s',
-            extensions=None,
-            position=3,
-        ),
+        mcmaxit=dict(argstr="-mcmaxit %d",),
+        mcout=dict(argstr="-mcout %s", extensions=None,),
+        mcsamples=dict(argstr="-mcsamples %d",),
+        nb_comp=dict(argstr="-nc %d", position=6,),
+        prior=dict(argstr="-prior %s", extensions=None, position=3,),
         res_file=dict(
-            argstr='-res %s',
+            argstr="-res %s",
             extensions=None,
-            name_source=['source_file'],
-            name_template='%s_res.nii.gz',
+            name_source=["source_file"],
+            name_template="%s_res.nii.gz",
         ),
-        slice_no=dict(
-            argstr='-slice %d',
-            position=9,
-        ),
+        slice_no=dict(argstr="-slice %d", position=9,),
         source_file=dict(
-            argstr='-source %s',
-            extensions=None,
-            mandatory=True,
-            position=1,
+            argstr="-source %s", extensions=None, mandatory=True, position=1,
         ),
-        spgr=dict(argstr='-SPGR', ),
-        sr_flag=dict(
-            argstr='-SR',
-            position=12,
-        ),
+        spgr=dict(argstr="-SPGR",),
+        sr_flag=dict(argstr="-SR", position=12,),
         syn_file=dict(
-            argstr='-syn %s',
+            argstr="-syn %s",
             extensions=None,
-            name_source=['source_file'],
-            name_template='%s_syn.nii.gz',
+            name_source=["source_file"],
+            name_template="%s_syn.nii.gz",
         ),
-        t1_list=dict(
-            argstr='-T1list %s',
-            extensions=None,
-        ),
+        t1_list=dict(argstr="-T1list %s", extensions=None,),
         t1map_file=dict(
-            argstr='-t1map %s',
+            argstr="-t1map %s",
             extensions=None,
-            name_source=['source_file'],
-            name_template='%s_t1map.nii.gz',
+            name_source=["source_file"],
+            name_template="%s_t1map.nii.gz",
         ),
-        t1max=dict(argstr='-T1max %f', ),
-        t1min=dict(argstr='-T1min %f', ),
-        te_value=dict(
-            argstr='-TE %f',
-            position=4,
-        ),
-        tis=dict(
-            argstr='-TIs %s',
-            position=14,
-            sep=' ',
-        ),
-        tis_list=dict(
-            argstr='-TIlist %s',
-            extensions=None,
-        ),
-        tr_value=dict(
-            argstr='-TR %f',
-            position=5,
-        ),
-        voxel=dict(
-            argstr='-voxel %d %d %d',
-            position=10,
-        ),
+        t1max=dict(argstr="-T1max %f",),
+        t1min=dict(argstr="-T1min %f",),
+        te_value=dict(argstr="-TE %f", position=4,),
+        tis=dict(argstr="-TIs %s", position=14, sep=" ",),
+        tis_list=dict(argstr="-TIlist %s", extensions=None,),
+        tr_value=dict(argstr="-TR %f", position=5,),
+        voxel=dict(argstr="-voxel %d %d %d", position=10,),
     )
     inputs = FitQt1.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
+
+
 def test_FitQt1_outputs():
     output_map = dict(
-        comp_file=dict(extensions=None, ),
-        error_file=dict(extensions=None, ),
-        m0map_file=dict(extensions=None, ),
-        mcmap_file=dict(extensions=None, ),
-        res_file=dict(extensions=None, ),
-        syn_file=dict(extensions=None, ),
-        t1map_file=dict(extensions=None, ),
+        comp_file=dict(extensions=None,),
+        error_file=dict(extensions=None,),
+        m0map_file=dict(extensions=None,),
+        mcmap_file=dict(extensions=None,),
+        res_file=dict(extensions=None,),
+        syn_file=dict(extensions=None,),
+        t1map_file=dict(extensions=None,),
     )
     outputs = FitQt1.output_spec()
 

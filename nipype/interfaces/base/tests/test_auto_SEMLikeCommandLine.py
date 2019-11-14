@@ -4,11 +4,7 @@ from ..core import SEMLikeCommandLine
 
 def test_SEMLikeCommandLine_inputs():
     input_map = dict(
-        args=dict(argstr='%s', ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s",), environ=dict(nohash=True, usedefault=True,),
     )
     inputs = SEMLikeCommandLine.input_spec()
 

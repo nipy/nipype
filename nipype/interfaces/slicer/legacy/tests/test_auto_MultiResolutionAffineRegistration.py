@@ -4,49 +4,30 @@ from ..registration import MultiResolutionAffineRegistration
 
 def test_MultiResolutionAffineRegistration_inputs():
     input_map = dict(
-        args=dict(argstr='%s', ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        fixedImage=dict(
-            argstr='%s',
-            extensions=None,
-            position=-2,
-        ),
-        fixedImageMask=dict(
-            argstr='--fixedImageMask %s',
-            extensions=None,
-        ),
-        fixedImageROI=dict(argstr='--fixedImageROI %s', ),
-        metricTolerance=dict(argstr='--metricTolerance %f', ),
-        movingImage=dict(
-            argstr='%s',
-            extensions=None,
-            position=-1,
-        ),
-        numIterations=dict(argstr='--numIterations %d', ),
-        numLineIterations=dict(argstr='--numLineIterations %d', ),
-        resampledImage=dict(
-            argstr='--resampledImage %s',
-            hash_files=False,
-        ),
-        saveTransform=dict(
-            argstr='--saveTransform %s',
-            hash_files=False,
-        ),
-        stepSize=dict(argstr='--stepSize %f', ),
-        stepTolerance=dict(argstr='--stepTolerance %f', ),
+        args=dict(argstr="%s",),
+        environ=dict(nohash=True, usedefault=True,),
+        fixedImage=dict(argstr="%s", extensions=None, position=-2,),
+        fixedImageMask=dict(argstr="--fixedImageMask %s", extensions=None,),
+        fixedImageROI=dict(argstr="--fixedImageROI %s",),
+        metricTolerance=dict(argstr="--metricTolerance %f",),
+        movingImage=dict(argstr="%s", extensions=None, position=-1,),
+        numIterations=dict(argstr="--numIterations %d",),
+        numLineIterations=dict(argstr="--numLineIterations %d",),
+        resampledImage=dict(argstr="--resampledImage %s", hash_files=False,),
+        saveTransform=dict(argstr="--saveTransform %s", hash_files=False,),
+        stepSize=dict(argstr="--stepSize %f",),
+        stepTolerance=dict(argstr="--stepTolerance %f",),
     )
     inputs = MultiResolutionAffineRegistration.input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
             assert getattr(inputs.traits()[key], metakey) == value
+
+
 def test_MultiResolutionAffineRegistration_outputs():
     output_map = dict(
-        resampledImage=dict(extensions=None, ),
-        saveTransform=dict(extensions=None, ),
+        resampledImage=dict(extensions=None,), saveTransform=dict(extensions=None,),
     )
     outputs = MultiResolutionAffineRegistration.output_spec()
 

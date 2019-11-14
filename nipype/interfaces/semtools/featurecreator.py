@@ -5,22 +5,33 @@ If you spot a bug, please report it on the mailing list and/or change the genera
 
 import os
 
-from ..base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
-                    TraitedSpec, File, Directory, traits, isdefined,
-                    InputMultiPath, OutputMultiPath)
+from ..base import (
+    CommandLine,
+    CommandLineInputSpec,
+    SEMLikeCommandLine,
+    TraitedSpec,
+    File,
+    Directory,
+    traits,
+    isdefined,
+    InputMultiPath,
+    OutputMultiPath,
+)
 
 
 class GenerateCsfClippedFromClassifiedImageInputSpec(CommandLineInputSpec):
     inputCassifiedVolume = File(
         desc="Required: input tissue label image",
         exists=True,
-        argstr="--inputCassifiedVolume %s")
+        argstr="--inputCassifiedVolume %s",
+    )
     outputVolume = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Required: output image",
-        argstr="--outputVolume %s")
+        argstr="--outputVolume %s",
+    )
 
 
 class GenerateCsfClippedFromClassifiedImageOutputSpec(TraitedSpec):
@@ -47,5 +58,5 @@ contributor: This tool was written by Hans J. Johnson.
     input_spec = GenerateCsfClippedFromClassifiedImageInputSpec
     output_spec = GenerateCsfClippedFromClassifiedImageOutputSpec
     _cmd = " GenerateCsfClippedFromClassifiedImage "
-    _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
+    _outputs_filenames = {"outputVolume": "outputVolume.nii"}
     _redirect_x = False

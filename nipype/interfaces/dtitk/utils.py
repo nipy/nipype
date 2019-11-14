@@ -29,25 +29,35 @@ from ...utils.filemanip import fname_presuffix
 from .base import CommandLineDtitk, DTITKRenameMixin
 import os
 
-__docformat__ = 'restructuredtext'
+__docformat__ = "restructuredtext"
 
 
 class TVAdjustVoxSpInputSpec(CommandLineInputSpec):
-    in_file = File(desc="tensor volume to modify", exists=True,
-                   mandatory=True, argstr="-in %s")
-    out_file = File(desc='output path',
-                    argstr="-out %s", name_source='in_file',
-                    name_template='%s_avs', keep_extension=True)
-    target_file = File(desc='target volume to match',
-                       argstr="-target %s",
-                       xor=['voxel_size', 'origin'])
-    voxel_size = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
-                              desc='xyz voxel size (superseded by target)',
-                              argstr="-vsize %g %g %g", xor=['target_file'])
-    origin = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
-                          desc='xyz origin (superseded by target)',
-                          argstr='-origin %g %g %g',
-                          xor=['target_file'])
+    in_file = File(
+        desc="tensor volume to modify", exists=True, mandatory=True, argstr="-in %s"
+    )
+    out_file = File(
+        desc="output path",
+        argstr="-out %s",
+        name_source="in_file",
+        name_template="%s_avs",
+        keep_extension=True,
+    )
+    target_file = File(
+        desc="target volume to match", argstr="-target %s", xor=["voxel_size", "origin"]
+    )
+    voxel_size = traits.Tuple(
+        (traits.Float(), traits.Float(), traits.Float()),
+        desc="xyz voxel size (superseded by target)",
+        argstr="-vsize %g %g %g",
+        xor=["target_file"],
+    )
+    origin = traits.Tuple(
+        (traits.Float(), traits.Float(), traits.Float()),
+        desc="xyz origin (superseded by target)",
+        argstr="-origin %g %g %g",
+        xor=["target_file"],
+    )
 
 
 class TVAdjustVoxSpOutputSpec(TraitedSpec):
@@ -69,26 +79,38 @@ class TVAdjustVoxSp(CommandLineDtitk):
     'TVAdjustVoxelspace -in im1.nii -out im1_avs.nii -target im2.nii'
     >>> node.run() # doctest: +SKIP
     """
+
     input_spec = TVAdjustVoxSpInputSpec
     output_spec = TVAdjustVoxSpOutputSpec
-    _cmd = 'TVAdjustVoxelspace'
+    _cmd = "TVAdjustVoxelspace"
 
 
 class SVAdjustVoxSpInputSpec(CommandLineInputSpec):
-    in_file = File(desc="scalar volume to modify", exists=True,
-                   mandatory=True, argstr="-in %s")
-    out_file = File(desc='output path', argstr="-out %s",
-                    name_source="in_file", name_template='%s_avs',
-                    keep_extension=True)
-    target_file = File(desc='target volume to match',
-                       argstr="-target %s", xor=['voxel_size', 'origin'])
-    voxel_size = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
-                              desc='xyz voxel size (superseded by target)',
-                              argstr="-vsize %g %g %g", xor=['target_file'])
-    origin = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
-                          desc='xyz origin (superseded by target)',
-                          argstr='-origin %g %g %g',
-                          xor=['target_file'])
+    in_file = File(
+        desc="scalar volume to modify", exists=True, mandatory=True, argstr="-in %s"
+    )
+    out_file = File(
+        desc="output path",
+        argstr="-out %s",
+        name_source="in_file",
+        name_template="%s_avs",
+        keep_extension=True,
+    )
+    target_file = File(
+        desc="target volume to match", argstr="-target %s", xor=["voxel_size", "origin"]
+    )
+    voxel_size = traits.Tuple(
+        (traits.Float(), traits.Float(), traits.Float()),
+        desc="xyz voxel size (superseded by target)",
+        argstr="-vsize %g %g %g",
+        xor=["target_file"],
+    )
+    origin = traits.Tuple(
+        (traits.Float(), traits.Float(), traits.Float()),
+        desc="xyz origin (superseded by target)",
+        argstr="-origin %g %g %g",
+        xor=["target_file"],
+    )
 
 
 class SVAdjustVoxSpOutputSpec(TraitedSpec):
@@ -110,33 +132,55 @@ class SVAdjustVoxSp(CommandLineDtitk):
         'SVAdjustVoxelspace -in im1.nii -out im1_avs.nii -target im2.nii'
         >>> node.run() # doctest: +SKIP
         """
+
     input_spec = SVAdjustVoxSpInputSpec
     output_spec = SVAdjustVoxSpOutputSpec
-    _cmd = 'SVAdjustVoxelspace'
+    _cmd = "SVAdjustVoxelspace"
 
 
 class TVResampleInputSpec(CommandLineInputSpec):
-    in_file = File(desc="tensor volume to resample", exists=True,
-                   mandatory=True, argstr="-in %s")
-    out_file = File(desc='output path',
-                    name_source="in_file", name_template="%s_resampled",
-                    keep_extension=True, argstr="-out %s")
-    target_file = File(desc='specs read from the target volume',
-                       argstr="-target %s",
-                       xor=['array_size', 'voxel_size', 'origin'])
-    align = traits.Enum('center', 'origin', argstr="-align %s",
-                        desc='how to align output volume to input volume')
-    interpolation = traits.Enum('LEI', 'EI', argstr="-interp %s",
-                                desc='Log Euclidean Euclidean Interpolation')
-    array_size = traits.Tuple((traits.Int(), traits.Int(), traits.Int()),
-                              desc='resampled array size', xor=['target_file'],
-                              argstr="-size %d %d %d")
-    voxel_size = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
-                              desc='resampled voxel size', xor=['target_file'],
-                              argstr="-vsize %g %g %g")
-    origin = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
-                          desc='xyz origin', xor=['target_file'],
-                          argstr='-origin %g %g %g')
+    in_file = File(
+        desc="tensor volume to resample", exists=True, mandatory=True, argstr="-in %s"
+    )
+    out_file = File(
+        desc="output path",
+        name_source="in_file",
+        name_template="%s_resampled",
+        keep_extension=True,
+        argstr="-out %s",
+    )
+    target_file = File(
+        desc="specs read from the target volume",
+        argstr="-target %s",
+        xor=["array_size", "voxel_size", "origin"],
+    )
+    align = traits.Enum(
+        "center",
+        "origin",
+        argstr="-align %s",
+        desc="how to align output volume to input volume",
+    )
+    interpolation = traits.Enum(
+        "LEI", "EI", argstr="-interp %s", desc="Log Euclidean Euclidean Interpolation"
+    )
+    array_size = traits.Tuple(
+        (traits.Int(), traits.Int(), traits.Int()),
+        desc="resampled array size",
+        xor=["target_file"],
+        argstr="-size %d %d %d",
+    )
+    voxel_size = traits.Tuple(
+        (traits.Float(), traits.Float(), traits.Float()),
+        desc="resampled voxel size",
+        xor=["target_file"],
+        argstr="-vsize %g %g %g",
+    )
+    origin = traits.Tuple(
+        (traits.Float(), traits.Float(), traits.Float()),
+        desc="xyz origin",
+        xor=["target_file"],
+        argstr="-origin %g %g %g",
+    )
 
 
 class TVResampleOutputSpec(TraitedSpec):
@@ -158,31 +202,52 @@ class TVResample(CommandLineDtitk):
         'TVResample -in im1.nii -out im1_resampled.nii -target im2.nii'
         >>> node.run() # doctest: +SKIP
         """
+
     input_spec = TVResampleInputSpec
     output_spec = TVResampleOutputSpec
-    _cmd = 'TVResample'
+    _cmd = "TVResample"
 
 
 class SVResampleInputSpec(CommandLineInputSpec):
-    in_file = File(desc="image to resample", exists=True,
-                   mandatory=True, argstr="-in %s")
-    out_file = File(desc='output path',
-                    name_source="in_file", name_template="%s_resampled",
-                    keep_extension=True, argstr="-out %s")
-    target_file = File(desc='specs read from the target volume',
-                       argstr="-target %s",
-                       xor=['array_size', 'voxel_size', 'origin'])
-    align = traits.Enum('center', 'origin', argstr="-align %s",
-                        desc='how to align output volume to input volume')
-    array_size = traits.Tuple((traits.Int(), traits.Int(), traits.Int()),
-                              desc='resampled array size', xor=['target_file'],
-                              argstr="-size %d %d %d")
-    voxel_size = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
-                              desc='resampled voxel size', xor=['target_file'],
-                              argstr="-vsize %g %g %g")
-    origin = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
-                          desc='xyz origin', xor=['target_file'],
-                          argstr='-origin %g %g %g')
+    in_file = File(
+        desc="image to resample", exists=True, mandatory=True, argstr="-in %s"
+    )
+    out_file = File(
+        desc="output path",
+        name_source="in_file",
+        name_template="%s_resampled",
+        keep_extension=True,
+        argstr="-out %s",
+    )
+    target_file = File(
+        desc="specs read from the target volume",
+        argstr="-target %s",
+        xor=["array_size", "voxel_size", "origin"],
+    )
+    align = traits.Enum(
+        "center",
+        "origin",
+        argstr="-align %s",
+        desc="how to align output volume to input volume",
+    )
+    array_size = traits.Tuple(
+        (traits.Int(), traits.Int(), traits.Int()),
+        desc="resampled array size",
+        xor=["target_file"],
+        argstr="-size %d %d %d",
+    )
+    voxel_size = traits.Tuple(
+        (traits.Float(), traits.Float(), traits.Float()),
+        desc="resampled voxel size",
+        xor=["target_file"],
+        argstr="-vsize %g %g %g",
+    )
+    origin = traits.Tuple(
+        (traits.Float(), traits.Float(), traits.Float()),
+        desc="xyz origin",
+        xor=["target_file"],
+        argstr="-origin %g %g %g",
+    )
 
 
 class SVResampleOutputSpec(TraitedSpec):
@@ -204,17 +269,18 @@ class SVResample(CommandLineDtitk):
         'SVResample -in im1.nii -out im1_resampled.nii -target im2.nii'
         >>> node.run() # doctest: +SKIP
         """
+
     input_spec = SVResampleInputSpec
     output_spec = SVResampleOutputSpec
-    _cmd = 'SVResample'
+    _cmd = "SVResample"
 
 
 class TVtoolInputSpec(CommandLineInputSpec):
-    in_file = File(desc="scalar volume to resample", exists=True,
-                   argstr="-in %s", mandatory=True)
-    '''NOTE: there are a lot more options here; not implementing all of them'''
-    in_flag = traits.Enum('fa', 'tr', 'ad', 'rd', 'pd', 'rgb',
-                          argstr="-%s", desc='')
+    in_file = File(
+        desc="scalar volume to resample", exists=True, argstr="-in %s", mandatory=True
+    )
+    """NOTE: there are a lot more options here; not implementing all of them"""
+    in_flag = traits.Enum("fa", "tr", "ad", "rd", "pd", "rgb", argstr="-%s", desc="")
     out_file = File(argstr="-out %s", genfile=True)
 
 
@@ -237,46 +303,78 @@ class TVtool(CommandLineDtitk):
         'TVtool -in im1.nii -fa -out im1_fa.nii'
         >>> node.run() # doctest: +SKIP
         """
+
     input_spec = TVtoolInputSpec
     output_spec = TVtoolOutputSpec
-    _cmd = 'TVtool'
+    _cmd = "TVtool"
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         out_file = self.inputs.out_file
         if not isdefined(out_file):
-            out_file = self._gen_filename('out_file')
-        outputs['out_file'] = os.path.abspath(out_file)
+            out_file = self._gen_filename("out_file")
+        outputs["out_file"] = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
-        if name != 'out_file':
+        if name != "out_file":
             return
-        return fname_presuffix(os.path.basename(self.inputs.in_file),
-                               suffix='_' + self.inputs.in_flag)
+        return fname_presuffix(
+            os.path.basename(self.inputs.in_file), suffix="_" + self.inputs.in_flag
+        )
 
 
-'''Note: SVTool not implemented at this time'''
+"""Note: SVTool not implemented at this time"""
 
 
 class BinThreshInputSpec(CommandLineInputSpec):
-    in_file = File(desc='Image to threshold/binarize', exists=True,
-                   position=0, argstr="%s", mandatory=True)
-    out_file = File(desc='output path',  position=1, argstr="%s",
-                    keep_extension=True, name_source='in_file',
-                    name_template='%s_thrbin')
-    lower_bound = traits.Float(0.01, usedefault=True,
-                               position=2, argstr="%g", mandatory=True,
-                               desc='lower bound of binarization range')
-    upper_bound = traits.Float(100, usedefault=True,
-                               position=3, argstr="%g", mandatory=True,
-                               desc='upper bound of binarization range')
-    inside_value = traits.Float(1, position=4, argstr="%g", usedefault=True,
-                                mandatory=True, desc='value for voxels in '
-                                'binarization range')
-    outside_value = traits.Float(0, position=5, argstr="%g", usedefault=True,
-                                 mandatory=True, desc='value for voxels'
-                                 'outside of binarization range')
+    in_file = File(
+        desc="Image to threshold/binarize",
+        exists=True,
+        position=0,
+        argstr="%s",
+        mandatory=True,
+    )
+    out_file = File(
+        desc="output path",
+        position=1,
+        argstr="%s",
+        keep_extension=True,
+        name_source="in_file",
+        name_template="%s_thrbin",
+    )
+    lower_bound = traits.Float(
+        0.01,
+        usedefault=True,
+        position=2,
+        argstr="%g",
+        mandatory=True,
+        desc="lower bound of binarization range",
+    )
+    upper_bound = traits.Float(
+        100,
+        usedefault=True,
+        position=3,
+        argstr="%g",
+        mandatory=True,
+        desc="upper bound of binarization range",
+    )
+    inside_value = traits.Float(
+        1,
+        position=4,
+        argstr="%g",
+        usedefault=True,
+        mandatory=True,
+        desc="value for voxels in " "binarization range",
+    )
+    outside_value = traits.Float(
+        0,
+        position=5,
+        argstr="%g",
+        usedefault=True,
+        mandatory=True,
+        desc="value for voxels" "outside of binarization range",
+    )
 
 
 class BinThreshOutputSpec(TraitedSpec):
@@ -304,7 +402,7 @@ class BinThresh(CommandLineDtitk):
 
     input_spec = BinThreshInputSpec
     output_spec = BinThreshOutputSpec
-    _cmd = 'BinaryThresholdImageFilter'
+    _cmd = "BinaryThresholdImageFilter"
 
 
 class BinThreshTask(DTITKRenameMixin, BinThresh):
