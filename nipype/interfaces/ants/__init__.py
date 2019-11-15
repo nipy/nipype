@@ -4,23 +4,44 @@
 """Top-level namespace for ants."""
 
 # Registraiton programs
-from .registration import (ANTS, Registration, RegistrationSynQuick,
-                           CompositeTransformUtil, MeasureImageSimilarity)
+from .registration import (
+    ANTS,
+    Registration,
+    RegistrationSynQuick,
+    CompositeTransformUtil,
+    MeasureImageSimilarity,
+)
 
 # Resampling Programs
-from .resampling import (ApplyTransforms, ApplyTransformsToPoints,
-                         WarpImageMultiTransform,
-                         WarpTimeSeriesImageMultiTransform)
+from .resampling import (
+    ApplyTransforms,
+    ApplyTransformsToPoints,
+    WarpImageMultiTransform,
+    WarpTimeSeriesImageMultiTransform,
+)
 
 # Segmentation Programs
-from .segmentation import (Atropos, LaplacianThickness, N4BiasFieldCorrection,
-                           JointFusion, CorticalThickness, BrainExtraction,
-                           DenoiseImage, AntsJointFusion)
+from .segmentation import (
+    Atropos,
+    LaplacianThickness,
+    N4BiasFieldCorrection,
+    JointFusion,
+    CorticalThickness,
+    BrainExtraction,
+    DenoiseImage,
+    AntsJointFusion,
+)
 
 # Visualization Programs
 from .visualization import ConvertScalarImageToRGB, CreateTiledMosaic
 
 # Utility Programs
-from .utils import (AverageAffineTransform, AverageImages, MultiplyImages,
-                    CreateJacobianDeterminantImage, AffineInitializer,
-                    ComposeMultiTransform, LabelGeometry)
+from .utils import (
+    AverageAffineTransform,
+    AverageImages,
+    MultiplyImages,
+    CreateJacobianDeterminantImage,
+    AffineInitializer,
+    ComposeMultiTransform,
+    LabelGeometry,
+)

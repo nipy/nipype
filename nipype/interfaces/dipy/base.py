@@ -1,17 +1,21 @@
 # -*- coding: utf-8 -*-
 """ Base interfaces for dipy """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 
 import os.path as op
 import inspect
 import numpy as np
 from ... import logging
-from ..base import (traits, File, isdefined, LibraryBaseInterface,
-                    BaseInterfaceInputSpec, TraitedSpec)
+from ..base import (
+    traits,
+    File,
+    isdefined,
+    LibraryBaseInterface,
+    BaseInterfaceInputSpec,
+    TraitedSpec,
+)
 
 # List of workflows to ignore
-SKIP_WORKFLOWS_LIST = ['Workflow', 'CombinedWorkflow']
+SKIP_WORKFLOWS_LIST = ["Workflow", "CombinedWorkflow"]
 
 HAVE_DIPY = True
 
@@ -40,27 +44,30 @@ class DipyBaseInterface(LibraryBaseInterface):
     """
     A base interface for py:mod:`dipy` computations
     """
-    _pkg = 'dipy'
+
+    _pkg = "dipy"
 
 
 class DipyBaseInterfaceInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc=('input diffusion data'))
-    in_bval = File(exists=True, mandatory=True, desc=('input b-values table'))
-    in_bvec = File(exists=True, mandatory=True, desc=('input b-vectors table'))
-    b0_thres = traits.Int(700, usedefault=True, desc=('b0 threshold'))
-    out_prefix = traits.Str(desc=('output prefix for file names'))
+    in_file = File(exists=True, mandatory=True, desc=("input diffusion data"))
+    in_bval = File(exists=True, mandatory=True, desc=("input b-values table"))
+    in_bvec = File(exists=True, mandatory=True, desc=("input b-vectors table"))
+    b0_thres = traits.Int(700, usedefault=True, desc=("b0 threshold"))
+    out_prefix = traits.Str(desc=("output prefix for file names"))
 
 
 class DipyDiffusionInterface(DipyBaseInterface):
     """
     A base interface for py:mod:`dipy` computations
     """
+
     input_spec = DipyBaseInterfaceInputSpec
 
     def _get_gradient_table(self):
         bval = np.loadtxt(self.inputs.in_bval)
         bvec = np.loadtxt(self.inputs.in_bvec).T
         from dipy.core.gradients import gradient_table
+
         gtab = gradient_table(bval, bvec)
 
         gtab.b0_threshold = self.inputs.b0_thres
@@ -68,7 +75,7 @@ class DipyDiffusionInterface(DipyBaseInterface):
 
     def _gen_filename(self, name, ext=None):
         fname, fext = op.splitext(op.basename(self.inputs.in_file))
-        if fext == '.gz':
+        if fext == ".gz":
             fname, fext2 = op.splitext(fname)
             fext = fext2 + fext
 
@@ -80,7 +87,7 @@ class DipyDiffusionInterface(DipyBaseInterface):
         if ext is None:
             ext = fext
 
-        return out_prefix + '_' + name + ext
+        return out_prefix + "_" + name + ext
 
 
 def convert_to_traits_type(dipy_type, is_file=False):
@@ -110,8 +117,10 @@ def convert_to_traits_type(dipy_type, is_file=False):
     elif "complex" in dipy_type:
         return traits.Complex, is_mandatory
     else:
-        msg = "Error during convert_to_traits_type({0}).".format(dipy_type) + \
-              "Unknown DIPY type."
+        msg = (
+            "Error during convert_to_traits_type({0}).".format(dipy_type)
+            + "Unknown DIPY type."
+        )
         raise IOError(msg)
 
 
@@ -138,22 +147,21 @@ def create_interface_specs(class_name, params=None, BaseClass=TraitedSpec):
         for p in params:
             name, dipy_type, desc = p[0], p[1], p[2]
             is_file = bool("files" in name or "out_" in name)
-            traits_type, is_mandatory = convert_to_traits_type(dipy_type,
-                                                               is_file)
+            traits_type, is_mandatory = convert_to_traits_type(dipy_type, is_file)
             # print(name, dipy_type, desc, is_file, traits_type, is_mandatory)
             if BaseClass.__name__ == BaseInterfaceInputSpec.__name__:
                 if len(p) > 3:
-                    attr[name] = traits_type(p[3], desc=desc[-1],
-                                             usedefault=True,
-                                             mandatory=is_mandatory)
+                    attr[name] = traits_type(
+                        p[3], desc=desc[-1], usedefault=True, mandatory=is_mandatory
+                    )
                 else:
-                    attr[name] = traits_type(desc=desc[-1],
-                                             mandatory=is_mandatory)
+                    attr[name] = traits_type(desc=desc[-1], mandatory=is_mandatory)
             else:
-                attr[name] = traits_type(p[3], desc=desc[-1], exists=True,
-                                         usedefault=True,)
+                attr[name] = traits_type(
+                    p[3], desc=desc[-1], exists=True, usedefault=True,
+                )
 
-    newclass = type(str(class_name), (BaseClass, ), attr)
+    newclass = type(str(class_name), (BaseClass,), attr)
     return newclass
 
 
@@ -182,19 +190,26 @@ def dipy_to_nipype_interface(cls_name, dipy_flow, BaseClass=DipyBaseInterface):
     flow = dipy_flow()
     parser.add_workflow(flow)
     default_values = inspect.getargspec(flow.run).defaults
-    optional_params = [args + (val,) for args, val in zip(parser.optional_parameters, default_values)]
+    optional_params = [
+        args + (val,) for args, val in zip(parser.optional_parameters, default_values)
+    ]
     start = len(parser.optional_parameters) - len(parser.output_parameters)
 
-    output_parameters = [args + (val,) for args, val in zip(parser.output_parameters, default_values[start:])]
+    output_parameters = [
+        args + (val,)
+        for args, val in zip(parser.output_parameters, default_values[start:])
+    ]
     input_parameters = parser.positional_parameters + optional_params
 
-    input_spec = create_interface_specs("{}InputSpec".format(cls_name),
-                                        input_parameters,
-                                        BaseClass=BaseInterfaceInputSpec)
+    input_spec = create_interface_specs(
+        "{}InputSpec".format(cls_name),
+        input_parameters,
+        BaseClass=BaseInterfaceInputSpec,
+    )
 
-    output_spec = create_interface_specs("{}OutputSpec".format(cls_name),
-                                         output_parameters,
-                                         BaseClass=TraitedSpec)
+    output_spec = create_interface_specs(
+        "{}OutputSpec".format(cls_name), output_parameters, BaseClass=TraitedSpec
+    )
 
     def _run_interface(self, runtime):
         flow = dipy_flow()
@@ -209,11 +224,16 @@ def dipy_to_nipype_interface(cls_name, dipy_flow, BaseClass=DipyBaseInterface):
 
         return outputs
 
-    newclass = type(str(cls_name), (BaseClass, ),
-                    {"input_spec": input_spec,
-                     "output_spec": output_spec,
-                     "_run_interface": _run_interface,
-                     "_list_outputs:": _list_outputs})
+    newclass = type(
+        str(cls_name),
+        (BaseClass,),
+        {
+            "input_spec": input_spec,
+            "output_spec": output_spec,
+            "_run_interface": _run_interface,
+            "_list_outputs:": _list_outputs,
+        },
+    )
     return newclass
 
 
@@ -237,7 +257,10 @@ def get_dipy_workflows(module):
     >>> get_dipy_workflows(align)  # doctest: +SKIP
 
     """
-    return [(m, obj) for m, obj in inspect.getmembers(module)
-            if inspect.isclass(obj) and
-            issubclass(obj, module.Workflow) and
-            m not in SKIP_WORKFLOWS_LIST]
+    return [
+        (m, obj)
+        for m, obj in inspect.getmembers(module)
+        if inspect.isclass(obj)
+        and issubclass(obj, module.Workflow)
+        and m not in SKIP_WORKFLOWS_LIST
+    ]

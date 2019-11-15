@@ -26,7 +26,8 @@ def test_CreateNifti(create_analyze_pair_file_in_directory):
     # .inputs based parameters setting
     create_nifti.inputs.header_file = filelist[0]
     create_nifti.inputs.data_file = fname_presuffix(
-        filelist[0], '', '.img', use_ext=False)
+        filelist[0], "", ".img", use_ext=False
+    )
 
     result = create_nifti.run()
 
@@ -41,7 +42,7 @@ def test_CalculateMedian(create_analyze_pair_file_in_directory):
     with pytest.raises(TypeError):
         mean.run()
 
-    mean.inputs.in_files = example_data('ds003_sub-01_mc.nii.gz')
+    mean.inputs.in_files = example_data("ds003_sub-01_mc.nii.gz")
     eg = mean.run()
 
     assert os.path.exists(eg.outputs.median_files)

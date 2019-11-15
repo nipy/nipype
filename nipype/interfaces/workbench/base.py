@@ -10,8 +10,6 @@ The workbench module provides classes for interfacing with `connectome workbench
  Human Connectome Project.
 """
 
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 import os
 import re
 
@@ -19,7 +17,7 @@ from ... import logging
 from ...utils.filemanip import split_filename
 from ..base import CommandLine, PackageInfo
 
-iflogger = logging.getLogger('nipype.interface')
+iflogger = logging.getLogger("nipype.interface")
 
 
 class Info(PackageInfo):
@@ -27,11 +25,11 @@ class Info(PackageInfo):
     Handle `wb_command` version information.
     """
 
-    version_cmd = 'wb_command -version'
+    version_cmd = "wb_command -version"
 
     @staticmethod
     def parse_version(raw_info):
-        m = re.search(r'\nVersion (\S+)', raw_info)
+        m = re.search(r"\nVersion (\S+)", raw_info)
         return m.groups()[0] if m else None
 
 
@@ -42,7 +40,7 @@ class WBCommand(CommandLine):
     def version(self):
         return Info.version()
 
-    def _gen_filename(self, name, outdir=None, suffix='', ext=None):
+    def _gen_filename(self, name, outdir=None, suffix="", ext=None):
         """Generate a filename based on the given parameters.
         The filename will take the form: <basename><suffix><ext>.
         Parameters
@@ -65,5 +63,5 @@ class WBCommand(CommandLine):
         if ext is None:
             ext = fext
         if outdir is None:
-            outdir = '.'
+            outdir = "."
         return os.path.join(outdir, fname + suffix + ext)

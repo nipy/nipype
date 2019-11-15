@@ -3,14 +3,18 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provides interfaces to various commands provided by diffusion toolkit
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 
 import os
-from ..base import (TraitedSpec, File, traits, CommandLine, InputMultiPath,
-                    CommandLineInputSpec)
+from ..base import (
+    TraitedSpec,
+    File,
+    traits,
+    CommandLine,
+    InputMultiPath,
+    CommandLineInputSpec,
+)
 
-__docformat__ = 'restructuredtext'
+__docformat__ = "restructuredtext"
 
 
 class SplineFilterInputSpec(CommandLineInputSpec):
@@ -19,18 +23,21 @@ class SplineFilterInputSpec(CommandLineInputSpec):
         desc="file containing tracks to be filtered",
         position=0,
         argstr="%s",
-        mandatory=True)
+        mandatory=True,
+    )
     step_length = traits.Float(
         desc="in the unit of minimum voxel size",
         position=1,
         argstr="%f",
-        mandatory=True)
+        mandatory=True,
+    )
     output_file = File(
         "spline_tracks.trk",
         desc="target file for smoothed tracks",
         position=2,
         argstr="%s",
-        usedefault=True)
+        usedefault=True,
+    )
 
 
 class SplineFilterOutputSpec(TraitedSpec):
@@ -55,6 +62,7 @@ class SplineFilter(CommandLine):
     >>> filt.inputs.step_length = 0.5
     >>> filt.run()                                 # doctest: +SKIP
     """
+
     input_spec = SplineFilterInputSpec
     output_spec = SplineFilterOutputSpec
 
@@ -62,8 +70,7 @@ class SplineFilter(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['smoothed_track_file'] = os.path.abspath(
-            self.inputs.output_file)
+        outputs["smoothed_track_file"] = os.path.abspath(self.inputs.output_file)
         return outputs
 
 
@@ -73,13 +80,15 @@ class TrackMergeInputSpec(CommandLineInputSpec):
         desc="file containing tracks to be filtered",
         position=0,
         argstr="%s...",
-        mandatory=True)
+        mandatory=True,
+    )
     output_file = File(
         "merged_tracks.trk",
         desc="target file for merged tracks",
         position=-1,
         argstr="%s",
-        usedefault=True)
+        usedefault=True,
+    )
 
 
 class TrackMergeOutputSpec(TraitedSpec):
@@ -106,6 +115,7 @@ class TrackMerge(CommandLine):
     >>> mrg.inputs.track_files = ['track1.trk','track2.trk']
     >>> mrg.run()                                 # doctest: +SKIP
     """
+
     input_spec = TrackMergeInputSpec
     output_spec = TrackMergeOutputSpec
 
@@ -113,5 +123,5 @@ class TrackMerge(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['track_file'] = os.path.abspath(self.inputs.output_file)
+        outputs["track_file"] = os.path.abspath(self.inputs.output_file)
         return outputs

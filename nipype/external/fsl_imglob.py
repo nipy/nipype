@@ -63,7 +63,6 @@
 #   Innovation Limited ("Isis"), the technology transfer company of the
 #   University, to negotiate a licence. Contact details are:
 #   innovation@isis.ox.ac.uk quoting reference DE/9564.
-from __future__ import print_function
 import sys
 import glob
 from builtins import range
@@ -80,9 +79,9 @@ def usage():
 # basename and extension pair )
 def isImage(input, allExtensions):
     for extension in allExtensions:
-        if input[-len(extension):] == extension:
-            return True, input[:-len(extension)], extension
-    return False, input, ''
+        if input[-len(extension) :] == extension:
+            return True, input[: -len(extension)], extension
+    return False, input, ""
 
 
 def removeImageExtension(input, allExtensions):
@@ -96,13 +95,14 @@ def main():
     if sys.version_info < (2, 4):
         import sets
         from sets import Set
+
         setAvailable = False
     else:
         setAvailable = True
 
     deleteExtensions = True
-    primaryExtensions = ['.nii.gz', '.nii', '.hdr.gz', '.hdr']
-    secondaryExtensions = ['.img.gz', '.img']
+    primaryExtensions = [".nii.gz", ".nii", ".hdr.gz", ".hdr"]
+    secondaryExtensions = [".img.gz", ".img"]
     allExtensions = primaryExtensions + secondaryExtensions
     validExtensions = primaryExtensions
     startingArg = 1
@@ -126,13 +126,14 @@ def main():
         for currentExtension in validExtensions:
             filelist.extend(
                 glob.glob(
-                    removeImageExtension(sys.argv[arg], allExtensions) +
-                    currentExtension))
+                    removeImageExtension(sys.argv[arg], allExtensions)
+                    + currentExtension
+                )
+            )
 
     if deleteExtensions:
         for file in range(0, len(filelist)):
-            filelist[file] = removeImageExtension(filelist[file],
-                                                  allExtensions)
+            filelist[file] = removeImageExtension(filelist[file], allExtensions)
     if setAvailable:
         filelist = list(set(filelist))
     else:
@@ -140,9 +141,9 @@ def main():
     filelist.sort()
 
     for file in range(0, len(filelist)):
-        print(filelist[file], end=' ')
+        print(filelist[file], end=" ")
         if file < len(filelist) - 1:
-            print(" ", end=' ')
+            print(" ", end=" ")
 
 
 if __name__ == "__main__":

@@ -9,20 +9,15 @@ Base I/O specifications for Nipype interfaces
 Define the API for the I/O of interfaces
 
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
 import os
 from inspect import isclass
 from copy import deepcopy
 from warnings import warn
-from builtins import str, bytes
 from packaging.version import Version
 
 from traits.trait_errors import TraitError
 from traits.trait_handlers import TraitDictObject, TraitListObject
-from ...utils.filemanip import (
-    md5, hash_infile, hash_timestamp, to_str, USING_PATHLIB2)
+from ...utils.filemanip import md5, hash_infile, hash_timestamp
 from .traits_extension import (
     traits,
     File,
@@ -36,7 +31,7 @@ from .traits_extension import (
 from ... import config, __version__
 
 
-FLOAT_FORMAT = '{:.10f}'.format
+FLOAT_FORMAT = "{:.10f}".format
 nipype_version = Version(__version__)
 
 
@@ -60,6 +55,7 @@ class BaseTraitedSpec(traits.HasTraits):
     XXX Reconsider this in the long run, but it seems like the best
     solution to move forward on the refactoring.
     """
+
     package_version = nipype_version
 
     def __init__(self, **kwargs):
@@ -88,8 +84,8 @@ class BaseTraitedSpec(traits.HasTraits):
         """ Return a well-formatted representation of the traits """
         outstr = []
         for name, value in sorted(self.trait_get().items()):
-            outstr.append('%s = %s' % (name, value))
-        return '\n{}\n'.format('\n'.join(outstr))
+            outstr.append("%s = %s" % (name, value))
+        return "\n{}\n".format("\n".join(outstr))
 
     def _generate_handlers(self):
         """Find all traits with the 'xor' metadata and attach an event
@@ -116,11 +112,12 @@ class BaseTraitedSpec(traits.HasTraits):
                     continue
                 if isdefined(getattr(self, trait_name)):
                     self.trait_set(
-                        trait_change_notify=False, **{
-                            '%s' % name: Undefined
-                        })
-                    msg = ('Input "%s" is mutually exclusive with input "%s", '
-                           'which is already set') % (name, trait_name)
+                        trait_change_notify=False, **{"%s" % name: Undefined}
+                    )
+                    msg = (
+                        'Input "%s" is mutually exclusive with input "%s", '
+                        "which is already set"
+                    ) % (name, trait_name)
                     raise IOError(msg)
 
     def _deprecated_warn(self, obj, name, old, new):
@@ -128,32 +125,37 @@ class BaseTraitedSpec(traits.HasTraits):
         """
         if isdefined(new):
             trait_spec = self.traits()[name]
-            msg1 = ('Input %s in interface %s is deprecated.' %
-                    (name, self.__class__.__name__.split('InputSpec')[0]))
-            msg2 = ('Will be removed or raise an error as of release %s' %
-                    trait_spec.deprecated)
+            msg1 = "Input %s in interface %s is deprecated." % (
+                name,
+                self.__class__.__name__.split("InputSpec")[0],
+            )
+            msg2 = (
+                "Will be removed or raise an error as of release %s"
+                % trait_spec.deprecated
+            )
             if trait_spec.new_name:
                 if trait_spec.new_name not in self.copyable_trait_names():
-                    raise TraitError(msg1 + ' Replacement trait %s not found' %
-                                     trait_spec.new_name)
-                msg3 = 'It has been replaced by %s.' % trait_spec.new_name
+                    raise TraitError(
+                        msg1 + " Replacement trait %s not found" % trait_spec.new_name
+                    )
+                msg3 = "It has been replaced by %s." % trait_spec.new_name
             else:
-                msg3 = ''
-            msg = ' '.join((msg1, msg2, msg3))
+                msg3 = ""
+            msg = " ".join((msg1, msg2, msg3))
             if Version(str(trait_spec.deprecated)) < self.package_version:
                 raise TraitError(msg)
             else:
                 if trait_spec.new_name:
-                    msg += 'Unsetting old value %s; setting new value %s.' % (
-                        name, trait_spec.new_name)
+                    msg += "Unsetting old value %s; setting new value %s." % (
+                        name,
+                        trait_spec.new_name,
+                    )
                 warn(msg)
                 if trait_spec.new_name:
                     self.trait_set(
                         trait_change_notify=False,
-                        **{
-                            '%s' % name: Undefined,
-                            '%s' % trait_spec.new_name: new
-                        })
+                        **{"%s" % name: Undefined, "%s" % trait_spec.new_name: new}
+                    )
 
     def trait_get(self, **kwargs):
         """ Returns traited class as a dict
@@ -189,8 +191,11 @@ class BaseTraitedSpec(traits.HasTraits):
                 else:
                     if not skipundefined:
                         out[key] = undefinedval
-        elif (isinstance(objekt, TraitListObject) or isinstance(objekt, list) or
-              isinstance(objekt, tuple)):
+        elif (
+            isinstance(objekt, TraitListObject)
+            or isinstance(objekt, list)
+            or isinstance(objekt, tuple)
+        ):
             out = []
             for val in objekt:
                 if isdefined(val):
@@ -216,8 +221,7 @@ class BaseTraitedSpec(traits.HasTraits):
         Return has_metadata for the requested trait name in this
         interface
         """
-        return has_metadata(
-            self.trait(name).trait_type, metadata, value, recursive)
+        return has_metadata(self.trait(name).trait_type, metadata, value, recursive)
 
     def get_hashval(self, hash_method=None):
         """Return a dictionary of our items with hashes for each file.
@@ -246,36 +250,45 @@ class BaseTraitedSpec(traits.HasTraits):
                 # skip undefined traits and traits with nohash=True
                 continue
 
-            hash_files = (not self.has_metadata(name, "hash_files", False) and
-                          not self.has_metadata(name, "name_source"))
-            list_nofilename.append((name,
-                                    self._get_sorteddict(
-                                        val,
-                                        hash_method=hash_method,
-                                        hash_files=hash_files)))
-            list_withhash.append((name,
-                                  self._get_sorteddict(
-                                      val,
-                                      True,
-                                      hash_method=hash_method,
-                                      hash_files=hash_files)))
-        return list_withhash, md5(to_str(list_nofilename).encode()).hexdigest()
+            hash_files = not self.has_metadata(
+                name, "hash_files", False
+            ) and not self.has_metadata(name, "name_source")
+            list_nofilename.append(
+                (
+                    name,
+                    self._get_sorteddict(
+                        val, hash_method=hash_method, hash_files=hash_files
+                    ),
+                )
+            )
+            list_withhash.append(
+                (
+                    name,
+                    self._get_sorteddict(
+                        val, True, hash_method=hash_method, hash_files=hash_files
+                    ),
+                )
+            )
+        return list_withhash, md5(str(list_nofilename).encode()).hexdigest()
 
-    def _get_sorteddict(self,
-                        objekt,
-                        dictwithhash=False,
-                        hash_method=None,
-                        hash_files=True):
+    def _get_sorteddict(
+        self, objekt, dictwithhash=False, hash_method=None, hash_files=True
+    ):
         if isinstance(objekt, dict):
             out = []
             for key, val in sorted(objekt.items()):
                 if isdefined(val):
-                    out.append((key,
-                                self._get_sorteddict(
-                                    val,
-                                    dictwithhash,
-                                    hash_method=hash_method,
-                                    hash_files=hash_files)))
+                    out.append(
+                        (
+                            key,
+                            self._get_sorteddict(
+                                val,
+                                dictwithhash,
+                                hash_method=hash_method,
+                                hash_files=hash_files,
+                            ),
+                        )
+                    )
         elif isinstance(objekt, (list, tuple)):
             out = []
             for val in objekt:
@@ -285,24 +298,28 @@ class BaseTraitedSpec(traits.HasTraits):
                             val,
                             dictwithhash,
                             hash_method=hash_method,
-                            hash_files=hash_files))
+                            hash_files=hash_files,
+                        )
+                    )
             if isinstance(objekt, tuple):
                 out = tuple(out)
         else:
             out = None
             if isdefined(objekt):
-                if (hash_files and isinstance(objekt, (str, bytes)) and
-                        os.path.isfile(objekt)):
+                if (
+                    hash_files
+                    and isinstance(objekt, (str, bytes))
+                    and os.path.isfile(objekt)
+                ):
                     if hash_method is None:
-                        hash_method = config.get('execution', 'hash_method')
+                        hash_method = config.get("execution", "hash_method")
 
-                    if hash_method.lower() == 'timestamp':
+                    if hash_method.lower() == "timestamp":
                         hash = hash_timestamp(objekt)
-                    elif hash_method.lower() == 'content':
+                    elif hash_method.lower() == "content":
                         hash = hash_infile(objekt)
                     else:
-                        raise Exception(
-                            "Unknown hash method: %s" % hash_method)
+                        raise Exception("Unknown hash method: %s" % hash_method)
                     if dictwithhash:
                         out = (objekt, hash)
                     else:
@@ -344,44 +361,12 @@ class BaseTraitedSpec(traits.HasTraits):
         return state
 
 
-def _deepcopypatch(self, memo):
-    """
-    Replace the ``__deepcopy__`` member with a traits-friendly implementation.
-
-    A bug in ``__deepcopy__`` for ``HasTraits`` results in weird cloning behaviors.
-    Occurs for all specs in Python<3 and only for DynamicTraitedSpec in Python>2.
-
-    """
-    id_self = id(self)
-    if id_self in memo:
-        return memo[id_self]
-    dup_dict = deepcopy(self.trait_get(), memo)
-    # access all keys
-    for key in self.copyable_trait_names():
-        if key in self.__dict__.keys():
-            _ = getattr(self, key)
-    # clone once
-    dup = self.clone_traits(memo=memo)
-    for key in self.copyable_trait_names():
-        try:
-            _ = getattr(dup, key)
-        except:
-            pass
-    # clone twice
-    dup = self.clone_traits(memo=memo)
-    dup.trait_set(**dup_dict)
-    return dup
-
-
-if USING_PATHLIB2:
-    BaseTraitedSpec.__deepcopy__ = _deepcopypatch
-
-
 class TraitedSpec(BaseTraitedSpec):
     """ Create a subclass with strict traits.
 
     This is used in 90% of the cases.
     """
+
     _ = traits.Disallow
 
 
@@ -396,15 +381,38 @@ class DynamicTraitedSpec(BaseTraitedSpec):
     functioning well together.
     """
 
+    def __deepcopy__(self, memo):
+        """
+        Replace the ``__deepcopy__`` member with a traits-friendly implementation.
 
-if not USING_PATHLIB2:
-    DynamicTraitedSpec.__deepcopy__ = _deepcopypatch
+        A bug in ``__deepcopy__`` for ``HasTraits`` results in weird cloning behaviors.
+        """
+        id_self = id(self)
+        if id_self in memo:
+            return memo[id_self]
+        dup_dict = deepcopy(self.trait_get(), memo)
+        # access all keys
+        for key in self.copyable_trait_names():
+            if key in self.__dict__.keys():
+                _ = getattr(self, key)
+        # clone once
+        dup = self.clone_traits(memo=memo)
+        for key in self.copyable_trait_names():
+            try:
+                _ = getattr(dup, key)
+            except:
+                pass
+        # clone twice
+        dup = self.clone_traits(memo=memo)
+        dup.trait_set(**dup_dict)
+        return dup
 
 
 class CommandLineInputSpec(BaseInterfaceInputSpec):
-    args = Str(argstr='%s', desc='Additional parameters to the command')
+    args = Str(argstr="%s", desc="Additional parameters to the command")
     environ = traits.DictStrStr(
-        desc='Environment variables', usedefault=True, nohash=True)
+        desc="Environment variables", usedefault=True, nohash=True
+    )
 
 
 class StdOutCommandLineInputSpec(CommandLineInputSpec):
@@ -413,12 +421,13 @@ class StdOutCommandLineInputSpec(CommandLineInputSpec):
 
 class MpiCommandLineInputSpec(CommandLineInputSpec):
     use_mpi = traits.Bool(
-        False,
-        desc="Whether or not to run the command with mpiexec",
-        usedefault=True)
-    n_procs = traits.Int(desc="Num processors to specify to mpiexec. Do not "
-                         "specify if this is managed externally (e.g. through "
-                         "SGE)")
+        False, desc="Whether or not to run the command with mpiexec", usedefault=True
+    )
+    n_procs = traits.Int(
+        desc="Num processors to specify to mpiexec. Do not "
+        "specify if this is managed externally (e.g. through "
+        "SGE)"
+    )
 
 
 def get_filecopy_info(cls):
@@ -429,7 +438,7 @@ def get_filecopy_info(cls):
         return None
 
     # normalize_filenames is not a classmethod, hence check first
-    if not isclass(cls) and hasattr(cls, 'normalize_filenames'):
+    if not isclass(cls) and hasattr(cls, "normalize_filenames"):
         cls.normalize_filenames()
     info = []
     inputs = cls.input_spec() if isclass(cls) else cls.inputs

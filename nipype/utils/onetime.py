@@ -17,10 +17,6 @@ Hettinger. http://users.rcn.com/python/download/Descriptor.htm
 
 [2] Python data model, http://docs.python.org/reference/datamodel.html
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
-from builtins import object
 
 
 class OneTimeProperty(object):

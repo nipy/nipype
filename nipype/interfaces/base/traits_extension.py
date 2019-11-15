@@ -19,10 +19,6 @@ all of these bugs and they've been fixed in enthought svn repository
 (usually by Robert Kern).
 
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
-from builtins import str, bytes
 from collections import Sequence
 
 # perform all external trait imports here
@@ -32,29 +28,23 @@ from traits.trait_handlers import TraitType, NoDefaultSpecified
 from traits.trait_base import _Undefined
 
 from traits.api import Unicode
-from future import standard_library
-from ...utils.filemanip import Path, USING_PATHLIB2, path_resolve
+from pathlib import Path
+from ...utils.filemanip import path_resolve
 
-if USING_PATHLIB2:
-    from future.types.newstr import newstr
-
-
-if traits_version < '3.7.0':
-    raise ImportError('Traits version 3.7.0 or higher must be installed')
-
-standard_library.install_aliases()
+if traits_version < "3.7.0":
+    raise ImportError("Traits version 3.7.0 or higher must be installed")
 
 IMG_FORMATS = {
-    'afni': ('.HEAD', '.BRIK'),
-    'cifti2': ('.nii', '.nii.gz'),
-    'dicom': ('.dcm', '.IMA', '.tar', '.tar.gz'),
-    'gifti': ('.gii', '.gii.gz'),
-    'mgh': ('.mgh', '.mgz', '.mgh.gz'),
-    'nifti1': ('.nii', '.nii.gz', '.hdr', '.img', '.img.gz'),
-    'nifti2': ('.nii', '.nii.gz'),
-    'nrrd': ('.nrrd', '.nhdr'),
+    "afni": (".HEAD", ".BRIK"),
+    "cifti2": (".nii", ".nii.gz"),
+    "dicom": (".dcm", ".IMA", ".tar", ".tar.gz"),
+    "gifti": (".gii", ".gii.gz"),
+    "mgh": (".mgh", ".mgz", ".mgh.gz"),
+    "nifti1": (".nii", ".nii.gz", ".hdr", ".img", ".img.gz"),
+    "nifti2": (".nii", ".nii.gz"),
+    "nrrd": (".nrrd", ".nhdr"),
 }
-IMG_ZIP_FMT = set(['.nii.gz', 'tar.gz', '.gii.gz', '.mgz', '.mgh.gz', 'img.gz'])
+IMG_ZIP_FMT = set([".nii.gz", "tar.gz", ".gii.gz", ".mgz", ".mgh.gz", "img.gz"])
 
 """
 The functions that pop-up the Traits GUIs, edit_traits and
@@ -108,17 +98,17 @@ class BasePath(TraitType):
     @property
     def info_text(self):
         """Create the trait's general description."""
-        info_text = 'a pathlike object or string'
+        info_text = "a pathlike object or string"
         if any((self.exists, self._is_file, self._is_dir)):
-            info_text += ' representing a'
+            info_text += " representing a"
             if self.exists:
-                info_text += 'n existing'
+                info_text += "n existing"
             if self._is_file:
-                info_text += ' file'
+                info_text += " file"
             elif self._is_dir:
-                info_text += ' directory'
+                info_text += " directory"
             else:
-                info_text += ' file or directory'
+                info_text += " file or directory"
         return info_text
 
     def __init__(self, value=Undefined, exists=False, resolve=False, **metadata):
@@ -130,8 +120,6 @@ class BasePath(TraitType):
     def validate(self, objekt, name, value, return_pathlike=False):
         """Validate a value change."""
         try:
-            if USING_PATHLIB2 and isinstance(value, newstr):
-                value = '%s' % value  # pathlib2 doesn't like newstr
             value = Path(value)  # Use pathlib's validation
         except Exception:
             self.error(objekt, name, str(value))
@@ -153,6 +141,7 @@ class BasePath(TraitType):
             value = str(value)
 
         return value
+
 
 class Directory(BasePath):
     """
@@ -296,8 +285,15 @@ class File(BasePath):
     _is_file = True
     _exts = None
 
-    def __init__(self, value=NoDefaultSpecified, exists=False, resolve=False,
-                 allow_compressed=True, extensions=None, **metadata):
+    def __init__(
+        self,
+        value=NoDefaultSpecified,
+        exists=False,
+        resolve=False,
+        allow_compressed=True,
+        extensions=None,
+        **metadata
+    ):
         """Create a File trait."""
         if extensions is not None:
             if isinstance(extensions, (bytes, str)):
@@ -306,11 +302,22 @@ class File(BasePath):
             if allow_compressed is False:
                 extensions = list(set(extensions) - IMG_ZIP_FMT)
 
-            self._exts = sorted(set(['.%s' % ext if not ext.startswith('.') else ext
-                                     for ext in extensions]))
+            self._exts = sorted(
+                set(
+                    [
+                        ".%s" % ext if not ext.startswith(".") else ext
+                        for ext in extensions
+                    ]
+                )
+            )
 
-        super(File, self).__init__(value=value, exists=exists, resolve=resolve,
-                                   extensions=self._exts, **metadata)
+        super(File, self).__init__(
+            value=value,
+            exists=exists,
+            resolve=resolve,
+            extensions=self._exts,
+            **metadata
+        )
 
     def validate(self, objekt, name, value, return_pathlike=False):
         """Validate a value change."""
@@ -329,8 +336,14 @@ class File(BasePath):
 class ImageFile(File):
     """Defines a trait whose value must be a known neuroimaging file."""
 
-    def __init__(self, value=NoDefaultSpecified, exists=False,
-                 resolve=False, types=None, **metadata):
+    def __init__(
+        self,
+        value=NoDefaultSpecified,
+        exists=False,
+        resolve=False,
+        types=None,
+        **metadata
+    ):
         """Create an ImageFile trait."""
         extensions = None
         if types is not None:
@@ -339,14 +352,21 @@ class ImageFile(File):
 
             if set(types) - set(IMG_FORMATS.keys()):
                 invalid = set(types) - set(IMG_FORMATS.keys())
-                raise ValueError("""\
+                raise ValueError(
+                    """\
 Unknown value(s) %s for metadata type of an ImageFile input.\
-""" % ', '.join(['"%s"' % t for t in invalid]))
+"""
+                    % ", ".join(['"%s"' % t for t in invalid])
+                )
             extensions = [ext for t in types for ext in IMG_FORMATS[t]]
 
         super(ImageFile, self).__init__(
-            value=value, exists=exists, extensions=extensions,
-            resolve=resolve, **metadata)
+            value=value,
+            exists=exists,
+            extensions=extensions,
+            resolve=resolve,
+            **metadata
+        )
 
 
 def isdefined(objekt):
@@ -354,20 +374,21 @@ def isdefined(objekt):
 
 
 def has_metadata(trait, metadata, value=None, recursive=True):
-    '''
+    """
     Checks if a given trait has a metadata (and optionally if it is set to particular value)
-    '''
+    """
     count = 0
-    if hasattr(trait, "_metadata") and metadata in list(
-            trait._metadata.keys()) and (trait._metadata[metadata] == value
-                                         or value is None):
+    if (
+        hasattr(trait, "_metadata")
+        and metadata in list(trait._metadata.keys())
+        and (trait._metadata[metadata] == value or value is None)
+    ):
         count += 1
     if recursive:
-        if hasattr(trait, 'inner_traits'):
+        if hasattr(trait, "inner_traits"):
             for inner_trait in trait.inner_traits():
-                count += has_metadata(inner_trait.trait_type, metadata,
-                                      recursive)
-        if hasattr(trait, 'handlers') and trait.handlers is not None:
+                count += has_metadata(inner_trait.trait_type, metadata, recursive)
+        if hasattr(trait, "handlers") and trait.handlers is not None:
             for handler in trait.handlers:
                 count += has_metadata(handler, metadata, recursive)
 
@@ -381,21 +402,20 @@ class MultiObject(traits.List):
     def validate(self, objekt, name, value):
 
         # want to treat range and other sequences (except str) as list
-        if not isinstance(value, (str, bytes)) and isinstance(
-                value, Sequence):
+        if not isinstance(value, (str, bytes)) and isinstance(value, Sequence):
             value = list(value)
 
-        if not isdefined(value) or \
-                (isinstance(value, list) and len(value) == 0):
+        if not isdefined(value) or (isinstance(value, list) and len(value) == 0):
             return Undefined
 
         newvalue = value
 
         inner_trait = self.inner_traits()[0]
-        if not isinstance(value, list) \
-            or (isinstance(inner_trait.trait_type, traits.List) and
-                not isinstance(inner_trait.trait_type, InputMultiObject) and
-                not isinstance(value[0], list)):
+        if not isinstance(value, list) or (
+            isinstance(inner_trait.trait_type, traits.List)
+            and not isinstance(inner_trait.trait_type, InputMultiObject)
+            and not isinstance(value[0], list)
+        ):
             newvalue = [value]
         value = super(MultiObject, self).validate(objekt, name, newvalue)
 
@@ -482,6 +502,7 @@ class InputMultiObject(MultiObject):
     ['/software/temp/foo.txt', '/software/temp/goo.txt']
 
     """
+
     pass
 
 
@@ -524,23 +545,34 @@ def _recurse_on_path_traits(func, thistrait, value, cwd):
     if thistrait.is_trait_type(BasePath):
         value = func(value, cwd)
     elif thistrait.is_trait_type(traits.List):
-        innertrait, = thistrait.inner_traits
+        (innertrait,) = thistrait.inner_traits
         if not isinstance(value, (list, tuple)):
             return _recurse_on_path_traits(func, innertrait, value, cwd)
 
-        value = [_recurse_on_path_traits(func, innertrait, v, cwd)
-                 for v in value]
+        value = [_recurse_on_path_traits(func, innertrait, v, cwd) for v in value]
     elif isinstance(value, dict) and thistrait.is_trait_type(traits.Dict):
         _, innertrait = thistrait.inner_traits
-        value = {k: _recurse_on_path_traits(func, innertrait, v, cwd)
-                 for k, v in value.items()}
+        value = {
+            k: _recurse_on_path_traits(func, innertrait, v, cwd)
+            for k, v in value.items()
+        }
     elif isinstance(value, tuple) and thistrait.is_trait_type(traits.Tuple):
-        value = tuple([_recurse_on_path_traits(func, subtrait, v, cwd)
-                       for subtrait, v in zip(thistrait.handler.types, value)])
+        value = tuple(
+            [
+                _recurse_on_path_traits(func, subtrait, v, cwd)
+                for subtrait, v in zip(thistrait.handler.types, value)
+            ]
+        )
     elif thistrait.is_trait_type(traits.TraitCompound):
-        is_str = [isinstance(f, (traits.String, traits.BaseStr, traits.BaseBytes, Str))
-                  for f in thistrait.handler.handlers]
-        if any(is_str) and isinstance(value, (bytes, str)) and not value.startswith('/'):
+        is_str = [
+            isinstance(f, (traits.String, traits.BaseStr, traits.BaseBytes, Str))
+            for f in thistrait.handler.handlers
+        ]
+        if (
+            any(is_str)
+            and isinstance(value, (bytes, str))
+            and not value.startswith("/")
+        ):
             return value
 
         for subtrait in thistrait.handler.handlers:

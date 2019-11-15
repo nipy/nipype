@@ -6,6 +6,7 @@ from .. import Memory
 from ...pipeline.engine.tests.test_engine import EngineTestInterface
 
 from ... import config
+
 config.set_default_config()
 
 nb_runs = 0
@@ -19,10 +20,10 @@ class SideEffectInterface(EngineTestInterface):
 
 
 def test_caching(tmpdir):
-    old_rerun = config.get('execution', 'stop_on_first_rerun')
+    old_rerun = config.get("execution", "stop_on_first_rerun")
     try:
         # Prevent rerun to check that evaluation is computed only once
-        config.set('execution', 'stop_on_first_rerun', 'true')
+        config.set("execution", "stop_on_first_rerun", "true")
         mem = Memory(tmpdir.strpath)
         first_nb_run = nb_runs
         results = mem.cache(SideEffectInterface)(input1=2, input2=1)
@@ -37,4 +38,4 @@ def test_caching(tmpdir):
         assert nb_runs == first_nb_run + 2
         assert results.outputs.output1 == [1, 1]
     finally:
-        config.set('execution', 'stop_on_first_rerun', old_rerun)
+        config.set("execution", "stop_on_first_rerun", old_rerun)

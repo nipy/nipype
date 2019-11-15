@@ -122,7 +122,7 @@ One your PR is ready a member of the development team will review your changes t
 In general, do not catch exceptions without good reason.
 For non-fatal exceptions, log the exception as a warning and add more information about what may have caused the error.
 
-If you do need to catch an exception, raise a new exception using ``raise_from(NewException("message"), oldException)`` from ``future``.
+If you do need to catch an exception, raise a new exception using ``raise NewException("message") from oldException)``.
 Do not log this, as it creates redundant/confusing logs.
 
 #### Testing

@@ -6,8 +6,21 @@ Top-level namespace for dti-tk.
 """
 
 # from .base import ()
-from .registration import (Rigid, Affine, Diffeo,
-                           ComposeXfm, DiffeoSymTensor3DVol, AffSymTensor3DVol,
-                           AffScalarVol, DiffeoScalarVol)
-from .utils import (TVAdjustVoxSp, SVAdjustVoxSp, TVResample, SVResample,
-                    TVtool, BinThresh)
+from .registration import (
+    Rigid,
+    Affine,
+    Diffeo,
+    ComposeXfm,
+    DiffeoSymTensor3DVol,
+    AffSymTensor3DVol,
+    AffScalarVol,
+    DiffeoScalarVol,
+)
+from .utils import (
+    TVAdjustVoxSp,
+    SVAdjustVoxSp,
+    TVResample,
+    SVResample,
+    TVtool,
+    BinThresh,
+)

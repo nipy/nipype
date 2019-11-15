@@ -1,2 +1,5 @@
 from .reporting import (
-    ReportCapableInterface, ReportCapableInputSpec, ReportCapableOutputSpec)
+    ReportCapableInterface,
+    ReportCapableInputSpec,
+    ReportCapableOutputSpec,
+)

@@ -56,20 +56,6 @@ _build_main_image_py36: &build_main_image_py36
         --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
         --build-arg VERSION="${CIRCLE_TAG}" /home/circleci/nipype
 
-_build_main_image_py27: &build_main_image_py27
-  name: Build main image (py27)
-  no_output_timeout: 60m
-  command: |
-    tools/retry_cmd.sh -n 5 -s 15 \
-      docker build \
-        --rm=false \
-        --tag nipype/nipype:py27 \
-        --build-arg PYTHON_VERSION_MAJOR=2 \
-        --build-arg PYTHON_VERSION_MINOR=7 \
-        --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-        --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
-        --build-arg VERSION="${CIRCLE_TAG}-py27" /home/circleci/nipype
-
 _download_test_data: &_download_test_data
   name: Download test data
   no_output_timeout: 20m
@@ -161,28 +147,22 @@ jobs:
       - run: *modify_nipype_version
       - run: *get_base_image
       - run: *build_main_image_py36
-      - run: *build_main_image_py27
       - run: *_get_codecov
       - run: *_download_test_data
       - run: *prepare_working_directory
       - run:
-          name: Run pytests (py36)
+          name: Run pytests
           no_output_timeout: 30m
           environment: *test_environment
-          command: bash -ux /home/circleci/nipype/.circleci/test_py3_pytest.sh
-      - run:
-          name: Run pytests (py27)
-          no_output_timeout: 30m
-          environment: *test_environment
-          command: bash -ux /home/circleci/nipype/.circleci/test_py2_pytest.sh
+          command: bash -ux /home/circleci/nipype/.circleci/test_pytest.sh
       - run: *_run_codecov_coverage
       - store_artifacts: *store_artifacts_kwds
       - store_test_results: *store_artifacts_kwds
       - run:
-          name: Build docs (py36)
+          name: Build docs
           no_output_timeout: 30m
           environment: *test_environment
-          command: bash -ux /home/circleci/nipype/.circleci/test_py3_docs.sh
+          command: bash -ux /home/circleci/nipype/.circleci/build_docs.sh
       - store_artifacts:
           path: /home/circleci/work/docs
       - run:
@@ -192,16 +172,15 @@ jobs:
             if [ "$CIRCLE_BRANCH" = "master" -a -z "$CIRCLE_PULL_REQUEST" ]; then
               docker save nipype/nipype:base \
                           nipype/nipype:latest \
-                          nipype/nipype:py27 \
-                          nipype/nipype:py36 | gzip -1 > /tmp/docker/nipype-base-latest-py36-py27.tar.gz \
-              && du -h /tmp/docker/nipype-base-latest-py36-py27.tar.gz
+                          nipype/nipype:py36 | gzip -1 > /tmp/docker/nipype-base-latest-py36.tar.gz \
+              && du -h /tmp/docker/nipype-base-latest-py36.tar.gz
             fi
       - persist_to_workspace:
           root: /tmp
           paths:
             - docker
 
-  test_py3_fmri_fsl_spm:
+  test_fmri_fsl_spm:
     machine: *machine_kwds
     working_directory: /home/circleci/nipype
     steps:
@@ -218,24 +197,24 @@ jobs:
       - run: *_download_test_data
       - run: *prepare_working_directory
       - run:
-          name: Run FSL reuse pipeline (py36)
+          name: Run FSL reuse pipeline
           no_output_timeout: 40m
           environment: *test_environment
-          command: bash -ux /home/circleci/nipype/.circleci/test_py3_fmri_fsl_reuse_linear_l1.sh
+          command: bash -ux /home/circleci/nipype/.circleci/test_fmri_fsl_reuse_linear_l1.sh
       - run:
-          name: Run SPM test workflow - 3D inputs (py36)
+          name: Run SPM test workflow - 3D inputs
           no_output_timeout: 40m
           environment: *test_environment
-          command: bash -ux /home/circleci/nipype/.circleci/test_py3_fmri_spm_linear_3d.sh
+          command: bash -ux /home/circleci/nipype/.circleci/test_fmri_spm_linear_3d.sh
       - run:
-          name: Run SPM test workflow - 4D inputs (py36)
+          name: Run SPM test workflow - 4D inputs
           no_output_timeout: 40m
           environment: *test_environment
-          command: bash -ux /home/circleci/nipype/.circleci/test_py3_fmri_spm_linear_4d.sh
+          command: bash -ux /home/circleci/nipype/.circleci/test_fmri_spm_linear_4d.sh
       - run: *_run_codecov_smoke
       - store_artifacts: *store_artifacts_kwds
 
-  test_py3_fmri_spm_dartel_multiproc:
+  test_fmri_spm_dartel_multiproc:
     machine: *machine_kwds
     working_directory: /home/circleci/nipype
     steps:
@@ -252,15 +231,15 @@ jobs:
       - run: *_download_test_data
       - run: *prepare_working_directory
       - run:
-          name: Run SPM DARTEL Level 1 pipeline (py36)
+          name: Run SPM DARTEL Level 1 pipeline
           no_output_timeout: 1h
           environment: *test_environment
-          command: bash -ux /home/circleci/nipype/.circleci/test_py3_fmri_spm_dartel_multiproc_l1.sh
+          command: bash -ux /home/circleci/nipype/.circleci/test_fmri_spm_dartel_multiproc_l1.sh
       - run:
-          name: Run SPM DARTEL Level 2 pipeline (py36)
+          name: Run SPM DARTEL Level 2 pipeline
           no_output_timeout: 30m
           environment: *test_environment
-          command: bash -ux /home/circleci/nipype/.circleci/test_py3_fmri_spm_dartel_multiproc_l2.sh
+          command: bash -ux /home/circleci/nipype/.circleci/test_fmri_spm_dartel_multiproc_l2.sh
       - run: *_run_codecov_smoke
       - store_artifacts: *store_artifacts_kwds
 
@@ -277,25 +256,24 @@ jobs:
       - run: *modify_nipype_version
       - run: *get_base_image
       - run: *build_main_image_py36
-      - run: *build_main_image_py27
       - run: *_get_codecov
       - run: *_download_test_data
       - run: *prepare_working_directory
       - run:
-          name: Run SPM Nested Level 1 pipeline (py36)
+          name: Run SPM Nested Level 1 pipeline
           no_output_timeout: 1h
           environment: *test_environment
-          command: bash -ux /home/circleci/nipype/.circleci/test_py3_fmri_spm_nested_multiproc_l1.sh
+          command: bash -ux /home/circleci/nipype/.circleci/test_fmri_spm_nested_multiproc_l1.sh
       - run:
-          name: Run SPM Nested Level 2 pipeline (py27)
+          name: Run SPM Nested Level 2 pipeline
           no_output_timeout: 30m
           environment: *test_environment
-          command: bash -ux /home/circleci/nipype/.circleci/test_py2_fmri_spm_nested_multiproc_l2.sh
+          command: bash -ux /home/circleci/nipype/.circleci/test_fmri_spm_nested_multiproc_l2.sh
       - run:
-          name: Run FSL FEEDS pipeline (py36)
+          name: Run FSL FEEDS pipeline
           no_output_timeout: 40m
           environment: *test_environment
-          command: bash -ux /home/circleci/nipype/.circleci/test_py3_fmri_fsl_feeds_linear_l1.sh
+          command: bash -ux /home/circleci/nipype/.circleci/test_fmri_fsl_feeds_linear_l1.sh
       - run: *_run_codecov_smoke
       - store_artifacts: *store_artifacts_kwds
 
@@ -310,7 +288,7 @@ jobs:
           name: Load saved Docker images.
           no_output_timeout: 60m
           command: |
-            docker load < /tmp/docker/nipype-base-latest-py36-py27.tar.gz
+            docker load < /tmp/docker/nipype-base-latest-py36.tar.gz
       - run:
           name: Push to DockerHub
           no_output_timeout: 120m
@@ -319,7 +297,6 @@ jobs:
             docker push nipype/nipype:base
             docker push nipype/nipype:latest
             docker push nipype/nipype:py36
-            docker push nipype/nipype:py27
       - run:
           name: Move pruned Dockerfile to /tmp/docker/cache directory
           command: |
@@ -344,21 +321,11 @@ jobs:
             python setup.py sdist bdist_wheel
             twine check dist/*
       - run:
-          name: Validate Python 2 installation
-          command: |
-            pyenv local 2.7.12
-            pip install --upgrade pip
-            pip install dist/nipype-*-py2.py3-none-any.whl
-            # Futures should install in Python 2
-            pip show futures 2>/dev/null | grep "Name: futures"
-      - run:
           name: Validate Python 3 installation
           command: |
             pyenv local 3.6.5
             pip install --upgrade pip
-            pip install dist/nipype-*-py2.py3-none-any.whl
-            # Futures should not install in Python 3
-            test $(pip show futures 2>/dev/null | wc -l) = "0"
+            pip install dist/nipype-*-py3-none-any.whl
       - run:
           name: Validate Python 3.7 installation
           command: |
@@ -366,7 +333,7 @@ jobs:
             pip install --upgrade pip
             # Pre-install a version of numpy that will not pass
             pip install numpy==1.15.0
-            pip install dist/nipype-*-py2.py3-none-any.whl
+            pip install dist/nipype-*-py3-none-any.whl
             # Numpy should be upgraded to >= 1.15.3
             test "$(pip show numpy | grep Version)" \> "Version: 1.15.2"
       - run:
@@ -390,7 +357,7 @@ jobs:
           name: Deploy to PyPI
           command: |
             pyenv local 3.6.5
-            pip install --upgrade twine future wheel readme_renderer setuptools
+            pip install --upgrade twine wheel readme_renderer setuptools
             python setup.py check -r -s
             python setup.py sdist bdist_wheel
             twine upload dist/*
@@ -434,7 +401,7 @@ workflows:
       - pypi_precheck:
           filters:
             branches:
-              only: /rel\/.*/
+              only: /(rel|dev)\/.*/
             tags:
               only: /.*/
       - compare_base_dockerfiles:
@@ -447,10 +414,10 @@ workflows:
               only: /.*/
           requires:
             - compare_base_dockerfiles
-      - test_py3_fmri_fsl_spm:
+      - test_fmri_fsl_spm:
           requires:
             - compare_base_dockerfiles
-      - test_py3_fmri_spm_dartel_multiproc:
+      - test_fmri_spm_dartel_multiproc:
           requires:
             - compare_base_dockerfiles
       - test_fmri_spm_nested_fsl_feeds:
@@ -463,8 +430,8 @@ workflows:
           requires:
             - test_pytest
             - test_fmri_spm_nested_fsl_feeds
-            - test_py3_fmri_fsl_spm
-            - test_py3_fmri_spm_dartel_multiproc
+            - test_fmri_fsl_spm
+            - test_fmri_spm_dartel_multiproc
       - deploy_pypi:
           filters:
             branches:

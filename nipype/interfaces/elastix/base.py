@@ -9,24 +9,26 @@ the elastix registration software.
 
 
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 
 from ... import logging
 from ..base import CommandLineInputSpec, Directory, traits
-iflogger = logging.getLogger('nipype.interface')
+
+iflogger = logging.getLogger("nipype.interface")
 
 
 class ElastixBaseInputSpec(CommandLineInputSpec):
     output_path = Directory(
-        './',
+        "./",
         exists=True,
         mandatory=True,
         usedefault=True,
-        argstr='-out %s',
-        desc='output directory')
+        argstr="-out %s",
+        desc="output directory",
+    )
     num_threads = traits.Int(
-        1, usedefault=True,
-        argstr='-threads %01d',
+        1,
+        usedefault=True,
+        argstr="-threads %01d",
         nohash=True,
-        desc='set the maximum number of threads of elastix')
+        desc="set the maximum number of threads of elastix",
+    )

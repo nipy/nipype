@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 """The dcm2nii module provides basic functions for dicom conversion
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import str, open
 import os
 import re
 from copy import deepcopy
@@ -11,19 +8,28 @@ import itertools as it
 from glob import iglob
 
 from ..utils.filemanip import split_filename
-from .base import (CommandLine, CommandLineInputSpec, InputMultiPath, traits,
-                   TraitedSpec, OutputMultiPath, isdefined, File, Directory,
-                   PackageInfo)
+from .base import (
+    CommandLine,
+    CommandLineInputSpec,
+    InputMultiPath,
+    traits,
+    TraitedSpec,
+    OutputMultiPath,
+    isdefined,
+    File,
+    Directory,
+    PackageInfo,
+)
 
 
 class Info(PackageInfo):
     """Handle dcm2niix version information"""
 
-    version_cmd = 'dcm2niix'
+    version_cmd = "dcm2niix"
 
     @staticmethod
     def parse_version(raw_info):
-        m = re.search(r'version (\S+)', raw_info)
+        m = re.search(r"version (\S+)", raw_info)
         return m.groups()[0] if m else None
 
 
@@ -34,64 +40,63 @@ class Dcm2niiInputSpec(CommandLineInputSpec):
         position=-1,
         copyfile=False,
         mandatory=True,
-        xor=['source_dir'])
+        xor=["source_dir"],
+    )
     source_dir = Directory(
-        exists=True,
-        argstr="%s",
-        position=-1,
-        mandatory=True,
-        xor=['source_names'])
+        exists=True, argstr="%s", position=-1, mandatory=True, xor=["source_names"]
+    )
     anonymize = traits.Bool(
-        True,
-        argstr='-a',
-        usedefault=True,
-        desc="Remove identifying information")
+        True, argstr="-a", usedefault=True, desc="Remove identifying information"
+    )
     config_file = File(
         exists=True,
         argstr="-b %s",
         genfile=True,
-        desc="Load settings from specified inifile")
+        desc="Load settings from specified inifile",
+    )
     collapse_folders = traits.Bool(
-        True, argstr='-c', usedefault=True, desc="Collapse input folders")
+        True, argstr="-c", usedefault=True, desc="Collapse input folders"
+    )
     date_in_filename = traits.Bool(
-        True, argstr='-d', usedefault=True, desc="Date in filename")
+        True, argstr="-d", usedefault=True, desc="Date in filename"
+    )
     events_in_filename = traits.Bool(
-        True,
-        argstr='-e',
-        usedefault=True,
-        desc="Events (series/acq) in filename")
+        True, argstr="-e", usedefault=True, desc="Events (series/acq) in filename"
+    )
     source_in_filename = traits.Bool(
-        False, argstr='-f', usedefault=True, desc="Source filename")
+        False, argstr="-f", usedefault=True, desc="Source filename"
+    )
     gzip_output = traits.Bool(
-        False, argstr='-g', usedefault=True, desc="Gzip output (.gz)")
+        False, argstr="-g", usedefault=True, desc="Gzip output (.gz)"
+    )
     id_in_filename = traits.Bool(
-        False, argstr='-i', usedefault=True, desc="ID  in filename")
+        False, argstr="-i", usedefault=True, desc="ID  in filename"
+    )
     nii_output = traits.Bool(
         True,
-        argstr='-n',
+        argstr="-n",
         usedefault=True,
-        desc="Save as .nii - if no, create .hdr/.img pair")
+        desc="Save as .nii - if no, create .hdr/.img pair",
+    )
     output_dir = Directory(
         exists=True,
-        argstr='-o %s',
+        argstr="-o %s",
         genfile=True,
-        desc="Output dir - if unspecified, source directory is used")
+        desc="Output dir - if unspecified, source directory is used",
+    )
     protocol_in_filename = traits.Bool(
-        True, argstr='-p', usedefault=True, desc="Protocol in filename")
-    reorient = traits.Bool(
-        argstr='-r', desc="Reorient image to nearest orthogonal")
+        True, argstr="-p", usedefault=True, desc="Protocol in filename"
+    )
+    reorient = traits.Bool(argstr="-r", desc="Reorient image to nearest orthogonal")
     spm_analyze = traits.Bool(
-        argstr='-s', xor=['nii_output'], desc="SPM2/Analyze not SPM5/NIfTI")
+        argstr="-s", xor=["nii_output"], desc="SPM2/Analyze not SPM5/NIfTI"
+    )
     convert_all_pars = traits.Bool(
-        True,
-        argstr='-v',
-        usedefault=True,
-        desc="Convert every image in directory")
+        True, argstr="-v", usedefault=True, desc="Convert every image in directory"
+    )
     reorient_and_crop = traits.Bool(
-        False,
-        argstr='-x',
-        usedefault=True,
-        desc="Reorient and crop 3D images")
+        False, argstr="-x", usedefault=True, desc="Reorient and crop 3D images"
+    )
 
 
 class Dcm2niiOutputSpec(TraitedSpec):
@@ -119,34 +124,46 @@ class Dcm2nii(CommandLine):
 
     input_spec = Dcm2niiInputSpec
     output_spec = Dcm2niiOutputSpec
-    _cmd = 'dcm2nii'
+    _cmd = "dcm2nii"
 
     def _format_arg(self, opt, spec, val):
         if opt in [
-                'anonymize', 'collapse_folders', 'date_in_filename',
-                'events_in_filename', 'source_in_filename', 'gzip_output',
-                'id_in_filename', 'nii_output', 'protocol_in_filename',
-                'reorient', 'spm_analyze', 'convert_all_pars',
-                'reorient_and_crop'
+            "anonymize",
+            "collapse_folders",
+            "date_in_filename",
+            "events_in_filename",
+            "source_in_filename",
+            "gzip_output",
+            "id_in_filename",
+            "nii_output",
+            "protocol_in_filename",
+            "reorient",
+            "spm_analyze",
+            "convert_all_pars",
+            "reorient_and_crop",
         ]:
             spec = deepcopy(spec)
             if val:
-                spec.argstr += ' y'
+                spec.argstr += " y"
             else:
-                spec.argstr += ' n'
+                spec.argstr += " n"
                 val = True
-        if opt == 'source_names':
+        if opt == "source_names":
             return spec.argstr % val[0]
         return super(Dcm2nii, self)._format_arg(opt, spec, val)
 
     def _run_interface(self, runtime):
         self._config_created = False
         new_runtime = super(Dcm2nii, self)._run_interface(runtime)
-        (self.output_files, self.reoriented_files,
-         self.reoriented_and_cropped_files, self.bvecs,
-         self.bvals) = self._parse_stdout(new_runtime.stdout)
+        (
+            self.output_files,
+            self.reoriented_files,
+            self.reoriented_and_cropped_files,
+            self.bvecs,
+            self.bvals,
+        ) = self._parse_stdout(new_runtime.stdout)
         if self._config_created:
-            os.remove('config.ini')
+            os.remove("config.ini")
         return new_runtime
 
     def _parse_stdout(self, stdout):
@@ -161,12 +178,11 @@ class Dcm2nii(CommandLine):
             if not skip:
                 out_file = None
                 if line.startswith("Saving "):
-                    out_file = line[len("Saving "):]
+                    out_file = line[len("Saving ") :]
                 elif line.startswith("GZip..."):
                     # for gzipped output files are not absolute
-                    fname = line[len("GZip..."):]
-                    if len(files) and os.path.basename(
-                            files[-1]) == fname[:-3]:
+                    fname = line[len("GZip...") :]
+                    if len(files) and os.path.basename(files[-1]) == fname[:-3]:
                         # we are seeing a previously reported conversion
                         # as being saved in gzipped form -- remove the
                         # obsolete, uncompressed file
@@ -174,7 +190,7 @@ class Dcm2nii(CommandLine):
                     if isdefined(self.inputs.output_dir):
                         output_dir = self.inputs.output_dir
                     else:
-                        output_dir = self._gen_filename('output_dir')
+                        output_dir = self._gen_filename("output_dir")
                     out_file = os.path.abspath(os.path.join(output_dir, fname))
                 elif line.startswith("Number of diffusion directions "):
                     if last_added_file:
@@ -186,15 +202,15 @@ class Dcm2nii(CommandLine):
                     # just above
                     for l in (bvecs, bvals):
                         l[-1] = os.path.join(
-                            os.path.dirname(l[-1]),
-                            'x%s' % (os.path.basename(l[-1]), ))
-                elif re.search('.*->(.*)', line):
-                    val = re.search('.*->(.*)', line)
+                            os.path.dirname(l[-1]), "x%s" % (os.path.basename(l[-1]),)
+                        )
+                elif re.search(".*->(.*)", line):
+                    val = re.search(".*->(.*)", line)
                     val = val.groups()[0]
                     if isdefined(self.inputs.output_dir):
                         output_dir = self.inputs.output_dir
                     else:
-                        output_dir = self._gen_filename('output_dir')
+                        output_dir = self._gen_filename("output_dir")
                     val = os.path.join(output_dir, val)
                     if os.path.exists(val):
                         out_file = val
@@ -206,18 +222,22 @@ class Dcm2nii(CommandLine):
                     continue
 
                 if line.startswith("Reorienting as "):
-                    reoriented_files.append(line[len("Reorienting as "):])
+                    reoriented_files.append(line[len("Reorienting as ") :])
                     skip = True
                     continue
                 elif line.startswith("Cropping NIfTI/Analyze image "):
                     base, filename = os.path.split(
-                        line[len("Cropping NIfTI/Analyze image "):])
+                        line[len("Cropping NIfTI/Analyze image ") :]
+                    )
                     filename = "c" + filename
-                    if os.path.exists(os.path.join(
-                            base, filename)) or self.inputs.reorient_and_crop:
+                    if (
+                        os.path.exists(os.path.join(base, filename))
+                        or self.inputs.reorient_and_crop
+                    ):
                         # if reorient&crop is true but the file doesn't exist, this errors when setting outputs
                         reoriented_and_cropped_files.append(
-                            os.path.join(base, filename))
+                            os.path.join(base, filename)
+                        )
                         skip = True
                         continue
 
@@ -226,18 +246,17 @@ class Dcm2nii(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['converted_files'] = self.output_files
-        outputs['reoriented_files'] = self.reoriented_files
-        outputs[
-            'reoriented_and_cropped_files'] = self.reoriented_and_cropped_files
-        outputs['bvecs'] = self.bvecs
-        outputs['bvals'] = self.bvals
+        outputs["converted_files"] = self.output_files
+        outputs["reoriented_files"] = self.reoriented_files
+        outputs["reoriented_and_cropped_files"] = self.reoriented_and_cropped_files
+        outputs["bvecs"] = self.bvecs
+        outputs["bvals"] = self.bvals
         return outputs
 
     def _gen_filename(self, name):
-        if name == 'output_dir':
+        if name == "output_dir":
             return os.getcwd()
-        elif name == 'config_file':
+        elif name == "config_file":
             self._config_created = True
             config_file = "config.ini"
             with open(config_file, "w") as f:
@@ -254,103 +273,103 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
         position=-1,
         copyfile=False,
         mandatory=True,
-        desc=('A set of filenames to be converted. Note that the current '
-              'version (1.0.20180328) of dcm2niix converts any files in the '
-              'directory. To only convert specific files they should be in an '
-              'isolated directory'),
-        xor=['source_dir'])
+        desc=(
+            "A set of filenames to be converted. Note that the current "
+            "version (1.0.20180328) of dcm2niix converts any files in the "
+            "directory. To only convert specific files they should be in an "
+            "isolated directory"
+        ),
+        xor=["source_dir"],
+    )
     source_dir = Directory(
         exists=True,
         argstr="%s",
         position=-1,
         mandatory=True,
-        desc='A directory containing dicom files to be converted',
-        xor=['source_names'])
+        desc="A directory containing dicom files to be converted",
+        xor=["source_names"],
+    )
     out_filename = traits.Str(
         argstr="-f %s",
         desc="Output filename template ("
-             "%a=antenna (coil) number, "
-             "%c=comments, "
-             "%d=description, "
-             "%e=echo number, "
-             "%f=folder name, "
-             "%i=ID of patient, "
-             "%j=seriesInstanceUID, "
-             "%k=studyInstanceUID, "
-             "%m=manufacturer, "
-             "%n=name of patient, "
-             "%p=protocol, "
-             "%s=series number, "
-             "%t=time, "
-             "%u=acquisition number, "
-             "%v=vendor, "
-             "%x=study ID; "
-             "%z=sequence name)")
+        "%a=antenna (coil) number, "
+        "%c=comments, "
+        "%d=description, "
+        "%e=echo number, "
+        "%f=folder name, "
+        "%i=ID of patient, "
+        "%j=seriesInstanceUID, "
+        "%k=studyInstanceUID, "
+        "%m=manufacturer, "
+        "%n=name of patient, "
+        "%p=protocol, "
+        "%s=series number, "
+        "%t=time, "
+        "%u=acquisition number, "
+        "%v=vendor, "
+        "%x=study ID; "
+        "%z=sequence name)",
+    )
     output_dir = Directory(
-        ".",
-        usedefault=True,
-        exists=True,
-        argstr='-o %s',
-        desc="Output directory")
+        ".", usedefault=True, exists=True, argstr="-o %s", desc="Output directory"
+    )
     bids_format = traits.Bool(
-        True,
-        argstr='-b',
-        usedefault=True,
-        desc="Create a BIDS sidecar file")
+        True, argstr="-b", usedefault=True, desc="Create a BIDS sidecar file"
+    )
     anon_bids = traits.Bool(
-        argstr='-ba',
-        requires=["bids_format"],
-        desc="Anonymize BIDS")
+        argstr="-ba", requires=["bids_format"], desc="Anonymize BIDS"
+    )
     compress = traits.Enum(
-        'y', 'i', 'n', '3',
-        argstr='-z %s',
+        "y",
+        "i",
+        "n",
+        "3",
+        argstr="-z %s",
         usedefault=True,
-        desc="Gzip compress images - [y=pigz, i=internal, n=no, 3=no,3D]")
+        desc="Gzip compress images - [y=pigz, i=internal, n=no, 3=no,3D]",
+    )
     merge_imgs = traits.Bool(
-        False,
-        argstr='-m',
-        usedefault=True,
-        desc="merge 2D slices from same series")
+        False, argstr="-m", usedefault=True, desc="merge 2D slices from same series"
+    )
     single_file = traits.Bool(
-        False,
-        argstr='-s',
-        usedefault=True,
-        desc="Single file mode")
-    verbose = traits.Bool(
-        False,
-        argstr='-v',
-        usedefault=True,
-        desc="Verbose output")
+        False, argstr="-s", usedefault=True, desc="Single file mode"
+    )
+    verbose = traits.Bool(False, argstr="-v", usedefault=True, desc="Verbose output")
     crop = traits.Bool(
-        False,
-        argstr='-x',
-        usedefault=True,
-        desc="Crop 3D T1 acquisitions")
+        False, argstr="-x", usedefault=True, desc="Crop 3D T1 acquisitions"
+    )
     has_private = traits.Bool(
         False,
-        argstr='-t',
+        argstr="-t",
         usedefault=True,
-        desc="Text notes including private patient details")
+        desc="Text notes including private patient details",
+    )
     compression = traits.Enum(
-        1, 2, 3, 4, 5, 6, 7, 8, 9,
-        argstr='-%d',
-        desc="Gz compression level (1=fastest, 9=smallest)")
-    comment = traits.Str(
-        argstr='-c %s',
-        desc="Comment stored as NIfTI aux_file")
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        argstr="-%d",
+        desc="Gz compression level (1=fastest, 9=smallest)",
+    )
+    comment = traits.Str(argstr="-c %s", desc="Comment stored as NIfTI aux_file")
     ignore_deriv = traits.Bool(
-        argstr='-i',
-        desc="Ignore derived, localizer and 2D images")
+        argstr="-i", desc="Ignore derived, localizer and 2D images"
+    )
     series_numbers = InputMultiPath(
         traits.Str(),
-        argstr='-n %s...',
-        desc="Selectively convert by series number - can be used up to 16 times")
+        argstr="-n %s...",
+        desc="Selectively convert by series number - can be used up to 16 times",
+    )
     philips_float = traits.Bool(
-        argstr='-p',
-        desc="Philips precise float (not display) scaling")
-    to_nrrd = traits.Bool(
-        argstr="-e",
-        desc="Export as NRRD instead of NIfTI")
+        argstr="-p", desc="Philips precise float (not display) scaling"
+    )
+    to_nrrd = traits.Bool(argstr="-e", desc="Export as NRRD instead of NIfTI")
 
 
 class Dcm2niixOutputSpec(TraitedSpec):
@@ -391,7 +410,7 @@ class Dcm2niix(CommandLine):
 
     input_spec = Dcm2niixInputSpec
     output_spec = Dcm2niixOutputSpec
-    _cmd = 'dcm2niix'
+    _cmd = "dcm2niix"
 
     @property
     def version(self):
@@ -399,25 +418,33 @@ class Dcm2niix(CommandLine):
 
     def _format_arg(self, opt, spec, val):
         bools = [
-            'bids_format', 'merge_imgs', 'single_file', 'verbose', 'crop',
-            'has_private', 'anon_bids', 'ignore_deriv', 'philips_float',
-            'to_nrrd',
+            "bids_format",
+            "merge_imgs",
+            "single_file",
+            "verbose",
+            "crop",
+            "has_private",
+            "anon_bids",
+            "ignore_deriv",
+            "philips_float",
+            "to_nrrd",
         ]
         if opt in bools:
             spec = deepcopy(spec)
             if val:
-                spec.argstr += ' y'
+                spec.argstr += " y"
             else:
-                spec.argstr += ' n'
+                spec.argstr += " n"
                 val = True
-        if opt == 'source_names':
-            return spec.argstr % (os.path.dirname(val[0]) or '.')
+        if opt == "source_names":
+            return spec.argstr % (os.path.dirname(val[0]) or ".")
         return super(Dcm2niix, self)._format_arg(opt, spec, val)
 
     def _run_interface(self, runtime):
         # may use return code 1 despite conversion
         runtime = super(Dcm2niix, self)._run_interface(
-            runtime, correct_return_codes=(0, 1, ))
+            runtime, correct_return_codes=(0, 1,)
+        )
         self._parse_files(self._parse_stdout(runtime.stdout))
         return runtime
 
@@ -425,7 +452,7 @@ class Dcm2niix(CommandLine):
         filenames = []
         for line in stdout.split("\n"):
             if line.startswith("Convert "):  # output
-                fname = str(re.search(r'\S+/\S+', line).group(0))
+                fname = str(re.search(r"\S+/\S+", line).group(0))
                 filenames.append(os.path.abspath(fname))
         return filenames
 
@@ -441,10 +468,10 @@ class Dcm2niix(CommandLine):
             # search for relevant files, and sort accordingly
             for fl in search_files(filename, outtypes):
                 if (
-                    fl.endswith(".nii") or
-                    fl.endswith(".gz") or
-                    fl.endswith(".nrrd") or
-                    fl.endswith(".nhdr")
+                    fl.endswith(".nii")
+                    or fl.endswith(".gz")
+                    or fl.endswith(".nrrd")
+                    or fl.endswith(".nhdr")
                 ):
                     outfiles.append(fl)
                 elif fl.endswith(".bval"):
@@ -460,11 +487,12 @@ class Dcm2niix(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['converted_files'] = self.output_files
-        outputs['bvecs'] = self.bvecs
-        outputs['bvals'] = self.bvals
-        outputs['bids'] = self.bids
+        outputs["converted_files"] = self.output_files
+        outputs["bvecs"] = self.bvecs
+        outputs["bvals"] = self.bvals
+        outputs["bids"] = self.bids
         return outputs
+
 
 # https://stackoverflow.com/a/4829130
 def search_files(prefix, outtypes):

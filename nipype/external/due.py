@@ -24,7 +24,7 @@ Copyright:  2015-2016  DueCredit developers
 License:    BSD-2
 """
 
-__version__ = '0.0.5'
+__version__ = "0.0.5"
 
 
 class InactiveDueCreditCollector(object):
@@ -45,7 +45,7 @@ class InactiveDueCreditCollector(object):
     cite = load = add = _donothing
 
     def __repr__(self):
-        return '{}()'.format(self.__class__.__name__)
+        return "{}()".format(self.__class__.__name__)
 
 
 def _donothing_func(*args, **kwargs):
@@ -55,9 +55,9 @@ def _donothing_func(*args, **kwargs):
 
 try:
     from duecredit import due, BibTeX, Doi, Url
-    if 'due' in locals() and not hasattr(due, 'cite'):
-        raise RuntimeError(
-            "Imported due lacks .cite. DueCredit is now disabled")
+
+    if "due" in locals() and not hasattr(due, "cite"):
+        raise RuntimeError("Imported due lacks .cite. DueCredit is now disabled")
 except ImportError:
     # Initiate due stub
     due = InactiveDueCreditCollector()
