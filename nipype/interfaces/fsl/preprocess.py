@@ -210,8 +210,8 @@ class BET(FSLCommand):
                 outputs["out_file"], suffix="_skull_mask"
             )
         if isdefined(self.inputs.skull) and self.inputs.skull:
-            outputs['skull_file'] = self._gen_fname(
-                outputs['out_file'], suffix='_skull'
+            outputs["skull_file"] = self._gen_fname(
+                outputs["out_file"], suffix="_skull"
             )
         if isdefined(self.inputs.no_output) and self.inputs.no_output:
             outputs["out_file"] = Undefined
