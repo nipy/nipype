@@ -5,20 +5,29 @@ If you spot a bug, please report it on the mailing list and/or change the genera
 
 import os
 
-from ...base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
-                     TraitedSpec, File, Directory, traits, isdefined,
-                     InputMultiPath, OutputMultiPath)
+from ...base import (
+    CommandLine,
+    CommandLineInputSpec,
+    SEMLikeCommandLine,
+    TraitedSpec,
+    File,
+    Directory,
+    traits,
+    isdefined,
+    InputMultiPath,
+    OutputMultiPath,
+)
 
 
 class BRAINSResizeInputSpec(CommandLineInputSpec):
-    inputVolume = File(
-        desc="Image To Scale", exists=True, argstr="--inputVolume %s")
+    inputVolume = File(desc="Image To Scale", exists=True, argstr="--inputVolume %s")
     outputVolume = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Resulting scaled image",
-        argstr="--outputVolume %s")
+        argstr="--outputVolume %s",
+    )
     pixelType = traits.Enum(
         "float",
         "short",
@@ -27,12 +36,12 @@ class BRAINSResizeInputSpec(CommandLineInputSpec):
         "uint",
         "uchar",
         "binary",
-        desc=
-        "Specifies the pixel type for the input/output images.  The \'binary\' pixel type uses a modified algorithm whereby the image is read in as unsigned char, a signed distance map is created, signed distance map is resampled, and then a thresholded image of type unsigned char is written to disk.",
-        argstr="--pixelType %s")
+        desc="Specifies the pixel type for the input/output images.  The 'binary' pixel type uses a modified algorithm whereby the image is read in as unsigned char, a signed distance map is created, signed distance map is resampled, and then a thresholded image of type unsigned char is written to disk.",
+        argstr="--pixelType %s",
+    )
     scaleFactor = traits.Float(
-        desc="The scale factor for the image spacing.",
-        argstr="--scaleFactor %f")
+        desc="The scale factor for the image spacing.", argstr="--scaleFactor %f"
+    )
 
 
 class BRAINSResizeOutputSpec(TraitedSpec):
@@ -59,5 +68,5 @@ acknowledgements: The development of this tool was supported by funding from gra
     input_spec = BRAINSResizeInputSpec
     output_spec = BRAINSResizeOutputSpec
     _cmd = " BRAINSResize "
-    _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
+    _outputs_filenames = {"outputVolume": "outputVolume.nii"}
     _redirect_x = False

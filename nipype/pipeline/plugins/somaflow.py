@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
 """Parallel workflow execution via PBS/Torque
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 
 import os
 import sys
 
-from .base import (GraphPluginBase, logger)
+from .base import GraphPluginBase, logger
 
 soma_not_loaded = False
 try:
-    from soma.workflow.client import (Job, Workflow, WorkflowController,
-                                      Helper)
+    from soma.workflow.client import Job, Workflow, WorkflowController, Helper
 except:
     soma_not_loaded = True
 
@@ -23,7 +20,7 @@ class SomaFlowPlugin(GraphPluginBase):
 
     def __init__(self, plugin_args=None):
         if soma_not_loaded:
-            raise ImportError('SomaFlow could not be imported')
+            raise ImportError("SomaFlow could not be imported")
         super(SomaFlowPlugin, self).__init__(plugin_args=plugin_args)
 
     def _submit_graph(self, pyfiles, dependencies, nodes):
@@ -37,9 +34,9 @@ class SomaFlowPlugin(GraphPluginBase):
                 soma_deps.append((jobs[val], jobs[key]))
 
         wf = Workflow(jobs, soma_deps)
-        logger.info('serializing workflow')
-        Helper.serialize('workflow', wf)
+        logger.info("serializing workflow")
+        Helper.serialize("workflow", wf)
         controller = WorkflowController()
-        logger.info('submitting workflow')
+        logger.info("submitting workflow")
         wf_id = controller.submit_workflow(wf)
         Helper.wait_workflow(wf_id, controller)

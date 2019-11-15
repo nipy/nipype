@@ -11,10 +11,6 @@
 #
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ##
 """Helper to automagically generate ReST versions of examples"""
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import open, str
-
 import os
 import sys
 import re

@@ -6,10 +6,6 @@
 
 The `EngineBase` class implements the more general view of a task.
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import object
-
 from copy import deepcopy
 import re
 import numpy as np
@@ -37,7 +33,7 @@ class EngineBase(object):
         """
         self._hierarchy = None
         self.name = name
-        self._id = self.name # for compatibility with node expansion using iterables
+        self._id = self.name  # for compatibility with node expansion using iterables
 
         self.base_dir = base_dir
         self.config = deepcopy(config._sections)
@@ -48,14 +44,14 @@ class EngineBase(object):
 
     @name.setter
     def name(self, name):
-        if not name or not re.match(r'^[\w-]+$', name):
+        if not name or not re.match(r"^[\w-]+$", name):
             raise ValueError('[Workflow|Node] name "%s" is not valid.' % name)
         self._name = name
 
     @property
     def fullname(self):
         if self._hierarchy:
-            return '%s.%s' % (self._hierarchy, self.name)
+            return "%s.%s" % (self._hierarchy, self.name)
         return self.name
 
     @property
@@ -71,7 +67,7 @@ class EngineBase(object):
         """Name for expanded iterable"""
         itername = self._id
         if self._hierarchy:
-            itername = '%s.%s' % (self._hierarchy, self._id)
+            itername = "%s.%s" % (self._hierarchy, self._id)
         return itername
 
     def clone(self, name):
@@ -84,11 +80,10 @@ class EngineBase(object):
             A clone of node or workflow must have a new name
         """
         if name == self.name:
-            raise ValueError('Cloning requires a new name, "%s" is '
-                             'in use.' % name)
+            raise ValueError('Cloning requires a new name, "%s" is ' "in use." % name)
         clone = deepcopy(self)
         clone.name = name
-        if hasattr(clone, '_id'):
+        if hasattr(clone, "_id"):
             clone._id = name
         return clone
 
@@ -108,7 +103,7 @@ class EngineBase(object):
 
     def save(self, filename=None):
         if filename is None:
-            filename = 'temp.pklz'
+            filename = "temp.pklz"
         savepkl(filename, self)
 
     def load(self, filename):

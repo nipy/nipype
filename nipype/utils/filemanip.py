@@ -3,8 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous file manipulation functions
 """
-from __future__ import print_function, division, unicode_literals, absolute_import
-
 import sys
 import pickle
 import errno
@@ -19,53 +17,20 @@ import re
 import shutil
 import contextlib
 import posixpath
+from pathlib import Path
 import simplejson as json
 from time import sleep, time
 
-from builtins import str, bytes, open
-
 from .. import logging, config, __version__ as version
 from .misc import is_container
-from future import standard_library
-
-standard_library.install_aliases()
 
 fmlogger = logging.getLogger("nipype.utils")
 
-related_filetype_sets = [(".hdr", ".img", ".mat"), (".nii", ".mat"), (".BRIK", ".HEAD")]
-
-PY3 = sys.version_info[0] >= 3
-
-try:
-    from builtins import FileNotFoundError, FileExistsError
-except ImportError:  # PY27
-
-    class FileNotFoundError(OSError):  # noqa
-        """Defines the exception for Python 2."""
-
-        def __init__(self, path):
-            """Initialize the exception."""
-            super(FileNotFoundError, self).__init__(
-                2, "No such file or directory", "%s" % path
-            )
-
-    class FileExistsError(OSError):  # noqa
-        """Defines the exception for Python 2."""
-
-        def __init__(self, path):
-            """Initialize the exception."""
-            super(FileExistsError, self).__init__(
-                17, "File or directory exists", "%s" % path
-            )
-
-
-USING_PATHLIB2 = False
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path
-
-    USING_PATHLIB2 = True
+related_filetype_sets = [
+    (".hdr", ".img", ".mat"),
+    (".nii", ".mat"),
+    (".BRIK", ".HEAD"),
+]
 
 
 def _resolve_with_filenotfound(path, **kwargs):
@@ -92,25 +57,6 @@ def path_resolve(path, strict=False):
     # In cases where the existing part of the path contains a
     # symlink, different results will be produced
     return path
-
-
-def path_mkdir(path, mode=0o777, parents=False, exist_ok=False):
-    try:
-        return path.mkdir(mode=mode, parents=parents, exist_ok=exist_ok)
-    except TypeError:  # PY27/PY34
-        if parents:
-            return makedirs(str(path), mode=mode, exist_ok=exist_ok)
-        elif not exist_ok or not path.exists():
-            return os.mkdir(str(path), mode=mode)
-
-
-if not hasattr(Path, "write_text"):
-    # PY34 - Path does not have write_text
-    def _write_text(self, text):
-        with open(str(self), "w") as f:
-            f.write(text)
-
-    Path.write_text = _write_text
 
 
 def split_filename(fname):
@@ -161,63 +107,6 @@ def split_filename(fname):
         fname, ext = op.splitext(fname)
 
     return pth, fname, ext
-
-
-def to_str(value):
-    """
-    Manipulates ordered dicts before they are hashed (Py2/3 compat.)
-
-    """
-    if sys.version_info[0] > 2:
-        retval = str(value)
-    else:
-        retval = to_str_py27(value)
-    return retval
-
-
-def to_str_py27(value):
-    """
-    Encode dictionary for python 2
-    """
-
-    if isinstance(value, dict):
-        entry = "{}: {}".format
-        retval = "{"
-        for key, val in list(value.items()):
-            if len(retval) > 1:
-                retval += ", "
-            kenc = repr(key)
-            if kenc.startswith(("u'", 'u"')):
-                kenc = kenc[1:]
-            venc = to_str_py27(val)
-            if venc.startswith(("u'", 'u"')):
-                venc = venc[1:]
-            retval += entry(kenc, venc)
-        retval += "}"
-        return retval
-
-    istuple = isinstance(value, tuple)
-    if isinstance(value, (tuple, list)):
-        retval = "(" if istuple else "["
-        nels = len(value)
-        for i, v in enumerate(value):
-            venc = to_str_py27(v)
-            if venc.startswith(("u'", 'u"')):
-                venc = venc[1:]
-            retval += venc
-
-            if i < nels - 1:
-                retval += ", "
-
-        if istuple and nels == 1:
-            retval += ","
-        retval += ")" if istuple else "]"
-        return retval
-
-    retval = repr(value).decode()
-    if retval.startswith(("u'", 'u"')):
-        retval = retval[1:]
-    return retval
 
 
 def fname_presuffix(fname, prefix="", suffix="", newpath=None, use_ext=True):
@@ -680,8 +569,6 @@ def save_json(filename, data):
 
     """
     mode = "w"
-    if sys.version_info[0] < 3:
-        mode = "wb"
     with open(filename, mode) as fp:
         json.dump(data, fp, sort_keys=True, indent=4)
 
@@ -766,8 +653,6 @@ def loadpkl(infile):
     # Unpickling problems
     except Exception as e:
         if pkl_metadata and "version" in pkl_metadata:
-            from nipype import __version__ as version
-
             if pkl_metadata["version"] != version:
                 fmlogger.error(
                     """\
@@ -878,31 +763,6 @@ def dist_is_editable(dist):
     return False
 
 
-def makedirs(path, mode=0o777, exist_ok=False):
-    """
-    Create path, if it doesn't exist.
-
-    Parameters
-    ----------
-    path : output directory to create
-
-    """
-    if not exist_ok:  # The old makedirs
-        os.makedirs(path, mode=mode)
-        return path
-
-    # this odd approach deals with concurrent directory cureation
-    if not op.exists(op.abspath(path)):
-        fmlogger.debug("Creating directory %s", path)
-        try:
-            os.makedirs(path, mode=mode)
-        except OSError:
-            fmlogger.debug("Problem creating directory %s", path)
-            if not op.exists(path):
-                raise OSError("Could not create directory %s" % path)
-    return path
-
-
 def emptydirs(path, noexist_ok=False):
     """
     Empty an existing directory, without deleting it. Do not
@@ -937,7 +797,7 @@ def emptydirs(path, noexist_ok=False):
         else:
             raise ex
 
-    makedirs(path)
+    os.makedirs(path)
 
 
 def silentrm(filename):
@@ -979,27 +839,10 @@ def which(cmd, env=None, pathext=None):
     if env and "PATH" in env:
         path = env.get("PATH")
 
-    if sys.version_info >= (3, 3):
-        for ext in pathext:
-            filename = shutil.which(cmd + ext, path=path)
-            if filename:
-                return filename
-        return None
-
-    def isexec(path):
-        return os.path.isfile(path) and os.access(path, os.X_OK)
-
     for ext in pathext:
-        extcmd = cmd + ext
-        fpath, fname = os.path.split(extcmd)
-        if fpath:
-            if isexec(extcmd):
-                return extcmd
-        else:
-            for directory in path.split(os.pathsep):
-                filename = op.join(directory, extcmd)
-                if isexec(filename):
-                    return filename
+        filename = shutil.which(cmd + ext, path=path)
+        if filename:
+            return filename
     return None
 
 
@@ -1051,18 +894,12 @@ def canonicalize_env(env):
     if os.name != "nt":
         return env
 
-    # convert unicode to string for python 2
-    if not PY3:
-        from future.utils import bytes_to_native_str
     out_env = {}
     for key, val in env.items():
         if not isinstance(key, bytes):
             key = key.encode("utf-8")
         if not isinstance(val, bytes):
             val = val.encode("utf-8")
-        if not PY3:
-            key = bytes_to_native_str(key)
-            val = bytes_to_native_str(val)
         out_env[key] = val
     return out_env
 

@@ -106,8 +106,6 @@ The workflow directive has the following configuration options:
         Provide a customized template for preparing restructured text.
 
 """
-from __future__ import print_function, division, absolute_import, unicode_literals
-
 import sys
 import os
 import shutil
@@ -122,6 +120,7 @@ missing_imports = []
 try:
     from docutils.parsers.rst import directives
     from docutils.parsers.rst.directives.images import Image
+
     align = Image.align
 except ImportError as e:
     missing_imports = [str(e)]
@@ -132,6 +131,8 @@ try:
 
     def format_template(template, **kw):
         return jinja2.Template(template).render(**kw)
+
+
 except ImportError as e:
     missing_imports.append(str(e))
     try:
@@ -144,35 +145,22 @@ except ImportError as e:
     except ImportError as e:
         missing_imports.append(str(e))
 
-from builtins import str, bytes
 
-PY2 = sys.version_info[0] == 2
-PY3 = sys.version_info[0] == 3
-
-
-def _mkdirp(folder):
-    """
-    Equivalent to bash's mkdir -p
-    """
-    if sys.version_info > (3, 4, 1):
-        os.makedirs(folder, exist_ok=True)
-        return folder
-
-    try:
-        os.makedirs(folder)
-    except OSError as exc:
-        if exc.errno != EEXIST or not os.path.isdir(folder):
-            raise
-
-    return folder
-
-
-def wf_directive(name, arguments, options, content, lineno, content_offset,
-                 block_text, state, state_machine):
+def wf_directive(
+    name,
+    arguments,
+    options,
+    content,
+    lineno,
+    content_offset,
+    block_text,
+    state,
+    state_machine,
+):
     if len(missing_imports) == 0:
         return run(arguments, content, options, state_machine, state, lineno)
     else:
-        raise ImportError('\n'.join(missing_imports))
+        raise ImportError("\n".join(missing_imports))
 
 
 wf_directive.__doc__ = __doc__
@@ -182,32 +170,32 @@ def _option_boolean(arg):
     if not arg or not arg.strip():
         # no argument given, assume used as a flag
         return True
-    elif arg.strip().lower() in ('no', '0', 'false'):
+    elif arg.strip().lower() in ("no", "0", "false"):
         return False
-    elif arg.strip().lower() in ('yes', '1', 'true'):
+    elif arg.strip().lower() in ("yes", "1", "true"):
         return True
     else:
         raise ValueError('"%s" unknown boolean' % arg)
 
 
 def _option_graph2use(arg):
-    return directives.choice(
-        arg, ('hierarchical', 'colored', 'flat', 'orig', 'exec'))
+    return directives.choice(arg, ("hierarchical", "colored", "flat", "orig", "exec"))
 
 
 def _option_context(arg):
-    if arg in [None, 'reset', 'close-figs']:
+    if arg in [None, "reset", "close-figs"]:
         return arg
     raise ValueError("argument should be None or 'reset' or 'close-figs'")
 
 
 def _option_format(arg):
-    return directives.choice(arg, ('python', 'doctest'))
+    return directives.choice(arg, ("python", "doctest"))
 
 
 def _option_align(arg):
     return directives.choice(
-        arg, ("top", "middle", "bottom", "left", "center", "right"))
+        arg, ("top", "middle", "bottom", "left", "center", "right")
+    )
 
 
 def mark_wf_labels(app, document):
@@ -223,21 +211,24 @@ def mark_wf_labels(app, document):
         if labelid is None:
             continue
         node = document.ids[labelid]
-        if node.tagname in ('html_only', 'latex_only'):
+        if node.tagname in ("html_only", "latex_only"):
             for n in node:
-                if n.tagname == 'figure':
+                if n.tagname == "figure":
                     sectname = name
                     for c in n:
-                        if c.tagname == 'caption':
+                        if c.tagname == "caption":
                             sectname = c.astext()
                             break
 
-                    node['ids'].remove(labelid)
-                    node['names'].remove(name)
-                    n['ids'].append(labelid)
-                    n['names'].append(name)
-                    document.settings.env.labels[name] = \
-                        document.settings.env.docname, labelid, sectname
+                    node["ids"].remove(labelid)
+                    node["names"].remove(name)
+                    n["ids"].append(labelid)
+                    n["names"].append(name)
+                    document.settings.env.labels[name] = (
+                        document.settings.env.docname,
+                        labelid,
+                        sectname,
+                    )
                     break
 
 
@@ -247,39 +238,38 @@ def setup(app):
     setup.confdir = app.confdir
 
     options = {
-        'alt': directives.unchanged,
-        'height': directives.length_or_unitless,
-        'width': directives.length_or_percentage_or_unitless,
-        'scale': directives.nonnegative_int,
-        'align': _option_align,
-        'class': directives.class_option,
-        'include-source': _option_boolean,
-        'format': _option_format,
-        'context': _option_context,
-        'nofigs': directives.flag,
-        'encoding': directives.encoding,
-        'graph2use': _option_graph2use,
-        'simple_form': _option_boolean
+        "alt": directives.unchanged,
+        "height": directives.length_or_unitless,
+        "width": directives.length_or_percentage_or_unitless,
+        "scale": directives.nonnegative_int,
+        "align": _option_align,
+        "class": directives.class_option,
+        "include-source": _option_boolean,
+        "format": _option_format,
+        "context": _option_context,
+        "nofigs": directives.flag,
+        "encoding": directives.encoding,
+        "graph2use": _option_graph2use,
+        "simple_form": _option_boolean,
     }
 
-    app.add_directive('workflow', wf_directive, True, (0, 2, False), **options)
-    app.add_config_value('graph2use', 'hierarchical', 'html')
-    app.add_config_value('simple_form', True, 'html')
-    app.add_config_value('wf_pre_code', None, True)
-    app.add_config_value('wf_include_source', False, True)
-    app.add_config_value('wf_html_show_source_link', True, True)
-    app.add_config_value('wf_formats', ['png', 'svg', 'pdf'], True)
-    app.add_config_value('wf_basedir', None, True)
-    app.add_config_value('wf_html_show_formats', True, True)
-    app.add_config_value('wf_rcparams', {}, True)
-    app.add_config_value('wf_apply_rcparams', False, True)
-    app.add_config_value('wf_working_directory', None, True)
-    app.add_config_value('wf_template', None, True)
+    app.add_directive("workflow", wf_directive, True, (0, 2, False), **options)
+    app.add_config_value("graph2use", "hierarchical", "html")
+    app.add_config_value("simple_form", True, "html")
+    app.add_config_value("wf_pre_code", None, True)
+    app.add_config_value("wf_include_source", False, True)
+    app.add_config_value("wf_html_show_source_link", True, True)
+    app.add_config_value("wf_formats", ["png", "svg", "pdf"], True)
+    app.add_config_value("wf_basedir", None, True)
+    app.add_config_value("wf_html_show_formats", True, True)
+    app.add_config_value("wf_rcparams", {}, True)
+    app.add_config_value("wf_apply_rcparams", False, True)
+    app.add_config_value("wf_working_directory", None, True)
+    app.add_config_value("wf_template", None, True)
 
-    app.connect('doctree-read'.encode()
-                if PY2 else 'doctree-read', mark_wf_labels)
+    app.connect("doctree-read", mark_wf_labels)
 
-    metadata = {'parallel_read_safe': True, 'parallel_write_safe': True}
+    metadata = {"parallel_read_safe": True, "parallel_write_safe": True}
     return metadata
 
 
@@ -291,11 +281,11 @@ def setup(app):
 def contains_doctest(text):
     try:
         # check if it's valid Python as-is
-        compile(text, '<string>', 'exec')
+        compile(text, "<string>", "exec")
         return False
     except SyntaxError:
         pass
-    r = re.compile(r'^\s*>>>', re.M)
+    r = re.compile(r"^\s*>>>", re.M)
     m = r.search(text)
     return bool(m)
 
@@ -310,7 +300,7 @@ def unescape_doctest(text):
 
     code = ""
     for line in text.split("\n"):
-        m = re.match(r'^\s*(>>>|\.\.\.) (.*)$', line)
+        m = re.match(r"^\s*(>>>|\.\.\.) (.*)$", line)
         if m:
             code += m.group(2) + "\n"
         elif line.strip():
@@ -413,9 +403,10 @@ def out_of_date(original, derived):
     Returns True if derivative is out-of-date wrt original,
     both of which are full file paths.
     """
-    return (not os.path.exists(derived)
-            or (os.path.exists(original)
-                and os.stat(derived).st_mtime < os.stat(original).st_mtime))
+    return not os.path.exists(derived) or (
+        os.path.exists(original)
+        and os.stat(derived).st_mtime < os.stat(original).st_mtime
+    )
 
 
 class GraphError(RuntimeError):
@@ -438,14 +429,16 @@ def run_code(code, code_path, ns=None, function_name=None):
             os.chdir(setup.config.wf_working_directory)
         except OSError as err:
             raise OSError(
-                str(err) + '\n`wf_working_directory` option in'
-                'Sphinx configuration file must be a valid '
-                'directory path')
+                str(err) + "\n`wf_working_directory` option in"
+                "Sphinx configuration file must be a valid "
+                "directory path"
+            )
         except TypeError as err:
             raise TypeError(
-                str(err) + '\n`wf_working_directory` option in '
-                'Sphinx configuration file must be a string or '
-                'None')
+                str(err) + "\n`wf_working_directory` option in "
+                "Sphinx configuration file must be a string or "
+                "None"
+            )
         sys.path.insert(0, setup.config.wf_working_directory)
     elif code_path is not None:
         dirname = os.path.abspath(os.path.dirname(code_path))
@@ -458,11 +451,7 @@ def run_code(code, code_path, ns=None, function_name=None):
 
     # Redirect stdout
     stdout = sys.stdout
-    if PY3:
-        sys.stdout = io.StringIO()
-    else:
-        from cStringIO import StringIO
-        sys.stdout = StringIO()
+    sys.stdout = io.StringIO()
 
     # Assign a do-nothing print function to the namespace.  There
     # doesn't seem to be any other way to provide a way to (not) print
@@ -478,7 +467,7 @@ def run_code(code, code_path, ns=None, function_name=None):
             if not ns:
                 if setup.config.wf_pre_code is not None:
                     exec(str(setup.config.wf_pre_code), ns)
-            ns['print'] = _dummy_print
+            ns["print"] = _dummy_print
             if "__main__" in code:
                 exec("__name__ = '__main__'", ns)
             code = remove_coding(code)
@@ -496,18 +485,18 @@ def run_code(code, code_path, ns=None, function_name=None):
 
 
 def get_wf_formats(config):
-    default_dpi = {'png': 80, 'hires.png': 200, 'pdf': 200}
+    default_dpi = {"png": 80, "hires.png": 200, "pdf": 200}
     formats = []
     wf_formats = config.wf_formats
     if isinstance(wf_formats, (str, bytes)):
         # String Sphinx < 1.3, Split on , to mimic
         # Sphinx 1.3 and later. Sphinx 1.3 always
         # returns a list.
-        wf_formats = wf_formats.split(',')
+        wf_formats = wf_formats.split(",")
     for fmt in wf_formats:
         if isinstance(fmt, (str, bytes)):
-            if ':' in fmt:
-                suffix, dpi = fmt.split(':')
+            if ":" in fmt:
+                suffix, dpi = fmt.split(":")
                 formats.append((str(suffix), int(dpi)))
             else:
                 formats.append((fmt, default_dpi.get(fmt, 80)))
@@ -518,17 +507,19 @@ def get_wf_formats(config):
     return formats
 
 
-def render_figures(code,
-                   code_path,
-                   output_dir,
-                   output_base,
-                   context,
-                   function_name,
-                   config,
-                   graph2use,
-                   simple_form,
-                   context_reset=False,
-                   close_figs=False):
+def render_figures(
+    code,
+    code_path,
+    output_dir,
+    output_base,
+    context,
+    function_name,
+    config,
+    graph2use,
+    simple_form,
+    context_reset=False,
+    close_figs=False,
+):
     """
     Run a nipype workflow creation script and save the graph in *output_dir*.
     Save the images under *output_dir* with file names derived from
@@ -546,12 +537,10 @@ def render_figures(code,
         try:
             img_path = img.filename(fmt)
             imgname, ext = os.path.splitext(os.path.basename(img_path))
-            ns['wf'].base_dir = output_dir
-            src = ns['wf'].write_graph(
-                imgname,
-                format=ext[1:],
-                graph2use=graph2use,
-                simple_form=simple_form)
+            ns["wf"].base_dir = output_dir
+            src = ns["wf"].write_graph(
+                imgname, format=ext[1:], graph2use=graph2use, simple_form=simple_form
+            )
             shutil.move(src, img_path)
         except Exception:
             raise GraphError(traceback.format_exc())
@@ -564,31 +553,33 @@ def render_figures(code,
 def run(arguments, content, options, state_machine, state, lineno):
     document = state_machine.document
     config = document.settings.env.config
-    nofigs = 'nofigs' in options
+    nofigs = "nofigs" in options
 
     formats = get_wf_formats(config)
     default_fmt = formats[0][0]
 
-    graph2use = options.get('graph2use', 'hierarchical')
-    simple_form = options.get('simple_form', True)
+    graph2use = options.get("graph2use", "hierarchical")
+    simple_form = options.get("simple_form", True)
 
-    options.setdefault('include-source', config.wf_include_source)
-    keep_context = 'context' in options
-    context_opt = None if not keep_context else options['context']
+    options.setdefault("include-source", config.wf_include_source)
+    keep_context = "context" in options
+    context_opt = None if not keep_context else options["context"]
 
-    rst_file = document.attributes['source']
+    rst_file = document.attributes["source"]
     rst_dir = os.path.dirname(rst_file)
 
     if len(arguments):
         if not config.wf_basedir:
-            source_file_name = os.path.join(setup.app.builder.srcdir,
-                                            directives.uri(arguments[0]))
+            source_file_name = os.path.join(
+                setup.app.builder.srcdir, directives.uri(arguments[0])
+            )
         else:
-            source_file_name = os.path.join(setup.confdir, config.wf_basedir,
-                                            directives.uri(arguments[0]))
+            source_file_name = os.path.join(
+                setup.confdir, config.wf_basedir, directives.uri(arguments[0])
+            )
 
         # If there is content, it will be passed as a caption.
-        caption = '\n'.join(content)
+        caption = "\n".join(content)
 
         # If the optional function name is provided, use it
         if len(arguments) == 2:
@@ -596,32 +587,32 @@ def run(arguments, content, options, state_machine, state, lineno):
         else:
             function_name = None
 
-        with io.open(source_file_name, 'r', encoding='utf-8') as fd:
+        with io.open(source_file_name, "r", encoding="utf-8") as fd:
             code = fd.read()
         output_base = os.path.basename(source_file_name)
     else:
         source_file_name = rst_file
         code = textwrap.dedent("\n".join([str(c) for c in content]))
-        counter = document.attributes.get('_wf_counter', 0) + 1
-        document.attributes['_wf_counter'] = counter
+        counter = document.attributes.get("_wf_counter", 0) + 1
+        document.attributes["_wf_counter"] = counter
         base, _ = os.path.splitext(os.path.basename(source_file_name))
-        output_base = '%s-%d.py' % (base, counter)
+        output_base = "%s-%d.py" % (base, counter)
         function_name = None
-        caption = ''
+        caption = ""
 
     base, source_ext = os.path.splitext(output_base)
-    if source_ext in ('.py', '.rst', '.txt'):
+    if source_ext in (".py", ".rst", ".txt"):
         output_base = base
     else:
-        source_ext = ''
+        source_ext = ""
 
     # ensure that LaTeX includegraphics doesn't choke in foo.bar.pdf filenames
-    output_base = output_base.replace('.', '-')
+    output_base = output_base.replace(".", "-")
 
     # is it in doctest format?
     is_doctest = contains_doctest(code)
-    if 'format' in options:
-        if options['format'] == 'python':
+    if "format" in options:
+        if options["format"] == "python":
             is_doctest = False
         else:
             is_doctest = True
@@ -634,7 +625,8 @@ def run(arguments, content, options, state_machine, state, lineno):
 
     # build_dir: where to place output files (temporarily)
     build_dir = os.path.join(
-        os.path.dirname(setup.app.doctreedir), 'wf_directive', source_rel_dir)
+        os.path.dirname(setup.app.doctreedir), "wf_directive", source_rel_dir
+    )
     # get rid of .. in paths, also changes pathsep
     # see note in Python docs for warning about symbolic links on Windows.
     # need to compare source and dest paths at end
@@ -644,22 +636,21 @@ def run(arguments, content, options, state_machine, state, lineno):
         os.makedirs(build_dir)
 
     # output_dir: final location in the builder's directory
-    dest_dir = os.path.abspath(
-        os.path.join(setup.app.builder.outdir, source_rel_dir))
+    dest_dir = os.path.abspath(os.path.join(setup.app.builder.outdir, source_rel_dir))
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir)  # no problem here for me, but just use built-ins
 
     # how to link to files from the RST file
     dest_dir_link = os.path.join(
-        relpath(setup.confdir, rst_dir), source_rel_dir).replace(
-            os.path.sep, '/')
+        relpath(setup.confdir, rst_dir), source_rel_dir
+    ).replace(os.path.sep, "/")
     try:
-        build_dir_link = relpath(build_dir, rst_dir).replace(os.path.sep, '/')
+        build_dir_link = relpath(build_dir, rst_dir).replace(os.path.sep, "/")
     except ValueError:
         # on Windows, relpath raises ValueError when path and start are on
         # different mounts/drives
         build_dir_link = build_dir
-    source_link = dest_dir_link + '/' + output_base + source_ext
+    source_link = dest_dir_link + "/" + output_base + source_ext
 
     # make figures
     try:
@@ -673,35 +664,34 @@ def run(arguments, content, options, state_machine, state, lineno):
             config,
             graph2use,
             simple_form,
-            context_reset=context_opt == 'reset',
-            close_figs=context_opt == 'close-figs')
+            context_reset=context_opt == "reset",
+            close_figs=context_opt == "close-figs",
+        )
         errors = []
     except GraphError as err:
         reporter = state.memo.reporter
         sm = reporter.system_message(
             2,
-            "Exception occurred in plotting %s\n from %s:\n%s" %
-            (output_base, source_file_name, err),
-            line=lineno)
+            "Exception occurred in plotting %s\n from %s:\n%s"
+            % (output_base, source_file_name, err),
+            line=lineno,
+        )
         results = [(code, [])]
         errors = [sm]
 
     # Properly indent the caption
-    caption = '\n'.join(
-        '      ' + line.strip() for line in caption.split('\n'))
+    caption = "\n".join("      " + line.strip() for line in caption.split("\n"))
 
     # generate output restructuredtext
     total_lines = []
     for j, (code_piece, images) in enumerate(results):
-        if options['include-source']:
+        if options["include-source"]:
             if is_doctest:
-                lines = ['']
-                lines += [row.rstrip() for row in code_piece.split('\n')]
+                lines = [""]
+                lines += [row.rstrip() for row in code_piece.split("\n")]
             else:
-                lines = ['.. code-block:: python', '']
-                lines += [
-                    '    %s' % row.rstrip() for row in code_piece.split('\n')
-                ]
+                lines = [".. code-block:: python", ""]
+                lines += ["    %s" % row.rstrip() for row in code_piece.split("\n")]
             source_code = "\n".join(lines)
         else:
             source_code = ""
@@ -710,8 +700,9 @@ def run(arguments, content, options, state_machine, state, lineno):
             images = []
 
         opts = [
-            ':%s: %s' % (key, val) for key, val in list(options.items())
-            if key in ('alt', 'height', 'width', 'scale', 'align', 'class')
+            ":%s: %s" % (key, val)
+            for key, val in list(options.items())
+            if key in ("alt", "height", "width", "scale", "align", "class")
         ]
 
         only_html = ".. only:: html"
@@ -739,7 +730,8 @@ def run(arguments, content, options, state_machine, state, lineno):
             images=images,
             source_code=source_code,
             html_show_formats=config.wf_html_show_formats and len(images),
-            caption=caption)
+            caption=caption,
+        )
 
         total_lines.extend(result.split("\n"))
         total_lines.extend("\n")
@@ -748,7 +740,7 @@ def run(arguments, content, options, state_machine, state, lineno):
         state_machine.insert_input(total_lines, source=source_file_name)
 
     # copy image files to builder's output directory, if necessary
-    _mkdirp(dest_dir)
+    os.makedirs(dest_dir, exist_ok=True)
     for code_piece, images in results:
         for img in images:
             for fn in img.filenames():
@@ -758,7 +750,7 @@ def run(arguments, content, options, state_machine, state, lineno):
 
     # copy script (if necessary)
     target_name = os.path.join(dest_dir, output_base + source_ext)
-    with io.open(target_name, 'w', encoding="utf-8") as f:
+    with io.open(target_name, "w", encoding="utf-8") as f:
         if source_file_name == rst_file:
             code_escaped = unescape_doctest(code)
         else:

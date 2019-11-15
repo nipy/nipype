@@ -2,9 +2,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Utility routines for workflow graphs"""
-from __future__ import print_function, division, unicode_literals, absolute_import
-from builtins import str, open, next, zip, range
-
 import os
 import sys
 import pickle
@@ -12,6 +9,7 @@ from collections import defaultdict
 import re
 from copy import deepcopy
 from glob import glob
+from pathlib import Path
 
 from traceback import format_exception
 from hashlib import sha1
@@ -19,17 +17,12 @@ from hashlib import sha1
 from functools import reduce
 
 import numpy as np
-from future import standard_library
 
 from ... import logging, config, LooseVersion
 from ...utils.filemanip import (
-    Path,
-    path_mkdir,
     indirectory,
     relpath,
-    makedirs,
     fname_presuffix,
-    to_str,
     ensure_list,
     get_related_files,
     save_json,
@@ -38,7 +31,6 @@ from ...utils.filemanip import (
     write_rst_header,
     write_rst_dict,
     write_rst_list,
-    FileNotFoundError,
 )
 from ...utils.misc import str2bool
 from ...utils.functions import create_function_from_source
@@ -54,14 +46,9 @@ from ...interfaces.base import CommandLine
 from ...interfaces.utility import IdentityInterface
 from ...utils.provenance import ProvStore, pm, nipype_ns, get_id
 
-try:
-    from inspect import signature
-except ImportError:
-    from funcsigs import signature
+from inspect import signature
 
-standard_library.install_aliases()
 logger = logging.getLogger("nipype.workflow")
-PY3 = sys.version_info[0] > 2
 
 
 def _parameterization_dir(param):
@@ -127,7 +114,7 @@ def write_node_report(node, result=None, is_mapnode=False):
 
     cwd = node.output_dir()
     report_file = Path(cwd) / "_report" / "report.rst"
-    path_mkdir(report_file.parent, exist_ok=True, parents=True)
+    report_file.parent.mkdir(exist_ok=True, parents=True)
 
     lines = [
         write_rst_header("Node: %s" % get_print_name(node), level=0),
@@ -405,8 +392,6 @@ def format_node(node, format="python", include_config=False):
         if include_config:
             lines = [
                 importline,
-                "from future import standard_library",
-                "standard_library.install_aliases()",
                 "from collections import OrderedDict",
                 comment,
                 nodedef,
@@ -618,7 +603,7 @@ def _get_valid_pathstr(pathstr):
     Replaces: ',' -> '.'
     """
     if not isinstance(pathstr, (str, bytes)):
-        pathstr = to_str(pathstr)
+        pathstr = str(pathstr)
     pathstr = pathstr.replace(os.sep, "..")
     pathstr = re.sub(r"""[][ (){}?:<>#!|"';]""", "", pathstr)
     pathstr = pathstr.replace(",", ".")
@@ -1389,7 +1374,7 @@ def export_graph(
     if base_dir is None:
         base_dir = os.getcwd()
 
-    makedirs(base_dir, exist_ok=True)
+    os.makedirs(base_dir, exist_ok=True)
     out_dot = fname_presuffix(
         dotfilename, suffix="_detailed.dot", use_ext=False, newpath=base_dir
     )
@@ -1697,7 +1682,7 @@ def write_workflow_resources(graph, filename=None, append=None):
     # If we append different runs, then we will see different
     # "bursts" of timestamps corresponding to those executions.
     if append and os.path.isfile(filename):
-        with open(filename, "r" if PY3 else "rb") as rsf:
+        with open(filename, "r") as rsf:
             big_dict = json.load(rsf)
 
     for _, node in enumerate(graph.nodes()):
@@ -1742,7 +1727,7 @@ def write_workflow_resources(graph, filename=None, append=None):
             big_dict["mapnode"] += [subidx] * nsamples
             big_dict["params"] += [params] * nsamples
 
-    with open(filename, "w" if PY3 else "wb") as rsf:
+    with open(filename, "w") as rsf:
         json.dump(big_dict, rsf, ensure_ascii=False)
 
     return filename
