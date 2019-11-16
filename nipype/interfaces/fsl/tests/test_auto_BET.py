@@ -126,6 +126,7 @@ def test_BET_outputs():
         outskin_mesh_file=dict(extensions=None,),
         outskull_mask_file=dict(extensions=None,),
         outskull_mesh_file=dict(extensions=None,),
+        skull_file=dict(extensions=None,),
         skull_mask_file=dict(extensions=None,),
     )
     outputs = BET.output_spec()
