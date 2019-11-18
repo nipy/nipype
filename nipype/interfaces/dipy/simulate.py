@@ -143,7 +143,7 @@ class SimulateMultiTensor(DipyBaseInterface):
         vfs = np.squeeze(
             nb.concat_images(
                 [nb.load(f, mmap=NUMPY_MMAP) for f in self.inputs.in_vfms]
-            ).get_data()
+            ).dataobj
         )
         if nballs == 1:
             vfs = vfs[..., np.newaxis]
@@ -151,7 +151,7 @@ class SimulateMultiTensor(DipyBaseInterface):
 
         # Generate a mask
         if isdefined(self.inputs.in_mask):
-            msk = nb.load(self.inputs.in_mask).get_data()
+            msk = np.asanyarray(nb.load(self.inputs.in_mask).dataobj)
             msk[msk > 0.0] = 1.0
             msk[msk < 1.0] = 0.0
         else:
@@ -165,7 +165,7 @@ class SimulateMultiTensor(DipyBaseInterface):
         ffsim = nb.concat_images(
             [nb.load(f, mmap=NUMPY_MMAP) for f in self.inputs.in_frac]
         )
-        ffs = np.nan_to_num(np.squeeze(ffsim.get_data()))  # fiber fractions
+        ffs = np.nan_to_num(np.squeeze(ffsim.dataobj))  # fiber fractions
         ffs = np.clip(ffs, 0.0, 1.0)
         if nsticks == 1:
             ffs = ffs[..., np.newaxis]
@@ -207,7 +207,7 @@ class SimulateMultiTensor(DipyBaseInterface):
         dirs = None
         for i in range(nsticks):
             f = self.inputs.in_dirs[i]
-            fd = np.nan_to_num(nb.load(f, mmap=NUMPY_MMAP).get_data())
+            fd = np.nan_to_num(nb.load(f, mmap=NUMPY_MMAP).dataobj)
             w = np.linalg.norm(fd, axis=3)[..., np.newaxis]
             w[w < np.finfo(float).eps] = 1.0
             fd /= w
@@ -230,7 +230,7 @@ class SimulateMultiTensor(DipyBaseInterface):
 
         mevals = [sf_evals] * nsticks + [[ba_evals[d]] * 3 for d in range(nballs)]
 
-        b0 = b0_im.get_data()[msk > 0]
+        b0 = b0_im.get_fdata()[msk > 0]
         args = []
         for i in range(nvox):
             args.append(

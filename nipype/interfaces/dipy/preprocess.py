@@ -166,7 +166,7 @@ class Denoise(DipyBaseInterface):
         settings = dict(mask=None, rician=(self.inputs.noise_model == "rician"))
 
         if isdefined(self.inputs.in_mask):
-            settings["mask"] = nb.load(self.inputs.in_mask).get_data()
+            settings["mask"] = np.asanyarray(nb.load(self.inputs.in_mask).dataobj)
 
         if isdefined(self.inputs.patch_radius):
             settings["patch_radius"] = self.inputs.patch_radius
@@ -180,10 +180,10 @@ class Denoise(DipyBaseInterface):
 
         signal_mask = None
         if isdefined(self.inputs.signal_mask):
-            signal_mask = nb.load(self.inputs.signal_mask).get_data()
+            signal_mask = np.asanyarray(nb.load(self.inputs.signal_mask).dataobj)
         noise_mask = None
         if isdefined(self.inputs.noise_mask):
-            noise_mask = nb.load(self.inputs.noise_mask).get_data()
+            noise_mask = np.asanyarray(nb.load(self.inputs.noise_mask).dataobj)
 
         _, s = nlmeans_proxy(
             self.inputs.in_file,
@@ -224,7 +224,7 @@ def resample_proxy(in_file, order=3, new_zooms=None, out_file=None):
 
     img = nb.load(in_file, mmap=NUMPY_MMAP)
     hdr = img.header.copy()
-    data = img.get_data().astype(np.float32)
+    data = img.get_fdata(dtype=np.float32)
     affine = img.affine
     im_zooms = hdr.get_zooms()[:3]
 
@@ -264,7 +264,7 @@ def nlmeans_proxy(in_file, settings, snr=None, smask=None, nmask=None, out_file=
 
     img = nb.load(in_file, mmap=NUMPY_MMAP)
     hdr = img.header
-    data = img.get_data()
+    data = img.get_fdata()
     aff = img.affine
 
     if data.ndim < 4:

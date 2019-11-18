@@ -47,11 +47,11 @@ class DTI(DipyDiffusionInterface):
         gtab = self._get_gradient_table()
 
         img = nb.load(self.inputs.in_file)
-        data = img.get_data()
+        data = img.get_fdata()
         affine = img.affine
         mask = None
         if isdefined(self.inputs.mask_file):
-            mask = nb.load(self.inputs.mask_file).get_data()
+            mask = np.asanyarray(nb.load(self.inputs.mask_file).dataobj)
 
         # Fit it
         tenmodel = dti.TensorModel(gtab)
@@ -120,7 +120,7 @@ class TensorMode(DipyDiffusionInterface):
 
         # Load the 4D image files
         img = nb.load(self.inputs.in_file)
-        data = img.get_data()
+        data = img.get_fdata()
         affine = img.affine
 
         # Load the gradient strengths and directions
