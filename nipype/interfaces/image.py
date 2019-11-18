@@ -68,8 +68,8 @@ class Rescale(SimpleInterface):
         import nibabel as nb
 
         img = nb.load(self.inputs.in_file)
-        data = img.get_data()
-        ref_data = nb.load(self.inputs.ref_file).get_data()
+        data = img.get_fdata()
+        ref_data = nb.load(self.inputs.ref_file).get_fdata()
 
         in_mask = data > 0
         ref_mask = ref_data > 0
@@ -232,7 +232,7 @@ def _as_reoriented_backport(img, ornt):
     if np.array_equal(ornt, [[0, 1], [1, 1], [2, 1]]):
         return img
 
-    t_arr = nb.apply_orientation(img.get_data(), ornt)
+    t_arr = nb.apply_orientation(img.dataobj, ornt)
     new_aff = img.affine.dot(inv_ornt_aff(ornt, img.shape))
     reoriented = img.__class__(t_arr, new_aff, img.header)
 

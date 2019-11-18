@@ -89,10 +89,10 @@ class Distance(BaseInterface):
     def _eucl_min(self, nii1, nii2):
         from scipy.spatial.distance import cdist, euclidean
 
-        origdata1 = nii1.get_data().astype(np.bool)
+        origdata1 = np.asanyarray(nii1.dataobj).astype(np.bool)
         border1 = self._find_border(origdata1)
 
-        origdata2 = nii2.get_data().astype(np.bool)
+        origdata2 = np.asanyarray(nii2.dataobj).astype(np.bool)
         border2 = self._find_border(origdata2)
 
         set1_coordinates = self._get_coordinates(border1, nii1.affine)
@@ -111,16 +111,14 @@ class Distance(BaseInterface):
         from scipy.spatial.distance import cdist
         from scipy.ndimage.measurements import center_of_mass, label
 
-        origdata1 = np.logical_and(
-            nii1.get_data() != 0, np.logical_not(np.isnan(nii1.get_data()))
-        )
+        origdata1 = np.asanyarray(nii1.dataobj)
+        origdata1 = (origdata1 != 0) & ~np.isnan(origdata1)
         cog_t = np.array(center_of_mass(origdata1.copy())).reshape(-1, 1)
         cog_t = np.vstack((cog_t, np.array([1])))
         cog_t_coor = np.dot(nii1.affine, cog_t)[:3, :]
 
-        origdata2 = np.logical_and(
-            nii2.get_data() != 0, np.logical_not(np.isnan(nii2.get_data()))
-        )
+        origdata2 = np.asanyarray(nii2.dataobj)
+        origdata2 = (origdata2 != 0) & ~np.isnan(origdata2)
         (labeled_data, n_labels) = label(origdata2)
 
         cogs = np.ones((4, n_labels))
@@ -137,10 +135,10 @@ class Distance(BaseInterface):
     def _eucl_mean(self, nii1, nii2, weighted=False):
         from scipy.spatial.distance import cdist
 
-        origdata1 = nii1.get_data().astype(np.bool)
+        origdata1 = np.asanyarray(nii1.dataobj).astype(np.bool)
         border1 = self._find_border(origdata1)
 
-        origdata2 = nii2.get_data().astype(np.bool)
+        origdata2 = np.asanyarray(nii2.dataobj).astype(np.bool)
 
         set1_coordinates = self._get_coordinates(border1, nii1.affine)
         set2_coordinates = self._get_coordinates(origdata2, nii2.affine)
@@ -159,26 +157,26 @@ class Distance(BaseInterface):
         plt.close()
 
         if weighted:
-            return np.average(min_dist_matrix, weights=nii2.get_data()[origdata2].flat)
+            return np.average(min_dist_matrix, weights=nii2.dataobj[origdata2].flat)
         else:
             return np.mean(min_dist_matrix)
 
     def _eucl_max(self, nii1, nii2):
         from scipy.spatial.distance import cdist
 
-        origdata1 = nii1.get_data()
+        origdata1 = np.asanyarray(nii1.dataobj)
         origdata1 = np.logical_not(np.logical_or(origdata1 == 0, np.isnan(origdata1)))
-        origdata2 = nii2.get_data()
+        origdata2 = np.asanyarray(nii2.dataobj)
         origdata2 = np.logical_not(np.logical_or(origdata2 == 0, np.isnan(origdata2)))
 
         if isdefined(self.inputs.mask_volume):
-            maskdata = nb.load(self.inputs.mask_volume).get_data()
+            maskdata = np.asanyarray(nb.load(self.inputs.mask_volume).dataobj)
             maskdata = np.logical_not(np.logical_or(maskdata == 0, np.isnan(maskdata)))
             origdata1 = np.logical_and(maskdata, origdata1)
             origdata2 = np.logical_and(maskdata, origdata2)
 
         if origdata1.max() == 0 or origdata2.max() == 0:
-            return np.NaN
+            return np.nan
 
         border1 = self._find_border(origdata1)
         border2 = self._find_border(origdata2)
@@ -302,19 +300,17 @@ class Overlap(BaseInterface):
         scale = 1.0
 
         if self.inputs.vol_units == "mm":
-            voxvol = nii1.header.get_zooms()
-            for i in range(nii1.get_data().ndim - 1):
-                scale = scale * voxvol[i]
+            scale = np.prod(nii1.header.get_zooms()[:3])
 
-        data1 = nii1.get_data()
+        data1 = np.asanyarray(nii1.dataobj)
         data1[np.logical_or(data1 < 0, np.isnan(data1))] = 0
         max1 = int(data1.max())
         data1 = data1.astype(np.min_scalar_type(max1))
-        data2 = nii2.get_data().astype(np.min_scalar_type(max1))
+        data2 = np.asanyarray(nii2.dataobj).astype(np.min_scalar_type(max1))
         data2[np.logical_or(data1 < 0, np.isnan(data1))] = 0
 
         if isdefined(self.inputs.mask_volume):
-            maskdata = nb.load(self.inputs.mask_volume).get_data()
+            maskdata = np.asanyarray(nb.load(self.inputs.mask_volume).dataobj)
             maskdata = ~np.logical_or(maskdata == 0, np.isnan(maskdata))
             data1[~maskdata] = 0
             data2[~maskdata] = 0
@@ -445,8 +441,8 @@ class FuzzyOverlap(SimpleInterface):
 
     def _run_interface(self, runtime):
         # Load data
-        refdata = nb.concat_images(self.inputs.in_ref).get_data()
-        tstdata = nb.concat_images(self.inputs.in_tst).get_data()
+        refdata = np.asanyarray(nb.concat_images(self.inputs.in_ref).dataobj)
+        tstdata = np.asanyarray(nb.concat_images(self.inputs.in_tst).dataobj)
 
         # Data must have same shape
         if not refdata.shape == tstdata.shape:
@@ -460,8 +456,7 @@ class FuzzyOverlap(SimpleInterface):
         # Load mask
         mask = np.ones_like(refdata, dtype=bool)
         if isdefined(self.inputs.in_mask):
-            mask = nb.load(self.inputs.in_mask).get_data()
-            mask = mask > 0
+            mask = np.asanyarray(nb.load(self.inputs.in_mask).dataobj) > 0
             mask = np.repeat(mask[..., np.newaxis], ncomp, -1)
             assert mask.shape == refdata.shape
 
@@ -565,8 +560,8 @@ class ErrorMap(BaseInterface):
     def _run_interface(self, runtime):
         # Get two numpy data matrices
         nii_ref = nb.load(self.inputs.in_ref)
-        ref_data = np.squeeze(nii_ref.get_data())
-        tst_data = np.squeeze(nb.load(self.inputs.in_tst).get_data())
+        ref_data = np.squeeze(nii_ref.dataobj)
+        tst_data = np.squeeze(nb.load(self.inputs.in_tst).dataobj)
         assert ref_data.ndim == tst_data.ndim
 
         # Load mask
@@ -578,7 +573,7 @@ class ErrorMap(BaseInterface):
             mapshape = ref_data.shape[:-1]
 
         if isdefined(self.inputs.mask):
-            msk = nb.load(self.inputs.mask).get_data()
+            msk = np.asanyarray(nb.load(self.inputs.mask).dataobj)
             if mapshape != msk.shape:
                 raise RuntimeError(
                     "Mask should match volume shape, \
@@ -701,7 +696,7 @@ class Similarity(NipyBaseInterface):
         vol1_nii = nb.load(self.inputs.volume1)
         vol2_nii = nb.load(self.inputs.volume2)
 
-        dims = vol1_nii.get_data().ndim
+        dims = len(vol1_nii.shape)
 
         if dims == 3 or dims == 2:
             vols1 = [vol1_nii]
@@ -716,12 +711,12 @@ class Similarity(NipyBaseInterface):
             )
 
         if isdefined(self.inputs.mask1):
-            mask1 = nb.load(self.inputs.mask1).get_data() == 1
+            mask1 = np.asanyarray(nb.load(self.inputs.mask1).dataobj) == 1
         else:
             mask1 = None
 
         if isdefined(self.inputs.mask2):
-            mask2 = nb.load(self.inputs.mask2).get_data() == 1
+            mask2 = np.asanyarray(nb.load(self.inputs.mask2).dataobj) == 2
         else:
             mask2 = None
 

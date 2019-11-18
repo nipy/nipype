@@ -423,9 +423,9 @@ class AssertEqual(BaseInterface):
     def _run_interface(self, runtime):
         import nibabel as nb
 
-        data1 = nb.load(self.inputs.volume1).get_data()
-        data2 = nb.load(self.inputs.volume2).get_data()
+        data1 = np.asanyarray(nb.load(self.inputs.volume1))
+        data2 = np.asanyarray(nb.load(self.inputs.volume2))
 
-        if not np.all(data1 == data2):
+        if not np.array_equal(data1, data2):
             raise RuntimeError("Input images are not exactly equal")
         return runtime
