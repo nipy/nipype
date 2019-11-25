@@ -201,7 +201,8 @@ def cmat(
     stats["orig_n_fib"] = len(fib)
 
     roi = nb.load(roi_file, mmap=NUMPY_MMAP)
-    roiData = roi.get_data()
+    # Preserve on-disk type unless scaled
+    roiData = np.asanyarray(roi.dataobj)
     roiVoxelSize = roi.header.get_zooms()
     (endpoints, endpointsmm) = create_endpoints_array(fib, roiVoxelSize)
 
@@ -432,9 +433,7 @@ def cmat(
 
     fiberlabels_fname = op.abspath(endpoint_name + "_filtered_fiberslabel.npy")
     iflogger.info("Storing all fiber labels (with orphans) as %s", fiberlabels_fname)
-    np.save(
-        fiberlabels_fname, np.array(fiberlabels, dtype=np.int32),
-    )
+    np.save(fiberlabels_fname, np.array(fiberlabels, dtype=np.int32))
 
     fiberlabels_noorphans_fname = op.abspath(endpoint_name + "_final_fiberslabels.npy")
     iflogger.info(
@@ -840,7 +839,8 @@ class ROIGen(BaseInterface):
         aparcpath, aparcname, aparcext = split_filename(aparc_aseg_file)
         iflogger.info("Using Aparc+Aseg file: %s", aparcname + aparcext)
         niiAPARCimg = nb.load(aparc_aseg_file, mmap=NUMPY_MMAP)
-        niiAPARCdata = niiAPARCimg.get_data()
+        # Preserve on-disk type
+        niiAPARCdata = np.asanyarray(niiAPARCimg.dataobj)
         niiDataLabels = np.unique(niiAPARCdata)
         numDataLabels = np.size(niiDataLabels)
         iflogger.info("Number of labels in image: %s", numDataLabels)
@@ -1057,7 +1057,8 @@ def create_nodes(roi_file, resolution_network_file, out_filename):
     G = nx.Graph()
     gp = nx.read_graphml(resolution_network_file)
     roi_image = nb.load(roi_file, mmap=NUMPY_MMAP)
-    roiData = roi_image.get_data()
+    # Preserve on-disk type unless scaled
+    roiData = np.asanyarray(roi_image.dataobj)
     for u, d in gp.nodes(data=True):
         G.add_node(int(u), **d)
         xyz = tuple(

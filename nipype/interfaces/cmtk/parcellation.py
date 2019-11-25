@@ -345,7 +345,7 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name, dilation):
     parval = cmp_config._get_lausanne_parcellation("Lausanne2008")[parcellation_name]
     pgpath = parval["node_information_graphml"]
     aseg = nb.load(op.join(fs_dir, "mri", "aseg.nii.gz"))
-    asegd = aseg.get_data()
+    asegd = np.asanyarray(aseg.dataobj)
 
     # identify cortical voxels, right (3) and left (42) hemispheres
     idxr = np.where(asegd == 3)
@@ -420,7 +420,7 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name, dilation):
             runCmd(mri_cmd, log)
 
             tmp = nb.load(op.join(output_dir, "tmp.nii.gz"))
-            tmpd = tmp.get_data()
+            tmpd = np.asanyarray(tmp.dataobj)
 
             # find voxel and set them to intensityvalue in rois
             idx = np.where(tmpd == 1)
@@ -478,7 +478,7 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
     ]
     # load ribbon as basis for white matter mask
     fsmask = nb.load(op.join(fs_dir, "mri", "ribbon.nii.gz"))
-    fsmaskd = fsmask.get_data()
+    fsmaskd = np.asanyarray(fsmask.dataobj)
 
     wmmask = np.zeros(fsmaskd.shape)
     # extract right and left white matter
@@ -490,7 +490,7 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
 
     # remove subcortical nuclei from white matter mask
     aseg = nb.load(op.join(fs_dir, "mri", "aseg.nii.gz"))
-    asegd = aseg.get_data()
+    asegd = np.asanyarray(aseg.dataobj)
 
     # need binary erosion function
     imerode = nd.binary_erosion
@@ -583,7 +583,7 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
 
     # ADD voxels from 'cc_unknown.nii.gz' dataset
     ccun = nb.load(op.join(fs_dir, "label", "cc_unknown.nii.gz"))
-    ccund = ccun.get_data()
+    ccund = np.asanyarray(ccun.dataobj)
     idx = np.where(ccund != 0)
     iflogger.info("Add corpus callosum and unknown to wm mask")
     wmmask[idx] = 1
@@ -594,7 +594,7 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
         parcellation_name,
     )
     roi = nb.load(op.join(op.curdir, "ROI_%s.nii.gz" % parcellation_name))
-    roid = roi.get_data()
+    roid = np.asanyarray(roi.dataobj)
     assert roid.shape[0] == wmmask.shape[0]
     pg = nx.read_graphml(pgpath)
     for brk, brv in pg.nodes(data=True):
