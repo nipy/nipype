@@ -19,7 +19,7 @@ def test_ActivationCount(tmpdir):
     diff = nb.load(res.outputs.out_file)
     pos = nb.load(res.outputs.acm_pos)
     neg = nb.load(res.outputs.acm_neg)
-    assert np.allclose(diff.get_data(), pos.get_data() - neg.get_data())
+    assert np.allclose(diff.get_fdata(), pos.get_fdata() - neg.get_fdata())
 
 
 @pytest.mark.parametrize(
@@ -43,8 +43,8 @@ def test_ActivationCount_normaldistr(tmpdir, threshold, above_thresh):
     pos = nb.load(res.outputs.acm_pos)
     neg = nb.load(res.outputs.acm_neg)
     assert np.isclose(
-        pos.get_data().mean(), above_thresh * 1.0e-2, rtol=0.1, atol=1.0e-4
+        pos.get_fdata().mean(), above_thresh * 1.0e-2, rtol=0.1, atol=1.0e-4
     )
     assert np.isclose(
-        neg.get_data().mean(), above_thresh * 1.0e-2, rtol=0.1, atol=1.0e-4
+        neg.get_fdata().mean(), above_thresh * 1.0e-2, rtol=0.1, atol=1.0e-4
     )
