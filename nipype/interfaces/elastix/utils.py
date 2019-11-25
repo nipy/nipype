@@ -85,7 +85,7 @@ class EditTransform(BaseInterface):
     input_spec = EditTransformInputSpec
     output_spec = EditTransformOutputSpec
     _out_file = ""
-    _pattern = '\((?P<entry>%s\s"?)([-\.\s\w]+)("?\))'
+    _pattern = r'\((?P<entry>%s\s"?)([-\.\s\w]+)("?\))'
 
     _interp = {"nearest": 0, "linear": 1, "cubic": 3}
 
@@ -103,14 +103,14 @@ class EditTransform(BaseInterface):
             p = re.compile(
                 (self._pattern % "ResultImagePixelType").decode("string-escape")
             )
-            rep = "(\g<entry>%s\g<3>" % self.inputs.output_type
+            rep = r"(\g<entry>%s\g<3>" % self.inputs.output_type
             contents = p.sub(rep, contents)
 
         if isdefined(self.inputs.output_format):
             p = re.compile(
                 (self._pattern % "ResultImageFormat").decode("string-escape")
             )
-            rep = "(\g<entry>%s\g<3>" % self.inputs.output_format
+            rep = r"(\g<entry>%s\g<3>" % self.inputs.output_format
             contents = p.sub(rep, contents)
 
         if isdefined(self.inputs.interpolation):
@@ -119,7 +119,7 @@ class EditTransform(BaseInterface):
                     "string-escape"
                 )
             )
-            rep = "(\g<entry>%s\g<3>" % self._interp[self.inputs.interpolation]
+            rep = r"(\g<entry>%s\g<3>" % self._interp[self.inputs.interpolation]
             contents = p.sub(rep, contents)
 
         if isdefined(self.inputs.reference_image):
@@ -130,17 +130,17 @@ class EditTransform(BaseInterface):
 
             size = " ".join(["%01d" % s for s in im.shape])
             p = re.compile((self._pattern % "Size").decode("string-escape"))
-            rep = "(\g<entry>%s\g<3>" % size
+            rep = r"(\g<entry>%s\g<3>" % size
             contents = p.sub(rep, contents)
 
             index = " ".join(["0" for s in im.shape])
             p = re.compile((self._pattern % "Index").decode("string-escape"))
-            rep = "(\g<entry>%s\g<3>" % index
+            rep = r"(\g<entry>%s\g<3>" % index
             contents = p.sub(rep, contents)
 
             spacing = " ".join(["%0.4f" % f for f in im.header.get_zooms()])
             p = re.compile((self._pattern % "Spacing").decode("string-escape"))
-            rep = "(\g<entry>%s\g<3>" % spacing
+            rep = r"(\g<entry>%s\g<3>" % spacing
             contents = p.sub(rep, contents)
 
             itkmat = np.eye(4)
@@ -156,7 +156,7 @@ class EditTransform(BaseInterface):
             # contents = p.sub(rep, contents)
 
             p = re.compile((self._pattern % "Origin").decode("string-escape"))
-            rep = "(\g<entry>%s\g<3>" % orig
+            rep = r"(\g<entry>%s\g<3>" % orig
             contents = p.sub(rep, contents)
 
         with open(self._get_outfile(), "w") as of:

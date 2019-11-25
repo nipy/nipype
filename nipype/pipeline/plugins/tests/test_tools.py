@@ -21,12 +21,12 @@ def test_report_crash():
             mock_node = mock.MagicMock(name="mock_node")
             mock_node._id = "an_id"
             mock_node.config = {
-                "execution": {"crashdump_dir": ".", "crashfile_format": "pklz",}
+                "execution": {"crashdump_dir": ".", "crashfile_format": "pklz"}
             }
 
             actual_crashfile = report_crash(mock_node)
 
-            expected_crashfile = re.compile(".*/crash-.*-an_id-[0-9a-f\-]*.pklz")
+            expected_crashfile = re.compile(r".*/crash-.*-an_id-[0-9a-f\-]*.pklz")
 
             assert (
                 expected_crashfile.match(actual_crashfile).group() == actual_crashfile

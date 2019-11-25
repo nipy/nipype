@@ -1017,7 +1017,7 @@ class SurfaceSnapshots(FSCommand):
             # extension strings
             if value.endswith(".annot"):
                 value = value[:-6]
-            if re.match("%s[\.\-_]" % self.inputs.hemi, value[:3]):
+            if re.match(r"%s[\.\-_]" % self.inputs.hemi, value[:3]):
                 value = value[3:]
             return "-annotation %s" % value
         return super(SurfaceSnapshots, self)._format_arg(name, spec, value)
@@ -1145,7 +1145,7 @@ class ImageInfo(FSCommand):
     output_spec = ImageInfoOutputSpec
 
     def info_regexp(self, info, field, delim="\n"):
-        m = re.search("%s\s*:\s+(.+?)%s" % (field, delim), info)
+        m = re.search(r"%s\s*:\s+(.+?)%s" % (field, delim), info)
         if m:
             return m.group(1)
         else:
@@ -1175,7 +1175,7 @@ class ImageInfo(FSCommand):
         outputs.ph_enc_dir = self.info_regexp(info, "PhEncDir")
 
         # File format and datatype are both keyed by "type"
-        ftype, dtype = re.findall("%s\s*:\s+(.+?)\n" % "type", info)
+        ftype, dtype = re.findall(r"%s\s*:\s+(.+?)\n" % "type", info)
         outputs.file_format = ftype
         outputs.data_type = dtype
 
