@@ -50,7 +50,9 @@ def test_reorientation_backport():
 
         # Reorientation changes affine and data array
         assert not np.allclose(img.affine, reoriented_a.affine)
-        assert not (flips_only and np.allclose(img.get_data(), reoriented_a.get_data()))
+        assert not (
+            flips_only and np.allclose(img.get_fdata(), reoriented_a.get_fdata())
+        )
         # Dimension info changes iff axes are reordered
         assert flips_only == np.array_equal(
             img.header.get_dim_info(), reoriented_a.header.get_dim_info()
@@ -58,7 +60,7 @@ def test_reorientation_backport():
 
         # Both approaches produce equivalent images
         assert np.allclose(reoriented_a.affine, reoriented_b.affine)
-        assert np.array_equal(reoriented_a.get_data(), reoriented_b.get_data())
+        assert np.array_equal(reoriented_a.get_fdata(), reoriented_b.get_fdata())
         assert np.array_equal(
             reoriented_a.header.get_dim_info(), reoriented_b.header.get_dim_info()
         )
