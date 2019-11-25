@@ -41,12 +41,12 @@ class ICC(BaseInterface):
     output_spec = ICCOutputSpec
 
     def _run_interface(self, runtime):
-        maskdata = nb.load(self.inputs.mask).get_data()
+        maskdata = nb.load(self.inputs.mask).get_fdata()
         maskdata = np.logical_not(np.logical_or(maskdata == 0, np.isnan(maskdata)))
 
         session_datas = [
             [
-                nb.load(fname, mmap=NUMPY_MMAP).get_data()[maskdata].reshape(-1, 1)
+                nb.load(fname, mmap=NUMPY_MMAP).get_fdata()[maskdata].reshape(-1, 1)
                 for fname in sessions
             ]
             for sessions in self.inputs.subjects_sessions
@@ -66,17 +66,17 @@ class ICC(BaseInterface):
 
         nim = nb.load(self.inputs.subjects_sessions[0][0])
         new_data = np.zeros(nim.shape)
-        new_data[maskdata] = icc.reshape(-1,)
+        new_data[maskdata] = icc.reshape(-1)
         new_img = nb.Nifti1Image(new_data, nim.affine, nim.header)
         nb.save(new_img, "icc_map.nii")
 
         new_data = np.zeros(nim.shape)
-        new_data[maskdata] = session_var.reshape(-1,)
+        new_data[maskdata] = session_var.reshape(-1)
         new_img = nb.Nifti1Image(new_data, nim.affine, nim.header)
         nb.save(new_img, "session_var_map.nii")
 
         new_data = np.zeros(nim.shape)
-        new_data[maskdata] = subject_var.reshape(-1,)
+        new_data[maskdata] = subject_var.reshape(-1)
         new_img = nb.Nifti1Image(new_data, nim.affine, nim.header)
         nb.save(new_img, "subject_var_map.nii")
 

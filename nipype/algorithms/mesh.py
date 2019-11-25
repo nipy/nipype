@@ -113,9 +113,8 @@ class WarpPoints(TVTKBaseInterface):
 
         warps = []
         for axis in warp_dims:
-            wdata = axis.get_data()
+            wdata = axis.dataobj  # four_to_three ensures this is an array
             if np.any(wdata != 0):
-
                 warp = ndimage.map_coordinates(wdata, voxpoints.transpose())
             else:
                 warp = np.zeros((points.shape[0],))
