@@ -623,12 +623,10 @@ class CompCor(SimpleInterface):
         skip_vols = self.inputs.ignore_initial_volumes
         if skip_vols:
             imgseries = imgseries.__class__(
-                imgseries.get_data()[..., skip_vols:],
-                imgseries.affine,
-                imgseries.header,
+                imgseries.dataobj[..., skip_vols:], imgseries.affine, imgseries.header
             )
 
-        mask_images = self._process_masks(mask_images, imgseries.get_data())
+        mask_images = self._process_masks(mask_images, imgseries.dataobj)
 
         TR = 0
         if self.inputs.pre_filter == "cosine":
@@ -664,7 +662,7 @@ class CompCor(SimpleInterface):
             )
 
         components, filter_basis, metadata = compute_noise_components(
-            imgseries.get_data(),
+            imgseries.get_fdata(dtype=np.float32),
             mask_images,
             components_criterion,
             self.inputs.pre_filter,
@@ -837,8 +835,9 @@ class TCompCor(CompCor):
     def _process_masks(self, mask_images, timeseries=None):
         out_images = []
         self._mask_files = []
+        timeseries = np.asanyarray(timeseries)
         for i, img in enumerate(mask_images):
-            mask = img.get_data().astype(np.bool)
+            mask = np.asanyarray(img.dataobj).astype(np.bool)
             imgseries = timeseries[mask, :]
             imgseries = regress_poly(2, imgseries)[0]
             tSTD = _compute_tSTD(imgseries, 0, axis=-1)
@@ -924,7 +923,11 @@ class TSNR(BaseInterface):
             nb.load(filename, mmap=NUMPY_MMAP) for filename in self.inputs.in_file
         ]
         data = np.concatenate(
-            [vol.get_data().reshape(vol.shape[:3] + (-1,)) for vol in vollist], axis=3
+            [
+                vol.get_fdata(dtype=np.float32).reshape(vol.shape[:3] + (-1,))
+                for vol in vollist
+            ],
+            axis=3,
         )
         data = np.nan_to_num(data)
 
@@ -985,7 +988,7 @@ class NonSteadyStateDetector(BaseInterface):
     def _run_interface(self, runtime):
         in_nii = nb.load(self.inputs.in_file)
         global_signal = (
-            in_nii.get_data()[:, :, :, :50].mean(axis=0).mean(axis=0).mean(axis=0)
+            in_nii.dataobj[:, :, :, :50].mean(axis=0).mean(axis=0).mean(axis=0)
         )
 
         self._results = {"n_volumes_to_discard": is_outlier(global_signal)}
@@ -1032,8 +1035,8 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     from nitime.algorithms import AR_est_YW
     import warnings
 
-    func = nb.load(in_file, mmap=NUMPY_MMAP).get_data().astype(np.float32)
-    mask = nb.load(in_mask, mmap=NUMPY_MMAP).get_data().astype(np.uint8)
+    func = nb.load(in_file, mmap=NUMPY_MMAP).get_fdata(dtype=np.float32)
+    mask = np.asanyarray(nb.load(in_mask, mmap=NUMPY_MMAP).dataobj).astype(np.uint8)
 
     if len(func.shape) != 4:
         raise RuntimeError("Input fMRI dataset should be 4-dimensional")
@@ -1280,8 +1283,8 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
         for filename in mask_files:
             img = nb.load(filename, mmap=NUMPY_MMAP)
             if mask is None:
-                mask = img.get_data() > 0
-            np.logical_or(mask, img.get_data() > 0, mask)
+                mask = img.get_fdata() > 0
+            np.logical_or(mask, img.get_fdata() > 0, mask)
         img = nb.Nifti1Image(mask, img.affine, header=img.header)
         return [img]
 
@@ -1290,8 +1293,8 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
         for filename in mask_files:
             img = nb.load(filename, mmap=NUMPY_MMAP)
             if mask is None:
-                mask = img.get_data() > 0
-            np.logical_and(mask, img.get_data() > 0, mask)
+                mask = img.get_fdata() > 0
+            np.logical_and(mask, img.get_fdata() > 0, mask)
         img = nb.Nifti1Image(mask, img.affine, header=img.header)
         return [img]
 
@@ -1374,7 +1377,7 @@ def compute_noise_components(
     md_retained = []
 
     for name, img in zip(mask_names, mask_images):
-        mask = nb.squeeze_image(img).get_data().astype(np.bool)
+        mask = np.asanyarray(nb.squeeze_image(img).dataobj).astype(np.bool)
         if imgseries.shape[:3] != mask.shape:
             raise ValueError(
                 "Inputs for CompCor, timeseries and mask, do not have "
