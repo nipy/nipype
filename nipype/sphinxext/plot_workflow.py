@@ -314,7 +314,7 @@ def remove_coding(text):
     """
     Remove the coding comment, which exec doesn't like.
     """
-    sub_re = re.compile("^#\s*-\*-\s*coding:\s*.*-\*-$", flags=re.MULTILINE)
+    sub_re = re.compile(r"^#\s*-\*-\s*coding:\s*.*-\*-$", flags=re.MULTILINE)
     return sub_re.sub("", text)
 
 

@@ -158,7 +158,7 @@ def create_interface_specs(class_name, params=None, BaseClass=TraitedSpec):
                     attr[name] = traits_type(desc=desc[-1], mandatory=is_mandatory)
             else:
                 attr[name] = traits_type(
-                    p[3], desc=desc[-1], exists=True, usedefault=True,
+                    p[3], desc=desc[-1], exists=True, usedefault=True
                 )
 
     newclass = type(str(class_name), (BaseClass,), attr)
@@ -189,7 +189,7 @@ def dipy_to_nipype_interface(cls_name, dipy_flow, BaseClass=DipyBaseInterface):
     parser = IntrospectiveArgumentParser()
     flow = dipy_flow()
     parser.add_workflow(flow)
-    default_values = inspect.getargspec(flow.run).defaults
+    default_values = inspect.getfullargspec(flow.run).defaults
     optional_params = [
         args + (val,) for args, val in zip(parser.optional_parameters, default_values)
     ]
