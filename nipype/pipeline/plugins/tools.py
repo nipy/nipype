@@ -31,7 +31,7 @@ def report_crash(node, traceback=None, hostname=None):
 
 When creating this crashfile, the results file corresponding
 to the node could not be found.""".splitlines(
-            keepends=True
+            True
         )
     except Exception as exc:
         traceback += """
@@ -40,7 +40,7 @@ During the creation of this crashfile triggered by the above exception,
 another exception occurred:\n\n{}.""".format(
             exc
         ).splitlines(
-            keepends=True
+            True
         )
     else:
         if getattr(result, "runtime", None):
