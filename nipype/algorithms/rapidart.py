@@ -525,7 +525,7 @@ class ArtifactDetect(BaseInterface):
                     mask[:, :, :, t0] = mask_tmp
                     g[t0] = np.nansum(vol * mask_tmp) / np.nansum(mask_tmp)
         elif masktype == "file":  # uses a mask image to determine intensity
-            maskimg = load(self.inputs.mask_file, mmap=NUMPY_MMAP)
+            maskimg = load(self.inputs.mask_file)
             mask = maskimg.get_fdata()
             affine = maskimg.affine
             mask = mask > 0.5

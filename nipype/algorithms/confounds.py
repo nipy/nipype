@@ -920,7 +920,7 @@ class TSNR(BaseInterface):
         img = nb.load(self.inputs.in_file[0], mmap=NUMPY_MMAP)
         header = img.header.copy()
         vollist = [
-            nb.load(filename, mmap=NUMPY_MMAP) for filename in self.inputs.in_file
+            nb.load(filename) for filename in self.inputs.in_file
         ]
         data = np.concatenate(
             [
@@ -1035,8 +1035,8 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     from nitime.algorithms import AR_est_YW
     import warnings
 
-    func = nb.load(in_file, mmap=NUMPY_MMAP).get_fdata(dtype=np.float32)
-    mask = np.asanyarray(nb.load(in_mask, mmap=NUMPY_MMAP).dataobj).astype(np.uint8)
+    func = nb.load(in_file).get_fdata(dtype=np.float32)
+    mask = np.asanyarray(nb.load(in_mask).dataobj).astype(np.uint8)
 
     if len(func.shape) != 4:
         raise RuntimeError("Input fMRI dataset should be 4-dimensional")
@@ -1281,7 +1281,7 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
     if mask_method == "union":
         mask = None
         for filename in mask_files:
-            img = nb.load(filename, mmap=NUMPY_MMAP)
+            img = nb.load(filename)
             if mask is None:
                 mask = img.get_fdata() > 0
             np.logical_or(mask, img.get_fdata() > 0, mask)
@@ -1291,7 +1291,7 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
     if mask_method == "intersect":
         mask = None
         for filename in mask_files:
-            img = nb.load(filename, mmap=NUMPY_MMAP)
+            img = nb.load(filename)
             if mask is None:
                 mask = img.get_fdata() > 0
             np.logical_and(mask, img.get_fdata() > 0, mask)

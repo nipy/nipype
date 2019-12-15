@@ -57,7 +57,7 @@ class ComputeMask(NipyBaseInterface):
             value = getattr(self.inputs, key)
             if isdefined(value):
                 if key in ["mean_volume", "reference_volume"]:
-                    value = np.asanyarray(nb.load(value, mmap=NUMPY_MMAP).dataobj)
+                    value = np.asanyarray(nb.load(value).dataobj)
                 args[key] = value
 
         brain_mask = compute_mask(**args)

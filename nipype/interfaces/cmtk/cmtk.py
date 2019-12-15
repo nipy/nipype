@@ -200,7 +200,7 @@ def cmat(
     fib, hdr = nb.trackvis.read(track_file, False)
     stats["orig_n_fib"] = len(fib)
 
-    roi = nb.load(roi_file, mmap=NUMPY_MMAP)
+    roi = nb.load(roi_file)
     # Preserve on-disk type unless scaled
     roiData = np.asanyarray(roi.dataobj)
     roiVoxelSize = roi.header.get_zooms()
@@ -838,7 +838,7 @@ class ROIGen(BaseInterface):
         aparc_aseg_file = self.inputs.aparc_aseg_file
         aparcpath, aparcname, aparcext = split_filename(aparc_aseg_file)
         iflogger.info("Using Aparc+Aseg file: %s", aparcname + aparcext)
-        niiAPARCimg = nb.load(aparc_aseg_file, mmap=NUMPY_MMAP)
+        niiAPARCimg = nb.load(aparc_aseg_file)
         # Preserve on-disk type
         niiAPARCdata = np.asanyarray(niiAPARCimg.dataobj)
         niiDataLabels = np.unique(niiAPARCdata)
@@ -1056,7 +1056,7 @@ class ROIGen(BaseInterface):
 def create_nodes(roi_file, resolution_network_file, out_filename):
     G = nx.Graph()
     gp = nx.read_graphml(resolution_network_file)
-    roi_image = nb.load(roi_file, mmap=NUMPY_MMAP)
+    roi_image = nb.load(roi_file)
     # Preserve on-disk type unless scaled
     roiData = np.asanyarray(roi_image.dataobj)
     for u, d in gp.nodes(data=True):

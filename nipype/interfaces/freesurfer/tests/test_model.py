@@ -37,7 +37,7 @@ def test_concatenate(tmpdir):
     # Test specified concatenated_file
     res = model.Concatenate(in_files=[in1, in2], concatenated_file=out).run()
     assert res.outputs.concatenated_file == tmpdir.join(out).strpath
-    assert np.allclose(nb.load(out, mmap=NUMPY_MMAP).get_fdata(), out_data)
+    assert np.allclose(nb.load(out).get_fdata(), out_data)
 
     # Test in workflow
     wf = pe.Workflow("test_concatenate", base_dir=tmpdir.strpath)
@@ -55,4 +55,4 @@ def test_concatenate(tmpdir):
     res = model.Concatenate(
         in_files=[in1, in2], concatenated_file=out, stats="mean"
     ).run()
-    assert np.allclose(nb.load(out, mmap=NUMPY_MMAP).get_fdata(), mean_data)
+    assert np.allclose(nb.load(out).get_fdata(), mean_data)

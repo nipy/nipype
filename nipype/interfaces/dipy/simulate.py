@@ -142,7 +142,7 @@ class SimulateMultiTensor(DipyBaseInterface):
         nballs = len(self.inputs.in_vfms)
         vfs = np.squeeze(
             nb.concat_images(
-                [nb.load(f, mmap=NUMPY_MMAP) for f in self.inputs.in_vfms]
+                self.inputs.in_vfms
             ).dataobj
         )
         if nballs == 1:
@@ -163,7 +163,7 @@ class SimulateMultiTensor(DipyBaseInterface):
 
         # Fiber fractions
         ffsim = nb.concat_images(
-            [nb.load(f, mmap=NUMPY_MMAP) for f in self.inputs.in_frac]
+            self.inputs.in_frac
         )
         ffs = np.nan_to_num(np.squeeze(ffsim.dataobj))  # fiber fractions
         ffs = np.clip(ffs, 0.0, 1.0)
@@ -207,7 +207,7 @@ class SimulateMultiTensor(DipyBaseInterface):
         dirs = None
         for i in range(nsticks):
             f = self.inputs.in_dirs[i]
-            fd = np.nan_to_num(nb.load(f, mmap=NUMPY_MMAP).dataobj)
+            fd = np.nan_to_num(nb.load(f).dataobj)
             w = np.linalg.norm(fd, axis=3)[..., np.newaxis]
             w[w < np.finfo(float).eps] = 1.0
             fd /= w

@@ -152,7 +152,7 @@ class SimpleThreshold(BaseInterface):
 
     def _run_interface(self, runtime):
         for fname in self.inputs.volumes:
-            img = nb.load(fname, mmap=NUMPY_MMAP)
+            img = nb.load(fname)
             data = img.get_fdata()
 
             active_map = data > self.inputs.threshold
@@ -1269,7 +1269,7 @@ def normalize_tpms(in_files, in_mask=None, out_files=None):
             out_file = op.abspath("%s_norm_%02d%s" % (fname, i, fext))
             out_files += [out_file]
 
-    imgs = [nb.load(fim, mmap=NUMPY_MMAP) for fim in in_files]
+    imgs = [nb.load(fim) for fim in in_files]
 
     if len(in_files) == 1:
         img_data = imgs[0].get_fdata(dtype=np.float32)
@@ -1290,7 +1290,7 @@ def normalize_tpms(in_files, in_mask=None, out_files=None):
     msk[weights <= 0] = 0
 
     if in_mask is not None:
-        msk = np.asanyarray(nb.load(in_mask, mmap=NUMPY_MMAP).dataobj)
+        msk = np.asanyarray(nb.load(in_mask).dataobj)
         msk[msk <= 0] = 0
         msk[msk > 0] = 1
 
@@ -1328,7 +1328,7 @@ def split_rois(in_file, mask=None, roishape=None):
     droishape = (roishape[0], roishape[1], roishape[2], nvols)
 
     if mask is not None:
-        mask = np.asanyarray(nb.load(mask, mmap=NUMPY_MMAP).dataobj)
+        mask = np.asanyarray(nb.load(mask).dataobj)
         mask[mask > 0] = 1
         mask[mask < 1] = 0
     else:
@@ -1432,7 +1432,7 @@ def merge_rois(in_files, in_idxs, in_ref, dtype=None, out_file=None):
         for cname, iname in zip(in_files, in_idxs):
             f = np.load(iname)
             idxs = np.squeeze(f["arr_0"])
-            cdata = np.asanyarray(nb.load(cname, mmap=NUMPY_MMAP).dataobj).reshape(
+            cdata = np.asanyarray(nb.load(cname).dataobj).reshape(
                 -1, ndirs
             )
             nels = len(idxs)
@@ -1464,10 +1464,10 @@ def merge_rois(in_files, in_idxs, in_ref, dtype=None, out_file=None):
             idxs = np.squeeze(f["arr_0"])
 
             for d, fname in enumerate(nii):
-                data = np.asanyarray(nb.load(fname, mmap=NUMPY_MMAP).dataobj).reshape(
+                data = np.asanyarray(nb.load(fname).dataobj).reshape(
                     -1
                 )
-                cdata = nb.load(cname, mmap=NUMPY_MMAP).dataobj[..., d].reshape(-1)
+                cdata = nb.load(cname).dataobj[..., d].reshape(-1)
                 nels = len(idxs)
                 idata = (idxs,)
                 data[idata] = cdata[0:nels]
@@ -1547,7 +1547,7 @@ class CalculateMedian(BaseInterface):
         total = None
         self._median_files = []
         for idx, fname in enumerate(ensure_list(self.inputs.in_files)):
-            img = nb.load(fname, mmap=NUMPY_MMAP)
+            img = nb.load(fname)
             data = np.median(img.get_fdata(), axis=3)
             if self.inputs.median_per_file:
                 self._median_files.append(self._write_nifti(img, data, idx))

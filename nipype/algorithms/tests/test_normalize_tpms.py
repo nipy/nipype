@@ -19,7 +19,7 @@ from nipype.utils import NUMPY_MMAP
 def test_normalize_tpms(tmpdir):
 
     in_mask = example_data("tpms_msk.nii.gz")
-    mskdata = np.asanyarray(nb.load(in_mask, mmap=NUMPY_MMAP).dataobj)
+    mskdata = np.asanyarray(nb.load(in_mask).dataobj)
     mskdata[mskdata > 0.0] = 1.0
 
     mapdata = []
@@ -31,7 +31,7 @@ def test_normalize_tpms(tmpdir):
         filename = tmpdir.join("modtpm_%02d.nii.gz" % i).strpath
         out_files.append(tmpdir.join("normtpm_%02d.nii.gz" % i).strpath)
 
-        im = nb.load(mapname, mmap=NUMPY_MMAP)
+        im = nb.load(mapname)
         data = im.get_fdata()
         mapdata.append(data)
 
@@ -45,7 +45,7 @@ def test_normalize_tpms(tmpdir):
     sumdata = np.zeros_like(mskdata)
 
     for i, tstfname in enumerate(out_files):
-        normdata = nb.load(tstfname, mmap=NUMPY_MMAP).get_fdata()
+        normdata = nb.load(tstfname).get_fdata()
         sumdata += normdata
         assert np.all(normdata[mskdata == 0] == 0)
         assert np.allclose(normdata, mapdata[i])

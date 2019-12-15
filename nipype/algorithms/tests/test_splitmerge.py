@@ -15,7 +15,7 @@ def test_split_and_merge(tmpdir):
 
     in_mask = example_data("tpms_msk.nii.gz")
     dwfile = tmpdir.join("dwi.nii.gz").strpath
-    mask_img = nb.load(in_mask, mmap=NUMPY_MMAP)
+    mask_img = nb.load(in_mask)
     mskdata = np.asanyarray(mask_img.dataobj)
     aff = mask_img.affine
 
@@ -26,7 +26,7 @@ def test_split_and_merge(tmpdir):
 
     resdw, resmsk, resid = split_rois(dwfile, in_mask, roishape=(20, 20, 2))
     merged = merge_rois(resdw, resid, in_mask)
-    dwmerged = nb.load(merged, mmap=NUMPY_MMAP).get_fdata(dtype=np.float32)
+    dwmerged = nb.load(merged).get_fdata(dtype=np.float32)
 
     dwmasked = dwdata * mskdata[:, :, :, np.newaxis]
 
