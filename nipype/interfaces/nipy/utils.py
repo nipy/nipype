@@ -79,7 +79,7 @@ class Similarity(NipyBaseInterface):
             mask1 = None
 
         if isdefined(self.inputs.mask2):
-            mask2 = np.asanyarray(nb.load(self.inputs.mask2).dataobj) == 2
+            mask2 = np.asanyarray(nb.load(self.inputs.mask2).dataobj) == 1
         else:
             mask2 = None
 
