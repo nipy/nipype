@@ -4,7 +4,6 @@
 The stats module provides higher-level interfaces to some of the operations
 that can be performed with the niftyseg stats (seg_stats) command-line program.
 """
-from __future__ import print_function
 import numpy as np
 
 from ..base import TraitedSpec, File, traits, CommandLineInputSpec
@@ -14,27 +13,27 @@ from ..niftyreg.base import get_custom_path
 
 class StatsInput(CommandLineInputSpec):
     """Input Spec for seg_stats interfaces."""
+
     in_file = File(
-        position=2,
-        argstr='%s',
-        exists=True,
-        mandatory=True,
-        desc='image to operate on')
+        position=2, argstr="%s", exists=True, mandatory=True, desc="image to operate on"
+    )
 
     # Constrains
     mask_file = File(
         exists=True,
         position=-2,
-        argstr='-m %s',
-        desc='statistics within the masked area')
+        argstr="-m %s",
+        desc="statistics within the masked area",
+    )
 
-    desc = 'Only estimate statistics if voxel is larger than <float>'
-    larger_voxel = traits.Float(argstr='-t %f', position=-3, desc=desc)
+    desc = "Only estimate statistics if voxel is larger than <float>"
+    larger_voxel = traits.Float(argstr="-t %f", position=-3, desc=desc)
 
 
 class StatsOutput(TraitedSpec):
     """Output Spec for seg_stats interfaces."""
-    output = traits.Array(desc='Output array from seg_stats')
+
+    output = traits.Array(desc="Output array from seg_stats")
 
 
 class StatsCommand(NiftySegCommand):
@@ -51,14 +50,15 @@ class StatsCommand(NiftySegCommand):
     robust to the presence of NaNs, and can be constrained by a mask and/or
     thresholded at a certain level.
     """
-    _cmd = get_custom_path('seg_stats', env_dir='NIFTYSEGDIR')
+
+    _cmd = get_custom_path("seg_stats", env_dir="NIFTYSEGDIR")
     input_spec = StatsInput
     output_spec = StatsOutput
 
     def _parse_stdout(self, stdout):
         out = []
         for string_line in stdout.split("\n"):
-            if string_line.startswith('#'):
+            if string_line.startswith("#"):
                 continue
             if len(string_line) <= 1:
                 continue
@@ -73,34 +73,36 @@ class StatsCommand(NiftySegCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['output'] = self.output
+        outputs["output"] = self.output
         return outputs
 
 
 class UnaryStatsInput(StatsInput):
     """Input Spec for seg_stats unary operations."""
+
     operation = traits.Enum(
-        'r',
-        'R',
-        'a',
-        's',
-        'v',
-        'vl',
-        'vp',
-        'n',
-        'np',
-        'e',
-        'ne',
-        'x',
-        'X',
-        'c',
-        'B',
-        'xvox',
-        'xdim',
-        argstr='-%s',
+        "r",
+        "R",
+        "a",
+        "s",
+        "v",
+        "vl",
+        "vp",
+        "n",
+        "np",
+        "e",
+        "ne",
+        "x",
+        "X",
+        "c",
+        "B",
+        "xvox",
+        "xdim",
+        argstr="-%s",
         position=4,
         mandatory=True,
-        desc='operation to perform')
+        desc="operation to perform",
+    )
 
 
 class UnaryStats(StatsCommand):
@@ -179,26 +181,29 @@ y/z for other directions.
     >>> unary_x.run()  # doctest: +SKIP
 
     """
+
     input_spec = UnaryStatsInput
 
 
 class BinaryStatsInput(StatsInput):
     """Input Spec for seg_stats Binary operations."""
+
     operation = traits.Enum(
-        'p',
-        'sa',
-        'ss',
-        'svp',
-        'al',
-        'd',
-        'ncc',
-        'nmi',
-        'Vl',
-        'Nl',
+        "p",
+        "sa",
+        "ss",
+        "svp",
+        "al",
+        "d",
+        "ncc",
+        "nmi",
+        "Vl",
+        "Nl",
         mandatory=True,
-        argstr='-%s',
+        argstr="-%s",
         position=4,
-        desc='operation to perform')
+        desc="operation to perform",
+    )
 
     operand_file = File(
         exists=True,
@@ -206,14 +211,16 @@ class BinaryStatsInput(StatsInput):
         mandatory=True,
         position=5,
         xor=["operand_value"],
-        desc="second image to perform operation with")
+        desc="second image to perform operation with",
+    )
 
     operand_value = traits.Float(
-        argstr='%.8f',
+        argstr="%.8f",
         mandatory=True,
         position=5,
         xor=["operand_file"],
-        desc='value to perform operation with')
+        desc="value to perform operation with",
+    )
 
 
 class BinaryStats(StatsCommand):
@@ -281,4 +288,5 @@ and <in2>
     >>> binary_nl.run()  # doctest: +SKIP
 
     """
+
     input_spec = BinaryStatsInput

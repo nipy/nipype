@@ -74,14 +74,16 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
     exceed the given size.
     """
 
-    def __init__(self,
-                 filename,
-                 mode='a',
-                 maxBytes=0,
-                 backupCount=0,
-                 encoding=None,
-                 debug=True,
-                 supress_abs_warn=False):
+    def __init__(
+        self,
+        filename,
+        mode="a",
+        maxBytes=0,
+        backupCount=0,
+        encoding=None,
+        debug=True,
+        supress_abs_warn=False,
+    ):
         """
         Open the specified file and use it as the stream for logging.
 
@@ -139,15 +141,16 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
 
         # if the given filename contains no path, we make an absolute path
         if not os.path.isabs(filename):
-            if FORCE_ABSOLUTE_PATH or \
-               not os.path.split(filename)[0]:
+            if FORCE_ABSOLUTE_PATH or not os.path.split(filename)[0]:
                 filename = os.path.abspath(filename)
             elif not supress_abs_warn:
                 from warnings import warn
+
                 warn(
                     "The given 'filename' should be an absolute path.  If your "
                     "application calls os.chdir(), your logs may get messed up. "
-                    "Use 'supress_abs_warn=True' to hide this message.")
+                    "Use 'supress_abs_warn=True' to hide this message."
+                )
         try:
             BaseRotatingHandler.__init__(self, filename, mode, encoding)
         except TypeError:  # Due to a different logging release without encoding support  (Python 2.4.1 and earlier?)
@@ -158,7 +161,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         self.maxBytes = maxBytes
         self.backupCount = backupCount
         # Prevent multiple extensions on the lock file (Only handles the normal "*.log" case.)
-        self.lock_file = '%s.lock' % filename
+        self.lock_file = "%s.lock" % filename
         self.stream_lock = SoftFileLock(self.lock_file)
 
         # For debug mode, swap out the "_degrade()" method with a more a verbose one.
@@ -231,13 +234,17 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         """
         if degrade:
             if not self._rotateFailed:
-                sys.stderr.write("Degrade mode - ENTERING - (pid=%d)  %s\n" %
-                                 (os.getpid(), msg % args))
+                sys.stderr.write(
+                    "Degrade mode - ENTERING - (pid=%d)  %s\n"
+                    % (os.getpid(), msg % args)
+                )
                 self._rotateFailed = True
         else:
             if self._rotateFailed:
-                sys.stderr.write("Degrade mode - EXITING  - (pid=%d)   %s\n" %
-                                 (os.getpid(), msg % args))
+                sys.stderr.write(
+                    "Degrade mode - EXITING  - (pid=%d)   %s\n"
+                    % (os.getpid(), msg % args)
+                )
                 self._rotateFailed = False
 
     def doRollover(self):
@@ -255,15 +262,15 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
             # Attempt to rename logfile to tempname:  There is a slight race-condition here, but it seems unavoidable
             tmpname = None
             while not tmpname or os.path.exists(tmpname):
-                tmpname = "%s.rotate.%08d" % (self.baseFilename,
-                                              randint(0, 99999999))
+                tmpname = "%s.rotate.%08d" % (self.baseFilename, randint(0, 99999999))
             try:
                 # Do a rename test to determine if we can successfully rename the log file
                 os.rename(self.baseFilename, tmpname)
             except (IOError, OSError):
                 exc_value = sys.exc_info()[1]
-                self._degrade(True, "rename failed.  File in use?  "
-                              "exception=%s", exc_value)
+                self._degrade(
+                    True, "rename failed.  File in use?  " "exception=%s", exc_value
+                )
                 return
 
             # Q: Is there some way to protect this code from a KeboardInterupt?
@@ -311,19 +318,18 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
     def _shouldRollover(self):
         if self.maxBytes > 0:  # are we rolling over?
             try:
-                self.stream.seek(
-                    0, 2)  # due to non-posix-compliant Windows feature
+                self.stream.seek(0, 2)  # due to non-posix-compliant Windows feature
             except IOError:
                 return True
             if self.stream.tell() >= self.maxBytes:
                 return True
             else:
-                self._degrade(False,
-                              "Rotation done or not needed at this time")
+                self._degrade(False, "Rotation done or not needed at this time")
         return False
 
 
 # Publish this class to the "logging.handlers" module so that it can be use
 # from a logging config file via logging.config.fileConfig().
 import logging.handlers
+
 logging.handlers.ConcurrentRotatingFileHandler = ConcurrentRotatingFileHandler

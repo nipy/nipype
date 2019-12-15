@@ -10,5 +10,11 @@ Top-level namespace for niftyreg.
 
 from .base import get_custom_path
 from .reg import RegAladin, RegF3D
-from .regutils import (RegResample, RegJacobian, RegAverage, RegTools,
-                       RegTransform, RegMeasure)
+from .regutils import (
+    RegResample,
+    RegJacobian,
+    RegAverage,
+    RegTools,
+    RegTransform,
+    RegMeasure,
+)

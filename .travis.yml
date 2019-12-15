@@ -4,7 +4,6 @@ sudo: true
 language: python
 # our build matrix
 python:
-- 2.7
 - 3.5
 - 3.6
 - 3.7
@@ -63,7 +62,7 @@ before_install:
     export FSLOUTPUTTYPE=NIFTI_GZ;
   fi;
 
-- travis_retry pip install -r requirements.txt
+- travis_retry pip install $EXTRA_PIP_FLAGS -r requirements.txt
 - travis_retry pip install grabbit==0.2.6
 - travis_retry pip install -e git+https://github.com/bids-standard/pybids.git@0.7.0#egg=pybids
 

@@ -1,36 +1,40 @@
 # -*- coding: utf-8 -*-
 """The bru2nii module provides basic functions for dicom conversion
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 
 import os
-from .base import (CommandLine, CommandLineInputSpec, traits, TraitedSpec,
-                   isdefined, File, Directory)
+from .base import (
+    CommandLine,
+    CommandLineInputSpec,
+    traits,
+    TraitedSpec,
+    isdefined,
+    File,
+    Directory,
+)
 
 
 class Bru2InputSpec(CommandLineInputSpec):
     input_dir = Directory(
-        desc="Input Directory",
-        exists=True,
-        mandatory=True,
-        position=-1,
-        argstr="%s")
+        desc="Input Directory", exists=True, mandatory=True, position=-1, argstr="%s"
+    )
     actual_size = traits.Bool(
-        argstr='-a',
-        desc="Keep actual size - otherwise x10 scale so animals match human.")
+        argstr="-a",
+        desc="Keep actual size - otherwise x10 scale so animals match human.",
+    )
     force_conversion = traits.Bool(
-        argstr='-f',
-        desc="Force conversion of localizers images (multiple slice "
-        "orientations).")
-    compress = traits.Bool(
-        argstr='-z', desc='gz compress images (".nii.gz").')
+        argstr="-f",
+        desc="Force conversion of localizers images (multiple slice " "orientations).",
+    )
+    compress = traits.Bool(argstr="-z", desc='gz compress images (".nii.gz").')
     append_protocol_name = traits.Bool(
-        argstr='-p', desc="Append protocol name to output filename.")
+        argstr="-p", desc="Append protocol name to output filename."
+    )
     output_filename = traits.Str(
         argstr="-o %s",
         desc='Output filename (".nii" will be appended, or ".nii.gz" if the "-z" compress option is selected)',
-        genfile=True)
+        genfile=True,
+    )
 
 
 class Bru2OutputSpec(TraitedSpec):
@@ -49,6 +53,7 @@ class Bru2(CommandLine):
     >>> converter.cmdline  # doctest: +ELLIPSIS
     'Bru2 -o .../data/brukerdir brukerdir'
     """
+
     input_spec = Bru2InputSpec
     output_spec = Bru2OutputSpec
     _cmd = "Bru2"
@@ -58,7 +63,7 @@ class Bru2(CommandLine):
         if isdefined(self.inputs.output_filename):
             output_filename1 = os.path.abspath(self.inputs.output_filename)
         else:
-            output_filename1 = self._gen_filename('output_filename')
+            output_filename1 = self._gen_filename("output_filename")
         if self.inputs.compress:
             outputs["nii_file"] = output_filename1 + ".nii.gz"
         else:
@@ -66,8 +71,8 @@ class Bru2(CommandLine):
         return outputs
 
     def _gen_filename(self, name):
-        if name == 'output_filename':
+        if name == "output_filename":
             outfile = os.path.join(
-                os.getcwd(),
-                os.path.basename(os.path.normpath(self.inputs.input_dir)))
+                os.getcwd(), os.path.basename(os.path.normpath(self.inputs.input_dir))
+            )
             return outfile

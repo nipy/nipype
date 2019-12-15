@@ -149,7 +149,7 @@ Here is a minimalistic interface for the gzip command:
 	class GZipTask(CommandLine):
 	    input_spec = GZipInputSpec
 	    output_spec = GZipOutputSpec
-	    cmd = 'gzip'
+	    _cmd = 'gzip'
 
 	    def _list_outputs(self):
 	            outputs = self.output_spec().get()

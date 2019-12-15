@@ -23,30 +23,30 @@ def test_errormap(tmpdir):
     img2 = nb.Nifti1Image(volume2, np.eye(4))
     maskimg = nb.Nifti1Image(mask, np.eye(4))
 
-    nb.save(img1, tmpdir.join('von.nii.gz').strpath)
-    nb.save(img2, tmpdir.join('alan.nii.gz').strpath)
-    nb.save(maskimg, tmpdir.join('mask.nii.gz').strpath)
+    nb.save(img1, tmpdir.join("von.nii.gz").strpath)
+    nb.save(img2, tmpdir.join("alan.nii.gz").strpath)
+    nb.save(maskimg, tmpdir.join("mask.nii.gz").strpath)
 
     # Default metric
     errmap = ErrorMap()
-    errmap.inputs.in_tst = tmpdir.join('von.nii.gz').strpath
-    errmap.inputs.in_ref = tmpdir.join('alan.nii.gz').strpath
-    errmap.out_map = tmpdir.join('out_map.nii.gz').strpath
+    errmap.inputs.in_tst = tmpdir.join("von.nii.gz").strpath
+    errmap.inputs.in_ref = tmpdir.join("alan.nii.gz").strpath
+    errmap.out_map = tmpdir.join("out_map.nii.gz").strpath
     result = errmap.run()
     assert result.outputs.distance == 1.125
 
     # Square metric
-    errmap.inputs.metric = 'sqeuclidean'
+    errmap.inputs.metric = "sqeuclidean"
     result = errmap.run()
     assert result.outputs.distance == 1.125
 
     # Linear metric
-    errmap.inputs.metric = 'euclidean'
+    errmap.inputs.metric = "euclidean"
     result = errmap.run()
     assert result.outputs.distance == 0.875
 
     # Masked
-    errmap.inputs.mask = tmpdir.join('mask.nii.gz').strpath
+    errmap.inputs.mask = tmpdir.join("mask.nii.gz").strpath
     result = errmap.run()
     assert result.outputs.distance == 1.0
 
@@ -64,15 +64,15 @@ def test_errormap(tmpdir):
     msvolume2[:, :, :, 1] = volume1
     msimg2 = nb.Nifti1Image(msvolume2, np.eye(4))
 
-    nb.save(msimg1, tmpdir.join('von-ray.nii.gz').strpath)
-    nb.save(msimg2, tmpdir.join('alan-ray.nii.gz').strpath)
+    nb.save(msimg1, tmpdir.join("von-ray.nii.gz").strpath)
+    nb.save(msimg2, tmpdir.join("alan-ray.nii.gz").strpath)
 
-    errmap.inputs.in_tst = tmpdir.join('von-ray.nii.gz').strpath
-    errmap.inputs.in_ref = tmpdir.join('alan-ray.nii.gz').strpath
-    errmap.inputs.metric = 'sqeuclidean'
+    errmap.inputs.in_tst = tmpdir.join("von-ray.nii.gz").strpath
+    errmap.inputs.in_ref = tmpdir.join("alan-ray.nii.gz").strpath
+    errmap.inputs.metric = "sqeuclidean"
     result = errmap.run()
     assert result.outputs.distance == 5.5
 
-    errmap.inputs.metric = 'euclidean'
+    errmap.inputs.metric = "euclidean"
     result = errmap.run()
-    assert result.outputs.distance == np.float32(1.25 * (2**0.5))
+    assert result.outputs.distance == np.float32(1.25 * (2 ** 0.5))

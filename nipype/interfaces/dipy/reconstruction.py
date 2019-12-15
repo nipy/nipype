@@ -3,12 +3,6 @@
 Interfaces to the reconstruction algorithms in dipy
 
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str, open
-
 import os.path as op
 
 import numpy as np
@@ -17,46 +11,49 @@ from distutils.version import LooseVersion
 
 from ... import logging
 from ..base import TraitedSpec, File, traits, isdefined
-from .base import (DipyDiffusionInterface, DipyBaseInterfaceInputSpec,
-                   HAVE_DIPY, dipy_version, dipy_to_nipype_interface,
-                   get_dipy_workflows)
+from .base import (
+    DipyDiffusionInterface,
+    DipyBaseInterfaceInputSpec,
+    HAVE_DIPY,
+    dipy_version,
+    dipy_to_nipype_interface,
+    get_dipy_workflows,
+)
 
 
-IFLOGGER = logging.getLogger('nipype.interface')
+IFLOGGER = logging.getLogger("nipype.interface")
 
-if HAVE_DIPY and LooseVersion(dipy_version()) >= LooseVersion('0.15'):
+if HAVE_DIPY and LooseVersion(dipy_version()) >= LooseVersion("0.15"):
     from dipy.workflows import reconst
 
     l_wkflw = get_dipy_workflows(reconst)
     for name, obj in l_wkflw:
-        new_name = name.replace('Flow', '')
+        new_name = name.replace("Flow", "")
         globals()[new_name] = dipy_to_nipype_interface(new_name, obj)
     del l_wkflw
 
 else:
-    IFLOGGER.info("We advise you to upgrade DIPY version. This upgrade will"
-                  " open access to more models")
+    IFLOGGER.info(
+        "We advise you to upgrade DIPY version. This upgrade will"
+        " open access to more models"
+    )
 
 
 class RESTOREInputSpec(DipyBaseInterfaceInputSpec):
-    in_mask = File(exists=True, desc=('input mask in which compute tensors'))
-    noise_mask = File(
-        exists=True, desc=('input mask in which compute noise variance'))
+    in_mask = File(exists=True, desc=("input mask in which compute tensors"))
+    noise_mask = File(exists=True, desc=("input mask in which compute noise variance"))
 
 
 class RESTOREOutputSpec(TraitedSpec):
-    fa = File(desc='output fractional anisotropy (FA) map computed from '
-              'the fitted DTI')
-    md = File(desc='output mean diffusivity (MD) map computed from the '
-              'fitted DTI')
-    rd = File(desc='output radial diffusivity (RD) map computed from '
-              'the fitted DTI')
-    mode = File(desc=('output mode (MO) map computed from the fitted DTI'))
-    trace = File(
-        desc=('output the tensor trace map computed from the '
-              'fitted DTI'))
-    evals = File(desc=('output the eigenvalues of the fitted DTI'))
-    evecs = File(desc=('output the eigenvectors of the fitted DTI'))
+    fa = File(
+        desc="output fractional anisotropy (FA) map computed from " "the fitted DTI"
+    )
+    md = File(desc="output mean diffusivity (MD) map computed from the " "fitted DTI")
+    rd = File(desc="output radial diffusivity (RD) map computed from " "the fitted DTI")
+    mode = File(desc=("output mode (MO) map computed from the fitted DTI"))
+    trace = File(desc=("output the tensor trace map computed from the " "fitted DTI"))
+    evals = File(desc=("output the eigenvalues of the fitted DTI"))
+    evecs = File(desc=("output the eigenvectors of the fitted DTI"))
 
 
 class RESTORE(DipyDiffusionInterface):
@@ -83,6 +80,7 @@ class RESTORE(DipyDiffusionInterface):
 
 
     """
+
     input_spec = RESTOREInputSpec
     output_spec = RESTOREOutputSpec
 
@@ -110,7 +108,7 @@ class RESTORE(DipyDiffusionInterface):
             noise_msk = noise_msk.astype(np.uint8)
             try_b0 = False
         elif np.all(data[msk == 0, 0] == 0):
-            IFLOGGER.info('Input data are masked.')
+            IFLOGGER.info("Input data are masked.")
             noise_msk = msk.reshape(-1).astype(np.uint8)
         else:
             noise_msk = (1 - msk).reshape(-1).astype(np.uint8)
@@ -119,8 +117,9 @@ class RESTORE(DipyDiffusionInterface):
         dsample = data.reshape(-1, data.shape[-1])
 
         if try_b0 and (nb0 > 1):
-            noise_data = dsample.take(
-                np.where(gtab.b0s_mask), axis=-1)[noise_msk == 0, ...]
+            noise_data = dsample.take(np.where(gtab.b0s_mask), axis=-1)[
+                noise_msk == 0, ...
+            ]
             n = nb0
         else:
             nodiff = np.where(~gtab.b0s_mask)
@@ -132,22 +131,25 @@ class RESTORE(DipyDiffusionInterface):
         # Estimate sigma required by RESTORE
         mean_std = np.median(noise_data.std(-1))
         try:
-            bias = (1. - np.sqrt(2. / (n - 1)) * (gamma(n / 2.) / gamma(
-                (n - 1) / 2.)))
+            bias = 1.0 - np.sqrt(2.0 / (n - 1)) * (
+                gamma(n / 2.0) / gamma((n - 1) / 2.0)
+            )
         except:
-            bias = .0
+            bias = 0.0
             pass
 
         sigma = mean_std * (1 + bias)
 
         if sigma == 0:
-            IFLOGGER.warning('Noise std is 0.0, looks like data was masked and '
-                             'noise cannot be estimated correctly. Using default '
-                             'tensor model instead of RESTORE.')
+            IFLOGGER.warning(
+                "Noise std is 0.0, looks like data was masked and "
+                "noise cannot be estimated correctly. Using default "
+                "tensor model instead of RESTORE."
+            )
             dti = TensorModel(gtab)
         else:
-            IFLOGGER.info('Performing RESTORE with noise std=%.4f.', sigma)
-            dti = TensorModel(gtab, fit_method='RESTORE', sigma=sigma)
+            IFLOGGER.info("Performing RESTORE with noise std=%.4f.", sigma)
+            dti = TensorModel(gtab, fit_method="RESTORE", sigma=sigma)
 
         try:
             fit_restore = dti.fit(data, msk)
@@ -156,13 +158,14 @@ class RESTORE(DipyDiffusionInterface):
             fit_restore = dti.fit(data, msk)
 
         hdr.set_data_dtype(np.float32)
-        hdr['data_type'] = 16
+        hdr["data_type"] = 16
 
         for k in self._outputs().get():
             scalar = getattr(fit_restore, k)
             hdr.set_data_shape(np.shape(scalar))
             nb.Nifti1Image(scalar.astype(np.float32), affine, hdr).to_filename(
-                self._gen_filename(k))
+                self._gen_filename(k)
+            )
 
         return runtime
 
@@ -174,25 +177,25 @@ class RESTORE(DipyDiffusionInterface):
 
 
 class EstimateResponseSHInputSpec(DipyBaseInterfaceInputSpec):
-    in_evals = File(
-        exists=True, mandatory=True, desc=('input eigenvalues file'))
-    in_mask = File(
-        exists=True, desc=('input mask in which we find single fibers'))
-    fa_thresh = traits.Float(0.7, usedefault=True, desc=('FA threshold'))
+    in_evals = File(exists=True, mandatory=True, desc=("input eigenvalues file"))
+    in_mask = File(exists=True, desc=("input mask in which we find single fibers"))
+    fa_thresh = traits.Float(0.7, usedefault=True, desc=("FA threshold"))
     roi_radius = traits.Int(
-        10, usedefault=True, desc=('ROI radius to be used in auto_response'))
+        10, usedefault=True, desc=("ROI radius to be used in auto_response")
+    )
     auto = traits.Bool(
-        xor=['recursive'], desc='use the auto_response estimator from dipy')
+        xor=["recursive"], desc="use the auto_response estimator from dipy"
+    )
     recursive = traits.Bool(
-        xor=['auto'], desc='use the recursive response estimator from dipy')
-    response = File(
-        'response.txt', usedefault=True, desc=('the output response file'))
-    out_mask = File('wm_mask.nii.gz', usedefault=True, desc='computed wm mask')
+        xor=["auto"], desc="use the recursive response estimator from dipy"
+    )
+    response = File("response.txt", usedefault=True, desc=("the output response file"))
+    out_mask = File("wm_mask.nii.gz", usedefault=True, desc="computed wm mask")
 
 
 class EstimateResponseSHOutputSpec(TraitedSpec):
-    response = File(exists=True, desc=('the response file'))
-    out_mask = File(exists=True, desc=('output wm mask'))
+    response = File(exists=True, desc=("the response file"))
+    out_mask = File(exists=True, desc=("output wm mask"))
 
 
 class EstimateResponseSH(DipyDiffusionInterface):
@@ -215,6 +218,7 @@ class EstimateResponseSH(DipyDiffusionInterface):
 
 
     """
+
     input_spec = EstimateResponseSHInputSpec
     output_spec = EstimateResponseSHOutputSpec
 
@@ -248,12 +252,14 @@ class EstimateResponseSH(DipyDiffusionInterface):
                 gtab,
                 data,
                 roi_radius=self.inputs.roi_radius,
-                fa_thr=self.inputs.fa_thresh)
+                fa_thr=self.inputs.fa_thresh,
+            )
             response = response[0].tolist() + [S0]
         elif self.inputs.recursive:
             MD = np.nan_to_num(mean_diffusivity(evals)) * msk
-            indices = np.logical_or(FA >= 0.4,
-                                    (np.logical_and(FA >= 0.15, MD >= 0.0011)))
+            indices = np.logical_or(
+                FA >= 0.4, (np.logical_and(FA >= 0.15, MD >= 0.0011))
+            )
             data = nb.load(self.inputs.in_file).get_data()
             response = recursive_response(
                 gtab,
@@ -265,7 +271,8 @@ class EstimateResponseSH(DipyDiffusionInterface):
                 init_trace=0.0021,
                 iter=8,
                 convergence=0.001,
-                parallel=True)
+                parallel=True,
+            )
             ratio = abs(response[1] / response[0])
         else:
             lambdas = evals[indices]
@@ -275,42 +282,44 @@ class EstimateResponseSH(DipyDiffusionInterface):
             ratio = abs(response[1] / response[0])
 
         if ratio > 0.25:
-            IFLOGGER.warning('Estimated response is not prolate enough. '
-                             'Ratio=%0.3f.', ratio)
-        elif ratio < 1.e-5 or np.any(np.isnan(response)):
-            response = np.array([1.8e-3, 3.6e-4, 3.6e-4, S0])
             IFLOGGER.warning(
-                'Estimated response is not valid, using a default one')
+                "Estimated response is not prolate enough. " "Ratio=%0.3f.", ratio
+            )
+        elif ratio < 1.0e-5 or np.any(np.isnan(response)):
+            response = np.array([1.8e-3, 3.6e-4, 3.6e-4, S0])
+            IFLOGGER.warning("Estimated response is not valid, using a default one")
         else:
-            IFLOGGER.info('Estimated response: %s', str(response[:3]))
+            IFLOGGER.info("Estimated response: %s", str(response[:3]))
 
         np.savetxt(op.abspath(self.inputs.response), response)
 
         wm_mask = np.zeros_like(FA)
         wm_mask[indices] = 1
         nb.Nifti1Image(wm_mask.astype(np.uint8), affine, None).to_filename(
-            op.abspath(self.inputs.out_mask))
+            op.abspath(self.inputs.out_mask)
+        )
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['response'] = op.abspath(self.inputs.response)
-        outputs['out_mask'] = op.abspath(self.inputs.out_mask)
+        outputs["response"] = op.abspath(self.inputs.response)
+        outputs["out_mask"] = op.abspath(self.inputs.out_mask)
         return outputs
 
 
 class CSDInputSpec(DipyBaseInterfaceInputSpec):
-    in_mask = File(exists=True, desc=('input mask in which compute tensors'))
-    response = File(exists=True, desc=('single fiber estimated response'))
+    in_mask = File(exists=True, desc=("input mask in which compute tensors"))
+    response = File(exists=True, desc=("single fiber estimated response"))
     sh_order = traits.Int(
-        8, usedefault=True, desc=('maximal shperical harmonics order'))
-    save_fods = traits.Bool(True, usedefault=True, desc=('save fODFs in file'))
-    out_fods = File(desc=('fODFs output file name'))
+        8, usedefault=True, desc=("maximal shperical harmonics order")
+    )
+    save_fods = traits.Bool(True, usedefault=True, desc=("save fODFs in file"))
+    out_fods = File(desc=("fODFs output file name"))
 
 
 class CSDOutputSpec(TraitedSpec):
-    model = File(desc='Python pickled object of the CSD model fitted.')
-    out_fods = File(desc=('fODFs output file name'))
+    model = File(desc="Python pickled object of the CSD model fitted.")
+    out_fods = File(desc=("fODFs output file name"))
 
 
 class CSD(DipyDiffusionInterface):
@@ -334,12 +343,14 @@ class CSD(DipyDiffusionInterface):
     >>> csd.inputs.in_bvec = 'bvecs'
     >>> res = csd.run() # doctest: +SKIP
     """
+
     input_spec = CSDInputSpec
     output_spec = CSDOutputSpec
 
     def _run_interface(self, runtime):
         from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel
         from dipy.data import get_sphere
+
         # import marshal as pickle
         import pickle as pickle
         import gzip
@@ -361,30 +372,33 @@ class CSD(DipyDiffusionInterface):
         ratio = response[0][1] / response[0][0]
 
         if abs(ratio - 0.2) > 0.1:
-            IFLOGGER.warning('Estimated response is not prolate enough. '
-                             'Ratio=%0.3f.', ratio)
+            IFLOGGER.warning(
+                "Estimated response is not prolate enough. " "Ratio=%0.3f.", ratio
+            )
 
         csd_model = ConstrainedSphericalDeconvModel(
-            gtab, response, sh_order=self.inputs.sh_order)
+            gtab, response, sh_order=self.inputs.sh_order
+        )
 
-        IFLOGGER.info('Fitting CSD model')
+        IFLOGGER.info("Fitting CSD model")
         csd_fit = csd_model.fit(data, msk)
 
-        f = gzip.open(self._gen_filename('csdmodel', ext='.pklz'), 'wb')
+        f = gzip.open(self._gen_filename("csdmodel", ext=".pklz"), "wb")
         pickle.dump(csd_model, f, -1)
         f.close()
 
         if self.inputs.save_fods:
-            sphere = get_sphere('symmetric724')
+            sphere = get_sphere("symmetric724")
             fods = csd_fit.odf(sphere)
-            nb.Nifti1Image(fods.astype(np.float32), img.affine,
-                           None).to_filename(self._gen_filename('fods'))
+            nb.Nifti1Image(fods.astype(np.float32), img.affine, None).to_filename(
+                self._gen_filename("fods")
+            )
 
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['model'] = self._gen_filename('csdmodel', ext='.pklz')
+        outputs["model"] = self._gen_filename("csdmodel", ext=".pklz")
         if self.inputs.save_fods:
-            outputs['out_fods'] = self._gen_filename('fods')
+            outputs["out_fods"] = self._gen_filename("fods")
         return outputs

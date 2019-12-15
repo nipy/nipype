@@ -3,8 +3,6 @@
 Handles custom functions used in Function interface. Future imports
 are avoided to keep namespace as clear as possible.
 """
-from builtins import next, str
-from future.utils import raise_from
 import inspect
 from textwrap import dedent
 
@@ -36,13 +34,15 @@ def create_function_from_source(function_source, imports=None):
         exec(function_source, ns)
 
     except Exception as e:
-        msg = 'Error executing function\n{}\n'.format(function_source)
-        msg += ("Functions in connection strings have to be standalone. "
-                "They cannot be declared either interactively or inside "
-                "another function or inline in the connect string. Any "
-                "imports should be done inside the function.")
-        raise_from(RuntimeError(msg), e)
-    ns_funcs = list(set(ns) - set(import_keys + ['__builtins__']))
+        msg = "Error executing function\n{}\n".format(function_source)
+        msg += (
+            "Functions in connection strings have to be standalone. "
+            "They cannot be declared either interactively or inside "
+            "another function or inline in the connect string. Any "
+            "imports should be done inside the function."
+        )
+        raise RuntimeError(msg) from e
+    ns_funcs = list(set(ns) - set(import_keys + ["__builtins__"]))
     assert len(ns_funcs) == 1, "Function or inputs are ill-defined"
     func = ns[ns_funcs[0]]
     return func
