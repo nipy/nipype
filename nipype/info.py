@@ -160,14 +160,7 @@ REQUIRES = [
 # https://github.com/nipy/nipype/pull/2961#issuecomment-512035484
 REQUIRES += ["neurdflib"]
 
-TESTS_REQUIRES = [
-    "codecov",
-    "coverage<5",
-    "mock",
-    "pytest",
-    "pytest-cov",
-    "pytest-env",
-]
+TESTS_REQUIRES = ["codecov", "coverage<5", "mock", "pytest", "pytest-cov", "pytest-env"]
 
 EXTRA_REQUIRES = {
     "data": ["datalad"],
