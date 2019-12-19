@@ -10,7 +10,6 @@ import networkx as nx
 
 from ... import logging
 from ...utils.filemanip import split_filename
-from ...utils import NUMPY_MMAP
 
 from ..base import (
     BaseInterface,

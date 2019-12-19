@@ -4,7 +4,6 @@ import os
 import nibabel as nb
 import numpy as np
 
-from ...utils import NUMPY_MMAP
 from ...utils.filemanip import split_filename, fname_presuffix
 
 from .base import NipyBaseInterface, have_nipy

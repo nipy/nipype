@@ -6,7 +6,6 @@ import numpy as np
 import nibabel as nb
 
 from ... import logging
-from ...utils import NUMPY_MMAP
 from ..base import (
     traits,
     TraitedSpec,

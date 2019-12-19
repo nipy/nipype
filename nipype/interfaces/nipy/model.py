@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 
-from ...utils import NUMPY_MMAP
-
 from .base import NipyBaseInterface
 from ..base import (
     TraitedSpec,
