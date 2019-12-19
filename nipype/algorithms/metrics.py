@@ -441,8 +441,8 @@ class FuzzyOverlap(SimpleInterface):
 
     def _run_interface(self, runtime):
         # Load data
-        refdata = np.asanyarray(nb.concat_images(self.inputs.in_ref).dataobj)
-        tstdata = np.asanyarray(nb.concat_images(self.inputs.in_tst).dataobj)
+        refdata = nb.concat_images(self.inputs.in_ref).dataobj
+        tstdata = nb.concat_images(self.inputs.in_tst).dataobj
 
         # Data must have same shape
         if not refdata.shape == tstdata.shape:
