@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 
-from ...utils import NUMPY_MMAP
-
 from .base import NipyBaseInterface
 from ..base import (
     TraitedSpec,
@@ -115,21 +113,19 @@ class FitGLM(NipyBaseInterface):
         if isinstance(functional_runs, (str, bytes)):
             functional_runs = [functional_runs]
         nii = nb.load(functional_runs[0])
-        data = nii.get_data()
+        data = nii.get_fdata(caching="unchanged")
 
         if isdefined(self.inputs.mask):
-            mask = nb.load(self.inputs.mask).get_data() > 0
+            mask = np.asanyarray(nb.load(self.inputs.mask).dataobj) > 0
         else:
             mask = np.ones(nii.shape[:3]) == 1
 
-        timeseries = data.copy()[mask, :]
+        timeseries = data[mask, :]
         del data
 
         for functional_run in functional_runs[1:]:
-            nii = nb.load(functional_run, mmap=NUMPY_MMAP)
-            data = nii.get_data()
-            npdata = data.copy()
-            del data
+            nii = nb.load(functional_run, mmap=False)
+            npdata = np.asarray(nii.dataobj)
             timeseries = np.concatenate((timeseries, npdata[mask, :]), axis=1)
             del npdata
 
@@ -326,15 +322,14 @@ class EstimateContrast(NipyBaseInterface):
 
         beta_nii = nb.load(self.inputs.beta)
         if isdefined(self.inputs.mask):
-            mask = nb.load(self.inputs.mask).get_data() > 0
+            mask = np.asanyarray(nb.load(self.inputs.mask).dataobj) > 0
         else:
             mask = np.ones(beta_nii.shape[:3]) == 1
 
         glm = GLM.GeneralLinearModel()
-        nii = nb.load(self.inputs.beta)
-        glm.beta = beta_nii.get_data().copy()[mask, :].T
+        glm.beta = np.array(beta_nii.dataobj)[mask, :].T
         glm.nvbeta = self.inputs.nvbeta
-        glm.s2 = nb.load(self.inputs.s2).get_data().copy()[mask]
+        glm.s2 = np.array(nb.load(self.inputs.s2).dataobj)[mask]
         glm.dof = self.inputs.dof
         glm._axis = self.inputs.axis
         glm._constants = self.inputs.constants
@@ -358,7 +353,7 @@ class EstimateContrast(NipyBaseInterface):
             stat_map = np.zeros(mask.shape)
             stat_map[mask] = est_contrast.stat().T
             stat_map_file = os.path.abspath(name + "_stat_map.nii")
-            nb.save(nb.Nifti1Image(stat_map, nii.affine), stat_map_file)
+            nb.save(nb.Nifti1Image(stat_map, beta_nii.affine), stat_map_file)
             self._stat_maps.append(stat_map_file)
 
             p_map = np.zeros(mask.shape)

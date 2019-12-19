@@ -92,17 +92,19 @@ class RESTORE(DipyDiffusionInterface):
         img = nb.load(self.inputs.in_file)
         hdr = img.header.copy()
         affine = img.affine
-        data = img.get_data()
+        data = img.get_fdata()
         gtab = self._get_gradient_table()
 
         if isdefined(self.inputs.in_mask):
-            msk = nb.load(self.inputs.in_mask).get_data().astype(np.uint8)
+            msk = np.asanyarray(nb.load(self.inputs.in_mask).dataobj).astype(np.uint8)
         else:
             msk = np.ones(data.shape[:3], dtype=np.uint8)
 
         try_b0 = True
         if isdefined(self.inputs.noise_mask):
-            noise_msk = nb.load(self.inputs.noise_mask).get_data().reshape(-1)
+            noise_msk = (
+                nb.load(self.inputs.noise_mask).get_fdata(dtype=np.float32).reshape(-1)
+            )
             noise_msk[noise_msk > 0.5] = 1
             noise_msk[noise_msk < 1.0] = 0
             noise_msk = noise_msk.astype(np.uint8)
@@ -232,16 +234,16 @@ class EstimateResponseSH(DipyDiffusionInterface):
         affine = img.affine
 
         if isdefined(self.inputs.in_mask):
-            msk = nb.load(self.inputs.in_mask).get_data()
+            msk = np.asanyarray(nb.load(self.inputs.in_mask).dataobj)
             msk[msk > 0] = 1
             msk[msk < 0] = 0
         else:
             msk = np.ones(imref.shape)
 
-        data = img.get_data().astype(np.float32)
+        data = img.get_fdata(dtype=np.float32)
         gtab = self._get_gradient_table()
 
-        evals = np.nan_to_num(nb.load(self.inputs.in_evals).get_data())
+        evals = np.nan_to_num(nb.load(self.inputs.in_evals).dataobj)
         FA = np.nan_to_num(fractional_anisotropy(evals)) * msk
         indices = np.where(FA > self.inputs.fa_thresh)
         S0s = data[indices][:, np.nonzero(gtab.b0s_mask)[0]]
@@ -260,7 +262,7 @@ class EstimateResponseSH(DipyDiffusionInterface):
             indices = np.logical_or(
                 FA >= 0.4, (np.logical_and(FA >= 0.15, MD >= 0.0011))
             )
-            data = nb.load(self.inputs.in_file).get_data()
+            data = np.asanyarray(nb.load(self.inputs.in_file).dataobj)
             response = recursive_response(
                 gtab,
                 data,
@@ -359,11 +361,11 @@ class CSD(DipyDiffusionInterface):
         imref = nb.four_to_three(img)[0]
 
         if isdefined(self.inputs.in_mask):
-            msk = nb.load(self.inputs.in_mask).get_data()
+            msk = np.asanyarray(nb.load(self.inputs.in_mask).dataobj)
         else:
             msk = np.ones(imref.shape)
 
-        data = img.get_data().astype(np.float32)
+        data = img.get_fdata(dtype=np.float32)
 
         gtab = self._get_gradient_table()
         resp_file = np.loadtxt(self.inputs.response)

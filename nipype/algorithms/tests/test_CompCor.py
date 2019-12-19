@@ -124,7 +124,7 @@ class TestCompCor:
         ccinterface = TCompCor(num_components=6, realigned_file=self.realigned_file)
         ccinterface.run()
 
-        mask = nb.load("mask_000.nii.gz").get_data()
+        mask = nb.load("mask_000.nii.gz").dataobj
         num_nonmasked_voxels = np.count_nonzero(mask)
         assert num_nonmasked_voxels == 1
 
@@ -153,7 +153,7 @@ class TestCompCor:
         )
 
         TCompCor(realigned_file=asymmetric_data).run()
-        assert nb.load("mask_000.nii.gz").get_data().shape == asymmetric_shape[:3]
+        assert nb.load("mask_000.nii.gz").shape == asymmetric_shape[:3]
 
     def test_compcor_bad_input_shapes(self):
         # dim 0 is < dim 0 of self.mask_files (2)
@@ -183,12 +183,12 @@ class TestCompCor:
             ).run()
             if method == "union":
                 assert np.array_equal(
-                    nb.load("mask_000.nii.gz").get_data(),
+                    nb.load("mask_000.nii.gz").dataobj,
                     ([[[0, 0], [0, 0]], [[0, 0], [1, 0]]]),
                 )
             if method == "intersect":
                 assert np.array_equal(
-                    nb.load("mask_000.nii.gz").get_data(),
+                    nb.load("mask_000.nii.gz").dataobj,
                     ([[[0, 0], [0, 0]], [[0, 1], [0, 0]]]),
                 )
 
@@ -197,8 +197,7 @@ class TestCompCor:
             realigned_file=self.realigned_file, mask_files=self.mask_files, mask_index=1
         ).run()
         assert np.array_equal(
-            nb.load("mask_000.nii.gz").get_data(),
-            ([[[0, 0], [0, 0]], [[0, 1], [0, 0]]]),
+            nb.load("mask_000.nii.gz").dataobj, ([[[0, 0], [0, 0]], [[0, 1], [0, 0]]])
         )
 
     def test_tcompcor_multi_mask_no_index(self):

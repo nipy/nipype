@@ -4,7 +4,6 @@ import os
 import nibabel as nb
 import numpy as np
 
-from ...utils import NUMPY_MMAP
 from ...utils.filemanip import split_filename, fname_presuffix
 
 from .base import NipyBaseInterface, have_nipy
@@ -57,8 +56,7 @@ class ComputeMask(NipyBaseInterface):
             value = getattr(self.inputs, key)
             if isdefined(value):
                 if key in ["mean_volume", "reference_volume"]:
-                    nii = nb.load(value, mmap=NUMPY_MMAP)
-                    value = nii.get_data()
+                    value = np.asanyarray(nb.load(value).dataobj)
                 args[key] = value
 
         brain_mask = compute_mask(**args)
@@ -264,7 +262,7 @@ class Trim(NipyBaseInterface):
             s = slice(self.inputs.begin_index, nii.shape[3])
         else:
             s = slice(self.inputs.begin_index, self.inputs.end_index)
-        nii2 = nb.Nifti1Image(nii.get_data()[..., s], nii.affine, nii.header)
+        nii2 = nb.Nifti1Image(nii.dataobj[..., s], nii.affine, nii.header)
         nb.save(nii2, out_file)
         return runtime
 

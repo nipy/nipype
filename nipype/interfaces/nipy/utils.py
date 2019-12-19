@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import warnings
+import numpy as np
 import nibabel as nb
 
 from .base import NipyBaseInterface, have_nipy
@@ -74,12 +75,12 @@ class Similarity(NipyBaseInterface):
         vol2_nii = nb.load(self.inputs.volume2)
 
         if isdefined(self.inputs.mask1):
-            mask1 = nb.load(self.inputs.mask1).get_data() == 1
+            mask1 = np.asanyarray(nb.load(self.inputs.mask1).dataobj) == 1
         else:
             mask1 = None
 
         if isdefined(self.inputs.mask2):
-            mask2 = nb.load(self.inputs.mask2).get_data() == 1
+            mask2 = np.asanyarray(nb.load(self.inputs.mask2).dataobj) == 1
         else:
             mask2 = None
 

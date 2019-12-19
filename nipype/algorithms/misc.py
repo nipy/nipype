@@ -94,7 +94,7 @@ class PickAtlas(BaseInterface):
 
     def _get_brodmann_area(self):
         nii = nb.load(self.inputs.atlas)
-        origdata = nii.get_data()
+        origdata = np.asanyarray(nii.dataobj)
         newdata = np.zeros(origdata.shape)
 
         if not isinstance(self.inputs.labels, list):
@@ -152,8 +152,8 @@ class SimpleThreshold(BaseInterface):
 
     def _run_interface(self, runtime):
         for fname in self.inputs.volumes:
-            img = nb.load(fname, mmap=NUMPY_MMAP)
-            data = np.array(img.get_data())
+            img = nb.load(fname)
+            data = img.get_fdata()
 
             active_map = data > self.inputs.threshold
 
@@ -216,7 +216,7 @@ class ModifyAffine(BaseInterface):
             affine = np.dot(self.inputs.transformation_matrix, affine)
 
             nb.save(
-                nb.Nifti1Image(img.get_data(), affine, img.header),
+                nb.Nifti1Image(img.dataobj, affine, img.header),
                 self._gen_output_filename(fname),
             )
 
@@ -1014,11 +1014,11 @@ class AddNoise(BaseInterface):
 
     def _run_interface(self, runtime):
         in_image = nb.load(self.inputs.in_file)
-        in_data = in_image.get_data()
+        in_data = in_image.get_fdata()
         snr = self.inputs.snr
 
         if isdefined(self.inputs.in_mask):
-            in_mask = nb.load(self.inputs.in_mask).get_data()
+            in_mask = np.asanyarray(nb.load(self.inputs.in_mask).dataobj)
         else:
             in_mask = np.ones_like(in_data)
 
@@ -1269,30 +1269,28 @@ def normalize_tpms(in_files, in_mask=None, out_files=None):
             out_file = op.abspath("%s_norm_%02d%s" % (fname, i, fext))
             out_files += [out_file]
 
-    imgs = [nb.load(fim, mmap=NUMPY_MMAP) for fim in in_files]
+    imgs = [nb.load(fim) for fim in in_files]
 
     if len(in_files) == 1:
-        img_data = imgs[0].get_data()
+        img_data = imgs[0].get_fdata(dtype=np.float32)
         img_data[img_data > 0.0] = 1.0
         hdr = imgs[0].header.copy()
-        hdr["data_type"] = 16
         hdr.set_data_dtype(np.float32)
-        nb.save(
-            nb.Nifti1Image(img_data.astype(np.float32), imgs[0].affine, hdr),
-            out_files[0],
-        )
+        nb.save(nb.Nifti1Image(img_data, imgs[0].affine, hdr), out_files[0])
         return out_files[0]
 
-    img_data = np.array([im.get_data() for im in imgs]).astype(np.float32)
+    img_data = np.stack(
+        [im.get_fdata(caching="unchanged", dtype=np.float32) for im in imgs]
+    )
     # img_data[img_data>1.0] = 1.0
     img_data[img_data < 0.0] = 0.0
     weights = np.sum(img_data, axis=0)
 
-    msk = np.ones_like(imgs[0].get_data())
+    msk = np.ones(imgs[0].shape)
     msk[weights <= 0] = 0
 
     if in_mask is not None:
-        msk = nb.load(in_mask, mmap=NUMPY_MMAP).get_data()
+        msk = np.asanyarray(nb.load(in_mask).dataobj)
         msk[msk <= 0] = 0
         msk[msk > 0] = 1
 
@@ -1302,7 +1300,6 @@ def normalize_tpms(in_files, in_mask=None, out_files=None):
         data = np.ma.masked_equal(img_data[i], 0)
         probmap = data / weights
         hdr = imgs[i].header.copy()
-        hdr["data_type"] = 16
         hdr.set_data_dtype("float32")
         nb.save(
             nb.Nifti1Image(probmap.astype(np.float32), imgs[i].affine, hdr), out_file
@@ -1331,7 +1328,7 @@ def split_rois(in_file, mask=None, roishape=None):
     droishape = (roishape[0], roishape[1], roishape[2], nvols)
 
     if mask is not None:
-        mask = nb.load(mask, mmap=NUMPY_MMAP).get_data()
+        mask = np.asanyarray(nb.load(mask).dataobj)
         mask[mask > 0] = 1
         mask[mask < 1] = 0
     else:
@@ -1342,7 +1339,7 @@ def split_rois(in_file, mask=None, roishape=None):
     els = np.sum(mask)
     nrois = int(ceil(els / float(roisize)))
 
-    data = im.get_data().reshape((mask.size, -1))
+    data = np.asanyarray(im.dataobj).reshape((mask.size, -1))
     data = np.squeeze(data.take(nzels, axis=0))
     nvols = data.shape[-1]
 
@@ -1420,10 +1417,10 @@ def merge_rois(in_files, in_idxs, in_ref, dtype=None, out_file=None):
     rsh = ref.shape
     del ref
     npix = rsh[0] * rsh[1] * rsh[2]
-    fcdata = nb.load(in_files[0]).get_data()
+    fcimg = nb.load(in_files[0])
 
-    if fcdata.ndim == 4:
-        ndirs = fcdata.shape[-1]
+    if len(fcimg.shape) == 4:
+        ndirs = fcimg.shape[-1]
     else:
         ndirs = 1
     newshape = (rsh[0], rsh[1], rsh[2], ndirs)
@@ -1431,11 +1428,11 @@ def merge_rois(in_files, in_idxs, in_ref, dtype=None, out_file=None):
     hdr.set_xyzt_units("mm", "sec")
 
     if ndirs < 300:
-        data = np.zeros((npix, ndirs))
+        data = np.zeros((npix, ndirs), dtype=dtype)
         for cname, iname in zip(in_files, in_idxs):
             f = np.load(iname)
             idxs = np.squeeze(f["arr_0"])
-            cdata = nb.load(cname, mmap=NUMPY_MMAP).get_data().reshape(-1, ndirs)
+            cdata = np.asanyarray(nb.load(cname).dataobj).reshape(-1, ndirs)
             nels = len(idxs)
             idata = (idxs,)
             try:
@@ -1450,10 +1447,7 @@ def merge_rois(in_files, in_idxs, in_ref, dtype=None, out_file=None):
                 )
                 raise
 
-        hdr.set_data_shape(newshape)
-        nb.Nifti1Image(data.reshape(newshape).astype(dtype), aff, hdr).to_filename(
-            out_file
-        )
+        nb.Nifti1Image(data.reshape(newshape), aff, hdr).to_filename(out_file)
 
     else:
         hdr.set_data_shape(rsh[:3])
@@ -1468,10 +1462,8 @@ def merge_rois(in_files, in_idxs, in_ref, dtype=None, out_file=None):
             idxs = np.squeeze(f["arr_0"])
 
             for d, fname in enumerate(nii):
-                data = nb.load(fname, mmap=NUMPY_MMAP).get_data().reshape(-1)
-                cdata = (
-                    nb.load(cname, mmap=NUMPY_MMAP).get_data().reshape(-1, ndirs)[:, d]
-                )
+                data = np.asanyarray(nb.load(fname).dataobj).reshape(-1)
+                cdata = nb.load(cname).dataobj[..., d].reshape(-1)
                 nels = len(idxs)
                 idata = (idxs,)
                 data[idata] = cdata[0:nels]
@@ -1551,8 +1543,8 @@ class CalculateMedian(BaseInterface):
         total = None
         self._median_files = []
         for idx, fname in enumerate(ensure_list(self.inputs.in_files)):
-            img = nb.load(fname, mmap=NUMPY_MMAP)
-            data = np.median(img.get_data(), axis=3)
+            img = nb.load(fname)
+            data = np.median(img.get_fdata(), axis=3)
             if self.inputs.median_per_file:
                 self._median_files.append(self._write_nifti(img, data, idx))
             else:

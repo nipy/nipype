@@ -496,7 +496,7 @@ class ArtifactDetect(BaseInterface):
         # compute global intensity signal
         (x, y, z, timepoints) = nim.shape
 
-        data = nim.get_data()
+        data = nim.get_fdata(dtype=np.float32)
         affine = nim.affine
         g = np.zeros((timepoints, 1))
         masktype = self.inputs.mask_type
@@ -525,8 +525,8 @@ class ArtifactDetect(BaseInterface):
                     mask[:, :, :, t0] = mask_tmp
                     g[t0] = np.nansum(vol * mask_tmp) / np.nansum(mask_tmp)
         elif masktype == "file":  # uses a mask image to determine intensity
-            maskimg = load(self.inputs.mask_file, mmap=NUMPY_MMAP)
-            mask = maskimg.get_data()
+            maskimg = load(self.inputs.mask_file)
+            mask = maskimg.get_fdata(dtype=np.float32)
             affine = maskimg.affine
             mask = mask > 0.5
             for t0 in range(timepoints):

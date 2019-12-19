@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import numpy as np
 import nibabel as nb
 
 from ... import logging
@@ -43,11 +44,11 @@ class APMQball(DipyDiffusionInterface):
         gtab = self._get_gradient_table()
 
         img = nb.load(self.inputs.in_file)
-        data = img.get_data()
+        data = np.asanyarray(img.dataobj)
         affine = img.affine
         mask = None
         if isdefined(self.inputs.mask_file):
-            mask = nb.load(self.inputs.mask_file).get_data()
+            mask = np.asanyarray(nb.load(self.inputs.mask_file).dataobj)
 
         # Fit it
         model = shm.QballModel(gtab, 8)

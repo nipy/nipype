@@ -233,7 +233,7 @@ class StreamlineTractography(DipyBaseInterface):
         imref = nb.four_to_three(img)[0]
         affine = img.affine
 
-        data = img.get_data().astype(np.float32)
+        data = img.get_fdata(dtype=np.float32)
         hdr = imref.header.copy()
         hdr.set_data_dtype(np.float32)
         hdr["data_type"] = 16
@@ -274,7 +274,7 @@ class StreamlineTractography(DipyBaseInterface):
         IFLOGGER.info("Performing tractography")
 
         if isdefined(self.inputs.tracking_mask):
-            msk = nb.load(self.inputs.tracking_mask).get_data()
+            msk = np.asanyarray(nb.load(self.inputs.tracking_mask).dataobj)
             msk[msk > 0] = 1
             msk[msk < 0] = 0
         else:
@@ -287,7 +287,7 @@ class StreamlineTractography(DipyBaseInterface):
             seeds = np.loadtxt(self.inputs.seed_coord)
 
         elif isdefined(self.inputs.seed_mask):
-            seedmsk = nb.load(self.inputs.seed_mask).get_data()
+            seedmsk = np.asanyarray(nb.load(self.inputs.seed_mask).dataobj)
             assert seedmsk.shape == data.shape[:3]
             seedmsk[seedmsk > 0] = 1
             seedmsk[seedmsk < 1] = 0

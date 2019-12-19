@@ -91,7 +91,9 @@ class NipypeConfig(object):
         self._config = configparser.ConfigParser()
         self._cwd = None
 
-        config_dir = os.path.expanduser(os.getenv("NIPYPE_CONFIG_DIR", default="~/.nipype"))
+        config_dir = os.path.expanduser(
+            os.getenv("NIPYPE_CONFIG_DIR", default="~/.nipype")
+        )
         self.data_file = os.path.join(config_dir, "nipype.json")
 
         self.set_default_config()
