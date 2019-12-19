@@ -139,7 +139,6 @@ PROVIDES = ["nipype"]
 REQUIRES = [
     "click>=%s" % CLICK_MIN_VERSION,
     "funcsigs",
-    "future>=%s" % FUTURE_MIN_VERSION,
     "networkx>=%s" % NETWORKX_MIN_VERSION,
     "nibabel>=%s" % NIBABEL_MIN_VERSION,
     'numpy>=%s ; python_version < "3.7"' % NUMPY_MIN_VERSION,
