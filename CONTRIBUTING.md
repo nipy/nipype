@@ -85,6 +85,8 @@ If you get no errors, you're ready to submit your changes!
 It's a good practice to create [a new branch](https://help.github.com/articles/about-branches/)
 of the repository for a new set of changes.
 
+For Python 2.7-compatible fixes, the branch should start from the `maint/1.3.x` branch on the
+upstream repository.
 
 **4. Submit a [pull request][link_pullrequest].**
 
