@@ -112,13 +112,13 @@ class Distance(BaseInterface):
         from scipy.ndimage.measurements import center_of_mass, label
 
         origdata1 = np.asanyarray(nii1.dataobj)
-        origdata1 = (origdata1 != 0) & ~np.isnan(origdata1)
-        cog_t = np.array(center_of_mass(origdata1.copy())).reshape(-1, 1)
+        origdata1 = (np.rint(origdata1) != 0) & ~np.isnan(origdata1)
+        cog_t = np.array(center_of_mass(origdata1)).reshape(-1, 1)
         cog_t = np.vstack((cog_t, np.array([1])))
         cog_t_coor = np.dot(nii1.affine, cog_t)[:3, :]
 
         origdata2 = np.asanyarray(nii2.dataobj)
-        origdata2 = (origdata2 != 0) & ~np.isnan(origdata2)
+        origdata2 = (np.rint(origdata2) != 0) & ~np.isnan(origdata2)
         (labeled_data, n_labels) = label(origdata2)
 
         cogs = np.ones((4, n_labels))
@@ -165,13 +165,13 @@ class Distance(BaseInterface):
         from scipy.spatial.distance import cdist
 
         origdata1 = np.asanyarray(nii1.dataobj)
-        origdata1 = np.logical_not(np.logical_or(origdata1 == 0, np.isnan(origdata1)))
+        origdata1 = (np.rint(origdata1) != 0) & ~np.isnan(origdata1)
         origdata2 = np.asanyarray(nii2.dataobj)
-        origdata2 = np.logical_not(np.logical_or(origdata2 == 0, np.isnan(origdata2)))
+        origdata2 = (np.rint(origdata2) != 0) & ~np.isnan(origdata2)
 
         if isdefined(self.inputs.mask_volume):
             maskdata = np.asanyarray(nb.load(self.inputs.mask_volume).dataobj)
-            maskdata = np.logical_not(np.logical_or(maskdata == 0, np.isnan(maskdata)))
+            maskdata = (np.rint(maskdata) != 0) & ~np.isnan(maskdata)
             origdata1 = np.logical_and(maskdata, origdata1)
             origdata2 = np.logical_and(maskdata, origdata2)
 

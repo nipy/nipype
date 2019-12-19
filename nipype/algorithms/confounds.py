@@ -1280,9 +1280,10 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
         mask = None
         for filename in mask_files:
             img = nb.load(filename)
+            img_as_mask = np.asanyarray(img.dataobj).astype("int32") > 0
             if mask is None:
-                mask = img.get_fdata() > 0
-            np.logical_or(mask, img.get_fdata() > 0, mask)
+                mask = img_as_mask
+            np.logical_or(mask, img_as_mask, mask)
         img = nb.Nifti1Image(mask, img.affine, header=img.header)
         return [img]
 
@@ -1290,9 +1291,10 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
         mask = None
         for filename in mask_files:
             img = nb.load(filename)
+            img_as_mask = np.asanyarray(img.dataobj).astype("int32") > 0
             if mask is None:
-                mask = img.get_fdata() > 0
-            np.logical_and(mask, img.get_fdata() > 0, mask)
+                mask = img_as_mask
+            np.logical_and(mask, img_as_mask, mask)
         img = nb.Nifti1Image(mask, img.affine, header=img.header)
         return [img]
 
