@@ -1432,9 +1432,7 @@ def merge_rois(in_files, in_idxs, in_ref, dtype=None, out_file=None):
         for cname, iname in zip(in_files, in_idxs):
             f = np.load(iname)
             idxs = np.squeeze(f["arr_0"])
-            cdata = np.asanyarray(nb.load(cname).dataobj).reshape(
-                -1, ndirs
-            )
+            cdata = np.asanyarray(nb.load(cname).dataobj).reshape(-1, ndirs)
             nels = len(idxs)
             idata = (idxs,)
             try:
@@ -1464,9 +1462,7 @@ def merge_rois(in_files, in_idxs, in_ref, dtype=None, out_file=None):
             idxs = np.squeeze(f["arr_0"])
 
             for d, fname in enumerate(nii):
-                data = np.asanyarray(nb.load(fname).dataobj).reshape(
-                    -1
-                )
+                data = np.asanyarray(nb.load(fname).dataobj).reshape(-1)
                 cdata = nb.load(cname).dataobj[..., d].reshape(-1)
                 nels = len(idxs)
                 idata = (idxs,)

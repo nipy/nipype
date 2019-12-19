@@ -919,9 +919,7 @@ class TSNR(BaseInterface):
     def _run_interface(self, runtime):
         img = nb.load(self.inputs.in_file[0], mmap=NUMPY_MMAP)
         header = img.header.copy()
-        vollist = [
-            nb.load(filename) for filename in self.inputs.in_file
-        ]
+        vollist = [nb.load(filename) for filename in self.inputs.in_file]
         data = np.concatenate(
             [
                 vol.get_fdata(dtype=np.float32).reshape(vol.shape[:3] + (-1,))

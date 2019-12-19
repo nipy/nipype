@@ -115,7 +115,7 @@ class FitGLM(NipyBaseInterface):
         if isinstance(functional_runs, (str, bytes)):
             functional_runs = [functional_runs]
         nii = nb.load(functional_runs[0])
-        data = nii.get_fdata(caching='unchanged')
+        data = nii.get_fdata(caching="unchanged")
 
         if isdefined(self.inputs.mask):
             mask = np.asanyarray(nb.load(self.inputs.mask).dataobj) > 0

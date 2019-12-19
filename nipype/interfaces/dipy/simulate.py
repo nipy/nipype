@@ -140,11 +140,7 @@ class SimulateMultiTensor(DipyBaseInterface):
 
         # Volume fractions of isotropic compartments
         nballs = len(self.inputs.in_vfms)
-        vfs = np.squeeze(
-            nb.concat_images(
-                self.inputs.in_vfms
-            ).dataobj
-        )
+        vfs = np.squeeze(nb.concat_images(self.inputs.in_vfms).dataobj)
         if nballs == 1:
             vfs = vfs[..., np.newaxis]
         total_vf = np.sum(vfs, axis=3)
@@ -162,9 +158,7 @@ class SimulateMultiTensor(DipyBaseInterface):
         nvox = len(msk[msk > 0])
 
         # Fiber fractions
-        ffsim = nb.concat_images(
-            self.inputs.in_frac
-        )
+        ffsim = nb.concat_images(self.inputs.in_frac)
         ffs = np.nan_to_num(np.squeeze(ffsim.dataobj))  # fiber fractions
         ffs = np.clip(ffs, 0.0, 1.0)
         if nsticks == 1:
