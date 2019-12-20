@@ -87,7 +87,7 @@ class ANTSInputSpec(ANTSCommandInputSpec):
         desc="",
     )
     gradient_step_length = traits.Float(requires=["transformation_model"], desc="")
-    number_of_time_steps = traits.Float(requires=["gradient_step_length"], desc="")
+    number_of_time_steps = traits.Int(requires=["gradient_step_length"], desc="")
     delta_time = traits.Float(requires=["number_of_time_steps"], desc="")
     symmetry_type = traits.Float(requires=["delta_time"], desc="")
 
