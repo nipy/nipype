@@ -12,8 +12,6 @@ nibabel denoted by ## START - COPIED FROM NIBABEL and a corresponding ## END
 
 """
 # Build helper
-import sys
-from glob import glob
 import os
 from os.path import join as pjoin
 
@@ -115,9 +113,6 @@ def main():
     with open(ver_file) as infofile:
         exec(infofile.read(), globals(), ldict)
 
-    SETUP_REQUIRES = ["future"]
-    if sys.version_info <= (3, 4):
-        SETUP_REQUIRES.append("configparser")
     setup(
         name=ldict["NAME"],
         maintainer=ldict["MAINTAINER"],
@@ -134,7 +129,6 @@ def main():
         version=ldict["VERSION"],
         python_requires=ldict["PYTHON_REQUIRES"],
         install_requires=ldict["REQUIRES"],
-        setup_requires=SETUP_REQUIRES,
         provides=ldict["PROVIDES"],
         packages=find_packages(),
         package_data={"nipype": testdatafiles},
