@@ -1,3 +1,22 @@
+1.4.0 (December 20, 2019)
+=========================
+
+##### [Full changelog](https://github.com/nipy/nipype/milestone/37?closed=1)
+
+  * FIX: Mark strings containing regex escapes as raw (https://github.com/nipy/nipype/pull/3106)
+  * ENH: Pacify DeprecationWarnings caused by nibabel 3 pre-release (https://github.com/nipy/nipype/pull/3099)
+  * ENH: Allow Nipype configuration directory to be specified with NIPYPE_CONFIG_DIR environment variable (https://github.com/nipy/nipype/pull/3073)
+  * ENH: Add options and outputs to ``fsl.Eddy`` interface (https://github.com/nipy/nipype/pull/3034)
+  * ENH: Add skull_file output to fsl.BET interface (https://github.com/nipy/nipype/pull/3095)
+  * RF: Drop various remaining compatibilities for Python < 3.5 (https://github.com/nipy/nipype/pull/2831)
+  * DOC: Add Python 2 statement to README, reference maintenance branch in CONTRIBUTING (https://github.com/nipy/nipype/pull/3115)
+  * DOC: Miss underline before cmd in example code (https://github.com/nipy/nipype/pull/3107)
+  * STY: Black (https://github.com/nipy/nipype/pull/3096)
+  * MNT: Set junit_family to suppress pytest warning (https://github.com/nipy/nipype/pull/3111)
+  * MNT: Fix Dorota Jarecka ORCID (https://github.com/nipy/nipype/pull/3100)
+  * MNT: Drop Python 2 support (https://github.com/nipy/nipype/pull/2654)
+
+
 1.3.1 (November 12, 2019)
 =========================
 
