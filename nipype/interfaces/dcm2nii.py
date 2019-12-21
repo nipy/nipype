@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-"""The dcm2nii module provides basic functions for dicom conversion
-"""
+"""dcm2nii converts images from the proprietary scanner DICOM format to NIfTI."""
 import os
 import re
 from copy import deepcopy

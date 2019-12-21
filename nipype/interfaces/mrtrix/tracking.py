@@ -324,7 +324,7 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
         argstr="-number %d",
         desc="Sets the desired number of tracks."
         "The program will continue to generate tracks until this number of tracks have been selected and written to the output file"
-        "(default is 100 for *_STREAM methods, 1000 for *_PROB methods).",
+        "(default is 100 for ``*_STREAM`` methods, 1000 for ``*_PROB`` methods).",
     )
     maximum_number_of_tracks = traits.Int(
         argstr="-maxnum %d",

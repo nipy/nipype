@@ -31,14 +31,11 @@ class ConvertScalarImageToRGBInputSpec(ANTSCommandInputSpec):
     mask_image = File(
         "none", argstr="%s", exists=True, desc="mask image", position=3, usedefault=True
     )
-    colormap = traits.Str(
+    colormap = traits.Enum(
+        "grey", "red", "green", "blue", "copper", "jet", "hsv", "spring", "summer",
+        "autumn", "winter", "hot", "cool", "overunder", "custom",
         argstr="%s",
-        usedefault=True,
-        desc=(
-            "Possible colormaps: grey, red, green, "
-            "blue, copper, jet, hsv, spring, summer, "
-            "autumn, winter, hot, cool, overunder, custom "
-        ),
+        desc="Select a colormap",
         mandatory=True,
         position=4,
     )
@@ -52,10 +49,10 @@ class ConvertScalarImageToRGBInputSpec(ANTSCommandInputSpec):
         argstr="%d", desc="maximum input", mandatory=True, position=7
     )
     minimum_RGB_output = traits.Int(
-        0, usedefault=True, argstr="%d", desc="", position=8
+        0, usedefault=True, argstr="%d", position=8
     )
     maximum_RGB_output = traits.Int(
-        255, usedefault=True, argstr="%d", desc="", position=9
+        255, usedefault=True, argstr="%d", position=9
     )
 
 
@@ -65,6 +62,8 @@ class ConvertScalarImageToRGBOutputSpec(TraitedSpec):
 
 class ConvertScalarImageToRGB(ANTSCommand):
     """
+    Convert scalar images to RGB.
+
     Examples
     --------
     >>> from nipype.interfaces.ants.visualization import ConvertScalarImageToRGB
@@ -76,6 +75,7 @@ class ConvertScalarImageToRGB(ANTSCommand):
     >>> converter.inputs.maximum_input = 6
     >>> converter.cmdline
     'ConvertScalarImageToRGB 3 T1.nii.gz rgb.nii.gz none jet none 0 6 0 255'
+
     """
 
     _cmd = "ConvertScalarImageToRGB"

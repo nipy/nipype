@@ -30,8 +30,7 @@ from .traits_extension import (
 
 from ... import config, __version__
 
-
-FLOAT_FORMAT = "{:.10f}".format
+_float_fmt = "{:.10f}".format
 nipype_version = Version(__version__)
 
 
@@ -325,7 +324,7 @@ class BaseTraitedSpec(traits.HasTraits):
                     else:
                         out = hash
                 elif isinstance(objekt, float):
-                    out = FLOAT_FORMAT(objekt)
+                    out = _float_fmt(objekt)
                 else:
                     out = objekt
         return out

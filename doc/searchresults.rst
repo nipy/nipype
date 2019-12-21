@@ -1,3 +1,5 @@
+:orphan:
+
 .. This displays the search results from the Google Custom Search engine.
    Don't link to it directly.
 

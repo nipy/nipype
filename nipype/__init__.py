@@ -1,11 +1,20 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+"""
+Information on specific functions, classes, and methods.
+
+:Release: |version|
+:Date: |today|
+
+Top-level module API
+--------------------
+
+"""
 import os
 from distutils.version import LooseVersion
 
 from .info import (
-    LONG_DESCRIPTION as __doc__,
     URL as __url__,
     STATUS as __status__,
     __version__,

@@ -1653,15 +1653,18 @@ class RegistrationSynQuickInputSpec(ANTSCommandInputSpec):
         "b",
         "br",
         argstr="-t %s",
-        desc="""
-                                 transform type
-                                 t:  translation
-                                 r:  rigid
-                                 a:  rigid + affine
-                                 s:  rigid + affine + deformable syn (default)
-                                 sr: rigid + deformable syn
-                                 b:  rigid + affine + deformable b-spline syn
-                                 br: rigid + deformable b-spline syn""",
+        desc="""\
+Transform type
+
+  * t:  translation
+  * r:  rigid
+  * a:  rigid + affine
+  * s:  rigid + affine + deformable syn (default)
+  * sr: rigid + deformable syn
+  * b:  rigid + affine + deformable b-spline syn
+  * br: rigid + deformable b-spline syn
+
+""",
         usedefault=True,
     )
 

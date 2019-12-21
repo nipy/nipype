@@ -205,9 +205,10 @@ class FieldMap(SPMCommand):
 
     http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=173
 
-    To do
-    -----
-    Deal with real/imag magnitude images and with the two phase files case.
+    .. important::
+
+        This interface does not deal with real/imag magnitude images neither
+        with the two phase files case.
 
     Examples
     --------
@@ -266,18 +267,18 @@ class SliceTimingInputSpec(SPMCommandInputSpec):
     )
     time_repetition = traits.Float(
         field="tr",
-        desc=("time between volume acquisitions" "(start to start time)"),
+        desc=("time between volume acquisitions (start to start time)"),
         mandatory=True,
     )
     time_acquisition = traits.Float(
         field="ta",
-        desc=("time of volume acquisition. usually" "calculated as TR-(TR/num_slices)"),
+        desc=("time of volume acquisition. usually calculated as TR-(TR/num_slices)"),
         mandatory=True,
     )
     slice_order = traits.List(
         traits.Float(),
         field="so",
-        desc=("1-based order or onset (in ms) in which " "slices are acquired"),
+        desc=("1-based order or onset (in ms) in which slices are acquired"),
         mandatory=True,
     )
     ref_slice = traits.Int(
@@ -378,7 +379,7 @@ class RealignInputSpec(SPMCommandInputSpec):
     )
     register_to_mean = traits.Bool(
         field="eoptions.rtm",
-        desc=("Indicate whether realignment is " "done to the mean image"),
+        desc=("Indicate whether realignment is done to the mean image"),
     )
     weight_img = File(
         exists=True, field="eoptions.weight", desc="filename of weighting image"
@@ -408,14 +409,14 @@ class RealignInputSpec(SPMCommandInputSpec):
         low=0,
         high=7,
         field="roptions.interp",
-        desc=("degree of b-spline used for " "interpolation"),
+        desc=("degree of b-spline used for interpolation"),
     )
     write_wrap = traits.List(
         traits.Int(),
         minlen=3,
         maxlen=3,
         field="roptions.wrap",
-        desc=("Check if interpolation should wrap in " "[x,y,z]"),
+        desc=("Check if interpolation should wrap in [x,y,z]"),
     )
     write_mask = traits.Bool(field="roptions.mask", desc="True/False mask output image")
     out_prefix = traits.String(
@@ -448,7 +449,7 @@ class RealignOutputSpec(TraitedSpec):
         ),
     )
     realignment_parameters = OutputMultiPath(
-        File(exists=True), desc=("Estimated translation and " "rotation parameters")
+        File(exists=True), desc=("Estimated translation and rotation parameters")
     )
 
 
@@ -872,14 +873,14 @@ class CoregisterInputSpec(SPMCommandInputSpec):
         low=0,
         high=7,
         field="roptions.interp",
-        desc=("degree of b-spline used for " "interpolation"),
+        desc=("degree of b-spline used for interpolation"),
     )
     write_wrap = traits.List(
         traits.Int(),
         minlen=3,
         maxlen=3,
         field="roptions.wrap",
-        desc=("Check if interpolation should wrap in " "[x,y,z]"),
+        desc=("Check if interpolation should wrap in [x,y,z]"),
     )
     write_mask = traits.Bool(field="roptions.mask", desc="True/False mask output image")
     out_prefix = traits.String(
@@ -1025,7 +1026,7 @@ class NormalizeInputSpec(SPMCommandInputSpec):
         field="eoptions.cutoff", desc="Cutoff of for DCT bases"
     )
     nonlinear_iterations = traits.Int(
-        field="eoptions.nits", desc=("Number of iterations of " "nonlinear warping")
+        field="eoptions.nits", desc=("Number of iterations of nonlinear warping")
     )
     nonlinear_regularization = traits.Float(
         field="eoptions.reg",
@@ -1053,12 +1054,12 @@ class NormalizeInputSpec(SPMCommandInputSpec):
         low=0,
         high=7,
         field="roptions.interp",
-        desc=("degree of b-spline used for " "interpolation"),
+        desc=("degree of b-spline used for interpolation"),
     )
     write_wrap = traits.List(
         traits.Int(),
         field="roptions.wrap",
-        desc=("Check if interpolation should wrap in " "[x,y,z] - list of bools"),
+        desc=("Check if interpolation should wrap in [x,y,z] - list of bools"),
     )
     out_prefix = traits.String(
         "w", field="roptions.prefix", usedefault=True, desc="normalized output prefix"
@@ -1068,7 +1069,7 @@ class NormalizeInputSpec(SPMCommandInputSpec):
 class NormalizeOutputSpec(TraitedSpec):
     normalization_parameters = OutputMultiPath(
         File(exists=True),
-        desc=("MAT files containing " "the normalization " "parameters"),
+        desc=("MAT files containing the normalization parameters"),
     )
     normalized_source = OutputMultiPath(
         File(exists=True), desc="Normalized source files"
@@ -1175,7 +1176,7 @@ class Normalize12InputSpec(SPMCommandInputSpec):
     image_to_align = ImageFileSPM(
         exists=True,
         field="subj.vol",
-        desc=("file to estimate normalization parameters " "with"),
+        desc=("file to estimate normalization parameters with"),
         xor=["deformation_file"],
         mandatory=True,
         copyfile=True,
@@ -1235,7 +1236,7 @@ class Normalize12InputSpec(SPMCommandInputSpec):
     tpm = File(
         exists=True,
         field="eoptions.tpm",
-        desc=("template in form of tissue probablitiy maps to " "normalize to"),
+        desc=("template in form of tissue probablitiy maps to normalize to"),
         xor=["deformation_file"],
         copyfile=False,
     )
@@ -1247,15 +1248,15 @@ class Normalize12InputSpec(SPMCommandInputSpec):
         field="eoptions.reg",
         minlen=5,
         maxlen=5,
-        desc=("controls balance between " "parameters and data"),
+        desc=("controls balance between parameters and data"),
     )
     smoothness = traits.Float(
         field="eoptions.fwhm",
-        desc=("value (in mm) to smooth the data before " "normalization"),
+        desc=("value (in mm) to smooth the data before normalization"),
     )
     sampling_distance = traits.Float(
         field="eoptions.samp",
-        desc=("Sampling distance on data for " "parameter estimation"),
+        desc=("Sampling distance on data for parameter estimation"),
     )
     write_bounding_box = traits.List(
         traits.List(traits.Float(), minlen=3, maxlen=3),
@@ -1283,7 +1284,7 @@ class Normalize12InputSpec(SPMCommandInputSpec):
         low=0,
         high=7,
         field="woptions.interp",
-        desc=("degree of b-spline used for " "interpolation"),
+        desc=("degree of b-spline used for interpolation"),
     )
     out_prefix = traits.String(
         "w", field="woptions.prefix", usedefault=True, desc="Normalized output prefix"
@@ -1301,7 +1302,7 @@ class Normalize12OutputSpec(TraitedSpec):
         ),
     )
     normalized_image = OutputMultiPath(
-        File(exists=True), desc=("Normalized file that needed to " "be aligned")
+        File(exists=True), desc=("Normalized file that needed to be aligned")
     )
     normalized_files = OutputMultiPath(File(exists=True), desc="Normalized other files")
 
@@ -1456,24 +1457,24 @@ class SegmentInputSpec(SPMCommandInputSpec):
             Modulated + Unmodulated Normalised: [True,True,False]""",
     )
     save_bias_corrected = traits.Bool(
-        field="output.biascor", desc=("True/False produce a bias " "corrected image")
+        field="output.biascor", desc=("True/False produce a bias corrected image")
     )
     clean_masks = traits.Enum(
         "no",
         "light",
         "thorough",
         field="output.cleanup",
-        desc=("clean using estimated brain mask " "('no','light','thorough')"),
+        desc=("clean using estimated brain mask ('no','light','thorough')"),
     )
     tissue_prob_maps = traits.List(
         File(exists=True),
         field="opts.tpm",
-        desc=("list of gray, white & csf prob. " "(opt,)"),
+        desc=("list of gray, white & csf prob. (opt,)"),
     )
     gaussians_per_class = traits.List(
         traits.Int(),
         field="opts.ngaus",
-        desc=("num Gaussians capture intensity " "distribution"),
+        desc=("num Gaussians capture intensity distribution"),
     )
     affine_regularization = traits.Enum(
         "mni",
@@ -1490,7 +1491,7 @@ class SegmentInputSpec(SPMCommandInputSpec):
         ),
     )
     warping_regularization = traits.Float(
-        field="opts.warpreg", desc=("Controls balance between " "parameters and data")
+        field="opts.warpreg", desc=("Controls balance between parameters and data")
     )
     warp_frequency_cutoff = traits.Float(
         field="opts.warpco", desc="Cutoff of DCT bases"
@@ -1525,7 +1526,7 @@ class SegmentInputSpec(SPMCommandInputSpec):
     )
     sampling_distance = traits.Float(
         field="opts.samp",
-        desc=("Sampling distance on data for " "parameter estimation"),
+        desc=("Sampling distance on data for parameter estimation"),
     )
     mask_image = File(
         exists=True,
@@ -1537,13 +1538,13 @@ class SegmentInputSpec(SPMCommandInputSpec):
 class SegmentOutputSpec(TraitedSpec):
     native_gm_image = File(desc="native space grey probability map")
     normalized_gm_image = File(desc="normalized grey probability map",)
-    modulated_gm_image = File(desc=("modulated, normalized grey " "probability map"))
+    modulated_gm_image = File(desc=("modulated, normalized grey probability map"))
     native_wm_image = File(desc="native space white probability map")
     normalized_wm_image = File(desc="normalized white probability map")
-    modulated_wm_image = File(desc=("modulated, normalized white " "probability map"))
+    modulated_wm_image = File(desc=("modulated, normalized white probability map"))
     native_csf_image = File(desc="native space csf probability map")
     normalized_csf_image = File(desc="normalized csf probability map")
-    modulated_csf_image = File(desc=("modulated, normalized csf " "probability map"))
+    modulated_csf_image = File(desc=("modulated, normalized csf probability map"))
     modulated_input_image = File(
         deprecated="0.10",
         new_name="bias_corrected_image",
@@ -1682,14 +1683,14 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
     )
     sampling_distance = traits.Float(
         field="warp.samp",
-        desc=("Sampling distance on data for " "parameter estimation"),
+        desc=("Sampling distance on data for parameter estimation"),
     )
     write_deformation_fields = traits.List(
         traits.Bool(),
         minlen=2,
         maxlen=2,
         field="warp.write",
-        desc=("Which deformation fields to " "write:[Inverse, Forward]"),
+        desc=("Which deformation fields to write:[Inverse, Forward]"),
     )
 
 
@@ -1704,7 +1705,7 @@ class NewSegmentOutputSpec(TraitedSpec):
         traits.List(File(exists=True)), desc="normalized class images"
     )
     modulated_class_images = traits.List(
-        traits.List(File(exists=True)), desc=("modulated+normalized class " "images")
+        traits.List(File(exists=True)), desc=("modulated+normalized class images")
     )
     transformation_mat = OutputMultiPath(
         File(exists=True), desc="Normalization transformation"
@@ -1883,7 +1884,7 @@ class SmoothInputSpec(SPMCommandInputSpec):
     )
     data_type = traits.Int(field="dtype", desc="Data type of the output images")
     implicit_masking = traits.Bool(
-        field="im", desc=("A mask implied by a particular" "voxel value")
+        field="im", desc=("A mask implied by a particular voxel value")
     )
     out_prefix = traits.String(
         "s", field="prefix", usedefault=True, desc="smoothed output prefix"
@@ -1957,7 +1958,7 @@ class DARTELInputSpec(SPMCommandInputSpec):
         "Membrane",
         "Bending",
         field="warp.settings.rform",
-        desc=("Form of regularization energy " "term"),
+        desc=("Form of regularization energy term"),
     )
     iteration_parameters = traits.List(
         traits.Tuple(
@@ -1969,31 +1970,36 @@ class DARTELInputSpec(SPMCommandInputSpec):
         minlen=3,
         maxlen=12,
         field="warp.settings.param",
-        desc="""List of tuples for each iteration
-                                       - Inner iterations
-                                       - Regularization parameters
-                                       - Time points for deformation model
-                                       - smoothing parameter
-                                       """,
+        desc="""\
+List of tuples for each iteration
+
+  * Inner iterations
+  * Regularization parameters
+  * Time points for deformation model
+  * smoothing parameter
+
+""",
     )
     optimization_parameters = traits.Tuple(
         traits.Float,
         traits.Range(1, 8),
         traits.Range(1, 8),
         field="warp.settings.optim",
-        desc="""
-                                           Optimization settings a tuple
-                                           - LM regularization
-                                           - cycles of multigrid solver
-                                           - relaxation iterations
-                                           """,
+        desc="""\
+Optimization settings a tuple:
+
+  * LM regularization
+  * cycles of multigrid solver
+  * relaxation iterations
+
+""",
     )
 
 
 class DARTELOutputSpec(TraitedSpec):
     final_template_file = File(exists=True, desc="final DARTEL template")
     template_files = traits.List(
-        File(exists=True), desc=("Templates from different stages of " "iteration")
+        File(exists=True), desc=("Templates from different stages of iteration")
     )
     dartel_flow_fields = traits.List(File(exists=True), desc="DARTEL flow fields")
 
@@ -2104,7 +2110,7 @@ class DARTELNorm2MNIInputSpec(SPMCommandInputSpec):
     )
     modulate = traits.Bool(
         field="mni_norm.preserve",
-        desc=("Modulate out images - no modulation " "preserves concentrations"),
+        desc=("Modulate out images - no modulation preserves concentrations"),
     )
     fwhm = traits.Either(
         traits.List(traits.Float(), minlen=3, maxlen=3),
@@ -2119,7 +2125,7 @@ class DARTELNorm2MNIOutputSpec(TraitedSpec):
         File(exists=True), desc="Normalized files in MNI space"
     )
     normalization_parameter_file = File(
-        exists=True, desc=("Transform parameters to MNI " "space")
+        exists=True, desc=("Transform parameters to MNI space")
     )
 
 
@@ -2203,7 +2209,7 @@ class CreateWarpedInputSpec(SPMCommandInputSpec):
     iterations = traits.Range(
         low=0,
         high=9,
-        desc=("The number of iterations: log2(number of " "time steps)"),
+        desc=("The number of iterations: log2(number of time steps)"),
         field="crt_warped.K",
     )
     interp = traits.Range(
@@ -2491,7 +2497,7 @@ class VBMSegmentOuputSpec(TraitedSpec):
         traits.List(File(exists=True)), desc="normalized class images"
     )
     modulated_class_images = traits.List(
-        traits.List(File(exists=True)), desc=("modulated+normalized class " "images")
+        traits.List(File(exists=True)), desc=("modulated+normalized class images")
     )
     transformation_mat = OutputMultiPath(
         File(exists=True), desc="Normalization transformation"

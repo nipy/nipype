@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Provides interfaces to various commands provided by dcmstack
-"""
+"""dcmstack allows series of DICOM images to be stacked into multi-dimensional arrays."""
 
 import os
 from os import path as op

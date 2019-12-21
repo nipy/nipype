@@ -134,8 +134,8 @@ class SFPICOCalibData(StdOutCommandLine):
     which stores information about the datafile, is generated along with
     the datafile.
 
-    Example 1
-    ---------
+    Examples
+    --------
     To create a calibration dataset using the default settings
 
     >>> import nipype.interfaces.camino as cam
@@ -151,8 +151,6 @@ class SFPICOCalibData(StdOutCommandLine):
     data produced can be varied by specifying the ranges and steps of
     the parameters for both the one and two fibre datasets used.
 
-    Example 2
-    ---------
     To create a custom calibration dataset
 
     >>> import nipype.interfaces.camino as cam
@@ -172,6 +170,7 @@ class SFPICOCalibData(StdOutCommandLine):
     simulate the one fibre cases and 72,912 voxels simulate the various
     two fibre cases. However, care should be taken to ensure that enough
     data is generated for calculating the LUT.      # doctest: +SKIP
+
     """
 
     _cmd = "sfpicocalibdata"
@@ -218,14 +217,16 @@ class SFLUTGenInputSpec(StdOutCommandLineInputSpec):
         "bingham",
         "watson",
         argstr="-pdf %s",
-        desc=(
-            "Sets the distribution to use for the calibration. The default is the Bingham "
-            "distribution, which allows elliptical  probability  density  contours. "
-            "Currently supported options are: "
-            "  bingham - The Bingham distribution, which allows elliptical probability "
-            "            density contours. "
-            "  watson - The Watson distribution. This distribution is rotationally symmetric."
-        ),
+        desc="""\
+Sets the distribution to use for the calibration. The default is the Bingham
+distribution, which allows elliptical probability density contours.
+Currently supported options are:
+
+  * bingham -- The Bingham distribution, which allows elliptical probability
+    density contours.
+  * watson -- The Watson distribution. This distribution is rotationally symmetric.
+
+""",
         usedefault=True,
     )
     binincsize = traits.Int(
@@ -286,9 +287,9 @@ class SFLUTGen(StdOutCommandLine):
     This utility uses calibration data generated from SFPICOCalibData
     and peak information created by SFPeaks.
 
-    The utility outputs two lut's, *_oneFibreSurfaceCoeffs.Bdouble and
-    *_twoFibreSurfaceCoeffs.Bdouble. Each of these files contains big-
-    endian doubles as standard. The format of the output is: ::
+    The utility outputs two lut's, ``*_oneFibreSurfaceCoeffs.Bdouble`` and
+    ``*_twoFibreSurfaceCoeffs.Bdouble``. Each of these files contains big-endian doubles
+    as standard. The format of the output is::
 
           dimensions    (1 for Watson, 2 for Bingham)
           order         (the order of the polynomial)
@@ -298,12 +299,12 @@ class SFLUTGen(StdOutCommandLine):
           coefficient_N
 
     In  the case of the Watson, there is a single set of coefficients,
-    which are ordered: ::
+    which are ordered::
 
           constant, x, x^2, ..., x^order.
 
     In the case of the Bingham, there are two sets of coefficients (one
-    for each surface), ordered so that: ::
+    for each surface), ordered so that::
 
           for j = 1 to order
             for k = 1 to order
@@ -311,7 +312,7 @@ class SFLUTGen(StdOutCommandLine):
           where j+k < order
 
     Example
-    ---------
+    -------
     To create a calibration dataset using the default settings
 
     >>> import nipype.interfaces.camino as cam
@@ -319,6 +320,7 @@ class SFLUTGen(StdOutCommandLine):
     >>> lutgen.inputs.in_file = 'QSH_peaks.Bdouble'
     >>> lutgen.inputs.info_file = 'PICO_calib.info'
     >>> lutgen.run()        # doctest: +SKIP
+
     """
 
     _cmd = "sflutgen"

@@ -1,3 +1,5 @@
+:orphan:
+
 .. _version:
 
 :Release: |version|

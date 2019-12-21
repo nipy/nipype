@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-""" Quickshear is a simple geometric defacing algorithm
-"""
+"""Quickshear is a simple geometric defacing algorithm."""
 
 from .base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
 from ..external.due import BibTeX
