@@ -66,11 +66,10 @@ class TVAdjustVoxSpOutputSpec(TraitedSpec):
 
 class TVAdjustVoxSp(CommandLineDtitk):
     """
-     Adjusts the voxel space of a tensor volume
+     Adjusts the voxel space of a tensor volume.
 
     Example
     -------
-
     >>> from nipype.interfaces import dtitk
     >>> node = dtitk.TVAdjustVoxSp()
     >>> node.inputs.in_file = 'im1.nii'
@@ -78,6 +77,7 @@ class TVAdjustVoxSp(CommandLineDtitk):
     >>> node.cmdline
     'TVAdjustVoxelspace -in im1.nii -out im1_avs.nii -target im2.nii'
     >>> node.run() # doctest: +SKIP
+
     """
 
     input_spec = TVAdjustVoxSpInputSpec
@@ -119,19 +119,19 @@ class SVAdjustVoxSpOutputSpec(TraitedSpec):
 
 class SVAdjustVoxSp(CommandLineDtitk):
     """
-     Adjusts the voxel space of a scalar volume
+    Adjusts the voxel space of a scalar volume.
 
-        Example
-        -------
+    Example
+    -------
+    >>> from nipype.interfaces import dtitk
+    >>> node = dtitk.SVAdjustVoxSp()
+    >>> node.inputs.in_file = 'im1.nii'
+    >>> node.inputs.target_file = 'im2.nii'
+    >>> node.cmdline
+    'SVAdjustVoxelspace -in im1.nii -out im1_avs.nii -target im2.nii'
+    >>> node.run() # doctest: +SKIP
 
-        >>> from nipype.interfaces import dtitk
-        >>> node = dtitk.SVAdjustVoxSp()
-        >>> node.inputs.in_file = 'im1.nii'
-        >>> node.inputs.target_file = 'im2.nii'
-        >>> node.cmdline
-        'SVAdjustVoxelspace -in im1.nii -out im1_avs.nii -target im2.nii'
-        >>> node.run() # doctest: +SKIP
-        """
+    """
 
     input_spec = SVAdjustVoxSpInputSpec
     output_spec = SVAdjustVoxSpOutputSpec
@@ -189,19 +189,19 @@ class TVResampleOutputSpec(TraitedSpec):
 
 class TVResample(CommandLineDtitk):
     """
-    Resamples a tensor volume
+    Resamples a tensor volume.
 
-        Example
-        -------
+    Example
+    -------
+    >>> from nipype.interfaces import dtitk
+    >>> node = dtitk.TVResample()
+    >>> node.inputs.in_file = 'im1.nii'
+    >>> node.inputs.target_file = 'im2.nii'
+    >>> node.cmdline
+    'TVResample -in im1.nii -out im1_resampled.nii -target im2.nii'
+    >>> node.run() # doctest: +SKIP
 
-        >>> from nipype.interfaces import dtitk
-        >>> node = dtitk.TVResample()
-        >>> node.inputs.in_file = 'im1.nii'
-        >>> node.inputs.target_file = 'im2.nii'
-        >>> node.cmdline
-        'TVResample -in im1.nii -out im1_resampled.nii -target im2.nii'
-        >>> node.run() # doctest: +SKIP
-        """
+    """
 
     input_spec = TVResampleInputSpec
     output_spec = TVResampleOutputSpec
@@ -256,19 +256,19 @@ class SVResampleOutputSpec(TraitedSpec):
 
 class SVResample(CommandLineDtitk):
     """
-    Resamples a scalar volume
+    Resamples a scalar volume.
 
-        Example
-        -------
+    Example
+    -------
+    >>> from nipype.interfaces import dtitk
+    >>> node = dtitk.SVResample()
+    >>> node.inputs.in_file = 'im1.nii'
+    >>> node.inputs.target_file = 'im2.nii'
+    >>> node.cmdline
+    'SVResample -in im1.nii -out im1_resampled.nii -target im2.nii'
+    >>> node.run() # doctest: +SKIP
 
-        >>> from nipype.interfaces import dtitk
-        >>> node = dtitk.SVResample()
-        >>> node.inputs.in_file = 'im1.nii'
-        >>> node.inputs.target_file = 'im2.nii'
-        >>> node.cmdline
-        'SVResample -in im1.nii -out im1_resampled.nii -target im2.nii'
-        >>> node.run() # doctest: +SKIP
-        """
+    """
 
     input_spec = SVResampleInputSpec
     output_spec = SVResampleOutputSpec
@@ -290,19 +290,19 @@ class TVtoolOutputSpec(TraitedSpec):
 
 class TVtool(CommandLineDtitk):
     """
-    Calculates a tensor metric volume from a tensor volume
+    Calculates a tensor metric volume from a tensor volume.
 
-        Example
-        -------
+    Example
+    -------
+    >>> from nipype.interfaces import dtitk
+    >>> node = dtitk.TVtool()
+    >>> node.inputs.in_file = 'im1.nii'
+    >>> node.inputs.in_flag = 'fa'
+    >>> node.cmdline
+    'TVtool -in im1.nii -fa -out im1_fa.nii'
+    >>> node.run() # doctest: +SKIP
 
-        >>> from nipype.interfaces import dtitk
-        >>> node = dtitk.TVtool()
-        >>> node.inputs.in_file = 'im1.nii'
-        >>> node.inputs.in_flag = 'fa'
-        >>> node.cmdline
-        'TVtool -in im1.nii -fa -out im1_fa.nii'
-        >>> node.run() # doctest: +SKIP
-        """
+    """
 
     input_spec = TVtoolInputSpec
     output_spec = TVtoolOutputSpec
@@ -383,11 +383,10 @@ class BinThreshOutputSpec(TraitedSpec):
 
 class BinThresh(CommandLineDtitk):
     """
-    Binarizes an image
+    Binarizes an image.
 
     Example
     -------
-
     >>> from nipype.interfaces import dtitk
     >>> node = dtitk.BinThresh()
     >>> node.inputs.in_file = 'im1.nii'
@@ -398,6 +397,7 @@ class BinThresh(CommandLineDtitk):
     >>> node.cmdline
     'BinaryThresholdImageFilter im1.nii im1_thrbin.nii 0 100 1 0'
     >>> node.run() # doctest: +SKIP
+
     """
 
     input_spec = BinThreshInputSpec

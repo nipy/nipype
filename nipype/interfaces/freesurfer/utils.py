@@ -446,7 +446,7 @@ class SurfaceSmoothInputSpec(FSTraitedSpec):
         True,
         argstr="--cortex",
         usedefault=True,
-        desc="only smooth within $hemi.cortex.label",
+        desc="only smooth within ``$hemi.cortex.label``",
     )
     reshape = traits.Bool(
         argstr="--reshape", desc="reshape surface vector to fit in non-mgh format"
@@ -468,14 +468,13 @@ class SurfaceSmooth(FSCommand):
     smoothing process.  If the latter, the underlying program will calculate
     the correct number of iterations internally.
 
-    .. seealso::
-
-        SmoothTessellation() Interface
-            For smoothing a tessellated surface (e.g. in gifti or .stl)
+    See Also
+    --------
+    `nipype.interfaces.freesurfer.utils.SmoothTessellation`_ interface for
+    smoothing a tessellated surface (e.g. in gifti or .stl)
 
     Examples
     --------
-
     >>> import nipype.interfaces.freesurfer as fs
     >>> smoother = fs.SurfaceSmooth()
     >>> smoother.inputs.in_file = "lh.cope1.mgz"
@@ -1569,16 +1568,12 @@ class MRIPretess(FSCommand):
     """
     Uses Freesurfer's mri_pretess to prepare volumes to be tessellated.
 
-    Description
-    -----------
-
     Changes white matter (WM) segmentation so that the neighbors of all
     voxels labeled as WM have a face in common - no edges or corners
     allowed.
 
     Example
     -------
-
     >>> import nipype.interfaces.freesurfer as fs
     >>> pretess = fs.MRIPretess()
     >>> pretess.inputs.in_filled = 'wm.mgz'
@@ -1675,10 +1670,6 @@ class MRIMarchingCubes(FSCommand):
 
 
 class SmoothTessellationInputSpec(FSTraitedSpec):
-    """
-    This program smooths the tessellation of a surface using 'mris_smooth'
-    """
-
     in_file = File(
         exists=True,
         mandatory=True,
@@ -1694,17 +1685,17 @@ class SmoothTessellationInputSpec(FSTraitedSpec):
         argstr="-n %d", desc="Number of smoothing iterations (default=10)"
     )
     snapshot_writing_iterations = traits.Int(
-        argstr="-w %d", desc='Write snapshot every "n" iterations'
+        argstr="-w %d", desc='Write snapshot every *n* iterations'
     )
 
     use_gaussian_curvature_smoothing = traits.Bool(
         argstr="-g", desc="Use Gaussian curvature smoothing"
     )
     gaussian_curvature_norm_steps = traits.Int(
-        argstr="%d ", desc="Use Gaussian curvature smoothing"
+        argstr="%d", desc="Use Gaussian curvature smoothing"
     )
     gaussian_curvature_smoothing_steps = traits.Int(
-        argstr="%d", desc="Use Gaussian curvature smoothing"
+        argstr=" %d", desc="Use Gaussian curvature smoothing"
     )
 
     disable_estimates = traits.Bool(
@@ -1722,10 +1713,10 @@ class SmoothTessellationInputSpec(FSTraitedSpec):
         desc="output filename or True to generate one",
     )
     out_curvature_file = File(
-        argstr="-c %s", desc='Write curvature to ?h.curvname (default "curv")'
+        argstr="-c %s", desc='Write curvature to ``?h.curvname`` (default "curv")'
     )
     out_area_file = File(
-        argstr="-b %s", desc='Write area to ?h.areaname (default "area")'
+        argstr="-b %s", desc='Write area to ``?h.areaname`` (default "area")'
     )
     seed = traits.Int(
         argstr="-seed %d", desc="Seed for setting random number generator"
@@ -1737,25 +1728,25 @@ class SmoothTessellationOutputSpec(TraitedSpec):
     This program smooths the tessellation of a surface using 'mris_smooth'
     """
 
-    surface = File(exists=True, desc="Smoothed surface file ")
+    surface = File(exists=True, desc="Smoothed surface file.")
 
 
 class SmoothTessellation(FSCommand):
     """
-    This program smooths the tessellation of a surface using 'mris_smooth'
+    Smooth a tessellated surface.
 
-    .. seealso::
-
-        SurfaceSmooth() Interface
-            For smoothing a scalar field along a surface manifold
+    See Also
+    --------
+    `nipype.interfaces.freesurfer.utils.SurfaceSmooth`_ interface for smoothing a scalar field
+    along a surface manifold
 
     Example
     -------
-
     >>> import nipype.interfaces.freesurfer as fs
     >>> smooth = fs.SmoothTessellation()
     >>> smooth.inputs.in_file = 'lh.hippocampus.stl'
     >>> smooth.run() # doctest: +SKIP
+
     """
 
     _cmd = "mris_smooth"
@@ -1951,11 +1942,10 @@ class Tkregister2(FSCommand):
 
     Examples
     --------
-
     Get transform matrix between orig (*tkRAS*) and native (*scannerRAS*)
     coordinates in Freesurfer. Implements the first step of mapping surfaces
     to native space in `this guide
-    <http://surfer.nmr.mgh.harvard.edu/fswiki/FsAnat-to-NativeAnat>`_.
+    <http://surfer.nmr.mgh.harvard.edu/fswiki/FsAnat-to-NativeAnat>`__.
 
     >>> from nipype.interfaces.freesurfer import Tkregister2
     >>> tk2 = Tkregister2(reg_file='T1_to_native.dat')
@@ -2050,11 +2040,16 @@ class AddXFormToHeaderOutputSpec(TraitedSpec):
 
 
 class AddXFormToHeader(FSCommand):
-    """ Just adds specified xform to the volume header
+    """
+    Just adds specified xform to the volume header.
 
-    (!) WARNING: transform input **MUST** be an absolute path to a DataSink'ed transform or
-    the output will reference a transform in the workflow cache directory!
+    .. danger ::
 
+        Input transform **MUST** be an absolute path to a DataSink'ed transform or
+        the output will reference a transform in the workflow cache directory!
+
+    Examples
+    --------
     >>> from nipype.interfaces.freesurfer import AddXFormToHeader
     >>> adder = AddXFormToHeader()
     >>> adder.inputs.in_file = 'norm.mgz'
@@ -2065,10 +2060,9 @@ class AddXFormToHeader(FSCommand):
     >>> adder.inputs.copy_name = True
     >>> adder.cmdline
     'mri_add_xform_to_header -c trans.mat norm.mgz output.mgz'
-
     >>> adder.run()   # doctest: +SKIP
 
-    References:
+    References
     ----------
     [https://surfer.nmr.mgh.harvard.edu/fswiki/mri_add_xform_to_header]
 
@@ -3829,11 +3823,10 @@ class Aparc2AsegInputSpec(FSTraitedSpec):
     ctxseg = File(argstr="--ctxseg %s", exists=True, desc="")
     label_wm = traits.Bool(
         argstr="--labelwm",
-        desc="""
-                           For each voxel labeled as white matter in the aseg, re-assign
-                           its label to be that of the closest cortical point if its
-                           distance is less than dmaxctx
-                           """,
+        desc="""\
+For each voxel labeled as white matter in the aseg, re-assign
+its label to be that of the closest cortical point if its
+distance is less than dmaxctx.""",
     )
     hypo_wm = traits.Bool(argstr="--hypo-as-wm", desc="Label hypointensities as WM")
     rip_unknown = traits.Bool(
@@ -3842,8 +3835,8 @@ class Aparc2AsegInputSpec(FSTraitedSpec):
     a2009s = traits.Bool(argstr="--a2009s", desc="Using the a2009s atlas")
     copy_inputs = traits.Bool(
         desc="If running as a node, set this to True."
-        + "This will copy the input files to the node "
-        + "directory."
+             "This will copy the input files to the node "
+             "directory."
     )
 
 
@@ -3859,17 +3852,17 @@ class Aparc2Aseg(FSCommand):
     labeled as cortex (3 and 42) and assign it the label of the closest
     cortical vertex. If the voxel is not in the ribbon (as defined by mri/
     lh.ribbon and rh.ribbon), then the voxel is marked as unknown (0).
-    This can be turned off with --noribbon. The cortical parcellation is
+    This can be turned off with ``--noribbon``. The cortical parcellation is
     obtained from subject/label/hemi.aparc.annot which should be based on
     the curvature.buckner40.filled.desikan_killiany.gcs atlas. The aseg is
     obtained from subject/mri/aseg.mgz and should be based on the
     RB40_talairach_2005-07-20.gca atlas. If these atlases are used, then the
     segmentations can be viewed with tkmedit and the
-    FreeSurferColorLUT.txt color table found in $FREESURFER_HOME. These
-    are the default atlases used by recon-all.
+    FreeSurferColorLUT.txt color table found in ``$FREESURFER_HOME``. These
+    are the default atlases used by ``recon-all``.
 
     Examples
-    ========
+    --------
     >>> from nipype.interfaces.freesurfer import Aparc2Aseg
     >>> aparc2aseg = Aparc2Aseg()
     >>> aparc2aseg.inputs.lh_white = 'lh.pial'
@@ -3886,6 +3879,7 @@ class Aparc2Aseg(FSCommand):
     >>> aparc2aseg.inputs.rip_unknown = True
     >>> aparc2aseg.cmdline # doctest: +SKIP
     'mri_aparc2aseg --labelwm  --o aparc+aseg.mgz --rip-unknown --s subject_id'
+
     """
 
     _cmd = "mri_aparc2aseg"
@@ -3947,13 +3941,14 @@ class Apas2Aseg(FSCommand):
     actual surface (this is not the case with aseg.mgz).
 
     Examples
-    ========
+    --------
     >>> from nipype.interfaces.freesurfer import Apas2Aseg
     >>> apas2aseg = Apas2Aseg()
     >>> apas2aseg.inputs.in_file = 'aseg.mgz'
     >>> apas2aseg.inputs.out_file = 'output.mgz'
     >>> apas2aseg.cmdline
     'apas2aseg --i aseg.mgz --o output.mgz'
+
     """
 
     _cmd = "apas2aseg"
@@ -3989,9 +3984,9 @@ class MRIsExpandInputSpec(FSTraitedSpec):
         position=-1,
         usedefault=True,
         desc=(
-            "Output surface file\n"
-            "If no path, uses directory of `in_file`\n"
-            'If no path AND missing "lh." or "rh.", derive from `in_file`'
+            "Output surface file. "
+            "If no path, uses directory of ``in_file``. "
+            'If no path AND missing "lh." or "rh.", derive from ``in_file``'
         ),
     )
     thickness = traits.Bool(
@@ -4002,7 +3997,7 @@ class MRIsExpandInputSpec(FSTraitedSpec):
         copyfile=False,
         desc=(
             'Name of thickness file (implicit: "thickness")\n'
-            "If no path, uses directory of `in_file`\n"
+            "If no path, uses directory of ``in_file``\n"
             'If no path AND missing "lh." or "rh.", derive from `in_file`'
         ),
     )
@@ -4011,8 +4006,8 @@ class MRIsExpandInputSpec(FSTraitedSpec):
         copyfile=False,
         desc=(
             'Name of pial file (implicit: "pial")\n'
-            "If no path, uses directory of `in_file`\n"
-            'If no path AND missing "lh." or "rh.", derive from `in_file`'
+            "If no path, uses directory of ``in_file``\n"
+            'If no path AND missing "lh." or "rh.", derive from ``in_file``'
         ),
     )
     sphere = traits.Str(

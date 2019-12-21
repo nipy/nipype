@@ -146,8 +146,8 @@ class Conmat(CommandLine):
 
     In all cases, distance to the seed point is defined along the streamline path.
 
-    Example 1
-    ---------
+    Examples
+    --------
     To create a standard connectivity matrix based on streamline counts.
 
     >>> import nipype.interfaces.camino as cam
@@ -156,8 +156,6 @@ class Conmat(CommandLine):
     >>> conmat.inputs.target_file = 'atlas.nii.gz'
     >>> conmat.run()        # doctest: +SKIP
 
-    Example 1
-    ---------
     To create a standard connectivity matrix and mean tractwise FA statistics.
 
     >>> import nipype.interfaces.camino as cam
@@ -167,6 +165,7 @@ class Conmat(CommandLine):
     >>> conmat.inputs.scalar_file = 'fa.nii.gz'
     >>> conmat.tract_stat         = 'mean'
     >>> conmat.run()        # doctest: +SKIP
+
     """
 
     _cmd = "conmat"

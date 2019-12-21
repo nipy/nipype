@@ -2491,7 +2491,7 @@ class MNIBiasCorrection(FSCommand):
     >>> correct.cmdline
     'mri_nu_correct.mni --distance 50 --i norm.mgz --n 6 --o norm_output.mgz --proto-iters 1000'
 
-    References:
+    References
     ----------
     [http://freesurfer.net/fswiki/mri_nu_correct.mni]
     [http://www.bic.mni.mcgill.ca/software/N3]
@@ -2677,11 +2677,13 @@ class CANormalize(FSCommand):
     """This program creates a normalized volume using the brain volume and an
     input gca file.
 
-    For complete details, see the `FS Documentation <http://surfer.nmr.mgh.harvard.edu/fswiki/mri_ca_normalize>`_
+    See Also
+    --------
+    For complete details, see the `FS Documentation
+    <http://surfer.nmr.mgh.harvard.edu/fswiki/mri_ca_normalize>`__.
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import freesurfer
     >>> ca_normalize = freesurfer.CANormalize()
     >>> ca_normalize.inputs.in_file = "T1.mgz"
@@ -2689,6 +2691,7 @@ class CANormalize(FSCommand):
     >>> ca_normalize.inputs.transform = "trans.mat" # in practice use .lta transforms
     >>> ca_normalize.cmdline
     'mri_ca_normalize T1.mgz atlas.nii.gz trans.mat T1_norm.mgz'
+
     """
 
     _cmd = "mri_ca_normalize"
@@ -2752,16 +2755,20 @@ class CARegisterOutputSpec(TraitedSpec):
 class CARegister(FSCommandOpenMP):
     """Generates a multi-dimensional talairach transform from a gca file and talairach.lta file
 
-    For complete details, see the `FS Documentation <http://surfer.nmr.mgh.harvard.edu/fswiki/mri_ca_register>`_
+    See Also
+    --------
+    For complete details, see the `FS Documentation
+    <http://surfer.nmr.mgh.harvard.edu/fswiki/mri_ca_register>`__
 
     Examples
-    ========
+    --------
     >>> from nipype.interfaces import freesurfer
     >>> ca_register = freesurfer.CARegister()
     >>> ca_register.inputs.in_file = "norm.mgz"
     >>> ca_register.inputs.out_file = "talairach.m3z"
     >>> ca_register.cmdline
     'mri_ca_register norm.mgz talairach.m3z'
+
     """
 
     _cmd = "mri_ca_register"
@@ -2851,12 +2858,15 @@ class CALabelOutputSpec(TraitedSpec):
 
 
 class CALabel(FSCommandOpenMP):
-    """
-    For complete details, see the `FS Documentation <http://surfer.nmr.mgh.harvard.edu/fswiki/mri_ca_register>`_
+    """Label subcortical structures based in GCA model.
+
+    See Also
+    --------
+    For complete details, see the `FS Documentation
+    <http://surfer.nmr.mgh.harvard.edu/fswiki/mri_ca_label>`__
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import freesurfer
     >>> ca_label = freesurfer.CALabel()
     >>> ca_label.inputs.in_file = "norm.mgz"
@@ -2865,6 +2875,7 @@ class CALabel(FSCommandOpenMP):
     >>> ca_label.inputs.template = "Template_6.nii" # in practice use .gcs extension
     >>> ca_label.cmdline
     'mri_ca_label norm.mgz trans.mat Template_6.nii out.mgz'
+
     """
 
     _cmd = "mri_ca_label"

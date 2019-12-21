@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+"""
+3D Slicer is a platform for medical image informatics processing and visualization.
+
+For an EXPERIMENTAL implementation of an interface for the ``3dSlicer`` full framework,
+please check `"dynamic" Slicer <nipype.interfaces.dynamic_slicer.html>`__.
+"""
 from .diffusion import *
 from .segmentation import *
 from .filtering import *

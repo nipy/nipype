@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""MIPAV enables quantitative analysis and visualization of multimodal medical images."""
 from .developer import (
     JistLaminarVolumetricLayering,
     JistBrainMgdmSegmentation,

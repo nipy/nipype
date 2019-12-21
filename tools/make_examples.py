@@ -3,8 +3,6 @@
 
 This also creates the index.rst file appropriately, makes figures, etc.
 """
-from past.builtins import execfile
-
 # -----------------------------------------------------------------------------
 # Library imports
 # -----------------------------------------------------------------------------
@@ -66,16 +64,19 @@ plt.show = show
 # Main script
 # -----------------------------------------------------------------------------
 
+exclude_files = ['-x %s' % sys.argv[i + 1] for i, arg in enumerate(sys.argv) if arg == '-x']
+
 # Work in examples directory
 cd("users/examples")
 if not os.getcwd().endswith("users/examples"):
     raise OSError("This must be run from doc/examples directory")
 
 # Run the conversion from .py to rst file
-sh("../../../tools/ex2rst --project Nipype --outdir . ../../../examples")
-sh(
-    "../../../tools/ex2rst --project Nipype "
-    "--outdir . ../../../examples/frontiers_paper"
+sh("../../../tools/ex2rst %s --project Nipype --outdir . ../../../examples" %
+    ' '.join(exclude_files))
+sh("""\
+../../../tools/ex2rst --project Nipype %s --outdir . ../../../examples/frontiers_paper \
+""" % ' '.join(exclude_files)
 )
 
 # Make the index.rst file
@@ -99,5 +100,6 @@ else:
 
     for script in glob("*.py"):
         figure_basename = pjoin("fig", os.path.splitext(script)[0])
-        execfile(script)
+        with open(script, 'rt') as f:
+            exec(f.read())
         plt.close("all")

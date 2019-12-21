@@ -5,8 +5,7 @@
 <http://www.bic.mni.mcgill.ca/ServicesSoftware/MINC>`_ command line tools.  This
 module was written to work with MINC version 2.2.00.
 
-Author: Carlo Hamalainen <carlo@carlo-hamalainen.net>
-        http://carlo-hamalainen.net
+Author: `Carlo Hamalainen <http://carlo-hamalainen.net>`__
 """
 import glob
 import os
@@ -1263,7 +1262,7 @@ class BBoxInputSpec(StdOutCommandLineInputSpec):
         xor=_xor_one_two,
     )
     two_lines = traits.Bool(
-        desc="Output on two lines: start_x y z \n width_x y z",
+        desc="""Write output with two rows (start and width).""",
         argstr="-two_lines",
         xor=_xor_one_two,
     )
@@ -1298,13 +1297,13 @@ class BBox(StdOutCommandLine):
 
     Examples
     --------
-
     >>> from nipype.interfaces.minc import BBox
     >>> from nipype.interfaces.minc.testdata import nonempty_minc_data
 
     >>> file0 = nonempty_minc_data(0)
     >>> bbox = BBox(input_file=file0)
     >>> bbox.run() # doctest: +SKIP
+
     """
 
     input_spec = BBoxInputSpec

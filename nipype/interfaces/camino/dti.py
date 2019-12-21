@@ -357,7 +357,7 @@ class ModelFitInputSpec(StdOutCommandLineInputSpec):
         argstr="-fixedmod %s",
         minlen=4,
         maxlen=4,
-        desc="Specifies <M> <N> <Q> <tau> a spherical acquisition scheme with M measurements with q=0 and N measurements with |q|=Q and diffusion time tau. The N measurements with |q|=Q have unique directions. The program reads in the directions from the files in directory PointSets.",
+        desc="Specifies <M> <N> <Q> <tau> a spherical acquisition scheme with M measurements with q=0 and N measurements with :math:`|q|=Q` and diffusion time tau. The N measurements with :math:`|q|=Q` have unique directions. The program reads in the directions from the files in directory PointSets.",
     )
 
     fixedbvalue = traits.List(

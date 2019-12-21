@@ -277,64 +277,64 @@ class DataSinkOutputSpec(TraitedSpec):
 
 # Custom DataSink class
 class DataSink(IOBase):
-    """ Generic datasink module to store structured outputs
+    """
+    Generic datasink module to store structured outputs.
 
-        Primarily for use within a workflow. This interface allows arbitrary
-        creation of input attributes. The names of these attributes define the
-        directory structure to create for storage of the files or directories.
+    Primarily for use within a workflow. This interface allows arbitrary
+    creation of input attributes. The names of these attributes define the
+    directory structure to create for storage of the files or directories.
 
-        The attributes take the following form:
+    The attributes take the following form::
 
-        string[[.[@]]string[[.[@]]string]] ...
+      string[[.[@]]string[[.[@]]string]] ...
 
-        where parts between [] are optional.
+    where parts between ``[]`` are optional.
 
-        An attribute such as contrasts.@con will create a 'contrasts' directory
-        to store the results linked to the attribute. If the @ is left out, such
-        as in 'contrasts.con', a subdirectory 'con' will be created under
-        'contrasts'.
+    An attribute such as contrasts.@con will create a 'contrasts' directory
+    to store the results linked to the attribute. If the ``@`` is left out, such
+    as in 'contrasts.con', a subdirectory 'con' will be created under
+    'contrasts'.
 
-        the general form of the output is::
+    The general form of the output is::
 
-           'base_directory/container/parameterization/destloc/filename'
+       'base_directory/container/parameterization/destloc/filename'
 
-           destloc = string[[.[@]]string[[.[@]]string]] and
-           filename comesfrom the input to the connect statement.
+    ``destloc = string[[.[@]]string[[.[@]]string]]`` and
+    ``filename`` come from the input to the connect statement.
 
-        .. warning::
+    .. warning::
 
-            This is not a thread-safe node because it can write to a common
-            shared location. It will not complain when it overwrites a file.
+        This is not a thread-safe node because it can write to a common
+        shared location. It will not complain when it overwrites a file.
 
-        .. note::
+    .. note::
 
-            If both substitutions and regexp_substitutions are used, then
-            substitutions are applied first followed by regexp_substitutions.
+        If both substitutions and regexp_substitutions are used, then
+        substitutions are applied first followed by regexp_substitutions.
 
-            This interface **cannot** be used in a MapNode as the inputs are
-            defined only when the connect statement is executed.
+        This interface **cannot** be used in a MapNode as the inputs are
+        defined only when the connect statement is executed.
 
-        Examples
-        --------
+    Examples
+    --------
+    >>> ds = DataSink()
+    >>> ds.inputs.base_directory = 'results_dir'
+    >>> ds.inputs.container = 'subject'
+    >>> ds.inputs.structural = 'structural.nii'
+    >>> setattr(ds.inputs, 'contrasts.@con', ['cont1.nii', 'cont2.nii'])
+    >>> setattr(ds.inputs, 'contrasts.alt', ['cont1a.nii', 'cont2a.nii'])
+    >>> ds.run()  # doctest: +SKIP
 
-        >>> ds = DataSink()
-        >>> ds.inputs.base_directory = 'results_dir'
-        >>> ds.inputs.container = 'subject'
-        >>> ds.inputs.structural = 'structural.nii'
-        >>> setattr(ds.inputs, 'contrasts.@con', ['cont1.nii', 'cont2.nii'])
-        >>> setattr(ds.inputs, 'contrasts.alt', ['cont1a.nii', 'cont2a.nii'])
-        >>> ds.run()  # doctest: +SKIP
+    To use DataSink in a MapNode, its inputs have to be defined at the
+    time the interface is created.
 
-        To use DataSink in a MapNode, its inputs have to be defined at the
-        time the interface is created.
-
-        >>> ds = DataSink(infields=['contasts.@con'])
-        >>> ds.inputs.base_directory = 'results_dir'
-        >>> ds.inputs.container = 'subject'
-        >>> ds.inputs.structural = 'structural.nii'
-        >>> setattr(ds.inputs, 'contrasts.@con', ['cont1.nii', 'cont2.nii'])
-        >>> setattr(ds.inputs, 'contrasts.alt', ['cont1a.nii', 'cont2a.nii'])
-        >>> ds.run()  # doctest: +SKIP
+    >>> ds = DataSink(infields=['contasts.@con'])
+    >>> ds.inputs.base_directory = 'results_dir'
+    >>> ds.inputs.container = 'subject'
+    >>> ds.inputs.structural = 'structural.nii'
+    >>> setattr(ds.inputs, 'contrasts.@con', ['cont1.nii', 'cont2.nii'])
+    >>> setattr(ds.inputs, 'contrasts.alt', ['cont1a.nii', 'cont2a.nii'])
+    >>> ds.run()  # doctest: +SKIP
 
     """
 
@@ -822,7 +822,7 @@ class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         False,
         usedefault=True,
         desc="Use anonymous connection to s3.  If this is set to True, boto may print"
-        + " a urlopen error, but this does not prevent data from being downloaded.",
+        " a urlopen error, but this does not prevent data from being downloaded.",
     )
     region = Str("us-east-1", usedefault=True, desc="Region of s3 bucket")
     bucket = Str(mandatory=True, desc="Amazon S3 bucket where your data is stored")
@@ -855,33 +855,36 @@ class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
 
 class S3DataGrabber(LibraryBaseInterface, IOBase):
-    """ Generic datagrabber module that wraps around glob in an
-        intelligent way for neuroimaging tasks to grab files from
-        Amazon S3
+    """
+    Pull data from an Amazon S3 Bucket.
 
-        Works exactly like DataGrabber, except, you must specify an
-        S3 "bucket" and "bucket_path" to search for your data and a
-        "local_directory" to store the data. "local_directory"
-        should be a location on HDFS for Spark jobs. Additionally,
-        "template" uses regex style formatting, rather than the
-        glob-style found in the original DataGrabber.
+    Generic datagrabber module that wraps around glob in an
+    intelligent way for neuroimaging tasks to grab files from
+    Amazon S3
 
-        Examples
-        --------
+    Works exactly like DataGrabber, except, you must specify an
+    S3 "bucket" and "bucket_path" to search for your data and a
+    "local_directory" to store the data. "local_directory"
+    should be a location on HDFS for Spark jobs. Additionally,
+    "template" uses regex style formatting, rather than the
+    glob-style found in the original DataGrabber.
 
-        >>> s3grab = S3DataGrabber(infields=['subj_id'], outfields=["func", "anat"])
-        >>> s3grab.inputs.bucket = 'openneuro'
-        >>> s3grab.inputs.sort_filelist = True
-        >>> s3grab.inputs.template = '*'
-        >>> s3grab.inputs.anon = True
-        >>> s3grab.inputs.bucket_path = 'ds000101/ds000101_R2.0.0/uncompressed/'
-        >>> s3grab.inputs.local_directory = '/tmp'
-        >>> s3grab.inputs.field_template = {'anat': '%s/anat/%s_T1w.nii.gz',
-        ...                                 'func': '%s/func/%s_task-simon_run-1_bold.nii.gz'}
-        >>> s3grab.inputs.template_args = {'anat': [['subj_id', 'subj_id']],
-        ...                                'func': [['subj_id', 'subj_id']]}
-        >>> s3grab.inputs.subj_id = 'sub-01'
-        >>> s3grab.run()  # doctest: +SKIP
+    Examples
+    --------
+    >>> s3grab = S3DataGrabber(infields=['subj_id'], outfields=["func", "anat"])
+    >>> s3grab.inputs.bucket = 'openneuro'
+    >>> s3grab.inputs.sort_filelist = True
+    >>> s3grab.inputs.template = '*'
+    >>> s3grab.inputs.anon = True
+    >>> s3grab.inputs.bucket_path = 'ds000101/ds000101_R2.0.0/uncompressed/'
+    >>> s3grab.inputs.local_directory = '/tmp'
+    >>> s3grab.inputs.field_template = {'anat': '%s/anat/%s_T1w.nii.gz',
+    ...                                 'func': '%s/func/%s_task-simon_run-1_bold.nii.gz'}
+    >>> s3grab.inputs.template_args = {'anat': [['subj_id', 'subj_id']],
+    ...                                'func': [['subj_id', 'subj_id']]}
+    >>> s3grab.inputs.subj_id = 'sub-01'
+    >>> s3grab.run()  # doctest: +SKIP
+
     """
 
     input_spec = S3DataGrabberInputSpec
@@ -1119,54 +1122,55 @@ class DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
 
 class DataGrabber(IOBase):
-    """ Generic datagrabber module that wraps around glob in an
-        intelligent way for neuroimaging tasks to grab files
+    """
+    Find files on a filesystem.
 
+    Generic datagrabber module that wraps around glob in an
+    intelligent way for neuroimaging tasks to grab files
 
-        .. attention::
+    .. important::
 
-           Doesn't support directories currently
+       Doesn't support directories currently
 
-        Examples
-        --------
+    Examples
+    --------
+    >>> from nipype.interfaces.io import DataGrabber
 
-        >>> from nipype.interfaces.io import DataGrabber
+    Pick all files from current directory
 
-        Pick all files from current directory
+    >>> dg = DataGrabber()
+    >>> dg.inputs.template = '*'
 
-        >>> dg = DataGrabber()
-        >>> dg.inputs.template = '*'
+    Pick file foo/foo.nii from current directory
 
-        Pick file foo/foo.nii from current directory
+    >>> dg.inputs.template = '%s/%s.dcm'
+    >>> dg.inputs.template_args['outfiles']=[['dicomdir','123456-1-1.dcm']]
 
-        >>> dg.inputs.template = '%s/%s.dcm'
-        >>> dg.inputs.template_args['outfiles']=[['dicomdir','123456-1-1.dcm']]
+    Same thing but with dynamically created fields
 
-        Same thing but with dynamically created fields
+    >>> dg = DataGrabber(infields=['arg1','arg2'])
+    >>> dg.inputs.template = '%s/%s.nii'
+    >>> dg.inputs.arg1 = 'foo'
+    >>> dg.inputs.arg2 = 'foo'
 
-        >>> dg = DataGrabber(infields=['arg1','arg2'])
-        >>> dg.inputs.template = '%s/%s.nii'
-        >>> dg.inputs.arg1 = 'foo'
-        >>> dg.inputs.arg2 = 'foo'
+    however this latter form can be used with iterables and iterfield in a
+    pipeline.
 
-        however this latter form can be used with iterables and iterfield in a
-        pipeline.
+    Dynamically created, user-defined input and output fields
 
-        Dynamically created, user-defined input and output fields
+    >>> dg = DataGrabber(infields=['sid'], outfields=['func','struct','ref'])
+    >>> dg.inputs.base_directory = '.'
+    >>> dg.inputs.template = '%s/%s.nii'
+    >>> dg.inputs.template_args['func'] = [['sid',['f3','f5']]]
+    >>> dg.inputs.template_args['struct'] = [['sid',['struct']]]
+    >>> dg.inputs.template_args['ref'] = [['sid','ref']]
+    >>> dg.inputs.sid = 's1'
 
-        >>> dg = DataGrabber(infields=['sid'], outfields=['func','struct','ref'])
-        >>> dg.inputs.base_directory = '.'
-        >>> dg.inputs.template = '%s/%s.nii'
-        >>> dg.inputs.template_args['func'] = [['sid',['f3','f5']]]
-        >>> dg.inputs.template_args['struct'] = [['sid',['struct']]]
-        >>> dg.inputs.template_args['ref'] = [['sid','ref']]
-        >>> dg.inputs.sid = 's1'
+    Change the template only for output field struct. The rest use the
+    general template
 
-        Change the template only for output field struct. The rest use the
-        general template
-
-        >>> dg.inputs.field_template = dict(struct='%s/struct.nii')
-        >>> dg.inputs.template_args['struct'] = [['sid']]
+    >>> dg.inputs.field_template = dict(struct='%s/struct.nii')
+    >>> dg.inputs.template_args['struct'] = [['sid']]
 
     """
 
@@ -1357,7 +1361,8 @@ class SelectFilesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
 
 class SelectFiles(IOBase):
-    """Flexibly collect data from disk to feed into workflows.
+    """
+    Flexibly collect data from disk to feed into workflows.
 
     This interface uses the {}-based string formatting syntax to plug
     values (possibly known only at workflow execution time) into string
@@ -1369,7 +1374,6 @@ class SelectFiles(IOBase):
 
     Examples
     --------
-
     >>> import pprint
     >>> from nipype import SelectFiles, Node
     >>> templates={"T1": "{subject_id}/struct/T1.nii",
@@ -1520,7 +1524,7 @@ class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
 
 class DataFinder(IOBase):
-    """Search for paths that match a given regular expression. Allows a less
+    r"""Search for paths that match a given regular expression. Allows a less
     proscriptive approach to gathering input files compared to DataGrabber.
     Will recursively search any subdirectories by default. This can be limited
     with the min/max depth options.
@@ -1530,7 +1534,6 @@ class DataFinder(IOBase):
 
     Examples
     --------
-
     >>> from nipype.interfaces.io import DataFinder
     >>> df = DataFinder()
     >>> df.inputs.root_paths = '.'
@@ -1803,11 +1806,10 @@ class FSSourceOutputSpec(TraitedSpec):
 
 
 class FreeSurferSource(IOBase):
-    """Generates freesurfer subject info from their directories
+    """Generates freesurfer subject info from their directories.
 
     Examples
     --------
-
     >>> from nipype.interfaces.io import FreeSurferSource
     >>> fs = FreeSurferSource()
     >>> #fs.inputs.subjects_dir = '.'
@@ -1891,36 +1893,35 @@ class XNATSourceInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
 
 class XNATSource(LibraryBaseInterface, IOBase):
-    """ Generic XNATSource module that wraps around the pyxnat module in
-        an intelligent way for neuroimaging tasks to grab files and data
-        from an XNAT server.
+    """
+    Pull data from an XNAT server.
 
-        Examples
-        --------
+    Generic XNATSource module that wraps around the pyxnat module in
+    an intelligent way for neuroimaging tasks to grab files and data
+    from an XNAT server.
 
-        >>> from nipype.interfaces.io import XNATSource
+    Examples
+    --------
+    Pick all files from current directory
 
-        Pick all files from current directory
+    >>> dg = XNATSource()
+    >>> dg.inputs.template = '*'
 
-        >>> dg = XNATSource()
-        >>> dg.inputs.template = '*'
+    >>> dg = XNATSource(infields=['project','subject','experiment','assessor','inout'])
+    >>> dg.inputs.query_template = '/projects/%s/subjects/%s/experiments/%s' \
+               '/assessors/%s/%s_resources/files'
+    >>> dg.inputs.project = 'IMAGEN'
+    >>> dg.inputs.subject = 'IMAGEN_000000001274'
+    >>> dg.inputs.experiment = '*SessionA*'
+    >>> dg.inputs.assessor = '*ADNI_MPRAGE_nii'
+    >>> dg.inputs.inout = 'out'
 
-        >>> dg = XNATSource(infields=['project','subject','experiment','assessor','inout'])
-        >>> dg.inputs.query_template = '/projects/%s/subjects/%s/experiments/%s' \
-                   '/assessors/%s/%s_resources/files'
-        >>> dg.inputs.project = 'IMAGEN'
-        >>> dg.inputs.subject = 'IMAGEN_000000001274'
-        >>> dg.inputs.experiment = '*SessionA*'
-        >>> dg.inputs.assessor = '*ADNI_MPRAGE_nii'
-        >>> dg.inputs.inout = 'out'
-
-        >>> dg = XNATSource(infields=['sid'],outfields=['struct','func'])
-        >>> dg.inputs.query_template = '/projects/IMAGEN/subjects/%s/experiments/*SessionA*' \
-                   '/assessors/*%s_nii/out_resources/files'
-        >>> dg.inputs.query_template_args['struct'] = [['sid','ADNI_MPRAGE']]
-        >>> dg.inputs.query_template_args['func'] = [['sid','EPI_faces']]
-        >>> dg.inputs.sid = 'IMAGEN_000000001274'
-
+    >>> dg = XNATSource(infields=['sid'],outfields=['struct','func'])
+    >>> dg.inputs.query_template = '/projects/IMAGEN/subjects/%s/experiments/*SessionA*' \
+               '/assessors/*%s_nii/out_resources/files'
+    >>> dg.inputs.query_template_args['struct'] = [['sid','ADNI_MPRAGE']]
+    >>> dg.inputs.query_template_args['func'] = [['sid','EPI_faces']]
+    >>> dg.inputs.sid = 'IMAGEN_000000001274'
 
     """
 
@@ -2310,22 +2311,23 @@ class SQLiteSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
 
 class SQLiteSink(LibraryBaseInterface, IOBase):
-    """ Very simple frontend for storing values into SQLite database.
+    """
+    Very simple frontend for storing values into SQLite database.
 
-        .. warning::
+    .. warning::
 
-            This is not a thread-safe node because it can write to a common
-            shared location. It will not complain when it overwrites a file.
+        This is not a thread-safe node because it can write to a common
+        shared location. It will not complain when it overwrites a file.
 
-        Examples
-        --------
+    Examples
+    --------
 
-        >>> sql = SQLiteSink(input_names=['subject_id', 'some_measurement'])
-        >>> sql.inputs.database_file = 'my_database.db'
-        >>> sql.inputs.table_name = 'experiment_results'
-        >>> sql.inputs.subject_id = 's1'
-        >>> sql.inputs.some_measurement = 11.4
-        >>> sql.run() # doctest: +SKIP
+    >>> sql = SQLiteSink(input_names=['subject_id', 'some_measurement'])
+    >>> sql.inputs.database_file = 'my_database.db'
+    >>> sql.inputs.table_name = 'experiment_results'
+    >>> sql.inputs.subject_id = 's1'
+    >>> sql.inputs.some_measurement = 11.4
+    >>> sql.run() # doctest: +SKIP
 
     """
 
@@ -2377,19 +2379,20 @@ class MySQLSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
 
 class MySQLSink(IOBase):
-    """ Very simple frontend for storing values into MySQL database.
+    """
+    Very simple frontend for storing values into MySQL database.
 
-        Examples
-        --------
+    Examples
+    --------
 
-        >>> sql = MySQLSink(input_names=['subject_id', 'some_measurement'])
-        >>> sql.inputs.database_name = 'my_database'
-        >>> sql.inputs.table_name = 'experiment_results'
-        >>> sql.inputs.username = 'root'
-        >>> sql.inputs.password = 'secret'
-        >>> sql.inputs.subject_id = 's1'
-        >>> sql.inputs.some_measurement = 11.4
-        >>> sql.run() # doctest: +SKIP
+    >>> sql = MySQLSink(input_names=['subject_id', 'some_measurement'])
+    >>> sql.inputs.database_name = 'my_database'
+    >>> sql.inputs.table_name = 'experiment_results'
+    >>> sql.inputs.username = 'root'
+    >>> sql.inputs.password = 'secret'
+    >>> sql.inputs.subject_id = 's1'
+    >>> sql.inputs.some_measurement = 11.4
+    >>> sql.run() # doctest: +SKIP
 
     """
 
@@ -2455,64 +2458,64 @@ class SSHDataGrabberInputSpec(DataGrabberInputSpec):
 
 
 class SSHDataGrabber(LibraryBaseInterface, DataGrabber):
-    """ Extension of DataGrabber module that downloads the file list and
-        optionally the files from a SSH server. The SSH operation must
-        not need user and password so an SSH agent must be active in
-        where this module is being run.
+    """
+    Extension of DataGrabber module that downloads the file list and
+    optionally the files from a SSH server. The SSH operation must
+    not need user and password so an SSH agent must be active in
+    where this module is being run.
 
 
-        .. attention::
+    .. attention::
 
-           Doesn't support directories currently
+       Doesn't support directories currently
 
-        Examples
-        --------
+    Examples
+    --------
+    >>> from nipype.interfaces.io import SSHDataGrabber
+    >>> dg = SSHDataGrabber()
+    >>> dg.inputs.hostname = 'test.rebex.net'
+    >>> dg.inputs.user = 'demo'
+    >>> dg.inputs.password = 'password'
+    >>> dg.inputs.base_directory = 'pub/example'
 
-        >>> from nipype.interfaces.io import SSHDataGrabber
-        >>> dg = SSHDataGrabber()
-        >>> dg.inputs.hostname = 'test.rebex.net'
-        >>> dg.inputs.user = 'demo'
-        >>> dg.inputs.password = 'password'
-        >>> dg.inputs.base_directory = 'pub/example'
+    Pick all files from the base directory
 
-        Pick all files from the base directory
+    >>> dg.inputs.template = '*'
 
-        >>> dg.inputs.template = '*'
+    Pick all files starting with "s" and a number from current directory
 
-        Pick all files starting with "s" and a number from current directory
+    >>> dg.inputs.template_expression = 'regexp'
+    >>> dg.inputs.template = 'pop[0-9].*'
 
-        >>> dg.inputs.template_expression = 'regexp'
-        >>> dg.inputs.template = 'pop[0-9].*'
+    Same thing but with dynamically created fields
 
-        Same thing but with dynamically created fields
+    >>> dg = SSHDataGrabber(infields=['arg1','arg2'])
+    >>> dg.inputs.hostname = 'test.rebex.net'
+    >>> dg.inputs.user = 'demo'
+    >>> dg.inputs.password = 'password'
+    >>> dg.inputs.base_directory = 'pub'
+    >>> dg.inputs.template = '%s/%s.txt'
+    >>> dg.inputs.arg1 = 'example'
+    >>> dg.inputs.arg2 = 'foo'
 
-        >>> dg = SSHDataGrabber(infields=['arg1','arg2'])
-        >>> dg.inputs.hostname = 'test.rebex.net'
-        >>> dg.inputs.user = 'demo'
-        >>> dg.inputs.password = 'password'
-        >>> dg.inputs.base_directory = 'pub'
-        >>> dg.inputs.template = '%s/%s.txt'
-        >>> dg.inputs.arg1 = 'example'
-        >>> dg.inputs.arg2 = 'foo'
+    however this latter form can be used with iterables and iterfield in a
+    pipeline.
 
-        however this latter form can be used with iterables and iterfield in a
-        pipeline.
+    Dynamically created, user-defined input and output fields
 
-        Dynamically created, user-defined input and output fields
+    >>> dg = SSHDataGrabber(infields=['sid'], outfields=['func','struct','ref'])
+    >>> dg.inputs.hostname = 'myhost.com'
+    >>> dg.inputs.base_directory = '/main_folder/my_remote_dir'
+    >>> dg.inputs.template_args['func'] = [['sid',['f3','f5']]]
+    >>> dg.inputs.template_args['struct'] = [['sid',['struct']]]
+    >>> dg.inputs.template_args['ref'] = [['sid','ref']]
+    >>> dg.inputs.sid = 's1'
 
-        >>> dg = SSHDataGrabber(infields=['sid'], outfields=['func','struct','ref'])
-        >>> dg.inputs.hostname = 'myhost.com'
-        >>> dg.inputs.base_directory = '/main_folder/my_remote_dir'
-        >>> dg.inputs.template_args['func'] = [['sid',['f3','f5']]]
-        >>> dg.inputs.template_args['struct'] = [['sid',['struct']]]
-        >>> dg.inputs.template_args['ref'] = [['sid','ref']]
-        >>> dg.inputs.sid = 's1'
+    Change the template only for output field struct. The rest use the
+    general template
 
-        Change the template only for output field struct. The rest use the
-        general template
-
-        >>> dg.inputs.field_template = dict(struct='%s/struct.nii')
-        >>> dg.inputs.template_args['struct'] = [['sid']]
+    >>> dg.inputs.field_template = dict(struct='%s/struct.nii')
+    >>> dg.inputs.template_args['struct'] = [['sid']]
 
     """
 
@@ -2801,26 +2804,25 @@ class JSONFileSink(IOBase):
     Entries already existing in in_dict will be overridden by matching
     entries dynamically added as inputs.
 
-        .. warning::
+    .. warning::
 
-            This is not a thread-safe node because it can write to a common
-            shared location. It will not complain when it overwrites a file.
+        This is not a thread-safe node because it can write to a common
+        shared location. It will not complain when it overwrites a file.
 
-        Examples
-        --------
+    Examples
+    --------
+    >>> jsonsink = JSONFileSink(input_names=['subject_id',
+    ...                         'some_measurement'])
+    >>> jsonsink.inputs.subject_id = 's1'
+    >>> jsonsink.inputs.some_measurement = 11.4
+    >>> jsonsink.run() # doctest: +SKIP
 
-        >>> jsonsink = JSONFileSink(input_names=['subject_id',
-        ...                         'some_measurement'])
-        >>> jsonsink.inputs.subject_id = 's1'
-        >>> jsonsink.inputs.some_measurement = 11.4
-        >>> jsonsink.run() # doctest: +SKIP
+    Using a dictionary as input:
 
-        Using a dictionary as input:
-
-        >>> dictsink = JSONFileSink()
-        >>> dictsink.inputs.in_dict = {'subject_id': 's1',
-        ...                            'some_measurement': 11.4}
-        >>> dictsink.run() # doctest: +SKIP
+    >>> dictsink = JSONFileSink()
+    >>> dictsink.inputs.in_dict = {'subject_id': 's1',
+    ...                            'some_measurement': 11.4}
+    >>> dictsink.run() # doctest: +SKIP
 
     """
 
@@ -2898,13 +2900,11 @@ class BIDSDataGrabberInputSpec(DynamicTraitedSpec):
 
 
 class BIDSDataGrabber(LibraryBaseInterface, IOBase):
-
-    """ BIDS datagrabber module that wraps around pybids to allow arbitrary
+    """BIDS datagrabber module that wraps around pybids to allow arbitrary
     querying of BIDS datasets.
 
     Examples
     --------
-
     By default, the BIDSDataGrabber fetches anatomical and functional images
     from a project, and makes BIDS entities (e.g. subject) available for
     filtering outputs.
@@ -3025,7 +3025,7 @@ class ExportFileOutputSpec(TraitedSpec):
 
 
 class ExportFile(SimpleInterface):
-    """ Export a file to an absolute path
+    """Export a file to an absolute path.
 
     This interface copies an input file to a named output file.
     This is useful to save individual files to a specific location,
@@ -3033,7 +3033,6 @@ class ExportFile(SimpleInterface):
 
     Examples
     --------
-
     >>> from nipype.interfaces.io import ExportFile
     >>> import os.path as op
     >>> ef = ExportFile()
