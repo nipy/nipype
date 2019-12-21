@@ -34,25 +34,42 @@ def generate_boutiques_descriptor(
     tags=None,
 ):
     """
-    Returns a JSON string containing a JSON Boutiques description of a
-    Nipype interface.
-    Arguments:
-    * module: module where the Nipype interface is declared.
-    * interface_name: name of Nipype interface.
-    * container_image: name of the container image where the tool is installed
-    * container_type: type of container image (Docker or Singularity)
-    * container_index: optional index where the image is available
-    * verbose: print information messages
-    * save: True if you want to save descriptor to a file
-    * save_path: file path for the saved descriptor (defaults to name of the
-      interface in current directory)
-    * author: author of the tool (required for publishing)
-    * ignore_inputs: list of interface inputs to not include in the descriptor
-    * tags: JSON object containing tags to include in the descriptor,
-      e.g. "{\"key1\": \"value1\"}" (note: the tags 'domain:neuroinformatics'
-      and 'interface-type:nipype' are included by default)
-    """
+    Generate a JSON Boutiques description of a Nipype interface.
 
+    Arguments
+    ---------
+    module :
+        module where the Nipype interface is declared.
+    interface_name :
+        name of Nipype interface.
+    container_image :
+        name of the container image where the tool is installed
+    container_type :
+        type of container image (Docker or Singularity)
+    container_index :
+        optional index where the image is available
+    verbose :
+        print information messages
+    save :
+        True if you want to save descriptor to a file
+    save_path :
+        file path for the saved descriptor (defaults to name of the
+      interface in current directory)
+    author :
+        author of the tool (required for publishing)
+    ignore_inputs :
+        list of interface inputs to not include in the descriptor
+    tags :
+        JSON object containing tags to include in the descriptor,
+        e.g. ``{"key1": "value1"}`` (note: the tags 'domain:neuroinformatics'
+        and 'interface-type:nipype' are included by default)
+
+    Returns
+    -------
+    boutiques : str
+       string containing a Boutiques' JSON object
+
+    """
     if not module:
         raise Exception("Undefined module.")
 

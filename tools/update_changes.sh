@@ -13,7 +13,7 @@ set -u         # Treat unset variables as an error when substituting.
 set -x         # Print command traces before executing command.
 
 ROOT=$( git rev-parse --show-toplevel )
-CHANGES=$ROOT/doc/changelog/1.X.X-changelog
+CHANGES=$ROOT/doc/changelog/1.X.X-changelog.rst
 
 # Check whether the Upcoming release header is present
 head -1 $CHANGES | grep -q Upcoming

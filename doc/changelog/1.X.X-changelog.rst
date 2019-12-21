@@ -26,7 +26,7 @@
 1.3.0 (November 11, 2019)
 =========================
 
-##### [Full changelog](https://github.com/nipy/nipype/milestone/34?closed=1)
+(`Full changelog <https://github.com/nipy/nipype/milestone/34?closed=1>`__)
 
   * FIX: Fixed typo in QwarpInputSpec Trait description (https://github.com/nipy/nipype/pull/3079)
   * FIX: Restore ``AFNICommand._get_fname``, required by some interfaces (https://github.com/nipy/nipype/pull/3071)
@@ -52,7 +52,7 @@
 
 Python 1.2.3 will be the last version to support Python 3.4.
 
-##### [Full changelog](https://github.com/nipy/nipype/milestone/35?closed=1)
+(`Full changelog <https://github.com/nipy/nipype/milestone/35?closed=1>`__)
 
   * FIX: Patch Path.mkdir for Python 2 (https://github.com/nipy/nipype/pull/3037)
   * FIX: Drop deprecated message argument to ``FileNotFoundError`` (https://github.com/nipy/nipype/pull/3035)
@@ -71,7 +71,7 @@ Python 1.2.3 will be the last version to support Python 3.4.
 1.2.2 (September 07, 2019)
 ==========================
 
-##### [Full changelog](https://github.com/nipy/nipype/milestone/33?closed=1)
+(`Full changelog <https://github.com/nipy/nipype/milestone/33?closed=1>`__)
 
   * FIX: Ensure ``loadpkl`` returns a not None value (https://github.com/nipy/nipype/pull/3020)
   * FIX: ``loadpkl`` failed when pklz file contained versioning info (https://github.com/nipy/nipype/pull/3017)
@@ -87,7 +87,7 @@ Python 1.2.3 will be the last version to support Python 3.4.
 1.2.1 (August 19, 2019)
 =======================
 
-##### [Full changelog](https://github.com/nipy/nipype/milestone/32?closed=1)
+(`Full changelog <https://github.com/nipy/nipype/milestone/32?closed=1>`__)
 
   * FIX: Resolve/rebase paths from/to results files (https://github.com/nipy/nipype/pull/2971)
   * FIX: Use ``load_resultfile`` when loading a results pickle (https://github.com/nipy/nipype/pull/2985)
@@ -97,7 +97,7 @@ Python 1.2.3 will be the last version to support Python 3.4.
   * FIX: Docker build (https://github.com/nipy/nipype/pull/2963)
   * FIX: Remove '=' signs from EddyQuad argument specifications (https://github.com/nipy/nipype/pull/2941)
   * FIX: Set input model to bedpostx for camino.TrackBedpostxProba (https://github.com/nipy/nipype/pull/2947)
-  * FIX: Allow ``max_sh``not to be set (auto mode) (https://github.com/nipy/nipype/pull/2940)
+  * FIX: Allow ``max_sh`` to not be set (auto mode) (https://github.com/nipy/nipype/pull/2940)
   * ENH: Update mrtrix reconst.py EstimateFOD max_sh to be able to accept list (https://github.com/nipy/nipype/pull/2990)
   * ENH: Let ``indirectory`` handle ``nipype.utils.filemanip.Path`` (https://github.com/nipy/nipype/pull/2989)
   * ENH: Add resolve/rebase ``BasePath`` traits methods & tests (https://github.com/nipy/nipype/pull/2970)
@@ -114,7 +114,7 @@ Python 1.2.3 will be the last version to support Python 3.4.
 1.2.0 (May 09, 2019)
 ====================
 
-##### [Full changelog](https://github.com/nipy/nipype/milestone/31?closed=1)
+(`Full changelog <https://github.com/nipy/nipype/milestone/31?closed=1>`__)
 
   * FIX: Parsing of filename in AlignEpiAnatPy when filename does not have + (https://github.com/nipy/nipype/pull/2909)
   * FIX: Import nibabel reorientation bug fix (https://github.com/nipy/nipype/pull/2912)
@@ -133,7 +133,7 @@ Python 1.2.3 will be the last version to support Python 3.4.
 1.1.9 (February 25, 2019)
 =========================
 
-##### [Full changelog](https://github.com/nipy/nipype/milestone/30?closed=1)
+(`Full changelog <https://github.com/nipy/nipype/milestone/30?closed=1>`__)
 
   * FIX: Make positional arguments to LaplacianThickness require previous argument (https://github.com/nipy/nipype/pull/2848)
   * FIX: Import math and csv modules for bids_gen_info (https://github.com/nipy/nipype/pull/2881)
@@ -149,7 +149,7 @@ Python 1.2.3 will be the last version to support Python 3.4.
 1.1.8 (January 28, 2019)
 ========================
 
-##### [Full changelog](https://github.com/nipy/nipype/milestone/29?closed=1)
+(`Full changelog <https://github.com/nipy/nipype/milestone/29?closed=1>`__)
 
   * FIX: ANTS LaplacianThickness cmdline opts fixed up (https://github.com/nipy/nipype/pull/2846)
   * FIX: Resolve LinAlgError during SVD (https://github.com/nipy/nipype/pull/2838)
@@ -171,7 +171,7 @@ Python 1.2.3 will be the last version to support Python 3.4.
 1.1.7 (December 17, 2018)
 =========================
 
-##### [Full changelog](https://github.com/nipy/nipype/milestone/28?closed=1)
+(`Full changelog <https://github.com/nipy/nipype/milestone/28?closed=1>`__)
 
   * FIX: Copy node list before generating a flat graph (https://github.com/nipy/nipype/pull/2828)
   * FIX: Update pytest req'd version to 3.6 (https://github.com/nipy/nipype/pull/2827)
@@ -193,7 +193,7 @@ Python 1.2.3 will be the last version to support Python 3.4.
 1.1.6 (November 26, 2018)
 =========================
 
-##### [Full changelog](https://github.com/nipy/nipype/milestone/27?closed=1)
+(`Full changelog <https://github.com/nipy/nipype/milestone/27?closed=1>`__)
 
   * FIX: MapNodes fail when ``MultiProcPlugin`` passed by instance (https://github.com/nipy/nipype/pull/2786)
   * FIX: --fineTune arguments order for MeshFix command (https://github.com/nipy/nipype/pull/2780)
@@ -216,7 +216,7 @@ Python 1.2.3 will be the last version to support Python 3.4.
 
 Hotfix release.
 
-##### [Full changelog](https://github.com/nipy/nipype/milestone/26?closed=1)
+(`Full changelog <https://github.com/nipy/nipype/milestone/26?closed=1>`__)
 
   * ENH: Allow timeouts during SLURM job status checks (https://github.com/nipy/nipype/pull/2767)
   * RF: Subclass non-daemon variants of all multiprocessing contexts (https://github.com/nipy/nipype/pull/2771)
@@ -225,7 +225,7 @@ Hotfix release.
 1.1.4 (October 31, 2018)
 ========================
 
-##### [Full changelog](https://github.com/nipy/nipype/milestone/25?closed=1)
+(`Full changelog <https://github.com/nipy/nipype/milestone/25?closed=1>`__)
 
   * FIX: Python 2.7-3.7.1 compatible NonDaemonPool (https://github.com/nipy/nipype/pull/2754)
   * FIX: VRML typo (VMRL) in MeshFix (https://github.com/nipy/nipype/pull/2757)
@@ -253,7 +253,7 @@ Hotfix release.
 1.1.3 (September 24, 2018)
 ==========================
 
-##### [Full changelog](https://github.com/nipy/nipype/milestone/24?closed=1)
+(`Full changelog <https://github.com/nipy/nipype/milestone/24?closed=1>`__)
 
   * FIX: Return afni.Qwarp outputs as absolute paths (https://github.com/nipy/nipype/pull/2705)
   * FIX: Add informative error for interfaces that fail to return valid runtime object (https://github.com/nipy/nipype/pull/2692)
@@ -272,7 +272,7 @@ Hotfix release.
 
 Hot-fix release, resolving incorrect dependencies in 1.1.1 wheel.
 
-##### [Full changelog](https://github.com/nipy/nipype/milestone/23?closed=1)
+(`Full changelog <https://github.com/nipy/nipype/milestone/23?closed=1>`__)
 
   * FIX: Read BIDS config.json under grabbids or layout (https://github.com/nipy/nipype/pull/2679)
   * FIX: Node __repr__ and detailed graph expansion (https://github.com/nipy/nipype/pull/2669)
@@ -287,7 +287,7 @@ Hot-fix release, resolving incorrect dependencies in 1.1.1 wheel.
 1.1.1 (July 30, 2018)
 =====================
 
-##### [Full changelog](https://github.com/nipy/nipype/milestone/22?closed=1)
+(`Full changelog <https://github.com/nipy/nipype/milestone/22?closed=1>`__)
 
   * FIX: Un-set incorrect default options in TOPUP (https://github.com/nipy/nipype/pull/2637)
   * FIX: Copy FSCommand.version to ReconAll.version (https://github.com/nipy/nipype/pull/2656)
@@ -309,7 +309,7 @@ Hot-fix release, resolving incorrect dependencies in 1.1.1 wheel.
 1.1.0 (July 04, 2018)
 =====================
 
-###### [Full changelog](https://github.com/nipy/nipype/milestone/21?closed=1)
+(`Full changelog <https://github.com/nipy/nipype/milestone/21?closed=1>`__)
 
   * RF: Futures-based MultiProc (https://github.com/nipy/nipype/pull/2598)
   * FIX: Avoid closing file descriptors on Windows (https://github.com/nipy/nipype/pull/2617)
@@ -326,7 +326,7 @@ Hot-fix release, resolving incorrect dependencies in 1.1.1 wheel.
 1.0.4 (May 29, 2018)
 ====================
 
-###### [Full changelog](https://github.com/nipy/nipype/milestone/20?closed=1)
+(`Full changelog <https://github.com/nipy/nipype/milestone/20?closed=1>`__)
 
   * FIX: Update logging levels in enable_debug_mode (https://github.com/nipy/nipype/pull/2595)
   * FIX: Set default result in DistributedPluginBase._clean_queue (https://github.com/nipy/nipype/pull/2596)
@@ -349,7 +349,7 @@ Hot-fix release, resolving incorrect dependencies in 1.1.1 wheel.
 1.0.3 (April 30, 2018)
 ======================
 
-###### [Full changelog](https://github.com/nipy/nipype/milestone/19?closed=1)
+(`Full changelog <https://github.com/nipy/nipype/milestone/19?closed=1>`__)
 
   * FIX: Propagate explicit Workflow config to Nodes (https://github.com/nipy/nipype/pull/2559)
   * FIX: Return non-enhanced volumes from dwi_flirt (https://github.com/nipy/nipype/pull/2547)
@@ -376,7 +376,7 @@ Hot-fix release, resolving incorrect dependencies in 1.1.1 wheel.
 1.0.2 (March 27, 2018)
 ======================
 
-###### [Full changelog](https://github.com/nipy/nipype/milestone/16?closed=1)
+(`Full changelog <https://github.com/nipy/nipype/milestone/16?closed=1>`__)
 
   * FIX: dcm2niix interface (https://github.com/nipy/nipype/pull/2498)
   * FIX: mark .niml.dset as special extension in utils.filemanip (https://github.com/nipy/nipype/pull/2495)
@@ -399,7 +399,7 @@ Hot-fix release, resolving incorrect dependencies in 1.1.1 wheel.
 1.0.1 (February 27, 2018)
 =========================
 
-###### [Full changelog](https://github.com/nipy/nipype/milestone/16?closed=1)
+(`Full changelog <https://github.com/nipy/nipype/milestone/16?closed=1>`__)
 
 * FIX: Small bug in freesurfer label2annot fill_thresh specs [#2377](https://github.com/nipy/nipype/pull/2377)
 * FIX: Error creating gradients in DTIRecon [#2460](https://github.com/nipy/nipype/pull/2460)
@@ -432,7 +432,7 @@ Hot-fix release, resolving incorrect dependencies in 1.1.1 wheel.
 1.0.0 (January 24, 2018)
 ========================
 
-###### [Full changelog](https://github.com/nipy/nipype/milestone/16?closed=1)
+(`Full changelog <https://github.com/nipy/nipype/milestone/16?closed=1>`__)
 
 * FIX: Change to interface workdir within ``Interface.run()`` instead Node (https://github.com/nipy/nipype/pull/2384)
 * FIX: PBS plugin submissions (https://github.com/nipy/nipype/pull/2344)
