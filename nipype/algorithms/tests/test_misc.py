@@ -9,7 +9,6 @@ import nibabel as nb
 from nipype.algorithms import misc
 from nipype.utils.filemanip import fname_presuffix
 from nipype.testing.fixtures import create_analyze_pair_file_in_directory
-from nipype.utils import NUMPY_MMAP
 from nipype.testing import example_data
 
 
@@ -32,7 +31,7 @@ def test_CreateNifti(create_analyze_pair_file_in_directory):
     result = create_nifti.run()
 
     assert os.path.exists(result.outputs.nifti_file)
-    assert nb.load(result.outputs.nifti_file, mmap=NUMPY_MMAP)
+    assert nb.load(result.outputs.nifti_file)
 
 
 def test_CalculateMedian(create_analyze_pair_file_in_directory):
@@ -46,4 +45,4 @@ def test_CalculateMedian(create_analyze_pair_file_in_directory):
     eg = mean.run()
 
     assert os.path.exists(eg.outputs.median_files)
-    assert nb.load(eg.outputs.median_files, mmap=NUMPY_MMAP)
+    assert nb.load(eg.outputs.median_files)

@@ -73,10 +73,9 @@ regions.
 
 def get_vox_dims(volume):
     import nibabel as nb
-    from nipype.utils import NUMPY_MMAP
     if isinstance(volume, list):
         volume = volume[0]
-    nii = nb.load(volume, mmap=NUMPY_MMAP)
+    nii = nb.load(volume)
     hdr = nii.header
     voxdims = hdr.get_zooms()
     return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]
@@ -84,10 +83,9 @@ def get_vox_dims(volume):
 
 def get_data_dims(volume):
     import nibabel as nb
-    from nipype.utils import NUMPY_MMAP
     if isinstance(volume, list):
         volume = volume[0]
-    nii = nb.load(volume, mmap=NUMPY_MMAP)
+    nii = nb.load(volume)
     hdr = nii.header
     datadims = hdr.get_data_shape()
     return [int(datadims[0]), int(datadims[1]), int(datadims[2])]
@@ -95,8 +93,7 @@ def get_data_dims(volume):
 
 def get_affine(volume):
     import nibabel as nb
-    from nipype.utils import NUMPY_MMAP
-    nii = nb.load(volume, mmap=NUMPY_MMAP)
+    nii = nb.load(volume)
     return nii.affine
 
 

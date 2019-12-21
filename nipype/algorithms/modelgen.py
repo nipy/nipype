@@ -17,7 +17,6 @@ import csv, math, os
 from nibabel import load
 import numpy as np
 
-from ..utils import NUMPY_MMAP
 from ..interfaces.base import (
     BaseInterface,
     TraitedSpec,
@@ -474,7 +473,7 @@ None])
             for i, out in enumerate(outliers):
                 numscans = 0
                 for f in ensure_list(sessinfo[i]["scans"]):
-                    shape = load(f, mmap=NUMPY_MMAP).shape
+                    shape = load(f).shape
                     if len(shape) == 3 or shape[3] == 1:
                         iflogger.warning(
                             "You are using 3D instead of 4D "
@@ -604,7 +603,7 @@ class SpecifySPMModel(SpecifyModel):
             if isinstance(f, list):
                 numscans = len(f)
             elif isinstance(f, (str, bytes)):
-                img = load(f, mmap=NUMPY_MMAP)
+                img = load(f)
                 numscans = img.shape[3]
             else:
                 raise Exception("Functional input not specified correctly")
@@ -984,7 +983,7 @@ durations=[[1]])
             infoout[i].onsets = None
             infoout[i].durations = None
             if info.conditions:
-                img = load(self.inputs.functional_runs[i], mmap=NUMPY_MMAP)
+                img = load(self.inputs.functional_runs[i])
                 nscans = img.shape[3]
                 reg, regnames = self._cond_to_regress(info, nscans)
                 if hasattr(infoout[i], "regressors") and infoout[i].regressors:

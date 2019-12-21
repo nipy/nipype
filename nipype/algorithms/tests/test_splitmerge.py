@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from nipype.testing import example_data
-from nipype.utils import NUMPY_MMAP
 
 
 def test_split_and_merge(tmpdir):

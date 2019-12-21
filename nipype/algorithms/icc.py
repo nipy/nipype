@@ -11,7 +11,6 @@ from ..interfaces.base import (
     traits,
     File,
 )
-from ..utils import NUMPY_MMAP
 
 
 class ICCInputSpec(BaseInterfaceInputSpec):
@@ -46,7 +45,7 @@ class ICC(BaseInterface):
 
         session_datas = [
             [
-                nb.load(fname, mmap=NUMPY_MMAP).get_fdata()[maskdata].reshape(-1, 1)
+                nb.load(fname).get_fdata()[maskdata].reshape(-1, 1)
                 for fname in sessions
             ]
             for sessions in self.inputs.subjects_sessions

@@ -76,7 +76,6 @@ import nipype.interfaces.freesurfer as fs
 import numpy as np
 import scipy as sp
 import nibabel as nb
-from nipype.utils.config import NUMPY_MMAP
 
 """
 A list of modules and functions to import inside of nodes
@@ -129,7 +128,7 @@ def median(in_files):
     """
     average = None
     for idx, filename in enumerate(filename_to_list(in_files)):
-        img = nb.load(filename, mmap=NUMPY_MMAP)
+        img = nb.load(filename)
         data = np.median(img.get_data(), axis=3)
         if average is None:
             average = data
@@ -156,7 +155,7 @@ def bandpass_filter(files, lowpass_freq, highpass_freq, fs):
     for filename in filename_to_list(files):
         path, name, ext = split_filename(filename)
         out_file = os.path.join(os.getcwd(), name + '_bp' + ext)
-        img = nb.load(filename, mmap=NUMPY_MMAP)
+        img = nb.load(filename)
         timepoints = img.shape[-1]
         F = np.zeros((timepoints))
         lowidx = int(timepoints / 2) + 1
@@ -282,9 +281,9 @@ def extract_subrois(timeseries_file, label_file, indices):
         The first four columns are: freesurfer index, i, j, k positions in the
         label file
     """
-    img = nb.load(timeseries_file, mmap=NUMPY_MMAP)
+    img = nb.load(timeseries_file)
     data = img.get_data()
-    roiimg = nb.load(label_file, mmap=NUMPY_MMAP)
+    roiimg = nb.load(label_file)
     rois = roiimg.get_data()
     prefix = split_filename(timeseries_file)[1]
     out_ts_file = os.path.join(os.getcwd(), '%s_subcortical_ts.txt' % prefix)
@@ -303,8 +302,8 @@ def extract_subrois(timeseries_file, label_file, indices):
 def combine_hemi(left, right):
     """Combine left and right hemisphere time series into a single text file
     """
-    lh_data = nb.load(left, mmap=NUMPY_MMAP).get_data()
-    rh_data = nb.load(right, mmap=NUMPY_MMAP).get_data()
+    lh_data = nb.load(left).get_data()
+    rh_data = nb.load(right).get_data()
 
     indices = np.vstack((1000000 + np.arange(0, lh_data.shape[0])[:, None],
                          2000000 + np.arange(0, rh_data.shape[0])[:, None]))

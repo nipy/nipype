@@ -22,7 +22,6 @@ from .base import (
     isdefined,
     Undefined,
 )
-from ..utils import NUMPY_MMAP
 
 have_dcmstack = True
 try:
@@ -369,7 +368,7 @@ class MergeNifti(NiftiGeneratorBase):
     output_spec = MergeNiftiOutputSpec
 
     def _run_interface(self, runtime):
-        niis = [nb.load(fn, mmap=NUMPY_MMAP) for fn in self.inputs.in_files]
+        niis = [nb.load(fn) for fn in self.inputs.in_files]
         nws = [NiftiWrapper(nii, make_empty=True) for nii in niis]
         if self.inputs.sort_order:
             sort_order = self.inputs.sort_order

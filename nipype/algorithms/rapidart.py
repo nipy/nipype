@@ -18,7 +18,6 @@ from copy import deepcopy
 from nibabel import load, funcs, Nifti1Image
 import numpy as np
 
-from ..utils import NUMPY_MMAP
 from ..interfaces.base import (
     BaseInterface,
     traits,
@@ -485,12 +484,12 @@ class ArtifactDetect(BaseInterface):
 
         # read in functional image
         if isinstance(imgfile, (str, bytes)):
-            nim = load(imgfile, mmap=NUMPY_MMAP)
+            nim = load(imgfile)
         elif isinstance(imgfile, list):
             if len(imgfile) == 1:
-                nim = load(imgfile[0], mmap=NUMPY_MMAP)
+                nim = load(imgfile[0])
             else:
-                images = [load(f, mmap=NUMPY_MMAP) for f in imgfile]
+                images = [load(f) for f in imgfile]
                 nim = funcs.concat_images(images)
 
         # compute global intensity signal
