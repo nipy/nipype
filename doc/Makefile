@@ -5,18 +5,19 @@
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
+PYTHONPATH    = $(PWD)
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
 ALLSPHINXOPTS   = -d _build/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
-.PHONY: help clean html api htmlonly latex changes linkcheck doctest
+.PHONY: help clean html nipypeapi htmlonly latex changes linkcheck doctest
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  html      make the HTML documentation"
-	@echo "  api       	make API documents only"
+	@echo "  nipypeapi make interface API documents only"
 	@echo "  latex     make the LaTeX, you can set PAPER=a4 or PAPER=letter"
 	@echo "  pdf		make <latex> and run the PDF generation"
 	@echo "  changes   make an overview of all changed/added/deprecated" \
@@ -33,14 +34,12 @@ htmlonly:
 	@echo
 	@echo "Build finished. The HTML pages are in _build/html."
 
-api:
-	rm -rf api/generated
-	python -u ../tools/build_modref_templates.py
+nipypeapi:
 	rm -rf interfaces/generated
 	python -u ../tools/build_interface_docs.py
 	@echo "Build API docs finished."
 
-html: clean examples2rst api htmlonly
+html: clean examples2rst nipypeapi htmlonly
 	@echo "Build HTML and API finished."
 
 examples2rst:
@@ -48,7 +47,7 @@ examples2rst:
 	../tools/make_examples.py --no-exec
 	@echo "examples2rst finished."
 
-latex: api
+latex: nipypeapi
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) _build/latex
 	@echo
 	@echo "Build finished; the LaTeX files are in _build/latex."

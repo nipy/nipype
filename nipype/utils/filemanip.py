@@ -284,7 +284,8 @@ _cifs_table = _generate_cifs_table()
 
 
 def on_cifs(fname):
-    """ Checks whether a file path is on a CIFS filesystem mounted in a POSIX
+    """
+    Checks whether a file path is on a CIFS filesystem mounted in a POSIX
     host (i.e., has the ``mount`` command).
 
     On Windows, Docker mounts host directories into containers through CIFS
@@ -292,9 +293,10 @@ def on_cifs(fname):
     the CIFS driver exposes to the OS as symlinks.
     We have found that under concurrent access to the filesystem, this feature
     can result in failures to create or read recently-created symlinks,
-    leading to inconsistent behavior and ``FileNotFoundError``s.
+    leading to inconsistent behavior and ``FileNotFoundError``.
 
     This check is written to support disabling symlinks on CIFS shares.
+
     """
     # Only the first match (most recent parent) counts
     for fspath, fstype in _cifs_table:

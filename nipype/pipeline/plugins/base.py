@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""Common graph operations for execution
-"""
+"""Common graph operations for execution."""
 import sys
 from copy import deepcopy
 from glob import glob
@@ -23,10 +22,7 @@ logger = logging.getLogger("nipype.workflow")
 
 
 class PluginBase(object):
-    """
-    Base class for plugins
-
-    """
+    """Base class for plugins."""
 
     def __init__(self, plugin_args=None):
         if plugin_args is None:
@@ -37,15 +33,20 @@ class PluginBase(object):
 
     def run(self, graph, config, updatehash=False):
         """
+        Instruct the plugin to execute the workflow graph.
+
         The core plugin member that should be implemented by
         all plugins.
 
-        graph: a networkx, flattened :abbr:`DAG (Directed Acyclic Graph)`
-          to be executed
-
-        config: a nipype.config object
-
-        updatehash:
+        Parameters
+        ----------
+        graph :
+            a networkx, flattened :abbr:`DAG (Directed Acyclic Graph)`
+            to be executed
+        config : :obj:`~nipype.config`
+            a nipype.config object
+        updatehash : :obj:`bool`
+            whether cached nodes with stale hash should be just updated.
 
         """
         raise NotImplementedError
@@ -55,19 +56,7 @@ class DistributedPluginBase(PluginBase):
     """
     Execute workflow with a distribution engine
 
-    Relevant class attributes
-    -------------------------
-
-    procs: list (N) of underlying interface elements to be processed
-    proc_done: a boolean numpy array (N,) signifying whether a process has been
-        submitted for execution
-    proc_pending: a boolean numpy array (N,) signifying whether a
-        process is currently running.
-    depidx: a boolean matrix (NxN) storing the dependency structure accross
-        processes. Process dependencies are derived from each column.
-
-    Combinations of ``proc_done`` and ``proc_pending``
-    --------------------------------------------------
+    Combinations of ``proc_done`` and ``proc_pending``:
 
     +------------+---------------+--------------------------------+
     | proc_done  | proc_pending  | outcome                        |
@@ -80,6 +69,21 @@ class DistributedPluginBase(PluginBase):
     +------------+---------------+--------------------------------+
     | False      | True          | INVALID COMBINATION            |
     +------------+---------------+--------------------------------+
+
+    Attributes
+    ----------
+    procs : :obj:`list`
+        list (N) of underlying interface elements to be processed
+    proc_done : :obj:`numpy.ndarray`
+        a boolean numpy array (N,) signifying whether a process has been
+        submitted for execution
+    proc_pending : :obj:`numpy.ndarray`
+        a boolean numpy array (N,) signifying whether a
+        process is currently running.
+    depidx : :obj:`numpy.matrix`
+        a boolean matrix (NxN) storing the dependency structure accross
+        processes. Process dependencies are derived from each column.
+
     """
 
     def __init__(self, plugin_args=None):

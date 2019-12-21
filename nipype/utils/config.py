@@ -71,7 +71,7 @@ summary_append = true
 
 [check]
 interval = 1209600
-""".format
+"""
 
 
 def mkdir_p(path):
@@ -130,7 +130,7 @@ class NipypeConfig(object):
 
     def set_default_config(self):
         """Read default settings template and set into config object"""
-        default_cfg = DEFAULT_CONFIG_TPL(
+        default_cfg = DEFAULT_CONFIG_TPL.format(
             log_dir=os.path.expanduser("~"),  # Get $HOME in a platform-agnostic way
             crashdump_dir=self.cwd,  # Read cached cwd
         )

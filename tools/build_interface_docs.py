@@ -26,22 +26,25 @@ if __name__ == "__main__":
         r"\.testing",
         r"\.caching",
         r"\.scripts",
+        r"\.sphinxext$",
+        r"\.workflows"
     ]
     # Modules that should not be included in generated API docs.
     docwriter.module_skip_patterns += [
-        r"\.version$",
+        r"\.conftest",
         r"\.interfaces\.base$",
         r"\.interfaces\.matlab$",
-        r"\.interfaces\.rest$",
         r"\.interfaces\.pymvpa$",
+        r"\.interfaces\.rest$",
         r"\.interfaces\.slicer\.generate_classes$",
         r"\.interfaces\.spm\.base$",
         r"\.interfaces\.traits",
         r"\.pipeline\.alloy$",
         r"\.pipeline\.s3_node_wrapper$",
-        r"\.testing",
+        r"\.pkg_info"
         r"\.scripts",
-        r"\.conftest",
+        r"\.testing",
+        r"\.version$",
     ]
     docwriter.class_skip_patterns += [
         "AFNICommand",
@@ -52,12 +55,12 @@ if __name__ == "__main__":
         "^SPM",
         "Tester",
         "Spec$",
-        "Numpy"
+        "Numpy",
         # NipypeTester raises an
         # exception when instantiated in
         # InterfaceHelpWriter.generate_api_doc
         "NipypeTester",
     ]
     docwriter.write_api_docs(outdir)
-    docwriter.write_index(outdir, "gen", relative_to="interfaces")
+    # docwriter.write_index(outdir, "gen")
     print("%d files written" % len(docwriter.written_modules))
