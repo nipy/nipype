@@ -47,6 +47,7 @@ def get_data_dims(volume):
     import nibabel as nb
     if isinstance(volume, list):
         volume = volume[0]
+    nii = nb.load(volume)
     hdr = nii.header
     datadims = hdr.get_data_shape()
     return [int(datadims[0]), int(datadims[1]), int(datadims[2])]
