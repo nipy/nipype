@@ -99,7 +99,6 @@ _run_codecov_smoke: &_run_codecov_smoke
 
 version: 2
 jobs:
-
   compare_base_dockerfiles:
     docker:
       - image: docker:17.10.0-ce-git
@@ -402,6 +401,7 @@ jobs:
       - FSLOUTPUTTYPE: 'NIFTI'
     steps:
       - checkout
+      - run:
           name: Check Python version and upgrade pip
           command: |
             python --version
@@ -413,7 +413,7 @@ jobs:
               apt-get install -y graphviz
       - run:
           name: Install Requirements (may contain pinned versions)
-          command: python -m pip install -r docs/requirements.txt
+          command: python -m pip install -r doc/requirements.txt
       - run:
           name: Install NiPype
           command: python -m pip install ".[doc]"
@@ -427,6 +427,10 @@ workflows:
   version: 2
   build_test_deploy:
     jobs:
+      - build_docs:
+          filters:
+            tags:
+              only: /.*/
       - pypi_precheck:
           filters:
             branches:
