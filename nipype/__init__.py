@@ -67,10 +67,12 @@ from .interfaces import (
 
 
 def check_latest_version(raise_exception=False):
-    """Check for the latest version of the library
+    """
+    Check for the latest version of the library.
 
-    parameters:
-    raise_exception: boolean
+    Parameters
+    ----------
+    raise_exception: bool
         Raise a RuntimeError if a bad version is being used
     """
     import etelemetry

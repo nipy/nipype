@@ -170,7 +170,7 @@ names as arguments on the command line. We have simplified this procedure with
 three additional metadata terms: ``name_source``, ``name_template``,
 ``keep_extension``.
 
-For example in the :ref:`InvWarp <nipype.interfaces.fsl.InvWarp>` class, the
+For example in the :ref:`InvWarp <nipype.interfaces.fsl.utils.InvWarp>` class, the
 ``inverse_warp`` parameter is the name of the output file that is created by
 the routine.
 
