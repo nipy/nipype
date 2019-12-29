@@ -12,36 +12,36 @@ if __name__ == "__main__":
     nipypepath = os.path.abspath("..")
     sys.path.insert(1, nipypepath)
     # local imports
-    from interfacedocgen import InterfaceHelpWriter
+    from apigen import InterfaceHelpWriter
 
     package = "nipype"
     outdir = os.path.join("interfaces", "generated")
     docwriter = InterfaceHelpWriter(package)
     # Packages that should not be included in generated API docs.
     docwriter.package_skip_patterns += [
-        "\.external$",
-        "\.fixes$",
-        "\.utils$",
-        "\.pipeline",
-        "\.testing",
-        "\.caching",
-        "\.scripts",
+        r"\.external$",
+        r"\.fixes$",
+        r"\.utils$",
+        r"\.pipeline",
+        r"\.testing",
+        r"\.caching",
+        r"\.scripts",
     ]
     # Modules that should not be included in generated API docs.
     docwriter.module_skip_patterns += [
-        "\.version$",
-        "\.interfaces\.base$",
-        "\.interfaces\.matlab$",
-        "\.interfaces\.rest$",
-        "\.interfaces\.pymvpa$",
-        "\.interfaces\.slicer\.generate_classes$",
-        "\.interfaces\.spm\.base$",
-        "\.interfaces\.traits",
-        "\.pipeline\.alloy$",
-        "\.pipeline\.s3_node_wrapper$",
-        "\.testing",
-        "\.scripts",
-        "\.conftest",
+        r"\.version$",
+        r"\.interfaces\.base$",
+        r"\.interfaces\.matlab$",
+        r"\.interfaces\.rest$",
+        r"\.interfaces\.pymvpa$",
+        r"\.interfaces\.slicer\.generate_classes$",
+        r"\.interfaces\.spm\.base$",
+        r"\.interfaces\.traits",
+        r"\.pipeline\.alloy$",
+        r"\.pipeline\.s3_node_wrapper$",
+        r"\.testing",
+        r"\.scripts",
+        r"\.conftest",
     ]
     docwriter.class_skip_patterns += [
         "AFNICommand",
