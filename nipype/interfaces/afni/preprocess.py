@@ -3483,7 +3483,8 @@ Sets the prefix/suffix for the output datasets.
   or the inverse can be computed as needed in 3dNwarpApply, like
   3dNwarpApply -nwarp 'INV(Z_WARP+tlrc)' -source Dataset.nii ...
 
-""")
+""",
+    )
     resample = traits.Bool(
         desc="""\
 This option simply resamples the source dataset to match the
@@ -3579,7 +3580,8 @@ of 3dQwarp.
   use the option '-penold'.To be completely compatible with
   the older 3dQwarp, you'll also have to use '-penfac 0.2'.
 
-""")
+""",
+    )
     noweight = traits.Bool(
         desc="If you want a binary weight (the old default), use this option."
         "That is, each voxel in the base volume automask will be"
@@ -3624,7 +3626,7 @@ alignments are good enough for your purposes.""",
         argstr="-wball %s",
         minlen=5,
         maxlen=5,
-        xor=['wmask'],
+        xor=["wmask"],
     )
     traits.Tuple((traits.Float(), traits.Float()), argstr="-bpass %f %f")
     wmask = traits.Tuple(
@@ -3643,7 +3645,7 @@ that indicates where to increase the weight.
 
 """,
         argstr="-wpass %s %f",
-        xor=['wball'],
+        xor=["wball"],
     )
     out_weight_file = File(
         argstr="-wtprefix %s", desc="Write the weight volume to disk as a dataset"

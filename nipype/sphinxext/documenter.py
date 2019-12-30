@@ -22,11 +22,11 @@ class NipypeClassDocumenter(_ClassDocumenter):  # type: ignore
 
     def add_directive_header(self, sig: str) -> None:
         if self.doc_as_attr:
-            self.directivetype = 'attribute'
+            self.directivetype = "attribute"
 
         # Copied from super
-        domain = getattr(self, 'domain', 'py')
-        directive = getattr(self, 'directivetype', self.objtype)
+        domain = getattr(self, "domain", "py")
+        directive = getattr(self, "directivetype", self.objtype)
         name = self.format_name()
         sourcename = self.get_sourcename()
 
@@ -41,31 +41,33 @@ class NipypeClassDocumenter(_ClassDocumenter):  # type: ignore
                 code_url=get_url(self.object),
                 module=self.modname,
                 name=name,
-                underline='=' * len(name),
+                underline="=" * len(name),
             )
             for line in lines.splitlines():
                 self.add_line(line, sourcename)
         else:
-            self.add_line('.. %s:%s:: %s%s' % (domain, directive, name, sig),
-                          sourcename)
+            self.add_line(
+                ".. %s:%s:: %s%s" % (domain, directive, name, sig), sourcename
+            )
             if self.options.noindex:
-                self.add_line('   :noindex:', sourcename)
+                self.add_line("   :noindex:", sourcename)
             if self.objpath:
                 # Be explicit about the module, this is necessary since .. class::
                 # etc. don't support a prepended module name
-                self.add_line('   :module: %s' % self.modname, sourcename)
+                self.add_line("   :module: %s" % self.modname, sourcename)
 
         # add inheritance info, if wanted
         if not self.doc_as_attr and self.options.show_inheritance:
             sourcename = self.get_sourcename()
-            self.add_line('', sourcename)
-            if hasattr(self.object, '__bases__') and len(self.object.__bases__):
-                bases = [':class:`%s`' % b.__name__
-                         if b.__module__ in ('__builtin__', 'builtins')
-                         else ':class:`%s.%s`' % (b.__module__, b.__name__)
-                         for b in self.object.__bases__]
-                self.add_line('   ' + _('Bases: %s') % ', '.join(bases),
-                              sourcename)
+            self.add_line("", sourcename)
+            if hasattr(self.object, "__bases__") and len(self.object.__bases__):
+                bases = [
+                    ":class:`%s`" % b.__name__
+                    if b.__module__ in ("__builtin__", "builtins")
+                    else ":class:`%s.%s`" % (b.__module__, b.__name__)
+                    for b in self.object.__bases__
+                ]
+                self.add_line("   " + _("Bases: %s") % ", ".join(bases), sourcename)
 
 
 def setup(app):

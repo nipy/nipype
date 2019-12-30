@@ -210,12 +210,12 @@ and 0.1 for other methods""",
     )
     angle_threshold_weight = traits.Float(
         desc="set angle threshold weighting factor. weighting will be be applied "
-             "on top of the angle_threshold",
+        "on top of the angle_threshold",
         argstr="-atw %f",
     )
     random_seed = traits.Int(
         desc="use random location in a voxel instead of the center of the voxel "
-             "to seed. can also define number of seed per voxel. default is 1",
+        "to seed. can also define number of seed per voxel. default is 1",
         argstr="-rseed %d",
     )
     invert_x = traits.Bool(desc="invert x component of the vector", argstr="-ix")
@@ -229,13 +229,13 @@ and 0.1 for other methods""",
     )
     mask1_threshold = traits.Float(
         desc="threshold value for the first mask image, if not given, the program will "
-             "try automatically find the threshold",
+        "try automatically find the threshold",
         position=3,
     )
     mask2_file = File(desc="second mask image", argstr="-m2 %s", position=4)
     mask2_threshold = traits.Float(
         desc="threshold value for the second mask image, if not given, the program will "
-             "try automatically find the threshold",
+        "try automatically find the threshold",
         position=5,
     )
     input_data_prefix = traits.Str(

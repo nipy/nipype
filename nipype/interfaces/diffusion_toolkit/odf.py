@@ -297,13 +297,13 @@ to seed. can also define number of seed per voxel. default is 1""",
     )
     mask1_threshold = traits.Float(
         desc="threshold value for the first mask image, if not given, the program will "
-             "try automatically find the threshold",
+        "try automatically find the threshold",
         position=3,
     )
     mask2_file = File(desc="second mask image", argstr="-m2 %s", position=4)
     mask2_threshold = traits.Float(
         desc="threshold value for the second mask image, if not given, the program will "
-             "try automatically find the threshold",
+        "try automatically find the threshold",
         position=5,
     )
     limit = traits.Int(

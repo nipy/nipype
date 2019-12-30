@@ -1685,7 +1685,7 @@ class SmoothTessellationInputSpec(FSTraitedSpec):
         argstr="-n %d", desc="Number of smoothing iterations (default=10)"
     )
     snapshot_writing_iterations = traits.Int(
-        argstr="-w %d", desc='Write snapshot every *n* iterations'
+        argstr="-w %d", desc="Write snapshot every *n* iterations"
     )
 
     use_gaussian_curvature_smoothing = traits.Bool(
@@ -3835,8 +3835,8 @@ distance is less than dmaxctx.""",
     a2009s = traits.Bool(argstr="--a2009s", desc="Using the a2009s atlas")
     copy_inputs = traits.Bool(
         desc="If running as a node, set this to True."
-             "This will copy the input files to the node "
-             "directory."
+        "This will copy the input files to the node "
+        "directory."
     )
 
 

@@ -175,8 +175,8 @@ class MRISPreprocReconAllInputSpec(MRISPreprocInputSpec):
     )
     copy_inputs = traits.Bool(
         desc="If running as a node, set this to True "
-             "this will copy some implicit inputs to the "
-             "node directory."
+        "this will copy some implicit inputs to the "
+        "node directory."
     )
 
 
@@ -1073,8 +1073,8 @@ class SegStatsReconAllInputSpec(SegStatsInputSpec):
     aseg = File(exists=True, desc="Mandatory implicit input in 5.3")
     copy_inputs = traits.Bool(
         desc="If running as a node, set this to True "
-             "otherwise, this will copy the implicit inputs "
-             "to the node directory."
+        "otherwise, this will copy the implicit inputs "
+        "to the node directory."
     )
 
 

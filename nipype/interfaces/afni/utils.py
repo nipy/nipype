@@ -1034,7 +1034,9 @@ class Edge3(AFNICommand):
     input_spec = Edge3InputSpec
     output_spec = AFNICommandOutputSpec
     references_ = [
-        {'entry': BibTeX("""\
+        {
+            "entry": BibTeX(
+                """\
 @article{Deriche1987,
 author={R. Deriche},
 title={Optimal edge detection using recursive filtering},
@@ -1042,8 +1044,13 @@ journal={International Journal of Computer Vision},
 volume={2},'
 pages={167-187},
 year={1987},
-}"""), 'tags': ['method']},
-        {'entry': BibTeX("""\
+}"""
+            ),
+            "tags": ["method"],
+        },
+        {
+            "entry": BibTeX(
+                """\
 @article{MongaDericheMalandainCocquerez1991,
     author={O. Monga, R. Deriche, G. Malandain, J.P. Cocquerez},
     title={Recursive filtering and edge tracking: two primary tools for 3D edge detection},
@@ -1051,7 +1058,11 @@ year={1987},
     volume={9},'
     pages={203-214},
     year={1991},
-}"""), 'tags': ['method']}]
+}"""
+            ),
+            "tags": ["method"],
+        },
+    ]
 
 
 class EvalInputSpec(AFNICommandInputSpec):

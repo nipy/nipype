@@ -149,7 +149,8 @@ Operation to perform:
     * 4to5 - Flip the 4th and 5th dimension.
     * range - Reset the image range to the min max.
 
-""")
+""",
+    )
 
 
 class UnaryMaths(MathsCommand):
@@ -406,7 +407,8 @@ Operation to perform:
     * crop - <int> - Crop <int> voxels around each 3D volume.
     * pad - <int> -  Pad <int> voxels with NaN value around each 3D volume.
 
-""")
+""",
+    )
 
     operand_value = traits.Int(
         argstr="%d",
@@ -475,7 +477,8 @@ Operation to perform:
     * lssd <file> <std> Local SSD between current img and <file> on a kernel with <std>
     * lltsnorm <file_norm> <float>  Linear LTS normalisation assuming <float> percent outliers
 
-""")
+""",
+    )
 
     operand_file1 = File(
         exists=True,
@@ -559,8 +562,11 @@ class MergeInput(MathsInput):
 
     dimension = traits.Int(mandatory=True, desc="Dimension to merge the images.")
     merge_files = traits.List(
-        File(exists=True), argstr="%s", mandatory=True, position=4,
-        desc="List of images to merge to the working image <input>."
+        File(exists=True),
+        argstr="%s",
+        mandatory=True,
+        position=4,
+        desc="List of images to merge to the working image <input>.",
     )
 
 
