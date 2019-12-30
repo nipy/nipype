@@ -1299,7 +1299,7 @@ class SelectFiles(IOBase):
     This interface uses Python's {}-based string formatting syntax to plug
     values (possibly known only at workflow execution time) into string
     templates and collect files from persistant storage. These templates can
-    also be combined with glob wildcards (*, ?) and character ranges ([...]).
+    also be combined with glob wildcards (``*``, ``?``) and character ranges (``[...]``).
     The field names in the formatting template (i.e. the terms in braces) will
     become inputs fields on the interface, and the keys in the templates
     dictionary will form the output fields.
