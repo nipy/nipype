@@ -167,3 +167,5 @@ References
                    NeuroImage 103:411--426. 2014.
                    doi:`10.1016/j.neuroimage.2014.07.061
                    <https://doi.org/10.1016/j.neuroimage.2014.07.061>`__.
+
+"""

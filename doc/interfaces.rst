@@ -15,7 +15,7 @@ Workflows
 
 Interfaces
 ----------
-An index of all nipype interfaces is found belows.
+An index of all nipype interfaces is found below.
 Nipype provides some *in-house* interfaces to help with workflow
 management tasks, basic image manipulations, and filesystem/storage
 interfaces:
