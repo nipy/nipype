@@ -610,9 +610,7 @@ class CorticalThicknessInputSpec(ANTSCommandInputSpec):
         0,
         1,
         argstr="-u %d",
-        desc=(
-            "Use random number generated from system clock in Atropos (default = 1)"
-        ),
+        desc=("Use random number generated from system clock in Atropos (default = 1)"),
     )
     b_spline_smoothing = traits.Bool(
         argstr="-v",
@@ -855,9 +853,7 @@ class BrainExtractionInputSpec(ANTSCommandInputSpec):
         "highres001_",
         argstr="-o %s",
         usedefault=True,
-        desc=(
-            "Prefix that is prepended to all output files"
-        ),
+        desc=("Prefix that is prepended to all output files"),
     )
 
     extraction_registration_mask = File(
@@ -879,9 +875,7 @@ class BrainExtractionInputSpec(ANTSCommandInputSpec):
         0,
         1,
         argstr="-u %d",
-        desc=(
-            "Use random number generated from system clock in Atropos (default = 1)"
-        ),
+        desc=("Use random number generated from system clock in Atropos (default = 1)"),
     )
     keep_temporary_files = traits.Int(
         argstr="-k %d",
@@ -1156,9 +1150,7 @@ class JointFusionInputSpec(ANTSCommandInputSpec):
         minlen=3,
         maxlen=3,
         argstr="-rp %s",
-        desc=(
-            "Patch radius for similarity measures, scalar or vector. Default: 2x2x2"
-        ),
+        desc=("Patch radius for similarity measures, scalar or vector. Default: 2x2x2"),
     )
     search_radius = traits.ListInt(
         minlen=3, maxlen=3, argstr="-rs %s", desc="Local search radius. Default: 3x3x3"
@@ -1816,7 +1808,8 @@ class KellyKapowski(ANTSCommand):
 
     references_ = [
         {
-            "entry": BibTeX("""\
+            "entry": BibTeX(
+                """\
 @book{Das2009867,
   author={Sandhitsu R. Das and Brian B. Avants and Murray Grossman and James C. Gee},
   title={Registration based cortical thickness measurement.},
@@ -1828,7 +1821,8 @@ class KellyKapowski(ANTSCommand):
   issn={1053-8119},
   url={http://www.sciencedirect.com/science/article/pii/S1053811908012780},
   doi={https://doi.org/10.1016/j.neuroimage.2008.12.016}
-}"""),
+}"""
+            ),
             "description": "The details on the implementation of DiReCT.",
             "tags": ["implementation"],
         }

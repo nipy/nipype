@@ -216,9 +216,7 @@ class EstimateModelInputSpec(SPMCommandInputSpec):
         traits.Enum("Classical", "Bayesian2", "Bayesian"),
         field="method",
         mandatory=True,
-        desc=(
-            "Dictionary of either Classical: 1, Bayesian: 1, or Bayesian2: 1 (dict)"
-        ),
+        desc=("Dictionary of either Classical: 1, Bayesian: 1, or Bayesian2: 1 (dict)"),
     )
     write_residuals = traits.Bool(
         field="write_residuals", desc="Write individual residual images"
@@ -502,9 +500,10 @@ class EstimateContrast(SPMCommand):
                     if contrast.sessions:
                         for sno, sw in enumerate(contrast.sessions):
                             script += "sidx = find(condsess(idx)==%d);\n" % (sno + 1)
-                            script += (
-                                "consess{%d}.tcon.convec(idx(sidx)) = %f;\n"
-                            ) % (i + 1, sw * contrast.weights[c0])
+                            script += ("consess{%d}.tcon.convec(idx(sidx)) = %f;\n") % (
+                                i + 1,
+                                sw * contrast.weights[c0],
+                            )
                     else:
                         script += "consess{%d}.tcon.convec(idx) = %f;\n" % (
                             i + 1,

@@ -115,13 +115,9 @@ class CoherenceAnalyzerOutputSpec(TraitedSpec):
         desc=("The pairwise time delays between the ROIs (in seconds)")
     )
 
-    coherence_csv = File(
-        desc=("A csv file containing the pairwise  coherence values")
-    )
+    coherence_csv = File(desc=("A csv file containing the pairwise  coherence values"))
 
-    timedelay_csv = File(
-        desc=("A csv file containing the pairwise time delay values")
-    )
+    timedelay_csv = File(desc=("A csv file containing the pairwise time delay values"))
 
     coherence_fig = File(desc=("Figure representing coherence values"))
     timedelay_fig = File(desc=("Figure representing coherence values"))

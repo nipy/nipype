@@ -48,7 +48,9 @@ class PETPVCInputSpec(CommandLineInputSpec):
         desc="Mask image file", exists=True, mandatory=True, argstr="-m %s"
     )
     pvc = traits.Enum(
-        pvc_methods, mandatory=True, argstr="-p %s",
+        pvc_methods,
+        mandatory=True,
+        argstr="-p %s",
         desc="""\
 Desired PVC method:
 
@@ -75,7 +77,7 @@ Desired PVC method:
     * Muller Gartner with Van-Cittert -- ``MG+VC``
     * Muller Gartner with Richardson-Lucy -- ``MG+RL``
 
-"""
+""",
     )
     fwhm_x = traits.Float(
         desc="The full-width at half maximum in mm along x-axis",

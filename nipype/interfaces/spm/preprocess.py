@@ -1068,8 +1068,7 @@ class NormalizeInputSpec(SPMCommandInputSpec):
 
 class NormalizeOutputSpec(TraitedSpec):
     normalization_parameters = OutputMultiPath(
-        File(exists=True),
-        desc=("MAT files containing the normalization parameters"),
+        File(exists=True), desc=("MAT files containing the normalization parameters"),
     )
     normalized_source = OutputMultiPath(
         File(exists=True), desc="Normalized source files"
@@ -1525,8 +1524,7 @@ class SegmentInputSpec(SPMCommandInputSpec):
         desc="FWHM of Gaussian smoothness of bias",
     )
     sampling_distance = traits.Float(
-        field="opts.samp",
-        desc=("Sampling distance on data for parameter estimation"),
+        field="opts.samp", desc=("Sampling distance on data for parameter estimation"),
     )
     mask_image = File(
         exists=True,
@@ -1682,8 +1680,7 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
         ),
     )
     sampling_distance = traits.Float(
-        field="warp.samp",
-        desc=("Sampling distance on data for parameter estimation"),
+        field="warp.samp", desc=("Sampling distance on data for parameter estimation"),
     )
     write_deformation_fields = traits.List(
         traits.Bool(),

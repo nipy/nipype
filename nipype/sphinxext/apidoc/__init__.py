@@ -5,7 +5,7 @@ import re
 from sphinxcontrib.napoleon import (
     Config as NapoleonConfig,
     _patch_python_domain,
-    _skip_member as _napoleon_skip_member
+    _skip_member as _napoleon_skip_member,
 )
 
 from ... import __version__
@@ -39,20 +39,23 @@ class Config(NapoleonConfig):
 
     """
     _config_values = {
-        'nipype_skip_classes': ([
-            "AFNI(Python)?Command",
-            "ANTS",
-            "FSLCommand",
-            "FS(Command|Script)",
-            "Info",
-            "^SPM",
-            "Tester",
-            "InputSpec",
-            "OutputSpec",
-            "Numpy",
-            "NipypeTester",
-        ], 'env'),
-        **NapoleonConfig._config_values
+        "nipype_skip_classes": (
+            [
+                "AFNI(Python)?Command",
+                "ANTS",
+                "FSLCommand",
+                "FS(Command|Script)",
+                "Info",
+                "^SPM",
+                "Tester",
+                "InputSpec",
+                "OutputSpec",
+                "Numpy",
+                "NipypeTester",
+            ],
+            "env",
+        ),
+        **NapoleonConfig._config_values,
     }
 
 
@@ -79,19 +82,20 @@ def setup(app):
 
     """
     from sphinx.application import Sphinx
+
     if not isinstance(app, Sphinx):
         # probably called by tests
-        return {'version': __version__, 'parallel_read_safe': True}
+        return {"version": __version__, "parallel_read_safe": True}
 
     _patch_python_domain()
 
-    app.setup_extension('sphinx.ext.autodoc')
-    app.connect('autodoc-process-docstring', _process_docstring)
-    app.connect('autodoc-skip-member', _skip_member)
+    app.setup_extension("sphinx.ext.autodoc")
+    app.connect("autodoc-process-docstring", _process_docstring)
+    app.connect("autodoc-skip-member", _skip_member)
 
     for name, (default, rebuild) in Config._config_values.items():
         app.add_config_value(name, default, rebuild)
-    return {'version': __version__, 'parallel_read_safe': True}
+    return {"version": __version__, "parallel_read_safe": True}
 
 
 def _process_docstring(app, what, name, obj, options, lines):
@@ -129,10 +133,12 @@ def _process_docstring(app, what, name, obj, options, lines):
     # Parse Nipype Interfaces
     if what == "class" and issubclass(obj, BaseInterface):
         result_lines[:] = InterfaceDocstring(
-            result_lines, app.config, app, what, name, obj, options).lines()
+            result_lines, app.config, app, what, name, obj, options
+        ).lines()
 
-    result_lines = NipypeDocstring(result_lines, app.config, app, what, name,
-                                   obj, options).lines()
+    result_lines = NipypeDocstring(
+        result_lines, app.config, app, what, name, obj, options
+    ).lines()
     lines[:] = result_lines[:]
 
 
@@ -170,8 +176,10 @@ def _skip_member(app, what, name, obj, skip, options):
 
     """
     # Parse Nipype Interfaces
-    patterns = [pat if hasattr(pat, 'search') else re.compile(pat)
-                for pat in app.config.nipype_skip_classes]
+    patterns = [
+        pat if hasattr(pat, "search") else re.compile(pat)
+        for pat in app.config.nipype_skip_classes
+    ]
     isbase = False
     try:
         isbase = issubclass(obj, BaseInterface)

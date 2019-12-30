@@ -124,7 +124,8 @@ Operation to perform:
     * xdim - Output the voxel dimention in the x direction.
       Replace x with y/z for other directions.
 
-""")
+""",
+    )
 
 
 class UnaryStats(StatsCommand):
@@ -199,7 +200,8 @@ Operation to perform:
     * Vl - <csv> - Volume of each integer label <in>. Save to <csv>file.
     * Nl - <csv> - Count of each label <in>. Save to <csv> file.
 
-""")
+""",
+    )
 
     operand_file = File(
         exists=True,

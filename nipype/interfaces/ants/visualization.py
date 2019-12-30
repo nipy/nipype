@@ -32,8 +32,21 @@ class ConvertScalarImageToRGBInputSpec(ANTSCommandInputSpec):
         "none", argstr="%s", exists=True, desc="mask image", position=3, usedefault=True
     )
     colormap = traits.Enum(
-        "grey", "red", "green", "blue", "copper", "jet", "hsv", "spring", "summer",
-        "autumn", "winter", "hot", "cool", "overunder", "custom",
+        "grey",
+        "red",
+        "green",
+        "blue",
+        "copper",
+        "jet",
+        "hsv",
+        "spring",
+        "summer",
+        "autumn",
+        "winter",
+        "hot",
+        "cool",
+        "overunder",
+        "custom",
         argstr="%s",
         desc="Select a colormap",
         mandatory=True,
@@ -48,12 +61,8 @@ class ConvertScalarImageToRGBInputSpec(ANTSCommandInputSpec):
     maximum_input = traits.Int(
         argstr="%d", desc="maximum input", mandatory=True, position=7
     )
-    minimum_RGB_output = traits.Int(
-        0, usedefault=True, argstr="%d", position=8
-    )
-    maximum_RGB_output = traits.Int(
-        255, usedefault=True, argstr="%d", position=9
-    )
+    minimum_RGB_output = traits.Int(0, usedefault=True, argstr="%d", position=8)
+    maximum_RGB_output = traits.Int(255, usedefault=True, argstr="%d", position=9)
 
 
 class ConvertScalarImageToRGBOutputSpec(TraitedSpec):
