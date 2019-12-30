@@ -101,11 +101,10 @@ Define a function to return the 1 based index of the middle volume
 
 def getmiddlevolume(func):
     from nibabel import load
-    from nipype.utils import NUMPY_MMAP
     funcfile = func
     if isinstance(func, list):
         funcfile = func[0]
-    _, _, _, timepoints = load(funcfile, mmap=NUMPY_MMAP).shape
+    _, _, _, timepoints = load(funcfile).shape
     return int(timepoints / 2) - 1
 
 

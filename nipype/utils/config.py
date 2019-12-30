@@ -28,7 +28,6 @@ CONFIG_DEPRECATIONS = {
     "filemanip_level": ("logging.utils_level", "1.0"),
 }
 
-NUMPY_MMAP = LooseVersion(np.__version__) >= LooseVersion("1.12.0")
 
 DEFAULT_CONFIG_TPL = """\
 [logging]

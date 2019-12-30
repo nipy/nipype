@@ -26,7 +26,6 @@ from ..interfaces.base import (
     OutputMultiPath,
     SimpleInterface,
 )
-from ..utils import NUMPY_MMAP
 from ..utils.misc import normalize_mc_params
 
 IFLOGGER = logging.getLogger("nipype.interface")
@@ -599,7 +598,7 @@ class CompCor(SimpleInterface):
             else 0
         )
 
-        imgseries = nb.load(self.inputs.realigned_file, mmap=NUMPY_MMAP)
+        imgseries = nb.load(self.inputs.realigned_file)
 
         if len(imgseries.shape) != 4:
             raise ValueError(
@@ -917,7 +916,7 @@ class TSNR(BaseInterface):
     output_spec = TSNROutputSpec
 
     def _run_interface(self, runtime):
-        img = nb.load(self.inputs.in_file[0], mmap=NUMPY_MMAP)
+        img = nb.load(self.inputs.in_file[0])
         header = img.header.copy()
         vollist = [nb.load(filename) for filename in self.inputs.in_file]
         data = np.concatenate(
@@ -1263,7 +1262,7 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
                     )
                 )
         if mask_index < len(mask_files):
-            mask = nb.load(mask_files[mask_index], mmap=NUMPY_MMAP)
+            mask = nb.load(mask_files[mask_index])
             return [mask]
         raise ValueError(
             ("mask_index {0} must be less than number of mask " "files {1}").format(
@@ -1273,7 +1272,7 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
     masks = []
     if mask_method == "none":
         for filename in mask_files:
-            masks.append(nb.load(filename, mmap=NUMPY_MMAP))
+            masks.append(nb.load(filename))
         return masks
 
     if mask_method == "union":

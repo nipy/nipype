@@ -11,7 +11,6 @@ import nibabel as nb
 import warnings
 
 from ...utils.filemanip import split_filename, fname_presuffix
-from ...utils import NUMPY_MMAP
 
 from ..base import traits, TraitedSpec, InputMultiPath, File, isdefined
 from .base import FSLCommand, FSLCommandInputSpec, Info
@@ -118,7 +117,7 @@ class PrepareFieldmap(FSLCommand):
 
         if runtime.returncode == 0:
             out_file = self.inputs.out_fieldmap
-            im = nb.load(out_file, mmap=NUMPY_MMAP)
+            im = nb.load(out_file)
             dumb_img = nb.Nifti1Image(np.zeros(im.shape), im.affine, im.header)
             out_nii = nb.funcs.concat_images((im, dumb_img))
             nb.save(out_nii, out_file)
