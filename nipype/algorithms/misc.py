@@ -26,7 +26,6 @@ from ..interfaces.base import (
     Undefined,
 )
 from ..utils.filemanip import fname_presuffix, split_filename, ensure_list
-from ..utils import NUMPY_MMAP
 
 from . import confounds
 
@@ -208,7 +207,7 @@ class ModifyAffine(BaseInterface):
 
     def _run_interface(self, runtime):
         for fname in self.inputs.volumes:
-            img = nb.load(fname, mmap=NUMPY_MMAP)
+            img = nb.load(fname)
 
             affine = img.affine
             affine = np.dot(self.inputs.transformation_matrix, affine)
@@ -1324,7 +1323,7 @@ def split_rois(in_file, mask=None, roishape=None):
     if roishape is None:
         roishape = (10, 10, 1)
 
-    im = nb.load(in_file, mmap=NUMPY_MMAP)
+    im = nb.load(in_file)
     imshape = im.shape
     dshape = imshape[:3]
     nvols = imshape[-1]
@@ -1415,7 +1414,7 @@ def merge_rois(in_files, in_idxs, in_ref, dtype=None, out_file=None):
         except:
             pass
 
-    ref = nb.load(in_ref, mmap=NUMPY_MMAP)
+    ref = nb.load(in_ref)
     aff = ref.affine
     hdr = ref.header.copy()
     rsh = ref.shape
@@ -1473,7 +1472,7 @@ def merge_rois(in_files, in_idxs, in_ref, dtype=None, out_file=None):
                 data[idata] = cdata[0:nels]
                 nb.Nifti1Image(data.reshape(rsh[:3]), aff, hdr).to_filename(fname)
 
-        imgs = [nb.load(im, mmap=NUMPY_MMAP) for im in nii]
+        imgs = [nb.load(im) for im in nii]
         allim = nb.concat_images(imgs)
         allim.to_filename(out_file)
 

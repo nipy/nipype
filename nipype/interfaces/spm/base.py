@@ -24,7 +24,7 @@ import numpy as np
 
 # Local imports
 from ... import logging
-from ...utils import spm_docs as sd, NUMPY_MMAP
+from ...utils import spm_docs as sd
 from ..base import (
     BaseInterface,
     traits,
@@ -50,7 +50,7 @@ def func_is_3d(in_file):
     if isinstance(in_file, list):
         return func_is_3d(in_file[0])
     else:
-        img = load(in_file, mmap=NUMPY_MMAP)
+        img = load(in_file)
         shape = img.shape
         if len(shape) == 3 or (len(shape) == 4 and shape[3] == 1):
             return True
@@ -78,7 +78,7 @@ def scans_for_fname(fname):
         for sno, f in enumerate(fname):
             scans[sno] = "%s,1" % f
         return scans
-    img = load(fname, mmap=NUMPY_MMAP)
+    img = load(fname)
     if len(img.shape) == 3:
         return np.array(("%s,1" % fname,), dtype=object)
     else:
