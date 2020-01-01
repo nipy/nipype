@@ -391,7 +391,7 @@ Execute the pipeline
 The code discussed above sets up all the necessary data structures
 with appropriate parameters and the connectivity between the
 processes, but does not generate any output. To actually run the
-analysis on the data the :func:`nipype.pipeline.engine.Workflow.run`
+analysis on the data the :func:`nipype.pipeline.engine.workflows.Workflow.run`
 function needs to be called.
 """
 
