@@ -653,10 +653,10 @@ class CompCor(SimpleInterface):
         else:
             components_criterion = 6
             IFLOGGER.warning(
-                "``num_components`` and ``variance_threshold`` are "
+                "`num_components` and `variance_threshold` are "
                 "not defined. Setting number of components to 6 "
                 "for backward compatibility. Please set either "
-                "``num_components`` or ``variance_threshold``, as "
+                "`num_components` or `variance_threshold`, as "
                 "this feature may be deprecated in the future."
             )
 

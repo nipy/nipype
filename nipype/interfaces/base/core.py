@@ -145,7 +145,7 @@ class BaseInterface(Interface):
     ----------
     input_spec: :obj:`nipype.interfaces.base.specs.TraitedSpec`
         points to the traited class for the inputs
-    output_spec: HasTraits
+    output_spec: :obj:`nipype.interfaces.base.specs.TraitedSpec`
         points to the traited class for the outputs
     _redirect_x: bool
         should be set to ``True`` when the interface requires

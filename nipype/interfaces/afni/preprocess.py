@@ -3145,7 +3145,7 @@ class TSmoothInputSpec(AFNICommandInputSpec):
         argstr="-osf",
     )
     lin3 = traits.Int(
-        desc=r"3 point linear filter: :math:`0.5\,(1-m)\,a + m\,b + 0.5\,(1-m)\,c"
+        desc=r"3 point linear filter: :math:`0.5\,(1-m)\,a + m\,b + 0.5\,(1-m)\,c`"
         "Here, 'm' is a number strictly between 0 and 1.",
         argstr="-3lin %d",
     )

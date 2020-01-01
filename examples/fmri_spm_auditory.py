@@ -147,7 +147,7 @@ Set up analysis workflow
 l1analysis = pe.Workflow(name='analysis')
 
 """Generate SPM-specific design information using
-:ref:`nipype.algorithms.modelgen.SpecifyModel`.
+:ref:`nipype.algorithms.modelgen.SpecifySPMModel`.
 """
 
 modelspec = pe.Node(interface=model.SpecifySPMModel(), name="modelspec")
@@ -272,7 +272,7 @@ Experimental paradigm specific components
 -----------------------------------------
 Here we create a structure that provides information
 about the experimental paradigm. This is used by the
-:ref:`nipype.algorithms.modelgen.SpecifyModel`
+:ref:`nipype.algorithms.modelgen.SpecifySPMModel`
 to create the information necessary to generate an SPM design matrix.
 """
 
@@ -326,7 +326,7 @@ sub-directories under `workdir` corresponding to the iterables in the
 pipeline. Thus for this pipeline there will be subject specific
 sub-directories.
 
-The :func:`nipype.pipeline.engine.Workflow.connect` function creates the
+The :func:`~nipype.pipeline.engine.workflows.Workflow.connect` method creates the
 links between the processes, i.e., how data should flow in and out of
 the processing nodes.
 """
@@ -390,8 +390,8 @@ Execute the pipeline
 The code discussed above sets up all the necessary data structures
 with appropriate parameters and the connectivity between the
 processes, but does not generate any output. To actually run the
-analysis on the data the :func:`nipype.pipeline.engine.workflows.Workflow.run`
-function needs to be called.
+analysis on the data the :func:`~nipype.pipeline.engine.workflows.Workflow.run`
+method needs to be called.
 """
 
 if __name__ == '__main__':
