@@ -267,7 +267,7 @@ class BrickStatInputSpec(CommandLineInputSpec):
         traits.Float,
         traits.Float,
         desc="p0 ps p1 write the percentile values starting "
-        "at p0\\% and ending at p1\\% at a step of ps%. "
+        "at p0% and ending at p1% at a step of ps%. "
         "only one sub-brick is accepted.",
         argstr="-percentile %.3f %.3f %.3f",
     )
