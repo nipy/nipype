@@ -60,14 +60,24 @@ class NipypeClassDocumenter(_ClassDocumenter):  # type: ignore
         if not self.doc_as_attr and self.options.show_inheritance:
             sourcename = self.get_sourcename()
             self.add_line("", sourcename)
-            if hasattr(self.object, "__bases__") and len(self.object.__bases__):
-                bases = [
-                    ":class:`%s`" % b.__name__
-                    if b.__module__ in ("__builtin__", "builtins")
-                    else ":class:`%s.%s`" % (b.__module__, b.__name__)
-                    for b in self.object.__bases__
-                ]
-                self.add_line("   " + _("Bases: %s") % ", ".join(bases), sourcename)
+            bases = getattr(self.object, "__bases__", [])
+            bases_links = []
+
+            for b in bases:
+                based_interface = False
+                try:
+                    based_interface = issubclass(b, BaseInterface)
+                except TypeError:
+                    pass
+
+                if b.__module__ in ("__builtin__", "builtins"):
+                    bases_links.append(":class:`%s`" % b.__name__)
+                elif based_interface:
+                    bases_links.append(":ref:`%s.%s`" % (b.__module__, b.__name__))
+                else:
+                    bases_links.append(":class:`%s.%s`" % (b.__module__, b.__name__))
+
+            self.add_line("   " + _("Bases: %s") % ", ".join(bases_links), sourcename)
 
 
 def setup(app):
