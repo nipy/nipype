@@ -70,7 +70,7 @@ Dictionary names of the basis function to parameters:
     * hrf
 
         * derivs -- (2-element list) Model  HRF  Derivatives. No derivatives: [0,0],
-            Time derivatives : [1,0], Time and Dispersion derivatives: [1,1]
+          Time derivatives : [1,0], Time and Dispersion derivatives: [1,1]
 
     * fourier, fourier_han, gamma, or fir:
 
@@ -500,7 +500,7 @@ class EstimateContrast(SPMCommand):
                     if contrast.sessions:
                         for sno, sw in enumerate(contrast.sessions):
                             script += "sidx = find(condsess(idx)==%d);\n" % (sno + 1)
-                            script += ("consess{%d}.tcon.convec(idx(sidx)) = %f;\n") % (
+                            script += "consess{%d}.tcon.convec(idx(sidx)) = %f;\n" % (
                                 i + 1,
                                 sw * contrast.weights[c0],
                             )

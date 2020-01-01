@@ -207,7 +207,7 @@ class FieldMap(SPMCommand):
 
     .. important::
 
-        This interface does not deal with real/imag magnitude images neither
+        This interface does not deal with real/imag magnitude images nor
         with the two phase files case.
 
     Examples
