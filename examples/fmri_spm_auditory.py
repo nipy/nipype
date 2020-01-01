@@ -327,7 +327,7 @@ sub-directories under `workdir` corresponding to the iterables in the
 pipeline. Thus for this pipeline there will be subject specific
 sub-directories.
 
-The :func:`nipype.pipeline.engine.Pipeline.connect` function creates the
+The :func:`nipype.pipeline.engine.Workflow.connect` function creates the
 links between the processes, i.e., how data should flow in and out of
 the processing nodes.
 """

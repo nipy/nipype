@@ -20,7 +20,7 @@ Nipype provides some *in-house* interfaces to help with workflow
 management tasks, basic image manipulations, and filesystem/storage
 interfaces:
 
-    * `"Algorithms" <api/generated/nipype.algorithms.html>`__
+    * `Algorithms <api/generated/nipype.algorithms.html>`__
     * `Image manipulation <api/generated/nipype.interfaces.image.html>`__
     * `I/O Operations <api/generated/nipype.interfaces.io.html>`__
     * `Self-reporting interfaces <api/generated/nipype.interfaces.mixins.html>`__
