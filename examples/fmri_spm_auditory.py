@@ -317,7 +317,7 @@ from nodes are piped into appropriate inputs of other nodes.
 
 Use the :class:`~nipype.pipeline.engine.workflows.Workflow` to create a
 graph-based execution pipeline for first level analysis.
-Set the :py:attr:`~nipype.pipeline.engine.workflows.Workflow.base_dir`
+Set the :py:attr:`~nipype.pipeline.engine.workflows.base.EngineBase.base_dir`
 option to instruct the pipeline engine to use ``spm_auditory_tutorial/workingdir``
 as the filesystem location to use when running the processes and keeping their
 outputs.
