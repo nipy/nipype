@@ -145,9 +145,9 @@ def create_endpoints_array(fib, voxelSize):
     Returns
     -------
     endpoints : ndarray of size [#fibers, 2, 3]
-      containing for each fiber the ndex of its first and last point in the voxelSize volume
+      containing for each fiber the index of its first and last point in the voxelSize volume
     endpointsmm : ndarray of size [#fibers, 2, 3]
-      endpoints in milimeter coordinates
+      endpoints in millimeter coordinates
 
     """
     # Init
