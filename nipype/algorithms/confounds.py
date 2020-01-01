@@ -418,7 +418,7 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         low=0,
         xor=["merge_method"],
         requires=["mask_files"],
-        desc=("Position of mask in ``mask_files`` to use - " "first is the default."),
+        desc="Position of mask in ``mask_files`` to use - first is the default.",
     )
     mask_names = traits.List(
         traits.Str,

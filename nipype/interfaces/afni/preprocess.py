@@ -3135,7 +3135,7 @@ class TSmoothInputSpec(AFNICommandInputSpec):
     )
     lin = traits.Bool(
         desc=r"3 point linear filter: :math:`0.15\,a + 0.70\,b + 0.15\,c`"
-        "[This is the default smoother]",
+        " [This is the default smoother]",
         argstr="-lin",
     )
     med = traits.Bool(desc="3 point median filter: median(a,b,c)", argstr="-med")
@@ -3146,7 +3146,7 @@ class TSmoothInputSpec(AFNICommandInputSpec):
     )
     lin3 = traits.Int(
         desc=r"3 point linear filter: :math:`0.5\,(1-m)\,a + m\,b + 0.5\,(1-m)\,c`"
-        "Here, 'm' is a number strictly between 0 and 1.",
+        " Here, 'm' is a number strictly between 0 and 1.",
         argstr="-3lin %d",
     )
     hamming = traits.Int(
