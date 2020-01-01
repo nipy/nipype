@@ -41,12 +41,6 @@ class Config(NapoleonConfig):
     _config_values = {
         "nipype_skip_classes": (
             [
-                "AFNI(Python)?Command",
-                "ANTS",
-                "FSLCommand",
-                "FS(Command|Script)",
-                "Info",
-                "^SPM",
                 "Tester",
                 "InputSpec",
                 "OutputSpec",
