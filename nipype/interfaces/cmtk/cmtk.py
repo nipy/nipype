@@ -137,16 +137,16 @@ def create_endpoints_array(fib, voxelSize):
 
     Parameters
     ----------
-    fib :
+    fib : array-like
       the fibers data
-    voxelSize:
+    voxelSize : tuple
       3-tuple containing the voxel size of the ROI image
 
     Returns
     -------
-    endpoints : matrix of size [#fibers, 2, 3]
+    endpoints : ndarray of size [#fibers, 2, 3]
       containing for each fiber the ndex of its first and last point in the voxelSize volume
-    endpointsmm : matrix of size [#fibers, 2, 3]
+    endpointsmm : ndarray of size [#fibers, 2, 3]
       endpoints in milimeter coordinates
 
     """

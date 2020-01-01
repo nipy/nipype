@@ -33,9 +33,9 @@ class NipypeInterfaceError(Exception):
 
 class Bunch(object):
     """
-    Dictionary-like class that provides attribute-style access to it's items.
+    Dictionary-like class that provides attribute-style access to its items.
 
-    A ``Bunch`` is a simple container that stores it's items as class
+    A ``Bunch`` is a simple container that stores its items as class
     attributes [1]_. Internally all items are stored in a dictionary and
     the class exposes several of the dictionary methods.
 

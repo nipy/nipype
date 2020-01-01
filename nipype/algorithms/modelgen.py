@@ -54,6 +54,7 @@ def spm_hrf(RT, P=None, fMRI_T=16):
     python implementation of spm_hrf
 
     See ``spm_hrf`` for implementation details::
+
       % RT   - scan repeat time
       % p    - parameters of the response function (two gamma
       % functions)

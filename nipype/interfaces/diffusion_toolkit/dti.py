@@ -190,8 +190,8 @@ Default type is 'nii'
         desc="""\
 Tracking algorithm.
 
-* fact -> use FACT method for tracking. this is the default method.
-* rk2  -> use 2nd order runge-kutta method for tracking.
+* fact -> use FACT method for tracking. This is the default method.
+* rk2  -> use 2nd order Runge-Kutta method for tracking.
 * tl   -> use tensorline method for tracking.
 * sl   -> use interpolated streamline method with fixed step-length
 

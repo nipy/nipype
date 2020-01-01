@@ -665,18 +665,18 @@ def extract(Z, shape, position, fill):
 
     Parameters
     ----------
-    Z :
+    Z : array-like
         the original data
-    shape :
+    shape : tuple
         tuple containing neighbourhood dimensions
     position :
         tuple containing central point indexes
-    fill :
+    fill : float
        value for the padding of Z
 
     Returns
     -------
-    R :
+    R : ndarray
         the neighbourhood of the specified point in Z
 
     """

@@ -264,7 +264,7 @@ class ODFTrackerInputSpec(CommandLineInputSpec):
     runge_kutta2 = traits.Bool(
         argstr="-rk2",
         desc="""\
-use 2nd order runge-kutta method for tracking.
+use 2nd order Runge-Kutta method for tracking.
 default tracking method is non-interpolate streamline""",
     )
     step_length = traits.Float(
