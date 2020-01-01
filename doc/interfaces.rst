@@ -12,6 +12,9 @@ Workflows
   The workflows that used to live as a module under
   ``nipype.workflows`` have been migrated to the
   new project `NiFlows <https://github.com/niflows>`__.
+  These may be installed with the
+  `niflow-nipype1-examples <https://pypi.org/project/niflow-nipype1-workflows/>`__
+  package, but their continued use is discouraged.
 
 Interfaces
 ----------

@@ -669,7 +669,7 @@ def extract(Z, shape, position, fill):
         the original data
     shape : tuple
         tuple containing neighbourhood dimensions
-    position :
+    position : tuple
         tuple containing central point indexes
     fill : float
        value for the padding of Z
