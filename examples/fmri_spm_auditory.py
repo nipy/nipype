@@ -33,15 +33,15 @@ Preliminaries
 
 """
 
-# Set the way matlab should be called
+# Set the way Matlab should be called
 mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodesktop -nosplash")
 
 """
 
 Setting up workflows
 --------------------
-In this tutorial we will be setting up a hierarchical workflow for spm
-analysis. This will demonstrate how pre-defined workflows can be setup
+In this tutorial we will be setting up a hierarchical workflow for SPM
+analysis. This will demonstrate how predefined workflows can be setup
 and shared across users, projects and labs.
 
 Setup preprocessing workflow
@@ -51,11 +51,11 @@ This is a generic preprocessing workflow that can be used by different analyses
 """
 
 preproc = pe.Workflow(name='preproc')
-"""We strongly encourage to use 4D files insteead of series of 3D for fMRI analyses
+"""We strongly encourage to use 4D files instead of series of 3D for fMRI analyses
 for many reasons (cleanness and saving and filesystem inodes are among them). However,
 the the workflow presented in the SPM8 manual which this tutorial is based on
 uses 3D files. Therefore we leave converting to 4D as an option. We are using ``merge_to_4d``
-variable, because switching between 3d and 4d requires some additional steps (explauned later on).
+variable, because switching between 3D and 4dD requires some additional steps (explained later on).
 Use :ref:`nipype.interfaces.fsl.utils.Merge` to merge a series
 of 3D files along the time dimension creating a 4D file.
 """
@@ -119,8 +119,8 @@ def get_vox_dims(volume):
 
 """Here we are connecting all the nodes together.
 Notice that we add the merge node only if you choose to use 4D.
-Also ``get_vox_dims`` function is passed along the input volume of normalise to set the optimal
-voxel sizes.
+Also, the ``get_vox_dims`` function is passed along the input volume of
+:ref:`nipype.interfaces.spm.preprocess.Normalize` to set the optimal voxel sizes.
 """
 
 if merge_to_4d:
@@ -186,8 +186,8 @@ l1analysis.connect([
                                    ('spmT_images', 'stat_image')]),
 ])
 """
-Preproc + Analysis pipeline
----------------------------
+Preprocessing and analysis pipeline
+-----------------------------------
 """
 
 l1pipeline = pe.Workflow(name='firstlevel')
@@ -196,7 +196,7 @@ l1pipeline.connect([(preproc, l1analysis,
                        'modelspec.realignment_parameters')])])
 
 """
-Pluging in ``functional_runs`` is a bit more complicated,
+Plugging in ``functional_runs`` is a bit more complicated,
 because model spec expects a list of ``runs``.
 Every run can be a 4D file or a list of 3D files.
 Therefore for 3D analysis we need a list of lists and to make one we need a helper function.
@@ -253,10 +253,7 @@ infosource.iterables = ('subject_id', subject_list)
 
 """
 Now we create a :ref:`nipype.interfaces.io.DataGrabber`
-object and fill in the information from above about the layout of our data.  The
-:class:`nipype.pipeline.NodeWrapper` module wraps the interface object
-and provides additional housekeeping and pipeline specific
-functionality.
+object and fill in the information from above about the layout of our data.
 """
 
 datasource = pe.Node(
@@ -318,18 +315,26 @@ describe the parameters used for each function. In this section we
 setup the connections between the nodes such that appropriate outputs
 from nodes are piped into appropriate inputs of other nodes.
 
-Use the :class:`nipype.pipeline.engine.Pipeline` to create a
-graph-based execution pipeline for first level analysis. The config
-options tells the pipeline engine to use `workdir` as the disk
-location to use when running the processes and keeping their
-outputs. The `use_parameterized_dirs` tells the engine to create
-sub-directories under `workdir` corresponding to the iterables in the
-pipeline. Thus for this pipeline there will be subject specific
-sub-directories.
+Use the :class:`~nipype.pipeline.engine.workflows.Workflow` to create a
+graph-based execution pipeline for first level analysis.
+Set the :py:attr:`~nipype.pipeline.engine.workflows.Workflow.base_dir`
+option to instruct the pipeline engine to use ``spm_auditory_tutorial/workingdir``
+as the filesystem location to use when running the processes and keeping their
+outputs.
+Other options can be set via `the configuration file
+<https://miykael.github.io/nipype_tutorial/notebooks/basic_execution_configuration.html>`__.
+For example, ``use_parameterized_dirs`` tells the engine to create
+sub-directories under :py:attr:`~nipype.pipeline.engine.workflows.Workflow.base_dir`,
+corresponding to the iterables in the pipeline.
+Thus, for this pipeline there will be subject specific sub-directories.
+
+When building a workflow, interface objects are wrapped within
+a :class:`~nipype.pipeline.engine.nodes.Node` so that they can be inserted
+in the workflow.
 
 The :func:`~nipype.pipeline.engine.workflows.Workflow.connect` method creates the
-links between the processes, i.e., how data should flow in and out of
-the processing nodes.
+links between :class:`~nipype.pipeline.engine.nodes.Node` instances, i.e.,
+how data should flow in and out of the processing nodes.
 """
 
 level1 = pe.Workflow(name="level1")
