@@ -143,7 +143,7 @@ class BaseInterface(Interface):
 
     Attributes
     ----------
-    input_spec: :obj:`nipype.interfaces.base.spec.TraitedSpec`
+    input_spec: :obj:`nipype.interfaces.base.specs.TraitedSpec`
         points to the traited class for the inputs
     output_spec: HasTraits
         points to the traited class for the outputs
@@ -326,7 +326,7 @@ class BaseInterface(Interface):
 
         Returns
         -------
-        results :  :obj:`nipype.interfaces.base.core.InterfaceResult`
+        results :  :obj:`nipype.interfaces.base.support.InterfaceResult`
             A copy of the instance that was executed, provenance information and,
             if successful, results
 
