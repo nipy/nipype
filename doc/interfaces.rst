@@ -97,7 +97,7 @@ Nipype provides interfaces for the following **third-party** tools:
     `NiftySeg <api/generated/nipype.interfaces.niftyseg.html>`__
     contains programs to perform EM based segmentation of images in NIfTI or Analyze format.
   * `NiLearn <api/generated/nipype.interfaces.nilearn.html>`__
-    is a Python module for fast and easy statistical learning on NeuroImaging data.
+    is a Python library for fast and easy statistical learning on NeuroImaging data.
   * `NiPy <api/generated/nipype.interfaces.nipy.html>`__
     is a Python project for analysis of structural and functional neuroimaging data.
   * `Nitime <api/generated/nipype.interfaces.nitime.html>`__
