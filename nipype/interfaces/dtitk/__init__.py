@@ -1,11 +1,10 @@
-"""The dtitk module provides classes for interfacing with the `Diffusion
-Tensor Imaging Toolkit (DTI-TK)
+"""
+DTI-TK is a spatial normalization and atlas construction toolkit for DTI.
+
+Interfaces for the `Diffusion Tensor Imaging Toolkit (DTI-TK)
 <http://dti-tk.sourceforge.net/pmwiki/pmwiki.php>`_ command line tools.
 
-Top-level namespace for dti-tk.
 """
-
-# from .base import ()
 from .registration import (
     Rigid,
     Affine,

@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+"""This script provides interfaces for BrainSuite command line tools.
+Please see brainsuite.org for more information.
+
+Author: Jason Wong
+"""
 
 import os
 import re as regex
@@ -11,12 +16,6 @@ from ..base import (
     traits,
     isdefined,
 )
-
-"""This script provides interfaces for BrainSuite command line tools.
-Please see brainsuite.org for more information.
-
-Author: Jason Wong
-"""
 
 
 class BseInputSpec(CommandLineInputSpec):
@@ -124,7 +123,7 @@ class BfcInputSpec(CommandLineInputSpec):
     )
     inputMaskFile = File(desc="mask file", argstr="-m %s", hash_files=False)
     outputMRIVolume = File(
-        desc="output bias-corrected MRI volume.If unspecified, output file name will be auto generated.",
+        desc="output bias-corrected MRI volume. If unspecified, output file name will be auto generated.",
         argstr="-o %s",
         hash_files=False,
         genfile=True,
@@ -150,7 +149,13 @@ class BfcInputSpec(CommandLineInputSpec):
     histogramType = traits.Enum(
         "ellipse",
         "block",
-        desc="Options for type of histogram\nellipse: use ellipsoid for ROI histogram\nblock :use block for ROI histogram",
+        desc="""\
+Options for type of histogram:
+
+  * ``ellipse``: use ellipsoid for ROI histogram
+  * ``block``:use block for ROI histogram
+
+""",
         argstr="%s",
     )
     iterativeMode = traits.Bool(
@@ -178,8 +183,14 @@ class BfcInputSpec(CommandLineInputSpec):
         "low",
         "medium",
         "high",
-        desc="Preset options for bias_model\n low: small bias model [0.95,1.05]\n"
-        "medium: medium bias model [0.90,1.10]\n high: high bias model [0.80,1.20]",
+        desc="""\
+Preset options for bias_model
+
+  * low: small bias model [0.95,1.05]
+  * medium: medium bias model [0.90,1.10]
+  * high: high bias model [0.80,1.20]
+
+""",
         argstr="%s",
     )
     intermediate_file_type = traits.Enum(
@@ -1314,7 +1325,7 @@ class BDPInputSpec(CommandLineInputSpec):
         "saves derived diffusion tensor parameters (FA, MD, axial, radial, L2, "
         "L3). This is the default behavior if no diffusion modeling flags are "
         "specified. The estimated diffusion tensors can be visualized by loading "
-        "the saved *.eig.nii.gz file in BrainSuite. BDP reports diffusivity (MD, "
+        "the saved ``*.eig.nii.gz`` file in BrainSuite. BDP reports diffusivity (MD, "
         "axial, radial, L2 and L3) in a unit which is reciprocal inverse of the "
         "unit of input b-value. ",
     )

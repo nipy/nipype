@@ -394,8 +394,8 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         desc=(
             "One or more mask files that determines "
             "ROI (3D). When more that one file is "
-            "provided `merge_method` or "
-            "`merge_index` must be provided"
+            "provided ``merge_method`` or "
+            "``merge_index`` must be provided"
         ),
     )
     merge_method = traits.Enum(
@@ -406,10 +406,10 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         requires=["mask_files"],
         desc=(
             "Merge method if multiple masks are "
-            "present - `union` uses voxels included in"
-            " at least one input mask, `intersect` "
+            "present - ``union`` uses voxels included in"
+            " at least one input mask, ``intersect`` "
             "uses only voxels present in all input "
-            "masks, `none` performs CompCor on "
+            "masks, ``none`` performs CompCor on "
             "each mask individually"
         ),
     )
@@ -417,7 +417,7 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         low=0,
         xor=["merge_method"],
         requires=["mask_files"],
-        desc=("Position of mask in `mask_files` to use - " "first is the default."),
+        desc="Position of mask in ``mask_files`` to use - first is the default.",
     )
     mask_names = traits.List(
         traits.Str,
@@ -435,12 +435,12 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         traits.Range(low=1),
         xor=["variance_threshold"],
         desc="Number of components to return from the decomposition. If "
-        "`num_components` is `all`, then all components will be "
+        "``num_components`` is ``all``, then all components will be "
         "retained.",
     )
     # 6 for BOLD, 4 for ASL
     # automatically instantiated to 6 in CompCor below if neither
-    # `num_components` nor `variance_threshold` is defined (for
+    # ``num_components`` nor ``variance_threshold`` is defined (for
     # backward compatibility)
     variance_threshold = traits.Range(
         low=0.0,
@@ -450,7 +450,7 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         xor=["num_components"],
         desc="Select the number of components to be returned automatically "
         "based on their ability to explain variance in the dataset. "
-        "`variance_threshold` is a fractional value between 0 and 1; "
+        "``variance_threshold`` is a fractional value between 0 and 1; "
         "the number of components retained will be equal to the minimum "
         "number of components necessary to explain the provided "
         "fraction of variance in the masked time series.",
@@ -520,13 +520,14 @@ class CompCorOutputSpec(TraitedSpec):
 
 class CompCor(SimpleInterface):
     """
-    Interface with core CompCor computation, used in aCompCor and tCompCor
+    Interface with core CompCor computation, used in aCompCor and tCompCor.
 
     CompCor provides three pre-filter options, all of which include per-voxel
     mean removal:
-      - polynomial: Legendre polynomial basis
-      - cosine: Discrete cosine basis
-      - False: mean-removal only
+
+      - ``'polynomial'``: Legendre polynomial basis
+      - ``'cosine'``: Discrete cosine basis
+      - ``False``: mean-removal only
 
     In the case of ``polynomial`` and ``cosine`` filters, a pre-filter file may
     be saved with a row for each volume/timepoint, and a column for each
@@ -544,7 +545,6 @@ class CompCor(SimpleInterface):
 
     Example
     -------
-
     >>> ccinterface = CompCor()
     >>> ccinterface.inputs.realigned_file = 'functional.nii'
     >>> ccinterface.inputs.mask_files = 'mask.nii'
@@ -811,7 +811,6 @@ class TCompCor(CompCor):
 
     Example
     -------
-
     >>> ccinterface = TCompCor()
     >>> ccinterface.inputs.realigned_file = 'functional.nii'
     >>> ccinterface.inputs.mask_files = 'mask.nii'
@@ -905,7 +904,6 @@ class TSNR(BaseInterface):
 
     Example
     -------
-
     >>> tsnr = TSNR()
     >>> tsnr.inputs.in_file = 'functional.nii'
     >>> res = tsnr.run() # doctest: +SKIP
@@ -1239,6 +1237,8 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
 
     A helper function for CompCor
 
+    Parameters
+    ----------
     mask_files: a list
         one or more binary mask files
     mask_method: enum ('union', 'intersect', 'none')
@@ -1246,7 +1246,10 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
     mask_index: an integer
         determines which file to return (mutually exclusive with mask_method)
 
-    returns: a list of nibabel images
+    Returns
+    -------
+    masks: a list of nibabel images
+
     """
 
     if isdefined(mask_index) or not isdefined(mask_method):
@@ -1309,49 +1312,48 @@ def compute_noise_components(
     failure_mode="error",
     mask_names=None,
 ):
-    """Compute the noise components from the imgseries for each mask
+    """
+    Compute the noise components from the image series for each mask.
 
     Parameters
     ----------
     imgseries: nibabel image
         Time series data to be decomposed.
     mask_images: list
-        List of nibabel images. Time series data from `img_series` is subset
+        List of nibabel images. Time series data from ``img_series`` is subset
         according to the spatial extent of each mask, and the subset data is
         then decomposed using principal component analysis. Masks should be
         coextensive with either anatomical or spatial noise ROIs.
     components_criterion: float
         Number of noise components to return. If this is a decimal value
-        between 0 and 1, then `create_noise_components` will instead return
+        between 0 and 1, then ``create_noise_components`` will instead return
         the smallest number of components necessary to explain the indicated
-        fraction of variance. If `components_criterion` is `all`, then all
+        fraction of variance. If ``components_criterion`` is ``all``, then all
         components will be returned.
     filter_type: str
-        Type of filter to apply to time series before computing
-                noise components.
-        'polynomial' - Legendre polynomial basis
-        'cosine' - Discrete cosine (DCT) basis
-        False - None (mean-removal only)
+        Type of filter to apply to time series before computing noise components.
+
+            - 'polynomial' - Legendre polynomial basis
+            - 'cosine' - Discrete cosine (DCT) basis
+            - False - None (mean-removal only)
+
     failure_mode: str
         Action to be taken in the event that any decomposition fails to
-        identify any components. `error` indicates that the routine should
+        identify any components. ``error`` indicates that the routine should
         raise an exception and exit, while any other value indicates that the
         routine should return a matrix of NaN values equal in size to the
         requested decomposition matrix.
     mask_names: list or None
-        List of names for each image in `mask_images`. This should be equal in
-        length to `mask_images`, with the ith element of `mask_names` naming
-        the ith element of `mask_images`.
-
-    Filter options:
-
+        List of names for each image in ``mask_images``. This should be equal in
+        length to ``mask_images``, with the ith element of ``mask_names`` naming
+        the ith element of ``mask_images``.
     degree: int
         Order of polynomial used to remove trends from the timeseries
     period_cut: float
         Minimum period (in sec) for DCT high-pass filter
     repetition_time: float
         Time (in sec) between volume acquisitions. This must be defined if
-        the `filter_type` is `cosine`.
+        the ``filter_type`` is ``cosine``.
 
     Returns
     -------
@@ -1362,6 +1364,7 @@ def compute_noise_components(
     metadata: OrderedDict{str: numpy array}
         Dictionary of eigenvalues, fractional explained variances, and
         cumulative explained variances.
+
     """
     basis = np.array([])
     if components_criterion == "all":

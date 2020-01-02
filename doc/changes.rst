@@ -1,3 +1,4 @@
+:orphan:
 :tocdepth: 2
 
 .. _changes:

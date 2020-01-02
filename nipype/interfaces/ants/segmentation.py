@@ -331,7 +331,7 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
         False,
         mandatory=True,
         usedefault=True,
-        desc="copy headers of the original image into the " "output (corrected) file",
+        desc="copy headers of the original image into the output (corrected) file",
     )
     rescale_intensities = traits.Bool(
         False,
@@ -545,11 +545,11 @@ class CorticalThicknessInputSpec(ANTSCommandInputSpec):
         "antsCT_",
         argstr="-o %s",
         usedefault=True,
-        desc=("Prefix that is prepended to all output" " files (default = antsCT_)"),
+        desc=("Prefix that is prepended to all output files"),
     )
     image_suffix = traits.Str(
         "nii.gz",
-        desc=("any of standard ITK formats," " nii.gz is default"),
+        desc=("any of standard ITK formats, nii.gz is default"),
         argstr="-s %s",
         usedefault=True,
     )
@@ -583,11 +583,11 @@ class CorticalThicknessInputSpec(ANTSCommandInputSpec):
     )
     prior_segmentation_weight = traits.Float(
         argstr="-w %f",
-        desc=("Atropos spatial prior *probability* weight for" " the segmentation"),
+        desc=("Atropos spatial prior *probability* weight for the segmentation"),
     )
     segmentation_iterations = traits.Int(
         argstr="-n %d",
-        desc=("N4 -> Atropos -> N4 iterations during segmentation" " (default = 3)"),
+        desc=("N4 -> Atropos -> N4 iterations during segmentation (default = 3)"),
     )
     posterior_formulation = traits.Str(
         argstr="-b %s",
@@ -610,9 +610,7 @@ class CorticalThicknessInputSpec(ANTSCommandInputSpec):
         0,
         1,
         argstr="-u %d",
-        desc=(
-            "Use random number generated from system clock in Atropos" " (default = 1)"
-        ),
+        desc=("Use random number generated from system clock in Atropos (default = 1)"),
     )
     b_spline_smoothing = traits.Bool(
         argstr="-v",
@@ -855,9 +853,7 @@ class BrainExtractionInputSpec(ANTSCommandInputSpec):
         "highres001_",
         argstr="-o %s",
         usedefault=True,
-        desc=(
-            "Prefix that is prepended to all output" " files (default = highress001_)"
-        ),
+        desc=("Prefix that is prepended to all output files"),
     )
 
     extraction_registration_mask = File(
@@ -871,7 +867,7 @@ class BrainExtractionInputSpec(ANTSCommandInputSpec):
     )
     image_suffix = traits.Str(
         "nii.gz",
-        desc=("any of standard ITK formats," " nii.gz is default"),
+        desc=("any of standard ITK formats, nii.gz is default"),
         argstr="-s %s",
         usedefault=True,
     )
@@ -879,9 +875,7 @@ class BrainExtractionInputSpec(ANTSCommandInputSpec):
         0,
         1,
         argstr="-u %d",
-        desc=(
-            "Use random number generated from system clock in Atropos" " (default = 1)"
-        ),
+        desc=("Use random number generated from system clock in Atropos (default = 1)"),
     )
     keep_temporary_files = traits.Int(
         argstr="-k %d",
@@ -932,6 +926,8 @@ class BrainExtractionOutputSpec(TraitedSpec):
 
 class BrainExtraction(ANTSCommand):
     """
+    Atlas-based brain extraction.
+
     Examples
     --------
     >>> from nipype.interfaces.ants.segmentation import BrainExtraction
@@ -941,8 +937,8 @@ class BrainExtraction(ANTSCommand):
     >>> brainextraction.inputs.brain_template = 'study_template.nii.gz'
     >>> brainextraction.inputs.brain_probability_mask ='ProbabilityMaskOfStudyTemplate.nii.gz'
     >>> brainextraction.cmdline
-    'antsBrainExtraction.sh -a T1.nii.gz -m ProbabilityMaskOfStudyTemplate.nii.gz -e study_template.nii.gz -d 3 \
--s nii.gz -o highres001_'
+    'antsBrainExtraction.sh -a T1.nii.gz -m ProbabilityMaskOfStudyTemplate.nii.gz -e study_template.nii.gz -d 3 -s nii.gz -o highres001_'
+
     """
 
     input_spec = BrainExtractionInputSpec
@@ -1121,23 +1117,23 @@ class JointFusionInputSpec(ANTSCommandInputSpec):
         desc="Warped atlas segmentations",
     )
     method = traits.Str(
-        default="Joint",
+        "Joint",
         argstr="-m %s",
         usedefault=True,
         desc=(
             "Select voting method. Options: Joint (Joint"
-            " Label Fusion). May be followed by optional"
-            " parameters in brackets, e.g., -m Joint[0.1,2]"
+            "Label Fusion). May be followed by optional"
+            "parameters in brackets, e.g., -m Joint[0.1,2]"
         ),
     )
     alpha = traits.Float(
-        default=0.1,
+        0.1,
         usedefault=True,
         requires=["method"],
         desc=("Regularization term added to matrix Mx for inverse"),
     )
     beta = traits.Int(
-        default=2,
+        2,
         usedefault=True,
         requires=["method"],
         desc=("Exponent for mapping intensity difference to joint error"),
@@ -1154,9 +1150,7 @@ class JointFusionInputSpec(ANTSCommandInputSpec):
         minlen=3,
         maxlen=3,
         argstr="-rp %s",
-        desc=(
-            "Patch radius for similarity measures, " "scalar or vector. Default: 2x2x2"
-        ),
+        desc=("Patch radius for similarity measures, scalar or vector. Default: 2x2x2"),
     )
     search_radius = traits.ListInt(
         minlen=3, maxlen=3, argstr="-rs %s", desc="Local search radius. Default: 3x3x3"
@@ -1181,9 +1175,10 @@ class JointFusionOutputSpec(TraitedSpec):
 
 class JointFusion(ANTSCommand):
     """
+    Segmentation fusion tool.
+
     Examples
     --------
-
     >>> from nipype.interfaces.ants import JointFusion
     >>> at = JointFusion()
     >>> at.inputs.dimension = 3
@@ -1209,6 +1204,7 @@ class JointFusion(ANTSCommand):
     >>> at.cmdline
     'jointfusion 3 1 -m Joint[0.5,1] -rp 3x2x1 -rs 1x2x3 -tg T1.nii -g im1.nii -g im2.nii -g im3.nii \
 -l segmentation0.nii.gz -l segmentation1.nii.gz -l segmentation1.nii.gz fusion_labelimage_output.nii'
+
     """
 
     input_spec = JointFusionInputSpec
@@ -1334,6 +1330,7 @@ class DenoiseImage(ANTSCommand):
     >>> denoise_3.inputs.save_noise = True
     >>> denoise_3.cmdline
     'DenoiseImage -i im1.nii -n Gaussian -o [ im1_noise_corrected.nii, im1_noise.nii ] -s 1'
+
     """
 
     input_spec = DenoiseImageInputSpec
@@ -1433,7 +1430,7 @@ class AntsJointFusionInputSpec(ANTSCommandInputSpec):
         minlen=3,
         maxlen=3,
         argstr="-p %s",
-        desc=("Patch radius for similarity measures." "Default: 2x2x2"),
+        desc=("Patch radius for similarity measures. Default: 2x2x2"),
     )
     patch_metric = traits.Enum(
         "PC",
@@ -1485,7 +1482,7 @@ class AntsJointFusionInputSpec(ANTSCommandInputSpec):
     out_label_post_prob_name_format = traits.Str(
         "antsJointFusionPosterior_%d.nii.gz",
         requires=["out_label_fusion", "out_intensity_fusion_name_format"],
-        desc="Optional label posterior probability " "image file name format.",
+        desc="Optional label posterior probability image file name format.",
     )
     out_atlas_voting_weight_name_format = traits.Str(
         "antsJointFusionVotingWeight_%d.nii.gz",
@@ -1494,7 +1491,7 @@ class AntsJointFusionInputSpec(ANTSCommandInputSpec):
             "out_intensity_fusion_name_format",
             "out_label_post_prob_name_format",
         ],
-        desc="Optional atlas voting weight image " "file name format.",
+        desc="Optional atlas voting weight image file name format.",
     )
     verbose = traits.Bool(False, argstr="-v", desc=("Verbose output."))
 
@@ -1510,7 +1507,6 @@ class AntsJointFusion(ANTSCommand):
     """
     Examples
     --------
-
     >>> from nipype.interfaces.ants import AntsJointFusion
     >>> antsjointfusion = AntsJointFusion()
     >>> antsjointfusion.inputs.out_label_fusion = 'ants_fusion_label_output.nii'
@@ -1560,7 +1556,7 @@ class AntsJointFusion(ANTSCommand):
     >>> antsjointfusion.inputs.out_atlas_voting_weight_name_format = 'ants_joint_fusion_voting_weight_%d.nii.gz'
     >>> antsjointfusion.cmdline
     "antsJointFusion -a 0.5 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii'] \
--l segmentation0.nii.gz -l segmentation1.nii.gz -b 1.0 -d 3 -e 1[roi01.nii] -e 2[roi02.nii]  \
+-l segmentation0.nii.gz -l segmentation1.nii.gz -b 1.0 -d 3 -e 1[roi01.nii] -e 2[roi02.nii] \
 -o [ants_fusion_label_output.nii, ants_joint_fusion_intensity_%d.nii.gz, \
 ants_joint_fusion_posterior_%d.nii.gz, ants_joint_fusion_voting_weight_%d.nii.gz] \
 -p 3x2x1 -s mask.nii -t ['im1.nii', 'im2.nii'] -v"
@@ -1678,8 +1674,8 @@ class KellyKapowskiInputSpec(ANTSCommandInputSpec):
         exists=True,
         argstr='--segmentation-image "%s"',
         mandatory=True,
-        desc="A segmentation image must be supplied labeling the gray and white matters."
-        " Default values = 2 and 3, respectively.",
+        desc="A segmentation image must be supplied labeling the gray and white matters. "
+        "Default values = 2 and 3, respectively.",
     )
 
     gray_matter_label = traits.Int(
@@ -1711,7 +1707,7 @@ class KellyKapowskiInputSpec(ANTSCommandInputSpec):
     )
 
     convergence = traits.Str(
-        default="[50,0.001,10]",
+        "[50,0.001,10]",
         argstr='--convergence "%s"',
         usedefault=True,
         desc="Convergence is determined by fitting a line to the normalized energy profile of"
@@ -1832,18 +1828,19 @@ class KellyKapowski(ANTSCommand):
     references_ = [
         {
             "entry": BibTeX(
-                "@book{Das2009867,"
-                "author={Sandhitsu R. Das and Brian B. Avants and Murray Grossman and James C. Gee},"
-                "title={Registration based cortical thickness measurement.},"
-                "journal={NeuroImage},"
-                "volume={45},"
-                "number={37},"
-                "pages={867--879},"
-                "year={2009},"
-                "issn={1053-8119},"
-                "url={http://www.sciencedirect.com/science/article/pii/S1053811908012780},"
-                "doi={https://doi.org/10.1016/j.neuroimage.2008.12.016}"
-                "}"
+                """\
+@book{Das2009867,
+  author={Sandhitsu R. Das and Brian B. Avants and Murray Grossman and James C. Gee},
+  title={Registration based cortical thickness measurement.},
+  journal={NeuroImage},
+  volume={45},
+  number={37},
+  pages={867--879},
+  year={2009},
+  issn={1053-8119},
+  url={http://www.sciencedirect.com/science/article/pii/S1053811908012780},
+  doi={https://doi.org/10.1016/j.neuroimage.2008.12.016}
+}"""
             ),
             "description": "The details on the implementation of DiReCT.",
             "tags": ["implementation"],

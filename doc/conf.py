@@ -16,14 +16,6 @@ import os
 from packaging.version import Version
 import nipype
 
-# if not os.path.exists('users/examples'):
-#     os.mkdir('users/examples')
-# os.system('python ../tools/make_examples.py --no-exec')
-
-# if os.path.exists('interfaces/generated'):
-#     rmtree('interfaces/generated')
-# os.system('python ../tools/build_interface_docs.py')
-
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -41,9 +33,11 @@ extensions = [
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.todo',
     'sphinxcontrib.apidoc',
-    'sphinxcontrib.napoleon',
     'matplotlib.sphinxext.plot_directive',
+    'nbsphinx',
     'nipype.sphinxext.plot_workflow',
+    'nipype.sphinxext.apidoc',
+    'nipype.sphinxext.documenter',
 ]
 
 autodoc_mock_imports = [
@@ -57,6 +51,8 @@ autodoc_mock_imports = [
     'skimage',
     'svgutils',
     'transforms3d',
+    'tvtk',
+    'vtk'
 ]
 
 # Accept custom section names to be parsed for numpy-style docstrings
@@ -68,6 +64,8 @@ napoleon_custom_sections = [
     ('Inputs', 'Parameters'),
     ('Outputs', 'Parameters'),
     ('Attributes', 'Parameters'),
+    ('Mandatory Inputs', 'Parameters'),
+    ('Optional Inputs', 'Parameters'),
 ]
 
 
@@ -122,8 +120,6 @@ exclude_trees = ['_build']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = [
     '_build', 'Thumbs.db', '.DS_Store',
-    'api/generated/gen.rst',
-    'interfaces/generated/gen.rst'
 ]
 
 # The reST default role (used for this markup: `text`) to use for all documents.
@@ -252,8 +248,12 @@ htmlhelp_basename = 'nipypedoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ('documentation', 'nipype.tex', u'nipype Documentation',
-     u'Neuroimaging in Python team', 'manual'),
+    ('interfaces', 'interfaces.tex', 'Nipype Interfaces Documentation',
+     'Neuroimaging in Python team', 'manual'),
+    # ('developers', 'developers.tex', 'Nipype API',
+    #  'Neuroimaging in Python team', 'manual'),
+    ('examples', 'examples.tex', 'Nipype Examples',
+     'Neuroimaging in Python team', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -278,10 +278,8 @@ apidoc_module_dir = '../nipype'
 apidoc_output_dir = 'api/generated'
 apidoc_excluded_paths = [
     '*/tests/*', 'tests/*',
-    'algorithms/*',
     'external/*',
     'fixes/*',
-    'interfaces/*',
     'scripts/*',
     'sphinxext/*',
     'testing/*',

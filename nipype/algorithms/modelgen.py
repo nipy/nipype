@@ -6,10 +6,6 @@ The modelgen module provides classes for specifying designs for individual
 subject analysis of task-based fMRI experiments. In particular it also includes
 algorithms for generating regressors for sparse and sparse-clustered acquisition
 experiments.
-
-These functions include:
-
-  * SpecifyModel: allows specification of sparse and non-sparse models
 """
 from copy import deepcopy
 import csv, math, os
@@ -35,10 +31,11 @@ iflogger = logging.getLogger("nipype.interface")
 
 
 def gcd(a, b):
-    """Returns the greatest common divisor of two integers
+    """
+    Return the greatest common divisor of two integers (uses Euclid's algorithm).
 
-    uses Euclid's algorithm
-
+    Examples
+    --------
     >>> gcd(4, 5)
     1
     >>> gcd(4, 8)
@@ -53,31 +50,34 @@ def gcd(a, b):
 
 
 def spm_hrf(RT, P=None, fMRI_T=16):
-    """ python implementation of spm_hrf
+    """
+    python implementation of spm_hrf
 
-    see spm_hrf for implementation details
+    See ``spm_hrf`` for implementation details::
 
-    % RT   - scan repeat time
-    % p    - parameters of the response function (two gamma
-    % functions)
-    % defaults  (seconds)
-    %	p(0) - delay of response (relative to onset)	   6
-    %	p(1) - delay of undershoot (relative to onset)    16
-    %	p(2) - dispersion of response			   1
-    %	p(3) - dispersion of undershoot			   1
-    %	p(4) - ratio of response to undershoot		   6
-    %	p(5) - onset (seconds)				   0
-    %	p(6) - length of kernel (seconds)		  32
-    %
-    % hrf  - hemodynamic response function
-    % p    - parameters of the response function
+      % RT   - scan repeat time
+      % p    - parameters of the response function (two gamma
+      % functions)
+      % defaults  (seconds)
+      %	p(0) - delay of response (relative to onset)	   6
+      %	p(1) - delay of undershoot (relative to onset)    16
+      %	p(2) - dispersion of response			   1
+      %	p(3) - dispersion of undershoot			   1
+      %	p(4) - ratio of response to undershoot		   6
+      %	p(5) - onset (seconds)				   0
+      %	p(6) - length of kernel (seconds)		  32
+      %
+      % hrf  - hemodynamic response function
+      % p    - parameters of the response function
 
-    the following code using scipy.stats.distributions.gamma
-    doesn't return the same result as the spm_Gpdf function ::
+    The following code using ``scipy.stats.distributions.gamma``
+    doesn't return the same result as the ``spm_Gpdf`` function::
 
         hrf = gamma.pdf(u, p[0]/p[2], scale=dt/p[2]) -
               gamma.pdf(u, p[1]/p[3], scale=dt/p[3])/p[4]
 
+    Example
+    -------
     >>> print(spm_hrf(2))
     [  0.00000000e+00   8.65660810e-02   3.74888236e-01   3.84923382e-01
        2.16117316e-01   7.68695653e-02   1.62017720e-03  -3.06078117e-02
@@ -130,11 +130,11 @@ def orth(x_in, y_in):
 
 
 def scale_timings(timelist, input_units, output_units, time_repetition):
-    """Scales timings given input and output units (scans/secs)
+    """
+    Scale timings given input and output units (scans/secs).
 
     Parameters
     ----------
-
     timelist: list of times to scale
     input_units: 'secs' or 'scans'
     output_units: Ibid.
@@ -156,11 +156,11 @@ def scale_timings(timelist, input_units, output_units, time_repetition):
 def bids_gen_info(
     bids_event_files, condition_column="", amplitude_column=None, time_repetition=False,
 ):
-    """Generate subject_info structure from a list of BIDS .tsv event files.
+    """
+    Generate a subject_info structure from a list of BIDS .tsv event files.
 
     Parameters
     ----------
-
     bids_event_files : list of str
         Filenames of BIDS .tsv event files containing columns including:
         'onset', 'duration', and 'trial_type' or the `condition_column` value.
@@ -174,8 +174,8 @@ def bids_gen_info(
 
     Returns
     -------
+    subject_info: list of Bunch
 
-    list of Bunch
     """
     info = []
     for bids_event_file in bids_event_files:
@@ -209,8 +209,7 @@ def bids_gen_info(
 
 
 def gen_info(run_event_files):
-    """Generate subject_info structure from a list of event files
-    """
+    """Generate subject_info structure from a list of event files."""
     info = []
     for i, event_files in enumerate(run_event_files):
         runinfo = Bunch(conditions=[], onsets=[], durations=[], amplitudes=[])
@@ -244,8 +243,7 @@ class SpecifyModelInputSpec(BaseInterfaceInputSpec):
         xor=["subject_info", "event_files", "bids_event_file"],
         desc="Bunch or List(Bunch) subject-specific "
         "condition information. see "
-        ":ref:`SpecifyModel` or "
-        "SpecifyModel.__doc__ for details",
+        ":ref:`nipype.algorithms.modelgen.SpecifyModel` or for details",
     )
     event_files = InputMultiPath(
         traits.List(File(exists=True)),
@@ -265,17 +263,17 @@ class SpecifyModelInputSpec(BaseInterfaceInputSpec):
     bids_condition_column = traits.Str(
         default_value="trial_type",
         usedefault=True,
-        desc="Column of the file passed to `bids_event_file` to the "
+        desc="Column of the file passed to ``bids_event_file`` to the "
         "unique values of which events will be assigned"
         "to regressors",
     )
     bids_amplitude_column = traits.Str(
-        desc="Column of the file passed to `bids_event_file` "
+        desc="Column of the file passed to ``bids_event_file`` "
         "according to which to assign amplitudes to events"
     )
     realignment_parameters = InputMultiPath(
         File(exists=True),
-        desc="Realignment parameters returned " "by motion correction algorithm",
+        desc="Realignment parameters returned by motion correction algorithm",
         copyfile=False,
     )
     parameter_source = traits.Enum(
@@ -289,7 +287,7 @@ class SpecifyModelInputSpec(BaseInterfaceInputSpec):
     )
     outlier_files = InputMultiPath(
         File(exists=True),
-        desc="Files containing scan outlier indices " "that should be tossed",
+        desc="Files containing scan outlier indices that should be tossed",
         copyfile=False,
     )
     functional_runs = InputMultiPath(
@@ -325,37 +323,38 @@ class SpecifyModelOutputSpec(TraitedSpec):
 
 
 class SpecifyModel(BaseInterface):
-    """Makes a model specification compatible with spm/fsl designers.
+    """
+    Makes a model specification compatible with spm/fsl designers.
 
     The subject_info field should contain paradigm information in the form of
     a Bunch or a list of Bunch. The Bunch should contain the following
     information::
 
-     [Mandatory]
-     - conditions : list of names
-     - onsets : lists of onsets corresponding to each condition
-     - durations : lists of durations corresponding to each condition. Should be
-     left to a single 0 if all events are being modelled as impulses.
+        [Mandatory]
+        conditions : list of names
+        onsets : lists of onsets corresponding to each condition
+        durations : lists of durations corresponding to each condition. Should be
+            left to a single 0 if all events are being modelled as impulses.
 
-     [Optional]
-     - regressor_names : list of str
-         list of names corresponding to each column. Should be None if
-         automatically assigned.
-     - regressors : list of lists
-        values for each regressor - must correspond to the number of
-        volumes in the functional run
-     - amplitudes : lists of amplitudes for each event. This will be ignored by
-       SPM's Level1Design.
+        [Optional]
+        regressor_names : list of str
+            list of names corresponding to each column. Should be None if
+            automatically assigned.
+        regressors : list of lists
+            values for each regressor - must correspond to the number of
+            volumes in the functional run
+        amplitudes : lists of amplitudes for each event. This will be ignored by
+            SPM's Level1Design.
 
-     The following two (tmod, pmod) will be ignored by any Level1Design class
-     other than SPM:
+        The following two (tmod, pmod) will be ignored by any Level1Design class
+        other than SPM:
 
-     - tmod : lists of conditions that should be temporally modulated. Should
-       default to None if not being used.
-     - pmod : list of Bunch corresponding to conditions
-       - name : name of parametric modulator
-       - param : values of the modulator
-       - poly : degree of modulation
+        tmod : lists of conditions that should be temporally modulated. Should
+            default to None if not being used.
+        pmod : list of Bunch corresponding to conditions
+          - name : name of parametric modulator
+          - param : values of the modulator
+          - poly : degree of modulation
 
     Alternatively, you can provide information through event files.
 
@@ -366,7 +365,6 @@ class SpecifyModel(BaseInterface):
 
     Examples
     --------
-
     >>> from nipype.algorithms import modelgen
     >>> from nipype.interfaces.base import Bunch
     >>> s = modelgen.SpecifyModel()
@@ -378,8 +376,7 @@ class SpecifyModel(BaseInterface):
     >>> evs_run3 = Bunch(conditions=['cond1'], onsets=[[30, 40, 100, 150]], durations=[[1]])
     >>> s.inputs.subject_info = [evs_run2, evs_run3]
 
-    Using pmod:
-
+    >>> # Using pmod
     >>> evs_run2 = Bunch(conditions=['cond1', 'cond2'], onsets=[[2, 50], [100, 180]], \
 durations=[[0], [0]], pmod=[Bunch(name=['amp'], poly=[2], param=[[1, 2]]), \
 None])
@@ -396,9 +393,7 @@ None])
     def _generate_standard_design(
         self, infolist, functional_runs=None, realignment_parameters=None, outliers=None
     ):
-        """ Generates a standard design matrix paradigm given information about
-            each run
-        """
+        """Generate a standard design matrix paradigm given information about each run."""
         sessinfo = []
         output_units = "secs"
         if "output_units" in self.inputs.traits():
@@ -560,26 +555,26 @@ class SpecifySPMModelInputSpec(SpecifyModelInputSpec):
     concatenate_runs = traits.Bool(
         False,
         usedefault=True,
-        desc="Concatenate all runs to look like a " "single session.",
+        desc="Concatenate all runs to look like a single session.",
     )
     output_units = traits.Enum(
         "secs",
         "scans",
         usedefault=True,
-        desc="Units of design event onsets and durations " "(secs or scans)",
+        desc="Units of design event onsets and durations (secs or scans)",
     )
 
 
 class SpecifySPMModel(SpecifyModel):
-    """Adds SPM specific options to SpecifyModel
+    """Add SPM specific options to SpecifyModel
 
-     adds:
+    Adds:
+
        - concatenate_runs
        - output_units
 
     Examples
     --------
-
     >>> from nipype.algorithms import modelgen
     >>> from nipype.interfaces.base import Bunch
     >>> s = modelgen.SpecifySPMModel()
@@ -733,7 +728,7 @@ class SpecifySPMModel(SpecifyModel):
 
 class SpecifySparseModelInputSpec(SpecifyModelInputSpec):
     time_acquisition = traits.Float(
-        0, mandatory=True, desc="Time in seconds to acquire a single " "image volume"
+        0, mandatory=True, desc="Time in seconds to acquire a single image volume"
     )
     volumes_in_cluster = traits.Range(
         1, usedefault=True, desc="Number of scan volumes in a cluster"
@@ -744,7 +739,7 @@ class SpecifySparseModelInputSpec(SpecifyModelInputSpec):
     )
     use_temporal_deriv = traits.Bool(
         requires=["model_hrf"],
-        desc="Create a temporal derivative in " "addition to regular regressor",
+        desc="Create a temporal derivative in addition to regular regressor",
     )
     scale_regressors = traits.Bool(
         True, desc="Scale regressors by the peak", usedefault=True
@@ -753,7 +748,7 @@ class SpecifySparseModelInputSpec(SpecifyModelInputSpec):
         0.0, desc="Start of scanning relative to onset of run in secs", usedefault=True
     )
     save_plot = traits.Bool(
-        desc=("Save plot of sparse design calculation " "(requires matplotlib)")
+        desc=("Save plot of sparse design calculation (requires matplotlib)")
     )
 
 
@@ -763,18 +758,10 @@ class SpecifySparseModelOutputSpec(SpecifyModelOutputSpec):
 
 
 class SpecifySparseModel(SpecifyModel):
-    """ Specify a sparse model that is compatible with spm/fsl designers
-
-    References
-    ----------
-
-    .. [1] Perrachione TK and Ghosh SS (2013) Optimized design and analysis of
-    sparse-sampling fMRI experiments. Front. Neurosci. 7:55
-    http://journal.frontiersin.org/Journal/10.3389/fnins.2013.00055/abstract
+    """ Specify a sparse model that is compatible with SPM/FSL designers [1]_.
 
     Examples
     --------
-
     >>> from nipype.algorithms import modelgen
     >>> from nipype.interfaces.base import Bunch
     >>> s = modelgen.SpecifySparseModel()
@@ -784,11 +771,17 @@ class SpecifySparseModel(SpecifyModel):
     >>> s.inputs.time_acquisition = 2
     >>> s.inputs.high_pass_filter_cutoff = 128.
     >>> s.inputs.model_hrf = True
-    >>> evs_run2 = Bunch(conditions=['cond1'], onsets=[[2, 50, 100, 180]], \
-durations=[[1]])
-    >>> evs_run3 = Bunch(conditions=['cond1'], onsets=[[30, 40, 100, 150]], \
-durations=[[1]])
-    >>> s.inputs.subject_info = [evs_run2, evs_run3]
+    >>> evs_run2 = Bunch(conditions=['cond1'], onsets=[[2, 50, 100, 180]],
+    ...                  durations=[[1]])
+    >>> evs_run3 = Bunch(conditions=['cond1'], onsets=[[30, 40, 100, 150]],
+    ...                  durations=[[1]])
+    >>> s.inputs.subject_info = [evs_run2, evs_run3]  # doctest: +SKIP
+
+    References
+    ----------
+    .. [1] Perrachione TK and Ghosh SS (2013) Optimized design and analysis of
+       sparse-sampling fMRI experiments. Front. Neurosci. 7:55
+       http://journal.frontiersin.org/Journal/10.3389/fnins.2013.00055/abstract
 
     """
 

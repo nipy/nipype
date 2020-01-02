@@ -40,7 +40,8 @@ class TractographyInputSpec(MRTrix3BaseInputSpec):
         "Tensor_Prob",
         usedefault=True,
         argstr="-algorithm %s",
-        desc="tractography algorithm to be used",
+        desc="Tractography algorithm to be used -- References:"
+        "[FACT]_, [iFOD1]_, [iFOD2]_, [Nulldist]_, [Tensor_Det]_, [Tensor_Prob]_.",
     )
 
     # ROIs processing options
@@ -311,8 +312,10 @@ class TractographyOutputSpec(TraitedSpec):
 
 class Tractography(MRTrix3Base):
     """
-    Performs streamlines tractography after selecting the appropriate
-    algorithm.
+    Performs streamlines tractography after selecting the appropriate algorithm.
+
+    References
+    ----------
 
     .. [FACT] Mori, S.; Crain, B. J.; Chacko, V. P. & van Zijl,
       P. C. M. Three-dimensional tracking of axonal projections in the
@@ -339,7 +342,6 @@ class Tractography(MRTrix3Base):
     .. [Tensor_Prob] Jones, D. Tractography Gone Wild: Probabilistic Fibre
       Tracking Using the Wild Bootstrap With Diffusion Tensor MRI. IEEE
       Transactions on Medical Imaging, 2008, 27, 1268-1274
-
 
     Example
     -------

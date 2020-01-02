@@ -661,17 +661,25 @@ def crop_and_move_datasets(
 
 
 def extract(Z, shape, position, fill):
-    """ Extract voxel neighbourhood
-Parameters
-----------
-Z: the original data
-shape: tuple containing neighbourhood dimensions
-position: tuple containing central point indexes
-fill: value for the padding of Z
-Returns
--------
-R: the neighbourhood of the specified point in Z
-"""
+    """Extract voxel neighbourhood
+
+    Parameters
+    ----------
+    Z : array-like
+        the original data
+    shape : tuple
+        tuple containing neighbourhood dimensions
+    position : tuple
+        tuple containing central point indexes
+    fill : float
+       value for the padding of Z
+
+    Returns
+    -------
+    R : ndarray
+        the neighbourhood of the specified point in Z
+
+    """
     R = (
         np.ones(shape, dtype=Z.dtype) * fill
     )  # initialize output block to the fill value

@@ -2,7 +2,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-
 Interfaces to functionality from nitime for time-series analysis of fmri data
 
 - nitime.analysis.CoherenceAnalyzer: Coherence/y
@@ -48,7 +47,7 @@ class CoherenceAnalyzerInputSpec(BaseInterfaceInputSpec):
 
     # If you gave just a file name, you need to specify the sampling_rate:
     TR = traits.Float(
-        desc=("The TR used to collect the data" "in your csv file <in_file>")
+        desc=("The TR used to collect the data in your csv file <in_file>")
     )
 
     in_TS = traits.Any(desc="a nitime TimeSeries object")
@@ -87,11 +86,14 @@ class CoherenceAnalyzerInputSpec(BaseInterfaceInputSpec):
     )
 
     output_csv_file = File(
-        desc="File to write outputs (coherence,time-delay) with file-names: file_name_ {coherence,timedelay}"
+        desc="File to write outputs (coherence,time-delay) with file-names: "
+        "``file_name_{coherence,timedelay}``"
     )
 
     output_figure_file = File(
-        desc="File to write output figures (coherence,time-delay) with file-names: file_name_{coherence,timedelay}. Possible formats: .png,.svg,.pdf,.jpg,..."
+        desc="""\
+File to write output figures (coherence,time-delay) with file-names:
+``file_name_{coherence,timedelay}``. Possible formats: .png,.svg,.pdf,.jpg,..."""
     )
 
     figure_type = traits.Enum(
@@ -109,26 +111,23 @@ class CoherenceAnalyzerInputSpec(BaseInterfaceInputSpec):
 
 class CoherenceAnalyzerOutputSpec(TraitedSpec):
     coherence_array = traits.Array(
-        desc=("The pairwise coherence values" "between the ROIs")
+        desc=("The pairwise coherence values between the ROIs")
     )
 
     timedelay_array = traits.Array(
-        desc=("The pairwise time delays between the" "ROIs (in seconds)")
+        desc=("The pairwise time delays between the ROIs (in seconds)")
     )
 
-    coherence_csv = File(
-        desc=("A csv file containing the pairwise " "coherence values")
-    )
+    coherence_csv = File(desc=("A csv file containing the pairwise  coherence values"))
 
-    timedelay_csv = File(
-        desc=("A csv file containing the pairwise " "time delay values")
-    )
+    timedelay_csv = File(desc=("A csv file containing the pairwise time delay values"))
 
     coherence_fig = File(desc=("Figure representing coherence values"))
     timedelay_fig = File(desc=("Figure representing coherence values"))
 
 
 class CoherenceAnalyzer(NitimeBaseInterface):
+    """Wraps nitime.analysis.CoherenceAnalyzer: Coherence/y"""
 
     input_spec = CoherenceAnalyzerInputSpec
     output_spec = CoherenceAnalyzerOutputSpec

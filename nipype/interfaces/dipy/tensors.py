@@ -94,23 +94,25 @@ class TensorMode(DipyDiffusionInterface):
     """
     Creates a map of the mode of the diffusion tensors given a set of
     diffusion-weighted images, as well as their associated b-values and
-    b-vectors. Fits the diffusion tensors and calculates tensor mode
+    b-vectors [1]_. Fits the diffusion tensors and calculates tensor mode
     with Dipy.
-
-    .. [1] Daniel B. Ennis and G. Kindlmann, "Orthogonal Tensor
-        Invariants and the Analysis of Diffusion Tensor Magnetic Resonance
-        Images", Magnetic Resonance in Medicine, vol. 55, no. 1, pp. 136-146,
-        2006.
 
     Example
     -------
-
     >>> import nipype.interfaces.dipy as dipy
     >>> mode = dipy.TensorMode()
     >>> mode.inputs.in_file = 'diffusion.nii'
     >>> mode.inputs.in_bvec = 'bvecs'
     >>> mode.inputs.in_bval = 'bvals'
     >>> mode.run()                                   # doctest: +SKIP
+
+    References
+    ----------
+    .. [1] Daniel B. Ennis and G. Kindlmann, "Orthogonal Tensor
+        Invariants and the Analysis of Diffusion Tensor Magnetic Resonance
+        Images", Magnetic Resonance in Medicine, vol. 55, no. 1, pp. 136-146,
+        2006.
+
     """
 
     input_spec = TensorModeInputSpec

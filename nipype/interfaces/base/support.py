@@ -32,10 +32,11 @@ class NipypeInterfaceError(Exception):
 
 
 class Bunch(object):
-    """Dictionary-like class that provides attribute-style access to it's items.
+    """
+    Dictionary-like class that provides attribute-style access to its items.
 
-    A `Bunch` is a simple container that stores it's items as class
-    attributes.  Internally all items are stored in a dictionary and
+    A ``Bunch`` is a simple container that stores its items as class
+    attributes [1]_. Internally all items are stored in a dictionary and
     the class exposes several of the dictionary methods.
 
     Examples
@@ -48,10 +49,8 @@ class Bunch(object):
     >>> inputs
     Bunch(fwhm=6.0, infile='subj.nii', register_to_mean=False)
 
-    Notes
-    -----
-    The Bunch pattern came from the Python Cookbook:
-
+    References
+    ----------
     .. [1] A. Martelli, D. Hudgeon, "Collecting a Bunch of Named
            Items", Python Cookbook, 2nd Ed, Chapter 4.18, 2005.
 

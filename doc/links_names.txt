@@ -98,6 +98,7 @@
 .. _MNE: https://martinos.org/mne/index.html
 .. _ANTS: http://stnava.github.io/ANTs/
 .. _DIPY: http://dipy.org
+.. _BrainSuite: http://brainsuite.org/
 
 .. General software
 .. _gcc: http://gcc.gnu.org

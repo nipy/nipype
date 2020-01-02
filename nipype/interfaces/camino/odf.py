@@ -73,8 +73,8 @@ class QBallMX(StdOutCommandLine):
     Generates a reconstruction matrix for Q-Ball. Used in LinRecon with
     the same scheme file to reconstruct data.
 
-    Example 1
-    ---------
+    Examples
+    --------
     To create  a linear transform matrix using Spherical Harmonics (sh).
 
     >>> import nipype.interfaces.camino as cam
@@ -84,8 +84,6 @@ class QBallMX(StdOutCommandLine):
     >>> qballmx.inputs.order = 6
     >>> qballmx.run()            # doctest: +SKIP
 
-    Example 2
-    ---------
     To create  a linear transform matrix using Radial Basis Functions
     (rbf). This command uses the default setting of rbf sigma = 0.2618
     (15 degrees), data smoothing sigma = 0.1309 (7.5 degrees), rbf
@@ -106,6 +104,7 @@ class QBallMX(StdOutCommandLine):
     >>> qballcoeffs.inputs.normalize = True
     >>> qballcoeffs.inputs.bgmask = 'brain_mask.nii'
     >>> qballcoeffs.run()             # doctest: +SKIP
+
     """
 
     _cmd = "qballmx"
@@ -187,7 +186,7 @@ class LinRecon(StdOutCommandLine):
     are stored row by row.
 
     Example
-    ---------
+    -------
     First run QBallMX and create a linear transform matrix using
     Spherical Harmonics (sh).
 
@@ -206,6 +205,7 @@ class LinRecon(StdOutCommandLine):
     >>> qballcoeffs.inputs.qball_mat = 'A_qmat.Bdouble'
     >>> qballcoeffs.inputs.normalize = True
     >>> qballcoeffs.run()         # doctest: +SKIP
+
     """
 
     _cmd = "linrecon"
@@ -236,14 +236,19 @@ class MESDInputSpec(StdOutCommandLineInputSpec):
         argstr="-filter %s",
         position=2,
         mandatory=True,
-        desc=(
-            "The inversion index specifies the type of inversion to perform on the data."
-            "The currently available choices are:"
-            "Inverter name  | Inverter parameters"
-            "---------------|------------------"
-            "SPIKE          | bd (b-value x diffusivity along the fibre.)"
-            "PAS            | r"
-        ),
+        desc="""
+The inversion index specifies the type of inversion to perform on the data.
+The currently available choices are:
+
+  +----------------+---------------------------------------------+
+  | Inverter name  | Inverter parameters                         |
+  +================+=============================================+
+  | SPIKE          | bd (b-value x diffusivity along the fibre.) |
+  +----------------+---------------------------------------------+
+  | PAS            | r                                           |
+  +----------------+---------------------------------------------+
+
+""",
     )
     inverter_param = traits.Float(
         argstr="%f",
@@ -365,7 +370,7 @@ class MESD(StdOutCommandLine):
     Sweet and Alexander "Reduced Encoding Persistent Angular Structure" 572 ISMRM 2010.
 
     Example
-    ---------
+    -------
     Run MESD on every voxel of the data file SubjectA.Bfloat using the PASMRI kernel.
 
     >>> import nipype.interfaces.camino as cam
@@ -375,6 +380,7 @@ class MESD(StdOutCommandLine):
     >>> mesd.inputs.inverter = 'PAS'
     >>> mesd.inputs.inverter_param = 1.4
     >>> mesd.run()            # doctest: +SKIP
+
     """
 
     _cmd = "mesd"
@@ -565,7 +571,7 @@ class SFPeaks(StdOutCommandLine):
 
 
     Example
-    ---------
+    -------
     First run QBallMX and create a linear transform matrix using
     Spherical Harmonics (sh).
 
@@ -577,6 +583,7 @@ class SFPeaks(StdOutCommandLine):
     >>> sf_peaks.inputs.density = 100
     >>> sf_peaks.inputs.searchradius = 1.0
     >>> sf_peaks.run()          # doctest: +SKIP
+
     """
 
     _cmd = "sfpeaks"

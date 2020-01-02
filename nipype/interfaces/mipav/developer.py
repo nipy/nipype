@@ -106,18 +106,17 @@ class JistLaminarVolumetricLayeringOutputSpec(TraitedSpec):
 
 
 class JistLaminarVolumetricLayering(SEMLikeCommandLine):
-    """title: Volumetric Layering
+    """Volumetric Layering.
 
-category: Developer Tools
+    Builds a continuous layering of the cortex following distance-preserving or volume-preserving
+    models of cortical folding.
 
-description: Builds a continuous layering of the cortex following distance-preserving or volume-preserving models of cortical folding.
-Waehnert MD, Dinse J, Weiss M, Streicher MN, Waehnert P, Geyer S, Turner R, Bazin PL, Anatomically motivated modeling of cortical laminae, Neuroimage, 2013.
+    References
+    ----------
+    Waehnert MD, Dinse J, Weiss M, Streicher MN, Waehnert P, Geyer S, Turner R, Bazin PL,
+    Anatomically motivated modeling of cortical laminae, Neuroimage, 2013.
 
-version: 3.0.RC
-
-contributor: Miriam Waehnert (waehnert@cbs.mpg.de) http://www.cbs.mpg.de/
-
-"""
+    """
 
     input_spec = JistLaminarVolumetricLayeringInputSpec
     output_spec = JistLaminarVolumetricLayeringOutputSpec
@@ -217,15 +216,12 @@ class JistBrainMgdmSegmentationOutputSpec(TraitedSpec):
 
 
 class JistBrainMgdmSegmentation(SEMLikeCommandLine):
-    """title: MGDM Whole Brain Segmentation
+    """MGDM Whole Brain Segmentation.
 
-category: Developer Tools
+    Estimate brain structures from an atlas for a MRI dataset (multiple input combinations
+    are possible).
 
-description: Estimate brain structures from an atlas for a MRI dataset (multiple input combinations are possible).
-
-version: 2.0.RC
-
-"""
+    """
 
     input_spec = JistBrainMgdmSegmentationInputSpec
     output_spec = JistBrainMgdmSegmentationOutputSpec
@@ -279,15 +275,7 @@ class JistLaminarProfileGeometryOutputSpec(TraitedSpec):
 
 
 class JistLaminarProfileGeometry(SEMLikeCommandLine):
-    """title: Profile Geometry
-
-category: Developer Tools
-
-description: Compute various geometric quantities for a cortical layers.
-
-version: 3.0.RC
-
-"""
+    """Compute various geometric quantities for a cortical layers."""
 
     input_spec = JistLaminarProfileGeometryInputSpec
     output_spec = JistLaminarProfileGeometryOutputSpec
@@ -330,15 +318,7 @@ class JistLaminarProfileCalculatorOutputSpec(TraitedSpec):
 
 
 class JistLaminarProfileCalculator(SEMLikeCommandLine):
-    """title: Profile Calculator
-
-category: Developer Tools
-
-description: Compute various moments for intensities mapped along a cortical profile.
-
-version: 3.0.RC
-
-"""
+    """Compute various moments for intensities mapped along a cortical profile."""
 
     input_spec = JistLaminarProfileCalculatorInputSpec
     output_spec = JistLaminarProfileCalculatorOutputSpec
@@ -410,15 +390,7 @@ class MedicAlgorithmN3OutputSpec(TraitedSpec):
 
 
 class MedicAlgorithmN3(SEMLikeCommandLine):
-    """title: N3 Correction
-
-category: Developer Tools
-
-description: Non-parametric Intensity Non-uniformity Correction, N3, originally by J.G. Sled.
-
-version: 1.8.R
-
-"""
+    """Non-parametric Intensity Non-uniformity Correction, N3, originally by J.G. Sled."""
 
     input_spec = MedicAlgorithmN3InputSpec
     output_spec = MedicAlgorithmN3OutputSpec
@@ -458,15 +430,7 @@ class JistLaminarROIAveragingOutputSpec(TraitedSpec):
 
 
 class JistLaminarROIAveraging(SEMLikeCommandLine):
-    """title: Profile ROI Averaging
-
-category: Developer Tools
-
-description: Compute an average profile over a given ROI.
-
-version: 3.0.RC
-
-"""
+    """Compute an average profile over a given ROI."""
 
     input_spec = JistLaminarROIAveragingInputSpec
     output_spec = JistLaminarROIAveragingOutputSpec
@@ -639,18 +603,18 @@ class MedicAlgorithmLesionToadsOutputSpec(TraitedSpec):
 
 
 class MedicAlgorithmLesionToads(SEMLikeCommandLine):
-    """title: Lesion TOADS
+    """Algorithm for simulataneous brain structures and MS lesion segmentation of MS Brains.
 
-category: Developer Tools
+    The brain segmentation is topologically consistent and the algorithm can use multiple
+    MR sequences as input data.
 
-description: Algorithm for simulataneous brain structures and MS lesion segmentation of MS Brains. The brain segmentation is topologically consistent and the algorithm can use multiple MR sequences as input data.
-N. Shiee, P.-L. Bazin, A.Z. Ozturk, P.A. Calabresi, D.S. Reich, D.L. Pham, "A Topology-Preserving Approach to the Segmentation of Brain Images with Multiple Sclerosis", NeuroImage, vol. 49, no. 2, pp. 1524-1535, 2010.
+    References
+    ----------
+    N. Shiee, P.-L. Bazin, A.Z. Ozturk, P.A. Calabresi, D.S. Reich, D.L. Pham,
+    "A Topology-Preserving Approach to the Segmentation of Brain Images with Multiple Sclerosis",
+    NeuroImage, vol. 49, no. 2, pp. 1524-1535, 2010.
 
-version: 1.9.R
-
-contributor: Navid Shiee (navid.shiee@nih.gov) http://iacl.ece.jhu.edu/~nshiee/
-
-"""
+    """
 
     input_spec = MedicAlgorithmLesionToadsInputSpec
     output_spec = MedicAlgorithmLesionToadsOutputSpec
@@ -728,15 +692,11 @@ class JistBrainMp2rageSkullStrippingOutputSpec(TraitedSpec):
 
 
 class JistBrainMp2rageSkullStripping(SEMLikeCommandLine):
-    """title: MP2RAGE Skull Stripping
+    """Estimate a brain mask for a MP2RAGE dataset.
 
-category: Developer Tools
+    At least a T1-weighted or a T1 map image is required.
 
-description: Estimate a brain mask for a MP2RAGE dataset. At least a T1-weighted or a T1 map image is required.
-
-version: 3.0.RC
-
-"""
+    """
 
     input_spec = JistBrainMp2rageSkullStrippingInputSpec
     output_spec = JistBrainMp2rageSkullStrippingOutputSpec
@@ -804,18 +764,14 @@ class JistCortexSurfaceMeshInflationOutputSpec(TraitedSpec):
 
 
 class JistCortexSurfaceMeshInflation(SEMLikeCommandLine):
-    """title: Surface Mesh Inflation
+    """Inflates a cortical surface mesh.
 
-category: Developer Tools
+    References
+    ----------
+    D. Tosun, M. E. Rettmann, X. Han, X. Tao, C. Xu, S. M. Resnick, D. Pham, and J. L. Prince,
+    Cortical Surface Segmentation and Mapping, NeuroImage, vol. 23, pp. S108--S118, 2004.
 
-description: Inflates a cortical surface mesh.
-D. Tosun, M. E. Rettmann, X. Han, X. Tao, C. Xu, S. M. Resnick, D. Pham, and J. L. Prince, Cortical Surface Segmentation and Mapping, NeuroImage, vol. 23, pp. S108--S118, 2004.
-
-version: 3.0.RC
-
-contributor: Duygu Tosun
-
-"""
+    """
 
     input_spec = JistCortexSurfaceMeshInflationInputSpec
     output_spec = JistCortexSurfaceMeshInflationOutputSpec
@@ -861,17 +817,7 @@ class RandomVolOutputSpec(TraitedSpec):
 
 
 class RandomVol(SEMLikeCommandLine):
-    """title: Random Volume Generator
-
-category: Developer Tools
-
-description: Generate a random scalar volume.
-
-version: 1.12.RC
-
-documentation-url: http://www.nitrc.org/projects/jist/
-
-"""
+    """Generate a volume of random scalars."""
 
     input_spec = RandomVolInputSpec
     output_spec = RandomVolOutputSpec
@@ -918,17 +864,11 @@ class MedicAlgorithmImageCalculatorOutputSpec(TraitedSpec):
 
 
 class MedicAlgorithmImageCalculator(SEMLikeCommandLine):
-    """title: Image Calculator
+    """Perform simple image calculator operations on two images.
 
-category: Developer Tools
+    The operations include 'Add', 'Subtract', 'Multiply', and 'Divide'
 
-description: Perform simple image calculator operations on two images. The operations include 'Add', 'Subtract', 'Multiply', and 'Divide'
-
-version: 1.10.RC
-
-documentation-url: http://www.iacl.ece.jhu.edu/
-
-"""
+    """
 
     input_spec = MedicAlgorithmImageCalculatorInputSpec
     output_spec = MedicAlgorithmImageCalculatorOutputSpec
@@ -975,15 +915,7 @@ class JistBrainMp2rageDuraEstimationOutputSpec(TraitedSpec):
 
 
 class JistBrainMp2rageDuraEstimation(SEMLikeCommandLine):
-    """title: MP2RAGE Dura Estimation
-
-category: Developer Tools
-
-description: Filters a MP2RAGE brain image to obtain a probability map of dura matter.
-
-version: 3.0.RC
-
-"""
+    """Filters a MP2RAGE brain image to obtain a probability map of dura matter."""
 
     input_spec = JistBrainMp2rageDuraEstimationInputSpec
     output_spec = JistBrainMp2rageDuraEstimationOutputSpec
@@ -1029,15 +961,7 @@ class JistLaminarProfileSamplingOutputSpec(TraitedSpec):
 
 
 class JistLaminarProfileSampling(SEMLikeCommandLine):
-    """title: Profile Sampling
-
-category: Developer Tools
-
-description: Sample some intensity image along a cortical profile across layer surfaces.
-
-version: 3.0.RC
-
-"""
+    """Sample some intensity image along a cortical profile across layer surfaces."""
 
     input_spec = JistLaminarProfileSamplingInputSpec
     output_spec = JistLaminarProfileSamplingOutputSpec
@@ -1142,15 +1066,7 @@ class MedicAlgorithmMipavReorientOutputSpec(TraitedSpec):
 
 
 class MedicAlgorithmMipavReorient(SEMLikeCommandLine):
-    """title: Reorient Volume
-
-category: Developer Tools
-
-description: Reorient a volume to a particular anatomical orientation.
-
-version: .alpha
-
-"""
+    """Reorient a volume to a particular anatomical orientation."""
 
     input_spec = MedicAlgorithmMipavReorientInputSpec
     output_spec = MedicAlgorithmMipavReorientOutputSpec
@@ -1409,26 +1325,20 @@ class MedicAlgorithmSPECTRE2010OutputSpec(TraitedSpec):
 
 
 class MedicAlgorithmSPECTRE2010(SEMLikeCommandLine):
-    """title: SPECTRE 2010
+    """SPECTRE 2010: Simple Paradigm for Extra-Cranial Tissue REmoval [1]_, [2]_.
 
-category: Developer Tools
+    References
+    ----------
 
-description: Simple Paradigm for Extra-Cranial Tissue REmoval
+    .. [1] A. Carass, M.B. Wheeler, J. Cuzzocreo, P.-L. Bazin, S.S. Bassett, and J.L. Prince,
+           'A Joint Registration and Segmentation Approach to Skull Stripping',
+           Fourth IEEE International Symposium on Biomedical Imaging (ISBI 2007), Arlington, VA,
+           April 12-15, 2007.
+    .. [2] A. Carass, J. Cuzzocreo, M.B. Wheeler, P.-L. Bazin, S.M. Resnick, and J.L. Prince,
+           'Simple paradigm for extra-cerebral tissue removal: Algorithm and analysis',
+           NeuroImage 56(4):1982-1992, 2011.
 
-Algorithm Version: 1.6
-GUI Version: 1.10
-
-A. Carass, M.B. Wheeler, J. Cuzzocreo, P.-L. Bazin, S.S. Bassett, and J.L. Prince, 'A Joint Registration and Segmentation Approach to Skull Stripping', Fourth IEEE International Symposium on Biomedical Imaging (ISBI 2007), Arlington, VA, April 12-15, 2007.
-A. Carass, J. Cuzzocreo, M.B. Wheeler, P.-L. Bazin, S.M. Resnick, and J.L. Prince, 'Simple paradigm for extra-cerebral tissue removal: Algorithm and analysis', NeuroImage 56(4):1982-1992, 2011.
-
-version: 1.6.R
-
-documentation-url: http://www.iacl.ece.jhu.edu/
-
-contributor: Aaron Carass (aaron_carass@jhu.edu) http://www.iacl.ece.jhu.edu/
-Hanlin Wan (hanlinwan@gmail.com)
-
-"""
+    """
 
     input_spec = MedicAlgorithmSPECTRE2010InputSpec
     output_spec = MedicAlgorithmSPECTRE2010OutputSpec
@@ -1484,15 +1394,11 @@ class JistBrainPartialVolumeFilterOutputSpec(TraitedSpec):
 
 
 class JistBrainPartialVolumeFilter(SEMLikeCommandLine):
-    """title: Partial Volume Filter
+    """Partial Volume Filter.
 
-category: Developer Tools
+    Filters an image for regions of partial voluming assuming a ridge-like model of intensity.
 
-description: Filters an image for regions of partial voluming assuming a ridge-like model of intensity.
-
-version: 2.0.RC
-
-"""
+    """
 
     input_spec = JistBrainPartialVolumeFilterInputSpec
     output_spec = JistBrainPartialVolumeFilterOutputSpec
@@ -1575,15 +1481,7 @@ class JistIntensityMp2rageMaskingOutputSpec(TraitedSpec):
 
 
 class JistIntensityMp2rageMasking(SEMLikeCommandLine):
-    """title: MP2RAGE Background Masking
-
-category: Developer Tools
-
-description: Estimate a background signal mask for a MP2RAGE dataset.
-
-version: 3.0.RC
-
-"""
+    """Estimate a background signal mask for a MP2RAGE dataset."""
 
     input_spec = JistIntensityMp2rageMaskingInputSpec
     output_spec = JistIntensityMp2rageMaskingOutputSpec
@@ -1628,17 +1526,11 @@ class MedicAlgorithmThresholdToBinaryMaskOutputSpec(TraitedSpec):
 
 
 class MedicAlgorithmThresholdToBinaryMask(SEMLikeCommandLine):
-    """title: Threshold to Binary Mask
+    """Threshold to Binary Mask.
 
-category: Developer Tools
+    Given a volume and an intensity range create a binary mask for values within that range.
 
-description: Given a volume and an intensity range create a binary mask for values within that range.
-
-version: 1.2.RC
-
-documentation-url: http://www.iacl.ece.jhu.edu/
-
-"""
+    """
 
     input_spec = MedicAlgorithmThresholdToBinaryMaskInputSpec
     output_spec = MedicAlgorithmThresholdToBinaryMaskOutputSpec

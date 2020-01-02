@@ -133,18 +133,23 @@ def create_allpoints_cmat(streamlines, roiData, voxelSize, n_rois):
 
 
 def create_endpoints_array(fib, voxelSize):
-    """ Create the endpoints arrays for each fiber
+    """ Create the endpoints arrays for each fiber.
+
     Parameters
     ----------
-    fib: the fibers data
-    voxelSize: 3-tuple containing the voxel size of the ROI image
+    fib : array-like
+      the fibers data
+    voxelSize : tuple
+      3-tuple containing the voxel size of the ROI image
+
     Returns
     -------
-    (endpoints: matrix of size [#fibers, 2, 3] containing for each fiber the
-    index of its first and last point in the voxelSize volume
-    endpointsmm) : endpoints in milimeter coordinates
-    """
+    endpoints : ndarray of size [#fibers, 2, 3]
+      containing for each fiber the index of its first and last point in the voxelSize volume
+    endpointsmm : ndarray of size [#fibers, 2, 3]
+      endpoints in millimeter coordinates
 
+    """
     # Init
     n = len(fib)
     endpoints = np.zeros((n, 2, 3))

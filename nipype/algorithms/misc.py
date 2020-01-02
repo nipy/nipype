@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-Miscellaneous algorithms
-"""
+"""Miscellaneous algorithms."""
 import os
 import os.path as op
 
@@ -330,7 +328,7 @@ def replaceext(in_list, ext):
     return out_list
 
 
-def matlab2csv(in_array, name, reshape):
+def _matlab2csv(in_array, name, reshape):
     output_array = np.asarray(in_array)
     if reshape:
         if len(np.shape(output_array)) > 1:
@@ -363,19 +361,19 @@ class Matlab2CSVOutputSpec(TraitedSpec):
 
 
 class Matlab2CSV(BaseInterface):
-    """Simple interface to save the components of a MATLAB .mat file as a text
-    file with comma-separated values (CSVs).
+    """
+    Save the components of a MATLAB .mat file as a text file with comma-separated values (CSVs).
 
     CSV files are easily loaded in R, for use in statistical processing.
     For further information, see cran.r-project.org/doc/manuals/R-data.pdf
 
     Example
     -------
-
     >>> from nipype.algorithms import misc
     >>> mat2csv = misc.Matlab2CSV()
     >>> mat2csv.inputs.in_file = 'cmatrix.mat'
     >>> mat2csv.run() # doctest: +SKIP
+
     """
 
     input_spec = Matlab2CSVInputSpec
@@ -412,7 +410,7 @@ class Matlab2CSV(BaseInterface):
                     variable,
                     type(in_dict[variable]),
                 )
-                matlab2csv(in_dict[variable], variable, self.inputs.reshape_matrix)
+                _matlab2csv(in_dict[variable], variable, self.inputs.reshape_matrix)
         elif len(saved_variables) == 1:
             _, name, _ = split_filename(self.inputs.in_file)
             variable = saved_variables[0]
@@ -422,7 +420,7 @@ class Matlab2CSV(BaseInterface):
             iflogger.info(
                 "...Converting %s to CSV from %s", variable, self.inputs.in_file
             )
-            matlab2csv(in_dict[variable], name, self.inputs.reshape_matrix)
+            _matlab2csv(in_dict[variable], name, self.inputs.reshape_matrix)
         else:
             iflogger.error("No values in the MATLAB file?!")
         return runtime
@@ -586,22 +584,23 @@ class MergeCSVFilesOutputSpec(TraitedSpec):
 
 
 class MergeCSVFiles(BaseInterface):
-    """This interface is designed to facilitate data loading in the R environment.
-    It takes input CSV files and merges them into a single CSV file.
+    """
+    Merge several CSV files into a single CSV file.
+
+    This interface is designed to facilitate data loading in the R environment.
     If provided, it will also incorporate column heading names into the
     resulting CSV file.
-
     CSV files are easily loaded in R, for use in statistical processing.
     For further information, see cran.r-project.org/doc/manuals/R-data.pdf
 
     Example
     -------
-
     >>> from nipype.algorithms import misc
     >>> mat2csv = misc.MergeCSVFiles()
     >>> mat2csv.inputs.in_files = ['degree.mat','clustering.mat']
     >>> mat2csv.inputs.column_headings = ['degree','clustering']
     >>> mat2csv.run() # doctest: +SKIP
+
     """
 
     input_spec = MergeCSVFilesInputSpec
@@ -721,17 +720,18 @@ class AddCSVColumnOutputSpec(TraitedSpec):
 
 
 class AddCSVColumn(BaseInterface):
-    """Short interface to add an extra column and field to a text file
+    """
+    Short interface to add an extra column and field to a text file.
 
     Example
     -------
-
     >>> from nipype.algorithms import misc
     >>> addcol = misc.AddCSVColumn()
     >>> addcol.inputs.in_file = 'degree.csv'
     >>> addcol.inputs.extra_column_heading = 'group'
     >>> addcol.inputs.extra_field = 'male'
     >>> addcol.run() # doctest: +SKIP
+
     """
 
     input_spec = AddCSVColumnInputSpec
@@ -787,7 +787,8 @@ class AddCSVRowOutputSpec(TraitedSpec):
 
 
 class AddCSVRow(BaseInterface):
-    """Simple interface to add an extra row to a csv file
+    """
+    Simple interface to add an extra row to a CSV file.
 
     .. note:: Requires `pandas <http://pandas.pydata.org/>`_
 
@@ -800,7 +801,6 @@ class AddCSVRow(BaseInterface):
 
     Example
     -------
-
     >>> from nipype.algorithms import misc
     >>> addrow = misc.AddCSVRow()
     >>> addrow.inputs.in_file = 'scores.csv'
@@ -809,6 +809,7 @@ class AddCSVRow(BaseInterface):
     >>> addrow.inputs.subject_id = 'S400'
     >>> addrow.inputs.list_of_values = [ 0.4, 0.7, 0.3 ]
     >>> addrow.run() # doctest: +SKIP
+
     """
 
     input_spec = AddCSVRowInputSpec
@@ -916,16 +917,17 @@ class CalculateNormalizedMomentsOutputSpec(TraitedSpec):
 
 
 class CalculateNormalizedMoments(BaseInterface):
-    """Calculates moments of timeseries.
+    """
+    Calculates moments of timeseries.
 
     Example
     -------
-
     >>> from nipype.algorithms import misc
     >>> skew = misc.CalculateNormalizedMoments()
     >>> skew.inputs.moment = 3
     >>> skew.inputs.timeseries_file = 'timeseries.txt'
     >>> skew.run() # doctest: +SKIP
+
     """
 
     input_spec = CalculateNormalizedMomentsInputSpec
@@ -994,7 +996,7 @@ class AddNoiseOutputSpec(TraitedSpec):
 
 class AddNoise(BaseInterface):
     """
-    Corrupts with noise the input image
+    Corrupts with noise the input image.
 
 
     Example
@@ -1104,21 +1106,23 @@ class NormalizeProbabilityMapSetOutputSpec(TraitedSpec):
 
 
 class NormalizeProbabilityMapSet(BaseInterface):
-    """ Returns the input tissue probability maps (tpms, aka volume fractions)
-    normalized to sum up 1.0 at each voxel within the mask.
+    """
+    Returns the input tissue probability maps (tpms, aka volume fractions).
+
+    The tissue probability maps are normalized to sum up 1.0 at each voxel within the mask.
 
     .. note:: Please recall this is not a spatial normalization algorithm
 
 
     Example
     -------
-
     >>> from nipype.algorithms import misc
     >>> normalize = misc.NormalizeProbabilityMapSet()
     >>> normalize.inputs.in_files = [ 'tpm_00.nii.gz', 'tpm_01.nii.gz', \
 'tpm_02.nii.gz' ]
     >>> normalize.inputs.in_mask = 'tpms_msk.nii.gz'
     >>> normalize.run() # doctest: +SKIP
+
     """
 
     input_spec = NormalizeProbabilityMapSetInputSpec
@@ -1158,11 +1162,11 @@ class SplitROIsOutputSpec(TraitedSpec):
 class SplitROIs(BaseInterface):
     """
     Splits a 3D image in small chunks to enable parallel processing.
+
     ROIs keep time series structure in 4D images.
 
     Example
     -------
-
     >>> from nipype.algorithms import misc
     >>> rois = misc.SplitROIs()
     >>> rois.inputs.in_file = 'diffusion.nii'
@@ -1214,11 +1218,11 @@ class MergeROIsOutputSpec(TraitedSpec):
 class MergeROIs(BaseInterface):
     """
     Splits a 3D image in small chunks to enable parallel processing.
+
     ROIs keep time series structure in 4D images.
 
     Example
     -------
-
     >>> from nipype.algorithms import misc
     >>> rois = misc.MergeROIs()
     >>> rois.inputs.in_files = ['roi%02d.nii' % i for i in range(1, 6)]
@@ -1499,7 +1503,6 @@ class CalculateMedian(BaseInterface):
 
     Example
     -------
-
     >>> from nipype.algorithms.misc import CalculateMedian
     >>> mean = CalculateMedian()
     >>> mean.inputs.in_files = 'functional.nii'

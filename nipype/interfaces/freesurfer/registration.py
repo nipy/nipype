@@ -48,8 +48,7 @@ class MPRtoMNI305(FSScriptCommand):
     For complete details, see FreeSurfer documentation
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces.freesurfer import MPRtoMNI305, Info
     >>> mprtomni305 = MPRtoMNI305()
     >>> mprtomni305.inputs.target = 'structural.nii'

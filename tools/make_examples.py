@@ -2,20 +2,13 @@
 """Run the py->rst conversion and run all examples.
 
 This also creates the index.rst file appropriately, makes figures, etc.
+
 """
-from past.builtins import execfile
-
-# -----------------------------------------------------------------------------
-# Library imports
-# -----------------------------------------------------------------------------
-
-# Stdlib imports
 import os
 import sys
-
 from glob import glob
-
-# Third-party imports
+import runpy
+from toollib import sh
 
 # We must configure the mpl backend before making any further mpl imports
 import matplotlib
@@ -23,10 +16,6 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from matplotlib._pylab_helpers import Gcf
-
-# Local tools
-from toollib import *
 
 # -----------------------------------------------------------------------------
 # Globals
@@ -54,6 +43,7 @@ figure_basename = None
 
 
 def show():
+    from matplotlib._pylab_helpers import Gcf
     allfm = Gcf.get_all_fig_managers()
     for fcount, fm in enumerate(allfm):
         fm.canvas.figure.savefig("%s_%02i.png" % (figure_basename, fcount + 1))
@@ -66,17 +56,19 @@ plt.show = show
 # Main script
 # -----------------------------------------------------------------------------
 
+exclude_files = ['-x %s' % sys.argv[i + 1] for i, arg in enumerate(sys.argv) if arg == '-x']
+
+tools_path = os.path.abspath(os.path.dirname(__file__))
+ex2rst = os.path.join(tools_path, 'ex2rst')
 # Work in examples directory
-cd("users/examples")
+os.chdir("users/examples")
 if not os.getcwd().endswith("users/examples"):
     raise OSError("This must be run from doc/examples directory")
 
 # Run the conversion from .py to rst file
-sh("../../../tools/ex2rst --project Nipype --outdir . ../../../examples")
-sh(
-    "../../../tools/ex2rst --project Nipype "
-    "--outdir . ../../../examples/frontiers_paper"
-)
+sh("%s %s --project Nipype --outdir . ../../../examples" % (ex2rst, ' '.join(exclude_files)))
+sh("""%s --project Nipype %s --outdir . ../../../examples/frontiers_paper""" % (
+    ex2rst, ' '.join(exclude_files)))
 
 # Make the index.rst file
 """
@@ -98,6 +90,6 @@ else:
         os.mkdir("fig")
 
     for script in glob("*.py"):
-        figure_basename = pjoin("fig", os.path.splitext(script)[0])
-        execfile(script)
+        figure_basename = os.path.join("fig", os.path.splitext(script)[0])
+        runpy.run_path(script)
         plt.close("all")

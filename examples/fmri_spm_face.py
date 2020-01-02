@@ -27,11 +27,10 @@ import nipype.interfaces.matlab as mlab  # how to run matlab
 import nipype.interfaces.utility as util  # utility
 import nipype.pipeline.engine as pe  # pypeline engine
 import nipype.algorithms.modelgen as model  # model specification
-"""
 
+"""
 Preliminaries
 -------------
-
 Set any package specific configuration. The output file format
 for FSL routines is being set to uncompressed NIFTI and a specific
 version of matlab is being used. The uncompressed format is required
@@ -42,22 +41,20 @@ because SPM does not handle compressed NIFTI.
 mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodesktop -nosplash")
 # If SPM is not in your MATLAB path you should add it here
 # mlab.MatlabCommand.set_default_paths('/path/to/your/spm8')
+
 """
 Setting up workflows
 --------------------
-
 In this tutorial we will be setting up a hierarchical workflow for spm
 analysis. It one is slightly different then the one used in spm_tutorial2.
 
-
 Setup preprocessing workflow
 ----------------------------
-
 This is a generic preprocessing workflow that can be used by different analyses
-
 """
 
 preproc = pe.Workflow(name='preproc')
+
 """Use :class:`nipype.interfaces.spm.Realign` for motion correction
 and register all images to the mean image.
 """
@@ -65,6 +62,7 @@ and register all images to the mean image.
 realign = pe.Node(interface=spm.Realign(), name="realign")
 
 slice_timing = pe.Node(interface=spm.SliceTiming(), name="slice_timing")
+
 """Use :class:`nipype.interfaces.spm.Coregister` to perform a rigid
 body registration of the functional data to the structural data.
 """
@@ -74,10 +72,12 @@ coregister.inputs.jobtype = 'estimate'
 
 segment = pe.Node(interface=spm.Segment(), name="segment")
 segment.inputs.save_bias_corrected = True
+
 """Uncomment the following line for faster execution
 """
 
 # segment.inputs.gaussians_per_class = [1, 1, 1, 4]
+
 """Warp functional and structural data to SPM's T1 template using
 :class:`nipype.interfaces.spm.Normalize`.  The tutorial data set
 includes the template image, T1.nii.
@@ -88,11 +88,13 @@ normalize_func.inputs.jobtype = "write"
 
 normalize_struc = pe.Node(interface=spm.Normalize(), name="normalize_struc")
 normalize_struc.inputs.jobtype = "write"
+
 """Smooth the functional data using
 :class:`nipype.interfaces.spm.Smooth`.
 """
 
 smooth = pe.Node(interface=spm.Smooth(), name="smooth")
+
 """`write_voxel_sizes` is the input of the normalize interface that is recommended to be set to
 the voxel sizes of the target volume. There is no need to set it manually since we van infer it from data
 using the following function:
@@ -128,23 +130,26 @@ preproc.connect([
                                      'write_voxel_sizes')]),
     (normalize_func, smooth, [('normalized_files', 'in_files')]),
 ])
+
 """
 Set up analysis workflow
 ------------------------
-
 """
 
 l1analysis = pe.Workflow(name='analysis')
+
 """Generate SPM-specific design information using
 :class:`nipype.interfaces.spm.SpecifyModel`.
 """
 
 modelspec = pe.Node(interface=model.SpecifySPMModel(), name="modelspec")
+
 """Generate a first level SPM.mat file for analysis
 :class:`nipype.interfaces.spm.Level1Design`.
 """
 
 level1design = pe.Node(interface=spm.Level1Design(), name="level1design")
+
 """Use :class:`nipype.interfaces.spm.EstimateModel` to determine the
 parameters of the model.
 """
@@ -153,6 +158,7 @@ level1estimate = pe.Node(interface=spm.EstimateModel(), name="level1estimate")
 level1estimate.inputs.estimation_method = {'Classical': 1}
 
 threshold = pe.Node(interface=spm.Threshold(), name="threshold")
+
 """Use :class:`nipype.interfaces.spm.EstimateContrast` to estimate the
 first level contrasts specified in a few steps above.
 """
@@ -175,16 +181,17 @@ l1analysis.connect([
                                    (('spmT_images', pickfirst),
                                     'stat_image')]),
 ])
+
 """
 Preproc + Analysis pipeline
 ---------------------------
-
 """
 
 l1pipeline = pe.Workflow(name='firstlevel')
 l1pipeline.connect([(preproc, l1analysis,
                      [('realign.realignment_parameters',
                        'modelspec.realignment_parameters')])])
+
 """Pluging in `functional_runs` is a bit more complicated, because model spec expects a list of `runs`.
 Every run can be a 4D file or a list of 3D files. Therefore for 3D analysis we need a list of lists and
 to make one we need a helper function.
@@ -198,10 +205,10 @@ def makelist(item):
 l1pipeline.connect([(preproc, l1analysis, [(('smooth.smoothed_files',
                                              makelist),
                                             'modelspec.functional_runs')])])
+
 """
 Data specific components
 ------------------------
-
 In this tutorial there is only one subject `M03953`.
 
 Below we set some variables to inform the ``datasource`` about the
@@ -222,6 +229,7 @@ info = dict(
 
 infosource = pe.Node(
     interface=util.IdentityInterface(fields=['subject_id']), name="infosource")
+
 """Here we set up iteration over all the subjects. The following line
 is a particular example of the flexibility of the system.  The
 ``datasource`` attribute ``iterables`` tells the pipeline engine that
@@ -232,6 +240,7 @@ contained in subject_list.
 """
 
 infosource.iterables = ('subject_id', subject_list)
+
 """
 Now we create a :class:`nipype.interfaces.io.DataGrabber` object and
 fill in the information from above about the layout of our data.  The
@@ -248,10 +257,10 @@ datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/s%s_%04d%s.img'
 datasource.inputs.template_args = info
 datasource.inputs.sort_filelist = True
+
 """
 Experimental paradigm specific components
 -----------------------------------------
-
 Here we create a structure that provides information
 about the experimental paradigm. This is used by the
 :class:`nipype.interfaces.spm.SpecifyModel` to create the information
@@ -259,6 +268,7 @@ necessary to generate an SPM design matrix.
 """
 
 from nipype.interfaces.base import Bunch
+
 """We're importing the onset times from a mat file (found on
 http://www.fil.ion.ucl.ac.uk/spm/data/face_rep/)
 """
@@ -279,6 +289,7 @@ subjectinfo = [
         regressor_names=None,
         regressors=None)
 ]
+
 """Setup the contrast structure that needs to be evaluated. This is a
 list of lists. The inner list specifies the contrasts and has the
 following format - [Name,Stat,[list of condition names],[weights on
@@ -321,6 +332,7 @@ contrasts = [
     cond1, cond2, cond3, fam1, fam2, fam3, rep1, rep2, rep3, int1, int2, int3,
     contf1, contf2, contf3, contf4
 ]
+
 """Setting up nodes inputs
 """
 
@@ -349,6 +361,7 @@ l1designref.interscan_interval = modelspecref.time_repetition
 l1designref.microtime_resolution = slice_timingref.num_slices
 l1designref.microtime_onset = slice_timingref.ref_slice
 l1designref.bases = {'hrf': {'derivs': [1, 1]}}
+
 """
 The following lines automatically inform SPM to create a default set of
 contrats for a factorial design.
@@ -360,11 +373,13 @@ contrats for a factorial design.
 l1pipeline.inputs.analysis.modelspec.subject_info = subjectinfo
 l1pipeline.inputs.analysis.contrastestimate.contrasts = contrasts
 l1pipeline.inputs.analysis.threshold.contrast_index = 1
+
 """
 Use derivative estimates in the non-parametric model
 """
 
 l1pipeline.inputs.analysis.contrastestimate.use_derivs = True
+
 """
 Setting up parametricvariation of the model
 """
@@ -401,10 +416,10 @@ l1pipeline.connect(
     [(preproc, paramanalysis,
       [('realign.realignment_parameters', 'modelspec.realignment_parameters'),
        (('smooth.smoothed_files', makelist), 'modelspec.functional_runs')])])
+
 """
 Setup the pipeline
 ------------------
-
 The nodes created above do not describe the flow of data. They merely
 describe the parameters used for each function. In this section we
 setup the connections between the nodes such that appropriate outputs
@@ -431,11 +446,10 @@ level1.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                 (datasource, l1pipeline,
                  [('struct', 'preproc.coregister.source'),
                   ('func', 'preproc.realign.in_files')])])
-"""
 
+"""
 Setup storage results
 ---------------------
-
 Use :class:`nipype.interfaces.io.DataSink` to store selected outputs
 from the pipeline in a specific location. This allows the user to
 selectively choose important output bits from the analysis and keep
@@ -474,10 +488,10 @@ level1.connect([
        'paramcontrasts.@con'), ('paramanalysis.contrastestimate.spmT_images',
                                 'paramcontrasts.@T')]),
 ])
+
 """
 Execute the pipeline
 --------------------
-
 The code discussed above sets up all the necessary data structures
 with appropriate parameters and the connectivity between the
 processes, but does not generate any output. To actually run the

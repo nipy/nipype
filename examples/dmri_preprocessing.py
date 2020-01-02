@@ -130,6 +130,7 @@ from computed on the *b0* image, as suggested in [Jeurissen2014]_.
 """
 
 bias = remove_bias()
+
 """
 Connect nodes in workflow
 =========================
@@ -148,6 +149,7 @@ wf.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
             (prep, bias, [('outputnode.out_file', 'inputnode.in_file'),
                           ('outputnode.out_mask', 'inputnode.in_mask')]),
             (datasource, bias, [('bvals', 'inputnode.in_bval')])])
+
 """
 Run the workflow as command line executable
 """
@@ -155,3 +157,15 @@ Run the workflow as command line executable
 if __name__ == '__main__':
     wf.run()
     wf.write_graph()
+
+"""
+References
+----------
+
+.. [Jeurissen2014] Jeurissen et al., Multi-tissue constrained spherical deconvolution
+                   for improved analysis of multi-shell diffusion MRI data.
+                   NeuroImage 103:411--426. 2014.
+                   doi:`10.1016/j.neuroimage.2014.07.061
+                   <https://doi.org/10.1016/j.neuroimage.2014.07.061>`__.
+
+"""

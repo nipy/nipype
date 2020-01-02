@@ -8,8 +8,8 @@ def test_SmoothTessellation_inputs():
         curvature_averaging_iterations=dict(argstr="-a %d",),
         disable_estimates=dict(argstr="-nw",),
         environ=dict(nohash=True, usedefault=True,),
-        gaussian_curvature_norm_steps=dict(argstr="%d ",),
-        gaussian_curvature_smoothing_steps=dict(argstr="%d",),
+        gaussian_curvature_norm_steps=dict(argstr="%d",),
+        gaussian_curvature_smoothing_steps=dict(argstr=" %d",),
         in_file=dict(
             argstr="%s", copyfile=True, extensions=None, mandatory=True, position=-2,
         ),

@@ -903,7 +903,7 @@ class Eddy(FSLCommand):
     """
     Interface for FSL eddy, a tool for estimating and correcting eddy
     currents induced distortions. `User guide
-    <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy/UsersGuide>`_ and
+    <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy/UsersGuide>`__ and
     `more info regarding acqp file
     <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy/Faq#How_do_I_know_what_to_put_into_my_--acqp_file.3F>`_.
 
@@ -1647,7 +1647,7 @@ class EddyQuad(FSLCommand):
     """
     Interface for FSL eddy_quad, a tool for generating single subject reports
     and storing the quality assessment indices for each subject.
-    `User guide <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddyqc/UsersGuide>`_
+    `User guide <https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddyqc/UsersGuide>`__
 
     Examples
     --------

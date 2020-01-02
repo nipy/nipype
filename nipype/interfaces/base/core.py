@@ -128,10 +128,7 @@ class Interface(object):
 
 
 class BaseInterface(Interface):
-    """Implements common interface functionality.
-
-    Implements
-    ----------
+    """Implement common interface functionality.
 
     * Initializes inputs/outputs from input_spec/output_spec
     * Provides help based on input_spec and output_spec
@@ -144,18 +141,19 @@ class BaseInterface(Interface):
 
     This class cannot be instantiated.
 
-
-    Relevant Interface attributes
-    -----------------------------
-
-    ``input_spec`` points to the traited class for the inputs
-    ``output_spec`` points to the traited class for the outputs
-    ``_redirect_x`` should be set to ``True`` when the interface requires
-      connecting to a ``$DISPLAY`` (default is ``False``).
-    ``resource_monitor`` if ``False`` prevents resource-monitoring this
-      interface, if ``True`` monitoring will be enabled IFF the general
-      Nipype config is set on (``resource_monitor = true``).
-
+    Attributes
+    ----------
+    input_spec: :obj:`nipype.interfaces.base.specs.TraitedSpec`
+        points to the traited class for the inputs
+    output_spec: :obj:`nipype.interfaces.base.specs.TraitedSpec`
+        points to the traited class for the outputs
+    _redirect_x: bool
+        should be set to ``True`` when the interface requires
+        connecting to a ``$DISPLAY`` (default is ``False``).
+    resource_monitor: bool
+        If ``False``, prevents resource-monitoring this interface
+        If ``True`` monitoring will be enabled IFF the general
+        Nipype config is set on (``resource_monitor = true``).
 
     """
 
@@ -323,14 +321,15 @@ class BaseInterface(Interface):
 
         Parameters
         ----------
-
         cwd : specify a folder where the interface should be run
         inputs : allows the interface settings to be updated
 
         Returns
         -------
-        results :  an InterfaceResult object containing a copy of the instance
-        that was executed, provenance information and, if successful, results
+        results :  :obj:`nipype.interfaces.base.support.InterfaceResult`
+            A copy of the instance that was executed, provenance information and,
+            if successful, results
+
         """
         from ...utils.profiler import ResourceMonitor
 
@@ -577,7 +576,6 @@ class SimpleInterface(BaseInterface):
 
     Examples
     --------
-
     >>> from nipype.interfaces.base import (
     ...     SimpleInterface, BaseInterfaceInputSpec, TraitedSpec)
 
@@ -602,6 +600,7 @@ class SimpleInterface(BaseInterface):
     >>> dbl.inputs.x = 2
     >>> dbl.run().outputs.doubled
     4.0
+
     """
 
     def __init__(self, from_file=None, resource_monitor=None, **inputs):
@@ -620,13 +619,10 @@ class CommandLine(BaseInterface):
 
     Parameters
     ----------
-
-    command : string
+    command : str
         define base immutable `command` you wish to run
-
-    args : string, optional
+    args : str, optional
         optional arguments passed to base `command`
-
 
     Examples
     --------
@@ -637,7 +633,7 @@ class CommandLine(BaseInterface):
     >>> cli.cmdline
     'ls -al'
 
-    # Use get_traitsfree() to check all inputs set
+    >>> # Use get_traitsfree() to check all inputs set
     >>> pprint.pprint(cli.inputs.get_traitsfree())  # doctest:
     {'args': '-al',
      'environ': {'DISPLAY': ':1'}}
@@ -758,7 +754,8 @@ class CommandLine(BaseInterface):
 
         Returns
         -------
-        runtime : updated runtime information
+        runtime :
+            updated runtime information
             adds stdout, stderr, merged, cmdline, dependencies, command_path
 
         """
@@ -997,6 +994,7 @@ class MpiCommandLine(CommandLine):
     >>> mpi_cli.inputs.n_procs = 8
     >>> mpi_cli.cmdline
     'mpiexec -n 8 my_mpi_prog -v'
+
     """
 
     input_spec = MpiCommandLineInputSpec

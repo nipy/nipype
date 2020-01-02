@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""The fsl module provides classes for interfacing with the `FSL
-<http://www.fmrib.ox.ac.uk/fsl/index.html>`_ command line tools.
+"""
+FSL is a comprehensive library of analysis tools for fMRI, MRI and DTI brain imaging data.
 
-Top-level namespace for fsl.
+The fsl module provides classes for interfacing with the `FSL
+<http://www.fmrib.ox.ac.uk/fsl/index.html>`_ command line tools.
 """
 
 from .base import FSLCommand, Info, check_fsl, no_fsl, no_fsl_course_data

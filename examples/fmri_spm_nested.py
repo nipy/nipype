@@ -28,11 +28,10 @@ from nipype.interfaces import utility as niu  # utility
 from nipype.pipeline import engine as pe  # pypeline engine
 from nipype.algorithms import rapidart as ra  # artifact detection
 from nipype.algorithms import modelgen as model  # model specification
-"""
 
+"""
 Preliminaries
 -------------
-
 Set any package specific configuration. The output file format
 for FSL routines is being set to uncompressed NIFTI and a specific
 version of matlab is being used. The uncompressed format is required
@@ -45,18 +44,16 @@ fsl.FSLCommand.set_default_output_type('NIFTI')
 # Set the way matlab should be called
 # mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodesktop -nosplash")
 # mlab.MatlabCommand.set_default_paths('/software/spm8')
+
 """
 Setting up workflows
 --------------------
-
 In this tutorial we will be setting up a hierarchical workflow for spm
 analysis. This will demonstrate how pre-defined workflows can be setup
 and shared across users, projects and labs.
 
-
 Example of how to inline functions in connect()
 -----------------------------------------------
-
 """
 
 
@@ -66,15 +63,13 @@ def _template_path(in_data):
 
 
 """
-
 Set-up preprocessing workflow
 -----------------------------
-
 This is a generic preprocessing workflow that can be used by different analyses
-
 """
 
 preproc = pe.Workflow(name='preproc')
+
 """
 A node called :code:`inputnode` is set to designate the path in which input data
 are located:
@@ -82,12 +77,14 @@ are located:
 
 inputnode = pe.Node(
     niu.IdentityInterface(fields=['in_data']), name='inputnode')
+
 """Use :class:`nipype.interfaces.spm.Realign` for motion correction
 and register all images to the mean image.
 """
 
 realign = pe.Node(spm.Realign(), name="realign")
 realign.inputs.register_to_mean = True
+
 """Use :class:`nipype.algorithms.rapidart` to determine which of the
 images in the functional series are outliers based on deviations in
 intensity or movement.
@@ -100,24 +97,28 @@ art.inputs.norm_threshold = 1
 art.inputs.zintensity_threshold = 3
 art.inputs.mask_type = 'file'
 art.inputs.parameter_source = 'SPM'
+
 """Skull strip structural images using
 :class:`nipype.interfaces.fsl.BET`.
 """
 
 skullstrip = pe.Node(fsl.BET(), name="skullstrip")
 skullstrip.inputs.mask = True
+
 """Use :class:`nipype.interfaces.spm.Coregister` to perform a rigid
 body registration of the functional data to the structural data.
 """
 
 coregister = pe.Node(spm.Coregister(), name="coregister")
 coregister.inputs.jobtype = 'estimate'
+
 """Warp functional and structural data to SPM's T1 template using
 :class:`nipype.interfaces.spm.Normalize`.  The tutorial data set
 includes the template image, T1.nii.
 """
 
 normalize = pe.Node(spm.Normalize(), name="normalize")
+
 """Smooth the functional data using
 :class:`nipype.interfaces.spm.Smooth`.
 """
@@ -137,41 +138,47 @@ preproc.connect([
     (normalize, art, [('normalized_files', 'realigned_files')]),
     (skullstrip, art, [('mask_file', 'mask_file')]),
 ])
+
 """
 Set up analysis workflow
 ------------------------
-
 """
 
 l1analysis = pe.Workflow(name='analysis')
+
 """Generate SPM-specific design information using
 :class:`nipype.interfaces.spm.SpecifyModel`.
 """
 
 modelspec = pe.Node(model.SpecifySPMModel(), name="modelspec")
 modelspec.inputs.concatenate_runs = True
+
 """Generate a first level SPM.mat file for analysis
 :class:`nipype.interfaces.spm.Level1Design`.
 """
 
 level1design = pe.Node(spm.Level1Design(), name="level1design")
 level1design.inputs.bases = {'hrf': {'derivs': [0, 0]}}
+
 """Use :class:`nipype.interfaces.spm.EstimateModel` to determine the
 parameters of the model.
 """
 
 level1estimate = pe.Node(spm.EstimateModel(), name="level1estimate")
 level1estimate.inputs.estimation_method = {'Classical': 1}
+
 """Use :class:`nipype.interfaces.spm.EstimateContrast` to estimate the
 first level contrasts specified in a few steps above.
 """
 
 contrastestimate = pe.Node(spm.EstimateContrast(), name="contrastestimate")
+
 """Use :class: `nipype.interfaces.utility.Select` to select each contrast for
 reporting.
 """
 
 selectcontrast = pe.Node(niu.Select(), name="selectcontrast")
+
 """Use :class:`nipype.interfaces.fsl.Overlay` to combine the statistical output of
 the contrast estimate and a background image into one volume.
 """
@@ -180,6 +187,7 @@ overlaystats = pe.Node(fsl.Overlay(), name="overlaystats")
 overlaystats.inputs.stat_thresh = (3, 10)
 overlaystats.inputs.show_negative_stats = True
 overlaystats.inputs.auto_thresh_bg = True
+
 """Use :class:`nipype.interfaces.fsl.Slicer` to create images of the overlaid
 statistical volumes for a report of the first-level results.
 """
@@ -201,10 +209,10 @@ l1analysis.connect([(modelspec, level1design,
                     (selectcontrast, overlaystats,
                      [('out', 'stat_image')]), (overlaystats, slicestats,
                                                 [('out_file', 'in_file')])])
+
 """
 Preproc + Analysis pipeline
 ---------------------------
-
 """
 
 l1pipeline = pe.Workflow(name='firstlevel')
@@ -218,10 +226,10 @@ l1pipeline.connect([
        'level1design.mask_image'), ('normalize.normalized_source',
                                     'overlaystats.background_image')]),
 ])
+
 """
 Data specific components
 ------------------------
-
 The nipype tutorial contains data for two subjects.  Subject data
 is in two subdirectories, ``s1`` and ``s2``.  Each subject directory
 contains four functional volumes: f3.nii, f5.nii, f7.nii, f10.nii. And
@@ -236,7 +244,6 @@ the output fields of the ``datasource`` node in the pipeline.
 In the example below, run 'f3' is of type 'func' and gets mapped to a
 nifti filename through a template '%s.nii'. So 'f3' would become
 'f3.nii'.
-
 """
 
 # Specify the subject directories
@@ -248,6 +255,7 @@ info = dict(
 
 infosource = pe.Node(
     niu.IdentityInterface(fields=['subject_id']), name="infosource")
+
 """Here we set up iteration over all the subjects. The following line
 is a particular example of the flexibility of the system.  The
 ``datasource`` attribute ``iterables`` tells the pipeline engine that
@@ -258,6 +266,7 @@ contained in subject_list.
 """
 
 infosource.iterables = ('subject_id', subject_list)
+
 """
 Now we create a :class:`nipype.interfaces.io.DataGrabber` object and
 fill in the information from above about the layout of our data.  The
@@ -272,10 +281,10 @@ datasource = pe.Node(
 datasource.inputs.template = 'nipype-tutorial/data/%s/%s.nii'
 datasource.inputs.template_args = info
 datasource.inputs.sort_filelist = True
+
 """
 Experimental paradigm specific components
 -----------------------------------------
-
 Here we create a function that returns subject-specific information
 about the experimental paradigm. This is used by the
 :class:`nipype.interfaces.spm.SpecifyModel` to create the information
@@ -331,10 +340,10 @@ l1pipeline.inputs.analysis.contrastestimate.contrasts = contrasts
 
 # Iterate over each contrast and create report images.
 selectcontrast.iterables = ('index', [[i] for i in range(len(contrasts))])
+
 """
 Setup the pipeline
 ------------------
-
 The nodes created above do not describe the flow of data. They merely
 describe the parameters used for each function. In this section we
 setup the connections between the nodes such that appropriate outputs
@@ -366,11 +375,10 @@ level1.connect([
     (infosource, l1pipeline, [(('subject_id', subjectinfo),
                                'analysis.modelspec.subject_info')]),
 ])
-"""
 
+"""
 Setup storage results
 ---------------------
-
 Use :class:`nipype.interfaces.io.DataSink` to store selected outputs
 from the pipeline in a specific location. This allows the user to
 selectively choose important output bits from the analysis and keep
@@ -410,10 +418,10 @@ level1.connect([
                           (('subject_id', getstripdir), 'strip_dir')]),
     (l1pipeline, report, [('analysis.slicestats.out_file', '@report')]),
 ])
+
 """
 Execute the pipeline
 --------------------
-
 The code discussed above sets up all the necessary data structures
 with appropriate parameters and the connectivity between the
 processes, but does not generate any output. To actually run the
@@ -424,10 +432,10 @@ function needs to be called.
 if __name__ == '__main__':
     level1.run('MultiProc')
     level1.write_graph()
+
 """
 Setup level 2 pipeline
 ----------------------
-
 Use :class:`nipype.interfaces.io.DataGrabber` to extract the contrast
 images across a group of first level subjects. Unlike the previous
 pipeline that iterated over subjects, this pipeline will iterate over
@@ -443,6 +451,7 @@ l2source.inputs.template = op.abspath(
 # iterate over all contrast images
 l2source.iterables = [('fwhm', fwhmlist), ('con', contrast_ids)]
 l2source.inputs.sort_filelist = True
+
 """Use :class:`nipype.interfaces.spm.OneSampleTTestDesign` to perform a
 simple statistical analysis of the contrasts from the group of
 subjects (n=2 in this example).
@@ -456,6 +465,7 @@ l2conestimate = pe.Node(spm.EstimateContrast(), name="level2conestimate")
 cont1 = ('Group', 'T', ['mean'], [1])
 l2conestimate.inputs.contrasts = [cont1]
 l2conestimate.inputs.group_contrast = True
+
 """As before, we setup a pipeline to connect these two nodes (l2source
 -> onesamplettest).
 """
@@ -469,10 +479,10 @@ l2pipeline.connect([
      [('spm_mat_file', 'spm_mat_file'), ('beta_images', 'beta_images'),
       ('residual_image', 'residual_image')]),
 ])
+
 """
 Execute the second level pipeline
 ---------------------------------
-
 """
 
 if __name__ == '__main__':
