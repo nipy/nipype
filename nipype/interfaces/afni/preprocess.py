@@ -591,7 +591,7 @@ class Allineate(AFNICommand):
             outputs["out_weight_file"] = op.abspath(self.inputs.out_weight_file)
 
         if self.inputs.out_matrix:
-            path, base, ext = split_filename(self.inputs.out_matrix)
+            ext = split_filename(self.inputs.out_matrix)[-1]
             if ext.lower() not in [".1d", ".1D"]:
                 outputs["out_matrix"] = self._gen_fname(
                     self.inputs.out_matrix, suffix=".aff12.1D"
@@ -600,7 +600,7 @@ class Allineate(AFNICommand):
                 outputs["out_matrix"] = op.abspath(self.inputs.out_matrix)
 
         if self.inputs.out_param_file:
-            path, base, ext = split_filename(self.inputs.out_param_file)
+            ext = split_filename(self.inputs.out_param_file)[-1]
             if ext.lower() not in [".1d", ".1D"]:
                 outputs["out_param_file"] = self._gen_fname(
                     self.inputs.out_param_file, suffix=".param.1D"
@@ -1220,9 +1220,6 @@ class DegreeCentrality(AFNICommand):
 
     # Re-define generated inputs
     def _list_outputs(self):
-        # Import packages
-        import os
-
         # Update outputs dictionary if oned file is defined
         outputs = super(DegreeCentrality, self)._list_outputs()
         if self.inputs.oned_file:
@@ -1844,8 +1841,8 @@ class OutlierCount(CommandLine):
             skip += ["outliers_file"]
         return super(OutlierCount, self)._parse_inputs(skip)
 
-    def _run_interface(self, runtime):
-        runtime = super(OutlierCount, self)._run_interface(runtime)
+    def _run_interface(self, runtime, correct_return_codes=(0,)):
+        runtime = super(OutlierCount, self)._run_interface(runtime, correct_return_codes)
 
         # Read from runtime.stdout or runtime.merged
         with open(op.abspath(self.inputs.out_file), "w") as outfh:
@@ -2096,7 +2093,7 @@ class ROIStats(AFNICommandBase):
     input_spec = ROIStatsInputSpec
     output_spec = ROIStatsOutputSpec
 
-    def _format_arg(self, name, spec, value):
+    def _format_arg(self, name, trait_spec, value):
         _stat_dict = {
             "mean": "-nzmean",
             "median": "-nzmedian",
@@ -2113,7 +2110,7 @@ class ROIStats(AFNICommandBase):
         }
         if name == "stat":
             value = [_stat_dict[v] for v in value]
-        return super(ROIStats, self)._format_arg(name, spec, value)
+        return super(ROIStats, self)._format_arg(name, trait_spec, value)
 
 
 class RetroicorInputSpec(AFNICommandInputSpec):
@@ -3146,8 +3143,8 @@ class TSmoothInputSpec(AFNICommandInputSpec):
         argstr="-osf",
     )
     lin3 = traits.Int(
-        desc=r"3 point linear filter: :math:`0.5\,(1-m)\,a + m\,b + 0.5\,(1-m)\,c`"
-        " Here, 'm' is a number strictly between 0 and 1.",
+        desc=r"3 point linear filter: :math:`0.5\,(1-m)\,a + m\,b + 0.5\,(1-m)\,c`. "
+        "Here, 'm' is a number strictly between 0 and 1.",
         argstr="-3lin %d",
     )
     hamming = traits.Int(

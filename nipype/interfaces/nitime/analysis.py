@@ -86,11 +86,14 @@ class CoherenceAnalyzerInputSpec(BaseInterfaceInputSpec):
     )
 
     output_csv_file = File(
-        desc="File to write outputs (coherence,time-delay) with file-names: ``file_name_{coherence,timedelay}``"
+        desc="File to write outputs (coherence,time-delay) with file-names: "
+        "``file_name_{coherence,timedelay}``"
     )
 
     output_figure_file = File(
-        desc="File to write output figures (coherence,time-delay) with file-names: ``file_name_{coherence,timedelay}``. Possible formats: .png,.svg,.pdf,.jpg,..."
+        desc="""\
+File to write output figures (coherence,time-delay) with file-names:
+``file_name_{coherence,timedelay}``. Possible formats: .png,.svg,.pdf,.jpg,..."""
     )
 
     figure_type = traits.Enum(
