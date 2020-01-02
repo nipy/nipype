@@ -440,8 +440,9 @@ class DataSink(IOBase):
             is not a valid S3 path, defaults to '<N/A>'
         """
 
-        # Init variables
-        s3_str = "s3://"
+        # NOTE: due to pathlib.Path in traits.Directory, S3 bucket paths
+        #       follow the format 's3:/bucket_name/...'
+        s3_str = "s3:/"
         bucket_name = "<N/A>"
         base_directory = self.inputs.base_directory
 
@@ -449,18 +450,10 @@ class DataSink(IOBase):
             s3_flag = False
             return s3_flag, bucket_name
 
-        # Explicitly lower-case the "s3"
+        # Check for 's3:/' in base dir
         if base_directory.lower().startswith(s3_str):
-            base_dir_sp = base_directory.split("/")
-            base_dir_sp[0] = base_dir_sp[0].lower()
-            base_directory = "/".join(base_dir_sp)
-
-        # Check if 's3://' in base dir
-        if base_directory.startswith(s3_str):
-            # Expects bucket name to be 's3://bucket_name/base_dir/..'
-            bucket_name = base_directory.split(s3_str)[1].split("/")[0]
+            bucket_name = base_directory[len(s3_str):].split("/")[0]
             s3_flag = True
-        # Otherwise it's just a normal datasink
         else:
             s3_flag = False
 
@@ -618,8 +611,9 @@ class DataSink(IOBase):
 
         from botocore.exceptions import ClientError
 
-        # Init variables
-        s3_str = "s3://"
+        # NOTE: due to pathlib.Path in traits.Directory, S3 bucket paths
+        #       follow the format 's3:/bucket_name/...'
+        s3_str = "s3:/"
         s3_prefix = s3_str + bucket.name
 
         # Explicitly lower-case the "s3"
