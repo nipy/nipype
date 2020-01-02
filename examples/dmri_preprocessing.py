@@ -32,13 +32,13 @@ from nipype.interfaces import fsl
 from nipype.interfaces import ants
 """
 Load specific nipype's workflows for preprocessing of dMRI data:
-:class:`nipype.workflows.dmri.preprocess.epi.all_peb_pipeline`,
+:class:`niflow.nipype1.workflows.dmri.preprocess.epi.all_peb_pipeline`,
 as data include a *b0* volume with reverse encoding direction
 (*P>>>A*, or *y*), in contrast with the general acquisition encoding
 that is *A>>>P* or *-y* (in RAS systems).
 """
 
-from nipype.workflows.dmri.fsl.artifacts import all_fsl_pipeline, remove_bias
+from niflow.nipype1.workflows.dmri.fsl.artifacts import all_fsl_pipeline, remove_bias
 """
 Map field names into individual subject runs
 """

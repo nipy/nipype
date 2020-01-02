@@ -25,7 +25,7 @@ import nipype.interfaces.fsl as fsl  # fsl
 import nipype.interfaces.utility as util  # utility
 import nipype.pipeline.engine as pe  # pypeline engine
 import os  # system functions
-from nipype.workflows.dmri.fsl.dti import create_eddy_correct_pipeline,\
+from niflow.nipype1.workflows.dmri.fsl.dti import create_eddy_correct_pipeline,\
     create_bedpostx_pipeline
 """
 Confirm package dependencies are installed.  (This is only for the

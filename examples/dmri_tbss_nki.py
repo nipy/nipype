@@ -10,8 +10,8 @@ A pipeline to do a TBSS analysis on the NKI rockland sample data
 
 """
 
-from nipype.workflows.dmri.fsl.dti import create_eddy_correct_pipeline
-from nipype.workflows.dmri.fsl.tbss import create_tbss_non_FA, create_tbss_all
+from niflow.nipype1.workflows.dmri.fsl.dti import create_eddy_correct_pipeline
+from niflow.nipype1.workflows.dmri.fsl.tbss import create_tbss_non_FA, create_tbss_all
 """
 Tell python where to find the appropriate functions.
 """

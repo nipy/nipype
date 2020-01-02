@@ -1418,7 +1418,7 @@ class EPIDeWarp(FSLCommand):
         warnings.warn(
             (
                 "Deprecated: Please use "
-                "nipype.workflows.dmri.preprocess.epi.sdc_fmb instead"
+                "niflow.nipype1.workflows.dmri.preprocess.epi.sdc_fmb instead"
             ),
             DeprecationWarning,
         )

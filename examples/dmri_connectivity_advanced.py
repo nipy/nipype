@@ -58,12 +58,12 @@ import nipype.interfaces.dipy as dipy
 import inspect
 import os
 import os.path as op  # system functions
-from nipype.workflows.dmri.fsl.dti import create_eddy_correct_pipeline
-from nipype.workflows.dmri.camino.connectivity_mapping import select_aparc_annot
+from niflow.nipype1.workflows.dmri.fsl.dti import create_eddy_correct_pipeline
+from niflow.nipype1.workflows.dmri.camino.connectivity_mapping import select_aparc_annot
 from nipype.utils.misc import package_check
 import warnings
-from nipype.workflows.dmri.connectivity.nx import create_networkx_pipeline, create_cmats_to_csv_pipeline
-from nipype.workflows.smri.freesurfer import create_tessellation_flow
+from niflow.nipype1.workflows.dmri.connectivity.nx import create_networkx_pipeline, create_cmats_to_csv_pipeline
+from niflow.nipype1.workflows.smri.freesurfer import create_tessellation_flow
 
 try:
     package_check('cmp')
