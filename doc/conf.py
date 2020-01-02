@@ -16,6 +16,9 @@ import os
 from packaging.version import Version
 import nipype
 
+os.makedirs('users/examples', exist_ok=True)
+os.system('python ../tools/make_examples.py -x ../../../examples/test_spm.py --no-exec')
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
