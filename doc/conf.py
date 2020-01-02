@@ -16,8 +16,16 @@ import os
 from packaging.version import Version
 import nipype
 
+doc_path = os.path.abspath(os.path.dirname(__file__))
 os.makedirs('users/examples', exist_ok=True)
-os.system('python ../tools/make_examples.py -x ../../../examples/test_spm.py --no-exec')
+
+os.chdir(os.path.join(doc_path, 'users', 'examples'))
+os.system("""python ../../../tools/ex2rst -x ../../../examples/test_spm.py \
+--project Nipype --outdir . ../../../examples""")
+os.system("""python ../../../tools/ex2rst --project Nipype --outdir . \
+../../../examples/frontiers_paper""")
+os.chdir(doc_path)
+
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
