@@ -40,7 +40,7 @@ examples2rst: clean
 	../tools/make_examples.py -x ../../../examples/test_spm.py --no-exec
 	@echo "examples2rst finished."
 
-latex: clean
+latex: clean examples2rst
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) _build/latex
 	@echo
 	@echo "Build finished; the LaTeX files are in _build/latex."

@@ -248,8 +248,12 @@ htmlhelp_basename = 'nipypedoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ('documentation', 'nipype.tex', u'nipype Documentation',
-     u'Neuroimaging in Python team', 'manual'),
+    ('interfaces', 'interfaces.tex', 'Nipype Interfaces Documentation',
+     'Neuroimaging in Python team', 'manual'),
+    # ('developers', 'developers.tex', 'Nipype API',
+    #  'Neuroimaging in Python team', 'manual'),
+    ('examples', 'examples.tex', 'Nipype Examples',
+     'Neuroimaging in Python team', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
