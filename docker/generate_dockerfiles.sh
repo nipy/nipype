@@ -111,7 +111,7 @@ function generate_main_dockerfile() {
                 pip_opts="-e" \
                 pip_install="/src/nipype[all] https://github.com/bids-standard/pybids/tarball/0.7.0" \
     --miniconda use_env=neuro \
-                pip_install="niflow-nipype1-workflows" \
+                pip_install='"niflow-nipype1-workflows>=0.4.0"' \
     --workdir /work \
     --label org.label-schema.build-date='$BUILD_DATE' \
             org.label-schema.name="NIPYPE" \
