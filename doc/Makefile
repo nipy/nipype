@@ -32,7 +32,7 @@ htmlonly:
 	@echo
 	@echo "Build finished. The HTML pages are in _build/html."
 
-html: clean examples2rst htmlonly
+html: clean htmlonly
 	@echo "Build HTML and API finished."
 
 examples2rst: clean
@@ -40,7 +40,7 @@ examples2rst: clean
 	../tools/make_examples.py -x ../../../examples/test_spm.py --no-exec
 	@echo "examples2rst finished."
 
-latex: clean examples2rst
+latex: clean
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) _build/latex
 	@echo
 	@echo "Build finished; the LaTeX files are in _build/latex."
