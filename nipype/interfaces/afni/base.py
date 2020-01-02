@@ -121,7 +121,9 @@ class AFNICommandBase(CommandLine):
     def _run_interface(self, runtime, correct_return_codes=(0,)):
         if platform == "darwin":
             runtime.environ["DYLD_FALLBACK_LIBRARY_PATH"] = "/usr/local/afni/"
-        return super(AFNICommandBase, self)._run_interface(runtime, correct_return_codes)
+        return super(AFNICommandBase, self)._run_interface(
+            runtime, correct_return_codes
+        )
 
 
 class AFNICommandInputSpec(CommandLineInputSpec):

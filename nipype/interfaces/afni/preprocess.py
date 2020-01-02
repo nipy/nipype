@@ -1842,7 +1842,9 @@ class OutlierCount(CommandLine):
         return super(OutlierCount, self)._parse_inputs(skip)
 
     def _run_interface(self, runtime, correct_return_codes=(0,)):
-        runtime = super(OutlierCount, self)._run_interface(runtime, correct_return_codes)
+        runtime = super(OutlierCount, self)._run_interface(
+            runtime, correct_return_codes
+        )
 
         # Read from runtime.stdout or runtime.merged
         with open(op.abspath(self.inputs.out_file), "w") as outfh:
