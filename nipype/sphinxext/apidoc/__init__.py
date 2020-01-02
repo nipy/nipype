@@ -40,13 +40,7 @@ class Config(NapoleonConfig):
     """
     _config_values = {
         "nipype_skip_classes": (
-            [
-                "Tester",
-                "InputSpec",
-                "OutputSpec",
-                "Numpy",
-                "NipypeTester",
-            ],
+            ["Tester", "InputSpec", "OutputSpec", "Numpy", "NipypeTester",],
             "env",
         ),
         **NapoleonConfig._config_values,

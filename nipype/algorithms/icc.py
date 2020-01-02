@@ -44,10 +44,7 @@ class ICC(BaseInterface):
         maskdata = np.logical_not(np.logical_or(maskdata == 0, np.isnan(maskdata)))
 
         session_datas = [
-            [
-                nb.load(fname).get_fdata()[maskdata].reshape(-1, 1)
-                for fname in sessions
-            ]
+            [nb.load(fname).get_fdata()[maskdata].reshape(-1, 1) for fname in sessions]
             for sessions in self.inputs.subjects_sessions
         ]
         list_of_sessions = [np.dstack(session_data) for session_data in session_datas]
