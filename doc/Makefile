@@ -22,7 +22,6 @@ help:
 	      		"items (ChangeLog)"
 	@echo "  linkcheck check all external links for integrity"
 	@echo "  doctest   run all doctests embedded in the documentation"
-	@echo "  sf_satra copy html files to sourceforge (satra only)"
 
 clean:
 	-rm -rf _build/* *~ api/generated interfaces/generated users/examples documentation.zip
@@ -34,11 +33,6 @@ htmlonly:
 
 html: clean htmlonly
 	@echo "Build HTML and API finished."
-
-examples2rst: clean
-	mkdir -p users/examples
-	../tools/make_examples.py -x ../../../examples/test_spm.py --no-exec
-	@echo "examples2rst finished."
 
 latex: clean
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) _build/latex
