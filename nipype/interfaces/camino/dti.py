@@ -1049,7 +1049,7 @@ class TrackBedpostxProbaInputSpec(TrackInputSpec):
     iterations = traits.Int(
         argstr="-iterations %d",
         units="NA",
-        desc="Number of streamlines to generate at each " "seed point. The default is 1.",
+        desc="Number of streamlines to generate at each seed point. The default is 1.",
     )
 
 
