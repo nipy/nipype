@@ -158,13 +158,6 @@ jobs:
       - store_artifacts: *store_artifacts_kwds
       - store_test_results: *store_artifacts_kwds
       - run:
-          name: Build docs
-          no_output_timeout: 30m
-          environment: *test_environment
-          command: bash -ux /home/circleci/nipype/.circleci/build_docs.sh
-      - store_artifacts:
-          path: /home/circleci/work/docs
-      - run:
           name: Save Docker images to workspace if on master
           no_output_timeout: 60m
           command: |
