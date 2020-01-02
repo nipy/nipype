@@ -180,7 +180,8 @@ class AlignEpiAnatPy(AFNIPythonCommand):
     >>> al_ea.inputs.tshift = 'off'
     >>> al_ea.inputs.save_skullstrip = True
     >>> al_ea.cmdline # doctest: +ELLIPSIS
-    'python2 ...align_epi_anat.py -anat structural.nii -epi_base 0 -epi_strip 3dAutomask -epi functional.nii -save_skullstrip -suffix _al -tshift off -volreg off'
+    'python2 ...align_epi_anat.py -anat structural.nii -epi_base 0 -epi_strip 3dAutomask -epi \
+functional.nii -save_skullstrip -suffix _al -tshift off -volreg off'
     >>> res = allineate.run()  # doctest: +SKIP
 
     See Also
@@ -3285,7 +3286,8 @@ class Volreg(AFNICommand):
     >>> volreg.inputs.zpad = 4
     >>> volreg.inputs.outputtype = 'NIFTI'
     >>> volreg.cmdline  # doctest: +ELLIPSIS
-    '3dvolreg -Fourier -twopass -1Dfile functional.1D -1Dmatrix_save functional.aff12.1D -prefix functional_volreg.nii -zpad 4 -maxdisp1D functional_md.1D functional.nii'
+    '3dvolreg -Fourier -twopass -1Dfile functional.1D -1Dmatrix_save functional.aff12.1D -prefix \
+functional_volreg.nii -zpad 4 -maxdisp1D functional_md.1D functional.nii'
     >>> res = volreg.run()  # doctest: +SKIP
 
     >>> from nipype.interfaces import afni
@@ -3299,7 +3301,8 @@ class Volreg(AFNICommand):
     >>> volreg.inputs.oned_file = 'dfile.r1.1D'
     >>> volreg.inputs.oned_matrix_save = 'mat.r1.tshift+orig.1D'
     >>> volreg.cmdline
-    '3dvolreg -cubic -1Dfile dfile.r1.1D -1Dmatrix_save mat.r1.tshift+orig.1D -prefix rm.epi.volreg.r1 -verbose -base functional.nii -zpad 1 -maxdisp1D functional_md.1D functional.nii'
+    '3dvolreg -cubic -1Dfile dfile.r1.1D -1Dmatrix_save mat.r1.tshift+orig.1D -prefix \
+rm.epi.volreg.r1 -verbose -base functional.nii -zpad 1 -maxdisp1D functional_md.1D functional.nii'
     >>> res = volreg.run()  # doctest: +SKIP
 
     """
@@ -3406,8 +3409,8 @@ class Warp(AFNICommand):
     input_spec = WarpInputSpec
     output_spec = WarpOutputSpec
 
-    def _run_interface(self, runtime):
-        runtime = super(Warp, self)._run_interface(runtime)
+    def _run_interface(self, runtime, correct_return_codes=(0,)):
+        runtime = super(Warp, self)._run_interface(runtime, correct_return_codes)
 
         if self.inputs.save_warp:
             import numpy as np
@@ -4168,10 +4171,10 @@ warp+tlrc.HEAD -prefix Q11'
     input_spec = QwarpInputSpec
     output_spec = QwarpOutputSpec
 
-    def _format_arg(self, name, spec, value):
+    def _format_arg(self, name, trait_spec, value):
         if name == "allineate_opts":
-            return spec.argstr % ("'" + value + "'")
-        return super(Qwarp, self)._format_arg(name, spec, value)
+            return trait_spec.argstr % ("'" + value + "'")
+        return super(Qwarp, self)._format_arg(name, trait_spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

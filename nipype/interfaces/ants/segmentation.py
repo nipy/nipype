@@ -1193,7 +1193,8 @@ class JointFusion(ANTSCommand):
     ...                                  'segmentation1.nii.gz']
     >>> at.inputs.target_image = 'T1.nii'
     >>> at.cmdline
-    'jointfusion 3 1 -m Joint[0.1,2] -tg T1.nii -g im1.nii -g im2.nii -g im3.nii -l segmentation0.nii.gz -l segmentation1.nii.gz -l segmentation1.nii.gz fusion_labelimage_output.nii'
+    'jointfusion 3 1 -m Joint[0.1,2] -tg T1.nii -g im1.nii -g im2.nii -g im3.nii -l segmentation0.nii.gz \
+-l segmentation1.nii.gz -l segmentation1.nii.gz fusion_labelimage_output.nii'
 
     >>> at.inputs.method = 'Joint'
     >>> at.inputs.alpha = 0.5
@@ -1201,7 +1202,8 @@ class JointFusion(ANTSCommand):
     >>> at.inputs.patch_radius = [3,2,1]
     >>> at.inputs.search_radius = [1,2,3]
     >>> at.cmdline
-    'jointfusion 3 1 -m Joint[0.5,1] -rp 3x2x1 -rs 1x2x3 -tg T1.nii -g im1.nii -g im2.nii -g im3.nii -l segmentation0.nii.gz -l segmentation1.nii.gz -l segmentation1.nii.gz fusion_labelimage_output.nii'
+    'jointfusion 3 1 -m Joint[0.5,1] -rp 3x2x1 -rs 1x2x3 -tg T1.nii -g im1.nii -g im2.nii -g im3.nii \
+-l segmentation0.nii.gz -l segmentation1.nii.gz -l segmentation1.nii.gz fusion_labelimage_output.nii'
 
     """
 
@@ -1512,18 +1514,22 @@ class AntsJointFusion(ANTSCommand):
     >>> antsjointfusion.inputs.atlas_segmentation_image = ['segmentation0.nii.gz']
     >>> antsjointfusion.inputs.target_image = ['im1.nii']
     >>> antsjointfusion.cmdline
-    "antsJointFusion -a 0.1 -g ['rc1s1.nii', 'rc1s2.nii'] -l segmentation0.nii.gz -b 2.0 -o ants_fusion_label_output.nii -s 3x3x3 -t ['im1.nii']"
+    "antsJointFusion -a 0.1 -g ['rc1s1.nii', 'rc1s2.nii'] -l segmentation0.nii.gz \
+-b 2.0 -o ants_fusion_label_output.nii -s 3x3x3 -t ['im1.nii']"
 
     >>> antsjointfusion.inputs.target_image = [ ['im1.nii', 'im2.nii'] ]
     >>> antsjointfusion.cmdline
-    "antsJointFusion -a 0.1 -g ['rc1s1.nii', 'rc1s2.nii'] -l segmentation0.nii.gz -b 2.0 -o ants_fusion_label_output.nii -s 3x3x3 -t ['im1.nii', 'im2.nii']"
+    "antsJointFusion -a 0.1 -g ['rc1s1.nii', 'rc1s2.nii'] -l segmentation0.nii.gz \
+-b 2.0 -o ants_fusion_label_output.nii -s 3x3x3 -t ['im1.nii', 'im2.nii']"
 
     >>> antsjointfusion.inputs.atlas_image = [ ['rc1s1.nii','rc1s2.nii'],
     ...                                        ['rc2s1.nii','rc2s2.nii'] ]
     >>> antsjointfusion.inputs.atlas_segmentation_image = ['segmentation0.nii.gz',
     ...                                                    'segmentation1.nii.gz']
     >>> antsjointfusion.cmdline
-    "antsJointFusion -a 0.1 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii'] -l segmentation0.nii.gz -l segmentation1.nii.gz -b 2.0 -o ants_fusion_label_output.nii -s 3x3x3 -t ['im1.nii', 'im2.nii']"
+    "antsJointFusion -a 0.1 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii'] \
+-l segmentation0.nii.gz -l segmentation1.nii.gz -b 2.0 -o ants_fusion_label_output.nii \
+-s 3x3x3 -t ['im1.nii', 'im2.nii']"
 
     >>> antsjointfusion.inputs.dimension = 3
     >>> antsjointfusion.inputs.alpha = 0.5
@@ -1531,21 +1537,29 @@ class AntsJointFusion(ANTSCommand):
     >>> antsjointfusion.inputs.patch_radius = [3,2,1]
     >>> antsjointfusion.inputs.search_radius = [3]
     >>> antsjointfusion.cmdline
-    "antsJointFusion -a 0.5 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii'] -l segmentation0.nii.gz -l segmentation1.nii.gz -b 1.0 -d 3 -o ants_fusion_label_output.nii -p 3x2x1 -s 3 -t ['im1.nii', 'im2.nii']"
+    "antsJointFusion -a 0.5 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii'] \
+-l segmentation0.nii.gz -l segmentation1.nii.gz -b 1.0 -d 3 -o ants_fusion_label_output.nii \
+-p 3x2x1 -s 3 -t ['im1.nii', 'im2.nii']"
 
     >>> antsjointfusion.inputs.search_radius = ['mask.nii']
     >>> antsjointfusion.inputs.verbose = True
     >>> antsjointfusion.inputs.exclusion_image = ['roi01.nii', 'roi02.nii']
     >>> antsjointfusion.inputs.exclusion_image_label = ['1','2']
     >>> antsjointfusion.cmdline
-    "antsJointFusion -a 0.5 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii'] -l segmentation0.nii.gz -l segmentation1.nii.gz -b 1.0 -d 3 -e 1[roi01.nii] -e 2[roi02.nii] -o ants_fusion_label_output.nii -p 3x2x1 -s mask.nii -t ['im1.nii', 'im2.nii'] -v"
+    "antsJointFusion -a 0.5 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii'] \
+-l segmentation0.nii.gz -l segmentation1.nii.gz -b 1.0 -d 3 -e 1[roi01.nii] -e 2[roi02.nii] \
+-o ants_fusion_label_output.nii -p 3x2x1 -s mask.nii -t ['im1.nii', 'im2.nii'] -v"
 
     >>> antsjointfusion.inputs.out_label_fusion = 'ants_fusion_label_output.nii'
     >>> antsjointfusion.inputs.out_intensity_fusion_name_format = 'ants_joint_fusion_intensity_%d.nii.gz'
     >>> antsjointfusion.inputs.out_label_post_prob_name_format = 'ants_joint_fusion_posterior_%d.nii.gz'
     >>> antsjointfusion.inputs.out_atlas_voting_weight_name_format = 'ants_joint_fusion_voting_weight_%d.nii.gz'
     >>> antsjointfusion.cmdline
-    "antsJointFusion -a 0.5 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii'] -l segmentation0.nii.gz -l segmentation1.nii.gz -b 1.0 -d 3 -e 1[roi01.nii] -e 2[roi02.nii]  -o [ants_fusion_label_output.nii, ants_joint_fusion_intensity_%d.nii.gz, ants_joint_fusion_posterior_%d.nii.gz, ants_joint_fusion_voting_weight_%d.nii.gz] -p 3x2x1 -s mask.nii -t ['im1.nii', 'im2.nii'] -v"
+    "antsJointFusion -a 0.5 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii'] \
+-l segmentation0.nii.gz -l segmentation1.nii.gz -b 1.0 -d 3 -e 1[roi01.nii] -e 2[roi02.nii] \
+-o [ants_fusion_label_output.nii, ants_joint_fusion_intensity_%d.nii.gz, \
+ants_joint_fusion_posterior_%d.nii.gz, ants_joint_fusion_voting_weight_%d.nii.gz] \
+-p 3x2x1 -s mask.nii -t ['im1.nii', 'im2.nii'] -v"
 
     """
 
@@ -1798,7 +1812,12 @@ class KellyKapowski(ANTSCommand):
     >>> kk.inputs.convergence = "[45,0.0,10]"
     >>> kk.inputs.thickness_prior_estimate = 10
     >>> kk.cmdline
-    'KellyKapowski --convergence "[45,0.0,10]" --output "[segmentation0_cortical_thickness.nii.gz,segmentation0_warped_white_matter.nii.gz]" --image-dimensionality 3 --gradient-step 0.025000 --maximum-number-of-invert-displacement-field-iterations 20 --number-of-integration-points 10 --segmentation-image "[segmentation0.nii.gz,2,3]" --smoothing-variance 1.000000 --smoothing-velocity-field-parameter 1.500000 --thickness-prior-estimate 10.000000'
+    'KellyKapowski --convergence "[45,0.0,10]" \
+--output "[segmentation0_cortical_thickness.nii.gz,segmentation0_warped_white_matter.nii.gz]" \
+--image-dimensionality 3 --gradient-step 0.025000 \
+--maximum-number-of-invert-displacement-field-iterations 20 --number-of-integration-points 10 \
+--segmentation-image "[segmentation0.nii.gz,2,3]" --smoothing-variance 1.000000 \
+--smoothing-velocity-field-parameter 1.500000 --thickness-prior-estimate 10.000000'
 
     """
 
