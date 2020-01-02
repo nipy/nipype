@@ -28,7 +28,7 @@ import nipype.pipeline.engine as pe  # pypeline engine
 import nipype.algorithms.modelgen as model  # model generation
 import nipype.algorithms.rapidart as ra  # artifact detection
 
-from nipype.workflows.fmri.fsl import (create_featreg_preproc,
+from niflow.nipype1.workflows.fmri.fsl import (create_featreg_preproc,
                                        create_modelfit_workflow,
                                        create_fixed_effects_flow)
 """

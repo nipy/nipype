@@ -22,7 +22,7 @@ from nipype.interfaces import utility as niu  # Utilities
 from nipype.interfaces import fsl  # fsl
 from nipype.pipeline import engine as pe  # pypeline engine
 from nipype.algorithms import modelgen as model  # model generation
-from nipype.workflows.fmri.fsl import (
+from niflow.nipype1.workflows.fmri.fsl import (
     create_featreg_preproc, create_modelfit_workflow, create_reg_workflow)
 from nipype.interfaces.base import Bunch
 """

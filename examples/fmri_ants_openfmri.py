@@ -38,7 +38,7 @@ import nipype.interfaces.io as nio
 from nipype.interfaces.io import FreeSurferSource
 import nipype.interfaces.utility as niu
 from nipype.interfaces.utility import Merge, IdentityInterface
-from nipype.workflows.fmri.fsl import (create_featreg_preproc,
+from niflow.nipype1.workflows.fmri.fsl import (create_featreg_preproc,
                                        create_modelfit_workflow,
                                        create_fixed_effects_flow)
 

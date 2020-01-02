@@ -7,7 +7,7 @@ sMRI: Regional Tessellation and Surface Smoothing
 Introduction
 ============
 
-This script, tessellation_tutorial.py, demonstrates the use of create_tessellation_flow from nipype.workflows.smri.freesurfer, and it can be run with::
+This script, tessellation_tutorial.py, demonstrates the use of create_tessellation_flow from niflow.nipype1.workflows.smri.freesurfer, and it can be run with::
 
     python tessellation_tutorial.py
 
@@ -39,7 +39,7 @@ import nipype.interfaces.cmtk as cmtk
 import nipype.interfaces.io as nio  # Data i/o
 import os
 import os.path as op
-from nipype.workflows.smri.freesurfer import create_tessellation_flow
+from niflow.nipype1.workflows.smri.freesurfer import create_tessellation_flow
 """
 Directories
 ===========
