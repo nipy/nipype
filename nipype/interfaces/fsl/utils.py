@@ -40,11 +40,9 @@ class CopyGeomInputSpec(FSLCommandInputSpec):
         argstr="%s",
         position=1,
         desc="destination image",
-        copyfile=True,
-        output_name="out_file",
-        name_source="dest_file",
-        name_template="%s",
-    )
+        output_name='out_file',
+        name_source='dest_file',
+        name_template='%s')
     ignore_dims = traits.Bool(
         desc="Do not copy image dimensions", argstr="-d", position="-1"
     )

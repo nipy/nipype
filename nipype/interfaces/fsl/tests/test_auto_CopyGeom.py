@@ -7,7 +7,6 @@ def test_CopyGeom_inputs():
         args=dict(argstr="%s",),
         dest_file=dict(
             argstr="%s",
-            copyfile=True,
             extensions=None,
             mandatory=True,
             name_source="dest_file",
