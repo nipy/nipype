@@ -21,7 +21,7 @@ from builtins import range
 
 import nipype.interfaces.io as nio  # Data i/o
 import nipype.interfaces.spm as spm  # spm
-import nipype.workflows.fmri.spm as spm_wf  # spm
+import niflow.nipype1.workflows.fmri.spm as spm_wf  # spm
 import nipype.interfaces.fsl as fsl  # fsl
 from nipype.interfaces import utility as niu  # Utilities
 import nipype.pipeline.engine as pe  # pypeline engine

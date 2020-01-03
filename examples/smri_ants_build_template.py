@@ -23,7 +23,7 @@ import nipype.interfaces.ants as ants
 import nipype.interfaces.io as io
 import nipype.pipeline.engine as pe  # pypeline engine
 
-from nipype.workflows.smri.ants import ANTSTemplateBuildSingleIterationWF
+from niflow.nipype1.workflows.smri.ants import ANTSTemplateBuildSingleIterationWF
 """
 2. Download T1 volumes into home directory
 """

@@ -21,7 +21,7 @@ the directive `workflow`::
       :graph2use: flat
       :simple_form: no
 
-      from nipype.workflows.dmri.camino.connectivity_mapping import create_connectivity_pipeline
+      from niflow.nipype1.workflows.dmri.camino.connectivity_mapping import create_connectivity_pipeline
       wf = create_connectivity_pipeline()
 
 
@@ -32,7 +32,7 @@ code block in this documentation:
   :graph2use: flat
   :simple_form: no
 
-  from nipype.workflows.dmri.camino.connectivity_mapping import create_connectivity_pipeline
+  from niflow.nipype1.workflows.dmri.camino.connectivity_mapping import create_connectivity_pipeline
   wf = create_connectivity_pipeline()
 
 

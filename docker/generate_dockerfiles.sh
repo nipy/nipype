@@ -94,7 +94,7 @@ function generate_main_dockerfile() {
                 conda_install='python=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
                                libxml2 libxslt matplotlib mkl "numpy!=1.16.0" paramiko
                                pandas psutil scikit-learn scipy traits rdflib' \
-                pip_install="pytest-xdist niflow-nipype1-workflows" \
+                pip_install="pytest-xdist" \
                 activate=true \
     --copy docker/files/run_builddocs.sh docker/files/run_examples.sh \
            docker/files/run_pytests.sh nipype/external/fsl_imglob.py /usr/bin/ \
@@ -110,6 +110,8 @@ function generate_main_dockerfile() {
     --miniconda use_env=neuro \
                 pip_opts="-e" \
                 pip_install="/src/nipype[all] https://github.com/bids-standard/pybids/tarball/0.7.0" \
+    --miniconda use_env=neuro \
+                pip_install='"niflow-nipype1-workflows>=0.4.0"' \
     --workdir /work \
     --label org.label-schema.build-date='$BUILD_DATE' \
             org.label-schema.name="NIPYPE" \
