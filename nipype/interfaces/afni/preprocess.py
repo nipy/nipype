@@ -283,6 +283,9 @@ class AllineateInputSpec(AFNICommandInputSpec):
     )
     out_matrix = File(
         argstr="-1Dmatrix_save %s",
+        name_template='%s_allineated.aff12.1D',
+        name_source='in_file',
+        keep_extension=False,
         desc="Save the transformation matrix for each volume.",
         xor=["in_matrix", "allcostx"],
     )
