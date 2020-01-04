@@ -335,7 +335,6 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
     )
     rescale_intensities = traits.Bool(
         False,
-        usedefault=True,
         argstr="-r",
         min_ver="2.1.0",
         desc="""\
