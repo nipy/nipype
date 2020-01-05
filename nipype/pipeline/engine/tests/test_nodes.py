@@ -320,14 +320,10 @@ def test_outputmultipath_collapse(tmpdir):
 def test_mapnode_single(tmpdir):
     tmpdir.chdir()
 
-    def _producer(num=1, output_file=None, deadly_num=7):
+    def _producer(num=1, deadly_num=7):
         if num == deadly_num:
             raise RuntimeError("Got the deadly num (%d)." % num)
-        if output_file is None:
-            output_file = "producer_output_%05d" % num
-        with open(output_file, "w") as ofile:
-            ofile.write("%d" % num)
-        return output_file
+        return num + 1
 
     pnode = pe.MapNode(
         niu.Function(function=_producer), name="ProducerNode", iterfield=["num"]
