@@ -314,3 +314,27 @@ def test_outputmultipath_collapse(tmpdir):
     assert ifres.outputs.out == [4]
     assert ndres.outputs.out == [4]
     assert select_nd.result.outputs.out == [4]
+
+
+@pytest.mark.timeout(30)
+def test_mapnode_single(tmpdir):
+    tmpdir.chdir()
+
+    def _producer(num=1, output_file=None, deadly_num=7):
+        if num == deadly_num:
+            raise RuntimeError("Got the deadly num (%d)." % num)
+        if output_file is None:
+            output_file = "producer_output_%05d" % num
+        with open(output_file, "w") as ofile:
+            ofile.write("%d" % num)
+        return output_file
+
+    pnode = pe.MapNode(
+        niu.Function(function=_producer), name="ProducerNode", iterfield=["num"]
+    )
+    pnode.inputs.num = [7]
+    wf = pe.Workflow(name="PC_Workflow")
+    wf.add_nodes([pnode])
+    wf.base_dir = os.path.abspath("./test_output")
+    with pytest.raises(RuntimeError):
+        wf.run(plugin="MultiProc")
