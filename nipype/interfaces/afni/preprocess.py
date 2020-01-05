@@ -579,7 +579,7 @@ class Allineate(AFNICommand):
     >>> allineate.inputs.reference = 'structural.nii'
     >>> allineate.inputs.nwarp_fixmot = ['X', 'Y']
     >>> allineate.cmdline
-    '3dAllineate -source functional.nii -nwarp_fixmotX -nwarp_fixmotY -prefix functional_allineate -base structural.nii'
+    '3dAllineate -source functional.nii -nwarp_fixmotX -nwarp_fixmotY -prefix functional_allineate -1Dmatrix_save functional_allineated.aff12 -base structural.nii'
     >>> res = allineate.run()  # doctest: +SKIP
     """
 
