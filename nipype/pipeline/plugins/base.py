@@ -461,7 +461,7 @@ class DistributedPluginBase(PluginBase):
                         )
                         % (self.procs[idx]._id, outdir)
                     )
-                    shutil.rmtree(outdir)
+                    shutil.rmtree(outdir, ignore_errors=True)
 
 
 class SGELikeBatchManagerBase(DistributedPluginBase):
