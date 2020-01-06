@@ -482,6 +482,11 @@
       "name": "Hinds, Oliver"
     },
     {
+      "affiliation": "Max Planck UCL Centre for Computational Psychiatry and Ageing Research, University College London",
+      "name": "Stojic, Hrvoje",
+      "orcid": "0000-0002-9699-9052"
+    },
+    {
       "affiliation": "TIB \u2013 Leibniz Information Centre for Science and Technology and University Library, Hannover, Germany",
       "name": "Leinweber, Katrin",
       "orcid": "0000-0001-5135-5758"
@@ -502,9 +507,6 @@
       "name": "Mattfeld, Aaron"
     },
     {
-      "name": "Matsubara, K"
-    },
-    {
       "name": "Noel, Maxime"
     },
     {
@@ -515,6 +517,9 @@
     {
       "affiliation": "Institute of Imaging & Computer Vision, RWTH Aachen University, Germany",
       "name": "Weninger, Leon"
+    },
+    {
+      "name": "Matsubara, K"
     },
     {
       "affiliation": "University of Pennsylvania",
@@ -573,9 +578,6 @@
       "name": "Weinstein, Alejandro"
     },
     {
-      "name": "Tambini, Arielle"
-    },
-    {
       "affiliation": "Duke University",
       "name": "Broderick, William",
       "orcid": "0000-0002-8999-9003"
@@ -606,6 +608,9 @@
     },
     {
       "name": "Tarbert, Claire"
+    },
+    {
+      "name": "Tambini, Arielle"
     },
     {
       "name": "Harms, Robbert"
