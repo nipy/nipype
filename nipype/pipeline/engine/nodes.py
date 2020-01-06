@@ -1290,12 +1290,39 @@ class MapNode(Node):
         nodenames = [nnametpl.format(i) for i in range(nitems)]
 
         # Run mapnode
-        result = self._collate_results(
-            _node_runner(
-                self._make_nodes(cwd),
-                updatehash=updatehash,
-                stop_first=str2bool(
-                    self.config['execution']['stop_on_first_crash'])))
+        outdir = self.output_dir()
+        result = InterfaceResult(
+            interface=self._interface.__class__,
+            runtime=Bunch(
+                cwd=outdir,
+                returncode=1,
+                environ=dict(os.environ),
+                hostname=socket.gethostname(),
+            ),
+            inputs=self._interface.inputs.get_traitsfree(),
+        )
+        try:
+            result = self._collate_results(
+                _node_runner(
+                    self._make_nodes(cwd),
+                    updatehash=updatehash,
+                    stop_first=str2bool(
+                        self.config["execution"]["stop_on_first_crash"]
+                    ),
+                )
+            )
+        except Exception as msg:
+            result.runtime.stderr = "%s\n\n%s".format(
+                getattr(result.runtime, "stderr", ""), msg
+            )
+            _save_resultfile(
+                result,
+                outdir,
+                self.name,
+                rebase=str2bool(self.config["execution"]["use_relative_paths"]),
+            )
+            raise
+
         # And store results
         _save_resultfile(result, cwd, self.name, rebase=False)
         # remove any node directories no longer required
