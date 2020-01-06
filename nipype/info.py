@@ -155,11 +155,28 @@ REQUIRES = [
 # https://github.com/nipy/nipype/pull/2961#issuecomment-512035484
 REQUIRES += ["neurdflib"]
 
-TESTS_REQUIRES = ["codecov", "coverage<5", "mock", "pytest", "pytest-cov", "pytest-env"]
+TESTS_REQUIRES = [
+    "codecov",
+    "coverage<5",
+    "mock",
+    "pytest",
+    "pytest-cov",
+    "pytest-env",
+    "pytest-timeout",
+]
 
 EXTRA_REQUIRES = {
     "data": ["datalad"],
-    "doc": ["Sphinx>=1.4", "numpydoc", "matplotlib", "pydotplus", "pydot>=1.2.3"],
+    "doc": [
+        "dipy",
+        "ipython",
+        "matplotlib",
+        "nbsphinx",
+        "sphinx-argparse",
+        "sphinx>=2.1.2",
+        "sphinxcontrib-apidoc",
+        "sphinxcontrib-napoleon",
+    ],
     "duecredit": ["duecredit"],
     "nipy": ["nitime", "nilearn<0.5.0", "dipy", "nipy", "matplotlib"],
     "profiler": ["psutil>=5.0"],

@@ -143,7 +143,7 @@ def exfile2rst(filename):
         else:
             if doc2code:
                 doc2code = False
-                s += '\n::\n'
+                s += '\n\n.. code-block :: python\n'
 
             # has to be code
             s += '  %s' % line
@@ -158,9 +158,11 @@ def exfile2rstfile(filename, opts):
     """
     #  doc filename
     dfilename = os.path.basename(filename[:-3]) + '.rst'
+    dfilepath = os.path.join(opts.outdir, os.path.basename(dfilename))
+    print("Creating file %s." % os.path.abspath(dfilepath))
 
     # open dest file
-    dfile = open(os.path.join(opts.outdir, os.path.basename(dfilename)), 'w')
+    dfile = open(dfilepath, 'w')
 
     # place header
     dfile.write('.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n')
@@ -196,8 +198,8 @@ def exfile2rstfile(filename, opts):
 
 
 def main():
-    parser = OptionParser( \
-        usage="%prog [options] <filename|directory> [...]", \
+    parser = OptionParser(
+        usage="%prog [options] <filename|directory> [...]",
         version="%prog 0.1", description="""\
 %prog converts Python scripts into restructered text (ReST) format suitable for
 integration into the Sphinx documentation framework. Its key feature is that it
@@ -217,7 +219,7 @@ the respective indentation is removed in the ReST output.
 
 The parser algorithm automatically excludes file headers and starts with the
 first (module-level) docstring instead.
-""" ) #'
+""")
 
     # define options
     parser.add_option(
@@ -284,8 +286,8 @@ Name of the project that contains the examples. This name is used in the
             toparse.append(t)
 
     # filter parse list
-    if not opts.excluded is None:
-        toparse = [t for t in toparse if not t in opts.excluded]
+    if opts.excluded is not None:
+        toparse = [t for t in toparse if t not in opts.excluded]
 
     toparse_list = toparse
     toparse = set(toparse)
@@ -293,8 +295,7 @@ Name of the project that contains the examples. This name is used in the
     if len(toparse) != len(toparse_list):
         print('Ignoring duplicate parse targets.')
 
-    if not os.path.exists(opts.outdir):
-        os.mkdir(outdir)
+    os.makedirs(opts.outdir, exist_ok=True)
 
     # finally process all examples
     for t in toparse:

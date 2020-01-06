@@ -77,9 +77,9 @@ def test_QwarpPlusMinus_inputs():
             new_name="in_file",
         ),
         verb=dict(argstr="-verb", xor=["quiet"],),
-        wball=dict(argstr="-wball %s",),
+        wball=dict(argstr="-wball %s", xor=["wmask"],),
         weight=dict(argstr="-weight %s", extensions=None,),
-        wmask=dict(argstr="-wpass %s %f",),
+        wmask=dict(argstr="-wpass %s %f", xor=["wball"],),
         workhard=dict(argstr="-workhard", xor=["boxopt", "ballopt"],),
     )
     inputs = QwarpPlusMinus.input_spec()

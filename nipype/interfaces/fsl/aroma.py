@@ -2,7 +2,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """This commandline module provides classes for interfacing with the
-`ICA-AROMA.py<https://github.com/rhr-pruim/ICA-AROMA>`_ command line tool.
+`ICA-AROMA.py <https://github.com/maartenmennes/ICA-AROMA>`__ command line tool.
 """
 
 from ..base import (

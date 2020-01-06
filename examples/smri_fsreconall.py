@@ -20,7 +20,7 @@ import os
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.io as nio
-from nipype.workflows.smri.freesurfer import create_reconall_workflow
+from niflow.nipype1.workflows.smri.freesurfer import create_reconall_workflow
 from nipype.interfaces.freesurfer.utils import MakeAverageSubject
 from nipype.interfaces.utility import IdentityInterface
 """

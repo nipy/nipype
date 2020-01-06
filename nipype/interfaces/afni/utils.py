@@ -1,14 +1,7 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-AFNI utility interfaces.
-
-Examples
---------
-See the docstrings of the individual classes for examples.
-
-"""
+"""AFNI utility interfaces."""
 import os
 import os.path as op
 import re
@@ -76,8 +69,7 @@ class ABoverlap(AFNICommand):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dABoverlap.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> aboverlap = afni.ABoverlap()
     >>> aboverlap.inputs.in_file_a = 'functional.nii'
@@ -149,8 +141,7 @@ class AFNItoNIFTI(AFNICommand):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAFNItoNIFTI.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> a2n = afni.AFNItoNIFTI()
     >>> a2n.inputs.in_file = 'afni_output.3D'
@@ -217,8 +208,7 @@ class Autobox(AFNICommand):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutobox.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> abox = afni.Autobox()
     >>> abox.inputs.in_file = 'structural.nii'
@@ -295,8 +285,7 @@ class BrickStat(AFNICommandBase):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBrickStat.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> brickstat = afni.BrickStat()
     >>> brickstat.inputs.in_file = 'functional.nii'
@@ -350,46 +339,46 @@ class BucketInputSpec(AFNICommandInputSpec):
         position=-1,
         mandatory=True,
         argstr="%s",
-        desc="List of tuples of input datasets and subbrick selection strings"
-        "as described in more detail in the following afni help string"
-        "Input dataset specified using one of these forms:"
-        "   'prefix+view', 'prefix+view.HEAD', or 'prefix+view.BRIK'."
-        "You can also add a sub-brick selection list after the end of the"
-        "dataset name.  This allows only a subset of the sub-bricks to be"
-        "included into the output (by default, all of the input dataset"
-        "is copied into the output).  A sub-brick selection list looks like"
-        "one of the following forms:"
-        "  fred+orig[5]                     ==> use only sub-brick #5"
-        "  fred+orig[5,9,17]                ==> use #5, #9, and #17"
-        "  fred+orig[5..8]     or [5-8]     ==> use #5, #6, #7, and #8"
-        "  fred+orig[5..13(2)] or [5-13(2)] ==> use #5, #7, #9, #11, and #13"
-        "Sub-brick indexes start at 0.  You can use the character '$'"
-        "to indicate the last sub-brick in a dataset; for example, you"
-        "can select every third sub-brick by using the selection list"
-        "  fred+orig[0..$(3)]"
-        "N.B.: The sub-bricks are output in the order specified, which may"
-        " not be the order in the original datasets.  For example, using"
-        "  fred+orig[0..$(2),1..$(2)]"
-        " will cause the sub-bricks in fred+orig to be output into the"
-        " new dataset in an interleaved fashion.  Using"
-        "  fred+orig[$..0]"
-        " will reverse the order of the sub-bricks in the output."
-        "N.B.: Bucket datasets have multiple sub-bricks, but do NOT have"
-        " a time dimension.  You can input sub-bricks from a 3D+time dataset"
-        " into a bucket dataset.  You can use the '3dinfo' program to see"
-        " how many sub-bricks a 3D+time or a bucket dataset contains."
-        "N.B.: In non-bucket functional datasets (like the 'fico' datasets"
-        " output by FIM, or the 'fitt' datasets output by 3dttest), sub-brick"
-        " [0] is the 'intensity' and sub-brick [1] is the statistical parameter"
-        " used as a threshold.  Thus, to create a bucket dataset using the"
-        " intensity from dataset A and the threshold from dataset B, and"
-        " calling the output dataset C, you would type"
-        "    3dbucket -prefix C -fbuc 'A+orig[0]' -fbuc 'B+orig[1]'"
-        "WARNING: using this program, it is possible to create a dataset that"
-        "         has different basic datum types for different sub-bricks"
-        "         (e.g., shorts for brick 0, floats for brick 1)."
-        "         Do NOT do this!  Very few AFNI programs will work correctly"
-        "         with such datasets!",
+        desc="""\
+List of tuples of input datasets and subbrick selection strings
+as described in more detail in the following afni help string
+Input dataset specified using one of these forms:
+``prefix+view``, ``prefix+view.HEAD``, or ``prefix+view.BRIK``.
+You can also add a sub-brick selection list after the end of the
+dataset name.  This allows only a subset of the sub-bricks to be
+included into the output (by default, all of the input dataset
+is copied into the output).  A sub-brick selection list looks like
+one of the following forms::
+
+    fred+orig[5]                     ==> use only sub-brick #5
+    fred+orig[5,9,17]                ==> use #5, #9, and #17
+    fred+orig[5..8]     or [5-8]     ==> use #5, #6, #7, and #8
+    fred+orig[5..13(2)] or [5-13(2)] ==> use #5, #7, #9, #11, and #13
+
+Sub-brick indexes start at 0.  You can use the character '$'
+to indicate the last sub-brick in a dataset; for example, you
+can select every third sub-brick by using the selection list
+``fred+orig[0..$(3)]``
+N.B.: The sub-bricks are output in the order specified, which may
+not be the order in the original datasets.  For example, using
+``fred+orig[0..$(2),1..$(2)]``
+will cause the sub-bricks in fred+orig to be output into the
+new dataset in an interleaved fashion. Using ``fred+orig[$..0]``
+will reverse the order of the sub-bricks in the output.
+N.B.: Bucket datasets have multiple sub-bricks, but do NOT have
+a time dimension.  You can input sub-bricks from a 3D+time dataset
+into a bucket dataset.  You can use the '3dinfo' program to see
+how many sub-bricks a 3D+time or a bucket dataset contains.
+N.B.: In non-bucket functional datasets (like the 'fico' datasets
+output by FIM, or the 'fitt' datasets output by 3dttest), sub-brick
+``[0]`` is the 'intensity' and sub-brick [1] is the statistical parameter
+used as a threshold.  Thus, to create a bucket dataset using the
+intensity from dataset A and the threshold from dataset B, and
+calling the output dataset C, you would type::
+
+    3dbucket -prefix C -fbuc 'A+orig[0]' -fbuc 'B+orig[1]
+
+""",
     )
     out_file = File(argstr="-prefix %s", name_template="buck")
 
@@ -398,12 +387,16 @@ class Bucket(AFNICommand):
     """Concatenate sub-bricks from input datasets into one big
     'bucket' dataset.
 
-    For complete details, see the `3dbucket Documentation.
-    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dbucket.html>`_
+    .. danger::
+
+        Using this program, it is possible to create a dataset that
+        has different basic datum types for different sub-bricks
+        (e.g., shorts for brick 0, floats for brick 1).
+        Do NOT do this!  Very few AFNI programs will work correctly
+        with such datasets!
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> bucket = afni.Bucket()
     >>> bucket.inputs.in_file = [('functional.nii',"{2..$}"), ('functional.nii',"{1}")]
@@ -411,6 +404,11 @@ class Bucket(AFNICommand):
     >>> bucket.cmdline
     "3dbucket -prefix vr_base functional.nii'{2..$}' functional.nii'{1}'"
     >>> res = bucket.run()  # doctest: +SKIP
+
+    See Also
+    --------
+    For complete details, see the `3dbucket Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dbucket.html>`__.
 
     """
 
@@ -459,8 +457,7 @@ class Calc(AFNICommand):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dcalc.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> calc = afni.Calc()
     >>> calc.inputs.in_file_a = 'functional.nii'
@@ -531,8 +528,7 @@ class CatInputSpec(AFNICommandInputSpec):
         "fint",
         "cint",
         argstr="-form %s",
-        desc="specify data type for output. Valid types are 'int', "
-        "'nice', 'double', 'fint', and 'cint'.",
+        desc="specify data type for output.",
         xor=["out_int", "out_nice", "out_double", "out_fint", "out_cint"],
     )
     stack = traits.Bool(
@@ -578,8 +574,7 @@ class Cat(AFNICommand):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/1dcat.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> cat1d = afni.Cat()
     >>> cat1d.inputs.sel = "'[0,2]'"
@@ -642,8 +637,7 @@ class CatMatvec(AFNICommand):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/cat_matvec.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> cmv = afni.CatMatvec()
     >>> cmv.inputs.in_file = [('structural.BRIK::WARP_DATA','I')]
@@ -738,8 +732,7 @@ class CenterMass(AFNICommandBase):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dCM.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> cm = afni.CenterMass()
     >>> cm.inputs.in_file = 'structural.nii'
@@ -748,6 +741,7 @@ class CenterMass(AFNICommandBase):
     >>> cm.cmdline
     '3dCM -roi_vals 2 10 structural.nii > cm.txt'
     >>> res = 3dcm.run()  # doctest: +SKIP
+
     """
 
     _cmd = "3dCM"
@@ -806,8 +800,7 @@ class ConvertDset(AFNICommandBase):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/ConvertDset.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> convertdset = afni.ConvertDset()
     >>> convertdset.inputs.in_file = 'lh.pial_converted.gii'
@@ -816,6 +809,7 @@ class ConvertDset(AFNICommandBase):
     >>> convertdset.cmdline
     'ConvertDset -o_niml_asc -input lh.pial_converted.gii -prefix lh.pial_converted.niml.dset'
     >>> res = convertdset.run()  # doctest: +SKIP
+
     """
 
     _cmd = "ConvertDset"
@@ -852,11 +846,10 @@ class Copy(AFNICommand):
     or different type using 3dcopy command
 
     For complete details, see the `3dcopy Documentation.
-    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dcopy.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dcopy.html>`__
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> copy3d = afni.Copy()
     >>> copy3d.inputs.in_file = 'functional.nii'
@@ -914,7 +907,7 @@ class DotInputSpec(AFNICommandInputSpec):
     )
     dodot = traits.Bool(desc="Return the dot product (unscaled).", argstr="-dodot")
     docoef = traits.Bool(
-        desc="Return the least square fit coefficients {{a,b}} so that dset2 is approximately a + b*dset1",
+        desc="Return the least square fit coefficients {{a,b}} so that dset2 is approximately a + b\\*dset1",
         argstr="-docoef",
     )
     dosums = traits.Bool(
@@ -943,7 +936,11 @@ class Dot(AFNICommand):
     """Correlation coefficient between sub-brick pairs.
     All datasets in in_files list will be concatenated.
     You can use sub-brick selectors in the file specification.
-    Note: This program is not efficient when more than two subbricks are input.
+
+    .. warning::
+
+        This program is not efficient when more than two subbricks are input.
+
     For complete details, see the `3ddot Documentation.
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3ddot.html>`_
 
@@ -1015,36 +1012,13 @@ class Edge3InputSpec(AFNICommandInputSpec):
 
 class Edge3(AFNICommand):
     """Does 3D Edge detection using the library 3DEdge
-    by Gregoire Malandain (gregoire.malandain@sophia.inria.fr).
+    by Gregoire Malandain.
 
     For complete details, see the `3dedge3 Documentation.
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dedge3.html>`_
 
-    references_ = [{'entry': BibTeX('@article{Deriche1987,'
-                                    'author={R. Deriche},'
-                                    'title={Optimal edge detection using recursive filtering},'
-                                    'journal={International Journal of Computer Vision},'
-                                    'volume={2},',
-                                    'pages={167-187},'
-                                    'year={1987},'
-                                    '}'),
-                    'tags': ['method'],
-                    },
-                   {'entry': BibTeX('@article{MongaDericheMalandainCocquerez1991,'
-                                    'author={O. Monga, R. Deriche, G. Malandain, J.P. Cocquerez},'
-                                    'title={Recursive filtering and edge tracking: two primary tools for 3D edge detection},'
-                                    'journal={Image and vision computing},'
-                                    'volume={9},',
-                                    'pages={203-214},'
-                                    'year={1991},'
-                                    '}'),
-                    'tags': ['method'],
-                    },
-                   ]
-
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> edge3 = afni.Edge3()
     >>> edge3.inputs.in_file = 'functional.nii'
@@ -1059,6 +1033,36 @@ class Edge3(AFNICommand):
     _cmd = "3dedge3"
     input_spec = Edge3InputSpec
     output_spec = AFNICommandOutputSpec
+    references_ = [
+        {
+            "entry": BibTeX(
+                """\
+@article{Deriche1987,
+author={R. Deriche},
+title={Optimal edge detection using recursive filtering},
+journal={International Journal of Computer Vision},
+volume={2},'
+pages={167-187},
+year={1987},
+}"""
+            ),
+            "tags": ["method"],
+        },
+        {
+            "entry": BibTeX(
+                """\
+@article{MongaDericheMalandainCocquerez1991,
+    author={O. Monga, R. Deriche, G. Malandain, J.P. Cocquerez},
+    title={Recursive filtering and edge tracking: two primary tools for 3D edge detection},
+    journal={Image and vision computing},
+    volume={9},'
+    pages={203-214},
+    year={1991},
+}"""
+            ),
+            "tags": ["method"],
+        },
+    ]
 
 
 class EvalInputSpec(AFNICommandInputSpec):
@@ -1097,8 +1101,7 @@ class Eval(AFNICommand):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/1deval.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> eval = afni.Eval()
     >>> eval.inputs.in_file_a = 'seed.1D'
@@ -1252,17 +1255,6 @@ class FWHMx(AFNICommandBase):
     For complete details, see the `3dFWHMx Documentation.
     <https://afni.nimh.nih.gov/pub../pub/dist/doc/program_help/3dFWHMx.html>`_
 
-    Examples
-    --------
-
-    >>> from nipype.interfaces import afni
-    >>> fwhm = afni.FWHMx()
-    >>> fwhm.inputs.in_file = 'functional.nii'
-    >>> fwhm.cmdline
-    '3dFWHMx -input functional.nii -out functional_subbricks.out > functional_fwhmx.out'
-    >>> res = fwhm.run()  # doctest: +SKIP
-
-
     (Classic) METHOD:
 
       * Calculate ratio of variance of first differences to data variance.
@@ -1296,13 +1288,11 @@ class FWHMx(AFNICommandBase):
       3dClustSim has also been modified to use the ACF model given above to generate
       noise random fields.
 
-
     .. note:: TL;DR or summary
 
       The take-awaymessage is that the 'classic' 3dFWHMx and
       3dClustSim analysis, using a pure Gaussian ACF, is not very correct for
       FMRI data -- I cannot speak for PET or MEG data.
-
 
     .. warning::
 
@@ -1310,7 +1300,6 @@ class FWHMx(AFNICommandBase):
       3dDeconvolve or 3dREMLfit!!!  The function of 3dFWHMx is to estimate
       the smoothness of the time series NOISE, not of the statistics. This
       proscription is especially true if you plan to use 3dClustSim next!!
-
 
     .. note:: Recommendations
 
@@ -1327,7 +1316,6 @@ class FWHMx(AFNICommandBase):
       * If you do not use '-detrend', the program attempts to find non-zero spatial
         structure in the input, and will print a warning message if it is detected.
 
-
     .. note:: Notes on -demend
 
       * I recommend this option, and it is not the default only for historical
@@ -1340,6 +1328,14 @@ class FWHMx(AFNICommandBase):
         structure in the image will bias the estimation of the FWHM of the image time
         series NOISE (which is usually the point of using 3dFWHMx).
 
+    Examples
+    --------
+    >>> from nipype.interfaces import afni
+    >>> fwhm = afni.FWHMx()
+    >>> fwhm.inputs.in_file = 'functional.nii'
+    >>> fwhm.cmdline
+    '3dFWHMx -input functional.nii -out functional_subbricks.out > functional_fwhmx.out'
+    >>> res = fwhm.run()  # doctest: +SKIP
 
     """
 
@@ -1371,21 +1367,19 @@ class FWHMx(AFNICommandBase):
 
     def _format_arg(self, name, trait_spec, value):
         if name == "detrend":
-            if isinstance(value, bool):
-                if value:
-                    return trait_spec.argstr
-                else:
-                    return None
+            if value is True:
+                return trait_spec.argstr
+            elif value is False:
+                return None
             elif isinstance(value, int):
                 return trait_spec.argstr + " %d" % value
 
         if name == "acf":
-            if isinstance(value, bool):
-                if value:
-                    return trait_spec.argstr
-                else:
-                    self._acf = False
-                    return None
+            if value is True:
+                return trait_spec.argstr
+            elif value is False:
+                self._acf = False
+                return None
             elif isinstance(value, tuple):
                 return trait_spec.argstr + " %s %f" % value
             elif isinstance(value, (str, bytes)):
@@ -1471,30 +1465,33 @@ class LocalBistatInputSpec(AFNICommandInputSpec):
     stat = InputMultiPath(
         traits.Enum(_stat_names),
         mandatory=True,
-        desc="statistics to compute. Possible names are :"
-        "  * pearson  = Pearson correlation coefficient"
-        "  * spearman = Spearman correlation coefficient"
-        "  * quadrant = Quadrant correlation coefficient"
-        "  * mutinfo  = Mutual Information"
-        "  * normuti  = Normalized Mutual Information"
-        "  * jointent = Joint entropy"
-        "  * hellinger= Hellinger metric"
-        "  * crU      = Correlation ratio (Unsymmetric)"
-        "  * crM      = Correlation ratio (symmetrized by Multiplication)"
-        "  * crA      = Correlation ratio (symmetrized by Addition)"
-        "  * L2slope  = slope of least-squares (L2) linear regression of "
-        "               the data from dataset1 vs. the dataset2 "
-        "               (i.e., d2 = a + b*d1 ==> this is 'b')"
-        "  * L1slope  = slope of least-absolute-sum (L1) linear "
-        "               regression of the data from dataset1 vs. "
-        "               the dataset2"
-        "  * num      = number of the values in the region: "
-        "               with the use of -mask or -automask, "
-        "               the size of the region around any given "
-        "               voxel will vary; this option lets you "
-        "               map that size."
-        "  * ALL      = all of the above, in that order"
-        "More than one option can be used.",
+        desc="""\
+Statistics to compute. Possible names are:
+
+  * pearson  = Pearson correlation coefficient
+  * spearman = Spearman correlation coefficient
+  * quadrant = Quadrant correlation coefficient
+  * mutinfo  = Mutual Information
+  * normuti  = Normalized Mutual Information
+  * jointent = Joint entropy
+  * hellinger= Hellinger metric
+  * crU      = Correlation ratio (Unsymmetric)
+  * crM      = Correlation ratio (symmetrized by Multiplication)
+  * crA      = Correlation ratio (symmetrized by Addition)
+  * L2slope  = slope of least-squares (L2) linear regression of
+               the data from dataset1 vs. the dataset2
+               (i.e., d2 = a + b*d1 ==> this is 'b')
+  * L1slope  = slope of least-absolute-sum (L1) linear
+               regression of the data from dataset1 vs.
+               the dataset2
+  * num      = number of the values in the region:
+               with the use of -mask or -automask,
+               the size of the region around any given
+               voxel will vary; this option lets you
+               map that size.
+  * ALL      = all of the above, in that order
+
+More than one option can be used.""",
         argstr="-stat %s...",
     )
     mask_file = File(
@@ -1534,8 +1531,7 @@ class LocalBistat(AFNICommand):
     <https://afni.nimh.nih.gov/pub../pub/dist/doc/program_help/3dLocalBistat.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> bistat = afni.LocalBistat()
     >>> bistat.inputs.in_file1 = 'functional.nii'
@@ -1608,48 +1604,51 @@ class LocalstatInputSpec(AFNICommandInputSpec):
             ),
         ),
         mandatory=True,
-        desc="statistics to compute. Possible names are :\n"
-        " * mean   = average of the values\n"
-        " * stdev  = standard deviation\n"
-        " * var    = variance (stdev*stdev)\n"
-        " * cvar   = coefficient of variation = stdev/fabs(mean)\n"
-        " * median = median of the values\n"
-        " * MAD    = median absolute deviation\n"
-        " * min    = minimum\n"
-        " * max    = maximum\n"
-        " * absmax = maximum of the absolute values\n"
-        " * num    = number of the values in the region:\n"
-        "            with the use of -mask or -automask,"
-        "            the size of the region around any given"
-        "            voxel will vary; this option lets you"
-        "            map that size.  It may be useful if you"
-        "            plan to compute a t-statistic (say) from"
-        "            the mean and stdev outputs.\n"
-        " * sum    = sum of the values in the region\n"
-        " * FWHM   = compute (like 3dFWHM) image smoothness"
-        "            inside each voxel's neighborhood.  Results"
-        "            are in 3 sub-bricks: FWHMx, FHWMy, and FWHMz."
-        "            Places where an output is -1 are locations"
-        "            where the FWHM value could not be computed"
-        "            (e.g., outside the mask).\n"
-        " * FWHMbar= Compute just the average of the 3 FWHM values"
-        "            (normally would NOT do this with FWHM also).\n"
-        " * perc:P0:P1:Pstep = \n"
-        "            Compute percentiles between P0 and P1 with a "
-        "            step of Pstep.\n"
-        "            Default P1 is equal to P0 and default P2 = 1\n"
-        " * rank   = rank of the voxel's intensity\n"
-        " * frank  = rank / number of voxels in neighborhood\n"
-        " * P2skew = Pearson's second skewness coefficient"
-        "             3 * (mean - median) / stdev\n"
-        " * ALL    = all of the above, in that order "
-        "            (except for FWHMbar and perc).\n"
-        " * mMP2s  = Exactly the same output as:"
-        "            median, MAD, P2skew,"
-        "            but a little faster\n"
-        " * mmMP2s = Exactly the same output as:"
-        "            mean, median, MAD, P2skew\n"
-        "More than one option can be used.",
+        desc="""\
+statistics to compute. Possible names are:
+
+ * mean   = average of the values
+ * stdev  = standard deviation
+ * var    = variance (stdev\\*stdev)
+ * cvar   = coefficient of variation = stdev/fabs(mean)
+ * median = median of the values
+ * MAD    = median absolute deviation
+ * min    = minimum
+ * max    = maximum
+ * absmax = maximum of the absolute values
+ * num    = number of the values in the region:
+            with the use of -mask or -automask,
+            the size of the region around any given
+            voxel will vary; this option lets you
+            map that size.  It may be useful if you
+            plan to compute a t-statistic (say) from
+            the mean and stdev outputs.
+ * sum    = sum of the values in the region
+ * FWHM   = compute (like 3dFWHM) image smoothness
+            inside each voxel's neighborhood.  Results
+            are in 3 sub-bricks: FWHMx, FHWMy, and FWHMz.
+            Places where an output is -1 are locations
+            where the FWHM value could not be computed
+            (e.g., outside the mask).
+ * FWHMbar= Compute just the average of the 3 FWHM values
+            (normally would NOT do this with FWHM also).
+ * perc:P0:P1:Pstep =
+            Compute percentiles between P0 and P1 with a
+            step of Pstep.
+            Default P1 is equal to P0 and default P2 = 1
+ * rank   = rank of the voxel's intensity
+ * frank  = rank / number of voxels in neighborhood
+ * P2skew = Pearson's second skewness coefficient
+             3 \\* (mean - median) / stdev
+ * ALL    = all of the above, in that order
+            (except for FWHMbar and perc).
+ * mMP2s  = Exactly the same output as:
+            median, MAD, P2skew,
+            but a little faster
+ * mmMP2s = Exactly the same output as:
+            mean, median, MAD, P2skew
+
+More than one option can be used.""",
         argstr="-stat %s...",
     )
     mask_file = File(
@@ -1664,12 +1663,12 @@ class LocalstatInputSpec(AFNICommandInputSpec):
         desc="Compute the mask as in program 3dAutomask.", argstr="-automask"
     )
     nonmask = traits.Bool(
-        desc="Voxels not in the mask WILL have their local statistics "
-        "computed from all voxels in their neighborhood that ARE in "
-        "the mask.\n"
-        " * For instance, this option can be used to compute the "
-        "   average local white matter time series, even at non-WM "
-        "   voxels.",
+        desc="""\
+Voxels not in the mask WILL have their local statistics
+computed from all voxels in their neighborhood that ARE in
+the mask. For instance, this option can be used to compute the
+average local white matter time series, even at non-WM
+voxels.""",
         argstr="-use_nonmask",
     )
     reduce_grid = traits.Either(
@@ -1737,8 +1736,7 @@ class Localstat(AFNICommand):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dLocalstat.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> localstat = afni.Localstat()
     >>> localstat.inputs.in_file = 'functional.nii'
@@ -1796,8 +1794,7 @@ class MaskToolInputSpec(AFNICommandInputSpec):
         "short",
         "float",
         argstr="-datum %s",
-        desc="specify data type for output. Valid types are 'byte', "
-        "'short' and 'float'.",
+        desc="specify data type for output.",
     )
     dilate_inputs = Str(
         desc="Use this option to dilate and/or erode datasets as they are "
@@ -1843,8 +1840,7 @@ class MaskTool(AFNICommand):
     <https://afni.nimh.nih.gov/pub../pub/dist/doc/program_help/3dmask_tool.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> masktool = afni.MaskTool()
     >>> masktool.inputs.in_file = 'functional.nii'
@@ -1889,8 +1885,7 @@ class Merge(AFNICommand):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dmerge.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> merge = afni.Merge()
     >>> merge.inputs.in_files = ['functional.nii', 'functional2.nii']
@@ -1938,8 +1933,7 @@ class Notes(CommandLine):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dNotes.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> notes = afni.Notes()
     >>> notes.inputs.in_file = 'functional.HEAD'
@@ -1948,6 +1942,7 @@ class Notes(CommandLine):
     >>> notes.cmdline
     '3dNotes -a "This note is added." -h "This note is added to history." functional.HEAD'
     >>> res = notes.run()  # doctest: +SKIP
+
     """
 
     _cmd = "3dNotes"
@@ -2000,8 +1995,7 @@ class NwarpAdjust(AFNICommandBase):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dNwarpAdjust.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> adjust = afni.NwarpAdjust()
     >>> adjust.inputs.warps = ['func2anat_InverseWarp.nii.gz', 'func2anat_InverseWarp.nii.gz', 'func2anat_InverseWarp.nii.gz', 'func2anat_InverseWarp.nii.gz', 'func2anat_InverseWarp.nii.gz']
@@ -2117,8 +2111,7 @@ class NwarpApply(AFNICommandBase):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dNwarpApply.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> nwarp = afni.NwarpApply()
     >>> nwarp.inputs.in_file = 'Fred+orig'
@@ -2215,8 +2208,7 @@ class NwarpCat(AFNICommand):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dNwarpCat.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> nwarpcat = afni.NwarpCat()
     >>> nwarpcat.inputs.in_files = ['Q25_warp+tlrc.HEAD', ('IDENT', 'structural.nii')]
@@ -2450,8 +2442,7 @@ class Refit(AFNICommandBase):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3drefit.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> refit = afni.Refit()
     >>> refit.inputs.in_file = 'structural.nii'
@@ -2466,6 +2457,7 @@ class Refit(AFNICommandBase):
     >>> refit_2.cmdline
     "3drefit -atrfloat IJK_TO_DICOM_REAL '1 0.2 0 0 -0.2 1 0 0 0 0 1 0' structural.nii"
     >>> res = refit_2.run()  # doctest: +SKIP
+
     """
 
     _cmd = "3drefit"
@@ -2510,29 +2502,32 @@ class ReHoInputSpec(CommandLineInputSpec):
         "vertices",
         xor=["sphere", "ellipsoid"],
         argstr="-nneigh %s",
-        desc="voxels in neighborhood. can be: "
-        "* faces      (for voxel and 6 facewise neighbors, only),\n"
-        "* edges      (for voxel and 18 face- and edge-wise neighbors),\n"
-        "* vertices   (for voxel and 26 face-, edge-, and node-wise "
-        "neighbors).\n",
+        desc="""
+voxels in neighborhood. can be:
+``faces`` (for voxel and 6 facewise neighbors, only),
+``edges`` (for voxel and 18 face- and edge-wise neighbors),
+``vertices`` (for voxel and 26 face-, edge-, and node-wise neighbors).""",
     )
     sphere = traits.Float(
         argstr="-neigh_RAD %s",
         xor=["neighborhood", "ellipsoid"],
-        desc="for additional voxelwise neighborhood control, the "
-        "radius R of a desired neighborhood can be put in; R is "
-        "a floating point number, and must be >1. Examples of "
-        "the numbers of voxels in a given radius are as follows "
-        "(you can roughly approximate with the ol' 4*PI*(R^3)/3 "
-        "thing):\n"
-        "        R=2.0 -> V=33,\n"
-        "        R=2.3 -> V=57, \n"
-        "        R=2.9 -> V=93, \n"
-        "        R=3.1 -> V=123, \n"
-        "        R=3.9 -> V=251, \n"
-        "        R=4.5 -> V=389, \n"
-        "        R=6.1 -> V=949, \n"
-        "but you can choose most any value.",
+        desc=r"""\
+For additional voxelwise neighborhood control, the
+radius R of a desired neighborhood can be put in; R is
+a floating point number, and must be >1. Examples of
+the numbers of voxels in a given radius are as follows
+(you can roughly approximate with the ol' :math:`4\pi\,R^3/3`
+thing):
+
+    * R=2.0 -> V=33
+    * R=2.3 -> V=57,
+    * R=2.9 -> V=93,
+    * R=3.1 -> V=123,
+    * R=3.9 -> V=251,
+    * R=4.5 -> V=389,
+    * R=6.1 -> V=949,
+
+but you can choose most any value.""",
     )
     ellipsoid = traits.Tuple(
         traits.Float,
@@ -2540,13 +2535,14 @@ class ReHoInputSpec(CommandLineInputSpec):
         traits.Float,
         xor=["sphere", "neighborhood"],
         argstr="-neigh_X %s -neigh_Y %s -neigh_Z %s",
-        desc="Tuple indicating the x, y, and z radius of an ellipsoid "
-        "defining the neighbourhood of each voxel.\n"
-        "The 'hood is then made according to the following relation:"
-        "(i/A)^2 + (j/B)^2 + (k/C)^2 <=1.\n"
-        "which will have approx. V=4*PI*A*B*C/3. The impetus for "
-        "this freedom was for use with data having anisotropic "
-        "voxel edge lengths.",
+        desc=r"""\
+Tuple indicating the x, y, and z radius of an ellipsoid
+defining the neighbourhood of each voxel.
+The 'hood is then made according to the following relation:
+:math:`(i/A)^2 + (j/B)^2 + (k/C)^2 \le 1.`
+which will have approx. :math:`V=4 \pi \, A B C/3`. The impetus for
+this freedom was for use with data having anisotropic
+voxel edge lengths.""",
     )
     label_set = File(
         exists=True,
@@ -2572,8 +2568,7 @@ class ReHo(AFNICommandBase):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dReHo.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> reho = afni.ReHo()
     >>> reho.inputs.in_file = 'functional.nii'
@@ -2648,8 +2643,7 @@ class Resample(AFNICommand):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dresample.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> resample = afni.Resample()
     >>> resample.inputs.in_file = 'functional.nii'
@@ -2708,8 +2702,7 @@ class TCat(AFNICommand):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcat.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> tcat = afni.TCat()
     >>> tcat.inputs.in_files = ['functional.nii', 'functional2.nii']
@@ -2760,8 +2753,7 @@ class TCatSubBrick(AFNICommand):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcat.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> tcsb = afni.TCatSubBrick()
     >>> tcsb.inputs.in_files = [('functional.nii', "'{2..$}'"), ('functional2.nii', "'{2..$}'")]
@@ -2808,8 +2800,7 @@ class TStat(AFNICommand):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTstat.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> tstat = afni.TStat()
     >>> tstat.inputs.in_file = 'functional.nii'
@@ -2890,8 +2881,7 @@ class To3D(AFNICommand):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/to3d.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> to3d = afni.To3D()
     >>> to3d.inputs.datatype = 'float'
@@ -3005,8 +2995,7 @@ class Undump(AFNICommand):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dUndump.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> unndump = afni.Undump()
     >>> unndump.inputs.in_file = 'structural.nii'
@@ -3068,7 +3057,7 @@ class UnifizeInputSpec(AFNICommandInputSpec):
         argstr="-noduplo",
     )
     epi = traits.Bool(
-        desc="Assume the input dataset is a T2 (or T2*) weighted EPI time "
+        desc="Assume the input dataset is a T2 (or T2\\*) weighted EPI time "
         "series. After computing the scaling, apply it to ALL volumes "
         "(TRs) in the input dataset. That is, a given voxel will be "
         "scaled by the same factor at each TR. "
@@ -3144,8 +3133,7 @@ class Unifize(AFNICommand):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dUnifize.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> unifize = afni.Unifize()
     >>> unifize.inputs.in_file = 'structural.nii'
@@ -3186,8 +3174,7 @@ class ZCutUp(AFNICommand):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZcutup.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> zcutup = afni.ZCutUp()
     >>> zcutup.inputs.in_file = 'functional.nii'
@@ -3243,8 +3230,7 @@ class GCOR(CommandLine):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/@compute_gcor.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> gcor = afni.GCOR()
     >>> gcor.inputs.in_file = 'structural.nii'
@@ -3318,10 +3304,10 @@ class Axialize(AFNICommand):
          with the data brick oriented as axial slices.
 
     For complete details, see the `3dcopy Documentation.
-    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3daxialize.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3daxialize.html>`__
 
     Examples
-    ========
+    --------
     >>> from nipype.interfaces import afni
     >>> axial3d = afni.Axialize()
     >>> axial3d.inputs.in_file = 'functional.nii'
@@ -3389,8 +3375,7 @@ class Zcat(AFNICommand):
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZcat.html>`_
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> zcat = afni.Zcat()
     >>> zcat.inputs.in_files = ['functional2.nii', 'functional3.nii']
@@ -3398,6 +3383,7 @@ class Zcat(AFNICommand):
     >>> zcat.cmdline
     '3dZcat -prefix cat_functional.nii functional2.nii functional3.nii'
     >>> res = zcat.run()  # doctest: +SKIP
+
     """
 
     _cmd = "3dZcat"
@@ -3498,11 +3484,10 @@ class Zeropad(AFNICommand):
     """Adds planes of zeros to a dataset (i.e., pads it out).
 
     For complete details, see the `3dZeropad Documentation.
-    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZeropad.html>`_
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZeropad.html>`__
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces import afni
     >>> zeropad = afni.Zeropad()
     >>> zeropad.inputs.in_files = 'functional.nii'
@@ -3516,6 +3501,7 @@ class Zeropad(AFNICommand):
     >>> zeropad.cmdline
     '3dZeropad -A 10 -I 10 -L 10 -P 10 -R 10 -S 10 -prefix pad_functional.nii functional.nii'
     >>> res = zeropad.run()  # doctest: +SKIP
+
     """
 
     _cmd = "3dZeropad"

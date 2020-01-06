@@ -116,7 +116,6 @@ class MRISPreproc(FSCommand):
 
     Examples
     --------
-
     >>> preproc = MRISPreproc()
     >>> preproc.inputs.target = 'fsaverage'
     >>> preproc.inputs.hemi = 'lh'
@@ -176,8 +175,8 @@ class MRISPreprocReconAllInputSpec(MRISPreprocInputSpec):
     )
     copy_inputs = traits.Bool(
         desc="If running as a node, set this to True "
-        + "this will copy some implicit inputs to the "
-        + "node directory."
+        "this will copy some implicit inputs to the "
+        "node directory."
     )
 
 
@@ -185,7 +184,7 @@ class MRISPreprocReconAll(MRISPreproc):
     """Extends MRISPreproc to allow it to be used in a recon-all workflow
 
     Examples
-    ========
+    --------
     >>> preproc = MRISPreprocReconAll()
     >>> preproc.inputs.target = 'fsaverage'
     >>> preproc.inputs.hemi = 'lh'
@@ -194,6 +193,7 @@ class MRISPreprocReconAll(MRISPreproc):
     >>> preproc.inputs.out_file = 'concatenated_file.mgz'
     >>> preproc.cmdline
     'mris_preproc --hemi lh --out concatenated_file.mgz --s subject_id --target fsaverage --iv cont1.nii register.dat --iv cont1a.nii register.dat'
+
     """
 
     input_spec = MRISPreprocReconAllInputSpec
@@ -451,7 +451,6 @@ class GLMFit(FSCommand):
 
     Examples
     --------
-
     >>> glmfit = GLMFit()
     >>> glmfit.inputs.in_file = 'functional.nii'
     >>> glmfit.inputs.one_sample = True
@@ -614,7 +613,6 @@ class Binarize(FSCommand):
 
     Examples
     --------
-
     >>> binvol = Binarize(in_file='structural.nii', min=10, binary_file='foo_out.nii')
     >>> binvol.cmdline
     'mri_binarize --o foo_out.nii --i structural.nii --min 10.000000'
@@ -755,7 +753,6 @@ class Concatenate(FSCommand):
 
     Examples
     --------
-
     Combine two input volumes into one volume with two frames
 
     >>> concat = Concatenate()
@@ -974,7 +971,6 @@ class SegStats(FSCommand):
 
     Examples
     --------
-
     >>> import nipype.interfaces.freesurfer as fs
     >>> ss = fs.SegStats()
     >>> ss.inputs.annot = ('PWS04', 'lh', 'aparc')
@@ -1077,8 +1073,8 @@ class SegStatsReconAllInputSpec(SegStatsInputSpec):
     aseg = File(exists=True, desc="Mandatory implicit input in 5.3")
     copy_inputs = traits.Bool(
         desc="If running as a node, set this to True "
-        + "otherwise, this will copy the implicit inputs "
-        + "to the node directory."
+        "otherwise, this will copy the implicit inputs "
+        "to the node directory."
     )
 
 
@@ -1089,7 +1085,7 @@ class SegStatsReconAll(SegStats):
     To ensure backwards compatability of SegStats, this class was created.
 
     Examples
-    ========
+    --------
     >>> from nipype.interfaces.freesurfer import SegStatsReconAll
     >>> segstatsreconall = SegStatsReconAll()
     >>> segstatsreconall.inputs.annot = ('PWS04', 'lh', 'aparc')
@@ -1118,6 +1114,7 @@ class SegStatsReconAll(SegStats):
     >>> segstatsreconall.inputs.exclude_id = 0
     >>> segstatsreconall.cmdline
     'mri_segstats --annot PWS04 lh aparc --avgwf ./avgwf.txt --brain-vol-from-seg --surf-ctx-vol --empty --etiv --euler --excl-ctxgmwm --excludeid 0 --subcortgray --subject 10335 --supratent --totalgray --surf-wm-vol --sum ./summary.stats'
+
     """
 
     input_spec = SegStatsReconAllInputSpec
@@ -1248,7 +1245,6 @@ class Label2Vol(FSCommand):
 
     Examples
     --------
-
     >>> binvol = Label2Vol(label_file='cortex.label', template_file='structural.nii', reg_file='register.dat', fill_thresh=0.5, vol_label_file='foo_out.nii')
     >>> binvol.cmdline
     'mri_label2vol --fillthresh 0.5 --label cortex.label --reg register.dat --temp structural.nii --o foo_out.nii'
@@ -1340,7 +1336,6 @@ class MS_LDA(FSCommand):
 
     Examples
     --------
-
     >>> grey_label = 2
     >>> white_label = 3
     >>> zero_value = 1
@@ -1351,6 +1346,7 @@ class MS_LDA(FSCommand):
                                 images=['FLASH1.mgz', 'FLASH2.mgz', 'FLASH3.mgz'])
     >>> optimalWeights.cmdline
     'mri_ms_LDA -conform -label label.mgz -lda 2 3 -shift 1 -W -synth synth_out.mgz -weight weights.txt FLASH1.mgz FLASH2.mgz FLASH3.mgz'
+
     """
 
     _cmd = "mri_ms_LDA"
@@ -1625,12 +1621,11 @@ class SphericalAverageInputSpec(FSTraitedSpec):
         argstr="%s",
         mandatory=True,
         position=-5,
-        desc="""Filename from the average subject directory.
-                          Example: to use rh.entorhinal.label as the input label
-                          filename, set fname to 'rh.entorhinal' and which to
-                          'label'. The program will then search for
-                          '{in_average}/label/rh.entorhinal.label'
-                          """,
+        desc="""\
+Filename from the average subject directory.
+Example: to use rh.entorhinal.label as the input label filename, set fname to 'rh.entorhinal'
+and which to 'label'. The program will then search for
+``<in_average>/label/rh.entorhinal.label``""",
     )
     which = traits.Enum(
         "coords",
@@ -1673,6 +1668,7 @@ class SphericalAverage(FSCommand):
     >>> sphericalavg.inputs.threshold = 5
     >>> sphericalavg.cmdline
     'mris_spherical_average -erode 2 -o 10335 -t 5.0 label lh.entorhinal lh pial . test.out'
+
     """
 
     _cmd = "mris_spherical_average"

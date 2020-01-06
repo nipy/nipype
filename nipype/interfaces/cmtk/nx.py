@@ -447,11 +447,11 @@ class NetworkXMetrics(BaseInterface):
 
     Example
     -------
-
     >>> import nipype.interfaces.cmtk as cmtk
     >>> nxmetrics = cmtk.NetworkXMetrics()
     >>> nxmetrics.inputs.in_file = 'subj1.pck'
     >>> nxmetrics.run()                 # doctest: +SKIP
+
     """
 
     input_spec = NetworkXMetricsInputSpec
@@ -636,7 +636,6 @@ class AverageNetworks(BaseInterface):
 
     Example
     -------
-
     >>> import nipype.interfaces.cmtk as cmtk
     >>> avg = cmtk.AverageNetworks()
     >>> avg.inputs.in_files = ['subj1.pck', 'subj2.pck']

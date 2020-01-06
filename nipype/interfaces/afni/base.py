@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""Provide interface to AFNI commands."""
+"""Provide a base interface to AFNI commands."""
 import os
 from sys import platform
 from distutils import spawn
@@ -108,15 +108,22 @@ class Info(PackageInfo):
 
 class AFNICommandBase(CommandLine):
     """
-    A base class to fix a linking problem in OSX and afni.
+    A base class to fix a linking problem in OSX and AFNI.
 
-    See http://afni.nimh.nih.gov/afni/community/board/read.php?1,145346,145347#msg-145347
+    See Also
+    --------
+    `This thread
+    <http://afni.nimh.nih.gov/afni/community/board/read.php?1,145346,145347#msg-145347>`__
+    about the particular environment variable that fixes this problem.
+
     """
 
-    def _run_interface(self, runtime):
+    def _run_interface(self, runtime, correct_return_codes=(0,)):
         if platform == "darwin":
             runtime.environ["DYLD_FALLBACK_LIBRARY_PATH"] = "/usr/local/afni/"
-        return super(AFNICommandBase, self)._run_interface(runtime)
+        return super(AFNICommandBase, self)._run_interface(
+            runtime, correct_return_codes
+        )
 
 
 class AFNICommandInputSpec(CommandLineInputSpec):
@@ -294,13 +301,6 @@ class AFNICommand(AFNICommandBase):
         return fname
 
 
-def no_afni():
-    """Check whether AFNI is not available."""
-    if Info.version() is None:
-        return True
-    return False
-
-
 class AFNIPythonCommandInputSpec(CommandLineInputSpec):
     outputtype = traits.Enum(
         "AFNI", list(Info.ftypes.keys()), desc="AFNI output filetype"
@@ -323,3 +323,10 @@ class AFNIPythonCommand(AFNICommand):
     @property
     def _cmd_prefix(self):
         return "{} ".format(self.inputs.py27_path)
+
+
+def no_afni():
+    """Check whether AFNI is not available."""
+    if Info.version() is None:
+        return True
+    return False

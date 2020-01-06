@@ -1,7 +1,7 @@
 0.14.0 (November 29, 2017)
 ==========================
 
-###### [Full changelog](https://github.com/nipy/nipype/milestone/13)
+(`Full changelog <https://github.com/nipy/nipype/milestone/13>`__)
 
 * FIX+MAINT: Revision of the resource monitor (https://github.com/nipy/nipype/pull/2285)
 * FIX: MultiProc mishandling crashes (https://github.com/nipy/nipype/pull/2301)
@@ -385,8 +385,10 @@ Release 0.9.0 (December 20, 2013)
         - camino.QBallMX
         - camino.LinRecon
         - camino.SFPeaks
-        One outdated interface no longer part of Camino was removed:
+
+  One outdated interface no longer part of Camino was removed:
         - camino.Conmap
+
 * ENH: Three new mrtrix interfaces were added:
         - mrtrix.GenerateDirections
         - mrtrix.FindShPeaks
@@ -713,7 +715,7 @@ Features added
 
 * General:
 
-  - Type checking of inputs and outputs using Traits from ETS_.
+  - Type checking of inputs and outputs using Traits from ETS.
   - Support for nested workflows.
   - Preliminary Slicer and AFNI support.
   - New flexible DataGrabber node.

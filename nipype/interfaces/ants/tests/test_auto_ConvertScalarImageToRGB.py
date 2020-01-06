@@ -5,7 +5,7 @@ from ..visualization import ConvertScalarImageToRGB
 def test_ConvertScalarImageToRGB_inputs():
     input_map = dict(
         args=dict(argstr="%s",),
-        colormap=dict(argstr="%s", mandatory=True, position=4, usedefault=True,),
+        colormap=dict(argstr="%s", mandatory=True, position=4,),
         custom_color_map_file=dict(argstr="%s", position=5, usedefault=True,),
         dimension=dict(argstr="%d", mandatory=True, position=0, usedefault=True,),
         environ=dict(nohash=True, usedefault=True,),

@@ -8,7 +8,6 @@ fMRI: SPM Auditory dataset
 
 Introduction
 ============
-
 The fmri_spm_auditory.py recreates the classical workflow described in the
 `SPM8 manual <http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf>`_ using auditory
 dataset that can be downloaded from http://www.fil.ion.ucl.ac.uk/spm/data/auditory/::
@@ -34,32 +33,31 @@ Preliminaries
 
 """
 
-# Set the way matlab should be called
+# Set the way Matlab should be called
 mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodesktop -nosplash")
+
 """
+
 Setting up workflows
 --------------------
-
-In this tutorial we will be setting up a hierarchical workflow for spm
-analysis. This will demonstrate how pre-defined workflows can be setup
+In this tutorial we will be setting up a hierarchical workflow for SPM
+analysis. This will demonstrate how predefined workflows can be setup
 and shared across users, projects and labs.
-
 
 Setup preprocessing workflow
 ----------------------------
-
 This is a generic preprocessing workflow that can be used by different analyses
 
 """
 
 preproc = pe.Workflow(name='preproc')
-"""We strongly encourage to use 4D files insteead of series of 3D for fMRI analyses
+"""We strongly encourage to use 4D files instead of series of 3D for fMRI analyses
 for many reasons (cleanness and saving and filesystem inodes are among them). However,
 the the workflow presented in the SPM8 manual which this tutorial is based on
-uses 3D files. Therefore we leave converting to 4D as an option. We are using `merge_to_4d`
-variable, because switching between 3d and 4d requires some additional steps (explauned later on).
-Use :class:`nipype.interfaces.fsl.Merge` to merge a series of 3D files along the time
-dimension creating a 4d file.
+uses 3D files. Therefore we leave converting to 4D as an option. We are using ``merge_to_4d``
+variable, because switching between 3D and 4dD requires some additional steps (explained later on).
+Use :ref:`nipype.interfaces.fsl.utils.Merge` to merge a series
+of 3D files along the time dimension creating a 4D file.
 """
 
 merge_to_4d = True
@@ -67,26 +65,28 @@ merge_to_4d = True
 if merge_to_4d:
     merge = pe.Node(interface=fsl.Merge(), name="merge")
     merge.inputs.dimension = "t"
-"""Use :class:`nipype.interfaces.spm.Realign` for motion correction
-and register all images to the mean image.
+"""Use :ref:`nipype.interfaces.spm.preprocess.Realign`
+for motion correction and register all images to the mean image.
 """
 
 realign = pe.Node(interface=spm.Realign(), name="realign")
-"""Use :class:`nipype.interfaces.spm.Coregister` to perform a rigid
-body registration of the functional data to the structural data.
+"""Use :ref:`nipype.interfaces.spm.preprocess.Coregister`
+to perform a rigid body registration of the functional data to the structural data.
 """
 
 coregister = pe.Node(interface=spm.Coregister(), name="coregister")
 coregister.inputs.jobtype = 'estimate'
 
 segment = pe.Node(interface=spm.Segment(), name="segment")
+
 """Uncomment the following line for faster execution
 """
 
 # segment.inputs.gaussians_per_class = [1, 1, 1, 4]
+
 """Warp functional and structural data to SPM's T1 template using
-:class:`nipype.interfaces.spm.Normalize`.  The tutorial data set
-includes the template image, T1.nii.
+:ref:`nipype.interfaces.spm.preprocess.Normalize`.
+The tutorial data set includes the template image, T1.nii.
 """
 
 normalize_func = pe.Node(interface=spm.Normalize(), name="normalize_func")
@@ -95,15 +95,16 @@ normalize_func.inputs.jobtype = "write"
 normalize_struc = pe.Node(interface=spm.Normalize(), name="normalize_struc")
 normalize_struc.inputs.jobtype = "write"
 """Smooth the functional data using
-:class:`nipype.interfaces.spm.Smooth`.
+:ref:`nipype.interfaces.spm.preprocess.Smooth`.
 """
 
 smooth = pe.Node(interface=spm.Smooth(), name="smooth")
-"""`write_voxel_sizes` is the input of the normalize interface that is recommended to be set to
-the voxel sizes of the target volume. There is no need to set it manually since we van infer it from data
+
+"""``write_voxel_sizes`` is the input of the normalize interface that is recommended
+to be set to the voxel sizes of the target volume.
+There is no need to set it manually since we can infer it from data
 using the following function:
 """
-
 
 def get_vox_dims(volume):
     import nibabel as nb
@@ -116,9 +117,10 @@ def get_vox_dims(volume):
     return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]
 
 
-"""Here we are connecting all the nodes together. Notice that we add the merge node only if you choose
-to use 4D. Also `get_vox_dims` function is passed along the input volume of normalise to set the optimal
-voxel sizes.
+"""Here we are connecting all the nodes together.
+Notice that we add the merge node only if you choose to use 4D.
+Also, the ``get_vox_dims`` function is passed along the input volume of
+:ref:`nipype.interfaces.spm.preprocess.Normalize` to set the optimal voxel sizes.
 """
 
 if merge_to_4d:
@@ -137,34 +139,38 @@ preproc.connect([
                                 'write_voxel_sizes')]),
     (normalize_func, smooth, [('normalized_files', 'in_files')]),
 ])
+
 """
 Set up analysis workflow
 ------------------------
-
 """
 
 l1analysis = pe.Workflow(name='analysis')
+
 """Generate SPM-specific design information using
-:class:`nipype.interfaces.spm.SpecifyModel`.
+:ref:`nipype.algorithms.modelgen.SpecifySPMModel`.
 """
 
 modelspec = pe.Node(interface=model.SpecifySPMModel(), name="modelspec")
+
 """Generate a first level SPM.mat file for analysis
-:class:`nipype.interfaces.spm.Level1Design`.
+:ref:`nipype.interfaces.spm.model.Level1Design`.
 """
 
 level1design = pe.Node(interface=spm.Level1Design(), name="level1design")
 level1design.inputs.bases = {'hrf': {'derivs': [0, 0]}}
-"""Use :class:`nipype.interfaces.spm.EstimateModel` to determine the
-parameters of the model.
+
+"""Use :ref:`nipype.interfaces.spm.model.EstimateModel`
+to determine the parameters of the model.
 """
 
 level1estimate = pe.Node(interface=spm.EstimateModel(), name="level1estimate")
 level1estimate.inputs.estimation_method = {'Classical': 1}
 
 threshold = pe.Node(interface=spm.Threshold(), name="threshold")
-"""Use :class:`nipype.interfaces.spm.EstimateContrast` to estimate the
-first level contrasts specified in a few steps above.
+
+"""Use :ref:`nipype.interfaces.spm.model.EstimateContrast`
+to estimate the first level contrasts specified in a few steps above.
 """
 
 contrastestimate = pe.Node(
@@ -180,18 +186,20 @@ l1analysis.connect([
                                    ('spmT_images', 'stat_image')]),
 ])
 """
-Preproc + Analysis pipeline
----------------------------
-
+Preprocessing and analysis pipeline
+-----------------------------------
 """
 
 l1pipeline = pe.Workflow(name='firstlevel')
 l1pipeline.connect([(preproc, l1analysis,
                      [('realign.realignment_parameters',
                        'modelspec.realignment_parameters')])])
-"""Pluging in `functional_runs` is a bit more complicated, because model spec expects a list of `runs`.
-Every run can be a 4D file or a list of 3D files. Therefore for 3D analysis we need a list of lists and
-to make one we need a helper function.
+
+"""
+Plugging in ``functional_runs`` is a bit more complicated,
+because model spec expects a list of ``runs``.
+Every run can be a 4D file or a list of 3D files.
+Therefore for 3D analysis we need a list of lists and to make one we need a helper function.
 """
 
 if merge_to_4d:
@@ -209,8 +217,7 @@ else:
 """
 Data specific components
 ------------------------
-
-In this tutorial there is only one subject `M00223`.
+In this tutorial there is only one subject ``M00223``.
 
 Below we set some variables to inform the ``datasource`` about the
 layout of our data.  We specify the location of the data, the subject
@@ -231,7 +238,9 @@ info = dict(
 
 infosource = pe.Node(
     interface=util.IdentityInterface(fields=['subject_id']), name="infosource")
-"""Here we set up iteration over all the subjects. The following line
+
+"""
+Here we set up iteration over all the subjects. The following line
 is a particular example of the flexibility of the system.  The
 ``datasource`` attribute ``iterables`` tells the pipeline engine that
 it should repeat the analysis on each of the items in the
@@ -241,12 +250,10 @@ contained in subject_list.
 """
 
 infosource.iterables = ('subject_id', subject_list)
+
 """
-Now we create a :class:`nipype.interfaces.io.DataGrabber` object and
-fill in the information from above about the layout of our data.  The
-:class:`nipype.pipeline.NodeWrapper` module wraps the interface object
-and provides additional housekeeping and pipeline specific
-functionality.
+Now we create a :ref:`nipype.interfaces.io.DataGrabber`
+object and fill in the information from above about the layout of our data.
 """
 
 datasource = pe.Node(
@@ -257,14 +264,14 @@ datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s%s/%s%s_%03d.img'
 datasource.inputs.template_args = info
 datasource.inputs.sort_filelist = True
+
 """
 Experimental paradigm specific components
 -----------------------------------------
-
 Here we create a structure that provides information
 about the experimental paradigm. This is used by the
-:class:`nipype.interfaces.spm.SpecifyModel` to create the information
-necessary to generate an SPM design matrix.
+:ref:`nipype.algorithms.modelgen.SpecifySPMModel`
+to create the information necessary to generate an SPM design matrix.
 """
 
 from nipype.interfaces.base import Bunch
@@ -272,11 +279,13 @@ subjectinfo = [
     Bunch(
         conditions=['Task'], onsets=[list(range(6, 84, 12))], durations=[[6]])
 ]
-"""Setup the contrast structure that needs to be evaluated. This is a
+
+"""
+Setup the contrast structure that needs to be evaluated. This is a
 list of lists. The inner list specifies the contrasts and has the
-following format - [Name,Stat,[list of condition names],[weights on
-those conditions]. The condition names must match the `names` listed
-in the `subjectinfo` function described above.
+following format - ``[Name,Stat,[list of condition names],[weights on
+those conditions]``. The condition names must match the ``names`` listed
+in the ``subjectinfo`` function described above.
 """
 
 cont1 = ('active > rest', 'T', ['Task'], [1])
@@ -297,27 +306,35 @@ l1pipeline.inputs.preproc.smooth.fwhm = [6, 6, 6]
 l1pipeline.inputs.analysis.modelspec.subject_info = subjectinfo
 l1pipeline.inputs.analysis.contrastestimate.contrasts = contrasts
 l1pipeline.inputs.analysis.threshold.contrast_index = 1
+
 """
 Setup the pipeline
 ------------------
-
 The nodes created above do not describe the flow of data. They merely
 describe the parameters used for each function. In this section we
 setup the connections between the nodes such that appropriate outputs
 from nodes are piped into appropriate inputs of other nodes.
 
-Use the :class:`nipype.pipeline.engine.Pipeline` to create a
-graph-based execution pipeline for first level analysis. The config
-options tells the pipeline engine to use `workdir` as the disk
-location to use when running the processes and keeping their
-outputs. The `use_parameterized_dirs` tells the engine to create
-sub-directories under `workdir` corresponding to the iterables in the
-pipeline. Thus for this pipeline there will be subject specific
-sub-directories.
+Use the :class:`~nipype.pipeline.engine.workflows.Workflow` to create a
+graph-based execution pipeline for first level analysis.
+Set the :py:attr:`~nipype.pipeline.engine.workflows.base.EngineBase.base_dir`
+option to instruct the pipeline engine to use ``spm_auditory_tutorial/workingdir``
+as the filesystem location to use when running the processes and keeping their
+outputs.
+Other options can be set via `the configuration file
+<https://miykael.github.io/nipype_tutorial/notebooks/basic_execution_configuration.html>`__.
+For example, ``use_parameterized_dirs`` tells the engine to create
+sub-directories under :py:attr:`~nipype.pipeline.engine.workflows.Workflow.base_dir`,
+corresponding to the iterables in the pipeline.
+Thus, for this pipeline there will be subject specific sub-directories.
 
-The ``nipype.pipeline.engine.Pipeline.connect`` function creates the
-links between the processes, i.e., how data should flow in and out of
-the processing nodes.
+When building a workflow, interface objects are wrapped within
+a :class:`~nipype.pipeline.engine.nodes.Node` so that they can be inserted
+in the workflow.
+
+The :func:`~nipype.pipeline.engine.workflows.Workflow.connect` method creates the
+links between :class:`~nipype.pipeline.engine.nodes.Node` instances, i.e.,
+how data should flow in and out of the processing nodes.
 """
 
 level1 = pe.Workflow(name="level1")
@@ -332,24 +349,24 @@ if merge_to_4d:
 else:
     level1.connect([(datasource, l1pipeline, [('func',
                                                'preproc.realign.in_files')])])
-"""
 
+"""
 Setup storage results
 ---------------------
-
-Use :class:`nipype.interfaces.io.DataSink` to store selected outputs
+Use :ref:`nipype.interfaces.io.DataSink` to store selected outputs
 from the pipeline in a specific location. This allows the user to
 selectively choose important output bits from the analysis and keep
 them.
 
 The first step is to create a datasink node and then to connect
 outputs from the modules above to storage locations. These take the
-following form directory_name[.[@]subdir] where parts between [] are
+following form ``directory_name[.[@]subdir]`` where parts between ``[]`` are
 optional. For example 'realign.@mean' below creates a directory called
 realign in 'l1output/subject_id/' and stores the mean image output
 from the Realign process in the realign directory. If the @ is left
 out, then a sub-directory with the name 'mean' would be created and
 the mean image would be copied to that directory.
+
 """
 
 datasink = pe.Node(interface=nio.DataSink(), name="datasink")
@@ -372,15 +389,15 @@ level1.connect([
      [('analysis.contrastestimate.con_images', 'contrasts.@con'),
       ('analysis.contrastestimate.spmT_images', 'contrasts.@T')]),
 ])
+
 """
 Execute the pipeline
 --------------------
-
 The code discussed above sets up all the necessary data structures
 with appropriate parameters and the connectivity between the
 processes, but does not generate any output. To actually run the
-analysis on the data the ``nipype.pipeline.engine.Pipeline.Run``
-function needs to be called.
+analysis on the data the :func:`~nipype.pipeline.engine.workflows.Workflow.run`
+method needs to be called.
 """
 
 if __name__ == '__main__':

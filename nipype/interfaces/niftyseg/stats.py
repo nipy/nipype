@@ -101,59 +101,40 @@ class UnaryStatsInput(StatsInput):
         argstr="-%s",
         position=4,
         mandatory=True,
-        desc="operation to perform",
+        desc="""\
+Operation to perform:
+
+    * r - The range <min max> of all voxels.
+    * R - The robust range (assuming 2% outliers on both sides) of all voxels
+    * a - Average of all voxels
+    * s - Standard deviation of all voxels
+    * v - Volume of all voxels above 0 (<# voxels> * <volume per voxel>)
+    * vl - Volume of each integer label (<# voxels per label> x <volume per voxel>)
+    * vp - Volume of all probabilsitic voxels (sum(<in>) x <volume per voxel>)
+    * n - Count of all voxels above 0 (<# voxels>)
+    * np - Sum of all fuzzy voxels (sum(<in>))
+    * e - Entropy of all voxels
+    * ne - Normalized entropy of all voxels
+    * x - Location (i j k x y z) of the smallest value in the image
+    * X - Location (i j k x y z) of the largest value in the image
+    * c - Location (i j k x y z) of the centre of mass of the object
+    * B - Bounding box of all nonzero voxels [ xmin xsize ymin ysize zmin zsize ]
+    * xvox - Output the number of voxels in the x direction.
+      Replace x with y/z for other directions.
+    * xdim - Output the voxel dimention in the x direction.
+      Replace x with y/z for other directions.
+
+""",
     )
 
 
 class UnaryStats(StatsCommand):
-    """
-    Interface for executable seg_stats from NiftySeg platform.
+    """Unary statistical operations.
 
-    Interface to use any unary statistical operations that can be performed
-
-    with the seg_stats command-line program.
-
-    See below for those operations::
-
-    r - The range <min max> of all voxels.
-
-    R - The robust range (assuming 2% outliers on both sides) of all voxels
-
-    a - Average of all voxels
-
-    s - Standard deviation of all voxels
-
-    v - Volume of all voxels above 0 (<# voxels> * <volume per voxel>)
-
-    vl - Volume of each integer label (<# voxels per label> * \
-<volume per voxel>)
-
-    vp - Volume of all probabilsitic voxels (sum(<in>) * <volume per voxel>)
-
-    n - Count of all voxels above 0 (<# voxels>)
-
-    np - Sum of all fuzzy voxels (sum(<in>))
-
-    e - Entropy of all voxels
-
-    ne - Normalized entropy of all voxels
-
-    x - Location (i j k x y z) of the smallest value in the image
-
-    X - Location (i j k x y z) of the largest value in the image
-
-    c - Location (i j k x y z) of the centre of mass of the object
-
-    B - Bounding box of all nonzero voxels [ xmin xsize ymin ysize zmin zsize ]
-
-    xvox - Output the number of voxels in the x direction. Replace x with \
-y/z for other directions.
-
-    xdim - Output the voxel dimention in the x direction. Replace x with \
-y/z for other directions.
-
-    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ |
-    `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`_
+    See Also
+    --------
+    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`__ --
+    `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`__
 
     Examples
     --------
@@ -161,18 +142,21 @@ y/z for other directions.
     >>> from nipype.interfaces import niftyseg
     >>> unary = niftyseg.UnaryStats()
     >>> unary.inputs.in_file = 'im1.nii'
+
     >>> # Test v operation
     >>> unary_v = copy.deepcopy(unary)
     >>> unary_v.inputs.operation = 'v'
     >>> unary_v.cmdline
     'seg_stats im1.nii -v'
     >>> unary_v.run()  # doctest: +SKIP
+
     >>> # Test vl operation
     >>> unary_vl = copy.deepcopy(unary)
     >>> unary_vl.inputs.operation = 'vl'
     >>> unary_vl.cmdline
     'seg_stats im1.nii -vl'
     >>> unary_vl.run()  # doctest: +SKIP
+
     >>> # Test x operation
     >>> unary_x = copy.deepcopy(unary)
     >>> unary_x.inputs.operation = 'x'
@@ -202,7 +186,21 @@ class BinaryStatsInput(StatsInput):
         mandatory=True,
         argstr="-%s",
         position=4,
-        desc="operation to perform",
+        desc="""\
+Operation to perform:
+
+    * p - <float> - The <float>th percentile of all voxels intensity (float=[0,100])
+    * sa - <ax> - Average of all voxels
+    * ss - <ax> - Standard deviation of all voxels
+    * svp - <ax> - Volume of all probabilsitic voxels (sum(<in>) x <volume per voxel>)
+    * al - <in2> - Average value in <in> for each label in <in2>
+    * d - <in2> - Calculate the Dice score between all classes in <in> and <in2>
+    * ncc - <in2> - Normalized cross correlation between <in> and <in2>
+    * nmi - <in2> - Normalized Mutual Information between <in> and <in2>
+    * Vl - <csv> - Volume of each integer label <in>. Save to <csv>file.
+    * Nl - <csv> - Count of each label <in>. Save to <csv> file.
+
+""",
     )
 
     operand_file = File(
@@ -224,40 +222,12 @@ class BinaryStatsInput(StatsInput):
 
 
 class BinaryStats(StatsCommand):
-    """
-    Interface for executable seg_stats from NiftySeg platform.
+    """Binary statistical operations.
 
-    Interface to use any binary statistical operations that can be performed
-
-    with the seg_stats command-line program.
-
-    See below for those operations::
-
-    p - <float> - The <float>th percentile of all voxels intensity \
-(float=[0,100])
-
-    sa - <ax> - Average of all voxels
-
-    ss - <ax> - Standard deviation of all voxels
-
-    svp - <ax> - Volume of all probabilsitic voxels (sum(<in>) * \
-<volume per voxel>)
-
-    al - <in2> - Average value in <in> for each label in <in2>
-
-    d - <in2> - Calculate the Dice score between all classes in <in>\
-and <in2>
-
-    ncc - <in2> - Normalized cross correlation between <in> and <in2>
-
-    nmi - <in2> - Normalized Mutual Information between <in> and <in2>
-
-    Vl - <csv> - Volume of each integer label <in>. Save to <csv>file.
-
-    Nl - <csv> - Count of each label <in>. Save to <csv> file.
-
-    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`_ |
-    `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`_
+    See Also
+    --------
+    `Source code <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg>`__ --
+    `Documentation <http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg_documentation>`__
 
     Examples
     --------
