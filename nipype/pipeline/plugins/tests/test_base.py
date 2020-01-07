@@ -42,7 +42,7 @@ wf.run(plugin='MultiProc')
 """
 
 @pytest.mark.regression
-def test_remove_nodes(tmpdir):
+def test_remove_nodes(tmp_path):
     import os
     import nipype.interfaces.utility as niu
     import nipype.pipeline.engine as pe
