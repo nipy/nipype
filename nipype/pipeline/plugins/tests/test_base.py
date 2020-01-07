@@ -67,7 +67,7 @@ def test_remove_nodes(tmp_path):
     wf.base_dir = tmpdir
     wf.config['execution']['remove_node_directories'] = 'true'
     wf.config['execution']['stop_on_first_crash'] = 'false'
-    wf.config['logging']['crashdump_dir'] = tmpdir
+    wf.config['logging']['crashdump_dir'] = str(tmp_path)
     res = wf.run(plugin='MultiProc')
 
     assert os.path.isdir(Path(tmpdir)/'test/functor') is False
