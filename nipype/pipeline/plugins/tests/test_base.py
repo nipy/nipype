@@ -70,4 +70,4 @@ def test_remove_nodes(tmp_path):
     wf.config['logging']['crashdump_dir'] = str(tmp_path)
     res = wf.run(plugin='MultiProc')
 
-    assert os.path.isdir(Path(tmpdir)/'test/functor') is False
+    assert not Path.is_dir(tmp_path / "test" / "functor")
