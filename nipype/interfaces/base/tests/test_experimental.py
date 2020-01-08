@@ -1,4 +1,5 @@
 """Proof of concept."""
+import sys
 from ....utils.filemanip import fname_presuffix
 from ... import base as nib
 from ..experimental import AutoOutputInterface
@@ -45,8 +46,8 @@ def test_AutoOutputInterface():
         output_spec = _OutputSpec
 
         def _run_interface(self, runtime):
-            runtime.stdout = _TOOL_OUTPUT
-            runtime.stderr = ' '.join(('a', 'b', '1', '2', '3.0'))
+            print(_TOOL_OUTPUT)
+            print(' '.join(('a', 'b', '1', '2', '3.0')), file=sys.stderr)
             out_fname = fname_presuffix(
                 self.inputs.woo, suffix='_brain')
             open(out_fname, 'w').close()

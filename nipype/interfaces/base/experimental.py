@@ -1,8 +1,11 @@
 """Experimental Nipype 1.99 interfaces."""
 import os
+import sys
 import platform
 import json
+from io import StringIO
 from string import Formatter
+from contextlib import AbstractContextManager
 from copy import deepcopy
 from datetime import datetime as dt
 from dateutil.parser import parse as parseutc
@@ -275,9 +278,12 @@ class AutoOutputInterface(Interface):
 
         # Grab inputs now, as they should not change during execution
         inputs = self.inputs.get_traitsfree()
+        stdout = StringIO()
+        stderr = StringIO()
         try:
             runtime = self._pre_run_hook(runtime)
-            runtime = self._run_interface(runtime)
+            with RedirectStandardStreams(stdout, stderr=stderr):
+                runtime = self._run_interface(runtime)
             runtime = self._post_run_hook(runtime)
         except Exception as e:
             import traceback
@@ -295,6 +301,8 @@ class AutoOutputInterface(Interface):
 
             runtime.traceback_args = ("\n".join(["%s" % arg for arg in exc_args]),)
 
+            stderr.write("Nipype captured error:\n\n%s" % runtime.traceback)
+
             if not ignore_exception:
                 raise
         finally:
@@ -303,6 +311,7 @@ class AutoOutputInterface(Interface):
                     "{} interface failed to return valid "
                     "runtime object".format(interface.__class__.__name__)
                 )
+
             # This needs to be done always
             runtime.endTime = dt.isoformat(dt.utcnow())
             timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
@@ -341,6 +350,10 @@ class AutoOutputInterface(Interface):
                         "vms_GiB": (vals[:, 3] / 1024).tolist(),
                     }
                 results.runtime = runtime
+
+            # Store captured outputs
+            runtime.stdout = stdout.getvalue()
+            runtime.stderr = stderr.getvalue()
 
             results.outputs = self._find_outputs(runtime)
             os.chdir(syscwd)
@@ -454,3 +467,56 @@ class AutoOutputInterface(Interface):
                 setattr(outputs, name,
                         ''.join((out_template.format(**fields), ext)))
         return outputs
+
+
+class RedirectStandardStreams(AbstractContextManager):
+    """
+    Context that redirects standard out/err.
+
+    Examples
+    --------
+    >>> f = StringIO()
+    >>> with RedirectStandardStreams(f):
+    ...     print("1")
+    ...     print("2", file=sys.stderr)
+    >>> captured = f.getvalue()
+    >>> "1" in captured
+    True
+    >>> "2" in captured
+    True
+
+    >>> out = StringIO()
+    >>> err = StringIO()
+    >>> with RedirectStandardStreams(out, err):
+    ...     print("1")
+    ...     print("2", file=sys.stderr)
+    >>> captured_out = out.getvalue()
+    >>> "1" in captured_out
+    True
+    >>> "2" in captured_out
+    False
+    >>> captured_err = err.getvalue()
+    >>> "1" in captured_err
+    False
+    >>> "2" in captured_err
+    True
+
+    """
+
+    _defaults = (sys.stdout, sys.stderr)
+
+    def __init__(self, stdout, stderr=None):
+        """Redirect standard streams."""
+        self._out_target = stdout
+        self._err_target = stderr
+
+    def __enter__(self):
+        sys.stdout = self._out_target
+        sys.stderr = self._err_target
+        if self._err_target is None:
+            sys.stderr = self._out_target
+            return self._out_target
+        return self._out_target, self._err_target
+
+    def __exit__(self, exctype, excinst, exctb):
+        sys.stdout, sys.stderr = self._defaults
