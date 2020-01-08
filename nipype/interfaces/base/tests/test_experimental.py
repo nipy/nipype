@@ -2,7 +2,7 @@
 import sys
 from ....utils.filemanip import fname_presuffix
 from ... import base as nib
-from ..experimental import AutoOutputInterface
+from ..experimental import Interface
 
 _TOOL_OUTPUT = r"""\
   _____________
@@ -41,9 +41,9 @@ def test_AutoOutputInterface():
         out_std = nib.Str(stdout=True)
         out_err = nib.traits.Float(stderr=_parse_err_cb)
 
-    class TestInterface(AutoOutputInterface):
-        input_spec = _InputSpec
-        output_spec = _OutputSpec
+    class TestInterface(Interface):
+        _input_spec = _InputSpec
+        _output_spec = _OutputSpec
 
         def _run_interface(self, runtime):
             print(_TOOL_OUTPUT)
