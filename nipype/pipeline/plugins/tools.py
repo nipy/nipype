@@ -125,6 +125,9 @@ except ImportError:
     can_import_matplotlib = False
     pass
 
+import os
+os.environ['NO_ET'] = "1"
+
 from nipype import config, logging
 from nipype.utils.filemanip import loadpkl, savepkl
 from socket import gethostname

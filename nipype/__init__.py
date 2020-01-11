@@ -14,11 +14,7 @@ Top-level module API
 import os
 from distutils.version import LooseVersion
 
-from .info import (
-    URL as __url__,
-    STATUS as __status__,
-    __version__,
-)
+from .info import URL as __url__, STATUS as __status__, __version__
 from .utils.config import NipypeConfig
 from .utils.logger import Logging
 from .refs import due
@@ -105,6 +101,8 @@ def check_latest_version(raise_exception=False):
                         packname="nipype", version=__version__, latest=latest["version"]
                     )
                 )
+            else:
+                logger.info("No new version available.")
             if latest["bad_versions"] and any(
                 [
                     LooseVersion(__version__) == LooseVersion(ver)
