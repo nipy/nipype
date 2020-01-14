@@ -76,7 +76,7 @@ def run_node(node, updatehash, taskid):
 def process_initializer(cwd):
     """Initializes the environment of the child process"""
     os.chdir(cwd)
-    os.environ["NO_ET"] = "1"
+    os.environ["NO_NIPYPE_ET"] = "1"
 
 
 class MultiProcPlugin(DistributedPluginBase):

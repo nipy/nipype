@@ -170,7 +170,7 @@ class BaseInterface(Interface):
     ):
         if (
             config.getboolean("execution", "check_version")
-            and "NO_NIPYPE_ET" in os.environ
+            and "NO_NIPYPE_ET" not in os.environ
         ):
             from ... import check_latest_version
 
