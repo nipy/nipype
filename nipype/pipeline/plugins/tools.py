@@ -126,9 +126,13 @@ except ImportError:
     pass
 
 import os
-os.environ['NO_ET'] = "1"
-
+value = os.environ.get('NO_NIPYPE_ET', None)
+if value is None:
+    os.environ['NO_NIPYPE_ET'] = "1"
 from nipype import config, logging
+if value is None:
+    del os.environ['NO_NIPYPE_ET']
+
 from nipype.utils.filemanip import loadpkl, savepkl
 from socket import gethostname
 from traceback import format_exception
