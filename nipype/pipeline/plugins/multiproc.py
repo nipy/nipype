@@ -151,7 +151,7 @@ class MultiProcPlugin(DistributedPluginBase):
             # Python < 3.7 does not support initialization or contexts
             self.pool = ProcessPoolExecutor(max_workers=self.processors)
             result_future = self.pool.submit(process_initializer, self._cwd)
-            wait(result_future, timeout=5)
+            wait([result_future], timeout=5)
 
         self._stats = None
 
