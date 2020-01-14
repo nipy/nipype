@@ -128,10 +128,9 @@ except ImportError:
 import os
 value = os.environ.get('NO_NIPYPE_ET', None)
 if value is None:
+    # disable ET for any submitted job
     os.environ['NO_NIPYPE_ET'] = "1"
 from nipype import config, logging
-if value is None:
-    del os.environ['NO_NIPYPE_ET']
 
 from nipype.utils.filemanip import loadpkl, savepkl
 from socket import gethostname
