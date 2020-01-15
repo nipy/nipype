@@ -29,7 +29,7 @@ env:
       CI_SKIP_TEST=1
     - INSTALL_DEB_DEPENDECIES=true
       NIPYPE_EXTRAS="doc,tests,nipy,profiler"
-      EXTRA_PIP_FLAGS="--pre $EXTRA_PIP_FLAGS --find-links $PRE_WHEELS"
+      EXTRA_PIP_FLAGS="--pre $EXTRA_PIP_FLAGS --find-links $PRE_WHEELS --upgrade"
       CI_SKIP_TEST=1
 
 matrix:
