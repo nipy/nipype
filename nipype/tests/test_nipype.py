@@ -25,9 +25,9 @@ def _check_no_et():
     import os
     from unittest.mock import patch
 
-    et = os.getenv("NO_NIPYPE_ET") is None
+    et = os.getenv("NIPYPE_NO_ET") is None
 
-    with patch.dict("os.environ", {"NO_NIPYPE_ET": "1"}):
+    with patch.dict("os.environ", {"NIPYPE_NO_ET": "1"}):
         from nipype.interfaces.base import BaseInterface
 
         ver_data = BaseInterface._etelemetry_version_data
@@ -67,13 +67,13 @@ def test_no_et(tmp_path):
         res = wf1.run()
         assert next(iter(res.nodes)).result.outputs.out is True
 
-        # MultiProc run - environment initialized with NO_NIPYPE_ET
+        # MultiProc run - environment initialized with NIPYPE_NO_ET
         wf2 = pe.Workflow(name="wf2", base_dir=str(tmp_path))
         wf2.add_nodes([pe.Node(niu.Function(function=_check_no_et), name="n")])
         res = wf2.run(plugin="MultiProc", plugin_args={"n_procs": 1})
         assert next(iter(res.nodes)).result.outputs.out is False
 
-        # LegacyMultiProc run - environment initialized with NO_NIPYPE_ET
+        # LegacyMultiProc run - environment initialized with NIPYPE_NO_ET
         wf3 = pe.Workflow(name="wf3", base_dir=str(tmp_path))
         wf3.add_nodes([pe.Node(niu.Function(function=_check_no_et), name="n")])
         res = wf3.run(plugin="LegacyMultiProc", plugin_args={"n_procs": 1})
@@ -93,7 +93,7 @@ def test_no_et(tmp_path):
         res = wf4.run(plugin="MultiProc", plugin_args={"n_procs": 1})
         assert next(iter(res.nodes)).result.outputs.out is True
 
-        # LegacyMultiProc run - environment initialized with NO_NIPYPE_ET
+        # LegacyMultiProc run - environment initialized with NIPYPE_NO_ET
         wf5 = pe.Workflow(name="wf5", base_dir=str(tmp_path))
         wf5.add_nodes(
             [

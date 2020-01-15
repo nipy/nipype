@@ -156,7 +156,7 @@ except ImportError:
 def process_initializer(cwd):
     """Initializes the environment of the child process"""
     os.chdir(cwd)
-    os.environ["NO_NIPYPE_ET"] = "1"
+    os.environ["NIPYPE_NO_ET"] = "1"
 
 
 class LegacyMultiProcPlugin(DistributedPluginBase):
