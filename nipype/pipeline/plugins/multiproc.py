@@ -140,7 +140,7 @@ class MultiProcPlugin(DistributedPluginBase):
         )
 
         try:
-            mp_context = mp.context.get_context(self.plugin_args.get("mp_context"))
+            mp_context = mp.get_context(self.plugin_args.get("mp_context"))
             self.pool = ProcessPoolExecutor(
                 max_workers=self.processors,
                 initializer=process_initializer,
