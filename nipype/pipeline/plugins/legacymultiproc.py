@@ -153,6 +153,12 @@ except ImportError:
         Process = NonDaemonProcess
 
 
+def process_initializer(cwd):
+    """Initializes the environment of the child process"""
+    os.chdir(cwd)
+    os.environ["NO_NIPYPE_ET"] = "1"
+
+
 class LegacyMultiProcPlugin(DistributedPluginBase):
     """
     Execute workflow with multiprocessing, not sending more jobs at once
@@ -223,7 +229,7 @@ class LegacyMultiProcPlugin(DistributedPluginBase):
             self.pool = NipypePool(
                 processes=self.processors,
                 maxtasksperchild=maxtasks,
-                initializer=os.chdir,
+                initializer=process_initializer,
                 initargs=(self._cwd,),
             )
         except TypeError:
