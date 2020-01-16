@@ -168,7 +168,10 @@ class BaseInterface(Interface):
     def __init__(
         self, from_file=None, resource_monitor=None, ignore_exception=False, **inputs
     ):
-        if config.getboolean("execution", "check_version"):
+        if (
+            config.getboolean("execution", "check_version")
+            and "NIPYPE_NO_ET" not in os.environ
+        ):
             from ... import check_latest_version
 
             if BaseInterface._etelemetry_version_data is None:
