@@ -125,7 +125,13 @@ except ImportError:
     can_import_matplotlib = False
     pass
 
+import os
+value = os.environ.get('NIPYPE_NO_ET', None)
+if value is None:
+    # disable ET for any submitted job
+    os.environ['NIPYPE_NO_ET'] = "1"
 from nipype import config, logging
+
 from nipype.utils.filemanip import loadpkl, savepkl
 from socket import gethostname
 from traceback import format_exception
