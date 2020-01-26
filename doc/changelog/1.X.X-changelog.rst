@@ -1,7 +1,9 @@
-1.4.1 (To Be Determined)
+1.4.1 (January 27, 2020)
 ========================
 (`Full changelog <https://github.com/nipy/nipype/milestone/1.4.1?closed=1>`__)
 
+  * FIX: DataSink to S3 buckets (https://github.com/nipy/nipype/pull/3130)
+  * FIX: improve version checking for nodes of workflows (https://github.com/nipy/nipype/pull/3152)
   * FIX: mapnode to generate result file when crashes in single node mode (https://github.com/nipy/nipype/pull/3143)
   * FIX: Can't seem to import workflows from niflows in CircleCI (https://github.com/nipy/nipype/pull/3134)
   * FIX: Repair aftermath of docs refactor (https://github.com/nipy/nipype/pull/3133)
@@ -11,6 +13,7 @@
   * DOC: Documentation overhaul (https://github.com/nipy/nipype/pull/3124)
   * DOC: Deep revision of documentation building (https://github.com/nipy/nipype/pull/3120)
   * DOC: Deduplicate code for Sphinx's APIdoc generation (https://github.com/nipy/nipype/pull/3119)
+  * MNT: Update requirements.txt post-1.4 (https://github.com/nipy/nipype/pull/3153)
 
 1.4.0 (December 20, 2019)
 =========================
