@@ -11,9 +11,6 @@
       "orcid": "0000-0002-6533-164X"
     },
     {
-      "name": "Burns, Christopher"
-    },
-    {
       "affiliation": "University of Iowa",
       "name": "Johnson, Hans",
       "orcid": "0000-0001-9513-2660"
@@ -34,12 +31,12 @@
       "orcid": "0000-0001-8282-2988"
     },
     {
+      "name": "Burns, Christopher"
+    },
+    {
       "affiliation": "The University of Iowa",
       "name": "Ellis, David Gage",
       "orcid": "0000-0002-3718-6836"
-    },
-    {
-      "name": "Yvernault, Benjamin"
     },
     {
       "name": "Hamalainen, Carlo",
@@ -49,6 +46,9 @@
       "affiliation": "The Laboratory for Investigative Neurophysiology (The LINE), Department of Radiology and Department of Clinical Neurosciences, Lausanne, Switzerland; Center for Biomedical Imaging (CIBM), Lausanne, Switzerland",
       "name": "Notter, Michael Philipp",
       "orcid": "0000-0002-5866-047X"
+    },
+    {
+      "name": "Yvernault, Benjamin"
     },
     {
       "affiliation": "Florida International University",
@@ -82,6 +82,10 @@
       "name": "Madison, Cindee"
     },
     {
+      "affiliation": "Concordia University",
+      "name": "Benderoff, Erin"
+    },
+    {
       "affiliation": "Developer",
       "name": "Clark, Daniel",
       "orcid": "0000-0002-8121-8954"
@@ -95,11 +99,6 @@
       "orcid": "0000-0002-3982-4416"
     },
     {
-      "affiliation": "National Institute of Mental Health",
-      "name": "Nielson, Dylan M.",
-      "orcid": "0000-0003-4613-6643"
-    },
-    {
       "affiliation": "UC Berkeley - UCSF Graduate Program in Bioengineering",
       "name": "Keshavan, Anisha",
       "orcid": "0000-0003-3554-043X"
@@ -110,6 +109,11 @@
       "orcid": "0000-0002-0068-230X"
     },
     {
+      "affiliation": "National Institute of Mental Health",
+      "name": "Nielson, Dylan M.",
+      "orcid": "0000-0003-4613-6643"
+    },
+    {
       "affiliation": "Mayo Clinic, Neurology, Rochester, MN, USA",
       "name": "Dayan, Michael",
       "orcid": "0000-0002-2666-0969"
@@ -118,18 +122,13 @@
       "name": "Modat, Marc"
     },
     {
-      "affiliation": "Molecular Imaging Research Center, CEA, France",
-      "name": "Bougacha, Salma"
-    },
-    {
       "affiliation": "CNRS LTCI, Telecom ParisTech, Universit\u00e9 Paris-Saclay",
       "name": "Gramfort, Alexandre",
       "orcid": "0000-0001-9791-4404"
     },
     {
-      "affiliation": "Dartmouth College",
-      "name": "Visconti di Oleggio Castello, Matteo",
-      "orcid": "0000-0001-7931-5272"
+      "affiliation": "Molecular Imaging Research Center, CEA, France",
+      "name": "Bougacha, Salma"
     },
     {
       "name": "Pinsard, Basile"
@@ -148,6 +147,11 @@
       "orcid": "0000-0003-0679-1985"
     },
     {
+      "affiliation": "Dartmouth College",
+      "name": "Visconti di Oleggio Castello, Matteo",
+      "orcid": "0000-0001-7931-5272"
+    },
+    {
       "affiliation": "Dartmouth College: Hanover, NH, United States",
       "name": "Halchenko, Yaroslav O.",
       "orcid": "0000-0003-3456-2493"
@@ -158,18 +162,14 @@
       "orcid": "0000-0002-5544-7577"
     },
     {
-      "affiliation": "Concordia University",
-      "name": "Benderoff, Erin"
+      "affiliation": "INRIA",
+      "name": "Varoquaux, Gael",
+      "orcid": "0000-0003-1076-5122"
     },
     {
       "affiliation": "Stanford University",
       "name": "\u0106iri\u0107 , Rastko",
       "orcid": "0000-0001-6347-7939"
-    },
-    {
-      "affiliation": "INRIA",
-      "name": "Varoquaux, Gael",
-      "orcid": "0000-0003-1076-5122"
     },
     {
       "name": "Moloney, Brendan"
@@ -188,14 +188,14 @@
       "name": "Clark, Michael G. "
     },
     {
-      "affiliation": "Athena EPI, Inria Sophia-Antipolis",
-      "name": "Wassermann, Demian",
-      "orcid": "0000-0001-5194-6056"
-    },
-    {
       "affiliation": "UC San Diego",
       "name": "Cipollini, Ben",
       "orcid": "0000-0002-7782-0790"
+    },
+    {
+      "affiliation": "Athena EPI, Inria Sophia-Antipolis",
+      "name": "Wassermann, Demian",
+      "orcid": "0000-0001-5194-6056"
     },
     {
       "affiliation": "ARAMIS LAB, Brain and Spine Institute (ICM), Paris, France.",
@@ -208,19 +208,15 @@
       "orcid": "0000-0003-1057-1336"
     },
     {
-      "name": "Buchanan, Colin"
-    },
-    {
       "affiliation": "Otto-von-Guericke-University Magdeburg, Germany",
       "name": "Hanke, Michael",
       "orcid": "0000-0001-6398-6370"
     },
     {
-      "name": "Tungaraza, Rosalia"
+      "name": "Buchanan, Colin"
     },
     {
-      "affiliation": "Nathan s Kline institute for psychiatric research",
-      "name": "Sikka, Sharad"
+      "name": "Tungaraza, Rosalia"
     },
     {
       "affiliation": "Australian eHealth Research Centre, Commonwealth Scientific and Industrial Research Organisation; University of Queensland",
@@ -238,15 +234,19 @@
       "orcid": "0000-0003-1988-5091"
     },
     {
+      "affiliation": "Nathan s Kline institute for psychiatric research",
+      "name": "Sikka, Sharad"
+    },
+    {
       "name": "Forbes, Jessica"
+    },
+    {
+      "name": "Mordom, David"
     },
     {
       "affiliation": "Duke University",
       "name": "Iqbal, Shariq",
       "orcid": "0000-0003-2766-8425"
-    },
-    {
-      "name": "Mordom, David"
     },
     {
       "affiliation": "University College London",
@@ -306,12 +306,12 @@
       "orcid": "0000-0002-6652-3512"
     },
     {
+      "name": "Ginsburg, Daniel"
+    },
+    {
       "affiliation": "National University Singapore",
       "name": "Schaefer, Alexander",
       "orcid": "0000-0001-6488-4739"
-    },
-    {
-      "name": "Ginsburg, Daniel"
     },
     {
       "affiliation": "Florida International University",
@@ -346,16 +346,11 @@
       "name": "Erickson, Drew"
     },
     {
-      "affiliation": "Child Mind Institute",
-      "name": "Giavasis, Steven"
-    },
-    {
       "name": "Ghayoor, Ali"
     },
     {
-      "affiliation": "University of Zurich",
-      "name": "Liem, Franz",
-      "orcid": "0000-0003-0646-4810"
+      "affiliation": "Child Mind Institute",
+      "name": "Giavasis, Steven"
     },
     {
       "affiliation": "University of Texas at Austin",
@@ -363,10 +358,12 @@
       "orcid": "0000-0001-9062-3778"
     },
     {
-      "name": "K\u00fcttner, Ren\u00e9"
+      "affiliation": "University of Zurich",
+      "name": "Liem, Franz",
+      "orcid": "0000-0003-0646-4810"
     },
     {
-      "name": "Millman, Jarrod"
+      "name": "K\u00fcttner, Ren\u00e9"
     },
     {
       "affiliation": "Neurospin/Unicog/Inserm/CEA",
@@ -377,6 +374,12 @@
       "affiliation": "NIMH IRP",
       "name": "Lee, John A.",
       "orcid": "0000-0001-5884-4247"
+    },
+    {
+      "name": "Millman, Jarrod"
+    },
+    {
+      "name": "Lai, Jeff"
     },
     {
       "name": "Zhou, Dale"
@@ -410,6 +413,11 @@
     },
     {
       "name": "Hallquist, Michael"
+    },
+    {
+      "affiliation": "Korea Advanced Institute of Science and Technology",
+      "name": "Kim, Sin",
+      "orcid": "0000-0003-4652-3758"
     },
     {
       "affiliation": "University of Pennsylvania",
@@ -448,6 +456,11 @@
       "name": "Park, Anne"
     },
     {
+      "affiliation": "Max Planck UCL Centre for Computational Psychiatry and Ageing Research, University College London",
+      "name": "Stojic, Hrvoje",
+      "orcid": "0000-0002-9699-9052"
+    },
+    {
       "affiliation": "Child Mind Institute",
       "name": "Craddock, R. Cameron",
       "orcid": "0000-0002-4950-1303"
@@ -463,9 +476,9 @@
       "name": "Perkins, L. Nathan"
     },
     {
-      "affiliation": "Korea Advanced Institute of Science and Technology",
-      "name": "Kim, Sin",
-      "orcid": "0000-0003-4652-3758"
+      "affiliation": "University of Amsterdam",
+      "name": "Snoek, Lukas",
+      "orcid": "0000-0001-8972-204X"
     },
     {
       "affiliation": "Donders Institute for Brain, Cognition and Behavior, Center for Cognitive Neuroimaging",
@@ -476,19 +489,9 @@
       "name": "Inati, Souheil"
     },
     {
-      "affiliation": "Department of Neuropsychiatry, University of Pennsylvania",
-      "name": "Cieslak, Matthew",
-      "orcid": "0000-0002-1931-4734"
-    },
-    {
       "affiliation": "GIGA Institute",
       "name": "Grignard, Martin",
       "orcid": "0000-0001-5549-1861"
-    },
-    {
-      "affiliation": "University of Amsterdam",
-      "name": "Snoek, Lukas",
-      "orcid": "0000-0001-8972-204X"
     },
     {
       "affiliation": "Yale University; New Haven, CT, United States",
@@ -506,18 +509,13 @@
       "orcid": "0000-0003-2077-3070"
     },
     {
-      "name": "Matsubara, K"
-    },
-    {
       "name": "Urchs, Sebastian"
     },
     {
       "name": "Blair, Ross"
     },
     {
-      "affiliation": "Max Planck UCL Centre for Computational Psychiatry and Ageing Research, University College London",
-      "name": "Stojic, Hrvoje",
-      "orcid": "0000-0002-9699-9052"
+      "name": "Matsubara, K"
     },
     {
       "affiliation": "The University of Texas at Austin",
@@ -533,15 +531,17 @@
       "orcid": "0000-0003-4454-6171"
     },
     {
+      "affiliation": "Leibniz Institute for Neurobiology",
+      "name": "Stadler, J\u00f6rg",
+      "orcid": "0000-0003-4313-129X"
+    },
+    {
       "affiliation": "University of Newcastle, Australia",
       "name": "Cooper, Gavin",
       "orcid": "0000-0002-7186-5293"
     },
     {
       "name": "Haehn, Daniel"
-    },
-    {
-      "name": "Tambini, Arielle"
     },
     {
       "affiliation": "Duke University",
@@ -557,14 +557,14 @@
       "name": "Noel, Maxime"
     },
     {
+      "affiliation": "Department of Neuropsychiatry, University of Pennsylvania",
+      "name": "Cieslak, Matthew",
+      "orcid": "0000-0002-1931-4734"
+    },
+    {
       "affiliation": "Department of Psychology, Stanford University; Parietal, INRIA",
       "name": "Durnez, Joke",
       "orcid": "0000-0001-9030-2202"
-    },
-    {
-      "affiliation": "Leibniz Institute for Neurobiology",
-      "name": "Stadler, J\u00f6rg",
-      "orcid": "0000-0003-4313-129X"
     },
     {
       "affiliation": "CNRS, UMS3552 IRMaGe",
@@ -582,7 +582,19 @@
       "orcid": "0000-0003-2076-5329"
     },
     {
+      "affiliation": "University of Pittsburgh",
+      "name": "Meyers, Benjamin",
+      "orcid": "0000-0001-9137-4363"
+    },
+    {
+      "name": "Tambini, Arielle"
+    },
+    {
       "name": "Weinstein, Alejandro"
+    },
+    {
+      "affiliation": "Universidad de Guadalajara",
+      "name": "Gonz\u00e1lez Orozco, Abel A."
     },
     {
       "name": "Harms, Robbert"
@@ -613,6 +625,10 @@
       "name": "Falkiewicz, Marcel"
     },
     {
+      "affiliation": "Institute of Imaging & Computer Vision, RWTH Aachen University, Germany",
+      "name": "Weninger, Leon"
+    },
+    {
       "name": "Podranski, Kornelius"
     },
     {
@@ -629,18 +645,10 @@
       "orcid": "0000-0001-9800-4816"
     },
     {
-      "name": "Shachnev, Dmitry"
-    },
-    {
       "name": "Tarbert, Claire"
     },
     {
       "name": "Cheung, Brian"
-    },
-    {
-      "affiliation": "University of Pittsburgh",
-      "name": "Meyers, Benjamin",
-      "orcid": "0000-0001-9137-4363"
     },
     {
       "affiliation": "Washington University in St Louis",
@@ -651,8 +659,7 @@
       "name": "Davison, Andrew"
     },
     {
-      "affiliation": "Institute of Imaging & Computer Vision, RWTH Aachen University, Germany",
-      "name": "Weninger, Leon"
+      "name": "Shachnev, Dmitry"
     },
     {
       "affiliation": "Technical University Munich",
@@ -678,9 +685,6 @@
       "affiliation": "University of Cambridge",
       "name": "McNamee, Daniel",
       "orcid": "0000-0001-9928-4960"
-    },
-    {
-      "name": "Lai, Jeff"
     },
     {
       "name": "Arias, Jaime"

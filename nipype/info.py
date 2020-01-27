@@ -5,7 +5,7 @@ docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 
 # nipype version information
 # Remove -dev for release
-__version__ = "1.4.1-dev"
+__version__ = "1.4.1"
 
 
 def get_nipype_gitversion():
