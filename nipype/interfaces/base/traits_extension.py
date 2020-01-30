@@ -28,10 +28,15 @@ from collections import Sequence
 # perform all external trait imports here
 from traits import __version__ as traits_version
 import traits.api as traits
-from traits.trait_handlers import TraitType, NoDefaultSpecified
+from traits.api import TraitType, Unicode
 from traits.trait_base import _Undefined
+try:
+    # Moved in traits 6.0
+    from traits.trait_type import NoDefaultSpecified
+except ImportError:
+    # Pre-6.0
+    from traits.trait_handlers import NoDefaultSpecified
 
-from traits.api import Unicode
 from future import standard_library
 from ...utils.filemanip import Path, USING_PATHLIB2, path_resolve
 
