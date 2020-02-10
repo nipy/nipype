@@ -1573,9 +1573,8 @@ class MultipleRegressDesign(BaseInterface):
                     convals = np.zeros((ntcons, 1))
                     for tcon in con[2]:
                         convals[tconmap[self.inputs.contrasts.index(tcon)]] = 1
-                    fcon_txt.append(" ".join(["%d" % val for val in convals]))
-                    fcon_txt = "\n".join(fcon_txt)
-            fcon_txt += "\n"
+                    fcon_txt.append(" ".join(["%d" % val for val in convals]))                    
+            fcon_txt = "\n".join(fcon_txt) + "\n"
         # write group file
         grp_txt = ["/NumWaves       1", "/NumPoints      %d" % npoints, "", "/Matrix"]
         for i in range(npoints):
