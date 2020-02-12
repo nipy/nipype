@@ -31,6 +31,8 @@ if __name__ == "__main__":
         if line
     )
 
+    existing_creators = set(creator_map.keys())
+
     committers = []
 
     # Stable sort:
@@ -40,11 +42,17 @@ if __name__ == "__main__":
         matches = process.extract(
             committer, creator_map.keys(), scorer=fuzz.token_sort_ratio, limit=2
         )
-        if matches[0][1] <= 80:
-            # skip unmatched names
+        match, score = matches[0]
+        if score <= 80:
             print("No entry to sort:", committer)
             continue
-        committers.append(matches[0][0])
+        existing_creators.discard(match)
+        committers.append(match)
+
+    for unmatched in sorted(existing_creators):
+        print("No matching commits:", unmatched)
+        # Keep the entries to avoid removing people for bad matching
+        committers.append(unmatched)
 
     for last_author in CREATORS_LAST:
         if committers[-1] != last_author:
