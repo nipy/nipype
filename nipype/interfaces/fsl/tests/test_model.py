@@ -25,7 +25,9 @@ def test_MultipleRegressDesign(tmpdir):
             os.path.exists(eval('res.outputs.design_'+ii))
         )
 
-    design_mat_expected_content = """/NumWaves       3
+    expected_content = {}
+
+    expected_content["design_mat"] = """/NumWaves       3
 /NumPoints      3
 /PPheights      3.000000e+00 5.000000e-01 1.000000e+00
 
