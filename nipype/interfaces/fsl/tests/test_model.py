@@ -66,4 +66,5 @@ def test_MultipleRegressDesign(tmpdir):
 1
 """
     for ii in ["mat", "con", "fts", "grp"]:
-        assert Path(eval('res.outputs.design_'+ii)).read_text() in eval( "design_" + ii + "_expected_content")
+        outfile = "design_" + ii
+        assert Path(outputs[outfile]).read_text() == expected_content[outfile]
