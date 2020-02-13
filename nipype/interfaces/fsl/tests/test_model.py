@@ -6,23 +6,23 @@ import os
 import pytest
 import nipype.interfaces.fsl.model as fsl
 from nipype.interfaces.fsl import no_fsl
+from pathlib import Path
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_MultipleRegressDesign(tmpdir):
-    tmpdir.chdir()
     foo = fsl.MultipleRegressDesign()
     foo.inputs.regressors = dict(
         voice_stenght=[1, 1, 1], age=[0.2, 0.4, 0.5], BMI=[1, -1, 2]
     )
     con1 = ["voice_and_age", "T", ["age", "voice_stenght"], [0.5, 0.5]]
     con2 = ["just_BMI", "T", ["BMI"], [1]]
-    foo.inputs.contrasts = [con1, con2, ["con3", "F", [con1, con2]]]
+    foo.inputs.contrasts = [con1, con2, ["con3", "F", [con1, con2]], ["con4", "F", [con2]]]
     res = foo.run()
 
     for ii in ["mat", "con", "fts", "grp"]:
         assert (
-            getattr(res.outputs, "design_" + ii) == tmpdir.join("design." + ii).strpath
+            os.path.exists(eval('res.outputs.design_'+ii))
         )
 
     design_mat_expected_content = """/NumWaves       3
@@ -48,10 +48,11 @@ def test_MultipleRegressDesign(tmpdir):
 """
 
     design_fts_expected_content = """/NumWaves       2
-/NumContrasts   1
+/NumContrasts   2
 
 /Matrix
 1 1
+0 1
 """
 
     design_grp_expected_content = """/NumWaves       1
@@ -63,6 +64,4 @@ def test_MultipleRegressDesign(tmpdir):
 1
 """
     for ii in ["mat", "con", "fts", "grp"]:
-        assert tmpdir.join("design." + ii).read() == eval(
-            "design_" + ii + "_expected_content"
-        )
+        assert Path(eval('res.outputs.design_'+ii)).read_text() in eval( "design_" + ii + "_expected_content")
