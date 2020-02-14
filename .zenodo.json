@@ -345,12 +345,12 @@
       "name": "Kleesiek, Jens"
     },
     {
-      "name": "Erickson, Drew"
-    },
-    {
       "affiliation": "The University of Iowa",
       "name": "Ghayoor, Ali",
       "orcid": "0000-0002-8858-1254"
+    },
+    {
+      "name": "Erickson, Drew"
     },
     {
       "affiliation": "Child Mind Institute",
@@ -395,6 +395,11 @@
       "affiliation": "NIMH, Scientific and Statistical Computing Core",
       "name": "Glen, Daniel",
       "orcid": "0000-0001-8456-5647"
+    },
+    {
+      "affiliation": "Department of Psychology, University of Bielefeld, Bielefeld, Germany.",
+      "name": "Doll, Anna",
+      "orcid": "0000-0002-0799-0831"
     },
     {
       "name": "Renfro, Mandy"
@@ -460,11 +465,6 @@
       "name": "Park, Anne"
     },
     {
-      "affiliation": "Max Planck UCL Centre for Computational Psychiatry and Ageing Research, University College London",
-      "name": "Stojic, Hrvoje",
-      "orcid": "0000-0002-9699-9052"
-    },
-    {
       "affiliation": "Child Mind Institute",
       "name": "Craddock, R. Cameron",
       "orcid": "0000-0002-4950-1303"
@@ -480,9 +480,9 @@
       "name": "Perkins, L. Nathan"
     },
     {
-      "affiliation": "University of Amsterdam",
-      "name": "Snoek, Lukas",
-      "orcid": "0000-0001-8972-204X"
+      "affiliation": "Max Planck UCL Centre for Computational Psychiatry and Ageing Research, University College London",
+      "name": "Stojic, Hrvoje",
+      "orcid": "0000-0002-9699-9052"
     },
     {
       "affiliation": "Donders Institute for Brain, Cognition and Behavior, Center for Cognitive Neuroimaging",
@@ -496,6 +496,11 @@
       "affiliation": "GIGA Institute",
       "name": "Grignard, Martin",
       "orcid": "0000-0001-5549-1861"
+    },
+    {
+      "affiliation": "University of Amsterdam",
+      "name": "Snoek, Lukas",
+      "orcid": "0000-0001-8972-204X"
     },
     {
       "affiliation": "Yale University; New Haven, CT, United States",
@@ -762,11 +767,6 @@
       "affiliation": "Max Planck Institute for Human Cognitive and Brain Sciences, Leipzig, Germany.",
       "name": "Mihai, Paul Glad",
       "orcid": "0000-0001-5715-6442"
-    },
-    {
-      "affiliation": "Department of Psychology, University of Bielefeld, Bielefeld, Germany.",
-      "name": "Doll, Anna",
-      "orcid": "0000-0002-0799-0831"
     },
     {
       "name": "Lai, Jeff"
