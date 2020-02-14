@@ -1,3 +1,11 @@
+1.4.2 (February 14, 2020)
+=========================
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.4.2?closed=1>`__)
+
+  * FIX: Allow ``fsl.MultipleRegressDesign`` to create multiple F-tests (https://github.com/nipy/nipype/pull/3166)
+  * FIX: Reliably parse SGE job IDs in the presence of warnings (https://github.com/nipy/nipype/pull/3168)
+  * FIX: Move TraitType import, handle API change for NoDefaultSpecified (https://github.com/nipy/nipype/pull/3159)
+
 1.4.1 (January 27, 2020)
 ========================
 (`Full changelog <https://github.com/nipy/nipype/milestone/1.4.1?closed=1>`__)
