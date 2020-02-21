@@ -37,13 +37,13 @@ with TemporaryDirectory() as tmpdir:
     source_dir = Path(tmpdir) / "package" / "niflow" / "nipype1" / "examples"
     shutil.copytree(source_dir, python_dir)
 
-sp.run(["python", ex2rst, "--project", "Nipype", "--outdir", str(example_dir),
+sp.run(["python", ex2rst, "--outdir", str(example_dir), str(python_dir),
         "-x", str(python_dir / "test_spm.py"),
         "-x", str(python_dir / "__init__.py"),
-        "-x", str(python_dir / "cli.py"),
-        str(python_dir)], check=True)
-sp.run(["python", ex2rst, "--project", "Nipype", "--outdir", str(example_dir),
-        str(python_dir / "frontiers_paper")], check=True)
+        "-x", str(python_dir / "cli.py")],
+       check=True)
+sp.run(["python", ex2rst, "--outdir", str(example_dir), str(python_dir / "frontiers_paper")],
+       check=True)
 
 
 # If extensions (or modules to document with autodoc) are in another directory,

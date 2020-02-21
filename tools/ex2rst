@@ -187,10 +187,13 @@ def exfile2rstfile(filename, opts):
 .. admonition:: Example source code
 
    You can download :download:`the full source code of this example <%s>`.
-   This same script is also included in the %s source distribution under the
-   :file:`examples` directory.
+   This same script is also included in `%s <%s>`__ under the :file:`%s`
+   directory.
 
-""" % (os.path.relpath(filename, opts.outdir), opts.project)
+""" % (os.path.relpath(filename, opts.outdir),
+       "Nipype1 Examples Niflow",
+       "https://github.com/niflows/nipype1-examples",
+       "package/niflow/nipype1/examples")
 
         dfile.write(msg)
 
