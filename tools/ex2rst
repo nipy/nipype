@@ -190,7 +190,7 @@ def exfile2rstfile(filename, opts):
    This same script is also included in the %s source distribution under the
    :file:`examples` directory.
 
-""" % (filename, opts.project)
+""" % (os.path.relpath(filename, opts.outdir), opts.project)
 
         dfile.write(msg)
 

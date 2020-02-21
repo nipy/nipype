@@ -24,7 +24,7 @@ help:
 	@echo "  doctest   run all doctests embedded in the documentation"
 
 clean:
-	-rm -rf _build/* *~ api/generated interfaces/generated users/examples documentation.zip
+	-rm -rf _build/* *~ api/generated interfaces/generated users/examples documentation.zip _static/python
 
 htmlonly:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) _build/html
