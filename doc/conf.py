@@ -13,18 +13,37 @@
 # serve to show the default.
 
 import os
+from pathlib import Path
+from tempfile import TemporaryDirectory
+import shutil
 from packaging.version import Version
 import nipype
+import subprocess as sp
 
-doc_path = os.path.abspath(os.path.dirname(__file__))
-os.makedirs('users/examples', exist_ok=True)
 
-os.chdir(os.path.join(doc_path, 'users', 'examples'))
-os.system("""python ../../../tools/ex2rst -x ../../../examples/test_spm.py \
---project Nipype --outdir . ../../../examples""")
-os.system("""python ../../../tools/ex2rst --project Nipype --outdir . \
-../../../examples/frontiers_paper""")
-os.chdir(doc_path)
+conf_py = Path(__file__)
+
+example_dir = conf_py.parent / 'users' / 'examples'
+shutil.rmtree(example_dir, ignore_errors=True)
+example_dir.mkdir(parents=True)
+python_dir = conf_py.parent / "_static" / "python"
+shutil.rmtree(python_dir, ignore_errors=True)
+
+ex2rst = str(conf_py.parent.parent / "tools" / "ex2rst")
+
+with TemporaryDirectory() as tmpdir:
+    sp.run(["git", "clone", "--depth", "1", "https://github.com/niflows/nipype1-examples.git",
+            tmpdir], check=True)
+    source_dir = Path(tmpdir) / "package" / "niflow" / "nipype1" / "examples"
+    shutil.copytree(source_dir, python_dir)
+
+sp.run(["python", ex2rst, "--outdir", str(example_dir), str(python_dir),
+        "-x", str(python_dir / "test_spm.py"),
+        "-x", str(python_dir / "__init__.py"),
+        "-x", str(python_dir / "cli.py")],
+       check=True)
+sp.run(["python", ex2rst, "--outdir", str(example_dir), str(python_dir / "frontiers_paper")],
+       check=True)
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -98,7 +117,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'nipype'
-copyright = u'2009-19, Neuroimaging in Python team'
+copyright = u'2009-20, Neuroimaging in Python team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
