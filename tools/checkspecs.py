@@ -324,7 +324,7 @@ class InterfaceChecker(object):
                     and "xor" not in trait.__dict__
                 ):
                     if (
-                        trait.trait_type.__class__.__name__ is "Range"
+                        trait.trait_type.__class__.__name__ == "Range"
                         and trait.default == trait.trait_type._low
                     ):
                         continue
