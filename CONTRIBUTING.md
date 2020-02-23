@@ -6,7 +6,8 @@ These guidelines are designed to make it as easy as possible to get involved. If
 
 Before you start you'll need to set up a free [GitHub][link_github] account and sign in. Here are some [instructions][link_signupinstructions].
 If you are not familiar with version control systems such as git,
- introductions and tutorials may be found [here](http://www.reproducibleimaging.org/module-reproducible-basics/02-vcs/).
+we recommend the [VCS module](http://www.reproducibleimaging.org/module-reproducible-basics/02-vcs/)
+available from [ReproNim](http://www.reproducibleimaging.org/).
 
 Already know what you're looking for in this guide? Jump to the following sections:
 * [Understanding issue labels](#issue-labels)
