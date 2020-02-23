@@ -20,6 +20,8 @@ from packaging.version import Version
 import nipype
 import subprocess as sp
 
+# Disable etelemetry during doc builds
+os.environ["NIPYPE_NO_ET"] = "1"
 
 conf_py = Path(__file__)
 
