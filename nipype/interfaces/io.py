@@ -1350,31 +1350,35 @@ class SelectFiles(IOBase):
     """
     Flexibly collect data from disk to feed into workflows.
 
-    This interface uses the {}-based string formatting syntax to plug
+    This interface uses Python's {}-based string formatting syntax to plug
     values (possibly known only at workflow execution time) into string
-    templates and collect files from persistant storage. These templates
-    can also be combined with glob wildcards. The field names in the
-    formatting template (i.e. the terms in braces) will become inputs
-    fields on the interface, and the keys in the templates dictionary
-    will form the output fields.
+    templates and collect files from persistant storage. These templates can
+    also be combined with glob wildcards (``*``, ``?``) and character ranges (``[...]``).
+    The field names in the formatting template (i.e. the terms in braces) will
+    become inputs fields on the interface, and the keys in the templates
+    dictionary will form the output fields.
 
     Examples
     --------
     >>> import pprint
     >>> from nipype import SelectFiles, Node
     >>> templates={"T1": "{subject_id}/struct/T1.nii",
-    ...            "epi": "{subject_id}/func/f[0, 1].nii"}
+    ...            "epi": "{subject_id}/func/f[0,1].nii"}
     >>> dg = Node(SelectFiles(templates), "selectfiles")
     >>> dg.inputs.subject_id = "subj1"
     >>> pprint.pprint(dg.outputs.get())  # doctest:
     {'T1': <undefined>, 'epi': <undefined>}
 
-    The same thing with dynamic grabbing of specific files:
+    Note that SelectFiles does not support lists as inputs for the dynamic
+    fields. Attempts to do so may lead to unexpected results because brackets
+    also express glob character ranges. For example,
 
-    >>> templates["epi"] = "{subject_id}/func/f{run!s}.nii"
+    >>> templates["epi"] = "{subject_id}/func/f{run}.nii"
     >>> dg = Node(SelectFiles(templates), "selectfiles")
     >>> dg.inputs.subject_id = "subj1"
-    >>> dg.inputs.run = [2, 4]
+    >>> dg.inputs.run = [10, 11]
+
+    would match f0.nii or f1.nii, not f10.nii or f11.nii.
 
     """
 
