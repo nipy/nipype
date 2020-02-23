@@ -1,50 +1,53 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 # -*- coding: utf-8 -*-
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 
 import os.path as op
 
-from ..base import (CommandLineInputSpec, CommandLine, traits, TraitedSpec,
-                    File, isdefined, Undefined, InputMultiObject)
+from ..base import (
+    CommandLineInputSpec,
+    CommandLine,
+    traits,
+    TraitedSpec,
+    File,
+    isdefined,
+    Undefined,
+    InputMultiObject,
+)
 from .base import MRTrix3BaseInputSpec, MRTrix3Base
 
 
 class DWIDenoiseInputSpec(MRTrix3BaseInputSpec):
     in_file = File(
-        exists=True,
-        argstr='%s',
-        position=-2,
-        mandatory=True,
-        desc='input DWI image')
-    mask = File(
-        exists=True,
-        argstr='-mask %s',
-        position=1,
-        desc='mask image')
+        exists=True, argstr="%s", position=-2, mandatory=True, desc="input DWI image"
+    )
+    mask = File(exists=True, argstr="-mask %s", position=1, desc="mask image")
     extent = traits.Tuple(
         (traits.Int, traits.Int, traits.Int),
-        argstr='-extent %d,%d,%d',
-        desc='set the window size of the denoising filter. (default = 5,5,5)')
+        argstr="-extent %d,%d,%d",
+        desc="set the window size of the denoising filter. (default = 5,5,5)",
+    )
     noise = File(
-        argstr='-noise %s',
-        name_template='%s_noise',
-        name_source='in_file',
+        argstr="-noise %s",
+        name_template="%s_noise",
+        name_source="in_file",
         keep_extension=True,
-        desc='the output noise map')
+        desc="the output noise map",
+    )
     out_file = File(
-        argstr='%s',
+        argstr="%s",
         position=-1,
-        name_template='%s_denoised',
-        name_source='in_file',
+        name_template="%s_denoised",
+        name_source="in_file",
         keep_extension=True,
-        desc='the output denoised DWI image')
+        desc="the output denoised DWI image",
+    )
 
 
 class DWIDenoiseOutputSpec(TraitedSpec):
-    noise = File(desc='the output noise map', exists=True)
-    out_file = File(desc='the output denoised DWI image', exists=True)
+    noise = File(desc="the output noise map", exists=True)
+    out_file = File(desc="the output denoised DWI image", exists=True)
+
 
 class DWIDenoise(MRTrix3Base):
     """
@@ -78,54 +81,58 @@ class DWIDenoise(MRTrix3Base):
     >>> denoise.run()                                 # doctest: +SKIP
     """
 
-    _cmd = 'dwidenoise'
+    _cmd = "dwidenoise"
     input_spec = DWIDenoiseInputSpec
     output_spec = DWIDenoiseOutputSpec
 
 
 class MRDeGibbsInputSpec(MRTrix3BaseInputSpec):
     in_file = File(
-        exists=True,
-        argstr='%s',
-        position=-2,
-        mandatory=True,
-        desc='input DWI image')
+        exists=True, argstr="%s", position=-2, mandatory=True, desc="input DWI image"
+    )
     axes = traits.ListInt(
         default_value=[0, 1],
         usedefault=True,
-        sep=',',
+        sep=",",
         minlen=2,
         maxlen=2,
-        argstr='-axes %s',
-        desc='indicate the plane in which the data was acquired (axial = 0,1; '
-             'coronal = 0,2; sagittal = 1,2')
+        argstr="-axes %s",
+        desc="indicate the plane in which the data was acquired (axial = 0,1; "
+        "coronal = 0,2; sagittal = 1,2",
+    )
     nshifts = traits.Int(
         default_value=20,
         usedefault=True,
-        argstr='-nshifts %d',
-        desc='discretization of subpixel spacing (default = 20)')
+        argstr="-nshifts %d",
+        desc="discretization of subpixel spacing (default = 20)",
+    )
     minW = traits.Int(
         default_value=1,
         usedefault=True,
-        argstr='-minW %d',
-        desc='left border of window used for total variation (TV) computation '
-             '(default = 1)')
+        argstr="-minW %d",
+        desc="left border of window used for total variation (TV) computation "
+        "(default = 1)",
+    )
     maxW = traits.Int(
         default_value=3,
         usedefault=True,
-        argstr='-maxW %d',
-        desc='right border of window used for total variation (TV) computation '
-             '(default = 3)')
+        argstr="-maxW %d",
+        desc="right border of window used for total variation (TV) computation "
+        "(default = 3)",
+    )
     out_file = File(
-        name_template='%s_unr',
-        name_source='in_file',
+        name_template="%s_unr",
+        name_source="in_file",
         keep_extension=True,
-        argstr='%s',
+        argstr="%s",
         position=-1,
-        desc='the output unringed DWI image')
+        desc="the output unringed DWI image",
+    )
+
 
 class MRDeGibbsOutputSpec(TraitedSpec):
-    out_file = File(desc='the output unringed DWI image', exists=True)
+    out_file = File(desc="the output unringed DWI image", exists=True)
+
 
 class MRDeGibbs(MRTrix3Base):
     """
@@ -163,46 +170,44 @@ class MRDeGibbs(MRTrix3Base):
     >>> unring.run()                                 # doctest: +SKIP
     """
 
-    _cmd = 'mrdegibbs'
+    _cmd = "mrdegibbs"
     input_spec = MRDeGibbsInputSpec
     output_spec = MRDeGibbsOutputSpec
 
 
 class DWIBiasCorrectInputSpec(MRTrix3BaseInputSpec):
     in_file = File(
-        exists=True,
-        argstr='%s',
-        position=-2,
-        mandatory=True,
-        desc='input DWI image')
-    in_mask = File(
-        argstr='-mask %s',
-        desc='input mask image for bias field estimation')
+        exists=True, argstr="%s", position=-2, mandatory=True, desc="input DWI image"
+    )
+    in_mask = File(argstr="-mask %s", desc="input mask image for bias field estimation")
     use_ants = traits.Bool(
-        argstr='-ants',
+        argstr="-ants",
         mandatory=True,
-        desc='use ANTS N4 to estimate the inhomogeneity field',
-        xor=['use_fsl'])
+        desc="use ANTS N4 to estimate the inhomogeneity field",
+        xor=["use_fsl"],
+    )
     use_fsl = traits.Bool(
-        argstr='-fsl',
+        argstr="-fsl",
         mandatory=True,
-        desc='use FSL FAST to estimate the inhomogeneity field',
-        xor=['use_ants'])
-    bias = File(
-        argstr='-bias %s',
-        desc='bias field')
+        desc="use FSL FAST to estimate the inhomogeneity field",
+        xor=["use_ants"],
+    )
+    bias = File(argstr="-bias %s", desc="bias field")
     out_file = File(
-        name_template='%s_biascorr',
-        name_source='in_file',
+        name_template="%s_biascorr",
+        name_source="in_file",
         keep_extension=True,
-        argstr='%s',
+        argstr="%s",
         position=-1,
-        desc='the output bias corrected DWI image',
-        genfile=True)
+        desc="the output bias corrected DWI image",
+        genfile=True,
+    )
+
 
 class DWIBiasCorrectOutputSpec(TraitedSpec):
-    bias = File(desc='the output bias field', exists=True)
-    out_file = File(desc='the output bias corrected DWI image', exists=True)
+    bias = File(desc="the output bias field", exists=True)
+    out_file = File(desc="the output bias corrected DWI image", exists=True)
+
 
 class DWIBiasCorrect(MRTrix3Base):
     """
@@ -223,52 +228,51 @@ class DWIBiasCorrect(MRTrix3Base):
     >>> bias_correct.run()                             # doctest: +SKIP
     """
 
-    _cmd = 'dwibiascorrect'
+    _cmd = "dwibiascorrect"
     input_spec = DWIBiasCorrectInputSpec
     output_spec = DWIBiasCorrectOutputSpec
 
 
 class ResponseSDInputSpec(MRTrix3BaseInputSpec):
     algorithm = traits.Enum(
-        'msmt_5tt',
-        'dhollander',
-        'tournier',
-        'tax',
-        argstr='%s',
+        "msmt_5tt",
+        "dhollander",
+        "tournier",
+        "tax",
+        argstr="%s",
         position=1,
         mandatory=True,
-        desc='response estimation algorithm (multi-tissue)')
+        desc="response estimation algorithm (multi-tissue)",
+    )
     in_file = File(
-        exists=True,
-        argstr='%s',
-        position=-5,
-        mandatory=True,
-        desc='input DWI image')
-    mtt_file = File(argstr='%s', position=-4, desc='input 5tt image')
+        exists=True, argstr="%s", position=-5, mandatory=True, desc="input DWI image"
+    )
+    mtt_file = File(argstr="%s", position=-4, desc="input 5tt image")
     wm_file = File(
-        'wm.txt',
-        argstr='%s',
+        "wm.txt",
+        argstr="%s",
         position=-3,
         usedefault=True,
-        desc='output WM response text file')
-    gm_file = File(
-        argstr='%s', position=-2, desc='output GM response text file')
-    csf_file = File(
-        argstr='%s', position=-1, desc='output CSF response text file')
-    in_mask = File(
-        exists=True, argstr='-mask %s', desc='provide initial mask image')
+        desc="output WM response text file",
+    )
+    gm_file = File(argstr="%s", position=-2, desc="output GM response text file")
+    csf_file = File(argstr="%s", position=-1, desc="output CSF response text file")
+    in_mask = File(exists=True, argstr="-mask %s", desc="provide initial mask image")
     max_sh = InputMultiObject(
         traits.Int,
-        argstr='-lmax %s',
-        sep=',',
-        desc=('maximum harmonic degree of response function - single value for '
-              'single-shell response, list for multi-shell response'))
+        argstr="-lmax %s",
+        sep=",",
+        desc=(
+            "maximum harmonic degree of response function - single value for "
+            "single-shell response, list for multi-shell response"
+        ),
+    )
 
 
 class ResponseSDOutputSpec(TraitedSpec):
-    wm_file = File(argstr='%s', desc='output WM response text file')
-    gm_file = File(argstr='%s', desc='output GM response text file')
-    csf_file = File(argstr='%s', desc='output CSF response text file')
+    wm_file = File(argstr="%s", desc="output WM response text file")
+    gm_file = File(argstr="%s", desc="output GM response text file")
+    csf_file = File(argstr="%s", desc="output CSF response text file")
 
 
 class ResponseSD(MRTrix3Base):
@@ -293,39 +297,41 @@ class ResponseSD(MRTrix3Base):
     'dwi2response tournier -fslgrad bvecs bvals -lmax 6,8,10 dwi.mif wm.txt'
     """
 
-    _cmd = 'dwi2response'
+    _cmd = "dwi2response"
     input_spec = ResponseSDInputSpec
     output_spec = ResponseSDOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['wm_file'] = op.abspath(self.inputs.wm_file)
+        outputs["wm_file"] = op.abspath(self.inputs.wm_file)
         if self.inputs.gm_file != Undefined:
-            outputs['gm_file'] = op.abspath(self.inputs.gm_file)
+            outputs["gm_file"] = op.abspath(self.inputs.gm_file)
         if self.inputs.csf_file != Undefined:
-            outputs['csf_file'] = op.abspath(self.inputs.csf_file)
+            outputs["csf_file"] = op.abspath(self.inputs.csf_file)
         return outputs
 
 
 class ACTPrepareFSLInputSpec(CommandLineInputSpec):
     in_file = File(
         exists=True,
-        argstr='%s',
+        argstr="%s",
         mandatory=True,
         position=-2,
-        desc='input anatomical image')
+        desc="input anatomical image",
+    )
 
     out_file = File(
-        'act_5tt.mif',
-        argstr='%s',
+        "act_5tt.mif",
+        argstr="%s",
         mandatory=True,
         position=-1,
         usedefault=True,
-        desc='output file after processing')
+        desc="output file after processing",
+    )
 
 
 class ACTPrepareFSLOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='the output response file')
+    out_file = File(exists=True, desc="the output response file")
 
 
 class ACTPrepareFSL(CommandLine):
@@ -344,46 +350,43 @@ class ACTPrepareFSL(CommandLine):
     >>> prep.run()                                 # doctest: +SKIP
     """
 
-    _cmd = 'act_anat_prepare_fsl'
+    _cmd = "act_anat_prepare_fsl"
     input_spec = ACTPrepareFSLInputSpec
     output_spec = ACTPrepareFSLOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        outputs["out_file"] = op.abspath(self.inputs.out_file)
         return outputs
 
 
 class ReplaceFSwithFIRSTInputSpec(CommandLineInputSpec):
     in_file = File(
         exists=True,
-        argstr='%s',
+        argstr="%s",
         mandatory=True,
         position=-4,
-        desc='input anatomical image')
+        desc="input anatomical image",
+    )
     in_t1w = File(
-        exists=True,
-        argstr='%s',
-        mandatory=True,
-        position=-3,
-        desc='input T1 image')
+        exists=True, argstr="%s", mandatory=True, position=-3, desc="input T1 image"
+    )
     in_config = File(
-        exists=True,
-        argstr='%s',
-        position=-2,
-        desc='connectome configuration file')
+        exists=True, argstr="%s", position=-2, desc="connectome configuration file"
+    )
 
     out_file = File(
-        'aparc+first.mif',
-        argstr='%s',
+        "aparc+first.mif",
+        argstr="%s",
         mandatory=True,
         position=-1,
         usedefault=True,
-        desc='output file after processing')
+        desc="output file after processing",
+    )
 
 
 class ReplaceFSwithFIRSTOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='the output response file')
+    out_file = File(exists=True, desc="the output response file")
 
 
 class ReplaceFSwithFIRST(CommandLine):
@@ -405,11 +408,11 @@ mrtrix3_labelconfig.txt aparc+first.mif'
     >>> prep.run()                                 # doctest: +SKIP
     """
 
-    _cmd = 'fs_parc_replace_sgm_first'
+    _cmd = "fs_parc_replace_sgm_first"
     input_spec = ReplaceFSwithFIRSTInputSpec
     output_spec = ReplaceFSwithFIRSTOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        outputs["out_file"] = op.abspath(self.inputs.out_file)
         return outputs

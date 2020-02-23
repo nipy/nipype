@@ -11,10 +11,10 @@ from ...utils.misc import package_check
 # Remove in 2.0
 have_nipy = True
 try:
-    package_check('nipy')
+    package_check("nipy")
 except ImportError:
     have_nipy = False
 
 
 class NipyBaseInterface(LibraryBaseInterface):
-    _pkg = 'nipy'
+    _pkg = "nipy"

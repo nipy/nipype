@@ -6,38 +6,40 @@ vtkbase provides some helpers to use VTK through the tvtk package (mayavi)
 
 Code using tvtk should import it through this module
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 
 import os
 from .. import logging
 
-iflogger = logging.getLogger('nipype.interface')
+iflogger = logging.getLogger("nipype.interface")
 
 # Check that VTK can be imported and get version
 _vtk_version = None
 try:
     import vtk
-    _vtk_version = (vtk.vtkVersion.GetVTKMajorVersion(),
-                    vtk.vtkVersion.GetVTKMinorVersion())
+
+    _vtk_version = (
+        vtk.vtkVersion.GetVTKMajorVersion(),
+        vtk.vtkVersion.GetVTKMinorVersion(),
+    )
 except ImportError:
-    iflogger.warning('VTK was not found')
+    iflogger.warning("VTK was not found")
 
 # Ensure that tvtk is loaded with the appropriate ETS_TOOLKIT env var
-old_ets = os.getenv('ETS_TOOLKIT')
-os.environ['ETS_TOOLKIT'] = 'null'
+old_ets = os.getenv("ETS_TOOLKIT")
+os.environ["ETS_TOOLKIT"] = "null"
 _have_tvtk = False
 try:
     from tvtk.api import tvtk
+
     _have_tvtk = True
 except ImportError:
-    iflogger.warning('tvtk wasn\'t found')
+    iflogger.warning("tvtk wasn't found")
     tvtk = None
 finally:
     if old_ets is not None:
-        os.environ['ETS_TOOLKIT'] = old_ets
+        os.environ["ETS_TOOLKIT"] = old_ets
     else:
-        del os.environ['ETS_TOOLKIT']
+        del os.environ["ETS_TOOLKIT"]
 
 
 def vtk_version():
@@ -62,7 +64,7 @@ def vtk_old():
     """ Checks if VTK uses the old-style pipeline (VTK<6.0) """
     global _vtk_version
     if _vtk_version is None:
-        raise RuntimeException('VTK is not correctly installed.')
+        raise RuntimeException("VTK is not correctly installed.")
     return _vtk_version[0] < 6
 
 
