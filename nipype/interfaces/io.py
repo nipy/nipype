@@ -212,12 +212,12 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     """
 
     # Init inputspec data attributes
-    base_directory = Directory(desc="Path to the base directory for storing data.")
+    base_directory = Str(desc="Path to the base directory for storing data.")
     container = Str(desc="Folder within base directory in which to store output")
     parameterization = traits.Bool(
         True, usedefault=True, desc="store output in parametrized structure"
     )
-    strip_dir = Directory(desc="path to strip out of filename")
+    strip_dir = Str(desc="path to strip out of filename")
     substitutions = InputMultiPath(
         traits.Tuple(Str, Str),
         desc=(
@@ -440,7 +440,6 @@ class DataSink(IOBase):
             is not a valid S3 path, defaults to '<N/A>'
         """
 
-        # Init variables
         s3_str = "s3://"
         bucket_name = "<N/A>"
         base_directory = self.inputs.base_directory
@@ -449,22 +448,10 @@ class DataSink(IOBase):
             s3_flag = False
             return s3_flag, bucket_name
 
-        # Explicitly lower-case the "s3"
-        if base_directory.lower().startswith(s3_str):
-            base_dir_sp = base_directory.split("/")
-            base_dir_sp[0] = base_dir_sp[0].lower()
-            base_directory = "/".join(base_dir_sp)
+        s3_flag = base_directory.lower().startswith(s3_str)
+        if s3_flag:
+            bucket_name = base_directory[len(s3_str):].partition('/')[0]
 
-        # Check if 's3://' in base dir
-        if base_directory.startswith(s3_str):
-            # Expects bucket name to be 's3://bucket_name/base_dir/..'
-            bucket_name = base_directory.split(s3_str)[1].split("/")[0]
-            s3_flag = True
-        # Otherwise it's just a normal datasink
-        else:
-            s3_flag = False
-
-        # Return s3_flag
         return s3_flag, bucket_name
 
     # Function to return AWS secure environment variables
@@ -618,13 +605,12 @@ class DataSink(IOBase):
 
         from botocore.exceptions import ClientError
 
-        # Init variables
         s3_str = "s3://"
         s3_prefix = s3_str + bucket.name
 
         # Explicitly lower-case the "s3"
-        if dst[: len(s3_str)].lower() == s3_str:
-            dst = s3_str + dst[len(s3_str) :]
+        if dst.lower().startswith(s3_str):
+            dst = s3_str + dst[len(s3_str):]
 
         # If src is a directory, collect files (this assumes dst is a dir too)
         if os.path.isdir(src):
@@ -1364,31 +1350,35 @@ class SelectFiles(IOBase):
     """
     Flexibly collect data from disk to feed into workflows.
 
-    This interface uses the {}-based string formatting syntax to plug
+    This interface uses Python's {}-based string formatting syntax to plug
     values (possibly known only at workflow execution time) into string
-    templates and collect files from persistant storage. These templates
-    can also be combined with glob wildcards. The field names in the
-    formatting template (i.e. the terms in braces) will become inputs
-    fields on the interface, and the keys in the templates dictionary
-    will form the output fields.
+    templates and collect files from persistant storage. These templates can
+    also be combined with glob wildcards (``*``, ``?``) and character ranges (``[...]``).
+    The field names in the formatting template (i.e. the terms in braces) will
+    become inputs fields on the interface, and the keys in the templates
+    dictionary will form the output fields.
 
     Examples
     --------
     >>> import pprint
     >>> from nipype import SelectFiles, Node
     >>> templates={"T1": "{subject_id}/struct/T1.nii",
-    ...            "epi": "{subject_id}/func/f[0, 1].nii"}
+    ...            "epi": "{subject_id}/func/f[0,1].nii"}
     >>> dg = Node(SelectFiles(templates), "selectfiles")
     >>> dg.inputs.subject_id = "subj1"
     >>> pprint.pprint(dg.outputs.get())  # doctest:
     {'T1': <undefined>, 'epi': <undefined>}
 
-    The same thing with dynamic grabbing of specific files:
+    Note that SelectFiles does not support lists as inputs for the dynamic
+    fields. Attempts to do so may lead to unexpected results because brackets
+    also express glob character ranges. For example,
 
-    >>> templates["epi"] = "{subject_id}/func/f{run!s}.nii"
+    >>> templates["epi"] = "{subject_id}/func/f{run}.nii"
     >>> dg = Node(SelectFiles(templates), "selectfiles")
     >>> dg.inputs.subject_id = "subj1"
-    >>> dg.inputs.run = [2, 4]
+    >>> dg.inputs.run = [10, 11]
+
+    would match f0.nii or f1.nii, not f10.nii or f11.nii.
 
     """
 

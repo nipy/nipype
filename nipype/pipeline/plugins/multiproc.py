@@ -10,7 +10,7 @@ http://stackoverflow.com/a/8963618/1183453
 # Import packages
 import os
 import multiprocessing as mp
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, wait
 from traceback import format_exception
 import sys
 from logging import INFO
@@ -71,6 +71,12 @@ def run_node(node, updatehash, taskid):
 
     # Return the result dictionary
     return result
+
+
+def process_initializer(cwd):
+    """Initializes the environment of the child process"""
+    os.chdir(cwd)
+    os.environ["NIPYPE_NO_ET"] = "1"
 
 
 class MultiProcPlugin(DistributedPluginBase):
@@ -134,16 +140,18 @@ class MultiProcPlugin(DistributedPluginBase):
         )
 
         try:
-            mp_context = mp.context.get_context(self.plugin_args.get("mp_context"))
+            mp_context = mp.get_context(self.plugin_args.get("mp_context"))
             self.pool = ProcessPoolExecutor(
                 max_workers=self.processors,
-                initializer=os.chdir,
+                initializer=process_initializer,
                 initargs=(self._cwd,),
                 mp_context=mp_context,
             )
         except (AttributeError, TypeError):
             # Python < 3.7 does not support initialization or contexts
             self.pool = ProcessPoolExecutor(max_workers=self.processors)
+            result_future = self.pool.submit(process_initializer, self._cwd)
+            wait([result_future], timeout=5)
 
         self._stats = None
 
