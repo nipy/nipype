@@ -30,25 +30,6 @@ from .. import config, logging
 iflogger = logging.getLogger("nipype.interface")
 
 
-def gcd(a, b):
-    """
-    Return the greatest common divisor of two integers (uses Euclid's algorithm).
-
-    Examples
-    --------
-    >>> gcd(4, 5)
-    1
-    >>> gcd(4, 8)
-    4
-    >>> gcd(22, 55)
-    11
-
-    """
-    while b > 0:
-        a, b = b, a % b
-    return a
-
-
 def spm_hrf(RT, P=None, fMRI_T=16):
     """
     python implementation of spm_hrf
@@ -813,10 +794,10 @@ class SpecifySparseModel(SpecifyModel):
         if len(durations) == 1:
             durations = durations * np.ones((len(i_onsets)))
         onsets = np.round(np.array(i_onsets) * 1000)
-        dttemp = gcd(TA, gcd(SILENCE, TR))
+        dttemp = math.gcd(TA, math.gcd(SILENCE, TR))
         if dt < dttemp:
             if dttemp % dt != 0:
-                dt = float(gcd(dttemp, dt))
+                dt = float(math.gcd(dttemp, dt))
 
         if dt < 1:
             raise Exception("Time multiple less than 1 ms")
