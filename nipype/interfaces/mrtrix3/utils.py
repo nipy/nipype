@@ -1,34 +1,41 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 # -*- coding: utf-8 -*-
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 
 import os.path as op
 
-from ..base import (CommandLineInputSpec, CommandLine, traits, TraitedSpec,
-                    File, InputMultiPath, isdefined)
+from ..base import (
+    CommandLineInputSpec,
+    CommandLine,
+    traits,
+    TraitedSpec,
+    File,
+    InputMultiPath,
+    isdefined,
+)
 from .base import MRTrix3BaseInputSpec, MRTrix3Base
 
 
 class BrainMaskInputSpec(MRTrix3BaseInputSpec):
     in_file = File(
         exists=True,
-        argstr='%s',
+        argstr="%s",
         mandatory=True,
         position=-2,
-        desc='input diffusion weighted images')
+        desc="input diffusion weighted images",
+    )
     out_file = File(
-        'brainmask.mif',
-        argstr='%s',
+        "brainmask.mif",
+        argstr="%s",
         mandatory=True,
         position=-1,
         usedefault=True,
-        desc='output brain mask')
+        desc="output brain mask",
+    )
 
 
 class BrainMaskOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='the output response file')
+    out_file = File(exists=True, desc="the output response file")
 
 
 class BrainMask(CommandLine):
@@ -47,45 +54,45 @@ class BrainMask(CommandLine):
     >>> bmsk.run()                                 # doctest: +SKIP
     """
 
-    _cmd = 'dwi2mask'
+    _cmd = "dwi2mask"
     input_spec = BrainMaskInputSpec
     output_spec = BrainMaskOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        outputs["out_file"] = op.abspath(self.inputs.out_file)
         return outputs
 
 
 class Mesh2PVEInputSpec(CommandLineInputSpec):
     in_file = File(
-        exists=True,
-        argstr='%s',
-        mandatory=True,
-        position=-3,
-        desc='input mesh')
+        exists=True, argstr="%s", mandatory=True, position=-3, desc="input mesh"
+    )
     reference = File(
         exists=True,
-        argstr='%s',
+        argstr="%s",
         mandatory=True,
         position=-2,
-        desc='input reference image')
+        desc="input reference image",
+    )
     in_first = File(
         exists=True,
-        argstr='-first %s',
-        desc='indicates that the mesh file is provided by FSL FIRST')
+        argstr="-first %s",
+        desc="indicates that the mesh file is provided by FSL FIRST",
+    )
 
     out_file = File(
-        'mesh2volume.nii.gz',
-        argstr='%s',
+        "mesh2volume.nii.gz",
+        argstr="%s",
         mandatory=True,
         position=-1,
         usedefault=True,
-        desc='output file containing SH coefficients')
+        desc="output file containing SH coefficients",
+    )
 
 
 class Mesh2PVEOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='the output response file')
+    out_file = File(exists=True, desc="the output response file")
 
 
 class Mesh2PVE(CommandLine):
@@ -106,37 +113,34 @@ class Mesh2PVE(CommandLine):
     >>> m2p.run()                                 # doctest: +SKIP
     """
 
-    _cmd = 'mesh2pve'
+    _cmd = "mesh2pve"
     input_spec = Mesh2PVEInputSpec
     output_spec = Mesh2PVEOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        outputs["out_file"] = op.abspath(self.inputs.out_file)
         return outputs
 
 
 class Generate5ttInputSpec(MRTrix3BaseInputSpec):
     algorithm = traits.Enum(
-        'fsl',
-        'gif',
-        'freesurfer',
-        argstr='%s',
+        "fsl",
+        "gif",
+        "freesurfer",
+        argstr="%s",
         position=-3,
         mandatory=True,
-        desc='tissue segmentation algorithm')
+        desc="tissue segmentation algorithm",
+    )
     in_file = File(
-        exists=True,
-        argstr='%s',
-        mandatory=True,
-        position=-2,
-        desc='input image')
-    out_file = File(
-        argstr='%s', mandatory=True, position=-1, desc='output image')
+        exists=True, argstr="%s", mandatory=True, position=-2, desc="input image"
+    )
+    out_file = File(argstr="%s", mandatory=True, position=-1, desc="output image")
 
 
 class Generate5ttOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='output image')
+    out_file = File(exists=True, desc="output image")
 
 
 class Generate5tt(MRTrix3Base):
@@ -157,56 +161,56 @@ class Generate5tt(MRTrix3Base):
     >>> gen5tt.run()                               # doctest: +SKIP
     """
 
-    _cmd = '5ttgen'
+    _cmd = "5ttgen"
     input_spec = Generate5ttInputSpec
     output_spec = Generate5ttOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        outputs["out_file"] = op.abspath(self.inputs.out_file)
         return outputs
 
 
 class TensorMetricsInputSpec(CommandLineInputSpec):
     in_file = File(
-        exists=True,
-        argstr='%s',
-        mandatory=True,
-        position=-1,
-        desc='input DTI image')
+        exists=True, argstr="%s", mandatory=True, position=-1, desc="input DTI image"
+    )
 
-    out_fa = File(argstr='-fa %s', desc='output FA file')
-    out_adc = File(argstr='-adc %s', desc='output ADC file')
-    out_evec = File(
-        argstr='-vector %s', desc='output selected eigenvector(s) file')
-    out_eval = File(
-        argstr='-value %s', desc='output selected eigenvalue(s) file')
+    out_fa = File(argstr="-fa %s", desc="output FA file")
+    out_adc = File(argstr="-adc %s", desc="output ADC file")
+    out_evec = File(argstr="-vector %s", desc="output selected eigenvector(s) file")
+    out_eval = File(argstr="-value %s", desc="output selected eigenvalue(s) file")
     component = traits.List(
         [1],
         usedefault=True,
-        argstr='-num %s',
-        sep=',',
-        desc=('specify the desired eigenvalue/eigenvector(s). Note that '
-              'several eigenvalues can be specified as a number sequence'))
+        argstr="-num %s",
+        sep=",",
+        desc=(
+            "specify the desired eigenvalue/eigenvector(s). Note that "
+            "several eigenvalues can be specified as a number sequence"
+        ),
+    )
     in_mask = File(
         exists=True,
-        argstr='-mask %s',
-        desc=('only perform computation within the specified binary'
-              ' brain mask image'))
+        argstr="-mask %s",
+        desc=(
+            "only perform computation within the specified binary" " brain mask image"
+        ),
+    )
     modulate = traits.Enum(
-        'FA',
-        'none',
-        'eval',
-        argstr='-modulate %s',
-        desc=('how to modulate the magnitude of the'
-              ' eigenvectors'))
+        "FA",
+        "none",
+        "eval",
+        argstr="-modulate %s",
+        desc=("how to modulate the magnitude of the" " eigenvectors"),
+    )
 
 
 class TensorMetricsOutputSpec(TraitedSpec):
-    out_fa = File(desc='output FA file')
-    out_adc = File(desc='output ADC file')
-    out_evec = File(desc='output selected eigenvector(s) file')
-    out_eval = File(desc='output selected eigenvalue(s) file')
+    out_fa = File(desc="output FA file")
+    out_adc = File(desc="output ADC file")
+    out_evec = File(desc="output selected eigenvector(s) file")
+    out_eval = File(desc="output selected eigenvalue(s) file")
 
 
 class TensorMetrics(CommandLine):
@@ -226,7 +230,7 @@ class TensorMetrics(CommandLine):
     >>> comp.run()                                 # doctest: +SKIP
     """
 
-    _cmd = 'tensor2metric'
+    _cmd = "tensor2metric"
     input_spec = TensorMetricsInputSpec
     output_spec = TensorMetricsOutputSpec
 
@@ -242,127 +246,130 @@ class TensorMetrics(CommandLine):
 
 class ComputeTDIInputSpec(CommandLineInputSpec):
     in_file = File(
-        exists=True,
-        argstr='%s',
-        mandatory=True,
-        position=-2,
-        desc='input tractography')
+        exists=True, argstr="%s", mandatory=True, position=-2, desc="input tractography"
+    )
     out_file = File(
-        'tdi.mif',
-        argstr='%s',
-        usedefault=True,
-        position=-1,
-        desc='output TDI file')
+        "tdi.mif", argstr="%s", usedefault=True, position=-1, desc="output TDI file"
+    )
     reference = File(
         exists=True,
-        argstr='-template %s',
-        desc='a reference'
-        'image to be used as template')
+        argstr="-template %s",
+        desc="a reference" "image to be used as template",
+    )
     vox_size = traits.List(
-        traits.Int, argstr='-vox %s', sep=',', desc='voxel dimensions')
+        traits.Int, argstr="-vox %s", sep=",", desc="voxel dimensions"
+    )
     data_type = traits.Enum(
-        'float',
-        'unsigned int',
-        argstr='-datatype %s',
-        desc='specify output image data type')
-    use_dec = traits.Bool(argstr='-dec', desc='perform mapping in DEC space')
+        "float",
+        "unsigned int",
+        argstr="-datatype %s",
+        desc="specify output image data type",
+    )
+    use_dec = traits.Bool(argstr="-dec", desc="perform mapping in DEC space")
     dixel = File(
-        argstr='-dixel %s',
-        desc='map streamlines to'
-        'dixels within each voxel. Directions are stored as'
-        'azimuth elevation pairs.')
+        argstr="-dixel %s",
+        desc="map streamlines to"
+        "dixels within each voxel. Directions are stored as"
+        "azimuth elevation pairs.",
+    )
     max_tod = traits.Int(
-        argstr='-tod %d',
-        desc='generate a Track Orientation '
-        'Distribution (TOD) in each voxel.')
+        argstr="-tod %d",
+        desc="generate a Track Orientation " "Distribution (TOD) in each voxel.",
+    )
 
     contrast = traits.Enum(
-        'tdi',
-        'length',
-        'invlength',
-        'scalar_map',
-        'scalar_map_conut',
-        'fod_amp',
-        'curvature',
-        argstr='-constrast %s',
-        desc='define the desired '
-        'form of contrast for the output image')
+        "tdi",
+        "length",
+        "invlength",
+        "scalar_map",
+        "scalar_map_conut",
+        "fod_amp",
+        "curvature",
+        argstr="-constrast %s",
+        desc="define the desired " "form of contrast for the output image",
+    )
     in_map = File(
         exists=True,
-        argstr='-image %s',
-        desc='provide the'
-        'scalar image map for generating images with '
-        '\'scalar_map\' contrasts, or the SHs image for fod_amp')
+        argstr="-image %s",
+        desc="provide the"
+        "scalar image map for generating images with "
+        "'scalar_map' contrasts, or the SHs image for fod_amp",
+    )
 
     stat_vox = traits.Enum(
-        'sum',
-        'min',
-        'mean',
-        'max',
-        argstr='-stat_vox %s',
-        desc='define the statistic for choosing the final'
-        'voxel intesities for a given contrast')
+        "sum",
+        "min",
+        "mean",
+        "max",
+        argstr="-stat_vox %s",
+        desc="define the statistic for choosing the final"
+        "voxel intesities for a given contrast",
+    )
     stat_tck = traits.Enum(
-        'mean',
-        'sum',
-        'min',
-        'max',
-        'median',
-        'mean_nonzero',
-        'gaussian',
-        'ends_min',
-        'ends_mean',
-        'ends_max',
-        'ends_prod',
-        argstr='-stat_tck %s',
-        desc='define the statistic for choosing '
-        'the contribution to be made by each streamline as a function of'
-        ' the samples taken along their lengths.')
+        "mean",
+        "sum",
+        "min",
+        "max",
+        "median",
+        "mean_nonzero",
+        "gaussian",
+        "ends_min",
+        "ends_mean",
+        "ends_max",
+        "ends_prod",
+        argstr="-stat_tck %s",
+        desc="define the statistic for choosing "
+        "the contribution to be made by each streamline as a function of"
+        " the samples taken along their lengths.",
+    )
 
     fwhm_tck = traits.Float(
-        argstr='-fwhm_tck %f',
-        desc='define the statistic for choosing the'
-        ' contribution to be made by each streamline as a function of the '
-        'samples taken along their lengths')
+        argstr="-fwhm_tck %f",
+        desc="define the statistic for choosing the"
+        " contribution to be made by each streamline as a function of the "
+        "samples taken along their lengths",
+    )
 
     map_zero = traits.Bool(
-        argstr='-map_zero',
-        desc='if a streamline has zero contribution based '
-        'on the contrast & statistic, typically it is not mapped; use this '
-        'option to still contribute to the map even if this is the case '
-        '(these non-contributing voxels can then influence the mean value in '
-        'each voxel of the map)')
+        argstr="-map_zero",
+        desc="if a streamline has zero contribution based "
+        "on the contrast & statistic, typically it is not mapped; use this "
+        "option to still contribute to the map even if this is the case "
+        "(these non-contributing voxels can then influence the mean value in "
+        "each voxel of the map)",
+    )
 
     upsample = traits.Int(
-        argstr='-upsample %d',
-        desc='upsample the tracks by'
-        ' some ratio using Hermite interpolation before '
-        'mappping')
+        argstr="-upsample %d",
+        desc="upsample the tracks by"
+        " some ratio using Hermite interpolation before "
+        "mappping",
+    )
 
     precise = traits.Bool(
-        argstr='-precise',
-        desc='use a more precise streamline mapping '
-        'strategy, that accurately quantifies the length through each voxel '
-        '(these lengths are then taken into account during TWI calculation)')
+        argstr="-precise",
+        desc="use a more precise streamline mapping "
+        "strategy, that accurately quantifies the length through each voxel "
+        "(these lengths are then taken into account during TWI calculation)",
+    )
     ends_only = traits.Bool(
-        argstr='-ends_only',
-        desc='only map the streamline'
-        ' endpoints to the image')
+        argstr="-ends_only", desc="only map the streamline" " endpoints to the image"
+    )
 
     tck_weights = File(
         exists=True,
-        argstr='-tck_weights_in %s',
-        desc='specify'
-        ' a text scalar file containing the streamline weights')
+        argstr="-tck_weights_in %s",
+        desc="specify" " a text scalar file containing the streamline weights",
+    )
     nthreads = traits.Int(
-        argstr='-nthreads %d',
-        desc='number of threads. if zero, the number'
-        ' of available cpus will be used',
-        nohash=True)
+        argstr="-nthreads %d",
+        desc="number of threads. if zero, the number" " of available cpus will be used",
+        nohash=True,
+    )
 
 
 class ComputeTDIOutputSpec(TraitedSpec):
-    out_file = File(desc='output TDI file')
+    out_file = File(desc="output TDI file")
 
 
 class ComputeTDI(MRTrix3Base):
@@ -419,51 +426,47 @@ class ComputeTDI(MRTrix3Base):
     >>> tdi.run()                                 # doctest: +SKIP
     """
 
-    _cmd = 'tckmap'
+    _cmd = "tckmap"
     input_spec = ComputeTDIInputSpec
     output_spec = ComputeTDIOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        outputs["out_file"] = op.abspath(self.inputs.out_file)
         return outputs
 
 
 class TCK2VTKInputSpec(CommandLineInputSpec):
     in_file = File(
-        exists=True,
-        argstr='%s',
-        mandatory=True,
-        position=-2,
-        desc='input tractography')
+        exists=True, argstr="%s", mandatory=True, position=-2, desc="input tractography"
+    )
     out_file = File(
-        'tracks.vtk',
-        argstr='%s',
-        usedefault=True,
-        position=-1,
-        desc='output VTK file')
+        "tracks.vtk", argstr="%s", usedefault=True, position=-1, desc="output VTK file"
+    )
     reference = File(
         exists=True,
-        argstr='-image %s',
-        desc='if specified, the properties of'
-        ' this image will be used to convert track point positions from real '
-        '(scanner) coordinates into image coordinates (in mm).')
+        argstr="-image %s",
+        desc="if specified, the properties of"
+        " this image will be used to convert track point positions from real "
+        "(scanner) coordinates into image coordinates (in mm).",
+    )
     voxel = File(
         exists=True,
-        argstr='-image %s',
-        desc='if specified, the properties of'
-        ' this image will be used to convert track point positions from real '
-        '(scanner) coordinates into image coordinates.')
+        argstr="-image %s",
+        desc="if specified, the properties of"
+        " this image will be used to convert track point positions from real "
+        "(scanner) coordinates into image coordinates.",
+    )
 
     nthreads = traits.Int(
-        argstr='-nthreads %d',
-        desc='number of threads. if zero, the number'
-        ' of available cpus will be used',
-        nohash=True)
+        argstr="-nthreads %d",
+        desc="number of threads. if zero, the number" " of available cpus will be used",
+        nohash=True,
+    )
 
 
 class TCK2VTKOutputSpec(TraitedSpec):
-    out_file = File(desc='output VTK file')
+    out_file = File(desc="output VTK file")
 
 
 class TCK2VTK(MRTrix3Base):
@@ -483,38 +486,36 @@ class TCK2VTK(MRTrix3Base):
     >>> vtk.run()                                 # doctest: +SKIP
     """
 
-    _cmd = 'tck2vtk'
+    _cmd = "tck2vtk"
     input_spec = TCK2VTKInputSpec
     output_spec = TCK2VTKOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        outputs["out_file"] = op.abspath(self.inputs.out_file)
         return outputs
 
 
 class DWIExtractInputSpec(MRTrix3BaseInputSpec):
     in_file = File(
-        exists=True,
-        argstr='%s',
-        mandatory=True,
-        position=-2,
-        desc='input image')
-    out_file = File(
-        argstr='%s', mandatory=True, position=-1, desc='output image')
-    bzero = traits.Bool(argstr='-bzero', desc='extract b=0 volumes')
-    nobzero = traits.Bool(argstr='-no_bzero', desc='extract non b=0 volumes')
+        exists=True, argstr="%s", mandatory=True, position=-2, desc="input image"
+    )
+    out_file = File(argstr="%s", mandatory=True, position=-1, desc="output image")
+    bzero = traits.Bool(argstr="-bzero", desc="extract b=0 volumes")
+    nobzero = traits.Bool(argstr="-no_bzero", desc="extract non b=0 volumes")
     singleshell = traits.Bool(
-        argstr='-singleshell', desc='extract volumes with a specific shell')
+        argstr="-singleshell", desc="extract volumes with a specific shell"
+    )
     shell = traits.List(
         traits.Float,
-        sep=',',
-        argstr='-shell %s',
-        desc='specify one or more gradient shells')
+        sep=",",
+        argstr="-shell %s",
+        desc="specify one or more gradient shells",
+    )
 
 
 class DWIExtractOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='output image')
+    out_file = File(exists=True, desc="output image")
 
 
 class DWIExtract(MRTrix3Base):
@@ -536,54 +537,53 @@ class DWIExtract(MRTrix3Base):
     >>> dwiextract.run()                               # doctest: +SKIP
     """
 
-    _cmd = 'dwiextract'
+    _cmd = "dwiextract"
     input_spec = DWIExtractInputSpec
     output_spec = DWIExtractOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        outputs["out_file"] = op.abspath(self.inputs.out_file)
         return outputs
 
 
 class MRConvertInputSpec(MRTrix3BaseInputSpec):
     in_file = File(
-        exists=True,
-        argstr='%s',
-        mandatory=True,
-        position=-2,
-        desc='input image')
+        exists=True, argstr="%s", mandatory=True, position=-2, desc="input image"
+    )
     out_file = File(
-        'dwi.mif',
-        argstr='%s',
+        "dwi.mif",
+        argstr="%s",
         mandatory=True,
         position=-1,
         usedefault=True,
-        desc='output image')
+        desc="output image",
+    )
     coord = traits.List(
         traits.Float,
-        sep=' ',
-        argstr='-coord %s',
-        desc='extract data at the specified coordinates')
+        sep=" ",
+        argstr="-coord %s",
+        desc="extract data at the specified coordinates",
+    )
     vox = traits.List(
-        traits.Float,
-        sep=',',
-        argstr='-vox %s',
-        desc='change the voxel dimensions')
+        traits.Float, sep=",", argstr="-vox %s", desc="change the voxel dimensions"
+    )
     axes = traits.List(
         traits.Int,
-        sep=',',
-        argstr='-axes %s',
-        desc='specify the axes that will be used')
+        sep=",",
+        argstr="-axes %s",
+        desc="specify the axes that will be used",
+    )
     scaling = traits.List(
         traits.Float,
-        sep=',',
-        argstr='-scaling %s',
-        desc='specify the data scaling parameter')
+        sep=",",
+        argstr="-scaling %s",
+        desc="specify the data scaling parameter",
+    )
 
 
 class MRConvertOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='output image')
+    out_file = File(exists=True, desc="output image")
 
 
 class MRConvert(MRTrix3Base):
@@ -603,50 +603,46 @@ class MRConvert(MRTrix3Base):
     >>> mrconvert.run()                               # doctest: +SKIP
     """
 
-    _cmd = 'mrconvert'
+    _cmd = "mrconvert"
     input_spec = MRConvertInputSpec
     output_spec = MRConvertOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        outputs["out_file"] = op.abspath(self.inputs.out_file)
         return outputs
 
 
 class MRMathInputSpec(MRTrix3BaseInputSpec):
     in_file = File(
-        exists=True,
-        argstr='%s',
-        mandatory=True,
-        position=-3,
-        desc='input image')
-    out_file = File(
-        argstr='%s', mandatory=True, position=-1, desc='output image')
+        exists=True, argstr="%s", mandatory=True, position=-3, desc="input image"
+    )
+    out_file = File(argstr="%s", mandatory=True, position=-1, desc="output image")
     operation = traits.Enum(
-        'mean',
-        'median',
-        'sum',
-        'product',
-        'rms',
-        'norm',
-        'var',
-        'std',
-        'min',
-        'max',
-        'absmax',
-        'magmax',
-        argstr='%s',
+        "mean",
+        "median",
+        "sum",
+        "product",
+        "rms",
+        "norm",
+        "var",
+        "std",
+        "min",
+        "max",
+        "absmax",
+        "magmax",
+        argstr="%s",
         position=-2,
         mandatory=True,
-        desc='operation to computer along a specified axis')
+        desc="operation to computer along a specified axis",
+    )
     axis = traits.Int(
-        0,
-        argstr='-axis %d',
-        desc='specfied axis to perform the operation along')
+        0, argstr="-axis %d", desc="specfied axis to perform the operation along"
+    )
 
 
 class MRMathOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='output image')
+    out_file = File(exists=True, desc="output image")
 
 
 class MRMath(MRTrix3Base):
@@ -669,11 +665,103 @@ class MRMath(MRTrix3Base):
     >>> mrmath.run()                               # doctest: +SKIP
     """
 
-    _cmd = 'mrmath'
+    _cmd = "mrmath"
     input_spec = MRMathInputSpec
     output_spec = MRMathOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        outputs["out_file"] = op.abspath(self.inputs.out_file)
         return outputs
+
+
+class MRResizeInputSpec(MRTrix3BaseInputSpec):
+    in_file = File(
+        exists=True, argstr="%s", position=-2, mandatory=True, desc="input DWI image"
+    )
+    image_size = traits.Tuple(
+        (traits.Int, traits.Int, traits.Int),
+        argstr="-size %d,%d,%d",
+        mandatory=True,
+        desc="Number of voxels in each dimension of output image",
+        xor=["voxel_size", "scale_factor"],
+    )
+    voxel_size = traits.Tuple(
+        (traits.Float, traits.Float, traits.Float),
+        argstr="-voxel %g,%g,%g",
+        mandatory=True,
+        desc="Desired voxel size in mm for the output image",
+        xor=["image_size", "scale_factor"],
+    )
+    scale_factor = traits.Tuple(
+        (traits.Float, traits.Float, traits.Float),
+        argstr="-scale %g,%g,%g",
+        mandatory=True,
+        desc="Scale factors to rescale the image by in each dimension",
+        xor=["image_size", "voxel_size"],
+    )
+    interpolation = traits.Enum(
+        "cubic",
+        "nearest",
+        "linear",
+        "sinc",
+        argstr="-interp %s",
+        usedefault=True,
+        desc="set the interpolation method to use when resizing (choices: "
+        "nearest, linear, cubic, sinc. Default: cubic).",
+    )
+    out_file = File(
+        argstr="%s",
+        name_template="%s_resized",
+        name_source=["in_file"],
+        keep_extension=True,
+        position=-1,
+        desc="the output resized DWI image",
+    )
+
+
+class MRResizeOutputSpec(TraitedSpec):
+    out_file = File(desc="the output resized DWI image", exists=True)
+
+
+class MRResize(MRTrix3Base):
+    """
+    Resize an image by defining the new image resolution, voxel size or a
+    scale factor. If the image is 4D, then only the first 3 dimensions can be
+    resized. Also, if the image is down-sampled, the appropriate smoothing is
+    automatically applied using Gaussian smoothing.
+    For more information, see
+    <https://mrtrix.readthedocs.io/en/latest/reference/commands/mrresize.html>
+
+    Example
+    -------
+    >>> import nipype.interfaces.mrtrix3 as mrt
+
+    Defining the new image resolution:
+    >>> image_resize = mrt.MRResize()
+    >>> image_resize.inputs.in_file = 'dwi.mif'
+    >>> image_resize.inputs.image_size = (256, 256, 144)
+    >>> image_resize.cmdline                               # doctest: +ELLIPSIS
+    'mrresize -size 256,256,144 -interp cubic dwi.mif dwi_resized.mif'
+    >>> image_resize.run()                                 # doctest: +SKIP
+
+    Defining the new image's voxel size:
+    >>> voxel_resize = mrt.MRResize()
+    >>> voxel_resize.inputs.in_file = 'dwi.mif'
+    >>> voxel_resize.inputs.voxel_size = (1, 1, 1)
+    >>> voxel_resize.cmdline                               # doctest: +ELLIPSIS
+    'mrresize -interp cubic -voxel 1,1,1 dwi.mif dwi_resized.mif'
+    >>> voxel_resize.run()                                 # doctest: +SKIP
+
+    Defining the scale factor of each image dimension:
+    >>> scale_resize = mrt.MRResize()
+    >>> scale_resize.inputs.in_file = 'dwi.mif'
+    >>> scale_resize.inputs.scale_factor = (0.5,0.5,0.5)
+    >>> scale_resize.cmdline                               # doctest: +ELLIPSIS
+    'mrresize -interp cubic -scale 0.5,0.5,0.5 dwi.mif dwi_resized.mif'
+    >>> scale_resize.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = "mrresize"
+    input_spec = MRResizeInputSpec
+    output_spec = MRResizeOutputSpec

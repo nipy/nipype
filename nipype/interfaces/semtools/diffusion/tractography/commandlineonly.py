@@ -5,14 +5,22 @@ If you spot a bug, please report it on the mailing list and/or change the genera
 
 import os
 
-from ....base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
-                      TraitedSpec, File, Directory, traits, isdefined,
-                      InputMultiPath, OutputMultiPath)
+from ....base import (
+    CommandLine,
+    CommandLineInputSpec,
+    SEMLikeCommandLine,
+    TraitedSpec,
+    File,
+    Directory,
+    traits,
+    isdefined,
+    InputMultiPath,
+    OutputMultiPath,
+)
 
 
 class fiberstatsInputSpec(CommandLineInputSpec):
-    fiber_file = File(
-        desc="DTI Fiber File", exists=True, argstr="--fiber_file %s")
+    fiber_file = File(desc="DTI Fiber File", exists=True, argstr="--fiber_file %s")
     verbose = traits.Bool(desc="produce verbose output", argstr="--verbose ")
 
 

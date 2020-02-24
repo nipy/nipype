@@ -149,7 +149,7 @@ Here is a minimalistic interface for the gzip command:
 	class GZipTask(CommandLine):
 	    input_spec = GZipInputSpec
 	    output_spec = GZipOutputSpec
-	    cmd = 'gzip'
+	    _cmd = 'gzip'
 
 	    def _list_outputs(self):
 	            outputs = self.output_spec().get()
@@ -170,7 +170,7 @@ names as arguments on the command line. We have simplified this procedure with
 three additional metadata terms: ``name_source``, ``name_template``,
 ``keep_extension``.
 
-For example in the :ref:`InvWarp <nipype.interfaces.fsl.InvWarp>` class, the
+For example in the :ref:`InvWarp <nipype.interfaces.fsl.utils.InvWarp>` class, the
 ``inverse_warp`` parameter is the name of the output file that is created by
 the routine.
 

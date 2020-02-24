@@ -74,7 +74,7 @@
 .. _EPD: http://www.enthought.com/products/epd.php
 .. _Traits: http://code.enthought.com/projects/traits/
 .. _Miniconda: https://conda.io/miniconda.html
-.. _neurodocker: https://github.com/kaczmarj/neurodocker
+.. _NeuroDocker: https://github.com/kaczmarj/neurodocker
 
 .. Python imaging projects
 .. _PyMVPA: http://www.pymvpa.org
@@ -97,6 +97,8 @@
 .. _MRtrix3: http://www.mrtrix.org/
 .. _MNE: https://martinos.org/mne/index.html
 .. _ANTS: http://stnava.github.io/ANTs/
+.. _DIPY: http://dipy.org
+.. _BrainSuite: http://brainsuite.org/
 
 .. General software
 .. _gcc: http://gcc.gnu.org

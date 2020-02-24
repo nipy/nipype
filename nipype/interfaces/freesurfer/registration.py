@@ -3,8 +3,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provides interfaces to various longitudinal commands provided by freesurfer
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 
 import os
 import os.path
@@ -12,32 +10,37 @@ import os.path
 from ... import logging
 from ...utils.filemanip import split_filename, copyfile
 
-from .base import (FSCommand, FSTraitedSpec, FSScriptCommand,
-                   FSScriptOutputSpec, FSCommandOpenMP, FSTraitedSpecOpenMP)
-from ..base import (isdefined, TraitedSpec, File, traits, Directory)
+from .base import (
+    FSCommand,
+    FSTraitedSpec,
+    FSScriptCommand,
+    FSScriptOutputSpec,
+    FSCommandOpenMP,
+    FSTraitedSpecOpenMP,
+)
+from ..base import isdefined, TraitedSpec, File, traits, Directory
 
-__docformat__ = 'restructuredtext'
-iflogger = logging.getLogger('nipype.interface')
+__docformat__ = "restructuredtext"
+iflogger = logging.getLogger("nipype.interface")
 
 
 class MPRtoMNI305InputSpec(FSTraitedSpec):
     # environment variables, required
     # usedefault=True is hack for on_trait_change in __init__
     reference_dir = Directory(
-        "", exists=True, mandatory=True, usedefault=True, desc="TODO")
-    target = traits.String(
-        "", mandatory=True, usedefault=True, desc="input atlas file")
+        "", exists=True, mandatory=True, usedefault=True, desc="TODO"
+    )
+    target = traits.String("", mandatory=True, usedefault=True, desc="input atlas file")
     # required
     in_file = File(
-        argstr='%s',
-        usedefault=True,
-        desc="the input file prefix for MPRtoMNI305")
+        argstr="%s", usedefault=True, desc="the input file prefix for MPRtoMNI305"
+    )
 
 
 class MPRtoMNI305OutputSpec(FSScriptOutputSpec):
     out_file = File(
-        exists=False,
-        desc="The output file '<in_file>_to_<target>_t4_vox2vox.txt'")
+        exists=False, desc="The output file '<in_file>_to_<target>_t4_vox2vox.txt'"
+    )
 
 
 class MPRtoMNI305(FSScriptCommand):
@@ -45,8 +48,7 @@ class MPRtoMNI305(FSScriptCommand):
     For complete details, see FreeSurfer documentation
 
     Examples
-    ========
-
+    --------
     >>> from nipype.interfaces.freesurfer import MPRtoMNI305, Info
     >>> mprtomni305 = MPRtoMNI305()
     >>> mprtomni305.inputs.target = 'structural.nii'
@@ -63,26 +65,25 @@ class MPRtoMNI305(FSScriptCommand):
     >>> mprtomni305.run() # doctest: +SKIP
 
     """
+
     _cmd = "mpr2mni305"
     input_spec = MPRtoMNI305InputSpec
     output_spec = MPRtoMNI305OutputSpec
 
     def __init__(self, **inputs):
         super(MPRtoMNI305, self).__init__(**inputs)
-        self.inputs.on_trait_change(self._environ_update, 'target')
-        self.inputs.on_trait_change(self._environ_update, 'reference_dir')
+        self.inputs.on_trait_change(self._environ_update, "target")
+        self.inputs.on_trait_change(self._environ_update, "reference_dir")
 
     def _format_arg(self, opt, spec, val):
-        if opt in ['target', 'reference_dir']:
+        if opt in ["target", "reference_dir"]:
             return ""
-        elif opt == 'in_file':
+        elif opt == "in_file":
             _, retval, ext = split_filename(val)
             # Need to copy file to working cache directory!
             copyfile(
-                val,
-                os.path.abspath(retval + ext),
-                copy=True,
-                hashmethod='content')
+                val, os.path.abspath(retval + ext), copy=True, hashmethod="content"
+            )
             return retval
         return super(MPRtoMNI305, self)._format_arg(opt, spec, val)
 
@@ -90,7 +91,7 @@ class MPRtoMNI305(FSScriptCommand):
         # refdir = os.path.join(Info.home(), val)
         refdir = self.inputs.reference_dir
         target = self.inputs.target
-        self.inputs.environ['MPR2MNI305_TARGET'] = target
+        self.inputs.environ["MPR2MNI305_TARGET"] = target
         self.inputs.environ["REFDIR"] = refdir
 
     def _get_fname(self, fname):
@@ -98,44 +99,40 @@ class MPRtoMNI305(FSScriptCommand):
 
     def _list_outputs(self):
         outputs = super(MPRtoMNI305, self)._list_outputs()
-        fullname = "_".join([
-            self._get_fname(self.inputs.in_file), "to", self.inputs.target,
-            "t4", "vox2vox.txt"
-        ])
-        outputs['out_file'] = os.path.abspath(fullname)
+        fullname = "_".join(
+            [
+                self._get_fname(self.inputs.in_file),
+                "to",
+                self.inputs.target,
+                "t4",
+                "vox2vox.txt",
+            ]
+        )
+        outputs["out_file"] = os.path.abspath(fullname)
         return outputs
 
 
 class RegisterAVItoTalairachInputSpec(FSTraitedSpec):
     in_file = File(
-        argstr='%s',
-        exists=True,
-        mandatory=True,
-        position=0,
-        desc="The input file")
+        argstr="%s", exists=True, mandatory=True, position=0, desc="The input file"
+    )
     target = File(
-        argstr='%s',
-        exists=True,
-        mandatory=True,
-        position=1,
-        desc="The target file")
+        argstr="%s", exists=True, mandatory=True, position=1, desc="The target file"
+    )
     vox2vox = File(
-        argstr='%s',
-        exists=True,
-        mandatory=True,
-        position=2,
-        desc="The vox2vox file")
+        argstr="%s", exists=True, mandatory=True, position=2, desc="The vox2vox file"
+    )
     out_file = File(
-        'talairach.auto.xfm',
+        "talairach.auto.xfm",
         usedefault=True,
-        argstr='%s',
+        argstr="%s",
         position=3,
-        desc="The transform output")
+        desc="The transform output",
+    )
 
 
 class RegisterAVItoTalairachOutputSpec(FSScriptOutputSpec):
-    out_file = traits.File(
-        exists=False, desc="The output file for RegisterAVItoTalairach")
+    out_file = File(exists=False, desc="The output file for RegisterAVItoTalairach")
 
 
 class RegisterAVItoTalairach(FSScriptCommand):
@@ -170,50 +167,43 @@ class RegisterAVItoTalairach(FSScriptCommand):
 
     >>> register.run() # doctest: +SKIP
     """
+
     _cmd = "avi2talxfm"
     input_spec = RegisterAVItoTalairachInputSpec
     output_spec = RegisterAVItoTalairachOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
 class EMRegisterInputSpec(FSTraitedSpecOpenMP):
     # required
     in_file = File(
-        argstr="%s",
-        exists=True,
-        mandatory=True,
-        position=-3,
-        desc="in brain volume")
+        argstr="%s", exists=True, mandatory=True, position=-3, desc="in brain volume"
+    )
     template = File(
-        argstr="%s",
-        exists=True,
-        mandatory=True,
-        position=-2,
-        desc="template gca")
+        argstr="%s", exists=True, mandatory=True, position=-2, desc="template gca"
+    )
     out_file = File(
         argstr="%s",
         exists=False,
-        name_source=['in_file'],
+        name_source=["in_file"],
         name_template="%s_transform.lta",
         hash_files=False,
         keep_extension=False,
         position=-1,
-        desc="output transform")
+        desc="output transform",
+    )
     # optional
-    skull = traits.Bool(
-        argstr="-skull", desc="align to atlas containing skull (uns=5)")
+    skull = traits.Bool(argstr="-skull", desc="align to atlas containing skull (uns=5)")
     mask = File(argstr="-mask %s", exists=True, desc="use volume as a mask")
     nbrspacing = traits.Int(
         argstr="-uns %d",
-        desc=
-        "align to atlas containing skull setting unknown_nbr_spacing = nbrspacing"
+        desc="align to atlas containing skull setting unknown_nbr_spacing = nbrspacing",
     )
-    transform = File(
-        argstr="-t %s", exists=True, desc="Previously computed transform")
+    transform = File(argstr="-t %s", exists=True, desc="Previously computed transform")
 
 
 class EMRegisterOutputSpec(TraitedSpec):
@@ -235,13 +225,14 @@ class EMRegister(FSCommandOpenMP):
     >>> register.cmdline
     'mri_em_register -uns 9 -skull norm.mgz aseg.mgz norm_transform.lta'
     """
-    _cmd = 'mri_em_register'
+
+    _cmd = "mri_em_register"
     input_spec = EMRegisterInputSpec
     output_spec = EMRegisterOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -253,42 +244,44 @@ class RegisterInputSpec(FSTraitedSpec):
         mandatory=True,
         position=-3,
         copyfile=True,
-        desc="Surface to register, often {hemi}.sphere")
+        desc="Surface to register, often {hemi}.sphere",
+    )
     target = File(
         argstr="%s",
         exists=True,
         mandatory=True,
         position=-2,
-        desc="The data to register to. In normal recon-all usage, " +
-        "this is a template file for average surface.")
+        desc="The data to register to. In normal recon-all usage, "
+        + "this is a template file for average surface.",
+    )
     in_sulc = File(
         exists=True,
         mandatory=True,
         copyfile=True,
-        desc=
-        "Undocumented mandatory input file ${SUBJECTS_DIR}/surf/{hemisphere}.sulc "
+        desc="Undocumented mandatory input file ${SUBJECTS_DIR}/surf/{hemisphere}.sulc ",
     )
     out_file = File(
         argstr="%s",
         exists=False,
         position=-1,
         genfile=True,
-        desc="Output surface file to capture registration")
+        desc="Output surface file to capture registration",
+    )
     # optional
     curv = traits.Bool(
         argstr="-curv",
-        requires=['in_smoothwm'],
-        desc="Use smoothwm curvature for final alignment")
+        requires=["in_smoothwm"],
+        desc="Use smoothwm curvature for final alignment",
+    )
     in_smoothwm = File(
         exists=True,
         copyfile=True,
-        desc=
-        "Undocumented input file ${SUBJECTS_DIR}/surf/{hemisphere}.smoothwm ")
+        desc="Undocumented input file ${SUBJECTS_DIR}/surf/{hemisphere}.smoothwm ",
+    )
 
 
 class RegisterOutputSpec(TraitedSpec):
-    out_file = File(
-        exists=False, desc="Output surface file to capture registration")
+    out_file = File(exists=False, desc="Output surface file to capture registration")
 
 
 class Register(FSCommand):
@@ -308,26 +301,26 @@ class Register(FSCommand):
     'mris_register -curv lh.pial aseg.mgz lh.pial.reg'
     """
 
-    _cmd = 'mris_register'
+    _cmd = "mris_register"
     input_spec = RegisterInputSpec
     output_spec = RegisterOutputSpec
 
     def _format_arg(self, opt, spec, val):
-        if opt == 'curv':
+        if opt == "curv":
             return spec.argstr
         return super(Register, self)._format_arg(opt, spec, val)
 
     def _gen_filename(self, name):
-        if name == 'out_file':
+        if name == "out_file":
             return self._list_outputs()[name]
         return None
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if isdefined(self.inputs.out_file):
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+            outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         else:
-            outputs['out_file'] = os.path.abspath(self.inputs.in_surf) + '.reg'
+            outputs["out_file"] = os.path.abspath(self.inputs.in_surf) + ".reg"
         return outputs
 
 
@@ -338,14 +331,12 @@ class PaintInputSpec(FSTraitedSpec):
         exists=True,
         mandatory=True,
         position=-2,
-        desc="Surface file with grid (vertices) onto which the " +
-        "template data is to be sampled or 'painted'")
+        desc="Surface file with grid (vertices) onto which the "
+        + "template data is to be sampled or 'painted'",
+    )
     template = File(
-        argstr="%s",
-        exists=True,
-        mandatory=True,
-        position=-3,
-        desc="Template file")
+        argstr="%s", exists=True, mandatory=True, position=-3, desc="Template file"
+    )
     # optional
     template_param = traits.Int(desc="Frame number of the input template")
     averages = traits.Int(argstr="-a %d", desc="Average curvature patterns")
@@ -355,17 +346,17 @@ class PaintInputSpec(FSTraitedSpec):
         position=-1,
         name_template="%s.avg_curv",
         hash_files=False,
-        name_source=['in_surf'],
+        name_source=["in_surf"],
         keep_extension=False,
-        desc="File containing a surface-worth of per-vertex values, " +
-        "saved in 'curvature' format.")
+        desc="File containing a surface-worth of per-vertex values, "
+        + "saved in 'curvature' format.",
+    )
 
 
 class PaintOutputSpec(TraitedSpec):
     out_file = File(
         exists=False,
-        desc=
-        "File containing a surface-worth of per-vertex values, saved in 'curvature' format."
+        desc="File containing a surface-worth of per-vertex values, saved in 'curvature' format.",
     )
 
 
@@ -389,150 +380,166 @@ class Paint(FSCommand):
     'mrisp_paint -a 5 aseg.mgz lh.pial lh.avg_curv'
     """
 
-    _cmd = 'mrisp_paint'
+    _cmd = "mrisp_paint"
     input_spec = PaintInputSpec
     output_spec = PaintOutputSpec
 
     def _format_arg(self, opt, spec, val):
-        if opt == 'template':
+        if opt == "template":
             if isdefined(self.inputs.template_param):
-                return spec.argstr % (
-                    val + '#' + str(self.inputs.template_param))
+                return spec.argstr % (val + "#" + str(self.inputs.template_param))
         return super(Paint, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
 class MRICoregInputSpec(FSTraitedSpec):
     source_file = File(
-        argstr='--mov %s',
-        desc='source file to be registered',
-        mandatory=True,
-        copyfile=False)
-    reference_file = File(
-        argstr='--ref %s',
-        desc='reference (target) file',
+        argstr="--mov %s",
+        desc="source file to be registered",
         mandatory=True,
         copyfile=False,
-        xor=['subject_id'])
+    )
+    reference_file = File(
+        argstr="--ref %s",
+        desc="reference (target) file",
+        mandatory=True,
+        copyfile=False,
+        xor=["subject_id"],
+    )
     out_lta_file = traits.Either(
         True,
         File,
-        argstr='--lta %s',
+        argstr="--lta %s",
         default=True,
         usedefault=True,
-        desc='output registration file (LTA format)')
+        desc="output registration file (LTA format)",
+    )
     out_reg_file = traits.Either(
-        True,
-        File,
-        argstr='--regdat %s',
-        desc='output registration file (REG format)')
+        True, File, argstr="--regdat %s", desc="output registration file (REG format)"
+    )
     out_params_file = traits.Either(
-        True, File, argstr='--params %s', desc='output parameters file')
+        True, File, argstr="--params %s", desc="output parameters file"
+    )
 
     subjects_dir = Directory(
-        exists=True, argstr='--sd %s', desc='FreeSurfer SUBJECTS_DIR')
+        exists=True, argstr="--sd %s", desc="FreeSurfer SUBJECTS_DIR"
+    )
     subject_id = traits.Str(
-        argstr='--s %s',
+        argstr="--s %s",
         position=1,
         mandatory=True,
-        xor=['reference_file'],
-        requires=['subjects_dir'],
-        desc='freesurfer subject ID (implies ``reference_mask == '
-        'aparc+aseg.mgz`` unless otherwise specified)')
+        xor=["reference_file"],
+        requires=["subjects_dir"],
+        desc="freesurfer subject ID (implies ``reference_mask == "
+        "aparc+aseg.mgz`` unless otherwise specified)",
+    )
     dof = traits.Enum(
-        6,
-        9,
-        12,
-        argstr='--dof %d',
-        desc='number of transform degrees of freedom')
+        6, 9, 12, argstr="--dof %d", desc="number of transform degrees of freedom"
+    )
     reference_mask = traits.Either(
         False,
         traits.Str,
-        argstr='--ref-mask %s',
+        argstr="--ref-mask %s",
         position=2,
-        desc='mask reference volume with given mask, or None if ``False``')
+        desc="mask reference volume with given mask, or None if ``False``",
+    )
     source_mask = traits.Str(
-        argstr='--mov-mask', desc='mask source file with given mask')
-    num_threads = traits.Int(
-        argstr='--threads %d', desc='number of OpenMP threads')
+        argstr="--mov-mask", desc="mask source file with given mask"
+    )
+    num_threads = traits.Int(argstr="--threads %d", desc="number of OpenMP threads")
     no_coord_dithering = traits.Bool(
-        argstr='--no-coord-dither', desc='turn off coordinate dithering')
+        argstr="--no-coord-dither", desc="turn off coordinate dithering"
+    )
     no_intensity_dithering = traits.Bool(
-        argstr='--no-intensity-dither', desc='turn off intensity dithering')
+        argstr="--no-intensity-dither", desc="turn off intensity dithering"
+    )
     sep = traits.List(
-        argstr='--sep %s...',
+        argstr="--sep %s...",
         minlen=1,
         maxlen=2,
-        desc='set spatial scales, in voxels (default [2, 4])')
+        desc="set spatial scales, in voxels (default [2, 4])",
+    )
     initial_translation = traits.Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
-        argstr='--trans %g %g %g',
-        desc='initial translation in mm (implies no_cras0)')
+        argstr="--trans %g %g %g",
+        desc="initial translation in mm (implies no_cras0)",
+    )
     initial_rotation = traits.Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
-        argstr='--rot %g %g %g',
-        desc='initial rotation in degrees')
+        argstr="--rot %g %g %g",
+        desc="initial rotation in degrees",
+    )
     initial_scale = traits.Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
-        argstr='--scale %g %g %g',
-        desc='initial scale')
+        argstr="--scale %g %g %g",
+        desc="initial scale",
+    )
     initial_shear = traits.Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
-        argstr='--shear %g %g %g',
-        desc='initial shear (Hxy, Hxz, Hyz)')
+        argstr="--shear %g %g %g",
+        desc="initial shear (Hxy, Hxz, Hyz)",
+    )
     no_cras0 = traits.Bool(
-        argstr='--no-cras0',
-        desc='do not set translation parameters to align '
-        'centers of source and reference files')
+        argstr="--no-cras0",
+        desc="do not set translation parameters to align "
+        "centers of source and reference files",
+    )
     max_iters = traits.Range(
-        low=1, argstr='--nitersmax %d', desc='maximum iterations (default: 4)')
+        low=1, argstr="--nitersmax %d", desc="maximum iterations (default: 4)"
+    )
     ftol = traits.Float(
-        argstr='--ftol %e', desc='floating-point tolerance (default=1e-7)')
-    linmintol = traits.Float(argstr='--linmintol %e')
+        argstr="--ftol %e", desc="floating-point tolerance (default=1e-7)"
+    )
+    linmintol = traits.Float(argstr="--linmintol %e")
     saturation_threshold = traits.Range(
         low=0.0,
         high=100.0,
-        argstr='--sat %g',
-        desc='saturation threshold (default=9.999)')
+        argstr="--sat %g",
+        desc="saturation threshold (default=9.999)",
+    )
     conform_reference = traits.Bool(
-        argstr='--conf-ref', desc='conform reference without rescaling')
-    no_brute_force = traits.Bool(
-        argstr='--no-bf', desc='do not brute force search')
+        argstr="--conf-ref", desc="conform reference without rescaling"
+    )
+    no_brute_force = traits.Bool(argstr="--no-bf", desc="do not brute force search")
     brute_force_limit = traits.Float(
-        argstr='--bf-lim %g',
-        xor=['no_brute_force'],
-        desc='constrain brute force search to +/- lim')
+        argstr="--bf-lim %g",
+        xor=["no_brute_force"],
+        desc="constrain brute force search to +/- lim",
+    )
     brute_force_samples = traits.Int(
-        argstr='--bf-nsamp %d',
-        xor=['no_brute_force'],
-        desc='number of samples in brute force search')
+        argstr="--bf-nsamp %d",
+        xor=["no_brute_force"],
+        desc="number of samples in brute force search",
+    )
     no_smooth = traits.Bool(
-        argstr='--no-smooth',
-        desc='do not apply smoothing to either reference or source file')
+        argstr="--no-smooth",
+        desc="do not apply smoothing to either reference or source file",
+    )
     ref_fwhm = traits.Float(
-        argstr='--ref-fwhm', desc='apply smoothing to reference file')
+        argstr="--ref-fwhm", desc="apply smoothing to reference file"
+    )
     source_oob = traits.Bool(
-        argstr='--mov-oob',
-        desc='count source voxels that are out-of-bounds as 0')
+        argstr="--mov-oob", desc="count source voxels that are out-of-bounds as 0"
+    )
     # Skipping mat2par
 
 
 class MRICoregOutputSpec(TraitedSpec):
-    out_reg_file = File(exists=True, desc='output registration file')
-    out_lta_file = File(exists=True, desc='output LTA-style registration file')
-    out_params_file = File(exists=True, desc='output parameters file')
+    out_reg_file = File(exists=True, desc="output registration file")
+    out_lta_file = File(exists=True, desc="output LTA-style registration file")
+    out_params_file = File(exists=True, desc="output parameters file")
 
 
 class MRICoreg(FSCommand):
@@ -571,16 +578,15 @@ class MRICoreg(FSCommand):
     'mri_coreg --s fsaverage --no-ref-mask --lta .../registration.lta --sep 4 --sep 5 --mov moving1.nii --sd .'
     """
 
-    _cmd = 'mri_coreg'
+    _cmd = "mri_coreg"
     input_spec = MRICoregInputSpec
     output_spec = MRICoregOutputSpec
 
     def _format_arg(self, opt, spec, val):
-        if opt in ('out_reg_file', 'out_lta_file',
-                   'out_params_file') and val is True:
+        if opt in ("out_reg_file", "out_lta_file", "out_params_file") and val is True:
             val = self._list_outputs()[opt]
-        elif opt == 'reference_mask' and val is False:
-            return '--no-ref-mask'
+        elif opt == "reference_mask" and val is False:
+            return "--no-ref-mask"
         return super(MRICoreg, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
@@ -589,19 +595,19 @@ class MRICoreg(FSCommand):
         out_lta_file = self.inputs.out_lta_file
         if isdefined(out_lta_file):
             if out_lta_file is True:
-                out_lta_file = 'registration.lta'
-            outputs['out_lta_file'] = os.path.abspath(out_lta_file)
+                out_lta_file = "registration.lta"
+            outputs["out_lta_file"] = os.path.abspath(out_lta_file)
 
         out_reg_file = self.inputs.out_reg_file
         if isdefined(out_reg_file):
             if out_reg_file is True:
-                out_reg_file = 'registration.dat'
-            outputs['out_reg_file'] = os.path.abspath(out_reg_file)
+                out_reg_file = "registration.dat"
+            outputs["out_reg_file"] = os.path.abspath(out_reg_file)
 
         out_params_file = self.inputs.out_params_file
         if isdefined(out_params_file):
             if out_params_file is True:
-                out_params_file = 'registration.par'
-            outputs['out_params_file'] = os.path.abspath(out_params_file)
+                out_params_file = "registration.par"
+            outputs["out_params_file"] = os.path.abspath(out_params_file)
 
         return outputs

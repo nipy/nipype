@@ -12,17 +12,11 @@ nibabel denoted by ## START - COPIED FROM NIBABEL and a corresponding ## END
 
 """
 # Build helper
-import sys
-from glob import glob
 import os
 from os.path import join as pjoin
-from io import open
 
 # Commit hash writing, and dependency checking
 from setuptools.command.build_py import build_py
-
-
-PY3 = sys.version_info[0] >= 3
 
 
 class BuildWithCommitInfoCommand(build_py):
@@ -61,29 +55,26 @@ class BuildWithCommitInfoCommand(build_py):
     information at the terminal.  See the ``pkg_info.py`` module in the nipy
     package for an example.
     """
+
     def run(self):
         import subprocess
         import configparser
 
         build_py.run(self)
-        proc = subprocess.Popen('git rev-parse --short HEAD',
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE,
-                                shell=True)
-        repo_commit, _ = proc.communicate()
-        # Fix for python 3
-        if PY3:
-            repo_commit = repo_commit.decode()
+        proc = subprocess.Popen(
+            "git rev-parse --short HEAD",
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=True,
+        )
+        repo_commit = proc.communicate()[0].decode()
 
         # We write the installation commit even if it's empty
         cfg_parser = configparser.RawConfigParser()
-        cfg_parser.read(pjoin('nipype', 'COMMIT_INFO.txt'))
-        cfg_parser.set('commit hash', 'install_hash', repo_commit.strip())
-        out_pth = pjoin(self.build_lib, 'nipype', 'COMMIT_INFO.txt')
-        if PY3:
-            cfg_parser.write(open(out_pth, 'wt'))
-        else:
-            cfg_parser.write(open(out_pth, 'wb'))
+        cfg_parser.read(pjoin("nipype", "COMMIT_INFO.txt"))
+        cfg_parser.set("commit hash", "install_hash", repo_commit.strip())
+        out_pth = pjoin(self.build_lib, "nipype", "COMMIT_INFO.txt")
+        cfg_parser.write(open(out_pth, "wt"))
 
 
 def main():
@@ -91,68 +82,66 @@ def main():
 
     thispath, _ = os.path.split(__file__)
 
-    testdatafiles = [pjoin('testing', 'data', val)
-                     for val in os.listdir(pjoin(thispath, 'nipype', 'testing',
-                                                 'data'))
-                     if not os.path.isdir(pjoin(thispath, 'nipype', 'testing',
-                                                'data', val))]
+    testdatafiles = [
+        pjoin("testing", "data", val)
+        for val in os.listdir(pjoin(thispath, "nipype", "testing", "data"))
+        if not os.path.isdir(pjoin(thispath, "nipype", "testing", "data", val))
+    ]
 
     testdatafiles += [
-        pjoin('testing', 'data', 'dicomdir', '*'),
-        pjoin('testing', 'data', 'bedpostxout', '*'),
-        pjoin('testing', 'data', 'tbss_dir', '*'),
-        pjoin('testing', 'data', 'brukerdir', 'fid'),
-        pjoin('testing', 'data', 'brukerdir', 'pdata', '1', '*'),
-        pjoin('testing', 'data', 'ds005', '*'),
-        pjoin('testing', 'data', 'realign_json.json'),
-        pjoin('workflows', 'data', '*'),
-        pjoin('pipeline', 'engine', 'report_template.html'),
-        pjoin('external', 'd3.js'),
-        pjoin('interfaces', 'fsl', 'model_templates', '*'),
-        pjoin('interfaces', 'tests', 'use_resources'),
-        'pytest.ini',
-        'conftest.py',
+        pjoin("testing", "data", "dicomdir", "*"),
+        pjoin("testing", "data", "bedpostxout", "*"),
+        pjoin("testing", "data", "tbss_dir", "*"),
+        pjoin("testing", "data", "brukerdir", "fid"),
+        pjoin("testing", "data", "brukerdir", "pdata", "1", "*"),
+        pjoin("testing", "data", "ds005", "*"),
+        pjoin("testing", "data", "realign_json.json"),
+        pjoin("workflows", "data", "*"),
+        pjoin("pipeline", "engine", "report_template.html"),
+        pjoin("external", "d3.js"),
+        pjoin("interfaces", "fsl", "model_templates", "*"),
+        pjoin("interfaces", "tests", "use_resources"),
+        "pytest.ini",
+        "conftest.py",
     ]
 
     # Python 3: use a locals dictionary
     # http://stackoverflow.com/a/1463370/6820620
     ldict = locals()
     # Get version and release info, which is all stored in nipype/info.py
-    ver_file = os.path.join(thispath, 'nipype', 'info.py')
+    ver_file = os.path.join(thispath, "nipype", "info.py")
     with open(ver_file) as infofile:
         exec(infofile.read(), globals(), ldict)
 
-    SETUP_REQUIRES = ['future']
-    if sys.version_info <= (3, 4):
-        SETUP_REQUIRES.append('configparser')
     setup(
-        name=ldict['NAME'],
-        maintainer=ldict['MAINTAINER'],
-        maintainer_email=ldict['MAINTAINER_EMAIL'],
-        description=ldict['DESCRIPTION'],
-        long_description=ldict['LONG_DESCRIPTION'],
-        url=ldict['URL'],
-        download_url=ldict['DOWNLOAD_URL'],
-        license=ldict['LICENSE'],
-        classifiers=ldict['CLASSIFIERS'],
-        author=ldict['AUTHOR'],
-        author_email=ldict['AUTHOR_EMAIL'],
-        platforms=ldict['PLATFORMS'],
-        version=ldict['VERSION'],
-        install_requires=ldict['REQUIRES'],
-        setup_requires=SETUP_REQUIRES,
-        provides=ldict['PROVIDES'],
+        name=ldict["NAME"],
+        maintainer=ldict["MAINTAINER"],
+        maintainer_email=ldict["MAINTAINER_EMAIL"],
+        description=ldict["DESCRIPTION"],
+        long_description=ldict["LONG_DESCRIPTION"],
+        url=ldict["URL"],
+        download_url=ldict["DOWNLOAD_URL"],
+        license=ldict["LICENSE"],
+        classifiers=ldict["CLASSIFIERS"],
+        author=ldict["AUTHOR"],
+        author_email=ldict["AUTHOR_EMAIL"],
+        platforms=ldict["PLATFORMS"],
+        version=ldict["VERSION"],
+        python_requires=ldict["PYTHON_REQUIRES"],
+        install_requires=ldict["REQUIRES"],
+        provides=ldict["PROVIDES"],
         packages=find_packages(),
-        package_data={'nipype': testdatafiles},
-        cmdclass={'build_py': BuildWithCommitInfoCommand},
-        tests_require=ldict['TESTS_REQUIRES'],
+        package_data={"nipype": testdatafiles},
+        cmdclass={"build_py": BuildWithCommitInfoCommand},
+        tests_require=ldict["TESTS_REQUIRES"],
         zip_safe=False,
-        extras_require=ldict['EXTRA_REQUIRES'],
-        entry_points='''
+        extras_require=ldict["EXTRA_REQUIRES"],
+        entry_points="""
            [console_scripts]
            nipypecli=nipype.scripts.cli:cli
-        '''
+        """,
     )
+
 
 if __name__ == "__main__":
     main()
