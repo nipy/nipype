@@ -780,9 +780,9 @@ class SpecifySparseModel(SpecifyModel):
             matplotlib.use(config.get("execution", "matplotlib_backend"))
             import matplotlib.pyplot as plt
 
-        TR = np.round(self.inputs.time_repetition * 1000)  # in ms
+        TR = int(np.round(self.inputs.time_repetition * 1000))  # in ms
         if self.inputs.time_acquisition:
-            TA = np.round(self.inputs.time_acquisition * 1000)  # in ms
+            TA = int(np.round(self.inputs.time_acquisition * 1000))  # in ms
         else:
             TA = TR  # in ms
         nvol = self.inputs.volumes_in_cluster
@@ -797,7 +797,7 @@ class SpecifySparseModel(SpecifyModel):
         dttemp = math.gcd(TA, math.gcd(SILENCE, TR))
         if dt < dttemp:
             if dttemp % dt != 0:
-                dt = float(math.gcd(dttemp, dt))
+                dt = float(math.gcd(dttemp, int(dt)))
 
         if dt < 1:
             raise Exception("Time multiple less than 1 ms")
