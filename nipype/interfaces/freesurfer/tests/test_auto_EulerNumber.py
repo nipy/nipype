@@ -17,7 +17,7 @@ def test_EulerNumber_inputs():
 
 
 def test_EulerNumber_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(defects=dict(), euler=dict(),)
     outputs = EulerNumber.output_spec()
 
     for key, metadata in list(output_map.items()):
