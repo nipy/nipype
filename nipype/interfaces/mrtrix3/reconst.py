@@ -156,18 +156,24 @@ class EstimateFOD(MRTrix3Base):
     """
     Estimate fibre orientation distributions from diffusion data using spherical deconvolution
 
+    .. warning::
+
+       The CSD algorithm does not work as intended, but fixing it in this interface could break
+       existing workflows. This interface has been superseded by
+       :py:class:`.ConstrainedSphericalDecomposition`.
+
     Example
     -------
 
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> fod = mrt.EstimateFOD()
-    >>> fod.inputs.algorithm = 'csd'
+    >>> fod.inputs.algorithm = 'msmt_csd'
     >>> fod.inputs.in_file = 'dwi.mif'
     >>> fod.inputs.wm_txt = 'wm.txt'
     >>> fod.inputs.grad_fsl = ('bvecs', 'bvals')
-    >>> fod.cmdline                               # doctest: +ELLIPSIS
-    'dwi2fod -fslgrad bvecs bvals -lmax 8 csd dwi.mif wm.txt wm.mif gm.mif csf.mif'
-    >>> fod.run()                                 # doctest: +SKIP
+    >>> fod.cmdline
+    'dwi2fod -fslgrad bvecs bvals -lmax 8 msmt_csd dwi.mif wm.txt wm.mif gm.mif csf.mif'
+    >>> fod.run()  # doctest: +SKIP
     """
 
     _cmd = "dwi2fod"
@@ -182,3 +188,46 @@ class EstimateFOD(MRTrix3Base):
         if self.inputs.csf_odf != Undefined:
             outputs["csf_odf"] = op.abspath(self.inputs.csf_odf)
         return outputs
+
+
+class ConstrainedSphericalDeconvolutionInputSpec(EstimateFODInputSpec):
+    gm_odf = File(argstr="%s", position=-3, desc="output GM ODF")
+    csf_odf = File(argstr="%s", position=-1, desc="output CSF ODF")
+    max_sh = InputMultiObject(
+        traits.Int,
+        argstr="-lmax %s",
+        sep=",",
+        desc=(
+            "maximum harmonic degree of response function - single value for single-shell response, list for multi-shell response"
+        ),
+    )
+
+
+class ConstrainedSphericalDeconvolution(EstimateFOD):
+    """
+    Estimate fibre orientation distributions from diffusion data using spherical deconvolution
+
+    This interface supersedes :py:class:`.EstimateFOD`.
+    The old interface has contained a bug when using the CSD algorithm as opposed to the MSMT CSD
+    algorithm, but fixing it could potentially break existing workflows. The new interface works
+    the same, but does not populate the following inputs by default:
+
+    * ``gm_odf``
+    * ``csf_odf``
+    * ``max_sh``
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> fod = mrt.ConstrainedSphericalDeconvolution()
+    >>> fod.inputs.algorithm = 'csd'
+    >>> fod.inputs.in_file = 'dwi.mif'
+    >>> fod.inputs.wm_txt = 'wm.txt'
+    >>> fod.inputs.grad_fsl = ('bvecs', 'bvals')
+    >>> fod.cmdline
+    'dwi2fod -fslgrad bvecs bvals csd dwi.mif wm.txt wm.mif'
+    >>> fod.run()  # doctest: +SKIP
+    """
+
+    input_spec = ConstrainedSphericalDeconvolutionInputSpec

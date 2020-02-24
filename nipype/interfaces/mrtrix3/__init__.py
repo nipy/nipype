@@ -23,5 +23,5 @@ from .preprocess import (
     DWIBiasCorrect,
 )
 from .tracking import Tractography
-from .reconst import FitTensor, EstimateFOD
+from .reconst import FitTensor, EstimateFOD, ConstrainedSphericalDeconvolution
 from .connectivity import LabelConfig, LabelConvert, BuildConnectome
