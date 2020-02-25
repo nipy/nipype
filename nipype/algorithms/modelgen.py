@@ -30,25 +30,6 @@ from .. import config, logging
 iflogger = logging.getLogger("nipype.interface")
 
 
-def gcd(a, b):
-    """
-    Return the greatest common divisor of two integers (uses Euclid's algorithm).
-
-    Examples
-    --------
-    >>> gcd(4, 5)
-    1
-    >>> gcd(4, 8)
-    4
-    >>> gcd(22, 55)
-    11
-
-    """
-    while b > 0:
-        a, b = b, a % b
-    return a
-
-
 def spm_hrf(RT, P=None, fMRI_T=16):
     """
     python implementation of spm_hrf
@@ -799,9 +780,9 @@ class SpecifySparseModel(SpecifyModel):
             matplotlib.use(config.get("execution", "matplotlib_backend"))
             import matplotlib.pyplot as plt
 
-        TR = np.round(self.inputs.time_repetition * 1000)  # in ms
+        TR = int(np.round(self.inputs.time_repetition * 1000))  # in ms
         if self.inputs.time_acquisition:
-            TA = np.round(self.inputs.time_acquisition * 1000)  # in ms
+            TA = int(np.round(self.inputs.time_acquisition * 1000))  # in ms
         else:
             TA = TR  # in ms
         nvol = self.inputs.volumes_in_cluster
@@ -813,10 +794,10 @@ class SpecifySparseModel(SpecifyModel):
         if len(durations) == 1:
             durations = durations * np.ones((len(i_onsets)))
         onsets = np.round(np.array(i_onsets) * 1000)
-        dttemp = gcd(TA, gcd(SILENCE, TR))
+        dttemp = math.gcd(TA, math.gcd(SILENCE, TR))
         if dt < dttemp:
             if dttemp % dt != 0:
-                dt = float(gcd(dttemp, dt))
+                dt = float(math.gcd(dttemp, int(dt)))
 
         if dt < 1:
             raise Exception("Time multiple less than 1 ms")
