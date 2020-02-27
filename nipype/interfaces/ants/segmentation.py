@@ -31,7 +31,10 @@ class AtroposInputSpec(ANTSCommandInputSpec):
         requires=["number_of_tissue_classes"],
         mandatory=True,
     )
-    prior_probability_images = InputMultiPath(File(exists=True))
+    kmeans_init_centers = traits.List(traits.Either(traits.Int, traits.Float), minlen=1)
+    prior_image = traits.Either(
+        File(exists=True), traits.Str,
+        desc="either a string pattern (e.g., 'prior%%02d.nii') or an existing vector-image file.")
     number_of_tissue_classes = traits.Int(mandatory=True)
     prior_weighting = traits.Float()
     prior_probability_threshold = traits.Float(requires=["prior_weighting"])
@@ -65,7 +68,10 @@ class AtroposOutputSpec(TraitedSpec):
 
 
 class Atropos(ANTSCommand):
-    """A finite mixture modeling (FMM) segmentation approach with possibilities for
+    """
+    A multivariate n-class segmentation algorithm.
+
+    A finite mixture modeling (FMM) segmentation approach with possibilities for
     specifying prior constraints. These prior constraints include the specification
     of a prior label image, prior probability images (one for each class), and/or an
     MRF prior to enforce spatial smoothing of the labels. Similar algorithms include
@@ -73,32 +79,69 @@ class Atropos(ANTSCommand):
 
     Examples
     --------
-
     >>> from nipype.interfaces.ants import Atropos
-    >>> at = Atropos()
-    >>> at.inputs.dimension = 3
-    >>> at.inputs.intensity_images = 'structural.nii'
-    >>> at.inputs.mask_image = 'mask.nii'
-    >>> at.inputs.initialization = 'PriorProbabilityImages'
-    >>> at.inputs.prior_probability_images = ['rc1s1.nii', 'rc1s2.nii']
-    >>> at.inputs.number_of_tissue_classes = 2
-    >>> at.inputs.prior_weighting = 0.8
-    >>> at.inputs.prior_probability_threshold = 0.0000001
-    >>> at.inputs.likelihood_model = 'Gaussian'
-    >>> at.inputs.mrf_smoothing_factor = 0.2
-    >>> at.inputs.mrf_radius = [1, 1, 1]
-    >>> at.inputs.icm_use_synchronous_update = True
-    >>> at.inputs.maximum_number_of_icm_terations = 1
-    >>> at.inputs.n_iterations = 5
-    >>> at.inputs.convergence_threshold = 0.000001
-    >>> at.inputs.posterior_formulation = 'Socrates'
-    >>> at.inputs.use_mixture_model_proportions = True
-    >>> at.inputs.save_posteriors = True
+    >>> at = Atropos(
+    ...     dimension=3, intensity_images='structural.nii', mask_image='mask.nii',
+    ...     number_of_tissue_classes=2, likelihood_model='Gaussian', save_posteriors=True,
+    ...     mrf_smoothing_factor=0.2, mrf_radius=[1, 1, 1], icm_use_synchronous_update=True,
+    ...     maximum_number_of_icm_terations=1, n_iterations=5, convergence_threshold=0.000001,
+    ...     posterior_formulation='Socrates', use_mixture_model_proportions=True)
+    >>> at.inputs.initialization = 'Random'
     >>> at.cmdline
     'Atropos --image-dimensionality 3 --icm [1,1] \
---initialization PriorProbabilityImages[2,priors/priorProbImages%02d.nii,0.8,1e-07] --intensity-image structural.nii \
+--initialization Random[2] --intensity-image structural.nii \
 --likelihood-model Gaussian --mask-image mask.nii --mrf [0.2,1x1x1] --convergence [5,1e-06] \
---output [structural_labeled.nii,POSTERIOR_%02d.nii.gz] --posterior-formulation Socrates[1] --use-random-seed 1'
+--output [structural_labeled.nii,POSTERIOR_%02d.nii.gz] --posterior-formulation Socrates[1] \
+--use-random-seed 1'
+
+    >>> at = Atropos(
+    ...     dimension=3, intensity_images='structural.nii', mask_image='mask.nii',
+    ...     number_of_tissue_classes=2, likelihood_model='Gaussian', save_posteriors=True,
+    ...     mrf_smoothing_factor=0.2, mrf_radius=[1, 1, 1], icm_use_synchronous_update=True,
+    ...     maximum_number_of_icm_terations=1, n_iterations=5, convergence_threshold=0.000001,
+    ...     posterior_formulation='Socrates', use_mixture_model_proportions=True)
+    >>> at.inputs.initialization = 'KMeans'
+    >>> at.inputs.kmeans_init_centers = [100, 200]
+    >>> at.cmdline
+    'Atropos --image-dimensionality 3 --icm [1,1] \
+--initialization KMeans[2,100,200] --intensity-image structural.nii \
+--likelihood-model Gaussian --mask-image mask.nii --mrf [0.2,1x1x1] --convergence [5,1e-06] \
+--output [structural_labeled.nii,POSTERIOR_%02d.nii.gz] --posterior-formulation Socrates[1] \
+--use-random-seed 1'
+
+    >>> at = Atropos(
+    ...     dimension=3, intensity_images='structural.nii', mask_image='mask.nii',
+    ...     number_of_tissue_classes=2, likelihood_model='Gaussian', save_posteriors=True,
+    ...     mrf_smoothing_factor=0.2, mrf_radius=[1, 1, 1], icm_use_synchronous_update=True,
+    ...     maximum_number_of_icm_terations=1, n_iterations=5, convergence_threshold=0.000001,
+    ...     posterior_formulation='Socrates', use_mixture_model_proportions=True)
+    >>> at.inputs.initialization = 'PriorProbabilityImages'
+    >>> at.inputs.prior_image = 'BrainSegmentationPrior%02d.nii.gz'
+    >>> at.inputs.prior_weighting = 0.8
+    >>> at.inputs.prior_probability_threshold = 0.0000001
+    >>> at.cmdline
+    'Atropos --image-dimensionality 3 --icm [1,1] \
+--initialization PriorProbabilityImages[2,BrainSegmentationPrior%02d.nii.gz,0.8,1e-07] \
+--intensity-image structural.nii --likelihood-model Gaussian --mask-image mask.nii \
+--mrf [0.2,1x1x1] --convergence [5,1e-06] --output [structural_labeled.nii,POSTERIOR_%02d.nii.gz] \
+--posterior-formulation Socrates[1] --use-random-seed 1'
+
+    >>> at = Atropos(
+    ...     dimension=3, intensity_images='structural.nii', mask_image='mask.nii',
+    ...     number_of_tissue_classes=2, likelihood_model='Gaussian', save_posteriors=True,
+    ...     mrf_smoothing_factor=0.2, mrf_radius=[1, 1, 1], icm_use_synchronous_update=True,
+    ...     maximum_number_of_icm_terations=1, n_iterations=5, convergence_threshold=0.000001,
+    ...     posterior_formulation='Socrates', use_mixture_model_proportions=True)
+    >>> at.inputs.initialization = 'PriorLabelImage'
+    >>> at.inputs.prior_image = 'segmentation0.nii.gz'
+    >>> at.inputs.number_of_tissue_classes = 2
+    >>> at.inputs.prior_weighting = 0.8
+    >>> at.cmdline
+    'Atropos --image-dimensionality 3 --icm [1,1] \
+--initialization PriorLabelImage[2,segmentation0.nii.gz,0.8] --intensity-image structural.nii \
+--likelihood-model Gaussian --mask-image mask.nii --mrf [0.2,1x1x1] --convergence [5,1e-06] \
+--output [structural_labeled.nii,POSTERIOR_%02d.nii.gz] --posterior-formulation Socrates[1] \
+--use-random-seed 1'
 
     """
 
@@ -108,20 +151,53 @@ class Atropos(ANTSCommand):
 
     def _format_arg(self, opt, spec, val):
         if opt == "initialization":
-            retval = "--initialization %s[%d" % (
-                val,
-                self.inputs.number_of_tissue_classes,
-            )
-            if val == "PriorProbabilityImages":
-                _, _, ext = split_filename(self.inputs.prior_probability_images[0])
-                retval += (
-                    ",priors/priorProbImages%02d"
-                    + ext
-                    + ",%g" % self.inputs.prior_weighting
-                )
-                if isdefined(self.inputs.prior_probability_threshold):
-                    retval += ",%g" % self.inputs.prior_probability_threshold
-            return retval + "]"
+            n_classes = self.inputs.number_of_tissue_classes
+            brackets = ['%d' % n_classes]
+            if val == 'KMeans' and isdefined(self.inputs.kmeans_init_centers):
+                centers = sorted(set(self.inputs.kmeans_init_centers))
+                if len(centers) != n_classes:
+                    raise ValueError(
+                        "KMeans initialization with initial cluster centers requires "
+                        "the number of centers to match number_of_tissue_classes"
+                    )
+                brackets += ["%g" % c for c in centers]
+
+            if val in ("PriorProbabilityImages", "PriorLabelImage"):
+                if (
+                    not isdefined(self.inputs.prior_image)
+                    or not isdefined(self.inputs.prior_weighting)
+                ):
+                    raise ValueError(
+                        "'%s' initialization requires setting "
+                        "prior_image and prior_weighting" % val
+                    )
+
+                priors_paths = [self.inputs.prior_image]
+                if "%02d" in priors_paths[0]:
+                    if val == "PriorLabelImage":
+                        raise ValueError(
+                            "'PriorLabelImage' initialization does not "
+                            "accept patterns for prior_image."
+                        )
+                    priors_paths = [
+                        priors_paths[0] % i
+                        for i in range(1, n_classes + 1)
+                    ]
+
+                if not all([os.path.exists(p) for p in priors_paths]):
+                    raise FileNotFoundError(
+                        "One or more prior images do not exist: "
+                        "%s." % ', '.join(priors_paths)
+                    )
+                brackets += [self.inputs.prior_image,
+                             "%g" % self.inputs.prior_weighting]
+
+                if (
+                    val == "PriorProbabilityImages"
+                    and isdefined(self.inputs.prior_probability_threshold)
+                ):
+                    brackets.append("%g" % self.inputs.prior_probability_threshold)
+            return "--initialization %s[%s]" % (val, ','.join(brackets))
         if opt == "mrf_smoothing_factor":
             retval = "--mrf [%g" % val
             if isdefined(self.inputs.mrf_radius):
@@ -150,29 +226,6 @@ class Atropos(ANTSCommand):
                 retval += ",%s" % self.inputs.output_posteriors_name_template
             return retval + "]"
         return super(Atropos, self)._format_arg(opt, spec, val)
-
-    def _run_interface(self, runtime, correct_return_codes=[0]):
-        if self.inputs.initialization == "PriorProbabilityImages":
-            priors_directory = os.path.join(os.getcwd(), "priors")
-            if not os.path.exists(priors_directory):
-                os.makedirs(priors_directory)
-            _, _, ext = split_filename(self.inputs.prior_probability_images[0])
-            for i, f in enumerate(self.inputs.prior_probability_images):
-                target = os.path.join(
-                    priors_directory, "priorProbImages%02d" % (i + 1) + ext
-                )
-                if not (
-                    os.path.exists(target)
-                    and os.path.realpath(target) == os.path.abspath(f)
-                ):
-                    copyfile(
-                        os.path.abspath(f),
-                        os.path.join(
-                            priors_directory, "priorProbImages%02d" % (i + 1) + ext
-                        ),
-                    )
-        runtime = super(Atropos, self)._run_interface(runtime)
-        return runtime
 
     def _gen_filename(self, name):
         if name == "out_classified_image_name":
