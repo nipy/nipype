@@ -3,7 +3,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Top-level namespace for ants."""
 
-# RegistratIon programs
+# Registration programs
 from .registration import (
     ANTS,
     CompositeTransformUtil,
