@@ -2,6 +2,7 @@
 import os
 from glob import glob
 from ...external.due import BibTeX
+from ...utils.imagemanip import copy_header as _copy_header
 from ...utils.filemanip import split_filename, copyfile, which, fname_presuffix
 from ..base import TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined
 from .base import ANTSCommand, ANTSCommandInputSpec
@@ -235,7 +236,6 @@ class Atropos(ANTSCommand):
                 _, name, ext = split_filename(self.inputs.intensity_images[0])
                 output = name + "_labeled" + ext
             return output
-        return None
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -538,23 +538,14 @@ class N4BiasFieldCorrection(ANTSCommand):
 
         # Fix headers
         if self.inputs.copy_header:
-            self._copy_header(outputs["output_image"])
+            _copy_header(self.inputs.input_image, outputs["output_image"],
+                         keep_dtype=False)
 
         if self._out_bias_file:
             outputs["bias_image"] = os.path.abspath(self._out_bias_file)
             if self.inputs.copy_header:
-                self._copy_header(outputs["bias_image"])
+                _copy_header(self.inputs.input_image, outputs["bias_image"])
         return outputs
-
-    def _copy_header(self, fname):
-        """Copy header from input image to an output image."""
-        import nibabel as nb
-
-        in_img = nb.load(self.inputs.input_image)
-        out_img = nb.load(fname, mmap=False)
-        new_img = out_img.__class__(out_img.get_fdata(), in_img.affine, in_img.header)
-        new_img.set_data_dtype(out_img.get_data_dtype())
-        new_img.to_filename(fname)
 
 
 class CorticalThicknessInputSpec(ANTSCommandInputSpec):
@@ -1500,55 +1491,44 @@ class JointFusion(ANTSCommand):
                         self.inputs.exclusion_image[ii],
                     )
                 )
-            retval = " ".join(retval)
-        elif opt == "patch_radius":
-            retval = "-p {0}".format(self._format_xarray(val))
-        elif opt == "search_radius":
-            retval = "-s {0}".format(self._format_xarray(val))
-        elif opt == "out_label_fusion":
-            if isdefined(self.inputs.out_intensity_fusion_name_format):
-                if isdefined(self.inputs.out_label_post_prob_name_format):
-                    if isdefined(self.inputs.out_atlas_voting_weight_name_format):
-                        retval = "-o [{0}, {1}, {2}, {3}]".format(
-                            self.inputs.out_label_fusion,
-                            self.inputs.out_intensity_fusion_name_format,
-                            self.inputs.out_label_post_prob_name_format,
-                            self.inputs.out_atlas_voting_weight_name_format,
-                        )
-                    else:
-                        retval = "-o [{0}, {1}, {2}]".format(
-                            self.inputs.out_label_fusion,
-                            self.inputs.out_intensity_fusion_name_format,
-                            self.inputs.out_label_post_prob_name_format,
-                        )
+            return " ".join(retval)
+        if opt == "patch_radius":
+            return "-p {0}".format(self._format_xarray(val))
+        if opt == "search_radius":
+            return "-s {0}".format(self._format_xarray(val))
+        if opt == "out_label_fusion":
+            args = [self.inputs.out_label_fusion]
+            for option in (
+                self.inputs.out_intensity_fusion_name_format,
+                self.inputs.out_label_post_prob_name_format,
+                self.inputs.out_atlas_voting_weight_name_format
+            ):
+                if isdefined(option):
+                    args.append(option)
                 else:
-                    retval = "-o [{0}, {1}]".format(
-                        self.inputs.out_label_fusion,
-                        self.inputs.out_intensity_fusion_name_format,
-                    )
-            else:
-                retval = "-o {0}".format(self.inputs.out_label_fusion)
-        elif opt == "out_intensity_fusion_name_format":
-            retval = ""
+                    break
+            if len(args) == 1:
+                return " ".join(("-o", args[0]))
+            return "-o [{}]".format(", ".join(args))
+        if opt == "out_intensity_fusion_name_format":
             if not isdefined(self.inputs.out_label_fusion):
-                retval = "-o {0}".format(self.inputs.out_intensity_fusion_name_format)
-        elif opt == "atlas_image":
-            atlas_image_cmd = " ".join(
+                return "-o {0}".format(self.inputs.out_intensity_fusion_name_format)
+            return ""
+        if opt == "atlas_image":
+            return " ".join(
                 [
                     "-g [{0}]".format(", ".join("'%s'" % fn for fn in ai))
                     for ai in self.inputs.atlas_image
                 ]
             )
-            retval = atlas_image_cmd
-        elif opt == "target_image":
-            target_image_cmd = " ".join(
+        if opt == "target_image":
+            return " ".join(
                 [
                     "-t [{0}]".format(", ".join("'%s'" % fn for fn in ai))
                     for ai in self.inputs.target_image
                 ]
             )
-            retval = target_image_cmd
-        elif opt == "atlas_segmentation_image":
+        if opt == "atlas_segmentation_image":
             if len(val) != len(self.inputs.atlas_image):
                 raise ValueError(
                     "Number of specified segmentations should be identical to the number "
@@ -1557,14 +1537,10 @@ class JointFusion(ANTSCommand):
                     )
                 )
 
-            atlas_segmentation_image_cmd = " ".join(
+            return " ".join(
                 ["-l {0}".format(fn) for fn in self.inputs.atlas_segmentation_image]
             )
-            retval = atlas_segmentation_image_cmd
-        else:
-
-            return super(AntsJointFusion, self)._format_arg(opt, spec, val)
-        return retval
+        return super(AntsJointFusion, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -1804,8 +1780,6 @@ class KellyKapowski(ANTSCommand):
                 _, name, ext = split_filename(self.inputs.segmentation_image)
                 output = name + "_warped_white_matter" + ext
             return output
-
-        return None
 
     def _format_arg(self, opt, spec, val):
         if opt == "segmentation_image":
