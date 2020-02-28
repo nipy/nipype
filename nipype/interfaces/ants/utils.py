@@ -141,6 +141,12 @@ class _ResampleImageBySpacingInputSpec(ANTSCommandInputSpec):
     nn_interp = traits.Bool(
         argstr="%d", desc="nn interpolation", position=-1, requires=["addvox"]
     )
+    copy_header = traits.Bool(
+        True,
+        mandatory=True,
+        usedefault=True,
+        desc="copy headers of the original image into the output (corrected) file",
+    )
 
 
 class _ResampleImageBySpacingOutputSpec(TraitedSpec):
@@ -192,6 +198,14 @@ class ResampleImageBySpacing(ANTSCommand):
             value = " ".join(["%g" % d for d in value])
 
         return super(ResampleImageBySpacing, self)._format_arg(name, trait_spec, value)
+
+    def _list_outputs(self):
+        outputs = super(ResampleImageBySpacing, self)._list_outputs()
+        if self.inputs.copy_header:  # Fix headers
+            _copy_header(
+                self.inputs.input_image, outputs["output_image"], keep_dtype=True
+            )
+        return outputs
 
 
 class _ThresholdImageInputSpec(ANTSCommandInputSpec):

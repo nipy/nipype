@@ -7,6 +7,7 @@ def test_ResampleImageBySpacing_inputs():
         addvox=dict(argstr="%d", position=6, requires=["apply_smoothing"],),
         apply_smoothing=dict(argstr="%d", position=5,),
         args=dict(argstr="%s",),
+        copy_header=dict(mandatory=True, usedefault=True,),
         dimension=dict(argstr="%d", position=1, usedefault=True,),
         environ=dict(nohash=True, usedefault=True,),
         input_image=dict(argstr="%s", extensions=None, mandatory=True, position=2,),
