@@ -1,7 +1,7 @@
 """ANTs' utilities."""
 import os
 from ...utils.imagemanip import copy_header as _copy_header
-from ..base import traits, isdefined, TraitedSpec, File, Str, InputMultiPath
+from ..base import traits, isdefined, TraitedSpec, File, Str, InputMultiObject
 from .base import ANTSCommandInputSpec, ANTSCommand
 
 
@@ -400,11 +400,10 @@ class AI(ANTSCommand):
     'antsAI -c [10,1e-06,10] -d 3 -m Mattes[structural.nii,epi.nii,32,Regular,1]
     -o initialization.mat -p 0 -s [20,0.12] -t Affine[0.1] -v 0'
 
-    >>> AI(
-    ...     fixed_image='structural.nii',
-    ...     moving_image='epi.nii',
-    ...     metric=('Mattes', 32, 'Regular', 1),
-    ...     search_grid=(12, (1, 1, 1)),
+    >>> AI(fixed_image='structural.nii',
+    ...    moving_image='epi.nii',
+    ...    metric=('Mattes', 32, 'Regular', 1),
+    ...    search_grid=(12, (1, 1, 1)),
     ... ).cmdline
     'antsAI -c [10,1e-06,10] -d 3 -m Mattes[structural.nii,epi.nii,32,Regular,1]
     -o initialization.mat -p 0 -s [20,0.12] -g [12.0,1x1x1] -t Affine[0.1] -v 0'
@@ -418,15 +417,11 @@ class AI(ANTSCommand):
     def _run_interface(self, runtime, correct_return_codes=(0,)):
         runtime = super(AI, self)._run_interface(runtime, correct_return_codes)
 
-        setattr(
-            self,
-            "_output",
-            {
-                "output_transform": os.path.join(
-                    runtime.cwd, os.path.basename(self.inputs.output_transform)
-                )
-            },
-        )
+        self._output = {
+            "output_transform": os.path.join(
+                runtime.cwd, os.path.basename(self.inputs.output_transform)
+            )
+        }
         return runtime
 
     def _format_arg(self, opt, spec, val):
@@ -439,8 +434,7 @@ class AI(ANTSCommand):
             return spec.argstr % val
 
         if opt == "search_grid":
-            val1 = "x".join(["%g" % v for v in val[1]])
-            fmtval = "[%s]" % ",".join([str(val[0]), val1])
+            fmtval = "[%s,%s]" % (val[0], "x".join("%g" % v for v in val[1]))
             return spec.argstr % fmtval
 
         if opt == "fixed_image_mask":

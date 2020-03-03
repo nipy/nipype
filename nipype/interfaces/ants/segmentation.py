@@ -35,7 +35,7 @@ class AtroposInputSpec(ANTSCommandInputSpec):
     prior_image = traits.Either(
         File(exists=True),
         traits.Str,
-        desc="either a string pattern (e.g., 'prior%%02d.nii') or an existing vector-image file.",
+        desc="either a string pattern (e.g., 'prior%02d.nii') or an existing vector-image file.",
     )
     number_of_tissue_classes = traits.Int(mandatory=True)
     prior_weighting = traits.Float()
