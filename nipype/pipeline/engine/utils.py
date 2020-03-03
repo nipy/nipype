@@ -291,7 +291,7 @@ def load_resultfile(results_file, resolve=True):
         raise FileNotFoundError(results_file)
 
     result = loadpkl(results_file)
-    if resolve and result.outputs:
+    if resolve and hasattr(result,"outputs") and result.outputs:
         try:
             outputs = result.outputs.get()
         except TypeError:  # This is a Bunch
