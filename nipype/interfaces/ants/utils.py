@@ -1,8 +1,7 @@
 """ANTs' utilities."""
 import os
-from ...utils.imagemanip import copy_header as _copy_header
 from ..base import traits, isdefined, TraitedSpec, File, Str, InputMultiObject
-from .base import ANTSCommandInputSpec, ANTSCommand
+from .base import ANTSCommandInputSpec, ANTSCommand, FixHeaderANTSCommand
 
 
 class _ImageMathInputSpec(ANTSCommandInputSpec):
@@ -68,7 +67,7 @@ class _ImageMathOuputSpec(TraitedSpec):
     output_image = File(exists=True, desc="output image file")
 
 
-class ImageMath(ANTSCommand):
+class ImageMath(FixHeaderANTSCommand):
     """
     Operations over images.
 
@@ -97,16 +96,6 @@ class ImageMath(ANTSCommand):
     _cmd = "ImageMath"
     input_spec = _ImageMathInputSpec
     output_spec = _ImageMathOuputSpec
-
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
-        """Overload the aggregation with header replacement, if required."""
-        outputs = super(ImageMath, self).aggregate_outputs(
-            runtime, needed_outputs)
-        if self.inputs.copy_header:  # Fix headers
-            _copy_header(
-                self.inputs.op1, outputs["output_image"], keep_dtype=True
-            )
-        return outputs
 
 
 class _ResampleImageBySpacingInputSpec(ANTSCommandInputSpec):
@@ -157,7 +146,7 @@ class _ResampleImageBySpacingOutputSpec(TraitedSpec):
     output_image = File(exists=True, desc="resampled file")
 
 
-class ResampleImageBySpacing(ANTSCommand):
+class ResampleImageBySpacing(FixHeaderANTSCommand):
     """
     Resample an image with a given spacing.
 
@@ -202,16 +191,6 @@ class ResampleImageBySpacing(ANTSCommand):
             value = " ".join(["%g" % d for d in value])
 
         return super(ResampleImageBySpacing, self)._format_arg(name, trait_spec, value)
-
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
-        """Overload the aggregation with header replacement, if required."""
-        outputs = super(ResampleImageBySpacing, self).aggregate_outputs(
-            runtime, needed_outputs)
-        if self.inputs.copy_header:  # Fix headers
-            _copy_header(
-                self.inputs.input_image, outputs["output_image"], keep_dtype=True
-            )
-        return outputs
 
 
 class _ThresholdImageInputSpec(ANTSCommandInputSpec):
@@ -269,7 +248,7 @@ class _ThresholdImageOutputSpec(TraitedSpec):
     output_image = File(exists=True, desc="resampled file")
 
 
-class ThresholdImage(ANTSCommand):
+class ThresholdImage(FixHeaderANTSCommand):
     """
     Apply thresholds on images.
 
@@ -298,16 +277,6 @@ class ThresholdImage(ANTSCommand):
     _cmd = "ThresholdImage"
     input_spec = _ThresholdImageInputSpec
     output_spec = _ThresholdImageOutputSpec
-
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
-        """Overload the aggregation with header replacement, if required."""
-        outputs = super(ThresholdImage, self).aggregate_outputs(
-            runtime, needed_outputs)
-        if self.inputs.copy_header:  # Fix headers
-            _copy_header(
-                self.inputs.input_image, outputs["output_image"], keep_dtype=True
-            )
-        return outputs
 
 
 class _AIInputSpec(ANTSCommandInputSpec):
@@ -465,7 +434,7 @@ class AverageAffineTransformInputSpec(ANTSCommandInputSpec):
         position=1,
         desc="Outputfname.txt: the name of the resulting transform.",
     )
-    transforms = InputMultiPath(
+    transforms = InputMultiObject(
         File(exists=True),
         argstr="%s",
         mandatory=True,
@@ -526,7 +495,7 @@ class AverageImagesInputSpec(ANTSCommandInputSpec):
         desc="Normalize: if true, the 2nd image is divided by its mean. "
         "This will select the largest image to average into.",
     )
-    images = InputMultiPath(
+    images = InputMultiObject(
         File(exists=True),
         argstr="%s",
         mandatory=True,
@@ -767,7 +736,7 @@ class ComposeMultiTransformInputSpec(ANTSCommandInputSpec):
         position=2,
         desc="Reference image (only necessary when output is warpfield)",
     )
-    transforms = InputMultiPath(
+    transforms = InputMultiObject(
         File(exists=True),
         argstr="%s",
         mandatory=True,
