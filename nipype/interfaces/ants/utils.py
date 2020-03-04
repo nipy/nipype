@@ -1,7 +1,8 @@
 """ANTs' utilities."""
 import os
 from ..base import traits, isdefined, TraitedSpec, File, Str, InputMultiObject
-from .base import ANTSCommandInputSpec, ANTSCommand, FixHeaderANTSCommand
+from ..mixins import CopyHeaderInterface
+from .base import ANTSCommandInputSpec, ANTSCommand
 
 
 class ImageMathInputSpec(ANTSCommandInputSpec):
@@ -67,7 +68,7 @@ class ImageMathOuputSpec(TraitedSpec):
     output_image = File(exists=True, desc="output image file")
 
 
-class ImageMath(FixHeaderANTSCommand):
+class ImageMath(ANTSCommand, CopyHeaderInterface):
     """
     Operations over images.
 
@@ -96,6 +97,7 @@ class ImageMath(FixHeaderANTSCommand):
     _cmd = "ImageMath"
     input_spec = ImageMathInputSpec
     output_spec = ImageMathOuputSpec
+    _copy_header_map = {"output_image": "op1"}
 
 
 class ResampleImageBySpacingInputSpec(ANTSCommandInputSpec):
@@ -146,7 +148,7 @@ class ResampleImageBySpacingOutputSpec(TraitedSpec):
     output_image = File(exists=True, desc="resampled file")
 
 
-class ResampleImageBySpacing(FixHeaderANTSCommand):
+class ResampleImageBySpacing(ANTSCommand, CopyHeaderInterface):
     """
     Resample an image with a given spacing.
 
@@ -182,6 +184,7 @@ class ResampleImageBySpacing(FixHeaderANTSCommand):
     _cmd = "ResampleImageBySpacing"
     input_spec = ResampleImageBySpacingInputSpec
     output_spec = ResampleImageBySpacingOutputSpec
+    _copy_header_map = {"output_image": "input_image"}
 
     def _format_arg(self, name, trait_spec, value):
         if name == "out_spacing":
@@ -248,7 +251,7 @@ class ThresholdImageOutputSpec(TraitedSpec):
     output_image = File(exists=True, desc="resampled file")
 
 
-class ThresholdImage(FixHeaderANTSCommand):
+class ThresholdImage(ANTSCommand, CopyHeaderInterface):
     """
     Apply thresholds on images.
 
@@ -277,6 +280,7 @@ class ThresholdImage(FixHeaderANTSCommand):
     _cmd = "ThresholdImage"
     input_spec = ThresholdImageInputSpec
     output_spec = ThresholdImageOutputSpec
+    _copy_header_map = {"output_image": "input_image"}
 
 
 class AIInputSpec(ANTSCommandInputSpec):

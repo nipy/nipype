@@ -2,9 +2,9 @@
 import os
 from glob import glob
 from ...external.due import BibTeX
-from ...utils.imagemanip import copy_header as _copy_header
 from ...utils.filemanip import split_filename, copyfile, which, fname_presuffix
 from ..base import TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined
+from ..mixins import CopyHeaderInterface
 from .base import ANTSCommand, ANTSCommandInputSpec
 
 
@@ -420,7 +420,7 @@ class N4BiasFieldCorrectionOutputSpec(TraitedSpec):
     bias_image = File(exists=True, desc="Estimated bias")
 
 
-class N4BiasFieldCorrection(ANTSCommand):
+class N4BiasFieldCorrection(ANTSCommand, CopyHeaderInterface):
     """
     Bias field correction.
 
@@ -491,6 +491,10 @@ class N4BiasFieldCorrection(ANTSCommand):
     _cmd = "N4BiasFieldCorrection"
     input_spec = N4BiasFieldCorrectionInputSpec
     output_spec = N4BiasFieldCorrectionOutputSpec
+    _copy_header_map = {
+        "output_image": ("input_image", False),
+        "bias_image": ("input_image", True),
+    }
 
     def __init__(self, *args, **kwargs):
         """Instantiate the N4BiasFieldCorrection interface."""
@@ -532,20 +536,6 @@ class N4BiasFieldCorrection(ANTSCommand):
                 )
             self._out_bias_file = bias_image
         return super(N4BiasFieldCorrection, self)._parse_inputs(skip=skip)
-
-    def _list_outputs(self):
-        outputs = super(N4BiasFieldCorrection, self)._list_outputs()
-
-        # Fix headers
-        if self.inputs.copy_header:
-            _copy_header(self.inputs.input_image, outputs["output_image"],
-                         keep_dtype=False)
-
-        if self._out_bias_file:
-            outputs["bias_image"] = os.path.abspath(self._out_bias_file)
-            if self.inputs.copy_header:
-                _copy_header(self.inputs.input_image, outputs["bias_image"])
-        return outputs
 
 
 class CorticalThicknessInputSpec(ANTSCommandInputSpec):
@@ -1501,7 +1491,7 @@ class JointFusion(ANTSCommand):
             for option in (
                 self.inputs.out_intensity_fusion_name_format,
                 self.inputs.out_label_post_prob_name_format,
-                self.inputs.out_atlas_voting_weight_name_format
+                self.inputs.out_atlas_voting_weight_name_format,
             ):
                 if isdefined(option):
                     args.append(option)
