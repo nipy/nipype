@@ -98,10 +98,14 @@ class ImageMath(ANTSCommand):
     input_spec = _ImageMathInputSpec
     output_spec = _ImageMathOuputSpec
 
-    def _list_outputs(self):
-        outputs = super(ImageMath, self)._list_outputs()
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+        """Overload the aggregation with header replacement, if required."""
+        outputs = super(ImageMath, self).aggregate_outputs(
+            runtime, needed_outputs)
         if self.inputs.copy_header:  # Fix headers
-            _copy_header(self.inputs.op1, outputs["output_image"], keep_dtype=True)
+            _copy_header(
+                self.inputs.op1, outputs["output_image"], keep_dtype=True
+            )
         return outputs
 
 
@@ -199,8 +203,10 @@ class ResampleImageBySpacing(ANTSCommand):
 
         return super(ResampleImageBySpacing, self)._format_arg(name, trait_spec, value)
 
-    def _list_outputs(self):
-        outputs = super(ResampleImageBySpacing, self)._list_outputs()
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+        """Overload the aggregation with header replacement, if required."""
+        outputs = super(ResampleImageBySpacing, self).aggregate_outputs(
+            runtime, needed_outputs)
         if self.inputs.copy_header:  # Fix headers
             _copy_header(
                 self.inputs.input_image, outputs["output_image"], keep_dtype=True
@@ -293,8 +299,10 @@ class ThresholdImage(ANTSCommand):
     input_spec = _ThresholdImageInputSpec
     output_spec = _ThresholdImageOutputSpec
 
-    def _list_outputs(self):
-        outputs = super(ThresholdImage, self)._list_outputs()
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+        """Overload the aggregation with header replacement, if required."""
+        outputs = super(ThresholdImage, self).aggregate_outputs(
+            runtime, needed_outputs)
         if self.inputs.copy_header:  # Fix headers
             _copy_header(
                 self.inputs.input_image, outputs["output_image"], keep_dtype=True
