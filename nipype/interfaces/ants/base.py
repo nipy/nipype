@@ -122,17 +122,3 @@ class ANTSCommand(CommandLine):
     @property
     def version(self):
         return Info.version()
-
-
-class FixHeaderANTSCommand(ANTSCommand):
-    """Fix header if the copy_header input is on."""
-
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
-        """Overload the aggregation with header replacement, if required."""
-        outputs = super(FixHeaderANTSCommand, self).aggregate_outputs(
-            runtime, needed_outputs)
-        if self.inputs.copy_header:  # Fix headers
-            _copy_header(
-                self.inputs.op1, outputs["output_image"], keep_dtype=True
-            )
-        return outputs

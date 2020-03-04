@@ -6,25 +6,22 @@ import pytest
 from ..imagemanip import copy_header
 
 
-@pytest.mark.parametrize('keep_dtype', (True, False))
+@pytest.mark.parametrize("keep_dtype", (True, False))
 def test_copy_header(tmp_path, keep_dtype):
     """Cover copy_header."""
-    fname1 = tmp_path / 'reference.nii.gz'
-    fname2 = tmp_path / 'target.nii.gz'
+    fname1 = tmp_path / "reference.nii.gz"
+    fname2 = tmp_path / "target.nii.gz"
 
-    nii = nb.Nifti1Image(
-        np.zeros((10, 10, 10), dtype='uint8'), None, None)
-    nii.set_qform(np.diag((1., 2., 3., 1.)), code=2)
-    nii.set_sform(np.diag((1., 2., 3., 1.)), code=1)
+    nii = nb.Nifti1Image(np.zeros((10, 10, 10), dtype="uint8"), None, None)
+    nii.set_qform(np.diag((1.0, 2.0, 3.0, 1.0)), code=2)
+    nii.set_sform(np.diag((1.0, 2.0, 3.0, 1.0)), code=1)
     nii.to_filename(str(fname1))
 
-    nii.set_data_dtype('float32')
+    nii.set_data_dtype("float32")
     nii.set_qform(np.eye(4), code=1)
     nii.to_filename(str(fname2))
 
-    copied = nb.load(
-        copy_header(fname1, fname2, keep_dtype=keep_dtype)
-    )
+    copied = nb.load(copy_header(fname1, fname2, keep_dtype=keep_dtype))
     ref = nb.load(str(fname1))
     assert np.all(copied.get_qform(coded=False) == ref.get_qform(coded=False))
     assert np.all(copied.get_sform(coded=False) == ref.get_sform(coded=False))
