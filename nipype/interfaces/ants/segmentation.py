@@ -1248,7 +1248,7 @@ class DenoiseImage(ANTSCommand):
         return super(DenoiseImage, self)._format_arg(name, trait_spec, value)
 
 
-class _JointFusionInputSpec(ANTSCommandInputSpec):
+class JointFusionInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(
         3,
         2,
@@ -1394,7 +1394,7 @@ class _JointFusionInputSpec(ANTSCommandInputSpec):
     verbose = traits.Bool(False, argstr="-v", desc=("Verbose output."))
 
 
-class _JointFusionOutputSpec(TraitedSpec):
+class JointFusionOutputSpec(TraitedSpec):
     out_label_fusion = File(exists=True)
     out_intensity_fusion = OutputMultiPath(File(exists=True))
     out_label_post_prob = OutputMultiPath(File(exists=True))
@@ -1477,8 +1477,8 @@ class JointFusion(ANTSCommand):
 
     """
 
-    input_spec = _JointFusionInputSpec
-    output_spec = _JointFusionOutputSpec
+    input_spec = JointFusionInputSpec
+    output_spec = JointFusionOutputSpec
     _cmd = "antsJointFusion"
 
     def _format_arg(self, opt, spec, val):
@@ -1569,8 +1569,8 @@ class JointFusion(ANTSCommand):
 
 # For backwards compatibility
 AntsJointFusion = JointFusion
-AntsJointFusionInputSpec = _JointFusionInputSpec
-AntsJointFusionOutputSpec = _JointFusionOutputSpec
+AntsJointFusionInputSpec = JointFusionInputSpec
+AntsJointFusionOutputSpec = JointFusionOutputSpec
 
 
 class KellyKapowskiInputSpec(ANTSCommandInputSpec):

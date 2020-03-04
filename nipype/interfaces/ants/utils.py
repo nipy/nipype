@@ -4,7 +4,7 @@ from ..base import traits, isdefined, TraitedSpec, File, Str, InputMultiObject
 from .base import ANTSCommandInputSpec, ANTSCommand, FixHeaderANTSCommand
 
 
-class _ImageMathInputSpec(ANTSCommandInputSpec):
+class ImageMathInputSpec(ANTSCommandInputSpec):
     dimension = traits.Int(
         3, usedefault=True, position=1, argstr="%d", desc="dimension of output image"
     )
@@ -63,7 +63,7 @@ class _ImageMathInputSpec(ANTSCommandInputSpec):
     )
 
 
-class _ImageMathOuputSpec(TraitedSpec):
+class ImageMathOuputSpec(TraitedSpec):
     output_image = File(exists=True, desc="output image file")
 
 
@@ -94,11 +94,11 @@ class ImageMath(FixHeaderANTSCommand):
     """
 
     _cmd = "ImageMath"
-    input_spec = _ImageMathInputSpec
-    output_spec = _ImageMathOuputSpec
+    input_spec = ImageMathInputSpec
+    output_spec = ImageMathOuputSpec
 
 
-class _ResampleImageBySpacingInputSpec(ANTSCommandInputSpec):
+class ResampleImageBySpacingInputSpec(ANTSCommandInputSpec):
     dimension = traits.Int(
         3, usedefault=True, position=1, argstr="%d", desc="dimension of output image"
     )
@@ -142,7 +142,7 @@ class _ResampleImageBySpacingInputSpec(ANTSCommandInputSpec):
     )
 
 
-class _ResampleImageBySpacingOutputSpec(TraitedSpec):
+class ResampleImageBySpacingOutputSpec(TraitedSpec):
     output_image = File(exists=True, desc="resampled file")
 
 
@@ -180,8 +180,8 @@ class ResampleImageBySpacing(FixHeaderANTSCommand):
     """
 
     _cmd = "ResampleImageBySpacing"
-    input_spec = _ResampleImageBySpacingInputSpec
-    output_spec = _ResampleImageBySpacingOutputSpec
+    input_spec = ResampleImageBySpacingInputSpec
+    output_spec = ResampleImageBySpacingOutputSpec
 
     def _format_arg(self, name, trait_spec, value):
         if name == "out_spacing":
@@ -193,7 +193,7 @@ class ResampleImageBySpacing(FixHeaderANTSCommand):
         return super(ResampleImageBySpacing, self)._format_arg(name, trait_spec, value)
 
 
-class _ThresholdImageInputSpec(ANTSCommandInputSpec):
+class ThresholdImageInputSpec(ANTSCommandInputSpec):
     dimension = traits.Int(
         3, usedefault=True, position=1, argstr="%d", desc="dimension of output image"
     )
@@ -244,7 +244,7 @@ class _ThresholdImageInputSpec(ANTSCommandInputSpec):
     )
 
 
-class _ThresholdImageOutputSpec(TraitedSpec):
+class ThresholdImageOutputSpec(TraitedSpec):
     output_image = File(exists=True, desc="resampled file")
 
 
@@ -275,11 +275,11 @@ class ThresholdImage(FixHeaderANTSCommand):
     """
 
     _cmd = "ThresholdImage"
-    input_spec = _ThresholdImageInputSpec
-    output_spec = _ThresholdImageOutputSpec
+    input_spec = ThresholdImageInputSpec
+    output_spec = ThresholdImageOutputSpec
 
 
-class _AIInputSpec(ANTSCommandInputSpec):
+class AIInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(
         3, 2, usedefault=True, argstr="-d %d", desc="dimension of output image"
     )
@@ -359,7 +359,7 @@ class _AIInputSpec(ANTSCommandInputSpec):
     )
 
 
-class _AIOuputSpec(TraitedSpec):
+class AIOuputSpec(TraitedSpec):
     output_transform = File(exists=True, desc="output file name")
 
 
@@ -388,8 +388,8 @@ class AI(ANTSCommand):
     """
 
     _cmd = "antsAI"
-    input_spec = _AIInputSpec
-    output_spec = _AIOuputSpec
+    input_spec = AIInputSpec
+    output_spec = AIOuputSpec
 
     def _run_interface(self, runtime, correct_return_codes=(0,)):
         runtime = super(AI, self)._run_interface(runtime, correct_return_codes)
