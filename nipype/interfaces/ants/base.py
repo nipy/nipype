@@ -7,7 +7,6 @@ import os
 # Local imports
 from ... import logging, LooseVersion
 from ..base import CommandLine, CommandLineInputSpec, traits, isdefined, PackageInfo
-from ...utils.imagemanip import copy_header as _copy_header
 
 iflogger = logging.getLogger("nipype.interface")
 
