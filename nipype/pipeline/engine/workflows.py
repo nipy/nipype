@@ -770,16 +770,46 @@ connected.
     def _has_attr(self, parameter, subtype="in"):
         """Checks if a parameter is available as an input or output
         """
-        if subtype == "in":
-            subobject = self.inputs
-        else:
-            subobject = self.outputs
-        attrlist = parameter.split(".")
-        cur_out = subobject
-        for attr in attrlist:
-            if not hasattr(cur_out, attr):
+        hierarchy = parameter.split(".")
+        attrname = hierarchy.pop()
+        nodename = hierarchy.pop()
+
+        targetworkflow = self
+        for workflowname in hierarchy:
+            workflow = None
+            for node in targetworkflow._graph.nodes():
+                if node.name == workflowname:
+                    if isinstance(node, Workflow):
+                        workflow = node
+                        break
+            if workflow is None:
                 return False
-            cur_out = getattr(cur_out, attr)
+            targetworkflow = workflow
+
+        targetnode = None
+        for node in targetworkflow._graph.nodes():
+            if node.name == nodename:
+                if isinstance(node, Workflow):
+                    return False
+                else:
+                    targetnode = node
+                    break
+        if targetnode is None:
+            return False
+
+        if subtype == "in":
+            if not hasattr(node.inputs, attrname):
+                return False
+        else:
+            if not hasattr(node.outputs, attrname):
+                return False
+
+        if subtype == "in":
+            for _, _, d in targetworkflow._graph.in_edges(nbunch=targetnode, data=True):
+                for cd in d["connect"]:
+                    if attrname == cd[1]:
+                        return False
+
         return True
 
     def _get_parameter_node(self, parameter, subtype="in"):
