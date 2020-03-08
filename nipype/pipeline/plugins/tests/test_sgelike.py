@@ -27,8 +27,6 @@ def is_pending(self, taskid):
 @patch.object(SGELikeBatchManagerBase, '_submit_batchtask', new=submit_batchtask)
 @patch.object(SGELikeBatchManagerBase, '_is_pending', new=is_pending)
 def test_crashfile_creation(tmp_path):
-    cur_dir = os.getcwd()
-    with TemporaryDirectory(prefix="test_engine_", dir=cur_dir) as tmpdirname:
         pipe = pe.Workflow(name="pipe", base_dir=tmpdirname)
         pipe.config["execution"]["crashdump_dir"] = tmpdirname
         pipe.add_nodes([pe.Node(interface=Function(function=crasher), 
