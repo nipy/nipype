@@ -125,7 +125,9 @@ class CopyHeaderInterface(BaseInterface):
 
         inputs = self.inputs.get_traitsfree()
         outputs = self.aggregate_outputs(runtime=runtime).get_traitsfree()
-        for out, inp in self._copy_header_map.items():
+        defined_outputs = set(outputs.keys()).intersection(self._copy_header_map.keys())
+        for out in defined_outputs:
+            inp = self._copy_header_map[out]
             keep_dtype = True
             if isinstance(inp, tuple):
                 inp, keep_dtype = inp
