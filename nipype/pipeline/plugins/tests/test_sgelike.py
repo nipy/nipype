@@ -9,6 +9,7 @@ from mock import patch
 from tempfile import TemporaryDirectory
 import subprocess
 
+
 def crasher():
     raise ValueError()
 
@@ -18,7 +19,8 @@ def submit_batchtask(self, scriptfile, node):
     subprocess.call(["bash", scriptfile])
     return 1
 
-def is_pending(taskid):
+
+def is_pending(self, taskid):
     return False
 
 
@@ -40,3 +42,4 @@ def test_crashfile_creation():
         crashfiles = glob(join(tmpdirname,"crash*crasher*.pklz"))        
         assert len(crashfiles) == 1
     os.chdir(cur_dir)
+
