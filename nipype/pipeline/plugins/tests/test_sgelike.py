@@ -5,7 +5,7 @@ from os.path import join
 import os
 from glob import glob
 import pytest
-from mock import patch
+from unittest.mock import patch
 from tempfile import TemporaryDirectory
 import subprocess
 
@@ -42,4 +42,3 @@ def test_crashfile_creation():
         crashfiles = glob(join(tmpdirname,"crash*crasher*.pklz"))        
         assert len(crashfiles) == 1
     os.chdir(cur_dir)
-
