@@ -37,5 +37,5 @@ def test_crashfile_creation(tmp_path):
         assert (str(e.value) == 
                 "Workflow did not execute cleanly. Check log for details")
         
-        crashfiles = glob(join(tmpdirname,"crash*crasher*.pklz"))        
+        crashfiles = tmp_path.glob("crash*crasher*.pklz")
         assert len(crashfiles) == 1
