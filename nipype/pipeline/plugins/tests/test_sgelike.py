@@ -39,4 +39,3 @@ def test_crashfile_creation(tmp_path):
         
         crashfiles = glob(join(tmpdirname,"crash*crasher*.pklz"))        
         assert len(crashfiles) == 1
-    os.chdir(cur_dir)
