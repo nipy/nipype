@@ -3,3 +3,4 @@ from .reporting import (
     ReportCapableInputSpec,
     ReportCapableOutputSpec,
 )
+from .fixheader import CopyHeaderInputSpec, CopyHeaderInterface

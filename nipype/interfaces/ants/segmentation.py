@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
-"""The ants module provides basic functions for interfacing with ants functions.
-"""
+"""Wrappers for segmentation utilities within ANTs."""
 import os
+from glob import glob
 from ...external.due import BibTeX
 from ...utils.filemanip import split_filename, copyfile, which, fname_presuffix
 from ..base import TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined
+from ..mixins import CopyHeaderInterface
 from .base import ANTSCommand, ANTSCommandInputSpec
 
 
@@ -31,7 +31,12 @@ class AtroposInputSpec(ANTSCommandInputSpec):
         requires=["number_of_tissue_classes"],
         mandatory=True,
     )
-    prior_probability_images = InputMultiPath(File(exists=True))
+    kmeans_init_centers = traits.List(traits.Either(traits.Int, traits.Float), minlen=1)
+    prior_image = traits.Either(
+        File(exists=True),
+        traits.Str,
+        desc="either a string pattern (e.g., 'prior%02d.nii') or an existing vector-image file.",
+    )
     number_of_tissue_classes = traits.Int(mandatory=True)
     prior_weighting = traits.Float()
     prior_probability_threshold = traits.Float(requires=["prior_weighting"])
@@ -65,7 +70,10 @@ class AtroposOutputSpec(TraitedSpec):
 
 
 class Atropos(ANTSCommand):
-    """A finite mixture modeling (FMM) segmentation approach with possibilities for
+    """
+    A multivariate n-class segmentation algorithm.
+
+    A finite mixture modeling (FMM) segmentation approach with possibilities for
     specifying prior constraints. These prior constraints include the specification
     of a prior label image, prior probability images (one for each class), and/or an
     MRF prior to enforce spatial smoothing of the labels. Similar algorithms include
@@ -73,32 +81,70 @@ class Atropos(ANTSCommand):
 
     Examples
     --------
-
     >>> from nipype.interfaces.ants import Atropos
-    >>> at = Atropos()
-    >>> at.inputs.dimension = 3
-    >>> at.inputs.intensity_images = 'structural.nii'
-    >>> at.inputs.mask_image = 'mask.nii'
+    >>> at = Atropos(
+    ...     dimension=3, intensity_images='structural.nii', mask_image='mask.nii',
+    ...     number_of_tissue_classes=2, likelihood_model='Gaussian', save_posteriors=True,
+    ...     mrf_smoothing_factor=0.2, mrf_radius=[1, 1, 1], icm_use_synchronous_update=True,
+    ...     maximum_number_of_icm_terations=1, n_iterations=5, convergence_threshold=0.000001,
+    ...     posterior_formulation='Socrates', use_mixture_model_proportions=True)
+    >>> at.inputs.initialization = 'Random'
+    >>> at.cmdline
+    'Atropos --image-dimensionality 3 --icm [1,1]
+    --initialization Random[2] --intensity-image structural.nii
+    --likelihood-model Gaussian --mask-image mask.nii --mrf [0.2,1x1x1] --convergence [5,1e-06]
+    --output [structural_labeled.nii,POSTERIOR_%02d.nii.gz] --posterior-formulation Socrates[1]
+    --use-random-seed 1'
+
+    >>> at = Atropos(
+    ...     dimension=3, intensity_images='structural.nii', mask_image='mask.nii',
+    ...     number_of_tissue_classes=2, likelihood_model='Gaussian', save_posteriors=True,
+    ...     mrf_smoothing_factor=0.2, mrf_radius=[1, 1, 1], icm_use_synchronous_update=True,
+    ...     maximum_number_of_icm_terations=1, n_iterations=5, convergence_threshold=0.000001,
+    ...     posterior_formulation='Socrates', use_mixture_model_proportions=True)
+    >>> at.inputs.initialization = 'KMeans'
+    >>> at.inputs.kmeans_init_centers = [100, 200]
+    >>> at.cmdline
+    'Atropos --image-dimensionality 3 --icm [1,1]
+    --initialization KMeans[2,100,200] --intensity-image structural.nii
+    --likelihood-model Gaussian --mask-image mask.nii --mrf [0.2,1x1x1] --convergence [5,1e-06]
+    --output [structural_labeled.nii,POSTERIOR_%02d.nii.gz] --posterior-formulation Socrates[1]
+    --use-random-seed 1'
+
+    >>> at = Atropos(
+    ...     dimension=3, intensity_images='structural.nii', mask_image='mask.nii',
+    ...     number_of_tissue_classes=2, likelihood_model='Gaussian', save_posteriors=True,
+    ...     mrf_smoothing_factor=0.2, mrf_radius=[1, 1, 1], icm_use_synchronous_update=True,
+    ...     maximum_number_of_icm_terations=1, n_iterations=5, convergence_threshold=0.000001,
+    ...     posterior_formulation='Socrates', use_mixture_model_proportions=True)
     >>> at.inputs.initialization = 'PriorProbabilityImages'
-    >>> at.inputs.prior_probability_images = ['rc1s1.nii', 'rc1s2.nii']
-    >>> at.inputs.number_of_tissue_classes = 2
+    >>> at.inputs.prior_image = 'BrainSegmentationPrior%02d.nii.gz'
     >>> at.inputs.prior_weighting = 0.8
     >>> at.inputs.prior_probability_threshold = 0.0000001
-    >>> at.inputs.likelihood_model = 'Gaussian'
-    >>> at.inputs.mrf_smoothing_factor = 0.2
-    >>> at.inputs.mrf_radius = [1, 1, 1]
-    >>> at.inputs.icm_use_synchronous_update = True
-    >>> at.inputs.maximum_number_of_icm_terations = 1
-    >>> at.inputs.n_iterations = 5
-    >>> at.inputs.convergence_threshold = 0.000001
-    >>> at.inputs.posterior_formulation = 'Socrates'
-    >>> at.inputs.use_mixture_model_proportions = True
-    >>> at.inputs.save_posteriors = True
     >>> at.cmdline
-    'Atropos --image-dimensionality 3 --icm [1,1] \
---initialization PriorProbabilityImages[2,priors/priorProbImages%02d.nii,0.8,1e-07] --intensity-image structural.nii \
---likelihood-model Gaussian --mask-image mask.nii --mrf [0.2,1x1x1] --convergence [5,1e-06] \
---output [structural_labeled.nii,POSTERIOR_%02d.nii.gz] --posterior-formulation Socrates[1] --use-random-seed 1'
+    'Atropos --image-dimensionality 3 --icm [1,1]
+    --initialization PriorProbabilityImages[2,BrainSegmentationPrior%02d.nii.gz,0.8,1e-07]
+    --intensity-image structural.nii --likelihood-model Gaussian --mask-image mask.nii
+    --mrf [0.2,1x1x1] --convergence [5,1e-06]
+    --output [structural_labeled.nii,POSTERIOR_%02d.nii.gz]
+    --posterior-formulation Socrates[1] --use-random-seed 1'
+
+    >>> at = Atropos(
+    ...     dimension=3, intensity_images='structural.nii', mask_image='mask.nii',
+    ...     number_of_tissue_classes=2, likelihood_model='Gaussian', save_posteriors=True,
+    ...     mrf_smoothing_factor=0.2, mrf_radius=[1, 1, 1], icm_use_synchronous_update=True,
+    ...     maximum_number_of_icm_terations=1, n_iterations=5, convergence_threshold=0.000001,
+    ...     posterior_formulation='Socrates', use_mixture_model_proportions=True)
+    >>> at.inputs.initialization = 'PriorLabelImage'
+    >>> at.inputs.prior_image = 'segmentation0.nii.gz'
+    >>> at.inputs.number_of_tissue_classes = 2
+    >>> at.inputs.prior_weighting = 0.8
+    >>> at.cmdline
+    'Atropos --image-dimensionality 3 --icm [1,1]
+    --initialization PriorLabelImage[2,segmentation0.nii.gz,0.8] --intensity-image structural.nii
+    --likelihood-model Gaussian --mask-image mask.nii --mrf [0.2,1x1x1] --convergence [5,1e-06]
+    --output [structural_labeled.nii,POSTERIOR_%02d.nii.gz] --posterior-formulation Socrates[1]
+    --use-random-seed 1'
 
     """
 
@@ -108,20 +154,52 @@ class Atropos(ANTSCommand):
 
     def _format_arg(self, opt, spec, val):
         if opt == "initialization":
-            retval = "--initialization %s[%d" % (
-                val,
-                self.inputs.number_of_tissue_classes,
-            )
-            if val == "PriorProbabilityImages":
-                _, _, ext = split_filename(self.inputs.prior_probability_images[0])
-                retval += (
-                    ",priors/priorProbImages%02d"
-                    + ext
-                    + ",%g" % self.inputs.prior_weighting
-                )
-                if isdefined(self.inputs.prior_probability_threshold):
-                    retval += ",%g" % self.inputs.prior_probability_threshold
-            return retval + "]"
+            n_classes = self.inputs.number_of_tissue_classes
+            brackets = ["%d" % n_classes]
+            if val == "KMeans" and isdefined(self.inputs.kmeans_init_centers):
+                centers = sorted(set(self.inputs.kmeans_init_centers))
+                if len(centers) != n_classes:
+                    raise ValueError(
+                        "KMeans initialization with initial cluster centers requires "
+                        "the number of centers to match number_of_tissue_classes"
+                    )
+                brackets += ["%g" % c for c in centers]
+
+            if val in ("PriorProbabilityImages", "PriorLabelImage"):
+                if not isdefined(self.inputs.prior_image) or not isdefined(
+                    self.inputs.prior_weighting
+                ):
+                    raise ValueError(
+                        "'%s' initialization requires setting "
+                        "prior_image and prior_weighting" % val
+                    )
+
+                priors_paths = [self.inputs.prior_image]
+                if "%02d" in priors_paths[0]:
+                    if val == "PriorLabelImage":
+                        raise ValueError(
+                            "'PriorLabelImage' initialization does not "
+                            "accept patterns for prior_image."
+                        )
+                    priors_paths = [
+                        priors_paths[0] % i for i in range(1, n_classes + 1)
+                    ]
+
+                if not all([os.path.exists(p) for p in priors_paths]):
+                    raise FileNotFoundError(
+                        "One or more prior images do not exist: "
+                        "%s." % ", ".join(priors_paths)
+                    )
+                brackets += [
+                    self.inputs.prior_image,
+                    "%g" % self.inputs.prior_weighting,
+                ]
+
+                if val == "PriorProbabilityImages" and isdefined(
+                    self.inputs.prior_probability_threshold
+                ):
+                    brackets.append("%g" % self.inputs.prior_probability_threshold)
+            return "--initialization %s[%s]" % (val, ",".join(brackets))
         if opt == "mrf_smoothing_factor":
             retval = "--mrf [%g" % val
             if isdefined(self.inputs.mrf_radius):
@@ -151,29 +229,6 @@ class Atropos(ANTSCommand):
             return retval + "]"
         return super(Atropos, self)._format_arg(opt, spec, val)
 
-    def _run_interface(self, runtime, correct_return_codes=[0]):
-        if self.inputs.initialization == "PriorProbabilityImages":
-            priors_directory = os.path.join(os.getcwd(), "priors")
-            if not os.path.exists(priors_directory):
-                os.makedirs(priors_directory)
-            _, _, ext = split_filename(self.inputs.prior_probability_images[0])
-            for i, f in enumerate(self.inputs.prior_probability_images):
-                target = os.path.join(
-                    priors_directory, "priorProbImages%02d" % (i + 1) + ext
-                )
-                if not (
-                    os.path.exists(target)
-                    and os.path.realpath(target) == os.path.abspath(f)
-                ):
-                    copyfile(
-                        os.path.abspath(f),
-                        os.path.join(
-                            priors_directory, "priorProbImages%02d" % (i + 1) + ext
-                        ),
-                    )
-        runtime = super(Atropos, self)._run_interface(runtime)
-        return runtime
-
     def _gen_filename(self, name):
         if name == "out_classified_image_name":
             output = self.inputs.out_classified_image_name
@@ -181,7 +236,6 @@ class Atropos(ANTSCommand):
                 _, name, ext = split_filename(self.inputs.intensity_images[0])
                 output = name + "_labeled" + ext
             return output
-        return None
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -366,7 +420,7 @@ class N4BiasFieldCorrectionOutputSpec(TraitedSpec):
     bias_image = File(exists=True, desc="Estimated bias")
 
 
-class N4BiasFieldCorrection(ANTSCommand):
+class N4BiasFieldCorrection(ANTSCommand, CopyHeaderInterface):
     """
     Bias field correction.
 
@@ -395,48 +449,52 @@ class N4BiasFieldCorrection(ANTSCommand):
     >>> n4.inputs.shrink_factor = 3
     >>> n4.inputs.n_iterations = [50,50,30,20]
     >>> n4.cmdline
-    'N4BiasFieldCorrection --bspline-fitting [ 300 ] \
--d 3 --input-image structural.nii \
---convergence [ 50x50x30x20 ] --output structural_corrected.nii \
---shrink-factor 3'
+    'N4BiasFieldCorrection --bspline-fitting [ 300 ]
+    -d 3 --input-image structural.nii
+    --convergence [ 50x50x30x20 ] --output structural_corrected.nii
+    --shrink-factor 3'
 
     >>> n4_2 = copy.deepcopy(n4)
     >>> n4_2.inputs.convergence_threshold = 1e-6
     >>> n4_2.cmdline
-    'N4BiasFieldCorrection --bspline-fitting [ 300 ] \
--d 3 --input-image structural.nii \
---convergence [ 50x50x30x20, 1e-06 ] --output structural_corrected.nii \
---shrink-factor 3'
+    'N4BiasFieldCorrection --bspline-fitting [ 300 ]
+    -d 3 --input-image structural.nii
+    --convergence [ 50x50x30x20, 1e-06 ] --output structural_corrected.nii
+    --shrink-factor 3'
 
     >>> n4_3 = copy.deepcopy(n4_2)
     >>> n4_3.inputs.bspline_order = 5
     >>> n4_3.cmdline
-    'N4BiasFieldCorrection --bspline-fitting [ 300, 5 ] \
--d 3 --input-image structural.nii \
---convergence [ 50x50x30x20, 1e-06 ] --output structural_corrected.nii \
---shrink-factor 3'
+    'N4BiasFieldCorrection --bspline-fitting [ 300, 5 ]
+    -d 3 --input-image structural.nii
+    --convergence [ 50x50x30x20, 1e-06 ] --output structural_corrected.nii
+    --shrink-factor 3'
 
     >>> n4_4 = N4BiasFieldCorrection()
     >>> n4_4.inputs.input_image = 'structural.nii'
     >>> n4_4.inputs.save_bias = True
     >>> n4_4.inputs.dimension = 3
     >>> n4_4.cmdline
-    'N4BiasFieldCorrection -d 3 --input-image structural.nii \
---output [ structural_corrected.nii, structural_bias.nii ]'
+    'N4BiasFieldCorrection -d 3 --input-image structural.nii
+    --output [ structural_corrected.nii, structural_bias.nii ]'
 
     >>> n4_5 = N4BiasFieldCorrection()
     >>> n4_5.inputs.input_image = 'structural.nii'
     >>> n4_5.inputs.dimension = 3
     >>> n4_5.inputs.histogram_sharpening = (0.12, 0.02, 200)
     >>> n4_5.cmdline
-    'N4BiasFieldCorrection -d 3  --histogram-sharpening [0.12,0.02,200] \
---input-image structural.nii --output structural_corrected.nii'
+    'N4BiasFieldCorrection -d 3  --histogram-sharpening [0.12,0.02,200]
+    --input-image structural.nii --output structural_corrected.nii'
 
     """
 
     _cmd = "N4BiasFieldCorrection"
     input_spec = N4BiasFieldCorrectionInputSpec
     output_spec = N4BiasFieldCorrectionOutputSpec
+    _copy_header_map = {
+        "output_image": ("input_image", False),
+        "bias_image": ("input_image", True),
+    }
 
     def __init__(self, *args, **kwargs):
         """Instantiate the N4BiasFieldCorrection interface."""
@@ -478,29 +536,6 @@ class N4BiasFieldCorrection(ANTSCommand):
                 )
             self._out_bias_file = bias_image
         return super(N4BiasFieldCorrection, self)._parse_inputs(skip=skip)
-
-    def _list_outputs(self):
-        outputs = super(N4BiasFieldCorrection, self)._list_outputs()
-
-        # Fix headers
-        if self.inputs.copy_header:
-            self._copy_header(outputs["output_image"])
-
-        if self._out_bias_file:
-            outputs["bias_image"] = os.path.abspath(self._out_bias_file)
-            if self.inputs.copy_header:
-                self._copy_header(outputs["bias_image"])
-        return outputs
-
-    def _copy_header(self, fname):
-        """Copy header from input image to an output image."""
-        import nibabel as nb
-
-        in_img = nb.load(self.inputs.input_image)
-        out_img = nb.load(fname, mmap=False)
-        new_img = out_img.__class__(out_img.get_fdata(), in_img.affine, in_img.header)
-        new_img.set_data_dtype(out_img.get_data_dtype())
-        new_img.to_filename(fname)
 
 
 class CorticalThicknessInputSpec(ANTSCommandInputSpec):
@@ -696,8 +731,9 @@ class CorticalThickness(ANTSCommand):
     ...                                                 'BrainSegmentationPrior04.nii.gz']
     >>> corticalthickness.inputs.t1_registration_template = 'brain_study_template.nii.gz'
     >>> corticalthickness.cmdline
-    'antsCorticalThickness.sh -a T1.nii.gz -m ProbabilityMaskOfStudyTemplate.nii.gz -e study_template.nii.gz -d 3 \
--s nii.gz -o antsCT_ -p nipype_priors/BrainSegmentationPrior%02d.nii.gz -t brain_study_template.nii.gz'
+    'antsCorticalThickness.sh -a T1.nii.gz -m ProbabilityMaskOfStudyTemplate.nii.gz
+    -e study_template.nii.gz -d 3 -s nii.gz -o antsCT_
+    -p nipype_priors/BrainSegmentationPrior%02d.nii.gz -t brain_study_template.nii.gz'
 
     """
 
@@ -937,7 +973,8 @@ class BrainExtraction(ANTSCommand):
     >>> brainextraction.inputs.brain_template = 'study_template.nii.gz'
     >>> brainextraction.inputs.brain_probability_mask ='ProbabilityMaskOfStudyTemplate.nii.gz'
     >>> brainextraction.cmdline
-    'antsBrainExtraction.sh -a T1.nii.gz -m ProbabilityMaskOfStudyTemplate.nii.gz -e study_template.nii.gz -d 3 -s nii.gz -o highres001_'
+    'antsBrainExtraction.sh -a T1.nii.gz -m ProbabilityMaskOfStudyTemplate.nii.gz
+    -e study_template.nii.gz -d 3 -s nii.gz -o highres001_'
 
     """
 
@@ -1090,155 +1127,6 @@ class BrainExtraction(ANTSCommand):
         return outputs
 
 
-class JointFusionInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(
-        3,
-        2,
-        4,
-        argstr="%d",
-        position=0,
-        usedefault=True,
-        mandatory=True,
-        desc="image dimension (2, 3, or 4)",
-    )
-    modalities = traits.Int(
-        argstr="%d", position=1, mandatory=True, desc="Number of modalities or features"
-    )
-    warped_intensity_images = InputMultiPath(
-        File(exists=True), argstr="-g %s...", mandatory=True, desc="Warped atlas images"
-    )
-    target_image = InputMultiPath(
-        File(exists=True), argstr="-tg %s...", mandatory=True, desc="Target image(s)"
-    )
-    warped_label_images = InputMultiPath(
-        File(exists=True),
-        argstr="-l %s...",
-        mandatory=True,
-        desc="Warped atlas segmentations",
-    )
-    method = traits.Str(
-        "Joint",
-        argstr="-m %s",
-        usedefault=True,
-        desc=(
-            "Select voting method. Options: Joint (Joint"
-            "Label Fusion). May be followed by optional"
-            "parameters in brackets, e.g., -m Joint[0.1,2]"
-        ),
-    )
-    alpha = traits.Float(
-        0.1,
-        usedefault=True,
-        requires=["method"],
-        desc=("Regularization term added to matrix Mx for inverse"),
-    )
-    beta = traits.Int(
-        2,
-        usedefault=True,
-        requires=["method"],
-        desc=("Exponent for mapping intensity difference to joint error"),
-    )
-    output_label_image = File(
-        argstr="%s",
-        mandatory=True,
-        position=-1,
-        name_template="%s",
-        output_name="output_label_image",
-        desc="Output fusion label map image",
-    )
-    patch_radius = traits.ListInt(
-        minlen=3,
-        maxlen=3,
-        argstr="-rp %s",
-        desc=("Patch radius for similarity measures, scalar or vector. Default: 2x2x2"),
-    )
-    search_radius = traits.ListInt(
-        minlen=3, maxlen=3, argstr="-rs %s", desc="Local search radius. Default: 3x3x3"
-    )
-    exclusion_region = File(
-        exists=True,
-        argstr="-x %s",
-        desc=("Specify an exclusion region for the given label."),
-    )
-    atlas_group_id = traits.ListInt(
-        argstr="-gp %d...", desc="Assign a group ID for each atlas"
-    )
-    atlas_group_weights = traits.ListInt(
-        argstr="-gpw %d...", desc=("Assign the voting weights to each atlas group")
-    )
-
-
-class JointFusionOutputSpec(TraitedSpec):
-    output_label_image = File(exists=True)
-    # TODO: optional outputs - output_posteriors, output_voting_weights
-
-
-class JointFusion(ANTSCommand):
-    """
-    Segmentation fusion tool.
-
-    Examples
-    --------
-    >>> from nipype.interfaces.ants import JointFusion
-    >>> at = JointFusion()
-    >>> at.inputs.dimension = 3
-    >>> at.inputs.modalities = 1
-    >>> at.inputs.method = 'Joint[0.1,2]'
-    >>> at.inputs.output_label_image ='fusion_labelimage_output.nii'
-    >>> at.inputs.warped_intensity_images = ['im1.nii',
-    ...                                      'im2.nii',
-    ...                                      'im3.nii']
-    >>> at.inputs.warped_label_images = ['segmentation0.nii.gz',
-    ...                                  'segmentation1.nii.gz',
-    ...                                  'segmentation1.nii.gz']
-    >>> at.inputs.target_image = 'T1.nii'
-    >>> at.cmdline
-    'jointfusion 3 1 -m Joint[0.1,2] -tg T1.nii -g im1.nii -g im2.nii -g im3.nii -l segmentation0.nii.gz \
--l segmentation1.nii.gz -l segmentation1.nii.gz fusion_labelimage_output.nii'
-
-    >>> at.inputs.method = 'Joint'
-    >>> at.inputs.alpha = 0.5
-    >>> at.inputs.beta = 1
-    >>> at.inputs.patch_radius = [3,2,1]
-    >>> at.inputs.search_radius = [1,2,3]
-    >>> at.cmdline
-    'jointfusion 3 1 -m Joint[0.5,1] -rp 3x2x1 -rs 1x2x3 -tg T1.nii -g im1.nii -g im2.nii -g im3.nii \
--l segmentation0.nii.gz -l segmentation1.nii.gz -l segmentation1.nii.gz fusion_labelimage_output.nii'
-
-    """
-
-    input_spec = JointFusionInputSpec
-    output_spec = JointFusionOutputSpec
-    _cmd = "jointfusion"
-
-    def _format_arg(self, opt, spec, val):
-        if opt == "method":
-            if "[" in val:
-                retval = "-m {0}".format(val)
-            else:
-                retval = "-m {0}[{1},{2}]".format(
-                    self.inputs.method, self.inputs.alpha, self.inputs.beta
-                )
-        elif opt == "patch_radius":
-            retval = "-rp {0}".format(self._format_xarray(val))
-        elif opt == "search_radius":
-            retval = "-rs {0}".format(self._format_xarray(val))
-        else:
-            if opt == "warped_intensity_images":
-                assert len(val) == self.inputs.modalities * len(
-                    self.inputs.warped_label_images
-                ), "Number of intensity images and label maps must be the same {0}!={1}".format(
-                    len(val), len(self.inputs.warped_label_images)
-                )
-            return super(JointFusion, self)._format_arg(opt, spec, val)
-        return retval
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["output_label_image"] = os.path.abspath(self.inputs.output_label_image)
-        return outputs
-
-
 class DenoiseImageInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(
         2,
@@ -1350,7 +1238,7 @@ class DenoiseImage(ANTSCommand):
         return super(DenoiseImage, self)._format_arg(name, trait_spec, value)
 
 
-class AntsJointFusionInputSpec(ANTSCommandInputSpec):
+class JointFusionInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(
         3,
         2,
@@ -1496,75 +1384,91 @@ class AntsJointFusionInputSpec(ANTSCommandInputSpec):
     verbose = traits.Bool(False, argstr="-v", desc=("Verbose output."))
 
 
-class AntsJointFusionOutputSpec(TraitedSpec):
+class JointFusionOutputSpec(TraitedSpec):
     out_label_fusion = File(exists=True)
-    out_intensity_fusion_name_format = traits.Str()
-    out_label_post_prob_name_format = traits.Str()
-    out_atlas_voting_weight_name_format = traits.Str()
+    out_intensity_fusion = OutputMultiPath(File(exists=True))
+    out_label_post_prob = OutputMultiPath(File(exists=True))
+    out_atlas_voting_weight = OutputMultiPath(File(exists=True))
 
 
-class AntsJointFusion(ANTSCommand):
+class JointFusion(ANTSCommand):
     """
+    An image fusion algorithm.
+
+    Developed by Hongzhi Wang and Paul Yushkevich, and it won segmentation challenges
+    at MICCAI 2012 and MICCAI 2013.
+    The original label fusion framework was extended to accommodate intensities by Brian
+    Avants.
+    This implementation is based on Paul's original ITK-style implementation
+    and Brian's ANTsR implementation.
+
+    References include 1) H. Wang, J. W. Suh, S.
+    Das, J. Pluta, C. Craige, P. Yushkevich, Multi-atlas segmentation with joint
+    label fusion IEEE Trans. on Pattern Analysis and Machine Intelligence, 35(3),
+    611-623, 2013. and 2) H. Wang and P. A. Yushkevich, Multi-atlas segmentation
+    with joint label fusion and corrective learning--an open source implementation,
+    Front. Neuroinform., 2013.
+
     Examples
     --------
-    >>> from nipype.interfaces.ants import AntsJointFusion
-    >>> antsjointfusion = AntsJointFusion()
-    >>> antsjointfusion.inputs.out_label_fusion = 'ants_fusion_label_output.nii'
-    >>> antsjointfusion.inputs.atlas_image = [ ['rc1s1.nii','rc1s2.nii'] ]
-    >>> antsjointfusion.inputs.atlas_segmentation_image = ['segmentation0.nii.gz']
-    >>> antsjointfusion.inputs.target_image = ['im1.nii']
-    >>> antsjointfusion.cmdline
-    "antsJointFusion -a 0.1 -g ['rc1s1.nii', 'rc1s2.nii'] -l segmentation0.nii.gz \
--b 2.0 -o ants_fusion_label_output.nii -s 3x3x3 -t ['im1.nii']"
+    >>> from nipype.interfaces.ants import JointFusion
+    >>> jf = JointFusion()
+    >>> jf.inputs.out_label_fusion = 'ants_fusion_label_output.nii'
+    >>> jf.inputs.atlas_image = [ ['rc1s1.nii','rc1s2.nii'] ]
+    >>> jf.inputs.atlas_segmentation_image = ['segmentation0.nii.gz']
+    >>> jf.inputs.target_image = ['im1.nii']
+    >>> jf.cmdline
+    "antsJointFusion -a 0.1 -g ['rc1s1.nii', 'rc1s2.nii'] -l segmentation0.nii.gz
+    -b 2.0 -o ants_fusion_label_output.nii -s 3x3x3 -t ['im1.nii']"
 
-    >>> antsjointfusion.inputs.target_image = [ ['im1.nii', 'im2.nii'] ]
-    >>> antsjointfusion.cmdline
-    "antsJointFusion -a 0.1 -g ['rc1s1.nii', 'rc1s2.nii'] -l segmentation0.nii.gz \
--b 2.0 -o ants_fusion_label_output.nii -s 3x3x3 -t ['im1.nii', 'im2.nii']"
+    >>> jf.inputs.target_image = [ ['im1.nii', 'im2.nii'] ]
+    >>> jf.cmdline
+    "antsJointFusion -a 0.1 -g ['rc1s1.nii', 'rc1s2.nii'] -l segmentation0.nii.gz
+    -b 2.0 -o ants_fusion_label_output.nii -s 3x3x3 -t ['im1.nii', 'im2.nii']"
 
-    >>> antsjointfusion.inputs.atlas_image = [ ['rc1s1.nii','rc1s2.nii'],
+    >>> jf.inputs.atlas_image = [ ['rc1s1.nii','rc1s2.nii'],
     ...                                        ['rc2s1.nii','rc2s2.nii'] ]
-    >>> antsjointfusion.inputs.atlas_segmentation_image = ['segmentation0.nii.gz',
+    >>> jf.inputs.atlas_segmentation_image = ['segmentation0.nii.gz',
     ...                                                    'segmentation1.nii.gz']
-    >>> antsjointfusion.cmdline
-    "antsJointFusion -a 0.1 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii'] \
--l segmentation0.nii.gz -l segmentation1.nii.gz -b 2.0 -o ants_fusion_label_output.nii \
--s 3x3x3 -t ['im1.nii', 'im2.nii']"
+    >>> jf.cmdline
+    "antsJointFusion -a 0.1 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii']
+    -l segmentation0.nii.gz -l segmentation1.nii.gz -b 2.0 -o ants_fusion_label_output.nii
+    -s 3x3x3 -t ['im1.nii', 'im2.nii']"
 
-    >>> antsjointfusion.inputs.dimension = 3
-    >>> antsjointfusion.inputs.alpha = 0.5
-    >>> antsjointfusion.inputs.beta = 1.0
-    >>> antsjointfusion.inputs.patch_radius = [3,2,1]
-    >>> antsjointfusion.inputs.search_radius = [3]
-    >>> antsjointfusion.cmdline
-    "antsJointFusion -a 0.5 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii'] \
--l segmentation0.nii.gz -l segmentation1.nii.gz -b 1.0 -d 3 -o ants_fusion_label_output.nii \
--p 3x2x1 -s 3 -t ['im1.nii', 'im2.nii']"
+    >>> jf.inputs.dimension = 3
+    >>> jf.inputs.alpha = 0.5
+    >>> jf.inputs.beta = 1.0
+    >>> jf.inputs.patch_radius = [3,2,1]
+    >>> jf.inputs.search_radius = [3]
+    >>> jf.cmdline
+    "antsJointFusion -a 0.5 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii']
+    -l segmentation0.nii.gz -l segmentation1.nii.gz -b 1.0 -d 3 -o ants_fusion_label_output.nii
+    -p 3x2x1 -s 3 -t ['im1.nii', 'im2.nii']"
 
-    >>> antsjointfusion.inputs.search_radius = ['mask.nii']
-    >>> antsjointfusion.inputs.verbose = True
-    >>> antsjointfusion.inputs.exclusion_image = ['roi01.nii', 'roi02.nii']
-    >>> antsjointfusion.inputs.exclusion_image_label = ['1','2']
-    >>> antsjointfusion.cmdline
-    "antsJointFusion -a 0.5 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii'] \
--l segmentation0.nii.gz -l segmentation1.nii.gz -b 1.0 -d 3 -e 1[roi01.nii] -e 2[roi02.nii] \
--o ants_fusion_label_output.nii -p 3x2x1 -s mask.nii -t ['im1.nii', 'im2.nii'] -v"
+    >>> jf.inputs.search_radius = ['mask.nii']
+    >>> jf.inputs.verbose = True
+    >>> jf.inputs.exclusion_image = ['roi01.nii', 'roi02.nii']
+    >>> jf.inputs.exclusion_image_label = ['1','2']
+    >>> jf.cmdline
+    "antsJointFusion -a 0.5 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii']
+    -l segmentation0.nii.gz -l segmentation1.nii.gz -b 1.0 -d 3 -e 1[roi01.nii] -e 2[roi02.nii]
+    -o ants_fusion_label_output.nii -p 3x2x1 -s mask.nii -t ['im1.nii', 'im2.nii'] -v"
 
-    >>> antsjointfusion.inputs.out_label_fusion = 'ants_fusion_label_output.nii'
-    >>> antsjointfusion.inputs.out_intensity_fusion_name_format = 'ants_joint_fusion_intensity_%d.nii.gz'
-    >>> antsjointfusion.inputs.out_label_post_prob_name_format = 'ants_joint_fusion_posterior_%d.nii.gz'
-    >>> antsjointfusion.inputs.out_atlas_voting_weight_name_format = 'ants_joint_fusion_voting_weight_%d.nii.gz'
-    >>> antsjointfusion.cmdline
-    "antsJointFusion -a 0.5 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii'] \
--l segmentation0.nii.gz -l segmentation1.nii.gz -b 1.0 -d 3 -e 1[roi01.nii] -e 2[roi02.nii] \
--o [ants_fusion_label_output.nii, ants_joint_fusion_intensity_%d.nii.gz, \
-ants_joint_fusion_posterior_%d.nii.gz, ants_joint_fusion_voting_weight_%d.nii.gz] \
--p 3x2x1 -s mask.nii -t ['im1.nii', 'im2.nii'] -v"
+    >>> jf.inputs.out_label_fusion = 'ants_fusion_label_output.nii'
+    >>> jf.inputs.out_intensity_fusion_name_format = 'ants_joint_fusion_intensity_%d.nii.gz'
+    >>> jf.inputs.out_label_post_prob_name_format = 'ants_joint_fusion_posterior_%d.nii.gz'
+    >>> jf.inputs.out_atlas_voting_weight_name_format = 'ants_joint_fusion_voting_weight_%d.nii.gz'
+    >>> jf.cmdline
+    "antsJointFusion -a 0.5 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii']
+    -l segmentation0.nii.gz -l segmentation1.nii.gz -b 1.0 -d 3 -e 1[roi01.nii] -e 2[roi02.nii]
+    -o [ants_fusion_label_output.nii, ants_joint_fusion_intensity_%d.nii.gz,
+    ants_joint_fusion_posterior_%d.nii.gz, ants_joint_fusion_voting_weight_%d.nii.gz]
+    -p 3x2x1 -s mask.nii -t ['im1.nii', 'im2.nii'] -v"
 
     """
 
-    input_spec = AntsJointFusionInputSpec
-    output_spec = AntsJointFusionOutputSpec
+    input_spec = JointFusionInputSpec
+    output_spec = JointFusionOutputSpec
     _cmd = "antsJointFusion"
 
     def _format_arg(self, opt, spec, val):
@@ -1577,88 +1481,86 @@ ants_joint_fusion_posterior_%d.nii.gz, ants_joint_fusion_voting_weight_%d.nii.gz
                         self.inputs.exclusion_image[ii],
                     )
                 )
-            retval = " ".join(retval)
-        elif opt == "patch_radius":
-            retval = "-p {0}".format(self._format_xarray(val))
-        elif opt == "search_radius":
-            retval = "-s {0}".format(self._format_xarray(val))
-        elif opt == "out_label_fusion":
-            if isdefined(self.inputs.out_intensity_fusion_name_format):
-                if isdefined(self.inputs.out_label_post_prob_name_format):
-                    if isdefined(self.inputs.out_atlas_voting_weight_name_format):
-                        retval = "-o [{0}, {1}, {2}, {3}]".format(
-                            self.inputs.out_label_fusion,
-                            self.inputs.out_intensity_fusion_name_format,
-                            self.inputs.out_label_post_prob_name_format,
-                            self.inputs.out_atlas_voting_weight_name_format,
-                        )
-                    else:
-                        retval = "-o [{0}, {1}, {2}]".format(
-                            self.inputs.out_label_fusion,
-                            self.inputs.out_intensity_fusion_name_format,
-                            self.inputs.out_label_post_prob_name_format,
-                        )
+            return " ".join(retval)
+        if opt == "patch_radius":
+            return "-p {0}".format(self._format_xarray(val))
+        if opt == "search_radius":
+            return "-s {0}".format(self._format_xarray(val))
+        if opt == "out_label_fusion":
+            args = [self.inputs.out_label_fusion]
+            for option in (
+                self.inputs.out_intensity_fusion_name_format,
+                self.inputs.out_label_post_prob_name_format,
+                self.inputs.out_atlas_voting_weight_name_format,
+            ):
+                if isdefined(option):
+                    args.append(option)
                 else:
-                    retval = "-o [{0}, {1}]".format(
-                        self.inputs.out_label_fusion,
-                        self.inputs.out_intensity_fusion_name_format,
-                    )
-            else:
-                retval = "-o {0}".format(self.inputs.out_label_fusion)
-        elif opt == "out_intensity_fusion_name_format":
-            retval = ""
+                    break
+            if len(args) == 1:
+                return " ".join(("-o", args[0]))
+            return "-o [{}]".format(", ".join(args))
+        if opt == "out_intensity_fusion_name_format":
             if not isdefined(self.inputs.out_label_fusion):
-                retval = "-o {0}".format(self.inputs.out_intensity_fusion_name_format)
-        elif opt == "atlas_image":
-            atlas_image_cmd = " ".join(
+                return "-o {0}".format(self.inputs.out_intensity_fusion_name_format)
+            return ""
+        if opt == "atlas_image":
+            return " ".join(
                 [
                     "-g [{0}]".format(", ".join("'%s'" % fn for fn in ai))
                     for ai in self.inputs.atlas_image
                 ]
             )
-            retval = atlas_image_cmd
-        elif opt == "target_image":
-            target_image_cmd = " ".join(
+        if opt == "target_image":
+            return " ".join(
                 [
                     "-t [{0}]".format(", ".join("'%s'" % fn for fn in ai))
                     for ai in self.inputs.target_image
                 ]
             )
-            retval = target_image_cmd
-        elif opt == "atlas_segmentation_image":
-            assert len(val) == len(self.inputs.atlas_image), (
-                "Number of specified "
-                "segmentations should be identical to the number of atlas image "
-                "sets {0}!={1}".format(len(val), len(self.inputs.atlas_image))
-            )
+        if opt == "atlas_segmentation_image":
+            if len(val) != len(self.inputs.atlas_image):
+                raise ValueError(
+                    "Number of specified segmentations should be identical to the number "
+                    "of atlas image sets {0}!={1}".format(
+                        len(val), len(self.inputs.atlas_image)
+                    )
+                )
 
-            atlas_segmentation_image_cmd = " ".join(
+            return " ".join(
                 ["-l {0}".format(fn) for fn in self.inputs.atlas_segmentation_image]
             )
-            retval = atlas_segmentation_image_cmd
-        else:
-
-            return super(AntsJointFusion, self)._format_arg(opt, spec, val)
-        return retval
+        return super(AntsJointFusion, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         if isdefined(self.inputs.out_label_fusion):
             outputs["out_label_fusion"] = os.path.abspath(self.inputs.out_label_fusion)
         if isdefined(self.inputs.out_intensity_fusion_name_format):
-            outputs["out_intensity_fusion_name_format"] = os.path.abspath(
-                self.inputs.out_intensity_fusion_name_format
+            outputs["out_intensity_fusion"] = glob(
+                os.path.abspath(
+                    self.inputs.out_intensity_fusion_name_format.replace("%d", "*")
+                )
             )
         if isdefined(self.inputs.out_label_post_prob_name_format):
-            outputs["out_label_post_prob_name_format"] = os.path.abspath(
-                self.inputs.out_label_post_prob_name_format
+            outputs["out_label_post_prob"] = glob(
+                os.path.abspath(
+                    self.inputs.out_label_post_prob_name_format.replace("%d", "*")
+                )
             )
         if isdefined(self.inputs.out_atlas_voting_weight_name_format):
-            outputs["out_atlas_voting_weight_name_format"] = os.path.abspath(
-                self.inputs.out_atlas_voting_weight_name_format
+            outputs["out_atlas_voting_weight"] = glob(
+                os.path.abspath(
+                    self.inputs.out_atlas_voting_weight_name_format.replace("%d", "*")
+                )
             )
-
         return outputs
+
+
+# For backwards compatibility
+AntsJointFusion = JointFusion
+AntsJointFusionInputSpec = JointFusionInputSpec
+AntsJointFusionOutputSpec = JointFusionOutputSpec
 
 
 class KellyKapowskiInputSpec(ANTSCommandInputSpec):
@@ -1797,7 +1699,8 @@ class KellyKapowskiOutputSpec(TraitedSpec):
 
 
 class KellyKapowski(ANTSCommand):
-    """ Nipype Interface to ANTs' KellyKapowski, also known as DiReCT.
+    """
+    Nipype Interface to ANTs' KellyKapowski, also known as DiReCT.
 
     DiReCT is a registration based estimate of cortical thickness. It was published
     in S. R. Das, B. B. Avants, M. Grossman, and J. C. Gee, Registration based
@@ -1812,12 +1715,12 @@ class KellyKapowski(ANTSCommand):
     >>> kk.inputs.convergence = "[45,0.0,10]"
     >>> kk.inputs.thickness_prior_estimate = 10
     >>> kk.cmdline
-    'KellyKapowski --convergence "[45,0.0,10]" \
---output "[segmentation0_cortical_thickness.nii.gz,segmentation0_warped_white_matter.nii.gz]" \
---image-dimensionality 3 --gradient-step 0.025000 \
---maximum-number-of-invert-displacement-field-iterations 20 --number-of-integration-points 10 \
---segmentation-image "[segmentation0.nii.gz,2,3]" --smoothing-variance 1.000000 \
---smoothing-velocity-field-parameter 1.500000 --thickness-prior-estimate 10.000000'
+    'KellyKapowski --convergence "[45,0.0,10]"
+    --output "[segmentation0_cortical_thickness.nii.gz,segmentation0_warped_white_matter.nii.gz]"
+    --image-dimensionality 3 --gradient-step 0.025000
+    --maximum-number-of-invert-displacement-field-iterations 20 --number-of-integration-points 10
+    --segmentation-image "[segmentation0.nii.gz,2,3]" --smoothing-variance 1.000000
+    --smoothing-velocity-field-parameter 1.500000 --thickness-prior-estimate 10.000000'
 
     """
 
@@ -1867,8 +1770,6 @@ class KellyKapowski(ANTSCommand):
                 _, name, ext = split_filename(self.inputs.segmentation_image)
                 output = name + "_warped_white_matter" + ext
             return output
-
-        return None
 
     def _format_arg(self, opt, spec, val):
         if opt == "segmentation_image":

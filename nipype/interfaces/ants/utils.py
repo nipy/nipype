@@ -1,11 +1,431 @@
-# -*- coding: utf-8 -*-
-"""ANTS Apply Transforms interface
-"""
-
+"""ANTs' utilities."""
 import os
+from ..base import traits, isdefined, TraitedSpec, File, Str, InputMultiObject
+from ..mixins import CopyHeaderInterface
+from .base import ANTSCommandInputSpec, ANTSCommand
 
-from ..base import TraitedSpec, File, traits, InputMultiPath
-from .base import ANTSCommand, ANTSCommandInputSpec
+
+class ImageMathInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Int(
+        3, usedefault=True, position=1, argstr="%d", desc="dimension of output image"
+    )
+    output_image = File(
+        position=2,
+        argstr="%s",
+        name_source=["op1"],
+        name_template="%s_maths",
+        desc="output image file",
+        keep_extension=True,
+    )
+    operation = traits.Enum(
+        "m",
+        "vm",
+        "+",
+        "v+",
+        "-",
+        "v-",
+        "/",
+        "^",
+        "max",
+        "exp",
+        "addtozero",
+        "overadd",
+        "abs",
+        "total",
+        "mean",
+        "vtotal",
+        "Decision",
+        "Neg",
+        "Project",
+        "G",
+        "MD",
+        "ME",
+        "MO",
+        "MC",
+        "GD",
+        "GE",
+        "GO",
+        "GC",
+        mandatory=True,
+        position=3,
+        argstr="%s",
+        desc="mathematical operations",
+    )
+    op1 = File(
+        exists=True, mandatory=True, position=-2, argstr="%s", desc="first operator"
+    )
+    op2 = traits.Either(
+        File(exists=True), Str, position=-1, argstr="%s", desc="second operator"
+    )
+    copy_header = traits.Bool(
+        True,
+        usedefault=True,
+        desc="copy headers of the original image into the output (corrected) file",
+    )
+
+
+class ImageMathOuputSpec(TraitedSpec):
+    output_image = File(exists=True, desc="output image file")
+
+
+class ImageMath(ANTSCommand, CopyHeaderInterface):
+    """
+    Operations over images.
+
+    Example
+    -------
+    >>> ImageMath(
+    ...     op1='structural.nii',
+    ...     operation='+',
+    ...     op2='2').cmdline
+    'ImageMath 3 structural_maths.nii + structural.nii 2'
+
+    >>> ImageMath(
+    ...     op1='structural.nii',
+    ...     operation='Project',
+    ...     op2='1 2').cmdline
+    'ImageMath 3 structural_maths.nii Project structural.nii 1 2'
+
+    >>> ImageMath(
+    ...     op1='structural.nii',
+    ...     operation='G',
+    ...     op2='4').cmdline
+    'ImageMath 3 structural_maths.nii G structural.nii 4'
+
+    """
+
+    _cmd = "ImageMath"
+    input_spec = ImageMathInputSpec
+    output_spec = ImageMathOuputSpec
+    _copy_header_map = {"output_image": "op1"}
+
+
+class ResampleImageBySpacingInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Int(
+        3, usedefault=True, position=1, argstr="%d", desc="dimension of output image"
+    )
+    input_image = File(
+        exists=True, mandatory=True, position=2, argstr="%s", desc="input image file"
+    )
+    output_image = File(
+        position=3,
+        argstr="%s",
+        name_source=["input_image"],
+        name_template="%s_resampled",
+        desc="output image file",
+        keep_extension=True,
+    )
+    out_spacing = traits.Either(
+        traits.List(traits.Float, minlen=2, maxlen=3),
+        traits.Tuple(traits.Float, traits.Float, traits.Float),
+        traits.Tuple(traits.Float, traits.Float),
+        position=4,
+        argstr="%s",
+        mandatory=True,
+        desc="output spacing",
+    )
+    apply_smoothing = traits.Bool(
+        False, argstr="%d", position=5, desc="smooth before resampling"
+    )
+    addvox = traits.Int(
+        argstr="%d",
+        position=6,
+        requires=["apply_smoothing"],
+        desc="addvox pads each dimension by addvox",
+    )
+    nn_interp = traits.Bool(
+        argstr="%d", desc="nn interpolation", position=-1, requires=["addvox"]
+    )
+    copy_header = traits.Bool(
+        True,
+        mandatory=True,
+        usedefault=True,
+        desc="copy headers of the original image into the output (corrected) file",
+    )
+
+
+class ResampleImageBySpacingOutputSpec(TraitedSpec):
+    output_image = File(exists=True, desc="resampled file")
+
+
+class ResampleImageBySpacing(ANTSCommand, CopyHeaderInterface):
+    """
+    Resample an image with a given spacing.
+
+    Examples
+    --------
+    >>> res = ResampleImageBySpacing(dimension=3)
+    >>> res.inputs.input_image = 'structural.nii'
+    >>> res.inputs.output_image = 'output.nii.gz'
+    >>> res.inputs.out_spacing = (4, 4, 4)
+    >>> res.cmdline  #doctest: +ELLIPSIS
+    'ResampleImageBySpacing 3 structural.nii output.nii.gz 4 4 4'
+
+    >>> res = ResampleImageBySpacing(dimension=3)
+    >>> res.inputs.input_image = 'structural.nii'
+    >>> res.inputs.output_image = 'output.nii.gz'
+    >>> res.inputs.out_spacing = (4, 4, 4)
+    >>> res.inputs.apply_smoothing = True
+    >>> res.cmdline  #doctest: +ELLIPSIS
+    'ResampleImageBySpacing 3 structural.nii output.nii.gz 4 4 4 1'
+
+    >>> res = ResampleImageBySpacing(dimension=3)
+    >>> res.inputs.input_image = 'structural.nii'
+    >>> res.inputs.output_image = 'output.nii.gz'
+    >>> res.inputs.out_spacing = (0.4, 0.4, 0.4)
+    >>> res.inputs.apply_smoothing = True
+    >>> res.inputs.addvox = 2
+    >>> res.inputs.nn_interp = False
+    >>> res.cmdline  #doctest: +ELLIPSIS
+    'ResampleImageBySpacing 3 structural.nii output.nii.gz 0.4 0.4 0.4 1 2 0'
+
+    """
+
+    _cmd = "ResampleImageBySpacing"
+    input_spec = ResampleImageBySpacingInputSpec
+    output_spec = ResampleImageBySpacingOutputSpec
+    _copy_header_map = {"output_image": "input_image"}
+
+    def _format_arg(self, name, trait_spec, value):
+        if name == "out_spacing":
+            if len(value) != self.inputs.dimension:
+                raise ValueError("out_spacing dimensions should match dimension")
+
+            value = " ".join(["%g" % d for d in value])
+
+        return super(ResampleImageBySpacing, self)._format_arg(name, trait_spec, value)
+
+
+class ThresholdImageInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Int(
+        3, usedefault=True, position=1, argstr="%d", desc="dimension of output image"
+    )
+    input_image = File(
+        exists=True, mandatory=True, position=2, argstr="%s", desc="input image file"
+    )
+    output_image = File(
+        position=3,
+        argstr="%s",
+        name_source=["input_image"],
+        name_template="%s_resampled",
+        desc="output image file",
+        keep_extension=True,
+    )
+
+    mode = traits.Enum(
+        "Otsu",
+        "Kmeans",
+        argstr="%s",
+        position=4,
+        requires=["num_thresholds"],
+        xor=["th_low", "th_high"],
+        desc="whether to run Otsu / Kmeans thresholding",
+    )
+    num_thresholds = traits.Int(position=5, argstr="%d", desc="number of thresholds")
+    input_mask = File(
+        exists=True,
+        requires=["num_thresholds"],
+        argstr="%s",
+        desc="input mask for Otsu, Kmeans",
+    )
+
+    th_low = traits.Float(position=4, argstr="%f", xor=["mode"], desc="lower threshold")
+    th_high = traits.Float(
+        position=5, argstr="%f", xor=["mode"], desc="upper threshold"
+    )
+    inside_value = traits.Float(
+        1, position=6, argstr="%f", requires=["th_low"], desc="inside value"
+    )
+    outside_value = traits.Float(
+        0, position=7, argstr="%f", requires=["th_low"], desc="outside value"
+    )
+    copy_header = traits.Bool(
+        True,
+        mandatory=True,
+        usedefault=True,
+        desc="copy headers of the original image into the output (corrected) file",
+    )
+
+
+class ThresholdImageOutputSpec(TraitedSpec):
+    output_image = File(exists=True, desc="resampled file")
+
+
+class ThresholdImage(ANTSCommand, CopyHeaderInterface):
+    """
+    Apply thresholds on images.
+
+    Examples
+    --------
+    >>> thres = ThresholdImage(dimension=3)
+    >>> thres.inputs.input_image = 'structural.nii'
+    >>> thres.inputs.output_image = 'output.nii.gz'
+    >>> thres.inputs.th_low = 0.5
+    >>> thres.inputs.th_high = 1.0
+    >>> thres.inputs.inside_value = 1.0
+    >>> thres.inputs.outside_value = 0.0
+    >>> thres.cmdline  #doctest: +ELLIPSIS
+    'ThresholdImage 3 structural.nii output.nii.gz 0.500000 1.000000 1.000000 0.000000'
+
+    >>> thres = ThresholdImage(dimension=3)
+    >>> thres.inputs.input_image = 'structural.nii'
+    >>> thres.inputs.output_image = 'output.nii.gz'
+    >>> thres.inputs.mode = 'Kmeans'
+    >>> thres.inputs.num_thresholds = 4
+    >>> thres.cmdline  #doctest: +ELLIPSIS
+    'ThresholdImage 3 structural.nii output.nii.gz Kmeans 4'
+
+    """
+
+    _cmd = "ThresholdImage"
+    input_spec = ThresholdImageInputSpec
+    output_spec = ThresholdImageOutputSpec
+    _copy_header_map = {"output_image": "input_image"}
+
+
+class AIInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Enum(
+        3, 2, usedefault=True, argstr="-d %d", desc="dimension of output image"
+    )
+    verbose = traits.Bool(
+        False, usedefault=True, argstr="-v %d", desc="enable verbosity"
+    )
+
+    fixed_image = File(
+        exists=True,
+        mandatory=True,
+        desc="Image to which the moving_image should be transformed",
+    )
+    moving_image = File(
+        exists=True,
+        mandatory=True,
+        desc="Image that will be transformed to fixed_image",
+    )
+
+    fixed_image_mask = File(exists=True, argstr="-x %s", desc="fixed mage mask")
+    moving_image_mask = File(
+        exists=True, requires=["fixed_image_mask"], desc="moving mage mask"
+    )
+
+    metric_trait = (
+        traits.Enum("Mattes", "GC", "MI"),
+        traits.Int(32),
+        traits.Enum("Regular", "Random", "None"),
+        traits.Range(value=0.2, low=0.0, high=1.0),
+    )
+    metric = traits.Tuple(
+        *metric_trait, argstr="-m %s", mandatory=True, desc="the metric(s) to use."
+    )
+
+    transform = traits.Tuple(
+        traits.Enum("Affine", "Rigid", "Similarity"),
+        traits.Range(value=0.1, low=0.0, exclude_low=True),
+        argstr="-t %s[%g]",
+        usedefault=True,
+        desc="Several transform options are available",
+    )
+
+    principal_axes = traits.Bool(
+        False,
+        usedefault=True,
+        argstr="-p %d",
+        xor=["blobs"],
+        desc="align using principal axes",
+    )
+    search_factor = traits.Tuple(
+        traits.Float(20),
+        traits.Range(value=0.12, low=0.0, high=1.0),
+        usedefault=True,
+        argstr="-s [%g,%g]",
+        desc="search factor",
+    )
+
+    search_grid = traits.Either(
+        traits.Tuple(
+            traits.Float, traits.Tuple(traits.Float, traits.Float, traits.Float)
+        ),
+        traits.Tuple(traits.Float, traits.Tuple(traits.Float, traits.Float)),
+        argstr="-g %s",
+        desc="Translation search grid in mm",
+    )
+
+    convergence = traits.Tuple(
+        traits.Range(low=1, high=10000, value=10),
+        traits.Float(1e-6),
+        traits.Range(low=1, high=100, value=10),
+        usedefault=True,
+        argstr="-c [%d,%g,%d]",
+        desc="convergence",
+    )
+
+    output_transform = File(
+        "initialization.mat", usedefault=True, argstr="-o %s", desc="output file name"
+    )
+
+
+class AIOuputSpec(TraitedSpec):
+    output_transform = File(exists=True, desc="output file name")
+
+
+class AI(ANTSCommand):
+    """
+    Calculate the optimal linear transform parameters for aligning two images.
+
+    Examples
+    --------
+    >>> AI(
+    ...     fixed_image='structural.nii',
+    ...     moving_image='epi.nii',
+    ...     metric=('Mattes', 32, 'Regular', 1),
+    ... ).cmdline
+    'antsAI -c [10,1e-06,10] -d 3 -m Mattes[structural.nii,epi.nii,32,Regular,1]
+    -o initialization.mat -p 0 -s [20,0.12] -t Affine[0.1] -v 0'
+
+    >>> AI(fixed_image='structural.nii',
+    ...    moving_image='epi.nii',
+    ...    metric=('Mattes', 32, 'Regular', 1),
+    ...    search_grid=(12, (1, 1, 1)),
+    ... ).cmdline
+    'antsAI -c [10,1e-06,10] -d 3 -m Mattes[structural.nii,epi.nii,32,Regular,1]
+    -o initialization.mat -p 0 -s [20,0.12] -g [12.0,1x1x1] -t Affine[0.1] -v 0'
+
+    """
+
+    _cmd = "antsAI"
+    input_spec = AIInputSpec
+    output_spec = AIOuputSpec
+
+    def _run_interface(self, runtime, correct_return_codes=(0,)):
+        runtime = super(AI, self)._run_interface(runtime, correct_return_codes)
+
+        self._output = {
+            "output_transform": os.path.join(
+                runtime.cwd, os.path.basename(self.inputs.output_transform)
+            )
+        }
+        return runtime
+
+    def _format_arg(self, opt, spec, val):
+        if opt == "metric":
+            val = "%s[{fixed_image},{moving_image},%d,%s,%g]" % val
+            val = val.format(
+                fixed_image=self.inputs.fixed_image,
+                moving_image=self.inputs.moving_image,
+            )
+            return spec.argstr % val
+
+        if opt == "search_grid":
+            fmtval = "[%s,%s]" % (val[0], "x".join("%g" % v for v in val[1]))
+            return spec.argstr % fmtval
+
+        if opt == "fixed_image_mask":
+            if isdefined(self.inputs.moving_image_mask):
+                return spec.argstr % ("[%s,%s]" % (val, self.inputs.moving_image_mask))
+
+        return super(AI, self)._format_arg(opt, spec, val)
+
+    def _list_outputs(self):
+        return getattr(self, "_output")
 
 
 class AverageAffineTransformInputSpec(ANTSCommandInputSpec):
@@ -18,7 +438,7 @@ class AverageAffineTransformInputSpec(ANTSCommandInputSpec):
         position=1,
         desc="Outputfname.txt: the name of the resulting transform.",
     )
-    transforms = InputMultiPath(
+    transforms = InputMultiObject(
         File(exists=True),
         argstr="%s",
         mandatory=True,
@@ -42,6 +462,7 @@ class AverageAffineTransform(ANTSCommand):
     >>> avg.inputs.output_affine_transform = 'MYtemplatewarp.mat'
     >>> avg.cmdline
     'AverageAffineTransform 3 MYtemplatewarp.mat trans.mat func_to_struct.mat'
+
     """
 
     _cmd = "AverageAffineTransform"
@@ -78,7 +499,7 @@ class AverageImagesInputSpec(ANTSCommandInputSpec):
         desc="Normalize: if true, the 2nd image is divided by its mean. "
         "This will select the largest image to average into.",
     )
-    images = InputMultiPath(
+    images = InputMultiObject(
         File(exists=True),
         argstr="%s",
         mandatory=True,
@@ -319,7 +740,7 @@ class ComposeMultiTransformInputSpec(ANTSCommandInputSpec):
         position=2,
         desc="Reference image (only necessary when output is warpfield)",
     )
-    transforms = InputMultiPath(
+    transforms = InputMultiObject(
         File(exists=True),
         argstr="%s",
         mandatory=True,
@@ -343,7 +764,8 @@ class ComposeMultiTransform(ANTSCommand):
     >>> compose_transform.inputs.dimension = 3
     >>> compose_transform.inputs.transforms = ['struct_to_template.mat', 'func_to_struct.mat']
     >>> compose_transform.cmdline
-    'ComposeMultiTransform 3 struct_to_template_composed.mat struct_to_template.mat func_to_struct.mat'
+    'ComposeMultiTransform 3 struct_to_template_composed.mat
+    struct_to_template.mat func_to_struct.mat'
 
     """
 
