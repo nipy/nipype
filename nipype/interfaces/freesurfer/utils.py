@@ -2616,7 +2616,19 @@ class EulerNumber(FSCommand):
 
     def _run_interface(self, runtime):
         runtime = super()._run_interface(runtime)
-        self._parse_output(runtime.stdout, runtime.stderr)
+        if runtime.stdout or runtime.stderr:
+            self._parse_output(runtime.stdout, runtime.stderr)
+        else:
+            # debugging why no output
+            print("EulerNumber Error")
+            print(
+                runtime.cmdline,
+                runtime.returncode,
+                runtime.stdout,
+                runtime.stderr,
+                runtime.merged,
+                runtime.environ
+            )
         return runtime
 
     def _parse_output(self, stdout, stderr):
