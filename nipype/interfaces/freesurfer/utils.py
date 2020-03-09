@@ -2619,7 +2619,7 @@ class EulerNumber(FSCommand):
         if runtime.stdout or runtime.stderr:
             self._parse_output(runtime.stdout, runtime.stderr)
         else:
-            # debugging why no output
+            # debugging why no output 
             print("EulerNumber Error")
             print(
                 runtime.cmdline,
