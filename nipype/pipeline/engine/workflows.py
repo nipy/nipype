@@ -798,10 +798,10 @@ connected.
             return False
 
         if subtype == "in":
-            if not hasattr(node.inputs, attrname):
+            if not hasattr(targetnode.inputs, attrname):
                 return False
         else:
-            if not hasattr(node.outputs, attrname):
+            if not hasattr(targetnode.outputs, attrname):
                 return False
 
         if subtype == "in":
