@@ -1,12 +1,8 @@
 from nipype.pipeline.plugins.base import SGELikeBatchManagerBase
 from nipype.interfaces.utility import Function
 import nipype.pipeline.engine as pe
-from os.path import join
-import os
-from glob import glob
 import pytest
 from unittest.mock import patch
-from tempfile import TemporaryDirectory
 import subprocess
 
 
