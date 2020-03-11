@@ -771,11 +771,25 @@ connected.
         """Checks if a parameter is available as an input or output
         """
         hierarchy = parameter.split(".")
+
+        # Connecting to a workflow needs at least two values,
+        # the name of the child node and the name of the input/output
+        if len(hierarchy) < 2:
+            return False
+
         attrname = hierarchy.pop()
         nodename = hierarchy.pop()
 
+        def _check_is_already_connected(workflow, node, attrname):
+            for _, _, d in workflow._graph.in_edges(nbunch=node, data=True):
+                for cd in d["connect"]:
+                    if attrname == cd[1]:
+                        return False
+            return True
+
         targetworkflow = self
-        for workflowname in hierarchy:
+        while hierarchy:
+            workflowname = hierarchy.pop(0)
             workflow = None
             for node in targetworkflow._graph.nodes():
                 if node.name == workflowname:
@@ -784,6 +798,13 @@ connected.
                         break
             if workflow is None:
                 return False
+            # Verify input does not already have an incoming connection
+            # in the hierarchy of workflows
+            if subtype == "in":
+                hierattrname = ".".join(hierarchy + [nodename, attrname])
+                if not _check_is_already_connected(
+                        targetworkflow, workflow, hierattrname):
+                    return False
             targetworkflow = workflow
 
         targetnode = None
@@ -804,11 +825,12 @@ connected.
             if not hasattr(targetnode.outputs, attrname):
                 return False
 
+        # Verify input does not already have an incoming connection
+        # in the target workflow
         if subtype == "in":
-            for _, _, d in targetworkflow._graph.in_edges(nbunch=targetnode, data=True):
-                for cd in d["connect"]:
-                    if attrname == cd[1]:
-                        return False
+            if not _check_is_already_connected(
+                    targetworkflow, targetnode, attrname):
+                return False
 
         return True
 
