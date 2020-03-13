@@ -770,16 +770,68 @@ connected.
     def _has_attr(self, parameter, subtype="in"):
         """Checks if a parameter is available as an input or output
         """
-        if subtype == "in":
-            subobject = self.inputs
-        else:
-            subobject = self.outputs
-        attrlist = parameter.split(".")
-        cur_out = subobject
-        for attr in attrlist:
-            if not hasattr(cur_out, attr):
+        hierarchy = parameter.split(".")
+
+        # Connecting to a workflow needs at least two values,
+        # the name of the child node and the name of the input/output
+        if len(hierarchy) < 2:
+            return False
+
+        attrname = hierarchy.pop()
+        nodename = hierarchy.pop()
+
+        def _check_is_already_connected(workflow, node, attrname):
+            for _, _, d in workflow._graph.in_edges(nbunch=node, data=True):
+                for cd in d["connect"]:
+                    if attrname == cd[1]:
+                        return False
+            return True
+
+        targetworkflow = self
+        while hierarchy:
+            workflowname = hierarchy.pop(0)
+            workflow = None
+            for node in targetworkflow._graph.nodes():
+                if node.name == workflowname:
+                    if isinstance(node, Workflow):
+                        workflow = node
+                        break
+            if workflow is None:
                 return False
-            cur_out = getattr(cur_out, attr)
+            # Verify input does not already have an incoming connection
+            # in the hierarchy of workflows
+            if subtype == "in":
+                hierattrname = ".".join(hierarchy + [nodename, attrname])
+                if not _check_is_already_connected(
+                        targetworkflow, workflow, hierattrname):
+                    return False
+            targetworkflow = workflow
+
+        targetnode = None
+        for node in targetworkflow._graph.nodes():
+            if node.name == nodename:
+                if isinstance(node, Workflow):
+                    return False
+                else:
+                    targetnode = node
+                    break
+        if targetnode is None:
+            return False
+
+        if subtype == "in":
+            if not hasattr(targetnode.inputs, attrname):
+                return False
+        else:
+            if not hasattr(targetnode.outputs, attrname):
+                return False
+
+        # Verify input does not already have an incoming connection
+        # in the target workflow
+        if subtype == "in":
+            if not _check_is_already_connected(
+                    targetworkflow, targetnode, attrname):
+                return False
+
         return True
 
     def _get_parameter_node(self, parameter, subtype="in"):
