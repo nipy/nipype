@@ -2592,8 +2592,10 @@ class EulerNumberInputSpec(FSTraitedSpec):
 
 
 class EulerNumberOutputSpec(TraitedSpec):
-    euler = traits.Int(desc="Euler number of cortical surface. A value of 2 signals a "
-                            "topologically correct surface model with no holes")
+    euler = traits.Int(
+        desc="Euler number of cortical surface. A value of 2 signals a "
+        "topologically correct surface model with no holes"
+    )
     defects = traits.Int(desc="Number of defects")
 
 
@@ -2621,7 +2623,7 @@ class EulerNumber(FSCommand):
 
     def _parse_output(self, stdout, stderr):
         """Parse stdout / stderr and extract defects"""
-        m = re.search(r'(?<=total defect index = )\d+', stdout or stderr)
+        m = re.search(r"(?<=total defect index = )\d+", stdout or stderr)
         if m is None:
             raise RuntimeError("Could not fetch defect index")
         self._defects = int(m.group())
