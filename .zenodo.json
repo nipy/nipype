@@ -158,11 +158,6 @@
       "orcid": "0000-0001-9062-3778"
     },
     {
-      "affiliation": "Charite Universitatsmedizin Berlin, Germany",
-      "name": "Waller, Lea",
-      "orcid": "0000-0002-3239-6957"
-    },
-    {
       "affiliation": "MIT",
       "name": "Kaczmarzyk, Jakub",
       "orcid": "0000-0002-5544-7577"
@@ -184,6 +179,11 @@
       "name": "Erickson, Drew"
     },
     {
+      "affiliation": "Neuroscience Program, University of Iowa",
+      "name": "Kent, James D.",
+      "orcid": "0000-0002-4892-2659"
+    },
+    {
       "affiliation": "Otto-von-Guericke-University Magdeburg, Germany",
       "name": "Hanke, Michael",
       "orcid": "0000-0001-6398-6370"
@@ -194,11 +194,6 @@
     },
     {
       "name": "Moloney, Brendan"
-    },
-    {
-      "affiliation": "Neuroscience Program, University of Iowa",
-      "name": "Kent, James D.",
-      "orcid": "0000-0002-4892-2659"
     },
     {
       "affiliation": "SRI International",
@@ -247,6 +242,11 @@
       "name": "Mordom, David"
     },
     {
+      "affiliation": "University College London",
+      "name": "Mancini, Matteo",
+      "orcid": "0000-0001-7194-4568"
+    },
+    {
       "affiliation": "ARAMIS LAB, Brain and Spine Institute (ICM), Paris, France.",
       "name": "Guillon, Je\u0301re\u0301my",
       "orcid": "0000-0002-2672-7510"
@@ -292,14 +292,14 @@
       "name": "Salvatore, John"
     },
     {
-      "affiliation": "University College London",
-      "name": "Mancini, Matteo",
-      "orcid": "0000-0001-7194-4568"
-    },
-    {
       "affiliation": "CNRS LTCI, Telecom ParisTech, Universit\u00e9 Paris-Saclay",
       "name": "Gramfort, Alexandre",
       "orcid": "0000-0001-9791-4404"
+    },
+    {
+      "affiliation": "Department of Psychology, University of Bielefeld, Bielefeld, Germany.",
+      "name": "Doll, Anna",
+      "orcid": "0000-0002-0799-0831"
     },
     {
       "name": "Buchanan, Colin"
@@ -393,9 +393,14 @@
       "orcid": "0000-0003-2766-8425"
     },
     {
-      "affiliation": "Department of Psychology, University of Bielefeld, Bielefeld, Germany.",
-      "name": "Doll, Anna",
-      "orcid": "0000-0002-0799-0831"
+      "affiliation": "NIMH, Scientific and Statistical Computing Core",
+      "name": "Glen, Daniel",
+      "orcid": "0000-0001-8456-5647"
+    },
+    {
+      "affiliation": "Technische Universit\u00e4t Dresden, Faculty of Medicine, Department of Child and Adolescent Psychiatry",
+      "name": "Geisler, Daniel",
+      "orcid": "0000-0003-2076-5329"
     },
     {
       "affiliation": "University of Iowa",
@@ -405,6 +410,11 @@
       "affiliation": "Department of Psychology, Stanford University",
       "name": "Triplett, William",
       "orcid": "0000-0002-9546-1306"
+    },
+    {
+      "affiliation": "The University of Iowa",
+      "name": "Ghayoor, Ali",
+      "orcid": "0000-0002-8858-1254"
     },
     {
       "affiliation": "Child Mind Institute",
@@ -450,12 +460,12 @@
       "name": "Rothmei, Simon"
     },
     {
-      "name": "Weinstein, Alejandro"
+      "affiliation": "Korea Advanced Institute of Science and Technology",
+      "name": "Kim, Sin",
+      "orcid": "0000-0003-4652-3758"
     },
     {
-      "affiliation": "The University of Iowa",
-      "name": "Ghayoor, Ali",
-      "orcid": "0000-0002-8858-1254"
+      "name": "Weinstein, Alejandro"
     },
     {
       "affiliation": "University of Pennsylvania",
@@ -509,6 +519,11 @@
       "orcid": "0000-0002-1577-1233"
     },
     {
+      "affiliation": "Charite Universitatsmedizin Berlin, Germany",
+      "name": "Waller, Lea",
+      "orcid": "0000-0002-3239-6957"
+    },
+    {
       "name": "Renfro, Mandy"
     },
     {
@@ -522,11 +537,6 @@
       "name": "K\u00fcttner, Ren\u00e9"
     },
     {
-      "affiliation": "Korea Advanced Institute of Science and Technology",
-      "name": "Kim, Sin",
-      "orcid": "0000-0003-4652-3758"
-    },
-    {
       "affiliation": "California Institute of Technology",
       "name": "Pauli, Wolfgang M.",
       "orcid": "0000-0002-0966-0254"
@@ -537,17 +547,17 @@
       "orcid": "0000-0001-8456-5647"
     },
     {
+      "affiliation": "Florida International University",
+      "name": "Kimbler, Adam",
+      "orcid": "0000-0001-5885-9596"
+    },
+    {
       "affiliation": "University of Pittsburgh",
       "name": "Meyers, Benjamin",
       "orcid": "0000-0001-9137-4363"
     },
     {
       "name": "Tarbert, Claire"
-    },
-    {
-      "affiliation": "Technische Universit\u00e4t Dresden, Faculty of Medicine, Department of Child and Adolescent Psychiatry",
-      "name": "Geisler, Daniel",
-      "orcid": "0000-0003-2076-5329"
     },
     {
       "name": "Ginsburg, Daniel"
