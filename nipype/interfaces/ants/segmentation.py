@@ -537,6 +537,11 @@ class N4BiasFieldCorrection(ANTSCommand, CopyHeaderInterface):
             self._out_bias_file = bias_image
         return super(N4BiasFieldCorrection, self)._parse_inputs(skip=skip)
 
+    def _list_outputs(self):
+        outputs = super(N4BiasFieldCorrection, self)._list_outputs()
+        if self._out_bias_file:
+            outputs["bias_image"] = os.path.abspath(self._out_bias_file)
+        return outputs
 
 class CorticalThicknessInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(
