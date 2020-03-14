@@ -1,3 +1,28 @@
+1.5.0 (To be determined)
+=========================
+
+New feature release in the 1.5.x series.
+
+In this release, the example scripts have been split out into their own package:
+`niflow-nipype1-examples <https://github.com/niflows/nipype1-examples>`__.
+
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.5.0?closed=1>`__)
+
+  * FIX: ANTs' tools maintenance overhaul (https://github.com/nipy/nipype/pull/3180)
+  * FIX: load_resultfile crashes if open resultsfile from crashed job (https://github.com/nipy/nipype/pull/3182)
+  * FIX: FSL model.py make multiple F-tests (https://github.com/nipy/nipype/pull/3166)
+  * ENH: Improve workflow connect performance (https://github.com/nipy/nipype/pull/3184)
+  * ENH: Add ``ConstrainedSphericalDeconvolution`` interface to replace ``EstimateFOD`` for MRtrix3's ``dwi2fod`` (https://github.com/nipy/nipype/pull/3176)
+  * ENH: Detect values for EulerNumber interface (https://github.com/nipy/nipype/pull/3173)
+  * ENH: Remove examples from repository (https://github.com/nipy/nipype/pull/3172)
+  * REF: Prefer math.gcd to hand-rolled Euclid's algorithm (https://github.com/nipy/nipype/pull/3177)
+  * REF: Removed all uses of numpy_mmap (https://github.com/nipy/nipype/pull/3121)
+  * DOC: Update links, typos in contributing guide (https://github.com/nipy/nipype/pull/3160)
+  * DOC: Update SelectFiles docstring to match actual behavior (https://github.com/nipy/nipype/pull/3041)
+  * DOC: Updated .zenodo.json file (https://github.com/nipy/nipype/pull/3167)
+  * DOC: Update .zenodo.json (https://github.com/nipy/nipype/pull/3165)
+  * MNT: Update Zenodo ordering based on commit count (https://github.com/nipy/nipype/pull/3169)
+
 1.4.2 (February 14, 2020)
 =========================
 (`Full changelog <https://github.com/nipy/nipype/milestone/1.4.2?closed=1>`__)
