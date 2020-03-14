@@ -14,6 +14,9 @@ def decommify(name):
 # These names should go last
 CREATORS_LAST = ["Krzysztof J. Gorgolewski", "Satrajit Ghosh"]
 
+# Contributors that have requested not to be cited (or bothered)
+BLACKLIST = {"Jonathan R. Williford"}
+
 if __name__ == "__main__":
     git_root = Path(git.Repo(".", search_parent_directories=True).working_dir)
     zenodo_file = git_root / ".zenodo.json"
@@ -44,7 +47,8 @@ if __name__ == "__main__":
         )
         match, score = matches[0]
         if score <= 80:
-            print("No entry to sort:", committer)
+            if committer not in BLACKLIST:
+                print("No entry to sort:", committer)
             continue
         existing_creators.discard(match)
         committers.append(match)
