@@ -54,12 +54,11 @@ CLASSIFIERS = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: POSIX :: Linux",
-    "Programming Language :: Python :: 3.5",
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Topic :: Scientific/Engineering",
 ]
-PYTHON_REQUIRES = ">= 3.5"
+PYTHON_REQUIRES = ">= 3.6"
 
 description = "Neuroimaging in Python: Pipelines and Interfaces"
 
@@ -100,7 +99,7 @@ existing pipeline systems.
 # versions
 NIBABEL_MIN_VERSION = "2.1.0"
 NETWORKX_MIN_VERSION = "1.9"
-NUMPY_MIN_VERSION = "1.12"
+NUMPY_MIN_VERSION = "1.13"
 # Numpy bug in python 3.7:
 # https://www.opensourceanswers.com/blog/you-shouldnt-use-python-37-for-data-science-right-now.html
 NUMPY_MIN_VERSION_37 = "1.15.3"
