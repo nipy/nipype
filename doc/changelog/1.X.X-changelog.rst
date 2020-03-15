@@ -8,6 +8,7 @@ In this release, the example scripts have been split out into their own package:
 
 (`Full changelog <https://github.com/nipy/nipype/milestone/1.5.0?closed=1>`__)
 
+  * FIX: Partial rollback of N4BiasFieldCorrection (https://github.com/nipy/nipype/pull/3188)
   * FIX: ANTs' tools maintenance overhaul (https://github.com/nipy/nipype/pull/3180)
   * FIX: load_resultfile crashes if open resultsfile from crashed job (https://github.com/nipy/nipype/pull/3182)
   * FIX: FSL model.py make multiple F-tests (https://github.com/nipy/nipype/pull/3166)
