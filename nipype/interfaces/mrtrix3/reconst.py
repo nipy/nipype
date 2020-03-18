@@ -4,8 +4,7 @@
 
 import os.path as op
 
-from ..base import (
-    traits, TraitedSpec, File, Undefined, InputMultiObject, DynamicTraitedSpec)
+from ..base import traits, TraitedSpec, File, Undefined, InputMultiObject
 from .base import MRTrix3BaseInputSpec, MRTrix3Base
 
 
