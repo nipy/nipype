@@ -591,11 +591,17 @@ class RegistrationOutputSpec(TraitedSpec):
     forward_transforms = traits.List(
         File(exists=True), desc="List of output transforms for forward registration"
     )
+    reverse_forward_transforms = traits.List(
+        File(exists=True), desc="List of output transforms for forward registration reversed for antsApplyTransform"
+    )
     reverse_transforms = traits.List(
         File(exists=True), desc="List of output transforms for reverse registration"
     )
     forward_invert_flags = traits.List(
         traits.Bool(), desc="List of flags corresponding to the forward transforms"
+    )
+    reverse_forward_invert_flags = traits.List(
+        traits.Bool(), desc="List of flags corresponding to the forward transforms reversed for antsApplyTransform"
     )
     reverse_invert_flags = traits.List(
         traits.Bool(), desc="List of flags corresponding to the reverse transforms"
@@ -1472,6 +1478,10 @@ class Registration(ANTSCommand):
             outputs["metric_value"] = self._metric_value
         if self._elapsed_time:
             outputs["elapsed_time"] = self._elapsed_time
+
+        outputs["reverse_forward_transforms"] = outputs["forward_transforms"][::-1]
+        outputs["reverse_forward_invert_flags"] = outputs["forward_invert_flags"][::-1]
+
         return outputs
 
 
