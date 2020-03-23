@@ -5,6 +5,7 @@ import os
 import simplejson as json
 
 import pytest
+from unittest import mock
 
 from .... import config
 from ....testing import example_data
@@ -456,17 +457,18 @@ def test_global_CommandLine_output(tmpdir):
     ci = BET()
     assert ci.terminal_output == "stream"  # default case
 
-    nib.CommandLine.set_default_terminal_output("allatonce")
-    ci = nib.CommandLine(command="ls -l")
-    assert ci.terminal_output == "allatonce"
+    with mock.patch.object(nib.CommandLine, '_terminal_output'):
+        nib.CommandLine.set_default_terminal_output("allatonce")
+        ci = nib.CommandLine(command="ls -l")
+        assert ci.terminal_output == "allatonce"
 
-    nib.CommandLine.set_default_terminal_output("file")
-    ci = nib.CommandLine(command="ls -l")
-    assert ci.terminal_output == "file"
+        nib.CommandLine.set_default_terminal_output("file")
+        ci = nib.CommandLine(command="ls -l")
+        assert ci.terminal_output == "file"
 
-    # Check default affects derived interfaces
-    ci = BET()
-    assert ci.terminal_output == "file"
+        # Check default affects derived interfaces
+        ci = BET()
+        assert ci.terminal_output == "file"
 
 
 def test_CommandLine_prefix(tmpdir):
