@@ -32,7 +32,6 @@ def fetch_data():
 
 @pytest.mark.skipif(no_datalad, reason="Datalad required")
 @pytest.mark.skipif(no_dcm2niix, reason="Dcm2niix required")
-@pytest.mark.xfail(reason="Intermittent failures. Let's come back to this later.")
 def test_dcm2niix_dti(fetch_data, tmpdir):
     tmpdir.chdir()
     datadir = tmpdir.mkdir("data").strpath
