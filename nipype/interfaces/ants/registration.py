@@ -803,6 +803,8 @@ class Registration(ANTSCommand):
      'inverse_composite_transform': '...data/output_InverseComposite.h5',
      'inverse_warped_image': <undefined>,
      'metric_value': <undefined>,
+     'reverse_forward_invert_flags': [],
+     'reverse_forward_transforms': [],
      'reverse_invert_flags': [],
      'reverse_transforms': [],
      'save_state': '...data/trans.mat',
@@ -832,6 +834,9 @@ class Registration(ANTSCommand):
      'inverse_composite_transform': <undefined>,
      'inverse_warped_image': <undefined>,
      'metric_value': <undefined>,
+     'reverse_forward_invert_flags': [False, False],
+     'reverse_forward_transforms': ['...data/output_1Warp.nii.gz',
+     '...data/output_0GenericAffine.mat'],
      'reverse_invert_flags': [True, False],
      'reverse_transforms': ['...data/output_0GenericAffine.mat', \
     '...data/output_1InverseWarp.nii.gz'],
