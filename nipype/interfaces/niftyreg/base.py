@@ -102,8 +102,6 @@ class NiftyRegCommand(CommandLine):
         _version = self.version
         if not _version:
             raise Exception("Niftyreg not found")
-        # Decoding to string:
-        _version = _version.decode("utf-8")
         if StrictVersion(_version) < StrictVersion(self._min_version):
             err = "A later version of Niftyreg is required (%s < %s)"
             raise ValueError(err % (_version, self._min_version))
