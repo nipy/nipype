@@ -7,7 +7,7 @@ import numpy as np
 import scipy.sparse as ssp
 import re
 
-import mock
+from unittest import mock
 
 from nipype.pipeline.plugins.tools import report_crash
 

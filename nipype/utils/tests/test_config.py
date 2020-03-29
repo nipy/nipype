@@ -5,7 +5,7 @@ import os
 import sys
 import pytest
 from nipype import config
-from mock import MagicMock
+from unittest.mock import MagicMock
 
 try:
     import xvfbwrapper

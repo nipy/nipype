@@ -158,7 +158,6 @@ REQUIRES += ["neurdflib"]
 TESTS_REQUIRES = [
     "codecov",
     "coverage<5",
-    "mock",
     "pytest",
     "pytest-cov",
     "pytest-env",

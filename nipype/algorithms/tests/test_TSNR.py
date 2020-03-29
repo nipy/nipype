@@ -7,7 +7,7 @@ from .. import misc
 
 import pytest
 import numpy.testing as npt
-import mock
+from unittest import mock
 import nibabel as nb
 import numpy as np
 import os
@@ -16,9 +16,7 @@ import os
 class TestTSNR:
     """ Note: Tests currently do a poor job of testing functionality """
 
-    in_filenames = {
-        "in_file": "tsnrinfile.nii",
-    }
+    in_filenames = {"in_file": "tsnrinfile.nii"}
 
     out_filenames = {  # default output file names
         "detrended_file": "detrend.nii.gz",
