@@ -13,8 +13,7 @@ import pytest
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_fslversion():
     ver = fsl.Info.version()
-    ver = ver.split(".")
-    assert ver[0] in ["4", "5"]
+    assert ver.split(".", 1)[0].isdigit()
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
