@@ -1,3 +1,4 @@
+import os
 from .. import get_info
 from ..info import get_nipype_gitversion
 import pytest
@@ -46,26 +47,28 @@ def test_no_et(tmp_path):
     from nipype.interfaces import utility as niu
     from nipype.interfaces.base import BaseInterface
 
+    et = os.getenv("NIPYPE_NO_ET") is None
+
     # Pytest doesn't trigger this, so let's pretend it's there
     with patch.object(BaseInterface, "_etelemetry_version_data", {}):
 
         # Direct function call - environment not set
         f = niu.Function(function=_check_no_et)
         res = f.run()
-        assert res.outputs.out is True
+        assert res.outputs.out == et
 
         # Basic node - environment not set
         n = pe.Node(
             niu.Function(function=_check_no_et), name="n", base_dir=str(tmp_path)
         )
         res = n.run()
-        assert res.outputs.out is True
+        assert res.outputs.out == et
 
         # Linear run - environment not set
         wf1 = pe.Workflow(name="wf1", base_dir=str(tmp_path))
         wf1.add_nodes([pe.Node(niu.Function(function=_check_no_et), name="n")])
         res = wf1.run()
-        assert next(iter(res.nodes)).result.outputs.out is True
+        assert next(iter(res.nodes)).result.outputs.out == et
 
         # MultiProc run - environment initialized with NIPYPE_NO_ET
         wf2 = pe.Workflow(name="wf2", base_dir=str(tmp_path))
@@ -91,9 +94,9 @@ def test_no_et(tmp_path):
             ]
         )
         res = wf4.run(plugin="MultiProc", plugin_args={"n_procs": 1})
-        assert next(iter(res.nodes)).result.outputs.out is True
+        assert next(iter(res.nodes)).result.outputs.out == et
 
-        # LegacyMultiProc run - environment initialized with NIPYPE_NO_ET
+        # run_without_submitting - environment not set
         wf5 = pe.Workflow(name="wf5", base_dir=str(tmp_path))
         wf5.add_nodes(
             [
@@ -105,4 +108,4 @@ def test_no_et(tmp_path):
             ]
         )
         res = wf5.run(plugin="LegacyMultiProc", plugin_args={"n_procs": 1})
-        assert next(iter(res.nodes)).result.outputs.out is True
+        assert next(iter(res.nodes)).result.outputs.out == et
