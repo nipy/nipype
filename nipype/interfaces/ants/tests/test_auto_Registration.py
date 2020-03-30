@@ -97,6 +97,8 @@ def test_Registration_outputs():
         inverse_composite_transform=dict(extensions=None,),
         inverse_warped_image=dict(extensions=None,),
         metric_value=dict(),
+        reverse_forward_invert_flags=dict(),
+        reverse_forward_transforms=dict(),
         reverse_invert_flags=dict(),
         reverse_transforms=dict(),
         save_state=dict(extensions=None,),

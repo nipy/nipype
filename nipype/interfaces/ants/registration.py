@@ -591,11 +591,17 @@ class RegistrationOutputSpec(TraitedSpec):
     forward_transforms = traits.List(
         File(exists=True), desc="List of output transforms for forward registration"
     )
+    reverse_forward_transforms = traits.List(
+        File(exists=True), desc="List of output transforms for forward registration reversed for antsApplyTransform"
+    )
     reverse_transforms = traits.List(
         File(exists=True), desc="List of output transforms for reverse registration"
     )
     forward_invert_flags = traits.List(
         traits.Bool(), desc="List of flags corresponding to the forward transforms"
+    )
+    reverse_forward_invert_flags = traits.List(
+        traits.Bool(), desc="List of flags corresponding to the forward transforms reversed for antsApplyTransform"
     )
     reverse_invert_flags = traits.List(
         traits.Bool(), desc="List of flags corresponding to the reverse transforms"
@@ -797,6 +803,8 @@ class Registration(ANTSCommand):
      'inverse_composite_transform': '...data/output_InverseComposite.h5',
      'inverse_warped_image': <undefined>,
      'metric_value': <undefined>,
+     'reverse_forward_invert_flags': [],
+     'reverse_forward_transforms': [],
      'reverse_invert_flags': [],
      'reverse_transforms': [],
      'save_state': '...data/trans.mat',
@@ -826,6 +834,9 @@ class Registration(ANTSCommand):
      'inverse_composite_transform': <undefined>,
      'inverse_warped_image': <undefined>,
      'metric_value': <undefined>,
+     'reverse_forward_invert_flags': [False, False],
+     'reverse_forward_transforms': ['...data/output_1Warp.nii.gz',
+     '...data/output_0GenericAffine.mat'],
      'reverse_invert_flags': [True, False],
      'reverse_transforms': ['...data/output_0GenericAffine.mat', \
     '...data/output_1InverseWarp.nii.gz'],
@@ -1472,6 +1483,10 @@ class Registration(ANTSCommand):
             outputs["metric_value"] = self._metric_value
         if self._elapsed_time:
             outputs["elapsed_time"] = self._elapsed_time
+
+        outputs["reverse_forward_transforms"] = outputs["forward_transforms"][::-1]
+        outputs["reverse_forward_invert_flags"] = outputs["forward_invert_flags"][::-1]
+
         return outputs
 
 
