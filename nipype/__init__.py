@@ -83,41 +83,9 @@ def check_latest_version(raise_exception=False):
     import etelemetry
 
     logger = logging.getLogger("nipype.utils")
-
-    INIT_MSG = "Running {packname} version {version} (latest: {latest})".format
-
-    latest = {"version": "Unknown", "bad_versions": []}
-    result = None
-    try:
-        result = etelemetry.get_project("nipy/nipype")
-    except Exception as e:
-        logger.warning("Could not check for version updates: \n%s", e)
-    finally:
-        if result:
-            latest.update(**result)
-            if LooseVersion(__version__) != LooseVersion(latest["version"]):
-                logger.info(
-                    INIT_MSG(
-                        packname="nipype", version=__version__, latest=latest["version"]
-                    )
-                )
-            else:
-                logger.info("No new version available.")
-            if latest["bad_versions"] and any(
-                [
-                    LooseVersion(__version__) == LooseVersion(ver)
-                    for ver in latest["bad_versions"]
-                ]
-            ):
-                message = (
-                    "You are using a version of Nipype with a critical "
-                    "bug. Please use a different version."
-                )
-                if raise_exception:
-                    raise RuntimeError(message)
-                else:
-                    logger.critical(message)
-    return latest
+    return etelemetry.check_available_version(
+        "nipy/nipype", __version__, logger, raise_exception
+    )
 
 
 # Run telemetry on import for interactive sessions, such as IPython, Jupyter notebooks, Python REPL
