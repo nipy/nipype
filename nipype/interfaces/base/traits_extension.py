@@ -26,6 +26,7 @@ from traits import __version__ as traits_version
 import traits.api as traits
 from traits.api import TraitType, Unicode
 from traits.trait_base import _Undefined
+
 try:
     # Moved in traits 6.0
     from traits.trait_type import NoDefaultSpecified

@@ -4,7 +4,7 @@ from ..io import ExportFile
 
 def test_ExportFile_inputs():
     input_map = dict(
-        check_extension=dict(),
+        check_extension=dict(usedefault=True,),
         clobber=dict(),
         in_file=dict(extensions=None, mandatory=True,),
         out_file=dict(extensions=None, mandatory=True,),

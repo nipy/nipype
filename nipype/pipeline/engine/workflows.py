@@ -803,7 +803,8 @@ connected.
             if subtype == "in":
                 hierattrname = ".".join(hierarchy + [nodename, attrname])
                 if not _check_is_already_connected(
-                        targetworkflow, workflow, hierattrname):
+                    targetworkflow, workflow, hierattrname
+                ):
                     return False
             targetworkflow = workflow
 
@@ -828,8 +829,7 @@ connected.
         # Verify input does not already have an incoming connection
         # in the target workflow
         if subtype == "in":
-            if not _check_is_already_connected(
-                    targetworkflow, targetnode, attrname):
+            if not _check_is_already_connected(targetworkflow, targetnode, attrname):
                 return False
 
         return True
