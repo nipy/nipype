@@ -3,10 +3,9 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
 import time
-import warnings
 from pathlib import Path
 
-import mock
+from unittest import mock, SkipTest
 import pytest
 from ...testing import TempFATFS
 from ...utils.filemanip import (
@@ -238,22 +237,22 @@ def test_copyfallback(_temp_analyze_files):
     try:
         fatfs = TempFATFS()
     except (IOError, OSError):
-        warnings.warn("Fuse mount failed. copyfile fallback tests skipped.")
-    else:
-        with fatfs as fatdir:
-            tgt_img = os.path.join(fatdir, imgname)
-            tgt_hdr = os.path.join(fatdir, hdrname)
-            for copy in (True, False):
-                for use_hardlink in (True, False):
-                    copyfile(orig_img, tgt_img, copy=copy, use_hardlink=use_hardlink)
-                    assert os.path.exists(tgt_img)
-                    assert os.path.exists(tgt_hdr)
-                    assert not os.path.islink(tgt_img)
-                    assert not os.path.islink(tgt_hdr)
-                    assert not os.path.samefile(orig_img, tgt_img)
-                    assert not os.path.samefile(orig_hdr, tgt_hdr)
-                    os.unlink(tgt_img)
-                    os.unlink(tgt_hdr)
+        raise SkipTest("Fuse mount failed. copyfile fallback tests skipped.")
+
+    with fatfs as fatdir:
+        tgt_img = os.path.join(fatdir, imgname)
+        tgt_hdr = os.path.join(fatdir, hdrname)
+        for copy in (True, False):
+            for use_hardlink in (True, False):
+                copyfile(orig_img, tgt_img, copy=copy, use_hardlink=use_hardlink)
+                assert os.path.exists(tgt_img)
+                assert os.path.exists(tgt_hdr)
+                assert not os.path.islink(tgt_img)
+                assert not os.path.islink(tgt_hdr)
+                assert not os.path.samefile(orig_img, tgt_img)
+                assert not os.path.samefile(orig_hdr, tgt_hdr)
+                os.unlink(tgt_img)
+                os.unlink(tgt_hdr)
 
 
 def test_get_related_files(_temp_analyze_files):
@@ -295,7 +294,7 @@ def test_ensure_list(filename, expected):
 
 
 @pytest.mark.parametrize(
-    "list, expected", [(["foo.nii"], "foo.nii"), (["foo", "bar"], ["foo", "bar"]),]
+    "list, expected", [(["foo.nii"], "foo.nii"), (["foo", "bar"], ["foo", "bar"])]
 )
 def test_simplify_list(list, expected):
     x = simplify_list(list)

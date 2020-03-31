@@ -2,10 +2,19 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
+from nibabel.optpkg import optional_package
+import pytest
+
+_, have_rdflib5, _ = optional_package("rdflib", min_version="5.0.0")
 
 from nipype.utils.provenance import ProvStore, safe_encode
 
+needs_rdflib5 = pytest.mark.skipif(
+    not have_rdflib5, reason="Test requires rdflib 5.0.0 or higher"
+)
 
+
+@needs_rdflib5
 def test_provenance(tmpdir):
     from nipype.interfaces.base import CommandLine
 
@@ -17,6 +26,7 @@ def test_provenance(tmpdir):
     assert "echo hello" in provn
 
 
+@needs_rdflib5
 def test_provenance_exists(tmpdir):
     tmpdir.chdir()
     from nipype import config
