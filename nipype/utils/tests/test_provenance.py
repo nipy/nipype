@@ -15,6 +15,7 @@ needs_rdflib5 = pytest.mark.skipif(
 
 
 @needs_rdflib5
+@pytest.mark.timeout(60)
 def test_provenance(tmpdir):
     from nipype.interfaces.base import CommandLine
 
@@ -27,6 +28,7 @@ def test_provenance(tmpdir):
 
 
 @needs_rdflib5
+@pytest.mark.timeout(60)
 def test_provenance_exists(tmpdir):
     tmpdir.chdir()
     from nipype import config
