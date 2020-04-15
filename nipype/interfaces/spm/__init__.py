@@ -14,6 +14,7 @@ from .preprocess import (
     Segment,
     Smooth,
     NewSegment,
+    MultiChannelNewSegment,
     DARTEL,
     DARTELNorm2MNI,
     CreateWarped,
