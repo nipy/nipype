@@ -46,7 +46,11 @@ with TemporaryDirectory() as tmpdir:
         check=True,
     )
     source_dir = Path(tmpdir) / "package" / "niflow" / "nipype1" / "examples"
-    shutil.copytree(source_dir, python_dir)
+    shutil.copytree(
+        source_dir,
+        python_dir,
+        ignore=lambda src, names: [n for n in names if n.endswith(".ipynb")],
+    )
 
 sp.run(
     [
