@@ -29,7 +29,8 @@ class PbsTestInterface(nib.BaseInterface):
         return outputs
 
 
-@pytest.mark.skipif(which('qsub') is None, reason="PBS not installed")
+@pytest.mark.skipif(which("qsub") is None, reason="PBS not installed")
+@pytest.mark.timeout(60)
 def test_run_pbsgraph(tmp_path):
     pipe = pe.Workflow(name="pipe", base_dir=str(tmp_path))
     mod1 = pe.Node(interface=PbsTestInterface(), name="mod1")
