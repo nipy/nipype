@@ -448,9 +448,6 @@ class WorkflowDirective(Directive):
         return errors
 
 
-WorkflowDirective.__doc__ = __doc__
-
-
 def setup(app):
     setup.app = app
     setup.config = app.config
