@@ -16,6 +16,7 @@ import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import shutil
+import sys
 from packaging.version import Version
 import nipype
 import subprocess as sp
@@ -54,7 +55,7 @@ with TemporaryDirectory() as tmpdir:
 
 sp.run(
     [
-        "python",
+        sys.executable,
         ex2rst,
         "--outdir",
         str(example_dir),
@@ -70,7 +71,7 @@ sp.run(
 )
 sp.run(
     [
-        "python",
+        sys.executable,
         ex2rst,
         "--outdir",
         str(example_dir),
