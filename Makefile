@@ -56,10 +56,10 @@ inplace:
 	$(PYTHON) setup.py build_ext -i
 
 test-code: in
-	py.test --doctest-modules nipype
+	$(PYTHON) -m pytest --doctest-modules nipype
 
 test-coverage: clean-tests in
-	py.test --doctest-modules --cov-config .coveragerc --cov=nipype nipype
+	$(PYTHON) -m pytest --doctest-modules --cov-config .coveragerc --cov=nipype nipype
 
 test: tests # just another name
 tests: clean test-code
