@@ -7,6 +7,7 @@ import os
 import os.path as op
 from glob import glob
 import shutil
+import sys
 
 import numpy as np
 from nibabel import load
@@ -726,7 +727,7 @@ class DICOMConvert(FSCommand):
         outdir = self._get_outdir()
         cmd = []
         if not os.path.exists(outdir):
-            cmdstr = "python -c \"import os; os.makedirs('%s')\"" % outdir
+            cmdstr = "%s -c \"import os; os.makedirs('%s')\"" % (op.basename(sys.executable), outdir)
             cmd.extend([cmdstr])
         infofile = os.path.join(outdir, "shortinfo.txt")
         if not os.path.exists(infofile):
