@@ -11,18 +11,18 @@ zipdoc: html
 
 sdist: zipdoc
 	@echo "Building source distribution..."
-	python setup.py sdist
+	$(PYTHON) setup.py sdist
 	@echo "Done building source distribution."
 	# XXX copy documentation.zip to dist directory.
 
 egg: zipdoc
 	@echo "Building egg..."
-	python setup.py bdist_egg
+	$(PYTHON) setup.py bdist_egg
 	@echo "Done building egg."
 
 upload_to_pypi: zipdoc
 	@echo "Uploading to PyPi..."
-	python setup.py sdist --formats=zip,gztar upload
+	$(PYTHON) setup.py sdist --formats=zip,gztar upload
 
 trailing-spaces:
 	find . -name "*[.py|.rst]" -type f | xargs perl -pi -e 's/[ \t]*$$//'
@@ -70,7 +70,7 @@ html:
 
 specs:
 	@echo "Checking specs and autogenerating spec tests"
-	env PYTHONPATH=".:$(PYTHONPATH)" python tools/checkspecs.py
+	env PYTHONPATH=".:$(PYTHONPATH)" $(PYTHON) tools/checkspecs.py
 
 check: check-before-commit # just a shortcut
 check-before-commit: specs trailing-spaces html test
