@@ -29,8 +29,9 @@ class OarTestInterface(nib.BaseInterface):
         return outputs
 
 
-@pytest.mark.skipif(which('oarsub') is None, reason="OAR not installed")
-def test_run_pbsgraph(tmp_path):
+@pytest.mark.skipif(which("oarsub") is None, reason="OAR not installed")
+@pytest.mark.timeout(60)
+def test_run_oargraph(tmp_path):
     pipe = pe.Workflow(name="pipe", base_dir=str(tmp_path))
     mod1 = pe.Node(interface=OarTestInterface(), name="mod1")
     mod2 = pe.MapNode(interface=OarTestInterface(), iterfield=["input1"], name="mod2")

@@ -56,6 +56,7 @@ CLASSIFIERS = [
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
     "Topic :: Scientific/Engineering",
 ]
 PYTHON_REQUIRES = ">= 3.6"
@@ -109,6 +110,7 @@ DATEUTIL_MIN_VERSION = "2.2"
 FUTURE_MIN_VERSION = "0.16.0"
 SIMPLEJSON_MIN_VERSION = "3.8.0"
 PROV_VERSION = "1.5.2"
+RDFLIB_MIN_VERSION = "5.0.0"
 CLICK_MIN_VERSION = "6.6.0"
 PYDOT_MIN_VERSION = "1.2.3"
 
@@ -143,16 +145,13 @@ REQUIRES = [
     "pydot>=%s" % PYDOT_MIN_VERSION,
     "pydotplus",
     "python-dateutil>=%s" % DATEUTIL_MIN_VERSION,
+    "rdflib>=%s" % RDFLIB_MIN_VERSION,
     "scipy>=%s" % SCIPY_MIN_VERSION,
     "simplejson>=%s" % SIMPLEJSON_MIN_VERSION,
     "traits>=%s,!=5.0" % TRAITS_MIN_VERSION,
     "filelock>=3.0.0",
     "etelemetry>=0.2.0",
 ]
-
-# neurdflib has to come after prov
-# https://github.com/nipy/nipype/pull/2961#issuecomment-512035484
-REQUIRES += ["neurdflib"]
 
 TESTS_REQUIRES = [
     "codecov",
