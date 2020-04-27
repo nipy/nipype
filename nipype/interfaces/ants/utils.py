@@ -46,6 +46,7 @@ class ImageMathInputSpec(ANTSCommandInputSpec):
         "GE",
         "GO",
         "GC",
+        "TruncateImageIntensity",
         mandatory=True,
         position=3,
         argstr="%s",
@@ -91,6 +92,12 @@ class ImageMath(ANTSCommand, CopyHeaderInterface):
     ...     operation='G',
     ...     op2='4').cmdline
     'ImageMath 3 structural_maths.nii G structural.nii 4'
+
+    >>> ImageMath(
+    ...     op1='structural.nii',
+    ...     operation='TruncateImageIntensity',
+    ...     op2='0.005 0.999 256').cmdline
+    'ImageMath 3 structural_maths.nii TruncateImageIntensity structural.nii 0.005 0.999 256'
 
     """
 
