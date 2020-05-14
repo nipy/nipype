@@ -269,6 +269,16 @@ class FramewiseDisplacementInputSpec(BaseInterfaceInputSpec):
         desc="Source of movement parameters",
         mandatory=True,
     )
+    metric = traits.Enum(
+        "L1",
+        "riemannian",
+        usedefault=True,
+        mandatory=True,
+        desc="Distance metric to apply: "
+        "L1 = Manhattan distance (original definition); "
+        "riemannian = Riemannian distance on the "
+        "Special Euclidean group in 3D (geodesic)",
+    )
     radius = traits.Float(
         50,
         usedefault=True,
@@ -342,9 +352,38 @@ Bradley L. and Petersen, Steven E.},
             arr=mpars,
             source=self.inputs.parameter_source,
         )
-        diff = mpars[:-1, :6] - mpars[1:, :6]
-        diff[:, 3:6] *= self.inputs.radius
-        fd_res = np.abs(diff).sum(axis=1)
+
+        if self.inputs.metric == "L1":
+            diff = mpars[:-1, :6] - mpars[1:, :6]
+            diff[:, 3:6] *= self.inputs.radius
+            fd_res = np.abs(diff).sum(axis=1)
+
+        elif self.inputs.metric == "riemannian":
+            from geomstats.invariant_metric import InvariantMetric
+            from geomstats.special_euclidean_group import SpecialEuclideanGroup
+
+            SE3_GROUP = SpecialEuclideanGroup(n=3)
+            SO3_GROUP = SE3_GROUP.rotations
+            DIM_TRANSLATIONS = SE3_GROUP.translations.dimension
+            DIM_ROTATIONS = SE3_GROUP.rotations.dimension
+
+            so3pars = mpars[:, DIM_TRANSLATIONS:]
+            so3pars = SO3_GROUP.rotation_vector_from_tait_bryan_angles(
+                so3pars, extrinsic_or_intrinsic="extrinsic", order="zyx"
+            )
+
+            se3pars = np.hstack([so3pars, mpars[:, :DIM_TRANSLATIONS]])
+
+            diag_rotations = self.inputs.radius * np.ones(DIM_ROTATIONS)
+            diag_translations = np.ones(DIM_TRANSLATIONS)
+            diag = np.concatenate([diag_rotations, diag_translations])
+            inner_product = np.diag(diag)
+            metric = InvariantMetric(
+                group=SE3_GROUP,
+                inner_product_mat_at_identity=inner_product,
+                left_or_right="left",
+            )
+            fd_res = metric.dist(se3pars[:-1], se3pars[1:])
 
         self._results = {
             "out_file": op.abspath(self.inputs.out_file),

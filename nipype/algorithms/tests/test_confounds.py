@@ -15,14 +15,48 @@ try:
 except ImportError:
     pass
 
+nogeomstats = True
+try:
+    import geomstats
+
+    nogeomstats = False
+except ImportError:
+    pass
+
 
 def test_fd(tmpdir):
     tempdir = tmpdir.strpath
     ground_truth = np.loadtxt(example_data("fsl_motion_outliers_fd.txt"))
+
     fdisplacement = FramewiseDisplacement(
         in_file=example_data("fsl_mcflirt_movpar.txt"),
         out_file=tempdir + "/fd.txt",
         parameter_source="FSL",
+    )
+    res = fdisplacement.run()
+
+    with open(res.outputs.out_file) as all_lines:
+        for line in all_lines:
+            assert "FramewiseDisplacement" in line
+            break
+
+    assert np.allclose(
+        ground_truth, np.loadtxt(res.outputs.out_file, skiprows=1), atol=0.16
+    )
+    assert np.abs(ground_truth.mean() - res.outputs.fd_average) < 1e-2
+
+
+@pytest.mark.skipif(nogeomstats, reason="geomstats is not installed")
+def test_fd_riemannian(tmpdir):
+    tempdir = tmpdir.strpath
+    # TODO(nina): Adapt ground_truth w. SPM Euler angles convention
+    ground_truth = np.loadtxt(example_data("fsl_motion_outliers_fd.txt"))
+
+    fdisplacement = FramewiseDisplacement(
+        in_file=example_data("fsl_mcflirt_movpar.txt"),
+        out_file=tempdir + "/fd.txt",
+        parameter_source="FSL",
+        metric="riemannian",
     )
     res = fdisplacement.run()
 

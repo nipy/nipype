@@ -175,7 +175,7 @@ EXTRA_REQUIRES = {
         "sphinxcontrib-napoleon",
     ],
     "duecredit": ["duecredit"],
-    "nipy": ["nitime", "nilearn<0.5.0", "dipy", "nipy", "matplotlib"],
+    "nipy": ["nitime", "nilearn<0.5.0", "dipy", "nipy", "matplotlib", "geomstats>=1.1.0"],
     "profiler": ["psutil>=5.0"],
     "pybids": ["pybids>=0.7.0"],
     "specs": ["black"],
