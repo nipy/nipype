@@ -173,45 +173,50 @@ class BET(FSLCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs["out_file"] = self._gen_outfilename()
+
+        basename = os.path.basename(outputs['out_file'])
+        cwd = os.path.dirname(outputs['out_file'])
+        kwargs = {'basename': basename, 'cwd': cwd}
+
         if (isdefined(self.inputs.mesh) and self.inputs.mesh) or (
             isdefined(self.inputs.surfaces) and self.inputs.surfaces
         ):
             outputs["meshfile"] = self._gen_fname(
-                outputs["out_file"], suffix="_mesh.vtk", change_ext=False
+                suffix="_mesh.vtk", change_ext=False, **kwargs
             )
         if (isdefined(self.inputs.mask) and self.inputs.mask) or (
             isdefined(self.inputs.reduce_bias) and self.inputs.reduce_bias
         ):
-            outputs["mask_file"] = self._gen_fname(outputs["out_file"], suffix="_mask")
+            outputs["mask_file"] = self._gen_fname(suffix="_mask", **kwargs)
         if isdefined(self.inputs.outline) and self.inputs.outline:
             outputs["outline_file"] = self._gen_fname(
-                outputs["out_file"], suffix="_overlay"
+                suffix="_overlay", **kwargs
             )
         if isdefined(self.inputs.surfaces) and self.inputs.surfaces:
             outputs["inskull_mask_file"] = self._gen_fname(
-                outputs["out_file"], suffix="_inskull_mask"
+                suffix="_inskull_mask", **kwargs
             )
             outputs["inskull_mesh_file"] = self._gen_fname(
-                outputs["out_file"], suffix="_inskull_mesh"
+                suffix="_inskull_mesh", **kwargs
             )
             outputs["outskull_mask_file"] = self._gen_fname(
-                outputs["out_file"], suffix="_outskull_mask"
+                suffix="_outskull_mask", **kwargs
             )
             outputs["outskull_mesh_file"] = self._gen_fname(
-                outputs["out_file"], suffix="_outskull_mesh"
+                suffix="_outskull_mesh", **kwargs
             )
             outputs["outskin_mask_file"] = self._gen_fname(
-                outputs["out_file"], suffix="_outskin_mask"
+                suffix="_outskin_mask", **kwargs
             )
             outputs["outskin_mesh_file"] = self._gen_fname(
-                outputs["out_file"], suffix="_outskin_mesh"
+                suffix="_outskin_mesh", **kwargs
             )
             outputs["skull_mask_file"] = self._gen_fname(
-                outputs["out_file"], suffix="_skull_mask"
+                suffix="_skull_mask", **kwargs
             )
         if isdefined(self.inputs.skull) and self.inputs.skull:
             outputs["skull_file"] = self._gen_fname(
-                outputs["out_file"], suffix="_skull"
+                suffix="_skull", **kwargs
             )
         if isdefined(self.inputs.no_output) and self.inputs.no_output:
             outputs["out_file"] = Undefined
