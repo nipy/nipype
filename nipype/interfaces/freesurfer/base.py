@@ -76,6 +76,9 @@ class Info(PackageInfo):
                 vstr = "6.0.0-dev" + githash
             elif vinfo[5][0] == "v":
                 vstr = vinfo[5][1:]
+            elif len([1 for val in vinfo[3] if val == '.']) == 2:
+                "version string: freesurfer-linux-centos7_x86_64-7.1.0-20200511-813297b"
+                vstr = vinfo[3]
             else:
                 raise RuntimeError("Unknown version string: " + ver)
         # Retain pre-6.0.0 heuristics
