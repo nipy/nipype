@@ -736,7 +736,7 @@ def write_rst_header(header, level=0):
 
 def write_rst_list(items, prefix=""):
     out = []
-    for item in items:
+    for item in ensure_list(items):
         out.append("{} {}".format(prefix, str(item)))
     return "\n".join(out) + "\n\n"
 
