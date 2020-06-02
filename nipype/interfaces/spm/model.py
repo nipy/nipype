@@ -81,7 +81,7 @@ Dictionary names of the basis function to parameters:
         mandatory=True,
     )
     volterra_expansion_order = traits.Enum(
-        1, 2, field="volt", desc=("Model interactions - yes:1, no:2")
+        1, 2, field="volt", desc=("Model interactions - no:1, yes:2")
     )
     global_intensity_normalization = traits.Enum(
         "none",
