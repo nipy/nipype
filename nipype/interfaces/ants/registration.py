@@ -1968,7 +1968,7 @@ class antsIntroduction(ANTSCommand):
     """Uses ANTS to generate matrices to warp data from one space to another.
     Examples
     --------
-    >>> from nipype.interfaces.ants.legacy import antsIntroduction
+    >>> from nipype.interfaces.ants.registration import antsIntroduction
     >>> warp = antsIntroduction()
     >>> warp.inputs.reference_image = 'Template_6.nii'
     >>> warp.inputs.input_image = 'structural.nii'
