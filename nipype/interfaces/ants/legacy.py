@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-# NOTE:  This implementation has been superceeded buy the antsApplyTransform
-#        implmeentation that more closely follows the strucutre and capabilities
-#        of the antsApplyTransform program.  This implementation is here
-#        for backwards compatibility.
-"""ANTS Apply Transforms interface
+"""ANTS Legacy Interfaces
+
+These interfaces are for programs that have been deprecated by ANTs, but
+are preserved for backwards compatibility.
 """
 
 from builtins import range
