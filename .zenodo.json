@@ -77,12 +77,12 @@
       "orcid": "0000-0002-2666-0969"
     },
     {
-      "name": "Loney, Fred"
-    },
-    {
       "affiliation": "Dartmouth College: Hanover, NH, United States",
       "name": "Halchenko, Yaroslav O.",
       "orcid": "0000-0003-3456-2493"
+    },
+    {
+      "name": "Loney, Fred"
     },
     {
       "affiliation": "Florida International University",
@@ -289,6 +289,11 @@
       "orcid": "0000-0002-0805-1350"
     },
     {
+      "affiliation": "Division of Psychological and Social Medicine and Developmental Neuroscience, Faculty of Medicine, Technische Universit\u00e4t Dresden, Dresden, Germany",
+      "name": "Geisler, Daniel",
+      "orcid": "0000-0003-2076-5329"
+    },
+    {
       "name": "Salvatore, John"
     },
     {
@@ -385,22 +390,17 @@
       "name": "Cumba, Chad"
     },
     {
+      "affiliation": "University College London",
+      "name": "P\u00e9rez-Garc\u00eda, Fernando",
+      "orcid": "0000-0001-9090-3024"
+    },
+    {
       "name": "Blair, Ross"
     },
     {
       "affiliation": "Duke University",
       "name": "Iqbal, Shariq",
       "orcid": "0000-0003-2766-8425"
-    },
-    {
-      "affiliation": "NIMH, Scientific and Statistical Computing Core",
-      "name": "Glen, Daniel",
-      "orcid": "0000-0001-8456-5647"
-    },
-    {
-      "affiliation": "Technische Universit\u00e4t Dresden, Faculty of Medicine, Department of Child and Adolescent Psychiatry",
-      "name": "Geisler, Daniel",
-      "orcid": "0000-0003-2076-5329"
     },
     {
       "affiliation": "University of Iowa",
@@ -428,11 +428,6 @@
       "affiliation": "CEA",
       "name": "Papadopoulos Orfanos, Dimitri",
       "orcid": "0000-0002-1242-8990"
-    },
-    {
-      "affiliation": "University College London",
-      "name": "P\u00e9rez-Garc\u00eda, Fernando",
-      "orcid": "0000-0001-9090-3024"
     },
     {
       "affiliation": "Leibniz Institute for Neurobiology",
@@ -619,6 +614,10 @@
       "orcid": "0000-0003-4454-6171"
     },
     {
+      "affiliation": "Enigma Biomedical Group",
+      "name": "Mathotaarachchi, Sulantha"
+    },
+    {
       "name": "Saase, Victor"
     },
     {
@@ -660,6 +659,11 @@
       "orcid": "0000-0001-6810-4461"
     },
     {
+      "affiliation": "BarcelonaBeta Brain Research Center",
+      "name": "Huguet, Jordi",
+      "orcid": "0000-0001-8420-4833"
+    },
+    {
       "affiliation": "University of Pennsylvania",
       "name": "Junhao WEN",
       "orcid": "0000-0003-2077-3070"
@@ -688,6 +692,10 @@
       "affiliation": "University of Helsinki",
       "name": "Andberg, Sami Kristian",
       "orcid": "0000-0002-5650-3964"
+    },
+    {
+      "affiliation": "Sagol School of Neuroscience, Tel Aviv University",
+      "name": "Baratz, Zvi"
     },
     {
       "name": "Matsubara, K"
