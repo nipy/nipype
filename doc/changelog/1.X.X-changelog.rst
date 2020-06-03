@@ -1,4 +1,4 @@
-1.5.0 (To be determined)
+1.5.0 (June 03, 2020)
 =========================
 
 New feature release in the 1.5.x series.
@@ -8,20 +8,36 @@ In this release, the example scripts have been split out into their own package:
 
 (`Full changelog <https://github.com/nipy/nipype/milestone/1.5.0?closed=1>`__)
 
+  * FIX: volterra_expansion_order documentation error (https://github.com/nipy/nipype/pull/3213)
+  * FIX: BET incorrect output paths (https://github.com/nipy/nipype/pull/3214)
+  * FIX: Terminal output in ``report.rst`` spreads one line per character (https://github.com/nipy/nipype/pull/3220)
+  * FIX: Allow parsing freesurfer 7 version string (https://github.com/nipy/nipype/pull/3216)
+  * FIX: Use PackageInfo to get NiftyReg version (https://github.com/nipy/nipype/pull/3194)
   * FIX: Partial rollback of N4BiasFieldCorrection (https://github.com/nipy/nipype/pull/3188)
   * FIX: ANTs' tools maintenance overhaul (https://github.com/nipy/nipype/pull/3180)
   * FIX: load_resultfile crashes if open resultsfile from crashed job (https://github.com/nipy/nipype/pull/3182)
   * FIX: FSL model.py make multiple F-tests (https://github.com/nipy/nipype/pull/3166)
+  * ENH: Restore ants.legacy interfaces (https://github.com/nipy/nipype/pull/3222)
+  * ENH: Add ``"TruncateImageIntensity"`` operation to ``ants.utils.Image.Math`` (https://github.com/nipy/nipype/pull/3210)
+  * ENH: SPM NewSegment multi-channel segmentation (https://github.com/nipy/nipype/pull/3162)
+  * ENH: Add reverse-ordered transform lists to ants.Registration outputs (https://github.com/nipy/nipype/pull/3192)
   * ENH: Improve workflow connect performance (https://github.com/nipy/nipype/pull/3184)
   * ENH: Add ``ConstrainedSphericalDeconvolution`` interface to replace ``EstimateFOD`` for MRtrix3's ``dwi2fod`` (https://github.com/nipy/nipype/pull/3176)
   * ENH: Detect values for EulerNumber interface (https://github.com/nipy/nipype/pull/3173)
   * ENH: Remove examples from repository (https://github.com/nipy/nipype/pull/3172)
+  * TEST: Clean up tests (https://github.com/nipy/nipype/pull/3195)
+  * TEST: Mock terminal output before testing changing default value (https://github.com/nipy/nipype/pull/3193)
+  * REF: make invocations of python and pytest consistent with the one used/desired python (https://github.com/nipy/nipype/pull/3208)
   * REF: Prefer math.gcd to hand-rolled Euclid's algorithm (https://github.com/nipy/nipype/pull/3177)
   * REF: Removed all uses of numpy_mmap (https://github.com/nipy/nipype/pull/3121)
+  * DOC: Sphinx 3 compatibility (https://github.com/nipy/nipype/pull/3206)
   * DOC: Update links, typos in contributing guide (https://github.com/nipy/nipype/pull/3160)
   * DOC: Update SelectFiles docstring to match actual behavior (https://github.com/nipy/nipype/pull/3041)
   * DOC: Updated .zenodo.json file (https://github.com/nipy/nipype/pull/3167)
   * DOC: Update .zenodo.json (https://github.com/nipy/nipype/pull/3165)
+  * MNT: Permit recent nilearns (https://github.com/nipy/nipype/pull/2841)
+  * MNT: Test Python 3.8 (https://github.com/nipy/nipype/pull/3154)
+  * MNT: Restore ReadTheDocs (https://github.com/nipy/nipype/pull/3207)
   * MNT: Update Zenodo ordering based on commit count (https://github.com/nipy/nipype/pull/3169)
 
 1.4.2 (February 14, 2020)

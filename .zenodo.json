@@ -636,6 +636,11 @@
       "name": "Ort, Eduard"
     },
     {
+      "affiliation": "CNRS, UMS3552 IRMaGe",
+      "name": "Condamine, Eric",
+      "orcid": "0000-0002-9533-3769"
+    },
+    {
       "affiliation": "Stanford University",
       "name": "Lerma-Usabiaga, Garikoitz",
       "orcid": "0000-0001-9800-4816"
@@ -718,11 +723,6 @@
     },
     {
       "name": "Shachnev, Dmitry"
-    },
-    {
-      "affiliation": "CNRS, UMS3552 IRMaGe",
-      "name": "Condamine, Eric",
-      "orcid": "0000-0002-9533-3769"
     },
     {
       "name": "Flandin, Guillaume"
