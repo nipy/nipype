@@ -2895,6 +2895,14 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
 
     Examples
     --------
+
+    .. setup::
+
+        >>> try:
+        ...     import bids
+        ... except ImportError:
+        ...     pytest.skip()
+
     By default, the BIDSDataGrabber fetches anatomical and functional images
     from a project, and makes BIDS entities (e.g. subject) available for
     filtering outputs.
