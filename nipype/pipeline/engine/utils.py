@@ -369,9 +369,15 @@ def format_node(node, format="python", include_config=False):
             filled_args = []
             for arg in args:
                 if hasattr(node.interface, "_%s" % arg):
-                    filled_args.append(
-                        "%s=%s" % (arg, getattr(node.interface, "_%s" % arg))
-                    )
+                    argval = getattr(node.interface, "_%s" % arg)
+                    if isinstance(argval, str):
+                        filled_args.append(
+                            "%s='%s'" % (arg, argval)
+                        )
+                    else:
+                        filled_args.append(
+                            "%s=%s" % (arg, argval)
+                        )
             args = ", ".join(filled_args)
         else:
             args = ""
