@@ -365,7 +365,6 @@ def format_node(node, format="python", include_config=False):
         comment = "# Node: %s" % node.fullname
         spec = signature(node.interface.__init__)
         args = [p.name for p in list(spec.parameters.values())]
-        args = args[1:]
         if args:
             filled_args = []
             for arg in args:
