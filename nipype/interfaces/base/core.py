@@ -276,6 +276,15 @@ class BaseInterface(Interface):
             version = LooseVersion(str(self.version))
             for name in names:
                 min_ver = LooseVersion(str(trait_object.traits()[name].min_ver))
+                try:
+                    min_ver > version
+                except TypeError:
+                    iflogger.warning(
+                        'Nipype is having issues parsing the package version '
+                        f'for Trait {name} ({self.__class__.__name__})'
+                        f'You may want to check whether {version} is larger than {min_ver}'
+                        )
+                    continue
                 if min_ver > version:
                     unavailable_traits.append(name)
                     if not isdefined(getattr(trait_object, name)):
@@ -293,6 +302,15 @@ class BaseInterface(Interface):
             version = LooseVersion(str(self.version))
             for name in names:
                 max_ver = LooseVersion(str(trait_object.traits()[name].max_ver))
+                try:
+                    max_ver > version
+                except TypeError:
+                    iflogger.warning(
+                        'Nipype is having issues parsing the package version '
+                        f'for Trait {name} ({self.__class__.__name__})'
+                        f'You may want to check whether {version} is smaller than {max_ver}'
+                        )
+                    continue
                 if max_ver < version:
                     unavailable_traits.append(name)
                     if not isdefined(getattr(trait_object, name)):
