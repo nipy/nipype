@@ -838,15 +838,28 @@ connected.
         """Returns the underlying node corresponding to an input or
         output parameter
         """
-        if subtype == "in":
-            subobject = self.inputs
-        else:
-            subobject = self.outputs
         attrlist = parameter.split(".")
-        cur_out = subobject
-        for attr in attrlist[:-1]:
-            cur_out = getattr(cur_out, attr)
-        return cur_out.traits()[attrlist[-1]].node
+        _ = attrlist.pop()  # take attribute name
+        nodename = attrlist.pop()
+
+        targetworkflow = self
+        while attrlist:
+            workflowname = attrlist.pop(0)
+            workflow = None
+            for node in targetworkflow._graph.nodes():
+                if node.name == workflowname and isinstance(node, Workflow):
+                    workflow = node
+                    break
+            if workflow is None:
+                return
+            targetworkflow = workflow
+
+        for node in targetworkflow._graph.nodes():
+            if node.name == nodename:
+                if isinstance(node, Workflow):
+                    return
+                else:
+                    return node
 
     def _check_outputs(self, parameter):
         return self._has_attr(parameter, subtype="out")
