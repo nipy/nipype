@@ -1,5 +1,6 @@
 """ANTs' utilities."""
 import os
+from warnings import warn
 from ..base import traits, isdefined, TraitedSpec, File, Str, InputMultiObject
 from ..mixins import CopyHeaderInterface
 from .base import ANTSCommandInputSpec, ANTSCommand
@@ -103,12 +104,45 @@ class ImageMath(ANTSCommand, CopyHeaderInterface):
     ...     op2='0.005 0.999 256').cmdline
     'ImageMath 3 structural_maths.nii TruncateImageIntensity structural.nii 0.005 0.999 256'
 
+    >>> pad = ImageMath(
+    ...     op1='structural.nii',
+    ...     operation='PadImage',
+    ...     op2='0.005 0.999 256')
+    >>> pad.inputs.copy_header
+    False
+
+    >>> pad.inputs.copy_header = True
+    >>> pad.inputs.copy_header
+    False
+
+    >>> pad.inputs.operation = "ME"
+    >>> pad.inputs.copy_header = True
+    >>> pad.inputs.copy_header
+    True
+
     """
 
     _cmd = "ImageMath"
     input_spec = ImageMathInputSpec
     output_spec = ImageMathOuputSpec
     _copy_header_map = {"output_image": "op1"}
+
+    def __init__(self, **inputs):
+        super(ImageMath, self).__init__(**inputs)
+        if self.inputs.operation in ("PadImage", ):
+            self.inputs.copy_header = False
+
+        self.inputs.on_trait_change(self._operation_update, "operation")
+        self.inputs.on_trait_change(self._copyheader_update, "copy_header")
+
+    def _operation_update(self):
+        if self.inputs.operation in ("PadImage", ):
+            self.inputs.copy_header = False
+
+    def _copyheader_update(self):
+        if self.inputs.copy_header and self.inputs.operation in ("PadImage", ):
+            warn("copy_header cannot be updated to True with PadImage as operation.")
+            self.inputs.copy_header = False
 
 
 class ResampleImageBySpacingInputSpec(ANTSCommandInputSpec):
@@ -147,19 +181,13 @@ class ResampleImageBySpacingInputSpec(ANTSCommandInputSpec):
     nn_interp = traits.Bool(
         argstr="%d", desc="nn interpolation", position=-1, requires=["addvox"]
     )
-    copy_header = traits.Bool(
-        True,
-        mandatory=True,
-        usedefault=True,
-        desc="copy headers of the original image into the output (corrected) file",
-    )
 
 
 class ResampleImageBySpacingOutputSpec(TraitedSpec):
     output_image = File(exists=True, desc="resampled file")
 
 
-class ResampleImageBySpacing(ANTSCommand, CopyHeaderInterface):
+class ResampleImageBySpacing(ANTSCommand):
     """
     Resample an image with a given spacing.
 
@@ -195,7 +223,6 @@ class ResampleImageBySpacing(ANTSCommand, CopyHeaderInterface):
     _cmd = "ResampleImageBySpacing"
     input_spec = ResampleImageBySpacingInputSpec
     output_spec = ResampleImageBySpacingOutputSpec
-    _copy_header_map = {"output_image": "input_image"}
 
     def _format_arg(self, name, trait_spec, value):
         if name == "out_spacing":
