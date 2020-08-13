@@ -78,8 +78,8 @@ class ImageMath(ANTSCommand, CopyHeaderInterface):
     """
     Operations over images.
 
-    Example
-    -------
+    Examples
+    --------
     >>> ImageMath(
     ...     op1='structural.nii',
     ...     operation='+',
@@ -104,16 +104,25 @@ class ImageMath(ANTSCommand, CopyHeaderInterface):
     ...     op2='0.005 0.999 256').cmdline
     'ImageMath 3 structural_maths.nii TruncateImageIntensity structural.nii 0.005 0.999 256'
 
+    By default, Nipype copies headers from the first input image (``op1``)
+    to the output image.
+    For the ``PadImage`` operation, the header cannot be copied from inputs to
+    outputs, and so ``copy_header`` option is automatically set to ``False``.
+
     >>> pad = ImageMath(
     ...     op1='structural.nii',
-    ...     operation='PadImage',
-    ...     op2='0.005 0.999 256')
+    ...     operation='PadImage')
     >>> pad.inputs.copy_header
     False
+
+    While the operation is set to ``PadImage``,
+    setting ``copy_header = True`` will have no effect.
 
     >>> pad.inputs.copy_header = True
     >>> pad.inputs.copy_header
     False
+
+    For any other operation, ``copy_header`` can be enabled/disabled normally:
 
     >>> pad.inputs.operation = "ME"
     >>> pad.inputs.copy_header = True
