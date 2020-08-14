@@ -1884,7 +1884,7 @@ class MultiChannelNewSegmentInputSpec(SPMCommandInputSpec):
                     - FWHM of Gaussian smoothness of bias
                     - which maps to save (Field, Corrected) - a tuple of two boolean values""",
                 field="channel",
-            )
+            ),
         ),
         desc="""A list of tuples (one per each channel) with the following fields:
             - a list of channel files (only 1rst channel files will be segmented)

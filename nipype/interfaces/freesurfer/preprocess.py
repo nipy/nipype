@@ -727,7 +727,10 @@ class DICOMConvert(FSCommand):
         outdir = self._get_outdir()
         cmd = []
         if not os.path.exists(outdir):
-            cmdstr = "%s -c \"import os; os.makedirs('%s')\"" % (op.basename(sys.executable), outdir)
+            cmdstr = "%s -c \"import os; os.makedirs('%s')\"" % (
+                op.basename(sys.executable),
+                outdir,
+            )
             cmd.extend([cmdstr])
         infofile = os.path.join(outdir, "shortinfo.txt")
         if not os.path.exists(infofile):
