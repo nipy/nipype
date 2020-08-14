@@ -420,11 +420,11 @@ class ApplyTransforms(ANTSCommand):
     >>> at.inputs.interpolation = 'Linear'
     >>> at.inputs.default_value = 0
     >>> at.inputs.transforms = ['ants_Warp.nii.gz', 'trans.mat']
-    >>> at.inputs.invert_transform_flags = [False, False]
+    >>> at.inputs.invert_transform_flags = [False, True]
     >>> at.cmdline
     'antsApplyTransforms --default-value 0 --dimensionality 3 --float 0 --input moving1.nii \
 --interpolation Linear --output deformed_moving1.nii --reference-image fixed1.nii \
---transform [ ants_Warp.nii.gz, 0 ] --transform [ trans.mat, 0 ]'
+--transform ants_Warp.nii.gz --transform [ trans.mat, 1 ]'
 
     >>> at1 = ApplyTransforms()
     >>> at1.inputs.dimension = 3
@@ -439,7 +439,7 @@ class ApplyTransforms(ANTSCommand):
     >>> at1.cmdline
     'antsApplyTransforms --default-value 0 --dimensionality 3 --float 0 --input moving1.nii \
 --interpolation BSpline[ 5 ] --output deformed_moving1.nii --reference-image fixed1.nii \
---transform [ ants_Warp.nii.gz, 0 ] --transform [ trans.mat, 0 ]'
+--transform ants_Warp.nii.gz --transform trans.mat'
 
     Identity transforms may be used as part of a chain:
 
@@ -473,25 +473,20 @@ class ApplyTransforms(ANTSCommand):
 
     def _get_transform_filenames(self):
         retval = []
-        for ii in range(len(self.inputs.transforms)):
-            if isdefined(self.inputs.invert_transform_flags):
-                if len(self.inputs.transforms) == len(
-                    self.inputs.invert_transform_flags
-                ):
-                    invert_code = 1 if self.inputs.invert_transform_flags[ii] else 0
-                    retval.append(
-                        "--transform [ %s, %d ]"
-                        % (self.inputs.transforms[ii], invert_code)
-                    )
-                else:
-                    raise Exception(
-                        (
-                            "ERROR: The useInverse list must have the same number "
-                            "of entries as the transformsFileName list."
-                        )
-                    )
+        invert_flags = self.inputs.invert_transform_flags
+        if not isdefined(invert_flags):
+            invert_flags = [False] * len(self.inputs.transforms)
+        elif len(self.inputs.transforms) != len(invert_flags):
+            raise ValueError(
+                "ERROR: The invert_transform_flags list must have the same number "
+                "of entries as the transforms list."
+            )
+
+        for transform, invert in zip(self.inputs.transforms, invert_flags):
+            if invert:
+                retval.append(f"--transform [ {transform}, 1 ]")
             else:
-                retval.append("--transform %s" % self.inputs.transforms[ii])
+                retval.append(f"--transform {transform}")
         return " ".join(retval)
 
     def _get_output_warped_filename(self):
