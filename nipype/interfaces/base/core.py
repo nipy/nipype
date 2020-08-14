@@ -277,15 +277,15 @@ class BaseInterface(Interface):
             for name in names:
                 min_ver = LooseVersion(str(trait_object.traits()[name].min_ver))
                 try:
-                    min_ver > version
+                    too_old = min_ver > version
                 except TypeError:
                     iflogger.warning(
-                        'Nipype is having issues parsing the package version '
-                        f'for Trait {name} ({self.__class__.__name__})'
-                        f'You may want to check whether {version} is larger than {min_ver}'
-                        )
+                        f"Nipype cannot validate the package version {version!r} for "
+                        f"{self.__class__.__name__}. Trait {name} requires version "
+                        f">={min_ver}. Please verify validity."
+                    )
                     continue
-                if min_ver > version:
+                if too_old:
                     unavailable_traits.append(name)
                     if not isdefined(getattr(trait_object, name)):
                         continue
@@ -303,15 +303,15 @@ class BaseInterface(Interface):
             for name in names:
                 max_ver = LooseVersion(str(trait_object.traits()[name].max_ver))
                 try:
-                    max_ver > version
+                    too_new = max_ver < version
                 except TypeError:
                     iflogger.warning(
-                        'Nipype is having issues parsing the package version '
-                        f'for Trait {name} ({self.__class__.__name__})'
-                        f'You may want to check whether {version} is smaller than {max_ver}'
-                        )
+                        f"Nipype cannot validate the package version {version!r} for "
+                        f"{self.__class__.__name__}. Trait {name} requires version "
+                        f"<={max_ver}. Please verify validity."
+                    )
                     continue
-                if max_ver < version:
+                if too_new:
                     unavailable_traits.append(name)
                     if not isdefined(getattr(trait_object, name)):
                         continue
