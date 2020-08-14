@@ -4,7 +4,7 @@
 import os
 
 from .base import ANTSCommand, ANTSCommandInputSpec
-from ..base import TraitedSpec, File, traits, isdefined, InputMultiPath
+from ..base import TraitedSpec, File, traits, isdefined, InputMultiObject
 from ...utils.filemanip import split_filename
 
 
@@ -52,7 +52,7 @@ class WarpTimeSeriesImageMultiTransformInputSpec(ANTSCommandInputSpec):
     use_bspline = traits.Bool(
         argstr="--use-Bspline", desc="Use 3rd order B-Spline interpolation"
     )
-    transformation_series = InputMultiPath(
+    transformation_series = InputMultiObject(
         File(exists=True),
         argstr="%s",
         desc="transformation file(s) to be applied",
@@ -204,7 +204,7 @@ class WarpImageMultiTransformInputSpec(ANTSCommandInputSpec):
     use_bspline = traits.Bool(
         argstr="--use-BSpline", desc="Use 3rd order B-Spline interpolation"
     )
-    transformation_series = InputMultiPath(
+    transformation_series = InputMultiObject(
         File(exists=True),
         argstr="%s",
         desc="transformation file(s) to be applied",
@@ -369,15 +369,14 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
             traits.Float(), traits.Float()  # Gaussian/MultiLabel (sigma, alpha)
         ),
     )
-    transforms = traits.Either(
-        InputMultiPath(File(exists=True)),
-        "identity",
+    transforms = InputMultiObject(
+        traits.Either(File(exists=True), "identity"),
         argstr="%s",
         mandatory=True,
         desc="transform files: will be applied in reverse order. For "
         "example, the last specified transform will be applied first.",
     )
-    invert_transform_flags = InputMultiPath(traits.Bool())
+    invert_transform_flags = InputMultiObject(traits.Bool())
     default_value = traits.Float(0.0, argstr="--default-value %g", usedefault=True)
     print_out_composite_warp_file = traits.Bool(
         False,
@@ -411,7 +410,7 @@ class ApplyTransforms(ANTSCommand):
     >>> at.cmdline
     'antsApplyTransforms --default-value 0 --float 0 --input moving1.nii \
 --interpolation Linear --output moving1_trans.nii \
---reference-image fixed1.nii -t identity'
+--reference-image fixed1.nii --transform identity'
 
     >>> at = ApplyTransforms()
     >>> at.inputs.dimension = 3
@@ -441,6 +440,22 @@ class ApplyTransforms(ANTSCommand):
     'antsApplyTransforms --default-value 0 --dimensionality 3 --float 0 --input moving1.nii \
 --interpolation BSpline[ 5 ] --output deformed_moving1.nii --reference-image fixed1.nii \
 --transform [ ants_Warp.nii.gz, 0 ] --transform [ trans.mat, 0 ]'
+
+    Identity transforms may be used as part of a chain:
+
+    >>> at2 = ApplyTransforms()
+    >>> at2.inputs.dimension = 3
+    >>> at2.inputs.input_image = 'moving1.nii'
+    >>> at2.inputs.reference_image = 'fixed1.nii'
+    >>> at2.inputs.output_image = 'deformed_moving1.nii'
+    >>> at2.inputs.interpolation = 'BSpline'
+    >>> at2.inputs.interpolation_parameters = (5,)
+    >>> at2.inputs.default_value = 0
+    >>> at2.inputs.transforms = ['identity', 'ants_Warp.nii.gz', 'trans.mat']
+    >>> at2.cmdline
+    'antsApplyTransforms --default-value 0 --dimensionality 3 --float 0 --input moving1.nii \
+--interpolation BSpline[ 5 ] --output deformed_moving1.nii --reference-image fixed1.nii \
+--transform identity --transform ants_Warp.nii.gz --transform trans.mat'
     """
 
     _cmd = "antsApplyTransforms"
