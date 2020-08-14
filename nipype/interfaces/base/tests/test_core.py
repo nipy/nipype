@@ -3,6 +3,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
 import simplejson as json
+import logging
 
 import pytest
 from unittest import mock
@@ -234,6 +235,21 @@ def test_input_version_6():
     obj = DerivedInterface1()
     obj.inputs.foo = 1
     obj._check_version_requirements(obj.inputs)
+
+
+def test_input_version_missing(caplog):
+    class DerivedInterface(nib.BaseInterface):
+        class input_spec(nib.TraitedSpec):
+            foo = nib.traits.Int(min_ver="0.9")
+            bar = nib.traits.Int(max_ver="0.9")
+        _version = "misparsed-garbage"
+
+    obj = DerivedInterface()
+    obj.inputs.foo = 1
+    obj.inputs.bar = 1
+    with caplog.at_level(logging.WARNING, logger="nipype.interface"):
+        obj._check_version_requirements(obj.inputs)
+    assert len(caplog.records) == 2
 
 
 def test_output_version():
