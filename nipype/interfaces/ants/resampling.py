@@ -502,8 +502,6 @@ class ApplyTransforms(ANTSCommand):
         if opt == "output_image":
             return self._get_output_warped_filename()
         elif opt == "transforms":
-            if val == "identity":
-                return "-t identity"
             return self._get_transform_filenames()
         elif opt == "interpolation":
             if self.inputs.interpolation in [
