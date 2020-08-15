@@ -11,7 +11,12 @@ from ... import engine as pe
 from ....interfaces import base as nib
 from ....interfaces import utility as niu
 from .... import config
-from ..utils import clean_working_directory, write_workflow_prov, load_resultfile
+from ..utils import (
+    clean_working_directory,
+    write_workflow_prov,
+    load_resultfile,
+    format_node,
+)
 
 
 class InputSpec(nib.TraitedSpec):
@@ -327,3 +332,11 @@ def test_save_load_resultfile(tmpdir, use_relative):
             )
 
     config.set("execution", "use_relative_paths", old_use_relative)
+
+
+def test_format_node():
+    node = pe.Node(niu.IdentityInterface(fields=["a", "b"]), name="node")
+    serialized = format_node(node)
+    workspace = {"Node": pe.Node}
+    exec("\n".join(serialized), workspace)
+    assert workspace["node"].interface._fields == node.interface._fields
