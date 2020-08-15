@@ -4,7 +4,7 @@
 import os
 
 from .base import ANTSCommand, ANTSCommandInputSpec
-from ..base import TraitedSpec, File, traits, isdefined, InputMultiPath
+from ..base import TraitedSpec, File, traits, isdefined, InputMultiObject
 from ...utils.filemanip import split_filename
 
 
@@ -52,7 +52,7 @@ class WarpTimeSeriesImageMultiTransformInputSpec(ANTSCommandInputSpec):
     use_bspline = traits.Bool(
         argstr="--use-Bspline", desc="Use 3rd order B-Spline interpolation"
     )
-    transformation_series = InputMultiPath(
+    transformation_series = InputMultiObject(
         File(exists=True),
         argstr="%s",
         desc="transformation file(s) to be applied",
@@ -204,7 +204,7 @@ class WarpImageMultiTransformInputSpec(ANTSCommandInputSpec):
     use_bspline = traits.Bool(
         argstr="--use-BSpline", desc="Use 3rd order B-Spline interpolation"
     )
-    transformation_series = InputMultiPath(
+    transformation_series = InputMultiObject(
         File(exists=True),
         argstr="%s",
         desc="transformation file(s) to be applied",
@@ -369,15 +369,14 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
             traits.Float(), traits.Float()  # Gaussian/MultiLabel (sigma, alpha)
         ),
     )
-    transforms = traits.Either(
-        InputMultiPath(File(exists=True)),
-        "identity",
+    transforms = InputMultiObject(
+        traits.Either(File(exists=True), "identity"),
         argstr="%s",
         mandatory=True,
         desc="transform files: will be applied in reverse order. For "
         "example, the last specified transform will be applied first.",
     )
-    invert_transform_flags = InputMultiPath(traits.Bool())
+    invert_transform_flags = InputMultiObject(traits.Bool())
     default_value = traits.Float(0.0, argstr="--default-value %g", usedefault=True)
     print_out_composite_warp_file = traits.Bool(
         False,
@@ -411,7 +410,7 @@ class ApplyTransforms(ANTSCommand):
     >>> at.cmdline
     'antsApplyTransforms --default-value 0 --float 0 --input moving1.nii \
 --interpolation Linear --output moving1_trans.nii \
---reference-image fixed1.nii -t identity'
+--reference-image fixed1.nii --transform identity'
 
     >>> at = ApplyTransforms()
     >>> at.inputs.dimension = 3
@@ -421,11 +420,11 @@ class ApplyTransforms(ANTSCommand):
     >>> at.inputs.interpolation = 'Linear'
     >>> at.inputs.default_value = 0
     >>> at.inputs.transforms = ['ants_Warp.nii.gz', 'trans.mat']
-    >>> at.inputs.invert_transform_flags = [False, False]
+    >>> at.inputs.invert_transform_flags = [False, True]
     >>> at.cmdline
     'antsApplyTransforms --default-value 0 --dimensionality 3 --float 0 --input moving1.nii \
 --interpolation Linear --output deformed_moving1.nii --reference-image fixed1.nii \
---transform [ ants_Warp.nii.gz, 0 ] --transform [ trans.mat, 0 ]'
+--transform ants_Warp.nii.gz --transform [ trans.mat, 1 ]'
 
     >>> at1 = ApplyTransforms()
     >>> at1.inputs.dimension = 3
@@ -440,7 +439,23 @@ class ApplyTransforms(ANTSCommand):
     >>> at1.cmdline
     'antsApplyTransforms --default-value 0 --dimensionality 3 --float 0 --input moving1.nii \
 --interpolation BSpline[ 5 ] --output deformed_moving1.nii --reference-image fixed1.nii \
---transform [ ants_Warp.nii.gz, 0 ] --transform [ trans.mat, 0 ]'
+--transform ants_Warp.nii.gz --transform trans.mat'
+
+    Identity transforms may be used as part of a chain:
+
+    >>> at2 = ApplyTransforms()
+    >>> at2.inputs.dimension = 3
+    >>> at2.inputs.input_image = 'moving1.nii'
+    >>> at2.inputs.reference_image = 'fixed1.nii'
+    >>> at2.inputs.output_image = 'deformed_moving1.nii'
+    >>> at2.inputs.interpolation = 'BSpline'
+    >>> at2.inputs.interpolation_parameters = (5,)
+    >>> at2.inputs.default_value = 0
+    >>> at2.inputs.transforms = ['identity', 'ants_Warp.nii.gz', 'trans.mat']
+    >>> at2.cmdline
+    'antsApplyTransforms --default-value 0 --dimensionality 3 --float 0 --input moving1.nii \
+--interpolation BSpline[ 5 ] --output deformed_moving1.nii --reference-image fixed1.nii \
+--transform identity --transform ants_Warp.nii.gz --transform trans.mat'
     """
 
     _cmd = "antsApplyTransforms"
@@ -458,25 +473,20 @@ class ApplyTransforms(ANTSCommand):
 
     def _get_transform_filenames(self):
         retval = []
-        for ii in range(len(self.inputs.transforms)):
-            if isdefined(self.inputs.invert_transform_flags):
-                if len(self.inputs.transforms) == len(
-                    self.inputs.invert_transform_flags
-                ):
-                    invert_code = 1 if self.inputs.invert_transform_flags[ii] else 0
-                    retval.append(
-                        "--transform [ %s, %d ]"
-                        % (self.inputs.transforms[ii], invert_code)
-                    )
-                else:
-                    raise Exception(
-                        (
-                            "ERROR: The useInverse list must have the same number "
-                            "of entries as the transformsFileName list."
-                        )
-                    )
+        invert_flags = self.inputs.invert_transform_flags
+        if not isdefined(invert_flags):
+            invert_flags = [False] * len(self.inputs.transforms)
+        elif len(self.inputs.transforms) != len(invert_flags):
+            raise ValueError(
+                "ERROR: The invert_transform_flags list must have the same number "
+                "of entries as the transforms list."
+            )
+
+        for transform, invert in zip(self.inputs.transforms, invert_flags):
+            if invert:
+                retval.append(f"--transform [ {transform}, 1 ]")
             else:
-                retval.append("--transform %s" % self.inputs.transforms[ii])
+                retval.append(f"--transform {transform}")
         return " ".join(retval)
 
     def _get_output_warped_filename(self):
@@ -492,8 +502,6 @@ class ApplyTransforms(ANTSCommand):
         if opt == "output_image":
             return self._get_output_warped_filename()
         elif opt == "transforms":
-            if val == "identity":
-                return "-t identity"
             return self._get_transform_filenames()
         elif opt == "interpolation":
             if self.inputs.interpolation in [
