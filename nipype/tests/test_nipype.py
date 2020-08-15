@@ -41,7 +41,7 @@ def _check_no_et():
     return et
 
 
-def test_no_et(tmp_path):
+def test_no_et_bare(tmp_path):
     from unittest.mock import patch
     from nipype.pipeline import engine as pe
     from nipype.interfaces import utility as niu
@@ -70,42 +70,30 @@ def test_no_et(tmp_path):
         res = wf1.run()
         assert next(iter(res.nodes)).result.outputs.out == et
 
-        # MultiProc run - environment initialized with NIPYPE_NO_ET
-        wf2 = pe.Workflow(name="wf2", base_dir=str(tmp_path))
-        wf2.add_nodes([pe.Node(niu.Function(function=_check_no_et), name="n")])
-        res = wf2.run(plugin="MultiProc", plugin_args={"n_procs": 1})
-        assert next(iter(res.nodes)).result.outputs.out is False
 
-        # LegacyMultiProc run - environment initialized with NIPYPE_NO_ET
-        wf3 = pe.Workflow(name="wf3", base_dir=str(tmp_path))
-        wf3.add_nodes([pe.Node(niu.Function(function=_check_no_et), name="n")])
-        res = wf3.run(plugin="LegacyMultiProc", plugin_args={"n_procs": 1})
-        assert next(iter(res.nodes)).result.outputs.out is False
+@pytest.mark.parametrize("plugin", ("MultiProc", "LegacyMultiProc"))
+@pytest.mark.parametrize("run_without_submitting", (True, False))
+def test_no_et_multiproc(tmp_path, plugin, run_without_submitting):
+    from unittest.mock import patch
+    from nipype.pipeline import engine as pe
+    from nipype.interfaces import utility as niu
+    from nipype.interfaces.base import BaseInterface
 
-        # run_without_submitting - environment not set
-        wf4 = pe.Workflow(name="wf4", base_dir=str(tmp_path))
-        wf4.add_nodes(
-            [
-                pe.Node(
-                    niu.Function(function=_check_no_et),
-                    run_without_submitting=True,
-                    name="n",
-                )
-            ]
+    et = os.getenv("NIPYPE_NO_ET") is None
+
+    # Multiprocessing runs initialize new processes with NIPYPE_NO_ET
+    # This does not apply to unsubmitted jobs, run by the main thread
+    expectation = et if run_without_submitting else False
+
+    # Pytest doesn't trigger this, so let's pretend it's there
+    with patch.object(BaseInterface, "_etelemetry_version_data", {}):
+
+        wf = pe.Workflow(name="wf2", base_dir=str(tmp_path))
+        n = pe.Node(
+            niu.Function(function=_check_no_et),
+            run_without_submitting=run_without_submitting,
+            name="n",
         )
-        res = wf4.run(plugin="MultiProc", plugin_args={"n_procs": 1})
-        assert next(iter(res.nodes)).result.outputs.out == et
-
-        # run_without_submitting - environment not set
-        wf5 = pe.Workflow(name="wf5", base_dir=str(tmp_path))
-        wf5.add_nodes(
-            [
-                pe.Node(
-                    niu.Function(function=_check_no_et),
-                    run_without_submitting=True,
-                    name="n",
-                )
-            ]
-        )
-        res = wf5.run(plugin="LegacyMultiProc", plugin_args={"n_procs": 1})
-        assert next(iter(res.nodes)).result.outputs.out == et
+        wf.add_nodes([n])
+        res = wf.run(plugin=plugin, plugin_args={"n_procs": 1})
+        assert next(iter(res.nodes)).result.outputs.out is expectation
