@@ -364,23 +364,12 @@ def format_node(node, format="python", include_config=False):
         importline = "from %s import %s" % (klass.__module__, klass.__class__.__name__)
         comment = "# Node: %s" % node.fullname
         spec = signature(node.interface.__init__)
-        args = [p.name for p in list(spec.parameters.values())]
-        if args:
-            filled_args = []
-            for arg in args:
-                if hasattr(node.interface, "_%s" % arg):
-                    argval = getattr(node.interface, "_%s" % arg)
-                    if isinstance(argval, str):
-                        filled_args.append(
-                            "%s='%s'" % (arg, argval)
-                        )
-                    else:
-                        filled_args.append(
-                            "%s=%s" % (arg, argval)
-                        )
-            args = ", ".join(filled_args)
-        else:
-            args = ""
+        filled_args = []
+        for param in spec.parameters.values():
+            val = getattr(node.interface, f"_{param.name}", None)
+            if val is not None:
+                filled_args.append(f"{param.name}={val!r}")
+        args = ", ".join(filled_args)
         klass_name = klass.__class__.__name__
         if isinstance(node, MapNode):
             nodedef = '%s = MapNode(%s(%s), iterfield=%s, name="%s")' % (
