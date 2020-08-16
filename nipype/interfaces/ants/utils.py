@@ -138,18 +138,18 @@ class ImageMath(ANTSCommand, CopyHeaderInterface):
 
     def __init__(self, **inputs):
         super(ImageMath, self).__init__(**inputs)
-        if self.inputs.operation in ("PadImage", ):
+        if self.inputs.operation in ("PadImage",):
             self.inputs.copy_header = False
 
         self.inputs.on_trait_change(self._operation_update, "operation")
         self.inputs.on_trait_change(self._copyheader_update, "copy_header")
 
     def _operation_update(self):
-        if self.inputs.operation in ("PadImage", ):
+        if self.inputs.operation in ("PadImage",):
             self.inputs.copy_header = False
 
     def _copyheader_update(self):
-        if self.inputs.copy_header and self.inputs.operation in ("PadImage", ):
+        if self.inputs.copy_header and self.inputs.operation in ("PadImage",):
             warn("copy_header cannot be updated to True with PadImage as operation.")
             self.inputs.copy_header = False
 

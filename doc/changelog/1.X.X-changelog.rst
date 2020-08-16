@@ -1,5 +1,21 @@
+1.5.1 (August 16, 2020)
+=======================
+
+Bug-fix release in the 1.5.x series.
+
+This release includes small updates to ANTs utilities that lie somewhere
+between bug fixes and enhancements.
+
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.5.1?closed=1>`__)
+
+  * FIX: Warn for min/max_ver traits when tool version can't be parsed (https://github.com/nipy/nipype/pull/3241)
+  * FIX: Serialize all interface arguments when exporting workflows (https://github.com/nipy/nipype/pull/3240)
+  * FIX: Permit identity transforms in list of transforms given to ants.ApplyTransforms (https://github.com/nipy/nipype/pull/3237)
+  * FIX: ANTs' utilities revision - bug fixes and add more operations to ``ants.ImageMath`` (https://github.com/nipy/nipype/pull/3236)
+  * DOC: Skip BIDSDataGrabber doctest if pybids is missing (https://github.com/nipy/nipype/pull/3224)
+
 1.5.0 (June 03, 2020)
-=========================
+=====================
 
 New feature release in the 1.5.x series.
 

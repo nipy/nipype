@@ -174,9 +174,9 @@ class BET(FSLCommand):
         outputs = self.output_spec().get()
         outputs["out_file"] = self._gen_outfilename()
 
-        basename = os.path.basename(outputs['out_file'])
-        cwd = os.path.dirname(outputs['out_file'])
-        kwargs = {'basename': basename, 'cwd': cwd}
+        basename = os.path.basename(outputs["out_file"])
+        cwd = os.path.dirname(outputs["out_file"])
+        kwargs = {"basename": basename, "cwd": cwd}
 
         if (isdefined(self.inputs.mesh) and self.inputs.mesh) or (
             isdefined(self.inputs.surfaces) and self.inputs.surfaces
@@ -189,9 +189,7 @@ class BET(FSLCommand):
         ):
             outputs["mask_file"] = self._gen_fname(suffix="_mask", **kwargs)
         if isdefined(self.inputs.outline) and self.inputs.outline:
-            outputs["outline_file"] = self._gen_fname(
-                suffix="_overlay", **kwargs
-            )
+            outputs["outline_file"] = self._gen_fname(suffix="_overlay", **kwargs)
         if isdefined(self.inputs.surfaces) and self.inputs.surfaces:
             outputs["inskull_mask_file"] = self._gen_fname(
                 suffix="_inskull_mask", **kwargs
@@ -211,13 +209,9 @@ class BET(FSLCommand):
             outputs["outskin_mesh_file"] = self._gen_fname(
                 suffix="_outskin_mesh", **kwargs
             )
-            outputs["skull_mask_file"] = self._gen_fname(
-                suffix="_skull_mask", **kwargs
-            )
+            outputs["skull_mask_file"] = self._gen_fname(suffix="_skull_mask", **kwargs)
         if isdefined(self.inputs.skull) and self.inputs.skull:
-            outputs["skull_file"] = self._gen_fname(
-                suffix="_skull", **kwargs
-            )
+            outputs["skull_file"] = self._gen_fname(suffix="_skull", **kwargs)
         if isdefined(self.inputs.no_output) and self.inputs.no_output:
             outputs["out_file"] = Undefined
         return outputs

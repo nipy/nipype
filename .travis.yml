@@ -71,7 +71,7 @@ install:
 script:
 - |
     if [ "$CHECK_TYPE" = "test" ]; then
-        py.test -v --cov nipype --cov-config .coveragerc --cov-report xml:cov.xml -c nipype/pytest.ini --doctest-modules nipype -n auto
+        py.test -sv --cov nipype --cov-config .coveragerc --cov-report xml:cov.xml -c nipype/pytest.ini --doctest-modules nipype -n 2
     fi
 - |
     if [ "$CHECK_TYPE" = "specs" ]; then

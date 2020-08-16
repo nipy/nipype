@@ -655,12 +655,15 @@ def test_pickle(tmp_path, save_versioning):
     assert outobj == testobj
 
 
-@pytest.mark.parametrize("items,expected", [
-    ('', ' \n\n'),
-    ('A string', ' A string\n\n'),
-    (['A list', 'Of strings'], ' A list\n Of strings\n\n'),
-    (None, TypeError),
-])
+@pytest.mark.parametrize(
+    "items,expected",
+    [
+        ("", " \n\n"),
+        ("A string", " A string\n\n"),
+        (["A list", "Of strings"], " A list\n Of strings\n\n"),
+        (None, TypeError),
+    ],
+)
 def test_write_rst_list(tmp_path, items, expected):
     if items is not None:
         assert write_rst_list(items) == expected

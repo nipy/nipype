@@ -116,14 +116,14 @@
       "orcid": "0000-0001-7655-3830"
     },
     {
-      "affiliation": "Stanford University",
-      "name": "\u0106iri\u0107 , Rastko",
-      "orcid": "0000-0001-6347-7939"
-    },
-    {
       "affiliation": "Institute for Biomedical Engineering, ETH and University of Zurich",
       "name": "Christian, Horea",
       "orcid": "0000-0001-7037-2449"
+    },
+    {
+      "affiliation": "Stanford University",
+      "name": "\u0106iri\u0107 , Rastko",
+      "orcid": "0000-0001-6347-7939"
     },
     {
       "name": "Dubois, Mathieu"
@@ -226,6 +226,11 @@
       "name": "Millman, Jarrod"
     },
     {
+      "affiliation": "University College London",
+      "name": "Mancini, Matteo",
+      "orcid": "0000-0001-7194-4568"
+    },
+    {
       "affiliation": "National Institute of Mental Health",
       "name": "Nielson, Dylan M.",
       "orcid": "0000-0003-4613-6643"
@@ -240,11 +245,6 @@
     },
     {
       "name": "Mordom, David"
-    },
-    {
-      "affiliation": "University College London",
-      "name": "Mancini, Matteo",
-      "orcid": "0000-0001-7194-4568"
     },
     {
       "affiliation": "ARAMIS LAB, Brain and Spine Institute (ICM), Paris, France.",

@@ -19,8 +19,7 @@ from distutils.version import StrictVersion
 import os
 
 from ... import logging
-from ..base import (CommandLine, CommandLineInputSpec, traits, Undefined,
-                    PackageInfo)
+from ..base import CommandLine, CommandLineInputSpec, traits, Undefined, PackageInfo
 from ...utils.filemanip import split_filename
 
 iflogger = logging.getLogger("nipype.interface")
@@ -31,7 +30,7 @@ def get_custom_path(command, env_dir="NIFTYREGDIR"):
 
 
 class Info(PackageInfo):
-    version_cmd = get_custom_path('reg_aladin') + ' --version'
+    version_cmd = get_custom_path("reg_aladin") + " --version"
 
     @staticmethod
     def parse_version(raw_info):

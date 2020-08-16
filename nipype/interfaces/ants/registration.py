@@ -592,7 +592,8 @@ class RegistrationOutputSpec(TraitedSpec):
         File(exists=True), desc="List of output transforms for forward registration"
     )
     reverse_forward_transforms = traits.List(
-        File(exists=True), desc="List of output transforms for forward registration reversed for antsApplyTransform"
+        File(exists=True),
+        desc="List of output transforms for forward registration reversed for antsApplyTransform",
     )
     reverse_transforms = traits.List(
         File(exists=True), desc="List of output transforms for reverse registration"
@@ -601,7 +602,8 @@ class RegistrationOutputSpec(TraitedSpec):
         traits.Bool(), desc="List of flags corresponding to the forward transforms"
     )
     reverse_forward_invert_flags = traits.List(
-        traits.Bool(), desc="List of flags corresponding to the forward transforms reversed for antsApplyTransform"
+        traits.Bool(),
+        desc="List of flags corresponding to the forward transforms reversed for antsApplyTransform",
     )
     reverse_invert_flags = traits.List(
         traits.Bool(), desc="List of flags corresponding to the reverse transforms"
