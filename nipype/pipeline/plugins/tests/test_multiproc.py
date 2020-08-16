@@ -34,7 +34,9 @@ class MultiprocTestInterface(nib.BaseInterface):
         return outputs
 
 
-@pytest.mark.skipif(sys.version_info >= (3, 8), reason="multiprocessing issues in Python 3.8")
+@pytest.mark.skipif(
+    sys.version_info >= (3, 8), reason="multiprocessing issues in Python 3.8"
+)
 def test_run_multiproc(tmpdir):
     tmpdir.chdir()
 
@@ -116,7 +118,9 @@ def test_no_more_threads_than_specified(tmpdir):
         pipe.run(plugin="MultiProc", plugin_args={"n_procs": max_threads})
 
 
-@pytest.mark.skipif(sys.version_info >= (3, 8), reason="multiprocessing issues in Python 3.8")
+@pytest.mark.skipif(
+    sys.version_info >= (3, 8), reason="multiprocessing issues in Python 3.8"
+)
 def test_hold_job_until_procs_available(tmpdir):
     tmpdir.chdir()
 

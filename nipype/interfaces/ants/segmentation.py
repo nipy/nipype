@@ -543,6 +543,7 @@ class N4BiasFieldCorrection(ANTSCommand, CopyHeaderInterface):
             outputs["bias_image"] = os.path.abspath(self._out_bias_file)
         return outputs
 
+
 class CorticalThicknessInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(
         3, 2, argstr="-d %d", usedefault=True, desc="image dimension (2 or 3)"
