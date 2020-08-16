@@ -242,6 +242,7 @@ def test_input_version_missing(caplog):
         class input_spec(nib.TraitedSpec):
             foo = nib.traits.Int(min_ver="0.9")
             bar = nib.traits.Int(max_ver="0.9")
+
         _version = "misparsed-garbage"
 
     obj = DerivedInterface()
@@ -250,6 +251,25 @@ def test_input_version_missing(caplog):
     with caplog.at_level(logging.WARNING, logger="nipype.interface"):
         obj._check_version_requirements(obj.inputs)
     assert len(caplog.records) == 2
+
+
+def test_input_version_missing_error():
+    from nipype import config
+
+    class DerivedInterface(nib.BaseInterface):
+        class input_spec(nib.TraitedSpec):
+            foo = nib.traits.Int(min_ver="0.9")
+            bar = nib.traits.Int(max_ver="0.9")
+
+        _version = "misparsed-garbage"
+
+    with mock.patch.object(config, "getboolean", return_value=True):
+        obj = DerivedInterface(foo=1)
+        with pytest.raises(ValueError):
+            obj._check_version_requirements(obj.inputs)
+        obj = DerivedInterface(bar=1)
+        with pytest.raises(ValueError):
+            obj._check_version_requirements(obj.inputs)
 
 
 def test_output_version():
@@ -473,7 +493,7 @@ def test_global_CommandLine_output(tmpdir):
     ci = BET()
     assert ci.terminal_output == "stream"  # default case
 
-    with mock.patch.object(nib.CommandLine, '_terminal_output'):
+    with mock.patch.object(nib.CommandLine, "_terminal_output"):
         nib.CommandLine.set_default_terminal_output("allatonce")
         ci = nib.CommandLine(command="ls -l")
         assert ci.terminal_output == "allatonce"

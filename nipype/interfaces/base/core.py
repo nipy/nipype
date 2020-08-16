@@ -278,12 +278,14 @@ class BaseInterface(Interface):
                 min_ver = LooseVersion(str(trait_object.traits()[name].min_ver))
                 try:
                     too_old = min_ver > version
-                except TypeError:
-                    iflogger.warning(
+                except TypeError as err:
+                    msg = (
                         f"Nipype cannot validate the package version {version!r} for "
-                        f"{self.__class__.__name__}. Trait {name} requires version "
-                        f">={min_ver}. Please verify validity."
+                        f"{self.__class__.__name__}. Trait {name} requires version >={min_ver}."
                     )
+                    iflogger.warning(f"{msg}. Please verify validity.")
+                    if config.getboolean("execution", "stop_on_unknown_version"):
+                        raise ValueError(msg) from err
                     continue
                 if too_old:
                     unavailable_traits.append(name)
@@ -304,12 +306,14 @@ class BaseInterface(Interface):
                 max_ver = LooseVersion(str(trait_object.traits()[name].max_ver))
                 try:
                     too_new = max_ver < version
-                except TypeError:
-                    iflogger.warning(
+                except TypeError as err:
+                    msg = (
                         f"Nipype cannot validate the package version {version!r} for "
-                        f"{self.__class__.__name__}. Trait {name} requires version "
-                        f"<={max_ver}. Please verify validity."
+                        f"{self.__class__.__name__}. Trait {name} requires version <={max_ver}."
                     )
+                    iflogger.warning(f"{msg}. Please verify validity.")
+                    if config.getboolean("execution", "stop_on_unknown_version"):
+                        raise ValueError(msg) from err
                     continue
                 if too_new:
                     unavailable_traits.append(name)
