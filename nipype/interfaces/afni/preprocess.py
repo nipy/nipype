@@ -283,6 +283,9 @@ class AllineateInputSpec(AFNICommandInputSpec):
     )
     out_matrix = File(
         argstr="-1Dmatrix_save %s",
+        name_template='%s_allineated.aff12.1D',
+        name_source='in_file',
+        keep_extension=False,
         desc="Save the transformation matrix for each volume.",
         xor=["in_matrix", "allcostx"],
     )
@@ -576,7 +579,8 @@ class Allineate(AFNICommand):
     >>> allineate.inputs.reference = 'structural.nii'
     >>> allineate.inputs.nwarp_fixmot = ['X', 'Y']
     >>> allineate.cmdline
-    '3dAllineate -source functional.nii -nwarp_fixmotX -nwarp_fixmotY -prefix functional_allineate -base structural.nii'
+    '3dAllineate -source functional.nii -nwarp_fixmotX -nwarp_fixmotY -prefix functional_allineate \
+-1Dmatrix_save functional_allineated.aff12 -base structural.nii'
     >>> res = allineate.run()  # doctest: +SKIP
     """
 

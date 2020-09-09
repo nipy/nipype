@@ -58,7 +58,12 @@ def test_Allineate_inputs():
             xor=["allcostx"],
         ),
         out_matrix=dict(
-            argstr="-1Dmatrix_save %s", extensions=None, xor=["in_matrix", "allcostx"],
+            argstr="-1Dmatrix_save %s",
+            extensions=None,
+            keep_extension=False,
+            name_source="in_file",
+            name_template="%s_allineated.aff12.1D",
+            xor=["in_matrix", "allcostx"],
         ),
         out_param_file=dict(
             argstr="-1Dparam_save %s",
