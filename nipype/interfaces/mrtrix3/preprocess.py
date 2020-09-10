@@ -181,13 +181,13 @@ class DWIBiasCorrectInputSpec(MRTrix3BaseInputSpec):
     )
     in_mask = File(argstr="-mask %s", desc="input mask image for bias field estimation")
     use_ants = traits.Bool(
-        argstr="-ants",
+        argstr="ants",
         mandatory=True,
         desc="use ANTS N4 to estimate the inhomogeneity field",
         xor=["use_fsl"],
     )
     use_fsl = traits.Bool(
-        argstr="-fsl",
+        argstr="fsl",
         mandatory=True,
         desc="use FSL FAST to estimate the inhomogeneity field",
         xor=["use_ants"],
