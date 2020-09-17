@@ -4,11 +4,24 @@ from ..convert import MRTrix2TrackVis
 
 def test_MRTrix2TrackVis_inputs():
     input_map = dict(
-        image_file=dict(extensions=None,),
-        in_file=dict(extensions=None, mandatory=True,),
-        matrix_file=dict(extensions=None,),
-        out_filename=dict(extensions=None, genfile=True, usedefault=True,),
-        registration_image_file=dict(extensions=None,),
+        image_file=dict(
+            extensions=None,
+        ),
+        in_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        matrix_file=dict(
+            extensions=None,
+        ),
+        out_filename=dict(
+            extensions=None,
+            genfile=True,
+            usedefault=True,
+        ),
+        registration_image_file=dict(
+            extensions=None,
+        ),
     )
     inputs = MRTrix2TrackVis.input_spec()
 
@@ -18,7 +31,11 @@ def test_MRTrix2TrackVis_inputs():
 
 
 def test_MRTrix2TrackVis_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = MRTrix2TrackVis.output_spec()
 
     for key, metadata in list(output_map.items()):

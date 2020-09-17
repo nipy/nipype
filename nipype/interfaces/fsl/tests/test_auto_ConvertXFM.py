@@ -4,22 +4,36 @@ from ..utils import ConvertXFM
 
 def test_ConvertXFM_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
+        args=dict(
+            argstr="%s",
+        ),
         concat_xfm=dict(
             argstr="-concat",
             position=-3,
             requires=["in_file2"],
             xor=["invert_xfm", "concat_xfm", "fix_scale_skew"],
         ),
-        environ=dict(nohash=True, usedefault=True,),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         fix_scale_skew=dict(
             argstr="-fixscaleskew",
             position=-3,
             requires=["in_file2"],
             xor=["invert_xfm", "concat_xfm", "fix_scale_skew"],
         ),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=-1,),
-        in_file2=dict(argstr="%s", extensions=None, position=-2,),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-1,
+        ),
+        in_file2=dict(
+            argstr="%s",
+            extensions=None,
+            position=-2,
+        ),
         invert_xfm=dict(
             argstr="-inverse",
             position=-3,
@@ -42,7 +56,11 @@ def test_ConvertXFM_inputs():
 
 
 def test_ConvertXFM_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = ConvertXFM.output_spec()
 
     for key, metadata in list(output_map.items()):

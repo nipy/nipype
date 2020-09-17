@@ -4,14 +4,35 @@ from ..segmentation import OtsuThresholdSegmentation
 
 def test_OtsuThresholdSegmentation_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        brightObjects=dict(argstr="--brightObjects ",),
-        environ=dict(nohash=True, usedefault=True,),
-        faceConnected=dict(argstr="--faceConnected ",),
-        inputVolume=dict(argstr="%s", extensions=None, position=-2,),
-        minimumObjectSize=dict(argstr="--minimumObjectSize %d",),
-        numberOfBins=dict(argstr="--numberOfBins %d",),
-        outputVolume=dict(argstr="%s", hash_files=False, position=-1,),
+        args=dict(
+            argstr="%s",
+        ),
+        brightObjects=dict(
+            argstr="--brightObjects ",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        faceConnected=dict(
+            argstr="--faceConnected ",
+        ),
+        inputVolume=dict(
+            argstr="%s",
+            extensions=None,
+            position=-2,
+        ),
+        minimumObjectSize=dict(
+            argstr="--minimumObjectSize %d",
+        ),
+        numberOfBins=dict(
+            argstr="--numberOfBins %d",
+        ),
+        outputVolume=dict(
+            argstr="%s",
+            hash_files=False,
+            position=-1,
+        ),
     )
     inputs = OtsuThresholdSegmentation.input_spec()
 
@@ -21,7 +42,12 @@ def test_OtsuThresholdSegmentation_inputs():
 
 
 def test_OtsuThresholdSegmentation_outputs():
-    output_map = dict(outputVolume=dict(extensions=None, position=-1,),)
+    output_map = dict(
+        outputVolume=dict(
+            extensions=None,
+            position=-1,
+        ),
+    )
     outputs = OtsuThresholdSegmentation.output_spec()
 
     for key, metadata in list(output_map.items()):

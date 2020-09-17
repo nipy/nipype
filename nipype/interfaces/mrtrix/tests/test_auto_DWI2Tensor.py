@@ -4,13 +4,37 @@ from ..preprocess import DWI2Tensor
 
 def test_DWI2Tensor_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        debug=dict(argstr="-debug", position=1,),
-        encoding_file=dict(argstr="-grad %s", extensions=None, position=2,),
-        environ=dict(nohash=True, usedefault=True,),
-        ignore_slice_by_volume=dict(argstr="-ignoreslices %s", position=2, sep=" ",),
-        ignore_volumes=dict(argstr="-ignorevolumes %s", position=2, sep=" ",),
-        in_file=dict(argstr="%s", mandatory=True, position=-2,),
+        args=dict(
+            argstr="%s",
+        ),
+        debug=dict(
+            argstr="-debug",
+            position=1,
+        ),
+        encoding_file=dict(
+            argstr="-grad %s",
+            extensions=None,
+            position=2,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        ignore_slice_by_volume=dict(
+            argstr="-ignoreslices %s",
+            position=2,
+            sep=" ",
+        ),
+        ignore_volumes=dict(
+            argstr="-ignorevolumes %s",
+            position=2,
+            sep=" ",
+        ),
+        in_file=dict(
+            argstr="%s",
+            mandatory=True,
+            position=-2,
+        ),
         out_filename=dict(
             argstr="%s",
             extensions=None,
@@ -19,7 +43,10 @@ def test_DWI2Tensor_inputs():
             output_name="tensor",
             position=-1,
         ),
-        quiet=dict(argstr="-quiet", position=1,),
+        quiet=dict(
+            argstr="-quiet",
+            position=1,
+        ),
     )
     inputs = DWI2Tensor.input_spec()
 
@@ -29,7 +56,11 @@ def test_DWI2Tensor_inputs():
 
 
 def test_DWI2Tensor_outputs():
-    output_map = dict(tensor=dict(extensions=None,),)
+    output_map = dict(
+        tensor=dict(
+            extensions=None,
+        ),
+    )
     outputs = DWI2Tensor.output_spec()
 
     for key, metadata in list(output_map.items()):

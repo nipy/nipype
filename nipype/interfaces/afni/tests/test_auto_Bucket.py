@@ -4,11 +4,27 @@ from ..utils import Bucket
 
 def test_Bucket_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        in_file=dict(argstr="%s", mandatory=True, position=-1,),
-        num_threads=dict(nohash=True, usedefault=True,),
-        out_file=dict(argstr="-prefix %s", extensions=None, name_template="buck",),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            mandatory=True,
+            position=-1,
+        ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        out_file=dict(
+            argstr="-prefix %s",
+            extensions=None,
+            name_template="buck",
+        ),
         outputtype=dict(),
     )
     inputs = Bucket.input_spec()
@@ -19,7 +35,11 @@ def test_Bucket_inputs():
 
 
 def test_Bucket_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Bucket.output_spec()
 
     for key, metadata in list(output_map.items()):

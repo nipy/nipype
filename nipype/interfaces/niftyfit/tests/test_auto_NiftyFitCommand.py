@@ -4,7 +4,13 @@ from ..base import NiftyFitCommand
 
 def test_NiftyFitCommand_inputs():
     input_map = dict(
-        args=dict(argstr="%s",), environ=dict(nohash=True, usedefault=True,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
     )
     inputs = NiftyFitCommand.input_spec()
 

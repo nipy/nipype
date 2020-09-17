@@ -4,13 +4,32 @@ from ..minc import Voliso
 
 def test_Voliso_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        avgstep=dict(argstr="--avgstep",),
-        clobber=dict(argstr="--clobber", usedefault=True,),
-        environ=dict(nohash=True, usedefault=True,),
-        input_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2,),
-        maxstep=dict(argstr="--maxstep %s",),
-        minstep=dict(argstr="--minstep %s",),
+        args=dict(
+            argstr="%s",
+        ),
+        avgstep=dict(
+            argstr="--avgstep",
+        ),
+        clobber=dict(
+            argstr="--clobber",
+            usedefault=True,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        input_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
+        maxstep=dict(
+            argstr="--maxstep %s",
+        ),
+        minstep=dict(
+            argstr="--minstep %s",
+        ),
         output_file=dict(
             argstr="%s",
             extensions=None,
@@ -20,7 +39,9 @@ def test_Voliso_inputs():
             name_template="%s_voliso.mnc",
             position=-1,
         ),
-        verbose=dict(argstr="--verbose",),
+        verbose=dict(
+            argstr="--verbose",
+        ),
     )
     inputs = Voliso.input_spec()
 
@@ -30,7 +51,11 @@ def test_Voliso_inputs():
 
 
 def test_Voliso_outputs():
-    output_map = dict(output_file=dict(extensions=None,),)
+    output_map = dict(
+        output_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Voliso.output_spec()
 
     for key, metadata in list(output_map.items()):

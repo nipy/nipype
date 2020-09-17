@@ -6,7 +6,9 @@ def test_CFFConverter_inputs():
     input_map = dict(
         creator=dict(),
         data_files=dict(),
-        description=dict(usedefault=True,),
+        description=dict(
+            usedefault=True,
+        ),
         email=dict(),
         gifti_labels=dict(),
         gifti_surfaces=dict(),
@@ -14,13 +16,18 @@ def test_CFFConverter_inputs():
         graphml_networks=dict(),
         license=dict(),
         nifti_volumes=dict(),
-        out_file=dict(extensions=None, usedefault=True,),
+        out_file=dict(
+            extensions=None,
+            usedefault=True,
+        ),
         publisher=dict(),
         references=dict(),
         relation=dict(),
         rights=dict(),
         script_files=dict(),
-        species=dict(usedefault=True,),
+        species=dict(
+            usedefault=True,
+        ),
         timeseries_files=dict(),
         title=dict(),
         tract_files=dict(),
@@ -33,7 +40,11 @@ def test_CFFConverter_inputs():
 
 
 def test_CFFConverter_outputs():
-    output_map = dict(connectome_file=dict(extensions=None,),)
+    output_map = dict(
+        connectome_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = CFFConverter.output_spec()
 
     for key, metadata in list(output_map.items()):

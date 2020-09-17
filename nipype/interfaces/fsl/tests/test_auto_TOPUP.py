@@ -4,8 +4,13 @@ from ..epi import TOPUP
 
 def test_TOPUP_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        config=dict(argstr="--config=%s", usedefault=True,),
+        args=dict(
+            argstr="%s",
+        ),
+        config=dict(
+            argstr="--config=%s",
+            usedefault=True,
+        ),
         encoding_direction=dict(
             argstr="--datain=%s",
             mandatory=True,
@@ -18,14 +23,33 @@ def test_TOPUP_inputs():
             mandatory=True,
             xor=["encoding_direction"],
         ),
-        environ=dict(nohash=True, usedefault=True,),
-        estmov=dict(argstr="--estmov=%d",),
-        fwhm=dict(argstr="--fwhm=%f",),
-        in_file=dict(argstr="--imain=%s", extensions=None, mandatory=True,),
-        interp=dict(argstr="--interp=%s",),
-        max_iter=dict(argstr="--miter=%d",),
-        minmet=dict(argstr="--minmet=%d",),
-        numprec=dict(argstr="--numprec=%s",),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        estmov=dict(
+            argstr="--estmov=%d",
+        ),
+        fwhm=dict(
+            argstr="--fwhm=%f",
+        ),
+        in_file=dict(
+            argstr="--imain=%s",
+            extensions=None,
+            mandatory=True,
+        ),
+        interp=dict(
+            argstr="--interp=%s",
+        ),
+        max_iter=dict(
+            argstr="--miter=%d",
+        ),
+        minmet=dict(
+            argstr="--minmet=%d",
+        ),
+        numprec=dict(
+            argstr="--numprec=%s",
+        ),
         out_base=dict(
             argstr="--out=%s",
             extensions=None,
@@ -47,7 +71,11 @@ def test_TOPUP_inputs():
             name_source=["in_file"],
             name_template="%s_field",
         ),
-        out_jac_prefix=dict(argstr="--jacout=%s", hash_files=False, usedefault=True,),
+        out_jac_prefix=dict(
+            argstr="--jacout=%s",
+            hash_files=False,
+            usedefault=True,
+        ),
         out_logfile=dict(
             argstr="--logout=%s",
             extensions=None,
@@ -56,20 +84,46 @@ def test_TOPUP_inputs():
             name_source=["in_file"],
             name_template="%s_topup.log",
         ),
-        out_mat_prefix=dict(argstr="--rbmout=%s", hash_files=False, usedefault=True,),
-        out_warp_prefix=dict(argstr="--dfout=%s", hash_files=False, usedefault=True,),
+        out_mat_prefix=dict(
+            argstr="--rbmout=%s",
+            hash_files=False,
+            usedefault=True,
+        ),
+        out_warp_prefix=dict(
+            argstr="--dfout=%s",
+            hash_files=False,
+            usedefault=True,
+        ),
         output_type=dict(),
         readout_times=dict(
-            mandatory=True, requires=["encoding_direction"], xor=["encoding_file"],
+            mandatory=True,
+            requires=["encoding_direction"],
+            xor=["encoding_file"],
         ),
-        reg_lambda=dict(argstr="--lambda=%0.f",),
-        regmod=dict(argstr="--regmod=%s",),
-        regrid=dict(argstr="--regrid=%d",),
-        scale=dict(argstr="--scale=%d",),
-        splineorder=dict(argstr="--splineorder=%d",),
-        ssqlambda=dict(argstr="--ssqlambda=%d",),
-        subsamp=dict(argstr="--subsamp=%d",),
-        warp_res=dict(argstr="--warpres=%f",),
+        reg_lambda=dict(
+            argstr="--lambda=%0.f",
+        ),
+        regmod=dict(
+            argstr="--regmod=%s",
+        ),
+        regrid=dict(
+            argstr="--regrid=%d",
+        ),
+        scale=dict(
+            argstr="--scale=%d",
+        ),
+        splineorder=dict(
+            argstr="--splineorder=%d",
+        ),
+        ssqlambda=dict(
+            argstr="--ssqlambda=%d",
+        ),
+        subsamp=dict(
+            argstr="--subsamp=%d",
+        ),
+        warp_res=dict(
+            argstr="--warpres=%f",
+        ),
     )
     inputs = TOPUP.input_spec()
 
@@ -80,14 +134,26 @@ def test_TOPUP_inputs():
 
 def test_TOPUP_outputs():
     output_map = dict(
-        out_corrected=dict(extensions=None,),
-        out_enc_file=dict(extensions=None,),
-        out_field=dict(extensions=None,),
-        out_fieldcoef=dict(extensions=None,),
+        out_corrected=dict(
+            extensions=None,
+        ),
+        out_enc_file=dict(
+            extensions=None,
+        ),
+        out_field=dict(
+            extensions=None,
+        ),
+        out_fieldcoef=dict(
+            extensions=None,
+        ),
         out_jacs=dict(),
-        out_logfile=dict(extensions=None,),
+        out_logfile=dict(
+            extensions=None,
+        ),
         out_mats=dict(),
-        out_movpar=dict(extensions=None,),
+        out_movpar=dict(
+            extensions=None,
+        ),
         out_warps=dict(),
     )
     outputs = TOPUP.output_spec()

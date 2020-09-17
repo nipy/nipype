@@ -4,25 +4,56 @@ from ..brains import BRAINSConstellationModeler
 
 def test_BRAINSConstellationModeler_inputs():
     input_map = dict(
-        BackgroundFillValue=dict(argstr="--BackgroundFillValue %s",),
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        inputTrainingList=dict(argstr="--inputTrainingList %s", extensions=None,),
-        mspQualityLevel=dict(argstr="--mspQualityLevel %d",),
-        numberOfThreads=dict(argstr="--numberOfThreads %d",),
+        BackgroundFillValue=dict(
+            argstr="--BackgroundFillValue %s",
+        ),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        inputTrainingList=dict(
+            argstr="--inputTrainingList %s",
+            extensions=None,
+        ),
+        mspQualityLevel=dict(
+            argstr="--mspQualityLevel %d",
+        ),
+        numberOfThreads=dict(
+            argstr="--numberOfThreads %d",
+        ),
         optimizedLandmarksFilenameExtender=dict(
             argstr="--optimizedLandmarksFilenameExtender %s",
         ),
-        outputModel=dict(argstr="--outputModel %s", hash_files=False,),
-        rescaleIntensities=dict(argstr="--rescaleIntensities ",),
-        rescaleIntensitiesOutputRange=dict(
-            argstr="--rescaleIntensitiesOutputRange %s", sep=",",
+        outputModel=dict(
+            argstr="--outputModel %s",
+            hash_files=False,
         ),
-        resultsDir=dict(argstr="--resultsDir %s", hash_files=False,),
-        saveOptimizedLandmarks=dict(argstr="--saveOptimizedLandmarks ",),
-        trimRescaledIntensities=dict(argstr="--trimRescaledIntensities %f",),
-        verbose=dict(argstr="--verbose ",),
-        writedebuggingImagesLevel=dict(argstr="--writedebuggingImagesLevel %d",),
+        rescaleIntensities=dict(
+            argstr="--rescaleIntensities ",
+        ),
+        rescaleIntensitiesOutputRange=dict(
+            argstr="--rescaleIntensitiesOutputRange %s",
+            sep=",",
+        ),
+        resultsDir=dict(
+            argstr="--resultsDir %s",
+            hash_files=False,
+        ),
+        saveOptimizedLandmarks=dict(
+            argstr="--saveOptimizedLandmarks ",
+        ),
+        trimRescaledIntensities=dict(
+            argstr="--trimRescaledIntensities %f",
+        ),
+        verbose=dict(
+            argstr="--verbose ",
+        ),
+        writedebuggingImagesLevel=dict(
+            argstr="--writedebuggingImagesLevel %d",
+        ),
     )
     inputs = BRAINSConstellationModeler.input_spec()
 
@@ -32,7 +63,12 @@ def test_BRAINSConstellationModeler_inputs():
 
 
 def test_BRAINSConstellationModeler_outputs():
-    output_map = dict(outputModel=dict(extensions=None,), resultsDir=dict(),)
+    output_map = dict(
+        outputModel=dict(
+            extensions=None,
+        ),
+        resultsDir=dict(),
+    )
     outputs = BRAINSConstellationModeler.output_spec()
 
     for key, metadata in list(output_map.items()):

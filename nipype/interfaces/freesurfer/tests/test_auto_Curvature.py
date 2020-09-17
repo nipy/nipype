@@ -4,18 +4,37 @@ from ..utils import Curvature
 
 def test_Curvature_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        averages=dict(argstr="-a %d",),
-        copy_input=dict(),
-        distances=dict(argstr="-distances %d %d",),
-        environ=dict(nohash=True, usedefault=True,),
-        in_file=dict(
-            argstr="%s", copyfile=True, extensions=None, mandatory=True, position=-2,
+        args=dict(
+            argstr="%s",
         ),
-        n=dict(argstr="-n",),
-        save=dict(argstr="-w",),
+        averages=dict(
+            argstr="-a %d",
+        ),
+        copy_input=dict(),
+        distances=dict(
+            argstr="-distances %d %d",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            copyfile=True,
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
+        n=dict(
+            argstr="-n",
+        ),
+        save=dict(
+            argstr="-w",
+        ),
         subjects_dir=dict(),
-        threshold=dict(argstr="-thresh %.3f",),
+        threshold=dict(
+            argstr="-thresh %.3f",
+        ),
     )
     inputs = Curvature.input_spec()
 
@@ -26,7 +45,12 @@ def test_Curvature_inputs():
 
 def test_Curvature_outputs():
     output_map = dict(
-        out_gauss=dict(extensions=None,), out_mean=dict(extensions=None,),
+        out_gauss=dict(
+            extensions=None,
+        ),
+        out_mean=dict(
+            extensions=None,
+        ),
     )
     outputs = Curvature.output_spec()
 

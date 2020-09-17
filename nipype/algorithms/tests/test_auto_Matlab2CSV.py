@@ -4,8 +4,13 @@ from ..misc import Matlab2CSV
 
 def test_Matlab2CSV_inputs():
     input_map = dict(
-        in_file=dict(extensions=None, mandatory=True,),
-        reshape_matrix=dict(usedefault=True,),
+        in_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        reshape_matrix=dict(
+            usedefault=True,
+        ),
     )
     inputs = Matlab2CSV.input_spec()
 
@@ -15,7 +20,9 @@ def test_Matlab2CSV_inputs():
 
 
 def test_Matlab2CSV_outputs():
-    output_map = dict(csv_files=dict(),)
+    output_map = dict(
+        csv_files=dict(),
+    )
     outputs = Matlab2CSV.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -4,11 +4,27 @@ from ..maths import Merge
 
 def test_Merge_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        dimension=dict(mandatory=True,),
-        environ=dict(nohash=True, usedefault=True,),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=2,),
-        merge_files=dict(argstr="%s", mandatory=True, position=4,),
+        args=dict(
+            argstr="%s",
+        ),
+        dimension=dict(
+            mandatory=True,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=2,
+        ),
+        merge_files=dict(
+            argstr="%s",
+            mandatory=True,
+            position=4,
+        ),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -16,7 +32,10 @@ def test_Merge_inputs():
             name_template="%s",
             position=-2,
         ),
-        output_datatype=dict(argstr="-odt %s", position=-3,),
+        output_datatype=dict(
+            argstr="-odt %s",
+            position=-3,
+        ),
     )
     inputs = Merge.input_spec()
 
@@ -26,7 +45,11 @@ def test_Merge_inputs():
 
 
 def test_Merge_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Merge.output_spec()
 
     for key, metadata in list(output_map.items()):

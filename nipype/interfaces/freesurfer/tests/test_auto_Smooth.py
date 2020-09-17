@@ -4,14 +4,41 @@ from ..preprocess import Smooth
 
 def test_Smooth_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        in_file=dict(argstr="--i %s", extensions=None, mandatory=True,),
-        num_iters=dict(argstr="--niters %d", mandatory=True, xor=["surface_fwhm"],),
-        proj_frac=dict(argstr="--projfrac %s", xor=["proj_frac_avg"],),
-        proj_frac_avg=dict(argstr="--projfrac-avg %.2f %.2f %.2f", xor=["proj_frac"],),
-        reg_file=dict(argstr="--reg %s", extensions=None, mandatory=True,),
-        smoothed_file=dict(argstr="--o %s", extensions=None, genfile=True,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="--i %s",
+            extensions=None,
+            mandatory=True,
+        ),
+        num_iters=dict(
+            argstr="--niters %d",
+            mandatory=True,
+            xor=["surface_fwhm"],
+        ),
+        proj_frac=dict(
+            argstr="--projfrac %s",
+            xor=["proj_frac_avg"],
+        ),
+        proj_frac_avg=dict(
+            argstr="--projfrac-avg %.2f %.2f %.2f",
+            xor=["proj_frac"],
+        ),
+        reg_file=dict(
+            argstr="--reg %s",
+            extensions=None,
+            mandatory=True,
+        ),
+        smoothed_file=dict(
+            argstr="--o %s",
+            extensions=None,
+            genfile=True,
+        ),
         subjects_dir=dict(),
         surface_fwhm=dict(
             argstr="--fwhm %f",
@@ -19,7 +46,9 @@ def test_Smooth_inputs():
             requires=["reg_file"],
             xor=["num_iters"],
         ),
-        vol_fwhm=dict(argstr="--vol-fwhm %f",),
+        vol_fwhm=dict(
+            argstr="--vol-fwhm %f",
+        ),
     )
     inputs = Smooth.input_spec()
 
@@ -29,7 +58,11 @@ def test_Smooth_inputs():
 
 
 def test_Smooth_outputs():
-    output_map = dict(smoothed_file=dict(extensions=None,),)
+    output_map = dict(
+        smoothed_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Smooth.output_spec()
 
     for key, metadata in list(output_map.items()):

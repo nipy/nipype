@@ -4,18 +4,40 @@ from ..minc import Average
 
 def test_Average_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        avgdim=dict(argstr="-avgdim %s",),
-        binarize=dict(argstr="-binarize",),
-        binrange=dict(argstr="-binrange %s %s",),
-        binvalue=dict(argstr="-binvalue %s",),
-        check_dimensions=dict(
-            argstr="-check_dimensions", xor=("check_dimensions", "no_check_dimensions"),
+        args=dict(
+            argstr="%s",
         ),
-        clobber=dict(argstr="-clobber", usedefault=True,),
-        copy_header=dict(argstr="-copy_header", xor=("copy_header", "no_copy_header"),),
-        debug=dict(argstr="-debug",),
-        environ=dict(nohash=True, usedefault=True,),
+        avgdim=dict(
+            argstr="-avgdim %s",
+        ),
+        binarize=dict(
+            argstr="-binarize",
+        ),
+        binrange=dict(
+            argstr="-binrange %s %s",
+        ),
+        binvalue=dict(
+            argstr="-binvalue %s",
+        ),
+        check_dimensions=dict(
+            argstr="-check_dimensions",
+            xor=("check_dimensions", "no_check_dimensions"),
+        ),
+        clobber=dict(
+            argstr="-clobber",
+            usedefault=True,
+        ),
+        copy_header=dict(
+            argstr="-copy_header",
+            xor=("copy_header", "no_copy_header"),
+        ),
+        debug=dict(
+            argstr="-debug",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         filelist=dict(
             argstr="-filelist %s",
             extensions=None,
@@ -156,17 +178,25 @@ def test_Average_inputs():
             xor=("input_files", "filelist"),
         ),
         max_buffer_size_in_kb=dict(
-            argstr="-max_buffer_size_in_kb %d", usedefault=True,
+            argstr="-max_buffer_size_in_kb %d",
+            usedefault=True,
         ),
         no_check_dimensions=dict(
             argstr="-nocheck_dimensions",
             xor=("check_dimensions", "no_check_dimensions"),
         ),
         no_copy_header=dict(
-            argstr="-nocopy_header", xor=("copy_header", "no_copy_header"),
+            argstr="-nocopy_header",
+            xor=("copy_header", "no_copy_header"),
         ),
-        nonormalize=dict(argstr="-nonormalize", xor=("normalize", "nonormalize"),),
-        normalize=dict(argstr="-normalize", xor=("normalize", "nonormalize"),),
+        nonormalize=dict(
+            argstr="-nonormalize",
+            xor=("normalize", "nonormalize"),
+        ),
+        normalize=dict(
+            argstr="-normalize",
+            xor=("normalize", "nonormalize"),
+        ),
         output_file=dict(
             argstr="%s",
             extensions=None,
@@ -176,13 +206,32 @@ def test_Average_inputs():
             name_template="%s_averaged.mnc",
             position=-1,
         ),
-        quiet=dict(argstr="-quiet", xor=("verbose", "quiet"),),
-        sdfile=dict(argstr="-sdfile %s", extensions=None,),
-        two=dict(argstr="-2",),
-        verbose=dict(argstr="-verbose", xor=("verbose", "quiet"),),
-        voxel_range=dict(argstr="-range %d %d",),
-        weights=dict(argstr="-weights %s", sep=",",),
-        width_weighted=dict(argstr="-width_weighted", requires=("avgdim",),),
+        quiet=dict(
+            argstr="-quiet",
+            xor=("verbose", "quiet"),
+        ),
+        sdfile=dict(
+            argstr="-sdfile %s",
+            extensions=None,
+        ),
+        two=dict(
+            argstr="-2",
+        ),
+        verbose=dict(
+            argstr="-verbose",
+            xor=("verbose", "quiet"),
+        ),
+        voxel_range=dict(
+            argstr="-range %d %d",
+        ),
+        weights=dict(
+            argstr="-weights %s",
+            sep=",",
+        ),
+        width_weighted=dict(
+            argstr="-width_weighted",
+            requires=("avgdim",),
+        ),
     )
     inputs = Average.input_spec()
 
@@ -192,7 +241,11 @@ def test_Average_inputs():
 
 
 def test_Average_outputs():
-    output_map = dict(output_file=dict(extensions=None,),)
+    output_map = dict(
+        output_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Average.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -4,14 +4,32 @@ from ..preprocess import Fourier
 
 def test_Fourier_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        highpass=dict(argstr="-highpass %f", mandatory=True,),
-        in_file=dict(
-            argstr="%s", copyfile=False, extensions=None, mandatory=True, position=-1,
+        args=dict(
+            argstr="%s",
         ),
-        lowpass=dict(argstr="-lowpass %f", mandatory=True,),
-        num_threads=dict(nohash=True, usedefault=True,),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        highpass=dict(
+            argstr="-highpass %f",
+            mandatory=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            copyfile=False,
+            extensions=None,
+            mandatory=True,
+            position=-1,
+        ),
+        lowpass=dict(
+            argstr="-lowpass %f",
+            mandatory=True,
+        ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -19,7 +37,9 @@ def test_Fourier_inputs():
             name_template="%s_fourier",
         ),
         outputtype=dict(),
-        retrend=dict(argstr="-retrend",),
+        retrend=dict(
+            argstr="-retrend",
+        ),
     )
     inputs = Fourier.input_spec()
 
@@ -29,7 +49,11 @@ def test_Fourier_inputs():
 
 
 def test_Fourier_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Fourier.output_spec()
 
     for key, metadata in list(output_map.items()):
