@@ -394,6 +394,7 @@ class AIInputSpec(ANTSCommandInputSpec):
         traits.Tuple(traits.Float, traits.Tuple(traits.Float, traits.Float)),
         argstr="-g %s",
         desc="Translation search grid in mm",
+        min_ver="2.3.0",
     )
 
     convergence = traits.Tuple(
