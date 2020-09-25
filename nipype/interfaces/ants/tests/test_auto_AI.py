@@ -59,6 +59,7 @@ def test_AI_inputs():
         ),
         search_grid=dict(
             argstr="-g %s",
+            min_ver="2.3.0",
         ),
         transform=dict(
             argstr="-t %s[%g]",
