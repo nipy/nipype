@@ -962,7 +962,7 @@ connected.
                     logger.debug("in: connections-> %s", str(d["connect"]))
                     for cd in deepcopy(d["connect"]):
                         logger.debug("in: %s", str(cd))
-                        dstnode = node.get_node(parameter.rsplit(".", 1)[0])
+                        dstnode = node.get_node(cd[1].rsplit(".", 1)[0])
                         srcnode = u
                         srcout = cd[0]
                         dstin = cd[1].split(".")[-1]
