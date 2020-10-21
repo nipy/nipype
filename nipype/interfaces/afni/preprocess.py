@@ -2556,6 +2556,79 @@ class TCorrMap(AFNICommand):
             return super(TCorrMap, self)._format_arg(name, trait_spec, value)
 
 
+class NetCorrInputSpec(AFNICommandInputSpec):
+    in_file = File(exists=True, argstr="-inset %s", mandatory=True)
+    in_rois = File(exists=True, argstr="-in_rois %s", mandatory=True)
+    mask = File(exists=True, argstr="-mask %s")
+    weight_ts = File(exists=True, argstr="-weight_ts %s")
+    fish_z = traits.Bool(argstr="-fish_z")
+    part_corr = traits.Bool(argstr="-part_corr")
+    ts_out = traits.Bool(argstr="-ts_out")
+    ts_label = traits.Bool(argstr="-ts_label")
+    ts_indiv = traits.Bool(argstr="-ts_indiv")
+    ts_wb_corr = traits.Bool(argstr="-ts_wb_corr")
+    ts_wb_Z = traits.Bool(argstr="-ts_wb_Z")
+    ts_wb_strlabel = traits.Bool(argstr="-ts_wb_strlabel")
+    nifti = traits.Bool(argstr="-nifti")
+    output_mask_nonnull = traits.Bool(argstr="-output_mask_nonnull")
+    push_thru_many_zeros = traits.Bool(argstr="-push_thru_many_zeros")
+    ignore_LT = traits.Bool(argstr="-ignore_LT")
+    out_file = File(
+        name_template="%s_netcorr",
+        desc="output file name part",
+        argstr="-prefix %s",
+        position=1,
+        name_source="in_file",
+    )
+
+class NetCorrOutputSpec(TraitedSpec):
+    out_matrix = File(desc="output text file for correlation stats")
+
+class NetCorr(AFNICommand):
+    """Calculate correlation matrix of a set of ROIs (using mean time series of
+    each). Several networks may be analyzed simultaneously, one per brick.
+
+    For complete details, see the `3dTcorrMap Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dNetCorr.html>`_
+
+    Examples
+    --------
+    >>> from nipype.interfaces import afni
+    >>> ncorr = afni.NetCorr()
+    >>> ncorr.inputs.in_file = 'functional.nii'
+    >>> ncorr.inputs.mask = 'mask.nii'
+    >>> ncorr.inputs.in_rois = 'rois.nii'
+    >>> ncorr.inputs.ts_wb_corr = True
+    >>> ncorr.inputs.ts_wb_Z = True
+    >>> ncorr.inputs.fish_z = True
+    >>> ncorr.inputs.prefix = 'sub0.tp1.ncorr'
+    >>> ncorr.cmdline # doctest: +SKIP
+    '3dNetCorr -prefix sub0.tp1.ncorr -inset functional.nii -mask mask.nii -in_rois rois.nii -ts_wb_corr -ts_wb_Z -fish_z'
+    >>> res = ncorr.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = "3dNetCorr"
+    input_spec = NetCorrInputSpec
+    output_spec = NetCorrOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+
+        if not isdefined(self.inputs.out_file):
+            prefix = self._gen_fname(self.inputs.in_file, suffix="_netcorr")
+        else:
+            prefix = self.inputs.out_file
+
+        # All outputs should be in the same directory as the prefix
+        out_dir = os.path.dirname(os.path.abspath(prefix))
+
+        outputs["out_matrix"] = (
+            fname_presuffix(prefix, suffix="_000", use_ext=False, newpath=out_dir) + ".netcc"
+        )
+        return outputs
+
+
 class TCorrelateInputSpec(AFNICommandInputSpec):
     xset = File(
         desc="input xset",
