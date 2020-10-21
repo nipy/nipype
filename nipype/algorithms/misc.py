@@ -1408,7 +1408,7 @@ def merge_rois(in_files, in_idxs, in_ref, dtype=None, out_file=None):
     # to avoid memory errors
     if op.splitext(in_ref)[1] == ".gz":
         try:
-            iflogger.info("uncompress %i", in_ref)
+            iflogger.info("uncompress %s", in_ref)
             sp.check_call(["gunzip", in_ref], stdout=sp.PIPE, shell=True)
             in_ref = op.splitext(in_ref)[0]
         except:
