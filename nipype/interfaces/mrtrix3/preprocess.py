@@ -184,6 +184,7 @@ class DWIBiasCorrectInputSpec(MRTrix3BaseInputSpec):
         argstr="ants",
         mandatory=True,
         desc="use ANTS N4 to estimate the inhomogeneity field",
+        position=0,
         xor=["use_fsl"],
     )
     use_fsl = traits.Bool(
