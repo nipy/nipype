@@ -191,6 +191,7 @@ class DWIBiasCorrectInputSpec(MRTrix3BaseInputSpec):
         argstr="fsl",
         mandatory=True,
         desc="use FSL FAST to estimate the inhomogeneity field",
+        position=0,
         xor=["use_ants"],
     )
     bias = File(argstr="-bias %s", desc="bias field")
