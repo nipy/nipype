@@ -4,9 +4,19 @@ from ..utils import RemoveNeck
 
 def test_RemoveNeck_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=-4,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-4,
+        ),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -16,10 +26,22 @@ def test_RemoveNeck_inputs():
             name_template="%s_noneck",
             position=-1,
         ),
-        radius=dict(argstr="-radius %d",),
+        radius=dict(
+            argstr="-radius %d",
+        ),
         subjects_dir=dict(),
-        template=dict(argstr="%s", extensions=None, mandatory=True, position=-2,),
-        transform=dict(argstr="%s", extensions=None, mandatory=True, position=-3,),
+        template=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
+        transform=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-3,
+        ),
     )
     inputs = RemoveNeck.input_spec()
 
@@ -29,7 +51,11 @@ def test_RemoveNeck_inputs():
 
 
 def test_RemoveNeck_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = RemoveNeck.output_spec()
 
     for key, metadata in list(output_map.items()):

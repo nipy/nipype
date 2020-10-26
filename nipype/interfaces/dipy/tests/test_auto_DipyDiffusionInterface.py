@@ -4,10 +4,21 @@ from ..base import DipyDiffusionInterface
 
 def test_DipyDiffusionInterface_inputs():
     input_map = dict(
-        b0_thres=dict(usedefault=True,),
-        in_bval=dict(extensions=None, mandatory=True,),
-        in_bvec=dict(extensions=None, mandatory=True,),
-        in_file=dict(extensions=None, mandatory=True,),
+        b0_thres=dict(
+            usedefault=True,
+        ),
+        in_bval=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        in_bvec=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        in_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
         out_prefix=dict(),
     )
     inputs = DipyDiffusionInterface.input_spec()

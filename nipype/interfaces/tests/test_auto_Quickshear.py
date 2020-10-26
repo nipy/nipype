@@ -4,11 +4,29 @@ from ..quickshear import Quickshear
 
 def test_Quickshear_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        buff=dict(argstr="%d", position=4,),
-        environ=dict(nohash=True, usedefault=True,),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=1,),
-        mask_file=dict(argstr="%s", extensions=None, mandatory=True, position=2,),
+        args=dict(
+            argstr="%s",
+        ),
+        buff=dict(
+            argstr="%d",
+            position=4,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=1,
+        ),
+        mask_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=2,
+        ),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -26,7 +44,11 @@ def test_Quickshear_inputs():
 
 
 def test_Quickshear_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Quickshear.output_spec()
 
     for key, metadata in list(output_map.items()):

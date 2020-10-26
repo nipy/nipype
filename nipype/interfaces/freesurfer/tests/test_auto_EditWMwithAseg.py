@@ -4,13 +4,40 @@ from ..preprocess import EditWMwithAseg
 
 def test_EditWMwithAseg_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        brain_file=dict(argstr="%s", extensions=None, mandatory=True, position=-3,),
-        environ=dict(nohash=True, usedefault=True,),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=-4,),
-        keep_in=dict(argstr="-keep-in",),
-        out_file=dict(argstr="%s", extensions=None, mandatory=True, position=-1,),
-        seg_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2,),
+        args=dict(
+            argstr="%s",
+        ),
+        brain_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-3,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-4,
+        ),
+        keep_in=dict(
+            argstr="-keep-in",
+        ),
+        out_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-1,
+        ),
+        seg_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
         subjects_dir=dict(),
     )
     inputs = EditWMwithAseg.input_spec()
@@ -21,7 +48,11 @@ def test_EditWMwithAseg_inputs():
 
 
 def test_EditWMwithAseg_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = EditWMwithAseg.output_spec()
 
     for key, metadata in list(output_map.items()):

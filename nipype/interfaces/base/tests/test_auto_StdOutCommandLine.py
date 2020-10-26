@@ -4,9 +4,19 @@ from ..core import StdOutCommandLine
 
 def test_StdOutCommandLine_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        out_file=dict(argstr="> %s", extensions=None, genfile=True, position=-1,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        out_file=dict(
+            argstr="> %s",
+            extensions=None,
+            genfile=True,
+            position=-1,
+        ),
     )
     inputs = StdOutCommandLine.input_spec()
 

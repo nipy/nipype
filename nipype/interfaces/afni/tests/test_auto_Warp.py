@@ -4,19 +4,48 @@ from ..preprocess import Warp
 
 def test_Warp_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        deoblique=dict(argstr="-deoblique",),
-        environ=dict(nohash=True, usedefault=True,),
-        gridset=dict(argstr="-gridset %s", extensions=None,),
-        in_file=dict(
-            argstr="%s", copyfile=False, extensions=None, mandatory=True, position=-1,
+        args=dict(
+            argstr="%s",
         ),
-        interp=dict(argstr="-%s",),
-        matparent=dict(argstr="-matparent %s", extensions=None,),
-        mni2tta=dict(argstr="-mni2tta",),
-        newgrid=dict(argstr="-newgrid %f",),
-        num_threads=dict(nohash=True, usedefault=True,),
-        oblique_parent=dict(argstr="-oblique_parent %s", extensions=None,),
+        deoblique=dict(
+            argstr="-deoblique",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        gridset=dict(
+            argstr="-gridset %s",
+            extensions=None,
+        ),
+        in_file=dict(
+            argstr="%s",
+            copyfile=False,
+            extensions=None,
+            mandatory=True,
+            position=-1,
+        ),
+        interp=dict(
+            argstr="-%s",
+        ),
+        matparent=dict(
+            argstr="-matparent %s",
+            extensions=None,
+        ),
+        mni2tta=dict(
+            argstr="-mni2tta",
+        ),
+        newgrid=dict(
+            argstr="-newgrid %f",
+        ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        oblique_parent=dict(
+            argstr="-oblique_parent %s",
+            extensions=None,
+        ),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -25,10 +54,18 @@ def test_Warp_inputs():
             name_template="%s_warp",
         ),
         outputtype=dict(),
-        save_warp=dict(requires=["verbose"],),
-        tta2mni=dict(argstr="-tta2mni",),
-        verbose=dict(argstr="-verb",),
-        zpad=dict(argstr="-zpad %d",),
+        save_warp=dict(
+            requires=["verbose"],
+        ),
+        tta2mni=dict(
+            argstr="-tta2mni",
+        ),
+        verbose=dict(
+            argstr="-verb",
+        ),
+        zpad=dict(
+            argstr="-zpad %d",
+        ),
     )
     inputs = Warp.input_spec()
 
@@ -39,7 +76,12 @@ def test_Warp_inputs():
 
 def test_Warp_outputs():
     output_map = dict(
-        out_file=dict(extensions=None,), warp_file=dict(extensions=None,),
+        out_file=dict(
+            extensions=None,
+        ),
+        warp_file=dict(
+            extensions=None,
+        ),
     )
     outputs = Warp.output_spec()
 

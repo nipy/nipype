@@ -4,14 +4,36 @@ from ..votingbinaryholefillingimagefilter import VotingBinaryHoleFillingImageFil
 
 def test_VotingBinaryHoleFillingImageFilter_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        background=dict(argstr="--background %d",),
-        environ=dict(nohash=True, usedefault=True,),
-        foreground=dict(argstr="--foreground %d",),
-        inputVolume=dict(argstr="%s", extensions=None, position=-2,),
-        majorityThreshold=dict(argstr="--majorityThreshold %d",),
-        outputVolume=dict(argstr="%s", hash_files=False, position=-1,),
-        radius=dict(argstr="--radius %s", sep=",",),
+        args=dict(
+            argstr="%s",
+        ),
+        background=dict(
+            argstr="--background %d",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        foreground=dict(
+            argstr="--foreground %d",
+        ),
+        inputVolume=dict(
+            argstr="%s",
+            extensions=None,
+            position=-2,
+        ),
+        majorityThreshold=dict(
+            argstr="--majorityThreshold %d",
+        ),
+        outputVolume=dict(
+            argstr="%s",
+            hash_files=False,
+            position=-1,
+        ),
+        radius=dict(
+            argstr="--radius %s",
+            sep=",",
+        ),
     )
     inputs = VotingBinaryHoleFillingImageFilter.input_spec()
 
@@ -21,7 +43,12 @@ def test_VotingBinaryHoleFillingImageFilter_inputs():
 
 
 def test_VotingBinaryHoleFillingImageFilter_outputs():
-    output_map = dict(outputVolume=dict(extensions=None, position=-1,),)
+    output_map = dict(
+        outputVolume=dict(
+            extensions=None,
+            position=-1,
+        ),
+    )
     outputs = VotingBinaryHoleFillingImageFilter.output_spec()
 
     for key, metadata in list(output_map.items()):

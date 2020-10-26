@@ -4,14 +4,38 @@ from ..utils import MRIFill
 
 def test_MRIFill_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2,),
-        log_file=dict(argstr="-a %s", extensions=None,),
-        out_file=dict(argstr="%s", extensions=None, mandatory=True, position=-1,),
-        segmentation=dict(argstr="-segmentation %s", extensions=None,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
+        log_file=dict(
+            argstr="-a %s",
+            extensions=None,
+        ),
+        out_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-1,
+        ),
+        segmentation=dict(
+            argstr="-segmentation %s",
+            extensions=None,
+        ),
         subjects_dir=dict(),
-        transform=dict(argstr="-xform %s", extensions=None,),
+        transform=dict(
+            argstr="-xform %s",
+            extensions=None,
+        ),
     )
     inputs = MRIFill.input_spec()
 
@@ -21,7 +45,14 @@ def test_MRIFill_inputs():
 
 
 def test_MRIFill_outputs():
-    output_map = dict(log_file=dict(extensions=None,), out_file=dict(extensions=None,),)
+    output_map = dict(
+        log_file=dict(
+            extensions=None,
+        ),
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = MRIFill.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -4,14 +4,38 @@ from ..utils import AddXFormToHeader
 
 def test_AddXFormToHeader_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        copy_name=dict(argstr="-c",),
-        environ=dict(nohash=True, usedefault=True,),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2,),
-        out_file=dict(argstr="%s", extensions=None, position=-1, usedefault=True,),
+        args=dict(
+            argstr="%s",
+        ),
+        copy_name=dict(
+            argstr="-c",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
+        out_file=dict(
+            argstr="%s",
+            extensions=None,
+            position=-1,
+            usedefault=True,
+        ),
         subjects_dir=dict(),
-        transform=dict(argstr="%s", extensions=None, mandatory=True, position=-3,),
-        verbose=dict(argstr="-v",),
+        transform=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-3,
+        ),
+        verbose=dict(
+            argstr="-v",
+        ),
     )
     inputs = AddXFormToHeader.input_spec()
 
@@ -21,7 +45,11 @@ def test_AddXFormToHeader_inputs():
 
 
 def test_AddXFormToHeader_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = AddXFormToHeader.output_spec()
 
     for key, metadata in list(output_map.items()):

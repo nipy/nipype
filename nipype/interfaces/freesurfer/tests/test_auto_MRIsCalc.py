@@ -4,16 +4,45 @@ from ..utils import MRIsCalc
 
 def test_MRIsCalc_inputs():
     input_map = dict(
-        action=dict(argstr="%s", mandatory=True, position=-2,),
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        in_file1=dict(argstr="%s", extensions=None, mandatory=True, position=-3,),
-        in_file2=dict(
-            argstr="%s", extensions=None, position=-1, xor=["in_float", "in_int"],
+        action=dict(
+            argstr="%s",
+            mandatory=True,
+            position=-2,
         ),
-        in_float=dict(argstr="%f", position=-1, xor=["in_file2", "in_int"],),
-        in_int=dict(argstr="%d", position=-1, xor=["in_file2", "in_float"],),
-        out_file=dict(argstr="-o %s", extensions=None, mandatory=True,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file1=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-3,
+        ),
+        in_file2=dict(
+            argstr="%s",
+            extensions=None,
+            position=-1,
+            xor=["in_float", "in_int"],
+        ),
+        in_float=dict(
+            argstr="%f",
+            position=-1,
+            xor=["in_file2", "in_int"],
+        ),
+        in_int=dict(
+            argstr="%d",
+            position=-1,
+            xor=["in_file2", "in_float"],
+        ),
+        out_file=dict(
+            argstr="-o %s",
+            extensions=None,
+            mandatory=True,
+        ),
         subjects_dir=dict(),
     )
     inputs = MRIsCalc.input_spec()
@@ -24,7 +53,11 @@ def test_MRIsCalc_inputs():
 
 
 def test_MRIsCalc_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = MRIsCalc.output_spec()
 
     for key, metadata in list(output_map.items()):

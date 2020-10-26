@@ -4,10 +4,24 @@ from ..utils import RelabelHypointensities
 
 def test_RelabelHypointensities_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        aseg=dict(argstr="%s", extensions=None, mandatory=True, position=-3,),
-        environ=dict(nohash=True, usedefault=True,),
-        lh_white=dict(copyfile=True, extensions=None, mandatory=True,),
+        args=dict(
+            argstr="%s",
+        ),
+        aseg=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-3,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        lh_white=dict(
+            copyfile=True,
+            extensions=None,
+            mandatory=True,
+        ),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -17,9 +31,17 @@ def test_RelabelHypointensities_inputs():
             name_template="%s.hypos.mgz",
             position=-1,
         ),
-        rh_white=dict(copyfile=True, extensions=None, mandatory=True,),
+        rh_white=dict(
+            copyfile=True,
+            extensions=None,
+            mandatory=True,
+        ),
         subjects_dir=dict(),
-        surf_directory=dict(argstr="%s", position=-2, usedefault=True,),
+        surf_directory=dict(
+            argstr="%s",
+            position=-2,
+            usedefault=True,
+        ),
     )
     inputs = RelabelHypointensities.input_spec()
 
@@ -29,7 +51,12 @@ def test_RelabelHypointensities_inputs():
 
 
 def test_RelabelHypointensities_outputs():
-    output_map = dict(out_file=dict(argstr="%s", extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            argstr="%s",
+            extensions=None,
+        ),
+    )
     outputs = RelabelHypointensities.output_spec()
 
     for key, metadata in list(output_map.items()):

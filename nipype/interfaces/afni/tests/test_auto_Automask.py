@@ -4,21 +4,39 @@ from ..preprocess import Automask
 
 def test_Automask_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
+        args=dict(
+            argstr="%s",
+        ),
         brain_file=dict(
             argstr="-apply_prefix %s",
             extensions=None,
             name_source="in_file",
             name_template="%s_masked",
         ),
-        clfrac=dict(argstr="-clfrac %s",),
-        dilate=dict(argstr="-dilate %s",),
-        environ=dict(nohash=True, usedefault=True,),
-        erode=dict(argstr="-erode %s",),
-        in_file=dict(
-            argstr="%s", copyfile=False, extensions=None, mandatory=True, position=-1,
+        clfrac=dict(
+            argstr="-clfrac %s",
         ),
-        num_threads=dict(nohash=True, usedefault=True,),
+        dilate=dict(
+            argstr="-dilate %s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        erode=dict(
+            argstr="-erode %s",
+        ),
+        in_file=dict(
+            argstr="%s",
+            copyfile=False,
+            extensions=None,
+            mandatory=True,
+            position=-1,
+        ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -36,7 +54,12 @@ def test_Automask_inputs():
 
 def test_Automask_outputs():
     output_map = dict(
-        brain_file=dict(extensions=None,), out_file=dict(extensions=None,),
+        brain_file=dict(
+            extensions=None,
+        ),
+        out_file=dict(
+            extensions=None,
+        ),
     )
     outputs = Automask.output_spec()
 

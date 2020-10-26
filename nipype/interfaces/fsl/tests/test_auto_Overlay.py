@@ -4,7 +4,9 @@ from ..utils import Overlay
 
 def test_Overlay_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
+        args=dict(
+            argstr="%s",
+        ),
         auto_thresh_bg=dict(
             argstr="-a",
             mandatory=True,
@@ -12,7 +14,10 @@ def test_Overlay_inputs():
             xor=("auto_thresh_bg", "full_bg_range", "bg_thresh"),
         ),
         background_image=dict(
-            argstr="%s", extensions=None, mandatory=True, position=4,
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=4,
         ),
         bg_thresh=dict(
             argstr="%.3f %.3f",
@@ -20,7 +25,10 @@ def test_Overlay_inputs():
             position=5,
             xor=("auto_thresh_bg", "full_bg_range", "bg_thresh"),
         ),
-        environ=dict(nohash=True, usedefault=True,),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         full_bg_range=dict(
             argstr="-A",
             mandatory=True,
@@ -28,19 +36,53 @@ def test_Overlay_inputs():
             xor=("auto_thresh_bg", "full_bg_range", "bg_thresh"),
         ),
         out_file=dict(
-            argstr="%s", extensions=None, genfile=True, hash_files=False, position=-1,
+            argstr="%s",
+            extensions=None,
+            genfile=True,
+            hash_files=False,
+            position=-1,
         ),
-        out_type=dict(argstr="%s", position=2, usedefault=True,),
+        out_type=dict(
+            argstr="%s",
+            position=2,
+            usedefault=True,
+        ),
         output_type=dict(),
-        show_negative_stats=dict(argstr="%s", position=8, xor=["stat_image2"],),
-        stat_image=dict(argstr="%s", extensions=None, mandatory=True, position=6,),
-        stat_image2=dict(
-            argstr="%s", extensions=None, position=9, xor=["show_negative_stats"],
+        show_negative_stats=dict(
+            argstr="%s",
+            position=8,
+            xor=["stat_image2"],
         ),
-        stat_thresh=dict(argstr="%.2f %.2f", mandatory=True, position=7,),
-        stat_thresh2=dict(argstr="%.2f %.2f", position=10,),
-        transparency=dict(argstr="%s", position=1, usedefault=True,),
-        use_checkerboard=dict(argstr="-c", position=3,),
+        stat_image=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=6,
+        ),
+        stat_image2=dict(
+            argstr="%s",
+            extensions=None,
+            position=9,
+            xor=["show_negative_stats"],
+        ),
+        stat_thresh=dict(
+            argstr="%.2f %.2f",
+            mandatory=True,
+            position=7,
+        ),
+        stat_thresh2=dict(
+            argstr="%.2f %.2f",
+            position=10,
+        ),
+        transparency=dict(
+            argstr="%s",
+            position=1,
+            usedefault=True,
+        ),
+        use_checkerboard=dict(
+            argstr="-c",
+            position=3,
+        ),
     )
     inputs = Overlay.input_spec()
 
@@ -50,7 +92,11 @@ def test_Overlay_inputs():
 
 
 def test_Overlay_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Overlay.output_spec()
 
     for key, metadata in list(output_map.items()):

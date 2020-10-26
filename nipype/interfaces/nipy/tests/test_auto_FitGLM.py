@@ -4,16 +4,36 @@ from ..model import FitGLM
 
 def test_FitGLM_inputs():
     input_map = dict(
-        TR=dict(mandatory=True,),
-        drift_model=dict(usedefault=True,),
-        hrf_model=dict(usedefault=True,),
-        mask=dict(extensions=None,),
-        method=dict(usedefault=True,),
-        model=dict(usedefault=True,),
-        normalize_design_matrix=dict(usedefault=True,),
-        plot_design_matrix=dict(usedefault=True,),
-        save_residuals=dict(usedefault=True,),
-        session_info=dict(mandatory=True,),
+        TR=dict(
+            mandatory=True,
+        ),
+        drift_model=dict(
+            usedefault=True,
+        ),
+        hrf_model=dict(
+            usedefault=True,
+        ),
+        mask=dict(
+            extensions=None,
+        ),
+        method=dict(
+            usedefault=True,
+        ),
+        model=dict(
+            usedefault=True,
+        ),
+        normalize_design_matrix=dict(
+            usedefault=True,
+        ),
+        plot_design_matrix=dict(
+            usedefault=True,
+        ),
+        save_residuals=dict(
+            usedefault=True,
+        ),
+        session_info=dict(
+            mandatory=True,
+        ),
     )
     inputs = FitGLM.input_spec()
 
@@ -24,15 +44,23 @@ def test_FitGLM_inputs():
 
 def test_FitGLM_outputs():
     output_map = dict(
-        a=dict(extensions=None,),
+        a=dict(
+            extensions=None,
+        ),
         axis=dict(),
-        beta=dict(extensions=None,),
+        beta=dict(
+            extensions=None,
+        ),
         constants=dict(),
         dof=dict(),
         nvbeta=dict(),
         reg_names=dict(),
-        residuals=dict(extensions=None,),
-        s2=dict(extensions=None,),
+        residuals=dict(
+            extensions=None,
+        ),
+        s2=dict(
+            extensions=None,
+        ),
     )
     outputs = FitGLM.output_spec()
 

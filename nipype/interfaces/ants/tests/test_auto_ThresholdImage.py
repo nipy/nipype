@@ -4,21 +4,52 @@ from ..utils import ThresholdImage
 
 def test_ThresholdImage_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        copy_header=dict(mandatory=True, usedefault=True,),
-        dimension=dict(argstr="%d", position=1, usedefault=True,),
-        environ=dict(nohash=True, usedefault=True,),
-        input_image=dict(argstr="%s", extensions=None, mandatory=True, position=2,),
-        input_mask=dict(argstr="%s", extensions=None, requires=["num_thresholds"],),
-        inside_value=dict(argstr="%f", position=6, requires=["th_low"],),
+        args=dict(
+            argstr="%s",
+        ),
+        copy_header=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        dimension=dict(
+            argstr="%d",
+            position=1,
+            usedefault=True,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        input_image=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=2,
+        ),
+        input_mask=dict(
+            argstr="%s",
+            extensions=None,
+            requires=["num_thresholds"],
+        ),
+        inside_value=dict(
+            argstr="%f",
+            position=6,
+            requires=["th_low"],
+        ),
         mode=dict(
             argstr="%s",
             position=4,
             requires=["num_thresholds"],
             xor=["th_low", "th_high"],
         ),
-        num_threads=dict(nohash=True, usedefault=True,),
-        num_thresholds=dict(argstr="%d", position=5,),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        num_thresholds=dict(
+            argstr="%d",
+            position=5,
+        ),
         output_image=dict(
             argstr="%s",
             extensions=None,
@@ -27,9 +58,21 @@ def test_ThresholdImage_inputs():
             name_template="%s_resampled",
             position=3,
         ),
-        outside_value=dict(argstr="%f", position=7, requires=["th_low"],),
-        th_high=dict(argstr="%f", position=5, xor=["mode"],),
-        th_low=dict(argstr="%f", position=4, xor=["mode"],),
+        outside_value=dict(
+            argstr="%f",
+            position=7,
+            requires=["th_low"],
+        ),
+        th_high=dict(
+            argstr="%f",
+            position=5,
+            xor=["mode"],
+        ),
+        th_low=dict(
+            argstr="%f",
+            position=4,
+            xor=["mode"],
+        ),
     )
     inputs = ThresholdImage.input_spec()
 
@@ -39,7 +82,11 @@ def test_ThresholdImage_inputs():
 
 
 def test_ThresholdImage_outputs():
-    output_map = dict(output_image=dict(extensions=None,),)
+    output_map = dict(
+        output_image=dict(
+            extensions=None,
+        ),
+    )
     outputs = ThresholdImage.output_spec()
 
     for key, metadata in list(output_map.items()):

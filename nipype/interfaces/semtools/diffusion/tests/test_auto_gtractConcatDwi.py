@@ -4,12 +4,26 @@ from ..gtract import gtractConcatDwi
 
 def test_gtractConcatDwi_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        ignoreOrigins=dict(argstr="--ignoreOrigins ",),
-        inputVolume=dict(argstr="--inputVolume %s...",),
-        numberOfThreads=dict(argstr="--numberOfThreads %d",),
-        outputVolume=dict(argstr="--outputVolume %s", hash_files=False,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        ignoreOrigins=dict(
+            argstr="--ignoreOrigins ",
+        ),
+        inputVolume=dict(
+            argstr="--inputVolume %s...",
+        ),
+        numberOfThreads=dict(
+            argstr="--numberOfThreads %d",
+        ),
+        outputVolume=dict(
+            argstr="--outputVolume %s",
+            hash_files=False,
+        ),
     )
     inputs = gtractConcatDwi.input_spec()
 
@@ -19,7 +33,11 @@ def test_gtractConcatDwi_inputs():
 
 
 def test_gtractConcatDwi_outputs():
-    output_map = dict(outputVolume=dict(extensions=None,),)
+    output_map = dict(
+        outputVolume=dict(
+            extensions=None,
+        ),
+    )
     outputs = gtractConcatDwi.output_spec()
 
     for key, metadata in list(output_map.items()):

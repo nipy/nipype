@@ -4,26 +4,70 @@ from ..model import Concatenate
 
 def test_Concatenate_inputs():
     input_map = dict(
-        add_val=dict(argstr="--add %f",),
-        args=dict(argstr="%s",),
-        combine=dict(argstr="--combine",),
-        concatenated_file=dict(argstr="--o %s", extensions=None, genfile=True,),
-        environ=dict(nohash=True, usedefault=True,),
-        gmean=dict(argstr="--gmean %d",),
-        in_files=dict(argstr="--i %s...", mandatory=True,),
-        keep_dtype=dict(argstr="--keep-datatype",),
-        mask_file=dict(argstr="--mask %s", extensions=None,),
-        max_bonfcor=dict(argstr="--max-bonfcor",),
-        max_index=dict(argstr="--max-index",),
-        mean_div_n=dict(argstr="--mean-div-n",),
-        multiply_by=dict(argstr="--mul %f",),
-        multiply_matrix_file=dict(argstr="--mtx %s", extensions=None,),
-        paired_stats=dict(argstr="--paired-%s",),
-        sign=dict(argstr="--%s",),
-        sort=dict(argstr="--sort",),
-        stats=dict(argstr="--%s",),
+        add_val=dict(
+            argstr="--add %f",
+        ),
+        args=dict(
+            argstr="%s",
+        ),
+        combine=dict(
+            argstr="--combine",
+        ),
+        concatenated_file=dict(
+            argstr="--o %s",
+            extensions=None,
+            genfile=True,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        gmean=dict(
+            argstr="--gmean %d",
+        ),
+        in_files=dict(
+            argstr="--i %s...",
+            mandatory=True,
+        ),
+        keep_dtype=dict(
+            argstr="--keep-datatype",
+        ),
+        mask_file=dict(
+            argstr="--mask %s",
+            extensions=None,
+        ),
+        max_bonfcor=dict(
+            argstr="--max-bonfcor",
+        ),
+        max_index=dict(
+            argstr="--max-index",
+        ),
+        mean_div_n=dict(
+            argstr="--mean-div-n",
+        ),
+        multiply_by=dict(
+            argstr="--mul %f",
+        ),
+        multiply_matrix_file=dict(
+            argstr="--mtx %s",
+            extensions=None,
+        ),
+        paired_stats=dict(
+            argstr="--paired-%s",
+        ),
+        sign=dict(
+            argstr="--%s",
+        ),
+        sort=dict(
+            argstr="--sort",
+        ),
+        stats=dict(
+            argstr="--%s",
+        ),
         subjects_dir=dict(),
-        vote=dict(argstr="--vote",),
+        vote=dict(
+            argstr="--vote",
+        ),
     )
     inputs = Concatenate.input_spec()
 
@@ -33,7 +77,11 @@ def test_Concatenate_inputs():
 
 
 def test_Concatenate_outputs():
-    output_map = dict(concatenated_file=dict(extensions=None,),)
+    output_map = dict(
+        concatenated_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Concatenate.output_spec()
 
     for key, metadata in list(output_map.items()):

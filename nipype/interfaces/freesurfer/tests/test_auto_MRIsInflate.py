@@ -4,12 +4,24 @@ from ..utils import MRIsInflate
 
 def test_MRIsInflate_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        in_file=dict(
-            argstr="%s", copyfile=True, extensions=None, mandatory=True, position=-2,
+        args=dict(
+            argstr="%s",
         ),
-        no_save_sulc=dict(argstr="-no-save-sulc", xor=["out_sulc"],),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            copyfile=True,
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
+        no_save_sulc=dict(
+            argstr="-no-save-sulc",
+            xor=["out_sulc"],
+        ),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -19,7 +31,10 @@ def test_MRIsInflate_inputs():
             name_template="%s.inflated",
             position=-1,
         ),
-        out_sulc=dict(extensions=None, xor=["no_save_sulc"],),
+        out_sulc=dict(
+            extensions=None,
+            xor=["no_save_sulc"],
+        ),
         subjects_dir=dict(),
     )
     inputs = MRIsInflate.input_spec()
@@ -30,7 +45,14 @@ def test_MRIsInflate_inputs():
 
 
 def test_MRIsInflate_outputs():
-    output_map = dict(out_file=dict(extensions=None,), out_sulc=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+        out_sulc=dict(
+            extensions=None,
+        ),
+    )
     outputs = MRIsInflate.output_spec()
 
     for key, metadata in list(output_map.items()):

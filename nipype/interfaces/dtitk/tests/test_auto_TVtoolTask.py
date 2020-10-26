@@ -4,11 +4,26 @@ from ..utils import TVtoolTask
 
 def test_TVtoolTask_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        in_file=dict(argstr="-in %s", extensions=None, mandatory=True,),
-        in_flag=dict(argstr="-%s",),
-        out_file=dict(argstr="-out %s", extensions=None, genfile=True,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="-in %s",
+            extensions=None,
+            mandatory=True,
+        ),
+        in_flag=dict(
+            argstr="-%s",
+        ),
+        out_file=dict(
+            argstr="-out %s",
+            extensions=None,
+            genfile=True,
+        ),
     )
     inputs = TVtoolTask.input_spec()
 
@@ -18,7 +33,11 @@ def test_TVtoolTask_inputs():
 
 
 def test_TVtoolTask_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = TVtoolTask.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -4,13 +4,31 @@ from ..gtract import gtractInvertDisplacementField
 
 def test_gtractInvertDisplacementField_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        baseImage=dict(argstr="--baseImage %s", extensions=None,),
-        deformationImage=dict(argstr="--deformationImage %s", extensions=None,),
-        environ=dict(nohash=True, usedefault=True,),
-        numberOfThreads=dict(argstr="--numberOfThreads %d",),
-        outputVolume=dict(argstr="--outputVolume %s", hash_files=False,),
-        subsamplingFactor=dict(argstr="--subsamplingFactor %d",),
+        args=dict(
+            argstr="%s",
+        ),
+        baseImage=dict(
+            argstr="--baseImage %s",
+            extensions=None,
+        ),
+        deformationImage=dict(
+            argstr="--deformationImage %s",
+            extensions=None,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        numberOfThreads=dict(
+            argstr="--numberOfThreads %d",
+        ),
+        outputVolume=dict(
+            argstr="--outputVolume %s",
+            hash_files=False,
+        ),
+        subsamplingFactor=dict(
+            argstr="--subsamplingFactor %d",
+        ),
     )
     inputs = gtractInvertDisplacementField.input_spec()
 
@@ -20,7 +38,11 @@ def test_gtractInvertDisplacementField_inputs():
 
 
 def test_gtractInvertDisplacementField_outputs():
-    output_map = dict(outputVolume=dict(extensions=None,),)
+    output_map = dict(
+        outputVolume=dict(
+            extensions=None,
+        ),
+    )
     outputs = gtractInvertDisplacementField.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -4,15 +4,41 @@ from ..denoising import DWIUnbiasedNonLocalMeansFilter
 
 def test_DWIUnbiasedNonLocalMeansFilter_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        hp=dict(argstr="--hp %f",),
-        inputVolume=dict(argstr="%s", extensions=None, position=-2,),
-        ng=dict(argstr="--ng %d",),
-        outputVolume=dict(argstr="%s", hash_files=False, position=-1,),
-        rc=dict(argstr="--rc %s", sep=",",),
-        re=dict(argstr="--re %s", sep=",",),
-        rs=dict(argstr="--rs %s", sep=",",),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        hp=dict(
+            argstr="--hp %f",
+        ),
+        inputVolume=dict(
+            argstr="%s",
+            extensions=None,
+            position=-2,
+        ),
+        ng=dict(
+            argstr="--ng %d",
+        ),
+        outputVolume=dict(
+            argstr="%s",
+            hash_files=False,
+            position=-1,
+        ),
+        rc=dict(
+            argstr="--rc %s",
+            sep=",",
+        ),
+        re=dict(
+            argstr="--re %s",
+            sep=",",
+        ),
+        rs=dict(
+            argstr="--rs %s",
+            sep=",",
+        ),
     )
     inputs = DWIUnbiasedNonLocalMeansFilter.input_spec()
 
@@ -22,7 +48,12 @@ def test_DWIUnbiasedNonLocalMeansFilter_inputs():
 
 
 def test_DWIUnbiasedNonLocalMeansFilter_outputs():
-    output_map = dict(outputVolume=dict(extensions=None, position=-1,),)
+    output_map = dict(
+        outputVolume=dict(
+            extensions=None,
+            position=-1,
+        ),
+    )
     outputs = DWIUnbiasedNonLocalMeansFilter.output_spec()
 
     for key, metadata in list(output_map.items()):
