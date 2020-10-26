@@ -226,14 +226,20 @@ class DWIBiasCorrect(MRTrix3Base):
     >>> bias_correct.inputs.in_file = 'dwi.mif'
     >>> bias_correct.inputs.use_ants = True
     >>> bias_correct.cmdline
-    'dwibiascorrect -ants dwi.mif dwi_biascorr.mif'
+    'dwibiascorrect ants dwi.mif dwi_biascorr.mif'
     >>> bias_correct.run()                             # doctest: +SKIP
     """
 
     _cmd = "dwibiascorrect"
     input_spec = DWIBiasCorrectInputSpec
     output_spec = DWIBiasCorrectOutputSpec
-
+    def _format_arg(self, name, trait_spec, value):
+        if name in ("use_ants", "use_fsl"):
+            ver = self.version
+            # Changed in version 3.0, after release candidates
+            if ver is not None and (ver[0] < "3" or ver.startswith("3.0_RC")):
+                return f"-{trait_spec.argstr}"
+        super()._format_arg(name, trait_spec, value)
 
 class ResponseSDInputSpec(MRTrix3BaseInputSpec):
     algorithm = traits.Enum(
