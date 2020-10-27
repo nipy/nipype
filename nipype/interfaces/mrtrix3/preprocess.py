@@ -239,7 +239,7 @@ class DWIBiasCorrect(MRTrix3Base):
             # Changed in version 3.0, after release candidates
             if ver is not None and (ver[0] < "3" or ver.startswith("3.0_RC")):
                 return f"-{trait_spec.argstr}"
-        super()._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
 class ResponseSDInputSpec(MRTrix3BaseInputSpec):
     algorithm = traits.Enum(
