@@ -1306,20 +1306,19 @@ class EpiReg(FSLCommand):
             outputs["epi2str_inv"] = os.path.join(
                 os.getcwd(), self.inputs.out_base + "_inv.mat"
             )
-
+        if not isdefined(self.inputs.wmseg):
+            outputs["wmedge"] = os.path.join(
+                os.getcwd(), self.inputs.out_base + "_fast_wmedge.nii.gz"
+            )
+            outputs["wmseg"] = os.path.join(
+                os.getcwd(), self.inputs.out_base + "_fast_wmseg.nii.gz"
+            )
+            outputs["seg"] = os.path.join(
+                os.getcwd(), self.inputs.out_base + "_fast_seg.nii.gz"
+            )
         outputs["epi2str_mat"] = os.path.join(
             os.getcwd(), self.inputs.out_base + ".mat"
         )
-        outputs["wmedge"] = os.path.join(
-            os.getcwd(), self.inputs.out_base + "_fast_wmedge.nii.gz"
-        )
-        outputs["wmseg"] = os.path.join(
-            os.getcwd(), self.inputs.out_base + "_fast_wmseg.nii.gz"
-        )
-        outputs["seg"] = os.path.join(
-            os.getcwd(), self.inputs.out_base + "_fast_seg.nii.gz"
-        )
-
         return outputs
 
 
