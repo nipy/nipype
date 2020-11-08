@@ -4,25 +4,78 @@ from ..dti import DTIFit
 
 def test_DTIFit_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        base_name=dict(argstr="-o %s", position=1, usedefault=True,),
-        bvals=dict(argstr="-b %s", extensions=None, mandatory=True, position=4,),
-        bvecs=dict(argstr="-r %s", extensions=None, mandatory=True, position=3,),
-        cni=dict(argstr="--cni=%s", extensions=None,),
-        dwi=dict(argstr="-k %s", extensions=None, mandatory=True, position=0,),
-        environ=dict(nohash=True, usedefault=True,),
-        gradnonlin=dict(argstr="--gradnonlin=%s", extensions=None,),
-        little_bit=dict(argstr="--littlebit",),
-        mask=dict(argstr="-m %s", extensions=None, mandatory=True, position=2,),
-        max_x=dict(argstr="-X %d",),
-        max_y=dict(argstr="-Y %d",),
-        max_z=dict(argstr="-Z %d",),
-        min_x=dict(argstr="-x %d",),
-        min_y=dict(argstr="-y %d",),
-        min_z=dict(argstr="-z %d",),
+        args=dict(
+            argstr="%s",
+        ),
+        base_name=dict(
+            argstr="-o %s",
+            position=1,
+            usedefault=True,
+        ),
+        bvals=dict(
+            argstr="-b %s",
+            extensions=None,
+            mandatory=True,
+            position=4,
+        ),
+        bvecs=dict(
+            argstr="-r %s",
+            extensions=None,
+            mandatory=True,
+            position=3,
+        ),
+        cni=dict(
+            argstr="--cni=%s",
+            extensions=None,
+        ),
+        dwi=dict(
+            argstr="-k %s",
+            extensions=None,
+            mandatory=True,
+            position=0,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        gradnonlin=dict(
+            argstr="--gradnonlin=%s",
+            extensions=None,
+        ),
+        little_bit=dict(
+            argstr="--littlebit",
+        ),
+        mask=dict(
+            argstr="-m %s",
+            extensions=None,
+            mandatory=True,
+            position=2,
+        ),
+        max_x=dict(
+            argstr="-X %d",
+        ),
+        max_y=dict(
+            argstr="-Y %d",
+        ),
+        max_z=dict(
+            argstr="-Z %d",
+        ),
+        min_x=dict(
+            argstr="-x %d",
+        ),
+        min_y=dict(
+            argstr="-y %d",
+        ),
+        min_z=dict(
+            argstr="-z %d",
+        ),
         output_type=dict(),
-        save_tensor=dict(argstr="--save_tensor",),
-        sse=dict(argstr="--sse",),
+        save_tensor=dict(
+            argstr="--save_tensor",
+        ),
+        sse=dict(
+            argstr="--sse",
+        ),
     )
     inputs = DTIFit.input_spec()
 
@@ -33,18 +86,42 @@ def test_DTIFit_inputs():
 
 def test_DTIFit_outputs():
     output_map = dict(
-        FA=dict(extensions=None,),
-        L1=dict(extensions=None,),
-        L2=dict(extensions=None,),
-        L3=dict(extensions=None,),
-        MD=dict(extensions=None,),
-        MO=dict(extensions=None,),
-        S0=dict(extensions=None,),
-        V1=dict(extensions=None,),
-        V2=dict(extensions=None,),
-        V3=dict(extensions=None,),
-        sse=dict(extensions=None,),
-        tensor=dict(extensions=None,),
+        FA=dict(
+            extensions=None,
+        ),
+        L1=dict(
+            extensions=None,
+        ),
+        L2=dict(
+            extensions=None,
+        ),
+        L3=dict(
+            extensions=None,
+        ),
+        MD=dict(
+            extensions=None,
+        ),
+        MO=dict(
+            extensions=None,
+        ),
+        S0=dict(
+            extensions=None,
+        ),
+        V1=dict(
+            extensions=None,
+        ),
+        V2=dict(
+            extensions=None,
+        ),
+        V3=dict(
+            extensions=None,
+        ),
+        sse=dict(
+            extensions=None,
+        ),
+        tensor=dict(
+            extensions=None,
+        ),
     )
     outputs = DTIFit.output_spec()
 

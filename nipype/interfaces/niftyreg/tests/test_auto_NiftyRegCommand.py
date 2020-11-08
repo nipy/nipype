@@ -4,9 +4,17 @@ from ..base import NiftyRegCommand
 
 def test_NiftyRegCommand_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        omp_core_val=dict(argstr="-omp %i", usedefault=True,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        omp_core_val=dict(
+            argstr="-omp %i",
+            usedefault=True,
+        ),
     )
     inputs = NiftyRegCommand.input_spec()
 

@@ -4,18 +4,47 @@ from ..petstandarduptakevaluecomputation import PETStandardUptakeValueComputatio
 
 def test_PETStandardUptakeValueComputation_inputs():
     input_map = dict(
-        OutputLabel=dict(argstr="--OutputLabel %s",),
-        OutputLabelValue=dict(argstr="--OutputLabelValue %s",),
-        SUVMax=dict(argstr="--SUVMax %s",),
-        SUVMean=dict(argstr="--SUVMean %s",),
-        SUVMin=dict(argstr="--SUVMin %s",),
-        args=dict(argstr="%s",),
-        color=dict(argstr="--color %s", extensions=None,),
-        csvFile=dict(argstr="--csvFile %s", hash_files=False,),
-        environ=dict(nohash=True, usedefault=True,),
-        labelMap=dict(argstr="--labelMap %s", extensions=None,),
-        petDICOMPath=dict(argstr="--petDICOMPath %s",),
-        petVolume=dict(argstr="--petVolume %s", extensions=None,),
+        OutputLabel=dict(
+            argstr="--OutputLabel %s",
+        ),
+        OutputLabelValue=dict(
+            argstr="--OutputLabelValue %s",
+        ),
+        SUVMax=dict(
+            argstr="--SUVMax %s",
+        ),
+        SUVMean=dict(
+            argstr="--SUVMean %s",
+        ),
+        SUVMin=dict(
+            argstr="--SUVMin %s",
+        ),
+        args=dict(
+            argstr="%s",
+        ),
+        color=dict(
+            argstr="--color %s",
+            extensions=None,
+        ),
+        csvFile=dict(
+            argstr="--csvFile %s",
+            hash_files=False,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        labelMap=dict(
+            argstr="--labelMap %s",
+            extensions=None,
+        ),
+        petDICOMPath=dict(
+            argstr="--petDICOMPath %s",
+        ),
+        petVolume=dict(
+            argstr="--petVolume %s",
+            extensions=None,
+        ),
     )
     inputs = PETStandardUptakeValueComputation.input_spec()
 
@@ -25,7 +54,11 @@ def test_PETStandardUptakeValueComputation_inputs():
 
 
 def test_PETStandardUptakeValueComputation_outputs():
-    output_map = dict(csvFile=dict(extensions=None,),)
+    output_map = dict(
+        csvFile=dict(
+            extensions=None,
+        ),
+    )
     outputs = PETStandardUptakeValueComputation.output_spec()
 
     for key, metadata in list(output_map.items()):

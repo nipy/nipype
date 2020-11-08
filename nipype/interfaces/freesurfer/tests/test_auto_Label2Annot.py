@@ -4,18 +4,46 @@ from ..model import Label2Annot
 
 def test_Label2Annot_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        color_table=dict(argstr="--ctab %s", extensions=None,),
+        args=dict(
+            argstr="%s",
+        ),
+        color_table=dict(
+            argstr="--ctab %s",
+            extensions=None,
+        ),
         copy_inputs=dict(),
-        environ=dict(nohash=True, usedefault=True,),
-        hemisphere=dict(argstr="--hemi %s", mandatory=True,),
-        in_labels=dict(argstr="--l %s...", mandatory=True,),
-        keep_max=dict(argstr="--maxstatwinner",),
-        orig=dict(extensions=None, mandatory=True,),
-        out_annot=dict(argstr="--a %s", mandatory=True,),
-        subject_id=dict(argstr="--s %s", mandatory=True, usedefault=True,),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        hemisphere=dict(
+            argstr="--hemi %s",
+            mandatory=True,
+        ),
+        in_labels=dict(
+            argstr="--l %s...",
+            mandatory=True,
+        ),
+        keep_max=dict(
+            argstr="--maxstatwinner",
+        ),
+        orig=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        out_annot=dict(
+            argstr="--a %s",
+            mandatory=True,
+        ),
+        subject_id=dict(
+            argstr="--s %s",
+            mandatory=True,
+            usedefault=True,
+        ),
         subjects_dir=dict(),
-        verbose_off=dict(argstr="--noverbose",),
+        verbose_off=dict(
+            argstr="--noverbose",
+        ),
     )
     inputs = Label2Annot.input_spec()
 
@@ -25,7 +53,11 @@ def test_Label2Annot_inputs():
 
 
 def test_Label2Annot_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Label2Annot.output_spec()
 
     for key, metadata in list(output_map.items()):

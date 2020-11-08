@@ -289,15 +289,9 @@ def compute_singlevalued_measures(ntwk, weighted=True, calculate_cliques=False):
     iflogger.info("Computing single valued measures:")
     measures = {}
     iflogger.info("...Computing degree assortativity (pearson number) ...")
-    try:
-        measures["degree_pearsonr"] = nx.degree_pearsonr(ntwk)
-    except AttributeError:  # For NetworkX 1.6
-        measures["degree_pearsonr"] = nx.degree_pearson_correlation_coefficient(ntwk)
+    measures["degree_pearsonr"] = nx.degree_pearson_correlation_coefficient(ntwk)
     iflogger.info("...Computing degree assortativity...")
-    try:
-        measures["degree_assortativity"] = nx.degree_assortativity(ntwk)
-    except AttributeError:
-        measures["degree_assortativity"] = nx.degree_assortativity_coefficient(ntwk)
+    measures["degree_assortativity"] = nx.degree_assortativity_coefficient(ntwk)
     iflogger.info("...Computing transitivity...")
     measures["transitivity"] = nx.transitivity(ntwk)
     iflogger.info("...Computing number of connected_components...")

@@ -4,15 +4,47 @@ from ..odf import LinRecon
 
 def test_LinRecon_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        bgmask=dict(argstr="-bgmask %s", extensions=None,),
-        environ=dict(nohash=True, usedefault=True,),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=1,),
-        log=dict(argstr="-log",),
-        normalize=dict(argstr="-normalize",),
-        out_file=dict(argstr="> %s", extensions=None, genfile=True, position=-1,),
-        qball_mat=dict(argstr="%s", extensions=None, mandatory=True, position=3,),
-        scheme_file=dict(argstr="%s", extensions=None, mandatory=True, position=2,),
+        args=dict(
+            argstr="%s",
+        ),
+        bgmask=dict(
+            argstr="-bgmask %s",
+            extensions=None,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=1,
+        ),
+        log=dict(
+            argstr="-log",
+        ),
+        normalize=dict(
+            argstr="-normalize",
+        ),
+        out_file=dict(
+            argstr="> %s",
+            extensions=None,
+            genfile=True,
+            position=-1,
+        ),
+        qball_mat=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=3,
+        ),
+        scheme_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=2,
+        ),
     )
     inputs = LinRecon.input_spec()
 
@@ -22,7 +54,11 @@ def test_LinRecon_inputs():
 
 
 def test_LinRecon_outputs():
-    output_map = dict(recon_data=dict(extensions=None,),)
+    output_map = dict(
+        recon_data=dict(
+            extensions=None,
+        ),
+    )
     outputs = LinRecon.output_spec()
 
     for key, metadata in list(output_map.items()):

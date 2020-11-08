@@ -4,13 +4,34 @@ from ..utils import Zcat
 
 def test_Zcat_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        datum=dict(argstr="-datum %s",),
-        environ=dict(nohash=True, usedefault=True,),
-        fscale=dict(argstr="-fscale", xor=["nscale"],),
-        in_files=dict(argstr="%s", copyfile=False, mandatory=True, position=-1,),
-        nscale=dict(argstr="-nscale", xor=["fscale"],),
-        num_threads=dict(nohash=True, usedefault=True,),
+        args=dict(
+            argstr="%s",
+        ),
+        datum=dict(
+            argstr="-datum %s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        fscale=dict(
+            argstr="-fscale",
+            xor=["nscale"],
+        ),
+        in_files=dict(
+            argstr="%s",
+            copyfile=False,
+            mandatory=True,
+            position=-1,
+        ),
+        nscale=dict(
+            argstr="-nscale",
+            xor=["fscale"],
+        ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -18,7 +39,9 @@ def test_Zcat_inputs():
             name_template="%s_zcat",
         ),
         outputtype=dict(),
-        verb=dict(argstr="-verb",),
+        verb=dict(
+            argstr="-verb",
+        ),
     )
     inputs = Zcat.input_spec()
 
@@ -28,7 +51,11 @@ def test_Zcat_inputs():
 
 
 def test_Zcat_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Zcat.output_spec()
 
     for key, metadata in list(output_map.items()):

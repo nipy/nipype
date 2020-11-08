@@ -834,20 +834,6 @@ connected.
 
         return True
 
-    def _get_parameter_node(self, parameter, subtype="in"):
-        """Returns the underlying node corresponding to an input or
-        output parameter
-        """
-        if subtype == "in":
-            subobject = self.inputs
-        else:
-            subobject = self.outputs
-        attrlist = parameter.split(".")
-        cur_out = subobject
-        for attr in attrlist[:-1]:
-            cur_out = getattr(cur_out, attr)
-        return cur_out.traits()[attrlist[-1]].node
-
     def _check_outputs(self, parameter):
         return self._has_attr(parameter, subtype="out")
 
@@ -976,7 +962,7 @@ connected.
                     logger.debug("in: connections-> %s", str(d["connect"]))
                     for cd in deepcopy(d["connect"]):
                         logger.debug("in: %s", str(cd))
-                        dstnode = node._get_parameter_node(cd[1], subtype="in")
+                        dstnode = node.get_node(cd[1].rsplit(".", 1)[0])
                         srcnode = u
                         srcout = cd[0]
                         dstin = cd[1].split(".")[-1]
@@ -996,7 +982,7 @@ connected.
                             parameter = cd[0][0]
                         else:
                             parameter = cd[0]
-                        srcnode = node._get_parameter_node(parameter, subtype="out")
+                        srcnode = node.get_node(parameter.rsplit(".", 1)[0])
                         if isinstance(cd[0], tuple):
                             srcout = list(cd[0])
                             srcout[0] = parameter.split(".")[-1]

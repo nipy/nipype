@@ -4,9 +4,17 @@ from ..regutils import RegJacobian
 
 def test_RegJacobian_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        omp_core_val=dict(argstr="-omp %i", usedefault=True,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        omp_core_val=dict(
+            argstr="-omp %i",
+            usedefault=True,
+        ),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -14,9 +22,20 @@ def test_RegJacobian_inputs():
             name_template="%s",
             position=-1,
         ),
-        ref_file=dict(argstr="-ref %s", extensions=None,),
-        trans_file=dict(argstr="-trans %s", extensions=None, mandatory=True,),
-        type=dict(argstr="-%s", position=-2, usedefault=True,),
+        ref_file=dict(
+            argstr="-ref %s",
+            extensions=None,
+        ),
+        trans_file=dict(
+            argstr="-trans %s",
+            extensions=None,
+            mandatory=True,
+        ),
+        type=dict(
+            argstr="-%s",
+            position=-2,
+            usedefault=True,
+        ),
     )
     inputs = RegJacobian.input_spec()
 
@@ -26,7 +45,11 @@ def test_RegJacobian_inputs():
 
 
 def test_RegJacobian_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = RegJacobian.output_spec()
 
     for key, metadata in list(output_map.items()):

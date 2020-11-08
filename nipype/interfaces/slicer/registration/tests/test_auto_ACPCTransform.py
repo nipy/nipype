@@ -4,12 +4,26 @@ from ..specialized import ACPCTransform
 
 def test_ACPCTransform_inputs():
     input_map = dict(
-        acpc=dict(argstr="--acpc %s...",),
-        args=dict(argstr="%s",),
-        debugSwitch=dict(argstr="--debugSwitch ",),
-        environ=dict(nohash=True, usedefault=True,),
-        midline=dict(argstr="--midline %s...",),
-        outputTransform=dict(argstr="--outputTransform %s", hash_files=False,),
+        acpc=dict(
+            argstr="--acpc %s...",
+        ),
+        args=dict(
+            argstr="%s",
+        ),
+        debugSwitch=dict(
+            argstr="--debugSwitch ",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        midline=dict(
+            argstr="--midline %s...",
+        ),
+        outputTransform=dict(
+            argstr="--outputTransform %s",
+            hash_files=False,
+        ),
     )
     inputs = ACPCTransform.input_spec()
 
@@ -19,7 +33,11 @@ def test_ACPCTransform_inputs():
 
 
 def test_ACPCTransform_outputs():
-    output_map = dict(outputTransform=dict(extensions=None,),)
+    output_map = dict(
+        outputTransform=dict(
+            extensions=None,
+        ),
+    )
     outputs = ACPCTransform.output_spec()
 
     for key, metadata in list(output_map.items()):

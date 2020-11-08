@@ -4,16 +4,39 @@ from ..gtract import compareTractInclusion
 
 def test_compareTractInclusion_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        closeness=dict(argstr="--closeness %f",),
-        environ=dict(nohash=True, usedefault=True,),
-        numberOfPoints=dict(argstr="--numberOfPoints %d",),
-        numberOfThreads=dict(argstr="--numberOfThreads %d",),
-        standardFiber=dict(argstr="--standardFiber %s", extensions=None,),
-        testFiber=dict(argstr="--testFiber %s", extensions=None,),
-        testForBijection=dict(argstr="--testForBijection ",),
-        testForFiberCardinality=dict(argstr="--testForFiberCardinality ",),
-        writeXMLPolyDataFile=dict(argstr="--writeXMLPolyDataFile ",),
+        args=dict(
+            argstr="%s",
+        ),
+        closeness=dict(
+            argstr="--closeness %f",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        numberOfPoints=dict(
+            argstr="--numberOfPoints %d",
+        ),
+        numberOfThreads=dict(
+            argstr="--numberOfThreads %d",
+        ),
+        standardFiber=dict(
+            argstr="--standardFiber %s",
+            extensions=None,
+        ),
+        testFiber=dict(
+            argstr="--testFiber %s",
+            extensions=None,
+        ),
+        testForBijection=dict(
+            argstr="--testForBijection ",
+        ),
+        testForFiberCardinality=dict(
+            argstr="--testForFiberCardinality ",
+        ),
+        writeXMLPolyDataFile=dict(
+            argstr="--writeXMLPolyDataFile ",
+        ),
     )
     inputs = compareTractInclusion.input_spec()
 

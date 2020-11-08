@@ -5,10 +5,15 @@ from ..base import SPMCommand
 def test_SPMCommand_inputs():
     input_map = dict(
         matlab_cmd=dict(),
-        mfile=dict(usedefault=True,),
+        mfile=dict(
+            usedefault=True,
+        ),
         paths=dict(),
         use_mcr=dict(),
-        use_v8struct=dict(min_ver="8", usedefault=True,),
+        use_v8struct=dict(
+            min_ver="8",
+            usedefault=True,
+        ),
     )
     inputs = SPMCommand.input_spec()
 

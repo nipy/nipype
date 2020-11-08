@@ -4,55 +4,169 @@ from ..model import Deconvolve
 
 def test_Deconvolve_inputs():
     input_map = dict(
-        STATmask=dict(argstr="-STATmask %s", extensions=None,),
-        TR_1D=dict(argstr="-TR_1D %f",),
-        allzero_OK=dict(argstr="-allzero_OK",),
-        args=dict(argstr="%s",),
-        automask=dict(argstr="-automask",),
-        cbucket=dict(argstr="-cbucket %s",),
-        censor=dict(argstr="-censor %s", extensions=None,),
-        dmbase=dict(argstr="-dmbase",),
-        dname=dict(argstr="-D%s=%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        force_TR=dict(argstr="-force_TR %f", position=0,),
-        fout=dict(argstr="-fout",),
-        global_times=dict(argstr="-global_times", xor=["local_times"],),
-        glt_label=dict(argstr="-glt_label %d %s...", position=-1, requires=["gltsym"],),
-        gltsym=dict(argstr="-gltsym 'SYM: %s'...", position=-2,),
-        goforit=dict(argstr="-GOFORIT %i",),
-        in_files=dict(argstr="-input %s", copyfile=False, position=1, sep=" ",),
-        input1D=dict(argstr="-input1D %s", extensions=None,),
-        legendre=dict(argstr="-legendre",),
-        local_times=dict(argstr="-local_times", xor=["global_times"],),
-        mask=dict(argstr="-mask %s", extensions=None,),
-        noblock=dict(argstr="-noblock",),
-        nocond=dict(argstr="-nocond",),
-        nodmbase=dict(argstr="-nodmbase",),
-        nofdr=dict(argstr="-noFDR",),
-        nolegendre=dict(argstr="-nolegendre",),
-        nosvd=dict(argstr="-nosvd",),
-        num_glt=dict(argstr="-num_glt %d", position=-3,),
-        num_stimts=dict(argstr="-num_stimts %d", position=-6,),
-        num_threads=dict(argstr="-jobs %d", nohash=True,),
-        ortvec=dict(argstr="-ortvec %s %s",),
-        out_file=dict(argstr="-bucket %s", extensions=None,),
-        outputtype=dict(),
-        polort=dict(argstr="-polort %d",),
-        rmsmin=dict(argstr="-rmsmin %f",),
-        rout=dict(argstr="-rout",),
-        sat=dict(argstr="-sat", xor=["trans"],),
-        singvals=dict(argstr="-singvals",),
-        stim_label=dict(
-            argstr="-stim_label %d %s...", position=-4, requires=["stim_times"],
+        STATmask=dict(
+            argstr="-STATmask %s",
+            extensions=None,
         ),
-        stim_times=dict(argstr="-stim_times %d %s '%s'...", position=-5,),
-        stim_times_subtract=dict(argstr="-stim_times_subtract %f",),
-        svd=dict(argstr="-svd",),
-        tout=dict(argstr="-tout",),
-        trans=dict(argstr="-trans", xor=["sat"],),
-        vout=dict(argstr="-vout",),
-        x1D=dict(argstr="-x1D %s", extensions=None,),
-        x1D_stop=dict(argstr="-x1D_stop",),
+        TR_1D=dict(
+            argstr="-TR_1D %f",
+        ),
+        allzero_OK=dict(
+            argstr="-allzero_OK",
+        ),
+        args=dict(
+            argstr="%s",
+        ),
+        automask=dict(
+            argstr="-automask",
+        ),
+        cbucket=dict(
+            argstr="-cbucket %s",
+        ),
+        censor=dict(
+            argstr="-censor %s",
+            extensions=None,
+        ),
+        dmbase=dict(
+            argstr="-dmbase",
+        ),
+        dname=dict(
+            argstr="-D%s=%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        force_TR=dict(
+            argstr="-force_TR %f",
+            position=0,
+        ),
+        fout=dict(
+            argstr="-fout",
+        ),
+        global_times=dict(
+            argstr="-global_times",
+            xor=["local_times"],
+        ),
+        glt_label=dict(
+            argstr="-glt_label %d %s...",
+            position=-1,
+            requires=["gltsym"],
+        ),
+        gltsym=dict(
+            argstr="-gltsym 'SYM: %s'...",
+            position=-2,
+        ),
+        goforit=dict(
+            argstr="-GOFORIT %i",
+        ),
+        in_files=dict(
+            argstr="-input %s",
+            copyfile=False,
+            position=1,
+            sep=" ",
+        ),
+        input1D=dict(
+            argstr="-input1D %s",
+            extensions=None,
+        ),
+        legendre=dict(
+            argstr="-legendre",
+        ),
+        local_times=dict(
+            argstr="-local_times",
+            xor=["global_times"],
+        ),
+        mask=dict(
+            argstr="-mask %s",
+            extensions=None,
+        ),
+        noblock=dict(
+            argstr="-noblock",
+        ),
+        nocond=dict(
+            argstr="-nocond",
+        ),
+        nodmbase=dict(
+            argstr="-nodmbase",
+        ),
+        nofdr=dict(
+            argstr="-noFDR",
+        ),
+        nolegendre=dict(
+            argstr="-nolegendre",
+        ),
+        nosvd=dict(
+            argstr="-nosvd",
+        ),
+        num_glt=dict(
+            argstr="-num_glt %d",
+            position=-3,
+        ),
+        num_stimts=dict(
+            argstr="-num_stimts %d",
+            position=-6,
+        ),
+        num_threads=dict(
+            argstr="-jobs %d",
+            nohash=True,
+        ),
+        ortvec=dict(
+            argstr="-ortvec %s %s",
+        ),
+        out_file=dict(
+            argstr="-bucket %s",
+            extensions=None,
+        ),
+        outputtype=dict(),
+        polort=dict(
+            argstr="-polort %d",
+        ),
+        rmsmin=dict(
+            argstr="-rmsmin %f",
+        ),
+        rout=dict(
+            argstr="-rout",
+        ),
+        sat=dict(
+            argstr="-sat",
+            xor=["trans"],
+        ),
+        singvals=dict(
+            argstr="-singvals",
+        ),
+        stim_label=dict(
+            argstr="-stim_label %d %s...",
+            position=-4,
+            requires=["stim_times"],
+        ),
+        stim_times=dict(
+            argstr="-stim_times %d %s '%s'...",
+            position=-5,
+        ),
+        stim_times_subtract=dict(
+            argstr="-stim_times_subtract %f",
+        ),
+        svd=dict(
+            argstr="-svd",
+        ),
+        tout=dict(
+            argstr="-tout",
+        ),
+        trans=dict(
+            argstr="-trans",
+            xor=["sat"],
+        ),
+        vout=dict(
+            argstr="-vout",
+        ),
+        x1D=dict(
+            argstr="-x1D %s",
+            extensions=None,
+        ),
+        x1D_stop=dict(
+            argstr="-x1D_stop",
+        ),
     )
     inputs = Deconvolve.input_spec()
 
@@ -63,10 +177,18 @@ def test_Deconvolve_inputs():
 
 def test_Deconvolve_outputs():
     output_map = dict(
-        cbucket=dict(extensions=None,),
-        out_file=dict(extensions=None,),
-        reml_script=dict(extensions=None,),
-        x1D=dict(extensions=None,),
+        cbucket=dict(
+            extensions=None,
+        ),
+        out_file=dict(
+            extensions=None,
+        ),
+        reml_script=dict(
+            extensions=None,
+        ),
+        x1D=dict(
+            extensions=None,
+        ),
     )
     outputs = Deconvolve.output_spec()
 

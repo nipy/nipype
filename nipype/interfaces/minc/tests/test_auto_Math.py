@@ -4,25 +4,61 @@ from ..minc import Math
 
 def test_Math_inputs():
     input_map = dict(
-        abs=dict(argstr="-abs",),
-        args=dict(argstr="%s",),
-        calc_add=dict(argstr="-add",),
-        calc_and=dict(argstr="-and",),
-        calc_div=dict(argstr="-div",),
-        calc_mul=dict(argstr="-mult",),
-        calc_not=dict(argstr="-not",),
-        calc_or=dict(argstr="-or",),
-        calc_sub=dict(argstr="-sub",),
-        check_dimensions=dict(
-            argstr="-check_dimensions", xor=("check_dimensions", "no_check_dimensions"),
+        abs=dict(
+            argstr="-abs",
         ),
-        clamp=dict(argstr="-clamp -const2 %s %s",),
-        clobber=dict(argstr="-clobber", usedefault=True,),
-        copy_header=dict(argstr="-copy_header", xor=("copy_header", "no_copy_header"),),
-        count_valid=dict(argstr="-count_valid",),
-        dimension=dict(argstr="-dimension %s",),
-        environ=dict(nohash=True, usedefault=True,),
-        exp=dict(argstr="-exp -const2 %s %s",),
+        args=dict(
+            argstr="%s",
+        ),
+        calc_add=dict(
+            argstr="-add",
+        ),
+        calc_and=dict(
+            argstr="-and",
+        ),
+        calc_div=dict(
+            argstr="-div",
+        ),
+        calc_mul=dict(
+            argstr="-mult",
+        ),
+        calc_not=dict(
+            argstr="-not",
+        ),
+        calc_or=dict(
+            argstr="-or",
+        ),
+        calc_sub=dict(
+            argstr="-sub",
+        ),
+        check_dimensions=dict(
+            argstr="-check_dimensions",
+            xor=("check_dimensions", "no_check_dimensions"),
+        ),
+        clamp=dict(
+            argstr="-clamp -const2 %s %s",
+        ),
+        clobber=dict(
+            argstr="-clobber",
+            usedefault=True,
+        ),
+        copy_header=dict(
+            argstr="-copy_header",
+            xor=("copy_header", "no_copy_header"),
+        ),
+        count_valid=dict(
+            argstr="-count_valid",
+        ),
+        dimension=dict(
+            argstr="-dimension %s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        exp=dict(
+            argstr="-exp -const2 %s %s",
+        ),
         filelist=dict(
             argstr="-filelist %s",
             extensions=None,
@@ -155,7 +191,9 @@ def test_Math_inputs():
                 "format_unsigned",
             ),
         ),
-        ignore_nan=dict(argstr="-ignore_nan",),
+        ignore_nan=dict(
+            argstr="-ignore_nan",
+        ),
         input_files=dict(
             argstr="%s",
             mandatory=True,
@@ -163,23 +201,39 @@ def test_Math_inputs():
             sep=" ",
             xor=("input_files", "filelist"),
         ),
-        invert=dict(argstr="-invert -const %s",),
-        isnan=dict(argstr="-isnan",),
-        log=dict(argstr="-log -const2 %s %s",),
-        max_buffer_size_in_kb=dict(
-            argstr="-max_buffer_size_in_kb %d", usedefault=True,
+        invert=dict(
+            argstr="-invert -const %s",
         ),
-        maximum=dict(argstr="-maximum",),
-        minimum=dict(argstr="-minimum",),
-        nisnan=dict(argstr="-nisnan",),
+        isnan=dict(
+            argstr="-isnan",
+        ),
+        log=dict(
+            argstr="-log -const2 %s %s",
+        ),
+        max_buffer_size_in_kb=dict(
+            argstr="-max_buffer_size_in_kb %d",
+            usedefault=True,
+        ),
+        maximum=dict(
+            argstr="-maximum",
+        ),
+        minimum=dict(
+            argstr="-minimum",
+        ),
+        nisnan=dict(
+            argstr="-nisnan",
+        ),
         no_check_dimensions=dict(
             argstr="-nocheck_dimensions",
             xor=("check_dimensions", "no_check_dimensions"),
         ),
         no_copy_header=dict(
-            argstr="-nocopy_header", xor=("copy_header", "no_copy_header"),
+            argstr="-nocopy_header",
+            xor=("copy_header", "no_copy_header"),
         ),
-        nsegment=dict(argstr="-nsegment -const2 %s %s",),
+        nsegment=dict(
+            argstr="-nsegment -const2 %s %s",
+        ),
         output_file=dict(
             argstr="%s",
             extensions=None,
@@ -194,25 +248,55 @@ def test_Math_inputs():
             xor=("output_nan", "output_zero", "output_illegal_value"),
         ),
         output_nan=dict(
-            argstr="-nan", xor=("output_nan", "output_zero", "output_illegal_value"),
+            argstr="-nan",
+            xor=("output_nan", "output_zero", "output_illegal_value"),
         ),
         output_zero=dict(
-            argstr="-zero", xor=("output_nan", "output_zero", "output_illegal_value"),
+            argstr="-zero",
+            xor=("output_nan", "output_zero", "output_illegal_value"),
         ),
-        percentdiff=dict(argstr="-percentdiff",),
-        propagate_nan=dict(argstr="-propagate_nan",),
-        scale=dict(argstr="-scale -const2 %s %s",),
-        segment=dict(argstr="-segment -const2 %s %s",),
-        sqrt=dict(argstr="-sqrt",),
-        square=dict(argstr="-square",),
-        test_eq=dict(argstr="-eq",),
-        test_ge=dict(argstr="-ge",),
-        test_gt=dict(argstr="-gt",),
-        test_le=dict(argstr="-le",),
-        test_lt=dict(argstr="-lt",),
-        test_ne=dict(argstr="-ne",),
-        two=dict(argstr="-2",),
-        voxel_range=dict(argstr="-range %d %d",),
+        percentdiff=dict(
+            argstr="-percentdiff",
+        ),
+        propagate_nan=dict(
+            argstr="-propagate_nan",
+        ),
+        scale=dict(
+            argstr="-scale -const2 %s %s",
+        ),
+        segment=dict(
+            argstr="-segment -const2 %s %s",
+        ),
+        sqrt=dict(
+            argstr="-sqrt",
+        ),
+        square=dict(
+            argstr="-square",
+        ),
+        test_eq=dict(
+            argstr="-eq",
+        ),
+        test_ge=dict(
+            argstr="-ge",
+        ),
+        test_gt=dict(
+            argstr="-gt",
+        ),
+        test_le=dict(
+            argstr="-le",
+        ),
+        test_lt=dict(
+            argstr="-lt",
+        ),
+        test_ne=dict(
+            argstr="-ne",
+        ),
+        two=dict(
+            argstr="-2",
+        ),
+        voxel_range=dict(
+            argstr="-range %d %d",
+        ),
     )
     inputs = Math.input_spec()
 
@@ -222,7 +306,11 @@ def test_Math_inputs():
 
 
 def test_Math_outputs():
-    output_map = dict(output_file=dict(extensions=None,),)
+    output_map = dict(
+        output_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Math.output_spec()
 
     for key, metadata in list(output_map.items()):

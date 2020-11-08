@@ -4,8 +4,14 @@ from ..io import MySQLSink
 
 def test_MySQLSink_inputs():
     input_map = dict(
-        config=dict(extensions=None, mandatory=True, xor=["host"],),
-        database_name=dict(mandatory=True,),
+        config=dict(
+            extensions=None,
+            mandatory=True,
+            xor=["host"],
+        ),
+        database_name=dict(
+            mandatory=True,
+        ),
         host=dict(
             mandatory=True,
             requires=["username", "password"],
@@ -13,7 +19,9 @@ def test_MySQLSink_inputs():
             xor=["config"],
         ),
         password=dict(),
-        table_name=dict(mandatory=True,),
+        table_name=dict(
+            mandatory=True,
+        ),
         username=dict(),
     )
     inputs = MySQLSink.input_spec()

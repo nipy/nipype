@@ -4,11 +4,24 @@ from ..gtract import gtractInvertRigidTransform
 
 def test_gtractInvertRigidTransform_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        inputTransform=dict(argstr="--inputTransform %s", extensions=None,),
-        numberOfThreads=dict(argstr="--numberOfThreads %d",),
-        outputTransform=dict(argstr="--outputTransform %s", hash_files=False,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        inputTransform=dict(
+            argstr="--inputTransform %s",
+            extensions=None,
+        ),
+        numberOfThreads=dict(
+            argstr="--numberOfThreads %d",
+        ),
+        outputTransform=dict(
+            argstr="--outputTransform %s",
+            hash_files=False,
+        ),
     )
     inputs = gtractInvertRigidTransform.input_spec()
 
@@ -18,7 +31,11 @@ def test_gtractInvertRigidTransform_inputs():
 
 
 def test_gtractInvertRigidTransform_outputs():
-    output_map = dict(outputTransform=dict(extensions=None,),)
+    output_map = dict(
+        outputTransform=dict(
+            extensions=None,
+        ),
+    )
     outputs = gtractInvertRigidTransform.output_spec()
 
     for key, metadata in list(output_map.items()):

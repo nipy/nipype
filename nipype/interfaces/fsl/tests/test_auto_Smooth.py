@@ -4,15 +4,25 @@ from ..utils import Smooth
 
 def test_Smooth_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         fwhm=dict(
             argstr="-kernel gauss %.03f -fmean",
             mandatory=True,
             position=1,
             xor=["sigma"],
         ),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=0,),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=0,
+        ),
         output_type=dict(),
         sigma=dict(
             argstr="-kernel gauss %.03f -fmean",
@@ -37,7 +47,11 @@ def test_Smooth_inputs():
 
 
 def test_Smooth_outputs():
-    output_map = dict(smoothed_file=dict(extensions=None,),)
+    output_map = dict(
+        smoothed_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Smooth.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -4,16 +4,36 @@ from ..segmentation import LaplacianThickness
 
 def test_LaplacianThickness_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        dT=dict(argstr="%s", position=6, requires=["prior_thickness"],),
-        environ=dict(nohash=True, usedefault=True,),
+        args=dict(
+            argstr="%s",
+        ),
+        dT=dict(
+            argstr="%s",
+            position=6,
+            requires=["prior_thickness"],
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         input_gm=dict(
-            argstr="%s", copyfile=True, extensions=None, mandatory=True, position=2,
+            argstr="%s",
+            copyfile=True,
+            extensions=None,
+            mandatory=True,
+            position=2,
         ),
         input_wm=dict(
-            argstr="%s", copyfile=True, extensions=None, mandatory=True, position=1,
+            argstr="%s",
+            copyfile=True,
+            extensions=None,
+            mandatory=True,
+            position=1,
         ),
-        num_threads=dict(nohash=True, usedefault=True,),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         output_image=dict(
             argstr="%s",
             extensions=None,
@@ -23,10 +43,25 @@ def test_LaplacianThickness_inputs():
             name_template="%s_thickness",
             position=3,
         ),
-        prior_thickness=dict(argstr="%s", position=5, requires=["smooth_param"],),
-        smooth_param=dict(argstr="%s", position=4,),
-        sulcus_prior=dict(argstr="%s", position=7, requires=["dT"],),
-        tolerance=dict(argstr="%s", position=8, requires=["sulcus_prior"],),
+        prior_thickness=dict(
+            argstr="%s",
+            position=5,
+            requires=["smooth_param"],
+        ),
+        smooth_param=dict(
+            argstr="%s",
+            position=4,
+        ),
+        sulcus_prior=dict(
+            argstr="%s",
+            position=7,
+            requires=["dT"],
+        ),
+        tolerance=dict(
+            argstr="%s",
+            position=8,
+            requires=["sulcus_prior"],
+        ),
     )
     inputs = LaplacianThickness.input_spec()
 
@@ -36,7 +71,11 @@ def test_LaplacianThickness_inputs():
 
 
 def test_LaplacianThickness_outputs():
-    output_map = dict(output_image=dict(extensions=None,),)
+    output_map = dict(
+        output_image=dict(
+            extensions=None,
+        ),
+    )
     outputs = LaplacianThickness.output_spec()
 
     for key, metadata in list(output_map.items()):

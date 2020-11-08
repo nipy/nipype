@@ -4,14 +4,35 @@ from ..brainsuite import Dewisp
 
 def test_Dewisp_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        inputMaskFile=dict(argstr="-i %s", extensions=None, mandatory=True,),
-        maximumIterations=dict(argstr="-n %d",),
-        outputMaskFile=dict(argstr="-o %s", extensions=None, genfile=True,),
-        sizeThreshold=dict(argstr="-t %d",),
-        timer=dict(argstr="--timer",),
-        verbosity=dict(argstr="-v %d",),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        inputMaskFile=dict(
+            argstr="-i %s",
+            extensions=None,
+            mandatory=True,
+        ),
+        maximumIterations=dict(
+            argstr="-n %d",
+        ),
+        outputMaskFile=dict(
+            argstr="-o %s",
+            extensions=None,
+            genfile=True,
+        ),
+        sizeThreshold=dict(
+            argstr="-t %d",
+        ),
+        timer=dict(
+            argstr="--timer",
+        ),
+        verbosity=dict(
+            argstr="-v %d",
+        ),
     )
     inputs = Dewisp.input_spec()
 
@@ -21,7 +42,11 @@ def test_Dewisp_inputs():
 
 
 def test_Dewisp_outputs():
-    output_map = dict(outputMaskFile=dict(extensions=None,),)
+    output_map = dict(
+        outputMaskFile=dict(
+            extensions=None,
+        ),
+    )
     outputs = Dewisp.output_spec()
 
     for key, metadata in list(output_map.items()):

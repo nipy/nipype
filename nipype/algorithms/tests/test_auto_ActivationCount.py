@@ -3,7 +3,14 @@ from ..stats import ActivationCount
 
 
 def test_ActivationCount_inputs():
-    input_map = dict(in_files=dict(mandatory=True,), threshold=dict(mandatory=True,),)
+    input_map = dict(
+        in_files=dict(
+            mandatory=True,
+        ),
+        threshold=dict(
+            mandatory=True,
+        ),
+    )
     inputs = ActivationCount.input_spec()
 
     for key, metadata in list(input_map.items()):
@@ -13,9 +20,15 @@ def test_ActivationCount_inputs():
 
 def test_ActivationCount_outputs():
     output_map = dict(
-        acm_neg=dict(extensions=None,),
-        acm_pos=dict(extensions=None,),
-        out_file=dict(extensions=None,),
+        acm_neg=dict(
+            extensions=None,
+        ),
+        acm_pos=dict(
+            extensions=None,
+        ),
+        out_file=dict(
+            extensions=None,
+        ),
     )
     outputs = ActivationCount.output_spec()
 

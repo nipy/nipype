@@ -4,8 +4,13 @@ from ..misc import CalculateNormalizedMoments
 
 def test_CalculateNormalizedMoments_inputs():
     input_map = dict(
-        moment=dict(mandatory=True,),
-        timeseries_file=dict(extensions=None, mandatory=True,),
+        moment=dict(
+            mandatory=True,
+        ),
+        timeseries_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
     )
     inputs = CalculateNormalizedMoments.input_spec()
 
@@ -15,7 +20,9 @@ def test_CalculateNormalizedMoments_inputs():
 
 
 def test_CalculateNormalizedMoments_outputs():
-    output_map = dict(moments=dict(),)
+    output_map = dict(
+        moments=dict(),
+    )
     outputs = CalculateNormalizedMoments.output_spec()
 
     for key, metadata in list(output_map.items()):

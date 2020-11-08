@@ -4,12 +4,26 @@ from ..utils import EditTransform
 
 def test_EditTransform_inputs():
     input_map = dict(
-        interpolation=dict(argstr="FinalBSplineInterpolationOrder", usedefault=True,),
-        output_file=dict(extensions=None,),
-        output_format=dict(argstr="ResultImageFormat",),
-        output_type=dict(argstr="ResultImagePixelType",),
-        reference_image=dict(extensions=None,),
-        transform_file=dict(extensions=None, mandatory=True,),
+        interpolation=dict(
+            argstr="FinalBSplineInterpolationOrder",
+            usedefault=True,
+        ),
+        output_file=dict(
+            extensions=None,
+        ),
+        output_format=dict(
+            argstr="ResultImageFormat",
+        ),
+        output_type=dict(
+            argstr="ResultImagePixelType",
+        ),
+        reference_image=dict(
+            extensions=None,
+        ),
+        transform_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
     )
     inputs = EditTransform.input_spec()
 
@@ -19,7 +33,11 @@ def test_EditTransform_inputs():
 
 
 def test_EditTransform_outputs():
-    output_map = dict(output_file=dict(extensions=None,),)
+    output_map = dict(
+        output_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = EditTransform.output_spec()
 
     for key, metadata in list(output_map.items()):

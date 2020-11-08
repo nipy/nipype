@@ -276,12 +276,14 @@ class SliceTimingInputSpec(SPMCommandInputSpec):
         mandatory=True,
     )
     slice_order = traits.List(
-        traits.Float(),
+        traits.Either(traits.Int(),traits.Float()),
         field="so",
         desc=("1-based order or onset (in ms) in which slices are acquired"),
         mandatory=True,
     )
-    ref_slice = traits.Int(
+    ref_slice = traits.Either(
+        traits.Int(),
+        traits.Float(),
         field="refslice",
         desc="1-based Number of the reference slice or "
         "reference time point if slice_order is in "

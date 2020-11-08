@@ -4,20 +4,57 @@ from ..n4itkbiasfieldcorrection import N4ITKBiasFieldCorrection
 
 def test_N4ITKBiasFieldCorrection_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        bsplineorder=dict(argstr="--bsplineorder %d",),
-        convergencethreshold=dict(argstr="--convergencethreshold %f",),
-        environ=dict(nohash=True, usedefault=True,),
-        histogramsharpening=dict(argstr="--histogramsharpening %s", sep=",",),
-        inputimage=dict(argstr="--inputimage %s", extensions=None,),
-        iterations=dict(argstr="--iterations %s", sep=",",),
-        maskimage=dict(argstr="--maskimage %s", extensions=None,),
-        meshresolution=dict(argstr="--meshresolution %s", sep=",",),
-        outputbiasfield=dict(argstr="--outputbiasfield %s", hash_files=False,),
-        outputimage=dict(argstr="--outputimage %s", hash_files=False,),
-        shrinkfactor=dict(argstr="--shrinkfactor %d",),
-        splinedistance=dict(argstr="--splinedistance %f",),
-        weightimage=dict(argstr="--weightimage %s", extensions=None,),
+        args=dict(
+            argstr="%s",
+        ),
+        bsplineorder=dict(
+            argstr="--bsplineorder %d",
+        ),
+        convergencethreshold=dict(
+            argstr="--convergencethreshold %f",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        histogramsharpening=dict(
+            argstr="--histogramsharpening %s",
+            sep=",",
+        ),
+        inputimage=dict(
+            argstr="--inputimage %s",
+            extensions=None,
+        ),
+        iterations=dict(
+            argstr="--iterations %s",
+            sep=",",
+        ),
+        maskimage=dict(
+            argstr="--maskimage %s",
+            extensions=None,
+        ),
+        meshresolution=dict(
+            argstr="--meshresolution %s",
+            sep=",",
+        ),
+        outputbiasfield=dict(
+            argstr="--outputbiasfield %s",
+            hash_files=False,
+        ),
+        outputimage=dict(
+            argstr="--outputimage %s",
+            hash_files=False,
+        ),
+        shrinkfactor=dict(
+            argstr="--shrinkfactor %d",
+        ),
+        splinedistance=dict(
+            argstr="--splinedistance %f",
+        ),
+        weightimage=dict(
+            argstr="--weightimage %s",
+            extensions=None,
+        ),
     )
     inputs = N4ITKBiasFieldCorrection.input_spec()
 
@@ -28,7 +65,12 @@ def test_N4ITKBiasFieldCorrection_inputs():
 
 def test_N4ITKBiasFieldCorrection_outputs():
     output_map = dict(
-        outputbiasfield=dict(extensions=None,), outputimage=dict(extensions=None,),
+        outputbiasfield=dict(
+            extensions=None,
+        ),
+        outputimage=dict(
+            extensions=None,
+        ),
     )
     outputs = N4ITKBiasFieldCorrection.output_spec()
 

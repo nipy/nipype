@@ -4,9 +4,19 @@ from ..preprocess import MRTrixInfo
 
 def test_MRTrixInfo_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
     )
     inputs = MRTrixInfo.input_spec()
 

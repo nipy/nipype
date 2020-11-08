@@ -4,18 +4,46 @@ from ..convert import NIfTIDT2Camino
 
 def test_NIfTIDT2Camino_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        bgmask=dict(argstr="-bgmask %s", extensions=None,),
-        environ=dict(nohash=True, usedefault=True,),
-        in_file=dict(
-            argstr="-inputfile %s", extensions=None, mandatory=True, position=1,
+        args=dict(
+            argstr="%s",
         ),
-        lns0_file=dict(argstr="-lns0 %s", extensions=None,),
-        out_file=dict(argstr="> %s", extensions=None, genfile=True, position=-1,),
-        s0_file=dict(argstr="-s0 %s", extensions=None,),
-        scaleinter=dict(argstr="-scaleinter %s",),
-        scaleslope=dict(argstr="-scaleslope %s",),
-        uppertriangular=dict(argstr="-uppertriangular %s",),
+        bgmask=dict(
+            argstr="-bgmask %s",
+            extensions=None,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="-inputfile %s",
+            extensions=None,
+            mandatory=True,
+            position=1,
+        ),
+        lns0_file=dict(
+            argstr="-lns0 %s",
+            extensions=None,
+        ),
+        out_file=dict(
+            argstr="> %s",
+            extensions=None,
+            genfile=True,
+            position=-1,
+        ),
+        s0_file=dict(
+            argstr="-s0 %s",
+            extensions=None,
+        ),
+        scaleinter=dict(
+            argstr="-scaleinter %s",
+        ),
+        scaleslope=dict(
+            argstr="-scaleslope %s",
+        ),
+        uppertriangular=dict(
+            argstr="-uppertriangular %s",
+        ),
     )
     inputs = NIfTIDT2Camino.input_spec()
 
@@ -25,7 +53,11 @@ def test_NIfTIDT2Camino_inputs():
 
 
 def test_NIfTIDT2Camino_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = NIfTIDT2Camino.output_spec()
 
     for key, metadata in list(output_map.items()):
