@@ -58,13 +58,15 @@ def test_DWIBiasCorrect_inputs():
             position=-1,
         ),
         use_ants=dict(
-            argstr="-ants",
+            argstr="ants",
             mandatory=True,
+            position=0,
             xor=["use_fsl"],
         ),
         use_fsl=dict(
-            argstr="-fsl",
+            argstr="fsl",
             mandatory=True,
+            position=0,
             xor=["use_ants"],
         ),
     )
