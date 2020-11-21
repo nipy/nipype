@@ -245,15 +245,17 @@ def test_input_version_missing(caplog):
 
         _version = "misparsed-garbage"
 
-    obj = DerivedInterface()
+    with caplog.at_level(logging.WARNING, logger="nipype.interface"):
+        obj = DerivedInterface()
+    assert len(caplog.records) == 2
     obj.inputs.foo = 1
     obj.inputs.bar = 1
     with caplog.at_level(logging.WARNING, logger="nipype.interface"):
         obj._check_version_requirements(obj.inputs)
-    assert len(caplog.records) == 2
+    assert len(caplog.records) == 4
 
 
-def test_input_version_missing_error():
+def test_input_version_missing_error(caplog):
     from nipype import config
 
     class DerivedInterface(nib.BaseInterface):
@@ -263,13 +265,17 @@ def test_input_version_missing_error():
 
         _version = "misparsed-garbage"
 
-    with mock.patch.object(config, "getboolean", return_value=True):
-        obj = DerivedInterface(foo=1)
-        with pytest.raises(ValueError):
-            obj._check_version_requirements(obj.inputs)
-        obj = DerivedInterface(bar=1)
-        with pytest.raises(ValueError):
-            obj._check_version_requirements(obj.inputs)
+    with caplog.at_level(logging.WARNING, logger="nipype.interface"):
+        obj1 = DerivedInterface(foo=1)
+        obj2 = DerivedInterface(bar=1)
+    assert len(caplog.records) == 4
+    with caplog.at_level(logging.WARNING, logger="nipype.interface"):
+        with mock.patch.object(config, "getboolean", return_value=True):
+            with pytest.raises(ValueError):
+                obj1._check_version_requirements(obj1.inputs)
+            with pytest.raises(ValueError):
+                obj2._check_version_requirements(obj2.inputs)
+    assert len(caplog.records) == 6
 
 
 def test_unavailable_input():
