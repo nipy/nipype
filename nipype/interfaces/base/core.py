@@ -31,7 +31,7 @@ from ...utils.subprocess import run_command
 
 from ...external.due import due
 
-from .traits_extension import traits, isdefined
+from .traits_extension import traits, isdefined, Undefined
 from .specs import (
     BaseInterfaceInputSpec,
     CommandLineInputSpec,
@@ -371,8 +371,10 @@ class BaseInterface(Interface):
 
         enable_rm = config.resource_monitor and self.resource_monitor
         self.inputs.trait_set(**inputs)
+        unavailable_traits = self._check_version_requirements(self.inputs)
+        if unavailable_traits:
+            self.inputs.traitset(**{k: Undefined for k in unavailable_traits})
         self._check_mandatory_inputs()
-        self._check_version_requirements(self.inputs)
         interface = self.__class__
         self._duecredit_cite()
 
