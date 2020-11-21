@@ -439,7 +439,7 @@ def copyfile(
             fmlogger.debug("Copying File: %s->%s", newfile, originalfile)
             shutil.copyfile(originalfile, newfile)
         except shutil.Error as e:
-            fmlogger.warning(e.message)
+            fmlogger.warning(str(e))
 
     # Associated files
     if copy_related_files:
@@ -870,10 +870,8 @@ def get_dependencies(name, environ):
         o, e = proc.communicate()
         deps = o.rstrip()
     except Exception as ex:
-        deps = '"%s" failed' % command
-        fmlogger.warning(
-            "Could not get dependencies of %s. Error:\n%s", name, ex.message
-        )
+        deps = f'{command!r} failed'
+        fmlogger.warning(f"Could not get dependencies of {name}s. Error:\n{ex}")
     return deps
 
 

@@ -1010,11 +1010,8 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
                         try:
                             filledtemplate = template % tuple(argtuple)
                         except TypeError as e:
-                            raise TypeError(
-                                e.message
-                                + ": Template %s failed to convert with args %s"
-                                % (template, str(tuple(argtuple)))
-                            )
+                            raise TypeError(f"{e}: Template {template} failed to convert "
+                                            f"with args {tuple(argtuple)}")
                     outfiles = []
                     for fname in bkt_files:
                         if re.match(filledtemplate, fname):
@@ -1286,11 +1283,8 @@ class DataGrabber(IOBase):
                         try:
                             filledtemplate = template % tuple(argtuple)
                         except TypeError as e:
-                            raise TypeError(
-                                e.message
-                                + ": Template %s failed to convert with args %s"
-                                % (template, str(tuple(argtuple)))
-                            )
+                            raise TypeError(f"{e}: Template {template} failed to convert "
+                                            f"with args {tuple(argtuple)}")
                     outfiles = glob.glob(filledtemplate)
                     if len(outfiles) == 0:
                         msg = "Output key: %s Template: %s returned no files" % (
@@ -2664,11 +2658,8 @@ class SSHDataGrabber(LibraryBaseInterface, DataGrabber):
                         try:
                             filledtemplate = template % tuple(argtuple)
                         except TypeError as e:
-                            raise TypeError(
-                                e.message
-                                + ": Template %s failed to convert with args %s"
-                                % (template, str(tuple(argtuple)))
-                            )
+                            raise TypeError(f"{e}: Template {template} failed to convert "
+                                            f"with args {tuple(argtuple)}")
 
                     outputs[key].append(self._get_files_over_ssh(filledtemplate))
 
