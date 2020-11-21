@@ -180,7 +180,14 @@ class BaseInterface(Interface):
         if not self.input_spec:
             raise Exception("No input_spec in class: %s" % self.__class__.__name__)
 
-        self.inputs = self.input_spec(**inputs)
+        # Create input spec, disable any defaults that are unavailable due to
+        # version, and then apply the inputs that were passed.
+        self.inputs = self.input_spec()
+        unavailable_traits = self._check_version_requirements(self.inputs, raise_exception=False)
+        if unavailable_traits:
+            self.inputs.trait_set(**{k: Undefined for k in unavailable_traits})
+        self.inputs.trait_set(**inputs)
+
         self.ignore_exception = ignore_exception
 
         if resource_monitor is not None:
@@ -371,10 +378,8 @@ class BaseInterface(Interface):
 
         enable_rm = config.resource_monitor and self.resource_monitor
         self.inputs.trait_set(**inputs)
-        unavailable_traits = self._check_version_requirements(self.inputs)
-        if unavailable_traits:
-            self.inputs.traitset(**{k: Undefined for k in unavailable_traits})
         self._check_mandatory_inputs()
+        self._check_version_requirements(self.inputs)
         interface = self.__class__
         self._duecredit_cite()
 
