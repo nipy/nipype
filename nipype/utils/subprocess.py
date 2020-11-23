@@ -124,7 +124,7 @@ def run_command(runtime, output=None, timeout=0.01):
                 res = select.select(streams, [], [], timeout)
             except select.error as e:
                 iflogger.info(e)
-                if e[0] == errno.EINTR:
+                if e.errno == errno.EINTR:
                     return
                 else:
                     raise
