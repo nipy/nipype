@@ -465,7 +465,7 @@ def test_datasink_substitutions(tmpdir):
         files.append(f)
         open(f, "w")
     ds = nio.DataSink(
-        parametrization=False,
+        parameterization=False,
         base_directory=str(outdir),
         substitutions=[("ababab", "ABABAB")],
         # end archoring ($) is used to assure operation on the filename

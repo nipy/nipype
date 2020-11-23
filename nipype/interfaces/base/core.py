@@ -31,7 +31,7 @@ from ...utils.subprocess import run_command
 
 from ...external.due import due
 
-from .traits_extension import traits, isdefined
+from .traits_extension import traits, isdefined, Undefined
 from .specs import (
     BaseInterfaceInputSpec,
     CommandLineInputSpec,
@@ -180,7 +180,16 @@ class BaseInterface(Interface):
         if not self.input_spec:
             raise Exception("No input_spec in class: %s" % self.__class__.__name__)
 
-        self.inputs = self.input_spec(**inputs)
+        # Create input spec, disable any defaults that are unavailable due to
+        # version, and then apply the inputs that were passed.
+        self.inputs = self.input_spec()
+        unavailable_traits = self._check_version_requirements(
+            self.inputs, permissive=True
+        )
+        if unavailable_traits:
+            self.inputs.trait_set(**{k: Undefined for k in unavailable_traits})
+        self.inputs.trait_set(**inputs)
+
         self.ignore_exception = ignore_exception
 
         if resource_monitor is not None:
@@ -264,8 +273,12 @@ class BaseInterface(Interface):
         ):
             self._check_requires(spec, name, getattr(self.inputs, name))
 
-    def _check_version_requirements(self, trait_object, raise_exception=True):
+    def _check_version_requirements(self, trait_object, permissive=False):
         """ Raises an exception on version mismatch
+
+        Set the ``permissive`` attribute to True to suppress warnings and exceptions.
+        This is currently only used in __init__ to silently identify unavailable
+        traits.
         """
         unavailable_traits = []
         # check minimum version
@@ -283,7 +296,8 @@ class BaseInterface(Interface):
                         f"Nipype cannot validate the package version {version!r} for "
                         f"{self.__class__.__name__}. Trait {name} requires version >={min_ver}."
                     )
-                    iflogger.warning(f"{msg}. Please verify validity.")
+                    if not permissive:
+                        iflogger.warning(f"{msg}. Please verify validity.")
                     if config.getboolean("execution", "stop_on_unknown_version"):
                         raise ValueError(msg) from err
                     continue
@@ -291,7 +305,7 @@ class BaseInterface(Interface):
                     unavailable_traits.append(name)
                     if not isdefined(getattr(trait_object, name)):
                         continue
-                    if raise_exception:
+                    if not permissive:
                         raise Exception(
                             "Trait %s (%s) (version %s < required %s)"
                             % (name, self.__class__.__name__, version, min_ver)
@@ -311,7 +325,8 @@ class BaseInterface(Interface):
                         f"Nipype cannot validate the package version {version!r} for "
                         f"{self.__class__.__name__}. Trait {name} requires version <={max_ver}."
                     )
-                    iflogger.warning(f"{msg}. Please verify validity.")
+                    if not permissive:
+                        iflogger.warning(f"{msg}. Please verify validity.")
                     if config.getboolean("execution", "stop_on_unknown_version"):
                         raise ValueError(msg) from err
                     continue
@@ -319,7 +334,7 @@ class BaseInterface(Interface):
                     unavailable_traits.append(name)
                     if not isdefined(getattr(trait_object, name)):
                         continue
-                    if raise_exception:
+                    if not permissive:
                         raise Exception(
                             "Trait %s (%s) (version %s > required %s)"
                             % (name, self.__class__.__name__, version, max_ver)

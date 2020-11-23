@@ -253,7 +253,7 @@ def test_input_version_missing(caplog):
     assert len(caplog.records) == 2
 
 
-def test_input_version_missing_error():
+def test_input_version_missing_error(caplog):
     from nipype import config
 
     class DerivedInterface(nib.BaseInterface):
@@ -263,13 +263,55 @@ def test_input_version_missing_error():
 
         _version = "misparsed-garbage"
 
-    with mock.patch.object(config, "getboolean", return_value=True):
-        obj = DerivedInterface(foo=1)
-        with pytest.raises(ValueError):
-            obj._check_version_requirements(obj.inputs)
-        obj = DerivedInterface(bar=1)
-        with pytest.raises(ValueError):
-            obj._check_version_requirements(obj.inputs)
+    obj1 = DerivedInterface(foo=1)
+    obj2 = DerivedInterface(bar=1)
+    with caplog.at_level(logging.WARNING, logger="nipype.interface"):
+        with mock.patch.object(config, "getboolean", return_value=True):
+            with pytest.raises(ValueError):
+                obj1._check_version_requirements(obj1.inputs)
+            with pytest.raises(ValueError):
+                obj2._check_version_requirements(obj2.inputs)
+    assert len(caplog.records) == 2
+
+
+def test_unavailable_input():
+    class WithInput(nib.BaseInterface):
+        class input_spec(nib.TraitedSpec):
+            foo = nib.traits.Int(3, usedefault=True, max_ver="0.5")
+
+        _version = "0.4"
+
+        def _run_interface(self, runtime):
+            return runtime
+
+    class WithoutInput(WithInput):
+        _version = "0.6"
+
+    has = WithInput()
+    hasnt = WithoutInput()
+    trying_anyway = WithoutInput(foo=3)
+    assert has.inputs.foo == 3
+    assert not nib.isdefined(hasnt.inputs.foo)
+    assert trying_anyway.inputs.foo == 3
+
+    has.run()
+    hasnt.run()
+    with pytest.raises(Exception):
+        trying_anyway.run()
+
+    # Still settable
+    has.inputs.foo = 4
+    hasnt.inputs.foo = 4
+    trying_anyway.inputs.foo = 4
+    assert has.inputs.foo == 4
+    assert hasnt.inputs.foo == 4
+    assert trying_anyway.inputs.foo == 4
+
+    has.run()
+    with pytest.raises(Exception):
+        hasnt.run()
+    with pytest.raises(Exception):
+        trying_anyway.run()
 
 
 def test_output_version():
