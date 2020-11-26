@@ -299,10 +299,12 @@ class DWIPreprocInputSpec(MRTrix3BaseInputSpec):
     export_grad_fsl = traits.Bool(
         argstr="-export_grad_fsl", desc="export gradient files in FSL format"
     )
-    out_grad_mrtrix = File("dwi.b", argstrt="%s", desc="name of new gradient file")
+    out_grad_mrtrix = File(
+        "dwi.b", argstr="%s", usedefault=True, desc="name of new gradient file"
+    )
     out_grad_fsl = traits.Tuple(
-        File("dwi.bvecs", desc="bvecs"),
-        File("dwi.bvals", desc="bvals"),
+        File("dwi.bvecs", usedefault=True, desc="bvecs"),
+        File("dwi.bvals", usedefault=True, desc="bvals"),
         argstr="%s, %s",
         desc="Output (bvecs, bvals) gradients FSL format",
     )
@@ -313,8 +315,18 @@ class DWIPreprocOutputtSpec(TraitedSpec):
     out_grad_mrtrix = File(
         argstr="%s", desc="preprocessed gradient file in mrtrix3 format"
     )
-    out_fsl_bvec = File("dwi.bvecs", desc="exported fsl gradient bvec file")
-    out_fsl_bval = File("dwi.bvals", desc="exported fsl gradient bval file")
+    out_fsl_bvec = File(
+        "dwi.bvecs",
+        argstr="%s",
+        usedefault=True,
+        desc="exported fsl gradient bvec file",
+    )
+    out_fsl_bval = File(
+        "dwi.bvals",
+        argstr="%s",
+        usedefault=True,
+        desc="exported fsl gradient bval file",
+    )
 
 
 class DWIPreproc(MRTrix3Base):
