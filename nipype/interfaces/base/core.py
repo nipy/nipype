@@ -26,7 +26,7 @@ from traits.trait_errors import TraitError
 from ... import config, logging, LooseVersion
 from ...utils.provenance import write_provenance
 from ...utils.misc import str2bool, rgetcwd
-from ...utils.filemanip import split_filename, which, get_dependencies
+from ...utils.filemanip import split_filename, which, get_dependencies, canonicalize_env
 from ...utils.subprocess import run_command
 
 from ...external.due import due
@@ -778,7 +778,7 @@ class CommandLine(BaseInterface):
             proc = sp.Popen(
                 " ".join((cmd, flag)),
                 shell=True,
-                env=env,
+                env=canonicalize_env(env),
                 stdout=sp.PIPE,
                 stderr=sp.PIPE,
             )
