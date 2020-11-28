@@ -407,6 +407,16 @@
       "name": "Welch, David"
     },
     {
+      "affiliation": "Charite Universitatsmedizin Berlin, Germany",
+      "name": "Waller, Lea",
+      "orcid": "0000-0002-3239-6957"
+    },
+    {
+      "affiliation": "Max Planck Institute for Human Cognitive and Brain Sciences",
+      "name": "Contier, Oliver",
+      "orcid": "0000-0002-2983-4709"
+    },
+    {
       "affiliation": "Department of Psychology, Stanford University",
       "name": "Triplett, William",
       "orcid": "0000-0002-9546-1306"
@@ -487,16 +497,15 @@
       "name": "Perkins, L. Nathan"
     },
     {
-      "affiliation": "Max Planck Institute for Human Cognitive and Brain Sciences",
-      "name": "Contier, Oliver",
-      "orcid": "0000-0002-2983-4709"
-    },
-    {
       "name": "Zhou, Dale"
     },
     {
       "name": "Bielievtsov, Dmytro",
       "orcid": "0000-0003-3846-7696"
+    },
+    {
+      "affiliation": "Sagol School of Neuroscience, Tel Aviv University",
+      "name": "Ben-Zvi, Gal"
     },
     {
       "affiliation": "University of Newcastle, Australia",
@@ -512,11 +521,6 @@
       "affiliation": "German Institute for International Educational Research",
       "name": "Linkersd\u00f6rfer, Janosch",
       "orcid": "0000-0002-1577-1233"
-    },
-    {
-      "affiliation": "Charite Universitatsmedizin Berlin, Germany",
-      "name": "Waller, Lea",
-      "orcid": "0000-0002-3239-6957"
     },
     {
       "name": "Renfro, Mandy"
@@ -564,6 +568,11 @@
       "affiliation": "Max Planck Research Group for Neuroanatomy & Connectivity, Max Planck Institute for Human Cognitive and Brain Sciences, Leipzig, Germany",
       "name": "Margulies, Daniel S.",
       "orcid": "0000-0002-8880-9204"
+    },
+    {
+      "affiliation": "CNRS, UMS3552 IRMaGe",
+      "name": "Condamine, Eric",
+      "orcid": "0000-0002-9533-3769"
     },
     {
       "affiliation": "Dartmouth College",
@@ -635,11 +644,6 @@
       "name": "Ort, Eduard"
     },
     {
-      "affiliation": "CNRS, UMS3552 IRMaGe",
-      "name": "Condamine, Eric",
-      "orcid": "0000-0002-9533-3769"
-    },
-    {
       "affiliation": "Stanford University",
       "name": "Lerma-Usabiaga, Garikoitz",
       "orcid": "0000-0001-9800-4816"
@@ -696,10 +700,6 @@
     {
       "affiliation": "Sagol School of Neuroscience, Tel Aviv University",
       "name": "Baratz, Zvi"
-    },
-    {
-      "affiliation": "Sagol School of Neuroscience, Tel Aviv University",
-      "name": "Ben-Zvi, Gal"
     },
     {
       "name": "Matsubara, K"

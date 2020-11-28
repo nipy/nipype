@@ -1,3 +1,26 @@
+1.6.0 (November 28, 2020)
+=========================
+
+New feature release in the 1.6.x series.
+
+In addition to the usual bug fixes, significant reductions were made
+in workflow startup costs.
+
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.6.0?closed=1>`__)
+
+  * FIX: Canonicalize environment dicts to strings in Windows (https://github.com/nipy/nipype/pull/3267)
+  * FIX: Purge deprecated exception content accesses (https://github.com/nipy/nipype/pull/3272)
+  * FIX: Handle changes in CLI structure of mrtrix3.DWIBiasCorrect (https://github.com/nipy/nipype/pull/3248)
+  * FIX: EpiReg changed to not list certain outputs when 'wmseg' input is specified (https://github.com/nipy/nipype/pull/3265)
+  * FIX: CI issues (https://github.com/nipy/nipype/pull/3262)
+  * FIX: SPM SliceTiming must accept either Int or float for ref_slice and sli… (https://github.com/nipy/nipype/pull/3255)
+  * FIX: Raise version error when using ``-g`` with ``antsAI`` < 2.3.0 (https://github.com/nipy/nipype/pull/3256)
+  * FIX: No longer depending on pydotplus (networkx >=2.0 update) (https://github.com/nipy/nipype/pull/3251)
+  * FIX: ANTs' utilities revision - bug fixes and add more operations to ``ants.ImageMath`` (https://github.com/nipy/nipype/pull/3236)
+  * ENH: Handle unavailable traits due to version differences (https://github.com/nipy/nipype/pull/3273)
+  * ENH: Optimize workflow.run performance (https://github.com/nipy/nipype/pull/3260)
+  * DOC: Remove myself (@mr-c) from the zenodo metadata (https://github.com/nipy/nipype/pull/3271)
+
 1.5.1 (August 16, 2020)
 =======================
 
