@@ -18,6 +18,7 @@ from .preprocess import (
     ResponseSD,
     ACTPrepareFSL,
     ReplaceFSwithFIRST,
+    DWIPreproc,
     DWIDenoise,
     MRDeGibbs,
     DWIBiasCorrect,

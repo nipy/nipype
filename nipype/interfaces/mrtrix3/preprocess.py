@@ -310,7 +310,7 @@ class DWIPreprocInputSpec(MRTrix3BaseInputSpec):
     )
 
 
-class DWIPreprocOutputtSpec(TraitedSpec):
+class DWIPreprocOutputSpec(TraitedSpec):
     out_file = File(argstr="%s", desc="output preprocessed image series")
     out_grad_mrtrix = File(
         argstr="%s", desc="preprocessed gradient file in mrtrix3 format"
@@ -354,7 +354,7 @@ class DWIPreproc(MRTrix3Base):
 
     _cmd = "dwifslpreproc"
     input_spec = DWIPreprocInputSpec
-    output_spec = DWIPreprocOutputtSpec
+    output_spec = DWIPreprocOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
