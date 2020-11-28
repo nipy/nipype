@@ -343,13 +343,12 @@ class DWIPreproc(MRTrix3Base):
     >>> preproc = mrt.DWIPreproc()
     >>> preproc.inputs.in_file = 'dwi.mif'
     >>> preproc.inputs.rpe_options = '-rpe_none'
-    >>> preproc.inputs.eddy_options = '"--slm=linear --repol"'
     >>> preproc.inputs.out_file = "preproc.mif"
     >>> preproc.inputs.grad_file = "dwi.b"
     >>> preproc.inputs.ro_time = 0.165240   # 'TotalReadoutTime' in BIDS JSON metadata files
     >>> preproc.inputs.pe_dir = 'j'     # 'PhaseEncodingDirection' in BIDS JSON metadata files
     >>> preproc.cmdline
-    `dwifslpreproc dwi.mif preproc.mif -eddy_options "--slm=linear " -rpe_none -pe_dir j -grad dwi.b -readout_time 0.165240`
+    `dwifslpreproc dwi.mif preproc.mif -rpe_none -pe_dir j -readout_time 0.165240 -grad dwi.b`
     """
 
     _cmd = "dwifslpreproc"
