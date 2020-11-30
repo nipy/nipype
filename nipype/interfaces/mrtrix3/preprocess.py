@@ -349,6 +349,7 @@ class DWIPreproc(MRTrix3Base):
     >>> preproc.inputs.pe_dir = 'j'     # 'PhaseEncodingDirection' in BIDS JSON metadata files
     >>> preproc.cmdline
     `dwifslpreproc dwi.mif preproc.mif -rpe_none -pe_dir j -readout_time 0.165240 -grad dwi.b`
+    >>> preproc.run()                             # doctest: +SKIP
     """
 
     _cmd = "dwifslpreproc"
