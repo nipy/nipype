@@ -812,9 +812,9 @@ class SHConv(CommandLine):
 
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> sh = mrt.SHConv()
-    >>> sh.inputs.in_file = 'odf.mif'
+    >>> sh.inputs.in_file = 'csd.mif'
     >>> sh.inputs.response = 'response.txt'
-    >>> sh.cmdline                               # doctest: +ELLIPSIS
+    >>> sh.cmdline
     'shconv odf.mif response.txt sh.mif'
     >>> sh.run()                                 # doctest: +SKIP
     """
@@ -881,7 +881,7 @@ class SH2Amp(CommandLine):
     >>> sh = mrt.SH2Amp()
     >>> sh.inputs.in_file = 'sh.mif'
     >>> sh.inputs.directions = 'grads.txt'
-    >>> sh.cmdline                               # doctest: +ELLIPSIS
+    >>> sh.cmdline
     'sh2amp sh.mif grads.txt amp.mif'
     >>> sh.run()                                 # doctest: +SKIP
     """
