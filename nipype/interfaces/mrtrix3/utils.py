@@ -765,3 +765,129 @@ class MRResize(MRTrix3Base):
     _cmd = "mrresize"
     input_spec = MRResizeInputSpec
     output_spec = MRResizeOutputSpec
+
+
+class SHConvInputSpec(TraitedSpec):
+    in_file = File(
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=-3,
+        desc="input ODF image",
+    )
+
+    # General options
+    response = File(
+        exists=True,
+        mandatory=True,
+        argstr="%s",
+        position=-2,
+        desc=("The response function"),
+    )
+
+    out_file = File(
+        "sh.mif",
+        argstr="%s",
+        mandatory=True,
+        position=-1,
+        usedefault=True,
+        desc="the output spherical harmonics",
+    )
+
+
+class SHConvOutputSpec(TraitedSpec):
+    out_file = File(exists=True,
+                    desc="the output convoluted spherical harmonics file")
+
+
+class SHConv(CommandLine):
+    """
+    Convert diffusion-weighted images to tensor images
+
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> tsr = mrt.SHConv()
+    >>> tsr.inputs.in_file = 'odf.mif'
+    >>> tsr.inputs.response = 'response.txt'
+    >>> tsr.inputs.grad_fsl = ('bvecs', 'bvals')
+    >>> tsr.cmdline                               # doctest: +ELLIPSIS
+    'dwi2tensor -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif dti.mif'
+    >>> tsr.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = "shconv"
+    input_spec = SHConvInputSpec
+    output_spec = SHConvOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["out_file"] = op.abspath(self.inputs.out_file)
+        return outputs
+
+
+
+class SH2AmpInputSpec(MRTrix3BaseInputSpec):
+    in_file = File(
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=-3,
+        desc="input ODF image",
+    )
+
+    # General options
+    directions = File(
+        exists=True,
+        mandatory=True,
+        argstr="%s",
+        position=-2,
+        desc=("The directions along which to sample the function"),
+    )
+
+    out_file = File(
+        "amp.mif",
+        argstr="%s",
+        mandatory=True,
+        position=-1,
+        usedefault=True,
+        desc="the output spherical harmonics",
+    )
+
+    nonnegative = traits.Bool(
+        argstr='-nonnegative',
+        desc="cap all negative amplitudes to zero")
+
+
+class SH2AmpOutputSpec(TraitedSpec):
+    out_file = File(exists=True,
+                    desc="the output convoluted spherical harmonics file")
+
+
+class SH2Amp(MRTrix3Base):
+    """
+    Convert diffusion-weighted images to tensor images
+
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> sha = mrt.SH2Amp()
+    >>> sha.inputs.in_file = 'odf.mif'
+    >>> sha.inputs.response = 'response.txt'
+    >>> sha.cmdline                               # doctest: +ELLIPSIS
+    'dwi2tensor -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif dti.mif'
+    >>> sha.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = "sh2amp"
+    input_spec = SH2AmpInputSpec
+    output_spec = SH2AmpOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["out_file"] = op.abspath(self.inputs.out_file)
+        return outputs
