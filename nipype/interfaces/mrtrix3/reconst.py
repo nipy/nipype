@@ -158,7 +158,10 @@ class EstimateFODInputSpec(MRTrix3BaseInputSpec):
         argstr='-predicted_signal %s',
         desc=(
             "specify a file to contain the predicted signal from the FOD "
-            "estimates. This can be used to calculate the residual signal"))
+            "estimates. This can be used to calculate the residual signal."
+            "Note that this is only valid if algorithm == 'msmt_csd'. "
+            "For single shell reconstructions use a combination of SHConv "
+            "and SH2Amp instead."))
 
 
 class EstimateFODOutputSpec(TraitedSpec):
@@ -199,11 +202,15 @@ class EstimateFOD(MRTrix3Base):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs["wm_odf"] = op.abspath(self.inputs.wm_odf)
-        if self.inputs.gm_odf != Undefined:
+        if isdefined(self.inputs.gm_odf):
             outputs["gm_odf"] = op.abspath(self.inputs.gm_odf)
-        if self.inputs.csf_odf != Undefined:
+        if isdefined(self.inputs.csf_odf):
             outputs["csf_odf"] = op.abspath(self.inputs.csf_odf)
-        if self.inputs.predicted_signal != Undefined:
+        if isdefined(self.inputs.predicted_signal):
+            if self.inputs.algorithm != 'msmt_csd':
+                raise Exception(
+                    "'predicted_signal' option can only be used with "
+                    "the 'msmt_csd' algorithm")
             outputs["predicted_signal"] = op.abspath(
                 self.inputs.predicted_signal)
         return outputs
