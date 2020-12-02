@@ -80,6 +80,10 @@ def test_EstimateFOD_inputs():
             argstr="-nthreads %d",
             nohash=True,
         ),
+        predicted_signal=dict(
+            argstr="-predicted_signal %s",
+            extensions=None,
+        ),
         shell=dict(
             argstr="-shell %s",
             sep=",",
@@ -113,6 +117,9 @@ def test_EstimateFOD_outputs():
         ),
         gm_odf=dict(
             argstr="%s",
+            extensions=None,
+        ),
+        predicted_signal=dict(
             extensions=None,
         ),
         wm_odf=dict(
