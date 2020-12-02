@@ -13,6 +13,8 @@ from .utils import (
     MRConvert,
     MRResize,
     DWIExtract,
+    SHConv,
+    SH2Amp
 )
 from .preprocess import (
     ResponseSD,

@@ -767,7 +767,8 @@ class MRResize(MRTrix3Base):
     output_spec = MRResizeOutputSpec
 
 
-class SHConvInputSpec(TraitedSpec):
+class SHConvInputSpec(CommandLineInputSpec):
+
     in_file = File(
         exists=True,
         argstr="%s",
@@ -802,20 +803,20 @@ class SHConvOutputSpec(TraitedSpec):
 
 class SHConv(CommandLine):
     """
-    Convert diffusion-weighted images to tensor images
+    Convolve spherical harmonics with a tissue response function. Useful for
+    checking residuals of ODF estimates.
 
 
     Example
     -------
 
     >>> import nipype.interfaces.mrtrix3 as mrt
-    >>> tsr = mrt.SHConv()
-    >>> tsr.inputs.in_file = 'odf.mif'
-    >>> tsr.inputs.response = 'response.txt'
-    >>> tsr.inputs.grad_fsl = ('bvecs', 'bvals')
-    >>> tsr.cmdline                               # doctest: +ELLIPSIS
-    'dwi2tensor -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif dti.mif'
-    >>> tsr.run()                                 # doctest: +SKIP
+    >>> sh = mrt.SHConv()
+    >>> sh.inputs.in_file = 'odf.mif'
+    >>> sh.inputs.response = 'response.txt'
+    >>> sh.cmdline                               # doctest: +ELLIPSIS
+    'shconv odf.mif response.txt sh.mif'
+    >>> sh.run()                                 # doctest: +SKIP
     """
 
     _cmd = "shconv"
@@ -829,7 +830,7 @@ class SHConv(CommandLine):
 
 
 
-class SH2AmpInputSpec(MRTrix3BaseInputSpec):
+class SH2AmpInputSpec(CommandLineInputSpec):
     in_file = File(
         exists=True,
         argstr="%s",
@@ -844,7 +845,8 @@ class SH2AmpInputSpec(MRTrix3BaseInputSpec):
         mandatory=True,
         argstr="%s",
         position=-2,
-        desc=("The directions along which to sample the function"),
+        desc=("The gradient directions along which to sample the spherical "
+              "harmonics MRtrix format"),
     )
 
     out_file = File(
@@ -866,21 +868,22 @@ class SH2AmpOutputSpec(TraitedSpec):
                     desc="the output convoluted spherical harmonics file")
 
 
-class SH2Amp(MRTrix3Base):
+class SH2Amp(CommandLine):
     """
-    Convert diffusion-weighted images to tensor images
+    Sample spherical harmonics on a set of gradient orientations.  Useful for
+    checking residuals of ODF estimates.
 
 
     Example
     -------
 
     >>> import nipype.interfaces.mrtrix3 as mrt
-    >>> sha = mrt.SH2Amp()
-    >>> sha.inputs.in_file = 'odf.mif'
-    >>> sha.inputs.response = 'response.txt'
-    >>> sha.cmdline                               # doctest: +ELLIPSIS
-    'dwi2tensor -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif dti.mif'
-    >>> sha.run()                                 # doctest: +SKIP
+    >>> sh = mrt.SH2Amp()
+    >>> sh.inputs.in_file = 'sh.mif'
+    >>> sh.inputs.directions = 'grads.txt'
+    >>> sh.cmdline                               # doctest: +ELLIPSIS
+    'sh2amp sh.mif grads.txt amp.mif'
+    >>> sh.run()                                 # doctest: +SKIP
     """
 
     _cmd = "sh2amp"
