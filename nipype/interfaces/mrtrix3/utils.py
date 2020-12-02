@@ -797,8 +797,7 @@ class SHConvInputSpec(CommandLineInputSpec):
 
 
 class SHConvOutputSpec(TraitedSpec):
-    out_file = File(exists=True,
-                    desc="the output convoluted spherical harmonics file")
+    out_file = File(exists=True, desc="the output convoluted spherical harmonics file")
 
 
 class SHConv(CommandLine):
@@ -829,7 +828,6 @@ class SHConv(CommandLine):
         return outputs
 
 
-
 class SH2AmpInputSpec(CommandLineInputSpec):
     in_file = File(
         exists=True,
@@ -845,8 +843,10 @@ class SH2AmpInputSpec(CommandLineInputSpec):
         mandatory=True,
         argstr="%s",
         position=-2,
-        desc=("The gradient directions along which to sample the spherical "
-              "harmonics MRtrix format"),
+        desc=(
+            "The gradient directions along which to sample the spherical "
+            "harmonics MRtrix format"
+        ),
     )
 
     out_file = File(
@@ -859,13 +859,12 @@ class SH2AmpInputSpec(CommandLineInputSpec):
     )
 
     nonnegative = traits.Bool(
-        argstr='-nonnegative',
-        desc="cap all negative amplitudes to zero")
+        argstr="-nonnegative", desc="cap all negative amplitudes to zero"
+    )
 
 
 class SH2AmpOutputSpec(TraitedSpec):
-    out_file = File(exists=True,
-                    desc="the output convoluted spherical harmonics file")
+    out_file = File(exists=True, desc="the output convoluted spherical harmonics file")
 
 
 class SH2Amp(CommandLine):

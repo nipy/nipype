@@ -4,8 +4,7 @@
 
 import os.path as op
 
-from ..base import (
-    traits, TraitedSpec, File, Undefined, InputMultiObject, isdefined)
+from ..base import traits, TraitedSpec, File, Undefined, InputMultiObject, isdefined
 from .base import MRTrix3BaseInputSpec, MRTrix3Base
 
 
@@ -52,10 +51,12 @@ class FitTensorInputSpec(MRTrix3BaseInputSpec):
         ),
     )
     predicted_signal = File(
-        argstr='-predicted_signal %s',
+        argstr="-predicted_signal %s",
         desc=(
             "specify a file to contain the predicted signal from the tensor "
-            "fits. This can be used to calculate the residual signal"))
+            "fits. This can be used to calculate the residual signal"
+        ),
+    )
 
 
 class FitTensorOutputSpec(TraitedSpec):
@@ -89,8 +90,7 @@ class FitTensor(MRTrix3Base):
         outputs = self.output_spec().get()
         outputs["out_file"] = op.abspath(self.inputs.out_file)
         if isdefined(self.inputs.predicted_signal):
-            outputs['predicted_signal'] = op.abspath(
-                self.inputs.predicted_signal)
+            outputs["predicted_signal"] = op.abspath(self.inputs.predicted_signal)
         return outputs
 
 
@@ -155,13 +155,15 @@ class EstimateFODInputSpec(MRTrix3BaseInputSpec):
         ),
     )
     predicted_signal = File(
-        argstr='-predicted_signal %s',
+        argstr="-predicted_signal %s",
         desc=(
             "specify a file to contain the predicted signal from the FOD "
             "estimates. This can be used to calculate the residual signal."
             "Note that this is only valid if algorithm == 'msmt_csd'. "
             "For single shell reconstructions use a combination of SHConv "
-            "and SH2Amp instead."))
+            "and SH2Amp instead."
+        ),
+    )
 
 
 class EstimateFODOutputSpec(TraitedSpec):
@@ -207,12 +209,12 @@ class EstimateFOD(MRTrix3Base):
         if isdefined(self.inputs.csf_odf):
             outputs["csf_odf"] = op.abspath(self.inputs.csf_odf)
         if isdefined(self.inputs.predicted_signal):
-            if self.inputs.algorithm != 'msmt_csd':
+            if self.inputs.algorithm != "msmt_csd":
                 raise Exception(
                     "'predicted_signal' option can only be used with "
-                    "the 'msmt_csd' algorithm")
-            outputs["predicted_signal"] = op.abspath(
-                self.inputs.predicted_signal)
+                    "the 'msmt_csd' algorithm"
+                )
+            outputs["predicted_signal"] = op.abspath(self.inputs.predicted_signal)
         return outputs
 
 
