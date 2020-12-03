@@ -288,19 +288,19 @@ class DWIPreprocInputSpec(MRTrix3BaseInputSpec):
         desc="Achieve alignment between the SE-EPI images used for inhomogeneity field estimation, and the DWIs",
     )
     eddy_options = traits.Str(
-        argstr="-eddy_options %s",
+        argstr="-eddy_options \"%s\"",
         position=-3,
-        desc="-eddy_options ” EddyOptions” Manually provide additional command-line options to the eddy command (provide a string within quotation marks that contains at least one space, even if only passing a single command-line option to eddy)",
+        desc="Manually provide additional command-line options to the eddy command",
     )
     topup_options = traits.Str(
-        argstr="-topup_options %s",
+        argstr="-topup_options \"%s\"",
         position=-3,
-        desc="-topup_options ” TopupOptions” Manually provide additional command-line options to the topup command (provide a string within quotation marks that contains at least one space, even if only passing a single command-line option to topup)",
+        desc="Manually provide additional command-line options to the topup command",
     )
     export_grad_mrtrix = traits.Bool(
         argstr="-export_grad_mrtrix",
         position=-2,
-        desc="export new gradientt files in mrtrix format",
+        desc="export new gradient files in mrtrix format",
     )
     export_grad_fsl = traits.Bool(
         argstr="-export_grad_fsl",
@@ -360,14 +360,14 @@ class DWIPreproc(MRTrix3Base):
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> preproc = mrt.DWIPreproc()
     >>> preproc.inputs.in_file = 'dwi.mif'
-    >>> preproc.inputs.rpe_options = '-rpe_none'
+    >>> preproc.inputs.rpe_options = 'none'
     >>> preproc.inputs.out_file = "preproc.mif"
-    >>> preproc.inputs.eddy_options = '"--slm=linear --repol "'     # linear second level model and replace outliers
+    >>> preproc.inputs.eddy_options = '--slm=linear --repol'     # linear second level model and replace outliers
     >>> preproc.inputs.export_grad_mrtrix = True    # export final gradient table in MRtrix format
     >>> preproc.inputs.ro_time = 0.165240   # 'TotalReadoutTime' in BIDS JSON metadata files
     >>> preproc.inputs.pe_dir = 'j'     # 'PhaseEncodingDirection' in BIDS JSON metadata files
     >>> preproc.cmdline
-    'dwifslpreproc dwi.mif preproc.mif -rpe_none -pe_dir j -readout_time 0.165240 -eddy_options "--slm=linear --repol " -export_grad_mrtrix grad.b'
+    'dwifslpreproc dwi.mif preproc.mif -rpe_none -pe_dir j -readout_time 0.165240 -eddy_options "--slm=linear --repol" -export_grad_mrtrix grad.b'
     >>> preproc.run()                             # doctest: +SKIP
     """
 
@@ -378,9 +378,9 @@ class DWIPreproc(MRTrix3Base):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs["out_file"] = op.abspath(self.inputs.out_file)
-        if self.inputs.export_grad_mrtrix == True:
+        if self.inputs.export_grad_mrtrix:
             outputs["out_grad_mrtrix"] = op.abspath(self.inputs.out_grad_mrtrix)
-        if self.inputs.export_grad_fsl == True:
+        if self.inputs.export_grad_fsl:
             outputs["out_fsl_bvec"] = op.abspath(self.inputs.out_grad_fsl[0])
             outputs["out_fsl_bval"] = op.abspath(self.inputs.out_grad_fsl[1])
 
