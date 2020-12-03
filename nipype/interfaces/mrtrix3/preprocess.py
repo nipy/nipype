@@ -256,11 +256,11 @@ class DWIPreprocInputSpec(MRTrix3BaseInputSpec):
         desc="output file after preprocessing",
     )
     rpe_options = traits.Enum(
-        "-rpe_none",
-        "-rpe_pair",
-        "-rpe_all",
-        "-rpe_header",
-        argstr="%s",
+        "none",
+        "pair",
+        "all",
+        "header",
+        argstr="-rpe_%s",
         position=-8,
         mandatory=True,
         desc="Specify acquisition phase-encoding design, one of the -rpe_* options must be provided",
