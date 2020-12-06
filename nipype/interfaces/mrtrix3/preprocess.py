@@ -263,7 +263,7 @@ class DWIPreprocInputSpec(MRTrix3BaseInputSpec):
         argstr="-rpe_%s",
         position=-8,
         mandatory=True,
-        desc="Specify acquisition phase-encoding design, one of the -rpe_* options must be provided",
+        desc="Specify acquisition phase-encoding design. "none" for no reversed phase-encoding image, "all" for all DWIs have opposing phase-encoding acquisition, "pair" for using a pair of b0 volumes for inhomogeneity field estimation only, and "header" for phase-encoding information can be found in the image header(s)",
     )
     pe_dir = traits.Str(
         argstr="-pe_dir %s",
