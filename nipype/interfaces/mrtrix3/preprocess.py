@@ -355,7 +355,7 @@ class DWIPreproc(MRTrix3Base):
     >>> preproc.inputs.ro_time = 0.165240   # 'TotalReadoutTime' in BIDS JSON metadata files
     >>> preproc.inputs.pe_dir = 'j'     # 'PhaseEncodingDirection' in BIDS JSON metadata files
     >>> preproc.cmdline
-    'dwifslpreproc dwi.mif preproc.mif -rpe_none -pe_dir j -readout_time 0.165240 -eddy_options "--slm=linear --repol" -export_grad_mrtrix grad.b'
+    'dwifslpreproc dwi.mif preproc.mif -rpe_none -eddy_options "--slm=linear --repol" -export_grad_mrtrix grad.b -pe_dir j -readout_time 0.165240'
     >>> preproc.run()                             # doctest: +SKIP
     """
 
