@@ -4,35 +4,34 @@ from ..preprocess import DWIPreproc
 
 def test_DWIPreproc_inputs():
     input_map = dict(
-        align_seepi=dict(argstr="-align_seepi", position=-4),
+        align_seepi=dict(argstr="-align_seepi"),
         args=dict(argstr="%s"),
         bval_scale=dict(argstr="-bvalue_scaling %s"),
-        eddy_options=dict(argstr="-eddy_options %s", position=-3),
+        eddy_options=dict(argstr='-eddy_options "%s"'),
         environ=dict(nohash=True, usedefault=True),
-        export_grad_fsl=dict(argstr="-export_grad_fsl", position=-2),
-        export_grad_mrtrix=dict(argstr="-export_grad_mrtrix", position=-2),
+        export_grad_fsl=dict(argstr="-export_grad_fsl"),
+        export_grad_mrtrix=dict(argstr="-export_grad_mrtrix"),
         grad_file=dict(argstr="-grad %s", extensions=None, xor=["grad_fsl"]),
         grad_fsl=dict(argstr="-fslgrad %s %s", xor=["grad_file"]),
         in_bval=dict(extensions=None),
         in_bvec=dict(argstr="-fslgrad %s %s", extensions=None),
-        in_epi=dict(argstr="-se_epi %s", extensions=None, position=-5),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=-10),
+        in_epi=dict(argstr="-se_epi %s", extensions=None),
+        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=0),
         nthreads=dict(argstr="-nthreads %d", nohash=True),
         out_file=dict(
-            argstr="%s", extensions=None, mandatory=True, position=-9, usedefault=True
+            argstr="%s", extensions=None, mandatory=True, position=1, usedefault=True
         ),
-        out_grad_fsl=dict(argstr="%s, %s", position=-1, requires=["export_grad_fsl"]),
+        out_grad_fsl=dict(argstr="%s, %s", requires=["export_grad_fsl"]),
         out_grad_mrtrix=dict(
             argstr="%s",
             extensions=None,
-            position=-1,
             requires=["export_grad_mrtrix"],
             usedefault=True,
         ),
-        pe_dir=dict(argstr="-pe_dir %s", mandatory=True, position=-7),
-        ro_time=dict(argstr="-readout_time %f", position=-6),
-        rpe_options=dict(argstr="%s", mandatory=True, position=-8),
-        topup_options=dict(argstr="-topup_options %s", position=-3),
+        pe_dir=dict(argstr="-pe_dir %s", mandatory=True),
+        ro_time=dict(argstr="-readout_time %f"),
+        rpe_options=dict(argstr="-rpe_%s", mandatory=True, position=2),
+        topup_options=dict(argstr='-topup_options "%s"'),
     )
     inputs = DWIPreproc.input_spec()
 
