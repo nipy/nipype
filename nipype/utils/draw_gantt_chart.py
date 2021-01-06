@@ -153,13 +153,14 @@ def calculate_resource_timeseries(events, resource):
     all_res = 0.0
 
     # Iterate through the events
+    nan = {"Unknown", "N/A"}
     for _, event in sorted(events.items()):
         if event["event"] == "start":
-            if resource in event and event[resource] != "Unknown":
+            if resource in event and event[resource] not in nan:
                 all_res += float(event[resource])
             current_time = event["start"]
         elif event["event"] == "finish":
-            if resource in event and event[resource] != "Unknown":
+            if resource in event and event[resource] not in nan:
                 all_res -= float(event[resource])
             current_time = event["finish"]
         res[current_time] = all_res
