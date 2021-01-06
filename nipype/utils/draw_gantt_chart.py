@@ -10,6 +10,7 @@ import datetime
 import simplejson as json
 
 from collections import OrderedDict
+from warnings import warn
 
 # Pandas
 try:
@@ -66,9 +67,9 @@ def create_event_dict(start_time, nodes_list):
         finish_delta = (node["finish"] - start_time).total_seconds()
 
         # Populate dictionary
-        if events.get(start_delta) or events.get(finish_delta):
+        if events.get(start_delta):
             err_msg = "Event logged twice or events started at exact same time!"
-            raise KeyError(err_msg)
+            warn(str(KeyError(err_msg)), category=Warning)
         events[start_delta] = start_node
         events[finish_delta] = finish_node
 
