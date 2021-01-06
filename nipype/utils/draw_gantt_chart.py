@@ -307,7 +307,7 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes, co
             "offset": offset,
             "scale_duration": scale_duration,
             "color": color,
-            "node_name": node["name"],
+            "node_name": node.get("name", node.get("id", "")),
             "node_dur": node["duration"] / 60.0,
             "node_start": node_start.strftime("%Y-%m-%d %H:%M:%S"),
             "node_finish": node_finish.strftime("%Y-%m-%d %H:%M:%S"),
@@ -526,6 +526,20 @@ def generate_gantt_chart(
 
     # Read in json-log to get list of node dicts
     nodes_list = log_to_dict(logfile)
+
+    # Only include nodes with timing information, and covert timestamps
+    # from strings to datetimes
+    nodes_list = [{
+        k: datetime.datetime.strptime(
+            i[k], "%Y-%m-%dT%H:%M:%S.%f"
+        ) if k in {"start", "finish"} else i[k] for k in i
+    } for i in nodes_list if "start" in i and "finish" in i]
+
+    for node in nodes_list:
+        if "duration" not in node:
+            node["duration"] = (
+                node["finish"] - node["start"]
+            ).total_seconds()
 
     # Create the header of the report with useful information
     start_node = nodes_list[0]
