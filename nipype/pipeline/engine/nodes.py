@@ -610,9 +610,9 @@ Error populating the inputs of node "%s": the results file of the source node \
                 # input_tries = 1 # Default no reties
                 # input_retry_delay = 5
                 # input_retry_exponential_backoff_factor = 1
-                input_tries = self.config["execution"]["input_tries"]
-                input_retry_delay = self.config["execution"]["input_retry_delay"]
-                input_retry_exp_backoff_factor = self.config["execution"]["input_retry_exp_backoff_factor"]
+                input_tries = int(self.config["execution"]["input_tries"])
+                input_retry_delay = int(self.config["execution"]["input_retry_delay"])
+                input_retry_exp_backoff_factor = int(self.config["execution"]["input_retry_exp_backoff_factor"])
                 for try_n in range(input_tries):
                     try:
                         self.set_input(key, deepcopy(output_value))
