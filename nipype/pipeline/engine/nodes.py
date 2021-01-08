@@ -620,7 +620,11 @@ Error populating the inputs of node "%s": the results file of the source node \
                     except traits.TraitError as e:
                         traits_err = e
                     if input_tries != 1:
-                        time.sleep(input_retry_delay*try_n*input_retry_exp_backoff_factor)
+                        sleep_time = input_retry_delay*try_n*input_retry_exp_backoff_factor
+                        logger.warning("Input set failed for : {0} -> {1}. Retrying in {2} secs. ".format(key,
+                                                                                                          results_fname,
+                                                                                                          sleep_time))
+                        time.sleep(sleep_time)
                 if traits_err is not None:
                     msg = (
                         traits_err.args[0],
