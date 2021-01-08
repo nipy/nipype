@@ -531,17 +531,20 @@ def generate_gantt_chart(
 
     # Only include nodes with timing information, and covert timestamps
     # from strings to datetimes
-    nodes_list = [{
-        k: datetime.datetime.strptime(
-            i[k], "%Y-%m-%dT%H:%M:%S.%f"
-        ) if k in {"start", "finish"} else i[k] for k in i
-    } for i in nodes_list if "start" in i and "finish" in i]
+    nodes_list = [
+        {
+            k: datetime.datetime.strptime(i[k], "%Y-%m-%dT%H:%M:%S.%f")
+            if k in {"start", "finish"}
+            else i[k]
+            for k in i
+        }
+        for i in nodes_list
+        if "start" in i and "finish" in i
+    ]
 
     for node in nodes_list:
         if "duration" not in node:
-            node["duration"] = (
-                node["finish"] - node["start"]
-            ).total_seconds()
+            node["duration"] = (node["finish"] - node["start"]).total_seconds()
 
     # Create the header of the report with useful information
     start_node = nodes_list[0]

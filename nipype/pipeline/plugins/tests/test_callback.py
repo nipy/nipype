@@ -72,13 +72,13 @@ def test_callback_gantt(tmpdir, plugin):
     from nipype.utils.profiler import log_nodes_cb
     from nipype.utils.draw_gantt_chart import generate_gantt_chart
 
-    log_filename = 'callback.log'
-    logger = logging.getLogger('callback')
+    log_filename = "callback.log"
+    logger = logging.getLogger("callback")
     logger.setLevel(logging.DEBUG)
     handler = logging.FileHandler(log_filename)
     logger.addHandler(handler)
 
-    #create workflow
+    # create workflow
     wf = pe.Workflow(name="test", base_dir=tmpdir.strpath)
     f_node = pe.Node(
         niu.Function(function=func, input_names=[], output_names=[]), name="f_node"
@@ -88,8 +88,8 @@ def test_callback_gantt(tmpdir, plugin):
 
     plugin_args = {"status_callback": log_nodes_cb}
     if plugin != "Linear":
-        plugin_args['n_procs'] = 8
+        plugin_args["n_procs"] = 8
     wf.run(plugin=plugin, plugin_args=plugin_args)
 
-    generate_gantt_chart('callback.log', 1 if plugin == "Linear" else 8)
-    assert path.exists('callback.log.html')
+    generate_gantt_chart("callback.log", 1 if plugin == "Linear" else 8)
+    assert path.exists("callback.log.html")
