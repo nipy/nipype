@@ -72,7 +72,7 @@ def test_callback_gantt(tmpdir, plugin):
     from nipype.utils.profiler import log_nodes_cb
     from nipype.utils.draw_gantt_chart import generate_gantt_chart
 
-    log_filename = "callback.log"
+    log_filename = path.join(tmpdir, "callback.log")
     logger = logging.getLogger("callback")
     logger.setLevel(logging.DEBUG)
     handler = logging.FileHandler(log_filename)
@@ -91,5 +91,7 @@ def test_callback_gantt(tmpdir, plugin):
         plugin_args["n_procs"] = 8
     wf.run(plugin=plugin, plugin_args=plugin_args)
 
-    generate_gantt_chart("callback.log", 1 if plugin == "Linear" else 8)
-    assert path.exists("callback.log.html")
+    generate_gantt_chart(
+        path.join(tmpdir, "callback.log"), 1 if plugin == "Linear" else 8
+    )
+    assert path.exists(path.join(tmpdir, "callback.log.html"))
