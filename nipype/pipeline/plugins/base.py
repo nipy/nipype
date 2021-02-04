@@ -549,7 +549,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         pyscript = create_pyscript(node, updatehash=updatehash)
         batch_dir, name = os.path.split(pyscript)
         name = ".".join(name.split(".")[:-1])
-        batchscript = "\n".join((self._template, "%s %s" % (sys.executable, pyscript)))
+        batchscript = "\n".join((self._template[:-1], "%s %s" % (sys.executable, pyscript)))
         batchscriptfile = os.path.join(batch_dir, "batchscript_%s.sh" % name)
         with open(batchscriptfile, "wt") as fp:
             fp.writelines(batchscript)
