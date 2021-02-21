@@ -2,30 +2,32 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """ class mixin and utilities for enabling reports for nipype interfaces """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 
 import os
 from abc import abstractmethod
 
 from ... import logging
-from ..base import (
-    File, BaseInterface, BaseInterfaceInputSpec, TraitedSpec)
+from ..base import File, BaseInterface, BaseInterfaceInputSpec, TraitedSpec
 
-iflogger = logging.getLogger('nipype.interface')
+iflogger = logging.getLogger("nipype.interface")
 
 
 class ReportCapableInputSpec(BaseInterfaceInputSpec):
-    out_report = File('report', usedefault=True, hash_files=False,
-                      desc='filename for the visual report')
+    out_report = File(
+        "report",
+        usedefault=True,
+        hash_files=False,
+        desc="filename for the visual report",
+    )
 
 
 class ReportCapableOutputSpec(TraitedSpec):
-    out_report = File(desc='filename for the visual report')
+    out_report = File(desc="filename for the visual report")
 
 
 class ReportCapableInterface(BaseInterface):
     """Mixin to enable reporting for Nipype interfaces"""
+
     _out_report = None
 
     def __init__(self, generate_report=False, **kwargs):
@@ -41,8 +43,9 @@ class ReportCapableInterface(BaseInterface):
 
         self._out_report = self.inputs.out_report
         if not os.path.isabs(self._out_report):
-            self._out_report = os.path.abspath(os.path.join(runtime.cwd,
-                                                            self._out_report))
+            self._out_report = os.path.abspath(
+                os.path.join(runtime.cwd, self._out_report)
+            )
 
         self._generate_report()
 
@@ -54,7 +57,7 @@ class ReportCapableInterface(BaseInterface):
         except NotImplementedError:
             outputs = {}
         if self._out_report is not None:
-            outputs['out_report'] = self._out_report
+            outputs["out_report"] = self._out_report
         return outputs
 
     @abstractmethod

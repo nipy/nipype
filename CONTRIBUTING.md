@@ -6,8 +6,8 @@ These guidelines are designed to make it as easy as possible to get involved. If
 
 Before you start you'll need to set up a free [GitHub][link_github] account and sign in. Here are some [instructions][link_signupinstructions].
 If you are not familiar with version control systems such as git,
- [introductions and tutorials](http://www.reproducibleimaging.org/module-reproducible-basics/02-vcs/)
- may be found on [ReproducibleImaging.org](https://www.reproducibleimaging.org/).
+we recommend the [VCS module](http://www.reproducibleimaging.org/module-reproducible-basics/02-vcs/)
+available from [ReproNim](http://www.reproducibleimaging.org/).
 
 Already know what you're looking for in this guide? Jump to the following sections:
 * [Understanding issue labels](#issue-labels)
@@ -22,7 +22,7 @@ The current list of issue labels are [here][link_labels] and include:
 
 * [![Bugs](https://img.shields.io/badge/-bugs-fc2929.svg)][link_bugs] *These issues point to problems in the project.*
 
-    If you find new a bug, please provide as much information as possible to recreate the error.
+    If you find a new bug, please provide as much information as possible to recreate the error.
     The [issue template][link_issue_template] will automatically populate any new issue you open, and contains information we've found to be helpful in addressing bug reports.
     Please fill it out to the best of your ability!
 
@@ -85,6 +85,8 @@ If you get no errors, you're ready to submit your changes!
 It's a good practice to create [a new branch](https://help.github.com/articles/about-branches/)
 of the repository for a new set of changes.
 
+For Python 2.7-compatible fixes, the branch should start from the `maint/1.3.x` branch on the
+upstream repository.
 
 **4. Submit a [pull request][link_pullrequest].**
 
@@ -122,7 +124,7 @@ One your PR is ready a member of the development team will review your changes t
 In general, do not catch exceptions without good reason.
 For non-fatal exceptions, log the exception as a warning and add more information about what may have caused the error.
 
-If you do need to catch an exception, raise a new exception using ``raise_from(NewException("message"), oldException)`` from ``future``.
+If you do need to catch an exception, raise a new exception using ``raise NewException("message") from oldException)``.
 Do not log this, as it creates redundant/confusing logs.
 
 #### Testing

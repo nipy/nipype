@@ -5,19 +5,25 @@ If you spot a bug, please report it on the mailing list and/or change the genera
 
 import os
 
-from ...base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
-                     TraitedSpec, File, Directory, traits, isdefined,
-                     InputMultiPath, OutputMultiPath)
+from ...base import (
+    CommandLine,
+    CommandLineInputSpec,
+    SEMLikeCommandLine,
+    TraitedSpec,
+    File,
+    Directory,
+    traits,
+    isdefined,
+    InputMultiPath,
+    OutputMultiPath,
+)
 
 
 class maxcurvatureInputSpec(CommandLineInputSpec):
     image = File(desc="FA Image", exists=True, argstr="--image %s")
     output = traits.Either(
-        traits.Bool,
-        File(),
-        hash_files=False,
-        desc="Output File",
-        argstr="--output %s")
+        traits.Bool, File(), hash_files=False, desc="Output File", argstr="--output %s"
+    )
     sigma = traits.Float(desc="Scale of Gradients", argstr="--sigma %f")
     verbose = traits.Bool(desc="produce verbose output", argstr="--verbose ")
 
@@ -52,5 +58,5 @@ acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); (1=University of Iowa D
     input_spec = maxcurvatureInputSpec
     output_spec = maxcurvatureOutputSpec
     _cmd = " maxcurvature "
-    _outputs_filenames = {'output': 'output.nii'}
+    _outputs_filenames = {"output": "output.nii"}
     _redirect_x = False

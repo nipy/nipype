@@ -5,49 +5,63 @@ If you spot a bug, please report it on the mailing list and/or change the genera
 
 import os
 
-from ...base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
-                     TraitedSpec, File, Directory, traits, isdefined,
-                     InputMultiPath, OutputMultiPath)
+from ...base import (
+    CommandLine,
+    CommandLineInputSpec,
+    SEMLikeCommandLine,
+    TraitedSpec,
+    File,
+    Directory,
+    traits,
+    isdefined,
+    InputMultiPath,
+    OutputMultiPath,
+)
 
 
 class BRAINSPosteriorToContinuousClassInputSpec(CommandLineInputSpec):
     inputWhiteVolume = File(
         desc="White Matter Posterior Volume",
         exists=True,
-        argstr="--inputWhiteVolume %s")
+        argstr="--inputWhiteVolume %s",
+    )
     inputBasalGmVolume = File(
         desc="Basal Grey Matter Posterior Volume",
         exists=True,
-        argstr="--inputBasalGmVolume %s")
+        argstr="--inputBasalGmVolume %s",
+    )
     inputSurfaceGmVolume = File(
         desc="Surface Grey Matter Posterior Volume",
         exists=True,
-        argstr="--inputSurfaceGmVolume %s")
+        argstr="--inputSurfaceGmVolume %s",
+    )
     inputCsfVolume = File(
-        desc="CSF Posterior Volume", exists=True, argstr="--inputCsfVolume %s")
+        desc="CSF Posterior Volume", exists=True, argstr="--inputCsfVolume %s"
+    )
     inputVbVolume = File(
-        desc="Venous Blood Posterior Volume",
-        exists=True,
-        argstr="--inputVbVolume %s")
+        desc="Venous Blood Posterior Volume", exists=True, argstr="--inputVbVolume %s"
+    )
     inputCrblGmVolume = File(
         desc="Cerebellum Grey Matter Posterior Volume",
         exists=True,
-        argstr="--inputCrblGmVolume %s")
+        argstr="--inputCrblGmVolume %s",
+    )
     inputCrblWmVolume = File(
         desc="Cerebellum White Matter Posterior Volume",
         exists=True,
-        argstr="--inputCrblWmVolume %s")
+        argstr="--inputCrblWmVolume %s",
+    )
     outputVolume = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Output Continuous Tissue Classified Image",
-        argstr="--outputVolume %s")
+        argstr="--outputVolume %s",
+    )
 
 
 class BRAINSPosteriorToContinuousClassOutputSpec(TraitedSpec):
-    outputVolume = File(
-        desc="Output Continuous Tissue Classified Image", exists=True)
+    outputVolume = File(desc="Output Continuous Tissue Classified Image", exists=True)
 
 
 class BRAINSPosteriorToContinuousClass(SEMLikeCommandLine):
@@ -72,5 +86,5 @@ acknowledgements: Funding for this work was provided by NIH/NINDS award NS050568
     input_spec = BRAINSPosteriorToContinuousClassInputSpec
     output_spec = BRAINSPosteriorToContinuousClassOutputSpec
     _cmd = " BRAINSPosteriorToContinuousClass "
-    _outputs_filenames = {'outputVolume': 'outputVolume'}
+    _outputs_filenames = {"outputVolume": "outputVolume"}
     _redirect_x = False

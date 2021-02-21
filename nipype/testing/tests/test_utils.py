@@ -7,7 +7,8 @@
 import os
 import warnings
 import subprocess
-from mock import patch, MagicMock
+from unittest.mock import patch, MagicMock
+from unittest import SkipTest
 from nipype.testing.utils import TempFATFS
 
 
@@ -15,15 +16,15 @@ def test_tempfatfs():
     try:
         fatfs = TempFATFS()
     except (IOError, OSError):
-        warnings.warn("Cannot mount FAT filesystems with FUSE")
-    else:
-        with fatfs as tmp_dir:
-            assert os.path.exists(tmp_dir)
+        raise SkipTest("Cannot mount FAT filesystems with FUSE")
+    with fatfs as tmp_dir:
+        assert os.path.exists(tmp_dir)
 
 
 @patch(
-    'subprocess.check_call',
-    MagicMock(side_effect=subprocess.CalledProcessError('', '')))
+    "subprocess.check_call",
+    MagicMock(side_effect=subprocess.CalledProcessError("", "")),
+)
 def test_tempfatfs_calledprocesserror():
     try:
         TempFATFS()
@@ -34,8 +35,8 @@ def test_tempfatfs_calledprocesserror():
         assert False
 
 
-@patch('subprocess.check_call', MagicMock())
-@patch('subprocess.Popen', MagicMock(side_effect=OSError()))
+@patch("subprocess.check_call", MagicMock())
+@patch("subprocess.Popen", MagicMock(side_effect=OSError()))
 def test_tempfatfs_oserror():
     try:
         TempFATFS()

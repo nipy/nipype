@@ -29,3 +29,5 @@ __pycache__/
 .ipynb_checkpoints/
 .ruby-version
 .pytest_cache
+.vscode/
+venv/

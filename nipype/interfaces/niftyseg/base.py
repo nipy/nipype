@@ -15,8 +15,6 @@ Examples
 --------
 See the docstrings of the individual classes for examples.
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 
 from ..niftyfit.base import NiftyFitCommand
 
@@ -25,7 +23,8 @@ class NiftySegCommand(NiftyFitCommand):
     """
     Base support interface for NiftySeg commands.
     """
-    _suffix = '_ns'
+
+    _suffix = "_ns"
     _min_version = None
 
     def __init__(self, **inputs):
@@ -33,4 +32,5 @@ class NiftySegCommand(NiftyFitCommand):
 
     def get_version(self):
         return super(NiftySegCommand, self).version_from_command(
-            cmd='seg_EM', flag='--version')
+            cmd="seg_EM", flag="--version"
+        )

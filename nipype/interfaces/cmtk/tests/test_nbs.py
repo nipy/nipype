@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 from ..nbs import NetworkBasedStatistic
 from ....utils.misc import package_check
 import numpy as np
@@ -7,7 +6,7 @@ import pytest
 
 have_cv = True
 try:
-    package_check('cviewer')
+    package_check("cviewer")
 except Exception as e:
     have_cv = False
 
@@ -19,15 +18,14 @@ def creating_graphs(tmpdir):
     for idx, name in enumerate(graphnames):
         graph = np.random.rand(10, 10)
         G = nx.from_numpy_matrix(graph)
-        out_file = tmpdir.strpath + graphnames[idx] + '.pck'
+        out_file = tmpdir.strpath + graphnames[idx] + ".pck"
         # Save as pck file
         nx.write_gpickle(G, out_file)
         graphlist.append(out_file)
     return graphlist
 
 
-@pytest.mark.skipif(
-    have_cv, reason="tests for import error, cviewer available")
+@pytest.mark.skipif(have_cv, reason="tests for import error, cviewer available")
 def test_importerror(creating_graphs, tmpdir):
     tmpdir.chdir()
     graphlist = creating_graphs

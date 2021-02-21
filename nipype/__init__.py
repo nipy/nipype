@@ -1,14 +1,20 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
+"""
+Information on specific functions, classes, and methods.
 
+:Release: |version|
+:Date: |today|
+
+Top-level module API
+--------------------
+
+"""
 import os
 from distutils.version import LooseVersion
 
-from .info import (LONG_DESCRIPTION as __doc__, URL as __url__, STATUS as
-                   __status__, __version__)
+from .info import URL as __url__, STATUS as __status__, __version__
 from .utils.config import NipypeConfig
 from .utils.logger import Logging
 from .refs import due
@@ -16,6 +22,7 @@ from .pkg_info import get_pkg_info as _get_pkg_info
 
 try:
     import faulthandler
+
     faulthandler.enable()
 except (ImportError, IOError) as e:
     pass
@@ -29,18 +36,16 @@ class NipypeTester(object):
         try:
             import pytest
         except ImportError:
-            raise RuntimeError(
-                'py.test not installed, run: pip install pytest')
+            raise RuntimeError("py.test not installed, run: pip install pytest")
         args = []
         if not doctests:
-            args.extend(['-p', 'no:doctest'])
+            args.extend(["-p", "no:doctest"])
         if parallel:
             try:
                 import xdist
             except ImportError:
-                raise RuntimeError(
-                    "pytest-xdist required for parallel run")
-            args.append('-n auto')
+                raise RuntimeError("pytest-xdist required for parallel run")
+            args.append("-n auto")
         args.append(os.path.dirname(__file__))
         pytest.main(args=args)
 
@@ -54,50 +59,41 @@ def get_info():
 
 
 from .pipeline import Node, MapNode, JoinNode, Workflow
-from .interfaces import (DataGrabber, DataSink, SelectFiles, IdentityInterface,
-                         Rename, Function, Select, Merge)
+from .interfaces import (
+    DataGrabber,
+    DataSink,
+    SelectFiles,
+    IdentityInterface,
+    Rename,
+    Function,
+    Select,
+    Merge,
+)
 
 
 def check_latest_version(raise_exception=False):
-    """Check for the latest version of the library
+    """
+    Check for the latest version of the library.
 
-    parameters:
-    raise_exception: boolean
+    Parameters
+    ----------
+    raise_exception: bool
         Raise a RuntimeError if a bad version is being used
     """
     import etelemetry
-    logger = logging.getLogger('nipype.utils')
 
-    INIT_MSG = "Running {packname} version {version} (latest: {latest})".format
+    logger = logging.getLogger("nipype.utils")
+    return etelemetry.check_available_version(
+        "nipy/nipype", __version__, logger, raise_exception
+    )
 
-    latest = {"version": 'Unknown', "bad_versions": []}
-    result = None
-    try:
-        result = etelemetry.get_project("nipy/nipype")
-    except Exception as e:
-        logger.warning("Could not check for version updates: \n%s", e)
-    finally:
-        if result:
-            latest.update(**result)
-            if LooseVersion(__version__) != LooseVersion(latest["version"]):
-                logger.info(INIT_MSG(packname='nipype',
-                                     version=__version__,
-                                     latest=latest["version"]))
-            if latest["bad_versions"] and \
-                    any([LooseVersion(__version__) == LooseVersion(ver)
-                         for ver in latest["bad_versions"]]):
-                message = ('You are using a version of Nipype with a critical '
-                           'bug. Please use a different version.')
-                if raise_exception:
-                    raise RuntimeError(message)
-                else:
-                    logger.critical(message)
-    return latest
 
 # Run telemetry on import for interactive sessions, such as IPython, Jupyter notebooks, Python REPL
-if config.getboolean('execution', 'check_version'):
+if config.getboolean("execution", "check_version"):
     import __main__
-    if not hasattr(__main__, '__file__'):
+
+    if not hasattr(__main__, "__file__") and "NIPYPE_NO_ET" not in os.environ:
         from .interfaces.base import BaseInterface
+
         if BaseInterface._etelemetry_version_data is None:
             BaseInterface._etelemetry_version_data = check_latest_version()
