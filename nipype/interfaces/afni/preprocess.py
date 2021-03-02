@@ -2705,7 +2705,7 @@ class NetCorr(AFNICommand):
     >>> ncorr.inputs.fish_z = True
     >>> ncorr.inputs.out_file = 'sub0.tp1.ncorr'
     >>> ncorr.cmdline
-    '3dNetCorr -prefix sub0.tp1.ncorr -inset functional.nii -mask mask.nii -in_rois maps.nii -ts_wb_corr -ts_wb_Z -fish_z'
+    '3dNetCorr -prefix sub0.tp1.ncorr -fish_z -inset functional.nii -in_rois maps.nii -mask mask.nii -ts_wb_Z -ts_wb_corr'
     >>> res = ncorr.run()  # doctest: +SKIP
 
     """
