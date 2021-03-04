@@ -169,11 +169,11 @@ class BET(FSLCommand):
         out_file = self.inputs.out_file
         if not isdefined(out_file) and isdefined(self.inputs.in_file):
             out_file = self._gen_fname(self.inputs.in_file, suffix="_brain")
-        return os.path.abspath(out_file)
+        return op.relpath(out_file, start=os.getcwd())
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["out_file"] = self._gen_outfilename()
+        outputs["out_file"] = os.path.abspath(self._gen_outfilename())
 
         basename = os.path.basename(outputs["out_file"])
         cwd = os.path.dirname(outputs["out_file"])
