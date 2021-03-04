@@ -2684,8 +2684,9 @@ class NetCorrInputSpec(AFNICommandInputSpec):
     )
 
 class NetCorrOutputSpec(TraitedSpec):
-    out_matrix = File(desc="output text file for correlation stats")
-
+    out_corr_matrix = File(desc="output correlation matrix between ROIs written to a text file with .netcc suffix")
+    out_corr_maps = traits.List(File(), desc="output correlation maps in Pearson and/or Z-scores")
+    
 class NetCorr(AFNICommand):
     """Calculate correlation matrix of a set of ROIs (using mean time series of
     each). Several networks may be analyzed simultaneously, one per brick.
@@ -2715,6 +2716,8 @@ class NetCorr(AFNICommand):
     output_spec = NetCorrOutputSpec
 
     def _list_outputs(self):
+        import glob
+        
         outputs = self.output_spec().get()
 
         if not isdefined(self.inputs.out_file):
@@ -2723,11 +2726,13 @@ class NetCorr(AFNICommand):
             prefix = self.inputs.out_file
 
         # All outputs should be in the same directory as the prefix
-        out_dir = os.path.dirname(os.path.abspath(prefix))
+        odir = os.path.dirname(os.path.abspath(prefix))
+        outputs["out_corr_matrix"] = glob.glob(os.path.join(odir, "*.netcc"))[0]
 
-        outputs["out_matrix"] = (
-            fname_presuffix(prefix, suffix="_000", use_ext=False, newpath=out_dir) + ".netcc"
-        )
+        if isdefined(self.inputs.ts_wb_corr) or isdefined(self.inputs.ts_Z_corr):
+            corrdir = os.path.join(odir, prefix + "_000_INDIV")
+            outputs["out_corr_maps"] = glob.glob(os.path.join(corrdir, "*.nii.gz"))
+
         return outputs
 
 
