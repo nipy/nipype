@@ -41,8 +41,7 @@ def test_bet(setup_infile):
     # Test generated outfile name
     better.inputs.in_file = tmp_infile
     outfile = fsl_name(better, "foo_brain")
-    outpath = os.path.join(os.getcwd(), outfile)
-    realcmd = "bet %s %s" % (tmp_infile, outpath)
+    realcmd = "bet %s %s" % (tmp_infile, outfile)
     assert better.cmdline == realcmd
     # Test specified outfile name
     outfile = fsl_name(better, "/newdata/bar")
@@ -79,12 +78,11 @@ def test_bet(setup_infile):
     # test each of our arguments
     better = fsl.BET()
     outfile = fsl_name(better, "foo_brain")
-    outpath = os.path.join(os.getcwd(), outfile)
     for name, settings in list(opt_map.items()):
         better = fsl.BET(**{name: settings[1]})
         # Add mandatory input
         better.inputs.in_file = tmp_infile
-        realcmd = " ".join([better.cmd, tmp_infile, outpath, settings[0]])
+        realcmd = " ".join([better.cmd, tmp_infile, outfile, settings[0]])
         assert better.cmdline == realcmd
 
 
