@@ -35,6 +35,7 @@ class BETInputSpec(FSLCommandInputSpec):
         argstr="%s",
         position=0,
         mandatory=True,
+        copyfile=False,
     )
     out_file = File(
         desc="name of output skull stripped image",
@@ -1309,10 +1310,7 @@ class FNIRT(FSLCommand):
 
             if key == "out_intensitymap_file" and isdefined(outputs[key]):
                 basename = FNIRT.intensitymap_file_basename(outputs[key])
-                outputs[key] = [
-                    outputs[key],
-                    "%s.txt" % basename,
-                ]
+                outputs[key] = [outputs[key], "%s.txt" % basename]
         return outputs
 
     def _format_arg(self, name, spec, value):
