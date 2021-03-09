@@ -245,10 +245,10 @@ class CAT12SegmentOutputSpec(TraitedSpec):
     ##########################################
     # Label XML files
     ##########################################
-    label_files = List(File(exists=True), desc="Files with the labeled version of the segmentations.")
+    label_files = List(File(exists=True), desc="Files with the measures extracted for OI ands ROIs")
 
-    label_rois = File(exists=True, desc="Files with labeled version of segmentations of ROIs Volumes")
-    label_roi = File(exists=True, desc="Files with labeled version of segmentations of ROI Volumes")
+    label_rois = File(exists=True, desc="Files with thickness values of ROIs.")
+    label_roi = File(exists=True, desc="Files with thickness values of ROI.")
 
     ##########################################
     # MRI .nii files

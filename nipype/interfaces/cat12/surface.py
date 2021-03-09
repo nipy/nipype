@@ -146,6 +146,10 @@ class ExtractROIBasedSurfaceMeasuresInputSpec(SPMCommandInputSpec):
                                   mandatory=False, copyfile=False)
 
 
+class ExtractROIBasedSurfaceMeasuresOutputSpec(TraitedSpec):
+    label_files = List(File(exists=True), desc="Files with the measures extracted for ROIs.")
+
+
 class ExtractROIBasedSurfaceMeasures(SPMCommand):
     """
     Extract ROI-based surface values
@@ -183,7 +187,7 @@ class ExtractROIBasedSurfaceMeasures(SPMCommand):
     """
 
     input_spec = ExtractROIBasedSurfaceMeasuresInputSpec
-    output_spec = None
+    output_spec = ExtractROIBasedSurfaceMeasuresOutputSpec
 
     def __init__(self, **inputs):
         _local_version = SPMCommand().version
@@ -202,7 +206,15 @@ class ExtractROIBasedSurfaceMeasures(SPMCommand):
         return super(ExtractROIBasedSurfaceMeasures, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
-        pass
+        outputs = self._outputs().get()
+
+        outputs["label_files"] = []
+        for f in self.inputs.lh_roi_atlas:
+            pth, base, ext = split_filename(f)
+
+            outputs["label_files"].extend([os.path.join(os.path.join(pth, "label"), f) for f in
+                                           os.listdir(os.path.join(pth, "label"))
+                                           if os.path.isfile(os.path.join(os.path.join(pth, "label"), f))])
 
 
 class Cell:
