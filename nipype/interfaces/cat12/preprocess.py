@@ -35,9 +35,9 @@ class CAT12SegmentInputSpec(SPMCommandInputSpec):
 
     Examples
     --------
-    path_mr = 'structural.nii'
-    cat = CAT12Segment(in_files=path_mr)
-    cat.run() # doctest: +SKIP
+    >>> path_mr = 'structural.nii'
+    >>> cat = CAT12Segment(in_files=path_mr)
+    >>> cat.run() # doctest: +SKIP
     """
 
     in_files = InputMultiPath(ImageFileSPM(exists=True), field="data", desc="file to segment", mandatory=True,
@@ -245,50 +245,50 @@ class CAT12SegmentOutputSpec(TraitedSpec):
     ##########################################
     # Label XML files
     ##########################################
-    label_files = List(File(exists=True))
+    label_files = List(File(exists=True), desc="Files with the labeled version of the segmentations.")
 
-    label_rois = File(exists=True, desc="ROIs Volumes")
-    label_roi = File(exists=True, desc="ROI volumes")
+    label_rois = File(exists=True, desc="Files with labeled version of segmentations of ROIs Volumes")
+    label_roi = File(exists=True, desc="Files with labeled version of segmentations of ROI Volumes")
 
     ##########################################
     # MRI .nii files
     ##########################################
 
-    mri_images = List(File(exists=True))
+    mri_images = List(File(exists=True), desc="Different segmented images.")
 
     # Grey Matter
-    gm_modulated_image = File(exists=True)
-    gm_dartel_image = File(exists=True)
-    gm_native_image = File(exists=True)
+    gm_modulated_image = File(exists=True, desc="Grey matter modulated image.")
+    gm_dartel_image = File(exists=True, desc="Grey matter dartel image.")
+    gm_native_image = File(exists=True, desc="Grey matter native space.")
 
     # White Matter
-    wm_modulated_image = File(exists=True)
-    wm_dartel_image = File(exists=True)
-    wm_native_image = File(exists=True)
+    wm_modulated_image = File(exists=True, desc="White matter modulated image.")
+    wm_dartel_image = File(exists=True, desc="White matter dartel image.")
+    wm_native_image = File(exists=True, desc="White matter in native space.")
 
     # CSF
-    csf_modulated_image = File(exists=True)
-    csf_dartel_image = File(exists=True)
-    csf_native_image = File(exists=True)
+    csf_modulated_image = File(exists=True, desc="CSF modulated image.")
+    csf_dartel_image = File(exists=True, desc="CSF dartel image.")
+    csf_native_image = File(exists=True, desc="CSF in native space.")
 
-    bias_corrected_image = File(exists=True)
+    bias_corrected_image = File(exists=True, desc="Bias corrected image")
     ##########################################
     # Surface files
     ##########################################
 
-    surface_files = List(File(exists=True))
+    surface_files = List(File(exists=True), desc="Surface files")
 
     # Right hemisphere
-    rh_central_surface = File(exists=True)
-    rh_sphere_surface = File(exists=True)
+    rh_central_surface = File(exists=True, desc="Central right hemisphere files")
+    rh_sphere_surface = File(exists=True, desc="Sphere right hemisphere files")
 
     # Left hemisphere
-    lh_central_surface = File(exists=True)
-    lh_sphere_surface = File(exists=True)
+    lh_central_surface = File(exists=True, desc="Central left hemisphere files")
+    lh_sphere_surface = File(exists=True, desc="Sphere left hemisphere files")
 
     # Report files
-    report_files = List(File(exists=True))
-    report = File(exists=True)
+    report_files = List(File(exists=True), desc="Report files.")
+    report = File(exists=True, desc="Report file.")
 
 
 class CAT12Segment(SPMCommand):

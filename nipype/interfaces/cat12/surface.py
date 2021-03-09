@@ -31,26 +31,23 @@ class ExtractAdditionalSurfaceParametersInputSpec(SPMCommandInputSpec):
 
 
 class ExtractAdditionalSurfaceParametersOutputSpec(TraitedSpec):
-    lh_extracted_files = List(File(exists=True))
-    rh_extracted_files = List(File(exists=True))
+    lh_extracted_files = List(File(exists=True), desc="Files of left Hemisphere extracted measures")
+    rh_extracted_files = List(File(exists=True), desc="Files of right Hemisphere extracted measures")
 
-    lh_gyrification = List(File(exists=True))
-    rh_gyrification = List(File(exists=True))
+    lh_gyrification = List(File(exists=True), desc="Gyrification of left Hemisphere")
+    rh_gyrification = List(File(exists=True), desc="Gyrification of right Hemisphere")
 
-    lh_gyrification_resampled = List(File(exists=True))
-    rh_gyrification_resampled = List(File(exists=True))
+    lh_gmv = List(File(exists=True), desc="Grey matter volume of left Hemisphere")
+    rh_gmv = List(File(exists=True), desc="Grey matter volume of right Hemisphere")
 
-    lh_gmv = List(File(exists=True))
-    rh_gmv = List(File(exists=True))
+    lh_area = List(File(exists=True), desc="Area of left Hemisphere")
+    rh_area = List(File(exists=True), desc="Area of right Hemisphere")
 
-    lh_area = List(File(exists=True))
-    rh_area = List(File(exists=True))
+    lh_depth = List(File(exists=True), desc="Depth of left Hemisphere")
+    rh_depth = List(File(exists=True), desc="Depth of right Hemisphere")
 
-    lh_depth = List(File(exists=True))
-    rh_depth = List(File(exists=True))
-
-    lh_fractaldimension = List(File(exists=True))
-    rh_fractaldimension = List(File(exists=True))
+    lh_fractaldimension = List(File(exists=True), desc="Fractal Dimension of left Hemisphere")
+    rh_fractaldimension = List(File(exists=True), desc="Fractal Dimension of right Hemisphere")
 
 
 class ExtractAdditionalSurfaceParameters(SPMCommand):
