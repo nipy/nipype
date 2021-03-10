@@ -31,6 +31,9 @@ def setup_infile(tmpdir):
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_bet(setup_infile):
     tmp_infile, tp_dir = setup_infile
+    # BET converts the in_file path to be relative to prevent
+    # failure with long paths.
+    tmp_infile = os.path.relpath(tmp_infile, start=os.getcwd())
     better = fsl.BET()
     assert better.cmd == "bet"
 
