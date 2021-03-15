@@ -133,13 +133,13 @@ class ExtractROIBasedSurfaceMeasuresInputSpec(SPMCommandInputSpec):
     lh_roi_atlas = InputMultiPath(File(exists=True), field="rdata", desc="(Left) ROI Atlas. These are the ROI's ",
                                   mandatory=True, copyfile=False)
 
+    rh_roi_atlas = InputMultiPath(File(exists=True), desc="(Right) ROI Atlas. These are the ROI's ",
+                                  mandatory=False, copyfile=False)
+
     lh_surface_measure = InputMultiPath(File(exists=True), field="cdata", desc="(Left) Surface data files. ",
                                         mandatory=True, copyfile=False)
     rh_surface_measure = InputMultiPath(File(exists=True), desc="(Right) Surface data files.",
                                         mandatory=False, copyfile=False)
-
-    rh_roi_atlas = InputMultiPath(File(exists=True), desc="(Right) ROI Atlas. These are the ROI's ",
-                                  mandatory=False, copyfile=False)
 
 
 class ExtractROIBasedSurfaceMeasuresOutputSpec(TraitedSpec):
@@ -194,13 +194,12 @@ class ExtractROIBasedSurfaceMeasures(SPMCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
 
-        outputs["label_files"] = []
-        for f in self.inputs.lh_roi_atlas:
-            pth, base, ext = split_filename(f)
+        pth, base, ext = split_filename(self.inputs.lh_surface_measure[0])
 
-            outputs["label_files"].extend([os.path.join(os.path.join(pth, "label"), f) for f in
-                                           os.listdir(os.path.join(pth, "label"))
-                                           if os.path.isfile(os.path.join(os.path.join(pth, "label"), f))])
+        outputs["label_files"] = [os.path.join(os.path.join(pth, "label"), f) for f in
+                                  os.listdir(os.path.join(pth, "label"))
+                                  if os.path.isfile(os.path.join(os.path.join(pth, "label"), f))]
+        return outputs
 
 
 class Cell:
@@ -227,4 +226,3 @@ class Cell2Str(Cell):
         """Convert input to appropriate format for cat12
         """
         return "{%s}" % self.to_string()
-
