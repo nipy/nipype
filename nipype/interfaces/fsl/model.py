@@ -1886,7 +1886,7 @@ class SmoothEstimateInputSpec(FSLCommandInputSpec):
 class SmoothEstimateOutputSpec(TraitedSpec):
     dlh = traits.Float(desc="smoothness estimate sqrt(det(Lambda))")
     volume = traits.Int(desc="number of voxels in mask")
-    resels = traits.Float(desc="number of resels")
+    resels = traits.Float(desc="number of voxels per resel")
 
 
 class SmoothEstimate(FSLCommand):
