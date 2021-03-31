@@ -35,6 +35,7 @@ class BETInputSpec(FSLCommandInputSpec):
         argstr="%s",
         position=0,
         mandatory=True,
+        copyfile=False,
     )
     out_file = File(
         desc="name of output skull stripped image",
@@ -164,15 +165,27 @@ class BET(FSLCommand):
             self.raise_exception(runtime)
         return runtime
 
+    def _format_arg(self, name, spec, value):
+        formatted = super(BET, self)._format_arg(name, spec, value)
+        if name == "in_file":
+            # Convert to relative path to prevent BET failure
+            # with long paths.
+            return op.relpath(formatted, start=os.getcwd())
+        return formatted
+
     def _gen_outfilename(self):
         out_file = self.inputs.out_file
+        # Generate default output filename if non specified.
         if not isdefined(out_file) and isdefined(self.inputs.in_file):
             out_file = self._gen_fname(self.inputs.in_file, suffix="_brain")
-        return os.path.abspath(out_file)
+            # Convert to relative path to prevent BET failure
+            # with long paths.
+            return op.relpath(out_file, start=os.getcwd())
+        return out_file
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["out_file"] = self._gen_outfilename()
+        outputs["out_file"] = os.path.abspath(self._gen_outfilename())
 
         basename = os.path.basename(outputs["out_file"])
         cwd = os.path.dirname(outputs["out_file"])
@@ -1309,10 +1322,7 @@ class FNIRT(FSLCommand):
 
             if key == "out_intensitymap_file" and isdefined(outputs[key]):
                 basename = FNIRT.intensitymap_file_basename(outputs[key])
-                outputs[key] = [
-                    outputs[key],
-                    "%s.txt" % basename,
-                ]
+                outputs[key] = [outputs[key], "%s.txt" % basename]
         return outputs
 
     def _format_arg(self, name, spec, value):
