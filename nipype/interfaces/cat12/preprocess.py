@@ -1,5 +1,4 @@
 import os
-import sys
 import traits
 from nipype.interfaces.base import InputMultiPath, TraitedSpec, isdefined
 from nipype.interfaces.spm import SPMCommand
@@ -59,8 +58,8 @@ class CAT12SegmentInputSpec(SPMCommandInputSpec):
     affine_regularization = traits.trait_types.Str(default_value="mni",
                                                    field="opts.affreg", usedefault=True, desc=affine_reg_help)
 
-    bias_acc_help = "Strength of the SPM inhomogeneity (bias) correction that simultaneously controls the SPM biasreg, " \
-                    "biasfwhm, samp (resolution), and tol (iteration) parameter."
+    bias_acc_help = "Strength of the SPM inhomogeneity (bias) correction that simultaneously controls the SPM " \
+                    "biasreg, biasfwhm, samp (resolution), and tol (iteration) parameter."
     power_spm_inhomogeneity_correction = traits.trait_types.Float(default_value=0.5, field='opts.biasacc',
                                                                   usedefault=True,
                                                                   desc=bias_acc_help)
@@ -168,9 +167,9 @@ class CAT12SegmentInputSpec(SPMCommandInputSpec):
     # Templates
     neuromorphometrics = traits.trait_types.Bool(True, field="output.ROImenu.atlases.neuromorphometrics",
                                                  usedefault=True)
-    lpba40 = traits.trait_types.Bool(False, field="output.ROImenu.atlases.lpba40", usedefault=True)
+    lpba40 = traits.trait_types.Bool(True, field="output.ROImenu.atlases.lpba40", usedefault=True)
     cobra = traits.trait_types.Bool(True, field="output.ROImenu.atlases.hammers", usedefault=True)
-    hammers = traits.trait_types.Bool(False, field="output.ROImenu.atlases.cobra", usedefault=True)
+    hammers = traits.trait_types.Bool(True, field="output.ROImenu.atlases.cobra", usedefault=True)
     own_atlas = InputMultiPath(ImageFileSPM(exists=True), field="output.ROImenu.atlases.ownatlas",
                                desc="Own Atlas", mandatory=False, copyfile=False)
 
@@ -335,7 +334,7 @@ class CAT12Segment(SPMCommand):
                         outputs[outfield] = fname_presuffix(f, prefix=prefix, suffix="_rigid")
 
         if isdefined(self.inputs.save_bias_corrected) and self.inputs.save_bias_corrected:
-            outputs["bias_corrected_image"] = fname_presuffix(f, prefix=os.path.join("mri", 'mi'))
+            outputs["bias_corrected_image"] = fname_presuffix(f, prefix=os.path.join("mri", 'wmi'))
 
         outputs["surface_files"] = [os.path.join(os.path.join(pth, "surf"), f) for f in
                                     os.listdir(os.path.join(pth, "surf"))
