@@ -69,7 +69,7 @@ def create_event_dict(start_time, nodes_list):
         # Populate dictionary
         if events.get(start_delta):
             err_msg = "Event logged twice or events started at exact same time!"
-            warn(str(KeyError(err_msg)), category=Warning)
+            warn(err_msg, category=Warning)
         events[start_delta] = start_node
         events[finish_delta] = finish_node
 
