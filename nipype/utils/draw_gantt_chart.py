@@ -159,14 +159,14 @@ def calculate_resource_timeseries(events, resource):
                 try:
                     all_res += float(event[resource])
                 except ValueError:
-                    next
+                    continue
             current_time = event["start"]
         elif event["event"] == "finish":
             if resource in event:
                 try:
                     all_res -= float(event[resource])
                 except ValueError:
-                    next
+                    continue
             current_time = event["finish"]
         res[current_time] = all_res
 
