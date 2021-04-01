@@ -65,7 +65,6 @@ def test_callback_exception(tmpdir, plugin, stop_on_first_crash):
 @pytest.mark.parametrize("plugin", ["Linear", "MultiProc", "LegacyMultiProc"])
 def test_callback_gantt(tmpdir, plugin):
     import logging
-    import logging.handlers
 
     from os import path
 
