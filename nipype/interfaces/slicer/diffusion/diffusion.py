@@ -162,19 +162,18 @@ class ResampleDTIVolumeOutputSpec(TraitedSpec):
 class ResampleDTIVolume(SEMLikeCommandLine):
     """title: Resample DTI Volume
 
-category: Diffusion.Diffusion Tensor Images
+    category: Diffusion.Diffusion Tensor Images
 
-description: Resampling an image is a very important task in image analysis. It is especially important in the frame of image registration. This module implements DT image resampling through the use of itk Transforms. The resampling is controlled by the Output Spacing. "Resampling" is performed in space coordinates, not pixel/grid coordinates. It is quite important to ensure that image spacing is properly set on the images involved. The interpolator is required since the mapping from one space to the other will often require evaluation of the intensity of the image at non-grid positions.
+    description: Resampling an image is a very important task in image analysis. It is especially important in the frame of image registration. This module implements DT image resampling through the use of itk Transforms. The resampling is controlled by the Output Spacing. "Resampling" is performed in space coordinates, not pixel/grid coordinates. It is quite important to ensure that image spacing is properly set on the images involved. The interpolator is required since the mapping from one space to the other will often require evaluation of the intensity of the image at non-grid positions.
 
-version: 0.1
+    version: 0.1
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/ResampleDTI
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/ResampleDTI
 
-contributor: Francois Budin (UNC)
+    contributor: Francois Budin (UNC)
 
-acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149. Information on the National Centers for Biomedical Computing can be obtained from http://nihroadmap.nih.gov/bioinformatics
-
-"""
+    acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149. Information on the National Centers for Biomedical Computing can be obtained from http://nihroadmap.nih.gov/bioinformatics
+    """
 
     input_spec = ResampleDTIVolumeInputSpec
     output_spec = ResampleDTIVolumeOutputSpec
@@ -232,22 +231,21 @@ class DWIRicianLMMSEFilterOutputSpec(TraitedSpec):
 class DWIRicianLMMSEFilter(SEMLikeCommandLine):
     """title: DWI Rician LMMSE Filter
 
-category: Diffusion.Diffusion Weighted Images
+    category: Diffusion.Diffusion Weighted Images
 
-description: This module reduces noise (or unwanted detail) on a set of diffusion weighted images. For this, it filters the image in the mean squared error sense using a Rician noise model. Images corresponding to each gradient direction, including baseline, are processed individually. The noise parameter is automatically estimated (noise estimation improved but slower).
-Note that this is a general purpose filter for MRi images. The module jointLMMSE has been specifically designed for DWI volumes and shows a better performance, so its use is recommended instead.
-A complete description of the algorithm in this module can be found in:
-S. Aja-Fernandez, M. Niethammer, M. Kubicki, M. Shenton, and C.-F. Westin. Restoration of DWI data using a Rician LMMSE estimator. IEEE Transactions on Medical Imaging, 27(10): pp. 1389-1403, Oct. 2008.
+    description: This module reduces noise (or unwanted detail) on a set of diffusion weighted images. For this, it filters the image in the mean squared error sense using a Rician noise model. Images corresponding to each gradient direction, including baseline, are processed individually. The noise parameter is automatically estimated (noise estimation improved but slower).
+    Note that this is a general purpose filter for MRi images. The module jointLMMSE has been specifically designed for DWI volumes and shows a better performance, so its use is recommended instead.
+    A complete description of the algorithm in this module can be found in:
+    S. Aja-Fernandez, M. Niethammer, M. Kubicki, M. Shenton, and C.-F. Westin. Restoration of DWI data using a Rician LMMSE estimator. IEEE Transactions on Medical Imaging, 27(10): pp. 1389-1403, Oct. 2008.
 
-version: 0.1.1.$Revision: 1 $(alpha)
+    version: 0.1.1.$Revision: 1 $(alpha)
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/RicianLMMSEImageFilter
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/RicianLMMSEImageFilter
 
-contributor: Antonio Tristan Vega (UVa), Santiago Aja Fernandez (UVa), Marc Niethammer (UNC)
+    contributor: Antonio Tristan Vega (UVa), Santiago Aja Fernandez (UVa), Marc Niethammer (UNC)
 
-acknowledgements: Partially founded by grant number TEC2007-67073/TCM from the Comision Interministerial de Ciencia y Tecnologia (Spain).
-
-"""
+    acknowledgements: Partially founded by grant number TEC2007-67073/TCM from the Comision Interministerial de Ciencia y Tecnologia (Spain).
+    """
 
     input_spec = DWIRicianLMMSEFilterInputSpec
     output_spec = DWIRicianLMMSEFilterOutputSpec
@@ -330,21 +328,20 @@ class TractographyLabelMapSeedingOutputSpec(TraitedSpec):
 class TractographyLabelMapSeeding(SEMLikeCommandLine):
     """title: Tractography Label Map Seeding
 
-category: Diffusion.Diffusion Tensor Images
+    category: Diffusion.Diffusion Tensor Images
 
-description: Seed tracts on a Diffusion Tensor Image (DT) from a label map
+    description: Seed tracts on a Diffusion Tensor Image (DT) from a label map
 
-version: 0.1.0.$Revision: 1892 $(alpha)
+    version: 0.1.0.$Revision: 1892 $(alpha)
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/Seeding
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/Seeding
 
-license: slicer3
+    license: slicer3
 
-contributor: Raul San Jose (SPL, BWH), Demian Wassermann (SPL, BWH)
+    contributor: Raul San Jose (SPL, BWH), Demian Wassermann (SPL, BWH)
 
-acknowledgements: Laboratory of Mathematics in Imaging. This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
-
-"""
+    acknowledgements: Laboratory of Mathematics in Imaging. This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
+    """
 
     input_spec = TractographyLabelMapSeedingInputSpec
     output_spec = TractographyLabelMapSeedingOutputSpec
@@ -386,22 +383,21 @@ class DWIJointRicianLMMSEFilterOutputSpec(TraitedSpec):
 class DWIJointRicianLMMSEFilter(SEMLikeCommandLine):
     """title: DWI Joint Rician LMMSE Filter
 
-category: Diffusion.Diffusion Weighted Images
+    category: Diffusion.Diffusion Weighted Images
 
-description: This module reduces Rician noise (or unwanted detail) on a set of diffusion weighted images. For this, it filters the image in the mean squared error sense using a Rician noise model. The N closest gradient directions to the direction being processed are filtered together to improve the results: the noise-free signal is seen as an n-diemensional vector which has to be estimated with the LMMSE method from a set of corrupted measurements. To that end, the covariance matrix of the noise-free vector and the cross covariance between this signal and the noise have to be estimated, which is done taking into account the image formation process.
-The noise parameter is automatically estimated from a rough segmentation of the background of the image. In this area the signal is simply 0, so that Rician statistics reduce to Rayleigh and the noise power can be easily estimated from the mode of the histogram.
-A complete description of the algorithm may be found in:
-Antonio Tristan-Vega and Santiago Aja-Fernandez, DWI filtering using joint information for DTI and HARDI, Medical Image Analysis, Volume 14, Issue 2, Pages 205-218. 2010.
+    description: This module reduces Rician noise (or unwanted detail) on a set of diffusion weighted images. For this, it filters the image in the mean squared error sense using a Rician noise model. The N closest gradient directions to the direction being processed are filtered together to improve the results: the noise-free signal is seen as an n-diemensional vector which has to be estimated with the LMMSE method from a set of corrupted measurements. To that end, the covariance matrix of the noise-free vector and the cross covariance between this signal and the noise have to be estimated, which is done taking into account the image formation process.
+    The noise parameter is automatically estimated from a rough segmentation of the background of the image. In this area the signal is simply 0, so that Rician statistics reduce to Rayleigh and the noise power can be easily estimated from the mode of the histogram.
+    A complete description of the algorithm may be found in:
+    Antonio Tristan-Vega and Santiago Aja-Fernandez, DWI filtering using joint information for DTI and HARDI, Medical Image Analysis, Volume 14, Issue 2, Pages 205-218. 2010.
 
-version: 0.1.1.$Revision: 1 $(alpha)
+    version: 0.1.1.$Revision: 1 $(alpha)
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/JointRicianLMMSEImageFilter
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/JointRicianLMMSEImageFilter
 
-contributor: Antonio Tristan Vega (UVa), Santiago Aja Fernandez (UVa)
+    contributor: Antonio Tristan Vega (UVa), Santiago Aja Fernandez (UVa)
 
-acknowledgements: Partially founded by grant number TEC2007-67073/TCM from the Comision Interministerial de Ciencia y Tecnologia (Spain).
-
-"""
+    acknowledgements: Partially founded by grant number TEC2007-67073/TCM from the Comision Interministerial de Ciencia y Tecnologia (Spain).
+    """
 
     input_spec = DWIJointRicianLMMSEFilterInputSpec
     output_spec = DWIJointRicianLMMSEFilterOutputSpec
@@ -444,19 +440,18 @@ class DiffusionWeightedVolumeMaskingOutputSpec(TraitedSpec):
 class DiffusionWeightedVolumeMasking(SEMLikeCommandLine):
     """title: Diffusion Weighted Volume Masking
 
-category: Diffusion.Diffusion Weighted Images
+    category: Diffusion.Diffusion Weighted Images
 
-description: <p>Performs a mask calculation from a diffusion weighted (DW) image.</p><p>Starting from a dw image, this module computes the baseline image averaging all the images without diffusion weighting and then applies the otsu segmentation algorithm in order to produce a mask. this mask can then be used when estimating the diffusion tensor (dt) image, not to estimate tensors all over the volume.</p>
+    description: <p>Performs a mask calculation from a diffusion weighted (DW) image.</p><p>Starting from a dw image, this module computes the baseline image averaging all the images without diffusion weighting and then applies the otsu segmentation algorithm in order to produce a mask. this mask can then be used when estimating the diffusion tensor (dt) image, not to estimate tensors all over the volume.</p>
 
-version: 0.1.0.$Revision: 1892 $(alpha)
+    version: 0.1.0.$Revision: 1892 $(alpha)
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DiffusionWeightedMasking
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DiffusionWeightedMasking
 
-license: slicer3
+    license: slicer3
 
-contributor: Demian Wassermann (SPL, BWH)
-
-"""
+    contributor: Demian Wassermann (SPL, BWH)
+    """
 
     input_spec = DiffusionWeightedVolumeMaskingInputSpec
     output_spec = DiffusionWeightedVolumeMaskingOutputSpec
@@ -490,19 +485,18 @@ class DTIimportOutputSpec(TraitedSpec):
 class DTIimport(SEMLikeCommandLine):
     """title: DTIimport
 
-category: Diffusion.Diffusion Data Conversion
+    category: Diffusion.Diffusion Data Conversion
 
-description: Import tensor datasets from various formats, including the NifTi file format
+    description: Import tensor datasets from various formats, including the NifTi file format
 
-version: 1.0
+    version: 1.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DTIImport
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DTIImport
 
-contributor: Sonia Pujol (SPL, BWH)
+    contributor: Sonia Pujol (SPL, BWH)
 
-acknowledgements: This work is part of the National Alliance for Medical Image Computing (NA-MIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
-
-"""
+    acknowledgements: This work is part of the National Alliance for Medical Image Computing (NA-MIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
+    """
 
     input_spec = DTIimportInputSpec
     output_spec = DTIimportOutputSpec
@@ -551,23 +545,22 @@ class DWIToDTIEstimationOutputSpec(TraitedSpec):
 class DWIToDTIEstimation(SEMLikeCommandLine):
     """title: DWI to DTI Estimation
 
-category: Diffusion.Diffusion Weighted Images
+    category: Diffusion.Diffusion Weighted Images
 
-description: Performs a tensor model estimation from diffusion weighted images.
+    description: Performs a tensor model estimation from diffusion weighted images.
 
-There are three estimation methods available: least squares, weigthed least squares and non-linear estimation. The first method is the traditional method for tensor estimation and the fastest one. Weighted least squares takes into account the noise characteristics of the MRI images to weight the DWI samples used in the estimation based on its intensity magnitude. The last method is the more complex.
+    There are three estimation methods available: least squares, weigthed least squares and non-linear estimation. The first method is the traditional method for tensor estimation and the fastest one. Weighted least squares takes into account the noise characteristics of the MRI images to weight the DWI samples used in the estimation based on its intensity magnitude. The last method is the more complex.
 
-version: 0.1.0.$Revision: 1892 $(alpha)
+    version: 0.1.0.$Revision: 1892 $(alpha)
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DiffusionTensorEstimation
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DiffusionTensorEstimation
 
-license: slicer3
+    license: slicer3
 
-contributor: Raul San Jose (SPL, BWH)
+    contributor: Raul San Jose (SPL, BWH)
 
-acknowledgements: This command module is based on the estimation functionality provided by the Teem library. This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
-
-"""
+    acknowledgements: This command module is based on the estimation functionality provided by the Teem library. This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
+    """
 
     input_spec = DWIToDTIEstimationInputSpec
     output_spec = DWIToDTIEstimationOutputSpec
@@ -628,19 +621,18 @@ class DiffusionTensorScalarMeasurementsOutputSpec(TraitedSpec):
 class DiffusionTensorScalarMeasurements(SEMLikeCommandLine):
     """title: Diffusion Tensor Scalar Measurements
 
-category: Diffusion.Diffusion Tensor Images
+    category: Diffusion.Diffusion Tensor Images
 
-description: Compute a set of different scalar measurements from a tensor field, specially oriented for Diffusion Tensors where some rotationally invariant measurements, like Fractional Anisotropy, are highly used to describe the anistropic behaviour of the tensor.
+    description: Compute a set of different scalar measurements from a tensor field, specially oriented for Diffusion Tensors where some rotationally invariant measurements, like Fractional Anisotropy, are highly used to describe the anistropic behaviour of the tensor.
 
-version: 0.1.0.$Revision: 1892 $(alpha)
+    version: 0.1.0.$Revision: 1892 $(alpha)
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DiffusionTensorMathematics
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DiffusionTensorMathematics
 
-contributor: Raul San Jose (SPL, BWH)
+    contributor: Raul San Jose (SPL, BWH)
 
-acknowledgements: LMI
-
-"""
+    acknowledgements: LMI
+    """
 
     input_spec = DiffusionTensorScalarMeasurementsInputSpec
     output_spec = DiffusionTensorScalarMeasurementsOutputSpec
@@ -667,19 +659,18 @@ class DTIexportOutputSpec(TraitedSpec):
 class DTIexport(SEMLikeCommandLine):
     """title: DTIexport
 
-category: Diffusion.Diffusion Data Conversion
+    category: Diffusion.Diffusion Data Conversion
 
-description: Export DTI data to various file formats
+    description: Export DTI data to various file formats
 
-version: 1.0
+    version: 1.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DTIExport
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DTIExport
 
-contributor: Sonia Pujol (SPL, BWH)
+    contributor: Sonia Pujol (SPL, BWH)
 
-acknowledgements: This work is part of the National Alliance for Medical Image Computing (NA-MIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
-
-"""
+    acknowledgements: This work is part of the National Alliance for Medical Image Computing (NA-MIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
+    """
 
     input_spec = DTIexportInputSpec
     output_spec = DTIexportOutputSpec

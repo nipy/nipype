@@ -9,7 +9,7 @@ COMMIT_INFO_FNAME = "COMMIT_INFO.txt"
 
 
 def pkg_commit_hash(pkg_path):
-    """ Get short form of commit hash given directory `pkg_path`
+    """Get short form of commit hash given directory `pkg_path`
 
     There should be a file called 'COMMIT_INFO.txt' in `pkg_path`.  This is a
     file in INI file format, with at least one section: ``commit hash`` and two
@@ -66,7 +66,7 @@ def pkg_commit_hash(pkg_path):
 
 
 def get_pkg_info(pkg_path):
-    """ Return dict describing the context of this package
+    """Return dict describing the context of this package
 
     Parameters
     ----------

@@ -64,7 +64,7 @@ class CalcCoregAffineOutputSpec(TraitedSpec):
 
 
 class CalcCoregAffine(SPMCommand):
-    """ Uses SPM (spm_coreg) to calculate the transform mapping
+    """Uses SPM (spm_coreg) to calculate the transform mapping
     moving to target. Saves Transform in mat (matlab binary file)
     Also saves inverse transform
 
@@ -148,7 +148,7 @@ class ApplyTransformOutputSpec(TraitedSpec):
 
 
 class ApplyTransform(SPMCommand):
-    """ Uses SPM to apply transform stored in a .mat file to given file
+    """Uses SPM to apply transform stored in a .mat file to given file
 
     Examples
     --------
@@ -305,7 +305,7 @@ class ApplyInverseDeformationOutput(TraitedSpec):
 
 
 class ApplyInverseDeformation(SPMCommand):
-    """ Uses spm to apply inverse deformation stored in a .mat file or a
+    """Uses spm to apply inverse deformation stored in a .mat file or a
     deformation field to a given file
 
     Examples
@@ -326,8 +326,7 @@ class ApplyInverseDeformation(SPMCommand):
     _jobname = "defs"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt == "in_files":
             return scans_for_fnames(ensure_list(val))
         if opt == "target":
@@ -402,8 +401,7 @@ class ResliceToReference(SPMCommand):
     _jobname = "defs"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt == "in_files":
             return scans_for_fnames(ensure_list(val))
         if opt == "target":
@@ -466,7 +464,7 @@ class DicomImportOutputSpec(TraitedSpec):
 
 
 class DicomImport(SPMCommand):
-    """ Uses spm to convert DICOM files to nii or img+hdr.
+    """Uses spm to convert DICOM files to nii or img+hdr.
 
     Examples
     --------
@@ -484,8 +482,7 @@ class DicomImport(SPMCommand):
     _jobname = "dicom"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt == "in_files":
             return np.array(val, dtype=object)
         if opt == "output_dir":

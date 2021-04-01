@@ -315,7 +315,7 @@ connected.
                 self._graph.add_edges_from([(srcnode, dstnode, edge_data)])
 
     def add_nodes(self, nodes):
-        """ Add nodes to a workflow
+        """Add nodes to a workflow
 
         Parameters
         ----------
@@ -348,7 +348,7 @@ connected.
         self._graph.add_nodes_from(newnodes)
 
     def remove_nodes(self, nodes):
-        """ Remove nodes from a workflow
+        """Remove nodes from a workflow
 
         Parameters
         ----------
@@ -367,8 +367,7 @@ connected.
         return self._get_outputs()
 
     def get_node(self, name):
-        """Return an internal node by name
-        """
+        """Return an internal node by name"""
         nodenames = name.split(".")
         nodename = nodenames[0]
         outnode = [
@@ -383,8 +382,7 @@ connected.
         return outnode
 
     def list_node_names(self):
-        """List names of all nodes in a workflow
-        """
+        """List names of all nodes in a workflow"""
         import networkx as nx
 
         outlist = []
@@ -587,7 +585,7 @@ connected.
         return all_lines
 
     def run(self, plugin=None, plugin_args=None, updatehash=False):
-        """ Execute the workflow
+        """Execute the workflow
 
         Parameters
         ----------
@@ -736,8 +734,7 @@ connected.
                 node.needed_outputs = sorted(node.needed_outputs)
 
     def _configure_exec_nodes(self, graph):
-        """Ensure that each node knows where to get inputs from
-        """
+        """Ensure that each node knows where to get inputs from"""
         for node in graph.nodes():
             node.input_source = {}
             for edge in graph.in_edges(node):
@@ -749,9 +746,7 @@ connected.
                     )
 
     def _check_nodes(self, nodes):
-        """Checks if any of the nodes are already in the graph
-
-        """
+        """Checks if any of the nodes are already in the graph"""
         node_names = [node.name for node in self._graph.nodes()]
         node_lineage = [node._hierarchy for node in self._graph.nodes()]
         for node in nodes:
@@ -768,8 +763,7 @@ connected.
                 node_names.append(node.name)
 
     def _has_attr(self, parameter, subtype="in"):
-        """Checks if a parameter is available as an input or output
-        """
+        """Checks if a parameter is available as an input or output"""
         hierarchy = parameter.split(".")
 
         # Connecting to a workflow needs at least two values,
@@ -867,8 +861,7 @@ connected.
         return inputdict
 
     def _get_outputs(self):
-        """Returns all possible output ports that are not already connected
-        """
+        """Returns all possible output ports that are not already connected"""
         outputdict = TraitedSpec()
         for node in self._graph.nodes():
             outputdict.add_trait(node.name, traits.Instance(TraitedSpec))
@@ -883,8 +876,7 @@ connected.
         return outputdict
 
     def _set_input(self, objekt, name, newvalue):
-        """Trait callback function to update a node input
-        """
+        """Trait callback function to update a node input"""
         objekt.traits()[name].node.set_input(name, newvalue)
 
     def _set_node_input(self, node, param, source, sourceinfo):
@@ -928,8 +920,7 @@ connected.
         return workflowcopy._graph
 
     def _reset_hierarchy(self):
-        """Reset the hierarchy on a graph
-        """
+        """Reset the hierarchy on a graph"""
         for node in self._graph.nodes():
             if isinstance(node, Workflow):
                 node._reset_hierarchy()
@@ -939,8 +930,7 @@ connected.
                 node._hierarchy = self.name
 
     def _generate_flatgraph(self):
-        """Generate a graph containing only Nodes or MapNodes
-        """
+        """Generate a graph containing only Nodes or MapNodes"""
         import networkx as nx
 
         logger.debug("expanding workflow: %s", self)
@@ -1009,8 +999,7 @@ connected.
     def _get_dot(
         self, prefix=None, hierarchy=None, colored=False, simple_form=True, level=0
     ):
-        """Create a dot file with connection info
-        """
+        """Create a dot file with connection info"""
         import networkx as nx
 
         if prefix is None:

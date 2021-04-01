@@ -33,7 +33,7 @@ warnings.filterwarnings("always", category=UserWarning)
 
 class ExtractInputSpec(StdOutCommandLineInputSpec):
     input_file = File(
-        desc="input file", exists=True, mandatory=True, argstr="%s", position=-2,
+        desc="input file", exists=True, mandatory=True, argstr="%s", position=-2
     )
 
     output_file = File(
@@ -109,10 +109,7 @@ class ExtractInputSpec(StdOutCommandLineInputSpec):
         desc="Specify the range of output values\nDefault value: 1.79769e+308 1.79769e+308.",
     )
 
-    _xor_normalize = (
-        "normalize",
-        "nonormalize",
-    )
+    _xor_normalize = ("normalize", "nonormalize")
 
     normalize = traits.Bool(
         desc="Normalize integer pixel values to file max and min.",
@@ -265,7 +262,7 @@ class Extract(StdOutCommandLine):
 
 class ToRawInputSpec(StdOutCommandLineInputSpec):
     input_file = File(
-        desc="input file", exists=True, mandatory=True, argstr="%s", position=-2,
+        desc="input file", exists=True, mandatory=True, argstr="%s", position=-2
     )
 
     output_file = File(
@@ -334,10 +331,7 @@ class ToRawInputSpec(StdOutCommandLineInputSpec):
         ),
     )
 
-    _xor_normalize = (
-        "normalize",
-        "nonormalize",
-    )
+    _xor_normalize = ("normalize", "nonormalize")
 
     normalize = traits.Bool(
         desc="Normalize integer pixel values to file max and min.",
@@ -456,11 +450,7 @@ class Convert(CommandLine):
 
 class CopyInputSpec(CommandLineInputSpec):
     input_file = File(
-        desc="input file to copy",
-        exists=True,
-        mandatory=True,
-        argstr="%s",
-        position=-2,
+        desc="input file to copy", exists=True, mandatory=True, argstr="%s", position=-2
     )
 
     output_file = File(
@@ -558,8 +548,7 @@ class ToEcatInputSpec(CommandLineInputSpec):
     )
 
     no_decay_corr_fctr = traits.Bool(
-        desc="Do not compute the decay correction factors",
-        argstr="-no_decay_corr_fctr",
+        desc="Do not compute the decay correction factors", argstr="-no_decay_corr_fctr"
     )
 
     voxels_as_integers = traits.Bool(
@@ -600,7 +589,7 @@ class ToEcat(CommandLine):
 
 class DumpInputSpec(StdOutCommandLineInputSpec):
     input_file = File(
-        desc="input file", exists=True, mandatory=True, argstr="%s", position=-2,
+        desc="input file", exists=True, mandatory=True, argstr="%s", position=-2
     )
 
     output_file = File(
@@ -612,10 +601,7 @@ class DumpInputSpec(StdOutCommandLineInputSpec):
         keep_extension=False,
     )
 
-    _xor_coords_or_header = (
-        "coordinate_data",
-        "header_data",
-    )
+    _xor_coords_or_header = ("coordinate_data", "header_data")
 
     coordinate_data = traits.Bool(
         desc="Coordinate variable data and header information.",
@@ -627,10 +613,7 @@ class DumpInputSpec(StdOutCommandLineInputSpec):
         desc="Header information only, no data.", argstr="-h", xor=_xor_coords_or_header
     )
 
-    _xor_annotations = (
-        "annotations_brief",
-        "annotations_full",
-    )
+    _xor_annotations = ("annotations_brief", "annotations_full")
 
     annotations_brief = traits.Enum(
         "c",
@@ -705,7 +688,7 @@ class Dump(StdOutCommandLine):
                 and isinstance(value[0], int)
                 and isinstance(value[1], int)
             ):
-                return "-p %d,%d" % (value[0], value[1],)
+                return "-p %d,%d" % (value[0], value[1])
             else:
                 raise ValueError("Invalid precision argument: " + str(value))
         return super(Dump, self)._format_arg(name, spec, value)
@@ -751,10 +734,7 @@ class AverageInputSpec(CommandLineInputSpec):
         default_value=True,
     )
 
-    _xor_verbose = (
-        "verbose",
-        "quiet",
-    )
+    _xor_verbose = ("verbose", "quiet")
 
     verbose = traits.Bool(
         desc="Print out log messages (default).", argstr="-verbose", xor=_xor_verbose
@@ -765,10 +745,7 @@ class AverageInputSpec(CommandLineInputSpec):
 
     debug = traits.Bool(desc="Print out debugging messages.", argstr="-debug")
 
-    _xor_check_dimensions = (
-        "check_dimensions",
-        "no_check_dimensions",
-    )
+    _xor_check_dimensions = ("check_dimensions", "no_check_dimensions")
 
     check_dimensions = traits.Bool(
         desc="Check that dimension info matches across files (default).",
@@ -837,10 +814,7 @@ class AverageInputSpec(CommandLineInputSpec):
         argstr="-max_buffer_size_in_kb %d",
     )
 
-    _xor_normalize = (
-        "normalize",
-        "nonormalize",
-    )
+    _xor_normalize = ("normalize", "nonormalize")
 
     normalize = traits.Bool(
         desc="Normalize data sets for mean intensity.",
@@ -939,11 +913,7 @@ class Average(CommandLine):
 
 class BlobInputSpec(CommandLineInputSpec):
     input_file = File(
-        desc="input file to blob",
-        exists=True,
-        mandatory=True,
-        argstr="%s",
-        position=-2,
+        desc="input file to blob", exists=True, mandatory=True, argstr="%s", position=-2
     )
 
     output_file = File(
@@ -1025,10 +995,7 @@ class CalcInputSpec(CommandLineInputSpec):
         default_value=True,
     )
 
-    _xor_verbose = (
-        "verbose",
-        "quiet",
-    )
+    _xor_verbose = ("verbose", "quiet")
 
     verbose = traits.Bool(
         desc="Print out log messages (default).", argstr="-verbose", xor=_xor_verbose
@@ -1120,10 +1087,7 @@ class CalcInputSpec(CommandLineInputSpec):
         argstr="-max_buffer_size_in_kb %d",
     )
 
-    _xor_check_dimensions = (
-        "check_dimensions",
-        "no_check_dimensions",
-    )
+    _xor_check_dimensions = ("check_dimensions", "no_check_dimensions")
 
     check_dimensions = traits.Bool(
         desc="Check that files have matching dimensions (default).",
@@ -1236,7 +1200,7 @@ class Calc(CommandLine):
 
 class BBoxInputSpec(StdOutCommandLineInputSpec):
     input_file = File(
-        desc="input file", exists=True, mandatory=True, argstr="%s", position=-2,
+        desc="input file", exists=True, mandatory=True, argstr="%s", position=-2
     )
 
     output_file = File(
@@ -1493,7 +1457,7 @@ class Beast(CommandLine):
 
 class PikInputSpec(CommandLineInputSpec):
     input_file = File(
-        desc="input file", exists=True, mandatory=True, argstr="%s", position=-2,
+        desc="input file", exists=True, mandatory=True, argstr="%s", position=-2
     )
 
     _xor_image_type = ("jpg", "png")
@@ -1677,7 +1641,7 @@ class Pik(CommandLine):
 
 class BlurInputSpec(CommandLineInputSpec):
     input_file = File(
-        desc="input file", exists=True, mandatory=True, argstr="%s", position=-2,
+        desc="input file", exists=True, mandatory=True, argstr="%s", position=-2
     )
 
     output_file_base = File(desc="output file base", argstr="%s", position=-1)
@@ -1966,10 +1930,7 @@ class MathInputSpec(CommandLineInputSpec):
         argstr="-max_buffer_size_in_kb %d",
     )
 
-    _xor_check_dimensions = (
-        "check_dimensions",
-        "no_check_dimensions",
-    )
+    _xor_check_dimensions = ("check_dimensions", "no_check_dimensions")
 
     check_dimensions = traits.Bool(
         desc="Check that dimension info matches across files (default).",
@@ -2246,15 +2207,14 @@ class Math(StdOutCommandLine):
             elif isinstance(value, bool) and not value:
                 raise ValueError("Does not make sense to specify %s=False" % (name,))
             elif isinstance(value, float):
-                return "%s -const %s" % (spec.argstr, value,)
+                return "%s -const %s" % (spec.argstr, value)
             else:
-                raise ValueError("Invalid %s argument: %s" % (name, value,))
+                raise ValueError("Invalid %s argument: %s" % (name, value))
 
         return super(Math, self)._format_arg(name, spec, value)
 
     def _parse_inputs(self):
-        """A number of the command line options expect precisely one or two files.
-        """
+        """A number of the command line options expect precisely one or two files."""
 
         nr_input_files = len(self.inputs.input_files)
 
@@ -2266,13 +2226,13 @@ class Math(StdOutCommandLine):
                     if nr_input_files != 2:
                         raise ValueError(
                             "Due to the %s option we expected 2 files but input_files is of length %d"
-                            % (n, nr_input_files,)
+                            % (n, nr_input_files)
                         )
                 elif isinstance(t, float):
                     if nr_input_files != 1:
                         raise ValueError(
                             "Due to the %s option we expected 1 file but input_files is of length %d"
-                            % (n, nr_input_files,)
+                            % (n, nr_input_files)
                         )
                 else:
                     raise ValueError(
@@ -2286,7 +2246,7 @@ class Math(StdOutCommandLine):
                 if nr_input_files != 1:
                     raise ValueError(
                         "Due to the %s option we expected 1 file but input_files is of length %d"
-                        % (n, nr_input_files,)
+                        % (n, nr_input_files)
                     )
 
         for n in self.input_spec.two_volume_traits:
@@ -2296,7 +2256,7 @@ class Math(StdOutCommandLine):
                 if nr_input_files != 2:
                     raise ValueError(
                         "Due to the %s option we expected 2 files but input_files is of length %d"
-                        % (n, nr_input_files,)
+                        % (n, nr_input_files)
                     )
 
         for n in self.input_spec.n_volume_traits:
@@ -2306,7 +2266,7 @@ class Math(StdOutCommandLine):
                 if not nr_input_files >= 1:
                     raise ValueError(
                         "Due to the %s option we expected at least one file but input_files is of length %d"
-                        % (n, nr_input_files,)
+                        % (n, nr_input_files)
                     )
 
         return super(Math, self)._parse_inputs()
@@ -2341,7 +2301,7 @@ class ResampleInputSpec(CommandLineInputSpec):
     )
 
     # This is a dummy input.
-    input_grid_files = InputMultiPath(File, desc="input grid file(s)",)
+    input_grid_files = InputMultiPath(File, desc="input grid file(s)")
 
     two = traits.Bool(desc="Create a MINC 2 output file.", argstr="-2")
 
@@ -3164,9 +3124,7 @@ class GennlxfmInputSpec(CommandLineInputSpec):
     )
     step = traits.Int(desc="Output ident xfm step [default: 1].", argstr="-step %s")
 
-    like = File(
-        desc="Generate a nlxfm like this file.", exists=True, argstr="-like %s",
-    )
+    like = File(desc="Generate a nlxfm like this file.", exists=True, argstr="-like %s")
 
 
 class GennlxfmOutputSpec(TraitedSpec):
@@ -3215,7 +3173,7 @@ class XfmConcatInputSpec(CommandLineInputSpec):
     )
 
     # This is a dummy input.
-    input_grid_files = InputMultiPath(File, desc="input grid file(s)",)
+    input_grid_files = InputMultiPath(File, desc="input grid file(s)")
 
     output_file = File(
         desc="output file",
@@ -3275,11 +3233,11 @@ class XfmConcat(CommandLine):
 
 class BestLinRegInputSpec(CommandLineInputSpec):
     source = File(
-        desc="source Minc file", exists=True, mandatory=True, argstr="%s", position=-4,
+        desc="source Minc file", exists=True, mandatory=True, argstr="%s", position=-4
     )
 
     target = File(
-        desc="target Minc file", exists=True, mandatory=True, argstr="%s", position=-3,
+        desc="target Minc file", exists=True, mandatory=True, argstr="%s", position=-3
     )
 
     output_xfm = File(
@@ -3356,17 +3314,17 @@ class BestLinReg(CommandLine):
 
 class NlpFitInputSpec(CommandLineInputSpec):
     source = File(
-        desc="source Minc file", exists=True, mandatory=True, argstr="%s", position=-3,
+        desc="source Minc file", exists=True, mandatory=True, argstr="%s", position=-3
     )
 
     target = File(
-        desc="target Minc file", exists=True, mandatory=True, argstr="%s", position=-2,
+        desc="target Minc file", exists=True, mandatory=True, argstr="%s", position=-2
     )
 
-    output_xfm = File(desc="output xfm file", genfile=True, argstr="%s", position=-1,)
+    output_xfm = File(desc="output xfm file", genfile=True, argstr="%s", position=-1)
 
     # This is a dummy input.
-    input_grid_files = InputMultiPath(File, desc="input grid file(s)",)
+    input_grid_files = InputMultiPath(File, desc="input grid file(s)")
 
     config_file = File(
         desc="File containing the fitting configuration use.",
@@ -3472,9 +3430,9 @@ class XfmAvgInputSpec(CommandLineInputSpec):
     )
 
     # This is a dummy input.
-    input_grid_files = InputMultiPath(File, desc="input grid file(s)",)
+    input_grid_files = InputMultiPath(File, desc="input grid file(s)")
 
-    output_file = File(desc="output file", genfile=True, argstr="%s", position=-1,)
+    output_file = File(desc="output file", genfile=True, argstr="%s", position=-1)
 
     verbose = traits.Bool(
         desc="Print out log messages. Default: False.", argstr="-verbose"
@@ -3568,7 +3526,7 @@ class XfmInvertInputSpec(CommandLineInputSpec):
         desc="input file", exists=True, mandatory=True, argstr="%s", position=-2
     )
 
-    output_file = File(desc="output file", genfile=True, argstr="%s", position=-1,)
+    output_file = File(desc="output file", genfile=True, argstr="%s", position=-1)
 
     verbose = traits.Bool(
         desc="Print out log messages. Default: False.", argstr="-verbose"
@@ -3818,7 +3776,7 @@ class VolSymmInputSpec(CommandLineInputSpec):
     )
 
     # This is a dummy input.
-    input_grid_files = InputMultiPath(File, desc="input grid file(s)",)
+    input_grid_files = InputMultiPath(File, desc="input grid file(s)")
 
     verbose = traits.Bool(
         desc="Print out log messages. Default: False.", argstr="-verbose"

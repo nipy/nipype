@@ -34,15 +34,14 @@ class SphericalCoordinateGenerationOutputSpec(TraitedSpec):
 class SphericalCoordinateGeneration(SEMLikeCommandLine):
     """title: Spherical Coordinate Generation
 
-category: Testing.FeatureDetection
+    category: Testing.FeatureDetection
 
-description: get the atlas image as input and generates the rho, phi and theta images.
+    description: get the atlas image as input and generates the rho, phi and theta images.
 
-version: 0.1.0.$Revision: 1 $(alpha)
+    version: 0.1.0.$Revision: 1 $(alpha)
 
-contributor: Ali Ghayoor
-
-"""
+    contributor: Ali Ghayoor
+    """
 
     input_spec = SphericalCoordinateGenerationInputSpec
     output_spec = SphericalCoordinateGenerationOutputSpec

@@ -168,15 +168,19 @@ class LabelFusion(NiftySegCommand):
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for seg_maths."""
         # Remove options if not STAPLE or STEPS as fusion type:
-        if opt in [
-            "proportion",
-            "prob_update_flag",
-            "set_pq",
-            "mrf_value",
-            "max_iter",
-            "unc_thresh",
-            "conv",
-        ] and self.inputs.classifier_type not in ["STAPLE", "STEPS"]:
+        if (
+            opt
+            in [
+                "proportion",
+                "prob_update_flag",
+                "set_pq",
+                "mrf_value",
+                "max_iter",
+                "unc_thresh",
+                "conv",
+            ]
+            and self.inputs.classifier_type not in ["STAPLE", "STEPS"]
+        ):
             return ""
 
         if opt == "sm_ranking":

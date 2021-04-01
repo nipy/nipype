@@ -240,7 +240,7 @@ class TrimOutputSpec(TraitedSpec):
 
 
 class Trim(NipyBaseInterface):
-    """ Simple interface to trim a few volumes from a 4d fmri nifti file
+    """Simple interface to trim a few volumes from a 4d fmri nifti file
 
     Examples
     --------

@@ -137,7 +137,7 @@ REQUIRES = [
     "click>=%s" % CLICK_MIN_VERSION,
     "networkx>=%s" % NETWORKX_MIN_VERSION,
     "nibabel>=%s" % NIBABEL_MIN_VERSION,
-    'numpy>=%s' % NUMPY_MIN_VERSION,
+    "numpy>=%s" % NUMPY_MIN_VERSION,
     "packaging",
     "prov>=%s" % PROV_VERSION,
     "pydot>=%s" % PYDOT_MIN_VERSION,

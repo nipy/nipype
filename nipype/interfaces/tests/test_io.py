@@ -661,8 +661,7 @@ def test_bids_infields_outfields(tmpdir):
 @pytest.mark.skipif(no_paramiko, reason="paramiko library is not available")
 @pytest.mark.skipif(no_local_ssh, reason="SSH Server is not running")
 def test_SSHDataGrabber(tmpdir):
-    """Test SSHDataGrabber by connecting to localhost and collecting some data.
-    """
+    """Test SSHDataGrabber by connecting to localhost and collecting some data."""
     old_cwd = tmpdir.chdir()
 
     source_dir = tmpdir.mkdir("source")

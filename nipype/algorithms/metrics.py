@@ -63,8 +63,7 @@ class DistanceOutputSpec(TraitedSpec):
 
 
 class Distance(BaseInterface):
-    """Calculates distance between two volumes.
-    """
+    """Calculates distance between two volumes."""
 
     input_spec = DistanceInputSpec
     output_spec = DistanceOutputSpec
@@ -542,7 +541,7 @@ class ErrorMapOutputSpec(TraitedSpec):
 
 
 class ErrorMap(BaseInterface):
-    """ Calculates the error (distance) map between two input volumes.
+    """Calculates the error (distance) map between two input volumes.
 
     Example
     -------

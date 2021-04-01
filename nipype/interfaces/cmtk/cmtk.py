@@ -99,8 +99,7 @@ def get_connectivity_matrix(n_rois, list_of_roi_crossed_lists):
 
 
 def create_allpoints_cmat(streamlines, roiData, voxelSize, n_rois):
-    """ Create the intersection arrays for each fiber
-    """
+    """Create the intersection arrays for each fiber"""
     n_fib = len(streamlines)
     pc = -1
     # Computation for each fiber
@@ -133,7 +132,7 @@ def create_allpoints_cmat(streamlines, roiData, voxelSize, n_rois):
 
 
 def create_endpoints_array(fib, voxelSize):
-    """ Create the endpoints arrays for each fiber.
+    """Create the endpoints arrays for each fiber.
 
     Parameters
     ----------
