@@ -40,13 +40,13 @@ def spm_hrf(RT, P=None, fMRI_T=16):
       % p    - parameters of the response function (two gamma
       % functions)
       % defaults  (seconds)
-      %	p(0) - delay of response (relative to onset)	   6
-      %	p(1) - delay of undershoot (relative to onset)    16
-      %	p(2) - dispersion of response			   1
-      %	p(3) - dispersion of undershoot			   1
-      %	p(4) - ratio of response to undershoot		   6
-      %	p(5) - onset (seconds)				   0
-      %	p(6) - length of kernel (seconds)		  32
+      % p(0) - delay of response (relative to onset)       6
+      % p(1) - delay of undershoot (relative to onset)    16
+      % p(2) - dispersion of response                      1
+      % p(3) - dispersion of undershoot                    1
+      % p(4) - ratio of response to undershoot             6
+      % p(5) - onset (seconds)                             0
+      % p(6) - length of kernel (seconds)                 32
       %
       % hrf  - hemodynamic response function
       % p    - parameters of the response function

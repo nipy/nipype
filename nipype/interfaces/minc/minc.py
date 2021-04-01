@@ -1327,7 +1327,7 @@ class BeastInputSpec(CommandLineInputSpec):
     Generic options for all commands:
      -help:             Print summary of command-line options and abort
      -version:          Print version number of program and exit
-    Copyright (C) 2011	Simon Fristed Eskildsen, Vladimir Fonov,
+    Copyright (C) 2011  Simon Fristed Eskildsen, Vladimir Fonov,
                 Pierrick Coupe, Jose V. Manjon
 
     This program comes with ABSOLUTELY NO WARRANTY; for details type 'cat COPYING'.
