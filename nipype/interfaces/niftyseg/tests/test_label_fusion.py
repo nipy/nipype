@@ -120,6 +120,6 @@ def test_seg_calctopncc():
     calctopncc.inputs.top_templates = 1
 
     cmd_tmp = "{cmd} -target {in_file} -templates 2 {file1} {file2} -n 1"
-    expected_cmd = cmd_tmp.format(cmd=cmd, in_file=in_file, file1=file1, file2=file2,)
+    expected_cmd = cmd_tmp.format(cmd=cmd, in_file=in_file, file1=file1, file2=file2)
 
     assert calctopncc.cmdline == expected_cmd

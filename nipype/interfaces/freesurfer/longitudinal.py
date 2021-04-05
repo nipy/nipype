@@ -108,7 +108,7 @@ class RobustTemplateOutputSpec(TraitedSpec):
 
 
 class RobustTemplate(FSCommandOpenMP):
-    """ construct an unbiased robust template for longitudinal volumes
+    """construct an unbiased robust template for longitudinal volumes
 
     Examples
     --------
@@ -221,7 +221,7 @@ class FuseSegmentationsOutputSpec(TraitedSpec):
 
 
 class FuseSegmentations(FSCommand):
-    """ fuse segmentations together from multiple timepoints
+    """fuse segmentations together from multiple timepoints
 
     Examples
     --------

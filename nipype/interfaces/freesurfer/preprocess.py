@@ -74,7 +74,7 @@ class ParseDICOMDir(FSCommand):
     >>> dcminfo.cmdline
     'mri_parse_sdcmdir --d . --o dicominfo.txt --sortbyrun --summarize'
 
-   """
+    """
 
     _cmd = "mri_parse_sdcmdir"
     input_spec = ParseDICOMDirInputSpec
@@ -721,7 +721,7 @@ class DICOMConvert(FSCommand):
 
     @property
     def cmdline(self):
-        """ `command` plus any arguments (args)
+        """`command` plus any arguments (args)
         validates arguments and generates command line"""
         self._check_mandatory_inputs()
         outdir = self._get_outdir()
@@ -1764,12 +1764,16 @@ class BBRegister(FSCommand):
         return outputs
 
     def _format_arg(self, name, spec, value):
-        if name in (
-            "registered_file",
-            "out_fsl_file",
-            "out_lta_file",
-            "init_cost_file",
-        ) and isinstance(value, bool):
+        if (
+            name
+            in (
+                "registered_file",
+                "out_fsl_file",
+                "out_lta_file",
+                "init_cost_file",
+            )
+            and isinstance(value, bool)
+        ):
             value = self._list_outputs()[name]
         return super(BBRegister, self)._format_arg(name, spec, value)
 
@@ -2475,7 +2479,7 @@ class MNIBiasCorrectionOutputSpec(TraitedSpec):
 
 
 class MNIBiasCorrection(FSCommand):
-    """ Wrapper for nu_correct, a program from the Montreal Neurological Insitute (MNI)
+    """Wrapper for nu_correct, a program from the Montreal Neurological Insitute (MNI)
     used for correcting intensity non-uniformity (ie, bias fields). You must have the
     MNI software installed on your system to run this. See [www.bic.mni.mcgill.ca/software/N3]
     for more info.
@@ -2533,7 +2537,7 @@ class WatershedSkullStripOutputSpec(TraitedSpec):
 
 
 class WatershedSkullStrip(FSCommand):
-    """ This program strips skull and other outer non-brain tissue and
+    """This program strips skull and other outer non-brain tissue and
     produces the brain volume from T1 volume or the scanned volume.
 
     The "watershed" segmentation algorithm was used to dertermine the
@@ -3339,7 +3343,7 @@ class ConcatenateLTAOutputSpec(TraitedSpec):
 
 
 class ConcatenateLTA(FSCommand):
-    """ Concatenates two consecutive LTA transformations into one overall
+    """Concatenates two consecutive LTA transformations into one overall
     transformation
 
     Out = LTA2*LTA1

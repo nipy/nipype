@@ -402,8 +402,7 @@ class TOPUP(FSLCommand):
         return out_file
 
     def _generate_encfile(self):
-        """Generate a topup compatible encoding file based on given directions
-        """
+        """Generate a topup compatible encoding file based on given directions"""
         out_file = self._get_encfilename()
         durations = self.inputs.readout_times
         if len(self.inputs.encoding_direction) != len(durations):
@@ -605,9 +604,7 @@ class EddyInputSpec(FSLCommandInputSpec):
         desc="Topup results file containing the movement parameters (movpar.txt)",
     )
     field = File(
-        exists=True,
-        argstr="--field=%s",
-        desc="Non-topup derived fieldmap scaled in Hz",
+        exists=True, argstr="--field=%s", desc="Non-topup derived fieldmap scaled in Hz"
     )
     field_mat = File(
         exists=True,
@@ -1575,15 +1572,13 @@ class EddyQuadInputSpec(FSLCommandInputSpec):
         argstr="--output-dir %s",
         desc="Output directory - default = '<base_name>.qc'",
     )
-    field = File(
-        exists=True, argstr="--field %s", desc="TOPUP estimated field (in Hz)",
-    )
+    field = File(exists=True, argstr="--field %s", desc="TOPUP estimated field (in Hz)")
     slice_spec = File(
         exists=True,
         argstr="--slspec %s",
         desc="Text file specifying slice/group acquisition",
     )
-    verbose = traits.Bool(argstr="--verbose", desc="Display debug messages",)
+    verbose = traits.Bool(argstr="--verbose", desc="Display debug messages")
 
 
 class EddyQuadOutputSpec(TraitedSpec):

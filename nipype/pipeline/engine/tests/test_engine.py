@@ -326,8 +326,7 @@ def test_old_config(tmpdir):
 
 
 def test_mapnode_json(tmpdir):
-    """Tests that mapnodes don't generate excess jsons
-    """
+    """Tests that mapnodes don't generate excess jsons"""
     tmpdir.chdir()
     wd = os.getcwd()
     from nipype import MapNode, Function, Workflow

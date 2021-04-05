@@ -46,18 +46,17 @@ class EMSegmentTransformToNewFormatOutputSpec(TraitedSpec):
 
 class EMSegmentTransformToNewFormat(SEMLikeCommandLine):
     """title:
-  Transform MRML Files to New EMSegmenter Standard
+      Transform MRML Files to New EMSegmenter Standard
 
 
-category:
-  Utilities
+    category:
+      Utilities
 
 
-description:
-  Transform MRML Files to New EMSegmenter Standard
+    description:
+      Transform MRML Files to New EMSegmenter Standard
 
-
-"""
+    """
 
     input_spec = EMSegmentTransformToNewFormatInputSpec
     output_spec = EMSegmentTransformToNewFormatOutputSpec

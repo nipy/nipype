@@ -686,8 +686,7 @@ class ArtifactDetect(BaseInterface):
         save_json(statsfile, stats)
 
     def _run_interface(self, runtime):
-        """Execute this module.
-        """
+        """Execute this module."""
         funcfilelist = ensure_list(self.inputs.realigned_files)
         motparamlist = ensure_list(self.inputs.realignment_parameters)
         for i, imgf in enumerate(funcfilelist):
@@ -814,8 +813,7 @@ class StimulusCorrelation(BaseInterface):
         return outmatrix
 
     def _run_interface(self, runtime):
-        """Execute this module.
-        """
+        """Execute this module."""
         import scipy.io as sio
 
         motparamlist = self.inputs.realignment_parameters

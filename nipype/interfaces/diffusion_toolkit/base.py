@@ -20,7 +20,7 @@ __docformat__ = "restructuredtext"
 
 
 class Info(object):
-    """ Handle dtk output type and version information.
+    """Handle dtk output type and version information.
 
     Examples
     --------

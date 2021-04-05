@@ -93,8 +93,8 @@ class TestTSNR:
 
     @mock.patch("warnings.warn")
     def test_warning(self, mock_warn):
-        """ test that usage of misc.TSNR trips a warning to use
-        confounds.TSNR instead """
+        """test that usage of misc.TSNR trips a warning to use
+        confounds.TSNR instead"""
         # run
         misc.TSNR(in_file=self.in_filenames["in_file"])
 

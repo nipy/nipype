@@ -71,7 +71,7 @@ def make_label_dec(label, ds=None):
 
 
 def needs_review(msg):
-    """ Skip a test that needs further review.
+    """Skip a test that needs further review.
 
     Parameters
     ----------

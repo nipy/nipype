@@ -148,8 +148,7 @@ def fname_presuffix(fname, prefix="", suffix="", newpath=None, use_ext=True):
 
 
 def fnames_presuffix(fnames, prefix="", suffix="", newpath=None, use_ext=True):
-    """Calls fname_presuffix for a list of files.
-    """
+    """Calls fname_presuffix for a list of files."""
     f2 = []
     for fname in fnames:
         f2.append(fname_presuffix(fname, prefix, suffix, newpath, use_ext))
@@ -517,8 +516,7 @@ def copyfiles(filelist, dest, copy=False, create_new=False):
 
 
 def ensure_list(filename):
-    """Returns a list given either a string or a list
-    """
+    """Returns a list given either a string or a list"""
     if isinstance(filename, (str, bytes)):
         return [filename]
     elif isinstance(filename, list):
@@ -531,7 +529,7 @@ def ensure_list(filename):
 
 def simplify_list(filelist):
     """Returns a list if filelist is a list of length greater than 1,
-       otherwise returns the first element
+    otherwise returns the first element
     """
     if len(filelist) > 1:
         return filelist
@@ -866,7 +864,7 @@ def get_dependencies(name, environ):
         o, e = proc.communicate()
         deps = o.rstrip()
     except Exception as ex:
-        deps = f'{command!r} failed'
+        deps = f"{command!r} failed"
         fmlogger.warning(f"Could not get dependencies of {name}s. Error:\n{ex}")
     return deps
 

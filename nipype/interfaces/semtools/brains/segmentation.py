@@ -46,17 +46,16 @@ class SimilarityIndexOutputSpec(TraitedSpec):
 class SimilarityIndex(SEMLikeCommandLine):
     """title: BRAINSCut:SimilarityIndexComputation
 
-category: BRAINS.Segmentation
+    category: BRAINS.Segmentation
 
-description: Automatic analysis of BRAINSCut Output
+    description: Automatic analysis of BRAINSCut Output
 
-version: 1.0
+    version: 1.0
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: Eunyoung Regin Kim
-
-"""
+    contributor: Eunyoung Regin Kim
+    """
 
     input_spec = SimilarityIndexInputSpec
     output_spec = SimilarityIndexOutputSpec
@@ -113,21 +112,20 @@ class BRAINSTalairachOutputSpec(TraitedSpec):
 class BRAINSTalairach(SEMLikeCommandLine):
     """title: BRAINS Talairach
 
-category: BRAINS.Segmentation
+    category: BRAINS.Segmentation
 
-description: This program creates a VTK structured grid defining the Talairach coordinate system based on four points: AC, PC, IRP, and SLA. The resulting structred grid can be written as either a classic VTK file or the new VTK XML file format. Two representations of the resulting grid can be written. The first is a bounding box representation that also contains the location of the AC and PC points. The second representation is the full Talairach grid representation that includes the additional rows of boxes added to the inferior allowing full coverage of the cerebellum.
+    description: This program creates a VTK structured grid defining the Talairach coordinate system based on four points: AC, PC, IRP, and SLA. The resulting structred grid can be written as either a classic VTK file or the new VTK XML file format. Two representations of the resulting grid can be written. The first is a bounding box representation that also contains the location of the AC and PC points. The second representation is the full Talairach grid representation that includes the additional rows of boxes added to the inferior allowing full coverage of the cerebellum.
 
-version: 0.1
+    version: 0.1
 
-documentation-url: http://www.nitrc.org/plugins/mwiki/index.php/brains:BRAINSTalairach
+    documentation-url: http://www.nitrc.org/plugins/mwiki/index.php/brains:BRAINSTalairach
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: Steven Dunn and Vincent Magnotta
+    contributor: Steven Dunn and Vincent Magnotta
 
-acknowledgements: Funding for this work was provided by NIH/NINDS award NS050568
-
-"""
+    acknowledgements: Funding for this work was provided by NIH/NINDS award NS050568
+    """
 
     input_spec = BRAINSTalairachInputSpec
     output_spec = BRAINSTalairachOutputSpec
@@ -178,21 +176,20 @@ class BRAINSTalairachMaskOutputSpec(TraitedSpec):
 class BRAINSTalairachMask(SEMLikeCommandLine):
     """title: Talairach Mask
 
-category: BRAINS.Segmentation
+    category: BRAINS.Segmentation
 
-description: This program creates a binary image representing the specified Talairach region. The input is an example image to define the physical space for the resulting image, the Talairach grid representation in VTK format, and the file containing the Talairach box definitions to be generated. These can be combined in BRAINS to create a label map using the procedure Brains::WorkupUtils::CreateLabelMapFromBinaryImages.
+    description: This program creates a binary image representing the specified Talairach region. The input is an example image to define the physical space for the resulting image, the Talairach grid representation in VTK format, and the file containing the Talairach box definitions to be generated. These can be combined in BRAINS to create a label map using the procedure Brains::WorkupUtils::CreateLabelMapFromBinaryImages.
 
-version: 0.1
+    version: 0.1
 
-documentation-url: http://www.nitrc.org/plugins/mwiki/index.php/brains:BRAINSTalairachMask
+    documentation-url: http://www.nitrc.org/plugins/mwiki/index.php/brains:BRAINSTalairachMask
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: Steven Dunn and Vincent Magnotta
+    contributor: Steven Dunn and Vincent Magnotta
 
-acknowledgements: Funding for this work was provided by NIH/NINDS award NS050568
-
-"""
+    acknowledgements: Funding for this work was provided by NIH/NINDS award NS050568
+    """
 
     input_spec = BRAINSTalairachMaskInputSpec
     output_spec = BRAINSTalairachMaskOutputSpec
