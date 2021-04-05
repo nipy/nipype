@@ -63,6 +63,7 @@ def test_callback_exception(tmpdir, plugin, stop_on_first_crash):
 
 
 @pytest.mark.parametrize("plugin", ["Linear", "MultiProc", "LegacyMultiProc"])
+@pytest.mark.skipif(not has_pandas, "Test requires pandas")
 def test_callback_gantt(tmpdir, plugin):
     import logging
 
