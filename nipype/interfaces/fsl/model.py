@@ -2245,7 +2245,7 @@ class RandomiseInputSpec(FSLCommandInputSpec):
         desc=("carry out Threshold-Free Cluster Enhancement with 2D " "optimisation"),
         argstr="--T2",
     )
-    f_only = traits.Bool(desc="calculate f-statistics only", argstr="--f_only")
+    f_only = traits.Bool(desc="calculate f-statistics only", argstr="--fonly")
     raw_stats_imgs = traits.Bool(
         desc="output raw ( unpermuted ) statistic images", argstr="-R"
     )
