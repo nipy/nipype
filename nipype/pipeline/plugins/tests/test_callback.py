@@ -7,6 +7,11 @@ import pytest
 import nipype.interfaces.utility as niu
 import nipype.pipeline.engine as pe
 
+try:
+    import pandas
+    has_pandas = True
+except ImportError:
+     has_pandas = False
 
 def func():
     return
