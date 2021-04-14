@@ -329,9 +329,11 @@ class ApplyInverseDeformation(SPMCommand):
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm"""
         if opt == "in_files":
-            return scans_for_fnames(ensure_list(val))
+            return np.array([simplify_list(val)], dtype=object)
+            # return scans_for_fnames(ensure_list(val))
         if opt == "target":
-            return scans_for_fname(ensure_list(val))
+            return np.array([simplify_list(val)], dtype=object)
+            # return scans_for_fname(ensure_list(val))
         if opt == "deformation":
             return np.array([simplify_list(val)], dtype=object)
         if opt == "deformation_field":
