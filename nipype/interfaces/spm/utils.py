@@ -262,12 +262,13 @@ class ApplyInverseDeformationInput(SPMCommandInputSpec):
     in_files = InputMultiPath(
         File(exists=True),
         mandatory=True,
-        field="fnames",
+        field="out{1}.pull.fnames",
         desc="Files on which deformation is applied",
     )
     target = File(
         exists=True, field="comp{1}.inv.space", desc="File defining target space"
     )
+
     deformation = File(
         exists=True,
         field="comp{1}.inv.comp{1}.sn2def.matname",
@@ -281,7 +282,7 @@ class ApplyInverseDeformationInput(SPMCommandInputSpec):
         xor=["deformation"],
     )
     interpolation = traits.Range(
-        low=0, high=7, field="interp", desc="degree of b-spline used for interpolation"
+        low=0, high=7, field="out{1}.pull.interp", desc="degree of b-spline used for interpolation"
     )
 
     bounding_box = traits.List(
