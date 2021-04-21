@@ -470,8 +470,7 @@ If you used genfile:
 
 And optionally:
 
-* ``_redirect_x``: If set to True it will make Nipype start Xvfb before running the interface and redirect X output to it. This is useful for
-commandlines that spawn a graphical user interface.
+* ``_redirect_x``: If set to True it will make Nipype start Xvfb before running the interface and redirect X output to it. This is useful for commandlines that spawn a graphical user interface.
 
 * ``_format_arg(name, spec, value)``: For extra formatting of the input values before passing them to generic ``_parse_inputs()`` method.
 

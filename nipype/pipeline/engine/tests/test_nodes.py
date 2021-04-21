@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from __future__ import print_function, unicode_literals
-from builtins import str
 import os
 from copy import deepcopy
 import pytest
@@ -14,7 +12,7 @@ from ..utils import merge_dict
 from .test_base import EngineTestInterface
 from .test_utils import UtilsTestInterface
 
-'''
+"""
 Test for order of iterables
 
 import nipype.pipeline.engine as pe
@@ -44,7 +42,7 @@ wf1.base_dir = os.path.join(os.getcwd(),'testit')
 wf1.run(inseries=True, createdirsonly=True)
 
 wf1.write_graph(graph2use='exec')
-'''
+"""
 '''
 import nipype.pipeline.engine as pe
 import nipype.interfaces.spm as spm
@@ -90,34 +88,42 @@ def test_node_init():
     with pytest.raises(TypeError):
         pe.Node()
     with pytest.raises(IOError):
-        pe.Node(EngineTestInterface, name='test')
+        pe.Node(EngineTestInterface, name="test")
 
 
 def test_node_get_output():
-    mod1 = pe.Node(interface=EngineTestInterface(), name='mod1')
+    mod1 = pe.Node(interface=EngineTestInterface(), name="mod1")
     mod1.inputs.input1 = 1
     mod1.run()
-    assert mod1.get_output('output1') == [1, 1]
+    assert mod1.get_output("output1") == [1, 1]
     mod1._result = None
-    assert mod1.get_output('output1') == [1, 1]
+    assert mod1.get_output("output1") == [1, 1]
 
 
 def test_mapnode_iterfield_check():
-    mod1 = pe.MapNode(EngineTestInterface(), iterfield=['input1'], name='mod1')
+    mod1 = pe.MapNode(EngineTestInterface(), iterfield=["input1"], name="mod1")
     with pytest.raises(ValueError):
         mod1._check_iterfield()
     mod1 = pe.MapNode(
-        EngineTestInterface(), iterfield=['input1', 'input2'], name='mod1')
+        EngineTestInterface(), iterfield=["input1", "input2"], name="mod1"
+    )
     mod1.inputs.input1 = [1, 2]
     mod1.inputs.input2 = 3
     with pytest.raises(ValueError):
         mod1._check_iterfield()
 
 
-@pytest.mark.parametrize("x_inp, f_exp",
-                         [(3, [6]), ([2, 3], [4, 6]), ((2, 3), [4, 6]),
-                          (range(3), [0, 2, 4]), ("Str", ["StrStr"]),
-                          (["Str1", "Str2"], ["Str1Str1", "Str2Str2"])])
+@pytest.mark.parametrize(
+    "x_inp, f_exp",
+    [
+        (3, [6]),
+        ([2, 3], [4, 6]),
+        ((2, 3), [4, 6]),
+        (range(3), [0, 2, 4]),
+        ("Str", ["StrStr"]),
+        (["Str1", "Str2"], ["Str1Str1", "Str2Str2"]),
+    ],
+)
 def test_mapnode_iterfield_type(x_inp, f_exp):
     from nipype import MapNode, Function
 
@@ -141,19 +147,21 @@ def test_mapnode_nested(tmpdir):
         return in1 + 1
 
     n1 = MapNode(
-        Function(input_names=['in1'], output_names=['out'], function=func1),
-        iterfield=['in1'],
+        Function(input_names=["in1"], output_names=["out"], function=func1),
+        iterfield=["in1"],
         nested=True,
-        name='n1')
+        name="n1",
+    )
     n1.inputs.in1 = [[1, [2]], 3, [4, 5]]
     n1.run()
-    assert n1.get_output('out') == [[2, [3]], 4, [5, 6]]
+    assert n1.get_output("out") == [[2, [3]], 4, [5, 6]]
 
     n2 = MapNode(
-        Function(input_names=['in1'], output_names=['out'], function=func1),
-        iterfield=['in1'],
+        Function(input_names=["in1"], output_names=["out"], function=func1),
+        iterfield=["in1"],
         nested=False,
-        name='n1')
+        name="n1",
+    )
     n2.inputs.in1 = [[1, [2]], 3, [4, 5]]
 
     with pytest.raises(Exception) as excinfo:
@@ -169,27 +177,25 @@ def test_mapnode_expansion(tmpdir):
         return in1 + 1
 
     mapnode = MapNode(
-        Function(function=func1),
-        iterfield='in1',
-        name='mapnode',
-        n_procs=2,
-        mem_gb=2)
+        Function(function=func1), iterfield="in1", name="mapnode", n_procs=2, mem_gb=2
+    )
     mapnode.inputs.in1 = [1, 2]
 
     for idx, node in mapnode._make_nodes():
-        for attr in ('overwrite', 'run_without_submitting', 'plugin_args'):
+        for attr in ("overwrite", "run_without_submitting", "plugin_args"):
             assert getattr(node, attr) == getattr(mapnode, attr)
-        for attr in ('_n_procs', '_mem_gb'):
-            assert (getattr(node, attr) == getattr(mapnode, attr))
+        for attr in ("_n_procs", "_mem_gb"):
+            assert getattr(node, attr) == getattr(mapnode, attr)
 
 
 def test_node_hash(tmpdir):
     from nipype.interfaces.utility import Function
+
     tmpdir.chdir()
 
     config.set_default_config()
-    config.set('execution', 'stop_on_first_crash', True)
-    config.set('execution', 'crashdump_dir', os.getcwd())
+    config.set("execution", "stop_on_first_crash", True)
+    config.set("execution", "crashdump_dir", os.getcwd())
 
     def func1():
         return 1
@@ -198,17 +204,18 @@ def test_node_hash(tmpdir):
         return a + 1
 
     n1 = pe.Node(
-        Function(input_names=[], output_names=['a'], function=func1),
-        name='n1')
+        Function(input_names=[], output_names=["a"], function=func1), name="n1"
+    )
     n2 = pe.Node(
-        Function(input_names=['a'], output_names=['b'], function=func2),
-        name='n2')
-    w1 = pe.Workflow(name='test')
+        Function(input_names=["a"], output_names=["b"], function=func2), name="n2"
+    )
+    w1 = pe.Workflow(name="test")
 
     def modify(x):
         return x + 1
+
     n1.inputs.a = 1
-    w1.connect(n1, ('a', modify), n2, 'a')
+    w1.connect(n1, ("a", modify), n2, "a")
     w1.base_dir = os.getcwd()
 
     # create dummy distributed plugin class
@@ -221,25 +228,26 @@ def test_node_hash(tmpdir):
     class RaiseError(DistributedPluginBase):
         def _submit_job(self, node, updatehash=False):
             raise EngineTestException(
-                'Submit called - cached=%s, updated=%s' % node.is_cached())
+                "Submit called - cached=%s, updated=%s" % node.is_cached()
+            )
 
     # check if a proper exception is raised
     with pytest.raises(EngineTestException) as excinfo:
         w1.run(plugin=RaiseError())
-    assert str(excinfo.value).startswith('Submit called')
+    assert str(excinfo.value).startswith("Submit called")
 
     # generate outputs
-    w1.run(plugin='Linear')
+    w1.run(plugin="Linear")
     # ensure plugin is being called
-    config.set('execution', 'local_hash_check', False)
+    config.set("execution", "local_hash_check", False)
 
     # rerun to ensure we have outputs
-    w1.run(plugin='Linear')
+    w1.run(plugin="Linear")
 
     # set local check
-    config.set('execution', 'local_hash_check', True)
-    w1 = pe.Workflow(name='test')
-    w1.connect(n1, ('a', modify), n2, 'a')
+    config.set("execution", "local_hash_check", True)
+    w1 = pe.Workflow(name="test")
+    w1.connect(n1, ("a", modify), n2, "a")
     w1.base_dir = os.getcwd()
     w1.run(plugin=RaiseError())
 
@@ -247,57 +255,58 @@ def test_node_hash(tmpdir):
 def test_outputs_removal(tmpdir):
     def test_function(arg1):
         import os
-        file1 = os.path.join(os.getcwd(), 'file1.txt')
-        file2 = os.path.join(os.getcwd(), 'file2.txt')
-        with open(file1, 'wt') as fp:
-            fp.write('%d' % arg1)
-        with open(file2, 'wt') as fp:
-            fp.write('%d' % arg1)
+
+        file1 = os.path.join(os.getcwd(), "file1.txt")
+        file2 = os.path.join(os.getcwd(), "file2.txt")
+        with open(file1, "wt") as fp:
+            fp.write("%d" % arg1)
+        with open(file2, "wt") as fp:
+            fp.write("%d" % arg1)
         return file1, file2
 
     n1 = pe.Node(
         niu.Function(
-            input_names=['arg1'],
-            output_names=['file1', 'file2'],
-            function=test_function),
+            input_names=["arg1"],
+            output_names=["file1", "file2"],
+            function=test_function,
+        ),
         base_dir=tmpdir.strpath,
-        name='testoutputs')
+        name="testoutputs",
+    )
     n1.inputs.arg1 = 1
-    n1.config = {'execution': {'remove_unnecessary_outputs': True}}
+    n1.config = {"execution": {"remove_unnecessary_outputs": True}}
     n1.config = merge_dict(deepcopy(config._sections), n1.config)
     n1.run()
-    assert tmpdir.join(n1.name, 'file1.txt').check()
-    assert tmpdir.join(n1.name, 'file1.txt').check()
-    n1.needed_outputs = ['file2']
+    assert tmpdir.join(n1.name, "file1.txt").check()
+    assert tmpdir.join(n1.name, "file1.txt").check()
+    n1.needed_outputs = ["file2"]
     n1.run()
-    assert not tmpdir.join(n1.name, 'file1.txt').check()
-    assert tmpdir.join(n1.name, 'file2.txt').check()
+    assert not tmpdir.join(n1.name, "file1.txt").check()
+    assert tmpdir.join(n1.name, "file2.txt").check()
 
 
 def test_inputs_removal(tmpdir):
-    file1 = tmpdir.join('file1.txt')
-    file1.write('dummy_file')
-    n1 = pe.Node(
-        UtilsTestInterface(), base_dir=tmpdir.strpath, name='testinputs')
+    file1 = tmpdir.join("file1.txt")
+    file1.write("dummy_file")
+    n1 = pe.Node(UtilsTestInterface(), base_dir=tmpdir.strpath, name="testinputs")
     n1.inputs.in_file = file1.strpath
-    n1.config = {'execution': {'keep_inputs': True}}
+    n1.config = {"execution": {"keep_inputs": True}}
     n1.config = merge_dict(deepcopy(config._sections), n1.config)
     n1.run()
-    assert tmpdir.join(n1.name, 'file1.txt').check()
+    assert tmpdir.join(n1.name, "file1.txt").check()
     n1.inputs.in_file = file1.strpath
-    n1.config = {'execution': {'keep_inputs': False}}
+    n1.config = {"execution": {"keep_inputs": False}}
     n1.config = merge_dict(deepcopy(config._sections), n1.config)
     n1.overwrite = True
     n1.run()
-    assert not tmpdir.join(n1.name, 'file1.txt').check()
+    assert not tmpdir.join(n1.name, "file1.txt").check()
 
 
 def test_outputmultipath_collapse(tmpdir):
     """Test an OutputMultiPath whose initial value is ``[[x]]`` to ensure that
     it is returned as ``[x]``, regardless of how accessed."""
     select_if = niu.Select(inlist=[[1, 2, 3], [4]], index=1)
-    select_nd = pe.Node(niu.Select(inlist=[[1, 2, 3], [4]], index=1),
-                        name='select_nd')
+    select_nd = pe.Node(niu.Select(inlist=[[1, 2, 3], [4]], index=1), name="select_nd")
 
     ifres = select_if.run()
     ndres = select_nd.run()
@@ -305,3 +314,23 @@ def test_outputmultipath_collapse(tmpdir):
     assert ifres.outputs.out == [4]
     assert ndres.outputs.out == [4]
     assert select_nd.result.outputs.out == [4]
+
+
+@pytest.mark.timeout(30)
+def test_mapnode_single(tmpdir):
+    tmpdir.chdir()
+
+    def _producer(num=1, deadly_num=7):
+        if num == deadly_num:
+            raise RuntimeError("Got the deadly num (%d)." % num)
+        return num + 1
+
+    pnode = pe.MapNode(
+        niu.Function(function=_producer), name="ProducerNode", iterfield=["num"]
+    )
+    pnode.inputs.num = [7]
+    wf = pe.Workflow(name="PC_Workflow")
+    wf.add_nodes([pnode])
+    wf.base_dir = os.path.abspath("./test_output")
+    with pytest.raises(RuntimeError):
+        wf.run(plugin="MultiProc")

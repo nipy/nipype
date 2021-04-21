@@ -52,8 +52,8 @@ do
   esac
 done
 
-# neurodocker version 0.4.1-22-g7c44e01
-NEURODOCKER_IMAGE="kaczmarj/neurodocker:master@sha256:858632a7533cac100f70932749b4cfc77fc40f667f41fca208f406215cff8a27"
+# neurodocker version 0.5.0-3-g1788917
+NEURODOCKER_IMAGE="kaczmarj/neurodocker:master@sha256:ac2085702daac716481daae5da055e2062be52075f8f3881672e958e0cd53e6b"
 # neurodebian:stretch-non-free pulled on September 19, 2018
 BASE_IMAGE="neurodebian:stretch-non-free@sha256:7cd978427d7ad215834fee221d0536ed7825b3cddebc481eba2d792dfc2f7332"
 
@@ -68,10 +68,11 @@ function generate_base_dockerfile() {
     --spm12 version=r7219 \
     --env 'LD_LIBRARY_PATH=/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH' \
     --freesurfer version=6.0.0-min \
+    --dcm2niix version=v1.0.20190902 method=source \
     --run 'echo "cHJpbnRmICJrcnp5c3p0b2YuZ29yZ29sZXdza2lAZ21haWwuY29tCjUxNzIKICpDdnVtdkVWM3pUZmcKRlM1Si8yYzFhZ2c0RQoiID4gL29wdC9mcmVlc3VyZmVyLTYuMC4wLW1pbi9saWNlbnNlLnR4dA==" | base64 -d | sh' \
     --install afni ants apt-utils bzip2 convert3d file fsl-core \
               fsl-mni152-templates fusefat g++ git graphviz make python ruby \
-              unzip xvfb \
+              unzip xvfb git-annex-standalone liblzma-dev \
     --add-to-entrypoint "source /etc/fsl/fsl.sh && source /etc/afni/afni.sh" \
     --env ANTSPATH='/usr/lib/ants' \
           PATH='/usr/lib/ants:$PATH' \
@@ -88,10 +89,11 @@ function generate_main_dockerfile() {
           OMP_NUM_THREADS=1 \
     --arg PYTHON_VERSION_MAJOR=3 PYTHON_VERSION_MINOR=6 BUILD_DATE VCS_REF VERSION \
     --user neuro \
+    --workdir /home/neuro \
     --miniconda create_env=neuro \
                 conda_install='python=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
-                               icu=58.1 libxml2 libxslt matplotlib mkl "numpy!=1.16.0" paramiko
-                               pandas psutil scikit-learn scipy traits=4.6.0' \
+                               libxml2 libxslt matplotlib mkl "numpy!=1.16.0" paramiko
+                               pandas psutil scikit-learn scipy traits rdflib' \
                 pip_install="pytest-xdist" \
                 activate=true \
     --copy docker/files/run_builddocs.sh docker/files/run_examples.sh \
@@ -108,6 +110,8 @@ function generate_main_dockerfile() {
     --miniconda use_env=neuro \
                 pip_opts="-e" \
                 pip_install="/src/nipype[all] https://github.com/bids-standard/pybids/tarball/0.7.0" \
+    --miniconda use_env=neuro \
+                pip_install='"niflow-nipype1-workflows>=0.4.0"' \
     --workdir /work \
     --label org.label-schema.build-date='$BUILD_DATE' \
             org.label-schema.name="NIPYPE" \

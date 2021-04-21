@@ -2,16 +2,10 @@
 settings in setup.py, the nipy top-level docstring, and for building the
 docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 
-import sys
-
-# nipype version information.  An empty version_extra corresponds to a
-# full release.  '.dev' as a version_extra string means this is a development
-# version
+# nipype version information
 # Remove -dev for release
-__version__ = '1.1.9-dev'
+__version__ = "1.6.0"
 
 
 def get_nipype_gitversion():
@@ -24,45 +18,50 @@ def get_nipype_gitversion():
     """
     import os
     import subprocess
+
     try:
         import nipype
+
         gitpath = os.path.realpath(
-            os.path.join(os.path.dirname(nipype.__file__), os.path.pardir))
+            os.path.join(os.path.dirname(nipype.__file__), os.path.pardir)
+        )
     except:
         gitpath = os.getcwd()
-    gitpathgit = os.path.join(gitpath, '.git')
+    gitpathgit = os.path.join(gitpath, ".git")
     if not os.path.exists(gitpathgit):
         return None
     ver = None
     try:
         o, _ = subprocess.Popen(
-            'git describe', shell=True, cwd=gitpath,
-            stdout=subprocess.PIPE).communicate()
+            "git describe", shell=True, cwd=gitpath, stdout=subprocess.PIPE
+        ).communicate()
     except Exception:
         pass
     else:
-        ver = o.decode().strip().split('-')[-1]
+        ver = o.decode().strip().split("-")[-1]
     return ver
 
 
-if __version__.endswith('-dev'):
+if __version__.endswith("-dev"):
     gitversion = get_nipype_gitversion()
     if gitversion:
-        __version__ = '{}+{}'.format(__version__, gitversion)
+        __version__ = "{}+{}".format(__version__, gitversion)
 
 CLASSIFIERS = [
-    'Development Status :: 5 - Production/Stable', 'Environment :: Console',
-    'Intended Audience :: Science/Research',
-    'License :: OSI Approved :: Apache Software License',
-    'Operating System :: MacOS :: MacOS X',
-    'Operating System :: POSIX :: Linux',
-    'Programming Language :: Python :: 2.7',
-    'Programming Language :: Python :: 3.4',
-    'Programming Language :: Python :: 3.5',
-    'Programming Language :: Python :: 3.6', 'Topic :: Scientific/Engineering'
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: Scientific/Engineering",
 ]
+PYTHON_REQUIRES = ">= 3.6"
 
-description = 'Neuroimaging in Python: Pipelines and Interfaces'
+description = "Neuroimaging in Python: Pipelines and Interfaces"
 
 # Note: this long_description is actually a copy/paste from the top-level
 # README.txt, so that it shows up nicely on PyPI.  So please remember to edit
@@ -99,81 +98,87 @@ existing pipeline systems.
 """
 
 # versions
-NIBABEL_MIN_VERSION = '2.1.0'
-NETWORKX_MIN_VERSION = '1.9'
-NUMPY_MIN_VERSION = '1.9.0'
+NIBABEL_MIN_VERSION = "2.1.0"
+NETWORKX_MIN_VERSION = "2.0"
 # Numpy bug in python 3.7:
 # https://www.opensourceanswers.com/blog/you-shouldnt-use-python-37-for-data-science-right-now.html
-NUMPY_MIN_VERSION_37 = '1.15.3'
-NUMPY_BAD_VERSION_27 = '1.16.0'
-SCIPY_MIN_VERSION = '0.14'
-TRAITS_MIN_VERSION = '4.6'
-DATEUTIL_MIN_VERSION = '2.2'
-FUTURE_MIN_VERSION = '0.16.0'
-SIMPLEJSON_MIN_VERSION = '3.8.0'
-PROV_VERSION = '1.5.2'
-CLICK_MIN_VERSION = '6.6.0'
-PYDOT_MIN_VERSION = '1.2.3'
+NUMPY_MIN_VERSION = "1.15.3"
+SCIPY_MIN_VERSION = "0.14"
+TRAITS_MIN_VERSION = "4.6"
+DATEUTIL_MIN_VERSION = "2.2"
+FUTURE_MIN_VERSION = "0.16.0"
+SIMPLEJSON_MIN_VERSION = "3.8.0"
+PROV_VERSION = "1.5.2"
+RDFLIB_MIN_VERSION = "5.0.0"
+CLICK_MIN_VERSION = "6.6.0"
+PYDOT_MIN_VERSION = "1.2.3"
 
-NAME = 'nipype'
-MAINTAINER = 'nipype developers'
-MAINTAINER_EMAIL = 'neuroimaging@python.org'
+NAME = "nipype"
+MAINTAINER = "nipype developers"
+MAINTAINER_EMAIL = "neuroimaging@python.org"
 DESCRIPTION = description
 LONG_DESCRIPTION = long_description
-URL = 'http://nipy.org/nipype'
-DOWNLOAD_URL = 'http://github.com/nipy/nipype/archives/master'
-LICENSE = 'Apache License, 2.0'
-AUTHOR = 'nipype developers'
-AUTHOR_EMAIL = 'neuroimaging@python.org'
-PLATFORMS = 'OS Independent'
-MAJOR = __version__.split('.')[0]
-MINOR = __version__.split('.')[1]
-MICRO = __version__.replace('-', '.').split('.')[2]
-ISRELEASE = (len(__version__.replace('-', '.').split('.')) == 3
-             or 'post' in __version__.replace('-', '.').split('.')[-1])
+URL = "http://nipy.org/nipype"
+DOWNLOAD_URL = "http://github.com/nipy/nipype/archives/master"
+LICENSE = "Apache License, 2.0"
+AUTHOR = "nipype developers"
+AUTHOR_EMAIL = "neuroimaging@python.org"
+PLATFORMS = "OS Independent"
+MAJOR = __version__.split(".")[0]
+MINOR = __version__.split(".")[1]
+MICRO = __version__.replace("-", ".").split(".")[2]
+ISRELEASE = (
+    len(__version__.replace("-", ".").split(".")) == 3
+    or "post" in __version__.replace("-", ".").split(".")[-1]
+)
 VERSION = __version__
-PROVIDES = ['nipype']
+PROVIDES = ["nipype"]
 REQUIRES = [
-    'nibabel>=%s' % NIBABEL_MIN_VERSION,
-    'networkx>=%s' % NETWORKX_MIN_VERSION,
-    'numpy>=%s,!=%s ; python_version == "2.7"' % (NUMPY_MIN_VERSION, NUMPY_BAD_VERSION_27),
-    'numpy>=%s ; python_version > "3.0" and python_version < "3.7"' % NUMPY_MIN_VERSION,
-    'numpy>=%s ; python_version >= "3.7"' % NUMPY_MIN_VERSION_37,
-    'python-dateutil>=%s' % DATEUTIL_MIN_VERSION,
-    'scipy>=%s' % SCIPY_MIN_VERSION,
-    'traits>=%s' % TRAITS_MIN_VERSION,
-    'future>=%s' % FUTURE_MIN_VERSION,
-    'simplejson>=%s' % SIMPLEJSON_MIN_VERSION,
-    'prov>=%s' % PROV_VERSION,
-    'neurdflib',
-    'click>=%s' % CLICK_MIN_VERSION,
-    'funcsigs',
-    'pydotplus',
-    'pydot>=%s' % PYDOT_MIN_VERSION,
-    'packaging',
-    'futures; python_version == "2.7"',
-    'configparser; python_version <= "3.4"',
+    "click>=%s" % CLICK_MIN_VERSION,
+    "networkx>=%s" % NETWORKX_MIN_VERSION,
+    "nibabel>=%s" % NIBABEL_MIN_VERSION,
+    "numpy>=%s" % NUMPY_MIN_VERSION,
+    "packaging",
+    "prov>=%s" % PROV_VERSION,
+    "pydot>=%s" % PYDOT_MIN_VERSION,
+    "python-dateutil>=%s" % DATEUTIL_MIN_VERSION,
+    "rdflib>=%s" % RDFLIB_MIN_VERSION,
+    "scipy>=%s" % SCIPY_MIN_VERSION,
+    "simplejson>=%s" % SIMPLEJSON_MIN_VERSION,
+    "traits>=%s,!=5.0" % TRAITS_MIN_VERSION,
+    "filelock>=3.0.0",
+    "etelemetry>=0.2.0",
 ]
 
 TESTS_REQUIRES = [
-    'mock',
-    'pytest',
-    'pytest-cov',
-    'codecov',
-    'pytest-env',
-    'coverage<5'
+    "codecov",
+    "coverage<5",
+    "pytest",
+    "pytest-cov",
+    "pytest-env",
+    "pytest-timeout",
 ]
 
 EXTRA_REQUIRES = {
-    'doc': ['Sphinx>=1.4', 'numpydoc', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],
-    'tests': TESTS_REQUIRES,
-    'specs': ['yapf'],
-    'nipy': ['nitime', 'nilearn<0.5.0', 'dipy', 'nipy', 'matplotlib'],
-    'profiler': ['psutil>=5.0'],
-    'duecredit': ['duecredit'],
-    'xvfbwrapper': ['xvfbwrapper'],
-    'pybids': ['pybids>=0.7.0'],
-    'ssh': ['paramiko'],
+    "data": ["datalad"],
+    "doc": [
+        "dipy",
+        "ipython",
+        "matplotlib",
+        "nbsphinx",
+        "sphinx-argparse",
+        "sphinx>=2.1.2",
+        "sphinxcontrib-apidoc",
+        "sphinxcontrib-napoleon",
+    ],
+    "duecredit": ["duecredit"],
+    "nipy": ["nitime", "nilearn", "dipy", "nipy", "matplotlib"],
+    "profiler": ["psutil>=5.0"],
+    "pybids": ["pybids>=0.7.0"],
+    "specs": ["black"],
+    "ssh": ["paramiko"],
+    "tests": TESTS_REQUIRES,
+    "xvfbwrapper": ["xvfbwrapper"],
     # 'mesh': ['mayavi']  # Enable when it works
 }
 
@@ -183,9 +188,10 @@ def _list_union(iterable):
 
 
 # Enable a handle to install all extra dependencies at once
-EXTRA_REQUIRES['all'] = _list_union(EXTRA_REQUIRES.values())
+EXTRA_REQUIRES["all"] = _list_union(EXTRA_REQUIRES.values())
 # dev = doc + tests + specs
-EXTRA_REQUIRES['dev'] = _list_union(val for key, val in EXTRA_REQUIRES.items()
-                                    if key in ('doc', 'tests', 'specs'))
+EXTRA_REQUIRES["dev"] = _list_union(
+    val for key, val in EXTRA_REQUIRES.items() if key in ("doc", "tests", "specs")
+)
 
-STATUS = 'stable'
+STATUS = "stable"

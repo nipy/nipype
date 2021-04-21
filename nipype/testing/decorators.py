@@ -4,8 +4,7 @@
 """
 Extend numpy's decorators to use nipype's gui and data labels.
 """
-
-from numpy.testing.decorators import knownfailureif, skipif
+from numpy.testing import dec
 
 from nibabel.data import DataError
 
@@ -72,7 +71,7 @@ def make_label_dec(label, ds=None):
 
 
 def needs_review(msg):
-    """ Skip a test that needs further review.
+    """Skip a test that needs further review.
 
     Parameters
     ----------
@@ -81,19 +80,19 @@ def needs_review(msg):
     """
 
     def skip_func(func):
-        return skipif(True, msg)(func)
+        return dec.skipif(True, msg)(func)
 
     return skip_func
 
 
 # Easier version of the numpy knownfailure
 def knownfailure(f):
-    return knownfailureif(True)(f)
+    return dec.knownfailureif(True)(f)
 
 
 def if_datasource(ds, msg):
     try:
         ds.get_filename()
     except DataError:
-        return skipif(True, msg)
+        return dec.skipif(True, msg)
     return lambda f: f

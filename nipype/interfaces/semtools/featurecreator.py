@@ -5,22 +5,33 @@ If you spot a bug, please report it on the mailing list and/or change the genera
 
 import os
 
-from ..base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
-                    TraitedSpec, File, Directory, traits, isdefined,
-                    InputMultiPath, OutputMultiPath)
+from ..base import (
+    CommandLine,
+    CommandLineInputSpec,
+    SEMLikeCommandLine,
+    TraitedSpec,
+    File,
+    Directory,
+    traits,
+    isdefined,
+    InputMultiPath,
+    OutputMultiPath,
+)
 
 
 class GenerateCsfClippedFromClassifiedImageInputSpec(CommandLineInputSpec):
     inputCassifiedVolume = File(
         desc="Required: input tissue label image",
         exists=True,
-        argstr="--inputCassifiedVolume %s")
+        argstr="--inputCassifiedVolume %s",
+    )
     outputVolume = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Required: output image",
-        argstr="--outputVolume %s")
+        argstr="--outputVolume %s",
+    )
 
 
 class GenerateCsfClippedFromClassifiedImageOutputSpec(TraitedSpec):
@@ -30,22 +41,21 @@ class GenerateCsfClippedFromClassifiedImageOutputSpec(TraitedSpec):
 class GenerateCsfClippedFromClassifiedImage(SEMLikeCommandLine):
     """title: GenerateCsfClippedFromClassifiedImage
 
-category: FeatureCreator
+    category: FeatureCreator
 
-description: Get the distance from a voxel to the nearest voxel of a given tissue type.
+    description: Get the distance from a voxel to the nearest voxel of a given tissue type.
 
-version: 0.1.0.$Revision: 1 $(alpha)
+    version: 0.1.0.$Revision: 1 $(alpha)
 
-documentation-url: http:://www.na-mic.org/
+    documentation-url: http:://www.na-mic.org/
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: This tool was written by Hans J. Johnson.
-
-"""
+    contributor: This tool was written by Hans J. Johnson.
+    """
 
     input_spec = GenerateCsfClippedFromClassifiedImageInputSpec
     output_spec = GenerateCsfClippedFromClassifiedImageOutputSpec
     _cmd = " GenerateCsfClippedFromClassifiedImage "
-    _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
+    _outputs_filenames = {"outputVolume": "outputVolume.nii"}
     _redirect_x = False

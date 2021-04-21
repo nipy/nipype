@@ -1,0 +1,9 @@
+dipy
+ipython
+matplotlib
+nbsphinx
+sphinx-argparse
+sphinx>=2.1.2
+sphinxcontrib-apidoc
+sphinxcontrib-napoleon
+niflow-nipype1-workflows

@@ -5,45 +5,54 @@ If you spot a bug, please report it on the mailing list and/or change the genera
 
 import os
 
-from ..base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine,
-                    TraitedSpec, File, Directory, traits, isdefined,
-                    InputMultiPath, OutputMultiPath)
+from ..base import (
+    CommandLine,
+    CommandLineInputSpec,
+    SEMLikeCommandLine,
+    TraitedSpec,
+    File,
+    Directory,
+    traits,
+    isdefined,
+    InputMultiPath,
+    OutputMultiPath,
+)
 
 
 class JistLaminarVolumetricLayeringInputSpec(CommandLineInputSpec):
     inInner = File(
-        desc="Inner Distance Image (GM/WM boundary)",
-        exists=True,
-        argstr="--inInner %s")
+        desc="Inner Distance Image (GM/WM boundary)", exists=True, argstr="--inInner %s"
+    )
     inOuter = File(
         desc="Outer Distance Image (CSF/GM boundary)",
         exists=True,
-        argstr="--inOuter %s")
+        argstr="--inOuter %s",
+    )
     inNumber = traits.Int(desc="Number of layers", argstr="--inNumber %d")
     inMax = traits.Int(
-        desc="Max iterations for narrow band evolution", argstr="--inMax %d")
+        desc="Max iterations for narrow band evolution", argstr="--inMax %d"
+    )
     inMin = traits.Float(
-        desc="Min change ratio for narrow band evolution", argstr="--inMin %f")
+        desc="Min change ratio for narrow band evolution", argstr="--inMin %f"
+    )
     inLayering = traits.Enum(
         "distance-preserving",
         "volume-preserving",
         desc="Layering method",
-        argstr="--inLayering %s")
+        argstr="--inLayering %s",
+    )
     inLayering2 = traits.Enum(
-        "outward",
-        "inward",
-        desc="Layering direction",
-        argstr="--inLayering2 %s")
+        "outward", "inward", desc="Layering direction", argstr="--inLayering2 %s"
+    )
     incurvature = traits.Int(
-        desc="curvature approximation scale (voxels)",
-        argstr="--incurvature %d")
+        desc="curvature approximation scale (voxels)", argstr="--incurvature %d"
+    )
     inratio = traits.Float(
-        desc="ratio smoothing kernel size (voxels)", argstr="--inratio %f")
+        desc="ratio smoothing kernel size (voxels)", argstr="--inratio %f"
+    )
     inpresmooth = traits.Enum(
-        "true",
-        "false",
-        desc="pre-smooth cortical surfaces",
-        argstr="--inpresmooth %s")
+        "true", "false", desc="pre-smooth cortical surfaces", argstr="--inpresmooth %s"
+    )
     inTopology = traits.Enum(
         "26/6",
         "6/26",
@@ -54,35 +63,40 @@ class JistLaminarVolumetricLayeringInputSpec(CommandLineInputSpec):
         "wco",
         "no",
         desc="Topology",
-        argstr="--inTopology %s")
-    xPrefExt = traits.Enum(
-        "nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+        argstr="--inTopology %s",
+    )
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outContinuous = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Continuous depth measurement",
-        argstr="--outContinuous %s")
+        argstr="--outContinuous %s",
+    )
     outDiscrete = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Discrete sampled layers",
-        argstr="--outDiscrete %s")
+        argstr="--outDiscrete %s",
+    )
     outLayer = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Layer boundary surfaces",
-        argstr="--outLayer %s")
+        argstr="--outLayer %s",
+    )
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(
-        desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+        desc="Set default maximum heap size", argstr="-xDefaultMem %d"
+    )
     xMaxProcess = traits.Int(
         1,
         desc="Set default maximum number of processes.",
         argstr="-xMaxProcess %d",
-        usedefault=True)
+        usedefault=True,
+    )
 
 
 class JistLaminarVolumetricLayeringOutputSpec(TraitedSpec):
@@ -92,47 +106,43 @@ class JistLaminarVolumetricLayeringOutputSpec(TraitedSpec):
 
 
 class JistLaminarVolumetricLayering(SEMLikeCommandLine):
-    """title: Volumetric Layering
+    """Volumetric Layering.
 
-category: Developer Tools
+    Builds a continuous layering of the cortex following distance-preserving or volume-preserving
+    models of cortical folding.
 
-description: Builds a continuous layering of the cortex following distance-preserving or volume-preserving models of cortical folding.
-Waehnert MD, Dinse J, Weiss M, Streicher MN, Waehnert P, Geyer S, Turner R, Bazin PL, Anatomically motivated modeling of cortical laminae, Neuroimage, 2013.
+    References
+    ----------
+    Waehnert MD, Dinse J, Weiss M, Streicher MN, Waehnert P, Geyer S, Turner R, Bazin PL,
+    Anatomically motivated modeling of cortical laminae, Neuroimage, 2013.
 
-version: 3.0.RC
-
-contributor: Miriam Waehnert (waehnert@cbs.mpg.de) http://www.cbs.mpg.de/
-
-"""
+    """
 
     input_spec = JistLaminarVolumetricLayeringInputSpec
     output_spec = JistLaminarVolumetricLayeringOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.laminar.JistLaminarVolumetricLayering "
     _outputs_filenames = {
-        'outContinuous': 'outContinuous.nii',
-        'outLayer': 'outLayer.nii',
-        'outDiscrete': 'outDiscrete.nii'
+        "outContinuous": "outContinuous.nii",
+        "outLayer": "outLayer.nii",
+        "outDiscrete": "outDiscrete.nii",
     }
     _redirect_x = True
 
 
 class JistBrainMgdmSegmentationInputSpec(CommandLineInputSpec):
-    inMP2RAGE = File(
-        desc="MP2RAGE T1 Map Image", exists=True, argstr="--inMP2RAGE %s")
+    inMP2RAGE = File(desc="MP2RAGE T1 Map Image", exists=True, argstr="--inMP2RAGE %s")
     inMP2RAGE2 = File(
-        desc="MP2RAGE T1-weighted Image",
-        exists=True,
-        argstr="--inMP2RAGE2 %s")
+        desc="MP2RAGE T1-weighted Image", exists=True, argstr="--inMP2RAGE2 %s"
+    )
     inPV = File(desc="PV / Dura Image", exists=True, argstr="--inPV %s")
     inMPRAGE = File(
-        desc="MPRAGE T1-weighted Image", exists=True, argstr="--inMPRAGE %s")
+        desc="MPRAGE T1-weighted Image", exists=True, argstr="--inMPRAGE %s"
+    )
     inFLAIR = File(desc="FLAIR Image", exists=True, argstr="--inFLAIR %s")
     inAtlas = File(desc="Atlas file", exists=True, argstr="--inAtlas %s")
     inData = traits.Float(desc="Data weight", argstr="--inData %f")
-    inCurvature = traits.Float(
-        desc="Curvature weight", argstr="--inCurvature %f")
-    inPosterior = traits.Float(
-        desc="Posterior scale (mm)", argstr="--inPosterior %f")
+    inCurvature = traits.Float(desc="Curvature weight", argstr="--inCurvature %f")
+    inPosterior = traits.Float(desc="Posterior scale (mm)", argstr="--inPosterior %f")
     inMax = traits.Int(desc="Max iterations", argstr="--inMax %d")
     inMin = traits.Float(desc="Min change", argstr="--inMin %f")
     inSteps = traits.Int(desc="Steps", argstr="--inSteps %d")
@@ -146,89 +156,87 @@ class JistBrainMgdmSegmentationInputSpec(CommandLineInputSpec):
         "wco",
         "no",
         desc="Topology",
-        argstr="--inTopology %s")
+        argstr="--inTopology %s",
+    )
     inCompute = traits.Enum(
-        "true", "false", desc="Compute posteriors", argstr="--inCompute %s")
+        "true", "false", desc="Compute posteriors", argstr="--inCompute %s"
+    )
     inAdjust = traits.Enum(
-        "true",
-        "false",
-        desc="Adjust intensity priors",
-        argstr="--inAdjust %s")
+        "true", "false", desc="Adjust intensity priors", argstr="--inAdjust %s"
+    )
     inOutput = traits.Enum(
-        "segmentation",
-        "memberships",
-        desc="Output images",
-        argstr="--inOutput %s")
-    xPrefExt = traits.Enum(
-        "nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+        "segmentation", "memberships", desc="Output images", argstr="--inOutput %s"
+    )
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outSegmented = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Segmented Brain Image",
-        argstr="--outSegmented %s")
+        argstr="--outSegmented %s",
+    )
     outLevelset = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Levelset Boundary Image",
-        argstr="--outLevelset %s")
+        argstr="--outLevelset %s",
+    )
     outPosterior2 = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Posterior Maximum Memberships (4D)",
-        argstr="--outPosterior2 %s")
+        argstr="--outPosterior2 %s",
+    )
     outPosterior3 = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Posterior Maximum Labels (4D)",
-        argstr="--outPosterior3 %s")
+        argstr="--outPosterior3 %s",
+    )
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(
-        desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+        desc="Set default maximum heap size", argstr="-xDefaultMem %d"
+    )
     xMaxProcess = traits.Int(
         1,
         desc="Set default maximum number of processes.",
         argstr="-xMaxProcess %d",
-        usedefault=True)
+        usedefault=True,
+    )
 
 
 class JistBrainMgdmSegmentationOutputSpec(TraitedSpec):
     outSegmented = File(desc="Segmented Brain Image", exists=True)
     outLevelset = File(desc="Levelset Boundary Image", exists=True)
-    outPosterior2 = File(
-        desc="Posterior Maximum Memberships (4D)", exists=True)
+    outPosterior2 = File(desc="Posterior Maximum Memberships (4D)", exists=True)
     outPosterior3 = File(desc="Posterior Maximum Labels (4D)", exists=True)
 
 
 class JistBrainMgdmSegmentation(SEMLikeCommandLine):
-    """title: MGDM Whole Brain Segmentation
+    """MGDM Whole Brain Segmentation.
 
-category: Developer Tools
+    Estimate brain structures from an atlas for a MRI dataset (multiple input combinations
+    are possible).
 
-description: Estimate brain structures from an atlas for a MRI dataset (multiple input combinations are possible).
-
-version: 2.0.RC
-
-"""
+    """
 
     input_spec = JistBrainMgdmSegmentationInputSpec
     output_spec = JistBrainMgdmSegmentationOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.brain.JistBrainMgdmSegmentation "
     _outputs_filenames = {
-        'outSegmented': 'outSegmented.nii',
-        'outPosterior2': 'outPosterior2.nii',
-        'outPosterior3': 'outPosterior3.nii',
-        'outLevelset': 'outLevelset.nii'
+        "outSegmented": "outSegmented.nii",
+        "outPosterior2": "outPosterior2.nii",
+        "outPosterior3": "outPosterior3.nii",
+        "outLevelset": "outLevelset.nii",
     }
     _redirect_x = True
 
 
 class JistLaminarProfileGeometryInputSpec(CommandLineInputSpec):
-    inProfile = File(
-        desc="Profile Surface Image", exists=True, argstr="--inProfile %s")
+    inProfile = File(desc="Profile Surface Image", exists=True, argstr="--inProfile %s")
     incomputed = traits.Enum(
         "thickness",
         "curvedness",
@@ -239,32 +247,27 @@ class JistLaminarProfileGeometryInputSpec(CommandLineInputSpec):
         "profile_curvature",
         "profile_torsion",
         desc="computed measure",
-        argstr="--incomputed %s")
+        argstr="--incomputed %s",
+    )
     inregularization = traits.Enum(
-        "none",
-        "Gaussian",
-        desc="regularization",
-        argstr="--inregularization %s")
-    insmoothing = traits.Float(
-        desc="smoothing parameter", argstr="--insmoothing %f")
-    inoutside = traits.Float(
-        desc="outside extension (mm)", argstr="--inoutside %f")
-    xPrefExt = traits.Enum(
-        "nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+        "none", "Gaussian", desc="regularization", argstr="--inregularization %s"
+    )
+    insmoothing = traits.Float(desc="smoothing parameter", argstr="--insmoothing %f")
+    inoutside = traits.Float(desc="outside extension (mm)", argstr="--inoutside %f")
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outResult = traits.Either(
-        traits.Bool,
-        File(),
-        hash_files=False,
-        desc="Result",
-        argstr="--outResult %s")
+        traits.Bool, File(), hash_files=False, desc="Result", argstr="--outResult %s"
+    )
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(
-        desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+        desc="Set default maximum heap size", argstr="-xDefaultMem %d"
+    )
     xMaxProcess = traits.Int(
         1,
         desc="Set default maximum number of processes.",
         argstr="-xMaxProcess %d",
-        usedefault=True)
+        usedefault=True,
+    )
 
 
 class JistLaminarProfileGeometryOutputSpec(TraitedSpec):
@@ -272,51 +275,42 @@ class JistLaminarProfileGeometryOutputSpec(TraitedSpec):
 
 
 class JistLaminarProfileGeometry(SEMLikeCommandLine):
-    """title: Profile Geometry
-
-category: Developer Tools
-
-description: Compute various geometric quantities for a cortical layers.
-
-version: 3.0.RC
-
-"""
+    """Compute various geometric quantities for a cortical layers."""
 
     input_spec = JistLaminarProfileGeometryInputSpec
     output_spec = JistLaminarProfileGeometryOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.laminar.JistLaminarProfileGeometry "
-    _outputs_filenames = {'outResult': 'outResult.nii'}
+    _outputs_filenames = {"outResult": "outResult.nii"}
     _redirect_x = True
 
 
 class JistLaminarProfileCalculatorInputSpec(CommandLineInputSpec):
     inIntensity = File(
-        desc="Intensity Profile Image", exists=True, argstr="--inIntensity %s")
-    inMask = File(
-        desc="Mask Image (opt, 3D or 4D)", exists=True, argstr="--inMask %s")
+        desc="Intensity Profile Image", exists=True, argstr="--inIntensity %s"
+    )
+    inMask = File(desc="Mask Image (opt, 3D or 4D)", exists=True, argstr="--inMask %s")
     incomputed = traits.Enum(
         "mean",
         "stdev",
         "skewness",
         "kurtosis",
         desc="computed statistic",
-        argstr="--incomputed %s")
-    xPrefExt = traits.Enum(
-        "nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+        argstr="--incomputed %s",
+    )
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outResult = traits.Either(
-        traits.Bool,
-        File(),
-        hash_files=False,
-        desc="Result",
-        argstr="--outResult %s")
+        traits.Bool, File(), hash_files=False, desc="Result", argstr="--outResult %s"
+    )
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(
-        desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+        desc="Set default maximum heap size", argstr="-xDefaultMem %d"
+    )
     xMaxProcess = traits.Int(
         1,
         desc="Set default maximum number of processes.",
         argstr="-xMaxProcess %d",
-        usedefault=True)
+        usedefault=True,
+    )
 
 
 class JistLaminarProfileCalculatorOutputSpec(TraitedSpec):
@@ -324,77 +318,70 @@ class JistLaminarProfileCalculatorOutputSpec(TraitedSpec):
 
 
 class JistLaminarProfileCalculator(SEMLikeCommandLine):
-    """title: Profile Calculator
-
-category: Developer Tools
-
-description: Compute various moments for intensities mapped along a cortical profile.
-
-version: 3.0.RC
-
-"""
+    """Compute various moments for intensities mapped along a cortical profile."""
 
     input_spec = JistLaminarProfileCalculatorInputSpec
     output_spec = JistLaminarProfileCalculatorOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.laminar.JistLaminarProfileCalculator "
-    _outputs_filenames = {'outResult': 'outResult.nii'}
+    _outputs_filenames = {"outResult": "outResult.nii"}
     _redirect_x = True
 
 
 class MedicAlgorithmN3InputSpec(CommandLineInputSpec):
     inInput = File(desc="Input Volume", exists=True, argstr="--inInput %s")
     inSignal = traits.Float(
-        desc=
-        "Default = min + 1, Values at less than threshold are treated as part of the background",
-        argstr="--inSignal %f")
-    inMaximum = traits.Int(
-        desc="Maximum number of Iterations", argstr="--inMaximum %d")
+        desc="Default = min + 1, Values at less than threshold are treated as part of the background",
+        argstr="--inSignal %f",
+    )
+    inMaximum = traits.Int(desc="Maximum number of Iterations", argstr="--inMaximum %d")
     inEnd = traits.Float(
-        desc=
-        "Usually 0.01-0.00001, The measure used to terminate the iterations is the coefficient of variation of change in field estimates between successive iterations.",
-        argstr="--inEnd %f")
+        desc="Usually 0.01-0.00001, The measure used to terminate the iterations is the coefficient of variation of change in field estimates between successive iterations.",
+        argstr="--inEnd %f",
+    )
     inField = traits.Float(
-        desc=
-        "Characteristic distance over which the field varies. The distance between adjacent knots in bspline fitting with at least 4 knots going in every dimension. The default in the dialog is one third the distance (resolution * extents) of the smallest dimension.",
-        argstr="--inField %f")
+        desc="Characteristic distance over which the field varies. The distance between adjacent knots in bspline fitting with at least 4 knots going in every dimension. The default in the dialog is one third the distance (resolution * extents) of the smallest dimension.",
+        argstr="--inField %f",
+    )
     inSubsample = traits.Float(
-        desc=
-        "Usually between 1-32, The factor by which the data is subsampled to a lower resolution in estimating the slowly varying non-uniformity field. Reduce sampling in the finest sampling direction by the shrink factor.",
-        argstr="--inSubsample %f")
+        desc="Usually between 1-32, The factor by which the data is subsampled to a lower resolution in estimating the slowly varying non-uniformity field. Reduce sampling in the finest sampling direction by the shrink factor.",
+        argstr="--inSubsample %f",
+    )
     inKernel = traits.Float(
-        desc=
-        "Usually between 0.05-0.50, Width of deconvolution kernel used to sharpen the histogram. Larger values give faster convergence while smaller values give greater accuracy.",
-        argstr="--inKernel %f")
-    inWeiner = traits.Float(
-        desc="Usually between 0.0-1.0", argstr="--inWeiner %f")
+        desc="Usually between 0.05-0.50, Width of deconvolution kernel used to sharpen the histogram. Larger values give faster convergence while smaller values give greater accuracy.",
+        argstr="--inKernel %f",
+    )
+    inWeiner = traits.Float(desc="Usually between 0.0-1.0", argstr="--inWeiner %f")
     inAutomatic = traits.Enum(
         "true",
         "false",
-        desc=
-        "If true determines the threshold by histogram analysis. If true a VOI cannot be used and the input threshold is ignored.",
-        argstr="--inAutomatic %s")
-    xPrefExt = traits.Enum(
-        "nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+        desc="If true determines the threshold by histogram analysis. If true a VOI cannot be used and the input threshold is ignored.",
+        argstr="--inAutomatic %s",
+    )
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outInhomogeneity = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Inhomogeneity Corrected Volume",
-        argstr="--outInhomogeneity %s")
+        argstr="--outInhomogeneity %s",
+    )
     outInhomogeneity2 = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Inhomogeneity Field",
-        argstr="--outInhomogeneity2 %s")
+        argstr="--outInhomogeneity2 %s",
+    )
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(
-        desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+        desc="Set default maximum heap size", argstr="-xDefaultMem %d"
+    )
     xMaxProcess = traits.Int(
         1,
         desc="Set default maximum number of processes.",
         argstr="-xMaxProcess %d",
-        usedefault=True)
+        usedefault=True,
+    )
 
 
 class MedicAlgorithmN3OutputSpec(TraitedSpec):
@@ -403,49 +390,39 @@ class MedicAlgorithmN3OutputSpec(TraitedSpec):
 
 
 class MedicAlgorithmN3(SEMLikeCommandLine):
-    """title: N3 Correction
-
-category: Developer Tools
-
-description: Non-parametric Intensity Non-uniformity Correction, N3, originally by J.G. Sled.
-
-version: 1.8.R
-
-"""
+    """Non-parametric Intensity Non-uniformity Correction, N3, originally by J.G. Sled."""
 
     input_spec = MedicAlgorithmN3InputSpec
     output_spec = MedicAlgorithmN3OutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.classification.MedicAlgorithmN3 "
     _outputs_filenames = {
-        'outInhomogeneity2': 'outInhomogeneity2.nii',
-        'outInhomogeneity': 'outInhomogeneity.nii'
+        "outInhomogeneity2": "outInhomogeneity2.nii",
+        "outInhomogeneity": "outInhomogeneity.nii",
     }
     _redirect_x = True
 
 
 class JistLaminarROIAveragingInputSpec(CommandLineInputSpec):
     inIntensity = File(
-        desc="Intensity Profile Image", exists=True, argstr="--inIntensity %s")
+        desc="Intensity Profile Image", exists=True, argstr="--inIntensity %s"
+    )
     inROI = File(desc="ROI Mask", exists=True, argstr="--inROI %s")
     inROI2 = traits.Str(desc="ROI Name", argstr="--inROI2 %s")
-    inMask = File(
-        desc="Mask Image (opt, 3D or 4D)", exists=True, argstr="--inMask %s")
-    xPrefExt = traits.Enum(
-        "nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+    inMask = File(desc="Mask Image (opt, 3D or 4D)", exists=True, argstr="--inMask %s")
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outROI3 = traits.Either(
-        traits.Bool,
-        File(),
-        hash_files=False,
-        desc="ROI Average",
-        argstr="--outROI3 %s")
+        traits.Bool, File(), hash_files=False, desc="ROI Average", argstr="--outROI3 %s"
+    )
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(
-        desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+        desc="Set default maximum heap size", argstr="-xDefaultMem %d"
+    )
     xMaxProcess = traits.Int(
         1,
         desc="Set default maximum number of processes.",
         argstr="-xMaxProcess %d",
-        usedefault=True)
+        usedefault=True,
+    )
 
 
 class JistLaminarROIAveragingOutputSpec(TraitedSpec):
@@ -453,165 +430,164 @@ class JistLaminarROIAveragingOutputSpec(TraitedSpec):
 
 
 class JistLaminarROIAveraging(SEMLikeCommandLine):
-    """title: Profile ROI Averaging
-
-category: Developer Tools
-
-description: Compute an average profile over a given ROI.
-
-version: 3.0.RC
-
-"""
+    """Compute an average profile over a given ROI."""
 
     input_spec = JistLaminarROIAveragingInputSpec
     output_spec = JistLaminarROIAveragingOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.laminar.JistLaminarROIAveraging "
-    _outputs_filenames = {'outROI3': 'outROI3'}
+    _outputs_filenames = {"outROI3": "outROI3"}
     _redirect_x = True
 
 
 class MedicAlgorithmLesionToadsInputSpec(CommandLineInputSpec):
-    inT1_MPRAGE = File(
-        desc="T1_MPRAGE Image", exists=True, argstr="--inT1_MPRAGE %s")
-    inT1_SPGR = File(
-        desc="T1_SPGR Image", exists=True, argstr="--inT1_SPGR %s")
+    inT1_MPRAGE = File(desc="T1_MPRAGE Image", exists=True, argstr="--inT1_MPRAGE %s")
+    inT1_SPGR = File(desc="T1_SPGR Image", exists=True, argstr="--inT1_SPGR %s")
     inFLAIR = File(desc="FLAIR Image", exists=True, argstr="--inFLAIR %s")
     inAtlas = traits.Enum(
-        "With Lesion", "No Lesion", desc="Atlas to Use", argstr="--inAtlas %s")
+        "With Lesion", "No Lesion", desc="Atlas to Use", argstr="--inAtlas %s"
+    )
     inOutput = traits.Enum(
         "hard segmentation",
         "hard segmentation+memberships",
         "cruise inputs",
         "dura removal inputs",
         desc="Output images",
-        argstr="--inOutput %s")
+        argstr="--inOutput %s",
+    )
     inOutput2 = traits.Enum(
         "true",
         "false",
-        desc=
-        "Output the hard classification using maximum membership (not neceesarily topologically correct)",
-        argstr="--inOutput2 %s")
+        desc="Output the hard classification using maximum membership (not neceesarily topologically correct)",
+        argstr="--inOutput2 %s",
+    )
     inCorrect = traits.Enum(
-        "true",
-        "false",
-        desc="Correct MR field inhomogeneity.",
-        argstr="--inCorrect %s")
+        "true", "false", desc="Correct MR field inhomogeneity.", argstr="--inCorrect %s"
+    )
     inOutput3 = traits.Enum(
         "true",
         "false",
         desc="Output the estimated inhomogeneity field",
-        argstr="--inOutput3 %s")
+        argstr="--inOutput3 %s",
+    )
     inAtlas2 = File(
-        desc="Atlas File - With Lesions", exists=True, argstr="--inAtlas2 %s")
+        desc="Atlas File - With Lesions", exists=True, argstr="--inAtlas2 %s"
+    )
     inAtlas3 = File(
         desc="Atlas File - No Lesion - T1 and FLAIR",
         exists=True,
-        argstr="--inAtlas3 %s")
+        argstr="--inAtlas3 %s",
+    )
     inAtlas4 = File(
-        desc="Atlas File - No Lesion - T1 Only",
-        exists=True,
-        argstr="--inAtlas4 %s")
+        desc="Atlas File - No Lesion - T1 Only", exists=True, argstr="--inAtlas4 %s"
+    )
     inMaximum = traits.Int(
-        desc=
-        "Maximum distance from the interventricular WM boundary to downweight the lesion membership to avoid false postives",
-        argstr="--inMaximum %d")
-    inMaximum2 = traits.Int(
-        desc="Maximum Ventircle Distance", argstr="--inMaximum2 %d")
+        desc="Maximum distance from the interventricular WM boundary to downweight the lesion membership to avoid false postives",
+        argstr="--inMaximum %d",
+    )
+    inMaximum2 = traits.Int(desc="Maximum Ventircle Distance", argstr="--inMaximum2 %d")
     inMaximum3 = traits.Int(
-        desc="Maximum InterVentricular Distance", argstr="--inMaximum3 %d")
+        desc="Maximum InterVentricular Distance", argstr="--inMaximum3 %d"
+    )
     inInclude = traits.Enum(
         "true",
         "false",
         desc="Include lesion in WM class in hard classification",
-        argstr="--inInclude %s")
+        argstr="--inInclude %s",
+    )
     inAtlas5 = traits.Float(
         desc="Controls the effect of the statistical atlas on the segmentation",
-        argstr="--inAtlas5 %f")
+        argstr="--inAtlas5 %f",
+    )
     inSmooting = traits.Float(
         desc="Controls the effect of neighberhood voxels on the membership",
-        argstr="--inSmooting %f")
+        argstr="--inSmooting %f",
+    )
     inMaximum4 = traits.Float(
-        desc=
-        "Maximum amount of relative change in the energy function considered as the convergence criteria",
-        argstr="--inMaximum4 %f")
-    inMaximum5 = traits.Int(
-        desc="Maximum iterations", argstr="--inMaximum5 %d")
+        desc="Maximum amount of relative change in the energy function considered as the convergence criteria",
+        argstr="--inMaximum4 %f",
+    )
+    inMaximum5 = traits.Int(desc="Maximum iterations", argstr="--inMaximum5 %d")
     inAtlas6 = traits.Enum(
-        "rigid",
-        "multi_fully_affine",
-        desc="Atlas alignment",
-        argstr="--inAtlas6 %s")
+        "rigid", "multi_fully_affine", desc="Atlas alignment", argstr="--inAtlas6 %s"
+    )
     inConnectivity = traits.Enum(
         "(26,6)",
         "(6,26)",
         "(6,18)",
         "(18,6)",
         desc="Connectivity (foreground,background)",
-        argstr="--inConnectivity %s")
-    xPrefExt = traits.Enum(
-        "nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+        argstr="--inConnectivity %s",
+    )
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outHard = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Hard segmentation",
-        argstr="--outHard %s")
+        argstr="--outHard %s",
+    )
     outHard2 = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Hard segmentationfrom memberships",
-        argstr="--outHard2 %s")
+        argstr="--outHard2 %s",
+    )
     outInhomogeneity = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Inhomogeneity Field",
-        argstr="--outInhomogeneity %s")
+        argstr="--outInhomogeneity %s",
+    )
     outMembership = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Membership Functions",
-        argstr="--outMembership %s")
+        argstr="--outMembership %s",
+    )
     outLesion = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Lesion Segmentation",
-        argstr="--outLesion %s")
+        argstr="--outLesion %s",
+    )
     outSulcal = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Sulcal CSF Membership",
-        argstr="--outSulcal %s")
+        argstr="--outSulcal %s",
+    )
     outCortical = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Cortical GM Membership",
-        argstr="--outCortical %s")
+        argstr="--outCortical %s",
+    )
     outFilled = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Filled WM Membership",
-        argstr="--outFilled %s")
+        argstr="--outFilled %s",
+    )
     outWM = traits.Either(
-        traits.Bool,
-        File(),
-        hash_files=False,
-        desc="WM Mask",
-        argstr="--outWM %s")
+        traits.Bool, File(), hash_files=False, desc="WM Mask", argstr="--outWM %s"
+    )
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(
-        desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+        desc="Set default maximum heap size", argstr="-xDefaultMem %d"
+    )
     xMaxProcess = traits.Int(
         1,
         desc="Set default maximum number of processes.",
         argstr="-xMaxProcess %d",
-        usedefault=True)
+        usedefault=True,
+    )
 
 
 class MedicAlgorithmLesionToadsOutputSpec(TraitedSpec):
@@ -627,85 +603,85 @@ class MedicAlgorithmLesionToadsOutputSpec(TraitedSpec):
 
 
 class MedicAlgorithmLesionToads(SEMLikeCommandLine):
-    """title: Lesion TOADS
+    """Algorithm for simulataneous brain structures and MS lesion segmentation of MS Brains.
 
-category: Developer Tools
+    The brain segmentation is topologically consistent and the algorithm can use multiple
+    MR sequences as input data.
 
-description: Algorithm for simulataneous brain structures and MS lesion segmentation of MS Brains. The brain segmentation is topologically consistent and the algorithm can use multiple MR sequences as input data.
-N. Shiee, P.-L. Bazin, A.Z. Ozturk, P.A. Calabresi, D.S. Reich, D.L. Pham, "A Topology-Preserving Approach to the Segmentation of Brain Images with Multiple Sclerosis", NeuroImage, vol. 49, no. 2, pp. 1524-1535, 2010.
+    References
+    ----------
+    N. Shiee, P.-L. Bazin, A.Z. Ozturk, P.A. Calabresi, D.S. Reich, D.L. Pham,
+    "A Topology-Preserving Approach to the Segmentation of Brain Images with Multiple Sclerosis",
+    NeuroImage, vol. 49, no. 2, pp. 1524-1535, 2010.
 
-version: 1.9.R
-
-contributor: Navid Shiee (navid.shiee@nih.gov) http://iacl.ece.jhu.edu/~nshiee/
-
-"""
+    """
 
     input_spec = MedicAlgorithmLesionToadsInputSpec
     output_spec = MedicAlgorithmLesionToadsOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.classification.MedicAlgorithmLesionToads "
     _outputs_filenames = {
-        'outWM': 'outWM.nii',
-        'outHard': 'outHard.nii',
-        'outFilled': 'outFilled.nii',
-        'outMembership': 'outMembership.nii',
-        'outInhomogeneity': 'outInhomogeneity.nii',
-        'outCortical': 'outCortical.nii',
-        'outHard2': 'outHard2.nii',
-        'outLesion': 'outLesion.nii',
-        'outSulcal': 'outSulcal.nii'
+        "outWM": "outWM.nii",
+        "outHard": "outHard.nii",
+        "outFilled": "outFilled.nii",
+        "outMembership": "outMembership.nii",
+        "outInhomogeneity": "outInhomogeneity.nii",
+        "outCortical": "outCortical.nii",
+        "outHard2": "outHard2.nii",
+        "outLesion": "outLesion.nii",
+        "outSulcal": "outSulcal.nii",
     }
     _redirect_x = True
 
 
 class JistBrainMp2rageSkullStrippingInputSpec(CommandLineInputSpec):
     inSecond = File(
-        desc="Second inversion (Inv2) Image",
-        exists=True,
-        argstr="--inSecond %s")
-    inT1 = File(
-        desc="T1 Map (T1_Images) Image (opt)", exists=True, argstr="--inT1 %s")
+        desc="Second inversion (Inv2) Image", exists=True, argstr="--inSecond %s"
+    )
+    inT1 = File(desc="T1 Map (T1_Images) Image (opt)", exists=True, argstr="--inT1 %s")
     inT1weighted = File(
-        desc="T1-weighted (UNI) Image (opt)",
-        exists=True,
-        argstr="--inT1weighted %s")
-    inFilter = File(
-        desc="Filter Image (opt)", exists=True, argstr="--inFilter %s")
-    inSkip = traits.Enum(
-        "true", "false", desc="Skip zero values", argstr="--inSkip %s")
-    xPrefExt = traits.Enum(
-        "nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+        desc="T1-weighted (UNI) Image (opt)", exists=True, argstr="--inT1weighted %s"
+    )
+    inFilter = File(desc="Filter Image (opt)", exists=True, argstr="--inFilter %s")
+    inSkip = traits.Enum("true", "false", desc="Skip zero values", argstr="--inSkip %s")
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outBrain = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Brain Mask Image",
-        argstr="--outBrain %s")
+        argstr="--outBrain %s",
+    )
     outMasked = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Masked T1 Map Image",
-        argstr="--outMasked %s")
+        argstr="--outMasked %s",
+    )
     outMasked2 = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Masked T1-weighted Image",
-        argstr="--outMasked2 %s")
+        argstr="--outMasked2 %s",
+    )
     outMasked3 = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Masked Filter Image",
-        argstr="--outMasked3 %s")
+        argstr="--outMasked3 %s",
+    )
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(
-        desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+        desc="Set default maximum heap size", argstr="-xDefaultMem %d"
+    )
     xMaxProcess = traits.Int(
         1,
         desc="Set default maximum number of processes.",
         argstr="-xMaxProcess %d",
-        usedefault=True)
+        usedefault=True,
+    )
 
 
 class JistBrainMp2rageSkullStrippingOutputSpec(TraitedSpec):
@@ -716,38 +692,33 @@ class JistBrainMp2rageSkullStrippingOutputSpec(TraitedSpec):
 
 
 class JistBrainMp2rageSkullStripping(SEMLikeCommandLine):
-    """title: MP2RAGE Skull Stripping
+    """Estimate a brain mask for a MP2RAGE dataset.
 
-category: Developer Tools
+    At least a T1-weighted or a T1 map image is required.
 
-description: Estimate a brain mask for a MP2RAGE dataset. At least a T1-weighted or a T1 map image is required.
-
-version: 3.0.RC
-
-"""
+    """
 
     input_spec = JistBrainMp2rageSkullStrippingInputSpec
     output_spec = JistBrainMp2rageSkullStrippingOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.brain.JistBrainMp2rageSkullStripping "
     _outputs_filenames = {
-        'outBrain': 'outBrain.nii',
-        'outMasked3': 'outMasked3.nii',
-        'outMasked2': 'outMasked2.nii',
-        'outMasked': 'outMasked.nii'
+        "outBrain": "outBrain.nii",
+        "outMasked3": "outMasked3.nii",
+        "outMasked2": "outMasked2.nii",
+        "outMasked": "outMasked.nii",
     }
     _redirect_x = True
 
 
 class JistCortexSurfaceMeshInflationInputSpec(CommandLineInputSpec):
-    inLevelset = File(
-        desc="Levelset Image", exists=True, argstr="--inLevelset %s")
+    inLevelset = File(desc="Levelset Image", exists=True, argstr="--inLevelset %s")
     inSOR = traits.Float(desc="SOR Parameter", argstr="--inSOR %f")
-    inMean = traits.Float(
-        desc="Mean Curvature Threshold", argstr="--inMean %f")
+    inMean = traits.Float(desc="Mean Curvature Threshold", argstr="--inMean %f")
     inStep = traits.Int(desc="Step Size", argstr="--inStep %d")
     inMax = traits.Int(desc="Max Iterations", argstr="--inMax %d")
     inLorentzian = traits.Enum(
-        "true", "false", desc="Lorentzian Norm", argstr="--inLorentzian %s")
+        "true", "false", desc="Lorentzian Norm", argstr="--inLorentzian %s"
+    )
     inTopology = traits.Enum(
         "26/6",
         "6/26",
@@ -758,29 +729,33 @@ class JistCortexSurfaceMeshInflationInputSpec(CommandLineInputSpec):
         "wco",
         "no",
         desc="Topology",
-        argstr="--inTopology %s")
-    xPrefExt = traits.Enum(
-        "nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+        argstr="--inTopology %s",
+    )
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outOriginal = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Original Surface",
-        argstr="--outOriginal %s")
+        argstr="--outOriginal %s",
+    )
     outInflated = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Inflated Surface",
-        argstr="--outInflated %s")
+        argstr="--outInflated %s",
+    )
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(
-        desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+        desc="Set default maximum heap size", argstr="-xDefaultMem %d"
+    )
     xMaxProcess = traits.Int(
         1,
         desc="Set default maximum number of processes.",
         argstr="-xMaxProcess %d",
-        usedefault=True)
+        usedefault=True,
+    )
 
 
 class JistCortexSurfaceMeshInflationOutputSpec(TraitedSpec):
@@ -789,68 +764,52 @@ class JistCortexSurfaceMeshInflationOutputSpec(TraitedSpec):
 
 
 class JistCortexSurfaceMeshInflation(SEMLikeCommandLine):
-    """title: Surface Mesh Inflation
+    """Inflates a cortical surface mesh.
 
-category: Developer Tools
+    References
+    ----------
+    D. Tosun, M. E. Rettmann, X. Han, X. Tao, C. Xu, S. M. Resnick, D. Pham, and J. L. Prince,
+    Cortical Surface Segmentation and Mapping, NeuroImage, vol. 23, pp. S108--S118, 2004.
 
-description: Inflates a cortical surface mesh.
-D. Tosun, M. E. Rettmann, X. Han, X. Tao, C. Xu, S. M. Resnick, D. Pham, and J. L. Prince, Cortical Surface Segmentation and Mapping, NeuroImage, vol. 23, pp. S108--S118, 2004.
-
-version: 3.0.RC
-
-contributor: Duygu Tosun
-
-"""
+    """
 
     input_spec = JistCortexSurfaceMeshInflationInputSpec
     output_spec = JistCortexSurfaceMeshInflationOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.cortex.JistCortexSurfaceMeshInflation "
-    _outputs_filenames = {
-        'outOriginal': 'outOriginal',
-        'outInflated': 'outInflated'
-    }
+    _outputs_filenames = {"outOriginal": "outOriginal", "outInflated": "outInflated"}
     _redirect_x = True
 
 
 class RandomVolInputSpec(CommandLineInputSpec):
-    inSize = traits.Int(
-        desc="Size of Volume in X direction", argstr="--inSize %d")
-    inSize2 = traits.Int(
-        desc="Size of Volume in Y direction", argstr="--inSize2 %d")
-    inSize3 = traits.Int(
-        desc="Size of Volume in Z direction", argstr="--inSize3 %d")
-    inSize4 = traits.Int(
-        desc="Size of Volume in t direction", argstr="--inSize4 %d")
+    inSize = traits.Int(desc="Size of Volume in X direction", argstr="--inSize %d")
+    inSize2 = traits.Int(desc="Size of Volume in Y direction", argstr="--inSize2 %d")
+    inSize3 = traits.Int(desc="Size of Volume in Z direction", argstr="--inSize3 %d")
+    inSize4 = traits.Int(desc="Size of Volume in t direction", argstr="--inSize4 %d")
     inStandard = traits.Int(
-        desc="Standard Deviation for Normal Distribution",
-        argstr="--inStandard %d")
+        desc="Standard Deviation for Normal Distribution", argstr="--inStandard %d"
+    )
     inLambda = traits.Float(
-        desc="Lambda Value for Exponential Distribution",
-        argstr="--inLambda %f")
+        desc="Lambda Value for Exponential Distribution", argstr="--inLambda %f"
+    )
     inMaximum = traits.Int(desc="Maximum Value", argstr="--inMaximum %d")
     inMinimum = traits.Int(desc="Minimum Value", argstr="--inMinimum %d")
     inField = traits.Enum(
-        "Uniform",
-        "Normal",
-        "Exponential",
-        desc="Field",
-        argstr="--inField %s")
-    xPrefExt = traits.Enum(
-        "nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+        "Uniform", "Normal", "Exponential", desc="Field", argstr="--inField %s"
+    )
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outRand1 = traits.Either(
-        traits.Bool,
-        File(),
-        hash_files=False,
-        desc="Rand1",
-        argstr="--outRand1 %s")
+        traits.Bool, File(), hash_files=False, desc="Rand1", argstr="--outRand1 %s"
+    )
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(
-        desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+        desc="Set default maximum heap size", argstr="-xDefaultMem %d"
+    )
     xMaxProcess = traits.Int(
         1,
         desc="Set default maximum number of processes.",
         argstr="-xMaxProcess %d",
-        usedefault=True)
+        usedefault=True,
+    )
 
 
 class RandomVolOutputSpec(TraitedSpec):
@@ -858,22 +817,12 @@ class RandomVolOutputSpec(TraitedSpec):
 
 
 class RandomVol(SEMLikeCommandLine):
-    """title: Random Volume Generator
-
-category: Developer Tools
-
-description: Generate a random scalar volume.
-
-version: 1.12.RC
-
-documentation-url: http://www.nitrc.org/projects/jist/
-
-"""
+    """Generate a volume of random scalars."""
 
     input_spec = RandomVolInputSpec
     output_spec = RandomVolOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run edu.jhu.bme.smile.demo.RandomVol "
-    _outputs_filenames = {'outRand1': 'outRand1.nii'}
+    _outputs_filenames = {"outRand1": "outRand1.nii"}
     _redirect_x = True
 
 
@@ -888,23 +837,26 @@ class MedicAlgorithmImageCalculatorInputSpec(CommandLineInputSpec):
         "Min",
         "Max",
         desc="Operation",
-        argstr="--inOperation %s")
-    xPrefExt = traits.Enum(
-        "nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+        argstr="--inOperation %s",
+    )
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outResult = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Result Volume",
-        argstr="--outResult %s")
+        argstr="--outResult %s",
+    )
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(
-        desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+        desc="Set default maximum heap size", argstr="-xDefaultMem %d"
+    )
     xMaxProcess = traits.Int(
         1,
         desc="Set default maximum number of processes.",
         argstr="-xMaxProcess %d",
-        usedefault=True)
+        usedefault=True,
+    )
 
 
 class MedicAlgorithmImageCalculatorOutputSpec(TraitedSpec):
@@ -912,59 +864,50 @@ class MedicAlgorithmImageCalculatorOutputSpec(TraitedSpec):
 
 
 class MedicAlgorithmImageCalculator(SEMLikeCommandLine):
-    """title: Image Calculator
+    """Perform simple image calculator operations on two images.
 
-category: Developer Tools
+    The operations include 'Add', 'Subtract', 'Multiply', and 'Divide'
 
-description: Perform simple image calculator operations on two images. The operations include 'Add', 'Subtract', 'Multiply', and 'Divide'
-
-version: 1.10.RC
-
-documentation-url: http://www.iacl.ece.jhu.edu/
-
-"""
+    """
 
     input_spec = MedicAlgorithmImageCalculatorInputSpec
     output_spec = MedicAlgorithmImageCalculatorOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.utilities.math.MedicAlgorithmImageCalculator "
-    _outputs_filenames = {'outResult': 'outResult.nii'}
+    _outputs_filenames = {"outResult": "outResult.nii"}
     _redirect_x = True
 
 
 class JistBrainMp2rageDuraEstimationInputSpec(CommandLineInputSpec):
     inSecond = File(
-        desc="Second inversion (Inv2) Image",
-        exists=True,
-        argstr="--inSecond %s")
-    inSkull = File(
-        desc="Skull Stripping Mask", exists=True, argstr="--inSkull %s")
+        desc="Second inversion (Inv2) Image", exists=True, argstr="--inSecond %s"
+    )
+    inSkull = File(desc="Skull Stripping Mask", exists=True, argstr="--inSkull %s")
     inDistance = traits.Float(
-        desc="Distance to background (mm)", argstr="--inDistance %f")
+        desc="Distance to background (mm)", argstr="--inDistance %f"
+    )
     inoutput = traits.Enum(
         "dura_region",
         "boundary",
         "dura_prior",
         "bg_prior",
         "intens_prior",
-        desc=
-        "Outputs an estimate of the dura / CSF boundary or an estimate of the entire dura region.",
-        argstr="--inoutput %s")
-    xPrefExt = traits.Enum(
-        "nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+        desc="Outputs an estimate of the dura / CSF boundary or an estimate of the entire dura region.",
+        argstr="--inoutput %s",
+    )
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outDura = traits.Either(
-        traits.Bool,
-        File(),
-        hash_files=False,
-        desc="Dura Image",
-        argstr="--outDura %s")
+        traits.Bool, File(), hash_files=False, desc="Dura Image", argstr="--outDura %s"
+    )
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(
-        desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+        desc="Set default maximum heap size", argstr="-xDefaultMem %d"
+    )
     xMaxProcess = traits.Int(
         1,
         desc="Set default maximum number of processes.",
         argstr="-xMaxProcess %d",
-        usedefault=True)
+        usedefault=True,
+    )
 
 
 class JistBrainMp2rageDuraEstimationOutputSpec(TraitedSpec):
@@ -972,52 +915,44 @@ class JistBrainMp2rageDuraEstimationOutputSpec(TraitedSpec):
 
 
 class JistBrainMp2rageDuraEstimation(SEMLikeCommandLine):
-    """title: MP2RAGE Dura Estimation
-
-category: Developer Tools
-
-description: Filters a MP2RAGE brain image to obtain a probability map of dura matter.
-
-version: 3.0.RC
-
-"""
+    """Filters a MP2RAGE brain image to obtain a probability map of dura matter."""
 
     input_spec = JistBrainMp2rageDuraEstimationInputSpec
     output_spec = JistBrainMp2rageDuraEstimationOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.brain.JistBrainMp2rageDuraEstimation "
-    _outputs_filenames = {'outDura': 'outDura.nii'}
+    _outputs_filenames = {"outDura": "outDura.nii"}
     _redirect_x = True
 
 
 class JistLaminarProfileSamplingInputSpec(CommandLineInputSpec):
-    inProfile = File(
-        desc="Profile Surface Image", exists=True, argstr="--inProfile %s")
-    inIntensity = File(
-        desc="Intensity Image", exists=True, argstr="--inIntensity %s")
-    inCortex = File(
-        desc="Cortex Mask (opt)", exists=True, argstr="--inCortex %s")
-    xPrefExt = traits.Enum(
-        "nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+    inProfile = File(desc="Profile Surface Image", exists=True, argstr="--inProfile %s")
+    inIntensity = File(desc="Intensity Image", exists=True, argstr="--inIntensity %s")
+    inCortex = File(desc="Cortex Mask (opt)", exists=True, argstr="--inCortex %s")
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outProfilemapped = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Profile-mapped Intensity Image",
-        argstr="--outProfilemapped %s")
+        argstr="--outProfilemapped %s",
+    )
     outProfile2 = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Profile 4D Mask",
-        argstr="--outProfile2 %s")
+        argstr="--outProfile2 %s",
+    )
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(
-        desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+        desc="Set default maximum heap size", argstr="-xDefaultMem %d"
+    )
     xMaxProcess = traits.Int(
         1,
         desc="Set default maximum number of processes.",
         argstr="-xMaxProcess %d",
-        usedefault=True)
+        usedefault=True,
+    )
 
 
 class JistLaminarProfileSamplingOutputSpec(TraitedSpec):
@@ -1026,29 +961,20 @@ class JistLaminarProfileSamplingOutputSpec(TraitedSpec):
 
 
 class JistLaminarProfileSampling(SEMLikeCommandLine):
-    """title: Profile Sampling
-
-category: Developer Tools
-
-description: Sample some intensity image along a cortical profile across layer surfaces.
-
-version: 3.0.RC
-
-"""
+    """Sample some intensity image along a cortical profile across layer surfaces."""
 
     input_spec = JistLaminarProfileSamplingInputSpec
     output_spec = JistLaminarProfileSamplingOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.laminar.JistLaminarProfileSampling "
     _outputs_filenames = {
-        'outProfile2': 'outProfile2.nii',
-        'outProfilemapped': 'outProfilemapped.nii'
+        "outProfile2": "outProfile2.nii",
+        "outProfilemapped": "outProfilemapped.nii",
     }
     _redirect_x = True
 
 
 class MedicAlgorithmMipavReorientInputSpec(CommandLineInputSpec):
-    inSource = InputMultiPath(
-        File, desc="Source", sep=";", argstr="--inSource %s")
+    inSource = InputMultiPath(File, desc="Source", sep=";", argstr="--inSource %s")
     inTemplate = File(desc="Template", exists=True, argstr="--inTemplate %s")
     inNew = traits.Enum(
         "Dicom axial",
@@ -1056,7 +982,8 @@ class MedicAlgorithmMipavReorientInputSpec(CommandLineInputSpec):
         "Dicom sagittal",
         "User defined",
         desc="New image orientation",
-        argstr="--inNew %s")
+        argstr="--inNew %s",
+    )
     inUser = traits.Enum(
         "Unknown",
         "Patient Right to Left",
@@ -1066,7 +993,8 @@ class MedicAlgorithmMipavReorientInputSpec(CommandLineInputSpec):
         "Patient Inferior to Superior",
         "Patient Superior to Inferior",
         desc="User defined X-axis orientation (image left to right)",
-        argstr="--inUser %s")
+        argstr="--inUser %s",
+    )
     inUser2 = traits.Enum(
         "Unknown",
         "Patient Right to Left",
@@ -1076,7 +1004,8 @@ class MedicAlgorithmMipavReorientInputSpec(CommandLineInputSpec):
         "Patient Inferior to Superior",
         "Patient Superior to Inferior",
         desc="User defined Y-axis orientation (image top to bottom)",
-        argstr="--inUser2 %s")
+        argstr="--inUser2 %s",
+    )
     inUser3 = traits.Enum(
         "Unknown",
         "Patient Right to Left",
@@ -1086,14 +1015,16 @@ class MedicAlgorithmMipavReorientInputSpec(CommandLineInputSpec):
         "Patient Inferior to Superior",
         "Patient Superior to Inferior",
         desc="User defined Z-axis orientation (into the screen)",
-        argstr="--inUser3 %s")
+        argstr="--inUser3 %s",
+    )
     inUser4 = traits.Enum(
         "Axial",
         "Coronal",
         "Sagittal",
         "Unknown",
         desc="User defined Image Orientation",
-        argstr="--inUser4 %s")
+        argstr="--inUser4 %s",
+    )
     inInterpolation = traits.Enum(
         "Nearest Neighbor",
         "Trilinear",
@@ -1104,26 +1035,30 @@ class MedicAlgorithmMipavReorientInputSpec(CommandLineInputSpec):
         "Heptic Lagrangian",
         "Windowed Sinc",
         desc="Interpolation",
-        argstr="--inInterpolation %s")
+        argstr="--inInterpolation %s",
+    )
     inResolution = traits.Enum(
         "Unchanged",
         "Finest cubic",
         "Coarsest cubic",
         "Same as template",
         desc="Resolution",
-        argstr="--inResolution %s")
-    xPrefExt = traits.Enum(
-        "nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+        argstr="--inResolution %s",
+    )
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outReoriented = InputMultiPath(
-        File, desc="Reoriented Volume", sep=";", argstr="--outReoriented %s")
+        File, desc="Reoriented Volume", sep=";", argstr="--outReoriented %s"
+    )
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(
-        desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+        desc="Set default maximum heap size", argstr="-xDefaultMem %d"
+    )
     xMaxProcess = traits.Int(
         1,
         desc="Set default maximum number of processes.",
         argstr="-xMaxProcess %d",
-        usedefault=True)
+        usedefault=True,
+    )
 
 
 class MedicAlgorithmMipavReorientOutputSpec(TraitedSpec):
@@ -1131,15 +1066,7 @@ class MedicAlgorithmMipavReorientOutputSpec(TraitedSpec):
 
 
 class MedicAlgorithmMipavReorient(SEMLikeCommandLine):
-    """title: Reorient Volume
-
-category: Developer Tools
-
-description: Reorient a volume to a particular anatomical orientation.
-
-version: .alpha
-
-"""
+    """Reorient a volume to a particular anatomical orientation."""
 
     input_spec = MedicAlgorithmMipavReorientInputSpec
     output_spec = MedicAlgorithmMipavReorientOutputSpec
@@ -1150,86 +1077,91 @@ version: .alpha
 
 class MedicAlgorithmSPECTRE2010InputSpec(CommandLineInputSpec):
     inInput = File(
-        desc="Input volume to be skullstripped.",
-        exists=True,
-        argstr="--inInput %s")
+        desc="Input volume to be skullstripped.", exists=True, argstr="--inInput %s"
+    )
     inAtlas = File(
-        desc=
-        "SPECTRE atlas description file. A text file enumerating atlas files and landmarks.",
+        desc="SPECTRE atlas description file. A text file enumerating atlas files and landmarks.",
         exists=True,
-        argstr="--inAtlas %s")
+        argstr="--inAtlas %s",
+    )
     inInitial = traits.Int(
-        desc=
-        "Erosion of the inital mask, which is based on the probability mask and the classification., The initial mask is ouput as the d0 volume at the conclusion of SPECTRE.",
-        argstr="--inInitial %d")
+        desc="Erosion of the inital mask, which is based on the probability mask and the classification., The initial mask is ouput as the d0 volume at the conclusion of SPECTRE.",
+        argstr="--inInitial %d",
+    )
     inImage = traits.Enum(
         "T1_SPGR",
         "T1_ALT",
         "T1_MPRAGE",
         "T2",
         "FLAIR",
-        desc=
-        "Set the image modality. MP-RAGE is recommended for most T1 sequence images.",
-        argstr="--inImage %s")
+        desc="Set the image modality. MP-RAGE is recommended for most T1 sequence images.",
+        argstr="--inImage %s",
+    )
     inOutput = traits.Enum(
         "true",
         "false",
-        desc=
-        "Determines if the output results are transformed back into the space of the original input image.",
-        argstr="--inOutput %s")
+        desc="Determines if the output results are transformed back into the space of the original input image.",
+        argstr="--inOutput %s",
+    )
     inFind = traits.Enum(
-        "true", "false", desc="Find Midsaggital Plane", argstr="--inFind %s")
+        "true", "false", desc="Find Midsaggital Plane", argstr="--inFind %s"
+    )
     inRun = traits.Enum(
-        "true", "false", desc="Run Smooth Brain Mask", argstr="--inRun %s")
+        "true", "false", desc="Run Smooth Brain Mask", argstr="--inRun %s"
+    )
     inResample = traits.Enum(
         "true",
         "false",
-        desc=
-        "Determines if the data is resampled to be isotropic during the processing.",
-        argstr="--inResample %s")
+        desc="Determines if the data is resampled to be isotropic during the processing.",
+        argstr="--inResample %s",
+    )
     inInitial2 = traits.Float(
-        desc="Initial probability threshold", argstr="--inInitial2 %f")
+        desc="Initial probability threshold", argstr="--inInitial2 %f"
+    )
     inMinimum = traits.Float(
-        desc="Minimum probability threshold", argstr="--inMinimum %f")
+        desc="Minimum probability threshold", argstr="--inMinimum %f"
+    )
     inMMC = traits.Int(
-        desc=
-        "The size of the dilation step within the Modified Morphological Closing.",
-        argstr="--inMMC %d")
+        desc="The size of the dilation step within the Modified Morphological Closing.",
+        argstr="--inMMC %d",
+    )
     inMMC2 = traits.Int(
-        desc=
-        "The size of the erosion step within the Modified Morphological Closing.",
-        argstr="--inMMC2 %d")
+        desc="The size of the erosion step within the Modified Morphological Closing.",
+        argstr="--inMMC2 %d",
+    )
     inInhomogeneity = traits.Enum(
         "true",
         "false",
-        desc=
-        "Set to false by default, this parameter will make FANTASM try to do inhomogeneity correction during it's iterative cycle.",
-        argstr="--inInhomogeneity %s")
+        desc="Set to false by default, this parameter will make FANTASM try to do inhomogeneity correction during it's iterative cycle.",
+        argstr="--inInhomogeneity %s",
+    )
     inSmoothing = traits.Float(argstr="--inSmoothing %f")
     inBackground = traits.Float(argstr="--inBackground %f")
     inOutput2 = traits.Enum(
-        "true", "false", desc="Output Plane?", argstr="--inOutput2 %s")
+        "true", "false", desc="Output Plane?", argstr="--inOutput2 %s"
+    )
     inOutput3 = traits.Enum(
-        "true", "false", desc="Output Split-Halves?", argstr="--inOutput3 %s")
+        "true", "false", desc="Output Split-Halves?", argstr="--inOutput3 %s"
+    )
     inOutput4 = traits.Enum(
-        "true",
-        "false",
-        desc="Output Segmentation on Plane?",
-        argstr="--inOutput4 %s")
+        "true", "false", desc="Output Segmentation on Plane?", argstr="--inOutput4 %s"
+    )
     inDegrees = traits.Enum(
         "Rigid - 6",
         "Global rescale - 7",
         "Specific rescale - 9",
         "Affine - 12",
         desc="Degrees of freedom",
-        argstr="--inDegrees %s")
+        argstr="--inDegrees %s",
+    )
     inCost = traits.Enum(
         "Correlation ratio",
         "Least squares",
         "Normalized cross correlation",
         "Normalized mutual information",
         desc="Cost function",
-        argstr="--inCost %s")
+        argstr="--inCost %s",
+    )
     inRegistration = traits.Enum(
         "Trilinear",
         "Bspline 3rd order",
@@ -1239,7 +1171,8 @@ class MedicAlgorithmSPECTRE2010InputSpec(CommandLineInputSpec):
         "Heptic Lagrangian",
         "Windowed sinc",
         desc="Registration interpolation",
-        argstr="--inRegistration %s")
+        argstr="--inRegistration %s",
+    )
     inOutput5 = traits.Enum(
         "Trilinear",
         "Bspline 3rd order",
@@ -1250,174 +1183,176 @@ class MedicAlgorithmSPECTRE2010InputSpec(CommandLineInputSpec):
         "Windowed sinc",
         "Nearest Neighbor",
         desc="Output interpolation",
-        argstr="--inOutput5 %s")
+        argstr="--inOutput5 %s",
+    )
     inApply = traits.Enum(
-        "All", "X", "Y", "Z", desc="Apply rotation", argstr="--inApply %s")
+        "All", "X", "Y", "Z", desc="Apply rotation", argstr="--inApply %s"
+    )
     inMinimum2 = traits.Float(desc="Minimum angle", argstr="--inMinimum2 %f")
     inMaximum = traits.Float(desc="Maximum angle", argstr="--inMaximum %f")
-    inCoarse = traits.Float(
-        desc="Coarse angle increment", argstr="--inCoarse %f")
+    inCoarse = traits.Float(desc="Coarse angle increment", argstr="--inCoarse %f")
     inFine = traits.Float(desc="Fine angle increment", argstr="--inFine %f")
     inMultiple = traits.Int(
-        desc="Multiple of tolerance to bracket the minimum",
-        argstr="--inMultiple %d")
+        desc="Multiple of tolerance to bracket the minimum", argstr="--inMultiple %d"
+    )
     inNumber = traits.Int(desc="Number of iterations", argstr="--inNumber %d")
     inNumber2 = traits.Int(
-        desc="Number of minima from Level 8 to test at Level 4",
-        argstr="--inNumber2 %d")
+        desc="Number of minima from Level 8 to test at Level 4", argstr="--inNumber2 %d"
+    )
     inUse = traits.Enum(
         "true",
         "false",
-        desc=
-        "Use the max of the min resolutions of the two datasets when resampling",
-        argstr="--inUse %s")
+        desc="Use the max of the min resolutions of the two datasets when resampling",
+        argstr="--inUse %s",
+    )
     inSubsample = traits.Enum(
-        "true",
-        "false",
-        desc="Subsample image for speed",
-        argstr="--inSubsample %s")
+        "true", "false", desc="Subsample image for speed", argstr="--inSubsample %s"
+    )
     inSkip = traits.Enum(
         "true",
         "false",
         desc="Skip multilevel search (Assume images are close to alignment)",
-        argstr="--inSkip %s")
+        argstr="--inSkip %s",
+    )
     inMultithreading = traits.Enum(
         "true",
         "false",
-        desc=
-        "Set to false by default, this parameter controls the multithreaded behavior of the linear registration.",
-        argstr="--inMultithreading %s")
-    xPrefExt = traits.Enum(
-        "nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+        desc="Set to false by default, this parameter controls the multithreaded behavior of the linear registration.",
+        argstr="--inMultithreading %s",
+    )
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outOriginal = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
-        desc=
-        "If Output in Original Space Flag is true then outputs the original input volume. Otherwise outputs the axialy reoriented input volume.",
-        argstr="--outOriginal %s")
+        desc="If Output in Original Space Flag is true then outputs the original input volume. Otherwise outputs the axialy reoriented input volume.",
+        argstr="--outOriginal %s",
+    )
     outStripped = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Skullstripped result of the input volume with just the brain.",
-        argstr="--outStripped %s")
+        argstr="--outStripped %s",
+    )
     outMask = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Binary Mask of the skullstripped result with just the brain",
-        argstr="--outMask %s")
+        argstr="--outMask %s",
+    )
     outPrior = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Probability prior from the atlas registrations",
-        argstr="--outPrior %s")
+        argstr="--outPrior %s",
+    )
     outFANTASM = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Tissue classification of of the whole input volume.",
-        argstr="--outFANTASM %s")
+        argstr="--outFANTASM %s",
+    )
     outd0 = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Initial Brainmask",
-        argstr="--outd0 %s")
+        argstr="--outd0 %s",
+    )
     outMidsagittal = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Plane dividing the brain hemispheres",
-        argstr="--outMidsagittal %s")
+        argstr="--outMidsagittal %s",
+    )
     outSplitHalves = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Skullstripped mask of the brain with the hemispheres divided.",
-        argstr="--outSplitHalves %s")
+        argstr="--outSplitHalves %s",
+    )
     outSegmentation = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
-        desc=
-        "2D image showing the tissue classification on the midsagittal plane",
-        argstr="--outSegmentation %s")
+        desc="2D image showing the tissue classification on the midsagittal plane",
+        argstr="--outSegmentation %s",
+    )
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(
-        desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+        desc="Set default maximum heap size", argstr="-xDefaultMem %d"
+    )
     xMaxProcess = traits.Int(
         1,
         desc="Set default maximum number of processes.",
         argstr="-xMaxProcess %d",
-        usedefault=True)
+        usedefault=True,
+    )
 
 
 class MedicAlgorithmSPECTRE2010OutputSpec(TraitedSpec):
     outOriginal = File(
-        desc=
-        "If Output in Original Space Flag is true then outputs the original input volume. Otherwise outputs the axialy reoriented input volume.",
-        exists=True)
+        desc="If Output in Original Space Flag is true then outputs the original input volume. Otherwise outputs the axialy reoriented input volume.",
+        exists=True,
+    )
     outStripped = File(
         desc="Skullstripped result of the input volume with just the brain.",
-        exists=True)
+        exists=True,
+    )
     outMask = File(
-        desc="Binary Mask of the skullstripped result with just the brain",
-        exists=True)
-    outPrior = File(
-        desc="Probability prior from the atlas registrations", exists=True)
+        desc="Binary Mask of the skullstripped result with just the brain", exists=True
+    )
+    outPrior = File(desc="Probability prior from the atlas registrations", exists=True)
     outFANTASM = File(
-        desc="Tissue classification of of the whole input volume.",
-        exists=True)
+        desc="Tissue classification of of the whole input volume.", exists=True
+    )
     outd0 = File(desc="Initial Brainmask", exists=True)
-    outMidsagittal = File(
-        desc="Plane dividing the brain hemispheres", exists=True)
+    outMidsagittal = File(desc="Plane dividing the brain hemispheres", exists=True)
     outSplitHalves = File(
         desc="Skullstripped mask of the brain with the hemispheres divided.",
-        exists=True)
+        exists=True,
+    )
     outSegmentation = File(
-        desc=
-        "2D image showing the tissue classification on the midsagittal plane",
-        exists=True)
+        desc="2D image showing the tissue classification on the midsagittal plane",
+        exists=True,
+    )
 
 
 class MedicAlgorithmSPECTRE2010(SEMLikeCommandLine):
-    """title: SPECTRE 2010
+    """SPECTRE 2010: Simple Paradigm for Extra-Cranial Tissue REmoval [1]_, [2]_.
 
-category: Developer Tools
+    References
+    ----------
 
-description: Simple Paradigm for Extra-Cranial Tissue REmoval
+    .. [1] A. Carass, M.B. Wheeler, J. Cuzzocreo, P.-L. Bazin, S.S. Bassett, and J.L. Prince,
+           'A Joint Registration and Segmentation Approach to Skull Stripping',
+           Fourth IEEE International Symposium on Biomedical Imaging (ISBI 2007), Arlington, VA,
+           April 12-15, 2007.
+    .. [2] A. Carass, J. Cuzzocreo, M.B. Wheeler, P.-L. Bazin, S.M. Resnick, and J.L. Prince,
+           'Simple paradigm for extra-cerebral tissue removal: Algorithm and analysis',
+           NeuroImage 56(4):1982-1992, 2011.
 
-Algorithm Version: 1.6
-GUI Version: 1.10
-
-A. Carass, M.B. Wheeler, J. Cuzzocreo, P.-L. Bazin, S.S. Bassett, and J.L. Prince, 'A Joint Registration and Segmentation Approach to Skull Stripping', Fourth IEEE International Symposium on Biomedical Imaging (ISBI 2007), Arlington, VA, April 12-15, 2007.
-A. Carass, J. Cuzzocreo, M.B. Wheeler, P.-L. Bazin, S.M. Resnick, and J.L. Prince, 'Simple paradigm for extra-cerebral tissue removal: Algorithm and analysis', NeuroImage 56(4):1982-1992, 2011.
-
-version: 1.6.R
-
-documentation-url: http://www.iacl.ece.jhu.edu/
-
-contributor: Aaron Carass (aaron_carass@jhu.edu) http://www.iacl.ece.jhu.edu/
-Hanlin Wan (hanlinwan@gmail.com)
-
-"""
+    """
 
     input_spec = MedicAlgorithmSPECTRE2010InputSpec
     output_spec = MedicAlgorithmSPECTRE2010OutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.segmentation.skull_strip.MedicAlgorithmSPECTRE2010 "
     _outputs_filenames = {
-        'outd0': 'outd0.nii',
-        'outOriginal': 'outOriginal.nii',
-        'outMask': 'outMask.nii',
-        'outSplitHalves': 'outSplitHalves.nii',
-        'outMidsagittal': 'outMidsagittal.nii',
-        'outPrior': 'outPrior.nii',
-        'outFANTASM': 'outFANTASM.nii',
-        'outSegmentation': 'outSegmentation.nii',
-        'outStripped': 'outStripped.nii'
+        "outd0": "outd0.nii",
+        "outOriginal": "outOriginal.nii",
+        "outMask": "outMask.nii",
+        "outSplitHalves": "outSplitHalves.nii",
+        "outMidsagittal": "outMidsagittal.nii",
+        "outPrior": "outPrior.nii",
+        "outFANTASM": "outFANTASM.nii",
+        "outSegmentation": "outSegmentation.nii",
+        "outStripped": "outStripped.nii",
     }
     _redirect_x = True
 
@@ -1428,27 +1363,30 @@ class JistBrainPartialVolumeFilterInputSpec(CommandLineInputSpec):
         "bright",
         "dark",
         "both",
-        desc=
-        "Outputs the raw intensity values or a probability score for the partial volume regions.",
-        argstr="--inPV %s")
+        desc="Outputs the raw intensity values or a probability score for the partial volume regions.",
+        argstr="--inPV %s",
+    )
     inoutput = traits.Enum(
-        "probability", "intensity", desc="output", argstr="--inoutput %s")
-    xPrefExt = traits.Enum(
-        "nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+        "probability", "intensity", desc="output", argstr="--inoutput %s"
+    )
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outPartial = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Partial Volume Image",
-        argstr="--outPartial %s")
+        argstr="--outPartial %s",
+    )
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(
-        desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+        desc="Set default maximum heap size", argstr="-xDefaultMem %d"
+    )
     xMaxProcess = traits.Int(
         1,
         desc="Set default maximum number of processes.",
         argstr="-xMaxProcess %d",
-        usedefault=True)
+        usedefault=True,
+    )
 
 
 class JistBrainPartialVolumeFilterOutputSpec(TraitedSpec):
@@ -1456,84 +1394,83 @@ class JistBrainPartialVolumeFilterOutputSpec(TraitedSpec):
 
 
 class JistBrainPartialVolumeFilter(SEMLikeCommandLine):
-    """title: Partial Volume Filter
+    """Partial Volume Filter.
 
-category: Developer Tools
+    Filters an image for regions of partial voluming assuming a ridge-like model of intensity.
 
-description: Filters an image for regions of partial voluming assuming a ridge-like model of intensity.
-
-version: 2.0.RC
-
-"""
+    """
 
     input_spec = JistBrainPartialVolumeFilterInputSpec
     output_spec = JistBrainPartialVolumeFilterOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.brain.JistBrainPartialVolumeFilter "
-    _outputs_filenames = {'outPartial': 'outPartial.nii'}
+    _outputs_filenames = {"outPartial": "outPartial.nii"}
     _redirect_x = True
 
 
 class JistIntensityMp2rageMaskingInputSpec(CommandLineInputSpec):
     inSecond = File(
-        desc="Second inversion (Inv2) Image",
-        exists=True,
-        argstr="--inSecond %s")
+        desc="Second inversion (Inv2) Image", exists=True, argstr="--inSecond %s"
+    )
     inQuantitative = File(
         desc="Quantitative T1 Map (T1_Images) Image",
         exists=True,
-        argstr="--inQuantitative %s")
+        argstr="--inQuantitative %s",
+    )
     inT1weighted = File(
-        desc="T1-weighted (UNI) Image",
-        exists=True,
-        argstr="--inT1weighted %s")
+        desc="T1-weighted (UNI) Image", exists=True, argstr="--inT1weighted %s"
+    )
     inBackground = traits.Enum(
         "exponential",
         "half-normal",
-        desc=
-        "Model distribution for background noise (default is half-normal, exponential is more stringent).",
-        argstr="--inBackground %s")
-    inSkip = traits.Enum(
-        "true", "false", desc="Skip zero values", argstr="--inSkip %s")
+        desc="Model distribution for background noise (default is half-normal, exponential is more stringent).",
+        argstr="--inBackground %s",
+    )
+    inSkip = traits.Enum("true", "false", desc="Skip zero values", argstr="--inSkip %s")
     inMasking = traits.Enum(
         "binary",
         "proba",
-        desc=
-        "Whether to use a binary threshold or a weighted average based on the probability.",
-        argstr="--inMasking %s")
-    xPrefExt = traits.Enum(
-        "nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+        desc="Whether to use a binary threshold or a weighted average based on the probability.",
+        argstr="--inMasking %s",
+    )
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outSignal = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Signal Proba Image",
-        argstr="--outSignal_Proba %s")
+        argstr="--outSignal_Proba %s",
+    )
     outSignal2 = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Signal Mask Image",
-        argstr="--outSignal_Mask %s")
+        argstr="--outSignal_Mask %s",
+    )
     outMasked = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Masked T1 Map Image",
-        argstr="--outMasked_T1_Map %s")
+        argstr="--outMasked_T1_Map %s",
+    )
     outMasked2 = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Masked Iso Image",
-        argstr="--outMasked_T1weighted %s")
+        argstr="--outMasked_T1weighted %s",
+    )
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(
-        desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+        desc="Set default maximum heap size", argstr="-xDefaultMem %d"
+    )
     xMaxProcess = traits.Int(
         1,
         desc="Set default maximum number of processes.",
         argstr="-xMaxProcess %d",
-        usedefault=True)
+        usedefault=True,
+    )
 
 
 class JistIntensityMp2rageMaskingOutputSpec(TraitedSpec):
@@ -1544,52 +1481,44 @@ class JistIntensityMp2rageMaskingOutputSpec(TraitedSpec):
 
 
 class JistIntensityMp2rageMasking(SEMLikeCommandLine):
-    """title: MP2RAGE Background Masking
-
-category: Developer Tools
-
-description: Estimate a background signal mask for a MP2RAGE dataset.
-
-version: 3.0.RC
-
-"""
+    """Estimate a background signal mask for a MP2RAGE dataset."""
 
     input_spec = JistIntensityMp2rageMaskingInputSpec
     output_spec = JistIntensityMp2rageMaskingOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.intensity.JistIntensityMp2rageMasking "
     _outputs_filenames = {
-        'outSignal2': 'outSignal2.nii',
-        'outSignal': 'outSignal.nii',
-        'outMasked2': 'outMasked2.nii',
-        'outMasked': 'outMasked.nii'
+        "outSignal2": "outSignal2.nii",
+        "outSignal": "outSignal.nii",
+        "outMasked2": "outMasked2.nii",
+        "outMasked": "outMasked.nii",
     }
     _redirect_x = True
 
 
 class MedicAlgorithmThresholdToBinaryMaskInputSpec(CommandLineInputSpec):
-    inLabel = InputMultiPath(
-        File, desc="Input volumes", sep=";", argstr="--inLabel %s")
-    inMinimum = traits.Float(
-        desc="Minimum threshold value.", argstr="--inMinimum %f")
-    inMaximum = traits.Float(
-        desc="Maximum threshold value.", argstr="--inMaximum %f")
+    inLabel = InputMultiPath(File, desc="Input volumes", sep=";", argstr="--inLabel %s")
+    inMinimum = traits.Float(desc="Minimum threshold value.", argstr="--inMinimum %f")
+    inMaximum = traits.Float(desc="Maximum threshold value.", argstr="--inMaximum %f")
     inUse = traits.Enum(
         "true",
         "false",
         desc="Use the images max intensity as the max value of the range.",
-        argstr="--inUse %s")
-    xPrefExt = traits.Enum(
-        "nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+        argstr="--inUse %s",
+    )
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outBinary = InputMultiPath(
-        File, desc="Binary Mask", sep=";", argstr="--outBinary %s")
+        File, desc="Binary Mask", sep=";", argstr="--outBinary %s"
+    )
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(
-        desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+        desc="Set default maximum heap size", argstr="-xDefaultMem %d"
+    )
     xMaxProcess = traits.Int(
         1,
         desc="Set default maximum number of processes.",
         argstr="-xMaxProcess %d",
-        usedefault=True)
+        usedefault=True,
+    )
 
 
 class MedicAlgorithmThresholdToBinaryMaskOutputSpec(TraitedSpec):
@@ -1597,17 +1526,11 @@ class MedicAlgorithmThresholdToBinaryMaskOutputSpec(TraitedSpec):
 
 
 class MedicAlgorithmThresholdToBinaryMask(SEMLikeCommandLine):
-    """title: Threshold to Binary Mask
+    """Threshold to Binary Mask.
 
-category: Developer Tools
+    Given a volume and an intensity range create a binary mask for values within that range.
 
-description: Given a volume and an intensity range create a binary mask for values within that range.
-
-version: 1.2.RC
-
-documentation-url: http://www.iacl.ece.jhu.edu/
-
-"""
+    """
 
     input_spec = MedicAlgorithmThresholdToBinaryMaskInputSpec
     output_spec = MedicAlgorithmThresholdToBinaryMaskOutputSpec
