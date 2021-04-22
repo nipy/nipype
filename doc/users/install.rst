@@ -116,7 +116,7 @@ NeuroDocker_.
 Installation for developers
 ---------------------------
 
-Developers should start `here <../devel/testing_nipype.html>`_.
+Developers should start `here <../devel/testing_nipype.rst>`_.
 
 Developers can also use this docker container: `docker pull nipype/nipype:master`
 
