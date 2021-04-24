@@ -99,32 +99,9 @@ class Interface(object):
         print(allhelp)
         return None  # R1710
 
-    def __init__(self):
-        """Subclasses must implement __init__"""
-        raise NotImplementedError
-
     def run(self):
         """Execute the command."""
         raise NotImplementedError
-
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
-        """Called to populate outputs"""
-        raise NotImplementedError
-
-    def _list_outputs(self):
-        """ List expected outputs"""
-        raise NotImplementedError
-
-    @classmethod
-    def _get_filecopy_info(cls):
-        """Provides information about file inputs to copy or link to cwd.
-        Necessary for pipeline operation
-        """
-        iflogger.warning(
-            "_get_filecopy_info member of Interface was deprecated "
-            "in nipype-1.1.6 and will be removed in 1.2.0"
-        )
-        return get_filecopy_info(cls)
 
 
 class BaseInterface(Interface):
