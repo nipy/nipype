@@ -912,10 +912,12 @@ connected.
         return allnodes
 
     def _has_node(self, wanted_node):
-        for node in self._graph.nodes():
+        if wanted_node in self._graph:
+            return True  # best case scenario
+        for node in self._graph:  # iterate otherwise
             if wanted_node == node:
                 return True
-            if isinstance(node, Workflow):
+            if hasattr(node, "_has_node"):  # hasattr is faster than isinstance
                 if node._has_node(wanted_node):
                     return True
         return False
