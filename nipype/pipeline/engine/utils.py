@@ -753,7 +753,7 @@ def _merge_graphs(
     # nodes of the supergraph.
     supernodes = supergraph.nodes()
     ids = [n._hierarchy + n._id for n in supernodes]
-    if len(np.unique(ids)) != len(ids):
+    if len(set(ids)) != len(ids):
         # This should trap the problem of miswiring when multiple iterables are
         # used at the same level. The use of the template below for naming
         # updates to nodes is the general solution.
