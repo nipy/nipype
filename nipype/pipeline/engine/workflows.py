@@ -59,6 +59,9 @@ class Workflow(EngineBase):
         super(Workflow, self).__init__(name, base_dir)
         self._graph = nx.DiGraph()
 
+        self._nodes_cache = set()
+        self._nested_workflows_cache = set()
+
     # PUBLIC API
     def clone(self, name):
         """Clone a workflow
@@ -269,6 +272,8 @@ connected.
                 "(%s, %s): new edge data: %s", srcnode, destnode, str(edge_data)
             )
 
+        self._update_node_cache()
+
     def disconnect(self, *args):
         """Disconnect nodes
         See the docstring for connect for format.
@@ -314,6 +319,8 @@ connected.
             else:
                 self._graph.add_edges_from([(srcnode, dstnode, edge_data)])
 
+        self._update_node_cache()
+
     def add_nodes(self, nodes):
         """ Add nodes to a workflow
 
@@ -346,6 +353,7 @@ connected.
             if node._hierarchy is None:
                 node._hierarchy = self.name
         self._graph.add_nodes_from(newnodes)
+        self._update_node_cache()
 
     def remove_nodes(self, nodes):
         """ Remove nodes from a workflow
@@ -356,6 +364,7 @@ connected.
             A list of EngineBase-based objects
         """
         self._graph.remove_nodes_from(nodes)
+        self._update_node_cache()
 
     # Input-Output access
     @property
@@ -903,23 +912,32 @@ connected.
         node.set_input(param, deepcopy(newval))
 
     def _get_all_nodes(self):
-        allnodes = []
-        for node in self._graph.nodes():
-            if isinstance(node, Workflow):
-                allnodes.extend(node._get_all_nodes())
-            else:
-                allnodes.append(node)
+        allnodes = [
+            *self._nodes_cache.difference(self._nested_workflows_cache)
+        ]  # all nodes that are not workflows
+        for node in self._nested_workflows_cache:
+            allnodes.extend(node._get_all_nodes())
         return allnodes
 
+    def _update_node_cache(self):
+        nodes = set(self._graph)
+
+        added_nodes = nodes.difference(self._nodes_cache)
+        removed_nodes = self._nodes_cache.difference(nodes)
+
+        self._nodes_cache = nodes
+        self._nested_workflows_cache.difference_update(removed_nodes)
+
+        for node in added_nodes:
+            if isinstance(node, Workflow):
+                self._nested_workflows_cache.add(node)
+
     def _has_node(self, wanted_node):
-        if wanted_node in self._graph:
-            return True  # best case scenario
-        for node in self._graph:  # iterate otherwise
-            if wanted_node == node:
+        if wanted_node in self._nodes_cache:
+            return True
+        for node in self._nested_workflows_cache:
+            if node._has_node(wanted_node):
                 return True
-            if hasattr(node, "_has_node"):  # hasattr is faster than isinstance
-                if node._has_node(wanted_node):
-                    return True
         return False
 
     def _create_flat_graph(self):
