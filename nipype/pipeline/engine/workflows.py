@@ -144,7 +144,7 @@ class Workflow(EngineBase):
             self.disconnect(connection_list)
             return
 
-        newnodes = []
+        newnodes = set()
         for srcnode, destnode, _ in connection_list:
             if self in [srcnode, destnode]:
                 msg = (
@@ -154,9 +154,9 @@ class Workflow(EngineBase):
 
                 raise IOError(msg)
             if (srcnode not in newnodes) and not self._has_node(srcnode):
-                newnodes.append(srcnode)
+                newnodes.add(srcnode)
             if (destnode not in newnodes) and not self._has_node(destnode):
-                newnodes.append(destnode)
+                newnodes.add(destnode)
         if newnodes:
             self._check_nodes(newnodes)
             for node in newnodes:
