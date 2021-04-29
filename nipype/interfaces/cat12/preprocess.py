@@ -18,7 +18,6 @@ class CAT12SegmentInputSpec(SPMCommandInputSpec):
                          copyfile=False)
 
     n_jobs = traits.Int(1, usedefault=True, mandatory=True, field="nproc", desc="Number of threads")
-    use_prior = Str(field="useprior", usedefault=True)
 
     _help_affine_reg = 'Affine Regularization. The procedure is a local optimisation, so it needs reasonable initial ' \
                        'starting estimates. Images should be placed in approximate alignment using the Display ' \
@@ -129,16 +128,19 @@ class CAT12SegmentInputSpec(SPMCommandInputSpec):
                  'further analysis!  For distinction, these files contain "preview" in their filename and they' \
                  ' are not available as batch dependencies objects. '
     surface_and_thickness_estimation = traits.Int(1, field="surface", desc=_help_surf, usedefault=True)
-    surface_measures = traits.Int(1, field="output.surf_measures", usedefault=True)
+    surface_measures = traits.Int(1, field="output.surf_measures", usedefault=True, desc="Extract surface measures")
 
     # Templates
     neuromorphometrics = traits.Bool(True, field="output.ROImenu.atlases.neuromorphometrics",
-                                     usedefault=True)
-    lpba40 = traits.Bool(True, field="output.ROImenu.atlases.lpba40", usedefault=True)
-    cobra = traits.Bool(True, field="output.ROImenu.atlases.hammers", usedefault=True)
-    hammers = traits.Bool(True, field="output.ROImenu.atlases.cobra", usedefault=True)
+                                     usedefault=True, desc="Extract brain measures for Neuromorphometrics template")
+    lpba40 = traits.Bool(True, field="output.ROImenu.atlases.lpba40", usedefault=True,
+                         desc="Extract brain measures for LPBA40 template")
+    cobra = traits.Bool(True, field="output.ROImenu.atlases.hammers", usedefault=True,
+                        desc="Extract brain measures for COBRA template")
+    hammers = traits.Bool(True, field="output.ROImenu.atlases.cobra", usedefault=True,
+                          desc="Extract brain measures for Hammers template")
     own_atlas = InputMultiPath(ImageFileSPM(exists=True), field="output.ROImenu.atlases.ownatlas",
-                               desc="Own Atlas", mandatory=False, copyfile=False)
+                               desc="Extract brain measures for a given template", mandatory=False, copyfile=False)
 
     _dartel_help = 'This option is to export data into a form that can be used with DARTEL. The SPM default is to ' \
                    'only apply rigid body transformation. However, a more appropriate option is to apply affine ' \
@@ -146,47 +148,55 @@ class CAT12SegmentInputSpec(SPMCommandInputSpec):
                    'non-linearly register brains to the template.'
 
     # Grey matter
-    _gm_desc = 'Options to save grey matter images.'
-    gm_output_native = traits.Bool(False, field="output.GM.native", usedefault=True, desc=_gm_desc)
-    gm_output_modulated = traits.Bool(True, field="output.GM.mod", usedefault=True, desc=_gm_desc)
-    gm_output_dartel = traits.Bool(False, field="output.GM.dartel", usedefault=True, desc=_gm_desc)
+    gm_output_native = traits.Bool(False, field="output.GM.native", usedefault=True,
+                                   desc='Save modulated grey matter images.')
+    gm_output_modulated = traits.Bool(True, field="output.GM.mod", usedefault=True,
+                                      desc='Save native grey matter images.')
+    gm_output_dartel = traits.Bool(False, field="output.GM.dartel", usedefault=True,
+                                   desc='Save dartel grey matter images.')
 
     # White matter
     _wm_desc = 'Options to save white matter images.'
-    wm_output_native = traits.Bool(False, field="output.WM.native", usedefault=True, desc=_wm_desc)
-    wm_output_modulated = traits.Bool(True, field="output.WM.mod", usedefault=True, desc=_wm_desc)
-    wm_output_dartel = traits.Bool(False, field="output.WM.dartel", usedefault=True, desc=_wm_desc)
+    wm_output_native = traits.Bool(False, field="output.WM.native", usedefault=True,
+                                   desc='Save dartel white matter images.')
+    wm_output_modulated = traits.Bool(True, field="output.WM.mod", usedefault=True,
+                                   desc='Save dartel white matter images.')
+    wm_output_dartel = traits.Bool(False, field="output.WM.dartel", usedefault=True,
+                                   desc='Save dartel white matter images.')
 
     # CSF matter
     _csf_desc = 'Options to save CSF images.'
-    csf_output_native = traits.Bool(False, field="output.CSF.native", usedefault=True, desc=_csf_desc)
-    csf_output_modulated = traits.Bool(True, field="output.CSF.mod", usedefault=True, desc=_csf_desc)
-    csf_output_dartel = traits.Bool(False, field="output.CSF.dartel", usedefault=True, desc=_csf_desc)
+    csf_output_native = traits.Bool(False, field="output.CSF.native", usedefault=True,
+                                   desc='Save dartel CSF images.')
+    csf_output_modulated = traits.Bool(True, field="output.CSF.mod", usedefault=True,
+                                   desc='Save dartel CSF images.')
+    csf_output_dartel = traits.Bool(False, field="output.CSF.dartel", usedefault=True,
+                                   desc='Save dartel CSF images.')
 
     # Labels
-    _help_label_desc = 'This is the option to save a labeled version of your segmentations for fast visual ' \
+    _help_label_desc = 'This is the option to save a labeled version of your segmentations in the %s space for fast visual ' \
                        'comparision. Labels are saved as Partial Volume Estimation (PVE) values with different mix ' \
                        'classes for GM-WM (2.5) and GM-CSF (1.5). BG=0, CSF=1, GM=2, WM=3, WMH=4 (if WMHC=3), ' \
                        'SL=1.5 (if SLC)'
-    label_native = traits.Bool(False, field="output.label.native", usedefault=True, desc=_help_label_desc)
-    label_warped = traits.Bool(True, field="output.label.warped", usedefault=True, desc=_help_label_desc)
-    label_dartel = traits.Bool(False, field="output.label.dartel", usedefault=True, desc=_help_label_desc)
-    output_labelnative = traits.Bool(False, field="output.labelnative", usedefault=True, desc=_help_label_desc)
+    label_native = traits.Bool(False, field="output.label.native", usedefault=True, desc=_help_label_desc % "native")
+    label_warped = traits.Bool(True, field="output.label.warped", usedefault=True, desc=_help_label_desc % "warped")
+    label_dartel = traits.Bool(False, field="output.label.dartel", usedefault=True, desc=_help_label_desc % "dartel")
+    output_labelnative = traits.Bool(False, field="output.labelnative", usedefault=True, desc=_help_label_desc % "native")
 
     # Bias
-    save_bias_corrected = traits.Bool(True, field="output.bias.warped", usedefault=True)
+    save_bias_corrected = traits.Bool(True, field="output.bias.warped", usedefault=True, desc="Save bias corrected image")
 
     # las
     _las_desc = 'This is the option to save a bias, noise, and local intensity corrected version of the original T1' \
-                ' image. MR images are usually corrupted by a smooth, spatially varying artifact that modulates the' \
+                ' image in the %s space. MR images are usually corrupted by a smooth, spatially varying artifact that modulates the' \
                 ' intensity of the image (bias). These artifacts, although not usually a problem for visual ' \
                 'inspection, can impede automated processing of the images. The bias corrected version should have ' \
                 'more uniform intensities within the different types of tissues and can be saved in native space ' \
                 'and/or normalised. Noise is corrected by an adaptive non-local mean (NLM) filter (Manjon 2008, ' \
                 'Medical Image Analysis 12).'
-    las_native = traits.Bool(False, field="output.las.native", usedefault=True, desc=_las_desc)
-    las_warped = traits.Bool(True, field="output.las.warped", usedefault=True, desc=_las_desc)
-    las_dartel = traits.Bool(False, field="output.las.dartel", usedefault=True, desc=_las_desc)
+    las_native = traits.Bool(False, field="output.las.native", usedefault=True, desc=_las_desc % "native")
+    las_warped = traits.Bool(True, field="output.las.warped", usedefault=True, desc=_las_desc % "warped")
+    las_dartel = traits.Bool(False, field="output.las.dartel", usedefault=True, desc=_las_desc % "dartel")
 
     # Jacobian Warped
     _help_jacobian = 'This is the option to save the Jacobian determinant, which expresses local volume changes. This' \
