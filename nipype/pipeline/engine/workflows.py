@@ -166,15 +166,16 @@ class Workflow(EngineBase):
         connected_ports = {}
         for srcnode, destnode, connects in connection_list:
             if destnode not in connected_ports:
-                connected_ports[destnode] = []
+                connected_ports[destnode] = set()
             # check to see which ports of destnode are already
             # connected.
             if not disconnect and (destnode in self._graph.nodes()):
                 for edge in self._graph.in_edges(destnode):
                     data = self._graph.get_edge_data(*edge)
-                    for sourceinfo, destname in data["connect"]:
-                        if destname not in connected_ports[destnode]:
-                            connected_ports[destnode] += [destname]
+                    connected_ports[destnode].update(
+                        destname
+                        for _, destname in data["connect"]
+                    )
             for source, dest in connects:
                 # Currently datasource/sink/grabber.io modules
                 # determine their inputs/outputs depending on
@@ -229,7 +230,7 @@ connected.
                         )
                     if sourcename and not srcnode._check_outputs(sourcename):
                         not_found.append(["out", srcnode.name, sourcename])
-                connected_ports[destnode] += [dest]
+                connected_ports[destnode].add(dest)
         infostr = []
         for info in not_found:
             infostr += [
