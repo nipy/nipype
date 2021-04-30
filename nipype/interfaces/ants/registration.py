@@ -1289,11 +1289,15 @@ class Registration(ANTSCommand):
                 do_center_of_mass_init,
             )
         elif opt == "interpolation":
-            if self.inputs.interpolation in [
-                "BSpline",
-                "MultiLabel",
-                "Gaussian",
-            ] and isdefined(self.inputs.interpolation_parameters):
+            if (
+                self.inputs.interpolation
+                in [
+                    "BSpline",
+                    "MultiLabel",
+                    "Gaussian",
+                ]
+                and isdefined(self.inputs.interpolation_parameters)
+            ):
                 return "--interpolation %s[ %s ]" % (
                     self.inputs.interpolation,
                     ", ".join(
@@ -1386,10 +1390,11 @@ class Registration(ANTSCommand):
                         self.inputs.initial_moving_transform
                         + outputs["reverse_transforms"]
                     )
-                    outputs["reverse_invert_flags"] = (
-                        [not e for e in invert_initial_moving_transform]
-                        + outputs["reverse_invert_flags"]
-                    )  # Prepend
+                    outputs["reverse_invert_flags"] = [
+                        not e for e in invert_initial_moving_transform
+                    ] + outputs[
+                        "reverse_invert_flags"
+                    ]  # Prepend
                     transform_count += len(self.inputs.initial_moving_transform)
                 elif isdefined(self.inputs.initial_moving_transform_com):
                     forward_filename, forward_inversemode = self._output_filenames(
@@ -1502,7 +1507,7 @@ class MeasureImageSimilarityInputSpec(ANTSCommandInputSpec):
         desc="Dimensionality of the fixed/moving image pair",
     )
     fixed_image = File(
-        exists=True, mandatory=True, desc="Image to which the moving image is warped",
+        exists=True, mandatory=True, desc="Image to which the moving image is warped"
     )
     moving_image = File(
         exists=True,
@@ -1510,14 +1515,7 @@ class MeasureImageSimilarityInputSpec(ANTSCommandInputSpec):
         desc="Image to apply transformation to (generally a coregistered functional)",
     )
     metric = traits.Enum(
-        "CC",
-        "MI",
-        "Mattes",
-        "MeanSquares",
-        "Demons",
-        "GC",
-        argstr="%s",
-        mandatory=True,
+        "CC", "MI", "Mattes", "MeanSquares", "Demons", "GC", argstr="%s", mandatory=True
     )
     metric_weight = traits.Float(
         requires=["metric"],
@@ -1592,17 +1590,14 @@ class MeasureImageSimilarity(ANTSCommand):
     output_spec = MeasureImageSimilarityOutputSpec
 
     def _metric_constructor(self):
-        retval = (
-            '--metric {metric}["{fixed_image}","{moving_image}",{metric_weight},'
-            "{radius_or_number_of_bins},{sampling_strategy},{sampling_percentage}]".format(
-                metric=self.inputs.metric,
-                fixed_image=self.inputs.fixed_image,
-                moving_image=self.inputs.moving_image,
-                metric_weight=self.inputs.metric_weight,
-                radius_or_number_of_bins=self.inputs.radius_or_number_of_bins,
-                sampling_strategy=self.inputs.sampling_strategy,
-                sampling_percentage=self.inputs.sampling_percentage,
-            )
+        retval = '--metric {metric}["{fixed_image}","{moving_image}",{metric_weight},' "{radius_or_number_of_bins},{sampling_strategy},{sampling_percentage}]".format(
+            metric=self.inputs.metric,
+            fixed_image=self.inputs.fixed_image,
+            moving_image=self.inputs.moving_image,
+            metric_weight=self.inputs.metric_weight,
+            radius_or_number_of_bins=self.inputs.radius_or_number_of_bins,
+            sampling_strategy=self.inputs.sampling_strategy,
+            sampling_percentage=self.inputs.sampling_percentage,
         )
         return retval
 
@@ -1614,7 +1609,7 @@ class MeasureImageSimilarity(ANTSCommand):
             )
         else:
             retval = '--masks "{fixed_image_mask}"'.format(
-                fixed_image_mask=self.inputs.fixed_image_mask,
+                fixed_image_mask=self.inputs.fixed_image_mask
             )
         return retval
 

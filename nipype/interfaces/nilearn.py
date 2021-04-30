@@ -112,7 +112,7 @@ class SignalExtraction(NilearnBaseInterface, SimpleInterface):
         return runtime
 
     def _process_inputs(self):
-        """ validate and  process inputs into useful form.
+        """validate and  process inputs into useful form.
         Returns a list of nilearn maskers and the list of corresponding label
         names."""
         import nilearn.input_data as nl
@@ -170,6 +170,6 @@ class SignalExtraction(NilearnBaseInterface, SimpleInterface):
         return maskers
 
     def _4d(self, array, affine):
-        """ takes a 3-dimensional numpy array and an affine,
-        returns the equivalent 4th dimensional nifti file """
+        """takes a 3-dimensional numpy array and an affine,
+        returns the equivalent 4th dimensional nifti file"""
         return nb.Nifti1Image(array[:, :, :, np.newaxis], affine)

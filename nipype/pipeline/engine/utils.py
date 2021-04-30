@@ -753,7 +753,7 @@ def _merge_graphs(
     # nodes of the supergraph.
     supernodes = supergraph.nodes()
     ids = [n._hierarchy + n._id for n in supernodes]
-    if len(np.unique(ids)) != len(ids):
+    if len(set(ids)) != len(ids):
         # This should trap the problem of miswiring when multiple iterables are
         # used at the same level. The use of the template below for naming
         # updates to nodes is the general solution.
@@ -825,8 +825,7 @@ def _merge_graphs(
 
 
 def _connect_nodes(graph, srcnode, destnode, connection_info):
-    """Add a connection between two nodes
-    """
+    """Add a connection between two nodes"""
     data = graph.get_edge_data(srcnode, destnode, default=None)
     if not data:
         data = {"connect": connection_info}
@@ -867,8 +866,7 @@ def _identity_nodes(graph, include_iterables):
 
 
 def _remove_identity_node(graph, node):
-    """Remove identity nodes from an execution graph
-    """
+    """Remove identity nodes from an execution graph"""
     portinputs, portoutputs = _node_ports(graph, node)
     for field, connections in list(portoutputs.items()):
         if portinputs:
@@ -1100,11 +1098,12 @@ def generate_expanded_graph(graph_in):
             old_edge_dict = jedge_dict[jnode]
             # the edge source node replicates
             expansions = defaultdict(list)
-            for node in graph_in.nodes():
+            for node in graph_in:
                 for src_id in list(old_edge_dict.keys()):
                     # Drop the original JoinNodes; only concerned with
                     # generated Nodes
-                    if hasattr(node, "joinfield") and node.itername == src_id:
+                    itername = node.itername
+                    if hasattr(node, "joinfield") and itername == src_id:
                         continue
                     # Patterns:
                     #   - src_id : Non-iterable node
@@ -1113,10 +1112,10 @@ def generate_expanded_graph(graph_in):
                     #   - src_id.[a-z]I.[a-z]\d+ :
                     #       Non-IdentityInterface w/ iterables
                     #   - src_idJ\d+ : JoinNode(IdentityInterface)
-                    if re.match(
-                        src_id + r"((\.[a-z](I\.[a-z])?|J)\d+)?$", node.itername
-                    ):
-                        expansions[src_id].append(node)
+                    if itername.startswith(src_id):
+                        suffix = itername[len(src_id) :]
+                        if re.fullmatch(r"((\.[a-z](I\.[a-z])?|J)\d+)?", suffix):
+                            expansions[src_id].append(node)
             for in_id, in_nodes in list(expansions.items()):
                 logger.debug(
                     "The join node %s input %s was expanded" " to %d nodes.",
@@ -1337,7 +1336,7 @@ def export_graph(
     format="png",
     simple_form=True,
 ):
-    """ Displays the graph layout of the pipeline
+    """Displays the graph layout of the pipeline
 
     This function requires that pygraphviz and matplotlib are available on
     the system.
@@ -1433,8 +1432,7 @@ def get_all_files(infile):
 
 
 def walk_outputs(object):
-    """Extract every file and directory from a python structure
-    """
+    """Extract every file and directory from a python structure"""
     out = []
     if isinstance(object, dict):
         for _, val in sorted(object.items()):
@@ -1462,8 +1460,7 @@ def walk_files(cwd):
 def clean_working_directory(
     outputs, cwd, inputs, needed_outputs, config, files2keep=None, dirs2keep=None
 ):
-    """Removes all files not needed for further analysis from the directory
-    """
+    """Removes all files not needed for further analysis from the directory"""
     if not outputs:
         return
     outputs_to_keep = list(outputs.trait_get().keys())
@@ -1577,8 +1574,7 @@ def merge_bundles(g1, g2):
 
 
 def write_workflow_prov(graph, filename=None, format="all"):
-    """Write W3C PROV Model JSON file
-    """
+    """Write W3C PROV Model JSON file"""
     if not filename:
         filename = os.path.join(os.getcwd(), "workflow_provenance")
 
@@ -1728,8 +1724,7 @@ def write_workflow_resources(graph, filename=None, append=None):
 
 
 def topological_sort(graph, depth_first=False):
-    """Returns a depth first sorted order if depth_first is True
-    """
+    """Returns a depth first sorted order if depth_first is True"""
     import networkx as nx
 
     nodesort = list(nx.topological_sort(graph))

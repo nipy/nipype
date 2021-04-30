@@ -51,21 +51,20 @@ class GradientAnisotropicDiffusionOutputSpec(TraitedSpec):
 class GradientAnisotropicDiffusion(SEMLikeCommandLine):
     """title: Gradient Anisotropic Diffusion
 
-category: Filtering.Denoising
+    category: Filtering.Denoising
 
-description: Runs gradient anisotropic diffusion on a volume.
+    description: Runs gradient anisotropic diffusion on a volume.
 
-Anisotropic diffusion methods reduce noise (or unwanted detail) in images while preserving specific image features, like edges.  For many applications, there is an assumption that light-dark transitions (edges) are interesting.  Standard isotropic diffusion methods move and blur light-dark boundaries.  Anisotropic diffusion methods are formulated to specifically preserve edges. The conductance term for this implementation is a function of the gradient magnitude of the image at each point, reducing the strength of diffusion at edges. The numerical implementation of this equation is similar to that described in the Perona-Malik paper, but uses a more robust technique for gradient magnitude estimation and has been generalized to N-dimensions.
+    Anisotropic diffusion methods reduce noise (or unwanted detail) in images while preserving specific image features, like edges.  For many applications, there is an assumption that light-dark transitions (edges) are interesting.  Standard isotropic diffusion methods move and blur light-dark boundaries.  Anisotropic diffusion methods are formulated to specifically preserve edges. The conductance term for this implementation is a function of the gradient magnitude of the image at each point, reducing the strength of diffusion at edges. The numerical implementation of this equation is similar to that described in the Perona-Malik paper, but uses a more robust technique for gradient magnitude estimation and has been generalized to N-dimensions.
 
-version: 0.1.0.$Revision: 19608 $(alpha)
+    version: 0.1.0.$Revision: 19608 $(alpha)
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/GradientAnisotropicDiffusion
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/GradientAnisotropicDiffusion
 
-contributor: Bill Lorensen (GE)
+    contributor: Bill Lorensen (GE)
 
-acknowledgements: This command module was derived from Insight/Examples (copyright) Insight Software Consortium
-
-"""
+    acknowledgements: This command module was derived from Insight/Examples (copyright) Insight Software Consortium
+    """
 
     input_spec = GradientAnisotropicDiffusionInputSpec
     output_spec = GradientAnisotropicDiffusionOutputSpec
@@ -106,23 +105,22 @@ class CurvatureAnisotropicDiffusionOutputSpec(TraitedSpec):
 class CurvatureAnisotropicDiffusion(SEMLikeCommandLine):
     """title: Curvature Anisotropic Diffusion
 
-category: Filtering.Denoising
+    category: Filtering.Denoising
 
-description: Performs anisotropic diffusion on an image using a modified curvature diffusion equation (MCDE).
+    description: Performs anisotropic diffusion on an image using a modified curvature diffusion equation (MCDE).
 
-MCDE does not exhibit the edge enhancing properties of classic anisotropic diffusion, which can under certain conditions undergo a 'negative' diffusion, which enhances the contrast of edges.  Equations of the form of MCDE always undergo positive diffusion, with the conductance term only varying the strength of that diffusion.
+    MCDE does not exhibit the edge enhancing properties of classic anisotropic diffusion, which can under certain conditions undergo a 'negative' diffusion, which enhances the contrast of edges.  Equations of the form of MCDE always undergo positive diffusion, with the conductance term only varying the strength of that diffusion.
 
- Qualitatively, MCDE compares well with other non-linear diffusion techniques.  It is less sensitive to contrast than classic Perona-Malik style diffusion, and preserves finer detailed structures in images.  There is a potential speed trade-off for using this function in place of Gradient Anisotropic Diffusion.  Each iteration of the solution takes roughly twice as long.  Fewer iterations, however, may be required to reach an acceptable solution.
+     Qualitatively, MCDE compares well with other non-linear diffusion techniques.  It is less sensitive to contrast than classic Perona-Malik style diffusion, and preserves finer detailed structures in images.  There is a potential speed trade-off for using this function in place of Gradient Anisotropic Diffusion.  Each iteration of the solution takes roughly twice as long.  Fewer iterations, however, may be required to reach an acceptable solution.
 
-version: 0.1.0.$Revision: 19608 $(alpha)
+    version: 0.1.0.$Revision: 19608 $(alpha)
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/CurvatureAnisotropicDiffusion
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/CurvatureAnisotropicDiffusion
 
-contributor: Bill Lorensen (GE)
+    contributor: Bill Lorensen (GE)
 
-acknowledgements: This command module was derived from Insight/Examples (copyright) Insight Software Consortium
-
-"""
+    acknowledgements: This command module was derived from Insight/Examples (copyright) Insight Software Consortium
+    """
 
     input_spec = CurvatureAnisotropicDiffusionInputSpec
     output_spec = CurvatureAnisotropicDiffusionOutputSpec
@@ -153,19 +151,18 @@ class GaussianBlurImageFilterOutputSpec(TraitedSpec):
 class GaussianBlurImageFilter(SEMLikeCommandLine):
     """title: Gaussian Blur Image Filter
 
-category: Filtering.Denoising
+    category: Filtering.Denoising
 
-description: Apply a gaussian blurr to an image
+    description: Apply a gaussian blurr to an image
 
-version: 0.1.0.$Revision: 1.1 $(alpha)
+    version: 0.1.0.$Revision: 1.1 $(alpha)
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/GaussianBlurImageFilter
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/GaussianBlurImageFilter
 
-contributor: Julien Jomier (Kitware), Stephen Aylward (Kitware)
+    contributor: Julien Jomier (Kitware), Stephen Aylward (Kitware)
 
-acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
-
-"""
+    acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
+    """
 
     input_spec = GaussianBlurImageFilterInputSpec
     output_spec = GaussianBlurImageFilterOutputSpec
@@ -200,19 +197,18 @@ class MedianImageFilterOutputSpec(TraitedSpec):
 class MedianImageFilter(SEMLikeCommandLine):
     """title: Median Image Filter
 
-category: Filtering.Denoising
+    category: Filtering.Denoising
 
-description: The MedianImageFilter is commonly used as a robust approach for noise reduction. This filter is particularly efficient against "salt-and-pepper" noise. In other words, it is robust to the presence of gray-level outliers. MedianImageFilter computes the value of each output pixel as the statistical median of the neighborhood of values around the corresponding input pixel.
+    description: The MedianImageFilter is commonly used as a robust approach for noise reduction. This filter is particularly efficient against "salt-and-pepper" noise. In other words, it is robust to the presence of gray-level outliers. MedianImageFilter computes the value of each output pixel as the statistical median of the neighborhood of values around the corresponding input pixel.
 
-version: 0.1.0.$Revision: 19608 $(alpha)
+    version: 0.1.0.$Revision: 19608 $(alpha)
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/MedianImageFilter
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/MedianImageFilter
 
-contributor: Bill Lorensen (GE)
+    contributor: Bill Lorensen (GE)
 
-acknowledgements: This command module was derived from Insight/Examples/Filtering/MedianImageFilter (copyright) Insight Software Consortium
-
-"""
+    acknowledgements: This command module was derived from Insight/Examples/Filtering/MedianImageFilter (copyright) Insight Software Consortium
+    """
 
     input_spec = MedianImageFilterInputSpec
     output_spec = MedianImageFilterOutputSpec

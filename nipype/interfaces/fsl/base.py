@@ -146,9 +146,7 @@ class FSLCommandInputSpec(CommandLineInputSpec):
 
 
 class FSLCommand(CommandLine):
-    """Base support for FSL commands.
-
-    """
+    """Base support for FSL commands."""
 
     input_spec = FSLCommandInputSpec
     _output_type = None

@@ -18,8 +18,7 @@ logger = logging.getLogger("nipype.workflow")
 
 
 def report_crash(node, traceback=None, hostname=None):
-    """Writes crash related information to a file
-    """
+    """Writes crash related information to a file"""
     name = node._id
     host = None
     traceback = traceback or format_exception(*sys.exc_info())

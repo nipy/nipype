@@ -15,7 +15,7 @@ from ...utils.filemanip import split_filename
 
 
 class RegAladinInputSpec(NiftyRegCommandInputSpec):
-    """ Input Spec for RegAladin. """
+    """Input Spec for RegAladin."""
 
     # Input reference file
     ref_file = File(
@@ -116,7 +116,7 @@ class RegAladinInputSpec(NiftyRegCommandInputSpec):
 
 
 class RegAladinOutputSpec(TraitedSpec):
-    """ Output Spec for RegAladin. """
+    """Output Spec for RegAladin."""
 
     aff_file = File(desc="The output affine file")
     res_file = File(desc="The output transformed image")
@@ -163,7 +163,7 @@ class RegAladin(NiftyRegCommand):
 
 
 class RegF3DInputSpec(NiftyRegCommandInputSpec):
-    """ Input Spec for RegF3D. """
+    """Input Spec for RegF3D."""
 
     # Input reference file
     ref_file = File(
@@ -343,7 +343,7 @@ time point"
 
 
 class RegF3DOutputSpec(TraitedSpec):
-    """ Output Spec for RegF3D. """
+    """Output Spec for RegF3D."""
 
     cpp_file = File(desc="The output CPP file")
     res_file = File(desc="The output resampled image")

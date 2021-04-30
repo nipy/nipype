@@ -260,15 +260,12 @@ class Bfc(CommandLine):
                 % {"low": "--low", "medium": "--medium", "high": "--high"}[value]
             )
         if name == "intermediate_file_type":
-            return (
-                spec.argstr
-                % {
-                    "analyze": "--analyze",
-                    "nifti": "--nifti",
-                    "gzippedAnalyze": "--analyzegz",
-                    "gzippedNifti": "--niftigz",
-                }[value]
-            )
+            return spec.argstr % {
+                "analyze": "--analyze",
+                "nifti": "--nifti",
+                "gzippedAnalyze": "--analyzegz",
+                "gzippedNifti": "--niftigz",
+            }[value]
 
         return super(Bfc, self)._format_arg(name, spec, value)
 
@@ -775,14 +772,11 @@ class Dfs(CommandLine):
             return ""  # blank argstr
         if name == "specialTessellation":
             threshold = self.inputs.tessellationThreshold
-            return (
-                spec.argstr
-                % {
-                    "greater_than": "".join(("-gt %f" % threshold)),
-                    "less_than": "".join(("-lt %f" % threshold)),
-                    "equal_to": "".join(("-eq %f" % threshold)),
-                }[value]
-            )
+            return spec.argstr % {
+                "greater_than": "".join(("-gt %f" % threshold)),
+                "less_than": "".join(("-lt %f" % threshold)),
+                "equal_to": "".join(("-eq %f" % threshold)),
+            }[value]
         return super(Dfs, self)._format_arg(name, spec, value)
 
     def _gen_filename(self, name):

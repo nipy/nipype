@@ -35,25 +35,24 @@ class maxcurvatureOutputSpec(TraitedSpec):
 class maxcurvature(SEMLikeCommandLine):
     """title: MaxCurvature-Hessian (DTIProcess)
 
-category: Diffusion
+    category: Diffusion
 
-description: This program computes the Hessian of the FA image (--image). We use this scalar image as a registration input when doing DTI atlas building. For most adult FA we use a sigma of 2 whereas for neonate or primate images and sigma of 1 or 1.5 is more appropriate. For really noisy images, 2.5 - 4 can be considered. The final image (--output) shows the main feature of the input image.
+    description: This program computes the Hessian of the FA image (--image). We use this scalar image as a registration input when doing DTI atlas building. For most adult FA we use a sigma of 2 whereas for neonate or primate images and sigma of 1 or 1.5 is more appropriate. For really noisy images, 2.5 - 4 can be considered. The final image (--output) shows the main feature of the input image.
 
-version: 1.1.0
+    version: 1.1.0
 
-documentation-url: http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/DTIProcess
+    documentation-url: http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/DTIProcess
 
-license: Copyright (c)  Casey Goodlett. All rights reserved.
-  See http://www.ia.unc.edu/dev/Copyright.htm for details.
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notices for more information.
+    license: Copyright (c)  Casey Goodlett. All rights reserved.
+      See http://www.ia.unc.edu/dev/Copyright.htm for details.
+         This software is distributed WITHOUT ANY WARRANTY; without even
+         the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+         PURPOSE.  See the above copyright notices for more information.
 
-contributor: Casey Goodlett
+    contributor: Casey Goodlett
 
-acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); (1=University of Iowa Department of Psychiatry, 3=University of Iowa Department of Biomedical Engineering, 4=University of Iowa Department of Electrical and Computer Engineering) provided conversions to make DTIProcess compatible with Slicer execution, and simplified the stand-alone build requirements by removing the dependancies on boost and a fortran compiler.
-
-"""
+    acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); (1=University of Iowa Department of Psychiatry, 3=University of Iowa Department of Biomedical Engineering, 4=University of Iowa Department of Electrical and Computer Engineering) provided conversions to make DTIProcess compatible with Slicer execution, and simplified the stand-alone build requirements by removing the dependancies on boost and a fortran compiler.
+    """
 
     input_spec = maxcurvatureInputSpec
     output_spec = maxcurvatureOutputSpec

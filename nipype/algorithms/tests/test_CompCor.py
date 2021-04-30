@@ -11,7 +11,7 @@ from ..confounds import CompCor, TCompCor, ACompCor
 
 
 class TestCompCor:
-    """ Note: Tests currently do a poor job of testing functionality """
+    """Note: Tests currently do a poor job of testing functionality"""
 
     filenames = {
         "functionalnii": "compcorfunc.nii",

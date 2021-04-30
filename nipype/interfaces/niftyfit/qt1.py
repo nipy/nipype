@@ -11,7 +11,7 @@ from ..niftyreg.base import get_custom_path
 
 
 class FitQt1InputSpec(CommandLineInputSpec):
-    """ Input Spec for FitQt1. """
+    """Input Spec for FitQt1."""
 
     desc = "Filename of the 4D Multi-Echo T1 source image."
     source_file = File(
@@ -144,7 +144,7 @@ class FitQt1InputSpec(CommandLineInputSpec):
 
 
 class FitQt1OutputSpec(TraitedSpec):
-    """ Output Spec for FitQt1. """
+    """Output Spec for FitQt1."""
 
     t1map_file = File(desc="Filename of the estimated output T1 map (in ms)")
     m0map_file = File(desc="Filename of the m0 map")

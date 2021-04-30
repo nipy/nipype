@@ -118,8 +118,7 @@ class Dcm2nii(CommandLine):
     >>> converter.inputs.gzip_output = True
     >>> converter.inputs.output_dir = '.'
     >>> converter.cmdline  # doctest: +ELLIPSIS
-    'dcm2nii -a y -c y -b config.ini -v y -d y -e y -g y -i n -n y -o . -p y -x n -f n functional_1.dcm'
-"""
+    'dcm2nii -a y -c y -b config.ini -v y -d y -e y -g y -i n -n y -o . -p y -x n -f n functional_1.dcm'"""
 
     input_spec = Dcm2niiInputSpec
     output_spec = Dcm2niiOutputSpec
@@ -442,7 +441,7 @@ class Dcm2niix(CommandLine):
     def _run_interface(self, runtime):
         # may use return code 1 despite conversion
         runtime = super(Dcm2niix, self)._run_interface(
-            runtime, correct_return_codes=(0, 1,)
+            runtime, correct_return_codes=(0, 1)
         )
         self._parse_files(self._parse_stdout(runtime.stdout))
         return runtime
