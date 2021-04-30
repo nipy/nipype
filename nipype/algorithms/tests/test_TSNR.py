@@ -14,7 +14,7 @@ import os
 
 
 class TestTSNR:
-    """ Note: Tests currently do a poor job of testing functionality """
+    """Note: Tests currently do a poor job of testing functionality"""
 
     in_filenames = {"in_file": "tsnrinfile.nii"}
 

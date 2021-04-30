@@ -516,7 +516,7 @@ None])
         )
 
     def _run_interface(self, runtime):
-        """"""
+        """ """
         self._sessioninfo = None
         self._generate_design()
         return runtime
