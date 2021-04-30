@@ -932,12 +932,13 @@ connected.
                 self._nested_workflows_cache.add(node)
 
     def _has_node(self, wanted_node):
-        if wanted_node in self._nodes_cache:
-            return True
-        for node in self._nested_workflows_cache:
-            if node._has_node(wanted_node):
-                return True
-        return False
+        return (
+            wanted_node in self._nodes_cache or
+            any(
+                wf._has_node(wanted_node)
+                for wf in self._nested_workflows_cache
+            )
+        )
 
     def _create_flat_graph(self):
         """Make a simple DAG where no node is a workflow."""
