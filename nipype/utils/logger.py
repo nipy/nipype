@@ -17,8 +17,7 @@ except ImportError:
 
 
 class Logging(object):
-    """Nipype logging class
-    """
+    """Nipype logging class"""
 
     fmt = "%(asctime)s,%(msecs)d %(name)-2s " "%(levelname)-2s:\n\t %(message)s"
     datefmt = "%y%m%d-%H:%M:%S"

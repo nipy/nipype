@@ -36,7 +36,7 @@ class Info(PackageInfo):
 
     @classmethod
     def looseversion(cls):
-        """ Return a comparable version object
+        """Return a comparable version object
 
         If no version found, use LooseVersion('0.0.0')
         """

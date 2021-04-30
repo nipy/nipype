@@ -577,7 +577,7 @@ class CompCor(SimpleInterface):
     ]
 
     def __init__(self, *args, **kwargs):
-        """ exactly the same as compcor except the header """
+        """exactly the same as compcor except the header"""
         super(CompCor, self).__init__(*args, **kwargs)
         self._header = "CompCor"
 
@@ -774,7 +774,7 @@ class ACompCor(CompCor):
     """
 
     def __init__(self, *args, **kwargs):
-        """ exactly the same as compcor except the header """
+        """exactly the same as compcor except the header"""
         super(ACompCor, self).__init__(*args, **kwargs)
         self._header = "aCompCor"
 
@@ -825,7 +825,7 @@ class TCompCor(CompCor):
     output_spec = TCompCorOutputSpec
 
     def __init__(self, *args, **kwargs):
-        """ exactly the same as compcor except the header """
+        """exactly the same as compcor except the header"""
         super(TCompCor, self).__init__(*args, **kwargs)
         self._header = "tCompCor"
         self._mask_files = []

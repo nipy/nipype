@@ -37,7 +37,7 @@ def test_Randomise_inputs():
             argstr="-S %.2f",
         ),
         f_only=dict(
-            argstr="--f_only",
+            argstr="--fonly",
         ),
         fcon=dict(
             argstr="-f %s",

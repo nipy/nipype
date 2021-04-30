@@ -177,8 +177,7 @@ class GroupAndStackOutputSpec(TraitedSpec):
 
 
 class GroupAndStack(DcmStack):
-    """Create (potentially) multiple Nifti files for a set of DICOM files.
-    """
+    """Create (potentially) multiple Nifti files for a set of DICOM files."""
 
     input_spec = DcmStackInputSpec
     output_spec = GroupAndStackOutputSpec

@@ -86,17 +86,16 @@ class BRAINSCutOutputSpec(TraitedSpec):
 class BRAINSCut(SEMLikeCommandLine):
     """title: BRAINSCut (BRAINS)
 
-category: Segmentation.Specialized
+    category: Segmentation.Specialized
 
-description: Automatic Segmentation using neural networks
+    description: Automatic Segmentation using neural networks
 
-version: 1.0
+    version: 1.0
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: Vince Magnotta, Hans Johnson, Greg Harris, Kent Williams, Eunyoung Regina Kim
-
-"""
+    contributor: Vince Magnotta, Hans Johnson, Greg Harris, Kent Williams, Eunyoung Regina Kim
+    """
 
     input_spec = BRAINSCutInputSpec
     output_spec = BRAINSCutOutputSpec
@@ -177,19 +176,18 @@ class BRAINSROIAutoOutputSpec(TraitedSpec):
 class BRAINSROIAuto(SEMLikeCommandLine):
     """title: Foreground masking (BRAINS)
 
-category: Segmentation.Specialized
+    category: Segmentation.Specialized
 
-description: This program is used to create a mask over the most prominant forground region in an image.  This is accomplished via a combination of otsu thresholding and a closing operation.  More documentation is available here: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/ForegroundMasking.
+    description: This program is used to create a mask over the most prominant forground region in an image.  This is accomplished via a combination of otsu thresholding and a closing operation.  More documentation is available here: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/ForegroundMasking.
 
-version: 2.4.1
+    version: 2.4.1
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: Hans J. Johnson, hans-johnson -at- uiowa.edu, http://www.psychiatry.uiowa.edu
+    contributor: Hans J. Johnson, hans-johnson -at- uiowa.edu, http://www.psychiatry.uiowa.edu
 
-acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); Gregory Harris(1), Vincent Magnotta(1,2,3);  Andriy Fedorov(5), fedorov -at- bwh.harvard.edu (Slicer integration); (1=University of Iowa Department of Psychiatry, 2=University of Iowa Department of Radiology, 3=University of Iowa Department of Biomedical Engineering, 4=University of Iowa Department of Electrical and Computer Engineering, 5=Surgical Planning Lab, Harvard)
-
-"""
+    acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); Gregory Harris(1), Vincent Magnotta(1,2,3);  Andriy Fedorov(5), fedorov -at- bwh.harvard.edu (Slicer integration); (1=University of Iowa Department of Psychiatry, 2=University of Iowa Department of Radiology, 3=University of Iowa Department of Biomedical Engineering, 4=University of Iowa Department of Electrical and Computer Engineering, 5=Surgical Planning Lab, Harvard)
+    """
 
     input_spec = BRAINSROIAutoInputSpec
     output_spec = BRAINSROIAutoOutputSpec
@@ -467,15 +465,14 @@ class BRAINSConstellationDetectorOutputSpec(TraitedSpec):
 class BRAINSConstellationDetector(SEMLikeCommandLine):
     """title: Brain Landmark Constellation Detector (BRAINS)
 
-category: Segmentation.Specialized
+    category: Segmentation.Specialized
 
-description: This program will find the mid-sagittal plane, a constellation of landmarks in a volume, and create an AC/PC aligned data set with the AC point at the center of the voxel lattice (labeled at the origin of the image physical space.)  Part of this work is an extention of the algorithms originally described by Dr. Babak A. Ardekani, Alvin H. Bachman, Model-based automatic detection of the anterior and posterior commissures on MRI scans, NeuroImage, Volume 46, Issue 3, 1 July 2009, Pages 677-682, ISSN 1053-8119, DOI: 10.1016/j.neuroimage.2009.02.030.  (http://www.sciencedirect.com/science/article/B6WNP-4VRP25C-4/2/8207b962a38aa83c822c6379bc43fe4c)
+    description: This program will find the mid-sagittal plane, a constellation of landmarks in a volume, and create an AC/PC aligned data set with the AC point at the center of the voxel lattice (labeled at the origin of the image physical space.)  Part of this work is an extention of the algorithms originally described by Dr. Babak A. Ardekani, Alvin H. Bachman, Model-based automatic detection of the anterior and posterior commissures on MRI scans, NeuroImage, Volume 46, Issue 3, 1 July 2009, Pages 677-682, ISSN 1053-8119, DOI: 10.1016/j.neuroimage.2009.02.030.  (http://www.sciencedirect.com/science/article/B6WNP-4VRP25C-4/2/8207b962a38aa83c822c6379bc43fe4c)
 
-version: 1.0
+    version: 1.0
 
-documentation-url: http://www.nitrc.org/projects/brainscdetector/
-
-"""
+    documentation-url: http://www.nitrc.org/projects/brainscdetector/
+    """
 
     input_spec = BRAINSConstellationDetectorInputSpec
     output_spec = BRAINSConstellationDetectorOutputSpec
@@ -545,11 +542,10 @@ class BRAINSCreateLabelMapFromProbabilityMapsOutputSpec(TraitedSpec):
 class BRAINSCreateLabelMapFromProbabilityMaps(SEMLikeCommandLine):
     """title: Create Label Map From Probability Maps (BRAINS)
 
-category: Segmentation.Specialized
+    category: Segmentation.Specialized
 
-description: Given A list of Probability Maps, generate a LabelMap.
-
-"""
+    description: Given A list of Probability Maps, generate a LabelMap.
+    """
 
     input_spec = BRAINSCreateLabelMapFromProbabilityMapsInputSpec
     output_spec = BRAINSCreateLabelMapFromProbabilityMapsOutputSpec
@@ -614,13 +610,12 @@ class BinaryMaskEditorBasedOnLandmarksOutputSpec(TraitedSpec):
 class BinaryMaskEditorBasedOnLandmarks(SEMLikeCommandLine):
     """title: BRAINS Binary Mask Editor Based On Landmarks(BRAINS)
 
-category: Segmentation.Specialized
+    category: Segmentation.Specialized
 
-version: 1.0
+    version: 1.0
 
-documentation-url: http://www.nitrc.org/projects/brainscdetector/
-
-"""
+    documentation-url: http://www.nitrc.org/projects/brainscdetector/
+    """
 
     input_spec = BinaryMaskEditorBasedOnLandmarksInputSpec
     output_spec = BinaryMaskEditorBasedOnLandmarksOutputSpec
@@ -681,11 +676,10 @@ class BRAINSMultiSTAPLEOutputSpec(TraitedSpec):
 class BRAINSMultiSTAPLE(SEMLikeCommandLine):
     """title: Create best representative label map)
 
-category: Segmentation.Specialized
+    category: Segmentation.Specialized
 
-description: given a list of label map images, create a representative/average label map.
-
-"""
+    description: given a list of label map images, create a representative/average label map.
+    """
 
     input_spec = BRAINSMultiSTAPLEInputSpec
     output_spec = BRAINSMultiSTAPLEOutputSpec
@@ -766,7 +760,7 @@ class BRAINSABCInputSpec(CommandLineInputSpec):
     )
     outputVolumes = traits.Either(
         traits.Bool,
-        InputMultiPath(File(),),
+        InputMultiPath(File()),
         hash_files=False,
         desc="Corrected Output Images: should specify the same number of images as inputVolume, if only one element is given, then it is used as a file pattern where %s is replaced by the imageVolumeType, and %d by the index list location.",
         argstr="--outputVolumes %s...",
@@ -854,7 +848,7 @@ class BRAINSABCInputSpec(CommandLineInputSpec):
     defaultSuffix = traits.Str(argstr="--defaultSuffix %s")
     implicitOutputs = traits.Either(
         traits.Bool,
-        InputMultiPath(File(),),
+        InputMultiPath(File()),
         hash_files=False,
         desc="Outputs to be made available to NiPype. Needed because not all BRAINSABC outputs have command line arguments.",
         argstr="--implicitOutputs %s...",
@@ -900,11 +894,10 @@ class BRAINSABCOutputSpec(TraitedSpec):
 class BRAINSABC(SEMLikeCommandLine):
     """title: Intra-subject registration, bias Correction, and tissue classification (BRAINS)
 
-category: Segmentation.Specialized
+    category: Segmentation.Specialized
 
-description: Atlas-based tissue segmentation method.  This is an algorithmic extension of work done by XXXX at UNC and Utah XXXX need more description here.
-
-"""
+    description: Atlas-based tissue segmentation method.  This is an algorithmic extension of work done by XXXX at UNC and Utah XXXX need more description here.
+    """
 
     input_spec = BRAINSABCInputSpec
     output_spec = BRAINSABCOutputSpec
@@ -965,11 +958,10 @@ class ESLROutputSpec(TraitedSpec):
 class ESLR(SEMLikeCommandLine):
     """title: Clean Contiguous Label Map (BRAINS)
 
-category: Segmentation.Specialized
+    category: Segmentation.Specialized
 
-description: From a range of label map values, extract the largest contiguous region of those labels
-
-"""
+    description: From a range of label map values, extract the largest contiguous region of those labels
+    """
 
     input_spec = ESLRInputSpec
     output_spec = ESLROutputSpec

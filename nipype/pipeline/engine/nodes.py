@@ -1126,8 +1126,7 @@ class MapNode(Node):
         self._serial = serial
 
     def _create_dynamic_traits(self, basetraits, fields=None, nitems=None):
-        """Convert specific fields of a trait to accept multiple inputs
-        """
+        """Convert specific fields of a trait to accept multiple inputs"""
         output = DynamicTraitedSpec()
         if fields is None:
             fields = basetraits.copyable_trait_names()

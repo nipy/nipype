@@ -12,7 +12,7 @@ from ..qt1 import FitQt1
 
 @pytest.mark.skipif(no_nifty_tool(cmd="fit_qt1"), reason="niftyfit is not installed")
 def test_fit_qt1():
-    """ Testing FitQt1 interface."""
+    """Testing FitQt1 interface."""
     # Create a node object
     fit_qt1 = FitQt1()
 

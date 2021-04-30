@@ -46,24 +46,23 @@ class dtiaverageOutputSpec(TraitedSpec):
 class dtiaverage(SEMLikeCommandLine):
     """title: DTIAverage (DTIProcess)
 
-category: Diffusion.Diffusion Tensor Images.CommandLineOnly
+    category: Diffusion.Diffusion Tensor Images.CommandLineOnly
 
-description: dtiaverage is a program that allows to compute the average of an arbitrary number of tensor fields (listed after the --inputs option) This program is used in our pipeline as the last step of the atlas building processing. When all the tensor fields have been deformed in the same space, to create the average tensor field (--tensor_output) we use dtiaverage.
- Several average method can be used (specified by the --method option): euclidian, log-euclidian and pga. The default being euclidian.
+    description: dtiaverage is a program that allows to compute the average of an arbitrary number of tensor fields (listed after the --inputs option) This program is used in our pipeline as the last step of the atlas building processing. When all the tensor fields have been deformed in the same space, to create the average tensor field (--tensor_output) we use dtiaverage.
+     Several average method can be used (specified by the --method option): euclidian, log-euclidian and pga. The default being euclidian.
 
-version: 1.0.0
+    version: 1.0.0
 
-documentation-url: http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/DTIProcess
+    documentation-url: http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/DTIProcess
 
-license: Copyright (c)  Casey Goodlett. All rights reserved.
-    See http://www.ia.unc.edu/dev/Copyright.htm for details.
-    This software is distributed WITHOUT ANY WARRANTY; without even
-    the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-    PURPOSE.  See the above copyright notices for more information.
+    license: Copyright (c)  Casey Goodlett. All rights reserved.
+        See http://www.ia.unc.edu/dev/Copyright.htm for details.
+        This software is distributed WITHOUT ANY WARRANTY; without even
+        the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+        PURPOSE.  See the above copyright notices for more information.
 
-contributor: Casey Goodlett
-
-"""
+    contributor: Casey Goodlett
+    """
 
     input_spec = dtiaverageInputSpec
     output_spec = dtiaverageOutputSpec
@@ -179,45 +178,44 @@ class dtiestimOutputSpec(TraitedSpec):
 class dtiestim(SEMLikeCommandLine):
     """title: DTIEstim (DTIProcess)
 
-category: Diffusion.Diffusion Weighted Images
+    category: Diffusion.Diffusion Weighted Images
 
-description: dtiestim is a tool that takes in a set of DWIs (with --dwi_image option) in nrrd format and estimates a tensor field out of it. The output tensor file name is specified with the --tensor_output option
-There are several methods to estimate the tensors which you can specify with the option --method lls|wls|nls|ml . Here is a short description of the different methods:
+    description: dtiestim is a tool that takes in a set of DWIs (with --dwi_image option) in nrrd format and estimates a tensor field out of it. The output tensor file name is specified with the --tensor_output option
+    There are several methods to estimate the tensors which you can specify with the option --method lls|wls|nls|ml . Here is a short description of the different methods:
 
-lls
-      Linear least squares. Standard estimation technique that recovers the tensor parameters by multiplying the log of the normalized signal intensities by the pseudo-inverse of the gradient matrix. Default option.
+    lls
+          Linear least squares. Standard estimation technique that recovers the tensor parameters by multiplying the log of the normalized signal intensities by the pseudo-inverse of the gradient matrix. Default option.
 
-wls
-    Weighted least squares. This method is similar to the linear least squares method except that the gradient matrix is weighted by the original lls estimate. (See Salvador, R., Pena, A., Menon, D. K., Carpenter, T. A., Pickard, J. D., and Bullmore, E. T. Formal characterization and extension of the linearized diffusion tensor model. Human Brain Mapping 24, 2 (Feb. 2005), 144-155. for more information on this method). This method is recommended for most applications. The weight for each iteration can be specified with the --weight_iterations.  It is not currently the default due to occasional matrix singularities.
-nls
-    Non-linear least squares. This method does not take the log of the signal and requires an optimization based on levenberg-marquadt to optimize the parameters of the signal. The lls estimate is used as an initialization. For this method the step size can be specified with the --step option.
-ml
-    Maximum likelihood estimation. This method is experimental and is not currently recommended. For this ml method the sigma can be specified with the option --sigma and the step size can be specified with the --step option.
+    wls
+        Weighted least squares. This method is similar to the linear least squares method except that the gradient matrix is weighted by the original lls estimate. (See Salvador, R., Pena, A., Menon, D. K., Carpenter, T. A., Pickard, J. D., and Bullmore, E. T. Formal characterization and extension of the linearized diffusion tensor model. Human Brain Mapping 24, 2 (Feb. 2005), 144-155. for more information on this method). This method is recommended for most applications. The weight for each iteration can be specified with the --weight_iterations.  It is not currently the default due to occasional matrix singularities.
+    nls
+        Non-linear least squares. This method does not take the log of the signal and requires an optimization based on levenberg-marquadt to optimize the parameters of the signal. The lls estimate is used as an initialization. For this method the step size can be specified with the --step option.
+    ml
+        Maximum likelihood estimation. This method is experimental and is not currently recommended. For this ml method the sigma can be specified with the option --sigma and the step size can be specified with the --step option.
 
-You can set a threshold (--threshold) to have the tensor estimated to only a subset of voxels. All the baseline voxel value higher than the threshold define the voxels where the tensors are computed. If not specified the threshold is calculated using an OTSU threshold on the baseline image.The masked generated by the -t option or by the otsu value can be saved with the --B0_mask_output option.
+    You can set a threshold (--threshold) to have the tensor estimated to only a subset of voxels. All the baseline voxel value higher than the threshold define the voxels where the tensors are computed. If not specified the threshold is calculated using an OTSU threshold on the baseline image.The masked generated by the -t option or by the otsu value can be saved with the --B0_mask_output option.
 
-dtiestim also can extract a few scalar images out of the DWI set of images:
+    dtiestim also can extract a few scalar images out of the DWI set of images:
 
-        - the average baseline image (--B0) which is the average of all the B0s.
-        - the IDWI (--idwi)which is the geometric mean of the diffusion images.
+            - the average baseline image (--B0) which is the average of all the B0s.
+            - the IDWI (--idwi)which is the geometric mean of the diffusion images.
 
-You can also load a mask if you want to compute the tensors only where the voxels are non-zero (--brain_mask) or a negative mask and the tensors will be estimated where the negative mask has zero values (--bad_region_mask)
+    You can also load a mask if you want to compute the tensors only where the voxels are non-zero (--brain_mask) or a negative mask and the tensors will be estimated where the negative mask has zero values (--bad_region_mask)
 
-version: 1.2.0
+    version: 1.2.0
 
-documentation-url: http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/DTIProcess
+    documentation-url: http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/DTIProcess
 
-license: Copyright (c)  Casey Goodlett. All rights reserved.
-  See http://www.ia.unc.edu/dev/Copyright.htm for details.
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notices for more information.
+    license: Copyright (c)  Casey Goodlett. All rights reserved.
+      See http://www.ia.unc.edu/dev/Copyright.htm for details.
+         This software is distributed WITHOUT ANY WARRANTY; without even
+         the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+         PURPOSE.  See the above copyright notices for more information.
 
-contributor: Casey Goodlett, Francois Budin
+    contributor: Casey Goodlett, Francois Budin
 
-acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); (1=University of Iowa Department of Psychiatry, 3=University of Iowa Department of Biomedical Engineering, 4=University of Iowa Department of Electrical and Computer Engineering) provided conversions to make DTIProcess compatible with Slicer execution, and simplified the stand-alone build requirements by removing the dependancies on boost and a fortran compiler.
-
-"""
+    acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); (1=University of Iowa Department of Psychiatry, 3=University of Iowa Department of Biomedical Engineering, 4=University of Iowa Department of Electrical and Computer Engineering) provided conversions to make DTIProcess compatible with Slicer execution, and simplified the stand-alone build requirements by removing the dependancies on boost and a fortran compiler.
+    """
 
     input_spec = dtiestimInputSpec
     output_spec = dtiestimOutputSpec
@@ -436,35 +434,34 @@ class dtiprocessOutputSpec(TraitedSpec):
 class dtiprocess(SEMLikeCommandLine):
     """title: DTIProcess (DTIProcess)
 
-category: Diffusion.Diffusion Tensor Images
+    category: Diffusion.Diffusion Tensor Images
 
-description: dtiprocess is a tool that handles tensor fields. It takes as an input a tensor field in nrrd format.
-It can generate diffusion scalar properties out of the tensor field such as : FA (--fa_output), Gradient FA image (--fa_gradient_output), color FA (--color_fa_output), MD (--md_output), Frobenius norm (--frobenius_norm_output), lbd1, lbd2, lbd3 (--lambda{1,2,3}_output), binary map of voxel where if any of the eigenvalue is negative, the voxel is set to 1 (--negative_eigenvector_output)
+    description: dtiprocess is a tool that handles tensor fields. It takes as an input a tensor field in nrrd format.
+    It can generate diffusion scalar properties out of the tensor field such as : FA (--fa_output), Gradient FA image (--fa_gradient_output), color FA (--color_fa_output), MD (--md_output), Frobenius norm (--frobenius_norm_output), lbd1, lbd2, lbd3 (--lambda{1,2,3}_output), binary map of voxel where if any of the eigenvalue is negative, the voxel is set to 1 (--negative_eigenvector_output)
 
-It also creates 4D images out of the tensor field such as: Highest eigenvector map (highest eigenvector at each voxel) (--principal_eigenvector_output)
+    It also creates 4D images out of the tensor field such as: Highest eigenvector map (highest eigenvector at each voxel) (--principal_eigenvector_output)
 
-Masking capabilities: For any of the processing done with dtiprocess, it's possible to apply it on a masked region of the tensor field. You need to use the --mask option for any of the option to be applied on that tensor field sub-region only. If you want to save the masked tensor field use the option --outmask and specify the new masked tensor field file name.
-dtiprocess also allows a range of transformations on the tensor fields. The transformed tensor field file name is specified with the option --deformation_output. There are 3 resampling interpolation methods specified with the tag --interpolation followed by the type to use (nearestneighbor, linear, cubic) Then you have several transformations possible to apply:
+    Masking capabilities: For any of the processing done with dtiprocess, it's possible to apply it on a masked region of the tensor field. You need to use the --mask option for any of the option to be applied on that tensor field sub-region only. If you want to save the masked tensor field use the option --outmask and specify the new masked tensor field file name.
+    dtiprocess also allows a range of transformations on the tensor fields. The transformed tensor field file name is specified with the option --deformation_output. There are 3 resampling interpolation methods specified with the tag --interpolation followed by the type to use (nearestneighbor, linear, cubic) Then you have several transformations possible to apply:
 
-        - Affine transformations using as an input
-        - itk affine transformation file (based on the itkAffineTransform class)
-        - Affine transformations using rview (details and download at http://www.doc.ic.ac.uk/~dr/software/). There are 2 versions of rview both creating transformation files called dof files. The old version of rview outputs text files containing the transformation parameters. It can be read in with the --dof_file option. The new version outputs binary dof files. These dof files can be transformed into human readable file with the dof2mat tool which is part of the rview package. So you need to save the output of dof2mat into a text file which can then be used with the -- newdof_file option. Usage example: dof2mat mynewdoffile.dof >> mynewdoffile.txt       dtiprocess --dti_image mytensorfield.nhdr --newdof_file mynewdoffile.txt --rot_output myaffinetensorfield.nhdr
+            - Affine transformations using as an input
+            - itk affine transformation file (based on the itkAffineTransform class)
+            - Affine transformations using rview (details and download at http://www.doc.ic.ac.uk/~dr/software/). There are 2 versions of rview both creating transformation files called dof files. The old version of rview outputs text files containing the transformation parameters. It can be read in with the --dof_file option. The new version outputs binary dof files. These dof files can be transformed into human readable file with the dof2mat tool which is part of the rview package. So you need to save the output of dof2mat into a text file which can then be used with the -- newdof_file option. Usage example: dof2mat mynewdoffile.dof >> mynewdoffile.txt       dtiprocess --dti_image mytensorfield.nhdr --newdof_file mynewdoffile.txt --rot_output myaffinetensorfield.nhdr
 
-Non linear transformations as an input: The default transformation file type is d-field (displacement field) in nrrd format. The option to use is --forward with the name of the file. If the transformation file is a h-field you have to add the option --hField.
+    Non linear transformations as an input: The default transformation file type is d-field (displacement field) in nrrd format. The option to use is --forward with the name of the file. If the transformation file is a h-field you have to add the option --hField.
 
-version: 1.0.1
+    version: 1.0.1
 
-documentation-url: http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/DTIProcess
+    documentation-url: http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/DTIProcess
 
-license: Copyright (c)  Casey Goodlett. All rights reserved.
-  See http://www.ia.unc.edu/dev/Copyright.htm for details.
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notices for more information.
+    license: Copyright (c)  Casey Goodlett. All rights reserved.
+      See http://www.ia.unc.edu/dev/Copyright.htm for details.
+         This software is distributed WITHOUT ANY WARRANTY; without even
+         the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+         PURPOSE.  See the above copyright notices for more information.
 
-contributor: Casey Goodlett
-
-"""
+    contributor: Casey Goodlett
+    """
 
     input_spec = dtiprocessInputSpec
     output_spec = dtiprocessOutputSpec
@@ -606,21 +603,20 @@ class DWIConvertOutputSpec(TraitedSpec):
 class DWIConvert(SEMLikeCommandLine):
     """title: DWIConverter
 
-category: Diffusion.Diffusion Data Conversion
+    category: Diffusion.Diffusion Data Conversion
 
-description: Converts diffusion weighted MR images in dicom series into Nrrd format for analysis in Slicer. This program has been tested on only a limited subset of DTI dicom formats available from Siemens, GE, and Phillips scanners. Work in progress to support dicom multi-frame data. The program parses dicom header to extract necessary information about measurement frame, diffusion weighting directions, b-values, etc, and write out a nrrd image. For non-diffusion weighted dicom images, it loads in an entire dicom series and writes out a single dicom volume in a .nhdr/.raw pair.
+    description: Converts diffusion weighted MR images in dicom series into Nrrd format for analysis in Slicer. This program has been tested on only a limited subset of DTI dicom formats available from Siemens, GE, and Phillips scanners. Work in progress to support dicom multi-frame data. The program parses dicom header to extract necessary information about measurement frame, diffusion weighting directions, b-values, etc, and write out a nrrd image. For non-diffusion weighted dicom images, it loads in an entire dicom series and writes out a single dicom volume in a .nhdr/.raw pair.
 
-version: Version 1.0
+    version: Version 1.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DWIConverter
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DWIConverter
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: Vince Magnotta (UIowa), Hans Johnson (UIowa), Joy Matsui (UIowa), Kent Williams (UIowa), Mark Scully (Uiowa), Xiaodong Tao (GE)
+    contributor: Vince Magnotta (UIowa), Hans Johnson (UIowa), Joy Matsui (UIowa), Kent Williams (UIowa), Mark Scully (Uiowa), Xiaodong Tao (GE)
 
-acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.  Additional support for DTI data produced on Philips scanners was contributed by Vincent Magnotta and Hans Johnson at the University of Iowa.
-
-"""
+    acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.  Additional support for DTI data produced on Philips scanners was contributed by Vincent Magnotta and Hans Johnson at the University of Iowa.
+    """
 
     input_spec = DWIConvertInputSpec
     output_spec = DWIConvertOutputSpec

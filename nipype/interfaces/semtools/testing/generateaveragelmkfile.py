@@ -44,13 +44,12 @@ class GenerateAverageLmkFileOutputSpec(TraitedSpec):
 class GenerateAverageLmkFile(SEMLikeCommandLine):
     """title: Average Fiducials
 
-category: Testing
+    category: Testing
 
-description: This program gets several fcsv file each one contains several landmarks with the same name but slightly different coordinates. For EACH landmark we compute the average coordination.
+    description: This program gets several fcsv file each one contains several landmarks with the same name but slightly different coordinates. For EACH landmark we compute the average coordination.
 
-contributor: Ali Ghayoor
-
-"""
+    contributor: Ali Ghayoor
+    """
 
     input_spec = GenerateAverageLmkFileInputSpec
     output_spec = GenerateAverageLmkFileOutputSpec

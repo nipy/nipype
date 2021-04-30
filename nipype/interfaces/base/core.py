@@ -87,12 +87,12 @@ class Interface(object):
 
     @classmethod
     def _outputs(cls):
-        """ Initializes outputs"""
+        """Initializes outputs"""
         raise NotImplementedError
 
     @classmethod
     def help(cls, returnhelp=False):
-        """ Prints class help """
+        """Prints class help"""
         allhelp = format_help(cls)
         if returnhelp:
             return allhelp
@@ -112,7 +112,7 @@ class Interface(object):
         raise NotImplementedError
 
     def _list_outputs(self):
-        """ List expected outputs"""
+        """List expected outputs"""
         raise NotImplementedError
 
     @classmethod
@@ -202,8 +202,7 @@ class BaseInterface(Interface):
                 setattr(self.inputs, name, value)
 
     def _outputs(self):
-        """ Returns a bunch containing output fields for the class
-        """
+        """Returns a bunch containing output fields for the class"""
         outputs = None
         if self.output_spec:
             outputs = self.output_spec()
@@ -211,8 +210,7 @@ class BaseInterface(Interface):
         return outputs
 
     def _check_requires(self, spec, name, value):
-        """ check if required inputs are satisfied
-        """
+        """check if required inputs are satisfied"""
         if spec.requires:
             values = [
                 not isdefined(getattr(self.inputs, field)) for field in spec.requires
@@ -237,8 +235,7 @@ class BaseInterface(Interface):
                 raise ValueError(msg)
 
     def _check_xor(self, spec, name, value):
-        """ check if mutually exclusive inputs are satisfied
-        """
+        """check if mutually exclusive inputs are satisfied"""
         if spec.xor:
             values = [isdefined(getattr(self.inputs, field)) for field in spec.xor]
             if not any(values) and not isdefined(value):
@@ -254,8 +251,7 @@ class BaseInterface(Interface):
                 raise ValueError(msg)
 
     def _check_mandatory_inputs(self):
-        """ Raises an exception if a mandatory input is Undefined
-        """
+        """Raises an exception if a mandatory input is Undefined"""
         for name, spec in list(self.inputs.traits(mandatory=True).items()):
             value = getattr(self.inputs, name)
             self._check_xor(spec, name, value)
@@ -274,7 +270,7 @@ class BaseInterface(Interface):
             self._check_requires(spec, name, getattr(self.inputs, name))
 
     def _check_version_requirements(self, trait_object, permissive=False):
-        """ Raises an exception on version mismatch
+        """Raises an exception on version mismatch
 
         Set the ``permissive`` attribute to True to suppress warnings and exceptions.
         This is currently only used in __init__ to silently identify unavailable
@@ -342,13 +338,11 @@ class BaseInterface(Interface):
         return unavailable_traits
 
     def _run_interface(self, runtime):
-        """ Core function that executes interface
-        """
+        """Core function that executes interface"""
         raise NotImplementedError
 
     def _duecredit_cite(self):
-        """ Add the interface references to the duecredit citations
-        """
+        """Add the interface references to the duecredit citations"""
         for r in self.references_:
             r["path"] = self.__module__
             due.cite(**r)
@@ -500,8 +494,7 @@ class BaseInterface(Interface):
         return results
 
     def _list_outputs(self):
-        """ List the expected outputs
-        """
+        """List the expected outputs"""
         if self.output_spec:
             raise NotImplementedError
         else:
@@ -604,7 +597,7 @@ Output trait(s) %s not available in version %s of interface %s.\
 
 
 class SimpleInterface(BaseInterface):
-    """ An interface pattern that allows outputs to be set in a dictionary
+    """An interface pattern that allows outputs to be set in a dictionary
     called ``_results`` that is automatically interpreted by
     ``_list_outputs()`` to find the outputs.
 
@@ -733,7 +726,7 @@ class CommandLine(BaseInterface):
 
     @property
     def cmdline(self):
-        """ `command` plus any arguments (args)
+        """`command` plus any arguments (args)
         validates arguments and generates command line"""
         self._check_mandatory_inputs()
         allargs = [self._cmd_prefix + self.cmd] + self._parse_inputs()

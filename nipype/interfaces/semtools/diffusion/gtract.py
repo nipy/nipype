@@ -48,21 +48,20 @@ class gtractTransformToDisplacementFieldOutputSpec(TraitedSpec):
 class gtractTransformToDisplacementField(SEMLikeCommandLine):
     """title: Create Displacement Field
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This program will compute forward deformation from the given Transform. The size of the DF is equal to MNI space
+    description: This program will compute forward deformation from the given Transform. The size of the DF is equal to MNI space
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta, Madhura Ingalhalikar, and Greg Harris
+    contributor: This tool was developed by Vincent Magnotta, Madhura Ingalhalikar, and Greg Harris
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = gtractTransformToDisplacementFieldInputSpec
     output_spec = gtractTransformToDisplacementFieldOutputSpec
@@ -110,21 +109,20 @@ class gtractInvertBSplineTransformOutputSpec(TraitedSpec):
 class gtractInvertBSplineTransform(SEMLikeCommandLine):
     """title: B-Spline Transform Inversion
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This program will invert a B-Spline transform using a thin-plate spline approximation.
+    description: This program will invert a B-Spline transform using a thin-plate spline approximation.
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta and Greg Harris.
+    contributor: This tool was developed by Vincent Magnotta and Greg Harris.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = gtractInvertBSplineTransformInputSpec
     output_spec = gtractInvertBSplineTransformOutputSpec
@@ -166,21 +164,20 @@ class gtractConcatDwiOutputSpec(TraitedSpec):
 class gtractConcatDwi(SEMLikeCommandLine):
     """title: Concat DWI Images
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This program will concatenate two DTI runs together.
+    description: This program will concatenate two DTI runs together.
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta and Greg Harris.
+    contributor: This tool was developed by Vincent Magnotta and Greg Harris.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = gtractConcatDwiInputSpec
     output_spec = gtractConcatDwiOutputSpec
@@ -226,21 +223,20 @@ class gtractAverageBvaluesOutputSpec(TraitedSpec):
 class gtractAverageBvalues(SEMLikeCommandLine):
     """title: Average B-Values
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This program will directly average together the baseline gradients (b value equals 0) within a DWI scan. This is usually used after gtractCoregBvalues.
+    description: This program will directly average together the baseline gradients (b value equals 0) within a DWI scan. This is usually used after gtractCoregBvalues.
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta and Greg Harris.
+    contributor: This tool was developed by Vincent Magnotta and Greg Harris.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = gtractAverageBvaluesInputSpec
     output_spec = gtractAverageBvaluesOutputSpec
@@ -336,21 +332,20 @@ class gtractCoregBvaluesOutputSpec(TraitedSpec):
 class gtractCoregBvalues(SEMLikeCommandLine):
     """title: Coregister B-Values
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This step should be performed after converting DWI scans from DICOM to NRRD format. This program will register all gradients in a NRRD diffusion weighted 4D vector image (moving image) to a specified index in a fixed image. It also supports co-registration with a T2 weighted image or field map in the same plane as the DWI data. The fixed image for the registration should be a b0 image. A mutual information metric cost function is used for the registration because of the differences in signal intensity as a result of the diffusion gradients. The full affine allows the registration procedure to correct for eddy current distortions that may exist in the data. If the eddyCurrentCorrection is enabled, relaxationFactor (0.25) and maximumStepSize (0.1) should be adjusted.
+    description: This step should be performed after converting DWI scans from DICOM to NRRD format. This program will register all gradients in a NRRD diffusion weighted 4D vector image (moving image) to a specified index in a fixed image. It also supports co-registration with a T2 weighted image or field map in the same plane as the DWI data. The fixed image for the registration should be a b0 image. A mutual information metric cost function is used for the registration because of the differences in signal intensity as a result of the diffusion gradients. The full affine allows the registration procedure to correct for eddy current distortions that may exist in the data. If the eddyCurrentCorrection is enabled, relaxationFactor (0.25) and maximumStepSize (0.1) should be adjusted.
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta and Greg Harris.
+    contributor: This tool was developed by Vincent Magnotta and Greg Harris.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = gtractCoregBvaluesInputSpec
     output_spec = gtractCoregBvaluesOutputSpec
@@ -407,21 +402,20 @@ class gtractResampleAnisotropyOutputSpec(TraitedSpec):
 class gtractResampleAnisotropy(SEMLikeCommandLine):
     """title: Resample Anisotropy
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This program will resample a floating point image using either the Rigid or B-Spline transform. You may want to save the aligned B0 image after each of the anisotropy map co-registration steps with the anatomical image to check the registration quality with another tool.
+    description: This program will resample a floating point image using either the Rigid or B-Spline transform. You may want to save the aligned B0 image after each of the anisotropy map co-registration steps with the anatomical image to check the registration quality with another tool.
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta and Greg Harris.
+    contributor: This tool was developed by Vincent Magnotta and Greg Harris.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = gtractResampleAnisotropyInputSpec
     output_spec = gtractResampleAnisotropyOutputSpec
@@ -478,21 +472,20 @@ class gtractResampleCodeImageOutputSpec(TraitedSpec):
 class gtractResampleCodeImage(SEMLikeCommandLine):
     """title: Resample Code Image
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This program will resample a short integer code image using either the Rigid or Inverse-B-Spline transform.  The reference image is the DTI tensor anisotropy image space, and the input code image is in anatomical space.
+    description: This program will resample a short integer code image using either the Rigid or Inverse-B-Spline transform.  The reference image is the DTI tensor anisotropy image space, and the input code image is in anatomical space.
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta and Greg Harris.
+    contributor: This tool was developed by Vincent Magnotta and Greg Harris.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = gtractResampleCodeImageInputSpec
     output_spec = gtractResampleCodeImageOutputSpec
@@ -535,21 +528,20 @@ class gtractCopyImageOrientationOutputSpec(TraitedSpec):
 class gtractCopyImageOrientation(SEMLikeCommandLine):
     """title: Copy Image Orientation
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This program will copy the orientation from the reference image into the moving image. Currently, the registration process requires that the diffusion weighted images and the anatomical images have the same image orientation (i.e. Axial, Coronal, Sagittal). It is suggested that you copy the image orientation from the diffusion weighted images and apply this to the anatomical image. This image can be subsequently removed after the registration step is complete. We anticipate that this limitation will be removed in future versions of the registration programs.
+    description: This program will copy the orientation from the reference image into the moving image. Currently, the registration process requires that the diffusion weighted images and the anatomical images have the same image orientation (i.e. Axial, Coronal, Sagittal). It is suggested that you copy the image orientation from the diffusion weighted images and apply this to the anatomical image. This image can be subsequently removed after the registration step is complete. We anticipate that this limitation will be removed in future versions of the registration programs.
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta and Greg Harris.
+    contributor: This tool was developed by Vincent Magnotta and Greg Harris.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = gtractCopyImageOrientationInputSpec
     output_spec = gtractCopyImageOrientationOutputSpec
@@ -591,21 +583,20 @@ class gtractCreateGuideFiberOutputSpec(TraitedSpec):
 class gtractCreateGuideFiber(SEMLikeCommandLine):
     """title: Create Guide Fiber
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This program will create a guide fiber by averaging fibers from a previously generated tract.
+    description: This program will create a guide fiber by averaging fibers from a previously generated tract.
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta and Greg Harris.
+    contributor: This tool was developed by Vincent Magnotta and Greg Harris.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = gtractCreateGuideFiberInputSpec
     output_spec = gtractCreateGuideFiberOutputSpec
@@ -654,21 +645,20 @@ class gtractAnisotropyMapOutputSpec(TraitedSpec):
 class gtractAnisotropyMap(SEMLikeCommandLine):
     """title: Anisotropy Map
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This program will generate a scalar map of anisotropy, given a tensor representation. Anisotropy images are used for fiber tracking, but the anisotropy scalars are not defined along the path. Instead, the tensor representation is included as point data allowing all of these metrics to be computed using only the fiber tract point data. The images can be saved in any ITK supported format, but it is suggested that you use an image format that supports the definition of the image origin. This includes NRRD, NifTI, and Meta formats. These images can also be used for scalar analysis including regional anisotropy measures or VBM style analysis.
+    description: This program will generate a scalar map of anisotropy, given a tensor representation. Anisotropy images are used for fiber tracking, but the anisotropy scalars are not defined along the path. Instead, the tensor representation is included as point data allowing all of these metrics to be computed using only the fiber tract point data. The images can be saved in any ITK supported format, but it is suggested that you use an image format that supports the definition of the image origin. This includes NRRD, NifTI, and Meta formats. These images can also be used for scalar analysis including regional anisotropy measures or VBM style analysis.
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta and Greg Harris.
+    contributor: This tool was developed by Vincent Magnotta and Greg Harris.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = gtractAnisotropyMapInputSpec
     output_spec = gtractAnisotropyMapOutputSpec
@@ -710,21 +700,20 @@ class gtractClipAnisotropyOutputSpec(TraitedSpec):
 class gtractClipAnisotropy(SEMLikeCommandLine):
     """title: Clip Anisotropy
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This program will zero the first and/or last slice of an anisotropy image, creating a clipped anisotropy image.
+    description: This program will zero the first and/or last slice of an anisotropy image, creating a clipped anisotropy image.
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta and Greg Harris.
+    contributor: This tool was developed by Vincent Magnotta and Greg Harris.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = gtractClipAnisotropyInputSpec
     output_spec = gtractClipAnisotropyOutputSpec
@@ -782,21 +771,20 @@ class gtractResampleB0OutputSpec(TraitedSpec):
 class gtractResampleB0(SEMLikeCommandLine):
     """title: Resample B0
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This program will resample a signed short image using either a Rigid or B-Spline transform. The user must specify a template image that will be used to define the origin, orientation, spacing, and size of the resampled image.
+    description: This program will resample a signed short image using either a Rigid or B-Spline transform. The user must specify a template image that will be used to define the origin, orientation, spacing, and size of the resampled image.
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta and Greg Harris.
+    contributor: This tool was developed by Vincent Magnotta and Greg Harris.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = gtractResampleB0InputSpec
     output_spec = gtractResampleB0OutputSpec
@@ -831,21 +819,20 @@ class gtractInvertRigidTransformOutputSpec(TraitedSpec):
 class gtractInvertRigidTransform(SEMLikeCommandLine):
     """title: Rigid Transform Inversion
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This program will invert a Rigid transform.
+    description: This program will invert a Rigid transform.
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta and Greg Harris.
+    contributor: This tool was developed by Vincent Magnotta and Greg Harris.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = gtractInvertRigidTransformInputSpec
     output_spec = gtractInvertRigidTransformOutputSpec
@@ -888,21 +875,20 @@ class gtractImageConformityOutputSpec(TraitedSpec):
 class gtractImageConformity(SEMLikeCommandLine):
     """title: Image Conformity
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This program will straighten out the Direction and Origin to match the Reference Image.
+    description: This program will straighten out the Direction and Origin to match the Reference Image.
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta and Greg Harris.
+    contributor: This tool was developed by Vincent Magnotta and Greg Harris.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = gtractImageConformityInputSpec
     output_spec = gtractImageConformityOutputSpec
@@ -954,21 +940,20 @@ class compareTractInclusionOutputSpec(TraitedSpec):
 class compareTractInclusion(SEMLikeCommandLine):
     """title: Compare Tracts
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This program will halt with a status code indicating whether a test tract is nearly enough included in a standard tract in the sense that every fiber in the test tract has a low enough sum of squares distance to some fiber in the standard tract modulo spline resampling of every fiber to a fixed number of points.
+    description: This program will halt with a status code indicating whether a test tract is nearly enough included in a standard tract in the sense that every fiber in the test tract has a low enough sum of squares distance to some fiber in the standard tract modulo spline resampling of every fiber to a fixed number of points.
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta and Greg Harris.
+    contributor: This tool was developed by Vincent Magnotta and Greg Harris.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = compareTractInclusionInputSpec
     output_spec = compareTractInclusionOutputSpec
@@ -1048,21 +1033,20 @@ class gtractFastMarchingTrackingOutputSpec(TraitedSpec):
 class gtractFastMarchingTracking(SEMLikeCommandLine):
     """title: Fast Marching Tracking
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This program will use a fast marching fiber tracking algorithm to identify fiber tracts from a tensor image. This program is the second portion of the algorithm. The user must first run gtractCostFastMarching to generate the vcl_cost image. The second step of the algorithm implemented here is a gradient descent soplution from the defined ending region back to the seed points specified in gtractCostFastMarching. This algorithm is roughly based on the work by G. Parker et al. from IEEE Transactions On Medical Imaging, 21(5): 505-512, 2002. An additional feature of including anisotropy into the vcl_cost function calculation is included.
+    description: This program will use a fast marching fiber tracking algorithm to identify fiber tracts from a tensor image. This program is the second portion of the algorithm. The user must first run gtractCostFastMarching to generate the vcl_cost image. The second step of the algorithm implemented here is a gradient descent soplution from the defined ending region back to the seed points specified in gtractCostFastMarching. This algorithm is roughly based on the work by G. Parker et al. from IEEE Transactions On Medical Imaging, 21(5): 505-512, 2002. An additional feature of including anisotropy into the vcl_cost function calculation is included.
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta and Greg Harris. The original code here was developed by Daisy Espino.
+    contributor: This tool was developed by Vincent Magnotta and Greg Harris. The original code here was developed by Daisy Espino.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = gtractFastMarchingTrackingInputSpec
     output_spec = gtractFastMarchingTrackingOutputSpec
@@ -1106,21 +1090,20 @@ class gtractInvertDisplacementFieldOutputSpec(TraitedSpec):
 class gtractInvertDisplacementField(SEMLikeCommandLine):
     """title: Invert Displacement Field
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This program will invert a deformatrion field. The size of the deformation field is defined by an example image provided by the user
+    description: This program will invert a deformatrion field. The size of the deformation field is defined by an example image provided by the user
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta.
+    contributor: This tool was developed by Vincent Magnotta.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = gtractInvertDisplacementFieldInputSpec
     output_spec = gtractInvertDisplacementFieldOutputSpec
@@ -1239,21 +1222,20 @@ class gtractCoRegAnatomyOutputSpec(TraitedSpec):
 class gtractCoRegAnatomy(SEMLikeCommandLine):
     """title: Coregister B0 to Anatomy B-Spline
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This program will register a Nrrd diffusion weighted 4D vector image to a fixed anatomical image. Two registration methods are supported for alignment with anatomical images: Rigid and B-Spline. The rigid registration performs a rigid body registration with the anatomical images and should be done as well to initialize the B-Spline transform. The B-SPline transform is the deformable transform, where the user can control the amount of deformation based on the number of control points as well as the maximum distance that these points can move. The B-Spline registration places a low dimensional grid in the image, which is deformed. This allows for some susceptibility related distortions to be removed from the diffusion weighted images. In general the amount of motion in the slice selection and read-out directions direction should be kept low. The distortion is in the phase encoding direction in the images. It is recommended that skull stripped (i.e. image containing only brain with skull removed) images shoud be used for image co-registration with the B-Spline transform.
+    description: This program will register a Nrrd diffusion weighted 4D vector image to a fixed anatomical image. Two registration methods are supported for alignment with anatomical images: Rigid and B-Spline. The rigid registration performs a rigid body registration with the anatomical images and should be done as well to initialize the B-Spline transform. The B-SPline transform is the deformable transform, where the user can control the amount of deformation based on the number of control points as well as the maximum distance that these points can move. The B-Spline registration places a low dimensional grid in the image, which is deformed. This allows for some susceptibility related distortions to be removed from the diffusion weighted images. In general the amount of motion in the slice selection and read-out directions direction should be kept low. The distortion is in the phase encoding direction in the images. It is recommended that skull stripped (i.e. image containing only brain with skull removed) images shoud be used for image co-registration with the B-Spline transform.
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta and Greg Harris.
+    contributor: This tool was developed by Vincent Magnotta and Greg Harris.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = gtractCoRegAnatomyInputSpec
     output_spec = gtractCoRegAnatomyOutputSpec
@@ -1327,21 +1309,20 @@ class gtractResampleDWIInPlaceOutputSpec(TraitedSpec):
 class gtractResampleDWIInPlace(SEMLikeCommandLine):
     """title: Resample DWI In Place
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: Resamples DWI image to structural image.
+    description: Resamples DWI image to structural image.
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta, Greg Harris, Hans Johnson, and Joy Matsui.
+    contributor: This tool was developed by Vincent Magnotta, Greg Harris, Hans Johnson, and Joy Matsui.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = gtractResampleDWIInPlaceInputSpec
     output_spec = gtractResampleDWIInPlaceOutputSpec
@@ -1411,21 +1392,20 @@ class gtractCostFastMarchingOutputSpec(TraitedSpec):
 class gtractCostFastMarching(SEMLikeCommandLine):
     """title: Cost Fast Marching
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This program will use a fast marching fiber tracking algorithm to identify fiber tracts from a tensor image. This program is the first portion of the algorithm. The user must first run gtractFastMarchingTracking to generate the actual fiber tracts.  This algorithm is roughly based on the work by G. Parker et al. from IEEE Transactions On Medical Imaging, 21(5): 505-512, 2002. An additional feature of including anisotropy into the vcl_cost function calculation is included.
+    description: This program will use a fast marching fiber tracking algorithm to identify fiber tracts from a tensor image. This program is the first portion of the algorithm. The user must first run gtractFastMarchingTracking to generate the actual fiber tracts.  This algorithm is roughly based on the work by G. Parker et al. from IEEE Transactions On Medical Imaging, 21(5): 505-512, 2002. An additional feature of including anisotropy into the vcl_cost function calculation is included.
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta and Greg Harris. The original code here was developed by Daisy Espino.
+    contributor: This tool was developed by Vincent Magnotta and Greg Harris. The original code here was developed by Daisy Espino.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = gtractCostFastMarchingInputSpec
     output_spec = gtractCostFastMarchingOutputSpec
@@ -1560,21 +1540,20 @@ class gtractFiberTrackingOutputSpec(TraitedSpec):
 class gtractFiberTracking(SEMLikeCommandLine):
     """title: Fiber Tracking
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This program implements four fiber tracking methods (Free, Streamline, GraphSearch, Guided). The output of the fiber tracking is vtkPolyData (i.e. Polylines) that can be loaded into Slicer3 for visualization. The poly data can be saved in either old VTK format files (.vtk) or in the new VTK XML format (.xml). The polylines contain point data that defines ther Tensor at each point along the fiber tract. This can then be used to rendered as glyphs in Slicer3 and can be used to define severeal scalar measures without referencing back to the anisotropy images. (1) Free tracking is a basic streamlines algorithm. This is a direct implementation of the method original proposed by Basser et al. The tracking follows the primarty eigenvector. The tracking begins with seed points in the starting region. Only those voxels above the specified anisotropy threshold in the starting region are used as seed points. Tracking terminates either as a result of maximum fiber length, low ansiotropy, or large curvature. This is a great way to explore your data. (2) The streamlines algorithm is a direct implementation of the method originally proposed by Basser et al. The tracking follows the primary eigenvector. The tracking begins with seed points in the starting region. Only those voxels above the specified anisotropy threshold in the starting region are used as seed points. Tracking terminates either by reaching the ending region or reaching some stopping criteria. Stopping criteria are specified using the following parameters: tracking threshold, curvature threshold, and max length. Only paths terminating in the ending region are kept in this method. The TEND algorithm proposed by Lazar et al. (Human Brain Mapping 18:306-321, 2003) has been instrumented. This can be enabled using the --useTend option while performing Streamlines tracking. This utilizes the entire diffusion tensor to deflect the incoming vector instead of simply following the primary eigenvector. The TEND parameters are set using the --tendF and --tendG options. (3) Graph Search tracking is the first step in the full GTRACT algorithm developed by Cheng et al. (NeuroImage 31(3): 1075-1085, 2006) for finding the tracks in a tensor image. This method was developed to generate fibers in a Tensor representation where crossing fibers occur. The graph search algorithm follows the primary eigenvector in non-ambigous regions and utilizes branching and a graph search algorithm in ambigous regions. Ambiguous tracking regions are defined based on two criteria: Branching Al Threshold (anisotropy values below this value and above the traching threshold) and Curvature Major Eigen (angles of the primary eigenvector direction and the current tracking direction). In regions that meet this criteria, two or three tracking paths are considered. The first is the standard primary eigenvector direction. The second is the seconadary eigenvector direction. This is based on the assumption that these regions may be prolate regions. If the Random Walk option is selected then a third direction is also considered. This direction is defined by a cone pointing from the current position to the centroid of the ending region. The interior angle of the cone is specified by the user with the Branch/Guide Angle parameter. A vector contained inside of the cone is selected at random and used as the third direction. This method can also utilize the TEND option where the primary tracking direction is that specified by the TEND method instead of the primary eigenvector. The parameter '--maximumBranchPoints' allows the tracking to have this number of branches being considered at a time. If this number of branch points is exceeded at any time, then the algorithm will revert back to a streamline alogrithm until the number of branches is reduced. This allows the user to constrain the computational complexity of the algorithm. (4) The second phase of the GTRACT algorithm is Guided Tracking. This method incorporates anatomical information about the track orientation using an initial guess of the fiber track. In the originally proposed GTRACT method, this would be created from the fibers resulting from the Graph Search tracking. However, in practice this can be created using any method and could be defined manually. To create the guide fiber the program gtractCreateGuideFiber can be used. This program will load a fiber tract that has been generated and create a centerline representation of the fiber tract (i.e. a single fiber). In this method, the fiber tracking follows the primary eigenvector direction unless it deviates from the guide fiber track by a angle greater than that specified by the '--guidedCurvatureThreshold' parameter. The user must specify the guide fiber when running this program.
+    description: This program implements four fiber tracking methods (Free, Streamline, GraphSearch, Guided). The output of the fiber tracking is vtkPolyData (i.e. Polylines) that can be loaded into Slicer3 for visualization. The poly data can be saved in either old VTK format files (.vtk) or in the new VTK XML format (.xml). The polylines contain point data that defines ther Tensor at each point along the fiber tract. This can then be used to rendered as glyphs in Slicer3 and can be used to define severeal scalar measures without referencing back to the anisotropy images. (1) Free tracking is a basic streamlines algorithm. This is a direct implementation of the method original proposed by Basser et al. The tracking follows the primarty eigenvector. The tracking begins with seed points in the starting region. Only those voxels above the specified anisotropy threshold in the starting region are used as seed points. Tracking terminates either as a result of maximum fiber length, low ansiotropy, or large curvature. This is a great way to explore your data. (2) The streamlines algorithm is a direct implementation of the method originally proposed by Basser et al. The tracking follows the primary eigenvector. The tracking begins with seed points in the starting region. Only those voxels above the specified anisotropy threshold in the starting region are used as seed points. Tracking terminates either by reaching the ending region or reaching some stopping criteria. Stopping criteria are specified using the following parameters: tracking threshold, curvature threshold, and max length. Only paths terminating in the ending region are kept in this method. The TEND algorithm proposed by Lazar et al. (Human Brain Mapping 18:306-321, 2003) has been instrumented. This can be enabled using the --useTend option while performing Streamlines tracking. This utilizes the entire diffusion tensor to deflect the incoming vector instead of simply following the primary eigenvector. The TEND parameters are set using the --tendF and --tendG options. (3) Graph Search tracking is the first step in the full GTRACT algorithm developed by Cheng et al. (NeuroImage 31(3): 1075-1085, 2006) for finding the tracks in a tensor image. This method was developed to generate fibers in a Tensor representation where crossing fibers occur. The graph search algorithm follows the primary eigenvector in non-ambigous regions and utilizes branching and a graph search algorithm in ambigous regions. Ambiguous tracking regions are defined based on two criteria: Branching Al Threshold (anisotropy values below this value and above the traching threshold) and Curvature Major Eigen (angles of the primary eigenvector direction and the current tracking direction). In regions that meet this criteria, two or three tracking paths are considered. The first is the standard primary eigenvector direction. The second is the seconadary eigenvector direction. This is based on the assumption that these regions may be prolate regions. If the Random Walk option is selected then a third direction is also considered. This direction is defined by a cone pointing from the current position to the centroid of the ending region. The interior angle of the cone is specified by the user with the Branch/Guide Angle parameter. A vector contained inside of the cone is selected at random and used as the third direction. This method can also utilize the TEND option where the primary tracking direction is that specified by the TEND method instead of the primary eigenvector. The parameter '--maximumBranchPoints' allows the tracking to have this number of branches being considered at a time. If this number of branch points is exceeded at any time, then the algorithm will revert back to a streamline alogrithm until the number of branches is reduced. This allows the user to constrain the computational complexity of the algorithm. (4) The second phase of the GTRACT algorithm is Guided Tracking. This method incorporates anatomical information about the track orientation using an initial guess of the fiber track. In the originally proposed GTRACT method, this would be created from the fibers resulting from the Graph Search tracking. However, in practice this can be created using any method and could be defined manually. To create the guide fiber the program gtractCreateGuideFiber can be used. This program will load a fiber tract that has been generated and create a centerline representation of the fiber tract (i.e. a single fiber). In this method, the fiber tracking follows the primary eigenvector direction unless it deviates from the guide fiber track by a angle greater than that specified by the '--guidedCurvatureThreshold' parameter. The user must specify the guide fiber when running this program.
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta, Greg Harris and Yongqiang Zhao.
+    contributor: This tool was developed by Vincent Magnotta, Greg Harris and Yongqiang Zhao.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = gtractFiberTrackingInputSpec
     output_spec = gtractFiberTrackingOutputSpec
@@ -1623,21 +1602,20 @@ class extractNrrdVectorIndexOutputSpec(TraitedSpec):
 class extractNrrdVectorIndex(SEMLikeCommandLine):
     """title: Extract Nrrd Index
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This program will extract a 3D image (single vector) from a vector 3D image at a given vector index.
+    description: This program will extract a 3D image (single vector) from a vector 3D image at a given vector index.
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta and Greg Harris.
+    contributor: This tool was developed by Vincent Magnotta and Greg Harris.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = extractNrrdVectorIndexInputSpec
     output_spec = extractNrrdVectorIndexOutputSpec
@@ -1689,21 +1667,20 @@ class gtractResampleFibersOutputSpec(TraitedSpec):
 class gtractResampleFibers(SEMLikeCommandLine):
     """title: Resample Fibers
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This program will resample a fiber tract with respect to a pair of deformation fields that represent the forward and reverse deformation fields.
+    description: This program will resample a fiber tract with respect to a pair of deformation fields that represent the forward and reverse deformation fields.
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta and Greg Harris.
+    contributor: This tool was developed by Vincent Magnotta and Greg Harris.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = gtractResampleFibersInputSpec
     output_spec = gtractResampleFibersOutputSpec
@@ -1781,21 +1758,20 @@ class gtractTensorOutputSpec(TraitedSpec):
 class gtractTensor(SEMLikeCommandLine):
     """title: Tensor Estimation
 
-category: Diffusion.GTRACT
+    category: Diffusion.GTRACT
 
-description: This step will convert a b-value averaged diffusion tensor image to a 3x3 tensor voxel image. This step takes the diffusion tensor image data and generates a tensor representation of the data based on the signal intensity decay, b values applied, and the diffusion difrections. The apparent diffusion coefficient for a given orientation is computed on a pixel-by-pixel basis by fitting the image data (voxel intensities) to the Stejskal-Tanner equation. If at least 6 diffusion directions are used, then the diffusion tensor can be computed. This program uses itk::DiffusionTensor3DReconstructionImageFilter. The user can adjust background threshold, median filter, and isotropic resampling.
+    description: This step will convert a b-value averaged diffusion tensor image to a 3x3 tensor voxel image. This step takes the diffusion tensor image data and generates a tensor representation of the data based on the signal intensity decay, b values applied, and the diffusion difrections. The apparent diffusion coefficient for a given orientation is computed on a pixel-by-pixel basis by fitting the image data (voxel intensities) to the Stejskal-Tanner equation. If at least 6 diffusion directions are used, then the diffusion tensor can be computed. This program uses itk::DiffusionTensor3DReconstructionImageFilter. The user can adjust background threshold, median filter, and isotropic resampling.
 
-version: 4.0.0
+    version: 4.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:GTRACT
 
-license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
+    license: http://mri.radiology.uiowa.edu/copyright/GTRACT-Copyright.txt
 
-contributor: This tool was developed by Vincent Magnotta and Greg Harris.
+    contributor: This tool was developed by Vincent Magnotta and Greg Harris.
 
-acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
-
-"""
+    acknowledgements: Funding for this version of the GTRACT program was provided by NIH/NINDS R01NS050568-01A2S1
+    """
 
     input_spec = gtractTensorInputSpec
     output_spec = gtractTensorOutputSpec

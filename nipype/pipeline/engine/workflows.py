@@ -59,6 +59,9 @@ class Workflow(EngineBase):
         super(Workflow, self).__init__(name, base_dir)
         self._graph = nx.DiGraph()
 
+        self._nodes_cache = set()
+        self._nested_workflows_cache = set()
+
     # PUBLIC API
     def clone(self, name):
         """Clone a workflow
@@ -141,7 +144,7 @@ class Workflow(EngineBase):
             self.disconnect(connection_list)
             return
 
-        newnodes = []
+        newnodes = set()
         for srcnode, destnode, _ in connection_list:
             if self in [srcnode, destnode]:
                 msg = (
@@ -151,9 +154,9 @@ class Workflow(EngineBase):
 
                 raise IOError(msg)
             if (srcnode not in newnodes) and not self._has_node(srcnode):
-                newnodes.append(srcnode)
+                newnodes.add(srcnode)
             if (destnode not in newnodes) and not self._has_node(destnode):
-                newnodes.append(destnode)
+                newnodes.add(destnode)
         if newnodes:
             self._check_nodes(newnodes)
             for node in newnodes:
@@ -163,15 +166,15 @@ class Workflow(EngineBase):
         connected_ports = {}
         for srcnode, destnode, connects in connection_list:
             if destnode not in connected_ports:
-                connected_ports[destnode] = []
+                connected_ports[destnode] = set()
             # check to see which ports of destnode are already
             # connected.
             if not disconnect and (destnode in self._graph.nodes()):
                 for edge in self._graph.in_edges(destnode):
                     data = self._graph.get_edge_data(*edge)
-                    for sourceinfo, destname in data["connect"]:
-                        if destname not in connected_ports[destnode]:
-                            connected_ports[destnode] += [destname]
+                    connected_ports[destnode].update(
+                        destname for _, destname in data["connect"]
+                    )
             for source, dest in connects:
                 # Currently datasource/sink/grabber.io modules
                 # determine their inputs/outputs depending on
@@ -226,7 +229,7 @@ connected.
                         )
                     if sourcename and not srcnode._check_outputs(sourcename):
                         not_found.append(["out", srcnode.name, sourcename])
-                connected_ports[destnode] += [dest]
+                connected_ports[destnode].add(dest)
         infostr = []
         for info in not_found:
             infostr += [
@@ -268,6 +271,9 @@ connected.
             logger.debug(
                 "(%s, %s): new edge data: %s", srcnode, destnode, str(edge_data)
             )
+
+        if newnodes:
+            self._update_node_cache()
 
     def disconnect(self, *args):
         """Disconnect nodes
@@ -315,7 +321,7 @@ connected.
                 self._graph.add_edges_from([(srcnode, dstnode, edge_data)])
 
     def add_nodes(self, nodes):
-        """ Add nodes to a workflow
+        """Add nodes to a workflow
 
         Parameters
         ----------
@@ -325,7 +331,7 @@ connected.
         newnodes = []
         all_nodes = self._get_all_nodes()
         for node in nodes:
-            if self._has_node(node):
+            if node in all_nodes:
                 raise IOError("Node %s already exists in the workflow" % node)
             if isinstance(node, Workflow):
                 for subnode in node._get_all_nodes():
@@ -346,9 +352,10 @@ connected.
             if node._hierarchy is None:
                 node._hierarchy = self.name
         self._graph.add_nodes_from(newnodes)
+        self._update_node_cache()
 
     def remove_nodes(self, nodes):
-        """ Remove nodes from a workflow
+        """Remove nodes from a workflow
 
         Parameters
         ----------
@@ -356,6 +363,7 @@ connected.
             A list of EngineBase-based objects
         """
         self._graph.remove_nodes_from(nodes)
+        self._update_node_cache()
 
     # Input-Output access
     @property
@@ -367,8 +375,7 @@ connected.
         return self._get_outputs()
 
     def get_node(self, name):
-        """Return an internal node by name
-        """
+        """Return an internal node by name"""
         nodenames = name.split(".")
         nodename = nodenames[0]
         outnode = [
@@ -383,8 +390,7 @@ connected.
         return outnode
 
     def list_node_names(self):
-        """List names of all nodes in a workflow
-        """
+        """List names of all nodes in a workflow"""
         import networkx as nx
 
         outlist = []
@@ -587,7 +593,7 @@ connected.
         return all_lines
 
     def run(self, plugin=None, plugin_args=None, updatehash=False):
-        """ Execute the workflow
+        """Execute the workflow
 
         Parameters
         ----------
@@ -736,8 +742,7 @@ connected.
                 node.needed_outputs = sorted(node.needed_outputs)
 
     def _configure_exec_nodes(self, graph):
-        """Ensure that each node knows where to get inputs from
-        """
+        """Ensure that each node knows where to get inputs from"""
         for node in graph.nodes():
             node.input_source = {}
             for edge in graph.in_edges(node):
@@ -749,9 +754,7 @@ connected.
                     )
 
     def _check_nodes(self, nodes):
-        """Checks if any of the nodes are already in the graph
-
-        """
+        """Checks if any of the nodes are already in the graph"""
         node_names = [node.name for node in self._graph.nodes()]
         node_lineage = [node._hierarchy for node in self._graph.nodes()]
         for node in nodes:
@@ -768,8 +771,7 @@ connected.
                 node_names.append(node.name)
 
     def _has_attr(self, parameter, subtype="in"):
-        """Checks if a parameter is available as an input or output
-        """
+        """Checks if a parameter is available as an input or output"""
         hierarchy = parameter.split(".")
 
         # Connecting to a workflow needs at least two values,
@@ -867,8 +869,7 @@ connected.
         return inputdict
 
     def _get_outputs(self):
-        """Returns all possible output ports that are not already connected
-        """
+        """Returns all possible output ports that are not already connected"""
         outputdict = TraitedSpec()
         for node in self._graph.nodes():
             outputdict.add_trait(node.name, traits.Instance(TraitedSpec))
@@ -883,8 +884,7 @@ connected.
         return outputdict
 
     def _set_input(self, objekt, name, newvalue):
-        """Trait callback function to update a node input
-        """
+        """Trait callback function to update a node input"""
         objekt.traits()[name].node.set_input(name, newvalue)
 
     def _set_node_input(self, node, param, source, sourceinfo):
@@ -903,22 +903,28 @@ connected.
         node.set_input(param, deepcopy(newval))
 
     def _get_all_nodes(self):
-        allnodes = []
-        for node in self._graph.nodes():
-            if isinstance(node, Workflow):
-                allnodes.extend(node._get_all_nodes())
-            else:
-                allnodes.append(node)
+        allnodes = self._nodes_cache - self._nested_workflows_cache
+        for node in self._nested_workflows_cache:
+            allnodes |= node._get_all_nodes()
         return allnodes
 
-    def _has_node(self, wanted_node):
-        for node in self._graph.nodes():
-            if wanted_node == node:
-                return True
+    def _update_node_cache(self):
+        nodes = set(self._graph)
+
+        added_nodes = nodes.difference(self._nodes_cache)
+        removed_nodes = self._nodes_cache.difference(nodes)
+
+        self._nodes_cache = nodes
+        self._nested_workflows_cache.difference_update(removed_nodes)
+
+        for node in added_nodes:
             if isinstance(node, Workflow):
-                if node._has_node(wanted_node):
-                    return True
-        return False
+                self._nested_workflows_cache.add(node)
+
+    def _has_node(self, wanted_node):
+        return wanted_node in self._nodes_cache or any(
+            wf._has_node(wanted_node) for wf in self._nested_workflows_cache
+        )
 
     def _create_flat_graph(self):
         """Make a simple DAG where no node is a workflow."""
@@ -928,8 +934,7 @@ connected.
         return workflowcopy._graph
 
     def _reset_hierarchy(self):
-        """Reset the hierarchy on a graph
-        """
+        """Reset the hierarchy on a graph"""
         for node in self._graph.nodes():
             if isinstance(node, Workflow):
                 node._reset_hierarchy()
@@ -939,8 +944,7 @@ connected.
                 node._hierarchy = self.name
 
     def _generate_flatgraph(self):
-        """Generate a graph containing only Nodes or MapNodes
-        """
+        """Generate a graph containing only Nodes or MapNodes"""
         import networkx as nx
 
         logger.debug("expanding workflow: %s", self)
@@ -949,7 +953,7 @@ connected.
             raise Exception(
                 ("Workflow: %s is not a directed acyclic graph " "(DAG)") % self.name
             )
-        nodes = list(nx.topological_sort(self._graph))
+        nodes = list(self._graph.nodes)
         for node in nodes:
             logger.debug("processing node: %s", node)
             if isinstance(node, Workflow):
@@ -1009,8 +1013,7 @@ connected.
     def _get_dot(
         self, prefix=None, hierarchy=None, colored=False, simple_form=True, level=0
     ):
-        """Create a dot file with connection info
-        """
+        """Create a dot file with connection info"""
         import networkx as nx
 
         if prefix is None:

@@ -14,8 +14,7 @@ from nipype.interfaces.fsl import no_fsl
 
 
 def fsl_name(obj, fname):
-    """Create valid fsl name, including file extension for output type.
-    """
+    """Create valid fsl name, including file extension for output type."""
     ext = Info.output_type_to_ext(obj.inputs.output_type)
     return fname + ext
 
@@ -31,6 +30,9 @@ def setup_infile(tmpdir):
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_bet(setup_infile):
     tmp_infile, tp_dir = setup_infile
+    # BET converts the in_file path to be relative to prevent
+    # failure with long paths.
+    tmp_infile = os.path.relpath(tmp_infile, start=os.getcwd())
     better = fsl.BET()
     assert better.cmd == "bet"
 
@@ -41,8 +43,7 @@ def test_bet(setup_infile):
     # Test generated outfile name
     better.inputs.in_file = tmp_infile
     outfile = fsl_name(better, "foo_brain")
-    outpath = os.path.join(os.getcwd(), outfile)
-    realcmd = "bet %s %s" % (tmp_infile, outpath)
+    realcmd = "bet %s %s" % (tmp_infile, outfile)
     assert better.cmdline == realcmd
     # Test specified outfile name
     outfile = fsl_name(better, "/newdata/bar")
@@ -79,12 +80,11 @@ def test_bet(setup_infile):
     # test each of our arguments
     better = fsl.BET()
     outfile = fsl_name(better, "foo_brain")
-    outpath = os.path.join(os.getcwd(), outfile)
     for name, settings in list(opt_map.items()):
         better = fsl.BET(**{name: settings[1]})
         # Add mandatory input
         better.inputs.in_file = tmp_infile
-        realcmd = " ".join([better.cmd, tmp_infile, outpath, settings[0]])
+        realcmd = " ".join([better.cmd, tmp_infile, outfile, settings[0]])
         assert better.cmdline == realcmd
 
 
@@ -151,9 +151,9 @@ def test_fast(setup_infile):
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_fast_list_outputs(setup_infile, tmpdir):
-    """ By default (no -o), FSL's fast command outputs files into the same
+    """By default (no -o), FSL's fast command outputs files into the same
     directory as the input files. If the flag -o is set, it outputs files into
-    the cwd """
+    the cwd"""
 
     def _run_and_test(opts, output_base):
         outputs = fsl.FAST(**opts)._list_outputs()

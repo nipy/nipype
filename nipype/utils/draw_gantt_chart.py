@@ -322,8 +322,7 @@ def draw_resource_bar(
     left,
     resource,
 ):
-    """
-    """
+    """ """
 
     # Memory header
     result = "<p class='time' style='top:198px;left:%dpx;'>%s</p>" % (left, resource)

@@ -230,16 +230,14 @@ class FieldMap(SPMCommand):
     _jobname = "fieldmap"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt in ["phase_file", "magnitude_file", "anat_file", "epi_file"]:
             return scans_for_fname(ensure_list(val))
 
         return super(FieldMap, self)._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
-        """validate spm fieldmap options if set to None ignore
-        """
+        """validate spm fieldmap options if set to None ignore"""
         einputs = super(FieldMap, self)._parse_inputs()
         return [{self.inputs.jobtype: einputs[0]}]
 
@@ -276,7 +274,7 @@ class SliceTimingInputSpec(SPMCommandInputSpec):
         mandatory=True,
     )
     slice_order = traits.List(
-        traits.Either(traits.Int(),traits.Float()),
+        traits.Either(traits.Int(), traits.Float()),
         field="so",
         desc=("1-based order or onset (in ms) in which slices are acquired"),
         mandatory=True,
@@ -329,8 +327,7 @@ class SliceTiming(SPMCommand):
     _jobname = "st"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt == "in_files":
             return scans_for_fnames(
                 ensure_list(val), keep4d=False, separate_sessions=True
@@ -478,8 +475,7 @@ class Realign(SPMCommand):
     _jobname = "realign"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt == "in_files":
             if self.inputs.jobtype == "write":
                 separate_sessions = False
@@ -491,8 +487,7 @@ class Realign(SPMCommand):
         return super(Realign, self)._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
-        """validate spm realign options if set to None ignore
-        """
+        """validate spm realign options if set to None ignore"""
         einputs = super(Realign, self)._parse_inputs()
         return [{"%s" % (self.inputs.jobtype): einputs[0]}]
 
@@ -745,8 +740,7 @@ class RealignUnwarp(SPMCommand):
     _jobname = "realignunwarp"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt == "in_files":
             return scans_for_fnames(
                 ensure_list(val), keep4d=False, separate_sessions=True
@@ -921,8 +915,7 @@ class Coregister(SPMCommand):
     _jobname = "coreg"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt == "target" or (opt == "source" and self.inputs.jobtype != "write"):
             return scans_for_fnames(ensure_list(val), keep4d=True)
         if opt == "apply_to_files":
@@ -935,8 +928,7 @@ class Coregister(SPMCommand):
         return super(Coregister, self)._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
-        """validate spm coregister options if set to None ignore
-        """
+        """validate spm coregister options if set to None ignore"""
         if self.inputs.jobtype == "write":
             einputs = super(Coregister, self)._parse_inputs(
                 skip=("jobtype", "apply_to_files")
@@ -1070,7 +1062,7 @@ class NormalizeInputSpec(SPMCommandInputSpec):
 
 class NormalizeOutputSpec(TraitedSpec):
     normalization_parameters = OutputMultiPath(
-        File(exists=True), desc=("MAT files containing the normalization parameters"),
+        File(exists=True), desc=("MAT files containing the normalization parameters")
     )
     normalized_source = OutputMultiPath(
         File(exists=True), desc="Normalized source files"
@@ -1098,8 +1090,7 @@ class Normalize(SPMCommand):
     _jobname = "normalise"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt == "template":
             return scans_for_fname(ensure_list(val))
         if opt == "source":
@@ -1114,8 +1105,7 @@ class Normalize(SPMCommand):
         return super(Normalize, self)._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
-        """Validate spm normalize options if set to None ignore
-        """
+        """Validate spm normalize options if set to None ignore"""
         einputs = super(Normalize, self)._parse_inputs(
             skip=("jobtype", "apply_to_files")
         )
@@ -1333,8 +1323,7 @@ class Normalize12(SPMCommand):
     _jobname = "normalise"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt == "tpm":
             return scans_for_fname(ensure_list(val))
         if opt == "image_to_align":
@@ -1349,8 +1338,7 @@ class Normalize12(SPMCommand):
         return super(Normalize12, self)._format_arg(opt, spec, val)
 
     def _parse_inputs(self, skip=()):
-        """validate spm normalize options if set to None ignore
-        """
+        """validate spm normalize options if set to None ignore"""
         einputs = super(Normalize12, self)._parse_inputs(
             skip=("jobtype", "apply_to_files")
         )
@@ -1526,7 +1514,7 @@ class SegmentInputSpec(SPMCommandInputSpec):
         desc="FWHM of Gaussian smoothness of bias",
     )
     sampling_distance = traits.Float(
-        field="opts.samp", desc=("Sampling distance on data for parameter estimation"),
+        field="opts.samp", desc=("Sampling distance on data for parameter estimation")
     )
     mask_image = File(
         exists=True,
@@ -1537,7 +1525,7 @@ class SegmentInputSpec(SPMCommandInputSpec):
 
 class SegmentOutputSpec(TraitedSpec):
     native_gm_image = File(desc="native space grey probability map")
-    normalized_gm_image = File(desc="normalized grey probability map",)
+    normalized_gm_image = File(desc="normalized grey probability map")
     modulated_gm_image = File(desc=("modulated, normalized grey probability map"))
     native_wm_image = File(desc="native space white probability map")
     normalized_wm_image = File(desc="normalized white probability map")
@@ -1585,8 +1573,7 @@ class Segment(SPMCommand):
         SPMCommand.__init__(self, **inputs)
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         clean_masks_dict = {"no": 0, "light": 1, "thorough": 2}
 
         if opt in ["data", "tissue_prob_maps"]:
@@ -1682,7 +1669,7 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
         ),
     )
     sampling_distance = traits.Float(
-        field="warp.samp", desc=("Sampling distance on data for parameter estimation"),
+        field="warp.samp", desc=("Sampling distance on data for parameter estimation")
     )
     write_deformation_fields = traits.List(
         traits.Bool(),
@@ -1763,8 +1750,7 @@ class NewSegment(SPMCommand):
         SPMCommand.__init__(self, **inputs)
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
 
         if opt in ["channel_files", "channel_info"]:
             # structure have to be recreated because of some weird traits error
@@ -1931,7 +1917,7 @@ class MultiChannelNewSegmentInputSpec(SPMCommandInputSpec):
         ),
     )
     sampling_distance = traits.Float(
-        field="warp.samp", desc=("Sampling distance on data for parameter estimation"),
+        field="warp.samp", desc=("Sampling distance on data for parameter estimation")
     )
     write_deformation_fields = traits.List(
         traits.Bool(),
@@ -2011,8 +1997,7 @@ class MultiChannelNewSegment(SPMCommand):
         SPMCommand.__init__(self, **inputs)
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
 
         if opt == "channels":
             # structure have to be recreated because of some weird traits error
@@ -2279,8 +2264,7 @@ class DARTEL(SPMCommand):
     _jobname = "dartel"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
 
         if opt in ["image_files"]:
             return scans_for_fnames(val, keep4d=True, separate_sessions=True)
@@ -2407,8 +2391,7 @@ class DARTELNorm2MNI(SPMCommand):
     _jobname = "dartel"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt in ["template_file"]:
             return np.array([val], dtype=object)
         elif opt in ["flowfield_files"]:
@@ -2501,8 +2484,7 @@ class CreateWarped(SPMCommand):
     _jobname = "dartel"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
 
         if opt in ["image_files"]:
             return scans_for_fnames(val, keep4d=True, separate_sessions=True)
@@ -2546,8 +2528,7 @@ class ApplyDeformations(SPMCommand):
     _jobname = "defs"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt in ["deformation_field", "reference_volume"]:
             val = [val]
 
@@ -2615,7 +2596,7 @@ class VBMSegmentInputSpec(SPMCommandInputSpec):
         desc="Controls balance between parameters and data",
     )
 
-    spatial_normalization = traits.Enum("high", "low", usedefault=True,)
+    spatial_normalization = traits.Enum("high", "low", usedefault=True)
     dartel_template = ImageFileSPM(
         exists=True, field="estwrite.extopts.dartelwarp.normhigh.darteltpm"
     )
@@ -2636,9 +2617,9 @@ class VBMSegmentInputSpec(SPMCommandInputSpec):
     )
     display_results = traits.Bool(True, usedefault=True, field="estwrite.extopts.print")
 
-    gm_native = traits.Bool(False, usedefault=True, field="estwrite.output.GM.native",)
+    gm_native = traits.Bool(False, usedefault=True, field="estwrite.output.GM.native")
     gm_normalized = traits.Bool(
-        False, usedefault=True, field="estwrite.output.GM.warped",
+        False, usedefault=True, field="estwrite.output.GM.warped"
     )
     gm_modulated_normalized = traits.Range(
         0,
@@ -2657,9 +2638,9 @@ class VBMSegmentInputSpec(SPMCommandInputSpec):
         desc="0=None,1=rigid(SPM8 default),2=affine",
     )
 
-    wm_native = traits.Bool(False, usedefault=True, field="estwrite.output.WM.native",)
+    wm_native = traits.Bool(False, usedefault=True, field="estwrite.output.WM.native")
     wm_normalized = traits.Bool(
-        False, usedefault=True, field="estwrite.output.WM.warped",
+        False, usedefault=True, field="estwrite.output.WM.warped"
     )
     wm_modulated_normalized = traits.Range(
         0,
@@ -2678,11 +2659,9 @@ class VBMSegmentInputSpec(SPMCommandInputSpec):
         desc="0=None,1=rigid(SPM8 default),2=affine",
     )
 
-    csf_native = traits.Bool(
-        False, usedefault=True, field="estwrite.output.CSF.native",
-    )
+    csf_native = traits.Bool(False, usedefault=True, field="estwrite.output.CSF.native")
     csf_normalized = traits.Bool(
-        False, usedefault=True, field="estwrite.output.CSF.warped",
+        False, usedefault=True, field="estwrite.output.CSF.warped"
     )
     csf_modulated_normalized = traits.Range(
         0,
@@ -2702,13 +2681,13 @@ class VBMSegmentInputSpec(SPMCommandInputSpec):
     )
 
     bias_corrected_native = traits.Bool(
-        False, usedefault=True, field="estwrite.output.bias.native",
+        False, usedefault=True, field="estwrite.output.bias.native"
     )
     bias_corrected_normalized = traits.Bool(
-        True, usedefault=True, field="estwrite.output.bias.warped",
+        True, usedefault=True, field="estwrite.output.bias.warped"
     )
     bias_corrected_affine = traits.Bool(
-        False, usedefault=True, field="estwrite.output.bias.affine",
+        False, usedefault=True, field="estwrite.output.bias.affine"
     )
 
     pve_label_native = traits.Bool(
@@ -2906,8 +2885,7 @@ class VBMSegment(SPMCommand):
         return outputs
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt in ["in_files"]:
             return scans_for_fnames(val, keep4d=True)
         elif opt in ["spatial_normalization"]:

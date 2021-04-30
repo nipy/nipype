@@ -159,7 +159,7 @@ class CoherenceAnalyzer(NitimeBaseInterface):
         return data, roi_names
 
     def _csv2ts(self):
-        """ Read data from the in_file and generate a nitime TimeSeries object"""
+        """Read data from the in_file and generate a nitime TimeSeries object"""
         from nitime.timeseries import TimeSeries
 
         data, roi_names = self._read_csv()

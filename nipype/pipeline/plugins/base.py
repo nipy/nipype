@@ -392,7 +392,7 @@ class DistributedPluginBase(PluginBase):
         return False
 
     def _task_finished_cb(self, jobid, cached=False):
-        """ Extract outputs and assign to inputs of dependent tasks
+        """Extract outputs and assign to inputs of dependent tasks
 
         This is called when a job is completed.
         """
@@ -413,8 +413,7 @@ class DistributedPluginBase(PluginBase):
             self.refidx[self.refidx[:, jobid].nonzero()[0], jobid] = 0
 
     def _generate_dependency_list(self, graph):
-        """ Generates a dependency list for a list of graphs.
-        """
+        """Generates a dependency list for a list of graphs."""
         import networkx as nx
 
         self.procs, _ = topological_sort(graph)
@@ -444,8 +443,7 @@ class DistributedPluginBase(PluginBase):
         return dict(node=self.procs[jobid], dependents=subnodes, crashfile=crashfile)
 
     def _remove_node_dirs(self):
-        """Removes directories whose outputs have already been used up
-        """
+        """Removes directories whose outputs have already been used up"""
         if str2bool(self._config["execution"]["remove_node_directories"]):
             indices = np.nonzero((self.refidx.sum(axis=1) == 0).__array__())[0]
             for idx in indices:
@@ -465,8 +463,7 @@ class DistributedPluginBase(PluginBase):
 
 
 class SGELikeBatchManagerBase(DistributedPluginBase):
-    """Execute workflow with SGE/OGE/PBS like batch system
-    """
+    """Execute workflow with SGE/OGE/PBS like batch system"""
 
     def __init__(self, template, plugin_args=None):
         super(SGELikeBatchManagerBase, self).__init__(plugin_args=plugin_args)
@@ -483,13 +480,11 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         self._pending = {}
 
     def _is_pending(self, taskid):
-        """Check if a task is pending in the batch system
-        """
+        """Check if a task is pending in the batch system"""
         raise NotImplementedError
 
     def _submit_batchtask(self, scriptfile, node):
-        """Submit a task to the batch system
-        """
+        """Submit a task to the batch system"""
         raise NotImplementedError
 
     def _get_result(self, taskid):
@@ -544,8 +539,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         return result_out
 
     def _submit_job(self, node, updatehash=False):
-        """submit job and return taskid
-        """
+        """submit job and return taskid"""
         pyscript = create_pyscript(node, updatehash=updatehash)
         batch_dir, name = os.path.split(pyscript)
         name = ".".join(name.split(".")[:-1])
@@ -560,8 +554,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
 
 
 class GraphPluginBase(PluginBase):
-    """Base class for plugins that distribute graphs to workflows
-    """
+    """Base class for plugins that distribute graphs to workflows"""
 
     def __init__(self, plugin_args=None):
         if plugin_args and plugin_args.get("status_callback"):
