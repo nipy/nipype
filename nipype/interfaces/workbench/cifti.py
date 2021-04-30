@@ -156,9 +156,6 @@ class CiftiSmooth(WBCommand):
     _cmd = "wb_command -cifti-smoothing"
 
 
-
-
-
 class CiftiCorrelationInputSpec(CommandLineInputSpec):
     in_file = File(
         exists=True,
@@ -175,14 +172,14 @@ class CiftiCorrelationInputSpec(CommandLineInputSpec):
         position=1,
         desc="The output CIFTI",
     )
-    
+
     roi_override = traits.Bool(
         exists=True,
         argstr="-roi-override %s ",
         position=2,
         desc=" perform correlation from a subset of rows to all rows",
     )
-    
+
     left_roi = File(
         exists=True,
         position=3,
@@ -202,7 +199,7 @@ class CiftiCorrelationInputSpec(CommandLineInputSpec):
         argstr="-cerebellum-roi %s",
         desc="specify the cerebellum meytric to use",
     )
-    
+
     vol_roi = File(
         exists=True,
         position=7,
@@ -216,7 +213,7 @@ class CiftiCorrelationInputSpec(CommandLineInputSpec):
         argstr="-cifti-roi %s",
         desc="cifti roi to use",
     )
-    weights_file= File(
+    weights_file = File(
         exists=True,
         position=9,
         argstr="-weights %s",
@@ -239,8 +236,10 @@ class CiftiCorrelationInputSpec(CommandLineInputSpec):
         desc=" compute covariance instead of correlation",
     )
 
+
 class CiftiCorrelationOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="output CIFTI file")
+
 
 class CiftiCorrelation(WBCommand):
     r"""
@@ -257,7 +256,7 @@ class CiftiCorrelation(WBCommand):
 
     input_spec = CiftiCorrelationInputSpec
     output_spec = CiftiCorrelationOutputSpec
-    _cmd = "wb_command  -cifti-correlation" 
+    _cmd = "wb_command  -cifti-correlation"
 
 
 class CiftiParcellateInputSpec(CommandLineInputSpec):
@@ -290,13 +289,13 @@ class CiftiParcellateInputSpec(CommandLineInputSpec):
         position=3,
         desc="The output CIFTI",
     )
-    
+
     spatial_weights = traits.Str(
         argstr="-spatial-weights ",
         position=4,
         desc=" spatial weight file",
     )
-    
+
     left_area_surf = File(
         exists=True,
         position=5,
@@ -316,7 +315,7 @@ class CiftiParcellateInputSpec(CommandLineInputSpec):
         argstr="-cerebellum-area-surf %s",
         desc="specify the cerebellum surface to use",
     )
-    
+
     left_area_metric = File(
         exists=True,
         position=8,
@@ -336,7 +335,7 @@ class CiftiParcellateInputSpec(CommandLineInputSpec):
         argstr="-cerebellum-area-metric %s",
         desc="specify the cerebellum surface  metricto use",
     )
-    
+
     cifti_weights = File(
         exists=True,
         position=11,
@@ -345,10 +344,11 @@ class CiftiParcellateInputSpec(CommandLineInputSpec):
     )
     cor_method = traits.Str(
         position=12,
-        default='MEAN ',
+        default="MEAN ",
         argstr="-method %s",
         desc=" correlation method, option inlcude MODE",
     )
+
 
 class CiftiParcellateOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="output CIFTI file")
@@ -373,6 +373,7 @@ class CiftiParcellate(WBCommand):
     output_spec = CiftiParcellateOutputSpec
     _cmd = "wb_command -cifti-parcellate"
 
+
 class CiftiSeparateMetricInputSpec(CommandLineInputSpec):
     in_file = File(
         exists=True,
@@ -393,8 +394,8 @@ class CiftiSeparateMetricInputSpec(CommandLineInputSpec):
         mandatory=True,
         argstr=" -metric %s ",
         position=2,
-        desc="which of the structure eg CORTEX_LEFT CORTEX_RIGHT" \
-            "check https://www.humanconnectome.org/software/workbench-command/-cifti-separate ",
+        desc="which of the structure eg CORTEX_LEFT CORTEX_RIGHT"
+        "check https://www.humanconnectome.org/software/workbench-command/-cifti-separate ",
     )
     out_file = File(
         name_source=["in_file"],
@@ -404,9 +405,11 @@ class CiftiSeparateMetricInputSpec(CommandLineInputSpec):
         position=3,
         desc="The gifti output, iether left and right",
     )
-    
+
+
 class CiftiSeparateMetricOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="output CIFTI file")
+
 
 class CiftiSeparateMetric(WBCommand):
     r"""
