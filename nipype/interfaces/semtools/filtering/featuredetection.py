@@ -50,17 +50,16 @@ class GenerateSummedGradientImageOutputSpec(TraitedSpec):
 class GenerateSummedGradientImage(SEMLikeCommandLine):
     """title: GenerateSummedGradient
 
-category: Filtering.FeatureDetection
+    category: Filtering.FeatureDetection
 
-description: Automatic FeatureImages using neural networks
+    description: Automatic FeatureImages using neural networks
 
-version: 1.0
+    version: 1.0
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: Greg Harris, Eun Young Kim
-
-"""
+    contributor: Greg Harris, Eun Young Kim
+    """
 
     input_spec = GenerateSummedGradientImageInputSpec
     output_spec = GenerateSummedGradientImageOutputSpec
@@ -101,19 +100,18 @@ class CannySegmentationLevelSetImageFilterOutputSpec(TraitedSpec):
 class CannySegmentationLevelSetImageFilter(SEMLikeCommandLine):
     """title: Canny Level Set Image Filter
 
-category: Filtering.FeatureDetection
+    category: Filtering.FeatureDetection
 
-description: The CannySegmentationLevelSet is commonly used to refine a manually generated manual mask.
+    description: The CannySegmentationLevelSet is commonly used to refine a manually generated manual mask.
 
-version: 0.3.0
+    version: 0.3.0
 
-license: CC
+    license: CC
 
-contributor: Regina Kim
+    contributor: Regina Kim
 
-acknowledgements: This command module was derived from Insight/Examples/Segmentation/CannySegmentationLevelSetImageFilter.cxx (copyright) Insight Software Consortium.  See http://wiki.na-mic.org/Wiki/index.php/Slicer3:Execution_Model_Documentation for more detailed descriptions.
-
-"""
+    acknowledgements: This command module was derived from Insight/Examples/Segmentation/CannySegmentationLevelSetImageFilter.cxx (copyright) Insight Software Consortium.  See http://wiki.na-mic.org/Wiki/index.php/Slicer3:Execution_Model_Documentation for more detailed descriptions.
+    """
 
     input_spec = CannySegmentationLevelSetImageFilterInputSpec
     output_spec = CannySegmentationLevelSetImageFilterOutputSpec
@@ -153,19 +151,18 @@ class DilateImageOutputSpec(TraitedSpec):
 class DilateImage(SEMLikeCommandLine):
     """title: Dilate Image
 
-category: Filtering.FeatureDetection
+    category: Filtering.FeatureDetection
 
-description: Uses mathematical morphology to dilate the input images.
+    description: Uses mathematical morphology to dilate the input images.
 
-version: 0.1.0.$Revision: 1 $(alpha)
+    version: 0.1.0.$Revision: 1 $(alpha)
 
-documentation-url: http:://www.na-mic.org/
+    documentation-url: http:://www.na-mic.org/
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
-
-"""
+    contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
+    """
 
     input_spec = DilateImageInputSpec
     output_spec = DilateImageOutputSpec
@@ -197,19 +194,18 @@ class TextureFromNoiseImageFilterOutputSpec(TraitedSpec):
 class TextureFromNoiseImageFilter(SEMLikeCommandLine):
     """title: TextureFromNoiseImageFilter
 
-category: Filtering.FeatureDetection
+    category: Filtering.FeatureDetection
 
-description: Calculate the local noise in an image.
+    description: Calculate the local noise in an image.
 
-version: 0.1.0.$Revision: 1 $(alpha)
+    version: 0.1.0.$Revision: 1 $(alpha)
 
-documentation-url: http:://www.na-mic.org/
+    documentation-url: http:://www.na-mic.org/
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: This tool was developed by Eunyoung Regina Kim
-
-"""
+    contributor: This tool was developed by Eunyoung Regina Kim
+    """
 
     input_spec = TextureFromNoiseImageFilterInputSpec
     output_spec = TextureFromNoiseImageFilterOutputSpec
@@ -243,19 +239,18 @@ class FlippedDifferenceOutputSpec(TraitedSpec):
 class FlippedDifference(SEMLikeCommandLine):
     """title: Flip Image
 
-category: Filtering.FeatureDetection
+    category: Filtering.FeatureDetection
 
-description: Difference between an image and the axially flipped version of that image.
+    description: Difference between an image and the axially flipped version of that image.
 
-version: 0.1.0.$Revision: 1 $(alpha)
+    version: 0.1.0.$Revision: 1 $(alpha)
 
-documentation-url: http:://www.na-mic.org/
+    documentation-url: http:://www.na-mic.org/
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
-
-"""
+    contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
+    """
 
     input_spec = FlippedDifferenceInputSpec
     output_spec = FlippedDifferenceOutputSpec
@@ -292,19 +287,18 @@ class ErodeImageOutputSpec(TraitedSpec):
 class ErodeImage(SEMLikeCommandLine):
     """title: Erode Image
 
-category: Filtering.FeatureDetection
+    category: Filtering.FeatureDetection
 
-description: Uses mathematical morphology to erode the input images.
+    description: Uses mathematical morphology to erode the input images.
 
-version: 0.1.0.$Revision: 1 $(alpha)
+    version: 0.1.0.$Revision: 1 $(alpha)
 
-documentation-url: http:://www.na-mic.org/
+    documentation-url: http:://www.na-mic.org/
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
-
-"""
+    contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
+    """
 
     input_spec = ErodeImageInputSpec
     output_spec = ErodeImageOutputSpec
@@ -340,17 +334,16 @@ class GenerateBrainClippedImageOutputSpec(TraitedSpec):
 class GenerateBrainClippedImage(SEMLikeCommandLine):
     """title: GenerateBrainClippedImage
 
-category: Filtering.FeatureDetection
+    category: Filtering.FeatureDetection
 
-description: Automatic FeatureImages using neural networks
+    description: Automatic FeatureImages using neural networks
 
-version: 1.0
+    version: 1.0
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: Eun Young Kim
-
-"""
+    contributor: Eun Young Kim
+    """
 
     input_spec = GenerateBrainClippedImageInputSpec
     output_spec = GenerateBrainClippedImageOutputSpec
@@ -387,19 +380,18 @@ class NeighborhoodMedianOutputSpec(TraitedSpec):
 class NeighborhoodMedian(SEMLikeCommandLine):
     """title: Neighborhood Median
 
-category: Filtering.FeatureDetection
+    category: Filtering.FeatureDetection
 
-description: Calculates the median, for the given neighborhood size, at each voxel of the input image.
+    description: Calculates the median, for the given neighborhood size, at each voxel of the input image.
 
-version: 0.1.0.$Revision: 1 $(alpha)
+    version: 0.1.0.$Revision: 1 $(alpha)
 
-documentation-url: http:://www.na-mic.org/
+    documentation-url: http:://www.na-mic.org/
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
-
-"""
+    contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
+    """
 
     input_spec = NeighborhoodMedianInputSpec
     output_spec = NeighborhoodMedianOutputSpec
@@ -433,17 +425,16 @@ class GenerateTestImageOutputSpec(TraitedSpec):
 class GenerateTestImage(SEMLikeCommandLine):
     """title: DownSampleImage
 
-category: Filtering.FeatureDetection
+    category: Filtering.FeatureDetection
 
-description: Down sample image for testing
+    description: Down sample image for testing
 
-version: 1.0
+    version: 1.0
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: Eun Young Kim
-
-"""
+    contributor: Eun Young Kim
+    """
 
     input_spec = GenerateTestImageInputSpec
     output_spec = GenerateTestImageOutputSpec
@@ -480,19 +471,18 @@ class NeighborhoodMeanOutputSpec(TraitedSpec):
 class NeighborhoodMean(SEMLikeCommandLine):
     """title: Neighborhood Mean
 
-category: Filtering.FeatureDetection
+    category: Filtering.FeatureDetection
 
-description: Calculates the mean, for the given neighborhood size, at each voxel of the T1, T2, and FLAIR.
+    description: Calculates the mean, for the given neighborhood size, at each voxel of the T1, T2, and FLAIR.
 
-version: 0.1.0.$Revision: 1 $(alpha)
+    version: 0.1.0.$Revision: 1 $(alpha)
 
-documentation-url: http:://www.na-mic.org/
+    documentation-url: http:://www.na-mic.org/
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
-
-"""
+    contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
+    """
 
     input_spec = NeighborhoodMeanInputSpec
     output_spec = NeighborhoodMeanOutputSpec
@@ -532,19 +522,18 @@ class HammerAttributeCreatorOutputSpec(TraitedSpec):
 class HammerAttributeCreator(SEMLikeCommandLine):
     """title: HAMMER Feature Vectors
 
-category: Filtering.FeatureDetection
+    category: Filtering.FeatureDetection
 
-description: Create the feature vectors used by HAMMER.
+    description: Create the feature vectors used by HAMMER.
 
-version: 0.1.0.$Revision: 1 $(alpha)
+    version: 0.1.0.$Revision: 1 $(alpha)
 
-documentation-url: http:://www.na-mic.org/
+    documentation-url: http:://www.na-mic.org/
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: This was extracted from the Hammer Registration source code, and wrapped up by Hans J. Johnson.
-
-"""
+    contributor: This was extracted from the Hammer Registration source code, and wrapped up by Hans J. Johnson.
+    """
 
     input_spec = HammerAttributeCreatorInputSpec
     output_spec = HammerAttributeCreatorOutputSpec
@@ -570,19 +559,18 @@ class TextureMeasureFilterOutputSpec(TraitedSpec):
 class TextureMeasureFilter(SEMLikeCommandLine):
     """title: Canny Level Set Image Filter
 
-category: Filtering.FeatureDetection
+    category: Filtering.FeatureDetection
 
-description: The CannySegmentationLevelSet is commonly used to refine a manually generated manual mask.
+    description: The CannySegmentationLevelSet is commonly used to refine a manually generated manual mask.
 
-version: 0.3.0
+    version: 0.3.0
 
-license: CC
+    license: CC
 
-contributor: Regina Kim
+    contributor: Regina Kim
 
-acknowledgements: This command module was derived from Insight/Examples/Segmentation/CannySegmentationLevelSetImageFilter.cxx (copyright) Insight Software Consortium.  See http://wiki.na-mic.org/Wiki/index.php/Slicer3:Execution_Model_Documentation for more detailed descriptions.
-
-"""
+    acknowledgements: This command module was derived from Insight/Examples/Segmentation/CannySegmentationLevelSetImageFilter.cxx (copyright) Insight Software Consortium.  See http://wiki.na-mic.org/Wiki/index.php/Slicer3:Execution_Model_Documentation for more detailed descriptions.
+    """
 
     input_spec = TextureMeasureFilterInputSpec
     output_spec = TextureMeasureFilterOutputSpec
@@ -623,19 +611,18 @@ class DilateMaskOutputSpec(TraitedSpec):
 class DilateMask(SEMLikeCommandLine):
     """title: Dilate Image
 
-category: Filtering.FeatureDetection
+    category: Filtering.FeatureDetection
 
-description: Uses mathematical morphology to dilate the input images.
+    description: Uses mathematical morphology to dilate the input images.
 
-version: 0.1.0.$Revision: 1 $(alpha)
+    version: 0.1.0.$Revision: 1 $(alpha)
 
-documentation-url: http:://www.na-mic.org/
+    documentation-url: http:://www.na-mic.org/
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
-
-"""
+    contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
+    """
 
     input_spec = DilateMaskInputSpec
     output_spec = DilateMaskOutputSpec
@@ -664,19 +651,18 @@ class DumpBinaryTrainingVectorsOutputSpec(TraitedSpec):
 class DumpBinaryTrainingVectors(SEMLikeCommandLine):
     """title: Erode Image
 
-category: Filtering.FeatureDetection
+    category: Filtering.FeatureDetection
 
-description: Uses mathematical morphology to erode the input images.
+    description: Uses mathematical morphology to erode the input images.
 
-version: 0.1.0.$Revision: 1 $(alpha)
+    version: 0.1.0.$Revision: 1 $(alpha)
 
-documentation-url: http:://www.na-mic.org/
+    documentation-url: http:://www.na-mic.org/
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
-
-"""
+    contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
+    """
 
     input_spec = DumpBinaryTrainingVectorsInputSpec
     output_spec = DumpBinaryTrainingVectorsOutputSpec
@@ -716,19 +702,18 @@ class DistanceMapsOutputSpec(TraitedSpec):
 class DistanceMaps(SEMLikeCommandLine):
     """title: Mauerer Distance
 
-category: Filtering.FeatureDetection
+    category: Filtering.FeatureDetection
 
-description: Get the distance from a voxel to the nearest voxel of a given tissue type.
+    description: Get the distance from a voxel to the nearest voxel of a given tissue type.
 
-version: 0.1.0.$Revision: 1 $(alpha)
+    version: 0.1.0.$Revision: 1 $(alpha)
 
-documentation-url: http:://www.na-mic.org/
+    documentation-url: http:://www.na-mic.org/
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
-
-"""
+    contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
+    """
 
     input_spec = DistanceMapsInputSpec
     output_spec = DistanceMapsOutputSpec
@@ -762,19 +747,18 @@ class STAPLEAnalysisOutputSpec(TraitedSpec):
 class STAPLEAnalysis(SEMLikeCommandLine):
     """title: Dilate Image
 
-category: Filtering.FeatureDetection
+    category: Filtering.FeatureDetection
 
-description: Uses mathematical morphology to dilate the input images.
+    description: Uses mathematical morphology to dilate the input images.
 
-version: 0.1.0.$Revision: 1 $(alpha)
+    version: 0.1.0.$Revision: 1 $(alpha)
 
-documentation-url: http:://www.na-mic.org/
+    documentation-url: http:://www.na-mic.org/
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
-
-"""
+    contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
+    """
 
     input_spec = STAPLEAnalysisInputSpec
     output_spec = STAPLEAnalysisOutputSpec
@@ -812,13 +796,12 @@ class GradientAnisotropicDiffusionImageFilterOutputSpec(TraitedSpec):
 class GradientAnisotropicDiffusionImageFilter(SEMLikeCommandLine):
     """title: GradientAnisopropicDiffusionFilter
 
-category: Filtering.FeatureDetection
+    category: Filtering.FeatureDetection
 
-description: Image Smoothing using Gradient Anisotropic Diffuesion Filer
+    description: Image Smoothing using Gradient Anisotropic Diffuesion Filer
 
-contributor: This tool was developed by Eun Young Kim by modifying ITK Example
-
-"""
+    contributor: This tool was developed by Eun Young Kim by modifying ITK Example
+    """
 
     input_spec = GradientAnisotropicDiffusionImageFilterInputSpec
     output_spec = GradientAnisotropicDiffusionImageFilterOutputSpec
@@ -861,19 +844,18 @@ class CannyEdgeOutputSpec(TraitedSpec):
 class CannyEdge(SEMLikeCommandLine):
     """title: Canny Edge Detection
 
-category: Filtering.FeatureDetection
+    category: Filtering.FeatureDetection
 
-description: Get the distance from a voxel to the nearest voxel of a given tissue type.
+    description: Get the distance from a voxel to the nearest voxel of a given tissue type.
 
-version: 0.1.0.(alpha)
+    version: 0.1.0.(alpha)
 
-documentation-url: http:://www.na-mic.org/
+    documentation-url: http:://www.na-mic.org/
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: This tool was written by Hans J. Johnson.
-
-"""
+    contributor: This tool was written by Hans J. Johnson.
+    """
 
     input_spec = CannyEdgeInputSpec
     output_spec = CannyEdgeOutputSpec

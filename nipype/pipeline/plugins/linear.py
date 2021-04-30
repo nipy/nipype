@@ -10,8 +10,7 @@ from ..engine.utils import topological_sort
 
 
 class LinearPlugin(PluginBase):
-    """Execute workflow in series
-    """
+    """Execute workflow in series"""
 
     def run(self, graph, config, updatehash=False):
         """Executes a pre-defined pipeline in a serial order.

@@ -58,7 +58,7 @@ class BaseTraitedSpec(traits.HasTraits):
     package_version = nipype_version
 
     def __init__(self, **kwargs):
-        """ Initialize handlers and inputs"""
+        """Initialize handlers and inputs"""
         # NOTE: In python 2.6, object.__init__ no longer accepts input
         # arguments.  HasTraits does not define an __init__ and
         # therefore these args were being ignored.
@@ -74,13 +74,12 @@ class BaseTraitedSpec(traits.HasTraits):
         self.trait_set(**kwargs)
 
     def items(self):
-        """ Name, trait generator for user modifiable traits
-        """
+        """Name, trait generator for user modifiable traits"""
         for name in sorted(self.copyable_trait_names()):
             yield name, self.traits()[name]
 
     def __repr__(self):
-        """ Return a well-formatted representation of the traits """
+        """Return a well-formatted representation of the traits"""
         outstr = []
         for name, value in sorted(self.trait_get().items()):
             outstr.append("%s = %s" % (name, value))
@@ -100,8 +99,7 @@ class BaseTraitedSpec(traits.HasTraits):
             self.on_trait_change(self._deprecated_warn, elem)
 
     def _xor_warn(self, obj, name, old, new):
-        """ Generates warnings for xor traits
-        """
+        """Generates warnings for xor traits"""
         if isdefined(new):
             trait_spec = self.traits()[name]
             # for each xor, set to default_value
@@ -120,8 +118,7 @@ class BaseTraitedSpec(traits.HasTraits):
                     raise IOError(msg)
 
     def _deprecated_warn(self, obj, name, old, new):
-        """Checks if a user assigns a value to a deprecated trait
-        """
+        """Checks if a user assigns a value to a deprecated trait"""
         if isdefined(new):
             trait_spec = self.traits()[name]
             msg1 = "Input %s in interface %s is deprecated." % (
@@ -157,7 +154,7 @@ class BaseTraitedSpec(traits.HasTraits):
                     )
 
     def trait_get(self, **kwargs):
-        """ Returns traited class as a dict
+        """Returns traited class as a dict
 
         Augments the trait get function to return a dictionary without
         notification handles
@@ -169,7 +166,7 @@ class BaseTraitedSpec(traits.HasTraits):
     get = trait_get
 
     def get_traitsfree(self, **kwargs):
-        """ Returns traited class as a dict
+        """Returns traited class as a dict
 
         Augments the trait get function to return a dictionary without
         any traits. The dictionary does not contain any attributes that
@@ -180,8 +177,7 @@ class BaseTraitedSpec(traits.HasTraits):
         return out
 
     def _clean_container(self, objekt, undefinedval=None, skipundefined=False):
-        """Convert a traited obejct into a pure python representation.
-        """
+        """Convert a traited obejct into a pure python representation."""
         if isinstance(objekt, TraitDictObject) or isinstance(objekt, dict):
             out = {}
             for key, val in list(objekt.items()):
@@ -361,7 +357,7 @@ class BaseTraitedSpec(traits.HasTraits):
 
 
 class TraitedSpec(BaseTraitedSpec):
-    """ Create a subclass with strict traits.
+    """Create a subclass with strict traits.
 
     This is used in 90% of the cases.
     """
@@ -374,7 +370,7 @@ class BaseInterfaceInputSpec(TraitedSpec):
 
 
 class DynamicTraitedSpec(BaseTraitedSpec):
-    """ A subclass to handle dynamic traits
+    """A subclass to handle dynamic traits
 
     This class is a workaround for add_traits and clone_traits not
     functioning well together.

@@ -51,21 +51,20 @@ class ACPCTransformOutputSpec(TraitedSpec):
 class ACPCTransform(SEMLikeCommandLine):
     """title: ACPC Transform
 
-category: Registration.Specialized
+    category: Registration.Specialized
 
-description: <p>Calculate a transformation from two lists of fiducial points.</p><p>ACPC line is two fiducial points, one at the anterior commissure and one at the posterior commissure. The resulting transform will bring the line connecting them to horizontal to the AP axis.</p><p>The midline is a series of points defining the division between the hemispheres of the brain (the mid sagittal plane). The resulting transform will put the output volume with the mid sagittal plane lined up with the AS plane.</p><p>Use the Filtering module<b>Resample Scalar/Vector/DWI Volume</b>to apply the transformation to a volume.</p>
+    description: <p>Calculate a transformation from two lists of fiducial points.</p><p>ACPC line is two fiducial points, one at the anterior commissure and one at the posterior commissure. The resulting transform will bring the line connecting them to horizontal to the AP axis.</p><p>The midline is a series of points defining the division between the hemispheres of the brain (the mid sagittal plane). The resulting transform will put the output volume with the mid sagittal plane lined up with the AS plane.</p><p>Use the Filtering module<b>Resample Scalar/Vector/DWI Volume</b>to apply the transformation to a volume.</p>
 
-version: 1.0
+    version: 1.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/ACPCTransform
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/ACPCTransform
 
-license: slicer3
+    license: slicer3
 
-contributor: Nicole Aucoin (SPL, BWH), Ron Kikinis (SPL, BWH)
+    contributor: Nicole Aucoin (SPL, BWH), Ron Kikinis (SPL, BWH)
 
-acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
-
-"""
+    acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
+    """
 
     input_spec = ACPCTransformInputSpec
     output_spec = ACPCTransformOutputSpec
@@ -113,19 +112,18 @@ class FiducialRegistrationOutputSpec(TraitedSpec):
 class FiducialRegistration(SEMLikeCommandLine):
     """title: Fiducial Registration
 
-category: Registration.Specialized
+    category: Registration.Specialized
 
-description: Computes a rigid, similarity or affine transform from a matched list of fiducials
+    description: Computes a rigid, similarity or affine transform from a matched list of fiducials
 
-version: 0.1.0.$Revision$
+    version: 0.1.0.$Revision$
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/TransformFromFiducials
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/TransformFromFiducials
 
-contributor: Casey B Goodlett (Kitware), Dominik Meier (SPL, BWH)
+    contributor: Casey B Goodlett (Kitware), Dominik Meier (SPL, BWH)
 
-acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
-
-"""
+    acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
+    """
 
     input_spec = FiducialRegistrationInputSpec
     output_spec = FiducialRegistrationOutputSpec
@@ -371,24 +369,23 @@ class VBRAINSDemonWarpOutputSpec(TraitedSpec):
 class VBRAINSDemonWarp(SEMLikeCommandLine):
     """title: Vector Demon Registration (BRAINS)
 
-category: Registration.Specialized
+    category: Registration.Specialized
 
-description:
-    This program finds a deformation field to warp a moving image onto a fixed image.  The images must be of the same signal kind, and contain an image of the same kind of object.  This program uses the Thirion Demons warp software in ITK, the Insight Toolkit.  Additional information is available at: http://www.nitrc.org/projects/brainsdemonwarp.
+    description:
+        This program finds a deformation field to warp a moving image onto a fixed image.  The images must be of the same signal kind, and contain an image of the same kind of object.  This program uses the Thirion Demons warp software in ITK, the Insight Toolkit.  Additional information is available at: http://www.nitrc.org/projects/brainsdemonwarp.
 
 
 
-version: 3.0.0
+    version: 3.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:BRAINSDemonWarp
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:BRAINSDemonWarp
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: This tool was developed by Hans J. Johnson and Greg Harris.
+    contributor: This tool was developed by Hans J. Johnson and Greg Harris.
 
-acknowledgements: The development of this tool was supported by funding from grants NS050568 and NS40068 from the National Institute of Neurological Disorders and Stroke and grants MH31593, MH40856, from the National Institute of Mental Health.
-
-"""
+    acknowledgements: The development of this tool was supported by funding from grants NS050568 and NS40068 from the National Institute of Neurological Disorders and Stroke and grants MH31593, MH40856, from the National Institute of Mental Health.
+    """
 
     input_spec = VBRAINSDemonWarpInputSpec
     output_spec = VBRAINSDemonWarpOutputSpec
@@ -632,24 +629,23 @@ class BRAINSDemonWarpOutputSpec(TraitedSpec):
 class BRAINSDemonWarp(SEMLikeCommandLine):
     """title: Demon Registration (BRAINS)
 
-category: Registration.Specialized
+    category: Registration.Specialized
 
-description:
-    This program finds a deformation field to warp a moving image onto a fixed image.  The images must be of the same signal kind, and contain an image of the same kind of object.  This program uses the Thirion Demons warp software in ITK, the Insight Toolkit.  Additional information is available at: http://www.nitrc.org/projects/brainsdemonwarp.
+    description:
+        This program finds a deformation field to warp a moving image onto a fixed image.  The images must be of the same signal kind, and contain an image of the same kind of object.  This program uses the Thirion Demons warp software in ITK, the Insight Toolkit.  Additional information is available at: http://www.nitrc.org/projects/brainsdemonwarp.
 
 
 
-version: 3.0.0
+    version: 3.0.0
 
-documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:BRAINSDemonWarp
+    documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Modules:BRAINSDemonWarp
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: This tool was developed by Hans J. Johnson and Greg Harris.
+    contributor: This tool was developed by Hans J. Johnson and Greg Harris.
 
-acknowledgements: The development of this tool was supported by funding from grants NS050568 and NS40068 from the National Institute of Neurological Disorders and Stroke and grants MH31593, MH40856, from the National Institute of Mental Health.
-
-"""
+    acknowledgements: The development of this tool was supported by funding from grants NS050568 and NS40068 from the National Institute of Neurological Disorders and Stroke and grants MH31593, MH40856, from the National Institute of Mental Health.
+    """
 
     input_spec = BRAINSDemonWarpInputSpec
     output_spec = BRAINSDemonWarpOutputSpec

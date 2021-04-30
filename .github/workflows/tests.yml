@@ -1,0 +1,89 @@
+name: Stable tests
+
+# This file tests the claimed support range of nipype including
+#
+# * Operating systems: Linux, OSX
+# * Dependencies: minimum requirements, optional requirements
+# * Installation methods: setup.py, sdist, wheel, archive
+
+on:
+  push:
+    branches:
+      - master
+      - maint/*
+  pull_request:
+    branches:
+      - master
+      - maint/*
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  stable:
+    # Check each OS, all supported Python, minimum versions and latest releases
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ['ubuntu-18.04']
+        python-version: [3.6, 3.7, 3.8, 3.9]
+        check: ['test']
+        pip-flags: ['']
+        depends: ['REQUIREMENTS']
+        deb-depends: [false]
+        nipype-extras: ['doc,tests,profiler']
+        include:
+          - os: ubuntu-18.04
+            python-version: 3.8
+            check: test
+            pip-flags: ''
+            depends: REQUIREMENTS
+            deb-depends: true
+            nipype-extras: doc,tests,nipy,profiler,duecredit,ssh
+    env:
+      DEPENDS: ${{ matrix.depends }}
+      CHECK_TYPE: ${{ matrix.check }}
+      EXTRA_PIP_FLAGS: ${{ matrix.pip-flags }}
+      INSTALL_DEB_DEPENDENCIES: ${{ matrix.deb-depends }}
+      NIPYPE_EXTRAS: ${{ matrix.nipype-extras }}
+      INSTALL_TYPE: pip
+      CI_SKIP_TEST: 1
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+      - name: Create virtual environment
+        run: tools/ci/create_venv.sh
+      - name: Build archive
+        run: |
+          source tools/ci/build_archive.sh
+          echo "ARCHIVE=$ARCHIVE" >> $GITHUB_ENV
+      - name: Install Debian dependencies
+        run: tools/ci/install_deb_dependencies.sh
+        if: ${{ matrix.os == 'ubuntu-18.04' }}
+      - name: Install dependencies
+        run: tools/ci/install_dependencies.sh
+      - name: Install Nipype
+        run: tools/ci/install.sh
+      - name: Run tests
+        run: tools/ci/check.sh
+        if: ${{ matrix.check != 'skiptests' }}
+      - uses: codecov/codecov-action@v1
+        with:
+          file: coverage.xml
+        if: ${{ always() }}
+      - name: Upload pytest test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: pytest-results-${{ matrix.os }}-${{ matrix.python-version }}
+          path: test-results.xml
+        if: ${{ always() && matrix.check == 'test' }}

@@ -10,7 +10,7 @@ from ..niftyreg.base import get_custom_path
 
 
 class FitDwiInputSpec(CommandLineInputSpec):
-    """ Input Spec for FitDwi. """
+    """Input Spec for FitDwi."""
 
     # Inputs options
     source_file = File(
@@ -281,7 +281,7 @@ identity covariance...)."
 
 
 class FitDwiOutputSpec(TraitedSpec):
-    """ Output Spec for FitDwi. """
+    """Output Spec for FitDwi."""
 
     error_file = File(desc="Filename of parameter error maps")
     res_file = File(desc="Filename of model residual map")
@@ -342,7 +342,7 @@ class FitDwi(NiftyFitCommand):
 
 
 class DwiToolInputSpec(CommandLineInputSpec):
-    """ Input Spec for DwiTool. """
+    """Input Spec for DwiTool."""
 
     desc = "The source image containing the fitted model."
     source_file = File(
@@ -540,7 +540,7 @@ class DwiToolInputSpec(CommandLineInputSpec):
 
 
 class DwiToolOutputSpec(TraitedSpec):
-    """ Output Spec for DwiTool. """
+    """Output Spec for DwiTool."""
 
     desc = "Filename of multi-compartment model parameter map \
 (-ivim,-ball,-nod)"

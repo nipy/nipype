@@ -44,8 +44,7 @@ def execute_task(pckld_task, node_config, updatehash):
 
 
 class IPythonPlugin(DistributedPluginBase):
-    """Execute workflow with ipython
-    """
+    """Execute workflow with ipython"""
 
     def __init__(self, plugin_args=None):
         if IPython_not_loaded:

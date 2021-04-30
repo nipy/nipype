@@ -617,7 +617,7 @@ class Binarize(FSCommand):
     >>> binvol.cmdline
     'mri_binarize --o foo_out.nii --i structural.nii --min 10.000000'
 
-   """
+    """
 
     _cmd = "mri_binarize"
     input_spec = BinarizeInputSpec
@@ -1249,7 +1249,7 @@ class Label2Vol(FSCommand):
     >>> binvol.cmdline
     'mri_label2vol --fillthresh 0.5 --label cortex.label --reg register.dat --temp structural.nii --o foo_out.nii'
 
-   """
+    """
 
     _cmd = "mri_label2vol"
     input_spec = Label2VolInputSpec

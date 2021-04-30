@@ -251,7 +251,7 @@ exit;
 
 
 def no_spm():
-    """ Checks if SPM is NOT installed
+    """Checks if SPM is NOT installed
     used with pytest.mark.skipif decorator to skip tests
     that will fail if spm is not installed"""
 

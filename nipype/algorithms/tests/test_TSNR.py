@@ -14,7 +14,7 @@ import os
 
 
 class TestTSNR:
-    """ Note: Tests currently do a poor job of testing functionality """
+    """Note: Tests currently do a poor job of testing functionality"""
 
     in_filenames = {"in_file": "tsnrinfile.nii"}
 
@@ -93,8 +93,8 @@ class TestTSNR:
 
     @mock.patch("warnings.warn")
     def test_warning(self, mock_warn):
-        """ test that usage of misc.TSNR trips a warning to use
-        confounds.TSNR instead """
+        """test that usage of misc.TSNR trips a warning to use
+        confounds.TSNR instead"""
         # run
         misc.TSNR(in_file=self.in_filenames["in_file"])
 

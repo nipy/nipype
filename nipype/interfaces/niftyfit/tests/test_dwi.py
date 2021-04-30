@@ -12,7 +12,7 @@ from ...niftyreg.tests.test_regutils import no_nifty_tool
 
 @pytest.mark.skipif(no_nifty_tool(cmd="fit_dwi"), reason="niftyfit is not installed")
 def test_fit_dwi():
-    """ Testing FitDwi interface."""
+    """Testing FitDwi interface."""
     # Create a node object
     fit_dwi = FitDwi()
 
@@ -60,7 +60,7 @@ def test_fit_dwi():
 
 @pytest.mark.skipif(no_nifty_tool(cmd="dwi_tool"), reason="niftyfit is not installed")
 def test_dwi_tool():
-    """ Testing DwiTool interface."""
+    """Testing DwiTool interface."""
     # Create a node object
     dwi_tool = DwiTool()
 

@@ -402,8 +402,7 @@ def has_metadata(trait, metadata, value=None, recursive=True):
 
 
 class MultiObject(traits.List):
-    """ Abstract class - shared functionality of input and output MultiObject
-    """
+    """Abstract class - shared functionality of input and output MultiObject"""
 
     def validate(self, objekt, name, value):
 
@@ -432,7 +431,7 @@ class MultiObject(traits.List):
 
 
 class OutputMultiObject(MultiObject):
-    """ Implements a user friendly traits that accepts one or more
+    """Implements a user friendly traits that accepts one or more
     paths to files or directories. This is the output version which
     return a single string whenever possible (when it was set to a
     single value or a list of length 1). Default value of this trait
@@ -478,7 +477,7 @@ class OutputMultiObject(MultiObject):
 
 
 class InputMultiObject(MultiObject):
-    """ Implements a user friendly traits that accepts one or more
+    """Implements a user friendly traits that accepts one or more
     paths to files or directories. This is the input version which
     always returns a list. Default value of this trait
     is _Undefined. It does not accept empty lists.

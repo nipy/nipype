@@ -211,7 +211,7 @@ class EMRegisterOutputSpec(TraitedSpec):
 
 
 class EMRegister(FSCommandOpenMP):
-    """ This program creates a tranform in lta format
+    """This program creates a tranform in lta format
 
     Examples
     ========
@@ -285,7 +285,7 @@ class RegisterOutputSpec(TraitedSpec):
 
 
 class Register(FSCommand):
-    """ This program registers a surface to an average surface template.
+    """This program registers a surface to an average surface template.
 
     Examples
     ========
@@ -543,7 +543,7 @@ class MRICoregOutputSpec(TraitedSpec):
 
 
 class MRICoreg(FSCommand):
-    """ This program registers one volume to another
+    """This program registers one volume to another
 
     mri_coreg is a C reimplementation of spm_coreg in FreeSurfer
 

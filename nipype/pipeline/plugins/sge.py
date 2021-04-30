@@ -20,8 +20,7 @@ DEBUGGING_PREFIX = str(int(random.uniform(100, 999)))
 
 
 def sge_debug_print(message):
-    """  Needed for debugging on big jobs.  Once this is fully vetted, it can be removed.
-    """
+    """Needed for debugging on big jobs.  Once this is fully vetted, it can be removed."""
     logger.debug(DEBUGGING_PREFIX + " " + "=!" * 3 + "  " + message)
     # print DEBUGGING_PREFIX + " " + "=!" * 3 + "  " + message
 
@@ -79,8 +78,7 @@ class QJobInfo(object):
         return self._job_queue_state == "pending"
 
     def is_job_state_pending(self):
-        """ Return True, unless job is in the "zombie" status
-        """
+        """Return True, unless job is in the "zombie" status"""
         time_diff = time.time() - self._job_info_creation_time
         if self.is_zombie():
             sge_debug_print(
@@ -133,7 +131,7 @@ class QstatSubstitute(object):
         self._remove_old_jobs()
 
     def _remove_old_jobs(self):
-        """ This is only called during initialization of the function for the purpose
+        """This is only called during initialization of the function for the purpose
         of identifying jobs that are not part of this run of nipype.  They
         are jobs that existed prior to starting a new jobs, so they are irrelevant.
         """
@@ -154,8 +152,8 @@ class QstatSubstitute(object):
 
     @staticmethod
     def _qacct_verified_complete(taskid):
-        """ request definitive job completion information for the current job
-            from the qacct report
+        """request definitive job completion information for the current job
+        from the qacct report
         """
         sge_debug_print(
             "WARNING:  "
@@ -280,12 +278,12 @@ class QstatSubstitute(object):
                     pass
 
     def _run_qstat(self, reason_for_qstat, force_instant=True):
-        """ request all job information for the current user in xmlformat.
-            See documentation from java documentation:
-            http://arc.liv.ac.uk/SGE/javadocs/jgdi/com/sun/grid/jgdi/monitoring/filter/JobStateFilter.html
-            -s r gives running jobs
-            -s z gives recently completed jobs (**recently** is very ambiguous)
-            -s s suspended jobs
+        """request all job information for the current user in xmlformat.
+        See documentation from java documentation:
+        http://arc.liv.ac.uk/SGE/javadocs/jgdi/com/sun/grid/jgdi/monitoring/filter/JobStateFilter.html
+        -s r gives running jobs
+        -s z gives recently completed jobs (**recently** is very ambiguous)
+        -s s suspended jobs
         """
         sge_debug_print(
             "WARNING:  CONTACTING qmaster for jobs, "
@@ -373,7 +371,7 @@ class QstatSubstitute(object):
 
 
 def qsub_sanitize_job_name(testjobname):
-    """ Ensure that qsub job names must begin with a letter.
+    """Ensure that qsub job names must begin with a letter.
 
     Numbers and punctuation are  not allowed.
 
