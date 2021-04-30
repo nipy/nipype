@@ -190,7 +190,7 @@ def cmat(
     endpoint_name,
     intersections=False,
 ):
-    """ Create the connection matrix for each resolution using fibers and ROIs. """
+    """Create the connection matrix for each resolution using fibers and ROIs."""
     import scipy.io as sio
 
     stats = {}
@@ -460,7 +460,7 @@ def cmat(
 
 
 def save_fibers(oldhdr, oldfib, fname, indices):
-    """ Stores a new trackvis file fname using only given indices """
+    """Stores a new trackvis file fname using only given indices"""
     hdrnew = oldhdr.copy()
     outstreams = []
     for i in indices:

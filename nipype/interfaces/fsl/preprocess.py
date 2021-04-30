@@ -236,7 +236,7 @@ class BET(FSLCommand):
 
 
 class FASTInputSpec(FSLCommandInputSpec):
-    """ Defines inputs (trait classes) for FAST """
+    """Defines inputs (trait classes) for FAST"""
 
     in_files = InputMultiPath(
         File(exists=True),

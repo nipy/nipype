@@ -173,8 +173,7 @@ class Workflow(EngineBase):
                 for edge in self._graph.in_edges(destnode):
                     data = self._graph.get_edge_data(*edge)
                     connected_ports[destnode].update(
-                        destname
-                        for _, destname in data["connect"]
+                        destname for _, destname in data["connect"]
                     )
             for source, dest in connects:
                 # Currently datasource/sink/grabber.io modules
@@ -923,12 +922,8 @@ connected.
                 self._nested_workflows_cache.add(node)
 
     def _has_node(self, wanted_node):
-        return (
-            wanted_node in self._nodes_cache or
-            any(
-                wf._has_node(wanted_node)
-                for wf in self._nested_workflows_cache
-            )
+        return wanted_node in self._nodes_cache or any(
+            wf._has_node(wanted_node) for wf in self._nested_workflows_cache
         )
 
     def _create_flat_graph(self):

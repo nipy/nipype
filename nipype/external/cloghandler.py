@@ -222,7 +222,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         pass
 
     def _degrade(self, degrade, msg, *args):
-        """ Set degrade mode or not.  Ignore msg. """
+        """Set degrade mode or not.  Ignore msg."""
         self._rotateFailed = degrade
         del msg, args  # avoid pychecker warnings
 

@@ -23,7 +23,7 @@ IFLOGGER = logging.getLogger("nipype.interface")
 
 
 class TVTKBaseInterface(BaseInterface):
-    """ A base class for interfaces using VTK """
+    """A base class for interfaces using VTK"""
 
     _redirect_x = True
 

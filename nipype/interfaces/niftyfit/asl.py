@@ -10,7 +10,7 @@ from ..niftyreg.base import get_custom_path
 
 
 class FitAslInputSpec(CommandLineInputSpec):
-    """ Input Spec for FitAsl. """
+    """Input Spec for FitAsl."""
 
     desc = "Filename of the 4D ASL (control/label) source image (mandatory)."
     source_file = File(
@@ -129,7 +129,7 @@ estimation and PV correction {WM,GM,CSF}."
 
 
 class FitAslOutputSpec(TraitedSpec):
-    """ Output Spec for FitAsl. """
+    """Output Spec for FitAsl."""
 
     desc = "Filename of the Cerebral Blood Flow map (in ml/100g/min)."
     cbf_file = File(exists=True, desc=desc)

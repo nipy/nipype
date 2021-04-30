@@ -32,7 +32,7 @@ def test_read_csv():
 
 @pytest.mark.skipif(no_nitime, reason="nitime is not installed")
 def test_coherence_analysis(tmpdir):
-    """Test that the coherence analyzer works """
+    """Test that the coherence analyzer works"""
     import nitime.analysis as nta
     import nitime.timeseries as ts
 

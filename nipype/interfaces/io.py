@@ -169,7 +169,7 @@ class ProgressPercentage(object):
     """
 
     def __init__(self, filename):
-        """"""
+        """ """
 
         # Import packages
         import threading
@@ -181,7 +181,7 @@ class ProgressPercentage(object):
         self._lock = threading.Lock()
 
     def __call__(self, bytes_amount):
-        """"""
+        """ """
 
         # Import packages
         import sys
@@ -206,7 +206,7 @@ class ProgressPercentage(object):
 
 # DataSink inputs
 class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    """"""
+    """ """
 
     # Init inputspec data attributes
     base_directory = Str(desc="Path to the base directory for storing data.")

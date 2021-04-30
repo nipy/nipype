@@ -37,7 +37,7 @@ class OneTimeProperty(object):
         self.name = func.__name__
 
     def __get__(self, obj, type=None):
-        """ Called on attribute access on the class or instance.  """
+        """Called on attribute access on the class or instance."""
         if obj is None:
             # Being called on the class, return the original function.
             # This way, introspection works on the class.

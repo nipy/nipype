@@ -90,12 +90,12 @@ class CalcCoregAffine(SPMCommand):
     output_spec = CalcCoregAffineOutputSpec
 
     def _make_inv_file(self):
-        """ makes filename to hold inverse transform if not specified"""
+        """makes filename to hold inverse transform if not specified"""
         invmat = fname_presuffix(self.inputs.mat, prefix="inverse_")
         return invmat
 
     def _make_mat_file(self):
-        """ makes name for matfile if doesn exist"""
+        """makes name for matfile if doesn exist"""
         pth, mv, _ = split_filename(self.inputs.moving)
         _, tgt, _ = split_filename(self.inputs.target)
         mat = os.path.join(pth, "%s_to_%s.mat" % (mv, tgt))
@@ -228,13 +228,13 @@ class ResliceOutputSpec(TraitedSpec):
 
 
 class Reslice(SPMCommand):
-    """ uses  spm_reslice to resample in_file into space of space_defining"""
+    """uses  spm_reslice to resample in_file into space of space_defining"""
 
     input_spec = ResliceInputSpec
     output_spec = ResliceOutputSpec
 
     def _make_matlab_command(self, _):
-        """ generates script"""
+        """generates script"""
         if not isdefined(self.inputs.out_file):
             self.inputs.out_file = fname_presuffix(self.inputs.in_file, prefix="r")
         script = """

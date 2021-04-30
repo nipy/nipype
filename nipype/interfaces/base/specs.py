@@ -58,7 +58,7 @@ class BaseTraitedSpec(traits.HasTraits):
     package_version = nipype_version
 
     def __init__(self, **kwargs):
-        """ Initialize handlers and inputs"""
+        """Initialize handlers and inputs"""
         # NOTE: In python 2.6, object.__init__ no longer accepts input
         # arguments.  HasTraits does not define an __init__ and
         # therefore these args were being ignored.
@@ -79,7 +79,7 @@ class BaseTraitedSpec(traits.HasTraits):
             yield name, self.traits()[name]
 
     def __repr__(self):
-        """ Return a well-formatted representation of the traits """
+        """Return a well-formatted representation of the traits"""
         outstr = []
         for name, value in sorted(self.trait_get().items()):
             outstr.append("%s = %s" % (name, value))
