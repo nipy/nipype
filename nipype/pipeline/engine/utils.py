@@ -753,7 +753,7 @@ def _merge_graphs(
     # nodes of the supergraph.
     supernodes = supergraph.nodes()
     ids = [n._hierarchy + n._id for n in supernodes]
-    if len(np.unique(ids)) != len(ids):
+    if len(set(ids)) != len(ids):
         # This should trap the problem of miswiring when multiple iterables are
         # used at the same level. The use of the template below for naming
         # updates to nodes is the general solution.
@@ -1098,11 +1098,12 @@ def generate_expanded_graph(graph_in):
             old_edge_dict = jedge_dict[jnode]
             # the edge source node replicates
             expansions = defaultdict(list)
-            for node in graph_in.nodes():
+            for node in graph_in:
                 for src_id in list(old_edge_dict.keys()):
                     # Drop the original JoinNodes; only concerned with
                     # generated Nodes
-                    if hasattr(node, "joinfield") and node.itername == src_id:
+                    itername = node.itername
+                    if hasattr(node, "joinfield") and itername == src_id:
                         continue
                     # Patterns:
                     #   - src_id : Non-iterable node
@@ -1111,10 +1112,10 @@ def generate_expanded_graph(graph_in):
                     #   - src_id.[a-z]I.[a-z]\d+ :
                     #       Non-IdentityInterface w/ iterables
                     #   - src_idJ\d+ : JoinNode(IdentityInterface)
-                    if re.match(
-                        src_id + r"((\.[a-z](I\.[a-z])?|J)\d+)?$", node.itername
-                    ):
-                        expansions[src_id].append(node)
+                    if itername.startswith(src_id):
+                        suffix = itername[len(src_id):]
+                        if re.fullmatch(r"((\.[a-z](I\.[a-z])?|J)\d+)?", suffix):
+                            expansions[src_id].append(node)
             for in_id, in_nodes in list(expansions.items()):
                 logger.debug(
                     "The join node %s input %s was expanded" " to %d nodes.",
