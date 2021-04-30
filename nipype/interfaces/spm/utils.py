@@ -282,7 +282,10 @@ class ApplyInverseDeformationInput(SPMCommandInputSpec):
         xor=["deformation"],
     )
     interpolation = traits.Range(
-        low=0, high=7, field="out{1}.pull.interp", desc="degree of b-spline used for interpolation"
+        low=0,
+        high=7,
+        field="out{1}.pull.interp",
+        desc="degree of b-spline used for interpolation",
     )
 
     bounding_box = traits.List(
