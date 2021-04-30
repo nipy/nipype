@@ -1115,10 +1115,8 @@ def generate_expanded_graph(graph_in):
                     #       Non-IdentityInterface w/ iterables
                     #   - src_idJ\d+ : JoinNode(IdentityInterface)
                     if itername.startswith(src_id):
-                        itername = itername[len(src_id):]
-                        if re.fullmatch(
-                            r"((\.[a-z](I\.[a-z])?|J)\d+)?", itername
-                        ):
+                        suffix = itername[len(src_id):]
+                        if re.fullmatch(r"((\.[a-z](I\.[a-z])?|J)\d+)?", suffix):
                             expansions[src_id].append(node)
             for in_id, in_nodes in list(expansions.items()):
                 logger.debug(

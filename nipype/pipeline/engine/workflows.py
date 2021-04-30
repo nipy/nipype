@@ -913,11 +913,9 @@ connected.
         node.set_input(param, deepcopy(newval))
 
     def _get_all_nodes(self):
-        allnodes = [
-            *self._nodes_cache.difference(self._nested_workflows_cache)
-        ]  # all nodes that are not workflows
+        allnodes = self._nodes_cache - self._nested_workflows_cache
         for node in self._nested_workflows_cache:
-            allnodes.extend(node._get_all_nodes())
+            allnodes |= node._get_all_nodes()
         return allnodes
 
     def _update_node_cache(self):
