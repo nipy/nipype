@@ -10,33 +10,63 @@ from nipype.utils.filemanip import split_filename
 
 
 class ExtractAdditionalSurfaceParametersInputSpec(SPMCommandInputSpec):
-    left_central_surfaces = InputMultiPath(File(exists=True), field="data_surf",
-                                           desc="Left and central surfaces files", mandatory=True, copyfile=False)
-    surface_files = InputMultiPath(File(exists=True),
-                                   desc="All surface files", mandatory=False, copyfile=False)
+    left_central_surfaces = InputMultiPath(
+        File(exists=True),
+        field="data_surf",
+        desc="Left and central surfaces files",
+        mandatory=True,
+        copyfile=False,
+    )
+    surface_files = InputMultiPath(
+        File(exists=True), desc="All surface files", mandatory=False, copyfile=False
+    )
 
-    gyrification = traits.Bool(True, field="GI", usedefault=True,
-                                           desc="Extract gyrification index (GI) based on absolute mean curvature. The"
-                                                " method is described in Luders et al. Neuroimage, 29:1224-1230, 2006")
+    gyrification = traits.Bool(
+        True,
+        field="GI",
+        usedefault=True,
+        desc="Extract gyrification index (GI) based on absolute mean curvature. The"
+        " method is described in Luders et al. Neuroimage, 29:1224-1230, 2006",
+    )
     gmv = traits.Bool(True, field="gmv", usedefault=True, desc="Extract volume")
     area = traits.Bool(True, field="area", usedefault=True, desc="Extract area surface")
-    depth = traits.Bool(False, field="SD", usedefault=True,
-                                    desc="Extract sulcus depth based on euclidian distance between the central "
-                                         "surface anf its convex hull.")
-    fractal_dimension = traits.Bool(False, field="FD", usedefault=True,
-                                                desc="Extract cortical complexity (fractal dimension) which is "
-                                                     "described in Yotter ar al. Neuroimage, 56(3): 961-973, 2011")
+    depth = traits.Bool(
+        False,
+        field="SD",
+        usedefault=True,
+        desc="Extract sulcus depth based on euclidian distance between the central "
+        "surface anf its convex hull.",
+    )
+    fractal_dimension = traits.Bool(
+        False,
+        field="FD",
+        usedefault=True,
+        desc="Extract cortical complexity (fractal dimension) which is "
+        "described in Yotter ar al. Neuroimage, 56(3): 961-973, 2011",
+    )
 
 
 class ExtractAdditionalSurfaceParametersOutputSpec(TraitedSpec):
-    lh_extracted_files = traits.List(File(exists=True), desc="Files of left Hemisphere extracted measures")
-    rh_extracted_files = traits.List(File(exists=True), desc="Files of right Hemisphere extracted measures")
+    lh_extracted_files = traits.List(
+        File(exists=True), desc="Files of left Hemisphere extracted measures"
+    )
+    rh_extracted_files = traits.List(
+        File(exists=True), desc="Files of right Hemisphere extracted measures"
+    )
 
-    lh_gyrification = traits.List(File(exists=True), desc="Gyrification of left Hemisphere")
-    rh_gyrification = traits.List(File(exists=True), desc="Gyrification of right Hemisphere")
+    lh_gyrification = traits.List(
+        File(exists=True), desc="Gyrification of left Hemisphere"
+    )
+    rh_gyrification = traits.List(
+        File(exists=True), desc="Gyrification of right Hemisphere"
+    )
 
-    lh_gmv = traits.List(File(exists=True), desc="Grey matter volume of left Hemisphere")
-    rh_gmv = traits.List(File(exists=True), desc="Grey matter volume of right Hemisphere")
+    lh_gmv = traits.List(
+        File(exists=True), desc="Grey matter volume of left Hemisphere"
+    )
+    rh_gmv = traits.List(
+        File(exists=True), desc="Grey matter volume of right Hemisphere"
+    )
 
     lh_area = traits.List(File(exists=True), desc="Area of left Hemisphere")
     rh_area = traits.List(File(exists=True), desc="Area of right Hemisphere")
@@ -44,8 +74,12 @@ class ExtractAdditionalSurfaceParametersOutputSpec(TraitedSpec):
     lh_depth = traits.List(File(exists=True), desc="Depth of left Hemisphere")
     rh_depth = traits.List(File(exists=True), desc="Depth of right Hemisphere")
 
-    lh_fractaldimension = traits.List(File(exists=True), desc="Fractal Dimension of left Hemisphere")
-    rh_fractaldimension = traits.List(File(exists=True), desc="Fractal Dimension of right Hemisphere")
+    lh_fractaldimension = traits.List(
+        File(exists=True), desc="Fractal Dimension of left Hemisphere"
+    )
+    rh_fractaldimension = traits.List(
+        File(exists=True), desc="Fractal Dimension of right Hemisphere"
+    )
 
 
 class ExtractAdditionalSurfaceParameters(SPMCommand):
@@ -76,6 +110,7 @@ class ExtractAdditionalSurfaceParameters(SPMCommand):
     >>> extract_additional_measures.run() # doctest: +SKIP
 
     """
+
     input_spec = ExtractAdditionalSurfaceParametersInputSpec
     output_spec = ExtractAdditionalSurfaceParametersOutputSpec
 
@@ -90,9 +125,13 @@ class ExtractAdditionalSurfaceParameters(SPMCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
 
-        names_outputs = [(self.inputs.gyrification, 'gyrification'), (self.inputs.gmv, 'gmv'),
-                         (self.inputs.area, 'area'), (self.inputs.depth, 'depth'),
-                         (self.inputs.fractal_dimension, 'fractaldimension')]
+        names_outputs = [
+            (self.inputs.gyrification, "gyrification"),
+            (self.inputs.gmv, "gmv"),
+            (self.inputs.area, "area"),
+            (self.inputs.depth, "depth"),
+            (self.inputs.fractal_dimension, "fractaldimension"),
+        ]
 
         for filename in self.inputs.left_central_surfaces:
             pth, base, ext = split_filename(filename)
@@ -101,47 +140,79 @@ class ExtractAdditionalSurfaceParameters(SPMCommand):
             for i, (extracted_parameter, parameter_name) in enumerate(names_outputs):
                 if extracted_parameter:
                     for hemisphere in ["rh", "lh"]:
-                        all_files_hemisphere = hemisphere + '_extracted_files'
+                        all_files_hemisphere = hemisphere + "_extracted_files"
                         name_hemisphere = hemisphere + "_" + parameter_name
                         if isinstance(outputs[name_hemisphere], _Undefined):
                             outputs[name_hemisphere] = []
                         if isinstance(outputs[all_files_hemisphere], _Undefined):
                             outputs[all_files_hemisphere] = []
-                        generated_filename = ".".join([hemisphere, parameter_name, original_filename])
-                        outputs[name_hemisphere].append(os.path.join(pth, generated_filename))
+                        generated_filename = ".".join(
+                            [hemisphere, parameter_name, original_filename]
+                        )
+                        outputs[name_hemisphere].append(
+                            os.path.join(pth, generated_filename)
+                        )
 
                         # Add all hemisphere files into one list, this is important because only the left hemisphere
                         # files are used as input in the Surface ROI Tools, fpr instance.
-                        outputs[all_files_hemisphere].append(os.path.join(pth, generated_filename))
+                        outputs[all_files_hemisphere].append(
+                            os.path.join(pth, generated_filename)
+                        )
 
         return outputs
 
     def _format_arg(self, opt, spec, val):
         if opt == "left_central_surfaces":
             return Cell2Str(val)
-        return super(ExtractAdditionalSurfaceParameters, self)._format_arg(opt, spec, val)
+        return super(ExtractAdditionalSurfaceParameters, self)._format_arg(
+            opt, spec, val
+        )
 
 
 class ExtractROIBasedSurfaceMeasuresInputSpec(SPMCommandInputSpec):
     # Only these files are given as input, yet the right hemisphere (rh) files should also be on the processing
     # directory.
 
-    surface_files = InputMultiPath(File(exists=True), desc="Surface data files. This variable should be a list "
-                                                           "with all", mandatory=False, copyfile=False)
-    lh_roi_atlas = InputMultiPath(File(exists=True), field="rdata", desc="(Left) ROI Atlas. These are the ROI's ",
-                                  mandatory=True, copyfile=False)
+    surface_files = InputMultiPath(
+        File(exists=True),
+        desc="Surface data files. This variable should be a list " "with all",
+        mandatory=False,
+        copyfile=False,
+    )
+    lh_roi_atlas = InputMultiPath(
+        File(exists=True),
+        field="rdata",
+        desc="(Left) ROI Atlas. These are the ROI's ",
+        mandatory=True,
+        copyfile=False,
+    )
 
-    rh_roi_atlas = InputMultiPath(File(exists=True), desc="(Right) ROI Atlas. These are the ROI's ",
-                                  mandatory=False, copyfile=False)
+    rh_roi_atlas = InputMultiPath(
+        File(exists=True),
+        desc="(Right) ROI Atlas. These are the ROI's ",
+        mandatory=False,
+        copyfile=False,
+    )
 
-    lh_surface_measure = InputMultiPath(File(exists=True), field="cdata", desc="(Left) Surface data files. ",
-                                        mandatory=True, copyfile=False)
-    rh_surface_measure = InputMultiPath(File(exists=True), desc="(Right) Surface data files.",
-                                        mandatory=False, copyfile=False)
+    lh_surface_measure = InputMultiPath(
+        File(exists=True),
+        field="cdata",
+        desc="(Left) Surface data files. ",
+        mandatory=True,
+        copyfile=False,
+    )
+    rh_surface_measure = InputMultiPath(
+        File(exists=True),
+        desc="(Right) Surface data files.",
+        mandatory=False,
+        copyfile=False,
+    )
 
 
 class ExtractROIBasedSurfaceMeasuresOutputSpec(TraitedSpec):
-    label_files = traits.List(File(exists=True), desc="Files with the measures extracted for ROIs.")
+    label_files = traits.List(
+        File(exists=True), desc="Files with the measures extracted for ROIs."
+    )
 
 
 class ExtractROIBasedSurfaceMeasures(SPMCommand):
@@ -194,7 +265,9 @@ class ExtractROIBasedSurfaceMeasures(SPMCommand):
 
         pth, base, ext = split_filename(self.inputs.lh_surface_measure[0])
 
-        outputs["label_files"] = [str(label) for label in Path(pth).glob("label/*") if label.is_file()]
+        outputs["label_files"] = [
+            str(label) for label in Path(pth).glob("label/*") if label.is_file()
+        ]
         return outputs
 
 
@@ -204,21 +277,18 @@ class Cell:
 
     def to_string(self):
         if isinstance(self.arg, list):
-            v = '\n'.join([f"'{el}'" for el in self.arg])
+            v = "\n".join([f"'{el}'" for el in self.arg])
         else:
             v = self.arg
         return v
 
 
 class NestedCell(Cell):
-
     def __str__(self):
         return "{{%s}}" % self.to_string()
 
 
 class Cell2Str(Cell):
-
     def __str__(self):
-        """Convert input to appropriate format for cat12
-        """
+        """Convert input to appropriate format for cat12"""
         return "{%s}" % self.to_string()
