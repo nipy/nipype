@@ -273,7 +273,8 @@ connected.
                 "(%s, %s): new edge data: %s", srcnode, destnode, str(edge_data)
             )
 
-        self._update_node_cache()
+        if newnodes:
+            self._update_node_cache()
 
     def disconnect(self, *args):
         """Disconnect nodes
@@ -319,8 +320,6 @@ connected.
                 self._graph.remove_edge(srcnode, dstnode)
             else:
                 self._graph.add_edges_from([(srcnode, dstnode, edge_data)])
-
-        self._update_node_cache()
 
     def add_nodes(self, nodes):
         """ Add nodes to a workflow
