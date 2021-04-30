@@ -333,7 +333,7 @@ connected.
         newnodes = []
         all_nodes = self._get_all_nodes()
         for node in nodes:
-            if self._has_node(node):
+            if node in all_nodes:
                 raise IOError("Node %s already exists in the workflow" % node)
             if isinstance(node, Workflow):
                 for subnode in node._get_all_nodes():
