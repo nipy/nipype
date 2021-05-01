@@ -14,7 +14,7 @@ from ...utils.filemanip import split_filename
 
 
 class RegResampleInputSpec(NiftyRegCommandInputSpec):
-    """ Input Spec for RegResample. """
+    """Input Spec for RegResample."""
 
     # Input reference file
     ref_file = File(
@@ -78,7 +78,7 @@ estimating the PSF [0]"
 
 
 class RegResampleOutputSpec(TraitedSpec):
-    """ Output Spec for RegResample. """
+    """Output Spec for RegResample."""
 
     out_file = File(desc="The output filename of the transformed image")
 
@@ -126,7 +126,7 @@ warpfield.nii -res im2_res.nii.gz'
 
 
 class RegJacobianInputSpec(NiftyRegCommandInputSpec):
-    """ Input Spec for RegJacobian. """
+    """Input Spec for RegJacobian."""
 
     # Reference file name
     desc = "Reference/target file (required if specifying CPP transformations."
@@ -157,7 +157,7 @@ class RegJacobianInputSpec(NiftyRegCommandInputSpec):
 
 
 class RegJacobianOutputSpec(TraitedSpec):
-    """ Output Spec for RegJacobian. """
+    """Output Spec for RegJacobian."""
 
     out_file = File(desc="The output file")
 
@@ -194,7 +194,7 @@ warpfield_jac.nii.gz'
 
 
 class RegToolsInputSpec(NiftyRegCommandInputSpec):
-    """ Input Spec for RegTools. """
+    """Input Spec for RegTools."""
 
     # Input image file
     in_file = File(
@@ -302,7 +302,7 @@ class RegToolsInputSpec(NiftyRegCommandInputSpec):
 
 
 class RegToolsOutputSpec(TraitedSpec):
-    """ Output Spec for RegTools. """
+    """Output Spec for RegTools."""
 
     out_file = File(desc="The output file", exists=True)
 
@@ -343,7 +343,7 @@ class RegTools(NiftyRegCommand):
 
 
 class RegAverageInputSpec(NiftyRegCommandInputSpec):
-    """ Input Spec for RegAverage. """
+    """Input Spec for RegAverage."""
 
     avg_files = traits.List(
         File(exist=True),
@@ -462,7 +462,7 @@ reference space"
 
 
 class RegAverageOutputSpec(TraitedSpec):
-    """ Output Spec for RegAverage. """
+    """Output Spec for RegAverage."""
 
     out_file = File(desc="Output file name")
 
@@ -522,7 +522,7 @@ class RegAverage(NiftyRegCommand):
 
     @property
     def cmdline(self):
-        """ Rewrite the cmdline to write options in text_file."""
+        """Rewrite the cmdline to write options in text_file."""
         argv = super(RegAverage, self).cmdline
         reg_average_cmd = os.path.join(os.getcwd(), "reg_average_cmd")
         with open(reg_average_cmd, "w") as f:
@@ -531,7 +531,7 @@ class RegAverage(NiftyRegCommand):
 
 
 class RegTransformInputSpec(NiftyRegCommandInputSpec):
-    """ Input Spec for RegTransform. """
+    """Input Spec for RegTransform."""
 
     ref1_file = File(
         exists=True,
@@ -794,7 +794,7 @@ transformation"
 
 
 class RegTransformOutputSpec(TraitedSpec):
-    """ Output Spec for RegTransform. """
+    """Output Spec for RegTransform."""
 
     out_file = File(desc="Output File (transformation in any format)")
 
@@ -894,7 +894,7 @@ class RegTransform(NiftyRegCommand):
 
 
 class RegMeasureInputSpec(NiftyRegCommandInputSpec):
-    """ Input Spec for RegMeasure. """
+    """Input Spec for RegMeasure."""
 
     # Input reference file
     ref_file = File(
@@ -928,7 +928,7 @@ class RegMeasureInputSpec(NiftyRegCommandInputSpec):
 
 
 class RegMeasureOutputSpec(TraitedSpec):
-    """ Output Spec for RegMeasure. """
+    """Output Spec for RegMeasure."""
 
     out_file = File(desc="The output text file containing the measure")
 

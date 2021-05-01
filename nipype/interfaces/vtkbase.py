@@ -43,25 +43,25 @@ finally:
 
 
 def vtk_version():
-    """ Get VTK version """
+    """Get VTK version"""
     global _vtk_version
     return _vtk_version
 
 
 def no_vtk():
-    """ Checks if VTK is installed and the python wrapper is functional """
+    """Checks if VTK is installed and the python wrapper is functional"""
     global _vtk_version
     return _vtk_version is None
 
 
 def no_tvtk():
-    """ Checks if tvtk was found """
+    """Checks if tvtk was found"""
     global _have_tvtk
     return not _have_tvtk
 
 
 def vtk_old():
-    """ Checks if VTK uses the old-style pipeline (VTK<6.0) """
+    """Checks if VTK uses the old-style pipeline (VTK<6.0)"""
     global _vtk_version
     if _vtk_version is None:
         raise RuntimeException("VTK is not correctly installed.")
@@ -80,7 +80,7 @@ def configure_input_data(obj, data):
 
 
 def vtk_output(obj):
-    """ Configure the input data for vtk pipeline object obj."""
+    """Configure the input data for vtk pipeline object obj."""
     if vtk_old():
         return obj.output
     return obj.get_output()

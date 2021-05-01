@@ -538,7 +538,7 @@ dotfiles = {
     "graph_type", ["orig", "flat", "exec", "hierarchical", "colored"]
 )
 def test_write_graph_dotfile(tmpdir, graph_type, simple):
-    """ checking dot files for a workflow without iterables"""
+    """checking dot files for a workflow without iterables"""
     tmpdir.chdir()
 
     pipe = pe.Workflow(name="pipe")
@@ -631,7 +631,7 @@ dotfiles_detailed_iter = {
     "graph_type", ["orig", "flat", "exec", "hierarchical", "colored"]
 )
 def test_write_graph_dotfile_iterables(tmpdir, graph_type, simple):
-    """ checking dot files for a workflow with iterables"""
+    """checking dot files for a workflow with iterables"""
     tmpdir.chdir()
 
     pipe = pe.Workflow(name="pipe")

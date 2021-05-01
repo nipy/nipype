@@ -87,12 +87,12 @@ class Interface(object):
 
     @classmethod
     def _outputs(cls):
-        """ Initializes outputs"""
+        """Initializes outputs"""
         raise NotImplementedError
 
     @classmethod
     def help(cls, returnhelp=False):
-        """ Prints class help """
+        """Prints class help"""
         allhelp = format_help(cls)
         if returnhelp:
             return allhelp
@@ -112,7 +112,7 @@ class Interface(object):
         raise NotImplementedError
 
     def _list_outputs(self):
-        """ List expected outputs"""
+        """List expected outputs"""
         raise NotImplementedError
 
     @classmethod

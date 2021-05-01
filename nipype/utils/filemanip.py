@@ -30,7 +30,7 @@ related_filetype_sets = [(".hdr", ".img", ".mat"), (".nii", ".mat"), (".BRIK", "
 
 
 def _resolve_with_filenotfound(path, **kwargs):
-    """ Raise FileNotFoundError instead of OSError """
+    """Raise FileNotFoundError instead of OSError"""
     try:
         return path.resolve(**kwargs)
     except OSError as e:
@@ -210,7 +210,7 @@ def hash_infile(afile, chunk_len=8192, crypto=hashlib.md5, raise_notfound=False)
 
 
 def hash_timestamp(afile):
-    """ Computes md5 hash of the timestamp of a file """
+    """Computes md5 hash of the timestamp of a file"""
     md5hex = None
     if op.isfile(afile):
         md5obj = md5()
@@ -672,7 +672,7 @@ the same Nipype version from the generated pkl."""
 
 
 def crash2txt(filename, record):
-    """ Write out plain text crash file """
+    """Write out plain text crash file"""
     with open(filename, "w") as fp:
         if "node" in record:
             node = record["node"]
