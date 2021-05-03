@@ -522,13 +522,22 @@ class ThresholdInputSpec(SPMCommandInputSpec):
         exists=True, desc='stat image', copyfile=False, mandatory=True)
     contrast_index = traits.Int(
         mandatory=True, desc='which contrast in the SPM.mat to use')
-    use_fwe_correction = traits.Bool(
-        True,
+#    use_fwe_correction = traits.Bool(
+#        True,
+#        usedefault=True,
+#        desc=('whether to use FWE (Bonferroni) '
+#              'correction for initial threshold '
+#              '(height_threshold_type has to be '
+#              'set to p-value)'))
+    multitest_correction = traits.Enum(
+        'none',
+        'FWE',
+        'FDR',
         usedefault=True,
-        desc=('whether to use FWE (Bonferroni) '
-              'correction for initial threshold '
-              '(height_threshold_type has to be '
-              'set to p-value)'))
+        desc=('Whether to use a correction '
+              'for multiple test. '
+              'Possible choices are FWE, FDR '
+              'or none'))
     use_topo_fdr = traits.Bool(
         True,
         usedefault=True,
@@ -578,7 +587,6 @@ class Threshold(SPMCommand):
 
     Examples
     --------
-
     >>> thresh = Threshold()
     >>> thresh.inputs.spm_mat_file = 'SPM.mat'
     >>> thresh.inputs.stat_image = 'spmT_0001.img'
@@ -600,11 +608,11 @@ class Threshold(SPMCommand):
     def _make_matlab_command(self, _):
         script = "con_index = %d;\n" % self.inputs.contrast_index
         script += "cluster_forming_thr = %f;\n" % self.inputs.height_threshold
-        if self.inputs.use_fwe_correction:
-            script += "thresDesc  = 'FWE';\n"
-        else:
-            script += "thresDesc  = 'none';\n"
-
+        script += "thresDesc = '%s';\n" % self.inputs.multitest_correction
+#        if self.inputs.use_fwe_correction:
+#            script += "thresDesc  = 'FWE';\n"
+#        else:
+#            script += "thresDesc  = 'none';\n"
         if self.inputs.use_topo_fdr:
             script += "use_topo_fdr  = 1;\n"
         else:
@@ -629,10 +637,14 @@ STAT = SPM.xCon(con_index).STAT;
 R = SPM.xVol.R;
 S = SPM.xVol.S;
 n = 1;
+VspmSv = cat(1,SPM.xCon(con_index).Vspm);
 
 switch thresDesc
     case 'FWE'
         cluster_forming_thr = spm_uc(cluster_forming_thr,df,STAT,R,n,S);
+
+    case 'FDR'
+        cluster_forming_thr = spm_uc_FDR(cluster_forming_thr,df,STAT,n,VspmSv,0);
 
     case 'none'
         if strcmp(height_threshold_type, 'p-value')
