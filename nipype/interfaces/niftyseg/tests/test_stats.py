@@ -9,15 +9,14 @@ from ...niftyreg.tests.test_regutils import no_nifty_tool
 from .. import UnaryStats, BinaryStats
 
 
-@pytest.mark.skipif(
-    no_nifty_tool(cmd='seg_stats'), reason="niftyseg is not installed")
+@pytest.mark.skipif(no_nifty_tool(cmd="seg_stats"), reason="niftyseg is not installed")
 def test_unary_stats():
-    """ Test for the seg_stats interfaces """
+    """Test for the seg_stats interfaces"""
     # Create a node object
     unarys = UnaryStats()
 
     # Check if the command is properly defined
-    cmd = get_custom_path('seg_stats', env_dir='NIFTYSEGDIR')
+    cmd = get_custom_path("seg_stats", env_dir="NIFTYSEGDIR")
     assert unarys.cmd == cmd
 
     # test raising error with mandatory args absent
@@ -25,24 +24,23 @@ def test_unary_stats():
         unarys.run()
 
     # Assign some input data
-    in_file = example_data('im1.nii')
+    in_file = example_data("im1.nii")
     unarys.inputs.in_file = in_file
-    unarys.inputs.operation = 'a'
+    unarys.inputs.operation = "a"
 
-    expected_cmd = '{cmd} {in_file} -a'.format(cmd=cmd, in_file=in_file)
+    expected_cmd = "{cmd} {in_file} -a".format(cmd=cmd, in_file=in_file)
 
     assert unarys.cmdline == expected_cmd
 
 
-@pytest.mark.skipif(
-    no_nifty_tool(cmd='seg_stats'), reason="niftyseg is not installed")
+@pytest.mark.skipif(no_nifty_tool(cmd="seg_stats"), reason="niftyseg is not installed")
 def test_binary_stats():
-    """ Test for the seg_stats interfaces """
+    """Test for the seg_stats interfaces"""
     # Create a node object
     binarys = BinaryStats()
 
     # Check if the command is properly defined
-    cmd = get_custom_path('seg_stats', env_dir='NIFTYSEGDIR')
+    cmd = get_custom_path("seg_stats", env_dir="NIFTYSEGDIR")
     assert binarys.cmd == cmd
 
     # test raising error with mandatory args absent
@@ -50,12 +48,11 @@ def test_binary_stats():
         binarys.run()
 
     # Assign some input data
-    in_file = example_data('im1.nii')
+    in_file = example_data("im1.nii")
     binarys.inputs.in_file = in_file
     binarys.inputs.operand_value = 2
-    binarys.inputs.operation = 'sa'
+    binarys.inputs.operation = "sa"
 
-    expected_cmd = '{cmd} {in_file} -sa 2.00000000'.format(
-        cmd=cmd, in_file=in_file)
+    expected_cmd = "{cmd} {in_file} -sa 2.00000000".format(cmd=cmd, in_file=in_file)
 
     assert binarys.cmdline == expected_cmd

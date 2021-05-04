@@ -14,22 +14,26 @@ Examples
 See the docstrings for the individual classes for 'working' examples.
 
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import open, object, str
-
 import os
 
 from ... import LooseVersion
 from ...utils.filemanip import fname_presuffix
-from ..base import (CommandLine, Directory, CommandLineInputSpec, isdefined,
-                    traits, TraitedSpec, File, PackageInfo)
+from ..base import (
+    CommandLine,
+    Directory,
+    CommandLineInputSpec,
+    isdefined,
+    traits,
+    TraitedSpec,
+    File,
+    PackageInfo,
+)
 
-__docformat__ = 'restructuredtext'
+__docformat__ = "restructuredtext"
 
 
 class Info(PackageInfo):
-    """ Freesurfer subject directory and version information.
+    """Freesurfer subject directory and version information.
 
     Examples
     --------
@@ -39,9 +43,9 @@ class Info(PackageInfo):
     >>> Info.subjectsdir()  # doctest: +SKIP
 
     """
-    if os.getenv('FREESURFER_HOME'):
-        version_file = os.path.join(
-            os.getenv('FREESURFER_HOME'), 'build-stamp.txt')
+
+    if os.getenv("FREESURFER_HOME"):
+        version_file = os.path.join(os.getenv("FREESURFER_HOME"), "build-stamp.txt")
 
     @staticmethod
     def parse_version(raw_info):
@@ -49,36 +53,39 @@ class Info(PackageInfo):
 
     @classmethod
     def looseversion(cls):
-        """ Return a comparable version object
+        """Return a comparable version object
 
         If no version found, use LooseVersion('0.0.0')
         """
         ver = cls.version()
         if ver is None:
-            return LooseVersion('0.0.0')
+            return LooseVersion("0.0.0")
 
-        vinfo = ver.rstrip().split('-')
+        vinfo = ver.rstrip().split("-")
         try:
             int(vinfo[-1], 16)
         except ValueError:
-            githash = ''
+            githash = ""
         else:
-            githash = '.' + vinfo[-1]
+            githash = "." + vinfo[-1]
 
         # As of FreeSurfer v6.0.0, the final component is a githash
         if githash:
-            if vinfo[3] == 'dev':
+            if vinfo[3] == "dev":
                 # This will need updating when v6.0.1 comes out
-                vstr = '6.0.0-dev' + githash
-            elif vinfo[5][0] == 'v':
+                vstr = "6.0.0-dev" + githash
+            elif vinfo[5][0] == "v":
                 vstr = vinfo[5][1:]
+            elif len([1 for val in vinfo[3] if val == "."]) == 2:
+                "version string: freesurfer-linux-centos7_x86_64-7.1.0-20200511-813297b"
+                vstr = vinfo[3]
             else:
-                raise RuntimeError('Unknown version string: ' + ver)
+                raise RuntimeError("Unknown version string: " + ver)
         # Retain pre-6.0.0 heuristics
-        elif 'dev' in ver:
-            vstr = vinfo[-1] + '-dev'
+        elif "dev" in ver:
+            vstr = vinfo[-1] + "-dev"
         else:
-            vstr = ver.rstrip().split('-v')[-1]
+            vstr = ver.rstrip().split("-v")[-1]
 
         return LooseVersion(vstr)
 
@@ -100,18 +107,18 @@ class Info(PackageInfo):
 
         """
         if cls.version():
-            return os.environ['SUBJECTS_DIR']
+            return os.environ["SUBJECTS_DIR"]
         return None
 
 
 class FSTraitedSpec(CommandLineInputSpec):
-    subjects_dir = Directory(exists=True, desc='subjects directory')
+    subjects_dir = Directory(exists=True, desc="subjects directory")
 
 
 class FSCommand(CommandLine):
     """General support for FreeSurfer commands.
 
-       Every FS command accepts 'subjects_dir' input.
+    Every FS command accepts 'subjects_dir' input.
     """
 
     input_spec = FSTraitedSpec
@@ -120,7 +127,7 @@ class FSCommand(CommandLine):
 
     def __init__(self, **inputs):
         super(FSCommand, self).__init__(**inputs)
-        self.inputs.on_trait_change(self._subjects_dir_update, 'subjects_dir')
+        self.inputs.on_trait_change(self._subjects_dir_update, "subjects_dir")
         if not self._subjects_dir:
             self._subjects_dir = Info.subjectsdir()
         if not isdefined(self.inputs.subjects_dir) and self._subjects_dir:
@@ -129,27 +136,20 @@ class FSCommand(CommandLine):
 
     def _subjects_dir_update(self):
         if self.inputs.subjects_dir:
-            self.inputs.environ.update({
-                'SUBJECTS_DIR': self.inputs.subjects_dir
-            })
+            self.inputs.environ.update({"SUBJECTS_DIR": self.inputs.subjects_dir})
 
     @classmethod
     def set_default_subjects_dir(cls, subjects_dir):
         cls._subjects_dir = subjects_dir
 
     def run(self, **inputs):
-        if 'subjects_dir' in inputs:
-            self.inputs.subjects_dir = inputs['subjects_dir']
+        if "subjects_dir" in inputs:
+            self.inputs.subjects_dir = inputs["subjects_dir"]
         self._subjects_dir_update()
         return super(FSCommand, self).run(**inputs)
 
-    def _gen_fname(self,
-                   basename,
-                   fname=None,
-                   cwd=None,
-                   suffix='_fs',
-                   use_ext=True):
-        '''Define a generic mapping for a single outfile
+    def _gen_fname(self, basename, fname=None, cwd=None, suffix="_fs", use_ext=True):
+        """Define a generic mapping for a single outfile
 
         The filename is potentially autogenerated by suffixing inputs.infile
 
@@ -163,15 +163,14 @@ class FSCommand(CommandLine):
             prefix paths with cwd, otherwise os.getcwd()
         suffix : string
             default suffix
-        '''
-        if basename == '':
-            msg = 'Unable to generate filename for command %s. ' % self.cmd
-            msg += 'basename is not set!'
+        """
+        if basename == "":
+            msg = "Unable to generate filename for command %s. " % self.cmd
+            msg += "basename is not set!"
             raise ValueError(msg)
         if cwd is None:
             cwd = os.getcwd()
-        fname = fname_presuffix(
-            basename, suffix=suffix, use_ext=use_ext, newpath=cwd)
+        fname = fname_presuffix(basename, suffix=suffix, use_ext=use_ext, newpath=cwd)
         return fname
 
     @property
@@ -200,33 +199,34 @@ class FSSurfaceCommand(FSCommand):
         inspecting the surface data structure.
         """
         path, base = os.path.split(out_name)
-        if path == '':
+        if path == "":
             path, in_file = os.path.split(in_file)
-            hemis = ('lh.', 'rh.')
+            hemis = ("lh.", "rh.")
             if in_file[:3] in hemis and base[:3] not in hemis:
                 base = in_file[:3] + base
         return os.path.join(path, base)
 
 
 class FSScriptCommand(FSCommand):
-    """ Support for Freesurfer script commands with log terminal_output
-    """
-    _terminal_output = 'file'
+    """Support for Freesurfer script commands with log terminal_output"""
+
+    _terminal_output = "file"
     _always_run = False
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['log_file'] = os.path.abspath('output.nipype')
+        outputs["log_file"] = os.path.abspath("output.nipype")
         return outputs
 
 
 class FSScriptOutputSpec(TraitedSpec):
     log_file = File(
-        'output.nipype', usedefault=True, exists=True, desc="The output log")
+        "output.nipype", usedefault=True, exists=True, desc="The output log"
+    )
 
 
 class FSTraitedSpecOpenMP(FSTraitedSpec):
-    num_threads = traits.Int(desc='allows for specifying more threads')
+    num_threads = traits.Int(desc="allows for specifying more threads")
 
 
 class FSCommandOpenMP(FSCommand):
@@ -242,25 +242,24 @@ class FSCommandOpenMP(FSCommand):
 
     def __init__(self, **inputs):
         super(FSCommandOpenMP, self).__init__(**inputs)
-        self.inputs.on_trait_change(self._num_threads_update, 'num_threads')
+        self.inputs.on_trait_change(self._num_threads_update, "num_threads")
         if not self._num_threads:
-            self._num_threads = os.environ.get('OMP_NUM_THREADS', None)
+            self._num_threads = os.environ.get("OMP_NUM_THREADS", None)
             if not self._num_threads:
-                self._num_threads = os.environ.get('NSLOTS', None)
+                self._num_threads = os.environ.get("NSLOTS", None)
         if not isdefined(self.inputs.num_threads) and self._num_threads:
             self.inputs.num_threads = int(self._num_threads)
         self._num_threads_update()
 
     def _num_threads_update(self):
         if self.inputs.num_threads:
-            self.inputs.environ.update({
-                'OMP_NUM_THREADS':
-                str(self.inputs.num_threads)
-            })
+            self.inputs.environ.update(
+                {"OMP_NUM_THREADS": str(self.inputs.num_threads)}
+            )
 
     def run(self, **inputs):
-        if 'num_threads' in inputs:
-            self.inputs.num_threads = inputs['num_threads']
+        if "num_threads" in inputs:
+            self.inputs.num_threads = inputs["num_threads"]
         self._num_threads_update()
         return super(FSCommandOpenMP, self).run(**inputs)
 

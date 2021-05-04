@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 
 import warnings
+import numpy as np
 import nibabel as nb
 
 from .base import NipyBaseInterface, have_nipy
-from ..base import (TraitedSpec, traits, BaseInterfaceInputSpec,
-                    File, isdefined)
+from ..base import TraitedSpec, traits, BaseInterfaceInputSpec, File, isdefined
 
 
 class SimilarityInputSpec(BaseInterfaceInputSpec):
@@ -16,7 +14,7 @@ class SimilarityInputSpec(BaseInterfaceInputSpec):
     mask1 = File(exists=True, desc="3D volume")
     mask2 = File(exists=True, desc="3D volume")
     metric = traits.Either(
-        traits.Enum('cc', 'cr', 'crl1', 'mi', 'nmi', 'slr'),
+        traits.Enum("cc", "cr", "crl1", "mi", "nmi", "slr"),
         traits.Callable(),
         desc="""str or callable
 Cost-function for assessing image similarity. If a string,
@@ -26,7 +24,8 @@ information, 'nmi': normalized mutual information, 'slr':
 supervised log-likelihood ratio. If a callable, it should
 take a two-dimensional array representing the image joint
 histogram as an input and return a float.""",
-        usedefault=True)
+        usedefault=True,
+    )
 
 
 class SimilarityOutputSpec(TraitedSpec):
@@ -57,25 +56,31 @@ class Similarity(NipyBaseInterface):
     output_spec = SimilarityOutputSpec
 
     def __init__(self, **inputs):
-        warnings.warn(("This interface is deprecated since 0.10.0."
-                       " Please use nipype.algorithms.metrics.Similarity"),
-                      DeprecationWarning)
+        warnings.warn(
+            (
+                "This interface is deprecated since 0.10.0."
+                " Please use nipype.algorithms.metrics.Similarity"
+            ),
+            DeprecationWarning,
+        )
         super(Similarity, self).__init__(**inputs)
 
     def _run_interface(self, runtime):
-        from nipy.algorithms.registration.histogram_registration import HistogramRegistration
+        from nipy.algorithms.registration.histogram_registration import (
+            HistogramRegistration,
+        )
         from nipy.algorithms.registration.affine import Affine
 
         vol1_nii = nb.load(self.inputs.volume1)
         vol2_nii = nb.load(self.inputs.volume2)
 
         if isdefined(self.inputs.mask1):
-            mask1 = nb.load(self.inputs.mask1).get_data() == 1
+            mask1 = np.asanyarray(nb.load(self.inputs.mask1).dataobj) == 1
         else:
             mask1 = None
 
         if isdefined(self.inputs.mask2):
-            mask2 = nb.load(self.inputs.mask2).get_data() == 1
+            mask2 = np.asanyarray(nb.load(self.inputs.mask2).dataobj) == 1
         else:
             mask2 = None
 
@@ -84,12 +89,13 @@ class Similarity(NipyBaseInterface):
             to_img=vol2_nii,
             similarity=self.inputs.metric,
             from_mask=mask1,
-            to_mask=mask2)
+            to_mask=mask2,
+        )
         self._similarity = histreg.eval(Affine())
 
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['similarity'] = self._similarity
+        outputs["similarity"] = self._similarity
         return outputs

@@ -108,6 +108,10 @@ Updating feedstock to release branch
 
 * URL = https://github.com/$SRCREPO/archive/$REF.tar.gz
 * SHA256 = \`$SHA256\`
+
+---
+
+@conda-forge-admin, please rerender.
 END
 fi
 

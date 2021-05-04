@@ -2,10 +2,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """ Useful Functions for working with matlab"""
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
-from builtins import range
 
 # Stdlib imports
 import os
@@ -17,7 +13,7 @@ import numpy as np
 
 
 def fltcols(vals):
-    ''' Trivial little function to make 1xN float vector '''
+    """Trivial little function to make 1xN float vector"""
     return np.atleast_2d(np.array(vals, dtype=float))
 
 
@@ -52,7 +48,7 @@ def mlab_tempfile(dir=None):
 
     """
 
-    valid_name = re.compile(r'^\w+$')
+    valid_name = re.compile(r"^\w+$")
 
     # Make temp files until we get one whose name is a valid matlab identifier,
     # since matlab imposes that constraint.  Since the temp file routines may
@@ -60,8 +56,7 @@ def mlab_tempfile(dir=None):
     # directly, we just keep trying until we get a valid name.  To avoid an
     # infinite loop for some strange reason, we only try 100 times.
     for n in range(100):
-        f = tempfile.NamedTemporaryFile(
-            suffix='.m', prefix='tmp_matlab_', dir=dir)
+        f = tempfile.NamedTemporaryFile(suffix=".m", prefix="tmp_matlab_", dir=dir)
         # Check the file name for matlab compilance
         fname = os.path.splitext(os.path.basename(f.name))[0]
         if valid_name.match(fname):

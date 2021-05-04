@@ -1,90 +1,72 @@
 #!/usr/bin/env python3
+"""Update and sort the creators list of the zenodo record."""
+import git
 import json
+from subprocess import run, PIPE
+from pathlib import Path
 from fuzzywuzzy import fuzz, process
-import shutil
-import os
-import subprocess as sp
-
-if os.path.exists('line-contributions.txt'):
-    with open('line-contributions.txt', 'rt') as fp:
-        lines = fp.readlines()
-else:
-    if shutil.which('git-line-summary'):
-        print("Running git-line-summary on nipype repo")
-        lines = sp.check_output(['git-line-summary']).decode().split('\n')
-    else:
-        raise RuntimeError("Install Git Extras to view git contributors")
-
-data = [' '.join(line.strip().split()[1:-1]) for line in lines if '%' in line]
-
-# load zenodo from master
-with open('.zenodo.json', 'rt') as fp:
-    zenodo = json.load(fp)
-zen_names = [' '.join(val['name'].split(',')[::-1]).strip()
-             for val in zenodo['creators']]
-
-name_matches = []
-
-for ele in data:
-    matches = process.extract(ele, zen_names, scorer=fuzz.token_sort_ratio,
-                              limit=2)
-    # matches is a list [('First match', % Match), ('Second match', % Match)]
-    if matches[0][1] > 80:
-        val = zenodo['creators'][zen_names.index(matches[0][0])]
-    else:
-        # skip unmatched names
-        print("No entry to sort:", ele)
-        continue
-
-    if val not in name_matches:
-        name_matches.append(val)
-
-# for entries not found in line-contributions
-missing_entries = [
-    {"name": "Varada, Jan"},
-    {"name": "Schwabacher, Isaac"},
-    {"affiliation": "Child Mind Institute / Nathan Kline Institute",
-     "name": "Pellman, John",
-     "orcid": "0000-0001-6810-4461"},
-    {"name": "Perez-Guevara, Martin"},
-    {"name": "Khanuja, Ranjeet"},
-    {"affiliation":
-        "Medical Imaging & Biomarkers, Bioclinica, Newark, CA, USA.",
-     "name": "Pannetier, Nicolas",
-     "orcid": "0000-0002-0744-5155"},
-    {"name": "McDermottroe, Conor"},
-    {"affiliation":
-        "Max Planck Institute for Human Cognitive and Brain Sciences, "
-        "Leipzig, Germany.",
-     "name": "Mihai, Paul Glad",
-     "orcid": "0000-0001-5715-6442"},
-]
-
-for entry in missing_entries:
-    name_matches.append(entry)
 
 
-def fix_position(creators):
-    # position first / last authors
-    f_authr = None
-    l_authr = None
-
-    for i, info in enumerate(creators):
-        if info['name'] == 'Gorgolewski, Krzysztof J.':
-            f_authr = i
-        if info['name'] == 'Ghosh, Satrajit':
-            l_authr = i
-
-    if f_authr is None or l_authr is None:
-        raise AttributeError('Missing important people')
-
-    creators.insert(0, creators.pop(f_authr))
-    creators.insert(len(creators), creators.pop(l_authr + 1))
-    return creators
+def decommify(name):
+    return " ".join(name.split(", ")[::-1])
 
 
-zenodo['creators'] = fix_position(name_matches)
+# These names should go last
+CREATORS_LAST = ["Krzysztof J. Gorgolewski", "Satrajit Ghosh"]
 
-with open('.zenodo.json', 'wt') as fp:
-    json.dump(zenodo, fp, indent=2, sort_keys=True)
-    fp.write('\n')
+# Contributors that have requested not to be cited (or bothered)
+BLACKLIST = {"Jonathan R. Williford"}
+
+if __name__ == "__main__":
+    git_root = Path(git.Repo(".", search_parent_directories=True).working_dir)
+    zenodo_file = git_root / ".zenodo.json"
+
+    zenodo = json.loads(zenodo_file.read_text()) if zenodo_file.exists() else {}
+
+    creator_map = {
+        decommify(creator["name"]): creator for creator in zenodo.get("creators", [])
+    }
+
+    shortlog = run(["git", "shortlog", "-ns"], stdout=PIPE)
+    commit_counts = dict(
+        line.split("\t", 1)[::-1]
+        for line in shortlog.stdout.decode().split("\n")
+        if line
+    )
+
+    existing_creators = set(creator_map.keys())
+
+    committers = []
+
+    # Stable sort:
+    # Number of commits in descending order
+    # Ties broken by alphabetical order of first name
+    for committer, _ in sorted(commit_counts.items(), key=lambda x: (-int(x[1]), x[0])):
+        matches = process.extract(
+            committer, creator_map.keys(), scorer=fuzz.token_sort_ratio, limit=2
+        )
+        match, score = matches[0]
+        if score <= 80:
+            if committer not in BLACKLIST:
+                print("No entry to sort:", committer)
+            continue
+        existing_creators.discard(match)
+        committers.append(match)
+
+    for unmatched in sorted(existing_creators):
+        print("No matching commits:", unmatched)
+        # Keep the entries to avoid removing people for bad matching
+        committers.append(unmatched)
+
+    for last_author in CREATORS_LAST:
+        if committers[-1] != last_author:
+            committers.remove(last_author)
+            committers.append(last_author)
+
+    creators = [
+        creator_map.get(committer, {"name": committer}) for committer in committers
+    ]
+
+    zenodo["creators"] = creators
+
+    zenodo_file.write_text("%s\n" % json.dumps(zenodo, indent=2))

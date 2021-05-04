@@ -1,13 +1,13 @@
 # Contributing to Nipype
 
-Welcome to the Nipype repository! We're excited you're here and want to contribute.  
+Welcome to the Nipype repository! We're excited you're here and want to contribute.
 
 These guidelines are designed to make it as easy as possible to get involved. If you have any questions that aren't discussed below, please let us know by opening an [issue][link_issues]!
 
 Before you start you'll need to set up a free [GitHub][link_github] account and sign in. Here are some [instructions][link_signupinstructions].
 If you are not familiar with version control systems such as git,
- [introductions and tutorials](http://www.reproducibleimaging.org/module-reproducible-basics/02-vcs/)
- may be found on [ReproducibleImaging.org](https://www.reproducibleimaging.org/).
+we recommend the [VCS module](http://www.reproducibleimaging.org/module-reproducible-basics/02-vcs/)
+available from [ReproNim](http://www.reproducibleimaging.org/).
 
 Already know what you're looking for in this guide? Jump to the following sections:
 * [Understanding issue labels](#issue-labels)
@@ -22,7 +22,7 @@ The current list of issue labels are [here][link_labels] and include:
 
 * [![Bugs](https://img.shields.io/badge/-bugs-fc2929.svg)][link_bugs] *These issues point to problems in the project.*
 
-    If you find new a bug, please provide as much information as possible to recreate the error.
+    If you find a new bug, please provide as much information as possible to recreate the error.
     The [issue template][link_issue_template] will automatically populate any new issue you open, and contains information we've found to be helpful in addressing bug reports.
     Please fill it out to the best of your ability!
 
@@ -72,7 +72,7 @@ One way to do this is to [configure a new remote named "upstream"](https://help.
 
 **3. Make the changes you've discussed.**
 
-If you're adding a new tool from an existing neuroimaging toolkit (e.g., 3dDeconvolve from AFNI), 
+If you're adding a new tool from an existing neuroimaging toolkit (e.g., 3dDeconvolve from AFNI),
 check out the [guide for adding new interfaces to Nipype][link_new_interfaces].
 
 When you are working on your changes, test frequently to ensure you are not breaking the existing code.
@@ -82,27 +82,35 @@ Before pushing your changes to GitHub, run `make check-before-commit`. This will
 test the entire package, and build the documentation.
 If you get no errors, you're ready to submit your changes!
 
-It's a good practice to create [a new branch](https://help.github.com/articles/about-branches/) 
+It's a good practice to create [a new branch](https://help.github.com/articles/about-branches/)
 of the repository for a new set of changes.
 
+For Python 2.7-compatible fixes, the branch should start from the `maint/1.3.x` branch on the
+upstream repository.
 
 **4. Submit a [pull request][link_pullrequest].**
 
 A new pull request for your changes should be created from your fork of the repository.
 
-When opening a pull request, please use one of the following prefixes:  
+When opening a pull request, please use one of the following prefixes:
 
 
-* **[ENH]** for enhancements  
-* **[FIX]** for bug fixes  
-* **[TST]** for new or updated tests  
-* **[DOC]** for new or updated documentation  
-* **[STY]** for stylistic changes  
-* **[REF]** for refactoring existing code    
+* **[ENH]** for enhancements
+* **[FIX]** for bug fixes
+* **[TST]** for new or updated tests
+* **[DOC]** for new or updated documentation
+* **[STY]** for stylistic changes
+* **[REF]** for refactoring existing code
+
+**5. Install pre-commit.**
+
+[pre-commit](https://pre-commit.com/) is a git hook for running operations at commit time. To use it in
+your environment, do `pip install pre-commit` following by `pre-commit install`
+inside your source directory.
 
 <br>
 Pull requests should be submitted early and often (please don't mix too many unrelated changes within one PR)!
-If your pull request is not yet ready to be merged, please also include the **[WIP]** prefix (you can remove it once your PR is ready to be merged). 
+If your pull request is not yet ready to be merged, please also include the **[WIP]** prefix (you can remove it once your PR is ready to be merged).
 This tells the development team that your pull request is a "work-in-progress", and that you plan to continue working on it.
 
 Review and discussion on new code can begin well before the work is complete, and the more discussion the better!
@@ -116,7 +124,7 @@ One your PR is ready a member of the development team will review your changes t
 In general, do not catch exceptions without good reason.
 For non-fatal exceptions, log the exception as a warning and add more information about what may have caused the error.
 
-If you do need to catch an exception, raise a new exception using ``raise_from(NewException("message"), oldException)`` from ``future``.
+If you do need to catch an exception, raise a new exception using ``raise NewException("message") from oldException)``.
 Do not log this, as it creates redundant/confusing logs.
 
 #### Testing
