@@ -852,7 +852,6 @@ class SH2AmpInputSpec(CommandLineInputSpec):
         usedefault=True,
         desc="the output spherical harmonics",
     )
-
     nonnegative = traits.Bool(
         argstr="-nonnegative", desc="cap all negative amplitudes to zero"
     )
