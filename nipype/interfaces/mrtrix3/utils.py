@@ -775,7 +775,6 @@ class SHConvInputSpec(CommandLineInputSpec):
         position=-3,
         desc="input ODF image",
     )
-
     # General options
     response = File(
         exists=True,
