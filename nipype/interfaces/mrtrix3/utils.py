@@ -784,7 +784,8 @@ class SHConvInputSpec(CommandLineInputSpec):
         desc=("The response function"),
     )
     out_file = File(
-        "sh.mif",
+        name_template="%s_shconv.mif",
+        name_source=["in_file"],
         argstr="%s",
         mandatory=True,
         position=-1,
