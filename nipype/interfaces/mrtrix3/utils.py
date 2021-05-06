@@ -768,7 +768,6 @@ class MRResize(MRTrix3Base):
 
 
 class SHConvInputSpec(CommandLineInputSpec):
-
     in_file = File(
         exists=True,
         argstr="%s",
