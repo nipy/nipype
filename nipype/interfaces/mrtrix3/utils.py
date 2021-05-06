@@ -844,7 +844,6 @@ class SH2AmpInputSpec(CommandLineInputSpec):
             "harmonics MRtrix format"
         ),
     )
-
     out_file = File(
         "amp.mif",
         argstr="%s",
