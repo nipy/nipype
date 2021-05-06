@@ -845,7 +845,8 @@ class SH2AmpInputSpec(CommandLineInputSpec):
         ),
     )
     out_file = File(
-        "amp.mif",
+        name_template="%s_amp.mif",
+        name_source=["in_file"],
         argstr="%s",
         mandatory=True,
         position=-1,
