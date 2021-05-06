@@ -833,7 +833,6 @@ class SH2AmpInputSpec(CommandLineInputSpec):
         position=-3,
         desc="input ODF image",
     )
-
     # General options
     directions = File(
         exists=True,
