@@ -1,3 +1,26 @@
+1.6.1 (May 27, 2021)
+====================
+
+Bug-fix release in the 1.6.x series.
+
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.6.1?closed=1>`__)
+
+  * FIX: change fsl interface randomise --f_only to --fonly for #3322 (https://github.com/nipy/nipype/pull/3325)
+  * FIX: BET raising "No image files match: ..." with very long file names (https://github.com/nipy/nipype/pull/3309)
+  * FIX: Update SmoothEstimateOutputSpec resels description (https://github.com/nipy/nipype/pull/3316)
+  * ENH: AFNI 3dNetCorr as afni.NetCorr (https://github.com/nipy/nipype/pull/3263)
+  * ENH: Skip newline before Python call in batch submission to facilitate containerized runs (https://github.com/nipy/nipype/pull/3297)
+  * ENH: Add new dwifslpreproc interface for MRtrix3 (https://github.com/nipy/nipype/pull/3278)
+  * REF: Cache nodes in workflow to speed up construction, other optimizations (https://github.com/nipy/nipype/pull/3331)
+  * DOC: Fixed Developer Setup Link in install.rst (https://github.com/nipy/nipype/pull/3330)
+  * MNT: Blacklist Dipy 1.4.1 (https://github.com/nipy/nipype/pull/3335)
+  * MNT: Drop support for numpy < 1.15.3 (https://github.com/nipy/nipype/pull/3284)
+  * CI: Drop Circle doc builds (https://github.com/nipy/nipype/pull/3338)
+  * CI: Drop Travis (https://github.com/nipy/nipype/pull/3332)
+  * CI: Build docker images with Python 3.8 (https://github.com/nipy/nipype/pull/3287)
+  * CI: Add specs and style checks (https://github.com/nipy/nipype/pull/3321)
+  * CI: Move from Travis to GitHub actions (https://github.com/nipy/nipype/pull/3318)
+
 1.6.0 (November 28, 2020)
 =========================
 
