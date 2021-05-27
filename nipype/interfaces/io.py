@@ -96,7 +96,7 @@ def copytree(src, dst, use_hardlink=False):
 
 
 def add_traits(base, names, trait_type=None):
-    """ Add traits to a traited class.
+    """Add traits to a traited class.
 
     All traits are set to Undefined by default
     """
@@ -114,7 +114,7 @@ def add_traits(base, names, trait_type=None):
 
 
 def _get_head_bucket(s3_resource, bucket_name):
-    """ Try to get the header info of a bucket, in order to
+    """Try to get the header info of a bucket, in order to
     check if it exists and its permissions
     """
 
@@ -169,8 +169,7 @@ class ProgressPercentage(object):
     """
 
     def __init__(self, filename):
-        """
-        """
+        """ """
 
         # Import packages
         import threading
@@ -182,8 +181,7 @@ class ProgressPercentage(object):
         self._lock = threading.Lock()
 
     def __call__(self, bytes_amount):
-        """
-        """
+        """ """
 
         # Import packages
         import sys
@@ -208,8 +206,7 @@ class ProgressPercentage(object):
 
 # DataSink inputs
 class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    """
-    """
+    """ """
 
     # Init inputspec data attributes
     base_directory = Str(desc="Path to the base directory for storing data.")
@@ -661,8 +658,7 @@ class DataSink(IOBase):
 
     # List outputs, main run routine
     def _list_outputs(self):
-        """Execute this module.
-        """
+        """Execute this module."""
 
         # Init variables
         outputs = self.output_spec().get()
@@ -1010,8 +1006,10 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
                         try:
                             filledtemplate = template % tuple(argtuple)
                         except TypeError as e:
-                            raise TypeError(f"{e}: Template {template} failed to convert "
-                                            f"with args {tuple(argtuple)}")
+                            raise TypeError(
+                                f"{e}: Template {template} failed to convert "
+                                f"with args {tuple(argtuple)}"
+                            )
                     outfiles = []
                     for fname in bkt_files:
                         if re.match(filledtemplate, fname):
@@ -1283,8 +1281,10 @@ class DataGrabber(IOBase):
                         try:
                             filledtemplate = template % tuple(argtuple)
                         except TypeError as e:
-                            raise TypeError(f"{e}: Template {template} failed to convert "
-                                            f"with args {tuple(argtuple)}")
+                            raise TypeError(
+                                f"{e}: Template {template} failed to convert "
+                                f"with args {tuple(argtuple)}"
+                            )
                     outfiles = glob.glob(filledtemplate)
                     if len(outfiles) == 0:
                         msg = "Output key: %s Template: %s returned no files" % (
@@ -1489,7 +1489,7 @@ class SelectFiles(IOBase):
 
 
 class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    root_paths = traits.Either(traits.List(), Str(), mandatory=True,)
+    root_paths = traits.Either(traits.List(), Str(), mandatory=True)
     match_regex = Str(
         "(.+)", usedefault=True, desc=("Regular expression for matching paths.")
     )
@@ -2115,17 +2115,16 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
 
 class XNATSink(LibraryBaseInterface, IOBase):
-    """ Generic datasink module that takes a directory containing a
-        list of nifti files and provides a set of structured output
-        fields.
+    """Generic datasink module that takes a directory containing a
+    list of nifti files and provides a set of structured output
+    fields.
     """
 
     input_spec = XNATSinkInputSpec
     _pkg = "pyxnat"
 
     def _list_outputs(self):
-        """Execute this module.
-        """
+        """Execute this module."""
         import pyxnat
 
         # setup XNAT connection
@@ -2326,8 +2325,7 @@ class SQLiteSink(LibraryBaseInterface, IOBase):
         add_traits(self.inputs, [name for name in self._input_names])
 
     def _list_outputs(self):
-        """Execute this module.
-        """
+        """Execute this module."""
         import sqlite3
 
         conn = sqlite3.connect(self.inputs.database_file, check_same_thread=False)
@@ -2390,8 +2388,7 @@ class MySQLSink(IOBase):
         add_traits(self.inputs, [name for name in self._input_names])
 
     def _list_outputs(self):
-        """Execute this module.
-        """
+        """Execute this module."""
         import MySQLdb
 
         if isdefined(self.inputs.config):
@@ -2658,8 +2655,10 @@ class SSHDataGrabber(LibraryBaseInterface, DataGrabber):
                         try:
                             filledtemplate = template % tuple(argtuple)
                         except TypeError as e:
-                            raise TypeError(f"{e}: Template {template} failed to convert "
-                                            f"with args {tuple(argtuple)}")
+                            raise TypeError(
+                                f"{e}: Template {template} failed to convert "
+                                f"with args {tuple(argtuple)}"
+                            )
 
                     outputs[key].append(self._get_files_over_ssh(filledtemplate))
 

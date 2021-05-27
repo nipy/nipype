@@ -16,7 +16,7 @@ python_keywords = (
 
 
 def force_to_valid_python_variable_name(old_name):
-    """  Valid c++ names are not always valid in python, so
+    """Valid c++ names are not always valid in python, so
     provide alternate naming
 
     >>> force_to_valid_python_variable_name('lambda')
@@ -120,9 +120,9 @@ if __name__ == '__main__':
 def generate_all_classes(
     modules_list=[], launcher=[], redirect_x=False, mipav_hacks=False
 ):
-    """ modules_list contains all the SEM compliant tools that should have wrappers created for them.
-        launcher containtains the command line prefix wrapper arugments needed to prepare
-        a proper environment for each of the modules.
+    """modules_list contains all the SEM compliant tools that should have wrappers created for them.
+    launcher containtains the command line prefix wrapper arugments needed to prepare
+    a proper environment for each of the modules.
     """
     all_code = {}
     for module in modules_list:
@@ -367,14 +367,18 @@ def generate_class(
                     param.getElementsByTagName("channel")[0].firstChild.nodeValue
                     == "input"
                 ):
-                    if param.nodeName in [
-                        "file",
-                        "directory",
-                        "image",
-                        "geometry",
-                        "transform",
-                        "table",
-                    ] and type not in ["InputMultiPath", "traits.List"]:
+                    if (
+                        param.nodeName
+                        in [
+                            "file",
+                            "directory",
+                            "image",
+                            "geometry",
+                            "transform",
+                            "table",
+                        ]
+                        and type not in ["InputMultiPath", "traits.List"]
+                    ):
                         traitsParams["exists"] = True
                     inputTraits.append(
                         "%s = %s(%s%s)"

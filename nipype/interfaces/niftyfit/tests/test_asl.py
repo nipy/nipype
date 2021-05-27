@@ -13,7 +13,7 @@ from ...niftyreg.tests.test_regutils import no_nifty_tool
 
 @pytest.mark.skipif(no_nifty_tool(cmd="fit_asl"), reason="niftyfit is not installed")
 def test_fit_asl():
-    """ Testing FitAsl interface."""
+    """Testing FitAsl interface."""
     # Create the test node
     fit_asl = FitAsl()
 

@@ -375,7 +375,7 @@ class Cleaner(CommandLine):
     cmd = "fix -a"
 
     def _get_cleaned_functional_filename(self, artifacts_list_filename):
-        """ extract the proper filename from the first line of the artifacts file """
+        """extract the proper filename from the first line of the artifacts file"""
         artifacts_list_file = open(artifacts_list_filename, "r")
         functional_filename, extension = artifacts_list_file.readline().split(".")
         artifacts_list_file_path, artifacts_list_filename = os.path.split(

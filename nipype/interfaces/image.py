@@ -122,63 +122,62 @@ class ReorientOutputSpec(TraitedSpec):
 class Reorient(SimpleInterface):
     """Conform an image to a given orientation
 
-Flips and reorder the image data array so that the axes match the
-directions indicated in ``orientation``.
-The default ``RAS`` orientation corresponds to the first axis being ordered
-from left to right, the second axis from posterior to anterior, and the
-third axis from inferior to superior.
+    Flips and reorder the image data array so that the axes match the
+    directions indicated in ``orientation``.
+    The default ``RAS`` orientation corresponds to the first axis being ordered
+    from left to right, the second axis from posterior to anterior, and the
+    third axis from inferior to superior.
 
-For oblique images, the original orientation is considered to be the
-closest plumb orientation.
+    For oblique images, the original orientation is considered to be the
+    closest plumb orientation.
 
-No resampling is performed, and thus the output image is not de-obliqued
-or registered to any other image or template.
+    No resampling is performed, and thus the output image is not de-obliqued
+    or registered to any other image or template.
 
-The effective transform is calculated from the original affine matrix to
-the reoriented affine matrix.
+    The effective transform is calculated from the original affine matrix to
+    the reoriented affine matrix.
 
-Examples
---------
+    Examples
+    --------
 
-If an image is not reoriented, the original file is not modified
+    If an image is not reoriented, the original file is not modified
 
-.. testsetup::
+    .. testsetup::
 
-    >>> def print_affine(matrix):
-    ...     print(str(matrix).replace(']', ' ').replace('[', ' '))
+        >>> def print_affine(matrix):
+        ...     print(str(matrix).replace(']', ' ').replace('[', ' '))
 
->>> import numpy as np
->>> from nipype.interfaces.image import Reorient
->>> reorient = Reorient(orientation='LPS')
->>> reorient.inputs.in_file = 'segmentation0.nii.gz'
->>> res = reorient.run()
->>> res.outputs.out_file
-'segmentation0.nii.gz'
+    >>> import numpy as np
+    >>> from nipype.interfaces.image import Reorient
+    >>> reorient = Reorient(orientation='LPS')
+    >>> reorient.inputs.in_file = 'segmentation0.nii.gz'
+    >>> res = reorient.run()
+    >>> res.outputs.out_file
+    'segmentation0.nii.gz'
 
->>> print_affine(np.loadtxt(res.outputs.transform))
-1.  0.  0.  0.
-0.  1.  0.  0.
-0.  0.  1.  0.
-0.  0.  0.  1.
+    >>> print_affine(np.loadtxt(res.outputs.transform))
+    1.  0.  0.  0.
+    0.  1.  0.  0.
+    0.  0.  1.  0.
+    0.  0.  0.  1.
 
->>> reorient.inputs.orientation = 'RAS'
->>> res = reorient.run()
->>> res.outputs.out_file  # doctest: +ELLIPSIS
-'.../segmentation0_ras.nii.gz'
+    >>> reorient.inputs.orientation = 'RAS'
+    >>> res = reorient.run()
+    >>> res.outputs.out_file  # doctest: +ELLIPSIS
+    '.../segmentation0_ras.nii.gz'
 
->>> print_affine(np.loadtxt(res.outputs.transform))
--1.   0.   0.  60.
- 0.  -1.   0.  72.
- 0.   0.   1.   0.
- 0.   0.   0.   1.
+    >>> print_affine(np.loadtxt(res.outputs.transform))
+    -1.   0.   0.  60.
+     0.  -1.   0.  72.
+     0.   0.   1.   0.
+     0.   0.   0.   1.
 
-.. testcleanup::
+    .. testcleanup::
 
-    >>> import os
-    >>> os.unlink(res.outputs.out_file)
-    >>> os.unlink(res.outputs.transform)
-
-"""
+        >>> import os
+        >>> os.unlink(res.outputs.out_file)
+        >>> os.unlink(res.outputs.transform)
+    """
 
     input_spec = ReorientInputSpec
     output_spec = ReorientOutputSpec

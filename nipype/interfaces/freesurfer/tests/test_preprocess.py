@@ -192,7 +192,6 @@ def test_bbregister(create_files_in_directory):
 
 
 def test_FSVersion():
-    """Check that FSVersion is a string that can be compared with LooseVersion
-    """
+    """Check that FSVersion is a string that can be compared with LooseVersion"""
     assert isinstance(freesurfer.preprocess.FSVersion, str)
     assert LooseVersion(freesurfer.preprocess.FSVersion) >= LooseVersion("0")

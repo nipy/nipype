@@ -18,7 +18,7 @@ try:
 except ImportError:
 
     def textwrap_indent(text, prefix):
-        """ A textwrap.indent replacement for Python < 3.3 """
+        """A textwrap.indent replacement for Python < 3.3"""
         if not prefix:
             return text
         splittext = text.splitlines(True)

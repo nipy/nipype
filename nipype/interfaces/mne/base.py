@@ -98,9 +98,9 @@ class WatershedBEM(FSCommand):
     >>> bem.inputs.subjects_dir = '.'
     >>> bem.cmdline
     'mne watershed_bem --overwrite --subject subj1 --volume T1'
-    >>> bem.run() 				# doctest: +SKIP
+    >>> bem.run()  # doctest: +SKIP
 
-   """
+    """
 
     _cmd = "mne watershed_bem"
     input_spec = WatershedBEMInputSpec
