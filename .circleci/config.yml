@@ -204,61 +204,6 @@ jobs:
             - /tmp/docker/cache/Dockerfile.base-pruned
           key: dockerfile-cache-v1-{{ .Branch }}-{{ checksum "/tmp/docker/cache/Dockerfile.base-pruned" }}
 
-  pypi_precheck:
-    machine: *machine_kwds
-    working_directory: /home/circleci/nipype
-    steps:
-      - checkout:
-          path: /home/circleci/nipype
-      - run:
-          name: Check pypi preconditions
-          command: |
-            pyenv local 3.6.5
-            pip install --upgrade pip twine future wheel readme_renderer setuptools
-            python setup.py sdist bdist_wheel
-            twine check dist/*
-      - run:
-          name: Validate Python 3 installation
-          command: |
-            pyenv local 3.6.5
-            pip install --upgrade pip
-            pip install dist/nipype-*-py3-none-any.whl
-      - run:
-          name: Validate Python 3.7 installation
-          command: |
-            pyenv local 3.7.0
-            pip install --upgrade pip
-            # Pre-install a version of numpy that will not pass
-            pip install numpy==1.15.0
-            pip install dist/nipype-*-py3-none-any.whl
-            # Numpy should be upgraded to >= 1.15.3
-            test "$(pip show numpy | grep Version)" \> "Version: 1.15.2"
-      - run:
-          name: Check python_requires prevents installation on Python 3.3
-          command: |
-            pyenv install 3.3.7
-            pyenv local 3.3.7
-            FAIL=false
-            pip install dist/nipype-*-py2.py3-none-any.whl || FAIL=true
-            $FAIL
-      - store_artifacts:
-          path: /home/circleci/nipype/dist
-
-  deploy_pypi:
-    machine: *machine_kwds
-    working_directory: /home/circleci/nipype
-    steps:
-      - checkout:
-          path: /home/circleci/nipype
-      - run:
-          name: Deploy to PyPI
-          command: |
-            pyenv local 3.6.5
-            pip install --upgrade twine wheel readme_renderer setuptools
-            python setup.py check -r -s
-            python setup.py sdist bdist_wheel
-            twine upload dist/*
-
   update_feedstock:
     machine: *machine_kwds
     working_directory: /home/circleci/nipype
@@ -295,12 +240,6 @@ workflows:
   version: 2
   build_test_deploy:
     jobs:
-      - pypi_precheck:
-          filters:
-            branches:
-              only: /(rel|dev)\/.*/
-            tags:
-              only: /.*/
       - compare_base_dockerfiles:
           filters:
             branches:
@@ -324,15 +263,6 @@ workflows:
             tags:
               only: /.*/
           requires:
-            - test_pytest
-      - deploy_pypi:
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /.*/
-          requires:
-            - pypi_precheck
             - test_pytest
       - update_feedstock:
           context: nipybot
