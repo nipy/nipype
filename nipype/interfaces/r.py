@@ -49,7 +49,7 @@ class RCommand(CommandLine):
     >>> out = r.run()  # doctest: +SKIP
     """
 
-    _cmd = "R"
+    _cmd = get_r_command()
     _default_r_cmd = None
     _default_rfile = None
     input_spec = RInputSpec
