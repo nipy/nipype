@@ -19,11 +19,9 @@ from .base import (
 def get_r_command():
     if "NIPYPE_NO_R" in os.environ:
         return None
-    try:
-        r_cmd = os.environ["RCMD"]
-    except:
-        r_cmd = "R"
-    return r_cmd
+    r_cmd = os.getenv("RCMD", default="R")
+    
+    return r_cmd if which(r_cmd) else None
 
 
 no_r = get_r_command() is None
