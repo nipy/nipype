@@ -362,7 +362,9 @@ class Split(IOBase):
             splits.extend(self.inputs.splits)
             splits = np.cumsum(splits)
             for i in range(len(splits) - 1):
-                val = np.array(self.inputs.inlist)[splits[i] : splits[i + 1]].tolist()
+                val = np.array(self.inputs.inlist, dtype=object)[
+                    splits[i] : splits[i + 1]
+                ].tolist()
                 if self.inputs.squeeze and len(val) == 1:
                     val = val[0]
                 outputs["out%d" % (i + 1)] = val
@@ -407,7 +409,9 @@ class Select(IOBase):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        out = np.array(self.inputs.inlist)[np.array(self.inputs.index)].tolist()
+        out = np.array(self.inputs.inlist, dtype=object)[
+            np.array(self.inputs.index)
+        ].tolist()
         outputs["out"] = out
         return outputs
 
