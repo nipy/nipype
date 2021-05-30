@@ -9,6 +9,8 @@ from nipype.interfaces.base import (
     File,
     Str,
 )
+from nipype.interfaces.cat12.format_utils import Cell
+
 from nipype.interfaces.spm import SPMCommand
 from nipype.interfaces.spm.base import (
     SPMCommandInputSpec,
@@ -17,8 +19,6 @@ from nipype.interfaces.spm.base import (
     scans_for_fname,
 )
 from nipype.utils.filemanip import split_filename, fname_presuffix
-
-from src.interfaces.cat12.surface import Cell
 
 
 class CAT12SegmentInputSpec(SPMCommandInputSpec):

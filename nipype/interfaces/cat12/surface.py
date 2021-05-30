@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 from nipype.interfaces.base import File, InputMultiPath, TraitedSpec, traits, isdefined
+from nipype.interfaces.cat12.format_utils import NestedCell, Cell
 from nipype.interfaces.spm import SPMCommand
 from nipype.interfaces.spm.base import SPMCommandInputSpec
 from nipype.utils.filemanip import split_filename
@@ -267,23 +268,6 @@ class ExtractROIBasedSurfaceMeasures(SPMCommand):
             str(label) for label in Path(pth).glob("label/*") if label.is_file()
         ]
         return outputs
-
-
-class Cell:
-    def __init__(self, arg):
-        self.arg = arg
-
-    def to_string(self):
-        if isinstance(self.arg, list):
-            v = "\n".join([f"'{el}'" for el in self.arg])
-        else:
-            v = self.arg
-        return v
-
-
-class NestedCell(Cell):
-    def __str__(self):
-        return "{{%s}}" % self.to_string()
 
 
 class Cell2Str(Cell):
