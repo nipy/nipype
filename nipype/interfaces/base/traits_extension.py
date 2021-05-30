@@ -19,7 +19,7 @@ all of these bugs and they've been fixed in enthought svn repository
 (usually by Robert Kern).
 
 """
-from collections import Sequence
+from collections.abc import Sequence
 
 # perform all external trait imports here
 from traits import __version__ as traits_version
