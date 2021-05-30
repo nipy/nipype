@@ -18,6 +18,8 @@ from nipype.interfaces.spm.base import (
 )
 from nipype.utils.filemanip import split_filename, fname_presuffix
 
+from src.interfaces.cat12.surface import Cell
+
 
 class CAT12SegmentInputSpec(SPMCommandInputSpec):
     in_files = InputMultiPath(
@@ -39,6 +41,27 @@ class CAT12SegmentInputSpec(SPMCommandInputSpec):
         desc=_help_tpm,
         mandatory=False,
         copyfile=False,
+    )
+
+    _help_shoots_tpm = (
+        'Shooting Template %d.  The Shooting template must be in multi-volume nifti format and should contain GM,'
+        ' WM, and background segmentations and have to be saved with at least 16 bit. '
+    )
+
+    shooting_tpm = ImageFileSPM(exists=True, field="extopts.registration.shooting.shootingtpm",
+                                desc=_help_shoots_tpm % 0, mandatory=False, copyfile=False)
+
+    shooting_tpm_template_1 = ImageFileSPM(
+        exists=True, desc=_help_shoots_tpm % 1, mandatory=False, copyfile=False
+    )
+    shooting_tpm_template_2 = ImageFileSPM(
+        exists=True, desc=_help_shoots_tpm % 2, mandatory=False, copyfile=False
+    )
+    shooting_tpm_template_3 = ImageFileSPM(
+        exists=True, desc=_help_shoots_tpm % 3, mandatory=False, copyfile=False
+    )
+    shooting_tpm_template_4 = ImageFileSPM(
+        exists=True, desc=_help_shoots_tpm % 4, mandatory=False, copyfile=False
     )
 
     n_jobs = traits.Int(
@@ -237,13 +260,6 @@ class CAT12SegmentInputSpec(SPMCommandInputSpec):
         desc="Extract brain measures for a given template",
         mandatory=False,
         copyfile=False,
-    )
-
-    _dartel_help = (
-        "This option is to export data into a form that can be used with DARTEL. The SPM default is to "
-        "only apply rigid body transformation. However, a more appropriate option is to apply affine "
-        "transformation, because the additional scaling of the images requires less deformations to "
-        "non-linearly register brains to the template."
     )
 
     # Grey matter
@@ -495,11 +511,14 @@ class CAT12Segment(SPMCommand):
 
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm"""
-        if opt in ["in_files"]:
+        if opt == "in_files":
             if isinstance(val, list):
                 return scans_for_fnames(val)
             else:
                 return scans_for_fname(val)
+        elif opt in ["tpm", "shooting_tpm"]:
+            return Cell2Str(val)
+
         return super(CAT12Segment, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
@@ -513,9 +532,7 @@ class CAT12Segment(SPMCommand):
 
         for tidx, tissue in enumerate(["gm", "wm", "csf"]):
 
-            for idx, (image, prefix) in enumerate(
-                [("modulated", "mw"), ("dartel", "r"), ("native", "")]
-            ):
+            for image, prefix in [("modulated", "mw"), ("dartel", "r"), ("native", "")]:
                 outtype = f"{tissue}_output_{image}"
                 if isdefined(getattr(self.inputs, outtype)) and getattr(
                     self.inputs, outtype
@@ -552,7 +569,7 @@ class CAT12Segment(SPMCommand):
             str(report) for report in Path(pth).glob("report/*") if report.is_file()
         ]
 
-        outputs[f"report"] = fname_presuffix(
+        outputs["report"] = fname_presuffix(
             f, prefix=os.path.join("report", f"cat_"), suffix=".xml", use_ext=False
         )
 
@@ -561,10 +578,18 @@ class CAT12Segment(SPMCommand):
         ]
 
         outputs["label_rois"] = fname_presuffix(
-            f, prefix=os.path.join("label", f"catROIs_"), suffix=".xml", use_ext=False
+            f, prefix=os.path.join("label", "catROIs_"), suffix=".xml", use_ext=False
         )
         outputs["label_roi"] = fname_presuffix(
-            f, prefix=os.path.join("label", f"catROI_"), suffix=".xml", use_ext=False
+            f, prefix=os.path.join("label", "catROI_"), suffix=".xml", use_ext=False
         )
 
         return outputs
+
+
+class Cell2Str(Cell):
+
+    def __str__(self):
+        """Convert input to appropriate format for cat12
+        """
+        return "{'%s'}" % self.to_string()

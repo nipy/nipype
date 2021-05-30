@@ -1,9 +1,7 @@
 import os
 from pathlib import Path
 
-from traits.trait_base import _Undefined
-
-from nipype.interfaces.base import File, InputMultiPath, TraitedSpec, traits
+from nipype.interfaces.base import File, InputMultiPath, TraitedSpec, traits, isdefined
 from nipype.interfaces.spm import SPMCommand
 from nipype.interfaces.spm.base import SPMCommandInputSpec
 from nipype.utils.filemanip import split_filename
@@ -137,14 +135,14 @@ class ExtractAdditionalSurfaceParameters(SPMCommand):
             pth, base, ext = split_filename(filename)
             # The first part of the filename is rh.central or lh.central
             original_filename = base.split(".", 2)[-1]
-            for i, (extracted_parameter, parameter_name) in enumerate(names_outputs):
+            for extracted_parameter, parameter_name in names_outputs:
                 if extracted_parameter:
                     for hemisphere in ["rh", "lh"]:
                         all_files_hemisphere = hemisphere + "_extracted_files"
                         name_hemisphere = hemisphere + "_" + parameter_name
-                        if isinstance(outputs[name_hemisphere], _Undefined):
+                        if not isdefined(outputs[name_hemisphere]):
                             outputs[name_hemisphere] = []
-                        if isinstance(outputs[all_files_hemisphere], _Undefined):
+                        if not isdefined(outputs[all_files_hemisphere]):
                             outputs[all_files_hemisphere] = []
                         generated_filename = ".".join(
                             [hemisphere, parameter_name, original_filename]
