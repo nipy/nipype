@@ -47,7 +47,7 @@ class Info(object):
         """
         clout = CommandLine(command="dti_recon", terminal_output="allatonce").run()
 
-        if clout.runtime.returncode is not 0:
+        if clout.runtime.returncode != 0:
             return None
 
         dtirecon = clout.runtime.stdout

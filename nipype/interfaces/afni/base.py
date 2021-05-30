@@ -98,7 +98,7 @@ class Info(PackageInfo):
             resource_monitor=False,
             terminal_output="allatonce",
         ).run()
-        if clout.runtime.returncode is not 0:
+        if clout.runtime.returncode != 0:
             return None
 
         out = clout.runtime.stdout
