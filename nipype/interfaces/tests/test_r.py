@@ -4,7 +4,7 @@
 import os
 
 import pytest
-import nipype.interfaces.r as r
+from nipype.interfaces import r
 
 r_cmd = r.get_r_command()
 no_r = r_cmd is None
