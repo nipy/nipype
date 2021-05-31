@@ -91,7 +91,8 @@ def test_set_rcmd():
     default_script_file = clean_workspace_and_get_default_script_file()
 
     ri = r.RCommand()
+    _default_r_cmd = ri._default_r_cmd
     ri.set_default_r_cmd("foo")
     assert not os.path.exists(default_script_file), "scriptfile should not exist."
     assert ri._default_r_cmd == "foo"
-    ri.set_default_r_cmd(r_cmd)
+    ri.set_default_r_cmd(_default_r_cmd)
