@@ -38,7 +38,7 @@ def test_cmdline(tmp_path):
 def test_r_init():
     default_script_file = clean_workspace_and_get_default_script_file()
 
-    assert r.RCommand._cmd == "R"
+    assert r.RCommand._cmd == r.get_r_command()
     assert r.RCommand.input_spec == r.RInputSpec
 
     assert r.RCommand().cmd == r_cmd
