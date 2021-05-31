@@ -34,6 +34,7 @@ def test_cmdline(tmp_path):
         default_script_file
     ), "default scriptfile should not exist."
 
+
 @pytest.mark.skipif(no_r, reason="R is not available")
 def test_r_init():
     default_script_file = clean_workspace_and_get_default_script_file()
