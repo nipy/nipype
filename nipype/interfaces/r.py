@@ -3,6 +3,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Interfaces to run R scripts."""
 import os
+from shutil import which
 
 from .. import config
 from .base import (
