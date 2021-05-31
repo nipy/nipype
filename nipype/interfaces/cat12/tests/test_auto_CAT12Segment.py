@@ -130,6 +130,32 @@ def test_CAT12Segment_inputs():
             field="output.bias.warped",
             usedefault=True,
         ),
+        shooting_tpm=dict(
+            copyfile=False,
+            extensions=[".hdr", ".img", ".img.gz", ".nii"],
+            field="extopts.registration.shooting.shootingtpm",
+            mandatory=False,
+        ),
+        shooting_tpm_template_1=dict(
+            copyfile=False,
+            extensions=[".hdr", ".img", ".img.gz", ".nii"],
+            mandatory=False,
+        ),
+        shooting_tpm_template_2=dict(
+            copyfile=False,
+            extensions=[".hdr", ".img", ".img.gz", ".nii"],
+            mandatory=False,
+        ),
+        shooting_tpm_template_3=dict(
+            copyfile=False,
+            extensions=[".hdr", ".img", ".img.gz", ".nii"],
+            mandatory=False,
+        ),
+        shooting_tpm_template_4=dict(
+            copyfile=False,
+            extensions=[".hdr", ".img", ".img.gz", ".nii"],
+            mandatory=False,
+        ),
         skull_strip=dict(
             field="extopts.gcutstr",
             usedefault=True,
