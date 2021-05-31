@@ -6,8 +6,7 @@ import os
 import pytest
 from nipype.interfaces import r
 
-r_cmd = r.get_r_command()
-no_r = r_cmd is None
+no_r = r.no_r
 if not no_r:
     r.RCommand.set_default_r_cmd(r_cmd)
 
