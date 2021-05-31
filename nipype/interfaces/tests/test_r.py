@@ -7,8 +7,6 @@ import pytest
 from nipype.interfaces import r
 
 no_r = r.no_r
-if not no_r:
-    r.RCommand.set_default_r_cmd(r_cmd)
 
 
 def clean_workspace_and_get_default_script_file():
