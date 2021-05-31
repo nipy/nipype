@@ -44,12 +44,17 @@ class CAT12SegmentInputSpec(SPMCommandInputSpec):
     )
 
     _help_shoots_tpm = (
-        'Shooting Template %d.  The Shooting template must be in multi-volume nifti format and should contain GM,'
-        ' WM, and background segmentations and have to be saved with at least 16 bit. '
+        "Shooting Template %d.  The Shooting template must be in multi-volume nifti format and should contain GM,"
+        " WM, and background segmentations and have to be saved with at least 16 bit. "
     )
 
-    shooting_tpm = ImageFileSPM(exists=True, field="extopts.registration.shooting.shootingtpm",
-                                desc=_help_shoots_tpm % 0, mandatory=False, copyfile=False)
+    shooting_tpm = ImageFileSPM(
+        exists=True,
+        field="extopts.registration.shooting.shootingtpm",
+        desc=_help_shoots_tpm % 0,
+        mandatory=False,
+        copyfile=False,
+    )
 
     shooting_tpm_template_1 = ImageFileSPM(
         exists=True, desc=_help_shoots_tpm % 1, mandatory=False, copyfile=False
@@ -588,8 +593,6 @@ class CAT12Segment(SPMCommand):
 
 
 class Cell2Str(Cell):
-
     def __str__(self):
-        """Convert input to appropriate format for cat12
-        """
+        """Convert input to appropriate format for cat12"""
         return "{'%s'}" % self.to_string()
