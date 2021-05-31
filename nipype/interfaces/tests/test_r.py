@@ -20,17 +20,15 @@ def clean_workspace_and_get_default_script_file():
 
 
 @pytest.mark.skipif(no_r, reason="R is not available")
-def test_cmdline():
-    default_script_file = clean_workspace_and_get_default_script_file()
-
-    ri = r.RCommand(script="1 + 1", script_file="testscript", rfile=False)
+def test_cmdline(tmp_path):
+    ri = r.RCommand(script="1 + 1", script_file=str(tmp_path / "testscript"), rfile=False)
 
     assert ri.cmdline == r_cmd + (
         ' -e "1 + 1"'
     )
 
     assert ri.inputs.script == "1 + 1"
-    assert ri.inputs.script_file == "testscript"
+    assert ri.inputs.script_file == str(tmp_path / "testscript")
     assert not os.path.exists(ri.inputs.script_file), "scriptfile should not exist"
     assert not os.path.exists(
         default_script_file
