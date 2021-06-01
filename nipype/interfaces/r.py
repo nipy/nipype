@@ -21,7 +21,7 @@ def get_r_command():
     if "NIPYPE_NO_R" in os.environ:
         return None
     r_cmd = os.getenv("RCMD", default="R")
-    
+
     return r_cmd if which(r_cmd) else None
 
 
@@ -29,7 +29,7 @@ no_r = get_r_command() is None
 
 
 class RInputSpec(CommandLineInputSpec):
-    """ Basic expected inputs to R interface """
+    """Basic expected inputs to R interface"""
 
     script = traits.Str(
         argstr='-e "%s"', desc="R code to run", mandatory=True, position=-1
@@ -39,7 +39,7 @@ class RInputSpec(CommandLineInputSpec):
     script_file = File(
         "pyscript.R", usedefault=True, desc="Name of file to write R code to"
     )
-    
+
 
 class RCommand(CommandLine):
     """Interface that runs R code
@@ -69,7 +69,7 @@ class RCommand(CommandLine):
         """Set the default R command line for R classes.
 
         This method is used to set values for all R
-        subclasses. 
+        subclasses.
         """
         self._cmd = r_cmd
 
@@ -95,17 +95,19 @@ class RCommand(CommandLine):
         return super(RCommand, self)._format_arg(name, trait_spec, value)
 
     def _gen_r_command(self, argstr, script_lines):
-        """ Generates commands and, if rfile specified, writes it to disk."""
+        """Generates commands and, if rfile specified, writes it to disk."""
         if not self.inputs.rfile:
             # replace newlines with ;, strip comments
-            script = "; ".join([
-                        line
-                        for line in script_lines.split("\n")
-                        if not line.strip().startswith("#")
-                    ])
+            script = "; ".join(
+                [
+                    line
+                    for line in script_lines.split("\n")
+                    if not line.strip().startswith("#")
+                ]
+            )
             # escape " and $
-            script = script.replace('"','\\"')
-            script = script.replace('$','\\$')
+            script = script.replace('"', '\\"')
+            script = script.replace("$", "\\$")
         else:
             script_path = os.path.join(os.getcwd(), self.inputs.script_file)
             with open(script_path, "wt") as rfile:

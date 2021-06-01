@@ -8,15 +8,14 @@ from nipype.interfaces import r
 
 no_r = r.no_r
 
+
 @pytest.mark.skipif(no_r, reason="R is not available")
 def test_cmdline(tmp_path):
     default_script_file = str(tmp_path / "testscript")
     ri = r.RCommand(script="1 + 1", script_file=default_script_file, rfile=False)
     r_cmd = r.get_r_command()
 
-    assert ri.cmdline == r_cmd + (
-        ' -e "1 + 1"'
-    )
+    assert ri.cmdline == r_cmd + (' -e "1 + 1"')
 
     assert ri.inputs.script == "1 + 1"
     assert ri.inputs.script_file == default_script_file
@@ -47,7 +46,6 @@ def test_run_interface(tmpdir):
     if os.path.exists(default_script_file):  # cleanup
         os.remove(default_script_file)
     cwd.chdir()
-
 
 
 @pytest.mark.skipif(no_r, reason="R is not available")
