@@ -9,7 +9,7 @@ from nipype.interfaces.base import (
     File,
     Str,
 )
-from nipype.interfaces.cat12.format_utils import Cell
+from nipype.interfaces.cat12.base import Cell
 
 from nipype.interfaces.spm import SPMCommand
 from nipype.interfaces.spm.base import (
