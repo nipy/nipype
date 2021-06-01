@@ -28,7 +28,7 @@ def test_cmdline(tmp_path):
 
 @pytest.mark.skipif(no_r, reason="R is not available")
 def test_run_interface(tmpdir):
-    os.chdir(tmpdir)
+    cwd = tmpdir.chdir()
     default_script_file = r.RInputSpec().script_file
 
     rc = r.RCommand(r_cmd="foo_m")
@@ -46,6 +46,7 @@ def test_run_interface(tmpdir):
     assert os.path.exists(default_script_file), "scriptfile should exist 3."
     if os.path.exists(default_script_file):  # cleanup
         os.remove(default_script_file)
+    cwd.chdir()
 
 
 
