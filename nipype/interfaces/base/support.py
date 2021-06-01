@@ -75,13 +75,11 @@ class Bunch(object):
         return list(self.items())
 
     def get(self, *args):
-        """Support dictionary get() functionality
-        """
+        """Support dictionary get() functionality"""
         return self.__dict__.get(*args)
 
     def set(self, **kwargs):
-        """Support dictionary get() functionality
-        """
+        """Support dictionary get() functionality"""
         return self.__dict__.update(**kwargs)
 
     def dictcopy(self):

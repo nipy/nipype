@@ -29,6 +29,7 @@ from .preprocess import (
     LFCD,
     Maskave,
     Means,
+    NetCorr,
     OutlierCount,
     QualityIndex,
     ROIStats,

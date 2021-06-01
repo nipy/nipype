@@ -53,8 +53,7 @@ class Info(PackageInfo):
 
 
 class ANTSCommandInputSpec(CommandLineInputSpec):
-    """Base Input Specification for all ANTS Commands
-    """
+    """Base Input Specification for all ANTS Commands"""
 
     num_threads = traits.Int(
         LOCAL_DEFAULT_NUMBER_OF_THREADS,
@@ -65,8 +64,7 @@ class ANTSCommandInputSpec(CommandLineInputSpec):
 
 
 class ANTSCommand(CommandLine):
-    """Base class for ANTS interfaces
-    """
+    """Base class for ANTS interfaces"""
 
     input_spec = ANTSCommandInputSpec
     _num_threads = LOCAL_DEFAULT_NUMBER_OF_THREADS
@@ -103,8 +101,8 @@ class ANTSCommand(CommandLine):
 
     @staticmethod
     def _format_xarray(val):
-        """ Convenience method for converting input arrays [1,2,3] to
-        commandline format '1x2x3' """
+        """Convenience method for converting input arrays [1,2,3] to
+        commandline format '1x2x3'"""
         return "x".join([str(x) for x in val])
 
     @classmethod

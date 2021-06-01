@@ -15,8 +15,7 @@ except:
 
 
 class SomaFlowPlugin(GraphPluginBase):
-    """Execute using Soma workflow
-    """
+    """Execute using Soma workflow"""
 
     def __init__(self, plugin_args=None):
         if soma_not_loaded:

@@ -9,7 +9,7 @@ class CopyHeaderInputSpec(BaseInterfaceInputSpec):
 
 
 class CopyHeaderInterface(BaseInterface):
-    """ Copy headers if the copy_header input is ``True``
+    """Copy headers if the copy_header input is ``True``
 
     This interface mixin adds a post-run hook that allows for copying
     an input header to an output file.

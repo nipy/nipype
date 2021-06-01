@@ -70,15 +70,14 @@ class HistogramMatchingFilterOutputSpec(TraitedSpec):
 class HistogramMatchingFilter(SEMLikeCommandLine):
     """title: Write Out Image Intensities
 
-category: BRAINS.Utilities
+    category: BRAINS.Utilities
 
-description: For Analysis
+    description: For Analysis
 
-version: 0.1
+    version: 0.1
 
-contributor: University of Iowa Department of Psychiatry, http:://www.psychiatry.uiowa.edu
-
-"""
+    contributor: University of Iowa Department of Psychiatry, http:://www.psychiatry.uiowa.edu
+    """
 
     input_spec = HistogramMatchingFilterInputSpec
     output_spec = HistogramMatchingFilterOutputSpec
@@ -144,15 +143,14 @@ class GenerateEdgeMapImageOutputSpec(TraitedSpec):
 class GenerateEdgeMapImage(SEMLikeCommandLine):
     """title: GenerateEdgeMapImage
 
-category: BRAINS.Utilities
+    category: BRAINS.Utilities
 
-description: Automatic edgemap generation for edge-guided super-resolution reconstruction
+    description: Automatic edgemap generation for edge-guided super-resolution reconstruction
 
-version: 1.0
+    version: 1.0
 
-contributor: Ali Ghayoor
-
-"""
+    contributor: Ali Ghayoor
+    """
 
     input_spec = GenerateEdgeMapImageInputSpec
     output_spec = GenerateEdgeMapImageOutputSpec
@@ -195,15 +193,14 @@ class GeneratePurePlugMaskOutputSpec(TraitedSpec):
 class GeneratePurePlugMask(SEMLikeCommandLine):
     """title: GeneratePurePlugMask
 
-category: BRAINS.Utilities
+    category: BRAINS.Utilities
 
-description: This program gets several modality image files and returns a binary mask that defines the pure plugs
+    description: This program gets several modality image files and returns a binary mask that defines the pure plugs
 
-version: 1.0
+    version: 1.0
 
-contributor: Ali Ghayoor
-
-"""
+    contributor: Ali Ghayoor
+    """
 
     input_spec = GeneratePurePlugMaskInputSpec
     output_spec = GeneratePurePlugMaskOutputSpec

@@ -161,9 +161,9 @@ class ImageMeantsOutputSpec(TraitedSpec):
 
 
 class ImageMeants(FSLCommand):
-    """ Use fslmeants for printing the average timeseries (intensities) to
-        the screen (or saves to a file). The average is taken over all voxels
-        in the mask (or all voxels in the image if no mask is specified)
+    """Use fslmeants for printing the average timeseries (intensities) to
+    the screen (or saves to a file). The average is taken over all voxels
+    in the mask (or all voxels in the image if no mask is specified)
 
     """
 
@@ -1036,7 +1036,7 @@ class OverlayOutputSpec(TraitedSpec):
 
 
 class Overlay(FSLCommand):
-    """ Use FSL's overlay command to combine background and statistical images
+    """Use FSL's overlay command to combine background and statistical images
         into one volume
 
 
@@ -1980,19 +1980,19 @@ class ComplexInputSpec(FSLCommandInputSpec):
     start_vol = traits.Int(position=-2, argstr="%d")
     end_vol = traits.Int(position=-1, argstr="%d")
 
-    real_polar = traits.Bool(argstr="-realpolar", xor=_conversion, position=1,)
+    real_polar = traits.Bool(argstr="-realpolar", xor=_conversion, position=1)
     #        requires=['complex_in_file','magnitude_out_file','phase_out_file'])
-    real_cartesian = traits.Bool(argstr="-realcartesian", xor=_conversion, position=1,)
+    real_cartesian = traits.Bool(argstr="-realcartesian", xor=_conversion, position=1)
     #        requires=['complex_in_file','real_out_file','imaginary_out_file'])
-    complex_cartesian = traits.Bool(argstr="-complex", xor=_conversion, position=1,)
+    complex_cartesian = traits.Bool(argstr="-complex", xor=_conversion, position=1)
     #        requires=['real_in_file','imaginary_in_file','complex_out_file'])
-    complex_polar = traits.Bool(argstr="-complexpolar", xor=_conversion, position=1,)
+    complex_polar = traits.Bool(argstr="-complexpolar", xor=_conversion, position=1)
     #        requires=['magnitude_in_file','phase_in_file',
     #                  'magnitude_out_file','phase_out_file'])
-    complex_split = traits.Bool(argstr="-complexsplit", xor=_conversion, position=1,)
+    complex_split = traits.Bool(argstr="-complexsplit", xor=_conversion, position=1)
     #        requires=['complex_in_file','complex_out_file'])
     complex_merge = traits.Bool(
-        argstr="-complexmerge", xor=_conversion + ["start_vol", "end_vol"], position=1,
+        argstr="-complexmerge", xor=_conversion + ["start_vol", "end_vol"], position=1
     )
 
 

@@ -32,6 +32,7 @@ def test_BET_inputs():
         ),
         in_file=dict(
             argstr="%s",
+            copyfile=False,
             extensions=None,
             mandatory=True,
             position=0,

@@ -9,8 +9,7 @@ from .base import PluginBase, logger
 
 
 class DebugPlugin(PluginBase):
-    """Execute workflow in series
-    """
+    """Execute workflow in series"""
 
     def __init__(self, plugin_args=None):
         super(DebugPlugin, self).__init__(plugin_args=plugin_args)

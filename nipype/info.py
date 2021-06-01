@@ -100,10 +100,9 @@ existing pipeline systems.
 # versions
 NIBABEL_MIN_VERSION = "2.1.0"
 NETWORKX_MIN_VERSION = "2.0"
-NUMPY_MIN_VERSION = "1.13"
 # Numpy bug in python 3.7:
 # https://www.opensourceanswers.com/blog/you-shouldnt-use-python-37-for-data-science-right-now.html
-NUMPY_MIN_VERSION_37 = "1.15.3"
+NUMPY_MIN_VERSION = "1.15.3"
 SCIPY_MIN_VERSION = "0.14"
 TRAITS_MIN_VERSION = "4.6"
 DATEUTIL_MIN_VERSION = "2.2"
@@ -138,8 +137,7 @@ REQUIRES = [
     "click>=%s" % CLICK_MIN_VERSION,
     "networkx>=%s" % NETWORKX_MIN_VERSION,
     "nibabel>=%s" % NIBABEL_MIN_VERSION,
-    'numpy>=%s ; python_version < "3.7"' % NUMPY_MIN_VERSION,
-    'numpy>=%s ; python_version >= "3.7"' % NUMPY_MIN_VERSION_37,
+    "numpy>=%s" % NUMPY_MIN_VERSION,
     "packaging",
     "prov>=%s" % PROV_VERSION,
     "pydot>=%s" % PYDOT_MIN_VERSION,
@@ -164,7 +162,7 @@ TESTS_REQUIRES = [
 EXTRA_REQUIRES = {
     "data": ["datalad"],
     "doc": [
-        "dipy",
+        "dipy!=1.4.1",
         "ipython",
         "matplotlib",
         "nbsphinx",
@@ -174,7 +172,7 @@ EXTRA_REQUIRES = {
         "sphinxcontrib-napoleon",
     ],
     "duecredit": ["duecredit"],
-    "nipy": ["nitime", "nilearn", "dipy", "nipy", "matplotlib"],
+    "nipy": ["nitime", "nilearn", "dipy!=1.4.1", "nipy", "matplotlib"],
     "profiler": ["psutil>=5.0"],
     "pybids": ["pybids>=0.7.0"],
     "specs": ["black"],

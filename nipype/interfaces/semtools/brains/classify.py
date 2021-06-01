@@ -67,21 +67,20 @@ class BRAINSPosteriorToContinuousClassOutputSpec(TraitedSpec):
 class BRAINSPosteriorToContinuousClass(SEMLikeCommandLine):
     """title: Tissue Classification
 
-category: BRAINS.Classify
+    category: BRAINS.Classify
 
-description: This program will generate an 8-bit continuous tissue classified image based on BRAINSABC posterior images.
+    description: This program will generate an 8-bit continuous tissue classified image based on BRAINSABC posterior images.
 
-version: 3.0
+    version: 3.0
 
-documentation-url: http://www.nitrc.org/plugins/mwiki/index.php/brains:BRAINSClassify
+    documentation-url: http://www.nitrc.org/plugins/mwiki/index.php/brains:BRAINSClassify
 
-license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+    license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
 
-contributor: Vincent A. Magnotta
+    contributor: Vincent A. Magnotta
 
-acknowledgements: Funding for this work was provided by NIH/NINDS award NS050568
-
-"""
+    acknowledgements: Funding for this work was provided by NIH/NINDS award NS050568
+    """
 
     input_spec = BRAINSPosteriorToContinuousClassInputSpec
     output_spec = BRAINSPosteriorToContinuousClassOutputSpec

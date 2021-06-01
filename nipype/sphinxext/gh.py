@@ -23,7 +23,7 @@ def get_url(obj):
     revision = _get_git_revision()
     if revision is not None:
         shortfile = os.path.join("nipype", filename.split("nipype/")[-1])
-        uri = "http://github.com/nipy/nipype/blob/%s/%s" % (revision, shortfile,)
+        uri = "http://github.com/nipy/nipype/blob/%s/%s" % (revision, shortfile)
     lines, lstart = inspect.getsourcelines(obj)
     lend = len(lines) + lstart
     return "%s#L%d-L%d" % (uri, lstart, lend)

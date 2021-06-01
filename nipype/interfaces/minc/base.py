@@ -18,15 +18,13 @@ warnings.filterwarnings("always", category=UserWarning)
 
 
 def check_minc():
-    """Returns True if and only if MINC is installed.'
-    """
+    """Returns True if and only if MINC is installed.'"""
 
     return Info.version() is not None
 
 
 def no_minc():
-    """Returns True if and only if MINC is *not* installed.
-    """
+    """Returns True if and only if MINC is *not* installed."""
     return not check_minc()
 
 
@@ -79,12 +77,7 @@ class Info(object):
                 return s.split(":")[1].strip()
             return None
 
-        versions = {
-            "minc": None,
-            "libminc": None,
-            "netcdf": None,
-            "hdf5": None,
-        }
+        versions = {"minc": None, "libminc": None, "netcdf": None, "hdf5": None}
 
         for l in out.split("\n"):
             for (name, f) in [

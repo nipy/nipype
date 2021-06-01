@@ -42,7 +42,7 @@ no_matlab = get_matlab_command() is None
 
 
 class MatlabInputSpec(CommandLineInputSpec):
-    """ Basic expected inputs to Matlab interface """
+    """Basic expected inputs to Matlab interface"""
 
     script = traits.Str(
         argstr='-r "%s;exit"', desc="m-code to run", mandatory=True, position=-1
@@ -187,7 +187,7 @@ class MatlabCommand(CommandLine):
         return super(MatlabCommand, self)._format_arg(name, trait_spec, value)
 
     def _gen_matlab_command(self, argstr, script_lines):
-        """ Generates commands and, if mfile specified, writes it to disk."""
+        """Generates commands and, if mfile specified, writes it to disk."""
         cwd = os.getcwd()
         mfile = self.inputs.mfile or self.inputs.uses_mcr
         paths = []

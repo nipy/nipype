@@ -19,28 +19,28 @@ from ..pipeline.engine.utils import modify_paths
 
 
 class PipeFunc(object):
-    """ Callable interface to nipype.interface objects
+    """Callable interface to nipype.interface objects
 
-        Use this to wrap nipype.interface object and call them
-        specifying their input with keyword arguments::
+    Use this to wrap nipype.interface object and call them
+    specifying their input with keyword arguments::
 
-            fsl_merge = PipeFunc(fsl.Merge, base_dir='.')
-            out = fsl_merge(in_files=files, dimension='t')
+        fsl_merge = PipeFunc(fsl.Merge, base_dir='.')
+        out = fsl_merge(in_files=files, dimension='t')
     """
 
     def __init__(self, interface, base_dir, callback=None):
         """
 
-            Parameters
-            ===========
-            interface: a nipype interface class
-                The interface class to wrap
-            base_dir: a string
-                The directory in which the computation will be
-                stored
-            callback: a callable
-                An optional callable called each time after the function
-                is called.
+        Parameters
+        ===========
+        interface: a nipype interface class
+            The interface class to wrap
+        base_dir: a string
+            The directory in which the computation will be
+            stored
+        callback: a callable
+            An optional callable called each time after the function
+            is called.
         """
         if not (isinstance(interface, type) and issubclass(interface, BaseInterface)):
             raise ValueError(
@@ -113,14 +113,14 @@ def read_log(filename, run_dict=None):
 
 
 def rm_all_but(base_dir, dirs_to_keep, warn=False):
-    """ Remove all the sub-directories of base_dir, but those listed
+    """Remove all the sub-directories of base_dir, but those listed
 
-        Parameters
-        ============
-        base_dir: string
-            The base directory
-        dirs_to_keep: set
-            The names of the directories to keep
+    Parameters
+    ============
+    base_dir: string
+        The base directory
+    dirs_to_keep: set
+        The names of the directories to keep
     """
     try:
         all_dirs = os.listdir(base_dir)
@@ -148,23 +148,23 @@ class _MemoryCallback(object):
 
 
 class Memory(object):
-    """ Memory context to provide caching for interfaces
+    """Memory context to provide caching for interfaces
 
-        Parameters
-        ==========
-        base_dir: string
-            The directory name of the location for the caching
+    Parameters
+    ==========
+    base_dir: string
+        The directory name of the location for the caching
 
-        Methods
-        =======
-        cache
-            Creates a cacheable function from an nipype Interface class
-        clear_previous_runs
-            Removes from the disk all the runs that where not used after
-            the creation time of the specific Memory instance
-        clear_previous_runs
-            Removes from the disk all the runs that where not used after
-            the given time
+    Methods
+    =======
+    cache
+        Creates a cacheable function from an nipype Interface class
+    clear_previous_runs
+        Removes from the disk all the runs that where not used after
+        the creation time of the specific Memory instance
+    clear_previous_runs
+        Removes from the disk all the runs that where not used after
+        the given time
     """
 
     def __init__(self, base_dir):
@@ -177,49 +177,48 @@ class Memory(object):
         open(os.path.join(base_dir, "log.current"), "a").close()
 
     def cache(self, interface):
-        """ Returns a callable that caches the output of an interface
+        """Returns a callable that caches the output of an interface
 
-            Parameters
-            ==========
-            interface: nipype interface
-                The nipype interface class to be wrapped and cached
+        Parameters
+        ==========
+        interface: nipype interface
+            The nipype interface class to be wrapped and cached
 
-            Returns
-            =======
-            pipe_func: a PipeFunc callable object
-                An object that can be used as a function to apply the
-                interface to arguments. Inputs of the interface are given
-                as keyword arguments, bearing the same name as the name
-                in the inputs specs of the interface.
+        Returns
+        =======
+        pipe_func: a PipeFunc callable object
+            An object that can be used as a function to apply the
+            interface to arguments. Inputs of the interface are given
+            as keyword arguments, bearing the same name as the name
+            in the inputs specs of the interface.
 
-            Examples
-            ========
+        Examples
+        ========
 
-            >>> from tempfile import mkdtemp
-            >>> mem = Memory(mkdtemp())
-            >>> from nipype.interfaces import fsl
+        >>> from tempfile import mkdtemp
+        >>> mem = Memory(mkdtemp())
+        >>> from nipype.interfaces import fsl
 
-            Here we create a callable that can be used to apply an
-            fsl.Merge interface to files
+        Here we create a callable that can be used to apply an
+        fsl.Merge interface to files
 
-            >>> fsl_merge = mem.cache(fsl.Merge)
+        >>> fsl_merge = mem.cache(fsl.Merge)
 
-            Now we apply it to a list of files. We need to specify the
-            list of input files and the dimension along which the files
-            should be merged.
+        Now we apply it to a list of files. We need to specify the
+        list of input files and the dimension along which the files
+        should be merged.
 
-            >>> results = fsl_merge(in_files=['a.nii', 'b.nii'],
-            ...                     dimension='t') # doctest: +SKIP
+        >>> results = fsl_merge(in_files=['a.nii', 'b.nii'],
+        ...                     dimension='t') # doctest: +SKIP
 
-            We can retrieve the resulting file from the outputs:
-            >>> results.outputs.merged_file # doctest: +SKIP
-            '...'
+        We can retrieve the resulting file from the outputs:
+        >>> results.outputs.merged_file # doctest: +SKIP
+        '...'
         """
         return PipeFunc(interface, self.base_dir, _MemoryCallback(self))
 
     def _log_name(self, dir_name, job_name):
-        """ Increment counters tracking which cached function get executed.
-        """
+        """Increment counters tracking which cached function get executed."""
         base_dir = self.base_dir
         # Every counter is a file opened in append mode and closed
         # immediately to avoid race conditions in parallel computing:
@@ -243,32 +242,32 @@ class Memory(object):
             rotatefile.write("%s/%s\n" % (dir_name, job_name))
 
     def clear_previous_runs(self, warn=True):
-        """ Remove all the cache that where not used in the latest run of
-            the memory object: i.e. since the corresponding Python object
-            was created.
+        """Remove all the cache that where not used in the latest run of
+        the memory object: i.e. since the corresponding Python object
+        was created.
 
-            Parameters
-            ==========
-            warn: boolean, optional
-                If true, echoes warning messages for all directory
-                removed
+        Parameters
+        ==========
+        warn: boolean, optional
+            If true, echoes warning messages for all directory
+            removed
         """
         base_dir = self.base_dir
         latest_runs = read_log(os.path.join(base_dir, "log.current"))
         self._clear_all_but(latest_runs, warn=warn)
 
     def clear_runs_since(self, day=None, month=None, year=None, warn=True):
-        """ Remove all the cache that where not used since the given date
+        """Remove all the cache that where not used since the given date
 
-            Parameters
-            ==========
-            day, month, year: integers, optional
-                The integers specifying the latest day (in localtime) that
-                a node should have been accessed to be kept. If not
-                given, the current date is used.
-            warn: boolean, optional
-                If true, echoes warning messages for all directory
-                removed
+        Parameters
+        ==========
+        day, month, year: integers, optional
+            The integers specifying the latest day (in localtime) that
+            a node should have been accessed to be kept. If not
+            given, the current date is used.
+        warn: boolean, optional
+            If true, echoes warning messages for all directory
+            removed
         """
         t = time.localtime()
         day = day if day is not None else t.tm_mday
@@ -288,8 +287,8 @@ class Memory(object):
             os.remove(log_name)
 
     def _clear_all_but(self, runs, warn=True):
-        """ Remove all the runs appart from those given to the function
-            input.
+        """Remove all the runs appart from those given to the function
+        input.
         """
         rm_all_but(self.base_dir, set(runs.keys()), warn=warn)
         for dir_name, job_names in list(runs.items()):

@@ -118,7 +118,7 @@ class TestSignalExtraction:
         self._test_4d_label(wanted, self.fake_4d_label_data)
 
     def test_signal_extr_traits_valid(self):
-        """ Test a node using the SignalExtraction interface.
+        """Test a node using the SignalExtraction interface.
         Unlike interface.run(), node.run() checks the traits
         """
         # run

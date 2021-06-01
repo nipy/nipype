@@ -496,8 +496,7 @@ class Calc(AFNICommand):
         return super(Calc, self)._format_arg(name, trait_spec, value)
 
     def _parse_inputs(self, skip=None):
-        """Skip the arguments without argstr metadata
-        """
+        """Skip the arguments without argstr metadata"""
         return super(Calc, self)._parse_inputs(skip=("start_idx", "stop_idx", "other"))
 
 
@@ -1130,8 +1129,7 @@ class Eval(AFNICommand):
         return super(Eval, self)._format_arg(name, trait_spec, value)
 
     def _parse_inputs(self, skip=None):
-        """Skip the arguments without argstr metadata
-        """
+        """Skip the arguments without argstr metadata"""
         return super(Eval, self)._parse_inputs(skip=("start_idx", "stop_idx", "other"))
 
 
@@ -1354,7 +1352,7 @@ class FWHMx(AFNICommandBase):
                 "}"
             ),
             "tags": ["method"],
-        },
+        }
     ]
     _acf = True
 
@@ -2325,8 +2323,7 @@ class OneDToolPy(AFNIPythonCommand):
     >>> odt.inputs.out_file = 'motion_dmean.1D'
     >>> odt.cmdline # doctest: +ELLIPSIS
     'python2 ...1d_tool.py -demean -infile f1.1D -write motion_dmean.1D -set_nruns 3'
-     >>> res = odt.run()  # doctest: +SKIP
-"""
+     >>> res = odt.run()  # doctest: +SKIP"""
 
     _cmd = "1d_tool.py"
 
@@ -2591,11 +2588,7 @@ class ReHo(AFNICommandBase):
         return outputs
 
     def _format_arg(self, name, spec, value):
-        _neigh_dict = {
-            "faces": 7,
-            "edges": 19,
-            "vertices": 27,
-        }
+        _neigh_dict = {"faces": 7, "edges": 19, "vertices": 27}
         if name == "neighborhood":
             value = _neigh_dict[value]
         return super(ReHo, self)._format_arg(name, spec, value)
@@ -2892,7 +2885,7 @@ class To3D(AFNICommand):
     'to3d -datum float -anat -prefix dicomdir.nii ./*.dcm'
     >>> res = to3d.run()  # doctest: +SKIP
 
-   """
+    """
 
     _cmd = "to3d"
     input_spec = To3DInputSpec

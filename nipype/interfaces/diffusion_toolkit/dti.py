@@ -88,8 +88,7 @@ class DTIReconOutputSpec(TraitedSpec):
 
 
 class DTIRecon(CommandLine):
-    """Use dti_recon to generate tensors and other maps
-    """
+    """Use dti_recon to generate tensors and other maps"""
 
     input_spec = DTIReconInputSpec
     output_spec = DTIReconOutputSpec

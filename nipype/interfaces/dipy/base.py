@@ -27,13 +27,13 @@ except ImportError:
 
 
 def no_dipy():
-    """ Check if dipy is available """
+    """Check if dipy is available"""
     global HAVE_DIPY
     return not HAVE_DIPY
 
 
 def dipy_version():
-    """ Check dipy version """
+    """Check dipy version"""
     if no_dipy():
         return None
 

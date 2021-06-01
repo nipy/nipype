@@ -141,8 +141,7 @@ class SimpleThresholdOutputSpec(TraitedSpec):
 
 
 class SimpleThreshold(BaseInterface):
-    """Applies a threshold to input volumes
-    """
+    """Applies a threshold to input volumes"""
 
     input_spec = SimpleThresholdInputSpec
     output_spec = SimpleThresholdOutputSpec
@@ -240,8 +239,7 @@ class CreateNiftiOutputSpec(TraitedSpec):
 
 
 class CreateNifti(BaseInterface):
-    """Creates a nifti volume
-    """
+    """Creates a nifti volume"""
 
     input_spec = CreateNiftiInputSpec
     output_spec = CreateNiftiOutputSpec
