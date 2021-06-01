@@ -51,8 +51,6 @@ class RCommand(CommandLine):
     """
 
     _cmd = get_r_command()
-    _default_r_cmd = None
-    _default_rfile = None
     input_spec = RInputSpec
 
     def __init__(self, r_cmd=None, **inputs):
@@ -62,37 +60,26 @@ class RCommand(CommandLine):
         super(RCommand, self).__init__(**inputs)
         if r_cmd and isdefined(r_cmd):
             self._cmd = r_cmd
-        elif self._default_r_cmd:
-            self._cmd = self._default_r_cmd
-
-        if self._default_rfile and not isdefined(self.inputs.rfile):
-            self.inputs.rfile = self._default_rfile
 
         # For r commands force all output to be returned since r
         # does not have a clean way of notifying an error
         self.terminal_output = "allatonce"
 
-    @classmethod
-    def set_default_r_cmd(cls, r_cmd):
+    def set_default_r_cmd(self, r_cmd):
         """Set the default R command line for R classes.
 
         This method is used to set values for all R
-        subclasses.  However, setting this will not update the output
-        type for any existing instances.  For these, assign the
-        <instance>.inputs.r_cmd.
+        subclasses. 
         """
-        cls._default_r_cmd = r_cmd
+        self._cmd = r_cmd
 
-    @classmethod
-    def set_default_rfile(cls, rfile):
+    def set_default_rfile(self, rfile):
         """Set the default R script file format for R classes.
 
         This method is used to set values for all R
-        subclasses.  However, setting this will not update the output
-        type for any existing instances.  For these, assign the
-        <instance>.inputs.rfile.
+        subclasses.
         """
-        cls._default_rfile = rfile
+        self._rfile = rfile
 
     def _run_interface(self, runtime):
         self.terminal_output = "allatonce"

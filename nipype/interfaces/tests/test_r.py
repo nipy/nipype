@@ -8,27 +8,18 @@ from nipype.interfaces import r
 
 no_r = r.no_r
 
-
-def clean_workspace_and_get_default_script_file():
-    # Make sure things are clean.
-    default_script_file = r.RInputSpec().script_file
-    if os.path.exists(default_script_file):
-        os.remove(
-            default_script_file
-        )  # raise Exception('Default script file needed for tests; please remove %s!' % default_script_file)
-    return default_script_file
-
-
 @pytest.mark.skipif(no_r, reason="R is not available")
 def test_cmdline(tmp_path):
-    ri = r.RCommand(script="1 + 1", script_file=str(tmp_path / "testscript"), rfile=False)
+    default_script_file = str(tmp_path / "testscript")
+    ri = r.RCommand(script="1 + 1", script_file=default_script_file, rfile=False)
+    r_cmd = r.get_r_command()
 
     assert ri.cmdline == r_cmd + (
         ' -e "1 + 1"'
     )
 
     assert ri.inputs.script == "1 + 1"
-    assert ri.inputs.script_file == str(tmp_path / "testscript")
+    assert ri.inputs.script_file == default_script_file
     assert not os.path.exists(ri.inputs.script_file), "scriptfile should not exist"
     assert not os.path.exists(
         default_script_file
@@ -36,20 +27,9 @@ def test_cmdline(tmp_path):
 
 
 @pytest.mark.skipif(no_r, reason="R is not available")
-def test_r_init():
-    default_script_file = clean_workspace_and_get_default_script_file()
-
-    assert r.RCommand._cmd == r.get_r_command()
-    assert r.RCommand.input_spec == r.RInputSpec
-
-    assert r.RCommand().cmd == r_cmd
-    rc = r.RCommand(r_cmd="foo_m")
-    assert rc.cmd == "foo_m"
-
-
-@pytest.mark.skipif(no_r, reason="R is not available")
 def test_run_interface(tmpdir):
-    default_script_file = clean_workspace_and_get_default_script_file()
+    os.chdir(tmpdir)
+    default_script_file = r.RInputSpec().script_file
 
     rc = r.RCommand(r_cmd="foo_m")
     assert not os.path.exists(default_script_file), "scriptfile should not exist 1."
@@ -67,31 +47,16 @@ def test_run_interface(tmpdir):
     if os.path.exists(default_script_file):  # cleanup
         os.remove(default_script_file)
 
-    cwd = tmpdir.chdir()
-
-    # bypasses ubuntu dash issue
-    rc = r.RCommand(script="foo;", rfile=True)
-    assert not os.path.exists(default_script_file), "scriptfile should not exist 4."
-    with pytest.raises(RuntimeError):
-        rc.run()
-    assert os.path.exists(default_script_file), "scriptfile should exist 4."
-    if os.path.exists(default_script_file):  # cleanup
-        os.remove(default_script_file)
-
-    # bypasses ubuntu dash issue
-    res = r.RCommand(script="a=1;", rfile=True).run()
-    assert res.runtime.returncode == 0
-    assert os.path.exists(default_script_file), "scriptfile should exist 5."
-    cwd.chdir()
 
 
 @pytest.mark.skipif(no_r, reason="R is not available")
-def test_set_rcmd():
-    default_script_file = clean_workspace_and_get_default_script_file()
+def test_set_rcmd(tmpdir):
+    os.chdir(tmpdir)
+    default_script_file = r.RInputSpec().script_file
 
     ri = r.RCommand()
-    _default_r_cmd = ri._default_r_cmd
+    _default_r_cmd = ri._cmd
     ri.set_default_r_cmd("foo")
     assert not os.path.exists(default_script_file), "scriptfile should not exist."
-    assert ri._default_r_cmd == "foo"
+    assert ri._cmd == "foo"
     ri.set_default_r_cmd(_default_r_cmd)
