@@ -45,8 +45,8 @@ class RCommand(CommandLine):
     """Interface that runs R code
 
     >>> import nipype.interfaces.r as r
-    >>> r = r.RCommand(rfile=False)  # don't write script file
-    >>> r.inputs.script = "Sys.getenv('USER')"
+    >>> r = r.RCommand(rfile=False) # doctest: +SKIP
+    >>> r.inputs.script = "Sys.getenv('USER')" # doctest: +SKIP
     >>> out = r.run()  # doctest: +SKIP
     """
 
