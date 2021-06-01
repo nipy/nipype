@@ -51,7 +51,7 @@ def test_run_interface(tmpdir):
 
 @pytest.mark.skipif(no_r, reason="R is not available")
 def test_set_rcmd(tmpdir):
-    os.chdir(tmpdir)
+    cwd = tmpdir.chdir()
     default_script_file = r.RInputSpec().script_file
 
     ri = r.RCommand()
@@ -60,3 +60,4 @@ def test_set_rcmd(tmpdir):
     assert not os.path.exists(default_script_file), "scriptfile should not exist."
     assert ri._cmd == "foo"
     ri.set_default_r_cmd(_default_r_cmd)
+    cwd.chdir()
