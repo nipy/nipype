@@ -475,6 +475,7 @@ class CAT12SegmentOutputSpec(TraitedSpec):
 class CAT12Segment(SPMCommand):
     """
     CAT12: Segmentation
+
     This toolbox is an extension to the default segmentation in SPM12, but uses a completely different segmentation
     approach.
     The segmentation approach is based on an Adaptive Maximum A Posterior (MAP) technique without the need for a priori

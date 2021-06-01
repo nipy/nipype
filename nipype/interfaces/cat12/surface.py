@@ -217,7 +217,7 @@ class ExtractROIBasedSurfaceMeasuresOutputSpec(TraitedSpec):
 class ExtractROIBasedSurfaceMeasures(SPMCommand):
     """
     Extract ROI-based surface values
-    While ROI-based values for VBM (volume) data are automatically saved in the <em>label</em> folder as XML file it is
+    While ROI-based values for VBM (volume) data are automatically saved in the ``label`` folder as XML file it is
     necessary to additionally extract these values for surface data (except for thickness which is automatically
     extracted during segmentation). This has to be done after preprocessing the data and creating cortical surfaces.
 
