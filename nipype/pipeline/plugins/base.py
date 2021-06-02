@@ -417,14 +417,10 @@ class DistributedPluginBase(PluginBase):
         import networkx as nx
 
         self.procs, _ = topological_sort(graph)
-        try:
-            self.depidx = nx.to_scipy_sparse_matrix(
-                graph, nodelist=self.procs, format="lil"
-            )
-        except:
-            self.depidx = nx.to_scipy_sparse_matrix(graph, nodelist=self.procs)
-        self.refidx = deepcopy(self.depidx)
-        self.refidx.astype = np.int
+        self.depidx = nx.to_scipy_sparse_matrix(
+            graph, nodelist=self.procs, format="lil"
+        )
+        self.refidx = self.depidx.astype(int)
         self.proc_done = np.zeros(len(self.procs), dtype=bool)
         self.proc_pending = np.zeros(len(self.procs), dtype=bool)
 
