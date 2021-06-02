@@ -583,7 +583,7 @@ class ArtifactDetect(BaseInterface):
             tidx = find_indices(normval > self.inputs.norm_threshold)
             ridx = find_indices(normval < 0)
             if displacement is not None:
-                dmap = np.zeros((x, y, z, timepoints), dtype=np.float)
+                dmap = np.zeros((x, y, z, timepoints), dtype=np.float64)
                 for i in range(timepoints):
                     dmap[
                         voxel_coords[0], voxel_coords[1], voxel_coords[2], i
