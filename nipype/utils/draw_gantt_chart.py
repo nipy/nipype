@@ -12,6 +12,7 @@ import datetime
 import simplejson as json
 
 from collections import OrderedDict
+from warnings import warn
 
 # Pandas
 try:
@@ -69,9 +70,9 @@ def create_event_dict(start_time, nodes_list):
         finish_delta = (node["finish"] - start_time).total_seconds()
 
         # Populate dictionary
-        if events.get(start_delta) or events.get(finish_delta):
+        if events.get(start_delta):
             err_msg = "Event logged twice or events started at exact same time!"
-            raise KeyError(err_msg)
+            warn(err_msg, category=Warning)
         events[start_delta] = start_node
         events[finish_delta] = finish_node
 
@@ -139,12 +140,18 @@ def calculate_resource_timeseries(events, resource):
     # Iterate through the events
     for _, event in sorted(events.items()):
         if event["event"] == "start":
-            if resource in event and event[resource] != "Unknown":
-                all_res += float(event[resource])
+            if resource in event:
+                try:
+                    all_res += float(event[resource])
+                except ValueError:
+                    continue
             current_time = event["start"]
         elif event["event"] == "finish":
-            if resource in event and event[resource] != "Unknown":
-                all_res -= float(event[resource])
+            if resource in event:
+                try:
+                    all_res -= float(event[resource])
+                except ValueError:
+                    continue
             current_time = event["finish"]
         res[current_time] = all_res
 
@@ -292,7 +299,7 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes, co
             "offset": offset,
             "scale_duration": scale_duration,
             "color": color,
-            "node_name": node["name"],
+            "node_name": node.get("name", node.get("id", "")),
             "node_dur": node["duration"] / 60.0,
             "node_start": node_start.strftime("%Y-%m-%d %H:%M:%S"),
             "node_finish": node_finish.strftime("%Y-%m-%d %H:%M:%S"),
@@ -511,6 +518,23 @@ def generate_gantt_chart(
 
     # Read in json-log to get list of node dicts
     nodes_list = log_to_dict(logfile)
+
+    # Only include nodes with timing information, and covert timestamps
+    # from strings to datetimes
+    nodes_list = [
+        {
+            k: datetime.datetime.strptime(i[k], "%Y-%m-%dT%H:%M:%S.%f")
+            if k in {"start", "finish"}
+            else i[k]
+            for k in i
+        }
+        for i in nodes_list
+        if "start" in i and "finish" in i
+    ]
+
+    for node in nodes_list:
+        if "duration" not in node:
+            node["duration"] = (node["finish"] - node["start"]).total_seconds()
 
     # Create the header of the report with useful information
     start_node = nodes_list[0]
