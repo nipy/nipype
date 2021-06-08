@@ -417,14 +417,10 @@ class DistributedPluginBase(PluginBase):
         import networkx as nx
 
         self.procs, _ = topological_sort(graph)
-        try:
-            self.depidx = nx.to_scipy_sparse_matrix(
-                graph, nodelist=self.procs, format="lil"
-            )
-        except:
-            self.depidx = nx.to_scipy_sparse_matrix(graph, nodelist=self.procs)
-        self.refidx = deepcopy(self.depidx)
-        self.refidx.astype = np.int
+        self.depidx = nx.to_scipy_sparse_matrix(
+            graph, nodelist=self.procs, format="lil"
+        )
+        self.refidx = self.depidx.astype(int)
         self.proc_done = np.zeros(len(self.procs), dtype=bool)
         self.proc_pending = np.zeros(len(self.procs), dtype=bool)
 
@@ -543,7 +539,9 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         pyscript = create_pyscript(node, updatehash=updatehash)
         batch_dir, name = os.path.split(pyscript)
         name = ".".join(name.split(".")[:-1])
-        batchscript = "\n".join((self._template, "%s %s" % (sys.executable, pyscript)))
+        batchscript = "\n".join(
+            (self._template.rstrip("\n"), "%s %s" % (sys.executable, pyscript))
+        )
         batchscriptfile = os.path.join(batch_dir, "batchscript_%s.sh" % name)
         with open(batchscriptfile, "wt") as fp:
             fp.writelines(batchscript)
