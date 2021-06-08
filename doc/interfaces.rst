@@ -54,6 +54,9 @@ Nipype provides interfaces for the following **third-party** tools:
     is an open-source software toolkit for diffusion MRI processing.
   * `Camino-TrackVis <api/generated/nipype.interfaces.camino2trackvis.html>`__
     allows interoperability between Camino and TrackVis.
+  * `CAT12 <api/generated/nipype.interfaces.cat12.html>`__
+    (Computational Anatomy Toolbox) extends SPM12 to provide computational
+    anatomy.
   * `Connectome Mapper (CMP) <api/generated/nipype.interfaces.cmtk.html>`__
     implements a full processing pipeline for creating multi-variate and
     multi-resolution connectomes with dMRI data.
