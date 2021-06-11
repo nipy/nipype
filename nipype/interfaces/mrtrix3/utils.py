@@ -787,7 +787,6 @@ class SHConvInputSpec(CommandLineInputSpec):
         name_template="%s_shconv.mif",
         name_source=["in_file"],
         argstr="%s",
-        mandatory=True,
         position=-1,
         usedefault=True,
         desc="the output spherical harmonics",
