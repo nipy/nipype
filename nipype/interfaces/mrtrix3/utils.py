@@ -877,7 +877,7 @@ class SH2Amp(CommandLine):
     >>> sh.inputs.in_file = 'sh.mif'
     >>> sh.inputs.directions = 'grads.txt'
     >>> sh.cmdline
-    'sh2amp sh.mif grads.txt amp.mif'
+    'sh2amp sh.mif grads.txt sh_amp.mif'
     >>> sh.run()                                 # doctest: +SKIP
     """
 
