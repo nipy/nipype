@@ -583,7 +583,7 @@ class ArtifactDetect(BaseInterface):
             tidx = find_indices(normval > self.inputs.norm_threshold)
             ridx = find_indices(normval < 0)
             if displacement is not None:
-                dmap = np.zeros((x, y, z, timepoints), dtype=np.float)
+                dmap = np.zeros((x, y, z, timepoints), dtype=np.float64)
                 for i in range(timepoints):
                     dmap[
                         voxel_coords[0], voxel_coords[1], voxel_coords[2], i
@@ -686,8 +686,7 @@ class ArtifactDetect(BaseInterface):
         save_json(statsfile, stats)
 
     def _run_interface(self, runtime):
-        """Execute this module.
-        """
+        """Execute this module."""
         funcfilelist = ensure_list(self.inputs.realigned_files)
         motparamlist = ensure_list(self.inputs.realignment_parameters)
         for i, imgf in enumerate(funcfilelist):
@@ -814,8 +813,7 @@ class StimulusCorrelation(BaseInterface):
         return outmatrix
 
     def _run_interface(self, runtime):
-        """Execute this module.
-        """
+        """Execute this module."""
         import scipy.io as sio
 
         motparamlist = self.inputs.realignment_parameters

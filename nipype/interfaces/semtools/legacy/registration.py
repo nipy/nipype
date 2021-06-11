@@ -57,21 +57,20 @@ class scalartransformOutputSpec(TraitedSpec):
 class scalartransform(SEMLikeCommandLine):
     """title: ScalarTransform (DTIProcess)
 
-category: Legacy.Registration
+    category: Legacy.Registration
 
-version: 1.0.0
+    version: 1.0.0
 
-documentation-url: http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/DTIProcess
+    documentation-url: http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/DTIProcess
 
-license: Copyright (c)  Casey Goodlett. All rights reserved.
-  See http://www.ia.unc.edu/dev/Copyright.htm for details.
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notices for more information.
+    license: Copyright (c)  Casey Goodlett. All rights reserved.
+      See http://www.ia.unc.edu/dev/Copyright.htm for details.
+         This software is distributed WITHOUT ANY WARRANTY; without even
+         the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+         PURPOSE.  See the above copyright notices for more information.
 
-contributor: Casey Goodlett
-
-"""
+    contributor: Casey Goodlett
+    """
 
     input_spec = scalartransformInputSpec
     output_spec = scalartransformOutputSpec

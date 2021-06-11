@@ -234,7 +234,7 @@ class MergeCNetworksOutputSpec(TraitedSpec):
 
 
 class MergeCNetworks(CFFBaseInterface):
-    """ Merges networks from multiple CFF files into one new CFF file.
+    """Merges networks from multiple CFF files into one new CFF file.
 
     Example
     -------

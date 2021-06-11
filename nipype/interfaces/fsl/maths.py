@@ -76,9 +76,7 @@ class ChangeDataTypeInput(MathsInput):
 
 
 class ChangeDataType(MathsCommand):
-    """Use fslmaths to change the datatype of an image.
-
-    """
+    """Use fslmaths to change the datatype of an image."""
 
     input_spec = ChangeDataTypeInput
     _suffix = "_chdt"
@@ -105,9 +103,7 @@ class ThresholdInputSpec(MathsInput):
 
 
 class Threshold(MathsCommand):
-    """Use fslmaths to apply a threshold to an image in a variety of ways.
-
-    """
+    """Use fslmaths to apply a threshold to an image in a variety of ways."""
 
     input_spec = ThresholdInputSpec
     _suffix = "_thresh"
@@ -167,9 +163,7 @@ class MeanImageInput(MathsInput):
 
 
 class MeanImage(MathsCommand):
-    """Use fslmaths to generate a mean image across a given dimension.
-
-    """
+    """Use fslmaths to generate a mean image across a given dimension."""
 
     input_spec = MeanImageInput
     _suffix = "_mean"
@@ -286,9 +280,7 @@ class MinImageInput(MathsInput):
 
 
 class MinImage(MathsCommand):
-    """Use fslmaths to generate a minimum image across a given dimension.
-
-    """
+    """Use fslmaths to generate a minimum image across a given dimension."""
 
     input_spec = MinImageInput
     _suffix = "_min"
@@ -309,9 +301,7 @@ class MedianImageInput(MathsInput):
 
 
 class MedianImage(MathsCommand):
-    """Use fslmaths to generate a median image across a given dimension.
-
-    """
+    """Use fslmaths to generate a median image across a given dimension."""
 
     input_spec = MedianImageInput
     _suffix = "_median"
@@ -360,9 +350,7 @@ class IsotropicSmoothInput(MathsInput):
 
 
 class IsotropicSmooth(MathsCommand):
-    """Use fslmaths to spatially smooth an image with a gaussian kernel.
-
-    """
+    """Use fslmaths to spatially smooth an image with a gaussian kernel."""
 
     input_spec = IsotropicSmoothInput
     _suffix = "_smooth"
@@ -386,9 +374,7 @@ class ApplyMaskInput(MathsInput):
 
 
 class ApplyMask(MathsCommand):
-    """Use fslmaths to apply a binary mask to another image.
-
-    """
+    """Use fslmaths to apply a binary mask to another image."""
 
     input_spec = ApplyMaskInput
     _suffix = "_masked"
@@ -439,9 +425,7 @@ class DilateInput(KernelInput):
 
 
 class DilateImage(MathsCommand):
-    """Use fslmaths to perform a spatial dilation of an image.
-
-    """
+    """Use fslmaths to perform a spatial dilation of an image."""
 
     input_spec = DilateInput
     _suffix = "_dil"
@@ -464,9 +448,7 @@ class ErodeInput(KernelInput):
 
 
 class ErodeImage(MathsCommand):
-    """Use fslmaths to perform a spatial erosion of an image.
-
-    """
+    """Use fslmaths to perform a spatial erosion of an image."""
 
     input_spec = ErodeInput
     _suffix = "_ero"
@@ -493,9 +475,7 @@ class SpatialFilterInput(KernelInput):
 
 
 class SpatialFilter(MathsCommand):
-    """Use fslmaths to spatially filter an image.
-
-    """
+    """Use fslmaths to spatially filter an image."""
 
     input_spec = SpatialFilterInput
     _suffix = "_filt"
@@ -535,9 +515,7 @@ class UnaryMathsInput(MathsInput):
 
 
 class UnaryMaths(MathsCommand):
-    """Use fslmaths to perorm a variety of mathematical operations on an image.
-
-    """
+    """Use fslmaths to perorm a variety of mathematical operations on an image."""
 
     input_spec = UnaryMathsInput
 

@@ -20,7 +20,7 @@ from setuptools.command.build_py import build_py
 
 
 class BuildWithCommitInfoCommand(build_py):
-    """ Return extended build command class for recording commit
+    """Return extended build command class for recording commit
 
     The extended command tries to run git to find the current commit, getting
     the empty string if it fails.  It then writes the commit hash into a file

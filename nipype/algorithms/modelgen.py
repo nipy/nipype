@@ -40,13 +40,13 @@ def spm_hrf(RT, P=None, fMRI_T=16):
       % p    - parameters of the response function (two gamma
       % functions)
       % defaults  (seconds)
-      %	p(0) - delay of response (relative to onset)	   6
-      %	p(1) - delay of undershoot (relative to onset)    16
-      %	p(2) - dispersion of response			   1
-      %	p(3) - dispersion of undershoot			   1
-      %	p(4) - ratio of response to undershoot		   6
-      %	p(5) - onset (seconds)				   0
-      %	p(6) - length of kernel (seconds)		  32
+      % p(0) - delay of response (relative to onset)       6
+      % p(1) - delay of undershoot (relative to onset)    16
+      % p(2) - dispersion of response                      1
+      % p(3) - dispersion of undershoot                    1
+      % p(4) - ratio of response to undershoot             6
+      % p(5) - onset (seconds)                             0
+      % p(6) - length of kernel (seconds)                 32
       %
       % hrf  - hemodynamic response function
       % p    - parameters of the response function
@@ -135,7 +135,7 @@ def scale_timings(timelist, input_units, output_units, time_repetition):
 
 
 def bids_gen_info(
-    bids_event_files, condition_column="", amplitude_column=None, time_repetition=False,
+    bids_event_files, condition_column="", amplitude_column=None, time_repetition=False
 ):
     """
     Generate a subject_info structure from a list of BIDS .tsv event files.
@@ -383,7 +383,7 @@ None])
         for i, info in enumerate(infolist):
             sessinfo.insert(i, dict(cond=[]))
             if isdefined(self.inputs.high_pass_filter_cutoff):
-                sessinfo[i]["hpf"] = np.float(self.inputs.high_pass_filter_cutoff)
+                sessinfo[i]["hpf"] = float(self.inputs.high_pass_filter_cutoff)
 
             if hasattr(info, "conditions") and info.conditions is not None:
                 for cid, cond in enumerate(info.conditions):
@@ -471,8 +471,7 @@ None])
         return sessinfo
 
     def _generate_design(self, infolist=None):
-        """Generate design specification for a typical fmri paradigm
-        """
+        """Generate design specification for a typical fmri paradigm"""
         realignment_parameters = []
         if isdefined(self.inputs.realignment_parameters):
             for parfile in self.inputs.realignment_parameters:
@@ -517,8 +516,7 @@ None])
         )
 
     def _run_interface(self, runtime):
-        """
-        """
+        """ """
         self._sessioninfo = None
         self._generate_design()
         return runtime
@@ -739,7 +737,7 @@ class SpecifySparseModelOutputSpec(SpecifyModelOutputSpec):
 
 
 class SpecifySparseModel(SpecifyModel):
-    """ Specify a sparse model that is compatible with SPM/FSL designers [1]_.
+    """Specify a sparse model that is compatible with SPM/FSL designers [1]_.
 
     Examples
     --------
@@ -770,8 +768,7 @@ class SpecifySparseModel(SpecifyModel):
     output_spec = SpecifySparseModelOutputSpec
 
     def _gen_regress(self, i_onsets, i_durations, i_amplitudes, nscans):
-        """Generates a regressor for a sparse/clustered-sparse acquisition
-        """
+        """Generates a regressor for a sparse/clustered-sparse acquisition"""
         bplot = False
         if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
             bplot = True
@@ -901,8 +898,7 @@ class SpecifySparseModel(SpecifyModel):
             return reg
 
     def _cond_to_regress(self, info, nscans):
-        """Converts condition information to full regressors
-        """
+        """Converts condition information to full regressors"""
         reg = []
         regnames = []
         for i, cond in enumerate(info.conditions):

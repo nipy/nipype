@@ -52,6 +52,7 @@ _build_main_image_py36: &build_main_image_py36
         --rm=false \
         --tag nipype/nipype:latest \
         --tag nipype/nipype:py36 \
+        $(test -z "${CIRCLE_TAG}" || echo --tag nipype/nipype:"${CIRCLE_TAG}") \
         --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
         --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
         --build-arg VERSION="${CIRCLE_TAG}" /home/circleci/nipype
@@ -192,6 +193,7 @@ jobs:
             docker push nipype/nipype:base
             docker push nipype/nipype:latest
             docker push nipype/nipype:py36
+            test -z "${CIRCLE_TAG}" || docker push nipype/nipype:"${CIRCLE_TAG}"
       - run:
           name: Move pruned Dockerfile to /tmp/docker/cache directory
           command: |
@@ -289,44 +291,10 @@ jobs:
               ssh-add ~/.ssh/id_ed25519
               /home/circleci/nipype/tools/feedstock.sh
 
-  build_docs:
-    docker:
-      - image: python:3.7.4
-    working_directory: /tmp/src/nipype
-    environment:
-      - FSLOUTPUTTYPE: 'NIFTI'
-    steps:
-      - checkout
-      - run:
-          name: Check Python version and upgrade pip
-          command: |
-            python --version
-            python -m pip install -U pip
-      - run:
-          name: Install graphviz
-          command: |
-              apt-get update
-              apt-get install -y graphviz
-      - run:
-          name: Install Requirements (may contain pinned versions)
-          command: python -m pip install -r doc/requirements.txt
-      - run:
-          name: Install NiPype
-          command: python -m pip install ".[doc]"
-      - run:
-          name: Build documentation
-          command: make -C doc html
-      - store_artifacts:
-          path: /tmp/src/nipype/doc/_build/html
-
 workflows:
   version: 2
   build_test_deploy:
     jobs:
-      - build_docs:
-          filters:
-            tags:
-              only: /.*/
       - pypi_precheck:
           filters:
             branches:
@@ -353,6 +321,8 @@ workflows:
           filters:
             branches:
               only: master
+            tags:
+              only: /.*/
           requires:
             - test_pytest
       - deploy_pypi:

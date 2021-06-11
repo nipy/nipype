@@ -89,7 +89,7 @@ class DTIFitOutputSpec(TraitedSpec):
 
 
 class DTIFit(FSLCommand):
-    """ Use FSL  dtifit command for fitting a diffusion tensor model at each
+    """Use FSL  dtifit command for fitting a diffusion tensor model at each
     voxel
 
     Example
@@ -1045,7 +1045,7 @@ class ProbTrackX2OutputSpec(ProbTrackXOutputSpec):
 
 
 class ProbTrackX2(ProbTrackX):
-    """ Use FSL  probtrackx2 for tractography on bedpostx results
+    """Use FSL  probtrackx2 for tractography on bedpostx results
 
     Examples
     --------

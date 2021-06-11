@@ -191,7 +191,7 @@ class ConstrainedSphericalDeconvolution(CommandLine):
     First, the fact the signal attenuation profile is real implies that it has conjugate symmetry,
     i.e. Y(l,-m) = Y(l,m)* (where * denotes the complex conjugate). Second, the diffusion profile should be
     antipodally symmetric (i.e. S(x) = S(-x)), implying that all odd l components should be zero.
-    Therefore, this program only computes the even elements. 	Note that the spherical harmonics equations used here
+    Therefore, this program only computes the even elements. Note that the spherical harmonics equations used here
     differ slightly from those conventionally used, in that the (-1)^m factor has been omitted. This should be taken
     into account in all subsequent calculations. Each volume in the output image corresponds to a different spherical
     harmonic component, according to the following convention:

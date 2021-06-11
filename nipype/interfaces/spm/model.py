@@ -145,8 +145,7 @@ class Level1Design(SPMCommand):
     _jobname = "fmri_spec"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt in ["spm_mat_dir", "mask_image"]:
             return np.array([str(val)], dtype=object)
         if opt in ["session_info"]:  # , 'factor_info']:
@@ -157,8 +156,7 @@ class Level1Design(SPMCommand):
         return super(Level1Design, self)._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
-        """validate spm realign options if set to None ignore
-        """
+        """validate spm realign options if set to None ignore"""
         einputs = super(Level1Design, self)._parse_inputs(
             skip=("mask_threshold", "flags")
         )
@@ -273,8 +271,7 @@ class EstimateModel(SPMCommand):
     _jobname = "fmri_est"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt == "spm_mat_file":
             return np.array([str(val)], dtype=object)
         if opt == "estimation_method":
@@ -285,8 +282,7 @@ class EstimateModel(SPMCommand):
         return super(EstimateModel, self)._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
-        """validate spm realign options if set to None ignore
-        """
+        """validate spm realign options if set to None ignore"""
         einputs = super(EstimateModel, self)._parse_inputs(skip=("flags"))
         if isdefined(self.inputs.flags):
             einputs[0].update({flag: val for (flag, val) in self.inputs.flags.items()})
@@ -514,12 +510,12 @@ end;"""
                             script += ["sidx = find(condsess(idx)==%d);" % (sno + 1)]
                             script += [
                                 "consess{%d}.tcon.convec(idx(sidx)) = %f;"
-                                % (i + 1, sw * contrast.weights[c0],)
+                                % (i + 1, sw * contrast.weights[c0])
                             ]
                     else:
                         script += [
                             "consess{%d}.tcon.convec(idx) = %f;"
-                            % (i + 1, contrast.weights[c0],)
+                            % (i + 1, contrast.weights[c0])
                         ]
         for i, contrast in enumerate(contrasts):
             if contrast.stat == "F":
@@ -830,8 +826,7 @@ class ThresholdStatisticsInputSpec(SPMCommandInputSpec):
         mandatory=True, desc="which contrast in the SPM.mat to use"
     )
     height_threshold = traits.Float(
-        desc=("stat value for initial thresholding (defining clusters)"),
-        mandatory=True,
+        desc=("stat value for initial thresholding (defining clusters)"), mandatory=True
     )
     extent_threshold = traits.Int(
         0, usedefault=True, desc="Minimum cluster size in voxels"
@@ -1020,8 +1015,7 @@ class FactorialDesign(SPMCommand):
     _jobname = "factorial_design"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt in ["spm_mat_dir", "explicit_mask_file"]:
             return np.array([str(val)], dtype=object)
         if opt in ["covariates"]:
@@ -1041,8 +1035,7 @@ class FactorialDesign(SPMCommand):
         return super(FactorialDesign, self)._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
-        """validate spm realign options if set to None ignore
-        """
+        """validate spm realign options if set to None ignore"""
         einputs = super(FactorialDesign, self)._parse_inputs()
         if not isdefined(self.inputs.spm_mat_dir):
             einputs[0]["dir"] = np.array([str(os.getcwd())], dtype=object)
@@ -1079,8 +1072,7 @@ class OneSampleTTestDesign(FactorialDesign):
     input_spec = OneSampleTTestDesignInputSpec
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt in ["in_files"]:
             return np.array(val, dtype=object)
         return super(OneSampleTTestDesign, self)._format_arg(opt, spec, val)
@@ -1127,8 +1119,7 @@ class TwoSampleTTestDesign(FactorialDesign):
     input_spec = TwoSampleTTestDesignInputSpec
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt in ["group1_files", "group2_files"]:
             return np.array(val, dtype=object)
         return super(TwoSampleTTestDesign, self)._format_arg(opt, spec, val)
@@ -1164,8 +1155,7 @@ class PairedTTestDesign(FactorialDesign):
     input_spec = PairedTTestDesignInputSpec
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt in ["paired_files"]:
             return [dict(scans=np.array(files, dtype=object)) for files in val]
         return super(PairedTTestDesign, self)._format_arg(opt, spec, val)
@@ -1206,8 +1196,7 @@ class MultipleRegressionDesign(FactorialDesign):
     input_spec = MultipleRegressionDesignInputSpec
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt in ["in_files"]:
             return np.array(val, dtype=object)
         if opt in ["user_covariates"]:

@@ -11,7 +11,7 @@ from .. import UnaryStats, BinaryStats
 
 @pytest.mark.skipif(no_nifty_tool(cmd="seg_stats"), reason="niftyseg is not installed")
 def test_unary_stats():
-    """ Test for the seg_stats interfaces """
+    """Test for the seg_stats interfaces"""
     # Create a node object
     unarys = UnaryStats()
 
@@ -35,7 +35,7 @@ def test_unary_stats():
 
 @pytest.mark.skipif(no_nifty_tool(cmd="seg_stats"), reason="niftyseg is not installed")
 def test_binary_stats():
-    """ Test for the seg_stats interfaces """
+    """Test for the seg_stats interfaces"""
     # Create a node object
     binarys = BinaryStats()
 

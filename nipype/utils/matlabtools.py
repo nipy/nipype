@@ -13,7 +13,7 @@ import numpy as np
 
 
 def fltcols(vals):
-    """ Trivial little function to make 1xN float vector """
+    """Trivial little function to make 1xN float vector"""
     return np.atleast_2d(np.array(vals, dtype=float))
 
 

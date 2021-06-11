@@ -33,7 +33,7 @@ __docformat__ = "restructuredtext"
 
 
 class Info(PackageInfo):
-    """ Freesurfer subject directory and version information.
+    """Freesurfer subject directory and version information.
 
     Examples
     --------
@@ -53,7 +53,7 @@ class Info(PackageInfo):
 
     @classmethod
     def looseversion(cls):
-        """ Return a comparable version object
+        """Return a comparable version object
 
         If no version found, use LooseVersion('0.0.0')
         """
@@ -118,7 +118,7 @@ class FSTraitedSpec(CommandLineInputSpec):
 class FSCommand(CommandLine):
     """General support for FreeSurfer commands.
 
-       Every FS command accepts 'subjects_dir' input.
+    Every FS command accepts 'subjects_dir' input.
     """
 
     input_spec = FSTraitedSpec
@@ -208,8 +208,7 @@ class FSSurfaceCommand(FSCommand):
 
 
 class FSScriptCommand(FSCommand):
-    """ Support for Freesurfer script commands with log terminal_output
-    """
+    """Support for Freesurfer script commands with log terminal_output"""
 
     _terminal_output = "file"
     _always_run = False
