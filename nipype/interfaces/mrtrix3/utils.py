@@ -812,7 +812,7 @@ class SHConv(CommandLine):
     >>> sh.inputs.in_file = 'csd.mif'
     >>> sh.inputs.response = 'response.txt'
     >>> sh.cmdline
-    'shconv csd.mif response.txt sh.mif'
+    'shconv csd.mif response.txt csd_shconv.mif'
     >>> sh.run()                                 # doctest: +SKIP
     """
 
