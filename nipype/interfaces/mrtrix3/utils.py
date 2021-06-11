@@ -848,7 +848,6 @@ class SH2AmpInputSpec(CommandLineInputSpec):
         name_template="%s_amp.mif",
         name_source=["in_file"],
         argstr="%s",
-        mandatory=True,
         position=-1,
         usedefault=True,
         desc="the output spherical harmonics",
