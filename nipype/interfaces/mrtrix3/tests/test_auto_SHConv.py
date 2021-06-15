@@ -20,7 +20,8 @@ def test_SHConv_inputs():
         out_file=dict(
             argstr="%s",
             extensions=None,
-            mandatory=True,
+            name_source=["in_file"],
+            name_template="%s_shconv.mif",
             position=-1,
             usedefault=True,
         ),

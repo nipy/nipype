@@ -29,7 +29,8 @@ def test_SH2Amp_inputs():
         out_file=dict(
             argstr="%s",
             extensions=None,
-            mandatory=True,
+            name_source=["in_file"],
+            name_template="%s_amp.mif",
             position=-1,
             usedefault=True,
         ),
