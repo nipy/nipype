@@ -613,7 +613,7 @@ class CompCor(SimpleInterface):
 
         if len(mask_images) == 0:
             img = nb.Nifti1Image(
-                np.ones(imgseries.shape[:3], dtype=np.bool),
+                np.ones(imgseries.shape[:3], dtype=bool),
                 affine=imgseries.affine,
                 header=imgseries.header,
             )
@@ -835,7 +835,7 @@ class TCompCor(CompCor):
         self._mask_files = []
         timeseries = np.asanyarray(timeseries)
         for i, img in enumerate(mask_images):
-            mask = np.asanyarray(img.dataobj).astype(np.bool)
+            mask = np.asanyarray(img.dataobj).astype(bool)
             imgseries = timeseries[mask, :]
             imgseries = regress_poly(2, imgseries)[0]
             tSTD = _compute_tSTD(imgseries, 0, axis=-1)
@@ -1379,7 +1379,7 @@ def compute_noise_components(
     md_retained = []
 
     for name, img in zip(mask_names, mask_images):
-        mask = np.asanyarray(nb.squeeze_image(img).dataobj).astype(np.bool)
+        mask = np.asanyarray(nb.squeeze_image(img).dataobj).astype(bool)
         if imgseries.shape[:3] != mask.shape:
             raise ValueError(
                 "Inputs for CompCor, timeseries and mask, do not have "

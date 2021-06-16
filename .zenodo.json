@@ -231,6 +231,11 @@
       "orcid": "0000-0001-7194-4568"
     },
     {
+      "affiliation": "University of Sydney",
+      "name": "Close, Thomas",
+      "orcid": "0000-0002-4160-2134"
+    },
+    {
       "affiliation": "National Institute of Mental Health",
       "name": "Nielson, Dylan M.",
       "orcid": "0000-0003-4613-6643"
@@ -247,13 +252,28 @@
       "name": "Mordom, David"
     },
     {
+      "affiliation": "CIBIT, UC",
+      "name": "Machado, F\u00e1tima",
+      "orcid": "0000-0001-8878-1750"
+    },
+    {
       "affiliation": "ARAMIS LAB, Brain and Spine Institute (ICM), Paris, France.",
       "name": "Guillon, Je\u0301re\u0301my",
       "orcid": "0000-0002-2672-7510"
     },
     {
+      "affiliation": "Charite Universitatsmedizin Berlin, Germany",
+      "name": "Waller, Lea",
+      "orcid": "0000-0002-3239-6957"
+    },
+    {
       "affiliation": "Indiana University, IN, USA",
       "name": "Koudoro, Serge"
+    },
+    {
+      "affiliation": "Penn Statistics in Imaging and Visualization Endeavor, University of Pennsylvania",
+      "name": "Robert-Fitzgerald, Timothy",
+      "orcid": "0000-0001-8303-8001"
     },
     {
       "affiliation": "Donders Institute for Brain, Cognition and Behavior, Center for Cognitive Neuroimaging",
@@ -335,6 +355,11 @@
       "name": "Schwartz, Yannick"
     },
     {
+      "affiliation": "The University of Iowa",
+      "name": "Ghayoor, Ali",
+      "orcid": "0000-0002-8858-1254"
+    },
+    {
       "affiliation": "NIMH IRP",
       "name": "Lee, John A.",
       "orcid": "0000-0001-5884-4247"
@@ -403,13 +428,12 @@
       "orcid": "0000-0003-2766-8425"
     },
     {
-      "affiliation": "University of Iowa",
-      "name": "Welch, David"
+      "affiliation": "Sagol School of Neuroscience, Tel Aviv University",
+      "name": "Baratz, Zvi"
     },
     {
-      "affiliation": "Charite Universitatsmedizin Berlin, Germany",
-      "name": "Waller, Lea",
-      "orcid": "0000-0002-3239-6957"
+      "affiliation": "University of Iowa",
+      "name": "Welch, David"
     },
     {
       "affiliation": "Max Planck Institute for Human Cognitive and Brain Sciences",
@@ -420,11 +444,6 @@
       "affiliation": "Department of Psychology, Stanford University",
       "name": "Triplett, William",
       "orcid": "0000-0002-9546-1306"
-    },
-    {
-      "affiliation": "The University of Iowa",
-      "name": "Ghayoor, Ali",
-      "orcid": "0000-0002-8858-1254"
     },
     {
       "affiliation": "Child Mind Institute",
@@ -615,6 +634,9 @@
       "orcid": "0000-0001-9308-9988"
     },
     {
+      "name": "Jalan, Raunak"
+    },
+    {
       "name": "Inati, Souheil"
     },
     {
@@ -698,10 +720,6 @@
       "orcid": "0000-0002-5650-3964"
     },
     {
-      "affiliation": "Sagol School of Neuroscience, Tel Aviv University",
-      "name": "Baratz, Zvi"
-    },
-    {
       "name": "Matsubara, K"
     },
     {
@@ -710,11 +728,6 @@
     },
     {
       "name": "Marina, Ana"
-    },
-    {
-      "affiliation": "University of Sydney",
-      "name": "Close, Thomas",
-      "orcid": "0000-0002-4160-2134"
     },
     {
       "name": "Davison, Andrew"
@@ -742,7 +755,17 @@
       "name": "Shachnev, Dmitry"
     },
     {
+      "affiliation": "University of Applied Sciences and Arts Northwestern Switzerland",
+      "name": "Vogel, Dorian",
+      "orcid": "0000-0003-3445-576X"
+    },
+    {
       "name": "Flandin, Guillaume"
+    },
+    {
+      "affiliation": "Stanford University and the University of Chicago",
+      "name": "Jones, Henry",
+      "orcid": "0000-0001-7719-3646"
     },
     {
       "affiliation": "Athinoula A. Martinos Center for Biomedical Imaging, Department of Radiology, Massachusetts General Hospital, Charlestown, MA, USA",
@@ -791,20 +814,17 @@
       "orcid": "0000-0002-8999-9003"
     },
     {
-      "name": "Tambini, Arielle"
-    },
-    {
       "affiliation": "Weill Cornell Medicine",
       "name": "Xie, Xihe",
       "orcid": "0000-0001-6595-2473"
     },
     {
+      "name": "Tambini, Arielle"
+    },
+    {
       "affiliation": "Max Planck Institute for Human Cognitive and Brain Sciences, Leipzig, Germany.",
       "name": "Mihai, Paul Glad",
       "orcid": "0000-0001-5715-6442"
-    },
-    {
-      "name": "Jalan, Raunak",
     },
     {
       "affiliation": "Department of Psychology, Stanford University",
@@ -815,11 +835,6 @@
       "affiliation": "MIT, HMS",
       "name": "Ghosh, Satrajit",
       "orcid": "0000-0002-5312-6729"
-    },
-    {
-      "affiliation": "CIBIT, UC",
-      "name": "Machado, Fátima",
-      "orcid": "0000-0001-8878-1750"
     }
   ],
   "keywords": [

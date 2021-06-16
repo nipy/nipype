@@ -88,10 +88,10 @@ class Distance(BaseInterface):
     def _eucl_min(self, nii1, nii2):
         from scipy.spatial.distance import cdist, euclidean
 
-        origdata1 = np.asanyarray(nii1.dataobj).astype(np.bool)
+        origdata1 = np.asanyarray(nii1.dataobj).astype(bool)
         border1 = self._find_border(origdata1)
 
-        origdata2 = np.asanyarray(nii2.dataobj).astype(np.bool)
+        origdata2 = np.asanyarray(nii2.dataobj).astype(bool)
         border2 = self._find_border(origdata2)
 
         set1_coordinates = self._get_coordinates(border1, nii1.affine)
@@ -134,10 +134,10 @@ class Distance(BaseInterface):
     def _eucl_mean(self, nii1, nii2, weighted=False):
         from scipy.spatial.distance import cdist
 
-        origdata1 = np.asanyarray(nii1.dataobj).astype(np.bool)
+        origdata1 = np.asanyarray(nii1.dataobj).astype(bool)
         border1 = self._find_border(origdata1)
 
-        origdata2 = np.asanyarray(nii2.dataobj).astype(np.bool)
+        origdata2 = np.asanyarray(nii2.dataobj).astype(bool)
 
         set1_coordinates = self._get_coordinates(border1, nii1.affine)
         set2_coordinates = self._get_coordinates(origdata2, nii2.affine)

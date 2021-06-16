@@ -119,6 +119,7 @@ def main():
         maintainer_email=ldict["MAINTAINER_EMAIL"],
         description=ldict["DESCRIPTION"],
         long_description=ldict["LONG_DESCRIPTION"],
+        long_description_content_type="text/x-rst",
         url=ldict["URL"],
         download_url=ldict["DOWNLOAD_URL"],
         license=ldict["LICENSE"],
