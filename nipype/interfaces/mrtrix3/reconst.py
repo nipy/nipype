@@ -4,7 +4,7 @@
 
 import os.path as op
 
-from ..base import traits, TraitedSpec, File, Undefined, InputMultiObject
+from ..base import traits, TraitedSpec, File, InputMultiObject, isdefined
 from .base import MRTrix3BaseInputSpec, MRTrix3Base
 
 
@@ -50,10 +50,18 @@ class FitTensorInputSpec(MRTrix3BaseInputSpec):
             "only applies to the non-linear methods"
         ),
     )
+    predicted_signal = File(
+        argstr="-predicted_signal %s",
+        desc=(
+            "specify a file to contain the predicted signal from the tensor "
+            "fits. This can be used to calculate the residual signal"
+        ),
+    )
 
 
 class FitTensorOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="the output DTI file")
+    predicted_signal = File(desc="Predicted signal from fitted tensors")
 
 
 class FitTensor(MRTrix3Base):
@@ -81,6 +89,8 @@ class FitTensor(MRTrix3Base):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs["out_file"] = op.abspath(self.inputs.out_file)
+        if isdefined(self.inputs.predicted_signal):
+            outputs["predicted_signal"] = op.abspath(self.inputs.predicted_signal)
         return outputs
 
 
@@ -144,12 +154,23 @@ class EstimateFODInputSpec(MRTrix3BaseInputSpec):
             "[ az el ] pairs for the directions."
         ),
     )
+    predicted_signal = File(
+        argstr="-predicted_signal %s",
+        desc=(
+            "specify a file to contain the predicted signal from the FOD "
+            "estimates. This can be used to calculate the residual signal."
+            "Note that this is only valid if algorithm == 'msmt_csd'. "
+            "For single shell reconstructions use a combination of SHConv "
+            "and SH2Amp instead."
+        ),
+    )
 
 
 class EstimateFODOutputSpec(TraitedSpec):
     wm_odf = File(argstr="%s", desc="output WM ODF")
     gm_odf = File(argstr="%s", desc="output GM ODF")
     csf_odf = File(argstr="%s", desc="output CSF ODF")
+    predicted_signal = File(desc="output predicted signal")
 
 
 class EstimateFOD(MRTrix3Base):
@@ -183,10 +204,17 @@ class EstimateFOD(MRTrix3Base):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs["wm_odf"] = op.abspath(self.inputs.wm_odf)
-        if self.inputs.gm_odf != Undefined:
+        if isdefined(self.inputs.gm_odf):
             outputs["gm_odf"] = op.abspath(self.inputs.gm_odf)
-        if self.inputs.csf_odf != Undefined:
+        if isdefined(self.inputs.csf_odf):
             outputs["csf_odf"] = op.abspath(self.inputs.csf_odf)
+        if isdefined(self.inputs.predicted_signal):
+            if self.inputs.algorithm != "msmt_csd":
+                raise Exception(
+                    "'predicted_signal' option can only be used with "
+                    "the 'msmt_csd' algorithm"
+                )
+            outputs["predicted_signal"] = op.abspath(self.inputs.predicted_signal)
         return outputs
 
 

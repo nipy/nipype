@@ -54,6 +54,10 @@ def test_FitTensor_inputs():
             position=-1,
             usedefault=True,
         ),
+        predicted_signal=dict(
+            argstr="-predicted_signal %s",
+            extensions=None,
+        ),
         reg_term=dict(
             argstr="-regularisation %f",
             max_ver="0.3.13",
@@ -69,6 +73,9 @@ def test_FitTensor_inputs():
 def test_FitTensor_outputs():
     output_map = dict(
         out_file=dict(
+            extensions=None,
+        ),
+        predicted_signal=dict(
             extensions=None,
         ),
     )

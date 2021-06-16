@@ -765,3 +765,125 @@ class MRResize(MRTrix3Base):
     _cmd = "mrresize"
     input_spec = MRResizeInputSpec
     output_spec = MRResizeOutputSpec
+
+
+class SHConvInputSpec(CommandLineInputSpec):
+    in_file = File(
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=-3,
+        desc="input ODF image",
+    )
+    # General options
+    response = File(
+        exists=True,
+        mandatory=True,
+        argstr="%s",
+        position=-2,
+        desc=("The response function"),
+    )
+    out_file = File(
+        name_template="%s_shconv.mif",
+        name_source=["in_file"],
+        argstr="%s",
+        position=-1,
+        usedefault=True,
+        desc="the output spherical harmonics",
+    )
+
+
+class SHConvOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc="the output convoluted spherical harmonics file")
+
+
+class SHConv(CommandLine):
+    """
+    Convolve spherical harmonics with a tissue response function. Useful for
+    checking residuals of ODF estimates.
+
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> sh = mrt.SHConv()
+    >>> sh.inputs.in_file = 'csd.mif'
+    >>> sh.inputs.response = 'response.txt'
+    >>> sh.cmdline
+    'shconv csd.mif response.txt csd_shconv.mif'
+    >>> sh.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = "shconv"
+    input_spec = SHConvInputSpec
+    output_spec = SHConvOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["out_file"] = op.abspath(self.inputs.out_file)
+        return outputs
+
+
+class SH2AmpInputSpec(CommandLineInputSpec):
+    in_file = File(
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=-3,
+        desc="input ODF image",
+    )
+    # General options
+    directions = File(
+        exists=True,
+        mandatory=True,
+        argstr="%s",
+        position=-2,
+        desc=(
+            "The gradient directions along which to sample the spherical "
+            "harmonics MRtrix format"
+        ),
+    )
+    out_file = File(
+        name_template="%s_amp.mif",
+        name_source=["in_file"],
+        argstr="%s",
+        position=-1,
+        usedefault=True,
+        desc="the output spherical harmonics",
+    )
+    nonnegative = traits.Bool(
+        argstr="-nonnegative", desc="cap all negative amplitudes to zero"
+    )
+
+
+class SH2AmpOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc="the output convoluted spherical harmonics file")
+
+
+class SH2Amp(CommandLine):
+    """
+    Sample spherical harmonics on a set of gradient orientations.  Useful for
+    checking residuals of ODF estimates.
+
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> sh = mrt.SH2Amp()
+    >>> sh.inputs.in_file = 'sh.mif'
+    >>> sh.inputs.directions = 'grads.txt'
+    >>> sh.cmdline
+    'sh2amp sh.mif grads.txt sh_amp.mif'
+    >>> sh.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = "sh2amp"
+    input_spec = SH2AmpInputSpec
+    output_spec = SH2AmpOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["out_file"] = op.abspath(self.inputs.out_file)
+        return outputs
