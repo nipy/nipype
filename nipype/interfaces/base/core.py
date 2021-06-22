@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 Nipype interfaces core
 ......................
-
 
 Defines the ``Interface`` API and the body of the
 most basic interfaces.
@@ -12,20 +10,15 @@ The I/O specifications corresponding to these base
 interfaces are found in the ``specs`` module.
 
 """
-from copy import deepcopy
-from datetime import datetime as dt
 import os
-import platform
 import subprocess as sp
 import shlex
-import sys
 import simplejson as json
-from dateutil.parser import parse as parseutc
 from traits.trait_errors import TraitError
 
 from ... import config, logging, LooseVersion
 from ...utils.provenance import write_provenance
-from ...utils.misc import str2bool, rgetcwd
+from ...utils.misc import str2bool
 from ...utils.filemanip import split_filename, which, get_dependencies, canonicalize_env
 from ...utils.subprocess import run_command
 
@@ -39,7 +32,12 @@ from .specs import (
     MpiCommandLineInputSpec,
     get_filecopy_info,
 )
-from .support import Bunch, InterfaceResult, NipypeInterfaceError, format_help
+from .support import (
+    RuntimeContext,
+    InterfaceResult,
+    NipypeInterfaceError,
+    format_help,
+)
 
 iflogger = logging.getLogger("nipype.interface")
 
@@ -63,8 +61,15 @@ class Interface(object):
 
     """
 
-    input_spec = None  # A traited input specification
-    output_spec = None  # A traited output specification
+    input_spec = None
+    """
+    The specification of the input, defined by a :py:class:`~traits.has_traits.HasTraits` class.
+    """
+    output_spec = None
+    """
+    The specification of the output, defined by a :py:class:`~traits.has_traits.HasTraits` class.
+    """
+
     _can_resume = False  # See property below
     _always_run = False  # See property below
 
@@ -365,131 +370,42 @@ class BaseInterface(Interface):
             if successful, results
 
         """
-        from ...utils.profiler import ResourceMonitor
-
-        # if ignore_exception is not provided, taking self.ignore_exception
-        if ignore_exception is None:
-            ignore_exception = self.ignore_exception
-
-        # Tear-up: get current and prev directories
-        syscwd = rgetcwd(error=False)  # Recover when wd does not exist
-        if cwd is None:
-            cwd = syscwd
-
-        os.chdir(cwd)  # Change to the interface wd
-
-        enable_rm = config.resource_monitor and self.resource_monitor
-        self.inputs.trait_set(**inputs)
-        self._check_mandatory_inputs()
-        self._check_version_requirements(self.inputs)
-        interface = self.__class__
-        self._duecredit_cite()
-
-        # initialize provenance tracking
-        store_provenance = str2bool(
-            config.get("execution", "write_provenance", "false")
+        rtc = RuntimeContext(
+            resource_monitor=config.resource_monitor and self.resource_monitor,
+            ignore_exception=ignore_exception
+            if ignore_exception is not None
+            else self.ignore_exception,
         )
-        env = deepcopy(dict(os.environ))
-        if self._redirect_x:
-            env["DISPLAY"] = config.get_display()
 
-        runtime = Bunch(
-            cwd=cwd,
-            prevcwd=syscwd,
-            returncode=None,
-            duration=None,
-            environ=env,
-            startTime=dt.isoformat(dt.utcnow()),
-            endTime=None,
-            platform=platform.platform(),
-            hostname=platform.node(),
-            version=self.version,
-        )
-        runtime_attrs = set(runtime.dictcopy())
+        with rtc(self, cwd=cwd, redirect_x=self._redirect_x) as runtime:
+            self.inputs.trait_set(**inputs)
+            self._check_mandatory_inputs()
+            self._check_version_requirements(self.inputs)
 
-        mon_sp = None
-        if enable_rm:
-            mon_freq = float(config.get("execution", "resource_monitor_frequency", 1))
-            proc_pid = os.getpid()
-            iflogger.debug(
-                "Creating a ResourceMonitor on a %s interface, PID=%d.",
-                self.__class__.__name__,
-                proc_pid,
-            )
-            mon_sp = ResourceMonitor(proc_pid, freq=mon_freq)
-            mon_sp.start()
-
-        # Grab inputs now, as they should not change during execution
-        inputs = self.inputs.get_traitsfree()
-        outputs = None
-
-        try:
+            # Grab inputs now, as they should not change during execution
+            inputs = self.inputs.get_traitsfree()
+            outputs = None
+            # Run interface
             runtime = self._pre_run_hook(runtime)
             runtime = self._run_interface(runtime)
             runtime = self._post_run_hook(runtime)
+            # Collect outputs
             outputs = self.aggregate_outputs(runtime)
-        except Exception as e:
-            import traceback
 
-            # Retrieve the maximum info fast
-            runtime.traceback = traceback.format_exc()
-            # Gather up the exception arguments and append nipype info.
-            exc_args = e.args if getattr(e, "args") else tuple()
-            exc_args += (
-                "An exception of type %s occurred while running interface %s."
-                % (type(e).__name__, self.__class__.__name__),
-            )
-            if config.get("logging", "interface_level", "info").lower() == "debug":
-                exc_args += ("Inputs: %s" % str(self.inputs),)
+        results = InterfaceResult(
+            self.__class__,
+            rtc.runtime,
+            inputs=inputs,
+            outputs=outputs,
+            provenance=None,
+        )
 
-            runtime.traceback_args = ("\n".join(["%s" % arg for arg in exc_args]),)
+        # Add provenance (if required)
+        if str2bool(config.get("execution", "write_provenance", "false")):
+            # Provenance will only throw a warning if something went wrong
+            results.provenance = write_provenance(results)
 
-            if not ignore_exception:
-                raise
-        finally:
-            if runtime is None or runtime_attrs - set(runtime.dictcopy()):
-                raise RuntimeError(
-                    "{} interface failed to return valid "
-                    "runtime object".format(interface.__class__.__name__)
-                )
-            # This needs to be done always
-            runtime.endTime = dt.isoformat(dt.utcnow())
-            timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
-            runtime.duration = (
-                timediff.days * 86400 + timediff.seconds + timediff.microseconds / 1e6
-            )
-            results = InterfaceResult(
-                interface, runtime, inputs=inputs, outputs=outputs, provenance=None
-            )
-
-            # Add provenance (if required)
-            if store_provenance:
-                # Provenance will only throw a warning if something went wrong
-                results.provenance = write_provenance(results)
-
-            # Make sure runtime profiler is shut down
-            if enable_rm:
-                import numpy as np
-
-                mon_sp.stop()
-
-                runtime.mem_peak_gb = None
-                runtime.cpu_percent = None
-
-                # Read .prof file in and set runtime values
-                vals = np.loadtxt(mon_sp.fname, delimiter=",")
-                if vals.size:
-                    vals = np.atleast_2d(vals)
-                    runtime.mem_peak_gb = vals[:, 2].max() / 1024
-                    runtime.cpu_percent = vals[:, 1].max()
-
-                    runtime.prof_dict = {
-                        "time": vals[:, 0].tolist(),
-                        "cpus": vals[:, 1].tolist(),
-                        "rss_GiB": (vals[:, 2] / 1024).tolist(),
-                        "vms_GiB": (vals[:, 3] / 1024).tolist(),
-                    }
-            os.chdir(syscwd)
+        self._duecredit_cite()
 
         return results
 
