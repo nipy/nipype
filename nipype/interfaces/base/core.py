@@ -723,6 +723,7 @@ class CommandLine(BaseInterface):
         runtime.stderr = None
         runtime.cmdline = self.cmdline
         runtime.environ.update(out_environ)
+        runtime.success_codes = correct_return_codes
 
         # which $cmd
         executable_name = shlex.split(self._cmd_prefix + self.cmd)[0]
@@ -742,9 +743,6 @@ class CommandLine(BaseInterface):
             else "<skipped>"
         )
         runtime = run_command(runtime, output=self.terminal_output)
-        if runtime.returncode is None or runtime.returncode not in correct_return_codes:
-            self.raise_exception(runtime)
-
         return runtime
 
     def _format_arg(self, name, trait_spec, value):

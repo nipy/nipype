@@ -110,6 +110,17 @@ class RuntimeContext(AbstractContextManager):
             if self._ignore_exc:
                 return True
 
+        _exitcode = (
+            getattr(self._runtime, "returncode", None)
+            if getattr(self._runtime, "cmdline", None)
+            else 0
+        )
+        _success_codes = getattr(self._runtime, "success_codes", (0,))
+        if _exitcode not in _success_codes:
+            self._runtime.traceback = (
+                f"RuntimeError: subprocess exited with code {self._runtime.returncode}."
+            )
+
     @property
     def runtime(self):
         return self._runtime

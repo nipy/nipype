@@ -9,6 +9,7 @@ from collections import OrderedDict, defaultdict
 
 import os
 import os.path as op
+from pathlib import Path
 import shutil
 import socket
 from copy import deepcopy
@@ -30,7 +31,6 @@ from ...utils.filemanip import (
     load_json,
     emptydirs,
     savepkl,
-    indirectory,
     silentrm,
 )
 
@@ -98,7 +98,7 @@ class Node(EngineBase):
         run_without_submitting=False,
         n_procs=None,
         mem_gb=0.20,
-        **kwargs
+        **kwargs,
     ):
         """
         Parameters
@@ -697,78 +697,55 @@ Error populating the inputs of node "%s": the results file of the source node \
                 )
                 return result
 
-        outdir = self.output_dir()
-        # Run command: either execute is true or load_results failed.
-        result = InterfaceResult(
-            interface=self._interface.__class__,
-            runtime=Bunch(
-                cwd=outdir,
-                returncode=1,
-                environ=dict(os.environ),
-                hostname=socket.gethostname(),
-            ),
-            inputs=self._interface.inputs.get_traitsfree(),
-        )
-
+        outdir = Path(self.output_dir())
         if copyfiles:
             self._originputs = deepcopy(self._interface.inputs)
             self._copyfiles_to_wd(execute=execute)
 
-        message = '[Node] Running "{}" ("{}.{}")'.format(
-            self.name, self._interface.__module__, self._interface.__class__.__name__
+        # Run command: either execute is true or load_results failed.
+        logger.info(
+            f'[Node] Executing "{self.name}" <{self._interface.__module__}'
+            f".{self._interface.__class__.__name__}>"
         )
+        # Invoke core run method of the interface ignoring exceptions
+        result = self._interface.run(cwd=outdir, ignore_exception=True)
+        logger.info(
+            f'[Node] Finished "{self.name}", elapsed time {result.runtime.duration}s.'
+        )
+
         if issubclass(self._interface.__class__, CommandLine):
-            try:
-                with indirectory(outdir):
-                    cmd = self._interface.cmdline
-            except Exception as msg:
-                result.runtime.stderr = "{}\n\n{}".format(
-                    getattr(result.runtime, "stderr", ""), msg
-                )
-                _save_resultfile(
-                    result,
-                    outdir,
-                    self.name,
-                    rebase=str2bool(self.config["execution"]["use_relative_paths"]),
-                )
-                raise
-            cmdfile = op.join(outdir, "command.txt")
-            with open(cmdfile, "wt") as fd:
-                print(cmd + "\n", file=fd)
-            message += ", a CommandLine Interface with command:\n{}".format(cmd)
-        logger.info(message)
-        try:
-            result = self._interface.run(cwd=outdir)
-        except Exception as msg:
-            result.runtime.stderr = "%s\n\n%s".format(
-                getattr(result.runtime, "stderr", ""), msg
-            )
-            _save_resultfile(
-                result,
+            # Write out command line as it happened
+            (outdir / "command.txt").write_text(f"{result.runtime.cmdline}\n")
+
+        exc_tb = getattr(result, "traceback", None)
+
+        if not exc_tb:
+            # Clean working directory if no errors
+            dirs2keep = None
+            if isinstance(self, MapNode):
+                dirs2keep = [op.join(outdir, "mapflow")]
+
+            result.outputs = clean_working_directory(
+                result.outputs,
                 outdir,
-                self.name,
-                rebase=str2bool(self.config["execution"]["use_relative_paths"]),
+                self._interface.inputs,
+                self.needed_outputs,
+                self.config,
+                dirs2keep=dirs2keep,
             )
-            raise
 
-        dirs2keep = None
-        if isinstance(self, MapNode):
-            dirs2keep = [op.join(outdir, "mapflow")]
-
-        result.outputs = clean_working_directory(
-            result.outputs,
-            outdir,
-            self._interface.inputs,
-            self.needed_outputs,
-            self.config,
-            dirs2keep=dirs2keep,
-        )
+        # Store results file under all circumstances
         _save_resultfile(
             result,
             outdir,
             self.name,
             rebase=str2bool(self.config["execution"]["use_relative_paths"]),
         )
+
+        if exc_tb:
+            raise RuntimeError(
+                f"Exception raised while executing Node {self.name}.\n\n{result.runtime.traceback}"
+            )
 
         return result
 
