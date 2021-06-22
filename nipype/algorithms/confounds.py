@@ -104,7 +104,7 @@ class ComputeDVARS(BaseInterface):
 
     input_spec = ComputeDVARSInputSpec
     output_spec = ComputeDVARSOutputSpec
-    references_ = [
+    _references = [
         {
             "entry": BibTeX(
                 """\
@@ -311,7 +311,7 @@ class FramewiseDisplacement(BaseInterface):
     input_spec = FramewiseDisplacementInputSpec
     output_spec = FramewiseDisplacementOutputSpec
 
-    references_ = [
+    _references = [
         {
             "entry": BibTeX(
                 """\
@@ -556,7 +556,7 @@ class CompCor(SimpleInterface):
 
     input_spec = CompCorInputSpec
     output_spec = CompCorOutputSpec
-    references_ = [
+    _references = [
         {
             "tags": ["method", "implementation"],
             "entry": BibTeX(

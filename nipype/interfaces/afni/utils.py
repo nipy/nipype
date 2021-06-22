@@ -1032,7 +1032,7 @@ class Edge3(AFNICommand):
     _cmd = "3dedge3"
     input_spec = Edge3InputSpec
     output_spec = AFNICommandOutputSpec
-    references_ = [
+    _references = [
         {
             "entry": BibTeX(
                 """\
@@ -1341,7 +1341,7 @@ class FWHMx(AFNICommandBase):
     input_spec = FWHMxInputSpec
     output_spec = FWHMxOutputSpec
 
-    references_ = [
+    _references = [
         {
             "entry": BibTeX(
                 "@article{CoxReynoldsTaylor2016,"
