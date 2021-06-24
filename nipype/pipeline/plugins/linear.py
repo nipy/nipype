@@ -34,6 +34,8 @@ class LinearPlugin(PluginBase):
         old_wd = os.getcwd()
         notrun = []
         donotrun = []
+        stop_on_first_crash = str2bool(config["execution"]["stop_on_first_crash"])
+        errors = []
         nodes, _ = topological_sort(graph)
         for node in nodes:
             endstatus = "end"
@@ -43,13 +45,11 @@ class LinearPlugin(PluginBase):
                 if self._status_callback:
                     self._status_callback(node, "start")
                 node.run(updatehash=updatehash)
-            except:
+            except Exception as exc:
                 endstatus = "exception"
                 # bare except, but i really don't know where a
                 # node might fail
                 crashfile = report_crash(node)
-                if str2bool(config["execution"]["stop_on_first_crash"]):
-                    raise
                 # remove dependencies from queue
                 subnodes = [s for s in dfs_preorder(graph, node)]
                 notrun.append(
@@ -57,13 +57,16 @@ class LinearPlugin(PluginBase):
                 )
                 donotrun.extend(subnodes)
                 # Delay raising the crash until we cleaned the house
-                if str2bool(config["execution"]["stop_on_first_crash"]):
-                    os.chdir(old_wd)  # Return wherever we were before
-                    report_nodes_not_run(notrun)  # report before raising
-                    raise
+                errors.append(exc)
+
+                if stop_on_first_crash:
+                    break
             finally:
                 if self._status_callback:
                     self._status_callback(node, endstatus)
 
         os.chdir(old_wd)  # Return wherever we were before
         report_nodes_not_run(notrun)
+        if errors:
+            # Re-raise exception of first failed node
+            raise errors[0]

@@ -64,6 +64,10 @@ from .base import EngineBase
 logger = logging.getLogger("nipype.workflow")
 
 
+class NodeExecutionError(RuntimeError):
+    """A nipype-specific name for exceptions when executing a Node."""
+
+
 class Node(EngineBase):
     """
     Wraps interface objects for use in pipeline
@@ -582,7 +586,7 @@ directory. Please ensure no other concurrent workflows are racing""",
                 logger.critical("%s", e)
 
             if outputs is None:
-                raise RuntimeError(
+                raise NodeExecutionError(
                     """\
 Error populating the inputs of node "%s": the results file of the source node \
 (%s) does not contain any outputs."""
@@ -717,7 +721,7 @@ Error populating the inputs of node "%s": the results file of the source node \
             # Write out command line as it happened
             (outdir / "command.txt").write_text(f"{result.runtime.cmdline}\n")
 
-        exc_tb = getattr(result, "traceback", None)
+        exc_tb = getattr(result.runtime, "traceback", None)
 
         if not exc_tb:
             # Clean working directory if no errors
@@ -743,7 +747,7 @@ Error populating the inputs of node "%s": the results file of the source node \
         )
 
         if exc_tb:
-            raise RuntimeError(
+            raise NodeExecutionError(
                 f"Exception raised while executing Node {self.name}.\n\n{result.runtime.traceback}"
             )
 
@@ -1267,7 +1271,7 @@ class MapNode(Node):
                 if code is not None:
                     msg += ["Subnode %d failed" % i]
                     msg += ["Error: %s" % str(code)]
-            raise Exception(
+            raise NodeExecutionError(
                 "Subnodes of node: %s failed:\n%s" % (self.name, "\n".join(msg))
             )
 
