@@ -31,8 +31,7 @@ def test_crashfile_creation(tmp_path):
         assert pipe.run(plugin=sgelike_plugin)
         assert str(e.value) == "Workflow did not execute cleanly. Check log for details"
 
-    crashfiles = (
-        list(tmp_path.glob("crash*crasher*.pklz"))
-        + list(tmp_path.glob("crash*crasher*.txt"))
+    crashfiles = list(tmp_path.glob("crash*crasher*.pklz")) + list(
+        tmp_path.glob("crash*crasher*.txt")
     )
     assert len(crashfiles) == 1
