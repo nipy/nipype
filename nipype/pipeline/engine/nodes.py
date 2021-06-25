@@ -443,7 +443,8 @@ class Node(EngineBase):
         )
 
         # Check hash, check whether run should be enforced
-        logger.info('[Node] Setting-up "%s" in "%s".', self.fullname, outdir)
+        if not isinstance(self, MapNode):
+            logger.info(f'[Node] Setting-up "{self.fullname}" in "{outdir}".')
         cached, updated = self.is_cached()
 
         # If the node is cached, check on pklz files and finish
@@ -534,7 +535,6 @@ directory. Please ensure no other concurrent workflows are racing""",
         # Tear-up after success
         shutil.move(hashfile_unfinished, hashfile_unfinished.replace("_unfinished", ""))
         write_node_report(self, result=result, is_mapnode=isinstance(self, MapNode))
-        logger.info('[Node] Finished "%s".', self.fullname)
         return result
 
     def _get_hashval(self):
