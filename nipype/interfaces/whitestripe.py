@@ -29,6 +29,29 @@ class WhiteStripe(BaseInterface):
     output_spec = WhiteStripeOutputSpec
 
     def _run_interface(self, runtime):
+        tmpfile, script = self._cmdline(runtime)
+
+        # rfile = True  will create a .R file with your script and executed.
+        # Alternatively
+        # rfile can be set to False which will cause the R code to be
+        # passed
+        # as a commandline argument to the R executable
+        # (without creating any files).
+        # This, however, is less reliable and harder to debug
+        # (code will be reduced to
+        # a single line and stripped of any comments).
+        rcmd = RCommand(script=script, rfile=False)
+        result = rcmd.run()
+        if tmpfile:
+            os.remove(tmpfile)
+        return result.runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+    def _cmdline(self, runtime):
         d = dict(
             in_file=self.inputs.in_file,
             out_file=self.inputs.out_file,
@@ -65,25 +88,7 @@ class WhiteStripe(BaseInterface):
                 """
             ).substitute(d)
 
-        # rfile = True  will create a .R file with your script and executed.
-        # Alternatively
-        # rfile can be set to False which will cause the R code to be
-        # passed
-        # as a commandline argument to the R executable
-        # (without creating any files).
-        # This, however, is less reliable and harder to debug
-        # (code will be reduced to
-        # a single line and stripped of any comments).
-        rcmd = RCommand(script=script, rfile=False)
-        result = rcmd.run()
-        if tmpfile:
-            os.remove(tmpfile)
-        return result.runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
-        return outputs
+        return tmpfile, script
 
     def gen_indices(self):
         path = tempfile.mkstemp()[1]

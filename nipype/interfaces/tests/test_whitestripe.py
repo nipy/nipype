@@ -5,31 +5,43 @@ import os
 
 import pytest
 import requests
+from pathlib import Path
+from string import Template
 from nipype.interfaces import whitestripe
 from nipype.interfaces.r import get_r_command
 
 
-@pytest.mark.skipif(get_r_command() is None, reason="R is not available")
 def test_whitestripe(tmpdir):
     cwd = tmpdir.chdir()
 
-    filename = "T1W.nii.gz"
-    req = requests.get(
-        "https://johnmuschelli.com/open_ms_data/cross_sectional/coregistered_resampled/patient01/T1W.nii.gz"
-    )
-    with open(filename, "wb") as fd:
-        for chunk in req.iter_content(chunk_size=128):
-            fd.write(chunk)
+    Path("T1W.nii.gz").touch()
 
     normalizer = whitestripe.WhiteStripe()
     normalizer.inputs.img_type = "T1"
     normalizer.inputs.in_file = "T1W.nii.gz"
-    normalizer.inputs.indices = normalizer.gen_indices()
     normalizer.inputs.out_file = "T1W_ws.nii.gz"
-    normalizer.run()
+    tmpfile, script = normalizer._cmdline(normalizer)
 
-    assert os.path.isfile(normalizer.inputs.out_file)
-    os.remove(normalizer.inputs.out_file)
+    expected_script = Template(
+        # the level of indentation needs to match what's in the whitestripe interface
+        """
+                library(neurobase)
+                library(WhiteStripe)
+                in_file = readnii('$in_file')
+                ind = whitestripe(in_file, "$img_type")$$whitestripe.ind
+                norm = whitestripe_norm(in_file, ind)
+                out_file = '$out_file'
+                writenii(norm, out_file)
+                """
+    ).substitute(
+        {
+            "in_file": normalizer.inputs.in_file,
+            "out_file": normalizer.inputs.out_file,
+            "img_type": normalizer.inputs.img_type,
+        }
+    )
+    assert tmpfile is False
+    assert script == expected_script
     os.remove(normalizer.inputs.in_file)
 
     cwd.chdir()
