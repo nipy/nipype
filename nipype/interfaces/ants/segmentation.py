@@ -1734,7 +1734,7 @@ class KellyKapowski(ANTSCommand):
     input_spec = KellyKapowskiInputSpec
     output_spec = KellyKapowskiOutputSpec
 
-    references_ = [
+    _references = [
         {
             "entry": BibTeX(
                 """\

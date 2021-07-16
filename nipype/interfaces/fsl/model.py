@@ -1100,7 +1100,7 @@ class FLAMEO(FSLCommand):
     input_spec = FLAMEOInputSpec
     output_spec = FLAMEOOutputSpec
 
-    references_ = [
+    _references = [
         {
             "entry": BibTeX(
                 "@article{BeckmannJenkinsonSmith2003,"

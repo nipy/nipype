@@ -322,7 +322,7 @@ def _outputs_help(cls):
 
 def _refs_help(cls):
     """Prints interface references."""
-    references = getattr(cls, "references_", None)
+    references = getattr(cls, "_references", None)
     if not references:
         return []
 

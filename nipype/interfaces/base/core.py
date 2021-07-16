@@ -161,7 +161,7 @@ class BaseInterface(Interface):
     _version = None
     _additional_metadata = []
     _redirect_x = False
-    references_ = []
+    _references = []
     resource_monitor = True  # Enabled for this interface IFF enabled in the config
     _etelemetry_version_data = None
 
@@ -343,7 +343,7 @@ class BaseInterface(Interface):
 
     def _duecredit_cite(self):
         """Add the interface references to the duecredit citations"""
-        for r in self.references_:
+        for r in self._references:
             r["path"] = self.__module__
             due.cite(**r)
 

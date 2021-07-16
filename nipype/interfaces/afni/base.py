@@ -151,7 +151,7 @@ class AFNICommand(AFNICommandBase):
     input_spec = AFNICommandInputSpec
     _outputtype = None
 
-    references_ = [
+    _references = [
         {
             "entry": BibTeX(
                 "@article{Cox1996,"
