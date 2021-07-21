@@ -19,7 +19,13 @@ from traits.trait_errors import TraitError
 from ... import config, logging, LooseVersion
 from ...utils.provenance import write_provenance
 from ...utils.misc import str2bool
-from ...utils.filemanip import split_filename, which, get_dependencies, canonicalize_env
+from ...utils.filemanip import (
+    canonicalize_env,
+    get_dependencies,
+    indirectory,
+    split_filename,
+    which,
+)
 from ...utils.subprocess import run_command
 
 from ...external.due import due
@@ -377,10 +383,12 @@ class BaseInterface(Interface):
             else self.ignore_exception,
         )
 
-        with rtc(self, cwd=cwd, redirect_x=self._redirect_x) as runtime:
+        with indirectory(cwd or os.getcwd()):
             self.inputs.trait_set(**inputs)
-            self._check_mandatory_inputs()
-            self._check_version_requirements(self.inputs)
+        self._check_mandatory_inputs()
+        self._check_version_requirements(self.inputs)
+
+        with rtc(self, cwd=cwd, redirect_x=self._redirect_x) as runtime:
 
             # Grab inputs now, as they should not change during execution
             inputs = self.inputs.get_traitsfree()
