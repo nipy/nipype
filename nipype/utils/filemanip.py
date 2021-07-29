@@ -780,7 +780,7 @@ def emptydirs(path, noexist_ok=False):
     try:
         shutil.rmtree(path)
     except OSError as ex:
-        elcont = os.listdir(path)
+        elcont = [p for p in os.listdir(path) if not p.startswith(".nfs")]
         if ex.errno in [errno.ENOTEMPTY, errno.EBUSY] and not elcont:
             fmlogger.warning(
                 "An exception was raised trying to remove old %s, but the path"
