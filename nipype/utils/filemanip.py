@@ -782,7 +782,8 @@ def emptydirs(path, noexist_ok=False):
     except OSError as ex:
         elcont = [
             Path(root) / file
-            for root, _, files in os.walk(path) for file in files
+            for root, _, files in os.walk(path)
+            for file in files
             if not file.startswith(".nfs")
         ]
         if ex.errno in [errno.ENOTEMPTY, errno.EBUSY] and not elcont:
