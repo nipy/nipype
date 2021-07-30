@@ -674,7 +674,12 @@ def test_write_rst_list(tmp_path, items, expected):
 
 
 def nfs_unlink(pathlike, *, dir_fd=None):
-    os.rename(pathlike, ".nfs1111111111", src_dir_fd=dir_fd, dst_dir_fd=dir_fd)
+    if dir_fd is None:
+        path = Path(pathlike)
+        deleted = path.with_name(".nfs00000000")
+        path.rename(deleted)
+    else:
+        os.rename(pathlike, ".nfs1111111111", src_dir_fd=dir_fd, dst_dir_fd=dir_fd)
 
 
 def test_emptydirs_dangling_nfs(tmp_path):
