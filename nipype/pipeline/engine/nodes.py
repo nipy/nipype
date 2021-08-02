@@ -719,7 +719,7 @@ Error populating the inputs of node "%s": the results file of the source node \
 
         if issubclass(self._interface.__class__, CommandLine):
             # Write out command line as it happened
-            (outdir / "command.txt").write_text(f"{result.runtime.cmdline}\n")
+            Path.write_text(outdir / "command.txt", f"{result.runtime.cmdline}\n")
 
         exc_tb = getattr(result.runtime, "traceback", None)
 
