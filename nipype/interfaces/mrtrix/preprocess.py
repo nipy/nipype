@@ -872,6 +872,17 @@ class MRTransformInputSpec(CommandLineInputSpec):
         position=1,
         desc="Invert the specified transform before using it",
     )
+    linear_transform = File(
+        exists=True,
+        argstr="-linear %s",
+        position=1,
+        desc=(
+            "Specify a linear transform to apply, in the form of a 3x4 or 4x4 ascii file. "
+            "Note the standard reverse convention is used, "
+            "where the transform maps points in the template image to the moving image. "
+            "Note that the reverse convention is still assumed even if no -template image is supplied."
+        ),
+    )
     replace_transform = traits.Bool(
         argstr="-replace",
         position=1,
