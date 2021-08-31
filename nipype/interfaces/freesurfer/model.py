@@ -401,6 +401,21 @@ class GLMFitInputSpec(FSTraitedSpec):
     synth = traits.Bool(argstr="--synth", desc="replace input with gaussian")
     resynth_test = traits.Int(argstr="--resynthtest %d", desc="test GLM by resynthsis")
     profile = traits.Int(argstr="--profile %d", desc="niters : test speed")
+    mrtm1 = InputMultiPath(
+        traits.Tuple(File(exists=True), File(exists=True)),
+        argstr="--mrtm1 %s %s...",
+        desc="Reference time activity curve and frame times",
+    )
+    mrtm2 = InputMultiPath(
+       traits.Tuple(File(exists=True), File(exists=True), File(exists=True)),
+        argstr="--mrtm2 %s %s %s...",
+        desc="Reference time activity curve, frame times and k2p", 
+    )
+    logan = InputMultiPath(
+       traits.Tuple(File(exists=True), File(exists=True), File(exists=True)),
+        argstr="--logan %s %s %s...",
+        desc="Reference time activity curve, frame times and tstar", 
+    ) 
     force_perm = traits.Bool(
         argstr="--perm-force",
         desc="force perumtation test, even when design matrix is not orthog",
@@ -423,7 +438,10 @@ class GLMFitInputSpec(FSTraitedSpec):
     sim_done_file = File(
         argstr="--sim-done %s", desc="create file when simulation finished"
     )
-
+    nii_gz = traits.Bool(
+        argstr='--nii.gz',
+        desc='save outputs as nii.gz',
+    )
 
 class GLMFitOutputSpec(TraitedSpec):
 
@@ -444,7 +462,7 @@ class GLMFitOutputSpec(TraitedSpec):
     frame_eigenvectors = File(desc="matrix of frame eigenvectors from residual PCA")
     singular_values = File(desc="matrix singular values from residual PCA")
     svd_stats_file = File(desc="text file summarizing the residual PCA")
-
+    
 
 class GLMFit(FSCommand):
     """Use FreeSurfer's mri_glmfit to specify and estimate a general linear model.
