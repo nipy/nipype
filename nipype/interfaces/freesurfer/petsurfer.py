@@ -216,11 +216,11 @@ class GTMPVCInputSpec(FSTraitedSpec):
     )
 
     no_reduce_fov = traits.Bool(
-        argstr="--no_reduce_fov", desc="do not reduce FoV to encompass mask"
+        argstr="--no-reduce-fov", desc="do not reduce FoV to encompass mask"
     ) 
 
     reduce_fox_eqodd = traits.Bool(
-        argstr="--reduce_fox_eqodd", desc="reduce FoV to encompass mask but force nc=nr and ns to be odd"
+        argstr="--reduce-fox-eqodd", desc="reduce FoV to encompass mask but force nc=nr and ns to be odd"
     )
 
     contrast = InputMultiPath(
@@ -228,40 +228,79 @@ class GTMPVCInputSpec(FSTraitedSpec):
     )
 
     default_seg_merge = traits.Bool(
-        argstr="--default_seg_merge", desc="default schema for merging ROIs"
+        argstr="--default-seg-merge", desc="default schema for merging ROIs"
     ) 
 
-    merge_hypos =  
+    merge_hypos = traits.Bool(
+        argstr="--merge-hypos", desc="merge left and right hypointensites into to ROI"
+    )  
 
-    merge_cblum_wm_gyri = 
+    merge_cblum_wm_gyri = traits.Bool(
+        argstr="--merge-cblum-wm-gyri", desc="cerebellum WM gyri back into cerebellum WM"
+    )   
 
-    tt_reduce = 
+    tt_reduce = traits.Bool(
+        argstr="--tt-reduce", desc="reduce segmentation to that of a tissue type"
+    )    
 
-    replace = 
+    replace = traits.Tuple(
+        traits.Int,
+        traits.Int,
+        argstr="--replace %i %i",
+        desc="Id1 Id2 : replace seg Id1 with seg Id2"
 
     replace_file = 
 
     rescale = 
 
-    no_rescale = 
+    no_rescale = traits.Bool(
+        argstr="--no-rescale", desc="do not global rescale such that mean of reference region is scaleref"
+    )     
 
-    scale_refval = 
+    scale_refval = traits.Float(
+        argstr="--scale-refval %f",
+        desc="refval : scale such that mean in reference region is refval"
+    )  
 
-    ctab = 
+    _ctab_inputs = ("color_table_file", "default_color_table", "gca_color_table")
+    color_table_file = File(
+        exists=True,
+        argstr="--ctab %s",
+        xor=_ctab_inputs,
+        desc="color table file with seg id names",
+    )
 
-    ctab_default = 
+    default_color_table = traits.Bool(
+        argstr="--ctab-default",
+        xor=_ctab_inputs,
+        desc="use $FREESURFER_HOME/FreeSurferColorLUT.txt",
+    )
 
-    tt_update = 
+    tt_update = traits.Bool(
+        argstr="--tt-update", desc="changes tissue type of VentralDC, BrainStem, and Pons to be SubcortGM"
+    )      
 
-    lat = 
+    lat = traits.Bool(
+        argstr="--lat", desc="lateralize tissue types"
+    )       
 
-    no_tfe = 
+    no_tfe = traits.Bool(
+        argstr="--no-tfe", desc="do not correction for tissue fraction effect (with --psf 0 turns off PVC entirely)"
+    )        
 
-    segpvfres = 
+    segpvfres = traits.Float(
+        argstr="--segpvfres %f",
+        desc="set the tissue fraction resolution parameter (def is 0.5)"
+    )   
 
-    rbv = 
+    rbv = traits.Bool(
+        argstr="--rbv", desc="perform RBV PVC"
+    )         
 
-    rbv_res = 
+    rbv_res = traits.Float(
+        argstr="--rbv-res %f",
+        desc="voxsize : set RBV voxel resolution (good for when standard res takes too much memory)"
+    ) 
 
     mg = 
 
