@@ -384,6 +384,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
     )
 
 class GTMPVCOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc="PVC correction")
 
 class GTMPVC(FSCommand):
     """create an anatomical segmentation for the geometric transfer matrix (GTM).
@@ -403,20 +404,20 @@ class GTMPVC(FSCommand):
     def _format_arg(self, name, spec, value):       
         return super(GTMPVC, self)._format_arg(name, spec, value)
 
-class MRTMInputSpec(FSTraitedSpec):
+#class MRTMInputSpec(FSTraitedSpec):
 
-class MRTMOutputSpec(TraitedSpec):
+#class MRTMOutputSpec(TraitedSpec):
 
-class MRTM(FSCommand):
+#class MRTM(FSCommand):
 
-class MRTM2InputSpec(FSTraitedSpec):
+#class MRTM2InputSpec(FSTraitedSpec):
 
-class MRTM2OutputSpec(TraitedSpec):
+#class MRTM2OutputSpec(TraitedSpec):
 
-class MRTM2(FSCommand):
+#class MRTM2(FSCommand):
 
-class LoganRefInputSpec(FSTraitedSpec):
+#class LoganRefInputSpec(FSTraitedSpec):
 
-class LoganRefOutputSpec(TraitedSpec):
+#class LoganRefOutputSpec(TraitedSpec):
 
-class LoganRef(FSCommand):
+#class LoganRef(FSCommand):
