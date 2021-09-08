@@ -165,17 +165,39 @@ class GTMPVCInputSpec(FSTraitedSpec):
             desc="input volume - source data to pvc",
         )
     
-    frame = 
+    frame = traits.Int(
+        argstr="--frame %i",
+        desc="only process 0-based frame F from inputvol"
+    )
 
-    psf = 
+    psf = traits.Float(
+        argstr="--psf %f",
+        desc="scanner PSF FWHM in mm"
+    ) 
 
-    seg = 
+    segmentation_file = File(
+        exists=True,
+        argstr="--seg %s",
+        xor=_xor_inputs,
+        mandatory=True,
+        desc="anatomical segmentation to define regions for GTM",
+    )
 
-    reg = 
+    reg_file = File(
+        exists=True,
+        xor=_reg_xor,
+        argstr="--reg %s",
+        mandatory=True,
+        desc="LTA registration file that maps PET to anatomical",
+    )
 
-    regheader = 
+    regheader = traits.Bool(
+        argstr="--regheader", desc="assume input and seg share scanner space"
+    ) 
 
-    reg_identity = 
+    reg_identity = traits.Bool(
+        argstr="--regheader", desc="assume that input is in anatomical space"
+    )
 
     output_dir = traits.Str(argstr="--o %s", desc="save outputs to dir", genfile=True)
 
@@ -183,17 +205,23 @@ class GTMPVCInputSpec(FSTraitedSpec):
 
     auto_mask = 
 
-    no_reduce_fov = 
+    no_reduce_fov = traits.Bool(
+        argstr="--no_reduce_fov", desc="do not reduce FoV to encompass mask"
+    ) 
 
-    reduce_fox_eqodd = 
+    reduce_fox_eqodd = traits.Bool(
+        argstr="--reduce_fox_eqodd", desc="reduce FoV to encompass mask but force nc=nr and ns to be odd"
+    )
 
     contrast = InputMultiPath(
         File(exists=True), argstr="--C %s...", desc="contrast file"
     )
 
-    default_seg_merge = 
+    default_seg_merge = traits.Bool(
+        argstr="--default_seg_merge", desc="default schema for merging ROIs"
+    ) 
 
-    merge_hypos = 
+    merge_hypos =  
 
     merge_cblum_wm_gyri = 
 
@@ -251,13 +279,21 @@ class GTMPVCInputSpec(FSTraitedSpec):
 
     save_eres = 
 
-    save_yhat = 
+    save_yhat = traits.Bool(
+        argstr="--save-yhat", desc="save signal estimate (yhat)"
+    )
 
-    save_yhat_with_noise = 
+    save_yhat_with_noise = traits.Bool(
+        argstr="--save-yhat-with-noise", desc="save signal estimate (yhat) with noise"
+    ) 
 
-    save_yhat_full_fov = 
+    save_yhat_full_fov = traits.Bool(
+        argstr="--save_yhat_full_fov", desc="save signal estimate (yhat)"
+    )
 
-    save_yhat0 = 
+    save_yhat0 = traits.Bool(
+        argstr="--save_yhat0", desc="save signal estimate (yhat)"
+    )
 
     synth = 
 
@@ -267,7 +303,6 @@ class GTMPVCInputSpec(FSTraitedSpec):
 
     save_text = 
 
-    
 
 class GTMPVCOutputSpec(TraitedSpec):
 
