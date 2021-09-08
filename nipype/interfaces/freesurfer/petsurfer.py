@@ -174,13 +174,9 @@ class GTMPVCInputSpec(FSTraitedSpec):
         argstr="--psf %f",
         desc="scanner PSF FWHM in mm"
     ) 
-    _xor_inputs = ("segmentation_file", "annot", "surf_label")
-    segmentation_file = File(
-        exists=True,
-        argstr="--seg %s",
-        xor=_xor_inputs,
-        mandatory=True,
-        desc="anatomical segmentation to define regions for GTM",
+
+    segmentation = File(
+        argstr="-seg %s", exists=True, desc="segfile : anatomical segmentation to define regions for GTM"
     )
     _reg_xor = (
         "reg_file",
