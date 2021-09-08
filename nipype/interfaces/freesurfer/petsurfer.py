@@ -248,10 +248,11 @@ class GTMPVCInputSpec(FSTraitedSpec):
         traits.Int,
         argstr="--replace %i %i",
         desc="Id1 Id2 : replace seg Id1 with seg Id2"
+    )
 
-    replace_file = 
-
-    rescale = 
+    rescale =  traits.List(
+        argstr="--rescale %s...", desc="Id1 <Id2...>  : specify reference region(s) used to rescale (default is pons)"
+    )
 
     no_rescale = traits.Bool(
         argstr="--no-rescale", desc="do not global rescale such that mean of reference region is scaleref"
@@ -302,37 +303,75 @@ class GTMPVCInputSpec(FSTraitedSpec):
         desc="voxsize : set RBV voxel resolution (good for when standard res takes too much memory)"
     ) 
 
-    mg = 
+    mg = traits.List(
+        argstr="--id %s...", desc="Manually specify segmentation ids"
+    )
 
-    mg_ref_cerebral_wm = 
+    mg_ref_cerebral_wm = traits.Bool(
+        argstr="--mg-ref-cerebral-wm", desc=" set MG RefIds to 2 and 41"
+    )       
 
-    mg_ref_lobes_wm = 
+    mg_ref_lobes_wm = traits.Bool(
+        argstr="--mg-ref-lobes-wm", desc="set MG RefIds to those for lobes when using wm subseg"
+    )      
 
-    mgx = 
+    mgx = traits.Float(
+        argstr="--mgx %f",
+        desc="gmxthresh : GLM-based Mueller-Gaertner PVC, gmxthresh is min gm pvf bet 0 and 1"
+    ) 
 
-    km_ref = 
+    km_ref = traits.List(
+        argstr="--km-ref %s...", desc="RefId1 RefId2 ... : compute reference TAC for KM as mean of given RefIds"
+    )
 
-    km_hb = 
+    km_hb = traits.List(
+        argstr="--km-hb %s...", desc="RefId1 RefId2 ... : compute HiBinding TAC for KM as mean of given RefIds"
+    ) 
 
-    ss = 
+    ss = traits.Tuple(
+        traits.Float,
+        traits.Float,
+        traits.Float,
+        argstr="--ss %f %f %f",
+        desc="bpc scale dcf : steady-state analysis spec blood plasma concentration, unit scale and decay correction factor. You must also spec --km-ref. Turns off rescaling"
+    ) 
 
-    X = 
+    X = traits.Bool(
+        argstr="--X", desc="save X matrix in matlab4 format as X.mat (it will be big)"
+    ) 
 
-    y = 
+    y = traits.Bool(
+        argstr="--y", desc="save y matrix in matlab4 format as y.mat"
+    )
 
-    beta = 
+    beta = traits.Bool(
+        argstr="--beta", desc="save beta matrix in matlab4 format as beta.mat"
+    )
     
-    X0 = 
+    X0 = traits.Bool(
+        argstr="--X0", desc="save X0 matrix in matlab4 format as X0.mat (it will be big)"
+    )
 
-    save_input = 
+    save_input = traits.Bool(
+        argstr="--save-input", desc="saves rescaled input as input.rescaled.nii.gz"
+    )
 
-    save_eres = 
+    save_eres = traits.Bool(
+        argstr="--save-eres", desc="saves residual error"
+    )
 
     save_yhat = traits.Bool(
         argstr="--save-yhat", desc="save signal estimate (yhat)"
     )
 
-    save_yhat_with_noise = traits.Bool(
+    save_yhat_with_noise = traits.Tuple(
+        traits.Int,
+        traits.Int,
+        argstr="--ss %i %i",
+        desc="seed nreps : saves yhat with noise, seed < 0 for TOD"
+    ) 
+    
+    traits.Bool(
         argstr="--save-yhat-with-noise", desc="save signal estimate (yhat) with noise"
     ) 
 
@@ -343,15 +382,6 @@ class GTMPVCInputSpec(FSTraitedSpec):
     save_yhat0 = traits.Bool(
         argstr="--save_yhat0", desc="save signal estimate (yhat)"
     )
-
-    synth = 
-
-    synth_only = 
-
-    synth_save = 
-
-    save_text = 
-
 
 class GTMPVCOutputSpec(TraitedSpec):
 
