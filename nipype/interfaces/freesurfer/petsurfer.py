@@ -174,7 +174,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
         argstr="--psf %f",
         desc="scanner PSF FWHM in mm"
     ) 
-
+    _xor_inputs = ("segmentation_file", "annot", "surf_label")
     segmentation_file = File(
         exists=True,
         argstr="--seg %s",
@@ -182,7 +182,10 @@ class GTMPVCInputSpec(FSTraitedSpec):
         mandatory=True,
         desc="anatomical segmentation to define regions for GTM",
     )
-
+    _reg_xor = (
+        "reg_file",
+        "lta_file"
+    )
     reg_file = File(
         exists=True,
         xor=_reg_xor,
@@ -201,9 +204,16 @@ class GTMPVCInputSpec(FSTraitedSpec):
 
     output_dir = traits.Str(argstr="--o %s", desc="save outputs to dir", genfile=True)
 
-    mask = 
+    mask_file = File(
+        exists=True, argstr="--mask %s", desc="ignore areas outside of the mask (in input vol space)"
+    )
 
-    auto_mask = 
+    auto_mask = traits.Tuple(
+        traits.Float,
+        traits.Float,
+        argstr="--auto-mask %f %f",
+        desc="FWHM thresh : automatically compute mask"
+    )
 
     no_reduce_fov = traits.Bool(
         argstr="--no_reduce_fov", desc="do not reduce FoV to encompass mask"
@@ -307,6 +317,22 @@ class GTMPVCInputSpec(FSTraitedSpec):
 class GTMPVCOutputSpec(TraitedSpec):
 
 class GTMPVC(FSCommand):
+    """create an anatomical segmentation for the geometric transfer matrix (GTM).
+
+    Examples
+    --------
+    >>> gtmpvc = GTMPVC()
+    >>> gtmpvc.inputs.out_file = ''
+    >>> gtmpvc.cmdline == 'mri_gtmpvc '
+
+    """
+
+    _cmd = "mri_gtmpvc"
+    input_spec = GTMPVCInputSpec
+    output_spec = GTMPVCOutputSpec
+
+    def _format_arg(self, name, spec, value):       
+        return super(GTMPVC, self)._format_arg(name, spec, value)
 
 class MRTMInputSpec(FSTraitedSpec):
 
@@ -319,3 +345,9 @@ class MRTM2InputSpec(FSTraitedSpec):
 class MRTM2OutputSpec(TraitedSpec):
 
 class MRTM2(FSCommand):
+
+class LoganRefInputSpec(FSTraitedSpec):
+
+class LoganRefOutputSpec(TraitedSpec):
+
+class LoganRef(FSCommand):
