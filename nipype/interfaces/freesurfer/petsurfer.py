@@ -4,6 +4,7 @@
 """Provides interfaces to various commands for running PET analyses provided by FreeSurfer
 """
 
+from nipype.interfaces.freesurfer.model import GLMFitInputSpec
 import os
 import os.path as op
 from glob import glob
@@ -29,6 +30,8 @@ from ..base import (
 )
 from .base import FSCommand, FSTraitedSpec, FSTraitedSpecOpenMP, FSCommandOpenMP, Info
 from .utils import copy2subjdir
+
+from .model import GLMFitInputSpec, GLMFitInputSpec, GLMFit
 
 __docformat__ = "restructuredtext"
 iflogger = logging.getLogger("nipype.interface")
@@ -400,20 +403,89 @@ class GTMPVC(FSCommand):
     def _format_arg(self, name, spec, value):       
         return super(GTMPVC, self)._format_arg(name, spec, value)
 
-#class MRTMInputSpec(FSTraitedSpec):
+class MRTMInputSpec(GLMFitInputSpec):
 
-#class MRTMOutputSpec(TraitedSpec):
+    mrtm1 = InputMultiPath(
+        traits.Tuple(File(exists=True, mandatory=True), File(exists=True, mandatory=True)),
+        argstr="--mrtm1 %s %s...",
+        desc="RefTac TimeSec : perform MRTM1 kinetic modeling",
+    )
 
-#class MRTM(FSCommand):
+class MRTMOutputSpec(GLMFitInputSpec):
 
-#class MRTM2InputSpec(FSTraitedSpec):
+    k2p = File(desc="estimate of k2p parameter")
 
-#class MRTM2OutputSpec(TraitedSpec):
+class MRTM(GLMFit):
+    """Perform MRTM1 kinetic modeling.
+    Examples
+    --------
+    >>> mrtm = MRTM()
+    >>> mrtm.inputs.in_file = 'tac.nii'
+    >>> gtmseg.inputs.mrtm = ('ref_tac.dat', 'timing.dat')
+    >>> mrtm.inputs.glmdir = 'mrtm'
+    >>> mrtm.cmdline == 'mri_glmfit --glmdir mrtm --y tac.nii --mrtm1 ref_tac.dat timing.dat'
+    """
 
-#class MRTM2(FSCommand):
+    _cmd = "mri_glmfit"
+    input_spec = MRTMInputSpec
+    output_spec = MRTMOutputSpec
 
-#class LoganRefInputSpec(FSTraitedSpec):
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        return outputs
 
-#class LoganRefOutputSpec(TraitedSpec):
+class MRTM2InputSpec(GLMFitInputSpec):
+    
+    mrtm2 = InputMultiPath(
+        traits.Tuple(File(exists=True), File(exists=True), traits.Float),
+        mandatory=True,
+        argstr="--mrtm2 %s %s %f...",
+        desc="RefTac TimeSec k2prime : perform MRTM2 kinetic modeling", 
+    )
 
-#class LoganRef(FSCommand):
+    _ext_xor = ['nii', 'nii_gz']
+    nii = traits.Bool(
+        argstr='--nii',
+        desc='save outputs as nii',
+        xor=_ext_xor
+    )
+    nii_gz = traits.Bool(
+        argstr='--nii.gz',
+        desc='save outputs as nii.gz',
+        xor=_ext_xor
+    )
+
+class MRTM2OutputSpec(GLMFitInputSpec):
+    bp = File(desc="BP estimates")
+
+class MRTM2(GLMFit):
+    """Perform MRTM2 kinetic modeling.
+    Examples
+    --------
+    >>> mrtm = MRTM()
+    >>> mrtm.inputs.in_file = 'tac.nii'
+    >>> gtmseg.inputs.mrtm = ('ref_tac.dat', 'timing.dat', 'k2prime.dat')
+    >>> mrtm.inputs.glmdir = 'mrtm2'
+    >>> mrtm2.cmdline == 'mri_glmfit --glmdir mrtm2 --y tac.nii --mrtm2 ref_tac.dat timing.dat k2prime.dat'
+    """
+
+    _cmd = "mri_glmfit"
+    input_spec = MRTM2InputSpec
+    output_spec = MRTM2OutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.nii_gz):
+            ext = '.nii.gz'
+        if isdefined(self.inputs.nii):
+            ext = '.nii'
+        else:
+            ext = '.mgh'            
+        outputs['bp'] = join(self.inputs.glm_dir, 'bp' + ext)
+        return outputs
+
+class LoganRefInputSpec(FSTraitedSpec):
+
+class LoganRefOutputSpec(TraitedSpec):
+
+class LoganRef(FSCommand):
