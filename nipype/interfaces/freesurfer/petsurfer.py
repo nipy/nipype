@@ -481,11 +481,44 @@ class MRTM2(GLMFit):
             ext = '.nii'
         else:
             ext = '.mgh'            
-        outputs['bp'] = join(self.inputs.glm_dir, 'bp' + ext)
+        outputs['bp'] = os.join(self.inputs.glm_dir, 'bp' + ext)
         return outputs
 
-class LoganRefInputSpec(FSTraitedSpec):
+class LoganRefInputSpec(GLMFitInputSpec):
+    logan = InputMultiPath(
+        traits.Tuple(File(exists=True), File(exists=True), traits.Float),
+        mandatory=True,
+        argstr="--logan %s %s %f...",
+        desc="RefTac TimeSec tstar   : perform Logan kinetic modeling", 
+    )
 
-class LoganRefOutputSpec(TraitedSpec):
+    _ext_xor = ['nii', 'nii_gz']
+    nii = traits.Bool(
+        argstr='--nii',
+        desc='save outputs as nii',
+        xor=_ext_xor
+    )
+    nii_gz = traits.Bool(
+        argstr='--nii.gz',
+        desc='save outputs as nii.gz',
+        xor=_ext_xor
+    )
 
-class LoganRef(FSCommand):
+class LoganRefOutputSpec(GLMFitInputSpec):
+    vd = File(desc="BP estimates")
+
+class LoganRef(GLMFit):
+    _cmd = "mri_glmfit"
+    input_spec = LoganRefInputSpec
+    output_spec = LoganRefOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.nii_gz):
+            ext = '.nii.gz'
+        if isdefined(self.inputs.nii):
+            ext = '.nii'
+        else:
+            ext = '.mgh'            
+        outputs['vd'] = os.join(self.inputs.glm_dir, 'vd' + ext)
+        return outputs
