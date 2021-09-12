@@ -75,7 +75,7 @@ class Quickshear(CommandLine):
     input_spec = QuickshearInputSpec
     output_spec = QuickshearOutputSpec
 
-    references_ = [
+    _references = [
         {
             "entry": BibTeX(
                 "@inproceedings{Schimke2011,"

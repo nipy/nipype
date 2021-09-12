@@ -290,7 +290,7 @@ class SPMCommand(BaseInterface):
     _paths = None
     _use_mcr = None
 
-    references_ = [
+    _references = [
         {
             "entry": BibTeX(
                 "@book{FrackowiakFristonFrithDolanMazziotta1997,"

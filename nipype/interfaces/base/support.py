@@ -8,17 +8,111 @@ Miscellaneous tools to support Interface functionality
 
 """
 import os
+from contextlib import AbstractContextManager
 from copy import deepcopy
 from textwrap import wrap
 import re
+from datetime import datetime as dt
+from dateutil.parser import parse as parseutc
+import platform
 
-from ... import logging
-from ...utils.misc import is_container
+from ... import logging, config
+from ...utils.misc import is_container, rgetcwd
 from ...utils.filemanip import md5, hash_infile
 
 iflogger = logging.getLogger("nipype.interface")
 
 HELP_LINEWIDTH = 70
+
+
+class RuntimeContext(AbstractContextManager):
+    """A context manager to run NiPype interfaces."""
+
+    __slots__ = ("_runtime", "_resmon", "_ignore_exc")
+
+    def __init__(self, resource_monitor=False, ignore_exception=False):
+        """Initialize the context manager object."""
+        self._ignore_exc = ignore_exception
+        _proc_pid = os.getpid()
+        if resource_monitor:
+            from ...utils.profiler import ResourceMonitor
+        else:
+            from ...utils.profiler import ResourceMonitorMock as ResourceMonitor
+
+        self._resmon = ResourceMonitor(
+            _proc_pid,
+            freq=float(config.get("execution", "resource_monitor_frequency", 1)),
+        )
+
+    def __call__(self, interface, cwd=None, redirect_x=False):
+        """Generate a new runtime object."""
+        # Tear-up: get current and prev directories
+        _syscwd = rgetcwd(error=False)  # Recover when wd does not exist
+        if cwd is None:
+            cwd = _syscwd
+
+        self._runtime = Bunch(
+            cwd=str(cwd),
+            duration=None,
+            endTime=None,
+            environ=deepcopy(dict(os.environ)),
+            hostname=platform.node(),
+            interface=interface.__class__.__name__,
+            platform=platform.platform(),
+            prevcwd=str(_syscwd),
+            redirect_x=redirect_x,
+            resmon=self._resmon.fname or "off",
+            returncode=None,
+            startTime=None,
+            version=interface.version,
+        )
+        return self
+
+    def __enter__(self):
+        """Tear-up the execution of an interface."""
+        if self._runtime.redirect_x:
+            self._runtime.environ["DISPLAY"] = config.get_display()
+
+        self._runtime.startTime = dt.isoformat(dt.utcnow())
+        self._resmon.start()
+        # TODO: Perhaps clean-up path and ensure it exists?
+        os.chdir(self._runtime.cwd)
+        return self._runtime
+
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        """Tear-down interface execution."""
+        self._runtime.endTime = dt.isoformat(dt.utcnow())
+        timediff = parseutc(self._runtime.endTime) - parseutc(self._runtime.startTime)
+        self._runtime.duration = (
+            timediff.days * 86400 + timediff.seconds + timediff.microseconds / 1e6
+        )
+        # Collect monitored data
+        for k, v in self._resmon.stop():
+            setattr(self._runtime, k, v)
+
+        os.chdir(self._runtime.prevcwd)
+
+        if exc_type is not None or exc_value is not None or exc_tb is not None:
+            import traceback
+
+            # Retrieve the maximum info fast
+            self._runtime.traceback = "".join(
+                traceback.format_exception(exc_type, exc_value, exc_tb)
+            )
+            # Gather up the exception arguments and append nipype info.
+            exc_args = exc_value.args if getattr(exc_value, "args") else tuple()
+            exc_args += (
+                f"An exception of type {exc_type.__name__} occurred while "
+                f"running interface {self._runtime.interface}.",
+            )
+            self._runtime.traceback_args = ("\n".join([f"{arg}" for arg in exc_args]),)
+
+            if self._ignore_exc:
+                return True
+
+    @property
+    def runtime(self):
+        return self._runtime
 
 
 class NipypeInterfaceError(Exception):
@@ -322,7 +416,7 @@ def _outputs_help(cls):
 
 def _refs_help(cls):
     """Prints interface references."""
-    references = getattr(cls, "references_", None)
+    references = getattr(cls, "_references", None)
     if not references:
         return []
 
