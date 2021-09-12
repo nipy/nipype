@@ -151,7 +151,7 @@ class FSLCommand(CommandLine):
     input_spec = FSLCommandInputSpec
     _output_type = None
 
-    references_ = [
+    _references = [
         {
             "entry": BibTeX(
                 "@article{JenkinsonBeckmannBehrensWoolrichSmith2012,"

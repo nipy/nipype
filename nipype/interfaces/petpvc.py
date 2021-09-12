@@ -155,7 +155,7 @@ class PETPVC(CommandLine):
     output_spec = PETPVCOutputSpec
     _cmd = "petpvc"
 
-    references_ = [
+    _references = [
         {
             "entry": BibTeX(
                 "@article{0031-9155-61-22-7975,"

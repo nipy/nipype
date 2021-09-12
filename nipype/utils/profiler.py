@@ -5,6 +5,7 @@
 Utilities to keep track of performance
 """
 import os
+import numpy as np
 import threading
 from time import time
 
@@ -21,6 +22,24 @@ resource_monitor = config.resource_monitor
 
 # Init variables
 _MB = 1024.0 ** 2
+
+
+class ResourceMonitorMock:
+    """A mock class to use when the monitor is disabled."""
+
+    @property
+    def fname(self):
+        """Get/set the internal filename"""
+        return None
+
+    def __init__(self, pid, freq=5, fname=None, python=True):
+        pass
+
+    def start(self):
+        pass
+
+    def stop(self):
+        return {}
 
 
 class ResourceMonitor(threading.Thread):
@@ -57,13 +76,32 @@ class ResourceMonitor(threading.Thread):
         return self._fname
 
     def stop(self):
-        """Stop monitoring"""
+        """Stop monitoring."""
         if not self._event.is_set():
             self._event.set()
             self.join()
             self._sample()
             self._logfile.flush()
             self._logfile.close()
+
+        retval = {
+            "mem_peak_gb": None,
+            "cpu_percent": None,
+        }
+
+        # Read .prof file in and set runtime values
+        vals = np.loadtxt(self._fname, delimiter=",")
+        if vals.size:
+            vals = np.atleast_2d(vals)
+            retval["mem_peak_gb"] = vals[:, 2].max() / 1024
+            retval["cpu_percent"] = vals[:, 1].max()
+            retval["prof_dict"] = {
+                "time": vals[:, 0].tolist(),
+                "cpus": vals[:, 1].tolist(),
+                "rss_GiB": (vals[:, 2] / 1024).tolist(),
+                "vms_GiB": (vals[:, 3] / 1024).tolist(),
+            }
+        return retval
 
     def _sample(self, cpu_interval=None):
         cpu = 0.0
