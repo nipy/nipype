@@ -690,12 +690,12 @@ class CAT12SANLMDenoising(SPMCommand):
     necessary (and not recommended) to apply the filter before segmentation.
 
 
-    Example:
-    =======
-    from nipype.interfaces import cat12
-    c = cat12.CAT12SANLMDenoising()
-    c.inputs.in_files='sub-test_FLAIR.nii'
-    c.run()
+    Examples
+    --------
+    >>> from nipype.interfaces import cat12
+    >>> c = cat12.CAT12SANLMDenoising()
+    >>> c.inputs.in_files='sub-test_FLAIR.nii'
+    >>> c.run()
     """
 
     input_spec = CAT12SANLMDenoisingInputSpec
