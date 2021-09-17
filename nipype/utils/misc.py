@@ -325,17 +325,17 @@ def dict_diff(dold, dnew, indent=0):
     # so we need to join the messages together
     for k in new_keys.intersection(old_keys):
         try:
-            new, old = dnew[k], dold[k]
-            same = new == old
-            if not same:
-                # Since JSON does not discriminate between lists and
-                # tuples, we might need to cast them into the same type
-                # as the last resort.  And lets try to be more generic
-                same = old.__class__(new) == old
+            # Reading from JSON produces lists, but internally we typically
+            # use tuples. At this point these dictionary values can be
+            # immutable (and therefore the preference for tuple).
+            new = tuple([tuple(el) if isinstance(el, list) else el for el in dnew[k]])
+            old = tuple([tuple(el) if isinstance(el, list) else el for el in dold[k]])
         except Exception:
-            same = False
-        if not same:
-            diff += ["  * %s: %r != %r" % (k, dnew[k], dold[k])]
+            new = dnew[k]
+            old = dold[k]
+
+        if new != old:
+            diff += ["  * %s: %r != %r" % (k, new, old)]
 
     if len(diff) > diffkeys:
         diff.insert(diffkeys, "Some dictionary entries had differing values:")
