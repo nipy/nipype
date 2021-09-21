@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import numpy as np
-from numpy import ones, kron, mean, eye, hstack, dot, tile
+from numpy import ones, kron, mean, eye, hstack, dot, tile, nan_to_num
 from numpy.linalg import pinv
 import nibabel as nb
 from ..interfaces.base import (
