@@ -86,20 +86,41 @@ class ICC(BaseInterface):
         return outputs
 
 
-def ICC_rep_anova(Y):
+def ICC_rep_anova(Y, nocache=False):
     """
     the data Y are entered as a 'table' ie subjects are in rows and repeated
     measures in columns
-
     One Sample Repeated measure ANOVA
-
     Y = XB + E with X = [FaTor / Subjects]
-    """
 
-    [nb_subjects, nb_conditions] = Y.shape
-    dfc = nb_conditions - 1
-    dfe = (nb_subjects - 1) * dfc
-    dfr = nb_subjects - 1
+    This is a hacked up (but fully compatible) version of ICC_rep_anova
+    from nipype that caches some very expensive operations that depend
+    only on the input array shape - if you're going to run the routine
+    multiple times (like, on every voxel of an image), this gives you a
+    HUGE speed boost for large input arrays.  If you change the dimensions
+    of Y, it will reinitialize automatially.  Set nocache to True to get
+    the original, much slower behavior.  No, actually, don't do that.
+    """
+    global icc_inited
+    global current_Y_shape
+    global dfc, dfe, dfr
+    global nb_subjects, nb_conditions
+    global x, x0, X
+    global centerbit
+
+    try:
+        current_Y_shape
+        if nocache or (current_Y_shape != Y.shape):
+            icc_inited = False
+    except NameError:
+        icc_inited = False
+
+    if not icc_inited:
+        [nb_subjects, nb_conditions] = Y.shape
+        current_Y_shape = Y.shape
+        dfc = nb_conditions - 1
+        dfe = (nb_subjects - 1) * dfc
+        dfr = nb_subjects - 1
 
     # Compute the repeated measure effect
     # ------------------------------------
@@ -109,12 +130,14 @@ def ICC_rep_anova(Y):
     SST = ((Y - mean_Y) ** 2).sum()
 
     # create the design matrix for the different levels
-    x = kron(eye(nb_conditions), ones((nb_subjects, 1)))  # sessions
-    x0 = tile(eye(nb_subjects), (nb_conditions, 1))  # subjects
-    X = hstack([x, x0])
+    if not icc_inited:
+        x = kron(eye(nb_conditions), ones((nb_subjects, 1)))  # sessions
+        x0 = tile(eye(nb_subjects), (nb_conditions, 1))  # subjects
+        X = hstack([x, x0])
+        centerbit = X @ pinv(X.T @ X, hermitian=True) @ X.T
 
     # Sum Square Error
-    predicted_Y = X @ (pinv(X.T @ X, hermitian=True) @ (X.T @ Y.flatten("F")))
+    predicted_Y = centerbit @ Y.flatten("F")
     residuals = Y.flatten("F") - predicted_Y
     SSE = (residuals**2).sum()
 
@@ -122,7 +145,7 @@ def ICC_rep_anova(Y):
 
     MSE = SSE / dfe
 
-    # Sum square session effect - between colums/sessions
+    # Sum square session effect - between columns/sessions
     SSC = ((mean(Y, 0) - mean_Y) ** 2).sum() * nb_subjects
     MSC = SSC / dfc / nb_subjects
 
@@ -138,5 +161,7 @@ def ICC_rep_anova(Y):
 
     e_var = MSE  # variance of error
     r_var = (MSR - MSE) / nb_conditions  # variance between subjects
+
+    icc_inited = True
 
     return ICC, r_var, e_var, session_effect_F, dfc, dfe
