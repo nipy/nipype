@@ -584,7 +584,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         desc="The Lower quantile to clip image ranges",
     )
 
-    verbose = traits.Bool(argstr="-v", default_value=False, usedefault=True)
+    verbose = traits.Bool(argstr="-v", default_value=False, usedefault=True, nohash=True)
 
 
 class RegistrationOutputSpec(TraitedSpec):
