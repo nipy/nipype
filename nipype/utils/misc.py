@@ -300,10 +300,12 @@ def dict_diff(dold, dnew, indent=0):
         dnew = dict(dnew)
         dold = dict(dold)
     except Exception:
-        return textwrap_indent(f"""\
+        return textwrap_indent(
+            f"""\
 Diff between nipype inputs failed:
 * Cached inputs: {dold}
-* New inputs: {dnew}""")
+* New inputs: {dnew}"""
+        )
 
     # Compare against hashed_inputs
     # Keys: should rarely differ
@@ -327,9 +329,7 @@ Diff between nipype inputs failed:
         if isinstance(value, str) and len(value) > 50:
             return f"{value[:10]}...{value[-10:]}"
         if isinstance(value, (tuple, list)) and len(value) > 10:
-            return tuple(
-                list(value[:2]) + "..." + list(value[-2:])
-            )
+            return tuple(list(value[:2]) + "..." + list(value[-2:]))
         return value
 
     # Values in common keys would differ quite often,
