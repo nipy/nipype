@@ -296,12 +296,14 @@ def dict_diff(dold, dnew, indent=0):
 
     typical use -- log difference for hashed_inputs
     """
-    # First check inputs, since they usually are lists of tuples
-    # and dicts are required.
-    if isinstance(dnew, list):
+    try:
         dnew = dict(dnew)
-    if isinstance(dold, list):
         dold = dict(dold)
+    except Exception:
+        return textwrap_indent(f"""\
+Diff between nipype inputs failed:
+* Cached inputs: {dold}
+* New inputs: {dnew}""")
 
     # Compare against hashed_inputs
     # Keys: should rarely differ
@@ -321,21 +323,30 @@ def dict_diff(dold, dnew, indent=0):
 
     diffkeys = len(diff)
 
+    def _shorten(value):
+        if isinstance(value, str) and len(value) > 50:
+            return f"{value[:10]}...{value[-10:]}"
+        if isinstance(value, (tuple, list)) and len(value) > 10:
+            return tuple(
+                list(value[:2]) + "..." + list(value[-2:])
+            )
+        return value
+
     # Values in common keys would differ quite often,
     # so we need to join the messages together
     for k in new_keys.intersection(old_keys):
-        try:
-            # Reading from JSON produces lists, but internally we typically
-            # use tuples. At this point these dictionary values can be
-            # immutable (and therefore the preference for tuple).
+        new = dnew[k]
+        old = dold[k]
+        # Reading from JSON produces lists, but internally we typically
+        # use tuples. At this point these dictionary values can be
+        # immutable (and therefore the preference for tuple).
+        if isinstance(dnew[k], (list, tuple)):
             new = tuple([tuple(el) if isinstance(el, list) else el for el in dnew[k]])
+        if isinstance(dnew[k], (list, tuple)):
             old = tuple([tuple(el) if isinstance(el, list) else el for el in dold[k]])
-        except Exception:
-            new = dnew[k]
-            old = dold[k]
 
         if new != old:
-            diff += ["  * %s: %r != %r" % (k, new, old)]
+            diff += ["  * %s: %r != %r" % (k, _shorten(new), _shorten(old))]
 
     if len(diff) > diffkeys:
         diff.insert(diffkeys, "Some dictionary entries had differing values:")
