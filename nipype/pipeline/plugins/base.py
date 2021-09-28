@@ -199,10 +199,14 @@ class DistributedPluginBase(PluginBase):
 
         if errors:
             # If one or more nodes failed, re-rise first of them
-            if isinstance(errors[0], str):
-                raise RuntimeError(errors[0])
+            error, cause = errors[0], None
+            if isinstance(error, str):
+                error = RuntimeError(error)
 
-            raise errors[0]
+            if len(errors) > 1:
+                error, cause = RuntimeError(f"{len(errors)} raised. Re-raising first."), error
+
+            raise error from cause
 
     def _get_result(self, taskid):
         raise NotImplementedError
