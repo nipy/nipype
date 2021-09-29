@@ -2935,12 +2935,12 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
                 "bold": {
                     "datatype": "func",
                     "suffix": "bold",
-                    "extensions": ["nii", ".nii.gz"],
+                    "extension": ["nii", ".nii.gz"],
                 },
                 "T1w": {
                     "datatype": "anat",
                     "suffix": "T1w",
-                    "extensions": ["nii", ".nii.gz"],
+                    "extension": ["nii", ".nii.gz"],
                 },
             }
 
