@@ -73,7 +73,7 @@ def should_fail(tmp):
 
 
 def test_should_fail(tmpdir):
-    with pytest.raises(NameError):
+    with pytest.raises(pe.nodes.NodeExecutionError):
         should_fail(tmpdir)
 
 

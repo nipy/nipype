@@ -9,6 +9,7 @@ from collections import OrderedDict, defaultdict
 
 import os
 import os.path as op
+from pathlib import Path
 import shutil
 import socket
 from copy import deepcopy
@@ -30,7 +31,6 @@ from ...utils.filemanip import (
     load_json,
     emptydirs,
     savepkl,
-    indirectory,
     silentrm,
 )
 
@@ -62,6 +62,10 @@ from .utils import (
 from .base import EngineBase
 
 logger = logging.getLogger("nipype.workflow")
+
+
+class NodeExecutionError(RuntimeError):
+    """A nipype-specific name for exceptions when executing a Node."""
 
 
 class Node(EngineBase):
@@ -98,7 +102,7 @@ class Node(EngineBase):
         run_without_submitting=False,
         n_procs=None,
         mem_gb=0.20,
-        **kwargs
+        **kwargs,
     ):
         """
         Parameters
@@ -439,7 +443,8 @@ class Node(EngineBase):
         )
 
         # Check hash, check whether run should be enforced
-        logger.info('[Node] Setting-up "%s" in "%s".', self.fullname, outdir)
+        if not isinstance(self, MapNode):
+            logger.info(f'[Node] Setting-up "{self.fullname}" in "{outdir}".')
         cached, updated = self.is_cached()
 
         # If the node is cached, check on pklz files and finish
@@ -530,7 +535,6 @@ directory. Please ensure no other concurrent workflows are racing""",
         # Tear-up after success
         shutil.move(hashfile_unfinished, hashfile_unfinished.replace("_unfinished", ""))
         write_node_report(self, result=result, is_mapnode=isinstance(self, MapNode))
-        logger.info('[Node] Finished "%s".', self.fullname)
         return result
 
     def _get_hashval(self):
@@ -582,7 +586,7 @@ directory. Please ensure no other concurrent workflows are racing""",
                 logger.critical("%s", e)
 
             if outputs is None:
-                raise RuntimeError(
+                raise NodeExecutionError(
                     """\
 Error populating the inputs of node "%s": the results file of the source node \
 (%s) does not contain any outputs."""
@@ -697,78 +701,55 @@ Error populating the inputs of node "%s": the results file of the source node \
                 )
                 return result
 
-        outdir = self.output_dir()
-        # Run command: either execute is true or load_results failed.
-        result = InterfaceResult(
-            interface=self._interface.__class__,
-            runtime=Bunch(
-                cwd=outdir,
-                returncode=1,
-                environ=dict(os.environ),
-                hostname=socket.gethostname(),
-            ),
-            inputs=self._interface.inputs.get_traitsfree(),
-        )
-
+        outdir = Path(self.output_dir())
         if copyfiles:
             self._originputs = deepcopy(self._interface.inputs)
             self._copyfiles_to_wd(execute=execute)
 
-        message = '[Node] Running "{}" ("{}.{}")'.format(
-            self.name, self._interface.__module__, self._interface.__class__.__name__
+        # Run command: either execute is true or load_results failed.
+        logger.info(
+            f'[Node] Executing "{self.name}" <{self._interface.__module__}'
+            f".{self._interface.__class__.__name__}>"
         )
+        # Invoke core run method of the interface ignoring exceptions
+        result = self._interface.run(cwd=outdir, ignore_exception=True)
+        logger.info(
+            f'[Node] Finished "{self.name}", elapsed time {result.runtime.duration}s.'
+        )
+
         if issubclass(self._interface.__class__, CommandLine):
-            try:
-                with indirectory(outdir):
-                    cmd = self._interface.cmdline
-            except Exception as msg:
-                result.runtime.stderr = "{}\n\n{}".format(
-                    getattr(result.runtime, "stderr", ""), msg
-                )
-                _save_resultfile(
-                    result,
-                    outdir,
-                    self.name,
-                    rebase=str2bool(self.config["execution"]["use_relative_paths"]),
-                )
-                raise
-            cmdfile = op.join(outdir, "command.txt")
-            with open(cmdfile, "wt") as fd:
-                print(cmd + "\n", file=fd)
-            message += ", a CommandLine Interface with command:\n{}".format(cmd)
-        logger.info(message)
-        try:
-            result = self._interface.run(cwd=outdir)
-        except Exception as msg:
-            result.runtime.stderr = "%s\n\n%s".format(
-                getattr(result.runtime, "stderr", ""), msg
-            )
-            _save_resultfile(
-                result,
+            # Write out command line as it happened
+            Path.write_text(outdir / "command.txt", f"{result.runtime.cmdline}\n")
+
+        exc_tb = getattr(result.runtime, "traceback", None)
+
+        if not exc_tb:
+            # Clean working directory if no errors
+            dirs2keep = None
+            if isinstance(self, MapNode):
+                dirs2keep = [op.join(outdir, "mapflow")]
+
+            result.outputs = clean_working_directory(
+                result.outputs,
                 outdir,
-                self.name,
-                rebase=str2bool(self.config["execution"]["use_relative_paths"]),
+                self._interface.inputs,
+                self.needed_outputs,
+                self.config,
+                dirs2keep=dirs2keep,
             )
-            raise
 
-        dirs2keep = None
-        if isinstance(self, MapNode):
-            dirs2keep = [op.join(outdir, "mapflow")]
-
-        result.outputs = clean_working_directory(
-            result.outputs,
-            outdir,
-            self._interface.inputs,
-            self.needed_outputs,
-            self.config,
-            dirs2keep=dirs2keep,
-        )
+        # Store results file under all circumstances
         _save_resultfile(
             result,
             outdir,
             self.name,
             rebase=str2bool(self.config["execution"]["use_relative_paths"]),
         )
+
+        if exc_tb:
+            raise NodeExecutionError(
+                f"Exception raised while executing Node {self.name}.\n\n{result.runtime.traceback}"
+            )
 
         return result
 
@@ -1290,7 +1271,7 @@ class MapNode(Node):
                 if code is not None:
                     msg += ["Subnode %d failed" % i]
                     msg += ["Error: %s" % str(code)]
-            raise Exception(
+            raise NodeExecutionError(
                 "Subnodes of node: %s failed:\n%s" % (self.name, "\n".join(msg))
             )
 

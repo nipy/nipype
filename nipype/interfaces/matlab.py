@@ -17,25 +17,11 @@ from .base import (
 
 
 def get_matlab_command():
-    if "NIPYPE_NO_MATLAB" in os.environ:
-        return None
+    """Determine whether Matlab is installed and can be executed."""
+    if "NIPYPE_NO_MATLAB" not in os.environ:
+        from nipype.utils.filemanip import which
 
-    try:
-        matlab_cmd = os.environ["MATLABCMD"]
-    except:
-        matlab_cmd = "matlab"
-
-    try:
-        res = CommandLine(
-            command="which",
-            args=matlab_cmd,
-            resource_monitor=False,
-            terminal_output="allatonce",
-        ).run()
-        matlab_path = res.runtime.stdout.strip()
-    except Exception:
-        return None
-    return matlab_cmd
+        return which(os.getenv("MATLABCMD", "matlab"))
 
 
 no_matlab = get_matlab_command() is None
