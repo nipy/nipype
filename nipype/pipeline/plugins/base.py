@@ -147,7 +147,7 @@ class DistributedPluginBase(PluginBase):
                     "Progress: %d jobs, %d/%d/%d "
                     "(done/running/ready), %d/%d "
                     "(pending_tasks/waiting).",
-                    *progress_stats
+                    *progress_stats,
                 )
                 old_progress_stats = progress_stats
             toappend = []
@@ -204,7 +204,10 @@ class DistributedPluginBase(PluginBase):
                 error = RuntimeError(error)
 
             if len(errors) > 1:
-                error, cause = RuntimeError(f"{len(errors)} raised. Re-raising first."), error
+                error, cause = (
+                    RuntimeError(f"{len(errors)} raised. Re-raising first."),
+                    error,
+                )
 
             raise error from cause
 

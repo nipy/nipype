@@ -74,6 +74,9 @@ class LinearPlugin(PluginBase):
                 error = RuntimeError(error)
 
             if len(errors) > 1:
-                error, cause = RuntimeError(f"{len(errors)} raised. Re-raising first."), error
+                error, cause = (
+                    RuntimeError(f"{len(errors)} raised. Re-raising first."),
+                    error,
+                )
 
             raise error from cause
