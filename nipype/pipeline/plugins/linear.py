@@ -68,5 +68,12 @@ class LinearPlugin(PluginBase):
         os.chdir(old_wd)  # Return wherever we were before
         report_nodes_not_run(notrun)
         if errors:
-            # Re-raise exception of first failed node
-            raise errors[0]
+            # If one or more nodes failed, re-rise first of them
+            error, cause = errors[0], None
+            if isinstance(error, str):
+                error = RuntimeError(error)
+
+            if len(errors) > 1:
+                error, cause = RuntimeError(f"{len(errors)} raised. Re-raising first."), error
+
+            raise error from cause
