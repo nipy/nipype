@@ -329,7 +329,7 @@ Diff between nipype inputs failed:
         if isinstance(value, str) and len(value) > 50:
             return f"{value[:10]}...{value[-10:]}"
         if isinstance(value, (tuple, list)) and len(value) > 10:
-            return tuple(list(value[:2]) + "..." + list(value[-2:]))
+            return tuple(list(value[:2]) + ["..."] + list(value[-2:]))
         return value
 
     # Values in common keys would differ quite often,
