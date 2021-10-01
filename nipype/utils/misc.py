@@ -297,8 +297,7 @@ def dict_diff(dold, dnew, indent=0):
     typical use -- log difference for hashed_inputs
     """
     try:
-        dnew = dict(dnew)
-        dold = dict(dold)
+        dnew, dold = dict(dnew), dict(dold)
     except Exception:
         return textwrap_indent(
             f"""\
@@ -332,18 +331,21 @@ Diff between nipype inputs failed:
             return tuple(list(value[:2]) + ["..."] + list(value[-2:]))
         return value
 
+    def _uniformize(val):
+        if isinstance(val, dict):
+            return {k: _uniformize(v) for k, v in val.items()}
+        if isinstance(val, (list, tuple)):
+            return tuple(_uniformize(el) for el in val)
+        return val
+
     # Values in common keys would differ quite often,
     # so we need to join the messages together
     for k in new_keys.intersection(old_keys):
-        new = dnew[k]
-        old = dold[k]
         # Reading from JSON produces lists, but internally we typically
         # use tuples. At this point these dictionary values can be
         # immutable (and therefore the preference for tuple).
-        if isinstance(dnew[k], (list, tuple)):
-            new = tuple([tuple(el) if isinstance(el, list) else el for el in dnew[k]])
-        if isinstance(dnew[k], (list, tuple)):
-            old = tuple([tuple(el) if isinstance(el, list) else el for el in dold[k]])
+        new = _uniformize(dnew[k])
+        old = _uniformize(dold[k])
 
         if new != old:
             diff += ["  * %s: %r != %r" % (k, _shorten(new), _shorten(old))]
