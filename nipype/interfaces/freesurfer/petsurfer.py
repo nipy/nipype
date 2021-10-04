@@ -387,9 +387,20 @@ class GTMPVC(FSCommand):
     Examples
     --------
     >>> gtmpvc = GTMPVC()
-    >>> gtmpvc.inputs.out_file = ''
-    >>> gtmpvc.cmdline == 'mri_gtmpvc '
-
+    >>> gtmpvc.inputs.in_file = 'sub-01_ses-baseline_pet.nii.gz'
+    >>> gtmpvc.inputs.segmentation = 'gtmseg.mgz'
+    >>> gtmpvc.inputs.reg_file = 'sub-01_ses-baseline_pet_mean_reg.lta'
+    >>> gtmpvc.inputs.output_dir = 'pvc'
+    >>> gtmpvc.inputs.psf = 4
+    >>> gtmpvc.inputs.default_seg_merge = True
+    >>> gtmpvc.inputs.auto_mask = (1, 0.1)
+    >>> gtmpvc.inputs.km_ref = ['8 47']
+    >>> gtmpvc.inputs.km_hb = ['11 12 50 51']
+    >>> gtmpvc.inputs.no_rescale = True
+    >>> gtmpvc.inputs.save_input = True
+    >>> gtmpvc.cmdline == 'mri_gtmpvc --auto-mask 1.000000 0.100000 --default-seg-merge 
+    --i sub-01_ses-baseline_pet.nii.gz --km-hb 11 12 50 51 --km-ref 8 47 --no-rescale 
+    --o pvc --psf 4.000000 --reg sub-01_ses-baseline_pet_mean_reg.lta --save-input --seg gtmseg.mgz'
     """
 
     _cmd = "mri_gtmpvc"
