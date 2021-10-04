@@ -179,15 +179,11 @@ class GTMPVCInputSpec(FSTraitedSpec):
     ) 
 
     segmentation = File(
-        argstr="-seg %s", exists=True, mandatory=True, desc="segfile : anatomical segmentation to define regions for GTM"
+        argstr="--seg %s", exists=True, mandatory=True, desc="segfile : anatomical segmentation to define regions for GTM"
     )
-    _reg_xor = (
-        "reg_file",
-        "lta_file"
-    )
+
     reg_file = File(
         exists=True,
-        xor=_reg_xor,
         argstr="--reg %s",
         mandatory=True,
         desc="LTA registration file that maps PET to anatomical",
