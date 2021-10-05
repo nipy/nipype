@@ -627,7 +627,7 @@ class CAT12SANLMDenoisingInputSpec(SPMCommandInputSpec):
         desc='Filename prefix. Specify  the  string  to be prepended to the filenames of the filtered image file(s).',
     )
 
-    filename_suffix= traits.Str(
+    filename_suffix = traits.Str(
         field='suffix',
         default_value='',
         usedefault=True,
@@ -639,9 +639,8 @@ class CAT12SANLMDenoisingInputSpec(SPMCommandInputSpec):
                             field='addnoise',
                             desc='Strength of additional noise in noise-free regions. Add  minimal  amount  of noise in regions without any noise to avoid image segmentation problems. This parameter defines the strength of additional noise as percentage of the average signal intensity.')
 
-    rician = traits.Enum(
-        0,
-        1,
+    rician = traits.Bool(
+        True,
         field='rician',
         usedefault=True,
         desc='''Rician noise
@@ -651,7 +650,7 @@ class CAT12SANLMDenoisingInputSpec(SPMCommandInputSpec):
         artefacts, e.g. cortex can be affected by very high values in the scalp or in blood vessels.''')
 
     replaceNANandINF = traits.Bool(
-        True
+        True,
         field='replaceNANandINF',
         usedefault=True,
         desc='Replace NAN by 0, -INF by the minimum and INF by the maximum of the image.'
