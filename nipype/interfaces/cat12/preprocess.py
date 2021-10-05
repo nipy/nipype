@@ -650,9 +650,8 @@ class CAT12SANLMDenoisingInputSpec(SPMCommandInputSpec):
         distribution is expected. Please note that the Rician noise estimation is sensitive for large signals in the neighbourhood and can lead to
         artefacts, e.g. cortex can be affected by very high values in the scalp or in blood vessels.''')
 
-    replaceNANandINF = traits.Enum(
-        1,
-        0,
+    replaceNANandINF = traits.Bool(
+        True
         field='replaceNANandINF',
         usedefault=True,
         desc='Replace NAN by 0, -INF by the minimum and INF by the maximum of the image.'
