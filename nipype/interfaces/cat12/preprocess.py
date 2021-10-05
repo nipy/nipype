@@ -634,10 +634,11 @@ class CAT12SANLMDenoisingInputSpec(SPMCommandInputSpec):
         desc='Filename suffix. Specify  the  string  to  be  appended  to the filenames of the filtered image file(s).'
     )
 
-    addnoise = traits.Float(default_value=0.5,
-                            usedefault=True,
-                            field='addnoise',
-                            desc='Strength of additional noise in noise-free regions. Add  minimal  amount  of noise in regions without any noise to avoid image segmentation problems. This parameter defines the strength of additional noise as percentage of the average signal intensity.')
+    addnoise = traits.Float(
+        default_value=0.5,
+        usedefault=True,
+        field='addnoise',
+        desc='Strength of additional noise in noise-free regions. Add  minimal  amount  of noise in regions without any noise to avoid image segmentation problems. This parameter defines the strength of additional noise as percentage of the average signal intensity.')
 
     rician = traits.Bool(
         True,
@@ -649,14 +650,14 @@ class CAT12SANLMDenoisingInputSpec(SPMCommandInputSpec):
         distribution is expected. Please note that the Rician noise estimation is sensitive for large signals in the neighbourhood and can lead to
         artefacts, e.g. cortex can be affected by very high values in the scalp or in blood vessels.''')
 
-    replaceNANandINF = traits.Bool(
+    replace_nan_and_inf = traits.Bool(
         True,
         field='replaceNANandINF',
         usedefault=True,
         desc='Replace NAN by 0, -INF by the minimum and INF by the maximum of the image.'
     )
 
-    NCstr = traits.Enum(
+    noisecorr_strength = traits.Enum(
         '-Inf',
         2,
         4,
