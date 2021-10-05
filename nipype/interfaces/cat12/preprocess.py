@@ -624,14 +624,14 @@ class CAT12SANLMDenoisingInputSpec(SPMCommandInputSpec):
         field='prefix',
         default_value='sanlm_',
         usedefault=True,
-        desc='Filename prefix. Specify  the  string  to be prepended to the filenames of the filtered image file(s). Default prefix is "samlm_".',
+        desc='Filename prefix. Specify  the  string  to be prepended to the filenames of the filtered image file(s).',
     )
 
     filename_suffix= traits.Str(
         field='suffix',
         default_value='',
         usedefault=True,
-        desc='Filename suffix. Specify  the  string  to  be  appended  to the filenames of the filtered image file(s). Default suffix is "".'
+        desc='Filename suffix. Specify  the  string  to  be  appended  to the filenames of the filtered image file(s).'
     )
 
     addnoise = traits.Float(default_value=0.5,
