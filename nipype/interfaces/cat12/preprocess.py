@@ -608,67 +608,79 @@ class CAT12SANLMDenoisingInputSpec(SPMCommandInputSpec):
         0,
         2,
         512,
-        field='spm_type',
+        field="spm_type",
         usedefault=True,
-        desc='Data type of the output images. 0 = same, 2 = uint8, 512 = uint16, 16 = single (32 bit)'
+        desc="Data type of the output images. 0 = same, 2 = uint8, 512 = uint16, 16 = single (32 bit)",
+    )
 
+    intlim = traits.Int(
+        field="intlim",
+        default_value=100,
+        usedefault=True,
+        desc="intensity limitation (default = 100)",
     )
 
     filename_prefix = traits.Str(
-        field='prefix',
-        default_value='sanlm_',
+        field="prefix",
+        default_value="sanlm_",
         usedefault=True,
-        desc='Filename prefix. Specify  the  string  to be prepended to the filenames of the filtered image file(s).',
+        desc="Filename prefix. Specify  the  string  to be prepended to the filenames of the filtered image file(s).",
     )
 
     filename_suffix = traits.Str(
-        field='suffix',
-        default_value='',
+        field="suffix",
+        default_value="",
         usedefault=True,
-        desc='Filename suffix. Specify  the  string  to  be  appended  to the filenames of the filtered image file(s).'
+        desc="Filename suffix. Specify  the  string  to  be  appended  to the filenames of the filtered image file(s).",
     )
 
     addnoise = traits.Float(
         default_value=0.5,
         usedefault=True,
-        field='addnoise',
-        desc='Strength of additional noise in noise-free regions. Add  minimal  amount  of noise in regions without any noise to avoid image segmentation problems. This parameter defines the strength of additional noise as percentage of the average signal intensity.')
+        field="addnoise",
+        desc="""Strength of additional noise in noise-free regions. 
+        Add  minimal  amount  of noise in regions without any noise to avoid image segmentation problems. 
+        This parameter defines the strength of additional noise as percentage of the average signal intensity.""",
+    )
 
     rician = traits.Bool(
         True,
-        field='rician',
+        field="rician",
         usedefault=True,
-        desc='''Rician noise
-        MRIs  can  have  Gaussian  or  Rician  distributed  noise with uniform or nonuniform variance across the image. If SNR is high enough
-        (>3)  noise  can  be  well  approximated by Gaussian noise in the foreground. However, for SENSE reconstruction or DTI data a Rician
-        distribution is expected. Please note that the Rician noise estimation is sensitive for large signals in the neighbourhood and can lead to
-        artefacts, e.g. cortex can be affected by very high values in the scalp or in blood vessels.''')
+        desc="""Rician noise
+        MRIs  can  have  Gaussian  or  Rician  distributed  noise with uniform or nonuniform variance across the image. 
+        If SNR is high enough (>3)  noise  can  be  well  approximated by Gaussian noise in the foreground. However, for 
+        SENSE reconstruction or DTI data a Rician distribution is expected. Please note that the Rician noise estimation 
+        is sensitive for large signals in the neighbourhood and can lead to artefacts, e.g. cortex can be affected by 
+        very high values in the scalp or in blood vessels.""",
+    )
 
     replace_nan_and_inf = traits.Bool(
         True,
-        field='replaceNANandINF',
+        field="replaceNANandINF",
         usedefault=True,
-        desc='Replace NAN by 0, -INF by the minimum and INF by the maximum of the image.'
+        desc="Replace NAN by 0, -INF by the minimum and INF by the maximum of the image.",
     )
 
     noisecorr_strength = traits.Enum(
-        '-Inf',
+        "-Inf",
         2,
         4,
-        field='nlmfilter.optimized.NCstr',
+        field="nlmfilter.optimized.NCstr",
         usedefault=True,
-        desc='''Strength of Noise Corrections
-        Strength  of  the  (sub-resolution)  spatial  adaptive    non local means (SANLM) noise correction. Please note that the filter strength is
-        automatically  estimated.  Change this parameter only for specific conditions. The "light" option applies half of the filter strength of the
-        adaptive  "medium"  cases,  whereas  the  "strong"  option  uses  the  full  filter  strength,  force sub-resolution filtering and applies an
-        additional  iteration.  Sub-resolution  filtering  is  only  used  in  case  of  high image resolution below 0.8 mm or in case of the "strong"
-        option. light = 2, medium = -Inf, strong = 4'''
+        desc="""Strength of Noise Corrections
+        Strength  of  the  (sub-resolution)  spatial  adaptive    non local means (SANLM) noise correction. Please note 
+        that the filter strength is automatically  estimated.  Change this parameter only for specific conditions. The 
+        "light" option applies half of the filter strength of the adaptive  "medium"  cases,  whereas  the  "strong"  
+        option  uses  the  full  filter  strength,  force sub-resolution filtering and applies an additional  iteration.
+        Sub-resolution  filtering  is  only  used  in  case  of  high image resolution below 0.8 mm or in case of the 
+        "strong" option. light = 2, medium = -Inf, strong = 4""",
     )
 
 
 class CAT12SANLMDenoisingOutputSpec(TraitedSpec):
 
-    out_file = File(desc='out file')
+    out_file = File(desc="out file")
 
 
 class CAT12SANLMDenoising(SPMCommand):
@@ -681,6 +693,13 @@ class CAT12SANLMDenoising(SPMCommand):
 
     This   filter   is  internally  used  in  the  segmentation  procedure  anyway.  Thus,  it  is  not
     necessary (and not recommended) to apply the filter before segmentation.
+
+    ______________________________________________________________________
+    Christian Gaser, Robert Dahnke
+    Structural Brain Mapping Group (http://www.neuro.uni-jena.de)
+    Departments of Neurology and Psychiatry
+    Jena University Hospital
+    ______________________________________________________________________
 
 
     Examples
@@ -714,10 +733,12 @@ class CAT12SANLMDenoising(SPMCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = fname_presuffix(self.inputs.in_files[0],
-                                              newpath=os.getcwd(),
-                                              prefix=self.inputs.filename_prefix,
-                                              suffix=self.inputs.filename_suffix)
+        outputs["out_file"] = fname_presuffix(
+            self.inputs.in_files[0],
+            newpath=os.getcwd(),
+            prefix=self.inputs.filename_prefix,
+            suffix=self.inputs.filename_suffix,
+        )
         return outputs
 
 
