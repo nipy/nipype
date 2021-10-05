@@ -638,8 +638,8 @@ class CAT12SANLMDenoisingInputSpec(SPMCommandInputSpec):
         default_value=0.5,
         usedefault=True,
         field="addnoise",
-        desc="""Strength of additional noise in noise-free regions. 
-        Add  minimal  amount  of noise in regions without any noise to avoid image segmentation problems. 
+        desc="""Strength of additional noise in noise-free regions.
+        Add  minimal  amount  of noise in regions without any noise to avoid image segmentation problems.
         This parameter defines the strength of additional noise as percentage of the average signal intensity.""",
     )
 
@@ -648,10 +648,10 @@ class CAT12SANLMDenoisingInputSpec(SPMCommandInputSpec):
         field="rician",
         usedefault=True,
         desc="""Rician noise
-        MRIs  can  have  Gaussian  or  Rician  distributed  noise with uniform or nonuniform variance across the image. 
-        If SNR is high enough (>3)  noise  can  be  well  approximated by Gaussian noise in the foreground. However, for 
-        SENSE reconstruction or DTI data a Rician distribution is expected. Please note that the Rician noise estimation 
-        is sensitive for large signals in the neighbourhood and can lead to artefacts, e.g. cortex can be affected by 
+        MRIs  can  have  Gaussian  or  Rician  distributed  noise with uniform or nonuniform variance across the image.
+        If SNR is high enough (>3)  noise  can  be  well  approximated by Gaussian noise in the foreground. However, for
+        SENSE reconstruction or DTI data a Rician distribution is expected. Please note that the Rician noise estimation
+        is sensitive for large signals in the neighbourhood and can lead to artefacts, e.g. cortex can be affected by
         very high values in the scalp or in blood vessels.""",
     )
 
@@ -669,11 +669,11 @@ class CAT12SANLMDenoisingInputSpec(SPMCommandInputSpec):
         field="nlmfilter.optimized.NCstr",
         usedefault=True,
         desc="""Strength of Noise Corrections
-        Strength  of  the  (sub-resolution)  spatial  adaptive    non local means (SANLM) noise correction. Please note 
-        that the filter strength is automatically  estimated.  Change this parameter only for specific conditions. The 
-        "light" option applies half of the filter strength of the adaptive  "medium"  cases,  whereas  the  "strong"  
+        Strength  of  the  (sub-resolution)  spatial  adaptive    non local means (SANLM) noise correction. Please note
+        that the filter strength is automatically  estimated.  Change this parameter only for specific conditions. The
+        "light" option applies half of the filter strength of the adaptive  "medium"  cases,  whereas  the  "strong"
         option  uses  the  full  filter  strength,  force sub-resolution filtering and applies an additional  iteration.
-        Sub-resolution  filtering  is  only  used  in  case  of  high image resolution below 0.8 mm or in case of the 
+        Sub-resolution  filtering  is  only  used  in  case  of  high image resolution below 0.8 mm or in case of the
         "strong" option. light = 2, medium = -Inf, strong = 4""",
     )
 
