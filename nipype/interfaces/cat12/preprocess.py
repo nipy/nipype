@@ -614,12 +614,6 @@ class CAT12SANLMDenoisingInputSpec(SPMCommandInputSpec):
 
     )
 
-    intlim = traits.Int(
-        field='intlim',
-        default_value=100,
-        usedefault=True,
-    )
-
     filename_prefix = traits.Str(
         field='prefix',
         default_value='sanlm_',
