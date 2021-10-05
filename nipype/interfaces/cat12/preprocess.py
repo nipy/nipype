@@ -693,7 +693,6 @@ class CAT12SANLMDenoising(SPMCommand):
 
     This   filter   is  internally  used  in  the  segmentation  procedure  anyway.  Thus,  it  is  not
     necessary (and not recommended) to apply the filter before segmentation.
-
     ______________________________________________________________________
     Christian Gaser, Robert Dahnke
     Structural Brain Mapping Group (http://www.neuro.uni-jena.de)
@@ -701,13 +700,12 @@ class CAT12SANLMDenoising(SPMCommand):
     Jena University Hospital
     ______________________________________________________________________
 
-
     Examples
     --------
     >>> from nipype.interfaces import cat12
     >>> c = cat12.CAT12SANLMDenoising()
-    >>> c.inputs.in_files='anatomical.nii'
-    >>> c.run()
+    >>> c.inputs.in_files = 'anatomical.nii'
+    >>> c.run() # doctest: +SKIP
     """
 
     input_spec = CAT12SANLMDenoisingInputSpec
