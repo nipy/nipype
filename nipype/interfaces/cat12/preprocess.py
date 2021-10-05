@@ -693,7 +693,7 @@ class CAT12SANLMDenoising(SPMCommand):
     --------
     >>> from nipype.interfaces import cat12
     >>> c = cat12.CAT12SANLMDenoising()
-    >>> c.inputs.in_files='sub-test_FLAIR.nii'
+    >>> c.inputs.in_files='anatomical.nii'
     >>> c.run()
     """
 
