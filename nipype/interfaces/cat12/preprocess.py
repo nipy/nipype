@@ -720,11 +720,10 @@ class CAT12SANLMDenoising(SPMCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        pth, base, ext = split_filename(self.inputs.in_files[0])
-        outputs['out_file'] = os.path.join(os.getcwd(), self.inputs.filename_prefix +
-                                           base +
-                                           self.inputs.filename_suffix +
-                                           ext)
+        outputs['out_file'] = fname_presuffix(self.inputs.in_files[0],
+                                              newpath=os.getcwd(),
+                                              prefix=self.inputs.filename_prefix,
+                                              suffix=self.inputs.filename_suffix)
         return outputs
 
 
