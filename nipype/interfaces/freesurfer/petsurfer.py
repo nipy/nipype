@@ -379,7 +379,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
     )
 
 class GTMPVCOutputSpec(TraitedSpec):
-    
+
     pvc_dir = Directory(exists=True, desc="output directory")
     ref_file = File(exists=True, desc="Reference TAC in .dat")
     hb_nifti = File(exists=True, desc="High-binding TAC in nifti")
@@ -387,6 +387,7 @@ class GTMPVCOutputSpec(TraitedSpec):
     nopvc_file = File(exists=True, desc="TACs for all regions with no PVC")
     gtm_file = File(exists=True, desc="TACs for all regions with GTM PVC")
     gtm_stats = File(exists=True, desc="Statistics for the GTM PVC")
+    
 
 class GTMPVC(FSCommand):
     """create an anatomical segmentation for the geometric transfer matrix (GTM).
@@ -538,7 +539,7 @@ class LoganRefInputSpec(GLMFitInputSpec):
     )
 
 class LoganRefOutputSpec(GLMFitInputSpec):
-    vd = File(desc="BP estimates")
+    bp = File(desc="BP estimates")
 
 class LoganRef(GLMFit):
     _cmd = "mri_glmfit"
@@ -553,5 +554,5 @@ class LoganRef(GLMFit):
             ext = '.nii'
         else:
             ext = '.mgh'            
-        outputs['vd'] = os.join(self.inputs.glm_dir, 'vd' + ext)
+        outputs['bp'] = os.join(self.inputs.glm_dir, 'bp' + ext)
         return outputs
