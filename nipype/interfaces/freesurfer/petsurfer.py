@@ -146,7 +146,7 @@ class GTMSeg(FSCommand):
     --------
     >>> gtmseg = GTMSeg()
     >>> gtmseg.inputs.out_file = 'gtmseg.nii'
-    >>> gtmseg.inputs.subject_id = 'subjec_id'
+    >>> gtmseg.inputs.subject_id = 'subject_id'
     >>> gtmseg.cmdline == 'gtmseg --o gtmseg.nii --s subject_id'
 
     """
@@ -197,7 +197,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
         argstr="--regheader", desc="assume that input is in anatomical space"
     )
 
-    output_dir = traits.Str(argstr="--o %s", desc="save outputs to dir", genfile=True)
+    pvc_dir = traits.Str(argstr="--o %s", desc="save outputs to dir", genfile=True)
 
     mask_file = File(
         exists=True, argstr="--mask %s", desc="ignore areas outside of the mask (in input vol space)"
@@ -379,7 +379,14 @@ class GTMPVCInputSpec(FSTraitedSpec):
     )
 
 class GTMPVCOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="PVC correction")
+    
+    pvc_dir = Directory(exists=True, desc="output directory")
+    ref_file = File(exists=True, desc="Reference TAC in .dat")
+    hb_nifti = File(exists=True, desc="High-binding TAC in nifti")
+    hb_dat = File(exists=True, desc="High-binding TAC in .dat")
+    nopvc_file = File(exists=True, desc="TACs for all regions with no PVC")
+    gtm_file = File(exists=True, desc="TACs for all regions with GTM PVC")
+    gtm_stats = File(exists=True, desc="Statistics for the GTM PVC")
 
 class GTMPVC(FSCommand):
     """create an anatomical segmentation for the geometric transfer matrix (GTM).
@@ -399,13 +406,32 @@ class GTMPVC(FSCommand):
     >>> gtmpvc.inputs.no_rescale = True
     >>> gtmpvc.inputs.save_input = True
     >>> gtmpvc.cmdline == 'mri_gtmpvc --auto-mask 1.000000 0.100000 --default-seg-merge 
-    --i sub-01_ses-baseline_pet.nii.gz --km-hb 11 12 50 51 --km-ref 8 47 --no-rescale 
-    --o pvc --psf 4.000000 --reg sub-01_ses-baseline_pet_mean_reg.lta --save-input --seg gtmseg.mgz'
+        --i sub-01_ses-baseline_pet.nii.gz --km-hb 11 12 50 51 --km-ref 8 47 --no-rescale 
+        --o pvc --psf 4.000000 --reg sub-01_ses-baseline_pet_mean_reg.lta --save-input --seg gtmseg.mgz'
     """
 
     _cmd = "mri_gtmpvc"
     input_spec = GTMPVCInputSpec
     output_spec = GTMPVCOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        # Get the top-level output directory
+        if not isdefined(self.inputs.pvc_dir):
+            pvcdir = os.getcwd()
+        else:
+            pvcdir = os.path.abspath(self.inputs.pvc_dir)
+        outputs["pvc_dir"] = pvcdir
+
+        # Assign the output files that always get created
+        outputs["ref_file"] = os.path.join(pvcdir, "km.ref.tac.dat")
+        outputs["hb_nifti"] = os.path.join(pvcdir, "km.hb.tac.nii.gz")
+        outputs["hb_dat"] = os.path.join(pvcdir, "km.hb.tac.dat")
+        outputs["nopvc_file"] = os.path.join(pvcdir, "nopvc.nii.gz")
+        outputs["gtm_file"] = os.path.join(pvcdir, "gtm.nii.gz")
+        outputs["gtm_stats"] = os.path.join(pvcdir, "gtm.stats.dat")
+
+        return outputs
 
     def _format_arg(self, name, spec, value):       
         return super(GTMPVC, self)._format_arg(name, spec, value)
