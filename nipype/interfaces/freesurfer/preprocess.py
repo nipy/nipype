@@ -1330,7 +1330,11 @@ class ReconAll(CommandLine):
             ("careg", ["mri/transforms/talairach.m3z"], []),
             (
                 "calabel",
-                ["mri/aseg.auto_noCCseg.mgz", "mri/aseg.auto.mgz", "mri/aseg.presurf.mgz"],
+                [
+                    "mri/aseg.auto_noCCseg.mgz",
+                    "mri/aseg.auto.mgz",
+                    "mri/aseg.presurf.mgz",
+                ],
                 [],
             ),
             ("normalization2", ["mri/brain.mgz"], []),
