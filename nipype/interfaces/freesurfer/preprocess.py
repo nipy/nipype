@@ -1330,7 +1330,7 @@ class ReconAll(CommandLine):
             ("careg", ["mri/transforms/talairach.m3z"], []),
             (
                 "calabel",
-                ["mri/aseg.auto_noCCseg.mgz", "mri/aseg.auto.mgz", "mri/aseg.mgz"],
+                ["mri/aseg.auto_noCCseg.mgz", "mri/aseg.auto.mgz", "mri/aseg.presurf.mgz"],
                 [],
             ),
             ("normalization2", ["mri/brain.mgz"], []),
@@ -1354,7 +1354,7 @@ class ReconAll(CommandLine):
             ("smooth1", ["surf/lh.smoothwm.nofix"], []),
             ("inflate1", ["surf/lh.inflated.nofix"], []),
             ("qsphere", ["surf/lh.qsphere.nofix"], []),
-            ("fix", ["surf/lh.orig"], []),
+            ("fix", ["surf/lh.inflated", "surf/lh.orig"], []),
             (
                 "white",
                 [
@@ -1401,7 +1401,7 @@ class ReconAll(CommandLine):
             ("parcstats2", ["stats/lh.aparc.a2009s.stats"], []),
             ("cortparc3", ["label/lh.aparc.DKTatlas.annot"], []),
             ("parcstats3", ["stats/lh.aparc.DKTatlas.stats"], []),
-            ("pctsurfcon", ["surf/lh.w-g.pct.mgh"], []),
+            ("pctsurfcon", ["surf/lh.w-g.pct.mgh", "stats/lh.w-g.pct.stats"], []),
         ]
         _autorecon3_added_steps = [
             (
@@ -1431,6 +1431,8 @@ class ReconAll(CommandLine):
                     "label/BA_exvivo.thresh.ctab",
                     "label/lh.entorhinal_exvivo.label",
                     "label/rh.entorhinal_exvivo.label",
+                    "label/lh.perirhinal_exvivo.label",
+                    "label/rh.perirhinal_exvivo.label",
                 ],
                 [],
             ),
