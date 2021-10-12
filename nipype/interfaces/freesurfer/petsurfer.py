@@ -136,7 +136,7 @@ class GTMSegInputSpec(FSTraitedSpec):
 
 
 class GTMSegOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="GTM segmentation")
+    gtm_file = File(exists=True, desc="GTM segmentation")
 
 
 class GTMSeg(FSCommand):
@@ -154,6 +154,11 @@ class GTMSeg(FSCommand):
     _cmd = "gtmseg"
     input_spec = GTMSegInputSpec
     output_spec = GTMSegOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['gtm_file'] = os.path.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','gtmseg.mgz')
+        return outputs
 
     def _format_arg(self, name, spec, value):       
         return super(GTMSeg, self)._format_arg(name, spec, value)
@@ -398,7 +403,7 @@ class GTMPVC(FSCommand):
     >>> gtmpvc.inputs.in_file = 'sub-01_ses-baseline_pet.nii.gz'
     >>> gtmpvc.inputs.segmentation = 'gtmseg.mgz'
     >>> gtmpvc.inputs.reg_file = 'sub-01_ses-baseline_pet_mean_reg.lta'
-    >>> gtmpvc.inputs.output_dir = 'pvc'
+    >>> gtmpvc.inputs.pvc_dir = 'pvc'
     >>> gtmpvc.inputs.psf = 4
     >>> gtmpvc.inputs.default_seg_merge = True
     >>> gtmpvc.inputs.auto_mask = (1, 0.1)
@@ -440,7 +445,8 @@ class GTMPVC(FSCommand):
 class MRTMInputSpec(GLMFitInputSpec):
 
     mrtm1 = InputMultiPath(
-        traits.Tuple(File(exists=True, mandatory=True), File(exists=True, mandatory=True)),
+        (File(exists=True, mandatory=True), 
+        File(exists=True, mandatory=True)),
         argstr="--mrtm1 %s %s...",
         desc="RefTac TimeSec : perform MRTM1 kinetic modeling",
     )
@@ -455,7 +461,7 @@ class MRTM(GLMFit):
     --------
     >>> mrtm = MRTM()
     >>> mrtm.inputs.in_file = 'tac.nii'
-    >>> mrtm.inputs.mrtm1 = [('ref_tac.dat', 'timing.dat')]
+    >>> gtmseg.inputs.mrtm = [('ref_tac.dat', 'timing.dat')]
     >>> mrtm.inputs.glmdir = 'mrtm'
     >>> mrtm.cmdline == 'mri_glmfit --glmdir mrtm --y tac.nii --mrtm1 ref_tac.dat timing.dat'
     """
@@ -496,11 +502,11 @@ class MRTM2(GLMFit):
     """Perform MRTM2 kinetic modeling.
     Examples
     --------
-    >>> mrtm2 = MRTM2()
-    >>> mrtm2.inputs.in_file = 'tac.nii'
-    >>> mrtm2.inputs.mrtm2 = [('ref_tac.dat', 'timing.dat', 0.07872)]
-    >>> mrtm2.inputs.glmdir = 'mrtm2'
-    >>> mrtm2.cmdline == 'mri_glmfit --glmdir mrtm2 --y tac.nii --mrtm2 ref_tac.dat timing.dat 0.07872'
+    >>> mrtm = MRTM()
+    >>> mrtm.inputs.in_file = 'tac.nii'
+    >>> gtmseg.inputs.mrtm = [('ref_tac.dat', 'timing.dat', 'k2prime.dat')]
+    >>> mrtm.inputs.glmdir = 'mrtm2'
+    >>> mrtm2.cmdline == 'mri_glmfit --glmdir mrtm2 --y tac.nii --mrtm2 ref_tac.dat timing.dat k2prime.dat'
     """
 
     _cmd = "mri_glmfit"
@@ -515,7 +521,7 @@ class MRTM2(GLMFit):
             ext = '.nii'
         else:
             ext = '.mgh'            
-        outputs['bp'] = os.join(self.inputs.glm_dir, 'bp' + ext)
+        outputs['bp'] = os.path.join(self.inputs.glm_dir, 'bp', ext)
         return outputs
 
 class LoganRefInputSpec(GLMFitInputSpec):
@@ -554,5 +560,5 @@ class LoganRef(GLMFit):
             ext = '.nii'
         else:
             ext = '.mgh'            
-        outputs['bp'] = os.join(self.inputs.glm_dir, 'bp' + ext)
+        outputs['bp'] = os.path.join(self.inputs.glm_dir, 'bp' + ext)
         return outputs
