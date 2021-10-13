@@ -1,5 +1,5 @@
 _machine_kwds: &machine_kwds
-  image: circleci/classic:201808-01
+  image: ubuntu-2004:202107-02
 
 _store_artifacts_kwds: &store_artifacts_kwds
   path: /home/circleci/work/tests
