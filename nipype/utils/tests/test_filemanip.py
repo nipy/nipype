@@ -31,6 +31,7 @@ from ...utils.filemanip import (
     savepkl,
     path_resolve,
     write_rst_list,
+    emptydirs,
 )
 
 
@@ -670,3 +671,26 @@ def test_write_rst_list(tmp_path, items, expected):
     else:
         with pytest.raises(expected):
             write_rst_list(items)
+
+
+def nfs_unlink(pathlike, *, dir_fd=None):
+    if dir_fd is None:
+        path = Path(pathlike)
+        deleted = path.with_name(".nfs00000000")
+        path.rename(deleted)
+    else:
+        os.rename(pathlike, ".nfs1111111111", src_dir_fd=dir_fd, dst_dir_fd=dir_fd)
+
+
+def test_emptydirs_dangling_nfs(tmp_path):
+    busyfile = tmp_path / "base" / "subdir" / "busyfile"
+    busyfile.parent.mkdir(parents=True)
+    busyfile.touch()
+
+    with mock.patch("os.unlink") as mocked:
+        mocked.side_effect = nfs_unlink
+        emptydirs(tmp_path / "base")
+
+    assert Path.exists(tmp_path / "base")
+    assert not busyfile.exists()
+    assert busyfile.parent.exists()  # Couldn't remove
