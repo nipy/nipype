@@ -13,16 +13,7 @@ from distutils.version import LooseVersion
 
 import numpy as np
 
-try:
-    from textwrap import indent as textwrap_indent
-except ImportError:
-
-    def textwrap_indent(text, prefix):
-        """A textwrap.indent replacement for Python < 3.3"""
-        if not prefix:
-            return text
-        splittext = text.splitlines(True)
-        return prefix + prefix.join(splittext)
+import textwrap
 
 
 def human_order_sorted(l):
@@ -296,12 +287,16 @@ def dict_diff(dold, dnew, indent=0):
 
     typical use -- log difference for hashed_inputs
     """
-    # First check inputs, since they usually are lists of tuples
-    # and dicts are required.
-    if isinstance(dnew, list):
-        dnew = dict(dnew)
-    if isinstance(dold, list):
-        dold = dict(dold)
+    try:
+        dnew, dold = dict(dnew), dict(dold)
+    except Exception:
+        return textwrap.indent(
+            f"""\
+Diff between nipype inputs failed:
+* Cached inputs: {dold}
+* New inputs: {dnew}""",
+            " " * indent,
+        )
 
     # Compare against hashed_inputs
     # Keys: should rarely differ
@@ -321,26 +316,36 @@ def dict_diff(dold, dnew, indent=0):
 
     diffkeys = len(diff)
 
+    def _shorten(value):
+        if isinstance(value, str) and len(value) > 50:
+            return f"{value[:10]}...{value[-10:]}"
+        if isinstance(value, (tuple, list)) and len(value) > 10:
+            return tuple(list(value[:2]) + ["..."] + list(value[-2:]))
+        return value
+
+    def _uniformize(val):
+        if isinstance(val, dict):
+            return {k: _uniformize(v) for k, v in val.items()}
+        if isinstance(val, (list, tuple)):
+            return tuple(_uniformize(el) for el in val)
+        return val
+
     # Values in common keys would differ quite often,
     # so we need to join the messages together
     for k in new_keys.intersection(old_keys):
-        try:
-            new, old = dnew[k], dold[k]
-            same = new == old
-            if not same:
-                # Since JSON does not discriminate between lists and
-                # tuples, we might need to cast them into the same type
-                # as the last resort.  And lets try to be more generic
-                same = old.__class__(new) == old
-        except Exception:
-            same = False
-        if not same:
-            diff += ["  * %s: %r != %r" % (k, dnew[k], dold[k])]
+        # Reading from JSON produces lists, but internally we typically
+        # use tuples. At this point these dictionary values can be
+        # immutable (and therefore the preference for tuple).
+        new = _uniformize(dnew[k])
+        old = _uniformize(dold[k])
+
+        if new != old:
+            diff += ["  * %s: %r != %r" % (k, _shorten(new), _shorten(old))]
 
     if len(diff) > diffkeys:
         diff.insert(diffkeys, "Some dictionary entries had differing values:")
 
-    return textwrap_indent("\n".join(diff), " " * indent)
+    return textwrap.indent("\n".join(diff), " " * indent)
 
 
 def rgetcwd(error=True):
