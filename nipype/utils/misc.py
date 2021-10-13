@@ -13,16 +13,7 @@ from distutils.version import LooseVersion
 
 import numpy as np
 
-try:
-    from textwrap import indent as textwrap_indent
-except ImportError:
-
-    def textwrap_indent(text, prefix):
-        """A textwrap.indent replacement for Python < 3.3"""
-        if not prefix:
-            return text
-        splittext = text.splitlines(True)
-        return prefix + prefix.join(splittext)
+import textwrap
 
 
 def human_order_sorted(l):
@@ -299,11 +290,12 @@ def dict_diff(dold, dnew, indent=0):
     try:
         dnew, dold = dict(dnew), dict(dold)
     except Exception:
-        return textwrap_indent(
+        return textwrap.indent(
             f"""\
 Diff between nipype inputs failed:
 * Cached inputs: {dold}
-* New inputs: {dnew}"""
+* New inputs: {dnew}""",
+            " " * indent,
         )
 
     # Compare against hashed_inputs
@@ -353,7 +345,7 @@ Diff between nipype inputs failed:
     if len(diff) > diffkeys:
         diff.insert(diffkeys, "Some dictionary entries had differing values:")
 
-    return textwrap_indent("\n".join(diff), " " * indent)
+    return textwrap.indent("\n".join(diff), " " * indent)
 
 
 def rgetcwd(error=True):
