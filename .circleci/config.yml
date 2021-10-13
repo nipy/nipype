@@ -1,5 +1,5 @@
 _machine_kwds: &machine_kwds
-  image: circleci/classic:201808-01
+  image: ubuntu-2004:202107-02
 
 _store_artifacts_kwds: &store_artifacts_kwds
   path: /home/circleci/work/tests
@@ -43,15 +43,15 @@ _get_base_image: &get_base_image
       exit 1
     fi
 
-_build_main_image_py36: &build_main_image_py36
-  name: Build main image (py36)
+_build_main_image_py38: &build_main_image_py38
+  name: Build main image (py38)
   no_output_timeout: 60m
   command: |
     tools/retry_cmd.sh -n 5 -s 15 \
       docker build \
         --rm=false \
         --tag nipype/nipype:latest \
-        --tag nipype/nipype:py36 \
+        --tag nipype/nipype:py38 \
         $(test -z "${CIRCLE_TAG}" || echo --tag nipype/nipype:"${CIRCLE_TAG}") \
         --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
         --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
@@ -146,7 +146,7 @@ jobs:
       - run: *generate_dockerfiles
       - run: *modify_nipype_version
       - run: *get_base_image
-      - run: *build_main_image_py36
+      - run: *build_main_image_py38
       - run: *_get_codecov
       - run: *_download_test_data
       - run: *prepare_working_directory
@@ -165,8 +165,8 @@ jobs:
             if [ "$CIRCLE_BRANCH" = "master" -a -z "$CIRCLE_PULL_REQUEST" ]; then
               docker save nipype/nipype:base \
                           nipype/nipype:latest \
-                          nipype/nipype:py36 | gzip -1 > /tmp/docker/nipype-base-latest-py36.tar.gz \
-              && du -h /tmp/docker/nipype-base-latest-py36.tar.gz
+                          nipype/nipype:py38 | gzip -1 > /tmp/docker/nipype-base-latest-py38.tar.gz \
+              && du -h /tmp/docker/nipype-base-latest-py38.tar.gz
             fi
       - persist_to_workspace:
           root: /tmp
@@ -184,7 +184,7 @@ jobs:
           name: Load saved Docker images.
           no_output_timeout: 60m
           command: |
-            docker load < /tmp/docker/nipype-base-latest-py36.tar.gz
+            docker load < /tmp/docker/nipype-base-latest-py38.tar.gz
       - run:
           name: Push to DockerHub
           no_output_timeout: 120m
@@ -192,7 +192,7 @@ jobs:
             echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
             docker push nipype/nipype:base
             docker push nipype/nipype:latest
-            docker push nipype/nipype:py36
+            docker push nipype/nipype:py38
             test -z "${CIRCLE_TAG}" || docker push nipype/nipype:"${CIRCLE_TAG}"
       - run:
           name: Move pruned Dockerfile to /tmp/docker/cache directory
