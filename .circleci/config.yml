@@ -1,5 +1,5 @@
-_machine_kwds: &machine_kwds
-  image: circleci/classic:201808-01
+_docker_kwds: &docker_kwds
+  - image: cimg/python:3.9.7
 
 _store_artifacts_kwds: &store_artifacts_kwds
   path: /home/circleci/work/tests
@@ -135,7 +135,7 @@ jobs:
             - docker/get_base_image.sh
 
   test_pytest:
-    machine: *machine_kwds
+    docker: *docker_kwds
     working_directory: /home/circleci/nipype
     steps:
       - checkout:
@@ -205,7 +205,7 @@ jobs:
           key: dockerfile-cache-v1-{{ .Branch }}-{{ checksum "/tmp/docker/cache/Dockerfile.base-pruned" }}
 
   update_feedstock:
-    machine: *machine_kwds
+    docker: *docker_kwds
     working_directory: /home/circleci/nipype
     steps:
       - checkout:
