@@ -90,16 +90,15 @@ Testing Nipype using Docker
 Nipype is tested inside Docker containers and users can use nipype images to test local versions.
 First, install the `Docker Engine <https://docs.docker.com/engine/installation/>`_.
 Nipype has one base docker image called nipype/nipype:base, that contains several useful tools
-(FreeSurfer, AFNI, FSL, ANTs, etc.), and additional test images
-for specific Python versions: py27 for Python 2.7 and py36 for Python 3.6.
+(FreeSurfer, AFNI, FSL, ANTs, etc.), and an additional test image for Python 3.8:
 
-Users can pull the nipype image for Python 3.6 as follows::
+Users can pull the nipype image for Python 3.8 as follows::
 
-  docker pull nipype/nipype:py36
+  docker pull nipype/nipype:py38
 
 In order to test a local version of nipype you can run test within container as follows::
 
-  docker run -it -v $PWD:/src/nipype --rm nipype/nipype:py36 py.test -v --doctest-modules /src/nipype/nipype
+  docker run -it -v $PWD:/src/nipype --rm nipype/nipype:py38 py.test -v --doctest-modules /src/nipype/nipype
 
 
 Additional comments
