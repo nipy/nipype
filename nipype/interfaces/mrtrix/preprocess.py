@@ -220,9 +220,7 @@ class DWI2TensorInputSpec(CommandLineInputSpec):
     mask = File(
         exists=True,
         argstr="-mask %s",
-        desc=(
-            "Only perform computation within the specified binary brain mask image."
-        ),
+        desc="Only perform computation within the specified binary brain mask image.",
     )
     quiet = traits.Bool(
         argstr="-quiet",
