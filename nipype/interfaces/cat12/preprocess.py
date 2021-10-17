@@ -726,7 +726,9 @@ class CAT12SANLMDenoising(SPMCommand):
                 return scans_for_fnames(val)
             else:
                 return scans_for_fname(val)
-
+        if opt == "spm_type":
+            type_map = {"same": 0, "uint8": 2, "uint16": 512, "float32": 16}
+            val = type_map[val]
         return super(CAT12SANLMDenoising, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
