@@ -268,7 +268,7 @@ class LaplacianThicknessInputSpec(ANTSCommandInputSpec):
         desc="gray matter segmentation image",
         position=2,
     )
-    output_image = File(
+    output_image = traits.Str(
         desc="name of output file",
         argstr="%s",
         position=3,
