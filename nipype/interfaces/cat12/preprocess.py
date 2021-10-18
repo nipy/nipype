@@ -606,7 +606,8 @@ class CAT12SANLMDenoisingInputSpec(SPMCommandInputSpec):
     spm_type = traits.Enum(
         "float32",
         "uint16",
-        "uint8" "same",
+        "uint8",
+        "same",
         field="spm_type",
         usedefault=True,
         desc="Data type of the output images. 'same' matches the input image type.",
