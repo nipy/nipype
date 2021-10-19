@@ -4,22 +4,10 @@ from ..registration import Paint
 
 def test_Paint_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        averages=dict(
-            argstr="-a %d",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        in_surf=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=-2,
-        ),
+        args=dict(argstr="%s"),
+        averages=dict(argstr="-a %d"),
+        environ=dict(nohash=True, usedefault=True),
+        in_surf=dict(argstr="%s", extensions=None, mandatory=True, position=-2),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -30,12 +18,7 @@ def test_Paint_inputs():
             position=-1,
         ),
         subjects_dir=dict(),
-        template=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=-3,
-        ),
+        template=dict(argstr="%s", extensions=None, mandatory=True, position=-3),
         template_param=dict(),
     )
     inputs = Paint.input_spec()
@@ -46,11 +29,7 @@ def test_Paint_inputs():
 
 
 def test_Paint_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = Paint.output_spec()
 
     for key, metadata in list(output_map.items()):

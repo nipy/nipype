@@ -4,42 +4,14 @@ from ..utils import Calc
 
 def test_Calc_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        expr=dict(
-            argstr='-expr "%s"',
-            mandatory=True,
-            position=3,
-        ),
-        in_file_a=dict(
-            argstr="-a %s",
-            extensions=None,
-            mandatory=True,
-            position=0,
-        ),
-        in_file_b=dict(
-            argstr="-b %s",
-            extensions=None,
-            position=1,
-        ),
-        in_file_c=dict(
-            argstr="-c %s",
-            extensions=None,
-            position=2,
-        ),
-        num_threads=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        other=dict(
-            argstr="",
-            extensions=None,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        expr=dict(argstr='-expr "%s"', mandatory=True, position=3),
+        in_file_a=dict(argstr="-a %s", extensions=None, mandatory=True, position=0),
+        in_file_b=dict(argstr="-b %s", extensions=None, position=1),
+        in_file_c=dict(argstr="-c %s", extensions=None, position=2),
+        num_threads=dict(nohash=True, usedefault=True),
+        other=dict(argstr="", extensions=None),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -47,16 +19,10 @@ def test_Calc_inputs():
             name_template="%s_calc",
         ),
         outputtype=dict(),
-        overwrite=dict(
-            argstr="-overwrite",
-        ),
+        overwrite=dict(argstr="-overwrite"),
         single_idx=dict(),
-        start_idx=dict(
-            requires=["stop_idx"],
-        ),
-        stop_idx=dict(
-            requires=["start_idx"],
-        ),
+        start_idx=dict(requires=["stop_idx"]),
+        stop_idx=dict(requires=["start_idx"]),
     )
     inputs = Calc.input_spec()
 
@@ -66,11 +32,7 @@ def test_Calc_inputs():
 
 
 def test_Calc_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = Calc.output_spec()
 
     for key, metadata in list(output_map.items()):

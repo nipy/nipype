@@ -4,15 +4,9 @@ from ..utils import CenterMass
 
 def test_CenterMass_inputs():
     input_map = dict(
-        all_rois=dict(
-            argstr="-all_rois",
-        ),
-        args=dict(
-            argstr="%s",
-        ),
-        automask=dict(
-            argstr="-automask",
-        ),
+        all_rois=dict(argstr="-all_rois"),
+        args=dict(argstr="%s"),
+        automask=dict(argstr="-automask"),
         cm_file=dict(
             argstr="> %s",
             extensions=None,
@@ -22,30 +16,14 @@ def test_CenterMass_inputs():
             name_template="%s_cm.out",
             position=-1,
         ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        environ=dict(nohash=True, usedefault=True),
         in_file=dict(
-            argstr="%s",
-            copyfile=True,
-            extensions=None,
-            mandatory=True,
-            position=-2,
+            argstr="%s", copyfile=True, extensions=None, mandatory=True, position=-2
         ),
-        local_ijk=dict(
-            argstr="-local_ijk",
-        ),
-        mask_file=dict(
-            argstr="-mask %s",
-            extensions=None,
-        ),
-        roi_vals=dict(
-            argstr="-roi_vals %s",
-        ),
-        set_cm=dict(
-            argstr="-set %f %f %f",
-        ),
+        local_ijk=dict(argstr="-local_ijk"),
+        mask_file=dict(argstr="-mask %s", extensions=None),
+        roi_vals=dict(argstr="-roi_vals %s"),
+        set_cm=dict(argstr="-set %f %f %f"),
     )
     inputs = CenterMass.input_spec()
 
@@ -56,13 +34,7 @@ def test_CenterMass_inputs():
 
 def test_CenterMass_outputs():
     output_map = dict(
-        cm=dict(),
-        cm_file=dict(
-            extensions=None,
-        ),
-        out_file=dict(
-            extensions=None,
-        ),
+        cm=dict(), cm_file=dict(extensions=None), out_file=dict(extensions=None)
     )
     outputs = CenterMass.output_spec()
 

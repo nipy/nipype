@@ -4,36 +4,19 @@ from ..resampling import ApplyTransformsToPoints
 
 def test_ApplyTransformsToPoints_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        dimension=dict(
-            argstr="--dimensionality %d",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        input_file=dict(
-            argstr="--input %s",
-            extensions=None,
-            mandatory=True,
-        ),
+        args=dict(argstr="%s"),
+        dimension=dict(argstr="--dimensionality %d"),
+        environ=dict(nohash=True, usedefault=True),
+        input_file=dict(argstr="--input %s", extensions=None, mandatory=True),
         invert_transform_flags=dict(),
-        num_threads=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        num_threads=dict(nohash=True, usedefault=True),
         output_file=dict(
             argstr="--output %s",
             hash_files=False,
             name_source=["input_file"],
             name_template="%s_transformed.csv",
         ),
-        transforms=dict(
-            argstr="%s",
-            mandatory=True,
-        ),
+        transforms=dict(argstr="%s", mandatory=True),
     )
     inputs = ApplyTransformsToPoints.input_spec()
 
@@ -43,11 +26,7 @@ def test_ApplyTransformsToPoints_inputs():
 
 
 def test_ApplyTransformsToPoints_outputs():
-    output_map = dict(
-        output_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(output_file=dict(extensions=None))
     outputs = ApplyTransformsToPoints.output_spec()
 
     for key, metadata in list(output_map.items()):

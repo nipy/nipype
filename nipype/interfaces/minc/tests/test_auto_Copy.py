@@ -4,19 +4,9 @@ from ..minc import Copy
 
 def test_Copy_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        input_file=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=-2,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        input_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2),
         output_file=dict(
             argstr="%s",
             extensions=None,
@@ -26,14 +16,8 @@ def test_Copy_inputs():
             name_template="%s_copy.mnc",
             position=-1,
         ),
-        pixel_values=dict(
-            argstr="-pixel_values",
-            xor=("pixel_values", "real_values"),
-        ),
-        real_values=dict(
-            argstr="-real_values",
-            xor=("pixel_values", "real_values"),
-        ),
+        pixel_values=dict(argstr="-pixel_values", xor=("pixel_values", "real_values")),
+        real_values=dict(argstr="-real_values", xor=("pixel_values", "real_values")),
     )
     inputs = Copy.input_spec()
 
@@ -43,11 +27,7 @@ def test_Copy_inputs():
 
 
 def test_Copy_outputs():
-    output_map = dict(
-        output_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(output_file=dict(extensions=None))
     outputs = Copy.output_spec()
 
     for key, metadata in list(output_map.items()):

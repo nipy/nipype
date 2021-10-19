@@ -4,29 +4,14 @@ from ..utils import ApplyTransform
 
 def test_ApplyTransform_inputs():
     input_map = dict(
-        in_file=dict(
-            copyfile=True,
-            extensions=None,
-            mandatory=True,
-        ),
-        mat=dict(
-            extensions=None,
-            mandatory=True,
-        ),
+        in_file=dict(copyfile=True, extensions=None, mandatory=True),
+        mat=dict(extensions=None, mandatory=True),
         matlab_cmd=dict(),
-        mfile=dict(
-            usedefault=True,
-        ),
-        out_file=dict(
-            extensions=None,
-            genfile=True,
-        ),
+        mfile=dict(usedefault=True),
+        out_file=dict(extensions=None, genfile=True),
         paths=dict(),
         use_mcr=dict(),
-        use_v8struct=dict(
-            min_ver="8",
-            usedefault=True,
-        ),
+        use_v8struct=dict(min_ver="8", usedefault=True),
     )
     inputs = ApplyTransform.input_spec()
 
@@ -36,11 +21,7 @@ def test_ApplyTransform_inputs():
 
 
 def test_ApplyTransform_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = ApplyTransform.output_spec()
 
     for key, metadata in list(output_map.items()):

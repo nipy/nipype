@@ -4,70 +4,24 @@ from ..brains import BRAINSMush
 
 def test_BRAINSMush_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        boundingBoxSize=dict(
-            argstr="--boundingBoxSize %s",
-            sep=",",
-        ),
-        boundingBoxStart=dict(
-            argstr="--boundingBoxStart %s",
-            sep=",",
-        ),
-        desiredMean=dict(
-            argstr="--desiredMean %f",
-        ),
-        desiredVariance=dict(
-            argstr="--desiredVariance %f",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        inputFirstVolume=dict(
-            argstr="--inputFirstVolume %s",
-            extensions=None,
-        ),
-        inputMaskVolume=dict(
-            argstr="--inputMaskVolume %s",
-            extensions=None,
-        ),
-        inputSecondVolume=dict(
-            argstr="--inputSecondVolume %s",
-            extensions=None,
-        ),
-        lowerThresholdFactor=dict(
-            argstr="--lowerThresholdFactor %f",
-        ),
-        lowerThresholdFactorPre=dict(
-            argstr="--lowerThresholdFactorPre %f",
-        ),
-        numberOfThreads=dict(
-            argstr="--numberOfThreads %d",
-        ),
-        outputMask=dict(
-            argstr="--outputMask %s",
-            hash_files=False,
-        ),
-        outputVolume=dict(
-            argstr="--outputVolume %s",
-            hash_files=False,
-        ),
-        outputWeightsFile=dict(
-            argstr="--outputWeightsFile %s",
-            hash_files=False,
-        ),
-        seed=dict(
-            argstr="--seed %s",
-            sep=",",
-        ),
-        upperThresholdFactor=dict(
-            argstr="--upperThresholdFactor %f",
-        ),
-        upperThresholdFactorPre=dict(
-            argstr="--upperThresholdFactorPre %f",
-        ),
+        args=dict(argstr="%s"),
+        boundingBoxSize=dict(argstr="--boundingBoxSize %s", sep=","),
+        boundingBoxStart=dict(argstr="--boundingBoxStart %s", sep=","),
+        desiredMean=dict(argstr="--desiredMean %f"),
+        desiredVariance=dict(argstr="--desiredVariance %f"),
+        environ=dict(nohash=True, usedefault=True),
+        inputFirstVolume=dict(argstr="--inputFirstVolume %s", extensions=None),
+        inputMaskVolume=dict(argstr="--inputMaskVolume %s", extensions=None),
+        inputSecondVolume=dict(argstr="--inputSecondVolume %s", extensions=None),
+        lowerThresholdFactor=dict(argstr="--lowerThresholdFactor %f"),
+        lowerThresholdFactorPre=dict(argstr="--lowerThresholdFactorPre %f"),
+        numberOfThreads=dict(argstr="--numberOfThreads %d"),
+        outputMask=dict(argstr="--outputMask %s", hash_files=False),
+        outputVolume=dict(argstr="--outputVolume %s", hash_files=False),
+        outputWeightsFile=dict(argstr="--outputWeightsFile %s", hash_files=False),
+        seed=dict(argstr="--seed %s", sep=","),
+        upperThresholdFactor=dict(argstr="--upperThresholdFactor %f"),
+        upperThresholdFactorPre=dict(argstr="--upperThresholdFactorPre %f"),
     )
     inputs = BRAINSMush.input_spec()
 
@@ -78,15 +32,9 @@ def test_BRAINSMush_inputs():
 
 def test_BRAINSMush_outputs():
     output_map = dict(
-        outputMask=dict(
-            extensions=None,
-        ),
-        outputVolume=dict(
-            extensions=None,
-        ),
-        outputWeightsFile=dict(
-            extensions=None,
-        ),
+        outputMask=dict(extensions=None),
+        outputVolume=dict(extensions=None),
+        outputWeightsFile=dict(extensions=None),
     )
     outputs = BRAINSMush.output_spec()
 

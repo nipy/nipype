@@ -4,52 +4,21 @@ from ..preprocess import TSmooth
 
 def test_TSmooth_inputs():
     input_map = dict(
-        adaptive=dict(
-            argstr="-adaptive %d",
-        ),
-        args=dict(
-            argstr="%s",
-        ),
-        blackman=dict(
-            argstr="-blackman %d",
-        ),
-        custom=dict(
-            argstr="-custom %s",
-            extensions=None,
-        ),
-        datum=dict(
-            argstr="-datum %s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        hamming=dict(
-            argstr="-hamming %d",
-        ),
+        adaptive=dict(argstr="-adaptive %d"),
+        args=dict(argstr="%s"),
+        blackman=dict(argstr="-blackman %d"),
+        custom=dict(argstr="-custom %s", extensions=None),
+        datum=dict(argstr="-datum %s"),
+        environ=dict(nohash=True, usedefault=True),
+        hamming=dict(argstr="-hamming %d"),
         in_file=dict(
-            argstr="%s",
-            copyfile=False,
-            extensions=None,
-            mandatory=True,
-            position=-1,
+            argstr="%s", copyfile=False, extensions=None, mandatory=True, position=-1
         ),
-        lin=dict(
-            argstr="-lin",
-        ),
-        lin3=dict(
-            argstr="-3lin %d",
-        ),
-        med=dict(
-            argstr="-med",
-        ),
-        num_threads=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        osf=dict(
-            argstr="-osf",
-        ),
+        lin=dict(argstr="-lin"),
+        lin3=dict(argstr="-3lin %d"),
+        med=dict(argstr="-med"),
+        num_threads=dict(nohash=True, usedefault=True),
+        osf=dict(argstr="-osf"),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -66,11 +35,7 @@ def test_TSmooth_inputs():
 
 
 def test_TSmooth_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = TSmooth.output_spec()
 
     for key, metadata in list(output_map.items()):

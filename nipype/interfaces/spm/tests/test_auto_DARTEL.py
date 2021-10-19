@@ -4,34 +4,16 @@ from ..preprocess import DARTEL
 
 def test_DARTEL_inputs():
     input_map = dict(
-        image_files=dict(
-            copyfile=False,
-            field="warp.images",
-            mandatory=True,
-        ),
-        iteration_parameters=dict(
-            field="warp.settings.param",
-        ),
+        image_files=dict(copyfile=False, field="warp.images", mandatory=True),
+        iteration_parameters=dict(field="warp.settings.param"),
         matlab_cmd=dict(),
-        mfile=dict(
-            usedefault=True,
-        ),
-        optimization_parameters=dict(
-            field="warp.settings.optim",
-        ),
+        mfile=dict(usedefault=True),
+        optimization_parameters=dict(field="warp.settings.optim"),
         paths=dict(),
-        regularization_form=dict(
-            field="warp.settings.rform",
-        ),
-        template_prefix=dict(
-            field="warp.settings.template",
-            usedefault=True,
-        ),
+        regularization_form=dict(field="warp.settings.rform"),
+        template_prefix=dict(field="warp.settings.template", usedefault=True),
         use_mcr=dict(),
-        use_v8struct=dict(
-            min_ver="8",
-            usedefault=True,
-        ),
+        use_v8struct=dict(min_ver="8", usedefault=True),
     )
     inputs = DARTEL.input_spec()
 
@@ -43,9 +25,7 @@ def test_DARTEL_inputs():
 def test_DARTEL_outputs():
     output_map = dict(
         dartel_flow_fields=dict(),
-        final_template_file=dict(
-            extensions=None,
-        ),
+        final_template_file=dict(extensions=None),
         template_files=dict(),
     )
     outputs = DARTEL.output_spec()

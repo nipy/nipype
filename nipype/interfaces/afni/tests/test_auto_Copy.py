@@ -4,24 +4,12 @@ from ..utils import Copy
 
 def test_Copy_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
         in_file=dict(
-            argstr="%s",
-            copyfile=False,
-            extensions=None,
-            mandatory=True,
-            position=-2,
+            argstr="%s", copyfile=False, extensions=None, mandatory=True, position=-2
         ),
-        num_threads=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        num_threads=dict(nohash=True, usedefault=True),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -30,9 +18,7 @@ def test_Copy_inputs():
             position=-1,
         ),
         outputtype=dict(),
-        verbose=dict(
-            argstr="-verb",
-        ),
+        verbose=dict(argstr="-verb"),
     )
     inputs = Copy.input_spec()
 
@@ -42,11 +28,7 @@ def test_Copy_inputs():
 
 
 def test_Copy_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = Copy.output_spec()
 
     for key, metadata in list(output_map.items()):

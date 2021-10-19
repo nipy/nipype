@@ -4,32 +4,13 @@ from ..gtract import gtractInvertBSplineTransform
 
 def test_gtractInvertBSplineTransform_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        inputReferenceVolume=dict(
-            argstr="--inputReferenceVolume %s",
-            extensions=None,
-        ),
-        inputTransform=dict(
-            argstr="--inputTransform %s",
-            extensions=None,
-        ),
-        landmarkDensity=dict(
-            argstr="--landmarkDensity %s",
-            sep=",",
-        ),
-        numberOfThreads=dict(
-            argstr="--numberOfThreads %d",
-        ),
-        outputTransform=dict(
-            argstr="--outputTransform %s",
-            hash_files=False,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        inputReferenceVolume=dict(argstr="--inputReferenceVolume %s", extensions=None),
+        inputTransform=dict(argstr="--inputTransform %s", extensions=None),
+        landmarkDensity=dict(argstr="--landmarkDensity %s", sep=","),
+        numberOfThreads=dict(argstr="--numberOfThreads %d"),
+        outputTransform=dict(argstr="--outputTransform %s", hash_files=False),
     )
     inputs = gtractInvertBSplineTransform.input_spec()
 
@@ -39,11 +20,7 @@ def test_gtractInvertBSplineTransform_inputs():
 
 
 def test_gtractInvertBSplineTransform_outputs():
-    output_map = dict(
-        outputTransform=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(outputTransform=dict(extensions=None))
     outputs = gtractInvertBSplineTransform.output_spec()
 
     for key, metadata in list(output_map.items()):

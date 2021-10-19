@@ -4,49 +4,18 @@ from ..utils import MaskTool
 
 def test_MaskTool_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        count=dict(
-            argstr="-count",
-            position=2,
-        ),
-        datum=dict(
-            argstr="-datum %s",
-        ),
-        dilate_inputs=dict(
-            argstr="-dilate_inputs %s",
-        ),
-        dilate_results=dict(
-            argstr="-dilate_results %s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        fill_dirs=dict(
-            argstr="-fill_dirs %s",
-            requires=["fill_holes"],
-        ),
-        fill_holes=dict(
-            argstr="-fill_holes",
-        ),
-        frac=dict(
-            argstr="-frac %s",
-        ),
-        in_file=dict(
-            argstr="-input %s",
-            copyfile=False,
-            mandatory=True,
-            position=-1,
-        ),
-        inter=dict(
-            argstr="-inter",
-        ),
-        num_threads=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s"),
+        count=dict(argstr="-count", position=2),
+        datum=dict(argstr="-datum %s"),
+        dilate_inputs=dict(argstr="-dilate_inputs %s"),
+        dilate_results=dict(argstr="-dilate_results %s"),
+        environ=dict(nohash=True, usedefault=True),
+        fill_dirs=dict(argstr="-fill_dirs %s", requires=["fill_holes"]),
+        fill_holes=dict(argstr="-fill_holes"),
+        frac=dict(argstr="-frac %s"),
+        in_file=dict(argstr="-input %s", copyfile=False, mandatory=True, position=-1),
+        inter=dict(argstr="-inter"),
+        num_threads=dict(nohash=True, usedefault=True),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -54,12 +23,8 @@ def test_MaskTool_inputs():
             name_template="%s_mask",
         ),
         outputtype=dict(),
-        union=dict(
-            argstr="-union",
-        ),
-        verbose=dict(
-            argstr="-verb %s",
-        ),
+        union=dict(argstr="-union"),
+        verbose=dict(argstr="-verb %s"),
     )
     inputs = MaskTool.input_spec()
 
@@ -69,11 +34,7 @@ def test_MaskTool_inputs():
 
 
 def test_MaskTool_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = MaskTool.output_spec()
 
     for key, metadata in list(output_map.items()):

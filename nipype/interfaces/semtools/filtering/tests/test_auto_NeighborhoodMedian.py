@@ -4,28 +4,12 @@ from ..featuredetection import NeighborhoodMedian
 
 def test_NeighborhoodMedian_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        inputMaskVolume=dict(
-            argstr="--inputMaskVolume %s",
-            extensions=None,
-        ),
-        inputRadius=dict(
-            argstr="--inputRadius %d",
-        ),
-        inputVolume=dict(
-            argstr="--inputVolume %s",
-            extensions=None,
-        ),
-        outputVolume=dict(
-            argstr="--outputVolume %s",
-            hash_files=False,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        inputMaskVolume=dict(argstr="--inputMaskVolume %s", extensions=None),
+        inputRadius=dict(argstr="--inputRadius %d"),
+        inputVolume=dict(argstr="--inputVolume %s", extensions=None),
+        outputVolume=dict(argstr="--outputVolume %s", hash_files=False),
     )
     inputs = NeighborhoodMedian.input_spec()
 
@@ -35,11 +19,7 @@ def test_NeighborhoodMedian_inputs():
 
 
 def test_NeighborhoodMedian_outputs():
-    output_map = dict(
-        outputVolume=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(outputVolume=dict(extensions=None))
     outputs = NeighborhoodMedian.output_spec()
 
     for key, metadata in list(output_map.items()):

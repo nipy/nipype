@@ -4,34 +4,13 @@ from ..model import SmoothEstimate
 
 def test_SmoothEstimate_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        dof=dict(
-            argstr="--dof=%d",
-            mandatory=True,
-            xor=["zstat_file"],
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        mask_file=dict(
-            argstr="--mask=%s",
-            extensions=None,
-            mandatory=True,
-        ),
+        args=dict(argstr="%s"),
+        dof=dict(argstr="--dof=%d", mandatory=True, xor=["zstat_file"]),
+        environ=dict(nohash=True, usedefault=True),
+        mask_file=dict(argstr="--mask=%s", extensions=None, mandatory=True),
         output_type=dict(),
-        residual_fit_file=dict(
-            argstr="--res=%s",
-            extensions=None,
-            requires=["dof"],
-        ),
-        zstat_file=dict(
-            argstr="--zstat=%s",
-            extensions=None,
-            xor=["dof"],
-        ),
+        residual_fit_file=dict(argstr="--res=%s", extensions=None, requires=["dof"]),
+        zstat_file=dict(argstr="--zstat=%s", extensions=None, xor=["dof"]),
     )
     inputs = SmoothEstimate.input_spec()
 
@@ -41,11 +20,7 @@ def test_SmoothEstimate_inputs():
 
 
 def test_SmoothEstimate_outputs():
-    output_map = dict(
-        dlh=dict(),
-        resels=dict(),
-        volume=dict(),
-    )
+    output_map = dict(dlh=dict(), resels=dict(), volume=dict())
     outputs = SmoothEstimate.output_spec()
 
     for key, metadata in list(output_map.items()):

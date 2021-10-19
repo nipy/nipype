@@ -4,28 +4,13 @@ from ..preprocess import Seg
 
 def test_Seg_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        bias_classes=dict(
-            argstr="-bias_classes %s",
-        ),
-        bias_fwhm=dict(
-            argstr="-bias_fwhm %f",
-        ),
-        blur_meth=dict(
-            argstr="-blur_meth %s",
-        ),
-        bmrf=dict(
-            argstr="-bmrf %f",
-        ),
-        classes=dict(
-            argstr="-classes %s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s"),
+        bias_classes=dict(argstr="-bias_classes %s"),
+        bias_fwhm=dict(argstr="-bias_fwhm %f"),
+        blur_meth=dict(argstr="-blur_meth %s"),
+        bmrf=dict(argstr="-bmrf %f"),
+        classes=dict(argstr="-classes %s"),
+        environ=dict(nohash=True, usedefault=True),
         in_file=dict(
             argstr="-anat %s",
             copyfile=True,
@@ -33,23 +18,11 @@ def test_Seg_inputs():
             mandatory=True,
             position=-1,
         ),
-        main_N=dict(
-            argstr="-main_N %d",
-        ),
-        mask=dict(
-            argstr="-mask %s",
-            mandatory=True,
-            position=-2,
-        ),
-        mixfloor=dict(
-            argstr="-mixfloor %f",
-        ),
-        mixfrac=dict(
-            argstr="-mixfrac %s",
-        ),
-        prefix=dict(
-            argstr="-prefix %s",
-        ),
+        main_N=dict(argstr="-main_N %d"),
+        mask=dict(argstr="-mask %s", mandatory=True, position=-2),
+        mixfloor=dict(argstr="-mixfloor %f"),
+        mixfrac=dict(argstr="-mixfrac %s"),
+        prefix=dict(argstr="-prefix %s"),
     )
     inputs = Seg.input_spec()
 
@@ -59,11 +32,7 @@ def test_Seg_inputs():
 
 
 def test_Seg_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = Seg.output_spec()
 
     for key, metadata in list(output_map.items()):

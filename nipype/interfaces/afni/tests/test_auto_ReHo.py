@@ -4,38 +4,16 @@ from ..utils import ReHo
 
 def test_ReHo_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        chi_sq=dict(
-            argstr="-chi_sq",
-        ),
+        args=dict(argstr="%s"),
+        chi_sq=dict(argstr="-chi_sq"),
         ellipsoid=dict(
-            argstr="-neigh_X %s -neigh_Y %s -neigh_Z %s",
-            xor=["sphere", "neighborhood"],
+            argstr="-neigh_X %s -neigh_Y %s -neigh_Z %s", xor=["sphere", "neighborhood"]
         ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        in_file=dict(
-            argstr="-inset %s",
-            extensions=None,
-            mandatory=True,
-            position=1,
-        ),
-        label_set=dict(
-            argstr="-in_rois %s",
-            extensions=None,
-        ),
-        mask_file=dict(
-            argstr="-mask %s",
-            extensions=None,
-        ),
-        neighborhood=dict(
-            argstr="-nneigh %s",
-            xor=["sphere", "ellipsoid"],
-        ),
+        environ=dict(nohash=True, usedefault=True),
+        in_file=dict(argstr="-inset %s", extensions=None, mandatory=True, position=1),
+        label_set=dict(argstr="-in_rois %s", extensions=None),
+        mask_file=dict(argstr="-mask %s", extensions=None),
+        neighborhood=dict(argstr="-nneigh %s", xor=["sphere", "ellipsoid"]),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -44,13 +22,8 @@ def test_ReHo_inputs():
             name_template="%s_reho",
             position=0,
         ),
-        overwrite=dict(
-            argstr="-overwrite",
-        ),
-        sphere=dict(
-            argstr="-neigh_RAD %s",
-            xor=["neighborhood", "ellipsoid"],
-        ),
+        overwrite=dict(argstr="-overwrite"),
+        sphere=dict(argstr="-neigh_RAD %s", xor=["neighborhood", "ellipsoid"]),
     )
     inputs = ReHo.input_spec()
 
@@ -60,14 +33,7 @@ def test_ReHo_inputs():
 
 
 def test_ReHo_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-        out_vals=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None), out_vals=dict(extensions=None))
     outputs = ReHo.output_spec()
 
     for key, metadata in list(output_map.items()):

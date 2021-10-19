@@ -4,34 +4,16 @@ from ..preprocess import Smooth
 
 def test_Smooth_inputs():
     input_map = dict(
-        data_type=dict(
-            field="dtype",
-        ),
-        fwhm=dict(
-            field="fwhm",
-        ),
-        implicit_masking=dict(
-            field="im",
-        ),
-        in_files=dict(
-            copyfile=False,
-            field="data",
-            mandatory=True,
-        ),
+        data_type=dict(field="dtype"),
+        fwhm=dict(field="fwhm"),
+        implicit_masking=dict(field="im"),
+        in_files=dict(copyfile=False, field="data", mandatory=True),
         matlab_cmd=dict(),
-        mfile=dict(
-            usedefault=True,
-        ),
-        out_prefix=dict(
-            field="prefix",
-            usedefault=True,
-        ),
+        mfile=dict(usedefault=True),
+        out_prefix=dict(field="prefix", usedefault=True),
         paths=dict(),
         use_mcr=dict(),
-        use_v8struct=dict(
-            min_ver="8",
-            usedefault=True,
-        ),
+        use_v8struct=dict(min_ver="8", usedefault=True),
     )
     inputs = Smooth.input_spec()
 
@@ -41,9 +23,7 @@ def test_Smooth_inputs():
 
 
 def test_Smooth_outputs():
-    output_map = dict(
-        smoothed_files=dict(),
-    )
+    output_map = dict(smoothed_files=dict())
     outputs = Smooth.output_spec()
 
     for key, metadata in list(output_map.items()):

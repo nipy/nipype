@@ -4,13 +4,8 @@ from ..dcmstack import SplitNifti
 
 def test_SplitNifti_inputs():
     input_map = dict(
-        in_file=dict(
-            extensions=None,
-            mandatory=True,
-        ),
-        out_ext=dict(
-            usedefault=True,
-        ),
+        in_file=dict(extensions=None, mandatory=True),
+        out_ext=dict(usedefault=True),
         out_format=dict(),
         out_path=dict(),
         split_dim=dict(),
@@ -23,9 +18,7 @@ def test_SplitNifti_inputs():
 
 
 def test_SplitNifti_outputs():
-    output_map = dict(
-        out_list=dict(),
-    )
+    output_map = dict(out_list=dict())
     outputs = SplitNifti.output_spec()
 
     for key, metadata in list(output_map.items()):

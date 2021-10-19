@@ -4,34 +4,13 @@ from ..diffusion import DiffusionWeightedVolumeMasking
 
 def test_DiffusionWeightedVolumeMasking_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        inputVolume=dict(
-            argstr="%s",
-            extensions=None,
-            position=-4,
-        ),
-        otsuomegathreshold=dict(
-            argstr="--otsuomegathreshold %f",
-        ),
-        outputBaseline=dict(
-            argstr="%s",
-            hash_files=False,
-            position=-2,
-        ),
-        removeislands=dict(
-            argstr="--removeislands ",
-        ),
-        thresholdMask=dict(
-            argstr="%s",
-            hash_files=False,
-            position=-1,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        inputVolume=dict(argstr="%s", extensions=None, position=-4),
+        otsuomegathreshold=dict(argstr="--otsuomegathreshold %f"),
+        outputBaseline=dict(argstr="%s", hash_files=False, position=-2),
+        removeislands=dict(argstr="--removeislands "),
+        thresholdMask=dict(argstr="%s", hash_files=False, position=-1),
     )
     inputs = DiffusionWeightedVolumeMasking.input_spec()
 
@@ -42,14 +21,8 @@ def test_DiffusionWeightedVolumeMasking_inputs():
 
 def test_DiffusionWeightedVolumeMasking_outputs():
     output_map = dict(
-        outputBaseline=dict(
-            extensions=None,
-            position=-2,
-        ),
-        thresholdMask=dict(
-            extensions=None,
-            position=-1,
-        ),
+        outputBaseline=dict(extensions=None, position=-2),
+        thresholdMask=dict(extensions=None, position=-1),
     )
     outputs = DiffusionWeightedVolumeMasking.output_spec()
 

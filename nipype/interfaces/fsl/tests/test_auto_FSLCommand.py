@@ -4,13 +4,8 @@ from ..base import FSLCommand
 
 def test_FSLCommand_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
         output_type=dict(),
     )
     inputs = FSLCommand.input_spec()

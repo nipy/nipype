@@ -4,35 +4,14 @@ from ..gtract import gtractResampleCodeImage
 
 def test_gtractResampleCodeImage_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        inputCodeVolume=dict(
-            argstr="--inputCodeVolume %s",
-            extensions=None,
-        ),
-        inputReferenceVolume=dict(
-            argstr="--inputReferenceVolume %s",
-            extensions=None,
-        ),
-        inputTransform=dict(
-            argstr="--inputTransform %s",
-            extensions=None,
-        ),
-        numberOfThreads=dict(
-            argstr="--numberOfThreads %d",
-        ),
-        outputVolume=dict(
-            argstr="--outputVolume %s",
-            hash_files=False,
-        ),
-        transformType=dict(
-            argstr="--transformType %s",
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        inputCodeVolume=dict(argstr="--inputCodeVolume %s", extensions=None),
+        inputReferenceVolume=dict(argstr="--inputReferenceVolume %s", extensions=None),
+        inputTransform=dict(argstr="--inputTransform %s", extensions=None),
+        numberOfThreads=dict(argstr="--numberOfThreads %d"),
+        outputVolume=dict(argstr="--outputVolume %s", hash_files=False),
+        transformType=dict(argstr="--transformType %s"),
     )
     inputs = gtractResampleCodeImage.input_spec()
 
@@ -42,11 +21,7 @@ def test_gtractResampleCodeImage_inputs():
 
 
 def test_gtractResampleCodeImage_outputs():
-    output_map = dict(
-        outputVolume=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(outputVolume=dict(extensions=None))
     outputs = gtractResampleCodeImage.output_spec()
 
     for key, metadata in list(output_map.items()):

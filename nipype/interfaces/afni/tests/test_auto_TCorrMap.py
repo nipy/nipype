@@ -15,12 +15,8 @@ def test_TCorrMap_inputs():
                 "var_absolute_threshold_normalize",
             ),
         ),
-        args=dict(
-            argstr="%s",
-        ),
-        automask=dict(
-            argstr="-automask",
-        ),
+        args=dict(argstr="%s"),
+        automask=dict(argstr="-automask"),
         average_expr=dict(
             argstr="-Aexpr %s %s",
             extensions=None,
@@ -35,54 +31,28 @@ def test_TCorrMap_inputs():
             suffix="_cexpr",
             xor=("average_expr", "average_expr_nonzero", "sum_expr"),
         ),
-        bandpass=dict(
-            argstr="-bpass %f %f",
-        ),
-        blur_fwhm=dict(
-            argstr="-Gblur %f",
-        ),
+        bandpass=dict(argstr="-bpass %f %f"),
+        blur_fwhm=dict(argstr="-Gblur %f"),
         correlation_maps=dict(
-            argstr="-CorrMap %s",
-            extensions=None,
-            name_source="in_file",
+            argstr="-CorrMap %s", extensions=None, name_source="in_file"
         ),
         correlation_maps_masked=dict(
-            argstr="-CorrMask %s",
-            extensions=None,
-            name_source="in_file",
+            argstr="-CorrMask %s", extensions=None, name_source="in_file"
         ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        environ=dict(nohash=True, usedefault=True),
         expr=dict(),
         histogram=dict(
-            argstr="-Hist %d %s",
-            extensions=None,
-            name_source="in_file",
-            suffix="_hist",
+            argstr="-Hist %d %s", extensions=None, name_source="in_file", suffix="_hist"
         ),
         histogram_bin_numbers=dict(),
         in_file=dict(
-            argstr="-input %s",
-            copyfile=False,
-            extensions=None,
-            mandatory=True,
+            argstr="-input %s", copyfile=False, extensions=None, mandatory=True
         ),
-        mask=dict(
-            argstr="-mask %s",
-            extensions=None,
-        ),
+        mask=dict(argstr="-mask %s", extensions=None),
         mean_file=dict(
-            argstr="-Mean %s",
-            extensions=None,
-            name_source="in_file",
-            suffix="_mean",
+            argstr="-Mean %s", extensions=None, name_source="in_file", suffix="_mean"
         ),
-        num_threads=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        num_threads=dict(nohash=True, usedefault=True),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -91,33 +61,15 @@ def test_TCorrMap_inputs():
         ),
         outputtype=dict(),
         pmean=dict(
-            argstr="-Pmean %s",
-            extensions=None,
-            name_source="in_file",
-            suffix="_pmean",
+            argstr="-Pmean %s", extensions=None, name_source="in_file", suffix="_pmean"
         ),
-        polort=dict(
-            argstr="-polort %d",
-        ),
+        polort=dict(argstr="-polort %d"),
         qmean=dict(
-            argstr="-Qmean %s",
-            extensions=None,
-            name_source="in_file",
-            suffix="_qmean",
+            argstr="-Qmean %s", extensions=None, name_source="in_file", suffix="_qmean"
         ),
-        regress_out_timeseries=dict(
-            argstr="-ort %s",
-            extensions=None,
-        ),
-        seeds=dict(
-            argstr="-seed %s",
-            extensions=None,
-            xor="seeds_width",
-        ),
-        seeds_width=dict(
-            argstr="-Mseed %f",
-            xor="seeds",
-        ),
+        regress_out_timeseries=dict(argstr="-ort %s", extensions=None),
+        seeds=dict(argstr="-seed %s", extensions=None, xor="seeds_width"),
+        seeds_width=dict(argstr="-Mseed %f", xor="seeds"),
         sum_expr=dict(
             argstr="-Sexpr %s %s",
             extensions=None,
@@ -149,10 +101,7 @@ def test_TCorrMap_inputs():
             ),
         ),
         zmean=dict(
-            argstr="-Zmean %s",
-            extensions=None,
-            name_source="in_file",
-            suffix="_zmean",
+            argstr="-Zmean %s", extensions=None, name_source="in_file", suffix="_zmean"
         ),
     )
     inputs = TCorrMap.input_spec()
@@ -164,45 +113,19 @@ def test_TCorrMap_inputs():
 
 def test_TCorrMap_outputs():
     output_map = dict(
-        absolute_threshold=dict(
-            extensions=None,
-        ),
-        average_expr=dict(
-            extensions=None,
-        ),
-        average_expr_nonzero=dict(
-            extensions=None,
-        ),
-        correlation_maps=dict(
-            extensions=None,
-        ),
-        correlation_maps_masked=dict(
-            extensions=None,
-        ),
-        histogram=dict(
-            extensions=None,
-        ),
-        mean_file=dict(
-            extensions=None,
-        ),
-        pmean=dict(
-            extensions=None,
-        ),
-        qmean=dict(
-            extensions=None,
-        ),
-        sum_expr=dict(
-            extensions=None,
-        ),
-        var_absolute_threshold=dict(
-            extensions=None,
-        ),
-        var_absolute_threshold_normalize=dict(
-            extensions=None,
-        ),
-        zmean=dict(
-            extensions=None,
-        ),
+        absolute_threshold=dict(extensions=None),
+        average_expr=dict(extensions=None),
+        average_expr_nonzero=dict(extensions=None),
+        correlation_maps=dict(extensions=None),
+        correlation_maps_masked=dict(extensions=None),
+        histogram=dict(extensions=None),
+        mean_file=dict(extensions=None),
+        pmean=dict(extensions=None),
+        qmean=dict(extensions=None),
+        sum_expr=dict(extensions=None),
+        var_absolute_threshold=dict(extensions=None),
+        var_absolute_threshold_normalize=dict(extensions=None),
+        zmean=dict(extensions=None),
     )
     outputs = TCorrMap.output_spec()
 

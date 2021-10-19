@@ -4,28 +4,13 @@ from ..utils import Undump
 
 def test_Undump_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        coordinates_specification=dict(
-            argstr="-%s",
-        ),
-        datatype=dict(
-            argstr="-datum %s",
-        ),
-        default_value=dict(
-            argstr="-dval %f",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        fill_value=dict(
-            argstr="-fval %f",
-        ),
-        head_only=dict(
-            argstr="-head_only",
-        ),
+        args=dict(argstr="%s"),
+        coordinates_specification=dict(argstr="-%s"),
+        datatype=dict(argstr="-datum %s"),
+        default_value=dict(argstr="-dval %f"),
+        environ=dict(nohash=True, usedefault=True),
+        fill_value=dict(argstr="-fval %f"),
+        head_only=dict(argstr="-head_only"),
         in_file=dict(
             argstr="-master %s",
             copyfile=False,
@@ -33,26 +18,12 @@ def test_Undump_inputs():
             mandatory=True,
             position=-1,
         ),
-        mask_file=dict(
-            argstr="-mask %s",
-            extensions=None,
-        ),
-        num_threads=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        orient=dict(
-            argstr="-orient %s",
-        ),
-        out_file=dict(
-            argstr="-prefix %s",
-            extensions=None,
-            name_source="in_file",
-        ),
+        mask_file=dict(argstr="-mask %s", extensions=None),
+        num_threads=dict(nohash=True, usedefault=True),
+        orient=dict(argstr="-orient %s"),
+        out_file=dict(argstr="-prefix %s", extensions=None, name_source="in_file"),
         outputtype=dict(),
-        srad=dict(
-            argstr="-srad %f",
-        ),
+        srad=dict(argstr="-srad %f"),
     )
     inputs = Undump.input_spec()
 
@@ -62,11 +33,7 @@ def test_Undump_inputs():
 
 
 def test_Undump_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = Undump.output_spec()
 
     for key, metadata in list(output_map.items()):

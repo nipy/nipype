@@ -4,17 +4,9 @@ from ..utils import InvWarp
 
 def test_InvWarp_inputs():
     input_map = dict(
-        absolute=dict(
-            argstr="--abs",
-            xor=["relative"],
-        ),
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        absolute=dict(argstr="--abs", xor=["relative"]),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
         inverse_warp=dict(
             argstr="--out=%s",
             extensions=None,
@@ -22,36 +14,15 @@ def test_InvWarp_inputs():
             name_source=["warp"],
             name_template="%s_inverse",
         ),
-        jacobian_max=dict(
-            argstr="--jmax=%f",
-        ),
-        jacobian_min=dict(
-            argstr="--jmin=%f",
-        ),
-        niter=dict(
-            argstr="--niter=%d",
-        ),
-        noconstraint=dict(
-            argstr="--noconstraint",
-        ),
+        jacobian_max=dict(argstr="--jmax=%f"),
+        jacobian_min=dict(argstr="--jmin=%f"),
+        niter=dict(argstr="--niter=%d"),
+        noconstraint=dict(argstr="--noconstraint"),
         output_type=dict(),
-        reference=dict(
-            argstr="--ref=%s",
-            extensions=None,
-            mandatory=True,
-        ),
-        regularise=dict(
-            argstr="--regularise=%f",
-        ),
-        relative=dict(
-            argstr="--rel",
-            xor=["absolute"],
-        ),
-        warp=dict(
-            argstr="--warp=%s",
-            extensions=None,
-            mandatory=True,
-        ),
+        reference=dict(argstr="--ref=%s", extensions=None, mandatory=True),
+        regularise=dict(argstr="--regularise=%f"),
+        relative=dict(argstr="--rel", xor=["absolute"]),
+        warp=dict(argstr="--warp=%s", extensions=None, mandatory=True),
     )
     inputs = InvWarp.input_spec()
 
@@ -61,11 +32,7 @@ def test_InvWarp_inputs():
 
 
 def test_InvWarp_outputs():
-    output_map = dict(
-        inverse_warp=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(inverse_warp=dict(extensions=None))
     outputs = InvWarp.output_spec()
 
     for key, metadata in list(output_map.items()):

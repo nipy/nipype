@@ -4,64 +4,21 @@ from ..utils import VolumeMask
 
 def test_VolumeMask_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        aseg=dict(
-            extensions=None,
-            xor=["in_aseg"],
-        ),
+        args=dict(argstr="%s"),
+        aseg=dict(extensions=None, xor=["in_aseg"]),
         copy_inputs=dict(),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        in_aseg=dict(
-            argstr="--aseg_name %s",
-            extensions=None,
-            xor=["aseg"],
-        ),
-        left_ribbonlabel=dict(
-            argstr="--label_left_ribbon %d",
-            mandatory=True,
-        ),
-        left_whitelabel=dict(
-            argstr="--label_left_white %d",
-            mandatory=True,
-        ),
-        lh_pial=dict(
-            extensions=None,
-            mandatory=True,
-        ),
-        lh_white=dict(
-            extensions=None,
-            mandatory=True,
-        ),
-        rh_pial=dict(
-            extensions=None,
-            mandatory=True,
-        ),
-        rh_white=dict(
-            extensions=None,
-            mandatory=True,
-        ),
-        right_ribbonlabel=dict(
-            argstr="--label_right_ribbon %d",
-            mandatory=True,
-        ),
-        right_whitelabel=dict(
-            argstr="--label_right_white %d",
-            mandatory=True,
-        ),
-        save_ribbon=dict(
-            argstr="--save_ribbon",
-        ),
-        subject_id=dict(
-            argstr="%s",
-            mandatory=True,
-            position=-1,
-            usedefault=True,
-        ),
+        environ=dict(nohash=True, usedefault=True),
+        in_aseg=dict(argstr="--aseg_name %s", extensions=None, xor=["aseg"]),
+        left_ribbonlabel=dict(argstr="--label_left_ribbon %d", mandatory=True),
+        left_whitelabel=dict(argstr="--label_left_white %d", mandatory=True),
+        lh_pial=dict(extensions=None, mandatory=True),
+        lh_white=dict(extensions=None, mandatory=True),
+        rh_pial=dict(extensions=None, mandatory=True),
+        rh_white=dict(extensions=None, mandatory=True),
+        right_ribbonlabel=dict(argstr="--label_right_ribbon %d", mandatory=True),
+        right_whitelabel=dict(argstr="--label_right_white %d", mandatory=True),
+        save_ribbon=dict(argstr="--save_ribbon"),
+        subject_id=dict(argstr="%s", mandatory=True, position=-1, usedefault=True),
         subjects_dir=dict(),
     )
     inputs = VolumeMask.input_spec()
@@ -73,15 +30,9 @@ def test_VolumeMask_inputs():
 
 def test_VolumeMask_outputs():
     output_map = dict(
-        lh_ribbon=dict(
-            extensions=None,
-        ),
-        out_ribbon=dict(
-            extensions=None,
-        ),
-        rh_ribbon=dict(
-            extensions=None,
-        ),
+        lh_ribbon=dict(extensions=None),
+        out_ribbon=dict(extensions=None),
+        rh_ribbon=dict(extensions=None),
     )
     outputs = VolumeMask.output_spec()
 

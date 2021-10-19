@@ -4,33 +4,15 @@ from ..nbs import NetworkBasedStatistic
 
 def test_NetworkBasedStatistic_inputs():
     input_map = dict(
-        edge_key=dict(
-            usedefault=True,
-        ),
-        in_group1=dict(
-            mandatory=True,
-        ),
-        in_group2=dict(
-            mandatory=True,
-        ),
-        node_position_network=dict(
-            extensions=None,
-        ),
-        number_of_permutations=dict(
-            usedefault=True,
-        ),
-        out_nbs_network=dict(
-            extensions=None,
-        ),
-        out_nbs_pval_network=dict(
-            extensions=None,
-        ),
-        t_tail=dict(
-            usedefault=True,
-        ),
-        threshold=dict(
-            usedefault=True,
-        ),
+        edge_key=dict(usedefault=True),
+        in_group1=dict(mandatory=True),
+        in_group2=dict(mandatory=True),
+        node_position_network=dict(extensions=None),
+        number_of_permutations=dict(usedefault=True),
+        out_nbs_network=dict(extensions=None),
+        out_nbs_pval_network=dict(extensions=None),
+        t_tail=dict(usedefault=True),
+        threshold=dict(usedefault=True),
     )
     inputs = NetworkBasedStatistic.input_spec()
 
@@ -41,12 +23,8 @@ def test_NetworkBasedStatistic_inputs():
 
 def test_NetworkBasedStatistic_outputs():
     output_map = dict(
-        nbs_network=dict(
-            extensions=None,
-        ),
-        nbs_pval_network=dict(
-            extensions=None,
-        ),
+        nbs_network=dict(extensions=None),
+        nbs_pval_network=dict(extensions=None),
         network_files=dict(),
     )
     outputs = NetworkBasedStatistic.output_spec()

@@ -4,43 +4,17 @@ from ..preprocess import TProject
 
 def test_TProject_inputs():
     input_map = dict(
-        TR=dict(
-            argstr="-TR %g",
-        ),
-        args=dict(
-            argstr="%s",
-        ),
-        automask=dict(
-            argstr="-automask",
-            xor=["mask"],
-        ),
-        bandpass=dict(
-            argstr="-bandpass %g %g",
-        ),
-        blur=dict(
-            argstr="-blur %g",
-        ),
-        cenmode=dict(
-            argstr="-cenmode %s",
-        ),
-        censor=dict(
-            argstr="-censor %s",
-            extensions=None,
-        ),
-        censortr=dict(
-            argstr="-CENSORTR %s",
-        ),
-        concat=dict(
-            argstr="-concat %s",
-            extensions=None,
-        ),
-        dsort=dict(
-            argstr="-dsort %s...",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        TR=dict(argstr="-TR %g"),
+        args=dict(argstr="%s"),
+        automask=dict(argstr="-automask", xor=["mask"]),
+        bandpass=dict(argstr="-bandpass %g %g"),
+        blur=dict(argstr="-blur %g"),
+        cenmode=dict(argstr="-cenmode %s"),
+        censor=dict(argstr="-censor %s", extensions=None),
+        censortr=dict(argstr="-CENSORTR %s"),
+        concat=dict(argstr="-concat %s", extensions=None),
+        dsort=dict(argstr="-dsort %s..."),
+        environ=dict(nohash=True, usedefault=True),
         in_file=dict(
             argstr="-input %s",
             copyfile=False,
@@ -48,24 +22,11 @@ def test_TProject_inputs():
             mandatory=True,
             position=1,
         ),
-        mask=dict(
-            argstr="-mask %s",
-            extensions=None,
-        ),
-        noblock=dict(
-            argstr="-noblock",
-        ),
-        norm=dict(
-            argstr="-norm",
-        ),
-        num_threads=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        ort=dict(
-            argstr="-ort %s",
-            extensions=None,
-        ),
+        mask=dict(argstr="-mask %s", extensions=None),
+        noblock=dict(argstr="-noblock"),
+        norm=dict(argstr="-norm"),
+        num_threads=dict(nohash=True, usedefault=True),
+        ort=dict(argstr="-ort %s", extensions=None),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -74,12 +35,8 @@ def test_TProject_inputs():
             position=-1,
         ),
         outputtype=dict(),
-        polort=dict(
-            argstr="-polort %d",
-        ),
-        stopband=dict(
-            argstr="-stopband %g %g",
-        ),
+        polort=dict(argstr="-polort %d"),
+        stopband=dict(argstr="-stopband %g %g"),
     )
     inputs = TProject.input_spec()
 
@@ -89,11 +46,7 @@ def test_TProject_inputs():
 
 
 def test_TProject_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = TProject.output_spec()
 
     for key, metadata in list(output_map.items()):

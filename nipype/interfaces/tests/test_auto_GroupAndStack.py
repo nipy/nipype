@@ -4,18 +4,12 @@ from ..dcmstack import GroupAndStack
 
 def test_GroupAndStack_inputs():
     input_map = dict(
-        dicom_files=dict(
-            mandatory=True,
-        ),
+        dicom_files=dict(mandatory=True),
         embed_meta=dict(),
         exclude_regexes=dict(),
-        force_read=dict(
-            usedefault=True,
-        ),
+        force_read=dict(usedefault=True),
         include_regexes=dict(),
-        out_ext=dict(
-            usedefault=True,
-        ),
+        out_ext=dict(usedefault=True),
         out_format=dict(),
         out_path=dict(),
     )
@@ -27,9 +21,7 @@ def test_GroupAndStack_inputs():
 
 
 def test_GroupAndStack_outputs():
-    output_map = dict(
-        out_list=dict(),
-    )
+    output_map = dict(out_list=dict())
     outputs = GroupAndStack.output_spec()
 
     for key, metadata in list(output_map.items()):

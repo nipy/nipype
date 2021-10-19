@@ -4,24 +4,11 @@ from ..utils import MRIsCombine
 
 def test_MRIsCombine_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        in_files=dict(
-            argstr="--combinesurfs %s",
-            mandatory=True,
-            position=1,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        in_files=dict(argstr="--combinesurfs %s", mandatory=True, position=1),
         out_file=dict(
-            argstr="%s",
-            extensions=None,
-            genfile=True,
-            mandatory=True,
-            position=-1,
+            argstr="%s", extensions=None, genfile=True, mandatory=True, position=-1
         ),
         subjects_dir=dict(),
     )
@@ -33,11 +20,7 @@ def test_MRIsCombine_inputs():
 
 
 def test_MRIsCombine_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = MRIsCombine.output_spec()
 
     for key, metadata in list(output_map.items()):

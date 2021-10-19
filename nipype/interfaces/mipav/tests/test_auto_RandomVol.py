@@ -4,57 +4,22 @@ from ..developer import RandomVol
 
 def test_RandomVol_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        inField=dict(
-            argstr="--inField %s",
-        ),
-        inLambda=dict(
-            argstr="--inLambda %f",
-        ),
-        inMaximum=dict(
-            argstr="--inMaximum %d",
-        ),
-        inMinimum=dict(
-            argstr="--inMinimum %d",
-        ),
-        inSize=dict(
-            argstr="--inSize %d",
-        ),
-        inSize2=dict(
-            argstr="--inSize2 %d",
-        ),
-        inSize3=dict(
-            argstr="--inSize3 %d",
-        ),
-        inSize4=dict(
-            argstr="--inSize4 %d",
-        ),
-        inStandard=dict(
-            argstr="--inStandard %d",
-        ),
-        null=dict(
-            argstr="--null %s",
-        ),
-        outRand1=dict(
-            argstr="--outRand1 %s",
-            hash_files=False,
-        ),
-        xDefaultMem=dict(
-            argstr="-xDefaultMem %d",
-        ),
-        xMaxProcess=dict(
-            argstr="-xMaxProcess %d",
-            usedefault=True,
-        ),
-        xPrefExt=dict(
-            argstr="--xPrefExt %s",
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        inField=dict(argstr="--inField %s"),
+        inLambda=dict(argstr="--inLambda %f"),
+        inMaximum=dict(argstr="--inMaximum %d"),
+        inMinimum=dict(argstr="--inMinimum %d"),
+        inSize=dict(argstr="--inSize %d"),
+        inSize2=dict(argstr="--inSize2 %d"),
+        inSize3=dict(argstr="--inSize3 %d"),
+        inSize4=dict(argstr="--inSize4 %d"),
+        inStandard=dict(argstr="--inStandard %d"),
+        null=dict(argstr="--null %s"),
+        outRand1=dict(argstr="--outRand1 %s", hash_files=False),
+        xDefaultMem=dict(argstr="-xDefaultMem %d"),
+        xMaxProcess=dict(argstr="-xMaxProcess %d", usedefault=True),
+        xPrefExt=dict(argstr="--xPrefExt %s"),
     )
     inputs = RandomVol.input_spec()
 
@@ -64,11 +29,7 @@ def test_RandomVol_inputs():
 
 
 def test_RandomVol_outputs():
-    output_map = dict(
-        outRand1=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(outRand1=dict(extensions=None))
     outputs = RandomVol.output_spec()
 
     for key, metadata in list(output_map.items()):

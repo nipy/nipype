@@ -4,33 +4,15 @@ from ..minc import Resample
 
 def test_Resample_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        clobber=dict(
-            argstr="-clobber",
-            usedefault=True,
-        ),
+        args=dict(argstr="%s"),
+        clobber=dict(argstr="-clobber", usedefault=True),
         coronal_slices=dict(
-            argstr="-coronal",
-            xor=("transverse", "sagittal", "coronal"),
+            argstr="-coronal", xor=("transverse", "sagittal", "coronal")
         ),
-        dircos=dict(
-            argstr="-dircos %s %s %s",
-            xor=("nelements", "nelements_x_y_or_z"),
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        fill=dict(
-            argstr="-fill",
-            xor=("nofill", "fill"),
-        ),
-        fill_value=dict(
-            argstr="-fillvalue %s",
-            requires=["fill"],
-        ),
+        dircos=dict(argstr="-dircos %s %s %s", xor=("nelements", "nelements_x_y_or_z")),
+        environ=dict(nohash=True, usedefault=True),
+        fill=dict(argstr="-fill", xor=("nofill", "fill")),
+        fill_value=dict(argstr="-fillvalue %s", requires=["fill"]),
         format_byte=dict(
             argstr="-byte",
             xor=(
@@ -136,27 +118,15 @@ def test_Resample_inputs():
             ),
         ),
         half_width_sinc_window=dict(
-            argstr="-width %s",
-            requires=["sinc_interpolation"],
+            argstr="-width %s", requires=["sinc_interpolation"]
         ),
-        input_file=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=-2,
-        ),
+        input_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2),
         input_grid_files=dict(),
-        invert_transformation=dict(
-            argstr="-invert_transformation",
-        ),
+        invert_transformation=dict(argstr="-invert_transformation"),
         keep_real_range=dict(
-            argstr="-keep_real_range",
-            xor=("keep_real_range", "nokeep_real_range"),
+            argstr="-keep_real_range", xor=("keep_real_range", "nokeep_real_range")
         ),
-        like=dict(
-            argstr="-like %s",
-            extensions=None,
-        ),
+        like=dict(argstr="-like %s", extensions=None),
         nearest_neighbour_interpolation=dict(
             argstr="-nearest_neighbour",
             xor=(
@@ -167,24 +137,16 @@ def test_Resample_inputs():
             ),
         ),
         nelements=dict(
-            argstr="-nelements %s %s %s",
-            xor=("nelements", "nelements_x_y_or_z"),
+            argstr="-nelements %s %s %s", xor=("nelements", "nelements_x_y_or_z")
         ),
-        no_fill=dict(
-            argstr="-nofill",
-            xor=("nofill", "fill"),
-        ),
+        no_fill=dict(argstr="-nofill", xor=("nofill", "fill")),
         no_input_sampling=dict(
-            argstr="-use_input_sampling",
-            xor=("vio_transform", "no_input_sampling"),
+            argstr="-use_input_sampling", xor=("vio_transform", "no_input_sampling")
         ),
         nokeep_real_range=dict(
-            argstr="-nokeep_real_range",
-            xor=("keep_real_range", "nokeep_real_range"),
+            argstr="-nokeep_real_range", xor=("keep_real_range", "nokeep_real_range")
         ),
-        origin=dict(
-            argstr="-origin %s %s %s",
-        ),
+        origin=dict(argstr="-origin %s %s %s"),
         output_file=dict(
             argstr="%s",
             extensions=None,
@@ -194,12 +156,9 @@ def test_Resample_inputs():
             name_template="%s_resample.mnc",
             position=-1,
         ),
-        output_range=dict(
-            argstr="-range %s %s",
-        ),
+        output_range=dict(argstr="-range %s %s"),
         sagittal_slices=dict(
-            argstr="-sagittal",
-            xor=("transverse", "sagittal", "coronal"),
+            argstr="-sagittal", xor=("transverse", "sagittal", "coronal")
         ),
         sinc_interpolation=dict(
             argstr="-sinc",
@@ -220,30 +179,14 @@ def test_Resample_inputs():
             requires=["sinc_interpolation"],
             xor=("sinc_window_hanning", "sinc_window_hamming"),
         ),
-        spacetype=dict(
-            argstr="-spacetype %s",
-        ),
-        standard_sampling=dict(
-            argstr="-standard_sampling",
-        ),
-        start=dict(
-            argstr="-start %s %s %s",
-            xor=("nelements", "nelements_x_y_or_z"),
-        ),
-        step=dict(
-            argstr="-step %s %s %s",
-            xor=("nelements", "nelements_x_y_or_z"),
-        ),
-        talairach=dict(
-            argstr="-talairach",
-        ),
-        transformation=dict(
-            argstr="-transformation %s",
-            extensions=None,
-        ),
+        spacetype=dict(argstr="-spacetype %s"),
+        standard_sampling=dict(argstr="-standard_sampling"),
+        start=dict(argstr="-start %s %s %s", xor=("nelements", "nelements_x_y_or_z")),
+        step=dict(argstr="-step %s %s %s", xor=("nelements", "nelements_x_y_or_z")),
+        talairach=dict(argstr="-talairach"),
+        transformation=dict(argstr="-transformation %s", extensions=None),
         transverse_slices=dict(
-            argstr="-transverse",
-            xor=("transverse", "sagittal", "coronal"),
+            argstr="-transverse", xor=("transverse", "sagittal", "coronal")
         ),
         tricubic_interpolation=dict(
             argstr="-tricubic",
@@ -263,15 +206,10 @@ def test_Resample_inputs():
                 "sinc_interpolation",
             ),
         ),
-        two=dict(
-            argstr="-2",
-        ),
-        units=dict(
-            argstr="-units %s",
-        ),
+        two=dict(argstr="-2"),
+        units=dict(argstr="-units %s"),
         vio_transform=dict(
-            argstr="-tfm_input_sampling",
-            xor=("vio_transform", "no_input_sampling"),
+            argstr="-tfm_input_sampling", xor=("vio_transform", "no_input_sampling")
         ),
         xdircos=dict(
             argstr="-xdircos %s",
@@ -342,11 +280,7 @@ def test_Resample_inputs():
 
 
 def test_Resample_outputs():
-    output_map = dict(
-        output_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(output_file=dict(extensions=None))
     outputs = Resample.output_spec()
 
     for key, metadata in list(output_map.items()):

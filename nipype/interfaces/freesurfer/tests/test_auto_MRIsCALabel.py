@@ -4,43 +4,15 @@ from ..preprocess import MRIsCALabel
 
 def test_MRIsCALabel_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        aseg=dict(
-            argstr="-aseg %s",
-            extensions=None,
-        ),
-        canonsurf=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=-3,
-        ),
-        classifier=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=-2,
-        ),
+        args=dict(argstr="%s"),
+        aseg=dict(argstr="-aseg %s", extensions=None),
+        canonsurf=dict(argstr="%s", extensions=None, mandatory=True, position=-3),
+        classifier=dict(argstr="%s", extensions=None, mandatory=True, position=-2),
         copy_inputs=dict(),
-        curv=dict(
-            extensions=None,
-            mandatory=True,
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        hemisphere=dict(
-            argstr="%s",
-            mandatory=True,
-            position=-4,
-        ),
-        label=dict(
-            argstr="-l %s",
-            extensions=None,
-        ),
+        curv=dict(extensions=None, mandatory=True),
+        environ=dict(nohash=True, usedefault=True),
+        hemisphere=dict(argstr="%s", mandatory=True, position=-4),
+        label=dict(argstr="-l %s", extensions=None),
         num_threads=dict(),
         out_file=dict(
             argstr="%s",
@@ -51,24 +23,11 @@ def test_MRIsCALabel_inputs():
             name_template="%s.aparc.annot",
             position=-1,
         ),
-        seed=dict(
-            argstr="-seed %d",
-        ),
-        smoothwm=dict(
-            extensions=None,
-            mandatory=True,
-        ),
-        subject_id=dict(
-            argstr="%s",
-            mandatory=True,
-            position=-5,
-            usedefault=True,
-        ),
+        seed=dict(argstr="-seed %d"),
+        smoothwm=dict(extensions=None, mandatory=True),
+        subject_id=dict(argstr="%s", mandatory=True, position=-5, usedefault=True),
         subjects_dir=dict(),
-        sulc=dict(
-            extensions=None,
-            mandatory=True,
-        ),
+        sulc=dict(extensions=None, mandatory=True),
     )
     inputs = MRIsCALabel.input_spec()
 
@@ -78,11 +37,7 @@ def test_MRIsCALabel_inputs():
 
 
 def test_MRIsCALabel_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = MRIsCALabel.output_spec()
 
     for key, metadata in list(output_map.items()):

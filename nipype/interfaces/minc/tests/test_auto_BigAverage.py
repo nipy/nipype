@@ -4,23 +4,10 @@ from ..minc import BigAverage
 
 def test_BigAverage_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        clobber=dict(
-            argstr="--clobber",
-            usedefault=True,
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        input_files=dict(
-            argstr="%s",
-            mandatory=True,
-            position=-2,
-            sep=" ",
-        ),
+        args=dict(argstr="%s"),
+        clobber=dict(argstr="--clobber", usedefault=True),
+        environ=dict(nohash=True, usedefault=True),
+        input_files=dict(argstr="%s", mandatory=True, position=-2, sep=" "),
         output_file=dict(
             argstr="%s",
             extensions=None,
@@ -30,12 +17,8 @@ def test_BigAverage_inputs():
             name_template="%s_bigaverage.mnc",
             position=-1,
         ),
-        output_float=dict(
-            argstr="--float",
-        ),
-        robust=dict(
-            argstr="-robust",
-        ),
+        output_float=dict(argstr="--float"),
+        robust=dict(argstr="-robust"),
         sd_file=dict(
             argstr="--sdfile %s",
             extensions=None,
@@ -43,12 +26,8 @@ def test_BigAverage_inputs():
             name_source=["input_files"],
             name_template="%s_bigaverage_stdev.mnc",
         ),
-        tmpdir=dict(
-            argstr="-tmpdir %s",
-        ),
-        verbose=dict(
-            argstr="--verbose",
-        ),
+        tmpdir=dict(argstr="-tmpdir %s"),
+        verbose=dict(argstr="--verbose"),
     )
     inputs = BigAverage.input_spec()
 
@@ -58,14 +37,7 @@ def test_BigAverage_inputs():
 
 
 def test_BigAverage_outputs():
-    output_map = dict(
-        output_file=dict(
-            extensions=None,
-        ),
-        sd_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(output_file=dict(extensions=None), sd_file=dict(extensions=None))
     outputs = BigAverage.output_spec()
 
     for key, metadata in list(output_map.items()):

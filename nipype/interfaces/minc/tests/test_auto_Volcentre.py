@@ -4,29 +4,12 @@ from ..minc import Volcentre
 
 def test_Volcentre_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        centre=dict(
-            argstr="-centre %s %s %s",
-        ),
-        clobber=dict(
-            argstr="-clobber",
-            usedefault=True,
-        ),
-        com=dict(
-            argstr="-com",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        input_file=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=-2,
-        ),
+        args=dict(argstr="%s"),
+        centre=dict(argstr="-centre %s %s %s"),
+        clobber=dict(argstr="-clobber", usedefault=True),
+        com=dict(argstr="-com"),
+        environ=dict(nohash=True, usedefault=True),
+        input_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2),
         output_file=dict(
             argstr="%s",
             extensions=None,
@@ -36,12 +19,8 @@ def test_Volcentre_inputs():
             name_template="%s_volcentre.mnc",
             position=-1,
         ),
-        verbose=dict(
-            argstr="-verbose",
-        ),
-        zero_dircos=dict(
-            argstr="-zero_dircos",
-        ),
+        verbose=dict(argstr="-verbose"),
+        zero_dircos=dict(argstr="-zero_dircos"),
     )
     inputs = Volcentre.input_spec()
 
@@ -51,11 +30,7 @@ def test_Volcentre_inputs():
 
 
 def test_Volcentre_outputs():
-    output_map = dict(
-        output_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(output_file=dict(extensions=None))
     outputs = Volcentre.output_spec()
 
     for key, metadata in list(output_map.items()):

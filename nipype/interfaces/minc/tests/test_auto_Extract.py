@@ -4,17 +4,9 @@ from ..minc import Extract
 
 def test_Extract_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        count=dict(
-            argstr="-count %s",
-            sep=",",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s"),
+        count=dict(argstr="-count %s", sep=","),
+        environ=dict(nohash=True, usedefault=True),
         flip_any_direction=dict(
             argstr="-any_direction",
             xor=(
@@ -75,35 +67,13 @@ def test_Extract_inputs():
             argstr="+zdirection",
             xor=("flip_z_positive", "flip_z_negative", "flip_z_any"),
         ),
-        image_maximum=dict(
-            argstr="-image_maximum %s",
-        ),
-        image_minimum=dict(
-            argstr="-image_minimum %s",
-        ),
-        image_range=dict(
-            argstr="-image_range %s %s",
-        ),
-        input_file=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=-2,
-        ),
-        nonormalize=dict(
-            argstr="-nonormalize",
-            xor=("normalize", "nonormalize"),
-        ),
-        normalize=dict(
-            argstr="-normalize",
-            xor=("normalize", "nonormalize"),
-        ),
-        out_file=dict(
-            argstr="> %s",
-            extensions=None,
-            genfile=True,
-            position=-1,
-        ),
+        image_maximum=dict(argstr="-image_maximum %s"),
+        image_minimum=dict(argstr="-image_minimum %s"),
+        image_range=dict(argstr="-image_range %s %s"),
+        input_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2),
+        nonormalize=dict(argstr="-nonormalize", xor=("normalize", "nonormalize")),
+        normalize=dict(argstr="-normalize", xor=("normalize", "nonormalize")),
+        out_file=dict(argstr="> %s", extensions=None, genfile=True, position=-1),
         output_file=dict(
             extensions=None,
             hash_files=False,
@@ -112,10 +82,7 @@ def test_Extract_inputs():
             name_template="%s.raw",
             position=-1,
         ),
-        start=dict(
-            argstr="-start %s",
-            sep=",",
-        ),
+        start=dict(argstr="-start %s", sep=","),
         write_ascii=dict(
             argstr="-ascii",
             xor=(
@@ -206,9 +173,7 @@ def test_Extract_inputs():
                 "write_unsigned",
             ),
         ),
-        write_range=dict(
-            argstr="-range %s %s",
-        ),
+        write_range=dict(argstr="-range %s %s"),
         write_short=dict(
             argstr="-short",
             xor=(
@@ -224,14 +189,8 @@ def test_Extract_inputs():
                 "write_unsigned",
             ),
         ),
-        write_signed=dict(
-            argstr="-signed",
-            xor=("write_signed", "write_unsigned"),
-        ),
-        write_unsigned=dict(
-            argstr="-unsigned",
-            xor=("write_signed", "write_unsigned"),
-        ),
+        write_signed=dict(argstr="-signed", xor=("write_signed", "write_unsigned")),
+        write_unsigned=dict(argstr="-unsigned", xor=("write_signed", "write_unsigned")),
     )
     inputs = Extract.input_spec()
 
@@ -241,11 +200,7 @@ def test_Extract_inputs():
 
 
 def test_Extract_outputs():
-    output_map = dict(
-        output_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(output_file=dict(extensions=None))
     outputs = Extract.output_spec()
 
     for key, metadata in list(output_map.items()):

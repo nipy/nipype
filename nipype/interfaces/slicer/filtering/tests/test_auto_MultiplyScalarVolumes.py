@@ -4,31 +4,12 @@ from ..arithmetic import MultiplyScalarVolumes
 
 def test_MultiplyScalarVolumes_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        inputVolume1=dict(
-            argstr="%s",
-            extensions=None,
-            position=-3,
-        ),
-        inputVolume2=dict(
-            argstr="%s",
-            extensions=None,
-            position=-2,
-        ),
-        order=dict(
-            argstr="--order %s",
-        ),
-        outputVolume=dict(
-            argstr="%s",
-            hash_files=False,
-            position=-1,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        inputVolume1=dict(argstr="%s", extensions=None, position=-3),
+        inputVolume2=dict(argstr="%s", extensions=None, position=-2),
+        order=dict(argstr="--order %s"),
+        outputVolume=dict(argstr="%s", hash_files=False, position=-1),
     )
     inputs = MultiplyScalarVolumes.input_spec()
 
@@ -38,12 +19,7 @@ def test_MultiplyScalarVolumes_inputs():
 
 
 def test_MultiplyScalarVolumes_outputs():
-    output_map = dict(
-        outputVolume=dict(
-            extensions=None,
-            position=-1,
-        ),
-    )
+    output_map = dict(outputVolume=dict(extensions=None, position=-1))
     outputs = MultiplyScalarVolumes.output_spec()
 
     for key, metadata in list(output_map.items()):

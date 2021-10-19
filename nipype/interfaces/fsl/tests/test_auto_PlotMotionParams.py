@@ -4,35 +4,14 @@ from ..utils import PlotMotionParams
 
 def test_PlotMotionParams_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        in_file=dict(
-            argstr="%s",
-            mandatory=True,
-            position=1,
-        ),
-        in_source=dict(
-            mandatory=True,
-        ),
-        out_file=dict(
-            argstr="-o %s",
-            extensions=None,
-            genfile=True,
-            hash_files=False,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        in_file=dict(argstr="%s", mandatory=True, position=1),
+        in_source=dict(mandatory=True),
+        out_file=dict(argstr="-o %s", extensions=None, genfile=True, hash_files=False),
         output_type=dict(),
-        plot_size=dict(
-            argstr="%s",
-        ),
-        plot_type=dict(
-            argstr="%s",
-            mandatory=True,
-        ),
+        plot_size=dict(argstr="%s"),
+        plot_type=dict(argstr="%s", mandatory=True),
     )
     inputs = PlotMotionParams.input_spec()
 
@@ -42,11 +21,7 @@ def test_PlotMotionParams_inputs():
 
 
 def test_PlotMotionParams_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = PlotMotionParams.output_spec()
 
     for key, metadata in list(output_map.items()):

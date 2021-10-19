@@ -4,34 +4,15 @@ from ..preprocess import Volreg
 
 def test_Volreg_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        basefile=dict(
-            argstr="-base %s",
-            extensions=None,
-            position=-6,
-        ),
-        copyorigin=dict(
-            argstr="-twodup",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s"),
+        basefile=dict(argstr="-base %s", extensions=None, position=-6),
+        copyorigin=dict(argstr="-twodup"),
+        environ=dict(nohash=True, usedefault=True),
         in_file=dict(
-            argstr="%s",
-            copyfile=False,
-            extensions=None,
-            mandatory=True,
-            position=-1,
+            argstr="%s", copyfile=False, extensions=None, mandatory=True, position=-1
         ),
-        in_weight_volume=dict(
-            argstr="-weight '%s[%d]'",
-        ),
-        interp=dict(
-            argstr="-%s",
-        ),
+        in_weight_volume=dict(argstr="-weight '%s[%d]'"),
+        interp=dict(argstr="-%s"),
         md1d_file=dict(
             argstr="-maxdisp1D %s",
             extensions=None,
@@ -40,10 +21,7 @@ def test_Volreg_inputs():
             name_template="%s_md.1D",
             position=-4,
         ),
-        num_threads=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        num_threads=dict(nohash=True, usedefault=True),
         oned_file=dict(
             argstr="-1Dfile %s",
             extensions=None,
@@ -65,16 +43,9 @@ def test_Volreg_inputs():
             name_template="%s_volreg",
         ),
         outputtype=dict(),
-        timeshift=dict(
-            argstr="-tshift 0",
-        ),
-        verbose=dict(
-            argstr="-verbose",
-        ),
-        zpad=dict(
-            argstr="-zpad %d",
-            position=-5,
-        ),
+        timeshift=dict(argstr="-tshift 0"),
+        verbose=dict(argstr="-verbose"),
+        zpad=dict(argstr="-zpad %d", position=-5),
     )
     inputs = Volreg.input_spec()
 
@@ -85,18 +56,10 @@ def test_Volreg_inputs():
 
 def test_Volreg_outputs():
     output_map = dict(
-        md1d_file=dict(
-            extensions=None,
-        ),
-        oned_file=dict(
-            extensions=None,
-        ),
-        oned_matrix_save=dict(
-            extensions=None,
-        ),
-        out_file=dict(
-            extensions=None,
-        ),
+        md1d_file=dict(extensions=None),
+        oned_file=dict(extensions=None),
+        oned_matrix_save=dict(extensions=None),
+        out_file=dict(extensions=None),
     )
     outputs = Volreg.output_spec()
 

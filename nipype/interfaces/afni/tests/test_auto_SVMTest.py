@@ -4,51 +4,21 @@ from ..svm import SVMTest
 
 def test_SVMTest_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        classout=dict(
-            argstr="-classout",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        in_file=dict(
-            argstr="-testvol %s",
-            extensions=None,
-            mandatory=True,
-        ),
-        model=dict(
-            argstr="-model %s",
-            mandatory=True,
-        ),
-        multiclass=dict(
-            argstr="-multiclass %s",
-        ),
-        nodetrend=dict(
-            argstr="-nodetrend",
-        ),
-        nopredcensord=dict(
-            argstr="-nopredcensord",
-        ),
-        num_threads=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        options=dict(
-            argstr="%s",
-        ),
+        args=dict(argstr="%s"),
+        classout=dict(argstr="-classout"),
+        environ=dict(nohash=True, usedefault=True),
+        in_file=dict(argstr="-testvol %s", extensions=None, mandatory=True),
+        model=dict(argstr="-model %s", mandatory=True),
+        multiclass=dict(argstr="-multiclass %s"),
+        nodetrend=dict(argstr="-nodetrend"),
+        nopredcensord=dict(argstr="-nopredcensord"),
+        num_threads=dict(nohash=True, usedefault=True),
+        options=dict(argstr="%s"),
         out_file=dict(
-            argstr="-predictions %s",
-            extensions=None,
-            name_template="%s_predictions",
+            argstr="-predictions %s", extensions=None, name_template="%s_predictions"
         ),
         outputtype=dict(),
-        testlabels=dict(
-            argstr="-testlabels %s",
-            extensions=None,
-        ),
+        testlabels=dict(argstr="-testlabels %s", extensions=None),
     )
     inputs = SVMTest.input_spec()
 
@@ -58,11 +28,7 @@ def test_SVMTest_inputs():
 
 
 def test_SVMTest_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = SVMTest.output_spec()
 
     for key, metadata in list(output_map.items()):

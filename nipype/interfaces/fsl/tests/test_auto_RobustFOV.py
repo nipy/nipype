@@ -4,22 +4,10 @@ from ..utils import RobustFOV
 
 def test_RobustFOV_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        brainsize=dict(
-            argstr="-b %d",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        in_file=dict(
-            argstr="-i %s",
-            extensions=None,
-            mandatory=True,
-            position=0,
-        ),
+        args=dict(argstr="%s"),
+        brainsize=dict(argstr="-b %d"),
+        environ=dict(nohash=True, usedefault=True),
+        in_file=dict(argstr="-i %s", extensions=None, mandatory=True, position=0),
         out_roi=dict(
             argstr="-r %s",
             extensions=None,
@@ -45,12 +33,7 @@ def test_RobustFOV_inputs():
 
 def test_RobustFOV_outputs():
     output_map = dict(
-        out_roi=dict(
-            extensions=None,
-        ),
-        out_transform=dict(
-            extensions=None,
-        ),
+        out_roi=dict(extensions=None), out_transform=dict(extensions=None)
     )
     outputs = RobustFOV.output_spec()
 

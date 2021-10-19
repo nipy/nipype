@@ -4,28 +4,11 @@ from ..registration import ComposeXfmTask
 
 def test_ComposeXfmTask_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        in_aff=dict(
-            argstr="-aff %s",
-            extensions=None,
-            mandatory=True,
-        ),
-        in_df=dict(
-            argstr="-df %s",
-            extensions=None,
-            mandatory=True,
-        ),
-        out_file=dict(
-            argstr="-out %s",
-            extensions=None,
-            genfile=True,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        in_aff=dict(argstr="-aff %s", extensions=None, mandatory=True),
+        in_df=dict(argstr="-df %s", extensions=None, mandatory=True),
+        out_file=dict(argstr="-out %s", extensions=None, genfile=True),
     )
     inputs = ComposeXfmTask.input_spec()
 
@@ -35,11 +18,7 @@ def test_ComposeXfmTask_inputs():
 
 
 def test_ComposeXfmTask_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = ComposeXfmTask.output_spec()
 
     for key, metadata in list(output_map.items()):

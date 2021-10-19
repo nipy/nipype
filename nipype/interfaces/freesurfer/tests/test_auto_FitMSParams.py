@@ -4,24 +4,11 @@ from ..preprocess import FitMSParams
 
 def test_FitMSParams_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
         flip_list=dict(),
-        in_files=dict(
-            argstr="%s",
-            mandatory=True,
-            position=-2,
-        ),
-        out_dir=dict(
-            argstr="%s",
-            genfile=True,
-            position=-1,
-        ),
+        in_files=dict(argstr="%s", mandatory=True, position=-2),
+        out_dir=dict(argstr="%s", genfile=True, position=-1),
         subjects_dir=dict(),
         te_list=dict(),
         tr_list=dict(),
@@ -36,15 +23,9 @@ def test_FitMSParams_inputs():
 
 def test_FitMSParams_outputs():
     output_map = dict(
-        pd_image=dict(
-            extensions=None,
-        ),
-        t1_image=dict(
-            extensions=None,
-        ),
-        t2star_image=dict(
-            extensions=None,
-        ),
+        pd_image=dict(extensions=None),
+        t1_image=dict(extensions=None),
+        t2star_image=dict(extensions=None),
     )
     outputs = FitMSParams.output_spec()
 

@@ -4,13 +4,7 @@ from ..convert import MergeCNetworks
 
 def test_MergeCNetworks_inputs():
     input_map = dict(
-        in_files=dict(
-            mandatory=True,
-        ),
-        out_file=dict(
-            extensions=None,
-            usedefault=True,
-        ),
+        in_files=dict(mandatory=True), out_file=dict(extensions=None, usedefault=True)
     )
     inputs = MergeCNetworks.input_spec()
 
@@ -20,11 +14,7 @@ def test_MergeCNetworks_inputs():
 
 
 def test_MergeCNetworks_outputs():
-    output_map = dict(
-        connectome_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(connectome_file=dict(extensions=None))
     outputs = MergeCNetworks.output_spec()
 
     for key, metadata in list(output_map.items()):

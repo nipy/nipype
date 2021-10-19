@@ -4,29 +4,13 @@ from ..utils import Surface2VolTransform
 
 def test_Surface2VolTransform_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        hemi=dict(
-            argstr="--hemi %s",
-            mandatory=True,
-        ),
-        mkmask=dict(
-            argstr="--mkmask",
-            xor=["source_file"],
-        ),
-        projfrac=dict(
-            argstr="--projfrac %s",
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        hemi=dict(argstr="--hemi %s", mandatory=True),
+        mkmask=dict(argstr="--mkmask", xor=["source_file"]),
+        projfrac=dict(argstr="--projfrac %s"),
         reg_file=dict(
-            argstr="--volreg %s",
-            extensions=None,
-            mandatory=True,
-            xor=["subject_id"],
+            argstr="--volreg %s", extensions=None, mandatory=True, xor=["subject_id"]
         ),
         source_file=dict(
             argstr="--surfval %s",
@@ -35,20 +19,10 @@ def test_Surface2VolTransform_inputs():
             mandatory=True,
             xor=["mkmask"],
         ),
-        subject_id=dict(
-            argstr="--identity %s",
-            xor=["reg_file"],
-        ),
-        subjects_dir=dict(
-            argstr="--sd %s",
-        ),
-        surf_name=dict(
-            argstr="--surf %s",
-        ),
-        template_file=dict(
-            argstr="--template %s",
-            extensions=None,
-        ),
+        subject_id=dict(argstr="--identity %s", xor=["reg_file"]),
+        subjects_dir=dict(argstr="--sd %s"),
+        surf_name=dict(argstr="--surf %s"),
+        template_file=dict(argstr="--template %s", extensions=None),
         transformed_file=dict(
             argstr="--outvol %s",
             extensions=None,
@@ -73,12 +47,7 @@ def test_Surface2VolTransform_inputs():
 
 def test_Surface2VolTransform_outputs():
     output_map = dict(
-        transformed_file=dict(
-            extensions=None,
-        ),
-        vertexvol_file=dict(
-            extensions=None,
-        ),
+        transformed_file=dict(extensions=None), vertexvol_file=dict(extensions=None)
     )
     outputs = Surface2VolTransform.output_spec()
 

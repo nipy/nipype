@@ -5,34 +5,17 @@ from ..preprocess import CreateWarped
 def test_CreateWarped_inputs():
     input_map = dict(
         flowfield_files=dict(
-            copyfile=False,
-            field="crt_warped.flowfields",
-            mandatory=True,
+            copyfile=False, field="crt_warped.flowfields", mandatory=True
         ),
-        image_files=dict(
-            copyfile=False,
-            field="crt_warped.images",
-            mandatory=True,
-        ),
-        interp=dict(
-            field="crt_warped.interp",
-        ),
-        iterations=dict(
-            field="crt_warped.K",
-        ),
+        image_files=dict(copyfile=False, field="crt_warped.images", mandatory=True),
+        interp=dict(field="crt_warped.interp"),
+        iterations=dict(field="crt_warped.K"),
         matlab_cmd=dict(),
-        mfile=dict(
-            usedefault=True,
-        ),
-        modulate=dict(
-            field="crt_warped.jactransf",
-        ),
+        mfile=dict(usedefault=True),
+        modulate=dict(field="crt_warped.jactransf"),
         paths=dict(),
         use_mcr=dict(),
-        use_v8struct=dict(
-            min_ver="8",
-            usedefault=True,
-        ),
+        use_v8struct=dict(min_ver="8", usedefault=True),
     )
     inputs = CreateWarped.input_spec()
 
@@ -42,9 +25,7 @@ def test_CreateWarped_inputs():
 
 
 def test_CreateWarped_outputs():
-    output_map = dict(
-        warped_files=dict(),
-    )
+    output_map = dict(warped_files=dict())
     outputs = CreateWarped.output_spec()
 
     for key, metadata in list(output_map.items()):

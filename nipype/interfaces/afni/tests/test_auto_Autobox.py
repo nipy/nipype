@@ -4,26 +4,13 @@ from ..utils import Autobox
 
 def test_Autobox_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
         in_file=dict(
-            argstr="-input %s",
-            copyfile=False,
-            extensions=None,
-            mandatory=True,
+            argstr="-input %s", copyfile=False, extensions=None, mandatory=True
         ),
-        no_clustering=dict(
-            argstr="-noclust",
-        ),
-        num_threads=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        no_clustering=dict(argstr="-noclust"),
+        num_threads=dict(nohash=True, usedefault=True),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -31,9 +18,7 @@ def test_Autobox_inputs():
             name_template="%s_autobox",
         ),
         outputtype=dict(),
-        padding=dict(
-            argstr="-npad %d",
-        ),
+        padding=dict(argstr="-npad %d"),
     )
     inputs = Autobox.input_spec()
 
@@ -44,9 +29,7 @@ def test_Autobox_inputs():
 
 def test_Autobox_outputs():
     output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
+        out_file=dict(extensions=None),
         x_max=dict(),
         x_min=dict(),
         y_max=dict(),

@@ -4,67 +4,22 @@ from ..preprocess import CALabel
 
 def test_CALabel_inputs():
     input_map = dict(
-        align=dict(
-            argstr="-align",
-        ),
-        args=dict(
-            argstr="%s",
-        ),
-        aseg=dict(
-            argstr="-aseg %s",
-            extensions=None,
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        in_file=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=-4,
-        ),
-        in_vol=dict(
-            argstr="-r %s",
-            extensions=None,
-        ),
-        intensities=dict(
-            argstr="-r %s",
-            extensions=None,
-        ),
-        label=dict(
-            argstr="-l %s",
-            extensions=None,
-        ),
-        no_big_ventricles=dict(
-            argstr="-nobigventricles",
-        ),
+        align=dict(argstr="-align"),
+        args=dict(argstr="%s"),
+        aseg=dict(argstr="-aseg %s", extensions=None),
+        environ=dict(nohash=True, usedefault=True),
+        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=-4),
+        in_vol=dict(argstr="-r %s", extensions=None),
+        intensities=dict(argstr="-r %s", extensions=None),
+        label=dict(argstr="-l %s", extensions=None),
+        no_big_ventricles=dict(argstr="-nobigventricles"),
         num_threads=dict(),
-        out_file=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=-1,
-        ),
-        prior=dict(
-            argstr="-prior %.1f",
-        ),
-        relabel_unlikely=dict(
-            argstr="-relabel_unlikely %d %.1f",
-        ),
+        out_file=dict(argstr="%s", extensions=None, mandatory=True, position=-1),
+        prior=dict(argstr="-prior %.1f"),
+        relabel_unlikely=dict(argstr="-relabel_unlikely %d %.1f"),
         subjects_dir=dict(),
-        template=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=-2,
-        ),
-        transform=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=-3,
-        ),
+        template=dict(argstr="%s", extensions=None, mandatory=True, position=-2),
+        transform=dict(argstr="%s", extensions=None, mandatory=True, position=-3),
     )
     inputs = CALabel.input_spec()
 
@@ -74,11 +29,7 @@ def test_CALabel_inputs():
 
 
 def test_CALabel_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = CALabel.output_spec()
 
     for key, metadata in list(output_map.items()):

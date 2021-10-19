@@ -17,50 +17,23 @@ def test_Label2Vol_inputs():
             mandatory=True,
             xor=("label_file", "annot_file", "seg_file", "aparc_aseg"),
         ),
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        fill_thresh=dict(
-            argstr="--fillthresh %g",
-        ),
-        hemi=dict(
-            argstr="--hemi %s",
-        ),
-        identity=dict(
-            argstr="--identity",
-            xor=("reg_file", "reg_header", "identity"),
-        ),
-        invert_mtx=dict(
-            argstr="--invertmtx",
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        fill_thresh=dict(argstr="--fillthresh %g"),
+        hemi=dict(argstr="--hemi %s"),
+        identity=dict(argstr="--identity", xor=("reg_file", "reg_header", "identity")),
+        invert_mtx=dict(argstr="--invertmtx"),
         label_file=dict(
             argstr="--label %s...",
             copyfile=False,
             mandatory=True,
             xor=("label_file", "annot_file", "seg_file", "aparc_aseg"),
         ),
-        label_hit_file=dict(
-            argstr="--hits %s",
-            extensions=None,
-        ),
-        label_voxel_volume=dict(
-            argstr="--labvoxvol %f",
-        ),
-        map_label_stat=dict(
-            argstr="--label-stat %s",
-            extensions=None,
-        ),
-        native_vox2ras=dict(
-            argstr="--native-vox2ras",
-        ),
-        proj=dict(
-            argstr="--proj %s %f %f %f",
-            requires=("subject_id", "hemi"),
-        ),
+        label_hit_file=dict(argstr="--hits %s", extensions=None),
+        label_voxel_volume=dict(argstr="--labvoxvol %f"),
+        map_label_stat=dict(argstr="--label-stat %s", extensions=None),
+        native_vox2ras=dict(argstr="--native-vox2ras"),
+        proj=dict(argstr="--proj %s %f %f %f", requires=("subject_id", "hemi")),
         reg_file=dict(
             argstr="--reg %s",
             extensions=None,
@@ -78,23 +51,11 @@ def test_Label2Vol_inputs():
             mandatory=True,
             xor=("label_file", "annot_file", "seg_file", "aparc_aseg"),
         ),
-        subject_id=dict(
-            argstr="--subject %s",
-        ),
+        subject_id=dict(argstr="--subject %s"),
         subjects_dir=dict(),
-        surface=dict(
-            argstr="--surf %s",
-        ),
-        template_file=dict(
-            argstr="--temp %s",
-            extensions=None,
-            mandatory=True,
-        ),
-        vol_label_file=dict(
-            argstr="--o %s",
-            extensions=None,
-            genfile=True,
-        ),
+        surface=dict(argstr="--surf %s"),
+        template_file=dict(argstr="--temp %s", extensions=None, mandatory=True),
+        vol_label_file=dict(argstr="--o %s", extensions=None, genfile=True),
     )
     inputs = Label2Vol.input_spec()
 
@@ -104,11 +65,7 @@ def test_Label2Vol_inputs():
 
 
 def test_Label2Vol_outputs():
-    output_map = dict(
-        vol_label_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(vol_label_file=dict(extensions=None))
     outputs = Label2Vol.output_spec()
 
     for key, metadata in list(output_map.items()):

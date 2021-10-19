@@ -282,7 +282,7 @@ class FieldMap(SPMCommand):
 
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm"""
-        
+
         if ((self.inputs.jobtype == "calculatevdm") and (opt in ['phase_file', 'magnitude_file', 'anat_file', 'epi_file'])):
             return scans_for_fname(ensure_list(val))
 

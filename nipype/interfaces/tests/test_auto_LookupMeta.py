@@ -4,13 +4,7 @@ from ..dcmstack import LookupMeta
 
 def test_LookupMeta_inputs():
     input_map = dict(
-        in_file=dict(
-            extensions=None,
-            mandatory=True,
-        ),
-        meta_keys=dict(
-            mandatory=True,
-        ),
+        in_file=dict(extensions=None, mandatory=True), meta_keys=dict(mandatory=True)
     )
     inputs = LookupMeta.input_spec()
 

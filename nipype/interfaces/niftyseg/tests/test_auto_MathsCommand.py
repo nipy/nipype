@@ -4,19 +4,9 @@ from ..maths import MathsCommand
 
 def test_MathsCommand_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        in_file=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=2,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=2),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -24,10 +14,7 @@ def test_MathsCommand_inputs():
             name_template="%s",
             position=-2,
         ),
-        output_datatype=dict(
-            argstr="-odt %s",
-            position=-3,
-        ),
+        output_datatype=dict(argstr="-odt %s", position=-3),
     )
     inputs = MathsCommand.input_spec()
 
@@ -37,11 +24,7 @@ def test_MathsCommand_inputs():
 
 
 def test_MathsCommand_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = MathsCommand.output_spec()
 
     for key, metadata in list(output_map.items()):

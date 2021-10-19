@@ -4,103 +4,29 @@ from ..reconst import EstimateFOD
 
 def test_EstimateFOD_inputs():
     input_map = dict(
-        algorithm=dict(
-            argstr="%s",
-            mandatory=True,
-            position=-8,
-        ),
-        args=dict(
-            argstr="%s",
-        ),
-        bval_scale=dict(
-            argstr="-bvalue_scaling %s",
-        ),
-        csf_odf=dict(
-            argstr="%s",
-            extensions=None,
-            position=-1,
-            usedefault=True,
-        ),
-        csf_txt=dict(
-            argstr="%s",
-            extensions=None,
-            position=-2,
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        gm_odf=dict(
-            argstr="%s",
-            extensions=None,
-            position=-3,
-            usedefault=True,
-        ),
-        gm_txt=dict(
-            argstr="%s",
-            extensions=None,
-            position=-4,
-        ),
-        grad_file=dict(
-            argstr="-grad %s",
-            extensions=None,
-            xor=["grad_fsl"],
-        ),
-        grad_fsl=dict(
-            argstr="-fslgrad %s %s",
-            xor=["grad_file"],
-        ),
-        in_bval=dict(
-            extensions=None,
-        ),
-        in_bvec=dict(
-            argstr="-fslgrad %s %s",
-            extensions=None,
-        ),
-        in_dirs=dict(
-            argstr="-directions %s",
-            extensions=None,
-        ),
-        in_file=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=-7,
-        ),
-        mask_file=dict(
-            argstr="-mask %s",
-            extensions=None,
-        ),
-        max_sh=dict(
-            argstr="-lmax %s",
-            sep=",",
-            usedefault=True,
-        ),
-        nthreads=dict(
-            argstr="-nthreads %d",
-            nohash=True,
-        ),
-        predicted_signal=dict(
-            argstr="-predicted_signal %s",
-            extensions=None,
-        ),
-        shell=dict(
-            argstr="-shell %s",
-            sep=",",
-        ),
+        algorithm=dict(argstr="%s", mandatory=True, position=-8),
+        args=dict(argstr="%s"),
+        bval_scale=dict(argstr="-bvalue_scaling %s"),
+        csf_odf=dict(argstr="%s", extensions=None, position=-1, usedefault=True),
+        csf_txt=dict(argstr="%s", extensions=None, position=-2),
+        environ=dict(nohash=True, usedefault=True),
+        gm_odf=dict(argstr="%s", extensions=None, position=-3, usedefault=True),
+        gm_txt=dict(argstr="%s", extensions=None, position=-4),
+        grad_file=dict(argstr="-grad %s", extensions=None, xor=["grad_fsl"]),
+        grad_fsl=dict(argstr="-fslgrad %s %s", xor=["grad_file"]),
+        in_bval=dict(extensions=None),
+        in_bvec=dict(argstr="-fslgrad %s %s", extensions=None),
+        in_dirs=dict(argstr="-directions %s", extensions=None),
+        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=-7),
+        mask_file=dict(argstr="-mask %s", extensions=None),
+        max_sh=dict(argstr="-lmax %s", sep=",", usedefault=True),
+        nthreads=dict(argstr="-nthreads %d", nohash=True),
+        predicted_signal=dict(argstr="-predicted_signal %s", extensions=None),
+        shell=dict(argstr="-shell %s", sep=","),
         wm_odf=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=-5,
-            usedefault=True,
+            argstr="%s", extensions=None, mandatory=True, position=-5, usedefault=True
         ),
-        wm_txt=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=-6,
-        ),
+        wm_txt=dict(argstr="%s", extensions=None, mandatory=True, position=-6),
     )
     inputs = EstimateFOD.input_spec()
 
@@ -111,21 +37,10 @@ def test_EstimateFOD_inputs():
 
 def test_EstimateFOD_outputs():
     output_map = dict(
-        csf_odf=dict(
-            argstr="%s",
-            extensions=None,
-        ),
-        gm_odf=dict(
-            argstr="%s",
-            extensions=None,
-        ),
-        predicted_signal=dict(
-            extensions=None,
-        ),
-        wm_odf=dict(
-            argstr="%s",
-            extensions=None,
-        ),
+        csf_odf=dict(argstr="%s", extensions=None),
+        gm_odf=dict(argstr="%s", extensions=None),
+        predicted_signal=dict(extensions=None),
+        wm_odf=dict(argstr="%s", extensions=None),
     )
     outputs = EstimateFOD.output_spec()
 

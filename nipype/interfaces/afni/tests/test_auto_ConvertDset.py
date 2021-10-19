@@ -4,34 +4,14 @@ from ..utils import ConvertDset
 
 def test_ConvertDset_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        in_file=dict(
-            argstr="-input %s",
-            extensions=None,
-            mandatory=True,
-            position=-2,
-        ),
-        num_threads=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        in_file=dict(argstr="-input %s", extensions=None, mandatory=True, position=-2),
+        num_threads=dict(nohash=True, usedefault=True),
         out_file=dict(
-            argstr="-prefix %s",
-            extensions=None,
-            mandatory=True,
-            position=-1,
+            argstr="-prefix %s", extensions=None, mandatory=True, position=-1
         ),
-        out_type=dict(
-            argstr="-o_%s",
-            mandatory=True,
-            position=0,
-        ),
+        out_type=dict(argstr="-o_%s", mandatory=True, position=0),
         outputtype=dict(),
     )
     inputs = ConvertDset.input_spec()
@@ -42,11 +22,7 @@ def test_ConvertDset_inputs():
 
 
 def test_ConvertDset_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = ConvertDset.output_spec()
 
     for key, metadata in list(output_map.items()):

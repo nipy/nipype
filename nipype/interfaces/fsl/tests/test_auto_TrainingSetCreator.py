@@ -3,13 +3,7 @@ from ..fix import TrainingSetCreator
 
 
 def test_TrainingSetCreator_inputs():
-    input_map = dict(
-        mel_icas_in=dict(
-            argstr="%s",
-            copyfile=False,
-            position=-1,
-        ),
-    )
+    input_map = dict(mel_icas_in=dict(argstr="%s", copyfile=False, position=-1))
     inputs = TrainingSetCreator.input_spec()
 
     for key, metadata in list(input_map.items()):
@@ -18,13 +12,7 @@ def test_TrainingSetCreator_inputs():
 
 
 def test_TrainingSetCreator_outputs():
-    output_map = dict(
-        mel_icas_out=dict(
-            argstr="%s",
-            copyfile=False,
-            position=-1,
-        ),
-    )
+    output_map = dict(mel_icas_out=dict(argstr="%s", copyfile=False, position=-1))
     outputs = TrainingSetCreator.output_spec()
 
     for key, metadata in list(output_map.items()):

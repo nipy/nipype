@@ -4,23 +4,11 @@ from ..featuredetection import STAPLEAnalysis
 
 def test_STAPLEAnalysis_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        inputDimension=dict(
-            argstr="--inputDimension %d",
-        ),
-        inputLabelVolume=dict(
-            argstr="--inputLabelVolume %s...",
-        ),
-        outputVolume=dict(
-            argstr="--outputVolume %s",
-            hash_files=False,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        inputDimension=dict(argstr="--inputDimension %d"),
+        inputLabelVolume=dict(argstr="--inputLabelVolume %s..."),
+        outputVolume=dict(argstr="--outputVolume %s", hash_files=False),
     )
     inputs = STAPLEAnalysis.input_spec()
 
@@ -30,11 +18,7 @@ def test_STAPLEAnalysis_inputs():
 
 
 def test_STAPLEAnalysis_outputs():
-    output_map = dict(
-        outputVolume=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(outputVolume=dict(extensions=None))
     outputs = STAPLEAnalysis.output_spec()
 
     for key, metadata in list(output_map.items()):

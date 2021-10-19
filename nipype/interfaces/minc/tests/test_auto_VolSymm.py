@@ -4,37 +4,15 @@ from ..minc import VolSymm
 
 def test_VolSymm_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        clobber=dict(
-            argstr="-clobber",
-            usedefault=True,
-        ),
-        config_file=dict(
-            argstr="-config_file %s",
-            extensions=None,
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        fit_linear=dict(
-            argstr="-linear",
-        ),
-        fit_nonlinear=dict(
-            argstr="-nonlinear",
-        ),
-        input_file=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=-3,
-        ),
+        args=dict(argstr="%s"),
+        clobber=dict(argstr="-clobber", usedefault=True),
+        config_file=dict(argstr="-config_file %s", extensions=None),
+        environ=dict(nohash=True, usedefault=True),
+        fit_linear=dict(argstr="-linear"),
+        fit_nonlinear=dict(argstr="-nonlinear"),
+        input_file=dict(argstr="%s", extensions=None, mandatory=True, position=-3),
         input_grid_files=dict(),
-        nofit=dict(
-            argstr="-nofit",
-        ),
+        nofit=dict(argstr="-nofit"),
         output_file=dict(
             argstr="%s",
             extensions=None,
@@ -54,18 +32,10 @@ def test_VolSymm_inputs():
             name_template="%s_vol_symm.xfm",
             position=-2,
         ),
-        verbose=dict(
-            argstr="-verbose",
-        ),
-        x=dict(
-            argstr="-x",
-        ),
-        y=dict(
-            argstr="-y",
-        ),
-        z=dict(
-            argstr="-z",
-        ),
+        verbose=dict(argstr="-verbose"),
+        x=dict(argstr="-x"),
+        y=dict(argstr="-y"),
+        z=dict(argstr="-z"),
     )
     inputs = VolSymm.input_spec()
 
@@ -76,15 +46,9 @@ def test_VolSymm_inputs():
 
 def test_VolSymm_outputs():
     output_map = dict(
-        output_file=dict(
-            extensions=None,
-        ),
-        output_grid=dict(
-            extensions=None,
-        ),
-        trans_file=dict(
-            extensions=None,
-        ),
+        output_file=dict(extensions=None),
+        output_grid=dict(extensions=None),
+        trans_file=dict(extensions=None),
     )
     outputs = VolSymm.output_spec()
 

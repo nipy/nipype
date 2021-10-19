@@ -4,19 +4,9 @@ from ..utils import SHConv
 
 def test_SHConv_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        in_file=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=-3,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=-3),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -25,12 +15,7 @@ def test_SHConv_inputs():
             position=-1,
             usedefault=True,
         ),
-        response=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=-2,
-        ),
+        response=dict(argstr="%s", extensions=None, mandatory=True, position=-2),
     )
     inputs = SHConv.input_spec()
 
@@ -40,11 +25,7 @@ def test_SHConv_inputs():
 
 
 def test_SHConv_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = SHConv.output_spec()
 
     for key, metadata in list(output_map.items()):

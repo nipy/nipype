@@ -4,20 +4,10 @@ from ..commandlineonly import fiberstats
 
 def test_fiberstats_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        fiber_file=dict(
-            argstr="--fiber_file %s",
-            extensions=None,
-        ),
-        verbose=dict(
-            argstr="--verbose ",
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        fiber_file=dict(argstr="--fiber_file %s", extensions=None),
+        verbose=dict(argstr="--verbose "),
     )
     inputs = fiberstats.input_spec()
 

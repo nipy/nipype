@@ -4,9 +4,7 @@ from ..cifti import CiftiSmooth
 
 def test_CiftiSmooth_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
+        args=dict(argstr="%s"),
         cerebellum_corrected_areas=dict(
             argstr="cerebellum-corrected-areas %s",
             extensions=None,
@@ -14,53 +12,21 @@ def test_CiftiSmooth_inputs():
             requires=["cerebellum_surf"],
         ),
         cerebellum_surf=dict(
-            argstr="-cerebellum-surface %s",
-            extensions=None,
-            position=9,
+            argstr="-cerebellum-surface %s", extensions=None, position=9
         ),
-        cifti_roi=dict(
-            argstr="-cifti-roi %s",
-            extensions=None,
-            position=11,
-        ),
-        direction=dict(
-            argstr="%s",
-            mandatory=True,
-            position=3,
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        fix_zeros_surf=dict(
-            argstr="-fix-zeros-surface",
-            position=13,
-        ),
-        fix_zeros_vol=dict(
-            argstr="-fix-zeros-volume",
-            position=12,
-        ),
-        in_file=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=0,
-        ),
+        cifti_roi=dict(argstr="-cifti-roi %s", extensions=None, position=11),
+        direction=dict(argstr="%s", mandatory=True, position=3),
+        environ=dict(nohash=True, usedefault=True),
+        fix_zeros_surf=dict(argstr="-fix-zeros-surface", position=13),
+        fix_zeros_vol=dict(argstr="-fix-zeros-volume", position=12),
+        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=0),
         left_corrected_areas=dict(
-            argstr="-left-corrected-areas %s",
-            extensions=None,
-            position=6,
+            argstr="-left-corrected-areas %s", extensions=None, position=6
         ),
         left_surf=dict(
-            argstr="-left-surface %s",
-            extensions=None,
-            mandatory=True,
-            position=5,
+            argstr="-left-surface %s", extensions=None, mandatory=True, position=5
         ),
-        merged_volume=dict(
-            argstr="-merged-volume",
-            position=14,
-        ),
+        merged_volume=dict(argstr="-merged-volume", position=14),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -70,26 +36,13 @@ def test_CiftiSmooth_inputs():
             position=4,
         ),
         right_corrected_areas=dict(
-            argstr="-right-corrected-areas %s",
-            extensions=None,
-            position=8,
+            argstr="-right-corrected-areas %s", extensions=None, position=8
         ),
         right_surf=dict(
-            argstr="-right-surface %s",
-            extensions=None,
-            mandatory=True,
-            position=7,
+            argstr="-right-surface %s", extensions=None, mandatory=True, position=7
         ),
-        sigma_surf=dict(
-            argstr="%s",
-            mandatory=True,
-            position=1,
-        ),
-        sigma_vol=dict(
-            argstr="%s",
-            mandatory=True,
-            position=2,
-        ),
+        sigma_surf=dict(argstr="%s", mandatory=True, position=1),
+        sigma_vol=dict(argstr="%s", mandatory=True, position=2),
     )
     inputs = CiftiSmooth.input_spec()
 
@@ -99,11 +52,7 @@ def test_CiftiSmooth_inputs():
 
 
 def test_CiftiSmooth_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = CiftiSmooth.output_spec()
 
     for key, metadata in list(output_map.items()):

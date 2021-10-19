@@ -4,19 +4,9 @@ from ..epi import EddyCorrect
 
 def test_EddyCorrect_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        in_file=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=0,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=0),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -26,12 +16,7 @@ def test_EddyCorrect_inputs():
             position=1,
         ),
         output_type=dict(),
-        ref_num=dict(
-            argstr="%d",
-            mandatory=True,
-            position=2,
-            usedefault=True,
-        ),
+        ref_num=dict(argstr="%d", mandatory=True, position=2, usedefault=True),
     )
     inputs = EddyCorrect.input_spec()
 
@@ -41,11 +26,7 @@ def test_EddyCorrect_inputs():
 
 
 def test_EddyCorrect_outputs():
-    output_map = dict(
-        eddy_corrected=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(eddy_corrected=dict(extensions=None))
     outputs = EddyCorrect.output_spec()
 
     for key, metadata in list(output_map.items()):

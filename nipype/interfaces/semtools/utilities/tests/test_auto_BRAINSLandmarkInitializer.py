@@ -4,28 +4,17 @@ from ..brains import BRAINSLandmarkInitializer
 
 def test_BRAINSLandmarkInitializer_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
         inputFixedLandmarkFilename=dict(
-            argstr="--inputFixedLandmarkFilename %s",
-            extensions=None,
+            argstr="--inputFixedLandmarkFilename %s", extensions=None
         ),
         inputMovingLandmarkFilename=dict(
-            argstr="--inputMovingLandmarkFilename %s",
-            extensions=None,
+            argstr="--inputMovingLandmarkFilename %s", extensions=None
         ),
-        inputWeightFilename=dict(
-            argstr="--inputWeightFilename %s",
-            extensions=None,
-        ),
+        inputWeightFilename=dict(argstr="--inputWeightFilename %s", extensions=None),
         outputTransformFilename=dict(
-            argstr="--outputTransformFilename %s",
-            hash_files=False,
+            argstr="--outputTransformFilename %s", hash_files=False
         ),
     )
     inputs = BRAINSLandmarkInitializer.input_spec()
@@ -36,11 +25,7 @@ def test_BRAINSLandmarkInitializer_inputs():
 
 
 def test_BRAINSLandmarkInitializer_outputs():
-    output_map = dict(
-        outputTransformFilename=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(outputTransformFilename=dict(extensions=None))
     outputs = BRAINSLandmarkInitializer.output_spec()
 
     for key, metadata in list(output_map.items()):

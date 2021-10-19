@@ -4,39 +4,18 @@ from ..brains import BRAINSLmkTransform
 
 def test_BRAINSLmkTransform_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        inputFixedLandmarks=dict(
-            argstr="--inputFixedLandmarks %s",
-            extensions=None,
-        ),
-        inputMovingLandmarks=dict(
-            argstr="--inputMovingLandmarks %s",
-            extensions=None,
-        ),
-        inputMovingVolume=dict(
-            argstr="--inputMovingVolume %s",
-            extensions=None,
-        ),
-        inputReferenceVolume=dict(
-            argstr="--inputReferenceVolume %s",
-            extensions=None,
-        ),
-        numberOfThreads=dict(
-            argstr="--numberOfThreads %d",
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        inputFixedLandmarks=dict(argstr="--inputFixedLandmarks %s", extensions=None),
+        inputMovingLandmarks=dict(argstr="--inputMovingLandmarks %s", extensions=None),
+        inputMovingVolume=dict(argstr="--inputMovingVolume %s", extensions=None),
+        inputReferenceVolume=dict(argstr="--inputReferenceVolume %s", extensions=None),
+        numberOfThreads=dict(argstr="--numberOfThreads %d"),
         outputAffineTransform=dict(
-            argstr="--outputAffineTransform %s",
-            hash_files=False,
+            argstr="--outputAffineTransform %s", hash_files=False
         ),
         outputResampledVolume=dict(
-            argstr="--outputResampledVolume %s",
-            hash_files=False,
+            argstr="--outputResampledVolume %s", hash_files=False
         ),
     )
     inputs = BRAINSLmkTransform.input_spec()
@@ -48,12 +27,8 @@ def test_BRAINSLmkTransform_inputs():
 
 def test_BRAINSLmkTransform_outputs():
     output_map = dict(
-        outputAffineTransform=dict(
-            extensions=None,
-        ),
-        outputResampledVolume=dict(
-            extensions=None,
-        ),
+        outputAffineTransform=dict(extensions=None),
+        outputResampledVolume=dict(extensions=None),
     )
     outputs = BRAINSLmkTransform.output_spec()
 

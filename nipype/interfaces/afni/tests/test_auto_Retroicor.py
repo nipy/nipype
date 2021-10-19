@@ -4,39 +4,17 @@ from ..preprocess import Retroicor
 
 def test_Retroicor_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        card=dict(
-            argstr="-card %s",
-            extensions=None,
-            position=-2,
-        ),
+        args=dict(argstr="%s"),
+        card=dict(argstr="-card %s", extensions=None, position=-2),
         cardphase=dict(
-            argstr="-cardphase %s",
-            extensions=None,
-            hash_files=False,
-            position=-6,
+            argstr="-cardphase %s", extensions=None, hash_files=False, position=-6
         ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        environ=dict(nohash=True, usedefault=True),
         in_file=dict(
-            argstr="%s",
-            copyfile=False,
-            extensions=None,
-            mandatory=True,
-            position=-1,
+            argstr="%s", copyfile=False, extensions=None, mandatory=True, position=-1
         ),
-        num_threads=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        order=dict(
-            argstr="-order %s",
-            position=-5,
-        ),
+        num_threads=dict(nohash=True, usedefault=True),
+        order=dict(argstr="-order %s", position=-5),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -45,21 +23,11 @@ def test_Retroicor_inputs():
             position=1,
         ),
         outputtype=dict(),
-        resp=dict(
-            argstr="-resp %s",
-            extensions=None,
-            position=-3,
-        ),
+        resp=dict(argstr="-resp %s", extensions=None, position=-3),
         respphase=dict(
-            argstr="-respphase %s",
-            extensions=None,
-            hash_files=False,
-            position=-7,
+            argstr="-respphase %s", extensions=None, hash_files=False, position=-7
         ),
-        threshold=dict(
-            argstr="-threshold %d",
-            position=-4,
-        ),
+        threshold=dict(argstr="-threshold %d", position=-4),
     )
     inputs = Retroicor.input_spec()
 
@@ -69,11 +37,7 @@ def test_Retroicor_inputs():
 
 
 def test_Retroicor_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = Retroicor.output_spec()
 
     for key, metadata in list(output_map.items()):

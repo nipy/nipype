@@ -4,20 +4,11 @@ from ..brains import landmarksConstellationAligner
 
 def test_landmarksConstellationAligner_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        inputLandmarksPaired=dict(
-            argstr="--inputLandmarksPaired %s",
-            extensions=None,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        inputLandmarksPaired=dict(argstr="--inputLandmarksPaired %s", extensions=None),
         outputLandmarksPaired=dict(
-            argstr="--outputLandmarksPaired %s",
-            hash_files=False,
+            argstr="--outputLandmarksPaired %s", hash_files=False
         ),
     )
     inputs = landmarksConstellationAligner.input_spec()
@@ -28,11 +19,7 @@ def test_landmarksConstellationAligner_inputs():
 
 
 def test_landmarksConstellationAligner_outputs():
-    output_map = dict(
-        outputLandmarksPaired=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(outputLandmarksPaired=dict(extensions=None))
     outputs = landmarksConstellationAligner.output_spec()
 
     for key, metadata in list(output_map.items()):

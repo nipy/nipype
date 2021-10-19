@@ -3,15 +3,7 @@ from ..base import CommandLineDtitk
 
 
 def test_CommandLineDtitk_inputs():
-    input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-    )
+    input_map = dict(args=dict(argstr="%s"), environ=dict(nohash=True, usedefault=True))
     inputs = CommandLineDtitk.input_spec()
 
     for key, metadata in list(input_map.items()):

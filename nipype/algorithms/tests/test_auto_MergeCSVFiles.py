@@ -7,16 +7,9 @@ def test_MergeCSVFiles_inputs():
         column_headings=dict(),
         extra_column_heading=dict(),
         extra_field=dict(),
-        in_files=dict(
-            mandatory=True,
-        ),
-        out_file=dict(
-            extensions=None,
-            usedefault=True,
-        ),
-        row_heading_title=dict(
-            usedefault=True,
-        ),
+        in_files=dict(mandatory=True),
+        out_file=dict(extensions=None, usedefault=True),
+        row_heading_title=dict(usedefault=True),
         row_headings=dict(),
     )
     inputs = MergeCSVFiles.input_spec()
@@ -27,11 +20,7 @@ def test_MergeCSVFiles_inputs():
 
 
 def test_MergeCSVFiles_outputs():
-    output_map = dict(
-        csv_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(csv_file=dict(extensions=None))
     outputs = MergeCSVFiles.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -4,69 +4,28 @@ from ..brains import FindCenterOfBrain
 
 def test_FindCenterOfBrain_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        axis=dict(
-            argstr="--axis %d",
-        ),
-        backgroundValue=dict(
-            argstr="--backgroundValue %d",
-        ),
-        clippedImageMask=dict(
-            argstr="--clippedImageMask %s",
-            hash_files=False,
-        ),
-        closingSize=dict(
-            argstr="--closingSize %d",
-        ),
+        args=dict(argstr="%s"),
+        axis=dict(argstr="--axis %d"),
+        backgroundValue=dict(argstr="--backgroundValue %d"),
+        clippedImageMask=dict(argstr="--clippedImageMask %s", hash_files=False),
+        closingSize=dict(argstr="--closingSize %d"),
         debugAfterGridComputationsForegroundImage=dict(
-            argstr="--debugAfterGridComputationsForegroundImage %s",
-            hash_files=False,
+            argstr="--debugAfterGridComputationsForegroundImage %s", hash_files=False
         ),
         debugClippedImageMask=dict(
-            argstr="--debugClippedImageMask %s",
-            hash_files=False,
+            argstr="--debugClippedImageMask %s", hash_files=False
         ),
-        debugDistanceImage=dict(
-            argstr="--debugDistanceImage %s",
-            hash_files=False,
-        ),
-        debugGridImage=dict(
-            argstr="--debugGridImage %s",
-            hash_files=False,
-        ),
-        debugTrimmedImage=dict(
-            argstr="--debugTrimmedImage %s",
-            hash_files=False,
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        generateDebugImages=dict(
-            argstr="--generateDebugImages ",
-        ),
-        headSizeEstimate=dict(
-            argstr="--headSizeEstimate %f",
-        ),
-        headSizeLimit=dict(
-            argstr="--headSizeLimit %f",
-        ),
-        imageMask=dict(
-            argstr="--imageMask %s",
-            extensions=None,
-        ),
-        inputVolume=dict(
-            argstr="--inputVolume %s",
-            extensions=None,
-        ),
-        maximize=dict(
-            argstr="--maximize ",
-        ),
-        otsuPercentileThreshold=dict(
-            argstr="--otsuPercentileThreshold %f",
-        ),
+        debugDistanceImage=dict(argstr="--debugDistanceImage %s", hash_files=False),
+        debugGridImage=dict(argstr="--debugGridImage %s", hash_files=False),
+        debugTrimmedImage=dict(argstr="--debugTrimmedImage %s", hash_files=False),
+        environ=dict(nohash=True, usedefault=True),
+        generateDebugImages=dict(argstr="--generateDebugImages "),
+        headSizeEstimate=dict(argstr="--headSizeEstimate %f"),
+        headSizeLimit=dict(argstr="--headSizeLimit %f"),
+        imageMask=dict(argstr="--imageMask %s", extensions=None),
+        inputVolume=dict(argstr="--inputVolume %s", extensions=None),
+        maximize=dict(argstr="--maximize "),
+        otsuPercentileThreshold=dict(argstr="--otsuPercentileThreshold %f"),
     )
     inputs = FindCenterOfBrain.input_spec()
 
@@ -77,24 +36,12 @@ def test_FindCenterOfBrain_inputs():
 
 def test_FindCenterOfBrain_outputs():
     output_map = dict(
-        clippedImageMask=dict(
-            extensions=None,
-        ),
-        debugAfterGridComputationsForegroundImage=dict(
-            extensions=None,
-        ),
-        debugClippedImageMask=dict(
-            extensions=None,
-        ),
-        debugDistanceImage=dict(
-            extensions=None,
-        ),
-        debugGridImage=dict(
-            extensions=None,
-        ),
-        debugTrimmedImage=dict(
-            extensions=None,
-        ),
+        clippedImageMask=dict(extensions=None),
+        debugAfterGridComputationsForegroundImage=dict(extensions=None),
+        debugClippedImageMask=dict(extensions=None),
+        debugDistanceImage=dict(extensions=None),
+        debugGridImage=dict(extensions=None),
+        debugTrimmedImage=dict(extensions=None),
     )
     outputs = FindCenterOfBrain.output_spec()
 

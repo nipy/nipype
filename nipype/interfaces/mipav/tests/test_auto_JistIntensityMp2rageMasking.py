@@ -4,63 +4,22 @@ from ..developer import JistIntensityMp2rageMasking
 
 def test_JistIntensityMp2rageMasking_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        inBackground=dict(
-            argstr="--inBackground %s",
-        ),
-        inMasking=dict(
-            argstr="--inMasking %s",
-        ),
-        inQuantitative=dict(
-            argstr="--inQuantitative %s",
-            extensions=None,
-        ),
-        inSecond=dict(
-            argstr="--inSecond %s",
-            extensions=None,
-        ),
-        inSkip=dict(
-            argstr="--inSkip %s",
-        ),
-        inT1weighted=dict(
-            argstr="--inT1weighted %s",
-            extensions=None,
-        ),
-        null=dict(
-            argstr="--null %s",
-        ),
-        outMasked=dict(
-            argstr="--outMasked_T1_Map %s",
-            hash_files=False,
-        ),
-        outMasked2=dict(
-            argstr="--outMasked_T1weighted %s",
-            hash_files=False,
-        ),
-        outSignal=dict(
-            argstr="--outSignal_Proba %s",
-            hash_files=False,
-        ),
-        outSignal2=dict(
-            argstr="--outSignal_Mask %s",
-            hash_files=False,
-        ),
-        xDefaultMem=dict(
-            argstr="-xDefaultMem %d",
-        ),
-        xMaxProcess=dict(
-            argstr="-xMaxProcess %d",
-            usedefault=True,
-        ),
-        xPrefExt=dict(
-            argstr="--xPrefExt %s",
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        inBackground=dict(argstr="--inBackground %s"),
+        inMasking=dict(argstr="--inMasking %s"),
+        inQuantitative=dict(argstr="--inQuantitative %s", extensions=None),
+        inSecond=dict(argstr="--inSecond %s", extensions=None),
+        inSkip=dict(argstr="--inSkip %s"),
+        inT1weighted=dict(argstr="--inT1weighted %s", extensions=None),
+        null=dict(argstr="--null %s"),
+        outMasked=dict(argstr="--outMasked_T1_Map %s", hash_files=False),
+        outMasked2=dict(argstr="--outMasked_T1weighted %s", hash_files=False),
+        outSignal=dict(argstr="--outSignal_Proba %s", hash_files=False),
+        outSignal2=dict(argstr="--outSignal_Mask %s", hash_files=False),
+        xDefaultMem=dict(argstr="-xDefaultMem %d"),
+        xMaxProcess=dict(argstr="-xMaxProcess %d", usedefault=True),
+        xPrefExt=dict(argstr="--xPrefExt %s"),
     )
     inputs = JistIntensityMp2rageMasking.input_spec()
 
@@ -71,18 +30,10 @@ def test_JistIntensityMp2rageMasking_inputs():
 
 def test_JistIntensityMp2rageMasking_outputs():
     output_map = dict(
-        outMasked=dict(
-            extensions=None,
-        ),
-        outMasked2=dict(
-            extensions=None,
-        ),
-        outSignal=dict(
-            extensions=None,
-        ),
-        outSignal2=dict(
-            extensions=None,
-        ),
+        outMasked=dict(extensions=None),
+        outMasked2=dict(extensions=None),
+        outSignal=dict(extensions=None),
+        outSignal2=dict(extensions=None),
     )
     outputs = JistIntensityMp2rageMasking.output_spec()
 

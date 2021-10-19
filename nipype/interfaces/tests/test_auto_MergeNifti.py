@@ -4,13 +4,9 @@ from ..dcmstack import MergeNifti
 
 def test_MergeNifti_inputs():
     input_map = dict(
-        in_files=dict(
-            mandatory=True,
-        ),
+        in_files=dict(mandatory=True),
         merge_dim=dict(),
-        out_ext=dict(
-            usedefault=True,
-        ),
+        out_ext=dict(usedefault=True),
         out_format=dict(),
         out_path=dict(),
         sort_order=dict(),
@@ -23,11 +19,7 @@ def test_MergeNifti_inputs():
 
 
 def test_MergeNifti_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = MergeNifti.output_spec()
 
     for key, metadata in list(output_map.items()):

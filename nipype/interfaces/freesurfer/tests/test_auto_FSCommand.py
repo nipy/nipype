@@ -4,13 +4,8 @@ from ..base import FSCommand
 
 def test_FSCommand_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
         subjects_dir=dict(),
     )
     inputs = FSCommand.input_spec()

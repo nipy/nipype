@@ -7,13 +7,8 @@ def test_ComputeMask_inputs():
         M=dict(),
         cc=dict(),
         m=dict(),
-        mean_volume=dict(
-            extensions=None,
-            mandatory=True,
-        ),
-        reference_volume=dict(
-            extensions=None,
-        ),
+        mean_volume=dict(extensions=None, mandatory=True),
+        reference_volume=dict(extensions=None),
     )
     inputs = ComputeMask.input_spec()
 
@@ -23,11 +18,7 @@ def test_ComputeMask_inputs():
 
 
 def test_ComputeMask_outputs():
-    output_map = dict(
-        brain_mask=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(brain_mask=dict(extensions=None))
     outputs = ComputeMask.output_spec()
 
     for key, metadata in list(output_map.items()):

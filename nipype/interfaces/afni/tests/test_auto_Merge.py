@@ -4,30 +4,12 @@ from ..utils import Merge
 
 def test_Merge_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        blurfwhm=dict(
-            argstr="-1blur_fwhm %d",
-            units="mm",
-        ),
-        doall=dict(
-            argstr="-doall",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        in_files=dict(
-            argstr="%s",
-            copyfile=False,
-            mandatory=True,
-            position=-1,
-        ),
-        num_threads=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s"),
+        blurfwhm=dict(argstr="-1blur_fwhm %d", units="mm"),
+        doall=dict(argstr="-doall"),
+        environ=dict(nohash=True, usedefault=True),
+        in_files=dict(argstr="%s", copyfile=False, mandatory=True, position=-1),
+        num_threads=dict(nohash=True, usedefault=True),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -44,11 +26,7 @@ def test_Merge_inputs():
 
 
 def test_Merge_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = Merge.output_spec()
 
     for key, metadata in list(output_map.items()):

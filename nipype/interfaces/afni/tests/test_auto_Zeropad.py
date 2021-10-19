@@ -4,79 +4,30 @@ from ..utils import Zeropad
 
 def test_Zeropad_inputs():
     input_map = dict(
-        A=dict(
-            argstr="-A %i",
-            xor=["master"],
-        ),
-        AP=dict(
-            argstr="-AP %i",
-            xor=["master"],
-        ),
-        I=dict(
-            argstr="-I %i",
-            xor=["master"],
-        ),
-        IS=dict(
-            argstr="-IS %i",
-            xor=["master"],
-        ),
-        L=dict(
-            argstr="-L %i",
-            xor=["master"],
-        ),
-        P=dict(
-            argstr="-P %i",
-            xor=["master"],
-        ),
-        R=dict(
-            argstr="-R %i",
-            xor=["master"],
-        ),
-        RL=dict(
-            argstr="-RL %i",
-            xor=["master"],
-        ),
-        S=dict(
-            argstr="-S %i",
-            xor=["master"],
-        ),
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        A=dict(argstr="-A %i", xor=["master"]),
+        AP=dict(argstr="-AP %i", xor=["master"]),
+        I=dict(argstr="-I %i", xor=["master"]),
+        IS=dict(argstr="-IS %i", xor=["master"]),
+        L=dict(argstr="-L %i", xor=["master"]),
+        P=dict(argstr="-P %i", xor=["master"]),
+        R=dict(argstr="-R %i", xor=["master"]),
+        RL=dict(argstr="-RL %i", xor=["master"]),
+        S=dict(argstr="-S %i", xor=["master"]),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
         in_files=dict(
-            argstr="%s",
-            copyfile=False,
-            extensions=None,
-            mandatory=True,
-            position=-1,
+            argstr="%s", copyfile=False, extensions=None, mandatory=True, position=-1
         ),
         master=dict(
             argstr="-master %s",
             extensions=None,
             xor=["I", "S", "A", "P", "L", "R", "z", "RL", "AP", "IS", "mm"],
         ),
-        mm=dict(
-            argstr="-mm",
-            xor=["master"],
-        ),
-        num_threads=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        out_file=dict(
-            argstr="-prefix %s",
-            extensions=None,
-            name_template="zeropad",
-        ),
+        mm=dict(argstr="-mm", xor=["master"]),
+        num_threads=dict(nohash=True, usedefault=True),
+        out_file=dict(argstr="-prefix %s", extensions=None, name_template="zeropad"),
         outputtype=dict(),
-        z=dict(
-            argstr="-z %i",
-            xor=["master"],
-        ),
+        z=dict(argstr="-z %i", xor=["master"]),
     )
     inputs = Zeropad.input_spec()
 
@@ -86,11 +37,7 @@ def test_Zeropad_inputs():
 
 
 def test_Zeropad_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = Zeropad.output_spec()
 
     for key, metadata in list(output_map.items()):

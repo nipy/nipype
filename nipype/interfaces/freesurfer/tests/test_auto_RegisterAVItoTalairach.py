@@ -4,38 +4,13 @@ from ..registration import RegisterAVItoTalairach
 
 def test_RegisterAVItoTalairach_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        in_file=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=0,
-        ),
-        out_file=dict(
-            argstr="%s",
-            extensions=None,
-            position=3,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=0),
+        out_file=dict(argstr="%s", extensions=None, position=3, usedefault=True),
         subjects_dir=dict(),
-        target=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=1,
-        ),
-        vox2vox=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=2,
-        ),
+        target=dict(argstr="%s", extensions=None, mandatory=True, position=1),
+        vox2vox=dict(argstr="%s", extensions=None, mandatory=True, position=2),
     )
     inputs = RegisterAVItoTalairach.input_spec()
 
@@ -46,13 +21,7 @@ def test_RegisterAVItoTalairach_inputs():
 
 def test_RegisterAVItoTalairach_outputs():
     output_map = dict(
-        log_file=dict(
-            extensions=None,
-            usedefault=True,
-        ),
-        out_file=dict(
-            extensions=None,
-        ),
+        log_file=dict(extensions=None, usedefault=True), out_file=dict(extensions=None)
     )
     outputs = RegisterAVItoTalairach.output_spec()
 

@@ -4,9 +4,7 @@ from ..utils import CopyGeom
 
 def test_CopyGeom_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
+        args=dict(argstr="%s"),
         dest_file=dict(
             argstr="%s",
             copyfile=True,
@@ -17,20 +15,9 @@ def test_CopyGeom_inputs():
             output_name="out_file",
             position=1,
         ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        ignore_dims=dict(
-            argstr="-d",
-            position="-1",
-        ),
-        in_file=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=0,
-        ),
+        environ=dict(nohash=True, usedefault=True),
+        ignore_dims=dict(argstr="-d", position="-1"),
+        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=0),
         output_type=dict(),
     )
     inputs = CopyGeom.input_spec()
@@ -41,11 +28,7 @@ def test_CopyGeom_inputs():
 
 
 def test_CopyGeom_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = CopyGeom.output_spec()
 
     for key, metadata in list(output_map.items()):

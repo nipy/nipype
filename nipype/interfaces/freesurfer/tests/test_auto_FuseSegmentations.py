@@ -4,40 +4,15 @@ from ..longitudinal import FuseSegmentations
 
 def test_FuseSegmentations_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        in_norms=dict(
-            argstr="-n %s",
-            mandatory=True,
-        ),
-        in_segmentations=dict(
-            argstr="-a %s",
-            mandatory=True,
-        ),
-        in_segmentations_noCC=dict(
-            argstr="-c %s",
-            mandatory=True,
-        ),
-        out_file=dict(
-            extensions=None,
-            mandatory=True,
-            position=-1,
-        ),
-        subject_id=dict(
-            argstr="%s",
-            position=-3,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        in_norms=dict(argstr="-n %s", mandatory=True),
+        in_segmentations=dict(argstr="-a %s", mandatory=True),
+        in_segmentations_noCC=dict(argstr="-c %s", mandatory=True),
+        out_file=dict(extensions=None, mandatory=True, position=-1),
+        subject_id=dict(argstr="%s", position=-3),
         subjects_dir=dict(),
-        timepoints=dict(
-            argstr="%s",
-            mandatory=True,
-            position=-2,
-        ),
+        timepoints=dict(argstr="%s", mandatory=True, position=-2),
     )
     inputs = FuseSegmentations.input_spec()
 
@@ -47,11 +22,7 @@ def test_FuseSegmentations_inputs():
 
 
 def test_FuseSegmentations_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = FuseSegmentations.output_spec()
 
     for key, metadata in list(output_map.items()):

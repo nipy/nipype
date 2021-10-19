@@ -4,35 +4,15 @@ from ..dti import DistanceMap
 
 def test_DistanceMap_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
+        args=dict(argstr="%s"),
         distance_map=dict(
-            argstr="--out=%s",
-            extensions=None,
-            genfile=True,
-            hash_files=False,
+            argstr="--out=%s", extensions=None, genfile=True, hash_files=False
         ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        in_file=dict(
-            argstr="--in=%s",
-            extensions=None,
-            mandatory=True,
-        ),
-        invert_input=dict(
-            argstr="--invert",
-        ),
-        local_max_file=dict(
-            argstr="--localmax=%s",
-            hash_files=False,
-        ),
-        mask_file=dict(
-            argstr="--mask=%s",
-            extensions=None,
-        ),
+        environ=dict(nohash=True, usedefault=True),
+        in_file=dict(argstr="--in=%s", extensions=None, mandatory=True),
+        invert_input=dict(argstr="--invert"),
+        local_max_file=dict(argstr="--localmax=%s", hash_files=False),
+        mask_file=dict(argstr="--mask=%s", extensions=None),
         output_type=dict(),
     )
     inputs = DistanceMap.input_spec()
@@ -44,12 +24,7 @@ def test_DistanceMap_inputs():
 
 def test_DistanceMap_outputs():
     output_map = dict(
-        distance_map=dict(
-            extensions=None,
-        ),
-        local_max_file=dict(
-            extensions=None,
-        ),
+        distance_map=dict(extensions=None), local_max_file=dict(extensions=None)
     )
     outputs = DistanceMap.output_spec()
 

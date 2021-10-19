@@ -4,46 +4,19 @@ from ..utils import Notes
 
 def test_Notes_inputs():
     input_map = dict(
-        add=dict(
-            argstr='-a "%s"',
-        ),
-        add_history=dict(
-            argstr='-h "%s"',
-            xor=["rep_history"],
-        ),
-        args=dict(
-            argstr="%s",
-        ),
-        delete=dict(
-            argstr="-d %d",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        add=dict(argstr='-a "%s"'),
+        add_history=dict(argstr='-h "%s"', xor=["rep_history"]),
+        args=dict(argstr="%s"),
+        delete=dict(argstr="-d %d"),
+        environ=dict(nohash=True, usedefault=True),
         in_file=dict(
-            argstr="%s",
-            copyfile=False,
-            extensions=None,
-            mandatory=True,
-            position=-1,
+            argstr="%s", copyfile=False, extensions=None, mandatory=True, position=-1
         ),
-        num_threads=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        out_file=dict(
-            argstr="%s",
-            extensions=None,
-        ),
+        num_threads=dict(nohash=True, usedefault=True),
+        out_file=dict(argstr="%s", extensions=None),
         outputtype=dict(),
-        rep_history=dict(
-            argstr='-HH "%s"',
-            xor=["add_history"],
-        ),
-        ses=dict(
-            argstr="-ses",
-        ),
+        rep_history=dict(argstr='-HH "%s"', xor=["add_history"]),
+        ses=dict(argstr="-ses"),
     )
     inputs = Notes.input_spec()
 
@@ -53,11 +26,7 @@ def test_Notes_inputs():
 
 
 def test_Notes_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = Notes.output_spec()
 
     for key, metadata in list(output_map.items()):

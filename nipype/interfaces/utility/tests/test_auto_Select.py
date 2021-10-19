@@ -3,14 +3,7 @@ from ..base import Select
 
 
 def test_Select_inputs():
-    input_map = dict(
-        index=dict(
-            mandatory=True,
-        ),
-        inlist=dict(
-            mandatory=True,
-        ),
-    )
+    input_map = dict(index=dict(mandatory=True), inlist=dict(mandatory=True))
     inputs = Select.input_spec()
 
     for key, metadata in list(input_map.items()):
@@ -19,9 +12,7 @@ def test_Select_inputs():
 
 
 def test_Select_outputs():
-    output_map = dict(
-        out=dict(),
-    )
+    output_map = dict(out=dict())
     outputs = Select.output_spec()
 
     for key, metadata in list(output_map.items()):

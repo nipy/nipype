@@ -4,32 +4,12 @@ from ..minc import XfmInvert
 
 def test_XfmInvert_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        clobber=dict(
-            argstr="-clobber",
-            usedefault=True,
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        input_file=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=-2,
-        ),
-        output_file=dict(
-            argstr="%s",
-            extensions=None,
-            genfile=True,
-            position=-1,
-        ),
-        verbose=dict(
-            argstr="-verbose",
-        ),
+        args=dict(argstr="%s"),
+        clobber=dict(argstr="-clobber", usedefault=True),
+        environ=dict(nohash=True, usedefault=True),
+        input_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2),
+        output_file=dict(argstr="%s", extensions=None, genfile=True, position=-1),
+        verbose=dict(argstr="-verbose"),
     )
     inputs = XfmInvert.input_spec()
 
@@ -40,12 +20,7 @@ def test_XfmInvert_inputs():
 
 def test_XfmInvert_outputs():
     output_map = dict(
-        output_file=dict(
-            extensions=None,
-        ),
-        output_grid=dict(
-            extensions=None,
-        ),
+        output_file=dict(extensions=None), output_grid=dict(extensions=None)
     )
     outputs = XfmInvert.output_spec()
 

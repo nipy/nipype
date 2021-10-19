@@ -4,37 +4,16 @@ from ..preprocess import DegreeCentrality
 
 def test_DegreeCentrality_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        autoclip=dict(
-            argstr="-autoclip",
-        ),
-        automask=dict(
-            argstr="-automask",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s"),
+        autoclip=dict(argstr="-autoclip"),
+        automask=dict(argstr="-automask"),
+        environ=dict(nohash=True, usedefault=True),
         in_file=dict(
-            argstr="%s",
-            copyfile=False,
-            extensions=None,
-            mandatory=True,
-            position=-1,
+            argstr="%s", copyfile=False, extensions=None, mandatory=True, position=-1
         ),
-        mask=dict(
-            argstr="-mask %s",
-            extensions=None,
-        ),
-        num_threads=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        oned_file=dict(
-            argstr="-out1D %s",
-        ),
+        mask=dict(argstr="-mask %s", extensions=None),
+        num_threads=dict(nohash=True, usedefault=True),
+        oned_file=dict(argstr="-out1D %s"),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -42,15 +21,9 @@ def test_DegreeCentrality_inputs():
             name_template="%s_afni",
         ),
         outputtype=dict(),
-        polort=dict(
-            argstr="-polort %d",
-        ),
-        sparsity=dict(
-            argstr="-sparsity %f",
-        ),
-        thresh=dict(
-            argstr="-thresh %f",
-        ),
+        polort=dict(argstr="-polort %d"),
+        sparsity=dict(argstr="-sparsity %f"),
+        thresh=dict(argstr="-thresh %f"),
     )
     inputs = DegreeCentrality.input_spec()
 
@@ -60,14 +33,7 @@ def test_DegreeCentrality_inputs():
 
 
 def test_DegreeCentrality_outputs():
-    output_map = dict(
-        oned_file=dict(
-            extensions=None,
-        ),
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(oned_file=dict(extensions=None), out_file=dict(extensions=None))
     outputs = DegreeCentrality.output_spec()
 
     for key, metadata in list(output_map.items()):

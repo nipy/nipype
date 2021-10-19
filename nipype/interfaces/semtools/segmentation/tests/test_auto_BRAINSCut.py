@@ -4,66 +4,27 @@ from ..specialized import BRAINSCut
 
 def test_BRAINSCut_inputs():
     input_map = dict(
-        NoTrainingVectorShuffling=dict(
-            argstr="--NoTrainingVectorShuffling ",
-        ),
-        applyModel=dict(
-            argstr="--applyModel ",
-        ),
-        args=dict(
-            argstr="%s",
-        ),
-        computeSSEOn=dict(
-            argstr="--computeSSEOn ",
-        ),
-        createVectors=dict(
-            argstr="--createVectors ",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        generateProbability=dict(
-            argstr="--generateProbability ",
-        ),
-        histogramEqualization=dict(
-            argstr="--histogramEqualization ",
-        ),
-        method=dict(
-            argstr="--method %s",
-        ),
+        NoTrainingVectorShuffling=dict(argstr="--NoTrainingVectorShuffling "),
+        applyModel=dict(argstr="--applyModel "),
+        args=dict(argstr="%s"),
+        computeSSEOn=dict(argstr="--computeSSEOn "),
+        createVectors=dict(argstr="--createVectors "),
+        environ=dict(nohash=True, usedefault=True),
+        generateProbability=dict(argstr="--generateProbability "),
+        histogramEqualization=dict(argstr="--histogramEqualization "),
+        method=dict(argstr="--method %s"),
         modelConfigurationFilename=dict(
-            argstr="--modelConfigurationFilename %s",
-            extensions=None,
+            argstr="--modelConfigurationFilename %s", extensions=None
         ),
-        modelFilename=dict(
-            argstr="--modelFilename %s",
-        ),
-        multiStructureThreshold=dict(
-            argstr="--multiStructureThreshold ",
-        ),
-        netConfiguration=dict(
-            argstr="--netConfiguration %s",
-            extensions=None,
-        ),
-        numberOfTrees=dict(
-            argstr="--numberOfTrees %d",
-        ),
-        randomTreeDepth=dict(
-            argstr="--randomTreeDepth %d",
-        ),
-        trainModel=dict(
-            argstr="--trainModel ",
-        ),
-        trainModelStartIndex=dict(
-            argstr="--trainModelStartIndex %d",
-        ),
-        validate=dict(
-            argstr="--validate ",
-        ),
-        verbose=dict(
-            argstr="--verbose %d",
-        ),
+        modelFilename=dict(argstr="--modelFilename %s"),
+        multiStructureThreshold=dict(argstr="--multiStructureThreshold "),
+        netConfiguration=dict(argstr="--netConfiguration %s", extensions=None),
+        numberOfTrees=dict(argstr="--numberOfTrees %d"),
+        randomTreeDepth=dict(argstr="--randomTreeDepth %d"),
+        trainModel=dict(argstr="--trainModel "),
+        trainModelStartIndex=dict(argstr="--trainModelStartIndex %d"),
+        validate=dict(argstr="--validate "),
+        verbose=dict(argstr="--verbose %d"),
     )
     inputs = BRAINSCut.input_spec()
 

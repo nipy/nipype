@@ -4,56 +4,19 @@ from ..odf import MESD
 
 def test_MESD_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        bgmask=dict(
-            argstr="-bgmask %s",
-            extensions=None,
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        fastmesd=dict(
-            argstr="-fastmesd",
-            requires=["mepointset"],
-        ),
+        args=dict(argstr="%s"),
+        bgmask=dict(argstr="-bgmask %s", extensions=None),
+        environ=dict(nohash=True, usedefault=True),
+        fastmesd=dict(argstr="-fastmesd", requires=["mepointset"]),
         in_file=dict(
-            argstr="-inputfile %s",
-            extensions=None,
-            mandatory=True,
-            position=1,
+            argstr="-inputfile %s", extensions=None, mandatory=True, position=1
         ),
-        inputdatatype=dict(
-            argstr="-inputdatatype %s",
-        ),
-        inverter=dict(
-            argstr="-filter %s",
-            mandatory=True,
-            position=2,
-        ),
-        inverter_param=dict(
-            argstr="%f",
-            mandatory=True,
-            position=3,
-            units="NA",
-        ),
-        mepointset=dict(
-            argstr="-mepointset %d",
-            units="NA",
-        ),
-        out_file=dict(
-            argstr="> %s",
-            extensions=None,
-            genfile=True,
-            position=-1,
-        ),
-        scheme_file=dict(
-            argstr="-schemefile %s",
-            extensions=None,
-            mandatory=True,
-        ),
+        inputdatatype=dict(argstr="-inputdatatype %s"),
+        inverter=dict(argstr="-filter %s", mandatory=True, position=2),
+        inverter_param=dict(argstr="%f", mandatory=True, position=3, units="NA"),
+        mepointset=dict(argstr="-mepointset %d", units="NA"),
+        out_file=dict(argstr="> %s", extensions=None, genfile=True, position=-1),
+        scheme_file=dict(argstr="-schemefile %s", extensions=None, mandatory=True),
     )
     inputs = MESD.input_spec()
 
@@ -63,11 +26,7 @@ def test_MESD_inputs():
 
 
 def test_MESD_outputs():
-    output_map = dict(
-        mesd_data=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(mesd_data=dict(extensions=None))
     outputs = MESD.output_spec()
 
     for key, metadata in list(output_map.items()):

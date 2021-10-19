@@ -4,15 +4,9 @@ from ..base import Merge
 
 def test_Merge_inputs():
     input_map = dict(
-        axis=dict(
-            usedefault=True,
-        ),
-        no_flatten=dict(
-            usedefault=True,
-        ),
-        ravel_inputs=dict(
-            usedefault=True,
-        ),
+        axis=dict(usedefault=True),
+        no_flatten=dict(usedefault=True),
+        ravel_inputs=dict(usedefault=True),
     )
     inputs = Merge.input_spec()
 
@@ -22,9 +16,7 @@ def test_Merge_inputs():
 
 
 def test_Merge_outputs():
-    output_map = dict(
-        out=dict(),
-    )
+    output_map = dict(out=dict())
     outputs = Merge.output_spec()
 
     for key, metadata in list(output_map.items()):

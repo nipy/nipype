@@ -4,27 +4,13 @@ from ..utils import ZCutUp
 
 def test_ZCutUp_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
         in_file=dict(
-            argstr="%s",
-            copyfile=False,
-            extensions=None,
-            mandatory=True,
-            position=-1,
+            argstr="%s", copyfile=False, extensions=None, mandatory=True, position=-1
         ),
-        keep=dict(
-            argstr="-keep %s",
-        ),
-        num_threads=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        keep=dict(argstr="-keep %s"),
+        num_threads=dict(nohash=True, usedefault=True),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -41,11 +27,7 @@ def test_ZCutUp_inputs():
 
 
 def test_ZCutUp_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = ZCutUp.output_spec()
 
     for key, metadata in list(output_map.items()):

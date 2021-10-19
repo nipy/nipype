@@ -4,13 +4,8 @@ from ..calib import SFPICOCalibData
 
 def test_SFPICOCalibData_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
         info_file=dict(
             argstr="-infooutputfile %s",
             extensions=None,
@@ -18,61 +13,19 @@ def test_SFPICOCalibData_inputs():
             hash_files=False,
             mandatory=True,
         ),
-        onedtfarange=dict(
-            argstr="-onedtfarange %s",
-            units="NA",
-        ),
-        onedtfastep=dict(
-            argstr="-onedtfastep %f",
-            units="NA",
-        ),
-        out_file=dict(
-            argstr="> %s",
-            extensions=None,
-            genfile=True,
-            position=-1,
-        ),
-        scheme_file=dict(
-            argstr="-schemefile %s",
-            extensions=None,
-            mandatory=True,
-        ),
-        seed=dict(
-            argstr="-seed %f",
-            units="NA",
-        ),
-        snr=dict(
-            argstr="-snr %f",
-            units="NA",
-        ),
-        trace=dict(
-            argstr="-trace %f",
-            units="NA",
-        ),
-        twodtanglerange=dict(
-            argstr="-twodtanglerange %s",
-            units="NA",
-        ),
-        twodtanglestep=dict(
-            argstr="-twodtanglestep %f",
-            units="NA",
-        ),
-        twodtfarange=dict(
-            argstr="-twodtfarange %s",
-            units="NA",
-        ),
-        twodtfastep=dict(
-            argstr="-twodtfastep %f",
-            units="NA",
-        ),
-        twodtmixmax=dict(
-            argstr="-twodtmixmax %f",
-            units="NA",
-        ),
-        twodtmixstep=dict(
-            argstr="-twodtmixstep %f",
-            units="NA",
-        ),
+        onedtfarange=dict(argstr="-onedtfarange %s", units="NA"),
+        onedtfastep=dict(argstr="-onedtfastep %f", units="NA"),
+        out_file=dict(argstr="> %s", extensions=None, genfile=True, position=-1),
+        scheme_file=dict(argstr="-schemefile %s", extensions=None, mandatory=True),
+        seed=dict(argstr="-seed %f", units="NA"),
+        snr=dict(argstr="-snr %f", units="NA"),
+        trace=dict(argstr="-trace %f", units="NA"),
+        twodtanglerange=dict(argstr="-twodtanglerange %s", units="NA"),
+        twodtanglestep=dict(argstr="-twodtanglestep %f", units="NA"),
+        twodtfarange=dict(argstr="-twodtfarange %s", units="NA"),
+        twodtfastep=dict(argstr="-twodtfastep %f", units="NA"),
+        twodtmixmax=dict(argstr="-twodtmixmax %f", units="NA"),
+        twodtmixstep=dict(argstr="-twodtmixstep %f", units="NA"),
     )
     inputs = SFPICOCalibData.input_spec()
 
@@ -82,14 +35,7 @@ def test_SFPICOCalibData_inputs():
 
 
 def test_SFPICOCalibData_outputs():
-    output_map = dict(
-        PICOCalib=dict(
-            extensions=None,
-        ),
-        calib_info=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(PICOCalib=dict(extensions=None), calib_info=dict(extensions=None))
     outputs = SFPICOCalibData.output_spec()
 
     for key, metadata in list(output_map.items()):

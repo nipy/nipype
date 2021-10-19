@@ -4,23 +4,11 @@ from ..preprocess import BlurInMask
 
 def test_BlurInMask_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        automask=dict(
-            argstr="-automask",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        float_out=dict(
-            argstr="-float",
-        ),
-        fwhm=dict(
-            argstr="-FWHM %f",
-            mandatory=True,
-        ),
+        args=dict(argstr="%s"),
+        automask=dict(argstr="-automask"),
+        environ=dict(nohash=True, usedefault=True),
+        float_out=dict(argstr="-float"),
+        fwhm=dict(argstr="-FWHM %f", mandatory=True),
         in_file=dict(
             argstr="-input %s",
             copyfile=False,
@@ -28,22 +16,10 @@ def test_BlurInMask_inputs():
             mandatory=True,
             position=1,
         ),
-        mask=dict(
-            argstr="-mask %s",
-            extensions=None,
-        ),
-        multimask=dict(
-            argstr="-Mmask %s",
-            extensions=None,
-        ),
-        num_threads=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        options=dict(
-            argstr="%s",
-            position=2,
-        ),
+        mask=dict(argstr="-mask %s", extensions=None),
+        multimask=dict(argstr="-Mmask %s", extensions=None),
+        num_threads=dict(nohash=True, usedefault=True),
+        options=dict(argstr="%s", position=2),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -52,9 +28,7 @@ def test_BlurInMask_inputs():
             position=-1,
         ),
         outputtype=dict(),
-        preserve=dict(
-            argstr="-preserve",
-        ),
+        preserve=dict(argstr="-preserve"),
     )
     inputs = BlurInMask.input_spec()
 
@@ -64,11 +38,7 @@ def test_BlurInMask_inputs():
 
 
 def test_BlurInMask_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = BlurInMask.output_spec()
 
     for key, metadata in list(output_map.items()):

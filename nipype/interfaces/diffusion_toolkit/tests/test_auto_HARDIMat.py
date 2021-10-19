@@ -4,50 +4,17 @@ from ..odf import HARDIMat
 
 def test_HARDIMat_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        bvals=dict(
-            extensions=None,
-            mandatory=True,
-        ),
-        bvecs=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=1,
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        image_info=dict(
-            argstr="-info %s",
-            extensions=None,
-        ),
-        image_orientation_vectors=dict(
-            argstr="-iop %f",
-        ),
-        oblique_correction=dict(
-            argstr="-oc",
-        ),
-        odf_file=dict(
-            argstr="-odf %s",
-            extensions=None,
-        ),
-        order=dict(
-            argstr="-order %s",
-        ),
-        out_file=dict(
-            argstr="%s",
-            extensions=None,
-            position=2,
-            usedefault=True,
-        ),
-        reference_file=dict(
-            argstr="-ref %s",
-            extensions=None,
-        ),
+        args=dict(argstr="%s"),
+        bvals=dict(extensions=None, mandatory=True),
+        bvecs=dict(argstr="%s", extensions=None, mandatory=True, position=1),
+        environ=dict(nohash=True, usedefault=True),
+        image_info=dict(argstr="-info %s", extensions=None),
+        image_orientation_vectors=dict(argstr="-iop %f"),
+        oblique_correction=dict(argstr="-oc"),
+        odf_file=dict(argstr="-odf %s", extensions=None),
+        order=dict(argstr="-order %s"),
+        out_file=dict(argstr="%s", extensions=None, position=2, usedefault=True),
+        reference_file=dict(argstr="-ref %s", extensions=None),
     )
     inputs = HARDIMat.input_spec()
 
@@ -57,11 +24,7 @@ def test_HARDIMat_inputs():
 
 
 def test_HARDIMat_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = HARDIMat.output_spec()
 
     for key, metadata in list(output_map.items()):

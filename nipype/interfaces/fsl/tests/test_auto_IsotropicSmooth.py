@@ -4,51 +4,18 @@ from ..maths import IsotropicSmooth
 
 def test_IsotropicSmooth_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        fwhm=dict(
-            argstr="-s %.5f",
-            mandatory=True,
-            position=4,
-            xor=["sigma"],
-        ),
-        in_file=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=2,
-        ),
-        internal_datatype=dict(
-            argstr="-dt %s",
-            position=1,
-        ),
-        nan2zeros=dict(
-            argstr="-nan",
-            position=3,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        fwhm=dict(argstr="-s %.5f", mandatory=True, position=4, xor=["sigma"]),
+        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=2),
+        internal_datatype=dict(argstr="-dt %s", position=1),
+        nan2zeros=dict(argstr="-nan", position=3),
         out_file=dict(
-            argstr="%s",
-            extensions=None,
-            genfile=True,
-            hash_files=False,
-            position=-2,
+            argstr="%s", extensions=None, genfile=True, hash_files=False, position=-2
         ),
-        output_datatype=dict(
-            argstr="-odt %s",
-            position=-1,
-        ),
+        output_datatype=dict(argstr="-odt %s", position=-1),
         output_type=dict(),
-        sigma=dict(
-            argstr="-s %.5f",
-            mandatory=True,
-            position=4,
-            xor=["fwhm"],
-        ),
+        sigma=dict(argstr="-s %.5f", mandatory=True, position=4, xor=["fwhm"]),
     )
     inputs = IsotropicSmooth.input_spec()
 
@@ -58,11 +25,7 @@ def test_IsotropicSmooth_inputs():
 
 
 def test_IsotropicSmooth_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = IsotropicSmooth.output_spec()
 
     for key, metadata in list(output_map.items()):

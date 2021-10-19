@@ -4,20 +4,10 @@ from ..misc import Distance
 
 def test_Distance_inputs():
     input_map = dict(
-        mask_volume=dict(
-            extensions=None,
-        ),
-        method=dict(
-            usedefault=True,
-        ),
-        volume1=dict(
-            extensions=None,
-            mandatory=True,
-        ),
-        volume2=dict(
-            extensions=None,
-            mandatory=True,
-        ),
+        mask_volume=dict(extensions=None),
+        method=dict(usedefault=True),
+        volume1=dict(extensions=None, mandatory=True),
+        volume2=dict(extensions=None, mandatory=True),
     )
     inputs = Distance.input_spec()
 
@@ -28,12 +18,7 @@ def test_Distance_inputs():
 
 def test_Distance_outputs():
     output_map = dict(
-        distance=dict(),
-        histogram=dict(
-            extensions=None,
-        ),
-        point1=dict(),
-        point2=dict(),
+        distance=dict(), histogram=dict(extensions=None), point1=dict(), point2=dict()
     )
     outputs = Distance.output_spec()
 

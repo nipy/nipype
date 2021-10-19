@@ -4,13 +4,8 @@ from ..dynamic_slicer import SlicerCommandLine
 
 def test_SlicerCommandLine_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
         module=dict(),
     )
     inputs = SlicerCommandLine.input_spec()

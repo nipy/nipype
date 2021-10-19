@@ -4,28 +4,12 @@ from ..gtract import gtractCopyImageOrientation
 
 def test_gtractCopyImageOrientation_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        inputReferenceVolume=dict(
-            argstr="--inputReferenceVolume %s",
-            extensions=None,
-        ),
-        inputVolume=dict(
-            argstr="--inputVolume %s",
-            extensions=None,
-        ),
-        numberOfThreads=dict(
-            argstr="--numberOfThreads %d",
-        ),
-        outputVolume=dict(
-            argstr="--outputVolume %s",
-            hash_files=False,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        inputReferenceVolume=dict(argstr="--inputReferenceVolume %s", extensions=None),
+        inputVolume=dict(argstr="--inputVolume %s", extensions=None),
+        numberOfThreads=dict(argstr="--numberOfThreads %d"),
+        outputVolume=dict(argstr="--outputVolume %s", hash_files=False),
     )
     inputs = gtractCopyImageOrientation.input_spec()
 
@@ -35,11 +19,7 @@ def test_gtractCopyImageOrientation_inputs():
 
 
 def test_gtractCopyImageOrientation_outputs():
-    output_map = dict(
-        outputVolume=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(outputVolume=dict(extensions=None))
     outputs = gtractCopyImageOrientation.output_spec()
 
     for key, metadata in list(output_map.items()):

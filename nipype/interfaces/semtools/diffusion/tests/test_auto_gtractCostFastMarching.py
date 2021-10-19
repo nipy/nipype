@@ -4,48 +4,22 @@ from ..gtract import gtractCostFastMarching
 
 def test_gtractCostFastMarching_inputs():
     input_map = dict(
-        anisotropyWeight=dict(
-            argstr="--anisotropyWeight %f",
-        ),
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        anisotropyWeight=dict(argstr="--anisotropyWeight %f"),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
         inputAnisotropyVolume=dict(
-            argstr="--inputAnisotropyVolume %s",
-            extensions=None,
+            argstr="--inputAnisotropyVolume %s", extensions=None
         ),
         inputStartingSeedsLabelMapVolume=dict(
-            argstr="--inputStartingSeedsLabelMapVolume %s",
-            extensions=None,
+            argstr="--inputStartingSeedsLabelMapVolume %s", extensions=None
         ),
-        inputTensorVolume=dict(
-            argstr="--inputTensorVolume %s",
-            extensions=None,
-        ),
-        numberOfThreads=dict(
-            argstr="--numberOfThreads %d",
-        ),
-        outputCostVolume=dict(
-            argstr="--outputCostVolume %s",
-            hash_files=False,
-        ),
-        outputSpeedVolume=dict(
-            argstr="--outputSpeedVolume %s",
-            hash_files=False,
-        ),
-        seedThreshold=dict(
-            argstr="--seedThreshold %f",
-        ),
-        startingSeedsLabel=dict(
-            argstr="--startingSeedsLabel %d",
-        ),
-        stoppingValue=dict(
-            argstr="--stoppingValue %f",
-        ),
+        inputTensorVolume=dict(argstr="--inputTensorVolume %s", extensions=None),
+        numberOfThreads=dict(argstr="--numberOfThreads %d"),
+        outputCostVolume=dict(argstr="--outputCostVolume %s", hash_files=False),
+        outputSpeedVolume=dict(argstr="--outputSpeedVolume %s", hash_files=False),
+        seedThreshold=dict(argstr="--seedThreshold %f"),
+        startingSeedsLabel=dict(argstr="--startingSeedsLabel %d"),
+        stoppingValue=dict(argstr="--stoppingValue %f"),
     )
     inputs = gtractCostFastMarching.input_spec()
 
@@ -56,12 +30,7 @@ def test_gtractCostFastMarching_inputs():
 
 def test_gtractCostFastMarching_outputs():
     output_map = dict(
-        outputCostVolume=dict(
-            extensions=None,
-        ),
-        outputSpeedVolume=dict(
-            extensions=None,
-        ),
+        outputCostVolume=dict(extensions=None), outputSpeedVolume=dict(extensions=None)
     )
     outputs = gtractCostFastMarching.output_spec()
 

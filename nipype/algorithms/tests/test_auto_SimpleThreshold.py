@@ -3,14 +3,7 @@ from ..misc import SimpleThreshold
 
 
 def test_SimpleThreshold_inputs():
-    input_map = dict(
-        threshold=dict(
-            mandatory=True,
-        ),
-        volumes=dict(
-            mandatory=True,
-        ),
-    )
+    input_map = dict(threshold=dict(mandatory=True), volumes=dict(mandatory=True))
     inputs = SimpleThreshold.input_spec()
 
     for key, metadata in list(input_map.items()):
@@ -19,9 +12,7 @@ def test_SimpleThreshold_inputs():
 
 
 def test_SimpleThreshold_outputs():
-    output_map = dict(
-        thresholded_volumes=dict(),
-    )
+    output_map = dict(thresholded_volumes=dict())
     outputs = SimpleThreshold.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -4,24 +4,11 @@ from ..anisotropic_power import APMQball
 
 def test_APMQball_inputs():
     input_map = dict(
-        b0_thres=dict(
-            usedefault=True,
-        ),
-        in_bval=dict(
-            extensions=None,
-            mandatory=True,
-        ),
-        in_bvec=dict(
-            extensions=None,
-            mandatory=True,
-        ),
-        in_file=dict(
-            extensions=None,
-            mandatory=True,
-        ),
-        mask_file=dict(
-            extensions=None,
-        ),
+        b0_thres=dict(usedefault=True),
+        in_bval=dict(extensions=None, mandatory=True),
+        in_bvec=dict(extensions=None, mandatory=True),
+        in_file=dict(extensions=None, mandatory=True),
+        mask_file=dict(extensions=None),
         out_prefix=dict(),
     )
     inputs = APMQball.input_spec()
@@ -32,11 +19,7 @@ def test_APMQball_inputs():
 
 
 def test_APMQball_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = APMQball.output_spec()
 
     for key, metadata in list(output_map.items()):

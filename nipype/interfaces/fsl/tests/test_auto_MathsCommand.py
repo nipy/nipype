@@ -4,38 +4,15 @@ from ..maths import MathsCommand
 
 def test_MathsCommand_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        in_file=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=2,
-        ),
-        internal_datatype=dict(
-            argstr="-dt %s",
-            position=1,
-        ),
-        nan2zeros=dict(
-            argstr="-nan",
-            position=3,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=2),
+        internal_datatype=dict(argstr="-dt %s", position=1),
+        nan2zeros=dict(argstr="-nan", position=3),
         out_file=dict(
-            argstr="%s",
-            extensions=None,
-            genfile=True,
-            hash_files=False,
-            position=-2,
+            argstr="%s", extensions=None, genfile=True, hash_files=False, position=-2
         ),
-        output_datatype=dict(
-            argstr="-odt %s",
-            position=-1,
-        ),
+        output_datatype=dict(argstr="-odt %s", position=-1),
         output_type=dict(),
     )
     inputs = MathsCommand.input_spec()
@@ -46,11 +23,7 @@ def test_MathsCommand_inputs():
 
 
 def test_MathsCommand_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = MathsCommand.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -5,18 +5,10 @@ from ..io import DataGrabber
 def test_DataGrabber_inputs():
     input_map = dict(
         base_directory=dict(),
-        drop_blank_outputs=dict(
-            usedefault=True,
-        ),
-        raise_on_empty=dict(
-            usedefault=True,
-        ),
-        sort_filelist=dict(
-            mandatory=True,
-        ),
-        template=dict(
-            mandatory=True,
-        ),
+        drop_blank_outputs=dict(usedefault=True),
+        raise_on_empty=dict(usedefault=True),
+        sort_filelist=dict(mandatory=True),
+        template=dict(mandatory=True),
         template_args=dict(),
     )
     inputs = DataGrabber.input_spec()

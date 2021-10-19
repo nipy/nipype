@@ -4,32 +4,13 @@ from ..utils import TVResampleTask
 
 def test_TVResampleTask_inputs():
     input_map = dict(
-        align=dict(
-            argstr="-align %s",
-        ),
-        args=dict(
-            argstr="%s",
-        ),
-        array_size=dict(
-            argstr="-size %d %d %d",
-            xor=["target_file"],
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        in_file=dict(
-            argstr="-in %s",
-            extensions=None,
-            mandatory=True,
-        ),
-        interpolation=dict(
-            argstr="-interp %s",
-        ),
-        origin=dict(
-            argstr="-origin %g %g %g",
-            xor=["target_file"],
-        ),
+        align=dict(argstr="-align %s"),
+        args=dict(argstr="%s"),
+        array_size=dict(argstr="-size %d %d %d", xor=["target_file"]),
+        environ=dict(nohash=True, usedefault=True),
+        in_file=dict(argstr="-in %s", extensions=None, mandatory=True),
+        interpolation=dict(argstr="-interp %s"),
+        origin=dict(argstr="-origin %g %g %g", xor=["target_file"]),
         out_file=dict(
             argstr="-out %s",
             extensions=None,
@@ -42,10 +23,7 @@ def test_TVResampleTask_inputs():
             extensions=None,
             xor=["array_size", "voxel_size", "origin"],
         ),
-        voxel_size=dict(
-            argstr="-vsize %g %g %g",
-            xor=["target_file"],
-        ),
+        voxel_size=dict(argstr="-vsize %g %g %g", xor=["target_file"]),
     )
     inputs = TVResampleTask.input_spec()
 
@@ -55,11 +33,7 @@ def test_TVResampleTask_inputs():
 
 
 def test_TVResampleTask_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = TVResampleTask.output_spec()
 
     for key, metadata in list(output_map.items()):

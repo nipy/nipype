@@ -4,28 +4,11 @@ from ..utils import SH2Amp
 
 def test_SH2Amp_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        directions=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=-2,
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        in_file=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=-3,
-        ),
-        nonnegative=dict(
-            argstr="-nonnegative",
-        ),
+        args=dict(argstr="%s"),
+        directions=dict(argstr="%s", extensions=None, mandatory=True, position=-2),
+        environ=dict(nohash=True, usedefault=True),
+        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=-3),
+        nonnegative=dict(argstr="-nonnegative"),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -43,11 +26,7 @@ def test_SH2Amp_inputs():
 
 
 def test_SH2Amp_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = SH2Amp.output_spec()
 
     for key, metadata in list(output_map.items()):

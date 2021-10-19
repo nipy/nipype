@@ -4,30 +4,12 @@ from ..preprocess import ROIStats
 
 def test_ROIStats_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        debug=dict(
-            argstr="-debug",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        format1D=dict(
-            argstr="-1Dformat",
-            xor=["format1DR"],
-        ),
-        format1DR=dict(
-            argstr="-1DRformat",
-            xor=["format1D"],
-        ),
-        in_file=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=-2,
-        ),
+        args=dict(argstr="%s"),
+        debug=dict(argstr="-debug"),
+        environ=dict(nohash=True, usedefault=True),
+        format1D=dict(argstr="-1Dformat", xor=["format1DR"]),
+        format1DR=dict(argstr="-1DRformat", xor=["format1D"]),
+        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2),
         mask=dict(
             argstr="-mask %s",
             deprecated="1.1.4",
@@ -35,22 +17,11 @@ def test_ROIStats_inputs():
             new_name="mask_file",
             position=3,
         ),
-        mask_f2short=dict(
-            argstr="-mask_f2short",
-        ),
-        mask_file=dict(
-            argstr="-mask %s",
-            extensions=None,
-        ),
-        nobriklab=dict(
-            argstr="-nobriklab",
-        ),
-        nomeanout=dict(
-            argstr="-nomeanout",
-        ),
-        num_roi=dict(
-            argstr="-numroi %s",
-        ),
+        mask_f2short=dict(argstr="-mask_f2short"),
+        mask_file=dict(argstr="-mask %s", extensions=None),
+        nobriklab=dict(argstr="-nobriklab"),
+        nomeanout=dict(argstr="-nomeanout"),
+        num_roi=dict(argstr="-numroi %s"),
         out_file=dict(
             argstr="> %s",
             extensions=None,
@@ -59,20 +30,10 @@ def test_ROIStats_inputs():
             name_template="%s_roistat.1D",
             position=-1,
         ),
-        quiet=dict(
-            argstr="-quiet",
-        ),
-        roisel=dict(
-            argstr="-roisel %s",
-            extensions=None,
-        ),
-        stat=dict(
-            argstr="%s...",
-        ),
-        zerofill=dict(
-            argstr="-zerofill %s",
-            requires=["num_roi"],
-        ),
+        quiet=dict(argstr="-quiet"),
+        roisel=dict(argstr="-roisel %s", extensions=None),
+        stat=dict(argstr="%s..."),
+        zerofill=dict(argstr="-zerofill %s", requires=["num_roi"]),
     )
     inputs = ROIStats.input_spec()
 
@@ -82,11 +43,7 @@ def test_ROIStats_inputs():
 
 
 def test_ROIStats_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = ROIStats.output_spec()
 
     for key, metadata in list(output_map.items()):

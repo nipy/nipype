@@ -4,22 +4,10 @@ from ..utils import TVAdjustOriginTask
 
 def test_TVAdjustOriginTask_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        in_file=dict(
-            argstr="-in %s",
-            extensions=None,
-            mandatory=True,
-        ),
-        origin=dict(
-            argstr="-origin %g %g %g",
-            xor=["target_file"],
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        in_file=dict(argstr="-in %s", extensions=None, mandatory=True),
+        origin=dict(argstr="-origin %g %g %g", xor=["target_file"]),
         out_file=dict(
             argstr="-out %s",
             extensions=None,
@@ -28,14 +16,9 @@ def test_TVAdjustOriginTask_inputs():
             name_template="%s_avs",
         ),
         target_file=dict(
-            argstr="-target %s",
-            extensions=None,
-            xor=["voxel_size", "origin"],
+            argstr="-target %s", extensions=None, xor=["voxel_size", "origin"]
         ),
-        voxel_size=dict(
-            argstr="-vsize %g %g %g",
-            xor=["target_file"],
-        ),
+        voxel_size=dict(argstr="-vsize %g %g %g", xor=["target_file"]),
     )
     inputs = TVAdjustOriginTask.input_spec()
 
@@ -45,11 +28,7 @@ def test_TVAdjustOriginTask_inputs():
 
 
 def test_TVAdjustOriginTask_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = TVAdjustOriginTask.output_spec()
 
     for key, metadata in list(output_map.items()):

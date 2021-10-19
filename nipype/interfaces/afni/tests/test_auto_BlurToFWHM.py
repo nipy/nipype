@@ -4,39 +4,15 @@ from ..preprocess import BlurToFWHM
 
 def test_BlurToFWHM_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        automask=dict(
-            argstr="-automask",
-        ),
-        blurmaster=dict(
-            argstr="-blurmaster %s",
-            extensions=None,
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        fwhm=dict(
-            argstr="-FWHM %f",
-        ),
-        fwhmxy=dict(
-            argstr="-FWHMxy %f",
-        ),
-        in_file=dict(
-            argstr="-input %s",
-            extensions=None,
-            mandatory=True,
-        ),
-        mask=dict(
-            argstr="-mask %s",
-            extensions=None,
-        ),
-        num_threads=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s"),
+        automask=dict(argstr="-automask"),
+        blurmaster=dict(argstr="-blurmaster %s", extensions=None),
+        environ=dict(nohash=True, usedefault=True),
+        fwhm=dict(argstr="-FWHM %f"),
+        fwhmxy=dict(argstr="-FWHMxy %f"),
+        in_file=dict(argstr="-input %s", extensions=None, mandatory=True),
+        mask=dict(argstr="-mask %s", extensions=None),
+        num_threads=dict(nohash=True, usedefault=True),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -53,11 +29,7 @@ def test_BlurToFWHM_inputs():
 
 
 def test_BlurToFWHM_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = BlurToFWHM.output_spec()
 
     for key, metadata in list(output_map.items()):

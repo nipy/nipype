@@ -4,11 +4,7 @@ from ..misc import CalculateMedian
 
 def test_CalculateMedian_inputs():
     input_map = dict(
-        in_files=dict(),
-        median_file=dict(),
-        median_per_file=dict(
-            usedefault=True,
-        ),
+        in_files=dict(), median_file=dict(), median_per_file=dict(usedefault=True)
     )
     inputs = CalculateMedian.input_spec()
 
@@ -18,9 +14,7 @@ def test_CalculateMedian_inputs():
 
 
 def test_CalculateMedian_outputs():
-    output_map = dict(
-        median_files=dict(),
-    )
+    output_map = dict(median_files=dict())
     outputs = CalculateMedian.output_spec()
 
     for key, metadata in list(output_map.items()):

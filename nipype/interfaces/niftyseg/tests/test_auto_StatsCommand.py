@@ -4,28 +4,11 @@ from ..stats import StatsCommand
 
 def test_StatsCommand_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        in_file=dict(
-            argstr="%s",
-            extensions=None,
-            mandatory=True,
-            position=2,
-        ),
-        larger_voxel=dict(
-            argstr="-t %f",
-            position=-3,
-        ),
-        mask_file=dict(
-            argstr="-m %s",
-            extensions=None,
-            position=-2,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
+        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=2),
+        larger_voxel=dict(argstr="-t %f", position=-3),
+        mask_file=dict(argstr="-m %s", extensions=None, position=-2),
     )
     inputs = StatsCommand.input_spec()
 
@@ -35,9 +18,7 @@ def test_StatsCommand_inputs():
 
 
 def test_StatsCommand_outputs():
-    output_map = dict(
-        output=dict(),
-    )
+    output_map = dict(output=dict())
     outputs = StatsCommand.output_spec()
 
     for key, metadata in list(output_map.items()):

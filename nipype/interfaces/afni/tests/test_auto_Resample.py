@@ -4,13 +4,8 @@ from ..utils import Resample
 
 def test_Resample_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
+        args=dict(argstr="%s"),
+        environ=dict(nohash=True, usedefault=True),
         in_file=dict(
             argstr="-inset %s",
             copyfile=False,
@@ -18,17 +13,9 @@ def test_Resample_inputs():
             mandatory=True,
             position=-1,
         ),
-        master=dict(
-            argstr="-master %s",
-            extensions=None,
-        ),
-        num_threads=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        orientation=dict(
-            argstr="-orient %s",
-        ),
+        master=dict(argstr="-master %s", extensions=None),
+        num_threads=dict(nohash=True, usedefault=True),
+        orientation=dict(argstr="-orient %s"),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -36,12 +23,8 @@ def test_Resample_inputs():
             name_template="%s_resample",
         ),
         outputtype=dict(),
-        resample_mode=dict(
-            argstr="-rmode %s",
-        ),
-        voxel_size=dict(
-            argstr="-dxyz %f %f %f",
-        ),
+        resample_mode=dict(argstr="-rmode %s"),
+        voxel_size=dict(argstr="-dxyz %f %f %f"),
     )
     inputs = Resample.input_spec()
 
@@ -51,11 +34,7 @@ def test_Resample_inputs():
 
 
 def test_Resample_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = Resample.output_spec()
 
     for key, metadata in list(output_map.items()):

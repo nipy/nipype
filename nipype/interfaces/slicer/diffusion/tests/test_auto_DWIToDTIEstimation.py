@@ -4,38 +4,14 @@ from ..diffusion import DWIToDTIEstimation
 
 def test_DWIToDTIEstimation_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
-        enumeration=dict(
-            argstr="--enumeration %s",
-        ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        inputVolume=dict(
-            argstr="%s",
-            extensions=None,
-            position=-3,
-        ),
-        mask=dict(
-            argstr="--mask %s",
-            extensions=None,
-        ),
-        outputBaseline=dict(
-            argstr="%s",
-            hash_files=False,
-            position=-1,
-        ),
-        outputTensor=dict(
-            argstr="%s",
-            hash_files=False,
-            position=-2,
-        ),
-        shiftNeg=dict(
-            argstr="--shiftNeg ",
-        ),
+        args=dict(argstr="%s"),
+        enumeration=dict(argstr="--enumeration %s"),
+        environ=dict(nohash=True, usedefault=True),
+        inputVolume=dict(argstr="%s", extensions=None, position=-3),
+        mask=dict(argstr="--mask %s", extensions=None),
+        outputBaseline=dict(argstr="%s", hash_files=False, position=-1),
+        outputTensor=dict(argstr="%s", hash_files=False, position=-2),
+        shiftNeg=dict(argstr="--shiftNeg "),
     )
     inputs = DWIToDTIEstimation.input_spec()
 
@@ -46,14 +22,8 @@ def test_DWIToDTIEstimation_inputs():
 
 def test_DWIToDTIEstimation_outputs():
     output_map = dict(
-        outputBaseline=dict(
-            extensions=None,
-            position=-1,
-        ),
-        outputTensor=dict(
-            extensions=None,
-            position=-2,
-        ),
+        outputBaseline=dict(extensions=None, position=-1),
+        outputTensor=dict(extensions=None, position=-2),
     )
     outputs = DWIToDTIEstimation.output_spec()
 

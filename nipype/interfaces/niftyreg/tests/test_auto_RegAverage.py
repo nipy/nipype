@@ -4,9 +4,7 @@ from ..regutils import RegAverage
 
 def test_RegAverage_inputs():
     input_map = dict(
-        args=dict(
-            argstr="%s",
-        ),
+        args=dict(argstr="%s"),
         avg_files=dict(
             argstr="-avg %s",
             position=1,
@@ -85,25 +83,11 @@ def test_RegAverage_inputs():
                 "demean2_ref_file",
             ],
         ),
-        environ=dict(
-            nohash=True,
-            usedefault=True,
-        ),
-        omp_core_val=dict(
-            argstr="-omp %i",
-            usedefault=True,
-        ),
-        out_file=dict(
-            argstr="%s",
-            extensions=None,
-            genfile=True,
-            position=0,
-        ),
+        environ=dict(nohash=True, usedefault=True),
+        omp_core_val=dict(argstr="-omp %i", usedefault=True),
+        out_file=dict(argstr="%s", extensions=None, genfile=True, position=0),
         warp_files=dict(
-            argstr="%s",
-            position=-1,
-            sep=" ",
-            xor=["avg_files", "avg_lts_files"],
+            argstr="%s", position=-1, sep=" ", xor=["avg_files", "avg_lts_files"]
         ),
     )
     inputs = RegAverage.input_spec()
@@ -114,11 +98,7 @@ def test_RegAverage_inputs():
 
 
 def test_RegAverage_outputs():
-    output_map = dict(
-        out_file=dict(
-            extensions=None,
-        ),
-    )
+    output_map = dict(out_file=dict(extensions=None))
     outputs = RegAverage.output_spec()
 
     for key, metadata in list(output_map.items()):
