@@ -46,14 +46,14 @@ class FieldMapInputSpec(SPMCommandInputSpec):
         desc="one of: calculatevdm, applyvdm",
     )
     phase_file = File(
-        #mandatory=True,
+        # mandatory=True,
         exists=True,
         copyfile=False,
         field="subj.data.presubphasemag.phase",
         desc="presubstracted phase file",
     )
     magnitude_file = File(
-        #mandatory=True,
+        # mandatory=True,
         exists=True,
         copyfile=False,
         field="subj.data.presubphasemag.magnitude",
@@ -62,7 +62,7 @@ class FieldMapInputSpec(SPMCommandInputSpec):
     echo_times = traits.Tuple(
         traits.Float,
         traits.Float,
-        #mandatory=True,
+        # mandatory=True,
         field="subj.defaults.defaultsval.et",
         desc="short and long echo times",
     )
@@ -169,7 +169,7 @@ class FieldMapInputSpec(SPMCommandInputSpec):
     epi_file = File(
         copyfile=False,
         exists=True,
-        #mandatory=True,
+        # mandatory=True,
         field="subj.session.epi",
         desc="EPI to unwarp",
     )
@@ -196,46 +196,62 @@ class FieldMapInputSpec(SPMCommandInputSpec):
     )
 
     in_files = InputMultiObject(
-        traits.Either(ImageFileSPM(exists=True),
-                      traits.List(ImageFileSPM(exists=True))),
-        field='data.scans',mandatory=True,
+        traits.Either(
+            ImageFileSPM(exists=True), traits.List(ImageFileSPM(exists=True))
+        ),
+        field="data.scans",
+        mandatory=True,
         copyfile=True,
-        desc='list of filenames to apply the vdm to')
+        desc="list of filenames to apply the vdm to",
+    )
     vdmfile = File(
-        field='data.vdmfile',
-        desc='Voxel displacement map to use',mandatory=True,
-        copyfile=True)
+        field="data.vdmfile",
+        desc="Voxel displacement map to use",
+        mandatory=True,
+        copyfile=True,
+    )
     distortion_direction = traits.Int(
-        2, field='roptions.pedir', desc='phase encode direction input data have been acquired with',
-        usedefault=True)
+        2,
+        field="roptions.pedir",
+        desc="phase encode direction input data have been acquired with",
+        usedefault=True,
+    )
     write_which = traits.ListInt(
         [2, 1],
-        field='roptions.which',
+        field="roptions.which",
         minlen=2,
         maxlen=2,
         usedefault=True,
-        desc='determines which images to apply vdm to')
+        desc="determines which images to apply vdm to",
+    )
     interpolation = traits.Int(
-        4, field='roptions.rinterp', desc='phase encode direction input data have been acquired with',
-        usedefault=True)
+        4,
+        field="roptions.rinterp",
+        desc="phase encode direction input data have been acquired with",
+        usedefault=True,
+    )
     reslice_interp = traits.Range(
         low=0,
         high=7,
-        field='roptions.rinterp',
-        desc='degree of b-spline used for interpolation')
+        field="roptions.rinterp",
+        desc="degree of b-spline used for interpolation",
+    )
     write_wrap = traits.List(
         traits.Int(),
         minlen=3,
         maxlen=3,
-        field='roptions.wrap',
-        desc=('Check if interpolation should wrap in [x,y,z]'))
+        field="roptions.wrap",
+        desc=("Check if interpolation should wrap in [x,y,z]"),
+    )
     write_mask = traits.Bool(
-        field='roptions.mask', desc='True/False mask time series images')
+        field="roptions.mask", desc="True/False mask time series images"
+    )
     out_prefix = traits.String(
-        'u',
-        field='roptions.prefix',
+        "u",
+        field="roptions.prefix",
         usedefault=True,
-        desc='fieldmap corrected output prefix')
+        desc="fieldmap corrected output prefix",
+    )
 
 
 class FieldMapOutputSpec(TraitedSpec):
@@ -243,12 +259,15 @@ class FieldMapOutputSpec(TraitedSpec):
 
     out_files = OutputMultiPath(
         traits.Either(traits.List(File(exists=True)), File(exists=True)),
-        desc=('If jobtype is applyvdm, '
-              'these will be the fieldmap corrected files.'
-              ' Otherwise, they will be copies '
-              'of in_files that have had their '
-              'headers rewritten.'))
-    mean_image = File(exists=True, desc='Mean image')
+        desc=(
+            "If jobtype is applyvdm, "
+            "these will be the fieldmap corrected files."
+            " Otherwise, they will be copies "
+            "of in_files that have had their "
+            "headers rewritten."
+        ),
+    )
+    mean_image = File(exists=True, desc="Mean image")
 
 
 class FieldMap(SPMCommand):
@@ -283,73 +302,92 @@ class FieldMap(SPMCommand):
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm"""
 
-        if ((self.inputs.jobtype == "calculatevdm") and (opt in ['phase_file', 'magnitude_file', 'anat_file', 'epi_file'])):
+        if (self.inputs.jobtype == "calculatevdm") and (
+            opt in ["phase_file", "magnitude_file", "anat_file", "epi_file"]
+        ):
             return scans_for_fname(ensure_list(val))
 
-        if ((self.inputs.jobtype == "applyvdm") and (opt =='in_files')):
+        if (self.inputs.jobtype == "applyvdm") and (opt == "in_files"):
             return scans_for_fnames(ensure_list(val))
-        if ((self.inputs.jobtype == "applyvdm") and (opt =='vdmfile')):
+        if (self.inputs.jobtype == "applyvdm") and (opt == "vdmfile"):
             return scans_for_fname(ensure_list(val))
         return super(FieldMap, self)._format_arg(opt, spec, val)
-
 
     def _parse_inputs(self):
         """validate spm fieldmap options if set to None ignore"""
 
         if self.inputs.jobtype == "applyvdm":
-            einputs = (super(FieldMap, self)
-                       ._parse_inputs(skip=('jobtype','phase_file', 'magnitude_file',
-                                            'echo_times', 'blip_direction',
-                                            'total_readout_time','maskbrain',
-                                            'epifm','jacobian_modulation',
-                                            'method','unwarp_fwhm','pad','ws',
-                                            'template','mask_fwhm','nerode','ndilate',
-                                            'thresh','reg','epi_file','matchvdm',
-                                            'sessname','writeunwarped',
-                                            'anat_file','matchanat')))
+            einputs = super(FieldMap, self)._parse_inputs(
+                skip=(
+                    "jobtype",
+                    "phase_file",
+                    "magnitude_file",
+                    "echo_times",
+                    "blip_direction",
+                    "total_readout_time",
+                    "maskbrain",
+                    "epifm",
+                    "jacobian_modulation",
+                    "method",
+                    "unwarp_fwhm",
+                    "pad",
+                    "ws",
+                    "template",
+                    "mask_fwhm",
+                    "nerode",
+                    "ndilate",
+                    "thresh",
+                    "reg",
+                    "epi_file",
+                    "matchvdm",
+                    "sessname",
+                    "writeunwarped",
+                    "anat_file",
+                    "matchanat",
+                )
+            )
 
         else:
-            einputs = (super(FieldMap, self)
-                       ._parse_inputs(skip=('jobtype','in_files', 'vdmfile')))
+            einputs = super(FieldMap, self)._parse_inputs(
+                skip=("jobtype", "in_files", "vdmfile")
+            )
         jobtype = self.inputs.jobtype
 
-        return [{'%s' % (jobtype): einputs[0]}]
-
+        return [{"%s" % (jobtype): einputs[0]}]
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         jobtype = self.inputs.jobtype
-        resliced_all  = self.inputs.write_which[0] > 0
+        resliced_all = self.inputs.write_which[0] > 0
         resliced_mean = self.inputs.write_which[1] > 0
         if jobtype == "calculatevdm":
-            outputs['vdm'] = fname_presuffix(self.inputs.phase_file, prefix='vdm5_sc')
+            outputs["vdm"] = fname_presuffix(self.inputs.phase_file, prefix="vdm5_sc")
         elif jobtype == "applyvdm":
             if resliced_mean:
                 if isinstance(self.inputs.in_files[0], list):
                     first_image = self.inputs.in_files[0][0]
                 else:
                     first_image = self.inputs.in_files[0]
-                outputs['mean_image'] = fname_presuffix(
-                    first_image, prefix='meanu')
+                outputs["mean_image"] = fname_presuffix(first_image, prefix="meanu")
 
             if resliced_all:
-                outputs['out_files'] = []
+                outputs["out_files"] = []
                 for idx, imgf in enumerate(ensure_list(self.inputs.in_files)):
                     appliedvdm_run = []
                     if isinstance(imgf, list):
                         for i, inner_imgf in enumerate(ensure_list(imgf)):
-                            newfile = fname_presuffix(inner_imgf,
-                                                      prefix=self.inputs.out_prefix)
+                            newfile = fname_presuffix(
+                                inner_imgf, prefix=self.inputs.out_prefix
+                            )
                             appliedvdm_run.append(newfile)
                     else:
-                        appliedvdm_run = fname_presuffix(imgf,
-                                                        prefix=self.inputs.out_prefix)
-                    outputs['out_files'].append(appliedvdm_run)
+                        appliedvdm_run = fname_presuffix(
+                            imgf, prefix=self.inputs.out_prefix
+                        )
+                    outputs["out_files"].append(appliedvdm_run)
             return outputs
 
-
         return outputs
-
 
 
 class SliceTimingInputSpec(SPMCommandInputSpec):
