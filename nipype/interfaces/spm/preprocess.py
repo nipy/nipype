@@ -247,6 +247,7 @@ class FieldMap(SPMCommand):
 
         return outputs
 
+
 class ApplyVDMInputSpec(SPMCommandInputSpec):
 
     in_files = InputMultiObject(
@@ -261,7 +262,7 @@ class ApplyVDMInputSpec(SPMCommandInputSpec):
     vdmfile = File(
         field="data.vdmfile",
         desc="Voxel displacement map to use",
-        #mandatory=True,
+        # mandatory=True,
         copyfile=True,
     )
     distortion_direction = traits.Int(
@@ -307,14 +308,14 @@ class ApplyVDMInputSpec(SPMCommandInputSpec):
         desc="fieldmap corrected output prefix",
     )
 
+
 class ApplyVDMOutputSpec(TraitedSpec):
     out_files = OutputMultiPath(
         traits.Either(traits.List(File(exists=True)), File(exists=True)),
-        desc=(
-            "These will be the fieldmap corrected files."
-        ),
+        desc=("These will be the fieldmap corrected files."),
     )
     mean_image = File(exists=True, desc="Mean image")
+
 
 class ApplyVDM(SPMCommand):
     """Use the fieldmap toolbox from spm to apply the voxel displacement map (VDM) to some epi files.
