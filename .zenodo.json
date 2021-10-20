@@ -149,13 +149,13 @@
       "orcid": "0000-0001-7931-5272"
     },
     {
-      "affiliation": "Shattuck Lab, UCLA Brain Mapping Center",
-      "name": "Wong, Jason"
-    },
-    {
       "affiliation": "University of Texas at Austin",
       "name": "De La Vega, Alejandro",
       "orcid": "0000-0001-9062-3778"
+    },
+    {
+      "affiliation": "Shattuck Lab, UCLA Brain Mapping Center",
+      "name": "Wong, Jason"
     },
     {
       "affiliation": "MIT",
@@ -218,6 +218,11 @@
       "orcid": "0000-0003-1988-5091"
     },
     {
+      "affiliation": "Charit\u00e8 Universit\u00e4tsmedizin Berlin, Germany",
+      "name": "Dell'Orco, Andrea",
+      "orcid": "0000-0002-3964-8360"
+    },
+    {
       "affiliation": "University College London",
       "name": "Eshaghi, Arman",
       "orcid": "0000-0002-6652-3512"
@@ -252,6 +257,11 @@
       "name": "Mordom, David"
     },
     {
+      "affiliation": "Charite Universitatsmedizin Berlin, Germany",
+      "name": "Waller, Lea",
+      "orcid": "0000-0002-3239-6957"
+    },
+    {
       "affiliation": "CIBIT, UC",
       "name": "Machado, F\u00e1tima",
       "orcid": "0000-0001-8878-1750"
@@ -260,11 +270,6 @@
       "affiliation": "ARAMIS LAB, Brain and Spine Institute (ICM), Paris, France.",
       "name": "Guillon, Je\u0301re\u0301my",
       "orcid": "0000-0002-2672-7510"
-    },
-    {
-      "affiliation": "Charite Universitatsmedizin Berlin, Germany",
-      "name": "Waller, Lea",
-      "orcid": "0000-0002-3239-6957"
     },
     {
       "affiliation": "Indiana University, IN, USA",
@@ -727,6 +732,11 @@
       "name": "Gonz\u00e1lez Orozco, Abel A."
     },
     {
+      "affiliation": "ARAMIS Lab",
+      "name": "Routier, Alexandre",
+      "orcid": "0000-0003-1603-8049"
+    },
+    {
       "name": "Marina, Ana"
     },
     {
@@ -795,7 +805,17 @@
       "orcid": "0000-0002-0744-5155"
     },
     {
+      "affiliation": "Max Planck Institute for Human Cognitive and Brain Sciences",
+      "name": "Numssen, Ole",
+      "orcid": "0000-0001-7164-2682"
+    },
+    {
       "name": "Khanuja, Ranjeet"
+    },
+    {
+      "affiliation": "University of Waterloo",
+      "name": "Mukhometzianov, Rinat",
+      "orcid": "0000-0003-1274-4827"
     },
     {
       "name": "Urchs, Sebastian"
@@ -835,11 +855,6 @@
       "affiliation": "MIT, HMS",
       "name": "Ghosh, Satrajit",
       "orcid": "0000-0002-5312-6729"
-    },
-    {
-      "affiliation": "Charitè Universitätsmedizin Berlin, Germany",
-      "name": "Dell\'Orco, Andrea",
-      "orcid": "0000-0002-3964-8360"
     }
   ],
   "keywords": [

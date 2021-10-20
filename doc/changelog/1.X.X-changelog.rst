@@ -1,3 +1,26 @@
+1.7.0 (October 20, 2021)
+========================
+
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.7.0?closed=1>`__)
+
+  * FIX: Make ants.LaplacianThickness output_image a string, not file (https://github.com/nipy/nipype/pull/3393)
+  * FIX: coord for mrconvert (https://github.com/nipy/nipype/pull/3369)
+  * FIX: ``antsRegistration`` allows the ``restrict_deformation`` to be float  (https://github.com/nipy/nipype/pull/3387)
+  * FIX: Also allow `errno.EBUSY` during `emptydirs` on NFS  (https://github.com/nipy/nipype/pull/3357)
+  * FIX: Removed exists=True from MathsOutput (https://github.com/nipy/nipype/pull/3385)
+  * FIX: Extension not extensions, after pybids v0.9 (https://github.com/nipy/nipype/pull/3380)
+  * ENH: Add CAT12 SANLM denoising filter (https://github.com/nipy/nipype/pull/3374)
+  * ENH: Add expected steps for FreeSurfer 7 recon-all  (https://github.com/nipy/nipype/pull/3389)
+  * ENH: Stop printing false positive differences when logging cached nodes  (https://github.com/nipy/nipype/pull/3376)
+  * ENH: Add new flags to MRtrix/preprocess.py (DWI2Tensor, MRtransform)  (https://github.com/nipy/nipype/pull/3365)
+  * ENH: ``verbose`` input should not be hashed in ``ants.Registration`` (https://github.com/nipy/nipype/pull/3377)
+  * REF: Clean-up the BaseInterface ``run()`` function using context (https://github.com/nipy/nipype/pull/3347)
+  * DOC: Fix typo in README  (https://github.com/nipy/nipype/pull/3386)
+  * STY: Make private member name consistent with the rest of them (https://github.com/nipy/nipype/pull/3346)
+  * MNT: Simplify interface execution and better error handling of ``Node`` (https://github.com/nipy/nipype/pull/3349)
+  * MNT: Add user name and email to Docker to appease git/annex/datalad (https://github.com/nipy/nipype/pull/3378)
+  * CI: Update CircleCI machine image  (https://github.com/nipy/nipype/pull/3391)
+
 1.6.1 (June 16, 2021)
 =====================
 
