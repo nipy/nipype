@@ -1,4 +1,4 @@
-1.7.0 (October 18, 2021)
+1.7.0 (October 20, 2021)
 ========================
 
 (`Full changelog <https://github.com/nipy/nipype/milestone/1.7.0?closed=1>`__)
