@@ -4,10 +4,24 @@ from ..postproc import TrackMerge
 
 def test_TrackMerge_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        output_file=dict(argstr="%s", extensions=None, position=-1, usedefault=True),
-        track_files=dict(argstr="%s...", mandatory=True, position=0),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        output_file=dict(
+            argstr="%s",
+            extensions=None,
+            position=-1,
+            usedefault=True,
+        ),
+        track_files=dict(
+            argstr="%s...",
+            mandatory=True,
+            position=0,
+        ),
     )
     inputs = TrackMerge.input_spec()
 
@@ -17,7 +31,11 @@ def test_TrackMerge_inputs():
 
 
 def test_TrackMerge_outputs():
-    output_map = dict(track_file=dict(extensions=None))
+    output_map = dict(
+        track_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = TrackMerge.output_spec()
 
     for key, metadata in list(output_map.items()):

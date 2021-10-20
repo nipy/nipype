@@ -4,11 +4,24 @@ from ..tensors import DTI
 
 def test_DTI_inputs():
     input_map = dict(
-        b0_thres=dict(usedefault=True),
-        in_bval=dict(extensions=None, mandatory=True),
-        in_bvec=dict(extensions=None, mandatory=True),
-        in_file=dict(extensions=None, mandatory=True),
-        mask_file=dict(extensions=None),
+        b0_thres=dict(
+            usedefault=True,
+        ),
+        in_bval=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        in_bvec=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        in_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        mask_file=dict(
+            extensions=None,
+        ),
         out_prefix=dict(),
     )
     inputs = DTI.input_spec()
@@ -20,12 +33,24 @@ def test_DTI_inputs():
 
 def test_DTI_outputs():
     output_map = dict(
-        ad_file=dict(extensions=None),
-        color_fa_file=dict(extensions=None),
-        fa_file=dict(extensions=None),
-        md_file=dict(extensions=None),
-        out_file=dict(extensions=None),
-        rd_file=dict(extensions=None),
+        ad_file=dict(
+            extensions=None,
+        ),
+        color_fa_file=dict(
+            extensions=None,
+        ),
+        fa_file=dict(
+            extensions=None,
+        ),
+        md_file=dict(
+            extensions=None,
+        ),
+        out_file=dict(
+            extensions=None,
+        ),
+        rd_file=dict(
+            extensions=None,
+        ),
     )
     outputs = DTI.output_spec()
 

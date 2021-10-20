@@ -4,12 +4,28 @@ from ..mesh import P2PDistance
 
 def test_P2PDistance_inputs():
     input_map = dict(
-        metric=dict(usedefault=True),
-        out_file=dict(extensions=None, usedefault=True),
-        out_warp=dict(extensions=None, usedefault=True),
-        surface1=dict(extensions=None, mandatory=True),
-        surface2=dict(extensions=None, mandatory=True),
-        weighting=dict(usedefault=True),
+        metric=dict(
+            usedefault=True,
+        ),
+        out_file=dict(
+            extensions=None,
+            usedefault=True,
+        ),
+        out_warp=dict(
+            extensions=None,
+            usedefault=True,
+        ),
+        surface1=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        surface2=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        weighting=dict(
+            usedefault=True,
+        ),
     )
     inputs = P2PDistance.input_spec()
 
@@ -20,7 +36,13 @@ def test_P2PDistance_inputs():
 
 def test_P2PDistance_outputs():
     output_map = dict(
-        distance=dict(), out_file=dict(extensions=None), out_warp=dict(extensions=None)
+        distance=dict(),
+        out_file=dict(
+            extensions=None,
+        ),
+        out_warp=dict(
+            extensions=None,
+        ),
     )
     outputs = P2PDistance.output_spec()
 

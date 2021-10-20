@@ -4,13 +4,30 @@ from ..featuredetection import GenerateTestImage
 
 def test_GenerateTestImage_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        inputVolume=dict(argstr="--inputVolume %s", extensions=None),
-        lowerBoundOfOutputVolume=dict(argstr="--lowerBoundOfOutputVolume %f"),
-        outputVolume=dict(argstr="--outputVolume %s", hash_files=False),
-        outputVolumeSize=dict(argstr="--outputVolumeSize %f"),
-        upperBoundOfOutputVolume=dict(argstr="--upperBoundOfOutputVolume %f"),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        inputVolume=dict(
+            argstr="--inputVolume %s",
+            extensions=None,
+        ),
+        lowerBoundOfOutputVolume=dict(
+            argstr="--lowerBoundOfOutputVolume %f",
+        ),
+        outputVolume=dict(
+            argstr="--outputVolume %s",
+            hash_files=False,
+        ),
+        outputVolumeSize=dict(
+            argstr="--outputVolumeSize %f",
+        ),
+        upperBoundOfOutputVolume=dict(
+            argstr="--upperBoundOfOutputVolume %f",
+        ),
     )
     inputs = GenerateTestImage.input_spec()
 
@@ -20,7 +37,11 @@ def test_GenerateTestImage_inputs():
 
 
 def test_GenerateTestImage_outputs():
-    output_map = dict(outputVolume=dict(extensions=None))
+    output_map = dict(
+        outputVolume=dict(
+            extensions=None,
+        ),
+    )
     outputs = GenerateTestImage.output_spec()
 
     for key, metadata in list(output_map.items()):

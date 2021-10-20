@@ -4,8 +4,13 @@ from ..misc import SplitROIs
 
 def test_SplitROIs_inputs():
     input_map = dict(
-        in_file=dict(extensions=None, mandatory=True),
-        in_mask=dict(extensions=None),
+        in_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        in_mask=dict(
+            extensions=None,
+        ),
         roi_size=dict(),
     )
     inputs = SplitROIs.input_spec()
@@ -16,7 +21,11 @@ def test_SplitROIs_inputs():
 
 
 def test_SplitROIs_outputs():
-    output_map = dict(out_files=dict(), out_index=dict(), out_masks=dict())
+    output_map = dict(
+        out_files=dict(),
+        out_index=dict(),
+        out_masks=dict(),
+    )
     outputs = SplitROIs.output_spec()
 
     for key, metadata in list(output_map.items()):

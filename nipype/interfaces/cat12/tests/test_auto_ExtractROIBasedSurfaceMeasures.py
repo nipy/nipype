@@ -4,16 +4,38 @@ from ..surface import ExtractROIBasedSurfaceMeasures
 
 def test_ExtractROIBasedSurfaceMeasures_inputs():
     input_map = dict(
-        lh_roi_atlas=dict(copyfile=False, field="rdata", mandatory=True),
-        lh_surface_measure=dict(copyfile=False, field="cdata", mandatory=True),
+        lh_roi_atlas=dict(
+            copyfile=False,
+            field="rdata",
+            mandatory=True,
+        ),
+        lh_surface_measure=dict(
+            copyfile=False,
+            field="cdata",
+            mandatory=True,
+        ),
         matlab_cmd=dict(),
-        mfile=dict(usedefault=True),
+        mfile=dict(
+            usedefault=True,
+        ),
         paths=dict(),
-        rh_roi_atlas=dict(copyfile=False, mandatory=False),
-        rh_surface_measure=dict(copyfile=False, mandatory=False),
-        surface_files=dict(copyfile=False, mandatory=False),
+        rh_roi_atlas=dict(
+            copyfile=False,
+            mandatory=False,
+        ),
+        rh_surface_measure=dict(
+            copyfile=False,
+            mandatory=False,
+        ),
+        surface_files=dict(
+            copyfile=False,
+            mandatory=False,
+        ),
         use_mcr=dict(),
-        use_v8struct=dict(min_ver="8", usedefault=True),
+        use_v8struct=dict(
+            min_ver="8",
+            usedefault=True,
+        ),
     )
     inputs = ExtractROIBasedSurfaceMeasures.input_spec()
 
@@ -23,7 +45,9 @@ def test_ExtractROIBasedSurfaceMeasures_inputs():
 
 
 def test_ExtractROIBasedSurfaceMeasures_outputs():
-    output_map = dict(label_files=dict())
+    output_map = dict(
+        label_files=dict(),
+    )
     outputs = ExtractROIBasedSurfaceMeasures.output_spec()
 
     for key, metadata in list(output_map.items()):

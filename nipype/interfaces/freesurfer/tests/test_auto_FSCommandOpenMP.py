@@ -4,8 +4,13 @@ from ..base import FSCommandOpenMP
 
 def test_FSCommandOpenMP_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         num_threads=dict(),
         subjects_dir=dict(),
     )

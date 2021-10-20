@@ -4,10 +4,20 @@ from ..preprocess import BET
 
 def test_BET_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        center=dict(argstr="-c %s", units="voxels"),
-        environ=dict(nohash=True, usedefault=True),
-        frac=dict(argstr="-f %.2f"),
+        args=dict(
+            argstr="%s",
+        ),
+        center=dict(
+            argstr="-c %s",
+            units="voxels",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        frac=dict(
+            argstr="-f %.2f",
+        ),
         functional=dict(
             argstr="-F",
             xor=(
@@ -21,15 +31,31 @@ def test_BET_inputs():
             ),
         ),
         in_file=dict(
-            argstr="%s", copyfile=False, extensions=None, mandatory=True, position=0
+            argstr="%s",
+            copyfile=False,
+            extensions=None,
+            mandatory=True,
+            position=0,
         ),
-        mask=dict(argstr="-m"),
-        mesh=dict(argstr="-e"),
-        no_output=dict(argstr="-n"),
+        mask=dict(
+            argstr="-m",
+        ),
+        mesh=dict(
+            argstr="-e",
+        ),
+        no_output=dict(
+            argstr="-n",
+        ),
         out_file=dict(
-            argstr="%s", extensions=None, genfile=True, hash_files=False, position=1
+            argstr="%s",
+            extensions=None,
+            genfile=True,
+            hash_files=False,
+            position=1,
         ),
-        outline=dict(argstr="-o"),
+        outline=dict(
+            argstr="-o",
+        ),
         output_type=dict(),
         padding=dict(
             argstr="-Z",
@@ -43,7 +69,10 @@ def test_BET_inputs():
                 "t2_guided",
             ),
         ),
-        radius=dict(argstr="-r %d", units="mm"),
+        radius=dict(
+            argstr="-r %d",
+            units="mm",
+        ),
         reduce_bias=dict(
             argstr="-B",
             xor=(
@@ -80,7 +109,9 @@ def test_BET_inputs():
                 "t2_guided",
             ),
         ),
-        skull=dict(argstr="-s"),
+        skull=dict(
+            argstr="-s",
+        ),
         surfaces=dict(
             argstr="-A",
             xor=(
@@ -106,8 +137,12 @@ def test_BET_inputs():
                 "t2_guided",
             ),
         ),
-        threshold=dict(argstr="-t"),
-        vertical_gradient=dict(argstr="-g %.2f"),
+        threshold=dict(
+            argstr="-t",
+        ),
+        vertical_gradient=dict(
+            argstr="-g %.2f",
+        ),
     )
     inputs = BET.input_spec()
 
@@ -118,18 +153,42 @@ def test_BET_inputs():
 
 def test_BET_outputs():
     output_map = dict(
-        inskull_mask_file=dict(extensions=None),
-        inskull_mesh_file=dict(extensions=None),
-        mask_file=dict(extensions=None),
-        meshfile=dict(extensions=None),
-        out_file=dict(extensions=None),
-        outline_file=dict(extensions=None),
-        outskin_mask_file=dict(extensions=None),
-        outskin_mesh_file=dict(extensions=None),
-        outskull_mask_file=dict(extensions=None),
-        outskull_mesh_file=dict(extensions=None),
-        skull_file=dict(extensions=None),
-        skull_mask_file=dict(extensions=None),
+        inskull_mask_file=dict(
+            extensions=None,
+        ),
+        inskull_mesh_file=dict(
+            extensions=None,
+        ),
+        mask_file=dict(
+            extensions=None,
+        ),
+        meshfile=dict(
+            extensions=None,
+        ),
+        out_file=dict(
+            extensions=None,
+        ),
+        outline_file=dict(
+            extensions=None,
+        ),
+        outskin_mask_file=dict(
+            extensions=None,
+        ),
+        outskin_mesh_file=dict(
+            extensions=None,
+        ),
+        outskull_mask_file=dict(
+            extensions=None,
+        ),
+        outskull_mesh_file=dict(
+            extensions=None,
+        ),
+        skull_file=dict(
+            extensions=None,
+        ),
+        skull_mask_file=dict(
+            extensions=None,
+        ),
     )
     outputs = BET.output_spec()
 

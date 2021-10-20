@@ -4,11 +4,25 @@ from ..minc import Blob
 
 def test_Blob_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        determinant=dict(argstr="-determinant"),
-        environ=dict(nohash=True, usedefault=True),
-        input_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2),
-        magnitude=dict(argstr="-magnitude"),
+        args=dict(
+            argstr="%s",
+        ),
+        determinant=dict(
+            argstr="-determinant",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        input_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
+        magnitude=dict(
+            argstr="-magnitude",
+        ),
         output_file=dict(
             argstr="%s",
             extensions=None,
@@ -18,8 +32,12 @@ def test_Blob_inputs():
             name_template="%s_blob.mnc",
             position=-1,
         ),
-        trace=dict(argstr="-trace"),
-        translation=dict(argstr="-translation"),
+        trace=dict(
+            argstr="-trace",
+        ),
+        translation=dict(
+            argstr="-translation",
+        ),
     )
     inputs = Blob.input_spec()
 
@@ -29,7 +47,11 @@ def test_Blob_inputs():
 
 
 def test_Blob_outputs():
-    output_map = dict(output_file=dict(extensions=None))
+    output_map = dict(
+        output_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Blob.output_spec()
 
     for key, metadata in list(output_map.items()):

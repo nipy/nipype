@@ -4,12 +4,32 @@ from ..preprocess import MRMultiply
 
 def test_MRMultiply_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        debug=dict(argstr="-debug", position=1),
-        environ=dict(nohash=True, usedefault=True),
-        in_files=dict(argstr="%s", mandatory=True, position=-2),
-        out_filename=dict(argstr="%s", extensions=None, genfile=True, position=-1),
-        quiet=dict(argstr="-quiet", position=1),
+        args=dict(
+            argstr="%s",
+        ),
+        debug=dict(
+            argstr="-debug",
+            position=1,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_files=dict(
+            argstr="%s",
+            mandatory=True,
+            position=-2,
+        ),
+        out_filename=dict(
+            argstr="%s",
+            extensions=None,
+            genfile=True,
+            position=-1,
+        ),
+        quiet=dict(
+            argstr="-quiet",
+            position=1,
+        ),
     )
     inputs = MRMultiply.input_spec()
 
@@ -19,7 +39,11 @@ def test_MRMultiply_inputs():
 
 
 def test_MRMultiply_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = MRMultiply.output_spec()
 
     for key, metadata in list(output_map.items()):

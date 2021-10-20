@@ -4,13 +4,29 @@ from ..preprocess import Maskave
 
 def test_Maskave_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        in_file=dict(
-            argstr="%s", copyfile=False, extensions=None, mandatory=True, position=-2
+        args=dict(
+            argstr="%s",
         ),
-        mask=dict(argstr="-mask %s", extensions=None, position=1),
-        num_threads=dict(nohash=True, usedefault=True),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            copyfile=False,
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
+        mask=dict(
+            argstr="-mask %s",
+            extensions=None,
+            position=1,
+        ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         out_file=dict(
             argstr="> %s",
             extensions=None,
@@ -20,7 +36,10 @@ def test_Maskave_inputs():
             position=-1,
         ),
         outputtype=dict(),
-        quiet=dict(argstr="-quiet", position=2),
+        quiet=dict(
+            argstr="-quiet",
+            position=2,
+        ),
     )
     inputs = Maskave.input_spec()
 
@@ -30,7 +49,11 @@ def test_Maskave_inputs():
 
 
 def test_Maskave_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Maskave.output_spec()
 
     for key, metadata in list(output_map.items()):

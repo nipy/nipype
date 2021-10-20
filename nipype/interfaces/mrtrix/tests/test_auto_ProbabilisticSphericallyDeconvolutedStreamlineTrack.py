@@ -4,13 +4,27 @@ from ..tracking import ProbabilisticSphericallyDeconvolutedStreamlineTrack
 
 def test_ProbabilisticSphericallyDeconvolutedStreamlineTrack_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        cutoff_value=dict(argstr="-cutoff %s", units="NA"),
-        desired_number_of_tracks=dict(argstr="-number %d"),
-        do_not_precompute=dict(argstr="-noprecomputed"),
-        environ=dict(nohash=True, usedefault=True),
+        args=dict(
+            argstr="%s",
+        ),
+        cutoff_value=dict(
+            argstr="-cutoff %s",
+            units="NA",
+        ),
+        desired_number_of_tracks=dict(
+            argstr="-number %d",
+        ),
+        do_not_precompute=dict(
+            argstr="-noprecomputed",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         exclude_file=dict(
-            argstr="-exclude %s", extensions=None, xor=["exclude_file", "exclude_spec"]
+            argstr="-exclude %s",
+            extensions=None,
+            xor=["exclude_file", "exclude_spec"],
         ),
         exclude_spec=dict(
             argstr="-exclude %s",
@@ -19,9 +33,16 @@ def test_ProbabilisticSphericallyDeconvolutedStreamlineTrack_inputs():
             units="mm",
             xor=["exclude_file", "exclude_spec"],
         ),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
         include_file=dict(
-            argstr="-include %s", extensions=None, xor=["include_file", "include_spec"]
+            argstr="-include %s",
+            extensions=None,
+            xor=["include_file", "include_spec"],
         ),
         include_spec=dict(
             argstr="-include %s",
@@ -30,11 +51,23 @@ def test_ProbabilisticSphericallyDeconvolutedStreamlineTrack_inputs():
             units="mm",
             xor=["include_file", "include_spec"],
         ),
-        initial_cutoff_value=dict(argstr="-initcutoff %s", units="NA"),
-        initial_direction=dict(argstr="-initdirection %s", units="voxels"),
-        inputmodel=dict(argstr="%s", position=-3, usedefault=True),
+        initial_cutoff_value=dict(
+            argstr="-initcutoff %s",
+            units="NA",
+        ),
+        initial_direction=dict(
+            argstr="-initdirection %s",
+            units="voxels",
+        ),
+        inputmodel=dict(
+            argstr="%s",
+            position=-3,
+            usedefault=True,
+        ),
         mask_file=dict(
-            argstr="-mask %s", extensions=None, xor=["mask_file", "mask_spec"]
+            argstr="-mask %s",
+            extensions=None,
+            xor=["mask_file", "mask_spec"],
         ),
         mask_spec=dict(
             argstr="-mask %s",
@@ -43,12 +76,27 @@ def test_ProbabilisticSphericallyDeconvolutedStreamlineTrack_inputs():
             units="mm",
             xor=["mask_file", "mask_spec"],
         ),
-        maximum_number_of_tracks=dict(argstr="-maxnum %d"),
-        maximum_number_of_trials=dict(argstr="-trials %s"),
-        maximum_tract_length=dict(argstr="-length %s", units="mm"),
-        minimum_radius_of_curvature=dict(argstr="-curvature %s", units="mm"),
-        minimum_tract_length=dict(argstr="-minlength %s", units="mm"),
-        no_mask_interpolation=dict(argstr="-nomaskinterp"),
+        maximum_number_of_tracks=dict(
+            argstr="-maxnum %d",
+        ),
+        maximum_number_of_trials=dict(
+            argstr="-trials %s",
+        ),
+        maximum_tract_length=dict(
+            argstr="-length %s",
+            units="mm",
+        ),
+        minimum_radius_of_curvature=dict(
+            argstr="-curvature %s",
+            units="mm",
+        ),
+        minimum_tract_length=dict(
+            argstr="-minlength %s",
+            units="mm",
+        ),
+        no_mask_interpolation=dict(
+            argstr="-nomaskinterp",
+        ),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -58,7 +106,9 @@ def test_ProbabilisticSphericallyDeconvolutedStreamlineTrack_inputs():
             position=-1,
         ),
         seed_file=dict(
-            argstr="-seed %s", extensions=None, xor=["seed_file", "seed_spec"]
+            argstr="-seed %s",
+            extensions=None,
+            xor=["seed_file", "seed_spec"],
         ),
         seed_spec=dict(
             argstr="-seed %s",
@@ -67,9 +117,16 @@ def test_ProbabilisticSphericallyDeconvolutedStreamlineTrack_inputs():
             units="mm",
             xor=["seed_file", "seed_spec"],
         ),
-        step_size=dict(argstr="-step %s", units="mm"),
-        stop=dict(argstr="-stop"),
-        unidirectional=dict(argstr="-unidirectional"),
+        step_size=dict(
+            argstr="-step %s",
+            units="mm",
+        ),
+        stop=dict(
+            argstr="-stop",
+        ),
+        unidirectional=dict(
+            argstr="-unidirectional",
+        ),
     )
     inputs = ProbabilisticSphericallyDeconvolutedStreamlineTrack.input_spec()
 
@@ -79,7 +136,11 @@ def test_ProbabilisticSphericallyDeconvolutedStreamlineTrack_inputs():
 
 
 def test_ProbabilisticSphericallyDeconvolutedStreamlineTrack_outputs():
-    output_map = dict(tracked=dict(extensions=None))
+    output_map = dict(
+        tracked=dict(
+            extensions=None,
+        ),
+    )
     outputs = ProbabilisticSphericallyDeconvolutedStreamlineTrack.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -4,17 +4,46 @@ from ..em import EM
 
 def test_EM_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        bc_order_val=dict(argstr="-bc_order %s", usedefault=True),
-        bc_thresh_val=dict(argstr="-bc_thresh %s", usedefault=True),
-        environ=dict(nohash=True, usedefault=True),
-        in_file=dict(argstr="-in %s", extensions=None, mandatory=True, position=4),
-        mask_file=dict(argstr="-mask %s", extensions=None),
-        max_iter=dict(argstr="-max_iter %s", usedefault=True),
-        min_iter=dict(argstr="-min_iter %s", usedefault=True),
-        mrf_beta_val=dict(argstr="-mrf_beta %s"),
+        args=dict(
+            argstr="%s",
+        ),
+        bc_order_val=dict(
+            argstr="-bc_order %s",
+            usedefault=True,
+        ),
+        bc_thresh_val=dict(
+            argstr="-bc_thresh %s",
+            usedefault=True,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="-in %s",
+            extensions=None,
+            mandatory=True,
+            position=4,
+        ),
+        mask_file=dict(
+            argstr="-mask %s",
+            extensions=None,
+        ),
+        max_iter=dict(
+            argstr="-max_iter %s",
+            usedefault=True,
+        ),
+        min_iter=dict(
+            argstr="-min_iter %s",
+            usedefault=True,
+        ),
+        mrf_beta_val=dict(
+            argstr="-mrf_beta %s",
+        ),
         no_prior=dict(
-            argstr="-nopriors %s", mandatory=True, xor=["prior_4D", "priors"]
+            argstr="-nopriors %s",
+            mandatory=True,
+            xor=["prior_4D", "priors"],
         ),
         out_bc_file=dict(
             argstr="-bc_out %s",
@@ -34,16 +63,26 @@ def test_EM_inputs():
             name_source=["in_file"],
             name_template="%s_outlier_em.nii.gz",
         ),
-        outlier_val=dict(argstr="-outlier %s %s"),
+        outlier_val=dict(
+            argstr="-outlier %s %s",
+        ),
         prior_4D=dict(
             argstr="-prior4D %s",
             extensions=None,
             mandatory=True,
             xor=["no_prior", "priors"],
         ),
-        priors=dict(argstr="%s", mandatory=True, xor=["no_prior", "prior_4D"]),
-        reg_val=dict(argstr="-reg %s"),
-        relax_priors=dict(argstr="-rf %s %s"),
+        priors=dict(
+            argstr="%s",
+            mandatory=True,
+            xor=["no_prior", "prior_4D"],
+        ),
+        reg_val=dict(
+            argstr="-reg %s",
+        ),
+        relax_priors=dict(
+            argstr="-rf %s %s",
+        ),
     )
     inputs = EM.input_spec()
 
@@ -54,9 +93,15 @@ def test_EM_inputs():
 
 def test_EM_outputs():
     output_map = dict(
-        out_bc_file=dict(extensions=None),
-        out_file=dict(extensions=None),
-        out_outlier_file=dict(extensions=None),
+        out_bc_file=dict(
+            extensions=None,
+        ),
+        out_file=dict(
+            extensions=None,
+        ),
+        out_outlier_file=dict(
+            extensions=None,
+        ),
     )
     outputs = EM.output_spec()
 

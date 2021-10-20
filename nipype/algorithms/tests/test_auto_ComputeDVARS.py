@@ -4,18 +4,44 @@ from ..confounds import ComputeDVARS
 
 def test_ComputeDVARS_inputs():
     input_map = dict(
-        figdpi=dict(usedefault=True),
-        figformat=dict(usedefault=True),
-        figsize=dict(usedefault=True),
-        in_file=dict(extensions=None, mandatory=True),
-        in_mask=dict(extensions=None, mandatory=True),
-        intensity_normalization=dict(usedefault=True),
-        remove_zerovariance=dict(usedefault=True),
-        save_all=dict(usedefault=True),
-        save_nstd=dict(usedefault=True),
-        save_plot=dict(usedefault=True),
-        save_std=dict(usedefault=True),
-        save_vxstd=dict(usedefault=True),
+        figdpi=dict(
+            usedefault=True,
+        ),
+        figformat=dict(
+            usedefault=True,
+        ),
+        figsize=dict(
+            usedefault=True,
+        ),
+        in_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        in_mask=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        intensity_normalization=dict(
+            usedefault=True,
+        ),
+        remove_zerovariance=dict(
+            usedefault=True,
+        ),
+        save_all=dict(
+            usedefault=True,
+        ),
+        save_nstd=dict(
+            usedefault=True,
+        ),
+        save_plot=dict(
+            usedefault=True,
+        ),
+        save_std=dict(
+            usedefault=True,
+        ),
+        save_vxstd=dict(
+            usedefault=True,
+        ),
         series_tr=dict(),
     )
     inputs = ComputeDVARS.input_spec()
@@ -30,13 +56,27 @@ def test_ComputeDVARS_outputs():
         avg_nstd=dict(),
         avg_std=dict(),
         avg_vxstd=dict(),
-        fig_nstd=dict(extensions=None),
-        fig_std=dict(extensions=None),
-        fig_vxstd=dict(extensions=None),
-        out_all=dict(extensions=None),
-        out_nstd=dict(extensions=None),
-        out_std=dict(extensions=None),
-        out_vxstd=dict(extensions=None),
+        fig_nstd=dict(
+            extensions=None,
+        ),
+        fig_std=dict(
+            extensions=None,
+        ),
+        fig_vxstd=dict(
+            extensions=None,
+        ),
+        out_all=dict(
+            extensions=None,
+        ),
+        out_nstd=dict(
+            extensions=None,
+        ),
+        out_std=dict(
+            extensions=None,
+        ),
+        out_vxstd=dict(
+            extensions=None,
+        ),
     )
     outputs = ComputeDVARS.output_spec()
 

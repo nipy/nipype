@@ -4,9 +4,18 @@ from ..utils import ImageInfo
 
 def test_ImageInfo_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        in_file=dict(argstr="%s", extensions=None, position=1),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            position=1,
+        ),
         subjects_dir=dict(),
     )
     inputs = ImageInfo.input_spec()
@@ -26,7 +35,9 @@ def test_ImageInfo_outputs():
         file_format=dict(),
         info=dict(),
         orientation=dict(),
-        out_file=dict(extensions=None),
+        out_file=dict(
+            extensions=None,
+        ),
         ph_enc_dir=dict(),
         vox_sizes=dict(),
     )

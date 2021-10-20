@@ -4,8 +4,13 @@ from ..model import SMM
 
 def test_SMM_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         mask=dict(
             argstr='--mask="%s"',
             copyfile=False,
@@ -13,7 +18,10 @@ def test_SMM_inputs():
             mandatory=True,
             position=1,
         ),
-        no_deactivation_class=dict(argstr="--zfstatmode", position=2),
+        no_deactivation_class=dict(
+            argstr="--zfstatmode",
+            position=2,
+        ),
         output_type=dict(),
         spatial_data_file=dict(
             argstr='--sdf="%s"',
@@ -32,9 +40,15 @@ def test_SMM_inputs():
 
 def test_SMM_outputs():
     output_map = dict(
-        activation_p_map=dict(extensions=None),
-        deactivation_p_map=dict(extensions=None),
-        null_p_map=dict(extensions=None),
+        activation_p_map=dict(
+            extensions=None,
+        ),
+        deactivation_p_map=dict(
+            extensions=None,
+        ),
+        null_p_map=dict(
+            extensions=None,
+        ),
     )
     outputs = SMM.output_spec()
 

@@ -4,10 +4,22 @@ from ..utils import ComposeMultiTransform
 
 def test_ComposeMultiTransform_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        dimension=dict(argstr="%d", position=0, usedefault=True),
-        environ=dict(nohash=True, usedefault=True),
-        num_threads=dict(nohash=True, usedefault=True),
+        args=dict(
+            argstr="%s",
+        ),
+        dimension=dict(
+            argstr="%d",
+            position=0,
+            usedefault=True,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         output_transform=dict(
             argstr="%s",
             extensions=None,
@@ -16,8 +28,16 @@ def test_ComposeMultiTransform_inputs():
             name_template="%s_composed",
             position=1,
         ),
-        reference_image=dict(argstr="%s", extensions=None, position=2),
-        transforms=dict(argstr="%s", mandatory=True, position=3),
+        reference_image=dict(
+            argstr="%s",
+            extensions=None,
+            position=2,
+        ),
+        transforms=dict(
+            argstr="%s",
+            mandatory=True,
+            position=3,
+        ),
     )
     inputs = ComposeMultiTransform.input_spec()
 
@@ -27,7 +47,11 @@ def test_ComposeMultiTransform_inputs():
 
 
 def test_ComposeMultiTransform_outputs():
-    output_map = dict(output_transform=dict(extensions=None))
+    output_map = dict(
+        output_transform=dict(
+            extensions=None,
+        ),
+    )
     outputs = ComposeMultiTransform.output_spec()
 
     for key, metadata in list(output_map.items()):

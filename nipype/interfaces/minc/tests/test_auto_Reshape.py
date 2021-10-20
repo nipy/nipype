@@ -4,10 +4,23 @@ from ..minc import Reshape
 
 def test_Reshape_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        clobber=dict(argstr="-clobber", usedefault=True),
-        environ=dict(nohash=True, usedefault=True),
-        input_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2),
+        args=dict(
+            argstr="%s",
+        ),
+        clobber=dict(
+            argstr="-clobber",
+            usedefault=True,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        input_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
         output_file=dict(
             argstr="%s",
             extensions=None,
@@ -17,8 +30,12 @@ def test_Reshape_inputs():
             name_template="%s_reshape.mnc",
             position=-1,
         ),
-        verbose=dict(argstr="-verbose"),
-        write_short=dict(argstr="-short"),
+        verbose=dict(
+            argstr="-verbose",
+        ),
+        write_short=dict(
+            argstr="-short",
+        ),
     )
     inputs = Reshape.input_spec()
 
@@ -28,7 +45,11 @@ def test_Reshape_inputs():
 
 
 def test_Reshape_outputs():
-    output_map = dict(output_file=dict(extensions=None))
+    output_map = dict(
+        output_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Reshape.output_spec()
 
     for key, metadata in list(output_map.items()):

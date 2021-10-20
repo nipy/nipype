@@ -4,13 +4,31 @@ from ..featuredetection import DilateMask
 
 def test_DilateMask_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        inputBinaryVolume=dict(argstr="--inputBinaryVolume %s", extensions=None),
-        inputVolume=dict(argstr="--inputVolume %s", extensions=None),
-        lowerThreshold=dict(argstr="--lowerThreshold %f"),
-        outputVolume=dict(argstr="--outputVolume %s", hash_files=False),
-        sizeStructuralElement=dict(argstr="--sizeStructuralElement %d"),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        inputBinaryVolume=dict(
+            argstr="--inputBinaryVolume %s",
+            extensions=None,
+        ),
+        inputVolume=dict(
+            argstr="--inputVolume %s",
+            extensions=None,
+        ),
+        lowerThreshold=dict(
+            argstr="--lowerThreshold %f",
+        ),
+        outputVolume=dict(
+            argstr="--outputVolume %s",
+            hash_files=False,
+        ),
+        sizeStructuralElement=dict(
+            argstr="--sizeStructuralElement %d",
+        ),
     )
     inputs = DilateMask.input_spec()
 
@@ -20,7 +38,11 @@ def test_DilateMask_inputs():
 
 
 def test_DilateMask_outputs():
-    output_map = dict(outputVolume=dict(extensions=None))
+    output_map = dict(
+        outputVolume=dict(
+            extensions=None,
+        ),
+    )
     outputs = DilateMask.output_spec()
 
     for key, metadata in list(output_map.items()):

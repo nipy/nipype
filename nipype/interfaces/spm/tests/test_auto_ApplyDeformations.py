@@ -4,11 +4,22 @@ from ..preprocess import ApplyDeformations
 
 def test_ApplyDeformations_inputs():
     input_map = dict(
-        deformation_field=dict(extensions=None, field="comp{1}.def", mandatory=True),
-        in_files=dict(field="fnames", mandatory=True),
-        interp=dict(field="interp"),
+        deformation_field=dict(
+            extensions=None,
+            field="comp{1}.def",
+            mandatory=True,
+        ),
+        in_files=dict(
+            field="fnames",
+            mandatory=True,
+        ),
+        interp=dict(
+            field="interp",
+        ),
         matlab_cmd=dict(),
-        mfile=dict(usedefault=True),
+        mfile=dict(
+            usedefault=True,
+        ),
         paths=dict(),
         reference_volume=dict(
             extensions=[".hdr", ".img", ".img.gz", ".nii"],
@@ -16,7 +27,10 @@ def test_ApplyDeformations_inputs():
             mandatory=True,
         ),
         use_mcr=dict(),
-        use_v8struct=dict(min_ver="8", usedefault=True),
+        use_v8struct=dict(
+            min_ver="8",
+            usedefault=True,
+        ),
     )
     inputs = ApplyDeformations.input_spec()
 
@@ -26,7 +40,9 @@ def test_ApplyDeformations_inputs():
 
 
 def test_ApplyDeformations_outputs():
-    output_map = dict(out_files=dict())
+    output_map = dict(
+        out_files=dict(),
+    )
     outputs = ApplyDeformations.output_spec()
 
     for key, metadata in list(output_map.items()):

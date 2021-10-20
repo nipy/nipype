@@ -4,7 +4,9 @@ from ..utils import Complex
 
 def test_Complex_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
+        args=dict(
+            argstr="%s",
+        ),
         complex_cartesian=dict(
             argstr="-complex",
             position=1,
@@ -17,8 +19,16 @@ def test_Complex_inputs():
                 "complex_merge",
             ],
         ),
-        complex_in_file=dict(argstr="%s", extensions=None, position=2),
-        complex_in_file2=dict(argstr="%s", extensions=None, position=3),
+        complex_in_file=dict(
+            argstr="%s",
+            extensions=None,
+            position=2,
+        ),
+        complex_in_file2=dict(
+            argstr="%s",
+            extensions=None,
+            position=3,
+        ),
         complex_merge=dict(
             argstr="-complexmerge",
             position=1,
@@ -72,9 +82,19 @@ def test_Complex_inputs():
                 "complex_merge",
             ],
         ),
-        end_vol=dict(argstr="%d", position=-1),
-        environ=dict(nohash=True, usedefault=True),
-        imaginary_in_file=dict(argstr="%s", extensions=None, position=3),
+        end_vol=dict(
+            argstr="%d",
+            position=-1,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        imaginary_in_file=dict(
+            argstr="%s",
+            extensions=None,
+            position=3,
+        ),
         imaginary_out_file=dict(
             argstr="%s",
             extensions=None,
@@ -91,7 +111,11 @@ def test_Complex_inputs():
                 "complex_merge",
             ],
         ),
-        magnitude_in_file=dict(argstr="%s", extensions=None, position=2),
+        magnitude_in_file=dict(
+            argstr="%s",
+            extensions=None,
+            position=2,
+        ),
         magnitude_out_file=dict(
             argstr="%s",
             extensions=None,
@@ -109,7 +133,11 @@ def test_Complex_inputs():
             ],
         ),
         output_type=dict(),
-        phase_in_file=dict(argstr="%s", extensions=None, position=3),
+        phase_in_file=dict(
+            argstr="%s",
+            extensions=None,
+            position=3,
+        ),
         phase_out_file=dict(
             argstr="%s",
             extensions=None,
@@ -138,7 +166,11 @@ def test_Complex_inputs():
                 "complex_merge",
             ],
         ),
-        real_in_file=dict(argstr="%s", extensions=None, position=2),
+        real_in_file=dict(
+            argstr="%s",
+            extensions=None,
+            position=2,
+        ),
         real_out_file=dict(
             argstr="%s",
             extensions=None,
@@ -167,7 +199,10 @@ def test_Complex_inputs():
                 "complex_merge",
             ],
         ),
-        start_vol=dict(argstr="%d", position=-2),
+        start_vol=dict(
+            argstr="%d",
+            position=-2,
+        ),
     )
     inputs = Complex.input_spec()
 
@@ -178,11 +213,21 @@ def test_Complex_inputs():
 
 def test_Complex_outputs():
     output_map = dict(
-        complex_out_file=dict(extensions=None),
-        imaginary_out_file=dict(extensions=None),
-        magnitude_out_file=dict(extensions=None),
-        phase_out_file=dict(extensions=None),
-        real_out_file=dict(extensions=None),
+        complex_out_file=dict(
+            extensions=None,
+        ),
+        imaginary_out_file=dict(
+            extensions=None,
+        ),
+        magnitude_out_file=dict(
+            extensions=None,
+        ),
+        phase_out_file=dict(
+            extensions=None,
+        ),
+        real_out_file=dict(
+            extensions=None,
+        ),
     )
     outputs = Complex.output_spec()
 

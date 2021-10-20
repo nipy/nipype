@@ -4,11 +4,22 @@ from ..preprocess import Trim
 
 def test_Trim_inputs():
     input_map = dict(
-        begin_index=dict(usedefault=True),
-        end_index=dict(usedefault=True),
-        in_file=dict(extensions=None, mandatory=True),
-        out_file=dict(extensions=None),
-        suffix=dict(usedefault=True),
+        begin_index=dict(
+            usedefault=True,
+        ),
+        end_index=dict(
+            usedefault=True,
+        ),
+        in_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        out_file=dict(
+            extensions=None,
+        ),
+        suffix=dict(
+            usedefault=True,
+        ),
     )
     inputs = Trim.input_spec()
 
@@ -18,7 +29,11 @@ def test_Trim_inputs():
 
 
 def test_Trim_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Trim.output_spec()
 
     for key, metadata in list(output_map.items()):

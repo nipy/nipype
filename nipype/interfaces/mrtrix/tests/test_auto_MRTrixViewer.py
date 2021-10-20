@@ -4,11 +4,26 @@ from ..preprocess import MRTrixViewer
 
 def test_MRTrixViewer_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        debug=dict(argstr="-debug", position=1),
-        environ=dict(nohash=True, usedefault=True),
-        in_files=dict(argstr="%s", mandatory=True, position=-2),
-        quiet=dict(argstr="-quiet", position=1),
+        args=dict(
+            argstr="%s",
+        ),
+        debug=dict(
+            argstr="-debug",
+            position=1,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_files=dict(
+            argstr="%s",
+            mandatory=True,
+            position=-2,
+        ),
+        quiet=dict(
+            argstr="-quiet",
+            position=1,
+        ),
     )
     inputs = MRTrixViewer.input_spec()
 

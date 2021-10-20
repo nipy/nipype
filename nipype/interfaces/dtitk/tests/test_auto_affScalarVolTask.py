@@ -4,12 +4,30 @@ from ..registration import affScalarVolTask
 
 def test_affScalarVolTask_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        deformation=dict(argstr="-deformation %g %g %g %g %g %g", xor=["transform"]),
-        environ=dict(nohash=True, usedefault=True),
-        euler=dict(argstr="-euler %g %g %g", xor=["transform"]),
-        in_file=dict(argstr="-in %s", extensions=None, mandatory=True),
-        interpolation=dict(argstr="-interp %s", usedefault=True),
+        args=dict(
+            argstr="%s",
+        ),
+        deformation=dict(
+            argstr="-deformation %g %g %g %g %g %g",
+            xor=["transform"],
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        euler=dict(
+            argstr="-euler %g %g %g",
+            xor=["transform"],
+        ),
+        in_file=dict(
+            argstr="-in %s",
+            extensions=None,
+            mandatory=True,
+        ),
+        interpolation=dict(
+            argstr="-interp %s",
+            usedefault=True,
+        ),
         out_file=dict(
             argstr="-out %s",
             extensions=None,
@@ -17,13 +35,20 @@ def test_affScalarVolTask_inputs():
             name_source="in_file",
             name_template="%s_affxfmd",
         ),
-        target=dict(argstr="-target %s", extensions=None, xor=["transform"]),
+        target=dict(
+            argstr="-target %s",
+            extensions=None,
+            xor=["transform"],
+        ),
         transform=dict(
             argstr="-trans %s",
             extensions=None,
             xor=["target", "translation", "euler", "deformation"],
         ),
-        translation=dict(argstr="-translation %g %g %g", xor=["transform"]),
+        translation=dict(
+            argstr="-translation %g %g %g",
+            xor=["transform"],
+        ),
     )
     inputs = affScalarVolTask.input_spec()
 
@@ -33,7 +58,11 @@ def test_affScalarVolTask_inputs():
 
 
 def test_affScalarVolTask_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = affScalarVolTask.output_spec()
 
     for key, metadata in list(output_map.items()):

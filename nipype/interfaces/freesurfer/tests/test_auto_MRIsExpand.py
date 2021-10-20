@@ -4,23 +4,61 @@ from ..utils import MRIsExpand
 
 def test_MRIsExpand_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        distance=dict(argstr="%g", mandatory=True, position=-2),
-        dt=dict(argstr="-T %g"),
-        environ=dict(nohash=True, usedefault=True),
-        in_file=dict(
-            argstr="%s", copyfile=False, extensions=None, mandatory=True, position=-3
+        args=dict(
+            argstr="%s",
         ),
-        nsurfaces=dict(argstr="-N %d"),
-        out_name=dict(argstr="%s", position=-1, usedefault=True),
-        pial=dict(argstr="-pial %s", copyfile=False),
-        smooth_averages=dict(argstr="-A %d"),
-        sphere=dict(copyfile=False, usedefault=True),
-        spring=dict(argstr="-S %g"),
+        distance=dict(
+            argstr="%g",
+            mandatory=True,
+            position=-2,
+        ),
+        dt=dict(
+            argstr="-T %g",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            copyfile=False,
+            extensions=None,
+            mandatory=True,
+            position=-3,
+        ),
+        nsurfaces=dict(
+            argstr="-N %d",
+        ),
+        out_name=dict(
+            argstr="%s",
+            position=-1,
+            usedefault=True,
+        ),
+        pial=dict(
+            argstr="-pial %s",
+            copyfile=False,
+        ),
+        smooth_averages=dict(
+            argstr="-A %d",
+        ),
+        sphere=dict(
+            copyfile=False,
+            usedefault=True,
+        ),
+        spring=dict(
+            argstr="-S %g",
+        ),
         subjects_dir=dict(),
-        thickness=dict(argstr="-thickness"),
-        thickness_name=dict(argstr="-thickness_name %s", copyfile=False),
-        write_iterations=dict(argstr="-W %d"),
+        thickness=dict(
+            argstr="-thickness",
+        ),
+        thickness_name=dict(
+            argstr="-thickness_name %s",
+            copyfile=False,
+        ),
+        write_iterations=dict(
+            argstr="-W %d",
+        ),
     )
     inputs = MRIsExpand.input_spec()
 
@@ -30,7 +68,11 @@ def test_MRIsExpand_inputs():
 
 
 def test_MRIsExpand_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = MRIsExpand.output_spec()
 
     for key, metadata in list(output_map.items()):

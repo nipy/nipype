@@ -4,21 +4,48 @@ from ..model import Synthesize
 
 def test_Synthesize_inputs():
     input_map = dict(
-        TR=dict(argstr="-TR %f"),
-        args=dict(argstr="%s"),
+        TR=dict(
+            argstr="-TR %f",
+        ),
+        args=dict(
+            argstr="%s",
+        ),
         cbucket=dict(
-            argstr="-cbucket %s", copyfile=False, extensions=None, mandatory=True
+            argstr="-cbucket %s",
+            copyfile=False,
+            extensions=None,
+            mandatory=True,
         ),
-        cenfill=dict(argstr="-cenfill %s"),
-        dry_run=dict(argstr="-dry"),
-        environ=dict(nohash=True, usedefault=True),
+        cenfill=dict(
+            argstr="-cenfill %s",
+        ),
+        dry_run=dict(
+            argstr="-dry",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         matrix=dict(
-            argstr="-matrix %s", copyfile=False, extensions=None, mandatory=True
+            argstr="-matrix %s",
+            copyfile=False,
+            extensions=None,
+            mandatory=True,
         ),
-        num_threads=dict(nohash=True, usedefault=True),
-        out_file=dict(argstr="-prefix %s", extensions=None, name_template="syn"),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        out_file=dict(
+            argstr="-prefix %s",
+            extensions=None,
+            name_template="syn",
+        ),
         outputtype=dict(),
-        select=dict(argstr="-select %s", mandatory=True),
+        select=dict(
+            argstr="-select %s",
+            mandatory=True,
+        ),
     )
     inputs = Synthesize.input_spec()
 
@@ -28,7 +55,11 @@ def test_Synthesize_inputs():
 
 
 def test_Synthesize_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Synthesize.output_spec()
 
     for key, metadata in list(output_map.items()):

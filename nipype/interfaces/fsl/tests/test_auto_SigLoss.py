@@ -4,14 +4,34 @@ from ..utils import SigLoss
 
 def test_SigLoss_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        echo_time=dict(argstr="--te=%f"),
-        environ=dict(nohash=True, usedefault=True),
-        in_file=dict(argstr="-i %s", extensions=None, mandatory=True),
-        mask_file=dict(argstr="-m %s", extensions=None),
-        out_file=dict(argstr="-s %s", extensions=None, genfile=True),
+        args=dict(
+            argstr="%s",
+        ),
+        echo_time=dict(
+            argstr="--te=%f",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="-i %s",
+            extensions=None,
+            mandatory=True,
+        ),
+        mask_file=dict(
+            argstr="-m %s",
+            extensions=None,
+        ),
+        out_file=dict(
+            argstr="-s %s",
+            extensions=None,
+            genfile=True,
+        ),
         output_type=dict(),
-        slice_direction=dict(argstr="-d %s"),
+        slice_direction=dict(
+            argstr="-d %s",
+        ),
     )
     inputs = SigLoss.input_spec()
 
@@ -21,7 +41,11 @@ def test_SigLoss_inputs():
 
 
 def test_SigLoss_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = SigLoss.output_spec()
 
     for key, metadata in list(output_map.items()):

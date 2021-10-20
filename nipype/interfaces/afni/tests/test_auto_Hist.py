@@ -4,9 +4,16 @@ from ..preprocess import Hist
 
 def test_Hist_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        bin_width=dict(argstr="-binwidth %f"),
-        environ=dict(nohash=True, usedefault=True),
+        args=dict(
+            argstr="%s",
+        ),
+        bin_width=dict(
+            argstr="-binwidth %f",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         in_file=dict(
             argstr="-input %s",
             copyfile=False,
@@ -14,10 +21,19 @@ def test_Hist_inputs():
             mandatory=True,
             position=1,
         ),
-        mask=dict(argstr="-mask %s", extensions=None),
-        max_value=dict(argstr="-max %f"),
-        min_value=dict(argstr="-min %f"),
-        nbin=dict(argstr="-nbin %d"),
+        mask=dict(
+            argstr="-mask %s",
+            extensions=None,
+        ),
+        max_value=dict(
+            argstr="-max %f",
+        ),
+        min_value=dict(
+            argstr="-min %f",
+        ),
+        nbin=dict(
+            argstr="-nbin %d",
+        ),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -33,7 +49,10 @@ def test_Hist_inputs():
             name_template="%s_hist.out",
             position=-1,
         ),
-        showhist=dict(argstr="-showhist", usedefault=True),
+        showhist=dict(
+            argstr="-showhist",
+            usedefault=True,
+        ),
     )
     inputs = Hist.input_spec()
 
@@ -43,7 +62,14 @@ def test_Hist_inputs():
 
 
 def test_Hist_outputs():
-    output_map = dict(out_file=dict(extensions=None), out_show=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+        out_show=dict(
+            extensions=None,
+        ),
+    )
     outputs = Hist.output_spec()
 
     for key, metadata in list(output_map.items()):

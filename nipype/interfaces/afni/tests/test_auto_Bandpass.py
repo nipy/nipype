@@ -4,25 +4,70 @@ from ..preprocess import Bandpass
 
 def test_Bandpass_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        automask=dict(argstr="-automask"),
-        blur=dict(argstr="-blur %f"),
-        despike=dict(argstr="-despike"),
-        environ=dict(nohash=True, usedefault=True),
-        highpass=dict(argstr="%f", mandatory=True, position=-3),
-        in_file=dict(
-            argstr="%s", copyfile=False, extensions=None, mandatory=True, position=-1
+        args=dict(
+            argstr="%s",
         ),
-        localPV=dict(argstr="-localPV %f"),
-        lowpass=dict(argstr="%f", mandatory=True, position=-2),
-        mask=dict(argstr="-mask %s", extensions=None, position=2),
-        nfft=dict(argstr="-nfft %d"),
-        no_detrend=dict(argstr="-nodetrend"),
-        normalize=dict(argstr="-norm"),
-        notrans=dict(argstr="-notrans"),
-        num_threads=dict(nohash=True, usedefault=True),
-        orthogonalize_dset=dict(argstr="-dsort %s", extensions=None),
-        orthogonalize_file=dict(argstr="-ort %s"),
+        automask=dict(
+            argstr="-automask",
+        ),
+        blur=dict(
+            argstr="-blur %f",
+        ),
+        despike=dict(
+            argstr="-despike",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        highpass=dict(
+            argstr="%f",
+            mandatory=True,
+            position=-3,
+        ),
+        in_file=dict(
+            argstr="%s",
+            copyfile=False,
+            extensions=None,
+            mandatory=True,
+            position=-1,
+        ),
+        localPV=dict(
+            argstr="-localPV %f",
+        ),
+        lowpass=dict(
+            argstr="%f",
+            mandatory=True,
+            position=-2,
+        ),
+        mask=dict(
+            argstr="-mask %s",
+            extensions=None,
+            position=2,
+        ),
+        nfft=dict(
+            argstr="-nfft %d",
+        ),
+        no_detrend=dict(
+            argstr="-nodetrend",
+        ),
+        normalize=dict(
+            argstr="-norm",
+        ),
+        notrans=dict(
+            argstr="-notrans",
+        ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        orthogonalize_dset=dict(
+            argstr="-dsort %s",
+            extensions=None,
+        ),
+        orthogonalize_file=dict(
+            argstr="-ort %s",
+        ),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -31,7 +76,9 @@ def test_Bandpass_inputs():
             position=1,
         ),
         outputtype=dict(),
-        tr=dict(argstr="-dt %f"),
+        tr=dict(
+            argstr="-dt %f",
+        ),
     )
     inputs = Bandpass.input_spec()
 
@@ -41,7 +88,11 @@ def test_Bandpass_inputs():
 
 
 def test_Bandpass_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Bandpass.output_spec()
 
     for key, metadata in list(output_map.items()):

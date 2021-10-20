@@ -4,13 +4,31 @@ from ..utils import MotionOutliers
 
 def test_MotionOutliers_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        dummy=dict(argstr="--dummy=%d"),
-        environ=dict(nohash=True, usedefault=True),
-        in_file=dict(argstr="-i %s", extensions=None, mandatory=True),
-        mask=dict(argstr="-m %s", extensions=None),
-        metric=dict(argstr="--%s"),
-        no_motion_correction=dict(argstr="--nomoco"),
+        args=dict(
+            argstr="%s",
+        ),
+        dummy=dict(
+            argstr="--dummy=%d",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="-i %s",
+            extensions=None,
+            mandatory=True,
+        ),
+        mask=dict(
+            argstr="-m %s",
+            extensions=None,
+        ),
+        metric=dict(
+            argstr="--%s",
+        ),
+        no_motion_correction=dict(
+            argstr="--nomoco",
+        ),
         out_file=dict(
             argstr="-o %s",
             extensions=None,
@@ -36,7 +54,9 @@ def test_MotionOutliers_inputs():
             name_template="%s_metrics.txt",
         ),
         output_type=dict(),
-        threshold=dict(argstr="--thresh=%g"),
+        threshold=dict(
+            argstr="--thresh=%g",
+        ),
     )
     inputs = MotionOutliers.input_spec()
 
@@ -47,9 +67,15 @@ def test_MotionOutliers_inputs():
 
 def test_MotionOutliers_outputs():
     output_map = dict(
-        out_file=dict(extensions=None),
-        out_metric_plot=dict(extensions=None),
-        out_metric_values=dict(extensions=None),
+        out_file=dict(
+            extensions=None,
+        ),
+        out_metric_plot=dict(
+            extensions=None,
+        ),
+        out_metric_values=dict(
+            extensions=None,
+        ),
     )
     outputs = MotionOutliers.output_spec()
 

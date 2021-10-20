@@ -4,20 +4,69 @@ from ..preprocess import MRConvert
 
 def test_MRConvert_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        extension=dict(position=2, usedefault=True),
-        extract_at_axis=dict(argstr="-coord %s", position=1),
-        extract_at_coordinate=dict(argstr="%s", position=2, sep=","),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2),
-        layout=dict(argstr="-output %s", position=2),
-        offset_bias=dict(argstr="-scale %d", position=3, units="mm"),
-        out_filename=dict(argstr="%s", extensions=None, genfile=True, position=-1),
-        output_datatype=dict(argstr="-output %s", position=2),
-        prs=dict(argstr="-prs", position=3),
-        replace_NaN_with_zero=dict(argstr="-zero", position=3),
-        resample=dict(argstr="-scale %d", position=3, units="mm"),
-        voxel_dims=dict(argstr="-vox %s", position=3, sep=","),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        extension=dict(
+            position=2,
+            usedefault=True,
+        ),
+        extract_at_axis=dict(
+            argstr="-coord %s",
+            position=1,
+        ),
+        extract_at_coordinate=dict(
+            argstr="%s",
+            position=2,
+            sep=",",
+        ),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
+        layout=dict(
+            argstr="-output %s",
+            position=2,
+        ),
+        offset_bias=dict(
+            argstr="-scale %d",
+            position=3,
+            units="mm",
+        ),
+        out_filename=dict(
+            argstr="%s",
+            extensions=None,
+            genfile=True,
+            position=-1,
+        ),
+        output_datatype=dict(
+            argstr="-output %s",
+            position=2,
+        ),
+        prs=dict(
+            argstr="-prs",
+            position=3,
+        ),
+        replace_NaN_with_zero=dict(
+            argstr="-zero",
+            position=3,
+        ),
+        resample=dict(
+            argstr="-scale %d",
+            position=3,
+            units="mm",
+        ),
+        voxel_dims=dict(
+            argstr="-vox %s",
+            position=3,
+            sep=",",
+        ),
     )
     inputs = MRConvert.input_spec()
 
@@ -27,7 +76,11 @@ def test_MRConvert_inputs():
 
 
 def test_MRConvert_outputs():
-    output_map = dict(converted=dict(extensions=None))
+    output_map = dict(
+        converted=dict(
+            extensions=None,
+        ),
+    )
     outputs = MRConvert.output_spec()
 
     for key, metadata in list(output_map.items()):

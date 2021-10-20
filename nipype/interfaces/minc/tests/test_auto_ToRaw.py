@@ -4,12 +4,33 @@ from ..minc import ToRaw
 
 def test_ToRaw_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        input_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2),
-        nonormalize=dict(argstr="-nonormalize", xor=("normalize", "nonormalize")),
-        normalize=dict(argstr="-normalize", xor=("normalize", "nonormalize")),
-        out_file=dict(argstr="> %s", extensions=None, genfile=True, position=-1),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        input_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
+        nonormalize=dict(
+            argstr="-nonormalize",
+            xor=("normalize", "nonormalize"),
+        ),
+        normalize=dict(
+            argstr="-normalize",
+            xor=("normalize", "nonormalize"),
+        ),
+        out_file=dict(
+            argstr="> %s",
+            extensions=None,
+            genfile=True,
+            position=-1,
+        ),
         output_file=dict(
             extensions=None,
             hash_files=False,
@@ -73,7 +94,9 @@ def test_ToRaw_inputs():
                 "write_double",
             ),
         ),
-        write_range=dict(argstr="-range %s %s"),
+        write_range=dict(
+            argstr="-range %s %s",
+        ),
         write_short=dict(
             argstr="-short",
             xor=(
@@ -85,8 +108,14 @@ def test_ToRaw_inputs():
                 "write_double",
             ),
         ),
-        write_signed=dict(argstr="-signed", xor=("write_signed", "write_unsigned")),
-        write_unsigned=dict(argstr="-unsigned", xor=("write_signed", "write_unsigned")),
+        write_signed=dict(
+            argstr="-signed",
+            xor=("write_signed", "write_unsigned"),
+        ),
+        write_unsigned=dict(
+            argstr="-unsigned",
+            xor=("write_signed", "write_unsigned"),
+        ),
     )
     inputs = ToRaw.input_spec()
 
@@ -96,7 +125,11 @@ def test_ToRaw_inputs():
 
 
 def test_ToRaw_outputs():
-    output_map = dict(output_file=dict(extensions=None))
+    output_map = dict(
+        output_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = ToRaw.output_spec()
 
     for key, metadata in list(output_map.items()):

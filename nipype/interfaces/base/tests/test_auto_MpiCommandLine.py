@@ -4,10 +4,17 @@ from ..core import MpiCommandLine
 
 def test_MpiCommandLine_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         n_procs=dict(),
-        use_mpi=dict(usedefault=True),
+        use_mpi=dict(
+            usedefault=True,
+        ),
     )
     inputs = MpiCommandLine.input_spec()
 

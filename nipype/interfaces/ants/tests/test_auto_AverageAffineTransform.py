@@ -4,14 +4,33 @@ from ..utils import AverageAffineTransform
 
 def test_AverageAffineTransform_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        dimension=dict(argstr="%d", mandatory=True, position=0),
-        environ=dict(nohash=True, usedefault=True),
-        num_threads=dict(nohash=True, usedefault=True),
-        output_affine_transform=dict(
-            argstr="%s", extensions=None, mandatory=True, position=1
+        args=dict(
+            argstr="%s",
         ),
-        transforms=dict(argstr="%s", mandatory=True, position=3),
+        dimension=dict(
+            argstr="%d",
+            mandatory=True,
+            position=0,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        output_affine_transform=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=1,
+        ),
+        transforms=dict(
+            argstr="%s",
+            mandatory=True,
+            position=3,
+        ),
     )
     inputs = AverageAffineTransform.input_spec()
 
@@ -21,7 +40,11 @@ def test_AverageAffineTransform_inputs():
 
 
 def test_AverageAffineTransform_outputs():
-    output_map = dict(affine_transform=dict(extensions=None))
+    output_map = dict(
+        affine_transform=dict(
+            extensions=None,
+        ),
+    )
     outputs = AverageAffineTransform.output_spec()
 
     for key, metadata in list(output_map.items()):

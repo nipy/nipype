@@ -3,7 +3,15 @@ from ..base import NiftySegCommand
 
 
 def test_NiftySegCommand_inputs():
-    input_map = dict(args=dict(argstr="%s"), environ=dict(nohash=True, usedefault=True))
+    input_map = dict(
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+    )
     inputs = NiftySegCommand.input_spec()
 
     for key, metadata in list(input_map.items()):

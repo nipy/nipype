@@ -4,16 +4,30 @@ from ..convert import DT2NIfTI
 
 def test_DT2NIfTI_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         header_file=dict(
-            argstr="-header %s", extensions=None, mandatory=True, position=3
+            argstr="-header %s",
+            extensions=None,
+            mandatory=True,
+            position=3,
         ),
         in_file=dict(
-            argstr="-inputfile %s", extensions=None, mandatory=True, position=1
+            argstr="-inputfile %s",
+            extensions=None,
+            mandatory=True,
+            position=1,
         ),
         output_root=dict(
-            argstr="-outputroot %s", extensions=None, genfile=True, position=2
+            argstr="-outputroot %s",
+            extensions=None,
+            genfile=True,
+            position=2,
         ),
     )
     inputs = DT2NIfTI.input_spec()
@@ -25,9 +39,15 @@ def test_DT2NIfTI_inputs():
 
 def test_DT2NIfTI_outputs():
     output_map = dict(
-        dt=dict(extensions=None),
-        exitcode=dict(extensions=None),
-        lns0=dict(extensions=None),
+        dt=dict(
+            extensions=None,
+        ),
+        exitcode=dict(
+            extensions=None,
+        ),
+        lns0=dict(
+            extensions=None,
+        ),
     )
     outputs = DT2NIfTI.output_spec()
 

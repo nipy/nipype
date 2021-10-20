@@ -4,9 +4,19 @@ from ..utils import TalairachQC
 
 def test_TalairachQC_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        log_file=dict(argstr="%s", extensions=None, mandatory=True, position=0),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        log_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=0,
+        ),
         subjects_dir=dict(),
     )
     inputs = TalairachQC.input_spec()
@@ -17,7 +27,12 @@ def test_TalairachQC_inputs():
 
 
 def test_TalairachQC_outputs():
-    output_map = dict(log_file=dict(extensions=None, usedefault=True))
+    output_map = dict(
+        log_file=dict(
+            extensions=None,
+            usedefault=True,
+        ),
+    )
     outputs = TalairachQC.output_spec()
 
     for key, metadata in list(output_map.items()):

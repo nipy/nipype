@@ -4,14 +4,32 @@ from ..specialized import FiducialRegistration
 
 def test_FiducialRegistration_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        fixedLandmarks=dict(argstr="--fixedLandmarks %s..."),
-        movingLandmarks=dict(argstr="--movingLandmarks %s..."),
-        outputMessage=dict(argstr="--outputMessage %s"),
-        rms=dict(argstr="--rms %f"),
-        saveTransform=dict(argstr="--saveTransform %s", hash_files=False),
-        transformType=dict(argstr="--transformType %s"),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        fixedLandmarks=dict(
+            argstr="--fixedLandmarks %s...",
+        ),
+        movingLandmarks=dict(
+            argstr="--movingLandmarks %s...",
+        ),
+        outputMessage=dict(
+            argstr="--outputMessage %s",
+        ),
+        rms=dict(
+            argstr="--rms %f",
+        ),
+        saveTransform=dict(
+            argstr="--saveTransform %s",
+            hash_files=False,
+        ),
+        transformType=dict(
+            argstr="--transformType %s",
+        ),
     )
     inputs = FiducialRegistration.input_spec()
 
@@ -21,7 +39,11 @@ def test_FiducialRegistration_inputs():
 
 
 def test_FiducialRegistration_outputs():
-    output_map = dict(saveTransform=dict(extensions=None))
+    output_map = dict(
+        saveTransform=dict(
+            extensions=None,
+        ),
+    )
     outputs = FiducialRegistration.output_spec()
 
     for key, metadata in list(output_map.items()):

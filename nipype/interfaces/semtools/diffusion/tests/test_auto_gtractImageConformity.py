@@ -4,12 +4,28 @@ from ..gtract import gtractImageConformity
 
 def test_gtractImageConformity_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        inputReferenceVolume=dict(argstr="--inputReferenceVolume %s", extensions=None),
-        inputVolume=dict(argstr="--inputVolume %s", extensions=None),
-        numberOfThreads=dict(argstr="--numberOfThreads %d"),
-        outputVolume=dict(argstr="--outputVolume %s", hash_files=False),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        inputReferenceVolume=dict(
+            argstr="--inputReferenceVolume %s",
+            extensions=None,
+        ),
+        inputVolume=dict(
+            argstr="--inputVolume %s",
+            extensions=None,
+        ),
+        numberOfThreads=dict(
+            argstr="--numberOfThreads %d",
+        ),
+        outputVolume=dict(
+            argstr="--outputVolume %s",
+            hash_files=False,
+        ),
     )
     inputs = gtractImageConformity.input_spec()
 
@@ -19,7 +35,11 @@ def test_gtractImageConformity_inputs():
 
 
 def test_gtractImageConformity_outputs():
-    output_map = dict(outputVolume=dict(extensions=None))
+    output_map = dict(
+        outputVolume=dict(
+            extensions=None,
+        ),
+    )
     outputs = gtractImageConformity.output_spec()
 
     for key, metadata in list(output_map.items()):

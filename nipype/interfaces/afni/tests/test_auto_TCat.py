@@ -4,10 +4,23 @@ from ..utils import TCat
 
 def test_TCat_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        in_files=dict(argstr=" %s", copyfile=False, mandatory=True, position=-1),
-        num_threads=dict(nohash=True, usedefault=True),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_files=dict(
+            argstr=" %s",
+            copyfile=False,
+            mandatory=True,
+            position=-1,
+        ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -15,8 +28,13 @@ def test_TCat_inputs():
             name_template="%s_tcat",
         ),
         outputtype=dict(),
-        rlt=dict(argstr="-rlt%s", position=1),
-        verbose=dict(argstr="-verb"),
+        rlt=dict(
+            argstr="-rlt%s",
+            position=1,
+        ),
+        verbose=dict(
+            argstr="-verb",
+        ),
     )
     inputs = TCat.input_spec()
 
@@ -26,7 +44,11 @@ def test_TCat_inputs():
 
 
 def test_TCat_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = TCat.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -4,11 +4,18 @@ from ..io import BIDSDataGrabber
 
 def test_BIDSDataGrabber_inputs():
     input_map = dict(
-        base_dir=dict(mandatory=True),
+        base_dir=dict(
+            mandatory=True,
+        ),
         extra_derivatives=dict(),
-        index_derivatives=dict(mandatory=True, usedefault=True),
+        index_derivatives=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
         output_query=dict(),
-        raise_on_empty=dict(usedefault=True),
+        raise_on_empty=dict(
+            usedefault=True,
+        ),
     )
     inputs = BIDSDataGrabber.input_spec()
 

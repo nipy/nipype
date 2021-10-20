@@ -5,11 +5,17 @@ from ..io import DataFinder
 def test_DataFinder_inputs():
     input_map = dict(
         ignore_regexes=dict(),
-        match_regex=dict(usedefault=True),
+        match_regex=dict(
+            usedefault=True,
+        ),
         max_depth=dict(),
         min_depth=dict(),
-        root_paths=dict(mandatory=True),
-        unpack_single=dict(usedefault=True),
+        root_paths=dict(
+            mandatory=True,
+        ),
+        unpack_single=dict(
+            usedefault=True,
+        ),
     )
     inputs = DataFinder.input_spec()
 

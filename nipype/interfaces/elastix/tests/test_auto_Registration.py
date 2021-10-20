@@ -4,16 +4,49 @@ from ..registration import Registration
 
 def test_Registration_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        fixed_image=dict(argstr="-f %s", extensions=None, mandatory=True),
-        fixed_mask=dict(argstr="-fMask %s", extensions=None),
-        initial_transform=dict(argstr="-t0 %s", extensions=None),
-        moving_image=dict(argstr="-m %s", extensions=None, mandatory=True),
-        moving_mask=dict(argstr="-mMask %s", extensions=None),
-        num_threads=dict(argstr="-threads %01d", nohash=True, usedefault=True),
-        output_path=dict(argstr="-out %s", mandatory=True, usedefault=True),
-        parameters=dict(argstr="-p %s...", mandatory=True),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        fixed_image=dict(
+            argstr="-f %s",
+            extensions=None,
+            mandatory=True,
+        ),
+        fixed_mask=dict(
+            argstr="-fMask %s",
+            extensions=None,
+        ),
+        initial_transform=dict(
+            argstr="-t0 %s",
+            extensions=None,
+        ),
+        moving_image=dict(
+            argstr="-m %s",
+            extensions=None,
+            mandatory=True,
+        ),
+        moving_mask=dict(
+            argstr="-mMask %s",
+            extensions=None,
+        ),
+        num_threads=dict(
+            argstr="-threads %01d",
+            nohash=True,
+            usedefault=True,
+        ),
+        output_path=dict(
+            argstr="-out %s",
+            mandatory=True,
+            usedefault=True,
+        ),
+        parameters=dict(
+            argstr="-p %s...",
+            mandatory=True,
+        ),
     )
     inputs = Registration.input_spec()
 
@@ -25,7 +58,9 @@ def test_Registration_inputs():
 def test_Registration_outputs():
     output_map = dict(
         transform=dict(),
-        warped_file=dict(extensions=None),
+        warped_file=dict(
+            extensions=None,
+        ),
         warped_files=dict(),
         warped_files_flags=dict(),
     )

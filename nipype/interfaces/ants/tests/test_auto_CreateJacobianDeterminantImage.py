@@ -4,14 +4,42 @@ from ..utils import CreateJacobianDeterminantImage
 
 def test_CreateJacobianDeterminantImage_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        deformationField=dict(argstr="%s", extensions=None, mandatory=True, position=1),
-        doLogJacobian=dict(argstr="%d", position=3),
-        environ=dict(nohash=True, usedefault=True),
-        imageDimension=dict(argstr="%d", mandatory=True, position=0),
-        num_threads=dict(nohash=True, usedefault=True),
-        outputImage=dict(argstr="%s", extensions=None, mandatory=True, position=2),
-        useGeometric=dict(argstr="%d", position=4),
+        args=dict(
+            argstr="%s",
+        ),
+        deformationField=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=1,
+        ),
+        doLogJacobian=dict(
+            argstr="%d",
+            position=3,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        imageDimension=dict(
+            argstr="%d",
+            mandatory=True,
+            position=0,
+        ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        outputImage=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=2,
+        ),
+        useGeometric=dict(
+            argstr="%d",
+            position=4,
+        ),
     )
     inputs = CreateJacobianDeterminantImage.input_spec()
 
@@ -21,7 +49,11 @@ def test_CreateJacobianDeterminantImage_inputs():
 
 
 def test_CreateJacobianDeterminantImage_outputs():
-    output_map = dict(jacobian_image=dict(extensions=None))
+    output_map = dict(
+        jacobian_image=dict(
+            extensions=None,
+        ),
+    )
     outputs = CreateJacobianDeterminantImage.output_spec()
 
     for key, metadata in list(output_map.items()):

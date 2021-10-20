@@ -4,15 +4,47 @@ from ..utils import ResampleImageBySpacing
 
 def test_ResampleImageBySpacing_inputs():
     input_map = dict(
-        addvox=dict(argstr="%d", position=6, requires=["apply_smoothing"]),
-        apply_smoothing=dict(argstr="%d", position=5),
-        args=dict(argstr="%s"),
-        dimension=dict(argstr="%d", position=1, usedefault=True),
-        environ=dict(nohash=True, usedefault=True),
-        input_image=dict(argstr="%s", extensions=None, mandatory=True, position=2),
-        nn_interp=dict(argstr="%d", position=-1, requires=["addvox"]),
-        num_threads=dict(nohash=True, usedefault=True),
-        out_spacing=dict(argstr="%s", mandatory=True, position=4),
+        addvox=dict(
+            argstr="%d",
+            position=6,
+            requires=["apply_smoothing"],
+        ),
+        apply_smoothing=dict(
+            argstr="%d",
+            position=5,
+        ),
+        args=dict(
+            argstr="%s",
+        ),
+        dimension=dict(
+            argstr="%d",
+            position=1,
+            usedefault=True,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        input_image=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=2,
+        ),
+        nn_interp=dict(
+            argstr="%d",
+            position=-1,
+            requires=["addvox"],
+        ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        out_spacing=dict(
+            argstr="%s",
+            mandatory=True,
+            position=4,
+        ),
         output_image=dict(
             argstr="%s",
             extensions=None,
@@ -30,7 +62,11 @@ def test_ResampleImageBySpacing_inputs():
 
 
 def test_ResampleImageBySpacing_outputs():
-    output_map = dict(output_image=dict(extensions=None))
+    output_map = dict(
+        output_image=dict(
+            extensions=None,
+        ),
+    )
     outputs = ResampleImageBySpacing.output_spec()
 
     for key, metadata in list(output_map.items()):

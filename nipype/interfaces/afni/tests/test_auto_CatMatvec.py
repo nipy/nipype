@@ -4,13 +4,34 @@ from ..utils import CatMatvec
 
 def test_CatMatvec_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        fourxfour=dict(argstr="-4x4", xor=["matrix", "oneline"]),
-        in_file=dict(argstr="%s", mandatory=True, position=-2),
-        matrix=dict(argstr="-MATRIX", xor=["oneline", "fourxfour"]),
-        num_threads=dict(nohash=True, usedefault=True),
-        oneline=dict(argstr="-ONELINE", xor=["matrix", "fourxfour"]),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        fourxfour=dict(
+            argstr="-4x4",
+            xor=["matrix", "oneline"],
+        ),
+        in_file=dict(
+            argstr="%s",
+            mandatory=True,
+            position=-2,
+        ),
+        matrix=dict(
+            argstr="-MATRIX",
+            xor=["oneline", "fourxfour"],
+        ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        oneline=dict(
+            argstr="-ONELINE",
+            xor=["matrix", "fourxfour"],
+        ),
         out_file=dict(
             argstr=" > %s",
             extensions=None,
@@ -30,7 +51,11 @@ def test_CatMatvec_inputs():
 
 
 def test_CatMatvec_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = CatMatvec.output_spec()
 
     for key, metadata in list(output_map.items()):

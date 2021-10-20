@@ -4,13 +4,30 @@ from ..brains import BRAINSClipInferior
 
 def test_BRAINSClipInferior_inputs():
     input_map = dict(
-        BackgroundFillValue=dict(argstr="--BackgroundFillValue %s"),
-        acLowerBound=dict(argstr="--acLowerBound %f"),
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        inputVolume=dict(argstr="--inputVolume %s", extensions=None),
-        numberOfThreads=dict(argstr="--numberOfThreads %d"),
-        outputVolume=dict(argstr="--outputVolume %s", hash_files=False),
+        BackgroundFillValue=dict(
+            argstr="--BackgroundFillValue %s",
+        ),
+        acLowerBound=dict(
+            argstr="--acLowerBound %f",
+        ),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        inputVolume=dict(
+            argstr="--inputVolume %s",
+            extensions=None,
+        ),
+        numberOfThreads=dict(
+            argstr="--numberOfThreads %d",
+        ),
+        outputVolume=dict(
+            argstr="--outputVolume %s",
+            hash_files=False,
+        ),
     )
     inputs = BRAINSClipInferior.input_spec()
 
@@ -20,7 +37,11 @@ def test_BRAINSClipInferior_inputs():
 
 
 def test_BRAINSClipInferior_outputs():
-    output_map = dict(outputVolume=dict(extensions=None))
+    output_map = dict(
+        outputVolume=dict(
+            extensions=None,
+        ),
+    )
     outputs = BRAINSClipInferior.output_spec()
 
     for key, metadata in list(output_map.items()):

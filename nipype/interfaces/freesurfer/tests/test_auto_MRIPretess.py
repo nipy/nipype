@@ -4,13 +4,37 @@ from ..utils import MRIPretess
 
 def test_MRIPretess_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        in_filled=dict(argstr="%s", extensions=None, mandatory=True, position=-4),
-        in_norm=dict(argstr="%s", extensions=None, mandatory=True, position=-2),
-        keep=dict(argstr="-keep"),
-        label=dict(argstr="%s", mandatory=True, position=-3, usedefault=True),
-        nocorners=dict(argstr="-nocorners"),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_filled=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-4,
+        ),
+        in_norm=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
+        keep=dict(
+            argstr="-keep",
+        ),
+        label=dict(
+            argstr="%s",
+            mandatory=True,
+            position=-3,
+            usedefault=True,
+        ),
+        nocorners=dict(
+            argstr="-nocorners",
+        ),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -20,7 +44,9 @@ def test_MRIPretess_inputs():
             position=-1,
         ),
         subjects_dir=dict(),
-        test=dict(argstr="-test"),
+        test=dict(
+            argstr="-test",
+        ),
     )
     inputs = MRIPretess.input_spec()
 
@@ -30,7 +56,11 @@ def test_MRIPretess_inputs():
 
 
 def test_MRIPretess_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = MRIPretess.output_spec()
 
     for key, metadata in list(output_map.items()):

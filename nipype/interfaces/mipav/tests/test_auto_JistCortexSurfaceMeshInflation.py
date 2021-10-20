@@ -4,21 +4,56 @@ from ..developer import JistCortexSurfaceMeshInflation
 
 def test_JistCortexSurfaceMeshInflation_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        inLevelset=dict(argstr="--inLevelset %s", extensions=None),
-        inLorentzian=dict(argstr="--inLorentzian %s"),
-        inMax=dict(argstr="--inMax %d"),
-        inMean=dict(argstr="--inMean %f"),
-        inSOR=dict(argstr="--inSOR %f"),
-        inStep=dict(argstr="--inStep %d"),
-        inTopology=dict(argstr="--inTopology %s"),
-        null=dict(argstr="--null %s"),
-        outInflated=dict(argstr="--outInflated %s", hash_files=False),
-        outOriginal=dict(argstr="--outOriginal %s", hash_files=False),
-        xDefaultMem=dict(argstr="-xDefaultMem %d"),
-        xMaxProcess=dict(argstr="-xMaxProcess %d", usedefault=True),
-        xPrefExt=dict(argstr="--xPrefExt %s"),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        inLevelset=dict(
+            argstr="--inLevelset %s",
+            extensions=None,
+        ),
+        inLorentzian=dict(
+            argstr="--inLorentzian %s",
+        ),
+        inMax=dict(
+            argstr="--inMax %d",
+        ),
+        inMean=dict(
+            argstr="--inMean %f",
+        ),
+        inSOR=dict(
+            argstr="--inSOR %f",
+        ),
+        inStep=dict(
+            argstr="--inStep %d",
+        ),
+        inTopology=dict(
+            argstr="--inTopology %s",
+        ),
+        null=dict(
+            argstr="--null %s",
+        ),
+        outInflated=dict(
+            argstr="--outInflated %s",
+            hash_files=False,
+        ),
+        outOriginal=dict(
+            argstr="--outOriginal %s",
+            hash_files=False,
+        ),
+        xDefaultMem=dict(
+            argstr="-xDefaultMem %d",
+        ),
+        xMaxProcess=dict(
+            argstr="-xMaxProcess %d",
+            usedefault=True,
+        ),
+        xPrefExt=dict(
+            argstr="--xPrefExt %s",
+        ),
     )
     inputs = JistCortexSurfaceMeshInflation.input_spec()
 
@@ -29,7 +64,12 @@ def test_JistCortexSurfaceMeshInflation_inputs():
 
 def test_JistCortexSurfaceMeshInflation_outputs():
     output_map = dict(
-        outInflated=dict(extensions=None), outOriginal=dict(extensions=None)
+        outInflated=dict(
+            extensions=None,
+        ),
+        outOriginal=dict(
+            extensions=None,
+        ),
     )
     outputs = JistCortexSurfaceMeshInflation.output_spec()
 

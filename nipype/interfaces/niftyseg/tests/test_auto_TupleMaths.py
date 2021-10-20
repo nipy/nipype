@@ -4,9 +4,19 @@ from ..maths import TupleMaths
 
 def test_TupleMaths_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=2),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=2,
+        ),
         operand_file1=dict(
             argstr="%s",
             extensions=None,
@@ -22,12 +32,22 @@ def test_TupleMaths_inputs():
             xor=["operand_value2"],
         ),
         operand_value1=dict(
-            argstr="%.8f", mandatory=True, position=5, xor=["operand_file1"]
+            argstr="%.8f",
+            mandatory=True,
+            position=5,
+            xor=["operand_file1"],
         ),
         operand_value2=dict(
-            argstr="%.8f", mandatory=True, position=6, xor=["operand_file2"]
+            argstr="%.8f",
+            mandatory=True,
+            position=6,
+            xor=["operand_file2"],
         ),
-        operation=dict(argstr="-%s", mandatory=True, position=4),
+        operation=dict(
+            argstr="-%s",
+            mandatory=True,
+            position=4,
+        ),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -35,7 +55,10 @@ def test_TupleMaths_inputs():
             name_template="%s",
             position=-2,
         ),
-        output_datatype=dict(argstr="-odt %s", position=-3),
+        output_datatype=dict(
+            argstr="-odt %s",
+            position=-3,
+        ),
     )
     inputs = TupleMaths.input_spec()
 
@@ -45,7 +68,11 @@ def test_TupleMaths_inputs():
 
 
 def test_TupleMaths_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = TupleMaths.output_spec()
 
     for key, metadata in list(output_map.items()):

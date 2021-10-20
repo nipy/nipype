@@ -4,11 +4,21 @@ from ..nx import AverageNetworks
 
 def test_AverageNetworks_inputs():
     input_map = dict(
-        group_id=dict(usedefault=True),
-        in_files=dict(mandatory=True),
-        out_gexf_groupavg=dict(extensions=None),
-        out_gpickled_groupavg=dict(extensions=None),
-        resolution_network_file=dict(extensions=None),
+        group_id=dict(
+            usedefault=True,
+        ),
+        in_files=dict(
+            mandatory=True,
+        ),
+        out_gexf_groupavg=dict(
+            extensions=None,
+        ),
+        out_gpickled_groupavg=dict(
+            extensions=None,
+        ),
+        resolution_network_file=dict(
+            extensions=None,
+        ),
     )
     inputs = AverageNetworks.input_spec()
 
@@ -19,8 +29,12 @@ def test_AverageNetworks_inputs():
 
 def test_AverageNetworks_outputs():
     output_map = dict(
-        gexf_groupavg=dict(extensions=None),
-        gpickled_groupavg=dict(extensions=None),
+        gexf_groupavg=dict(
+            extensions=None,
+        ),
+        gpickled_groupavg=dict(
+            extensions=None,
+        ),
         matlab_groupavgs=dict(),
     )
     outputs = AverageNetworks.output_spec()

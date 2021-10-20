@@ -4,19 +4,50 @@ from ..tracks import StreamlineTractography
 
 def test_StreamlineTractography_inputs():
     input_map = dict(
-        gfa_thresh=dict(mandatory=True, usedefault=True),
-        in_file=dict(extensions=None, mandatory=True),
-        in_model=dict(extensions=None),
-        in_peaks=dict(extensions=None),
-        min_angle=dict(mandatory=True, usedefault=True),
-        multiprocess=dict(mandatory=True, usedefault=True),
-        num_seeds=dict(mandatory=True, usedefault=True),
+        gfa_thresh=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        in_model=dict(
+            extensions=None,
+        ),
+        in_peaks=dict(
+            extensions=None,
+        ),
+        min_angle=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        multiprocess=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        num_seeds=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
         out_prefix=dict(),
-        peak_threshold=dict(mandatory=True, usedefault=True),
-        save_seeds=dict(mandatory=True, usedefault=True),
-        seed_coord=dict(extensions=None),
-        seed_mask=dict(extensions=None),
-        tracking_mask=dict(extensions=None),
+        peak_threshold=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        save_seeds=dict(
+            mandatory=True,
+            usedefault=True,
+        ),
+        seed_coord=dict(
+            extensions=None,
+        ),
+        seed_mask=dict(
+            extensions=None,
+        ),
+        tracking_mask=dict(
+            extensions=None,
+        ),
     )
     inputs = StreamlineTractography.input_spec()
 
@@ -27,10 +58,18 @@ def test_StreamlineTractography_inputs():
 
 def test_StreamlineTractography_outputs():
     output_map = dict(
-        gfa=dict(extensions=None),
-        odf_peaks=dict(extensions=None),
-        out_seeds=dict(extensions=None),
-        tracks=dict(extensions=None),
+        gfa=dict(
+            extensions=None,
+        ),
+        odf_peaks=dict(
+            extensions=None,
+        ),
+        out_seeds=dict(
+            extensions=None,
+        ),
+        tracks=dict(
+            extensions=None,
+        ),
     )
     outputs = StreamlineTractography.output_spec()
 

@@ -4,9 +4,15 @@ from ..io import JSONFileSink
 
 def test_JSONFileSink_inputs():
     input_map = dict(
-        _outputs=dict(usedefault=True),
-        in_dict=dict(usedefault=True),
-        out_file=dict(extensions=None),
+        _outputs=dict(
+            usedefault=True,
+        ),
+        in_dict=dict(
+            usedefault=True,
+        ),
+        out_file=dict(
+            extensions=None,
+        ),
     )
     inputs = JSONFileSink.input_spec()
 
@@ -16,7 +22,11 @@ def test_JSONFileSink_inputs():
 
 
 def test_JSONFileSink_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = JSONFileSink.output_spec()
 
     for key, metadata in list(output_map.items()):

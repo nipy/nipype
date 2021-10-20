@@ -5,14 +5,27 @@ from ..preprocess import DARTELNorm2MNI
 def test_DARTELNorm2MNI_inputs():
     input_map = dict(
         apply_to_files=dict(
-            copyfile=False, field="mni_norm.data.subjs.images", mandatory=True
+            copyfile=False,
+            field="mni_norm.data.subjs.images",
+            mandatory=True,
         ),
-        bounding_box=dict(field="mni_norm.bb"),
-        flowfield_files=dict(field="mni_norm.data.subjs.flowfields", mandatory=True),
-        fwhm=dict(field="mni_norm.fwhm"),
+        bounding_box=dict(
+            field="mni_norm.bb",
+        ),
+        flowfield_files=dict(
+            field="mni_norm.data.subjs.flowfields",
+            mandatory=True,
+        ),
+        fwhm=dict(
+            field="mni_norm.fwhm",
+        ),
         matlab_cmd=dict(),
-        mfile=dict(usedefault=True),
-        modulate=dict(field="mni_norm.preserve"),
+        mfile=dict(
+            usedefault=True,
+        ),
+        modulate=dict(
+            field="mni_norm.preserve",
+        ),
         paths=dict(),
         template_file=dict(
             copyfile=False,
@@ -21,8 +34,13 @@ def test_DARTELNorm2MNI_inputs():
             mandatory=True,
         ),
         use_mcr=dict(),
-        use_v8struct=dict(min_ver="8", usedefault=True),
-        voxel_size=dict(field="mni_norm.vox"),
+        use_v8struct=dict(
+            min_ver="8",
+            usedefault=True,
+        ),
+        voxel_size=dict(
+            field="mni_norm.vox",
+        ),
     )
     inputs = DARTELNorm2MNI.input_spec()
 
@@ -33,7 +51,10 @@ def test_DARTELNorm2MNI_inputs():
 
 def test_DARTELNorm2MNI_outputs():
     output_map = dict(
-        normalization_parameter_file=dict(extensions=None), normalized_files=dict()
+        normalization_parameter_file=dict(
+            extensions=None,
+        ),
+        normalized_files=dict(),
     )
     outputs = DARTELNorm2MNI.output_spec()
 

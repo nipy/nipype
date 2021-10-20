@@ -4,9 +4,17 @@ from ..base import ANTSCommand
 
 def test_ANTSCommand_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        num_threads=dict(nohash=True, usedefault=True),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
     )
     inputs = ANTSCommand.input_spec()
 

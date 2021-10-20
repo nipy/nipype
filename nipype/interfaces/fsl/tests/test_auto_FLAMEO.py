@@ -4,29 +4,83 @@ from ..model import FLAMEO
 
 def test_FLAMEO_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        burnin=dict(argstr="--burnin=%d"),
-        cope_file=dict(argstr="--copefile=%s", extensions=None, mandatory=True),
-        cov_split_file=dict(
-            argstr="--covsplitfile=%s", extensions=None, mandatory=True
+        args=dict(
+            argstr="%s",
         ),
-        design_file=dict(argstr="--designfile=%s", extensions=None, mandatory=True),
-        dof_var_cope_file=dict(argstr="--dofvarcopefile=%s", extensions=None),
-        environ=dict(nohash=True, usedefault=True),
-        f_con_file=dict(argstr="--fcontrastsfile=%s", extensions=None),
-        fix_mean=dict(argstr="--fixmean"),
-        infer_outliers=dict(argstr="--inferoutliers"),
-        log_dir=dict(argstr="--ld=%s", usedefault=True),
-        mask_file=dict(argstr="--maskfile=%s", extensions=None, mandatory=True),
-        n_jumps=dict(argstr="--njumps=%d"),
-        no_pe_outputs=dict(argstr="--nopeoutput"),
-        outlier_iter=dict(argstr="--ioni=%d"),
+        burnin=dict(
+            argstr="--burnin=%d",
+        ),
+        cope_file=dict(
+            argstr="--copefile=%s",
+            extensions=None,
+            mandatory=True,
+        ),
+        cov_split_file=dict(
+            argstr="--covsplitfile=%s",
+            extensions=None,
+            mandatory=True,
+        ),
+        design_file=dict(
+            argstr="--designfile=%s",
+            extensions=None,
+            mandatory=True,
+        ),
+        dof_var_cope_file=dict(
+            argstr="--dofvarcopefile=%s",
+            extensions=None,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        f_con_file=dict(
+            argstr="--fcontrastsfile=%s",
+            extensions=None,
+        ),
+        fix_mean=dict(
+            argstr="--fixmean",
+        ),
+        infer_outliers=dict(
+            argstr="--inferoutliers",
+        ),
+        log_dir=dict(
+            argstr="--ld=%s",
+            usedefault=True,
+        ),
+        mask_file=dict(
+            argstr="--maskfile=%s",
+            extensions=None,
+            mandatory=True,
+        ),
+        n_jumps=dict(
+            argstr="--njumps=%d",
+        ),
+        no_pe_outputs=dict(
+            argstr="--nopeoutput",
+        ),
+        outlier_iter=dict(
+            argstr="--ioni=%d",
+        ),
         output_type=dict(),
-        run_mode=dict(argstr="--runmode=%s", mandatory=True),
-        sample_every=dict(argstr="--sampleevery=%d"),
-        sigma_dofs=dict(argstr="--sigma_dofs=%d"),
-        t_con_file=dict(argstr="--tcontrastsfile=%s", extensions=None, mandatory=True),
-        var_cope_file=dict(argstr="--varcopefile=%s", extensions=None),
+        run_mode=dict(
+            argstr="--runmode=%s",
+            mandatory=True,
+        ),
+        sample_every=dict(
+            argstr="--sampleevery=%d",
+        ),
+        sigma_dofs=dict(
+            argstr="--sigma_dofs=%d",
+        ),
+        t_con_file=dict(
+            argstr="--tcontrastsfile=%s",
+            extensions=None,
+            mandatory=True,
+        ),
+        var_cope_file=dict(
+            argstr="--varcopefile=%s",
+            extensions=None,
+        ),
     )
     inputs = FLAMEO.input_spec()
 

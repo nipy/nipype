@@ -4,8 +4,13 @@ from ..utils import CheckTalairachAlignment
 
 def test_CheckTalairachAlignment_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         in_file=dict(
             argstr="-xfm %s",
             extensions=None,
@@ -13,9 +18,17 @@ def test_CheckTalairachAlignment_inputs():
             position=-1,
             xor=["subject"],
         ),
-        subject=dict(argstr="-subj %s", mandatory=True, position=-1, xor=["in_file"]),
+        subject=dict(
+            argstr="-subj %s",
+            mandatory=True,
+            position=-1,
+            xor=["in_file"],
+        ),
         subjects_dir=dict(),
-        threshold=dict(argstr="-T %.3f", usedefault=True),
+        threshold=dict(
+            argstr="-T %.3f",
+            usedefault=True,
+        ),
     )
     inputs = CheckTalairachAlignment.input_spec()
 
@@ -25,7 +38,11 @@ def test_CheckTalairachAlignment_inputs():
 
 
 def test_CheckTalairachAlignment_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = CheckTalairachAlignment.output_spec()
 
     for key, metadata in list(output_map.items()):

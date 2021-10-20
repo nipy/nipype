@@ -4,11 +4,22 @@ from ..preprocess import Fim
 
 def test_Fim_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        fim_thr=dict(argstr="-fim_thr %f", position=3),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        fim_thr=dict(
+            argstr="-fim_thr %f",
+            position=3,
+        ),
         ideal_file=dict(
-            argstr="-ideal_file %s", extensions=None, mandatory=True, position=2
+            argstr="-ideal_file %s",
+            extensions=None,
+            mandatory=True,
+            position=2,
         ),
         in_file=dict(
             argstr="-input %s",
@@ -17,8 +28,14 @@ def test_Fim_inputs():
             mandatory=True,
             position=1,
         ),
-        num_threads=dict(nohash=True, usedefault=True),
-        out=dict(argstr="-out %s", position=4),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        out=dict(
+            argstr="-out %s",
+            position=4,
+        ),
         out_file=dict(
             argstr="-bucket %s",
             extensions=None,
@@ -35,7 +52,11 @@ def test_Fim_inputs():
 
 
 def test_Fim_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Fim.output_spec()
 
     for key, metadata in list(output_map.items()):

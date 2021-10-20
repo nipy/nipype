@@ -4,17 +4,44 @@ from ..brains import ImageRegionPlotter
 
 def test_ImageRegionPlotter_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        inputBinaryROIVolume=dict(argstr="--inputBinaryROIVolume %s", extensions=None),
-        inputLabelVolume=dict(argstr="--inputLabelVolume %s", extensions=None),
-        inputVolume1=dict(argstr="--inputVolume1 %s", extensions=None),
-        inputVolume2=dict(argstr="--inputVolume2 %s", extensions=None),
-        numberOfHistogramBins=dict(argstr="--numberOfHistogramBins %d"),
-        outputJointHistogramData=dict(argstr="--outputJointHistogramData %s"),
-        useIntensityForHistogram=dict(argstr="--useIntensityForHistogram "),
-        useROIAUTO=dict(argstr="--useROIAUTO "),
-        verbose=dict(argstr="--verbose "),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        inputBinaryROIVolume=dict(
+            argstr="--inputBinaryROIVolume %s",
+            extensions=None,
+        ),
+        inputLabelVolume=dict(
+            argstr="--inputLabelVolume %s",
+            extensions=None,
+        ),
+        inputVolume1=dict(
+            argstr="--inputVolume1 %s",
+            extensions=None,
+        ),
+        inputVolume2=dict(
+            argstr="--inputVolume2 %s",
+            extensions=None,
+        ),
+        numberOfHistogramBins=dict(
+            argstr="--numberOfHistogramBins %d",
+        ),
+        outputJointHistogramData=dict(
+            argstr="--outputJointHistogramData %s",
+        ),
+        useIntensityForHistogram=dict(
+            argstr="--useIntensityForHistogram ",
+        ),
+        useROIAUTO=dict(
+            argstr="--useROIAUTO ",
+        ),
+        verbose=dict(
+            argstr="--verbose ",
+        ),
     )
     inputs = ImageRegionPlotter.input_spec()
 

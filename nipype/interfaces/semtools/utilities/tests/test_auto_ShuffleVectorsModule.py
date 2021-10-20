@@ -4,15 +4,24 @@ from ..brains import ShuffleVectorsModule
 
 def test_ShuffleVectorsModule_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         inputVectorFileBaseName=dict(
-            argstr="--inputVectorFileBaseName %s", extensions=None
+            argstr="--inputVectorFileBaseName %s",
+            extensions=None,
         ),
         outputVectorFileBaseName=dict(
-            argstr="--outputVectorFileBaseName %s", hash_files=False
+            argstr="--outputVectorFileBaseName %s",
+            hash_files=False,
         ),
-        resampleProportion=dict(argstr="--resampleProportion %f"),
+        resampleProportion=dict(
+            argstr="--resampleProportion %f",
+        ),
     )
     inputs = ShuffleVectorsModule.input_spec()
 
@@ -22,7 +31,11 @@ def test_ShuffleVectorsModule_inputs():
 
 
 def test_ShuffleVectorsModule_outputs():
-    output_map = dict(outputVectorFileBaseName=dict(extensions=None))
+    output_map = dict(
+        outputVectorFileBaseName=dict(
+            extensions=None,
+        ),
+    )
     outputs = ShuffleVectorsModule.output_spec()
 
     for key, metadata in list(output_map.items()):

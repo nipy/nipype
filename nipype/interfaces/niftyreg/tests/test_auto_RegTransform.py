@@ -21,7 +21,9 @@ def test_RegTransform_inputs():
                 "flirt_2_nr_input",
             ],
         ),
-        args=dict(argstr="%s"),
+        args=dict(
+            argstr="%s",
+        ),
         comp_input=dict(
             argstr="-comp %s",
             extensions=None,
@@ -40,7 +42,11 @@ def test_RegTransform_inputs():
                 "flirt_2_nr_input",
             ],
         ),
-        comp_input2=dict(argstr="%s", extensions=None, position=-2),
+        comp_input2=dict(
+            argstr="%s",
+            extensions=None,
+            position=-2,
+        ),
         def_input=dict(
             argstr="-def %s",
             extensions=None,
@@ -75,7 +81,10 @@ def test_RegTransform_inputs():
                 "flirt_2_nr_input",
             ],
         ),
-        environ=dict(nohash=True, usedefault=True),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         flirt_2_nr_input=dict(
             argstr="-flirtAff2NR %s %s %s",
             position=-2,
@@ -175,11 +184,26 @@ def test_RegTransform_inputs():
                 "flirt_2_nr_input",
             ],
         ),
-        omp_core_val=dict(argstr="-omp %i", usedefault=True),
-        out_file=dict(argstr="%s", extensions=None, genfile=True, position=-1),
-        ref1_file=dict(argstr="-ref %s", extensions=None, position=0),
+        omp_core_val=dict(
+            argstr="-omp %i",
+            usedefault=True,
+        ),
+        out_file=dict(
+            argstr="%s",
+            extensions=None,
+            genfile=True,
+            position=-1,
+        ),
+        ref1_file=dict(
+            argstr="-ref %s",
+            extensions=None,
+            position=0,
+        ),
         ref2_file=dict(
-            argstr="-ref2 %s", extensions=None, position=1, requires=["ref1_file"]
+            argstr="-ref2 %s",
+            extensions=None,
+            position=1,
+            requires=["ref1_file"],
         ),
         upd_s_form_input=dict(
             argstr="-updSform %s",
@@ -200,7 +224,10 @@ def test_RegTransform_inputs():
             ],
         ),
         upd_s_form_input2=dict(
-            argstr="%s", extensions=None, position=-2, requires=["upd_s_form_input"]
+            argstr="%s",
+            extensions=None,
+            position=-2,
+            requires=["upd_s_form_input"],
         ),
     )
     inputs = RegTransform.input_spec()
@@ -211,7 +238,11 @@ def test_RegTransform_inputs():
 
 
 def test_RegTransform_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = RegTransform.output_spec()
 
     for key, metadata in list(output_map.items()):

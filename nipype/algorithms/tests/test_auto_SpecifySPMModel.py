@@ -5,25 +5,49 @@ from ..modelgen import SpecifySPMModel
 def test_SpecifySPMModel_inputs():
     input_map = dict(
         bids_amplitude_column=dict(),
-        bids_condition_column=dict(usedefault=True),
+        bids_condition_column=dict(
+            usedefault=True,
+        ),
         bids_event_file=dict(
-            mandatory=True, xor=["subject_info", "event_files", "bids_event_file"]
+            mandatory=True,
+            xor=["subject_info", "event_files", "bids_event_file"],
         ),
-        concatenate_runs=dict(usedefault=True),
+        concatenate_runs=dict(
+            usedefault=True,
+        ),
         event_files=dict(
-            mandatory=True, xor=["subject_info", "event_files", "bids_event_file"]
+            mandatory=True,
+            xor=["subject_info", "event_files", "bids_event_file"],
         ),
-        functional_runs=dict(copyfile=False, mandatory=True),
-        high_pass_filter_cutoff=dict(mandatory=True),
-        input_units=dict(mandatory=True),
-        outlier_files=dict(copyfile=False),
-        output_units=dict(usedefault=True),
-        parameter_source=dict(usedefault=True),
-        realignment_parameters=dict(copyfile=False),
+        functional_runs=dict(
+            copyfile=False,
+            mandatory=True,
+        ),
+        high_pass_filter_cutoff=dict(
+            mandatory=True,
+        ),
+        input_units=dict(
+            mandatory=True,
+        ),
+        outlier_files=dict(
+            copyfile=False,
+        ),
+        output_units=dict(
+            usedefault=True,
+        ),
+        parameter_source=dict(
+            usedefault=True,
+        ),
+        realignment_parameters=dict(
+            copyfile=False,
+        ),
         subject_info=dict(
-            mandatory=True, xor=["subject_info", "event_files", "bids_event_file"]
+            mandatory=True,
+            xor=["subject_info", "event_files", "bids_event_file"],
         ),
-        time_repetition=dict(mandatory=True),
+        time_repetition=dict(
+            mandatory=True,
+        ),
     )
     inputs = SpecifySPMModel.input_spec()
 
@@ -33,7 +57,9 @@ def test_SpecifySPMModel_inputs():
 
 
 def test_SpecifySPMModel_outputs():
-    output_map = dict(session_info=dict())
+    output_map = dict(
+        session_info=dict(),
+    )
     outputs = SpecifySPMModel.output_spec()
 
     for key, metadata in list(output_map.items()):

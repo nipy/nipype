@@ -4,14 +4,35 @@ from ..brains import BRAINSTransformConvert
 
 def test_BRAINSTransformConvert_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        displacementVolume=dict(argstr="--displacementVolume %s", hash_files=False),
-        environ=dict(nohash=True, usedefault=True),
-        inputTransform=dict(argstr="--inputTransform %s", extensions=None),
-        outputPrecisionType=dict(argstr="--outputPrecisionType %s"),
-        outputTransform=dict(argstr="--outputTransform %s", hash_files=False),
-        outputTransformType=dict(argstr="--outputTransformType %s"),
-        referenceVolume=dict(argstr="--referenceVolume %s", extensions=None),
+        args=dict(
+            argstr="%s",
+        ),
+        displacementVolume=dict(
+            argstr="--displacementVolume %s",
+            hash_files=False,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        inputTransform=dict(
+            argstr="--inputTransform %s",
+            extensions=None,
+        ),
+        outputPrecisionType=dict(
+            argstr="--outputPrecisionType %s",
+        ),
+        outputTransform=dict(
+            argstr="--outputTransform %s",
+            hash_files=False,
+        ),
+        outputTransformType=dict(
+            argstr="--outputTransformType %s",
+        ),
+        referenceVolume=dict(
+            argstr="--referenceVolume %s",
+            extensions=None,
+        ),
     )
     inputs = BRAINSTransformConvert.input_spec()
 
@@ -22,7 +43,12 @@ def test_BRAINSTransformConvert_inputs():
 
 def test_BRAINSTransformConvert_outputs():
     output_map = dict(
-        displacementVolume=dict(extensions=None), outputTransform=dict(extensions=None)
+        displacementVolume=dict(
+            extensions=None,
+        ),
+        outputTransform=dict(
+            extensions=None,
+        ),
     )
     outputs = BRAINSTransformConvert.output_spec()
 

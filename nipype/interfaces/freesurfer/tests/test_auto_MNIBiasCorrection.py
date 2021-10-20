@@ -4,13 +4,32 @@ from ..preprocess import MNIBiasCorrection
 
 def test_MNIBiasCorrection_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        distance=dict(argstr="--distance %d"),
-        environ=dict(nohash=True, usedefault=True),
-        in_file=dict(argstr="--i %s", extensions=None, mandatory=True),
-        iterations=dict(argstr="--n %d", usedefault=True),
-        mask=dict(argstr="--mask %s", extensions=None),
-        no_rescale=dict(argstr="--no-rescale"),
+        args=dict(
+            argstr="%s",
+        ),
+        distance=dict(
+            argstr="--distance %d",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="--i %s",
+            extensions=None,
+            mandatory=True,
+        ),
+        iterations=dict(
+            argstr="--n %d",
+            usedefault=True,
+        ),
+        mask=dict(
+            argstr="--mask %s",
+            extensions=None,
+        ),
+        no_rescale=dict(
+            argstr="--no-rescale",
+        ),
         out_file=dict(
             argstr="--o %s",
             extensions=None,
@@ -19,11 +38,20 @@ def test_MNIBiasCorrection_inputs():
             name_source=["in_file"],
             name_template="%s_output",
         ),
-        protocol_iterations=dict(argstr="--proto-iters %d"),
-        shrink=dict(argstr="--shrink %d"),
-        stop=dict(argstr="--stop %f"),
+        protocol_iterations=dict(
+            argstr="--proto-iters %d",
+        ),
+        shrink=dict(
+            argstr="--shrink %d",
+        ),
+        stop=dict(
+            argstr="--stop %f",
+        ),
         subjects_dir=dict(),
-        transform=dict(argstr="--uchar %s", extensions=None),
+        transform=dict(
+            argstr="--uchar %s",
+            extensions=None,
+        ),
     )
     inputs = MNIBiasCorrection.input_spec()
 
@@ -33,7 +61,11 @@ def test_MNIBiasCorrection_inputs():
 
 
 def test_MNIBiasCorrection_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = MNIBiasCorrection.output_spec()
 
     for key, metadata in list(output_map.items()):

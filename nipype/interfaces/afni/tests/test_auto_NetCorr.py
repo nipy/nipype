@@ -4,15 +4,40 @@ from ..preprocess import NetCorr
 
 def test_NetCorr_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        fish_z=dict(argstr="-fish_z"),
-        ignore_LT=dict(argstr="-ignore_LT"),
-        in_file=dict(argstr="-inset %s", extensions=None, mandatory=True),
-        in_rois=dict(argstr="-in_rois %s", extensions=None, mandatory=True),
-        mask=dict(argstr="-mask %s", extensions=None),
-        nifti=dict(argstr="-nifti"),
-        num_threads=dict(nohash=True, usedefault=True),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        fish_z=dict(
+            argstr="-fish_z",
+        ),
+        ignore_LT=dict(
+            argstr="-ignore_LT",
+        ),
+        in_file=dict(
+            argstr="-inset %s",
+            extensions=None,
+            mandatory=True,
+        ),
+        in_rois=dict(
+            argstr="-in_rois %s",
+            extensions=None,
+            mandatory=True,
+        ),
+        mask=dict(
+            argstr="-mask %s",
+            extensions=None,
+        ),
+        nifti=dict(
+            argstr="-nifti",
+        ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -20,17 +45,38 @@ def test_NetCorr_inputs():
             name_template="%s_netcorr",
             position=1,
         ),
-        output_mask_nonnull=dict(argstr="-output_mask_nonnull"),
+        output_mask_nonnull=dict(
+            argstr="-output_mask_nonnull",
+        ),
         outputtype=dict(),
-        part_corr=dict(argstr="-part_corr"),
-        push_thru_many_zeros=dict(argstr="-push_thru_many_zeros"),
-        ts_indiv=dict(argstr="-ts_indiv"),
-        ts_label=dict(argstr="-ts_label"),
-        ts_out=dict(argstr="-ts_out"),
-        ts_wb_Z=dict(argstr="-ts_wb_Z"),
-        ts_wb_corr=dict(argstr="-ts_wb_corr"),
-        ts_wb_strlabel=dict(argstr="-ts_wb_strlabel"),
-        weight_ts=dict(argstr="-weight_ts %s", extensions=None),
+        part_corr=dict(
+            argstr="-part_corr",
+        ),
+        push_thru_many_zeros=dict(
+            argstr="-push_thru_many_zeros",
+        ),
+        ts_indiv=dict(
+            argstr="-ts_indiv",
+        ),
+        ts_label=dict(
+            argstr="-ts_label",
+        ),
+        ts_out=dict(
+            argstr="-ts_out",
+        ),
+        ts_wb_Z=dict(
+            argstr="-ts_wb_Z",
+        ),
+        ts_wb_corr=dict(
+            argstr="-ts_wb_corr",
+        ),
+        ts_wb_strlabel=dict(
+            argstr="-ts_wb_strlabel",
+        ),
+        weight_ts=dict(
+            argstr="-weight_ts %s",
+            extensions=None,
+        ),
     )
     inputs = NetCorr.input_spec()
 
@@ -40,7 +86,12 @@ def test_NetCorr_inputs():
 
 
 def test_NetCorr_outputs():
-    output_map = dict(out_corr_maps=dict(), out_corr_matrix=dict(extensions=None))
+    output_map = dict(
+        out_corr_maps=dict(),
+        out_corr_matrix=dict(
+            extensions=None,
+        ),
+    )
     outputs = NetCorr.output_spec()
 
     for key, metadata in list(output_map.items()):

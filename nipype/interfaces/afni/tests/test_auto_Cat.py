@@ -4,21 +4,41 @@ from ..utils import Cat
 
 def test_Cat_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        in_files=dict(argstr="%s", mandatory=True, position=-2),
-        keepfree=dict(argstr="-nonfixed"),
-        num_threads=dict(nohash=True, usedefault=True),
-        omitconst=dict(argstr="-nonconst"),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_files=dict(
+            argstr="%s",
+            mandatory=True,
+            position=-2,
+        ),
+        keepfree=dict(
+            argstr="-nonfixed",
+        ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        omitconst=dict(
+            argstr="-nonconst",
+        ),
         out_cint=dict(
-            xor=["out_format", "out_nice", "out_double", "out_fint", "out_int"]
+            xor=["out_format", "out_nice", "out_double", "out_fint", "out_int"],
         ),
         out_double=dict(
             argstr="-d",
             xor=["out_format", "out_nice", "out_int", "out_fint", "out_cint"],
         ),
         out_file=dict(
-            argstr="> %s", extensions=None, mandatory=True, position=-1, usedefault=True
+            argstr="> %s",
+            extensions=None,
+            mandatory=True,
+            position=-1,
+            usedefault=True,
         ),
         out_fint=dict(
             argstr="-f",
@@ -37,8 +57,12 @@ def test_Cat_inputs():
             xor=["out_format", "out_int", "out_double", "out_fint", "out_cint"],
         ),
         outputtype=dict(),
-        sel=dict(argstr="-sel %s"),
-        stack=dict(argstr="-stack"),
+        sel=dict(
+            argstr="-sel %s",
+        ),
+        stack=dict(
+            argstr="-stack",
+        ),
     )
     inputs = Cat.input_spec()
 
@@ -48,7 +72,11 @@ def test_Cat_inputs():
 
 
 def test_Cat_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Cat.output_spec()
 
     for key, metadata in list(output_map.items()):

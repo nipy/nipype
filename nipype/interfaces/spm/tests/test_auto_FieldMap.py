@@ -4,59 +4,123 @@ from ..preprocess import FieldMap
 
 def test_FieldMap_inputs():
     input_map = dict(
-        anat_file=dict(copyfile=False, extensions=None, field="subj.anat"),
-        blip_direction=dict(field="subj.defaults.defaultsval.blipdir", mandatory=True),
-        distortion_direction=dict(field="roptions.pedir", usedefault=True),
-        echo_times=dict(field="subj.defaults.defaultsval.et"),
-        epi_file=dict(copyfile=False, extensions=None, field="subj.session.epi"),
-        epifm=dict(field="subj.defaults.defaultsval.epifm", usedefault=True),
-        in_files=dict(copyfile=True, field="data.scans", mandatory=True),
-        interpolation=dict(field="roptions.rinterp", usedefault=True),
+        anat_file=dict(
+            copyfile=False,
+            extensions=None,
+            field="subj.anat",
+        ),
+        blip_direction=dict(
+            field="subj.defaults.defaultsval.blipdir",
+            mandatory=True,
+        ),
+        echo_times=dict(
+            field="subj.defaults.defaultsval.et",
+            mandatory=True,
+        ),
+        epi_file=dict(
+            copyfile=False,
+            extensions=None,
+            field="subj.session.epi",
+            mandatory=True,
+        ),
+        epifm=dict(
+            field="subj.defaults.defaultsval.epifm",
+            usedefault=True,
+        ),
         jacobian_modulation=dict(
-            field="subj.defaults.defaultsval.ajm", usedefault=True
+            field="subj.defaults.defaultsval.ajm",
+            usedefault=True,
         ),
-        jobtype=dict(usedefault=True),
+        jobtype=dict(
+            usedefault=True,
+        ),
         magnitude_file=dict(
-            copyfile=False, extensions=None, field="subj.data.presubphasemag.magnitude"
+            copyfile=False,
+            extensions=None,
+            field="subj.data.presubphasemag.magnitude",
+            mandatory=True,
         ),
-        mask_fwhm=dict(field="subj.defaults.defaultsval.mflags.fwhm", usedefault=True),
-        maskbrain=dict(field="subj.defaults.defaultsval.maskbrain", usedefault=True),
-        matchanat=dict(field="subj.matchanat", usedefault=True),
-        matchvdm=dict(field="subj.matchvdm", usedefault=True),
+        mask_fwhm=dict(
+            field="subj.defaults.defaultsval.mflags.fwhm",
+            usedefault=True,
+        ),
+        maskbrain=dict(
+            field="subj.defaults.defaultsval.maskbrain",
+            usedefault=True,
+        ),
+        matchanat=dict(
+            field="subj.matchanat",
+            usedefault=True,
+        ),
+        matchvdm=dict(
+            field="subj.matchvdm",
+            usedefault=True,
+        ),
         matlab_cmd=dict(),
-        method=dict(field="subj.defaults.defaultsval.uflags.method", usedefault=True),
-        mfile=dict(usedefault=True),
-        ndilate=dict(field="subj.defaults.defaultsval.mflags.ndilate", usedefault=True),
-        nerode=dict(field="subj.defaults.defaultsval.mflags.nerode", usedefault=True),
-        out_prefix=dict(field="roptions.prefix", usedefault=True),
-        pad=dict(field="subj.defaults.defaultsval.uflags.pad", usedefault=True),
+        method=dict(
+            field="subj.defaults.defaultsval.uflags.method",
+            usedefault=True,
+        ),
+        mfile=dict(
+            usedefault=True,
+        ),
+        ndilate=dict(
+            field="subj.defaults.defaultsval.mflags.ndilate",
+            usedefault=True,
+        ),
+        nerode=dict(
+            field="subj.defaults.defaultsval.mflags.nerode",
+            usedefault=True,
+        ),
+        pad=dict(
+            field="subj.defaults.defaultsval.uflags.pad",
+            usedefault=True,
+        ),
         paths=dict(),
         phase_file=dict(
-            copyfile=False, extensions=None, field="subj.data.presubphasemag.phase"
+            copyfile=False,
+            extensions=None,
+            field="subj.data.presubphasemag.phase",
+            mandatory=True,
         ),
-        reg=dict(field="subj.defaults.defaultsval.mflags.reg", usedefault=True),
-        reslice_interp=dict(field="roptions.rinterp"),
-        sessname=dict(field="subj.sessname", usedefault=True),
+        reg=dict(
+            field="subj.defaults.defaultsval.mflags.reg",
+            usedefault=True,
+        ),
+        sessname=dict(
+            field="subj.sessname",
+            usedefault=True,
+        ),
         template=dict(
             copyfile=False,
             extensions=None,
             field="subj.defaults.defaultsval.mflags.template",
         ),
-        thresh=dict(field="subj.defaults.defaultsval.mflags.thresh", usedefault=True),
-        total_readout_time=dict(field="subj.defaults.defaultsval.tert", mandatory=True),
+        thresh=dict(
+            field="subj.defaults.defaultsval.mflags.thresh",
+            usedefault=True,
+        ),
+        total_readout_time=dict(
+            field="subj.defaults.defaultsval.tert",
+            mandatory=True,
+        ),
         unwarp_fwhm=dict(
-            field="subj.defaults.defaultsval.uflags.fwhm", usedefault=True
+            field="subj.defaults.defaultsval.uflags.fwhm",
+            usedefault=True,
         ),
         use_mcr=dict(),
-        use_v8struct=dict(min_ver="8", usedefault=True),
-        vdmfile=dict(
-            copyfile=True, extensions=None, field="data.vdmfile", mandatory=True
+        use_v8struct=dict(
+            min_ver="8",
+            usedefault=True,
         ),
-        write_mask=dict(field="roptions.mask"),
-        write_which=dict(field="roptions.which", maxlen=2, minlen=2, usedefault=True),
-        write_wrap=dict(field="roptions.wrap"),
-        writeunwarped=dict(field="subj.writeunwarped", usedefault=True),
-        ws=dict(field="subj.defaults.defaultsval.uflags.ws", usedefault=True),
+        writeunwarped=dict(
+            field="subj.writeunwarped",
+            usedefault=True,
+        ),
+        ws=dict(
+            field="subj.defaults.defaultsval.uflags.ws",
+            usedefault=True,
+        ),
     )
     inputs = FieldMap.input_spec()
 
@@ -67,7 +131,9 @@ def test_FieldMap_inputs():
 
 def test_FieldMap_outputs():
     output_map = dict(
-        mean_image=dict(extensions=None), out_files=dict(), vdm=dict(extensions=None)
+        vdm=dict(
+            extensions=None,
+        ),
     )
     outputs = FieldMap.output_spec()
 

@@ -4,9 +4,17 @@ from ..minc import BestLinReg
 
 def test_BestLinReg_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        clobber=dict(argstr="-clobber", usedefault=True),
-        environ=dict(nohash=True, usedefault=True),
+        args=dict(
+            argstr="%s",
+        ),
+        clobber=dict(
+            argstr="-clobber",
+            usedefault=True,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         output_mnc=dict(
             argstr="%s",
             extensions=None,
@@ -27,9 +35,21 @@ def test_BestLinReg_inputs():
             name_template="%s_bestlinreg.xfm",
             position=-2,
         ),
-        source=dict(argstr="%s", extensions=None, mandatory=True, position=-4),
-        target=dict(argstr="%s", extensions=None, mandatory=True, position=-3),
-        verbose=dict(argstr="-verbose"),
+        source=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-4,
+        ),
+        target=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-3,
+        ),
+        verbose=dict(
+            argstr="-verbose",
+        ),
     )
     inputs = BestLinReg.input_spec()
 
@@ -40,7 +60,12 @@ def test_BestLinReg_inputs():
 
 def test_BestLinReg_outputs():
     output_map = dict(
-        output_mnc=dict(extensions=None), output_xfm=dict(extensions=None)
+        output_mnc=dict(
+            extensions=None,
+        ),
+        output_xfm=dict(
+            extensions=None,
+        ),
     )
     outputs = BestLinReg.output_spec()
 

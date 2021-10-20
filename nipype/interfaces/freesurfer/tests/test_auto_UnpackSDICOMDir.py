@@ -4,33 +4,57 @@ from ..preprocess import UnpackSDICOMDir
 
 def test_UnpackSDICOMDir_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
+        args=dict(
+            argstr="%s",
+        ),
         config=dict(
             argstr="-cfg %s",
             extensions=None,
             mandatory=True,
             xor=("run_info", "config", "seq_config"),
         ),
-        dir_structure=dict(argstr="-%s"),
-        environ=dict(nohash=True, usedefault=True),
-        log_file=dict(argstr="-log %s", extensions=None),
-        no_info_dump=dict(argstr="-noinfodump"),
-        no_unpack_err=dict(argstr="-no-unpackerr"),
-        output_dir=dict(argstr="-targ %s"),
+        dir_structure=dict(
+            argstr="-%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        log_file=dict(
+            argstr="-log %s",
+            extensions=None,
+        ),
+        no_info_dump=dict(
+            argstr="-noinfodump",
+        ),
+        no_unpack_err=dict(
+            argstr="-no-unpackerr",
+        ),
+        output_dir=dict(
+            argstr="-targ %s",
+        ),
         run_info=dict(
             argstr="-run %d %s %s %s",
             mandatory=True,
             xor=("run_info", "config", "seq_config"),
         ),
-        scan_only=dict(argstr="-scanonly %s", extensions=None),
+        scan_only=dict(
+            argstr="-scanonly %s",
+            extensions=None,
+        ),
         seq_config=dict(
             argstr="-seqcfg %s",
             extensions=None,
             mandatory=True,
             xor=("run_info", "config", "seq_config"),
         ),
-        source_dir=dict(argstr="-src %s", mandatory=True),
-        spm_zeropad=dict(argstr="-nspmzeropad %d"),
+        source_dir=dict(
+            argstr="-src %s",
+            mandatory=True,
+        ),
+        spm_zeropad=dict(
+            argstr="-nspmzeropad %d",
+        ),
         subjects_dir=dict(),
     )
     inputs = UnpackSDICOMDir.input_spec()

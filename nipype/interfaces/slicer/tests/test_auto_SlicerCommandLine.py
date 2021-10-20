@@ -3,7 +3,15 @@ from ..base import SlicerCommandLine
 
 
 def test_SlicerCommandLine_inputs():
-    input_map = dict(args=dict(argstr="%s"), environ=dict(nohash=True, usedefault=True))
+    input_map = dict(
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+    )
     inputs = SlicerCommandLine.input_spec()
 
     for key, metadata in list(input_map.items()):

@@ -4,11 +4,26 @@ from ..preprocess import Normalize
 
 def test_Normalize_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        gradient=dict(argstr="-g %d"),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2),
-        mask=dict(argstr="-mask %s", extensions=None),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        gradient=dict(
+            argstr="-g %d",
+        ),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
+        mask=dict(
+            argstr="-mask %s",
+            extensions=None,
+        ),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -18,9 +33,14 @@ def test_Normalize_inputs():
             name_template="%s_norm",
             position=-1,
         ),
-        segmentation=dict(argstr="-aseg %s", extensions=None),
+        segmentation=dict(
+            argstr="-aseg %s",
+            extensions=None,
+        ),
         subjects_dir=dict(),
-        transform=dict(extensions=None),
+        transform=dict(
+            extensions=None,
+        ),
     )
     inputs = Normalize.input_spec()
 
@@ -30,7 +50,11 @@ def test_Normalize_inputs():
 
 
 def test_Normalize_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Normalize.output_spec()
 
     for key, metadata in list(output_map.items()):

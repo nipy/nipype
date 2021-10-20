@@ -4,13 +4,26 @@ from ..preprocess import AutoTLRC
 
 def test_AutoTLRC_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        base=dict(argstr="-base %s", mandatory=True),
-        environ=dict(nohash=True, usedefault=True),
-        in_file=dict(
-            argstr="-input %s", copyfile=False, extensions=None, mandatory=True
+        args=dict(
+            argstr="%s",
         ),
-        no_ss=dict(argstr="-no_ss"),
+        base=dict(
+            argstr="-base %s",
+            mandatory=True,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="-input %s",
+            copyfile=False,
+            extensions=None,
+            mandatory=True,
+        ),
+        no_ss=dict(
+            argstr="-no_ss",
+        ),
         outputtype=dict(),
     )
     inputs = AutoTLRC.input_spec()
@@ -21,7 +34,11 @@ def test_AutoTLRC_inputs():
 
 
 def test_AutoTLRC_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = AutoTLRC.output_spec()
 
     for key, metadata in list(output_map.items()):

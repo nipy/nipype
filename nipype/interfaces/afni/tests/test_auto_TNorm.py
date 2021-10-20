@@ -4,17 +4,39 @@ from ..preprocess import TNorm
 
 def test_TNorm_inputs():
     input_map = dict(
-        L1fit=dict(argstr="-L1fit"),
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        in_file=dict(
-            argstr="%s", copyfile=False, extensions=None, mandatory=True, position=-1
+        L1fit=dict(
+            argstr="-L1fit",
         ),
-        norm1=dict(argstr="-norm1"),
-        norm2=dict(argstr="-norm2"),
-        normR=dict(argstr="-normR"),
-        normx=dict(argstr="-normx"),
-        num_threads=dict(nohash=True, usedefault=True),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            copyfile=False,
+            extensions=None,
+            mandatory=True,
+            position=-1,
+        ),
+        norm1=dict(
+            argstr="-norm1",
+        ),
+        norm2=dict(
+            argstr="-norm2",
+        ),
+        normR=dict(
+            argstr="-normR",
+        ),
+        normx=dict(
+            argstr="-normx",
+        ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -22,7 +44,9 @@ def test_TNorm_inputs():
             name_template="%s_tnorm",
         ),
         outputtype=dict(),
-        polort=dict(argstr="-polort %s"),
+        polort=dict(
+            argstr="-polort %s",
+        ),
     )
     inputs = TNorm.input_spec()
 
@@ -32,7 +56,11 @@ def test_TNorm_inputs():
 
 
 def test_TNorm_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = TNorm.output_spec()
 
     for key, metadata in list(output_map.items()):

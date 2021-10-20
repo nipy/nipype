@@ -4,10 +4,25 @@ from ..utils import Jacobian
 
 def test_Jacobian_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        in_mappedsurf=dict(argstr="%s", extensions=None, mandatory=True, position=-2),
-        in_origsurf=dict(argstr="%s", extensions=None, mandatory=True, position=-3),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_mappedsurf=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
+        in_origsurf=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-3,
+        ),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -27,7 +42,11 @@ def test_Jacobian_inputs():
 
 
 def test_Jacobian_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Jacobian.output_spec()
 
     for key, metadata in list(output_map.items()):

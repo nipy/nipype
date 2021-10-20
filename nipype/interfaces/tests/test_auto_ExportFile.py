@@ -4,10 +4,18 @@ from ..io import ExportFile
 
 def test_ExportFile_inputs():
     input_map = dict(
-        check_extension=dict(usedefault=True),
+        check_extension=dict(
+            usedefault=True,
+        ),
         clobber=dict(),
-        in_file=dict(extensions=None, mandatory=True),
-        out_file=dict(extensions=None, mandatory=True),
+        in_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        out_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
     )
     inputs = ExportFile.input_spec()
 
@@ -17,7 +25,11 @@ def test_ExportFile_inputs():
 
 
 def test_ExportFile_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = ExportFile.output_spec()
 
     for key, metadata in list(output_map.items()):

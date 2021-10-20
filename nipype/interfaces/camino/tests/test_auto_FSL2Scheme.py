@@ -4,23 +4,58 @@ from ..convert import FSL2Scheme
 
 def test_FSL2Scheme_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        bscale=dict(argstr="-bscale %d", units="NA"),
+        args=dict(
+            argstr="%s",
+        ),
+        bscale=dict(
+            argstr="-bscale %d",
+            units="NA",
+        ),
         bval_file=dict(
-            argstr="-bvalfile %s", extensions=None, mandatory=True, position=2
+            argstr="-bvalfile %s",
+            extensions=None,
+            mandatory=True,
+            position=2,
         ),
         bvec_file=dict(
-            argstr="-bvecfile %s", extensions=None, mandatory=True, position=1
+            argstr="-bvecfile %s",
+            extensions=None,
+            mandatory=True,
+            position=1,
         ),
-        diffusiontime=dict(argstr="-diffusiontime %f", units="NA"),
-        environ=dict(nohash=True, usedefault=True),
-        flipx=dict(argstr="-flipx"),
-        flipy=dict(argstr="-flipy"),
-        flipz=dict(argstr="-flipz"),
-        interleave=dict(argstr="-interleave"),
-        numscans=dict(argstr="-numscans %d", units="NA"),
-        out_file=dict(argstr="> %s", extensions=None, genfile=True, position=-1),
-        usegradmod=dict(argstr="-usegradmod"),
+        diffusiontime=dict(
+            argstr="-diffusiontime %f",
+            units="NA",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        flipx=dict(
+            argstr="-flipx",
+        ),
+        flipy=dict(
+            argstr="-flipy",
+        ),
+        flipz=dict(
+            argstr="-flipz",
+        ),
+        interleave=dict(
+            argstr="-interleave",
+        ),
+        numscans=dict(
+            argstr="-numscans %d",
+            units="NA",
+        ),
+        out_file=dict(
+            argstr="> %s",
+            extensions=None,
+            genfile=True,
+            position=-1,
+        ),
+        usegradmod=dict(
+            argstr="-usegradmod",
+        ),
     )
     inputs = FSL2Scheme.input_spec()
 
@@ -30,7 +65,11 @@ def test_FSL2Scheme_inputs():
 
 
 def test_FSL2Scheme_outputs():
-    output_map = dict(scheme=dict(extensions=None))
+    output_map = dict(
+        scheme=dict(
+            extensions=None,
+        ),
+    )
     outputs = FSL2Scheme.output_spec()
 
     for key, metadata in list(output_map.items()):

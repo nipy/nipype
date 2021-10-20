@@ -4,7 +4,13 @@ from ..misc import AddCSVRow
 
 def test_AddCSVRow_inputs():
     input_map = dict(
-        _outputs=dict(usedefault=True), in_file=dict(extensions=None, mandatory=True)
+        _outputs=dict(
+            usedefault=True,
+        ),
+        in_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
     )
     inputs = AddCSVRow.input_spec()
 
@@ -14,7 +20,11 @@ def test_AddCSVRow_inputs():
 
 
 def test_AddCSVRow_outputs():
-    output_map = dict(csv_file=dict(extensions=None))
+    output_map = dict(
+        csv_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = AddCSVRow.output_spec()
 
     for key, metadata in list(output_map.items()):

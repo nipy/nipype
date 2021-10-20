@@ -3,7 +3,12 @@ from ..confounds import NonSteadyStateDetector
 
 
 def test_NonSteadyStateDetector_inputs():
-    input_map = dict(in_file=dict(extensions=None, mandatory=True))
+    input_map = dict(
+        in_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+    )
     inputs = NonSteadyStateDetector.input_spec()
 
     for key, metadata in list(input_map.items()):
@@ -12,7 +17,9 @@ def test_NonSteadyStateDetector_inputs():
 
 
 def test_NonSteadyStateDetector_outputs():
-    output_map = dict(n_volumes_to_discard=dict())
+    output_map = dict(
+        n_volumes_to_discard=dict(),
+    )
     outputs = NonSteadyStateDetector.output_spec()
 
     for key, metadata in list(output_map.items()):

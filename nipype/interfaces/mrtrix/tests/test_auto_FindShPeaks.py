@@ -4,13 +4,34 @@ from ..tensors import FindShPeaks
 
 def test_FindShPeaks_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        directions_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2),
-        display_debug=dict(argstr="-debug"),
-        display_info=dict(argstr="-info"),
-        environ=dict(nohash=True, usedefault=True),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=-3),
-        num_peaks=dict(argstr="-num %s"),
+        args=dict(
+            argstr="%s",
+        ),
+        directions_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
+        display_debug=dict(
+            argstr="-debug",
+        ),
+        display_info=dict(
+            argstr="-info",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-3,
+        ),
+        num_peaks=dict(
+            argstr="-num %s",
+        ),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -20,10 +41,20 @@ def test_FindShPeaks_inputs():
             name_template="%s_peak_dirs.mif",
             position=-1,
         ),
-        peak_directions=dict(argstr="-direction %s", sep=" "),
-        peak_threshold=dict(argstr="-threshold %s"),
-        peaks_image=dict(argstr="-peaks %s", extensions=None),
-        quiet_display=dict(argstr="-quiet"),
+        peak_directions=dict(
+            argstr="-direction %s",
+            sep=" ",
+        ),
+        peak_threshold=dict(
+            argstr="-threshold %s",
+        ),
+        peaks_image=dict(
+            argstr="-peaks %s",
+            extensions=None,
+        ),
+        quiet_display=dict(
+            argstr="-quiet",
+        ),
     )
     inputs = FindShPeaks.input_spec()
 
@@ -33,7 +64,11 @@ def test_FindShPeaks_inputs():
 
 
 def test_FindShPeaks_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = FindShPeaks.output_spec()
 
     for key, metadata in list(output_map.items()):

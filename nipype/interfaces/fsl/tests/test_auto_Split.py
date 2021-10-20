@@ -4,11 +4,28 @@ from ..utils import Split
 
 def test_Split_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        dimension=dict(argstr="-%s", mandatory=True, position=2),
-        environ=dict(nohash=True, usedefault=True),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=0),
-        out_base_name=dict(argstr="%s", position=1),
+        args=dict(
+            argstr="%s",
+        ),
+        dimension=dict(
+            argstr="-%s",
+            mandatory=True,
+            position=2,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=0,
+        ),
+        out_base_name=dict(
+            argstr="%s",
+            position=1,
+        ),
         output_type=dict(),
     )
     inputs = Split.input_spec()
@@ -19,7 +36,9 @@ def test_Split_inputs():
 
 
 def test_Split_outputs():
-    output_map = dict(out_files=dict())
+    output_map = dict(
+        out_files=dict(),
+    )
     outputs = Split.output_spec()
 
     for key, metadata in list(output_map.items()):

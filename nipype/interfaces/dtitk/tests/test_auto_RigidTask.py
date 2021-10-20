@@ -4,21 +4,50 @@ from ..registration import RigidTask
 
 def test_RigidTask_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        fixed_file=dict(
-            argstr="%s", copyfile=False, extensions=None, mandatory=True, position=0
+        args=dict(
+            argstr="%s",
         ),
-        ftol=dict(argstr="%g", mandatory=True, position=4, usedefault=True),
-        initialize_xfm=dict(argstr="%s", copyfile=True, extensions=None, position=5),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        fixed_file=dict(
+            argstr="%s",
+            copyfile=False,
+            extensions=None,
+            mandatory=True,
+            position=0,
+        ),
+        ftol=dict(
+            argstr="%g",
+            mandatory=True,
+            position=4,
+            usedefault=True,
+        ),
+        initialize_xfm=dict(
+            argstr="%s",
+            copyfile=True,
+            extensions=None,
+            position=5,
+        ),
         moving_file=dict(
-            argstr="%s", copyfile=False, extensions=None, mandatory=True, position=1
+            argstr="%s",
+            copyfile=False,
+            extensions=None,
+            mandatory=True,
+            position=1,
         ),
         sampling_xyz=dict(
-            argstr="%g %g %g", mandatory=True, position=3, usedefault=True
+            argstr="%g %g %g",
+            mandatory=True,
+            position=3,
+            usedefault=True,
         ),
         similarity_metric=dict(
-            argstr="%s", mandatory=True, position=2, usedefault=True
+            argstr="%s",
+            mandatory=True,
+            position=2,
+            usedefault=True,
         ),
     )
     inputs = RigidTask.input_spec()
@@ -30,7 +59,12 @@ def test_RigidTask_inputs():
 
 def test_RigidTask_outputs():
     output_map = dict(
-        out_file=dict(extensions=None), out_file_xfm=dict(extensions=None)
+        out_file=dict(
+            extensions=None,
+        ),
+        out_file_xfm=dict(
+            extensions=None,
+        ),
     )
     outputs = RigidTask.output_spec()
 

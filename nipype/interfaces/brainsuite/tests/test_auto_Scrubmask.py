@@ -4,15 +4,40 @@ from ..brainsuite import Scrubmask
 
 def test_Scrubmask_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        backgroundFillThreshold=dict(argstr="-b %d", usedefault=True),
-        environ=dict(nohash=True, usedefault=True),
-        foregroundTrimThreshold=dict(argstr="-f %d", usedefault=True),
-        inputMaskFile=dict(argstr="-i %s", extensions=None, mandatory=True),
-        numberIterations=dict(argstr="-n %d"),
-        outputMaskFile=dict(argstr="-o %s", extensions=None, genfile=True),
-        timer=dict(argstr="--timer"),
-        verbosity=dict(argstr="-v %d"),
+        args=dict(
+            argstr="%s",
+        ),
+        backgroundFillThreshold=dict(
+            argstr="-b %d",
+            usedefault=True,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        foregroundTrimThreshold=dict(
+            argstr="-f %d",
+            usedefault=True,
+        ),
+        inputMaskFile=dict(
+            argstr="-i %s",
+            extensions=None,
+            mandatory=True,
+        ),
+        numberIterations=dict(
+            argstr="-n %d",
+        ),
+        outputMaskFile=dict(
+            argstr="-o %s",
+            extensions=None,
+            genfile=True,
+        ),
+        timer=dict(
+            argstr="--timer",
+        ),
+        verbosity=dict(
+            argstr="-v %d",
+        ),
     )
     inputs = Scrubmask.input_spec()
 
@@ -22,7 +47,11 @@ def test_Scrubmask_inputs():
 
 
 def test_Scrubmask_outputs():
-    output_map = dict(outputMaskFile=dict(extensions=None))
+    output_map = dict(
+        outputMaskFile=dict(
+            extensions=None,
+        ),
+    )
     outputs = Scrubmask.output_spec()
 
     for key, metadata in list(output_map.items()):

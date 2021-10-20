@@ -4,10 +4,21 @@ from ..converters import DWICompare
 
 def test_DWICompare_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        inputVolume1=dict(argstr="--inputVolume1 %s", extensions=None),
-        inputVolume2=dict(argstr="--inputVolume2 %s", extensions=None),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        inputVolume1=dict(
+            argstr="--inputVolume1 %s",
+            extensions=None,
+        ),
+        inputVolume2=dict(
+            argstr="--inputVolume2 %s",
+            extensions=None,
+        ),
     )
     inputs = DWICompare.input_spec()
 

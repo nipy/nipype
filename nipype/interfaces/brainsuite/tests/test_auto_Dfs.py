@@ -4,30 +4,70 @@ from ..brainsuite import Dfs
 
 def test_Dfs_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        curvatureWeighting=dict(argstr="-w %f", usedefault=True),
-        environ=dict(nohash=True, usedefault=True),
-        inputShadingVolume=dict(argstr="-c %s", extensions=None),
-        inputVolumeFile=dict(argstr="-i %s", extensions=None, mandatory=True),
-        noNormalsFlag=dict(argstr="--nonormals"),
-        nonZeroTessellation=dict(
-            argstr="-nz", xor=("nonZeroTessellation", "specialTessellation")
+        args=dict(
+            argstr="%s",
         ),
-        outputSurfaceFile=dict(argstr="-o %s", extensions=None, genfile=True),
-        postSmoothFlag=dict(argstr="--postsmooth"),
-        scalingPercentile=dict(argstr="-f %f"),
-        smoothingConstant=dict(argstr="-a %f", usedefault=True),
-        smoothingIterations=dict(argstr="-n %d", usedefault=True),
+        curvatureWeighting=dict(
+            argstr="-w %f",
+            usedefault=True,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        inputShadingVolume=dict(
+            argstr="-c %s",
+            extensions=None,
+        ),
+        inputVolumeFile=dict(
+            argstr="-i %s",
+            extensions=None,
+            mandatory=True,
+        ),
+        noNormalsFlag=dict(
+            argstr="--nonormals",
+        ),
+        nonZeroTessellation=dict(
+            argstr="-nz",
+            xor=("nonZeroTessellation", "specialTessellation"),
+        ),
+        outputSurfaceFile=dict(
+            argstr="-o %s",
+            extensions=None,
+            genfile=True,
+        ),
+        postSmoothFlag=dict(
+            argstr="--postsmooth",
+        ),
+        scalingPercentile=dict(
+            argstr="-f %f",
+        ),
+        smoothingConstant=dict(
+            argstr="-a %f",
+            usedefault=True,
+        ),
+        smoothingIterations=dict(
+            argstr="-n %d",
+            usedefault=True,
+        ),
         specialTessellation=dict(
             argstr="%s",
             position=-1,
             requires=["tessellationThreshold"],
             xor=("nonZeroTessellation", "specialTessellation"),
         ),
-        tessellationThreshold=dict(argstr="%f"),
-        timer=dict(argstr="--timer"),
-        verbosity=dict(argstr="-v %d"),
-        zeroPadFlag=dict(argstr="-z"),
+        tessellationThreshold=dict(
+            argstr="%f",
+        ),
+        timer=dict(
+            argstr="--timer",
+        ),
+        verbosity=dict(
+            argstr="-v %d",
+        ),
+        zeroPadFlag=dict(
+            argstr="-z",
+        ),
     )
     inputs = Dfs.input_spec()
 
@@ -37,7 +77,11 @@ def test_Dfs_inputs():
 
 
 def test_Dfs_outputs():
-    output_map = dict(outputSurfaceFile=dict(extensions=None))
+    output_map = dict(
+        outputSurfaceFile=dict(
+            extensions=None,
+        ),
+    )
     outputs = Dfs.output_spec()
 
     for key, metadata in list(output_map.items()):

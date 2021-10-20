@@ -305,6 +305,7 @@ class FieldMap(SPMCommand):
         if (self.inputs.jobtype == "calculatevdm") and (
             opt in ["phase_file", "magnitude_file", "anat_file", "epi_file"]
         ):
+
             return scans_for_fname(ensure_list(val))
 
         if (self.inputs.jobtype == "applyvdm") and (opt == "in_files"):

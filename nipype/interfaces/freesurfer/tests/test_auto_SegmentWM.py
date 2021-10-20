@@ -4,10 +4,25 @@ from ..preprocess import SegmentWM
 
 def test_SegmentWM_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2),
-        out_file=dict(argstr="%s", extensions=None, mandatory=True, position=-1),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
+        out_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-1,
+        ),
         subjects_dir=dict(),
     )
     inputs = SegmentWM.input_spec()
@@ -18,7 +33,11 @@ def test_SegmentWM_inputs():
 
 
 def test_SegmentWM_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = SegmentWM.output_spec()
 
     for key, metadata in list(output_map.items()):

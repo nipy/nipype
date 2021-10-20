@@ -3,7 +3,12 @@ from ..misc import NormalizeProbabilityMapSet
 
 
 def test_NormalizeProbabilityMapSet_inputs():
-    input_map = dict(in_files=dict(), in_mask=dict(extensions=None))
+    input_map = dict(
+        in_files=dict(),
+        in_mask=dict(
+            extensions=None,
+        ),
+    )
     inputs = NormalizeProbabilityMapSet.input_spec()
 
     for key, metadata in list(input_map.items()):
@@ -12,7 +17,9 @@ def test_NormalizeProbabilityMapSet_inputs():
 
 
 def test_NormalizeProbabilityMapSet_outputs():
-    output_map = dict(out_files=dict())
+    output_map = dict(
+        out_files=dict(),
+    )
     outputs = NormalizeProbabilityMapSet.output_spec()
 
     for key, metadata in list(output_map.items()):

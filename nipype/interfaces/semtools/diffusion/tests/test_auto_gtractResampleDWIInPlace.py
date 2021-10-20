@@ -4,17 +4,47 @@ from ..gtract import gtractResampleDWIInPlace
 
 def test_gtractResampleDWIInPlace_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        debugLevel=dict(argstr="--debugLevel %d"),
-        environ=dict(nohash=True, usedefault=True),
-        imageOutputSize=dict(argstr="--imageOutputSize %s", sep=","),
-        inputTransform=dict(argstr="--inputTransform %s", extensions=None),
-        inputVolume=dict(argstr="--inputVolume %s", extensions=None),
-        numberOfThreads=dict(argstr="--numberOfThreads %d"),
-        outputResampledB0=dict(argstr="--outputResampledB0 %s", hash_files=False),
-        outputVolume=dict(argstr="--outputVolume %s", hash_files=False),
-        referenceVolume=dict(argstr="--referenceVolume %s", extensions=None),
-        warpDWITransform=dict(argstr="--warpDWITransform %s", extensions=None),
+        args=dict(
+            argstr="%s",
+        ),
+        debugLevel=dict(
+            argstr="--debugLevel %d",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        imageOutputSize=dict(
+            argstr="--imageOutputSize %s",
+            sep=",",
+        ),
+        inputTransform=dict(
+            argstr="--inputTransform %s",
+            extensions=None,
+        ),
+        inputVolume=dict(
+            argstr="--inputVolume %s",
+            extensions=None,
+        ),
+        numberOfThreads=dict(
+            argstr="--numberOfThreads %d",
+        ),
+        outputResampledB0=dict(
+            argstr="--outputResampledB0 %s",
+            hash_files=False,
+        ),
+        outputVolume=dict(
+            argstr="--outputVolume %s",
+            hash_files=False,
+        ),
+        referenceVolume=dict(
+            argstr="--referenceVolume %s",
+            extensions=None,
+        ),
+        warpDWITransform=dict(
+            argstr="--warpDWITransform %s",
+            extensions=None,
+        ),
     )
     inputs = gtractResampleDWIInPlace.input_spec()
 
@@ -25,7 +55,12 @@ def test_gtractResampleDWIInPlace_inputs():
 
 def test_gtractResampleDWIInPlace_outputs():
     output_map = dict(
-        outputResampledB0=dict(extensions=None), outputVolume=dict(extensions=None)
+        outputResampledB0=dict(
+            extensions=None,
+        ),
+        outputVolume=dict(
+            extensions=None,
+        ),
     )
     outputs = gtractResampleDWIInPlace.output_spec()
 

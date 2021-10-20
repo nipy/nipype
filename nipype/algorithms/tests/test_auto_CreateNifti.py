@@ -5,8 +5,14 @@ from ..misc import CreateNifti
 def test_CreateNifti_inputs():
     input_map = dict(
         affine=dict(),
-        data_file=dict(extensions=None, mandatory=True),
-        header_file=dict(extensions=None, mandatory=True),
+        data_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        header_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
     )
     inputs = CreateNifti.input_spec()
 
@@ -16,7 +22,11 @@ def test_CreateNifti_inputs():
 
 
 def test_CreateNifti_outputs():
-    output_map = dict(nifti_file=dict(extensions=None))
+    output_map = dict(
+        nifti_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = CreateNifti.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -4,11 +4,26 @@ from ..arithmetic import CastScalarVolume
 
 def test_CastScalarVolume_inputs():
     input_map = dict(
-        InputVolume=dict(argstr="%s", extensions=None, position=-2),
-        OutputVolume=dict(argstr="%s", hash_files=False, position=-1),
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        type=dict(argstr="--type %s"),
+        InputVolume=dict(
+            argstr="%s",
+            extensions=None,
+            position=-2,
+        ),
+        OutputVolume=dict(
+            argstr="%s",
+            hash_files=False,
+            position=-1,
+        ),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        type=dict(
+            argstr="--type %s",
+        ),
     )
     inputs = CastScalarVolume.input_spec()
 
@@ -18,7 +33,12 @@ def test_CastScalarVolume_inputs():
 
 
 def test_CastScalarVolume_outputs():
-    output_map = dict(OutputVolume=dict(extensions=None, position=-1))
+    output_map = dict(
+        OutputVolume=dict(
+            extensions=None,
+            position=-1,
+        ),
+    )
     outputs = CastScalarVolume.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -4,23 +4,61 @@ from ..registration import RigidRegistration
 
 def test_RigidRegistration_inputs():
     input_map = dict(
-        FixedImageFileName=dict(argstr="%s", extensions=None, position=-2),
-        MovingImageFileName=dict(argstr="%s", extensions=None, position=-1),
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        fixedsmoothingfactor=dict(argstr="--fixedsmoothingfactor %d"),
-        histogrambins=dict(argstr="--histogrambins %d"),
-        initialtransform=dict(argstr="--initialtransform %s", extensions=None),
-        iterations=dict(argstr="--iterations %s", sep=","),
-        learningrate=dict(argstr="--learningrate %s", sep=","),
-        movingsmoothingfactor=dict(argstr="--movingsmoothingfactor %d"),
-        outputtransform=dict(argstr="--outputtransform %s", hash_files=False),
-        resampledmovingfilename=dict(
-            argstr="--resampledmovingfilename %s", hash_files=False
+        FixedImageFileName=dict(
+            argstr="%s",
+            extensions=None,
+            position=-2,
         ),
-        spatialsamples=dict(argstr="--spatialsamples %d"),
-        testingmode=dict(argstr="--testingmode "),
-        translationscale=dict(argstr="--translationscale %f"),
+        MovingImageFileName=dict(
+            argstr="%s",
+            extensions=None,
+            position=-1,
+        ),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        fixedsmoothingfactor=dict(
+            argstr="--fixedsmoothingfactor %d",
+        ),
+        histogrambins=dict(
+            argstr="--histogrambins %d",
+        ),
+        initialtransform=dict(
+            argstr="--initialtransform %s",
+            extensions=None,
+        ),
+        iterations=dict(
+            argstr="--iterations %s",
+            sep=",",
+        ),
+        learningrate=dict(
+            argstr="--learningrate %s",
+            sep=",",
+        ),
+        movingsmoothingfactor=dict(
+            argstr="--movingsmoothingfactor %d",
+        ),
+        outputtransform=dict(
+            argstr="--outputtransform %s",
+            hash_files=False,
+        ),
+        resampledmovingfilename=dict(
+            argstr="--resampledmovingfilename %s",
+            hash_files=False,
+        ),
+        spatialsamples=dict(
+            argstr="--spatialsamples %d",
+        ),
+        testingmode=dict(
+            argstr="--testingmode ",
+        ),
+        translationscale=dict(
+            argstr="--translationscale %f",
+        ),
     )
     inputs = RigidRegistration.input_spec()
 
@@ -31,8 +69,12 @@ def test_RigidRegistration_inputs():
 
 def test_RigidRegistration_outputs():
     output_map = dict(
-        outputtransform=dict(extensions=None),
-        resampledmovingfilename=dict(extensions=None),
+        outputtransform=dict(
+            extensions=None,
+        ),
+        resampledmovingfilename=dict(
+            extensions=None,
+        ),
     )
     outputs = RigidRegistration.output_spec()
 

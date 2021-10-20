@@ -4,10 +4,20 @@ from ..utils import NwarpAdjust
 
 def test_NwarpAdjust_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        in_files=dict(argstr="-source %s"),
-        num_threads=dict(nohash=True, usedefault=True),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_files=dict(
+            argstr="-source %s",
+        ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -17,7 +27,10 @@ def test_NwarpAdjust_inputs():
             requires=["in_files"],
         ),
         outputtype=dict(),
-        warps=dict(argstr="-nwarp %s", mandatory=True),
+        warps=dict(
+            argstr="-nwarp %s",
+            mandatory=True,
+        ),
     )
     inputs = NwarpAdjust.input_spec()
 
@@ -27,7 +40,11 @@ def test_NwarpAdjust_inputs():
 
 
 def test_NwarpAdjust_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = NwarpAdjust.output_spec()
 
     for key, metadata in list(output_map.items()):

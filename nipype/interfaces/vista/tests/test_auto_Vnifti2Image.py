@@ -4,10 +4,24 @@ from ..vista import Vnifti2Image
 
 def test_Vnifti2Image_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        attributes=dict(argstr="-attr %s", extensions=None, position=2),
-        environ=dict(nohash=True, usedefault=True),
-        in_file=dict(argstr="-in %s", extensions=None, mandatory=True, position=1),
+        args=dict(
+            argstr="%s",
+        ),
+        attributes=dict(
+            argstr="-attr %s",
+            extensions=None,
+            position=2,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="-in %s",
+            extensions=None,
+            mandatory=True,
+            position=1,
+        ),
         out_file=dict(
             argstr="-out %s",
             extensions=None,
@@ -26,7 +40,11 @@ def test_Vnifti2Image_inputs():
 
 
 def test_Vnifti2Image_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Vnifti2Image.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -4,11 +4,30 @@ from ..fix import AccuracyTester
 
 def test_AccuracyTester_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        mel_icas=dict(argstr="%s", copyfile=False, mandatory=True, position=3),
-        output_directory=dict(argstr="%s", mandatory=True, position=2),
-        trained_wts_file=dict(argstr="%s", extensions=None, mandatory=True, position=1),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        mel_icas=dict(
+            argstr="%s",
+            copyfile=False,
+            mandatory=True,
+            position=3,
+        ),
+        output_directory=dict(
+            argstr="%s",
+            mandatory=True,
+            position=2,
+        ),
+        trained_wts_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=1,
+        ),
     )
     inputs = AccuracyTester.input_spec()
 
@@ -18,7 +37,12 @@ def test_AccuracyTester_inputs():
 
 
 def test_AccuracyTester_outputs():
-    output_map = dict(output_directory=dict(argstr="%s", position=1))
+    output_map = dict(
+        output_directory=dict(
+            argstr="%s",
+            position=1,
+        ),
+    )
     outputs = AccuracyTester.output_spec()
 
     for key, metadata in list(output_map.items()):

@@ -4,13 +4,34 @@ from ..utils import ApplyMask
 
 def test_ApplyMask_inputs():
     input_map = dict(
-        args=dict(argstr="%s"),
-        environ=dict(nohash=True, usedefault=True),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=-3),
-        invert_xfm=dict(argstr="-invert"),
-        keep_mask_deletion_edits=dict(argstr="-keep_mask_deletion_edits"),
-        mask_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2),
-        mask_thresh=dict(argstr="-T %.4f"),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-3,
+        ),
+        invert_xfm=dict(
+            argstr="-invert",
+        ),
+        keep_mask_deletion_edits=dict(
+            argstr="-keep_mask_deletion_edits",
+        ),
+        mask_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
+        mask_thresh=dict(
+            argstr="-T %.4f",
+        ),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -21,11 +42,24 @@ def test_ApplyMask_inputs():
             position=-1,
         ),
         subjects_dir=dict(),
-        transfer=dict(argstr="-transfer %d"),
-        use_abs=dict(argstr="-abs"),
-        xfm_file=dict(argstr="-xform %s", extensions=None),
-        xfm_source=dict(argstr="-lta_src %s", extensions=None),
-        xfm_target=dict(argstr="-lta_dst %s", extensions=None),
+        transfer=dict(
+            argstr="-transfer %d",
+        ),
+        use_abs=dict(
+            argstr="-abs",
+        ),
+        xfm_file=dict(
+            argstr="-xform %s",
+            extensions=None,
+        ),
+        xfm_source=dict(
+            argstr="-lta_src %s",
+            extensions=None,
+        ),
+        xfm_target=dict(
+            argstr="-lta_dst %s",
+            extensions=None,
+        ),
     )
     inputs = ApplyMask.input_spec()
 
@@ -35,7 +69,11 @@ def test_ApplyMask_inputs():
 
 
 def test_ApplyMask_outputs():
-    output_map = dict(out_file=dict(extensions=None))
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = ApplyMask.output_spec()
 
     for key, metadata in list(output_map.items()):
