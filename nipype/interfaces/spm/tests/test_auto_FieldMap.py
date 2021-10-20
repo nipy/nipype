@@ -13,18 +13,29 @@ def test_FieldMap_inputs():
             field="subj.defaults.defaultsval.blipdir",
             mandatory=True,
         ),
+        distortion_direction=dict(
+            field="roptions.pedir",
+            usedefault=True,
+        ),
         echo_times=dict(
             field="subj.defaults.defaultsval.et",
-            mandatory=True,
         ),
         epi_file=dict(
             copyfile=False,
             extensions=None,
             field="subj.session.epi",
-            mandatory=True,
         ),
         epifm=dict(
             field="subj.defaults.defaultsval.epifm",
+            usedefault=True,
+        ),
+        in_files=dict(
+            copyfile=True,
+            field="data.scans",
+            mandatory=True,
+        ),
+        interpolation=dict(
+            field="roptions.rinterp",
             usedefault=True,
         ),
         jacobian_modulation=dict(
@@ -38,7 +49,6 @@ def test_FieldMap_inputs():
             copyfile=False,
             extensions=None,
             field="subj.data.presubphasemag.magnitude",
-            mandatory=True,
         ),
         mask_fwhm=dict(
             field="subj.defaults.defaultsval.mflags.fwhm",
@@ -72,6 +82,10 @@ def test_FieldMap_inputs():
             field="subj.defaults.defaultsval.mflags.nerode",
             usedefault=True,
         ),
+        out_prefix=dict(
+            field="roptions.prefix",
+            usedefault=True,
+        ),
         pad=dict(
             field="subj.defaults.defaultsval.uflags.pad",
             usedefault=True,
@@ -81,11 +95,13 @@ def test_FieldMap_inputs():
             copyfile=False,
             extensions=None,
             field="subj.data.presubphasemag.phase",
-            mandatory=True,
         ),
         reg=dict(
             field="subj.defaults.defaultsval.mflags.reg",
             usedefault=True,
+        ),
+        reslice_interp=dict(
+            field="roptions.rinterp",
         ),
         sessname=dict(
             field="subj.sessname",
@@ -113,6 +129,24 @@ def test_FieldMap_inputs():
             min_ver="8",
             usedefault=True,
         ),
+        vdmfile=dict(
+            copyfile=True,
+            extensions=None,
+            field="data.vdmfile",
+            mandatory=True,
+        ),
+        write_mask=dict(
+            field="roptions.mask",
+        ),
+        write_which=dict(
+            field="roptions.which",
+            maxlen=2,
+            minlen=2,
+            usedefault=True,
+        ),
+        write_wrap=dict(
+            field="roptions.wrap",
+        ),
         writeunwarped=dict(
             field="subj.writeunwarped",
             usedefault=True,
@@ -131,6 +165,10 @@ def test_FieldMap_inputs():
 
 def test_FieldMap_outputs():
     output_map = dict(
+        mean_image=dict(
+            extensions=None,
+        ),
+        out_files=dict(),
         vdm=dict(
             extensions=None,
         ),
