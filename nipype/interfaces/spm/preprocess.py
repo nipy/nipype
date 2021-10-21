@@ -40,6 +40,13 @@ __docformat__ = "restructuredtext"
 
 class FieldMapInputSpec(SPMCommandInputSpec):
 
+    jobtype = traits.Enum(
+        "calculatevdm",
+        usedefault=True,
+        deprecated="1.9.0",  # Two minor releases in the future
+        desc="Must be 'calculatevdm'; to apply VDM, use the ApplyVDM interface.",
+    )
+
     phase_file = File(
         mandatory=True,
         exists=True,
@@ -251,9 +258,7 @@ class FieldMap(SPMCommand):
 class ApplyVDMInputSpec(SPMCommandInputSpec):
 
     in_files = InputMultiObject(
-        traits.Either(
-            ImageFileSPM(exists=True), traits.List(ImageFileSPM(exists=True))
-        ),
+        ImageFileSPM(exists=True),
         field="data.scans",
         mandatory=True,
         copyfile=True,
@@ -262,7 +267,7 @@ class ApplyVDMInputSpec(SPMCommandInputSpec):
     vdmfile = File(
         field="data.vdmfile",
         desc="Voxel displacement map to use",
-        # mandatory=True,
+        mandatory=True,
         copyfile=True,
     )
     distortion_direction = traits.Int(
@@ -279,13 +284,8 @@ class ApplyVDMInputSpec(SPMCommandInputSpec):
         usedefault=True,
         desc="determines which images to apply vdm to",
     )
-    interpolation = traits.Int(
-        4,
-        field="roptions.rinterp",
-        desc="phase encode direction input data have been acquired with",
-        usedefault=True,
-    )
-    reslice_interp = traits.Range(
+    interpolation = traits.Range(
+        value=4,
         low=0,
         high=7,
         field="roptions.rinterp",
