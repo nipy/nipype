@@ -39,12 +39,14 @@ __docformat__ = "restructuredtext"
 
 
 class FieldMapInputSpec(SPMCommandInputSpec):
+
     jobtype = traits.Enum(
         "calculatevdm",
-        "applyvdm",
         usedefault=True,
-        desc="one of: calculatevdm, applyvdm",
+        deprecated="1.9.0",  # Two minor releases in the future
+        desc="Must be 'calculatevdm'; to apply VDM, use the ApplyVDM interface.",
     )
+
     phase_file = File(
         mandatory=True,
         exists=True,
@@ -231,22 +233,148 @@ class FieldMap(SPMCommand):
 
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm"""
+
         if opt in ["phase_file", "magnitude_file", "anat_file", "epi_file"]:
+
             return scans_for_fname(ensure_list(val))
 
         return super(FieldMap, self)._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
         """validate spm fieldmap options if set to None ignore"""
+
         einputs = super(FieldMap, self)._parse_inputs()
-        return [{self.inputs.jobtype: einputs[0]}]
+        return [{"calculatevdm": einputs[0]}]
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         jobtype = self.inputs.jobtype
-        if jobtype == "calculatevdm":
-            outputs["vdm"] = fname_presuffix(self.inputs.phase_file, prefix="vdm5_sc")
 
+        outputs["vdm"] = fname_presuffix(self.inputs.phase_file, prefix="vdm5_sc")
+
+        return outputs
+
+
+class ApplyVDMInputSpec(SPMCommandInputSpec):
+
+    in_files = InputMultiObject(
+        ImageFileSPM(exists=True),
+        field="data.scans",
+        mandatory=True,
+        copyfile=True,
+        desc="list of filenames to apply the vdm to",
+    )
+    vdmfile = File(
+        field="data.vdmfile",
+        desc="Voxel displacement map to use",
+        mandatory=True,
+        copyfile=True,
+    )
+    distortion_direction = traits.Int(
+        2,
+        field="roptions.pedir",
+        desc="phase encode direction input data have been acquired with",
+        usedefault=True,
+    )
+    write_which = traits.ListInt(
+        [2, 1],
+        field="roptions.which",
+        minlen=2,
+        maxlen=2,
+        usedefault=True,
+        desc="If the first value is non-zero, reslice all images. If the second value is non-zero, reslice a mean image.",
+    )
+    interpolation = traits.Range(
+        value=4,
+        low=0,
+        high=7,
+        field="roptions.rinterp",
+        desc="degree of b-spline used for interpolation",
+    )
+    write_wrap = traits.List(
+        traits.Int(),
+        minlen=3,
+        maxlen=3,
+        field="roptions.wrap",
+        desc=("Check if interpolation should wrap in [x,y,z]"),
+    )
+    write_mask = traits.Bool(
+        field="roptions.mask", desc="True/False mask time series images"
+    )
+    out_prefix = traits.String(
+        "u",
+        field="roptions.prefix",
+        usedefault=True,
+        desc="fieldmap corrected output prefix",
+    )
+
+
+class ApplyVDMOutputSpec(TraitedSpec):
+    out_files = OutputMultiPath(
+        traits.Either(traits.List(File(exists=True)), File(exists=True)),
+        desc=("These will be the fieldmap corrected files."),
+    )
+    mean_image = File(exists=True, desc="Mean image")
+
+
+class ApplyVDM(SPMCommand):
+    """Use the fieldmap toolbox from spm to apply the voxel displacement map (VDM) to some epi files.
+
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=173
+
+    .. important::
+
+        This interface does not deal with real/imag magnitude images nor
+        with the two phase files case.
+
+    """
+
+    input_spec = ApplyVDMInputSpec
+    output_spec = ApplyVDMOutputSpec
+    _jobtype = "tools"
+    _jobname = "fieldmap"
+
+    def _format_arg(self, opt, spec, val):
+        """Convert input to appropriate format for spm"""
+
+        if opt in ["in_files", "vdmfile"]:
+            return scans_for_fname(ensure_list(val))
+        return super(FieldMap, self)._format_arg(opt, spec, val)
+
+    def _parse_inputs(self):
+        """validate spm fieldmap options if set to None ignore"""
+
+        einputs = super(ApplyVDM, self)._parse_inputs()
+
+        return [{"applymap": einputs[0]}]
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        jobtype = self.inputs.jobtype
+        resliced_all = self.inputs.write_which[0] > 0
+        resliced_mean = self.inputs.write_which[1] > 0
+        if resliced_mean:
+            if isinstance(self.inputs.in_files[0], list):
+                first_image = self.inputs.in_files[0][0]
+            else:
+                first_image = self.inputs.in_files[0]
+            outputs["mean_image"] = fname_presuffix(first_image, prefix="meanu")
+
+        if resliced_all:
+            outputs["out_files"] = []
+            for idx, imgf in enumerate(ensure_list(self.inputs.in_files)):
+                appliedvdm_run = []
+                if isinstance(imgf, list):
+                    for i, inner_imgf in enumerate(ensure_list(imgf)):
+                        newfile = fname_presuffix(
+                            inner_imgf, prefix=self.inputs.out_prefix
+                        )
+                        appliedvdm_run.append(newfile)
+                else:
+                    appliedvdm_run = fname_presuffix(
+                        imgf, prefix=self.inputs.out_prefix
+                    )
+                outputs["out_files"].append(appliedvdm_run)
         return outputs
 
 

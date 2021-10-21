@@ -106,6 +106,7 @@ The workflow directive has the following configuration options:
         Provide a customized template for preparing restructured text.
 
 """
+
 import sys
 import os
 import shutil

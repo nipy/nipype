@@ -4,6 +4,7 @@
 """SPM is a software package for the analysis of brain imaging data sequences."""
 from .base import Info, SPMCommand, logger, no_spm, scans_for_fname, scans_for_fnames
 from .preprocess import (
+    ApplyVDM,
     FieldMap,
     SliceTiming,
     Realign,
