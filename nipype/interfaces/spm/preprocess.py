@@ -282,7 +282,7 @@ class ApplyVDMInputSpec(SPMCommandInputSpec):
         minlen=2,
         maxlen=2,
         usedefault=True,
-        desc="determines which images to apply vdm to",
+        desc="If the first value is non-zero, reslice all images. If the second value is non-zero, reslice a mean image.",
     )
     interpolation = traits.Range(
         value=4,
