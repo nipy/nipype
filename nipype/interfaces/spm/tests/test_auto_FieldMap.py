@@ -31,6 +31,10 @@ def test_FieldMap_inputs():
             field="subj.defaults.defaultsval.ajm",
             usedefault=True,
         ),
+        jobtype=dict(
+            deprecated="1.9.0",
+            usedefault=True,
+        ),
         magnitude_file=dict(
             copyfile=False,
             extensions=None,

@@ -15,7 +15,6 @@ def test_ApplyVDM_inputs():
         ),
         interpolation=dict(
             field="roptions.rinterp",
-            usedefault=True,
         ),
         matlab_cmd=dict(),
         mfile=dict(
@@ -26,9 +25,6 @@ def test_ApplyVDM_inputs():
             usedefault=True,
         ),
         paths=dict(),
-        reslice_interp=dict(
-            field="roptions.rinterp",
-        ),
         use_mcr=dict(),
         use_v8struct=dict(
             min_ver="8",
@@ -38,6 +34,7 @@ def test_ApplyVDM_inputs():
             copyfile=True,
             extensions=None,
             field="data.vdmfile",
+            mandatory=True,
         ),
         write_mask=dict(
             field="roptions.mask",
