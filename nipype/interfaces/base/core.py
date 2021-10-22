@@ -607,6 +607,7 @@ class CommandLine(BaseInterface):
     _cmd = None
     _version = None
     _terminal_output = "stream"
+    _write_cmdline = False
 
     @classmethod
     def set_default_terminal_output(cls, output_type):
@@ -623,7 +624,7 @@ class CommandLine(BaseInterface):
         else:
             raise AttributeError("Invalid terminal output_type: %s" % output_type)
 
-    def __init__(self, command=None, terminal_output=None, **inputs):
+    def __init__(self, command=None, terminal_output=None, write_cmdline=False, **inputs):
         super(CommandLine, self).__init__(**inputs)
         self._environ = None
         # Set command. Input argument takes precedence
@@ -637,6 +638,8 @@ class CommandLine(BaseInterface):
 
         if terminal_output is not None:
             self.terminal_output = terminal_output
+
+        self._write_cmdline = write_cmdline
 
     @property
     def cmd(self):
@@ -668,6 +671,14 @@ class CommandLine(BaseInterface):
                 "%s." % (value, ", ".join(['"%s"' % v for v in VALID_TERMINAL_OUTPUT]))
             )
         self._terminal_output = value
+
+    @property
+    def write_cmdline(self):
+        return self._write_cmdline
+
+    @write_cmdline.setter
+    def write_cmdline(self, value):
+        self._write_cmdline = value is True
 
     def raise_exception(self, runtime):
         raise RuntimeError(
@@ -716,9 +727,14 @@ class CommandLine(BaseInterface):
             adds stdout, stderr, merged, cmdline, dependencies, command_path
 
         """
-
         out_environ = self._get_environ()
         # Initialize runtime Bunch
+
+        try:
+            runtime.cmdline = self.cmdline
+        except Exception as exc:
+            raise RuntimeError("Error raised when interpolating the command line") from exc
+
         runtime.stdout = None
         runtime.stderr = None
         runtime.cmdline = self.cmdline
@@ -742,7 +758,11 @@ class CommandLine(BaseInterface):
             if self._ldd
             else "<skipped>"
         )
-        runtime = run_command(runtime, output=self.terminal_output)
+        runtime = run_command(
+            runtime,
+            output=self.terminal_output,
+            write_cmdline=self.write_cmdline,
+        )
         return runtime
 
     def _format_arg(self, name, trait_spec, value):
@@ -907,7 +927,14 @@ class CommandLine(BaseInterface):
 
             if not isdefined(value):
                 continue
-            arg = self._format_arg(name, spec, value)
+
+            try:
+                arg = self._format_arg(name, spec, value)
+            except Exception as exc:
+                raise ValueError(
+                    f"Error formatting command line argument '{name}' with value '{value}'"
+                ) from exc
+
             if arg is None:
                 continue
             pos = spec.position

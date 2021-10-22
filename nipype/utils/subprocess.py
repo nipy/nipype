@@ -10,6 +10,7 @@ import errno
 import select
 import locale
 import datetime
+from pathlib import Path
 from subprocess import Popen, STDOUT, PIPE
 from .filemanip import canonicalize_env, read_stream
 
@@ -69,7 +70,7 @@ class Stream(object):
         self._lastidx = len(self._rows)
 
 
-def run_command(runtime, output=None, timeout=0.01):
+def run_command(runtime, output=None, timeout=0.01, write_cmdline=False):
     """Run a command, read stdout and stderr, prefix with timestamp.
 
     The returned runtime contains a merged stdout+stderr log with timestamps
@@ -99,6 +100,9 @@ def run_command(runtime, output=None, timeout=0.01):
     elif output == "file_stderr":
         errfile = os.path.join(runtime.cwd, "stderr.nipype")
         stderr = open(errfile, "wb")
+
+    if write_cmdline:
+        (Path(runtime.cwd) / "command.txt").write_text(cmdline)
 
     proc = Popen(
         cmdline,

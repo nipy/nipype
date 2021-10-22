@@ -209,6 +209,9 @@ class Node(EngineBase):
         self.needed_outputs = needed_outputs
         self.config = None
 
+        if issubclass(self._interface.__class__, CommandLine):
+            self._interface.write_cmdline = True
+
     @property
     def interface(self):
         """Return the underlying interface object"""
@@ -711,15 +714,12 @@ Error populating the inputs of node "%s": the results file of the source node \
             f'[Node] Executing "{self.name}" <{self._interface.__module__}'
             f".{self._interface.__class__.__name__}>"
         )
+
         # Invoke core run method of the interface ignoring exceptions
         result = self._interface.run(cwd=outdir, ignore_exception=True)
         logger.info(
             f'[Node] Finished "{self.name}", elapsed time {result.runtime.duration}s.'
         )
-
-        if issubclass(self._interface.__class__, CommandLine):
-            # Write out command line as it happened
-            Path.write_text(outdir / "command.txt", f"{result.runtime.cmdline}\n")
 
         exc_tb = getattr(result.runtime, "traceback", None)
 
