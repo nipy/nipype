@@ -3036,4 +3036,3 @@ class VBMSegment(SPMCommand):
             return einputs
         else:
             return super(VBMSegment, self)._parse_inputs(skip=("spatial_normalization"))
-
