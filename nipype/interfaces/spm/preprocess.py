@@ -339,18 +339,17 @@ class ApplyVDM(SPMCommand):
 
         if opt in ["in_files", "vdmfile"]:
             return scans_for_fname(ensure_list(val))
-        return super(FieldMap, self)._format_arg(opt, spec, val)
+        return super(ApplyVDM, self)._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
         """validate spm fieldmap options if set to None ignore"""
 
         einputs = super(ApplyVDM, self)._parse_inputs()
 
-        return [{"applymap": einputs[0]}]
+        return [{"applyvdm": einputs[0]}]
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        jobtype = self.inputs.jobtype
         resliced_all = self.inputs.write_which[0] > 0
         resliced_mean = self.inputs.write_which[1] > 0
         if resliced_mean:
@@ -3037,3 +3036,4 @@ class VBMSegment(SPMCommand):
             return einputs
         else:
             return super(VBMSegment, self)._parse_inputs(skip=("spatial_normalization"))
+
