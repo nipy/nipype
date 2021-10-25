@@ -493,9 +493,13 @@ class MRTM2InputSpec(GLMFitInputSpec):
         desc='save outputs as nii.gz',
         xor=_ext_xor
     )
+    yhat_save = traits.Bool(
+        argstr="--save-yhat", desc="save signal estimate (yhat)"
+    )
 
 class MRTM2OutputSpec(GLMFitInputSpec):
     bp = File(desc="BP estimates")
+    yhat = File(desc="Fitted values (yhat) to the TACs")
 
 class MRTM2(GLMFit):
     """Perform MRTM2 kinetic modeling.
@@ -521,6 +525,7 @@ class MRTM2(GLMFit):
         else:
             ext = '.mgh'            
         outputs['bp'] = os.join(self.inputs.glm_dir, 'bp',  ext)
+        outputs['yhat'] = os.join(self.inputs.glm_dir, 'yhat',  ext)
         return outputs
 
 class LoganRefInputSpec(GLMFitInputSpec):
