@@ -5,6 +5,10 @@ body {
     min-width: 70em;
 }
 
+div.sphinxsidebar {
+    position: relative;
+}
+
 div.sphinxsidebar h4, div.sphinxsidebar h3 {
     background-color: #2F83C8;
 }
