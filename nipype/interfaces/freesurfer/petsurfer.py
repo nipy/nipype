@@ -53,7 +53,7 @@ class GTMSegInputSpec(FSTraitedSpec):
         desc="run xcerebralseg on this subject to create apas+head.mgz"
     )
 
-    out_file = File(
+    gtm_file = File(
         argstr="--o %s",
         desc="output volume relative to subject/mri (default is gtmseg.mgz)"
     )
@@ -136,7 +136,7 @@ class GTMSegInputSpec(FSTraitedSpec):
 
 
 class GTMSegOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="GTM segmentation")
+    gtm_file = File(exists=True, desc="GTM segmentation")
 
 
 class GTMSeg(FSCommand):
@@ -154,6 +154,11 @@ class GTMSeg(FSCommand):
     _cmd = "gtmseg"
     input_spec = GTMSegInputSpec
     output_spec = GTMSegOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['gtm_file'] = os.path.join(self.inputs.subjects_dir,self.inputs.subject_id,'mri','gtmseg.mgz')
+        return outputs
 
     def _format_arg(self, name, spec, value):       
         return super(GTMSeg, self)._format_arg(name, spec, value)
@@ -398,7 +403,7 @@ class GTMPVC(FSCommand):
     >>> gtmpvc.inputs.in_file = 'sub-01_ses-baseline_pet.nii.gz'
     >>> gtmpvc.inputs.segmentation = 'gtmseg.mgz'
     >>> gtmpvc.inputs.reg_file = 'sub-01_ses-baseline_pet_mean_reg.lta'
-    >>> gtmpvc.inputs.output_dir = 'pvc'
+    >>> gtmpvc.inputs.pvc_dir = 'pvc'
     >>> gtmpvc.inputs.psf = 4
     >>> gtmpvc.inputs.default_seg_merge = True
     >>> gtmpvc.inputs.auto_mask = (1, 0.1)
@@ -515,7 +520,7 @@ class MRTM2(GLMFit):
             ext = '.nii'
         else:
             ext = '.mgh'            
-        outputs['bp'] = os.join(self.inputs.glm_dir, 'bp' + ext)
+        outputs['bp'] = os.join(self.inputs.glm_dir, 'bp',  ext)
         return outputs
 
 class LoganRefInputSpec(GLMFitInputSpec):
@@ -554,5 +559,5 @@ class LoganRef(GLMFit):
             ext = '.nii'
         else:
             ext = '.mgh'            
-        outputs['bp'] = os.join(self.inputs.glm_dir, 'bp' + ext)
+        outputs['bp'] = os.join(self.inputs.glm_dir, 'bp',  ext)
         return outputs
