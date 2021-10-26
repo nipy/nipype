@@ -209,7 +209,7 @@ class Node(EngineBase):
         self.needed_outputs = needed_outputs
         self.config = None
 
-        if issubclass(self._interface.__class__, CommandLine):
+        if hasattr(self._interface, "write_cmdline"):
             self._interface.write_cmdline = True
 
     @property
