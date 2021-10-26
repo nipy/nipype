@@ -624,7 +624,9 @@ class CommandLine(BaseInterface):
         else:
             raise AttributeError("Invalid terminal output_type: %s" % output_type)
 
-    def __init__(self, command=None, terminal_output=None, write_cmdline=False, **inputs):
+    def __init__(
+        self, command=None, terminal_output=None, write_cmdline=False, **inputs
+    ):
         super(CommandLine, self).__init__(**inputs)
         self._environ = None
         # Set command. Input argument takes precedence
@@ -733,7 +735,9 @@ class CommandLine(BaseInterface):
         try:
             runtime.cmdline = self.cmdline
         except Exception as exc:
-            raise RuntimeError("Error raised when interpolating the command line") from exc
+            raise RuntimeError(
+                "Error raised when interpolating the command line"
+            ) from exc
 
         runtime.stdout = None
         runtime.stderr = None
