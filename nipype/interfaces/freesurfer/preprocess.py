@@ -3380,38 +3380,3 @@ class ConcatenateLTA(FSCommand):
         if name == "out_type":
             value = {"VOX2VOX": 0, "RAS2RAS": 1}[value]
         return super(ConcatenateLTA, self)._format_arg(name, spec, value)
-
-class MRIGtmSegInputSpec(FSTraitedSpec):
-    subject_id = traits.Str(
-        argstr="--s %s", desc="freesurfer subject id", mandatory=True
-    )
-    
-
-class MRIGtmSeg(FSCommand):
-    """
-    This program performs a high-resolution segmentation to be used for PET partial volume correction.
-
-
-    Examples
-    ========
-    >>> '
-    """
-
-    _cmd = "mri_gtmseg"
-    input_spec = MRIGtmSegInputSpec
-
-
-class MRIGtmPVC(FSCommand):
-    """
-    This program performs partial volume correction using the output from gtmseg. 
-
-
-    Examples
-    ========
-    >>> '
-    """
-
-    _cmd = "mri_gtmpvc"
-
-
-
