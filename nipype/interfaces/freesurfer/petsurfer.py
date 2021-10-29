@@ -553,6 +553,16 @@ class LoganRefOutputSpec(GLMFitInputSpec):
     bp = File(desc="BP estimates")
 
 class LoganRef(GLMFit):
+    """Perform Logan reference kinetic modeling.
+    Examples
+    --------
+    >>> logan = LoganRef()
+    >>> logan.inputs.in_file = 'tac.nii'
+    >>> logan.inputs.logan = [('ref_tac.dat', 'timing.dat', 2600)]
+    >>> logan.inputs.glmdir = 'logan'
+    >>> logan.cmdline == 'mri_glmfit --glmdir logan --y tac.nii --mrtm2 ref_tac.dat timing.dat 2600'
+    """
+
     _cmd = "mri_glmfit"
     input_spec = LoganRefInputSpec
     output_spec = LoganRefOutputSpec
