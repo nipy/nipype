@@ -560,7 +560,7 @@ class LoganRef(GLMFit):
     >>> logan.inputs.in_file = 'tac.nii'
     >>> logan.inputs.logan = [('ref_tac.dat', 'timing.dat', 2600)]
     >>> logan.inputs.glmdir = 'logan'
-    >>> logan.cmdline == 'mri_glmfit --glmdir logan --y tac.nii --mrtm2 ref_tac.dat timing.dat 2600'
+    >>> logan.cmdline == 'mri_glmfit --glmdir logan --y tac.nii --logan ref_tac.dat timing.dat 2600'
     """
 
     _cmd = "mri_glmfit"
