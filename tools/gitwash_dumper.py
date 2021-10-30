@@ -50,9 +50,7 @@ def cp_files(in_path, globs, out_path):
 
 
 def filename_search_replace(sr_pairs, filename, backup=False):
-    """ Search and replace for expressions in files
-
-    """
+    """Search and replace for expressions in files"""
     in_txt = open(filename, "rt").read(-1)
     out_txt = in_txt[:]
     for in_exp, out_exp in sr_pairs:
@@ -94,7 +92,7 @@ def make_link_targets(
     url=None,
     ml_url=None,
 ):
-    """ Check and make link targets
+    """Check and make link targets
 
     If url is None or ml_url is None, check if there are links present for
     these in `known_link_fname`.  If not, raise error.  The check is:
