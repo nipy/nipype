@@ -638,10 +638,20 @@ class MRConvertInputSpec(MRTrix3BaseInputSpec):
         mandatory=False,
         desc="import data from a JSON file into header key-value pairs",
     )
+    json_export = File(
+        exists=False,
+        argstr="-json_export %s",
+        mandatory=False,
+        desc="export data from an image header key-value pairs into a JSON file",
+    )
 
 
 class MRConvertOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="output image")
+    json_export = File(
+        exists=True,
+        desc="exported data from an image header key-value pairs in a JSON file",
+    )
 
 
 class MRConvert(MRTrix3Base):
