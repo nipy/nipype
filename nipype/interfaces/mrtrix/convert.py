@@ -121,7 +121,9 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
                         "Expecting %s points, found only %s" % (stream_count, n_streams)
                     )
                     iflogger.error(
-                        "Expecting %s points, found only %s", stream_count, n_streams
+                        "Expecting %s points, found only %s",
+                        stream_count,
+                        n_streams,
                     )
                 break
             pts = np.ndarray(shape=(n_pts, pt_cols), dtype=f4dt, buffer=pts_str)
@@ -193,7 +195,10 @@ class MRTrix2TrackVis(DipyBaseInterface):
     output_spec = MRTrix2TrackVisOutputSpec
 
     def _run_interface(self, runtime):
-        from dipy.tracking.utils import move_streamlines, affine_from_fsl_mat_file
+        from dipy.tracking.utils import (
+            move_streamlines,
+            affine_from_fsl_mat_file,
+        )
 
         dx, dy, dz = get_data_dims(self.inputs.image_file)
         vx, vy, vz = get_vox_dims(self.inputs.image_file)
@@ -215,7 +220,8 @@ class MRTrix2TrackVis(DipyBaseInterface):
             self.inputs.registration_image_file
         ):
             iflogger.info(
-                "Applying transformation from matrix file %s", self.inputs.matrix_file
+                "Applying transformation from matrix file %s",
+                self.inputs.matrix_file,
             )
             xfm = np.genfromtxt(self.inputs.matrix_file)
             iflogger.info(xfm)
