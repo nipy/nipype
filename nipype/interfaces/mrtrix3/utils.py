@@ -64,6 +64,101 @@ class BrainMask(CommandLine):
         return outputs
 
 
+class MRCatInputSpec(MRTrix3BaseInputSpec):
+    in_files = traits.List(
+        File(exists=True),
+        argstr="%s",
+        position=-2,
+        mandatory=True,
+        desc="files to concatenate",
+    )
+
+    out_file = File(
+        "concatenated.mif",
+        argstr="%s",
+        mandatory=True,
+        position=-1,
+        usedefault=True,
+        desc="output concatenated image",
+    )
+
+    axis = traits.Int(
+        argstr="-axis %s",
+        desc="""specify axis along which concatenation should be performed. By default,
+     the program will use the last non-singleton, non-spatial axis of any of
+     the input images - in other words axis 3 or whichever axis (greater than
+     3) of the input images has size greater than one""",
+    )
+
+    datatype = traits.Enum(
+        "float32",
+        "float32le",
+        "float32be",
+        "float64",
+        "float64le",
+        "float64be",
+        "int64",
+        "uint64",
+        "int64le",
+        "uint64le",
+        "int64be",
+        "uint64be",
+        "int32",
+        "uint32",
+        "int32le",
+        "uint32le",
+        "int32be",
+        "uint32be",
+        "int16",
+        "uint16",
+        "int16le",
+        "uint16le",
+        "int16be",
+        "uint16be",
+        "cfloat32",
+        "cfloat32le",
+        "cfloat32be",
+        "cfloat64",
+        "cfloat64le",
+        "cfloat64be",
+        "int8",
+        "uint8",
+        "bit",
+        argstr="-datatype %s",
+        desc="specify output image data type",
+    )
+
+
+class MRCatOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc="the output concatenated image")
+
+
+class MRCat(CommandLine):
+    """
+    Concatenate several images into one
+
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> mrcat = mrt.MRCat()
+    >>> mrcat.inputs.in_files = ['image1.mif','image2.mif']
+    >>> mrcat.cmdline                               # doctest: +ELLIPSIS
+    'mrcat image1.mif image2.mif concatenated.mif'
+    >>> mrcat.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = "mrcat"
+    input_spec = MRCatInputSpec
+    output_spec = MRCatOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["out_file"] = op.abspath(self.inputs.out_file)
+        return outputs
+
+
 class Mesh2PVEInputSpec(CommandLineInputSpec):
     in_file = File(
         exists=True,
