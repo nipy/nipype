@@ -19,7 +19,11 @@ from .base import MRTrix3BaseInputSpec, MRTrix3Base
 
 class DWIDenoiseInputSpec(MRTrix3BaseInputSpec):
     in_file = File(
-        exists=True, argstr="%s", position=-2, mandatory=True, desc="input DWI image"
+        exists=True,
+        argstr="%s",
+        position=-2,
+        mandatory=True,
+        desc="input DWI image",
     )
     mask = File(exists=True, argstr="-mask %s", position=1, desc="mask image")
     extent = traits.Tuple(
@@ -88,7 +92,11 @@ class DWIDenoise(MRTrix3Base):
 
 class MRDeGibbsInputSpec(MRTrix3BaseInputSpec):
     in_file = File(
-        exists=True, argstr="%s", position=-2, mandatory=True, desc="input DWI image"
+        exists=True,
+        argstr="%s",
+        position=-2,
+        mandatory=True,
+        desc="input DWI image",
     )
     axes = traits.ListInt(
         default_value=[0, 1],
@@ -177,7 +185,11 @@ class MRDeGibbs(MRTrix3Base):
 
 class DWIBiasCorrectInputSpec(MRTrix3BaseInputSpec):
     in_file = File(
-        exists=True, argstr="%s", position=-2, mandatory=True, desc="input DWI image"
+        exists=True,
+        argstr="%s",
+        position=-2,
+        mandatory=True,
+        desc="input DWI image",
     )
     in_mask = File(argstr="-mask %s", desc="input mask image for bias field estimation")
     use_ants = traits.Bool(
@@ -245,7 +257,11 @@ class DWIBiasCorrect(MRTrix3Base):
 
 class DWIPreprocInputSpec(MRTrix3BaseInputSpec):
     in_file = File(
-        exists=True, argstr="%s", position=0, mandatory=True, desc="input DWI image"
+        exists=True,
+        argstr="%s",
+        position=0,
+        mandatory=True,
+        desc="input DWI image",
     )
     out_file = File(
         "preproc.mif",
@@ -292,7 +308,8 @@ class DWIPreprocInputSpec(MRTrix3BaseInputSpec):
         desc="Manually provide additional command-line options to the topup command",
     )
     export_grad_mrtrix = traits.Bool(
-        argstr="-export_grad_mrtrix", desc="export new gradient files in mrtrix format"
+        argstr="-export_grad_mrtrix",
+        desc="export new gradient files in mrtrix format",
     )
     export_grad_fsl = traits.Bool(
         argstr="-export_grad_fsl", desc="export gradient files in FSL format"
@@ -300,7 +317,7 @@ class DWIPreprocInputSpec(MRTrix3BaseInputSpec):
     out_grad_mrtrix = File(
         "grad.b",
         argstr="%s",
-        usedefault=True,
+        usedefault=False,
         requires=["export_grad_mrtrix"],
         desc="name of new gradient file",
     )
@@ -387,7 +404,11 @@ class ResponseSDInputSpec(MRTrix3BaseInputSpec):
         desc="response estimation algorithm (multi-tissue)",
     )
     in_file = File(
-        exists=True, argstr="%s", position=-5, mandatory=True, desc="input DWI image"
+        exists=True,
+        argstr="%s",
+        position=-5,
+        mandatory=True,
+        desc="input DWI image",
     )
     mtt_file = File(argstr="%s", position=-4, desc="input 5tt image")
     wm_file = File(
@@ -511,10 +532,17 @@ class ReplaceFSwithFIRSTInputSpec(CommandLineInputSpec):
         desc="input anatomical image",
     )
     in_t1w = File(
-        exists=True, argstr="%s", mandatory=True, position=-3, desc="input T1 image"
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=-3,
+        desc="input T1 image",
     )
     in_config = File(
-        exists=True, argstr="%s", position=-2, desc="connectome configuration file"
+        exists=True,
+        argstr="%s",
+        position=-2,
+        desc="connectome configuration file",
     )
 
     out_file = File(
