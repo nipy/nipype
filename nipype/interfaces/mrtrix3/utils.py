@@ -761,7 +761,8 @@ class MRConvert(MRTrix3Base):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs["out_file"] = op.abspath(self.inputs.out_file)
-        outputs["json_export"] = op.abspath(self.inputs.json_export)
+        if self.inputs.json_export:
+            outputs["json_export"] = op.abspath(self.inputs.json_export)
         return outputs
 
 
