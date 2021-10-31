@@ -1,13 +1,17 @@
 from nipype.interfaces.matlab import MatlabCommand
-from nipype.interfaces.base import TraitedSpec, \
-    BaseInterface, BaseInterfaceInputSpec, File
+from nipype.interfaces.base import (
+    TraitedSpec,
+    BaseInterface,
+    BaseInterfaceInputSpec,
+    File,
+)
 import os
 from string import Template
 
 
 class ConmapTxt2MatInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True)
-    out_file = File('cmatrix.mat', usedefault=True)
+    out_file = File("cmatrix.mat", usedefault=True)
 
 
 class ConmapTxt2MatOutputSpec(TraitedSpec):
@@ -19,14 +23,15 @@ class ConmapTxt2Mat(BaseInterface):
     output_spec = ConmapTxt2MatOutputSpec
 
     def _run_interface(self, runtime):
-        d = dict(in_file=self.inputs.in_file,
-                 out_file=self.inputs.out_file)
+        d = dict(in_file=self.inputs.in_file, out_file=self.inputs.out_file)
         # This is your MATLAB code template
-        script = Template("""in_file = '$in_file';
+        script = Template(
+            """in_file = '$in_file';
                              out_file = '$out_file';
                              ConmapTxt2Mat(in_file, out_file);
                              exit;
-                          """).substitute(d)
+                          """
+        ).substitute(d)
 
         # mfile = True  will create an .m file with your script and executed.
         # Alternatively
@@ -43,5 +48,5 @@ class ConmapTxt2Mat(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
