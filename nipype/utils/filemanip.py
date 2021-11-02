@@ -718,7 +718,15 @@ def savepkl(filename, record, versioning=False):
     tmpfile = filename + ".tmp"
     with pkl_open(tmpfile, "wb") as pkl_file:
         pkl_file.write(content)
-    os.rename(tmpfile, filename)
+    for _ in range(5):
+        try:
+            os.rename(tmpfile, filename)
+            break
+        except FileNotFoundError as e:
+            fmlogger.debug(str(e))
+            sleep(2)
+    else:
+        raise e
 
 
 rst_levels = ["=", "-", "~", "+"]
