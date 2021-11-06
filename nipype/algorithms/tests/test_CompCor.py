@@ -10,6 +10,41 @@ from ...testing import utils
 from ..confounds import CompCor, TCompCor, ACompCor
 
 
+def close_up_to_column_sign(a, b, rtol=1e-05, atol=1e-08, equal_nan=False):
+    """SVD can produce sign flips on a per-column basis."""
+    kwargs = dict(rtol=rtol, atol=atol, equal_nan=equal_nan)
+    if np.allclose(a, b, **kwargs):
+        return True
+
+    ret = True
+    for acol, bcol in zip(a.T, b.T):
+        ret &= np.allclose(acol, bcol, **kwargs) or np.allclose(acol, -bcol, **kwargs)
+        if not ret:
+            break
+
+    return ret
+
+
+@pytest.mark.parametrize(
+    "a, b, close",
+    [
+        ([[0.1, 0.2], [0.3, 0.4]], [[-0.1, 0.2], [-0.3, 0.4]], True),
+        ([[0.1, 0.2], [0.3, 0.4]], [[-0.1, 0.2], [0.3, -0.4]], False),
+    ],
+)
+def test_close_up_to_column_sign(a, b, close):
+    a = np.asanyarray(a)
+    b = np.asanyarray(b)
+    assert close_up_to_column_sign(a, b) == close
+    # Sign flips of all columns never changes result
+    assert close_up_to_column_sign(a, -b) == close
+    assert close_up_to_column_sign(-a, b) == close
+    assert close_up_to_column_sign(-a, -b) == close
+    # Trivial case
+    assert close_up_to_column_sign(a, a)
+    assert close_up_to_column_sign(b, b)
+
+
 class TestCompCor:
     """Note: Tests currently do a poor job of testing functionality"""
 
@@ -238,7 +273,7 @@ class TestCompCor:
         ]
 
         assert components_data.shape == (self.fake_data.shape[3], expected_n_components)
-        assert np.allclose(components_data[:, :2], expected_components)
+        assert close_up_to_column_sign(components_data[:, :2], expected_components)
 
         if ccinterface.inputs.save_metadata:
             expected_metadata_file = ccinterface._list_outputs()["metadata_file"]
