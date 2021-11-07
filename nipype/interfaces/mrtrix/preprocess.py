@@ -97,7 +97,7 @@ class MRConvertInputSpec(CommandLineInputSpec):
     offset_bias = traits.Float(
         argstr="-scale %d",
         position=3,
-        units="mm",
+        units="mm",json_import
         desc="Apply offset to the intensity values.",
     )
     replace_NaN_with_zero = traits.Bool(

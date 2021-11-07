@@ -713,6 +713,7 @@ class MRConvertInputSpec(MRTrix3BaseInputSpec):
         usedefault=True,
         desc="output image",
     )
+
     coord = traits.List(
         traits.Int,
         sep=" ",
@@ -757,6 +758,8 @@ class MRConvertOutputSpec(TraitedSpec):
         exists=True,
         desc="exported data from an image header key-value pairs in a JSON file",
     )
+    out_bvec = File(exists=True, desc="export bvec file in FSL format")
+    out_bval = File(exists=True, desc="export bvec file in FSL format")
 
 
 class MRConvert(MRTrix3Base):
@@ -785,6 +788,10 @@ class MRConvert(MRTrix3Base):
         outputs["out_file"] = op.abspath(self.inputs.out_file)
         if self.inputs.json_export:
             outputs["json_export"] = op.abspath(self.inputs.json_export)
+        if self.inputs.out_bvec:
+            outputs["out_bvec"] = op.abspath(self.inputs.out_bvec)
+        if self.inputs.out_bval:
+            outputs["out_bval"] = op.abspath(self.inputs.out_bval)
         return outputs
 
 
