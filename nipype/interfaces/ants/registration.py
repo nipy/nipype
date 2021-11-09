@@ -526,7 +526,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         )
     )
     restrict_deformation = traits.List(
-        traits.List(traits.Enum(0, 1)),
+        traits.List(traits.Range(low=0.0, high=1.0)),
         desc=(
             "This option allows the user to restrict the optimization of "
             "the displacement field, translation, rigid or affine transform "
@@ -584,7 +584,9 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         desc="The Lower quantile to clip image ranges",
     )
 
-    verbose = traits.Bool(argstr="-v", default_value=False, usedefault=True)
+    verbose = traits.Bool(
+        argstr="-v", default_value=False, usedefault=True, nohash=True
+    )
 
 
 class RegistrationOutputSpec(TraitedSpec):

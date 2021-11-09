@@ -82,7 +82,7 @@ Python 2 Statement
 
 Python 2.7 reaches its end-of-life in January 2020, which means it will
 *no longer be maintained* by Python developers. `Many projects
-<https://python3statement.org/`__ are removing support in advance of this
+<https://python3statement.org/>`__ are removing support in advance of this
 deadline, which will make it increasingly untenable to try to support
 Python 2, even if we wanted to.
 

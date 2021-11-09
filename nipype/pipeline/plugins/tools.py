@@ -93,9 +93,6 @@ def report_nodes_not_run(notrun):
             for subnode in info["dependents"]:
                 logger.debug(subnode._id)
         logger.info("***********************************")
-        raise RuntimeError(
-            ("Workflow did not execute cleanly. " "Check log for details")
-        )
 
 
 def create_pyscript(node, updatehash=False, store_exception=True):

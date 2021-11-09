@@ -123,6 +123,7 @@ class DistributedPluginBase(PluginBase):
         self.mapnodesubids = {}
         # setup polling - TODO: change to threaded model
         notrun = []
+        errors = []
 
         old_progress_stats = None
         old_presub_stats = None
@@ -146,7 +147,7 @@ class DistributedPluginBase(PluginBase):
                     "Progress: %d jobs, %d/%d/%d "
                     "(done/running/ready), %d/%d "
                     "(pending_tasks/waiting).",
-                    *progress_stats
+                    *progress_stats,
                 )
                 old_progress_stats = progress_stats
             toappend = []
@@ -155,14 +156,16 @@ class DistributedPluginBase(PluginBase):
                 taskid, jobid = self.pending_tasks.pop()
                 try:
                     result = self._get_result(taskid)
-                except Exception:
+                except Exception as exc:
                     notrun.append(self._clean_queue(jobid, graph))
+                    errors.append(exc)
                 else:
                     if result:
                         if result["traceback"]:
                             notrun.append(
                                 self._clean_queue(jobid, graph, result=result)
                             )
+                            errors.append("".join(result["traceback"]))
                         else:
                             self._task_finished_cb(jobid)
                             self._remove_node_dirs()
@@ -193,6 +196,20 @@ class DistributedPluginBase(PluginBase):
 
         # close any open resources
         self._postrun_check()
+
+        if errors:
+            # If one or more nodes failed, re-rise first of them
+            error, cause = errors[0], None
+            if isinstance(error, str):
+                error = RuntimeError(error)
+
+            if len(errors) > 1:
+                error, cause = (
+                    RuntimeError(f"{len(errors)} raised. Re-raising first."),
+                    error,
+                )
+
+            raise error from cause
 
     def _get_result(self, taskid):
         raise NotImplementedError
