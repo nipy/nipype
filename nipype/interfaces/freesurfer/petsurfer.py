@@ -471,6 +471,7 @@ class MRTM(GLMFit):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
+        outputs['k2p'] = os.join(self.inputs.glm_dir, 'k2prime.dat')
         return outputs
 
 class MRTM2InputSpec(GLMFitInputSpec):
@@ -493,9 +494,13 @@ class MRTM2InputSpec(GLMFitInputSpec):
         desc='save outputs as nii.gz',
         xor=_ext_xor
     )
+    yhat_save = traits.Bool(
+        argstr="--save-yhat", desc="save signal estimate (yhat)"
+    )
 
 class MRTM2OutputSpec(GLMFitInputSpec):
     bp = File(desc="BP estimates")
+    yhat = File(desc="Fitted values (yhat) to the TACs")
 
 class MRTM2(GLMFit):
     """Perform MRTM2 kinetic modeling.
@@ -521,6 +526,7 @@ class MRTM2(GLMFit):
         else:
             ext = '.mgh'            
         outputs['bp'] = os.path.join(self.inputs.glm_dir, 'bp',  ext)
+        outputs['yhat'] = os.path.join(self.inputs.glm_dir, 'yhat',  ext)
         return outputs
 
 class LoganRefInputSpec(GLMFitInputSpec):
@@ -547,6 +553,16 @@ class LoganRefOutputSpec(GLMFitInputSpec):
     bp = File(desc="BP estimates")
 
 class LoganRef(GLMFit):
+    """Perform Logan reference kinetic modeling.
+    Examples
+    --------
+    >>> logan = LoganRef()
+    >>> logan.inputs.in_file = 'tac.nii'
+    >>> logan.inputs.logan = [('ref_tac.dat', 'timing.dat', 2600)]
+    >>> logan.inputs.glmdir = 'logan'
+    >>> logan.cmdline == 'mri_glmfit --glmdir logan --y tac.nii --logan ref_tac.dat timing.dat 2600'
+    """
+
     _cmd = "mri_glmfit"
     input_spec = LoganRefInputSpec
     output_spec = LoganRefOutputSpec

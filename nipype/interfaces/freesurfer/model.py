@@ -407,13 +407,13 @@ class GLMFitInputSpec(FSTraitedSpec):
         desc="Reference time activity curve and frame times",
     )
     mrtm2 = InputMultiPath(
-       traits.Tuple(File(exists=True), File(exists=True), File(exists=True)),
-        argstr="--mrtm2 %s %s %s...",
+       traits.Tuple(File(exists=True), File(exists=True), traits.Float),
+        argstr="--mrtm2 %s %s %f...",
         desc="Reference time activity curve, frame times and k2p", 
     )
     logan = InputMultiPath(
-       traits.Tuple(File(exists=True), File(exists=True), File(exists=True)),
-        argstr="--logan %s %s %s...",
+       traits.Tuple(File(exists=True), File(exists=True), traits.Float),
+        argstr="--logan %s %s %f...",
         desc="Reference time activity curve, frame times and tstar", 
     ) 
     force_perm = traits.Bool(
