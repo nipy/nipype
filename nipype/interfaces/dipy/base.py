@@ -90,6 +90,23 @@ class DipyDiffusionInterface(DipyBaseInterface):
         return out_prefix + "_" + name + ext
 
 
+def get_default_args(func):
+    """Return optional arguments of a function.
+
+    Parameters
+    ----------
+    func: callable
+
+    Returns
+    -------
+    dict
+    """
+    signature = inspect.signature(func)
+    return {k: v.default for k, v in signature.parameters.items()
+            if v.default is not inspect.Parameter.empty
+            }
+
+
 def convert_to_traits_type(dipy_type, is_file=False):
     """Convert DIPY type to Traits type."""
     dipy_type = dipy_type.lower()
@@ -189,7 +206,7 @@ def dipy_to_nipype_interface(cls_name, dipy_flow, BaseClass=DipyBaseInterface):
     parser = IntrospectiveArgumentParser()
     flow = dipy_flow()
     parser.add_workflow(flow)
-    default_values = inspect.getfullargspec(flow.run).defaults
+    default_values = list(get_default_args(flow.run).values())
     optional_params = [
         args + (val,) for args, val in zip(parser.optional_parameters, default_values)
     ]
