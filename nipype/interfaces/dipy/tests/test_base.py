@@ -1,4 +1,5 @@
 import pytest
+from distutils.version import LooseVersion
 from collections import namedtuple
 from ...base import traits, File, TraitedSpec, BaseInterfaceInputSpec
 from ..base import (
@@ -8,7 +9,10 @@ from ..base import (
     DipyBaseInterface,
     no_dipy,
     get_dipy_workflows,
+    get_default_args,
+    dipy_version
 )
+DIPY_1_14_LESS = LooseVersion(dipy_version()) < LooseVersion("1.14")
 
 
 def test_convert_to_traits_type():
@@ -112,6 +116,32 @@ def test_create_interface_specs():
     assert "out_params" in current_params.keys()
 
 
+@pytest.mark.skipif(no_dipy() and DIPY_1_14_LESS,
+                    reason="DIPY is not installed")
+def test_get_default_args():
+    from dipy.utils.deprecator import deprecated_params
+
+    def test(dummy=11, x=3):
+        return dummy, x
+
+    @deprecated_params('x', None, '0.3', '0.5', alternative='test2.y')
+    def test2(dummy=11, x=3):
+        return dummy, x
+
+    @deprecated_params(['dummy', 'x'], None, '0.3', alternative='test2.y')
+    def test3(dummy=11, x=3):
+        return dummy, x
+
+    @deprecated_params(['dummy', 'x'], None, '0.3', '0.5',
+                       alternative='test2.y')
+    def test4(dummy=11, x=3):
+        return dummy, x
+
+    expected_res = {'dummy': 11, 'x': 3}
+    for func in [test, test2, test3, test4]:
+        assert get_default_args(func) == expected_res
+
+
 @pytest.mark.skipif(no_dipy(), reason="DIPY is not installed")
 def test_dipy_to_nipype_interface():
     from dipy.workflows.workflow import Workflow
@@ -178,3 +208,4 @@ if __name__ == "__main__":
     test_convert_to_traits_type()
     test_create_interface_specs()
     test_dipy_to_nipype_interface()
+    test_get_default_args()
