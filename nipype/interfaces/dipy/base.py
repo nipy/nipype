@@ -27,13 +27,13 @@ except ImportError:
 
 
 def no_dipy():
-    """Check if dipy is available"""
+    """Check if dipy is available."""
     global HAVE_DIPY
     return not HAVE_DIPY
 
 
 def dipy_version():
-    """Check dipy version"""
+    """Check dipy version."""
     if no_dipy():
         return None
 
@@ -41,9 +41,7 @@ def dipy_version():
 
 
 class DipyBaseInterface(LibraryBaseInterface):
-    """
-    A base interface for py:mod:`dipy` computations
-    """
+    """A base interface for py:mod:`dipy` computations."""
 
     _pkg = "dipy"
 
@@ -57,9 +55,7 @@ class DipyBaseInterfaceInputSpec(BaseInterfaceInputSpec):
 
 
 class DipyDiffusionInterface(DipyBaseInterface):
-    """
-    A base interface for py:mod:`dipy` computations
-    """
+    """A base interface for py:mod:`dipy` computations."""
 
     input_spec = DipyBaseInterfaceInputSpec
 
@@ -100,6 +96,7 @@ def get_default_args(func):
     Returns
     -------
     dict
+
     """
     signature = inspect.signature(func)
     return {k: v.default for k, v in signature.parameters.items()
