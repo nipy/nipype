@@ -2,15 +2,15 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 # -*- coding: utf-8 -*-
 
-from ... import logging, LooseVersion
+from ... import LooseVersion, logging
 from ...utils.filemanip import which
 from ..base import (
-    CommandLineInputSpec,
     CommandLine,
-    traits,
+    CommandLineInputSpec,
     File,
-    isdefined,
     PackageInfo,
+    isdefined,
+    traits,
 )
 
 iflogger = logging.getLogger("nipype.interface")
