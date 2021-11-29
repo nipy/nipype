@@ -4,6 +4,7 @@ import os
 import re
 from copy import deepcopy
 import itertools as it
+import glob
 from glob import iglob
 
 from ..utils.filemanip import split_filename
@@ -451,6 +452,7 @@ class Dcm2niix(CommandLine):
         for line in stdout.split("\n"):
             if line.startswith("Convert "):  # output
                 fname = str(re.search(r"\S+/\S+", line).group(0))
+                fname = glob.escape(fname)
                 filenames.append(os.path.abspath(fname))
         return filenames
 
