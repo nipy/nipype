@@ -452,7 +452,6 @@ class Dcm2niix(CommandLine):
         for line in stdout.split("\n"):
             if line.startswith("Convert "):  # output
                 fname = str(re.search(r"\S+/\S+", line).group(0))
-                fname = glob.escape(fname)
                 filenames.append(os.path.abspath(fname))
         return filenames
 
@@ -496,4 +495,4 @@ class Dcm2niix(CommandLine):
 
 # https://stackoverflow.com/a/4829130
 def search_files(prefix, outtypes):
-    return it.chain.from_iterable(iglob(prefix + outtype) for outtype in outtypes)
+    return it.chain.from_iterable(iglob(glob.escape(prefix + outtype)) for outtype in outtypes)
