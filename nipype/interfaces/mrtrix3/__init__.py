@@ -2,30 +2,32 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 # -*- coding: utf-8 -*-
 """MRTrix3 provides software tools to perform various types of diffusion MRI analyses."""
-from .utils import (
-    Mesh2PVE,
-    Generate5tt,
-    BrainMask,
-    TensorMetrics,
-    ComputeTDI,
-    TCK2VTK,
-    MRMath,
-    MRConvert,
-    MRResize,
-    DWIExtract,
-    SHConv,
-    SH2Amp,
-    MRCat,
-)
+from .connectivity import BuildConnectome, LabelConfig, LabelConvert
 from .preprocess import (
-    ResponseSD,
     ACTPrepareFSL,
-    ReplaceFSwithFIRST,
-    DWIPreproc,
-    DWIDenoise,
-    MRDeGibbs,
     DWIBiasCorrect,
+    DWIDenoise,
+    DWIPreproc,
+    MRDeGibbs,
+    ReplaceFSwithFIRST,
+    ResponseSD,
 )
+from .reconst import ConstrainedSphericalDeconvolution, EstimateFOD, FitTensor
 from .tracking import Tractography
-from .reconst import FitTensor, EstimateFOD, ConstrainedSphericalDeconvolution
-from .connectivity import LabelConfig, LabelConvert, BuildConnectome
+from .utils import (
+    TCK2VTK,
+    BrainMask,
+    ComputeTDI,
+    DWIExtract,
+    Generate5tt,
+    Mesh2PVE,
+    MRCat,
+    MRConvert,
+    MRMath,
+    MRResize,
+    MRTransform,
+    SH2Amp,
+    SHConv,
+    TensorMetrics,
+    TransformFSLConvert,
+)
