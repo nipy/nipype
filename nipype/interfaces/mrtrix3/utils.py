@@ -5,15 +5,8 @@
 import os.path as op
 
 from ...utils.filemanip import split_filename
-from ..base import (
-    CommandLine,
-    CommandLineInputSpec,
-    File,
-    InputMultiPath,
-    TraitedSpec,
-    isdefined,
-    traits,
-)
+from ..base import (CommandLine, CommandLineInputSpec, File, InputMultiPath,
+                    TraitedSpec, isdefined, traits)
 from .base import MRTrix3Base, MRTrix3BaseInputSpec
 
 
