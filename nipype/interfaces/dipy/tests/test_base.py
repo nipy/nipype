@@ -1,5 +1,5 @@
 import pytest
-from distutils.version import LooseVersion
+from packaging.version import Version
 from collections import namedtuple
 from ...base import traits, File, TraitedSpec, BaseInterfaceInputSpec
 from ..base import (
