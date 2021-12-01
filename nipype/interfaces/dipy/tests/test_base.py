@@ -12,7 +12,6 @@ from ..base import (
     get_default_args,
     dipy_version
 )
-DIPY_1_4_LESS = LooseVersion(dipy_version()) < LooseVersion("1.4")
 
 
 def test_convert_to_traits_type():
