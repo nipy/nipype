@@ -115,8 +115,8 @@ def test_create_interface_specs():
     assert "out_params" in current_params.keys()
 
 
-@pytest.mark.skipif(no_dipy() and DIPY_1_4_LESS,
-                    reason="DIPY is not installed")
+@pytest.mark.skipif(no_dipy() or Version(dipy_version()) < Version("1.4"),
+                    reason="DIPY >=1.4 required")
 def test_get_default_args():
     from dipy.utils.deprecator import deprecated_params
 
