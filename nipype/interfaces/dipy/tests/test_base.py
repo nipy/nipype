@@ -10,7 +10,7 @@ from ..base import (
     no_dipy,
     get_dipy_workflows,
     get_default_args,
-    dipy_version
+    dipy_version,
 )
 
 
@@ -115,8 +115,9 @@ def test_create_interface_specs():
     assert "out_params" in current_params.keys()
 
 
-@pytest.mark.skipif(no_dipy() or Version(dipy_version()) < Version("1.4"),
-                    reason="DIPY >=1.4 required")
+@pytest.mark.skipif(
+    no_dipy() or Version(dipy_version()) < Version("1.4"), reason="DIPY >=1.4 required"
+)
 def test_get_default_args():
     from dipy.utils.deprecator import deprecated_params
 
@@ -131,8 +132,7 @@ def test_get_default_args():
     def test3(dummy=11, x=3):
         return dummy, x
 
-    @deprecated_params(['dummy', 'x'], None, '0.3', '0.5',
-                       alternative='test2.y')
+    @deprecated_params(['dummy', 'x'], None, '0.3', '0.5', alternative='test2.y')
     def test4(dummy=11, x=3):
         return dummy, x
 

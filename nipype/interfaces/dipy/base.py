@@ -99,9 +99,11 @@ def get_default_args(func):
 
     """
     signature = inspect.signature(func)
-    return {k: v.default for k, v in signature.parameters.items()
-            if v.default is not inspect.Parameter.empty
-            }
+    return {
+        k: v.default
+        for k, v in signature.parameters.items()
+        if v.default is not inspect.Parameter.empty
+    }
 
 
 def convert_to_traits_type(dipy_type, is_file=False):
