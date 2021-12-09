@@ -2866,6 +2866,7 @@ class BIDSDataGrabberInputSpec(DynamicTraitedSpec):
     output_query = traits.Dict(
         key_trait=Str, value_trait=traits.Dict, desc="Queries for outfield outputs"
     )
+    load_layout = Directory(exists=True, desc="Path to load already saved Bidslayout.", mandatory=False)
     raise_on_empty = traits.Bool(
         True,
         usedefault=True,
@@ -2965,9 +2966,13 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
     def _list_outputs(self):
         from bids import BIDSLayout
 
-        layout = BIDSLayout(
-            self.inputs.base_dir, derivatives=self.inputs.index_derivatives
-        )
+        # if load_layout is given load layout which is on some datasets much faster
+        if isdefined(self.inputs.load_layout):
+            layout = BIDSLayout.load(self.inputs.load_layout)
+        else:
+            layout = BIDSLayout(
+                self.inputs.base_dir, derivatives=self.inputs.index_derivatives
+            )
 
         if isdefined(self.inputs.extra_derivatives):
             layout.add_derivatives(self.inputs.extra_derivatives)
