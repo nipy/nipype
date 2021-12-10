@@ -143,7 +143,6 @@ try:
                 context=context,
             )
 
-
 except ImportError:
 
     class NonDaemonProcess(NonDaemonMixin, mp.Process):

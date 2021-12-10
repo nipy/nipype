@@ -4,6 +4,7 @@ import os
 import re
 from copy import deepcopy
 import itertools as it
+import glob
 from glob import iglob
 
 from ..utils.filemanip import split_filename
@@ -494,4 +495,6 @@ class Dcm2niix(CommandLine):
 
 # https://stackoverflow.com/a/4829130
 def search_files(prefix, outtypes):
-    return it.chain.from_iterable(iglob(prefix + outtype) for outtype in outtypes)
+    return it.chain.from_iterable(
+        iglob(glob.escape(prefix + outtype)) for outtype in outtypes
+    )
