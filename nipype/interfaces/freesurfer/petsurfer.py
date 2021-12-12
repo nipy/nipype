@@ -477,7 +477,7 @@ class MRTM(GLMFit):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['k2p'] = os.join(self.inputs.glm_dir, 'k2prime.dat')
+        outputs['k2p'] = os.path.join(self.inputs.glm_dir, 'k2prime.dat')
         return outputs
 
 class MRTM2InputSpec(GLMFitInputSpec):
@@ -531,8 +531,8 @@ class MRTM2(GLMFit):
             ext = '.nii'
         else:
             ext = '.mgh'            
-        outputs['bp'] = os.join(self.inputs.glm_dir, 'bp',  ext)
-        outputs['yhat'] = os.join(self.inputs.glm_dir, 'yhat',  ext)
+        outputs['bp'] = os.path.join(self.inputs.glm_dir, 'bp',  ext)
+        outputs['yhat'] = os.path.join(self.inputs.glm_dir, 'yhat',  ext)
         return outputs
 
 class LoganRefInputSpec(GLMFitInputSpec):
@@ -581,5 +581,5 @@ class LoganRef(GLMFit):
             ext = '.nii'
         else:
             ext = '.mgh'            
-        outputs['bp'] = os.join(self.inputs.glm_dir, 'bp',  ext)
+        outputs['bp'] = os.path.join(self.inputs.glm_dir, 'bp',  ext)
         return outputs
