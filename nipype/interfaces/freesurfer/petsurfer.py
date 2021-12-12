@@ -393,6 +393,7 @@ class GTMPVCOutputSpec(TraitedSpec):
     gtm_file = File(exists=True, desc="TACs for all regions with GTM PVC")
     gtm_stats = File(exists=True, desc="Statistics for the GTM PVC")
     input_file = File(exists=True, desc="4D PET file in native volume space")
+    reg_pet2anat = File(exists=True, desc="Registration file to go from PET to anat")
     
 
 class GTMPVC(FSCommand):
