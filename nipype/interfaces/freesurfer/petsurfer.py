@@ -392,6 +392,7 @@ class GTMPVCOutputSpec(TraitedSpec):
     nopvc_file = File(exists=True, desc="TACs for all regions with no PVC")
     gtm_file = File(exists=True, desc="TACs for all regions with GTM PVC")
     gtm_stats = File(exists=True, desc="Statistics for the GTM PVC")
+    input_file = File(exists=True, desc="4D PET file in native volume space")
     
 
 class GTMPVC(FSCommand):
@@ -436,6 +437,11 @@ class GTMPVC(FSCommand):
         outputs["nopvc_file"] = os.path.join(pvcdir, "nopvc.nii.gz")
         outputs["gtm_file"] = os.path.join(pvcdir, "gtm.nii.gz")
         outputs["gtm_stats"] = os.path.join(pvcdir, "gtm.stats.dat")
+        outputs["reg_pet2anat"] = os.path.join(pvcdir, "aux/bbpet2anat.lta")
+        
+        # Assign the conditional outputs
+        if isdefined(self.inputs.save_input) and self.inputs.save_input:
+            outputs["input_file"] = os.path.join(pvcdir, "input.nii.gz")
 
         return outputs
 
