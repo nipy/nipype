@@ -394,7 +394,10 @@ class GTMPVCOutputSpec(TraitedSpec):
     gtm_stats = File(exists=True, desc="Statistics for the GTM PVC")
     input_file = File(exists=True, desc="4D PET file in native volume space")
     reg_pet2anat = File(exists=True, desc="Registration file to go from PET to anat")
-    
+    mgx_ctxgm = File(exists=True, desc="Cortical GM voxel-wise values corrected using the extended Muller-Gartner method")
+    mgx_subctxgm = File(exists=True, desc="Subcortical GM voxel-wise values corrected using the extended Muller-Gartner method")
+    mgx_gm = File(exists=True, desc="All GM voxel-wise values corrected using the extended Muller-Gartner method")
+
 
 class GTMPVC(FSCommand):
     """create an anatomical segmentation for the geometric transfer matrix (GTM).
@@ -443,6 +446,10 @@ class GTMPVC(FSCommand):
         # Assign the conditional outputs
         if isdefined(self.inputs.save_input) and self.inputs.save_input:
             outputs["input_file"] = os.path.join(pvcdir, "input.nii.gz")
+        if isdefined(self.inputs.mgx) and self.inputs.mgx:
+            outputs["mgx_ctxgm"] = os.path.join(pvcdir, "mgx.ctxgm.nii.gz")
+            outputs["mgx_subctxgm"] = os.path.join(pvcdir, "mgx.subctxgm.nii.gz")
+            outputs["mgx_gm"] = os.path.join(pvcdir, "mgx.gm.nii.gz")
 
         return outputs
 
