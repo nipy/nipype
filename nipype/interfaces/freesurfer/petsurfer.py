@@ -397,6 +397,7 @@ class GTMPVCOutputSpec(TraitedSpec):
     mgx_ctxgm = File(exists=True, desc="Cortical GM voxel-wise values corrected using the extended Muller-Gartner method")
     mgx_subctxgm = File(exists=True, desc="Subcortical GM voxel-wise values corrected using the extended Muller-Gartner method")
     mgx_gm = File(exists=True, desc="All GM voxel-wise values corrected using the extended Muller-Gartner method")
+    rbv = File(exists=True, desc="All GM voxel-wise values corrected using the RBV method")
 
 
 class GTMPVC(FSCommand):
@@ -450,6 +451,8 @@ class GTMPVC(FSCommand):
             outputs["mgx_ctxgm"] = os.path.join(pvcdir, "mgx.ctxgm.nii.gz")
             outputs["mgx_subctxgm"] = os.path.join(pvcdir, "mgx.subctxgm.nii.gz")
             outputs["mgx_gm"] = os.path.join(pvcdir, "mgx.gm.nii.gz")
+        if isdefined(self.inputs.rbv) and self.inputs.rbv:
+            outputs["rbv"] = os.path.join(pvcdir, "rbv.nii.gz")
 
         return outputs
 
