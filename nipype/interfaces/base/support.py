@@ -87,7 +87,7 @@ class RuntimeContext(AbstractContextManager):
             timediff.days * 86400 + timediff.seconds + timediff.microseconds / 1e6
         )
         # Collect monitored data
-        for k, v in self._resmon.stop():
+        for k, v in self._resmon.stop().items():
             setattr(self._runtime, k, v)
 
         os.chdir(self._runtime.prevcwd)

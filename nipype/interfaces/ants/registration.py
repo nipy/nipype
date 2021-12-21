@@ -418,6 +418,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         "BSpline",
         "MultiLabel",
         "Gaussian",
+        "GenericLabel",
         argstr="%s",
         usedefault=True,
     )
@@ -426,6 +427,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         traits.Tuple(
             traits.Float(), traits.Float()  # Gaussian/MultiLabel (sigma, alpha)
         ),
+        traits.Tuple(traits.Str()),  # GenericLabel (interpolator)
     )
 
     write_composite_transform = traits.Bool(
@@ -1297,6 +1299,7 @@ class Registration(ANTSCommand):
                     "BSpline",
                     "MultiLabel",
                     "Gaussian",
+                    "GenericLabel",
                 ]
                 and isdefined(self.inputs.interpolation_parameters)
             ):
