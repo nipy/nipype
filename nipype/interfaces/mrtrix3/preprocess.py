@@ -317,7 +317,7 @@ class DWIPreprocInputSpec(MRTrix3BaseInputSpec):
     out_grad_mrtrix = File(
         "grad.b",
         argstr="%s",
-        usedefault=False,
+        usedefault=True,
         requires=["export_grad_mrtrix"],
         desc="name of new gradient file",
     )
