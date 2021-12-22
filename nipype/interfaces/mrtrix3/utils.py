@@ -5,8 +5,15 @@
 import os.path as op
 
 from ...utils.filemanip import split_filename
-from ..base import (CommandLine, CommandLineInputSpec, File, InputMultiPath,
-                    TraitedSpec, isdefined, traits)
+from ..base import (
+    CommandLine,
+    CommandLineInputSpec,
+    File,
+    InputMultiPath,
+    TraitedSpec,
+    isdefined,
+    traits,
+)
 from .base import MRTrix3Base, MRTrix3BaseInputSpec
 
 
@@ -233,9 +240,7 @@ class Generate5ttInputSpec(MRTrix3BaseInputSpec):
         position=-2,
         desc="input image",
     )
-    out_file = File(
-        argstr="%s", mandatory=True, position=-1, desc="output image"
-    )
+    out_file = File(argstr="%s", mandatory=True, position=-1, desc="output image")
 
 
 class Generate5ttOutputSpec(TraitedSpec):
@@ -286,12 +291,8 @@ class TensorMetricsInputSpec(CommandLineInputSpec):
     out_cl = File(argstr="-cl %s", desc="output CL file")
     out_cp = File(argstr="-cp %s", desc="output CP file")
     out_cs = File(argstr="-cs %s", desc="output CS file")
-    out_evec = File(
-        argstr="-vector %s", desc="output selected eigenvector(s) file"
-    )
-    out_eval = File(
-        argstr="-value %s", desc="output selected eigenvalue(s) file"
-    )
+    out_evec = File(argstr="-vector %s", desc="output selected eigenvector(s) file")
+    out_eval = File(argstr="-value %s", desc="output selected eigenvalue(s) file")
     component = traits.List(
         [1],
         usedefault=True,
@@ -306,8 +307,7 @@ class TensorMetricsInputSpec(CommandLineInputSpec):
         exists=True,
         argstr="-mask %s",
         desc=(
-            "only perform computation within the specified binary"
-            " brain mask image"
+            "only perform computation within the specified binary" " brain mask image"
         ),
     )
     modulate = traits.Enum(
@@ -400,8 +400,7 @@ class ComputeTDIInputSpec(CommandLineInputSpec):
     )
     max_tod = traits.Int(
         argstr="-tod %d",
-        desc="generate a Track Orientation "
-        "Distribution (TOD) in each voxel.",
+        desc="generate a Track Orientation " "Distribution (TOD) in each voxel.",
     )
 
     contrast = traits.Enum(
@@ -491,8 +490,7 @@ class ComputeTDIInputSpec(CommandLineInputSpec):
     )
     nthreads = traits.Int(
         argstr="-nthreads %d",
-        desc="number of threads. if zero, the number"
-        " of available cpus will be used",
+        desc="number of threads. if zero, the number" " of available cpus will be used",
         nohash=True,
     )
 
@@ -597,8 +595,7 @@ class TCK2VTKInputSpec(CommandLineInputSpec):
 
     nthreads = traits.Int(
         argstr="-nthreads %d",
-        desc="number of threads. if zero, the number"
-        " of available cpus will be used",
+        desc="number of threads. if zero, the number" " of available cpus will be used",
         nohash=True,
     )
 
@@ -642,9 +639,7 @@ class DWIExtractInputSpec(MRTrix3BaseInputSpec):
         position=-2,
         desc="input image",
     )
-    out_file = File(
-        argstr="%s", mandatory=True, position=-1, desc="output image"
-    )
+    out_file = File(argstr="%s", mandatory=True, position=-1, desc="output image")
     bzero = traits.Bool(argstr="-bzero", desc="extract b=0 volumes")
     nobzero = traits.Bool(argstr="-no_bzero", desc="extract non b=0 volumes")
     singleshell = traits.Bool(
@@ -843,7 +838,7 @@ class TransformFSLConvert(MRTrix3Base):
     -------
 
     >>> import nipype.interfaces.mrtrix3 as mrt
-    >>> transform = mrt.TransformConvert()
+    >>> transform = mrt.TransformFSLConvert()
     >>> transform.inputs.in_file = 'flirt_in.nii.gz'
     >>> transform.inputs.reference = 'flirt_ref.nii.gz'
     >>> transform.inputs.in_transform = 'transform_flirt.mat'
@@ -926,9 +921,7 @@ class MRTransformInputSpec(MRTrix3BaseInputSpec):
         position=1,
         desc="Do not display information messages or progress status.",
     )
-    debug = traits.Bool(
-        argstr="-debug", position=1, desc="Display debugging messages."
-    )
+    debug = traits.Bool(argstr="-debug", position=1, desc="Display debugging messages.")
 
 
 class MRTransformOutputSpec(TraitedSpec):
@@ -979,9 +972,7 @@ class MRMathInputSpec(MRTrix3BaseInputSpec):
         position=-3,
         desc="input image",
     )
-    out_file = File(
-        argstr="%s", mandatory=True, position=-1, desc="output image"
-    )
+    out_file = File(argstr="%s", mandatory=True, position=-1, desc="output image")
     operation = traits.Enum(
         "mean",
         "median",
@@ -1164,9 +1155,7 @@ class SHConvInputSpec(CommandLineInputSpec):
 
 
 class SHConvOutputSpec(TraitedSpec):
-    out_file = File(
-        exists=True, desc="the output convoluted spherical harmonics file"
-    )
+    out_file = File(exists=True, desc="the output convoluted spherical harmonics file")
 
 
 class SHConv(CommandLine):
@@ -1230,9 +1219,7 @@ class SH2AmpInputSpec(CommandLineInputSpec):
 
 
 class SH2AmpOutputSpec(TraitedSpec):
-    out_file = File(
-        exists=True, desc="the output convoluted spherical harmonics file"
-    )
+    out_file = File(exists=True, desc="the output convoluted spherical harmonics file")
 
 
 class SH2Amp(CommandLine):
