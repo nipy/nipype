@@ -115,7 +115,7 @@ def test_DWIPreproc_outputs():
         out_grad_mrtrix=dict(
             argstr="%s",
             extensions=None,
-            usedefault=True,
+            usedefault=False,
         ),
     )
     outputs = DWIPreproc.output_spec()
