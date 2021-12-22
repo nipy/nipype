@@ -144,9 +144,9 @@ class MRCat(CommandLine):
 
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> mrcat = mrt.MRCat()
-    >>> mrcat.inputs.in_files = ['image1.mif','image2.mif']
+    >>> mrcat.inputs.in_files = ['dwi.mif','mask.mif']
     >>> mrcat.cmdline                               # doctest: +ELLIPSIS
-    'mrcat image1.mif image2.mif concatenated.mif'
+    'mrcat dwi.mif mask.mif concatenated.mif'
     >>> mrcat.run()                                 # doctest: +SKIP
     """
 
