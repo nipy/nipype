@@ -833,19 +833,6 @@ class TransformFSLConvertOutputSpec(TraitedSpec):
 class TransformFSLConvert(MRTrix3Base):
     """
     Perform conversion between FSL's transformation matrix format to mrtrix3's.
-
-    Example
-    -------
-
-    >>> import nipype.interfaces.mrtrix3 as mrt
-    >>> transform = mrt.TransformFSLConvert()
-    >>> transform.inputs.in_file = 'flirt_in.nii.gz'
-    >>> transform.inputs.reference = 'flirt_ref.nii.gz'
-    >>> transform.inputs.in_transform = 'transform_flirt.mat'
-    >>> transform.inputs.out_transform = 'transform_mrtrix.txt'
-    >>> transform.cmdline                             # doctest: +ELLIPSIS
-    'transformconvert transform_flirt.mat flirt_in.nii flirt_ref.nii flirt_import transform_mrtrix.txt'
-    >>> transform.run()                               # doctest: +SKIP
     """
 
     _cmd = "transformconvert"
