@@ -24,9 +24,7 @@ class MRConvertInputSpec(CommandLineInputSpec):
         position=-2,
         desc="voxel-order data filename",
     )
-    out_filename = File(
-        genfile=True, argstr="%s", position=-1, desc="Output filename"
-    )
+    out_filename = File(genfile=True, argstr="%s", position=-1, desc="Output filename")
     extract_at_axis = traits.Enum(
         1,
         2,
@@ -229,15 +227,11 @@ class DWI2TensorInputSpec(CommandLineInputSpec):
         position=1,
         desc=("Do not display information messages or progress " "status."),
     )
-    debug = traits.Bool(
-        argstr="-debug", position=1, desc="Display debugging messages."
-    )
+    debug = traits.Bool(argstr="-debug", position=1, desc="Display debugging messages.")
 
 
 class DWI2TensorOutputSpec(TraitedSpec):
-    tensor = File(
-        exists=True, desc="path/name of output diffusion tensor image"
-    )
+    tensor = File(exists=True, desc="path/name of output diffusion tensor image")
 
 
 class DWI2Tensor(CommandLine):
@@ -277,9 +271,7 @@ class Tensor2VectorInputSpec(CommandLineInputSpec):
         position=1,
         desc="Do not display information messages or progress status.",
     )
-    debug = traits.Bool(
-        argstr="-debug", position=1, desc="Display debugging messages."
-    )
+    debug = traits.Bool(argstr="-debug", position=1, desc="Display debugging messages.")
 
 
 class Tensor2VectorOutputSpec(TraitedSpec):
@@ -345,9 +337,7 @@ class Tensor2FractionalAnisotropyInputSpec(CommandLineInputSpec):
         position=1,
         desc="Do not display information messages or progress status.",
     )
-    debug = traits.Bool(
-        argstr="-debug", position=1, desc="Display debugging messages."
-    )
+    debug = traits.Bool(argstr="-debug", position=1, desc="Display debugging messages.")
 
 
 class Tensor2FractionalAnisotropyOutputSpec(TraitedSpec):
@@ -413,9 +403,7 @@ class Tensor2ApparentDiffusionInputSpec(CommandLineInputSpec):
         position=1,
         desc="Do not display information messages or progress status.",
     )
-    debug = traits.Bool(
-        argstr="-debug", position=1, desc="Display debugging messages."
-    )
+    debug = traits.Bool(argstr="-debug", position=1, desc="Display debugging messages.")
 
 
 class Tensor2ApparentDiffusionOutputSpec(TraitedSpec):
@@ -478,9 +466,7 @@ class MRMultiplyInputSpec(CommandLineInputSpec):
         position=1,
         desc="Do not display information messages or progress status.",
     )
-    debug = traits.Bool(
-        argstr="-debug", position=1, desc="Display debugging messages."
-    )
+    debug = traits.Bool(argstr="-debug", position=1, desc="Display debugging messages.")
 
 
 class MRMultiplyOutputSpec(TraitedSpec):
@@ -537,9 +523,7 @@ class MRTrixViewerInputSpec(CommandLineInputSpec):
         position=1,
         desc="Do not display information messages or progress status.",
     )
-    debug = traits.Bool(
-        argstr="-debug", position=1, desc="Display debugging messages."
-    )
+    debug = traits.Bool(argstr="-debug", position=1, desc="Display debugging messages.")
 
 
 class MRTrixViewerOutputSpec(TraitedSpec):
@@ -698,9 +682,7 @@ class ErodeInputSpec(CommandLineInputSpec):
         position=1,
         desc="Do not display information messages or progress status.",
     )
-    debug = traits.Bool(
-        argstr="-debug", position=1, desc="Display debugging messages."
-    )
+    debug = traits.Bool(argstr="-debug", position=1, desc="Display debugging messages.")
 
 
 class ErodeOutputSpec(TraitedSpec):
@@ -765,9 +747,7 @@ class ThresholdInputSpec(CommandLineInputSpec):
         argstr="-percent %s",
         desc="Specify threshold value as a percentage of the peak intensity in the input image.",
     )
-    invert = traits.Bool(
-        argstr="-invert", position=1, desc="Invert output binary mask"
-    )
+    invert = traits.Bool(argstr="-invert", position=1, desc="Invert output binary mask")
     replace_zeros_with_NaN = traits.Bool(
         argstr="-nan", position=1, desc="Replace all zero values with NaN"
     )
@@ -776,9 +756,7 @@ class ThresholdInputSpec(CommandLineInputSpec):
         position=1,
         desc="Do not display information messages or progress status.",
     )
-    debug = traits.Bool(
-        argstr="-debug", position=1, desc="Display debugging messages."
-    )
+    debug = traits.Bool(argstr="-debug", position=1, desc="Display debugging messages.")
 
 
 class ThresholdOutputSpec(TraitedSpec):
@@ -843,9 +821,7 @@ class MedianFilter3DInputSpec(CommandLineInputSpec):
         position=1,
         desc="Do not display information messages or progress status.",
     )
-    debug = traits.Bool(
-        argstr="-debug", position=1, desc="Display debugging messages."
-    )
+    debug = traits.Bool(argstr="-debug", position=1, desc="Display debugging messages.")
 
 
 class MedianFilter3DOutputSpec(TraitedSpec):
@@ -897,9 +873,7 @@ class MRTransformInputSpec(CommandLineInputSpec):
         position=-2,
         desc="Input images to be transformed",
     )
-    out_filename = File(
-        genfile=True, argstr="%s", position=-1, desc="Output image"
-    )
+    out_filename = File(genfile=True, argstr="%s", position=-1, desc="Output image")
     invert = traits.Bool(
         argstr="-inverse",
         position=1,
@@ -949,9 +923,7 @@ class MRTransformInputSpec(CommandLineInputSpec):
         position=1,
         desc="Do not display information messages or progress status.",
     )
-    debug = traits.Bool(
-        argstr="-debug", position=1, desc="Display debugging messages."
-    )
+    debug = traits.Bool(argstr="-debug", position=1, desc="Display debugging messages.")
 
 
 class MRTransformOutputSpec(TraitedSpec):

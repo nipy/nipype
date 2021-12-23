@@ -46,8 +46,7 @@ class Info(PackageInfo):
 class MRTrix3BaseInputSpec(CommandLineInputSpec):
     nthreads = traits.Int(
         argstr="-nthreads %d",
-        desc="number of threads. if zero, the number"
-        " of available cpus will be used",
+        desc="number of threads. if zero, the number" " of available cpus will be used",
         nohash=True,
     )
     # DW gradient table import options
@@ -116,9 +115,7 @@ class MRTrix3Base(CommandLine):
             skip = []
 
         try:
-            if isdefined(self.inputs.grad_file) or isdefined(
-                self.inputs.grad_fsl
-            ):
+            if isdefined(self.inputs.grad_file) or isdefined(self.inputs.grad_fsl):
                 skip += ["in_bvec", "in_bval"]
 
             is_bvec = isdefined(self.inputs.in_bvec)
@@ -126,8 +123,7 @@ class MRTrix3Base(CommandLine):
             if is_bvec or is_bval:
                 if not is_bvec or not is_bval:
                     raise RuntimeError(
-                        "If using bvecs and bvals inputs, both"
-                        "should be defined"
+                        "If using bvecs and bvals inputs, both" "should be defined"
                     )
                 skip += ["in_bval"]
         except AttributeError:
