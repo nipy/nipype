@@ -112,14 +112,14 @@ class InterfaceChecker(object):
         return path
 
     def _path2uri(self, dirpath):
-        """Convert directory path to uri"""
+        """ Convert directory path to uri """
         relpath = dirpath.replace(self.root_path, self.package_name)
         if relpath.startswith(os.path.sep):
             relpath = relpath[1:]
         return relpath.replace(os.path.sep, ".")
 
     def _parse_module(self, uri):
-        """Parse module defined in *uri*"""
+        """ Parse module defined in *uri* """
         filename = self._uri2path(uri)
         if filename is None:
             # nothing that we could handle here.
@@ -130,7 +130,7 @@ class InterfaceChecker(object):
         return functions, classes
 
     def _parse_lines(self, linesource, module):
-        """Parse lines of text for functions and classes"""
+        """ Parse lines of text for functions and classes """
         functions = []
         classes = []
         for line in linesource:
