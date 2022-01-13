@@ -383,6 +383,47 @@ class GTMPVCInputSpec(FSTraitedSpec):
         argstr="--save_yhat0", desc="save signal estimate (yhat)"
     )
 
+    opt = traits.Int(
+        argstr="--opt %i",
+        desc="opt : optimization schema for applying adaptive GTM"
+    )  
+
+    opt_tol = traits.Tuple(
+        traits.Float,
+        traits.Float,
+        traits.Float,
+        argstr="--opt-tol %f %f %f",
+        desc=""
+    ) 
+
+    opt_brain = traits.Bool(
+        argstr="--opt-brain", desc="apply adaptive GTM"
+    ) 
+
+    opt_seg_merge = traits.Bool(
+        argstr="--opt-seg-merge", desc="optimal schema for merging ROIs when applying adaptive GTM"
+    ) 
+
+    threads = opt = traits.Int(
+        argstr="--threads %i",
+        desc="threads : number of threads to use"
+    )   
+
+    psf_col = traits.Float(
+        argstr="--psf-col %f",
+        desc="xFWHM : full-width-half-maximum in the x-direction"
+    )  
+
+    psf_row = traits.Float(
+        argstr="--psf-row %f",
+        desc="yFWHM : full-width-half-maximum in the y-direction"
+    )   
+
+    psf_slice = traits.Float(
+        argstr="--psf-slice %f",
+        desc="zFWHM : full-width-half-maximum in the z-direction"
+    )  
+
 class GTMPVCOutputSpec(TraitedSpec):
 
     pvc_dir = Directory(exists=True, desc="output directory")
@@ -398,6 +439,7 @@ class GTMPVCOutputSpec(TraitedSpec):
     mgx_subctxgm = File(exists=True, desc="Subcortical GM voxel-wise values corrected using the extended Muller-Gartner method")
     mgx_gm = File(exists=True, desc="All GM voxel-wise values corrected using the extended Muller-Gartner method")
     rbv = File(exists=True, desc="All GM voxel-wise values corrected using the RBV method")
+    opt_param = File(exists=True, desc="Optimal parameter estimates for the FWHM using adaptive GTM")
 
 
 class GTMPVC(FSCommand):
@@ -453,6 +495,8 @@ class GTMPVC(FSCommand):
             outputs["mgx_gm"] = os.path.join(pvcdir, "mgx.gm.nii.gz")
         if isdefined(self.inputs.rbv) and self.inputs.rbv:
             outputs["rbv"] = os.path.join(pvcdir, "rbv.nii.gz")
+        if isdefined(self.inputs.opt) and self.inputs.opt:
+            outputs["opt_param"] = os.path.join(pvcdir, "aux/opt.param.dat")
 
         return outputs
 
