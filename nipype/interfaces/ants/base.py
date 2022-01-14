@@ -42,6 +42,9 @@ class Info(PackageInfo):
 
         # -githash may or may not be appended
         v_string = v_string.split("-")[0]
+        # if there is a 'v' at the beginning, it may be stripped
+        v_string = v_string.lstrip('v')
+
 
         # 2.2.0-equivalent version string
         if "post" in v_string and LooseVersion(v_string) >= LooseVersion(
