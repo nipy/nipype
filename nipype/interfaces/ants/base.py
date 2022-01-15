@@ -45,7 +45,6 @@ class Info(PackageInfo):
         # if there is a 'v' at the beginning, it may be stripped
         v_string = v_string.lstrip('v')
 
-
         # 2.2.0-equivalent version string
         if "post" in v_string and LooseVersion(v_string) >= LooseVersion(
             "2.1.0.post789"
