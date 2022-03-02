@@ -158,7 +158,7 @@ class ImageMath(ANTSCommand, CopyHeaderInterface):
 
     By default, Nipype copies headers from the first input image (``op1``)
     to the output image.
-    For the ``PadImage`` operation, the header cannot be copied from inputs to
+    For some operations, as the ``PadImage`` operation, the header cannot be copied from inputs to
     outputs, and so ``copy_header`` option is automatically set to ``False``.
 
     >>> pad = ImageMath(
