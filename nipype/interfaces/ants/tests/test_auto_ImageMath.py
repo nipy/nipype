@@ -6,6 +6,7 @@ def test_ImageMath_inputs():
     input_map = dict(
         args=dict(
             argstr="%s",
+            position=-1,
         ),
         copy_header=dict(
             usedefault=True,
@@ -27,11 +28,11 @@ def test_ImageMath_inputs():
             argstr="%s",
             extensions=None,
             mandatory=True,
-            position=-2,
+            position=-3,
         ),
         op2=dict(
             argstr="%s",
-            position=-1,
+            position=-2,
         ),
         operation=dict(
             argstr="%s",
