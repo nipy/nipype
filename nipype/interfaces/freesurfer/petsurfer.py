@@ -361,7 +361,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
     )
 
     save_yhat = traits.Bool(
-        argstr="--save-yhat", desc="save signal estimate (yhat)"
+        argstr="--save-yhat", desc="save signal estimate (yhat) smoothed with the PSF"
     )
 
     save_yhat_with_noise = traits.Tuple(
@@ -440,7 +440,10 @@ class GTMPVCOutputSpec(TraitedSpec):
     mgx_gm = File(exists=True, desc="All GM voxel-wise values corrected using the extended Muller-Gartner method")
     rbv = File(exists=True, desc="All GM voxel-wise values corrected using the RBV method")
     opt_param = File(exists=True, desc="Optimal parameter estimates for the FWHM using adaptive GTM")
-
+    yhat0 = File(exists=True, desc="4D PET file of signal estimate (yhat) after PVC (unsmoothed)")
+    yhat = File(exists=True, desc="4D PET file of signal estimate (yhat) after PVC (smoothed with PSF)")
+    yhat_full_fov = File(exists=True, desc="4D PET file with full FOV of signal estimate (yhat) after PVC (smoothed with PSF)")
+    yhat_with_noise = File(exists=True, desc="4D PET file with full FOV of signal estimate (yhat) with noise after PVC (smoothed with PSF)")
 
 class GTMPVC(FSCommand):
     """create an anatomical segmentation for the geometric transfer matrix (GTM).
@@ -489,6 +492,14 @@ class GTMPVC(FSCommand):
         # Assign the conditional outputs
         if isdefined(self.inputs.save_input) and self.inputs.save_input:
             outputs["input_file"] = os.path.join(pvcdir, "input.nii.gz")
+        if isdefined(self.inputs.save_yhat0) and self.inputs.save_yhat0:
+            outputs["yhat0"] = os.path.join(pvcdir, "yhat0.nii.gz")     
+        if isdefined(self.inputs.save_yhat) and self.inputs.save_yhat:
+            outputs["yhat"] = os.path.join(pvcdir, "yhat.nii.gz")  
+        if isdefined(self.inputs.save_yhat_full_fov) and self.inputs.save_yhat_full_fov:
+            outputs["yhat_full_fov"] = os.path.join(pvcdir, "yhat_full_fov.nii.gz")
+        if isdefined(self.inputs.save_yhat_with_noise) and self.inputs.save_yhat_with_noise:
+            outputs["yhat_with_noise"] = os.path.join(pvcdir, "yhat_with_noise.nii.gz") 
         if isdefined(self.inputs.mgx) and self.inputs.mgx:
             outputs["mgx_ctxgm"] = os.path.join(pvcdir, "mgx.ctxgm.nii.gz")
             outputs["mgx_subctxgm"] = os.path.join(pvcdir, "mgx.subctxgm.nii.gz")
