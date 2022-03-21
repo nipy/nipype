@@ -26,8 +26,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ['ubuntu-18.04']
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        os: ['ubuntu-latest']
+        python-version: [3.6, 3.7, 3.8, 3.9, "3.10"]
         check: ['test']
         pip-flags: ['']
         depends: ['REQUIREMENTS']
