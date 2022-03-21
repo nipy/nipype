@@ -337,7 +337,7 @@ class Overlap(BaseInterface):
         if self.inputs.weighting != "none":
             weights = weights / np.array(volumes1)
             if self.inputs.weighting == "squared_vol":
-                weights = weights ** 2
+                weights = weights**2
         weights = weights / np.sum(weights)
 
         both_data = np.zeros(data1.shape)
@@ -500,7 +500,7 @@ class FuzzyOverlap(SimpleInterface):
             volumes = np.sum((refdata + tstdata) > 0, axis=1).reshape((-1, ncomp))
             weights = 1.0 / volumes
             if self.inputs.weighting == "squared_vol":
-                weights = weights ** 2
+                weights = weights**2
 
         weights = weights / np.sum(weights)
         dices = 2.0 * jaccards / (jaccards + 1.0)
@@ -591,7 +591,7 @@ class ErrorMap(BaseInterface):
 
         # Scale the difference
         if self.inputs.metric == "sqeuclidean":
-            errvector = diffvector ** 2
+            errvector = diffvector**2
             if comps > 1:
                 errvector = np.sum(errvector, axis=1)
             else:

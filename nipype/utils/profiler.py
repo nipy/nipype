@@ -21,7 +21,7 @@ proflogger = logging.getLogger("nipype.utils")
 resource_monitor = config.resource_monitor
 
 # Init variables
-_MB = 1024.0 ** 2
+_MB = 1024.0**2
 
 
 class ResourceMonitorMock:
@@ -207,10 +207,10 @@ def get_system_total_memory_gb():
             meminfo_lines = f_in.readlines()
             mem_total_line = [line for line in meminfo_lines if "MemTotal" in line][0]
             mem_total = float(mem_total_line.split()[1])
-            memory_gb = mem_total / (1024.0 ** 2)
+            memory_gb = mem_total / (1024.0**2)
     elif "darwin" in sys.platform:
         mem_str = os.popen("sysctl hw.memsize").read().strip().split(" ")[-1]
-        memory_gb = float(mem_str) / (1024.0 ** 3)
+        memory_gb = float(mem_str) / (1024.0**3)
     else:
         err_msg = "System platform: %s is not supported"
         raise Exception(err_msg)
@@ -387,7 +387,7 @@ def _use_resources(n_procs, mem_gb):
     # Getsize of one character string
     BSIZE = sys.getsizeof("  ") - sys.getsizeof(" ")
     BOFFSET = sys.getsizeof("")
-    _GB = 1024.0 ** 3
+    _GB = 1024.0**3
 
     def _use_gb_ram(mem_gb):
         """A test function to consume mem_gb GB of RAM"""

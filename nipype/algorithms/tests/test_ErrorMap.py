@@ -75,4 +75,4 @@ def test_errormap(tmpdir):
 
     errmap.inputs.metric = "euclidean"
     result = errmap.run()
-    assert result.outputs.distance == np.float32(1.25 * (2 ** 0.5))
+    assert result.outputs.distance == np.float32(1.25 * (2**0.5))
