@@ -57,6 +57,8 @@ CLASSIFIERS = [
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
     "Topic :: Scientific/Engineering",
 ]
 PYTHON_REQUIRES = ">= 3.6"
@@ -169,7 +171,6 @@ EXTRA_REQUIRES = {
         "sphinx-argparse",
         "sphinx>=2.1.2",
         "sphinxcontrib-apidoc",
-        "sphinxcontrib-napoleon",
     ],
     "duecredit": ["duecredit"],
     "nipy": ["nitime", "nilearn", "dipy", "nipy", "matplotlib"],

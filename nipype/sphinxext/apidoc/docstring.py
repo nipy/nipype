@@ -2,8 +2,8 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Reformat interface docstrings."""
 import re
-from sphinxcontrib.napoleon._upstream import _
-from sphinxcontrib.napoleon.docstring import NumpyDocstring
+from sphinx.locale import _
+from sphinx.ext.napoleon.docstring import NumpyDocstring
 
 
 class NipypeDocstring(NumpyDocstring):
@@ -34,7 +34,7 @@ class InterfaceDocstring(NipypeDocstring):
     docstring : :obj:`str` or :obj:`list` of :obj:`str`
         The docstring to parse, given either as a string or split into
         individual lines.
-    config: :obj:`sphinxcontrib.napoleon.Config` or :obj:`sphinx.config.Config`
+    config: :obj:`sphinx.ext.napoleon.Config` or :obj:`sphinx.config.Config`
         The configuration settings to use. If not given, defaults to the
         config object on `app`; or if `app` is not given defaults to the
         a new :class:`nipype.sphinxext.apidoc.Config` object.

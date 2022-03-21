@@ -2,7 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Settings for sphinxext.interfaces and connection to sphinx-apidoc."""
 import re
-from sphinxcontrib.napoleon import (
+from sphinx.ext.napoleon import (
     Config as NapoleonConfig,
     _patch_python_domain,
     _skip_member as _napoleon_skip_member,
