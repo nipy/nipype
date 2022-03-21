@@ -171,7 +171,6 @@ EXTRA_REQUIRES = {
         "sphinx-argparse",
         "sphinx>=2.1.2",
         "sphinxcontrib-apidoc",
-        "sphinxcontrib-napoleon",
     ],
     "duecredit": ["duecredit"],
     "nipy": ["nitime", "nilearn", "dipy", "nipy", "matplotlib"],
