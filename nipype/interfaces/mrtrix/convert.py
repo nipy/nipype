@@ -197,10 +197,13 @@ class MRTrix2TrackVis(DipyBaseInterface):
 
     def _run_interface(self, runtime):
         from dipy.tracking.utils import affine_from_fsl_mat_file
+
         try:
             from dipy.tracking.utils import transform_tracking_output
         except ImportError:
-            from dipy.tracking.utils import move_streamlines as transform_tracking_output
+            from dipy.tracking.utils import (
+                move_streamlines as transform_tracking_output,
+            )
 
         dx, dy, dz = get_data_dims(self.inputs.image_file)
         vx, vy, vz = get_vox_dims(self.inputs.image_file)
