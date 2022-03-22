@@ -439,7 +439,7 @@ class GTMPVCOutputSpec(TraitedSpec):
     mgx_subctxgm = File(exists=True, desc="Subcortical GM voxel-wise values corrected using the extended Muller-Gartner method")
     mgx_gm = File(exists=True, desc="All GM voxel-wise values corrected using the extended Muller-Gartner method")
     rbv = File(exists=True, desc="All GM voxel-wise values corrected using the RBV method")
-    opt_param = File(exists=True, desc="Optimal parameter estimates for the FWHM using adaptive GTM")
+    opt_params = File(exists=True, desc="Optimal parameter estimates for the FWHM using adaptive GTM")
     yhat0 = File(exists=True, desc="4D PET file of signal estimate (yhat) after PVC (unsmoothed)")
     yhat = File(exists=True, desc="4D PET file of signal estimate (yhat) after PVC (smoothed with PSF)")
     yhat_full_fov = File(exists=True, desc="4D PET file with full FOV of signal estimate (yhat) after PVC (smoothed with PSF)")
@@ -507,7 +507,7 @@ class GTMPVC(FSCommand):
         if isdefined(self.inputs.rbv) and self.inputs.rbv:
             outputs["rbv"] = os.path.join(pvcdir, "rbv.nii.gz")
         if isdefined(self.inputs.opt) and self.inputs.opt:
-            outputs["opt_param"] = os.path.join(pvcdir, "aux/opt.param.dat")
+            outputs["opt_params"] = os.path.join(pvcdir, "aux/opt.params.dat")
 
         return outputs
 
