@@ -89,6 +89,8 @@ function generate_main_dockerfile() {
           OMP_NUM_THREADS=1 \
     --arg PYTHON_VERSION_MAJOR=3 PYTHON_VERSION_MINOR=8 BUILD_DATE VCS_REF VERSION \
     --user neuro \
+    --run 'git config --global user.name nipybot
+           && git config --global user.email "nipybot@gmail.com"' \
     --workdir /home/neuro \
     --miniconda create_env=neuro \
                 conda_install='python=${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}

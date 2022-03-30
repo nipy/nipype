@@ -303,13 +303,16 @@ def create_annot_label(subject_id, subjects_dir, fs_dir, parcellation_name):
         op.join(output_dir, "regenerated_lh_60", "lh.corpuscallosum.label"), lhco
     )
 
-    mri_cmd = """mri_label2vol --label "%s" --label "%s" --label "%s" --label "%s" --temp "%s" --o  "%s" --identity """ % (
-        rhun,
-        lhun,
-        rhco,
-        lhco,
-        op.join(op.join(subjects_dir, subject_id), "mri", "orig.mgz"),
-        op.join(fs_label_dir, "cc_unknown.nii.gz"),
+    mri_cmd = (
+        """mri_label2vol --label "%s" --label "%s" --label "%s" --label "%s" --temp "%s" --o  "%s" --identity """
+        % (
+            rhun,
+            lhun,
+            rhco,
+            lhco,
+            op.join(op.join(subjects_dir, subject_id), "mri", "orig.mgz"),
+            op.join(fs_label_dir, "cc_unknown.nii.gz"),
+        )
     )
     runCmd(mri_cmd, log)
     runCmd("mris_volmask %s" % subject_id, log)

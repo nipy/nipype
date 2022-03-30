@@ -718,7 +718,15 @@ def savepkl(filename, record, versioning=False):
     tmpfile = filename + ".tmp"
     with pkl_open(tmpfile, "wb") as pkl_file:
         pkl_file.write(content)
-    os.rename(tmpfile, filename)
+    for _ in range(5):
+        try:
+            os.rename(tmpfile, filename)
+            break
+        except FileNotFoundError as e:
+            fmlogger.debug(str(e))
+            sleep(2)
+    else:
+        raise e
 
 
 rst_levels = ["=", "-", "~", "+"]
@@ -780,8 +788,13 @@ def emptydirs(path, noexist_ok=False):
     try:
         shutil.rmtree(path)
     except OSError as ex:
-        elcont = os.listdir(path)
-        if ex.errno == errno.ENOTEMPTY and not elcont:
+        elcont = [
+            Path(root) / file
+            for root, _, files in os.walk(path)
+            for file in files
+            if not file.startswith(".nfs")
+        ]
+        if ex.errno in [errno.ENOTEMPTY, errno.EBUSY] and not elcont:
             fmlogger.warning(
                 "An exception was raised trying to remove old %s, but the path"
                 " seems empty. Is it an NFS mount?. Passing the exception.",
@@ -793,7 +806,7 @@ def emptydirs(path, noexist_ok=False):
         else:
             raise ex
 
-    os.makedirs(path)
+    os.makedirs(path, exist_ok=True)
 
 
 def silentrm(filename):

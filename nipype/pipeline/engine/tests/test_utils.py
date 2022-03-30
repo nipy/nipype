@@ -183,7 +183,7 @@ def test_mapnode_crash(tmpdir):
     node.config = deepcopy(config._sections)
     node.config["execution"]["stop_on_first_crash"] = True
     node.base_dir = tmpdir.strpath
-    with pytest.raises(TypeError):
+    with pytest.raises(pe.nodes.NodeExecutionError):
         node.run()
     os.chdir(cwd)
 

@@ -2,6 +2,9 @@
 {% set title = 'Neuroimaging in Python - Pipelines and Interfaces' %}
 {% set short_title = 'Nipype' %}
 
+{% block sidebar1 %}{{ sidebar() }}{% endblock %}
+{% block sidebar2 %}{% endblock %}
+
 {% block extrahead %}
 {{ super() }}
 <meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
@@ -42,8 +45,6 @@
 
 {% block relbar1 %}{% endblock %}
 {% block relbar2 %}{% endblock %}
-{% block sidebar1 %}{{ sidebar() }}{% endblock %}
-{% block sidebar2 %}{% endblock %}
 
 {% block footer %}
 {{ super() }}

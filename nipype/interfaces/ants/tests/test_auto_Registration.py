@@ -154,6 +154,7 @@ def test_Registration_inputs():
         ),
         verbose=dict(
             argstr="-v",
+            nohash=True,
             usedefault=True,
         ),
         winsorize_lower_quantile=dict(

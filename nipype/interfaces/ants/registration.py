@@ -418,6 +418,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         "BSpline",
         "MultiLabel",
         "Gaussian",
+        "GenericLabel",
         argstr="%s",
         usedefault=True,
     )
@@ -426,6 +427,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         traits.Tuple(
             traits.Float(), traits.Float()  # Gaussian/MultiLabel (sigma, alpha)
         ),
+        traits.Tuple(traits.Str()),  # GenericLabel (interpolator)
     )
 
     write_composite_transform = traits.Bool(
@@ -526,7 +528,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         )
     )
     restrict_deformation = traits.List(
-        traits.List(traits.Enum(0, 1)),
+        traits.List(traits.Range(low=0.0, high=1.0)),
         desc=(
             "This option allows the user to restrict the optimization of "
             "the displacement field, translation, rigid or affine transform "
@@ -584,7 +586,9 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         desc="The Lower quantile to clip image ranges",
     )
 
-    verbose = traits.Bool(argstr="-v", default_value=False, usedefault=True)
+    verbose = traits.Bool(
+        argstr="-v", default_value=False, usedefault=True, nohash=True
+    )
 
 
 class RegistrationOutputSpec(TraitedSpec):
@@ -1289,15 +1293,12 @@ class Registration(ANTSCommand):
                 do_center_of_mass_init,
             )
         elif opt == "interpolation":
-            if (
-                self.inputs.interpolation
-                in [
-                    "BSpline",
-                    "MultiLabel",
-                    "Gaussian",
-                ]
-                and isdefined(self.inputs.interpolation_parameters)
-            ):
+            if self.inputs.interpolation in [
+                "BSpline",
+                "MultiLabel",
+                "Gaussian",
+                "GenericLabel",
+            ] and isdefined(self.inputs.interpolation_parameters):
                 return "--interpolation %s[ %s ]" % (
                     self.inputs.interpolation,
                     ", ".join(
@@ -1590,14 +1591,17 @@ class MeasureImageSimilarity(ANTSCommand):
     output_spec = MeasureImageSimilarityOutputSpec
 
     def _metric_constructor(self):
-        retval = '--metric {metric}["{fixed_image}","{moving_image}",{metric_weight},' "{radius_or_number_of_bins},{sampling_strategy},{sampling_percentage}]".format(
-            metric=self.inputs.metric,
-            fixed_image=self.inputs.fixed_image,
-            moving_image=self.inputs.moving_image,
-            metric_weight=self.inputs.metric_weight,
-            radius_or_number_of_bins=self.inputs.radius_or_number_of_bins,
-            sampling_strategy=self.inputs.sampling_strategy,
-            sampling_percentage=self.inputs.sampling_percentage,
+        retval = (
+            '--metric {metric}["{fixed_image}","{moving_image}",{metric_weight},'
+            "{radius_or_number_of_bins},{sampling_strategy},{sampling_percentage}]".format(
+                metric=self.inputs.metric,
+                fixed_image=self.inputs.fixed_image,
+                moving_image=self.inputs.moving_image,
+                metric_weight=self.inputs.metric_weight,
+                radius_or_number_of_bins=self.inputs.radius_or_number_of_bins,
+                sampling_strategy=self.inputs.sampling_strategy,
+                sampling_percentage=self.inputs.sampling_percentage,
+            )
         )
         return retval
 

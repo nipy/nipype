@@ -36,7 +36,6 @@ def test_LaplacianThickness_inputs():
         ),
         output_image=dict(
             argstr="%s",
-            extensions=None,
             hash_files=False,
             keep_extension=True,
             name_source=["input_wm"],

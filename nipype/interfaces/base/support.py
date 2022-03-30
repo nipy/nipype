@@ -87,7 +87,7 @@ class RuntimeContext(AbstractContextManager):
             timediff.days * 86400 + timediff.seconds + timediff.microseconds / 1e6
         )
         # Collect monitored data
-        for k, v in self._resmon.stop():
+        for k, v in self._resmon.stop().items():
             setattr(self._runtime, k, v)
 
         os.chdir(self._runtime.prevcwd)
@@ -109,6 +109,13 @@ class RuntimeContext(AbstractContextManager):
 
             if self._ignore_exc:
                 return True
+
+        if hasattr(self._runtime, "cmdline"):
+            retcode = self._runtime.returncode
+            if retcode not in self._runtime.success_codes:
+                self._runtime.traceback = (
+                    f"RuntimeError: subprocess exited with code {retcode}."
+                )
 
     @property
     def runtime(self):

@@ -367,18 +367,14 @@ def generate_class(
                     param.getElementsByTagName("channel")[0].firstChild.nodeValue
                     == "input"
                 ):
-                    if (
-                        param.nodeName
-                        in [
-                            "file",
-                            "directory",
-                            "image",
-                            "geometry",
-                            "transform",
-                            "table",
-                        ]
-                        and type not in ["InputMultiPath", "traits.List"]
-                    ):
+                    if param.nodeName in [
+                        "file",
+                        "directory",
+                        "image",
+                        "geometry",
+                        "transform",
+                        "table",
+                    ] and type not in ["InputMultiPath", "traits.List"]:
                         traitsParams["exists"] = True
                     inputTraits.append(
                         "%s = %s(%s%s)"

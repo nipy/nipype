@@ -10,6 +10,41 @@ from ...testing import utils
 from ..confounds import CompCor, TCompCor, ACompCor
 
 
+def close_up_to_column_sign(a, b, rtol=1e-05, atol=1e-08, equal_nan=False):
+    """SVD can produce sign flips on a per-column basis."""
+    kwargs = dict(rtol=rtol, atol=atol, equal_nan=equal_nan)
+    if np.allclose(a, b, **kwargs):
+        return True
+
+    ret = True
+    for acol, bcol in zip(a.T, b.T):
+        ret &= np.allclose(acol, bcol, **kwargs) or np.allclose(acol, -bcol, **kwargs)
+        if not ret:
+            break
+
+    return ret
+
+
+@pytest.mark.parametrize(
+    "a, b, close",
+    [
+        ([[0.1, 0.2], [0.3, 0.4]], [[-0.1, 0.2], [-0.3, 0.4]], True),
+        ([[0.1, 0.2], [0.3, 0.4]], [[-0.1, 0.2], [0.3, -0.4]], False),
+    ],
+)
+def test_close_up_to_column_sign(a, b, close):
+    a = np.asanyarray(a)
+    b = np.asanyarray(b)
+    assert close_up_to_column_sign(a, b) == close
+    # Sign flips of all columns never changes result
+    assert close_up_to_column_sign(a, -b) == close
+    assert close_up_to_column_sign(-a, b) == close
+    assert close_up_to_column_sign(-a, -b) == close
+    # Trivial case
+    assert close_up_to_column_sign(a, a)
+    assert close_up_to_column_sign(b, b)
+
+
 class TestCompCor:
     """Note: Tests currently do a poor job of testing functionality"""
 
@@ -42,11 +77,11 @@ class TestCompCor:
 
     def test_compcor(self):
         expected_components = [
-            ["-0.1989607212", "-0.5753813646"],
-            ["0.5692369697", "0.5674945949"],
-            ["-0.6662573243", "0.4675843432"],
-            ["0.4206466244", "-0.3361270124"],
-            ["-0.1246655485", "-0.1235705610"],
+            [-0.1989607212, -0.5753813646],
+            [0.5692369697, 0.5674945949],
+            [-0.6662573243, 0.4675843432],
+            [0.4206466244, -0.3361270124],
+            [-0.1246655485, -0.1235705610],
         ]
 
         self.run_cc(
@@ -73,11 +108,11 @@ class TestCompCor:
 
     def test_compcor_variance_threshold_and_metadata(self):
         expected_components = [
-            ["-0.2027150345", "-0.4954813834"],
-            ["0.2565929051", "0.7866217875"],
-            ["-0.3550986008", "-0.0089784905"],
-            ["0.7512786244", "-0.3599828482"],
-            ["-0.4500578942", "0.0778209345"],
+            [-0.2027150345, -0.4954813834],
+            [0.2565929051, 0.7866217875],
+            [-0.3550986008, -0.0089784905],
+            [0.7512786244, -0.3599828482],
+            [-0.4500578942, 0.0778209345],
         ]
         expected_metadata = {
             "component": "CompCor00",
@@ -111,11 +146,11 @@ class TestCompCor:
         self.run_cc(
             ccinterface,
             [
-                ["-0.1114536190", "-0.4632908609"],
-                ["0.4566907310", "0.6983205193"],
-                ["-0.7132557407", "0.1340170559"],
-                ["0.5022537643", "-0.5098322262"],
-                ["-0.1342351356", "0.1407855119"],
+                [-0.1114536190, -0.4632908609],
+                [0.4566907310, 0.6983205193],
+                [-0.7132557407, 0.1340170559],
+                [0.5022537643, -0.5098322262],
+                [-0.1342351356, 0.1407855119],
             ],
             "tCompCor",
         )
@@ -138,11 +173,11 @@ class TestCompCor:
                 pre_filter=False,
             ),
             [
-                ["0.4451946442", "-0.7683311482"],
-                ["-0.4285129505", "-0.0926034137"],
-                ["0.5721540256", "0.5608764842"],
-                ["-0.5367548139", "0.0059943226"],
-                ["-0.0520809054", "0.2940637551"],
+                [0.4451946442, -0.7683311482],
+                [-0.4285129505, -0.0926034137],
+                [0.5721540256, 0.5608764842],
+                [-0.5367548139, 0.0059943226],
+                [-0.0520809054, 0.2940637551],
             ],
         )
 
@@ -225,27 +260,20 @@ class TestCompCor:
         assert os.path.getsize(expected_file) > 0
 
         with open(ccresult.outputs.components_file, "r") as components_file:
-            if expected_n_components is None:
-                expected_n_components = min(
-                    ccinterface.inputs.num_components, self.fake_data.shape[3]
-                )
+            header = components_file.readline().rstrip().split("\t")
+            components_data = np.loadtxt(components_file, delimiter="\t")
 
-            components_data = [line.rstrip().split("\t") for line in components_file]
+        if expected_n_components is None:
+            expected_n_components = min(
+                ccinterface.inputs.num_components, self.fake_data.shape[3]
+            )
 
-            # the first item will be '#', we can throw it out
-            header = components_data.pop(0)
-            expected_header = [
-                expected_header + "{:02d}".format(i)
-                for i in range(expected_n_components)
-            ]
-            for i, heading in enumerate(header):
-                assert expected_header[i] in heading
+        assert header == [
+            f"{expected_header}{i:02d}" for i in range(expected_n_components)
+        ]
 
-            num_got_timepoints = len(components_data)
-            assert num_got_timepoints == self.fake_data.shape[3]
-            for index, timepoint in enumerate(components_data):
-                assert len(timepoint) == expected_n_components
-                assert timepoint[:2] == expected_components[index]
+        assert components_data.shape == (self.fake_data.shape[3], expected_n_components)
+        assert close_up_to_column_sign(components_data[:, :2], expected_components)
 
         if ccinterface.inputs.save_metadata:
             expected_metadata_file = ccinterface._list_outputs()["metadata_file"]

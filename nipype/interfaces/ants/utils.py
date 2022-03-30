@@ -19,6 +19,7 @@ class ImageMathInputSpec(ANTSCommandInputSpec):
         keep_extension=True,
     )
     operation = traits.Enum(
+        # Mathematical Operations
         "m",
         "vm",
         "+",
@@ -37,6 +38,7 @@ class ImageMathInputSpec(ANTSCommandInputSpec):
         "vtotal",
         "Decision",
         "Neg",
+        # Spatial Filtering Operations
         "Project",
         "G",
         "MD",
@@ -47,22 +49,72 @@ class ImageMathInputSpec(ANTSCommandInputSpec):
         "GE",
         "GO",
         "GC",
-        "TruncateImageIntensity",
-        "Laplacian",
-        "GetLargestComponent",
+        "ExtractContours",
+        # Transform Image Operations
+        "Translate",
+        # Tensor Operations
+        "4DTensorTo3DTensor",
+        "ExtractVectorComponent",
+        "TensorColor",
+        "TensorFA",
+        "TensorFADenominator",
+        "TensorFANumerator",
+        "TensorMeanDiffusion",
+        "TensorRadialDiffusion",
+        "TensorAxialDiffusion",
+        "TensorEigenvalue",
+        "TensorToVector",
+        "TensorToVectorComponent",
+        "TensorMask",
+        # Unclassified Operators
+        "Byte",
+        "CorruptImage",
+        "D",
+        "MaurerDistance",
+        "ExtractSlice",
         "FillHoles",
+        "Convolve",
+        "Finite",
+        "FlattenImage",
+        "GetLargestComponent",
+        "Grad",
+        "RescaleImage",
+        "WindowImage",
+        "NeighborhoodStats",
+        "ReplicateDisplacement",
+        "ReplicateImage",
+        "LabelStats",
+        "Laplacian",
+        "Canny",
+        "Lipschitz",
+        "MTR",
+        "Normalize",
         "PadImage",
+        "SigmoidImage",
+        "Sharpen",
+        "UnsharpMask",
+        "PValueImage",
+        "ReplaceVoxelValue",
+        "SetTimeSpacing",
+        "SetTimeSpacingWarp",
+        "stack",
+        "ThresholdAtMean",
+        "TriPlanarView",
+        "TruncateImageIntensity",
         mandatory=True,
         position=3,
         argstr="%s",
         desc="mathematical operations",
     )
     op1 = File(
-        exists=True, mandatory=True, position=-2, argstr="%s", desc="first operator"
+        exists=True, mandatory=True, position=-3, argstr="%s", desc="first operator"
     )
     op2 = traits.Either(
-        File(exists=True), Str, position=-1, argstr="%s", desc="second operator"
+        File(exists=True), Str, position=-2, argstr="%s", desc="second operator"
     )
+
+    args = Str(position=-1, argstr="%s", desc="Additional parameters to the command")
+
     copy_header = traits.Bool(
         True,
         usedefault=True,
@@ -106,7 +158,7 @@ class ImageMath(ANTSCommand, CopyHeaderInterface):
 
     By default, Nipype copies headers from the first input image (``op1``)
     to the output image.
-    For the ``PadImage`` operation, the header cannot be copied from inputs to
+    For some operations, as the ``PadImage`` operation, the header cannot be copied from inputs to
     outputs, and so ``copy_header`` option is automatically set to ``False``.
 
     >>> pad = ImageMath(
@@ -135,22 +187,34 @@ class ImageMath(ANTSCommand, CopyHeaderInterface):
     input_spec = ImageMathInputSpec
     output_spec = ImageMathOuputSpec
     _copy_header_map = {"output_image": "op1"}
+    _no_copy_header_operation = (
+        "PadImage",
+        "LabelStats",
+        "SetTimeSpacing",
+        "SetTimeSpacingWarp",
+        "TriPlanarView",
+    )
 
     def __init__(self, **inputs):
         super(ImageMath, self).__init__(**inputs)
-        if self.inputs.operation in ("PadImage",):
+        if self.inputs.operation in self._no_copy_header_operation:
             self.inputs.copy_header = False
 
         self.inputs.on_trait_change(self._operation_update, "operation")
         self.inputs.on_trait_change(self._copyheader_update, "copy_header")
 
     def _operation_update(self):
-        if self.inputs.operation in ("PadImage",):
+        if self.inputs.operation in self._no_copy_header_operation:
             self.inputs.copy_header = False
 
     def _copyheader_update(self):
-        if self.inputs.copy_header and self.inputs.operation in ("PadImage",):
-            warn("copy_header cannot be updated to True with PadImage as operation.")
+        if (
+            self.inputs.copy_header
+            and self.inputs.operation in self._no_copy_header_operation
+        ):
+            warn(
+                f"copy_header cannot be updated to True with {self.inputs.operation} as operation."
+            )
             self.inputs.copy_header = False
 
 

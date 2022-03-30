@@ -35,6 +35,10 @@ def test_DWI2Tensor_inputs():
             mandatory=True,
             position=-2,
         ),
+        mask=dict(
+            argstr="-mask %s",
+            extensions=None,
+        ),
         out_filename=dict(
             argstr="%s",
             extensions=None,
