@@ -531,7 +531,8 @@ class MRTM(GLMFit):
     >>> mrtm.inputs.in_file = 'tac.nii'
     >>> mrtm.inputs.mrtm1 = [('ref_tac.dat', 'timing.dat')]
     >>> mrtm.inputs.glmdir = 'mrtm'
-    >>> mrtm.cmdline == 'mri_glmfit --glmdir mrtm --y tac.nii --mrtm1 ref_tac.dat timing.dat'
+    >>> mrtm.cmdline
+    'mri_glmfit --glmdir mrtm --y tac.nii --mrtm1 ref_tac.dat timing.dat'
     """
 
     _cmd = "mri_glmfit"
