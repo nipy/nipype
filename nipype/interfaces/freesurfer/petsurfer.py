@@ -36,9 +36,6 @@ from .model import GLMFitInputSpec, GLMFitInputSpec, GLMFit
 __docformat__ = "restructuredtext"
 iflogger = logging.getLogger("nipype.interface")
 
-# Keeping this to avoid breaking external programs that depend on it, but
-# this should not be used internally
-FSVersion = Info.looseversion().vstring
 
 class GTMSegInputSpec(FSTraitedSpec):
     
