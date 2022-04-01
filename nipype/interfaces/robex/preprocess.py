@@ -22,6 +22,7 @@ class RobexInputSpec(CommandLineInputSpec):
         argstr="%s",
         hash_files=False,
         name_template='%s_brain',
+        name_source=["in_file"],
         keep_extension=True,
     )
     out_mask = File(
@@ -30,6 +31,7 @@ class RobexInputSpec(CommandLineInputSpec):
         argstr="%s",
         hash_files=False,
         name_template='%s_brainmask',
+        name_source=["in_file"],
         keep_extension=True,
     )
     seed = traits.Int(desc="Seed for random number generator", position=3, argstr="%i")
