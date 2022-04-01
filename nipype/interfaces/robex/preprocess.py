@@ -69,23 +69,3 @@ class RobexSegment(CommandLine):
     input_spec = RobexInputSpec
     output_spec = RobexOutputSpec
     _cmd = 'runROBEX.sh'
-
-    def _format_arg(self, name, trait_spec, value):
-        if name == "out_file" or name == "out_mask":
-            if Path(value).name == value:
-                value = os.path.join(os.getcwd(), Path(value).name)
-                setattr(self.inputs, name, value)
-        return super(RobexSegment, self)._format_arg(name, trait_spec, value)
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["out_file"] = self.inputs.out_file
-        if isdefined(self.inputs.out_mask):
-            outputs["out_mask"] = self.inputs.out_mask
-        return outputs
-
-    def run(self, cwd=None, ignore_exception=None, **inputs):
-        if not isdefined(self.inputs.out_file):
-            _, base, extension = split_filename(self.inputs.in_file)
-            self.inputs.out_file = base + "_brain_robex" + extension
-        return super(RobexSegment, self).run(cwd, ignore_exception, **inputs)
