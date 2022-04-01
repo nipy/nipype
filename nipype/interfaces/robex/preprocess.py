@@ -6,18 +6,32 @@ from nipype.interfaces.base import (
     CommandLineInputSpec,
     CommandLine,
     File,
-    traits, isdefined
+    traits,
+    isdefined,
 )
 from nipype.utils.filemanip import split_filename
 
 
 class RobexInputSpec(CommandLineInputSpec):
-    in_file = File(desc="Input volume", exists=True,
-                   mandatory=True, position=0, argstr="%s")
-    out_file = File(desc="Output volume", position=1, argstr="%s",
-                    hash_files=False, name_template='%s_brain', keep_extension=True)
-    out_mask = File(desc="Output mask", position=2, argstr="%s",
-                    hash_files=False, name_template='%s_brainmask', keep_extension=True)
+    in_file = File(
+        desc="Input volume", exists=True, mandatory=True, position=0, argstr="%s"
+    )
+    out_file = File(
+        desc="Output volume",
+        position=1,
+        argstr="%s",
+        hash_files=False,
+        name_template='%s_brain',
+        keep_extension=True,
+    )
+    out_mask = File(
+        desc="Output mask",
+        position=2,
+        argstr="%s",
+        hash_files=False,
+        name_template='%s_brainmask',
+        keep_extension=True,
+    )
     seed = traits.Int(desc="Seed for random number generator", position=3, argstr="%i")
 
 
@@ -37,7 +51,7 @@ class RobexSegment(CommandLine):
     The method ROBEX is based on was published in IEEE Transactions on Medical Imaging;
     please visit the website http://www.jeiglesias.com to download the paper.
 
-        Examples
+    Examples
     --------
     >>> path_mr = 'structural.nii'
     >>> robex = RobexSegment(in_file=path_mr)
