@@ -80,5 +80,5 @@ class RobexSegment(CommandLine):
     def run(self, cwd=None, ignore_exception=None, **inputs):
         if not isdefined(self.inputs.out_file):
             _, base, extension = split_filename(self.inputs.in_file)
-            self.inputs.out_file = base + "_brain_robex_" + extension
+            self.inputs.out_file = base + "_brain_robex" + extension
         return super(RobexSegment, self).run(cwd, ignore_exception, **inputs)
