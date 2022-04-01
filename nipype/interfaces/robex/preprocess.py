@@ -36,8 +36,8 @@ class RobexInputSpec(CommandLineInputSpec):
 
 
 class RobexOutputSpec(TraitedSpec):
-    out_file = File(desc="Output volume", exists=True)
-    out_mask = File(desc="Output mask", exists=True)
+    out_file = File(desc="Output volume")
+    out_mask = File(desc="Output mask")
 
 
 class RobexSegment(CommandLine):
