@@ -2866,7 +2866,9 @@ class BIDSDataGrabberInputSpec(DynamicTraitedSpec):
     output_query = traits.Dict(
         key_trait=Str, value_trait=traits.Dict, desc="Queries for outfield outputs"
     )
-    load_layout = Directory(exists=True, desc="Path to load already saved Bidslayout.", mandatory=False)
+    load_layout = Directory(
+        exists=True, desc="Path to load already saved Bidslayout.", mandatory=False
+    )
     raise_on_empty = traits.Bool(
         True,
         usedefault=True,
