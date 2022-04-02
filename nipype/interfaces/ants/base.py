@@ -3,9 +3,10 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The ants module provides basic functions for interfacing with ANTS tools."""
 import os
+from packaging.version import Version, parse
 
 # Local imports
-from ... import logging, LooseVersion
+from ... import logging
 from ..base import CommandLine, CommandLineInputSpec, traits, isdefined, PackageInfo
 
 iflogger = logging.getLogger("nipype.interface")
@@ -42,16 +43,17 @@ class Info(PackageInfo):
 
         # -githash may or may not be appended
         v_string = v_string.split("-")[0]
-        # if there is a 'v' at the beginning, it may be stripped
-        v_string = v_string.lstrip('v')
 
-        # 2.2.0-equivalent version string
-        if "post" in v_string and LooseVersion(v_string) >= LooseVersion(
-            "2.1.0.post789"
-        ):
-            return "2.2.0"
-        else:
-            return ".".join(v_string.split(".")[:3])
+        version = parse(v_string)
+
+        # Known mislabeled versions
+        if version.is_postrelease:
+            if version.base_version == "2.1.0" and version.post >= 789:
+                return "2.2.0"
+
+        # Unless we know of a specific reason to re-version, we will
+        # treat the base version (before pre/post/dev) as authoritative
+        return version.base_version
 
 
 class ANTSCommandInputSpec(CommandLineInputSpec):
