@@ -58,10 +58,8 @@ class RobexSegment(CommandLine):
     >>> from nipype.interfaces.robex.preprocess import RobexSegment
     >>> robex = RobexSegment()
     >>> robex.inputs.in_file = 'structural.nii'
-    >>> robex.inputs.out_file = 'structural_brain.nii'
-    >>> robex.inputs.out_mask = 'structural_mask.nii'
-    >>> robex.cmdline # doctest: +SKIP
-    'runROBEX.sh structural.nii structural_brain.nii structural_mask.nii'
+    >>> robex.cmdline
+    'runROBEX.sh structural.nii structural_brain.nii structural_brainmask.nii'
     >>> robex.run() # doctest: +SKIP
 
     """
