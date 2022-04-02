@@ -46,6 +46,13 @@ def test_DWIExtract_inputs():
             argstr="-nthreads %d",
             nohash=True,
         ),
+        out_bval=dict(
+            extensions=None,
+        ),
+        out_bvec=dict(
+            argstr="-export_grad_fsl %s %s",
+            extensions=None,
+        ),
         out_file=dict(
             argstr="%s",
             extensions=None,

@@ -79,6 +79,15 @@ class MRTrix3BaseInputSpec(CommandLineInputSpec):
         exists=True, argstr="-fslgrad %s %s", desc="bvecs file in FSL format"
     )
     in_bval = File(exists=True, desc="bvals file in FSL format")
+    out_bvec = File(
+        exists=False,
+        argstr="-export_grad_fsl %s %s",
+        desc="export bvec file in FSL format",
+    )
+    out_bval = File(
+        exists=False,
+        desc="export bval file in FSL format",
+    )
 
 
 class MRTrix3Base(CommandLine):
@@ -96,6 +105,8 @@ class MRTrix3Base(CommandLine):
 
         if name == "in_bvec":
             return trait_spec.argstr % (value, self.inputs.in_bval)
+        if name == "out_bvec":
+            return trait_spec.argstr % (value, self.inputs.out_bval)
 
         return super(MRTrix3Base, self)._format_arg(name, trait_spec, value)
 

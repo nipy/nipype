@@ -29,8 +29,24 @@ def test_TensorMetrics_inputs():
         modulate=dict(
             argstr="-modulate %s",
         ),
+        out_ad=dict(
+            argstr="-ad %s",
+            extensions=None,
+        ),
         out_adc=dict(
             argstr="-adc %s",
+            extensions=None,
+        ),
+        out_cl=dict(
+            argstr="-cl %s",
+            extensions=None,
+        ),
+        out_cp=dict(
+            argstr="-cp %s",
+            extensions=None,
+        ),
+        out_cs=dict(
+            argstr="-cs %s",
             extensions=None,
         ),
         out_eval=dict(
@@ -45,6 +61,10 @@ def test_TensorMetrics_inputs():
             argstr="-fa %s",
             extensions=None,
         ),
+        out_rd=dict(
+            argstr="-rd %s",
+            extensions=None,
+        ),
     )
     inputs = TensorMetrics.input_spec()
 
@@ -55,7 +75,19 @@ def test_TensorMetrics_inputs():
 
 def test_TensorMetrics_outputs():
     output_map = dict(
+        out_ad=dict(
+            extensions=None,
+        ),
         out_adc=dict(
+            extensions=None,
+        ),
+        out_cl=dict(
+            extensions=None,
+        ),
+        out_cp=dict(
+            extensions=None,
+        ),
+        out_cs=dict(
             extensions=None,
         ),
         out_eval=dict(
@@ -65,6 +97,9 @@ def test_TensorMetrics_outputs():
             extensions=None,
         ),
         out_fa=dict(
+            extensions=None,
+        ),
+        out_rd=dict(
             extensions=None,
         ),
     )
