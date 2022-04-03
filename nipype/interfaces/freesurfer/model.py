@@ -407,15 +407,15 @@ class GLMFitInputSpec(FSTraitedSpec):
         desc="Reference time activity curve and frame times",
     )
     mrtm2 = InputMultiPath(
-       traits.Tuple(File(exists=True), File(exists=True), traits.Float),
+        traits.Tuple(File(exists=True), File(exists=True), traits.Float),
         argstr="--mrtm2 %s %s %f...",
-        desc="Reference time activity curve, frame times and k2p", 
+        desc="Reference time activity curve, frame times and k2p",
     )
     logan = InputMultiPath(
-       traits.Tuple(File(exists=True), File(exists=True), traits.Float),
+        traits.Tuple(File(exists=True), File(exists=True), traits.Float),
         argstr="--logan %s %s %f...",
-        desc="Reference time activity curve, frame times and tstar", 
-    ) 
+        desc="Reference time activity curve, frame times and tstar",
+    )
     force_perm = traits.Bool(
         argstr="--perm-force",
         desc="force perumtation test, even when design matrix is not orthog",
@@ -443,6 +443,7 @@ class GLMFitInputSpec(FSTraitedSpec):
         desc='save outputs as nii.gz',
     )
 
+
 class GLMFitOutputSpec(TraitedSpec):
 
     glm_dir = Directory(exists=True, desc="output directory")
@@ -462,7 +463,7 @@ class GLMFitOutputSpec(TraitedSpec):
     frame_eigenvectors = File(desc="matrix of frame eigenvectors from residual PCA")
     singular_values = File(desc="matrix singular values from residual PCA")
     svd_stats_file = File(desc="text file summarizing the residual PCA")
-    
+
 
 class GLMFit(FSCommand):
     """Use FreeSurfer's mri_glmfit to specify and estimate a general linear model.
