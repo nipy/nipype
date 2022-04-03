@@ -46,9 +46,11 @@ class GTMSegInputSpec(FSTraitedSpec):
         desc="run xcerebralseg on this subject to create apas+head.mgz",
     )
 
-    gtm_file = File(
+    out_file = File(
+        "gtmseg.mgz",
         argstr="--o %s",
-        desc="output volume relative to subject/mri (default is gtmseg.mgz)",
+        desc="output volume relative to subject/mri",
+        usedefault=True,
     )
 
     usf = traits.Int(argstr="--usf %i", desc="upsampling factor (default is 2)")
@@ -116,7 +118,7 @@ class GTMSegInputSpec(FSTraitedSpec):
 
 
 class GTMSegOutputSpec(TraitedSpec):
-    gtm_file = File(exists=True, desc="GTM segmentation")
+    out_file = File(exists=True, desc="GTM segmentation")
 
 
 class GTMSeg(FSCommand):
@@ -125,10 +127,9 @@ class GTMSeg(FSCommand):
     Examples
     --------
     >>> gtmseg = GTMSeg()
-    >>> gtmseg.inputs.out_file = 'gtmseg.nii'
     >>> gtmseg.inputs.subject_id = 'subject_id'
-    >>> gtmseg.cmdline == 'gtmseg --o gtmseg.nii --s subject_id'
-
+    >>> gtmseg.cmdline
+    'gtmseg --o gtmseg.mgz --s subject_id'
     """
 
     _cmd = "gtmseg"
@@ -461,9 +462,11 @@ class GTMPVC(FSCommand):
     >>> gtmpvc.inputs.km_hb = ['11 12 50 51']
     >>> gtmpvc.inputs.no_rescale = True
     >>> gtmpvc.inputs.save_input = True
-    >>> gtmpvc.cmdline == 'mri_gtmpvc --auto-mask 1.000000 0.100000 --default-seg-merge
-        --i sub-01_ses-baseline_pet.nii.gz --km-hb 11 12 50 51 --km-ref 8 47 --no-rescale
-        --o pvc --psf 4.000000 --reg sub-01_ses-baseline_pet_mean_reg.lta --save-input --seg gtmseg.mgz'
+    >>> gtmpvc.cmdline  # doctest: +NORMALIZE_WHITESPACE
+    'mri_gtmpvc --auto-mask 1.000000 0.100000 --default-seg-merge \
+    --i sub-01_ses-baseline_pet.nii.gz --km-hb 11 12 50 51 --km-ref 8 47 --no-rescale \
+    --psf 4.000000 --o pvc --reg sub-01_ses-baseline_pet_mean_reg.lta --save-input \
+    --seg gtmseg.mgz'
     """
 
     _cmd = "mri_gtmpvc"
@@ -540,7 +543,7 @@ class MRTM(GLMFit):
     >>> mrtm = MRTM()
     >>> mrtm.inputs.in_file = 'tac.nii'
     >>> mrtm.inputs.mrtm1 = [('ref_tac.dat', 'timing.dat')]
-    >>> mrtm.inputs.glmdir = 'mrtm'
+    >>> mrtm.inputs.glm_dir = 'mrtm'
     >>> mrtm.cmdline
     'mri_glmfit --glmdir mrtm --y tac.nii --mrtm1 ref_tac.dat timing.dat'
     """
@@ -582,8 +585,9 @@ class MRTM2(GLMFit):
     >>> mrtm2 = MRTM2()
     >>> mrtm2.inputs.in_file = 'tac.nii'
     >>> mrtm2.inputs.mrtm2 = [('ref_tac.dat', 'timing.dat', 0.07872)]
-    >>> mrtm2.inputs.glmdir = 'mrtm2'
-    >>> mrtm2.cmdline == 'mri_glmfit --glmdir mrtm2 --y tac.nii --mrtm2 ref_tac.dat timing.dat 0.07872'
+    >>> mrtm2.inputs.glm_dir = 'mrtm2'
+    >>> mrtm2.cmdline
+    'mri_glmfit --glmdir mrtm2 --y tac.nii --mrtm2 ref_tac.dat timing.dat 0.078720'
     """
 
     _cmd = "mri_glmfit"
@@ -607,7 +611,7 @@ class LoganRefInputSpec(GLMFitInputSpec):
     logan = InputMultiPath(
         traits.Tuple(File(exists=True), File(exists=True), traits.Float),
         mandatory=True,
-        argstr="--logan %s %s %f...",
+        argstr="--logan %s %s %g...",
         desc="RefTac TimeSec tstar   : perform Logan kinetic modeling",
     )
 
@@ -627,8 +631,9 @@ class LoganRef(GLMFit):
     >>> logan = LoganRef()
     >>> logan.inputs.in_file = 'tac.nii'
     >>> logan.inputs.logan = [('ref_tac.dat', 'timing.dat', 2600)]
-    >>> logan.inputs.glmdir = 'logan'
-    >>> logan.cmdline == 'mri_glmfit --glmdir logan --y tac.nii --logan ref_tac.dat timing.dat 2600'
+    >>> logan.inputs.glm_dir = 'logan'
+    >>> logan.cmdline
+    'mri_glmfit --glmdir logan --y tac.nii --logan ref_tac.dat timing.dat 2600'
     """
 
     _cmd = "mri_glmfit"
