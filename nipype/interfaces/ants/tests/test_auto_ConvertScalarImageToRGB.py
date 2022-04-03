@@ -35,7 +35,6 @@ def test_ConvertScalarImageToRGB_inputs():
         ),
         mask_image=dict(
             argstr="%s",
-            extensions=None,
             position=3,
             usedefault=True,
         ),
