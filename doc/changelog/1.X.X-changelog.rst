@@ -1,3 +1,29 @@
+1.7.1 (April 05, 2022)
+======================
+
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.7.1?closed=1>`__)
+
+  * FIX: Allow ``ConvertScalarImageToRGBInputSpec.mask_file`` to be ``"none"`` (https://github.com/nipy/nipype/pull/3364)
+  * FIX: Use a more robust strategy for detecting ANTs version (https://github.com/nipy/nipype/pull/3444)
+  * FIX: Retry renaming pkl(z) files on failure (https://github.com/nipy/nipype/pull/3404)
+  * FIX: Escape metacharacters when parsing dcm2niix outputs (https://github.com/nipy/nipype/pull/3417)
+  * FIX: Import error for nipype.interfaces.dipy.base (https://github.com/nipy/nipype/pull/3414)
+  * FIX: ``ValueError`` when using ``ResourceMonitor`` (https://github.com/nipy/nipype/pull/3419)
+  * FIX: Improve error handling of ``CommandLine`` interfaces (https://github.com/nipy/nipype/pull/3395)
+  * FIX: Bugs in ApplyVDM interface (https://github.com/nipy/nipype/pull/3396)
+  * ENH: Add MRTrix3 interfaces (pared-down gh-3426) (https://github.com/nipy/nipype/pull/3445)
+  * ENH: Enable BidsDataGrabber to load saved layouts (https://github.com/nipy/nipype/pull/3421)
+  * ENH: ROBEX interface (https://github.com/nipy/nipype/pull/3443)
+  * ENH: Include several operations to ANTs's ImageMath interface, including ReplicateImage and ReplicateDisplacement (https://github.com/nipy/nipype/pull/3435)
+  * ENH: Add "GenericLabel" to antsRegistration interpolation option. (https://github.com/nipy/nipype/pull/3424)
+  * ENH: added Apply VDM functionality to FieldMap SPM interface (https://github.com/nipy/nipype/pull/3394)
+  * DOC: Side bar and main page fixes (https://github.com/nipy/nipype/pull/3397)
+  * TEST: Allow SVD columns to flip sign (https://github.com/nipy/nipype/pull/3405)
+  * MNT: rename dipy ``move_streamlines`` to ``transform_tracking_output`` (https://github.com/nipy/nipype/pull/3412)
+  * MNT: Test on Python 3.10 (https://github.com/nipy/nipype/pull/3438)
+  * MNT: Added ORCID iD (https://github.com/nipy/nipype/pull/3436)
+
+
 1.7.0 (October 20, 2021)
 ========================
 
