@@ -21,10 +21,6 @@ def test_GTMSeg_inputs():
             nohash=True,
             usedefault=True,
         ),
-        gtm_file=dict(
-            argstr="--o %s",
-            extensions=None,
-        ),
         head=dict(
             argstr="--head %s",
         ),
@@ -42,6 +38,11 @@ def test_GTMSeg_inputs():
         ),
         no_vermis=dict(
             argstr="--no-vermis",
+        ),
+        out_file=dict(
+            argstr="--o %s",
+            extensions=None,
+            usedefault=True,
         ),
         output_usf=dict(
             argstr="--output-usf %i",
@@ -76,7 +77,7 @@ def test_GTMSeg_inputs():
 
 def test_GTMSeg_outputs():
     output_map = dict(
-        gtm_file=dict(
+        out_file=dict(
             extensions=None,
         ),
     )

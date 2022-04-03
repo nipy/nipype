@@ -90,7 +90,7 @@ def test_LoganRef_inputs():
             xor=["cortex"],
         ),
         logan=dict(
-            argstr="--logan %s %s %f...",
+            argstr="--logan %s %s %g...",
             mandatory=True,
         ),
         mask_file=dict(
