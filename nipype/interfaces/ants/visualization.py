@@ -34,6 +34,7 @@ class ConvertScalarImageToRGBInputSpec(ANTSCommandInputSpec):
         argstr="%s",
         desc="mask image",
         position=3,
+        default="none",
         usedefault=True,
     )
     colormap = traits.Enum(
