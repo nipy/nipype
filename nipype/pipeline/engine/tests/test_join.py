@@ -623,7 +623,7 @@ def test_name_prefix_join(tmpdir):
     tmpdir.chdir()
 
     def sq(x):
-        return x ** 2
+        return x**2
 
     wf = pe.Workflow("wf", base_dir=tmpdir.strpath)
     square = pe.Node(Function(function=sq), name="square")
@@ -642,7 +642,7 @@ def test_join_nestediters(tmpdir):
     tmpdir.chdir()
 
     def exponent(x, p):
-        return x ** p
+        return x**p
 
     wf = pe.Workflow("wf", base_dir=tmpdir.strpath)
 

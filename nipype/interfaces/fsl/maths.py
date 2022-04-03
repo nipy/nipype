@@ -41,7 +41,7 @@ class MathsInput(FSLCommandInputSpec):
 
 class MathsOutput(TraitedSpec):
 
-    out_file = File(exists=True, desc="image written after calculations")
+    out_file = File(desc="image written after calculations")
 
 
 class MathsCommand(FSLCommand):

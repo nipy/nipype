@@ -593,6 +593,155 @@ class CAT12Segment(SPMCommand):
         return outputs
 
 
+class CAT12SANLMDenoisingInputSpec(SPMCommandInputSpec):
+
+    in_files = InputMultiPath(
+        ImageFileSPM(exists=True),
+        field="data",
+        desc="Images for filtering.",
+        mandatory=True,
+        copyfile=False,
+    )
+
+    spm_type = traits.Enum(
+        "float32",
+        "uint16",
+        "uint8",
+        "same",
+        field="spm_type",
+        usedefault=True,
+        desc="Data type of the output images. 'same' matches the input image type.",
+    )
+
+    intlim = traits.Int(
+        field="intlim",
+        default_value=100,
+        usedefault=True,
+        desc="intensity limitation (default = 100)",
+    )
+
+    filename_prefix = traits.Str(
+        field="prefix",
+        default_value="sanlm_",
+        usedefault=True,
+        desc="Filename prefix. Specify  the  string  to be prepended to the filenames of the filtered image file(s).",
+    )
+
+    filename_suffix = traits.Str(
+        field="suffix",
+        default_value="",
+        usedefault=True,
+        desc="Filename suffix. Specify  the  string  to  be  appended  to the filenames of the filtered image file(s).",
+    )
+
+    addnoise = traits.Float(
+        default_value=0.5,
+        usedefault=True,
+        field="addnoise",
+        desc="""Strength of additional noise in noise-free regions.
+        Add  minimal  amount  of noise in regions without any noise to avoid image segmentation problems.
+        This parameter defines the strength of additional noise as percentage of the average signal intensity.""",
+    )
+
+    rician = traits.Bool(
+        True,
+        field="rician",
+        usedefault=True,
+        desc="""Rician noise
+        MRIs  can  have  Gaussian  or  Rician  distributed  noise with uniform or nonuniform variance across the image.
+        If SNR is high enough (>3)  noise  can  be  well  approximated by Gaussian noise in the foreground. However, for
+        SENSE reconstruction or DTI data a Rician distribution is expected. Please note that the Rician noise estimation
+        is sensitive for large signals in the neighbourhood and can lead to artefacts, e.g. cortex can be affected by
+        very high values in the scalp or in blood vessels.""",
+    )
+
+    replace_nan_and_inf = traits.Bool(
+        True,
+        field="replaceNANandINF",
+        usedefault=True,
+        desc="Replace NAN by 0, -INF by the minimum and INF by the maximum of the image.",
+    )
+
+    noisecorr_strength = traits.Enum(
+        "-Inf",
+        2,
+        4,
+        field="nlmfilter.optimized.NCstr",
+        usedefault=True,
+        desc="""Strength of Noise Corrections
+        Strength  of  the  (sub-resolution)  spatial  adaptive    non local means (SANLM) noise correction. Please note
+        that the filter strength is automatically  estimated.  Change this parameter only for specific conditions. The
+        "light" option applies half of the filter strength of the adaptive  "medium"  cases,  whereas  the  "strong"
+        option  uses  the  full  filter  strength,  force sub-resolution filtering and applies an additional  iteration.
+        Sub-resolution  filtering  is  only  used  in  case  of  high image resolution below 0.8 mm or in case of the
+        "strong" option. light = 2, medium = -Inf, strong = 4""",
+    )
+
+
+class CAT12SANLMDenoisingOutputSpec(TraitedSpec):
+
+    out_file = File(desc="out file")
+
+
+class CAT12SANLMDenoising(SPMCommand):
+    """
+    Spatially adaptive non-local means (SANLM) denoising filter
+
+    This  function  applies  an spatial adaptive (sub-resolution) non-local means denoising filter
+    to  the  data.  This  filter  will  remove  noise  while  preserving  edges. The filter strength is
+    automatically estimated based on the standard deviation of the noise.
+
+    This   filter   is  internally  used  in  the  segmentation  procedure  anyway.  Thus,  it  is  not
+    necessary (and not recommended) to apply the filter before segmentation.
+    ______________________________________________________________________
+    Christian Gaser, Robert Dahnke
+    Structural Brain Mapping Group (http://www.neuro.uni-jena.de)
+    Departments of Neurology and Psychiatry
+    Jena University Hospital
+    ______________________________________________________________________
+
+    Examples
+    --------
+    >>> from nipype.interfaces import cat12
+    >>> c = cat12.CAT12SANLMDenoising()
+    >>> c.inputs.in_files = 'anatomical.nii'
+    >>> c.run() # doctest: +SKIP
+    """
+
+    input_spec = CAT12SANLMDenoisingInputSpec
+    output_spec = CAT12SANLMDenoisingOutputSpec
+
+    def __init__(self, **inputs):
+        _local_version = SPMCommand().version
+        if _local_version and "12." in _local_version:
+            self._jobtype = "tools"
+            self._jobname = "cat.tools.sanlm"
+
+        SPMCommand.__init__(self, **inputs)
+
+    def _format_arg(self, opt, spec, val):
+        """Convert input to appropriate format for spm"""
+        if opt == "in_files":
+            if isinstance(val, list):
+                return scans_for_fnames(val)
+            else:
+                return scans_for_fname(val)
+        if opt == "spm_type":
+            type_map = {"same": 0, "uint8": 2, "uint16": 512, "float32": 16}
+            val = type_map[val]
+        return super(CAT12SANLMDenoising, self)._format_arg(opt, spec, val)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = fname_presuffix(
+            self.inputs.in_files[0],
+            newpath=os.getcwd(),
+            prefix=self.inputs.filename_prefix,
+            suffix=self.inputs.filename_suffix,
+        )
+        return outputs
+
+
 class Cell2Str(Cell):
     def __str__(self):
         """Convert input to appropriate format for cat12"""

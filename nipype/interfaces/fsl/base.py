@@ -51,7 +51,6 @@ class Info(PackageInfo):
     >>> Info.version()  # doctest: +SKIP
     >>> Info.output_type()  # doctest: +SKIP
 
-
     """
 
     ftypes = {

@@ -106,6 +106,7 @@ The workflow directive has the following configuration options:
         Provide a customized template for preparing restructured text.
 
 """
+
 import sys
 import os
 import shutil
@@ -131,7 +132,6 @@ try:
 
     def format_template(template, **kw):
         return jinja2.Template(template).render(**kw)
-
 
 except ImportError as e:
     missing_imports.append(str(e))

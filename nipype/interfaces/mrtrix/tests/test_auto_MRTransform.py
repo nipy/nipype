@@ -28,6 +28,11 @@ def test_MRTransform_inputs():
             argstr="-inverse",
             position=1,
         ),
+        linear_transform=dict(
+            argstr="-linear %s",
+            extensions=None,
+            position=1,
+        ),
         out_filename=dict(
             argstr="%s",
             extensions=None,

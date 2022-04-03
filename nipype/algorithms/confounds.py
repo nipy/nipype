@@ -1435,7 +1435,7 @@ def compute_noise_components(
             else:
                 u = np.full((M.shape[0], 1), np.nan, dtype=np.float32)
 
-        variance_explained = (s ** 2) / np.sum(s ** 2)
+        variance_explained = (s**2) / np.sum(s**2)
         cumulative_variance_explained = np.cumsum(variance_explained)
 
         num_components = int(components_criterion)

@@ -116,7 +116,7 @@ def ICC_rep_anova(Y):
     # Sum Square Error
     predicted_Y = dot(dot(dot(X, pinv(dot(X.T, X))), X.T), Y.flatten("F"))
     residuals = Y.flatten("F") - predicted_Y
-    SSE = (residuals ** 2).sum()
+    SSE = (residuals**2).sum()
 
     residuals.shape = Y.shape
 

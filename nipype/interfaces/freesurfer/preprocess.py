@@ -1081,6 +1081,7 @@ class ReconAll(CommandLine):
     #
     # [0] https://surfer.nmr.mgh.harvard.edu/fswiki/ReconAllTableStableV5.3
     # [1] https://surfer.nmr.mgh.harvard.edu/fswiki/ReconAllTableStableV6.0
+    # [2] https://surfer.nmr.mgh.harvard.edu/fswiki/ReconAllTableStableV6.0#ReconAllTableStable7.1.1
     _autorecon1_steps = [
         ("motioncor", ["mri/rawavg.mgz", "mri/orig.mgz"], []),
         (
@@ -1210,7 +1211,7 @@ class ReconAll(CommandLine):
             ("wmparc", ["mri/wmparc.mgz", "stats/wmparc.stats"], []),
             ("balabels", ["label/BA.ctab", "label/BA.thresh.ctab"], []),
         ]
-    else:
+    elif Info.looseversion() < LooseVersion("7.0.0"):
         _autorecon2_volonly_steps = [
             ("gcareg", ["mri/transforms/talairach.lta"], []),
             ("canorm", ["mri/norm.mgz"], []),
@@ -1318,6 +1319,124 @@ class ReconAll(CommandLine):
                     "label/BA_exvivo.thresh.ctab",
                     "label/lh.entorhinal_exvivo.label",
                     "label/rh.entorhinal_exvivo.label",
+                ],
+                [],
+            ),
+        ]
+    else:
+        _autorecon2_volonly_steps = [
+            ("gcareg", ["mri/transforms/talairach.lta"], []),
+            ("canorm", ["mri/norm.mgz"], []),
+            ("careg", ["mri/transforms/talairach.m3z"], []),
+            (
+                "calabel",
+                [
+                    "mri/aseg.auto_noCCseg.mgz",
+                    "mri/aseg.auto.mgz",
+                    "mri/aseg.presurf.mgz",
+                ],
+                [],
+            ),
+            ("normalization2", ["mri/brain.mgz"], []),
+            ("maskbfs", ["mri/brain.finalsurfs.mgz"], []),
+            (
+                "segmentation",
+                ["mri/wm.seg.mgz", "mri/wm.asegedit.mgz", "mri/wm.mgz"],
+                [],
+            ),
+            (
+                "fill",
+                [
+                    "mri/filled.mgz",
+                    # 'scripts/ponscc.cut.log',
+                ],
+                [],
+            ),
+        ]
+        _autorecon2_lh_steps = [
+            ("tessellate", ["surf/lh.orig.nofix"], []),
+            ("smooth1", ["surf/lh.smoothwm.nofix"], []),
+            ("inflate1", ["surf/lh.inflated.nofix"], []),
+            ("qsphere", ["surf/lh.qsphere.nofix"], []),
+            ("fix", ["surf/lh.inflated", "surf/lh.orig"], []),
+            (
+                "white",
+                [
+                    "surf/lh.white.preaparc",
+                    "surf/lh.curv",
+                    "surf/lh.area",
+                    "label/lh.cortex.label",
+                ],
+                [],
+            ),
+            ("smooth2", ["surf/lh.smoothwm"], []),
+            ("inflate2", ["surf/lh.inflated", "surf/lh.sulc"], []),
+            (
+                "curvHK",
+                [
+                    "surf/lh.white.H",
+                    "surf/lh.white.K",
+                    "surf/lh.inflated.H",
+                    "surf/lh.inflated.K",
+                ],
+                [],
+            ),
+            ("curvstats", ["stats/lh.curv.stats"], []),
+        ]
+        _autorecon3_lh_steps = [
+            ("sphere", ["surf/lh.sphere"], []),
+            ("surfreg", ["surf/lh.sphere.reg"], []),
+            ("jacobian_white", ["surf/lh.jacobian_white"], []),
+            ("avgcurv", ["surf/lh.avg_curv"], []),
+            ("cortparc", ["label/lh.aparc.annot"], []),
+            (
+                "pial",
+                [
+                    "surf/lh.pial",
+                    "surf/lh.curv.pial",
+                    "surf/lh.area.pial",
+                    "surf/lh.thickness",
+                    "surf/lh.white",
+                ],
+                [],
+            ),
+            ("parcstats", ["stats/lh.aparc.stats"], []),
+            ("cortparc2", ["label/lh.aparc.a2009s.annot"], []),
+            ("parcstats2", ["stats/lh.aparc.a2009s.stats"], []),
+            ("cortparc3", ["label/lh.aparc.DKTatlas.annot"], []),
+            ("parcstats3", ["stats/lh.aparc.DKTatlas.stats"], []),
+            ("pctsurfcon", ["surf/lh.w-g.pct.mgh", "stats/lh.w-g.pct.stats"], []),
+        ]
+        _autorecon3_added_steps = [
+            (
+                "cortribbon",
+                ["mri/lh.ribbon.mgz", "mri/rh.ribbon.mgz", "mri/ribbon.mgz"],
+                [],
+            ),
+            ("hyporelabel", ["mri/aseg.presurf.hypos.mgz"], []),
+            (
+                "aparc2aseg",
+                [
+                    "mri/aparc+aseg.mgz",
+                    "mri/aparc.a2009s+aseg.mgz",
+                    "mri/aparc.DKTatlas+aseg.mgz",
+                ],
+                [],
+            ),
+            ("apas2aseg", ["mri/aseg.mgz"], ["mri/aparc+aseg.mgz"]),
+            ("segstats", ["stats/aseg.stats"], []),
+            ("wmparc", ["mri/wmparc.mgz", "stats/wmparc.stats"], []),
+            # Note that this is a very incomplete list; however the ctab
+            # files are last to be touched, so this should be reasonable
+            (
+                "balabels",
+                [
+                    "label/BA_exvivo.ctab",
+                    "label/BA_exvivo.thresh.ctab",
+                    "label/lh.entorhinal_exvivo.label",
+                    "label/rh.entorhinal_exvivo.label",
+                    "label/lh.perirhinal_exvivo.label",
+                    "label/rh.perirhinal_exvivo.label",
                 ],
                 [],
             ),
@@ -1764,16 +1883,12 @@ class BBRegister(FSCommand):
         return outputs
 
     def _format_arg(self, name, spec, value):
-        if (
-            name
-            in (
-                "registered_file",
-                "out_fsl_file",
-                "out_lta_file",
-                "init_cost_file",
-            )
-            and isinstance(value, bool)
-        ):
+        if name in (
+            "registered_file",
+            "out_fsl_file",
+            "out_lta_file",
+            "init_cost_file",
+        ) and isinstance(value, bool):
             value = self._list_outputs()[name]
         return super(BBRegister, self)._format_arg(name, spec, value)
 

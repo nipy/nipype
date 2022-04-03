@@ -27,13 +27,13 @@ except ImportError:
 
 
 def no_dipy():
-    """Check if dipy is available"""
+    """Check if dipy is available."""
     global HAVE_DIPY
     return not HAVE_DIPY
 
 
 def dipy_version():
-    """Check dipy version"""
+    """Check dipy version."""
     if no_dipy():
         return None
 
@@ -41,9 +41,7 @@ def dipy_version():
 
 
 class DipyBaseInterface(LibraryBaseInterface):
-    """
-    A base interface for py:mod:`dipy` computations
-    """
+    """A base interface for py:mod:`dipy` computations."""
 
     _pkg = "dipy"
 
@@ -57,9 +55,7 @@ class DipyBaseInterfaceInputSpec(BaseInterfaceInputSpec):
 
 
 class DipyDiffusionInterface(DipyBaseInterface):
-    """
-    A base interface for py:mod:`dipy` computations
-    """
+    """A base interface for py:mod:`dipy` computations."""
 
     input_spec = DipyBaseInterfaceInputSpec
 
@@ -88,6 +84,26 @@ class DipyDiffusionInterface(DipyBaseInterface):
             ext = fext
 
         return out_prefix + "_" + name + ext
+
+
+def get_default_args(func):
+    """Return optional arguments of a function.
+
+    Parameters
+    ----------
+    func: callable
+
+    Returns
+    -------
+    dict
+
+    """
+    signature = inspect.signature(func)
+    return {
+        k: v.default
+        for k, v in signature.parameters.items()
+        if v.default is not inspect.Parameter.empty
+    }
 
 
 def convert_to_traits_type(dipy_type, is_file=False):
@@ -189,7 +205,7 @@ def dipy_to_nipype_interface(cls_name, dipy_flow, BaseClass=DipyBaseInterface):
     parser = IntrospectiveArgumentParser()
     flow = dipy_flow()
     parser.add_workflow(flow)
-    default_values = inspect.getfullargspec(flow.run).defaults
+    default_values = list(get_default_args(flow.run).values())
     optional_params = [
         args + (val,) for args, val in zip(parser.optional_parameters, default_values)
     ]
