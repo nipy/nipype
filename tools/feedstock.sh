@@ -62,7 +62,7 @@ if git checkout -t $GITHUB_USER/$BRANCH; then
     NEW_PR=false
 else
     NEW_PR=true
-    git checkout -b $BRANCH origin/master
+    git checkout -b $BRANCH origin/main
 fi
 
 # Calculate hash
@@ -90,7 +90,7 @@ git commit -m "$COMMIT_MSG"
 git push -u $GITHUB_USER $BRANCH
 
 if $NEW_PR; then
-    hub pull-request -b conda-forge:master -F - <<END
+    hub pull-request -b conda-forge:main -F - <<END
 $PR_TITLE
 
 Updating feedstock to release branch
