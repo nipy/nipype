@@ -29,7 +29,12 @@ class ConvertScalarImageToRGBInputSpec(ANTSCommandInputSpec):
         "rgb.nii.gz", argstr="%s", usedefault=True, desc="rgb output image", position=2
     )
     mask_image = traits.Either(
-        "none", traits.File(exists=True), argstr="%s", desc="mask image", position=3, usedefault=True
+        "none",
+        traits.File(exists=True),
+        argstr="%s",
+        desc="mask image",
+        position=3,
+        usedefault=True,
     )
     colormap = traits.Enum(
         "grey",
