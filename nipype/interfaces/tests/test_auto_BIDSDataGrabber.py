@@ -12,6 +12,9 @@ def test_BIDSDataGrabber_inputs():
             mandatory=True,
             usedefault=True,
         ),
+        load_layout=dict(
+            mandatory=False,
+        ),
         output_query=dict(),
         raise_on_empty=dict(
             usedefault=True,
