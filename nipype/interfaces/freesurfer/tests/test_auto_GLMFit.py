@@ -89,9 +89,21 @@ def test_GLMFit_inputs():
             extensions=None,
             xor=["cortex"],
         ),
+        logan=dict(
+            argstr="--logan %s %s %f...",
+        ),
         mask_file=dict(
             argstr="--mask %s",
             extensions=None,
+        ),
+        mrtm1=dict(
+            argstr="--mrtm1 %s %s...",
+        ),
+        mrtm2=dict(
+            argstr="--mrtm2 %s %s %f...",
+        ),
+        nii_gz=dict(
+            argstr="--nii.gz",
         ),
         no_contrast_ok=dict(
             argstr="--no-contrasts-ok",
