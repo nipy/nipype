@@ -40,13 +40,16 @@ def get_data_dims(volume):
 
 
 def transform_to_affine(streams, header, affine):
-    from dipy.tracking.utils import move_streamlines
+    try:
+        from dipy.tracking.utils import transform_tracking_output
+    except ImportError:
+        from dipy.tracking.utils import move_streamlines as transform_tracking_output
 
     rotation, scale = np.linalg.qr(affine)
-    streams = move_streamlines(streams, rotation)
+    streams = transform_tracking_output(streams, rotation)
     scale[0:3, 0:3] = np.dot(scale[0:3, 0:3], np.diag(1.0 / header["voxel_size"]))
     scale[0:3, 3] = abs(scale[0:3, 3])
-    streams = move_streamlines(streams, scale)
+    streams = transform_tracking_output(streams, scale)
     return streams
 
 
@@ -195,10 +198,14 @@ class MRTrix2TrackVis(DipyBaseInterface):
     output_spec = MRTrix2TrackVisOutputSpec
 
     def _run_interface(self, runtime):
-        from dipy.tracking.utils import (
-            move_streamlines,
-            affine_from_fsl_mat_file,
-        )
+        from dipy.tracking.utils import affine_from_fsl_mat_file
+
+        try:
+            from dipy.tracking.utils import transform_tracking_output
+        except ImportError:
+            from dipy.tracking.utils import (
+                move_streamlines as transform_tracking_output,
+            )
 
         dx, dy, dz = get_data_dims(self.inputs.image_file)
         vx, vy, vz = get_vox_dims(self.inputs.image_file)
@@ -249,7 +256,7 @@ class MRTrix2TrackVis(DipyBaseInterface):
             axcode = aff2axcodes(reg_affine)
             trk_header["voxel_order"] = axcode[0] + axcode[1] + axcode[2]
 
-            final_streamlines = move_streamlines(transformed_streamlines, aff)
+            final_streamlines = transform_tracking_output(transformed_streamlines, aff)
             trk_tracks = ((ii, None, None) for ii in final_streamlines)
             trk.write(out_filename, trk_tracks, trk_header)
             iflogger.info("Saving transformed Trackvis file as %s", out_filename)

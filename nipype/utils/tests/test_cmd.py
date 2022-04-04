@@ -45,9 +45,13 @@ nipype_cmd: error: the following arguments are required: module, interface
         assert exit_exception.code == 0
 
         assert stderr.getvalue() == ""
+        if sys.version_info >= (3, 10):
+            options = "options"
+        else:
+            options = "optional arguments"
         assert (
             stdout.getvalue()
-            == """usage: nipype_cmd [-h] module interface
+            == f"""usage: nipype_cmd [-h] module interface
 
 Nipype interface runner
 
@@ -55,7 +59,7 @@ positional arguments:
   module      Module name
   interface   Interface name
 
-optional arguments:
+{options}:
   -h, --help  show this help message and exit
 """
         )

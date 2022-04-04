@@ -504,15 +504,11 @@ class ApplyTransforms(ANTSCommand):
         elif opt == "transforms":
             return self._get_transform_filenames()
         elif opt == "interpolation":
-            if (
-                self.inputs.interpolation
-                in [
-                    "BSpline",
-                    "MultiLabel",
-                    "Gaussian",
-                ]
-                and isdefined(self.inputs.interpolation_parameters)
-            ):
+            if self.inputs.interpolation in [
+                "BSpline",
+                "MultiLabel",
+                "Gaussian",
+            ] and isdefined(self.inputs.interpolation_parameters):
                 return "--interpolation %s[ %s ]" % (
                     self.inputs.interpolation,
                     ", ".join(

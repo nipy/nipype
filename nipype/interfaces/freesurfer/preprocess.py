@@ -1883,16 +1883,12 @@ class BBRegister(FSCommand):
         return outputs
 
     def _format_arg(self, name, spec, value):
-        if (
-            name
-            in (
-                "registered_file",
-                "out_fsl_file",
-                "out_lta_file",
-                "init_cost_file",
-            )
-            and isinstance(value, bool)
-        ):
+        if name in (
+            "registered_file",
+            "out_fsl_file",
+            "out_lta_file",
+            "init_cost_file",
+        ) and isinstance(value, bool):
             value = self._list_outputs()[name]
         return super(BBRegister, self)._format_arg(name, spec, value)
 

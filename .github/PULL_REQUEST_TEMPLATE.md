@@ -17,7 +17,3 @@ Fixes # .
 
 ## List of changes proposed in this PR (pull-request)
 <!-- We suggest using bullets (indicated by * or -) and filled checkboxes [x] here -->
-
-## Acknowledgment
-
-- [ ] \(Mandatory\) I acknowledge that this contribution will be available under the Apache 2 license.

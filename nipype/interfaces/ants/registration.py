@@ -1293,16 +1293,12 @@ class Registration(ANTSCommand):
                 do_center_of_mass_init,
             )
         elif opt == "interpolation":
-            if (
-                self.inputs.interpolation
-                in [
-                    "BSpline",
-                    "MultiLabel",
-                    "Gaussian",
-                    "GenericLabel",
-                ]
-                and isdefined(self.inputs.interpolation_parameters)
-            ):
+            if self.inputs.interpolation in [
+                "BSpline",
+                "MultiLabel",
+                "Gaussian",
+                "GenericLabel",
+            ] and isdefined(self.inputs.interpolation_parameters):
                 return "--interpolation %s[ %s ]" % (
                     self.inputs.interpolation,
                     ", ".join(
@@ -1595,14 +1591,17 @@ class MeasureImageSimilarity(ANTSCommand):
     output_spec = MeasureImageSimilarityOutputSpec
 
     def _metric_constructor(self):
-        retval = '--metric {metric}["{fixed_image}","{moving_image}",{metric_weight},' "{radius_or_number_of_bins},{sampling_strategy},{sampling_percentage}]".format(
-            metric=self.inputs.metric,
-            fixed_image=self.inputs.fixed_image,
-            moving_image=self.inputs.moving_image,
-            metric_weight=self.inputs.metric_weight,
-            radius_or_number_of_bins=self.inputs.radius_or_number_of_bins,
-            sampling_strategy=self.inputs.sampling_strategy,
-            sampling_percentage=self.inputs.sampling_percentage,
+        retval = (
+            '--metric {metric}["{fixed_image}","{moving_image}",{metric_weight},'
+            "{radius_or_number_of_bins},{sampling_strategy},{sampling_percentage}]".format(
+                metric=self.inputs.metric,
+                fixed_image=self.inputs.fixed_image,
+                moving_image=self.inputs.moving_image,
+                metric_weight=self.inputs.metric_weight,
+                radius_or_number_of_bins=self.inputs.radius_or_number_of_bins,
+                sampling_strategy=self.inputs.sampling_strategy,
+                sampling_percentage=self.inputs.sampling_percentage,
+            )
         )
         return retval
 
