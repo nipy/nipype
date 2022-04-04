@@ -50,11 +50,17 @@ use the following command::
 While `all` installs everything, one can also install select components as
 listed below::
 
-    'doc': ['Sphinx>=1.4', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],
-    'tests': ['pytest-cov', 'codecov'],
-    'nipy': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
-    'profiler': ['psutil'],
+    'data': ['datalad'],
+    'doc': ['dipy', 'ipython', 'matplotlib', 'nbsphinx', 'sphinx-argparse',
+            'sphinx>=2.1.2', 'sphinxcontrib-apidoc'],
     'duecredit': ['duecredit'],
+    'nipy': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
+    'profiler': ['psutil>=5.0'],
+    'pybids': ['pybids>=0.7.0'],
+    'specs': ['black'],
+    'ssh': ['paramiko'],
+    'tests': ['codecov', 'coverage<5', 'pytest', 'pytest-cov', 'pytest-env',
+              'pytest-timeout'],
     'xvfbwrapper': ['xvfbwrapper'],
 
 
