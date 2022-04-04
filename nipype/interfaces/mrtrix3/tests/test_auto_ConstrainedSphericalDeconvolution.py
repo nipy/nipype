@@ -77,6 +77,13 @@ def test_ConstrainedSphericalDeconvolution_inputs():
             argstr="-nthreads %d",
             nohash=True,
         ),
+        out_bval=dict(
+            extensions=None,
+        ),
+        out_bvec=dict(
+            argstr="-export_grad_fsl %s %s",
+            extensions=None,
+        ),
         predicted_signal=dict(
             argstr="-predicted_signal %s",
             extensions=None,
