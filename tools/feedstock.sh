@@ -25,7 +25,7 @@
 #
 # 2018 Chris Markiewicz
 
-set -x
+set -ex
 
 REPO=${1:-$CIRCLE_PROJECT_REPONAME}
 FEEDSTOCK=${2:-$REPO-feedstock}
@@ -62,7 +62,7 @@ if git checkout -t $GITHUB_USER/$BRANCH; then
     NEW_PR=false
 else
     NEW_PR=true
-    git checkout -b $BRANCH origin/master
+    git checkout -b $BRANCH origin/main
 fi
 
 # Calculate hash
@@ -77,7 +77,7 @@ fi
 
 # Set version, hash, and reset build number
 # Use ~ for separator in URL, to avoid slash issues
-sed -i '' \
+sed -i \
     -e 's/^\({% set version = "\).*\(" %}\)$/'"\1$VERSION\2/" \
     -e 's/^\({% set sha256 = "\).*\(" %}\)$/'"\1$SHA256\2/" \
     -e 's~^\( *url:\) .*$~\1 '"$URL_FMT~" \
@@ -90,7 +90,7 @@ git commit -m "$COMMIT_MSG"
 git push -u $GITHUB_USER $BRANCH
 
 if $NEW_PR; then
-    hub pull-request -b conda-forge:master -F - <<END
+    hub pull-request -b conda-forge:main -F - <<END
 $PR_TITLE
 
 Updating feedstock to release branch

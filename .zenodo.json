@@ -179,6 +179,11 @@
       "name": "Erickson, Drew"
     },
     {
+      "affiliation": "CIBIT, UC",
+      "name": "Dias, Maria de Fatima",
+      "orcid": "0000-0001-8878-1750"
+    },
+    {
       "affiliation": "Neuroscience Program, University of Iowa",
       "name": "Kent, James D.",
       "orcid": "0000-0002-4892-2659"
@@ -204,6 +209,11 @@
       "name": "Tungaraza, Rosalia"
     },
     {
+      "affiliation": "Charit\u00e8 Universit\u00e4tsmedizin Berlin, Germany",
+      "name": "Dell'Orco, Andrea",
+      "orcid": "0000-0002-3964-8360"
+    },
+    {
       "affiliation": "Child Mind Institute",
       "name": "Frohlich, Caroline"
     },
@@ -218,9 +228,8 @@
       "orcid": "0000-0003-1988-5091"
     },
     {
-      "affiliation": "Charit\u00e8 Universit\u00e4tsmedizin Berlin, Germany",
-      "name": "Dell'Orco, Andrea",
-      "orcid": "0000-0002-3964-8360"
+      "affiliation": "Indiana University, IN, USA",
+      "name": "Koudoro, Serge"
     },
     {
       "affiliation": "University College London",
@@ -251,29 +260,20 @@
       "orcid": "0000-0003-1076-5122"
     },
     {
+      "affiliation": "Charite Universitatsmedizin Berlin, Germany",
+      "name": "Waller, Lea",
+      "orcid": "0000-0002-3239-6957"
+    },
+    {
       "name": "Watanabe, Aimi"
     },
     {
       "name": "Mordom, David"
     },
     {
-      "affiliation": "Charite Universitatsmedizin Berlin, Germany",
-      "name": "Waller, Lea",
-      "orcid": "0000-0002-3239-6957"
-    },
-    {
-      "affiliation": "CIBIT, UC",
-      "name": "Dias, Maria de Fatima",
-      "orcid": "0000-0001-8878-1750"
-    },
-    {
       "affiliation": "ARAMIS LAB, Brain and Spine Institute (ICM), Paris, France.",
       "name": "Guillon, Je\u0301re\u0301my",
       "orcid": "0000-0002-2672-7510"
-    },
-    {
-      "affiliation": "Indiana University, IN, USA",
-      "name": "Koudoro, Serge"
     },
     {
       "affiliation": "Penn Statistics in Imaging and Visualization Endeavor, University of Pennsylvania",
@@ -309,6 +309,11 @@
       "orcid": "0000-0001-9130-1092"
     },
     {
+      "affiliation": "Division of Psychological and Social Medicine and Developmental Neuroscience, Faculty of Medicine, Technische Universit\u00e4t Dresden, Dresden, Germany",
+      "name": "Bernardoni, Fabio",
+      "orcid": "0000-0002-5112-405X"
+    },
+    {
       "affiliation": "State Key Laboratory of Cognitive Neuroscience and Learning & IDG/McGovern Institute for Brain Research, Beijing Normal University, Beijing, China; Max Planck Institute for Psycholinguistics, Nijmegen, the Netherlands",
       "name": "Kong, Xiang-Zhen",
       "orcid": "0000-0002-0805-1350"
@@ -317,11 +322,6 @@
       "affiliation": "Division of Psychological and Social Medicine and Developmental Neuroscience, Faculty of Medicine, Technische Universit\u00e4t Dresden, Dresden, Germany",
       "name": "Geisler, Daniel",
       "orcid": "0000-0003-2076-5329"
-    },
-    {
-      "affiliation": "Division of Psychological and Social Medicine and Developmental Neuroscience, Faculty of Medicine, Technische Universit\u00e4t Dresden, Dresden, Germany",
-      "name": "Bernardoni, Fabio",
-      "orcid": "0000-0002-5112-405X"
     },
     {
       "name": "Salvatore, John"
@@ -417,6 +417,11 @@
       "orcid": "0000-0003-2620-5883"
     },
     {
+      "affiliation": "Sagol School of Neuroscience, Tel Aviv University",
+      "name": "Baratz, Zvi",
+      "orcid": "0000-0001-7159-1387"
+    },
+    {
       "affiliation": "Max Planck Institute for Human Cognitive and Brain Sciences, Leipzig, Germany.",
       "name": "Tabas, Alejandro",
       "orcid": "0000-0002-8643-1543"
@@ -436,11 +441,6 @@
       "affiliation": "Duke University",
       "name": "Iqbal, Shariq",
       "orcid": "0000-0003-2766-8425"
-    },
-    {
-      "affiliation": "Sagol School of Neuroscience, Tel Aviv University",
-      "name": "Baratz, Zvi",
-      "orcid": "0000-0001-7159-1387"
     },
     {
       "affiliation": "University of Iowa",
@@ -548,6 +548,9 @@
       "orcid": "0000-0002-9699-9052"
     },
     {
+      "name": "Hui Qian, Tan"
+    },
+    {
       "affiliation": "German Institute for International Educational Research",
       "name": "Linkersd\u00f6rfer, Janosch",
       "orcid": "0000-0002-1577-1233"
@@ -569,6 +572,11 @@
       "affiliation": "California Institute of Technology",
       "name": "Pauli, Wolfgang M.",
       "orcid": "0000-0002-0966-0254"
+    },
+    {
+      "affiliation": "Weill Cornell Medicine",
+      "name": "Xie, Xihe",
+      "orcid": "0000-0001-6595-2473"
     },
     {
       "affiliation": "NIMH, Scientific and Statistical Computing Core",
@@ -643,6 +651,11 @@
     {
       "name": "Lee, Nat",
       "orcid": "0000-0001-9308-9988"
+    },
+    {
+      "affiliation": "Insitiute and Polyclinc for Diagnostic and Interventional Neuroradiology, University Hospital Carl Gustav Carus, Dresden, Germany",
+      "name": "Kuntke, Paul",
+      "orcid": "0000-0003-1838-2230"
     },
     {
       "name": "Jalan, Raunak"
@@ -721,6 +734,11 @@
     },
     {
       "name": "Modat, Marc"
+    },
+    {
+      "affiliation": "University of Waterloo",
+      "name": "Mukhometzianov, Rinat",
+      "orcid": "0000-0003-1274-4827"
     },
     {
       "name": "Harms, Robbert"
@@ -819,11 +837,6 @@
       "name": "Khanuja, Ranjeet"
     },
     {
-      "affiliation": "University of Waterloo",
-      "name": "Mukhometzianov, Rinat",
-      "orcid": "0000-0003-1274-4827"
-    },
-    {
       "name": "Urchs, Sebastian"
     },
     {
@@ -838,11 +851,6 @@
       "affiliation": "Duke University",
       "name": "Broderick, William",
       "orcid": "0000-0002-8999-9003"
-    },
-    {
-      "affiliation": "Weill Cornell Medicine",
-      "name": "Xie, Xihe",
-      "orcid": "0000-0001-6595-2473"
     },
     {
       "name": "Tambini, Arielle"
@@ -861,16 +869,7 @@
       "affiliation": "MIT, HMS",
       "name": "Ghosh, Satrajit",
       "orcid": "0000-0002-5312-6729"
-    },
-    {
-      "name": "Hui Qian, Tan"
-    },
-	{
-      "affiliation": "Insitiute and Polyclinc for Diagnostic and Interventional Neuroradiology, University Hospital Carl Gustav Carus, Dresden, Germany",
-      "name": "Kuntke, Paul",
-      "orcid": "0000-0003-1838-2230"
-	}
-
+    }
   ],
   "keywords": [
     "neuroimaging",
