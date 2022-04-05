@@ -69,6 +69,8 @@ from .utils import (
     RobustFOV,
     CopyGeom,
     MotionOutliers,
+    Text2Vest,
+    Vest2Text,
 )
 
 from .epi import (
