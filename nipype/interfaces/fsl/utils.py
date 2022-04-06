@@ -2847,18 +2847,17 @@ class Text2VestInputSpec(FSLCommandInputSpec):
 
     out_file = File(
         mandatory=True,
-        desc=("file name to store matrix data in the format used by FSL tools" 
-              " (e.g., design.mat, design.con design.fts)"),
+        desc=(
+            "file name to store matrix data in the format used by FSL tools"
+            " (e.g., design.mat, design.con design.fts)"
+        ),
         argstr="%s",
         position=1,
     )
 
 
 class Text2VestOutputSpec(TraitedSpec):
-    out_file = File(
-        exists=True,
-        desc="matrix data in the format used by FSL tools"
-    )
+    out_file = File(exists=True, desc="matrix data in the format used by FSL tools")
 
 
 class Text2Vest(FSLCommand):
@@ -2900,10 +2899,7 @@ class Vest2TextInputSpec(FSLCommandInputSpec):
 
 
 class Vest2TextOutputSpec(TraitedSpec):
-    out_file = File(
-        exists=True,
-        desc="plain text representation of FSL matrix"
-    )
+    out_file = File(exists=True, desc="plain text representation of FSL matrix")
 
 
 class Vest2Text(FSLCommand):
