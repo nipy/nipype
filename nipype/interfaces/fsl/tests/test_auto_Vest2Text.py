@@ -20,8 +20,8 @@ def test_Vest2Text_inputs():
         out_file=dict(
             argstr="%s",
             extensions=None,
-            mandatory=True,
             position=1,
+            usedefault=True,
         ),
         output_type=dict(),
     )
