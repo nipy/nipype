@@ -2857,20 +2857,21 @@ class Text2VestInputSpec(FSLCommandInputSpec):
 
 
 class Text2VestOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="matrix data in the format used by FSL tools")
+    out_file = File(desc="matrix data in the format used by FSL tools")
 
 
 class Text2Vest(FSLCommand):
     """
     Use FSL Text2Vest`https://web.mit.edu/fsl_v5.0.10/fsl/doc/wiki/GLM(2f)CreatingDesignMatricesByHand.html`_
     to convert your plain text design matrix data into the format used by the FSL tools.
+
     Examples
     --------
     >>> from nipype.interfaces.fsl import Text2Vest
     >>> t2v = Text2Vest()
     >>> t2v.inputs.in_file = "design.txt"
     >>> t2v.inputs.out_file = "design.mat"
-    >>> t2v.cmdline # doctest: +ELLIPSIS
+    >>> t2v.cmdline
     'Text2Vest design.txt design.mat'
     >>> res = t2v.run() # doctest: +SKIP
     """
@@ -2891,7 +2892,8 @@ class Vest2TextInputSpec(FSLCommandInputSpec):
     )
 
     out_file = File(
-        mandatory=True,
+        "design.txt",
+        usedefault=True,
         desc="file name to store text output from matrix",
         argstr="%s",
         position=1,
@@ -2899,20 +2901,20 @@ class Vest2TextInputSpec(FSLCommandInputSpec):
 
 
 class Vest2TextOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="plain text representation of FSL matrix")
+    out_file = File(desc="plain text representation of FSL matrix")
 
 
 class Vest2Text(FSLCommand):
     """
     Use FSL Vest2Text`https://web.mit.edu/fsl_v5.0.10/fsl/doc/wiki/GLM(2f)CreatingDesignMatricesByHand.html`_
     to convert your design.mat design.con and design.fts files into plain text.
+
     Examples
     --------
     >>> from nipype.interfaces.fsl import Vest2Text
     >>> v2t = Vest2Text()
     >>> v2t.inputs.in_file = "design.mat"
-    >>> v2t.inputs.out_file = "design.txt"
-    >>> v2t.cmdline # doctest: +ELLIPSIS
+    >>> v2t.cmdline
     'Vest2Text design.mat design.txt'
     >>> res = v2t.run() # doctest: +SKIP
     """
