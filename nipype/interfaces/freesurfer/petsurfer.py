@@ -374,7 +374,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
         desc="optimal schema for merging ROIs when applying adaptive GTM",
     )
 
-    threads = opt = traits.Int(
+    threads = traits.Int(
         argstr="--threads %i", desc="threads : number of threads to use"
     )
 
