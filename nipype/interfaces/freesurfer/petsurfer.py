@@ -621,7 +621,7 @@ class LoganRefInputSpec(GLMFitInputSpec):
 
 
 class LoganRefOutputSpec(GLMFitInputSpec):
-    bp = File(desc="BP estimates")
+    bp_file = File(desc="BP estimates")
 
 
 class LoganRef(GLMFit):
