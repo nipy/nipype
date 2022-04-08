@@ -53,7 +53,7 @@ class GTMSegInputSpec(FSTraitedSpec):
         usedefault=True,
     )
 
-    usf = traits.Int(argstr="--usf %i", desc="upsampling factor (default is 2)")
+    upsampling_factor = traits.Int(argstr="--usf %i", desc="upsampling factor (default is 2)")
 
     subsegwm = traits.Bool(
         argstr="--subsegwm", desc="subsegment WM into lobes (default)"
@@ -89,7 +89,7 @@ class GTMSegInputSpec(FSTraitedSpec):
         desc="annot lhbase rhbase : annotation to use for WM segmentation (with --subsegwm, default is lobes 3200 4200)",
     )
 
-    output_usf = traits.Int(
+    output_upsampling_factor = traits.Int(
         argstr="--output-usf %i",
         desc="set output USF different than USF, mostly for debugging",
     )
@@ -118,7 +118,7 @@ class GTMSegInputSpec(FSTraitedSpec):
 
 
 class GTMSegOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="GTM segmentation")
+    out_file = File(desc="GTM segmentation")
 
 
 class GTMSeg(FSCommand):
@@ -139,12 +139,9 @@ class GTMSeg(FSCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['gtm_file'] = os.path.join(
-            self.inputs.subjects_dir, self.inputs.subject_id, 'mri', 'gtmseg.mgz'
+            self.inputs.subjects_dir, self.inputs.subject_id, 'mri', self.inputs.out_file
         )
         return outputs
-
-    def _format_arg(self, name, spec, value):
-        return super(GTMSeg, self)._format_arg(name, spec, value)
 
 
 class GTMPVCInputSpec(FSTraitedSpec):
