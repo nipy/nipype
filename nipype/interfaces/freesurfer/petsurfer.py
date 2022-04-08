@@ -182,7 +182,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
     )
 
     reg_identity = traits.Bool(
-        argstr="--regheader", desc="assume that input is in anatomical space"
+        argstr="--reg-identity", desc="assume that input is in anatomical space"
     )
 
     pvc_dir = traits.Str(argstr="--o %s", desc="save outputs to dir", genfile=True)
