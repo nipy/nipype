@@ -349,14 +349,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
         argstr="--save-yhat", desc="save signal estimate (yhat) smoothed with the PSF"
     )
 
-    save_yhat_with_noise = traits.Tuple(
-        traits.Int,
-        traits.Int,
-        argstr="--ss %i %i",
-        desc="seed nreps : saves yhat with noise, seed < 0 for TOD",
-    )
-
-    traits.Bool(
+    save_yhat_with_noise = traits.Bool(
         argstr="--save-yhat-with-noise", desc="save signal estimate (yhat) with noise"
     )
 
