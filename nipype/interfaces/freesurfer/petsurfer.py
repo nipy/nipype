@@ -165,22 +165,27 @@ class GTMPVCInputSpec(FSTraitedSpec):
         exists=True,
         mandatory=True,
         desc="segfile : anatomical segmentation to define regions for GTM",
-        xor=["reg_file", "regheader"]
     )
 
+    _reg_xor=["reg_file", "regheader", "reg_identity"]
     reg_file = File(
         exists=True,
         argstr="--reg %s",
         mandatory=True,
         desc="LTA registration file that maps PET to anatomical",
+        xor=_reg_xor,
     )
 
     regheader = traits.Bool(
-        argstr="--regheader", desc="assume input and seg share scanner space"
+        argstr="--regheader",
+        desc="assume input and seg share scanner space",
+        xor=_reg_xor,
     )
 
     reg_identity = traits.Bool(
-        argstr="--reg-identity", desc="assume that input is in anatomical space"
+        argstr="--reg-identity",
+        desc="assume that input is in anatomical space",
+        xor=_reg_xor,
     )
 
     pvc_dir = traits.Str(argstr="--o %s", desc="save outputs to dir", genfile=True)
