@@ -500,7 +500,7 @@ class GLMFit(FSCommand):
 
         if isdefined(self.inputs.nii_gz):
             ext = '.nii.gz'
-        if isdefined(self.inputs.nii):
+        elif isdefined(self.inputs.nii):
             ext = '.nii'
         else:
             ext = '.mgh'
