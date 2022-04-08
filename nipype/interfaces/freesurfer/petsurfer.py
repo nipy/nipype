@@ -401,45 +401,39 @@ class GTMPVCInputSpec(FSTraitedSpec):
 class GTMPVCOutputSpec(TraitedSpec):
 
     pvc_dir = Directory(exists=True, desc="output directory")
-    ref_file = File(exists=True, desc="Reference TAC in .dat")
-    hb_nifti = File(exists=True, desc="High-binding TAC in nifti")
-    hb_dat = File(exists=True, desc="High-binding TAC in .dat")
-    nopvc_file = File(exists=True, desc="TACs for all regions with no PVC")
-    gtm_file = File(exists=True, desc="TACs for all regions with GTM PVC")
-    gtm_stats = File(exists=True, desc="Statistics for the GTM PVC")
-    input_file = File(exists=True, desc="4D PET file in native volume space")
-    reg_pet2anat = File(exists=True, desc="Registration file to go from PET to anat")
+    ref_file = File(desc="Reference TAC in .dat")
+    hb_nifti = File(desc="High-binding TAC in nifti")
+    hb_dat = File(desc="High-binding TAC in .dat")
+    nopvc_file = File(desc="TACs for all regions with no PVC")
+    gtm_file = File(desc="TACs for all regions with GTM PVC")
+    gtm_stats = File(desc="Statistics for the GTM PVC")
+    input_file = File(desc="4D PET file in native volume space")
+    reg_pet2anat = File(desc="Registration file to go from PET to anat")
     mgx_ctxgm = File(
-        exists=True,
         desc="Cortical GM voxel-wise values corrected using the extended Muller-Gartner method",
     )
     mgx_subctxgm = File(
-        exists=True,
         desc="Subcortical GM voxel-wise values corrected using the extended Muller-Gartner method",
     )
     mgx_gm = File(
-        exists=True,
         desc="All GM voxel-wise values corrected using the extended Muller-Gartner method",
     )
     rbv = File(
-        exists=True, desc="All GM voxel-wise values corrected using the RBV method"
+        desc="All GM voxel-wise values corrected using the RBV method"
     )
     opt_params = File(
-        exists=True, desc="Optimal parameter estimates for the FWHM using adaptive GTM"
+        desc="Optimal parameter estimates for the FWHM using adaptive GTM"
     )
     yhat0 = File(
-        exists=True, desc="4D PET file of signal estimate (yhat) after PVC (unsmoothed)"
+        desc="4D PET file of signal estimate (yhat) after PVC (unsmoothed)"
     )
     yhat = File(
-        exists=True,
         desc="4D PET file of signal estimate (yhat) after PVC (smoothed with PSF)",
     )
     yhat_full_fov = File(
-        exists=True,
         desc="4D PET file with full FOV of signal estimate (yhat) after PVC (smoothed with PSF)",
     )
     yhat_with_noise = File(
-        exists=True,
         desc="4D PET file with full FOV of signal estimate (yhat) with noise after PVC (smoothed with PSF)",
     )
 
