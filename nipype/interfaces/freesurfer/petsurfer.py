@@ -275,7 +275,12 @@ class GTMPVCInputSpec(FSTraitedSpec):
 
     no_tfe = traits.Bool(
         argstr="--no-tfe",
-        desc="do not correction for tissue fraction effect (with --psf 0 turns off PVC entirely)",
+        desc="do not correct for tissue fraction effect (with --psf 0 turns off PVC entirely)",
+    )
+
+    no_pvc = traits.Bool(
+        argstr="--no-pvc",
+        desc="turns off PVC entirely (both PSF and TFE)",
     )
 
     segpvfres = traits.Float(
