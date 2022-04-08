@@ -519,23 +519,17 @@ class GTMPVC(FSCommand):
 
 
 class MRTMInputSpec(GLMFitInputSpec):
-
     mrtm1 = InputMultiPath(
-        traits.Tuple(
-            File(exists=True, mandatory=True), File(exists=True, mandatory=True)
-        ),
+        traits.Tuple(File(exists=True), File(exists=True)),
+        mandatory=True,
         argstr="--mrtm1 %s %s...",
         desc="RefTac TimeSec : perform MRTM1 kinetic modeling",
     )
 
 
-class MRTMOutputSpec(GLMFitInputSpec):
-
-    k2p = File(desc="estimate of k2p parameter")
-
-
 class MRTM(GLMFit):
     """Perform MRTM1 kinetic modeling.
+
     Examples
     --------
     >>> mrtm = MRTM()
@@ -546,34 +540,16 @@ class MRTM(GLMFit):
     'mri_glmfit --glmdir mrtm --y tac.nii --mrtm1 ref_tac.dat timing.dat'
     """
 
-    _cmd = "mri_glmfit"
     input_spec = MRTMInputSpec
-    output_spec = MRTMOutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['k2p'] = os.path.join(self.inputs.glm_dir, 'k2prime.dat')
-        return outputs
 
 
 class MRTM2InputSpec(GLMFitInputSpec):
-
     mrtm2 = InputMultiPath(
         traits.Tuple(File(exists=True), File(exists=True), traits.Float),
         mandatory=True,
         argstr="--mrtm2 %s %s %f...",
         desc="RefTac TimeSec k2prime : perform MRTM2 kinetic modeling",
     )
-
-    _ext_xor = ['nii', 'nii_gz']
-    nii = traits.Bool(argstr='--nii', desc='save outputs as nii', xor=_ext_xor)
-    nii_gz = traits.Bool(argstr='--nii.gz', desc='save outputs as nii.gz', xor=_ext_xor)
-    yhat_save = traits.Bool(argstr="--save-yhat", desc="save signal estimate (yhat)")
-
-
-class MRTM2OutputSpec(GLMFitInputSpec):
-    bp = File(desc="BP estimates")
-    yhat = File(desc="Fitted values (yhat) to the TACs")
 
 
 class MRTM2(GLMFit):
@@ -588,21 +564,7 @@ class MRTM2(GLMFit):
     'mri_glmfit --glmdir mrtm2 --y tac.nii --mrtm2 ref_tac.dat timing.dat 0.078720'
     """
 
-    _cmd = "mri_glmfit"
     input_spec = MRTM2InputSpec
-    output_spec = MRTM2OutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        if isdefined(self.inputs.nii_gz):
-            ext = '.nii.gz'
-        if isdefined(self.inputs.nii):
-            ext = '.nii'
-        else:
-            ext = '.mgh'
-        outputs['bp'] = os.path.join(self.inputs.glm_dir, 'bp', ext)
-        outputs['yhat'] = os.path.join(self.inputs.glm_dir, 'yhat', ext)
-        return outputs
 
 
 class LoganRefInputSpec(GLMFitInputSpec):
@@ -612,14 +574,6 @@ class LoganRefInputSpec(GLMFitInputSpec):
         argstr="--logan %s %s %g...",
         desc="RefTac TimeSec tstar   : perform Logan kinetic modeling",
     )
-
-    _ext_xor = ['nii', 'nii_gz']
-    nii = traits.Bool(argstr='--nii', desc='save outputs as nii', xor=_ext_xor)
-    nii_gz = traits.Bool(argstr='--nii.gz', desc='save outputs as nii.gz', xor=_ext_xor)
-
-
-class LoganRefOutputSpec(GLMFitInputSpec):
-    bp_file = File(desc="BP estimates")
 
 
 class LoganRef(GLMFit):
@@ -634,17 +588,4 @@ class LoganRef(GLMFit):
     'mri_glmfit --glmdir logan --y tac.nii --logan ref_tac.dat timing.dat 2600'
     """
 
-    _cmd = "mri_glmfit"
     input_spec = LoganRefInputSpec
-    output_spec = LoganRefOutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        if isdefined(self.inputs.nii_gz):
-            ext = '.nii.gz'
-        if isdefined(self.inputs.nii):
-            ext = '.nii'
-        else:
-            ext = '.mgh'
-        outputs['bp'] = os.path.join(self.inputs.glm_dir, 'bp', ext)
-        return outputs
