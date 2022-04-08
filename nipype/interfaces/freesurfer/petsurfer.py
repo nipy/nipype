@@ -364,7 +364,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
     )
 
     opt_tol = traits.Tuple(
-        traits.Float, traits.Float, traits.Float, argstr="--opt-tol %f %f %f", desc=""
+        traits.Int, traits.Float, traits.Float, argstr="--opt-tol %i %f %f", desc="n_iters_max ftol lin_min_tol : optimization parameters for adaptive gtm using fminsearch"
     )
 
     opt_brain = traits.Bool(argstr="--opt-brain", desc="apply adaptive GTM")
