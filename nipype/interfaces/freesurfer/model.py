@@ -401,19 +401,24 @@ class GLMFitInputSpec(FSTraitedSpec):
     synth = traits.Bool(argstr="--synth", desc="replace input with gaussian")
     resynth_test = traits.Int(argstr="--resynthtest %d", desc="test GLM by resynthsis")
     profile = traits.Int(argstr="--profile %d", desc="niters : test speed")
-    mrtm1 = InputMultiPath(
-        traits.Tuple(File(exists=True), File(exists=True)),
-        argstr="--mrtm1 %s %s...",
+    mrtm1 = traits.Tuple(
+        File(exists=True),
+        File(exists=True),
+        argstr="--mrtm1 %s %s",
         desc="RefTac TimeSec : perform MRTM1 kinetic modeling",
     )
-    mrtm2 = InputMultiPath(
-        traits.Tuple(File(exists=True), File(exists=True), traits.Float),
-        argstr="--mrtm2 %s %s %f...",
+    mrtm2 =  traits.Tuple(
+        File(exists=True),
+        File(exists=True),
+        traits.Float,
+        argstr="--mrtm2 %s %s %f",
         desc="RefTac TimeSec k2prime : perform MRTM2 kinetic modeling",
     )
-    logan = InputMultiPath(
-        traits.Tuple(File(exists=True), File(exists=True), traits.Float),
-        argstr="--logan %s %s %f...",
+    logan = traits.Tuple(
+        File(exists=True),
+        File(exists=True),
+        traits.Float,
+        argstr="--logan %s %s %f",
         desc="RefTac TimeSec tstar   : perform Logan kinetic modeling",
     )
     force_perm = traits.Bool(
