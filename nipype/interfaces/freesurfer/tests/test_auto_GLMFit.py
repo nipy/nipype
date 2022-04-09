@@ -102,8 +102,13 @@ def test_GLMFit_inputs():
         mrtm2=dict(
             argstr="--mrtm2 %s %s %f...",
         ),
+        nii=dict(
+            argstr="--nii",
+            xor=["nii", "nii_gz"],
+        ),
         nii_gz=dict(
             argstr="--nii.gz",
+            xor=["nii", "nii_gz"],
         ),
         no_contrast_ok=dict(
             argstr="--no-contrasts-ok",
@@ -220,6 +225,9 @@ def test_GLMFit_outputs():
         beta_file=dict(
             extensions=None,
         ),
+        bp_file=dict(
+            extensions=None,
+        ),
         dof_file=dict(
             extensions=None,
         ),
@@ -245,6 +253,9 @@ def test_GLMFit_outputs():
         gamma_file=dict(),
         gamma_var_file=dict(),
         glm_dir=dict(),
+        k2p_file=dict(
+            extensions=None,
+        ),
         mask_file=dict(
             extensions=None,
         ),

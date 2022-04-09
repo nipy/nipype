@@ -78,6 +78,9 @@ def test_GTMPVC_inputs():
         mgx=dict(
             argstr="--mgx %f",
         ),
+        no_pvc=dict(
+            argstr="--no-pvc",
+        ),
         no_reduce_fov=dict(
             argstr="--no-reduce-fov",
         ),
@@ -87,8 +90,11 @@ def test_GTMPVC_inputs():
         no_tfe=dict(
             argstr="--no-tfe",
         ),
-        opt=dict(
+        num_threads=dict(
             argstr="--threads %i",
+        ),
+        opt=dict(
+            argstr="--opt %i",
         ),
         opt_brain=dict(
             argstr="--opt-brain",
@@ -97,7 +103,7 @@ def test_GTMPVC_inputs():
             argstr="--opt-seg-merge",
         ),
         opt_tol=dict(
-            argstr="--opt-tol %f %f %f",
+            argstr="--opt-tol %i %f %f",
         ),
         psf=dict(
             argstr="--psf %f",
@@ -128,12 +134,15 @@ def test_GTMPVC_inputs():
             argstr="--reg %s",
             extensions=None,
             mandatory=True,
+            xor=["reg_file", "regheader", "reg_identity"],
         ),
         reg_identity=dict(
-            argstr="--regheader",
+            argstr="--reg-identity",
+            xor=["reg_file", "regheader", "reg_identity"],
         ),
         regheader=dict(
             argstr="--regheader",
+            xor=["reg_file", "regheader", "reg_identity"],
         ),
         replace=dict(
             argstr="--replace %i %i",
@@ -157,7 +166,7 @@ def test_GTMPVC_inputs():
             argstr="--save_yhat_full_fov",
         ),
         save_yhat_with_noise=dict(
-            argstr="--ss %i %i",
+            argstr="--save-yhat-with-noise",
         ),
         scale_refval=dict(
             argstr="--scale-refval %f",
@@ -174,9 +183,6 @@ def test_GTMPVC_inputs():
             argstr="--ss %f %f %f",
         ),
         subjects_dir=dict(),
-        threads=dict(
-            argstr="--threads %i",
-        ),
         tt_reduce=dict(
             argstr="--tt-reduce",
         ),

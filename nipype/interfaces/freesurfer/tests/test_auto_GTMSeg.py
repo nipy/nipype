@@ -44,7 +44,7 @@ def test_GTMSeg_inputs():
             extensions=None,
             usedefault=True,
         ),
-        output_usf=dict(
+        output_upsampling_factor=dict(
             argstr="--output-usf %i",
         ),
         subject_id=dict(
@@ -58,7 +58,7 @@ def test_GTMSeg_inputs():
         subsegwm=dict(
             argstr="--subsegwm",
         ),
-        usf=dict(
+        upsampling_factor=dict(
             argstr="--usf %i",
         ),
         wm_annot=dict(
