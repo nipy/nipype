@@ -53,7 +53,9 @@ class GTMSegInputSpec(FSTraitedSpec):
         usedefault=True,
     )
 
-    upsampling_factor = traits.Int(argstr="--usf %i", desc="upsampling factor (default is 2)")
+    upsampling_factor = traits.Int(
+        argstr="--usf %i", desc="upsampling factor (default is 2)"
+    )
 
     subsegwm = traits.Bool(
         argstr="--subsegwm", desc="subsegment WM into lobes (default)"
@@ -139,7 +141,10 @@ class GTMSeg(FSCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['gtm_file'] = os.path.join(
-            self.inputs.subjects_dir, self.inputs.subject_id, 'mri', self.inputs.out_file
+            self.inputs.subjects_dir,
+            self.inputs.subject_id,
+            'mri',
+            self.inputs.out_file,
         )
         return outputs
 
@@ -167,7 +172,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
         desc="segfile : anatomical segmentation to define regions for GTM",
     )
 
-    _reg_xor=["reg_file", "regheader", "reg_identity"]
+    _reg_xor = ["reg_file", "regheader", "reg_identity"]
     reg_file = File(
         exists=True,
         argstr="--reg %s",
@@ -372,7 +377,11 @@ class GTMPVCInputSpec(FSTraitedSpec):
     )
 
     opt_tol = traits.Tuple(
-        traits.Int, traits.Float, traits.Float, argstr="--opt-tol %i %f %f", desc="n_iters_max ftol lin_min_tol : optimization parameters for adaptive gtm using fminsearch"
+        traits.Int,
+        traits.Float,
+        traits.Float,
+        argstr="--opt-tol %i %f %f",
+        desc="n_iters_max ftol lin_min_tol : optimization parameters for adaptive gtm using fminsearch",
     )
 
     opt_brain = traits.Bool(argstr="--opt-brain", desc="apply adaptive GTM")
@@ -420,15 +429,11 @@ class GTMPVCOutputSpec(TraitedSpec):
     mgx_gm = File(
         desc="All GM voxel-wise values corrected using the extended Muller-Gartner method",
     )
-    rbv = File(
-        desc="All GM voxel-wise values corrected using the RBV method"
-    )
+    rbv = File(desc="All GM voxel-wise values corrected using the RBV method")
     opt_params = File(
         desc="Optimal parameter estimates for the FWHM using adaptive GTM"
     )
-    yhat0 = File(
-        desc="4D PET file of signal estimate (yhat) after PVC (unsmoothed)"
-    )
+    yhat0 = File(desc="4D PET file of signal estimate (yhat) after PVC (unsmoothed)")
     yhat = File(
         desc="4D PET file of signal estimate (yhat) after PVC (smoothed with PSF)",
     )
