@@ -504,11 +504,11 @@ class GLMFit(FSCommand):
         outputs["glm_dir"] = glmdir
 
         if isdefined(self.inputs.nii_gz):
-            ext = '.nii.gz'
+            ext = 'nii.gz'
         elif isdefined(self.inputs.nii):
-            ext = '.nii'
+            ext = 'nii'
         else:
-            ext = '.mgh'
+            ext = 'mgh'
 
         # Assign the output files that always get created
         outputs["beta_file"] = os.path.join(glmdir, f"beta.{ext}")
