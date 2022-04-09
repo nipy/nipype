@@ -4,34 +4,20 @@
 """Provides interfaces to various commands for running PET analyses provided by FreeSurfer
 """
 
-from nipype.interfaces.freesurfer.model import GLMFitInputSpec
 import os
-import os.path as op
-from glob import glob
-import shutil
-import sys
 
-import numpy as np
-from nibabel import load
-
-from ... import logging, LooseVersion
-from ...utils.filemanip import fname_presuffix, check_depends
-from ..io import FreeSurferSource
+from ... import logging
 from ..base import (
     TraitedSpec,
     File,
     traits,
     Directory,
     InputMultiPath,
-    OutputMultiPath,
-    CommandLine,
-    CommandLineInputSpec,
     isdefined,
 )
-from .base import FSCommand, FSTraitedSpec, FSTraitedSpecOpenMP, FSCommandOpenMP, Info
-from .utils import copy2subjdir
+from .base import FSCommand, FSTraitedSpec
 
-from .model import GLMFitInputSpec, GLMFitInputSpec, GLMFit
+from .model import GLMFitInputSpec, GLMFit
 
 __docformat__ = "restructuredtext"
 iflogger = logging.getLogger("nipype.interface")
