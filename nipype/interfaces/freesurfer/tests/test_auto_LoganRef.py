@@ -98,10 +98,10 @@ def test_LoganRef_inputs():
             extensions=None,
         ),
         mrtm1=dict(
-            argstr="--mrtm1 %s %s...",
+            argstr="--mrtm1 %s %s",
         ),
         mrtm2=dict(
-            argstr="--mrtm2 %s %s %f...",
+            argstr="--mrtm2 %s %s %f",
         ),
         nii=dict(
             argstr="--nii",

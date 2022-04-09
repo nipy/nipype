@@ -90,14 +90,14 @@ def test_MRTM2_inputs():
             xor=["cortex"],
         ),
         logan=dict(
-            argstr="--logan %s %s %f...",
+            argstr="--logan %s %s %f",
         ),
         mask_file=dict(
             argstr="--mask %s",
             extensions=None,
         ),
         mrtm1=dict(
-            argstr="--mrtm1 %s %s...",
+            argstr="--mrtm1 %s %s",
         ),
         mrtm2=dict(
             argstr="--mrtm2 %s %s %f...",
