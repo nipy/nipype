@@ -521,8 +521,9 @@ class GTMPVC(FSCommand):
 
 
 class MRTMInputSpec(GLMFitInputSpec):
-    mrtm1 = InputMultiPath(
-        traits.Tuple(File(exists=True), File(exists=True)),
+    mrtm1 = traits.Tuple(
+        File(exists=True),
+        File(exists=True),
         mandatory=True,
         argstr="--mrtm1 %s %s...",
         desc="RefTac TimeSec : perform MRTM1 kinetic modeling",
@@ -546,8 +547,10 @@ class MRTM(GLMFit):
 
 
 class MRTM2InputSpec(GLMFitInputSpec):
-    mrtm2 = InputMultiPath(
-        traits.Tuple(File(exists=True), File(exists=True), traits.Float),
+    mrtm2 = traits.Tuple(
+        File(exists=True),
+        File(exists=True),
+        traits.Float,
         mandatory=True,
         argstr="--mrtm2 %s %s %f...",
         desc="RefTac TimeSec k2prime : perform MRTM2 kinetic modeling",
@@ -570,8 +573,10 @@ class MRTM2(GLMFit):
 
 
 class LoganRefInputSpec(GLMFitInputSpec):
-    logan = InputMultiPath(
-        traits.Tuple(File(exists=True), File(exists=True), traits.Float),
+    logan = traits.Tuple(
+        File(exists=True),
+        File(exists=True),
+        traits.Float,
         mandatory=True,
         argstr="--logan %s %s %g...",
         desc="RefTac TimeSec tstar   : perform Logan kinetic modeling",

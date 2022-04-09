@@ -407,7 +407,7 @@ class GLMFitInputSpec(FSTraitedSpec):
         argstr="--mrtm1 %s %s",
         desc="RefTac TimeSec : perform MRTM1 kinetic modeling",
     )
-    mrtm2 =  traits.Tuple(
+    mrtm2 = traits.Tuple(
         File(exists=True),
         File(exists=True),
         traits.Float,
