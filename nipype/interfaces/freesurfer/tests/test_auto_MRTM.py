@@ -97,7 +97,7 @@ def test_MRTM_inputs():
             extensions=None,
         ),
         mrtm1=dict(
-            argstr="--mrtm1 %s %s...",
+            argstr="--mrtm1 %s %s",
             mandatory=True,
         ),
         mrtm2=dict(
