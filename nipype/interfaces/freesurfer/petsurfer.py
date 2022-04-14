@@ -126,7 +126,7 @@ class GTMSeg(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['gtm_file'] = os.path.join(
+        outputs['out_file'] = os.path.join(
             self.inputs.subjects_dir,
             self.inputs.subject_id,
             'mri',
