@@ -348,15 +348,18 @@ class GTMPVCInputSpec(FSTraitedSpec):
         argstr="--save-yhat", desc="save signal estimate (yhat) smoothed with the PSF"
     )
 
-    save_yhat_with_noise = traits.Bool(
-        argstr="--save-yhat-with-noise", desc="save signal estimate (yhat) with noise"
+    save_yhat_with_noise = traits.Tuple(
+        traits.Int,
+        traits.Int,
+        argstr="--save-yhat-with-noise %i %i", 
+        desc="seed nreps : save signal estimate (yhat) with noise"
     )
 
     save_yhat_full_fov = traits.Bool(
         argstr="--save-yhat-full-fov", desc="save signal estimate (yhat)"
     )
 
-    save_yhat0 = traits.Bool(argstr="--save_yhat0", desc="save signal estimate (yhat)")
+    save_yhat0 = traits.Bool(argstr="--save-yhat0", desc="save signal estimate (yhat)")
 
     opt = traits.Int(
         argstr="--opt %i", desc="opt : optimization schema for applying adaptive GTM"
@@ -485,9 +488,9 @@ class GTMPVC(FSCommand):
         if self.inputs.save_yhat:
             outputs["yhat"] = os.path.join(pvcdir, "yhat.nii.gz")
         if self.inputs.save_yhat_full_fov:
-            outputs["yhat_full_fov"] = os.path.join(pvcdir, "yhat_full_fov.nii.gz")
-        if self.inputs.save_yhat_with_noise:
-            outputs["yhat_with_noise"] = os.path.join(pvcdir, "yhat_with_noise.nii.gz")
+            outputs["yhat_full_fov"] = os.path.join(pvcdir, "yhat.fullfov.nii.gz")
+        if isdefined(self.inputs.save_yhat_with_noise) and self.inputs.save_yhat_with_noise:
+            outputs["yhat_with_noise"] = os.path.join(pvcdir, "yhat.nii.gz")
         if isdefined(self.inputs.mgx) and self.inputs.mgx:
             outputs["mgx_ctxgm"] = os.path.join(pvcdir, "mgx.ctxgm.nii.gz")
             outputs["mgx_subctxgm"] = os.path.join(pvcdir, "mgx.subctxgm.nii.gz")
