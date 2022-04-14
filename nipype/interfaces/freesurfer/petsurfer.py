@@ -475,7 +475,7 @@ class GTMPVC(FSCommand):
         outputs["nopvc_file"] = os.path.join(pvcdir, "nopvc.nii.gz")
         outputs["gtm_file"] = os.path.join(pvcdir, "gtm.nii.gz")
         outputs["gtm_stats"] = os.path.join(pvcdir, "gtm.stats.dat")
-        outputs["reg_pet2anat"] = os.path.join(pvcdir, "aux/bbpet2anat.lta")
+        outputs["reg_pet2anat"] = os.path.join(pvcdir, "aux", "bbpet2anat.lta")
 
         # Assign the conditional outputs
         if isdefined(self.inputs.save_input) and self.inputs.save_input:
