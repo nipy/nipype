@@ -353,7 +353,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
     )
 
     save_yhat_full_fov = traits.Bool(
-        argstr="--save_yhat_full_fov", desc="save signal estimate (yhat)"
+        argstr="--save-yhat-full-fov", desc="save signal estimate (yhat)"
     )
 
     save_yhat0 = traits.Bool(argstr="--save_yhat0", desc="save signal estimate (yhat)")
@@ -478,18 +478,15 @@ class GTMPVC(FSCommand):
         outputs["reg_pet2anat"] = os.path.join(pvcdir, "aux/bbpet2anat.lta")
 
         # Assign the conditional outputs
-        if isdefined(self.inputs.save_input) and self.inputs.save_input:
+        if self.inputs.save_input:
             outputs["input_file"] = os.path.join(pvcdir, "input.nii.gz")
-        if isdefined(self.inputs.save_yhat0) and self.inputs.save_yhat0:
+        if self.inputs.save_yhat0:
             outputs["yhat0"] = os.path.join(pvcdir, "yhat0.nii.gz")
-        if isdefined(self.inputs.save_yhat) and self.inputs.save_yhat:
+        if self.inputs.save_yhat:
             outputs["yhat"] = os.path.join(pvcdir, "yhat.nii.gz")
-        if isdefined(self.inputs.save_yhat_full_fov) and self.inputs.save_yhat_full_fov:
+        if self.inputs.save_yhat_full_fov:
             outputs["yhat_full_fov"] = os.path.join(pvcdir, "yhat_full_fov.nii.gz")
-        if (
-            isdefined(self.inputs.save_yhat_with_noise)
-            and self.inputs.save_yhat_with_noise
-        ):
+        if self.inputs.save_yhat_with_noise:
             outputs["yhat_with_noise"] = os.path.join(pvcdir, "yhat_with_noise.nii.gz")
         if isdefined(self.inputs.mgx) and self.inputs.mgx:
             outputs["mgx_ctxgm"] = os.path.join(pvcdir, "mgx.ctxgm.nii.gz")
