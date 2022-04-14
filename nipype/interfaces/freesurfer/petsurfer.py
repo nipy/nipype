@@ -414,6 +414,9 @@ class GTMPVCOutputSpec(TraitedSpec):
     gtm_stats = File(desc="Statistics for the GTM PVC")
     input_file = File(desc="4D PET file in native volume space")
     reg_pet2anat = File(desc="Registration file to go from PET to anat")
+    reg_anat2pet = File(desc="Registration file to go from anat to PET")
+    reg_rbvpet2anat = File(desc="Registration file to go from RBV corrected PET to anat")
+    reg_anat2rbvpet = File(desc="Registration file to go from anat to RBV corrected PET")
     mgx_ctxgm = File(
         desc="Cortical GM voxel-wise values corrected using the extended Muller-Gartner method",
     )
@@ -484,6 +487,7 @@ class GTMPVC(FSCommand):
         outputs["gtm_file"] = os.path.join(pvcdir, "gtm.nii.gz")
         outputs["gtm_stats"] = os.path.join(pvcdir, "gtm.stats.dat")
         outputs["reg_pet2anat"] = os.path.join(pvcdir, "aux", "bbpet2anat.lta")
+        outputs["reg_anat2pet"] = os.path.join(pvcdir, "aux", "anat2bbpet.lta")
 
         # Assign the conditional outputs
         if self.inputs.save_input:
@@ -502,6 +506,8 @@ class GTMPVC(FSCommand):
             outputs["mgx_gm"] = os.path.join(pvcdir, "mgx.gm.nii.gz")
         if isdefined(self.inputs.rbv) and self.inputs.rbv:
             outputs["rbv"] = os.path.join(pvcdir, "rbv.nii.gz")
+            outputs["reg_rbvpet2anat"] = os.path.join(pvcdir, "aux", "rbv2anat.lta")
+            outputs["reg_anat2rbvpet"] = os.path.join(pvcdir, "aux", "anat2rbv.lta")
         if isdefined(self.inputs.opt) and self.inputs.opt:
             outputs["opt_params"] = os.path.join(pvcdir, "aux/opt.params.dat")
 
