@@ -282,7 +282,9 @@ class GTMPVCInputSpec(FSTraitedSpec):
         desc="set the tissue fraction resolution parameter (def is 0.5)",
     )
 
-    rbv = traits.Bool(argstr="--rbv", desc="perform RBV PVC")
+    rbv = traits.Bool(argstr="--rbv", 
+        requires=["subjects_dir"],
+        desc="perform RBV PVC")
 
     rbv_res = traits.Float(
         argstr="--rbv-res %f",
