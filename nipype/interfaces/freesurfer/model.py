@@ -519,7 +519,7 @@ class GLMFit(FSCommand):
         outputs["dof_file"] = os.path.join(glmdir, "dof.dat")
         # Assign the conditional outputs
         if self.inputs.save_residual:
-            outputs["error_file"] = os.path.join(glmdir, "eres.{ext}")
+            outputs["error_file"] = os.path.join(glmdir, f"eres.{ext}")
         if self.inputs.save_estimate:
             outputs["estimate_file"] = os.path.join(glmdir, "yhat.{ext}")
         if any((self.inputs.mrtm1, self.inputs.mrtm2, self.inputs.logan)):
