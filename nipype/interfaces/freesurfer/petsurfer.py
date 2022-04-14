@@ -397,7 +397,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
 
 class GTMPVCOutputSpec(TraitedSpec):
 
-    pvc_dir = Directory(exists=True, desc="output directory")
+    pvc_dir = Directory(desc="output directory")
     ref_file = File(desc="Reference TAC in .dat")
     hb_nifti = File(desc="High-binding TAC in nifti")
     hb_dat = File(desc="High-binding TAC in .dat")
