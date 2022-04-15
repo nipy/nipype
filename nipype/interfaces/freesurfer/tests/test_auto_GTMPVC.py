@@ -166,7 +166,7 @@ def test_GTMPVC_inputs():
             argstr="--save-yhat-full-fov",
         ),
         save_yhat_with_noise=dict(
-            argstr="--save-yhat-with-noise",
+            argstr="--save-yhat-with-noise %i %i",
         ),
         scale_refval=dict(
             argstr="--scale-refval %f",
