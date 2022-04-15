@@ -160,10 +160,10 @@ def test_GTMPVC_inputs():
             argstr="--save-yhat",
         ),
         save_yhat0=dict(
-            argstr="--save_yhat0",
+            argstr="--save-yhat0",
         ),
         save_yhat_full_fov=dict(
-            argstr="--save_yhat_full_fov",
+            argstr="--save-yhat-fullfov",
         ),
         save_yhat_with_noise=dict(
             argstr="--save-yhat-with-noise",
@@ -240,6 +240,9 @@ def test_GTMPVC_outputs():
             extensions=None,
         ),
         reg_pet2anat=dict(
+            extensions=None,
+        ),
+        reg_anat2pet=dict(
             extensions=None,
         ),
         yhat=dict(
