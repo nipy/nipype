@@ -123,6 +123,7 @@ def test_GTMPVC_inputs():
         ),
         rbv=dict(
             argstr="--rbv",
+            requires=["subjects_dir"],
         ),
         rbv_res=dict(
             argstr="--rbv-res %f",
@@ -158,6 +159,7 @@ def test_GTMPVC_inputs():
         ),
         save_yhat=dict(
             argstr="--save-yhat",
+            xor=["save_yhat_with_noise"],
         ),
         save_yhat0=dict(
             argstr="--save-yhat0",
@@ -167,6 +169,7 @@ def test_GTMPVC_inputs():
         ),
         save_yhat_with_noise=dict(
             argstr="--save-yhat-with-noise %i %i",
+            xor=["save_yhat"],
         ),
         scale_refval=dict(
             argstr="--scale-refval %f",
@@ -239,10 +242,16 @@ def test_GTMPVC_outputs():
         ref_file=dict(
             extensions=None,
         ),
+        reg_anat2pet=dict(
+            extensions=None,
+        ),
+        reg_anat2rbvpet=dict(
+            extensions=None,
+        ),
         reg_pet2anat=dict(
             extensions=None,
         ),
-        reg_anat2pet=dict(
+        reg_rbvpet2anat=dict(
             extensions=None,
         ),
         yhat=dict(
