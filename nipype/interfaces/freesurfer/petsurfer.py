@@ -513,9 +513,6 @@ class GTMPVC(FSCommand):
 
         return outputs
 
-    def _format_arg(self, name, spec, value):
-        return super(GTMPVC, self)._format_arg(name, spec, value)
-
 
 class MRTMInputSpec(GLMFitInputSpec):
     mrtm1 = traits.Tuple(
