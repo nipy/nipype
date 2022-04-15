@@ -44,7 +44,9 @@ class GTMSegInputSpec(FSTraitedSpec):
     )
 
     subsegwm = traits.Bool(
-        argstr="--subsegwm", desc="subsegment WM into lobes (default)"
+        argstr="--subsegwm", 
+        default=True,
+        desc="subsegment WM into lobes (default)"
     )
 
     keep_hypo = traits.Bool(
