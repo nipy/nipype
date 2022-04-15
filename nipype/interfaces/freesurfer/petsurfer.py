@@ -44,9 +44,7 @@ class GTMSegInputSpec(FSTraitedSpec):
     )
 
     subsegwm = traits.Bool(
-        argstr="--subsegwm", 
-        default=True,
-        desc="subsegment WM into lobes (default)"
+        argstr="--subsegwm", default=True, desc="subsegment WM into lobes (default)"
     )
 
     keep_hypo = traits.Bool(
@@ -284,9 +282,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
         desc="set the tissue fraction resolution parameter (def is 0.5)",
     )
 
-    rbv = traits.Bool(argstr="--rbv", 
-        requires=["subjects_dir"],
-        desc="perform RBV PVC")
+    rbv = traits.Bool(argstr="--rbv", requires=["subjects_dir"], desc="perform RBV PVC")
 
     rbv_res = traits.Float(
         argstr="--rbv-res %f",
@@ -349,17 +345,17 @@ class GTMPVCInputSpec(FSTraitedSpec):
     save_eres = traits.Bool(argstr="--save-eres", desc="saves residual error")
 
     save_yhat = traits.Bool(
-        argstr="--save-yhat", 
+        argstr="--save-yhat",
         xor=["save_yhat_with_noise"],
-        desc="save signal estimate (yhat) smoothed with the PSF"
+        desc="save signal estimate (yhat) smoothed with the PSF",
     )
 
     save_yhat_with_noise = traits.Tuple(
         traits.Int,
         traits.Int,
-        argstr="--save-yhat-with-noise %i %i", 
+        argstr="--save-yhat-with-noise %i %i",
         xor=["save_yhat"],
-        desc="seed nreps : save signal estimate (yhat) with noise"
+        desc="seed nreps : save signal estimate (yhat) with noise",
     )
 
     save_yhat_full_fov = traits.Bool(
@@ -417,8 +413,12 @@ class GTMPVCOutputSpec(TraitedSpec):
     input_file = File(desc="4D PET file in native volume space")
     reg_pet2anat = File(desc="Registration file to go from PET to anat")
     reg_anat2pet = File(desc="Registration file to go from anat to PET")
-    reg_rbvpet2anat = File(desc="Registration file to go from RBV corrected PET to anat")
-    reg_anat2rbvpet = File(desc="Registration file to go from anat to RBV corrected PET")
+    reg_rbvpet2anat = File(
+        desc="Registration file to go from RBV corrected PET to anat"
+    )
+    reg_anat2rbvpet = File(
+        desc="Registration file to go from anat to RBV corrected PET"
+    )
     mgx_ctxgm = File(
         desc="Cortical GM voxel-wise values corrected using the extended Muller-Gartner method",
     )
@@ -500,17 +500,17 @@ class GTMPVC(FSCommand):
             outputs["yhat"] = os.path.join(pvcdir, "yhat.nii.gz")
         if self.inputs.save_yhat_full_fov:
             outputs["yhat_full_fov"] = os.path.join(pvcdir, "yhat.fullfov.nii.gz")
-        if isdefined(self.inputs.save_yhat_with_noise) and self.inputs.save_yhat_with_noise:
+        if self.inputs.save_yhat_with_noise:
             outputs["yhat_with_noise"] = os.path.join(pvcdir, "yhat.nii.gz")
-        if isdefined(self.inputs.mgx) and self.inputs.mgx:
+        if self.inputs.mgx:
             outputs["mgx_ctxgm"] = os.path.join(pvcdir, "mgx.ctxgm.nii.gz")
             outputs["mgx_subctxgm"] = os.path.join(pvcdir, "mgx.subctxgm.nii.gz")
             outputs["mgx_gm"] = os.path.join(pvcdir, "mgx.gm.nii.gz")
-        if isdefined(self.inputs.rbv) and self.inputs.rbv:
+        if self.inputs.rbv:
             outputs["rbv"] = os.path.join(pvcdir, "rbv.nii.gz")
             outputs["reg_rbvpet2anat"] = os.path.join(pvcdir, "aux", "rbv2anat.lta")
             outputs["reg_anat2rbvpet"] = os.path.join(pvcdir, "aux", "anat2rbv.lta")
-        if isdefined(self.inputs.opt) and self.inputs.opt:
+        if self.inputs.opt:
             outputs["opt_params"] = os.path.join(pvcdir, "aux/opt.params.dat")
 
         return outputs
