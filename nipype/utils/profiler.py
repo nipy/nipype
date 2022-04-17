@@ -66,7 +66,7 @@ class ResourceMonitor(threading.Thread):
         self._freq = freq
 
         # Dump first sample to file
-        print(",".join(f"v" for v in _first_sample), file=self._logfile)
+        print(",".join(f"{v}" for v in _first_sample), file=self._logfile)
         self._logfile.flush()
 
         # Start thread
@@ -84,7 +84,7 @@ class ResourceMonitor(threading.Thread):
             self._event.set()
             self.join()
             # Dump last sample to file
-            print(",".join(f"v" for v in self._sample()), file=self._logfile)
+            print(",".join(f"{v}" for v in self._sample()), file=self._logfile)
             self._logfile.flush()
             self._logfile.close()
 
@@ -145,7 +145,7 @@ class ResourceMonitor(threading.Thread):
         wait_til = start_time
         while not self._event.is_set():
             # Dump sample to file
-            print(",".join(f"v" for v in self._sample()), file=self._logfile)
+            print(",".join(f"{v}" for v in self._sample()), file=self._logfile)
             self._logfile.flush()
             wait_til += self._freq
             self._event.wait(max(0, wait_til - time()))
