@@ -64,7 +64,6 @@ class ResourceMonitor(threading.Thread):
         )
         self._logfile = open(self._fname, "w")
         self._freq = freq
-        self._python = python
 
         # Dump first sample to file
         print(",".join(_sample), file=self._logfile)
