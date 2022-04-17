@@ -31,20 +31,21 @@ class RuntimeContext(AbstractContextManager):
 
     __slots__ = ("_runtime", "_resmon", "_ignore_exc")
 
-    def __init__(self, resource_monitor=False, ignore_exception=False):
+    def __init__(self):
         """Initialize the context manager object."""
-        self._ignore_exc = ignore_exception
-        self._resmon = resource_monitor
+        self._ignore_exc = False
+        self._resmon = None
 
 
-    def __call__(self, interface, cwd=None, redirect_x=False):
+    def __call__(self, interface, cwd=None, redirect_x=False, ignore_exception=False):
         """Generate a new runtime object."""
         # Tear-up: get current and prev directories
         _syscwd = rgetcwd(error=False)  # Recover when wd does not exist
         if cwd is None:
             cwd = _syscwd
 
-        if self._resmon:
+        self._ignore_exc = ignore_exception or interface.ignore_exception
+        if interface.resource_monitor is True:
             _proc_pid = os.getpid()
             self._resmon = ResourceMonitor(
                 _proc_pid,

@@ -173,7 +173,7 @@ class BaseInterface(Interface):
     _additional_metadata = []
     _redirect_x = False
     _references = []
-    resource_monitor = True  # Enabled for this interface IFF enabled in the config
+    resource_monitor = None  # Enabled for this interface IFF enabled in the config
     _etelemetry_version_data = None
 
     def __init__(
@@ -202,9 +202,10 @@ class BaseInterface(Interface):
         self.inputs.trait_set(**inputs)
 
         self.ignore_exception = ignore_exception
-
-        if resource_monitor is not None:
-            self.resource_monitor = resource_monitor
+        self.resource_monitor = (
+            resource_monitor if resource_monitor is not None
+            else config.resource_monitor
+        )
 
         if from_file is not None:
             self.load_inputs_from_json(from_file, overwrite=True)
@@ -376,18 +377,13 @@ class BaseInterface(Interface):
             if successful, results
 
         """
-        rtc = RuntimeContext(
-            resource_monitor=config.resource_monitor and self.resource_monitor,
-            ignore_exception=ignore_exception
-            if ignore_exception is not None
-            else self.ignore_exception,
-        )
 
         with indirectory(cwd or os.getcwd()):
             self.inputs.trait_set(**inputs)
         self._check_mandatory_inputs()
         self._check_version_requirements(self.inputs)
 
+        rtc = RuntimeContext()
         with rtc(self, cwd=cwd, redirect_x=self._redirect_x) as runtime:
 
             # Grab inputs now, as they should not change during execution
