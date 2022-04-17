@@ -54,7 +54,7 @@ class ResourceMonitor(threading.Thread):
 
         # Leave process initialized and make first sample
         self._process = psutil.Process(pid)
-        _sample = self._sample(cpu_interval=0.2)
+        _first_sample = self._sample(cpu_interval=0.2)
 
         # Continue monitor configuration
         freq = max(freq, 0.2)
@@ -66,7 +66,7 @@ class ResourceMonitor(threading.Thread):
         self._freq = freq
 
         # Dump first sample to file
-        print(",".join(_sample), file=self._logfile)
+        print(",".join(_first_sample), file=self._logfile)
         self._logfile.flush()
 
         # Start thread
@@ -108,6 +108,7 @@ class ResourceMonitor(threading.Thread):
         return retval
 
     def _sample(self, cpu_interval=None):
+        _time = time()
         cpu = 0.0
         rss = 0.0
         vms = 0.0
@@ -136,7 +137,7 @@ class ResourceMonitor(threading.Thread):
             except psutil.NoSuchProcess:
                 pass
 
-        return (time(), cpu, rss / _MB, vms / _MB)
+        return (_time, cpu, rss / _MB, vms / _MB)
 
     def run(self):
         """Core monitoring function, called by start()"""
