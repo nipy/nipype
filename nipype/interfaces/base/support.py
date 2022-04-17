@@ -19,6 +19,7 @@ import platform
 from ... import logging, config
 from ...utils.misc import is_container, rgetcwd
 from ...utils.filemanip import md5, hash_infile
+from ...utils.profiler import ResourceMonitor, ResourceMonitorMock
 
 iflogger = logging.getLogger("nipype.interface")
 
@@ -33,16 +34,8 @@ class RuntimeContext(AbstractContextManager):
     def __init__(self, resource_monitor=False, ignore_exception=False):
         """Initialize the context manager object."""
         self._ignore_exc = ignore_exception
-        _proc_pid = os.getpid()
-        if resource_monitor:
-            from ...utils.profiler import ResourceMonitor
-        else:
-            from ...utils.profiler import ResourceMonitorMock as ResourceMonitor
+        self._resmon = resource_monitor
 
-        self._resmon = ResourceMonitor(
-            _proc_pid,
-            freq=float(config.get("execution", "resource_monitor_frequency", 1)),
-        )
 
     def __call__(self, interface, cwd=None, redirect_x=False):
         """Generate a new runtime object."""
@@ -50,6 +43,14 @@ class RuntimeContext(AbstractContextManager):
         _syscwd = rgetcwd(error=False)  # Recover when wd does not exist
         if cwd is None:
             cwd = _syscwd
+
+        _proc_pid = os.getpid()
+        _ResourceMonitor = ResourceMonitor if self._resmon else ResourceMonitorMock
+        self._resmon = _ResourceMonitor(
+            _proc_pid,
+            cwd=cwd,
+            freq=float(config.get("execution", "resource_monitor_frequency", 1)),
+        )
 
         self._runtime = Bunch(
             cwd=str(cwd),

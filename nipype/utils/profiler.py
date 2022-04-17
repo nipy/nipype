@@ -48,23 +48,27 @@ class ResourceMonitor(threading.Thread):
     to a file
     """
 
-    def __init__(self, pid, freq=5, fname=None, python=True):
+    def __init__(self, pid, freq=0.2, fname=None, cwd=None):
         # Make sure psutil is imported
         import psutil
 
-        if freq < 0.2:
-            raise RuntimeError("Frequency (%0.2fs) cannot be lower than 0.2s" % freq)
+        # Leave process initialized and make first sample
+        self._process = psutil.Process(pid)
+        _sample = self._sample(cpu_interval=0.2)
 
-        if fname is None:
-            fname = ".proc-%d_time-%s_freq-%0.2f" % (pid, time(), freq)
-        self._fname = os.path.abspath(fname)
+        # Continue monitor configuration
+        freq = max(freq, 0.2)
+        fname = fname or f".proc-{pid}"
+        self._fname = os.path.abspath(
+            os.path.join(cwd, fname) if cwd is not None else fname
+        )
         self._logfile = open(self._fname, "w")
         self._freq = freq
         self._python = python
 
-        # Leave process initialized and make first sample
-        self._process = psutil.Process(pid)
-        self._sample(cpu_interval=0.2)
+        # Dump first sample to file
+        print(",".join(_sample), file=self._logfile)
+        self._logfile.flush()
 
         # Start thread
         threading.Thread.__init__(self)
@@ -80,7 +84,8 @@ class ResourceMonitor(threading.Thread):
         if not self._event.is_set():
             self._event.set()
             self.join()
-            self._sample()
+            # Dump last sample to file
+            print(",".join(self._sample()), file=self._logfile)
             self._logfile.flush()
             self._logfile.close()
 
@@ -132,15 +137,16 @@ class ResourceMonitor(threading.Thread):
             except psutil.NoSuchProcess:
                 pass
 
-        print("%f,%f,%f,%f" % (time(), cpu, rss / _MB, vms / _MB), file=self._logfile)
-        self._logfile.flush()
+        return (time(), cpu, rss / _MB, vms / _MB)
 
     def run(self):
         """Core monitoring function, called by start()"""
         start_time = time()
         wait_til = start_time
         while not self._event.is_set():
-            self._sample()
+            # Dump sample to file
+            print(",".join(self._sample()), file=self._logfile)
+            self._logfile.flush()
             wait_til += self._freq
             self._event.wait(max(0, wait_til - time()))
 
