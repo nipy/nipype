@@ -32,7 +32,7 @@ class ResourceMonitorMock:
         """Get/set the internal filename"""
         return None
 
-    def __init__(self, pid, freq=5, fname=None, python=True):
+    def __init__(self, pid, freq=5, fname=None, cwd=None):
         pass
 
     def start(self):
