@@ -24,24 +24,6 @@ resource_monitor = config.resource_monitor
 _MB = 1024.0**2
 
 
-class ResourceMonitorMock:
-    """A mock class to use when the monitor is disabled."""
-
-    @property
-    def fname(self):
-        """Get/set the internal filename"""
-        return None
-
-    def __init__(self, pid, freq=5, fname=None, cwd=None):
-        pass
-
-    def start(self):
-        pass
-
-    def stop(self):
-        return {}
-
-
 class ResourceMonitor(threading.Thread):
     """
     A ``Thread`` to monitor a specific PID with a certain frequence

@@ -19,7 +19,7 @@ import platform
 from ... import logging, config
 from ...utils.misc import is_container, rgetcwd
 from ...utils.filemanip import md5, hash_infile
-from ...utils.profiler import ResourceMonitor, ResourceMonitorMock
+from ...utils.profiler import ResourceMonitor
 
 iflogger = logging.getLogger("nipype.interface")
 
@@ -44,13 +44,13 @@ class RuntimeContext(AbstractContextManager):
         if cwd is None:
             cwd = _syscwd
 
-        _proc_pid = os.getpid()
-        _ResourceMonitor = ResourceMonitor if self._resmon else ResourceMonitorMock
-        self._resmon = _ResourceMonitor(
-            _proc_pid,
-            cwd=cwd,
-            freq=float(config.get("execution", "resource_monitor_frequency", 1)),
-        )
+        if self._resmon:
+            _proc_pid = os.getpid()
+            self._resmon = ResourceMonitor(
+                _proc_pid,
+                cwd=cwd,
+                freq=float(config.get("execution", "resource_monitor_frequency", 1)),
+            )
 
         self._runtime = Bunch(
             cwd=str(cwd),
@@ -62,7 +62,7 @@ class RuntimeContext(AbstractContextManager):
             platform=platform.platform(),
             prevcwd=str(_syscwd),
             redirect_x=redirect_x,
-            resmon=self._resmon.fname or "off",
+            resmon=getattr(self._resmon, "fname", "off"),
             returncode=None,
             startTime=None,
             version=interface.version,
@@ -75,7 +75,8 @@ class RuntimeContext(AbstractContextManager):
             self._runtime.environ["DISPLAY"] = config.get_display()
 
         self._runtime.startTime = dt.isoformat(dt.utcnow())
-        self._resmon.start()
+        if self._resmon:
+            self._resmon.start()
         # TODO: Perhaps clean-up path and ensure it exists?
         os.chdir(self._runtime.cwd)
         return self._runtime
@@ -88,8 +89,9 @@ class RuntimeContext(AbstractContextManager):
             timediff.days * 86400 + timediff.seconds + timediff.microseconds / 1e6
         )
         # Collect monitored data
-        for k, v in self._resmon.stop().items():
-            setattr(self._runtime, k, v)
+        if self._resmon:
+            for k, v in self._resmon.stop().items():
+                setattr(self._runtime, k, v)
 
         os.chdir(self._runtime.prevcwd)
 
