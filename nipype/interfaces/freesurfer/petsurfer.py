@@ -169,12 +169,14 @@ class GTMPVCInputSpec(FSTraitedSpec):
 
     regheader = traits.Bool(
         argstr="--regheader",
+        mandatory=True,
         desc="assume input and seg share scanner space",
         xor=_reg_xor,
     )
 
     reg_identity = traits.Bool(
         argstr="--reg-identity",
+        mandatory=True,
         desc="assume that input is in anatomical space",
         xor=_reg_xor,
     )
