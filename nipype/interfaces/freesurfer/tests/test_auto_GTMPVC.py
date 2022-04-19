@@ -22,14 +22,14 @@ def test_GTMPVC_inputs():
         color_table_file=dict(
             argstr="--ctab %s",
             extensions=None,
-            xor=("color_table_file", "default_color_table", "gca_color_table"),
+            xor=("color_table_file", "default_color_table"),
         ),
         contrast=dict(
             argstr="--C %s...",
         ),
         default_color_table=dict(
             argstr="--ctab-default",
-            xor=("color_table_file", "default_color_table", "gca_color_table"),
+            xor=("color_table_file", "default_color_table"),
         ),
         default_seg_merge=dict(
             argstr="--default-seg-merge",
@@ -67,7 +67,7 @@ def test_GTMPVC_inputs():
             argstr="--merge-hypos",
         ),
         mg=dict(
-            argstr="--id %s...",
+            argstr="--mg %f %s...",
         ),
         mg_ref_cerebral_wm=dict(
             argstr="--mg-ref-cerebral-wm",
@@ -93,8 +93,8 @@ def test_GTMPVC_inputs():
         num_threads=dict(
             argstr="--threads %i",
         ),
-        opt=dict(
-            argstr="--opt %i",
+        optimization_schema=dict(
+            argstr="--opt %s",
         ),
         opt_brain=dict(
             argstr="--opt-brain",
@@ -179,10 +179,10 @@ def test_GTMPVC_inputs():
             extensions=None,
             mandatory=True,
         ),
-        segpvfres=dict(
+        tissue_fraction_resolution=dict(
             argstr="--segpvfres %f",
         ),
-        ss=dict(
+        steady_state_params=dict(
             argstr="--ss %f %f %f",
         ),
         subjects_dir=dict(),
