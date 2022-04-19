@@ -289,7 +289,11 @@ class GTMPVCInputSpec(FSTraitedSpec):
         desc="voxsize : set RBV voxel resolution (good for when standard res takes too much memory)",
     )
 
-    mg = traits.List(argstr="--id %s...", desc="Manually specify segmentation ids")
+    mg = traits.Tuple(
+        traits.Float,
+        traits.List(traits.String),
+        argstr="--mg %g %s...",
+        desc="gmthresh RefId1 RefId2 ...: perform Mueller-Gaertner PVC, gmthresh is min gm pvf bet 0 and 1")
 
     mg_ref_cerebral_wm = traits.Bool(
         argstr="--mg-ref-cerebral-wm", desc=" set MG RefIds to 2 and 41"
