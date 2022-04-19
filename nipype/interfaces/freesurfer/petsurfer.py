@@ -99,7 +99,7 @@ class GTMSegInputSpec(FSTraitedSpec):
         desc="do not add vermis segmentation when doing ---xcerseg",
     )
 
-    ctab = File(exists=True, argstr="--ctab %s", desc="colortable")
+    colortable = File(exists=True, argstr="--ctab %s", desc="colortable")
     no_seg_stats = traits.Bool(
         argstr="--no-seg-stats", desc="do not compute segmentation stats"
     )
