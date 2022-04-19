@@ -368,7 +368,8 @@ class GTMPVCInputSpec(FSTraitedSpec):
 
     save_yhat0 = traits.Bool(argstr="--save-yhat0", desc="save signal estimate (yhat)")
 
-    opt = traits.Int(
+    optimization_schema = traits.Enum(
+        "3D", "2D", "1D", "3D_MB", "2D_MB", "1D_MB", "MBZ", "MB3",
         argstr="--opt %i", desc="opt : optimization schema for applying adaptive GTM"
     )
 
