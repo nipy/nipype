@@ -67,7 +67,7 @@ def test_GTMPVC_inputs():
             argstr="--merge-hypos",
         ),
         mg=dict(
-            argstr="--mg %f %s...",
+            argstr="--mg %g %s",
         ),
         mg_ref_cerebral_wm=dict(
             argstr="--mg-ref-cerebral-wm",
@@ -93,9 +93,6 @@ def test_GTMPVC_inputs():
         num_threads=dict(
             argstr="--threads %i",
         ),
-        optimization_schema=dict(
-            argstr="--opt %s",
-        ),
         opt_brain=dict(
             argstr="--opt-brain",
         ),
@@ -104,6 +101,9 @@ def test_GTMPVC_inputs():
         ),
         opt_tol=dict(
             argstr="--opt-tol %i %f %f",
+        ),
+        optimization_schema=dict(
+            argstr="--opt %s",
         ),
         psf=dict(
             argstr="--psf %f",
@@ -139,10 +139,12 @@ def test_GTMPVC_inputs():
         ),
         reg_identity=dict(
             argstr="--reg-identity",
+            mandatory=True,
             xor=["reg_file", "regheader", "reg_identity"],
         ),
         regheader=dict(
             argstr="--regheader",
+            mandatory=True,
             xor=["reg_file", "regheader", "reg_identity"],
         ),
         replace=dict(
@@ -179,13 +181,13 @@ def test_GTMPVC_inputs():
             extensions=None,
             mandatory=True,
         ),
-        tissue_fraction_resolution=dict(
-            argstr="--segpvfres %f",
-        ),
         steady_state_params=dict(
             argstr="--ss %f %f %f",
         ),
         subjects_dir=dict(),
+        tissue_fraction_resolution=dict(
+            argstr="--segpvfres %f",
+        ),
         tt_reduce=dict(
             argstr="--tt-reduce",
         ),

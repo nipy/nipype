@@ -7,7 +7,7 @@ def test_GTMSeg_inputs():
         args=dict(
             argstr="%s",
         ),
-        ctab=dict(
+        colortable=dict(
             argstr="--ctab %s",
             extensions=None,
         ),
