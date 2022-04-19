@@ -319,7 +319,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
         desc="RefId1 RefId2 ... : compute HiBinding TAC for KM as mean of given RefIds",
     )
 
-    ss = traits.Tuple(
+    steady_state_params = traits.Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
