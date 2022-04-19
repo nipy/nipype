@@ -561,7 +561,7 @@ class GTMPVC(FSCommand):
             outputs["reg_rbvpet2anat"] = os.path.join(pvcdir, "aux", "rbv2anat.lta")
             outputs["reg_anat2rbvpet"] = os.path.join(pvcdir, "aux", "anat2rbv.lta")
         if self.inputs.opt:
-            outputs["opt_params"] = os.path.join(pvcdir, "aux/opt.params.dat")
+            outputs["opt_params"] = os.path.join(pvcdir, "aux", "opt.params.dat")
 
         return outputs
 
