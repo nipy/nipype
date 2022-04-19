@@ -491,18 +491,20 @@ class GTMPVC(FSCommand):
     output_spec = GTMPVCOutputSpec
 
     def _format_arg(self, name, spec, val):
+        # Values taken from
+        # https://github.com/freesurfer/freesurfer/blob/fs-7.2/mri_gtmpvc/mri_gtmpvc.cpp#L115-L122
         if name == 'optimization_schema':
             return (
                 spec.argstr
                 % {
-                    "3D": 0,
-                    "2D": 1,
-                    "1D": 2,
-                    "3D_MB": 3,
-                    "2D_MB": 4,
-                    "1D_MB": 5,
-                    "MBZ": 6,
-                    "MB3": 7,
+                    "3D": 1,
+                    "2D": 2,
+                    "1D": 3,
+                    "3D_MB": 4,
+                    "2D_MB": 5,
+                    "1D_MB": 6,
+                    "MBZ": 7,
+                    "MB3": 8,
                 }[val]
             )
         return super(GTMPVC, self)._format_arg(name, spec, val)
