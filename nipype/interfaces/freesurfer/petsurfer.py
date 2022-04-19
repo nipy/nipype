@@ -370,7 +370,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
 
     optimization_schema = traits.Enum(
         "3D", "2D", "1D", "3D_MB", "2D_MB", "1D_MB", "MBZ", "MB3",
-        argstr="--opt %i", desc="opt : optimization schema for applying adaptive GTM"
+        argstr="--opt %s", desc="opt : optimization schema for applying adaptive GTM"
     )
 
     opt_tol = traits.Tuple(
@@ -476,6 +476,11 @@ class GTMPVC(FSCommand):
     _cmd = "mri_gtmpvc"
     input_spec = GTMPVCInputSpec
     output_spec = GTMPVCOutputSpec
+
+    def _format_arg(self, name, spec, val):
+        if name == 'optimization_schema':
+            return spec.argstr%{"3D":0, "2D":1, "1D":2, "3D_MB":3, "2D_MB":4, "1D_MB":5, "MBZ":6, "MB3":7}[val]
+        return super(GTMPVC, self)._format_arg(name, spec, val)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
