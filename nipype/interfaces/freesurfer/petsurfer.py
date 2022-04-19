@@ -282,7 +282,11 @@ class GTMPVCInputSpec(FSTraitedSpec):
         desc="set the tissue fraction resolution parameter (def is 0.5)",
     )
 
-    rbv = traits.Bool(argstr="--rbv", requires=["subjects_dir"], desc="perform Region-based Voxelwise (RBV) PVC")
+    rbv = traits.Bool(
+        argstr="--rbv",
+        requires=["subjects_dir"],
+        desc="perform Region-based Voxelwise (RBV) PVC",
+    )
 
     rbv_res = traits.Float(
         argstr="--rbv-res %f",
@@ -293,7 +297,8 @@ class GTMPVCInputSpec(FSTraitedSpec):
         traits.Float,
         traits.List(traits.String),
         argstr="--mg %f %s...",
-        desc="gmthresh RefId1 RefId2 ...: perform Mueller-Gaertner PVC, gmthresh is min gm pvf bet 0 and 1")
+        desc="gmthresh RefId1 RefId2 ...: perform Mueller-Gaertner PVC, gmthresh is min gm pvf bet 0 and 1",
+    )
 
     mg_ref_cerebral_wm = traits.Bool(
         argstr="--mg-ref-cerebral-wm", desc=" set MG RefIds to 2 and 41"
@@ -369,8 +374,16 @@ class GTMPVCInputSpec(FSTraitedSpec):
     save_yhat0 = traits.Bool(argstr="--save-yhat0", desc="save signal estimate (yhat)")
 
     optimization_schema = traits.Enum(
-        "3D", "2D", "1D", "3D_MB", "2D_MB", "1D_MB", "MBZ", "MB3",
-        argstr="--opt %s", desc="opt : optimization schema for applying adaptive GTM"
+        "3D",
+        "2D",
+        "1D",
+        "3D_MB",
+        "2D_MB",
+        "1D_MB",
+        "MBZ",
+        "MB3",
+        argstr="--opt %s",
+        desc="opt : optimization schema for applying adaptive GTM",
     )
 
     opt_tol = traits.Tuple(
@@ -479,7 +492,19 @@ class GTMPVC(FSCommand):
 
     def _format_arg(self, name, spec, val):
         if name == 'optimization_schema':
-            return spec.argstr%{"3D":0, "2D":1, "1D":2, "3D_MB":3, "2D_MB":4, "1D_MB":5, "MBZ":6, "MB3":7}[val]
+            return (
+                spec.argstr
+                % {
+                    "3D": 0,
+                    "2D": 1,
+                    "1D": 2,
+                    "3D_MB": 3,
+                    "2D_MB": 4,
+                    "1D_MB": 5,
+                    "MBZ": 6,
+                    "MB3": 7,
+                }[val]
+            )
         return super(GTMPVC, self)._format_arg(name, spec, val)
 
     def _list_outputs(self):
