@@ -246,7 +246,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
         desc="refval : scale such that mean in reference region is refval",
     )
 
-    _ctab_inputs = ("color_table_file", "default_color_table", "gca_color_table")
+    _ctab_inputs = ("color_table_file", "default_color_table")
     color_table_file = File(
         exists=True,
         argstr="--ctab %s",
