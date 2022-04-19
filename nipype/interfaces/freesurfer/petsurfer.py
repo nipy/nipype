@@ -296,7 +296,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
     mg = traits.Tuple(
         traits.Float,
         traits.List(traits.String),
-        argstr="--mg %f %s...",
+        argstr="--mg %g %s",
         desc="gmthresh RefId1 RefId2 ...: perform Mueller-Gaertner PVC, gmthresh is min gm pvf bet 0 and 1",
     )
 
@@ -484,6 +484,15 @@ class GTMPVC(FSCommand):
     --i sub-01_ses-baseline_pet.nii.gz --km-hb 11 12 50 51 --km-ref 8 47 --no-rescale \
     --psf 4.000000 --o pvc --reg sub-01_ses-baseline_pet_mean_reg.lta --save-input \
     --seg gtmseg.mgz'
+
+    >>> gtmpvc = GTMPVC()
+    >>> gtmpvc.inputs.in_file = 'sub-01_ses-baseline_pet.nii.gz'
+    >>> gtmpvc.inputs.segmentation = 'gtmseg.mgz'
+    >>> gtmpvc.inputs.regheader = True
+    >>> gtmpvc.inputs.pvc_dir = 'pvc'
+    >>> gtmpvc.inputs.mg = (0.5, ["ROI1", "ROI2"])
+    >>> gtmpvc.cmdline  # doctest: +NORMALIZE_WHITESPACE
+    'mri_gtmpvc --i sub-01_ses-baseline_pet.nii.gz --mg 0.5 ROI1 ROI2 --o pvc --regheader --seg gtmseg.mgz'
     """
 
     _cmd = "mri_gtmpvc"
@@ -507,6 +516,8 @@ class GTMPVC(FSCommand):
                     "MB3": 8,
                 }[val]
             )
+        if name == 'mg':
+            return spec.argstr % (val[0], ' '.join(val[1]))
         return super(GTMPVC, self)._format_arg(name, spec, val)
 
     def _list_outputs(self):
