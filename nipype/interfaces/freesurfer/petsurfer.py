@@ -292,7 +292,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
     mg = traits.Tuple(
         traits.Float,
         traits.List(traits.String),
-        argstr="--mg %g %s...",
+        argstr="--mg %f %s...",
         desc="gmthresh RefId1 RefId2 ...: perform Mueller-Gaertner PVC, gmthresh is min gm pvf bet 0 and 1")
 
     mg_ref_cerebral_wm = traits.Bool(
