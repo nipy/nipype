@@ -277,7 +277,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
         desc="turns off PVC entirely (both PSF and TFE)",
     )
 
-    segpvfres = traits.Float(
+    tissue_fraction_resolution = traits.Float(
         argstr="--segpvfres %f",
         desc="set the tissue fraction resolution parameter (def is 0.5)",
     )
