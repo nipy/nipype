@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import numpy as np
-from numpy import ones, kron, mean, eye, hstack, dot, tile
+from numpy import ones, kron, mean, eye, hstack, tile
 from numpy.linalg import pinv
 import nibabel as nb
 from ..interfaces.base import (
@@ -114,7 +114,7 @@ def ICC_rep_anova(Y):
     X = hstack([x, x0])
 
     # Sum Square Error
-    predicted_Y = dot(dot(dot(X, pinv(dot(X.T, X))), X.T), Y.flatten("F"))
+    predicted_Y = X @ (pinv(X.T @ X, hermitian=True) @ (X.T @ Y.flatten("F")))
     residuals = Y.flatten("F") - predicted_Y
     SSE = (residuals**2).sum()
 
