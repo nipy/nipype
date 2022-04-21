@@ -101,15 +101,12 @@ existing pipeline systems.
 # versions
 NIBABEL_MIN_VERSION = "2.1.0"
 NETWORKX_MIN_VERSION = "2.0"
-# Numpy bug in python 3.7:
-# https://www.opensourceanswers.com/blog/you-shouldnt-use-python-37-for-data-science-right-now.html
-NUMPY_MIN_VERSION = "1.15.3"
+NUMPY_MIN_VERSION = "1.17"
 SCIPY_MIN_VERSION = "0.14"
 TRAITS_MIN_VERSION = "4.6"
 DATEUTIL_MIN_VERSION = "2.2"
-FUTURE_MIN_VERSION = "0.16.0"
 SIMPLEJSON_MIN_VERSION = "3.8.0"
-PROV_VERSION = "1.5.2"
+PROV_MIN_VERSION = "1.5.2"
 RDFLIB_MIN_VERSION = "5.0.0"
 CLICK_MIN_VERSION = "6.6.0"
 PYDOT_MIN_VERSION = "1.2.3"
@@ -140,7 +137,7 @@ REQUIRES = [
     "nibabel>=%s" % NIBABEL_MIN_VERSION,
     "numpy>=%s" % NUMPY_MIN_VERSION,
     "packaging",
-    "prov>=%s" % PROV_VERSION,
+    "prov>=%s" % PROV_MIN_VERSION,
     "pydot>=%s" % PYDOT_MIN_VERSION,
     "python-dateutil>=%s" % DATEUTIL_MIN_VERSION,
     "rdflib>=%s" % RDFLIB_MIN_VERSION,
