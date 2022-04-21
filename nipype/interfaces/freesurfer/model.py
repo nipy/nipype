@@ -401,6 +401,26 @@ class GLMFitInputSpec(FSTraitedSpec):
     synth = traits.Bool(argstr="--synth", desc="replace input with gaussian")
     resynth_test = traits.Int(argstr="--resynthtest %d", desc="test GLM by resynthsis")
     profile = traits.Int(argstr="--profile %d", desc="niters : test speed")
+    mrtm1 = traits.Tuple(
+        File(exists=True),
+        File(exists=True),
+        argstr="--mrtm1 %s %s",
+        desc="RefTac TimeSec : perform MRTM1 kinetic modeling",
+    )
+    mrtm2 = traits.Tuple(
+        File(exists=True),
+        File(exists=True),
+        traits.Float,
+        argstr="--mrtm2 %s %s %f",
+        desc="RefTac TimeSec k2prime : perform MRTM2 kinetic modeling",
+    )
+    logan = traits.Tuple(
+        File(exists=True),
+        File(exists=True),
+        traits.Float,
+        argstr="--logan %s %s %f",
+        desc="RefTac TimeSec tstar   : perform Logan kinetic modeling",
+    )
     force_perm = traits.Bool(
         argstr="--perm-force",
         desc="force perumtation test, even when design matrix is not orthog",
@@ -423,6 +443,9 @@ class GLMFitInputSpec(FSTraitedSpec):
     sim_done_file = File(
         argstr="--sim-done %s", desc="create file when simulation finished"
     )
+    _ext_xor = ['nii', 'nii_gz']
+    nii = traits.Bool(argstr='--nii', desc='save outputs as nii', xor=_ext_xor)
+    nii_gz = traits.Bool(argstr='--nii.gz', desc='save outputs as nii.gz', xor=_ext_xor)
 
 
 class GLMFitOutputSpec(TraitedSpec):
@@ -444,6 +467,8 @@ class GLMFitOutputSpec(TraitedSpec):
     frame_eigenvectors = File(desc="matrix of frame eigenvectors from residual PCA")
     singular_values = File(desc="matrix singular values from residual PCA")
     svd_stats_file = File(desc="text file summarizing the residual PCA")
+    k2p_file = File(desc="estimate of k2p parameter")
+    bp_file = File(desc="Binding potential estimates")
 
 
 class GLMFit(FSCommand):
@@ -478,22 +503,33 @@ class GLMFit(FSCommand):
             glmdir = os.path.abspath(self.inputs.glm_dir)
         outputs["glm_dir"] = glmdir
 
+        if isdefined(self.inputs.nii_gz):
+            ext = 'nii.gz'
+        elif isdefined(self.inputs.nii):
+            ext = 'nii'
+        else:
+            ext = 'mgh'
+
         # Assign the output files that always get created
-        outputs["beta_file"] = os.path.join(glmdir, "beta.mgh")
-        outputs["error_var_file"] = os.path.join(glmdir, "rvar.mgh")
-        outputs["error_stddev_file"] = os.path.join(glmdir, "rstd.mgh")
-        outputs["mask_file"] = os.path.join(glmdir, "mask.mgh")
+        outputs["beta_file"] = os.path.join(glmdir, f"beta.{ext}")
+        outputs["error_var_file"] = os.path.join(glmdir, f"rvar.{ext}")
+        outputs["error_stddev_file"] = os.path.join(glmdir, f"rstd.{ext}")
+        outputs["mask_file"] = os.path.join(glmdir, f"mask.{ext}")
         outputs["fwhm_file"] = os.path.join(glmdir, "fwhm.dat")
         outputs["dof_file"] = os.path.join(glmdir, "dof.dat")
         # Assign the conditional outputs
-        if isdefined(self.inputs.save_residual) and self.inputs.save_residual:
-            outputs["error_file"] = os.path.join(glmdir, "eres.mgh")
-        if isdefined(self.inputs.save_estimate) and self.inputs.save_estimate:
-            outputs["estimate_file"] = os.path.join(glmdir, "yhat.mgh")
+        if self.inputs.save_residual:
+            outputs["error_file"] = os.path.join(glmdir, f"eres.{ext}")
+        if self.inputs.save_estimate:
+            outputs["estimate_file"] = os.path.join(glmdir, f"yhat.{ext}")
+        if any((self.inputs.mrtm1, self.inputs.mrtm2, self.inputs.logan)):
+            outputs["bp_file"] = os.path.join(glmdir, f"bp.{ext}")
+        if self.inputs.mrtm1:
+            outputs["k2p_file"] = os.path.join(glmdir, "k2prime.dat")
 
         # Get the contrast directory name(s)
+        contrasts = []
         if isdefined(self.inputs.contrast):
-            contrasts = []
             for c in self.inputs.contrast:
                 if split_filename(c)[2] in [".mat", ".dat", ".mtx", ".con"]:
                     contrasts.append(split_filename(c)[1])
@@ -503,19 +539,19 @@ class GLMFit(FSCommand):
             contrasts = ["osgm"]
 
         # Add in the contrast images
-        outputs["sig_file"] = [os.path.join(glmdir, c, "sig.mgh") for c in contrasts]
-        outputs["ftest_file"] = [os.path.join(glmdir, c, "F.mgh") for c in contrasts]
+        outputs["sig_file"] = [os.path.join(glmdir, c, f"sig.{ext}") for c in contrasts]
+        outputs["ftest_file"] = [os.path.join(glmdir, c, f"F.{ext}") for c in contrasts]
         outputs["gamma_file"] = [
-            os.path.join(glmdir, c, "gamma.mgh") for c in contrasts
+            os.path.join(glmdir, c, f"gamma.{ext}") for c in contrasts
         ]
         outputs["gamma_var_file"] = [
-            os.path.join(glmdir, c, "gammavar.mgh") for c in contrasts
+            os.path.join(glmdir, c, f"gammavar.{ext}") for c in contrasts
         ]
 
         # Add in the PCA results, if relevant
         if isdefined(self.inputs.pca) and self.inputs.pca:
             pcadir = os.path.join(glmdir, "pca-eres")
-            outputs["spatial_eigenvectors"] = os.path.join(pcadir, "v.mgh")
+            outputs["spatial_eigenvectors"] = os.path.join(pcadir, f"v.{ext}")
             outputs["frame_eigenvectors"] = os.path.join(pcadir, "u.mtx")
             outputs["singluar_values"] = os.path.join(pcadir, "sdiag.mat")
             outputs["svd_stats_file"] = os.path.join(pcadir, "stats.dat")

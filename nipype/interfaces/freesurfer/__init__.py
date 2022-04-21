@@ -93,3 +93,7 @@ from .registration import (
     Paint,
     MRICoreg,
 )
+from .petsurfer import (
+    GTMSeg,
+    GTMPVC,
+)
