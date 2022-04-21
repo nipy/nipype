@@ -102,7 +102,7 @@ version: 2
 jobs:
   compare_base_dockerfiles:
     docker:
-      - image: docker:17.10.0-ce-git
+      - image: cimg/base:2022.04
     steps:
       - checkout:
           path: /home/circleci/nipype
