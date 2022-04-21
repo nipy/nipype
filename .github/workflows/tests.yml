@@ -34,7 +34,7 @@ jobs:
         deb-depends: [false]
         nipype-extras: ['doc,tests,profiler']
         include:
-          - os: ubuntu-18.04
+          - os: ubuntu-latest
             python-version: 3.8
             check: test
             pip-flags: ''
