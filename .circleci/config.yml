@@ -102,7 +102,7 @@ version: 2
 jobs:
   compare_base_dockerfiles:
     docker:
-      - image: docker:17.10.0-ce-git
+      - image: cimg/base:2022.04
     steps:
       - checkout:
           path: /home/circleci/nipype
@@ -112,10 +112,10 @@ jobs:
           working_directory: /home/circleci/nipype/docker
           command: |
             mkdir -p /tmp/docker
-            ash ./generate_dockerfiles.sh -b
+            bash ./generate_dockerfiles.sh -b
 
             # Use the sha256 sum of the pruned Dockerfile as the cache key.
-            ash prune_dockerfile.sh Dockerfile.base > /tmp/docker/Dockerfile.base-pruned
+            bash prune_dockerfile.sh Dockerfile.base > /tmp/docker/Dockerfile.base-pruned
       - restore_cache:
           key: dockerfile-cache-v1-master-{{ checksum "/tmp/docker/Dockerfile.base-pruned" }}
       - run:
