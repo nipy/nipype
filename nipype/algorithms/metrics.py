@@ -150,7 +150,7 @@ class Distance(BaseInterface):
         import matplotlib.pyplot as plt
 
         plt.figure()
-        plt.hist(min_dist_matrix, 50, normed=1, facecolor="green")
+        plt.hist(min_dist_matrix, 50, density=True, facecolor="green")
         plt.savefig(self._hist_filename)
         plt.clf()
         plt.close()
