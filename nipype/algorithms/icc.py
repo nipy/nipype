@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+from functools import lru_cache
 import numpy as np
 from numpy import ones, kron, mean, eye, hstack, tile
 from numpy.linalg import pinv
@@ -86,7 +87,17 @@ class ICC(BaseInterface):
         return outputs
 
 
-def ICC_rep_anova(Y):
+@lru_cache(maxsize=1)
+def ICC_projection_matrix(shape):
+    nb_subjects, nb_conditions = shape
+
+    x = kron(eye(nb_conditions), ones((nb_subjects, 1)))  # sessions
+    x0 = tile(eye(nb_subjects), (nb_conditions, 1))  # subjects
+    X = hstack([x, x0])
+    return X @ pinv(X.T @ X, hermitian=True) @ X.T
+
+
+def ICC_rep_anova(Y, projection_matrix=None):
     """
     the data Y are entered as a 'table' ie subjects are in rows and repeated
     measures in columns
@@ -94,36 +105,43 @@ def ICC_rep_anova(Y):
     One Sample Repeated measure ANOVA
 
     Y = XB + E with X = [FaTor / Subjects]
-    """
 
+    ``ICC_rep_anova`` involves an expensive operation to compute a projection
+    matrix, which depends only on the shape of ``Y``, which is computed by
+    calling ``ICC_projection_matrix(Y.shape)``. If arrays of multiple shapes are
+    expected, it may be worth pre-computing and passing directly as an
+    argument to ``ICC_rep_anova``.
+
+    If only one ``Y.shape`` will occur, you do not need to explicitly handle
+    these, as the most recently calculated matrix is cached automatically.
+    For example, if you are running the same computation on every voxel of
+    an image, you will see significant speedups.
+
+    If a ``Y`` is passed with a new shape, a new matrix will be calculated
+    automatically.
+    """
     [nb_subjects, nb_conditions] = Y.shape
     dfc = nb_conditions - 1
-    dfe = (nb_subjects - 1) * dfc
     dfr = nb_subjects - 1
+    dfe = dfr * dfc
 
     # Compute the repeated measure effect
     # ------------------------------------
 
     # Sum Square Total
-    mean_Y = mean(Y)
-    SST = ((Y - mean_Y) ** 2).sum()
-
-    # create the design matrix for the different levels
-    x = kron(eye(nb_conditions), ones((nb_subjects, 1)))  # sessions
-    x0 = tile(eye(nb_subjects), (nb_conditions, 1))  # subjects
-    X = hstack([x, x0])
+    demeaned_Y = Y - mean(Y)
+    SST = np.sum(demeaned_Y**2)
 
     # Sum Square Error
-    predicted_Y = X @ (pinv(X.T @ X, hermitian=True) @ (X.T @ Y.flatten("F")))
-    residuals = Y.flatten("F") - predicted_Y
-    SSE = (residuals**2).sum()
-
-    residuals.shape = Y.shape
+    if projection_matrix is None:
+        projection_matrix = ICC_projection_matrix(Y.shape)
+    residuals = Y.flatten("F") - (projection_matrix @ Y.flatten("F"))
+    SSE = np.sum(residuals**2)
 
     MSE = SSE / dfe
 
-    # Sum square session effect - between colums/sessions
-    SSC = ((mean(Y, 0) - mean_Y) ** 2).sum() * nb_subjects
+    # Sum square session effect - between columns/sessions
+    SSC = np.sum(mean(demeaned_Y, 0) ** 2) * nb_subjects
     MSC = SSC / dfc / nb_subjects
 
     session_effect_F = MSC / MSE
