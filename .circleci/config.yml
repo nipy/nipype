@@ -134,6 +134,23 @@ jobs:
             - docker/Dockerfile.base-pruned
             - docker/get_base_image.sh
 
+  get_test_data:
+    machine: *machine_kwds
+    working_directory: /home/circleci/nipype
+    steps:
+      - restore_cache:
+          keys:
+            - data-v0-{{ .Branch }}-{{ .Revision }}
+            - data-v0--{{ .Revision }}
+            - data-v0-{{ .Branch }}-
+            - data-v0-master-
+            - data-v0-
+      - run: *_download_test_data
+      - save_cache:
+         key: data-v0-{{ .Branch }}-{{ .Revision }}
+         paths:
+            - /home/circleci/examples
+
   test_pytest:
     machine: *machine_kwds
     working_directory: /home/circleci/nipype
@@ -142,13 +159,15 @@ jobs:
           path: /home/circleci/nipype
       - attach_workspace:
           at: /tmp
+      - restore_cache:
+          keys:
+            - data-v0-{{ .Branch }}-{{ .Revision }}
       - run: *set_pr_number
       - run: *generate_dockerfiles
       - run: *modify_nipype_version
       - run: *get_base_image
       - run: *build_main_image_py38
       - run: *_get_codecov
-      - run: *_download_test_data
       - run: *prepare_working_directory
       - run:
           name: Run pytests
@@ -248,6 +267,13 @@ workflows:
                 - /docs?\/.*/
             tags:
               only: /.*/
+      - get_test_data:
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+            tags:
+              only: /.*/
       - test_pytest:
           filters:
             branches:
@@ -257,6 +283,7 @@ workflows:
               only: /.*/
           requires:
             - compare_base_dockerfiles
+            - get_test_data
       - deploy_dockerhub:
           filters:
             branches:
