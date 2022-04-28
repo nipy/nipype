@@ -64,14 +64,21 @@ _download_test_data: &_download_test_data
   environment:
     OSF_NIPYPE_URL: "https://files.osf.io/v1/resources/nefdp/providers/osfstorage"
   command: |
+    set -x
     export DATA_NIPYPE_TUTORIAL_URL="${OSF_NIPYPE_URL}/57f4739cb83f6901ed94bf21"
-    curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_TUTORIAL_URL" | tar xj
+    if [[ ! -d nipype-tutorial ]]; then
+        curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_TUTORIAL_URL" | tar xjv
+    fi
 
     export DATA_NIPYPE_FSL_COURSE="${OSF_NIPYPE_URL}/57f472cf9ad5a101f977ecfe"
-    curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_COURSE" | tar xz
+    if [[ ! -d nipype-fsl_course_data ]]; then
+        curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_COURSE" | tar xzv
+    fi
 
     export DATA_NIPYPE_FSL_FEEDS="${OSF_NIPYPE_URL}/57f473066c613b01f113e7af"
-    curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_FEEDS" | tar xz
+    if [[ ! -d feeds ]]; then
+        curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_FEEDS" | tar xzv
+    fi
 
 _prepare_working_directory: &prepare_working_directory
   name: Prepare working directory
@@ -134,6 +141,23 @@ jobs:
             - docker/Dockerfile.base-pruned
             - docker/get_base_image.sh
 
+  get_test_data:
+    machine: *machine_kwds
+    working_directory: /home/circleci/nipype
+    steps:
+      - restore_cache:
+          keys:
+            - data-v0-{{ .Branch }}-{{ .Revision }}
+            - data-v0--{{ .Revision }}
+            - data-v0-{{ .Branch }}-
+            - data-v0-master-
+            - data-v0-
+      - run: *_download_test_data
+      - save_cache:
+         key: data-v0-{{ .Branch }}-{{ .Revision }}
+         paths:
+            - /home/circleci/examples
+
   test_pytest:
     machine: *machine_kwds
     working_directory: /home/circleci/nipype
@@ -142,13 +166,15 @@ jobs:
           path: /home/circleci/nipype
       - attach_workspace:
           at: /tmp
+      - restore_cache:
+          keys:
+            - data-v0-{{ .Branch }}-{{ .Revision }}
       - run: *set_pr_number
       - run: *generate_dockerfiles
       - run: *modify_nipype_version
       - run: *get_base_image
       - run: *build_main_image_py38
       - run: *_get_codecov
-      - run: *_download_test_data
       - run: *prepare_working_directory
       - run:
           name: Run pytests
@@ -248,6 +274,13 @@ workflows:
                 - /docs?\/.*/
             tags:
               only: /.*/
+      - get_test_data:
+          filters:
+            branches:
+              ignore:
+                - /docs?\/.*/
+            tags:
+              only: /.*/
       - test_pytest:
           filters:
             branches:
@@ -257,6 +290,7 @@ workflows:
               only: /.*/
           requires:
             - compare_base_dockerfiles
+            - get_test_data
       - deploy_dockerhub:
           filters:
             branches:
