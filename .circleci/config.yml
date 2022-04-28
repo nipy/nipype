@@ -66,13 +66,19 @@ _download_test_data: &_download_test_data
   command: |
     set -x
     export DATA_NIPYPE_TUTORIAL_URL="${OSF_NIPYPE_URL}/57f4739cb83f6901ed94bf21"
-    curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_TUTORIAL_URL" | tar xjv
+    if [[ ! -d nipype-tutorial ]]; then
+        curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_TUTORIAL_URL" | tar xjv
+    fi
 
     export DATA_NIPYPE_FSL_COURSE="${OSF_NIPYPE_URL}/57f472cf9ad5a101f977ecfe"
-    curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_COURSE" | tar xzv
+    if [[ ! -d nipype-fsl_course_data ]]; then
+        curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_COURSE" | tar xzv
+    fi
 
     export DATA_NIPYPE_FSL_FEEDS="${OSF_NIPYPE_URL}/57f473066c613b01f113e7af"
-    curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_FEEDS" | tar xzv
+    if [[ ! -d feeds ]]; then
+        curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_FEEDS" | tar xzv
+    fi
 
 _prepare_working_directory: &prepare_working_directory
   name: Prepare working directory
