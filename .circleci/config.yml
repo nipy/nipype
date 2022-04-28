@@ -64,14 +64,15 @@ _download_test_data: &_download_test_data
   environment:
     OSF_NIPYPE_URL: "https://files.osf.io/v1/resources/nefdp/providers/osfstorage"
   command: |
+    set -x
     export DATA_NIPYPE_TUTORIAL_URL="${OSF_NIPYPE_URL}/57f4739cb83f6901ed94bf21"
-    curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_TUTORIAL_URL" | tar xj
+    curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_TUTORIAL_URL" | tar xjv
 
     export DATA_NIPYPE_FSL_COURSE="${OSF_NIPYPE_URL}/57f472cf9ad5a101f977ecfe"
-    curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_COURSE" | tar xz
+    curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_COURSE" | tar xzv
 
     export DATA_NIPYPE_FSL_FEEDS="${OSF_NIPYPE_URL}/57f473066c613b01f113e7af"
-    curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_FEEDS" | tar xz
+    curl -sSL --retry 5 --connect-timeout 15 "$DATA_NIPYPE_FSL_FEEDS" | tar xzv
 
 _prepare_working_directory: &prepare_working_directory
   name: Prepare working directory
