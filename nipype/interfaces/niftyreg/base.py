@@ -15,8 +15,8 @@ Examples
 See the docstrings of the individual classes for examples.
 
 """
-from distutils.version import StrictVersion
 import os
+from packaging.version import Version
 
 from ... import logging
 from ..base import CommandLine, CommandLineInputSpec, traits, Undefined, PackageInfo
@@ -65,13 +65,13 @@ class NiftyRegCommand(CommandLine):
         self.required_version = required_version
         _version = self.version
         if _version:
-            if self._min_version is not None and StrictVersion(
-                _version
-            ) < StrictVersion(self._min_version):
+            if self._min_version is not None and Version(_version) < Version(
+                self._min_version
+            ):
                 msg = "A later version of Niftyreg is required (%s < %s)"
                 iflogger.warning(msg, _version, self._min_version)
             if required_version is not None:
-                if StrictVersion(_version) != StrictVersion(required_version):
+                if Version(_version) != Version(required_version):
                     msg = "The version of NiftyReg differs from the required"
                     msg += "(%s != %s)"
                     iflogger.warning(msg, _version, self.required_version)
@@ -101,11 +101,11 @@ class NiftyRegCommand(CommandLine):
         _version = self.version
         if not _version:
             raise Exception("Niftyreg not found")
-        if StrictVersion(_version) < StrictVersion(self._min_version):
+        if Version(_version) < Version(self._min_version):
             err = "A later version of Niftyreg is required (%s < %s)"
             raise ValueError(err % (_version, self._min_version))
         if self.required_version:
-            if StrictVersion(_version) != StrictVersion(self.required_version):
+            if Version(_version) != Version(self.required_version):
                 err = "The version of NiftyReg differs from the required"
                 err += "(%s != %s)"
                 raise ValueError(err % (_version, self.required_version))
