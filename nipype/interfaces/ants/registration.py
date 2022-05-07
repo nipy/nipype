@@ -585,7 +585,10 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         usedefault=True,
         desc="The Lower quantile to clip image ranges",
     )
-
+    random_seed = traits.Int(
+        argstr="--random-seed %d",
+        desc="Fixed seed for random number generation",
+    )
     verbose = traits.Bool(
         argstr="-v", default_value=False, usedefault=True, nohash=True
     )
@@ -1707,6 +1710,10 @@ Transform type
         argstr="-p %s",
         desc="precision type (default = double)",
         usedefault=True,
+    )
+    random_seed = traits.Int(
+        argstr="-e %d",
+        desc="fixed random seed",
     )
 
 
