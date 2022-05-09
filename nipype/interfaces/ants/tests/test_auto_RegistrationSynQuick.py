@@ -39,6 +39,10 @@ def test_RegistrationSynQuick_inputs():
             argstr="-p %s",
             usedefault=True,
         ),
+        random_seed=dict(
+            argstr="-e %d",
+            min_ver="2.3.0",
+        ),
         spline_distance=dict(
             argstr="-s %d",
             usedefault=True,

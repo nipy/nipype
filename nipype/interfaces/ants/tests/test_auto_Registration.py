@@ -115,6 +115,10 @@ def test_Registration_inputs():
             requires=["metric_weight"],
             usedefault=True,
         ),
+        random_seed=dict(
+            argstr="--random-seed %d",
+            min_ver="2.3.0",
+        ),
         restore_state=dict(
             argstr="--restore-state %s",
             extensions=None,
