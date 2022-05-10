@@ -3,7 +3,7 @@
 import os.path as op
 import numpy as np
 import nibabel as nb
-from distutils.version import LooseVersion
+from nipype.external.version import LooseVersion
 
 from ... import logging
 from ..base import TraitedSpec, BaseInterfaceInputSpec, File, isdefined, traits
