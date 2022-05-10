@@ -18,7 +18,7 @@ from functools import reduce
 
 import numpy as np
 
-from ... import logging, config, LooseVersion
+from ... import logging, config
 from ...utils.filemanip import (
     indirectory,
     relpath,
@@ -1076,11 +1076,7 @@ def generate_expanded_graph(graph_in):
         inode._id += ".%sI" % iterable_prefix
 
         # merge the iterated subgraphs
-        # dj: the behaviour of .copy changes in version 2
-        if LooseVersion(nx.__version__) < LooseVersion("2"):
-            subgraph = graph_in.subgraph(subnodes)
-        else:
-            subgraph = graph_in.subgraph(subnodes).copy()
+        subgraph = graph_in.subgraph(subnodes).copy()
         graph_in = _merge_graphs(
             graph_in,
             subnodes,

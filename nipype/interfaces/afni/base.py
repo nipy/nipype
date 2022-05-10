@@ -4,7 +4,7 @@
 """Provide a base interface to AFNI commands."""
 import os
 from sys import platform
-from distutils import spawn
+import shutil
 
 from ... import logging, LooseVersion
 from ...utils.filemanip import split_filename, fname_presuffix
@@ -317,7 +317,7 @@ class AFNIPythonCommand(AFNICommand):
     def cmd(self):
         """Revise the command path."""
         orig_cmd = super(AFNIPythonCommand, self).cmd
-        found = spawn.find_executable(orig_cmd)
+        found = shutil.which(orig_cmd)
         return found if found is not None else orig_cmd
 
     @property

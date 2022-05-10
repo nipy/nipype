@@ -9,7 +9,7 @@ import re
 from collections.abc import Iterator
 from warnings import warn
 
-from distutils.version import LooseVersion
+from nipype.external.version import LooseVersion
 
 import numpy as np
 
@@ -145,7 +145,7 @@ def package_check(
         packages.  Default is *Nipype*.
     checker : object, optional
         The class that will perform the version checking.  Default is
-        distutils.version.LooseVersion.
+        nipype.external.version.LooseVersion.
     exc_failed_import : Exception, optional
         Class of the exception to be thrown if import failed.
     exc_failed_check : Exception, optional

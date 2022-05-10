@@ -208,9 +208,9 @@ class LabelConfig(MRTrix3Base):
             skip = []
 
         if not isdefined(self.inputs.in_config):
-            from distutils.spawn import find_executable
+            from shutil import which
 
-            path = find_executable(self._cmd)
+            path = which(self._cmd)
             if path is None:
                 path = os.getenv(MRTRIX3_HOME, "/opt/mrtrix3")
             else:
