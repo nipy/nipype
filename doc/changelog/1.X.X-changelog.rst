@@ -1,3 +1,26 @@
+1.8.0 (May 10, 2022)
+====================
+
+New feature release in the 1.8.x series.
+
+The primary new features are a batch of PETSurfer interfaces.
+
+This release drops support for Python < 3.7 and Numpy < 1.17, triggering a minor version bump.
+Additionally, matplotlib < 2.1 will stop working with some interfaces, but more recent versions
+will start working.
+
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.8.0?closed=1>`__)
+
+  * FIX: Change plt.hist() argument from deprecated 'normed' to 'density' (https://github.com/nipy/nipype/pull/3455)
+  * ENH: Add random seed option to ANTs registration (https://github.com/nipy/nipype/pull/3463)
+  * ENH: Add PETsurfer interfaces (https://github.com/nipy/nipype/pull/3437)
+  * ENH: Add Text2Vest and Vest2Text interfaces (https://github.com/nipy/nipype/pull/3447)
+  * REF: Optimize ICC_rep_anova with a memoized helper function (https://github.com/nipy/nipype/pull/3454)
+  * REF: Rearranging matmul order and using hermitian flag in ICC_rep_anova  (https://github.com/nipy/nipype/pull/3453)
+  * MNT: Drop distutils (https://github.com/nipy/nipype/pull/3458)
+  * CI: Cache test data (https://github.com/nipy/nipype/pull/3459)
+
+
 1.7.1 (April 05, 2022)
 ======================
 

@@ -85,6 +85,11 @@
       "name": "Loney, Fred"
     },
     {
+      "affiliation": "Department of Psychology, Stanford University",
+      "name": "Norgaard, Martin",
+      "orcid": "0000-0003-2131-5688"
+    },
+    {
       "affiliation": "Florida International University",
       "name": "Salo, Taylor",
       "orcid": "0000-0001-9813-3167"
@@ -172,6 +177,11 @@
       "name": "Clark, Michael G. "
     },
     {
+      "affiliation": "Neuroscience Program, University of Iowa",
+      "name": "Kent, James D.",
+      "orcid": "0000-0002-4892-2659"
+    },
+    {
       "affiliation": "Concordia University",
       "name": "Benderoff, Erin"
     },
@@ -182,11 +192,6 @@
       "affiliation": "CIBIT, UC",
       "name": "Dias, Maria de Fatima",
       "orcid": "0000-0001-8878-1750"
-    },
-    {
-      "affiliation": "Neuroscience Program, University of Iowa",
-      "name": "Kent, James D.",
-      "orcid": "0000-0002-4892-2659"
     },
     {
       "affiliation": "Otto-von-Guericke-University Magdeburg, Germany",
@@ -695,6 +700,11 @@
       "orcid": "0000-0001-9800-4816"
     },
     {
+      "affiliation": "ARAMIS Lab, Paris Brain Institute",
+      "name": "Vaillant, Ghislain",
+      "orcid": "0000-0003-0267-3033"
+    },
+    {
       "name": "Schwabacher, Isaac"
     },
     {
@@ -775,6 +785,11 @@
       "name": "Park, Anne"
     },
     {
+      "affiliation": "Consolidated Department of Psychiatry, Harvard Medical School",
+      "name": "Frederick, Blaise",
+      "orcid": "0000-0001-5832-5279"
+    },
+    {
       "name": "Cheung, Brian"
     },
     {
@@ -838,6 +853,11 @@
     },
     {
       "name": "Urchs, Sebastian"
+    },
+    {
+      "affiliation": "Department of Psychology, Stanford University",
+      "name": "Shim, Sunjae",
+      "orcid": "0000-0003-2773-0807"
     },
     {
       "name": "Nickson, Thomas"
