@@ -540,7 +540,8 @@
     },
     {
       "affiliation": "Sagol School of Neuroscience, Tel Aviv University",
-      "name": "Ben-Zvi, Gal"
+      "name": "Ben-Zvi, Gal",
+      "orcid": "0000-0002-5655-9423"
     },
     {
       "affiliation": "University of Newcastle, Australia",
@@ -891,11 +892,7 @@
       "orcid": "0000-0002-5312-6729"
     }
   ],
-  "keywords": [
-    "neuroimaging",
-    "workflow",
-    "pipeline"
-  ],
+  "keywords": ["neuroimaging", "workflow", "pipeline"],
   "license": "Apache-2.0",
   "upload_type": "software"
 }
