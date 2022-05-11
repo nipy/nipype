@@ -12,6 +12,8 @@
 # 2022.04.27 - Minor changes are made to the comments,
 #            - The StrictVersion class was removed
 #            - Black styling was applied
+# 2022.05.11 - Refactor LooseVersion._cmp to permit comparisons with
+#              distutils.version.LooseVersion
 #
 
 # distutils/version.py
@@ -38,6 +40,7 @@ Every version number class implements the following interface:
     of the same class, thus must follow the same rules)
 """
 
+import sys
 import re
 
 
@@ -211,10 +214,7 @@ class LooseVersion(Version):
         return "LooseVersion ('%s')" % str(self)
 
     def _cmp(self, other):
-        if isinstance(other, str):
-            other = LooseVersion(other)
-        elif not isinstance(other, LooseVersion):
-            return NotImplemented
+        other = self._coerce(other)
 
         if self.version == other.version:
             return 0
@@ -222,3 +222,19 @@ class LooseVersion(Version):
             return -1
         if self.version > other.version:
             return 1
+
+    @staticmethod
+    def _coerce(other):
+        if isinstance(other, LooseVersion):
+            return other
+        elif isinstance(other, str):
+            return LooseVersion(other)
+        elif "distutils" in sys.modules:
+            # Using this check to avoid importing distutils and suppressing the warning
+            try:
+                from distutils.version import LooseVersion as deprecated
+            except ImportError:
+                return NotImplemented
+            if isinstance(other, deprecated):
+                return LooseVersion(str(other))
+        return NotImplemented
