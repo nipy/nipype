@@ -96,7 +96,6 @@ def test_DWIPreproc_inputs():
             argstr="%s",
             extensions=None,
             requires=["export_grad_mrtrix"],
-            usedefault=True,
         ),
         pe_dir=dict(
             argstr="-pe_dir %s",
