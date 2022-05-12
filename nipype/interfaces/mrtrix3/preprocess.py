@@ -192,9 +192,7 @@ class DWIBiasCorrectInputSpec(MRTrix3BaseInputSpec):
         mandatory=True,
         desc="input DWI image",
     )
-    in_mask = File(
-        argstr="-mask %s", desc="input mask image for bias field estimation"
-    )
+    in_mask = File(argstr="-mask %s", desc="input mask image for bias field estimation")
     use_ants = traits.Bool(
         argstr="ants",
         mandatory=True,
@@ -411,9 +409,7 @@ class DWIPreproc(MRTrix3Base):
         outputs = self.output_spec().get()
         outputs["out_file"] = op.abspath(self.inputs.out_file)
         if self.inputs.export_grad_mrtrix:
-            outputs["out_grad_mrtrix"] = op.abspath(
-                self.inputs.out_grad_mrtrix
-            )
+            outputs["out_grad_mrtrix"] = op.abspath(self.inputs.out_grad_mrtrix)
         if self.inputs.export_grad_fsl:
             outputs["out_fsl_bvec"] = op.abspath(self.inputs.out_grad_fsl[0])
             outputs["out_fsl_bval"] = op.abspath(self.inputs.out_grad_fsl[1])
@@ -447,15 +443,9 @@ class ResponseSDInputSpec(MRTrix3BaseInputSpec):
         usedefault=True,
         desc="output WM response text file",
     )
-    gm_file = File(
-        argstr="%s", position=-2, desc="output GM response text file"
-    )
-    csf_file = File(
-        argstr="%s", position=-1, desc="output CSF response text file"
-    )
-    in_mask = File(
-        exists=True, argstr="-mask %s", desc="provide initial mask image"
-    )
+    gm_file = File(argstr="%s", position=-2, desc="output GM response text file")
+    csf_file = File(argstr="%s", position=-1, desc="output CSF response text file")
+    in_mask = File(exists=True, argstr="-mask %s", desc="provide initial mask image")
     max_sh = InputMultiObject(
         traits.Int,
         argstr="-lmax %s",
