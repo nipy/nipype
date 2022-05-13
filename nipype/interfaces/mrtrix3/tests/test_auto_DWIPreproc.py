@@ -34,12 +34,6 @@ def test_DWIPreproc_inputs():
             nohash=True,
             usedefault=True,
         ),
-        export_grad_fsl=dict(
-            argstr="-export_grad_fsl",
-        ),
-        export_grad_mrtrix=dict(
-            argstr="-export_grad_mrtrix",
-        ),
         grad_file=dict(
             argstr="-grad %s",
             extensions=None,
@@ -89,13 +83,11 @@ def test_DWIPreproc_inputs():
             usedefault=True,
         ),
         out_grad_fsl=dict(
-            argstr="%s, %s",
-            requires=["export_grad_fsl"],
+            argstr="-export_grad_fsl %s, %s",
         ),
         out_grad_mrtrix=dict(
-            argstr="%s",
+            argstr="-export_grad_mrtrix %s",
             extensions=None,
-            requires=["export_grad_mrtrix"],
         ),
         pe_dir=dict(
             argstr="-pe_dir %s",
