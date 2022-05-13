@@ -288,6 +288,10 @@ class Gunzip(BaseInterface):
     >>> res = gunzip.run()
     >>> res.outputs.out_file  # doctest: +ELLIPSIS
     '.../tpms_msk.nii'
+    >>> gunzip = Gunzip(in_file='tpms_msk.nii', compress=True)
+    >>> res = gunzip.run()
+    >>> res.outputs.out_file  # doctest: +ELLIPSIS
+    '.../tpms_msk.nii.gz'
 
     .. testcleanup::
 
