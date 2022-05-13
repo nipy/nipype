@@ -4,6 +4,7 @@ from ..misc import Gunzip
 
 def test_Gunzip_inputs():
     input_map = dict(
+        compress=dict(),
         in_file=dict(
             extensions=None,
             mandatory=True,

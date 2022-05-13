@@ -273,6 +273,7 @@ class CreateNifti(BaseInterface):
 
 class GunzipInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True)
+    compress = traits.Bool(default_value=False)
 
 
 class GunzipOutputSpec(TraitedSpec):
@@ -298,17 +299,28 @@ class Gunzip(BaseInterface):
 
     def _gen_output_file_name(self):
         _, base, ext = split_filename(self.inputs.in_file)
-        if ext[-3:].lower() == ".gz":
-            ext = ext[:-3]
+
+        if self.inputs.compress:
+            ext += ".gz"
+        else:
+            if ext[-3:].lower() == ".gz":
+                ext = ext[:-3]
+
         return os.path.abspath(base + ext)
 
     def _run_interface(self, runtime):
         import gzip
         import shutil
 
-        with gzip.open(self.inputs.in_file, "rb") as in_file:
-            with open(self._gen_output_file_name(), "wb") as out_file:
-                shutil.copyfileobj(in_file, out_file)
+        if self.inputs.compress:
+            with open(self.inputs.in_file, "rb") as in_file:
+                with gzip.open(self._gen_output_file_name(), "wb") as out_file:
+                    shutil.copyfileobj(in_file, out_file)
+        else:
+            with gzip.open(self.inputs.in_file, "rb") as in_file:
+                with open(self._gen_output_file_name(), "wb") as out_file:
+                    shutil.copyfileobj(in_file, out_file)
+
         return runtime
 
     def _list_outputs(self):
