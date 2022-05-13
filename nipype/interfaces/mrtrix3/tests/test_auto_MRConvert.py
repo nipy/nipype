@@ -14,9 +14,21 @@ def test_MRConvert_inputs():
         bval_scale=dict(
             argstr="-bvalue_scaling %s",
         ),
+        clear_property=dict(
+            argstr="-clear_property %s",
+            sep=",",
+        ),
         coord=dict(
             argstr="-coord %s",
             sep=" ",
+        ),
+        copy_properties=dict(
+            argstr="-copy_properties %s",
+            extensions=None,
+            mandatory=False,
+        ),
+        datatype=dict(
+            argstr="-datatype %s",
         ),
         environ=dict(
             nohash=True,
@@ -72,6 +84,13 @@ def test_MRConvert_inputs():
             position=-1,
             usedefault=True,
         ),
+        out_grad_fsl=dict(
+            argstr="-export_grad_fsl %s, %s",
+        ),
+        out_grad_mrtrix=dict(
+            argstr="-export_grad_mrtrix %s",
+            extensions=None,
+        ),
         scaling=dict(
             argstr="-scaling %s",
             sep=",",
@@ -101,6 +120,11 @@ def test_MRConvert_outputs():
         ),
         out_file=dict(
             extensions=None,
+        ),
+        out_grad_mrtrix=dict(
+            argstr="%s",
+            extensions=None,
+            usedefault=True,
         ),
     )
     outputs = MRConvert.output_spec()
