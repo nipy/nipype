@@ -14,7 +14,7 @@ Top-level module API
 import os
 
 # XXX Deprecate this import
-from .external.version import LooseVersion
+from looseversion import LooseVersion
 
 from .info import URL as __url__, STATUS as __status__, __version__
 from .utils.config import NipypeConfig

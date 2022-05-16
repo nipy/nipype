@@ -7,7 +7,7 @@ import os.path as op
 
 import numpy as np
 import nibabel as nb
-from nipype.external.version import LooseVersion
+from looseversion import LooseVersion
 
 from ... import logging
 from ..base import TraitedSpec, File, traits, isdefined

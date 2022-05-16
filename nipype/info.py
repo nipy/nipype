@@ -146,6 +146,7 @@ REQUIRES = [
     "traits>=%s,!=5.0" % TRAITS_MIN_VERSION,
     "filelock>=3.0.0",
     "etelemetry>=0.2.0",
+    "looseversion",
 ]
 
 TESTS_REQUIRES = [
