@@ -8,6 +8,9 @@ def test_Gunzip_inputs():
             extensions=None,
             mandatory=True,
         ),
+        mode=dict(
+            usedefault=True,
+        ),
     )
     inputs = Gunzip.input_spec()
 
