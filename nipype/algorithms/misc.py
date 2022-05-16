@@ -337,7 +337,7 @@ class GunzipInputSpec(GzipInputSpec):
 
 
 class Gunzip(Gzip):
-    """Gzip wrapper defaulting to decompression
+    """Gunzip wrapper
 
     >>> from nipype.algorithms.misc import Gunzip
     >>> gunzip = Gunzip(in_file='tpms_msk.nii.gz')
