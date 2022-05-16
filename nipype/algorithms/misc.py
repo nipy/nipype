@@ -273,8 +273,9 @@ class CreateNifti(BaseInterface):
 
 class GzipInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True, desc="file to (de)compress")
-    mode = traits.Enum("compress", "decompress", usedefault=True,
-                       desc="compress or decompress")
+    mode = traits.Enum(
+        "compress", "decompress", usedefault=True, desc="compress or decompress"
+    )
 
 
 class GzipOutputSpec(TraitedSpec):
@@ -332,8 +333,7 @@ class Gzip(BaseInterface):
 
 
 class GunzipInputSpec(GzipInputSpec):
-    mode = traits.Enum("decompress", usedefault=True,
-                       desc="decompress or compress")
+    mode = traits.Enum("decompress", usedefault=True, desc="decompress or compress")
 
 
 class Gunzip(Gzip):
