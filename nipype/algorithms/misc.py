@@ -332,7 +332,7 @@ class Gzip(BaseInterface):
 
 
 class GunzipInputSpec(GzipInputSpec):
-    mode = traits.Enum("decompress", "compress", usedefault=True,
+    mode = traits.Enum("decompress", usedefault=True,
                        desc="decompress or compress")
 
 
