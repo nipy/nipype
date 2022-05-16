@@ -14,7 +14,7 @@ import sys
 import errno
 import atexit
 from warnings import warn
-from nipype.external.version import LooseVersion
+from looseversion import LooseVersion
 import configparser
 import numpy as np
 
