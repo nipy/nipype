@@ -1,3 +1,13 @@
+1.8.1 (May 16, 2022)
+====================
+
+Bug-fix release in the 1.8.x series.
+
+The previous release vendored ``distutils.version.LooseVersion``, and the vendored objects did not
+preserve compatiblity with the ``distutils`` objects. This release switches to the
+``looseversion`` package that ensures compatiblity.
+
+
 1.8.0 (May 10, 2022)
 ====================
 
