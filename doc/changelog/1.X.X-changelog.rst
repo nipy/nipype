@@ -1,3 +1,17 @@
+1.8.2 (June 06, 2022)
+=====================
+
+Bug-fix release in the 1.8.x series.
+
+This release restores compatibility with networkx 2.8.3, which errors when
+graph nodes might conflict with pydot parsing.
+
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.8.2?closed=1>`__)
+
+  * ENH: Enable compression with Gunzip interface (https://github.com/nipy/nipype/pull/3472)
+  * CI: Schedule weekly tests with cron (https://github.com/nipy/nipype/pull/3480)
+
+
 1.8.1 (May 16, 2022)
 ====================
 
