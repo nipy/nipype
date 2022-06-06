@@ -486,9 +486,9 @@ def _create_dot_graph(graph, show_connectinfo=False, simple_form=True):
         srcname = get_print_name(edge[0], simple_form=simple_form)
         destname = get_print_name(edge[1], simple_form=simple_form)
         if show_connectinfo:
-            pklgraph.add_edge(srcname, destname, l=str(data["connect"]))
+            pklgraph.add_edge(f'"{srcname}"', f'"{destname}"', l=str(data["connect"]))
         else:
-            pklgraph.add_edge(srcname, destname)
+            pklgraph.add_edge(f'"{srcname}"', f'"{destname}"')
     return pklgraph
 
 

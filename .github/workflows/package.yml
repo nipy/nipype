@@ -8,6 +8,9 @@ on:
       - rel/*
     tags:
       - '*'
+  schedule:
+    # 8am EST / 9am EDT Mondays
+    - cron: '0 13 * * 1'
 
 defaults:
   run:
