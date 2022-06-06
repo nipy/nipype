@@ -393,6 +393,11 @@
       "orcid": "0000-0003-0646-4810"
     },
     {
+      "affiliation": "ARAMIS Lab, Paris Brain Institute",
+      "name": "Vaillant, Ghislain",
+      "orcid": "0000-0003-0267-3033"
+    },
+    {
       "affiliation": "Neurospin/Unicog/Inserm/CEA",
       "name": "Perez-Guevara, Martin Felipe",
       "orcid": "0000-0003-4497-861X"
@@ -698,11 +703,6 @@
       "affiliation": "Stanford University",
       "name": "Lerma-Usabiaga, Garikoitz",
       "orcid": "0000-0001-9800-4816"
-    },
-    {
-      "affiliation": "ARAMIS Lab, Paris Brain Institute",
-      "name": "Vaillant, Ghislain",
-      "orcid": "0000-0003-0267-3033"
     },
     {
       "name": "Schwabacher, Isaac"
