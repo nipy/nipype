@@ -186,7 +186,7 @@ class BaseInterface(Interface):
             from ... import check_latest_version
 
             if BaseInterface._etelemetry_version_data is None:
-                BaseInterface._etelemetry_version_data = check_latest_version()
+                BaseInterface._etelemetry_version_data = check_latest_version() or "n/a"
 
         if not self.input_spec:
             raise Exception("No input_spec in class: %s" % self.__class__.__name__)
