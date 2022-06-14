@@ -98,4 +98,4 @@ if config.getboolean("execution", "check_version"):
         from .interfaces.base import BaseInterface
 
         if BaseInterface._etelemetry_version_data is None:
-            BaseInterface._etelemetry_version_data = check_latest_version()
+            BaseInterface._etelemetry_version_data = check_latest_version() or "n/a"
