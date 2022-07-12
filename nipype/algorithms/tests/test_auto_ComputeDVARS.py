@@ -43,6 +43,9 @@ def test_ComputeDVARS_inputs():
             usedefault=True,
         ),
         series_tr=dict(),
+        variance_tol=dict(
+            usedefault=True,
+        ),
     )
     inputs = ComputeDVARS.input_spec()
 
