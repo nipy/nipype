@@ -1011,8 +1011,8 @@ def compute_dvars(
     in_file,
     in_mask,
     remove_zerovariance=False,
-    variance_tol=0.0,
     intensity_normalization=1000,
+    variance_tol=0.0,
 ):
     """
     Compute the :abbr:`DVARS (D referring to temporal
