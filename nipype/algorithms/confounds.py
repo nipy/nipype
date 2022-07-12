@@ -50,6 +50,11 @@ class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
     remove_zerovariance = traits.Bool(
         True, usedefault=True, desc="remove voxels with zero variance"
     )
+    variance_tol = traits.Float(
+        1e-7,
+        usedefault=True,
+        desc="maximum variance to consider \"close to\" zero for the purposes of removal",
+    )
     save_std = traits.Bool(True, usedefault=True, desc="save standardized DVARS")
     save_nstd = traits.Bool(False, usedefault=True, desc="save non-standardized DVARS")
     save_vxstd = traits.Bool(
@@ -167,6 +172,7 @@ Bradley L. and Petersen, Steven E.},
             self.inputs.in_file,
             self.inputs.in_mask,
             remove_zerovariance=self.inputs.remove_zerovariance,
+            variance_tol=self.inputs.variance_tol,
             intensity_normalization=self.inputs.intensity_normalization,
         )
 
@@ -995,7 +1001,11 @@ class NonSteadyStateDetector(BaseInterface):
 
 
 def compute_dvars(
-    in_file, in_mask, remove_zerovariance=False, intensity_normalization=1000
+    in_file,
+    in_mask,
+    remove_zerovariance=False,
+    variance_tol=0.0,
+    intensity_normalization=1000,
 ):
     """
     Compute the :abbr:`DVARS (D referring to temporal
@@ -1050,8 +1060,9 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     ) / 1.349
 
     if remove_zerovariance:
-        mfunc = mfunc[func_sd != 0, :]
-        func_sd = func_sd[func_sd != 0]
+        zero_variance_voxels = func_sd > self.inputs.variance_tol
+        mfunc = mfunc[zero_variance_voxels, :]
+        func_sd = func_sd[zero_variance_voxels]
 
     # Compute (non-robust) estimate of lag-1 autocorrelation
     ar1 = np.apply_along_axis(
