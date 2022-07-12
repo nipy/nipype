@@ -1000,6 +1000,13 @@ class NonSteadyStateDetector(BaseInterface):
         return self._results
 
 
+def _AR_est_YW(x, order, rxx=None):
+    """Retrieve AR coefficients while dropping the sig_sq return value"""
+    from nitime.algorithms import AR_est_YW
+
+    return AR_est_YW(x, order, rxx=rxx)[0]
+
+
 def compute_dvars(
     in_file,
     in_mask,
@@ -1037,17 +1044,15 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     """
     import numpy as np
     import nibabel as nb
-    from nitime.algorithms import AR_est_YW
     import warnings
 
-    func = nb.load(in_file).get_fdata(dtype=np.float32)
-    mask = np.asanyarray(nb.load(in_mask).dataobj).astype(np.uint8)
+    func = np.float32(nb.load(in_file).dataobj)
+    mask = np.bool_(nb.load(in_mask).dataobj)
 
     if len(func.shape) != 4:
         raise RuntimeError("Input fMRI dataset should be 4-dimensional")
 
-    idx = np.where(mask > 0)
-    mfunc = func[idx[0], idx[1], idx[2], :]
+    mfunc = func[mask]
 
     if intensity_normalization != 0:
         mfunc = (mfunc / np.median(mfunc)) * intensity_normalization
@@ -1055,19 +1060,19 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     # Robust standard deviation (we are using "lower" interpolation
     # because this is what FSL is doing
     func_sd = (
-        np.percentile(mfunc, 75, axis=1, interpolation="lower")
-        - np.percentile(mfunc, 25, axis=1, interpolation="lower")
+        np.percentile(mfunc, 75, axis=1, method="lower")
+        - np.percentile(mfunc, 25, axis=1, method="lower")
     ) / 1.349
 
     if remove_zerovariance:
-        zero_variance_voxels = func_sd > self.inputs.variance_tol
+        zero_variance_voxels = func_sd > variance_tol
         mfunc = mfunc[zero_variance_voxels, :]
         func_sd = func_sd[zero_variance_voxels]
 
     # Compute (non-robust) estimate of lag-1 autocorrelation
     ar1 = np.apply_along_axis(
-        AR_est_YW, 1, regress_poly(0, mfunc, remove_mean=True)[0].astype(np.float32), 1
-    )[:, 0]
+        _AR_est_YW, 1, regress_poly(0, mfunc, remove_mean=True)[0].astype(np.float32), 1
+    )
 
     # Compute (predicted) standard deviation of temporal difference time series
     diff_sdhat = np.squeeze(np.sqrt(((1 - ar1) * 2).tolist())) * func_sd
