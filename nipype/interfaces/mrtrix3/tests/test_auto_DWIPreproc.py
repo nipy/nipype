@@ -91,7 +91,6 @@ def test_DWIPreproc_inputs():
         ),
         pe_dir=dict(
             argstr="-pe_dir %s",
-            mandatory=False,
         ),
         ro_time=dict(
             argstr="-readout_time %f",

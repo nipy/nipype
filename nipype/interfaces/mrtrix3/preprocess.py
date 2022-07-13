@@ -284,7 +284,6 @@ class DWIPreprocInputSpec(MRTrix3BaseInputSpec):
     )
     pe_dir = traits.Str(
         argstr="-pe_dir %s",
-        mandatory=False,
         desc="Specify the phase encoding direction of the input series, can be a signed axis number (e.g. -0, 1, +2), an axis designator (e.g. RL, PA, IS), or NIfTI axis codes (e.g. i-, j, k)",
     )
     ro_time = traits.Float(
