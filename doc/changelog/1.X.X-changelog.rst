@@ -1,3 +1,45 @@
+1.8.3 (July 14, 2022)
+=====================
+
+Bug-fix release in the 1.8.x series.
+
+This release includes compatibility fixes for nibabel 4.x and resolves a denial-of-service
+bug when the etelemetry server is down that resulted in excessive (blocking) network hits that
+would cause any tools using nipype interfaces to take a very long time.
+
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.8.3?closed=1>`__)
+
+  * FIX: Argument order to ``numpy.save()`` (https://github.com/nipy/nipype/pull/3485)
+  * FIX: Add tolerance parameter to ComputeDVARS (https://github.com/nipy/nipype/pull/3489)
+  * FIX: Delay access of nibabel.trackvis until actually needed (https://github.com/nipy/nipype/pull/3488)
+  * FIX: Avoid excessive etelemetry pings (https://github.com/nipy/nipype/pull/3484)
+  * ENH: Added outputs' generation to DWIBiascorrect interface (https://github.com/nipy/nipype/pull/3476)
+
+
+1.8.2 (June 06, 2022)
+=====================
+
+Bug-fix release in the 1.8.x series.
+
+This release restores compatibility with networkx 2.8.3, which errors when
+graph nodes might conflict with pydot parsing.
+
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.8.2?closed=1>`__)
+
+  * ENH: Enable compression with Gunzip interface (https://github.com/nipy/nipype/pull/3472)
+  * CI: Schedule weekly tests with cron (https://github.com/nipy/nipype/pull/3480)
+
+
+1.8.1 (May 16, 2022)
+====================
+
+Bug-fix release in the 1.8.x series.
+
+The previous release vendored ``distutils.version.LooseVersion``, and the vendored objects did not
+preserve compatiblity with the ``distutils`` objects. This release switches to the
+``looseversion`` package that ensures compatiblity.
+
+
 1.8.0 (May 10, 2022)
 ====================
 

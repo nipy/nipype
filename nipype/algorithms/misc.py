@@ -271,15 +271,72 @@ class CreateNifti(BaseInterface):
         return outputs
 
 
-class GunzipInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True)
+class GzipInputSpec(TraitedSpec):
+    in_file = File(exists=True, mandatory=True, desc="file to (de)compress")
+    mode = traits.Enum(
+        "compress", "decompress", usedefault=True, desc="compress or decompress"
+    )
 
 
-class GunzipOutputSpec(TraitedSpec):
-    out_file = File(exists=True)
+class GzipOutputSpec(TraitedSpec):
+    out_file = File()
 
 
-class Gunzip(BaseInterface):
+class Gzip(BaseInterface):
+    """Gzip wrapper
+
+    >>> from nipype.algorithms.misc import Gzip
+    >>> gzip = Gzip(in_file='tpms_msk.nii.gz', mode="decompress")
+    >>> res = gzip.run()
+    >>> res.outputs.out_file  # doctest: +ELLIPSIS
+    '.../tpms_msk.nii'
+
+    >>> gzip = Gzip(in_file='tpms_msk.nii')
+    >>> res = gzip.run()
+    >>> res.outputs.out_file  # doctest: +ELLIPSIS
+    '.../tpms_msk.nii.gz'
+
+    .. testcleanup::
+
+    >>> os.unlink('tpms_msk.nii')
+    """
+
+    input_spec = GzipInputSpec
+    output_spec = GzipOutputSpec
+
+    def _gen_output_file_name(self):
+        _, base, ext = split_filename(self.inputs.in_file)
+        if self.inputs.mode == "decompress" and ext[-3:].lower() == ".gz":
+            ext = ext[:-3]
+        elif self.inputs.mode == "compress":
+            ext = f"{ext}.gz"
+        return os.path.abspath(base + ext)
+
+    def _run_interface(self, runtime):
+        import gzip
+        import shutil
+
+        if self.inputs.mode == "compress":
+            open_input, open_output = open, gzip.open
+        else:
+            open_input, open_output = gzip.open, open
+
+        with open_input(self.inputs.in_file, "rb") as in_file:
+            with open_output(self._gen_output_file_name(), "wb") as out_file:
+                shutil.copyfileobj(in_file, out_file)
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = self._gen_output_file_name()
+        return outputs
+
+
+class GunzipInputSpec(GzipInputSpec):
+    mode = traits.Enum("decompress", usedefault=True, desc="decompress or compress")
+
+
+class Gunzip(Gzip):
     """Gunzip wrapper
 
     >>> from nipype.algorithms.misc import Gunzip
@@ -294,27 +351,6 @@ class Gunzip(BaseInterface):
     """
 
     input_spec = GunzipInputSpec
-    output_spec = GunzipOutputSpec
-
-    def _gen_output_file_name(self):
-        _, base, ext = split_filename(self.inputs.in_file)
-        if ext[-3:].lower() == ".gz":
-            ext = ext[:-3]
-        return os.path.abspath(base + ext)
-
-    def _run_interface(self, runtime):
-        import gzip
-        import shutil
-
-        with gzip.open(self.inputs.in_file, "rb") as in_file:
-            with open(self._gen_output_file_name(), "wb") as out_file:
-                shutil.copyfileobj(in_file, out_file)
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["out_file"] = self._gen_output_file_name()
-        return outputs
 
 
 def replaceext(in_list, ext):

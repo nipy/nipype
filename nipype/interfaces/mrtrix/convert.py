@@ -3,9 +3,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os.path as op
 import nibabel as nb
-import nibabel.trackvis as trk
 import numpy as np
-from nibabel.trackvis import HeaderError
 from nibabel.volumeutils import native_code
 from nibabel.orientations import aff2axcodes
 
@@ -120,7 +118,7 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
             nan_str = fileobj.read(bytesize)
             if len(pts_str) < (n_pts * bytesize):
                 if not n_streams == stream_count:
-                    raise HeaderError(
+                    raise nb.trackvis.HeaderError(
                         "Expecting %s points, found only %s" % (stream_count, n_streams)
                     )
                     iflogger.error(
@@ -255,7 +253,7 @@ class MRTrix2TrackVis(DipyBaseInterface):
 
             final_streamlines = transform_tracking_output(transformed_streamlines, aff)
             trk_tracks = ((ii, None, None) for ii in final_streamlines)
-            trk.write(out_filename, trk_tracks, trk_header)
+            nb.trackvis.write(out_filename, trk_tracks, trk_header)
             iflogger.info("Saving transformed Trackvis file as %s", out_filename)
             iflogger.info("New TrackVis Header:")
             iflogger.info(trk_header)
@@ -271,7 +269,7 @@ class MRTrix2TrackVis(DipyBaseInterface):
                 streamlines, trk_header, affine
             )
             trk_tracks = ((ii, None, None) for ii in transformed_streamlines)
-            trk.write(out_filename, trk_tracks, trk_header)
+            nb.trackvis.write(out_filename, trk_tracks, trk_header)
             iflogger.info("Saving Trackvis file as %s", out_filename)
             iflogger.info("TrackVis Header:")
             iflogger.info(trk_header)

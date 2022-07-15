@@ -50,6 +50,11 @@ class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
     remove_zerovariance = traits.Bool(
         True, usedefault=True, desc="remove voxels with zero variance"
     )
+    variance_tol = traits.Float(
+        1e-7,
+        usedefault=True,
+        desc="maximum variance to consider \"close to\" zero for the purposes of removal",
+    )
     save_std = traits.Bool(True, usedefault=True, desc="save standardized DVARS")
     save_nstd = traits.Bool(False, usedefault=True, desc="save non-standardized DVARS")
     save_vxstd = traits.Bool(
@@ -167,6 +172,7 @@ Bradley L. and Petersen, Steven E.},
             self.inputs.in_file,
             self.inputs.in_mask,
             remove_zerovariance=self.inputs.remove_zerovariance,
+            variance_tol=self.inputs.variance_tol,
             intensity_normalization=self.inputs.intensity_normalization,
         )
 
@@ -994,8 +1000,19 @@ class NonSteadyStateDetector(BaseInterface):
         return self._results
 
 
+def _AR_est_YW(x, order, rxx=None):
+    """Retrieve AR coefficients while dropping the sig_sq return value"""
+    from nitime.algorithms import AR_est_YW
+
+    return AR_est_YW(x, order, rxx=rxx)[0]
+
+
 def compute_dvars(
-    in_file, in_mask, remove_zerovariance=False, intensity_normalization=1000
+    in_file,
+    in_mask,
+    remove_zerovariance=False,
+    intensity_normalization=1000,
+    variance_tol=0.0,
 ):
     """
     Compute the :abbr:`DVARS (D referring to temporal
@@ -1027,17 +1044,15 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     """
     import numpy as np
     import nibabel as nb
-    from nitime.algorithms import AR_est_YW
     import warnings
 
-    func = nb.load(in_file).get_fdata(dtype=np.float32)
-    mask = np.asanyarray(nb.load(in_mask).dataobj).astype(np.uint8)
+    func = np.float32(nb.load(in_file).dataobj)
+    mask = np.bool_(nb.load(in_mask).dataobj)
 
     if len(func.shape) != 4:
         raise RuntimeError("Input fMRI dataset should be 4-dimensional")
 
-    idx = np.where(mask > 0)
-    mfunc = func[idx[0], idx[1], idx[2], :]
+    mfunc = func[mask]
 
     if intensity_normalization != 0:
         mfunc = (mfunc / np.median(mfunc)) * intensity_normalization
@@ -1045,18 +1060,19 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     # Robust standard deviation (we are using "lower" interpolation
     # because this is what FSL is doing
     func_sd = (
-        np.percentile(mfunc, 75, axis=1, interpolation="lower")
-        - np.percentile(mfunc, 25, axis=1, interpolation="lower")
+        np.percentile(mfunc, 75, axis=1, method="lower")
+        - np.percentile(mfunc, 25, axis=1, method="lower")
     ) / 1.349
 
     if remove_zerovariance:
-        mfunc = mfunc[func_sd != 0, :]
-        func_sd = func_sd[func_sd != 0]
+        zero_variance_voxels = func_sd > variance_tol
+        mfunc = mfunc[zero_variance_voxels, :]
+        func_sd = func_sd[zero_variance_voxels]
 
     # Compute (non-robust) estimate of lag-1 autocorrelation
     ar1 = np.apply_along_axis(
-        AR_est_YW, 1, regress_poly(0, mfunc, remove_mean=True)[0].astype(np.float32), 1
-    )[:, 0]
+        _AR_est_YW, 1, regress_poly(0, mfunc, remove_mean=True)[0].astype(np.float32), 1
+    )
 
     # Compute (predicted) standard deviation of temporal difference time series
     diff_sdhat = np.squeeze(np.sqrt(((1 - ar1) * 2).tolist())) * func_sd

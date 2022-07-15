@@ -255,6 +255,13 @@ class DWIBiasCorrect(MRTrix3Base):
                 return f"-{trait_spec.argstr}"
         return super()._format_arg(name, trait_spec, value)
 
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["out_file"] = op.abspath(self.inputs.out_file)
+        if self.inputs.bias:
+            outputs["bias"] = op.abspath(self.inputs.bias)
+        return outputs
+
 
 class DWIPreprocInputSpec(MRTrix3BaseInputSpec):
     in_file = File(

@@ -14,7 +14,7 @@ Top-level module API
 import os
 
 # XXX Deprecate this import
-from .external.version import LooseVersion
+from looseversion import LooseVersion
 
 from .info import URL as __url__, STATUS as __status__, __version__
 from .utils.config import NipypeConfig
@@ -98,4 +98,4 @@ if config.getboolean("execution", "check_version"):
         from .interfaces.base import BaseInterface
 
         if BaseInterface._etelemetry_version_data is None:
-            BaseInterface._etelemetry_version_data = check_latest_version()
+            BaseInterface._etelemetry_version_data = check_latest_version() or "n/a"

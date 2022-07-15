@@ -2584,7 +2584,7 @@ class WarpPoints(CommandLine):
         if out_file is None:
             out_file, _ = op.splitext(in_file)
 
-        np.savetxt(streamlines, out_file + ".txt")
+        np.savetxt(out_file + ".txt", streamlines)
         return out_file + ".txt"
 
     def _coords_to_trk(self, points, out_file):
