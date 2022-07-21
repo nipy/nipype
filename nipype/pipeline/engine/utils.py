@@ -51,14 +51,14 @@ from inspect import signature
 logger = logging.getLogger("nipype.workflow")
 
 
-def _parameterization_dir(param):
+def _parameterization_dir(param,maxlen):
     """
     Returns the directory name for the given parameterization string as follows:
-        - If the parameterization is longer than 32 characters, then
+        - If the parameterization is longer than maxlen characters, then
           return the SHA-1 hex digest.
         - Otherwise, return the parameterization unchanged.
     """
-    if len(param) > 32:
+    if len(param) > maxlen:
         return sha1(param.encode()).hexdigest()
     return param
 
