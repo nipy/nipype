@@ -51,7 +51,7 @@ from inspect import signature
 logger = logging.getLogger("nipype.workflow")
 
 
-def _parameterization_dir(param,maxlen):
+def _parameterization_dir(param, maxlen):
     """
     Returns the directory name for the given parameterization string as follows:
         - If the parameterization is longer than maxlen characters, then
